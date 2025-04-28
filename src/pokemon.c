@@ -2189,6 +2189,20 @@ u32 GetMonData3(struct Pokemon *mon, s32 field, u8 *data)
     case MON_DATA_MAIL:
         ret = mon->mail;
         break;
+    case MON_DATA_SPECIES2:
+        return GetFormSpeciesId(boxMon->secure.substructs[0].type0.species, 0); // or return your secondary species field if you store it
+    case MON_DATA_FORM_SPECIES:
+        return boxMon->secure.substructs[0].type0.species; // Or custom form id field if different
+    case MON_DATA_INNATE_ABILITY_1:
+        return boxMon->secure.substructs[3].type3.abilityNum; // if you're using abilityNum split
+    case MON_DATA_INNATE_ABILITY_2:
+        return 0; // placeholder (expand later if you store a second innate ability)
+    
+    case MON_DATA_NATURE:
+        return boxMon->hiddenNatureModifier; // or wherever you save explicit nature (already exists!)
+    case MON_DATA_EVENT_LEGAL:
+        return boxMon->isBadEgg; // if eventLegal == fateful encounter / special Pokémon flag
+    
     default:
         ret = GetBoxMonData(&mon->box, field, data);
         break;
@@ -2647,6 +2661,24 @@ void SetMonData(struct Pokemon *mon, s32 field, const void *dataArg)
         SET8(mon->mail);
         break;
     case MON_DATA_SPECIES_OR_EGG:
+        break;
+    case MON_DATA_SPECIES2:
+        boxMon->secure.substructs[0].type0.species = *(u16 *)dataArg; 
+        break;
+    case MON_DATA_FORM_SPECIES:
+        boxMon->secure.substructs[0].type0.species = *(u16 *)dataArg;
+        break;
+    case MON_DATA_INNATE_ABILITY_1:
+        boxMon->secure.substructs[3].type3.abilityNum = *(u8 *)dataArg;
+        break;
+    case MON_DATA_INNATE_ABILITY_2:
+        /* You need to add a new field later if you want innate_2 */
+        break;
+    case MON_DATA_NATURE:
+        boxMon->hiddenNatureModifier = *(u8 *)dataArg;
+        break;
+    case MON_DATA_EVENT_LEGAL:
+        boxMon->isBadEgg = *(u8 *)dataArg;
         break;
     default:
         SetBoxMonData(&mon->box, field, data);
