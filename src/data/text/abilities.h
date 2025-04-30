@@ -306,6 +306,7 @@ static const u8 sPoisonPuppeteerDescription[] = _("Confuses poisoned foes.");
 static const u8 sForecastPriorityDescription[] = _("Weather moves go first.");
 
 static const u8 sChloroplastDescription[] = _("Battles as if in sunlight.\nDoes not trigger abilities.");
+static const u8 sWhiteoutDescription[] = _("Boosts Ice moves by 50% in Hail.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -625,7 +626,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_FORECAST_PRIORITY] = _("Instant Forecast"),
 
         [ABILITY_CHLOROPLAST] = _("Chloroplast"),
-
+        [ABILITY_WHITEOUT] = _("Whiteout"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1263,4 +1264,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_FORECAST_PRIORITY] = sForecastPriorityDescription,
 
         [ABILITY_CHLOROPLAST] = sChloroplastDescription,
+        [ABILITY_WHITEOUT] = sWhiteoutDescription,
 };

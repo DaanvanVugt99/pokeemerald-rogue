@@ -1,6 +1,6 @@
 echo Working Directory: $PWD
 
-testToRunPrefix="Fire type effectiveness"
+testToRunPrefix="Whiteout does not boost non-Ice-type moves in Hail/Snow"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

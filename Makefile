@@ -564,7 +564,7 @@ $(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) libagbsyscall
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
 	$(FIX) $@ -p --silent
-	@echo "ROM size:" $$(stat -c "%s" $(ROM) | numfmt --to=iec --format="%.2f")
+	@echo "ROM size:" $$(stat -f "%z" $(ROM) | gnumfmt --to=iec --format="%.2f")
 	@echo $(MEMORYSTATS) -F $(MODERN_MAP_NAME)
 
 agbcc: all

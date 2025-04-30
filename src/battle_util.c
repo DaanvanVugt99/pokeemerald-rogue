@@ -9113,6 +9113,10 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         if (gDisableStructs[battlerDef].isFirstTurn == 2) // just switched in
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         break;
+    case ABILITY_WHITEOUT: // Boosts damage of Ice-type moves in hail
+        if (moveType == TYPE_ICE && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_HAIL | B_WEATHER_SNOW))
+            uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        break;
     case ABILITY_GUTS:
         if (gBattleMons[battlerAtk].status1 & STATUS1_ANY && IS_MOVE_PHYSICAL(move))
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
