@@ -22,348 +22,348 @@
 #include "constants/moves.h"
 #include "constants/items.h"
 
-#define CHECK_MOVE_FLAG(flag)                                                                                   \
-    s32 i;                                                                                                      \
-    u16 *moves = GetMovesArray(battler);                                                                        \
-    for (i = 0; i < MAX_MON_MOVES; i++)                                                                         \
-    {                                                                                                           \
-        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && gBattleMoves[moves[i]].flag)               \
-            return TRUE;                                                                                        \
-    }                                                                                                           \
+#define CHECK_MOVE_FLAG(flag)                                                                     \
+    s32 i;                                                                                        \
+    u16 *moves = GetMovesArray(battler);                                                          \
+    for (i = 0; i < MAX_MON_MOVES; i++)                                                           \
+    {                                                                                             \
+        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && gBattleMoves[moves[i]].flag) \
+            return TRUE;                                                                          \
+    }                                                                                             \
     return FALSE
 
 static u32 AI_GetEffectiveness(uq4_12_t multiplier);
 
 // Const Data
 static const s8 sAiAbilityRatings[ABILITIES_COUNT] =
-{
-    [ABILITY_ADAPTABILITY] = 8,
-    [ABILITY_AFTERMATH] = 5,
-    [ABILITY_AERILATE] = 8,
-    [ABILITY_AIR_LOCK] = 5,
-    [ABILITY_ANALYTIC] = 5,
-    [ABILITY_ANGER_POINT] = 4,
-    [ABILITY_ANTICIPATION] = 2,
-    [ABILITY_ARENA_TRAP] = 9,
-    [ABILITY_AROMA_VEIL] = 3,
-    [ABILITY_AURA_BREAK] = 3,
-    [ABILITY_BAD_DREAMS] = 4,
-    [ABILITY_BATTERY] = 0,
-    [ABILITY_BATTLE_ARMOR] = 2,
-    [ABILITY_BATTLE_BOND] = 6,
-    [ABILITY_BEAST_BOOST] = 7,
-    [ABILITY_BERSERK] = 5,
-    [ABILITY_BIG_PECKS] = 1,
-    [ABILITY_BLAZE] = 5,
-    [ABILITY_BULLETPROOF] = 7,
-    [ABILITY_CHEEK_POUCH] = 4,
-    [ABILITY_CHLOROPHYLL] = 6,
-    [ABILITY_CLEAR_BODY] = 4,
-    [ABILITY_CLOUD_NINE] = 5,
-    [ABILITY_COLOR_CHANGE] = 2,
-    [ABILITY_COMATOSE] = 6,
-    [ABILITY_COMPETITIVE] = 5,
-    [ABILITY_COMPOUND_EYES] = 7,
-    [ABILITY_CONTRARY] = 8,
-    [ABILITY_CORROSION] = 5,
-    [ABILITY_CURSED_BODY] = 4,
-    [ABILITY_CUTE_CHARM] = 2,
-    [ABILITY_DAMP] = 2,
-    [ABILITY_DANCER] = 5,
-    [ABILITY_DARK_AURA] = 6,
-    [ABILITY_DAZZLING] = 5,
-    [ABILITY_DEFEATIST] = -1,
-    [ABILITY_DEFIANT] = 5,
-    [ABILITY_DELTA_STREAM] = 10,
-    [ABILITY_DESOLATE_LAND] = 10,
-    [ABILITY_DISGUISE] = 8,
-    [ABILITY_DOWNLOAD] = 7,
-    [ABILITY_DRIZZLE] = 9,
-    [ABILITY_DROUGHT] = 9,
-    [ABILITY_DRY_SKIN] = 6,
-    [ABILITY_EARLY_BIRD] = 4,
-    [ABILITY_EFFECT_SPORE] = 4,
-    [ABILITY_ELECTRIC_SURGE] = 8,
-    [ABILITY_EMERGENCY_EXIT] = 3,
-    [ABILITY_FAIRY_AURA] = 6,
-    [ABILITY_FILTER] = 6,
-    [ABILITY_FLAME_BODY] = 4,
-    [ABILITY_FLARE_BOOST] = 5,
-    [ABILITY_FLASH_FIRE] = 6,
-    [ABILITY_FLOWER_GIFT] = 4,
-    [ABILITY_FLOWER_VEIL] = 0,
-    [ABILITY_FLUFFY] = 5,
-    [ABILITY_FORECAST] = 6,
-    [ABILITY_FOREWARN] = 2,
-    [ABILITY_FRIEND_GUARD] = 0,
-    [ABILITY_FRISK] = 3,
-    [ABILITY_FULL_METAL_BODY] = 4,
-    [ABILITY_FUR_COAT] = 7,
-    [ABILITY_GALE_WINGS] = 6,
-    [ABILITY_GALVANIZE] = 8,
-    [ABILITY_GLUTTONY] = 3,
-    [ABILITY_GOOEY] = 5,
-    [ABILITY_GRASS_PELT] = 2,
-    [ABILITY_GRASSY_SURGE] = 8,
-    [ABILITY_GUTS] = 6,
-    [ABILITY_HARVEST] = 5,
-    [ABILITY_HEALER] = 0,
-    [ABILITY_HEATPROOF] = 5,
-    [ABILITY_HEAVY_METAL] = -1,
-    [ABILITY_HONEY_GATHER] = 0,
-    [ABILITY_HUGE_POWER] = 10,
-    [ABILITY_HUSTLE] = 7,
-    [ABILITY_HYDRATION] = 4,
-    [ABILITY_HYPER_CUTTER] = 3,
-    [ABILITY_ICE_BODY] = 3,
-    [ABILITY_ILLUMINATE] = 0,
-    [ABILITY_ILLUSION] = 8,
-    [ABILITY_IMMUNITY] = 4,
-    [ABILITY_IMPOSTER] = 9,
-    [ABILITY_INFILTRATOR] = 6,
-    [ABILITY_INNARDS_OUT] = 5,
-    [ABILITY_INNER_FOCUS] = 2,
-    [ABILITY_INSOMNIA] = 4,
-    [ABILITY_INTIMIDATE] = 7,
-    [ABILITY_IRON_BARBS] = 6,
-    [ABILITY_IRON_FIST] = 6,
-    [ABILITY_JUSTIFIED] = 4,
-    [ABILITY_KEEN_EYE] = 1,
-    [ABILITY_KLUTZ] = -1,
-    [ABILITY_LEAF_GUARD] = 2,
-    [ABILITY_LEVITATE] = 7,
-    [ABILITY_LIGHT_METAL] = 2,
-    [ABILITY_LIGHTNING_ROD] = 7,
-    [ABILITY_LIMBER] = 3,
-    [ABILITY_LIQUID_OOZE] = 3,
-    [ABILITY_LIQUID_VOICE] = 5,
-    [ABILITY_LONG_REACH] = 3,
-    [ABILITY_MAGIC_BOUNCE] = 9,
-    [ABILITY_MAGIC_GUARD] = 9,
-    [ABILITY_MAGICIAN] = 3,
-    [ABILITY_MAGMA_ARMOR] = 1,
-    [ABILITY_MAGNET_PULL] = 9,
-    [ABILITY_MARVEL_SCALE] = 5,
-    [ABILITY_MEGA_LAUNCHER] = 7,
-    [ABILITY_MERCILESS] = 4,
-    [ABILITY_MINUS] = 0,
-    [ABILITY_MISTY_SURGE] = 8,
-    [ABILITY_MOLD_BREAKER] = 7,
-    [ABILITY_MOODY] = 10,
-    [ABILITY_MOTOR_DRIVE] = 6,
-    [ABILITY_MOXIE] = 7,
-    [ABILITY_MULTISCALE] = 8,
-    [ABILITY_MULTITYPE] = 8,
-    [ABILITY_MUMMY] = 5,
-    [ABILITY_NATURAL_CURE] = 7,
-    [ABILITY_NEUROFORCE] = 6,
-    [ABILITY_NO_GUARD] = 8,
-    [ABILITY_NORMALIZE] = -1,
-    [ABILITY_OBLIVIOUS] = 2,
-    [ABILITY_OVERCOAT] = 5,
-    [ABILITY_OVERGROW] = 5,
-    [ABILITY_OWN_TEMPO] = 3,
-    [ABILITY_PARENTAL_BOND] = 10,
-    [ABILITY_PICKUP] = 1,
-    [ABILITY_PICKPOCKET] = 3,
-    [ABILITY_PIXILATE] = 8,
-    [ABILITY_PLUS] = 0,
-    [ABILITY_POISON_HEAL] = 8,
-    [ABILITY_POISON_POINT] = 4,
-    [ABILITY_POISON_TOUCH] = 4,
-    [ABILITY_POWER_CONSTRUCT] = 10,
-    [ABILITY_POWER_OF_ALCHEMY] = 0,
-    [ABILITY_PRANKSTER] = 8,
-    [ABILITY_PRESSURE] = 5,
-    [ABILITY_PRIMORDIAL_SEA] = 10,
-    [ABILITY_PRISM_ARMOR] = 6,
-    [ABILITY_PROTEAN] = 8,
-    [ABILITY_PSYCHIC_SURGE] = 8,
-    [ABILITY_PURE_POWER] = 10,
-    [ABILITY_QUEENLY_MAJESTY] = 6,
-    [ABILITY_QUICK_FEET] = 5,
-    [ABILITY_RAIN_DISH] = 3,
-    [ABILITY_RATTLED] = 3,
-    [ABILITY_RECEIVER] = 0,
-    [ABILITY_RECKLESS] = 6,
-    [ABILITY_REFRIGERATE] = 8,
-    [ABILITY_REGENERATOR] = 8,
-    [ABILITY_RIVALRY] = 1,
-    [ABILITY_RKS_SYSTEM] = 8,
-    [ABILITY_ROCK_HEAD] = 5,
-    [ABILITY_ROUGH_SKIN] = 6,
-    [ABILITY_RUN_AWAY] = 0,
-    [ABILITY_SAND_FORCE] = 4,
-    [ABILITY_SAND_RUSH] = 6,
-    [ABILITY_SAND_STREAM] = 9,
-    [ABILITY_SAND_VEIL] = 3,
-    [ABILITY_SAP_SIPPER] = 7,
-    [ABILITY_SCHOOLING] = 6,
-    [ABILITY_SCRAPPY] = 6,
-    [ABILITY_SERENE_GRACE] = 8,
-    [ABILITY_SHADOW_SHIELD] = 8,
-    [ABILITY_SHADOW_TAG] = 10,
-    [ABILITY_SHED_SKIN] = 7,
-    [ABILITY_SHEER_FORCE] = 8,
-    [ABILITY_SHELL_ARMOR] = 2,
-    [ABILITY_SHIELD_DUST] = 5,
-    [ABILITY_SHIELDS_DOWN] = 6,
-    [ABILITY_SIMPLE] = 8,
-    [ABILITY_SKILL_LINK] = 7,
-    [ABILITY_SLOW_START] = -2,
-    [ABILITY_SLUSH_RUSH] = 5,
-    [ABILITY_SNIPER] = 3,
-    [ABILITY_SNOW_CLOAK] = 3,
-    [ABILITY_SNOW_WARNING] = 8,
-    [ABILITY_SOLAR_POWER] = 3,
-    [ABILITY_SOLID_ROCK] = 6,
-    [ABILITY_SOUL_HEART] = 7,
-    [ABILITY_SOUNDPROOF] = 4,
-    [ABILITY_SPEED_BOOST] = 9,
-    [ABILITY_STAKEOUT] = 6,
-    [ABILITY_STALL] = -1,
-    [ABILITY_STAMINA] = 6,
-    [ABILITY_STANCE_CHANGE] = 10,
-    [ABILITY_STATIC] = 4,
-    [ABILITY_STEADFAST] = 2,
-    [ABILITY_STEELWORKER] = 6,
-    [ABILITY_STENCH] = 1,
-    [ABILITY_STICKY_HOLD] = 3,
-    [ABILITY_STORM_DRAIN] = 7,
-    [ABILITY_STRONG_JAW] = 6,
-    [ABILITY_STURDY] = 6,
-    [ABILITY_SUCTION_CUPS] = 2,
-    [ABILITY_SUPER_LUCK] = 3,
-    [ABILITY_SURGE_SURFER] = 4,
-    [ABILITY_SWARM] = 5,
-    [ABILITY_SWEET_VEIL] = 4,
-    [ABILITY_SWIFT_SWIM] = 6,
-    [ABILITY_SYMBIOSIS] = 0,
-    [ABILITY_SYNCHRONIZE] = 4,
-    [ABILITY_TANGLED_FEET] = 2,
-    [ABILITY_TANGLING_HAIR] = 5,
-    [ABILITY_TECHNICIAN] = 8,
-    [ABILITY_TELEPATHY] = 0,
-    [ABILITY_TERAVOLT] = 7,
-    [ABILITY_THICK_FAT] = 7,
-    [ABILITY_TINTED_LENS] = 7,
-    [ABILITY_TORRENT] = 5,
-    [ABILITY_TOXIC_BOOST] = 6,
-    [ABILITY_TOUGH_CLAWS] = 7,
-    [ABILITY_TRACE] = 6,
-    [ABILITY_TRIAGE] = 7,
-    [ABILITY_TRUANT] = -2,
-    [ABILITY_TURBOBLAZE] = 7,
-    [ABILITY_UNAWARE] = 6,
-    [ABILITY_UNBURDEN] = 7,
-    [ABILITY_UNNERVE] = 3,
-    [ABILITY_VICTORY_STAR] = 6,
-    [ABILITY_VITAL_SPIRIT] = 4,
-    [ABILITY_VOLT_ABSORB] = 7,
-    [ABILITY_WATER_ABSORB] = 7,
-    [ABILITY_WATER_BUBBLE] = 8,
-    [ABILITY_WATER_COMPACTION] = 4,
-    [ABILITY_WATER_VEIL] = 4,
-    [ABILITY_WEAK_ARMOR] = 2,
-    [ABILITY_WHITE_SMOKE] = 4,
-    [ABILITY_WIMP_OUT] = 3,
-    [ABILITY_WONDER_GUARD] = 10,
-    [ABILITY_WONDER_SKIN] = 4,
-    [ABILITY_ZEN_MODE] = -1,
-    [ABILITY_INTREPID_SWORD] = 3,
-    [ABILITY_DAUNTLESS_SHIELD] = 3,
-    [ABILITY_BALL_FETCH] = 0,
-    [ABILITY_COTTON_DOWN] = 3,
-    [ABILITY_MIRROR_ARMOR] = 6,
-    [ABILITY_GULP_MISSILE] = 3,
-    [ABILITY_STALWART] = 2,
-    [ABILITY_PROPELLER_TAIL] = 2,
-    [ABILITY_STEAM_ENGINE] = 3,
-    [ABILITY_PUNK_ROCK] = 2,
-    [ABILITY_SAND_SPIT] = 5,
-    [ABILITY_ICE_SCALES] = 7,
-    [ABILITY_RIPEN] = 4,
-    [ABILITY_ICE_FACE] = 4,
-    [ABILITY_POWER_SPOT] = 2,
-    [ABILITY_MIMICRY] = 2,
-    [ABILITY_SCREEN_CLEANER] = 3,
-    [ABILITY_NEUTRALIZING_GAS] = 5,
-    [ABILITY_HUNGER_SWITCH] = 2,
-    [ABILITY_PASTEL_VEIL] = 4,
-    [ABILITY_STEELY_SPIRIT] = 2,
-    [ABILITY_PERISH_BODY] = -1,
-    [ABILITY_WANDERING_SPIRIT] = 2,
-    [ABILITY_GORILLA_TACTICS] = 4,
-    [ABILITY_EARTH_EATER] = 7,
+    {
+        [ABILITY_ADAPTABILITY] = 8,
+        [ABILITY_AFTERMATH] = 5,
+        [ABILITY_AERILATE] = 8,
+        [ABILITY_AIR_LOCK] = 5,
+        [ABILITY_ANALYTIC] = 5,
+        [ABILITY_ANGER_POINT] = 4,
+        [ABILITY_ANTICIPATION] = 2,
+        [ABILITY_ARENA_TRAP] = 9,
+        [ABILITY_AROMA_VEIL] = 3,
+        [ABILITY_AURA_BREAK] = 3,
+        [ABILITY_BAD_DREAMS] = 4,
+        [ABILITY_BATTERY] = 0,
+        [ABILITY_BATTLE_ARMOR] = 2,
+        [ABILITY_BATTLE_BOND] = 6,
+        [ABILITY_BEAST_BOOST] = 7,
+        [ABILITY_BERSERK] = 5,
+        [ABILITY_BIG_PECKS] = 1,
+        [ABILITY_BLAZE] = 5,
+        [ABILITY_BULLETPROOF] = 7,
+        [ABILITY_CHEEK_POUCH] = 4,
+        [ABILITY_CHLOROPHYLL] = 6,
+        [ABILITY_CLEAR_BODY] = 4,
+        [ABILITY_CLOUD_NINE] = 5,
+        [ABILITY_COLOR_CHANGE] = 2,
+        [ABILITY_COMATOSE] = 6,
+        [ABILITY_COMPETITIVE] = 5,
+        [ABILITY_COMPOUND_EYES] = 7,
+        [ABILITY_CONTRARY] = 8,
+        [ABILITY_CORROSION] = 5,
+        [ABILITY_CURSED_BODY] = 4,
+        [ABILITY_CUTE_CHARM] = 2,
+        [ABILITY_DAMP] = 2,
+        [ABILITY_DANCER] = 5,
+        [ABILITY_DARK_AURA] = 6,
+        [ABILITY_DAZZLING] = 5,
+        [ABILITY_DEFEATIST] = -1,
+        [ABILITY_DEFIANT] = 5,
+        [ABILITY_DELTA_STREAM] = 10,
+        [ABILITY_DESOLATE_LAND] = 10,
+        [ABILITY_DISGUISE] = 8,
+        [ABILITY_DOWNLOAD] = 7,
+        [ABILITY_DRIZZLE] = 9,
+        [ABILITY_DROUGHT] = 9,
+        [ABILITY_DRY_SKIN] = 6,
+        [ABILITY_EARLY_BIRD] = 4,
+        [ABILITY_EFFECT_SPORE] = 4,
+        [ABILITY_ELECTRIC_SURGE] = 8,
+        [ABILITY_EMERGENCY_EXIT] = 3,
+        [ABILITY_FAIRY_AURA] = 6,
+        [ABILITY_FILTER] = 6,
+        [ABILITY_FLAME_BODY] = 4,
+        [ABILITY_FLARE_BOOST] = 5,
+        [ABILITY_FLASH_FIRE] = 6,
+        [ABILITY_FLOWER_GIFT] = 4,
+        [ABILITY_FLOWER_VEIL] = 0,
+        [ABILITY_FLUFFY] = 5,
+        [ABILITY_FORECAST] = 6,
+        [ABILITY_FOREWARN] = 2,
+        [ABILITY_FRIEND_GUARD] = 0,
+        [ABILITY_FRISK] = 3,
+        [ABILITY_FULL_METAL_BODY] = 4,
+        [ABILITY_FUR_COAT] = 7,
+        [ABILITY_GALE_WINGS] = 6,
+        [ABILITY_GALVANIZE] = 8,
+        [ABILITY_GLUTTONY] = 3,
+        [ABILITY_GOOEY] = 5,
+        [ABILITY_GRASS_PELT] = 2,
+        [ABILITY_GRASSY_SURGE] = 8,
+        [ABILITY_GUTS] = 6,
+        [ABILITY_HARVEST] = 5,
+        [ABILITY_HEALER] = 0,
+        [ABILITY_HEATPROOF] = 5,
+        [ABILITY_HEAVY_METAL] = -1,
+        [ABILITY_HONEY_GATHER] = 0,
+        [ABILITY_HUGE_POWER] = 10,
+        [ABILITY_HUSTLE] = 7,
+        [ABILITY_HYDRATION] = 4,
+        [ABILITY_HYPER_CUTTER] = 3,
+        [ABILITY_ICE_BODY] = 3,
+        [ABILITY_ILLUMINATE] = 0,
+        [ABILITY_ILLUSION] = 8,
+        [ABILITY_IMMUNITY] = 4,
+        [ABILITY_IMPOSTER] = 9,
+        [ABILITY_INFILTRATOR] = 6,
+        [ABILITY_INNARDS_OUT] = 5,
+        [ABILITY_INNER_FOCUS] = 2,
+        [ABILITY_INSOMNIA] = 4,
+        [ABILITY_INTIMIDATE] = 7,
+        [ABILITY_IRON_BARBS] = 6,
+        [ABILITY_IRON_FIST] = 6,
+        [ABILITY_JUSTIFIED] = 4,
+        [ABILITY_KEEN_EYE] = 1,
+        [ABILITY_KLUTZ] = -1,
+        [ABILITY_LEAF_GUARD] = 2,
+        [ABILITY_LEVITATE] = 7,
+        [ABILITY_LIGHT_METAL] = 2,
+        [ABILITY_LIGHTNING_ROD] = 7,
+        [ABILITY_LIMBER] = 3,
+        [ABILITY_LIQUID_OOZE] = 3,
+        [ABILITY_LIQUID_VOICE] = 5,
+        [ABILITY_LONG_REACH] = 3,
+        [ABILITY_MAGIC_BOUNCE] = 9,
+        [ABILITY_MAGIC_GUARD] = 9,
+        [ABILITY_MAGICIAN] = 3,
+        [ABILITY_MAGMA_ARMOR] = 1,
+        [ABILITY_MAGNET_PULL] = 9,
+        [ABILITY_MARVEL_SCALE] = 5,
+        [ABILITY_MEGA_LAUNCHER] = 7,
+        [ABILITY_MERCILESS] = 4,
+        [ABILITY_MINUS] = 0,
+        [ABILITY_MISTY_SURGE] = 8,
+        [ABILITY_MOLD_BREAKER] = 7,
+        [ABILITY_MOODY] = 10,
+        [ABILITY_MOTOR_DRIVE] = 6,
+        [ABILITY_MOXIE] = 7,
+        [ABILITY_MULTISCALE] = 8,
+        [ABILITY_MULTITYPE] = 8,
+        [ABILITY_MUMMY] = 5,
+        [ABILITY_NATURAL_CURE] = 7,
+        [ABILITY_NEUROFORCE] = 6,
+        [ABILITY_NO_GUARD] = 8,
+        [ABILITY_NORMALIZE] = -1,
+        [ABILITY_OBLIVIOUS] = 2,
+        [ABILITY_OVERCOAT] = 5,
+        [ABILITY_OVERGROW] = 5,
+        [ABILITY_OWN_TEMPO] = 3,
+        [ABILITY_PARENTAL_BOND] = 10,
+        [ABILITY_PICKUP] = 1,
+        [ABILITY_PICKPOCKET] = 3,
+        [ABILITY_PIXILATE] = 8,
+        [ABILITY_PLUS] = 0,
+        [ABILITY_POISON_HEAL] = 8,
+        [ABILITY_POISON_POINT] = 4,
+        [ABILITY_POISON_TOUCH] = 4,
+        [ABILITY_POWER_CONSTRUCT] = 10,
+        [ABILITY_POWER_OF_ALCHEMY] = 0,
+        [ABILITY_PRANKSTER] = 8,
+        [ABILITY_PRESSURE] = 5,
+        [ABILITY_PRIMORDIAL_SEA] = 10,
+        [ABILITY_PRISM_ARMOR] = 6,
+        [ABILITY_PROTEAN] = 8,
+        [ABILITY_PSYCHIC_SURGE] = 8,
+        [ABILITY_PURE_POWER] = 10,
+        [ABILITY_QUEENLY_MAJESTY] = 6,
+        [ABILITY_QUICK_FEET] = 5,
+        [ABILITY_RAIN_DISH] = 3,
+        [ABILITY_RATTLED] = 3,
+        [ABILITY_RECEIVER] = 0,
+        [ABILITY_RECKLESS] = 6,
+        [ABILITY_REFRIGERATE] = 8,
+        [ABILITY_REGENERATOR] = 8,
+        [ABILITY_RIVALRY] = 1,
+        [ABILITY_RKS_SYSTEM] = 8,
+        [ABILITY_ROCK_HEAD] = 5,
+        [ABILITY_ROUGH_SKIN] = 6,
+        [ABILITY_RUN_AWAY] = 0,
+        [ABILITY_SAND_FORCE] = 4,
+        [ABILITY_SAND_RUSH] = 6,
+        [ABILITY_SAND_STREAM] = 9,
+        [ABILITY_SAND_VEIL] = 3,
+        [ABILITY_SAP_SIPPER] = 7,
+        [ABILITY_SCHOOLING] = 6,
+        [ABILITY_SCRAPPY] = 6,
+        [ABILITY_SERENE_GRACE] = 8,
+        [ABILITY_SHADOW_SHIELD] = 8,
+        [ABILITY_SHADOW_TAG] = 10,
+        [ABILITY_SHED_SKIN] = 7,
+        [ABILITY_SHEER_FORCE] = 8,
+        [ABILITY_SHELL_ARMOR] = 2,
+        [ABILITY_SHIELD_DUST] = 5,
+        [ABILITY_SHIELDS_DOWN] = 6,
+        [ABILITY_SIMPLE] = 8,
+        [ABILITY_SKILL_LINK] = 7,
+        [ABILITY_SLOW_START] = -2,
+        [ABILITY_SLUSH_RUSH] = 5,
+        [ABILITY_SNIPER] = 3,
+        [ABILITY_SNOW_CLOAK] = 3,
+        [ABILITY_SNOW_WARNING] = 8,
+        [ABILITY_SOLAR_POWER] = 3,
+        [ABILITY_SOLID_ROCK] = 6,
+        [ABILITY_SOUL_HEART] = 7,
+        [ABILITY_SOUNDPROOF] = 4,
+        [ABILITY_SPEED_BOOST] = 9,
+        [ABILITY_STAKEOUT] = 6,
+        [ABILITY_STALL] = -1,
+        [ABILITY_STAMINA] = 6,
+        [ABILITY_STANCE_CHANGE] = 10,
+        [ABILITY_STATIC] = 4,
+        [ABILITY_STEADFAST] = 2,
+        [ABILITY_STEELWORKER] = 6,
+        [ABILITY_STENCH] = 1,
+        [ABILITY_STICKY_HOLD] = 3,
+        [ABILITY_STORM_DRAIN] = 7,
+        [ABILITY_STRONG_JAW] = 6,
+        [ABILITY_STURDY] = 6,
+        [ABILITY_SUCTION_CUPS] = 2,
+        [ABILITY_SUPER_LUCK] = 3,
+        [ABILITY_SURGE_SURFER] = 4,
+        [ABILITY_SWARM] = 5,
+        [ABILITY_SWEET_VEIL] = 4,
+        [ABILITY_SWIFT_SWIM] = 6,
+        [ABILITY_SYMBIOSIS] = 0,
+        [ABILITY_SYNCHRONIZE] = 4,
+        [ABILITY_TANGLED_FEET] = 2,
+        [ABILITY_TANGLING_HAIR] = 5,
+        [ABILITY_TECHNICIAN] = 8,
+        [ABILITY_TELEPATHY] = 0,
+        [ABILITY_TERAVOLT] = 7,
+        [ABILITY_THICK_FAT] = 7,
+        [ABILITY_TINTED_LENS] = 7,
+        [ABILITY_TORRENT] = 5,
+        [ABILITY_TOXIC_BOOST] = 6,
+        [ABILITY_TOUGH_CLAWS] = 7,
+        [ABILITY_TRACE] = 6,
+        [ABILITY_TRIAGE] = 7,
+        [ABILITY_TRUANT] = -2,
+        [ABILITY_TURBOBLAZE] = 7,
+        [ABILITY_UNAWARE] = 6,
+        [ABILITY_UNBURDEN] = 7,
+        [ABILITY_UNNERVE] = 3,
+        [ABILITY_VICTORY_STAR] = 6,
+        [ABILITY_VITAL_SPIRIT] = 4,
+        [ABILITY_VOLT_ABSORB] = 7,
+        [ABILITY_WATER_ABSORB] = 7,
+        [ABILITY_WATER_BUBBLE] = 8,
+        [ABILITY_WATER_COMPACTION] = 4,
+        [ABILITY_WATER_VEIL] = 4,
+        [ABILITY_WEAK_ARMOR] = 2,
+        [ABILITY_WHITE_SMOKE] = 4,
+        [ABILITY_WIMP_OUT] = 3,
+        [ABILITY_WONDER_GUARD] = 10,
+        [ABILITY_WONDER_SKIN] = 4,
+        [ABILITY_ZEN_MODE] = -1,
+        [ABILITY_INTREPID_SWORD] = 3,
+        [ABILITY_DAUNTLESS_SHIELD] = 3,
+        [ABILITY_BALL_FETCH] = 0,
+        [ABILITY_COTTON_DOWN] = 3,
+        [ABILITY_MIRROR_ARMOR] = 6,
+        [ABILITY_GULP_MISSILE] = 3,
+        [ABILITY_STALWART] = 2,
+        [ABILITY_PROPELLER_TAIL] = 2,
+        [ABILITY_STEAM_ENGINE] = 3,
+        [ABILITY_PUNK_ROCK] = 2,
+        [ABILITY_SAND_SPIT] = 5,
+        [ABILITY_ICE_SCALES] = 7,
+        [ABILITY_RIPEN] = 4,
+        [ABILITY_ICE_FACE] = 4,
+        [ABILITY_POWER_SPOT] = 2,
+        [ABILITY_MIMICRY] = 2,
+        [ABILITY_SCREEN_CLEANER] = 3,
+        [ABILITY_NEUTRALIZING_GAS] = 5,
+        [ABILITY_HUNGER_SWITCH] = 2,
+        [ABILITY_PASTEL_VEIL] = 4,
+        [ABILITY_STEELY_SPIRIT] = 2,
+        [ABILITY_PERISH_BODY] = -1,
+        [ABILITY_WANDERING_SPIRIT] = 2,
+        [ABILITY_GORILLA_TACTICS] = 4,
+        [ABILITY_EARTH_EATER] = 7,
 
-    [ABILITY_FORECAST_PRIORITY] = 9,
+        [ABILITY_FORECAST_PRIORITY] = 9,
 };
 
 static const u16 sEncouragedEncoreEffects[] =
-{
-    EFFECT_DREAM_EATER,
-    EFFECT_ATTACK_UP,
-    EFFECT_DEFENSE_UP,
-    EFFECT_SPEED_UP,
-    EFFECT_SPECIAL_ATTACK_UP,
-    EFFECT_HAZE,
-    EFFECT_ROAR,
-    EFFECT_CONVERSION,
-    EFFECT_TOXIC,
-    EFFECT_LIGHT_SCREEN,
-    EFFECT_REST,
-    EFFECT_SUPER_FANG,
-    EFFECT_SPECIAL_DEFENSE_UP_2,
-    EFFECT_CONFUSE,
-    EFFECT_POISON,
-    EFFECT_PARALYZE,
-    EFFECT_LEECH_SEED,
-    EFFECT_DO_NOTHING,
-    EFFECT_ATTACK_UP_2,
-    EFFECT_ENCORE,
-    EFFECT_CONVERSION_2,
-    EFFECT_LOCK_ON,
-    EFFECT_HEAL_BELL,
-    EFFECT_MEAN_LOOK,
-    EFFECT_NIGHTMARE,
-    EFFECT_PROTECT,
-    EFFECT_SKILL_SWAP,
-    EFFECT_FORESIGHT,
-    EFFECT_PERISH_SONG,
-    EFFECT_SANDSTORM,
-    EFFECT_ENDURE,
-    EFFECT_SWAGGER,
-    EFFECT_ATTRACT,
-    EFFECT_SAFEGUARD,
-    EFFECT_RAIN_DANCE,
-    EFFECT_SUNNY_DAY,
-    EFFECT_BELLY_DRUM,
-    EFFECT_PSYCH_UP,
-    EFFECT_FUTURE_SIGHT,
-    EFFECT_FAKE_OUT,
-    EFFECT_STOCKPILE,
-    EFFECT_SPIT_UP,
-    EFFECT_SWALLOW,
-    EFFECT_HAIL,
-    EFFECT_SNOWSCAPE,
-    EFFECT_TORMENT,
-    EFFECT_WILL_O_WISP,
-    EFFECT_FOLLOW_ME,
-    EFFECT_CHARGE,
-    EFFECT_TRICK,
-    EFFECT_ROLE_PLAY,
-    EFFECT_INGRAIN,
-    EFFECT_RECYCLE,
-    EFFECT_KNOCK_OFF,
-    EFFECT_SKILL_SWAP,
-    EFFECT_IMPRISON,
-    EFFECT_REFRESH,
-    EFFECT_GRUDGE,
-    EFFECT_TEETER_DANCE,
-    EFFECT_MUD_SPORT,
-    EFFECT_WATER_SPORT,
-    EFFECT_DRAGON_DANCE,
-    EFFECT_CAMOUFLAGE,
+    {
+        EFFECT_DREAM_EATER,
+        EFFECT_ATTACK_UP,
+        EFFECT_DEFENSE_UP,
+        EFFECT_SPEED_UP,
+        EFFECT_SPECIAL_ATTACK_UP,
+        EFFECT_HAZE,
+        EFFECT_ROAR,
+        EFFECT_CONVERSION,
+        EFFECT_TOXIC,
+        EFFECT_LIGHT_SCREEN,
+        EFFECT_REST,
+        EFFECT_SUPER_FANG,
+        EFFECT_SPECIAL_DEFENSE_UP_2,
+        EFFECT_CONFUSE,
+        EFFECT_POISON,
+        EFFECT_PARALYZE,
+        EFFECT_LEECH_SEED,
+        EFFECT_DO_NOTHING,
+        EFFECT_ATTACK_UP_2,
+        EFFECT_ENCORE,
+        EFFECT_CONVERSION_2,
+        EFFECT_LOCK_ON,
+        EFFECT_HEAL_BELL,
+        EFFECT_MEAN_LOOK,
+        EFFECT_NIGHTMARE,
+        EFFECT_PROTECT,
+        EFFECT_SKILL_SWAP,
+        EFFECT_FORESIGHT,
+        EFFECT_PERISH_SONG,
+        EFFECT_SANDSTORM,
+        EFFECT_ENDURE,
+        EFFECT_SWAGGER,
+        EFFECT_ATTRACT,
+        EFFECT_SAFEGUARD,
+        EFFECT_RAIN_DANCE,
+        EFFECT_SUNNY_DAY,
+        EFFECT_BELLY_DRUM,
+        EFFECT_PSYCH_UP,
+        EFFECT_FUTURE_SIGHT,
+        EFFECT_FAKE_OUT,
+        EFFECT_STOCKPILE,
+        EFFECT_SPIT_UP,
+        EFFECT_SWALLOW,
+        EFFECT_HAIL,
+        EFFECT_SNOWSCAPE,
+        EFFECT_TORMENT,
+        EFFECT_WILL_O_WISP,
+        EFFECT_FOLLOW_ME,
+        EFFECT_CHARGE,
+        EFFECT_TRICK,
+        EFFECT_ROLE_PLAY,
+        EFFECT_INGRAIN,
+        EFFECT_RECYCLE,
+        EFFECT_KNOCK_OFF,
+        EFFECT_SKILL_SWAP,
+        EFFECT_IMPRISON,
+        EFFECT_REFRESH,
+        EFFECT_GRUDGE,
+        EFFECT_TEETER_DANCE,
+        EFFECT_MUD_SPORT,
+        EFFECT_WATER_SPORT,
+        EFFECT_DRAGON_DANCE,
+        EFFECT_CAMOUFLAGE,
 };
 
 // Functions
@@ -536,8 +536,7 @@ void SetBattlerData(u32 battlerId)
         if (illusionSpecies != SPECIES_NONE && ShouldFailForIllusion(illusionSpecies, battlerId))
         {
             // If the battler's type has not been changed, AI assumes the types of the illusion mon.
-            if (gBattleMons[battlerId].type1 == gSpeciesInfo[species].types[0]
-                && gBattleMons[battlerId].type2 == gSpeciesInfo[species].types[1])
+            if (gBattleMons[battlerId].type1 == gSpeciesInfo[species].types[0] && gBattleMons[battlerId].type2 == gSpeciesInfo[species].types[1])
             {
                 gBattleMons[battlerId].type1 = gSpeciesInfo[illusionSpecies].types[0];
                 gBattleMons[battlerId].type2 = gSpeciesInfo[illusionSpecies].types[1];
@@ -549,8 +548,7 @@ void SetBattlerData(u32 battlerId)
         if (AI_PARTY->mons[side][gBattlerPartyIndexes[battlerId]].ability != ABILITY_NONE)
             gBattleMons[battlerId].ability = AI_PARTY->mons[side][gBattlerPartyIndexes[battlerId]].ability;
         // Check if mon can only have one ability.
-        else if (gSpeciesInfo[species].abilities[1] == ABILITY_NONE
-                || gSpeciesInfo[species].abilities[1] == gSpeciesInfo[species].abilities[0])
+        else if (gSpeciesInfo[species].abilities[1] == ABILITY_NONE || gSpeciesInfo[species].abilities[1] == gSpeciesInfo[species].abilities[0])
             gBattleMons[battlerId].ability = gSpeciesInfo[species].abilities[0];
         // The ability is unknown.
         else
@@ -621,12 +619,7 @@ bool32 IsBattlerTrapped(u32 battler, bool32 checkSwitch)
 
 u32 GetTotalBaseStat(u32 species)
 {
-    return gSpeciesInfo[species].baseHP
-        + gSpeciesInfo[species].baseAttack
-        + gSpeciesInfo[species].baseDefense
-        + gSpeciesInfo[species].baseSpeed
-        + gSpeciesInfo[species].baseSpAttack
-        + gSpeciesInfo[species].baseSpDefense;
+    return gSpeciesInfo[species].baseHP + gSpeciesInfo[species].baseAttack + gSpeciesInfo[species].baseDefense + gSpeciesInfo[species].baseSpeed + gSpeciesInfo[species].baseSpAttack + gSpeciesInfo[species].baseSpDefense;
 }
 
 bool32 IsTruantMonVulnerable(u32 battlerAI, u32 opposingBattler)
@@ -647,9 +640,7 @@ bool32 IsTruantMonVulnerable(u32 battlerAI, u32 opposingBattler)
 // move checks
 bool32 IsAffectedByPowder(u32 battler, u32 ability, u32 holdEffect)
 {
-    if (ability == ABILITY_OVERCOAT
-        || (B_POWDER_GRASS >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GRASS))
-        || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES)
+    if (ability == ABILITY_OVERCOAT || (B_POWDER_GRASS >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GRASS)) || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES)
         return FALSE;
     return TRUE;
 }
@@ -665,10 +656,7 @@ bool32 MovesWithSplitUnusable(u32 attacker, u32 target, u32 split)
 
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
-        if (moves[i] != MOVE_NONE
-            && moves[i] != MOVE_UNAVAILABLE
-            && GetBattleMoveSplit(moves[i]) == split
-            && !(unusable & gBitTable[i]))
+        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && GetBattleMoveSplit(moves[i]) == split && !(unusable & gBitTable[i]))
         {
             SetTypeBeforeUsingMove(moves[i], attacker);
             GET_MOVE_TYPE(moves[i], moveType);
@@ -732,7 +720,6 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
 
     gBattleStruct->dynamicMoveType = 0;
 
-
     SetTypeBeforeUsingMove(move, battlerAtk);
     GET_MOVE_TYPE(move, moveType);
 
@@ -757,17 +744,17 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
             break;
         }
         normalDmg = CalculateMoveDamageVars(move, battlerAtk, battlerDef, moveType, fixedBasePower,
-                                             effectivenessMultiplier, weather, FALSE,
-                                             aiData->holdEffects[battlerAtk], aiData->holdEffects[battlerDef],
-                                             aiData->abilities[battlerAtk], aiData->abilities[battlerDef]);
+                                            effectivenessMultiplier, weather, FALSE,
+                                            aiData->holdEffects[battlerAtk], aiData->holdEffects[battlerDef],
+                                            aiData->abilities[battlerAtk], aiData->abilities[battlerDef]);
 
         critChanceIndex = CalcCritChanceStageArgs(battlerAtk, battlerDef, move, FALSE, aiData->abilities[battlerAtk], aiData->abilities[battlerDef], aiData->holdEffects[battlerAtk]);
         if (critChanceIndex > 1) // Consider crit damage only if a move has at least +1 crit chance
         {
             s32 critDmg = CalculateMoveDamageVars(move, battlerAtk, battlerDef, moveType, fixedBasePower,
-                                             effectivenessMultiplier, weather, TRUE,
-                                             aiData->holdEffects[battlerAtk], aiData->holdEffects[battlerDef],
-                                             aiData->abilities[battlerAtk], aiData->abilities[battlerDef]);
+                                                  effectivenessMultiplier, weather, TRUE,
+                                                  aiData->holdEffects[battlerAtk], aiData->holdEffects[battlerDef],
+                                                  aiData->abilities[battlerAtk], aiData->abilities[battlerDef]);
             u32 critChance = GetCritHitChance(critChanceIndex);
             // With critChance getting closer to 1, dmg gets closer to critDmg.
             dmg = LowestRollDmg((critDmg + normalDmg * (critChance - 1)) / (critChance));
@@ -801,8 +788,8 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
                 break;
             case EFFECT_SUPER_FANG:
                 dmg = (aiData->abilities[battlerAtk] == ABILITY_PARENTAL_BOND
-                    ? max(2, gBattleMons[battlerDef].hp * 3 / 4)
-                    : max(1, gBattleMons[battlerDef].hp / 2));
+                           ? max(2, gBattleMons[battlerDef].hp * 3 / 4)
+                           : max(1, gBattleMons[battlerDef].hp / 2));
                 break;
             case EFFECT_FINAL_GAMBIT:
                 dmg = gBattleMons[battlerAtk].hp;
@@ -814,7 +801,8 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
                     u32 i;
                     gBattleStruct->beatUpSlot = 0;
                     dmg = 0;
-                    for (i = 0; i < partyCount; i++) {
+                    for (i = 0; i < partyCount; i++)
+                    {
                         dmg += CalculateMoveDamage(move, battlerAtk, battlerDef, moveType, 0, FALSE, FALSE, FALSE);
                     }
                     gBattleStruct->beatUpSlot = 0;
@@ -1022,9 +1010,7 @@ u32 AI_WhichMoveBetter(u32 move1, u32 move2, u32 battlerAtk, u32 battlerDef, s32
     s32 defAbility = AI_DATA->abilities[battlerDef];
 
     // Check if physical moves hurt.
-    if (AI_DATA->holdEffects[battlerAtk] != HOLD_EFFECT_PROTECTIVE_PADS
-        && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_ROCKY_HELMET
-        || defAbility == ABILITY_IRON_BARBS || defAbility == ABILITY_ROUGH_SKIN))
+    if (AI_DATA->holdEffects[battlerAtk] != HOLD_EFFECT_PROTECTIVE_PADS && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_ROCKY_HELMET || defAbility == ABILITY_IRON_BARBS || defAbility == ABILITY_ROUGH_SKIN))
     {
         if (IS_MOVE_PHYSICAL(move1) && !IS_MOVE_PHYSICAL(move2))
             return 1;
@@ -1128,9 +1114,9 @@ static u32 AI_GetEffectiveness(uq4_12_t multiplier)
 
 /* Checks to see if AI will move ahead of another battler
  * Output:
-    * AI_IS_FASTER: is user(ai) faster
-    * AI_IS_SLOWER: is target faster
-*/
+ * AI_IS_FASTER: is user(ai) faster
+ * AI_IS_SLOWER: is target faster
+ */
 u32 AI_WhoStrikesFirst(u32 battlerAI, u32 battler2, u32 moveConsidered)
 {
     u32 fasterAI = 0, fasterPlayer = 0, i;
@@ -1143,8 +1129,7 @@ u32 AI_WhoStrikesFirst(u32 battlerAI, u32 battler2, u32 moveConsidered)
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
         prioBattler2 = GetMovePriority(battler2, battler2Moves[i]);
-        if (battler2Moves[i] == MOVE_NONE || battler2Moves[i] == MOVE_UNAVAILABLE
-            || (prioBattler2 > prioAI && !CanIndexMoveFaintTarget(battler2, battlerAI, i , 2)))
+        if (battler2Moves[i] == MOVE_NONE || battler2Moves[i] == MOVE_UNAVAILABLE || (prioBattler2 > prioAI && !CanIndexMoveFaintTarget(battler2, battlerAI, i, 2)))
             continue;
 
         if (prioAI > prioBattler2)
@@ -1164,7 +1149,7 @@ u32 AI_WhoStrikesFirst(u32 battlerAI, u32 battler2, u32 moveConsidered)
     else
     {
         if (prioAI > prioBattler2)
-            return AI_IS_FASTER;    // if we didn't know any of battler 2's moves to compare priorities, assume they don't have a prio+ move
+            return AI_IS_FASTER; // if we didn't know any of battler 2's moves to compare priorities, assume they don't have a prio+ move
         // Priorities are the same(at least comparing to moves the AI is aware of), decide by speed.
         if (GetWhichBattlerFasterArgs(battlerAI, battler2, TRUE,
                                       AI_DATA->abilities[battlerAI], AI_DATA->abilities[battler2],
@@ -1186,8 +1171,7 @@ bool32 CanTargetFaintAi(u32 battlerDef, u32 battlerAtk)
 
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
-        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && !(unusable & gBitTable[i])
-            && AI_DATA->simulatedDmg[battlerDef][battlerAtk][i] >= gBattleMons[battlerAtk].hp)
+        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && !(unusable & gBitTable[i]) && AI_DATA->simulatedDmg[battlerDef][battlerAtk][i] >= gBattleMons[battlerAtk].hp)
         {
             return TRUE;
         }
@@ -1370,7 +1354,7 @@ bool32 AI_IsBattlerGrounded(u32 battlerId)
 bool32 DoesBattlerIgnoreAbilityChecks(u32 atkAbility, u32 move)
 {
     if (AI_THINKING_STRUCT->aiFlags & AI_FLAG_NEGATE_UNAWARE)
-        return FALSE;   // AI handicap flag: doesn't understand ability suppression concept
+        return FALSE; // AI handicap flag: doesn't understand ability suppression concept
 
     if (IsMoldBreakerTypeAbility(atkAbility) || gBattleMoves[move].ignoresTargetAbility)
         return TRUE;
@@ -1381,9 +1365,9 @@ bool32 DoesBattlerIgnoreAbilityChecks(u32 atkAbility, u32 move)
 static inline bool32 AI_WeatherHasEffect(struct AiLogicData *aiData)
 {
     if (AI_THINKING_STRUCT->aiFlags & AI_FLAG_NEGATE_UNAWARE)
-        return TRUE;   // AI doesn't understand weather supression (handicap)
+        return TRUE; // AI doesn't understand weather supression (handicap)
 
-    return aiData->weatherHasEffect;  // weather damping abilities are announced
+    return aiData->weatherHasEffect; // weather damping abilities are announced
 }
 
 u32 AI_GetWeather(struct AiLogicData *aiData)
@@ -1468,10 +1452,7 @@ bool32 IsMoveRedirectionPrevented(u32 move, u32 atkAbility)
     if (AI_THINKING_STRUCT->aiFlags & AI_FLAG_NEGATE_UNAWARE)
         return FALSE;
 
-    if (move == MOVE_SKY_DROP
-      || move == MOVE_SNIPE_SHOT
-      || atkAbility == ABILITY_PROPELLER_TAIL
-      || atkAbility == ABILITY_STALWART)
+    if (move == MOVE_SKY_DROP || move == MOVE_SNIPE_SHOT || atkAbility == ABILITY_PROPELLER_TAIL || atkAbility == ABILITY_STALWART)
         return TRUE;
     return FALSE;
 }
@@ -1496,7 +1477,7 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
     if (IsSemiInvulnerable(battlerDef, move))
         return FALSE;
 
-    //TODO - anticipate protect move?
+    // TODO - anticipate protect move?
 
     // always hits
     if (gStatuses3[battlerDef] & STATUS3_ALWAYS_HITS || gDisableStructs[battlerDef].battlerWithSureHit == battlerAtk)
@@ -1508,18 +1489,16 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
     if (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(battlerAtk, TYPE_POISON))
         return TRUE;
 
-    // discouraged from hitting
-    weather = AI_GetWeather(AI_DATA);
-    if ((weather & B_WEATHER_SUN)
-      && (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
+    if ((IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN)) &&
+        (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
         return FALSE;
 
-    // increased accuracy but don't always hit
-    if ((((weather & B_WEATHER_RAIN) && (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
-            || (((weather & (B_WEATHER_HAIL | B_WEATHER_SNOW)) && move == MOVE_BLIZZARD)))
-        || (gBattleMoves[move].effect == EFFECT_VITAL_THROW)
-        || (B_MINIMIZE_DMG_ACC >= GEN_6 && (gStatuses3[battlerDef] & STATUS3_MINIMIZED) && gBattleMoves[move].minimizeDoubleDamage)
-        || (gBattleMoves[move].accuracy == 0))
+    if (((IsBattlerWeatherAffected(battlerAtk, B_WEATHER_RAIN)) &&
+         (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE)) ||
+        (IsBattlerWeatherAffected(battlerAtk, (B_WEATHER_HAIL | B_WEATHER_SNOW)) && move == MOVE_BLIZZARD) ||
+        (gBattleMoves[move].effect == EFFECT_VITAL_THROW) ||
+        (B_MINIMIZE_DMG_ACC >= GEN_6 && (gStatuses3[battlerDef] & STATUS3_MINIMIZED) && gBattleMoves[move].minimizeDoubleDamage) ||
+        (gBattleMoves[move].accuracy == 0))
     {
         return TRUE;
     }
@@ -1534,21 +1513,18 @@ bool32 ShouldTryOHKO(u32 battlerAtk, u32 battlerDef, u32 atkAbility, u32 defAbil
 
     gPotentialItemEffectBattler = battlerDef;
     if (holdEffect == HOLD_EFFECT_FOCUS_BAND && (Random() % 100) < AI_DATA->holdEffectParams[battlerDef])
-        return FALSE;   //probabilistically speaking, focus band should activate so dont OHKO
+        return FALSE; // probabilistically speaking, focus band should activate so dont OHKO
     else if (holdEffect == HOLD_EFFECT_FOCUS_SASH && AtMaxHp(battlerDef))
         return FALSE;
 
     if (!DoesBattlerIgnoreAbilityChecks(atkAbility, move) && defAbility == ABILITY_STURDY)
         return FALSE;
 
-    if ((((gStatuses3[battlerDef] & STATUS3_ALWAYS_HITS)
-        && gDisableStructs[battlerDef].battlerWithSureHit == battlerAtk)
-        || atkAbility == ABILITY_NO_GUARD || defAbility == ABILITY_NO_GUARD)
-        && gBattleMons[battlerAtk].level >= gBattleMons[battlerDef].level)
+    if ((((gStatuses3[battlerDef] & STATUS3_ALWAYS_HITS) && gDisableStructs[battlerDef].battlerWithSureHit == battlerAtk) || atkAbility == ABILITY_NO_GUARD || defAbility == ABILITY_NO_GUARD) && gBattleMons[battlerAtk].level >= gBattleMons[battlerDef].level)
     {
         return TRUE;
     }
-    else    // test the odds
+    else // test the odds
     {
         u32 odds = accuracy + (gBattleMons[battlerAtk].level - gBattleMons[battlerDef].level);
         if (B_SHEER_COLD_ACC >= GEN_7 && move == MOVE_SHEER_COLD && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_ICE))
@@ -1565,17 +1541,7 @@ bool32 ShouldSetSandstorm(u32 battler, u32 ability, u32 holdEffect)
     if (weather & B_WEATHER_SANDSTORM)
         return FALSE;
 
-    if (ability == ABILITY_SAND_VEIL
-      || ability == ABILITY_SAND_RUSH
-      || ability == ABILITY_SAND_FORCE
-      || ability == ABILITY_OVERCOAT
-      || ability == ABILITY_MAGIC_GUARD
-      || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES
-      || IS_BATTLER_OF_TYPE(battler, TYPE_ROCK)
-      || IS_BATTLER_OF_TYPE(battler, TYPE_STEEL)
-      || IS_BATTLER_OF_TYPE(battler, TYPE_GROUND)
-      || HasMoveEffect(battler, EFFECT_SHORE_UP)
-      || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
+    if (ability == ABILITY_SAND_VEIL || ability == ABILITY_SAND_RUSH || ability == ABILITY_SAND_FORCE || ability == ABILITY_OVERCOAT || ability == ABILITY_MAGIC_GUARD || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES || IS_BATTLER_OF_TYPE(battler, TYPE_ROCK) || IS_BATTLER_OF_TYPE(battler, TYPE_STEEL) || IS_BATTLER_OF_TYPE(battler, TYPE_GROUND) || HasMoveEffect(battler, EFFECT_SHORE_UP) || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
     {
         return TRUE;
     }
@@ -1588,17 +1554,7 @@ bool32 ShouldSetHail(u32 battler, u32 ability, u32 holdEffect)
     if (weather & (B_WEATHER_HAIL | B_WEATHER_SNOW))
         return FALSE;
 
-    if (ability == ABILITY_SNOW_CLOAK
-      || ability == ABILITY_ICE_BODY
-      || IS_FORECAST_ABILITY(ability)
-      || ability == ABILITY_SLUSH_RUSH
-      || ability == ABILITY_MAGIC_GUARD
-      || ability == ABILITY_OVERCOAT
-      || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES
-      || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
-      || HasMove(battler, MOVE_BLIZZARD)
-      || HasMoveEffect(battler, EFFECT_AURORA_VEIL)
-      || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
+    if (ability == ABILITY_SNOW_CLOAK || ability == ABILITY_ICE_BODY || IS_FORECAST_ABILITY(ability) || ability == ABILITY_SLUSH_RUSH || ability == ABILITY_MAGIC_GUARD || ability == ABILITY_OVERCOAT || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES || IS_BATTLER_OF_TYPE(battler, TYPE_ICE) || HasMove(battler, MOVE_BLIZZARD) || HasMoveEffect(battler, EFFECT_AURORA_VEIL) || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
     {
         return TRUE;
     }
@@ -1611,17 +1567,7 @@ bool32 ShouldSetRain(u32 battlerAtk, u32 atkAbility, u32 holdEffect)
     if (weather & B_WEATHER_RAIN)
         return FALSE;
 
-    if (holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA
-     && (atkAbility == ABILITY_SWIFT_SWIM
-      || IS_FORECAST_ABILITY(atkAbility)
-      || atkAbility == ABILITY_HYDRATION
-      || atkAbility == ABILITY_RAIN_DISH
-      || atkAbility == ABILITY_DRY_SKIN
-      || HasMoveEffect(battlerAtk, EFFECT_ELECTRO_SHOT)
-      || HasMoveEffect(battlerAtk, EFFECT_THUNDER)
-      || HasMoveEffect(battlerAtk, EFFECT_HURRICANE)
-      || HasMoveEffect(battlerAtk, EFFECT_WEATHER_BALL)
-      || HasMoveWithType(battlerAtk, TYPE_WATER)))
+    if (holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA && (atkAbility == ABILITY_SWIFT_SWIM || IS_FORECAST_ABILITY(atkAbility) || atkAbility == ABILITY_HYDRATION || atkAbility == ABILITY_RAIN_DISH || atkAbility == ABILITY_DRY_SKIN || HasMoveEffect(battlerAtk, EFFECT_ELECTRO_SHOT) || HasMoveEffect(battlerAtk, EFFECT_THUNDER) || HasMoveEffect(battlerAtk, EFFECT_HURRICANE) || HasMoveEffect(battlerAtk, EFFECT_WEATHER_BALL) || HasMoveWithType(battlerAtk, TYPE_WATER)))
     {
         return TRUE;
     }
@@ -1634,20 +1580,7 @@ bool32 ShouldSetSun(u32 battlerAtk, u32 atkAbility, u32 holdEffect)
     if (weather & B_WEATHER_SUN)
         return FALSE;
 
-    if (holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA
-     && (atkAbility == ABILITY_CHLOROPHYLL
-      || atkAbility == ABILITY_FLOWER_GIFT
-      || IS_FORECAST_ABILITY(atkAbility)
-      || atkAbility == ABILITY_LEAF_GUARD
-      || atkAbility == ABILITY_SOLAR_POWER
-      || atkAbility == ABILITY_HARVEST
-      || HasMoveEffect(battlerAtk, EFFECT_SOLAR_BEAM)
-      || HasMoveEffect(battlerAtk, EFFECT_MORNING_SUN)
-      || HasMoveEffect(battlerAtk, EFFECT_SYNTHESIS)
-      || HasMoveEffect(battlerAtk, EFFECT_MOONLIGHT)
-      || HasMoveEffect(battlerAtk, EFFECT_WEATHER_BALL)
-      || HasMoveEffect(battlerAtk, EFFECT_GROWTH)
-      || HasMoveWithType(battlerAtk, TYPE_FIRE)))
+    if (holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA && (atkAbility == ABILITY_CHLOROPHYLL || atkAbility == ABILITY_FLOWER_GIFT || IS_FORECAST_ABILITY(atkAbility) || atkAbility == ABILITY_LEAF_GUARD || atkAbility == ABILITY_SOLAR_POWER || atkAbility == ABILITY_HARVEST || HasMoveEffect(battlerAtk, EFFECT_SOLAR_BEAM) || HasMoveEffect(battlerAtk, EFFECT_MORNING_SUN) || HasMoveEffect(battlerAtk, EFFECT_SYNTHESIS) || HasMoveEffect(battlerAtk, EFFECT_MOONLIGHT) || HasMoveEffect(battlerAtk, EFFECT_WEATHER_BALL) || HasMoveEffect(battlerAtk, EFFECT_GROWTH) || HasMoveWithType(battlerAtk, TYPE_FIRE)))
     {
         return TRUE;
     }
@@ -1660,14 +1593,7 @@ bool32 ShouldSetSnow(u32 battler, u32 ability, u32 holdEffect)
     if (weather & (B_WEATHER_SNOW | B_WEATHER_HAIL))
         return FALSE;
 
-    if (ability == ABILITY_SNOW_CLOAK
-      || ability == ABILITY_ICE_BODY
-      || IS_FORECAST_ABILITY(ability)
-      || ability == ABILITY_SLUSH_RUSH
-      || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
-      || HasMove(battler, MOVE_BLIZZARD)
-      || HasMoveEffect(battler, EFFECT_AURORA_VEIL)
-      || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
+    if (ability == ABILITY_SNOW_CLOAK || ability == ABILITY_ICE_BODY || IS_FORECAST_ABILITY(ability) || ability == ABILITY_SLUSH_RUSH || IS_BATTLER_OF_TYPE(battler, TYPE_ICE) || HasMove(battler, MOVE_BLIZZARD) || HasMoveEffect(battler, EFFECT_AURORA_VEIL) || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
     {
         return TRUE;
     }
@@ -1688,7 +1614,7 @@ void ProtectChecks(u32 battlerAtk, u32 battlerDef, u32 move, u32 predictedMove, 
     if (uses == 0)
     {
         // Don't waste protect turns when at max HP
-        if(gBattleMons[battlerAtk].maxHP != 1 && gBattleMons[battlerAtk].hp == gBattleMons[battlerAtk].maxHP)
+        if (gBattleMons[battlerAtk].maxHP != 1 && gBattleMons[battlerAtk].hp == gBattleMons[battlerAtk].maxHP)
             ADJUST_SCORE_PTR(-1);
         else if (predictedMove != MOVE_NONE && predictedMove != 0xFFFF && !IS_MOVE_STATUS(predictedMove))
             ADJUST_SCORE_PTR(2);
@@ -1703,16 +1629,12 @@ void ProtectChecks(u32 battlerAtk, u32 battlerDef, u32 move, u32 predictedMove, 
             ADJUST_SCORE_PTR(-(min(uses, 3)));
     }
 
-    if (gBattleMons[battlerAtk].status1 & (STATUS1_PSN_ANY | STATUS1_BURN | STATUS1_FROSTBITE)
-     || gBattleMons[battlerAtk].status2 & (STATUS2_CURSED | STATUS2_INFATUATION)
-     || gStatuses3[battlerAtk] & (STATUS3_PERISH_SONG | STATUS3_LEECHSEED | STATUS3_YAWN))
+    if (gBattleMons[battlerAtk].status1 & (STATUS1_PSN_ANY | STATUS1_BURN | STATUS1_FROSTBITE) || gBattleMons[battlerAtk].status2 & (STATUS2_CURSED | STATUS2_INFATUATION) || gStatuses3[battlerAtk] & (STATUS3_PERISH_SONG | STATUS3_LEECHSEED | STATUS3_YAWN))
     {
         ADJUST_SCORE_PTR(-1);
     }
 
-    if (gBattleMons[battlerDef].status1 & STATUS1_TOXIC_POISON
-      || gBattleMons[battlerDef].status2 & (STATUS2_CURSED | STATUS2_INFATUATION)
-      || gStatuses3[battlerDef] & (STATUS3_PERISH_SONG | STATUS3_LEECHSEED | STATUS3_YAWN))
+    if (gBattleMons[battlerDef].status1 & STATUS1_TOXIC_POISON || gBattleMons[battlerDef].status2 & (STATUS2_CURSED | STATUS2_INFATUATION) || gStatuses3[battlerDef] & (STATUS3_PERISH_SONG | STATUS3_LEECHSEED | STATUS3_YAWN))
         ADJUST_SCORE_PTR(2);
 }
 
@@ -1721,18 +1643,13 @@ bool32 ShouldLowerStat(u32 battler, u32 battlerAbility, u32 stat)
 {
     if (gBattleMons[battler].statStages[stat] > MIN_STAT_STAGE && battlerAbility != ABILITY_CONTRARY)
     {
-        if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_CLEAR_AMULET
-         || battlerAbility == ABILITY_CLEAR_BODY
-         || battlerAbility == ABILITY_WHITE_SMOKE
-         || battlerAbility == ABILITY_FULL_METAL_BODY)
+        if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_CLEAR_AMULET || battlerAbility == ABILITY_CLEAR_BODY || battlerAbility == ABILITY_WHITE_SMOKE || battlerAbility == ABILITY_FULL_METAL_BODY)
             return FALSE;
 
         // If AI is faster and doesn't have any mons left, lowering speed doesn't give any
         if (stat == STAT_SPEED)
         {
-            if (AI_WhoStrikesFirst(sBattler_AI, battler, AI_THINKING_STRUCT->moveConsidered) == AI_IS_FASTER
-                && CountUsablePartyMons(sBattler_AI) == 0
-                && !HasMoveEffect(sBattler_AI, EFFECT_ELECTRO_BALL))
+            if (AI_WhoStrikesFirst(sBattler_AI, battler, AI_THINKING_STRUCT->moveConsidered) == AI_IS_FASTER && CountUsablePartyMons(sBattler_AI) == 0 && !HasMoveEffect(sBattler_AI, EFFECT_ELECTRO_BALL))
                 return FALSE;
         }
         return TRUE;
@@ -1743,8 +1660,7 @@ bool32 ShouldLowerStat(u32 battler, u32 battlerAbility, u32 stat)
 
 bool32 BattlerStatCanRise(u32 battler, u32 battlerAbility, u32 stat)
 {
-    if ((gBattleMons[battler].statStages[stat] < MAX_STAT_STAGE && battlerAbility != ABILITY_CONTRARY)
-      || (battlerAbility == ABILITY_CONTRARY && gBattleMons[battler].statStages[stat] > MIN_STAT_STAGE))
+    if ((gBattleMons[battler].statStages[stat] < MAX_STAT_STAGE && battlerAbility != ABILITY_CONTRARY) || (battlerAbility == ABILITY_CONTRARY && gBattleMons[battler].statStages[stat] > MIN_STAT_STAGE))
         return TRUE;
     return FALSE;
 }
@@ -1801,14 +1717,7 @@ bool32 ShouldLowerAttack(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     if (AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && (AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
         return FALSE; // Don't bother lowering stats if can kill enemy.
 
-    if (gBattleMons[battlerDef].statStages[STAT_ATK] > 4
-      && HasMoveWithSplit(battlerDef, SPLIT_PHYSICAL)
-      && defAbility != ABILITY_CONTRARY
-      && defAbility != ABILITY_CLEAR_BODY
-      && defAbility != ABILITY_WHITE_SMOKE
-      && defAbility != ABILITY_FULL_METAL_BODY
-      && defAbility != ABILITY_HYPER_CUTTER
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
+    if (gBattleMons[battlerDef].statStages[STAT_ATK] > 4 && HasMoveWithSplit(battlerDef, SPLIT_PHYSICAL) && defAbility != ABILITY_CONTRARY && defAbility != ABILITY_CLEAR_BODY && defAbility != ABILITY_WHITE_SMOKE && defAbility != ABILITY_FULL_METAL_BODY && defAbility != ABILITY_HYPER_CUTTER && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
 }
@@ -1818,14 +1727,7 @@ bool32 ShouldLowerDefense(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     if (AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && (AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
         return FALSE; // Don't bother lowering stats if can kill enemy.
 
-    if (gBattleMons[battlerDef].statStages[STAT_DEF] > 4
-      && HasMoveWithSplit(battlerAtk, SPLIT_PHYSICAL)
-      && defAbility != ABILITY_CONTRARY
-      && defAbility != ABILITY_CLEAR_BODY
-      && defAbility != ABILITY_WHITE_SMOKE
-      && defAbility != ABILITY_FULL_METAL_BODY
-      && defAbility != ABILITY_BIG_PECKS
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
+    if (gBattleMons[battlerDef].statStages[STAT_DEF] > 4 && HasMoveWithSplit(battlerAtk, SPLIT_PHYSICAL) && defAbility != ABILITY_CONTRARY && defAbility != ABILITY_CLEAR_BODY && defAbility != ABILITY_WHITE_SMOKE && defAbility != ABILITY_FULL_METAL_BODY && defAbility != ABILITY_BIG_PECKS && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
 }
@@ -1835,12 +1737,7 @@ bool32 ShouldLowerSpeed(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     if (AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && (AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
         return FALSE; // Don't bother lowering stats if can kill enemy.
 
-    if (!AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered)
-      && defAbility != ABILITY_CONTRARY
-      && defAbility != ABILITY_CLEAR_BODY
-      && defAbility != ABILITY_FULL_METAL_BODY
-      && defAbility != ABILITY_WHITE_SMOKE
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
+    if (!AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && defAbility != ABILITY_CONTRARY && defAbility != ABILITY_CLEAR_BODY && defAbility != ABILITY_FULL_METAL_BODY && defAbility != ABILITY_WHITE_SMOKE && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
 }
@@ -1850,13 +1747,7 @@ bool32 ShouldLowerSpAtk(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     if (AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && (AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
         return FALSE; // Don't bother lowering stats if can kill enemy.
 
-    if (gBattleMons[battlerDef].statStages[STAT_SPATK] > 4
-      && HasMoveWithSplit(battlerDef, SPLIT_SPECIAL)
-      && defAbility != ABILITY_CONTRARY
-      && defAbility != ABILITY_CLEAR_BODY
-      && defAbility != ABILITY_FULL_METAL_BODY
-      && defAbility != ABILITY_WHITE_SMOKE
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
+    if (gBattleMons[battlerDef].statStages[STAT_SPATK] > 4 && HasMoveWithSplit(battlerDef, SPLIT_SPECIAL) && defAbility != ABILITY_CONTRARY && defAbility != ABILITY_CLEAR_BODY && defAbility != ABILITY_FULL_METAL_BODY && defAbility != ABILITY_WHITE_SMOKE && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
 }
@@ -1866,13 +1757,7 @@ bool32 ShouldLowerSpDef(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     if (AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && (AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
         return FALSE; // Don't bother lowering stats if can kill enemy.
 
-    if (gBattleMons[battlerDef].statStages[STAT_SPDEF] > 4
-      && HasMoveWithSplit(battlerAtk, SPLIT_SPECIAL)
-      && defAbility != ABILITY_CONTRARY
-      && defAbility != ABILITY_CLEAR_BODY
-      && defAbility != ABILITY_FULL_METAL_BODY
-      && defAbility != ABILITY_WHITE_SMOKE
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
+    if (gBattleMons[battlerDef].statStages[STAT_SPDEF] > 4 && HasMoveWithSplit(battlerAtk, SPLIT_SPECIAL) && defAbility != ABILITY_CONTRARY && defAbility != ABILITY_CLEAR_BODY && defAbility != ABILITY_FULL_METAL_BODY && defAbility != ABILITY_WHITE_SMOKE && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
 }
@@ -1882,14 +1767,7 @@ bool32 ShouldLowerAccuracy(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     if (AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && (AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
         return FALSE; // Don't bother lowering stats if can kill enemy.
 
-    if (defAbility != ABILITY_CONTRARY
-      && defAbility != ABILITY_CLEAR_BODY
-      && defAbility != ABILITY_WHITE_SMOKE
-      && defAbility != ABILITY_FULL_METAL_BODY
-      && defAbility != ABILITY_KEEN_EYE
-      && defAbility != ABILITY_MINDS_EYE
-      && (B_ILLUMINATE_EFFECT >= GEN_9 && defAbility != ABILITY_ILLUMINATE)
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
+    if (defAbility != ABILITY_CONTRARY && defAbility != ABILITY_CLEAR_BODY && defAbility != ABILITY_WHITE_SMOKE && defAbility != ABILITY_FULL_METAL_BODY && defAbility != ABILITY_KEEN_EYE && defAbility != ABILITY_MINDS_EYE && (B_ILLUMINATE_EFFECT >= GEN_9 && defAbility != ABILITY_ILLUMINATE) && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
 }
@@ -1899,12 +1777,7 @@ bool32 ShouldLowerEvasion(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     if (AI_STRIKES_FIRST(battlerAtk, battlerDef, AI_THINKING_STRUCT->moveConsidered) && (AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
         return FALSE; // Don't bother lowering stats if can kill enemy.
 
-    if (gBattleMons[battlerDef].statStages[STAT_EVASION] > DEFAULT_STAT_STAGE
-      && defAbility != ABILITY_CONTRARY
-      && defAbility != ABILITY_CLEAR_BODY
-      && defAbility != ABILITY_FULL_METAL_BODY
-      && defAbility != ABILITY_WHITE_SMOKE
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
+    if (gBattleMons[battlerDef].statStages[STAT_EVASION] > DEFAULT_STAT_STAGE && defAbility != ABILITY_CONTRARY && defAbility != ABILITY_CLEAR_BODY && defAbility != ABILITY_FULL_METAL_BODY && defAbility != ABILITY_WHITE_SMOKE && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
 }
@@ -1988,10 +1861,10 @@ bool32 HasMoveEffect(u32 battlerId, u32 moveEffect)
 
 bool32 HasMoveWithCriticalHitChance(u32 battlerId)
 {
-    //s32 i;
-    //u16 *moves = GetMovesArray(battlerId);
-//
-    //for (i = 0; i < MAX_MON_MOVES; i++)
+    // s32 i;
+    // u16 *moves = GetMovesArray(battlerId);
+    //
+    // for (i = 0; i < MAX_MON_MOVES; i++)
     //{
     //    if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE
     //        && gBattleMoves[moves[i]].criticalHitStage > 0)
@@ -2031,8 +1904,7 @@ bool32 HasMoveWithLowAccuracy(u32 battlerAtk, u32 battlerDef, u32 accCheck, bool
         {
             if (ignoreStatus && IS_MOVE_STATUS(moves[i]))
                 continue;
-            else if ((!IS_MOVE_STATUS(moves[i]) && gBattleMoves[moves[i]].accuracy == 0)
-              || AI_GetBattlerMoveTargetType(battlerAtk, moves[i]) & (MOVE_TARGET_USER | MOVE_TARGET_OPPONENTS_FIELD))
+            else if ((!IS_MOVE_STATUS(moves[i]) && gBattleMoves[moves[i]].accuracy == 0) || AI_GetBattlerMoveTargetType(battlerAtk, moves[i]) & (MOVE_TARGET_USER | MOVE_TARGET_OPPONENTS_FIELD))
                 continue;
 
             if (AI_DATA->moveAccuracy[battlerAtk][battlerDef][i] <= accCheck)
@@ -2055,8 +1927,7 @@ bool32 HasSleepMoveWithLowAccuracy(u32 battlerAtk, u32 battlerDef)
             break;
         if (!(gBitTable[i] & moveLimitations))
         {
-            if (gBattleMoves[moves[i]].effect == EFFECT_SLEEP
-              && AI_DATA->moveAccuracy[battlerAtk][battlerDef][i] < 85)
+            if (gBattleMoves[moves[i]].effect == EFFECT_SLEEP && AI_DATA->moveAccuracy[battlerAtk][battlerDef][i] < 85)
                 return TRUE;
         }
     }
@@ -2090,7 +1961,7 @@ bool32 IsTrappingMoveEffect(u32 effect)
     case EFFECT_TRAP:
     case EFFECT_HIT_PREVENT_ESCAPE:
     case EFFECT_FAIRY_LOCK:
-    //case EFFECT_NO_RETREAT:   // TODO
+        // case EFFECT_NO_RETREAT:   // TODO
         return TRUE;
     default:
         return FALSE;
@@ -2133,7 +2004,7 @@ bool32 IsAttackBoostMoveEffect(u32 effect)
     switch (effect)
     {
     case EFFECT_ATTACK_UP:
-	case EFFECT_ATTACK_UP_2:
+    case EFFECT_ATTACK_UP_2:
     case EFFECT_ATTACK_ACCURACY_UP:
     case EFFECT_ATTACK_SPATK_UP:
     case EFFECT_DRAGON_DANCE:
@@ -2153,34 +2024,34 @@ bool32 IsStatRaisingEffect(u32 effect)
     switch (effect)
     {
     case EFFECT_ATTACK_UP:
-	case EFFECT_ATTACK_UP_2:
-	case EFFECT_DEFENSE_UP:
-	case EFFECT_DEFENSE_UP_2:
+    case EFFECT_ATTACK_UP_2:
+    case EFFECT_DEFENSE_UP:
+    case EFFECT_DEFENSE_UP_2:
     case EFFECT_DEFENSE_UP_3:
-	case EFFECT_SPEED_UP:
-	case EFFECT_SPEED_UP_2:
-	case EFFECT_SPECIAL_ATTACK_UP:
-	case EFFECT_SPECIAL_ATTACK_UP_2:
+    case EFFECT_SPEED_UP:
+    case EFFECT_SPEED_UP_2:
+    case EFFECT_SPECIAL_ATTACK_UP:
+    case EFFECT_SPECIAL_ATTACK_UP_2:
     case EFFECT_SPECIAL_ATTACK_UP_3:
-	case EFFECT_SPECIAL_DEFENSE_UP:
-	case EFFECT_SPECIAL_DEFENSE_UP_2:
+    case EFFECT_SPECIAL_DEFENSE_UP:
+    case EFFECT_SPECIAL_DEFENSE_UP_2:
     case EFFECT_ACCURACY_UP:
     case EFFECT_ACCURACY_UP_2:
     case EFFECT_EVASION_UP:
     case EFFECT_EVASION_UP_2:
     case EFFECT_MINIMIZE:
     case EFFECT_DEFENSE_CURL:
-	case EFFECT_CALM_MIND:
+    case EFFECT_CALM_MIND:
     case EFFECT_COSMIC_POWER:
-	case EFFECT_DRAGON_DANCE:
-	case EFFECT_ACUPRESSURE:
-	case EFFECT_SHELL_SMASH:
-	case EFFECT_SHIFT_GEAR:
-	case EFFECT_ATTACK_ACCURACY_UP:
-	case EFFECT_ATTACK_SPATK_UP:
-	case EFFECT_GROWTH:
-	case EFFECT_COIL:
-	case EFFECT_QUIVER_DANCE:
+    case EFFECT_DRAGON_DANCE:
+    case EFFECT_ACUPRESSURE:
+    case EFFECT_SHELL_SMASH:
+    case EFFECT_SHIFT_GEAR:
+    case EFFECT_ATTACK_ACCURACY_UP:
+    case EFFECT_ATTACK_SPATK_UP:
+    case EFFECT_GROWTH:
+    case EFFECT_COIL:
+    case EFFECT_QUIVER_DANCE:
     case EFFECT_BULK_UP:
     case EFFECT_GEOMANCY:
     case EFFECT_STOCKPILE:
@@ -2242,8 +2113,7 @@ bool32 HasDamagingMoveOfType(u32 battlerId, u32 type)
 
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
-        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE
-          && gBattleMoves[moves[i]].type == type && gBattleMoves[moves[i]].power != 0)
+        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && gBattleMoves[moves[i]].type == type && gBattleMoves[moves[i]].power != 0)
             return TRUE;
     }
 
@@ -2311,14 +2181,13 @@ bool32 IsChargingMove(u32 battlerAtk, u32 effect)
 static u32 GetLeechSeedDamage(u32 battlerId)
 {
     u32 damage = 0;
-    if ((gStatuses3[battlerId] & STATUS3_LEECHSEED)
-     && gBattleMons[gStatuses3[battlerId] & STATUS3_LEECHSEED_BATTLER].hp != 0)
-     {
+    if ((gStatuses3[battlerId] & STATUS3_LEECHSEED) && gBattleMons[gStatuses3[battlerId] & STATUS3_LEECHSEED_BATTLER].hp != 0)
+    {
         damage = GetNonDynamaxMaxHP(battlerId) / 8;
         if (damage == 0)
             damage = 1;
-     }
-     return damage;
+    }
+    return damage;
 }
 
 static u32 GetNightmareDamage(u32 battlerId)
@@ -2390,23 +2259,14 @@ static u32 GetPoisonDamage(u32 battlerId)
 
 static bool32 BattlerAffectedBySandstorm(u32 battlerId, u32 ability)
 {
-    if (!IS_BATTLER_OF_TYPE(battlerId, TYPE_ROCK)
-      && !IS_BATTLER_OF_TYPE(battlerId, TYPE_GROUND)
-      && !IS_BATTLER_OF_TYPE(battlerId, TYPE_STEEL)
-      && ability != ABILITY_SAND_VEIL
-      && ability != ABILITY_SAND_FORCE
-      && ability != ABILITY_SAND_RUSH
-      && ability != ABILITY_OVERCOAT)
+    if (!IS_BATTLER_OF_TYPE(battlerId, TYPE_ROCK) && !IS_BATTLER_OF_TYPE(battlerId, TYPE_GROUND) && !IS_BATTLER_OF_TYPE(battlerId, TYPE_STEEL) && ability != ABILITY_SAND_VEIL && ability != ABILITY_SAND_FORCE && ability != ABILITY_SAND_RUSH && ability != ABILITY_OVERCOAT)
         return TRUE;
     return FALSE;
 }
 
 static bool32 BattlerAffectedByHail(u32 battlerId, u32 ability)
 {
-    if (!IS_BATTLER_OF_TYPE(battlerId, TYPE_ICE)
-      && ability != ABILITY_SNOW_CLOAK
-      && ability != ABILITY_OVERCOAT
-      && ability != ABILITY_ICE_BODY)
+    if (!IS_BATTLER_OF_TYPE(battlerId, TYPE_ICE) && ability != ABILITY_SNOW_CLOAK && ability != ABILITY_OVERCOAT && ability != ABILITY_ICE_BODY)
         return TRUE;
     return FALSE;
 }
@@ -2422,9 +2282,7 @@ static u32 GetWeatherDamage(u32 battlerId)
 
     if (weather & B_WEATHER_SANDSTORM)
     {
-        if (BattlerAffectedBySandstorm(battlerId, ability)
-          && !(gStatuses3[battlerId] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
-          && holdEffect != HOLD_EFFECT_SAFETY_GOGGLES)
+        if (BattlerAffectedBySandstorm(battlerId, ability) && !(gStatuses3[battlerId] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)) && holdEffect != HOLD_EFFECT_SAFETY_GOGGLES)
         {
             damage = GetNonDynamaxMaxHP(battlerId) / 16;
             if (damage == 0)
@@ -2433,9 +2291,7 @@ static u32 GetWeatherDamage(u32 battlerId)
     }
     if ((weather & B_WEATHER_HAIL) && ability != ABILITY_ICE_BODY)
     {
-        if (BattlerAffectedByHail(battlerId, ability)
-          && !(gStatuses3[battlerId] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
-          && holdEffect != HOLD_EFFECT_SAFETY_GOGGLES)
+        if (BattlerAffectedByHail(battlerId, ability) && !(gStatuses3[battlerId] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)) && holdEffect != HOLD_EFFECT_SAFETY_GOGGLES)
         {
             damage = GetNonDynamaxMaxHP(battlerId) / 16;
             if (damage == 0)
@@ -2452,20 +2308,14 @@ u32 GetBattlerSecondaryDamage(u32 battlerId)
     if (AI_DATA->abilities[battlerId] == ABILITY_MAGIC_GUARD)
         return FALSE;
 
-    secondaryDamage = GetLeechSeedDamage(battlerId)
-     + GetNightmareDamage(battlerId)
-     + GetCurseDamage(battlerId)
-     + GetTrapDamage(battlerId)
-     + GetPoisonDamage(battlerId)
-     + GetWeatherDamage(battlerId);
+    secondaryDamage = GetLeechSeedDamage(battlerId) + GetNightmareDamage(battlerId) + GetCurseDamage(battlerId) + GetTrapDamage(battlerId) + GetPoisonDamage(battlerId) + GetWeatherDamage(battlerId);
 
     return secondaryDamage;
 }
 
 bool32 BattlerWillFaintFromWeather(u32 battler, u32 ability)
 {
-    if ((BattlerAffectedBySandstorm(battler, ability) || BattlerAffectedByHail(battler, ability))
-      && gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 16)
+    if ((BattlerAffectedBySandstorm(battler, ability) || BattlerAffectedByHail(battler, ability)) && gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 16)
         return TRUE;
 
     return FALSE;
@@ -2473,8 +2323,7 @@ bool32 BattlerWillFaintFromWeather(u32 battler, u32 ability)
 
 bool32 BattlerWillFaintFromSecondaryDamage(u32 battler, u32 ability)
 {
-    if (GetBattlerSecondaryDamage(battler) != 0
-      && gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 16)
+    if (GetBattlerSecondaryDamage(battler) != 0 && gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 16)
         return TRUE;
     return FALSE;
 }
@@ -2519,7 +2368,7 @@ struct Pokemon *GetPartyBattlerPartyData(u32 battlerId, u32 switchBattler)
 static bool32 PartyBattlerShouldAvoidHazards(u32 currBattler, u32 switchBattler)
 {
     struct Pokemon *mon = GetPartyBattlerPartyData(currBattler, switchBattler);
-    u32 ability = GetMonAbility(mon);   // we know our own party data
+    u32 ability = GetMonAbility(mon); // we know our own party data
     u32 holdEffect;
     u32 species = GetMonData(mon, MON_DATA_SPECIES);
     u32 flags = gSideStatuses[GetBattlerSide(currBattler)] & (SIDE_STATUS_SPIKES | SIDE_STATUS_STEALTH_ROCK | SIDE_STATUS_STICKY_WEB | SIDE_STATUS_TOXIC_SPIKES);
@@ -2543,9 +2392,7 @@ static bool32 PartyBattlerShouldAvoidHazards(u32 currBattler, u32 switchBattler)
     if (flags & SIDE_STATUS_STEALTH_ROCK)
         hazardDamage += GetStealthHazardDamageByTypesAndHP(gBattleMoves[MOVE_STEALTH_ROCK].type, type1, type2, maxHp);
 
-    if (flags & SIDE_STATUS_SPIKES && ((type1 != TYPE_FLYING && type2 != TYPE_FLYING
-        && ability != ABILITY_LEVITATE && holdEffect != HOLD_EFFECT_AIR_BALLOON)
-        || holdEffect == HOLD_EFFECT_IRON_BALL || gFieldStatuses & STATUS_FIELD_GRAVITY))
+    if (flags & SIDE_STATUS_SPIKES && ((type1 != TYPE_FLYING && type2 != TYPE_FLYING && ability != ABILITY_LEVITATE && holdEffect != HOLD_EFFECT_AIR_BALLOON) || holdEffect == HOLD_EFFECT_IRON_BALL || gFieldStatuses & STATUS_FIELD_GRAVITY))
     {
         s32 spikesDmg = maxHp / ((5 - gSideTimers[GetBattlerSide(currBattler)].spikesAmount) * 2);
         if (spikesDmg == 0)
@@ -2558,14 +2405,15 @@ static bool32 PartyBattlerShouldAvoidHazards(u32 currBattler, u32 switchBattler)
     return FALSE;
 }
 
-enum {
+enum
+{
     DONT_PIVOT,
     CAN_TRY_PIVOT,
     PIVOT,
 };
 bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32 moveIndex)
 {
-    bool32 hasStatBoost = AnyUsefulStatIsRaised(battlerAtk) || gBattleMons[battlerDef].statStages[STAT_EVASION] >= 9; //Significant boost in evasion for any class
+    bool32 hasStatBoost = AnyUsefulStatIsRaised(battlerAtk) || gBattleMons[battlerDef].statStages[STAT_EVASION] >= 9; // Significant boost in evasion for any class
     bool32 shouldSwitch;
     u32 battlerToSwitch;
 
@@ -2580,7 +2428,7 @@ bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32
         if (CountUsablePartyMons(battlerAtk) == 0)
             return CAN_TRY_PIVOT; // can't switch, but attack might still be useful
 
-        //TODO - predict opponent switching
+        // TODO - predict opponent switching
         /*if (IsPredictedToSwitch(battlerDef, battlerAtk) && !hasStatBoost)
             return PIVOT; // Try pivoting so you can switch to a better matchup to counter your new opponent*/
 
@@ -2592,22 +2440,15 @@ bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32
                 {
                     // attacker can kill target in two hits (theoretically)
                     if (CanTargetFaintAi(battlerDef, battlerAtk))
-                        return PIVOT;   // Won't get the two turns, pivot
+                        return PIVOT; // Won't get the two turns, pivot
 
-                    if (!IS_MOVE_STATUS(move) && (shouldSwitch
-                        || (AtMaxHp(battlerDef) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH
-                        || (B_STURDY >= GEN_5 && defAbility == ABILITY_STURDY)
-                        || defAbility == ABILITY_MULTISCALE
-                        || defAbility == ABILITY_SHADOW_SHIELD))))
-                        return PIVOT;   // pivot to break sash/sturdy/multiscale
+                    if (!IS_MOVE_STATUS(move) && (shouldSwitch || (AtMaxHp(battlerDef) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH || (B_STURDY >= GEN_5 && defAbility == ABILITY_STURDY) || defAbility == ABILITY_MULTISCALE || defAbility == ABILITY_SHADOW_SHIELD))))
+                        return PIVOT; // pivot to break sash/sturdy/multiscale
                 }
                 else if (!hasStatBoost)
                 {
-                    if (!IS_MOVE_STATUS(move) && (AtMaxHp(battlerDef) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH
-                        || (B_STURDY >= GEN_5 && defAbility == ABILITY_STURDY)
-                        || defAbility == ABILITY_MULTISCALE
-                        || defAbility == ABILITY_SHADOW_SHIELD)))
-                        return PIVOT;   // pivot to break sash/sturdy/multiscale
+                    if (!IS_MOVE_STATUS(move) && (AtMaxHp(battlerDef) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH || (B_STURDY >= GEN_5 && defAbility == ABILITY_STURDY) || defAbility == ABILITY_MULTISCALE || defAbility == ABILITY_SHADOW_SHIELD)))
+                        return PIVOT; // pivot to break sash/sturdy/multiscale
 
                     if (shouldSwitch)
                         return PIVOT;
@@ -2672,7 +2513,7 @@ bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32
                 if (CanAIFaintTarget(battlerAtk, battlerDef, 0))
                 {
                     if (!BattlerWillFaintFromSecondaryDamage(battlerAtk, AI_DATA->abilities[battlerAtk]) // This is the only move that can KO
-                      && !hasStatBoost) //You're not wasting a valuable stat boost
+                        && !hasStatBoost)                                                                // You're not wasting a valuable stat boost
                     {
                         return CAN_TRY_PIVOT;
                     }
@@ -2680,27 +2521,27 @@ bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32
                 else if (CanAIFaintTarget(battlerAtk, battlerDef, 2))
                 {
                     // can knock out foe in 2 hits
-                    if (IS_MOVE_STATUS(move) && (shouldSwitch //Damaging move
-                      //&& (switchScore >= SWITCHING_INCREASE_RESIST_ALL_MOVES + SWITCHING_INCREASE_KO_FOE //remove hazards
-                     || (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH && AtMaxHp(battlerDef))))
+                    if (IS_MOVE_STATUS(move) && (shouldSwitch // Damaging move
+                                                              //&& (switchScore >= SWITCHING_INCREASE_RESIST_ALL_MOVES + SWITCHING_INCREASE_KO_FOE //remove hazards
+                                                 || (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH && AtMaxHp(battlerDef))))
                         return DONT_PIVOT; // Pivot to break the sash
                     else
                         return CAN_TRY_PIVOT;
                 }
                 else
                 {
-                    //if (IsClassDamager(class) && switchScore >= SWITCHING_INCREASE_KO_FOE)
-                        //return PIVOT; //Only switch if way better matchup
+                    // if (IsClassDamager(class) && switchScore >= SWITCHING_INCREASE_KO_FOE)
+                    // return PIVOT; //Only switch if way better matchup
 
                     if (!hasStatBoost)
                     {
                         // TODO - check if switching prevents/removes hazards
-                        //if (gSideStatuses[battlerAtk] & SIDE_STATUS_SPIKES && switchScore >= SWITCHING_INCREASE_CAN_REMOVE_HAZARDS)
-                            //return PIVOT;
+                        // if (gSideStatuses[battlerAtk] & SIDE_STATUS_SPIKES && switchScore >= SWITCHING_INCREASE_CAN_REMOVE_HAZARDS)
+                        // return PIVOT;
 
                         // TODO - not always a good idea
-                        //if (BattlerWillFaintFromSecondaryDamage(battlerAtk) && switchScore >= SWITCHING_INCREASE_HAS_SUPER_EFFECTIVE_MOVE)
-                            //return PIVOT;
+                        // if (BattlerWillFaintFromSecondaryDamage(battlerAtk) && switchScore >= SWITCHING_INCREASE_HAS_SUPER_EFFECTIVE_MOVE)
+                        // return PIVOT;
 
                         /*if (IsClassDamager(class) && switchScore >= SWITCHING_INCREASE_HAS_SUPER_EFFECTIVE_MOVE)
                         {
@@ -2740,13 +2581,7 @@ bool32 CanKnockOffItem(u32 battler, u32 item)
     if (item == ITEM_NONE)
         return FALSE;
 
-    if (!(gBattleTypeFlags & (BATTLE_TYPE_EREADER_TRAINER
-      | BATTLE_TYPE_FRONTIER
-      | BATTLE_TYPE_LINK
-      | BATTLE_TYPE_RECORDED_LINK
-      | BATTLE_TYPE_SECRET_BASE
-      | (B_TRAINERS_KNOCK_OFF_ITEMS == TRUE ? BATTLE_TYPE_TRAINER : 0)
-      )) && GetBattlerSide(battler) == B_SIDE_PLAYER)
+    if (!(gBattleTypeFlags & (BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_SECRET_BASE | (B_TRAINERS_KNOCK_OFF_ITEMS == TRUE ? BATTLE_TYPE_TRAINER : 0))) && GetBattlerSide(battler) == B_SIDE_PLAYER)
         return FALSE;
 
     if (AI_DATA->abilities[battler] == ABILITY_STICKY_HOLD)
@@ -2762,7 +2597,7 @@ bool32 CanKnockOffItem(u32 battler, u32 item)
 bool32 IsBattlerIncapacitated(u32 battler, u32 ability)
 {
     if ((gBattleMons[battler].status1 & STATUS1_FREEZE) && !HasThawingMove(battler))
-        return TRUE;    // if battler has thawing move we assume they will definitely use it, and thus being frozen should be neglected
+        return TRUE; // if battler has thawing move we assume they will definitely use it, and thus being frozen should be neglected
 
     if (gBattleMons[battler].status1 & STATUS1_SLEEP)
         return TRUE;
@@ -2775,22 +2610,14 @@ bool32 IsBattlerIncapacitated(u32 battler, u32 ability)
 
 bool32 AI_CanSleep(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_INSOMNIA
-      || ability == ABILITY_VITAL_SPIRIT
-      || ability == ABILITY_COMATOSE
-      || gBattleMons[battler].status1 & STATUS1_ANY
-      || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
-      || (gFieldStatuses & (STATUS_FIELD_MISTY_TERRAIN | STATUS_FIELD_ELECTRIC_TERRAIN))
-      || IsAbilityStatusProtected(battler))
+    if (ability == ABILITY_INSOMNIA || ability == ABILITY_VITAL_SPIRIT || ability == ABILITY_COMATOSE || gBattleMons[battler].status1 & STATUS1_ANY || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD || (gFieldStatuses & (STATUS_FIELD_MISTY_TERRAIN | STATUS_FIELD_ELECTRIC_TERRAIN)) || IsAbilityStatusProtected(battler))
         return FALSE;
     return TRUE;
 }
 
 bool32 AI_CanPutToSleep(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32 partnerMove)
 {
-    if (!AI_CanSleep(battlerDef, defAbility)
-      || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-      || PartnerMoveEffectIsStatusSameTarget(BATTLE_PARTNER(battlerAtk), battlerDef, partnerMove))   // shouldn't try to sleep mon that partner is trying to make sleep
+    if (!AI_CanSleep(battlerDef, defAbility) || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || PartnerMoveEffectIsStatusSameTarget(BATTLE_PARTNER(battlerAtk), battlerDef, partnerMove)) // shouldn't try to sleep mon that partner is trying to make sleep
         return FALSE;
     return TRUE;
 }
@@ -2799,40 +2626,21 @@ static bool32 AI_CanBePoisoned(u32 battlerAtk, u32 battlerDef, u32 move)
 {
     u32 ability = AI_DATA->abilities[battlerDef];
 
-    if (!(CanPoisonType(battlerAtk, battlerDef))
-     || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD
-     || gBattleMons[battlerDef].status1 & STATUS1_ANY
-     || ability == ABILITY_IMMUNITY
-     || ability == ABILITY_COMATOSE
-     || AI_IsAbilityOnSide(battlerDef, ABILITY_PASTEL_VEIL)
-     || gBattleMons[battlerDef].status1 & STATUS1_ANY
-     || IsAbilityStatusProtected(battlerDef)
-     || AI_IsTerrainAffected(battlerDef, STATUS_FIELD_MISTY_TERRAIN))
+    if (!(CanPoisonType(battlerAtk, battlerDef)) || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD || gBattleMons[battlerDef].status1 & STATUS1_ANY || ability == ABILITY_IMMUNITY || ability == ABILITY_COMATOSE || AI_IsAbilityOnSide(battlerDef, ABILITY_PASTEL_VEIL) || gBattleMons[battlerDef].status1 & STATUS1_ANY || IsAbilityStatusProtected(battlerDef) || AI_IsTerrainAffected(battlerDef, STATUS_FIELD_MISTY_TERRAIN))
         return FALSE;
     return TRUE;
 }
 
 bool32 ShouldPoisonSelf(u32 battler, u32 ability)
 {
-    if (AI_CanBePoisoned(battler, battler, 0) && (
-     ability == ABILITY_MARVEL_SCALE
-      || ability == ABILITY_POISON_HEAL
-      || ability == ABILITY_QUICK_FEET
-      || ability == ABILITY_MAGIC_GUARD
-      || (ability == ABILITY_TOXIC_BOOST && HasMoveWithSplit(battler, SPLIT_PHYSICAL))
-      || (ability == ABILITY_GUTS && HasMoveWithSplit(battler, SPLIT_PHYSICAL))
-      || HasMoveEffect(battler, EFFECT_FACADE)
-      || HasMoveEffect(battler, EFFECT_PSYCHO_SHIFT)))
-        return TRUE;    // battler can be poisoned and has move/ability that synergizes with being poisoned
+    if (AI_CanBePoisoned(battler, battler, 0) && (ability == ABILITY_MARVEL_SCALE || ability == ABILITY_POISON_HEAL || ability == ABILITY_QUICK_FEET || ability == ABILITY_MAGIC_GUARD || (ability == ABILITY_TOXIC_BOOST && HasMoveWithSplit(battler, SPLIT_PHYSICAL)) || (ability == ABILITY_GUTS && HasMoveWithSplit(battler, SPLIT_PHYSICAL)) || HasMoveEffect(battler, EFFECT_FACADE) || HasMoveEffect(battler, EFFECT_PSYCHO_SHIFT)))
+        return TRUE; // battler can be poisoned and has move/ability that synergizes with being poisoned
     return FALSE;
 }
 
 bool32 AI_CanPoison(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32 partnerMove)
 {
-    if (!AI_CanBePoisoned(battlerAtk, battlerDef, move)
-      || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0
-      || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-      || PartnerMoveEffectIsStatusSameTarget(BATTLE_PARTNER(battlerAtk), battlerDef, partnerMove))
+    if (!AI_CanBePoisoned(battlerAtk, battlerDef, move) || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0 || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || PartnerMoveEffectIsStatusSameTarget(BATTLE_PARTNER(battlerAtk), battlerDef, partnerMove))
         return FALSE;
     else if (defAbility != ABILITY_CORROSION && (IS_BATTLER_OF_TYPE(battlerDef, TYPE_POISON) || IS_BATTLER_OF_TYPE(battlerDef, TYPE_STEEL)))
         return FALSE;
@@ -2844,42 +2652,28 @@ bool32 AI_CanPoison(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u3
 
 static bool32 AI_CanBeParalyzed(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_LIMBER
-      || ability == ABILITY_COMATOSE
-      || IS_BATTLER_OF_TYPE(battler, TYPE_ELECTRIC)
-      || gBattleMons[battler].status1 & STATUS1_ANY
-      || IsAbilityStatusProtected(battler))
+    if (ability == ABILITY_LIMBER || ability == ABILITY_COMATOSE || IS_BATTLER_OF_TYPE(battler, TYPE_ELECTRIC) || gBattleMons[battler].status1 & STATUS1_ANY || IsAbilityStatusProtected(battler))
         return FALSE;
     return TRUE;
 }
 
 bool32 AI_CanParalyze(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32 partnerMove)
 {
-    if (!AI_CanBeParalyzed(battlerDef, defAbility)
-      || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0
-      || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD
-      || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-      || PartnerMoveEffectIsStatusSameTarget(BATTLE_PARTNER(battlerAtk), battlerDef, partnerMove))
+    if (!AI_CanBeParalyzed(battlerDef, defAbility) || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0 || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || PartnerMoveEffectIsStatusSameTarget(BATTLE_PARTNER(battlerAtk), battlerDef, partnerMove))
         return FALSE;
     return TRUE;
 }
 
 bool32 AI_CanBeConfused(u32 battler, u32 ability)
 {
-    if ((gBattleMons[battler].status2 & STATUS2_CONFUSION)
-      || (ability == ABILITY_OWN_TEMPO)
-      || (IsBattlerGrounded(battler) && (gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN)))
+    if ((gBattleMons[battler].status2 & STATUS2_CONFUSION) || (ability == ABILITY_OWN_TEMPO) || (IsBattlerGrounded(battler) && (gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN)))
         return FALSE;
     return TRUE;
 }
 
 bool32 AI_CanConfuse(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 battlerAtkPartner, u32 move, u32 partnerMove)
 {
-    if (!AI_CanBeConfused(battlerDef, defAbility)
-      || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0
-      || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD
-      || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-      || DoesPartnerHaveSameMoveEffect(battlerAtkPartner, battlerDef, move, partnerMove))
+    if (!AI_CanBeConfused(battlerDef, defAbility) || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0 || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || DoesPartnerHaveSameMoveEffect(battlerAtkPartner, battlerDef, move, partnerMove))
     {
         return FALSE;
     }
@@ -2889,49 +2683,28 @@ bool32 AI_CanConfuse(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 battler
 
 bool32 AI_CanBeBurned(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_WATER_VEIL
-      || ability == ABILITY_WATER_BUBBLE
-      || ability == ABILITY_COMATOSE
-      || IS_BATTLER_OF_TYPE(battler, TYPE_FIRE)
-      || gBattleMons[battler].status1 & STATUS1_ANY
-      || IsAbilityStatusProtected(battler)
-      || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD)
+    if (ability == ABILITY_WATER_VEIL || ability == ABILITY_WATER_BUBBLE || ability == ABILITY_COMATOSE || IS_BATTLER_OF_TYPE(battler, TYPE_FIRE) || gBattleMons[battler].status1 & STATUS1_ANY || IsAbilityStatusProtected(battler) || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD)
         return FALSE;
     return TRUE;
 }
 
 bool32 AI_CanGetFrostbite(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_MAGMA_ARMOR
-      || ability == ABILITY_COMATOSE
-      || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
-      || gBattleMons[battler].status1 & STATUS1_ANY
-      || IsAbilityStatusProtected(battler)
-      || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD)
+    if (ability == ABILITY_MAGMA_ARMOR || ability == ABILITY_COMATOSE || IS_BATTLER_OF_TYPE(battler, TYPE_ICE) || gBattleMons[battler].status1 & STATUS1_ANY || IsAbilityStatusProtected(battler) || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD)
         return FALSE;
     return TRUE;
 }
 
 bool32 ShouldBurnSelf(u32 battler, u32 ability)
 {
-    if (AI_CanBeBurned(battler, ability) && (
-     ability == ABILITY_QUICK_FEET
-      || ability == ABILITY_HEATPROOF
-      || ability == ABILITY_MAGIC_GUARD
-      || (ability == ABILITY_FLARE_BOOST && HasMoveWithSplit(battler, SPLIT_SPECIAL))
-      || (ability == ABILITY_GUTS && HasMoveWithSplit(battler, SPLIT_PHYSICAL))
-      || HasMoveEffect(battler, EFFECT_FACADE)
-      || HasMoveEffect(battler, EFFECT_PSYCHO_SHIFT)))
+    if (AI_CanBeBurned(battler, ability) && (ability == ABILITY_QUICK_FEET || ability == ABILITY_HEATPROOF || ability == ABILITY_MAGIC_GUARD || (ability == ABILITY_FLARE_BOOST && HasMoveWithSplit(battler, SPLIT_SPECIAL)) || (ability == ABILITY_GUTS && HasMoveWithSplit(battler, SPLIT_PHYSICAL)) || HasMoveEffect(battler, EFFECT_FACADE) || HasMoveEffect(battler, EFFECT_PSYCHO_SHIFT)))
         return TRUE;
     return FALSE;
 }
 
 bool32 AI_CanBurn(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 battlerAtkPartner, u32 move, u32 partnerMove)
 {
-    if (!AI_CanBeBurned(battlerDef, defAbility)
-      || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0
-      || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-      || PartnerMoveEffectIsStatusSameTarget(battlerAtkPartner, battlerDef, partnerMove))
+    if (!AI_CanBeBurned(battlerDef, defAbility) || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0 || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || PartnerMoveEffectIsStatusSameTarget(battlerAtkPartner, battlerDef, partnerMove))
     {
         return FALSE;
     }
@@ -2940,10 +2713,7 @@ bool32 AI_CanBurn(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 battlerAtk
 
 bool32 AI_CanGiveFrostbite(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 battlerAtkPartner, u32 move, u32 partnerMove)
 {
-    if (!AI_CanGetFrostbite(battlerDef, defAbility)
-      || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0
-      || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-      || PartnerMoveEffectIsStatusSameTarget(battlerAtkPartner, battlerDef, partnerMove))
+    if (!AI_CanGetFrostbite(battlerDef, defAbility) || AI_GetMoveEffectiveness(move, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0 || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || PartnerMoveEffectIsStatusSameTarget(battlerAtkPartner, battlerDef, partnerMove))
     {
         return FALSE;
     }
@@ -2952,45 +2722,34 @@ bool32 AI_CanGiveFrostbite(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 b
 
 bool32 AI_CanBeInfatuated(u32 battlerAtk, u32 battlerDef, u32 defAbility)
 {
-    if ((gBattleMons[battlerDef].status2 & STATUS2_INFATUATION)
-      || AI_GetMoveEffectiveness(AI_THINKING_STRUCT->moveConsidered, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0
-      || defAbility == ABILITY_OBLIVIOUS
-      || !AreBattlersOfOppositeGender(battlerAtk, battlerDef)
-      || AI_IsAbilityOnSide(battlerDef, ABILITY_AROMA_VEIL))
+    if ((gBattleMons[battlerDef].status2 & STATUS2_INFATUATION) || AI_GetMoveEffectiveness(AI_THINKING_STRUCT->moveConsidered, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0 || defAbility == ABILITY_OBLIVIOUS || !AreBattlersOfOppositeGender(battlerAtk, battlerDef) || AI_IsAbilityOnSide(battlerDef, ABILITY_AROMA_VEIL))
         return FALSE;
     return TRUE;
 }
 
 u32 ShouldTryToFlinch(u32 battlerAtk, u32 battlerDef, u32 atkAbility, u32 defAbility, u32 move)
 {
-    if (((AI_DATA->abilities[battlerAtk] != ABILITY_MOLD_BREAKER && (defAbility == ABILITY_SHIELD_DUST || defAbility == ABILITY_INNER_FOCUS))
-      || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_COVERT_CLOAK
-      || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-      || AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_SLOWER)) // Opponent goes first
+    if (((AI_DATA->abilities[battlerAtk] != ABILITY_MOLD_BREAKER && (defAbility == ABILITY_SHIELD_DUST || defAbility == ABILITY_INNER_FOCUS)) || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_COVERT_CLOAK || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_SLOWER)) // Opponent goes first
     {
         return 0;
     }
-    else if ((atkAbility == ABILITY_SERENE_GRACE
-      || gBattleMons[battlerDef].status1 & STATUS1_PARALYSIS
-      || gBattleMons[battlerDef].status2 & STATUS2_INFATUATION
-      || gBattleMons[battlerDef].status2 & STATUS2_CONFUSION)
-      || ((AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_FASTER) && CanTargetFaintAi(battlerDef, battlerAtk)))
+    else if ((atkAbility == ABILITY_SERENE_GRACE || gBattleMons[battlerDef].status1 & STATUS1_PARALYSIS || gBattleMons[battlerDef].status2 & STATUS2_INFATUATION || gBattleMons[battlerDef].status2 & STATUS2_CONFUSION) || ((AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_FASTER) && CanTargetFaintAi(battlerDef, battlerAtk)))
     {
-        return 2;   // good idea to flinch
+        return 2; // good idea to flinch
     }
 
-    return 0;   // don't try to flinch
+    return 0; // don't try to flinch
 }
 
 bool32 ShouldTrap(u32 battlerAtk, u32 battlerDef, u32 move)
 {
     if (BattlerWillFaintFromSecondaryDamage(battlerDef, AI_DATA->abilities[battlerDef]))
-        return TRUE;    // battler is taking secondary damage with low HP
+        return TRUE; // battler is taking secondary damage with low HP
 
     if (AI_THINKING_STRUCT->aiFlags & AI_FLAG_STALL)
     {
         if (!CanTargetFaintAi(battlerDef, battlerAtk))
-            return TRUE;    // attacker goes first and opponent can't kill us
+            return TRUE; // attacker goes first and opponent can't kill us
     }
 
     return FALSE;
@@ -2998,13 +2757,7 @@ bool32 ShouldTrap(u32 battlerAtk, u32 battlerDef, u32 move)
 
 bool32 ShouldFakeOut(u32 battlerAtk, u32 battlerDef, u32 move)
 {
-    if (!gDisableStructs[battlerAtk].isFirstTurn
-    || AI_DATA->abilities[battlerAtk] == ABILITY_GORILLA_TACTICS
-    || AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_CHOICE_BAND
-    || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_COVERT_CLOAK
-    || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
-    || (AI_DATA->abilities[battlerAtk] != ABILITY_MOLD_BREAKER
-    && (AI_DATA->abilities[battlerDef] == ABILITY_SHIELD_DUST || AI_DATA->abilities[battlerDef] == ABILITY_INNER_FOCUS)))
+    if (!gDisableStructs[battlerAtk].isFirstTurn || AI_DATA->abilities[battlerAtk] == ABILITY_GORILLA_TACTICS || AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_CHOICE_BAND || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_COVERT_CLOAK || DoesSubstituteBlockMove(battlerAtk, battlerDef, move) || (AI_DATA->abilities[battlerAtk] != ABILITY_MOLD_BREAKER && (AI_DATA->abilities[battlerDef] == ABILITY_SHIELD_DUST || AI_DATA->abilities[battlerDef] == ABILITY_INNER_FOCUS)))
         return FALSE;
 
     return TRUE;
@@ -3075,13 +2828,13 @@ u32 GetBattlerSideSpeedAverage(u32 battler)
 
 bool32 ShouldUseRecoilMove(u32 battlerAtk, u32 battlerDef, u32 recoilDmg, u32 moveIndex)
 {
-    if (recoilDmg >= gBattleMons[battlerAtk].hp //Recoil kills attacker
-      && CountUsablePartyMons(battlerDef) != 0) //Foe has more than 1 target left
+    if (recoilDmg >= gBattleMons[battlerAtk].hp   // Recoil kills attacker
+        && CountUsablePartyMons(battlerDef) != 0) // Foe has more than 1 target left
     {
         if (recoilDmg >= gBattleMons[battlerDef].hp && !CanAIFaintTarget(battlerAtk, battlerDef, 0))
-            return TRUE; //If it's the only KO move then just use it
+            return TRUE; // If it's the only KO move then just use it
         else
-            return FALSE; //Not as good to use move if you'll faint and not win
+            return FALSE; // Not as good to use move if you'll faint and not win
     }
 
     return TRUE;
@@ -3098,11 +2851,10 @@ bool32 ShouldAbsorb(u32 battlerAtk, u32 battlerDef, u32 move, s32 damage)
         if (gStatuses3[battlerAtk] & STATUS3_HEAL_BLOCK)
             healDmg = 0;
 
-        if (CanTargetFaintAi(battlerDef, battlerAtk)
-          && !CanTargetFaintAiWithMod(battlerDef, battlerAtk, healDmg, 0))
-            return TRUE;    // target can faint attacker unless they heal
+        if (CanTargetFaintAi(battlerDef, battlerAtk) && !CanTargetFaintAiWithMod(battlerDef, battlerAtk, healDmg, 0))
+            return TRUE; // target can faint attacker unless they heal
         else if (!CanTargetFaintAi(battlerDef, battlerAtk) && AI_DATA->hpPercents[battlerAtk] < 60 && (Random() % 3))
-            return TRUE;    // target can't faint attacker at all, attacker health is about half, 2/3rds rate of encouraging healing
+            return TRUE; // target can't faint attacker at all, attacker health is about half, 2/3rds rate of encouraging healing
     }
     else
     {
@@ -3124,11 +2876,10 @@ bool32 ShouldRecover(u32 battlerAtk, u32 battlerDef, u32 move, u32 healPercent)
         if (gStatuses3[battlerAtk] & STATUS3_HEAL_BLOCK)
             healAmount = 0;
 
-        if (CanTargetFaintAi(battlerDef, battlerAtk)
-          && !CanTargetFaintAiWithMod(battlerDef, battlerAtk, healAmount, 0))
-            return TRUE;    // target can faint attacker unless they heal
+        if (CanTargetFaintAi(battlerDef, battlerAtk) && !CanTargetFaintAiWithMod(battlerDef, battlerAtk, healAmount, 0))
+            return TRUE; // target can faint attacker unless they heal
         else if (!CanTargetFaintAi(battlerDef, battlerAtk) && AI_DATA->hpPercents[battlerAtk] < 60 && (Random() % 3))
-            return TRUE;    // target can't faint attacker at all, attacker health is about half, 2/3rds rate of encouraging healing
+            return TRUE; // target can't faint attacker at all, attacker health is about half, 2/3rds rate of encouraging healing
     }
     return FALSE;
 }
@@ -3140,20 +2891,17 @@ bool32 ShouldSetScreen(u32 battlerAtk, u32 battlerDef, u32 moveEffect)
     {
     case EFFECT_AURORA_VEIL:
         // Use only in Hail and only if AI doesn't already have Reflect, Light Screen or Aurora Veil itself active.
-        if ((AI_GetWeather(AI_DATA) & (B_WEATHER_HAIL | B_WEATHER_SNOW))
-            && !(gSideStatuses[atkSide] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_AURORA_VEIL)))
+        if ((AI_GetWeather(AI_DATA) & (B_WEATHER_HAIL | B_WEATHER_SNOW)) && !(gSideStatuses[atkSide] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_AURORA_VEIL)))
             return TRUE;
         break;
     case EFFECT_REFLECT:
         // Use only if the player has a physical move and AI doesn't already have Reflect itself active.
-        if (HasMoveWithSplit(battlerDef, SPLIT_PHYSICAL)
-            && !(gSideStatuses[atkSide] & SIDE_STATUS_REFLECT))
+        if (HasMoveWithSplit(battlerDef, SPLIT_PHYSICAL) && !(gSideStatuses[atkSide] & SIDE_STATUS_REFLECT))
             return TRUE;
         break;
     case EFFECT_LIGHT_SCREEN:
         // Use only if the player has a special move and AI doesn't already have Light Screen itself active.
-        if (HasMoveWithSplit(battlerDef, SPLIT_SPECIAL)
-            && !(gSideStatuses[atkSide] & SIDE_STATUS_LIGHTSCREEN))
+        if (HasMoveWithSplit(battlerDef, SPLIT_SPECIAL) && !(gSideStatuses[atkSide] & SIDE_STATUS_LIGHTSCREEN))
             return TRUE;
         break;
     }
@@ -3164,8 +2912,7 @@ bool32 ShouldSetScreen(u32 battlerAtk, u32 battlerDef, u32 moveEffect)
 // Partner Logic
 bool32 IsValidDoubleBattle(u32 battlerAtk)
 {
-    if (IsDoubleBattle()
-      && ((IsBattlerAlive(BATTLE_OPPOSITE(battlerAtk)) && IsBattlerAlive(BATTLE_PARTNER(BATTLE_OPPOSITE(battlerAtk)))) || IsBattlerAlive(BATTLE_PARTNER(battlerAtk))))
+    if (IsDoubleBattle() && ((IsBattlerAlive(BATTLE_OPPOSITE(battlerAtk)) && IsBattlerAlive(BATTLE_PARTNER(BATTLE_OPPOSITE(battlerAtk)))) || IsBattlerAlive(BATTLE_PARTNER(battlerAtk))))
         return TRUE;
     return FALSE;
 }
@@ -3182,80 +2929,61 @@ u32 GetAllyChosenMove(u32 battlerId)
         return gBattleMons[partnerBattler].moves[gBattleStruct->chosenMovePositions[partnerBattler]];
 }
 
-//PARTNER_MOVE_EFFECT_IS_SAME
+// PARTNER_MOVE_EFFECT_IS_SAME
 bool32 DoesPartnerHaveSameMoveEffect(u32 battlerAtkPartner, u32 battlerDef, u32 move, u32 partnerMove)
 {
     if (!IsDoubleBattle())
         return FALSE;
 
-    if (gBattleMoves[move].effect == gBattleMoves[partnerMove].effect
-      && partnerMove != MOVE_NONE
-      && gBattleStruct->moveTarget[battlerAtkPartner] == battlerDef)
+    if (gBattleMoves[move].effect == gBattleMoves[partnerMove].effect && partnerMove != MOVE_NONE && gBattleStruct->moveTarget[battlerAtkPartner] == battlerDef)
     {
         return TRUE;
     }
     return FALSE;
 }
 
-//PARTNER_MOVE_EFFECT_IS_SAME_NO_TARGET
+// PARTNER_MOVE_EFFECT_IS_SAME_NO_TARGET
 bool32 PartnerHasSameMoveEffectWithoutTarget(u32 battlerAtkPartner, u32 move, u32 partnerMove)
 {
     if (!IsDoubleBattle())
         return FALSE;
 
-    if (gBattleMoves[move].effect == gBattleMoves[partnerMove].effect
-      && partnerMove != MOVE_NONE)
+    if (gBattleMoves[move].effect == gBattleMoves[partnerMove].effect && partnerMove != MOVE_NONE)
         return TRUE;
     return FALSE;
 }
 
-//PARTNER_MOVE_EFFECT_IS_STATUS_SAME_TARGET
+// PARTNER_MOVE_EFFECT_IS_STATUS_SAME_TARGET
 bool32 PartnerMoveEffectIsStatusSameTarget(u32 battlerAtkPartner, u32 battlerDef, u32 partnerMove)
 {
     if (!IsDoubleBattle())
         return FALSE;
 
-    if (partnerMove != MOVE_NONE
-     && gBattleStruct->moveTarget[battlerAtkPartner] == battlerDef
-     && (gBattleMoves[partnerMove].effect == EFFECT_SLEEP
-       || gBattleMoves[partnerMove].effect == EFFECT_POISON
-       || gBattleMoves[partnerMove].effect == EFFECT_TOXIC
-       || gBattleMoves[partnerMove].effect == EFFECT_PARALYZE
-       || gBattleMoves[partnerMove].effect == EFFECT_WILL_O_WISP
-       || gBattleMoves[partnerMove].effect == EFFECT_YAWN))
+    if (partnerMove != MOVE_NONE && gBattleStruct->moveTarget[battlerAtkPartner] == battlerDef && (gBattleMoves[partnerMove].effect == EFFECT_SLEEP || gBattleMoves[partnerMove].effect == EFFECT_POISON || gBattleMoves[partnerMove].effect == EFFECT_TOXIC || gBattleMoves[partnerMove].effect == EFFECT_PARALYZE || gBattleMoves[partnerMove].effect == EFFECT_WILL_O_WISP || gBattleMoves[partnerMove].effect == EFFECT_YAWN))
         return TRUE;
     return FALSE;
 }
 
 bool32 IsMoveEffectWeather(u32 move)
 {
-    if (move != MOVE_NONE
-     && (gBattleMoves[move].effect == EFFECT_SUNNY_DAY
-      || gBattleMoves[move].effect == EFFECT_RAIN_DANCE
-      || gBattleMoves[move].effect == EFFECT_SANDSTORM
-      || gBattleMoves[move].effect == EFFECT_HAIL
-      || gBattleMoves[move].effect == EFFECT_SNOWSCAPE))
+    if (move != MOVE_NONE && (gBattleMoves[move].effect == EFFECT_SUNNY_DAY || gBattleMoves[move].effect == EFFECT_RAIN_DANCE || gBattleMoves[move].effect == EFFECT_SANDSTORM || gBattleMoves[move].effect == EFFECT_HAIL || gBattleMoves[move].effect == EFFECT_SNOWSCAPE))
         return TRUE;
     return FALSE;
 }
 
-//PARTNER_MOVE_EFFECT_IS_TERRAIN
+// PARTNER_MOVE_EFFECT_IS_TERRAIN
 bool32 PartnerMoveEffectIsTerrain(u32 battlerAtkPartner, u32 partnerMove)
 {
     if (!IsDoubleBattle())
         return FALSE;
 
-    if (partnerMove != MOVE_NONE
-     && (gBattleMoves[partnerMove].effect == EFFECT_GRASSY_TERRAIN
-      || gBattleMoves[partnerMove].effect == EFFECT_MISTY_TERRAIN
-      || gBattleMoves[partnerMove].effect == EFFECT_ELECTRIC_TERRAIN
-      || gBattleMoves[partnerMove].effect == EFFECT_PSYCHIC_TERRAIN))
+    if (partnerMove != MOVE_NONE && (gBattleMoves[partnerMove].effect == EFFECT_GRASSY_TERRAIN || gBattleMoves[partnerMove].effect == EFFECT_MISTY_TERRAIN || gBattleMoves[partnerMove].effect == EFFECT_ELECTRIC_TERRAIN || gBattleMoves[partnerMove].effect == EFFECT_PSYCHIC_TERRAIN))
         return TRUE;
 
     return FALSE;
 }
 
-//PARTNER_MOVE_IS_TAILWIND_TRICKROOM
+// PARTNER_MOVE_IS_TAILWIND_TRICKROOM
 bool32 PartnerMoveIs(u32 battlerAtkPartner, u32 partnerMove, u32 moveCheck)
 {
     if (!IsDoubleBattle())
@@ -3266,7 +2994,7 @@ bool32 PartnerMoveIs(u32 battlerAtkPartner, u32 partnerMove, u32 moveCheck)
     return FALSE;
 }
 
-//PARTNER_MOVE_IS_SAME
+// PARTNER_MOVE_IS_SAME
 bool32 PartnerMoveIsSameAsAttacker(u32 battlerAtkPartner, u32 battlerDef, u32 move, u32 partnerMove)
 {
     if (!IsDoubleBattle())
@@ -3277,7 +3005,7 @@ bool32 PartnerMoveIsSameAsAttacker(u32 battlerAtkPartner, u32 battlerDef, u32 mo
     return FALSE;
 }
 
-//PARTNER_MOVE_IS_SAME_NO_TARGET
+// PARTNER_MOVE_IS_SAME_NO_TARGET
 bool32 PartnerMoveIsSameNoTarget(u32 battlerAtkPartner, u32 move, u32 partnerMove)
 {
     if (!IsDoubleBattle())
@@ -3291,7 +3019,7 @@ bool32 ShouldUseWishAromatherapy(u32 battlerAtk, u32 battlerDef, u32 move)
 {
     u32 i;
     s32 firstId, lastId;
-    struct Pokemon* party;
+    struct Pokemon *party;
     bool32 hasStatus = FALSE;
     bool32 needHealing = FALSE;
 
@@ -3302,8 +3030,7 @@ bool32 ShouldUseWishAromatherapy(u32 battlerAtk, u32 battlerDef, u32 move)
     else
         party = gEnemyParty;
 
-    if (CountUsablePartyMons(battlerAtk) == 0
-      && (CanTargetFaintAi(battlerDef, battlerAtk) || BattlerWillFaintFromSecondaryDamage(battlerAtk, AI_DATA->abilities[battlerAtk])))
+    if (CountUsablePartyMons(battlerAtk) == 0 && (CanTargetFaintAi(battlerDef, battlerAtk) || BattlerWillFaintFromSecondaryDamage(battlerAtk, AI_DATA->abilities[battlerAtk])))
         return FALSE; // Don't heal if last mon and will faint
 
     for (i = 0; i < PARTY_SIZE; i++)
@@ -3313,8 +3040,8 @@ bool32 ShouldUseWishAromatherapy(u32 battlerAtk, u32 battlerDef, u32 move)
 
         if (!GetMonData(&party[i], MON_DATA_IS_EGG, NULL) && currHp > 0)
         {
-            if ((currHp * 100) / maxHp < 65 // Less than 65% health remaining
-              && i >= firstId && i < lastId) // Can only switch to mon on your team
+            if ((currHp * 100) / maxHp < 65    // Less than 65% health remaining
+                && i >= firstId && i < lastId) // Can only switch to mon on your team
             {
                 needHealing = TRUE;
             }
@@ -3376,7 +3103,7 @@ s32 AI_CalcPartyMonDamage(u32 move, u32 battlerAtk, u32 battlerDef, struct Battl
     s32 dmg;
     u8 effectiveness;
     struct BattlePokemon *savedBattleMons = AllocSaveBattleMons();
-    if(isPartyMonAttacker)
+    if (isPartyMonAttacker)
         gBattleMons[battlerAtk] = switchinCandidate;
     else
         gBattleMons[battlerDef] = switchinCandidate;
@@ -3409,10 +3136,7 @@ s32 CountUsablePartyMons(u32 battlerId)
     ret = 0;
     for (i = 0; i < PARTY_SIZE; i++)
     {
-        if (i != battlerOnField1 && i != battlerOnField2
-         && GetMonData(&party[i], MON_DATA_HP) != 0
-         && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
-         && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG)
+        if (i != battlerOnField1 && i != battlerOnField2 && GetMonData(&party[i], MON_DATA_HP) != 0 && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG)
         {
             ret++;
         }
@@ -3433,11 +3157,7 @@ bool32 IsPartyFullyHealedExceptBattler(u32 battlerId)
 
     for (i = 0; i < PARTY_SIZE; i++)
     {
-        if (i != gBattlerPartyIndexes[battlerId]
-         && GetMonData(&party[i], MON_DATA_HP) != 0
-         && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
-         && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
-         && GetMonData(&party[i], MON_DATA_HP) < GetMonData(&party[i], MON_DATA_MAX_HP))
+        if (i != gBattlerPartyIndexes[battlerId] && GetMonData(&party[i], MON_DATA_HP) != 0 && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG && GetMonData(&party[i], MON_DATA_HP) < GetMonData(&party[i], MON_DATA_MAX_HP))
             return FALSE;
     }
     return TRUE;
@@ -3460,7 +3180,7 @@ bool32 PartyHasMoveSplit(u32 battlerId, u32 split)
 
             if (pp > 0 && move != MOVE_NONE)
             {
-                //TODO - handle photon geyser, light that burns the sky
+                // TODO - handle photon geyser, light that burns the sky
                 if (gBattleMoves[move].split == split)
                     return TRUE;
             }
@@ -3498,16 +3218,16 @@ s8 GetAbilityRating(u32 ability)
 }
 
 static const u16 sRecycleEncouragedItems[] =
-{
-    ITEM_CHESTO_BERRY,
-    ITEM_LUM_BERRY,
-    ITEM_STARF_BERRY,
-    ITEM_SITRUS_BERRY,
-    ITEM_MICLE_BERRY,
-    ITEM_CUSTAP_BERRY,
-    ITEM_MENTAL_HERB,
-    ITEM_FOCUS_SASH,
-    // TODO expand this
+    {
+        ITEM_CHESTO_BERRY,
+        ITEM_LUM_BERRY,
+        ITEM_STARF_BERRY,
+        ITEM_SITRUS_BERRY,
+        ITEM_MICLE_BERRY,
+        ITEM_CUSTAP_BERRY,
+        ITEM_MENTAL_HERB,
+        ITEM_FOCUS_SASH,
+        // TODO expand this
 };
 
 // Its assumed that the berry is strategically given, so no need to check benefits of the berry
@@ -3520,7 +3240,7 @@ bool32 IsStatBoostingBerry(u32 item)
     case ITEM_SALAC_BERRY:
     case ITEM_PETAYA_BERRY:
     case ITEM_APICOT_BERRY:
-    //case ITEM_LANSAT_BERRY:
+    // case ITEM_LANSAT_BERRY:
     case ITEM_STARF_BERRY:
     case ITEM_MICLE_BERRY:
         return TRUE;
@@ -3535,7 +3255,7 @@ bool32 ShouldRestoreHpBerry(u32 battlerAtk, u32 item)
     {
     case ITEM_ORAN_BERRY:
         if (gBattleMons[battlerAtk].maxHP <= 50)
-            return TRUE;    // Only worth it in the early game
+            return TRUE; // Only worth it in the early game
         return FALSE;
     case ITEM_SITRUS_BERRY:
     case ITEM_FIGY_BERRY:
@@ -3561,8 +3281,8 @@ bool32 IsRecycleEncouragedItem(u32 item)
 }
 
 // score increases
-#define STAT_UP_2_STAGE     8
-#define STAT_UP_STAGE       10
+#define STAT_UP_2_STAGE 8
+#define STAT_UP_STAGE 10
 void IncreaseStatUpScore(u32 battlerAtk, u32 battlerDef, u32 statId, s32 *score)
 {
     if (AI_DATA->abilities[battlerAtk] == ABILITY_CONTRARY)
@@ -3588,8 +3308,7 @@ void IncreaseStatUpScore(u32 battlerAtk, u32 battlerDef, u32 statId, s32 *score)
             ADJUST_SCORE_PTR(1);
         break;
     case STAT_DEF:
-        if ((HasMoveWithSplit(battlerDef, SPLIT_PHYSICAL)|| IS_MOVE_PHYSICAL(gLastMoves[battlerDef]))
-          && AI_DATA->hpPercents[battlerAtk] > 70)
+        if ((HasMoveWithSplit(battlerDef, SPLIT_PHYSICAL) || IS_MOVE_PHYSICAL(gLastMoves[battlerDef])) && AI_DATA->hpPercents[battlerAtk] > 70)
         {
             if (gBattleMons[battlerAtk].statStages[STAT_DEF] < STAT_UP_2_STAGE)
                 ADJUST_SCORE_PTR(2); // seems better to raise def at higher HP
@@ -3616,8 +3335,7 @@ void IncreaseStatUpScore(u32 battlerAtk, u32 battlerDef, u32 statId, s32 *score)
         }
         break;
     case STAT_SPDEF:
-        if ((HasMoveWithSplit(battlerDef, SPLIT_SPECIAL) || IS_MOVE_SPECIAL(gLastMoves[battlerDef]))
-          && AI_DATA->hpPercents[battlerAtk] > 70)
+        if ((HasMoveWithSplit(battlerDef, SPLIT_SPECIAL) || IS_MOVE_SPECIAL(gLastMoves[battlerDef])) && AI_DATA->hpPercents[battlerAtk] > 70)
         {
             if (gBattleMons[battlerAtk].statStages[STAT_SPDEF] < STAT_UP_2_STAGE)
                 ADJUST_SCORE_PTR(2); // seems better to raise spdef at higher HP
@@ -3645,8 +3363,7 @@ void IncreaseStatUpScore(u32 battlerAtk, u32 battlerDef, u32 statId, s32 *score)
 
 void IncreasePoisonScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 {
-    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
-    || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_PSN || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
+    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0)) || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_PSN || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
         return;
 
     if (AI_CanPoison(battlerAtk, battlerDef, AI_DATA->abilities[battlerDef], move, AI_DATA->partnerMove) && AI_DATA->hpPercents[battlerDef] > 20)
@@ -3655,12 +3372,9 @@ void IncreasePoisonScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
             ADJUST_SCORE_PTR(2);
 
         if (AI_THINKING_STRUCT->aiFlags & AI_FLAG_STALL && HasMoveEffect(battlerAtk, EFFECT_PROTECT))
-            ADJUST_SCORE_PTR(1);    // stall tactic
+            ADJUST_SCORE_PTR(1); // stall tactic
 
-        if (HasMoveEffect(battlerAtk, EFFECT_VENOSHOCK)
-          || HasMoveEffect(battlerAtk, EFFECT_HEX)
-          || HasMoveEffect(battlerAtk, EFFECT_VENOM_DRENCH)
-          || AI_DATA->abilities[battlerAtk] == ABILITY_MERCILESS)
+        if (HasMoveEffect(battlerAtk, EFFECT_VENOSHOCK) || HasMoveEffect(battlerAtk, EFFECT_HEX) || HasMoveEffect(battlerAtk, EFFECT_VENOM_DRENCH) || AI_DATA->abilities[battlerAtk] == ABILITY_MERCILESS)
             ADJUST_SCORE_PTR(2);
         else
             ADJUST_SCORE_PTR(1);
@@ -3669,8 +3383,7 @@ void IncreasePoisonScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 
 void IncreaseBurnScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 {
-    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
-    || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_BRN || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
+    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0)) || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_BRN || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
         return;
 
     if (AI_CanBurn(battlerAtk, battlerDef, AI_DATA->abilities[battlerDef], BATTLE_PARTNER(battlerAtk), move, AI_DATA->partnerMove))
@@ -3689,8 +3402,7 @@ void IncreaseBurnScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 
 void IncreaseParalyzeScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 {
-    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
-    || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_PAR || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
+    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0)) || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_PAR || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
         return;
 
     if (AI_CanParalyze(battlerAtk, battlerDef, AI_DATA->abilities[battlerDef], move, AI_DATA->partnerMove))
@@ -3699,10 +3411,7 @@ void IncreaseParalyzeScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
         u32 defSpeed = AI_DATA->speedStats[battlerDef];
 
         if ((defSpeed >= atkSpeed && defSpeed / 2 < atkSpeed) // You'll go first after paralyzing foe
-          || HasMoveEffect(battlerAtk, EFFECT_HEX)
-          || HasMoveEffect(battlerAtk, EFFECT_FLINCH_HIT)
-          || gBattleMons[battlerDef].status2 & STATUS2_INFATUATION
-          || gBattleMons[battlerDef].status2 & STATUS2_CONFUSION)
+            || HasMoveEffect(battlerAtk, EFFECT_HEX) || HasMoveEffect(battlerAtk, EFFECT_FLINCH_HIT) || gBattleMons[battlerDef].status2 & STATUS2_INFATUATION || gBattleMons[battlerDef].status2 & STATUS2_CONFUSION)
             ADJUST_SCORE_PTR(4);
         else
             ADJUST_SCORE_PTR(2);
@@ -3711,8 +3420,7 @@ void IncreaseParalyzeScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 
 void IncreaseSleepScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 {
-    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
-    || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_SLP || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
+    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0)) || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_SLP || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
         return;
 
     if (AI_CanPutToSleep(battlerAtk, battlerDef, AI_DATA->abilities[battlerDef], move, AI_DATA->partnerMove))
@@ -3720,8 +3428,7 @@ void IncreaseSleepScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
     else
         return;
 
-    if ((HasMoveEffect(battlerAtk, EFFECT_DREAM_EATER) || HasMoveEffect(battlerAtk, EFFECT_NIGHTMARE))
-      && !(HasMoveEffect(battlerDef, EFFECT_SNORE) || HasMoveEffect(battlerDef, EFFECT_SLEEP_TALK)))
+    if ((HasMoveEffect(battlerAtk, EFFECT_DREAM_EATER) || HasMoveEffect(battlerAtk, EFFECT_NIGHTMARE)) && !(HasMoveEffect(battlerDef, EFFECT_SNORE) || HasMoveEffect(battlerDef, EFFECT_SLEEP_TALK)))
         ADJUST_SCORE_PTR(1);
 
     if (HasMoveEffect(battlerAtk, EFFECT_HEX) || HasMoveEffect(BATTLE_PARTNER(battlerAtk), EFFECT_HEX))
@@ -3730,17 +3437,12 @@ void IncreaseSleepScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 
 void IncreaseConfusionScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score)
 {
-    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0))
-    || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_CONFUSION || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
+    if (((AI_THINKING_STRUCT->aiFlags & AI_FLAG_TRY_TO_FAINT) && CanAIFaintTarget(battlerAtk, battlerDef, 0)) || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_CONFUSION || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_CURE_STATUS)
         return;
 
-    if (AI_CanConfuse(battlerAtk, battlerDef, AI_DATA->abilities[battlerDef], BATTLE_PARTNER(battlerAtk), move, AI_DATA->partnerMove)
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CURE_CONFUSION
-      && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CURE_STATUS)
+    if (AI_CanConfuse(battlerAtk, battlerDef, AI_DATA->abilities[battlerDef], BATTLE_PARTNER(battlerAtk), move, AI_DATA->partnerMove) && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CURE_CONFUSION && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CURE_STATUS)
     {
-        if (gBattleMons[battlerDef].status1 & STATUS1_PARALYSIS
-          || gBattleMons[battlerDef].status2 & STATUS2_INFATUATION
-          || (AI_DATA->abilities[battlerAtk] == ABILITY_SERENE_GRACE && HasMoveEffect(battlerAtk, EFFECT_FLINCH_HIT)))
+        if (gBattleMons[battlerDef].status1 & STATUS1_PARALYSIS || gBattleMons[battlerDef].status2 & STATUS2_INFATUATION || (AI_DATA->abilities[battlerAtk] == ABILITY_SERENE_GRACE && HasMoveEffect(battlerAtk, EFFECT_FLINCH_HIT)))
             ADJUST_SCORE_PTR(3);
         else
             ADJUST_SCORE_PTR(2);
@@ -3768,21 +3470,19 @@ void IncreaseFrostbiteScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score
 
 bool32 AI_MoveMakesContact(u32 ability, u32 holdEffect, u32 move)
 {
-    if (gBattleMoves[move].makesContact
-      && ability != ABILITY_LONG_REACH
-      && holdEffect != HOLD_EFFECT_PROTECTIVE_PADS)
+    if (gBattleMoves[move].makesContact && ability != ABILITY_LONG_REACH && holdEffect != HOLD_EFFECT_PROTECTIVE_PADS)
         return TRUE;
     return FALSE;
 }
 
-//TODO - this could use some more sophisticated logic
+// TODO - this could use some more sophisticated logic
 bool32 ShouldUseZMove(u32 battlerAtk, u32 battlerDef, u32 chosenMove)
 {
     // simple logic. just upgrades chosen move to z move if possible, unless regular move would kill opponent
     if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && battlerDef == BATTLE_PARTNER(battlerAtk))
-        return FALSE; //don't use z move on partner
+        return FALSE; // don't use z move on partner
     if (gBattleStruct->zmove.used[battlerAtk])
-        return FALSE;   //cant use z move twice
+        return FALSE; // cant use z move twice
 
     if (IsViableZMove(battlerAtk, chosenMove))
     {
@@ -3799,7 +3499,7 @@ bool32 ShouldUseZMove(u32 battlerAtk, u32 battlerDef, u32 chosenMove)
             return FALSE;
 
         if (!IS_MOVE_STATUS(chosenMove) && AI_CalcDamageSaveBattlers(chosenMove, battlerAtk, battlerDef, &effectiveness, FALSE) >= gBattleMons[battlerDef].hp)
-            return FALSE;   // don't waste damaging z move if can otherwise faint target
+            return FALSE; // don't waste damaging z move if can otherwise faint target
 
         return TRUE;
     }

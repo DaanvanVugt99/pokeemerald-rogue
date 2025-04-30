@@ -21,16 +21,16 @@ struct GFRomHeader
     u32 version;
     u32 language;
     u8 gameName[32];
-    const struct CompressedSpriteSheet * monFrontPics;
-    const struct CompressedSpriteSheet * monBackPics;
-    const struct CompressedSpritePalette * monNormalPalettes;
-    const struct CompressedSpritePalette * monShinyPalettes;
-    const u8 *const * monIcons;
+    const struct CompressedSpriteSheet *monFrontPics;
+    const struct CompressedSpriteSheet *monBackPics;
+    const struct CompressedSpritePalette *monNormalPalettes;
+    const struct CompressedSpritePalette *monShinyPalettes;
+    const u8 *const *monIcons;
     const u8 *monIconPaletteIds;
-    const struct SpritePalette * monIconPalettes;
-    const u8 (* monSpeciesNames)[];
-    const u8 (* moveNames)[];
-    const struct Decoration * decorations;
+    const struct SpritePalette *monIconPalettes;
+    const u8 (*monSpeciesNames)[];
+    const u8 (*moveNames)[];
+    const struct Decoration *decorations;
     u32 flagsOffset;
     u32 varsOffset;
     u32 pokedexOffset;
@@ -46,7 +46,7 @@ struct GFRomHeader
     u8 pokemonNameLength2;
 #if 1
     u32 rogueAssistantHandshake1;
-    const struct RogueAssistantHeader * rogueAssistantHeader;
+    const struct RogueAssistantHeader *rogueAssistantHeader;
     u32 rogueAssistantHandshake2;
 #else
     // Chuck these out!
@@ -79,13 +79,13 @@ struct GFRomHeader
     u32 externalEventFlagsOffset;
     u32 externalEventDataOffset;
     u32 unk18;
-    const struct SpeciesInfo * speciesInfo;
-    const u8 (* abilityNames)[];
-    const u8 *const * abilityDescriptions;
-    const struct Item * items;
-    const struct BattleMove * moves;
-    const struct CompressedSpriteSheet * ballGfx;
-    const struct CompressedSpritePalette * ballPalettes;
+    const struct SpeciesInfo *speciesInfo;
+    const u8 (*abilityNames)[];
+    const u8 *const *abilityDescriptions;
+    const struct Item *items;
+    const struct BattleMove *moves;
+    const struct CompressedSpriteSheet *ballGfx;
+    const struct CompressedSpritePalette *ballPalettes;
     u32 gcnLinkFlagsOffset;
     u32 gameClearFlag;
     u32 ribbonFlag;
@@ -105,8 +105,7 @@ struct GFRomHeader
 
 // This seems to need to be in the text section for some reason.
 // To avoid a changed section attributes warning it's put in a special .text.consts section.
-__attribute__((section(".text.consts")))
-static const struct GFRomHeader sGFRomHeader = {
+__attribute__((used, section(".text.consts"))) static const struct GFRomHeader sGFRomHeader = {
     .version = GAME_VERSION,
     .language = GAME_LANGUAGE,
     .gameName = "pokemon emerald rogue version",
@@ -173,14 +172,14 @@ static const struct GFRomHeader sGFRomHeader = {
     .moves = gBattleMoves,
     .ballGfx = gBallSpriteSheets,
     .ballPalettes = gBallSpritePalettes,
-    .gcnLinkFlagsOffset = 0, //offsetof(struct SaveBlock2, gcnLinkFlags),
+    .gcnLinkFlagsOffset = 0, // offsetof(struct SaveBlock2, gcnLinkFlags),
     .gameClearFlag = FLAG_SYS_GAME_CLEAR,
     .ribbonFlag = FLAG_SYS_RIBBON_GET,
-    .bagCountItems = 0,//BAG_ITEMS_COUNT,
-    .bagCountKeyItems = 0,//BAG_KEYITEMS_COUNT,
-    .bagCountPokeballs = 0,//BAG_POKEBALLS_COUNT,
-    .bagCountTMHMs = 0,//BAG_TMHM_COUNT,
-    .bagCountBerries = 0,//BAG_BERRIES_COUNT,
+    .bagCountItems = 0,     // BAG_ITEMS_COUNT,
+    .bagCountKeyItems = 0,  // BAG_KEYITEMS_COUNT,
+    .bagCountPokeballs = 0, // BAG_POKEBALLS_COUNT,
+    .bagCountTMHMs = 0,     // BAG_TMHM_COUNT,
+    .bagCountBerries = 0,   // BAG_BERRIES_COUNT,
     .pcItemsCount = PC_ITEMS_COUNT,
     .pcItemsOffset = offsetof(struct SaveBlock1, pcItems),
     .giftRibbonsOffset = offsetof(struct SaveBlock1, giftRibbons),

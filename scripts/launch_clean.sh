@@ -1,6 +1,8 @@
+numCores=$(sysctl -n hw.ncpu)
+
 echo Working Directory: $PWD
-echo Running Clean.. [make clean -j$(nproc)]
-make clean -j$(nproc)
+echo Running Clean.. [make clean -j$($numCores)]
+make clean -j$($numCores)
 
 exitCode=$?
 

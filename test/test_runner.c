@@ -16,14 +16,16 @@ void CB2_TestRunner(void);
 EWRAM_DATA struct TestRunnerState gTestRunnerState;
 EWRAM_DATA struct FunctionTestRunnerState *gFunctionTestRunnerState;
 
-enum {
+enum
+{
     CURRENT_TEST_STATE_ESTIMATE,
     CURRENT_TEST_STATE_RUN,
 };
 
-__attribute__((section(".persistent"))) static struct {
-    u32 address:28;
-    u32 state:1;
+__attribute__((used, section(".persistent"))) static struct
+{
+    u32 address : 28;
+    u32 state : 1;
 } sCurrentTest = {0};
 
 void TestRunner_Battle(const struct Test *);
@@ -165,13 +167,14 @@ top:
     case STATE_ASSIGN_TEST:
         while (1)
         {
+            MgbaPrintf_("Checking test: %s", gTestRunnerState.test->name);
+
             if (gTestRunnerState.test == __stop_tests)
             {
                 gTestRunnerState.state = STATE_EXIT;
                 return;
             }
-            if (gTestRunnerState.test->runner != &gAssumptionsRunner
-              && !PrefixMatch(gTestRunnerArgv, gTestRunnerState.test->name))
+            if (gTestRunnerState.test->runner != &gAssumptionsRunner && !PrefixMatch(gTestRunnerArgv, gTestRunnerState.test->name))
                 ++gTestRunnerState.test;
             else
                 break;
@@ -235,16 +238,13 @@ top:
             gTestRunnerState.tearDown = FALSE;
         }
 
-        if (gTestRunnerState.result == TEST_RESULT_PASS
-         && !gTestRunnerState.expectLeaks)
+        if (gTestRunnerState.result == TEST_RESULT_PASS && !gTestRunnerState.expectLeaks)
         {
             const struct MemBlock *head = HeapHead();
             const struct MemBlock *block = head;
             do
             {
-                if (block->magic != MALLOC_SYSTEM_ID
-                 || !(EWRAM_START <= (uintptr_t)block->next && (uintptr_t)block->next < EWRAM_END)
-                 || (block->next <= block && block->next != head))
+                if (block->magic != MALLOC_SYSTEM_ID || !(EWRAM_START <= (uintptr_t)block->next && (uintptr_t)block->next < EWRAM_END) || (block->next <= block && block->next != head))
                 {
                     MgbaPrintf_("gHeap corrupted block at 0x%p", block);
                     gTestRunnerState.result = TEST_RESULT_ERROR;
@@ -261,8 +261,7 @@ top:
                     gTestRunnerState.result = TEST_RESULT_FAIL;
                 }
                 block = block->next;
-            }
-            while (block != head);
+            } while (block != head);
         }
 
         if (gTestRunnerState.test->runner == &gAssumptionsRunner)
@@ -408,10 +407,10 @@ static void FunctionTest_TearDown(void *data)
 }
 
 const struct TestRunner gFunctionTestRunner =
-{
-    .setUp = FunctionTest_SetUp,
-    .run = FunctionTest_Run,
-    .tearDown = FunctionTest_TearDown,
+    {
+        .setUp = FunctionTest_SetUp,
+        .run = FunctionTest_Run,
+        .tearDown = FunctionTest_TearDown,
 };
 
 static void Assumptions_Run(void *data)
@@ -421,8 +420,8 @@ static void Assumptions_Run(void *data)
 }
 
 const struct TestRunner gAssumptionsRunner =
-{
-    .run = Assumptions_Run,
+    {
+        .run = Assumptions_Run,
 };
 
 #define IRQ_LR (*(vu32 *)0x3007F9C)
@@ -456,8 +455,7 @@ static void Intr_Timer2(void)
 {
     if (--gTestRunnerState.timeoutSeconds == 0)
     {
-        if (gTestRunnerState.test->runner->checkProgress
-         && gTestRunnerState.test->runner->checkProgress(gTestRunnerState.test->data))
+        if (gTestRunnerState.test->runner->checkProgress && gTestRunnerState.test->runner->checkProgress(gTestRunnerState.test->data))
         {
             gTestRunnerState.timeoutSeconds = TIMEOUT_SECONDS;
         }
@@ -476,11 +474,9 @@ void Test_ExitWithResult(enum TestResult result, const char *fmt, ...)
 {
     gTestRunnerState.result = result;
     ReinitCallbacks();
-    if (gTestRunnerState.state == STATE_REPORT_RESULT
-     && gTestRunnerState.result != gTestRunnerState.expectedResult)
+    if (gTestRunnerState.state == STATE_REPORT_RESULT && gTestRunnerState.result != gTestRunnerState.expectedResult)
     {
-        if (!gTestRunnerState.test->runner->handleExitWithResult
-         || !gTestRunnerState.test->runner->handleExitWithResult(gTestRunnerState.test->data, result))
+        if (!gTestRunnerState.test->runner->handleExitWithResult || !gTestRunnerState.test->runner->handleExitWithResult(gTestRunnerState.test->data, result))
         {
             va_list va;
             va_start(va, fmt);
@@ -492,7 +488,7 @@ void Test_ExitWithResult(enum TestResult result, const char *fmt, ...)
 }
 
 #define REG_DEBUG_ENABLE (*(vu16 *)0x4FFF780)
-#define REG_DEBUG_FLAGS  (*(vu16 *)0x4FFF700)
+#define REG_DEBUG_FLAGS (*(vu16 *)0x4FFF700)
 #define REG_DEBUG_STRING ((char *)0x4FFF600)
 
 static bool32 MgbaOpen_(void)
@@ -504,7 +500,7 @@ static bool32 MgbaOpen_(void)
 static void MgbaExit_(u8 exitCode)
 {
     register u32 _exitCode asm("r0") = exitCode;
-    asm("swi 0x3" :: "r" (_exitCode));
+    asm("swi 0x3" ::"r"(_exitCode));
 }
 
 s32 MgbaPrintf_(const char *fmt, ...)
@@ -574,7 +570,7 @@ static s32 MgbaVPrintf_(const char *fmt, va_list va)
                     s32 n;
                     for (n = 0; n < 7; n++)
                     {
-                        unsigned nybble = (p >> (24 - (4*n))) & 0xF;
+                        unsigned nybble = (p >> (24 - (4 * n))) & 0xF;
                         if (nybble <= 9)
                             i = MgbaPutchar_(i, '0' + nybble);
                         else
@@ -660,8 +656,7 @@ static s32 MgbaVPrintf_(const char *fmt, va_list va)
 /* Entry point for the Debugging and Control System. Handles illegal
  * instructions, which are typically caused by branching to an invalid
  * address. */
-__attribute__((naked, section(".dacs"), target("arm")))
-void DACSEntry(void)
+__attribute__((naked, section(".dacs"), target("arm"))) void DACSEntry(void)
 {
     asm(".arm\n\
          ldr r0, =(DACSHandle + 1)\n\

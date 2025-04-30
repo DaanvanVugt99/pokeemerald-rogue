@@ -16,12 +16,11 @@ struct RHHRomHeader
     /*0x09*/ u8 expansionVersionFlags;
 };
 
-__attribute__((section(".text.consts")))
-static const struct RHHRomHeader sRHHRomHeader =
-{
-    .rhh_magic = { 'R', 'H', 'H', 'E', 'X', 'P' },
-    .expansionVersionMajor = EXPANSION_VERSION_MAJOR,
-    .expansionVersionMinor = EXPANSION_VERSION_MINOR,
-    .expansionVersionPatch = EXPANSION_VERSION_PATCH,
-    .expansionVersionFlags = (EXPANSION_TAGGED_RELEASE << 0),
+__attribute__((used, section(".text.consts"))) static const struct RHHRomHeader sRHHRomHeader =
+    {
+        .rhh_magic = {'R', 'H', 'H', 'E', 'X', 'P'},
+        .expansionVersionMajor = EXPANSION_VERSION_MAJOR,
+        .expansionVersionMinor = EXPANSION_VERSION_MINOR,
+        .expansionVersionPatch = EXPANSION_VERSION_PATCH,
+        .expansionVersionFlags = (EXPANSION_TAGGED_RELEASE << 0),
 };

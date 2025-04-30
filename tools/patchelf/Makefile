@@ -12,7 +12,7 @@ all: patchelf$(EXE)
 	@:
 
 patchelf$(EXE): $(SRCS)
-	$(CC) $(SRCS) -o $@ $(LDFLAGS)
+		$(CC) $(CFLAGS) $(SRCS) -o $@
 
 clean:
 	$(RM) patchelf$(EXE)

@@ -1,6 +1,8 @@
+numCores=$(sysctl -n hw.ncpu)
+
 echo Working Directory: $PWD
-echo Running Release Build.. [make -j$(nproc) -O RELEASE=1]
-make -j$(nproc) -O RELEASE=1
+echo Running Release Build.. [make -j$($numCores) -O RELEASE=1]
+make -j$($numCores) -O RELEASE=1
 
 exitCode=$?
 

@@ -1,9 +1,13 @@
 echo Working Directory: $PWD
 
-testToRunPrefix="Battle Armor and Shell Armor block critical"
+testToRunPrefix="Fire type effectiveness"
 
-echo Running Test Build.. [make -j$(nproc) -O pokeemerald-test.elf TEST=1 RELEASE=0 TESTS="$testToRunPrefix"]
-make -j$(nproc) -O pokeemerald-test.elf TEST=1 RELEASE=0 TESTS="$testToRunPrefix"
+# Get the number of CPUs on macOS
+numCores=$(sysctl -n hw.ncpu)
+
+# Run the make command with the correct options
+echo Running Test Build.. [make -j$numCores pokeemerald-test.elf TEST=1 RELEASE=0 TESTS="$testToRunPrefix"]
+make -j$numCores pokeemerald-test.elf TEST=1 RELEASE=0 TESTS="$testToRunPrefix"
 
 exitCode=$?
 
