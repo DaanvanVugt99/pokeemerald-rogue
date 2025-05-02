@@ -307,6 +307,7 @@ static const u8 sForecastPriorityDescription[] = _("Weather moves go first.");
 
 static const u8 sChloroplastDescription[] = _("Battles as if in sunlight.\nDoes not trigger abilities.");
 static const u8 sWhiteoutDescription[] = _("Boosts Ice moves by 50% in Hail.");
+static const u8 sPyromancyDescription[] = _("Fire moves burn 5x more often.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -627,6 +628,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
 
         [ABILITY_CHLOROPLAST] = _("Chloroplast"),
         [ABILITY_WHITEOUT] = _("Whiteout"),
+        [ABILITY_PYROMANCY] = _("Pyromancy"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1265,4 +1267,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
 
         [ABILITY_CHLOROPLAST] = sChloroplastDescription,
         [ABILITY_WHITEOUT] = sWhiteoutDescription,
+        [ABILITY_PYROMANCY] = sPyromancyDescription,
 };

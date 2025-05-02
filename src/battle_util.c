@@ -11058,15 +11058,24 @@ u32 CalcSecondaryEffectChance(u32 battler, u8 secondaryEffectChance, u16 moveEff
 {
     bool8 hasSereneGrace = (GetBattlerAbility(battler) == ABILITY_SERENE_GRACE);
     bool8 hasRainbow = (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_RAINBOW) != 0;
+    u8 moveType = gBattleMoves[gCurrentMove].type;
 
     if (hasRainbow && hasSereneGrace && moveEffect == EFFECT_FLINCH_HIT)
-        return secondaryEffectChance *= 2;
+        secondaryEffectChance *= 2;
 
     if (hasSereneGrace)
         secondaryEffectChance *= 2;
     if (hasRainbow && moveEffect != EFFECT_SECRET_POWER)
         secondaryEffectChance *= 2;
 
+    // Pyromancy boost
+    if ((GetBattlerAbility(battler) == ABILITY_PYROMANCY) &&
+        moveType == TYPE_FIRE && moveEffect == EFFECT_BURN_HIT)
+    {
+        secondaryEffectChance *= 5;
+    }
+
+    // Apply charm/curse value modifiers
     if (GetBattlerSide(battler) == B_SIDE_OPPONENT)
         secondaryEffectChance += GetCurseValue(EFFECT_SERENE_GRACE_CHANCE);
     else

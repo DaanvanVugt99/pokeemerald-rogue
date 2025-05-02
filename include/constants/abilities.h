@@ -345,8 +345,9 @@
 // IE Custom Abilities
 #define ABILITY_CHLOROPLAST (ABILITIES_COUNT_GEN9 + 1) // Moves function as if it's sunny, regardless of weather
 #define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)    // Boosts the power of Ice attacks in Hail by 50%
+#define ABILITY_PYROMANCY (ABILITIES_COUNT_GEN9 + 3)   // Fire attacks are 5x more likely to inflict a burn
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_WHITEOUT + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_PYROMANCY + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM
