@@ -2164,6 +2164,8 @@ bool32 IsChargingMove(u32 battlerAtk, u32 effect)
     case EFFECT_SOLAR_BEAM:
         if (AI_GetWeather(AI_DATA) & B_WEATHER_SUN)
             return FALSE;
+        if (AI_DATA->abilities[battlerAtk] == ABILITY_CHLOROPLAST)
+            return FALSE;
     case EFFECT_ELECTRO_SHOT:
         if (AI_GetWeather(AI_DATA) & B_WEATHER_RAIN)
             return FALSE;

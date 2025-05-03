@@ -5614,6 +5614,7 @@ BattleScript_EffectGust::
 
 BattleScript_EffectSolarBeam::
 	jumpifweatheraffected BS_ATTACKER, B_WEATHER_SUN, BattleScript_SolarBeamOnFirstTurn
+	jumpifability BS_ATTACKER, ABILITY_CHLOROPLAST, BattleScript_SolarBeamOnFirstTurn
 BattleScript_SolarBeamDecideTurn::
 	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_TwoTurnMovesSecondTurn
 	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_TwoTurnMovesSecondTurn
@@ -10813,6 +10814,28 @@ BattleScript_MagicianActivates::
 	call BattleScript_AbilityPopUp
 	call BattleScript_ItemSteal
 	return
+
+BattleScript_StenchActivates::
+    jumpifcantswitch BS_SCRIPTING, BattleScript_StenchEnd
+    pause B_WAIT_TIME_SHORT
+    call BattleScript_AbilityPopUp
+    waitmessage B_WAIT_TIME_MED
+    pause B_WAIT_TIME_SHORT
+    openpartyscreen BS_SCRIPTING, BattleScript_StenchEnd
+    switchoutabilities BS_SCRIPTING
+    waitstate
+    switchhandleorder BS_SCRIPTING 0x2
+    returntoball BS_SCRIPTING, FALSE
+    getswitchedmondata BS_SCRIPTING
+    switchindataupdate BS_SCRIPTING
+    hpthresholds BS_SCRIPTING
+    trytoclearprimalweather
+    pause B_WAIT_TIME_SHORT
+    switchinanim BS_SCRIPTING 0x1
+    waitstate
+    switchineffects BS_SCRIPTING
+BattleScript_StenchEnd:
+    return
 
 BattleScript_SymbiosisActivates::
 	call BattleScript_AbilityPopUp

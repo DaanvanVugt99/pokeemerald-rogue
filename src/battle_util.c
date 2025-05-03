@@ -5292,6 +5292,26 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_STENCH:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler)
+                // Move made contact
+                && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+                // 20% chance
+                && RandomWeighted(RNG_STENCH, 4, 1)
+                // Not multi-hit continuation
+                && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+                // Attacker must be able to switch
+                && (CanBattlerSwitch(gBattlerAttacker) || !(gBattleTypeFlags & BATTLE_TYPE_TRAINER)) && !(gBattleTypeFlags & BATTLE_TYPE_ARENA) && CountUsablePartyMons(gBattlerAttacker) > 0
+                // Not held by Sky Drop
+                && !(gStatuses3[gBattlerAttacker] & STATUS3_SKY_DROPPED)
+                // Attacker is not ghost type
+                && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_GHOST))
+            {
+                gBattleResources->flags->flags[gBattlerAttacker] |= RESOURCE_FLAG_STENCH;
+                gLastUsedAbility = ABILITY_STENCH;
+                effect++;
+            }
+            break;
         case ABILITY_WEAK_ARMOR:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) && IS_MOVE_PHYSICAL(gCurrentMove) && (CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN) // Don't activate if both Speed and Defense cannot be raised.
                                                                                                                                                     || CompareStat(battler, STAT_DEF, MIN_STAT_STAGE, CMP_GREATER_THAN)))
@@ -5677,16 +5697,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
                 gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-                effect++;
-            }
-            break;
-        case ABILITY_STENCH:
-            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerTarget].hp != 0 && !gProtectStructs[gBattlerAttacker].confusionSelfDmg && RandomWeighted(RNG_STENCH, 9, 1) && TARGET_TURN_DAMAGED && gBattleMoves[gCurrentMove].effect != EFFECT_FLINCH_HIT && gBattleMoves[gCurrentMove].effect != EFFECT_FLINCH_STATUS && gBattleMoves[gCurrentMove].effect != EFFECT_TRIPLE_ARROWS)
-            {
-                gBattleScripting.moveEffect = MOVE_EFFECT_FLINCH;
-                BattleScriptPushCursor();
-                SetMoveEffect(FALSE, 0);
-                BattleScriptPop();
                 effect++;
             }
             break;
@@ -7529,7 +7539,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             if (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_RAINBOW && gCurrentMove != MOVE_SECRET_POWER)
                 atkHoldEffectParam *= 2;
             if (gBattleMoveDamage != 0 // Need to have done damage
-                && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && !gBattleMoves[gCurrentMove].ignoresKingsRock && gBattleMons[gBattlerTarget].hp && RandomPercentage(RNG_HOLD_EFFECT_FLINCH, atkHoldEffectParam) && ability != ABILITY_STENCH)
+                && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && !gBattleMoves[gCurrentMove].ignoresKingsRock && gBattleMons[gBattlerTarget].hp && RandomPercentage(RNG_HOLD_EFFECT_FLINCH, atkHoldEffectParam))
             {
                 shouldFlinch = TRUE;
             }
@@ -8829,6 +8839,10 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         if (gBattleMoves[move].slicingMove)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
+    case ABILITY_WHITEOUT: // Boosts damage of Ice-type moves in hail
+        if (moveType == TYPE_ICE && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_HAIL | B_WEATHER_SNOW))
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        break;
     case ABILITY_SUPREME_OVERLORD:
         modifier = uq4_12_multiply(modifier, GetSupremeOverlordModifier(battlerAtk));
         break;
@@ -9112,10 +9126,6 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     case ABILITY_STAKEOUT:
         if (gDisableStructs[battlerDef].isFirstTurn == 2) // just switched in
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
-        break;
-    case ABILITY_WHITEOUT: // Boosts damage of Ice-type moves in hail
-        if (moveType == TYPE_ICE && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_HAIL | B_WEATHER_SNOW))
-            uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_GUTS:
         if (gBattleMons[battlerAtk].status1 & STATUS1_ANY && IS_MOVE_PHYSICAL(move))
@@ -10932,26 +10942,23 @@ u16 GetUsedHeldItem(u32 battler)
 
 bool32 IsBattlerWeatherAffected(u32 battler, u32 weatherFlags)
 {
+    u16 ability = gBattleMons[battler].ability;
+
+    // Chloroplast simulates sun, even if sun is not up
+    if ((weatherFlags & B_WEATHER_SUN) && ability == ABILITY_CHLOROPLAST)
+        return TRUE;
+
+    // Normal weather checks
     if (!(gBattleWeather & weatherFlags) || !WEATHER_HAS_EFFECT)
         return FALSE;
 
     u16 holdEffect = GetBattlerHoldEffect(battler, TRUE);
-    u16 ability = gBattleMons[battler].ability;
 
-    // Handle individual weather immunities or overrides
-    if ((weatherFlags & B_WEATHER_SUN))
-    {
-        if (ability == ABILITY_CHLOROPLAST)
-            return TRUE; // Chloroplast simulates sun regardless of actual weather
-        if (holdEffect == HOLD_EFFECT_UTILITY_UMBRELLA)
-            return FALSE;
-    }
-
-    if ((weatherFlags & B_WEATHER_RAIN))
-    {
-        if (holdEffect == HOLD_EFFECT_UTILITY_UMBRELLA)
-            return FALSE;
-    }
+    // Utility Umbrella negates sun and rain
+    if ((weatherFlags & B_WEATHER_SUN) && holdEffect == HOLD_EFFECT_UTILITY_UMBRELLA)
+        return FALSE;
+    if ((weatherFlags & B_WEATHER_RAIN) && holdEffect == HOLD_EFFECT_UTILITY_UMBRELLA)
+        return FALSE;
 
     return TRUE;
 }

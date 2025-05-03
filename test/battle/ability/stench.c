@@ -1,82 +1,88 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Stench has a 10% chance to flinch")
+SINGLE_BATTLE_TEST("Stench has a ~20% chance to force switch on contact hit")
 {
-    PASSES_RANDOMLY(1, 10, RNG_STENCH);
-    GIVEN {
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
-        PLAYER(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
-        OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        MESSAGE("Foe Wobbuffet flinched!");
-    }
-}
-
-SINGLE_BATTLE_TEST("Stench does not stack with King's Rock")
-{
-    PASSES_RANDOMLY(1, 10, RNG_STENCH);
-    GIVEN {
-        ASSUME(gItems[ITEM_KINGS_ROCK].holdEffect == HOLD_EFFECT_FLINCH);
-        ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
-
-        PLAYER(SPECIES_GRIMER) { Ability(ABILITY_STENCH); Item(ITEM_KINGS_ROCK); }
-        OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        MESSAGE("Foe Wobbuffet flinched!");
-    }
-}
-
-DOUBLE_BATTLE_TEST("Stench only triggers if target takes damage")
-{
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
-        ASSUME(gBattleMoves[MOVE_FAKE_OUT].effect == EFFECT_FAKE_OUT);
-        PLAYER(SPECIES_WOBBUFFET);
-        PLAYER(SPECIES_WYNAUT);
+        ASSUME(IsMoveMakingContact(MOVE_TACKLE, SPECIES_RATTATA));
+        PLAYER(SPECIES_RATTATA) { Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_SENTRET); // backup for switching
         OPPONENT(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
-        OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_FAKE_OUT, target: opponentLeft);
-            MOVE(opponentLeft, MOVE_TACKLE, WITH_RNG(RNG_STENCH, TRUE),  target: playerRight);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_STENCH, TRUE));
+            SEND_OUT(player, 1);
         }
-        TURN {
-            MOVE(opponentLeft, MOVE_SCARY_FACE, WITH_RNG(RNG_STENCH, TRUE),  target: playerRight);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
-        }
-    } SCENE {
-        NONE_OF { MESSAGE("Wynaut flinched!"); }
+    }
+    SCENE
+    {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        ABILITY_POPUP(opponent, ABILITY_STENCH);
     }
 }
 
-DOUBLE_BATTLE_TEST("Stench doesn't trigger if partner uses a move")
+SINGLE_BATTLE_TEST("Stench does not activate if move fails due to type immunity")
 {
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
-        ASSUME(gBattleMoves[MOVE_FAKE_OUT].effect == EFFECT_FAKE_OUT);
-        PLAYER(SPECIES_WOBBUFFET) { Speed(20); }
-        PLAYER(SPECIES_WYNAUT) { Speed(10); }
-        OPPONENT(SPECIES_GRIMER) { Speed(100); Ability(ABILITY_STENCH); }
-        OPPONENT(SPECIES_WOBBUFFET) {Speed(50); }
-    } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_FAKE_OUT, target: opponentLeft);
-            MOVE(opponentRight, MOVE_TACKLE, target: playerRight);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
-        }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_FAKE_OUT, playerLeft);
-        MESSAGE("Foe Grimer flinched!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponentRight);
-        NOT MESSAGE("Wynaut flinched!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerRight);
+    GIVEN
+    {
+        PLAYER(SPECIES_GASTLY) { Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_SENTRET);
+        OPPONENT(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
+    }
+    WHEN
+    {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    }
+    SCENE
+    {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        MESSAGE("It doesn't affect Grimer...");
+        NOT ABILITY_POPUP(opponent, ABILITY_STENCH);
     }
 }
 
-// TODO: Test against interaction with multi hits
+SINGLE_BATTLE_TEST("Stench does not force switch if attacker has no backup")
+{
+    GIVEN
+    {
+        PLAYER(SPECIES_RATTATA) { Moves(MOVE_TACKLE); } // Only one mon
+        OPPONENT(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
+    }
+    WHEN
+    {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_STENCH, TRUE)); }
+    }
+    SCENE
+    {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        NOT ABILITY_POPUP(opponent, ABILITY_STENCH);
+    }
+}
+
+SINGLE_BATTLE_TEST("Stench activates only once on multi-hit contact move")
+{
+    GIVEN
+    {
+        PLAYER(SPECIES_RATTATA) { Moves(MOVE_DOUBLE_SLAP); }
+        PLAYER(SPECIES_SENTRET);
+        OPPONENT(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, MOVE_DOUBLE_SLAP, WITH_RNG(RNG_STENCH, TRUE));
+            SEND_OUT(player, 1);
+        }
+    }
+    SCENE
+    {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DOUBLE_SLAP, player);
+        ABILITY_POPUP(opponent, ABILITY_STENCH);
+    }
+}

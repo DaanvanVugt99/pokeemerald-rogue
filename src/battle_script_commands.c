@@ -6240,6 +6240,30 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             gBattleScripting.moveendState++;
             break;
+        case MOVEEND_STENCH:
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                u8 defender = i;
+                u8 attacker = gBattlerAttacker;
+
+                if (gBattleResources->flags->flags[attacker] & RESOURCE_FLAG_STENCH)
+                {
+                    gBattleResources->flags->flags[attacker] &= ~RESOURCE_FLAG_STENCH;
+
+                    // Ability activation context (same as Static)
+                    gBattleScripting.battler = defender; // Defender who has Stench
+                    gBattlerTarget = attacker;           // Attacker being forced out
+                    gLastUsedAbility = ABILITY_STENCH;
+                    gBattlerAbility = ABILITY_STENCH;
+
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_StenchActivates;
+                    effect++;
+                    return;
+                }
+            }
+            gBattleScripting.moveendState++;
+            break;
         case MOVEEND_PICKPOCKET:
             if (IsBattlerAlive(gBattlerAttacker) && gBattleMons[gBattlerAttacker].item != ITEM_NONE                                         // Attacker must be holding an item
                 && !(gWishFutureKnock.knockedOffMons[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]) // But not knocked off
