@@ -2584,6 +2584,7 @@ static void Cmd_attackanimation(void)
     CMD_ARGS();
 
     u16 moveTarget = GetBattlerMoveTargetType(gBattlerAttacker, gCurrentMove);
+    u8 moveType = GetMoveType(gBattlerAttacker, gCurrentMove);
 
     if (gBattleControllerExecFlags)
         return;
@@ -2610,6 +2611,7 @@ static void Cmd_attackanimation(void)
             gBattlescriptCurrInstr = cmd->nextInstr;
             return;
         }
+
         if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
         {
             u8 multihit;
@@ -2626,16 +2628,53 @@ static void Cmd_attackanimation(void)
             else
                 multihit = gMultiHitCounter;
 
-            BtlController_EmitMoveAnimation(gBattlerAttacker, BUFFER_A, gCurrentMove, gBattleScripting.animTurn, gBattleMovePower, gBattleMoveDamage, gBattleMons[gBattlerAttacker].friendship, &gDisableStructs[gBattlerAttacker], multihit);
-            gBattleScripting.animTurn++;
-            gBattleScripting.animTargetsHit++;
-            MarkBattlerForControllerExec(gBattlerAttacker);
-            gBattlescriptCurrInstr = cmd->nextInstr;
-        }
-        else
-        {
-            BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_Pausex20;
+            // Color Change activation before move animation
+            if (gBattleMons[gBattlerTarget].ability == ABILITY_COLOR_CHANGE && !gSpecialStatuses[gBattlerTarget].colorChangeTriggered && gBattleMoves[gCurrentMove].power != 0 && gCurrentMove != MOVE_STRUGGLE && IsBattlerAlive(gBattlerTarget) && moveType != gBattleMons[gBattlerTarget].type1 && moveType != gBattleMons[gBattlerTarget].type2)
+            {
+                gSpecialStatuses[gBattlerTarget].colorChangeTriggered = TRUE;
+
+                u8 newType = GetBestCounterType(moveType,
+                                                gBattleMons[gBattlerTarget].type1,
+                                                gBattleMons[gBattlerTarget].type2);
+
+                if (newType != TYPE_MYSTERY)
+                {
+                    gBattleMons[gBattlerTarget].type1 = newType;
+                    gBattleMons[gBattlerTarget].type2 = newType;
+                    gBattleMons[gBattlerTarget].type3 = TYPE_MYSTERY;
+
+                    gBattleMoveDamage = CalculateMoveDamage(
+                        gCurrentMove, gBattlerAttacker, gBattlerTarget,
+                        moveType, gBattleMovePower,
+                        FALSE, TRUE, TRUE);
+
+                    gEffectBattler = gBattlerTarget;
+                    gLastUsedAbility = ABILITY_COLOR_CHANGE;
+                    PREPARE_TYPE_BUFFER(gBattleTextBuff1, newType);
+
+                    // Only push to return *after* the animation
+                    BattleScriptPush(cmd->nextInstr);
+
+                    // Skip command (which is attackanimation) entirely
+                    gBattlescriptCurrInstr = BattleScript_ColorChangeActivates;
+                    return;
+                }
+
+                // If no Color Change (or it failed), proceed with the move as normal
+                BtlController_EmitMoveAnimation(gBattlerAttacker, BUFFER_A, gCurrentMove, gBattleScripting.animTurn,
+                                                gBattleMovePower, gBattleMoveDamage,
+                                                gBattleMons[gBattlerAttacker].friendship,
+                                                &gDisableStructs[gBattlerAttacker], multihit);
+                gBattleScripting.animTurn++;
+                gBattleScripting.animTargetsHit++;
+                MarkBattlerForControllerExec(gBattlerAttacker);
+                gBattlescriptCurrInstr = cmd->nextInstr;
+            }
+            else
+            {
+                BattleScriptPush(cmd->nextInstr);
+                gBattlescriptCurrInstr = BattleScript_Pausex20;
+            }
         }
     }
 }

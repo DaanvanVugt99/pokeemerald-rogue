@@ -1,63 +1,63 @@
 #ifndef GUARD_BATTLE_UTIL_H
 #define GUARD_BATTLE_UTIL_H
 
-#define MOVE_LIMITATION_ZEROMOVE                (1 << 0)
-#define MOVE_LIMITATION_PP                      (1 << 1)
-#define MOVE_LIMITATION_DISABLED                (1 << 2)
-#define MOVE_LIMITATION_TORMENTED               (1 << 3)
-#define MOVE_LIMITATION_TAUNT                   (1 << 4)
-#define MOVE_LIMITATION_IMPRISON                (1 << 5)
-#define MOVE_LIMITATION_ENCORE                  (1 << 6)
-#define MOVE_LIMITATION_CHOICE_ITEM             (1 << 7)
-#define MOVE_LIMITATION_ASSAULT_VEST            (1 << 8)
-#define MOVE_LIMITATION_GRAVITY                 (1 << 9)
-#define MOVE_LIMITATION_HEAL_BLOCK              (1 << 10)
-#define MOVE_LIMITATION_BELCH                   (1 << 11)
-#define MOVE_LIMITATION_THROAT_CHOP             (1 << 12)
-#define MOVE_LIMITATION_STUFF_CHEEKS            (1 << 13)
-#define MOVE_LIMITATION_CANT_USE_TWICE          (1 << 14)
+#define MOVE_LIMITATION_ZEROMOVE (1 << 0)
+#define MOVE_LIMITATION_PP (1 << 1)
+#define MOVE_LIMITATION_DISABLED (1 << 2)
+#define MOVE_LIMITATION_TORMENTED (1 << 3)
+#define MOVE_LIMITATION_TAUNT (1 << 4)
+#define MOVE_LIMITATION_IMPRISON (1 << 5)
+#define MOVE_LIMITATION_ENCORE (1 << 6)
+#define MOVE_LIMITATION_CHOICE_ITEM (1 << 7)
+#define MOVE_LIMITATION_ASSAULT_VEST (1 << 8)
+#define MOVE_LIMITATION_GRAVITY (1 << 9)
+#define MOVE_LIMITATION_HEAL_BLOCK (1 << 10)
+#define MOVE_LIMITATION_BELCH (1 << 11)
+#define MOVE_LIMITATION_THROAT_CHOP (1 << 12)
+#define MOVE_LIMITATION_STUFF_CHEEKS (1 << 13)
+#define MOVE_LIMITATION_CANT_USE_TWICE (1 << 14)
 
-#define MOVE_LIMITATION_PLACEHOLDER             (1 << 15)
-#define MOVE_LIMITATIONS_ALL                    0xFFFF
+#define MOVE_LIMITATION_PLACEHOLDER (1 << 15)
+#define MOVE_LIMITATIONS_ALL 0xFFFF
 
-#define ABILITYEFFECT_ON_SWITCHIN                0
-#define ABILITYEFFECT_ENDTURN                    1
-#define ABILITYEFFECT_MOVES_BLOCK                2
-#define ABILITYEFFECT_ABSORBING                  3
-#define ABILITYEFFECT_MOVE_END_ATTACKER          4
-#define ABILITYEFFECT_MOVE_END                   5
-#define ABILITYEFFECT_IMMUNITY                   6
-#define ABILITYEFFECT_SYNCHRONIZE                7
-#define ABILITYEFFECT_ATK_SYNCHRONIZE            8
-#define ABILITYEFFECT_TRACE1                     9
-#define ABILITYEFFECT_TRACE2                     10
-#define ABILITYEFFECT_MOVE_END_OTHER             11
-#define ABILITYEFFECT_NEUTRALIZINGGAS            12
-#define ABILITYEFFECT_FIELD_SPORT                13 // Only used if B_SPORT_TURNS >= GEN_6
-#define ABILITYEFFECT_ON_WEATHER                 14
-#define ABILITYEFFECT_ON_TERRAIN                 15
-#define ABILITYEFFECT_SWITCH_IN_TERRAIN          16
-#define ABILITYEFFECT_SWITCH_IN_WEATHER          17
-#define ABILITYEFFECT_OPPORTUNIST                18
+#define ABILITYEFFECT_ON_SWITCHIN 0
+#define ABILITYEFFECT_ENDTURN 1
+#define ABILITYEFFECT_MOVES_BLOCK 2
+#define ABILITYEFFECT_ABSORBING 3
+#define ABILITYEFFECT_MOVE_END_ATTACKER 4
+#define ABILITYEFFECT_MOVE_END 5
+#define ABILITYEFFECT_IMMUNITY 6
+#define ABILITYEFFECT_SYNCHRONIZE 7
+#define ABILITYEFFECT_ATK_SYNCHRONIZE 8
+#define ABILITYEFFECT_TRACE1 9
+#define ABILITYEFFECT_TRACE2 10
+#define ABILITYEFFECT_MOVE_END_OTHER 11
+#define ABILITYEFFECT_NEUTRALIZINGGAS 12
+#define ABILITYEFFECT_FIELD_SPORT 13 // Only used if B_SPORT_TURNS >= GEN_6
+#define ABILITYEFFECT_ON_WEATHER 14
+#define ABILITYEFFECT_ON_TERRAIN 15
+#define ABILITYEFFECT_SWITCH_IN_TERRAIN 16
+#define ABILITYEFFECT_SWITCH_IN_WEATHER 17
+#define ABILITYEFFECT_OPPORTUNIST 18
 // Special cases
-#define ABILITYEFFECT_MUD_SPORT                  252 // Only used if B_SPORT_TURNS >= GEN_6
-#define ABILITYEFFECT_WATER_SPORT                253 // Only used if B_SPORT_TURNS >= GEN_6
+#define ABILITYEFFECT_MUD_SPORT 252   // Only used if B_SPORT_TURNS >= GEN_6
+#define ABILITYEFFECT_WATER_SPORT 253 // Only used if B_SPORT_TURNS >= GEN_6
 
 // For the first argument of ItemBattleEffects, to deteremine which block of item effects to try
-#define ITEMEFFECT_ON_SWITCH_IN                 0
-#define ITEMEFFECT_NORMAL                       1
-#define ITEMEFFECT_DUMMY                        2 // Unused, empty
-#define ITEMEFFECT_MOVE_END                     3
-#define ITEMEFFECT_KINGSROCK                    4
-#define ITEMEFFECT_TARGET                       5
-#define ITEMEFFECT_ORBS                         6
-#define ITEMEFFECT_LIFEORB_SHELLBELL            7
-#define ITEMEFFECT_USE_LAST_ITEM                8 // move end effects for just the battler, not whole field
+#define ITEMEFFECT_ON_SWITCH_IN 0
+#define ITEMEFFECT_NORMAL 1
+#define ITEMEFFECT_DUMMY 2 // Unused, empty
+#define ITEMEFFECT_MOVE_END 3
+#define ITEMEFFECT_KINGSROCK 4
+#define ITEMEFFECT_TARGET 5
+#define ITEMEFFECT_ORBS 6
+#define ITEMEFFECT_LIFEORB_SHELLBELL 7
+#define ITEMEFFECT_USE_LAST_ITEM 8 // move end effects for just the battler, not whole field
 
 #define WEATHER_HAS_EFFECT ((!IsAbilityOnField(ABILITY_CLOUD_NINE) && !IsAbilityOnField(ABILITY_AIR_LOCK)))
 
-#define IS_WHOLE_SIDE_ALIVE(battler)    ((IsBattlerAlive(battler) && IsBattlerAlive(BATTLE_PARTNER(battler))))
-#define IS_ALIVE_AND_PRESENT(battler)   (IsBattlerAlive(battler) && IsBattlerSpritePresent(battler))
+#define IS_WHOLE_SIDE_ALIVE(battler) ((IsBattlerAlive(battler) && IsBattlerAlive(BATTLE_PARTNER(battler))))
+#define IS_ALIVE_AND_PRESENT(battler) (IsBattlerAlive(battler) && IsBattlerSpritePresent(battler))
 
 // for Natural Gift and Fling
 struct TypePower
@@ -118,7 +118,7 @@ u8 GetBattlerForBattleScript(u8 caseId);
 bool32 IsBattlerMarkedForControllerExec(u32 battler);
 void MarkBattlerForControllerExec(u32 battler);
 void MarkBattlerReceivedLinkData(u32 battler);
-const u8* CancelMultiTurnMoves(u32 battler);
+const u8 *CancelMultiTurnMoves(u32 battler);
 bool32 WasUnableToUseMove(u32 battler);
 void PrepareStringBattle(u16 stringId, u32 battler);
 void ResetSentPokesToOpponentValue(void);
@@ -173,7 +173,7 @@ u32 CalcRolloutBasePower(u32 battlerAtk, u32 basePower, u32 rolloutTimer);
 u32 CalcFuryCutterBasePower(u32 basePower, u32 furyCutterCounter);
 s32 CalculateMoveDamage(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, bool32 isCrit, bool32 randomFactor, bool32 updateFlags);
 s32 CalculateMoveDamageVars(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, uq4_12_t typeEffectivenessModifier,
-                                          u32 weather, bool32 isCrit, u32 holdEffectAtk, u32 holdEffectDef, u32 abilityAtk, u32 abilityDef);
+                            u32 weather, bool32 isCrit, u32 holdEffectAtk, u32 holdEffectDef, u32 abilityAtk, u32 abilityDef);
 uq4_12_t CalcTypeEffectivenessMultiplier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, u32 defAbility, bool32 recordAbilities);
 uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u16 abilityDef);
 uq4_12_t GetTypeModifier(u32 atkType, u32 defType);
@@ -221,6 +221,7 @@ void CopyMonAbilityAndTypesToBattleMon(u32 battler, struct Pokemon *mon);
 void RecalcBattlerStats(u32 battler, struct Pokemon *mon);
 bool32 IsAlly(u32 battlerAtk, u32 battlerDef);
 bool32 IsGen6ExpShareEnabled(void);
+u8 GetMoveType(u32 battler, u32 move);
 
 // Ability checks
 bool32 IsRolePlayBannedAbilityAtk(u16 ability);
@@ -252,5 +253,6 @@ u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera);
 bool8 CanMonParticipateInSkyBattle(struct Pokemon *mon);
 bool8 IsMonBannedFromSkyBattles(u16 species);
 void RemoveBattlerType(u32 battler, u8 type);
+u8 GetBestCounterType(u8 moveType, u8 currentType1, u8 currentType2);
 
 #endif // GUARD_BATTLE_UTIL_H

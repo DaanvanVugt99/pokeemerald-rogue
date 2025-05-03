@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Oblivious prevents Intimidate from lowering Attack"
+testToRunPrefix="Color Change activates and changes the user's type to match the move's type"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

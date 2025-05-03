@@ -5413,16 +5413,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
-        case ABILITY_COLOR_CHANGE:
-            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && move != MOVE_STRUGGLE && gBattleMoves[move].power != 0 && TARGET_TURN_DAMAGED && !IS_BATTLER_OF_TYPE(battler, moveType) && moveType != TYPE_STELLAR && gBattleMons[battler].hp != 0)
-            {
-                SET_BATTLER_TYPE(battler, moveType);
-                PREPARE_TYPE_BUFFER(gBattleTextBuff1, moveType);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_ColorChangeActivates;
-                effect++;
-            }
-            break;
         case ABILITY_GOOEY:
         case ABILITY_TANGLING_HAIR:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 && (CompareStat(gBattlerAttacker, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN) || GetBattlerAbility(gBattlerAttacker) == ABILITY_MIRROR_ARMOR) && !gProtectStructs[gBattlerAttacker].confusionSelfDmg && TARGET_TURN_DAMAGED && IsMoveMakingContact(move, gBattlerAttacker))
@@ -9770,7 +9760,8 @@ static u32 GetWeather(void)
 s32 CalculateMoveDamage(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, bool32 isCrit, bool32 randomFactor, bool32 updateFlags)
 {
     return DoMoveDamageCalc(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, randomFactor,
-                            updateFlags, CalcTypeEffectivenessMultiplier(move, moveType, battlerAtk, battlerDef, GetBattlerAbility(battlerDef), updateFlags),
+                            updateFlags,
+                            CalcTypeEffectivenessMultiplier(move, moveType, battlerAtk, battlerDef, GetBattlerAbility(battlerDef), updateFlags),
                             GetWeather());
 }
 
@@ -11198,4 +11189,73 @@ void RemoveBattlerType(u32 battler, u8 type)
         if (*(u8 *)(&gBattleMons[battler].type1 + i) == type)
             *(u8 *)(&gBattleMons[battler].type1 + i) = TYPE_MYSTERY;
     }
+}
+
+u8 GetBestCounterType(u8 moveType, u8 currentType1, u8 currentType2)
+{
+    u8 bestType = TYPE_NORMAL;
+    u16 bestMultiplier = UQ_4_12(1.0); // Default 1.0x
+
+    for (u8 type = 0; type < NUMBER_OF_MON_TYPES; ++type)
+    {
+        if (type == TYPE_MYSTERY)
+            continue;
+
+        // Skip if mon already has this type
+        if (type == currentType1 || type == currentType2)
+            continue;
+
+        u16 mod = GetTypeModifier(moveType, type);
+
+        if (mod < bestMultiplier)
+        {
+            bestMultiplier = mod;
+            bestType = type;
+        }
+    }
+
+    if (bestMultiplier > UQ_4_12(1.0)) // Only worse than neutral
+        return TYPE_MYSTERY;
+
+    return bestType;
+}
+
+u8 GetMoveType(u32 battler, u32 move)
+{
+    u8 type = gBattleMoves[move].type;
+    u16 ability = GetBattlerAbility(battler);
+
+    // Treat Hidden Power as its calculated type
+    if (move == MOVE_HIDDEN_POWER && B_HIDDEN_POWER_DMG >= GEN_6)
+        type = gBattleStruct->dynamicMoveType;
+
+    // Normalize: ALL moves become Normal-type
+    if (ability == ABILITY_NORMALIZE)
+        type = TYPE_NORMAL;
+
+    // Liquid Voice: sound-based moves become Water-type
+    else if (ability == ABILITY_LIQUID_VOICE && gBattleMoves[move].soundMove)
+        type = TYPE_WATER;
+
+    // Refrigerate, Pixilate, Aerilate, Galvanize: only affect Normal-type moves
+    else if (gBattleMoves[move].type == TYPE_NORMAL)
+    {
+        switch (ability)
+        {
+        case ABILITY_REFRIGERATE:
+            type = TYPE_ICE;
+            break;
+        case ABILITY_PIXILATE:
+            type = TYPE_FAIRY;
+            break;
+        case ABILITY_AERILATE:
+            type = TYPE_FLYING;
+            break;
+        case ABILITY_GALVANIZE:
+            type = TYPE_ELECTRIC;
+            break;
+        }
+    }
+
+    return type;
 }

@@ -1,26 +1,64 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Sharpness increases the power of slicing moves", s16 damage)
+SINGLE_BATTLE_TEST("Color Change activates and changes the user's type to counter the move's type")
 {
-    u32 move;
-    u16 ability;
-    PARAMETRIZE { move = MOVE_AERIAL_ACE; ability = ABILITY_SHARPNESS; }
-    PARAMETRIZE { move = MOVE_AERIAL_ACE; ability = ABILITY_STEADFAST; }
-    PARAMETRIZE { move = MOVE_SCRATCH; ability = ABILITY_SHARPNESS; }
-    PARAMETRIZE { move = MOVE_SCRATCH; ability = ABILITY_STEADFAST; }
+    u16 move;
+    u8 expectedType;
 
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_AERIAL_ACE].slicingMove);
-        ASSUME(!gBattleMoves[MOVE_SCRATCH].slicingMove);
-        PLAYER(SPECIES_GALLADE) { Ability(ability); }
+    PARAMETRIZE
+    {
+        move = MOVE_FLAMETHROWER;
+        expectedType = TYPE_ROCK;
+    }
+    PARAMETRIZE
+    {
+        move = MOVE_THUNDERBOLT;
+        expectedType = TYPE_GROUND;
+    }
+    PARAMETRIZE
+    {
+        move = MOVE_ICE_BEAM;
+        expectedType = TYPE_WATER;
+    }
+    PARAMETRIZE
+    {
+        move = MOVE_SLUDGE_BOMB;
+        expectedType = TYPE_STEEL;
+    }
+    PARAMETRIZE
+    {
+        move = MOVE_PSYCHIC;
+        expectedType = TYPE_DARK;
+    }
+    PARAMETRIZE
+    {
+        move = MOVE_SHADOW_BALL;
+        expectedType = TYPE_NORMAL;
+    }
+
+    GIVEN
+    {
+        PLAYER(SPECIES_KECLEON)
+        {
+            Ability(ABILITY_COLOR_CHANGE);
+        }
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, move); }
-    } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } FINALLY {
-        EXPECT_MUL_EQ(results[1].damage, Q_4_12(1.5), results[0].damage); // Sharpness affects slicing moves
-        EXPECT_EQ(results[2].damage, results[3].damage); // Sharpness does not affect non-slicing moves
+    }
+    WHEN
+    {
+        TURN { MOVE(opponent, move); }
+    }
+    SCENE
+    {
+        MESSAGE("Foe Wobbuffet used");
+        HP_BAR(player);
+        ABILITY_POPUP(player, ABILITY_COLOR_CHANGE);
+        MESSAGE("Kecleon transformed into the");
+    }
+    THEN
+    {
+        EXPECT_EQ(player->type1, expectedType);
+        EXPECT_EQ(player->type2, expectedType);
     }
 }

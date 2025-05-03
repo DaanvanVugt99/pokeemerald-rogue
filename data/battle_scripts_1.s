@@ -9484,10 +9484,15 @@ BattleScript_StickyHoldActivates::
 	goto BattleScript_MoveEnd
 
 BattleScript_ColorChangeActivates::
-	call BattleScript_AbilityPopUp
-	printstring STRINGID_PKMNCHANGEDTYPEWITH
-	waitmessage B_WAIT_TIME_LONG
-	return
+    showabilitypopup BS_TARGET
+    printstring STRINGID_PKMNCHANGEDTYPEWITH
+    waitmessage B_WAIT_TIME_LONG
+    goto BattleScript_HitFromAbility
+
+BattleScript_HitFromAbility::
+    attackanimation
+    waitanimation
+    goto BattleScript_HitFromAtkAnimation
 
 BattleScript_ProteanActivates::
 	pause B_WAIT_TIME_SHORTEST
