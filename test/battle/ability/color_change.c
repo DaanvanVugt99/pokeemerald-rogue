@@ -1,31 +1,48 @@
 #include "global.h"
 #include "test/battle.h"
 
-#include "global.h"
-#include "test/battle.h"
-
-SINGLE_BATTLE_TEST("Color Change activates and changes the user's type to match the move's type")
+SINGLE_BATTLE_TEST("Color Change counters Flamethrower")
 {
-    ASSUME(gBattleMoves[MOVE_FLAMETHROWER].type == TYPE_FIRE);
-
     GIVEN
     {
-        PLAYER(SPECIES_KECLEON)
-        {
-            Ability(ABILITY_COLOR_CHANGE);
-        }
+        PLAYER(SPECIES_KECLEON) { Ability(ABILITY_COLOR_CHANGE); }
         OPPONENT(SPECIES_WOBBUFFET);
     }
     WHEN
     {
-        TURN { MOVE(opponent, MOVE_ABSORB); }
+        TURN { MOVE(opponent, MOVE_FLAMETHROWER); }
     }
     SCENE
     {
-        MESSAGE("Foe Wobbuffet used Flamethrower!");
+        MESSAGE("Foe Wobbuffet used");
         HP_BAR(player);
         ABILITY_POPUP(player, ABILITY_COLOR_CHANGE);
-        MESSAGE("Kecleon transformed into the Fire type!");
+        MESSAGE("Kecleon transformed into the");
+    }
+    THEN
+    {
+        EXPECT_EQ(player->type1, TYPE_ROCK);
+        EXPECT_EQ(player->type2, TYPE_ROCK);
+    }
+}
+
+SINGLE_BATTLE_TEST("Color Change counters Thunderbolt")
+{
+    GIVEN
+    {
+        PLAYER(SPECIES_KECLEON) { Ability(ABILITY_COLOR_CHANGE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    }
+    WHEN
+    {
+        TURN { MOVE(opponent, MOVE_THUNDERBOLT); }
+    }
+    SCENE
+    {
+        MESSAGE("Foe Wobbuffet used");
+        HP_BAR(player);
+        ABILITY_POPUP(player, ABILITY_COLOR_CHANGE);
+        MESSAGE("Kecleon transformed into the");
     }
     THEN
     {

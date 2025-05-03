@@ -1711,6 +1711,36 @@ static void Cmd_attackcanceler(void)
         return;
     }
 
+    if ((GetBattlerAbility(gBattlerTarget) == ABILITY_COLOR_CHANGE) &&
+        gProtectStructs[gBattlerAttacker].extraMoveUsed != TRUE && (gBattlerAttacker != gBattlerTarget))
+    {
+        u32 currentType;
+        u32 bestType = gBattleMons[gBattlerTarget].type1;
+        u16 bestModifier = GetTypeModifier(moveType, bestType);
+
+        for (currentType = TYPE_NORMAL; currentType < NUMBER_OF_MON_TYPES; ++currentType)
+        {
+            u16 currentModifier = GetTypeModifier(moveType, currentType);
+            if (currentModifier < bestModifier)
+            {
+                bestModifier = currentModifier;
+                bestType = currentType;
+            }
+            if (bestModifier == UQ_4_12(0.0))
+                break;
+        }
+
+        if (gBattleMons[gBattlerTarget].type1 != bestType)
+        {
+            SET_BATTLER_TYPE(gBattlerTarget, bestType);
+            PREPARE_TYPE_BUFFER(gBattleTextBuff1, bestType);
+            gBattlerAbility = gBattlerTarget;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_ColorChangeActivates;
+            return;
+        }
+    }
+
     if (AtkCanceller_UnableToUseMove2())
         return;
     if (AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0))
@@ -2584,14 +2614,11 @@ static void Cmd_attackanimation(void)
     CMD_ARGS();
 
     u16 moveTarget = GetBattlerMoveTargetType(gBattlerAttacker, gCurrentMove);
-    u8 moveType = GetMoveType(gBattlerAttacker, gCurrentMove);
 
     if (gBattleControllerExecFlags)
         return;
 
-    if ((gHitMarker & (HITMARKER_NO_ANIMATIONS | HITMARKER_DISABLE_ANIMATION)) && gCurrentMove != MOVE_TRANSFORM && gCurrentMove != MOVE_SUBSTITUTE && gCurrentMove != MOVE_ALLY_SWITCH
-        // In a wild double battle gotta use the teleport animation if two wild pokemon are alive.
-        && !(gCurrentMove == MOVE_TELEPORT && WILD_DOUBLE_BATTLE && GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT && IsBattlerAlive(BATTLE_PARTNER(gBattlerAttacker))))
+    if ((gHitMarker & (HITMARKER_NO_ANIMATIONS | HITMARKER_DISABLE_ANIMATION)) && gCurrentMove != MOVE_TRANSFORM && gCurrentMove != MOVE_SUBSTITUTE && gCurrentMove != MOVE_ALLY_SWITCH && !(gCurrentMove == MOVE_TELEPORT && WILD_DOUBLE_BATTLE && GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT && IsBattlerAlive(BATTLE_PARTNER(gBattlerAttacker))))
     {
         BattleScriptPush(cmd->nextInstr);
         gBattlescriptCurrInstr = BattleScript_Pausex20;
@@ -2600,7 +2627,7 @@ static void Cmd_attackanimation(void)
     }
     else
     {
-        if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_2ND_HIT) // No animation on second hit
+        if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_2ND_HIT)
         {
             gBattlescriptCurrInstr = cmd->nextInstr;
             return;
@@ -2626,55 +2653,23 @@ static void Cmd_attackanimation(void)
                     multihit = gMultiHitCounter;
             }
             else
+            {
                 multihit = gMultiHitCounter;
-
-            // Color Change activation before move animation
-            if (gBattleMons[gBattlerTarget].ability == ABILITY_COLOR_CHANGE && !gSpecialStatuses[gBattlerTarget].colorChangeTriggered && gBattleMoves[gCurrentMove].power != 0 && gCurrentMove != MOVE_STRUGGLE && IsBattlerAlive(gBattlerTarget) && moveType != gBattleMons[gBattlerTarget].type1 && moveType != gBattleMons[gBattlerTarget].type2)
-            {
-                gSpecialStatuses[gBattlerTarget].colorChangeTriggered = TRUE;
-
-                u8 newType = GetBestCounterType(moveType,
-                                                gBattleMons[gBattlerTarget].type1,
-                                                gBattleMons[gBattlerTarget].type2);
-
-                if (newType != TYPE_MYSTERY)
-                {
-                    gBattleMons[gBattlerTarget].type1 = newType;
-                    gBattleMons[gBattlerTarget].type2 = newType;
-                    gBattleMons[gBattlerTarget].type3 = TYPE_MYSTERY;
-
-                    gBattleMoveDamage = CalculateMoveDamage(
-                        gCurrentMove, gBattlerAttacker, gBattlerTarget,
-                        moveType, gBattleMovePower,
-                        FALSE, TRUE, TRUE);
-
-                    gEffectBattler = gBattlerTarget;
-                    gLastUsedAbility = ABILITY_COLOR_CHANGE;
-                    PREPARE_TYPE_BUFFER(gBattleTextBuff1, newType);
-
-                    // Only push to return *after* the animation
-                    BattleScriptPush(cmd->nextInstr);
-
-                    // Skip command (which is attackanimation) entirely
-                    gBattlescriptCurrInstr = BattleScript_ColorChangeActivates;
-                    return;
-                }
-
-                // If no Color Change (or it failed), proceed with the move as normal
-                BtlController_EmitMoveAnimation(gBattlerAttacker, BUFFER_A, gCurrentMove, gBattleScripting.animTurn,
-                                                gBattleMovePower, gBattleMoveDamage,
-                                                gBattleMons[gBattlerAttacker].friendship,
-                                                &gDisableStructs[gBattlerAttacker], multihit);
-                gBattleScripting.animTurn++;
-                gBattleScripting.animTargetsHit++;
-                MarkBattlerForControllerExec(gBattlerAttacker);
-                gBattlescriptCurrInstr = cmd->nextInstr;
             }
-            else
-            {
-                BattleScriptPush(cmd->nextInstr);
-                gBattlescriptCurrInstr = BattleScript_Pausex20;
-            }
+
+            BtlController_EmitMoveAnimation(gBattlerAttacker, BUFFER_A, gCurrentMove, gBattleScripting.animTurn,
+                                            gBattleMovePower, gBattleMoveDamage,
+                                            gBattleMons[gBattlerAttacker].friendship,
+                                            &gDisableStructs[gBattlerAttacker], multihit);
+            gBattleScripting.animTurn++;
+            gBattleScripting.animTargetsHit++;
+            MarkBattlerForControllerExec(gBattlerAttacker);
+            gBattlescriptCurrInstr = cmd->nextInstr;
+        }
+        else
+        {
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_Pausex20;
         }
     }
 }

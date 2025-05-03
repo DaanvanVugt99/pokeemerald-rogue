@@ -11191,35 +11191,6 @@ void RemoveBattlerType(u32 battler, u8 type)
     }
 }
 
-u8 GetBestCounterType(u8 moveType, u8 currentType1, u8 currentType2)
-{
-    u8 bestType = TYPE_NORMAL;
-    u16 bestMultiplier = UQ_4_12(1.0); // Default 1.0x
-
-    for (u8 type = 0; type < NUMBER_OF_MON_TYPES; ++type)
-    {
-        if (type == TYPE_MYSTERY)
-            continue;
-
-        // Skip if mon already has this type
-        if (type == currentType1 || type == currentType2)
-            continue;
-
-        u16 mod = GetTypeModifier(moveType, type);
-
-        if (mod < bestMultiplier)
-        {
-            bestMultiplier = mod;
-            bestType = type;
-        }
-    }
-
-    if (bestMultiplier > UQ_4_12(1.0)) // Only worse than neutral
-        return TYPE_MYSTERY;
-
-    return bestType;
-}
-
 u8 GetMoveType(u32 battler, u32 move)
 {
     u8 type = gBattleMoves[move].type;

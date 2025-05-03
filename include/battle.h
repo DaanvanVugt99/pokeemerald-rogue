@@ -172,6 +172,7 @@ struct ProtectStruct
     u32 specialDmg;
     u8 physicalBattlerId;
     u8 specialBattlerId;
+    bool8 extraMoveUsed : 1; // Add this line
 };
 
 struct SpecialStatus

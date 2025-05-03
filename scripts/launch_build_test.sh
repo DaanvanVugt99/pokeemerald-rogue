@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Color Change activates and changes the user's type to match the move's type"
+testToRunPrefix="Color Change counters Thunderbolt"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
