@@ -5742,6 +5742,8 @@ static void Cmd_moveend(void)
                     effect = TRUE;
                     break;
                 }
+                if (gBattleMons[gBattlerAttacker].ability == ABILITY_LIMBER)
+                    gBattleMoveDamage = gBattleMoveDamage * 0.5;
             }
             gBattleScripting.moveendState++;
             break;
@@ -6255,7 +6257,6 @@ static void Cmd_moveend(void)
                     gBattlerTarget = attacker;           // Attacker being forced out
                     gLastUsedAbility = ABILITY_STENCH;
                     gBattlerAbility = ABILITY_STENCH;
-
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_StenchActivates;
                     effect++;
@@ -11137,6 +11138,8 @@ static void Cmd_manipulatedamage(void)
         {
             gBattleMoveDamage /= 2;
         }
+        if (gBattleMons[gBattlerAttacker].ability == ABILITY_LIMBER)
+            gBattleMoveDamage = gBattleMoveDamage * 0.5;
         if (gBattleMoveDamage == 0)
             gBattleMoveDamage = 1;
         break;
@@ -11162,6 +11165,8 @@ static void Cmd_manipulatedamage(void)
         break;
     case DMG_RECOIL_FROM_IMMUNE:
         gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 2;
+        if (gBattleMons[gBattlerAttacker].ability == ABILITY_LIMBER)
+            gBattleMoveDamage = gBattleMoveDamage * 0.5;
         break;
     }
 

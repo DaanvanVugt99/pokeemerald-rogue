@@ -2,18 +2,18 @@
 #define GUARD_CONSTANTS_ABILITIES_H
 
 #define ABILITY_NONE 0
-#define ABILITY_STENCH 1         // This Pokemon's attacks without a chance to flinch gain a 10% chance to flinch.
+#define ABILITY_STENCH 1         // 20% chance to switch out the attacker when hit by a contact move.
 #define ABILITY_DRIZZLE 2        // The Pokémon makes it rain when it enters a battle.
 #define ABILITY_SPEED_BOOST 3    // Its Speed stat is boosted every turn.
-#define ABILITY_BATTLE_ARMOR 4   // Hard armor protects the Pokémon from critical hits. Takes 20% less damage.
+#define ABILITY_BATTLE_ARMOR 4   // Hard armor protects the Pokémon from critical hits. Takes 10% less damage.
 #define ABILITY_STURDY 5         // It cannot be knocked out with one hit. One-hit KO moves cannot knock it out, either.
 #define ABILITY_DAMP 6           // Prevents the use of explosive moves, such as Self-Destruct, by dampening its surroundings.
-#define ABILITY_LIMBER 7         // Its limber body protects the Pokémon from paralysis. Takes 30% less damage from crash damage.
+#define ABILITY_LIMBER 7         // Its limber body protects the Pokémon from paralysis. Takes 50% less damage from crash damage.
 #define ABILITY_SAND_VEIL 8      // Boosts the Pokémon's evasiveness in a sandstorm by 20%.
 #define ABILITY_STATIC 9         // 30% chance to get paralyzed on contact against this Pokémon.
 #define ABILITY_VOLT_ABSORB 10   // The Pokémon heals up to 1/4 of its maximum Hit Points when hit with Electric-type moves.
 #define ABILITY_WATER_ABSORB 11  // The Pokémon heals up to 1/4 of its maximum Hit Points when hit with Water-type moves.
-#define ABILITY_OBLIVIOUS 12     // The Pokémon is oblivious, and that keeps it from being infatuated or falling for taunts.
+#define ABILITY_OBLIVIOUS 12     // The Pokémon is oblivious, and that keeps it from being infatuated, intimidated or falling for taunts.
 #define ABILITY_CLOUD_NINE 13    // Eliminates the effects of weather.
 #define ABILITY_COMPOUND_EYES 14 // Raises the Pokémon’s accuracy by 30%.
 #define ABILITY_INSOMNIA 15      // The Pokémon is suffering from insomnia and cannot fall asleep.

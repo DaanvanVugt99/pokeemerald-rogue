@@ -8957,16 +8957,18 @@ BattleScript_TryAdrenalineOrbRet:
 	return
 
 BattleScript_IntimidateActivates::
-	showabilitypopup BS_ATTACKER
-	copybyte sSAVED_BATTLER, gBattlerTarget
-	pause B_WAIT_TIME_LONG
-	destroyabilitypopup
-	setbyte gBattlerTarget, 0
+    copybyte gBattlerAbility, gBattlerAttacker
+    showabilitypopup BS_ATTACKER
+    copybyte sSAVED_BATTLER, gBattlerTarget
+    pause B_WAIT_TIME_LONG
+    destroyabilitypopup
+    setbyte gBattlerTarget, 0
 BattleScript_IntimidateLoop:
 	jumpifbyteequal gBattlerTarget, gBattlerAttacker, BattleScript_IntimidateLoopIncrement
 	jumpiftargetally BattleScript_IntimidateLoopIncrement
 	jumpifabsent BS_TARGET, BattleScript_IntimidateLoopIncrement
 	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_IntimidateLoopIncrement
+	jumpifability BS_TARGET, ABILITY_OBLIVIOUS, BattleScript_ObliviousBlocksIntimidate
 	jumpifability BS_TARGET, ABILITY_GUARD_DOG, BattleScript_IntimidateInReverse
 BattleScript_IntimidateEffect:
 	copybyte sBATTLER, gBattlerAttacker
@@ -9007,6 +9009,11 @@ BattleScript_IntimidateInReverse:
 	modifybattlerstatstage BS_TARGET, STAT_ATK, INCREASE, 1, BattleScript_IntimidateLoopIncrement, ANIM_ON
 	call BattleScript_TryAdrenalineOrb
 	goto BattleScript_IntimidateLoopIncrement
+
+BattleScript_ObliviousBlocksIntimidate::
+    printstring STRINGID_OBLIVIOUSBLOCKSINTIMIDATE
+    waitmessage B_WAIT_TIME_LONG
+    goto BattleScript_IntimidateLoopIncrement
 
 BattleScript_SupersweetSyrupActivates::
 	showabilitypopup BS_ATTACKER

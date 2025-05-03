@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Fire moves gain weather boost from chloroplast"
+testToRunPrefix="Oblivious prevents Intimidate from lowering Attack"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

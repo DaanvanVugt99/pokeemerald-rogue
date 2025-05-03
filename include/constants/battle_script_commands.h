@@ -40,6 +40,7 @@
 #define sSWITCH_CASE (gBattleScripting + 0x36)                 // switchCase
 #define sBERRY_OVERRIDE (gBattleScripting + 0x37)              // overrideBerryRequirements
 #define sSTICKY_WEB_STAT_DROP (gBattleScripting + 0x38)        // stickyWebStatDrop
+#define sSAVED_BATTLER_ABILITY (gBattleScripting + 0x39)       // Used to remember the Intimidate user's ability
 
 // Array entries for battle communication
 #define MULTIUSE_STATE 0

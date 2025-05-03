@@ -4637,7 +4637,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             {
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
                 gBattlerAttacker = battler;
-                SET_STATCHANGER(STAT_ATK, 1, TRUE);
                 BattleScriptPushCursorAndCallback(BattleScript_IntimidateActivates);
                 effect++;
             }
@@ -9143,6 +9142,11 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             if (updateFlags)
                 RecordAbilityBattle(battlerDef, ABILITY_THICK_FAT);
         }
+        break;
+    case ABILITY_BATTLE_ARMOR:
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.9));
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_BATTLE_ARMOR);
         break;
     }
 
