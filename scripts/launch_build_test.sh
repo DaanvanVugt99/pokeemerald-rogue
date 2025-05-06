@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Neuroforce increases the strength of super-effective moves by 25%"
+testToRunPrefix="Spell Fist boosts punching moves by 1.3× and targets Sp. Def"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

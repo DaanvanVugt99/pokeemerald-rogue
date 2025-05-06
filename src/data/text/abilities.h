@@ -308,6 +308,8 @@ static const u8 sForecastPriorityDescription[] = _("Weather moves go first.");
 static const u8 sChloroplastDescription[] = _("Battles as if in sunlight.\nDoes not trigger abilities.");
 static const u8 sWhiteoutDescription[] = _("Boosts Ice moves by 50% in Hail.");
 static const u8 sPyromancyDescription[] = _("Fire moves burn 5x more often.");
+static const u8 sSpellFistDescription[] = _("Punches do special damage\nand 30% more damage.");
+static const u8 sBlitzBoxerDescription[] = _("Punching moves have\n+1 priority at full health.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -629,6 +631,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_CHLOROPLAST] = _("Chloroplast"),
         [ABILITY_WHITEOUT] = _("Whiteout"),
         [ABILITY_PYROMANCY] = _("Pyromancy"),
+        [ABILITY_SPELL_FIST] = _("Spell Fist"),
+        [ABILITY_BLITZ_BOXER] = _("Blitz Boxer"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1268,4 +1272,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_CHLOROPLAST] = sChloroplastDescription,
         [ABILITY_WHITEOUT] = sWhiteoutDescription,
         [ABILITY_PYROMANCY] = sPyromancyDescription,
+        [ABILITY_SPELL_FIST] = sSpellFistDescription,
+        [ABILITY_BLITZ_BOXER] = sBlitzBoxerDescription,
 };

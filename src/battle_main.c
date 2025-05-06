@@ -4751,35 +4751,56 @@ s8 GetMovePriority(u32 battler, u16 move)
     s8 priority;
     u16 ability = GetBattlerAbility(battler);
 
+    // Replace move with its corresponding Z-Move if applicable
     if (gBattleStruct->zmove.toBeUsed[battler] && gBattleMoves[move].power != 0)
         move = gBattleStruct->zmove.toBeUsed[battler];
 
+    // Default move priority
     priority = gBattleMoves[move].priority;
 
-    // Max Guard check
+    // Max Guard has its own priority for status moves
     if (gBattleStruct->dynamax.usingMaxMove[battler] && gBattleMoves[move].split == SPLIT_STATUS)
         return gBattleMoves[MOVE_MAX_GUARD].priority;
 
-    if (ability == ABILITY_GALE_WINGS && (B_GALE_WINGS < GEN_7 || BATTLER_MAX_HP(battler)) && gBattleMoves[move].type == TYPE_FLYING)
+    // Ability-based priority modifiers
+    switch (ability)
     {
-        priority++;
-    }
-    else if (ability == ABILITY_FORECAST_PRIORITY && IsWeatherAffectedMove(move))
-    {
-        priority++;
-    }
-    else if (ability == ABILITY_PRANKSTER && IS_MOVE_STATUS(move))
-    {
-        gProtectStructs[battler].pranksterElevated = 1;
-        priority++;
-    }
-    else if (gBattleMoves[move].effect == EFFECT_GRASSY_GLIDE && gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN && IsBattlerGrounded(battler))
-    {
-        priority++;
-    }
-    else if (ability == ABILITY_TRIAGE && IsHealingMove(move))
-        priority += 3;
+    case ABILITY_GALE_WINGS:
+        if ((B_GALE_WINGS < GEN_7 || BATTLER_MAX_HP(battler)) && gBattleMoves[move].type == TYPE_FLYING)
+            priority++;
+        break;
 
+    case ABILITY_FORECAST_PRIORITY:
+        if (IsWeatherAffectedMove(move))
+            priority++;
+        break;
+
+    case ABILITY_PRANKSTER:
+        if (IS_MOVE_STATUS(move))
+        {
+            gProtectStructs[battler].pranksterElevated = 1;
+            priority++;
+        }
+        break;
+
+    case ABILITY_TRIAGE:
+        if (IsHealingMove(move))
+            priority += 3;
+        break;
+
+    case ABILITY_BLITZ_BOXER:
+        if ((gBattleMoves[move].flags & FLAG_PUNCHING_BASED) && BATTLER_MAX_HP(battler))
+            priority++;
+        break;
+    }
+
+    // Grassy Glide bonus
+    if (gBattleMoves[move].effect == EFFECT_GRASSY_GLIDE && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN) && IsBattlerGrounded(battler))
+    {
+        priority++;
+    }
+
+    // Quash overrides everything
     if (gProtectStructs[battler].quash)
         priority = -8;
 
