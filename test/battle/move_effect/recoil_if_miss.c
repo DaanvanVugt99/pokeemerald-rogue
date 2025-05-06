@@ -8,49 +8,73 @@ ASSUMPTIONS
 
 SINGLE_BATTLE_TEST("Jump Kick has 50% recoil on miss")
 {
-    GIVEN {
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_JUMP_KICK, hit: FALSE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN { MOVE(player, MOVE_JUMP_KICK, hit : FALSE); }
+    }
+    SCENE
+    {
         s32 maxHP = GetMonData(&PLAYER_PARTY[0], MON_DATA_MAX_HP);
         MESSAGE("Wobbuffet used Jump Kick!");
         MESSAGE("Wobbuffet's attack missed!");
         MESSAGE("Wobbuffet kept going and crashed!");
-        HP_BAR(player, damage: maxHP / 2);
+        HP_BAR(player, damage : maxHP / 2);
     }
 }
 
 SINGLE_BATTLE_TEST("Jump Kick has 50% recoil on protect")
 {
-    GIVEN {
-        ASSUME(!gBattleMoves[MOVE_JUMP_KICK].ignoresProtect);
+    GIVEN
+    {
+        ASSUME(!(gBattleMoves[MOVE_JUMP_KICK].flags & FLAG_IGNORES_PROTECT));
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(opponent, MOVE_PROTECT); MOVE(player, MOVE_JUMP_KICK, hit: FALSE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(opponent, MOVE_PROTECT);
+            MOVE(player, MOVE_JUMP_KICK, hit : FALSE);
+        }
+    }
+    SCENE
+    {
         s32 maxHP = GetMonData(&PLAYER_PARTY[0], MON_DATA_MAX_HP);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, opponent);
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_JUMP_KICK, player);
-        HP_BAR(player, damage: maxHP / 2);
+        HP_BAR(player, damage : maxHP / 2);
     }
 }
 
 SINGLE_BATTLE_TEST("Jump Kick has no recoil if no target")
 {
-    GIVEN {
+    GIVEN
+    {
         ASSUME(B_HEALING_WISH_SWITCH >= GEN_5);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WYNAUT);
-    } WHEN {
-        TURN { MOVE(opponent, MOVE_HEALING_WISH); MOVE(player, MOVE_JUMP_KICK, hit: FALSE); SEND_OUT(opponent, 1); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(opponent, MOVE_HEALING_WISH);
+            MOVE(player, MOVE_JUMP_KICK, hit : FALSE);
+            SEND_OUT(opponent, 1);
+        }
+    }
+    SCENE
+    {
         s32 maxHP = GetMonData(&PLAYER_PARTY[0], MON_DATA_MAX_HP);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HEALING_WISH, opponent);
-        NOT HP_BAR(player, damage: maxHP / 2);
+        NOT HP_BAR(player, damage : maxHP / 2);
     }
 }
 
@@ -60,38 +84,72 @@ SINGLE_BATTLE_TEST("Jump Kick's recoil happens after Spiky Shield damage and Pok
     bool32 faintOnSpiky = FALSE, faintOnJumpKick = FALSE;
 
     PARAMETRIZE { hp = maxHp; }
-    PARAMETRIZE { hp = maxHp / 2; faintOnJumpKick = TRUE; } // Faints after Jump Kick's recoil
-    PARAMETRIZE { hp = maxHp / 8; faintOnSpiky = TRUE; } // Faints after Spiky Shield's recoil
+    PARAMETRIZE
+    {
+        hp = maxHp / 2;
+        faintOnJumpKick = TRUE;
+    } // Faints after Jump Kick's recoil
+    PARAMETRIZE
+    {
+        hp = maxHp / 8;
+        faintOnSpiky = TRUE;
+    } // Faints after Spiky Shield's recoil
 
-    GIVEN {
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_SPIKY_SHIELD].effect == EFFECT_PROTECT);
-        PLAYER(SPECIES_WOBBUFFET) { HP(hp); MaxHP(maxHp); }
+        PLAYER(SPECIES_WOBBUFFET)
+        {
+            HP(hp);
+            MaxHP(maxHp);
+        }
         PLAYER(SPECIES_WYNAUT);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        if (!faintOnJumpKick && !faintOnSpiky) {
-            TURN { MOVE(opponent, MOVE_SPIKY_SHIELD); MOVE(player, MOVE_JUMP_KICK, hit: FALSE); }
-        } else {
-            TURN { MOVE(opponent, MOVE_SPIKY_SHIELD); MOVE(player, MOVE_JUMP_KICK, hit: FALSE); SEND_OUT(player, 1); }
+    }
+    WHEN
+    {
+        if (!faintOnJumpKick && !faintOnSpiky)
+        {
+            TURN
+            {
+                MOVE(opponent, MOVE_SPIKY_SHIELD);
+                MOVE(player, MOVE_JUMP_KICK, hit : FALSE);
+            }
+        }
+        else
+        {
+            TURN
+            {
+                MOVE(opponent, MOVE_SPIKY_SHIELD);
+                MOVE(player, MOVE_JUMP_KICK, hit : FALSE);
+                SEND_OUT(player, 1);
+            }
         }
         TURN { ; }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SPIKY_SHIELD, opponent);
         MESSAGE("Wobbuffet used Jump Kick!");
         MESSAGE("Foe Wobbuffet protected itself!");
-        HP_BAR(player, damage: maxHp / 8);
+        HP_BAR(player, damage : maxHp / 8);
         MESSAGE("Wobbuffet was hurt by Foe Wobbuffet's Spiky Shield!");
-        if (faintOnSpiky){
+        if (faintOnSpiky)
+        {
             MESSAGE("Wobbuffet fainted!");
             MESSAGE("Go! Wynaut!");
-            NONE_OF {
+            NONE_OF
+            {
                 MESSAGE("Wobbuffet kept going and crashed!");
                 HP_BAR(player);
             }
-        } else {
+        }
+        else
+        {
             MESSAGE("Wobbuffet kept going and crashed!");
             HP_BAR(player);
-            if (faintOnJumpKick) {
+            if (faintOnJumpKick)
+            {
                 MESSAGE("Wobbuffet fainted!");
                 MESSAGE("Go! Wynaut!");
             }

@@ -10,30 +10,50 @@ SINGLE_BATTLE_TEST("Sheer Force boosts power, but removes secondary effects of m
     {
         // This gets the boost and the buff... for some reason, according to GF
         // so we're just gonna ignore it from this test?
-        if(gBattleMoves[j].effect == EFFECT_ELECTRO_SHOT)
+        if (gBattleMoves[j].effect == EFFECT_ELECTRO_SHOT)
             continue;
 
-        if (gBattleMoves[j].sheerForceBoost && j != MOVE_ORDER_UP)
+        if ((gBattleMoves[j].flags & FLAG_SHEER_FORCE_BOOST) && j != MOVE_ORDER_UP)
         {
-            PARAMETRIZE { ability = ABILITY_ANGER_POINT; move = j; }
-            PARAMETRIZE { ability = ABILITY_SHEER_FORCE; move = j; }
+            PARAMETRIZE
+            {
+                ability = ABILITY_ANGER_POINT;
+                move = j;
+            }
+            PARAMETRIZE
+            {
+                ability = ABILITY_SHEER_FORCE;
+                move = j;
+            }
         }
     }
 
-    GIVEN {
-        PLAYER(SPECIES_TAUROS) { Ability(ability); Status1(move == MOVE_SNORE ? STATUS1_SLEEP : STATUS1_NONE); }
-        OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, move); }
-        if (gBattleMoves[move].effect == EFFECT_TWO_TURNS_ATTACK || gBattleMoves[move].effect == EFFECT_SEMI_INVULNERABLE) {
-                TURN { SKIP_TURN(player); }
-                TURN { ; }
+    GIVEN
+    {
+        PLAYER(SPECIES_TAUROS)
+        {
+            Ability(ability);
+            Status1(move == MOVE_SNORE ? STATUS1_SLEEP : STATUS1_NONE);
         }
-    } SCENE {
+        OPPONENT(SPECIES_WOBBUFFET);
+    }
+    WHEN
+    {
+        TURN { MOVE(player, move); }
+        if (gBattleMoves[move].effect == EFFECT_TWO_TURNS_ATTACK || gBattleMoves[move].effect == EFFECT_SEMI_INVULNERABLE)
+        {
+            TURN { SKIP_TURN(player); }
+            TURN { ; }
+        }
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, move, player);
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-        if (ability == ABILITY_SHEER_FORCE) {
-            NONE_OF {
+        HP_BAR(opponent, captureDamage : &results[i].damage);
+        if (ability == ABILITY_SHEER_FORCE)
+        {
+            NONE_OF
+            {
                 ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
                 ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, opponent);
                 STATUS_ICON(opponent, STATUS1_FREEZE);
@@ -51,11 +71,13 @@ SINGLE_BATTLE_TEST("Sheer Force boosts power, but removes secondary effects of m
                 MESSAGE("Tauros is hit with recoil!");
             }
         }
-    } FINALLY {
+    }
+    FINALLY
+    {
         s32 j;
-        for (j = 0; j < gBattleTestRunnerState->parametersCount; j+=2)
+        for (j = 0; j < gBattleTestRunnerState->parametersCount; j += 2)
         {
-            EXPECT_GT(results[j+1].damage, results[j].damage);
+            EXPECT_GT(results[j + 1].damage, results[j].damage);
         }
     }
 }

@@ -788,7 +788,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
     {
         // handle negative checks on non-user target
         // check powder moves
-        if (gBattleMoves[move].powderMove && !IsAffectedByPowder(battlerDef, aiData->abilities[battlerDef], aiData->holdEffects[battlerDef]))
+        if ((gBattleMoves[move].flags & FLAG_POWDER_BASED) && !IsAffectedByPowder(battlerDef, aiData->abilities[battlerDef], aiData->holdEffects[battlerDef]))
         {
             RETURN_SCORE_MINUS(20);
         }
@@ -875,11 +875,11 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                     RETURN_SCORE_MINUS(10);
                 break;
             case ABILITY_SOUNDPROOF:
-                if (gBattleMoves[move].soundMove)
+                if (gBattleMoves[move].flags & FLAG_SOUND_BASED)
                     RETURN_SCORE_MINUS(10);
                 break;
             case ABILITY_BULLETPROOF:
-                if (gBattleMoves[move].ballisticMove)
+                if (gBattleMoves[move].flags & FLAG_BALLISTIC_BASED)
                     RETURN_SCORE_MINUS(10);
                 break;
             case ABILITY_DAZZLING:
@@ -900,7 +900,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                     RETURN_SCORE_MINUS(10);
                 break;
             case ABILITY_MAGIC_BOUNCE:
-                if (gBattleMoves[move].magicCoatAffected)
+                if (gBattleMoves[move].flags & FLAG_MAGIC_COAT_AFFECTED)
                     RETURN_SCORE_MINUS(20);
                 break;
             case ABILITY_CONTRARY:
@@ -962,7 +962,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                         RETURN_SCORE_MINUS(20);
                     break;
                 case ABILITY_MAGIC_BOUNCE:
-                    if (gBattleMoves[move].magicCoatAffected && moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY | MOVE_TARGET_OPPONENTS_FIELD))
+                    if ((gBattleMoves[move].flags & FLAG_MAGIC_COAT_AFFECTED) && moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY | MOVE_TARGET_OPPONENTS_FIELD))
                         RETURN_SCORE_MINUS(20);
                     break;
                 case ABILITY_SWEET_VEIL:
@@ -1012,7 +1012,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
     // the following checks apply to any target (including user)
 
     // throat chop check
-    if (gDisableStructs[battlerAtk].throatChopTimer && gBattleMoves[move].soundMove)
+    if (gDisableStructs[battlerAtk].throatChopTimer && (gBattleMoves[move].flags & FLAG_SOUND_BASED))
         return 0; // Can't even select move at all
     // heal block check
     if (gStatuses3[battlerAtk] & STATUS3_HEAL_BLOCK && IsHealBlockPreventingMove(battlerAtk, move))
@@ -1935,7 +1935,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         // TODO
         break;
     case EFFECT_HEAL_BELL:
-        if (!AnyPartyMemberStatused(battlerAtk, gBattleMoves[move].soundMove) || PartnerHasSameMoveEffectWithoutTarget(BATTLE_PARTNER(battlerAtk), move, aiData->partnerMove))
+        if (!AnyPartyMemberStatused(battlerAtk, (gBattleMoves[move].flags & FLAG_SOUND_BASED)) || PartnerHasSameMoveEffectWithoutTarget(BATTLE_PARTNER(battlerAtk), move, aiData->partnerMove))
             ADJUST_SCORE(-10);
         break;
     case EFFECT_HIT_PREVENT_ESCAPE:
@@ -2434,7 +2434,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         else
             instructedMove = gLastMoves[battlerDef];
 
-        if (instructedMove == MOVE_NONE || gBattleMoves[instructedMove].instructBanned || gBattleMoves[instructedMove].twoTurnMove || gBattleMoves[instructedMove].effect == EFFECT_RECHARGE || IsZMove(instructedMove) || (gLockedMoves[battlerDef] != 0 && gLockedMoves[battlerDef] != 0xFFFF) || gBattleMons[battlerDef].status2 & STATUS2_MULTIPLETURNS || PartnerMoveIsSameAsAttacker(BATTLE_PARTNER(battlerAtk), battlerDef, move, aiData->partnerMove))
+        if (instructedMove == MOVE_NONE || (gBattleMoves[instructedMove].banMask & BAN_INSTRUCT) || (gBattleMoves[instructedMove].flags2 & FLAG_TWO_TURN) || gBattleMoves[instructedMove].effect == EFFECT_RECHARGE || IsZMove(instructedMove) || (gLockedMoves[battlerDef] != 0 && gLockedMoves[battlerDef] != 0xFFFF) || gBattleMons[battlerDef].status2 & STATUS2_MULTIPLETURNS || PartnerMoveIsSameAsAttacker(BATTLE_PARTNER(battlerAtk), battlerDef, move, aiData->partnerMove))
         {
             ADJUST_SCORE(-10);
         }
@@ -2631,21 +2631,7 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                     ADJUST_SCORE(1);
             }
             break;
-        case EFFECT_ALWAYS_CRIT:
-            // Ally decided to use Frost Breath on us. we must have Anger Point as our ability
-            if (aiData->abilities[battlerAtk] == ABILITY_ANGER_POINT)
-            {
-                if (AI_WhoStrikesFirst(battlerAtk, battlerAtkPartner, move) == AI_IS_SLOWER) // Partner moving first
-                {
-                    // discourage raising our attack since it's about to be maxed out
-                    if (IsAttackBoostMoveEffect(effect))
-                        ADJUST_SCORE(-3);
-                    // encourage moves hitting multiple opponents
-                    if (!IS_MOVE_STATUS(move) && (moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY)))
-                        ADJUST_SCORE(3);
-                }
-            }
-            break;
+
         // Don't change weather if ally already decided to do so.
         case EFFECT_SUNNY_DAY:
         case EFFECT_HAIL:
@@ -2655,6 +2641,17 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             if (IsMoveEffectWeather(move))
                 ADJUST_SCORE(-10);
             break;
+        }
+        // FLAG_ALWAYS_CRIT check
+        if ((gBattleMoves[aiData->partnerMove].flags & FLAG_ALWAYS_CRIT) && aiData->abilities[battlerAtk] == ABILITY_ANGER_POINT)
+        {
+            if (AI_WhoStrikesFirst(battlerAtk, battlerAtkPartner, move) == AI_IS_SLOWER)
+            {
+                if (IsAttackBoostMoveEffect(effect))
+                    ADJUST_SCORE(-3);
+                if (!IS_MOVE_STATUS(move) && (moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY)))
+                    ADJUST_SCORE(3);
+            }
         }
     } // check partner move effect
 
@@ -3118,7 +3115,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         ADJUST_SCORE(1);
 
     // check thawing moves
-    if ((gBattleMons[battlerAtk].status1 & (STATUS1_FREEZE | STATUS1_FROSTBITE)) && gBattleMoves[move].thawsUser)
+    if ((gBattleMons[battlerAtk].status1 & (STATUS1_FREEZE | STATUS1_FROSTBITE)) && (gBattleMoves[move].flags & FLAG_THAW_USER))
         ADJUST_SCORE(10);
 
     // check burn / frostbite
@@ -4266,7 +4263,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     case EFFECT_GRUDGE:
         break;
     case EFFECT_SNATCH:
-        if (predictedMove != MOVE_NONE && gBattleMoves[predictedMove].snatchAffected)
+        if (predictedMove != MOVE_NONE && (gBattleMoves[predictedMove].flags & FLAG_SNATCH_AFFECTED))
             ADJUST_SCORE(3); // Steal move
         break;
     case EFFECT_MUD_SPORT:
@@ -4499,7 +4496,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
             ADJUST_SCORE(1);
         break;
     case EFFECT_THROAT_CHOP:
-        if (predictedMove != MOVE_NONE && gBattleMoves[predictedMove].soundMove && AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_FASTER)
+        if (predictedMove != MOVE_NONE && (gBattleMoves[predictedMove].flags & FLAG_SOUND_BASED) && AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_FASTER)
             ADJUST_SCORE(3); // Ai goes first and predicts the target will use a sound move
         else if (HasSoundMove(battlerDef))
             ADJUST_SCORE(3);
@@ -4770,7 +4767,7 @@ static s32 AI_Risky(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
     if (IS_TARGETING_PARTNER(battlerAtk, battlerDef))
         return score;
 
-    if (gBattleMoves[move].highCritRatio)
+    if (gBattleMoves[move].flags & FLAG_HIGH_CRIT)
         ADJUST_SCORE(2);
 
     switch (gBattleMoves[move].effect)

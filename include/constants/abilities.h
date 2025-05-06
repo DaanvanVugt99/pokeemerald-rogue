@@ -346,6 +346,7 @@
 #define ABILITY_CHLOROPLAST (ABILITIES_COUNT_GEN9 + 1) // Moves function as if it's sunny, regardless of weather
 #define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)    // Boosts the power of Ice attacks in Hail by 50%
 #define ABILITY_PYROMANCY (ABILITIES_COUNT_GEN9 + 3)   // Fire attacks are 5x more likely to inflict a burn
+#define ABILITY_SPELL_FIST (ABILITIES_COUNT_GEN9 + 4)  // Punching moves deal 1.3x and do special damage
 
 #define ABILITIES_COUNT_CUSTOM (ABILITY_PYROMANCY + 1)
 

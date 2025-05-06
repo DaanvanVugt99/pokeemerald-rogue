@@ -3,15 +3,23 @@
 
 SINGLE_BATTLE_TEST("Parental Bond converts Tackle into a two-strike move")
 {
-    GIVEN {
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_TACKLE].split != SPLIT_STATUS);
-        ASSUME(gBattleMoves[MOVE_TACKLE].strikeCount < 2);
         ASSUME(gBattleMoves[MOVE_TACKLE].effect == EFFECT_HIT);
         PLAYER(SPECIES_KANGASKHAN) { Item(ITEM_KANGASKHANITE); }
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, megaEvolve: TRUE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, MOVE_TACKLE, megaEvolve : TRUE);
+            MOVE(opponent, MOVE_CELEBRATE);
+        }
+    }
+    SCENE
+    {
         MESSAGE("Kangaskhan's Kangaskhanite is reacting to 1's Mega Ring!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
         MESSAGE("Kangaskhan has Mega Evolved into Mega Kangaskhan!");
@@ -19,21 +27,31 @@ SINGLE_BATTLE_TEST("Parental Bond converts Tackle into a two-strike move")
         HP_BAR(opponent);
         HP_BAR(opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
-    } THEN {
+    }
+    THEN
+    {
         EXPECT_EQ(player->species, SPECIES_KANGASKHAN_MEGA);
     }
 }
 
 SINGLE_BATTLE_TEST("Parental Bond does not convert a move with three or more strikes to a two-strike move")
 {
-    GIVEN {
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_TRIPLE_KICK].split != SPLIT_STATUS);
-        ASSUME(gBattleMoves[MOVE_TRIPLE_KICK].strikeCount == 3);
         PLAYER(SPECIES_KANGASKHAN) { Item(ITEM_KANGASKHANITE); }
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_TRIPLE_KICK, megaEvolve: TRUE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, MOVE_TRIPLE_KICK, megaEvolve : TRUE);
+            MOVE(opponent, MOVE_CELEBRATE);
+        }
+    }
+    SCENE
+    {
         MESSAGE("Kangaskhan's Kangaskhanite is reacting to 1's Mega Ring!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
         MESSAGE("Kangaskhan has Mega Evolved into Mega Kangaskhan!");
@@ -42,7 +60,9 @@ SINGLE_BATTLE_TEST("Parental Bond does not convert a move with three or more str
         HP_BAR(opponent);
         HP_BAR(opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
-    } THEN {
+    }
+    THEN
+    {
         EXPECT_EQ(player->species, SPECIES_KANGASKHAN_MEGA);
     }
 }
@@ -53,16 +73,23 @@ SINGLE_BATTLE_TEST("Parental Bond converts multi-target moves into a two-strike 
     PARAMETRIZE { move = MOVE_EARTHQUAKE; }
     PARAMETRIZE { move = MOVE_ICY_WIND; }
 
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_EARTHQUAKE].strikeCount < 2);
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_EARTHQUAKE].target == MOVE_TARGET_FOES_AND_ALLY);
-        ASSUME(gBattleMoves[MOVE_ICY_WIND].strikeCount < 2);
         ASSUME(gBattleMoves[MOVE_ICY_WIND].target == MOVE_TARGET_BOTH);
         PLAYER(SPECIES_KANGASKHAN) { Item(ITEM_KANGASKHANITE); }
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, move, megaEvolve: TRUE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, move, megaEvolve : TRUE);
+            MOVE(opponent, MOVE_CELEBRATE);
+        }
+    }
+    SCENE
+    {
         MESSAGE("Kangaskhan's Kangaskhanite is reacting to 1's Mega Ring!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
         MESSAGE("Kangaskhan has Mega Evolved into Mega Kangaskhan!");
@@ -70,24 +97,36 @@ SINGLE_BATTLE_TEST("Parental Bond converts multi-target moves into a two-strike 
         HP_BAR(opponent);
         HP_BAR(opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
-    } THEN {
+    }
+    THEN
+    {
         EXPECT_EQ(player->species, SPECIES_KANGASKHAN_MEGA);
     }
 }
 
 DOUBLE_BATTLE_TEST("Parental Bond does not convert multi-target moves into a two-strike move in Double Battles, even if it only damages one")
 {
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_EARTHQUAKE].strikeCount < 2);
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_EARTHQUAKE].target == MOVE_TARGET_FOES_AND_ALLY);
         ASSUME(gSpeciesInfo[SPECIES_PIDGEY].types[1] == TYPE_FLYING);
         PLAYER(SPECIES_KANGASKHAN) { Item(ITEM_KANGASKHANITE); }
         PLAYER(SPECIES_PIDGEY);
         OPPONENT(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_PIDGEY);
-    } WHEN {
-        TURN { MOVE(playerLeft, MOVE_EARTHQUAKE, megaEvolve: TRUE); MOVE(playerRight, MOVE_CELEBRATE); MOVE(opponentLeft, MOVE_CELEBRATE); MOVE(opponentRight, MOVE_CELEBRATE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(playerLeft, MOVE_EARTHQUAKE, megaEvolve : TRUE);
+            MOVE(playerRight, MOVE_CELEBRATE);
+            MOVE(opponentLeft, MOVE_CELEBRATE);
+            MOVE(opponentRight, MOVE_CELEBRATE);
+        }
+    }
+    SCENE
+    {
         MESSAGE("Kangaskhan's Kangaskhanite is reacting to 1's Mega Ring!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, playerLeft);
         MESSAGE("Kangaskhan has Mega Evolved into Mega Kangaskhan!");
@@ -98,7 +137,9 @@ DOUBLE_BATTLE_TEST("Parental Bond does not convert multi-target moves into a two
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, playerRight);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentLeft);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentRight);
-    } THEN {
+    }
+    THEN
+    {
         EXPECT_EQ(playerLeft->species, SPECIES_KANGASKHAN_MEGA);
     }
 }
@@ -106,27 +147,50 @@ DOUBLE_BATTLE_TEST("Parental Bond does not convert multi-target moves into a two
 SINGLE_BATTLE_TEST("Parental Bond-converted moves only hit once on Lightning Rod/Storm Drain mons")
 {
     u16 move, species, ability, type;
-    PARAMETRIZE { move = MOVE_THUNDERBOLT; ability = ABILITY_LIGHTNING_ROD; species = SPECIES_RAICHU; type = TYPE_ELECTRIC; }
-    PARAMETRIZE { move = MOVE_SURF; ability = ABILITY_STORM_DRAIN; species = SPECIES_LILEEP; type = TYPE_WATER; }
-    GIVEN {
-        ASSUME(gBattleMoves[move].strikeCount < 2);
+    PARAMETRIZE
+    {
+        move = MOVE_THUNDERBOLT;
+        ability = ABILITY_LIGHTNING_ROD;
+        species = SPECIES_RAICHU;
+        type = TYPE_ELECTRIC;
+    }
+    PARAMETRIZE
+    {
+        move = MOVE_SURF;
+        ability = ABILITY_STORM_DRAIN;
+        species = SPECIES_LILEEP;
+        type = TYPE_WATER;
+    }
+    GIVEN
+    {
         ASSUME(gBattleMoves[move].type == type);
         PLAYER(SPECIES_KANGASKHAN) { Item(ITEM_KANGASKHANITE); }
         OPPONENT(species) { Ability(ability); }
-    } WHEN {
-        TURN { MOVE(player, move, megaEvolve: TRUE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, move, megaEvolve : TRUE);
+            MOVE(opponent, MOVE_CELEBRATE);
+        }
+    }
+    SCENE
+    {
         MESSAGE("Kangaskhan's Kangaskhanite is reacting to 1's Mega Ring!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
         MESSAGE("Kangaskhan has Mega Evolved into Mega Kangaskhan!");
         ABILITY_POPUP(opponent, ability);
-        NONE_OF {
+        NONE_OF
+        {
             ANIMATION(ANIM_TYPE_MOVE, move, player);
             HP_BAR(opponent);
             ABILITY_POPUP(opponent, ability);
         };
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
-    } THEN {
+    }
+    THEN
+    {
         EXPECT_EQ(player->species, SPECIES_KANGASKHAN_MEGA);
     }
 }

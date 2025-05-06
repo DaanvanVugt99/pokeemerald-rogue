@@ -11,12 +11,17 @@ SINGLE_BATTLE_TEST("Accuracy controls the proportion of misses")
     PARAMETRIZE { move = MOVE_SCRATCH; }
     ASSUME(0 < gBattleMoves[move].accuracy && gBattleMoves[move].accuracy <= 100);
     PASSES_RANDOMLY(gBattleMoves[move].accuracy, 100, RNG_ACCURACY);
-    GIVEN {
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, move); }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, move, player);
     }
 }
@@ -30,25 +35,39 @@ SINGLE_BATTLE_TEST("Secondary Effect Chance controls the proportion of secondary
     ASSUME(gBattleMoves[move].effect == EFFECT_PARALYZE_HIT);
     ASSUME(0 < gBattleMoves[move].secondaryEffectChance && gBattleMoves[move].secondaryEffectChance <= 100);
     PASSES_RANDOMLY(gBattleMoves[move].secondaryEffectChance, 100, RNG_SECONDARY_EFFECT);
-    GIVEN {
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, move); }
-    } SCENE {
-        STATUS_ICON(opponent, paralysis: TRUE);
+    }
+    SCENE
+    {
+        STATUS_ICON(opponent, paralysis : TRUE);
     }
 }
 
 SINGLE_BATTLE_TEST("Turn order is determined by priority")
 {
-    GIVEN {
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_QUICK_ATTACK].priority > gBattleMoves[MOVE_TACKLE].priority);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_QUICK_ATTACK); MOVE(opponent, MOVE_TACKLE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, MOVE_QUICK_ATTACK);
+            MOVE(opponent, MOVE_TACKLE);
+        }
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_QUICK_ATTACK, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
     }
@@ -56,12 +75,21 @@ SINGLE_BATTLE_TEST("Turn order is determined by priority")
 
 SINGLE_BATTLE_TEST("Turn order is determined by Speed if priority ties")
 {
-    GIVEN {
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET) { Speed(2); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_QUICK_ATTACK); MOVE(opponent, MOVE_QUICK_ATTACK); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, MOVE_QUICK_ATTACK);
+            MOVE(opponent, MOVE_QUICK_ATTACK);
+        }
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_QUICK_ATTACK, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_QUICK_ATTACK, opponent);
     }
@@ -71,12 +99,21 @@ SINGLE_BATTLE_TEST("Turn order is determined randomly if priority and Speed tie"
 {
     KNOWN_FAILING; // The algorithm is significantly biased.
     PASSES_RANDOMLY(1, 2);
-    GIVEN {
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET) { Speed(1); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_QUICK_ATTACK); MOVE(opponent, MOVE_QUICK_ATTACK); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(player, MOVE_QUICK_ATTACK);
+            MOVE(opponent, MOVE_QUICK_ATTACK);
+        }
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_QUICK_ATTACK, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_QUICK_ATTACK, opponent);
     }
@@ -86,12 +123,17 @@ SINGLE_BATTLE_TEST("Critical hits occur at a 1/24 rate")
 {
     ASSUME(B_CRIT_CHANCE >= GEN_7);
     PASSES_RANDOMLY(1, 24, RNG_CRITICAL_HIT);
-    GIVEN {
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, MOVE_SCRATCH); }
-    } SCENE {
+    }
+    SCENE
+    {
         MESSAGE("A critical hit!");
     }
 }
@@ -99,14 +141,19 @@ SINGLE_BATTLE_TEST("Critical hits occur at a 1/24 rate")
 SINGLE_BATTLE_TEST("Slash's critical hits occur at a 1/8 rate")
 {
     ASSUME(B_CRIT_CHANCE >= GEN_7);
-    ASSUME(gBattleMoves[MOVE_SLASH].highCritRatio);
+    ASSUME(gBattleMoves[MOVE_SLASH].flags & FLAG_HIGH_CRIT);
     PASSES_RANDOMLY(1, 8, RNG_CRITICAL_HIT);
-    GIVEN {
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, MOVE_SLASH); }
-    } SCENE {
+    }
+    SCENE
+    {
         MESSAGE("A critical hit!");
     }
 }
@@ -116,15 +163,22 @@ SINGLE_BATTLE_TEST("Critical hits deal 50% more damage", s16 damage)
     bool32 criticalHit;
     PARAMETRIZE { criticalHit = FALSE; }
     PARAMETRIZE { criticalHit = TRUE; }
-    GIVEN {
+    GIVEN
+    {
         ASSUME(B_CRIT_MULTIPLIER >= GEN_6);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_SCRATCH, criticalHit: criticalHit); }
-    } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } FINALLY {
+    }
+    WHEN
+    {
+        TURN { MOVE(player, MOVE_SCRATCH, criticalHit : criticalHit); }
+    }
+    SCENE
+    {
+        HP_BAR(opponent, captureDamage : &results[i].damage);
+    }
+    FINALLY
+    {
         EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.5), results[1].damage);
     }
 }
@@ -135,16 +189,23 @@ SINGLE_BATTLE_TEST("Critical hits do not ignore positive stat stages", s16 damag
     PARAMETRIZE { move = MOVE_CELEBRATE; }
     PARAMETRIZE { move = MOVE_HOWL; }
     PARAMETRIZE { move = MOVE_TAIL_WHIP; }
-    GIVEN {
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_SCRATCH].split == SPLIT_PHYSICAL);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, move); }
-        TURN { MOVE(player, MOVE_SCRATCH, criticalHit: TRUE); }
-    } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } THEN {
+        TURN { MOVE(player, MOVE_SCRATCH, criticalHit : TRUE); }
+    }
+    SCENE
+    {
+        HP_BAR(opponent, captureDamage : &results[i].damage);
+    }
+    THEN
+    {
         if (i > 0)
             EXPECT_LT(results[0].damage, results[i].damage);
     }
@@ -156,16 +217,23 @@ SINGLE_BATTLE_TEST("Critical hits ignore negative stat stages", s16 damage)
     PARAMETRIZE { move = MOVE_CELEBRATE; }
     PARAMETRIZE { move = MOVE_HARDEN; }
     PARAMETRIZE { move = MOVE_GROWL; }
-    GIVEN {
+    GIVEN
+    {
         ASSUME(gBattleMoves[MOVE_SCRATCH].split == SPLIT_PHYSICAL);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(opponent, move); }
-        TURN { MOVE(player, MOVE_SCRATCH, criticalHit: TRUE); }
-    } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } THEN {
+        TURN { MOVE(player, MOVE_SCRATCH, criticalHit : TRUE); }
+    }
+    SCENE
+    {
+        HP_BAR(opponent, captureDamage : &results[i].damage);
+    }
+    THEN
+    {
         if (i > 0)
             EXPECT_EQ(results[0].damage, results[i].damage);
     }

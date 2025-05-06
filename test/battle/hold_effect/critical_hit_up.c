@@ -14,19 +14,33 @@ SINGLE_BATTLE_TEST("Lansat Berry raises the holder's critical-hit-ratio by two s
     PARAMETRIZE { move = MOVE_TACKLE; }
     PARAMETRIZE { move = MOVE_DRAGON_RAGE; }
 
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { MaxHP(160); HP(80); Item(ITEM_LANSAT_BERRY); }
+    GIVEN
+    {
+        PLAYER(SPECIES_WOBBUFFET)
+        {
+            MaxHP(160);
+            HP(80);
+            Item(ITEM_LANSAT_BERRY);
+        }
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(opponent, move); }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, move, opponent);
-        if (move == MOVE_TACKLE) {
-            NONE_OF {
+        if (move == MOVE_TACKLE)
+        {
+            NONE_OF
+            {
                 ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
                 MESSAGE("Wobbuffet used Lansat Berry to get pumped!");
             }
-        } else {
+        }
+        else
+        {
             ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
             MESSAGE("Wobbuffet used Lansat Berry to get pumped!");
         }
@@ -35,12 +49,23 @@ SINGLE_BATTLE_TEST("Lansat Berry raises the holder's critical-hit-ratio by two s
 
 SINGLE_BATTLE_TEST("Lansat Berry raises the holder's critical-hit-ratio by two stages when HP drops to 1/2 or below")
 {
-    GIVEN {
-        PLAYER(SPECIES_BELLSPROUT) { MaxHP(80); HP(80); Ability(ABILITY_GLUTTONY); Item(ITEM_LANSAT_BERRY); }
+    GIVEN
+    {
+        PLAYER(SPECIES_BELLSPROUT)
+        {
+            MaxHP(80);
+            HP(80);
+            Ability(ABILITY_GLUTTONY);
+            Item(ITEM_LANSAT_BERRY);
+        }
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(opponent, MOVE_DRAGON_RAGE); }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Bellsprout used Lansat Berry to get pumped!");
@@ -50,14 +75,28 @@ SINGLE_BATTLE_TEST("Lansat Berry raises the holder's critical-hit-ratio by two s
 SINGLE_BATTLE_TEST("Lansat Berry raises the holder's critical-hit-ratio by two stages")
 {
     PASSES_RANDOMLY(1, 2, RNG_CRITICAL_HIT);
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_TACKLE].highCritRatio == FALSE);
+    GIVEN
+    {
+        ASSUME(!(gBattleMoves[MOVE_TACKLE].flags & FLAG_HIGH_CRIT));
         ASSUME(B_CRIT_CHANCE >= GEN_6);
-        PLAYER(SPECIES_WOBBUFFET) { MaxHP(160); HP(80); Item(ITEM_LANSAT_BERRY); }
+        PLAYER(SPECIES_WOBBUFFET)
+        {
+            MaxHP(160);
+            HP(80);
+            Item(ITEM_LANSAT_BERRY);
+        }
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(opponent, MOVE_DRAGON_RAGE); MOVE(player, MOVE_TACKLE); }
-    } SCENE {
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(opponent, MOVE_DRAGON_RAGE);
+            MOVE(player, MOVE_TACKLE);
+        }
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Wobbuffet used Lansat Berry to get pumped!");

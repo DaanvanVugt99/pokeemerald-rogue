@@ -22,14 +22,14 @@
 #include "constants/moves.h"
 #include "constants/items.h"
 
-#define CHECK_MOVE_FLAG(flag)                                                                     \
-    s32 i;                                                                                        \
-    u16 *moves = GetMovesArray(battler);                                                          \
-    for (i = 0; i < MAX_MON_MOVES; i++)                                                           \
-    {                                                                                             \
-        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && gBattleMoves[moves[i]].flag) \
-            return TRUE;                                                                          \
-    }                                                                                             \
+#define CHECK_MOVE_FLAG(maskField, flagConstant)                                                                        \
+    s32 i;                                                                                                              \
+    u16 *moves = GetMovesArray(battler);                                                                                \
+    for (i = 0; i < MAX_MON_MOVES; i++)                                                                                 \
+    {                                                                                                                   \
+        if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && (gBattleMoves[moves[i]].maskField & flagConstant)) \
+            return TRUE;                                                                                                \
+    }                                                                                                                   \
     return FALSE
 
 static u32 AI_GetEffectiveness(uq4_12_t multiplier);
@@ -810,14 +810,25 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
                 break;
             }
 
-            // Handle other multi-strike moves
-            if (gBattleMoves[move].strikeCount > 1 && gBattleMoves[move].effect != EFFECT_TRIPLE_KICK)
-                dmg *= gBattleMoves[move].strikeCount;
-            else if (move == MOVE_WATER_SHURIKEN && gBattleMons[battlerAtk].species == SPECIES_GRENINJA_ASH)
-                dmg *= 3;
+            // Apply double-strike multiplier from flags BEFORE the switch handles other effects
+            if (!gBattleStruct->zmove.active && (gBattleMoves[move].flags & FLAG_TWO_STRIKES))
+                dmg *= 2;
 
-            if (dmg == 0)
-                dmg = 1;
+            // Handle other multi-strike moves
+            switch (gBattleMoves[move].effect)
+            {
+            case EFFECT_MULTI_HIT:
+                dmg *= 5;
+                break;
+            case EFFECT_TRIPLE_KICK:
+                dmg *= 3;
+                break;
+            case EFFECT_POPULATION_BOMB:
+                dmg *= 10;
+                break;
+            default:
+                break;
+            }
         }
     }
     else
@@ -840,6 +851,17 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
         gBattleStruct->tera.isTerastallized[GetBattlerSide(battlerAtk)] &= ~(gBitTable[gBattlerPartyIndexes[battlerAtk]]);
 
     return dmg;
+}
+
+static u8 GetMultiHitCountFromArgument(u16 argument)
+{
+    u8 minHits = argument & 0xFF;
+    u8 maxHits = argument >> 8;
+
+    if (minHits == 0 || maxHits < minHits)
+        return 2;
+
+    return maxHits;
 }
 
 bool32 AI_IsDamagedByRecoil(u32 battler)
@@ -1356,7 +1378,7 @@ bool32 DoesBattlerIgnoreAbilityChecks(u32 atkAbility, u32 move)
     if (AI_THINKING_STRUCT->aiFlags & AI_FLAG_NEGATE_UNAWARE)
         return FALSE; // AI handicap flag: doesn't understand ability suppression concept
 
-    if (IsMoldBreakerTypeAbility(atkAbility) || gBattleMoves[move].ignoresTargetAbility)
+    if (IsMoldBreakerTypeAbility(atkAbility) || (gBattleMoves[move].flags & FLAG_TARGET_ABILITY_IGNORED))
         return TRUE;
 
     return FALSE;
@@ -1461,14 +1483,14 @@ bool32 IsSemiInvulnerable(u32 battlerDef, u32 move)
 {
     if (gStatuses3[battlerDef] & STATUS3_PHANTOM_FORCE)
         return TRUE;
-    else if (!gBattleMoves[move].damagesAirborne && gStatuses3[battlerDef] & STATUS3_ON_AIR)
+    else if (!(gBattleMoves[move].flags & FLAG_DMG_IN_AIR) && gStatuses3[battlerDef] & STATUS3_ON_AIR)
         return TRUE;
-    else if (!gBattleMoves[move].damagesUnderwater && gStatuses3[battlerDef] & STATUS3_UNDERWATER)
+    else if (!(gBattleMoves[move].flags & FLAG_DMG_UNDERWATER) && gStatuses3[battlerDef] & STATUS3_UNDERWATER)
         return TRUE;
-    else if (!gBattleMoves[move].damagesUnderground && gStatuses3[battlerDef] & STATUS3_UNDERGROUND)
+    else if (!(gBattleMoves[move].flags & FLAG_DMG_UNDERGROUND) && gStatuses3[battlerDef] & STATUS3_UNDERGROUND)
         return TRUE;
-    else
-        return FALSE;
+
+    return FALSE;
 }
 
 bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
@@ -1497,7 +1519,7 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
          (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE)) ||
         (IsBattlerWeatherAffected(battlerAtk, (B_WEATHER_HAIL | B_WEATHER_SNOW)) && move == MOVE_BLIZZARD) ||
         (gBattleMoves[move].effect == EFFECT_VITAL_THROW) ||
-        (B_MINIMIZE_DMG_ACC >= GEN_6 && (gStatuses3[battlerDef] & STATUS3_MINIMIZED) && gBattleMoves[move].minimizeDoubleDamage) ||
+        (B_MINIMIZE_DMG_ACC >= GEN_6 && (gStatuses3[battlerDef] & STATUS3_MINIMIZED) && gBattleMoves[move].flags2 & FLAG_MINIMIZE_DOUBLE) ||
         (gBattleMoves[move].accuracy == 0))
     {
         return TRUE;
@@ -1936,7 +1958,7 @@ bool32 HasSleepMoveWithLowAccuracy(u32 battlerAtk, u32 battlerDef)
 
 bool32 IsHealingMove(u32 move)
 {
-    return gBattleMoves[move].healBlockBanned;
+    return gBattleMoves[move].banMask & BAN_HEAL_BLOCK;
 }
 
 bool32 HasHealingEffect(u32 battlerId)
@@ -1984,7 +2006,7 @@ bool32 HasTrappingMoveEffect(u32 battler)
 
 bool32 HasThawingMove(u32 battler)
 {
-    CHECK_MOVE_FLAG(thawsUser);
+    CHECK_MOVE_FLAG(flags, FLAG_THAW_USER);
 }
 
 bool32 IsUngroundingEffect(u32 effect)
@@ -2122,27 +2144,27 @@ bool32 HasDamagingMoveOfType(u32 battlerId, u32 type)
 
 bool32 HasSubstituteIgnoringMove(u32 battler)
 {
-    CHECK_MOVE_FLAG(ignoresSubstitute);
+    CHECK_MOVE_FLAG(flags, FLAG_IGNORES_SUBSTITUTE);
 }
 
 bool32 HasSoundMove(u32 battler)
 {
-    CHECK_MOVE_FLAG(soundMove);
+    CHECK_MOVE_FLAG(flags, FLAG_SOUND_BASED);
 }
 
 bool32 HasHighCritRatioMove(u32 battler)
 {
-    CHECK_MOVE_FLAG(highCritRatio);
+    CHECK_MOVE_FLAG(flags, FLAG_HIGH_CRIT);
 }
 
 bool32 HasMagicCoatAffectedMove(u32 battler)
 {
-    CHECK_MOVE_FLAG(magicCoatAffected);
+    CHECK_MOVE_FLAG(flags, FLAG_MAGIC_COAT_AFFECTED);
 }
 
 bool32 HasSnatchAffectedMove(u32 battler)
 {
-    CHECK_MOVE_FLAG(snatchAffected);
+    CHECK_MOVE_FLAG(flags, FLAG_SNATCH_AFFECTED);
 }
 
 bool32 IsEncoreEncouragedEffect(u32 moveEffect)
@@ -3472,7 +3494,7 @@ void IncreaseFrostbiteScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score
 
 bool32 AI_MoveMakesContact(u32 ability, u32 holdEffect, u32 move)
 {
-    if (gBattleMoves[move].makesContact && ability != ABILITY_LONG_REACH && holdEffect != HOLD_EFFECT_PROTECTIVE_PADS)
+    if (gBattleMoves[move].flags & FLAG_MAKES_CONTACT && ability != ABILITY_LONG_REACH && holdEffect != HOLD_EFFECT_PROTECTIVE_PADS)
         return TRUE;
     return FALSE;
 }

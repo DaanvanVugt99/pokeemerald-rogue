@@ -254,5 +254,7 @@ bool8 CanMonParticipateInSkyBattle(struct Pokemon *mon);
 bool8 IsMonBannedFromSkyBattles(u16 species);
 void RemoveBattlerType(u32 battler, u8 type);
 u8 GetBestCounterType(u8 moveType, u8 currentType1, u8 currentType2);
+bool8 IsManuallyScriptedMultiHit(u16 move);
+bool8 IsMultiHitMove(u16 move);
 
 #endif // GUARD_BATTLE_UTIL_H

@@ -3,13 +3,17 @@
 
 SINGLE_BATTLE_TEST("Population Bomb can hit ten times")
 {
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_POPULATION_BOMB].strikeCount == 10);
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, MOVE_POPULATION_BOMB); }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_POPULATION_BOMB, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_POPULATION_BOMB, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_POPULATION_BOMB, player);

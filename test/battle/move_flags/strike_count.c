@@ -3,13 +3,17 @@
 
 SINGLE_BATTLE_TEST("Two strike count turns a move into a 2-hit move")
 {
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_DOUBLE_KICK].strikeCount == 2);
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, MOVE_DOUBLE_KICK); }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DOUBLE_KICK, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DOUBLE_KICK, player);
         MESSAGE("Hit 2 time(s)!");
@@ -22,20 +26,26 @@ SINGLE_BATTLE_TEST("Three strike count turns a move into a 3-hit move")
     s16 secondHit;
     s16 thirdHit;
 
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_TRIPLE_DIVE].strikeCount == 3);
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, MOVE_TRIPLE_DIVE); }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TRIPLE_DIVE, player);
-        HP_BAR(opponent, captureDamage: &firstHit);
+        HP_BAR(opponent, captureDamage : &firstHit);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TRIPLE_DIVE, player);
-        HP_BAR(opponent, captureDamage: &secondHit);
+        HP_BAR(opponent, captureDamage : &secondHit);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TRIPLE_DIVE, player);
-        HP_BAR(opponent, captureDamage: &thirdHit);
-    } THEN {
+        HP_BAR(opponent, captureDamage : &thirdHit);
+    }
+    THEN
+    {
         EXPECT_EQ(firstHit, secondHit);
         EXPECT_EQ(secondHit, thirdHit);
         EXPECT_EQ(firstHit, thirdHit);
@@ -48,23 +58,29 @@ SINGLE_BATTLE_TEST("Surging Strikes hits 3 times with each hit being a critical 
     s16 secondHit;
     s16 thirdHit;
 
-    GIVEN {
-        ASSUME(gBattleMoves[MOVE_SURGING_STRIKES].strikeCount == 3);
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(player, MOVE_SURGING_STRIKES); }
-    } SCENE {
+    }
+    SCENE
+    {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SURGING_STRIKES, player);
-        HP_BAR(opponent, captureDamage: &firstHit);
+        HP_BAR(opponent, captureDamage : &firstHit);
         MESSAGE("A critical hit!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SURGING_STRIKES, player);
-        HP_BAR(opponent, captureDamage: &secondHit);
+        HP_BAR(opponent, captureDamage : &secondHit);
         MESSAGE("A critical hit!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SURGING_STRIKES, player);
-        HP_BAR(opponent, captureDamage: &thirdHit);
+        HP_BAR(opponent, captureDamage : &thirdHit);
         MESSAGE("A critical hit!");
-    } THEN {
+    }
+    THEN
+    {
         EXPECT_EQ(firstHit, secondHit);
         EXPECT_EQ(secondHit, thirdHit);
         EXPECT_EQ(firstHit, thirdHit);

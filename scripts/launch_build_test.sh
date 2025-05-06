@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Color Change counters Thunderbolt"
+testToRunPrefix="Neuroforce increases the strength of super-effective moves by 25%"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

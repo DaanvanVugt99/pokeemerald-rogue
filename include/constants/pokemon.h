@@ -2,28 +2,28 @@
 #define GUARD_CONSTANTS_POKEMON_H
 
 // Pokemon types
-#define TYPE_NONE             255
-#define TYPE_NORMAL           0
-#define TYPE_FIGHTING         1
-#define TYPE_FLYING           2
-#define TYPE_POISON           3
-#define TYPE_GROUND           4
-#define TYPE_ROCK             5
-#define TYPE_BUG              6
-#define TYPE_GHOST            7
-#define TYPE_STEEL            8
-#define TYPE_MYSTERY          9
-#define TYPE_FIRE             10
-#define TYPE_WATER            11
-#define TYPE_GRASS            12
-#define TYPE_ELECTRIC         13
-#define TYPE_PSYCHIC          14
-#define TYPE_ICE              15
-#define TYPE_DRAGON           16
-#define TYPE_DARK             17
-#define TYPE_FAIRY            18
-#define TYPE_STELLAR          19
-#define NUMBER_OF_MON_TYPES   20
+#define TYPE_NONE 255
+#define TYPE_NORMAL 0
+#define TYPE_FIGHTING 1
+#define TYPE_FLYING 2
+#define TYPE_POISON 3
+#define TYPE_GROUND 4
+#define TYPE_ROCK 5
+#define TYPE_BUG 6
+#define TYPE_GHOST 7
+#define TYPE_STEEL 8
+#define TYPE_MYSTERY 9
+#define TYPE_FIRE 10
+#define TYPE_WATER 11
+#define TYPE_GRASS 12
+#define TYPE_ELECTRIC 13
+#define TYPE_PSYCHIC 14
+#define TYPE_ICE 15
+#define TYPE_DRAGON 16
+#define TYPE_DARK 17
+#define TYPE_FAIRY 18
+#define TYPE_STELLAR 19
+#define NUMBER_OF_MON_TYPES 20
 
 #ifdef ROGUE_EXPANSION
 #define IS_STANDARD_TYPE(type) (type != TYPE_NONE && type != TYPE_MYSTERY && type != TYPE_STELLAR)
@@ -32,71 +32,71 @@
 #endif
 
 // Pokemon egg groups
-#define EGG_GROUP_NONE                0
-#define EGG_GROUP_MONSTER             1
-#define EGG_GROUP_WATER_1             2
-#define EGG_GROUP_BUG                 3
-#define EGG_GROUP_FLYING              4
-#define EGG_GROUP_FIELD               5
-#define EGG_GROUP_FAIRY               6
-#define EGG_GROUP_GRASS               7
-#define EGG_GROUP_HUMAN_LIKE          8
-#define EGG_GROUP_WATER_3             9
-#define EGG_GROUP_MINERAL             10
-#define EGG_GROUP_AMORPHOUS           11
-#define EGG_GROUP_WATER_2             12
-#define EGG_GROUP_DITTO               13
-#define EGG_GROUP_DRAGON              14
-#define EGG_GROUP_NO_EGGS_DISCOVERED  15
+#define EGG_GROUP_NONE 0
+#define EGG_GROUP_MONSTER 1
+#define EGG_GROUP_WATER_1 2
+#define EGG_GROUP_BUG 3
+#define EGG_GROUP_FLYING 4
+#define EGG_GROUP_FIELD 5
+#define EGG_GROUP_FAIRY 6
+#define EGG_GROUP_GRASS 7
+#define EGG_GROUP_HUMAN_LIKE 8
+#define EGG_GROUP_WATER_3 9
+#define EGG_GROUP_MINERAL 10
+#define EGG_GROUP_AMORPHOUS 11
+#define EGG_GROUP_WATER_2 12
+#define EGG_GROUP_DITTO 13
+#define EGG_GROUP_DRAGON 14
+#define EGG_GROUP_NO_EGGS_DISCOVERED 15
 
-#define EGG_GROUPS_PER_MON            2
+#define EGG_GROUPS_PER_MON 2
 
 // Pokemon natures
-#define NATURE_HARDY    0
-#define NATURE_LONELY   1
-#define NATURE_BRAVE    2
-#define NATURE_ADAMANT  3
-#define NATURE_NAUGHTY  4
-#define NATURE_BOLD     5
-#define NATURE_DOCILE   6
-#define NATURE_RELAXED  7
-#define NATURE_IMPISH   8
-#define NATURE_LAX      9
-#define NATURE_TIMID    10
-#define NATURE_HASTY    11
-#define NATURE_SERIOUS  12
-#define NATURE_JOLLY    13
-#define NATURE_NAIVE    14
-#define NATURE_MODEST   15
-#define NATURE_MILD     16
-#define NATURE_QUIET    17
-#define NATURE_BASHFUL  18
-#define NATURE_RASH     19
-#define NATURE_CALM     20
-#define NATURE_GENTLE   21
-#define NATURE_SASSY    22
-#define NATURE_CAREFUL  23
-#define NATURE_QUIRKY   24
-#define NUM_NATURES     25
+#define NATURE_HARDY 0
+#define NATURE_LONELY 1
+#define NATURE_BRAVE 2
+#define NATURE_ADAMANT 3
+#define NATURE_NAUGHTY 4
+#define NATURE_BOLD 5
+#define NATURE_DOCILE 6
+#define NATURE_RELAXED 7
+#define NATURE_IMPISH 8
+#define NATURE_LAX 9
+#define NATURE_TIMID 10
+#define NATURE_HASTY 11
+#define NATURE_SERIOUS 12
+#define NATURE_JOLLY 13
+#define NATURE_NAIVE 14
+#define NATURE_MODEST 15
+#define NATURE_MILD 16
+#define NATURE_QUIET 17
+#define NATURE_BASHFUL 18
+#define NATURE_RASH 19
+#define NATURE_CALM 20
+#define NATURE_GENTLE 21
+#define NATURE_SASSY 22
+#define NATURE_CAREFUL 23
+#define NATURE_QUIRKY 24
+#define NUM_NATURES 25
 
 // Pokemon Stats
-#define STAT_HP      0
-#define STAT_ATK     1
-#define STAT_DEF     2
-#define STAT_SPEED   3
-#define STAT_SPATK   4
-#define STAT_SPDEF   5
-#define NUM_STATS    6
+#define STAT_HP 0
+#define STAT_ATK 1
+#define STAT_DEF 2
+#define STAT_SPEED 3
+#define STAT_SPATK 4
+#define STAT_SPDEF 5
+#define NUM_STATS 6
 
-#define STAT_ACC     6 // Only in battles.
+#define STAT_ACC 6     // Only in battles.
 #define STAT_EVASION 7 // Only in battles.
 
 #define NUM_NATURE_STATS (NUM_STATS - 1) // excludes HP
 #define NUM_BATTLE_STATS (NUM_STATS + 2) // includes Accuracy and Evasion
 
-#define MIN_STAT_STAGE     0
+#define MIN_STAT_STAGE 0
 #define DEFAULT_STAT_STAGE 6
-#define MAX_STAT_STAGE    12
+#define MAX_STAT_STAGE 12
 
 // Shiny odds
 // RogueNote: odds are currently ~1/100
@@ -104,42 +104,42 @@
 #define NON_SHINY_PLACEHOLDER (SHINY_ODDS + 1)
 
 // Ribbon IDs used by TV and Pokénav
-#define CHAMPION_RIBBON       0
-#define COOL_RIBBON_NORMAL    1
-#define COOL_RIBBON_SUPER     2
-#define COOL_RIBBON_HYPER     3
-#define COOL_RIBBON_MASTER    4
-#define BEAUTY_RIBBON_NORMAL  5
-#define BEAUTY_RIBBON_SUPER   6
-#define BEAUTY_RIBBON_HYPER   7
-#define BEAUTY_RIBBON_MASTER  8
-#define CUTE_RIBBON_NORMAL    9
-#define CUTE_RIBBON_SUPER    10
-#define CUTE_RIBBON_HYPER    11
-#define CUTE_RIBBON_MASTER   12
-#define SMART_RIBBON_NORMAL  13
-#define SMART_RIBBON_SUPER   14
-#define SMART_RIBBON_HYPER   15
-#define SMART_RIBBON_MASTER  16
-#define TOUGH_RIBBON_NORMAL  17
-#define TOUGH_RIBBON_SUPER   18
-#define TOUGH_RIBBON_HYPER   19
-#define TOUGH_RIBBON_MASTER  20
-#define WINNING_RIBBON       21
-#define VICTORY_RIBBON       22
-#define ARTIST_RIBBON        23
-#define EFFORT_RIBBON        24
-#define MARINE_RIBBON        25
-#define LAND_RIBBON          26
-#define SKY_RIBBON           27
-#define COUNTRY_RIBBON       28
-#define NATIONAL_RIBBON      29
-#define EARTH_RIBBON         30
-#define WORLD_RIBBON         31
+#define CHAMPION_RIBBON 0
+#define COOL_RIBBON_NORMAL 1
+#define COOL_RIBBON_SUPER 2
+#define COOL_RIBBON_HYPER 3
+#define COOL_RIBBON_MASTER 4
+#define BEAUTY_RIBBON_NORMAL 5
+#define BEAUTY_RIBBON_SUPER 6
+#define BEAUTY_RIBBON_HYPER 7
+#define BEAUTY_RIBBON_MASTER 8
+#define CUTE_RIBBON_NORMAL 9
+#define CUTE_RIBBON_SUPER 10
+#define CUTE_RIBBON_HYPER 11
+#define CUTE_RIBBON_MASTER 12
+#define SMART_RIBBON_NORMAL 13
+#define SMART_RIBBON_SUPER 14
+#define SMART_RIBBON_HYPER 15
+#define SMART_RIBBON_MASTER 16
+#define TOUGH_RIBBON_NORMAL 17
+#define TOUGH_RIBBON_SUPER 18
+#define TOUGH_RIBBON_HYPER 19
+#define TOUGH_RIBBON_MASTER 20
+#define WINNING_RIBBON 21
+#define VICTORY_RIBBON 22
+#define ARTIST_RIBBON 23
+#define EFFORT_RIBBON 24
+#define MARINE_RIBBON 25
+#define LAND_RIBBON 26
+#define SKY_RIBBON 27
+#define COUNTRY_RIBBON 28
+#define NATIONAL_RIBBON 29
+#define EARTH_RIBBON 30
+#define WORLD_RIBBON 31
 
 #define FIRST_GIFT_RIBBON MARINE_RIBBON
-#define LAST_GIFT_RIBBON  WORLD_RIBBON
-#define NUM_GIFT_RIBBONS  (1 + LAST_GIFT_RIBBON - FIRST_GIFT_RIBBON)
+#define LAST_GIFT_RIBBON WORLD_RIBBON
+#define NUM_GIFT_RIBBONS (1 + LAST_GIFT_RIBBON - FIRST_GIFT_RIBBON)
 
 // The above gift ribbons (Marine - World) are
 // special distribution ribbons that correspond to
@@ -155,57 +155,57 @@
 #define MIN_LEVEL 1
 #define MAX_LEVEL 100
 
-#define OT_ID_PLAYER_ID       0
-#define OT_ID_PRESET          1
+#define OT_ID_PLAYER_ID 0
+#define OT_ID_PRESET 1
 #define OT_ID_RANDOM_NO_SHINY 2
-#define OT_ID_CUSTOM_MON      3
+#define OT_ID_CUSTOM_MON 3
 
-#define MON_GIVEN_TO_PARTY      0
-#define MON_GIVEN_TO_PC         1
-#define MON_CANT_GIVE           2
+#define MON_GIVEN_TO_PARTY 0
+#define MON_GIVEN_TO_PC 1
+#define MON_CANT_GIVE 2
 
-#define PLAYER_HAS_TWO_USABLE_MONS     0
-#define PLAYER_HAS_ONE_MON             1
-#define PLAYER_HAS_ONE_USABLE_MON      2
+#define PLAYER_HAS_TWO_USABLE_MONS 0
+#define PLAYER_HAS_ONE_MON 1
+#define PLAYER_HAS_ONE_USABLE_MON 2
 
-#define MON_ALREADY_KNOWS_MOVE  0xFFFE
-#define MON_HAS_MAX_MOVES       0xFFFF
+#define MON_ALREADY_KNOWS_MOVE 0xFFFE
+#define MON_HAS_MAX_MOVES 0xFFFF
 
-#define LEVEL_UP_MOVE_ID   0x01FF
-#define LEVEL_UP_MOVE_LV   0xFE00
-//#define LEVEL_UP_MOVE_END       0xFFFF
+#define LEVEL_UP_MOVE_ID 0x01FF
+#define LEVEL_UP_MOVE_LV 0xFE00
+// #define LEVEL_UP_MOVE_END       0xFFFF
 
-#define MON_MALE       0x00
-#define MON_FEMALE     0xFE
+#define MON_MALE 0x00
+#define MON_FEMALE 0xFE
 #define MON_GENDERLESS 0xFF
 
 // Constants for AdjustFriendship
-#define FRIENDSHIP_EVENT_GROW_LEVEL       0
-#define FRIENDSHIP_EVENT_VITAMIN          1 // unused, handled by PokemonUseItemEffects
-#define FRIENDSHIP_EVENT_BATTLE_ITEM      2 // unused, handled by PokemonUseItemEffects
-#define FRIENDSHIP_EVENT_LEAGUE_BATTLE    3
-#define FRIENDSHIP_EVENT_LEARN_TMHM       4
-#define FRIENDSHIP_EVENT_WALKING          5
-#define FRIENDSHIP_EVENT_FAINT_SMALL      6
-#define FRIENDSHIP_EVENT_FAINT_FIELD_PSN  7
-#define FRIENDSHIP_EVENT_FAINT_LARGE      8 // If opponent was >= 30 levels higher. See AdjustFriendshipOnBattleFaint
+#define FRIENDSHIP_EVENT_GROW_LEVEL 0
+#define FRIENDSHIP_EVENT_VITAMIN 1     // unused, handled by PokemonUseItemEffects
+#define FRIENDSHIP_EVENT_BATTLE_ITEM 2 // unused, handled by PokemonUseItemEffects
+#define FRIENDSHIP_EVENT_LEAGUE_BATTLE 3
+#define FRIENDSHIP_EVENT_LEARN_TMHM 4
+#define FRIENDSHIP_EVENT_WALKING 5
+#define FRIENDSHIP_EVENT_FAINT_SMALL 6
+#define FRIENDSHIP_EVENT_FAINT_FIELD_PSN 7
+#define FRIENDSHIP_EVENT_FAINT_LARGE 8 // If opponent was >= 30 levels higher. See AdjustFriendshipOnBattleFaint
 
 // Constants for GetLeadMonFriendshipScore
-#define FRIENDSHIP_NONE        0
-#define FRIENDSHIP_1_TO_49     1
-#define FRIENDSHIP_50_TO_99    2
-#define FRIENDSHIP_100_TO_149  3
-#define FRIENDSHIP_150_TO_199  4
-#define FRIENDSHIP_200_TO_254  5
-#define FRIENDSHIP_MAX         6
+#define FRIENDSHIP_NONE 0
+#define FRIENDSHIP_1_TO_49 1
+#define FRIENDSHIP_50_TO_99 2
+#define FRIENDSHIP_100_TO_149 3
+#define FRIENDSHIP_150_TO_199 4
+#define FRIENDSHIP_200_TO_254 5
+#define FRIENDSHIP_MAX 6
 
 // Constants for GetBattlerAffectionHearts (based on friendship value)
-#define AFFECTION_NO_HEARTS     0 // 0-79 friendship
-#define AFFECTION_ONE_HEART     1 // 80-129 friendship
-#define AFFECTION_TWO_HEARTS    2 // 130-179 friendship
-#define AFFECTION_THREE_HEARTS  3 // 180-219 friendship
-#define AFFECTION_FOUR_HEARTS   4 // 220-254 friendship
-#define AFFECTION_FIVE_HEARTS   5 // Max friendship
+#define AFFECTION_NO_HEARTS 0    // 0-79 friendship
+#define AFFECTION_ONE_HEART 1    // 80-129 friendship
+#define AFFECTION_TWO_HEARTS 2   // 130-179 friendship
+#define AFFECTION_THREE_HEARTS 3 // 180-219 friendship
+#define AFFECTION_FOUR_HEARTS 4  // 220-254 friendship
+#define AFFECTION_FIVE_HEARTS 5  // Max friendship
 
 // Friendship value that the majority of species use.
 #if P_UPDATED_FRIENDSHIP >= GEN_8
@@ -214,9 +214,9 @@
 #define STANDARD_FRIENDSHIP 70
 #endif
 
-#define MAX_FRIENDSHIP  255
-#define MAX_SHEEN       255
-#define MAX_CONDITION   255
+#define MAX_FRIENDSHIP 255
+#define MAX_SHEEN 255
+#define MAX_CONDITION 255
 
 #define MAX_PER_STAT_IVS 31
 #define MAX_IV_MASK 31
@@ -233,96 +233,165 @@
 #define EV_ITEM_RAISE_LIMIT 100
 #endif
 
+// === Interaction / Blocking Mechanics ===
+#define FLAG_MAKES_CONTACT (1 << 0)       // Move makes physical contact
+#define FLAG_IGNORES_PROTECT (1 << 1)     // Ignores Protect-type moves
+#define FLAG_MAGIC_COAT_AFFECTED (1 << 2) // Reflected by Magic Coat
+#define FLAG_SNATCH_AFFECTED (1 << 3)     // Can be stolen by Snatch
+#define FLAG_IGNORES_SUBSTITUTE (1 << 4)  // Hits through Substitute
+
+// === Offensive Traits ===
+#define FLAG_PUNCHING_BASED (1 << 5)   // Punching move (Iron Fist)
+#define FLAG_KICKING_BASED (1 << 6)    // Kicking move (e.g., High Jump Kick)
+#define FLAG_BITING_BASED (1 << 7)     // Biting move (Strong Jaw)
+#define FLAG_SLICING_BASED (1 << 8)    // Slicing move (Sharpness)
+#define FLAG_BONE_BASED (1 << 9)       // Bone-based move (e.g., Bone Rush)
+#define FLAG_LAUNCHER_BASED (1 << 10)  // Launcher move (Mega Launcher)
+#define FLAG_SOUND_BASED (1 << 11)     // Sound-based move (e.g., Hyper Voice)
+#define FLAG_BALLISTIC_BASED (1 << 12) // Projectile move (Bulletproof)
+#define FLAG_DANCE_BASED (1 << 13)     // Dance move (e.g., Quiver Dance)
+#define FLAG_WIND_BASED (1 << 14)      // Wind move (e.g., Bleakwind Storm)
+#define FLAG_HORN_BASED (1 << 15)      // Horn move (e.g., Horn Attack)
+#define FLAG_POWDER_BASED (1 << 16)    // Powder move (e.g., Spore, Sleep Powder)
+
+// === Environmental Interaction ===
+#define FLAG_DMG_UNDERGROUND (1 << 17)        // Can hit underground targets
+#define FLAG_DMG_UNDERWATER (1 << 18)         // Can hit underwater targets
+#define FLAG_DMG_IN_AIR (1 << 19)             // Can hit airborne targets
+#define FLAG_DMG_2X_IN_AIR (1 << 20)          // Deals double to airborne targets
+#define FLAG_DMG_UNGROUNDED_NEUTRAL (1 << 21) // Ground move hits Flying/Levitators neutrally
+
+// === Status & Mechanics ===
+#define FLAG_THAW_USER (1 << 22)              // Thaws user (e.g., Flame Wheel)
+#define FLAG_STAT_STAGES_IGNORED (1 << 23)    // Ignores stat changes (e.g., Sacred Sword)
+#define FLAG_TARGET_ABILITY_IGNORED (1 << 24) // Ignores target ability (e.g., Mold Breaker)
+
+// === Critical & Offensive Modifiers ===
+#define FLAG_HIGH_CRIT (1 << 25)         // High crit ratio
+#define FLAG_ALWAYS_CRIT (1 << 26)       // Always critical hit
+#define FLAG_RECKLESS_BOOST (1 << 27)    // Boosted by Reckless
+#define FLAG_SHEER_FORCE_BOOST (1 << 28) // Boosted by Sheer Force
+
+// === Conditional / Dynamic Modifiers ===
+#define FLAG_WEATHER_BASED (1 << 29) // Power/type changes with weather
+#define FLAG_FIELD_BASED (1 << 30)   // Power/type changes with terrain/field
+#define FLAG_PROTECT_BASED (1 << 31) // Protect-type move (e.g., Protect, Baneful Bunker)
+
+// Battle move Flags 2 (flags2)
+#define FLAG_TWO_TURN (1 << 0)                             // A two-turn move (e.g., Fly)
+#define FLAG_TWO_STRIKES (1 << 1)                          // Strikes twice in a row (e.g., Double Hit)
+#define FLAG_MINIMIZE_DOUBLE (1 << 2)                      // Deals double to minimized targets (e.g., Stomp)
+#define FLAG_FORCE_PRESSURE (1 << 3)                       // Forces Pressure PP loss (used for non-targeting moves)
+#define FLAG_CANT_USE_TWICE (1 << 4)                       // Can't be used two turns in a row (e.g., Gigaton Hammer)
+#define FLAG_DMG_UNGROUNDED_IGNORE_TYPE_IF_FLYING (1 << 5) // thousand arrows
+
+// Move BanMask Flags
+#define BAN_GRAVITY (1 << 0)        // Fails under Gravity
+#define BAN_HEAL_BLOCK (1 << 1)     // Fails under Heal Block
+#define BAN_ME_FIRST (1 << 2)       // Can't be used via Me First
+#define BAN_MIMIC (1 << 3)          // Can't be Mimicked
+#define BAN_METRONOME (1 << 4)      // Can't be picked by Metronome
+#define BAN_COPYCAT (1 << 5)        // Can't be picked by Copycat
+#define BAN_ASSIST (1 << 6)         // Can't be picked by Assist
+#define BAN_SLEEP_TALK (1 << 7)     // Can't be used via Sleep Talk
+#define BAN_INSTRUCT (1 << 8)       // Can't be Instructed (e.g., V-Create)
+#define BAN_ENCORE (1 << 9)         // Can't be Encored
+#define BAN_PARENTAL_BOND (1 << 10) // Can't trigger Parental Bond second hit
+#define BAN_SKY_BATTLE (1 << 11)    // Banned in Sky Battles
+#define BAN_SKETCH (1 << 12)        // Can't be Sketched
+#define BAN_MIRROR_MOVE (1 << 13)   // Can't be copied by Mirror Move
+#define BAN_KINGS_ROCK (1 << 14)    // Can activate King's Rock and similar effects
+
 // Split defines.
-#define SPLIT_PHYSICAL  0x0
-#define SPLIT_SPECIAL   0x1
-#define SPLIT_STATUS    0x2
+#define SPLIT_PHYSICAL 0x0
+#define SPLIT_SPECIAL 0x1
+#define SPLIT_STATUS 0x2
 
 // Growth rates
-#define GROWTH_MEDIUM_FAST  0
-#define GROWTH_ERRATIC      1
-#define GROWTH_FLUCTUATING  2
-#define GROWTH_MEDIUM_SLOW  3
-#define GROWTH_FAST         4
-#define GROWTH_SLOW         5
+#define GROWTH_MEDIUM_FAST 0
+#define GROWTH_ERRATIC 1
+#define GROWTH_FLUCTUATING 2
+#define GROWTH_MEDIUM_SLOW 3
+#define GROWTH_FAST 4
+#define GROWTH_SLOW 5
 
 // Body colors for pokedex search
-#define BODY_COLOR_RED      0
-#define BODY_COLOR_BLUE     1
-#define BODY_COLOR_YELLOW   2
-#define BODY_COLOR_GREEN    3
-#define BODY_COLOR_BLACK    4
-#define BODY_COLOR_BROWN    5
-#define BODY_COLOR_PURPLE   6
-#define BODY_COLOR_GRAY     7
-#define BODY_COLOR_WHITE    8
-#define BODY_COLOR_PINK     9
+#define BODY_COLOR_RED 0
+#define BODY_COLOR_BLUE 1
+#define BODY_COLOR_YELLOW 2
+#define BODY_COLOR_GREEN 3
+#define BODY_COLOR_BLACK 4
+#define BODY_COLOR_BROWN 5
+#define BODY_COLOR_PURPLE 6
+#define BODY_COLOR_GRAY 7
+#define BODY_COLOR_WHITE 8
+#define BODY_COLOR_PINK 9
 
 #define F_SUMMARY_SCREEN_FLIP_SPRITE 0x80
 
 // Evolution types
-#define EVOLUTIONS_END                    0xFFFF // Not an actual evolution, used to mark the end of an evolution array.
-#define EVO_NONE                          0xFFFE // Not an actual evolution, used to generate offspring that can't evolve into the specified species, like regional forms.
-#define EVO_FRIENDSHIP                    1      // Pokémon levels up with friendship ≥ 220
-#define EVO_FRIENDSHIP_DAY                2      // Pokémon levels up during the day with friendship ≥ 220
-#define EVO_FRIENDSHIP_NIGHT              3      // Pokémon levels up at night with friendship ≥ 220
-#define EVO_LEVEL                         4      // Pokémon reaches the specified level
-#define EVO_TRADE                         5      // Pokémon is traded
-#define EVO_TRADE_ITEM                    6      // Pokémon is traded while it's holding the specified item
-#define EVO_ITEM                          7      // specified item is used on Pokémon
-#define EVO_LEVEL_ATK_GT_DEF              8      // Pokémon reaches the specified level with attack > defense
-#define EVO_LEVEL_ATK_EQ_DEF              9      // Pokémon reaches the specified level with attack = defense
-#define EVO_LEVEL_ATK_LT_DEF              10     // Pokémon reaches the specified level with attack < defense
-#define EVO_LEVEL_SILCOON                 11     // Pokémon reaches the specified level with a Silcoon personality value
-#define EVO_LEVEL_CASCOON                 12     // Pokémon reaches the specified level with a Cascoon personality value
-#define EVO_LEVEL_NINJASK                 13     // Pokémon reaches the specified level (special value for Ninjask)
-#define EVO_LEVEL_SHEDINJA                14     // Pokémon reaches the specified level (special value for Shedinja)
-#define EVO_BEAUTY                        15     // Pokémon levels up with beauty ≥ specified value
-#define EVO_LEVEL_FEMALE                  16     // Pokémon reaches the specified level, is female
-#define EVO_LEVEL_MALE                    17     // Pokémon reaches the specified level, is male
-#define EVO_LEVEL_NIGHT                   18     // Pokémon reaches the specified level, is night
-#define EVO_LEVEL_DAY                     19     // Pokémon reaches the specified level, is day
-#define EVO_LEVEL_DUSK                    20     // Pokémon reaches the specified level, is dusk (5-6 P.M)
-#define EVO_ITEM_HOLD_DAY                 21     // Pokémon levels up, holds specified item at day
-#define EVO_ITEM_HOLD_NIGHT               22     // Pokémon levels up, holds specified item at night
-#define EVO_MOVE                          23     // Pokémon levels up, knows specified move
-#define EVO_FRIENDSHIP_MOVE_TYPE          24     // Pokémon levels up with friendship ≥ 220, knows move with specified type
-#define EVO_MAPSEC                        25     // Pokémon levels up on specified mapsec
-#define EVO_ITEM_MALE                     26     // specified item is used on a male Pokémon
-#define EVO_ITEM_FEMALE                   27     // specified item is used on a female Pokémon
-#define EVO_LEVEL_RAIN                    28     // Pokémon reaches the specified level during rain in the overworld
-#define EVO_SPECIFIC_MON_IN_PARTY         29     // Pokémon levels up with a specified Pokémon in party
-#define EVO_LEVEL_DARK_TYPE_MON_IN_PARTY  30     // Pokémon reaches the specified level with a Dark Type Pokémon in party
-#define EVO_TRADE_SPECIFIC_MON            31     // Pokémon is traded for a specified Pokémon
-#define EVO_SPECIFIC_MAP                  32     // Pokémon levels up on specified map
-#define EVO_LEVEL_NATURE_AMPED            33     // Pokémon reaches the specified level, it has a Hardy, Brave, Adamant, Naughty, Docile, Impish, Lax, Hasty, Jolly, Naive, Rash, Sassy, or Quirky nature.
-#define EVO_LEVEL_NATURE_LOW_KEY          34     // Pokémon reaches the specified level, it has a Lonely, Bold, Relaxed, Timid, Serious, Modest, Mild, Quiet, Bashful, Calm, Gentle, or Careful nature.
-#define EVO_CRITICAL_HITS                 35     // Pokémon performs specified number of critical hits in one battle
-#define EVO_SCRIPT_TRIGGER_DMG            36     // Pokémon has specified HP below max, then player interacts trigger
-#define EVO_DARK_SCROLL                   37     // interacts with Scroll of Darkness
-#define EVO_WATER_SCROLL                  38     // interacts with Scroll of Waters
-#define EVO_ITEM_NIGHT                    39     // specified item is used on Pokémon, is night
-#define EVO_ITEM_DAY                      40     // specified item is used on Pokémon, is day
-#define EVO_ITEM_HOLD                     41     // Pokémon levels up, holds specified item
-#define EVO_LEVEL_FOG                     42     // Pokémon reaches the specified level during fog in the overworld
-#define EVO_MOVE_TWO_SEGMENT              43     // Pokémon levels up, knows specified move, has a personality value with a modulus of 0
-#define EVO_MOVE_THREE_SEGMENT            44     // Pokémon levels up, knows specified move, has a personality value with a modulus of 1-99
-#define EVO_LEVEL_FAMILY_OF_THREE         45     // Pokémon reaches the specified level with a personality value with a modulus of 0
-#define EVO_LEVEL_FAMILY_OF_FOUR          46     // Pokémon reaches the specified level with a personality value with a modulus of 1-99
-#define EVO_LEVEL_TWO_SEGMENT             47     // Pokémon levels up, knows specified move, has a personality value with a modulus of 0
-#define EVO_LEVEL_THREE_SEGMENT           48     // Pokémon levels up, knows specified move, has a personality value with a modulus of 1-99
-#define EVO_LEVEL_30_NATURE               49     // Pokémon levels up to 30 has specific nature
+#define EVOLUTIONS_END 0xFFFF               // Not an actual evolution, used to mark the end of an evolution array.
+#define EVO_NONE 0xFFFE                     // Not an actual evolution, used to generate offspring that can't evolve into the specified species, like regional forms.
+#define EVO_FRIENDSHIP 1                    // Pokémon levels up with friendship ≥ 220
+#define EVO_FRIENDSHIP_DAY 2                // Pokémon levels up during the day with friendship ≥ 220
+#define EVO_FRIENDSHIP_NIGHT 3              // Pokémon levels up at night with friendship ≥ 220
+#define EVO_LEVEL 4                         // Pokémon reaches the specified level
+#define EVO_TRADE 5                         // Pokémon is traded
+#define EVO_TRADE_ITEM 6                    // Pokémon is traded while it's holding the specified item
+#define EVO_ITEM 7                          // specified item is used on Pokémon
+#define EVO_LEVEL_ATK_GT_DEF 8              // Pokémon reaches the specified level with attack > defense
+#define EVO_LEVEL_ATK_EQ_DEF 9              // Pokémon reaches the specified level with attack = defense
+#define EVO_LEVEL_ATK_LT_DEF 10             // Pokémon reaches the specified level with attack < defense
+#define EVO_LEVEL_SILCOON 11                // Pokémon reaches the specified level with a Silcoon personality value
+#define EVO_LEVEL_CASCOON 12                // Pokémon reaches the specified level with a Cascoon personality value
+#define EVO_LEVEL_NINJASK 13                // Pokémon reaches the specified level (special value for Ninjask)
+#define EVO_LEVEL_SHEDINJA 14               // Pokémon reaches the specified level (special value for Shedinja)
+#define EVO_BEAUTY 15                       // Pokémon levels up with beauty ≥ specified value
+#define EVO_LEVEL_FEMALE 16                 // Pokémon reaches the specified level, is female
+#define EVO_LEVEL_MALE 17                   // Pokémon reaches the specified level, is male
+#define EVO_LEVEL_NIGHT 18                  // Pokémon reaches the specified level, is night
+#define EVO_LEVEL_DAY 19                    // Pokémon reaches the specified level, is day
+#define EVO_LEVEL_DUSK 20                   // Pokémon reaches the specified level, is dusk (5-6 P.M)
+#define EVO_ITEM_HOLD_DAY 21                // Pokémon levels up, holds specified item at day
+#define EVO_ITEM_HOLD_NIGHT 22              // Pokémon levels up, holds specified item at night
+#define EVO_MOVE 23                         // Pokémon levels up, knows specified move
+#define EVO_FRIENDSHIP_MOVE_TYPE 24         // Pokémon levels up with friendship ≥ 220, knows move with specified type
+#define EVO_MAPSEC 25                       // Pokémon levels up on specified mapsec
+#define EVO_ITEM_MALE 26                    // specified item is used on a male Pokémon
+#define EVO_ITEM_FEMALE 27                  // specified item is used on a female Pokémon
+#define EVO_LEVEL_RAIN 28                   // Pokémon reaches the specified level during rain in the overworld
+#define EVO_SPECIFIC_MON_IN_PARTY 29        // Pokémon levels up with a specified Pokémon in party
+#define EVO_LEVEL_DARK_TYPE_MON_IN_PARTY 30 // Pokémon reaches the specified level with a Dark Type Pokémon in party
+#define EVO_TRADE_SPECIFIC_MON 31           // Pokémon is traded for a specified Pokémon
+#define EVO_SPECIFIC_MAP 32                 // Pokémon levels up on specified map
+#define EVO_LEVEL_NATURE_AMPED 33           // Pokémon reaches the specified level, it has a Hardy, Brave, Adamant, Naughty, Docile, Impish, Lax, Hasty, Jolly, Naive, Rash, Sassy, or Quirky nature.
+#define EVO_LEVEL_NATURE_LOW_KEY 34         // Pokémon reaches the specified level, it has a Lonely, Bold, Relaxed, Timid, Serious, Modest, Mild, Quiet, Bashful, Calm, Gentle, or Careful nature.
+#define EVO_CRITICAL_HITS 35                // Pokémon performs specified number of critical hits in one battle
+#define EVO_SCRIPT_TRIGGER_DMG 36           // Pokémon has specified HP below max, then player interacts trigger
+#define EVO_DARK_SCROLL 37                  // interacts with Scroll of Darkness
+#define EVO_WATER_SCROLL 38                 // interacts with Scroll of Waters
+#define EVO_ITEM_NIGHT 39                   // specified item is used on Pokémon, is night
+#define EVO_ITEM_DAY 40                     // specified item is used on Pokémon, is day
+#define EVO_ITEM_HOLD 41                    // Pokémon levels up, holds specified item
+#define EVO_LEVEL_FOG 42                    // Pokémon reaches the specified level during fog in the overworld
+#define EVO_MOVE_TWO_SEGMENT 43             // Pokémon levels up, knows specified move, has a personality value with a modulus of 0
+#define EVO_MOVE_THREE_SEGMENT 44           // Pokémon levels up, knows specified move, has a personality value with a modulus of 1-99
+#define EVO_LEVEL_FAMILY_OF_THREE 45        // Pokémon reaches the specified level with a personality value with a modulus of 0
+#define EVO_LEVEL_FAMILY_OF_FOUR 46         // Pokémon reaches the specified level with a personality value with a modulus of 1-99
+#define EVO_LEVEL_TWO_SEGMENT 47            // Pokémon levels up, knows specified move, has a personality value with a modulus of 0
+#define EVO_LEVEL_THREE_SEGMENT 48          // Pokémon levels up, knows specified move, has a personality value with a modulus of 1-99
+#define EVO_LEVEL_30_NATURE 49              // Pokémon levels up to 30 has specific nature
 
 // rogue note hookup
-#define EVO_LEVEL_ITEM                    50     // Pokémon levels up whilst holding item
-#define EVO_MOVE_TYPE                     51     // Pokémon levels up, knows move with specified type
+#define EVO_LEVEL_ITEM 50 // Pokémon levels up whilst holding item
+#define EVO_MOVE_TYPE 51  // Pokémon levels up, knows move with specified type
 
 // Evolution 'modes,' for GetEvolutionTargetSpecies
-#define EVO_MODE_NORMAL            0
-#define EVO_MODE_TRADE             1
-#define EVO_MODE_ITEM_USE          2
-#define EVO_MODE_ITEM_CHECK        3 // If an Everstone is being held, still want to show that the stone *could* be used on that Pokémon to evolve
-#define EVO_MODE_BATTLE_SPECIAL    4
+#define EVO_MODE_NORMAL 0
+#define EVO_MODE_TRADE 1
+#define EVO_MODE_ITEM_USE 2
+#define EVO_MODE_ITEM_CHECK 3 // If an Everstone is being held, still want to show that the stone *could* be used on that Pokémon to evolve
+#define EVO_MODE_BATTLE_SPECIAL 4
 #define EVO_MODE_OVERWORLD_SPECIAL 5
 
 #define MON_PIC_WIDTH 64
@@ -336,8 +405,8 @@
 // - Unown has 1 frame, presumably to avoid the work of animating all 28 of its forms
 #define MAX_MON_PIC_FRAMES 2
 
-#define BATTLE_ALIVE_EXCEPT_BATTLER  0
-#define BATTLE_ALIVE_SIDE            1
+#define BATTLE_ALIVE_EXCEPT_BATTLER 0
+#define BATTLE_ALIVE_SIDE 1
 
 #define SKIP_FRONT_ANIM (1 << 7)
 
