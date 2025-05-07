@@ -25,10 +25,8 @@ SINGLE_BATTLE_TEST("Spell Fist boosts punching moves by 1.3× and targets Sp. De
 
         OPPONENT(SPECIES_WOBBUFFET)
         {
+            SpDefense(20);
             Defense(200);
-            SpDefense(50);
-            Defense(200);
-            SpDefense(50);
         }
     }
     WHEN

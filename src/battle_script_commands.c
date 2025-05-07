@@ -2064,9 +2064,6 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
         if (IS_MOVE_PHYSICAL(move))
             calc = (calc * 80) / 100; // 0.8 hustle loss
         break;
-    case ABILITY_SIGHTING_SYSTEM:
-        calc = 0;
-        break;
     }
 
     // Target's ability
@@ -2145,6 +2142,14 @@ static void Cmd_accuracycheck(void)
 
     if (move == ACC_CURR_MOVE)
         move = gCurrentMove;
+
+    // skip accuracy check for these abilities
+    if ((abilityAtk == ABILITY_SIGHTING_SYSTEM) ||
+        (abilityAtk == ABILITY_ROUNDHOUSE && (move == MOVE_HIGH_JUMP_KICK || move == MOVE_AXE_KICK)))
+    {
+        gBattlescriptCurrInstr = cmd->nextInstr;
+        return;
+    }
 
     if (move == NO_ACC_CALC_CHECK_LOCK_ON)
     {

@@ -9369,13 +9369,31 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         usesDefStat = FALSE;
     }
 
-    // spell fist deals special
+    // Spell Fist deals special
     if ((gBattleMons[battlerAtk].ability == ABILITY_SPELL_FIST) &&
         gBattleMoves[move].flags & FLAG_PUNCHING_BASED)
     {
         defStat = spDef;
         defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
         usesDefStat = FALSE;
+    }
+
+    // Roundhouse deals dmg to lowest defensive type
+    if ((gBattleMons[battlerAtk].ability == ABILITY_ROUNDHOUSE) &&
+        gBattleMoves[move].flags & FLAG_KICKING_BASED)
+    {
+        if (def < spDef) // Compare Defense and Special Defense
+        {
+            defStat = def;
+            defStage = gBattleMons[battlerDef].statStages[STAT_DEF];
+            usesDefStat = TRUE;
+        }
+        else
+        {
+            defStat = spDef;
+            defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
+            usesDefStat = FALSE;
+        }
     }
 
     // Self-destruct / Explosion cut defense in half

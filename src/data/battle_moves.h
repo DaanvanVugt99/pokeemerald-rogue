@@ -371,7 +371,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST,
+                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST | FLAG_KICKING_BASED,
                 .flags2 = FLAG_MINIMIZE_DOUBLE,
                 .banMask = BAN_SKY_BATTLE,
             },
@@ -388,7 +388,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT,
+                .flags = FLAG_MAKES_CONTACT | FLAG_KICKING_BASED,
                 .flags2 = FLAG_TWO_STRIKES,
             },
 
@@ -404,7 +404,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT,
+                .flags = FLAG_MAKES_CONTACT | FLAG_KICKING_BASED,
             },
 
         [MOVE_JUMP_KICK] =
@@ -419,7 +419,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT,
+                .flags = FLAG_MAKES_CONTACT | FLAG_KICKING_BASED,
                 .banMask = BAN_GRAVITY,
             },
 
@@ -435,7 +435,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST,
+                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST | FLAG_KICKING_BASED,
             },
 
         [MOVE_SAND_ATTACK] =
@@ -1047,7 +1047,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT,
+                .flags = FLAG_MAKES_CONTACT | FLAG_KICKING_BASED,
             },
 
         [MOVE_COUNTER] =
@@ -2106,7 +2106,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT,
+                .flags = FLAG_MAKES_CONTACT | FLAG_KICKING_BASED,
                 .banMask = BAN_GRAVITY,
             },
 
@@ -4614,7 +4614,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT | FLAG_HIGH_CRIT | FLAG_SHEER_FORCE_BOOST,
+                .flags = FLAG_MAKES_CONTACT | FLAG_HIGH_CRIT | FLAG_SHEER_FORCE_BOOST | FLAG_KICKING_BASED,
             },
 
         [MOVE_MUD_SPORT] =
@@ -10010,7 +10010,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST,
+                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST | FLAG_KICKING_BASED,
             },
 
         [MOVE_INSTRUCT] =
@@ -10163,7 +10163,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT,
+                .flags = FLAG_MAKES_CONTACT | FLAG_KICKING_BASED,
                 .banMask = BAN_SKY_BATTLE,
             },
 
@@ -11560,7 +11560,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST,
+                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST | FLAG_KICKING_BASED,
                 .banMask = BAN_METRONOME,
             },
 
@@ -12020,7 +12020,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST,
+                .flags = FLAG_MAKES_CONTACT | FLAG_SHEER_FORCE_BOOST | FLAG_KICKING_BASED,
             },
 
         [MOVE_LAST_RESPECTS] =

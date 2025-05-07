@@ -321,6 +321,7 @@ static const u8 sExploitWeaknessDescription[] = _("+50% power against status\nan
 static const u8 sFightingSpiritDescription[] = _("Fighting moves become ghost\ntype and deal +30% damage.");
 static const u8 sAncientIdolDescription[] = _("Hits with its Defense\nStats respectively.");
 static const u8 sShortCircuitDescription[] = _("Ups Electric moves by 20%,\n50% when at 1/2 HP.");
+static const u8 sRoundhouseDescription[] = _("Kicking moves can't miss and\ndeal damage to lowest defense/");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -655,6 +656,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_FIGHTING_SPIRIT] = _("Fighting Spirit"),
         [ABILITY_ANCIENT_IDOL] = _("Ancient Idol"),
         [ABILITY_SHORT_CIRCUIT] = _("Short Circuit"),
+        [ABILITY_ROUNDHOUSE] = _("Roundhouse"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1307,4 +1309,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_FIGHTING_SPIRIT] = sFightingSpiritDescription,
         [ABILITY_ANCIENT_IDOL] = sAncientIdolDescription,
         [ABILITY_SHORT_CIRCUIT] = sShortCircuitDescription,
+        [ABILITY_ROUNDHOUSE] = sRoundhouseDescription,
 };

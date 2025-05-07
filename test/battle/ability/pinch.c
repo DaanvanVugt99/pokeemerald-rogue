@@ -97,7 +97,7 @@ SINGLE_BATTLE_TEST("Short Circuit boosts Electric-type moves consistently", s16 
     }
     FINALLY
     {
-        EXPECT_GT(results[1].damage, results[0].damage) // boost at low hp
+        EXPECT_GT(results[1].damage, results[0].damage); // boost at low hp
     }
 }
 

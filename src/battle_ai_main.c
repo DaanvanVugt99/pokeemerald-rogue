@@ -1850,7 +1850,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             ADJUST_SCORE(-4);
         break;
     case EFFECT_RECOIL_IF_MISS:
-        if (aiData->abilities[battlerAtk] != ABILITY_MAGIC_GUARD && AI_DATA->moveAccuracy[battlerAtk][battlerDef][AI_THINKING_STRUCT->movesetIndex] < 75)
+        if (aiData->abilities[battlerAtk] != ABILITY_MAGIC_GUARD && AI_DATA->moveAccuracy[battlerAtk][battlerDef][AI_THINKING_STRUCT->movesetIndex] < 75 && !(aiData->abilities[battlerAtk] != ABILITY_SIGHTING_SYSTEM) && !(aiData->abilities[battlerAtk] != ABILITY_ROUNDHOUSE && gBattleMoves[move].flags == FLAG_KICKING_BASED))
             ADJUST_SCORE(-6);
         break;
     case EFFECT_RECOIL_25:
