@@ -9177,6 +9177,15 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
                 modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2)); // 1.2x boost otherwise
         }
         break;
+    case ABILITY_SHORT_CIRCUIT:
+        if (moveType == TYPE_ELECTRIC)
+        {
+            if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5)); // 1.5x boost at or below 50% HP
+            else
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2)); // 1.2x boost otherwise
+        }
+        break;
     case ABILITY_SWARM:
         if (moveType == TYPE_BUG)
         {

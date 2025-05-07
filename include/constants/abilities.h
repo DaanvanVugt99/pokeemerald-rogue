@@ -358,8 +358,9 @@
 #define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.5x and become dark type against pokemon with status.
 #define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain 1.3x power
 #define ABILITY_ANCIENT_IDOL (ABILITIES_COUNT_GEN9 + 15)     // Uses Def for Atk and SpDef for SpAtk
+#define ABILITY_SHORT_CIRCUIT (ABILITIES_COUNT_GEN9 + 16)    // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_ANCIENT_IDOL + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_SHORT_CIRCUIT + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

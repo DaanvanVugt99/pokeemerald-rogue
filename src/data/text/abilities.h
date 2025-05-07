@@ -320,6 +320,7 @@ static const u8 sAerodynamicsDescription[] = _("Getting hit by Flying raises\nSp
 static const u8 sExploitWeaknessDescription[] = _("+50% power against status\nand moves become dark type.");
 static const u8 sFightingSpiritDescription[] = _("Fighting moves become ghost\ntype and deal +30% damage.");
 static const u8 sAncientIdolDescription[] = _("Hits with its Defense\nStats respectively.");
+static const u8 sShortCircuitDescription[] = _("Ups Electric moves by 20%,\n50% when at 1/2 HP.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -653,6 +654,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_EXPLOIT_WEAKNESS] = _("Exploit Weakness"),
         [ABILITY_FIGHTING_SPIRIT] = _("Fighting Spirit"),
         [ABILITY_ANCIENT_IDOL] = _("Ancient Idol"),
+        [ABILITY_SHORT_CIRCUIT] = _("Short Circuit"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1304,4 +1306,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_EXPLOIT_WEAKNESS] = sExploitWeaknessDescription,
         [ABILITY_FIGHTING_SPIRIT] = sFightingSpiritDescription,
         [ABILITY_ANCIENT_IDOL] = sAncientIdolDescription,
+        [ABILITY_SHORT_CIRCUIT] = sShortCircuitDescription,
 };

@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Ancient Idol makes Defense and Special Defense act as Attack and Special Attack"
+testToRunPrefix="Short Circuit boosts Electric-type moves consistently"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
