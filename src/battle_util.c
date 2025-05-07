@@ -5705,6 +5705,22 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_ELECTROCYTES:
+            // Check if the move used is Water-type
+            if (moveType == TYPE_WATER && TARGET_TURN_DAMAGED && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+            {
+                // 20% chance to paralyze the target
+                if (RandomWeighted(RNG_ELECTROCYTES, 4, 1) && CanBeParalyzed(gBattlerTarget))
+                {
+                    gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
+                    PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                    gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                    effect++;
+                }
+            }
+            break;
         }
         break;
     case ABILITYEFFECT_MOVE_END_OTHER: // Abilities that activate on *another* battler's moveend: Dancer, Soul-Heart, Receiver, Symbiosis
@@ -9463,6 +9479,10 @@ static inline uq4_12_t GetAdaptabilityCharmBoost(u32 battlerAtk)
 
 static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveType, u32 move, u32 abilityAtk)
 {
+    // Check for Electrocytes granting STAB to Electric moves
+    if (abilityAtk == ABILITY_ELECTROCYTES && moveType == TYPE_ELECTRIC)
+        return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
+
     if (gBattleStruct->pledgeMove && IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType))
         return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
     else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType) || move == MOVE_STRUGGLE || move == MOVE_NONE)

@@ -315,6 +315,7 @@ static const u8 sVengeanceDescription[] = _("Ups Ghost moves by 20%,\n50% when a
 static const u8 sSightingSystemDescription[] = _("Moves always hit. Moves last\nfor moves less than 80% accuracy.");
 static const u8 sBigWingsDescription[] = _("Ups wind moves by 30%,\ntailwind gains duration.");
 static const u8 sPowerCoreDescription[] = _("The Pokémon uses +25% of its\nDefense or SpDef during moves.");
+static const u8 sElectrocytesDescription[] = _("Electric moves gain STAB,\nWater moves may paralyze");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -643,6 +644,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_SIGHTING_SYSTEM] = _("Sighting System"),
         [ABILITY_BIG_WINGS] = _("Giant Wings"),
         [ABILITY_POWER_CORE] = _("Power Core"),
+        [ABILITY_ELECTROCYTES] = _("Electrocytes"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1289,4 +1291,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_SIGHTING_SYSTEM] = sSightingSystemDescription,
         [ABILITY_BIG_WINGS] = sBigWingsDescription,
         [ABILITY_POWER_CORE] = sPowerCoreDescription,
+        [ABILITY_ELECTROCYTES] = sElectrocytesDescription,
 };

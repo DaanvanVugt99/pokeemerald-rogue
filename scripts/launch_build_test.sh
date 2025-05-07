@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Power Core boosts special moves with increased special defense"
+testToRunPrefix="Electrocytes gives Water-type moves a 20% chance to paralyze"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

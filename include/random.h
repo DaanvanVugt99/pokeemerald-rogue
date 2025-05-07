@@ -3,8 +3,8 @@
 
 // The number 1103515245 comes from the example implementation of rand and srand
 // in the ISO C standard.
-#define ISO_RANDOMIZE1(val)(1103515245 * (val) + 24691)
-#define ISO_RANDOMIZE2(val)(1103515245 * (val) + 12345)
+#define ISO_RANDOMIZE1(val) (1103515245 * (val) + 24691)
+#define ISO_RANDOMIZE2(val) (1103515245 * (val) + 12345)
 
 #ifdef ROGUE_FEATURE_HQ_RANDOM
 
@@ -17,20 +17,19 @@ extern struct PCG32 gRngRogueValue;
 u32 Random32(void);
 u32 RandomAlt32(void);
 u32 RogueRandom32(void);
-u32 RandomCustom32(u32* seed);
+u32 RandomCustom32(u32 *seed);
 
-
-//Returns a 16-bit pseudorandom number
+// Returns a 16-bit pseudorandom number
 #define Random_16(value) ((u16)(value ^ (value >> 16)))
 
-#define Random()            Random_16(Random32())
-#define Random2()           Random_16(RandomAlt32())
-#define RogueRandom()       Random_16(RogueRandom32())
-#define RandomCustom(seed)  Random_16(RandomCustom32(seed))
+#define Random() Random_16(Random32())
+#define Random2() Random_16(RandomAlt32())
+#define RogueRandom() Random_16(RogueRandom32())
+#define RandomCustom(seed) Random_16(RandomCustom32(seed))
 
-#define CycleRandom()       Random32()
+#define CycleRandom() Random32()
 
-//Sets the initial seed value of the pseudorandom number generator
+// Sets the initial seed value of the pseudorandom number generator
 void SeedRng(u32 seed);
 void SeedRng2(u32 seed);
 void SeedRogueRng(u32 seed);
@@ -43,18 +42,18 @@ extern u32 gRngRogueValue;
 
 #define RAND_TYPE u32
 
-//Returns a 16-bit pseudorandom number
+// Returns a 16-bit pseudorandom number
 u16 Random(void);
 u16 Random2(void);
 u16 RogueRandom(void);
-u16 RandomCustom(u32* seed);
+u16 RandomCustom(u32 *seed);
 
-//Returns a 32-bit pseudorandom number
+// Returns a 32-bit pseudorandom number
 #define Random32() (Random() | (Random() << 16))
 
-#define CycleRandom()       Random()
+#define CycleRandom() Random()
 
-//Sets the initial seed value of the pseudorandom number generator
+// Sets the initial seed value of the pseudorandom number generator
 void SeedRng(u16 seed);
 void SeedRng2(u16 seed);
 void SeedRogueRng(u16 seed);
@@ -69,10 +68,18 @@ static inline void Shuffle(void *data, size_t n, size_t size)
 {
     switch (size)
     {
-    case 1: Shuffle8(data, n); break;
-    case 2: Shuffle16(data, n); break;
-    case 4: Shuffle32(data, n); break;
-    default: ShuffleN(data, n, size); break;
+    case 1:
+        Shuffle8(data, n);
+        break;
+    case 2:
+        Shuffle16(data, n);
+        break;
+    case 4:
+        Shuffle32(data, n);
+        break;
+    default:
+        ShuffleN(data, n, size);
+        break;
     }
 }
 
@@ -133,6 +140,7 @@ enum RandomTag
     RNG_SPEED_TIE,
     RNG_STATIC,
     RNG_STENCH,
+    RNG_ELECTROCYTES,
     RNG_TRI_ATTACK,
     RNG_TRIPLE_ARROWS_DEFENSE_DOWN,
     RNG_TRIPLE_ARROWS_FLINCH,
@@ -146,36 +154,36 @@ enum RandomTag
     RNG_FICKLE_BEAM,
 };
 
-#define RandomWeighted(tag, ...) \
-    ({ \
-        const u8 weights[] = { __VA_ARGS__ }; \
-        u32 sum, i; \
-        for (i = 0, sum = 0; i < ARRAY_COUNT(weights); i++) \
-            sum += weights[i]; \
+#define RandomWeighted(tag, ...)                                      \
+    ({                                                                \
+        const u8 weights[] = {__VA_ARGS__};                           \
+        u32 sum, i;                                                   \
+        for (i = 0, sum = 0; i < ARRAY_COUNT(weights); i++)           \
+            sum += weights[i];                                        \
         RandomWeightedArray(tag, sum, ARRAY_COUNT(weights), weights); \
     })
 
-#define RandomPercentage(tag, t) \
-    ({ \
-        u32 r; \
-        if (t <= 0) \
-        { \
-            r = FALSE; \
-        } \
-        else if (t >= 100) \
-        { \
-            r = TRUE; \
-        } \
-        else \
-        { \
-          const u8 weights[] = { 100 - t, t }; \
-          r = RandomWeightedArray(tag, 100, ARRAY_COUNT(weights), weights); \
-        } \
-        r; \
+#define RandomPercentage(tag, t)                                              \
+    ({                                                                        \
+        u32 r;                                                                \
+        if (t <= 0)                                                           \
+        {                                                                     \
+            r = FALSE;                                                        \
+        }                                                                     \
+        else if (t >= 100)                                                    \
+        {                                                                     \
+            r = TRUE;                                                         \
+        }                                                                     \
+        else                                                                  \
+        {                                                                     \
+            const u8 weights[] = {100 - t, t};                                \
+            r = RandomWeightedArray(tag, 100, ARRAY_COUNT(weights), weights); \
+        }                                                                     \
+        r;                                                                    \
     })
 
-#define RandomElement(tag, array) \
-    ({ \
+#define RandomElement(tag, array)                                                                      \
+    ({                                                                                                 \
         *(typeof((array)[0]) *)RandomElementArray(tag, array, sizeof((array)[0]), ARRAY_COUNT(array)); \
     })
 
