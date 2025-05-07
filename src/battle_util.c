@@ -9095,6 +9095,19 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPATK];
         }
     }
+    else if (GetBattlerAbility(battlerAtk) == ABILITY_ANCIENT_IDOL)
+    {
+        if (IS_MOVE_PHYSICAL(move))
+        {
+            atkStat = gBattleMons[battlerAtk].defense;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
+        }
+        else
+        {
+            atkStat = gBattleMons[battlerAtk].spDefense;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_SPDEF];
+        }
+    }
     else
     {
         if (IS_MOVE_PHYSICAL(move))

@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Fighting Spirit changes Fighting move to Ghost and boosts damage"
+testToRunPrefix="Ancient Idol makes Defense and Special Defense act as Attack and Special Attack"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

@@ -319,6 +319,7 @@ static const u8 sElectrocytesDescription[] = _("Electric moves gain STAB,\nWater
 static const u8 sAerodynamicsDescription[] = _("Getting hit by Flying raises\nSpeed by +1 instead.");
 static const u8 sExploitWeaknessDescription[] = _("+50% power against status\nand moves become dark type.");
 static const u8 sFightingSpiritDescription[] = _("Fighting moves become ghost\ntype and deal +30% damage.");
+static const u8 sAncientIdolDescription[] = _("Hits with its Defense\nStats respectively.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -651,6 +652,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_AERODYNAMICS] = _("Aerodynamics"),
         [ABILITY_EXPLOIT_WEAKNESS] = _("Exploit Weakness"),
         [ABILITY_FIGHTING_SPIRIT] = _("Fighting Spirit"),
+        [ABILITY_ANCIENT_IDOL] = _("Ancient Idol"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1301,4 +1303,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_AERODYNAMICS] = sAerodynamicsDescription,
         [ABILITY_EXPLOIT_WEAKNESS] = sExploitWeaknessDescription,
         [ABILITY_FIGHTING_SPIRIT] = sFightingSpiritDescription,
+        [ABILITY_ANCIENT_IDOL] = sAncientIdolDescription,
 };

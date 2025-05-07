@@ -357,8 +357,9 @@
 #define ABILITY_AERODYNAMICS (ABILITIES_COUNT_GEN9 + 12)     // Immune to flying and gains +1 speed when hit with a flying type move.
 #define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.5x and become dark type against pokemon with status.
 #define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain 1.3x power
+#define ABILITY_ANCIENT_IDOL (ABILITIES_COUNT_GEN9 + 15)     // Uses Def for Atk and SpDef for SpAtk
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_FIGHTING_SPIRIT + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_ANCIENT_IDOL + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM
