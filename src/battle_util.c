@@ -5709,9 +5709,21 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_WHITEOUT:
+            if (moveType == TYPE_ICE && TARGET_TURN_DAMAGED && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && IsBattlerAlive(gBattlerTarget) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW | B_WEATHER_HAIL))
+                if (RandomWeighted(RNG_WHITEOUT, 9, 1) && CanBeFrozen(gBattlerTarget))
+                {
+                    gBattleScripting.moveEffect = MOVE_EFFECT_FREEZE;
+                    PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                    gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                    effect++;
+                }
+            break;
         case ABILITY_ELECTROCYTES:
             // Check if the move used is Water-type
-            if (moveType == TYPE_WATER && TARGET_TURN_DAMAGED && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+            if (moveType == TYPE_WATER && TARGET_TURN_DAMAGED && IsBattlerAlive(gBattlerTarget) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
             {
                 // 20% chance to paralyze the target
                 if (RandomWeighted(RNG_ELECTROCYTES, 4, 1) && CanBeParalyzed(gBattlerTarget))
@@ -8835,7 +8847,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         break;
     case ABILITY_EXPLOIT_WEAKNESS:
         if (gBattleMons[battlerDef].status1 & STATUS1_ANY)
-            modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_PROTOSYNTHESIS:
     {

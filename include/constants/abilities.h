@@ -355,7 +355,8 @@
 #define ABILITY_POWER_CORE (ABILITIES_COUNT_GEN9 + 10)       // The Pokémon uses 25% of its Defense stat during physical moves and Special Defense stat during special moves in addition to the default stat. (Defense and Special Defense stat stages still affects these percentage).
 #define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)     // Electric type moves gain STAB, water type moves have 20% to paralyze
 #define ABILITY_AERODYNAMICS (ABILITIES_COUNT_GEN9 + 12)     // Immune to flying and gains +1 speed when hit with a flying type move.
-#define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.3x and become dark type against pokemon with status.
+#define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.5x and become dark type against pokemon with status.
+#define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain 1.3x power
 
 #define ABILITIES_COUNT_CUSTOM (ABILITY_EXPLOIT_WEAKNESS + 1)
 

@@ -306,7 +306,7 @@ static const u8 sPoisonPuppeteerDescription[] = _("Confuses poisoned foes.");
 static const u8 sForecastPriorityDescription[] = _("Weather moves go first.");
 
 static const u8 sChloroplastDescription[] = _("Battles as if in sunlight.\nDoes not trigger abilities.");
-static const u8 sWhiteoutDescription[] = _("Boosts Ice moves by 50% in Hail.");
+static const u8 sWhiteoutDescription[] = _("Boosts Ice moves by 50% and\n10% chance to freeze in snow.");
 static const u8 sPyromancyDescription[] = _("Fire moves burn 5x more often.");
 static const u8 sSpellFistDescription[] = _("Punches do special damage\nand 30% more damage.");
 static const u8 sBlitzBoxerDescription[] = _("Punching moves have\n+1 priority at full health.");
@@ -317,7 +317,7 @@ static const u8 sBigWingsDescription[] = _("Ups wind moves by 30%,\nTailwind gai
 static const u8 sPowerCoreDescription[] = _("The Pokémon uses +25% of its\nDefense or SpDef during moves.");
 static const u8 sElectrocytesDescription[] = _("Electric moves gain STAB,\nWater moves may paralyze");
 static const u8 sAerodynamicsDescription[] = _("Getting hit by Flying raises\nSpeed by +1 instead.");
-static const u8 sExploitWeaknessDescription[] = _("30% damage against status\nand moves become dark type.");
+static const u8 sExploitWeaknessDescription[] = _("+50% power against status\nand moves become dark type.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
