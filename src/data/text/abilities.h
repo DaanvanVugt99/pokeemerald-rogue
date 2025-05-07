@@ -317,6 +317,7 @@ static const u8 sBigWingsDescription[] = _("Ups wind moves by 30%,\nTailwind gai
 static const u8 sPowerCoreDescription[] = _("The Pokémon uses +25% of its\nDefense or SpDef during moves.");
 static const u8 sElectrocytesDescription[] = _("Electric moves gain STAB,\nWater moves may paralyze");
 static const u8 sAerodynamicsDescription[] = _("Getting hit by Flying raises\nSpeed by +1 instead.");
+static const u8 sExploitWeaknessDescription[] = _("30% damage against status\nand moves become dark type.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1295,4 +1296,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_POWER_CORE] = sPowerCoreDescription,
         [ABILITY_ELECTROCYTES] = sElectrocytesDescription,
         [ABILITY_AERODYNAMICS] = sAerodynamicsDescription,
+        [ABILITY_EXPLOIT_WEAKNESS] = sExploitWeaknessDescription,
+
 };

@@ -8833,6 +8833,10 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         if (moveType == TYPE_ROCK)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
+    case ABILITY_EXPLOIT_WEAKNESS:
+        if (gBattleMons[battlerDef].status1 & STATUS1_ANY)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        break;
     case ABILITY_PROTOSYNTHESIS:
     {
         u8 atkHighestStat = GetHighestStatId(battlerAtk);
@@ -11270,6 +11274,10 @@ u8 GetMoveType(u32 battler, u32 move)
     if (ability == ABILITY_NORMALIZE)
         type = TYPE_NORMAL;
 
+    // Exploit weakness: Moves become dark when opponent has status
+    if (ability == ABILITY_EXPLOIT_WEAKNESS && OpponentHasStatus(battler))
+        type = TYPE_DARK;
+
     // Liquid Voice: sound-based moves become Water-type
     else if (ability == ABILITY_LIQUID_VOICE && (gBattleMoves[move].flags & FLAG_SOUND_BASED))
         type = TYPE_WATER;
@@ -11325,4 +11333,26 @@ bool8 IsMultiHitMove(u16 move)
     default:
         return FALSE;
     }
+}
+
+bool8 OpponentHasStatus(u32 battler)
+{
+    u32 opponent1 = BATTLE_OPPOSITE(battler);
+    u32 status1 = gBattleMons[opponent1].status1;
+
+    // If it is a single battle, just check the primary opponent
+    if (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
+    {
+        if (status1 & STATUS1_ANY)
+            return TRUE;
+        return FALSE;
+    }
+
+    // In double battles, check both opponents
+    u32 opponent2 = BATTLE_PARTNER(opponent1);
+    u32 status2 = gBattleMons[opponent2].status1;
+
+    if ((status1 & STATUS1_ANY) || (status2 & STATUS1_ANY))
+        return TRUE;
+    return FALSE;
 }

@@ -343,20 +343,21 @@
 #define ABILITY_FORECAST_PRIORITY (ABILITIES_COUNT_GEN9)
 
 // IE Custom Abilities
-#define ABILITY_CHLOROPLAST (ABILITIES_COUNT_GEN9 + 1)     // Moves function as if it's sunny, regardless of weather
-#define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)        // Boosts the power of Ice attacks in Hail by 50%
-#define ABILITY_PYROMANCY (ABILITIES_COUNT_GEN9 + 3)       // Fire attacks are 5x more likely to inflict a burn
-#define ABILITY_SPELL_FIST (ABILITIES_COUNT_GEN9 + 4)      // Punching moves deal 1.3x and do special damage
-#define ABILITY_BLITZ_BOXER (ABILITIES_COUNT_GEN9 + 5)     // Punching moves gain priority at full health
-#define ABILITY_RAMPAGE (ABILITIES_COUNT_GEN9 + 6)         // If a recharge move KOs the foe, it doesn't need to recharge.
-#define ABILITY_VENGEANCE (ABILITIES_COUNT_GEN9 + 7)       // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
-#define ABILITY_SIGHTING_SYSTEM (ABILITIES_COUNT_GEN9 + 8) // When the Pokémon uses a move with Accuracy of 50% or lower, the move will have 100% Accuracy, but have its priority decreased by 3.
-#define ABILITY_BIG_WINGS (ABILITIES_COUNT_GEN9 + 9)       // Wind moves deal 1.3x and tailwind duration +1
-#define ABILITY_POWER_CORE (ABILITIES_COUNT_GEN9 + 10)     // The Pokémon uses 25% of its Defense stat during physical moves and Special Defense stat during special moves in addition to the default stat. (Defense and Special Defense stat stages still affects these percentage).
-#define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)   // Electric type moves gain STAB, water type moves have 20% to paralyze
-#define ABILITY_AERODYNAMICS (ABILITIES_COUNT_GEN9 + 12)   // Immune to flying and gains +1 speed when hit with a flying type move.
+#define ABILITY_CHLOROPLAST (ABILITIES_COUNT_GEN9 + 1)       // Moves function as if it's sunny, regardless of weather
+#define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)          // Boosts the power of Ice attacks in Hail by 50%
+#define ABILITY_PYROMANCY (ABILITIES_COUNT_GEN9 + 3)         // Fire attacks are 5x more likely to inflict a burn
+#define ABILITY_SPELL_FIST (ABILITIES_COUNT_GEN9 + 4)        // Punching moves deal 1.3x and do special damage
+#define ABILITY_BLITZ_BOXER (ABILITIES_COUNT_GEN9 + 5)       // Punching moves gain priority at full health
+#define ABILITY_RAMPAGE (ABILITIES_COUNT_GEN9 + 6)           // If a recharge move KOs the foe, it doesn't need to recharge.
+#define ABILITY_VENGEANCE (ABILITIES_COUNT_GEN9 + 7)         // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
+#define ABILITY_SIGHTING_SYSTEM (ABILITIES_COUNT_GEN9 + 8)   // When the Pokémon uses a move with Accuracy of 50% or lower, the move will have 100% Accuracy, but have its priority decreased by 3.
+#define ABILITY_BIG_WINGS (ABILITIES_COUNT_GEN9 + 9)         // Wind moves deal 1.3x and tailwind duration +1
+#define ABILITY_POWER_CORE (ABILITIES_COUNT_GEN9 + 10)       // The Pokémon uses 25% of its Defense stat during physical moves and Special Defense stat during special moves in addition to the default stat. (Defense and Special Defense stat stages still affects these percentage).
+#define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)     // Electric type moves gain STAB, water type moves have 20% to paralyze
+#define ABILITY_AERODYNAMICS (ABILITIES_COUNT_GEN9 + 12)     // Immune to flying and gains +1 speed when hit with a flying type move.
+#define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.3x and become dark type against pokemon with status.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_AERODYNAMICS + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_EXPLOIT_WEAKNESS + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

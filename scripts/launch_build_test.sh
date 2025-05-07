@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Aerodynamics is only triggered once on multi-strike moves"
+testToRunPrefix="Exploit Weakness makes Poison move Dark type if opponent is statused"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

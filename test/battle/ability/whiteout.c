@@ -15,7 +15,6 @@ SINGLE_BATTLE_TEST("Whiteout increases ice move damage in snow", s16 damage)
         move = MOVE_ICE_BEAM;
         ability = ABILITY_STEADFAST;
     }
-
     GIVEN
     {
         ASSUME(gBattleMoves[MOVE_ICE_BEAM].type == TYPE_ICE);
