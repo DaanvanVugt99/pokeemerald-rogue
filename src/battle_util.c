@@ -5146,6 +5146,10 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 if (moveType == TYPE_GRASS)
                     effect = 2, statId = STAT_ATK;
                 break;
+            case ABILITY_AERODYNAMICS:
+                if (moveType == TYPE_FLYING)
+                    effect = 2, statId = STAT_SPEED;
+                break;
             case ABILITY_FLASH_FIRE:
                 if (moveType == TYPE_FIRE && (B_FLASH_FIRE_FROZEN >= GEN_5 || !(gBattleMons[battler].status1 & STATUS1_FREEZE)))
                 {

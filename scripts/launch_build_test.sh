@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Electrocytes gives Water-type moves a 20% chance to paralyze"
+testToRunPrefix="Aerodynamics is only triggered once on multi-strike moves"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

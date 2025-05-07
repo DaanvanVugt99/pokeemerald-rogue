@@ -850,6 +850,10 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 if (moveType == TYPE_WATER)
                     RETURN_SCORE_MINUS(20);
                 break;
+            case ABILITY_AERODYNAMICS:
+                if (moveType == TYPE_FLYING)
+                    RETURN_SCORE_MINUS(20);
+                break;
             case ABILITY_EARTH_EATER:
                 if (moveType == TYPE_GROUND)
                     RETURN_SCORE_MINUS(20);
@@ -2766,6 +2770,12 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 break;
             case ABILITY_FLASH_FIRE:
                 if (moveType == TYPE_FIRE && HasMoveWithType(battlerAtkPartner, TYPE_FIRE) && !(gBattleResources->flags->flags[battlerAtkPartner] & RESOURCE_FLAG_FLASH_FIRE))
+                {
+                    RETURN_SCORE_PLUS(1);
+                }
+                break;
+            case ABILITY_AERODYNAMICS:
+                if (moveType == TYPE_FLYING && HasMoveWithType(battlerAtkPartner, TYPE_FLYING) && BattlerStatCanRise(battlerAtkPartner, atkPartnerAbility, STAT_SPEED))
                 {
                     RETURN_SCORE_PLUS(1);
                 }
