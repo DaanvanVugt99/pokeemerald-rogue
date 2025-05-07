@@ -38,7 +38,7 @@
 #define ABILITY_CHLOROPHYLL 34   // Doubles speed in sunshine.
 #define ABILITY_ILLUMINATE 35    // Boosts accuracy by 1.2x. Also has its existing field effect.
 #define ABILITY_TRACE 36         // *No innate* When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.
-#define ABILITY_HUGE_POWER 37    // Doubles the Pokémon's Attack.
+#define ABILITY_HUGE_POWER 37    // Doubles the Pokémon's highest offensive stat.
 #define ABILITY_POISON_POINT 38  // 30% chance to get poisoned on contact against this Pokémon.
 #define ABILITY_INNER_FOCUS 39   // The Pokémon's intensely focused, and that protects the Pokémon from flinching, Focus Blast has increased accuracy to 90%.
 #define ABILITY_MAGMA_ARMOR 40   // Prevents the Pokémon from becoming frozen. Takes 30% less damage from Water- and Ice-type moves.
@@ -75,7 +75,7 @@
 #define ABILITY_ARENA_TRAP 71    // Prevents fleeing.
 #define ABILITY_VITAL_SPIRIT 72  // Prevents falling asleep.
 #define ABILITY_WHITE_SMOKE 73   // The Pokémon is protected by its white smoke, which prevents other Pokémon from lowering its stats
-#define ABILITY_PURE_POWER 74    // Doubles Attack.
+#define ABILITY_PURE_POWER 74    // Doubles the Pokémon's highest offensive stat.
 #define ABILITY_SHELL_ARMOR 75   // A hard shell protects the Pokémon from critical hits. Takes 20% less damage.
 #define ABILITY_AIR_LOCK 76      // Eliminates the effects of weather.
 
