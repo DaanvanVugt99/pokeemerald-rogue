@@ -63,10 +63,10 @@ static const u8 sShedSkinDescription[] = _("Heals the body by shedding.");
 static const u8 sGutsDescription[] = _("Ups Attack if suffering.");
 static const u8 sMarvelScaleDescription[] = _("Ups Defense if suffering.");
 static const u8 sLiquidOozeDescription[] = _("Draining causes injury.");
-static const u8 sOvergrowDescription[] = _("Ups Grass moves in a pinch.");
-static const u8 sBlazeDescription[] = _("Ups Fire moves in a pinch.");
-static const u8 sTorrentDescription[] = _("Ups Water moves in a pinch.");
-static const u8 sSwarmDescription[] = _("Ups Bug moves in a pinch.");
+static const u8 sOvergrowDescription[] = _("Ups Grass moves by 20%,\n50% when at 1/2 HP.");
+static const u8 sBlazeDescription[] = _("Ups Fire moves by 20%,\n50% when at 1/2 HP.");
+static const u8 sTorrentDescription[] = _("Ups Water moves by 20%,\n50% when at 1/2 HP.");
+static const u8 sSwarmDescription[] = _("Ups Bug moves by 20%,\n50% when at 1/2 HP.");
 static const u8 sRockHeadDescription[] = _("Prevents recoil damage.");
 static const u8 sDroughtDescription[] = _("Summons sunlight in battle.");
 static const u8 sArenaTrapDescription[] = _("Prevents fleeing.");
@@ -311,6 +311,7 @@ static const u8 sPyromancyDescription[] = _("Fire moves burn 5x more often.");
 static const u8 sSpellFistDescription[] = _("Punches do special damage\nand 30% more damage.");
 static const u8 sBlitzBoxerDescription[] = _("Punching moves have\n+1 priority at full health.");
 static const u8 sRampageDescription[] = _("No recharge after a KO.");
+static const u8 sVengeanceDescription[] = _("Ups Ghost moves by 20%,\n50% when at 1/2 HP.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -635,6 +636,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_SPELL_FIST] = _("Spell Fist"),
         [ABILITY_BLITZ_BOXER] = _("Blitz Boxer"),
         [ABILITY_RAMPAGE] = _("Rampage"),
+        [ABILITY_VENGEANCE] = _("Vengeance"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1277,4 +1279,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_SPELL_FIST] = sSpellFistDescription,
         [ABILITY_BLITZ_BOXER] = sBlitzBoxerDescription,
         [ABILITY_RAMPAGE] = sRampageDescription,
+        [ABILITY_VENGEANCE] = sVengeanceDescription,
 };

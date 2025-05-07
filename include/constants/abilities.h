@@ -66,10 +66,10 @@
 #define ABILITY_GUTS 62          // Attack is increased by 50% when induced with a status (BURN, PARALYZE, SLEEP, POISON, FREEZE). Burn’s effect of lowering Attack is not applied.
 #define ABILITY_MARVEL_SCALE 63  // The Pokémon's marvelous scales boost the Defense stats by 50% if it has a status condition.
 #define ABILITY_LIQUID_OOZE 64   // *No innate* The oozed liquid has a strong stench, which damages attackers using any draining move.
-#define ABILITY_OVERGROW 65      // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/3 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
-#define ABILITY_BLAZE 66         // // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/3 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
-#define ABILITY_TORRENT 67       // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/3 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
-#define ABILITY_SWARM 68         // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/3 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
+#define ABILITY_OVERGROW 65      // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
+#define ABILITY_BLAZE 66         // // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
+#define ABILITY_TORRENT 67       // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
+#define ABILITY_SWARM 68         // Now always provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_ROCK_HEAD 69     // Prevents recoil damage.
 #define ABILITY_DROUGHT 70       // Summons sunshine on entry.
 #define ABILITY_ARENA_TRAP 71    // Prevents fleeing.
@@ -349,8 +349,9 @@
 #define ABILITY_SPELL_FIST (ABILITIES_COUNT_GEN9 + 4)  // Punching moves deal 1.3x and do special damage
 #define ABILITY_BLITZ_BOXER (ABILITIES_COUNT_GEN9 + 5) // Punching moves gain priority at full health
 #define ABILITY_RAMPAGE (ABILITIES_COUNT_GEN9 + 6)     // If a recharge move KOs the foe, it doesn't need to recharge.
+#define ABILITY_VENGEANCE (ABILITIES_COUNT_GEN9 + 7)   // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_RAMPAGE + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_VENGEANCE + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

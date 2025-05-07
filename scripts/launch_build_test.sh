@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Rampage does not prevent recharge if no KO"
+testToRunPrefix="Blaze boosts Fire-type moves consistently"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
