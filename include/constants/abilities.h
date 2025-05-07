@@ -352,8 +352,9 @@
 #define ABILITY_VENGEANCE (ABILITIES_COUNT_GEN9 + 7)       // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_SIGHTING_SYSTEM (ABILITIES_COUNT_GEN9 + 8) // When the Pokémon uses a move with Accuracy of 50% or lower, the move will have 100% Accuracy, but have its priority decreased by 3.
 #define ABILITY_BIG_WINGS (ABILITIES_COUNT_GEN9 + 9)       // Wind moves deal 1.3x and tailwind duration +1
+#define ABILITY_POWER_CORE (ABILITIES_COUNT_GEN9 + 10)     // The Pokémon uses 25% of its Defense stat during physical moves and Special Defense stat during special moves in addition to the default stat. (Defense and Special Defense stat stages still affects these percentage).
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_BIG_WINGS + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_POWER_CORE + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

@@ -192,7 +192,6 @@ u32 GetIllusionMonSpecies(u32 battler);
 struct Pokemon *GetIllusionMonPtr(u32 battler);
 void ClearIllusionMon(u32 battler);
 bool32 SetIllusionMon(struct Pokemon *mon, u32 battler);
-bool32 ShouldGetStatBadgeBoost(u16 flagId, u32 battler);
 u8 GetBattleMoveSplit(u32 moveId);
 bool32 CanFling(u32 battler);
 bool32 IsTelekinesisBannedSpecies(u16 species);

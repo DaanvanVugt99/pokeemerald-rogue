@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Big wings increases the power of wind moves"
+testToRunPrefix="Power Core boosts special moves with increased special defense"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

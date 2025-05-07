@@ -9034,6 +9034,27 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         atkStat = gBattleMons[battlerAtk].defense;
         atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
     }
+    else if (GetBattlerAbility(battlerAtk) == ABILITY_POWER_CORE)
+    {
+        if (IS_MOVE_PHYSICAL(move))
+        {
+            atkStat = gBattleMons[battlerAtk].attack +
+                      ((gBattleMons[battlerAtk].defense *
+                        gStatStageRatios[gBattleMons[battlerAtk].statStages[STAT_DEF]][0] /
+                        gStatStageRatios[gBattleMons[battlerAtk].statStages[STAT_DEF]][1]) *
+                       100 / 100);
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_ATK];
+        }
+        else
+        {
+            atkStat = gBattleMons[battlerAtk].spAttack +
+                      ((gBattleMons[battlerAtk].spDefense *
+                        gStatStageRatios[gBattleMons[battlerAtk].statStages[STAT_SPDEF]][0] /
+                        gStatStageRatios[gBattleMons[battlerAtk].statStages[STAT_SPDEF]][1]) *
+                       100 / 100);
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_SPATK];
+        }
+    }
     else
     {
         if (IS_MOVE_PHYSICAL(move))
@@ -9226,13 +9247,6 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         break;
     }
 
-    // The offensive stats of a Player's Pokémon are boosted by x1.1 (+10%) if they have the 1st badge and 7th badges.
-    // Having the 1st badge boosts physical attack while having the 7th badge boosts special attack.
-    if (ShouldGetStatBadgeBoost(FLAG_BADGE01_GET, battlerAtk) && IS_MOVE_PHYSICAL(move))
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.1));
-    if (ShouldGetStatBadgeBoost(FLAG_BADGE07_GET, battlerAtk) && IS_MOVE_SPECIAL(move))
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.1));
-
     return uq4_12_multiply_by_int_half_down(modifier, atkStat);
 }
 
@@ -9400,13 +9414,6 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     // snow def boost for ice types
     if (IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE) && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW) && usesDefStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
-
-    // The defensive stats of a Player's Pokémon are boosted by x1.1 (+10%) if they have the 5th badge and 7th badges.
-    // Having the 5th badge boosts physical defense while having the 7th badge boosts special defense.
-    if (ShouldGetStatBadgeBoost(FLAG_BADGE05_GET, battlerDef) && IS_MOVE_PHYSICAL(move))
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.1));
-    if (ShouldGetStatBadgeBoost(FLAG_BADGE07_GET, battlerDef) && IS_MOVE_SPECIAL(move))
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.1));
 
     return uq4_12_multiply_by_int_half_down(modifier, defStat);
 }
@@ -10556,22 +10563,6 @@ bool32 SetIllusionMon(struct Pokemon *mon, u32 battler)
         }
     }
 
-    return FALSE;
-}
-
-bool32 ShouldGetStatBadgeBoost(u16 badgeFlag, u32 battler)
-{
-    if (B_BADGE_BOOST == GEN_3)
-    {
-        if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_FRONTIER))
-            return FALSE;
-        else if (GetBattlerSide(battler) != B_SIDE_PLAYER)
-            return FALSE;
-        else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
-            return FALSE;
-        else if (FlagGet(badgeFlag))
-            return TRUE;
-    }
     return FALSE;
 }
 
