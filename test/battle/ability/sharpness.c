@@ -1,64 +1,48 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Color Change activates and changes the user's type to counter the move's type")
+SINGLE_BATTLE_TEST("Sharpness increases the power of slicing moves", s16 damage)
 {
-    u16 move;
-    u8 expectedType;
-
+    u32 move;
+    u16 ability;
+    ASSUME(gBattleMoves[MOVE_AERIAL_ACE].flags & FLAG_SLICING_BASED);
+    ASSUME(!(gBattleMoves[MOVE_SCRATCH].flags & FLAG_SLICING_BASED));
     PARAMETRIZE
     {
-        move = MOVE_FLAMETHROWER;
-        expectedType = TYPE_ROCK;
+        move = MOVE_AERIAL_ACE;
+        ability = ABILITY_SHARPNESS;
     }
     PARAMETRIZE
     {
-        move = MOVE_THUNDERBOLT;
-        expectedType = TYPE_GROUND;
+        move = MOVE_AERIAL_ACE;
+        ability = ABILITY_STEADFAST;
     }
     PARAMETRIZE
     {
-        move = MOVE_ICE_BEAM;
-        expectedType = TYPE_WATER;
+        move = MOVE_SCRATCH;
+        ability = ABILITY_SHARPNESS;
     }
     PARAMETRIZE
     {
-        move = MOVE_SLUDGE_BOMB;
-        expectedType = TYPE_STEEL;
+        move = MOVE_SCRATCH;
+        ability = ABILITY_STEADFAST;
     }
-    PARAMETRIZE
-    {
-        move = MOVE_PSYCHIC;
-        expectedType = TYPE_DARK;
-    }
-    PARAMETRIZE
-    {
-        move = MOVE_SHADOW_BALL;
-        expectedType = TYPE_NORMAL;
-    }
-
     GIVEN
     {
-        PLAYER(SPECIES_KECLEON)
-        {
-            Ability(ABILITY_COLOR_CHANGE);
-        }
+        PLAYER(SPECIES_GALLADE) { Ability(ability); }
         OPPONENT(SPECIES_WOBBUFFET);
     }
     WHEN
     {
-        TURN { MOVE(opponent, move); }
+        TURN { MOVE(player, move); }
     }
     SCENE
     {
-        MESSAGE("Foe Wobbuffet used");
-        HP_BAR(player);
-        ABILITY_POPUP(player, ABILITY_COLOR_CHANGE);
-        MESSAGE("Kecleon transformed into the");
+        HP_BAR(opponent, captureDamage : &results[i].damage);
     }
-    THEN
+    FINALLY
     {
-        EXPECT_EQ(player->type1, expectedType);
-        EXPECT_EQ(player->type2, expectedType);
+        EXPECT_MUL_EQ(results[1].damage, Q_4_12(1.5), results[0].damage); // Sharpness affects slicing moves
+        EXPECT_EQ(results[2].damage, results[3].damage);                  // Sharpness does not affect non-slicing moves
     }
 }

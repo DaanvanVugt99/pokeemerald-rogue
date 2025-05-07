@@ -8723,6 +8723,10 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         if (gBattleMoves[move].flags & FLAG_PUNCHING_BASED)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
         break;
+    case ABILITY_BIG_WINGS:
+        if (gBattleMoves[move].flags & FLAG_WIND_BASED)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        break;
     case ABILITY_SHEER_FORCE:
         if (gBattleMoves[move].flags & FLAG_SHEER_FORCE_BOOST)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));

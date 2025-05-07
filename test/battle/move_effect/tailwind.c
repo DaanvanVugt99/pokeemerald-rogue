@@ -8,17 +8,25 @@ ASSUMPTIONS
 
 SINGLE_BATTLE_TEST("Tailwind applies for 4 turns")
 {
-    GIVEN {
-        ASSUME(B_TAILWIND_TURNS >= GEN_5);
+    GIVEN
+    {
         PLAYER(SPECIES_WOBBUFFET) { Speed(10); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(15); }
-    } WHEN {
-        TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_TAILWIND); }
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(opponent, MOVE_CELEBRATE);
+            MOVE(player, MOVE_TAILWIND);
+        }
         TURN {}
         TURN {}
         TURN {}
         TURN {}
-    } SCENE {
+    }
+    SCENE
+    {
         MESSAGE("Foe Wobbuffet used Celebrate!");
         MESSAGE("Wobbuffet used Tailwind!");
 
@@ -36,17 +44,68 @@ SINGLE_BATTLE_TEST("Tailwind applies for 4 turns")
     }
 }
 
+SINGLE_BATTLE_TEST("Tailwind applies for 5 turns with Big Wings")
+{
+    GIVEN
+    {
+        PLAYER(SPECIES_PIDGEOT)
+        {
+            Ability(ABILITY_BIG_WINGS);
+            Speed(10);
+        }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(15); }
+    }
+    WHEN
+    {
+        TURN
+        {
+            MOVE(opponent, MOVE_CELEBRATE);
+            MOVE(player, MOVE_TAILWIND);
+        }
+        TURN {}
+        TURN {}
+        TURN {}
+        TURN {}
+        TURN {}
+    }
+    SCENE
+    {
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Pidgeot used Tailwind!");
+
+        MESSAGE("Pidgeot used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+
+        MESSAGE("Pidgeot used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+
+        MESSAGE("Pidgeot used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+
+        MESSAGE("Pidgeot used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Pidgeot used Celebrate!");
+    }
+}
+
 DOUBLE_BATTLE_TEST("Tailwind affects partner on first turn")
 {
-    GIVEN {
+    GIVEN
+    {
         ASSUME(B_RECALC_TURN_AFTER_ACTIONS);
         PLAYER(SPECIES_WOBBUFFET) { Speed(20); }
         PLAYER(SPECIES_WYNAUT) { Speed(10); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(15); }
         OPPONENT(SPECIES_WYNAUT) { Speed(14); }
-    } WHEN {
+    }
+    WHEN
+    {
         TURN { MOVE(playerLeft, MOVE_TAILWIND); }
-    } SCENE {
+    }
+    SCENE
+    {
         MESSAGE("Wobbuffet used Tailwind!");
         MESSAGE("Wynaut used Celebrate!");
         MESSAGE("Foe Wobbuffet used Celebrate!");

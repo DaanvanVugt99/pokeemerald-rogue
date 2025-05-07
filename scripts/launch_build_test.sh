@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Sighting System does not affect OHKO moves"
+testToRunPrefix="Big wings increases the power of wind moves"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
