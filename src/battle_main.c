@@ -4783,6 +4783,12 @@ s8 GetMovePriority(u32 battler, u16 move)
         }
         break;
 
+    case ABILITY_SIGHTING_SYSTEM:
+        if (gBattleMoves[move].accuracy <= 80 && gBattleMoves[move].accuracy != 0)
+        {
+            priority = priority - 3;
+        }
+
     case ABILITY_TRIAGE:
         if (IsHealingMove(move))
             priority += 3;

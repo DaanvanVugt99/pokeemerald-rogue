@@ -7,41 +7,43 @@
 #define AI_CHOICE_WATCH 5
 #define AI_CHOICE_SWITCH 7
 
+#define BATTLER_HAS_ABILITY_FAST_AI(battlerId, abilityToCheck) (AI_DATA->abilities[battlerId] == abilityToCheck)
+
 #include "test_runner.h"
 
 // Logs for debugging AI tests.
-#define SET_SCORE(battler, movesetIndex, val) \
-    do \
-    { \
+#define SET_SCORE(battler, movesetIndex, val)                                         \
+    do                                                                                \
+    {                                                                                 \
         TestRunner_Battle_AISetScore(__FILE__, __LINE__, battler, movesetIndex, val); \
-        AI_THINKING_STRUCT->score[movesetIndex] = val; \
-    } while (0) \
+        AI_THINKING_STRUCT->score[movesetIndex] = val;                                \
+    } while (0)
 
-#define ADJUST_SCORE(val) \
-    do \
-    { \
+#define ADJUST_SCORE(val)                                                                                        \
+    do                                                                                                           \
+    {                                                                                                            \
         TestRunner_Battle_AIAdjustScore(__FILE__, __LINE__, sBattler_AI, AI_THINKING_STRUCT->movesetIndex, val); \
-        score += val; \
-    } while (0) \
+        score += val;                                                                                            \
+    } while (0)
 
-#define ADJUST_SCORE_PTR(val) \
-    do \
-    { \
+#define ADJUST_SCORE_PTR(val)                                                                                    \
+    do                                                                                                           \
+    {                                                                                                            \
         TestRunner_Battle_AIAdjustScore(__FILE__, __LINE__, sBattler_AI, AI_THINKING_STRUCT->movesetIndex, val); \
-        (*score) += val; \
-    } while (0) \
+        (*score) += val;                                                                                         \
+    } while (0)
 
-#define RETURN_SCORE_PLUS(val)      \
-{                                   \
-    ADJUST_SCORE(val);              \
-    return score;                   \
-}
+#define RETURN_SCORE_PLUS(val) \
+    {                          \
+        ADJUST_SCORE(val);     \
+        return score;          \
+    }
 
-#define RETURN_SCORE_MINUS(val)     \
-{                                   \
-    ADJUST_SCORE(-val);             \
-    return score;                   \
-}
+#define RETURN_SCORE_MINUS(val) \
+    {                           \
+        ADJUST_SCORE(-val);     \
+        return score;           \
+    }
 
 u32 ComputeBattleAiScores(u32 battler);
 void BattleAI_SetupItems(void);

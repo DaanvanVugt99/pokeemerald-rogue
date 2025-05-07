@@ -1511,6 +1511,9 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
     if (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(battlerAtk, TYPE_POISON))
         return TRUE;
 
+    if (AI_DATA->abilities[battlerAtk] == ABILITY_SIGHTING_SYSTEM)
+        return TRUE;
+
     if ((IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN)) &&
         (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
         return FALSE;

@@ -312,6 +312,7 @@ static const u8 sSpellFistDescription[] = _("Punches do special damage\nand 30% 
 static const u8 sBlitzBoxerDescription[] = _("Punching moves have\n+1 priority at full health.");
 static const u8 sRampageDescription[] = _("No recharge after a KO.");
 static const u8 sVengeanceDescription[] = _("Ups Ghost moves by 20%,\n50% when at 1/2 HP.");
+static const u8 sSightingSystemDescription[] = _("Moves always hit. Moves last\nfor moves less than 80% accuracy.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -637,6 +638,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_BLITZ_BOXER] = _("Blitz Boxer"),
         [ABILITY_RAMPAGE] = _("Rampage"),
         [ABILITY_VENGEANCE] = _("Vengeance"),
+        [ABILITY_SIGHTING_SYSTEM] = _("Sighting System"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1280,4 +1282,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_BLITZ_BOXER] = sBlitzBoxerDescription,
         [ABILITY_RAMPAGE] = sRampageDescription,
         [ABILITY_VENGEANCE] = sVengeanceDescription,
+        [ABILITY_SIGHTING_SYSTEM] = sSightingSystemDescription,
 };

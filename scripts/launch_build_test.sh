@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Blaze boosts Fire-type moves consistently"
+testToRunPrefix="Sighting System does not affect OHKO moves"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
