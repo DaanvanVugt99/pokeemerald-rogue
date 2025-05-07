@@ -9389,6 +9389,19 @@ static void Cmd_various(void)
         }
         break;
     }
+    case VARIOUS_TRY_ACTIVATE_RAMPAGE:
+    {
+        VARIOUS_ARGS();
+
+        u16 battlerAbility = GetBattlerAbility(battler);
+
+        if (battlerAbility == ABILITY_RAMPAGE && HasAttackerFaintedTarget() && !NoAliveMonsForEitherParty())
+        {
+            gDisableStructs[battler].rechargeTimer = 0;
+            gBattleMons[battler].status2 &= ~STATUS2_RECHARGE;
+        }
+        break;
+    }
     case VARIOUS_TRY_ACTIVATE_GRIM_NEIGH: // and as one shadow rider
     {
         VARIOUS_ARGS();

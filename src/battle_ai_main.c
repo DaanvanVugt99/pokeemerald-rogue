@@ -4648,6 +4648,10 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         if (IS_BATTLER_OF_TYPE(battlerDef, TYPE_WATER) || IS_BATTLER_OF_TYPE(battlerDef, TYPE_STEEL))
             ADJUST_SCORE(2);
         break;
+    case EFFECT_RECHARGE:
+        if ((aiData->abilities[battlerAtk] == ABILITY_RAMPAGE) && CanIndexMoveFaintTarget(battlerAtk, battlerDef, AI_THINKING_STRUCT->movesetIndex, 0))
+            ADJUST_SCORE(4); // No recharge if Rampage attacker KOs the target
+        break;
     } // move effect checks
 
     return score;

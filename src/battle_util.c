@@ -3788,7 +3788,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 {
                     gMultiHitCounter = 3;
                 }
-                else if (gBattleMoves[gCurrentMove].flags & FLAG_TWO_STRIKES)
+                else if (gBattleMoves[gCurrentMove].flags2 & FLAG_TWO_STRIKES)
                 {
                     gMultiHitCounter = 2;
                 }
@@ -11251,14 +11251,14 @@ u8 GetMoveType(u32 battler, u32 move)
 
 bool8 IsManuallyScriptedMultiHit(u16 move)
 {
-    if (gBattleMoves[move].flags & FLAG_TWO_STRIKES)
+    if (gBattleMoves[move].flags2 & FLAG_TWO_STRIKES)
         return TRUE;
 
     switch (gBattleMoves[move].effect)
     {
     case EFFECT_TRIPLE_KICK:
     case EFFECT_POPULATION_BOMB:
-    case EFFECT_BEAT_UP: // optional — depends on your implementation
+    case EFFECT_BEAT_UP: // if handled here
         return TRUE;
     default:
         return FALSE;

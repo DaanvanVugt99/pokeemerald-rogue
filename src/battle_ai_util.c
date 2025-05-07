@@ -811,7 +811,7 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
             }
 
             // Apply double-strike multiplier from flags BEFORE the switch handles other effects
-            if (!gBattleStruct->zmove.active && (gBattleMoves[move].flags & FLAG_TWO_STRIKES))
+            if (!gBattleStruct->zmove.active && (gBattleMoves[move].flags2 & FLAG_TWO_STRIKES))
                 dmg *= 2;
 
             // Handle other multi-strike moves

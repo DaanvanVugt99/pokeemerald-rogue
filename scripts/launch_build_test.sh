@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Spell Fist boosts punching moves by 1.3× and targets Sp. Def"
+testToRunPrefix="Rampage does not prevent recharge if no KO"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

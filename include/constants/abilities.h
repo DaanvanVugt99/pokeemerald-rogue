@@ -348,8 +348,9 @@
 #define ABILITY_PYROMANCY (ABILITIES_COUNT_GEN9 + 3)   // Fire attacks are 5x more likely to inflict a burn
 #define ABILITY_SPELL_FIST (ABILITIES_COUNT_GEN9 + 4)  // Punching moves deal 1.3x and do special damage
 #define ABILITY_BLITZ_BOXER (ABILITIES_COUNT_GEN9 + 5) // Punching moves gain priority at full health
+#define ABILITY_RAMPAGE (ABILITIES_COUNT_GEN9 + 6)     // If a recharge move KOs the foe, it doesn't need to recharge.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_BLITZ_BOXER + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_RAMPAGE + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

@@ -310,6 +310,7 @@ static const u8 sWhiteoutDescription[] = _("Boosts Ice moves by 50% in Hail.");
 static const u8 sPyromancyDescription[] = _("Fire moves burn 5x more often.");
 static const u8 sSpellFistDescription[] = _("Punches do special damage\nand 30% more damage.");
 static const u8 sBlitzBoxerDescription[] = _("Punching moves have\n+1 priority at full health.");
+static const u8 sRampageDescription[] = _("No recharge after a KO.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -633,6 +634,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_PYROMANCY] = _("Pyromancy"),
         [ABILITY_SPELL_FIST] = _("Spell Fist"),
         [ABILITY_BLITZ_BOXER] = _("Blitz Boxer"),
+        [ABILITY_RAMPAGE] = _("Rampage"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1274,4 +1276,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_PYROMANCY] = sPyromancyDescription,
         [ABILITY_SPELL_FIST] = sSpellFistDescription,
         [ABILITY_BLITZ_BOXER] = sBlitzBoxerDescription,
+        [ABILITY_RAMPAGE] = sRampageDescription,
 };
