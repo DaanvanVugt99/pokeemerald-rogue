@@ -5767,6 +5767,12 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     else if (attackerAbility == ABILITY_EXPLOIT_WEAKNESS && OpponentHasStatus(battlerAtk))
     {
         gBattleStruct->dynamicMoveType = TYPE_DARK | F_DYNAMIC_TYPE_SET;
+        gBattleStruct->ateBoost[battlerAtk] = 1;
+    }
+    else if (attackerAbility == ABILITY_FIGHTING_SPIRIT && gBattleMoves[move].type == TYPE_FIGHTING)
+    {
+        gBattleStruct->dynamicMoveType = TYPE_GHOST | F_DYNAMIC_TYPE_SET;
+        gBattleStruct->ateBoost[battlerAtk] = 1;
     }
 
     GET_MOVE_TYPE(move, moveType);

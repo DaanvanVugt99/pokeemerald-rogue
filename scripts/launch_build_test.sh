@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Exploit Weakness makes Poison move Dark type if opponent is statused"
+testToRunPrefix="Fighting Spirit changes Fighting move to Ghost and boosts damage"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

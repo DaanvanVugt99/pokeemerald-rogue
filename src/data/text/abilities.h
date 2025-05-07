@@ -318,6 +318,7 @@ static const u8 sPowerCoreDescription[] = _("The Pokémon uses +25% of its\nDefe
 static const u8 sElectrocytesDescription[] = _("Electric moves gain STAB,\nWater moves may paralyze");
 static const u8 sAerodynamicsDescription[] = _("Getting hit by Flying raises\nSpeed by +1 instead.");
 static const u8 sExploitWeaknessDescription[] = _("+50% power against status\nand moves become dark type.");
+static const u8 sFightingSpiritDescription[] = _("Fighting moves become ghost\ntype and deal +30% damage.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -648,6 +649,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_POWER_CORE] = _("Power Core"),
         [ABILITY_ELECTROCYTES] = _("Electrocytes"),
         [ABILITY_AERODYNAMICS] = _("Aerodynamics"),
+        [ABILITY_EXPLOIT_WEAKNESS] = _("Exploit Weakness"),
+        [ABILITY_FIGHTING_SPIRIT] = _("Fighting Spirit"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1297,5 +1300,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_ELECTROCYTES] = sElectrocytesDescription,
         [ABILITY_AERODYNAMICS] = sAerodynamicsDescription,
         [ABILITY_EXPLOIT_WEAKNESS] = sExploitWeaknessDescription,
-
+        [ABILITY_FIGHTING_SPIRIT] = sFightingSpiritDescription,
 };
