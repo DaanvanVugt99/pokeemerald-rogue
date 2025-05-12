@@ -1739,6 +1739,14 @@
 	various \battler, VARIOUS_TRY_ACTIVATE_RAMPAGE
 	.endm
 
+	.macro tryactivatescavenger
+    various BS_ATTACKER VARIOUS_TRY_ACTIVATE_SCAVENGER
+	.endm
+
+	.macro tryactivatefeast battler:req
+    various \battler, VARIOUS_TRY_ACTIVATE_FEAST
+	.endm
+
 	.macro tryactivatebeastboost battler:req
 	various \battler, VARIOUS_TRY_ACTIVATE_BEAST_BOOST
 	.endm

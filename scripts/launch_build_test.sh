@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Sighting System does not affect OHKO moves"
+testToRunPrefix="Rampage allows recharge moves to act next turn"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

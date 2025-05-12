@@ -112,8 +112,8 @@
 #define ABILITY_MOLD_BREAKER 104 // Moves can be used on the target regardless of its Abilities. Hits Levitate with Ground moves.
 #define ABILITY_SUPER_LUCK 105   // Raises the critical-hit ratio of moves by one level.
 #define ABILITY_AFTERMATH 106    // The foe that dealt the final hit loses 1/4 of its maximum HP if the move made physical contact.
-#define ABILITY_ANTICIPATION 107 // *No innate* Warns when the foe knows 1-hit KO or super-effective moves.
-#define ABILITY_FOREWARN 108     // *No innate* Reveals the foe’s strongest move.
+#define ABILITY_ANTICIPATION 107 // Warns when the foe knows 1-hit KO or super-effective moves.
+#define ABILITY_FOREWARN 108     // Reveals the foe’s strongest move.
 #define ABILITY_UNAWARE 109      // Foe’s stat modifications are ignored.
 #define ABILITY_TINTED_LENS 110  // The Pokémon can use "not very effective" moves to deal regular damage.
 #define ABILITY_FILTER 111       // Reduces the power of supereffective attacks taken by 35%.
@@ -178,9 +178,9 @@
 #define ABILITIES_COUNT_GEN5 165
 
 // Gen 6
-#define ABILITY_AROMA_VEIL 165     // *No innate* Protects itself and its allies from attacks that limit their move choices.
-#define ABILITY_FLOWER_VEIL 166    // *No innate* Ally Grass-type Pokémon are protected from status conditions and the lowering of their stats.
-#define ABILITY_CHEEK_POUCH 167    // *No innate* Restores HP as well when the Pokémon eats a Berry.
+#define ABILITY_AROMA_VEIL 165     // Protects itself and its allies from attacks that limit their move choices.
+#define ABILITY_FLOWER_VEIL 166    // Ally Grass-type Pokémon are protected from status conditions and the lowering of their stats.
+#define ABILITY_CHEEK_POUCH 167    // Restores HP as well when the Pokémon eats a Berry.
 #define ABILITY_PROTEAN 168        // Changes the Pokémon's type to the type of the move it's about to use.
 #define ABILITY_FUR_COAT 169       // Halves the damage from physical moves.
 #define ABILITY_MAGICIAN 170       // *No innate* The Pokémon steals the held item of a Pokémon it hits with a move.
@@ -360,8 +360,10 @@
 #define ABILITY_ANCIENT_IDOL (ABILITIES_COUNT_GEN9 + 15)     // Uses Def for Atk and SpDef for SpAtk
 #define ABILITY_SHORT_CIRCUIT (ABILITIES_COUNT_GEN9 + 16)    // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_ROUNDHOUSE (ABILITIES_COUNT_GEN9 + 17)       // Kicking moves can't miss and deal damage based on the lowest defensive type
+#define ABILITY_SCAVENGER (ABILITIES_COUNT_GEN9 + 18)        // Heals 1/3 of health when any pokemon faints during battle.
+#define ABILITY_FEAST (ABILITIES_COUNT_GEN9 + 19)            // Heals 1/2 of health when the pokemon knocks out another pokemon
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_ROUNDHOUSE + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_FEAST + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

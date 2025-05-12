@@ -1,9 +1,6 @@
 #include "global.h"
 #include "test/battle.h"
 
-#include "global.h"
-#include "test/battle.h"
-
 SINGLE_BATTLE_TEST("Rampage allows recharge moves to act next turn")
 {
     u32 move;

@@ -9401,12 +9401,18 @@ static void Cmd_various(void)
     {
         VARIOUS_ARGS();
 
-        u16 battlerAbility = GetBattlerAbility(battler);
-
-        if (battlerAbility == ABILITY_RAMPAGE && HasAttackerFaintedTarget() && !NoAliveMonsForEitherParty())
+        if (GetBattlerAbility(battler) == ABILITY_RAMPAGE && HasAttackerFaintedTarget() && !NoAliveMonsForEitherParty())
         {
             gDisableStructs[battler].rechargeTimer = 0;
             gBattleMons[battler].status2 &= ~STATUS2_RECHARGE;
+
+            gLastUsedAbility = ABILITY_RAMPAGE;
+            gBattleScripting.battler = battler;
+            gBattlerAbility = battler;
+
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_RampageActivates;
+            return;
         }
         break;
     }
@@ -9510,6 +9516,75 @@ static void Cmd_various(void)
             PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_FellStingerRaisesStat;
+            return;
+        }
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_SCAVENGER:
+    {
+        VARIOUS_ARGS();
+
+        u8 faintedCount = 0;
+        static u8 processedFainted[MAX_BATTLERS_COUNT] = {0}; // Track processed fainted Pokémon
+
+        // Count the number of fainted Pokémon in this event that have not been processed
+        for (u8 i = 0; i < gBattlersCount; i++)
+        {
+            if ((gHitMarker & HITMARKER_FAINTED(i)) && !processedFainted[i])
+            {
+                faintedCount++;
+                processedFainted[i] = 1; // Mark this Pokémon as processed for Scavenger
+            }
+        }
+
+        // Check if any Pokémon with Scavenger ability is alive
+        for (u8 i = 0; i < gBattlersCount; i++)
+        {
+            if (GetBattlerAbility(i) == ABILITY_SCAVENGER && IsBattlerAlive(i) && faintedCount > 0)
+            {
+                // Heal based on the number of fainted Pokémon
+                u32 healAmount = (gBattleMons[i].maxHP / 3) * faintedCount;
+                if (healAmount == 0)
+                    healAmount = 1;
+
+                gBattleMoveDamage = -healAmount;
+                gLastUsedAbility = ABILITY_SCAVENGER;
+
+                gBattleScripting.battler = i;
+                gBattlerAbility = i;
+
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityHpHeal;
+                return;
+            }
+        }
+
+        // Reset the processed array after handling
+        for (u8 i = 0; i < gBattlersCount; i++)
+        {
+            processedFainted[i] = 0;
+        }
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_FEAST:
+    {
+        VARIOUS_ARGS();
+
+        if (GetBattlerAbility(gBattlerAttacker) == ABILITY_FEAST && HasAttackerFaintedTarget() && !NoAliveMonsForEitherParty())
+        {
+            // Heal 1/2 of max HP
+            u32 healAmount = gBattleMons[gBattlerAttacker].maxHP / 2;
+            if (healAmount == 0)
+                healAmount = 1;
+
+            gBattleMoveDamage = -healAmount;
+            gLastUsedAbility = ABILITY_FEAST;
+
+            gBattleScripting.battler = gBattlerAttacker;
+            gBattlerAbility = gBattlerAttacker;
+
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityHpHeal;
             return;
         }
         break;

@@ -509,6 +509,8 @@ extern const u8 BattleScript_ItemRestoreHP_Party[];
 extern const u8 BattleScript_StenchActivates[];
 extern const u8 BattleScript_StenchEnd[];
 extern const u8 BattleScript_ObliviousBlocksIntimidate[];
+extern const u8 BattleScript_AbilityHpHeal[];
+extern const u8 BattleScript_RampageActivates[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

@@ -322,6 +322,8 @@ static const u8 sFightingSpiritDescription[] = _("Fighting moves become ghost\nt
 static const u8 sAncientIdolDescription[] = _("Hits with its Defense\nStats respectively.");
 static const u8 sShortCircuitDescription[] = _("Ups Electric moves by 20%,\n50% when at 1/2 HP.");
 static const u8 sRoundhouseDescription[] = _("Kicking moves can't miss and\ndeal damage to lowest defense/");
+static const u8 sScavengerDescription[] = _("Heals 1/3 HP when any\npokemon faints.");
+static const u8 sFeastDescription[] = _("Heals 1/2 HP when knocking\nout another pokemon.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -657,6 +659,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_ANCIENT_IDOL] = _("Ancient Idol"),
         [ABILITY_SHORT_CIRCUIT] = _("Short Circuit"),
         [ABILITY_ROUNDHOUSE] = _("Roundhouse"),
+        [ABILITY_SCAVENGER] = _("Scavenger"),
+        [ABILITY_FEAST] = _("Feast"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1310,4 +1314,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_ANCIENT_IDOL] = sAncientIdolDescription,
         [ABILITY_SHORT_CIRCUIT] = sShortCircuitDescription,
         [ABILITY_ROUNDHOUSE] = sRoundhouseDescription,
+        [ABILITY_SCAVENGER] = sScavengerDescription,
+        [ABILITY_FEAST] = sFeastDescription,
 };
