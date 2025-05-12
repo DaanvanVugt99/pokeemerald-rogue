@@ -327,6 +327,7 @@ static const u8 sFeastDescription[] = _("Heals 1/2 HP when knocking\nout another
 static const u8 sBranchSwingDescription[] = _("Gain 50% Speed and Ground\nimmunity on grassy terrain.");
 static const u8 sArtilleryDescription[] = _("Launcher moves can't miss\nand hit both enemies");
 static const u8 sCoilUpDescription[] = _("Biting moves have +1 priority\nthe first time they are used.");
+static const u8 sMoltenDownDescription[] = _("Fire-type is super effective\nagainst Rock-type.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -667,6 +668,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_BRANCH_SWING] = _("Branch Swing"),
         [ABILITY_ARTILLERY] = _("Artillery"),
         [ABILITY_COIL_UP] = _("Coil Up"),
+        [ABILITY_MOLTEN_DOWN] = _("Molten Down"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1325,4 +1327,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_BRANCH_SWING] = sBranchSwingDescription,
         [ABILITY_ARTILLERY] = sArtilleryDescription,
         [ABILITY_COIL_UP] = sCoilUpDescription,
+        [ABILITY_MOLTEN_DOWN] = sMoltenDownDescription,
 };

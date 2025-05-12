@@ -5756,7 +5756,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
             break;
         case ABILITY_ELECTROCYTES:
-            // Check if the move used is Water-type
             if (moveType == TYPE_WATER && TARGET_TURN_DAMAGED && IsBattlerAlive(gBattlerTarget) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
             {
                 // 10% chance to paralyze the target
@@ -5769,6 +5768,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
                     effect++;
                 }
+            }
+            break;
+        case ABILITY_MOLTEN_DOWN:
+            if (moveType == TYPE_FIRE && TARGET_TURN_DAMAGED && IsBattlerAlive(gBattlerTarget) && IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_ROCK) && CompareStat(gBattlerTarget, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+            {
+                gBattlerAttacker = gBattlerTarget;
+                gBattleScripting.battler = gBattlerTarget;
+
+                SET_STATCHANGER(STAT_SPEED, 1, TRUE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_EffectLowerStatFoes;
+                effect++;
             }
             break;
         }
@@ -9981,6 +9994,13 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
 
     // Corrosion ability: Poison-type moves are super effective against Steel-type
     if (abilityAtk == ABILITY_CORROSION && moveType == TYPE_POISON && defType == TYPE_STEEL)
+    {
+        mod = UQ_4_12(2.0);
+        if (recordAbilities)
+            RecordAbilityBattle(battlerAtk, abilityAtk);
+    }
+    // Molten Down ability: Fire-type moves are super effective against Rock-type
+    if (abilityAtk == ABILITY_MOLTEN_DOWN && moveType == TYPE_FIRE && defType == TYPE_ROCK)
     {
         mod = UQ_4_12(2.0);
         if (recordAbilities)

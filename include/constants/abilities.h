@@ -365,7 +365,7 @@
 #define ABILITY_BRANCH_SWING (ABILITIES_COUNT_GEN9 + 20)     // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain)
 #define ABILITY_ARTILLERY (ABILITIES_COUNT_GEN9 + 21)        // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain)
 #define ABILITY_COIL_UP (ABILITIES_COUNT_GEN9 + 22)          // The Pokémon enters the battlefield coiled up. Coil: The next time the Pokémon uses a biting move, its priority is increased 1.
-#define ABILITY_MOLTEN_DOWN (ABILITIES_COUNT_GEN9 + 23)      // Fire moves deal super effective to rock.
+#define ABILITY_MOLTEN_DOWN (ABILITIES_COUNT_GEN9 + 23)      // Fire moves deal super effective to rock types and lower their speed.
 
 #define ABILITIES_COUNT_CUSTOM (ABILITY_MOLTEN_DOWN + 1)
 

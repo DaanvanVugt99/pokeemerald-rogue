@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Anger Point does not trigger on a special move"
+testToRunPrefix="Molten Down does not trigger on non-Rock types"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
