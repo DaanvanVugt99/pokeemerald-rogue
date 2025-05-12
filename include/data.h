@@ -14,7 +14,8 @@
 // Red and Leaf's back pics have 5 frames, but this is presumably irrelevant in the places this is used.
 #define MAX_TRAINER_PIC_FRAMES 4
 
-enum {
+enum
+{
     BATTLER_AFFINE_NORMAL,
     BATTLER_AFFINE_EMERGE,
     BATTLER_AFFINE_RETURN,
@@ -28,12 +29,12 @@ struct MonCoords
     u8 y_offset;
 };
 
-#define MON_COORDS_SIZE(width, height)(DIV_ROUND_UP(width, 8) << 4 | DIV_ROUND_UP(height, 8))
-#define GET_MON_COORDS_WIDTH(size)((size >> 4) * 8)
-#define GET_MON_COORDS_HEIGHT(size)((size & 0xF) * 8)
+#define MON_COORDS_SIZE(width, height) (DIV_ROUND_UP(width, 8) << 4 | DIV_ROUND_UP(height, 8))
+#define GET_MON_COORDS_WIDTH(size) ((size >> 4) * 8)
+#define GET_MON_COORDS_HEIGHT(size) ((size & 0xF) * 8)
 #define TRAINER_PARTY_IVS(hp, atk, def, speed, spatk, spdef) (hp | (atk << 5) | (def << 10) | (speed << 15) | (spatk << 20) | (spdef << 25))
-#define TRAINER_PARTY_EVS(hp, atk, def, speed, spatk, spdef) ((const u8[6]){hp,atk,def,spatk,spdef,speed})
-#define TRAINER_PARTY_NATURE(nature) (nature+1)
+#define TRAINER_PARTY_EVS(hp, atk, def, speed, spatk, spdef) ((const u8[6]){hp, atk, def, spatk, spdef, speed})
+#define TRAINER_PARTY_NATURE(nature) (nature + 1)
 
 struct TrainerMon
 {
@@ -63,12 +64,12 @@ struct Trainer
     /*0x11*/ u8 encounterMusic_gender; // last bit is gender
     /*0x12*/ u16 trainerPic;
     /*0x13*/ u8 trainerName[TRAINER_NAME_LENGTH + 1];
-    /*0x1E*/ bool8 doubleBattle:1;
-             u8 padding:7;
+    /*0x1E*/ bool8 doubleBattle : 1;
+    u8 padding : 7;
     /*0x1F*/ u8 partySize;
 };
 
-//#define TRAINER_ENCOUNTER_MUSIC(encounterMusic_gender)((encounterMusic_gender & 0x7F))
+// #define TRAINER_ENCOUNTER_MUSIC(encounterMusic_gender)((encounterMusic_gender & 0x7F))
 
 extern const u16 gMinigameDigits_Pal[];
 extern const u32 gMinigameDigits_Gfx[];

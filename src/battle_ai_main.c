@@ -1032,6 +1032,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case MOVE_RAIN_DANCE:
         case MOVE_HAIL:
         case MOVE_SANDSTORM:
+        case MOVE_CORROSIVE_CLOUDS:
             RETURN_SCORE_MINUS(30);
         }
 
@@ -1628,6 +1629,10 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             ADJUST_SCORE(-8);
         else if (weather & B_WEATHER_HAIL)
             ADJUST_SCORE(-2); // mainly to prevent looping between hail and snow
+        break;
+    case EFFECT_ACID_RAIN:
+        if (weather & B_WEATHER_ACID_RAIN || IsMoveEffectWeather(aiData->partnerMove))
+            ADJUST_SCORE(-8);
         break;
     case EFFECT_ATTRACT:
         if (!AI_CanBeInfatuated(battlerAtk, battlerDef, aiData->abilities[battlerDef]))
@@ -2648,6 +2653,7 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case EFFECT_SNOWSCAPE:
         case EFFECT_RAIN_DANCE:
         case EFFECT_SANDSTORM:
+        case EFFECT_ACID_RAIN:
             if (IsMoveEffectWeather(move))
                 ADJUST_SCORE(-10);
             break;
@@ -2721,6 +2727,12 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         break;
     case EFFECT_SNOWSCAPE:
         if (IsBattlerAlive(battlerAtkPartner) && ShouldSetSnow(battlerAtkPartner, atkPartnerAbility, atkPartnerHoldEffect))
+        {
+            RETURN_SCORE_PLUS(2); // our partner benefits from snow
+        }
+        break;
+    case EFFECT_ACID_RAIN:
+        if (IsBattlerAlive(battlerAtkPartner) && ShouldSetAcidRain(battlerAtkPartner, atkPartnerAbility, atkPartnerHoldEffect))
         {
             RETURN_SCORE_PLUS(2); // our partner benefits from snow
         }
@@ -3872,6 +3884,12 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
                 ADJUST_SCORE(1);
         }
         break;
+    case EFFECT_ACID_RAIN:
+        if (ShouldSetAcidRain(battlerAtk, aiData->abilities[battlerAtk], aiData->holdEffects[battlerAtk]))
+        {
+            ADJUST_SCORE(1);
+        }
+        break;
     case EFFECT_ATTACK_UP_HIT:
         if (secondaryEffectChance >= 100)
             IncreaseStatUpScore(battlerAtk, battlerDef, STAT_ATK, &score);
@@ -4769,6 +4787,7 @@ static s32 AI_SetupFirstTurn(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     case EFFECT_SANDSTORM:
     case EFFECT_HAIL:
     case EFFECT_SNOWSCAPE:
+    case EFFECT_ACID_RAIN:
     case EFFECT_GEOMANCY:
     case EFFECT_VICTORY_DANCE:
     case EFFECT_HIT_SET_ENTRY_HAZARD:
@@ -4990,6 +5009,7 @@ static s32 AI_HPAware(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             case EFFECT_HAIL:
             case EFFECT_SNOWSCAPE:
             case EFFECT_RAIN_DANCE:
+            case EFFECT_ACID_RAIN:
             case EFFECT_FILLET_AWAY:
                 ADJUST_SCORE(-2);
                 break;

@@ -545,6 +545,7 @@ static void Cmd_jumpifnexttargetvalid(void);
 static void Cmd_tryhealhalfhealth(void);
 static void Cmd_trymirrormove(void);
 static void Cmd_setrain(void);
+static void Cmd_setacidrain(void);
 static void Cmd_setreflect(void);
 static void Cmd_setseeded(void);
 static void Cmd_manipulatedamage(void);
@@ -675,7 +676,6 @@ static void Cmd_jumpifoppositegenders(void);
 static void Cmd_unused(void);
 static void Cmd_tryworryseed(void);
 static void Cmd_callnative(void);
-static void Cmd_rogue_partyhasroom(void);
 static void Cmd_rogue_caughtmon(void);
 
 void (*const gBattleScriptingCommandsTable[])(void) =
@@ -911,7 +911,7 @@ void (*const gBattleScriptingCommandsTable[])(void) =
         Cmd_getsecretpowereffect,            // 0xE4
         Cmd_pickup,                          // 0xE5
         Cmd_unused3,                         // 0xE6
-        Cmd_rogue_partyhasroom,              // Cmd_unused4,      //0xE7
+        Cmd_setacidrain,                     // 0xE7
         Cmd_settypebasedhalvers,             // 0xE8
         Cmd_jumpifsubstituteblocks,          // 0xE9
         Cmd_tryrecycleitem,                  // 0xEA
@@ -5384,7 +5384,7 @@ static void PlayAnimation(u32 battler, u8 animId, const u16 *argPtr, const u8 *n
         BattleScriptPush(nextInstr);
         gBattlescriptCurrInstr = BattleScript_Pausex20;
     }
-    else if (animId == B_ANIM_RAIN_CONTINUES || animId == B_ANIM_SUN_CONTINUES || animId == B_ANIM_SANDSTORM_CONTINUES || animId == B_ANIM_HAIL_CONTINUES || animId == B_ANIM_SNOW_CONTINUES)
+    else if (animId == B_ANIM_RAIN_CONTINUES || animId == B_ANIM_SUN_CONTINUES || animId == B_ANIM_SANDSTORM_CONTINUES || animId == B_ANIM_HAIL_CONTINUES || animId == B_ANIM_SNOW_CONTINUES || animId == B_ANIM_ACID_RAIN_CONTINUES)
     {
         BtlController_EmitBattleAnimation(battler, BUFFER_A, animId, &gDisableStructs[battler], *argPtr);
         MarkBattlerForControllerExec(battler);
@@ -8417,6 +8417,8 @@ static void RemoveAllWeather(void)
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_STRONG_WINDS;
     else if (gBattleWeather & B_WEATHER_SNOW)
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_SNOW;
+    else if (gBattleWeather & B_WEATHER_ACID_RAIN)
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_ACID_RAIN;
     else
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_COUNT; // failsafe
 
@@ -11195,6 +11197,22 @@ static void Cmd_setrain(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
+static void Cmd_setacidrain(void)
+{
+    CMD_ARGS();
+
+    if (!TryChangeBattleWeather(gBattlerAttacker, ENUM_WEATHER_ACID_RAIN, FALSE))
+    {
+        gMoveResultFlags |= MOVE_RESULT_MISSED;
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_FAILED;
+    }
+    else
+    {
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_ACID_RAIN;
+    }
+    gBattlescriptCurrInstr = cmd->nextInstr;
+}
+
 static void Cmd_setreflect(void)
 {
     CMD_ARGS();
@@ -12435,6 +12453,15 @@ static void Cmd_weatherdamage(void)
                 if (gBattleMoveDamage == 0)
                     gBattleMoveDamage = 1;
                 gBattleMoveDamage *= -1;
+            }
+        }
+        if (gBattleWeather & B_WEATHER_ACID_RAIN)
+        {
+            if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON) && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_BUG) && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)) && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
+            {
+                gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
             }
         }
     }
@@ -15327,21 +15354,21 @@ static void Cmd_handleballthrow(void)
     }
 }
 
-static void Cmd_rogue_partyhasroom(void)
-{
-    CMD_ARGS(const u8 *successInstr);
+// static void Cmd_rogue_partyhasroom(void)
+// {
+//     CMD_ARGS(const u8 *successInstr);
 
-    if (!Rogue_CheckPartyHasRoomForMon())
-    {
-        // Continue
-        gBattlescriptCurrInstr = cmd->nextInstr;
-        return;
-    }
+//     if (!Rogue_CheckPartyHasRoomForMon())
+//     {
+//         // Continue
+//         gBattlescriptCurrInstr = cmd->nextInstr;
+//         return;
+//     }
 
-    // Jump to location
-    gBattlescriptCurrInstr = cmd->successInstr;
-    return;
-}
+//     // Jump to location
+//     gBattlescriptCurrInstr = cmd->successInstr;
+//     return;
+// }
 
 static void Cmd_rogue_caughtmon(void)
 {

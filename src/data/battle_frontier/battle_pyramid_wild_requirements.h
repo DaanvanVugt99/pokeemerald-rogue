@@ -3,7 +3,8 @@
 #include "constants/abilities.h"
 #include "constants/battle_move_effects.h"
 
-struct BattlePyramidRequirement {
+struct BattlePyramidRequirement
+{
     const u16 *moves; /* use moves instead of effects so we don't need to find moves with said effect in our loop */
     u16 abilities[10];
     u8 nAbilities;
@@ -15,11 +16,11 @@ struct BattlePyramidRequirement {
 
 // EFFECT_PARALYZE, EFFECT_PARALYZE_HIT (30% or more)
 static const u16 sParalyzingMoves[] = {
-    //MOVE_THUNDER_PUNCH,
+    // MOVE_THUNDER_PUNCH,
     MOVE_BODY_SLAM,
     MOVE_STUN_SPORE,
-    //MOVE_THUNDER_SHOCK,
-    //MOVE_THUNDERBOLT,
+    // MOVE_THUNDER_SHOCK,
+    // MOVE_THUNDERBOLT,
     MOVE_THUNDER_WAVE,
     MOVE_LICK,
     MOVE_GLARE,
@@ -28,7 +29,7 @@ static const u16 sParalyzingMoves[] = {
     MOVE_DRAGON_BREATH,
     MOVE_FORCE_PALM,
     MOVE_DISCHARGE,
-    //MOVE_BOLT_STRIKE,
+    // MOVE_BOLT_STRIKE,
     MOVE_NUZZLE,
     MOVE_SPLISHY_SPLASH,
     MOVE_BUZZY_BUZZ,
@@ -38,17 +39,17 @@ static const u16 sParalyzingMoves[] = {
 // EFFECT_POISON_HIT (30% or more), EFFECT_POISON, EFFECT_POISON_FANG, EFFECT_TOXIC, EFFECT_TOXIC_THREAD
 static const u16 sPoisoningMoves[] = {
     MOVE_POISON_STING,
-    //MOVE_TWINEEDLE,
+    // MOVE_TWINEEDLE,
     MOVE_SMOG,
     MOVE_SLUDGE,
     MOVE_SLUDGE_BOMB,
-    //MOVE_POISON_TAIL,
+    // MOVE_POISON_TAIL,
     MOVE_POISON_JAB,
-    //MOVE_CROSS_POISON,
+    // MOVE_CROSS_POISON,
     MOVE_GUNK_SHOT,
-    //MOVE_SLUDGE_WAVE,
+    // MOVE_SLUDGE_WAVE,
     MOVE_NOXIOUS_TORQUE,
-    //MOVE_ACID,
+    // MOVE_ACID,
     MOVE_POISON_POWDER,
     MOVE_TOXIC,
     MOVE_POISON_GAS,
@@ -60,11 +61,11 @@ static const u16 sPoisoningMoves[] = {
 // EFFECT_BURN_HIT, EFFECT_WILL_O_WISP
 static const u16 sBurningMoves[] = {
     MOVE_WILL_O_WISP,
-    //MOVE_EMBER,
-    //MOVE_FLAMETHROWER,
-    //MOVE_FIRE_BLAST,
-    //MOVE_HEAT_WAVE,
-    //MOVE_BLAZE_KICK,
+    // MOVE_EMBER,
+    // MOVE_FLAMETHROWER,
+    // MOVE_FIRE_BLAST,
+    // MOVE_HEAT_WAVE,
+    // MOVE_BLAZE_KICK,
     MOVE_LAVA_PLUME,
     MOVE_SCALD,
     MOVE_INFERNO,
@@ -72,7 +73,7 @@ static const u16 sBurningMoves[] = {
     MOVE_BLUE_FLARE,
     MOVE_STEAM_ERUPTION,
     MOVE_SIZZLY_SLIDE,
-    //MOVE_PYRO_BALL,
+    // MOVE_PYRO_BALL,
     MOVE_BURNING_JEALOUSY,
     MOVE_SCORCHING_SANDS,
     MOVE_SANDSEAR_STORM,
@@ -108,6 +109,7 @@ static const u16 sWeatherChangingMoves[] = {
     MOVE_SANDSTORM,
     MOVE_HAIL,
     MOVE_SUNNY_DAY,
+    MOVE_CORROSIVE_CLOUDS,
 };
 
 // EFFECT_RECHARGE, EFFECT_RECOIL_33
@@ -127,7 +129,7 @@ static const struct BattlePyramidRequirement sBattlePyramidRequirementsByRound[]
         .type = TYPE_MYSTERY, // no type limitation
         .moves = sParalyzingMoves,
         .nMoves = NELEMS(sParalyzingMoves),
-        .abilities = { ABILITY_STATIC },
+        .abilities = {ABILITY_STATIC},
         .nAbilities = 1,
     },
     [1] = /* pokemon with moves that poison */
@@ -135,14 +137,14 @@ static const struct BattlePyramidRequirement sBattlePyramidRequirementsByRound[]
         .type = TYPE_MYSTERY,
         .moves = sPoisoningMoves,
         .nMoves = NELEMS(sPoisoningMoves),
-        .abilities = { ABILITY_POISON_POINT },
+        .abilities = {ABILITY_POISON_POINT},
     },
     [2] = /* Pokemon with moves that burn */
     {
         .type = TYPE_MYSTERY,
         .moves = sBurningMoves,
         .nMoves = NELEMS(sBurningMoves),
-        .abilities = { ABILITY_FLAME_BODY },
+        .abilities = {ABILITY_FLAME_BODY},
         .nAbilities = 1,
     },
     [3] = /* pokemon with moves that waste PP */
@@ -150,26 +152,26 @@ static const struct BattlePyramidRequirement sBattlePyramidRequirementsByRound[]
         .type = TYPE_MYSTERY,
         .moves = sPPReducingMoves,
         .nMoves = NELEMS(sPPReducingMoves),
-        .abilities = { ABILITY_PRESSURE },
+        .abilities = {ABILITY_PRESSURE},
         .nAbilities = 1,
     },
     [4] = /* pokemon with Levitate */
     {
         .type = TYPE_MYSTERY,
-        .abilities = { ABILITY_LEVITATE },
+        .abilities = {ABILITY_LEVITATE},
         .nAbilities = 1,
     },
     [5] = /* pokemon with trapping abilities */
     {
         .type = TYPE_MYSTERY,
-        .abilities = { ABILITY_SHADOW_TAG, ABILITY_ARENA_TRAP }, // TODO magnet pull?
+        .abilities = {ABILITY_SHADOW_TAG, ABILITY_ARENA_TRAP}, // TODO magnet pull?
         .nAbilities = 2,
     },
     [6] = /* ice types */
     {
         .type = TYPE_ICE,
     },
-    
+
     [7] = /* pokemon with explosion effects */
     {
         .type = TYPE_MYSTERY,
@@ -193,7 +195,7 @@ static const struct BattlePyramidRequirement sBattlePyramidRequirementsByRound[]
         .type = TYPE_MYSTERY,
         .moves = sWeatherChangingMoves,
         .nMoves = NELEMS(sWeatherChangingMoves),
-        .abilities = { ABILITY_SAND_SPIT, ABILITY_DRIZZLE, ABILITY_SNOW_WARNING, ABILITY_DROUGHT, ABILITY_SAND_STREAM },
+        .abilities = {ABILITY_SAND_SPIT, ABILITY_DRIZZLE, ABILITY_SNOW_WARNING, ABILITY_DROUGHT, ABILITY_SAND_STREAM},
         .nAbilities = 5,
     },
     [12] = /* bug types */

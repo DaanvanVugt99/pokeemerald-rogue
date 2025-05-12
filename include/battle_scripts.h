@@ -53,6 +53,8 @@ extern const u8 BattleScript_RainContinuesOrEnds[];
 extern const u8 BattleScript_SnowContinuesOrEnds[];
 extern const u8 BattleScript_DamagingWeatherContinues[];
 extern const u8 BattleScript_SandStormHailSnowEnds[];
+extern const u8 BattleScript_AcidRainContinues[];
+extern const u8 BattleScript_AcidRainStopped[];
 extern const u8 BattleScript_SunlightContinues[];
 extern const u8 BattleScript_SunlightFaded[];
 extern const u8 BattleScript_OverworldWeatherStarts[];

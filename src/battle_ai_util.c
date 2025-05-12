@@ -337,6 +337,7 @@ static const u16 sEncouragedEncoreEffects[] =
         EFFECT_ATTRACT,
         EFFECT_SAFEGUARD,
         EFFECT_RAIN_DANCE,
+        EFFECT_ACID_RAIN,
         EFFECT_SUNNY_DAY,
         EFFECT_BELLY_DRUM,
         EFFECT_PSYCH_UP,
@@ -1623,6 +1624,19 @@ bool32 ShouldSetSnow(u32 battler, u32 ability, u32 holdEffect)
         return FALSE;
 
     if (ability == ABILITY_SNOW_CLOAK || ability == ABILITY_ICE_BODY || IS_FORECAST_ABILITY(ability) || ability == ABILITY_SLUSH_RUSH || IS_BATTLER_OF_TYPE(battler, TYPE_ICE) || HasMove(battler, MOVE_BLIZZARD) || HasMoveEffect(battler, EFFECT_AURORA_VEIL) || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+bool32 ShouldSetAcidRain(u32 battler, u32 ability, u32 holdEffect)
+{
+    u32 weather = AI_GetWeather(AI_DATA);
+    if (weather & B_WEATHER_ACID_RAIN)
+        return FALSE;
+
+    if (IS_BATTLER_OF_TYPE(battler, TYPE_BUG) || IS_BATTLER_OF_TYPE(battler, TYPE_POISON) || HasMoveEffect(battler, EFFECT_WEATHER_BALL))
     {
         return TRUE;
     }
@@ -2997,7 +3011,7 @@ bool32 PartnerMoveEffectIsStatusSameTarget(u32 battlerAtkPartner, u32 battlerDef
 
 bool32 IsMoveEffectWeather(u32 move)
 {
-    if (move != MOVE_NONE && (gBattleMoves[move].effect == EFFECT_SUNNY_DAY || gBattleMoves[move].effect == EFFECT_RAIN_DANCE || gBattleMoves[move].effect == EFFECT_SANDSTORM || gBattleMoves[move].effect == EFFECT_HAIL || gBattleMoves[move].effect == EFFECT_SNOWSCAPE))
+    if (move != MOVE_NONE && (gBattleMoves[move].effect == EFFECT_SUNNY_DAY || gBattleMoves[move].effect == EFFECT_RAIN_DANCE || gBattleMoves[move].effect == EFFECT_SANDSTORM || gBattleMoves[move].effect == EFFECT_HAIL || gBattleMoves[move].effect == EFFECT_SNOWSCAPE || gBattleMoves[move].effect == EFFECT_ACID_RAIN))
         return TRUE;
     return FALSE;
 }

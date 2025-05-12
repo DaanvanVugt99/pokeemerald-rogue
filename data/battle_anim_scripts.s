@@ -875,6 +875,7 @@ gBattleAnims_Moves::
 	.4byte Move_PSYCHIC_NOISE
 	.4byte Move_UPPER_HAND
 	.4byte Move_MALIGNANT_CHAIN
+	.4byte Move_CORROSIVE_CLOUDS
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
 	.4byte Move_ALL_OUT_PUMMELING
@@ -1034,6 +1035,7 @@ gBattleAnims_General::
 	.4byte General_WonderRoom               @ B_ANIM_WONDER_ROOM
 	.4byte General_MagicRoom                @ B_ANIM_MAGIC_ROOM
 	.4byte General_Tailwind                 @ B_ANIM_TAILLWIND
+	.4byte General_AcidRain                 @ B_ANIM_ACID_RAIN
 
 	.align 2
 gBattleAnims_Special::
@@ -22757,6 +22759,20 @@ Move_RAIN_DANCE:
 	waitforvisualfinish
 	end
 
+Move_CORROSIVE_CLOUDS:
+	loadspritegfx ANIM_TAG_RAIN_DROPS
+	playsewithpan SE_M_RAIN_DANCE, SOUND_PAN_ATTACKER
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 0, 4, RGB_GREEN
+	waitforvisualfinish
+	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
+	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
+	delay 120
+	delay 30
+	waitforvisualfinish
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 4, 0, RGB_GREEN
+	waitforvisualfinish
+	end
+
 Move_BITE:
 	loadspritegfx ANIM_TAG_SHARP_TEETH
 	loadspritegfx ANIM_TAG_IMPACT
@@ -27355,6 +27371,7 @@ Move_WEATHER_BALL:
 	jumpreteq ANIM_WEATHER_SANDSTORM, WeatherBallSandstorm
 	jumpreteq ANIM_WEATHER_HAIL, WeatherBallIce
 	jumpreteq ANIM_WEATHER_SNOW, WeatherBallIce
+	jumpreteq ANIM_WEATHER_ACID_RAIN, WeatherBallPoison
 WeatherBallNormal:
 	loadspritegfx ANIM_TAG_IMPACT
 	createsprite gWeatherBallNormalDownSpriteTemplate, ANIM_TARGET, 2, -30, -100, 25, 1, 0, 0
@@ -27430,6 +27447,23 @@ WeatherBallIce:
 	call IceCrystalEffectShort
 	waitforvisualfinish
 	end
+WeatherBallPoison:
+    loadspritegfx ANIM_TAG_SMALL_BUBBLES
+    loadspritegfx ANIM_TAG_POISON_BUBBLE
+    createsprite gWeatherBallPoisonDownSpriteTemplate, ANIM_TARGET, 2, -30, -100, 25, 25, -20, 20
+    playsewithpan SE_M_WHIRLPOOL, SOUND_PAN_TARGET
+    delay 10
+    createsprite gWeatherBallPoisonDownSpriteTemplate, ANIM_TARGET, 2, -30, -100, 25, 25, 20, 0
+    playsewithpan SE_M_WHIRLPOOL, SOUND_PAN_TARGET
+    delay 10
+    createsprite gWeatherBallPoisonDownSpriteTemplate, ANIM_TARGET, 2, -30, -100, 25, 25, 0, 0
+    playsewithpan SE_M_WHIRLPOOL, SOUND_PAN_TARGET
+    waitforvisualfinish
+    createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 2, 0, 8, 1
+    playsewithpan SE_M_SPIT_UP, SOUND_PAN_TARGET
+	createvisualtask AnimTask_MistBallFog, 5
+    waitforvisualfinish
+    end
 
 Move_COUNT:
 	loadspritegfx ANIM_TAG_IMPACT
@@ -28082,6 +28116,23 @@ RainDrops:
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 4, 0, RGB_BLACK
 	waitforvisualfinish
 	return
+
+General_AcidRain::
+    call AcidRainDrops
+    end
+
+AcidRainDrops:
+    loadspritegfx ANIM_TAG_RAIN_DROPS
+    playsewithpan SE_M_FAINT_ATTACK, SOUND_PAN_ATTACKER
+    createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 0, 4, RGB_GREEN
+    waitforvisualfinish
+    createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 60
+    createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 60
+    delay 50
+    waitforvisualfinish
+    createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 4, 0, RGB_GREEN
+    waitforvisualfinish
+    return
 
 General_Sun:
 	goto Move_SUNNY_DAY

@@ -1911,6 +1911,7 @@ enum
     ENDTURN_RAINBOW,
     ENDTURN_SEA_OF_FIRE,
     ENDTURN_SWAMP,
+    ENDTURN_ACID_RAIN,
     ENDTURN_FIELD_COUNT,
 };
 
@@ -2230,6 +2231,26 @@ u8 DoFieldEndTurnEffects(void)
 
                 gBattleScripting.animArg1 = B_ANIM_SANDSTORM_CONTINUES;
                 gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SANDSTORM;
+                BattleScriptExecute(gBattlescriptCurrInstr);
+                effect++;
+            }
+            gBattleStruct->turnCountersTracker++;
+            break;
+        case ENDTURN_ACID_RAIN:
+            if (gBattleWeather & B_WEATHER_ACID_RAIN)
+            {
+                if (!(gBattleWeather & B_WEATHER_ACID_RAIN_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
+                {
+                    gBattleWeather &= ~B_WEATHER_ACID_RAIN_TEMPORARY;
+                    gBattlescriptCurrInstr = BattleScript_AcidRainStopped;
+                }
+                else
+                {
+                    gBattlescriptCurrInstr = BattleScript_DamagingWeatherContinues;
+                }
+
+                gBattleScripting.animArg1 = B_ANIM_ACID_RAIN_CONTINUES;
+                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ACID_RAIN;
                 BattleScriptExecute(gBattlescriptCurrInstr);
                 effect++;
             }
@@ -4015,6 +4036,7 @@ static const u16 sWeatherFlagsInfo[][3] =
         [ENUM_WEATHER_HAIL] = {B_WEATHER_HAIL_TEMPORARY, B_WEATHER_HAIL_PERMANENT, HOLD_EFFECT_ICY_ROCK},
         [ENUM_WEATHER_STRONG_WINDS] = {B_WEATHER_STRONG_WINDS, B_WEATHER_STRONG_WINDS, HOLD_EFFECT_NONE},
         [ENUM_WEATHER_SNOW] = {B_WEATHER_SNOW_TEMPORARY, B_WEATHER_SNOW_PERMANENT, HOLD_EFFECT_ICY_ROCK},
+        [ENUM_WEATHER_ACID_RAIN] = {B_WEATHER_ACID_RAIN_TEMPORARY, B_WEATHER_ACID_RAIN_PERMANENT, HOLD_EFFECT_NONE},
 };
 
 static void ShouldChangeFormInWeather(u32 battler)

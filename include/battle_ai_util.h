@@ -2,12 +2,12 @@
 #define GUARD_BATTLE_AI_UTIL_H
 
 // for AI_WhoStrikesFirst
-#define AI_IS_FASTER   0
-#define AI_IS_SLOWER   1
+#define AI_IS_FASTER 0
+#define AI_IS_SLOWER 1
 
 #define FOE(battler) ((BATTLE_OPPOSITE(battler)) & BIT_SIDE)
 
-#define AI_STRIKES_FIRST(battlerAi, battlerDef, move)((AI_WhoStrikesFirst(battlerAi, battlerDef, move) == AI_IS_FASTER))
+#define AI_STRIKES_FIRST(battlerAi, battlerDef, move) ((AI_WhoStrikesFirst(battlerAi, battlerDef, move) == AI_IS_FASTER))
 
 bool32 AI_RandLessThan(u32 val);
 bool32 IsAiVsAiBattle(void);
@@ -119,6 +119,7 @@ bool32 ShouldSetHail(u32 battler, u32 ability, u32 holdEffect);
 bool32 ShouldSetSnow(u32 battler, u32 ability, u32 holdEffect);
 bool32 ShouldSetRain(u32 battlerAtk, u32 ability, u32 holdEffect);
 bool32 ShouldSetSun(u32 battlerAtk, u32 atkAbility, u32 holdEffect);
+bool32 ShouldSetAcidRain(u32 battlerAtk, u32 atkAbility, u32 holdEffect);
 bool32 HasSleepMoveWithLowAccuracy(u32 battlerAtk, u32 battlerDef);
 bool32 IsHealingMove(u32 move);
 bool32 HasHealingEffect(u32 battler);
@@ -159,7 +160,7 @@ bool32 IsWakeupTurn(u32 battler);
 bool32 AI_IsBattlerAsleepOrComatose(u32 battlerId);
 
 // partner logic
-#define IS_TARGETING_PARTNER(battlerAtk, battlerDef)((battlerAtk) == (battlerDef ^ BIT_FLANK))
+#define IS_TARGETING_PARTNER(battlerAtk, battlerDef) ((battlerAtk) == (battlerDef ^ BIT_FLANK))
 u32 GetAllyChosenMove(u32 battlerId);
 bool32 IsValidDoubleBattle(u32 battlerAtk);
 bool32 IsTargetingPartner(u32 battlerAtk, u32 battlerDef);
@@ -193,4 +194,4 @@ void IncreaseFrostbiteScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score
 s32 AI_CalcPartyMonDamage(u32 move, u32 battlerAtk, u32 battlerDef, struct BattlePokemon switchinCandidate, bool8 isPartyMonAttacker);
 void IncreaseTidyUpScore(u32 battlerAtk, u32 battlerDef, u32 move, s32 *score);
 
-#endif //GUARD_BATTLE_AI_UTIL_H
+#endif // GUARD_BATTLE_AI_UTIL_H

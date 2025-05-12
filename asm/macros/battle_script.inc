@@ -1188,7 +1188,7 @@
 	.byte 0xe6
 	.endm
 
-	.macro unused4
+	.macro setacidrain
 	.byte 0xe7
 	.endm
 
@@ -2243,6 +2243,11 @@
 	.macro applyterastallization battler:req, applyFade:req
 	various \battler, VARIOUS_APPLY_TERASTALLIZATION
 	.byte \applyFade
+	.endm
+
+	.macro setcloudy ptr:req
+	various BS_ATTACKER, VARIOUS_SETCLOUDY
+	.4byte \ptr
 	.endm
 
 @ helpful macros

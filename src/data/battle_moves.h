@@ -13049,6 +13049,22 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .zMoveEffect = Z_EFFECT_NONE,
             },
 
+        [MOVE_CORROSIVE_CLOUDS] =
+            {
+                .effect = EFFECT_ACID_RAIN,
+                .power = 0,
+                .type = TYPE_POISON,
+                .accuracy = 0,
+                .pp = 5,
+                .secondaryEffectChance = 0,
+                .target = MOVE_TARGET_ALL_BATTLERS,
+                .priority = 0,
+                .split = SPLIT_STATUS,
+                .zMoveEffect = Z_EFFECT_SPD_UP_1,
+                .flags = FLAG_IGNORES_PROTECT,
+                .banMask = BAN_MIRROR_MOVE,
+            },
+
         // Z-Moves
         [MOVE_BREAKNECK_BLITZ] =
             {

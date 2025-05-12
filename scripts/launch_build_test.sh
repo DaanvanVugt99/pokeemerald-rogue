@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Molten Down does not trigger on non-Rock types"
+testToRunPrefix="Acid rain deals 1/16 damage per turn"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

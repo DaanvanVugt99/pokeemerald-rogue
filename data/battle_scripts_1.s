@@ -157,6 +157,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectHit                     @ EFFECT_HIDDEN_POWER
 	.4byte BattleScript_EffectRainDance               @ EFFECT_RAIN_DANCE
 	.4byte BattleScript_EffectSunnyDay                @ EFFECT_SUNNY_DAY
+	.4byte BattleScript_EffectCorrosiveClouds         @ EFFECT_CORROSIVE_CLOUDS
 	.4byte BattleScript_EffectDefenseUpHit            @ EFFECT_DEFENSE_UP_HIT
 	.4byte BattleScript_EffectAttackUpHit             @ EFFECT_ATTACK_UP_HIT
 	.4byte BattleScript_EffectAllStatsUpHit           @ EFFECT_ALL_STATS_UP_HIT
@@ -5450,6 +5451,13 @@ BattleScript_EffectSunnyDay::
 	setsunny
 	goto BattleScript_MoveWeatherChange
 
+BattleScript_EffectCorrosiveClouds::
+    attackcanceler
+    attackstring
+    ppreduce
+	setacidrain
+    goto BattleScript_MoveWeatherChange
+
 BattleScript_ExtremelyHarshSunlightWasNotLessened:
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_EXTREMELYHARSHSUNLIGHTWASNOTLESSENED
@@ -7070,7 +7078,7 @@ BattleScript_RainContinuesOrEndsEnd::
 	end2
 
 BattleScript_DamagingWeatherContinues::
-	printfromtable gSandStormHailSnowContinuesStringIds
+	printfromtable gSandStormHailSnowAcidContinuesStringIds
 	waitmessage B_WAIT_TIME_LONG
 	playanimation_var BS_ATTACKER, sB_ANIM_ARG1
 	setbyte gBattleCommunication, 0
@@ -7079,7 +7087,7 @@ BattleScript_DamagingWeatherLoop::
 	weatherdamage
 	jumpifword CMP_EQUAL, gBattleMoveDamage, 0, BattleScript_DamagingWeatherLoopIncrement
 	jumpifword CMP_COMMON_BITS gBattleMoveDamage, 1 << 31, BattleScript_DamagingWeatherHeal
-	printfromtable gSandStormHailDmgStringIds
+	printfromtable gSandStormHailAcidDmgStringIds
 	waitmessage B_WAIT_TIME_LONG
 	effectivenesssound
 	hitanimation BS_ATTACKER
@@ -7104,7 +7112,7 @@ BattleScript_DamagingWeatherContinuesEnd::
 	end2
 
 BattleScript_SandStormHailSnowEnds::
-	printfromtable gSandStormHailSnowEndStringIds
+	printfromtable gSandStormHailSnowAcidEndStringIds
 	waitmessage B_WAIT_TIME_LONG
 	call BattleScript_ActivateWeatherAbilities
 	end2
