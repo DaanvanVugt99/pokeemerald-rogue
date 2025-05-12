@@ -8328,13 +8328,6 @@ BattleScript_CottonDownReturn:
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return
 
-BattleScript_AnticipationActivates::
-	pause 5
-	call BattleScript_AbilityPopUp
-	printstring STRINGID_ANTICIPATIONACTIVATES
-	waitmessage B_WAIT_TIME_LONG
-	return
-
 BattleScript_AftermathDmg::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

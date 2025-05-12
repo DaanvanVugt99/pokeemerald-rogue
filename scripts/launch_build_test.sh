@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Corrosion makes Poison-type damaging moves super effective against Steel"
+testToRunPrefix="Anticipation activates correctly when an opponent switches in with a super-effective move"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
