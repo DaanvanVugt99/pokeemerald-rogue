@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Coil up makes the first biting move gain priority"
+testToRunPrefix="Corrosion makes Poison-type damaging moves super effective against Steel"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
