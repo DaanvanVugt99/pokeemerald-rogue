@@ -84,7 +84,7 @@
 // Gen 4
 #define ABILITY_TANGLED_FEET 77  // *No innate* Pokémon’s evasion raises one level when Confused.
 #define ABILITY_MOTOR_DRIVE 78   // Boosts its Speed stat if hit by an Electric-type move instead of taking damage.
-#define ABILITY_RIVALRY 79       // Attack & Special Attack is increased by 25% if the foe is of the same gender.
+#define ABILITY_RIVALRY 79       // Pokémon's power is increased by 25% if the foe is of the same gender.
 #define ABILITY_STEADFAST 80     // *No innate* Raises speed by +1 when flinching.
 #define ABILITY_SNOW_CLOAK 81    // Boosts the Pokémon's evasiveness in a hailstorm by 20%.
 #define ABILITY_GLUTTONY 82      // Eats berries at 1/2 HP instead of 1/3 HP.
@@ -154,7 +154,7 @@
 #define ABILITY_OVERCOAT 142     // Protects the Pokémon from things like sand, hail, and powder. The Pokémon takes 20% less damage from special moves.
 #define ABILITY_POISON_TOUCH 143 // 30% chance to badly poison a target when the Pokémon makes contact.
 #define ABILITY_REGENERATOR 144  // Restores 1/3 HP when withdrawn from battle.
-#define ABILITY_BIG_PECKS 145    // Powers up moves that make direct contact by 30%.
+#define ABILITY_BIG_PECKS 145    // Powers up moves that make direct contact by 30%. Prevents other Pokémon from lowering the Pokémon's defense stat stage.
 #define ABILITY_SAND_RUSH 146    // Doubles the Pokémon's Speed stat in a sandstorm.
 #define ABILITY_WONDER_SKIN 147  // Makes non-damaging moves that are targeted at this Pokémon have the accuracy of 50%.
 #define ABILITY_ANALYTIC 148     // Boosts move power by 30% when the Pokémon moves last.
