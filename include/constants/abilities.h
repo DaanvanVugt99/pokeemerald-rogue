@@ -353,7 +353,7 @@
 #define ABILITY_SIGHTING_SYSTEM (ABILITIES_COUNT_GEN9 + 8)   // When the Pokémon uses a move with Accuracy of 50% or lower, the move will have 100% Accuracy, but have its priority decreased by 3.
 #define ABILITY_BIG_WINGS (ABILITIES_COUNT_GEN9 + 9)         // Wind moves deal 1.3x and tailwind duration +1
 #define ABILITY_POWER_CORE (ABILITIES_COUNT_GEN9 + 10)       // The Pokémon uses 25% of its Defense stat during physical moves and Special Defense stat during special moves in addition to the default stat. (Defense and Special Defense stat stages still affects these percentage).
-#define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)     // Electric type moves gain STAB, water type moves have 20% to paralyze
+#define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)     // Electric type moves gain STAB, water type moves have 10% to paralyze
 #define ABILITY_AERODYNAMICS (ABILITIES_COUNT_GEN9 + 12)     // Immune to flying and gains +1 speed when hit with a flying type move.
 #define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.5x and become dark type against pokemon with status.
 #define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain 1.3x power
@@ -365,8 +365,9 @@
 #define ABILITY_BRANCH_SWING (ABILITIES_COUNT_GEN9 + 20)     // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain)
 #define ABILITY_ARTILLERY (ABILITIES_COUNT_GEN9 + 21)        // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain)
 #define ABILITY_COIL_UP (ABILITIES_COUNT_GEN9 + 22)          // The Pokémon enters the battlefield coiled up. Coil: The next time the Pokémon uses a biting move, its priority is increased 1.
+#define ABILITY_MOLTEN_DOWN (ABILITIES_COUNT_GEN9 + 23)      // Fire moves deal super effective to rock.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_COIL_UP + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_MOLTEN_DOWN + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

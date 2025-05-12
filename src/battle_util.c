@@ -5759,8 +5759,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             // Check if the move used is Water-type
             if (moveType == TYPE_WATER && TARGET_TURN_DAMAGED && IsBattlerAlive(gBattlerTarget) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
             {
-                // 20% chance to paralyze the target
-                if (RandomWeighted(RNG_ELECTROCYTES, 4, 1) && CanBeParalyzed(gBattlerTarget))
+                // 10% chance to paralyze the target
+                if (RandomWeighted(RNG_ELECTROCYTES, 9, 1) && CanBeParalyzed(gBattlerTarget))
                 {
                     gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
                     PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
