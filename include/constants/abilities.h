@@ -364,8 +364,9 @@
 #define ABILITY_FEAST (ABILITIES_COUNT_GEN9 + 19)            // Heals 1/2 of health when the pokemon knocks out another pokemon
 #define ABILITY_BRANCH_SWING (ABILITIES_COUNT_GEN9 + 20)     // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain)
 #define ABILITY_ARTILLERY (ABILITIES_COUNT_GEN9 + 21)        // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain)
+#define ABILITY_COIL_UP (ABILITIES_COUNT_GEN9 + 22)          // The Pokémon enters the battlefield coiled up. Coil: The next time the Pokémon uses a biting move, its priority is increased 1.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_ARTILLERY + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_COIL_UP + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

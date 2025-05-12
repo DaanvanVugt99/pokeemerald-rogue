@@ -326,6 +326,7 @@ static const u8 sScavengerDescription[] = _("Heals 1/3 HP when any\npokemon fain
 static const u8 sFeastDescription[] = _("Heals 1/2 HP when knocking\nout another pokemon.");
 static const u8 sBranchSwingDescription[] = _("Gain 50% Speed and Ground\nimmunity on grassy terrain.");
 static const u8 sArtilleryDescription[] = _("Launcher moves can't miss\nand hit both enemies");
+static const u8 sCoilUpDescription[] = _("Biting moves have +1 priority\nthe first time they are used.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -665,6 +666,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_FEAST] = _("Feast"),
         [ABILITY_BRANCH_SWING] = _("Branch Swing"),
         [ABILITY_ARTILLERY] = _("Artillery"),
+        [ABILITY_COIL_UP] = _("Coil Up"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1322,4 +1324,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_FEAST] = sFeastDescription,
         [ABILITY_BRANCH_SWING] = sBranchSwingDescription,
         [ABILITY_ARTILLERY] = sArtilleryDescription,
+        [ABILITY_COIL_UP] = sCoilUpDescription,
 };

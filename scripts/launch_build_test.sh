@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Artillery makes launcher-based moves hit both enemies"
+testToRunPrefix="Coil up makes the first biting move gain priority"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

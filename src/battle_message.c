@@ -846,8 +846,9 @@ static const u8 sText_HospitalityRestoration[] = _("{B_ATK_PARTNER_NAME} drank d
 static const u8 sText_SupersweetAromaWafts[] = _("A supersweet aroma is wafting from\nthe syrup covering {B_ATK_NAME_WITH_PREFIX}!");
 static const u8 sText_PkmnTerastallizedInto[] = _("{B_ATK_NAME_WITH_PREFIX} terastallized\ninto the {B_BUFF1} type!");
 static const u8 sText_ElectroShotCharging[] = _("{B_ATK_NAME_WITH_PREFIX} absorbed\nelectricity!");
-static const u8 sText_ObliviousBlocksIntimidate[] =
-    _("{B_DEF_NAME_WITH_PREFIX}'s {B_DEF_ABILITY}\nblocked Intimidate!");
+static const u8 sText_ObliviousBlocksIntimidate[] = _("{B_DEF_NAME_WITH_PREFIX}'s {B_DEF_ABILITY}\nblocked Intimidate!");
+static const u8 sText_BattlerCoiledUp[] = _("{B_ATK_NAME_WITH_PREFIX} coiled up \nand is ready to bite!");
+
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     {
         [STRINGID_PKMNTERASTALLIZEDINTO - BATTLESTRINGS_TABLE_START] = sText_PkmnTerastallizedInto,
@@ -2241,7 +2242,8 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
             BATTLESTRINGS_TABLE_START] = sText_PkmnIsCalm,
         [STRINGID_OBLIVIOUSBLOCKSINTIMIDATE -
             BATTLESTRINGS_TABLE_START] = sText_ObliviousBlocksIntimidate,
-
+        [STRINGID_BATTLERCOILEDUP -
+            BATTLESTRINGS_TABLE_START] = sText_BattlerCoiledUp,
 };
 
 const u16 gTrainerUsedItemStringIds[] =

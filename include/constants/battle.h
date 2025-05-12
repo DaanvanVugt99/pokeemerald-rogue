@@ -186,6 +186,7 @@
 #define STATUS4_SALT_CURE (1 << 4)
 #define STATUS4_SYRUP_BOMB (1 << 5)
 #define STATUS4_GLAIVE_RUSH (1 << 6)
+#define STATUS4_COILED (1 << 7) // Used for ability Coil Up
 
 #define HITMARKER_WAKE_UP_CLEAR (1 << 4) // Cleared when waking up. Never set or checked.
 #define HITMARKER_IGNORE_BIDE (1 << 5)

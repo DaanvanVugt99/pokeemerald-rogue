@@ -511,6 +511,7 @@ extern const u8 BattleScript_StenchEnd[];
 extern const u8 BattleScript_ObliviousBlocksIntimidate[];
 extern const u8 BattleScript_AbilityHpHeal[];
 extern const u8 BattleScript_RampageActivates[];
+extern const u8 BattleScript_BattlerCoiledUp[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

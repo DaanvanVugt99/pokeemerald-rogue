@@ -2559,6 +2559,7 @@ enum
     ENDTURN_EMBARGO,
     ENDTURN_LOCK_ON,
     ENDTURN_CHARGE,
+    ENDTURN_COILED_UP,
     ENDTURN_LASER_FOCUS,
     ENDTURN_TAUNT,
     ENDTURN_YAWN,
@@ -2973,6 +2974,11 @@ u8 DoBattlerEndTurnEffects(void)
         case ENDTURN_CHARGE: // charge
             if (gDisableStructs[battler].chargeTimer && --gDisableStructs[battler].chargeTimer == 0)
                 gStatuses3[battler] &= ~STATUS3_CHARGED_UP;
+            gBattleStruct->turnEffectsTracker++;
+            break;
+        case ENDTURN_COILED_UP:
+            if ((gStatuses4[battler] & STATUS4_COILED) && (gBattleMoves[gLastMoves[battler]].flags & FLAG_BITING_BASED))
+                gStatuses4[battler] &= ~(STATUS4_COILED);
             gBattleStruct->turnEffectsTracker++;
             break;
         case ENDTURN_TAUNT: // taunt
@@ -4646,6 +4652,18 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
                 gBattlerAttacker = battler;
                 BattleScriptPushCursorAndCallback(BattleScript_IntimidateActivates);
+                effect++;
+            }
+            break;
+        case ABILITY_COIL_UP:
+            if (!gSpecialStatuses[battler].switchInAbilityDone &&
+                !(gStatuses4[battler] & STATUS4_COILED))
+            {
+                gBattlerAttacker = battler;
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattleScripting.abilityPopupOverwrite = gLastUsedAbility = ABILITY_COIL_UP;
+                gStatuses4[battler] |= STATUS4_COILED;
+                BattleScriptPushCursorAndCallback(BattleScript_BattlerCoiledUp);
                 effect++;
             }
             break;

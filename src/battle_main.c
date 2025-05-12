@@ -4802,6 +4802,12 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    // Coil up bonus
+    if ((gStatuses4[battler] & STATUS4_COILED) && (gBattleMoves[move].flags & FLAG_BITING_BASED))
+    {
+        priority++;
+    }
+
     // Quash overrides everything
     if (gProtectStructs[battler].quash)
         priority = -8;
