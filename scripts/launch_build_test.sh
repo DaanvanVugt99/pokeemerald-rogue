@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Branch Swing makes the Pokémon ungrounded on Grassy Terrain"
+testToRunPrefix="Artillery makes launcher-based moves hit both enemies"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

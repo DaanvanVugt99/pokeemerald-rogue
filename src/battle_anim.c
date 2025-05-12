@@ -18,6 +18,7 @@
 #include "sprite.h"
 #include "task.h"
 #include "test_runner.h"
+#include "constants/abilities.h"
 #include "constants/battle_anim.h"
 #include "constants/moves.h"
 
@@ -123,59 +124,59 @@ EWRAM_DATA static bool8 sAnimHideHpBoxes = FALSE;
 
 #include "data/battle_anim.h"
 
-static void (* const sScriptCmdTable[])(void) =
-{
-    Cmd_loadspritegfx,        // 0x00
-    Cmd_unloadspritegfx,      // 0x01
-    Cmd_createsprite,         // 0x02
-    Cmd_createvisualtask,     // 0x03
-    Cmd_delay,                // 0x04
-    Cmd_waitforvisualfinish,  // 0x05
-    Cmd_nop,                  // 0x06
-    Cmd_nop2,                 // 0x07
-    Cmd_end,                  // 0x08
-    Cmd_playse,               // 0x09
-    Cmd_monbg,                // 0x0A
-    Cmd_clearmonbg,           // 0x0B
-    Cmd_setalpha,             // 0x0C
-    Cmd_blendoff,             // 0x0D
-    Cmd_call,                 // 0x0E
-    Cmd_return,               // 0x0F
-    Cmd_setarg,               // 0x10
-    Cmd_choosetwoturnanim,    // 0x11
-    Cmd_jumpifmoveturn,       // 0x12
-    Cmd_goto,                 // 0x13
-    Cmd_fadetobg,             // 0x14
-    Cmd_restorebg,            // 0x15
-    Cmd_waitbgfadeout,        // 0x16
-    Cmd_waitbgfadein,         // 0x17
-    Cmd_changebg,             // 0x18
-    Cmd_playsewithpan,        // 0x19
-    Cmd_setpan,               // 0x1A
-    Cmd_panse,                // 0x1B
-    Cmd_loopsewithpan,        // 0x1C
-    Cmd_waitplaysewithpan,    // 0x1D
-    Cmd_setbldcnt,            // 0x1E
-    Cmd_createsoundtask,      // 0x1F
-    Cmd_waitsound,            // 0x20
-    Cmd_jumpargeq,            // 0x21
-    Cmd_monbg_static,         // 0x22
-    Cmd_clearmonbg_static,    // 0x23
-    Cmd_jumpifcontest,        // 0x24
-    Cmd_fadetobgfromset,      // 0x25
-    Cmd_panse_adjustnone,     // 0x26
-    Cmd_panse_adjustall,      // 0x27
-    Cmd_splitbgprio,          // 0x28
-    Cmd_splitbgprio_all,      // 0x29
-    Cmd_splitbgprio_foes,     // 0x2A
-    Cmd_invisible,            // 0x2B
-    Cmd_visible,              // 0x2C
-    Cmd_teamattack_moveback,  // 0x2D
-    Cmd_teamattack_movefwd,   // 0x2E
-    Cmd_stopsound,            // 0x2F
-    Cmd_createvisualtaskontargets,  // 0x30
-    Cmd_createspriteontargets,      // 0x31
-    Cmd_createspriteontargets_onpos, // 0x32
+static void (*const sScriptCmdTable[])(void) =
+    {
+        Cmd_loadspritegfx,               // 0x00
+        Cmd_unloadspritegfx,             // 0x01
+        Cmd_createsprite,                // 0x02
+        Cmd_createvisualtask,            // 0x03
+        Cmd_delay,                       // 0x04
+        Cmd_waitforvisualfinish,         // 0x05
+        Cmd_nop,                         // 0x06
+        Cmd_nop2,                        // 0x07
+        Cmd_end,                         // 0x08
+        Cmd_playse,                      // 0x09
+        Cmd_monbg,                       // 0x0A
+        Cmd_clearmonbg,                  // 0x0B
+        Cmd_setalpha,                    // 0x0C
+        Cmd_blendoff,                    // 0x0D
+        Cmd_call,                        // 0x0E
+        Cmd_return,                      // 0x0F
+        Cmd_setarg,                      // 0x10
+        Cmd_choosetwoturnanim,           // 0x11
+        Cmd_jumpifmoveturn,              // 0x12
+        Cmd_goto,                        // 0x13
+        Cmd_fadetobg,                    // 0x14
+        Cmd_restorebg,                   // 0x15
+        Cmd_waitbgfadeout,               // 0x16
+        Cmd_waitbgfadein,                // 0x17
+        Cmd_changebg,                    // 0x18
+        Cmd_playsewithpan,               // 0x19
+        Cmd_setpan,                      // 0x1A
+        Cmd_panse,                       // 0x1B
+        Cmd_loopsewithpan,               // 0x1C
+        Cmd_waitplaysewithpan,           // 0x1D
+        Cmd_setbldcnt,                   // 0x1E
+        Cmd_createsoundtask,             // 0x1F
+        Cmd_waitsound,                   // 0x20
+        Cmd_jumpargeq,                   // 0x21
+        Cmd_monbg_static,                // 0x22
+        Cmd_clearmonbg_static,           // 0x23
+        Cmd_jumpifcontest,               // 0x24
+        Cmd_fadetobgfromset,             // 0x25
+        Cmd_panse_adjustnone,            // 0x26
+        Cmd_panse_adjustall,             // 0x27
+        Cmd_splitbgprio,                 // 0x28
+        Cmd_splitbgprio_all,             // 0x29
+        Cmd_splitbgprio_foes,            // 0x2A
+        Cmd_invisible,                   // 0x2B
+        Cmd_visible,                     // 0x2C
+        Cmd_teamattack_moveback,         // 0x2D
+        Cmd_teamattack_movefwd,          // 0x2E
+        Cmd_stopsound,                   // 0x2F
+        Cmd_createvisualtaskontargets,   // 0x30
+        Cmd_createspriteontargets,       // 0x31
+        Cmd_createspriteontargets_onpos, // 0x32
 };
 
 void ClearBattleAnimationVars(void)
@@ -213,6 +214,7 @@ void DoMoveAnim(u16 move)
 {
     gBattleAnimAttacker = gBattlerAttacker;
     gBattleAnimTarget = gBattlerTarget;
+
     // Make sure the anim target of moves hitting everyone is at the opposite side.
     if (GetBattlerMoveTargetType(gBattlerAttacker, move) & MOVE_TARGET_FOES_AND_ALLY && IsDoubleBattle())
     {
@@ -447,18 +449,21 @@ static u8 GetBattleAnimMoveTargets(u8 battlerArgIndex, u8 *targets)
     switch (GetBattlerMoveTargetType(gBattleAnimAttacker, gAnimMoveIndex))
     {
     case MOVE_TARGET_FOES_AND_ALLY:
-        if (IS_ALIVE_AND_PRESENT(BATTLE_PARTNER(BATTLE_OPPOSITE(battler)))) {
+        if (IS_ALIVE_AND_PRESENT(BATTLE_PARTNER(BATTLE_OPPOSITE(battler))))
+        {
             targets[idx++] = BATTLE_PARTNER(BATTLE_OPPOSITE(battler));
             numTargets++;
         }
         // fallthrough
     case MOVE_TARGET_BOTH:
-        if (IS_ALIVE_AND_PRESENT(battler)) {
+        if (IS_ALIVE_AND_PRESENT(battler))
+        {
             targets[idx++] = battler;
             numTargets++;
         }
         battler = BATTLE_PARTNER(battler);
-        if (IS_ALIVE_AND_PRESENT(battler)) {
+        if (IS_ALIVE_AND_PRESENT(battler))
+        {
             targets[idx++] = battler;
             numTargets++;
         }
@@ -528,12 +533,12 @@ static void Cmd_createsprite(void)
     subpriority = GetSubpriorityForMoveAnim(argVar);
 
     if (CreateSpriteAndAnimate(template,
-        GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_X_2),
-        GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_Y_PIC_OFFSET),
-        subpriority) != MAX_SPRITES) // Don't increment the task count if the sprite couldn't be created(i.e. there are too many created sprites atm).
-     {
-         gAnimVisualTaskCount++;
-     }
+                               GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_X_2),
+                               GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_Y_PIC_OFFSET),
+                               subpriority) != MAX_SPRITES) // Don't increment the task count if the sprite couldn't be created(i.e. there are too many created sprites atm).
+    {
+        gAnimVisualTaskCount++;
+    }
 }
 
 static void CreateSpriteOnTargets(const struct SpriteTemplate *template, u8 argVar, u8 battlerArgIndex, u8 argsCount, bool32 overwriteAnimTgt)
@@ -555,15 +560,16 @@ static void CreateSpriteOnTargets(const struct SpriteTemplate *template, u8 argV
     if (ntargets == 0)
         return;
 
-    for (i = 0; i < ntargets; i++) {
+    for (i = 0; i < ntargets; i++)
+    {
 
         if (overwriteAnimTgt)
             gBattleAnimArgs[battlerArgIndex] = targets[i];
 
         if (CreateSpriteAndAnimate(template,
-            GetBattlerSpriteCoord(targets[i], BATTLER_COORD_X_2),
-            GetBattlerSpriteCoord(targets[i], BATTLER_COORD_Y_PIC_OFFSET),
-            subpriority) != MAX_SPRITES) // Don't increment the task count if the sprite couldn't be created(i.e. there are too many created sprites atm).
+                                   GetBattlerSpriteCoord(targets[i], BATTLER_COORD_X_2),
+                                   GetBattlerSpriteCoord(targets[i], BATTLER_COORD_Y_PIC_OFFSET),
+                                   subpriority) != MAX_SPRITES) // Don't increment the task count if the sprite couldn't be created(i.e. there are too many created sprites atm).
         {
             gAnimVisualTaskCount++;
         }
@@ -673,7 +679,8 @@ static void Cmd_createvisualtaskontargets(void)
     sBattleAnimScriptPtr++;
 
     // copy task arguments
-    for (i = 0; i < numArgs; i++) {
+    for (i = 0; i < numArgs; i++)
+    {
         gBattleAnimArgs[i] = T1_READ_16(sBattleAnimScriptPtr);
         sBattleAnimScriptPtr += 2;
     }
@@ -690,7 +697,6 @@ static void Cmd_createvisualtaskontargets(void)
         gAnimVisualTaskCount++;
     }
 }
-
 
 static void Cmd_delay(void)
 {
@@ -730,8 +736,7 @@ static void Cmd_end(void)
     bool32 continuousAnim = FALSE;
 
     // Keep waiting as long as there are animations to be done.
-    if (gAnimVisualTaskCount != 0 || gAnimSoundTaskCount != 0
-     || sMonAnimTaskIdArray[0] != TASK_NONE || sMonAnimTaskIdArray[1] != TASK_NONE)
+    if (gAnimVisualTaskCount != 0 || gAnimSoundTaskCount != 0 || sMonAnimTaskIdArray[0] != TASK_NONE || sMonAnimTaskIdArray[1] != TASK_NONE)
     {
         sSoundAnimFramesToWait = 0;
         sAnimFramesToWait = 1;
@@ -790,18 +795,18 @@ static void Cmd_playse(void)
 // To differentiate them the task data for Task_UpdateMonBg is prefixed t2
 
 // Task data for Task_InitUpdateMonBg
-#define tBattlerId  data[0]
-#define tInBg2      data[1]
-#define tActive     data[2]
-#define tIsPartner  data[3]
+#define tBattlerId data[0]
+#define tInBg2 data[1]
+#define tActive data[2]
+#define tIsPartner data[3]
 
 // Task data for Task_UpdateMonBg
-#define t2_SpriteId  data[0]
-#define t2_SpriteX   data[1]
-#define t2_SpriteY   data[2]
-#define t2_BgX       data[3]
-#define t2_BgY       data[4]
-#define t2_InBg2     data[5]
+#define t2_SpriteId data[0]
+#define t2_SpriteX data[1]
+#define t2_SpriteY data[2]
+#define t2_BgX data[3]
+#define t2_BgY data[4]
+#define t2_InBg2 data[5]
 #define t2_BattlerId data[6]
 
 static void Task_InitUpdateMonBg(u8 taskId)
@@ -871,7 +876,6 @@ static void Cmd_monbg(void)
         gTasks[taskId].tInBg2 = toBG_2;
         gTasks[taskId].tActive = TRUE;
         gTasks[taskId].tIsPartner = FALSE;
-
     }
 
     // Move battler's partner to background
@@ -959,11 +963,11 @@ void MoveBattlerSpriteToBG(u8 battlerId, bool8 toBG_2, bool8 setSpriteInvisible)
 
         battlerSpriteId = gBattlerSpriteIds[battlerId];
 
-        gBattle_BG1_X =  -(gSprites[battlerSpriteId].x + gSprites[battlerSpriteId].x2) + 0x20;
+        gBattle_BG1_X = -(gSprites[battlerSpriteId].x + gSprites[battlerSpriteId].x2) + 0x20;
         if (IsContest() && IsSpeciesNotUnown(gContestResources->moveAnim->species))
             gBattle_BG1_X--;
 
-        gBattle_BG1_Y =  -(gSprites[battlerSpriteId].y + gSprites[battlerSpriteId].y2) + 0x20;
+        gBattle_BG1_Y = -(gSprites[battlerSpriteId].y + gSprites[battlerSpriteId].y2) + 0x20;
         if (setSpriteInvisible)
             gSprites[gBattlerSpriteIds[battlerId]].invisible = TRUE;
 
@@ -996,8 +1000,8 @@ void MoveBattlerSpriteToBG(u8 battlerId, bool8 toBG_2, bool8 setSpriteInvisible)
 
         battlerSpriteId = gBattlerSpriteIds[battlerId];
 
-        gBattle_BG2_X =  -(gSprites[battlerSpriteId].x + gSprites[battlerSpriteId].x2) + 0x20;
-        gBattle_BG2_Y =  -(gSprites[battlerSpriteId].y + gSprites[battlerSpriteId].y2) + 0x20;
+        gBattle_BG2_X = -(gSprites[battlerSpriteId].x + gSprites[battlerSpriteId].x2) + 0x20;
+        gBattle_BG2_Y = -(gSprites[battlerSpriteId].y + gSprites[battlerSpriteId].y2) + 0x20;
 
         if (setSpriteInvisible)
             gSprites[gBattlerSpriteIds[battlerId]].invisible = TRUE;
@@ -1371,8 +1375,8 @@ bool8 IsContest(void)
         return FALSE;
 }
 
-#define tBackgroundId   data[0]
-#define tState          data[10]
+#define tBackgroundId data[0]
+#define tState data[10]
 
 static void Cmd_fadetobg(void)
 {
@@ -1633,12 +1637,12 @@ static void Cmd_setpan(void)
     sBattleAnimScriptPtr++;
 }
 
-#define tInitialPan     data[0]
-#define tTargetPan      data[1]
-#define tIncrementPan   data[2]
-#define tFramesToWait   data[3]
-#define tCurrentPan     data[4]
-#define tFrameCounter   data[8]
+#define tInitialPan data[0]
+#define tTargetPan data[1]
+#define tIncrementPan data[2]
+#define tFramesToWait data[3]
+#define tCurrentPan data[4]
+#define tFrameCounter data[8]
 
 static void Cmd_panse(void)
 {
@@ -1778,11 +1782,11 @@ static void Cmd_panse_adjustall(void)
 #undef tCurrentPan
 #undef tFrameCounter
 
-#define tSongId         data[0]
-#define tPanning        data[1]
-#define tFramesToWait   data[2]
-#define tNumberOfPlays  data[3]
-#define tFrameCounter   data[8]
+#define tSongId data[0]
+#define tPanning data[1]
+#define tFramesToWait data[2]
+#define tNumberOfPlays data[3]
+#define tFrameCounter data[8]
 
 static void Cmd_loopsewithpan(void)
 {
@@ -1837,9 +1841,9 @@ static void Task_LoopAndPlaySE(u8 taskId)
 #undef tNumberOfPlays
 #undef tFrameCounter
 
-#define tSongId         data[0]
-#define tPanning        data[1]
-#define tFramesToWait   data[2]
+#define tSongId data[0]
+#define tPanning data[1]
+#define tFramesToWait data[2]
 
 static void Cmd_waitplaysewithpan(void)
 {
@@ -2043,8 +2047,7 @@ static void Cmd_teamattack_moveback(void)
     sBattleAnimScriptPtr += 2;
 
     // Apply to double battles when attacking own side
-    if (!IsContest() && IsDoubleBattle()
-     && GetBattlerSide(gBattleAnimAttacker) == GetBattlerSide(gBattleAnimTarget))
+    if (!IsContest() && IsDoubleBattle() && GetBattlerSide(gBattleAnimAttacker) == GetBattlerSide(gBattleAnimTarget))
     {
         if (wantedBattler == ANIM_ATTACKER)
         {
@@ -2080,8 +2083,7 @@ static void Cmd_teamattack_movefwd(void)
     sBattleAnimScriptPtr += 2;
 
     // Apply to double battles when attacking own side
-    if (!IsContest() && IsDoubleBattle()
-     && GetBattlerSide(gBattleAnimAttacker) == GetBattlerSide(gBattleAnimTarget))
+    if (!IsContest() && IsDoubleBattle() && GetBattlerSide(gBattleAnimAttacker) == GetBattlerSide(gBattleAnimTarget))
     {
         if (wantedBattler == ANIM_ATTACKER)
         {

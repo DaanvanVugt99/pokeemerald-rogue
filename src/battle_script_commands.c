@@ -2143,9 +2143,10 @@ static void Cmd_accuracycheck(void)
     if (move == ACC_CURR_MOVE)
         move = gCurrentMove;
 
-    // skip accuracy check for these abilities
+    // Skip accuracy check for abilities that guarantee a hit
     if ((abilityAtk == ABILITY_SIGHTING_SYSTEM) ||
-        (abilityAtk == ABILITY_ROUNDHOUSE && (move == MOVE_HIGH_JUMP_KICK || move == MOVE_AXE_KICK)))
+        (abilityAtk == ABILITY_ARTILLERY && (gBattleMoves[move].flags & FLAG_LAUNCHER_BASED)) ||
+        (abilityAtk == ABILITY_ROUNDHOUSE && (gBattleMoves[move].flags & FLAG_KICKING_BASED)))
     {
         gBattlescriptCurrInstr = cmd->nextInstr;
         return;

@@ -8269,6 +8269,12 @@ u32 CountBattlerStatIncreases(u32 battler, bool32 countEvasionAcc)
 
 u32 GetMoveTargetCount(u32 move, u32 battlerAtk, u32 battlerDef)
 {
+    // Artillery makes launcher moves hit both
+    if (GetBattlerAbility(battlerAtk) == ABILITY_ARTILLERY && (gBattleMoves[move].flags & FLAG_LAUNCHER_BASED))
+    {
+        return IsBattlerAlive(battlerDef) + IsBattlerAlive(BATTLE_PARTNER(battlerDef));
+    }
+
     switch (GetBattlerMoveTargetType(gBattlerAttacker, move))
     {
     case MOVE_TARGET_BOTH:
@@ -11099,13 +11105,24 @@ bool32 IsBattlerWeatherAffected(u32 battler, u32 weatherFlags)
 // Possible return values are defined in battle.h following MOVE_TARGET_SELECTED
 u32 GetBattlerMoveTargetType(u32 battler, u32 move)
 {
+    // Special case for Curse when not used by a Ghost-type
     if (move == MOVE_CURSE && !IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
         return MOVE_TARGET_USER;
+
+    // Expanding Force on Psychic Terrain hits both
     else if (gBattleMoves[move].effect == EFFECT_EXPANDING_FORCE && IsBattlerTerrainAffected(battler, STATUS_FIELD_PSYCHIC_TERRAIN))
         return MOVE_TARGET_BOTH;
+
+    // Tera Starstorm used by Terapagos Stellar hits both
     else if (gBattleMoves[move].effect == EFFECT_TERA_STARSTORM && gBattleMons[battler].species == SPECIES_TERAPAGOS_STELLAR)
         return MOVE_TARGET_BOTH;
 
+    // Artillery ability: launcher-based moves hit both enemies
+    else if (GetBattlerAbility(battler) == ABILITY_ARTILLERY &&
+             (gBattleMoves[move].flags & FLAG_LAUNCHER_BASED))
+        return MOVE_TARGET_BOTH;
+
+    // Return the default move target
     return gBattleMoves[move].target;
 }
 

@@ -1515,6 +1515,9 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
     if (AI_DATA->abilities[battlerAtk] == ABILITY_SIGHTING_SYSTEM)
         return TRUE;
 
+    if (AI_DATA->abilities[battlerAtk] == ABILITY_ARTILLERY && gBattleMoves[move].flags & FLAG_LAUNCHER_BASED)
+        return TRUE;
+
     if ((IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN)) &&
         (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
         return FALSE;

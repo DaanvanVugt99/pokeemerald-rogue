@@ -5388,7 +5388,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .priority = 0,
                 .split = SPLIT_PHYSICAL,
                 .zMoveEffect = Z_EFFECT_NONE,
-                .flags = FLAG_LAUNCHER_BASED,
+                .flags = FLAG_BALLISTIC_BASED,
             },
 
         [MOVE_SHOCK_WAVE] =
