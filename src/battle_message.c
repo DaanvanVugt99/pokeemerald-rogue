@@ -620,7 +620,7 @@ static const u8 sText_SlowStartEnters[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} can
 static const u8 sText_SlowStartEnd[] = _("{B_ATK_NAME_WITH_PREFIX} finally got\nits act together!");
 static const u8 sText_SolarPowerHpDrop[] = _("The {B_ATK_NAME_WITH_PREFIX}'s {B_ATK_ABILITY}\ntakes its toll!");
 static const u8 sText_AftermathDmg[] = _("{B_ATK_NAME_WITH_PREFIX} is hurt!");
-static const u8 sText_AnticipationActivates[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} shuddered\nin anticipation!");
+static const u8 sText_AngerPointsPkmnRaisedAttack[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s Anger Point\nraised its Attack!");
 static const u8 sText_ForewarnActivates[] = _("{B_SCR_ACTIVE_ABILITY} alerted {B_SCR_ACTIVE_NAME_WITH_PREFIX}\nto the {B_DEF_NAME_WITH_PREFIX}'s {B_BUFF1}!");
 static const u8 sText_IceBodyHpGain[] = _("{B_ATK_NAME_WITH_PREFIX}'s {B_ATK_ABILITY}\nhealed it a little bit!");
 static const u8 sText_SnowWarningHail[] = _("It started to hail!");
@@ -2050,8 +2050,8 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
             BATTLESTRINGS_TABLE_START] = sText_SolarPowerHpDrop,
         [STRINGID_AFTERMATHDMG -
             BATTLESTRINGS_TABLE_START] = sText_AftermathDmg,
-        [STRINGID_ANTICIPATIONACTIVATES -
-            BATTLESTRINGS_TABLE_START] = sText_AnticipationActivates,
+        [STRINGID_ANGERPOINTSPKMNRAISEDATTACK -
+            BATTLESTRINGS_TABLE_START] = sText_AngerPointsPkmnRaisedAttack,
         [STRINGID_FOREWARNACTIVATES -
             BATTLESTRINGS_TABLE_START] = sText_ForewarnActivates,
         [STRINGID_ICEBODYHPGAIN -
@@ -2314,7 +2314,6 @@ const u16 gSwitchInAbilityStringIds[] =
         [B_MSG_SWITCHIN_TURBOBLAZE] = STRINGID_TURBOBLAZEENTERS,
         [B_MSG_SWITCHIN_SLOWSTART] = STRINGID_SLOWSTARTENTERS,
         [B_MSG_SWITCHIN_UNNERVE] = STRINGID_UNNERVEENTERS,
-        [B_MSG_SWITCHIN_ANTICIPATION] = STRINGID_ANTICIPATIONACTIVATES,
         [B_MSG_SWITCHIN_FOREWARN] = STRINGID_FOREWARNACTIVATES,
         [B_MSG_SWITCHIN_PRESSURE] = STRINGID_PRESSUREENTERS,
         [B_MSG_SWITCHIN_DARKAURA] = STRINGID_DARKAURAENTERS,

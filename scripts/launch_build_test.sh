@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Anticipation activates correctly when an opponent switches in with a super-effective move"
+testToRunPrefix="Anger Point does not trigger on a special move"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
