@@ -184,7 +184,7 @@
 #define ABILITY_PROTEAN 168        // Changes the Pokémon's type to the type of the move it's about to use.
 #define ABILITY_FUR_COAT 169       // Halves the damage from physical moves.
 #define ABILITY_MAGICIAN 170       // *No innate* The Pokémon steals the held item of a Pokémon it hits with a move.
-#define ABILITY_BULLETPROOF 171    // Protects the Pokémon from some ball and bomb moves.
+#define ABILITY_BULLETPROOF 171    // Protects the Pokémon from some ball and bomb moves. Takes 20% less damage from special moves.
 #define ABILITY_COMPETITIVE 172    // Boosts the Sp. Atk stat sharply when a stat is lowered.
 #define ABILITY_STRONG_JAW 173     // The Pokémon's strong jaw boosts the power of its biting moves. [Now affects Bug Bite, Super Fang, Deathroll]
 #define ABILITY_REFRIGERATE 174    // All Normal-type moves used by the Pokémon to become Ice-type and receive a 10% power boost.

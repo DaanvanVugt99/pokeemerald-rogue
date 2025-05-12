@@ -9314,6 +9314,12 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         if (updateFlags)
             RecordAbilityBattle(battlerDef, ABILITY_BATTLE_ARMOR);
         break;
+    case ABILITY_BULLETPROOF:
+        if (IS_MOVE_SPECIAL(move))
+            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.8));
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_BULLETPROOF);
+        break;
     }
 
     // ally's abilities
