@@ -8982,7 +8982,8 @@ static void Cmd_various(void)
     case VARIOUS_CHECK_IF_GRASSY_TERRAIN_HEALS:
     {
         VARIOUS_ARGS(const u8 *failInstr);
-        if ((gStatuses3[battler] & (STATUS3_SEMI_INVULNERABLE | STATUS3_HEAL_BLOCK)) || BATTLER_MAX_HP(battler) || !gBattleMons[battler].hp || !(IsBattlerGrounded(battler)))
+        if ((gStatuses3[battler] & (STATUS3_SEMI_INVULNERABLE | STATUS3_HEAL_BLOCK)) || BATTLER_MAX_HP(battler) || !gBattleMons[battler].hp ||
+            (!(IsBattlerGrounded(battler)) && GetBattlerAbility(battler) != ABILITY_BRANCH_SWING))
         {
             gBattlescriptCurrInstr = cmd->failInstr;
         }

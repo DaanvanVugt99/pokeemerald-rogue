@@ -8169,10 +8169,12 @@ static bool32 IsBattlerGrounded2(u32 battler, bool32 considerInverse)
         return TRUE;
     if (gFieldStatuses & STATUS_FIELD_GRAVITY)
         return TRUE;
-    if (B_ROOTED_GROUNDING >= GEN_4 && gStatuses3[battler] & STATUS3_ROOTED)
+    if (gStatuses3[battler] & STATUS3_ROOTED)
         return TRUE;
     if (gStatuses3[battler] & STATUS3_SMACKED_DOWN)
         return TRUE;
+    if (GetBattlerAbility(battler) == ABILITY_BRANCH_SWING && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN))
+        return FALSE;
     if (gStatuses3[battler] & STATUS3_TELEKINESIS)
         return FALSE;
     if (gStatuses3[battler] & STATUS3_MAGNET_RISE)

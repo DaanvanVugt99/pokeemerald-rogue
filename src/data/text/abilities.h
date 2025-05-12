@@ -324,6 +324,7 @@ static const u8 sShortCircuitDescription[] = _("Ups Electric moves by 20%,\n50% 
 static const u8 sRoundhouseDescription[] = _("Kicking moves can't miss and\ndeal damage to lowest defense/");
 static const u8 sScavengerDescription[] = _("Heals 1/3 HP when any\npokemon faints.");
 static const u8 sFeastDescription[] = _("Heals 1/2 HP when knocking\nout another pokemon.");
+static const u8 sBranchSwingDescription[] = _("Gain 50% Speed and Ground\nimmunity on grassy terrain.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -661,6 +662,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_ROUNDHOUSE] = _("Roundhouse"),
         [ABILITY_SCAVENGER] = _("Scavenger"),
         [ABILITY_FEAST] = _("Feast"),
+        [ABILITY_BRANCH_SWING] = _("Branch Swing"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1316,4 +1318,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_ROUNDHOUSE] = sRoundhouseDescription,
         [ABILITY_SCAVENGER] = sScavengerDescription,
         [ABILITY_FEAST] = sFeastDescription,
+        [ABILITY_BRANCH_SWING] = sBranchSwingDescription,
 };

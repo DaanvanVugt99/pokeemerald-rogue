@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Rampage allows recharge moves to act next turn"
+testToRunPrefix="Branch Swing makes the Pokémon ungrounded on Grassy Terrain"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
