@@ -1889,6 +1889,7 @@ enum
     ENDTURN_WISH,
     ENDTURN_RAIN,
     ENDTURN_SANDSTORM,
+    ENDTURN_ACID_RAIN,
     ENDTURN_SUN,
     ENDTURN_HAIL,
     ENDTURN_SNOW,
@@ -1911,7 +1912,6 @@ enum
     ENDTURN_RAINBOW,
     ENDTURN_SEA_OF_FIRE,
     ENDTURN_SWAMP,
-    ENDTURN_ACID_RAIN,
     ENDTURN_FIELD_COUNT,
 };
 
@@ -2222,7 +2222,7 @@ u8 DoFieldEndTurnEffects(void)
                 if (!(gBattleWeather & B_WEATHER_SANDSTORM_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
                 {
                     gBattleWeather &= ~B_WEATHER_SANDSTORM_TEMPORARY;
-                    gBattlescriptCurrInstr = BattleScript_SandStormHailSnowEnds;
+                    gBattlescriptCurrInstr = BattleScript_SandStormHailSnowAcidEnds;
                 }
                 else
                 {
@@ -2241,8 +2241,8 @@ u8 DoFieldEndTurnEffects(void)
             {
                 if (!(gBattleWeather & B_WEATHER_ACID_RAIN_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
                 {
-                    gBattleWeather &= ~B_WEATHER_ACID_RAIN_TEMPORARY;
-                    gBattlescriptCurrInstr = BattleScript_AcidRainStopped;
+                    gBattleWeather &= ~(B_WEATHER_ACID_RAIN | B_WEATHER_ACID_RAIN_TEMPORARY);
+                    gBattlescriptCurrInstr = BattleScript_SandStormHailSnowAcidEnds;
                 }
                 else
                 {
@@ -2282,7 +2282,7 @@ u8 DoFieldEndTurnEffects(void)
                 if (!(gBattleWeather & B_WEATHER_HAIL_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
                 {
                     gBattleWeather &= ~B_WEATHER_HAIL_TEMPORARY;
-                    gBattlescriptCurrInstr = BattleScript_SandStormHailSnowEnds;
+                    gBattlescriptCurrInstr = BattleScript_SandStormHailSnowAcidEnds;
                 }
                 else
                 {
@@ -2302,7 +2302,7 @@ u8 DoFieldEndTurnEffects(void)
                 if (!(gBattleWeather & B_WEATHER_SNOW_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
                 {
                     gBattleWeather &= ~B_WEATHER_SNOW_TEMPORARY;
-                    gBattlescriptCurrInstr = BattleScript_SandStormHailSnowEnds;
+                    gBattlescriptCurrInstr = BattleScript_SandStormHailSnowAcidEnds;
                 }
                 else
                 {

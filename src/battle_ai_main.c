@@ -1032,7 +1032,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case MOVE_RAIN_DANCE:
         case MOVE_HAIL:
         case MOVE_SANDSTORM:
-        case MOVE_CORROSIVE_CLOUDS:
+        case MOVE_ACID_RAIN:
             RETURN_SCORE_MINUS(30);
         }
 

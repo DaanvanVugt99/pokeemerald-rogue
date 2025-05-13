@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Acid rain deals 1/16 damage per turn"
+testToRunPrefix="Acid Rain"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

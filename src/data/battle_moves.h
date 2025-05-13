@@ -13049,7 +13049,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
                 .zMoveEffect = Z_EFFECT_NONE,
             },
 
-        [MOVE_CORROSIVE_CLOUDS] =
+        [MOVE_ACID_RAIN] =
             {
                 .effect = EFFECT_ACID_RAIN,
                 .power = 0,

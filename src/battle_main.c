@@ -4661,6 +4661,12 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
     else if (ability == ABILITY_BRANCH_SWING && gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN)
         speed = (speed * 150) / 100;
 
+    // Acid Rain Speed Reduction (after ability effects)
+    if (IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN) && !IS_BATTLER_OF_TYPE(battler, TYPE_POISON) && !IS_BATTLER_OF_TYPE(battler, TYPE_BUG))
+    {
+        speed = (speed * 90) / 100;
+    }
+
     // stat stages
     speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
     speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
@@ -4725,7 +4731,7 @@ static bool32 IsWeatherAffectedMove(u16 move)
     case MOVE_GROWTH:
     case MOVE_SUNNY_DAY:
     case MOVE_RAIN_DANCE:
-    case MOVE_CORROSIVE_CLOUDS:
+    case MOVE_ACID_RAIN:
     case MOVE_BLEAKWIND_STORM:
     case MOVE_WILDBOLT_STORM:
     case MOVE_SANDSEAR_STORM:

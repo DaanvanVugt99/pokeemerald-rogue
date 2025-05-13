@@ -875,7 +875,7 @@ gBattleAnims_Moves::
 	.4byte Move_PSYCHIC_NOISE
 	.4byte Move_UPPER_HAND
 	.4byte Move_MALIGNANT_CHAIN
-	.4byte Move_CORROSIVE_CLOUDS
+	.4byte Move_ACID_RAIN
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
 	.4byte Move_ALL_OUT_PUMMELING
@@ -1031,11 +1031,11 @@ gBattleAnims_General::
 	.4byte General_Swamp                    @ B_ANIM_SWAMP
 	.4byte General_TeraCharge               @ B_ANIM_TERA_CHARGE
 	.4byte General_TeraActivate             @ B_ANIM_TERA_ACTIVATE
+	.4byte General_AcidRain                 @ B_ANIM_ACID_RAIN_CONTINUES
 	.4byte General_TrickRoom                @ B_ANIM_TRICK_ROOM
 	.4byte General_WonderRoom               @ B_ANIM_WONDER_ROOM
 	.4byte General_MagicRoom                @ B_ANIM_MAGIC_ROOM
 	.4byte General_Tailwind                 @ B_ANIM_TAILLWIND
-	.4byte General_AcidRain                 @ B_ANIM_ACID_RAIN
 
 	.align 2
 gBattleAnims_Special::
@@ -22759,18 +22759,8 @@ Move_RAIN_DANCE:
 	waitforvisualfinish
 	end
 
-Move_CORROSIVE_CLOUDS:
-	loadspritegfx ANIM_TAG_RAIN_DROPS
-	playsewithpan SE_M_RAIN_DANCE, SOUND_PAN_ATTACKER
-	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 0, 4, RGB_GREEN
-	waitforvisualfinish
-	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
-	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
-	delay 120
-	delay 30
-	waitforvisualfinish
-	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 4, 0, RGB_GREEN
-	waitforvisualfinish
+Move_ACID_RAIN:
+	call AcidRainDrops
 	end
 
 Move_BITE:
@@ -28117,13 +28107,13 @@ RainDrops:
 	waitforvisualfinish
 	return
 
-General_AcidRain::
+General_AcidRain:
     call AcidRainDrops
     end
 
 AcidRainDrops:
     loadspritegfx ANIM_TAG_RAIN_DROPS
-    playsewithpan SE_M_FAINT_ATTACK, SOUND_PAN_ATTACKER
+    playsewithpan SE_M_RAIN_DANCE, SOUND_PAN_ATTACKER
     createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 0, 4, RGB_GREEN
     waitforvisualfinish
     createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 60

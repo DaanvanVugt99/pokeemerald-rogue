@@ -851,7 +851,7 @@ static const u8 sText_BattlerCoiledUp[] = _("{B_ATK_NAME_WITH_PREFIX} coiled up 
 static const u8 sText_StartedAcidRain[] = _("A caustic downpour begins!");
 static const u8 sText_AcidRainContinues[] = _("The air burns with acid rain!");
 static const u8 sText_AcidRainStopped[] = _("The toxic storm subsides.");
-static const u8 sText_PkmnBuffetedByAcidRain[] = _("{B_ATK_NAME_WITH_PREFIX} is scorched\nby the acid rain!");
+static const u8 sText_PkmnScorchedByAcidRain[] = _("{B_ATK_NAME_WITH_PREFIX} is scorched\nby the acid rain!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     {
@@ -2254,8 +2254,8 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
             BATTLESTRINGS_TABLE_START] = sText_AcidRainContinues,
         [STRINGID_ACIDRAINSTOPPED -
             BATTLESTRINGS_TABLE_START] = sText_AcidRainStopped,
-        [STRINGID_PKMNBUFFETEDBYACIDRAIN -
-            BATTLESTRINGS_TABLE_START] = sText_PkmnBuffetedByAcidRain,
+        [STRINGID_PKMNSCORCHEDBYACIDRAIN -
+            BATTLESTRINGS_TABLE_START] = sText_PkmnScorchedByAcidRain,
 };
 
 const u16 gTrainerUsedItemStringIds[] =
@@ -2389,14 +2389,14 @@ const u16 gSandStormHailAcidDmgStringIds[] =
     {
         [B_MSG_SANDSTORM] = STRINGID_PKMNBUFFETEDBYSANDSTORM,
         [B_MSG_HAIL] = STRINGID_PKMNPELTEDBYHAIL,
-        [B_MSG_ACID_RAIN] = STRINGID_PKMNBUFFETEDBYACIDRAIN};
+        [B_MSG_ACID_RAIN] = STRINGID_PKMNSCORCHEDBYACIDRAIN};
 
 const u16 gSandStormHailSnowAcidEndStringIds[] =
     {
         [B_MSG_SANDSTORM] = STRINGID_SANDSTORMSUBSIDED,
         [B_MSG_HAIL] = STRINGID_HAILSTOPPED,
         [B_MSG_SNOW] = STRINGID_SNOWSTOPPED,
-        [B_MSG_ACID_RAIN] = STRINGID_ACIDRAINCONTINUES};
+        [B_MSG_ACID_RAIN] = STRINGID_ACIDRAINSTOPPED};
 
 const u16 gRainContinuesStringIds[] =
     {

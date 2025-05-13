@@ -157,7 +157,6 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectHit                     @ EFFECT_HIDDEN_POWER
 	.4byte BattleScript_EffectRainDance               @ EFFECT_RAIN_DANCE
 	.4byte BattleScript_EffectSunnyDay                @ EFFECT_SUNNY_DAY
-	.4byte BattleScript_EffectCorrosiveClouds         @ EFFECT_CORROSIVE_CLOUDS
 	.4byte BattleScript_EffectDefenseUpHit            @ EFFECT_DEFENSE_UP_HIT
 	.4byte BattleScript_EffectAttackUpHit             @ EFFECT_ATTACK_UP_HIT
 	.4byte BattleScript_EffectAllStatsUpHit           @ EFFECT_ALL_STATS_UP_HIT
@@ -458,6 +457,8 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectTeraBlast               @ EFFECT_TERA_BLAST
 	.4byte BattleScript_EffectPhotonGeyser            @ EFFECT_TERA_STARSTORM
 	.4byte BattleScript_EffectElectroShot             @ EFFECT_ELECTRO_SHOT
+	.4byte BattleScript_EffectAcidRain                @ EFFECT_ACID_RAIN
+
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -5451,7 +5452,7 @@ BattleScript_EffectSunnyDay::
 	setsunny
 	goto BattleScript_MoveWeatherChange
 
-BattleScript_EffectCorrosiveClouds::
+BattleScript_EffectAcidRain::
     attackcanceler
     attackstring
     ppreduce
@@ -7111,7 +7112,7 @@ BattleScript_DamagingWeatherContinuesEnd::
 	call BattleScript_ActivateWeatherAbilities
 	end2
 
-BattleScript_SandStormHailSnowEnds::
+BattleScript_SandStormHailSnowAcidEnds::
 	printfromtable gSandStormHailSnowAcidEndStringIds
 	waitmessage B_WAIT_TIME_LONG
 	call BattleScript_ActivateWeatherAbilities

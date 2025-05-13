@@ -3331,7 +3331,7 @@ static const u8 sMalignantChainDescription[] = _(
     "A corrosive chain attack\n"
     "that may badly poison.");
 
-static const u8 sCorrosiveCloudsDescription[] = _(
+static const u8 sAcidRainDescription[] = _(
     "Summons acid rain that\n"
     "hurts foes for several turns.");
 
@@ -4193,5 +4193,5 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
         [MOVE_PSYCHIC_NOISE - 1] = sPsychicNoiseDescription,
         [MOVE_UPPER_HAND - 1] = sUpperHandDescription,
         [MOVE_MALIGNANT_CHAIN - 1] = sMalignantChainDescription,
-        [MOVE_CORROSIVE_CLOUDS - 1] = sCorrosiveCloudsDescription,
+        [MOVE_ACID_RAIN - 1] = sAcidRainDescription,
 };
