@@ -11232,3 +11232,67 @@ BattleScript_BattlerCoiledUp::
 	printstring STRINGID_BATTLERCOILEDUP
 	waitmessage B_WAIT_TIME_LONG
 	end3
+
+BattleScript_AttackerUsedAnExtraMove::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ABILITYLETITUSEMOVE
+	waitmessage B_WAIT_TIME_SHORT
+BattleScript_EffectExtraHit::
+BattleScript_ExtraHitFromAtkCanceler::
+	attackcanceler
+BattleScript_ExtraHitFromAccCheck::
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+BattleScript_ExtraHitFromAtkString::
+BattleScript_ExtraHitFromCritCalc::
+	critcalc
+	damagecalc
+	adjustdamage
+BattleScript_ExtraHitFromAtkAnimation::
+	playmoveanimation BS_ATTACKER, MOVE_NONE
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	seteffectwithchance
+	tryfaintmon BS_TARGET
+BattleScript_ExtraExtraMoveEnd::
+	moveendall
+	end
+
+BattleScript_AttackerUsedAnExtraMoveOnSwitchIn::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ABILITYLETITUSEMOVE
+	waitmessage B_WAIT_TIME_SHORT
+BattleScript_EffectExtraHitOnSwitchIn::
+BattleScript_ExtraHitFromAtkCancelerOnSwitchIn::
+	attackcanceler
+BattleScript_ExtraHitFromAccCheckOnSwitchIn::
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+BattleScript_ExtraHitFromAtkStringOnSwitchIn::
+BattleScript_ExtraHitFromCritCalcOnSwitchIn::
+	critcalc
+	damagecalc
+	adjustdamage
+BattleScript_ExtraHitFromAtkAnimationOnSwitchIn::
+	playmoveanimation BS_ATTACKER, MOVE_NONE
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	seteffectwithchance
+	tryfaintmon BS_TARGET
+BattleScript_ExtraExtraMoveEndOnSwitchIn::
+	moveendall
+	end3

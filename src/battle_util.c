@@ -67,6 +67,7 @@ static u32 GetFlingPowerFromItemId(u32 itemId);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
+bool8 canUseExtraMove(u32 battlerAtk, u32 battlerDef);
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 *const gBattlescriptsForRunningByItem[];
@@ -4928,6 +4929,60 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattleScripting.abilityPopupOverwrite = gLastUsedAbility = ABILITY_TERA_SHIFT;
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
                 BattleScriptPushCursorAndCallback(BattleScript_AttackerFormChangeWithStringEnd3);
+                effect++;
+            }
+            break;
+        case ABILITY_LOW_BLOW:
+            bool8 activateAbilty = FALSE;
+            bool8 checkPassed = FALSE;
+            bool8 hasTarget = FALSE;
+            u8 opposingBattler = BATTLE_OPPOSITE(battler);
+
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gBattlerAttacker = battler;
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                checkPassed = TRUE;
+            }
+
+            // Checks Target
+            for (i = 0; i < 2; opposingBattler ^= BIT_FLANK, i++)
+            {
+                if (IsBattlerAlive(opposingBattler) && gBattleMons[opposingBattler].hp != 1)
+                {
+                    gBattlerTarget = opposingBattler;
+                    hasTarget = TRUE;
+                }
+            }
+
+            if (checkPassed && hasTarget)
+            {
+                // Checks if the ability is triggered
+                if (canUseExtraMove(battler, gBattlerTarget))
+                {
+                    activateAbilty = TRUE;
+                }
+            }
+
+            // This is the stuff that has to be changed for each ability
+            if (activateAbilty)
+            {
+                u16 extraMove = MOVE_FEINT_ATTACK; // The Extra Move to be used
+                u8 movePower = 0;                  // The Move power, leave at 0 if you want it to be the same as the normal move
+                u8 moveEffectPercentChance = 0;    // The percent chance of the move effect happening
+                u8 extraMoveSecondaryEffect = 0;   // Leave at 0 to remove it's secondary effect
+                gTempMove = gCurrentMove;
+                gCurrentMove = extraMove;
+                gMultiHitCounter = 0;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+
+                // Move Effect
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, movePower);
+                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, moveEffectPercentChance);
+                VarSet(VAR_TEMP_MOVEEFFECT, extraMoveSecondaryEffect);
+
+                gProtectStructs[gBattlerAttacker].extraMoveUsed = TRUE;
+                BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
                 effect++;
             }
             break;
@@ -11548,4 +11603,18 @@ bool8 OpponentHasStatus(u32 battler)
     if ((status1 & STATUS1_ANY) || (status2 & STATUS1_ANY))
         return TRUE;
     return FALSE;
+}
+
+bool8 canUseExtraMove(u32 battlerAtk, u32 battlerDef)
+{
+    if (IsBattlerAlive(battlerAtk) &&
+        IsBattlerAlive(battlerDef) &&
+        battlerAtk != battlerDef &&
+        !gProtectStructs[battlerAtk].confusionSelfDmg &&
+        !gProtectStructs[battlerAtk].extraMoveUsed &&
+        !(gBattleMons[battlerAtk].status1 & STATUS1_SLEEP) &&
+        !(gBattleMons[battlerAtk].status1 & STATUS1_FREEZE))
+        return TRUE;
+    else
+        return FALSE;
 }

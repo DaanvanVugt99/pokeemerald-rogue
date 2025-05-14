@@ -714,8 +714,9 @@
 #define STRINGID_ACIDRAINSTOPPED 712
 #define STRINGID_PKMNSCORCHEDBYACIDRAIN 713
 #define STRINGID_PKMNSXCAUSEDACIDRAIN 714
+#define STRINGID_ABILITYLETITUSEMOVE 715
 
-#define BATTLESTRINGS_COUNT 715
+#define BATTLESTRINGS_COUNT 716
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

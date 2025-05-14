@@ -329,6 +329,7 @@ static const u8 sArtilleryDescription[] = _("Launcher moves can't miss\nand hit 
 static const u8 sCoilUpDescription[] = _("Biting moves have +1 priority\nthe first time they are used.");
 static const u8 sMoltenDownDescription[] = _("Fire-type is super effective\nagainst Rock-type.");
 static const u8 sToxisphereDescription[] = _("Summons acid rain in battle.");
+static const u8 sLowBlowDescription[] = _("Attacks with Feint Attack\non switch-in.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -671,6 +672,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_COIL_UP] = _("Coil Up"),
         [ABILITY_MOLTEN_DOWN] = _("Molten Down"),
         [ABILITY_TOXISPHERE] = _("Toxisphere"),
+        [ABILITY_LOW_BLOW] = _("Low Blow"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1331,4 +1333,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_COIL_UP] = sCoilUpDescription,
         [ABILITY_MOLTEN_DOWN] = sMoltenDownDescription,
         [ABILITY_TOXISPHERE] = sToxisphereDescription,
+        [ABILITY_LOW_BLOW] = sLowBlowDescription,
 };

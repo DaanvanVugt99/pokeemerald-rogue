@@ -853,6 +853,7 @@ static const u8 sText_AcidRainContinues[] = _("The air seethes with acid rain!")
 static const u8 sText_AcidRainStopped[] = _("The toxic storm subsides.");
 static const u8 sText_PkmnScorchedByAcidRain[] = _("{B_ATK_NAME_WITH_PREFIX} is scorched\nby the acid rain!");
 static const u8 sText_PkmnsXCausedAcidRain[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nbrought forth acid rain!");
+static const u8 sText_AbilityLetItUseMove[] = _("{B_ATK_NAME_WITH_PREFIX}'s ability let it use\n{B_CURRENT_MOVE}!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     {
@@ -2259,6 +2260,9 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
             BATTLESTRINGS_TABLE_START] = sText_PkmnScorchedByAcidRain,
         [STRINGID_PKMNSXCAUSEDACIDRAIN -
             BATTLESTRINGS_TABLE_START] = sText_PkmnsXCausedAcidRain,
+        [STRINGID_ABILITYLETITUSEMOVE -
+            BATTLESTRINGS_TABLE_START] = sText_AbilityLetItUseMove,
+
 };
 
 const u16 gTrainerUsedItemStringIds[] =
