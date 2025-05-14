@@ -8922,6 +8922,15 @@ BattleScript_SandstreamActivates::
 	call BattleScript_ActivateWeatherAbilities
 	end3
 
+Battlescript_ToxisphereActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNSXCAUSEDACIDRAIN
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_ACID_RAIN_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	end3
+
 BattleScript_SandSpitActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

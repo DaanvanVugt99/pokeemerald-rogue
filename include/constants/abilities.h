@@ -366,8 +366,9 @@
 #define ABILITY_ARTILLERY (ABILITIES_COUNT_GEN9 + 21)        // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain)
 #define ABILITY_COIL_UP (ABILITIES_COUNT_GEN9 + 22)          // The Pokémon enters the battlefield coiled up. Coil: The next time the Pokémon uses a biting move, its priority is increased 1.
 #define ABILITY_MOLTEN_DOWN (ABILITIES_COUNT_GEN9 + 23)      // Fire moves deal super effective to rock types and lower their speed.
+#define ABILITY_TOXISPHERE (ABILITIES_COUNT_GEN9 + 24)       // Set Acid Rain weather on switch in.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_MOLTEN_DOWN + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_TOXISPHERE + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

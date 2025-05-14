@@ -4616,6 +4616,19 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_TOXISPHERE:
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(Battlescript_ToxisphereActivates);
+                effect++;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT && !gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                effect++;
+            }
+            break;
         case ABILITY_DROUGHT:
             if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
             {
