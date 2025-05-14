@@ -330,6 +330,7 @@ static const u8 sCoilUpDescription[] = _("Biting moves have +1 priority\nthe fir
 static const u8 sMoltenDownDescription[] = _("Fire-type is super effective\nagainst Rock-type.");
 static const u8 sToxisphereDescription[] = _("Summons acid rain in battle.");
 static const u8 sLowBlowDescription[] = _("Attacks with Feint Attack\non switch-in.");
+static const u8 sVolcanicRageDescription[] = _("Triggers 50 BP Eruption after\nusing a Fire-type move.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -673,6 +674,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
         [ABILITY_MOLTEN_DOWN] = _("Molten Down"),
         [ABILITY_TOXISPHERE] = _("Toxisphere"),
         [ABILITY_LOW_BLOW] = _("Low Blow"),
+        [ABILITY_VOLCANIC_RAGE] = _("Volcanic Rage"),
 };
 #else // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1334,4 +1336,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
         [ABILITY_MOLTEN_DOWN] = sMoltenDownDescription,
         [ABILITY_TOXISPHERE] = sToxisphereDescription,
         [ABILITY_LOW_BLOW] = sLowBlowDescription,
+        [ABILITY_VOLCANIC_RAGE] = sVolcanicRageDescription,
 };

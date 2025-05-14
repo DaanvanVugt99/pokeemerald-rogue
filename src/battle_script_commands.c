@@ -2387,9 +2387,17 @@ static void Cmd_damagecalc(void)
     CMD_ARGS();
 
     u8 moveType;
+    u8 movePower = 0;
+    bool8 isExtraMove = gProtectStructs[gBattlerAttacker].extraMoveUsed;
+
+    if (isExtraMove)
+    {
+        movePower = VarGet(VAR_EXTRA_MOVE_DAMAGE);
+        VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+    }
 
     GET_MOVE_TYPE(gCurrentMove, moveType);
-    gBattleMoveDamage = CalculateMoveDamage(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType, 0, gIsCriticalHit, TRUE, TRUE);
+    gBattleMoveDamage = CalculateMoveDamage(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType, movePower, gIsCriticalHit, TRUE, TRUE);
 
     if ((IsCurseActive(EFFECT_ONE_HIT) || Rogue_GetActiveCampaign() == ROGUE_CAMPAIGN_ONE_HP) && gBattleMoveDamage != 0)
     {
@@ -4119,6 +4127,32 @@ static void Cmd_seteffectwithchance(void)
     CMD_ARGS();
 
     u32 percentChance = CalcSecondaryEffectChance(gBattlerAttacker, gBattleMoves[gCurrentMove].secondaryEffectChance, gBattleMoves[gCurrentMove].effect);
+    u8 moveType = gBattleMoves[gCurrentMove].type;
+    u8 moveEffect = gBattleMoves[gCurrentMove].effect;
+
+    if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
+    {
+        if (VarGet(VAR_TEMP_MOVEEFECT_CHANCE) != 0)
+        {
+            percentChance = VarGet(VAR_TEMP_MOVEEFECT_CHANCE);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+        }
+
+        if (VarGet(VAR_TEMP_MOVEEFFECT) != 0)
+        {
+            moveEffect = VarGet(VAR_TEMP_MOVEEFFECT);
+            gBattleScripting.moveEffect = moveEffect;
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+        }
+    }
+
+    // Serene Grace boost
+    if (GetBattlerAbility(gBattlerAttacker) == ABILITY_SERENE_GRACE)
+        percentChance = percentChance * 2;
+
+    // Pyromancy boost
+    if (GetBattlerAbility(gBattlerAttacker) == ABILITY_PYROMANCY && moveType == TYPE_FIRE && moveEffect == EFFECT_BURN_HIT)
+        percentChance = percentChance * 5;
 
     if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleScripting.moveEffect)
     {

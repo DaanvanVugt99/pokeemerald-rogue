@@ -368,8 +368,9 @@
 #define ABILITY_MOLTEN_DOWN (ABILITIES_COUNT_GEN9 + 23)      // Fire moves deal super effective to rock types and lower their speed.
 #define ABILITY_TOXISPHERE (ABILITIES_COUNT_GEN9 + 24)       // Set Acid Rain weather on switch in.
 #define ABILITY_LOW_BLOW (ABILITIES_COUNT_GEN9 + 25)         // Attacks with Feint Attack on switch-in.
+#define ABILITY_VOLCANIC_RAGE (ABILITIES_COUNT_GEN9 + 26)    // Attacks with 50 BP Eruption after using a Fire-type move.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_LOW_BLOW + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_VOLCANIC_RAGE + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM

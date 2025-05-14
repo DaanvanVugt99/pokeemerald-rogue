@@ -5833,6 +5833,37 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_VOLCANIC_RAGE:
+            bool8 activateAbilty = FALSE;
+
+            // Checks if the ability is triggered
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) &&
+                canUseExtraMove(battler, gBattlerTarget) &&
+                moveType == TYPE_FIRE)
+            {
+                activateAbilty = TRUE;
+            }
+
+            // This is the stuff that has to be changed for each ability
+            if (activateAbilty)
+            {
+                u16 extraMove = MOVE_ERUPTION;   // The Extra Move to be used
+                u8 movePower = 50;               // The Move power, leave at 0 if you want it to be the same as the normal move
+                u8 moveEffectPercentChance = 0;  // The percent chance of the move effect happening
+                u8 extraMoveSecondaryEffect = 0; // Leave at 0 to remove it's secondary effect
+                gTempMove = gCurrentMove;
+                gCurrentMove = extraMove;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, movePower);
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+
+                // Move Effect
+                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, moveEffectPercentChance);
+                VarSet(VAR_TEMP_MOVEEFFECT, extraMoveSecondaryEffect);
+
+                BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
+                effect++;
+            }
+            break;
         case ABILITY_WHITEOUT:
             if (moveType == TYPE_ICE && TARGET_TURN_DAMAGED && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && IsBattlerAlive(gBattlerTarget) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW | B_WEATHER_HAIL))
                 if (RandomWeighted(RNG_WHITEOUT, 9, 1) && CanBeFrozen(gBattlerTarget))
@@ -11372,24 +11403,13 @@ bool32 AreBattlersOfSameGender(u32 battler1, u32 battler2)
 
 u32 CalcSecondaryEffectChance(u32 battler, u8 secondaryEffectChance, u16 moveEffect)
 {
-    bool8 hasSereneGrace = (GetBattlerAbility(battler) == ABILITY_SERENE_GRACE);
     bool8 hasRainbow = (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_RAINBOW) != 0;
-    u8 moveType = gBattleMoves[gCurrentMove].type;
 
-    if (hasRainbow && hasSereneGrace && moveEffect == EFFECT_FLINCH_HIT)
+    if (hasRainbow && moveEffect == EFFECT_FLINCH_HIT)
         secondaryEffectChance *= 2;
 
-    if (hasSereneGrace)
-        secondaryEffectChance *= 2;
     if (hasRainbow && moveEffect != EFFECT_SECRET_POWER)
         secondaryEffectChance *= 2;
-
-    // Pyromancy boost
-    if ((GetBattlerAbility(battler) == ABILITY_PYROMANCY) &&
-        moveType == TYPE_FIRE && moveEffect == EFFECT_BURN_HIT)
-    {
-        secondaryEffectChance *= 5;
-    }
 
     // Apply charm/curse value modifiers
     if (GetBattlerSide(battler) == B_SIDE_OPPONENT)
