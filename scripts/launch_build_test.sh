@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Pyromancy guarantees burn when base chance ×5 ≥ 100; Blaze burns ~30%"
+testToRunPrefix="Embargo"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

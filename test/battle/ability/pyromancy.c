@@ -4,44 +4,52 @@
 
 SINGLE_BATTLE_TEST("Pyromancy guarantees burn when base chance ×5 ≥ 100; Blaze burns ~30%")
 {
-    u16 ability;
+  u16 ability;
 
-    PARAMETRIZE { ability = ABILITY_PYROMANCY; }
-    PARAMETRIZE
+  PARAMETRIZE
+  {
+    ability = ABILITY_PYROMANCY;
+  }
+  PARAMETRIZE
+  {
+    ability = ABILITY_BLAZE;
+    PASSES_RANDOMLY(15, 50);  // ~30%
+  }
+
+  GIVEN
+  {
+    ASSUME(gBattleMoves[MOVE_LAVA_PLUME].effect == EFFECT_BURN_HIT);
+    ASSUME(gBattleMoves[MOVE_LAVA_PLUME].secondaryEffectChance == 30);
+
+    PLAYER(SPECIES_CHARMANDER)
     {
-        ability = ABILITY_BLAZE;
-        PASSES_RANDOMLY(15, 50); // ~30%
+      Ability(ability);
+      Moves(MOVE_LAVA_PLUME);
     }
 
-    GIVEN
+    OPPONENT(SPECIES_WOBBUFFET)
     {
-        ASSUME(gBattleMoves[MOVE_LAVA_PLUME].effect == EFFECT_BURN_HIT);
-        ASSUME(gBattleMoves[MOVE_LAVA_PLUME].secondaryEffectChance == 30);
-
-        PLAYER(SPECIES_CHARMANDER)
-        {
-            Ability(ability);
-            Moves(MOVE_LAVA_PLUME);
-        }
-
-        OPPONENT(SPECIES_WOBBUFFET)
-        {
-            MaxHP(999);
-            HP(999);
-        }
+      MaxHP(999);
+      HP(999);
     }
+  }
 
-    WHEN
+  WHEN
+  {
+    TURN
     {
-        TURN { MOVE(player, MOVE_LAVA_PLUME); }
+      MOVE(player, MOVE_LAVA_PLUME);
     }
+  }
 
-    SCENE
+  SCENE
+  {
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_LAVA_PLUME, player);
+    HP_BAR(opponent);
+
+    if (ability == ABILITY_PYROMANCY)
     {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_LAVA_PLUME, player);
-        HP_BAR(opponent);
-
-        if (ability == ABILITY_PYROMANCY)
-            STATUS_ICON(opponent, burn : TRUE);
+      STATUS_ICON(opponent, burn : TRUE);
     }
+  }
 }
