@@ -1,0 +1,18 @@
+Language: Cpp
+ColumnLimit: 500
+AllowShortEnumsOnASingleLine: true
+MacroBlockBegin: "^#define ABILITY_"
+MacroBlockEnd: "^[^#]"
+PenaltyBreakBeforeFirstCallParameter: 0
+PenaltyBreakString: 0
+PenaltyExcessCharacter: 1000000
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: false
+  AfterControlStatement: Never
+  SplitEmptyRecord: false
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Always

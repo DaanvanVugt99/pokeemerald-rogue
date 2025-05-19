@@ -1935,13 +1935,13 @@ u32 GetTotalAccuracy(u32 battlerAtk,
     case ABILITY_SAND_VEIL:
       if (WEATHER_HAS_EFFECT && gBattleWeather & B_WEATHER_SANDSTORM)
       {
-        calc = (calc * 80) / 100;  // 0.8 sand veil loss
+        calc = (calc * 70) / 100;  // 0.7 sand veil loss
       }
       break;
     case ABILITY_SNOW_CLOAK:
       if (WEATHER_HAS_EFFECT && (gBattleWeather & (B_WEATHER_HAIL | B_WEATHER_SNOW)))
       {
-        calc = (calc * 80) / 100;  // 0.8 snow cloak loss
+        calc = (calc * 70) / 100;  // 0.7 snow cloak loss
       }
       break;
     case ABILITY_TANGLED_FEET:
