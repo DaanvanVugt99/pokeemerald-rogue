@@ -1,6 +1,7 @@
 #include "global.h"
 #include "test/battle.h"
 
+// TODO: FIX TESTS
 SINGLE_BATTLE_TEST("Stench has a ~20% chance to force switch on contact hit")
 {
   GIVEN

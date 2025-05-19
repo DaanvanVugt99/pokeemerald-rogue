@@ -31,7 +31,7 @@
 #define ABILITY_EFFECT_SPORE 27  // When a Pokémon with this Ability is hit by a move that makes contact, there is a 1/3 chance that the attacking Pokémon will become either  poisoned, paralyzed, or asleep
 #define ABILITY_SYNCHRONIZE 28   // *No innate* The attacker will receive the same status condition if it inflicts a burn, poison, or paralysis to the Pokémon.
 #define ABILITY_CLEAR_BODY 29    // Prevents other Pokémon's moves or Abilities from lowering the Pokémon's stats.
-#define ABILITY_NATURAL_CURE 30  // All status conditions heal when the Pokémon switches out.
+#define ABILITY_NATURAL_CURE 30  // All status conditions heal when the Pokémon switches out or the battle ends.
 #define ABILITY_LIGHTNING_ROD 31 // The Pokémon draws in all Electric-type moves. Instead of being hit by Electric-type moves, it boosts its Attack or Sp. Attack stat (which is higher).
 #define ABILITY_SERENE_GRACE 32  // Doubles the likelihood of additional effects occurring when attacking.
 #define ABILITY_SWIFT_SWIM 33    // Doubles speed in rain.
@@ -153,7 +153,7 @@
 #define ABILITY_MOODY 141        // Raises one stat sharply and lowers another every turn.
 #define ABILITY_OVERCOAT 142     // Protects the Pokémon from things like sand, hail, and powder. The  Pokémon takes 20% less damage from special moves.
 #define ABILITY_POISON_TOUCH 143 // 30% chance to badly poison a target when the Pokémon makes contact.
-#define ABILITY_REGENERATOR 144  // Restores 1/3 HP when withdrawn from battle.
+#define ABILITY_REGENERATOR 144  // Restores 1/3 HP when withdrawn from battle or when battle ends.
 #define ABILITY_BIG_PECKS 145    // Powers up moves that make direct contact by 30%. Prevents other Pokémon from lowering the Pokémon's defense stat stage.
 #define ABILITY_SAND_RUSH 146    // Doubles the Pokémon's Speed stat in a sandstorm.
 #define ABILITY_WONDER_SKIN 147  // Makes non-damaging moves that are targeted at this Pokémon have the accuracy of 50%.
