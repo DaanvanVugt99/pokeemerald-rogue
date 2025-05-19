@@ -9000,7 +9000,6 @@ BattleScript_IntimidateLoop:
 	jumpiftargetally BattleScript_IntimidateLoopIncrement
 	jumpifabsent BS_TARGET, BattleScript_IntimidateLoopIncrement
 	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_IntimidateLoopIncrement
-	jumpifability BS_TARGET, ABILITY_OBLIVIOUS, BattleScript_ObliviousBlocksIntimidate
 	jumpifability BS_TARGET, ABILITY_GUARD_DOG, BattleScript_IntimidateInReverse
 BattleScript_IntimidateEffect:
 	copybyte sBATTLER, gBattlerAttacker
@@ -9041,11 +9040,6 @@ BattleScript_IntimidateInReverse:
 	modifybattlerstatstage BS_TARGET, STAT_ATK, INCREASE, 1, BattleScript_IntimidateLoopIncrement, ANIM_ON
 	call BattleScript_TryAdrenalineOrb
 	goto BattleScript_IntimidateLoopIncrement
-
-BattleScript_ObliviousBlocksIntimidate::
-    printstring STRINGID_OBLIVIOUSBLOCKSINTIMIDATE
-    waitmessage B_WAIT_TIME_LONG
-    goto BattleScript_IntimidateLoopIncrement
 
 BattleScript_SupersweetSyrupActivates::
 	showabilitypopup BS_ATTACKER
@@ -11308,3 +11302,47 @@ BattleScript_SuctionCupsActivates::
     call BattleScript_AbilityPopUp
     playanimation BS_TARGET, B_ANIM_TURN_TRAP, sB_ANIM_ARG1
     goto BattleScript_MoveEffectWrap
+
+BattleScript_IlluminateActivates::
+    copybyte gBattlerAbility, gBattlerAttacker
+    showabilitypopup BS_ATTACKER
+    copybyte sSAVED_BATTLER, gBattlerTarget
+    pause B_WAIT_TIME_LONG
+    destroyabilitypopup
+    setbyte gBattlerTarget, 0
+BattleScript_IlluminateLoop:
+    jumpifbyteequal gBattlerTarget, gBattlerAttacker, BattleScript_IlluminateLoopIncrement
+    jumpiftargetally BattleScript_IlluminateLoopIncrement
+    jumpifabsent BS_TARGET, BattleScript_IlluminateLoopIncrement
+    jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_IlluminateLoopIncrement
+BattleScript_IlluminateEffect:
+    copybyte sBATTLER, gBattlerAttacker
+    setstatchanger STAT_ACC, 1, TRUE
+    statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_IlluminateLoopIncrement
+    setgraphicalstatchangevalues
+    jumpifability BS_TARGET, ABILITY_CONTRARY, BattleScript_IlluminateContrary
+    playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+    printstring STRINGID_PKMNLOWERSACCURACYWITH
+BattleScript_IlluminateEffect_WaitString:
+    waitmessage B_WAIT_TIME_LONG
+    copybyte sBATTLER, gBattlerTarget
+    call BattleScript_TryAdrenalineOrb
+BattleScript_IlluminateLoopIncrement:
+    addbyte gBattlerTarget, 1
+    jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_IlluminateLoop
+BattleScript_IlluminateEnd:
+    copybyte sBATTLER, gBattlerAttacker
+    destroyabilitypopup
+    copybyte gBattlerTarget, sSAVED_BATTLER
+    pause B_WAIT_TIME_MED
+    end3
+
+BattleScript_IlluminateContrary:
+    call BattleScript_AbilityPopUpTarget
+    jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_IlluminateContrary_WontIncrease
+    playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+    printfromtable gStatUpStringIds
+    goto BattleScript_IlluminateEffect_WaitString
+BattleScript_IlluminateContrary_WontIncrease:
+    printstring STRINGID_TARGETSTATWONTGOHIGHER
+    goto BattleScript_IlluminateEffect_WaitString

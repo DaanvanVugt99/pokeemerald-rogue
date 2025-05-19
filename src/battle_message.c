@@ -1004,8 +1004,6 @@ static const u8 sText_SupersweetAromaWafts[] = _(
     "A supersweet aroma is wafting from\nthe syrup covering {B_ATK_NAME_WITH_PREFIX}!");
 static const u8 sText_PkmnTerastallizedInto[] = _("{B_ATK_NAME_WITH_PREFIX} terastallized\ninto the {B_BUFF1} type!");
 static const u8 sText_ElectroShotCharging[] = _("{B_ATK_NAME_WITH_PREFIX} absorbed\nelectricity!");
-static const u8 sText_ObliviousBlocksIntimidate[] = _(
-    "{B_DEF_NAME_WITH_PREFIX}'s {B_DEF_ABILITY}\nblocked Intimidate!");
 static const u8 sText_BattlerCoiledUp[] = _("{B_ATK_NAME_WITH_PREFIX} coiled up \nand is ready to bite!");
 static const u8 sText_StartedAcidRain[] = _("A caustic downpour begins!");
 static const u8 sText_AcidRainContinues[] = _("The air seethes with acid rain!");
@@ -1016,6 +1014,8 @@ static const u8 sText_PkmnsXCausedAcidRain[] = _(
 static const u8 sText_AbilityLetItUseMove[] = _("{B_ATK_NAME_WITH_PREFIX}'s ability let it use\n{B_CURRENT_MOVE}!");
 static const u8 sText_AbilityTrapped[] = _("{B_DEF_NAME_WITH_PREFIX} was trapped\nby {B_LAST_ABILITY}!");
 static const u8 sText_PkmnIsHurtByAbility[] = _("{B_ATK_NAME_WITH_PREFIX} is hurt by {B_LAST_ABILITY}!");
+static const u8 sText_PkmnLowersAccuracyWith[] = _(
+    "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nlowers {B_DEF_NAME_WITH_PREFIX}'s accuracy!");
 
 const u8* const gBattleStringsTable[BATTLESTRINGS_COUNT] = {
     [STRINGID_PKMNTERASTALLIZEDINTO - BATTLESTRINGS_TABLE_START] = sText_PkmnTerastallizedInto,
@@ -1716,7 +1716,6 @@ const u8* const gBattleStringsTable[BATTLESTRINGS_COUNT] = {
     [STRINGID_TARGETCOVEREDINSTICKYCANDYSYRUP - BATTLESTRINGS_TABLE_START] = sText_TargetCoveredInStickyCandySyrup,
     [STRINGID_PKMNISANGRY - BATTLESTRINGS_TABLE_START] = sText_PkmnIsAngry,
     [STRINGID_PKMNISCALM - BATTLESTRINGS_TABLE_START] = sText_PkmnIsCalm,
-    [STRINGID_OBLIVIOUSBLOCKSINTIMIDATE - BATTLESTRINGS_TABLE_START] = sText_ObliviousBlocksIntimidate,
     [STRINGID_BATTLERCOILEDUP - BATTLESTRINGS_TABLE_START] = sText_BattlerCoiledUp,
     [STRINGID_STARTEDACIDRAIN - BATTLESTRINGS_TABLE_START] = sText_StartedAcidRain,
     [STRINGID_ACIDRAINCONTINUES - BATTLESTRINGS_TABLE_START] = sText_AcidRainContinues,
@@ -1726,6 +1725,7 @@ const u8* const gBattleStringsTable[BATTLESTRINGS_COUNT] = {
     [STRINGID_ABILITYLETITUSEMOVE - BATTLESTRINGS_TABLE_START] = sText_AbilityLetItUseMove,
     [STRINGID_ABILITYTRAPPED - BATTLESTRINGS_TABLE_START] = sText_AbilityTrapped,
     [STRINGID_PKMNHURTBYABILITY - BATTLESTRINGS_TABLE_START] = sText_PkmnIsHurtByAbility,
+    [STRINGID_PKMNLOWERSACCURACYWITH - BATTLESTRINGS_TABLE_START] = sText_PkmnLowersAccuracyWith,
 
 };
 

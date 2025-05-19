@@ -1381,7 +1381,8 @@ void PrepareStringBattle(u16 stringId, u32 battler)
   }
 
   // Check Defiant and Competitive stat raise whenever a stat is lowered.
-  else if ((stringId == STRINGID_DEFENDERSSTATFELL || stringId == STRINGID_PKMNCUTSATTACKWITH) &&
+  else if ((stringId == STRINGID_DEFENDERSSTATFELL || stringId == STRINGID_PKMNCUTSATTACKWITH ||
+            stringId == STRINGID_PKMNLOWERSACCURACYWITH) &&
            ((targetAbility == ABILITY_DEFIANT &&
              CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN)) ||
             (targetAbility == ABILITY_COMPETITIVE &&
@@ -5050,6 +5051,15 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gSpecialStatuses[battler].switchInAbilityDone = TRUE;
             gBattlerAttacker = battler;
             BattleScriptPushCursorAndCallback(BattleScript_IntimidateActivates);
+            effect++;
+          }
+          break;
+        case ABILITY_ILLUMINATE:
+          if (!gSpecialStatuses[battler].switchInAbilityDone)
+          {
+            gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+            gBattlerAttacker = battler;
+            BattleScriptPushCursorAndCallback(BattleScript_IlluminateActivates);
             effect++;
           }
           break;

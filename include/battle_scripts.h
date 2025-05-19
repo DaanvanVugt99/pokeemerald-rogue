@@ -509,7 +509,6 @@ extern const u8 BattleScript_TheSwampDisappeared[];
 extern const u8 BattleScript_ItemRestoreHP_Party[];
 extern const u8 BattleScript_StenchActivates[];
 extern const u8 BattleScript_StenchEnd[];
-extern const u8 BattleScript_ObliviousBlocksIntimidate[];
 extern const u8 BattleScript_AbilityHpHeal[];
 extern const u8 BattleScript_RampageActivates[];
 extern const u8 BattleScript_BattlerCoiledUp[];
@@ -518,6 +517,7 @@ extern const u8 BattleScript_AttackerUsedAnExtraMove[];
 extern const u8 BattleScript_AttackerUsedAnExtraMoveOnSwitchIn[];
 extern const u8 BattleScript_AbilityTurnDmg[];
 extern const u8 BattleScript_SuctionCupsActivates[];
+extern const u8 BattleScript_IlluminateActivates[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

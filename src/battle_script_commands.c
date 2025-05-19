@@ -7875,7 +7875,7 @@ static void Cmd_switchineffects(void)
     // Don't activate switch-in abilities if the opposing field is empty.
     // This could happen when a mon uses explosion and causes everyone to faint.
     if ((battlerAbility == ABILITY_INTIMIDATE || battlerAbility == ABILITY_SUPERSWEET_SYRUP ||
-         battlerAbility == ABILITY_DOWNLOAD) &&
+         battlerAbility == ABILITY_DOWNLOAD || battlerAbility == ABILITY_ILLUMINATE) &&
         !IsBattlerAlive(BATTLE_OPPOSITE(battler)) && !IsBattlerAlive(BATTLE_PARTNER(BATTLE_OPPOSITE(battler))))
     {
       if (ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN, battler, FALSE))

@@ -36,7 +36,7 @@
 #define ABILITY_SERENE_GRACE 32  // Doubles the likelihood of additional effects occurring when attacking.
 #define ABILITY_SWIFT_SWIM 33    // Doubles speed in rain.
 #define ABILITY_CHLOROPHYLL 34   // Doubles speed in sunshine.
-#define ABILITY_ILLUMINATE 35    // Boosts accuracy by 1.2x. Also has its existing field effect.
+#define ABILITY_ILLUMINATE 35    // Prevents other Pokémon from lowering the accuracy stat stage of the Pokémon with this Ability, and also ignores the target's evasion stages. Lowers all opposing pokemons accuracy by 1 stage.
 #define ABILITY_TRACE 36         // *No innate* When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.
 #define ABILITY_HUGE_POWER 37    // Doubles the Pokémon's highest offensive stat.
 #define ABILITY_POISON_POINT 38  // 1/3 chance to get poisoned on contact against this Pokémon.
