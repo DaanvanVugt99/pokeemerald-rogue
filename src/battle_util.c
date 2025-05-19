@@ -3014,10 +3014,19 @@ u8 DoBattlerEndTurnEffects(void)
           {
             MAGIC_GUARD_CHECK;
 
-            gBattleScripting.animArg1 = gBattleStruct->wrappedMove[battler];
-            gBattleScripting.animArg2 = gBattleStruct->wrappedMove[battler] >> 8;
-            PREPARE_MOVE_BUFFER(gBattleTextBuff1, gBattleStruct->wrappedMove[battler]);
-            gBattlescriptCurrInstr = BattleScript_WrapTurnDmg;
+            if (GetBattlerAbility(gBattleStruct->wrappedBy[battler]) == ABILITY_SUCTION_CUPS)
+            {
+              gLastUsedAbility = ABILITY_SUCTION_CUPS;
+              PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+              PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff2, battler, gBattlerPartyIndexes[battler]);
+              gBattlescriptCurrInstr = BattleScript_AbilityTurnDmg;
+            } else
+            {
+              gBattleScripting.animArg1 = gBattleStruct->wrappedMove[battler];
+              gBattleScripting.animArg2 = gBattleStruct->wrappedMove[battler] >> 8;
+              PREPARE_MOVE_BUFFER(gBattleTextBuff1, gBattleStruct->wrappedMove[battler]);
+              gBattlescriptCurrInstr = BattleScript_WrapTurnDmg;
+            }
             if (GetBattlerHoldEffect(gBattleStruct->wrappedBy[battler], TRUE) == HOLD_EFFECT_BINDING_BAND)
             {
               gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / (B_BINDING_DAMAGE >= GEN_6 ? 6 : 8);
@@ -6432,7 +6441,28 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             VarSet(VAR_TEMP_MOVEEFECT_CHANCE, moveEffectPercentChance);
             VarSet(VAR_TEMP_MOVEEFFECT, extraMoveSecondaryEffect);
 
-            BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
+            BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMove);
+            effect++;
+          }
+          break;
+        case ABILITY_SUCTION_CUPS:  // Traps enemy for 2-3 turns on contact
+          if (IsMoveMakingContact(move, gBattlerAttacker) && TARGET_TURN_DAMAGED)
+          {
+            gBattleMons[gBattlerTarget].status2 |= STATUS2_WRAPPED;
+            gDisableStructs[gBattlerTarget].wrapTurns = (Random() % 2) + 2;
+            gBattleStruct->wrappedMove[gBattlerTarget] = MOVE_WHIRLPOOL;
+            gBattleStruct->wrappedBy[gBattlerTarget] = gBattlerAttacker;
+
+            gLastUsedAbility = ABILITY_SUCTION_CUPS;
+            gBattlerAbility = gBattlerAttacker;
+
+            PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, gBattlerTarget, gBattlerPartyIndexes[gBattlerTarget]);
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff2, gLastUsedAbility);
+
+            gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WRAPPED_MOVE;
+
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_SuctionCupsActivates;
             effect++;
           }
           break;
@@ -12944,7 +12974,7 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
   {
     ret = FALSE;
     RecordItemEffectBattle(battler, holdEffect);
-  } else if (GetBattlerAbility(gActiveBattler) == ABILITY_SHIELD_DUST)
+  } else if (GetBattlerAbility(battler) == ABILITY_SHIELD_DUST)
   {
     ret = FALSE;
   }

@@ -8566,6 +8566,13 @@ BattleScript_WrapTurnDmg::
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_DoTurnDmg
 
+BattleScript_AbilityTurnDmg::
+    jumpifability BS_ATTACKER, ABILITY_MAGIC_GUARD, BattleScript_DoTurnDmgEnd
+    playanimation BS_ATTACKER, B_ANIM_TURN_TRAP, sB_ANIM_ARG1
+    printstring STRINGID_PKMNHURTBYABILITY
+    waitmessage B_WAIT_TIME_LONG
+    goto BattleScript_DoTurnDmg
+
 BattleScript_WrapEnds::
 	printstring STRINGID_PKMNFREEDFROM
 	waitmessage B_WAIT_TIME_LONG
@@ -11296,3 +11303,8 @@ BattleScript_ExtraHitFromAtkAnimationOnSwitchIn::
 BattleScript_ExtraExtraMoveEndOnSwitchIn::
 	moveendall
 	end3
+
+BattleScript_SuctionCupsActivates::
+    call BattleScript_AbilityPopUp
+    playanimation BS_TARGET, B_ANIM_TURN_TRAP, sB_ANIM_ARG1
+    goto BattleScript_MoveEffectWrap

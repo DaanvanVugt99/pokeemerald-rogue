@@ -21,9 +21,9 @@
 #define ABILITY_IMMUNITY 17      // The immune system of the Pokémon prevents it from getting poisoned or being hurt from acid rain. Halves damage from Poison-type moves.
 #define ABILITY_FLASH_FIRE 18    // This ability makes the Pokémon immune to Fire-type moves and will activate when hit by one. When activated, the power of the Pokémon's Fire-type moves is increased by 50%.
 #define ABILITY_SHIELD_DUST 19   // Damaging moves used by the opponent will not have an additional effect. Also avoids damage from entry hazards.
-#define ABILITY_OWN_TEMPO 20     // Prevents it from becoming confused.
-#define ABILITY_SUCTION_CUPS 21  // *No innate* This Pokémon uses suction cups to stay in one spot to  negate all moves and items that force switching out.
-#define ABILITY_INTIMIDATE 22    // The Pokémon intimidates opposing Pokémon upon entering battle, lowering   their Attack stat.
+#define ABILITY_OWN_TEMPO 20     // Prevents it from becoming confused or being intimidated.
+#define ABILITY_SUCTION_CUPS 21  // This Pokémon uses suction cups to stay in one spot to negate all moves and items that force switching out. Traps enemies for 2-3 turns on contact.
+#define ABILITY_INTIMIDATE 22    // The Pokémon intimidates opposing Pokémon upon entering battle, lowering their Attack stat.
 #define ABILITY_SHADOW_TAG 23    // This Pokémon steps on the opposing Pokémon's shadow to prevent it from  escaping.
 #define ABILITY_ROUGH_SKIN 24    // This Pokémon inflicts 1/8 HP damage on contact.
 #define ABILITY_WONDER_GUARD 25  // *No innate* Its mysterious power only lets supereffective moves hit the  Pokémon.
@@ -344,7 +344,7 @@
 
 // Custom Abilities
 #define ABILITY_CHLOROPLAST (ABILITIES_COUNT_GEN9 + 1)       // Moves function as if it's sunny, regardless of weather
-#define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)          // Boosts the power of Ice attacks in Hail by 50%
+#define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)          // Boosts the power of Ice attacks in Hail by 50%, 10% chance to freeze
 #define ABILITY_PYROMANCY (ABILITIES_COUNT_GEN9 + 3)         // Fire attacks are 5x more likely to inflict a burn
 #define ABILITY_SPELL_FIST (ABILITIES_COUNT_GEN9 + 4)        // Punching moves deal 1.3x and do special damage
 #define ABILITY_BLITZ_BOXER (ABILITIES_COUNT_GEN9 + 5)       // Punching moves gain priority at full health
