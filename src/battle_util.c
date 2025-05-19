@@ -10683,6 +10683,16 @@ static inline u32 CalcAttackStat(u32 move,
         }
       }
       break;
+    case ABILITY_SHADOW_TAG:
+      if (moveType == TYPE_GHOST)
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+      }
+    case ABILITY_ARENA_TRAP:
+      if (moveType == TYPE_GROUND)
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+      }
     case ABILITY_PLUS:
       if (IS_MOVE_SPECIAL(move) && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
       {

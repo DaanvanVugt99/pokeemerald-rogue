@@ -24,7 +24,7 @@
 #define ABILITY_OWN_TEMPO 20     // Prevents it from becoming confused or being intimidated.
 #define ABILITY_SUCTION_CUPS 21  // This Pokémon uses suction cups to stay in one spot to negate all moves and items that force switching out. Traps enemies for 2-3 turns on contact.
 #define ABILITY_INTIMIDATE 22    // The Pokémon intimidates opposing Pokémon upon entering battle, lowering their Attack stat.
-#define ABILITY_SHADOW_TAG 23    // This Pokémon steps on the opposing Pokémon's shadow to prevent it from  escaping.
+#define ABILITY_SHADOW_TAG 23    // This Pokémon steps on the opposing Pokémon's shadow to prevent it from  escaping. 1.2x damage for ghost-type moves.
 #define ABILITY_ROUGH_SKIN 24    // This Pokémon inflicts 1/8 HP damage on contact.
 #define ABILITY_WONDER_GUARD 25  // *No innate* Its mysterious power only lets supereffective moves hit the  Pokémon.
 #define ABILITY_LEVITATE 26      // By floating in the air, the Pokémon receives full immunity to all Ground-type moves. Boosts the power of Flying-type moves by 25%.
@@ -72,7 +72,7 @@
 #define ABILITY_SWARM 68         // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_ROCK_HEAD 69     // Prevents recoil damage.
 #define ABILITY_DROUGHT 70       // Summons sunshine on entry.
-#define ABILITY_ARENA_TRAP 71    // Prevents fleeing.
+#define ABILITY_ARENA_TRAP 71    // Prevents fleeing. 1.2x damage for ground-type moves.
 #define ABILITY_VITAL_SPIRIT 72  // Prevents falling asleep.
 #define ABILITY_WHITE_SMOKE 73   // The Pokémon is protected by its white smoke, which prevents other Pokémon from lowering its stats
 #define ABILITY_PURE_POWER 74    // Doubles the Pokémon's highest offensive stat.
