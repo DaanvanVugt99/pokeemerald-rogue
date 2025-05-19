@@ -25,7 +25,7 @@
 #define ABILITY_SUCTION_CUPS 21  // This Pokémon uses suction cups to stay in one spot to negate all moves and items that force switching out. Traps enemies for 2-3 turns on contact.
 #define ABILITY_INTIMIDATE 22    // The Pokémon intimidates opposing Pokémon upon entering battle, lowering their Attack stat.
 #define ABILITY_SHADOW_TAG 23    // This Pokémon steps on the opposing Pokémon's shadow to prevent it from  escaping. 1.2x damage for ghost-type moves.
-#define ABILITY_ROUGH_SKIN 24    // This Pokémon inflicts 1/8 HP damage on contact.
+#define ABILITY_ROUGH_SKIN 24    // This Pokémon inflicts 1/8 HP damage on contact. Deals 1/6 damage if the attacking move is Normal-, Fighting-, or Bug-type.
 #define ABILITY_WONDER_GUARD 25  // *No innate* Its mysterious power only lets supereffective moves hit the  Pokémon.
 #define ABILITY_LEVITATE 26      // By floating in the air, the Pokémon receives full immunity to all Ground-type moves. Boosts the power of Flying-type moves by 25%.
 #define ABILITY_EFFECT_SPORE 27  // When a Pokémon with this Ability is hit by a move that makes contact, there is a 10% chance that the attacking Pokémon will become either  poisoned, paralyzed, or asleep, with a 3.3% probability each.
@@ -169,7 +169,7 @@
 #define ABILITY_SAP_SIPPER 157   // Immune to Grass-type moves. Instead of being hit by Grass-type moves, it boosts its Attack or Sp. Attack stat (which is higher).
 #define ABILITY_PRANKSTER 158    // Gives priority to a status move.
 #define ABILITY_SAND_FORCE 159   // Boosts the power of Rock-, Ground-, and Steel-type moves by 30% in a sandstorm.
-#define ABILITY_IRON_BARBS 160   // Deals 1/8 HP damage on contact.
+#define ABILITY_IRON_BARBS 160   // Deals 1/8 HP damage on contact. Deals 1/6 damage if the attacking move is Steel-, Rock-, or Ground-type.
 #define ABILITY_ZEN_MODE 161     // Changes form regardless of health (So, becomes Zen Mode as soon as Darmanitan is switched in)
 #define ABILITY_VICTORY_STAR 162 // Boosts the accuracy of its allies and itself by 20%.
 #define ABILITY_TURBOBLAZE 163   // Moves can be used on the target regardless of its Abilities. Adds the Fire-type to the Pokémon, in addition to the Pokémon's original type(s).
