@@ -2139,7 +2139,17 @@ static void Cmd_ppreduce(void)
     {
       if (GetBattlerSide(i) != GetBattlerSide(gBattlerAttacker) && IsBattlerAlive(i))
       {
-        ppToDeduct += (GetBattlerAbility(i) == ABILITY_PRESSURE);
+        if (GetBattlerAbility(i) == ABILITY_PRESSURE)
+        {
+          ppToDeduct++;
+          for (int j = 0; j < MAX_MON_MOVES; j++)
+          {
+            if (gBattleMons[gBattlerAttacker].moves[j] != MOVE_NONE && gBattleMons[gBattlerAttacker].pp[j] > 0)
+            {
+              gBattleMons[gBattlerAttacker].pp[j]--;
+            }
+          }
+        }
       }
     }
 
@@ -2157,6 +2167,14 @@ static void Cmd_ppreduce(void)
     if (gBattlerAttacker != gBattlerTarget && GetBattlerAbility(gBattlerTarget) == ABILITY_PRESSURE)
     {
       ppToDeduct++;
+
+      for (int j = 0; j < MAX_MON_MOVES; j++)
+      {
+        if (gBattleMons[gBattlerAttacker].moves[j] != MOVE_NONE && gBattleMons[gBattlerAttacker].pp[j] > 0)
+        {
+          gBattleMons[gBattlerAttacker].pp[j]--;
+        }
+      }
     }
 
     if (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER && IsCurseActive(EFFECT_PRESSURE_STATUS))
