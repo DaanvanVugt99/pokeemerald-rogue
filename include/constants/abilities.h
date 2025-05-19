@@ -48,7 +48,7 @@
 #define ABILITY_RAIN_DISH 44     // Restores 1/8 HP per turn under rain.
 #define ABILITY_SAND_STREAM 45   // The Pokémon summons a sandstorm when it enters a battle.
 #define ABILITY_PRESSURE 46      // When this Pokémon is hit by a move, all the opponent’s PP moves lower by 1.
-#define ABILITY_THICK_FAT 47     // The Pokémon is protected by a layer of thick fat, which halves the  damage taken from Fire- and Ice-type moves.
+#define ABILITY_THICK_FAT 47     // The Pokémon is protected by a layer of thick fat, which halves the  damage taken from Fire- and Ice-type moves. Also immune to burn and freeze/frostbite.
 #define ABILITY_EARLY_BIRD 48    // The Pokémon awakens from sleep twice as fast as other Pokémon.
 #define ABILITY_FLAME_BODY 49    // 30% chance to get burned on contact against this Pokémon.
 #define ABILITY_RUN_AWAY 50      // Enables a sure getaway from wild Pokémon. Boosts the Pokémon's Speed  stat sharply when its stats are lowered.

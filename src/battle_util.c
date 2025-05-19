@@ -6766,6 +6766,14 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
               effect = 1;
             }
             break;
+          case ABILITY_THICK_FAT:
+            if ((gBattleMons[battler].status1 & (STATUS1_FREEZE | STATUS1_FROSTBITE)) ||
+                (gBattleMons[battler].status1 & STATUS1_BURN))
+            {
+              StringCopy(gBattleTextBuff1, gStatusConditionString_IceJpn);
+              effect = 1;
+            }
+            break;
           case ABILITY_OBLIVIOUS:
             if (gBattleMons[battler].status2 & STATUS2_INFATUATION)
             {
@@ -7321,9 +7329,10 @@ bool32 CanBeBurned(u32 battler)
 {
   u16 ability = GetBattlerAbility(battler);
   if (IS_BATTLER_OF_TYPE(battler, TYPE_FIRE) || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD ||
-      gBattleMons[battler].status1 & STATUS1_ANY || ability == ABILITY_WATER_VEIL || ability == ABILITY_WATER_BUBBLE ||
-      ability == ABILITY_COMATOSE || ability == ABILITY_THERMAL_EXCHANGE || ability == ABILITY_PURIFYING_SALT ||
-      IsAbilityStatusProtected(battler) || IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
+      gBattleMons[battler].status1 & STATUS1_ANY || ability == ABILITY_WATER_VEIL || ABILITY_THICK_FAT ||
+      ability == ABILITY_WATER_BUBBLE || ability == ABILITY_COMATOSE || ability == ABILITY_THERMAL_EXCHANGE ||
+      ability == ABILITY_PURIFYING_SALT || IsAbilityStatusProtected(battler) ||
+      IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
   {
     return FALSE;
   }
@@ -7348,8 +7357,9 @@ bool32 CanBeFrozen(u32 battler)
   u16 ability = GetBattlerAbility(battler);
   if (IS_BATTLER_OF_TYPE(battler, TYPE_ICE) || IsBattlerWeatherAffected(battler, B_WEATHER_SUN) ||
       gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD || ability == ABILITY_MAGMA_ARMOR ||
-      ability == ABILITY_COMATOSE || ability == ABILITY_PURIFYING_SALT || gBattleMons[battler].status1 & STATUS1_ANY ||
-      IsAbilityStatusProtected(battler) || IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
+      ABILITY_THICK_FAT || ability == ABILITY_COMATOSE || ability == ABILITY_PURIFYING_SALT ||
+      gBattleMons[battler].status1 & STATUS1_ANY || IsAbilityStatusProtected(battler) ||
+      IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
   {
     return FALSE;
   }
@@ -7360,9 +7370,9 @@ bool32 CanGetFrostbite(u32 battler)
 {
   u16 ability = GetBattlerAbility(battler);
   if (IS_BATTLER_OF_TYPE(battler, TYPE_ICE) || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD ||
-      ability == ABILITY_MAGMA_ARMOR || ability == ABILITY_COMATOSE || ability == ABILITY_PURIFYING_SALT ||
-      gBattleMons[battler].status1 & STATUS1_ANY || IsAbilityStatusProtected(battler) ||
-      IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
+      ability == ABILITY_MAGMA_ARMOR || ABILITY_THICK_FAT || ability == ABILITY_COMATOSE ||
+      ability == ABILITY_PURIFYING_SALT || gBattleMons[battler].status1 & STATUS1_ANY ||
+      IsAbilityStatusProtected(battler) || IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
   {
     return FALSE;
   }
