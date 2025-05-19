@@ -41,7 +41,7 @@
 #define ABILITY_HUGE_POWER 37    // Doubles the Pokémon's highest offensive stat.
 #define ABILITY_POISON_POINT 38  // 1/3 chance to get poisoned on contact against this Pokémon.
 #define ABILITY_INNER_FOCUS 39   // The Pokémon's intensely focused, and that protects the Pokémon from flinching, Focus Blast has increased accuracy to 90%. Focus Punch halves damage instead of canceling on hit.
-#define ABILITY_MAGMA_ARMOR 40   // Prevents the Pokémon from becoming frozen. Takes 30% less damage from Water- and Ice-type moves.
+#define ABILITY_MAGMA_ARMOR 40   // Prevents the Pokémon from becoming frozen. Takes 50% less damage from Water- and Ice-type moves.
 #define ABILITY_WATER_VEIL 41    // Prevents the Pokémon from getting a burn. Sets Aqua Ring on entry. Aqua Ring effect: Restore 1/8 HP every turn
 #define ABILITY_MAGNET_PULL 42   // Traps Steel-type Pokémon.
 #define ABILITY_SOUNDPROOF 43    // Soundproofing gives the Pokémon full immunity to all sound-based moves.
