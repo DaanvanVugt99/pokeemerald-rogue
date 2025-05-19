@@ -119,7 +119,7 @@
 #define ABILITY_FILTER 111       // Reduces the power of supereffective attacks taken by 35%.
 #define ABILITY_SLOW_START 112   // For five turns, the Pokémon's Attack and Speed stats are halved, but restores its stats after these five turns.
 #define ABILITY_SCRAPPY 113      // The Pokémon can hit: Ghost-type Pokémon with Normal- and Fighting-type  moves.
-#define ABILITY_STORM_DRAIN 114  // Water-type moves are drawn to this Pokémon. Water-type moves will do  no damage and the Pokémon's SP ATK is raised one stage
+#define ABILITY_STORM_DRAIN 114  // Water-type moves are drawn to this Pokémon. Water-type moves will do  no damage and the Pokémon's highest offensive stat is raised by 1 stage.
 #define ABILITY_ICE_BODY 115     // Restores 1/8 HP every turn in hailstorm.
 #define ABILITY_SOLID_ROCK 116   // Reduces the power of supereffective attacks taken by 35%.
 #define ABILITY_SNOW_WARNING 117 // The Pokémon summons a hailstorm when it enters a battle.

@@ -5691,21 +5691,72 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
             break;
           case ABILITY_LIGHTNING_ROD:
-            if (moveType == TYPE_ELECTRIC && gBattleMoves[move].target != MOVE_TARGET_ALL_BATTLERS)
+            if (moveType == TYPE_ELECTRIC)
             {
-              effect = 2, statId = STAT_SPATK;
+              u16 userAttack;
+              u16 userSpAttack;
+              effect = 2;
+
+              userAttack = gBattleMons[battler].attack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][1];
+              userSpAttack = gBattleMons[battler].spAttack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][1];
+
+              if (userSpAttack < userAttack)
+              {
+                statId = STAT_ATK;
+              } else
+              {
+                statId = STAT_SPATK;
+              }
             }
             break;
           case ABILITY_STORM_DRAIN:
             if (moveType == TYPE_WATER)
             {
-              effect = 2, statId = STAT_SPATK;
+              u16 userAttack;
+              u16 userSpAttack;
+              effect = 2;
+
+              userAttack = gBattleMons[battler].attack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][1];
+              userSpAttack = gBattleMons[battler].spAttack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][1];
+
+              if (userSpAttack < userAttack)
+              {
+                statId = STAT_ATK;
+              } else
+              {
+                statId = STAT_SPATK;
+              }
             }
             break;
           case ABILITY_SAP_SIPPER:
             if (moveType == TYPE_GRASS)
             {
-              effect = 2, statId = STAT_ATK;
+              u16 userAttack;
+              u16 userSpAttack;
+              effect = 2;
+
+              userAttack = gBattleMons[battler].attack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][1];
+              userSpAttack = gBattleMons[battler].spAttack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][1];
+
+              if (userSpAttack < userAttack)
+              {
+                statId = STAT_ATK;
+              } else
+              {
+                statId = STAT_SPATK;
+              }
             }
             break;
           case ABILITY_AERODYNAMICS:
