@@ -10719,7 +10719,7 @@ static inline u32 CalcAttackStat(u32 move,
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
         if (updateFlags)
         {
-          RecordAbilityBattle(battlerDef, ABILITY_BATTLE_ARMOR);
+          RecordAbilityBattle(battlerDef, ABILITY_IMMUNITY);
         }
       }
       break;
@@ -12944,6 +12944,9 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
   {
     ret = FALSE;
     RecordItemEffectBattle(battler, holdEffect);
+  } else if (GetBattlerAbility(gActiveBattler) == ABILITY_SHIELD_DUST)
+  {
+    ret = FALSE;
   }
   return ret;
 }

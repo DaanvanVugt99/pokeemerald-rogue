@@ -20,7 +20,7 @@
 #define ABILITY_COLOR_CHANGE 16  // The Pokemon's type become the type that counters the move used on it before hit.
 #define ABILITY_IMMUNITY 17      // The immune system of the Pokémon prevents it from getting poisoned or being hurt from acid rain. Halves damage from Poison-type moves.
 #define ABILITY_FLASH_FIRE 18    // This ability makes the Pokémon immune to Fire-type moves and will activate when hit by one. When activated, the power of the Pokémon's Fire-type moves is increased by 50%.
-#define ABILITY_SHIELD_DUST 19   // Damaging moves used by the opponent will not have an additional effect.   Now also avoids damage from entry hazards.
+#define ABILITY_SHIELD_DUST 19   // Damaging moves used by the opponent will not have an additional effect. Also avoids damage from entry hazards.
 #define ABILITY_OWN_TEMPO 20     // Prevents it from becoming confused.
 #define ABILITY_SUCTION_CUPS 21  // *No innate* This Pokémon uses suction cups to stay in one spot to  negate all moves and items that force switching out.
 #define ABILITY_INTIMIDATE 22    // The Pokémon intimidates opposing Pokémon upon entering battle, lowering   their Attack stat.
