@@ -5074,6 +5074,18 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             effect++;
           }
           break;
+        case ABILITY_WATER_VEIL:
+          if (!gSpecialStatuses[battler].switchInAbilityDone && !(gStatuses3[battler] & STATUS3_AQUA_RING))
+          {
+            gBattlerAttacker = battler;
+            gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+            gBattleScripting.abilityPopupOverwrite = ABILITY_WATER_VEIL;
+            gLastUsedAbility = ABILITY_WATER_VEIL;
+            gStatuses3[battler] |= STATUS3_AQUA_RING;
+            BattleScriptPushCursorAndCallback(BattleScript_BattlerEnvelopedItselfInAVeil);
+            effect++;
+          }
+          break;
         case ABILITY_SUPERSWEET_SYRUP:
           if (!gSpecialStatuses[battler].switchInAbilityDone &&
               !(gBattleStruct->supersweetSyrup[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
@@ -10837,6 +10849,11 @@ static inline u32 CalcAttackStat(u32 move,
       }
     case ABILITY_ARENA_TRAP:
       if (moveType == TYPE_GROUND)
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+      }
+    case ABILITY_MAGNET_PULL:
+      if (moveType == TYPE_STEEL)
       {
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
       }

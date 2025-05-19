@@ -11347,3 +11347,11 @@ BattleScript_IlluminateContrary:
 BattleScript_IlluminateContrary_WontIncrease:
     printstring STRINGID_TARGETSTATWONTGOHIGHER
     goto BattleScript_IlluminateEffect_WaitString
+
+BattleScript_BattlerEnvelopedItselfInAVeil::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_BATTLERENVELOPEDITSELFINAVEIL
+	playanimation BS_ATTACKER, B_ANIM_AQUA_RING_HEAL
+	waitmessage B_WAIT_TIME_LONG
+	end3
