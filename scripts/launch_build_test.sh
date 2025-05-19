@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Coil up"
+testToRunPrefix="Color Change"
 
 
 # Get the number of CPUs on macOS

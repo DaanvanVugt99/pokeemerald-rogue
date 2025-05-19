@@ -1499,7 +1499,8 @@ static void Cmd_attackcanceler(void)
   }
 
   if ((GetBattlerAbility(gBattlerTarget) == ABILITY_COLOR_CHANGE) &&
-      gProtectStructs[gBattlerAttacker].extraMoveUsed != TRUE && (gBattlerAttacker != gBattlerTarget))
+      gProtectStructs[gBattlerAttacker].extraMoveUsed != TRUE && (gBattlerAttacker != gBattlerTarget) &&
+      !IS_MOVE_STATUS(gCurrentMove))
   {
     u32 currentType;
     u32 bestType = gBattleMons[gBattlerTarget].type1;

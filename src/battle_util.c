@@ -6161,7 +6161,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           }
           break;
         STATIC:
-        case ABILITY_STATIC:
+        case ABILITY_STATIC:  // defender static
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 &&
               !gProtectStructs[gBattlerAttacker].confusionSelfDmg && TARGET_TURN_DAMAGED &&
               CanBeParalyzed(gBattlerAttacker) && IsMoveMakingContact(move, gBattlerAttacker) &&
@@ -6389,6 +6389,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           {
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AttackerFormChange;
+            effect++;
+          }
+          break;
+        case ABILITY_STATIC:  // Attacker Static
+          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerTarget].hp != 0 &&
+              !gProtectStructs[gBattlerAttacker].confusionSelfDmg && CanBeParalyzed(gBattlerTarget) &&
+              IsMoveMakingContact(move, gBattlerAttacker) && TARGET_TURN_DAMAGED  // Need to actually hit the target
+              && RandomWeighted(RNG_STATIC, 2, 1))
+          {
+            gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
           }
           break;

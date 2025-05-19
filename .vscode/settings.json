@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.inc": "asm",
         "*.h": "c",
         "iosfwd": "c",
         "xlocbuf": "c",
@@ -84,7 +85,8 @@
         "xstddef": "cpp",
         "csignal": "cpp",
         "filesystem": "cpp",
-        "bitset": "c"
+        "bitset": "c",
+        "__bit_reference": "c"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "languageServerPoryscript.commandIncludes": [
