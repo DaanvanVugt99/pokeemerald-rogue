@@ -1909,6 +1909,11 @@ u32 GetTotalAccuracy(u32 battlerAtk,
   {
     moveAcc = 50;
   }
+  // Check Inner Focus.
+  if (defAbility == ABILITY_INNER_FOCUS && move == MOVE_FOCUS_BLAST)
+  {
+    moveAcc = 90;
+  }
 
   calc = gAccuracyStageRatios[buff].dividend * moveAcc;
   calc /= gAccuracyStageRatios[buff].divisor;

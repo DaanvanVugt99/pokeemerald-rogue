@@ -6052,13 +6052,14 @@ BattleScript_MementoTargetProtectEnd:
 	tryfaintmon BS_ATTACKER
 	goto BattleScript_MoveEnd
 
-BattleScript_EffectFocusPunch::
-	attackcanceler
-	jumpifnodamage BattleScript_HitFromAccCheck
-	ppreduce
-	printstring STRINGID_PKMNLOSTFOCUS
-	waitmessage B_WAIT_TIME_LONG
-	goto BattleScript_MoveEnd
+BattleScript_EffectFocusPunch:
+    attackcanceler
+    jumpifnodamage BattleScript_HitFromAccCheck
+    ppreduce
+    jumpifability BS_ATTACKER, ABILITY_INNER_FOCUS, BattleScript_HitFromAccCheck
+    printstring STRINGID_PKMNLOSTFOCUS
+    waitmessage B_WAIT_TIME_LONG
+    goto BattleScript_MoveEnd
 
 BattleScript_EffectSmellingsalt:
 BattleScript_EffectWakeUpSlap:

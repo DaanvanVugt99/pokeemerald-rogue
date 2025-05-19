@@ -10411,6 +10411,18 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
     case ABILITY_SUPREME_OVERLORD:
       modifier = uq4_12_multiply(modifier, GetSupremeOverlordModifier(battlerAtk));
       break;
+    case ABILITY_INNER_FOCUS:
+      if (move == MOVE_FOCUS_PUNCH)
+      {
+        // Check if the user of Focus Punch has been damaged this turn
+        if ((gProtectStructs[battlerAtk].physicalDmg != 0 || gProtectStructs[battlerAtk].specialDmg != 0) ||
+            (gProtectStructs[battlerAtk].confusionSelfDmg))
+        {
+          // Halve the damage if Focus Punch was interrupted
+          modifier = uq4_12_multiply(modifier, UQ_4_12(0.5));
+        }
+      }
+      break;
   }
 
   // field abilities
