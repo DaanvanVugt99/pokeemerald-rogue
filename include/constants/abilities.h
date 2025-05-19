@@ -27,7 +27,7 @@
 #define ABILITY_SHADOW_TAG 23    // This Pokémon steps on the opposing Pokémon's shadow to prevent it from  escaping. 1.2x damage for ghost-type moves.
 #define ABILITY_ROUGH_SKIN 24    // This Pokémon inflicts 1/8 HP damage on contact. Deals 1/6 damage if the attacking move is Normal-, Fighting-, or Bug-type.
 #define ABILITY_WONDER_GUARD 25  // *No innate* Its mysterious power only lets supereffective moves hit the  Pokémon.
-#define ABILITY_LEVITATE 26      // By floating in the air, the Pokémon receives full immunity to all Ground-type moves. Boosts the power of Flying-type moves by 25%.
+#define ABILITY_LEVITATE 26      // By floating in the air, the Pokémon receives full immunity to all Ground-type moves. Flying moves gain STAB.
 #define ABILITY_EFFECT_SPORE 27  // When a Pokémon with this Ability is hit by a move that makes contact, there is a 10% chance that the attacking Pokémon will become either  poisoned, paralyzed, or asleep, with a 3.3% probability each.
 #define ABILITY_SYNCHRONIZE 28   // *No innate* The attacker will receive the same status condition if it inflicts a burn, poison, or paralysis to the Pokémon.
 #define ABILITY_CLEAR_BODY 29    // Prevents other Pokémon's moves or Abilities from lowering the Pokémon's stats.

@@ -11176,6 +11176,12 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
     return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5),
                       GetAdaptabilityCharmBoost(battlerAtk));
   }
+  // Check for Levitate granting STAB to Flying moves
+  if (abilityAtk == ABILITY_LEVITATE && moveType == TYPE_FLYING)
+  {
+    return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5),
+                      GetAdaptabilityCharmBoost(battlerAtk));
+  }
 
   if (gBattleStruct->pledgeMove && IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType))
   {
