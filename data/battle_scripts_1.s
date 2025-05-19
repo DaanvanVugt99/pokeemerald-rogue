@@ -11355,3 +11355,13 @@ BattleScript_BattlerEnvelopedItselfInAVeil::
 	playanimation BS_ATTACKER, B_ANIM_AQUA_RING_HEAL
 	waitmessage B_WAIT_TIME_LONG
 	end3
+
+BattleScript_EarlyBirdActivates::
+    statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_EarlyBirdActivatesEnd
+    call BattleScript_AbilityPopUp
+    setgraphicalstatchangevalues
+    playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+    printstring STRINGID_PKMNRAISEDSPEED
+    waitmessage B_WAIT_TIME_LONG
+BattleScript_EarlyBirdActivatesEnd:
+    end3::

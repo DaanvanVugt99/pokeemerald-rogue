@@ -1,20 +1,39 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Speed Boost gradually boosts Speed")
+// Test: Early Bird grants a Speed boost when the Pokémon wakes up
+SINGLE_BATTLE_TEST("Early Bird grants a Speed boost when the Pokémon wakes up")
 {
-    GIVEN {
-        PLAYER(SPECIES_TORCHIC) { Ability(ABILITY_SPEED_BOOST); Speed(99); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-        MESSAGE("Torchic used Celebrate!");
-        ABILITY_POPUP(player, ABILITY_SPEED_BOOST);
-        MESSAGE("Torchic's Speed Boost raised its SPEED!");
-        MESSAGE("Torchic used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
+  GIVEN
+  {
+    PLAYER(SPECIES_XATU)
+    {
+      Ability(ABILITY_EARLY_BIRD);
+      Speed(99);
     }
+    OPPONENT(SPECIES_HYPNO)
+    {
+      Speed(100);
+    }
+  }
+  WHEN
+  {
+    TURN
+    {
+      MOVE(opponent, MOVE_HYPNOSIS);
+    }  // Hypno uses Hypnosis to put Xatu to sleep
+    TURN;  // Skip to simulate sleep turns
+    TURN;  // Sleep turn 2 (Early Bird wakes up here)
+    TURN
+    {
+      MOVE(player, MOVE_TACKLE);
+    }  // Xatu wakes up and uses Tackle
+  }
+  SCENE
+  {
+    MESSAGE("Hypno used Hypnosis!");
+    MESSAGE("Xatu fell asleep!");
+    ABILITY_POPUP(player, ABILITY_EARLY_BIRD);
+    MESSAGE("Xatu's Early Bird raised it's speed!");
+  }
 }

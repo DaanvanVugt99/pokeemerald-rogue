@@ -519,6 +519,7 @@ extern const u8 BattleScript_AbilityTurnDmg[];
 extern const u8 BattleScript_SuctionCupsActivates[];
 extern const u8 BattleScript_IlluminateActivates[];
 extern const u8 BattleScript_BattlerEnvelopedItselfInAVeil[];
+extern const u8 BattleScript_EarlyBirdActivates[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

@@ -3731,6 +3731,19 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
               gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WOKE_UP;
               gBattlescriptCurrInstr = BattleScript_MoveUsedWokeUp;
               effect = 2;
+
+              // Early Bird Speed Boost
+              if (GetBattlerAbility(gBattlerAttacker) == ABILITY_EARLY_BIRD)
+              {
+                if (CompareStat(gBattlerAttacker, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+                {
+                  gEffectBattler = gBattlerAttacker;
+                  SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+                  BattleScriptPushCursor();
+                  gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+                  effect++;
+                }
+              }
             }
           }
         }
@@ -4126,9 +4139,10 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
       case CANCELLER_END:
         break;
     }
+  }
 
-  } while (gBattleStruct->atkCancellerTracker != CANCELLER_END &&
-           gBattleStruct->atkCancellerTracker != CANCELLER_END2 && effect == 0);
+  while (gBattleStruct->atkCancellerTracker != CANCELLER_END && gBattleStruct->atkCancellerTracker != CANCELLER_END2 &&
+         effect == 0);
 
   if (effect == 2)
   {
@@ -5492,8 +5506,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
               if (validToLower != 0 || validToRaise != 0)  // Can lower one stat, or can raise one stat
               {
-                gBattleScripting.statChanger = gBattleScripting
-                                                   .savedStatChanger = 0;  // for raising and lowering stat respectively
+                gBattleScripting.statChanger = gBattleScripting.savedStatChanger = 0;  // for raising and lowering
+                                                                                       // stat respectively
                 if (validToRaise != 0)  // Find stat to raise
                 {
                   do
