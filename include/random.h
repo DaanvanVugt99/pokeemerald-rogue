@@ -12,22 +12,22 @@ extern struct PCG32 gRngValue;
 extern struct PCG32 gRng2Value;
 extern struct PCG32 gRngRogueValue;
 
-#define RAND_TYPE struct PCG32
+#  define RAND_TYPE struct PCG32
 
 u32 Random32(void);
 u32 RandomAlt32(void);
 u32 RogueRandom32(void);
-u32 RandomCustom32(u32 *seed);
+u32 RandomCustom32(u32* seed);
 
 // Returns a 16-bit pseudorandom number
-#define Random_16(value) ((u16)(value ^ (value >> 16)))
+#  define Random_16(value) ((u16)(value ^ (value >> 16)))
 
-#define Random() Random_16(Random32())
-#define Random2() Random_16(RandomAlt32())
-#define RogueRandom() Random_16(RogueRandom32())
-#define RandomCustom(seed) Random_16(RandomCustom32(seed))
+#  define Random() Random_16(Random32())
+#  define Random2() Random_16(RandomAlt32())
+#  define RogueRandom() Random_16(RogueRandom32())
+#  define RandomCustom(seed) Random_16(RandomCustom32(seed))
 
-#define CycleRandom() Random32()
+#  define CycleRandom() Random32()
 
 // Sets the initial seed value of the pseudorandom number generator
 void SeedRng(u32 seed);
@@ -40,18 +40,18 @@ extern u32 gRngValue;
 extern u32 gRng2Value;
 extern u32 gRngRogueValue;
 
-#define RAND_TYPE u32
+#  define RAND_TYPE u32
 
 // Returns a 16-bit pseudorandom number
 u16 Random(void);
 u16 Random2(void);
 u16 RogueRandom(void);
-u16 RandomCustom(u32 *seed);
+u16 RandomCustom(u32* seed);
 
 // Returns a 32-bit pseudorandom number
-#define Random32() (Random() | (Random() << 16))
+#  define Random32() (Random() | (Random() << 16))
 
-#define CycleRandom() Random()
+#  define CycleRandom() Random()
 
 // Sets the initial seed value of the pseudorandom number generator
 void SeedRng(u16 seed);
@@ -59,28 +59,28 @@ void SeedRng2(u16 seed);
 void SeedRogueRng(u16 seed);
 #endif
 
-void Shuffle8(void *data, size_t n);
-void Shuffle16(void *data, size_t n);
-void Shuffle32(void *data, size_t n);
-void ShuffleN(void *data, size_t n, size_t size);
+void Shuffle8(void* data, size_t n);
+void Shuffle16(void* data, size_t n);
+void Shuffle32(void* data, size_t n);
+void ShuffleN(void* data, size_t n, size_t size);
 
-static inline void Shuffle(void *data, size_t n, size_t size)
+static inline void Shuffle(void* data, size_t n, size_t size)
 {
-    switch (size)
-    {
+  switch (size)
+  {
     case 1:
-        Shuffle8(data, n);
-        break;
+      Shuffle8(data, n);
+      break;
     case 2:
-        Shuffle16(data, n);
-        break;
+      Shuffle16(data, n);
+      break;
     case 4:
-        Shuffle32(data, n);
-        break;
+      Shuffle32(data, n);
+      break;
     default:
-        ShuffleN(data, n, size);
-        break;
-    }
+      ShuffleN(data, n, size);
+      break;
+  }
 }
 
 /* Structured random number generator.
@@ -113,89 +113,81 @@ static inline void Shuffle(void *data, size_t n, size_t size)
 
 enum RandomTag
 {
-    RNG_NONE,
-    RNG_ACCURACY,
-    RNG_CONFUSION,
-    RNG_CRITICAL_HIT,
-    RNG_CUTE_CHARM,
-    RNG_DAMAGE_MODIFIER,
-    RNG_DIRE_CLAW,
-    RNG_FLAME_BODY,
-    RNG_FORCE_RANDOM_SWITCH,
-    RNG_FROZEN,
-    RNG_G_MAX_STUN_SHOCK,
-    RNG_G_MAX_BEFUDDLE,
-    RNG_G_MAX_REPLENISH,
-    RNG_G_MAX_SNOOZE,
-    RNG_HITS,
-    RNG_HOLD_EFFECT_FLINCH,
-    RNG_INFATUATION,
-    RNG_LOADED_DICE,
-    RNG_METRONOME,
-    RNG_PARALYSIS,
-    RNG_POISON_POINT,
-    RNG_RAMPAGE_TURNS,
-    RNG_SECONDARY_EFFECT,
-    RNG_SLEEP_TURNS,
-    RNG_SPEED_TIE,
-    RNG_STATIC,
-    RNG_STENCH,
-    RNG_ELECTROCYTES,
-    RNG_WHITEOUT,
-    RNG_TRI_ATTACK,
-    RNG_TRIPLE_ARROWS_DEFENSE_DOWN,
-    RNG_TRIPLE_ARROWS_FLINCH,
-    RNG_QUICK_DRAW,
-    RNG_QUICK_CLAW,
-    RNG_ROGUE_FLINCH_CHARM,
-    RNG_ROGUE_SHED_SKIN_CHARM,
-    RNG_ROGUE_PRIORITY_CHARM,
-    RNG_ROGUE_ENDURE_CHARM,
-    RNG_TRACE,
-    RNG_FICKLE_BEAM,
+  RNG_NONE,
+  RNG_ACCURACY,
+  RNG_CONFUSION,
+  RNG_CRITICAL_HIT,
+  RNG_CUTE_CHARM,
+  RNG_DAMAGE_MODIFIER,
+  RNG_DIRE_CLAW,
+  RNG_FORCE_RANDOM_SWITCH,
+  RNG_FROZEN,
+  RNG_G_MAX_STUN_SHOCK,
+  RNG_G_MAX_BEFUDDLE,
+  RNG_G_MAX_REPLENISH,
+  RNG_G_MAX_SNOOZE,
+  RNG_HITS,
+  RNG_HOLD_EFFECT_FLINCH,
+  RNG_INFATUATION,
+  RNG_LOADED_DICE,
+  RNG_METRONOME,
+  RNG_PARALYSIS,
+  RNG_RAMPAGE_TURNS,
+  RNG_SECONDARY_EFFECT,
+  RNG_SLEEP_TURNS,
+  RNG_SPEED_TIE,
+  RNG_ELECTROCYTES,
+  RNG_WHITEOUT,
+  RNG_TRI_ATTACK,
+  RNG_TRIPLE_ARROWS_DEFENSE_DOWN,
+  RNG_TRIPLE_ARROWS_FLINCH,
+  RNG_QUICK_DRAW,
+  RNG_QUICK_CLAW,
+  RNG_ROGUE_FLINCH_CHARM,
+  RNG_ROGUE_SHED_SKIN_CHARM,
+  RNG_ROGUE_PRIORITY_CHARM,
+  RNG_ROGUE_ENDURE_CHARM,
+  RNG_TRACE,
+  RNG_FICKLE_BEAM,
 };
 
-#define RandomWeighted(tag, ...)                                      \
-    ({                                                                \
-        const u8 weights[] = {__VA_ARGS__};                           \
-        u32 sum, i;                                                   \
-        for (i = 0, sum = 0; i < ARRAY_COUNT(weights); i++)           \
-            sum += weights[i];                                        \
-        RandomWeightedArray(tag, sum, ARRAY_COUNT(weights), weights); \
-    })
+#define RandomWeighted(tag, ...) \
+  ({ \
+    const u8 weights[] = {__VA_ARGS__}; \
+    u32 sum, i; \
+    for (i = 0, sum = 0; i < ARRAY_COUNT(weights); i++) \
+      sum += weights[i]; \
+    RandomWeightedArray(tag, sum, ARRAY_COUNT(weights), weights); \
+  })
 
-#define RandomPercentage(tag, t)                                              \
-    ({                                                                        \
-        u32 r;                                                                \
-        if (t <= 0)                                                           \
-        {                                                                     \
-            r = FALSE;                                                        \
-        }                                                                     \
-        else if (t >= 100)                                                    \
-        {                                                                     \
-            r = TRUE;                                                         \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-            const u8 weights[] = {100 - t, t};                                \
-            r = RandomWeightedArray(tag, 100, ARRAY_COUNT(weights), weights); \
-        }                                                                     \
-        r;                                                                    \
-    })
+#define RandomPercentage(tag, t) \
+  ({ \
+    u32 r; \
+    if (t <= 0) \
+    { \
+      r = FALSE; \
+    } else if (t >= 100) \
+    { \
+      r = TRUE; \
+    } else \
+    { \
+      const u8 weights[] = {100 - t, t}; \
+      r = RandomWeightedArray(tag, 100, ARRAY_COUNT(weights), weights); \
+    } \
+    r; \
+  })
 
-#define RandomElement(tag, array)                                                                      \
-    ({                                                                                                 \
-        *(typeof((array)[0]) *)RandomElementArray(tag, array, sizeof((array)[0]), ARRAY_COUNT(array)); \
-    })
+#define RandomElement(tag, array) \
+  ({ *(typeof((array)[0])*)RandomElementArray(tag, array, sizeof((array)[0]), ARRAY_COUNT(array)); })
 
 u32 RandomUniform(enum RandomTag, u32 lo, u32 hi);
 u32 RandomUniformExcept(enum RandomTag, u32 lo, u32 hi, bool32 (*reject)(u32));
-u32 RandomWeightedArray(enum RandomTag, u32 sum, u32 n, const u8 *weights);
-const void *RandomElementArray(enum RandomTag, const void *array, size_t size, size_t count);
+u32 RandomWeightedArray(enum RandomTag, u32 sum, u32 n, const u8* weights);
+const void* RandomElementArray(enum RandomTag, const void* array, size_t size, size_t count);
 
 u32 RandomUniformDefault(enum RandomTag, u32 lo, u32 hi);
 u32 RandomUniformExceptDefault(enum RandomTag, u32 lo, u32 hi, bool32 (*reject)(u32));
-u32 RandomWeightedArrayDefault(enum RandomTag, u32 sum, u32 n, const u8 *weights);
-const void *RandomElementArrayDefault(enum RandomTag, const void *array, size_t size, size_t count);
+u32 RandomWeightedArrayDefault(enum RandomTag, u32 sum, u32 n, const u8* weights);
+const void* RandomElementArrayDefault(enum RandomTag, const void* array, size_t size, size_t count);
 
-#endif // GUARD_RANDOM_H
+#endif  // GUARD_RANDOM_H

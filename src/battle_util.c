@@ -5910,12 +5910,10 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           }
           break;
         case ABILITY_STENCH:
-          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED &&
+          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) &&
               IsBattlerAlive(battler)
               // Move made contact
               && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
-              // 20% chance
-              && RandomWeighted(RNG_STENCH, 4, 1)
               // Not multi-hit continuation
               && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
               // Attacker must be able to switch
@@ -5925,7 +5923,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
               // Not held by Sky Drop
               && !(gStatuses3[gBattlerAttacker] & STATUS3_SKY_DROPPED)
               // Attacker is not ghost type
-              && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_GHOST))
+              && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_GHOST)
+              // 20% chance
+              && (Random() % 5) == 0)
           {
             gBattleResources->flags->flags[gBattlerAttacker] |= RESOURCE_FLAG_STENCH;
             gLastUsedAbility = ABILITY_STENCH;
@@ -6186,7 +6186,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 &&
               !gProtectStructs[gBattlerAttacker].confusionSelfDmg && TARGET_TURN_DAMAGED &&
               CanBePoisoned(gBattlerTarget, gBattlerAttacker) && IsMoveMakingContact(move, gBattlerAttacker) &&
-              RandomWeighted(RNG_POISON_POINT, 2, 1))
+              (Random() % 3) == 0)
           {
             gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_POISON;
             PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
@@ -6200,8 +6200,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         case ABILITY_STATIC:  // defender static
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 &&
               !gProtectStructs[gBattlerAttacker].confusionSelfDmg && TARGET_TURN_DAMAGED &&
-              CanBeParalyzed(gBattlerAttacker) && IsMoveMakingContact(move, gBattlerAttacker) &&
-              RandomWeighted(RNG_STATIC, 2, 1))
+              CanBeParalyzed(gBattlerAttacker) && IsMoveMakingContact(move, gBattlerAttacker) && (Random() % 3) == 0)
           {
             gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_PARALYSIS;
             BattleScriptPushCursor();
@@ -6213,7 +6212,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         case ABILITY_FLAME_BODY:
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 &&
               !gProtectStructs[gBattlerAttacker].confusionSelfDmg && (IsMoveMakingContact(move, gBattlerAttacker)) &&
-              TARGET_TURN_DAMAGED && CanBeBurned(gBattlerAttacker) && RandomWeighted(RNG_FLAME_BODY, 2, 1))
+              TARGET_TURN_DAMAGED && CanBeBurned(gBattlerAttacker) && (Random() % 3) == 0)
           {
             gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_BURN;
             BattleScriptPushCursor();
@@ -6428,11 +6427,59 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             effect++;
           }
           break;
+        case ABILITY_EFFECT_SPORE:  // Attacker Effect Spore
+          if (!IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GRASS) &&
+              GetBattlerAbility(gBattlerTarget) != ABILITY_OVERCOAT &&
+              GetBattlerHoldEffect(gBattlerTarget, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
+          {
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerTarget].hp != 0 &&
+                !gProtectStructs[gBattlerAttacker].confusionSelfDmg && IsMoveMakingContact(move, gBattlerAttacker) &&
+                TARGET_TURN_DAMAGED)
+            {
+              int i = Random() % 3;
+
+              if (i == 0)
+              {
+                goto ATTACKER_POISON_POINT;
+              } else if (i == 1)
+              {
+                goto ATTACKER_STATIC;
+              } else
+              {
+                // Specific Sleep logic for Spore.
+                if (CanSleep(gBattlerTarget) && (Random() % 3) == 0)
+                {
+                  gBattleScripting.moveEffect = MOVE_EFFECT_SLEEP;
+                  PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                  BattleScriptPushCursor();
+                  gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                  gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                  effect++;
+                }
+              }
+            }
+          }
+          break;
+        ATTACKER_POISON_POINT:
+        case ABILITY_POISON_POINT:  // Attacker Poison Point
+          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerTarget].hp != 0 &&
+              !gProtectStructs[gBattlerAttacker].confusionSelfDmg && CanBePoisoned(gBattlerTarget, gBattlerAttacker) &&
+              IsMoveMakingContact(move, gBattlerAttacker) && TARGET_TURN_DAMAGED && (Random() % 3) == 0)
+          {
+            gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+          }
+          break;
+        ATTACKER_STATIC:
         case ABILITY_STATIC:  // Attacker Static
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerTarget].hp != 0 &&
               !gProtectStructs[gBattlerAttacker].confusionSelfDmg && CanBeParalyzed(gBattlerTarget) &&
               IsMoveMakingContact(move, gBattlerAttacker) && TARGET_TURN_DAMAGED  // Need to actually hit the target
-              && RandomWeighted(RNG_STATIC, 2, 1))
+              && (Random() % 3) == 0)
           {
             gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
             PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
@@ -6513,7 +6560,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
               !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
           {
             // 10% chance to paralyze the target
-            if (RandomWeighted(RNG_ELECTROCYTES, 9, 1) && CanBeParalyzed(gBattlerTarget))
+            if (Random() % 9 == 0 && CanBeParalyzed(gBattlerTarget))
             {
               gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
               PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
@@ -6543,8 +6590,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           break;
       }
       break;
-    case ABILITYEFFECT_MOVE_END_OTHER:  // Abilities that activate on *another* battler's moveend: Dancer, Soul-Heart,
-                                        // Receiver, Symbiosis
+    case ABILITYEFFECT_MOVE_END_OTHER:  // Abilities that activate on *another* battler's moveend: Dancer,
+                                        // Soul-Heart, Receiver, Symbiosis
       switch (GetBattlerAbility(battler))
       {
         case ABILITY_DANCER:
@@ -9314,8 +9361,8 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
     return TRUE;
   }
 
-  // Protective Pads doesn't stop Unseen Fist from bypassing Protect effects, so IsMoveMakingContact() isn't used here.
-  // This means extra logic is needed to handle Shell Side Arm.
+  // Protective Pads doesn't stop Unseen Fist from bypassing Protect effects, so IsMoveMakingContact() isn't used
+  // here. This means extra logic is needed to handle Shell Side Arm.
   if (GetBattlerAbility(gBattlerAttacker) == ABILITY_UNSEEN_FIST &&
       (gBattleMoves[move].flags & FLAG_MAKES_CONTACT ||
        (gBattleMoves[move].effect == EFFECT_SHELL_SIDE_ARM && gBattleStruct->swapDamageCategory)) &&
@@ -13274,7 +13321,8 @@ static void SetRandomMultiHitCounter()
     gMultiHitCounter = RandomUniform(RNG_LOADED_DICE, 4, 5);
   } else if (B_MULTI_HIT_CHANCE >= GEN_5)
   {
-    gMultiHitCounter = RandomWeighted(RNG_HITS, 0, 0, 7, 7, 3, 3);  // 35%: 2 hits, 35%: 3 hits, 15% 4 hits, 15% 5 hits.
+    gMultiHitCounter = RandomWeighted(RNG_HITS, 0, 0, 7, 7, 3,
+                                      3);  // 35%: 2 hits, 35%: 3 hits, 15% 4 hits, 15% 5 hits.
   } else
   {
     gMultiHitCounter = RandomWeighted(RNG_HITS, 0, 0, 3, 3, 1,

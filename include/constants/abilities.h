@@ -10,7 +10,7 @@
 #define ABILITY_DAMP 6           // Prevents the use of explosive moves, such as Self-Destruct, by dampening its surroundings.
 #define ABILITY_LIMBER 7         // Its limber body protects the Pokémon from paralysis. Takes 50% less damage from crash damage.
 #define ABILITY_SAND_VEIL 8      // Boosts the Pokémon's evasiveness in a sandstorm by 30%.
-#define ABILITY_STATIC 9         // 30%  chance to get paralyzed on contact against this Pokémon.
+#define ABILITY_STATIC 9         // 1/3 chance to get paralyzed on contact against this Pokémon.
 #define ABILITY_VOLT_ABSORB 10   // The Pokémon heals up to 1/4 of its maximum Hit Points when hit with Electric-type moves.
 #define ABILITY_WATER_ABSORB 11  // The Pokémon heals up to 1/4 of its maximum Hit Points when hit with Water-type moves.
 #define ABILITY_OBLIVIOUS 12     // The Pokémon is oblivious, and that keeps it from being infatuated, intimidated or falling for taunts.
@@ -28,7 +28,7 @@
 #define ABILITY_ROUGH_SKIN 24    // This Pokémon inflicts 1/8 HP damage on contact. Deals 1/6 damage if the attacking move is Normal-, Fighting-, or Bug-type.
 #define ABILITY_WONDER_GUARD 25  // *No innate* Its mysterious power only lets supereffective moves hit the  Pokémon.
 #define ABILITY_LEVITATE 26      // By floating in the air, the Pokémon receives full immunity to all Ground-type moves. Flying moves gain STAB.
-#define ABILITY_EFFECT_SPORE 27  // When a Pokémon with this Ability is hit by a move that makes contact, there is a 10% chance that the attacking Pokémon will become either  poisoned, paralyzed, or asleep, with a 3.3% probability each.
+#define ABILITY_EFFECT_SPORE 27  // When a Pokémon with this Ability is hit by a move that makes contact, there is a 1/3 chance that the attacking Pokémon will become either  poisoned, paralyzed, or asleep
 #define ABILITY_SYNCHRONIZE 28   // *No innate* The attacker will receive the same status condition if it inflicts a burn, poison, or paralysis to the Pokémon.
 #define ABILITY_CLEAR_BODY 29    // Prevents other Pokémon's moves or Abilities from lowering the Pokémon's stats.
 #define ABILITY_NATURAL_CURE 30  // All status conditions heal when the Pokémon switches out.
@@ -39,7 +39,7 @@
 #define ABILITY_ILLUMINATE 35    // Boosts accuracy by 1.2x. Also has its existing field effect.
 #define ABILITY_TRACE 36         // *No innate* When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.
 #define ABILITY_HUGE_POWER 37    // Doubles the Pokémon's highest offensive stat.
-#define ABILITY_POISON_POINT 38  // 30% chance to get poisoned on contact against this Pokémon.
+#define ABILITY_POISON_POINT 38  // 1/3 chance to get poisoned on contact against this Pokémon.
 #define ABILITY_INNER_FOCUS 39   // The Pokémon's intensely focused, and that protects the Pokémon from flinching, Focus Blast has increased accuracy to 90%.
 #define ABILITY_MAGMA_ARMOR 40   // Prevents the Pokémon from becoming frozen. Takes 30% less damage from Water- and Ice-type moves.
 #define ABILITY_WATER_VEIL 41    // Prevents the Pokémon from getting a burn. Sets Aqua Ring on entry. Aqua Ring effect: Restore 1/8 HP every turn
