@@ -1380,13 +1380,15 @@ void PrepareStringBattle(u16 stringId, u32 battler)
     stringId = STRINGID_STATSWONTDECREASE2;
   }
 
-  // Check Defiant and Competitive stat raise whenever a stat is lowered.
+  // Check Defiant, Competitive, and Run Away stat raise whenever a stat is lowered.
   else if ((stringId == STRINGID_DEFENDERSSTATFELL || stringId == STRINGID_PKMNCUTSATTACKWITH ||
             stringId == STRINGID_PKMNLOWERSACCURACYWITH) &&
            ((targetAbility == ABILITY_DEFIANT &&
              CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN)) ||
             (targetAbility == ABILITY_COMPETITIVE &&
-             CompareStat(gBattlerTarget, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))) &&
+             CompareStat(gBattlerTarget, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN)) ||
+            (targetAbility == ABILITY_RUN_AWAY &&
+             CompareStat(gBattlerTarget, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))) &&
            gSpecialStatuses[gBattlerTarget].changedStatsBattlerId != BATTLE_PARTNER(gBattlerTarget) &&
            ((gSpecialStatuses[gBattlerTarget].changedStatsBattlerId != gBattlerTarget) ||
             gBattleScripting.stickyWebStatDrop == 1) &&
@@ -1400,9 +1402,12 @@ void PrepareStringBattle(u16 stringId, u32 battler)
     if (targetAbility == ABILITY_DEFIANT)
     {
       SET_STATCHANGER(STAT_ATK, 2, FALSE);
-    } else
+    } else if (targetAbility == ABILITY_COMPETITIVE)
     {
       SET_STATCHANGER(STAT_SPATK, 2, FALSE);
+    } else if (targetAbility == ABILITY_RUN_AWAY)
+    {
+      SET_STATCHANGER(STAT_SPEED, 2, FALSE);
     }
   }
 #if B_UPDATED_INTIMIDATE >= GEN_8

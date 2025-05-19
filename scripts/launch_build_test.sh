@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Early Bird"
+testToRunPrefix="Run Away activates for opponent after Sticky Web lo"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
