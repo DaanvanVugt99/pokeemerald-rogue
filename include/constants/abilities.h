@@ -60,12 +60,12 @@
 #define ABILITY_CUTE_CHARM 56    // The opponent has a 30% chance of being induced with Attract when using an attack, that requires physical contact, against this Pokémon.
 #define ABILITY_PLUS 57          // When battling with Plus, at the end of each turn, this pokemon recovers 1/8 HP. With Minus, this pokemon's status moves gain +1 priority.
 #define ABILITY_MINUS 58         // When battling with Plus, Special Attack increases by 50%. With Minus, this pokemons attacks ignore target stat changes.
-#define ABILITY_FORECAST 59      // *No innate* This Pokémon’ changes its form and type if Harsh Sunlight,  Heavy Rain or Hail is in effect.
+#define ABILITY_FORECAST 59      // This Pokémon’ changes its form and type if Sunlight, Rain, Acid Rain, Eclipse or Hail is in effect.
 #define ABILITY_STICKY_HOLD 60   // This Pokémon’s item cannot be removed. Contact moves used against it have a 50% chance to lower the attacker’s Speed by 1 stage.
 #define ABILITY_SHED_SKIN 61     // Every turn, it has a 1 in 3 chance of healing from a status condition  (BURN, PARALYZE, SLEEP, POISON, FREEZE).
 #define ABILITY_GUTS 62          // Attack is increased by 50% when induced with a status (BURN, PARALYZE, SLEEP, POISON, FREEZE). Burn’s effect of lowering Attack is not applied.
 #define ABILITY_MARVEL_SCALE 63  // The Pokémon's marvelous scales boost the Defense stats by 50% if it has a status condition.
-#define ABILITY_LIQUID_OOZE 64   // *No innate* The oozed liquid has a strong stench, which damages  attackers using any draining move.
+#define ABILITY_LIQUID_OOZE 64   // The oozed liquid has a strong stench, which damages  attackers using any draining move.
 #define ABILITY_OVERGROW 65      // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts  do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_BLAZE 66         // // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_TORRENT 67       // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).

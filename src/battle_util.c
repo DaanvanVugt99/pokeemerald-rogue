@@ -6182,17 +6182,23 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           break;
         case ABILITY_GOOEY:
         case ABILITY_TANGLING_HAIR:
+        case ABILITY_STICKY_HOLD:
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 &&
               (CompareStat(gBattlerAttacker, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN) ||
                GetBattlerAbility(gBattlerAttacker) == ABILITY_MIRROR_ARMOR) &&
               !gProtectStructs[gBattlerAttacker].confusionSelfDmg && TARGET_TURN_DAMAGED &&
               IsMoveMakingContact(move, gBattlerAttacker))
           {
+            if (gLastUsedAbility == ABILITY_STICKY_HOLD && (Random() % 2) == 0)
+            {
+              break;
+            }
+
             SET_STATCHANGER(STAT_SPEED, 1, TRUE);
             gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
             PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_GooeyActivates;
+            gBattlescriptCurrInstr = BattleScript_AbilitySpeedLowerActivates;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
           }

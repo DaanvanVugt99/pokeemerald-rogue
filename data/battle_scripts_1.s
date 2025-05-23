@@ -9789,7 +9789,7 @@ BattleScript_CuteCharmActivates::
 	call BattleScript_TryDestinyKnotTarget
 	return
 
-BattleScript_GooeyActivates::
+BattleScript_AbilitySpeedLowerActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
 	swapattackerwithtarget  @ for defiant, mirror armor

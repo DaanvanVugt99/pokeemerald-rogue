@@ -440,7 +440,7 @@ extern const u8 BattleScript_SelectingNotAllowedMoveGorillaTactics[];
 extern const u8 BattleScript_SelectingNotAllowedMoveGorillaTacticsInPalace[];
 extern const u8 BattleScript_WanderingSpiritActivates[];
 extern const u8 BattleScript_MirrorArmorReflect[];
-extern const u8 BattleScript_GooeyActivates[];
+extern const u8 BattleScript_AbilitySpeedLowerActivates[];
 extern const u8 BattleScript_PastelVeilActivates[];
 extern const u8 BattleScript_MimicryActivatesEnd3[];
 extern const u8 BattleScript_ApplyMimicry[];
