@@ -29,6 +29,6 @@ SINGLE_BATTLE_TEST("Shed Skin caps damage at half HP")
     ANIMATION(ANIM_TYPE_MOVE, MOVE_SEISMIC_TOSS, opponent);
     HP_BAR(player, hp : 50);
     ABILITY_POPUP(player, ABILITY_STURDY);
-    MESSAGE("Ekans shed its skin and protected itself!");
+    MESSAGE("Ekans shed its skin and recovered!");
   }
 }
