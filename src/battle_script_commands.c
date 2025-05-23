@@ -1924,6 +1924,9 @@ u32 GetTotalAccuracy(u32 battlerAtk,
     case ABILITY_COMPOUND_EYES:
       calc = (calc * 130) / 100;  // 1.3 compound eyes boost
       break;
+    case ABILITY_KEEN_EYE:
+      calc = (calc * 120) / 100;  // 1.3 compound eyes boost
+      break;
     case ABILITY_VICTORY_STAR:
       calc = (calc * 110) / 100;  // 1.1 victory star boost
       break;
@@ -2266,7 +2269,8 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk,
         //+ 2 * (B_AFFECTION_MECHANICS == TRUE &&
         // GetBattlerAffectionHearts(battlerAtk) == AFFECTION_FIVE_HEARTS) //
         // TODO -MAKE THIS A FLAT 10% BECAUSE THIS IS CRAZY
-        + (abilityAtk == ABILITY_SUPER_LUCK) + gBattleStruct->bonusCritStages[gBattlerAttacker];
+        + (abilityAtk == ABILITY_SUPER_LUCK) + (abilityAtk == ABILITY_HYPER_CUTTER) +
+        gBattleStruct->bonusCritStages[gBattlerAttacker];
 
     if (GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT)
     {
