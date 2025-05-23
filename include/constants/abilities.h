@@ -16,7 +16,7 @@
 #define ABILITY_OBLIVIOUS 12     // The Pokémon is oblivious, and that keeps it from being infatuated, intimidated or falling for taunts.
 #define ABILITY_CLOUD_NINE 13    // Eliminates the effects of weather.
 #define ABILITY_COMPOUND_EYES 14 // Raises the Pokémon’s accuracy by 30%.
-#define ABILITY_INSOMNIA 15      // The Pokémon is suffering from insomnia and cannot fall asleep.
+#define ABILITY_INSOMNIA 15      // The Pokémon cannot fall asleep and Speed cannot be lowered.
 #define ABILITY_COLOR_CHANGE 16  // The Pokemon's type become the type that counters the move used on it before hit.
 #define ABILITY_IMMUNITY 17      // The immune system of the Pokémon prevents it from getting poisoned or being hurt from acid rain. Halves damage from Poison-type moves.
 #define ABILITY_FLASH_FIRE 18    // This ability makes the Pokémon immune to Fire-type moves and will activate when hit by one. When activated, the power of the Pokémon's Fire-type moves is increased by 50%.
@@ -64,7 +64,7 @@
 #define ABILITY_STICKY_HOLD 60   // This Pokémon’s item cannot be removed. Contact moves used against it have a 50% chance to lower the attacker’s Speed by 1 stage.
 #define ABILITY_SHED_SKIN 61     // Every turn, it has a 1 in 3 chance of healing from a status condition  (BURN, PARALYZE, SLEEP, POISON, FREEZE).
 #define ABILITY_GUTS 62          // Attack is increased by 50% when induced with a status (BURN, PARALYZE, SLEEP, POISON, FREEZE). Burn’s effect of lowering Attack is not applied.
-#define ABILITY_MARVEL_SCALE 63  // The Pokémon's marvelous scales boost the Defense stats by 50% if it has a status condition.
+#define ABILITY_MARVEL_SCALE 63  // The Pokémon's marvelous scales double Defense if it has a status condition.
 #define ABILITY_LIQUID_OOZE 64   // The oozed liquid has a strong stench, which damages  attackers using any draining move.
 #define ABILITY_OVERGROW 65      // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts  do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_BLAZE 66         // // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
@@ -73,7 +73,7 @@
 #define ABILITY_ROCK_HEAD 69     // Prevents recoil damage.
 #define ABILITY_DROUGHT 70       // Summons sunshine on entry.
 #define ABILITY_ARENA_TRAP 71    // Prevents fleeing. 1.2x damage for ground-type moves.
-#define ABILITY_VITAL_SPIRIT 72  // Prevents falling asleep.
+#define ABILITY_VITAL_SPIRIT 72  // Prevents falling asleep and self lowering stat drops from attacks. (ideally add a popup for this)
 #define ABILITY_WHITE_SMOKE 73   // The Pokémon is protected by its white smoke, which prevents other Pokémon from lowering its stats
 #define ABILITY_PURE_POWER 74    // Doubles the Pokémon's highest offensive stat.
 #define ABILITY_SHELL_ARMOR 75   // A hard shell protects the Pokémon from critical hits. Takes 20% less damage from non-contact moves.

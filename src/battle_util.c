@@ -11175,7 +11175,7 @@ static inline u32 CalcDefenseStat(u32 move,
     case ABILITY_MARVEL_SCALE:
       if (gBattleMons[battlerDef].status1 & STATUS1_ANY && usesDefStat)
       {
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         if (updateFlags)
         {
           RecordAbilityBattle(battlerDef, ABILITY_MARVEL_SCALE);

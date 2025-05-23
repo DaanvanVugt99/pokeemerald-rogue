@@ -3835,7 +3835,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
             {
               gBattlescriptCurrInstr++;
             }
-          } else
+          } else if (!(affectsUser && GetBattlerAbility(gBattlerAttacker) == ABILITY_VITAL_SPIRIT))
           {
             gBattleScripting.animArg1 = gBattleScripting.moveEffect & ~(MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN);
             gBattleScripting.animArg2 = 0;
@@ -3966,14 +3966,18 @@ void SetMoveEffect(bool32 primary, u32 certain)
           gBattlescriptCurrInstr = BattleScript_RapidSpinAway;
           break;
         case MOVE_EFFECT_ATK_DEF_DOWN:  // SuperPower
-          if (!NoAliveMonsForEitherParty())
+          if (!NoAliveMonsForEitherParty() && GetBattlerAbility(gEffectBattler) != ABILITY_VITAL_SPIRIT)
           {
             BattleScriptPush(gBattlescriptCurrInstr + 1);
             gBattlescriptCurrInstr = BattleScript_AtkDefDown;
           }
           break;
         case MOVE_EFFECT_DEF_SPDEF_DOWN:  // Close Combat
-          if (!NoAliveMonsForEitherParty())
+          if (!NoAliveMonsForEitherParty() && GetBattlerAbility(gEffectBattler) != ABILITY_VITAL_SPIRIT)
+          {
+            BattleScriptPush(gBattlescriptCurrInstr + 1);
+            gBattlescriptCurrInstr = BattleScript_DefSpDefDown;
+          }
           {
             BattleScriptPush(gBattlescriptCurrInstr + 1);
             gBattlescriptCurrInstr = BattleScript_DefSpDefDown;
@@ -4005,7 +4009,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
           }
           break;
         case MOVE_EFFECT_SP_ATK_TWO_DOWN:  // Overheat
-          if (!NoAliveMonsForEitherParty())
+          if (!NoAliveMonsForEitherParty() && GetBattlerAbility(gEffectBattler) != ABILITY_VITAL_SPIRIT)
           {
             BattleScriptPush(gBattlescriptCurrInstr + 1);
             gBattlescriptCurrInstr = BattleScript_SAtkDown2;
@@ -5890,6 +5894,7 @@ static void Cmd_playstatchangeanimation(void)
                    ability != ABILITY_FULL_METAL_BODY && ability != ABILITY_WHITE_SMOKE &&
                    !((ability == ABILITY_KEEN_EYE || ability == ABILITY_MINDS_EYE) && currStat == STAT_ACC) &&
                    !(B_ILLUMINATE_EFFECT >= GEN_9 && ability == ABILITY_ILLUMINATE && currStat == STAT_ACC) &&
+                   !((ability == ABILITY_INSOMNIA) && currStat == STAT_SPEED) &&
                    !(ability == ABILITY_HYPER_CUTTER && currStat == STAT_ATK) &&
                    !(ability == ABILITY_BIG_PECKS && currStat == STAT_DEF))
         {
