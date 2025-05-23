@@ -5474,7 +5474,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN) && !BATTLER_MAX_HP(battler) &&
                 !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
             {
-              BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+              BattleScriptPushCursorAndCallback(BattleScript_AbilityHpHealActivates);
               gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / (gLastUsedAbility == ABILITY_RAIN_DISH ? 16 : 8);
               if (gBattleMoveDamage == 0)
               {
@@ -5488,6 +5488,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN) && gBattleMons[battler].status1 & STATUS1_ANY)
             {
               shedSkinAbilityActivate = TRUE;
+            }
+            break;
+          case ABILITY_PLUS:
+            if (GetBattlerAbility(BATTLE_PARTNER(battler)) == ABILITY_PLUS && !BATTLER_MAX_HP(battler) &&
+                !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+              BattleScriptPushCursorAndCallback(BattleScript_AbilityHpHealActivates);
+              gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+              if (gBattleMoveDamage == 0)
+              {
+                gBattleMoveDamage = 1;
+              }
+              gBattleMoveDamage *= -1;
+              effect++;
             }
             break;
           case ABILITY_SHED_SKIN:
@@ -10901,21 +10915,10 @@ static inline u32 CalcAttackStat(u32 move,
       {
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
       }
-    case ABILITY_PLUS:
-      if (IS_MOVE_SPECIAL(move) && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
-      {
-        u32 partnerAbility = GetBattlerAbility(BATTLE_PARTNER(battlerAtk));
-        if (partnerAbility == ABILITY_MINUS || (B_PLUS_MINUS_INTERACTION >= GEN_5 && partnerAbility == ABILITY_PLUS))
-        {
-          modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
-        }
-      }
-      break;
     case ABILITY_MINUS:
       if (IS_MOVE_SPECIAL(move) && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
       {
-        u32 partnerAbility = GetBattlerAbility(BATTLE_PARTNER(battlerAtk));
-        if (partnerAbility == ABILITY_PLUS || (B_PLUS_MINUS_INTERACTION >= GEN_5 && partnerAbility == ABILITY_MINUS))
+        if (GetBattlerAbility(BATTLE_PARTNER(battlerAtk)) == ABILITY_PLUS)
         {
           modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         }
@@ -11171,6 +11174,11 @@ static inline u32 CalcDefenseStat(u32 move,
   }
   // pokemon with unaware ignore defense stat changes while dealing damage
   if (atkAbility == ABILITY_UNAWARE || ApplyUnawareCurse(battlerAtk, defStage))
+  {
+    defStage = DEFAULT_STAT_STAGE;
+  }
+  // pokemon with minus ignore defense stat changes while dealing damage if the partner has minus
+  if (atkAbility == ABILITY_MINUS && GetBattlerAbility(BATTLE_PARTNER(battlerAtk)) == ABILITY_MINUS)
   {
     defStage = DEFAULT_STAT_STAGE;
   }

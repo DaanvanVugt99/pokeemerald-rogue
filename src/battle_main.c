@@ -5177,6 +5177,14 @@ s8 GetMovePriority(u32 battler, u16 move)
       }
       break;
 
+    // Plus gains priority when partner has Minus
+    case ABILITY_PLUS:
+      if (IS_MOVE_STATUS(move) && GetBattlerAbility(BATTLE_PARTNER(battler)) == ABILITY_MINUS)
+      {
+        priority++;
+      }
+      break;
+
     case ABILITY_SIGHTING_SYSTEM:
       if (gBattleMoves[move].accuracy <= 80 && gBattleMoves[move].accuracy != 0)
       {

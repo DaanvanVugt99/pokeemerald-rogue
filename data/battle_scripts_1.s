@@ -8883,7 +8883,7 @@ BattleScript_AbilityHpHeal::
 	datahpupdate BS_ATTACKER
 	return
 
-BattleScript_RainDishActivates::
+BattleScript_AbilityHpHealActivates::
 	call BattleScript_AbilityHpHeal
 	end3
 

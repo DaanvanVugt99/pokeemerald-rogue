@@ -160,7 +160,7 @@ extern const u8 BattleScript_DrizzleActivates[];
 extern const u8 BattleScript_SpeedBoostActivates[];
 extern const u8 BattleScript_TraceActivates[];
 extern const u8 BattleScript_TraceActivatesEnd3[];
-extern const u8 BattleScript_RainDishActivates[];
+extern const u8 BattleScript_AbilityHpHealActivates[];
 extern const u8 BattleScript_SandstreamActivates[];
 extern const u8 BattleScript_ShedSkinActivates[];
 extern const u8 BattleScript_ShedSkinCharmActivates[];
