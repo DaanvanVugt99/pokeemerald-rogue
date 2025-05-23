@@ -520,6 +520,7 @@ extern const u8 BattleScript_SuctionCupsActivates[];
 extern const u8 BattleScript_IlluminateActivates[];
 extern const u8 BattleScript_BattlerEnvelopedItselfInAVeil[];
 extern const u8 BattleScript_EarlyBirdActivates[];
+extern const u8 BattleScript_AbilityRemovesHazards[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

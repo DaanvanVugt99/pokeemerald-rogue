@@ -1018,6 +1018,8 @@ static const u8 sText_PkmnLowersAccuracyWith[] = _(
     "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nlowers {B_DEF_NAME_WITH_PREFIX}'s accuracy!");
 static const u8 sText_BattlerEnvelopedItselfInAVeil[] = _(
     "{B_SCR_ACTIVE_NAME_WITH_PREFIX} enveloped itself in\na veil made of water.");
+static const u8 sText_AbilityRemovesHazards[] = _(
+    "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nremoved the hazards on its side!");
 
 const u8* const gBattleStringsTable[BATTLESTRINGS_COUNT] = {
     [STRINGID_PKMNTERASTALLIZEDINTO - BATTLESTRINGS_TABLE_START] = sText_PkmnTerastallizedInto,
@@ -1729,6 +1731,7 @@ const u8* const gBattleStringsTable[BATTLESTRINGS_COUNT] = {
     [STRINGID_PKMNHURTBYABILITY - BATTLESTRINGS_TABLE_START] = sText_PkmnIsHurtByAbility,
     [STRINGID_PKMNLOWERSACCURACYWITH - BATTLESTRINGS_TABLE_START] = sText_PkmnLowersAccuracyWith,
     [STRINGID_BATTLERENVELOPEDITSELFINAVEIL - BATTLESTRINGS_TABLE_START] = sText_BattlerEnvelopedItselfInAVeil,
+    [STRINGID_ABILITYREMOVESHAZARDS - BATTLESTRINGS_TABLE_START] = sText_AbilityRemovesHazards,
 
 };
 

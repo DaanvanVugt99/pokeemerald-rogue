@@ -11365,3 +11365,10 @@ BattleScript_EarlyBirdActivates::
     waitmessage B_WAIT_TIME_LONG
 BattleScript_EarlyBirdActivatesEnd:
     end3::
+
+BattleScript_AbilityRemovesHazards::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ABILITYREMOVESHAZARDS
+	waitmessage B_WAIT_TIME_LONG
+	end3

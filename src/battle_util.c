@@ -5123,6 +5123,21 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gSpecialStatuses[battler].traced = TRUE;
           }
           break;
+        case ABILITY_PICKUP:
+          if (!gSpecialStatuses[battler].switchInAbilityDone)
+          {
+            gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+
+            if (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_HAZARDS_ANY)
+            {
+              gBattlerAttacker = battler;
+              gSideStatuses[GetBattlerSide(battler)] &= ~(SIDE_STATUS_STEALTH_ROCK | SIDE_STATUS_TOXIC_SPIKES |
+                                                          SIDE_STATUS_SPIKES | SIDE_STATUS_STICKY_WEB);
+              BattleScriptPushCursorAndCallback(BattleScript_AbilityRemovesHazards);
+              effect++;
+            }
+          }
+          break;
         case ABILITY_CLOUD_NINE:
         case ABILITY_AIR_LOCK:
           if (!gSpecialStatuses[battler].switchInAbilityDone)
