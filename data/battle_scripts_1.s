@@ -8949,15 +8949,17 @@ BattleScript_SandSpitActivates::
 	return
 
 BattleScript_ShedSkinActivates::
+	playanimation BS_TARGET, B_ANIM_HANGED_ON
+	call BattleScript_AbilityPopUpTarget
+	printstring STRINGID_PKMNSHEDS
+	waitmessage B_WAIT_TIME_LONG
+	updatestatusicon BS_TARGET
+	return
+
+BattleScript_AbilityStatusClearActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PKMNSXCUREDYPROBLEM
 	waitmessage B_WAIT_TIME_LONG
-	updatestatusicon BS_ATTACKER
-	end3
-
-BattleScript_ShedSkinCharmActivates::
-	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
-	waitanimation
 	updatestatusicon BS_ATTACKER
 	end3
 

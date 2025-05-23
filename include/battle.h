@@ -218,6 +218,7 @@ struct SpecialStatus
   u8 preventLifeOrbDamage : 1;  // So that Life Orb doesn't activate various effects.
   u8 colorChangeTriggered : 1;  // Prevent Color Change from activating multiple times per move
   u8 focusPunchInterrupted : 1;
+  u8 skinShed : 1;
 };
 
 struct SideTimer

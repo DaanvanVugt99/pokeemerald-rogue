@@ -811,24 +811,6 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .iconPalette = gItemIconPalette_RogueCharm,
     },
 
-    [ITEM_SHED_SKIN_CHARM - ITEM_ROGUE_ITEM_FIRST] =
-    {
-#ifdef ROGUE_EXPANSION
-        .name = _("Shed Skin Charm"),
-#else
-        .name = _("SHED SKIN CHARM"),
-#endif
-        .itemId = ITEM_SHED_SKIN_CHARM,
-        .price = 0,
-        .description = gItemDesc_ShedSkinCharm,
-        .pocket = POCKET_KEY_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
-        .registrability = FALSE,
-        .iconImage = gItemIcon_RogueCharm,
-        .iconPalette = gItemIconPalette_RogueCharm,
-    },
-
     [ITEM_WILD_IV_CHARM - ITEM_ROGUE_ITEM_FIRST] =
     {
 #ifdef ROGUE_EXPANSION

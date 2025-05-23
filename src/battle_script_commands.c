@@ -2466,6 +2466,28 @@ static void Cmd_adjustdamage(void)
     // Form change will be done after attack animation in Cmd_resultmessage.
     goto END;
   }
+  if (GetBattlerAbility(gBattlerTarget) == ABILITY_SHED_SKIN &&
+      gBattleMoveDamage > gBattleMons[gBattlerTarget].hp / 2 && !IS_MOVE_STATUS(gCurrentMove) &&
+      !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+  {
+    gBattleMoveDamage = gBattleMons[gBattlerTarget].hp / 2;
+
+    RecordAbilityBattle(gBattlerTarget, ABILITY_SHED_SKIN);
+    gSpecialStatuses[gBattlerTarget].skinShed = TRUE;
+
+    if (gBattleMons[gBattlerTarget].status1 != STATUS1_NONE)
+    {
+      gBattleMons[gBattlerTarget].status1 = 0;
+      gBattleMons[gBattlerTarget].status2 &= ~STATUS2_NIGHTMARE;
+
+      gBattleScripting.battler = gBattlerTarget;
+      BtlController_EmitSetMonData(gBattlerTarget, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4,
+                                   &gBattleMons[gBattlerTarget].status1);
+      MarkBattlerForControllerExec(gBattlerTarget);
+    }
+
+    gMoveResultFlags |= MOVE_RESULT_SKIN_SHED;
+  }
   if (gBattleMons[gBattlerTarget].hp > gBattleMoveDamage)
   {
     goto END;
@@ -2557,6 +2579,7 @@ END:
     gBattlescriptCurrInstr = BattleScript_GemActivates;
     gLastUsedItem = gBattleMons[gBattlerAttacker].item;
   }
+
 
   // B_WEATHER_STRONG_WINDS prints a string when it's about to reduce the power
   // of a move that is Super Effective against a Flying-type Pokémon.
@@ -3071,6 +3094,14 @@ static void Cmd_resultmessage(void)
           gMoveResultFlags &= ~(MOVE_RESULT_FOE_ENDURED | MOVE_RESULT_FOE_HUNG_ON);
           BattleScriptPushCursor();
           gBattlescriptCurrInstr = BattleScript_EnduredMsg;
+          return;
+        } else if (gMoveResultFlags & MOVE_RESULT_SKIN_SHED)
+        {
+          gMoveResultFlags &= ~MOVE_RESULT_SKIN_SHED;
+          gBattleScripting.battler = gBattlerTarget;
+          gLastUsedAbility = ABILITY_SHED_SKIN;
+          BattleScriptPushCursor();
+          gBattlescriptCurrInstr = BattleScript_ShedSkinActivates;
           return;
         } else if (gMoveResultFlags & MOVE_RESULT_FOE_HUNG_ON)
         {

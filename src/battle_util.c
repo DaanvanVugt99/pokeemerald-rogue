@@ -5428,28 +5428,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
     case ABILITYEFFECT_ENDTURN:  // 1
       if (gBattleMons[battler].hp != 0)
       {
-        bool8 shedSkinAbilityActivate = FALSE;
-        bool8 shedSkinCharmActive = FALSE;
-        u8 extraShedSkinChance = 0;
+        bool8 statusClearAbilityActivate = FALSE;
 
         gBattlerAttacker = battler;
-
-        if (GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT)
-        {
-          extraShedSkinChance = GetCurseValue(EFFECT_SHED_SKIN_CHANCE);
-        } else
-        {
-          extraShedSkinChance = GetCharmValue(EFFECT_SHED_SKIN_CHANCE);
-        }
-
-        if (extraShedSkinChance)
-        {
-          if ((gBattleMons[battler].status1 & STATUS1_ANY) &&
-              RandomPercentage(RNG_ROGUE_SHED_SKIN_CHARM, extraShedSkinChance))
-          {
-            shedSkinCharmActive = TRUE;
-          }
-        }
 
         switch (gLastUsedAbility)
         {
@@ -5487,7 +5468,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           case ABILITY_HYDRATION:
             if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN) && gBattleMons[battler].status1 & STATUS1_ANY)
             {
-              shedSkinAbilityActivate = TRUE;
+              statusClearAbilityActivate = TRUE;
             }
             break;
           case ABILITY_PLUS:
@@ -5502,12 +5483,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
               }
               gBattleMoveDamage *= -1;
               effect++;
-            }
-            break;
-          case ABILITY_SHED_SKIN:
-            if ((gBattleMons[battler].status1 & STATUS1_ANY) && (Random() % 3) == 0)
-            {
-              shedSkinAbilityActivate = TRUE;
             }
             break;
           case ABILITY_SPEED_BOOST:
@@ -5642,7 +5617,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             break;
         }
 
-        if (shedSkinAbilityActivate || shedSkinCharmActive)
+        if (statusClearAbilityActivate)
         {
           if (gBattleMons[battler].status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON))
           {
@@ -5669,13 +5644,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           gBattleMons[battler].status2 &= ~STATUS2_NIGHTMARE;
           gBattleScripting.battler = battler;
 
-          if (shedSkinCharmActive)
-          {
-            BattleScriptPushCursorAndCallback(BattleScript_ShedSkinCharmActivates);
-          } else
-          {
-            BattleScriptPushCursorAndCallback(BattleScript_ShedSkinActivates);
-          }
+          BattleScriptPushCursorAndCallback(BattleScript_AbilityStatusClearActivates);
 
           BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
           MarkBattlerForControllerExec(battler);

@@ -163,7 +163,6 @@ extern const u8 BattleScript_TraceActivatesEnd3[];
 extern const u8 BattleScript_AbilityHpHealActivates[];
 extern const u8 BattleScript_SandstreamActivates[];
 extern const u8 BattleScript_ShedSkinActivates[];
-extern const u8 BattleScript_ShedSkinCharmActivates[];
 extern const u8 BattleScript_IntimidateActivates[];
 extern const u8 BattleScript_DroughtActivates[];
 extern const u8 BattleScript_AlphaMonActivates[];
@@ -521,6 +520,7 @@ extern const u8 BattleScript_IlluminateActivates[];
 extern const u8 BattleScript_BattlerEnvelopedItselfInAVeil[];
 extern const u8 BattleScript_EarlyBirdActivates[];
 extern const u8 BattleScript_AbilityRemovesHazards[];
+extern const u8 BattleScript_AbilityStatusClearActivates[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

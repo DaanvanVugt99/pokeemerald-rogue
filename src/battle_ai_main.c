@@ -4610,7 +4610,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_CURE_SLP ||
             aiData->holdEffects[battlerAtk] == HOLD_EFFECT_CURE_STATUS ||
             HasMoveEffect(EFFECT_SLEEP_TALK, battlerAtk) || HasMoveEffect(EFFECT_SNORE, battlerAtk) ||
-            aiData->abilities[battlerAtk] == ABILITY_SHED_SKIN || aiData->abilities[battlerAtk] == ABILITY_EARLY_BIRD ||
+            aiData->abilities[battlerAtk] == ABILITY_EARLY_BIRD ||
             (AI_GetWeather(aiData) & B_WEATHER_RAIN && gWishFutureKnock.weatherDuration != 1 &&
              aiData->abilities[battlerAtk] == ABILITY_HYDRATION &&
              aiData->holdEffects[battlerAtk] != HOLD_EFFECT_UTILITY_UMBRELLA))
