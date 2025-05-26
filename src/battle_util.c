@@ -10344,7 +10344,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
     case ABILITY_FIGHTING_SPIRIT:
       if (moveType == TYPE_FIGHTING && gBattleStruct->ateBoost[battlerAtk])
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
       }
       break;
     case ABILITY_REFRIGERATE:
@@ -13698,19 +13698,25 @@ u8 GetMoveType(u32 battler, u32 move)
   }
 
   // Liquid Voice: sound-based moves become Water-type
-  else if (ability == ABILITY_LIQUID_VOICE && (gBattleMoves[move].flags & FLAG_SOUND_BASED))
+  if (ability == ABILITY_LIQUID_VOICE && (gBattleMoves[move].flags & FLAG_SOUND_BASED))
   {
     type = TYPE_WATER;
   }
 
-  // Liquid Voice: sound-based moves become Water-type
-  else if (ability == ABILITY_FIGHTING_SPIRIT && (gBattleMoves[move].type == TYPE_FIGHTING))
+  // Fighting Spirit: Fighting-type moves become Ghost-type
+  if (ability == ABILITY_FIGHTING_SPIRIT && (gBattleMoves[move].type == TYPE_FIGHTING))
   {
     type = TYPE_GHOST;
   }
 
+  // Rock Head: Normal-type recoil moves become Rock-type
+  if (ability == ABILITY_ROCK_HEAD && move == MOVE_DOUBLE_EDGE)  //(gBattleMoves[move].type == TYPE_NORMAL))
+  {
+    type = TYPE_ROCK;
+  }
+
   // Refrigerate, Pixilate, Aerilate, Galvanize: only affect Normal-type moves
-  else if (gBattleMoves[move].type == TYPE_NORMAL)
+  if (gBattleMoves[move].type == TYPE_NORMAL)
   {
     switch (ability)
     {

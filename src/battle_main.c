@@ -6365,6 +6365,10 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
   {
     gBattleStruct->dynamicMoveType = TYPE_GHOST | F_DYNAMIC_TYPE_SET;
     gBattleStruct->ateBoost[battlerAtk] = 1;
+  } else if (attackerAbility == ABILITY_ROCK_HEAD && IS_MOVE_RECOIL(move) && gBattleMoves[move].type == TYPE_NORMAL)
+  {
+    gBattleStruct->dynamicMoveType = TYPE_ROCK | F_DYNAMIC_TYPE_SET;
+    gBattleStruct->ateBoost[battlerAtk] = 1;
   }
 
   GET_MOVE_TYPE(move, moveType);

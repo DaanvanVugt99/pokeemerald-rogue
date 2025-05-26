@@ -70,7 +70,7 @@
 #define ABILITY_BLAZE 66         // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_TORRENT 67       // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_SWARM 68         // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
-#define ABILITY_ROCK_HEAD 69     // Prevents recoil damage.
+#define ABILITY_ROCK_HEAD 69     // Prevents recoil damage. And all Normal-type moves that have recoil damage become Rock-type moves.
 #define ABILITY_DROUGHT 70       // Summons sunshine on entry.
 #define ABILITY_ARENA_TRAP 71    // Prevents fleeing. 1.2x damage for ground-type moves.
 #define ABILITY_VITAL_SPIRIT 72  // Prevents falling asleep and self lowering stat drops from attacks. (ideally add a popup for this)
@@ -356,7 +356,7 @@
 #define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)     // Electric type moves gain STAB, water type moves have 10% to paralyze  // Whiscash
 #define ABILITY_AERODYNAMICS (ABILITIES_COUNT_GEN9 + 12)     // Immune to flying and gains +1 speed when hit with a flying type move. // Yanmega
 #define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.5x and become dark type against pokemon with status. // Honchcrow
-#define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain a 1.5x boost // Gallade (got to change effect)
+#define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain a 1.5x boost // Gallade
 #define ABILITY_ANCIENT_IDOL (ABILITIES_COUNT_GEN9 + 15)     // Uses Def for Atk and SpDef for SpAtk // Claydol
 #define ABILITY_SHORT_CIRCUIT (ABILITIES_COUNT_GEN9 + 16)    // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened). // rework 30 60 // Rotom
 #define ABILITY_ROUNDHOUSE (ABILITIES_COUNT_GEN9 + 17)       // Kicking moves can't miss and deal damage based on the lowest defensive type // Hitmonlee
