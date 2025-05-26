@@ -10377,6 +10377,12 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
       }
       break;
+    case ABILITY_LIQUID_OOZE:
+      if (gBattleMoves[move].effect == EFFECT_ABSORB)
+      {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+      }
+      break;
     case ABILITY_STEELY_SPIRIT:
       if (moveType == TYPE_STEEL)
       {

@@ -65,9 +65,9 @@
 #define ABILITY_SHED_SKIN 61     // Every turn, it has a 1 in 3 chance of healing from a status condition  (BURN, PARALYZE, SLEEP, POISON, FREEZE).
 #define ABILITY_GUTS 62          // Attack is increased by 50% when induced with a status (BURN, PARALYZE, SLEEP, POISON, FREEZE). Burn’s effect of lowering Attack is not applied.
 #define ABILITY_MARVEL_SCALE 63  // The Pokémon's marvelous scales double Defense if it has a status condition.
-#define ABILITY_LIQUID_OOZE 64   // The oozed liquid has a strong stench, which damages  attackers using any draining move.
+#define ABILITY_LIQUID_OOZE 64   // The oozed liquid has a strong stench, which damages  attackers using any draining move. Also ups draining moves by 1.3x damage.
 #define ABILITY_OVERGROW 65      // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts  do not stack (the 50% boost replaces the 20% one while weakened).
-#define ABILITY_BLAZE 66         // // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
+#define ABILITY_BLAZE 66         // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_TORRENT 67       // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_SWARM 68         // Now always provides a 20% damage boost to their move types. This  increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened).
 #define ABILITY_ROCK_HEAD 69     // Prevents recoil damage.
