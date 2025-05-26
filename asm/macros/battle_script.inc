@@ -2250,6 +2250,10 @@
 	.4byte \ptr
 	.endm
 
+	.macro tryraisehigheststat battler:req
+	various \battler, VARIOUS_TRY_RAISE_HIGHEST_STAT
+	.endm
+
 @ helpful macros
 	.macro setstatchanger stat:req, stages:req, down:req
 	setbyte sSTATCHANGER, \stat | \stages << 3 | \down << 7

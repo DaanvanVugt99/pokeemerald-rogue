@@ -9702,6 +9702,10 @@ BattleScript_FellStingerRaisesStat::
 BattleScript_FellStingerRaisesAtkEnd:
 	return
 
+BattleScript_GluttonyActivates::
+	tryraisehigheststat BS_TARGET
+	end2
+
 BattleScript_AttackerAbilityStatRaiseEnd3::
 	call BattleScript_AttackerAbilityStatRaise
 	end3

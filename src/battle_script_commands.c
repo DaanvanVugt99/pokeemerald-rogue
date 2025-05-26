@@ -10363,6 +10363,20 @@ static void Cmd_various(void)
       }
       break;
     }
+    case VARIOUS_TRY_RAISE_HIGHEST_STAT: {
+      VARIOUS_ARGS();
+      i = GetHighestStatId(battler);
+      if (!NoAliveMonsForEitherParty() && CompareStat(battler, i, MAX_STAT_STAGE, CMP_LESS_THAN))
+      {
+        SET_STATCHANGER(i, 1, FALSE);
+        PREPARE_STAT_BUFFER(gBattleTextBuff1, i);
+        gLastUsedAbility = GetBattlerAbility(battler);
+        BattleScriptPush(cmd->nextInstr);
+        gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+        return;
+      }
+      break;
+    }
     case VARIOUS_TRY_ACTIVATE_SOULHEART: {
       VARIOUS_ARGS();
       while (gBattleStruct->soulheartBattlerId < gBattlersCount)

@@ -522,6 +522,7 @@ extern const u8 BattleScript_EarlyBirdActivates[];
 extern const u8 BattleScript_AbilityRemovesHazards[];
 extern const u8 BattleScript_AbilityStatusClearActivates[];
 extern const u8 BattleScript_SteadfastActivates[];
+extern const u8 BattleScript_GluttonyActivates[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

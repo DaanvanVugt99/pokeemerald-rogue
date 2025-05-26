@@ -7452,6 +7452,7 @@ bool32 HasEnoughHpToEatBerry(u32 battler, u32 hpFraction, u32 itemId)
       gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 2)
   {
     RecordAbilityBattle(battler, ABILITY_GLUTTONY);
+    BattleScriptExecute(BattleScript_GluttonyActivates);
     return TRUE;
   }
 
