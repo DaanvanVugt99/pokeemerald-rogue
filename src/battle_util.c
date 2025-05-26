@@ -10296,7 +10296,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
       if (GetBattlerTurnOrderNum(battlerAtk) == gBattlersCount - 1 && move != MOVE_FUTURE_SIGHT &&
           move != MOVE_DOOM_DESIRE)
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
       }
       break;
     case ABILITY_TOUGH_CLAWS:

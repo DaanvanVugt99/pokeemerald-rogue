@@ -157,7 +157,7 @@
 #define ABILITY_BIG_PECKS 145    // Powers up moves that make direct contact by 30%. Prevents other Pokémon from lowering the Pokémon's defense stat stage.
 #define ABILITY_SAND_RUSH 146    // Doubles the Pokémon's Speed stat in a sandstorm.
 #define ABILITY_WONDER_SKIN 147  // Makes non-damaging moves that are targeted at this Pokémon have the accuracy of 50%.
-#define ABILITY_ANALYTIC 148     // Boosts move power by 30% when the Pokémon moves last.
+#define ABILITY_ANALYTIC 148     // Boosts move power by 50% when the Pokémon moves last.
 #define ABILITY_ILLUSION 149     // 1.3x damage boost when in Illusion mode.
 #define ABILITY_IMPOSTER 150     // *No innate* The Pokémon transforms itself into the Pokémon it's facing.
 #define ABILITY_INFILTRATOR 151  // Passes through the opposing Pokémon's barrier, substitute, and the like and strikes.
@@ -422,7 +422,7 @@
 // #define ABILITY_KINGS_WRATH (ABILITIES_COUNT_LATEST_GEN + 141) // When a stat is lowered, boost Atk and Def by +1. Includes Ally Drops.
 // #define ABILITY_QUEENS_MOURNING (ABILITIES_COUNT_LATEST_GEN + 141) // When a stat is lowered, boost Sp.Atk and Sp.Def by +1. Includes Ally Drops.
 // #define ABILITY_SWEEPING_EDGE (ABILITIES_COUNT_LATEST_GEN + 153) // Slicing moves cannot miss and single-target moves hit both foes. // Kingambit
-// #define ABILITY_GIFTED_MIND (ABILITIES_COUNT_LATEST_GEN + 154) // Immune to Psychic Weaknesses but take double damage from Fighting, status moves can't miss // Slowking
+// #define ABILITY_GIFTED_MIND (ABILITIES_COUNT_LATEST_GEN + 154) // Immune to Psychic Weaknesses but take super effective from Fighting, status moves can't miss // Slowking
 // #define ABILITY_HYDRO_CIRCUIT (ABILITIES_COUNT_LATEST_GEN + 155) // Electric moves deal 1.3x damage and water moves drain 1/5 of the damage dealt. // Lanturn
 // #define ABILITY_CELESTIAL_SYNC (ABILITIES_COUNT_LATEST_GEN + 156) // The user Attack and Special Attack are equal to the higher of the two. // Mineor
 // #define ABILITY_EXPOSED_CORE (ABILITIES_COUNT_LATEST_GEN + 156) // Same as Shields down but also gives psychic moves STAB // Mineor
