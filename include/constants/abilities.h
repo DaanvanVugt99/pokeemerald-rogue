@@ -29,7 +29,7 @@
 #define ABILITY_WONDER_GUARD 25  // *No innate* Its mysterious power only lets supereffective moves hit the  Pokémon.
 #define ABILITY_LEVITATE 26      // By floating in the air, the Pokémon receives full immunity to all Ground-type moves. Flying moves gain STAB.
 #define ABILITY_EFFECT_SPORE 27  // When a Pokémon with this Ability is hit by a move that makes contact, there is a 1/3 chance that the attacking Pokémon will become either  poisoned, paralyzed, or asleep
-#define ABILITY_SYNCHRONIZE 28   // *No innate* The attacker will receive the same status condition if it inflicts a burn, poison, or paralysis to the Pokémon.
+#define ABILITY_SYNCHRONIZE 28   // The attacker will receive the same status condition if it inflicts a burn, poison, or paralysis to the Pokémon.
 #define ABILITY_CLEAR_BODY 29    // Prevents other Pokémon's moves or Abilities from lowering the Pokémon's stats.
 #define ABILITY_NATURAL_CURE 30  // All status conditions heal when the Pokémon switches out or the battle ends.
 #define ABILITY_LIGHTNING_ROD 31 // The Pokémon draws in all Electric-type moves. Instead of being hit by Electric-type moves, it boosts its Attack or Sp. Attack stat (which is higher).
@@ -40,7 +40,7 @@
 #define ABILITY_TRACE 36         // *No innate* When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.
 #define ABILITY_HUGE_POWER 37    // Doubles the Pokémon's highest offensive stat.
 #define ABILITY_POISON_POINT 38  // Deals 1/16 damage and has 1/3 chance to get poisoned on contact against this Pokémon.
-#define ABILITY_INNER_FOCUS 39   // The Pokémon's intensely focused, and that protects the Pokémon from flinching, Focus Blast has increased accuracy to 90%. Focus Punch halves damage instead of canceling on hit.
+#define ABILITY_INNER_FOCUS 39   // The Pokémon's intensely focused, and that protects the Pokémon from flinching. Focus Blast has increased accuracy to 90%. Focus Punch halves damage instead of canceling on hit.
 #define ABILITY_MAGMA_ARMOR 40   // Prevents the Pokémon from becoming frozen. Takes 50% less damage from Water- and Ice-type moves.
 #define ABILITY_WATER_VEIL 41    // Prevents the Pokémon from getting a burn. Sets Aqua Ring on entry. Aqua Ring effect: Restore 1/8 HP every turn
 #define ABILITY_MAGNET_PULL 42   // Traps Steel-type Pokémon. Steel moves gain 1.2x damage. (WIP, has to be good for magnezone)
@@ -89,7 +89,7 @@
 #define ABILITY_SNOW_CLOAK 81    // Boosts the Pokémon's evasiveness in a hailstorm by 30%.
 #define ABILITY_GLUTTONY 82      // Eats berries at 1/2 HP instead of 1/3 HP.
 #define ABILITY_ANGER_POINT 83   // The Pokémon is angered when it takes a critical hit from physical move from opposing Pokémon, and that maxes its Attack stat. Boosts the Attack stat by one stage when hit by physical moves.
-#define ABILITY_UNBURDEN 84      // *No innate* Doubles the Speed stat if the Pokémon's held item is used or lost.
+#define ABILITY_UNBURDEN 84      // Doubles the Speed stat if the Pokémon's held item is used or lost.
 #define ABILITY_HEATPROOF 85     // The heatproof body of the Pokémon halves the damage from Fire-type moves that hit it.
 #define ABILITY_SIMPLE 86        // Doubles all stat changes.
 #define ABILITY_DRY_SKIN 87      // Rain: HP will increase by 1/8 of its max HP each turn. Intense Sunlight: HP will decrease by 1/8 of its max HP each turn.
@@ -99,7 +99,7 @@
 #define ABILITY_ADAPTABILITY 91  // Increases the STAB Bonus from x1.5 to x2.
 #define ABILITY_SKILL_LINK 92    // Maximizes the number of times multistrike moves hit.
 #define ABILITY_HYDRATION 93     // Heals status conditions every turn if it's raining.
-#define ABILITY_SOLAR_POWER 94   // Ups Sp. Atk in the sun by 1.5x. No longer decreases HP at end of every sun turn.
+#define ABILITY_SOLAR_POWER 94   // Ups Sp. Atk in the sun by 1.5x.
 #define ABILITY_QUICK_FEET 95    // Boosts the Speed stat if the Pokémon has a status condition.
 #define ABILITY_NORMALIZE 96     // All the Pokémon's moves become Normal type. The power of those moves is boosted 1.5x.
 #define ABILITY_SNIPER 97        // Power of critical-hit moves is increased to 225% rather than 150%.

@@ -2940,7 +2940,7 @@ u8 DoBattlerEndTurnEffects(void)
         if ((gBattleMons[battler].status1 & STATUS1_BURN) && gBattleMons[battler].hp != 0)
         {
           MAGIC_GUARD_CHECK;
-          gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / (B_BURN_DAMAGE >= GEN_7 ? 16 : 8);
+          gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
           if (ability == ABILITY_HEATPROOF)
           {
             if (gBattleMoveDamage >
@@ -5448,15 +5448,22 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           case ABILITY_DRY_SKIN:
             if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
             {
-              goto SOLAR_POWER_HP_DROP;
+              BattleScriptPushCursorAndCallback(
+                  BattleScript_DrySkinSunDamage);  // or reuse SolarPowerActivates if you want
+              gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+              if (gBattleMoveDamage == 0)
+              {
+                gBattleMoveDamage = 1;
+              }
+              effect++;
             }
-          // Dry Skin works similarly to Rain Dish in Rain
+            // fall through
           case ABILITY_RAIN_DISH:
             if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN) && !BATTLER_MAX_HP(battler) &&
                 !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
             {
               BattleScriptPushCursorAndCallback(BattleScript_AbilityHpHealActivates);
-              gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / (gLastUsedAbility == ABILITY_RAIN_DISH ? 16 : 8);
+              gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
               if (gBattleMoveDamage == 0)
               {
                 gBattleMoveDamage = 1;
@@ -5545,19 +5552,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           case ABILITY_BAD_DREAMS:
             BattleScriptPushCursorAndCallback(BattleScript_BadDreamsActivates);
             effect++;
-            break;
-          SOLAR_POWER_HP_DROP:
-          case ABILITY_SOLAR_POWER:
-            if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
-            {
-              BattleScriptPushCursorAndCallback(BattleScript_SolarPowerActivates);
-              gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
-              if (gBattleMoveDamage == 0)
-              {
-                gBattleMoveDamage = 1;
-              }
-              effect++;
-            }
             break;
           case ABILITY_HEALER:
             gBattleScripting.battler = BATTLE_PARTNER(battler);

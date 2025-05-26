@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Gluttony"
+testToRunPrefix="Dry Skin"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)
