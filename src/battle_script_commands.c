@@ -1922,10 +1922,10 @@ u32 GetTotalAccuracy(u32 battlerAtk,
   switch (atkAbility)
   {
     case ABILITY_COMPOUND_EYES:
-      calc = (calc * 130) / 100;  // 1.3 compound eyes boost
+      calc = (calc * 130) / 100;  // 1.3 Compound Eyes boost
       break;
     case ABILITY_KEEN_EYE:
-      calc = (calc * 120) / 100;  // 1.3 compound eyes boost
+      calc = (calc * 120) / 100;  // 1.2 Keen Eye boost
       break;
     case ABILITY_VICTORY_STAR:
       calc = (calc * 110) / 100;  // 1.1 victory star boost

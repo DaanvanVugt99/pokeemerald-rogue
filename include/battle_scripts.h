@@ -521,6 +521,7 @@ extern const u8 BattleScript_BattlerEnvelopedItselfInAVeil[];
 extern const u8 BattleScript_EarlyBirdActivates[];
 extern const u8 BattleScript_AbilityRemovesHazards[];
 extern const u8 BattleScript_AbilityStatusClearActivates[];
+extern const u8 BattleScript_SteadfastActivates[];
 
 // zmoves
 extern const u8 BattleScript_ZMoveActivateDamaging[];

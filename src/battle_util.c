@@ -5982,6 +5982,19 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             effect++;
           }
           break;
+        case ABILITY_STEADFAST:
+          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) &&
+              HadMoreThanHalfHpNowHasLess(battler) && (gMultiHitCounter == 0 || gMultiHitCounter == 1) &&
+              !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove)) &&
+              (CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN) ||
+               CompareStat(battler, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN)))
+          {
+            gEffectBattler = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_SteadfastActivates;
+            effect++;
+          }
+          break;
         case ABILITY_EMERGENCY_EXIT:
         case ABILITY_WIMP_OUT:
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED &&

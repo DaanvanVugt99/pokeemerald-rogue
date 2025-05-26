@@ -82,10 +82,10 @@
 #define ABILITIES_COUNT_GEN3 77
 
 // Gen 4
-#define ABILITY_TANGLED_FEET 77  // *No innate* Pokémon’s evasion raises one level when Confused.
+#define ABILITY_TANGLED_FEET 77  // Pokémon has 50% evasion when Confused.
 #define ABILITY_MOTOR_DRIVE 78   // Boosts its Speed stat if hit by an Electric-type move instead of taking damage.
 #define ABILITY_RIVALRY 79       // Pokémon's power is increased by 25% if the foe is of the same gender.
-#define ABILITY_STEADFAST 80     // *No innate* Raises speed by +1 when flinching.
+#define ABILITY_STEADFAST 80     // Raises speed by +1 when flinching.
 #define ABILITY_SNOW_CLOAK 81    // Boosts the Pokémon's evasiveness in a hailstorm by 30%.
 #define ABILITY_GLUTTONY 82      // Eats berries at 1/2 HP instead of 1/3 HP.
 #define ABILITY_ANGER_POINT 83   // The Pokémon is angered when it takes a critical hit from physical move from opposing Pokémon, and that maxes its Attack stat. Boosts the Attack stat by one stage when hit by physical moves.
