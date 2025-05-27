@@ -5472,6 +5472,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
               effect++;
             }
             break;
+          case ABILITY_LEAF_GUARD:
+            if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN) && !BATTLER_MAX_HP(battler) &&
+                !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+              BattleScriptPushCursorAndCallback(BattleScript_AbilityHpHealActivates);
+              gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
+              if (gBattleMoveDamage == 0)
+              {
+                gBattleMoveDamage = 1;
+              }
+              gBattleMoveDamage *= -1;
+              effect++;
+            }
+            break;
           case ABILITY_HYDRATION:
             if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN) && gBattleMons[battler].status1 & STATUS1_ANY)
             {
@@ -10370,7 +10384,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
     case ABILITY_NORMALIZE:
       if (moveType == TYPE_NORMAL && gBattleStruct->ateBoost[battlerAtk])
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
       }
       break;
     case ABILITY_EXPLOIT_WEAKNESS:
@@ -10993,6 +11007,16 @@ static inline u32 CalcAttackStat(u32 move,
         }
         break;
       }
+    case ABILITY_HYDRATION:
+      if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.9));
+        if (updateFlags)
+        {
+          RecordAbilityBattle(battlerDef, ABILITY_HYDRATION);
+        }
+      }
+      break;
     case ABILITY_BULLETPROOF:
       if (IS_MOVE_SPECIAL(move))
       {

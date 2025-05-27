@@ -98,7 +98,7 @@
 #define ABILITY_POISON_HEAL 90   // Restores 1/8 HP per turn if the Pokémon is poisoned instead of losing HP.
 #define ABILITY_ADAPTABILITY 91  // Increases the STAB Bonus from x1.5 to x2.
 #define ABILITY_SKILL_LINK 92    // Maximizes the number of times multistrike moves hit.
-#define ABILITY_HYDRATION 93     // Heals status conditions every turn if it's raining.
+#define ABILITY_HYDRATION 93     // Heals status conditions every turn and takes 0.9x damage if it's raining.
 #define ABILITY_SOLAR_POWER 94   // Ups Sp. Atk in the sun by 1.5x.
 #define ABILITY_QUICK_FEET 95    // Boosts the Speed stat if the Pokémon has a status condition.
 #define ABILITY_NORMALIZE 96     // All the Pokémon's moves become Normal type. The power of those moves is boosted 1.5x.
@@ -107,7 +107,7 @@
 #define ABILITY_NO_GUARD 99      // The Pokémon employs no-guard tactics to ensure incoming and outgoing attacks always land.
 #define ABILITY_STALL 100        // Always moves last.
 #define ABILITY_TECHNICIAN 101   // Powers up the Pokémon's weaker moves with BP 60 or less.
-#define ABILITY_LEAF_GUARD 102   // Prevents status conditions in harsh sunlight.
+#define ABILITY_LEAF_GUARD 102   // Prevents status conditions and restores 1/16 HP at the end of turn in harsh sunlight.
 #define ABILITY_KLUTZ 103        // *No innate* Can't use items.
 #define ABILITY_MOLD_BREAKER 104 // Moves can be used on the target regardless of its Abilities. Hits Levitate with Ground moves.
 #define ABILITY_SUPER_LUCK 105   // Raises the critical-hit ratio of moves by one level.
@@ -430,9 +430,9 @@
 // #define ABILITY_CHEAT_DEATH (ABILITIES_COUNT_LATEST_GEN + 159) // The first attack against this pokemon deals no damage.
 // #define ABILITY_COWARD (ABILITIES_COUNT_LATEST_GEN + 161) // Sets up Protect on switch-in. Only works once.
 // #define ABILITY_DUNE_TERROR (ABILITIES_COUNT_LATEST_GEN + 163) // Sandstorm reduces damage by 25% and boosts Ground moves by 20%. // Krookodile
-// #define ABILITY_INFERNAL_RAGE (ABILITIES_COUNT_LATEST_GEN + 164)    // Fire-type moves are boosted by 30% with 5% recoil. // Houndoom
+// #define ABILITY_INFERNAL_RAGE (ABILITIES_COUNT_LATEST_GEN + 164)    // Fire-type moves are boosted by 30% with 10% recoil. // Houndoom
 // #define ABILITY_ELEMENTALIST (ABILITIES_COUNT_LATEST_GEN + 166) // 20% chance to BRN/FRZ/PARA with respective types. // Drampa
-// #define ABILITY_AMBUSH (ABILITIES_COUNT_LATEST_GEN + 167) // Guaranteed critical hit on first turn. // Zoroark
+// #define ABILITY_AMBUSH (ABILITIES_COUNT_LATEST_GEN + 167) // Guaranteed critical hit on first turn (once per battle). // Zoroark
 // #define ABILITY_GRAVITY_WELL (ABILITIES_COUNT_LATEST_GEN + 168) // Sets Gravity on entry for 5 turns. // Probopass
 // #define ABILITY_RADIANCE (ABILITIES_COUNT_LATEST_GEN + 169) // +20% accuracy; Dark moves fail when user is on the field. // Gardevoir
 // #define ABILITY_EMPATH (ABILITIES_COUNT_LATEST_GEN + 169) // Mirrors positive enemy stat changes. // Ralts, Kirlia
@@ -440,7 +440,7 @@
 // #define ABILITY_CHLOROFUMES (ABILITIES_COUNT_LATEST_GEN + 177) // Grass-type moves lower the targets attack stage by 1 and poison if sunny // Venusaur
 // #define ABILITY_DRACONIC (ABILITIES_COUNT_LATEST_GEN + 178) // Dragon type moves gain STAB. // Charizard
 // #define ABILITY_PRESSURE_SHELL (ABILITIES_COUNT_LATEST_GEN + 178) // Moves that hit this pokemon use up 2 more PP and it is immune to multi hit moves. // Blastoise
-// #define ABILITY_MAGIC_POWDER (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a move, 30% chance to sleep the attacker. Flying-type and Magic Guard Pokémon are immune. // Butterfree
+// #define ABILITY_MAGIC_POWDER (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a move, makes the opponent drowsy. // Butterfree
 // #define ABILITY_VENOM_RUSH (ABILITIES_COUNT_GEN9 + XX) // If the target is poisoned or slowed, this Pokémon’s Speed is doubled and moves have +1 Crit. // Beedrill
 // #define ABILITY_GNAWING_INSTINCT (ABILITIES_COUNT_GEN9 + XX) // biting moves lower the target's Defense. // Raticate
 // #define ABILITY_SPARK_SURGE (ABILITIES_COUNT_GEN9 + XX) // On switch-in, sets Electric Terrain. Boosts Speed by 1.5x in Electric Terrain. // Raichu
@@ -448,7 +448,7 @@
 // #define ABILITY_FROSTFLARE_GUARD (ABILITIES_COUNT_GEN9 + XX) // On switch in: If Sun is active, sets Light Screen, if Hail is active, sets Reflect. // Ninetales
 // #define ABILITY_VOCAL_RANGE (ABILITIES_COUNT_GEN9 + XX) // Sound-based moves are Normal/Fairy dual-typed and have +1 priority if the target is statused. // Wigglytuff
 // #define ABILITY_TOXIC_BLOOM (ABILITIES_COUNT_GEN9 + XX) // At the end of each turn, all foes are poisoned. // Vileplume
-// #define ABILITY_NEUROTOXIN (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon hits with a Bug or Poison move, there is a 30% chance to reduce the target’s Speed and Special Defense by 1 stage. // Venomoth
+// #define ABILITY_NEUROTOXIN (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon hits with a Bug or Poison move, there is a 50% chance to reduce the target’s Speed and Special Defense by 1 stage. // Venomoth
 // #define ABILITY_SINKHOLE (ABILITIES_COUNT_GEN9 + XX) // On switch-in, lowers the Speed of all grounded enemies by 1 stage. // Dugtrio
 // #define ABILITY_TIDAL_FOCUS (ABILITIES_COUNT_GEN9 + XX) // While Rain is active, this Pokémon's moves always land critical hits. // Golduck
 // #define ABILITY_FATAL_GRACE (ABILITIES_COUNT_GEN9 + XX) // This Pokémon's moves have +1 priority if the target is at or below 1/2 HP. // Persian
@@ -484,7 +484,7 @@
 // #define ABILITY_COMBAT_TRANCE (ABILITIES_COUNT_GEN9 + XX) // This Pokémon is unaffected by flinching, Intimidate, and stat drops caused by opponents. // Tauros Paldean
 // #define ABILITY_STABILIZE (ABILITIES_COUNT_GEN9 + XX) // On switch-in, this Pokémon removes all stat stage changes from both sides. // Ditto
 // #define ABILITY_PRECOGNITION (ABILITIES_COUNT_GEN9 + XX) // On switch-in, this Pokémon identifies and disables the move with the highest base power in each opposing Pokémon’s current moveset for 3 turns. // Espeon
-// #define ABILITY_SHADOW_CARAPACE (ABILITIES_COUNT_GEN9 + XX) // This Pokémon takes 0.8x from physical moves and lowers the target's Special Defense by 1 stage when hit by a special move. // Umbreon
+// #define ABILITY_SHADOW_CARAPACE (ABILITIES_COUNT_GEN9 + XX) // This Pokémon has 20% evasion and lowers the target's Special Defense by 1 stage when hit by a special move. // Umbreon
 // #define ABILITY_VERDANT_RUSH (ABILITIES_COUNT_GEN9 + XX) // While Grassy Terrain is active, this Pokémon gains 1.5x Speed and grass moves ignore resistances. // Leafeon
 // #define ABILITY_GLACIAL_DUST (ABILITIES_COUNT_GEN9 + XX) // While Snow is active, this Pokémon is immune to critical hits and takes 30% less from super-effective moves. // Glaceon
 // #define ABILITY_SMOLDER (ABILITIES_COUNT_GEN9 + XX) // While this Pokémon is active, all opposing Pokémon are considered burned for the purpose of damage calculation. // Flareon
@@ -522,7 +522,7 @@
 // #define ABILITY_FORTIFIED_SPIN (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon uses protect, remove entry hazards on its side of the field and heal 1/8 HP. // Forretress
 // #define ABILITY_BURROW (ABILITIES_COUNT_GEN9 + XX) // While grounded, this Pokémon is immune to Flying-type moves and can't be crit. // Dudunsparce
 // #define ABILITY_SANDSTALK (ABILITIES_COUNT_GEN9 + XX) // While Sandstorm is active, this Pokémon’s damaging moves can't miss and ignore Protect and Substitute. // Gliscor
-// #define ABILITY_TOXIC_SPINES (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a contact move, the attacker is poisoned and set Spikes or Toxic Spikes randomly.
+// #define ABILITY_TOXIC_SPINES (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a contact move, the attacker is poisoned and set Spikes or Toxic Spikes randomly. // Qwilfish
 // #define ABILITY_SILVER_LINING (ABILITIES_COUNT_GEN9 + XX) // This Pokémon is immune to status effects. Every time it takes a hit, it restores 1/16 HP afterwards. // Shuckle
 // #define ABILITY_DUALIST_INSTINCT (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon hits with a contact move, it gains a stack of Battle Instinct (max 3). Each stack boosts the power of its contact moves by 10%. At max stacks, gainst +1 Speed. // heracross
 // #define ABILITY_VICTORY_FLARE (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon lands a critical hit, all stats gain a boost. // Victini
@@ -577,7 +577,7 @@
 // #define ABILITY_TWILIGHT_VEIL (ABILITIES_COUNT_GEN9 + XX) // While Eclipse is active, all allied Pokémon take 30% less damage from special moves.
 // #define ABILITY_FEEDING_FRENZY (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon uses a biting move, it the opponents Defense is lowered by 1. If Rain is active, it also loses 1 Speed. // Sharpedo
 // #define ABILITY_TIDAL_FLOOD (ABILITIES_COUNT_GEN9 + XX) // On switch-in, clears hazards and restores 1/4 HP. // Wailord
-// #define ABILITY_PSYCHIC_SPRING (ABILITIES_COUNT_GEN9 + XX) // On switch-in, this Pokémon sets Psychic Terrain. While Psychic Terrain is active, all moves have a 10% chance to confuse the target. // Grumpig
+// #define ABILITY_PSYCHIC_SPRING (ABILITIES_COUNT_GEN9 + XX) // On switch-in, this Pokémon sets Psychic Terrain. While Psychic Terrain is active, all moves have a 20% chance to confuse the target. // Grumpig
 // #define ABILITY_GETTING_DIZZY (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a move, the attacker has a 50% chance to become confused. // Spinda
 // #define ABILITY_DESERT_PHANTOM (ABILITIES_COUNT_GEN9 + XX) // While Sandstorm is active, sound-based moves become Ground-type deal and 1.5× damage.
 // #define ABILITY_NEEDLEBURST (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon uses a contact move, it also sets a layer of Spikes. Immune to Sandstorm damage. // Cacturne
