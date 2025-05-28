@@ -140,7 +140,7 @@
 #define ABILITY_DEFIANT 128      // Boosts the Pokémon's Attack stat sharply when its stats are lowered.
 #define ABILITY_DEFEATIST 129    // Halves Atk & SpAtk at 1/3 HP.
 #define ABILITY_CURSED_BODY 130  // May disable a move used on the Pokémon.
-#define ABILITY_HEALER 131       // At the end of the turn, there is a 30% chance of either Ally being healed from a status condition
+#define ABILITY_HEALER 131       // At the end of the turn, heals allies from a status condition
 #define ABILITY_FRIEND_GUARD 132 // *No innate* The damage that ally Pokémon receive from attacks is reduced by 25%.
 #define ABILITY_WEAK_ARMOR 133   // Physical attacks to the Pokémon lower its Defense and Sp. Defense stats but sharply raise its Attack, Sp. Attack and Speed stat.
 #define ABILITY_HEAVY_METAL 134  // Doubles the Pokémon's weight.
