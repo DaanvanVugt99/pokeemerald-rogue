@@ -10835,7 +10835,7 @@ static inline u32 CalcAttackStat(u32 move,
       }
       break;
     case ABILITY_DEFEATIST:
-      if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
+      if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 3))
       {
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
       }

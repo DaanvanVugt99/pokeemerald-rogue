@@ -133,12 +133,12 @@
 #define ABILITIES_COUNT_GEN4 124
 
 // Gen 5
-#define ABILITY_PICKPOCKET 124   // *No innate* When a Pokémon makes physical contact with the Pokémon, the item of the opponent is stolen.
+#define ABILITY_PICKPOCKET 124   // *No innate* When a Pokémon makes physical contact with the Pokémon, the item of the opponent is stolen. // TODO: add to bag logic for stealtargetitem
 #define ABILITY_SHEER_FORCE 125  // Moves with a secondary effect are increased in power by 30% but lost their secondary effect
 #define ABILITY_CONTRARY 126     // Makes stat changes have an opposite effect.
-#define ABILITY_UNNERVE 127      // *No innate* Unnerves opposing Pokémon and makes them unable to eat Berries and blocks healing moves.
+#define ABILITY_UNNERVE 127      // Unnerves opposing Pokémon and makes them unable to eat Berries and blocks healing moves.
 #define ABILITY_DEFIANT 128      // Boosts the Pokémon's Attack stat sharply when its stats are lowered.
-#define ABILITY_DEFEATIST 129    // *No innate* Halves Atk & SpAtk at 1/3 HP (instead of 1/2 HP).
+#define ABILITY_DEFEATIST 129    // Halves Atk & SpAtk at 1/3 HP.
 #define ABILITY_CURSED_BODY 130  // May disable a move used on the Pokémon.
 #define ABILITY_HEALER 131       // At the end of the turn, there is a 30% chance of either Ally being healed from a status condition
 #define ABILITY_FRIEND_GUARD 132 // *No innate* The damage that ally Pokémon receive from attacks is reduced by 25%.
