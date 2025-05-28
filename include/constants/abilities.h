@@ -147,9 +147,9 @@
 #define ABILITY_LIGHT_METAL 135  // Halves the Pokémon's weight and increases speed by 20%.
 #define ABILITY_MULTISCALE 136   // Reduces damage afflicted to the Pokémon by 50% if at maximum HP
 #define ABILITY_TOXIC_BOOST 137  // Attack stat increased by 50% when poisoned. Immune to poison status damage.
-#define ABILITY_FLARE_BOOST 138  // Special Attack stat increased by 50% when burned. Now immune to burn  status damage.
+#define ABILITY_FLARE_BOOST 138  // Special Attack stat increased by 50% when burned. Immune to burn status damage.
 #define ABILITY_HARVEST 139      // The Pokémon has a 50% chance of restoring a consumed berry. During sunshine, this chance increased to 100%
-#define ABILITY_TELEPATHY 140    // *No innate* Anticipates an ally's attack and dodges it.
+#define ABILITY_TELEPATHY 140    // Anticipates an ally's attack and dodges it. // TODO dodges the first super effective move
 #define ABILITY_MOODY 141        // Raises one stat sharply and lowers another every turn.
 #define ABILITY_OVERCOAT 142     // Protects the Pokémon from things like sand, hail, and powder. The  Pokémon takes 20% less damage from special moves.
 #define ABILITY_POISON_TOUCH 143 // 30% chance to badly poison a target when the Pokémon makes contact.

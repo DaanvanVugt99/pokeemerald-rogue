@@ -2954,6 +2954,14 @@ u8 DoBattlerEndTurnEffects(void)
         if ((gBattleMons[battler].status1 & STATUS1_BURN) && gBattleMons[battler].hp != 0)
         {
           MAGIC_GUARD_CHECK;
+
+          // Skip damage if Flare Boost is active
+          if (ability == ABILITY_FLARE_BOOST)
+          {
+            gBattleStruct->turnEffectsTracker++;
+            break;
+          }
+
           gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
           if (ability == ABILITY_HEATPROOF)
           {
@@ -11053,6 +11061,16 @@ static inline u32 CalcAttackStat(u32 move,
       if (updateFlags)
       {
         RecordAbilityBattle(battlerDef, ABILITY_BULLETPROOF);
+      }
+      break;
+    case ABILITY_OVERCOAT:
+      if (IS_MOVE_SPECIAL(move))
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.8));
+      }
+      if (updateFlags)
+      {
+        RecordAbilityBattle(battlerDef, ABILITY_OVERCOAT);
       }
       break;
   }
