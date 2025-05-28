@@ -146,7 +146,7 @@
 #define ABILITY_HEAVY_METAL 134  // Doubles the Pokémon's weight and increases defense by 20%.
 #define ABILITY_LIGHT_METAL 135  // Halves the Pokémon's weight and increases speed by 20%.
 #define ABILITY_MULTISCALE 136   // Reduces damage afflicted to the Pokémon by 50% if at maximum HP
-#define ABILITY_TOXIC_BOOST 137  // Attack stat increased by 50% when poisoned. Now immune to poison status damage.
+#define ABILITY_TOXIC_BOOST 137  // Attack stat increased by 50% when poisoned. Immune to poison status damage.
 #define ABILITY_FLARE_BOOST 138  // Special Attack stat increased by 50% when burned. Now immune to burn  status damage.
 #define ABILITY_HARVEST 139      // The Pokémon has a 50% chance of restoring a consumed berry. During sunshine, this chance increased to 100%
 #define ABILITY_TELEPATHY 140    // *No innate* Anticipates an ally's attack and dodges it.

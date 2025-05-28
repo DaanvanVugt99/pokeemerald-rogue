@@ -2872,6 +2872,13 @@ u8 DoBattlerEndTurnEffects(void)
         {
           MAGIC_GUARD_CHECK;
 
+          // Skip damage if Toxic Boost is active
+          if (ability == ABILITY_TOXIC_BOOST)
+          {
+            gBattleStruct->turnEffectsTracker++;
+            break;
+          }
+
           if (ability == ABILITY_POISON_HEAL)
           {
             if (!BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
@@ -2903,6 +2910,13 @@ u8 DoBattlerEndTurnEffects(void)
         if ((gBattleMons[battler].status1 & STATUS1_TOXIC_POISON) && gBattleMons[battler].hp != 0)
         {
           MAGIC_GUARD_CHECK;
+
+          // Skip damage if Toxic Boost is active
+          if (ability == ABILITY_TOXIC_BOOST)
+          {
+            gBattleStruct->turnEffectsTracker++;
+            break;
+          }
 
           if (ability == ABILITY_POISON_HEAL)
           {
