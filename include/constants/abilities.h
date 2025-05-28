@@ -141,10 +141,10 @@
 #define ABILITY_DEFEATIST 129    // Halves Atk & SpAtk at 1/3 HP.
 #define ABILITY_CURSED_BODY 130  // May disable a move used on the Pokémon.
 #define ABILITY_HEALER 131       // At the end of the turn, heals allies from a status condition
-#define ABILITY_FRIEND_GUARD 132 // *No innate* The damage that ally Pokémon receive from attacks is reduced by 25%.
+#define ABILITY_FRIEND_GUARD 132 // The damage that ally Pokémon receive from attacks is reduced by 25%.
 #define ABILITY_WEAK_ARMOR 133   // Physical attacks to the Pokémon lower its Defense and Sp. Defense stats but sharply raise its Attack, Sp. Attack and Speed stat.
-#define ABILITY_HEAVY_METAL 134  // Doubles the Pokémon's weight.
-#define ABILITY_LIGHT_METAL 135  // Halves the Pokémon's weight.
+#define ABILITY_HEAVY_METAL 134  // Doubles the Pokémon's weight and increases defense by 20%.
+#define ABILITY_LIGHT_METAL 135  // Halves the Pokémon's weight and increases speed by 20%.
 #define ABILITY_MULTISCALE 136   // Reduces damage afflicted to the Pokémon by 50% if at maximum HP
 #define ABILITY_TOXIC_BOOST 137  // Attack stat increased by 50% when poisoned. Now immune to poison status damage.
 #define ABILITY_FLARE_BOOST 138  // Special Attack stat increased by 50% when burned. Now immune to burn  status damage.

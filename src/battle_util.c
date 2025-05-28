@@ -11267,6 +11267,12 @@ static inline u32 CalcDefenseStat(u32 move,
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
       }
       break;
+    case ABILITY_HEAVY_METAL:
+      if (usesDefStat)
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+      }
+      break;
   }
 
   // ally's abilities
