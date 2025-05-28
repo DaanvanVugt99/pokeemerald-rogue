@@ -108,12 +108,12 @@
 #define ABILITY_STALL 100        // Always moves last.
 #define ABILITY_TECHNICIAN 101   // Powers up the Pokémon's weaker moves with BP 60 or less.
 #define ABILITY_LEAF_GUARD 102   // Prevents status conditions and restores 1/16 HP at the end of turn in harsh sunlight.
-#define ABILITY_KLUTZ 103        // *No innate* Can't use items.
+#define ABILITY_KLUTZ 103        // Can't use items. Deals 1.2x damage and has 10% evasion.
 #define ABILITY_MOLD_BREAKER 104 // Moves can be used on the target regardless of its Abilities. Hits Levitate with Ground moves.
 #define ABILITY_SUPER_LUCK 105   // Raises the critical-hit ratio of moves by one level.
 #define ABILITY_AFTERMATH 106    // The foe that dealt the final hit loses 1/4 of its maximum HP if the  move made physical contact.
-#define ABILITY_ANTICIPATION 107 // Warns when the foe knows 1-hit KO or super-effective moves.
-#define ABILITY_FOREWARN 108     // Reveals the foe’s strongest move.
+#define ABILITY_ANTICIPATION 107 // Warns when the foe knows 1-hit KO or super-effective moves. Ups evasion by 1 stage if the foe has a super-effective move.
+#define ABILITY_FOREWARN 108     // Reveals the foe’s strongest move and disables it for 4 turns. Increases accuracy and evasion by 5%.
 #define ABILITY_UNAWARE 109      // Foe’s stat modifications are ignored.
 #define ABILITY_TINTED_LENS 110  // The Pokémon can use "not very effective" moves to deal regular damage.
 #define ABILITY_FILTER 111       // Reduces the power of supereffective attacks taken by 35%.
@@ -124,7 +124,7 @@
 #define ABILITY_SOLID_ROCK 116   // Reduces the power of supereffective attacks taken by 35%.
 #define ABILITY_SNOW_WARNING 117 // The Pokémon summons a hailstorm when it enters a battle.
 #define ABILITY_HONEY_GATHER 118 // *No innate* The Pokémon may gather Honey after a battle.
-#define ABILITY_FRISK 119        // *No innate* When it enters a battle, the Pokémon can check an opposing Pokémon's held item.
+#define ABILITY_FRISK 119        // When it enters a battle, the Pokémon can check an opposing Pokémon's held item and disable it for 2 turns.
 #define ABILITY_RECKLESS 120     // Powers up moves that have recoil and crash damage by 20%.
 #define ABILITY_MULTITYPE 121    // *No innate* Changes the Pokémon's type to match the Plate or Z-Crystal  it holds.
 #define ABILITY_FLOWER_GIFT 122  // *No innate* Ally’s Attack and Special Defence are multiplied by 1.5  during strong sunlight.

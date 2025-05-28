@@ -10295,6 +10295,9 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
       }
       break;
+    case ABILITY_KLUTZ:
+      modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+      break;
     case ABILITY_SHEER_FORCE:
       if (gBattleMoves[move].flags & FLAG_SHEER_FORCE_BOOST)
       {
@@ -11608,7 +11611,7 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move,
     case ABILITY_PRISM_ARMOR:
       if (typeEffectivenessModifier >= UQ_4_12(2.0))
       {
-        return UQ_4_12(0.75);
+        return UQ_4_12(0.65);
       }
       break;
     case ABILITY_FLUFFY:

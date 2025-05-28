@@ -1959,6 +1959,9 @@ u32 GetTotalAccuracy(u32 battlerAtk,
         calc = (calc * 50) / 100;  // 0.5 tangled feet loss
       }
       break;
+    case ABILITY_KLUTZ:
+      calc = (calc * 90) / 100;  // 0.9 klutz loss
+      break;
   }
 
   // Attacker's ally's ability
