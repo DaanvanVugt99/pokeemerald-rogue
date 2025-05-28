@@ -1928,7 +1928,7 @@ u32 GetTotalAccuracy(u32 battlerAtk,
       calc = (calc * 120) / 100;  // 1.2 Keen Eye boost
       break;
     case ABILITY_VICTORY_STAR:
-      calc = (calc * 110) / 100;  // 1.1 victory star boost
+      calc = (calc * 120) / 100;  // 1.2 victory star boost
       break;
     case ABILITY_FOREWARN:
       calc = (calc * 105) / 100;  // 1.05 forewarn boost
@@ -1976,7 +1976,7 @@ u32 GetTotalAccuracy(u32 battlerAtk,
     case ABILITY_VICTORY_STAR:
       if (IsBattlerAlive(atkAlly))
       {
-        calc = (calc * 110) / 100;  // 1.1 ally's victory star boost
+        calc = (calc * 120) / 100;  // 1.2 ally's victory star boost
       }
       break;
   }

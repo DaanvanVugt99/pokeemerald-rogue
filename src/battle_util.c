@@ -5839,6 +5839,29 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
               }
             }
             break;
+          case ABILITY_JUSTIFIED:
+            if (moveType == TYPE_DARK)
+            {
+              u16 userAttack;
+              u16 userSpAttack;
+              effect = 2;
+
+              userAttack = gBattleMons[battler].attack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][1];
+              userSpAttack = gBattleMons[battler].spAttack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][1];
+
+              if (userSpAttack < userAttack)
+              {
+                statId = STAT_ATK;
+              } else
+              {
+                statId = STAT_SPATK;
+              }
+            }
+            break;
           case ABILITY_AERODYNAMICS:
             if (moveType == TYPE_FLYING)
             {
@@ -5964,17 +5987,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
     case ABILITYEFFECT_MOVE_END:  // Think contact abilities.
       switch (gLastUsedAbility)
       {
-        case ABILITY_JUSTIFIED:
-          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) &&
-              moveType == TYPE_DARK && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
-          {
-            gEffectBattler = battler;
-            SET_STATCHANGER(STAT_ATK, 1, FALSE);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
-            effect++;
-          }
-          break;
         case ABILITY_RATTLED:
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) &&
               (moveType == TYPE_DARK || moveType == TYPE_BUG || moveType == TYPE_GHOST) &&
@@ -10322,12 +10334,6 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
       }
       break;
-    case ABILITY_BIG_PECKS:
-      if (gBattleMoves[move].flags & FLAG_MAKES_CONTACT)
-      {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
-      }
-      break;
     case ABILITY_KLUTZ:
       modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
       break;
@@ -10357,8 +10363,15 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
       }
       break;
+    case ABILITY_BIG_PECKS:
     case ABILITY_TOUGH_CLAWS:
       if (IsMoveMakingContact(move, battlerAtk))
+      {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+      }
+      break;
+    case ABILITY_ILLUSION:
+      if (gBattleStruct->illusion[battlerAtk].on && !gBattleStruct->illusion[battlerAtk].broken)
       {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
       }

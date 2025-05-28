@@ -37,9 +37,9 @@
 #define ABILITY_SWIFT_SWIM 33    // Doubles speed in rain.
 #define ABILITY_CHLOROPHYLL 34   // Doubles speed in sunshine.
 #define ABILITY_ILLUMINATE 35    // Prevents other Pokémon from lowering the accuracy stat stage of the Pokémon with this Ability, and also ignores the target's evasion stages. Lowers all opposing pokemons accuracy by 1 stage.
-#define ABILITY_TRACE 36         // *No innate* When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.
+#define ABILITY_TRACE 36         // When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.
 #define ABILITY_HUGE_POWER 37    // Doubles the Pokémon's highest offensive stat.
-#define ABILITY_POISON_POINT 38  // Deals 1/16 damage and has 1/3 chance to get poisoned on contact against this Pokémon.
+#define ABILITY_POISON_POINT 38  // Deals 1/16 damage and has 1/3 chance to get poisoned on contact against this Pokémon. // TODO: fix contact damage
 #define ABILITY_INNER_FOCUS 39   // The Pokémon's intensely focused, and that protects the Pokémon from flinching. Focus Blast has increased accuracy to 90%. Focus Punch halves damage instead of canceling on hit.
 #define ABILITY_MAGMA_ARMOR 40   // Prevents the Pokémon from becoming frozen. Takes 50% less damage from Water- and Ice-type moves.
 #define ABILITY_WATER_VEIL 41    // Prevents the Pokémon from getting a burn. Sets Aqua Ring on entry. Aqua Ring effect: Restore 1/8 HP every turn
@@ -152,25 +152,25 @@
 #define ABILITY_TELEPATHY 140    // Anticipates an ally's attack and dodges it. // TODO dodges the first super effective move
 #define ABILITY_MOODY 141        // Raises one stat sharply and lowers another every turn.
 #define ABILITY_OVERCOAT 142     // Protects the Pokémon from things like sand, hail, and powder. The  Pokémon takes 20% less damage from special moves.
-#define ABILITY_POISON_TOUCH 143 // 30% chance to badly poison a target when the Pokémon makes contact.
+#define ABILITY_POISON_TOUCH 143 // 30% chance to badly poison a target when the Pokémon makes contact. // TODO: check if this is working correctly
 #define ABILITY_REGENERATOR 144  // Restores 1/3 HP when withdrawn from battle or when battle ends.
 #define ABILITY_BIG_PECKS 145    // Powers up moves that make direct contact by 30%. Prevents other Pokémon from lowering the Pokémon's defense stat stage.
 #define ABILITY_SAND_RUSH 146    // Doubles the Pokémon's Speed stat in a sandstorm.
 #define ABILITY_WONDER_SKIN 147  // Makes non-damaging moves that are targeted at this Pokémon have the accuracy of 50%.
 #define ABILITY_ANALYTIC 148     // Boosts move power by 50% when the Pokémon moves last.
-#define ABILITY_ILLUSION 149     // 1.3x damage boost when in Illusion mode.
-#define ABILITY_IMPOSTER 150     // *No innate* The Pokémon transforms itself into the Pokémon it's facing.
-#define ABILITY_INFILTRATOR 151  // Passes through the opposing Pokémon's barrier, substitute, and the like and strikes.
-#define ABILITY_MUMMY 152        // *No innate* Contact with the Pokémon changes the attacker's Ability to Mummy.
+#define ABILITY_ILLUSION 149     // 1.3x damage boost when in Illusion mode. / TODO: Test
+#define ABILITY_IMPOSTER 150     // The Pokémon transforms itself into the Pokémon it's facing.
+#define ABILITY_INFILTRATOR 151  // Passes through the opposing Pokémon's barrier, substitute, and the like and strikes. // TODO: check if needs buff
+#define ABILITY_MUMMY 152        // Contact with the Pokémon changes the attacker's Ability to Mummy.
 #define ABILITY_MOXIE 153        // Attack is raised by one stage when the Pokémon knocks out another Pokémon
-#define ABILITY_JUSTIFIED 154    // Attack is raised by one stage when the Pokémon is hit by a Dark-type move
+#define ABILITY_JUSTIFIED 154    // Immune to Dark-type moves. Instead of being hit by Dark-type moves, it boosts its Attack or Sp. Attack stat (which is higher).
 #define ABILITY_RATTLED 155      // Dark-, Ghost-, and Bug-type moves scare the Pokémon and boost its Speed stats.
 #define ABILITY_MAGIC_BOUNCE 156 // Reflects status moves instead of getting hit by them.
 #define ABILITY_SAP_SIPPER 157   // Immune to Grass-type moves. Instead of being hit by Grass-type moves, it boosts its Attack or Sp. Attack stat (which is higher).
 #define ABILITY_PRANKSTER 158    // Gives priority to a status move.
 #define ABILITY_SAND_FORCE 159   // Boosts the power of Rock-, Ground-, and Steel-type moves by 30% in a sandstorm.
 #define ABILITY_IRON_BARBS 160   // Deals 1/8 HP damage on contact. Deals 1/6 damage if the attacking move is Steel-, Rock-, or Ground-type.
-#define ABILITY_ZEN_MODE 161     // Changes form regardless of health (So, becomes Zen Mode as soon as Darmanitan is switched in)
+#define ABILITY_ZEN_MODE 161     // Changes form regardless of health (So, becomes Zen Mode as soon as Darmanitan is switched in) // TODO: check what this means
 #define ABILITY_VICTORY_STAR 162 // Boosts the accuracy of its allies and itself by 20%.
 #define ABILITY_TURBOBLAZE 163   // Moves can be used on the target regardless of its Abilities. Adds the Fire-type to the Pokémon, in addition to the Pokémon's original type(s).
 #define ABILITY_TERAVOLT 164     // Moves can be used on the target regardless of its Abilities. Adds the Electric-type to the Pokémon, in addition to the Pokémon's original type(s).
