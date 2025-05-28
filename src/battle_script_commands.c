@@ -12300,8 +12300,8 @@ static void Cmd_manipulatedamage(void)
     case DMG_DOUBLED:
       gBattleMoveDamage *= 2;
       break;
-    case DMG_1_8_TARGET_HP:
-      gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 8;
+    case DMG_1_4_TARGET_HP:
+      gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 4;
       if (gBattleMoveDamage == 0)
       {
         gBattleMoveDamage = 1;

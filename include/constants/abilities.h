@@ -126,8 +126,8 @@
 #define ABILITY_HONEY_GATHER 118 // *No innate* The Pokémon may gather Honey after a battle.
 #define ABILITY_FRISK 119        // When it enters a battle, the Pokémon can check an opposing Pokémon's held item and disable it for 4 turns.
 #define ABILITY_RECKLESS 120     // Powers up moves that have recoil and crash damage by 20%.
-#define ABILITY_MULTITYPE 121    // *No innate* Changes the Pokémon's type to match the Plate or Z-Crystal  it holds.
-#define ABILITY_FLOWER_GIFT 122  // *No innate* Ally’s Attack and Special Defence are multiplied by 1.5  during strong sunlight.
+#define ABILITY_MULTITYPE 121    // Changes the Pokémon's type to match the Plate or Z-Crystal  it holds.
+#define ABILITY_FLOWER_GIFT 122  // Ally’s Attack and Special Defence are multiplied by 1.5  during strong sunlight.
 #define ABILITY_BAD_DREAMS 123   // Reduces 1/4 HP of sleeping opposing Pokémon every turn.
 
 #define ABILITIES_COUNT_GEN4 124

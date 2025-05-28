@@ -2341,8 +2341,8 @@
 	jumpifword CMP_NO_COMMON_BITS, gBattleTypeFlags, \flags, \jumpInstr
 	.endm
 
-	.macro dmg_1_8_targethp
-	manipulatedamage DMG_1_8_TARGET_HP
+	.macro dmg_1_4_targethp
+	manipulatedamage DMG_1_4_TARGET_HP
 	.endm
 
 	.macro dmgtomaxattackerhp
