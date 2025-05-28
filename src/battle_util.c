@@ -4511,6 +4511,18 @@ static void ForewarnChooseMove(u32 battler)
     }
   }
 
+  // Try to disable the selected move
+  for (i = 0; i < MAX_MON_MOVES; i++)
+  {
+    if (gBattleMons[data[bestId].battler].moves[i] == data[bestId].moveId &&
+        gBattleMons[data[bestId].battler].pp[i] > 0 && gDisableStructs[data[bestId].battler].disabledMove == MOVE_NONE)
+    {
+      gDisableStructs[data[bestId].battler].disabledMove = data[bestId].moveId;
+      gDisableStructs[data[bestId].battler].disableTimer = 4;
+      break;
+    }
+  }
+
   gBattlerTarget = data[bestId].battler;
   PREPARE_MOVE_BUFFER(gBattleTextBuff1, data[bestId].moveId)
   RecordKnownMove(gBattlerTarget, data[bestId].moveId);

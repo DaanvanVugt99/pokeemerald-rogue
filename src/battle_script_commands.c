@@ -1930,6 +1930,9 @@ u32 GetTotalAccuracy(u32 battlerAtk,
     case ABILITY_VICTORY_STAR:
       calc = (calc * 110) / 100;  // 1.1 victory star boost
       break;
+    case ABILITY_FOREWARN:
+      calc = (calc * 105) / 100;  // 1.05 forewarn boost
+      break;
     case ABILITY_HUSTLE:
       if (IS_MOVE_PHYSICAL(move))
       {
@@ -1961,6 +1964,9 @@ u32 GetTotalAccuracy(u32 battlerAtk,
       break;
     case ABILITY_KLUTZ:
       calc = (calc * 90) / 100;  // 0.9 klutz loss
+      break;
+    case ABILITY_FOREWARN:
+      calc = (calc * 95) / 100;  // 0.95 forewarn loss
       break;
   }
 
