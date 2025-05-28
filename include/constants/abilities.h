@@ -172,8 +172,8 @@
 #define ABILITY_IRON_BARBS 160   // Deals 1/8 HP damage on contact. Deals 1/6 damage if the attacking move is Steel-, Rock-, or Ground-type.
 #define ABILITY_ZEN_MODE 161     // Changes form regardless of health (So, becomes Zen Mode as soon as Darmanitan is switched in) // TODO: check what this means
 #define ABILITY_VICTORY_STAR 162 // Boosts the accuracy of its allies and itself by 20%.
-#define ABILITY_TURBOBLAZE 163   // Moves can be used on the target regardless of its Abilities. Adds the Fire-type to the Pokémon, in addition to the Pokémon's original type(s).
-#define ABILITY_TERAVOLT 164     // Moves can be used on the target regardless of its Abilities. Adds the Electric-type to the Pokémon, in addition to the Pokémon's original type(s).
+#define ABILITY_TURBOBLAZE 163   // Moves can be used on the target regardless of its Abilities.
+#define ABILITY_TERAVOLT 164     // Moves can be used on the target regardless of its Abilities.
 
 #define ABILITIES_COUNT_GEN5 165
 
@@ -187,21 +187,21 @@
 #define ABILITY_BULLETPROOF 171    // Protects the Pokémon from some ball and bomb moves. Takes 20% less damage from special moves.
 #define ABILITY_COMPETITIVE 172    // Boosts the Sp. Atk stat sharply when a stat is lowered.
 #define ABILITY_STRONG_JAW 173     // The Pokémon's strong jaw boosts the power of its biting moves. [Now  affects Bug Bite, Super Fang, Deathroll]
-#define ABILITY_REFRIGERATE 174    // All Normal-type moves used by the Pokémon to become Ice-type and receive a 10% power boost.
-#define ABILITY_SWEET_VEIL 175     // *No innate* Prevents itself and ally Pokémon from falling asleep.
-#define ABILITY_STANCE_CHANGE 176  // *No innate* The Pokémon changes its form to Blade Forme when it uses an attack move and changes to Shield Forme when it uses King's Shield.
+#define ABILITY_REFRIGERATE 174    // All Normal-type moves used by the Pokémon to become Ice-type and receive a 1.3x power boost.
+#define ABILITY_SWEET_VEIL 175     // Prevents itself and ally Pokémon from falling asleep. Bug-types can't flee or switch out.
+#define ABILITY_STANCE_CHANGE 176  // The Pokémon changes its form to Blade Forme when it uses an attack move and changes to Shield Forme when it uses King's Shield.
 #define ABILITY_GALE_WINGS 177     // Flying-type moves have +1 priority. Requires full HP.
 #define ABILITY_MEGA_LAUNCHER 178  // Boosts all beam, pump, cannon, zooka, shot, gun, aura and pulse moves  by 50%.
 #define ABILITY_GRASS_PELT 179     // Increases Defense by 50% when battling on Grass or if the move Grassy  Terrain is in effect
 #define ABILITY_SYMBIOSIS 180      // May pass an item to an ally.
 #define ABILITY_TOUGH_CLAWS 181    // Powers up moves by 30% that make direct contact.
-#define ABILITY_PIXILATE 182       // All Normal-type moves used by the Pokémon to become Fairy-type and  receive a 10% power boost.
-#define ABILITY_GOOEY 183          // Lowers speed on contact.
-#define ABILITY_AERILATE 184       // All Normal-type moves used by the Pokémon to become Flying-type and  receive a 10% power boost.
+#define ABILITY_PIXILATE 182       // All Normal-type moves used by the Pokémon to become Fairy-type and  receive a 1.3x power boost.
+#define ABILITY_GOOEY 183          // Lowers speed on contact. // TODO: add on attack
+#define ABILITY_AERILATE 184       // All Normal-type moves used by the Pokémon to become Flying-type and  receive a 1.3x power boost.
 #define ABILITY_PARENTAL_BOND 185  // Hits twice. Second hit deals 0.25x damage.
 #define ABILITY_DARK_AURA 186      // Powers up each Pokémon's Dark-type moves by 50%.
 #define ABILITY_FAIRY_AURA 187     // Powers up each Pokémon's Fairy-type moves by 50%.
-#define ABILITY_AURA_BREAK 188     // *No innate* The effects of “Aura” Abilities are reversed to lower the  power of affected moves.
+#define ABILITY_AURA_BREAK 188     // The effects of “Aura” Abilities are reversed to lower the  power of affected moves.
 #define ABILITY_PRIMORDIAL_SEA 189 // The Pokémon changes the weather to nullify Fire-type attacks.
 #define ABILITY_DESOLATE_LAND 190  // The Pokémon changes the weather to nullify Water-type attacks.
 #define ABILITY_DELTA_STREAM 191   // Creates the Strong Winds weather. This lasts until the Pokémon exits battle, and weakens moves used on Flying-type Pokémon that would be Super Effective

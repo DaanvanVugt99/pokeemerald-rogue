@@ -7316,6 +7316,10 @@ u32 IsAbilityPreventingEscape(u32 battler)
   {
     return id;
   }
+  if ((id = IsAbilityOnOpposingSide(battler, ABILITY_SWEET_VEIL)) && IS_BATTLER_OF_TYPE(battler, TYPE_BUG))
+  {
+    return id;
+  }
 
   return 0;
 }
@@ -10553,10 +10557,10 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
   {
     if (IsAbilityOnField(ABILITY_AURA_BREAK))
     {
-      modifier = uq4_12_multiply(modifier, UQ_4_12(0.75));
+      modifier = uq4_12_multiply(modifier, UQ_4_12(0.5));
     } else
     {
-      modifier = uq4_12_multiply(modifier, UQ_4_12(1.33));
+      modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
     }
   }
 
