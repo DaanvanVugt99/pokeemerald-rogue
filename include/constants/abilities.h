@@ -124,7 +124,7 @@
 #define ABILITY_SOLID_ROCK 116   // Reduces the power of supereffective attacks taken by 35%.
 #define ABILITY_SNOW_WARNING 117 // The Pokémon summons a hailstorm when it enters a battle.
 #define ABILITY_HONEY_GATHER 118 // *No innate* The Pokémon may gather Honey after a battle.
-#define ABILITY_FRISK 119        // When it enters a battle, the Pokémon can check an opposing Pokémon's held item and disable it for 2 turns.
+#define ABILITY_FRISK 119        // When it enters a battle, the Pokémon can check an opposing Pokémon's held item and disable it for 4 turns.
 #define ABILITY_RECKLESS 120     // Powers up moves that have recoil and crash damage by 20%.
 #define ABILITY_MULTITYPE 121    // *No innate* Changes the Pokémon's type to match the Plate or Z-Crystal  it holds.
 #define ABILITY_FLOWER_GIFT 122  // *No innate* Ally’s Attack and Special Defence are multiplied by 1.5  during strong sunlight.
