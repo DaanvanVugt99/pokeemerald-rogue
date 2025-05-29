@@ -5914,7 +5914,24 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if ((gBattleMoves[gCurrentMove].flags2 & FLAG_WIND_BASED) &&
                 !(GetBattlerMoveTargetType(gBattlerAttacker, gCurrentMove) & MOVE_TARGET_USER))
             {
-              effect = 2, statId = STAT_ATK;
+              u16 userAttack;
+              u16 userSpAttack;
+              effect = 2;
+
+              userAttack = gBattleMons[battler].attack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_ATK]][1];
+              userSpAttack = gBattleMons[battler].spAttack *
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][0] /
+                  gStatStageRatios[gBattleMons[battler].statStages[STAT_SPATK]][1];
+
+              if (userSpAttack < userAttack)
+              {
+                statId = STAT_ATK;
+              } else
+              {
+                statId = STAT_SPATK;
+              }
             }
             break;
           case ABILITY_EARTH_EATER:
@@ -10920,10 +10937,10 @@ static inline u32 CalcAttackStat(u32 move,
       {
         if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
         {
-          modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));  // 1.5x boost at or below 50% HP
+          modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.6));  // 1.6x boost at or below 50% HP
         } else
         {
-          modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));  // 1.2x boost otherwise
+          modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.3));  // 1.3x boost otherwise
         }
       }
       break;

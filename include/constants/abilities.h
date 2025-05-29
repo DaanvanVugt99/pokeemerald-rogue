@@ -297,12 +297,12 @@
 #define ABILITY_SEED_SOWER 269       // When a Pokémon with Seed Sower is hit by a damaging move, it summons Grassy Terrain for five turns.
 #define ABILITY_THERMAL_EXCHANGE 270 // When a Pokémon with Thermal Exchange is hit by a Fire-type damaging move, its Attack is increased by one stage. Can't be burned.
 #define ABILITY_ANGER_SHELL 271      // When the Pokémon's HP falls to 50% or lower, apply Shell Smash.
-#define ABILITY_PURIFYING_SALT 272
-#define ABILITY_WELL_BAKED_BODY 273
-#define ABILITY_WIND_RIDER 274
-#define ABILITY_GUARD_DOG 275
-#define ABILITY_ROCKY_PAYLOAD 276
-#define ABILITY_WIND_POWER 277
+#define ABILITY_PURIFYING_SALT 272   // Grants the Pokémon immunity to status conditions and gives resistance to Ghost-type.
+#define ABILITY_WELL_BAKED_BODY 273  // When a Pokémon with Well-Baked Body is hit by a Fire-type move, its Defense is increased by two stages, and the move will have no effect on that Pokémon.
+#define ABILITY_WIND_RIDER 274       // Pokémon with Wind Rider are immune to damage from wind moves and its highest offensive stat is increased by one stage when hit by one or when under effect of Tailwind.
+#define ABILITY_GUARD_DOG 275        // Prevents other Pokémon from forcing the Pokémon to switch out or flee with a move or item. Additionally, if the Pokémon is affected by Intimidate, its Attack stat will increase by one stage, rather than decreasing by one stage.
+#define ABILITY_ROCKY_PAYLOAD 276    // Powers up Rock-type moves by 1.5x.
+#define ABILITY_WIND_POWER 277       // When a Pokémon with Wind Power is hit by a wind move or when Tailwind takes effect, it becomes charged, boosting the power of the next Electric-type move it uses.
 #define ABILITY_ZERO_TO_HERO 278
 #define ABILITY_COMMANDER 279
 #define ABILITY_ELECTROMORPHOSIS 280
@@ -358,7 +358,7 @@
 #define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.5x and become dark type against pokemon with status. // Honchcrow
 #define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain a 1.5x boost // Gallade
 #define ABILITY_ANCIENT_IDOL (ABILITIES_COUNT_GEN9 + 15)     // Uses Def for Atk and SpDef for SpAtk // Claydol
-#define ABILITY_SHORT_CIRCUIT (ABILITIES_COUNT_GEN9 + 16)    // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened). // rework 30 60 // Rotom
+#define ABILITY_SHORT_CIRCUIT (ABILITIES_COUNT_GEN9 + 16)    // Provides a 1.3x damage boost to their move types. This increases to 1.6x while the Pokémon is at or below 1/2 HP.// Rotom
 #define ABILITY_ROUNDHOUSE (ABILITIES_COUNT_GEN9 + 17)       // Kicking moves can't miss and deal damage based on the lowest defensive type // Hitmonlee
 #define ABILITY_SCAVENGER (ABILITIES_COUNT_GEN9 + 18)        // Heals 1/3 of health when any pokemon faints during battle. // Mandibuzz
 #define ABILITY_FEAST (ABILITIES_COUNT_GEN9 + 19)            // Heals 1/2 of health when the pokemon knocks out another pokemon // Guzzlord
