@@ -5027,6 +5027,9 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
   } else if (ability == ABILITY_LIGHT_METAL)
   {
     speed = (speed * 120) / 100;
+  } else if (ability == ABILITY_PROPELLER_TAIL)
+  {
+    speed = (speed * 120) / 100;
   }
   // Acid Rain Speed Reduction (after ability effects)
   if (IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN) && !IS_BATTLER_OF_TYPE(battler, TYPE_POISON) &&

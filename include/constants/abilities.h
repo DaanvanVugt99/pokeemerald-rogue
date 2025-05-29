@@ -217,8 +217,8 @@
 #define ABILITY_SHIELDS_DOWN 197     // Changes the Pokémon into its Core form when its Hit Points drop below 50%. In Meteor form, it cannot be affected by Status Conditions, in Core form, Psychic-type moves gain STAB.
 #define ABILITY_STAKEOUT 198         // Doubles the damage dealt to the target's replacement if the target switches out.
 #define ABILITY_WATER_BUBBLE 199     // Water Bubble halves the damage dealt to the Pokémon with this Ability by Fire-type attacks and doubles the power of Water-type moves used by the Pokémon with this Ability. It also prevents the Pokémon with the Ability from being burned.
-#define ABILITY_STEELWORKER 200      // Powers up Steel-type moves by 30%.
-#define ABILITY_BERSERK 201          // *No innate* Boosts the Pokémon's Sp. Atk stat when it takes a hit that causes its HP to become half or less.
+#define ABILITY_STEELWORKER 200      // Powers up Steel-type moves by 1.5x.
+#define ABILITY_BERSERK 201          // Boosts the Pokémon's Sp. Atk stat when it takes a hit that causes its HP to become half or less.
 #define ABILITY_SLUSH_RUSH 202       // Doubles speed in hail.
 #define ABILITY_LONG_REACH 203       // The Pokémon uses its moves without making contact with the target. If a physical move already doesn't make contact before applying this  ability, boosts its damage by 20%.
 #define ABILITY_LIQUID_VOICE 204     // All sound-based moves become Water-type moves and boosts them by 1.2x.
@@ -226,23 +226,23 @@
 #define ABILITY_GALVANIZE 206        // All Normal-type moves become Electric-type moves and boosts them by 1.2x%.
 #define ABILITY_SURGE_SURFER 207     // Doubles the Pokémon's Speed stat on Electric Terrain. Works while levitating.
 #define ABILITY_SCHOOLING 208        // Changes the Pokémon's form when it is Level 20 and has more than 25% Hit Points. When Hit Points drop below 25%, it changes back to Solo Form
-#define ABILITY_DISGUISE 209         // *No innate* Once per battle, the Pokémon can withstand one damaging attack without receiving any damage. Damage inflicted through entry hazards, weather or status conditions will not break the disguise. Damage from Confusion will break the Disguise. It causes 1/8th of max Hit Point damage when it breaks
-#define ABILITY_BATTLE_BOND 210      // *No innate* Defeating an opposing Pokémon strengthens the Pokémon's bond with its Trainer, and it becomes Ash-Greninja. Water Shuriken gets more powerful.
-#define ABILITY_POWER_CONSTRUCT 211  // *No innate* At the start of battle or at the end of a turn, if the HP of the Pokémon is below half, other cells gather to aid and it change into its Complete Forme. After the battle, if the Pokémon's HP is above half, it reverts to its original form.
+#define ABILITY_DISGUISE 209         // Once per battle, the Pokémon can withstand one damaging attack without receiving any damage. Damage inflicted through entry hazards, weather or status conditions will not break the disguise. Damage from Confusion will break the Disguise. It causes 1/8th of max Hit Point damage when it breaks
+#define ABILITY_BATTLE_BOND 210      // Defeating an opposing Pokémon strengthens the Pokémon's bond with its Trainer, and it becomes Ash-Greninja. Water Shuriken gets more powerful.
+#define ABILITY_POWER_CONSTRUCT 211  // At the start of battle or at the end of a turn, if the HP of the Pokémon is below half, other cells gather to aid and it change into its Complete Forme. After the battle, if the Pokémon's HP is above half, it reverts to its original form.
 #define ABILITY_CORROSION 212        // The Pokémon can poison or attack the target even if it's a Steel or Poison type. Poison-type moves deals "super-effective" damage against Steel-type Pokemon.
 #define ABILITY_COMATOSE 213         // Always sleeping, but can use moves.
 #define ABILITY_QUEENLY_MAJESTY 214  // Its majesty pressures the opposing Pokémon, making it unable to attack using priority moves.
 #define ABILITY_INNARDS_OUT 215      // Damages the attacker landing the finishing hit by the amount equal to its last HP.
-#define ABILITY_DANCER 216           // *No innate* When another Pokémon uses a dance move, it can use a dance move following it regardless of its Speed.
-#define ABILITY_BATTERY 217          // Powers up ally Pokémon's special moves by 30%.
+#define ABILITY_DANCER 216           // When another Pokémon uses a dance move, it can use a dance move following it regardless of its Speed.
+#define ABILITY_BATTERY 217          // Powers up ally Pokémon's special moves by 1.3x.
 #define ABILITY_FLUFFY 218           // A Pokémon with Fluffy takes half damage from moves that make contact. It also takes double damage from Fire-type moves.
 #define ABILITY_DAZZLING 219         // Surprises the opposing Pokémon, making it unable to attack using priority moves.
 #define ABILITY_SOUL_HEART 220       // Boosts its Sp. Atk stat every time a Pokémon faints.
 #define ABILITY_TANGLING_HAIR 221    // Contact with the Pokémon will lowers its Speed stat
-#define ABILITY_RECEIVER 222         // *No innate* The Pokémon copies the Ability of a defeated ally.
-#define ABILITY_POWER_OF_ALCHEMY 223 // *No innate* The Pokémon copies the Ability of a defeated ally.
+#define ABILITY_RECEIVER 222         // The Pokémon copies the Ability of a defeated ally.
+#define ABILITY_POWER_OF_ALCHEMY 223 // The Pokémon copies the Ability of a defeated ally. // TODO: transmutes berries into gold
 #define ABILITY_BEAST_BOOST 224      // The Pokémon boosts its most proficient stat each time it knocks out a Pokémon.
-#define ABILITY_RKS_SYSTEM 225       // *No innate* Changes the Pokémon's type to match the memory disc it holds.
+#define ABILITY_RKS_SYSTEM 225       // Changes the Pokémon's type to match the memory disc it holds.
 #define ABILITY_ELECTRIC_SURGE 226   // Activates Electric Terrain for 5 turns when the Pokémon enters a battle.
 #define ABILITY_PSYCHIC_SURGE 227    // Activates Psychic Terrain for 5 turns when the Pokémon enters a battle.
 #define ABILITY_MISTY_SURGE 228      // Activates Misty Terrain for 5 turns when the Pokémon enters a battle.
@@ -258,9 +258,9 @@
 #define ABILITY_INTREPID_SWORD 234      // Boosts the Pokémon's Attack stat when the Pokémon enters a battle.
 #define ABILITY_DAUNTLESS_SHIELD 235    // Boosts the Pokémon's Defense stat when the Pokémon enters a battle.
 #define ABILITY_LIBERO 236              // Changes the Pokémon's type to the type of the move it's about to use.
-#define ABILITY_BALL_FETCH 237          // *No innate* If the Pokémon is not holding an item, it will fetch the Poké Ball from the first failed throw of the battle.
+#define ABILITY_BALL_FETCH 237          // If the Pokémon is not holding an item, it will fetch the Poké Ball from the first failed throw of the battle. // TODO: Dancer for 'ball' moves
 #define ABILITY_COTTON_DOWN 238         // When the Pokémon is hit by an attack, it scatters cotton fluff around and lowers the Speed stat of all Pokémon except itself.
-#define ABILITY_PROPELLER_TAIL 239      // *No innate* Ignores the effects of opposing Pokémon's Abilities and moves that draw in moves.
+#define ABILITY_PROPELLER_TAIL 239      // Ignores the effects of opposing Pokémon's Abilities and moves that draw in moves. Has 1.2x speed.
 #define ABILITY_MIRROR_ARMOR 240        // Bounces back only the stat-lowering effects that the Pokémon receives.
 #define ABILITY_GULP_MISSILE 241        // *No innate* When using Surf or Dive, it will change into Gulping Form if it has over 50% max HP or Gorging Form if it has less than 50% max HP. If hit afterwards, form reverts and it shoots out its prey to attack, doing 1/4th of opponent's maximum HP in damage. If the Cramorant was in Gulping Form, the opponent's Defense is lowered 1 stage. If the Cramorant was in Gorging Form, the opponent is paralyzed.
 #define ABILITY_STALWART 242            // *No innate* Ignores the effects of opposing Pokémon's Abilities and moves that draw in moves.
@@ -443,7 +443,7 @@
 // #define ABILITY_MAGIC_POWDER (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a move, makes the opponent drowsy. // Butterfree
 // #define ABILITY_VENOM_RUSH (ABILITIES_COUNT_GEN9 + XX) // If the target is poisoned or slowed, this Pokémon’s Speed is doubled and moves have 1.2x power. // Beedrill
 // #define ABILITY_GNAWING_INSTINCT (ABILITIES_COUNT_GEN9 + XX) // biting moves lower the target's Defense. // Raticate
-// #define ABILITY_SPARK_SURGE (ABILITIES_COUNT_GEN9 + XX) // On switch-in, sets Electric Terrain. Boosts Speed by 1.5x in Electric Terrain. // Raichu
+// #define ABILITY_STATIC_CHARGE (ABILITIES_COUNT_GEN9 + XX) // When hit by a contact move, raises speed by 1 stage and deals 1/8 damage (except for Ground-type moves). // Raichu
 // #define ABILITY_STARFIELD (ABILITIES_COUNT_GEN9 + XX) // Fairy-type moves hit both opponents and sound-based moves become Fairy-type. // Clefairy
 // #define ABILITY_FROSTFLARE_GUARD (ABILITIES_COUNT_GEN9 + XX) // On switch in: If Sun is active, sets Light Screen, if Hail is active, sets Reflect. // Ninetales
 // #define ABILITY_VOCAL_RANGE (ABILITIES_COUNT_GEN9 + XX) // Sound-based moves are Normal/Fairy dual-typed and have +1 priority if the target is statused. // Wigglytuff
