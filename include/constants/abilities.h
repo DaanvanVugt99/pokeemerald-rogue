@@ -262,27 +262,27 @@
 #define ABILITY_COTTON_DOWN 238         // When the Pokémon is hit by an attack, it scatters cotton fluff around and lowers the Speed stat of all Pokémon except itself.
 #define ABILITY_PROPELLER_TAIL 239      // Ignores the effects of opposing Pokémon's Abilities and moves that draw in moves. Has 1.2x speed.
 #define ABILITY_MIRROR_ARMOR 240        // Bounces back only the stat-lowering effects that the Pokémon receives.
-#define ABILITY_GULP_MISSILE 241        // *No innate* When using Surf or Dive, it will change into Gulping Form if it has over 50% max HP or Gorging Form if it has less than 50% max HP. If hit afterwards, form reverts and it shoots out its prey to attack, doing 1/4th of opponent's maximum HP in damage. If the Cramorant was in Gulping Form, the opponent's Defense is lowered 1 stage. If the Cramorant was in Gorging Form, the opponent is paralyzed.
-#define ABILITY_STALWART 242            // *No innate* Ignores the effects of opposing Pokémon's Abilities and moves that draw in moves.
+#define ABILITY_GULP_MISSILE 241        // When using Surf or Dive, it will change into Gulping Form if it has over 50% max HP or Gorging Form if it has less than 50% max HP. If hit afterwards, form reverts and it shoots out its prey to attack, doing 1/4th of opponent's maximum HP in damage. If the Cramorant was in Gulping Form, the opponent's Defense is lowered 1 stage. If the Cramorant was in Gorging Form, the opponent is paralyzed.
+#define ABILITY_STALWART 242            // Ignores the effects of opposing Pokémon's Abilities and moves that draw in moves. // Test this
 #define ABILITY_STEAM_ENGINE 243        // Boosts the Pokémon's Speed stat drastically each time it is hit by a Fire- or Water-type move.
-#define ABILITY_PUNK_ROCK 244           // Boosts the power of sound-based moves by 30%. The Pokémon also takes half the damage from these kinds of moves.
+#define ABILITY_PUNK_ROCK 244           // Boosts the power of sound-based moves by 1.3x. The Pokémon also takes half the damage from these kinds of moves.
 #define ABILITY_SAND_SPIT 245           // The Pokémon creates a sandstorm when it's hit by an attack.
 #define ABILITY_ICE_SCALES 246          // The Pokémon is protected by ice scales, which halve the damage taken from special moves.
 #define ABILITY_RIPEN 247               // Ripens Berries and doubles their effect.
-#define ABILITY_ICE_FACE 248            // *No innate* Has a protective barrier that protects against Physical Attacks once and will change form to Noice Face after breaking. Confusion also breaks the barrier. Setting Hail or being sent out during hail will restore the Ice Face and change form to Ice Face
-#define ABILITY_POWER_SPOT 249          // Increases the power of Ally Pokémon's attacks by 30%
-#define ABILITY_MIMICRY 250             // *No innate* Changes the Pokémon's type depending on the terrain.
-#define ABILITY_SCREEN_CLEANER 251      // *No innate* When the Pokémon enters a battle, the effects of Light Screen, Reflect, and Aurora Veil are nullified for both opposing and ally Pokémon.
-#define ABILITY_STEELY_SPIRIT 252       // Increases the power of Steel-type moves used by the user or any Ally Pokémon by 30%
+#define ABILITY_ICE_FACE 248            // Has a protective barrier that protects against Physical Attacks once and will change form to Noice Face after breaking. Confusion also breaks the barrier. Setting Hail or being sent out during hail will restore the Ice Face and change form to Ice Face
+#define ABILITY_POWER_SPOT 249          // Increases the power of Ally Pokémon's attacks by 1.3x
+#define ABILITY_MIMICRY 250             // Changes the Pokémon's type depending on the terrain.
+#define ABILITY_SCREEN_CLEANER 251      // When the Pokémon enters a battle, the effects of Light Screen, Reflect, and Aurora Veil are nullified for both opposing and ally Pokémon.
+#define ABILITY_STEELY_SPIRIT 252       // Increases the power of Steel-type moves used by the user or any Ally Pokémon by 1.3x
 #define ABILITY_PERISH_BODY 253         // When hit by a move that makes direct contact, the Pokémon and the attacker will faint after three turns unless they switch out of battle.
 #define ABILITY_WANDERING_SPIRIT 254    // The Pokémon exchanges Abilities with a Pokémon that hits it with a move that makes direct contact.
 #define ABILITY_GORILLA_TACTICS 255     // Boosts the Pokémon's Attack stat but only allows the use of the first selected move.
-#define ABILITY_NEUTRALIZING_GAS 256    // *No innate* If the Pokémon with Neutralizing Gas is in the battle, the effects of all Pokémon's abilities will be nullified or will not be triggered.
-#define ABILITY_PASTEL_VEIL 257         // *No innate* Protects the Pokémon and its ally Pokémon from being poisoned.
-#define ABILITY_HUNGER_SWITCH 258       // *No innate* Morpeko changes its form, alternating between its Full Belly Mode and Hangry Mode after the end of each turn.
+#define ABILITY_NEUTRALIZING_GAS 256    // If the Pokémon with Neutralizing Gas is in the battle, the effects of all Pokémon's abilities will be nullified or will not be triggered.
+#define ABILITY_PASTEL_VEIL 257         // Protects the Pokémon and its ally Pokémon from being poisoned. Also heals poison on switch in.
+#define ABILITY_HUNGER_SWITCH 258       // Morpeko changes its form, alternating between its Full Belly Mode and Hangry Mode after the end of each turn.
 #define ABILITY_QUICK_DRAW 259          // At the start of each turn, this Pokémon has a 30% chance of moving first in the Speed Priority Bracket
-#define ABILITY_UNSEEN_FIST 260         // *No innate* If the Pokémon uses moves that make direct contact, it can attack the target even if the target protects itself.
-#define ABILITY_CURIOUS_MEDICINE 261    // *No innate* When the Pokémon enters a battle, it scatters medicine from its shell, which removes all stat changes from allies.
+#define ABILITY_UNSEEN_FIST 260         // If the Pokémon uses moves that make direct contact, it can attack the target even if the target protects itself.
+#define ABILITY_CURIOUS_MEDICINE 261    // When the Pokémon enters a battle, it scatters medicine from its shell, which removes all stat changes on the field.
 #define ABILITY_TRANSISTOR 262          // Powers up Electric-type moves by 50%.
 #define ABILITY_DRAGONS_MAW 263         // Powers up Dragon-type moves by 50%.
 #define ABILITY_CHILLING_NEIGH 264      // *No innate* When the Pokémon knocks out a target, it utters a chilling neigh, which boosts its Attack stat.

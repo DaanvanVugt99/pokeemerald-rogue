@@ -4829,8 +4829,13 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           break;
         case ABILITY_CURIOUS_MEDICINE:
           if (!gSpecialStatuses[battler].switchInAbilityDone && IsDoubleBattle() &&
-              IsBattlerAlive(BATTLE_PARTNER(battler)) && TryResetBattlerStatChanges(BATTLE_PARTNER(battler)))
+              IsBattlerAlive(BATTLE_PARTNER(battler)))
           {
+            for (i = 0; i < gBattlersCount; i++)
+            {
+              TryResetBattlerStatChanges(i);
+            }
+
             gEffectBattler = BATTLE_PARTNER(battler);
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SWITCHIN_CURIOUS_MEDICINE;
             gSpecialStatuses[battler].switchInAbilityDone = TRUE;
@@ -7221,7 +7226,8 @@ bool32 IsMyceliumMightOnField(void)
 
 bool32 IsMoldBreakerTypeAbility(u32 ability)
 {
-  return (ability == ABILITY_MOLD_BREAKER || ability == ABILITY_TERAVOLT || ability == ABILITY_TURBOBLAZE);
+  return (ability == ABILITY_MOLD_BREAKER || ability == ABILITY_TERAVOLT || ability == ABILITY_TURBOBLAZE ||
+          ability == ABILITY_STALWART);
 }
 
 u32 GetBattlerAbility(u32 battler)
@@ -10595,7 +10601,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
       case ABILITY_STEELY_SPIRIT:
         if (moveType == TYPE_STEEL)
         {
-          modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+          modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
         }
         break;
     }
