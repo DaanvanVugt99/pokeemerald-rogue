@@ -10415,13 +10415,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
     case ABILITY_PIXILATE:
       if (moveType == TYPE_FAIRY && gBattleStruct->ateBoost[battlerAtk])
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
       }
       break;
     case ABILITY_GALVANIZE:
       if (moveType == TYPE_GHOST && gBattleStruct->ateBoost[battlerAtk])
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
       }
       break;
     case ABILITY_FIGHTING_SPIRIT:
@@ -10433,19 +10433,25 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
     case ABILITY_REFRIGERATE:
       if (moveType == TYPE_ICE && gBattleStruct->ateBoost[battlerAtk])
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
       }
       break;
     case ABILITY_AERILATE:
       if (moveType == TYPE_FLYING && gBattleStruct->ateBoost[battlerAtk])
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
       }
       break;
     case ABILITY_NORMALIZE:
       if (moveType == TYPE_NORMAL && gBattleStruct->ateBoost[battlerAtk])
       {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+      }
+      break;
+    case ABILITY_LIQUID_VOICE:
+      if (moveType == TYPE_WATER && gBattleMoves[move].flags & FLAG_SOUND_BASED && gBattleStruct->ateBoost[battlerAtk])
+      {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
       }
       break;
     case ABILITY_EXPLOIT_WEAKNESS:
@@ -11459,31 +11465,37 @@ static inline uq4_12_t GetAdaptabilityCharmBoost(u32 battlerAtk)
 
 static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveType, u32 move, u32 abilityAtk)
 {
-  // Check for Electrocytes granting STAB to Electric moves
-  if (abilityAtk == ABILITY_ELECTROCYTES && moveType == TYPE_ELECTRIC)
+  bool isSTAB = IS_BATTLER_OF_TYPE(battlerAtk, moveType);
+  bool isForcedSTAB = FALSE;
+
+  // Check for special abilities that grant STAB even without typing
+  switch (abilityAtk)
   {
-    return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5),
-                      GetAdaptabilityCharmBoost(battlerAtk));
-  }
-  // Check for Levitate granting STAB to Flying moves
-  if (abilityAtk == ABILITY_LEVITATE && moveType == TYPE_FLYING)
-  {
-    return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5),
-                      GetAdaptabilityCharmBoost(battlerAtk));
+    case ABILITY_ELECTROCYTES:
+      isForcedSTAB = (moveType == TYPE_ELECTRIC);
+      break;
+    case ABILITY_LEVITATE:
+      isForcedSTAB = (moveType == TYPE_FLYING);
+      break;
+    case ABILITY_SHIELDS_DOWN:
+      isForcedSTAB = (moveType == TYPE_PSYCHIC && !IsShieldsDownProtected(battlerAtk));
+      break;
   }
 
-  if (gBattleStruct->pledgeMove && IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType))
+  // Check for Pledge combination STAB
+  if (!isSTAB && gBattleStruct->pledgeMove)
   {
-    return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5),
-                      GetAdaptabilityCharmBoost(battlerAtk));
-  } else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType) || move == MOVE_STRUGGLE || move == MOVE_NONE)
-  {
-    return UQ_4_12(1.0);
-  } else
-  {
-    return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5),
-                      GetAdaptabilityCharmBoost(battlerAtk));
+    isSTAB = IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType);
   }
+
+  // Final decision: does this move get STAB?
+  if ((isSTAB || isForcedSTAB) && move != MOVE_STRUGGLE && move != MOVE_NONE)
+  {
+    uq4_12_t base = (abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5);
+    return uq4_12_add(base, GetAdaptabilityCharmBoost(battlerAtk));
+  }
+
+  return UQ_4_12(1.0);
 }
 
 // Utility Umbrella holders take normal damage from what would be rain- and sun-weakened attacks.

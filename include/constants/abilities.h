@@ -187,7 +187,7 @@
 #define ABILITY_BULLETPROOF 171    // Protects the Pokémon from some ball and bomb moves. Takes 20% less damage from special moves.
 #define ABILITY_COMPETITIVE 172    // Boosts the Sp. Atk stat sharply when a stat is lowered.
 #define ABILITY_STRONG_JAW 173     // The Pokémon's strong jaw boosts the power of its biting moves. [Now  affects Bug Bite, Super Fang, Deathroll]
-#define ABILITY_REFRIGERATE 174    // All Normal-type moves used by the Pokémon to become Ice-type and receive a 1.3x power boost.
+#define ABILITY_REFRIGERATE 174    // All Normal-type moves used by the Pokémon to become Ice-type and receive a 1.2x power boost.
 #define ABILITY_SWEET_VEIL 175     // Prevents itself and ally Pokémon from falling asleep. Bug-types can't flee or switch out.
 #define ABILITY_STANCE_CHANGE 176  // The Pokémon changes its form to Blade Forme when it uses an attack move and changes to Shield Forme when it uses King's Shield.
 #define ABILITY_GALE_WINGS 177     // Flying-type moves have +1 priority. Requires full HP.
@@ -195,12 +195,12 @@
 #define ABILITY_GRASS_PELT 179     // Increases Defense by 50% when battling on Grass or if the move Grassy  Terrain is in effect
 #define ABILITY_SYMBIOSIS 180      // May pass an item to an ally.
 #define ABILITY_TOUGH_CLAWS 181    // Powers up moves by 30% that make direct contact.
-#define ABILITY_PIXILATE 182       // All Normal-type moves used by the Pokémon to become Fairy-type and  receive a 1.3x power boost.
+#define ABILITY_PIXILATE 182       // All Normal-type moves used by the Pokémon to become Fairy-type and  receive a 1.2x power boost.
 #define ABILITY_GOOEY 183          // Lowers speed on contact. // TODO: add on attack
-#define ABILITY_AERILATE 184       // All Normal-type moves used by the Pokémon to become Flying-type and  receive a 1.3x power boost.
+#define ABILITY_AERILATE 184       // All Normal-type moves used by the Pokémon to become Flying-type and  receive a 1.2x power boost.
 #define ABILITY_PARENTAL_BOND 185  // Hits twice. Second hit deals 0.25x damage.
-#define ABILITY_DARK_AURA 186      // Powers up each Pokémon's Dark-type moves by 50%.
-#define ABILITY_FAIRY_AURA 187     // Powers up each Pokémon's Fairy-type moves by 50%.
+#define ABILITY_DARK_AURA 186      // Powers up each Pokémon's Dark-type moves by 1.5x.
+#define ABILITY_FAIRY_AURA 187     // Powers up each Pokémon's Fairy-type moves by 1.5x.
 #define ABILITY_AURA_BREAK 188     // The effects of “Aura” Abilities are reversed to lower the  power of affected moves.
 #define ABILITY_PRIMORDIAL_SEA 189 // The Pokémon changes the weather to nullify Fire-type attacks.
 #define ABILITY_DESOLATE_LAND 190  // The Pokémon changes the weather to nullify Water-type attacks.
@@ -214,16 +214,16 @@
 #define ABILITY_EMERGENCY_EXIT 194   // The Pokémon, sensing danger, switches out when its HP becomes half or less.
 #define ABILITY_WATER_COMPACTION 195 // When hit by a Water-type move, its Defense rises by +2. Reduces Water type damage by 50%.
 #define ABILITY_MERCILESS 196        // The Pokémon's attacks become critical hits if the target is poisoned or its Speed stat stage is -1 or lower.
-#define ABILITY_SHIELDS_DOWN 197     // Changes the Pokémon into its Core form when its Hit Points drop below 50%. Before then, it cannot be affected by Status Conditions such as Burn or Paralysis
+#define ABILITY_SHIELDS_DOWN 197     // Changes the Pokémon into its Core form when its Hit Points drop below 50%. In Meteor form, it cannot be affected by Status Conditions, in Core form, Psychic-type moves gain STAB.
 #define ABILITY_STAKEOUT 198         // Doubles the damage dealt to the target's replacement if the target switches out.
 #define ABILITY_WATER_BUBBLE 199     // Water Bubble halves the damage dealt to the Pokémon with this Ability by Fire-type attacks and doubles the power of Water-type moves used by the Pokémon with this Ability. It also prevents the Pokémon with the Ability from being burned.
 #define ABILITY_STEELWORKER 200      // Powers up Steel-type moves by 30%.
 #define ABILITY_BERSERK 201          // *No innate* Boosts the Pokémon's Sp. Atk stat when it takes a hit that causes its HP to become half or less.
 #define ABILITY_SLUSH_RUSH 202       // Doubles speed in hail.
 #define ABILITY_LONG_REACH 203       // The Pokémon uses its moves without making contact with the target. If a physical move already doesn't make contact before applying this  ability, boosts its damage by 20%.
-#define ABILITY_LIQUID_VOICE 204     // All sound-based moves become Water-type moves and boosts them by 20%.
+#define ABILITY_LIQUID_VOICE 204     // All sound-based moves become Water-type moves and boosts them by 1.2x.
 #define ABILITY_TRIAGE 205           // Gives +1 priority to healing moves.
-#define ABILITY_GALVANIZE 206        // All Normal-type moves become Electric-type moves and boosts them by 10%.
+#define ABILITY_GALVANIZE 206        // All Normal-type moves become Electric-type moves and boosts them by 1.2x%.
 #define ABILITY_SURGE_SURFER 207     // Doubles the Pokémon's Speed stat on Electric Terrain. Works while levitating.
 #define ABILITY_SCHOOLING 208        // Changes the Pokémon's form when it is Level 20 and has more than 25% Hit Points. When Hit Points drop below 25%, it changes back to Solo Form
 #define ABILITY_DISGUISE 209         // *No innate* Once per battle, the Pokémon can withstand one damaging attack without receiving any damage. Damage inflicted through entry hazards, weather or status conditions will not break the disguise. Damage from Confusion will break the Disguise. It causes 1/8th of max Hit Point damage when it breaks
@@ -441,7 +441,7 @@
 // #define ABILITY_DRACONIC (ABILITIES_COUNT_LATEST_GEN + 178) // Dragon type moves gain STAB. // Charizard
 // #define ABILITY_PRESSURE_SHELL (ABILITIES_COUNT_LATEST_GEN + 178) // Moves that hit this pokemon use up 2 more PP and it is immune to multi hit moves. // Blastoise
 // #define ABILITY_MAGIC_POWDER (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a move, makes the opponent drowsy. // Butterfree
-// #define ABILITY_VENOM_RUSH (ABILITIES_COUNT_GEN9 + XX) // If the target is poisoned or slowed, this Pokémon’s Speed is doubled and moves have +1 Crit. // Beedrill
+// #define ABILITY_VENOM_RUSH (ABILITIES_COUNT_GEN9 + XX) // If the target is poisoned or slowed, this Pokémon’s Speed is doubled and moves have 1.2x power. // Beedrill
 // #define ABILITY_GNAWING_INSTINCT (ABILITIES_COUNT_GEN9 + XX) // biting moves lower the target's Defense. // Raticate
 // #define ABILITY_SPARK_SURGE (ABILITIES_COUNT_GEN9 + XX) // On switch-in, sets Electric Terrain. Boosts Speed by 1.5x in Electric Terrain. // Raichu
 // #define ABILITY_STARFIELD (ABILITIES_COUNT_GEN9 + XX) // Fairy-type moves hit both opponents and sound-based moves become Fairy-type. // Clefairy
