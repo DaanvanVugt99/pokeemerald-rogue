@@ -285,18 +285,18 @@
 #define ABILITY_CURIOUS_MEDICINE 261    // When the Pokémon enters a battle, it scatters medicine from its shell, which removes all stat changes on the field.
 #define ABILITY_TRANSISTOR 262          // Powers up Electric-type moves by 50%.
 #define ABILITY_DRAGONS_MAW 263         // Powers up Dragon-type moves by 50%.
-#define ABILITY_CHILLING_NEIGH 264      // *No innate* When the Pokémon knocks out a target, it utters a chilling neigh, which boosts its Attack stat.
-#define ABILITY_GRIM_NEIGH 265          // *No innate* When the Pokémon knocks out a target, it utters a  terrifying neigh, which boosts its Sp. Atk stat.
-#define ABILITY_AS_ONE_ICE_RIDER 266    // *No innate* This ability combines the effects of both Calyrex's Unnerve ability and Glastrier's Chilling Neigh ability/Spectrier's Grim Neigh ability.
-#define ABILITY_AS_ONE_SHADOW_RIDER 267 // *No innate* This ability combines the effects of both Calyrex's Unnerve ability and Glastrier's Chilling Neigh ability/Spectrier's Grim Neigh ability.
+#define ABILITY_CHILLING_NEIGH 264      // When the Pokémon knocks out a target, it utters a chilling neigh, which boosts its Attack stat.
+#define ABILITY_GRIM_NEIGH 265          // When the Pokémon knocks out a target, it utters a  terrifying neigh, which boosts its Sp. Atk stat.
+#define ABILITY_AS_ONE_ICE_RIDER 266    // This ability combines the effects of both Calyrex's Unnerve ability and Glastrier's Chilling Neigh ability/Spectrier's Grim Neigh ability.
+#define ABILITY_AS_ONE_SHADOW_RIDER 267 // This ability combines the effects of both Calyrex's Unnerve ability and Glastrier's Chilling Neigh ability/Spectrier's Grim Neigh ability.
 
 #define ABILITIES_COUNT_LATEST_GEN 268
 
 // Gen 9
-#define ABILITY_LINGERING_AROMA 268
-#define ABILITY_SEED_SOWER 269
-#define ABILITY_THERMAL_EXCHANGE 270
-#define ABILITY_ANGER_SHELL 271
+#define ABILITY_LINGERING_AROMA 268  // When a Pokémon with Lingering Aroma is hit by a contact move, the attacker's Ability is changed to Lingering Aroma.
+#define ABILITY_SEED_SOWER 269       // When a Pokémon with Seed Sower is hit by a damaging move, it summons Grassy Terrain for five turns.
+#define ABILITY_THERMAL_EXCHANGE 270 // When a Pokémon with Thermal Exchange is hit by a Fire-type damaging move, its Attack is increased by one stage. Can't be burned.
+#define ABILITY_ANGER_SHELL 271      // When the Pokémon's HP falls to 50% or lower, apply Shell Smash.
 #define ABILITY_PURIFYING_SALT 272
 #define ABILITY_WELL_BAKED_BODY 273
 #define ABILITY_WIND_RIDER 274

@@ -7609,16 +7609,16 @@ BattleScript_AngerShellActivates::
 	jumpifstat BS_TARGET, CMP_EQUAL, STAT_SPDEF, MIN_STAT_STAGE, BattleScript_ButItFailed
 BattleScript_AngerShellTryDef::
 	setbyte sSTAT_ANIM_PLAYED, FALSE
-	modifybattlerstatstage BS_ATTACKER, STAT_DEF, DECREASE, 1, BattleScript_AngerShellTrySpDef, ANIM_ON
+	modifybattlerstatstage BS_ATTACKER, STAT_DEF, DECREASE, 2, BattleScript_AngerShellTrySpDef, ANIM_ON
 BattleScript_AngerShellTrySpDef:
-	modifybattlerstatstage BS_ATTACKER, STAT_SPDEF, DECREASE, 1, BattleScript_AngerShellTryAttack, ANIM_ON
+	modifybattlerstatstage BS_ATTACKER, STAT_SPDEF, DECREASE, 2, BattleScript_AngerShellTryAttack, ANIM_ON
 BattleScript_AngerShellTryAttack:
 	setbyte sSTAT_ANIM_PLAYED, FALSE
-	modifybattlerstatstage BS_ATTACKER, STAT_ATK, INCREASE, 1, BattleScript_AngerShellTrySpAtk, ANIM_ON
+	modifybattlerstatstage BS_ATTACKER, STAT_ATK, INCREASE, 2, BattleScript_AngerShellTrySpAtk, ANIM_ON
 BattleScript_AngerShellTrySpAtk:
-	modifybattlerstatstage BS_ATTACKER, STAT_SPATK, INCREASE, 1, BattleScript_AngerShellTrySpeed, ANIM_ON
+	modifybattlerstatstage BS_ATTACKER, STAT_SPATK, INCREASE, 2, BattleScript_AngerShellTrySpeed, ANIM_ON
 BattleScript_AngerShellTrySpeed:
-	modifybattlerstatstage BS_ATTACKER, STAT_SPEED, INCREASE, 1, BattleScript_AngerShellRet, ANIM_ON
+	modifybattlerstatstage BS_ATTACKER, STAT_SPEED, INCREASE, 2, BattleScript_AngerShellRet, ANIM_ON
 BattleScript_AngerShellRet:
 	return
 
@@ -9609,40 +9609,24 @@ BattleScript_ScriptingAbilityStatRaise::
 
 BattleScript_WeakArmorActivates::
 	call BattleScript_AbilityPopUp
-	setstatchanger STAT_DEF, 1, TRUE
-	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_WeakArmorActivatesSpeed
-	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_WeakArmorDefAnim
-	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_FELL_EMPTY, BattleScript_WeakArmorActivatesSpeed
-	pause B_WAIT_TIME_SHORTEST
-	printfromtable gStatDownStringIds
-	bichalfword gMoveResultFlags, MOVE_RESULT_MISSED @ Set by statbuffchange when stat can't be decreased
-	waitmessage B_WAIT_TIME_LONG
-	goto BattleScript_WeakArmorActivatesSpeed
-BattleScript_WeakArmorDefAnim:
-	setgraphicalstatchangevalues
-	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
-	printstring STRINGID_TARGETABILITYSTATLOWER
-	waitmessage B_WAIT_TIME_LONG
-BattleScript_WeakArmorActivatesSpeed:
-.if B_WEAK_ARMOR_SPEED >= GEN_7
-	setstatchanger STAT_SPEED, 2, FALSE
-.else
-	setstatchanger STAT_SPEED, 1, FALSE
-.endif
-	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_WeakArmorActivatesEnd
-	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_WeakArmorSpeedAnim
-	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_ROSE_EMPTY, BattleScript_WeakArmorActivatesEnd
-	pause B_WAIT_TIME_SHORTEST
-	printstring STRINGID_TARGETSTATWONTGOHIGHER
-	bichalfword gMoveResultFlags, MOVE_RESULT_MISSED
-	waitmessage B_WAIT_TIME_LONG
-	goto BattleScript_WeakArmorActivatesEnd
-BattleScript_WeakArmorSpeedAnim:
-	setgraphicalstatchangevalues
-	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
-	printstring STRINGID_TARGETABILITYSTATRAISE
-	waitmessage B_WAIT_TIME_LONG
-BattleScript_WeakArmorActivatesEnd:
+	jumpifstat BS_TARGET, CMP_LESS_THAN, STAT_ATK, MAX_STAT_STAGE, BattleScript_WeakArmorTryDef
+	jumpifstat BS_TARGET, CMP_LESS_THAN, STAT_SPATK, MAX_STAT_STAGE, BattleScript_WeakArmorTryDef
+	jumpifstat BS_TARGET, CMP_LESS_THAN, STAT_SPEED, MAX_STAT_STAGE, BattleScript_WeakArmorTryDef
+	jumpifstat BS_TARGET, CMP_GREATER_THAN, STAT_DEF, MIN_STAT_STAGE, BattleScript_WeakArmorTryDef
+	jumpifstat BS_TARGET, CMP_EQUAL, STAT_SPDEF, MIN_STAT_STAGE, BattleScript_ButItFailed
+BattleScript_WeakArmorTryDef::
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	modifybattlerstatstage BS_TARGET, STAT_DEF, DECREASE, 1, BattleScript_WeakArmorTrySpDef, ANIM_ON
+BattleScript_WeakArmorTrySpDef:
+	modifybattlerstatstage BS_TARGET, STAT_SPDEF, DECREASE, 1, BattleScript_WeakArmorTryAttack, ANIM_ON
+BattleScript_WeakArmorTryAttack:
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	modifybattlerstatstage BS_TARGET, STAT_ATK, INCREASE, 2, BattleScript_WeakArmorTrySpAtk, ANIM_ON
+BattleScript_WeakArmorTrySpAtk:
+	modifybattlerstatstage BS_TARGET, STAT_SPATK, INCREASE, 2, BattleScript_WeakArmorTrySpeed, ANIM_ON
+BattleScript_WeakArmorTrySpeed:
+	modifybattlerstatstage BS_TARGET, STAT_SPEED, INCREASE, 2, BattleScript_WeakArmorRet, ANIM_ON
+BattleScript_WeakArmorRet:
 	return
 
 BattleScript_SteadfastActivates::

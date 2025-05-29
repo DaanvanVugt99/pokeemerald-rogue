@@ -4828,8 +4828,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           }
           break;
         case ABILITY_CURIOUS_MEDICINE:
-          if (!gSpecialStatuses[battler].switchInAbilityDone && IsDoubleBattle() &&
-              IsBattlerAlive(BATTLE_PARTNER(battler)))
+          if (!gSpecialStatuses[battler].switchInAbilityDone)
           {
             for (i = 0; i < gBattlersCount; i++)
             {
@@ -6104,13 +6103,15 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         case ABILITY_WEAK_ARMOR:
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) &&
               IS_MOVE_PHYSICAL(gCurrentMove) &&
-              (CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE,
-                           CMP_LESS_THAN)  // Don't activate if both Speed and Defense cannot be raised.
-               || CompareStat(battler, STAT_DEF, MIN_STAT_STAGE, CMP_GREATER_THAN)))
+              (CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN) ||
+               CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN) ||
+               CompareStat(battler, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN) ||
+               CompareStat(battler, STAT_DEF, MIN_STAT_STAGE, CMP_GREATER_THAN) ||
+               CompareStat(battler, STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)))
           {
             if (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE && CanBattlerSwitch(gBattlerAttacker))
             {
-              gProtectStructs[battler].disableEjectPack = TRUE;  // Set flag for target
+              gProtectStructs[battler].disableEjectPack = TRUE;  // Prevent Eject Pack from triggering
             }
 
             BattleScriptPushCursor();
@@ -10486,11 +10487,9 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
       break;
     case ABILITY_TRANSISTOR:
       if (moveType == TYPE_ELECTRIC)
-#if B_TRANSISTOR_BOOST >= GEN_9
-        modifier = uq4_12_multiply(modifier, UQ_4_12(5325 / 4096));
-#else
+      {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
-#endif
+      }
       break;
     case ABILITY_DRAGONS_MAW:
       if (moveType == TYPE_DRAGON)
@@ -11471,8 +11470,8 @@ static inline uq4_12_t GetAdaptabilityCharmBoost(u32 battlerAtk)
 
 static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveType, u32 move, u32 abilityAtk)
 {
-  bool isSTAB = IS_BATTLER_OF_TYPE(battlerAtk, moveType);
-  bool isForcedSTAB = FALSE;
+  bool32 isSTAB = IS_BATTLER_OF_TYPE(battlerAtk, moveType);
+  bool32 isForcedSTAB = FALSE;
 
   // Check for special abilities that grant STAB even without typing
   switch (abilityAtk)
