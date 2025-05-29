@@ -2269,7 +2269,12 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk,
   {
     critChance = -1;
   } else if ((gStatuses3[battlerAtk] & STATUS3_LASER_FOCUS) || (gBattleMoves[move].flags & FLAG_ALWAYS_CRIT) ||
-             (abilityAtk == ABILITY_MERCILESS && gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY))
+             (abilityAtk == ABILITY_MERCILESS &&
+              (gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY ||
+               gBattleMons[battlerDef].statStages[STAT_SPEED] < DEFAULT_STAT_STAGE)))
+  {
+    critChance = -2;
+  } else
   {
     critChance = 2 * ((gBattleMons[battlerAtk].status2 & STATUS2_FOCUS_ENERGY) != 0) +
         (gBattleMoves[gCurrentMove].flags & FLAG_HIGH_CRIT) + (holdEffectAtk == HOLD_EFFECT_SCOPE_LENS) +

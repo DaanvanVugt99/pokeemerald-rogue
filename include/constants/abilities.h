@@ -90,7 +90,7 @@
 #define ABILITY_GLUTTONY 82      // Eats berries at 1/2 HP instead of 1/3 HP.
 #define ABILITY_ANGER_POINT 83   // The Pokémon is angered when it takes a critical hit from physical move from opposing Pokémon, and that maxes its Attack stat. Boosts the Attack stat by one stage when hit by physical moves.
 #define ABILITY_UNBURDEN 84      // Doubles the Speed stat if the Pokémon's held item is used or lost.
-#define ABILITY_HEATPROOF 85     // The heatproof body of the Pokémon halves the damage from Fire-type moves that hit it.
+#define ABILITY_HEATPROOF 85     // The heatproof body of the Pokémon halves the damage from Fire-type moves that hit it and halves burn damage.
 #define ABILITY_SIMPLE 86        // Doubles all stat changes.
 #define ABILITY_DRY_SKIN 87      // Rain: HP will increase by 1/8 of its max HP each turn. Intense Sunlight: HP will decrease by 1/8 of its max HP each turn.
 #define ABILITY_DOWNLOAD 88      // Compares an opposing Pokémon's Defense and Sp. Def stats before raising its own Attack or Sp. Atk stat—whichever will be more effective.
@@ -183,7 +183,7 @@
 #define ABILITY_CHEEK_POUCH 167    // Restores HP as well when the Pokémon eats a Berry.
 #define ABILITY_PROTEAN 168        // Changes the Pokémon's type to the type of the move it's about to use.
 #define ABILITY_FUR_COAT 169       // Halves the damage from physical moves.
-#define ABILITY_MAGICIAN 170       // *No innate* The Pokémon steals the held item of a Pokémon it hits with a move.
+#define ABILITY_MAGICIAN 170       // The Pokémon steals the held item of a Pokémon it hits with a move.
 #define ABILITY_BULLETPROOF 171    // Protects the Pokémon from some ball and bomb moves. Takes 20% less damage from special moves.
 #define ABILITY_COMPETITIVE 172    // Boosts the Sp. Atk stat sharply when a stat is lowered.
 #define ABILITY_STRONG_JAW 173     // The Pokémon's strong jaw boosts the power of its biting moves. [Now  affects Bug Bite, Super Fang, Deathroll]
@@ -210,11 +210,11 @@
 
 // Gen 7
 #define ABILITY_STAMINA 192          // Boosts the Defense stat when hit by an attack. When it takes a critical hit, it maxes its Defense stat.
-#define ABILITY_WIMP_OUT 193         // *No innate* The Pokémon cowardly switches out when its HP becomes half or less.
+#define ABILITY_WIMP_OUT 193         // The Pokémon cowardly switches out when its HP becomes half or less.
 #define ABILITY_EMERGENCY_EXIT 194   // The Pokémon, sensing danger, switches out when its HP becomes half or less.
 #define ABILITY_WATER_COMPACTION 195 // When hit by a Water-type move, its Defense rises by +2. Reduces Water type damage by 50%.
 #define ABILITY_MERCILESS 196        // The Pokémon's attacks become critical hits if the target is poisoned or its Speed stat stage is -1 or lower.
-#define ABILITY_SHIELDS_DOWN 197     // *No innate* Changes the Pokémon into its Core form when its Hit Points drop below 50%. Before then, it cannot be affected by Status Conditions such as Burn or Paralysis
+#define ABILITY_SHIELDS_DOWN 197     // Changes the Pokémon into its Core form when its Hit Points drop below 50%. Before then, it cannot be affected by Status Conditions such as Burn or Paralysis
 #define ABILITY_STAKEOUT 198         // Doubles the damage dealt to the target's replacement if the target switches out.
 #define ABILITY_WATER_BUBBLE 199     // Water Bubble halves the damage dealt to the Pokémon with this Ability by Fire-type attacks and doubles the power of Water-type moves used by the Pokémon with this Ability. It also prevents the Pokémon with the Ability from being burned.
 #define ABILITY_STEELWORKER 200      // Powers up Steel-type moves by 30%.
