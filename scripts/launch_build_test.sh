@@ -2,7 +2,7 @@
 
 echo "Working Directory: $PWD"
 
-testToRunPrefix="Weak Armor"
+testToRunPrefix="Cold Rebound"
 
 # Get the number of CPUs on macOS
 numCores=$(sysctl -n hw.ncpu)

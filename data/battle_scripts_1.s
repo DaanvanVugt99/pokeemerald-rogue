@@ -11312,6 +11312,46 @@ BattleScript_ExtraExtraMoveEndOnSwitchIn::
 	moveendall
 	end3
 
+BattleScript_DefenderUsedIcyWindExtraMove::
+	savetarget
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAttacker, gBattlerTarget
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ABILITYLETITUSEMOVE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_DefenderEffectExtraHit::
+BattleScript_DefenderExtraHitFromAtkCanceler::
+	attackcanceler
+BattleScript_DefenderExtraHitFromAccCheck::
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+BattleScript_DefenderExtraHitFromAtkString::
+	attackstring
+BattleScript_DefenderExtraHitFromCritCalc::
+	critcalc
+	damagecalc
+	adjustdamage
+BattleScript_DefenderExtraHitFromAtkAnimation::
+	playmoveanimation BS_ATTACKER, MOVE_ICY_WIND
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	seteffectwithchance
+	tryfaintmon BS_TARGET
+BattleScript_DefenderExtraRestoreBattlers::
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	restoretarget
+BattleScript_DefenderExtraMoveEnd::
+	moveendall
+	end
+
 BattleScript_SuctionCupsActivates::
     call BattleScript_AbilityPopUp
     playanimation BS_TARGET, B_ANIM_TURN_TRAP, sB_ANIM_ARG1

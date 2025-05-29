@@ -5408,7 +5408,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           }
           break;
         case ABILITY_LOW_BLOW:
-          bool8 activateAbilty = FALSE;
+          bool8 activateAbility = FALSE;
           bool8 checkPassed = FALSE;
           bool8 hasTarget = FALSE;
           u8 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -5435,12 +5435,12 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             // Checks if the ability is triggered
             if (canUseExtraMove(battler, gBattlerTarget))
             {
-              activateAbilty = TRUE;
+              activateAbility = TRUE;
             }
           }
 
           // This is the stuff that has to be changed for each ability
-          if (activateAbilty)
+          if (activateAbility)
           {
             u16 extraMove = MOVE_FEINT_ATTACK;  // The Extra Move to be used
             u8 movePower = 0;  // The Move power, leave at 0 if you want it to be the same as the normal move
@@ -6414,6 +6414,38 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             effect++;
           }
           break;
+        case ABILITY_COLD_REBOUND:
+          bool8 activateAbility = FALSE;
+
+          // Checks if the ability is triggered
+          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 &&
+              !gProtectStructs[gBattlerAttacker].confusionSelfDmg && (IsMoveMakingContact(move, gBattlerAttacker)) &&
+              TARGET_TURN_DAMAGED && canUseExtraMove(battler, gBattlerAttacker))
+          {
+            activateAbility = TRUE;
+          }
+
+          // This is the stuff that has to be changed for each ability
+          if (activateAbility)
+          {
+            u16 extraMove = MOVE_ICY_WIND;  // The Extra Move to be used
+            u8 movePower = 0;  // The Move power, leave at 0 if you want it to be the same as the normal move
+            u8 moveEffectPercentChance = 100;  // The percent chance of the move effect happening
+            u8 extraMoveSecondaryEffect = MOVE_EFFECT_SPD_MINUS_1;  // Leave at 0 to remove it's secondary effect
+            gTempMove = gCurrentMove;
+            gCurrentMove = extraMove;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, movePower);
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+
+            // Move Effect
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, moveEffectPercentChance);
+            VarSet(VAR_TEMP_MOVEEFFECT, extraMoveSecondaryEffect);
+            gBattleScripting.animArg2 = MOVE_ICY_WIND;
+
+            gBattlescriptCurrInstr = BattleScript_DefenderUsedIcyWindExtraMove;
+            effect++;
+          }
+          break;
         case ABILITY_CUTE_CHARM:
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMons[gBattlerAttacker].hp != 0 &&
               !gProtectStructs[gBattlerAttacker].confusionSelfDmg && TARGET_TURN_DAMAGED &&
@@ -6683,17 +6715,17 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           }
           break;
         case ABILITY_VOLCANIC_RAGE:
-          bool8 activateAbilty = FALSE;
+          bool8 activateAbility = FALSE;
 
           // Checks if the ability is triggered
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && canUseExtraMove(battler, gBattlerTarget) &&
               moveType == TYPE_FIRE)
           {
-            activateAbilty = TRUE;
+            activateAbility = TRUE;
           }
 
           // This is the stuff that has to be changed for each ability
-          if (activateAbilty)
+          if (activateAbility)
           {
             u16 extraMove = MOVE_ERUPTION;  // The Extra Move to be used
             u8 movePower = 50;  // The Move power, leave at 0 if you want it to be the same as the normal move
@@ -10561,7 +10593,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
     case ABILITY_SHARPNESS:
       if (gBattleMoves[move].flags & FLAG_SLICING_BASED)
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
       }
       break;
     case ABILITY_WHITEOUT:  // Boosts damage of Ice-type moves in hail
@@ -11063,6 +11095,16 @@ static inline u32 CalcAttackStat(u32 move,
         if (updateFlags)
         {
           RecordAbilityBattle(battlerDef, ABILITY_IMMUNITY);
+        }
+      }
+      break;
+    case ABILITY_WATER_COMPACTION:
+      if (moveType == TYPE_WATER)
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
+        if (updateFlags)
+        {
+          RecordAbilityBattle(battlerDef, ABILITY_WATER_COMPACTION);
         }
       }
       break;

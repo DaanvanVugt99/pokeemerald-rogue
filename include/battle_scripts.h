@@ -514,6 +514,7 @@ extern const u8 BattleScript_BattlerCoiledUp[];
 extern const u8 Battlescript_ToxisphereActivates[];
 extern const u8 BattleScript_AttackerUsedAnExtraMove[];
 extern const u8 BattleScript_AttackerUsedAnExtraMoveOnSwitchIn[];
+extern const u8 BattleScript_DefenderUsedIcyWindExtraMove[];
 extern const u8 BattleScript_AbilityTurnDmg[];
 extern const u8 BattleScript_SuctionCupsActivates[];
 extern const u8 BattleScript_IlluminateActivates[];

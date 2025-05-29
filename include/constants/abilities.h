@@ -293,49 +293,49 @@
 #define ABILITIES_COUNT_LATEST_GEN 268
 
 // Gen 9
-#define ABILITY_LINGERING_AROMA 268  // When a Pokémon with Lingering Aroma is hit by a contact move, the attacker's Ability is changed to Lingering Aroma.
-#define ABILITY_SEED_SOWER 269       // When a Pokémon with Seed Sower is hit by a damaging move, it summons Grassy Terrain for five turns.
-#define ABILITY_THERMAL_EXCHANGE 270 // When a Pokémon with Thermal Exchange is hit by a Fire-type damaging move, its Attack is increased by one stage. Can't be burned.
-#define ABILITY_ANGER_SHELL 271      // When the Pokémon's HP falls to 50% or lower, apply Shell Smash.
-#define ABILITY_PURIFYING_SALT 272   // Grants the Pokémon immunity to status conditions and gives resistance to Ghost-type.
-#define ABILITY_WELL_BAKED_BODY 273  // When a Pokémon with Well-Baked Body is hit by a Fire-type move, its Defense is increased by two stages, and the move will have no effect on that Pokémon.
-#define ABILITY_WIND_RIDER 274       // Pokémon with Wind Rider are immune to damage from wind moves and its highest offensive stat is increased by one stage when hit by one or when under effect of Tailwind.
-#define ABILITY_GUARD_DOG 275        // Prevents other Pokémon from forcing the Pokémon to switch out or flee with a move or item. Additionally, if the Pokémon is affected by Intimidate, its Attack stat will increase by one stage, rather than decreasing by one stage.
-#define ABILITY_ROCKY_PAYLOAD 276    // Powers up Rock-type moves by 1.5x.
-#define ABILITY_WIND_POWER 277       // When a Pokémon with Wind Power is hit by a wind move or when Tailwind takes effect, it becomes charged, boosting the power of the next Electric-type move it uses.
-#define ABILITY_ZERO_TO_HERO 278
-#define ABILITY_COMMANDER 279
-#define ABILITY_ELECTROMORPHOSIS 280
-#define ABILITY_PROTOSYNTHESIS 281
-#define ABILITY_QUARK_DRIVE 282
-#define ABILITY_GOOD_AS_GOLD 283
-#define ABILITY_VESSEL_OF_RUIN 284
-#define ABILITY_SWORD_OF_RUIN 285
-#define ABILITY_TABLETS_OF_RUIN 286
-#define ABILITY_BEADS_OF_RUIN 287
-#define ABILITY_ORICHALCUM_PULSE 288
-#define ABILITY_HADRON_ENGINE 289
-#define ABILITY_OPPORTUNIST 290
-#define ABILITY_CUD_CHEW 291
-#define ABILITY_SHARPNESS 292
-#define ABILITY_SUPREME_OVERLORD 293
-#define ABILITY_COSTAR 294
-#define ABILITY_TOXIC_DEBRIS 295
-#define ABILITY_ARMOR_TAIL 296
-#define ABILITY_EARTH_EATER 297
-#define ABILITY_MYCELIUM_MIGHT 298
-#define ABILITY_HOSPITALITY 299
-#define ABILITY_MINDS_EYE 300
-#define ABILITY_EMBODY_ASPECT_TEAL 301
-#define ABILITY_EMBODY_ASPECT_HEARTHFLAME 302
-#define ABILITY_EMBODY_ASPECT_WELLSPRING 303
-#define ABILITY_EMBODY_ASPECT_CORNERSTONE 304
-#define ABILITY_TOXIC_CHAIN 305
-#define ABILITY_SUPERSWEET_SYRUP 306
-#define ABILITY_TERA_SHIFT 307
-#define ABILITY_TERA_SHELL 308
-#define ABILITY_TERAFORM_ZERO 309
-#define ABILITY_POISON_PUPPETEER 310
+#define ABILITY_LINGERING_AROMA 268           // When a Pokémon with Lingering Aroma is hit by a contact move, the attacker's Ability is changed to Lingering Aroma.
+#define ABILITY_SEED_SOWER 269                // When a Pokémon with Seed Sower is hit by a damaging move, it summons Grassy Terrain for five turns.
+#define ABILITY_THERMAL_EXCHANGE 270          // When a Pokémon with Thermal Exchange is hit by a Fire-type damaging move, its Attack is increased by one stage. Can't be burned.
+#define ABILITY_ANGER_SHELL 271               // When the Pokémon's HP falls to 50% or lower, apply Shell Smash.
+#define ABILITY_PURIFYING_SALT 272            // Grants the Pokémon immunity to status conditions and gives resistance to Ghost-type.
+#define ABILITY_WELL_BAKED_BODY 273           // When a Pokémon with Well-Baked Body is hit by a Fire-type move, its Defense is increased by two stages, and the move will have no effect on that Pokémon.
+#define ABILITY_WIND_RIDER 274                // Pokémon with Wind Rider are immune to damage from wind moves and its highest offensive stat is increased by one stage when hit by one or when under effect of Tailwind.
+#define ABILITY_GUARD_DOG 275                 // Prevents other Pokémon from forcing the Pokémon to switch out or flee with a move or item. Additionally, if the Pokémon is affected by Intimidate, its Attack stat will increase by one stage, rather than decreasing by one stage.
+#define ABILITY_ROCKY_PAYLOAD 276             // Powers up Rock-type moves by 1.5x.
+#define ABILITY_WIND_POWER 277                // When a Pokémon with Wind Power is hit by a wind move or when Tailwind takes effect, it becomes charged, boosting the power of the next Electric-type move it uses.
+#define ABILITY_ZERO_TO_HERO 278              // After switching out for the first time in battle, a Palafin switches to its Hero Form until the end of battle.
+#define ABILITY_COMMANDER 279                 // Not implemented
+#define ABILITY_ELECTROMORPHOSIS 280          // When the Pokémon with this Ability is hit by a move, it becomes charged, boosting the power of the next Electric-type move it uses.
+#define ABILITY_PROTOSYNTHESIS 281            // When the Pokémon is in harsh sunlight or is holding Booster Energy, its highest stat is increased by 30%, or 50% if Speed is the highest stat. // TODO: Implement booster energy.
+#define ABILITY_QUARK_DRIVE 282               // When the Pokémon is on the field and Electric Terrain is active, or the Pokémon is holding Booster Energy, its highest stat is increased by 30%, or 50% if Speed is the highest stat.
+#define ABILITY_GOOD_AS_GOLD 283              // The Pokémon is unaffected by other Pokémon's status moves.
+#define ABILITY_VESSEL_OF_RUIN 284            // Decreases the Special Attack stat of all Pokémon on the field other than Pokémon with this Ability by 25%.
+#define ABILITY_SWORD_OF_RUIN 285             // Decreases the Defense stat of all Pokémon on the field other than Pokémon with this Ability by 25%.
+#define ABILITY_TABLETS_OF_RUIN 286           // Decreases the Attack stat of all Pokémon on the field other than Pokémon with this Ability by 25%.
+#define ABILITY_BEADS_OF_RUIN 287             // Decreases the Special Defense stat of all Pokémon on the field other than Pokémon with this Ability by 25%.
+#define ABILITY_ORICHALCUM_PULSE 288          // When the Pokémon enters the field, it summons harsh sunlight for five turns that boosts the its Attack stat by 33%.
+#define ABILITY_HADRON_ENGINE 289             // When the Pokémon enters the battle, it creates the effect of the move Electric Terrain on the battlefield for five turns and boosts the Pokémon's Special Attack stat by 33% on Electric Terrain.
+#define ABILITY_OPPORTUNIST 290               // When an opposing Pokémon raises its stats, the Pokémon with this Ability will also raise the same stats by the same number of stages as the opposing Pokémon.
+#define ABILITY_CUD_CHEW 291                  // If the Pokémon eats a Berry or is affected by a Flung Berry, its effect will activate again at the end of the next turn.
+#define ABILITY_SHARPNESS 292                 // Sharpness boosts the strength of slicing moves used by a Pokémon with this Ability by 1.3x.
+#define ABILITY_SUPREME_OVERLORD 293          // When the Pokémon enters battle, it receives a 10% additive increase to the power of its moves for each ally Pokémon that is fainted in its party.
+#define ABILITY_COSTAR 294                    // When the Pokémon enters the battle, it copies an ally's stat stages for itself.
+#define ABILITY_TOXIC_DEBRIS 295              // When the Pokémon is hit by a physical move, Toxic Spikes are set on the opposing side of the field.
+#define ABILITY_ARMOR_TAIL 296                // If an opponent uses a move with increased priority that targets the Pokémon or its allies, it prevents the Pokémon from executing that move.
+#define ABILITY_EARTH_EATER 297               // When the Pokémon is hit by a Ground-type move, its HP is restored by 1/4, and the move will have no effect.
+#define ABILITY_MYCELIUM_MIGHT 298            // The Pokémon will always act more slowly when using status moves, but these moves will be unimpeded by the Ability of the target.
+#define ABILITY_HOSPITALITY 299               // When the Pokémon enters a battle, it showers its ally with hospitality, restoring 1/4 HP.
+#define ABILITY_MINDS_EYE 300                 // The Pokémon ignores changes to opponents' evasiveness, its accuracy can't be lowered, and it can hit Ghost types with Normal- and Fighting-type moves.
+#define ABILITY_EMBODY_ASPECT_TEAL 301        // The Pokémon's heart fills with memories, causing the Teal Mask to shine and the Pokémon's Speed stat to be boosted.
+#define ABILITY_EMBODY_ASPECT_HEARTHFLAME 302 // The Pokémon's heart fills with memories, causing the Wellspring Mask to shine and the Pokémon's Sp. Def stat to be boosted.
+#define ABILITY_EMBODY_ASPECT_WELLSPRING 303  // The Pokémon's heart fills with memories, causing the Hearthflame Mask to shine and the Pokémon's Attack stat to be boosted.
+#define ABILITY_EMBODY_ASPECT_CORNERSTONE 304 // The Pokémon's heart fills with memories, causing the Cornerstone Mask to shine and the Pokémon's Defense stat to be boosted.
+#define ABILITY_TOXIC_CHAIN 305               // The power of the Pokémon's toxic chain may badly poison any target the Pokémon hits with a move. // Not implemented
+#define ABILITY_SUPERSWEET_SYRUP 306          // The first time the Pokémon enters a battle, lowering the evasiveness of opposing Pokémon. // Rework to cant lose item, disables item on contact for 2 turns.
+#define ABILITY_TERA_SHIFT 307                // When the Pokémon enters a battle, it absorbs the energy around itself and transforms into its Terastal Form.
+#define ABILITY_TERA_SHELL 308                // All damage-dealing moves that hit the Pokémon when its HP is full will not be very effective.
+#define ABILITY_TERAFORM_ZERO 309             // When Terapagos changes into its Stellar Form, it uses its hidden powers to eliminate all effects of weather and terrain, reducing them to zero.
+#define ABILITY_POISON_PUPPETEER 310          // Pokémon poisoned by moves will also become confused. // Not implemented
 
 #define ABILITIES_COUNT_GEN9 311
 
@@ -369,7 +369,7 @@
 #define ABILITY_TOXISPHERE (ABILITIES_COUNT_GEN9 + 24)       // Set Acid Rain weather on switch in. // Weezing
 #define ABILITY_LOW_BLOW (ABILITIES_COUNT_GEN9 + 25)         // Attacks with Feint Attack on switch-in. // Scrafty
 #define ABILITY_VOLCANIC_RAGE (ABILITIES_COUNT_GEN9 + 26)    // Attacks with 50 BP Eruption after using a Fire-type move. // Camerupt
-// #define ABILITY_COLD_REBOUND (ABILITIES_COUNT_GEN9 + 27) // Everytime when hit by a contact move, counter-attacks with Icy Wind. // Dewgong
+#define ABILITY_COLD_REBOUND (ABILITIES_COUNT_GEN9 + 27)     // Everytime when hit by a contact move, counter-attacks with Icy Wind. // Dewgong
 // #define ABILITY_CHRISTMAS_SPIRIT (ABILITIES_COUNT_GEN9 + 28) // The Pokémon is protected by a mysterious force that reduces all incoming damage by 50% during a hailstorm. delibird
 // #define ABILITY_INFLATABLE (ABILITIES_COUNT_GEN9 + 29) // When the Pokémon is hit by Fire-type or Flying-type moves, its Defense and Special Defense stats are increased by one stage. // drifblim
 // #define ABILITY_DRAGONSLAYER (ABILITIES_COUNT_GEN9 + 30) // Increases the damage dealt against Dragon-type Pokémon by 50%. // Verizion, cobalion, terrakion
@@ -608,7 +608,7 @@
 // #define ABILITY_ASTRAL_PRAYER (ABILITIES_COUNT_GEN9 + XX) // Wish heals a Pokémon to full health // Jirachi
 // #define ABILITY_STELLAR_MUTATION (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a damaging move, randomly boosts one stat by +1 and lowers another by -1.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_VOLCANIC_RAGE + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_COLD_REBOUND + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM
