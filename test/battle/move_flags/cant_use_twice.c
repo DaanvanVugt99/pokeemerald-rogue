@@ -3,119 +3,185 @@
 
 ASSUMPTIONS
 {
-    ASSUME(gBattleMoves[MOVE_GIGATON_HAMMER].flags2 & FLAG_CANT_USE_TWICE);
-    ASSUME(gBattleMoves[MOVE_BLOOD_MOON].flags2 & FLAG_CANT_USE_TWICE);
+  ASSUME(gBattleMoves[MOVE_GIGATON_HAMMER].flags2 & FLAG_CANT_USE_TWICE);
+  ASSUME(gBattleMoves[MOVE_BLOOD_MOON].flags2 & FLAG_CANT_USE_TWICE);
 }
 
 SINGLE_BATTLE_TEST("Struggle will be used if slow Encore is used on moves with the cantUseTwice flag")
 {
-    u32 move;
-    PARAMETRIZE { move = MOVE_GIGATON_HAMMER; }
-    PARAMETRIZE { move = MOVE_BLOOD_MOON; }
-    GIVEN
+  u32 move;
+  PARAMETRIZE
+  {
+    move = MOVE_GIGATON_HAMMER;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_BLOOD_MOON;
+  }
+  GIVEN
+  {
+    ASSUME(gBattleMoves[MOVE_ENCORE].effect == EFFECT_ENCORE);
+    PLAYER(SPECIES_WOBBUFFET);
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        ASSUME(gBattleMoves[MOVE_ENCORE].effect == EFFECT_ENCORE);
-        PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_WOBBUFFET);
+      MOVE(player, move);
+      MOVE(opponent, MOVE_ENCORE);
     }
-    WHEN
+    TURN
     {
-        TURN
-        {
-            MOVE(player, move);
-            MOVE(opponent, MOVE_ENCORE);
-        }
-        TURN { FORCED_MOVE(player); }
+      FORCED_MOVE(player);
     }
-    SCENE
-    {
-        ANIMATION(ANIM_TYPE_MOVE, move, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_ENCORE, opponent);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
-    }
+  }
+  SCENE
+  {
+    ANIMATION(ANIM_TYPE_MOVE, move, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_ENCORE, opponent);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
+  }
 }
 
 SINGLE_BATTLE_TEST("Moves with the cantUseTwice flag strike again if fast encore is used")
 {
-    u32 move;
-    PARAMETRIZE { move = MOVE_GIGATON_HAMMER; }
-    PARAMETRIZE { move = MOVE_BLOOD_MOON; }
-    GIVEN
+  u32 move;
+  PARAMETRIZE
+  {
+    move = MOVE_GIGATON_HAMMER;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_BLOOD_MOON;
+  }
+  GIVEN
+  {
+    ASSUME(gBattleMoves[MOVE_ENCORE].effect == EFFECT_ENCORE);
+    PLAYER(SPECIES_WOBBUFFET);
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        ASSUME(gBattleMoves[MOVE_ENCORE].effect == EFFECT_ENCORE);
-        PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_WOBBUFFET);
+      MOVE(player, move);
     }
-    WHEN
+    TURN
     {
-        TURN { MOVE(player, move); }
-        TURN
-        {
-            MOVE(opponent, MOVE_ENCORE);
-            FORCED_MOVE(player);
-        }
-        TURN { FORCED_MOVE(player); }
-        TURN { FORCED_MOVE(player); }
+      MOVE(opponent, MOVE_ENCORE);
+      FORCED_MOVE(player);
     }
-    SCENE
+    TURN
     {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
-        ANIMATION(ANIM_TYPE_MOVE, move, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_ENCORE, opponent);
-        ANIMATION(ANIM_TYPE_MOVE, move, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
+      FORCED_MOVE(player);
     }
+    TURN
+    {
+      FORCED_MOVE(player);
+    }
+  }
+  SCENE
+  {
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
+    ANIMATION(ANIM_TYPE_MOVE, move, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_ENCORE, opponent);
+    ANIMATION(ANIM_TYPE_MOVE, move, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
+  }
 }
 
 SINGLE_BATTLE_TEST("Moves with the cantUseTwice flag alternate with Struggle if it is the only usable move left")
 {
-    u32 move;
-    PARAMETRIZE { move = MOVE_GIGATON_HAMMER; }
-    PARAMETRIZE { move = MOVE_BLOOD_MOON; }
-    GIVEN
+  u32 move;
+  PARAMETRIZE
+  {
+    move = MOVE_GIGATON_HAMMER;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_BLOOD_MOON;
+  }
+  GIVEN
+  {
+    PLAYER(SPECIES_WOBBUFFET)
     {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(move, MOVE_NONE, MOVE_NONE, MOVE_NONE); }
-        OPPONENT(SPECIES_WOBBUFFET);
+      Moves(move, MOVE_NONE, MOVE_NONE, MOVE_NONE);
     }
-    WHEN
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        TURN { MOVE(player, move); }
-        TURN { FORCED_MOVE(player); }
-        TURN { MOVE(player, move); }
-        TURN { FORCED_MOVE(player); }
-        TURN { MOVE(player, move); }
+      MOVE(player, move);
     }
-    SCENE
+    TURN
     {
-        ANIMATION(ANIM_TYPE_MOVE, move, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
-        ANIMATION(ANIM_TYPE_MOVE, move, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
-        ANIMATION(ANIM_TYPE_MOVE, move, player);
+      FORCED_MOVE(player);
     }
+    TURN
+    {
+      MOVE(player, move);
+    }
+    TURN
+    {
+      FORCED_MOVE(player);
+    }
+    TURN
+    {
+      MOVE(player, move);
+    }
+  }
+  SCENE
+  {
+    ANIMATION(ANIM_TYPE_MOVE, move, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
+    ANIMATION(ANIM_TYPE_MOVE, move, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
+    ANIMATION(ANIM_TYPE_MOVE, move, player);
+  }
 }
 
 SINGLE_BATTLE_TEST("Moves with the cantUseTwice flag can alternate between each other")
 {
-    GIVEN
+  GIVEN
+  {
+    PLAYER(SPECIES_WOBBUFFET)
     {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_GIGATON_HAMMER, MOVE_BLOOD_MOON, MOVE_NONE, MOVE_NONE); }
-        OPPONENT(SPECIES_WOBBUFFET);
+      Moves(MOVE_GIGATON_HAMMER, MOVE_BLOOD_MOON, MOVE_NONE, MOVE_NONE);
     }
-    WHEN
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        TURN { MOVE(player, MOVE_GIGATON_HAMMER); }
-        TURN { MOVE(player, MOVE_BLOOD_MOON); }
-        TURN { MOVE(player, MOVE_GIGATON_HAMMER); }
-        TURN { MOVE(player, MOVE_BLOOD_MOON); }
-        TURN { MOVE(player, MOVE_GIGATON_HAMMER); }
+      MOVE(player, MOVE_GIGATON_HAMMER);
     }
-    SCENE
+    TURN
     {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_GIGATON_HAMMER, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_BLOOD_MOON, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_GIGATON_HAMMER, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_BLOOD_MOON, player);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_GIGATON_HAMMER, player);
+      MOVE(player, MOVE_BLOOD_MOON);
     }
+    TURN
+    {
+      MOVE(player, MOVE_GIGATON_HAMMER);
+    }
+    TURN
+    {
+      MOVE(player, MOVE_BLOOD_MOON);
+    }
+    TURN
+    {
+      MOVE(player, MOVE_GIGATON_HAMMER);
+    }
+  }
+  SCENE
+  {
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_GIGATON_HAMMER, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_BLOOD_MOON, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_GIGATON_HAMMER, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_BLOOD_MOON, player);
+    ANIMATION(ANIM_TYPE_MOVE, MOVE_GIGATON_HAMMER, player);
+  }
 }
