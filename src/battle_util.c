@@ -6020,6 +6020,18 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             effect++;
           }
           break;
+        case ABILITY_INFLATABLE:
+          if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) &&
+              (moveType == TYPE_FIRE || moveType == TYPE_FLYING) &&
+              (CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN) ||
+               CompareStat(battler, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN)))
+          {
+            gEffectBattler = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_SteadfastActivates;
+            effect++;
+          }
+          break;
         case ABILITY_WATER_COMPACTION:
           if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && TARGET_TURN_DAMAGED && IsBattlerAlive(battler) &&
               moveType == TYPE_WATER && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))

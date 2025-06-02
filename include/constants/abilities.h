@@ -371,7 +371,7 @@
 #define ABILITY_VOLCANIC_RAGE (ABILITIES_COUNT_GEN9 + 26)    // Attacks with 50 BP Eruption after using a Fire-type move. // Camerupt
 #define ABILITY_COLD_REBOUND (ABILITIES_COUNT_GEN9 + 27)     // Everytime when hit by a contact move, counter-attacks with Icy Wind. // Dewgong
 #define ABILITY_CHRISTMAS_SPIRIT (ABILITIES_COUNT_GEN9 + 28) // The Pokémon is protected by a mysterious force that reduces all incoming damage by 50% during a hailstorm. delibird
-// #define ABILITY_INFLATABLE (ABILITIES_COUNT_GEN9 + 29) // When the Pokémon is hit by Fire-type or Flying-type moves, its Defense and Special Defense stats are increased by one stage. // drifblim
+#define ABILITY_INFLATABLE (ABILITIES_COUNT_GEN9 + 29)       // When the Pokémon is hit by Fire-type or Flying-type moves, its Defense and Special Defense stats are increased by one stage. // drifblim
 // #define ABILITY_DRAGONSLAYER (ABILITIES_COUNT_GEN9 + 30) // Increases the damage dealt against Dragon-type Pokémon by 50%. // Verizion, cobalion, terrakion
 // #define ABILITY_LIQUIFIED (ABILITIES_COUNT_GEN9 + 31) // Takes half damage from contact moves. Takes 2x damage from Water-type moves. // Muk
 // #define ABILITY_SELF_SUFFICIENT (ABILITIES_COUNT_GEN9 + 32) // Heals 1/8 at the end of every turn. // Torterra
@@ -608,7 +608,7 @@
 // #define ABILITY_ASTRAL_PRAYER (ABILITIES_COUNT_GEN9 + XX) // Wish heals a Pokémon to full health // Jirachi
 // #define ABILITY_STELLAR_MUTATION (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a damaging move, randomly boosts one stat by +1 and lowers another by -1.
 
-#define ABILITIES_COUNT_CUSTOM (ABILITY_CHRISTMAS_SPIRIT + 1)
+#define ABILITIES_COUNT_CUSTOM (ABILITY_INFLATABLE + 1)
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 #define ABILITIES_COUNT ABILITIES_COUNT_CUSTOM
