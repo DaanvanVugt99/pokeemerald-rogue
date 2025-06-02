@@ -143,8 +143,8 @@
 #define ABILITY_HEALER 131       // At the end of the turn, heals allies from a status condition
 #define ABILITY_FRIEND_GUARD 132 // The damage that ally Pokémon receive from attacks is reduced by 25%.
 #define ABILITY_WEAK_ARMOR 133   // Physical attacks to the Pokémon lower its Defense and Sp. Defense stats but sharply raise its Attack, Sp. Attack and Speed stat.
-#define ABILITY_HEAVY_METAL 134  // Doubles the Pokémon's weight and increases defense by 20%.
-#define ABILITY_LIGHT_METAL 135  // Halves the Pokémon's weight and increases speed by 20%.
+#define ABILITY_HEAVY_METAL 134  // Doubles the Pokémon's weight and increases defense by 30%.
+#define ABILITY_LIGHT_METAL 135  // Halves the Pokémon's weight and increases speed by 30%.
 #define ABILITY_MULTISCALE 136   // Reduces damage afflicted to the Pokémon by 50% if at maximum HP
 #define ABILITY_TOXIC_BOOST 137  // Attack stat increased by 50% when poisoned. Immune to poison status damage.
 #define ABILITY_FLARE_BOOST 138  // Special Attack stat increased by 50% when burned. Immune to burn status damage.
@@ -344,26 +344,26 @@
 
 // Unique Abilities
 #define ABILITY_CHLOROPLAST (ABILITIES_COUNT_GEN9 + 1)       // Moves function as if it's sunny, regardless of weather // Bellossom
-#define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)          // Boosts the power of Ice attacks in Hail by 50%, 10% chance to freeze // Froslass
+#define ABILITY_WHITEOUT (ABILITIES_COUNT_GEN9 + 2)          // Boosts the power of Ice attacks in Hail by 1.5 with 20% chance to freeze // Froslass
 #define ABILITY_PYROMANCY (ABILITIES_COUNT_GEN9 + 3)         // Fire attacks are 5x more likely to inflict a burn // Chandelure
 #define ABILITY_SPELL_FIST (ABILITIES_COUNT_GEN9 + 4)        // Punching moves deal 1.3x and do special damage // Golurk (spirit fist?)
 #define ABILITY_BLITZ_BOXER (ABILITIES_COUNT_GEN9 + 5)       // Punching moves gain priority at full health // Hitmonchan
 #define ABILITY_RAMPAGE (ABILITIES_COUNT_GEN9 + 6)           // If a recharge move KOs the foe, it doesn't need to recharge. // Rhyperior
-#define ABILITY_VENGEANCE (ABILITIES_COUNT_GEN9 + 7)         // Provides a 20% damage boost to their move types. This increases to 50% while the Pokémon is at or below 1/2 HP. These boosts do not stack (the 50% boost replaces the 20% one while weakened). // rework 30 60 // spiritomb
+#define ABILITY_CHLOROFUMES (ABILITIES_COUNT_GEN9 + 7)       // Grass-type moves lower the targets attack stage by 1 and poison if sunny // Venusaur
 #define ABILITY_SIGHTING_SYSTEM (ABILITIES_COUNT_GEN9 + 8)   // When the Pokémon uses a move with Accuracy of 80% or lower, the move will have 100% Accuracy, but have its priority decreased by 3. // Magnezone
 #define ABILITY_BIG_WINGS (ABILITIES_COUNT_GEN9 + 9)         // Wind moves deal 1.3x and tailwind duration +1 // Braviary
 #define ABILITY_POWER_CORE (ABILITIES_COUNT_GEN9 + 10)       // The Pokémon uses 25% of its Defense stat during physical moves and  Special Defense stat during special moves in addition to the default stat. (Defense and Special Defense stat stages still affects this percentage). // All def regis
-#define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)     // Electric type moves gain STAB, water type moves have 10% to paralyze  // Whiscash
+#define ABILITY_ELECTROCYTES (ABILITIES_COUNT_GEN9 + 11)     // In rain, Electric type moves gain STAB and water type moves have 20% to paralyze  // Whiscash
 #define ABILITY_AERODYNAMICS (ABILITIES_COUNT_GEN9 + 12)     // Immune to flying and gains +1 speed when hit with a flying type move. // Yanmega
 #define ABILITY_EXPLOIT_WEAKNESS (ABILITIES_COUNT_GEN9 + 13) // Moves deal 1.5x and become dark type against pokemon with status. // Honchcrow
 #define ABILITY_FIGHTING_SPIRIT (ABILITIES_COUNT_GEN9 + 14)  // Fighting moves become ghost type and gain a 1.5x boost // Gallade
-#define ABILITY_ANCIENT_IDOL (ABILITIES_COUNT_GEN9 + 15)     // Uses Def for Atk and SpDef for SpAtk // Claydol
+#define ABILITY_ANCIENT_IDOL (ABILITIES_COUNT_GEN9 + 15)     // Uses Def for Atk and SpDef for SpAtk // Claydol // Maybe lower stats if too OP
 #define ABILITY_SHORT_CIRCUIT (ABILITIES_COUNT_GEN9 + 16)    // Provides a 1.3x damage boost to their move types. This increases to 1.6x while the Pokémon is at or below 1/2 HP.// Rotom
 #define ABILITY_ROUNDHOUSE (ABILITIES_COUNT_GEN9 + 17)       // Kicking moves can't miss and deal damage based on the lowest defensive type // Hitmonlee
 #define ABILITY_SCAVENGER (ABILITIES_COUNT_GEN9 + 18)        // Heals 1/3 of health when any pokemon faints during battle. // Mandibuzz
 #define ABILITY_FEAST (ABILITIES_COUNT_GEN9 + 19)            // Heals 1/2 of health when the pokemon knocks out another pokemon // Guzzlord
 #define ABILITY_BRANCH_SWING (ABILITIES_COUNT_GEN9 + 20)     // Pokemon's speed is increased by 50% and becomes ungrounded on grassy terrain (but is still affected by grassy terrain) // Zarude
-#define ABILITY_ARTILLERY (ABILITIES_COUNT_GEN9 + 21)        // Launcher moves hit both pokemon in double battles // Octillery
+#define ABILITY_ARTILLERY (ABILITIES_COUNT_GEN9 + 21)        // Launcher moves can not miss and hit both pokemon in double battles // Octillery
 #define ABILITY_COIL_UP (ABILITIES_COUNT_GEN9 + 22)          // The Pokémon enters the battlefield coiled up. Coil: The next time the Pokémon uses a biting move, its priority is increased 1. // Arbok
 #define ABILITY_MOLTEN_DOWN (ABILITIES_COUNT_GEN9 + 23)      // Fire moves deal super effective to rock types and lower their speed. // Magcargo
 #define ABILITY_TOXISPHERE (ABILITIES_COUNT_GEN9 + 24)       // Set Acid Rain weather on switch in. // Weezing
@@ -419,27 +419,26 @@
 // #define ABILITY_SHARP_QUILLS (ABILITIES_COUNT_GEN9 + 57) // when being hit by any physical move, trigger Spikes // Sandslash
 // #define ABILITY_STONE_SHRAPNEL (ABILITIES_COUNT_GEN9 + 57) // when being hit by any physical move, trigger Stealth Rock // Gigalith
 // #define ABILITY_SPINNING_TOP (ABILITIES_COUNT_GEN9 + 57) // Fighting-type moves raise speed by +1 and clear hazards. // Hitmontop
-// #define ABILITY_KINGS_WRATH (ABILITIES_COUNT_LATEST_GEN + 141) // When a stat is lowered, boost Atk and Def by +1. Includes Ally Drops.
-// #define ABILITY_QUEENS_MOURNING (ABILITIES_COUNT_LATEST_GEN + 141) // When a stat is lowered, boost Sp.Atk and Sp.Def by +1. Includes Ally Drops.
-// #define ABILITY_SWEEPING_EDGE (ABILITIES_COUNT_LATEST_GEN + 153) // Slicing moves cannot miss and single-target moves hit both foes. // Kingambit
-// #define ABILITY_GIFTED_MIND (ABILITIES_COUNT_LATEST_GEN + 154) // Immune to Psychic Weaknesses but take super effective from Fighting, status moves can't miss // Slowking
-// #define ABILITY_HYDRO_CIRCUIT (ABILITIES_COUNT_LATEST_GEN + 155) // Electric moves deal 1.3x damage and water moves drain 1/5 of the damage dealt. // Lanturn
-// #define ABILITY_CELESTIAL_SYNC (ABILITIES_COUNT_LATEST_GEN + 156) // The user Attack and Special Attack are equal to the higher of the two. // Mineor
-// #define ABILITY_EXPOSED_CORE (ABILITIES_COUNT_LATEST_GEN + 156) // Same as Shields down but also gives psychic moves STAB // Mineor
-// #define ABILITY_CLUELESS (ABILITIES_COUNT_LATEST_GEN + 158)         // When this Pokemon is on the field, all weather and terrains are negated. // Quagsire
-// #define ABILITY_CHEAT_DEATH (ABILITIES_COUNT_LATEST_GEN + 159) // The first attack against this pokemon deals no damage.
-// #define ABILITY_COWARD (ABILITIES_COUNT_LATEST_GEN + 161) // Sets up Protect on switch-in. Only works once.
-// #define ABILITY_DUNE_TERROR (ABILITIES_COUNT_LATEST_GEN + 163) // Sandstorm reduces damage by 25% and boosts Ground moves by 20%. // Krookodile
-// #define ABILITY_INFERNAL_RAGE (ABILITIES_COUNT_LATEST_GEN + 164)    // Fire-type moves are boosted by 30% with 10% recoil. // Houndoom
-// #define ABILITY_ELEMENTALIST (ABILITIES_COUNT_LATEST_GEN + 166) // 20% chance to BRN/FRZ/PARA with respective types. // Drampa
-// #define ABILITY_AMBUSH (ABILITIES_COUNT_LATEST_GEN + 167) // Guaranteed critical hit on first turn (once per battle). // Zoroark
-// #define ABILITY_GRAVITY_WELL (ABILITIES_COUNT_LATEST_GEN + 168) // Sets Gravity on entry for 5 turns. // Probopass
-// #define ABILITY_RADIANCE (ABILITIES_COUNT_LATEST_GEN + 169) // +20% accuracy; Dark moves fail when user is on the field. // Gardevoir
-// #define ABILITY_EMPATH (ABILITIES_COUNT_LATEST_GEN + 169) // Mirrors positive enemy stat changes. // Ralts, Kirlia
-// #define ABILITY_EVAPORATE (ABILITIES_COUNT_LATEST_GEN + 176) // Takes no damage and sets Mist if hit by water // Torkoal
-// #define ABILITY_CHLOROFUMES (ABILITIES_COUNT_LATEST_GEN + 177) // Grass-type moves lower the targets attack stage by 1 and poison if sunny // Venusaur
-// #define ABILITY_DRACONIC (ABILITIES_COUNT_LATEST_GEN + 178) // Dragon type moves gain STAB. // Charizard
-// #define ABILITY_PRESSURE_SHELL (ABILITIES_COUNT_LATEST_GEN + 178) // Moves that hit this pokemon use up 2 more PP and it is immune to multi hit moves. // Blastoise
+// #define ABILITY_KINGS_WRATH (ABILITIES_COUNT_GEN9 + 141) // When a stat is lowered, boost Atk and Def by +1. Includes Ally Drops.
+// #define ABILITY_QUEENS_MOURNING (ABILITIES_COUNT_GEN9 + 141) // When a stat is lowered, boost Sp.Atk and Sp.Def by +1. Includes Ally Drops.
+// #define ABILITY_SWEEPING_EDGE (ABILITIES_COUNT_GEN9 + 153) // Slicing moves cannot miss and single-target moves hit both foes. // Kingambit
+// #define ABILITY_GIFTED_MIND (ABILITIES_COUNT_GEN9 + 154) // Immune to Psychic Weaknesses but take super effective from Fighting, status moves can't miss // Slowking
+// #define ABILITY_HYDRO_CIRCUIT (ABILITIES_COUNT_GEN9 + 155) // Electric moves deal 1.3x damage and water moves drain 1/5 of the damage dealt. // Lanturn
+// #define ABILITY_CELESTIAL_SYNC (ABILITIES_COUNT_GEN9 + 156) // The user Attack and Special Attack are equal to the higher of the two. // Mineor
+// #define ABILITY_EXPOSED_CORE (ABILITIES_COUNT_GEN9 + 156) // Same as Shields down but also gives psychic moves STAB // Mineor
+// #define ABILITY_CLUELESS (ABILITIES_COUNT_GEN9 + 158)         // When this Pokemon is on the field, all weather and terrains are negated. // Quagsire
+// #define ABILITY_CHEAT_DEATH (ABILITIES_COUNT_GEN9 + 159) // The first attack against this pokemon deals no damage.
+// #define ABILITY_COWARD (ABILITIES_COUNT_GEN9 + 161) // Sets up Protect on switch-in. Only works once.
+// #define ABILITY_DUNE_TERROR (ABILITIES_COUNT_GEN9 + 163) // Sandstorm reduces damage by 25% and boosts Ground moves by 20%. // Krookodile
+// #define ABILITY_INFERNAL_RAGE (ABILITIES_COUNT_GEN9 + 164)    // Fire-type moves are boosted by 30% with 10% recoil. // Houndoom
+// #define ABILITY_ELEMENTALIST (ABILITIES_COUNT_GEN9 + 166) // 20% chance to BRN/FRZ/PARA with respective types. // Drampa
+// #define ABILITY_AMBUSH (ABILITIES_COUNT_GEN9 + 167) // Guaranteed critical hit on first turn (once per battle). // Zoroark
+// #define ABILITY_GRAVITY_WELL (ABILITIES_COUNT_GEN9 + 168) // Sets Gravity on entry for 5 turns. // Probopass
+// #define ABILITY_RADIANCE (ABILITIES_COUNT_GEN9 + 169) // +20% accuracy; Dark moves fail when user is on the field. // Gardevoir
+// #define ABILITY_EMPATH (ABILITIES_COUNT_GEN9 + 169) // Mirrors positive enemy stat changes. // Ralts, Kirlia
+// #define ABILITY_EVAPORATE (ABILITIES_COUNT_GEN9 + 176) // Takes no damage and sets Mist if hit by water // Torkoal
+// #define ABILITY_DRACONIC (ABILITIES_COUNT_GEN9 + 178) // Dragon type moves gain STAB. // Charizard
+// #define ABILITY_PRESSURE_SHELL (ABILITIES_COUNT_GEN9 + 178) // Moves that hit this pokemon use up 2 more PP and it is immune to multi hit moves. // Blastoise
 // #define ABILITY_MAGIC_POWDER (ABILITIES_COUNT_GEN9 + XX) // When this Pokémon is hit by a move, makes the opponent drowsy. // Butterfree
 // #define ABILITY_VENOM_RUSH (ABILITIES_COUNT_GEN9 + XX) // If the target is poisoned or slowed, this Pokémon’s Speed is doubled and moves have 1.2x power. // Beedrill
 // #define ABILITY_GNAWING_INSTINCT (ABILITIES_COUNT_GEN9 + XX) // biting moves lower the target's Defense. // Raticate

@@ -5026,7 +5026,7 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
     speed = (speed * 150) / 100;
   } else if (ability == ABILITY_LIGHT_METAL)
   {
-    speed = (speed * 120) / 100;
+    speed = (speed * 130) / 100;
   } else if (ability == ABILITY_PROPELLER_TAIL)
   {
     speed = (speed * 120) / 100;

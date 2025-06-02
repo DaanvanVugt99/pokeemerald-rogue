@@ -6781,14 +6781,17 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
           if (moveType == TYPE_ICE && TARGET_TURN_DAMAGED && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) &&
               IsBattlerAlive(gBattlerTarget) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW | B_WEATHER_HAIL))
           {
-            if (RandomWeighted(RNG_WHITEOUT, 9, 1) && CanBeFrozen(gBattlerTarget))
+            // 20% chance to freeze the target
+            if ((Random() % 5) && CanBeFrozen(gBattlerTarget))
             {
-              gBattleScripting.moveEffect = MOVE_EFFECT_FREEZE;
-              PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
-              BattleScriptPushCursor();
-              gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-              gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-              effect++;
+              {
+                gBattleScripting.moveEffect = MOVE_EFFECT_FREEZE;
+                PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+              }
             }
           }
           break;
@@ -6797,9 +6800,36 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
               !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
           {
             // 10% chance to paralyze the target
-            if (Random() % 9 == 0 && CanBeParalyzed(gBattlerTarget))
+            if (Random() % 10 == 0 && CanBeParalyzed(gBattlerTarget))
             {
               gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
+              PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+              BattleScriptPushCursor();
+              gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+              gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+              effect++;
+            }
+          }
+          break;
+        case ABILITY_CHLOROFUMES:
+          if (moveType == TYPE_GRASS && TARGET_TURN_DAMAGED && IsBattlerAlive(gBattlerTarget) &&
+              !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+          {
+            if (CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+              gBattlerAttacker = gBattlerTarget;
+              gBattleScripting.battler = gBattlerTarget;
+
+              SET_STATCHANGER(STAT_ATK, 1, TRUE);
+              PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+
+              BattleScriptPushCursor();
+              gBattlescriptCurrInstr = BattleScript_EffectLowerStatFoes;
+              effect++;
+            }
+            if (CanBePoisoned(battler, gBattlerTarget) && IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
+            {
+              gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
               PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
               BattleScriptPushCursor();
               gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
@@ -10365,13 +10395,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
       ((gFieldStatuses & STATUS_FIELD_MUDSPORT) ||
        AbilityBattleEffects(ABILITYEFFECT_FIELD_SPORT, 0, 0, ABILITYEFFECT_MUD_SPORT, 0)))
   {
-    modifier = uq4_12_multiply(modifier, UQ_4_12(B_SPORT_DMG_REDUCTION >= GEN_5 ? 0.23 : 0.5));
+    modifier = uq4_12_multiply(modifier, UQ_4_12(0));
   }
   if (moveType == TYPE_FIRE &&
       ((gFieldStatuses & STATUS_FIELD_WATERSPORT) ||
        AbilityBattleEffects(ABILITYEFFECT_FIELD_SPORT, 0, 0, ABILITYEFFECT_WATER_SPORT, 0)))
   {
-    modifier = uq4_12_multiply(modifier, UQ_4_12(B_SPORT_DMG_REDUCTION >= GEN_5 ? 0.23 : 0.5));
+    modifier = uq4_12_multiply(modifier, UQ_4_12(0));
   }
 
   // attacker's abilities
@@ -10970,18 +11000,6 @@ static inline u32 CalcAttackStat(u32 move,
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
       }
       break;
-    case ABILITY_VENGEANCE:
-      if (moveType == TYPE_GHOST)
-      {
-        if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
-        {
-          modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));  // 1.5x boost at or below 50% HP
-        } else
-        {
-          modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));  // 1.2x boost otherwise
-        }
-      }
-      break;
     case ABILITY_SHORT_CIRCUIT:
       if (moveType == TYPE_ELECTRIC)
       {
@@ -11425,7 +11443,7 @@ static inline u32 CalcDefenseStat(u32 move,
     case ABILITY_HEAVY_METAL:
       if (usesDefStat)
       {
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.3));
       }
       break;
   }

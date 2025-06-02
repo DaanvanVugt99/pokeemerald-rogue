@@ -1935,6 +1935,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         .growthRate = GROWTH_FLUCTUATING,
         .eggGroups = { EGG_GROUP_AMORPHOUS, EGG_GROUP_AMORPHOUS },
         .abilities = { ABILITY_AFTERMATH, ABILITY_UNBURDEN, ABILITY_FLARE_BOOST },
+        .uniqueAbility = ABILITY_INFLATABLE,
         .bodyColor = BODY_COLOR_PURPLE,
         .speciesName = _("Drifloon"),
         .cryId = CRY_DRIFLOON,
@@ -1984,6 +1985,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         .growthRate = GROWTH_FLUCTUATING,
         .eggGroups = { EGG_GROUP_AMORPHOUS, EGG_GROUP_AMORPHOUS },
         .abilities = { ABILITY_AFTERMATH, ABILITY_UNBURDEN, ABILITY_FLARE_BOOST },
+        .uniqueAbility = ABILITY_INFLATABLE,
         .bodyColor = BODY_COLOR_PURPLE,
         .speciesName = _("Drifblim"),
         .cryId = CRY_DRIFBLIM,
@@ -3490,7 +3492,6 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         .friendship = STANDARD_FRIENDSHIP,                          \
         .growthRate = GROWTH_MEDIUM_FAST,                           \
         .eggGroups = { EGG_GROUP_AMORPHOUS, EGG_GROUP_AMORPHOUS },  \
-        .abilities = { ABILITY_LEVITATE, ABILITY_NONE },            \
         .bodyColor = BODY_COLOR_RED,                                \
         .speciesName = _("Rotom"),                                  \
         .cryId = CRY_ROTOM,                                         \
@@ -3517,6 +3518,8 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         .baseSpAttack  = 95,
         .baseSpDefense = 77,
         .types = { TYPE_ELECTRIC, TYPE_GHOST },
+        .abilities = { ABILITY_LEVITATE, ABILITY_MOTOR_DRIVE, ABILITY_PRANKSTER },
+        .uniqueAbility = ABILITY_SHORT_CIRCUIT,
         .expYield = 154,
         .description = POKEDEX_DESC_STRING(
             "Its body is composed of plasma and loves\n"
@@ -3548,6 +3551,8 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     {
         ROTOM_MISC_INFO,
         .types = { TYPE_ELECTRIC, TYPE_FIRE },
+        .abilities = { ABILITY_LEVITATE, ABILITY_MOTOR_DRIVE, ABILITY_FLASH_FIRE },
+        .uniqueAbility = ABILITY_SHORT_CIRCUIT,
         ROTOM_APPLIANCE_INFO(Heat),
         .description = POKEDEX_DESC_STRING(
             "If the convection microwave oven is not\n"
@@ -3570,6 +3575,8 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     {
         ROTOM_MISC_INFO,
         .types = { TYPE_ELECTRIC, TYPE_WATER },
+        .abilities = { ABILITY_LEVITATE, ABILITY_MOTOR_DRIVE, ABILITY_WATER_ABSORB },
+        .uniqueAbility = ABILITY_SHORT_CIRCUIT,
         .noFlip = TRUE,
         ROTOM_APPLIANCE_INFO(Wash),
         .description = POKEDEX_DESC_STRING(
@@ -3593,6 +3600,8 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     {
         ROTOM_MISC_INFO,
         .types = { TYPE_ELECTRIC, TYPE_ICE },
+        .abilities = { ABILITY_LEVITATE, ABILITY_MOTOR_DRIVE, ABILITY_REFRIGERATE },
+        .uniqueAbility = ABILITY_SHORT_CIRCUIT,
         ROTOM_APPLIANCE_INFO(Frost),
         .description = POKEDEX_DESC_STRING(
             "In this form, Rotom likes to play freezing\n"
@@ -3615,6 +3624,8 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     {
         ROTOM_MISC_INFO,
         .types = { TYPE_ELECTRIC, TYPE_FLYING },
+        .abilities = { ABILITY_LEVITATE, ABILITY_MOTOR_DRIVE, ABILITY_WIND_RIDER },
+        .uniqueAbility = ABILITY_SHORT_CIRCUIT,
         ROTOM_APPLIANCE_INFO(Fan),
         .description = POKEDEX_DESC_STRING(
             "The first appliance developed that Rotom\n"
@@ -3638,6 +3649,8 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     {
         ROTOM_MISC_INFO,
         .types = { TYPE_ELECTRIC, TYPE_GRASS },
+        .abilities = { ABILITY_LEVITATE, ABILITY_MOTOR_DRIVE, ABILITY_GRASSY_SURGE },
+        .uniqueAbility = ABILITY_SHORT_CIRCUIT,
         ROTOM_APPLIANCE_INFO(Mow),
         .description = POKEDEX_DESC_STRING(
             "The lawn mower is an appliance that led to\n"

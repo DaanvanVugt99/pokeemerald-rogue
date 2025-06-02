@@ -1768,6 +1768,15 @@ static bool32 AccuracyCalcHelper(u16 move)
     }
     return TRUE;
   }
+  // Artillery allows launcher-based moves to always hit
+  else if (GetBattlerAbility(gBattlerAttacker) == ABILITY_ARTILLERY && (gBattleMoves[move].flags & FLAG_LAUNCHER_BASED))
+  {
+    if (!JumpIfMoveFailed(7, move))
+    {
+      RecordAbilityBattle(gBattlerAttacker, ABILITY_ARTILLERY);
+    }
+    return TRUE;
+  }
   // If the target has the ability No Guard and they aren't involved in a Sky
   // Drop or the current move isn't Sky Drop, move hits.
   else if (GetBattlerAbility(gBattlerTarget) == ABILITY_NO_GUARD &&

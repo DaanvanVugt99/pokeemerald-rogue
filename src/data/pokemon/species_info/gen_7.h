@@ -4126,12 +4126,12 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
 #if P_FAMILY_GUZZLORD
     [SPECIES_GUZZLORD] =
     {
-        .baseHP        = 223,
+        .baseHP        = 203,
         .baseAttack    = 101,
-        .baseDefense   = 53,
-        .baseSpeed     = 43,
+        .baseDefense   = 73,
+        .baseSpeed     = 23,
         .baseSpAttack  = 97,
-        .baseSpDefense = 53,
+        .baseSpDefense = 73,
         .types = { TYPE_DARK, TYPE_DRAGON },
         .catchRate = 45,
         .expYield = 257,
@@ -4141,7 +4141,8 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         .friendship = 0,
         .growthRate = GROWTH_SLOW,
         .eggGroups = { EGG_GROUP_NO_EGGS_DISCOVERED, EGG_GROUP_NO_EGGS_DISCOVERED },
-        .abilities = { ABILITY_BEAST_BOOST, ABILITY_NONE },
+        .uniqueAbility = ABILITY_FEAST,
+        .abilities = { ABILITY_BEAST_BOOST, ABILITY_NONE, ABILITY_GLUTTONY },
         .bodyColor = BODY_COLOR_BLACK,
         .isUltraBeast = TRUE,
         .speciesName = _("Guzzlord"),
