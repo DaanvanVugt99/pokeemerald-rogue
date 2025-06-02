@@ -11168,6 +11168,16 @@ static inline u32 CalcAttackStat(u32 move,
         RecordAbilityBattle(battlerDef, ABILITY_OVERCOAT);
       }
       break;
+    case ABILITY_CHRISTMAS_SPIRIT:
+      if (IsBattlerWeatherAffected(battlerAtk, B_WEATHER_HAIL | B_WEATHER_SNOW))
+      {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
+      }
+      if (updateFlags)
+      {
+        RecordAbilityBattle(battlerDef, ABILITY_CHRISTMAS_SPIRIT);
+      }
+      break;
   }
 
   // ally's abilities

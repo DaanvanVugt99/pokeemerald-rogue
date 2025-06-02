@@ -332,6 +332,8 @@ static const u8 sToxisphereDescription[] = _("Summons acid rain in battle.");
 static const u8 sLowBlowDescription[] = _("Attacks with Feint Attack\non switch-in.");
 static const u8 sVolcanicRageDescription[] = _("Triggers Eruption after\nusing a Fire-type move.");
 static const u8 sColdReboundDescription[] = _("Triggers Icy Wind on\ncontact moves.");
+static const u8 sChristmasSpiritDescription[] = _("Takes 50% less damage\nin hail of snow.");
+
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] = {
@@ -676,6 +678,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] = {
     [ABILITY_LOW_BLOW] = _("Low Blow"),
     [ABILITY_VOLCANIC_RAGE] = _("Volcanic Rage"),
     [ABILITY_COLD_REBOUND] = _("Cold Rebound"),
+    [ABILITY_CHRISTMAS_SPIRIT] = _("Christmas Spirit"),
 };
 #else  // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] = {
@@ -1337,4 +1340,5 @@ const u8* const gAbilityDescriptionPointers[ABILITIES_COUNT] = {
     [ABILITY_LOW_BLOW] = sLowBlowDescription,
     [ABILITY_VOLCANIC_RAGE] = sVolcanicRageDescription,
     [ABILITY_COLD_REBOUND] = sColdReboundDescription,
+    [ABILITY_CHRISTMAS_SPIRIT] = sChristmasSpiritDescription,
 };
