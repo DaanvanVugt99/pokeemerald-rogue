@@ -4,27 +4,27 @@
 ASSUMPTIONS
 {
   ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
-  ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+  ASSUME(gBattleMoves[MOVE_BUBBLE].type == TYPE_WATER);
   ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
-  ASSUME(gBattleMoves[MOVE_FIRE_PUNCH].flags & FLAG_MAKES_CONTACT);
-  ASSUME(gBattleMoves[MOVE_FIRE_PUNCH].type == TYPE_FIRE);
+  ASSUME(gBattleMoves[MOVE_WATERFALL].flags & FLAG_MAKES_CONTACT);
+  ASSUME(gBattleMoves[MOVE_WATERFALL].type == TYPE_WATER);
 }
 
-SINGLE_BATTLE_TEST("Fluffy halves damage taken from moves that make direct contact", s16 damage)
+SINGLE_BATTLE_TEST("Liquified halves damage taken from moves that make direct contact", s16 damage)
 {
   u32 ability;
   PARAMETRIZE
   {
-    ability = ABILITY_KLUTZ;
+    ability = ABILITY_STICKY_HOLD;
   }
   PARAMETRIZE
   {
-    ability = ABILITY_FLUFFY;
+    ability = ABILITY_LIQUIFIED;
   }
   GIVEN
   {
     PLAYER(SPECIES_WOBBUFFET);
-    OPPONENT(SPECIES_STUFFUL)
+    OPPONENT(SPECIES_MUK)
     {
       Ability(ability);
     }
@@ -47,21 +47,21 @@ SINGLE_BATTLE_TEST("Fluffy halves damage taken from moves that make direct conta
   }
 }
 
-SINGLE_BATTLE_TEST("Fluffy doubles damage taken from fire type moves", s16 damage)
+SINGLE_BATTLE_TEST("Liquified doubles damage taken from water type moves", s16 damage)
 {
   u32 ability;
   PARAMETRIZE
   {
-    ability = ABILITY_KLUTZ;
+    ability = ABILITY_STICKY_HOLD;
   }
   PARAMETRIZE
   {
-    ability = ABILITY_FLUFFY;
+    ability = ABILITY_LIQUIFIED;
   }
   GIVEN
   {
     PLAYER(SPECIES_WOBBUFFET);
-    OPPONENT(SPECIES_STUFFUL)
+    OPPONENT(SPECIES_MUK)
     {
       Ability(ability);
     }
@@ -70,12 +70,12 @@ SINGLE_BATTLE_TEST("Fluffy doubles damage taken from fire type moves", s16 damag
   {
     TURN
     {
-      MOVE(player, MOVE_EMBER);
+      MOVE(player, MOVE_BUBBLE);
     }
   }
   SCENE
   {
-    MESSAGE("Wobbuffet used Ember!");
+    MESSAGE("Wobbuffet used Bubble!");
     HP_BAR(opponent, captureDamage : &results[i].damage);
   }
   FINALLY
@@ -84,21 +84,21 @@ SINGLE_BATTLE_TEST("Fluffy doubles damage taken from fire type moves", s16 damag
   }
 }
 
-SINGLE_BATTLE_TEST("Fluffy does not alter damage of fire-type moves that make direct contact", s16 damage)
+SINGLE_BATTLE_TEST("Liquified does not alter damage of water-type moves that make direct contact", s16 damage)
 {
   u32 ability;
   PARAMETRIZE
   {
-    ability = ABILITY_KLUTZ;
+    ability = ABILITY_STICKY_HOLD;
   }
   PARAMETRIZE
   {
-    ability = ABILITY_FLUFFY;
+    ability = ABILITY_LIQUIFIED;
   }
   GIVEN
   {
     PLAYER(SPECIES_WOBBUFFET);
-    OPPONENT(SPECIES_STUFFUL)
+    OPPONENT(SPECIES_MUK)
     {
       Ability(ability);
     }
@@ -107,12 +107,12 @@ SINGLE_BATTLE_TEST("Fluffy does not alter damage of fire-type moves that make di
   {
     TURN
     {
-      MOVE(player, MOVE_FIRE_PUNCH);
+      MOVE(player, MOVE_WATERFALL);
     }
   }
   SCENE
   {
-    MESSAGE("Wobbuffet used Fire Punch!");
+    MESSAGE("Wobbuffet used Waterfall!");
     HP_BAR(opponent, captureDamage : &results[i].damage);
   }
   FINALLY

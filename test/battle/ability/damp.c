@@ -3,114 +3,174 @@
 
 SINGLE_BATTLE_TEST("Damp prevents explosion-like moves from enemies")
 {
-    u32 move;
-    PARAMETRIZE { move = MOVE_EXPLOSION; }
-    PARAMETRIZE { move = MOVE_SELF_DESTRUCT; }
-    PARAMETRIZE { move = MOVE_MIND_BLOWN; }
-    PARAMETRIZE { move = MOVE_MISTY_EXPLOSION; }
-    GIVEN
+  u32 move;
+  PARAMETRIZE
+  {
+    move = MOVE_EXPLOSION;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_SELF_DESTRUCT;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_MIND_BLOWN;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_MISTY_EXPLOSION;
+  }
+  GIVEN
+  {
+    PLAYER(SPECIES_PARAS)
     {
-        PLAYER(SPECIES_PARAS) { Ability(ABILITY_DAMP); }
-        OPPONENT(SPECIES_WOBBUFFET);
+      Ability(ABILITY_DAMP);
     }
-    WHEN
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        TURN { MOVE(opponent, move); }
+      MOVE(opponent, move);
     }
-    SCENE
+  }
+  SCENE
+  {
+    ABILITY_POPUP(player, ABILITY_DAMP);
+    NONE_OF
     {
-        ABILITY_POPUP(player, ABILITY_DAMP);
-        NONE_OF
-        {
-            HP_BAR(player);
-            HP_BAR(opponent);
-        }
+      HP_BAR(player);
+      HP_BAR(opponent);
     }
+  }
 }
 
 DOUBLE_BATTLE_TEST("Damp prevents explosion-like moves from enemies in a double battle")
 {
-    u32 move;
-    PARAMETRIZE { move = MOVE_EXPLOSION; }
-    PARAMETRIZE { move = MOVE_SELF_DESTRUCT; }
-    PARAMETRIZE { move = MOVE_MIND_BLOWN; }
-    PARAMETRIZE { move = MOVE_MISTY_EXPLOSION; }
-    GIVEN
+  u32 move;
+  PARAMETRIZE
+  {
+    move = MOVE_EXPLOSION;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_SELF_DESTRUCT;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_MIND_BLOWN;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_MISTY_EXPLOSION;
+  }
+  GIVEN
+  {
+    PLAYER(SPECIES_PARAS)
     {
-        PLAYER(SPECIES_PARAS) { Ability(ABILITY_DAMP); }
-        PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_WOBBUFFET);
+      Ability(ABILITY_DAMP);
     }
-    WHEN
+    PLAYER(SPECIES_WOBBUFFET);
+    OPPONENT(SPECIES_WOBBUFFET);
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        TURN { MOVE(opponentLeft, move); }
+      MOVE(opponentLeft, move);
     }
-    SCENE
+  }
+  SCENE
+  {
+    ABILITY_POPUP(playerLeft, ABILITY_DAMP);
+    NONE_OF
     {
-        ABILITY_POPUP(playerLeft, ABILITY_DAMP);
-        NONE_OF
-        {
-            HP_BAR(playerLeft);
-            HP_BAR(opponentLeft);
-            HP_BAR(playerRight);
-            HP_BAR(opponentRight);
-        }
+      HP_BAR(playerLeft);
+      HP_BAR(opponentLeft);
+      HP_BAR(playerRight);
+      HP_BAR(opponentRight);
     }
+  }
 }
 
 SINGLE_BATTLE_TEST("Damp prevents explosion-like moves from self")
 {
-    u32 move;
-    PARAMETRIZE { move = MOVE_EXPLOSION; }
-    PARAMETRIZE { move = MOVE_SELF_DESTRUCT; }
-    PARAMETRIZE { move = MOVE_MIND_BLOWN; }
-    PARAMETRIZE { move = MOVE_MISTY_EXPLOSION; }
-    GIVEN
+  u32 move;
+  PARAMETRIZE
+  {
+    move = MOVE_EXPLOSION;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_SELF_DESTRUCT;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_MIND_BLOWN;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_MISTY_EXPLOSION;
+  }
+  GIVEN
+  {
+    PLAYER(SPECIES_PARAS)
     {
-        PLAYER(SPECIES_PARAS) { Ability(ABILITY_DAMP); }
-        OPPONENT(SPECIES_WOBBUFFET);
+      Ability(ABILITY_DAMP);
     }
-    WHEN
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        TURN { MOVE(player, move); }
+      MOVE(player, move);
     }
-    SCENE
+  }
+  SCENE
+  {
+    ABILITY_POPUP(player, ABILITY_DAMP);
+    NONE_OF
     {
-        ABILITY_POPUP(player, ABILITY_DAMP);
-        NONE_OF
-        {
-            HP_BAR(player);
-            HP_BAR(opponent);
-        }
+      HP_BAR(player);
+      HP_BAR(opponent);
     }
+  }
 }
 
 SINGLE_BATTLE_TEST("Damp prevents damage from aftermath")
 {
-    GIVEN
+  GIVEN
+  {
+    ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
+    PLAYER(SPECIES_PARAS)
     {
-        ASSUME(gBattleMoves[MOVE_TACKLE].flags == FLAG_MAKES_CONTACT);
-        PLAYER(SPECIES_PARAS) { Ability(ABILITY_DAMP); }
-        OPPONENT(SPECIES_VOLTORB)
-        {
-            Ability(ABILITY_AFTERMATH);
-            HP(1);
-        }
-        OPPONENT(SPECIES_WOBBUFFET);
+      Ability(ABILITY_DAMP);
     }
-    WHEN
+    OPPONENT(SPECIES_VOLTORB)
     {
-        TURN
-        {
-            MOVE(player, MOVE_TACKLE);
-            SEND_OUT(opponent, 1);
-        }
+      Ability(ABILITY_AFTERMATH);
+      HP(1);
     }
-    SCENE
+    OPPONENT(SPECIES_WOBBUFFET);
+  }
+  WHEN
+  {
+    TURN
     {
-        ABILITY_POPUP(opponent, ABILITY_AFTERMATH);
-        ABILITY_POPUP(player, ABILITY_DAMP);
-        NONE_OF { HP_BAR(player); }
+      MOVE(player, MOVE_TACKLE);
+      SEND_OUT(opponent, 1);
     }
+  }
+  SCENE
+  {
+    ABILITY_POPUP(opponent, ABILITY_AFTERMATH);
+    ABILITY_POPUP(player, ABILITY_DAMP);
+    NONE_OF
+    {
+      HP_BAR(player);
+    }
+  }
 }

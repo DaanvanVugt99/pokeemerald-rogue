@@ -3,39 +3,50 @@
 
 SINGLE_BATTLE_TEST("Poison Point inflicts poison on contact")
 {
-    u32 move;
-    PARAMETRIZE { move = MOVE_TACKLE; }
-    PARAMETRIZE { move = MOVE_SWIFT; }
-    GIVEN
+  u32 move;
+  PARAMETRIZE
+  {
+    move = MOVE_TACKLE;
+  }
+  PARAMETRIZE
+  {
+    move = MOVE_SWIFT;
+  }
+  GIVEN
+  {
+    ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
+    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags & FLAG_MAKES_CONTACT));
+    PLAYER(SPECIES_WOBBUFFET);
+    OPPONENT(SPECIES_NIDORAN_M)
     {
-        ASSUME(gBattleMoves[MOVE_TACKLE].flags == FLAG_MAKES_CONTACT);
-        ASSUME(!(gBattleMoves[MOVE_SWIFT].flags == FLAG_MAKES_CONTACT));
-        PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_NIDORAN_M) { Ability(ABILITY_POISON_POINT); }
+      Ability(ABILITY_POISON_POINT);
     }
-    WHEN
+  }
+  WHEN
+  {
+    TURN
     {
-        TURN { MOVE(player, move); }
-        TURN {}
+      MOVE(player, move);
     }
-    SCENE
+    TURN {}
+  }
+  SCENE
+  {
+    if (gBattleMoves[move].flags & FLAG_MAKES_CONTACT)
     {
-        if (gBattleMoves[move].flags == FLAG_MAKES_CONTACT)
-        {
-            ABILITY_POPUP(opponent, ABILITY_POISON_POINT);
-            ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, player);
-            MESSAGE("Wobbuffet was poisoned by Foe Nidoran♂'s Poison Point!");
-            STATUS_ICON(player, poison : TRUE);
-        }
-        else
-        {
-            NONE_OF
-            {
-                ABILITY_POPUP(opponent, ABILITY_POISON_POINT);
-                ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, player);
-                MESSAGE("Wobbuffet was poisoned by Foe Nidoran♂'s Poison Point!");
-                STATUS_ICON(player, poison : TRUE);
-            }
-        }
+      ABILITY_POPUP(opponent, ABILITY_POISON_POINT);
+      ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, player);
+      MESSAGE("Wobbuffet was poisoned by Foe Nidoran♂'s Poison Point!");
+      STATUS_ICON(player, poison : TRUE);
+    } else
+    {
+      NONE_OF
+      {
+        ABILITY_POPUP(opponent, ABILITY_POISON_POINT);
+        ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, player);
+        MESSAGE("Wobbuffet was poisoned by Foe Nidoran♂'s Poison Point!");
+        STATUS_ICON(player, poison : TRUE);
+      }
     }
+  }
 }

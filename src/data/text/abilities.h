@@ -335,6 +335,8 @@ static const u8 sColdReboundDescription[] = _("Triggers Icy Wind on\ncontact mov
 static const u8 sChristmasSpiritDescription[] = _("Takes 50% less damage\nin hail of snow.");
 static const u8 sInflatableDescription[] = _("Boosts defenses when hit\nby Fire- or Flying-type.");
 static const u8 sDragonslayerDescription[] = _("Deals 50% more damage\nto Dragon-type Pokémon.");
+static const u8 sLiquifiedDescription[] = _("Takes 50% less contact damage.\nTakes double from Water-type.");
+
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] = {
@@ -682,6 +684,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] = {
     [ABILITY_CHRISTMAS_SPIRIT] = _("Christmas Spirit"),
     [ABILITY_INFLATABLE] = _("Inflatable"),
     [ABILITY_DRAGONSLAYER] = _("Dragonslayer"),
+    [ABILITY_LIQUIFIED] = _("Liquified"),
 };
 #else  // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] = {
@@ -1346,4 +1349,5 @@ const u8* const gAbilityDescriptionPointers[ABILITIES_COUNT] = {
     [ABILITY_CHRISTMAS_SPIRIT] = sChristmasSpiritDescription,
     [ABILITY_INFLATABLE] = sInflatableDescription,
     [ABILITY_DRAGONSLAYER] = sDragonslayerDescription,
+    [ABILITY_LIQUIFIED] = sLiquifiedDescription,
 };

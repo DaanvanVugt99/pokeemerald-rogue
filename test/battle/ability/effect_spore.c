@@ -15,8 +15,8 @@ SINGLE_BATTLE_TEST("Effect Spore inflicts a status on defensive contact")
 
   GIVEN
   {
-    ASSUME(gBattleMoves[MOVE_TACKLE].flags == FLAG_MAKES_CONTACT);
-    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags == FLAG_MAKES_CONTACT));
+    ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
+    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags & FLAG_MAKES_CONTACT));
     PLAYER(SPECIES_WOBBUFFET);
     OPPONENT(SPECIES_BRELOOM)
     {
@@ -77,8 +77,8 @@ SINGLE_BATTLE_TEST("Effect Spore inflicts a status on attacker's contact move")
 
   GIVEN
   {
-    ASSUME(gBattleMoves[MOVE_TACKLE].flags == FLAG_MAKES_CONTACT);
-    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags == FLAG_MAKES_CONTACT));
+    ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
+    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags & FLAG_MAKES_CONTACT));
     PLAYER(SPECIES_BRELOOM)
     {
       Ability(ABILITY_EFFECT_SPORE);

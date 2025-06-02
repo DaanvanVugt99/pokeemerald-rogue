@@ -11802,6 +11802,16 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move,
         return UQ_4_12(0.5);
       }
       break;
+    case ABILITY_LIQUIFIED:
+      if (!IsMoveMakingContact(move, battlerAtk) && moveType == TYPE_WATER)
+      {
+        return UQ_4_12(2.0);
+      }
+      if (IsMoveMakingContact(move, battlerAtk) && moveType != TYPE_WATER)
+      {
+        return UQ_4_12(0.5);
+      }
+      break;
     case ABILITY_PUNK_ROCK:
       if (gBattleMoves[move].flags & FLAG_SOUND_BASED)
       {

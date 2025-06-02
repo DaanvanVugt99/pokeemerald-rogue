@@ -14,8 +14,8 @@ SINGLE_BATTLE_TEST("Suction Cups traps opponent on contact move")
   }
   GIVEN
   {
-    ASSUME(gBattleMoves[MOVE_TACKLE].flags == FLAG_MAKES_CONTACT);
-    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags == FLAG_MAKES_CONTACT));
+    ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
+    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags & FLAG_MAKES_CONTACT));
     PLAYER(SPECIES_OCTILLERY)
     {
       Ability(ABILITY_SUCTION_CUPS);
@@ -31,7 +31,7 @@ SINGLE_BATTLE_TEST("Suction Cups traps opponent on contact move")
   }
   SCENE
   {
-    if (gBattleMoves[move].flags == FLAG_MAKES_CONTACT)
+    if (gBattleMoves[move].flags & FLAG_MAKES_CONTACT)
     {
       ABILITY_POPUP(player, ABILITY_SUCTION_CUPS);
     } else

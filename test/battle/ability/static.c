@@ -14,8 +14,8 @@ SINGLE_BATTLE_TEST("Static inflicts paralysis on defensive contact")
   }
   GIVEN
   {
-    ASSUME(gBattleMoves[MOVE_TACKLE].flags == FLAG_MAKES_CONTACT);
-    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags == FLAG_MAKES_CONTACT));
+    ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
+    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags & FLAG_MAKES_CONTACT));
     PLAYER(SPECIES_WOBBUFFET);
     OPPONENT(SPECIES_PIKACHU)
     {
@@ -31,7 +31,7 @@ SINGLE_BATTLE_TEST("Static inflicts paralysis on defensive contact")
   }
   SCENE
   {
-    if (gBattleMoves[move].flags == FLAG_MAKES_CONTACT)
+    if (gBattleMoves[move].flags & FLAG_MAKES_CONTACT)
     {
       ABILITY_POPUP(opponent, ABILITY_STATIC);
       ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PRZ, player);
@@ -63,8 +63,8 @@ SINGLE_BATTLE_TEST("Static inflicts paralysis on attacker's contact move")
   }
   GIVEN
   {
-    ASSUME(gBattleMoves[MOVE_TACKLE].flags == FLAG_MAKES_CONTACT);
-    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags == FLAG_MAKES_CONTACT));
+    ASSUME(gBattleMoves[MOVE_TACKLE].flags & FLAG_MAKES_CONTACT);
+    ASSUME(!(gBattleMoves[MOVE_SWIFT].flags & FLAG_MAKES_CONTACT));
     PLAYER(SPECIES_PIKACHU)
     {
       Ability(ABILITY_STATIC);
@@ -80,7 +80,7 @@ SINGLE_BATTLE_TEST("Static inflicts paralysis on attacker's contact move")
   }
   SCENE
   {
-    if (gBattleMoves[move].flags == FLAG_MAKES_CONTACT)
+    if (gBattleMoves[move].flags & FLAG_MAKES_CONTACT)
     {
       ABILITY_POPUP(player, ABILITY_STATIC);
       ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PRZ, opponent);
