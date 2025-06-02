@@ -10611,7 +10611,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move,
     case ABILITY_DRAGONSLAYER:
       if (IS_BATTLER_OF_TYPE(battlerDef, TYPE_DRAGON))
       {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
       }
       break;
     case ABILITY_WHITEOUT:  // Boosts damage of Ice-type moves in hail
