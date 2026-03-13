@@ -71,18 +71,21 @@ DOUBLE_BATTLE_TEST("White Herb restores stats after Attack was lowered by Intimi
 
 SINGLE_BATTLE_TEST("White Herb restores stats after Attack was lowered by Intimidate while switching in")
 {
-    KNOWN_FAILING;
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_WHITE_HERB); }
         OPPONENT(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_ARBOK) { Ability(ABILITY_INTIMIDATE); }
     } WHEN {
-        TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CLOSE_COMBAT); }
+        TURN { SWITCH(opponent, 1); }
+        TURN { MOVE(player, MOVE_CLOSE_COMBAT); }
     } SCENE {
+        // Turn 1: White Herb should be consumed by Intimidate.
         ABILITY_POPUP(opponent, ABILITY_INTIMIDATE);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Wobbuffet's White Herb restored its status!");
+
+        // Turn 2: White Herb was already consumed, so it should not trigger again.
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CLOSE_COMBAT, player);
         NONE_OF {
             ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
@@ -231,7 +234,6 @@ SINGLE_BATTLE_TEST("White Herb restores stats after Defiant or Competitive were 
         ABILITY_POPUP(player, ability);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
-        MESSAGE("Wobbuffet's White Herb restored its status!");
     } THEN {
         EXPECT(player->item == ITEM_NONE);
         if (species == SPECIES_IGGLYBUFF)
