@@ -77,9 +77,15 @@ void Test_ExitWithResult(enum TestResult, const char *fmt, ...);
 
 s32 MgbaPrintf_(const char *fmt, ...);
 
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(__INTELLISENSE__)
+#define TEST_SECTION_ATTR
+#else
+#define TEST_SECTION_ATTR __attribute__((section(".tests")))
+#endif
+
 #define TEST(_name) \
     static void CAT(Test, __LINE__)(void); \
-    __attribute__((section(".tests"))) static const struct Test CAT(sTest, __LINE__) = \
+    TEST_SECTION_ATTR static const struct Test CAT(sTest, __LINE__) = \
     { \
         .name = _name, \
         .filename = __FILE__, \
@@ -90,7 +96,7 @@ s32 MgbaPrintf_(const char *fmt, ...);
 
 #define ASSUMPTIONS \
     static void Assumptions(void); \
-    __attribute__((section(".tests"))) static const struct Test sAssumptions = \
+    TEST_SECTION_ATTR static const struct Test sAssumptions = \
     { \
         .name = "ASSUMPTIONS: " __FILE__, \
         .filename = __FILE__, \

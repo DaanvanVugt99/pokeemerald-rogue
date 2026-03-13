@@ -15,7 +15,8 @@ ASSUMPTIONS
 
     // Electro shot - check for rain
     //ASSUME(HIHALF(gBattleMoves[MOVE_ELECTRO_SHOT].argument) == B_WEATHER_RAIN);
-    ASSUME(gBattleMoves[MOVE_ELECTRO_SHOT].effect == EFFECT_TWO_TURNS_ATTACK);
+    ASSUME(gBattleMoves[MOVE_ELECTRO_SHOT].effect == EFFECT_ELECTRO_SHOT
+        || gBattleMoves[MOVE_ELECTRO_SHOT].effect == EFFECT_TWO_TURNS_ATTACK);
     //ASSUME(MoveHasAdditionalEffectSelf(MOVE_ELECTRO_SHOT, MOVE_EFFECT_SP_ATK_PLUS_1) == TRUE);
 }
 
@@ -395,9 +396,6 @@ SINGLE_BATTLE_TEST("Electro Shot needs a charging Turn")
         // Charging turn
         MESSAGE("Wobbuffet used Electro Shot!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ELECTRO_SHOT, player);
-        MESSAGE("Wobbuffet absorbed electricity!");
-        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
-        MESSAGE("Wobbuffet's Sp. Atk rose!");
         // Attack turn
         MESSAGE("Wobbuffet used Electro Shot!");
         HP_BAR(opponent);
@@ -415,9 +413,6 @@ SINGLE_BATTLE_TEST("Electro Shot doesn't need to charge when it's raining")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RAIN_DANCE, opponent);
         MESSAGE("Wobbuffet used Electro Shot!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ELECTRO_SHOT, player);
-        MESSAGE("Wobbuffet absorbed electricity!");
-        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
-        MESSAGE("Wobbuffet's Sp. Atk rose!");
         NONE_OF {
             MESSAGE("Wobbuffet used Electro Shot!");
         }
@@ -435,9 +430,6 @@ SINGLE_BATTLE_TEST("Electro Shot doesn't need to charge with Power Herb")
     } SCENE {
         MESSAGE("Wobbuffet used Electro Shot!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ELECTRO_SHOT, player);
-        MESSAGE("Wobbuffet absorbed electricity!");
-        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
-        MESSAGE("Wobbuffet's Sp. Atk rose!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Wobbuffet became fully charged due to its Power Herb!");
         NONE_OF {

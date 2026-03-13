@@ -83,6 +83,7 @@ static void ModifyTrainerMonPreset(u16 trainerNum, struct Pokemon* mon, struct R
 static void ReorderPartyMons(u16 trainerNum, struct Pokemon *party, u8 monCount);
 static void AssignAnySpecialMons(u16 trainerNum, struct Pokemon *party, u8 monCount);
 static bool8 IsChoiceItem(u16 itemId);
+static void ApplyBlackSludgeTeraOverride(struct TrainerHeldItemScratch* heldItems, struct RoguePokemonCompetitiveSet* preset, bool8 teraEnabled);
 
 u16 Rogue_GetDynamicTrainer(u16 i)
 {
@@ -3443,14 +3444,7 @@ static bool8 SelectNextPreset(struct TrainerPartyScratch* scratch, u16 species, 
 #ifdef ROGUE_EXPANSION
         else if(outPreset->heldItem == ITEM_BLACK_SLUDGE)
         {
-            scratch->heldItems.hasBlackSludge = TRUE;
-
-            // Replace at last second, as we will allow multiple leftovers for this edge case
-            if(IsTerastallizeEnabled())
-            {
-                // Avoid black sludge during tera because it's a bit silly
-                outPreset->heldItem == ITEM_LEFTOVERS;
-            }
+            ApplyBlackSludgeTeraOverride(&scratch->heldItems, outPreset, IsTerastallizeEnabled());
         }
         else if(outPreset->heldItem >= ITEM_VENUSAURITE && outPreset->heldItem <= ITEM_DIANCITE)
         {
@@ -3482,6 +3476,42 @@ static bool8 IsChoiceItem(u16 itemId)
     }
 
     return FALSE;
+}
+
+static void ApplyBlackSludgeTeraOverride(struct TrainerHeldItemScratch* heldItems, struct RoguePokemonCompetitiveSet* preset, bool8 teraEnabled)
+{
+#ifdef ROGUE_EXPANSION
+    heldItems->hasBlackSludge = TRUE;
+
+    // Replace at last second, as we will allow multiple leftovers for this edge case
+    if(teraEnabled)
+    {
+        // Avoid black sludge during tera because it's a bit silly
+        preset->heldItem = ITEM_LEFTOVERS;
+    }
+#else
+    (void)heldItems;
+    (void)preset;
+    (void)teraEnabled;
+#endif
+}
+
+u16 RogueDebug_AdjustHeldItemForTera(u16 heldItem, bool8 teraEnabled)
+{
+#ifdef ROGUE_EXPANSION
+    struct TrainerHeldItemScratch heldItems = {0};
+    struct RoguePokemonCompetitiveSet preset = {0};
+
+    preset.heldItem = heldItem;
+
+    if(preset.heldItem == ITEM_BLACK_SLUDGE)
+        ApplyBlackSludgeTeraOverride(&heldItems, &preset, teraEnabled);
+
+    return preset.heldItem;
+#else
+    (void)teraEnabled;
+    return heldItem;
+#endif
 }
 
 

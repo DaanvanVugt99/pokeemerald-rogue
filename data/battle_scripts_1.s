@@ -628,7 +628,7 @@ BattleScript_EffectDoodle_CopyAbility:
 .if B_ABILITY_POP_UP == TRUE
 	setbyte sFIXED_ABILITY_POPUP, TRUE
 	showabilitypopup BS_ATTACKER
-	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_LONG 
+	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_LONG
 	sethword sABILITY_OVERWRITE, 0
 	updateabilitypopup BS_ATTACKER
 	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_SHORTEST
@@ -1209,14 +1209,8 @@ BattleScript_FirstChargingTurnElectroShot::
 	attackcanceler
 	flushtextbox
 	ppreduce
-	attackanimation
-	waitanimation
-	orword gHitMarker, HITMARKER_CHARGING
-	setmoveeffect MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER
-	seteffectprimary
-	copybyte cMULTISTRING_CHOOSER, sTWOTURN_STRINGID
-	printfromtable gFirstTurnOfTwoStringIds
-	waitmessage B_WAIT_TIME_LONG
+	attackstring
+	call BattleScriptFirstChargingTurnAfterAttackString
 	setmoveeffect MOVE_EFFECT_SP_ATK_PLUS_1 | MOVE_EFFECT_AFFECTS_USER
 	seteffectsecondary
 	return
@@ -4872,7 +4866,7 @@ BattleScript_AlphaMonActivates::
 	updatestatusicon BS_TARGET
 	waitstate
 	playanimation BS_TARGET, B_ANIM_FOCUS_PUNCH_SETUP
-	
+
 	setstatchanger STAT_ATK, 1, FALSE
 	call BattleScript_EffectStatUpAlpha
 	setstatchanger STAT_SPATK, 1, FALSE

@@ -21,7 +21,15 @@ enum {
     CURRENT_TEST_STATE_RUN,
 };
 
-__attribute__((section(".persistent"))) static struct {
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(__INTELLISENSE__)
+#define TEST_PERSISTENT_ATTR
+#define TEST_DACS_ENTRY_ATTR
+#else
+#define TEST_PERSISTENT_ATTR __attribute__((section(".persistent")))
+#define TEST_DACS_ENTRY_ATTR __attribute__((naked, section(".dacs"), target("arm")))
+#endif
+
+TEST_PERSISTENT_ATTR static struct {
     u32 address:28;
     u32 state:1;
 } sCurrentTest = {0};
@@ -660,7 +668,7 @@ static s32 MgbaVPrintf_(const char *fmt, va_list va)
 /* Entry point for the Debugging and Control System. Handles illegal
  * instructions, which are typically caused by branching to an invalid
  * address. */
-__attribute__((naked, section(".dacs"), target("arm")))
+TEST_DACS_ENTRY_ATTR
 void DACSEntry(void)
 {
     asm(".arm\n\
