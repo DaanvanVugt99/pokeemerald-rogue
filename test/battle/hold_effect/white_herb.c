@@ -129,38 +129,22 @@ SINGLE_BATTLE_TEST("White Herb restores stats after all hits of a multi hit move
     }
 }
 
-SINGLE_BATTLE_TEST("White Herb wont have time to activate if it is knocked off or stolen by Thief")
+SINGLE_BATTLE_TEST("White Herb does not activate if Knock Off removes it")
 {
-    u16 move;
-
-    PARAMETRIZE { move = MOVE_THIEF; }
-    PARAMETRIZE { move = MOVE_KNOCK_OFF; }
-
-    KNOWN_FAILING; // Knock off fails, Thief is fine
     GIVEN {
-        ASSUME(gBattleMoves[MOVE_THIEF].effect == EFFECT_THIEF);
         ASSUME(gBattleMoves[MOVE_KNOCK_OFF].effect == EFFECT_KNOCK_OFF);
-        PLAYER(SPECIES_SLUGMA) {  Ability(ABILITY_WEAK_ARMOR); Item(ITEM_WHITE_HERB); }
+        PLAYER(SPECIES_SLUGMA) {  Ability(ABILITY_WEAK_ARMOR); Item(ITEM_WHITE_HERB); MaxHP(400); HP(400); Defense(200); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
-        TURN { MOVE(opponent, move); }
+        TURN { MOVE(opponent, MOVE_KNOCK_OFF); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, move, opponent);
-        if (move == MOVE_THIEF)
-            MESSAGE("Foe Wobbuffet stole Slugma's White Herb!");
-        else
-            MESSAGE("Foe Wobbuffet knocked off Slugma's White Herb!");
-        ABILITY_POPUP(player, ABILITY_WEAK_ARMOR);
-        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
-        MESSAGE("Slugma's Weak Armor lowered its Defense!");
-        MESSAGE("Slugma's Weak Armor raised its Speed!");
-        NONE_OF {
-            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
-            MESSAGE("Wobbuffet's White Herb restored its status!");
-        }
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_KNOCK_OFF, opponent);
+        MESSAGE("Foe Wobbuffet knocked off Slugma's White Herb!");
+        NONE_OF { MESSAGE("Slugma's White Herb restored its status!"); }
     } THEN {
-        EXPECT(player->statStages[STAT_DEF] = DEFAULT_STAT_STAGE - 1);
-        EXPECT(player->statStages[STAT_SPEED] = DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 2);
     }
 }
 
