@@ -334,6 +334,15 @@ If this works, then proceed to [Installation](#installation). Otherwise, ask for
     echo "if [ -f ~/.bashrc ]; then . ~/.bashrc; fi" >> ~/.bash_profile
     ```
 
+5. This repository also requires `poryscript` during the build. On macOS, install `poryscript` version `3.5.2` from [huderlem/poryscript](https://github.com/huderlem/poryscript) and use its `install.sh` script to copy the binary and config files into this repository's `tools/poryscript` directory.
+
+    ```bash
+    cd /path/to/poryscript
+    git checkout 3.5.2
+    go build
+    ./install.sh /path/to/pokeemerald-rogue
+    ```
+
 ### Choosing where to store pokeemerald Expansion (macOS)
 At this point, you can choose a folder to store pokeemerald Expansion into. If you're okay with storing pokeemerald Expansion in the user folder, then proceed to [Installation](#installation). Otherwise, you'll need to account for where pokeemerald Expansion is stored when changing directory to the pokeemerald-expansion folder.
 

@@ -40,12 +40,20 @@ endif
 
 ifeq ($(OS),Windows_NT)
 PORYSCRIPT := tools/poryscript/poryscript-windows/poryscript$(EXE)
+else ifeq ($(shell uname -s),Darwin)
+ifneq ($(wildcard tools/poryscript/poryscript),)
+PORYSCRIPT := tools/poryscript/poryscript
+else ifneq ($(wildcard tools/poryscript/poryscript-macos/poryscript),)
+PORYSCRIPT := tools/poryscript/poryscript-macos/poryscript
+else
+PORYSCRIPT := poryscript
+endif
 else
 PORYSCRIPT := tools/poryscript/poryscript-linux/poryscript$(EXE)
 endif
 
 ROGUEPORYSCRIPTSDIR := data/scripts/Rogue
-PORYSCRIPTARGS := -fc $(ROGUEPORYSCRIPTSDIR)/Strings/poryscript_font_config.json
+PORYSCRIPTARGS := -cc tools/poryscript/command_config.json -fc $(ROGUEPORYSCRIPTSDIR)/Strings/poryscript_font_config.json
 
 ifeq ($(EXPANSION), 1)
 PORYSCRIPTARGS += -s ROGUE_VERSION=ROGUE_VERSION_EXPANSION
@@ -559,7 +567,7 @@ $(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) libagbsyscall
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
 	$(FIX) $@ -p --silent
-	@echo "ROM size:" $$(stat -c "%s" $(ROM) | numfmt --to=iec --format="%.2f")
+	@echo "ROM size (bytes):" $$(wc -c < $(ROM) | tr -d ' ')
 	@echo $(MEMORYSTATS) -F $(MODERN_MAP_NAME)
 
 agbcc: all
