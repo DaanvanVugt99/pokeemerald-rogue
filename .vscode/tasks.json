@@ -1,190 +1,219 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        { 
-            "label": "stop emulation",
-            "type":"shell",
-            "windows": {
-                "command":"taskkill /im mGBA.exe /F"
-            },
-            "osx": {
-                "command": "killall mGBA"
-            }
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "stop emulation",
+      "type": "shell",
+      "windows": {
+        "command": "taskkill /im mGBA.exe /F",
+      },
+      "osx": {
+        "command": "killall mGBA",
+      },
+      "linux": {
+        "command": "killall mGBA || true",
+      },
+    },
+    {
+      "label": "start emulator",
+      "type": "shell",
+      "isBackground": true,
+      "windows": {
+        "command": "${workspaceFolder}/scripts/launch_emu.bat",
+      },
+      "osx": {
+        "command": "${workspaceFolder}/scripts/launch_emu.sh",
+      },
+      "linux": {
+        "command": "${workspaceFolder}/scripts/launch_emu.sh",
+      },
+    },
+    {
+      "label": "start emulator (debug)",
+      "type": "shell",
+      "isBackground": true,
+      "windows": {
+        "command": "${workspaceFolder}/scripts/launch_emu_debug.bat",
+      },
+      "osx": {
+        "command": "${workspaceFolder}/scripts/launch_emu_debug.sh",
+      },
+      "linux": {
+        "command": "${workspaceFolder}/scripts/launch_emu_debug.sh",
+      },
+    },
+    {
+      "label": "start emulator (test)",
+      "type": "shell",
+      "isBackground": true,
+      "windows": {
+        "command": "${workspaceFolder}/scripts/launch_emu_test.bat",
+      },
+      "osx": {
+        "command": "${workspaceFolder}/scripts/launch_emu_test.sh",
+      },
+      "linux": {
+        "command": "${workspaceFolder}/scripts/launch_emu_test.sh",
+      },
+    },
+    {
+      "label": "gdb-debug",
+      "type": "shell",
+      "dependsOn": ["start emulator (debug)"],
+      "isBackground": false,
+      "windows": {
+        "command": "sleep 1; echo debuggerReady",
+      },
+      "osx": {
+        "command": "sleep 1; echo debuggerReady",
+      },
+      "linux": {
+        "command": "sleep 1; echo debuggerReady",
+      },
+      "presentation": {
+        "clear": true,
+        "reveal": "always",
+        "panel": "new",
+      },
+      "command": "debuggerReady",
+      "problemMatcher": {
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*debuggerReady.*$",
+          "endsPattern": "^.*debuggerReady.*$",
         },
-        { 
-            "label": "start emulator",
-            "type": "shell",
-            "isBackground": true,
-            "windows": {
-                "command": "${workspaceFolder}/scripts/launch_emu.bat"
-            },
+      },
+    },
+    {
+      "label": "gdb-debug-test",
+      "type": "shell",
+      "dependsOn": ["start emulator (test)"],
+      "isBackground": false,
+      "windows": {
+        "command": "sleep 1; echo debuggerReady",
+      },
+      "osx": {
+        "command": "sleep 1; echo debuggerReady",
+      },
+      "linux": {
+        "command": "sleep 1; echo debuggerReady",
+      },
+      "presentation": {
+        "clear": true,
+        "reveal": "always",
+        "panel": "new",
+      },
+      "command": "debuggerReady",
+      "problemMatcher": {
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*debuggerReady.*$",
+          "endsPattern": "^.*debuggerReady.*$",
         },
-        { 
-            "label": "start emulator (debug)",
-            "type": "shell",
-            "isBackground": true,
-            "windows": {
-                "command": "${workspaceFolder}/scripts/launch_emu_debug.bat"
-            },
-        },
-        { 
-            "label": "start emulator (test)",
-            "type": "shell",
-            "isBackground": true,
-            "windows": {
-                "command": "${workspaceFolder}/scripts/launch_emu_test.bat"
-            },
-        },
-        {
-            "label": "gdb-debug",
-            "type": "shell",
-            "dependsOn": ["start emulator (debug)"],
-            "isBackground": false,
-            "windows": {
-                "command": "sleep 1; echo debuggerReady"
-            },
-            "presentation": {
-                "clear": true,
-                "reveal": "always",
-                "panel": "new"
-            },
-            "command": "debuggerReady",
-            "problemMatcher": {
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^.*debuggerReady.*$",
-                    "endsPattern": "^.*debuggerReady.*$"
-                },
-            }
-        },
-        {
-            "label": "gdb-debug-test",
-            "type": "shell",
-            "dependsOn": ["start emulator (test)"],
-            "isBackground": false,
-            "windows": {
-                "command": "sleep 1; echo debuggerReady"
-            },
-            "presentation": {
-                "clear": true,
-                "reveal": "always",
-                "panel": "new"
-            },
-            "command": "debuggerReady",
-            "problemMatcher": {
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^.*debuggerReady.*$",
-                    "endsPattern": "^.*debuggerReady.*$"
-                },
-            }
-        },
+      },
+    },
 
-        { 
-            "label": "clean",
-            "type":"shell",
-            "isBackground": false,
-            "windows": {
-                "command": "${workspaceFolder}/scripts/launch_clean.bat"
-            },
-        },
-        { 
-            "label": "build-debug",
-            "type":"shell",
-            "isBackground": false,
-            "windows": {
-                "command": "${workspaceFolder}/scripts/launch_build_debug.bat"
-            },
-        },
-        { 
-            "label": "build-release",
-            "type":"shell",
-            "isBackground": false,
-            "windows": {
-                "command": "${workspaceFolder}/scripts/launch_build_release.bat"
-            },
-        },
-        { 
-            "label": "build-test",
-            "type":"shell",
-            "isBackground": false,
-            "windows": {
-                "command": "${workspaceFolder}/scripts/launch_build_test.bat"
-            },
-        },
-        { 
-            "label": "rebuild-debug",
-            "type":"shell",
-            "isBackground": false,
-            "dependsOrder": "sequence",
-            "dependsOn":
-            [
-                "clean",
-                "build-debug"
-            ]
-        },
-        { 
-            "label": "rebuild-release",
-            "type":"shell",
-            "isBackground": false,
-            "dependsOrder": "sequence",
-            "dependsOn":
-            [
-                "clean",
-                "build-release"
-            ]
-        },
-        { 
-            "label": "build-debug & attach",
-            "type":"shell",
-            "dependsOrder": "sequence",
-            "dependsOn":
-            [
-                "build-debug",
-                "gdb-debug"
-            ]
-        },
-        { 
-            "label": "build-release & attach",
-            "type":"shell",
-            "dependsOrder": "sequence",
-            "dependsOn":
-            [
-                "build-release",
-                "gdb-debug"
-            ]
-        },
-        { 
-            "label": "build-test & attach",
-            "type":"shell",
-            "dependsOrder": "sequence",
-            "dependsOn":
-            [
-                "build-test",
-                "gdb-debug-test"
-            ]
-        },
-        { 
-            "label": "build-debug & launch",
-            "type":"shell",
-            "dependsOrder": "sequence",
-            "dependsOn":
-            [
-                "build-debug",
-                "start emulator"
-            ]
-        },
-        { 
-            "label": "build-release & launch",
-            "type":"shell",
-            "dependsOrder": "sequence",
-            "dependsOn":
-            [
-                "build-release",
-                "start emulator"
-            ]
-        }
-    ]
+    {
+      "label": "clean",
+      "type": "shell",
+      "isBackground": false,
+      "windows": {
+        "command": "${workspaceFolder}/scripts/launch_clean.bat",
+      },
+      "osx": {
+        "command": "${workspaceFolder}/scripts/launch_clean.sh",
+      },
+      "linux": {
+        "command": "${workspaceFolder}/scripts/launch_clean.sh",
+      },
+    },
+    {
+      "label": "build-debug",
+      "type": "shell",
+      "isBackground": false,
+      "windows": {
+        "command": "${workspaceFolder}/scripts/launch_build_debug.bat",
+      },
+      "osx": {
+        "command": "${workspaceFolder}/scripts/launch_build_debug.sh",
+      },
+      "linux": {
+        "command": "${workspaceFolder}/scripts/launch_build_debug.sh",
+      },
+    },
+    {
+      "label": "build-release",
+      "type": "shell",
+      "isBackground": false,
+      "windows": {
+        "command": "${workspaceFolder}/scripts/launch_build_release.bat",
+      },
+      "osx": {
+        "command": "${workspaceFolder}/scripts/launch_build_release.sh",
+      },
+      "linux": {
+        "command": "${workspaceFolder}/scripts/launch_build_release.sh",
+      },
+    },
+    {
+      "label": "build-test",
+      "type": "shell",
+      "isBackground": false,
+      "windows": {
+        "command": "${workspaceFolder}/scripts/launch_build_test.bat",
+      },
+      "osx": {
+        "command": "${workspaceFolder}/scripts/launch_build_test.sh --build",
+      },
+      "linux": {
+        "command": "${workspaceFolder}/scripts/launch_build_test.sh --build",
+      },
+    },
+    {
+      "label": "rebuild-debug",
+      "type": "shell",
+      "isBackground": false,
+      "dependsOrder": "sequence",
+      "dependsOn": ["clean", "build-debug"],
+    },
+    {
+      "label": "rebuild-release",
+      "type": "shell",
+      "isBackground": false,
+      "dependsOrder": "sequence",
+      "dependsOn": ["clean", "build-release"],
+    },
+    {
+      "label": "build-debug & attach",
+      "type": "shell",
+      "dependsOrder": "sequence",
+      "dependsOn": ["build-debug", "gdb-debug"],
+    },
+    {
+      "label": "build-release & attach",
+      "type": "shell",
+      "dependsOrder": "sequence",
+      "dependsOn": ["build-release", "gdb-debug"],
+    },
+    {
+      "label": "build-test & attach",
+      "type": "shell",
+      "dependsOrder": "sequence",
+      "dependsOn": ["build-test", "gdb-debug-test"],
+    },
+    {
+      "label": "build-debug & launch",
+      "type": "shell",
+      "dependsOrder": "sequence",
+      "dependsOn": ["build-debug", "start emulator"],
+    },
+    {
+      "label": "build-release & launch",
+      "type": "shell",
+      "dependsOrder": "sequence",
+      "dependsOn": ["build-release", "start emulator"],
+    },
+  ],
 }
