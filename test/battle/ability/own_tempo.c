@@ -63,7 +63,6 @@ SINGLE_BATTLE_TEST("Own Tempo prevents confusion from moves by the user")
 
 SINGLE_BATTLE_TEST("Own Tempo cures confusion obtained from an opponent with Mold Breaker")
 {
-    KNOWN_FAILING;
     GIVEN {
         ASSUME(gBattleMoves[MOVE_CONFUSE_RAY].effect == EFFECT_CONFUSE);
         PLAYER(SPECIES_PINSIR) { Ability(ABILITY_MOLD_BREAKER); };

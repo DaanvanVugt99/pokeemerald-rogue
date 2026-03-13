@@ -67,6 +67,7 @@ static u32 GetFlingPowerFromItemId(u32 itemId);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
+static u32 GetBattlerAbilityIgnoreMoldBreaker(u32 battler);
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 *const gBattlescriptsForRunningByItem[];
@@ -6091,7 +6092,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
     case ABILITYEFFECT_IMMUNITY: // 5
         for (battler = 0; battler < gBattlersCount; battler++)
         {
-            switch (GetBattlerAbility(battler))
+            switch (GetBattlerAbilityIgnoreMoldBreaker(battler))
             {
             case ABILITY_IMMUNITY:
             case ABILITY_PASTEL_VEIL:
@@ -6463,6 +6464,20 @@ bool32 IsMyceliumMightOnField(void)
 bool32 IsMoldBreakerTypeAbility(u32 ability)
 {
     return (ability == ABILITY_MOLD_BREAKER || ability == ABILITY_TERAVOLT || ability == ABILITY_TURBOBLAZE);
+}
+
+static u32 GetBattlerAbilityIgnoreMoldBreaker(u32 battler)
+{
+    if (gStatuses3[battler] & STATUS3_GASTRO_ACID)
+        return ABILITY_NONE;
+
+    if (IsNeutralizingGasOnField() && !IsNeutralizingGasBannedAbility(gBattleMons[battler].ability))
+        return ABILITY_NONE;
+
+    if (IsMyceliumMightOnField())
+        return ABILITY_NONE;
+
+    return gBattleMons[battler].ability;
 }
 
 u32 GetBattlerAbility(u32 battler)
