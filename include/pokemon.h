@@ -1,7 +1,7 @@
 #ifndef GUARD_POKEMON_H
 #define GUARD_POKEMON_H
 
-#include "sprite.h"
+#include "../gflib/sprite.h"
 #include "constants/items.h"
 #include "constants/region_map_sections.h"
 #include "constants/map_groups.h"

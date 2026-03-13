@@ -1,7 +1,7 @@
 #ifndef GUARD_MENU_SPECIALIZED_H
 #define GUARD_MENU_SPECIALIZED_H
 
-#include "sprite.h"
+#include "../gflib/sprite.h"
 #include "player_pc.h"
 #include "list_menu.h"
 #include "pokemon.h"

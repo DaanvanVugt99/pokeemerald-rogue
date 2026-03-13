@@ -1,7 +1,7 @@
 #ifndef GUARD_WEATHER_H
 #define GUARD_WEATHER_H
 
-#include "sprite.h"
+#include "../gflib/sprite.h"
 #include "constants/field_weather.h"
 
 #define TAG_WEATHER_START 0x1200

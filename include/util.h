@@ -1,7 +1,7 @@
 #ifndef GUARD_UTIL_H
 #define GUARD_UTIL_H
 
-#include "sprite.h"
+#include "../gflib/sprite.h"
 
 extern const u8 gMiscBlank_Gfx[]; // unused in Emerald
 extern const u32 gBitTable[];

@@ -1,7 +1,7 @@
 #ifndef GUARD_DECOMPRESS_H
 #define GUARD_DECOMPRESS_H
 
-#include "sprite.h"
+#include "../gflib/sprite.h"
 
 extern u8 ALIGNED(4) gDecompressionBuffer[0x4000];
 

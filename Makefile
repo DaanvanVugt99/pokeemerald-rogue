@@ -234,7 +234,11 @@ FIX := tools/gbafix/gbafix$(EXE)
 MAPJSON := tools/mapjson/mapjson$(EXE)
 JSONPROC := tools/jsonproc/jsonproc$(EXE)
 PATCHELF := tools/patchelf/patchelf$(EXE)
+ifeq ($(shell uname -s),Darwin)
+ROMTEST ?= $(shell command -v mgba-rom-test 2>/dev/null)
+else
 ROMTEST ?= $(shell { command -v mgba-rom-test || command -v tools/mgba/mgba-rom-test$(EXE); } 2>/dev/null)
+endif
 ROMTESTHYDRA := tools/mgba-rom-test-hydra/mgba-rom-test-hydra$(EXE)
 MEMORYSTATS := tools/Pokabbie/Build/MemoryStats/memorystats$(EXE)
 CUSTOMJSON := tools/Pokabbie/Build/CustomJson/customjson$(EXE)
@@ -599,6 +603,11 @@ TEST_SKIP_IS_FAIL := \x00
 endif
 
 check: $(TESTELF)
+	@if [ -z "$(ROMTEST)" ]; then \
+		echo "Error: mgba-rom-test not found in PATH."; \
+		echo "Install it or run an interactive test build instead (./scripts/launch_build_test.sh --ui)."; \
+		exit 127; \
+	fi
 	@cp $< $(HEADLESSELF)
 	$(PATCHELF) $(HEADLESSELF) gTestRunnerHeadless '\x01' gTestRunnerSkipIsFail "$(TEST_SKIP_IS_FAIL)"
 	$(ROMTESTHYDRA) $(ROMTEST) $(OBJCOPY) $(HEADLESSELF)

@@ -964,7 +964,7 @@ struct BattleSpriteData
     struct BattleBarInfo *battleBars;
 };
 
-#include "sprite.h"
+#include "../gflib/sprite.h"
 
 struct MonSpritesGfx
 {
