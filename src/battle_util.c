@@ -5033,7 +5033,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             u8 extraShedSkinChance = 0;
 
             gBattlerAttacker = battler;
-            
+
             if(GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT)
                 extraShedSkinChance = GetCurseValue(EFFECT_SHED_SKIN_CHANCE);
             else
@@ -7119,6 +7119,56 @@ static u8 TryConsumeMirrorHerb(u32 battler, bool32 execute)
     return effect;
 }
 
+static bool32 ShouldDelayWhiteHerbAtMoveEnd(u32 battler)
+{
+    u32 i;
+
+    // Magician resolves after ITEMEFFECT_MOVE_END. If it'll steal this battler's
+    // item, White Herb should not consume first.
+    if (battler == gBattlerTarget
+     && GetBattlerAbility(gBattlerAttacker) == ABILITY_MAGICIAN
+     && gCurrentMove != MOVE_FLING && gCurrentMove != MOVE_NATURAL_GIFT
+     && gBattleMons[gBattlerAttacker].item == ITEM_NONE
+     && gBattleMons[battler].item != ITEM_NONE
+     && IsBattlerAlive(gBattlerAttacker)
+     && TARGET_TURN_DAMAGED
+     && CanStealItem(gBattlerAttacker, battler, gBattleMons[battler].item)
+     && !gSpecialStatuses[gBattlerAttacker].gemBoost
+     && !(gWishFutureKnock.knockedOffMons[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+     && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)
+     && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+     && (GetBattlerAbility(battler) != ABILITY_STICKY_HOLD || !IsBattlerAlive(battler)))
+    {
+        return TRUE;
+    }
+
+    // Pickpocket also resolves after ITEMEFFECT_MOVE_END.
+    if (battler == gBattlerAttacker
+     && IsBattlerAlive(gBattlerAttacker)
+     && gBattleMons[gBattlerAttacker].item != ITEM_NONE
+     && !(gWishFutureKnock.knockedOffMons[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]])
+     && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
+     && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+     && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+    {
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (i != gBattlerAttacker
+             && GetBattlerAbility(i) == ABILITY_PICKPOCKET
+             && BATTLER_TURN_DAMAGED(i)
+             && !DoesSubstituteBlockMove(gBattlerAttacker, i, gCurrentMove)
+             && IsBattlerAlive(i)
+             && gBattleMons[i].item == ITEM_NONE
+             && CanStealItem(i, gBattlerAttacker, gBattleMons[gBattlerAttacker].item))
+            {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
 static u8 ItemEffectMoveEnd(u32 battler, u16 holdEffect)
 {
     u8 effect = 0;
@@ -7303,6 +7353,11 @@ static u8 ItemEffectMoveEnd(u32 battler, u16 holdEffect)
         }
         break;
     case HOLD_EFFECT_RESTORE_STATS:
+        // For multi-hit moves, White Herb should activate after the final strike.
+        if (gMultiHitCounter > 1)
+            break;
+        if (ShouldDelayWhiteHerbAtMoveEnd(battler))
+            break;
         for (i = 0; i < NUM_BATTLE_STATS; i++)
         {
             if (gBattleMons[battler].statStages[i] < DEFAULT_STAT_STAGE)
@@ -8009,7 +8064,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 }
                 break;
             }
-            
+
             if(shouldFlinch)
             {
                 gBattleScripting.moveEffect = MOVE_EFFECT_FLINCH;
@@ -10329,7 +10384,7 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
     {
         mod = UQ_4_12(1.0);
     }
-    else if ((moveType == TYPE_FIGHTING || moveType == TYPE_NORMAL) && defType == TYPE_GHOST 
+    else if ((moveType == TYPE_FIGHTING || moveType == TYPE_NORMAL) && defType == TYPE_GHOST
         && (abilityAtk == ABILITY_SCRAPPY || abilityAtk == ABILITY_MINDS_EYE)
         && mod == UQ_4_12(0.0))
     {
