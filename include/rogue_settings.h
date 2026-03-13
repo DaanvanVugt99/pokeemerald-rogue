@@ -1,6 +1,8 @@
 #ifndef ROGUE_SETTINGS__H
 #define ROGUE_SETTINGS__H
 
+#include "global.h"
+
 typedef void (*RogueDifficultyMenuCallback)(void);
 
 struct GameModeRules

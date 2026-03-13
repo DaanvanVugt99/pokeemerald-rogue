@@ -1,6 +1,8 @@
 #ifndef GUARD_ROGUE_H
 #define GUARD_ROGUE_H
 
+#include "global.h"
+
 // Extra data for pokemon in party
 struct RoguePartyMon
 {

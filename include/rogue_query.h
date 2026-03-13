@@ -1,6 +1,8 @@
 #ifndef ROGUE_QUERY_H
 #define ROGUE_QUERY_H
 
+#include "global.h"
+
 typedef bool8 (*QueryCallback)(u16 elem, u16 usrData);
 typedef bool8 (*QueryFilterCallback)(u16 elem, void* usrData);
 typedef u8 (*WeightCallback)(u16 index, u16 elem, void* usrData);

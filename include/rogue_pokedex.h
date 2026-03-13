@@ -1,6 +1,8 @@
 #ifndef ROGUE_POKEDEX__H
 #define ROGUE_POKEDEX__H
 
+#include "global.h"
+
 // New UI/UX for Rogue pokedex
 void Rogue_ShowPokedexFromMenu(void);
 void Rogue_ShowPokedexFromScript(void);

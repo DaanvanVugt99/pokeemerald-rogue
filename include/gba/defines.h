@@ -6,8 +6,13 @@
 #define TRUE  1
 #define FALSE 0
 
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(__INTELLISENSE__)
+#define IWRAM_DATA
+#define EWRAM_DATA
+#else
 #define IWRAM_DATA __attribute__((section("iwram_data")))
 #define EWRAM_DATA __attribute__((section("ewram_data")))
+#endif
 #define UNUSED __attribute__((unused))
 
 #if MODERN

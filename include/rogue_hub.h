@@ -1,6 +1,7 @@
 #ifndef ROGUE_HUB_H
 #define ROGUE_HUB_H
 
+#include "global.h"
 #include "constants/generated/decorations.h"
 
 void RogueHub_Enter();

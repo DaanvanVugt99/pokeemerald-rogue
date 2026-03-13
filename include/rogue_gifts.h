@@ -1,6 +1,7 @@
 #ifndef ROGUE_GIFTS_H
 #define ROGUE_GIFTS_H
 
+#include "global.h"
 #include "constants/generated/custom_mons.h"
 
 enum

@@ -1,6 +1,8 @@
 #ifndef ROGUE_SCRIPT_H
 #define ROGUE_SCRIPT_H
 
+#include "global.h"
+
 
 bool8 Rogue_CheckPartyHasRoomForMon(void);
 

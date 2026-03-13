@@ -1,6 +1,8 @@
 #ifndef ROGUE_CAMPAIGN_H
 #define ROGUE_CAMPAIGN_H
 
+#include "global.h"
+
 const u8* GetCampaignTitle(u16 campaignId);
 
 void Rogue_ResetCampaignAfter(u16 count);

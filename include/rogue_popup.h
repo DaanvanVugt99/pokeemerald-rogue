@@ -1,6 +1,8 @@
 #ifndef QUEST_POPUP_H
 #define QUEST_POPUP_H
 
+#include "global.h"
+
 struct CustomPopup
 {
     u8 const* titleStr;

@@ -1,6 +1,7 @@
 #ifndef ROGUE_QUEST_H
 #define ROGUE_QUEST_H
 
+#include "global.h"
 #include "constants/generated/quests.h"
 
 struct RogueQuestTrigger;

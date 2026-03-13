@@ -1,5 +1,7 @@
 #ifdef ROGUE_FEATURE_AUTOMATION
 
+#include "global.h"
+
 enum
 {
     AUTO_INPUT_STATE_UNKNOWN,

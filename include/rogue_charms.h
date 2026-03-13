@@ -1,6 +1,8 @@
 #ifndef ROGUE_CHARMS__H
 #define ROGUE_CHARMS__H
 
+#include "global.h"
+
 enum RogueCharmEffects
 {
     EFFECT_SHOP_PRICE,

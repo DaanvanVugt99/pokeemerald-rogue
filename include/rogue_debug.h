@@ -1,6 +1,8 @@
 #ifndef ROGUE_DEBUG_H
 #define ROGUE_DEBUG_H
 
+#include "global.h"
+
 // Comment features in if want to use them
 
 // Memory Stomp Tracking:

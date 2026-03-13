@@ -1,6 +1,8 @@
 #ifndef ROGUE_QUERY_SCRIPTS_H
 #define ROGUE_QUERY_SCRIPTS_H
 
+#include "global.h"
+
 enum
 {
     // Global

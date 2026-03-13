@@ -1,0 +1,7 @@
+-std=gnu17
+-DMODERN=1
+-DTESTING=0
+-DROGUE_EXPANSION=1
+-DROGUE_DEBUG=1
+-Iinclude
+-Igflib

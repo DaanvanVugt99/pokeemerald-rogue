@@ -1,6 +1,8 @@
 #ifndef ROGUE_FOLLOWMON_H
 #define ROGUE_FOLLOWMON_H
 
+#include "global.h"
+
 const struct ObjectEventGraphicsInfo *GetFollowMonObjectEventInfo(u16 graphicsId);
 void SetupFollowParterMonObjectEvent();
 void ResetFollowParterMonObjectEvent();

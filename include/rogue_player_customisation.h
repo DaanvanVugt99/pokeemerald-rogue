@@ -1,6 +1,8 @@
 #ifndef ROGUE_PLAYER_CUSTOMISATION__H
 #define ROGUE_PLAYER_CUSTOMISATION__H
 
+#include "global.h"
+
 #define RGB_MAX_UI_VALUE 10
 #define MULTI_DIVIDE_ROUND(value, multiply, divide) (((value * multiply) / divide) + ((value * multiply) % divide >= divide/ 2 ? 1 : 0))
 

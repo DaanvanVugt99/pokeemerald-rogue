@@ -1,6 +1,8 @@
 #ifndef QUEST_MENU_H
 #define QUEST_MENU_H
 
+#include "global.h"
+
 typedef void (*RogueQuestMenuCallback)(void);
 
 bool8 Rogue_IsQuestMenuOverviewActive(void);

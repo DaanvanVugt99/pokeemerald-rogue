@@ -1,6 +1,8 @@
 #ifndef GUARD_ROGUE_GAME_SHOW_H
 #define GUARD_ROGUE_GAME_SHOW_H
 
+#include "global.h"
+
 struct RogueGameShow
 {
     u16 recentSpecies;

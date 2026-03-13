@@ -1,6 +1,8 @@
 #ifndef ROGUE_RIDEMON_H
 #define ROGUE_RIDEMON_H
 
+#include "global.h"
+
 void Rogue_RideMonInit();
 struct RogueRideMonState* Rogue_GetPlayerRideMonStatePtr();
 

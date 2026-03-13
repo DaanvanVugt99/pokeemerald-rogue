@@ -1,6 +1,8 @@
 #ifndef ROGUE_TIMEOFDAY__H
 #define ROGUE_TIMEOFDAY__H
 
+#include "global.h"
+
 u16 RogueToD_GetTime();
 void RogueToD_SetTime(u16 time);
 

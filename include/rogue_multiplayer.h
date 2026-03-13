@@ -1,6 +1,8 @@
 #ifndef ROGUE_MULTIPLAYER_H
 #define ROGUE_MULTIPLAYER_H
 
+#include "global.h"
+
 enum
 {
     MP_CMD_NONE,

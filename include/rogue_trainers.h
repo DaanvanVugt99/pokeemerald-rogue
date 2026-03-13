@@ -1,6 +1,8 @@
 #ifndef ROGUE_TRAINERS_H
 #define ROGUE_TRAINERS_H
 
+#include "global.h"
+
 bool8 Rogue_IsBossTrainer(u16 trainerNum);
 bool8 Rogue_IsRivalTrainer(u16 trainerNum);
 bool8 Rogue_IsTeamBossTrainer(u16 trainerNum);

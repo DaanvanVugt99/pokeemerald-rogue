@@ -1,6 +1,8 @@
 #ifndef ROGUE_SAVE_H
 #define ROGUE_SAVE_H
 
+#include "global.h"
+
 extern struct RogueSaveBlock *gRogueSaveBlock;
 
 // The version to use for tracking/updating internal save game data

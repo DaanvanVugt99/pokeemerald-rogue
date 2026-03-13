@@ -1,6 +1,8 @@
 #ifndef ROGUE_ASSISTANT_H
 #define ROGUE_ASSISTANT_H
 
+#include "global.h"
+
 enum ASSISTANT_STATE_NUM
 {
     ASSISTANT_STATE_NONE,

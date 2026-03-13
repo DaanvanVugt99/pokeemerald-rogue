@@ -1,6 +1,7 @@
 #ifndef ROGUE_CONTROLLER_H
 #define ROGUE_CONTROLLER_H
 
+#include "global.h"
 #include "rogue_baked.h"
 
 enum

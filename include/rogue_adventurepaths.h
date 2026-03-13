@@ -1,6 +1,8 @@
 #ifndef ROGUE_ADVENTUREPATHS_H
 #define ROGUE_ADVENTUREPATHS_H
 
+#include "global.h"
+
 #define ROGUE_WARP_UNSET 0
 #define ROGUE_WARP_TO_ROOM 1
 #define ROGUE_WARP_TO_ADVPATH 2 
