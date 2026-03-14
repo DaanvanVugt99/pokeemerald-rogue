@@ -4707,13 +4707,6 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
         else if (ability == ABILITY_SLUSH_RUSH  && (gBattleWeather & (B_WEATHER_HAIL | B_WEATHER_SNOW)))
             speed *= 2;
 
-        if ((gBattleWeather & B_WEATHER_ACID_RAIN)
-         && !IS_BATTLER_OF_TYPE(battler, TYPE_POISON))
-        {
-            speed = (speed * 9) / 10;
-            if (speed == 0)
-                speed = 1;
-        }
     }
 
     // other abilities

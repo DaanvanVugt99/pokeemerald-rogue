@@ -7094,8 +7094,13 @@ BattleScript_DamagingWeatherLoop::
 	hitanimation BS_ATTACKER
 	goto BattleScript_DamagingWeatherHpChange
 BattleScript_DamagingWeatherHeal:
+	jumpifhalfword CMP_COMMON_BITS, gBattleWeather, B_WEATHER_ACID_RAIN, BattleScript_DamagingWeatherAcidRainHeal
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_ICEBODYHPGAIN
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_DamagingWeatherHpChange
+BattleScript_DamagingWeatherAcidRainHeal:
+	printstring STRINGID_ACIDRAINHEALS
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_DamagingWeatherHpChange:
 	orword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE | HITMARKER_GRUDGE

@@ -37,34 +37,31 @@ SINGLE_BATTLE_TEST("Acid rain damage does not affect Poison-type Pokemon")
     }
 }
 
-SINGLE_BATTLE_TEST("Acid rain reduces the Speed of non-Poison Pokemon")
+SINGLE_BATTLE_TEST("Acid rain heals Poison-type Pokemon by 1/16 per turn")
 {
+    s16 acidRainHeal;
+
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE, MOVE_CORROSIVE_CLOUDS); }
-        OPPONENT(SPECIES_KOFFING) { Speed(95); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_KOFFING) { HP(1); MaxHP(160); }
     } WHEN {
-        TURN { MOVE(player, MOVE_CORROSIVE_CLOUDS); MOVE(opponent, MOVE_CELEBRATE); }
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CORROSIVE_CLOUDS); }
     } SCENE {
-        MESSAGE("Wobbuffet used Corrosive Clouds!");
-        MESSAGE("Foe Koffing used Celebrate!");
-        MESSAGE("Foe Koffing used Celebrate!");
-        MESSAGE("Wobbuffet used Celebrate!");
+        MESSAGE("The acid rain restored Foe Koffing's HP a little!");
+        HP_BAR(opponent, captureDamage: &acidRainHeal);
+    } THEN {
+        EXPECT_EQ(acidRainHeal, -(opponent->maxHP / 16));
     }
 }
 
-SINGLE_BATTLE_TEST("Acid rain does not reduce the Speed of Poison-type Pokemon")
+SINGLE_BATTLE_TEST("Acid rain does not heal Poison-type Pokemon at max HP")
 {
     GIVEN {
-        PLAYER(SPECIES_KOFFING) { Speed(100); Moves(MOVE_CELEBRATE, MOVE_CORROSIVE_CLOUDS); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(95); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_KOFFING);
     } WHEN {
-        TURN { MOVE(player, MOVE_CORROSIVE_CLOUDS); MOVE(opponent, MOVE_CELEBRATE); }
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CORROSIVE_CLOUDS); }
     } SCENE {
-        MESSAGE("Koffing used Corrosive Clouds!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-        MESSAGE("Koffing used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
+        NOT MESSAGE("The acid rain restored Foe Koffing's HP a little!");
     }
 }
