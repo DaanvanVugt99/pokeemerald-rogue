@@ -875,6 +875,7 @@ gBattleAnims_Moves::
 	.4byte Move_PSYCHIC_NOISE
 	.4byte Move_UPPER_HAND
 	.4byte Move_MALIGNANT_CHAIN
+	.4byte Move_CORROSIVE_CLOUDS
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
 	.4byte Move_ALL_OUT_PUMMELING
@@ -17358,7 +17359,7 @@ Move_LAST_RESPECTS::
 	restorebg
 	waitbgfadein
 	end
-	
+
 Move_TIDY_UP::
 	loadspritegfx ANIM_TAG_PINK_CLOUD
 	monbg ANIM_ATTACKER
@@ -17379,7 +17380,7 @@ Move_TIDY_UP::
 	clearmonbg ANIM_ATTACKER
 	blendoff
 	end
-	
+
 Move_KOWTOW_CLEAVE::
 	loadspritegfx ANIM_TAG_SLASH
 	loadspritegfx ANIM_TAG_CROSS_IMPACT
@@ -17673,7 +17674,7 @@ Move_HYDRO_STEAM::
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 3, 9, 0, RGB_RED
 	waitforvisualfinish
 	end
-	
+
 Move_POUNCE::
 	loadspritegfx ANIM_TAG_IMPACT
 	monbg ANIM_TARGET
@@ -22684,6 +22685,20 @@ Move_RAIN_DANCE:
 	delay 30
 	waitforvisualfinish
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 4, 0, RGB_BLACK
+	waitforvisualfinish
+	end
+
+Move_CORROSIVE_CLOUDS:
+	loadspritegfx ANIM_TAG_RAIN_DROPS
+	playsewithpan SE_M_RAIN_DANCE, SOUND_PAN_ATTACKER
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 0, 4, RGB_GREEN
+	waitforvisualfinish
+	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
+	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
+	delay 120
+	delay 30
+	waitforvisualfinish
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 4, 0, RGB_GREEN
 	waitforvisualfinish
 	end
 
@@ -28266,12 +28281,12 @@ General_TeraCharge:
 	clearmonbg ANIM_ATK_PARTNER
 	blendoff
 	end
-	
+
 TeraChargeParticles:
 	@ createsprite gBrickBreakWallShardSpriteTemplate, ANIM_ATTACKER, 2, ANIM_TARGET, 0, -8, -12
 	@ createsprite gBrickBreakWallShardSpriteTemplate, ANIM_ATTACKER, 2, ANIM_TARGET, 1, 8, -12
 	@ createsprite gBrickBreakWallShardSpriteTemplate, ANIM_ATTACKER, 2, ANIM_TARGET, 2, -8, 12
-	@ createsprite gBrickBreakWallShardSpriteTemplate, ANIM_ATTACKER, 2, ANIM_TARGET, 3, 8, 12 
+	@ createsprite gBrickBreakWallShardSpriteTemplate, ANIM_ATTACKER, 2, ANIM_TARGET, 3, 8, 12
 	createsprite gTeraCrystalSpreadSpriteTemplate, ANIM_TARGET, 0, 0, -5, 8
 	createsprite gTeraCrystalSpreadSpriteTemplate, ANIM_TARGET, 0, 1, 5, 9
 	createsprite gTeraCrystalSpreadSpriteTemplate, ANIM_TARGET, 0, 2, 5, -8

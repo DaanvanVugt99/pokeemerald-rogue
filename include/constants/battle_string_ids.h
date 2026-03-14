@@ -706,8 +706,12 @@
 #define STRINGID_PKMNTERASTALLIZEDINTO                704
 #define STRINGID_PKMNMADESHELLGLEAM                   705
 #define STRINGID_ELECTROSHOTCHARGING                  706
+#define STRINGID_ACIDRAINSTARTED                      707
+#define STRINGID_ACIDRAINCONTINUES                    708
+#define STRINGID_ACIDRAINSTOPPED                      709
+#define STRINGID_PKMNSCORCHEDBYACIDRAIN               710
 
-#define BATTLESTRINGS_COUNT                           707
+#define BATTLESTRINGS_COUNT                           711
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
@@ -775,6 +779,7 @@
 #define B_MSG_STARTED_SUNLIGHT  4
 #define B_MSG_STARTED_HAIL      5
 #define B_MSG_STARTED_SNOW      6
+#define B_MSG_STARTED_ACID_RAIN 7
 
 // gWeatherEndsStringIds
 #define B_MSG_WEATHER_END_RAIN         0
@@ -784,7 +789,8 @@
 #define B_MSG_WEATHER_END_STRONG_WINDS 4
 #define B_MSG_WEATHER_END_SNOW         5
 #define B_MSG_WEATHER_END_FOG          6
-#define B_MSG_WEATHER_END_COUNT        7
+#define B_MSG_WEATHER_END_ACID_RAIN    7
+#define B_MSG_WEATHER_END_COUNT        8
 
 // gRainContinuesStringIds
 #define B_MSG_RAIN_CONTINUES     0
@@ -795,6 +801,7 @@
 #define B_MSG_SANDSTORM  0
 #define B_MSG_HAIL       1
 #define B_MSG_SNOW       2
+#define B_MSG_ACID_RAIN  3
 
 // gReflectLightScreenSafeguardStringIds
 #define B_MSG_SIDE_STATUS_FAILED     0

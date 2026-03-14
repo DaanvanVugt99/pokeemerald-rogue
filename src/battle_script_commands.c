@@ -8377,6 +8377,8 @@ static void RemoveAllWeather(void)
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_STRONG_WINDS;
     else if(gBattleWeather & B_WEATHER_SNOW)
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_SNOW;
+    else if(gBattleWeather & B_WEATHER_ACID_RAIN)
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_ACID_RAIN;
     else
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_END_COUNT;  // failsafe
 
@@ -12423,6 +12425,18 @@ static void Cmd_weatherdamage(void)
                 gBattleMoveDamage *= -1;
             }
         }
+        if (gBattleWeather & B_WEATHER_ACID_RAIN)
+        {
+            if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON)
+                && ability != ABILITY_OVERCOAT
+                && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
+                && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
+            {
+                gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+            }
+        }
     }
 
     gBattlescriptCurrInstr = cmd->nextInstr;
@@ -16462,6 +16476,23 @@ void BS_SetSnow(void)
     {
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_SNOW;
     }
+    gBattlescriptCurrInstr = cmd->nextInstr;
+}
+
+void BS_SetAcidRain(void)
+{
+    NATIVE_ARGS();
+
+    if (!TryChangeBattleWeather(gBattlerAttacker, ENUM_WEATHER_ACID_RAIN, FALSE))
+    {
+        gMoveResultFlags |= MOVE_RESULT_MISSED;
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WEATHER_FAILED;
+    }
+    else
+    {
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_ACID_RAIN;
+    }
+
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 

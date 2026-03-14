@@ -3288,6 +3288,10 @@ static const u8 sElectroShotDescription[] = _(
     "Absorbs electricity in one turn,\n"
     "then attacks next turn.");
 
+static const u8 sCorrosiveCloudsDescription[] = _(
+    "Whips up acidic clouds to\n"
+    "cause acid rain.");
+
 static const u8 sTeraStarstormDescription[] = _(
     "Damages all opponents if user is\n"
     "Stellar form Terapagos.");
@@ -4176,6 +4180,7 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_SYRUP_BOMB - 1] = sSyrupBombDescription,
     [MOVE_IVY_CUDGEL - 1] = sIvyCudgelDescription,
     [MOVE_ELECTRO_SHOT - 1] = sElectroShotDescription,
+    [MOVE_CORROSIVE_CLOUDS - 1] = sCorrosiveCloudsDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,

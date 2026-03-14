@@ -4706,6 +4706,14 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
             speed *= 2;
         else if (ability == ABILITY_SLUSH_RUSH  && (gBattleWeather & (B_WEATHER_HAIL | B_WEATHER_SNOW)))
             speed *= 2;
+
+        if ((gBattleWeather & B_WEATHER_ACID_RAIN)
+         && !IS_BATTLER_OF_TYPE(battler, TYPE_POISON))
+        {
+            speed = (speed * 9) / 10;
+            if (speed == 0)
+                speed = 1;
+        }
     }
 
     // other abilities
@@ -4801,6 +4809,7 @@ static bool32 IsWeatherAffectedMove(u16 move)
         case MOVE_BLIZZARD:
         case MOVE_SNOWSCAPE:
         case MOVE_CHILLY_RECEPTION:
+        case MOVE_CORROSIVE_CLOUDS:
         case MOVE_SANDSTORM:
         case MOVE_SHORE_UP:
             return TRUE;
@@ -5771,6 +5780,8 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
                 gBattleStruct->dynamicMoveType = TYPE_FIRE | F_DYNAMIC_TYPE_SET;
             else if (gBattleWeather & (B_WEATHER_HAIL |B_WEATHER_SNOW))
                 gBattleStruct->dynamicMoveType = TYPE_ICE | F_DYNAMIC_TYPE_SET;
+            else if (gBattleWeather & B_WEATHER_ACID_RAIN)
+                gBattleStruct->dynamicMoveType = TYPE_POISON | F_DYNAMIC_TYPE_SET;
             else
                 gBattleStruct->dynamicMoveType = TYPE_NORMAL | F_DYNAMIC_TYPE_SET;
         }

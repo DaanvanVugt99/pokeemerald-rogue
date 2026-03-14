@@ -10,7 +10,7 @@ SINGLE_BATTLE_TEST("Electric Terrain protects grounded battlers from falling asl
         TURN { MOVE(player, MOVE_ELECTRIC_TERRAIN); MOVE(opponent, MOVE_SPORE); }
         TURN { MOVE(player, MOVE_SPORE); }
     } SCENE {
-        MESSAGE("Wobbuffet used ElctrcTrrain!");
+        MESSAGE("Wobbuffet used Electric Terrain!");
         MESSAGE("Foe Claydol used Spore!");
         MESSAGE("Wobbuffet surrounds itself with electrified terrain!");
         MESSAGE("Wobbuffet used Spore!");

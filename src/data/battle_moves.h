@@ -14491,6 +14491,23 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .sheerForceBoost = TRUE, //(uncomment when effect is implemented, otherwise it breaks the Sheer Force Test)
     },
 
+    [MOVE_CORROSIVE_CLOUDS] =
+    {
+        .effect = EFFECT_CORROSIVE_CLOUDS,
+        .power = 0,
+        .type = TYPE_POISON,
+        .accuracy = 0,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_ALL_BATTLERS,
+        .priority = 0,
+        .split = SPLIT_STATUS,
+        .zMoveEffect = Z_EFFECT_SPD_UP_1,
+        .ignoresProtect = TRUE,
+        .mirrorMoveBanned = TRUE,
+        .metronomeBanned = TRUE,
+    },
+
     [MOVE_TERA_STARSTORM] =
     {
         .effect = EFFECT_TERA_STARSTORM,

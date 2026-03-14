@@ -1370,6 +1370,10 @@
 	callnative BS_SetSnow
 	.endm
 
+	.macro setacidrain
+	callnative BS_SetAcidRain
+	.endm
+
 	.macro applysaltcure battler:req
 	callnative BS_ApplySaltCure
 	.byte \battler

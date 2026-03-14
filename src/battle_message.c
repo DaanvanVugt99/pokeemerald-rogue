@@ -176,6 +176,7 @@ static const u8 sText_PkmnHitWithRecoil[] = _("{B_ATK_NAME_WITH_PREFIX} is hit\n
 static const u8 sText_PkmnProtectedItself2[] = _("{B_ATK_NAME_WITH_PREFIX} protected\nitself!");
 static const u8 sText_PkmnBuffetedBySandstorm[] = _("{B_ATK_NAME_WITH_PREFIX} is buffeted\nby the sandstorm!");
 static const u8 sText_PkmnPeltedByHail[] = _("{B_ATK_NAME_WITH_PREFIX} is pelted\nby HAIL!");
+static const u8 sText_PkmnScorchedByAcidRain[] = _("{B_ATK_NAME_WITH_PREFIX} is scorched\nby acid rain!");
 static const u8 sText_PkmnsXWoreOff[] = _("{B_ATK_PREFIX1}'s {B_BUFF1}\nwore off!");
 static const u8 sText_PkmnSeeded[] = _("{B_DEF_NAME_WITH_PREFIX} was seeded!");
 static const u8 sText_PkmnEvadedAttack[] = _("{B_DEF_NAME_WITH_PREFIX} evaded\nthe attack!");
@@ -374,6 +375,9 @@ static const u8 sText_HailStopped[] = _("The hail stopped.");
 static const u8 sText_StartedSnow[] = _("It started to snow!");
 static const u8 sText_SnowContinues[] = _("Snow continues to fall.");
 static const u8 sText_SnowStopped[] = _("The snow stopped.");
+static const u8 sText_AcidRainStarted[] = _("Acid rain began to fall!");
+static const u8 sText_AcidRainContinues[] = _("Acid rain continues to fall.");
+static const u8 sText_AcidRainStopped[] = _("The acid rain stopped.");
 static const u8 sText_FailedToSpitUp[] = _("But it failed to spit up\na thing!");
 static const u8 sText_FailedToSwallow[] = _("But it failed to swallow\na thing!");
 static const u8 sText_WindBecameHeatWave[] = _("The wind turned into a\nHEAT WAVE!");
@@ -1090,6 +1094,7 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     [STRINGID_PKMNPROTECTEDITSELF2 - BATTLESTRINGS_TABLE_START] = sText_PkmnProtectedItself2,
     [STRINGID_PKMNBUFFETEDBYSANDSTORM - BATTLESTRINGS_TABLE_START] = sText_PkmnBuffetedBySandstorm,
     [STRINGID_PKMNPELTEDBYHAIL - BATTLESTRINGS_TABLE_START] = sText_PkmnPeltedByHail,
+    [STRINGID_PKMNSCORCHEDBYACIDRAIN - BATTLESTRINGS_TABLE_START] = sText_PkmnScorchedByAcidRain,
     [STRINGID_PKMNSEEDED - BATTLESTRINGS_TABLE_START] = sText_PkmnSeeded,
     [STRINGID_PKMNEVADEDATTACK - BATTLESTRINGS_TABLE_START] = sText_PkmnEvadedAttack,
     [STRINGID_PKMNSAPPEDBYLEECHSEED - BATTLESTRINGS_TABLE_START] = sText_PkmnSappedByLeechSeed,
@@ -1235,6 +1240,9 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     [STRINGID_STARTEDSNOW - BATTLESTRINGS_TABLE_START] = sText_StartedSnow,
     [STRINGID_SNOWCONTINUES -BATTLESTRINGS_TABLE_START] = sText_SnowContinues,
     [STRINGID_SNOWSTOPPED - BATTLESTRINGS_TABLE_START] = sText_SnowStopped,
+    [STRINGID_ACIDRAINSTARTED - BATTLESTRINGS_TABLE_START] = sText_AcidRainStarted,
+    [STRINGID_ACIDRAINCONTINUES - BATTLESTRINGS_TABLE_START] = sText_AcidRainContinues,
+    [STRINGID_ACIDRAINSTOPPED - BATTLESTRINGS_TABLE_START] = sText_AcidRainStopped,
     [STRINGID_FAILEDTOSPITUP - BATTLESTRINGS_TABLE_START] = sText_FailedToSpitUp,
     [STRINGID_FAILEDTOSWALLOW - BATTLESTRINGS_TABLE_START] = sText_FailedToSwallow,
     [STRINGID_WINDBECAMEHEATWAVE - BATTLESTRINGS_TABLE_START] = sText_WindBecameHeatWave,
@@ -1661,6 +1669,7 @@ const u16 gMoveWeatherChangeStringIds[] =
     [B_MSG_STARTED_SUNLIGHT]  = STRINGID_SUNLIGHTGOTBRIGHT,
     [B_MSG_STARTED_HAIL]      = STRINGID_STARTEDHAIL,
     [B_MSG_STARTED_SNOW]      = STRINGID_STARTEDSNOW,
+    [B_MSG_STARTED_ACID_RAIN] = STRINGID_ACIDRAINSTARTED,
 };
 
 const u16 gWeatherEndsStringIds[B_MSG_WEATHER_END_COUNT] =
@@ -1672,6 +1681,7 @@ const u16 gWeatherEndsStringIds[B_MSG_WEATHER_END_COUNT] =
     [B_MSG_WEATHER_END_STRONG_WINDS] = STRINGID_STRONGWINDSDISSIPATED,
     [B_MSG_WEATHER_END_SNOW] = STRINGID_SNOWSTOPPED,
     [B_MSG_WEATHER_END_FOG] = STRINGID_SNOWSTOPPED,
+    [B_MSG_WEATHER_END_ACID_RAIN] = STRINGID_ACIDRAINSTOPPED,
 };
 
 const u16 gSandStormHailSnowContinuesStringIds[] =
@@ -1679,12 +1689,14 @@ const u16 gSandStormHailSnowContinuesStringIds[] =
     [B_MSG_SANDSTORM] = STRINGID_SANDSTORMRAGES,
     [B_MSG_HAIL]      = STRINGID_HAILCONTINUES,
     [B_MSG_SNOW]      = STRINGID_SNOWCONTINUES,
+    [B_MSG_ACID_RAIN] = STRINGID_ACIDRAINCONTINUES,
 };
 
 const u16 gSandStormHailDmgStringIds[] =
 {
     [B_MSG_SANDSTORM] = STRINGID_PKMNBUFFETEDBYSANDSTORM,
-    [B_MSG_HAIL]      = STRINGID_PKMNPELTEDBYHAIL
+    [B_MSG_HAIL]      = STRINGID_PKMNPELTEDBYHAIL,
+    [B_MSG_ACID_RAIN] = STRINGID_PKMNSCORCHEDBYACIDRAIN,
 };
 
 const u16 gSandStormHailSnowEndStringIds[] =
@@ -1692,6 +1704,7 @@ const u16 gSandStormHailSnowEndStringIds[] =
     [B_MSG_SANDSTORM] = STRINGID_SANDSTORMSUBSIDED,
     [B_MSG_HAIL]      = STRINGID_HAILSTOPPED,
     [B_MSG_SNOW]      = STRINGID_SNOWSTOPPED,
+    [B_MSG_ACID_RAIN] = STRINGID_ACIDRAINSTOPPED,
 };
 
 const u16 gRainContinuesStringIds[] =

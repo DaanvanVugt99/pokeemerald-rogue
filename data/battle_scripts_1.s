@@ -457,6 +457,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectTeraBlast               @ EFFECT_TERA_BLAST
 	.4byte BattleScript_EffectPhotonGeyser            @ EFFECT_TERA_STARSTORM
 	.4byte BattleScript_EffectElectroShot             @ EFFECT_ELECTRO_SHOT
+	.4byte BattleScript_EffectCorrosiveClouds         @ EFFECT_CORROSIVE_CLOUDS
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -5442,6 +5443,13 @@ BattleScript_EffectSunnyDay::
 	ppreduce
 	call BattleScript_CheckPrimalWeather
 	setsunny
+	goto BattleScript_MoveWeatherChange
+
+BattleScript_EffectCorrosiveClouds::
+	attackcanceler
+	attackstring
+	ppreduce
+	setacidrain
 	goto BattleScript_MoveWeatherChange
 
 BattleScript_ExtremelyHarshSunlightWasNotLessened:
