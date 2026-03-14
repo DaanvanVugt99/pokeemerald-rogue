@@ -3691,6 +3691,7 @@ extern const u32 gBattleAnimBgTilemap_FocusBlast[];
 extern const u32 gBattleAnimBgPalette_GarbageFalls[];
 extern const u32 gBattleAnimBgImage_GrassyTerrain[];
 extern const u32 gBattleAnimBgPalette_GrassyTerrain[];
+extern const u32 gBattleAnimBgPalette_InfestedTerrain[];
 extern const u32 gBattleAnimBgTilemap_GrassyTerrain[];
 extern const u32 gBattleAnimBgPalette_GunkShot[];
 extern const u32 gBattleAnimBgImage_HydroCannon[];

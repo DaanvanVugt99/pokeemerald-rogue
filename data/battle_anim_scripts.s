@@ -877,6 +877,7 @@ gBattleAnims_Moves::
 	.4byte Move_MALIGNANT_CHAIN
 	.4byte Move_CORROSIVE_CLOUDS
 	.4byte Move_ECLIPSE
+	.4byte Move_INFESTED_TERRAIN
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
 	.4byte Move_ALL_OUT_PUMMELING
@@ -22726,6 +22727,43 @@ Move_ECLIPSE:
 	blendoff
 	end
 
+Move_INFESTED_TERRAIN:
+	loadspritegfx ANIM_TAG_ORBS
+	loadspritegfx ANIM_TAG_GREEN_SPARKLE
+	playsewithpan SE_M_HEAL_BELL, SOUND_PAN_ATTACKER
+	createvisualtask AnimTask_ScaleMonAndRestore, 5, -7, -7, 11, ANIM_ATTACKER, 0
+	waitforvisualfinish
+	delay 30
+	createvisualtask AnimTask_BlendMonInAndOut, 5, ANIM_ATTACKER, RGB(18, 20, 6), 12, 5, 1
+	delay 4
+	createvisualtask AnimTask_ScaleMonAndRestore, 5, -7, -7, 11, ANIM_ATTACKER, 0
+	playsewithpan SE_M_REVERSAL, SOUND_PAN_ATTACKER
+	createsprite gGrassyTerrainOrbsTemplate, ANIM_ATTACKER, 2, 26, 0
+	createsprite gGrassyTerrainOrbsTemplate, ANIM_ATTACKER, 2, 26, 42
+	createsprite gGrassyTerrainOrbsTemplate, ANIM_ATTACKER, 2, 26, 84
+	createsprite gGrassyTerrainOrbsTemplate, ANIM_ATTACKER, 2, 26, 126
+	createsprite gGrassyTerrainOrbsTemplate, ANIM_ATTACKER, 2, 26, 168
+	createsprite gGrassyTerrainOrbsTemplate, ANIM_ATTACKER, 2, 26, 210
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 3, 0, 4, RGB(18, 20, 6)
+	delay 52
+	setarg 7, 0xFFFF
+	playsewithpan SE_M_STRING_SHOT2, SOUND_PAN_ATTACKER
+	createvisualtask AnimTask_ScaleMonAndRestore, 5, -7, -7, 11, ANIM_ATTACKER, 0
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 0
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 32
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 64
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 96
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 128
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 160
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 192
+	createsprite gGrassyTerrainStarTemplate, ANIM_TARGET, 2, 224
+	panse_adjustnone SE_M_STRING_SHOT2, SOUND_PAN_ATTACKER, SOUND_PAN_TARGET, +1, 0x0
+	waitforvisualfinish
+	delay 4
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 3, 4, 0, RGB(18, 20, 6)
+	waitforvisualfinish
+	end
+
 Move_BITE:
 	loadspritegfx ANIM_TAG_SHARP_TEETH
 	loadspritegfx ANIM_TAG_IMPACT
@@ -27086,6 +27124,7 @@ Move_SECRET_POWER:
 	jumpargeq 0, STATUS_FIELD_GRASSY_TERRAIN,   Move_NEEDLE_ARM
 	jumpargeq 0, STATUS_FIELD_ELECTRIC_TERRAIN, Move_THUNDER_SHOCK
 	jumpargeq 0, STATUS_FIELD_PSYCHIC_TERRAIN,  Move_CONFUSION
+	jumpargeq 0, STATUS_FIELD_INFESTED_TERRAIN, Move_BUG_BUZZ
 	createvisualtask AnimTask_GetBattleTerrain, 5
 	jumpargeq 0, BATTLE_TERRAIN_GRASS,          Move_NEEDLE_ARM
 	jumpargeq 0, BATTLE_TERRAIN_LONG_GRASS,     Move_MAGICAL_LEAF

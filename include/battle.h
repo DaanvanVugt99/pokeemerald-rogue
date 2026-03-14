@@ -113,6 +113,7 @@ struct DisableStruct
     u8 toxicSpikesDone:1;
     u8 stickyWebDone:1;
     u8 stealthRockDone:1;
+    u8 infestedTerrainDone:1;
     u8 syrupBombTimer;
     u8 syrupBombIsShiny:1;
     u8 steelSurgeDone:1;

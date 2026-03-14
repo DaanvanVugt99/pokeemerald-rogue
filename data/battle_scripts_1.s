@@ -459,6 +459,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectElectroShot             @ EFFECT_ELECTRO_SHOT
 	.4byte BattleScript_EffectCorrosiveClouds         @ EFFECT_CORROSIVE_CLOUDS
 	.4byte BattleScript_EffectEclipse                 @ EFFECT_ECLIPSE
+	.4byte BattleScript_EffectInfestedTerrain         @ EFFECT_INFESTED_TERRAIN
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -2896,6 +2897,7 @@ BattleScript_EffectMistyTerrain:
 BattleScript_EffectGrassyTerrain:
 BattleScript_EffectElectricTerrain:
 BattleScript_EffectPsychicTerrain:
+BattleScript_EffectInfestedTerrain:
 	attackcanceler
 	attackstring
 	ppreduce

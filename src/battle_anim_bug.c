@@ -9,6 +9,7 @@ static void AnimLeechLifeNeedle(struct Sprite *);
 static void AnimTranslateWebThread(struct Sprite *);
 static void AnimTranslateWebThread_Step(struct Sprite *);
 static void AnimStringWrap(struct Sprite *);
+static void AnimInfestedTerrainWeb(struct Sprite *);
 static void AnimSpiderWeb_Step(struct Sprite *);
 static void AnimSpiderWeb_End(struct Sprite *);
 static void AnimTranslateStinger(struct Sprite *);
@@ -129,6 +130,17 @@ const struct SpriteTemplate gSpiderWebSpriteTemplate =
     .images = NULL,
     .affineAnims = sAffineAnims_SpiderWeb,
     .callback = AnimSpiderWeb,
+};
+
+const struct SpriteTemplate gInfestedTerrainWebSpriteTemplate =
+{
+    .tileTag = ANIM_TAG_SPIDER_WEB,
+    .paletteTag = ANIM_TAG_SPIDER_WEB,
+    .oam = &gOamData_AffineDouble_ObjNormal_64x64,
+    .anims = gDummySpriteAnimTable,
+    .images = NULL,
+    .affineAnims = sAffineAnims_SpiderWeb,
+    .callback = AnimInfestedTerrainWeb,
 };
 
 const struct SpriteTemplate gLinearStingerSpriteTemplate =
@@ -336,6 +348,22 @@ void AnimSpiderWeb(struct Sprite *sprite)
     sprite->y += gBattleAnimArgs[1];
     sprite->data[0] = 16;
     sprite->callback = AnimSpiderWeb_Step;
+}
+
+// Places a fading web on either the attacker side or target side.
+// arg0: x offset from chosen side
+// arg1: y offset from chosen side
+// arg2: 0 = attacker side, 1 = target side
+static void AnimInfestedTerrainWeb(struct Sprite *sprite)
+{
+    u8 battler = (gBattleAnimArgs[2] == 0) ? gBattleAnimAttacker : gBattleAnimTarget;
+
+    SetAverageBattlerPositions(battler, FALSE, &sprite->x, &sprite->y);
+    sprite->x += gBattleAnimArgs[0];
+    sprite->y += gBattleAnimArgs[1];
+    sprite->data[0] = 36;
+    StoreSpriteCallbackInData6(sprite, DestroySpriteAndMatrix);
+    sprite->callback = WaitAnimForDuration;
 }
 
 static void AnimSpiderWeb_Step(struct Sprite *sprite)

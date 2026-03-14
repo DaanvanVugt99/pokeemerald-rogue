@@ -381,6 +381,9 @@ static const u8 sText_AcidRainStopped[] = _("The acid rain stopped.");
 static const u8 sText_EclipseStarted[] = _("An eclipse blotted out the sun!");
 static const u8 sText_EclipseContinues[] = _("The eclipse shrouds the sky.");
 static const u8 sText_EclipseStopped[] = _("The eclipse faded.");
+static const u8 sText_TerrainBecomesInfested[] = _("The battlefield became\ninfested!");
+static const u8 sText_InfestedTerrainEnds[] = _("The infestation cleared\nfrom the battlefield.");
+static const u8 sText_PkmnHurtByInfestedTerrain[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} is swarmed\nby the infested terrain!");
 static const u8 sText_FailedToSpitUp[] = _("But it failed to spit up\na thing!");
 static const u8 sText_FailedToSwallow[] = _("But it failed to swallow\na thing!");
 static const u8 sText_WindBecameHeatWave[] = _("The wind turned into a\nHEAT WAVE!");
@@ -1249,6 +1252,8 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     [STRINGID_ECLIPSESTARTED - BATTLESTRINGS_TABLE_START] = sText_EclipseStarted,
     [STRINGID_ECLIPSECONTINUES - BATTLESTRINGS_TABLE_START] = sText_EclipseContinues,
     [STRINGID_ECLIPSESTOPPED - BATTLESTRINGS_TABLE_START] = sText_EclipseStopped,
+    [STRINGID_INFESTEDTERRAINENDS - BATTLESTRINGS_TABLE_START] = sText_InfestedTerrainEnds,
+    [STRINGID_PKMNHURTBYINFESTEDTERRAIN - BATTLESTRINGS_TABLE_START] = sText_PkmnHurtByInfestedTerrain,
     [STRINGID_FAILEDTOSPITUP - BATTLESTRINGS_TABLE_START] = sText_FailedToSpitUp,
     [STRINGID_FAILEDTOSWALLOW - BATTLESTRINGS_TABLE_START] = sText_FailedToSwallow,
     [STRINGID_WINDBECAMEHEATWAVE - BATTLESTRINGS_TABLE_START] = sText_WindBecameHeatWave,
@@ -1510,6 +1515,7 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     [STRINGID_TERRAINBECOMESGRASSY - BATTLESTRINGS_TABLE_START] = sText_TerrainBecomesGrassy,
     [STRINGID_TERRAINBECOMESELECTRIC - BATTLESTRINGS_TABLE_START] = sText_TerrainBecomesElectric,
     [STRINGID_TERRAINBECOMESPSYCHIC - BATTLESTRINGS_TABLE_START] = sText_TerrainBecomesPsychic,
+    [STRINGID_TERRAINBECOMESINFESTED - BATTLESTRINGS_TABLE_START] = sText_TerrainBecomesInfested,
     [STRINGID_TARGETELECTRIFIED - BATTLESTRINGS_TABLE_START] = sText_TargetElectrified,
     [STRINGID_MEGAEVOREACTING - BATTLESTRINGS_TABLE_START] = sText_MegaEvoReacting,
     [STRINGID_FERVENTWISHREACHED - BATTLESTRINGS_TABLE_START] = sText_FerventWishReached,
@@ -1594,10 +1600,12 @@ const u16 gTerrainStringIds[B_MSG_TERRAIN_COUNT] =
     [B_MSG_TERRAIN_SET_ELECTRIC] = STRINGID_TERRAINBECOMESELECTRIC,
     [B_MSG_TERRAIN_SET_PSYCHIC] = STRINGID_TERRAINBECOMESPSYCHIC,
     [B_MSG_TERRAIN_SET_GRASSY] = STRINGID_TERRAINBECOMESGRASSY,
+    [B_MSG_TERRAIN_SET_INFESTED] = STRINGID_TERRAINBECOMESINFESTED,
     [B_MSG_TERRAIN_END_MISTY] = STRINGID_MISTYTERRAINENDS,
     [B_MSG_TERRAIN_END_ELECTRIC] = STRINGID_ELECTRICTERRAINENDS,
     [B_MSG_TERRAIN_END_PSYCHIC] = STRINGID_PSYCHICTERRAINENDS,
     [B_MSG_TERRAIN_END_GRASSY] = STRINGID_GRASSYTERRAINENDS,
+    [B_MSG_TERRAIN_END_INFESTED] = STRINGID_INFESTEDTERRAINENDS,
 };
 
 const u16 gTerrainPreventsStringIds[] =
@@ -1625,6 +1633,7 @@ const u16 gDmgHazardsStringIds[] =
     [B_MSG_POINTEDSTONESFLOAT] = STRINGID_POINTEDSTONESFLOAT,
     [B_MSG_SPIKESSCATTERED]    = STRINGID_SPIKESSCATTERED,
     [B_MSG_SHARPSTEELFLOATS]   = STRINGID_SHARPSTEELFLOATS,
+    [B_MSG_INFESTED_TERRAIN_DMG] = STRINGID_PKMNHURTBYINFESTEDTERRAIN,
 };
 
 const u16 gSwitchInAbilityStringIds[] =

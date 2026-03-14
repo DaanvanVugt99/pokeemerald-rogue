@@ -7021,6 +7021,24 @@ static void SetDmgHazardsBattlescript(u8 battler, u8 multistringId)
         gBattlescriptCurrInstr = BattleScript_DmgHazardsOnFaintedBattler;
 }
 
+static s32 GetSwitchInInfestedTerrainDamage(u32 battler)
+{
+    const struct BattlePokemon *incomingMon = (const struct BattlePokemon *)&gBattleResources->bufferB[battler][4];
+    u16 species = incomingMon->species;
+    u8 type1 = gSpeciesInfo[species].types[0];
+    u8 type2 = gSpeciesInfo[species].types[1];
+    u32 maxHp = incomingMon->maxHP;
+
+    if (type1 == TYPE_BUG || type2 == TYPE_BUG)
+        return 0;
+    if (!(gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))
+        return 0;
+    if (GetBattlerAbility(battler) == ABILITY_MAGIC_GUARD)
+        return 0;
+
+    return GetStealthHazardDamageByTypesAndHP(TYPE_BUG, type1, type2, maxHp);
+}
+
 bool32 DoSwitchInAbilities(u32 battler)
 {
     return (TryPrimalReversion(battler)
@@ -7096,6 +7114,15 @@ static void Cmd_switchineffects(void)
 
         if (gBattleMoveDamage != 0)
             SetDmgHazardsBattlescript(battler, B_MSG_STEALTHROCKDMG);
+    }
+    else if (!(gDisableStructs[battler].infestedTerrainDone)
+        && GetSwitchInInfestedTerrainDamage(battler) != 0)
+    {
+        gDisableStructs[battler].infestedTerrainDone = TRUE;
+        gBattleMoveDamage = GetSwitchInInfestedTerrainDamage(battler);
+
+        if (gBattleMoveDamage != 0)
+            SetDmgHazardsBattlescript(battler, B_MSG_INFESTED_TERRAIN_DMG);
     }
     else if (!(gDisableStructs[battler].toxicSpikesDone)
         && (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TOXIC_SPIKES)
@@ -7197,6 +7224,7 @@ static void Cmd_switchineffects(void)
         gDisableStructs[battler].spikesDone = FALSE;
         gDisableStructs[battler].toxicSpikesDone = FALSE;
         gDisableStructs[battler].stealthRockDone = FALSE;
+        gDisableStructs[battler].infestedTerrainDone = FALSE;
         gDisableStructs[battler].steelSurgeDone = FALSE;
 
         for (i = 0; i < gBattlersCount; i++)
@@ -8405,6 +8433,9 @@ static void RemoveAllTerrains(void)
         break;
     case STATUS_FIELD_PSYCHIC_TERRAIN:
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_END_PSYCHIC;
+        break;
+    case STATUS_FIELD_INFESTED_TERRAIN:
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_END_INFESTED;
         break;
     default:
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_COUNT;  // failsafe
@@ -13989,6 +14020,8 @@ u16 GetNaturePowerMove(void)
         return MOVE_ENERGY_BALL;
     else if (gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN)
         return MOVE_PSYCHIC;
+    else if (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN)
+        return MOVE_BUG_BUZZ;
     else if (sNaturePowerMoves[gBattleTerrain] == MOVE_NONE)
         return MOVE_TRI_ATTACK;
     return sNaturePowerMoves[gBattleTerrain];
@@ -14954,6 +14987,9 @@ static void Cmd_settypetoterrain(void)
         break;
     case STATUS_FIELD_PSYCHIC_TERRAIN:
         terrainType = TYPE_PSYCHIC;
+        break;
+    case STATUS_FIELD_INFESTED_TERRAIN:
+        terrainType = TYPE_BUG;
         break;
     default:
         terrainType = sTerrainToType[gBattleTerrain];
@@ -16633,6 +16669,10 @@ void BS_SetRemoveTerrain(void)
     case EFFECT_PSYCHIC_TERRAIN:
         statusFlag = STATUS_FIELD_PSYCHIC_TERRAIN;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_SET_PSYCHIC;
+        break;
+    case EFFECT_INFESTED_TERRAIN:
+        statusFlag = STATUS_FIELD_INFESTED_TERRAIN;
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_SET_INFESTED;
         break;
     case EFFECT_HIT_SET_REMOVE_TERRAIN:
         switch (gBattleMoves[gCurrentMove].argument)

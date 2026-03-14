@@ -3250,7 +3250,8 @@ bool32 PartnerMoveEffectIsTerrain(u32 battlerAtkPartner, u32 partnerMove)
      && (gBattleMoves[partnerMove].effect == EFFECT_GRASSY_TERRAIN
       || gBattleMoves[partnerMove].effect == EFFECT_MISTY_TERRAIN
       || gBattleMoves[partnerMove].effect == EFFECT_ELECTRIC_TERRAIN
-      || gBattleMoves[partnerMove].effect == EFFECT_PSYCHIC_TERRAIN))
+      || gBattleMoves[partnerMove].effect == EFFECT_PSYCHIC_TERRAIN
+      || gBattleMoves[partnerMove].effect == EFFECT_INFESTED_TERRAIN))
         return TRUE;
 
     return FALSE;

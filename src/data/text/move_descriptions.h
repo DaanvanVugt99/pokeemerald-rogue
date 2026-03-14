@@ -992,6 +992,10 @@ static const u8 sEclipseDescription[] = _(
     "Boosts Dark moves and\n"
     "weakens Fairy for 5 turns.");
 
+static const u8 sInfestedTerrainDescription[] = _(
+    "Switching causes Bug-\n"
+    "type damage for 5 turns.");
+
 static const u8 sCrunchDescription[] = _(
     "Crunches with sharp fangs.\n"
 #if B_UPDATED_MOVE_DATA >= GEN_4
@@ -4186,6 +4190,7 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_ELECTRO_SHOT - 1] = sElectroShotDescription,
     [MOVE_CORROSIVE_CLOUDS - 1] = sCorrosiveCloudsDescription,
     [MOVE_ECLIPSE - 1] = sEclipseDescription,
+    [MOVE_INFESTED_TERRAIN - 1] = sInfestedTerrainDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,

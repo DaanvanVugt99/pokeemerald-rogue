@@ -713,8 +713,11 @@
 #define STRINGID_ECLIPSESTARTED                       711
 #define STRINGID_ECLIPSECONTINUES                     712
 #define STRINGID_ECLIPSESTOPPED                       713
+#define STRINGID_TERRAINBECOMESINFESTED               714
+#define STRINGID_INFESTEDTERRAINENDS                  715
+#define STRINGID_PKMNHURTBYINFESTEDTERRAIN            716
 
-#define BATTLESTRINGS_COUNT                           714
+#define BATTLESTRINGS_COUNT                           717
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
@@ -1002,11 +1005,13 @@
 #define B_MSG_TERRAIN_SET_ELECTRIC  1
 #define B_MSG_TERRAIN_SET_PSYCHIC   2
 #define B_MSG_TERRAIN_SET_GRASSY    3
-#define B_MSG_TERRAIN_END_MISTY     4
-#define B_MSG_TERRAIN_END_ELECTRIC  5
-#define B_MSG_TERRAIN_END_PSYCHIC   6
-#define B_MSG_TERRAIN_END_GRASSY    7
-#define B_MSG_TERRAIN_COUNT         8
+#define B_MSG_TERRAIN_SET_INFESTED  4
+#define B_MSG_TERRAIN_END_MISTY     5
+#define B_MSG_TERRAIN_END_ELECTRIC  6
+#define B_MSG_TERRAIN_END_PSYCHIC   7
+#define B_MSG_TERRAIN_END_GRASSY    8
+#define B_MSG_TERRAIN_END_INFESTED  9
+#define B_MSG_TERRAIN_COUNT         10
 
 // gWrappedStringIds
 #define B_MSG_WRAPPED_BIND         0
@@ -1037,6 +1042,7 @@
 #define B_MSG_POINTEDSTONESFLOAT 3
 #define B_MSG_SPIKESSCATTERED    4
 #define B_MSG_SHARPSTEELFLOATS   5
+#define B_MSG_INFESTED_TERRAIN_DMG 6
 
 // gDamageNonTypesStartStringIds
 #define B_MSG_TRAPPED_WITH_VINES  0
