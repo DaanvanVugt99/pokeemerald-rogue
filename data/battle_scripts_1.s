@@ -458,6 +458,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectPhotonGeyser            @ EFFECT_TERA_STARSTORM
 	.4byte BattleScript_EffectElectroShot             @ EFFECT_ELECTRO_SHOT
 	.4byte BattleScript_EffectCorrosiveClouds         @ EFFECT_CORROSIVE_CLOUDS
+	.4byte BattleScript_EffectEclipse                 @ EFFECT_ECLIPSE
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -5452,6 +5453,14 @@ BattleScript_EffectCorrosiveClouds::
 	setacidrain
 	goto BattleScript_MoveWeatherChange
 
+BattleScript_EffectEclipse::
+	attackcanceler
+	attackstring
+	ppreduce
+	call BattleScript_CheckPrimalWeather
+	seteclipse
+	goto BattleScript_MoveWeatherChange
+
 BattleScript_ExtremelyHarshSunlightWasNotLessened:
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_EXTREMELYHARSHSUNLIGHTWASNOTLESSENED
@@ -7116,6 +7125,19 @@ BattleScript_SunlightContinues::
 
 BattleScript_SunlightFaded::
 	printstring STRINGID_SUNLIGHTFADED
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ActivateWeatherAbilities
+	end2
+
+BattleScript_EclipseContinues::
+	printstring STRINGID_ECLIPSECONTINUES
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_ATTACKER, B_ANIM_ECLIPSE_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	end2
+
+BattleScript_EclipseFaded::
+	printstring STRINGID_ECLIPSESTOPPED
 	waitmessage B_WAIT_TIME_LONG
 	call BattleScript_ActivateWeatherAbilities
 	end2

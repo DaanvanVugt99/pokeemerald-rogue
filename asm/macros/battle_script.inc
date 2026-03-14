@@ -1374,6 +1374,10 @@
 	callnative BS_SetAcidRain
 	.endm
 
+	.macro seteclipse
+	callnative BS_SetEclipse
+	.endm
+
 	.macro applysaltcure battler:req
 	callnative BS_ApplySaltCure
 	.byte \battler

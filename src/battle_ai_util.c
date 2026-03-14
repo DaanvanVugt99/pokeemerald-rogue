@@ -3234,7 +3234,8 @@ bool32 IsMoveEffectWeather(u32 move)
       || gBattleMoves[move].effect == EFFECT_RAIN_DANCE
       || gBattleMoves[move].effect == EFFECT_SANDSTORM
       || gBattleMoves[move].effect == EFFECT_HAIL
-      || gBattleMoves[move].effect == EFFECT_SNOWSCAPE))
+      || gBattleMoves[move].effect == EFFECT_SNOWSCAPE
+      || gBattleMoves[move].effect == EFFECT_ECLIPSE))
         return TRUE;
     return FALSE;
 }

@@ -435,7 +435,8 @@
 #define EFFECT_TERA_STARSTORM               429
 #define EFFECT_ELECTRO_SHOT                 430
 #define EFFECT_CORROSIVE_CLOUDS             431
+#define EFFECT_ECLIPSE                      432
 
-#define NUM_BATTLE_MOVE_EFFECTS             432
+#define NUM_BATTLE_MOVE_EFFECTS             433
 
 #endif  // GUARD_CONSTANTS_BATTLE_MOVE_EFFECTS_H

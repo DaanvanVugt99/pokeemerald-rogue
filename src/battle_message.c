@@ -378,6 +378,9 @@ static const u8 sText_SnowStopped[] = _("The snow stopped.");
 static const u8 sText_AcidRainStarted[] = _("Acid rain began to fall!");
 static const u8 sText_AcidRainContinues[] = _("Acid rain continues to fall.");
 static const u8 sText_AcidRainStopped[] = _("The acid rain stopped.");
+static const u8 sText_EclipseStarted[] = _("An eclipse blotted out the sun!");
+static const u8 sText_EclipseContinues[] = _("The eclipse shrouds the sky.");
+static const u8 sText_EclipseStopped[] = _("The eclipse faded.");
 static const u8 sText_FailedToSpitUp[] = _("But it failed to spit up\na thing!");
 static const u8 sText_FailedToSwallow[] = _("But it failed to swallow\na thing!");
 static const u8 sText_WindBecameHeatWave[] = _("The wind turned into a\nHEAT WAVE!");
@@ -1243,6 +1246,9 @@ const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
     [STRINGID_ACIDRAINSTARTED - BATTLESTRINGS_TABLE_START] = sText_AcidRainStarted,
     [STRINGID_ACIDRAINCONTINUES - BATTLESTRINGS_TABLE_START] = sText_AcidRainContinues,
     [STRINGID_ACIDRAINSTOPPED - BATTLESTRINGS_TABLE_START] = sText_AcidRainStopped,
+    [STRINGID_ECLIPSESTARTED - BATTLESTRINGS_TABLE_START] = sText_EclipseStarted,
+    [STRINGID_ECLIPSECONTINUES - BATTLESTRINGS_TABLE_START] = sText_EclipseContinues,
+    [STRINGID_ECLIPSESTOPPED - BATTLESTRINGS_TABLE_START] = sText_EclipseStopped,
     [STRINGID_FAILEDTOSPITUP - BATTLESTRINGS_TABLE_START] = sText_FailedToSpitUp,
     [STRINGID_FAILEDTOSWALLOW - BATTLESTRINGS_TABLE_START] = sText_FailedToSwallow,
     [STRINGID_WINDBECAMEHEATWAVE - BATTLESTRINGS_TABLE_START] = sText_WindBecameHeatWave,
@@ -1670,6 +1676,7 @@ const u16 gMoveWeatherChangeStringIds[] =
     [B_MSG_STARTED_HAIL]      = STRINGID_STARTEDHAIL,
     [B_MSG_STARTED_SNOW]      = STRINGID_STARTEDSNOW,
     [B_MSG_STARTED_ACID_RAIN] = STRINGID_ACIDRAINSTARTED,
+    [B_MSG_STARTED_ECLIPSE]   = STRINGID_ECLIPSESTARTED,
 };
 
 const u16 gWeatherEndsStringIds[B_MSG_WEATHER_END_COUNT] =
@@ -1682,6 +1689,7 @@ const u16 gWeatherEndsStringIds[B_MSG_WEATHER_END_COUNT] =
     [B_MSG_WEATHER_END_SNOW] = STRINGID_SNOWSTOPPED,
     [B_MSG_WEATHER_END_FOG] = STRINGID_SNOWSTOPPED,
     [B_MSG_WEATHER_END_ACID_RAIN] = STRINGID_ACIDRAINSTOPPED,
+    [B_MSG_WEATHER_END_ECLIPSE] = STRINGID_ECLIPSESTOPPED,
 };
 
 const u16 gSandStormHailSnowContinuesStringIds[] =

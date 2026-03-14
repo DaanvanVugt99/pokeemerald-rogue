@@ -851,6 +851,7 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_UPPER_HAND] = _("Upper Hand"),
     [MOVE_MALIGNANT_CHAIN] = _("Malignant Chain"),
     [MOVE_CORROSIVE_CLOUDS] = _("Corrosive Clouds"),
+    [MOVE_ECLIPSE] = _("Eclipse"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("Max Guard"),
     [MOVE_MAX_STRIKE] = _("Max Strike"),
@@ -1759,6 +1760,7 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_UPPER_HAND] = _("Upper Hand"),
     [MOVE_MALIGNANT_CHAIN] = _("MalignntChan"),
     [MOVE_CORROSIVE_CLOUDS] = _("CorrosCloud"),
+    [MOVE_ECLIPSE] = _("Eclipse"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("M-Guard"),
     [MOVE_MAX_STRIKE] = _("M-Strike"),

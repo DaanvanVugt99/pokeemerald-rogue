@@ -210,6 +210,28 @@ const struct SpriteTemplate gGreenPoisonBubble =
 	.callback = AnimAcidPoisonBubble,
 };
 
+const struct SpriteTemplate gGreenPoisonBubbleEffect =
+{
+	.tileTag = ANIM_TAG_GREEN_POISON_BUBBLE,
+	.paletteTag = ANIM_TAG_GREEN_POISON_BUBBLE,
+	.oam = &gOamData_AffineDouble_ObjNormal_16x16,
+	.anims = gAnims_PoisonProjectile,
+	.images = NULL,
+	.affineAnims = gAffineAnims_Bubble,
+	.callback = AnimBubbleEffect,
+};
+
+const struct SpriteTemplate gWeatherBallPoisonDownSpriteTemplate =
+{
+    .tileTag = ANIM_TAG_GREEN_POISON_BUBBLE,
+    .paletteTag = ANIM_TAG_GREEN_POISON_BUBBLE,
+    .oam = &gOamData_AffineDouble_ObjNormal_16x16,
+    .anims = gAnims_PoisonProjectile,
+    .images = NULL,
+    .affineAnims = gAffineAnims_PoisonProjectile,
+    .callback = AnimWeatherBallDown,
+};
+
 const union AnimCmd gSuckerPunchAnimCmd[] =
 {
     ANIMCMD_FRAME(0, 3),

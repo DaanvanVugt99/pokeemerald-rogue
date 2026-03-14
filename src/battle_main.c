@@ -4810,6 +4810,7 @@ static bool32 IsWeatherAffectedMove(u16 move)
         case MOVE_SNOWSCAPE:
         case MOVE_CHILLY_RECEPTION:
         case MOVE_CORROSIVE_CLOUDS:
+        case MOVE_ECLIPSE:
         case MOVE_SANDSTORM:
         case MOVE_SHORE_UP:
             return TRUE;
@@ -5782,6 +5783,8 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
                 gBattleStruct->dynamicMoveType = TYPE_ICE | F_DYNAMIC_TYPE_SET;
             else if (gBattleWeather & B_WEATHER_ACID_RAIN)
                 gBattleStruct->dynamicMoveType = TYPE_POISON | F_DYNAMIC_TYPE_SET;
+            else if (gBattleWeather & B_WEATHER_ECLIPSE)
+                gBattleStruct->dynamicMoveType = TYPE_DARK | F_DYNAMIC_TYPE_SET;
             else
                 gBattleStruct->dynamicMoveType = TYPE_NORMAL | F_DYNAMIC_TYPE_SET;
         }

@@ -510,6 +510,17 @@ const struct SpriteTemplate gEclipsingOrbSpriteTemplate =
     .callback = AnimSpriteOnMonPos,
 };
 
+const struct SpriteTemplate gWeatherBallEclipseDownSpriteTemplate =
+{
+    .tileTag = ANIM_TAG_ECLIPSING_ORB,
+    .paletteTag = ANIM_TAG_ECLIPSING_ORB,
+    .oam = &gOamData_AffineOff_ObjNormal_32x32,
+    .anims = gEclipsingOrbAnimTable,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = AnimWeatherBallDown,
+};
+
 const union AffineAnimCmd DefenseCurlDeformMonAffineAnimCmds[] =
 {
     AFFINEANIMCMD_FRAME(-12, 20, 0, 8),
@@ -5737,6 +5748,10 @@ void AnimTask_GetWeather(u8 taskId)
         gBattleAnimArgs[ARG_RET_ID] = ANIM_WEATHER_HAIL;
     else if (gWeatherMoveAnim & B_WEATHER_SNOW)
         gBattleAnimArgs[ARG_RET_ID] = ANIM_WEATHER_SNOW;
+    else if (gWeatherMoveAnim & B_WEATHER_ACID_RAIN)
+        gBattleAnimArgs[ARG_RET_ID] = ANIM_WEATHER_ACID_RAIN;
+    else if (gWeatherMoveAnim & B_WEATHER_ECLIPSE)
+        gBattleAnimArgs[ARG_RET_ID] = ANIM_WEATHER_ECLIPSE;
 
     DestroyAnimVisualTask(taskId);
 }

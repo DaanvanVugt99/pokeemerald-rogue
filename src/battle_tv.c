@@ -221,6 +221,7 @@ static const u16 sPoints_MoveEffect[NUM_BATTLE_MOVE_EFFECTS] =
     [EFFECT_HIDDEN_POWER]               = 1,
     [EFFECT_RAIN_DANCE]                 = 4,
     [EFFECT_SUNNY_DAY]                  = 4,
+    [EFFECT_ECLIPSE]                    = 4,
     [EFFECT_DEFENSE_UP_HIT]             = 1,
     [EFFECT_ATTACK_UP_HIT]              = 1,
     [EFFECT_ALL_STATS_UP_HIT]           = 1,

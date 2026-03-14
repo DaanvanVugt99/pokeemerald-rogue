@@ -55,3 +55,8 @@ This file documents practical repo-specific guidance for coding agents and contr
   - `make mostlyclean`
   - `make clean`
 
+## Large Assembly File Editing
+
+- Large assembly/script files such as `data/battle_anim_scripts.s` can cause `apply_patch` to hang or stall on otherwise small edits.
+- If that happens, prefer a narrow scripted replacement with tools like `perl -0pi` after first verifying the exact surrounding text with `sed`/`rg`.
+- After scripted edits to assembly animation/script files, always re-open the edited block and run a focused filtered test/build to confirm the replacement was exact.

@@ -1957,6 +1957,7 @@ enum
     ENDTURN_RAIN,
     ENDTURN_SANDSTORM,
     ENDTURN_SUN,
+    ENDTURN_ECLIPSE,
     ENDTURN_HAIL,
     ENDTURN_ACID_RAIN,
     ENDTURN_SNOW,
@@ -2330,6 +2331,27 @@ u8 DoFieldEndTurnEffects(void)
             }
             gBattleStruct->turnCountersTracker++;
             break;
+        case ENDTURN_ECLIPSE:
+            if (gBattleWeather & B_WEATHER_ECLIPSE)
+            {
+                if (!(gBattleWeather & B_WEATHER_ECLIPSE_PERMANENT)
+                 && --gWishFutureKnock.weatherDuration == 0)
+                {
+                    gBattleWeather &= ~B_WEATHER_ECLIPSE_TEMPORARY;
+                    for (i = 0; i < gBattlersCount; i++)
+                        gDisableStructs[i].weatherAbilityDone = FALSE;
+                    gBattlescriptCurrInstr = BattleScript_EclipseFaded;
+                }
+                else
+                {
+                    gBattlescriptCurrInstr = BattleScript_EclipseContinues;
+                }
+
+                BattleScriptExecute(gBattlescriptCurrInstr);
+                effect++;
+            }
+            gBattleStruct->turnCountersTracker++;
+            break;
         case ENDTURN_HAIL:
             if (gBattleWeather & B_WEATHER_HAIL)
             {
@@ -2363,7 +2385,7 @@ u8 DoFieldEndTurnEffects(void)
                     gBattlescriptCurrInstr = BattleScript_DamagingWeatherContinues;
                 }
 
-                gBattleScripting.animArg1 = B_ANIM_RAIN_CONTINUES;
+                gBattleScripting.animArg1 = B_ANIM_ACID_RAIN_CONTINUES;
                 gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ACID_RAIN;
                 BattleScriptExecute(gBattlescriptCurrInstr);
                 effect++;
@@ -4145,7 +4167,7 @@ bool32 HasNoMonsToSwitch(u32 battler, u8 partyIdBattlerOn1, u8 partyIdBattlerOn2
     }
 }
 
-static const u16 sWeatherFlagsInfo[][3] =
+static const u32 sWeatherFlagsInfo[][3] =
 {
     [ENUM_WEATHER_RAIN] = {B_WEATHER_RAIN_TEMPORARY, B_WEATHER_RAIN_PERMANENT, HOLD_EFFECT_DAMP_ROCK},
     [ENUM_WEATHER_RAIN_PRIMAL] = {B_WEATHER_RAIN_PRIMAL, B_WEATHER_RAIN_PRIMAL, HOLD_EFFECT_DAMP_ROCK},
@@ -4156,6 +4178,7 @@ static const u16 sWeatherFlagsInfo[][3] =
     [ENUM_WEATHER_STRONG_WINDS] = {B_WEATHER_STRONG_WINDS, B_WEATHER_STRONG_WINDS, HOLD_EFFECT_NONE},
     [ENUM_WEATHER_SNOW] = {B_WEATHER_SNOW_TEMPORARY, B_WEATHER_SNOW_PERMANENT, HOLD_EFFECT_ICY_ROCK},
     [ENUM_WEATHER_ACID_RAIN] = {B_WEATHER_ACID_RAIN_TEMPORARY, B_WEATHER_ACID_RAIN_PERMANENT, HOLD_EFFECT_NONE},
+    [ENUM_WEATHER_ECLIPSE] = {B_WEATHER_ECLIPSE_TEMPORARY, B_WEATHER_ECLIPSE_PERMANENT, HOLD_EFFECT_NONE},
 };
 
 static void ShouldChangeFormInWeather(u32 battler)
@@ -10055,6 +10078,12 @@ static uq4_12_t GetWeatherDamageModifier(u32 battlerAtk, u32 move, u32 moveType,
         if (moveType != TYPE_FIRE && moveType != TYPE_WATER)
             return UQ_4_12(1.0);
         return (moveType == TYPE_WATER) ? UQ_4_12(0.5) : UQ_4_12(1.5);
+    }
+    if (weather & B_WEATHER_ECLIPSE)
+    {
+        if (moveType != TYPE_DARK && moveType != TYPE_FAIRY)
+            return UQ_4_12(1.0);
+        return (moveType == TYPE_FAIRY) ? UQ_4_12(0.5) : UQ_4_12(1.5);
     }
     return UQ_4_12(1.0);
 }

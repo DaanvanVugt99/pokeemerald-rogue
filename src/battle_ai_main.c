@@ -1679,6 +1679,11 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
              || IsMoveEffectWeather(aiData->partnerMove))
                 ADJUST_SCORE(-8);
             break;
+        case EFFECT_ECLIPSE:
+            if (weather & (B_WEATHER_ECLIPSE | B_WEATHER_PRIMAL_ANY)
+             || IsMoveEffectWeather(aiData->partnerMove))
+                ADJUST_SCORE(-8);
+            break;
         case EFFECT_RAIN_DANCE:
             if (weather & (B_WEATHER_RAIN | B_WEATHER_PRIMAL_ANY)
              || IsMoveEffectWeather(aiData->partnerMove))
@@ -2841,6 +2846,7 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case EFFECT_SNOWSCAPE:
         case EFFECT_RAIN_DANCE:
         case EFFECT_SANDSTORM:
+        case EFFECT_ECLIPSE:
             if (IsMoveEffectWeather(move))
                 ADJUST_SCORE(-10);
             break;
@@ -2896,6 +2902,14 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         if (ShouldSetSun(battlerAtkPartner, atkPartnerAbility, atkPartnerHoldEffect))
         {
             RETURN_SCORE_PLUS(1);   // our partner benefits from sun
+        }
+        break;
+    case EFFECT_ECLIPSE:
+        if (IsBattlerAlive(battlerAtkPartner)
+         && (HasMoveWithType(battlerAtkPartner, TYPE_DARK)
+          || HasMoveWithType(FOE(battlerAtkPartner), TYPE_FAIRY)))
+        {
+            RETURN_SCORE_PLUS(1);
         }
         break;
     case EFFECT_HAIL:
@@ -4124,6 +4138,16 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
                 ADJUST_SCORE(2);
         }
         break;
+    case EFFECT_ECLIPSE:
+        if (!(gBattleWeather & (B_WEATHER_ECLIPSE | B_WEATHER_PRIMAL_ANY)))
+        {
+            ADJUST_SCORE(1);
+            if (HasMoveWithType(battlerAtk, TYPE_DARK) || HasMoveWithType(BATTLE_PARTNER(battlerAtk), TYPE_DARK))
+                ADJUST_SCORE(1);
+            if (HasMoveWithType(battlerDef, TYPE_FAIRY) || HasMoveWithType(BATTLE_PARTNER(battlerDef), TYPE_FAIRY))
+                ADJUST_SCORE(1);
+        }
+        break;
     case EFFECT_RAIN_DANCE:
         if (ShouldSetRain(battlerAtk, aiData->abilities[battlerAtk], aiData->holdEffects[battlerAtk]))
         {
@@ -5095,6 +5119,7 @@ static s32 AI_SetupFirstTurn(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     case EFFECT_SANDSTORM:
     case EFFECT_HAIL:
     case EFFECT_SNOWSCAPE:
+    case EFFECT_ECLIPSE:
     case EFFECT_GEOMANCY:
     case EFFECT_VICTORY_DANCE:
     case EFFECT_HIT_SET_ENTRY_HAZARD:
@@ -5324,6 +5349,7 @@ static s32 AI_HPAware(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             case EFFECT_HAIL:
             case EFFECT_SNOWSCAPE:
             case EFFECT_RAIN_DANCE:
+            case EFFECT_ECLIPSE:
             case EFFECT_FILLET_AWAY:
                 ADJUST_SCORE(-2);
                 break;
