@@ -717,8 +717,10 @@
 #define STRINGID_INFESTEDTERRAINENDS                  715
 #define STRINGID_PKMNHURTBYINFESTEDTERRAIN            716
 #define STRINGID_ACIDRAINHEALS                        717
+#define STRINGID_TERRAINBECOMESPLAIN                  718
+#define STRINGID_PLAINTERRAINENDS                     719
 
-#define BATTLESTRINGS_COUNT                           718
+#define BATTLESTRINGS_COUNT                           720
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
@@ -1007,12 +1009,14 @@
 #define B_MSG_TERRAIN_SET_PSYCHIC   2
 #define B_MSG_TERRAIN_SET_GRASSY    3
 #define B_MSG_TERRAIN_SET_INFESTED  4
-#define B_MSG_TERRAIN_END_MISTY     5
-#define B_MSG_TERRAIN_END_ELECTRIC  6
-#define B_MSG_TERRAIN_END_PSYCHIC   7
-#define B_MSG_TERRAIN_END_GRASSY    8
-#define B_MSG_TERRAIN_END_INFESTED  9
-#define B_MSG_TERRAIN_COUNT         10
+#define B_MSG_TERRAIN_SET_PLAIN     5
+#define B_MSG_TERRAIN_END_MISTY     6
+#define B_MSG_TERRAIN_END_ELECTRIC  7
+#define B_MSG_TERRAIN_END_PSYCHIC   8
+#define B_MSG_TERRAIN_END_GRASSY    9
+#define B_MSG_TERRAIN_END_INFESTED  10
+#define B_MSG_TERRAIN_END_PLAIN     11
+#define B_MSG_TERRAIN_COUNT         12
 
 // gWrappedStringIds
 #define B_MSG_WRAPPED_BIND         0

@@ -14542,6 +14542,23 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .skyBattleBanned = TRUE,
     },
 
+    [MOVE_PLAIN_TERRAIN] =
+    {
+        .effect = EFFECT_PLAIN_TERRAIN,
+        .power = 0,
+        .type = TYPE_NORMAL,
+        .accuracy = 0,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_ALL_BATTLERS,
+        .priority = 0,
+        .split = SPLIT_STATUS,
+        .zMoveEffect = Z_EFFECT_ATK_UP_1,
+        .ignoresProtect = TRUE,
+        .mirrorMoveBanned = TRUE,
+        .skyBattleBanned = TRUE,
+    },
+
     [MOVE_TERA_STARSTORM] =
     {
         .effect = EFFECT_TERA_STARSTORM,

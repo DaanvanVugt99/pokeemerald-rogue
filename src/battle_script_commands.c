@@ -8437,6 +8437,9 @@ static void RemoveAllTerrains(void)
     case STATUS_FIELD_INFESTED_TERRAIN:
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_END_INFESTED;
         break;
+    case STATUS_FIELD_PLAIN_TERRAIN:
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_END_PLAIN;
+        break;
     default:
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_COUNT;  // failsafe
         break;
@@ -14032,6 +14035,8 @@ u16 GetNaturePowerMove(void)
         return MOVE_PSYCHIC;
     else if (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN)
         return MOVE_BUG_BUZZ;
+    else if (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
+        return MOVE_TRI_ATTACK;
     else if (sNaturePowerMoves[gBattleTerrain] == MOVE_NONE)
         return MOVE_TRI_ATTACK;
     return sNaturePowerMoves[gBattleTerrain];
@@ -15000,6 +15005,9 @@ static void Cmd_settypetoterrain(void)
         break;
     case STATUS_FIELD_INFESTED_TERRAIN:
         terrainType = TYPE_BUG;
+        break;
+    case STATUS_FIELD_PLAIN_TERRAIN:
+        terrainType = TYPE_NORMAL;
         break;
     default:
         terrainType = sTerrainToType[gBattleTerrain];
@@ -16683,6 +16691,10 @@ void BS_SetRemoveTerrain(void)
     case EFFECT_INFESTED_TERRAIN:
         statusFlag = STATUS_FIELD_INFESTED_TERRAIN;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_SET_INFESTED;
+        break;
+    case EFFECT_PLAIN_TERRAIN:
+        statusFlag = STATUS_FIELD_PLAIN_TERRAIN;
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_SET_PLAIN;
         break;
     case EFFECT_HIT_SET_REMOVE_TERRAIN:
         switch (gBattleMoves[gCurrentMove].argument)

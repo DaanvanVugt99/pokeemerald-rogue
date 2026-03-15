@@ -1575,9 +1575,11 @@ void DrawTerrainTypeBattleBackground(void)
     case STATUS_FIELD_INFESTED_TERRAIN:
         LoadMoveBg(BG_INFESTED_TERRAIN);
         break;
+    case STATUS_FIELD_PLAIN_TERRAIN:
+        LoadMoveBg(BG_PLAIN_TERRAIN);
+        break;
     default:
         DrawMainBattleBackground();
         break;
     }
 }
-

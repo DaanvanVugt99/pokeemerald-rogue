@@ -8622,6 +8622,8 @@ void AnimTask_TerrainPulse(u8 taskId)
             gBattleAnimArgs[0] = TYPE_PSYCHIC;
         else if (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN)
             gBattleAnimArgs[0] = TYPE_BUG;
+        else if (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
+            gBattleAnimArgs[0] = TYPE_NORMAL;
         else //failsafe
             gBattleAnimArgs[0] = 0;
     }
