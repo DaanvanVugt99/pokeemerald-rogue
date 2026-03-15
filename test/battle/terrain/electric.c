@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+#if B_EXPANDED_MOVE_NAMES
+#define THUNDER_SHOCK_NAME "Thunder Shock"
+#else
+#define THUNDER_SHOCK_NAME "ThunderShock"
+#endif
+
 SINGLE_BATTLE_TEST("Electric Terrain protects grounded battlers from falling asleep")
 {
     GIVEN {
@@ -51,7 +57,7 @@ SINGLE_BATTLE_TEST("Electric Terrain increases power of Electric-type moves by 3
             TURN { MOVE(player, MOVE_ELECTRIC_TERRAIN); }
         TURN { MOVE(player, MOVE_THUNDER_SHOCK); }
     } SCENE {
-        MESSAGE("Wobbuffet used ThunderShock!");
+        MESSAGE("Wobbuffet used " THUNDER_SHOCK_NAME "!");
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         if (B_TERRAIN_TYPE_BOOST >= GEN_8)

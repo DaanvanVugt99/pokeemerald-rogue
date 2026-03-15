@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+#if B_EXPANDED_MOVE_NAMES
+#define POISON_POWDER_NAME "Poison Powder"
+#else
+#define POISON_POWDER_NAME "PoisonPowder"
+#endif
+
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_METRONOME].effect == EFFECT_METRONOME);
@@ -35,7 +41,7 @@ SINGLE_BATTLE_TEST("Metronome's called powder move fails against Grass Types")
     } SCENE {
         MESSAGE("Wobbuffet used Metronome!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
-        MESSAGE("Wobbuffet used PoisonPowder!");
+        MESSAGE("Wobbuffet used " POISON_POWDER_NAME "!");
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_POISON_POWDER, player);
         MESSAGE("It doesn't affect Foe Tangela…");
         NOT STATUS_ICON(opponent, poison: TRUE);

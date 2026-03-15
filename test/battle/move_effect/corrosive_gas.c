@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+#if B_EXPANDED_MOVE_NAMES
+#define CORROSIVE_GAS_NAME "Corrosive Gas"
+#else
+#define CORROSIVE_GAS_NAME "CorrosiveGas"
+#endif
+
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_CORROSIVE_GAS].effect == EFFECT_CORROSIVE_GAS);
@@ -19,7 +25,7 @@ SINGLE_BATTLE_TEST("Corrosive Gas destroys the target's item or fails if the tar
     } WHEN {
         TURN { MOVE(player, MOVE_CORROSIVE_GAS); }
     } SCENE {
-        MESSAGE("Wobbuffet used CorrosiveGas!");
+        MESSAGE("Wobbuffet used " CORROSIVE_GAS_NAME "!");
         if (item == ITEM_POTION) {
             ANIMATION(ANIM_TYPE_MOVE, MOVE_CORROSIVE_GAS, player);
             MESSAGE("Wobbuffet corroded Foe Wobbuffet's Potion!");
@@ -40,11 +46,11 @@ SINGLE_BATTLE_TEST("Corrosive Gas doesn't destroy the item of a Pokemon with the
     } WHEN {
         TURN { MOVE(player, MOVE_CORROSIVE_GAS); }
     } SCENE {
-        MESSAGE("Wobbuffet used CorrosiveGas!");
+        MESSAGE("Wobbuffet used " CORROSIVE_GAS_NAME "!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CORROSIVE_GAS, player);
         NOT MESSAGE("Wobbuffet corroded Foe Wobbuffet's Potion!");
         ABILITY_POPUP(opponent, ABILITY_STICKY_HOLD);
-        MESSAGE("Foe Muk's Sticky Hold made CorrosiveGas ineffective!");
+        MESSAGE("Foe Muk's Sticky Hold made " CORROSIVE_GAS_NAME " ineffective!");
     } THEN {
         EXPECT_EQ(opponent->item, ITEM_POISON_BARB);
     }
@@ -59,7 +65,7 @@ SINGLE_BATTLE_TEST("Items lost to Corrosive Gas cannot be restored by Recycle")
     } WHEN {
         TURN { MOVE(player, MOVE_CORROSIVE_GAS); MOVE(opponent, MOVE_RECYCLE); }
     } SCENE {
-        MESSAGE("Wobbuffet used CorrosiveGas!");
+        MESSAGE("Wobbuffet used " CORROSIVE_GAS_NAME "!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CORROSIVE_GAS, player);
         MESSAGE("Wobbuffet corroded Foe Wobbuffet's Oran Berry!");
         MESSAGE("Foe Wobbuffet used Recycle!");
@@ -93,7 +99,7 @@ DOUBLE_BATTLE_TEST("Corrosive Gas destroys foes and ally's items if they have on
     } WHEN {
         TURN { MOVE(playerRight, MOVE_CORROSIVE_GAS); }
     } SCENE {
-        MESSAGE("Wynaut used CorrosiveGas!");
+        MESSAGE("Wynaut used " CORROSIVE_GAS_NAME "!");
         if (itemPlayerLeft == ITEM_CHERI_BERRY) {
             MESSAGE("Wynaut corroded Wobbuffet's Cheri Berry!");
         } else {

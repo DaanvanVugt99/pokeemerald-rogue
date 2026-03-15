@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+#if B_EXPANDED_MOVE_NAMES
+#define FORESTS_CURSE_NAME "Forest's Curse"
+#else
+#define FORESTS_CURSE_NAME "Forest'sCurs"
+#endif
+
 TO_DO_BATTLE_TEST("Reflect Type fails if the user is Terastallized");
 TO_DO_BATTLE_TEST("Reflect Type succeeds against a Terastallized target and copies its Tera type");
 
@@ -171,7 +177,7 @@ SINGLE_BATTLE_TEST("Reflect Type defaults to Normal type for the user's type1 an
         HP_BAR(player);
         MESSAGE("Foe Arcanine burned itself out!");
         // Turn 2
-        MESSAGE("Wobbuffet used Forest'sCurs!");
+        MESSAGE("Wobbuffet used " FORESTS_CURSE_NAME "!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_FORESTS_CURSE, player);
         MESSAGE("Grass type was added to Foe Arcanine!");
         // Turn 3

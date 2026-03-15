@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+#if B_EXPANDED_MOVE_NAMES
+#define EXTREME_SPEED_NAME "Extreme Speed"
+#else
+#define EXTREME_SPEED_NAME "ExtremeSpeed"
+#endif
+
 // ============= DYNAMAX AND MAX MOVE INTERACTIONS ===================
 SINGLE_BATTLE_TEST("(DYNAMAX) Dynamax increases HP and max HP by 1.5x", u16 hp)
 {
@@ -829,9 +835,9 @@ SINGLE_BATTLE_TEST("(DYNAMAX) Max Mindstorm sets up Psychic Terrain")
         TURN { MOVE(opponent, MOVE_EXTREME_SPEED); MOVE(player, MOVE_PSYCHIC, dynamax: TRUE); }
         TURN { MOVE(opponent, MOVE_EXTREME_SPEED); MOVE(player, MOVE_PSYCHIC); }
     } SCENE {
-        MESSAGE("Foe Wobbuffet used ExtremeSpeed!");
+        MESSAGE("Foe Wobbuffet used " EXTREME_SPEED_NAME "!");
         MESSAGE("Wobbuffet used Max Mindstorm!");
-        MESSAGE("Foe Wobbuffet cannot use ExtremeSpeed!");
+        MESSAGE("Foe Wobbuffet cannot use " EXTREME_SPEED_NAME "!");
         MESSAGE("Wobbuffet used Max Mindstorm!");
     }
 }

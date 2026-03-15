@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+#if B_EXPANDED_MOVE_NAMES
+#define PETAL_BLIZZARD_NAME "Petal Blizzard"
+#else
+#define PETAL_BLIZZARD_NAME "PetalBlizzrd"
+#endif
+
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_THUNDERBOLT].power != 0);
@@ -167,12 +173,12 @@ DOUBLE_BATTLE_TEST("Wind Power activates correctly for every battler with the ab
         HP_BAR(playerLeft);
         if (abilityLeft == ABILITY_WIND_POWER) {
             ABILITY_POPUP(playerLeft, ABILITY_WIND_POWER);
-            MESSAGE("Being hit by PetalBlizzrd charged Wattrel with power!");
+            MESSAGE("Being hit by " PETAL_BLIZZARD_NAME " charged Wattrel with power!");
         }
         HP_BAR(playerRight);
         if (abilityRight == ABILITY_WIND_POWER) {
             ABILITY_POPUP(playerRight, ABILITY_WIND_POWER);
-            MESSAGE("Being hit by PetalBlizzrd charged Wattrel with power!");
+            MESSAGE("Being hit by " PETAL_BLIZZARD_NAME " charged Wattrel with power!");
         }
         HP_BAR(opponentRight);
         NOT HP_BAR(opponentLeft);

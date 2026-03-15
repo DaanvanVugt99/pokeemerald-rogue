@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+#if B_EXPANDED_MOVE_NAMES
+#define SELF_DESTRUCT_NAME "Self-Destruct"
+#else
+#define SELF_DESTRUCT_NAME "SelfDestruct"
+#endif
+
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_FLING].effect == EFFECT_FLING);
@@ -114,7 +120,7 @@ SINGLE_BATTLE_TEST("Fling - Item is lost even when there is no target")
         TURN { MOVE(opponent, MOVE_SELF_DESTRUCT); MOVE(player, MOVE_FLING); SEND_OUT(opponent, 1); }
         TURN { MOVE(player, MOVE_FLING); }
     } SCENE {
-        MESSAGE("Foe Wobbuffet used SelfDestruct!");
+        MESSAGE("Foe Wobbuffet used " SELF_DESTRUCT_NAME "!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SELF_DESTRUCT, opponent);
         HP_BAR(player);
         MESSAGE("Foe Wobbuffet fainted!");
