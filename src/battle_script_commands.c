@@ -15073,7 +15073,9 @@ static void Cmd_removelightscreenreflect(void)
     CMD_ARGS();
 
     u8 side;
+    u8 moveType;
     bool32 failed;
+    uq4_12_t modifier;
 
     if (B_BRICK_BREAK >= GEN_4)
         side = GetBattlerSide(gBattlerTarget); // From Gen 4 onwards, Brick Break can remove screens on the user's side if used on an ally
@@ -15081,9 +15083,16 @@ static void Cmd_removelightscreenreflect(void)
         side = GetBattlerSide(gBattlerAttacker) ^ BIT_SIDE;
 
     if (B_BRICK_BREAK >= GEN_5)
-        failed = (gMoveResultFlags & MOVE_RESULT_NO_EFFECT);
+    {
+        // This command runs before `typecalc`, so check immunity here as well.
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        modifier = CalcTypeEffectivenessMultiplier(gCurrentMove, moveType, gBattlerAttacker, gBattlerTarget, GetBattlerAbility(gBattlerTarget), FALSE);
+        failed = (gMoveResultFlags & MOVE_RESULT_NO_EFFECT) || modifier == UQ_4_12(0.0);
+    }
     else
+    {
         failed = FALSE;
+    }
 
     if (!failed
      && (gSideTimers[side].reflectTimer
