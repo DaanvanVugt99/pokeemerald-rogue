@@ -20,7 +20,7 @@ SINGLE_BATTLE_TEST("Limber prevents paralysis")
 SINGLE_BATTLE_TEST("Unique Limber prevents paralysis")
 {
     GIVEN {
-        PLAYER(SPECIES_PERSIAN) { UniqueAbility(ABILITY_LIMBER); }
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_LIMBER); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_THUNDER_WAVE); }

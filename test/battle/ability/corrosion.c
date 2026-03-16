@@ -100,7 +100,7 @@ SINGLE_BATTLE_TEST("Unique Corrosion can poison or badly poison a Steel type wit
     GIVEN {
         ASSUME(gBattleMoves[MOVE_POISON_POWDER].effect == EFFECT_POISON);
         ASSUME(gBattleMoves[MOVE_TOXIC].effect == EFFECT_TOXIC);
-        PLAYER(SPECIES_SALANDIT) { UniqueAbility(ABILITY_CORROSION); }
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_CORROSION); }
         OPPONENT(SPECIES_BELDUM);
     } WHEN {
         TURN { MOVE(player, move); }

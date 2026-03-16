@@ -52,11 +52,11 @@ WILD_BATTLE_TEST("Poke Toy lets the player escape from a wild battle even if an 
 WILD_BATTLE_TEST("Unique Run Away lets the player escape from a wild battle")
 {
     GIVEN {
-        PLAYER(SPECIES_RATTATA) { UniqueAbility(ABILITY_RUN_AWAY); }
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_RUN_AWAY); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { RUN_AWAY(player); }
     } SCENE {
-        MESSAGE("{PLAY_SE SE_FLEE}Rattata fled\nusing Run Away!\p");
+        MESSAGE("{PLAY_SE SE_FLEE}Wobbuffet fled\nusing Run Away!\p");
     }
 }

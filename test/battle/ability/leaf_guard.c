@@ -50,15 +50,15 @@ SINGLE_BATTLE_TEST("Unique Leaf Guard prevents non-volatile status conditions in
         ASSUME(gBattleMoves[MOVE_THUNDER_WAVE].effect == EFFECT_PARALYZE);
         ASSUME(gBattleMoves[MOVE_TOXIC].effect == EFFECT_TOXIC);
         ASSUME(gBattleMoves[MOVE_POWDER_SNOW].effect == EFFECT_FREEZE_HIT);
-        PLAYER(SPECIES_LEAFEON) { UniqueAbility(ABILITY_LEAF_GUARD); }
-        OPPONENT(SPECIES_WOBBUFFET);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); UniqueAbility(ABILITY_LEAF_GUARD); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); }
     } WHEN {
         TURN { MOVE(player, MOVE_SUNNY_DAY); MOVE(opponent, move); }
     } SCENE {
         if (move != MOVE_POWDER_SNOW) {
             NOT ANIMATION(ANIM_TYPE_MOVE, move, opponent);
             ABILITY_POPUP(player, ABILITY_LEAF_GUARD);
-            MESSAGE("It doesn't affect Leafeon…");
+            MESSAGE("It doesn't affect Wobbuffet…");
             NOT STATUS_ICON(player, status);
         } else {
             NONE_OF {

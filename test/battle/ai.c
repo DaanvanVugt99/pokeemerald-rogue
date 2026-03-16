@@ -69,6 +69,100 @@ AI_SINGLE_BATTLE_TEST("AI prefers Water Gun over Bubble if it knows that foe has
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI does not use Rest if it has Insomnia")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { HP(200); }
+        OPPONENT(SPECIES_DROWZEE) { Ability(ABILITY_INSOMNIA); HP(40); MaxHP(120); Moves(MOVE_REST, MOVE_TACKLE); }
+    } WHEN {
+        TURN { EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI does not use Rest if it has unique Insomnia")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { HP(200); }
+        OPPONENT(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_INSOMNIA); HP(40); MaxHP(120); Moves(MOVE_REST, MOVE_TACKLE); }
+    } WHEN {
+        TURN { EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores Confuse Ray below Tackle against revealed Own Tempo")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_CONFUSE_RAY].effect == EFFECT_CONFUSE);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_OWN_TEMPO); }
+        OPPONENT(SPECIES_ARBOK) { Ability(ABILITY_INTIMIDATE); Moves(MOVE_CONFUSE_RAY, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_CONFUSE_RAY); }
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_CONFUSE_RAY); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores Confuse Ray below Tackle against revealed unique Own Tempo")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_CONFUSE_RAY].effect == EFFECT_CONFUSE);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_OWN_TEMPO); }
+        OPPONENT(SPECIES_ARBOK) { Ability(ABILITY_INTIMIDATE); Moves(MOVE_CONFUSE_RAY, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_CONFUSE_RAY); }
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_CONFUSE_RAY); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores Knock Off below Tackle against known Sticky Hold")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_STICKY_HOLD); Item(ITEM_LEFTOVERS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_MACHAMP) { Moves(MOVE_KNOCK_OFF, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_KNOCK_OFF); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores Knock Off below Tackle against revealed unique Sticky Hold")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_STICKY_HOLD); Item(ITEM_LEFTOVERS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_MACHAMP) { Moves(MOVE_KNOCK_OFF, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_KNOCK_OFF); }
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_KNOCK_OFF); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores Thunder Wave below Tackle against known Limber")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_LIMBER); }
+        OPPONENT(SPECIES_PIKACHU) { Moves(MOVE_THUNDER_WAVE, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_THUNDER_WAVE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores Thunder Wave below Tackle against revealed unique Limber")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_LIMBER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_PIKACHU) { Moves(MOVE_THUNDER_WAVE, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_THUNDER_WAVE); }
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_THUNDER_WAVE); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI prefers moves with better accuracy, but only if they both require the same number of hits to ko")
 {
     u16 move1 = MOVE_NONE, move2 = MOVE_NONE, move3 = MOVE_NONE, move4 = MOVE_NONE;

@@ -362,7 +362,7 @@ static bool32 ChangeOrderTargetAfterAttacker(void);
 void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBattler);
 static void RemoveAllWeather(void);
 static void RemoveAllTerrains(void);
-static bool8 CanAbilityPreventStatLoss(u16 abilityDef, bool8 isIntimidate);
+static u16 GetStatLossPreventionAbility(u32 battler, bool8 isIntimidate);
 
 static void Cmd_attackcanceler(void);
 static void Cmd_accuracycheck(void);
@@ -3026,6 +3026,8 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     statusAbility = ABILITY_IMMUNITY;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_PASTEL_VEIL))
                     statusAbility = ABILITY_PASTEL_VEIL;
+                else if (IsLeafGuardProtected(gEffectBattler))
+                    statusAbility = ABILITY_LEAF_GUARD;
 
                 if (statusAbility != ABILITY_NONE
                     && (primary == TRUE || certain == MOVE_EFFECT_CERTAIN))
@@ -3074,6 +3076,8 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     statusAbility = ABILITY_WATER_VEIL;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_WATER_BUBBLE))
                     statusAbility = ABILITY_WATER_BUBBLE;
+                else if (IsLeafGuardProtected(gEffectBattler))
+                    statusAbility = ABILITY_LEAF_GUARD;
 
                 if (statusAbility != ABILITY_NONE
                   && (primary == TRUE || certain == MOVE_EFFECT_CERTAIN))
@@ -3121,12 +3125,15 @@ void SetMoveEffect(bool32 primary, u32 certain)
             statusChanged = TRUE;
             break;
         case STATUS1_PARALYSIS:
-            if (HasBattlerAbility(gEffectBattler, ABILITY_LIMBER))
+            if (HasBattlerAbility(gEffectBattler, ABILITY_LIMBER)
+              || IsLeafGuardProtected(gEffectBattler))
             {
                 if (primary == TRUE || certain == MOVE_EFFECT_CERTAIN)
                 {
-                    SetBattlerTriggeredAbility(gEffectBattler, ABILITY_LIMBER);
-                    RecordAbilityBattle(gEffectBattler, ABILITY_LIMBER);
+                    u16 statusAbility = IsLeafGuardProtected(gEffectBattler) ? ABILITY_LEAF_GUARD : ABILITY_LIMBER;
+
+                    SetBattlerTriggeredAbility(gEffectBattler, statusAbility);
+                    RecordAbilityBattle(gEffectBattler, statusAbility);
 
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
                     gBattlescriptCurrInstr = BattleScript_PRLZPrevention;
@@ -10581,6 +10588,8 @@ static void Cmd_various(void)
         if (IsLeafGuardProtected(battler))
         {
             gBattlerAbility = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_LEAF_GUARD);
+            RecordAbilityBattle(battler, ABILITY_LEAF_GUARD);
             gBattlescriptCurrInstr = cmd->jumpInstr;
         }
         else
@@ -11650,7 +11659,7 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
             return STAT_CHANGE_DIDNT_WORK;
         }
         else if ((battlerHoldEffect == HOLD_EFFECT_CLEAR_AMULET
-              || CanAbilityPreventStatLoss(battlerAbility, GetBattlerAbility(gBattlerAttacker) == ABILITY_INTIMIDATE))
+              || (battlerAbility = GetStatLossPreventionAbility(battler, GetBattlerAbility(gBattlerAttacker) == ABILITY_INTIMIDATE)) != ABILITY_NONE)
               && (!affectsUser || mirrorArmored) && !certain && gCurrentMove != MOVE_CURSE)
         {
             if (flags == STAT_CHANGE_ALLOW_PTR)
@@ -11673,8 +11682,8 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
                     {
                         gBattlerAbility = battler;
                         gBattlescriptCurrInstr = BattleScript_AbilityNoStatLoss;
-                        gLastUsedAbility = battlerAbility;
-                        RecordAbilityBattle(battler, gLastUsedAbility);
+                        SetBattlerTriggeredAbility(battler, battlerAbility);
+                        RecordAbilityBattle(battler, battlerAbility);
                     }
                     gSpecialStatuses[battler].statLowered = TRUE;
                 }
@@ -16178,23 +16187,28 @@ static bool8 IsFinalStrikeEffect(u16 move)
     return FALSE;
 }
 
-static bool8 CanAbilityPreventStatLoss(u16 abilityDef, bool8 byIntimidate)
+static u16 GetStatLossPreventionAbility(u32 battler, bool8 byIntimidate)
 {
-    switch (abilityDef)
+    if (HasBattlerAbility(battler, ABILITY_CLEAR_BODY))
+        return ABILITY_CLEAR_BODY;
+    if (HasBattlerAbility(battler, ABILITY_FULL_METAL_BODY))
+        return ABILITY_FULL_METAL_BODY;
+    if (HasBattlerAbility(battler, ABILITY_WHITE_SMOKE))
+        return ABILITY_WHITE_SMOKE;
+
+    if (byIntimidate && (B_UPDATED_INTIMIDATE >= GEN_8))
     {
-    case ABILITY_CLEAR_BODY:
-    case ABILITY_FULL_METAL_BODY:
-    case ABILITY_WHITE_SMOKE:
-        return TRUE;
-    case ABILITY_INNER_FOCUS:
-    case ABILITY_SCRAPPY:
-    case ABILITY_OWN_TEMPO:
-    case ABILITY_OBLIVIOUS:
-        if (byIntimidate && (B_UPDATED_INTIMIDATE >= GEN_8))
-            return TRUE;
-        break;
+        if (HasBattlerAbility(battler, ABILITY_INNER_FOCUS))
+            return ABILITY_INNER_FOCUS;
+        if (HasBattlerAbility(battler, ABILITY_SCRAPPY))
+            return ABILITY_SCRAPPY;
+        if (HasBattlerAbility(battler, ABILITY_OWN_TEMPO))
+            return ABILITY_OWN_TEMPO;
+        if (HasBattlerAbility(battler, ABILITY_OBLIVIOUS))
+            return ABILITY_OBLIVIOUS;
     }
-    return FALSE;
+
+    return ABILITY_NONE;
 }
 
 void BS_CheckParentalBondCounter(void)

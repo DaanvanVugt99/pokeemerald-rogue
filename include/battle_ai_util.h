@@ -35,6 +35,8 @@ bool32 CanTargetFaintAi(u32 battlerDef, u32 battlerAtk);
 bool32 CanTargetMoveFaintAi(u32 move, u32 battlerDef, u32 battlerAtk, u32 nHits);
 bool32 CanTargetFaintAiWithMod(u32 battlerDef, u32 battlerAtk, s32 hpMod, s32 dmgMod);
 s32 AI_DecideKnownAbilityForTurn(u32 battlerId);
+u32 AI_DecideKnownUniqueAbilityForTurn(u32 battlerId);
+bool32 AI_HasAbility(u32 battlerId, u32 ability);
 u32 AI_DecideHoldEffectForTurn(u32 battlerId);
 bool32 DoesBattlerIgnoreAbilityChecks(u32 atkAbility, u32 move);
 u32 AI_GetWeather(struct AiLogicData *aiData);

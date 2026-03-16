@@ -453,7 +453,7 @@ SINGLE_BATTLE_TEST("Unique Unseen Fist bypasses Protect with contact moves")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
-        PLAYER(SPECIES_URSHIFU) { UniqueAbility(ABILITY_UNSEEN_FIST); }
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_UNSEEN_FIST); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_PROTECT); MOVE(player, MOVE_TACKLE); }

@@ -35,6 +35,12 @@ This file documents practical repo-specific guidance for coding agents and contr
   - `Error: mgba-rom-test not found in PATH.`
 - Fix: install `mgba-rom-test` and ensure it is resolvable by `command -v mgba-rom-test`.
 
+## Battle Test Gaps
+
+- `Shadow Tag` is currently awkward to validate in the black-box battle DSL.
+- `RUN_AWAY(...)`, direct escape checks, and simple trainer-battle probes were not reliable enough for a canonical test.
+- Prefer manual in-game verification for `Shadow Tag` interactions until a better harness pattern or AI-side mirror test is added.
+
 ## Battle Test Authoring Guidance
 
 - Prefer robust assertions in `SCENE`:

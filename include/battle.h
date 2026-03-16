@@ -290,6 +290,7 @@ struct AiPartyMon
     u16 item;
     u16 heldEffect;
     u16 ability;
+    u16 uniqueAbility;
     u16 gender;
     u16 level;
     u16 moves[MAX_MON_MOVES];
@@ -315,6 +316,7 @@ struct SwitchinCandidate
 struct AiLogicData
 {
     u16 abilities[MAX_BATTLERS_COUNT];
+    u16 uniqueAbilities[MAX_BATTLERS_COUNT];
     u16 items[MAX_BATTLERS_COUNT];
     u16 holdEffects[MAX_BATTLERS_COUNT];
     u8 holdEffectParams[MAX_BATTLERS_COUNT];

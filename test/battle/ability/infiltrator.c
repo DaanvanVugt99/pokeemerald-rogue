@@ -20,7 +20,7 @@ SINGLE_BATTLE_TEST("Unique Infiltrator bypasses Substitute")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TOXIC].effect == EFFECT_TOXIC);
-        PLAYER(SPECIES_CROBAT) { UniqueAbility(ABILITY_INFILTRATOR); }
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_INFILTRATOR); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_SUBSTITUTE); MOVE(player, MOVE_TOXIC); }

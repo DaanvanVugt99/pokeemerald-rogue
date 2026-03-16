@@ -213,7 +213,7 @@ SINGLE_BATTLE_TEST("Unique Pickpocket steals White Herb before it activates")
     GIVEN {
         ASSUME(gBattleMoves[MOVE_SUPERPOWER].effect == EFFECT_SUPERPOWER);
         PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_WHITE_HERB); }
-        OPPONENT(SPECIES_SNEASEL) { UniqueAbility(ABILITY_PICKPOCKET); }
+        OPPONENT(SPECIES_WYNAUT) { UniqueAbility(ABILITY_PICKPOCKET); }
     } WHEN {
         TURN { MOVE(player, MOVE_SUPERPOWER); }
     } SCENE {

@@ -62,7 +62,7 @@ SINGLE_BATTLE_TEST("Unique Insomnia prevents sleep")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_SPORE].effect == EFFECT_SLEEP);
-        PLAYER(SPECIES_DROWZEE) { UniqueAbility(ABILITY_INSOMNIA); }
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_INSOMNIA); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_SPORE); }
@@ -80,7 +80,7 @@ SINGLE_BATTLE_TEST("Unique Vital Spirit prevents yawn")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_YAWN].effect == EFFECT_YAWN);
-        PLAYER(SPECIES_DROWZEE) { UniqueAbility(ABILITY_VITAL_SPIRIT); }
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_VITAL_SPIRIT); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_YAWN); }

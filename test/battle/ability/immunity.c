@@ -52,7 +52,7 @@ SINGLE_BATTLE_TEST("Unique Immunity prevents Toxic Spikes poison")
         ASSUME(gBattleMoves[MOVE_TOXIC_SPIKES].effect == EFFECT_TOXIC_SPIKES);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_SNORLAX) { UniqueAbility(ABILITY_IMMUNITY); }
+        OPPONENT(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_IMMUNITY); }
     } WHEN {
         TURN { MOVE(player, MOVE_TOXIC_SPIKES); }
         TURN { SWITCH(opponent, 1); }
@@ -66,13 +66,13 @@ SINGLE_BATTLE_TEST("Unique Immunity prevents Toxic bad poison")
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TOXIC].effect == EFFECT_TOXIC);
         PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_SNORLAX) { UniqueAbility(ABILITY_IMMUNITY); }
+        OPPONENT(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_IMMUNITY); }
     } WHEN {
         TURN { MOVE(player, MOVE_TOXIC); }
     } SCENE {
         MESSAGE("Wobbuffet used Toxic!");
         ABILITY_POPUP(opponent, ABILITY_IMMUNITY);
-        MESSAGE("Foe Snorlax's Immunity prevents poisoning!");
+        MESSAGE("Foe Wobbuffet's Immunity prevents poisoning!");
         NOT STATUS_ICON(opponent, poison: TRUE);
     }
 }

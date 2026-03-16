@@ -21,13 +21,13 @@ SINGLE_BATTLE_TEST("Unique Overcoat blocks powder and spore moves")
     GIVEN {
         ASSUME(gBattleMoves[MOVE_STUN_SPORE].powderMove);
         PLAYER(SPECIES_WYNAUT);
-        OPPONENT(SPECIES_PINECO) { UniqueAbility(ABILITY_OVERCOAT); }
+        OPPONENT(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_OVERCOAT); }
     } WHEN {
         TURN { MOVE(player, MOVE_STUN_SPORE); }
     } SCENE {
         ABILITY_POPUP(opponent, ABILITY_OVERCOAT);
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_STUN_SPORE, player);
-        MESSAGE("It doesn't affect Foe Pineco…");
+        MESSAGE("It doesn't affect Foe Wobbuffet…");
     }
 }
 

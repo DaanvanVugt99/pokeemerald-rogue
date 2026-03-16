@@ -452,8 +452,14 @@ void RecordAllMoves(u32 battler)
 
 void RecordAbilityBattle(u32 battlerId, u32 abilityId)
 {
+    struct AiPartyMon *aiMon = &AI_PARTY->mons[GetBattlerSide(battlerId)][gBattlerPartyIndexes[battlerId]];
+
     BATTLE_HISTORY->abilities[battlerId] = abilityId;
-    AI_PARTY->mons[GetBattlerSide(battlerId)][gBattlerPartyIndexes[battlerId]].ability = abilityId;
+
+    if (abilityId == GetBattlerUniqueAbility(battlerId))
+        aiMon->uniqueAbility = abilityId;
+    else
+        aiMon->ability = abilityId;
 }
 
 void ClearBattlerAbilityHistory(u32 battlerId)
@@ -603,7 +609,7 @@ bool32 IsBattlerTrapped(u32 battler, bool32 checkSwitch)
         return FALSE;
     if (checkSwitch && holdEffect == HOLD_EFFECT_SHED_SHELL)
         return FALSE;
-    else if (!checkSwitch && HasBattlerAbility(battler, ABILITY_RUN_AWAY))
+    else if (!checkSwitch && AI_HasAbility(battler, ABILITY_RUN_AWAY))
         return FALSE;
     else if (!checkSwitch && holdEffect == HOLD_EFFECT_CAN_ALWAYS_RUN)
         return FALSE;
@@ -1262,12 +1268,18 @@ bool32 CanTargetFaintAiWithMod(u32 battlerDef, u32 battlerAtk, s32 hpMod, s32 dm
 
 bool32 AI_IsAbilityOnSide(u32 battlerId, u32 ability)
 {
-    if (IsBattlerAlive(battlerId) && AI_DATA->abilities[battlerId] == ability)
+    if (IsBattlerAlive(battlerId) && AI_HasAbility(battlerId, ability))
         return TRUE;
-    else if (IsBattlerAlive(BATTLE_PARTNER(battlerId)) && AI_DATA->abilities[BATTLE_PARTNER(battlerId)] == ability)
+    else if (IsBattlerAlive(BATTLE_PARTNER(battlerId)) && AI_HasAbility(BATTLE_PARTNER(battlerId), ability))
         return TRUE;
     else
         return FALSE;
+}
+
+bool32 AI_HasAbility(u32 battlerId, u32 ability)
+{
+    return AI_DATA->abilities[battlerId] == ability
+        || AI_DATA->uniqueAbilities[battlerId] == ability;
 }
 
 // does NOT include ability suppression checks
@@ -1307,6 +1319,24 @@ s32 AI_DecideKnownAbilityForTurn(u32 battlerId)
     }
 
     return ABILITY_NONE; // Unknown.
+}
+
+u32 AI_DecideKnownUniqueAbilityForTurn(u32 battlerId)
+{
+    u32 side = GetBattlerSide(battlerId);
+    u32 partyIndex = gBattlerPartyIndexes[battlerId];
+    u32 uniqueAbility = GetBattlerUniqueAbility(battlerId);
+
+    if (IsAiBattlerAware(battlerId))
+        return uniqueAbility;
+
+    if (BATTLE_HISTORY->abilities[battlerId] == uniqueAbility)
+        return uniqueAbility;
+
+    if (AI_PARTY->mons[side][partyIndex].uniqueAbility != ABILITY_NONE)
+        return AI_PARTY->mons[side][partyIndex].uniqueAbility;
+
+    return GetUniqueAbilityBySpecies(gBattleMons[battlerId].species);
 }
 
 u32 AI_DecideHoldEffectForTurn(u32 battlerId)
@@ -1359,7 +1389,7 @@ bool32 AI_IsBattlerGrounded(u32 battlerId)
         return FALSE;
     else if (holdEffect == HOLD_EFFECT_AIR_BALLOON)
         return FALSE;
-    else if (AI_DATA->abilities[battlerId] == ABILITY_LEVITATE)
+    else if (AI_HasAbility(battlerId, ABILITY_LEVITATE))
         return FALSE;
     else if (IS_BATTLER_OF_TYPE(battlerId, TYPE_FLYING))
         return FALSE;
@@ -2749,7 +2779,7 @@ bool32 CanKnockOffItem(u32 battler, u32 item)
       )) && GetBattlerSide(battler) == B_SIDE_PLAYER)
         return FALSE;
 
-    if (AI_DATA->abilities[battler] == ABILITY_STICKY_HOLD)
+    if (AI_HasAbility(battler, ABILITY_STICKY_HOLD))
         return FALSE;
 
     if (!CanBattlerGetOrLoseItem(battler, item))
@@ -2775,9 +2805,9 @@ bool32 IsBattlerIncapacitated(u32 battler, u32 ability)
 
 bool32 AI_CanSleep(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_INSOMNIA
-      || ability == ABILITY_VITAL_SPIRIT
-      || ability == ABILITY_COMATOSE
+    if (AI_HasAbility(battler, ABILITY_INSOMNIA)
+      || AI_HasAbility(battler, ABILITY_VITAL_SPIRIT)
+      || AI_HasAbility(battler, ABILITY_COMATOSE)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
       || (gFieldStatuses & (STATUS_FIELD_MISTY_TERRAIN | STATUS_FIELD_ELECTRIC_TERRAIN))
@@ -2797,13 +2827,11 @@ bool32 AI_CanPutToSleep(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move
 
 static bool32 AI_CanBePoisoned(u32 battlerAtk, u32 battlerDef, u32 move)
 {
-    u32 ability = AI_DATA->abilities[battlerDef];
-
     if (!(CanPoisonType(battlerAtk, battlerDef))
      || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD
      || gBattleMons[battlerDef].status1 & STATUS1_ANY
-     || ability == ABILITY_IMMUNITY
-     || ability == ABILITY_COMATOSE
+     || AI_HasAbility(battlerDef, ABILITY_IMMUNITY)
+     || AI_HasAbility(battlerDef, ABILITY_COMATOSE)
      || AI_IsAbilityOnSide(battlerDef, ABILITY_PASTEL_VEIL)
      || gBattleMons[battlerDef].status1 & STATUS1_ANY
      || IsAbilityStatusProtected(battlerDef)
@@ -2836,7 +2864,7 @@ bool32 AI_CanPoison(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u3
         return FALSE;
     else if (defAbility != ABILITY_CORROSION && (IS_BATTLER_OF_TYPE(battlerDef, TYPE_POISON) || IS_BATTLER_OF_TYPE(battlerDef, TYPE_STEEL)))
         return FALSE;
-    else if (IsValidDoubleBattle(battlerAtk) && AI_DATA->abilities[BATTLE_PARTNER(battlerDef)] == ABILITY_PASTEL_VEIL)
+    else if (IsValidDoubleBattle(battlerAtk) && AI_HasAbility(BATTLE_PARTNER(battlerDef), ABILITY_PASTEL_VEIL))
         return FALSE;
 
     return TRUE;
@@ -2844,8 +2872,8 @@ bool32 AI_CanPoison(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u3
 
 static bool32 AI_CanBeParalyzed(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_LIMBER
-      || ability == ABILITY_COMATOSE
+    if (AI_HasAbility(battler, ABILITY_LIMBER)
+      || AI_HasAbility(battler, ABILITY_COMATOSE)
       || IS_BATTLER_OF_TYPE(battler, TYPE_ELECTRIC)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler))
@@ -2867,7 +2895,7 @@ bool32 AI_CanParalyze(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, 
 bool32 AI_CanBeConfused(u32 battler, u32 ability)
 {
     if ((gBattleMons[battler].status2 & STATUS2_CONFUSION)
-      || (ability == ABILITY_OWN_TEMPO)
+      || AI_HasAbility(battler, ABILITY_OWN_TEMPO)
       || (IsBattlerGrounded(battler) && (gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN)))
         return FALSE;
     return TRUE;
@@ -2889,9 +2917,9 @@ bool32 AI_CanConfuse(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 battler
 
 bool32 AI_CanBeBurned(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_WATER_VEIL
-      || ability == ABILITY_WATER_BUBBLE
-      || ability == ABILITY_COMATOSE
+    if (AI_HasAbility(battler, ABILITY_WATER_VEIL)
+      || AI_HasAbility(battler, ABILITY_WATER_BUBBLE)
+      || AI_HasAbility(battler, ABILITY_COMATOSE)
       || IS_BATTLER_OF_TYPE(battler, TYPE_FIRE)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)
@@ -2902,8 +2930,8 @@ bool32 AI_CanBeBurned(u32 battler, u32 ability)
 
 bool32 AI_CanGetFrostbite(u32 battler, u32 ability)
 {
-    if (ability == ABILITY_MAGMA_ARMOR
-      || ability == ABILITY_COMATOSE
+    if (AI_HasAbility(battler, ABILITY_MAGMA_ARMOR)
+      || AI_HasAbility(battler, ABILITY_COMATOSE)
       || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)
@@ -2954,7 +2982,7 @@ bool32 AI_CanBeInfatuated(u32 battlerAtk, u32 battlerDef, u32 defAbility)
 {
     if ((gBattleMons[battlerDef].status2 & STATUS2_INFATUATION)
       || AI_GetMoveEffectiveness(AI_THINKING_STRUCT->moveConsidered, battlerAtk, battlerDef) == AI_EFFECTIVENESS_x0
-      || defAbility == ABILITY_OBLIVIOUS
+      || AI_HasAbility(battlerDef, ABILITY_OBLIVIOUS)
       || !AreBattlersOfOppositeGender(battlerAtk, battlerDef)
       || AI_IsAbilityOnSide(battlerDef, ABILITY_AROMA_VEIL))
         return FALSE;
@@ -3812,7 +3840,7 @@ bool32 ShouldUseZMove(u32 battlerAtk, u32 battlerDef, u32 chosenMove)
 
 bool32 AI_IsBattlerAsleepOrComatose(u32 battlerId)
 {
-    return (gBattleMons[battlerId].status1 & STATUS1_SLEEP) || AI_DATA->abilities[battlerId] == ABILITY_COMATOSE;
+    return (gBattleMons[battlerId].status1 & STATUS1_SLEEP) || AI_HasAbility(battlerId, ABILITY_COMATOSE);
 }
 
 u32 AI_CalcSecondaryEffectChance(u32 battler, u32 secondaryEffectChance)
