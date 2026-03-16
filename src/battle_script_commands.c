@@ -1244,10 +1244,10 @@ static bool32 TryAegiFormChange(void)
     case SPECIES_AEGISLASH_SHIELD: // Shield -> Blade
         if (IS_MOVE_STATUS(gCurrentMove))
             return FALSE;
-    
+
         if (gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[gBattlerAttacker]] == SPECIES_NONE)
             gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[gBattlerAttacker]] = gBattleMons[gBattlerAttacker].species;
-    
+
         gBattleMons[gBattlerAttacker].species = SPECIES_AEGISLASH_BLADE;
         break;
     case SPECIES_AEGISLASH_BLADE: // Blade -> Shield
@@ -1948,7 +1948,7 @@ static void Cmd_ppreduce(void)
 
     gHitMarker &= ~HITMARKER_NO_PPDEDUCT;
     gBattlescriptCurrInstr = cmd->nextInstr;
-    
+
     if (ShouldTeraShellDistortTypeMatchups(gCurrentMove, gBattlerTarget))
     {
         gBattleStruct->distortedTypeMatchups |= gBitTable[gBattlerTarget];
@@ -11588,7 +11588,7 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
 {
     bool32 certain = FALSE;
     bool32 notProtectAffected = FALSE;
-    u32 index, battler, battlerAbility, battlerHoldEffect;
+    u32 index, battler, battlerAbility, battlerHoldEffect, preventionAbility = ABILITY_NONE;
     bool32 affectsUser = (flags & MOVE_EFFECT_AFFECTS_USER);
     bool32 mirrorArmored = (flags & STAT_CHANGE_MIRROR_ARMOR);
 
@@ -11659,7 +11659,7 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
             return STAT_CHANGE_DIDNT_WORK;
         }
         else if ((battlerHoldEffect == HOLD_EFFECT_CLEAR_AMULET
-              || (battlerAbility = GetStatLossPreventionAbility(battler, GetBattlerAbility(gBattlerAttacker) == ABILITY_INTIMIDATE)) != ABILITY_NONE)
+              || (preventionAbility = GetStatLossPreventionAbility(battler, GetBattlerAbility(gBattlerAttacker) == ABILITY_INTIMIDATE)) != ABILITY_NONE)
               && (!affectsUser || mirrorArmored) && !certain && gCurrentMove != MOVE_CURSE)
         {
             if (flags == STAT_CHANGE_ALLOW_PTR)
@@ -11682,8 +11682,8 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
                     {
                         gBattlerAbility = battler;
                         gBattlescriptCurrInstr = BattleScript_AbilityNoStatLoss;
-                        SetBattlerTriggeredAbility(battler, battlerAbility);
-                        RecordAbilityBattle(battler, battlerAbility);
+                        SetBattlerTriggeredAbility(battler, preventionAbility);
+                        RecordAbilityBattle(battler, preventionAbility);
                     }
                     gSpecialStatuses[battler].statLowered = TRUE;
                 }
@@ -11803,13 +11803,6 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
             gBattleTextBuff2[1] = B_BUFF_STRING;
             gBattleTextBuff2[2] = STRINGID_STATSHARPLY;
             gBattleTextBuff2[3] = STRINGID_STATSHARPLY >> 8;
-            index = 4;
-        }
-        else if (statValue >= 3)
-        {
-            gBattleTextBuff2[1] = B_BUFF_STRING;
-            gBattleTextBuff2[2] = STRINGID_DRASTICALLY & 0xFF;
-            gBattleTextBuff2[3] = STRINGID_DRASTICALLY >> 8;
             index = 4;
         }
         else if (statValue >= 3)
@@ -15346,7 +15339,7 @@ static void Cmd_handleballthrow(void)
             {
                 struct Evolution evo;
                 u8 evoCount = Rogue_GetMaxEvolutionCount(gBattleMons[gBattlerTarget].species);
-                
+
                 for (i = 0; i < evoCount; i++)
                 {
                     Rogue_ModifyEvolution(gBattleMons[gBattlerTarget].species, i, &evo);
@@ -15624,7 +15617,7 @@ static void Cmd_trysetcaughtmondexflags(void)
         HandleSetPokedexFlag(species, FLAG_SET_CAUGHT, personality);
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
-    
+
     // RogueNote: Never display caught mon dex info
     gBattlescriptCurrInstr = cmd->failInstr;
 
@@ -15777,7 +15770,7 @@ static void Cmd_trygivecaughtmonnick(void)
     {
     case 0:
         HandleBattleWindow(YESNOBOX_X_Y, 0);
-        
+
         if(Rogue_ShouldSkipAssignNicknameYesNoMessage())
         {
             gBattleCommunication[MULTIUSE_STATE] = 2;
