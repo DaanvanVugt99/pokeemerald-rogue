@@ -13,6 +13,18 @@ SINGLE_BATTLE_TEST("Pressure causes opponent's moves to use up 1 additional PP")
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Pressure causes opponent's moves to use up 1 additional PP")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { MovesWithPP({MOVE_POUND, 35}); }
+        OPPONENT(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_PRESSURE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_POUND); }
+    } THEN {
+        EXPECT_EQ(player->pp[0], 33);
+    }
+}
+
 DOUBLE_BATTLE_TEST("Pressure's effect stacks with multiple Pokémon")
 {
     GIVEN {

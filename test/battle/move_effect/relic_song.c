@@ -39,6 +39,23 @@ SINGLE_BATTLE_TEST("Relic Song is prevented by Soundproof")
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Soundproof blocks Relic Song")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_VOLTORB) { UniqueAbility(ABILITY_SOUNDPROOF); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_RELIC_SONG); }
+    } SCENE {
+        ABILITY_POPUP(opponent, ABILITY_SOUNDPROOF);
+        MESSAGE("Foe Voltorb's Soundproof blocks Relic Song!");
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_RELIC_SONG, player);
+            HP_BAR(opponent);
+        }
+    }
+}
+
 SINGLE_BATTLE_TEST("Relic Song will become a Water-type move when used by a Pokémon with the Ability Liquid Voice")
 {
     GIVEN {

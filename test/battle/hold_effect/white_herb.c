@@ -166,6 +166,25 @@ SINGLE_BATTLE_TEST("White Herb wont have time to activate if Magician steals it"
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Sticky Hold blocks Magician before White Herb activates")
+{
+    GIVEN {
+        PLAYER(SPECIES_SLUGMA) { Ability(ABILITY_WEAK_ARMOR); Item(ITEM_WHITE_HERB); UniqueAbility(ABILITY_STICKY_HOLD); }
+        OPPONENT(SPECIES_FENNEKIN) { Ability(ABILITY_MAGICIAN); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Slugma's White Herb restored its status!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT_EQ(opponent->item, ITEM_NONE);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 2);
+    }
+}
+
 SINGLE_BATTLE_TEST("White Herb wont have time to activate if Pickpocket steals it")
 {
     GIVEN {
@@ -186,6 +205,29 @@ SINGLE_BATTLE_TEST("White Herb wont have time to activate if Pickpocket steals i
         EXPECT_EQ(opponent->item, ITEM_WHITE_HERB);
         EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE - 1);
         EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+    }
+}
+
+
+SINGLE_BATTLE_TEST("Unique Sticky Hold blocks Pickpocket before White Herb activates")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SUPERPOWER].effect == EFFECT_SUPERPOWER);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_WHITE_HERB); UniqueAbility(ABILITY_STICKY_HOLD); }
+        OPPONENT(SPECIES_SNEASEL) { Ability(ABILITY_PICKPOCKET); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SUPERPOWER); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SUPERPOWER, player);
+        ABILITY_POPUP(opponent, ABILITY_PICKPOCKET);
+        ABILITY_POPUP(player, ABILITY_STICKY_HOLD);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet's White Herb restored its status!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT_EQ(opponent->item, ITEM_NONE);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
     }
 }
 

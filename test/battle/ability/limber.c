@@ -16,3 +16,18 @@ SINGLE_BATTLE_TEST("Limber prevents paralysis")
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Unique Limber prevents paralysis")
+{
+    GIVEN {
+        PLAYER(SPECIES_PERSIAN) { UniqueAbility(ABILITY_LIMBER); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_THUNDER_WAVE); }
+    } SCENE {
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PRZ, player);
+            STATUS_ICON(player, paralysis: TRUE);
+        }
+    }
+}

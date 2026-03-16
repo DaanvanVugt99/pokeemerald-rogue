@@ -19,6 +19,23 @@ SINGLE_BATTLE_TEST("Magic Bounce bounces back status moves")
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Magic Bounce bounces back status moves")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TOXIC].effect == EFFECT_TOXIC);
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_ESPEON) { UniqueAbility(ABILITY_MAGIC_BOUNCE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TOXIC); }
+    } SCENE {
+        ABILITY_POPUP(opponent, ABILITY_MAGIC_BOUNCE);
+        NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC, player);
+        MESSAGE("Wynaut's Toxic was bounced back by Foe Espeon's Magic Bounce!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC, opponent);
+        STATUS_ICON(player, badPoison: TRUE);
+    }
+}
+
 SINGLE_BATTLE_TEST("Magic Bounce bounces back powder moves")
 {
     GIVEN {

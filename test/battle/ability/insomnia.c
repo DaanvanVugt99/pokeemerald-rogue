@@ -57,3 +57,41 @@ SINGLE_BATTLE_TEST("Insomnia prevents rest")
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Unique Insomnia prevents sleep")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SPORE].effect == EFFECT_SLEEP);
+        PLAYER(SPECIES_DROWZEE) { UniqueAbility(ABILITY_INSOMNIA); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SPORE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_INSOMNIA);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SPORE, opponent);
+            ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_SLP, player);
+            STATUS_ICON(player, sleep: TRUE);
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Unique Vital Spirit prevents yawn")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_YAWN].effect == EFFECT_YAWN);
+        PLAYER(SPECIES_DROWZEE) { UniqueAbility(ABILITY_VITAL_SPIRIT); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_YAWN); }
+        TURN {}
+        TURN {}
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_VITAL_SPIRIT);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_YAWN, opponent);
+            ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_SLP, player);
+            STATUS_ICON(player, sleep: TRUE);
+        }
+    }
+}

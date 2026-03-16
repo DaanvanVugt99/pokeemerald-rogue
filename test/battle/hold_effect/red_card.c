@@ -283,6 +283,44 @@ DOUBLE_BATTLE_TEST("Red Card activates but fails if the attacker is rooted")
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Guard Dog blocks Red Card forced switch")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_RED_CARD); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_MASCHIFF) { UniqueAbility(ABILITY_GUARD_DOG); }
+        OPPONENT(SPECIES_WYNAUT);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet held up its Red Card against Foe Maschiff!");
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_RED_CARD);
+    }
+}
+
+SINGLE_BATTLE_TEST("Unique Suction Cups makes Red Card fail after activation")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_RED_CARD); }
+        OPPONENT(SPECIES_OCTILLERY) { UniqueAbility(ABILITY_SUCTION_CUPS); }
+        OPPONENT(SPECIES_WYNAUT);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet held up its Red Card against Foe Octillery!");
+        MESSAGE("Foe Octillery anchors itself with Suction Cups!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+    }
+}
+
 DOUBLE_BATTLE_TEST("Red Card activates but fails if the attacker has Suction Cups")
 {
     GIVEN {

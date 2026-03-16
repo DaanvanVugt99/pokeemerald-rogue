@@ -10,6 +10,13 @@ This file documents practical repo-specific guidance for coding agents and contr
 - For interactive test ROM runs: `mgba` in `PATH`.
 - For headless checks: `mgba-rom-test` in `PATH` (used via `make check` + hydra wrapper).
 
+## Current Product Scope
+
+- Long-term MVP content scope is Gen 1-3 only.
+- Treat this as a vertical-slice target, not a hard engine limitation.
+- Prefer decisions that preserve the Emerald/Hoenn feel for the first fully playable milestone.
+- Engine work may remain future-compatible with later generations, but content rollout, balancing, and unique-ability authoring should prioritize Gen 1-3 first.
+
 ## Test Commands
 
 - Build test ELF only:

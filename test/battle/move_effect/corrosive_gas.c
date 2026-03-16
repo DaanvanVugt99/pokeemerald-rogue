@@ -56,6 +56,24 @@ SINGLE_BATTLE_TEST("Corrosive Gas doesn't destroy the item of a Pokemon with the
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Sticky Hold blocks Corrosive Gas item destruction")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_MUK) {Item(ITEM_POISON_BARB); UniqueAbility(ABILITY_STICKY_HOLD); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CORROSIVE_GAS); }
+    } SCENE {
+        MESSAGE("Wobbuffet used " CORROSIVE_GAS_NAME "!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CORROSIVE_GAS, player);
+        NOT MESSAGE("Wobbuffet corroded Foe Muk's Poison Barb!");
+        ABILITY_POPUP(opponent, ABILITY_STICKY_HOLD);
+        MESSAGE("Foe Muk's Sticky Hold made " CORROSIVE_GAS_NAME " ineffective!");
+    } THEN {
+        EXPECT_EQ(opponent->item, ITEM_POISON_BARB);
+    }
+}
+
 SINGLE_BATTLE_TEST("Items lost to Corrosive Gas cannot be restored by Recycle")
 {
     GIVEN {

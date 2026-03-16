@@ -133,3 +133,18 @@ SINGLE_BATTLE_TEST("Spikes do not damage airborne Pokemon")
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Unique Magic Guard prevents Spikes damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WYNAUT) { UniqueAbility(ABILITY_MAGIC_GUARD); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SPIKES); }
+        TURN { SWITCH(opponent, 1); }
+    } SCENE {
+        MESSAGE("2 sent out Wynaut!");
+        NOT MESSAGE("Foe Wynaut is hurt by spikes!");
+    }
+}

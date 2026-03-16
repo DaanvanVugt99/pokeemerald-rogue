@@ -448,3 +448,21 @@ DOUBLE_BATTLE_TEST("Crafty Shield protects self and ally from status moves")
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Unique Unseen Fist bypasses Protect with contact moves")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
+        PLAYER(SPECIES_URSHIFU) { UniqueAbility(ABILITY_UNSEEN_FIST); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_PROTECT); MOVE(player, MOVE_TACKLE); }
+        TURN {}
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, opponent);
+        MESSAGE("Foe Wobbuffet protected itself!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        HP_BAR(opponent);
+        NOT MESSAGE("Foe Wobbuffet protected itself!");
+    }
+}

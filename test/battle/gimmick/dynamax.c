@@ -919,6 +919,24 @@ SINGLE_BATTLE_TEST("(DYNAMAX) G-Max Steelsurge sets up sharp steel")
     }
 }
 
+SINGLE_BATTLE_TEST("(DYNAMAX) Unique Magic Guard prevents G-Max Steelsurge damage")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_G_MAX_STEELSURGE].argument == MAX_EFFECT_STEELSURGE);
+        PLAYER(SPECIES_COPPERAJAH);
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_HATTERENE) { UniqueAbility(ABILITY_MAGIC_GUARD); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_IRON_HEAD, dynamax: TRUE); }
+        TURN { SWITCH(opponent, 1); }
+    } SCENE {
+        MESSAGE("Copperajah used G-Max Steelsurge!");
+        MESSAGE("Sharp-pointed steel floats around the opposing team!");
+        MESSAGE("2 sent out Hatterene!");
+        NOT MESSAGE("Sharp steel bit into Foe Hatterene!");
+    }
+}
+
 // The test below should apply to G-Max Fireball and G-Max Drum Solo, too.
 SINGLE_BATTLE_TEST("(DYNAMAX) G-Max Hydrosnipe has fixed power and ignores abilities", s16 damage)
 {

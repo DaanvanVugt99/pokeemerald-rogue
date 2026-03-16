@@ -62,6 +62,30 @@ SINGLE_BATTLE_TEST("Fling fails if pokemon is under the effects of Embargo or Ma
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Klutz makes Fling fail")
+{
+    u16 uniqueAbility;
+
+    PARAMETRIZE {uniqueAbility = ABILITY_KLUTZ; }
+    PARAMETRIZE {uniqueAbility = ABILITY_RUN_AWAY; }
+
+    GIVEN {
+        ASSUME(B_KLUTZ_FLING_INTERACTION >= GEN_5);
+        PLAYER(SPECIES_BUNEARY) { Item(ITEM_RAZOR_CLAW); UniqueAbility(uniqueAbility); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_FLING); }
+    } SCENE {
+        MESSAGE("Buneary used Fling!");
+        if (uniqueAbility != ABILITY_KLUTZ) {
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_FLING, player);
+            HP_BAR(opponent);
+        } else {
+            MESSAGE("But it failed!");
+        }
+    }
+}
+
 SINGLE_BATTLE_TEST("Fling fails for pokemon with Klutz ability")
 {
     u16 ability;

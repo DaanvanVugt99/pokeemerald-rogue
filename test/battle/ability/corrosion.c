@@ -90,6 +90,30 @@ SINGLE_BATTLE_TEST("Corrosion can poison Poison- and Steel-type targets if it us
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Corrosion can poison or badly poison a Steel type with a status poison effect")
+{
+    u16 move;
+
+    PARAMETRIZE { move = MOVE_POISON_POWDER; }
+    PARAMETRIZE { move = MOVE_TOXIC; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_POISON_POWDER].effect == EFFECT_POISON);
+        ASSUME(gBattleMoves[MOVE_TOXIC].effect == EFFECT_TOXIC);
+        PLAYER(SPECIES_SALANDIT) { UniqueAbility(ABILITY_CORROSION); }
+        OPPONENT(SPECIES_BELDUM);
+    } WHEN {
+        TURN { MOVE(player, move); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, move, player);
+        ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, opponent);
+        if (move == MOVE_POISON_POWDER)
+            STATUS_ICON(opponent, poison: TRUE);
+        else
+            STATUS_ICON(opponent, badPoison: TRUE);
+    }
+}
+
 SINGLE_BATTLE_TEST("If a Poison- or Steel-type Pokémon with Corrosion holds a Toxic Orb, it will badly poison itself")
 {
     GIVEN {

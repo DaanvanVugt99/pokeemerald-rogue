@@ -41,12 +41,46 @@ SINGLE_BATTLE_TEST("Own Tempo prevents confusion from moves by the opponent")
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Own Tempo prevents confusion from moves by the opponent")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_CONFUSE_RAY].effect == EFFECT_CONFUSE);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_SLOWPOKE) { UniqueAbility(ABILITY_OWN_TEMPO); };
+    } WHEN {
+        TURN { MOVE(player, MOVE_CONFUSE_RAY); }
+    } SCENE {
+        ABILITY_POPUP(opponent, ABILITY_OWN_TEMPO);
+        MESSAGE("Foe Slowpoke's Own Tempo prevents confusion!");
+    }
+}
+
 SINGLE_BATTLE_TEST("Own Tempo prevents confusion from moves by the user")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_PETAL_DANCE].effect == EFFECT_RAMPAGE);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_SLOWPOKE) { Ability(ABILITY_OWN_TEMPO); };
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_PETAL_DANCE); }
+        TURN { MOVE(opponent, MOVE_PETAL_DANCE); }
+        TURN { MOVE(opponent, MOVE_PETAL_DANCE); }
+        TURN { MOVE(opponent, MOVE_PETAL_DANCE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PETAL_DANCE, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PETAL_DANCE, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PETAL_DANCE, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PETAL_DANCE, opponent);
+        NONE_OF { MESSAGE("Foe Slowpoke became confused due to fatigue!"); }
+    }
+}
+
+SINGLE_BATTLE_TEST("Unique Own Tempo prevents confusion from moves by the user")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_PETAL_DANCE].effect == EFFECT_RAMPAGE);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_SLOWPOKE) { UniqueAbility(ABILITY_OWN_TEMPO); };
     } WHEN {
         TURN { MOVE(opponent, MOVE_PETAL_DANCE); }
         TURN { MOVE(opponent, MOVE_PETAL_DANCE); }

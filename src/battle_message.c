@@ -52,9 +52,21 @@ struct BattleWindowText
 
 static void ChooseMoveUsedParticle(u8 *textPtr);
 static void ChooseTypeOfMoveUsedString(u8 *dst);
+static u16 GetDisplayedBattlerAbility(u32 battler);
 
 static EWRAM_DATA u16 sBattlerAbilities[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA struct BattleMsgData *gBattleMsgDataPtr = NULL;
+
+static u16 GetDisplayedBattlerAbility(u32 battler)
+{
+    if (battler == gBattleMsgDataPtr->abilityBattler && gLastUsedAbility != ABILITY_NONE)
+        return gLastUsedAbility;
+
+    if (gBattleScripting.abilityPopupOverwrite != 0 && battler == gBattlerAbility)
+        return gBattleScripting.abilityPopupOverwrite;
+
+    return sBattlerAbilities[battler];
+}
 
 // todo: make some of those names less vague: attacker/target vs pkmn, etc.
 
@@ -3493,16 +3505,16 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 toCpy = gAbilityNames[gLastUsedAbility];
                 break;
             case B_TXT_ATK_ABILITY: // attacker ability
-                toCpy = gAbilityNames[sBattlerAbilities[gBattlerAttacker]];
+                toCpy = gAbilityNames[GetDisplayedBattlerAbility(gBattlerAttacker)];
                 break;
             case B_TXT_DEF_ABILITY: // target ability
-                toCpy = gAbilityNames[sBattlerAbilities[gBattlerTarget]];
+                toCpy = gAbilityNames[GetDisplayedBattlerAbility(gBattlerTarget)];
                 break;
             case B_TXT_SCR_ACTIVE_ABILITY: // scripting active ability
-                toCpy = gAbilityNames[sBattlerAbilities[gBattleScripting.battler]];
+                toCpy = gAbilityNames[GetDisplayedBattlerAbility(gBattleScripting.battler)];
                 break;
             case B_TXT_EFF_ABILITY: // effect battler ability
-                toCpy = gAbilityNames[sBattlerAbilities[gEffectBattler]];
+                toCpy = gAbilityNames[GetDisplayedBattlerAbility(gEffectBattler)];
                 break;
             case B_TXT_TRAINER1_CLASS: // trainer class name
                 toCpy = BattleStringGetOpponentClassByTrainerId(gTrainerBattleOpponent_A);

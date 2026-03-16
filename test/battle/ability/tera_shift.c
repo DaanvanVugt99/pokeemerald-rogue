@@ -3,7 +3,6 @@
 
 SINGLE_BATTLE_TEST("Tera Shift transforms Terapagos into its Terastal form on switch in")
 {
-    KNOWN_FAILING;
 
     GIVEN {
         PLAYER(SPECIES_TERAPAGOS_NORMAL) { Ability(ABILITY_TERA_SHIFT); }
@@ -21,7 +20,6 @@ SINGLE_BATTLE_TEST("Tera Shift transforms Terapagos into its Terastal form on sw
 
 SINGLE_BATTLE_TEST("Tera Shift can't be suppressed by Neutralizing Gas")
 {
-    KNOWN_FAILING;
 
     GIVEN {
         PLAYER(SPECIES_TERAPAGOS_NORMAL) { Ability(ABILITY_TERA_SHIFT); }

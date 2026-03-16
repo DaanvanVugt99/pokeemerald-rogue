@@ -99,6 +99,28 @@ SINGLE_BATTLE_TEST("Tri Attack cannot paralyze/burn/freeze pokemon with abilitie
     }
 }
 
+SINGLE_BATTLE_TEST("Unique burn immunity abilities block Tri Attack burn")
+{
+    u16 species, ability;
+    PARAMETRIZE { species = SPECIES_DEWPIDER; ability = ABILITY_WATER_BUBBLE; }
+    PARAMETRIZE { species = SPECIES_SEAKING; ability = ABILITY_WATER_VEIL; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(species) { UniqueAbility(ability); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TRI_ATTACK, WITH_RNG(RNG_TRI_ATTACK, MOVE_EFFECT_BURN)); }
+        TURN {}
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TRI_ATTACK, player);
+        HP_BAR(opponent);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_BRN, opponent);
+            STATUS_ICON(opponent, burn: TRUE);
+        }
+    }
+}
+
 SINGLE_BATTLE_TEST("Tri Attack cannot paralyze/burn/freeze a mon which is already statused")
 {
     u8 statusAnim;
