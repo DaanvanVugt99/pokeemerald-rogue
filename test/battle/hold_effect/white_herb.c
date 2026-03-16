@@ -208,6 +208,29 @@ SINGLE_BATTLE_TEST("White Herb wont have time to activate if Pickpocket steals i
     }
 }
 
+SINGLE_BATTLE_TEST("Unique Pickpocket steals White Herb before it activates")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SUPERPOWER].effect == EFFECT_SUPERPOWER);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_WHITE_HERB); }
+        OPPONENT(SPECIES_SNEASEL) { UniqueAbility(ABILITY_PICKPOCKET); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SUPERPOWER); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SUPERPOWER, player);
+        ABILITY_POPUP(opponent, ABILITY_PICKPOCKET);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet's White Herb restored its status!");
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT_EQ(opponent->item, ITEM_WHITE_HERB);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE - 1);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+    }
+}
+
 
 SINGLE_BATTLE_TEST("Unique Sticky Hold blocks Pickpocket before White Herb activates")
 {

@@ -5674,7 +5674,7 @@ static void Cmd_moveend(void)
             break;
         case MOVEEND_CHOICE_MOVE: // update choice band move
             if (gHitMarker & HITMARKER_OBEYS
-             && (HOLD_EFFECT_CHOICE(holdEffectAtk) || GetBattlerAbility(gBattlerAttacker) == ABILITY_GORILLA_TACTICS)
+             && (HOLD_EFFECT_CHOICE(holdEffectAtk) || HasBattlerAbility(gBattlerAttacker, ABILITY_GORILLA_TACTICS))
              && gChosenMove != MOVE_STRUGGLE
              && (*choicedMoveAtk == MOVE_NONE || *choicedMoveAtk == MOVE_UNAVAILABLE))
             {
@@ -5957,7 +5957,7 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_MAGICIAN:
-            if (GetBattlerAbility(gBattlerAttacker) == ABILITY_MAGICIAN
+            if (HasBattlerAbility(gBattlerAttacker, ABILITY_MAGICIAN)
               && gCurrentMove != MOVE_FLING && gCurrentMove != MOVE_NATURAL_GIFT
               && gBattleMons[gBattlerAttacker].item == ITEM_NONE
               && gBattleMons[gBattlerTarget].item != ITEM_NONE
@@ -5971,7 +5971,8 @@ static void Cmd_moveend(void)
               && (!HasBattlerAbility(gBattlerTarget, ABILITY_STICKY_HOLD) || !IsBattlerAlive(gBattlerTarget)))
             {
                 StealTargetItem(gBattlerAttacker, gBattlerTarget);
-                gBattleScripting.battler = gBattlerAbility = gBattlerAttacker;
+                gBattleScripting.battler = gBattlerAttacker;
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_MAGICIAN);
                 gEffectBattler = gBattlerTarget;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_MagicianActivates;
@@ -6217,14 +6218,15 @@ static void Cmd_moveend(void)
                     u8 battler = battlers[i];
                     // Attacker is mon who made contact, battler is mon with pickpocket
                     if (battler != gBattlerAttacker                                                     // Cannot pickpocket yourself
-                      && GetBattlerAbility(battler) == ABILITY_PICKPOCKET                               // Target must have pickpocket ability
+                      && HasBattlerAbility(battler, ABILITY_PICKPOCKET)                                 // Target must have pickpocket ability
                       && BATTLER_TURN_DAMAGED(battler)                                                  // Target needs to have been damaged
                       && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)              // Subsitute unaffected
                       && IsBattlerAlive(battler)                                                        // Battler must be alive to pickpocket
                       && gBattleMons[battler].item == ITEM_NONE                                         // Pickpocketer can't have an item already
                       && CanStealItem(battler, gBattlerAttacker, gBattleMons[gBattlerAttacker].item))   // Cannot steal plates, mega stones, etc
                     {
-                        gBattlerTarget = gBattlerAbility = battler;
+                        gBattlerTarget = battler;
+                        SetBattlerTriggeredAbility(battler, ABILITY_PICKPOCKET);
                         // Battle scripting is super brittle so we shall do the item exchange now (if possible)
                         if (!HasBattlerAbility(gBattlerAttacker, ABILITY_STICKY_HOLD))
                             StealTargetItem(gBattlerTarget, gBattlerAttacker);  // Target takes attacker's item
@@ -7871,7 +7873,7 @@ static void Cmd_setgravity(void)
 static bool32 TryCheekPouch(u32 battler, u32 itemId)
 {
     if (ItemId_GetPocket(itemId) == POCKET_BERRIES
-        && GetBattlerAbility(battler) == ABILITY_CHEEK_POUCH
+        && HasBattlerAbility(battler, ABILITY_CHEEK_POUCH)
         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
         && gBattleStruct->ateBerry[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]
         && !BATTLER_MAX_HP(battler))
@@ -7880,7 +7882,7 @@ static bool32 TryCheekPouch(u32 battler, u32 itemId)
         if (gBattleMoveDamage == 0)
             gBattleMoveDamage = 1;
         gBattleMoveDamage *= -1;
-        gBattlerAbility = battler;
+        SetBattlerTriggeredAbility(battler, ABILITY_CHEEK_POUCH);
         BattleScriptPush(gBattlescriptCurrInstr + 2);
         gBattlescriptCurrInstr = BattleScript_CheekPouchActivates;
         return TRUE;
@@ -15399,7 +15401,7 @@ static void Cmd_handleballthrow(void)
                 }
                 break;
             case ITEM_DREAM_BALL:
-                if (B_DREAM_BALL_MODIFIER >= GEN_8 && (gBattleMons[gBattlerTarget].status1 & STATUS1_SLEEP || GetBattlerAbility(gBattlerTarget) == ABILITY_COMATOSE))
+                if (B_DREAM_BALL_MODIFIER >= GEN_8 && (gBattleMons[gBattlerTarget].status1 & STATUS1_SLEEP || HasBattlerAbility(gBattlerTarget, ABILITY_COMATOSE)))
                     ballMultiplier = 400;
                 break;
             case ITEM_BEAST_BALL:

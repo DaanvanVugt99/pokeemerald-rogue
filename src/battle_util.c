@@ -1760,7 +1760,7 @@ u32 TrySetCantSelectMoveBattleScript(u32 battler)
             limitations++;
         }
     }
-    if (DYNAMAX_BYPASS_CHECK && (GetBattlerAbility(battler) == ABILITY_GORILLA_TACTICS) && *choicedMove != MOVE_NONE
+    if (DYNAMAX_BYPASS_CHECK && HasBattlerAbility(battler, ABILITY_GORILLA_TACTICS) && *choicedMove != MOVE_NONE
               && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != move)
     {
         gCurrentMove = *choicedMove;
@@ -1863,7 +1863,7 @@ u8 CheckMoveLimitations(u32 battler, u8 unusableMoves, u16 check)
         else if (check & MOVE_LIMITATION_STUFF_CHEEKS && gBattleMons[battler].moves[i] == MOVE_STUFF_CHEEKS && ItemId_GetPocket(gBattleMons[battler].item) != POCKET_BERRIES)
             unusableMoves |= gBitTable[i];
         // Gorilla Tactics
-        else if (check & MOVE_LIMITATION_CHOICE_ITEM && GetBattlerAbility(battler) == ABILITY_GORILLA_TACTICS && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != gBattleMons[battler].moves[i])
+        else if (check & MOVE_LIMITATION_CHOICE_ITEM && HasBattlerAbility(battler, ABILITY_GORILLA_TACTICS) && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != gBattleMons[battler].moves[i])
             unusableMoves |= gBitTable[i];
         // Can't Use Twice flag
         else if (check & MOVE_LIMITATION_CANT_USE_TWICE && gBattleMoves[gBattleMons[battler].moves[i]].cantUseTwice && gBattleMons[battler].moves[i] == gLastResultingMoves[battler])
@@ -3259,7 +3259,7 @@ u8 DoBattlerEndTurnEffects(void)
             gBattleStruct->turnEffectsTracker++;
             break;
         case ENDTURN_CUD_CHEW:
-            if (GetBattlerAbility(battler) == ABILITY_CUD_CHEW && !gDisableStructs[battler].cudChew && ItemId_GetPocket(GetUsedHeldItem(battler)) == POCKET_BERRIES)
+            if (HasBattlerAbility(battler, ABILITY_CUD_CHEW) && !gDisableStructs[battler].cudChew && ItemId_GetPocket(GetUsedHeldItem(battler)) == POCKET_BERRIES)
                 gDisableStructs[battler].cudChew = TRUE;
             gBattleStruct->turnEffectsTracker++;
             break;
@@ -5117,6 +5117,19 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
             }
 
+            if (gLastUsedAbility != ABILITY_CUD_CHEW
+                && HasBattlerAbility(battler, ABILITY_CUD_CHEW)
+                && ItemId_GetPocket(GetUsedHeldItem(battler)) == POCKET_BERRIES
+                && gDisableStructs[battler].cudChew == TRUE)
+            {
+                gLastUsedItem = gBattleStruct->usedHeldItems[battler][GetBattlerSide(battler)];
+                gBattleStruct->usedHeldItems[battler][GetBattlerSide(battler)] = ITEM_NONE;
+                SetBattlerTriggeredAbility(battler, ABILITY_CUD_CHEW);
+                BattleScriptPushCursorAndCallback(BattleScript_CudChewActivates);
+                effect++;
+                break;
+            }
+
             switch (gLastUsedAbility)
             {
             case ABILITY_HARVEST:
@@ -5273,10 +5286,13 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
                 break;
             case ABILITY_CUD_CHEW:
-                if (ItemId_GetPocket(GetUsedHeldItem(battler)) == POCKET_BERRIES && gDisableStructs[battler].cudChew == TRUE)
+                if (HasBattlerAbility(battler, ABILITY_CUD_CHEW)
+                    && ItemId_GetPocket(GetUsedHeldItem(battler)) == POCKET_BERRIES
+                    && gDisableStructs[battler].cudChew == TRUE)
                 {
                     gLastUsedItem = gBattleStruct->usedHeldItems[battler][GetBattlerSide(battler)];
                     gBattleStruct->usedHeldItems[battler][GetBattlerSide(battler)] = ITEM_NONE;
+                    SetBattlerTriggeredAbility(battler, ABILITY_CUD_CHEW);
                     BattleScriptPushCursorAndCallback(BattleScript_CudChewActivates);
                     effect++;
                 }
@@ -6737,7 +6753,7 @@ u32 IsAbilityPreventingEscape(u32 battler)
     if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
         return 0;
     if ((id = IsAbilityOnOpposingSide(battler, ABILITY_SHADOW_TAG))
-        && (B_SHADOW_TAG_ESCAPE >= GEN_4 && GetBattlerAbility(battler) != ABILITY_SHADOW_TAG))
+        && (B_SHADOW_TAG_ESCAPE >= GEN_4 && !HasBattlerAbility(battler, ABILITY_SHADOW_TAG)))
         return id;
     if ((id = IsAbilityOnOpposingSide(battler, ABILITY_ARENA_TRAP)) && IsBattlerGrounded(battler))
         return id;
@@ -7306,7 +7322,7 @@ static bool32 ShouldDelayWhiteHerbAtMoveEnd(u32 battler)
     // Magician resolves after ITEMEFFECT_MOVE_END. If it'll steal this battler's
     // item, White Herb should not consume first.
     if (battler == gBattlerTarget
-     && GetBattlerAbility(gBattlerAttacker) == ABILITY_MAGICIAN
+     && HasBattlerAbility(gBattlerAttacker, ABILITY_MAGICIAN)
      && gCurrentMove != MOVE_FLING && gCurrentMove != MOVE_NATURAL_GIFT
      && gBattleMons[gBattlerAttacker].item == ITEM_NONE
      && gBattleMons[battler].item != ITEM_NONE
@@ -7334,7 +7350,7 @@ static bool32 ShouldDelayWhiteHerbAtMoveEnd(u32 battler)
         for (i = 0; i < gBattlersCount; i++)
         {
             if (i != gBattlerAttacker
-             && GetBattlerAbility(i) == ABILITY_PICKPOCKET
+             && HasBattlerAbility(i, ABILITY_PICKPOCKET)
              && BATTLER_TURN_DAMAGED(i)
              && !DoesSubstituteBlockMove(gBattlerAttacker, i, gCurrentMove)
              && IsBattlerAlive(i)
