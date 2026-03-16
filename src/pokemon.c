@@ -3173,6 +3173,15 @@ u16 GetAbilityBySpecies(u16 species, u8 abilityNum, u32 otId)
 #endif
 }
 
+u16 GetUniqueAbilityBySpecies(u16 species)
+{
+    switch (species)
+    {
+    default:
+        return ABILITY_NONE;
+    }
+}
+
 u16 GetMonAbility(struct Pokemon *mon)
 {
     u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);

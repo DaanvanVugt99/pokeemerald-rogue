@@ -22,6 +22,7 @@
 #undef TestRunner_Battle_AfterLastTurn
 #undef TestRunner_Battle_CheckBattleRecordActionType
 #undef TestRunner_Battle_GetForcedAbility
+#undef TestRunner_Battle_GetForcedUniqueAbility
 #undef TestRunner_Battle_HandleTurnTimeout
 #endif
 
@@ -1614,6 +1615,12 @@ void Ability_(u32 sourceLine, u32 ability)
     }
 }
 
+void UniqueAbility_(u32 sourceLine, u32 ability)
+{
+    INVALID_IF(!DATA.currentMon, "UniqueAbility outside of PLAYER/OPPONENT");
+    DATA.forcedUniqueAbilities[DATA.currentSide][DATA.currentPartyIndex] = ability;
+}
+
 void Level_(u32 sourceLine, u32 level)
 {
     // TODO: Preserve any explicitly-set stats.
@@ -2577,6 +2584,11 @@ void ValidateFinally(u32 sourceLine)
 u32 TestRunner_Battle_GetForcedAbility(u32 side, u32 partyIndex)
 {
     return DATA.forcedAbilities[side][partyIndex];
+}
+
+u32 TestRunner_Battle_GetForcedUniqueAbility(u32 side, u32 partyIndex)
+{
+    return DATA.forcedUniqueAbilities[side][partyIndex];
 }
 
 // TODO: Consider storing the last successful i and searching from i+1

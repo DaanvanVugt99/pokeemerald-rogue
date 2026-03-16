@@ -67,7 +67,8 @@ static u32 GetFlingPowerFromItemId(u32 itemId);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
-static u32 GetBattlerAbilityIgnoreMoldBreaker(u32 battler);
+static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability);
+static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 *const gBattlescriptsForRunningByItem[];
@@ -6157,16 +6158,17 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
     case ABILITYEFFECT_IMMUNITY: // 5
         for (battler = 0; battler < gBattlersCount; battler++)
         {
-            switch (GetBattlerAbilityIgnoreMoldBreaker(battler))
+            u32 battlerAbility = GetBattlerPrimaryAbilityIgnoreMoldBreaker(battler);
+
+            if ((HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_IMMUNITY)
+              || HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_PASTEL_VEIL))
+             && (gBattleMons[battler].status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON | STATUS1_TOXIC_COUNTER)))
             {
-            case ABILITY_IMMUNITY:
-            case ABILITY_PASTEL_VEIL:
-                if (gBattleMons[battler].status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON | STATUS1_TOXIC_COUNTER))
-                {
-                    StringCopy(gBattleTextBuff1, gStatusConditionString_PoisonJpn);
-                    effect = 1;
-                }
-                break;
+                StringCopy(gBattleTextBuff1, gStatusConditionString_PoisonJpn);
+                effect = 1;
+            }
+            else switch (battlerAbility)
+            {
             case ABILITY_OWN_TEMPO:
                 if (gBattleMons[battler].status2 & STATUS2_CONFUSION)
                 {
@@ -6531,48 +6533,123 @@ bool32 IsMoldBreakerTypeAbility(u32 ability)
     return (ability == ABILITY_MOLD_BREAKER || ability == ABILITY_TERAVOLT || ability == ABILITY_TURBOBLAZE);
 }
 
-static u32 GetBattlerAbilityIgnoreMoldBreaker(u32 battler)
+static u32 GetBattlerUniqueAbilityRaw(u32 battler)
 {
-    if (gStatuses3[battler] & STATUS3_GASTRO_ACID)
-        return ABILITY_NONE;
+    u32 ability;
 
-    if (IsNeutralizingGasOnField() && !IsNeutralizingGasBannedAbility(gBattleMons[battler].ability))
-        return ABILITY_NONE;
+#if TESTING
+    if (gTestRunnerEnabled)
+    {
+        u32 side = GetBattlerSide(battler);
+        u32 partyIndex = gBattlerPartyIndexes[battler];
+
+        ability = TestRunner_Battle_GetForcedUniqueAbility(side, partyIndex);
+        if (ability != ABILITY_NONE)
+            return ability;
+    }
+#endif
+
+    return GetUniqueAbilityBySpecies(gBattleMons[battler].species);
+}
+
+static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability)
+{
+    if (ability == ABILITY_NONE)
+        return TRUE;
+
+    if (gStatuses3[battler] & STATUS3_GASTRO_ACID)
+        return TRUE;
+
+    if (IsNeutralizingGasOnField() && !IsNeutralizingGasBannedAbility(ability))
+        return TRUE;
 
     if (IsMyceliumMightOnField())
+        return TRUE;
+
+    return FALSE;
+}
+
+bool32 HasBattlerAbilityIgnoreMoldBreaker(u32 battler, u32 ability)
+{
+    return GetBattlerPrimaryAbilityIgnoreMoldBreaker(battler) == ability
+        || GetBattlerUniqueAbilityIgnoreMoldBreaker(battler) == ability;
+}
+
+static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability)
+{
+    bool32 attackerIgnoresAbilities;
+
+    if (ability == ABILITY_NONE)
+        return FALSE;
+
+    attackerIgnoresAbilities =
+        HasBattlerAbilityIgnoreMoldBreaker(gBattlerAttacker, ABILITY_MOLD_BREAKER)
+        || HasBattlerAbilityIgnoreMoldBreaker(gBattlerAttacker, ABILITY_TERAVOLT)
+        || HasBattlerAbilityIgnoreMoldBreaker(gBattlerAttacker, ABILITY_TURBOBLAZE);
+
+    if (!attackerIgnoresAbilities && !gBattleMoves[gCurrentMove].ignoresTargetAbility)
+        return FALSE;
+
+    return sAbilitiesAffectedByMoldBreaker[ability]
+        && gBattlerByTurnOrder[gCurrentTurnActionNumber] == gBattlerAttacker
+        && gActionsByTurnOrder[gBattlerByTurnOrder[gBattlerAttacker]] == B_ACTION_USE_MOVE
+        && gCurrentTurnActionNumber < gBattlersCount;
+}
+
+u32 GetBattlerPrimaryAbilityIgnoreMoldBreaker(u32 battler)
+{
+    if (IsBattlerAbilitySuppressedCommon(battler, gBattleMons[battler].ability))
         return ABILITY_NONE;
 
     return gBattleMons[battler].ability;
+}
+
+u32 GetBattlerUniqueAbilityIgnoreMoldBreaker(u32 battler)
+{
+    u32 ability = GetBattlerUniqueAbilityRaw(battler);
+
+    if (IsBattlerAbilitySuppressedCommon(battler, ability))
+        return ABILITY_NONE;
+
+    return ability;
+}
+
+u32 GetBattlerPrimaryAbility(u32 battler)
+{
+    u32 ability = GetBattlerPrimaryAbilityIgnoreMoldBreaker(battler);
+
+    if (IsBattlerAbilitySuppressedByMoldBreaker(battler, ability))
+        return ABILITY_NONE;
+
+    return ability;
+}
+
+u32 GetBattlerUniqueAbility(u32 battler)
+{
+    u32 ability = GetBattlerUniqueAbilityIgnoreMoldBreaker(battler);
+
+    if (IsBattlerAbilitySuppressedByMoldBreaker(battler, ability))
+        return ABILITY_NONE;
+
+    return ability;
 }
 
 u32 GetBattlerAbility(u32 battler)
 {
-    if (gStatuses3[battler] & STATUS3_GASTRO_ACID)
-        return ABILITY_NONE;
+    return GetBattlerPrimaryAbility(battler);
+}
 
-    if (IsNeutralizingGasOnField() && !IsNeutralizingGasBannedAbility(gBattleMons[battler].ability))
-        return ABILITY_NONE;
-
-    if (IsMyceliumMightOnField())
-        return ABILITY_NONE;
-
-    if (((IsMoldBreakerTypeAbility(gBattleMons[gBattlerAttacker].ability)
-            && !(gStatuses3[gBattlerAttacker] & STATUS3_GASTRO_ACID))
-            || gBattleMoves[gCurrentMove].ignoresTargetAbility)
-            && sAbilitiesAffectedByMoldBreaker[gBattleMons[battler].ability]
-            && gBattlerByTurnOrder[gCurrentTurnActionNumber] == gBattlerAttacker
-            && gActionsByTurnOrder[gBattlerByTurnOrder[gBattlerAttacker]] == B_ACTION_USE_MOVE
-            && gCurrentTurnActionNumber < gBattlersCount)
-        return ABILITY_NONE;
-
-    return gBattleMons[battler].ability;
+bool32 HasBattlerAbility(u32 battler, u32 ability)
+{
+    return GetBattlerPrimaryAbility(battler) == ability
+        || GetBattlerUniqueAbility(battler) == ability;
 }
 
 u32 IsAbilityOnSide(u32 battler, u32 ability)
 {
-    if (IsBattlerAlive(battler) && GetBattlerAbility(battler) == ability)
+    if (IsBattlerAlive(battler) && HasBattlerAbility(battler, ability))
         return battler + 1;
-    else if (IsBattlerAlive(BATTLE_PARTNER(battler)) && GetBattlerAbility(BATTLE_PARTNER(battler)) == ability)
+    else if (IsBattlerAlive(BATTLE_PARTNER(battler)) && HasBattlerAbility(BATTLE_PARTNER(battler), ability))
         return BATTLE_PARTNER(battler) + 1;
     else
         return 0;
@@ -6589,7 +6666,7 @@ u32 IsAbilityOnField(u32 ability)
 
     for (i = 0; i < gBattlersCount; i++)
     {
-        if (IsBattlerAlive(i) && GetBattlerAbility(i) == ability)
+        if (IsBattlerAlive(i) && HasBattlerAbility(i, ability))
             return i + 1;
     }
 
@@ -6602,7 +6679,7 @@ u32 IsAbilityOnFieldExcept(u32 battler, u32 ability)
 
     for (i = 0; i < gBattlersCount; i++)
     {
-        if (i != battler && IsBattlerAlive(i) && GetBattlerAbility(i) == ability)
+        if (i != battler && IsBattlerAlive(i) && HasBattlerAbility(i, ability))
             return i + 1;
     }
 
@@ -8774,7 +8851,7 @@ static bool32 IsBattlerGrounded2(u32 battler, bool32 considerInverse)
         return FALSE;
     if (holdEffect == HOLD_EFFECT_AIR_BALLOON)
         return FALSE;
-    if (GetBattlerAbility(battler) == ABILITY_LEVITATE)
+    if (HasBattlerAbility(battler, ABILITY_LEVITATE))
         return FALSE;
     if (IS_BATTLER_OF_TYPE(battler, TYPE_FLYING) && (!considerInverse || !FlagGet(B_FLAG_INVERSE_BATTLE)))
         return FALSE;

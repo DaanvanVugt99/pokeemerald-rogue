@@ -24,6 +24,7 @@ void TestRunner_Battle_HandleTurnTimeout(void);
 void TestRunner_Battle_CheckBattleRecordActionType(u32 battlerId, u32 recordIndex, u32 actionType);
 
 u32 TestRunner_Battle_GetForcedAbility(u32 side, u32 partyIndex);
+u32 TestRunner_Battle_GetForcedUniqueAbility(u32 side, u32 partyIndex);
 
 void TestRunner_HandleAssertion(const char *fmt, ...);
 
@@ -46,6 +47,7 @@ void TestRunner_HandleAssertion(const char *fmt, ...);
 #define TestRunner_Battle_CheckBattleRecordActionType(...) (void)0
 
 #define TestRunner_Battle_GetForcedAbility(...) (u32)0
+#define TestRunner_Battle_GetForcedUniqueAbility(...) (u32)0
 
 #define TestRunner_HandleAssertion(...) (void)0
 
