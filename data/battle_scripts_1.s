@@ -9690,6 +9690,16 @@ BattleScript_SwitchInAbilityMsgRet::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_StrongWindsActivated::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
+	waitanimation
+	call BattleScript_TryTailwindAbilitiesLoop
+	end3
+
 BattleScript_ActivateAsOne::
 	call BattleScript_AbilityPopUp
 	printfromtable gSwitchInAbilityStringIds

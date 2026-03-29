@@ -9161,6 +9161,7 @@ static void Cmd_various(void)
         VARIOUS_ARGS();
         gSpecialStatuses[battler].traced = FALSE;
         gSpecialStatuses[battler].switchInAbilityDone = FALSE;
+        gSpecialStatuses[battler].switchInUniqueAbilityDone = FALSE;
         break;
     }
     case VARIOUS_UPDATE_CHOICE_MOVE_ON_LVL_UP:

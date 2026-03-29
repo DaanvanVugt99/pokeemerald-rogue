@@ -3177,6 +3177,10 @@ u16 GetUniqueAbilityBySpecies(u16 species)
 {
     switch (species)
     {
+    case SPECIES_PIDGEY:
+    case SPECIES_PIDGEOTTO:
+    case SPECIES_PIDGEOT:
+        return ABILITY_STRONG_WINDS;
     default:
         return ABILITY_NONE;
     }

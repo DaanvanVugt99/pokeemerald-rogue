@@ -4389,6 +4389,34 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
     if (gBattleTypeFlags & BATTLE_TYPE_SAFARI)
         return 0;
 
+    if (caseID == ABILITYEFFECT_ON_SWITCHIN && special == 0)
+    {
+        u32 primaryAbility = GetBattlerAbility(battler);
+        u32 uniqueAbility = GetBattlerUniqueAbility(battler);
+        bool32 primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
+
+        if (primaryAbility != ABILITY_NONE)
+        {
+            effect = AbilityBattleEffects(caseID, battler, ability, primaryAbility, moveArg);
+            primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
+            if (effect != 0)
+                return effect;
+        }
+
+        if (uniqueAbility != ABILITY_NONE && uniqueAbility != primaryAbility)
+        {
+            gSpecialStatuses[battler].switchInAbilityDone = gSpecialStatuses[battler].switchInUniqueAbilityDone;
+            effect = AbilityBattleEffects(caseID, battler, ability, uniqueAbility, moveArg);
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = gSpecialStatuses[battler].switchInAbilityDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            if (effect != 0)
+                return effect;
+        }
+
+        gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+        return 0;
+    }
+
     if (gBattlerAttacker >= gBattlersCount)
         gBattlerAttacker = battler;
 
@@ -4858,6 +4886,19 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlerAttacker = battler;
                 SET_STATCHANGER(STAT_ATK, 1, TRUE);
                 BattleScriptPushCursorAndCallback(BattleScript_IntimidateActivates);
+                effect++;
+            }
+            break;
+        case ABILITY_STRONG_WINDS:
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = battler;
+                gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TAILWIND;
+                gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = gBattlerAttacker;
+                gSideTimers[GetBattlerSide(battler)].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
+                BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
                 effect++;
             }
             break;
