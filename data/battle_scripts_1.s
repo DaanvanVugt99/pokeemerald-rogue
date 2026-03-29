@@ -7650,15 +7650,18 @@ BattleScript_WindPowerActivates_Ret:
 	return
 
 BattleScript_ToxicDebrisActivates::
+	savetarget
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAttacker, gBattlerTarget
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	settoxicspikes BattleScript_ToxicDebrisRet
 	call BattleScript_AbilityPopUp
 	pause B_WAIT_TIME_SHORT
-	settoxicspikes BattleScript_ToxicDebrisRet
 	printstring STRINGID_POISONSPIKESSCATTERED
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_ToxicDebrisRet:
-	copybyte sBATTLER, gBattlerTarget
-	copybyte gBattlerTarget, gBattlerAttacker
-	copybyte gBattlerAttacker, sBATTLER
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	restoretarget
 	return
 
 BattleScript_EarthEaterActivates::
@@ -9807,6 +9810,24 @@ BattleScript_AbilityStatusEffect::
 	waitstate
 	call BattleScript_AbilityPopUp
 	seteffectsecondary
+	return
+
+BattleScript_SleepDustActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	swapattackerwithtarget
+	printstring STRINGID_PKMNWASMADEDROWSY
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+
+BattleScript_ChlorofumesActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	seteffectsecondary
+	setmoveeffect MOVE_EFFECT_POISON
+	seteffectsecondary
+	setmoveeffect 0
 	return
 
 BattleScript_BattleBondActivatesOnMoveEndAttacker::

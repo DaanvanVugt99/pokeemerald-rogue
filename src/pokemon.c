@@ -843,7 +843,7 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     }
     else if (otIdType == OT_ID_CUSTOM_MON)
     {
-        // Allow extra bits via this path 
+        // Allow extra bits via this path
         // (split out from OT_ID_PRESET for saftey)
         value = fixedOtId;
     }
@@ -1918,7 +1918,7 @@ u8 GetGenderForSpecies(u16 species, u8 genderFlag)
 {
     u8 genderRatio = Rogue_ModifyGenderRatio(gSpeciesInfo[species].genderRatio);
 
-    // Ignore gender flag for 100% 
+    // Ignore gender flag for 100%
     switch (genderRatio)
     {
     case MON_MALE:
@@ -3177,10 +3177,40 @@ u16 GetUniqueAbilityBySpecies(u16 species)
 {
     switch (species)
     {
+    case SPECIES_BULBASAUR:
+    case SPECIES_IVYSAUR:
+    case SPECIES_VENUSAUR:
+        return ABILITY_CHLOROFUMES;
+    case SPECIES_CHARMANDER:
+    case SPECIES_CHARMELEON:
+    case SPECIES_CHARIZARD:
+        return ABILITY_DRACONIC;
+    case SPECIES_SQUIRTLE:
+    case SPECIES_WARTORTLE:
+    case SPECIES_BLASTOISE:
+        return ABILITY_PRESSURE_SHELL;
     case SPECIES_PIDGEY:
     case SPECIES_PIDGEOTTO:
     case SPECIES_PIDGEOT:
         return ABILITY_STRONG_WINDS;
+    case SPECIES_CATERPIE:
+    case SPECIES_METAPOD:
+    case SPECIES_BUTTERFREE:
+        return ABILITY_SLEEP_DUST;
+    case SPECIES_WEEDLE:
+    case SPECIES_KAKUNA:
+    case SPECIES_BEEDRILL:
+    case SPECIES_BEEDRILL_MEGA:
+        return ABILITY_VENOM_RUSH;
+    case SPECIES_RATTATA:
+    case SPECIES_RATICATE:
+    case SPECIES_RATTATA_ALOLAN:
+    case SPECIES_RATICATE_ALOLAN:
+    case SPECIES_RATICATE_ALOLAN_TOTEM:
+        return ABILITY_GNAW_DOWN;
+    case SPECIES_SPEAROW:
+    case SPECIES_FEAROW:
+        return ABILITY_TERRITORIAL;
     default:
         return ABILITY_NONE;
     }
@@ -4924,7 +4954,7 @@ void MonGainEVs(struct Pokemon *mon, u16 defeatedSpecies)
             multiplier = 1;
 
         Rogue_ModifyEVGain(&multiplier);
-        
+
         if(multiplier == 0)
             continue;
 
@@ -5601,7 +5631,7 @@ void SetWildMonHeldItem(void)
         {
             if (GetMonData(&gEnemyParty[i], MON_DATA_HELD_ITEM, NULL) != ITEM_NONE)
                 continue; // prevent ovewriting previously set item
-            
+
             rnd = Random() % 100;
             species = GetMonData(&gEnemyParty[i], MON_DATA_SPECIES, 0);
             if (gSpeciesInfo[species].itemCommon == gSpeciesInfo[species].itemRare && gSpeciesInfo[species].itemCommon != ITEM_NONE)
@@ -5689,7 +5719,7 @@ static void Task_PokemonSummaryAnimateAfterDelay(u8 taskId)
 
 void BattleAnimateFrontSprite(struct Sprite *sprite, u16 species, bool8 noCry, u8 panMode)
 {
-    
+
 
     if ((Rogue_FastBattleAnims() || gHitMarker & HITMARKER_NO_ANIMATIONS) && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)))
         DoMonFrontSpriteAnimation(sprite, species, noCry, panMode | SKIP_FRONT_ANIM);

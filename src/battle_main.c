@@ -1799,7 +1799,7 @@ void BattleMainCB2(void)
         gMain.nativeSpeedUpActive = TRUE;
 
         // Update select entries at higher speed
-        // disable speed up during palette fades otherwise we run into issues with blending 
+        // disable speed up during palette fades otherwise we run into issues with blending
         //(e.g. moves that change background like Psychic can get stuck or have their colours overflow)
         for(s = 1; s < speedScale; ++s)
         {
@@ -1824,7 +1824,7 @@ void BattleMainCB2(void)
                     gMain.callback1();
             }
         }
-        
+
         gMain.nativeSpeedUpActive = FALSE;
 
         if(fadeResult != PALETTE_FADE_STATUS_LOADING)
@@ -3335,6 +3335,7 @@ const u8* FaintClearSetData(u32 battler)
     gProtectStructs[battler].statRaised = FALSE;
     gProtectStructs[battler].statFell = FALSE;
     gProtectStructs[battler].pranksterElevated = FALSE;
+    gProtectStructs[battler].uniqueAbilityActive = FALSE;
 
     gDisableStructs[battler].isFirstTurn = 2;
 
@@ -4721,6 +4722,23 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
     else if (ability == ABILITY_QUARK_DRIVE && gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN && highestStat == STAT_SPEED)
         speed = (speed * 150) / 100;
 
+    // unique abilities
+    if (HasBattlerAbility(battler, ABILITY_VENOM_RUSH))
+    {
+        u32 i;
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (GetBattlerSide(i) != GetBattlerSide(battler)
+             && IsBattlerAlive(i)
+             && ((gBattleMons[i].status1 & STATUS1_PSN_ANY)
+              || (gBattleMons[i].statStages[STAT_SPEED] < DEFAULT_STAT_STAGE)))
+            {
+                speed *= 2;
+                break;
+            }
+        }
+    }
+
     // stat stages
     speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
     speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
@@ -5721,7 +5739,7 @@ static void ReturnFromBattleToOverworld(void)
 
     m4aSongNumStop(SE_LOW_HEALTH);
     SetMainCallback2(gMain.savedCallback);
-    
+
     // if you experience the follower de-syncing with the player after battle, set POST_BATTLE_FOLLOWER_FIX to TRUE in include/constants/global.h
     #if POST_BATTLE_FOLLOWER_FIX
         FollowMe_WarpSetEnd();

@@ -5555,6 +5555,10 @@ if (triggeringAbility != ABILITY_NONE)
         }
         break;
     case ABILITYEFFECT_MOVE_END: // Think contact abilities.
+    {
+        u32 moveEndAttacker = gBattlerAttacker;
+        u32 moveEndTarget = gBattlerTarget;
+
         switch (gLastUsedAbility)
         {
         case ABILITY_JUSTIFIED:
@@ -6125,19 +6129,36 @@ if (triggeringAbility != ABILITY_NONE)
         case ABILITY_TOXIC_DEBRIS:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
              && (!gBattleStruct->isSkyBattle)
-             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-             && IS_MOVE_PHYSICAL(gCurrentMove)
-             && TARGET_TURN_DAMAGED
-             && (gSideTimers[gBattlerAttacker].toxicSpikesAmount != 2))
+             && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+             && IS_MOVE_PHYSICAL(move)
+             && BATTLER_TURN_DAMAGED(moveEndTarget)
+             && (gSideTimers[GetBattlerSide(moveEndAttacker)].toxicSpikesAmount < 2))
             {
-                SWAP(gBattlerAttacker, gBattlerTarget, i);
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_ToxicDebrisActivates;
                 effect++;
             }
             break;
         }
+
+        if (HasBattlerAbility(battler, ABILITY_SLEEP_DUST)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && !(gStatuses3[moveEndAttacker] & STATUS3_YAWN)
+         && CanSleep(moveEndAttacker)
+         && !UproarWakeUpCheck(moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SLEEP_DUST);
+            gStatuses3[moveEndAttacker] |= STATUS3_YAWN_TURN(2);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_SleepDustActivates;
+            effect++;
+        }
         break;
+    }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
         switch (gLastUsedAbility)
         {
@@ -6184,6 +6205,49 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRESSURE_SHELL)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && moveType == TYPE_WATER
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE))
+        {
+            gProtectStructs[battler].uniqueAbilityActive = TRUE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CHLOROFUMES)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && moveType == TYPE_GRASS)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_CHLOROFUMES);
+            gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
+            BattleScriptPushCursor();
+            if ((gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN)
+                && CanBePoisoned(gBattlerAttacker, gBattlerTarget))
+                gBattlescriptCurrInstr = BattleScript_ChlorofumesActivates;
+            else
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_GNAW_DOWN)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && gBattleMoves[move].bitingMove)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_GNAW_DOWN);
+            gBattleScripting.moveEffect = MOVE_EFFECT_DEF_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
         }
         break;
     case ABILITYEFFECT_MOVE_END_OTHER: // Abilities that activate on *another* battler's moveend: Dancer, Soul-Heart, Receiver, Symbiosis
@@ -9692,6 +9756,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         }
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_DRACONIC)
+     && moveType == TYPE_DRAGON
+     && gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP)
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+    }
+
     // target's abilities
     switch (defAbility)
     {
@@ -10245,7 +10316,9 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
 {
     if (gBattleStruct->pledgeMove && IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType))
         return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
-    else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType) || move == MOVE_STRUGGLE || move == MOVE_NONE)
+    else if ((!IS_BATTLER_OF_TYPE(battlerAtk, moveType)
+           && !(HasBattlerAbility(battlerAtk, ABILITY_DRACONIC) && moveType == TYPE_DRAGON))
+          || move == MOVE_STRUGGLE || move == MOVE_NONE)
         return UQ_4_12(1.0);
     else
         return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
@@ -10367,8 +10440,12 @@ static inline uq4_12_t GetCollisionCourseElectroDriftModifier(u32 move, uq4_12_t
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, uq4_12_t typeEffectivenessModifier, bool32 isCrit, u32 abilityAtk)
+static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 isCrit, u32 abilityAtk)
 {
+    if (HasBattlerAbility(battlerAtk, ABILITY_TERRITORIAL)
+     && IsBattlerTerrainAffected(battlerDef, STATUS_FIELD_TERRAIN_ANY))
+        return UQ_4_12(2.0);
+
     switch (abilityAtk)
     {
     case ABILITY_NEUROFORCE:
@@ -10389,6 +10466,10 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, uq4_12_t typ
 
 static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
 {
+    if (HasBattlerAbility(battlerDef, ABILITY_PRESSURE_SHELL)
+     && gProtectStructs[battlerDef].uniqueAbilityActive)
+        return UQ_4_12(0.75);
+
     switch (abilityDef)
     {
     case ABILITY_MULTISCALE:
@@ -10502,7 +10583,7 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
 
     if (unmodifiedAttackerSpeed >= unmodifiedDefenderSpeed)
     {
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, typeEffectivenessModifier, isCrit, abilityAtk));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(battlerAtk, typeEffectivenessModifier, holdEffectAtk));
@@ -10512,7 +10593,7 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
     {
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, typeEffectivenessModifier, isCrit, abilityAtk));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(moveType, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(battlerAtk, typeEffectivenessModifier, holdEffectAtk));
     }

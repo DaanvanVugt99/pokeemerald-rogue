@@ -228,7 +228,7 @@ DOUBLE_BATTLE_TEST("Roost suppresses the user's not-yet-aquired Flying-type this
         ASSUME(gSpeciesInfo[SPECIES_KECLEON].types[1] != TYPE_FLYING);
         PLAYER(SPECIES_KECLEON) { Speed(40); HP(150); Ability(ABILITY_COLOR_CHANGE); }
         PLAYER(SPECIES_WOBBUFFET) { Speed(10); }
-        OPPONENT(SPECIES_PIDGEY) { Speed(30); }
+        OPPONENT(SPECIES_ZUBAT) { Speed(30); }
         OPPONENT(SPECIES_SANDSHREW) { Speed(20); }
     } WHEN {
         TURN { MOVE(playerLeft, MOVE_ROOST);
@@ -238,7 +238,7 @@ DOUBLE_BATTLE_TEST("Roost suppresses the user's not-yet-aquired Flying-type this
         MESSAGE("Kecleon used Roost!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ROOST, playerLeft);
         MESSAGE("Kecleon regained health!");
-        MESSAGE("Foe Pidgey used Gust!");
+        MESSAGE("Foe Zubat used Gust!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GUST, opponentLeft);
         MESSAGE("Kecleon's Color Change made it the Flying type!");
         MESSAGE("Foe Sandshrew used Earthquake!");

@@ -304,6 +304,13 @@ static const u8 sPoisonPuppeteerDescription[] = _("Confuses poisoned foes.");
 
 static const u8 sForecastPriorityDescription[] = _("Weather moves go first.");
 static const u8 sStrongWindsDescription[] = _("On entry, sets Tailwind.");
+static const u8 sDraconicDescription[] = _("Dragon STAB. Boosts if below half HP.");
+static const u8 sChlorofumesDescription[] = _("Grass moves drop Atk; terrain poisons.");
+static const u8 sPressureShellDescription[] = _("Water move: take 0.75x this turn.");
+static const u8 sSleepDustDescription[] = _("Contact makes attacker drowsy.");
+static const u8 sVenomRushDescription[] = _("Target poisoned/slowed: double Speed.");
+static const u8 sGnawDownDescription[] = _("Biting moves lower target's Defense.");
+static const u8 sTerritorialDescription[] = _("2x damage to terrain-affected targets.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -622,6 +629,13 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     
     [ABILITY_FORECAST_PRIORITY] = _("Instant Forecast"),
     [ABILITY_STRONG_WINDS] = _("Strong Winds"),
+    [ABILITY_DRACONIC] = _("Draconic"),
+    [ABILITY_CHLOROFUMES] = _("Chlorofumes"),
+    [ABILITY_PRESSURE_SHELL] = _("Pressure Shell"),
+    [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
+    [ABILITY_VENOM_RUSH] = _("Venom Rush"),
+    [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
+    [ABILITY_TERRITORIAL] = _("Territorial"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -940,6 +954,13 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     
     [ABILITY_FORECAST_PRIORITY] = _("Instant Forecast"),
     [ABILITY_STRONG_WINDS] = _("Strong Winds"),
+    [ABILITY_DRACONIC] = _("Draconic"),
+    [ABILITY_CHLOROFUMES] = _("Chlorofumes"),
+    [ABILITY_PRESSURE_SHELL] = _("Presr Shell"),
+    [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
+    [ABILITY_VENOM_RUSH] = _("Venom Rush"),
+    [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
+    [ABILITY_TERRITORIAL] = _("Territorial"),
 };
 #endif
 
@@ -1259,4 +1280,11 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     
     [ABILITY_FORECAST_PRIORITY] = sForecastPriorityDescription,
     [ABILITY_STRONG_WINDS] = sStrongWindsDescription,
+    [ABILITY_DRACONIC] = sDraconicDescription,
+    [ABILITY_CHLOROFUMES] = sChlorofumesDescription,
+    [ABILITY_PRESSURE_SHELL] = sPressureShellDescription,
+    [ABILITY_SLEEP_DUST] = sSleepDustDescription,
+    [ABILITY_VENOM_RUSH] = sVenomRushDescription,
+    [ABILITY_GNAW_DOWN] = sGnawDownDescription,
+    [ABILITY_TERRITORIAL] = sTerritorialDescription,
 };
