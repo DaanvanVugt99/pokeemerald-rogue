@@ -7664,6 +7664,21 @@ BattleScript_ToxicDebrisRet:
 	restoretarget
 	return
 
+BattleScript_SharpQuillsActivates::
+	savetarget
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAttacker, gBattlerTarget
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	trysetspikes BattleScript_SharpQuillsRet
+	call BattleScript_AbilityPopUp
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_SPIKESSCATTERED
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SharpQuillsRet:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	restoretarget
+	return
+
 BattleScript_EarthEaterActivates::
 	call BattleScript_AbilityPopUp
 	pause B_WAIT_TIME_LONG
@@ -9703,6 +9718,28 @@ BattleScript_StrongWindsActivated::
 	call BattleScript_TryTailwindAbilitiesLoop
 	end3
 
+BattleScript_RevelryLightScreen::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	copybyte gBattlerAttacker, gBattlerAbility
+	playmoveanimation BS_ATTACKER, MOVE_LIGHT_SCREEN
+	waitanimation
+	setlightscreen
+	printfromtable gReflectLightScreenSafeguardStringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_RevelryReflect::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	copybyte gBattlerAttacker, gBattlerAbility
+	playmoveanimation BS_ATTACKER, MOVE_REFLECT
+	waitanimation
+	setreflect
+	printfromtable gReflectLightScreenSafeguardStringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_ActivateAsOne::
 	call BattleScript_AbilityPopUp
 	printfromtable gSwitchInAbilityStringIds
@@ -9812,6 +9849,24 @@ BattleScript_AbilityStatusEffect::
 	seteffectsecondary
 	return
 
+BattleScript_ToxicBloomActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	setbyte gBattlerTarget, 0
+BattleScript_ToxicBloomLoop:
+	jumpiftargetally BattleScript_ToxicBloomNext
+	jumpifabsent BS_TARGET, BattleScript_ToxicBloomNext
+	setbyte gBattleTextBuff1, 0xFD
+	setbyte gBattleTextBuff1 + 1, 9
+	setbyte gBattleTextBuff1 + 2, ABILITY_TOXIC_BLOOM & 0xFF
+	setbyte gBattleTextBuff1 + 3, ABILITY_TOXIC_BLOOM >> 8
+	setbyte gBattleTextBuff1 + 4, 0xFF
+	seteffectsecondary
+BattleScript_ToxicBloomNext:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_ToxicBloomLoop
+	end3
+
 BattleScript_SleepDustActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
@@ -9821,11 +9876,49 @@ BattleScript_SleepDustActivates::
 	swapattackerwithtarget
 	return
 
+BattleScript_StaticChargeActivates::
+	setstatchanger STAT_SPEED, 1, FALSE
+	copybyte gEffectBattler, gBattlerTarget
+	call BattleScript_TargetAbilityStatRaiseRet
+	setbyte gBattleTextBuff1, 0xFD
+	setbyte gBattleTextBuff1 + 1, 9
+	setbyte gBattleTextBuff1 + 2, ABILITY_STATIC_CHARGE & 0xFF
+	setbyte gBattleTextBuff1 + 3, ABILITY_STATIC_CHARGE >> 8
+	setbyte gBattleTextBuff1 + 4, 0xFF
+	jumpiftype BS_ATTACKER, TYPE_GROUND, BattleScript_StaticChargeEnd
+	jumpifabsent BS_ATTACKER, BattleScript_StaticChargeEnd
+	call BattleScript_HurtAttacker
+BattleScript_StaticChargeEnd:
+	return
+
+BattleScript_VampiricActivates::
+	call BattleScript_AbilityPopUp
+	setbyte cMULTISTRING_CHOOSER, B_MSG_ABSORB
+	jumpifability BS_TARGET, ABILITY_LIQUID_OOZE, BattleScript_VampiricLiquidOoze
+	goto BattleScript_VampiricUpdateHp
+BattleScript_VampiricLiquidOoze:
+	call BattleScript_AbilityPopUpTarget
+	manipulatedamage DMG_CHANGE_SIGN
+	setbyte cMULTISTRING_CHOOSER, B_MSG_ABSORB_OOZE
+BattleScript_VampiricUpdateHp:
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_IGNORE_DISGUISE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printfromtable gAbsorbDrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_ATTACKER
+	return
+
 BattleScript_ChlorofumesActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
 	seteffectsecondary
 	setmoveeffect MOVE_EFFECT_POISON
+	setbyte gBattleTextBuff1, 0xFD
+	setbyte gBattleTextBuff1 + 1, 9
+	setbyte gBattleTextBuff1 + 2, ABILITY_CHLOROFUMES & 0xFF
+	setbyte gBattleTextBuff1 + 3, ABILITY_CHLOROFUMES >> 8
+	setbyte gBattleTextBuff1 + 4, 0xFF
 	seteffectsecondary
 	setmoveeffect 0
 	return

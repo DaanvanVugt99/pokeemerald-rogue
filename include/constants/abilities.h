@@ -341,6 +341,8 @@
 
 // Rogue
 #define ABILITY_FORECAST_PRIORITY   311
+
+// Uniques
 #define ABILITY_STRONG_WINDS        312
 #define ABILITY_DRACONIC            313
 #define ABILITY_CHLOROFUMES         314
@@ -349,10 +351,20 @@
 #define ABILITY_VENOM_RUSH          317
 #define ABILITY_GNAW_DOWN           318
 #define ABILITY_TERRITORIAL         319
+#define ABILITY_AMBUSH              320
+#define ABILITY_STATIC_CHARGE       321
+#define ABILITY_SHARP_QUILLS        322
+#define ABILITY_FROST_REVELRY       323
+#define ABILITY_SUN_REVELRY         324
+#define ABILITY_MATRIARCHY          325
+#define ABILITY_PATRIARCHY          326
+#define ABILITY_SOFT_BODY           327
+#define ABILITY_VAMPIRIC            328
+#define ABILITY_TOXIC_BLOOM         329
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
-#define ABILITIES_COUNT_ROGUE       320
+#define ABILITIES_COUNT_ROGUE       330
 
 #define ABILITIES_COUNT ABILITIES_COUNT_ROGUE
 

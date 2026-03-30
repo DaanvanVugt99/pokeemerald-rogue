@@ -3,6 +3,10 @@
 
 extern const u8 BattleScript_SupersweetSyrupActivates[];
 extern const u8 BattleScript_StrongWindsActivated[];
+extern const u8 BattleScript_RevelryLightScreen[];
+extern const u8 BattleScript_RevelryReflect[];
+extern const u8 BattleScript_VampiricActivates[];
+extern const u8 BattleScript_ToxicBloomActivates[];
 extern const u8 BattleScript_OpportunistCopyStatChange[];
 extern const u8 BattleScript_MirrorHerbCopyStatChange[];
 extern const u8 BattleScript_MirrorHerbCopyStatChangeEnd2[];
@@ -194,6 +198,7 @@ extern const u8 BattleScript_RoughSkinActivates[];
 extern const u8 BattleScript_CuteCharmActivates[];
 extern const u8 BattleScript_AbilityStatusEffect[];
 extern const u8 BattleScript_SleepDustActivates[];
+extern const u8 BattleScript_StaticChargeActivates[];
 extern const u8 BattleScript_SynchronizeActivates[];
 extern const u8 BattleScript_NoItemSteal[];
 extern const u8 BattleScript_AbilityCuredStatus[];
@@ -480,6 +485,7 @@ extern const u8 BattleScript_CostarActivates[];
 extern const u8 BattleScript_ZeroToHeroActivates[];
 extern const u8 BattleScript_HospitalityActivates[];
 extern const u8 BattleScript_ToxicDebrisActivates[];
+extern const u8 BattleScript_SharpQuillsActivates[];
 extern const u8 BattleScript_EarthEaterActivates[];
 extern const u8 BattleScript_MimicryActivates_End3[];
 extern const u8 BattleScript_IceFaceNullsDamage[];

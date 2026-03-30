@@ -311,6 +311,16 @@ static const u8 sSleepDustDescription[] = _("Contact makes attacker drowsy.");
 static const u8 sVenomRushDescription[] = _("Target poisoned/slowed: double Speed.");
 static const u8 sGnawDownDescription[] = _("Biting moves lower target's Defense.");
 static const u8 sTerritorialDescription[] = _("2x damage to terrain-affected targets.");
+static const u8 sAmbushDescription[] = _("First turn: biting moves gain +1 priority.");
+static const u8 sStaticChargeDescription[] = _("Contact: +1 Speed; non-Ground takes 1/8.");
+static const u8 sSharpQuillsDescription[] = _("Physical hit: sets 1 layer of Spikes.");
+static const u8 sFrostRevelryDescription[] = _("Switch-in: If Sun is active, sets Reflect.");
+static const u8 sSunRevelryDescription[] = _("Switch-in: If Hail is active, sets Light Screen.");
+static const u8 sMatriarchyDescription[] = _("Opposite-gender foes: Attack is reduced.");
+static const u8 sPatriarchyDescription[] = _("Opposite-gender foes: Defense is reduced.");
+static const u8 sSoftBodyDescription[] = _("Immune to Fighting-type moves.");
+static const u8 sVampiricDescription[] = _("First strike contact heals for 1/3 damage.");
+static const u8 sToxicBloomDescription[] = _("End turn: all foes are poisoned.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -636,6 +646,16 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VENOM_RUSH] = _("Venom Rush"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
     [ABILITY_TERRITORIAL] = _("Territorial"),
+    [ABILITY_AMBUSH] = _("Ambush"),
+    [ABILITY_STATIC_CHARGE] = _("Static Charge"),
+    [ABILITY_SHARP_QUILLS] = _("Sharp Quills"),
+    [ABILITY_FROST_REVELRY] = _("Frost Revelry"),
+    [ABILITY_SUN_REVELRY] = _("Sun Revelry"),
+    [ABILITY_MATRIARCHY] = _("Matriarchy"),
+    [ABILITY_PATRIARCHY] = _("Patriarchy"),
+    [ABILITY_SOFT_BODY] = _("Soft Body"),
+    [ABILITY_VAMPIRIC] = _("Vampiric"),
+    [ABILITY_TOXIC_BLOOM] = _("Toxic Bloom"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -961,6 +981,16 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VENOM_RUSH] = _("Venom Rush"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
     [ABILITY_TERRITORIAL] = _("Territorial"),
+    [ABILITY_AMBUSH] = _("Ambush"),
+    [ABILITY_STATIC_CHARGE] = _("StaticCharge"),
+    [ABILITY_SHARP_QUILLS] = _("Sharp Quills"),
+    [ABILITY_FROST_REVELRY] = _("FrostRevelry"),
+    [ABILITY_SUN_REVELRY] = _("Sun Revelry"),
+    [ABILITY_MATRIARCHY] = _("Matriarchy"),
+    [ABILITY_PATRIARCHY] = _("Patriarchy"),
+    [ABILITY_SOFT_BODY] = _("Soft Body"),
+    [ABILITY_VAMPIRIC] = _("Vampiric"),
+    [ABILITY_TOXIC_BLOOM] = _("Toxic Bloom"),
 };
 #endif
 
@@ -1287,4 +1317,14 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_VENOM_RUSH] = sVenomRushDescription,
     [ABILITY_GNAW_DOWN] = sGnawDownDescription,
     [ABILITY_TERRITORIAL] = sTerritorialDescription,
+    [ABILITY_AMBUSH] = sAmbushDescription,
+    [ABILITY_STATIC_CHARGE] = sStaticChargeDescription,
+    [ABILITY_SHARP_QUILLS] = sSharpQuillsDescription,
+    [ABILITY_FROST_REVELRY] = sFrostRevelryDescription,
+    [ABILITY_SUN_REVELRY] = sSunRevelryDescription,
+    [ABILITY_MATRIARCHY] = sMatriarchyDescription,
+    [ABILITY_PATRIARCHY] = sPatriarchyDescription,
+    [ABILITY_SOFT_BODY] = sSoftBodyDescription,
+    [ABILITY_VAMPIRIC] = sVampiricDescription,
+    [ABILITY_TOXIC_BLOOM] = sToxicBloomDescription,
 };

@@ -4866,6 +4866,13 @@ s8 GetMovePriority(u32 battler, u16 move)
     else if (ability == ABILITY_TRIAGE && IsHealingMove(move))
         priority += 3;
 
+    if (HasBattlerAbility(battler, ABILITY_AMBUSH)
+     && gDisableStructs[battler].isFirstTurn
+     && gBattleMoves[move].bitingMove)
+    {
+        priority++;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 

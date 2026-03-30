@@ -4394,26 +4394,30 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         u32 primaryAbility = GetBattlerAbility(battler);
         u32 uniqueAbility = GetBattlerUniqueAbility(battler);
         bool32 primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
+        bool32 uniqueDone = gSpecialStatuses[battler].switchInUniqueAbilityDone;
+
+        if (uniqueAbility != ABILITY_NONE && uniqueAbility != primaryAbility)
+        {
+            gSpecialStatuses[battler].switchInAbilityDone = uniqueDone;
+            effect = AbilityBattleEffects(caseID, battler, ability, uniqueAbility, moveArg);
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = gSpecialStatuses[battler].switchInAbilityDone;
+            uniqueDone = gSpecialStatuses[battler].switchInUniqueAbilityDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            if (effect != 0)
+                return effect;
+        }
 
         if (primaryAbility != ABILITY_NONE)
         {
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             effect = AbilityBattleEffects(caseID, battler, ability, primaryAbility, moveArg);
             primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
             if (effect != 0)
                 return effect;
         }
 
-        if (uniqueAbility != ABILITY_NONE && uniqueAbility != primaryAbility)
-        {
-            gSpecialStatuses[battler].switchInAbilityDone = gSpecialStatuses[battler].switchInUniqueAbilityDone;
-            effect = AbilityBattleEffects(caseID, battler, ability, uniqueAbility, moveArg);
-            gSpecialStatuses[battler].switchInUniqueAbilityDone = gSpecialStatuses[battler].switchInAbilityDone;
-            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-            if (effect != 0)
-                return effect;
-        }
-
         gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+        gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
         return 0;
     }
 
@@ -4902,6 +4906,34 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_FROST_REVELRY:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gBattlerAttacker = battler;
+                if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
+                 && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_REFLECT))
+                {
+                    gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                    gCurrentMove = MOVE_REFLECT;
+                    BattleScriptPushCursorAndCallback(BattleScript_RevelryReflect);
+                    effect++;
+                }
+            }
+            break;
+        case ABILITY_SUN_REVELRY:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gBattlerAttacker = battler;
+                if (IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW)
+                 && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_LIGHTSCREEN))
+                {
+                    gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                    gCurrentMove = MOVE_LIGHT_SCREEN;
+                    BattleScriptPushCursorAndCallback(BattleScript_RevelryLightScreen);
+                    effect++;
+                }
+            }
+            break;
         case ABILITY_SUPERSWEET_SYRUP:
             if (!gSpecialStatuses[battler].switchInAbilityDone
                     && !(gBattleStruct->supersweetSyrup[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
@@ -5338,6 +5370,27 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     effect++;
                 }
                 break;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_TOXIC_BLOOM))
+            {
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler)
+                     && IsBattlerAlive(i)
+                     && CanBePoisoned(battler, i))
+                        break;
+                }
+
+                if (i != gBattlersCount)
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_TOXIC_BLOOM);
+                    PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                    gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
+                    BattleScriptPushCursorAndCallback(BattleScript_ToxicBloomActivates);
+                    gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                    effect++;
+                }
             }
 
             if(shedSkinAbilityActivate || shedSkinCharmActive)
@@ -6157,6 +6210,42 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlescriptCurrInstr = BattleScript_SleepDustActivates;
             effect++;
         }
+
+        if (HasBattlerAbility(battler, ABILITY_STATIC_CHARGE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_STATIC_CHARGE);
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            if (!IS_BATTLER_OF_TYPE(moveEndAttacker, TYPE_GROUND))
+            {
+                gBattleMoveDamage = GetNonDynamaxMaxHP(moveEndAttacker) / 8;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+            }
+            else
+            {
+                gBattleMoveDamage = 0;
+            }
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_StaticChargeActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SHARP_QUILLS)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && IS_MOVE_PHYSICAL(move)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && gSideTimers[GetBattlerSide(moveEndAttacker)].spikesAmount < 3)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SHARP_QUILLS);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_SharpQuillsActivates;
+            effect++;
+        }
         break;
     }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
@@ -6247,6 +6336,26 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_VAMPIRIC)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsMoveMakingContact(move, battler)
+         && GetBattlerTurnOrderNum(battler) < GetBattlerTurnOrderNum(gBattlerTarget)
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 3;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_VAMPIRIC);
+            if (drainedHp == 0)
+                drainedHp = 1;
+            gBattleMoveDamage = -drainedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
             effect++;
         }
         break;
@@ -10045,6 +10154,13 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         break;
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_MATRIARCHY)
+     && IS_MOVE_PHYSICAL(move)
+     && AreBattlersOfOppositeGender(battlerAtk, battlerDef))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
+    }
+
     // ally's abilities
     if (IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
     {
@@ -10258,6 +10374,13 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     // snow def boost for ice types
     if (IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE) && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW) && usesDefStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_PATRIARCHY)
+     && usesDefStat
+     && AreBattlersOfOppositeGender(battlerAtk, battlerDef))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
+    }
 
     // The defensive stats of a Player's Pokémon are boosted by x1.1 (+10%) if they have the 5th badge and 7th badges.
     // Having the 5th badge boosts physical defense while having the 7th badge boosts special defense.
@@ -10822,6 +10945,18 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
             RecordAbilityBattle(battlerDef, ABILITY_LEVITATE);
         }
     }
+    else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOFT_BODY))
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_SOFT_BODY);
+            gMoveResultFlags |= MOVE_RESULT_MISSED;
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_SOFT_BODY);
+        }
+    }
     else if (B_SHEER_COLD_IMMUNITY >= GEN_7 && move == MOVE_SHEER_COLD && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE))
     {
         modifier = UQ_4_12(0.0);
@@ -10910,6 +11045,18 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
             RecordAbilityBattle(battlerDef, ABILITY_LEVITATE);
         }
     }
+    else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOFT_BODY))
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            gLastUsedAbility = ABILITY_SOFT_BODY;
+            gMoveResultFlags |= MOVE_RESULT_MISSED;
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_SOFT_BODY);
+        }
+    }
     else if (B_SHEER_COLD_IMMUNITY >= GEN_7 && move == MOVE_SHEER_COLD && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE))
     {
         modifier = UQ_4_12(0.0);
@@ -10975,6 +11122,9 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u16 a
         }
 
         if (moveType == TYPE_GROUND && abilityDef == ABILITY_LEVITATE && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
+            modifier = UQ_4_12(0.0);
+        if (moveType == TYPE_FIGHTING
+         && (abilityDef == ABILITY_SOFT_BODY || GetUniqueAbilityBySpecies(speciesDef) == ABILITY_SOFT_BODY))
             modifier = UQ_4_12(0.0);
         if (abilityDef == ABILITY_WONDER_GUARD && modifier <= UQ_4_12(1.0) && gBattleMoves[move].power)
             modifier = UQ_4_12(0.0);

@@ -17,13 +17,11 @@ SINGLE_BATTLE_TEST("Static inflicts paralysis on contact")
         if (gBattleMoves[move].makesContact) {
             ABILITY_POPUP(opponent, ABILITY_STATIC);
             ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PRZ, player);
-            MESSAGE("Foe Pikachu's Static paralyzed Wobbuffet! It may be unable to move!");
             STATUS_ICON(player, paralysis: TRUE);
         } else {
             NONE_OF {
                 ABILITY_POPUP(opponent, ABILITY_STATIC);
                 ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PRZ, player);
-                MESSAGE("Foe Pikachu's Static paralyzed Wobbuffet! It may be unable to move!");
                 STATUS_ICON(player, paralysis: TRUE);
             }
         }
@@ -35,14 +33,13 @@ SINGLE_BATTLE_TEST("Unique Long Reach prevents Static from triggering on contact
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
         PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_LONG_REACH); }
-        OPPONENT(SPECIES_PIKACHU) { Ability(ABILITY_STATIC); }
+        OPPONENT(SPECIES_PIKACHU) { Ability(ABILITY_STATIC); UniqueAbility(ABILITY_NONE); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); }
     } SCENE {
         NONE_OF {
             ABILITY_POPUP(opponent, ABILITY_STATIC);
             ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PRZ, player);
-            MESSAGE("Foe Pikachu's Static paralyzed Wobbuffet! It may be unable to move!");
             STATUS_ICON(player, paralysis: TRUE);
         }
     }
