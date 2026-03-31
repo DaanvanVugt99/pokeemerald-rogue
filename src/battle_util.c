@@ -6413,6 +6413,21 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ACIDIC_MUCUS)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsMoveMakingContact(move, battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ACIDIC_MUCUS);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_2;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FUNGAL_INFECTION)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
@@ -10256,6 +10271,14 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         break;
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_GIFTED_MIND)
+     && (moveType == TYPE_BUG || moveType == TYPE_DARK || moveType == TYPE_GHOST))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_GIFTED_MIND);
+    }
+
     if (HasBattlerAbility(battlerDef, ABILITY_MATRIARCHY)
      && IS_MOVE_PHYSICAL(move)
      && AreBattlersOfOppositeGender(battlerAtk, battlerDef))
@@ -10510,10 +10533,13 @@ static inline uq4_12_t GetTargetDamageModifier(u32 move, u32 battlerAtk, u32 bat
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk)
+static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
 {
     if (gSpecialStatuses[battlerAtk].parentalBondState != PARENTAL_BOND_2ND_HIT)
         return UQ_4_12(1.0);
+    if (HasBattlerAbility(battlerAtk, ABILITY_CHAMPION)
+     && gBattleMoves[move].punchingMove)
+        return UQ_4_12(0.25);
     return B_PARENTAL_BOND_DMG >= GEN_7 ? UQ_4_12(0.25) : UQ_4_12(0.5);
 }
 
@@ -10852,7 +10878,7 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
 
     dmg = CalculateBaseDamage(gBattleMovePower, userFinalAttack, gBattleMons[battlerAtk].level, targetFinalDefense);
     DAMAGE_APPLY_MODIFIER(GetTargetDamageModifier(move, battlerAtk, battlerDef));
-    DAMAGE_APPLY_MODIFIER(GetParentalBondModifier(battlerAtk));
+    DAMAGE_APPLY_MODIFIER(GetParentalBondModifier(battlerAtk, move));
     DAMAGE_APPLY_MODIFIER(GetWeatherDamageModifier(battlerAtk, move, moveType, holdEffectAtk, holdEffectDef, weather));
     DAMAGE_APPLY_MODIFIER(GetCriticalModifier(isCrit));
     DAMAGE_APPLY_MODIFIER(GetGlaiveRushModifier(battlerDef));
@@ -10958,6 +10984,15 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
     if (moveType == TYPE_PSYCHIC && defType == TYPE_DARK && gStatuses3[battlerDef] & STATUS3_MIRACLE_EYED && mod == UQ_4_12(0.0))
         mod = UQ_4_12(1.0);
     if (gBattleMoves[move].effect == EFFECT_FREEZE_DRY && defType == TYPE_WATER)
+        mod = UQ_4_12(2.0);
+    if ((moveType == TYPE_FLYING || moveType == TYPE_BUG)
+     && defType == TYPE_GRASS
+     && HasBattlerAbility(battlerDef, ABILITY_CARNIVOROUS))
+        mod = UQ_4_12(1.0);
+    if (moveType == TYPE_GRASS
+     && (defType == TYPE_FLYING || defType == TYPE_BUG)
+     && battlerAtk < gBattlersCount
+     && HasBattlerAbility(battlerAtk, ABILITY_CARNIVOROUS))
         mod = UQ_4_12(2.0);
     if (moveType == TYPE_GROUND && defType == TYPE_FLYING && IsBattlerGrounded(battlerDef) && mod == UQ_4_12(0.0))
         mod = UQ_4_12(1.0);

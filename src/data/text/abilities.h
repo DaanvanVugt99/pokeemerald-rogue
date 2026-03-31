@@ -331,6 +331,10 @@ static const u8 sTantrumDescription[] = _("Missed move: next move gains +1 prior
 static const u8 sImmolateDescription[] = _("Normal moves become Fire.");
 static const u8 sSpiralGazeDescription[] = _("First turn: Hypnosis has 100% accuracy.");
 static const u8 sClairvoyantDescription[] = _("Switch-in: disable foe's lowest-power move.");
+static const u8 sChampionDescription[] = _("Punch moves hit twice. Second hit is weaker.");
+static const u8 sCarnivorousDescription[] = _("Bug/Flying hit normally; Grass hits them hard.");
+static const u8 sAcidicMucusDescription[] = _("Contact hits: lower foe's Sp. Def by 2.");
+static const u8 sGiftedMindDescription[] = _("Takes less Bug, Dark, and Ghost damage.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -676,6 +680,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_IMMOLATE] = _("Immolate"),
     [ABILITY_SPIRAL_GAZE] = _("Spiral Gaze"),
     [ABILITY_CLAIRVOYANT] = _("Clairvoyant"),
+    [ABILITY_CHAMPION] = _("Champion"),
+    [ABILITY_CARNIVOROUS] = _("Carnivorous"),
+    [ABILITY_ACIDIC_MUCUS] = _("Acidic Mucus"),
+    [ABILITY_GIFTED_MIND] = _("Gifted Mind"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1021,6 +1029,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_IMMOLATE] = _("Immolate"),
     [ABILITY_SPIRAL_GAZE] = _("Spiral Gaze"),
     [ABILITY_CLAIRVOYANT] = _("Clairvoyant"),
+    [ABILITY_CHAMPION] = _("Champion"),
+    [ABILITY_CARNIVOROUS] = _("Carnivorous"),
+    [ABILITY_ACIDIC_MUCUS] = _("AcidicMucus"),
+    [ABILITY_GIFTED_MIND] = _("Gifted Mind"),
 };
 #endif
 
@@ -1367,4 +1379,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_IMMOLATE] = sImmolateDescription,
     [ABILITY_SPIRAL_GAZE] = sSpiralGazeDescription,
     [ABILITY_CLAIRVOYANT] = sClairvoyantDescription,
+    [ABILITY_CHAMPION] = sChampionDescription,
+    [ABILITY_CARNIVOROUS] = sCarnivorousDescription,
+    [ABILITY_ACIDIC_MUCUS] = sAcidicMucusDescription,
+    [ABILITY_GIFTED_MIND] = sGiftedMindDescription,
 };
