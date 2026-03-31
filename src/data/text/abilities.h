@@ -321,6 +321,11 @@ static const u8 sPatriarchyDescription[] = _("Opposite-gender foes: Defense is r
 static const u8 sSoftBodyDescription[] = _("Immune to Fighting-type moves.");
 static const u8 sVampiricDescription[] = _("First strike contact heals for 1/3 damage.");
 static const u8 sToxicBloomDescription[] = _("End turn: all foes are poisoned.");
+static const u8 sFungalInfectionDescription[] = _("Damaging foes inflicts Leech Seed.");
+static const u8 sNeurotoxinDescription[] = _("Bug/Poison hits may lower Spe and Sp.Def.");
+static const u8 sSinkholeDescription[] = _("Switch-in: lowers Speed of grounded foes.");
+static const u8 sFatalGraceDescription[] = _("Damaging moves: +1 priority vs half HP.");
+static const u8 sHeadacheDescription[] = _("Confusion self-hit chance becomes 75%.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -656,6 +661,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SOFT_BODY] = _("Soft Body"),
     [ABILITY_VAMPIRIC] = _("Vampiric"),
     [ABILITY_TOXIC_BLOOM] = _("Toxic Bloom"),
+    [ABILITY_FUNGAL_INFECTION] = _("Fungal Infection"),
+    [ABILITY_NEUROTOXIN] = _("Neurotoxin"),
+    [ABILITY_SINKHOLE] = _("Sinkhole"),
+    [ABILITY_FATAL_GRACE] = _("Fatal Grace"),
+    [ABILITY_HEADACHE] = _("Headache"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -991,6 +1001,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SOFT_BODY] = _("Soft Body"),
     [ABILITY_VAMPIRIC] = _("Vampiric"),
     [ABILITY_TOXIC_BLOOM] = _("Toxic Bloom"),
+    [ABILITY_FUNGAL_INFECTION] = _("FungalInfect"),
+    [ABILITY_NEUROTOXIN] = _("Neurotoxin"),
+    [ABILITY_SINKHOLE] = _("Sinkhole"),
+    [ABILITY_FATAL_GRACE] = _("Fatal Grace"),
+    [ABILITY_HEADACHE] = _("Headache"),
 };
 #endif
 
@@ -1327,4 +1342,9 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SOFT_BODY] = sSoftBodyDescription,
     [ABILITY_VAMPIRIC] = sVampiricDescription,
     [ABILITY_TOXIC_BLOOM] = sToxicBloomDescription,
+    [ABILITY_FUNGAL_INFECTION] = sFungalInfectionDescription,
+    [ABILITY_NEUROTOXIN] = sNeurotoxinDescription,
+    [ABILITY_SINKHOLE] = sSinkholeDescription,
+    [ABILITY_FATAL_GRACE] = sFatalGraceDescription,
+    [ABILITY_HEADACHE] = sHeadacheDescription,
 };

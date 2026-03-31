@@ -3744,7 +3744,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 if (gBattleMons[gBattlerAttacker].status2 & STATUS2_CONFUSION)
                 {
                      // confusion dmg
-                    if (RandomWeighted(RNG_CONFUSION, (B_CONFUSION_SELF_DMG_CHANCE >= GEN_7 ? 2 : 1), 1))
+                    if (RandomWeighted(RNG_CONFUSION, IsAbilityOnField(ABILITY_HEADACHE) ? 1 : (B_CONFUSION_SELF_DMG_CHANCE >= GEN_7 ? 2 : 1), IsAbilityOnField(ABILITY_HEADACHE) ? 3 : 1))
                     {
                         gBattleCommunication[MULTISTRING_CHOOSER] = TRUE;
                         gBattlerTarget = gBattlerAttacker;
@@ -4890,6 +4890,16 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlerAttacker = battler;
                 SET_STATCHANGER(STAT_ATK, 1, TRUE);
                 BattleScriptPushCursorAndCallback(BattleScript_IntimidateActivates);
+                effect++;
+            }
+            break;
+        case ABILITY_SINKHOLE:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = battler;
+                SET_STATCHANGER(STAT_SPEED, 1, TRUE);
+                BattleScriptPushCursorAndCallback(BattleScript_SinkholeActivates);
                 effect++;
             }
             break;
@@ -6336,6 +6346,34 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FUNGAL_INFECTION)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && !(gStatuses3[gBattlerTarget] & STATUS3_LEECHSEED)
+         && !IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GRASS))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FUNGAL_INFECTION);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_FungalInfectionActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_NEUROTOXIN)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && (moveType == TYPE_BUG || moveType == TYPE_POISON)
+         && RandomWeighted(RNG_STENCH, 1, 1))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_NEUROTOXIN);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_NeurotoxinActivates;
             effect++;
         }
 

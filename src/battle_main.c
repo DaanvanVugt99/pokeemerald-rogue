@@ -4873,6 +4873,16 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_FATAL_GRACE)
+     && gBattleMoves[move].power > 0
+     && gBattleStruct->moveTarget[battler] < gBattlersCount
+     && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
+     && IsBattlerAlive(gBattleStruct->moveTarget[battler])
+     && gBattleMons[gBattleStruct->moveTarget[battler]].hp * 2 <= gBattleMons[gBattleStruct->moveTarget[battler]].maxHP)
+    {
+        priority++;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 

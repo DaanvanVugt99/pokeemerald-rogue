@@ -9103,6 +9103,54 @@ BattleScript_SupersweetSyrupContrary_WontIncrease:
 	printstring STRINGID_TARGETSTATWONTGOHIGHER
 	goto BattleScript_SupersweetSyrupEffect_WaitString
 
+BattleScript_SinkholeActivates::
+	showabilitypopup BS_ATTACKER
+	copybyte sSAVED_BATTLER, gBattlerTarget
+	pause B_WAIT_TIME_LONG
+	destroyabilitypopup
+	setbyte gBattlerTarget, 0
+BattleScript_SinkholeLoop:
+	jumpifbyteequal gBattlerTarget, gBattlerAttacker, BattleScript_SinkholeLoopIncrement
+	jumpiftargetally BattleScript_SinkholeLoopIncrement
+	jumpifabsent BS_TARGET, BattleScript_SinkholeLoopIncrement
+	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_SinkholeLoopIncrement
+	jumpifnotgrounded BS_TARGET, BattleScript_SinkholeUngrounded
+BattleScript_SinkholeEffect:
+	copybyte sBATTLER, gBattlerAttacker
+	setstatchanger STAT_SPEED, 1, TRUE
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_SinkholeLoopIncrement
+	setgraphicalstatchangevalues
+	jumpifability BS_TARGET, ABILITY_CONTRARY, BattleScript_SinkholeContrary
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+BattleScript_SinkholeEffect_WaitString:
+	waitmessage B_WAIT_TIME_LONG
+	copybyte sBATTLER, gBattlerTarget
+	call BattleScript_TryAdrenalineOrb
+	goto BattleScript_SinkholeLoopIncrement
+BattleScript_SinkholeUngrounded:
+	printstring STRINGID_ITDOESNTAFFECT
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SinkholeLoopIncrement:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_SinkholeLoop
+BattleScript_SinkholeEnd:
+	copybyte sBATTLER, gBattlerAttacker
+	destroyabilitypopup
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	pause B_WAIT_TIME_MED
+	end3
+
+BattleScript_SinkholeContrary:
+	call BattleScript_AbilityPopUpTarget
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_SinkholeContrary_WontIncrease
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	goto BattleScript_SinkholeEffect_WaitString
+BattleScript_SinkholeContrary_WontIncrease:
+	printstring STRINGID_TARGETSTATWONTGOHIGHER
+	goto BattleScript_SinkholeEffect_WaitString
+
 BattleScript_DroughtActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
@@ -9921,6 +9969,23 @@ BattleScript_ChlorofumesActivates::
 	setbyte gBattleTextBuff1 + 4, 0xFF
 	seteffectsecondary
 	setmoveeffect 0
+	return
+
+BattleScript_FungalInfectionActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	setseeded
+	printfromtable gLeechSeedStringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_NeurotoxinActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	modifybattlerstatstage BS_TARGET, STAT_SPEED, DECREASE, 1, BattleScript_NeurotoxinTrySpDef, ANIM_ON
+BattleScript_NeurotoxinTrySpDef:
+	modifybattlerstatstage BS_TARGET, STAT_SPDEF, DECREASE, 1, BattleScript_NeurotoxinRet, ANIM_ON
+BattleScript_NeurotoxinRet:
 	return
 
 BattleScript_BattleBondActivatesOnMoveEndAttacker::
