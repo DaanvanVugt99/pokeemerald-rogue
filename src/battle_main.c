@@ -4883,6 +4883,12 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_TANTRUM)
+     && gDisableStructs[battler].uniquePersistentStateActive)
+    {
+        priority++;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 
@@ -5903,11 +5909,12 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
                  || (attackerAbility == ABILITY_REFRIGERATE && (ateType = TYPE_ICE))
                  || (attackerAbility == ABILITY_AERILATE && (ateType = TYPE_FLYING))
                  || ((attackerAbility == ABILITY_GALVANIZE) && (ateType = TYPE_ELECTRIC))
+                 || (HasBattlerAbility(battlerAtk, ABILITY_IMMOLATE) && (ateType = TYPE_FIRE))
                 )
              )
     {
         gBattleStruct->dynamicMoveType = ateType | F_DYNAMIC_TYPE_SET;
-        if (!IsDynamaxed(battlerAtk))
+        if (!IsDynamaxed(battlerAtk) && !HasBattlerAbility(battlerAtk, ABILITY_IMMOLATE))
             gBattleStruct->ateBoost[battlerAtk] = 1;
     }
     else if (gBattleMoves[move].type != TYPE_NORMAL

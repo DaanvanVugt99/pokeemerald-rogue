@@ -9600,6 +9600,12 @@ BattleScript_CursedBodyActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_ClairvoyantActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNMOVEWASDISABLED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_MummyActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_ATTACKERACQUIREDABILITY
@@ -9986,6 +9992,13 @@ BattleScript_NeurotoxinActivates::
 BattleScript_NeurotoxinTrySpDef:
 	modifybattlerstatstage BS_TARGET, STAT_SPDEF, DECREASE, 1, BattleScript_NeurotoxinRet, ANIM_ON
 BattleScript_NeurotoxinRet:
+	return
+
+BattleScript_TantrumActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNRAGEBUILDING
+	waitmessage B_WAIT_TIME_LONG
 	return
 
 BattleScript_BattleBondActivatesOnMoveEndAttacker::

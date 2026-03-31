@@ -1710,6 +1710,10 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
         buff = MAX_STAT_STAGE;
 
     moveAcc = gBattleMoves[move].accuracy;
+    if (move == MOVE_HYPNOSIS
+     && HasBattlerAbility(battlerAtk, ABILITY_SPIRAL_GAZE)
+     && gDisableStructs[battlerAtk].isFirstTurn)
+        moveAcc = 100;
     // Check Thunder and Hurricane on sunny weather.
     if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_SUN)
       && (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
@@ -5872,6 +5876,17 @@ static void Cmd_moveend(void)
                 gBattleStruct->lastMoveFailed |= gBitTable[gBattlerAttacker];
             else
                 gBattleStruct->lastMoveFailed &= ~(gBitTable[gBattlerAttacker]);
+
+            if (HasBattlerAbility(gBattlerAttacker, ABILITY_TANTRUM)
+             && (gMoveResultFlags & MOVE_RESULT_MISSED)
+             && !gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_TANTRUM);
+                gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_TantrumActivates;
+                effect = TRUE;
+            }
 
             // Set ShellTrap to activate after the attacker's turn if target was hit by a physical move.
             if (gBattleMoves[gChosenMoveByBattler[gBattlerTarget]].effect == EFFECT_SHELL_TRAP

@@ -326,6 +326,11 @@ static const u8 sNeurotoxinDescription[] = _("Bug/Poison hits may lower Spe and 
 static const u8 sSinkholeDescription[] = _("Switch-in: lowers Speed of grounded foes.");
 static const u8 sFatalGraceDescription[] = _("Damaging moves: +1 priority vs half HP.");
 static const u8 sHeadacheDescription[] = _("Confusion self-hit chance becomes 75%.");
+static const u8 sMoonlightDescription[] = _("Allies gain 1.25x Sp. Def.");
+static const u8 sTantrumDescription[] = _("Missed move: next move gains +1 priority.");
+static const u8 sImmolateDescription[] = _("Normal moves become Fire.");
+static const u8 sSpiralGazeDescription[] = _("First turn: Hypnosis has 100% accuracy.");
+static const u8 sClairvoyantDescription[] = _("Switch-in: disable foe's lowest-power move.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -666,6 +671,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SINKHOLE] = _("Sinkhole"),
     [ABILITY_FATAL_GRACE] = _("Fatal Grace"),
     [ABILITY_HEADACHE] = _("Headache"),
+    [ABILITY_MOONLIGHT] = _("Moonlight"),
+    [ABILITY_TANTRUM] = _("Tantrum"),
+    [ABILITY_IMMOLATE] = _("Immolate"),
+    [ABILITY_SPIRAL_GAZE] = _("Spiral Gaze"),
+    [ABILITY_CLAIRVOYANT] = _("Clairvoyant"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1006,6 +1016,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SINKHOLE] = _("Sinkhole"),
     [ABILITY_FATAL_GRACE] = _("Fatal Grace"),
     [ABILITY_HEADACHE] = _("Headache"),
+    [ABILITY_MOONLIGHT] = _("Moonlight"),
+    [ABILITY_TANTRUM] = _("Tantrum"),
+    [ABILITY_IMMOLATE] = _("Immolate"),
+    [ABILITY_SPIRAL_GAZE] = _("Spiral Gaze"),
+    [ABILITY_CLAIRVOYANT] = _("Clairvoyant"),
 };
 #endif
 
@@ -1347,4 +1362,9 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SINKHOLE] = sSinkholeDescription,
     [ABILITY_FATAL_GRACE] = sFatalGraceDescription,
     [ABILITY_HEADACHE] = sHeadacheDescription,
+    [ABILITY_MOONLIGHT] = sMoonlightDescription,
+    [ABILITY_TANTRUM] = sTantrumDescription,
+    [ABILITY_IMMOLATE] = sImmolateDescription,
+    [ABILITY_SPIRAL_GAZE] = sSpiralGazeDescription,
+    [ABILITY_CLAIRVOYANT] = sClairvoyantDescription,
 };

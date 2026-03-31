@@ -289,6 +289,12 @@ void HandleAction_UseMove(void)
         return;
     }
 
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_TANTRUM)
+     && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
+    {
+        gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
+    }
+
     gIsCriticalHit = FALSE;
     gBattleStruct->atkCancellerTracker = 0;
     gMoveResultFlags = 0;
@@ -4414,6 +4420,64 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
             if (effect != 0)
                 return effect;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CLAIRVOYANT) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 lowestPower = 0xFFFFFFFF;
+            u32 tieCount = 0;
+            u32 slot;
+            u16 lowestPowerMove = MOVE_NONE;
+
+            uniqueDone = TRUE;
+
+            if (IsBattlerAlive(opposingBattler)
+             && gDisableStructs[opposingBattler].disabledMove == MOVE_NONE
+             && !IsAbilityOnSide(opposingBattler, ABILITY_AROMA_VEIL)
+             && !IsDynamaxed(opposingBattler))
+            {
+                for (slot = 0; slot < MAX_MON_MOVES; slot++)
+                {
+                    move = gBattleMons[opposingBattler].moves[slot];
+                    if (move == MOVE_NONE
+                     || gBattleMons[opposingBattler].pp[slot] == 0
+                     || gBattleMoves[move].power == 0)
+                        continue;
+
+                    if (gBattleMoves[move].power < lowestPower)
+                    {
+                        lowestPower = gBattleMoves[move].power;
+                        lowestPowerMove = move;
+                        tieCount = 1;
+                    }
+                    else if (gBattleMoves[move].power == lowestPower)
+                    {
+                        tieCount++;
+                        if ((Random() % tieCount) == 0)
+                            lowestPowerMove = move;
+                    }
+                }
+
+                if (lowestPowerMove != MOVE_NONE)
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_CLAIRVOYANT);
+                    gDisableStructs[opposingBattler].disabledMove = lowestPowerMove;
+                    if (B_DISABLE_TURNS >= GEN_5)
+                        gDisableStructs[opposingBattler].disableTimer = 4;
+                    else if (B_DISABLE_TURNS >= GEN_4)
+                        gDisableStructs[opposingBattler].disableTimer = (Random() & 3) + 4; // 4-7 turns
+                    else
+                        gDisableStructs[opposingBattler].disableTimer = (Random() & 3) + 2; // 2-5 turns
+                    PREPARE_MOVE_BUFFER(gBattleTextBuff1, lowestPowerMove);
+                    gBattlerAttacker = battler;
+                    gBattlerTarget = opposingBattler;
+                    gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                    gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                    BattleScriptPushCursorAndCallback(BattleScript_ClairvoyantActivates);
+                    return 1;
+                }
+            }
         }
 
         gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
@@ -10369,6 +10433,9 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
                 modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
             break;
         }
+
+        if (HasBattlerAbility(BATTLE_PARTNER(battlerDef), ABILITY_MOONLIGHT) && !usesDefStat)
+            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.25));
     }
 
     // field abilities
