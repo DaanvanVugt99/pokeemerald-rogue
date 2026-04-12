@@ -115,6 +115,11 @@
 #define VAR_UNUSED_0x405F                    0x405F 
 #define VAR_UNUSED_0x4060                    0x4060
 
+// Battle-only temp overrides for ability-induced extra moves.
+#define VAR_EXTRA_MOVE_DAMAGE                VAR_UNUSED_0x404A
+#define VAR_TEMP_MOVEEFFECT                  VAR_UNUSED_0x404B
+#define VAR_TEMP_MOVEEFECT_CHANCE            VAR_UNUSED_0x404C
+
 #define VAR_ROGUE_ITEM0                      0x4061 
 #define VAR_ROGUE_ITEM1                      0x4062 
 #define VAR_ROGUE_ITEM2                      0x4063

@@ -12,6 +12,8 @@ extern const u8 BattleScript_NeurotoxinActivates[];
 extern const u8 BattleScript_SinkholeActivates[];
 extern const u8 BattleScript_TantrumActivates[];
 extern const u8 BattleScript_ClairvoyantActivates[];
+extern const u8 BattleScript_AttackerUsedAnExtraMove[];
+extern const u8 BattleScript_AttackerUsedAnExtraMoveOnSwitchIn[];
 extern const u8 BattleScript_OpportunistCopyStatChange[];
 extern const u8 BattleScript_MirrorHerbCopyStatChange[];
 extern const u8 BattleScript_MirrorHerbCopyStatChangeEnd2[];

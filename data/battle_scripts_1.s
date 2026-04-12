@@ -6976,7 +6976,12 @@ BattleScript_PursuitSwitchDmgLoop::
 	jumpifnopursuitswitchdmg BattleScript_DoSwitchOut
 	swapattackerwithtarget
 	trysetdestinybondtohappen
+	jumpifmove MOVE_FLAME_CHARGE, BattleScript_CallHotPursuitDmgOnSwitchOut
 	call BattleScript_PursuitDmgOnSwitchOut
+	goto BattleScript_PursuitSwitchDmgDone
+BattleScript_CallHotPursuitDmgOnSwitchOut:
+	call BattleScript_HotPursuitDmgOnSwitchOut
+BattleScript_PursuitSwitchDmgDone:
 	swapattackerwithtarget
 BattleScript_DoSwitchOut::
 	decrementmultihit BattleScript_PursuitSwitchDmgLoop
@@ -7026,6 +7031,35 @@ BattleScript_PursuitDmgOnSwitchOut::
 	setbyte sGIVEEXP_STATE, 0
 	getexp BS_TARGET
 BattleScript_PursuitDmgOnSwitchOutRet:
+	return
+
+BattleScript_HotPursuitDmgOnSwitchOut::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	attackstring
+	critcalc
+	damagecalc
+	adjustdamage
+	attackanimation
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	setstatchanger STAT_SPEED, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_HotPursuit_AfterSpeedRaise
+	setgraphicalstatchangevalues
+	call BattleScript_StatUp
+BattleScript_HotPursuit_AfterSpeedRaise:
+	setmoveeffect MOVE_EFFECT_BURN
+	seteffectprimary
+	tryfaintmon BS_TARGET
+BattleScript_HotPursuitDmgOnSwitchOutRet:
 	return
 
 BattleScript_Pausex20::
@@ -9993,6 +10027,54 @@ BattleScript_NeurotoxinTrySpDef:
 	modifybattlerstatstage BS_TARGET, STAT_SPDEF, DECREASE, 1, BattleScript_NeurotoxinRet, ANIM_ON
 BattleScript_NeurotoxinRet:
 	return
+
+BattleScript_AttackerUsedAnExtraMove::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	attackcanceler
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	critcalc
+	damagecalc
+	adjustdamage
+	playmoveanimation BS_ATTACKER, MOVE_NONE
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	seteffectwithchance
+	tryfaintmon BS_TARGET
+	moveendall
+	return
+
+BattleScript_AttackerUsedAnExtraMoveOnSwitchIn::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	attackcanceler
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	critcalc
+	damagecalc
+	adjustdamage
+	playmoveanimation BS_ATTACKER, MOVE_NONE
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	seteffectwithchance
+	tryfaintmon BS_TARGET
+	moveendall
+	end3
 
 BattleScript_TantrumActivates::
 	waitstate

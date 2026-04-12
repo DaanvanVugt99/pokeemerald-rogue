@@ -2073,9 +2073,15 @@ static void Cmd_damagecalc(void)
     CMD_ARGS();
 
     u8 moveType;
+    u32 movePower = 0;
 
     GET_MOVE_TYPE(gCurrentMove, moveType);
-    gBattleMoveDamage = CalculateMoveDamage(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType, 0, gIsCriticalHit, TRUE, TRUE);
+    if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
+    {
+        movePower = VarGet(VAR_EXTRA_MOVE_DAMAGE);
+        VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+    }
+    gBattleMoveDamage = CalculateMoveDamage(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType, movePower, gIsCriticalHit, TRUE, TRUE);
 
     if((IsCurseActive(EFFECT_ONE_HIT) || Rogue_GetActiveCampaign() == ROGUE_CAMPAIGN_ONE_HP) && gBattleMoveDamage != 0)
     {
@@ -3906,6 +3912,20 @@ static void Cmd_seteffectwithchance(void)
     CMD_ARGS();
 
     u32 percentChance = CalcSecondaryEffectChance(gBattlerAttacker, gBattleMoves[gCurrentMove].secondaryEffectChance, gBattleMoves[gCurrentMove].effect);
+
+    if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
+    {
+        u32 tempChance = VarGet(VAR_TEMP_MOVEEFECT_CHANCE);
+        u32 tempEffect = VarGet(VAR_TEMP_MOVEEFFECT);
+
+        if (tempChance != 0)
+            percentChance = tempChance;
+        if (tempEffect != 0)
+            gBattleScripting.moveEffect = tempEffect;
+
+        VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+        VarSet(VAR_TEMP_MOVEEFFECT, 0);
+    }
 
     if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
      && gBattleScripting.moveEffect)
@@ -13633,6 +13653,7 @@ static void Cmd_magnitudedamagecalculation(void)
 static void Cmd_jumpifnopursuitswitchdmg(void)
 {
     CMD_ARGS(const u8 *jumpInstr);
+    bool32 doSwitchIntercept = FALSE;
 
     if (gMultiHitCounter == 1)
     {
@@ -13666,6 +13687,21 @@ static void Cmd_jumpifnopursuitswitchdmg(void)
 
         gCurrentMove = gChosenMoveByBattler[gBattlerTarget];
         gCurrMovePos = gChosenMovePos = *(gBattleStruct->chosenMovePositions + gBattlerTarget);
+        doSwitchIntercept = TRUE;
+    }
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_HOT_PURSUIT)
+          && !(gBattleMons[gBattlerTarget].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+          && gBattleMons[gBattlerAttacker].hp
+          && gBattleMons[gBattlerTarget].hp
+          && !gDisableStructs[gBattlerTarget].truantCounter)
+    {
+        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_HOT_PURSUIT);
+        gCurrentMove = MOVE_FLAME_CHARGE;
+        doSwitchIntercept = TRUE;
+    }
+
+    if (doSwitchIntercept)
+    {
         gBattlescriptCurrInstr = cmd->nextInstr;
         gBattleScripting.animTurn = 1;
         gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;

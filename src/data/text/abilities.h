@@ -335,6 +335,9 @@ static const u8 sChampionDescription[] = _("Punch moves hit twice. Second hit is
 static const u8 sCarnivorousDescription[] = _("Bug/Flying hit normally; Grass hits them hard.");
 static const u8 sAcidicMucusDescription[] = _("Contact hits: lower foe's Sp. Def by 2.");
 static const u8 sGiftedMindDescription[] = _("Takes less Bug, Dark, and Ghost damage.");
+static const u8 sCheapTacticsDescription[] = _("Switch-in: uses Scratch immediately.");
+static const u8 sVolcanicRageDescription[] = _("Fire move: extra 40 BP Eruption.");
+static const u8 sHotPursuitDescription[] = _("On foe switch: Flame Charge and guaranteed burn.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -684,6 +687,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CARNIVOROUS] = _("Carnivorous"),
     [ABILITY_ACIDIC_MUCUS] = _("Acidic Mucus"),
     [ABILITY_GIFTED_MIND] = _("Gifted Mind"),
+    [ABILITY_CHEAP_TACTICS] = _("Cheap Tactics"),
+    [ABILITY_VOLCANIC_RAGE] = _("Volcanic Rage"),
+    [ABILITY_HOT_PURSUIT] = _("Hot Pursuit"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1033,6 +1039,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CARNIVOROUS] = _("Carnivorous"),
     [ABILITY_ACIDIC_MUCUS] = _("AcidicMucus"),
     [ABILITY_GIFTED_MIND] = _("Gifted Mind"),
+    [ABILITY_CHEAP_TACTICS] = _("CheapTactic"),
+    [ABILITY_VOLCANIC_RAGE] = _("VolcanicRag"),
+    [ABILITY_HOT_PURSUIT] = _("Hot Pursuit"),
 };
 #endif
 
@@ -1383,4 +1392,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_CARNIVOROUS] = sCarnivorousDescription,
     [ABILITY_ACIDIC_MUCUS] = sAcidicMucusDescription,
     [ABILITY_GIFTED_MIND] = sGiftedMindDescription,
+    [ABILITY_CHEAP_TACTICS] = sCheapTacticsDescription,
+    [ABILITY_VOLCANIC_RAGE] = sVolcanicRageDescription,
+    [ABILITY_HOT_PURSUIT] = sHotPursuitDescription,
 };

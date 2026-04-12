@@ -48,6 +48,7 @@
 #include "constants/trainers.h"
 #include "constants/weather.h"
 #include "constants/pokemon.h"
+#include "constants/vars.h"
 
 #include "rogue_controller.h"
 #include "rogue_charms.h"
@@ -69,6 +70,7 @@ static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
 static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability);
 static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
+static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 *const gBattlescriptsForRunningByItem[];
@@ -903,6 +905,7 @@ void HandleAction_ActionFinished(void)
     }
 
     gCurrentMove = 0;
+    gTempMove = 0;
     gBattleMoveDamage = 0;
     gMoveResultFlags = 0;
     gBattleScripting.animTurn = 0;
@@ -916,6 +919,7 @@ void HandleAction_ActionFinished(void)
     gBattleScripting.multihitMoveEffect = 0;
     gBattleResources->battleScriptsStack->size = 0;
     gBattleStruct->dynamax.usingMaxMove[gBattlerAttacker] = 0;
+    gProtectStructs[gBattlerAttacker].extraMoveUsed = FALSE;
 
     if (B_RECALC_TURN_AFTER_ACTIONS >= GEN_8 && !afterYouActive && !gBattleStruct->pledgeMove)
     {
@@ -4367,6 +4371,17 @@ static inline u8 GetBattlerSideFaintCounter(u32 battler)
     return GetSideFaintCounter(GetBattlerSide(battler));
 }
 
+static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget)
+{
+    return IsBattlerAlive(battlerAttacker)
+        && IsBattlerAlive(battlerTarget)
+        && battlerAttacker != battlerTarget
+        && !gProtectStructs[battlerAttacker].confusionSelfDmg
+        && !gProtectStructs[battlerAttacker].extraMoveUsed
+        && !(gBattleMons[battlerAttacker].status1 & STATUS1_SLEEP)
+        && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
+}
+
 // Supreme Overlord adds a x0.1 damage boost for each fainted ally.
 static inline uq4_12_t GetSupremeOverlordModifier(u32 battler)
 {
@@ -4477,6 +4492,36 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     BattleScriptPushCursorAndCallback(BattleScript_ClairvoyantActivates);
                     return 1;
                 }
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CHEAP_TACTICS) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!IsBattlerAlive(opposingBattler))
+                    continue;
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_CHEAP_TACTICS);
+                gBattlerAttacker = battler;
+                gBattlerTarget = opposingBattler;
+                gTempMove = gCurrentMove;
+                gCurrentMove = MOVE_SCRATCH;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+                VarSet(VAR_TEMP_MOVEEFFECT, 0);
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
+                return 1;
             }
         }
 
@@ -6377,6 +6422,23 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE))
         {
             gProtectStructs[battler].uniqueAbilityActive = TRUE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_VOLCANIC_RAGE)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_FIRE
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_VOLCANIC_RAGE);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_ERUPTION;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_CHLOROFUMES)
