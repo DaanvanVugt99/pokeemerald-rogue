@@ -105,7 +105,7 @@ SINGLE_BATTLE_TEST("White Herb restores stats after all hits of a multi hit move
     u16 ability;
 
     PARAMETRIZE { species = SPECIES_SLIGGOO_HISUIAN; ability = ABILITY_GOOEY; }
-    PARAMETRIZE { species = SPECIES_DUGTRIO_ALOLAN; ability = ABILITY_TANGLING_HAIR; }
+    PARAMETRIZE { species = SPECIES_WOBBUFFET; ability = ABILITY_TANGLING_HAIR; }
 
     GIVEN {
         ASSUME(gBattleMoves[MOVE_DUAL_WINGBEAT].strikeCount == 2);

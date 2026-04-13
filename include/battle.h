@@ -120,6 +120,7 @@ struct DisableStruct
     u8 weatherAbilityDone:1;
     u8 terrainAbilityDone:1;
     u8 usedProteanLibero:1;
+    u8 uniqueOncePerSwitchInUsed:1;
     bool8 uniquePersistentStateActive;
 };
 

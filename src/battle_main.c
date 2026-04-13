@@ -4874,12 +4874,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
-    if (HasBattlerAbility(battler, ABILITY_FATAL_GRACE)
-     && gBattleMoves[move].power > 0
+    if (HasBattlerAbility(battler, ABILITY_TERRITORIAL)
+     && (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
+     && gBattleMoves[move].type == TYPE_FLYING
      && gBattleStruct->moveTarget[battler] < gBattlersCount
      && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
      && IsBattlerAlive(gBattleStruct->moveTarget[battler])
-     && gBattleMons[gBattleStruct->moveTarget[battler]].hp * 2 <= gBattleMons[gBattleStruct->moveTarget[battler]].maxHP)
+     && IsBattlerGrounded(gBattleStruct->moveTarget[battler]))
     {
         priority++;
     }

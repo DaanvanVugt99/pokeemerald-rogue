@@ -4382,6 +4382,11 @@ static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
 }
 
+static inline bool32 IsFinalMultiHitStrike(void)
+{
+    return (gMultiHitCounter == 0 || gMultiHitCounter == 1);
+}
+
 // Supreme Overlord adds a x0.1 damage boost for each fainted ally.
 static inline uq4_12_t GetSupremeOverlordModifier(u32 battler)
 {
@@ -6368,6 +6373,7 @@ if (triggeringAbility != ABILITY_NONE)
         break;
     }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
+    {
         switch (gLastUsedAbility)
         {
         case ABILITY_POISON_TOUCH:
@@ -6415,18 +6421,10 @@ if (triggeringAbility != ABILITY_NONE)
             break;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRESSURE_SHELL)
-         && IsBattlerAlive(battler)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && moveType == TYPE_WATER
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE))
-        {
-            gProtectStructs[battler].uniqueAbilityActive = TRUE;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_VOLCANIC_RAGE)
          && IsBattlerAlive(battler)
          && moveType == TYPE_FIRE
+         && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_VOLCANIC_RAGE);
@@ -6441,22 +6439,108 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PASSIVE_INCOME)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_NORMAL
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PASSIVE_INCOME);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_PAY_DAY;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_AFTERSHOCK)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_GROUND
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_AFTERSHOCK);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_BULLDOZE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_CHLOROFUMES)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && TARGET_TURN_DAMAGED
-         && moveType == TYPE_GRASS)
+         && moveType == TYPE_GRASS
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_CHLOROFUMES);
-            gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_LEECH_SEED;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
-            if ((gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN)
-                && CanBePoisoned(gBattlerAttacker, gBattlerTarget))
-                gBattlescriptCurrInstr = BattleScript_ChlorofumesActivates;
-            else
-                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_UPDRAFT)
+         && moveType == TYPE_FIRE
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_UPDRAFT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_TAILWIND;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SHELL_FORMATION)
+         && moveType == TYPE_WATER
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SHELL_FORMATION);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_IRON_DEFENSE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_STRIKE_FEAR)
+         && move == MOVE_GLARE
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_STRIKE_FEAR);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_MEAN_LOOK;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
         }
 
@@ -6465,6 +6549,7 @@ if (triggeringAbility != ABILITY_NONE)
          && gBattleMons[gBattlerTarget].hp != 0
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
          && gBattleMoves[move].bitingMove)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_GNAW_DOWN);
@@ -6480,6 +6565,7 @@ if (triggeringAbility != ABILITY_NONE)
          && gBattleMons[gBattlerTarget].hp != 0
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
          && IsMoveMakingContact(move, battler))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_ACIDIC_MUCUS);
@@ -6495,6 +6581,7 @@ if (triggeringAbility != ABILITY_NONE)
          && gBattleMons[gBattlerTarget].hp != 0
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
          && !(gStatuses3[gBattlerTarget] & STATUS3_LEECHSEED)
          && !IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GRASS))
         {
@@ -6509,6 +6596,7 @@ if (triggeringAbility != ABILITY_NONE)
          && gBattleMons[gBattlerTarget].hp != 0
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
          && (moveType == TYPE_BUG || moveType == TYPE_POISON)
          && RandomWeighted(RNG_STENCH, 1, 1))
         {
@@ -6522,6 +6610,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
          && IsMoveMakingContact(move, battler)
          && GetBattlerTurnOrderNum(battler) < GetBattlerTurnOrderNum(gBattlerTarget)
          && !BATTLER_MAX_HP(battler)
@@ -6538,6 +6627,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
         break;
+    }
     case ABILITYEFFECT_MOVE_END_OTHER: // Abilities that activate on *another* battler's moveend: Dancer, Soul-Heart, Receiver, Symbiosis
         switch (GetBattlerAbility(battler))
         {
@@ -10044,13 +10134,6 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         }
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_DRACONIC)
-     && moveType == TYPE_DRAGON
-     && gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP)
-    {
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
-    }
-
     // target's abilities
     switch (defAbility)
     {
@@ -10632,8 +10715,7 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
 {
     if (gBattleStruct->pledgeMove && IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType))
         return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
-    else if ((!IS_BATTLER_OF_TYPE(battlerAtk, moveType)
-           && !(HasBattlerAbility(battlerAtk, ABILITY_DRACONIC) && moveType == TYPE_DRAGON))
+    else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType)
           || move == MOVE_STRUGGLE || move == MOVE_NONE)
         return UQ_4_12(1.0);
     else
@@ -10782,10 +10864,6 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
 
 static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
 {
-    if (HasBattlerAbility(battlerDef, ABILITY_PRESSURE_SHELL)
-     && gProtectStructs[battlerDef].uniqueAbilityActive)
-        return UQ_4_12(0.75);
-
     switch (abilityDef)
     {
     case ABILITY_MULTISCALE:

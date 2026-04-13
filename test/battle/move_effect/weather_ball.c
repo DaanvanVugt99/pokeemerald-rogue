@@ -14,8 +14,8 @@ ASSUMPTIONS
         || gSpeciesInfo[SPECIES_MAGMAR].types[1] == TYPE_FIRE);
     ASSUME(gSpeciesInfo[SPECIES_DRAGONAIR].types[0] == TYPE_DRAGON
         || gSpeciesInfo[SPECIES_DRAGONAIR].types[1] == TYPE_DRAGON);
-    ASSUME(gSpeciesInfo[SPECIES_KADABRA].types[0] == TYPE_PSYCHIC
-        || gSpeciesInfo[SPECIES_KADABRA].types[1] == TYPE_PSYCHIC);
+    ASSUME(gSpeciesInfo[SPECIES_DROWZEE].types[0] == TYPE_PSYCHIC
+        || gSpeciesInfo[SPECIES_DROWZEE].types[1] == TYPE_PSYCHIC);
     ASSUME(gSpeciesInfo[SPECIES_WIGGLYTUFF].types[0] == TYPE_FAIRY
         || gSpeciesInfo[SPECIES_WIGGLYTUFF].types[1] == TYPE_FAIRY);
 }
@@ -118,7 +118,7 @@ SINGLE_BATTLE_TEST("Weather Ball doubles its power and turns to a Dark-type move
     PARAMETRIZE{ move = MOVE_ECLIPSE; }
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_KADABRA);
+        OPPONENT(SPECIES_DROWZEE);
     } WHEN {
         TURN { MOVE(player, move); }
         TURN { MOVE(player, MOVE_WEATHER_BALL); }

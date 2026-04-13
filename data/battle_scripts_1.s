@@ -9997,18 +9997,38 @@ BattleScript_VampiricUpdateHp:
 	tryfaintmon BS_ATTACKER
 	return
 
+BattleScript_UpdraftActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	settailwind BattleScript_UpdraftEnd
+	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
+	waitanimation
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_TryTailwindAbilitiesLoop
+BattleScript_UpdraftEnd:
+	return
+
+BattleScript_ShellFormationActivates::
+	waitstate
+	setstatchanger STAT_DEF, 2, FALSE
+	call BattleScript_AttackerAbilityStatRaise
+	return
+
+BattleScript_AbilityUsesCalledMove::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	setbyte sB_ANIM_TURN, 0
+	setbyte sB_ANIM_TARGETS_HIT, 0
+	orword gHitMarker, HITMARKER_ALLOW_NO_PP
+	jumptocalledmove TRUE
+
 BattleScript_ChlorofumesActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
-	seteffectsecondary
-	setmoveeffect MOVE_EFFECT_POISON
-	setbyte gBattleTextBuff1, 0xFD
-	setbyte gBattleTextBuff1 + 1, 9
-	setbyte gBattleTextBuff1 + 2, ABILITY_CHLOROFUMES & 0xFF
-	setbyte gBattleTextBuff1 + 3, ABILITY_CHLOROFUMES >> 8
-	setbyte gBattleTextBuff1 + 4, 0xFF
-	seteffectsecondary
-	setmoveeffect 0
+	setseeded
+	printfromtable gLeechSeedStringIds
+	waitmessage B_WAIT_TIME_LONG
 	return
 
 BattleScript_FungalInfectionActivates::

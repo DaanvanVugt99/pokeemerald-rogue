@@ -88,20 +88,20 @@ DOUBLE_BATTLE_TEST("Mind Blown causes everyone to faint in a double battle")
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { HP(200); MaxHP(400); }
         PLAYER(SPECIES_WYNAUT) { HP(1); }
-        OPPONENT(SPECIES_ABRA) { HP(1); }
-        OPPONENT(SPECIES_KADABRA) { HP(1); }
-        OPPONENT(SPECIES_KADABRA);
+        OPPONENT(SPECIES_ZIGZAGOON) { HP(1); }
+        OPPONENT(SPECIES_LINOONE) { HP(1); }
+        OPPONENT(SPECIES_LINOONE);
     } WHEN {
         TURN { MOVE(playerLeft, MOVE_MIND_BLOWN); }
     } SCENE {
         HP_BAR(playerLeft, hp: 0);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_MIND_BLOWN, playerLeft);
         HP_BAR(opponentLeft, hp: 0);
-        MESSAGE("Foe Abra fainted!");
+        MESSAGE("Foe Zigzagoon fainted!");
         HP_BAR(playerRight, hp: 0);
         MESSAGE("Wynaut fainted!");
         HP_BAR(opponentRight, hp: 0);
-        MESSAGE("Foe Kadabra fainted!");
+        MESSAGE("Foe Linoone fainted!");
         MESSAGE("Wobbuffet fainted!");
     }
 }
