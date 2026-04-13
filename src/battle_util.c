@@ -5517,6 +5517,65 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
             }
 
+            if (HasBattlerAbility(battler, ABILITY_SPLIT_INSTINCT))
+            {
+                u32 splitInstinctRoll = RandomUniform(RNG_ROGUE_SPLIT_INSTINCT, 0, 2);
+
+                if (splitInstinctRoll == 0
+                 && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_SPLIT_INSTINCT);
+                    gBattleScripting.battler = battler;
+                    SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+                    BattleScriptPushCursorAndCallback(BattleScript_SplitInstinctSpeed);
+                    effect++;
+                }
+                else if (splitInstinctRoll == 1
+                      && !BATTLER_MAX_HP(battler)
+                      && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                {
+                    s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
+
+                    SetBattlerTriggeredAbility(battler, ABILITY_SPLIT_INSTINCT);
+                    if (healAmount == 0)
+                        healAmount = 1;
+                    gBattleMoveDamage = -healAmount;
+                    BattleScriptPushCursorAndCallback(BattleScript_SplitInstinctHeal);
+                    effect++;
+                }
+                else if (splitInstinctRoll == 2)
+                {
+                    u32 target = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
+                    u32 highestStat;
+
+                    if (!IsBattlerAlive(target) || GetBattlerSide(target) == GetBattlerSide(battler))
+                    {
+                        target = gBattlersCount;
+                        for (i = 0; i < gBattlersCount; i++)
+                        {
+                            if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                            {
+                                target = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (target < gBattlersCount)
+                    {
+                        highestStat = GetHighestStatId(target);
+                        if (CompareStat(target, highestStat, MIN_STAT_STAGE, CMP_GREATER_THAN))
+                        {
+                            SetBattlerTriggeredAbility(battler, ABILITY_SPLIT_INSTINCT);
+                            gBattlerTarget = target;
+                            SET_STATCHANGER(highestStat, 1, TRUE);
+                            BattleScriptPushCursorAndCallback(BattleScript_SplitInstinctTargetStatLower);
+                            effect++;
+                        }
+                    }
+                }
+            }
+
             if(shedSkinAbilityActivate || shedSkinCharmActive)
             {
                 if (gBattleMons[battler].status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON))
@@ -6624,6 +6683,27 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleMoveDamage = -drainedHp;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DUELIST)
+         && IsBattlerAlive(battler)
+         && IsFinalMultiHitStrike()
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && gBattleMoves[move].slicingMove
+         && gBattleMons[battler].hp <= (gBattleMons[battler].maxHP / 2)
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 healAmount = gBattleMons[battler].maxHP / 8;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_DUELIST);
+            if (healAmount == 0)
+                healAmount = 1;
+            gBattleMoveDamage = -healAmount;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DuelistActivates;
             effect++;
         }
         break;

@@ -1722,6 +1722,10 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     // Check Wonder Skin.
     if (defAbility == ABILITY_WONDER_SKIN && IS_MOVE_STATUS(move) && moveAcc > 50)
         moveAcc = 50;
+    if (HasBattlerAbility(battlerAtk, ABILITY_SIGHTING_SYSTEM)
+     && gBattleMoves[move].accuracy != 0
+     && gBattleMoves[move].accuracy <= 50)
+        moveAcc = 100;
 
     calc = gAccuracyStageRatios[buff].dividend * moveAcc;
     calc /= gAccuracyStageRatios[buff].divisor;
@@ -1984,7 +1988,10 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
     }
     else if (gStatuses3[battlerAtk] & STATUS3_LASER_FOCUS
              || gBattleMoves[move].effect == EFFECT_ALWAYS_CRIT
-             || (abilityAtk == ABILITY_MERCILESS && gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY))
+             || (abilityAtk == ABILITY_MERCILESS && gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY)
+             || (HasBattlerAbility(battlerAtk, ABILITY_SIGHTING_SYSTEM)
+                 && gBattleMoves[move].accuracy != 0
+                 && gBattleMoves[move].accuracy <= 50))
     {
         critChance = -2;
     }

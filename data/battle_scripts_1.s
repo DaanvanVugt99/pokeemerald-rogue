@@ -8943,6 +8943,33 @@ BattleScript_AbilityHpHeal:
 	datahpupdate BS_ATTACKER
 	return
 
+BattleScript_DuelistActivates::
+	call BattleScript_AbilityHpHeal
+	return
+
+BattleScript_SplitInstinctSpeed::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_SPLITINSTINCTSPEED
+	waitmessage B_WAIT_TIME_SHORT
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_SplitInstinctSpeed_End
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_PKMNRAISEDSPEED
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SplitInstinctSpeed_End:
+	end3
+
+BattleScript_SplitInstinctHeal::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_SPLITINSTINCTHEAL
+	waitmessage B_WAIT_TIME_SHORT
+	printstring STRINGID_PKMNSXRESTOREDHPALITTLE2
+	waitmessage B_WAIT_TIME_LONG
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	end3
+
 BattleScript_RainDishActivates::
 	call BattleScript_AbilityHpHeal
 	end3
@@ -11168,6 +11195,21 @@ BattleScript_TargetAbilityStatRaiseRet::
 BattleScript_TargetAbilityStatRaiseRet_End:
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return
+
+BattleScript_SplitInstinctTargetStatLower::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_SPLITINSTINCTDEBUFF
+	waitmessage B_WAIT_TIME_SHORT
+	copybyte gBattlerAttacker, gBattlerTarget
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_SplitInstinctTargetStatLower_End
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SplitInstinctTargetStatLower_End:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	end3
 
 @@@ MAX MOVES @@@
 BattleScript_EffectMaxMove::

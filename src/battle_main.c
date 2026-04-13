@@ -4891,6 +4891,20 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_SIGHTING_SYSTEM)
+     && gBattleMoves[move].accuracy != 0
+     && gBattleMoves[move].accuracy <= 50)
+    {
+        priority -= 3;
+    }
+
+    if (HasBattlerAbility(battler, ABILITY_DUELIST)
+     && gBattleMoves[move].slicingMove
+     && gBattleMons[battler].hp <= (gBattleMons[battler].maxHP / 2))
+    {
+        priority++;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 

@@ -340,6 +340,9 @@ static const u8 sVolcanicRageDescription[] = _("Fire move: extra 40 BP Eruption.
 static const u8 sHotPursuitDescription[] = _("On foe switch: Flame Charge and guaranteed burn.");
 static const u8 sStrikeFearDescription[] = _("Using Glare also uses Mean Look.");
 static const u8 sAftershockDescription[] = _("Ground move: extra 30 BP Bulldoze.");
+static const u8 sSightingSystemDescription[] = _("<=50% Accuracy: perfect hit, crit, -3 priority.");
+static const u8 sDuelistDescription[] = _("At half HP, slicing moves get +1 priority and heal 1/8.");
+static const u8 sSplitInstinctDescription[] = _("Turn end: +1 Speed, heal 1/8, or lower foe's top stat.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -694,6 +697,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_HOT_PURSUIT] = _("Hot Pursuit"),
     [ABILITY_STRIKE_FEAR] = _("Strike Fear"),
     [ABILITY_AFTERSHOCK] = _("Aftershock"),
+    [ABILITY_SIGHTING_SYSTEM] = _("Sighting System"),
+    [ABILITY_DUELIST] = _("Duelist"),
+    [ABILITY_SPLIT_INSTINCT] = _("Split Instinct"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1048,6 +1054,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_HOT_PURSUIT] = _("Hot Pursuit"),
     [ABILITY_STRIKE_FEAR] = _("Strike Fear"),
     [ABILITY_AFTERSHOCK] = _("Aftershock"),
+    [ABILITY_SIGHTING_SYSTEM] = _("SightingSyst"),
+    [ABILITY_DUELIST] = _("Duelist"),
+    [ABILITY_SPLIT_INSTINCT] = _("SplitInstnct"),
 };
 #endif
 
@@ -1403,4 +1412,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_HOT_PURSUIT] = sHotPursuitDescription,
     [ABILITY_STRIKE_FEAR] = sStrikeFearDescription,
     [ABILITY_AFTERSHOCK] = sAftershockDescription,
+    [ABILITY_SIGHTING_SYSTEM] = sSightingSystemDescription,
+    [ABILITY_DUELIST] = sDuelistDescription,
+    [ABILITY_SPLIT_INSTINCT] = sSplitInstinctDescription,
 };
