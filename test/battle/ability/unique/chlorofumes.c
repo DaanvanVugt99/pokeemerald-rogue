@@ -6,12 +6,13 @@ ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_MAGICAL_LEAF].type == TYPE_GRASS);
     ASSUME(gBattleMoves[MOVE_MAGICAL_LEAF].power > 0);
+    ASSUME(gBattleMoves[MOVE_SMACK_DOWN].effect == EFFECT_SMACK_DOWN);
 }
 
-SINGLE_BATTLE_TEST("Chlorofumes seeds only on the first Grass-type move after switch-in")
+SINGLE_BATTLE_TEST("Rootsnare triggers only on the first Grass-type move after switch-in")
 {
     GIVEN {
-        PLAYER(SPECIES_VENUSAUR) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_CHLOROFUMES); Moves(MOVE_MAGICAL_LEAF); }
+        PLAYER(SPECIES_VENUSAUR) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_ROOTSNARE); Moves(MOVE_MAGICAL_LEAF); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
     } WHEN {
@@ -19,20 +20,20 @@ SINGLE_BATTLE_TEST("Chlorofumes seeds only on the first Grass-type move after sw
         TURN { SWITCH(opponent, 1); MOVE(player, MOVE_MAGICAL_LEAF); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGICAL_LEAF, player);
-        ABILITY_POPUP(player, ABILITY_CHLOROFUMES);
-        MESSAGE("Foe Wobbuffet was seeded!");
+        ABILITY_POPUP(player, ABILITY_ROOTSNARE);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SMACK_DOWN, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGICAL_LEAF, player);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_CHLOROFUMES);
-            MESSAGE("Foe Wynaut was seeded!");
+            ABILITY_POPUP(player, ABILITY_ROOTSNARE);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SMACK_DOWN, player);
         }
     }
 }
 
-SINGLE_BATTLE_TEST("Chlorofumes refreshes after the user switches out and back in")
+SINGLE_BATTLE_TEST("Rootsnare refreshes after the user switches out and back in")
 {
     GIVEN {
-        PLAYER(SPECIES_VENUSAUR) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_CHLOROFUMES); Moves(MOVE_MAGICAL_LEAF); }
+        PLAYER(SPECIES_VENUSAUR) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_ROOTSNARE); Moves(MOVE_MAGICAL_LEAF); }
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
@@ -42,9 +43,9 @@ SINGLE_BATTLE_TEST("Chlorofumes refreshes after the user switches out and back i
         TURN { SWITCH(player, 0); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { SWITCH(opponent, 1); MOVE(player, MOVE_MAGICAL_LEAF); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_CHLOROFUMES);
-        MESSAGE("Foe Wobbuffet was seeded!");
-        ABILITY_POPUP(player, ABILITY_CHLOROFUMES);
-        MESSAGE("Foe Wynaut was seeded!");
+        ABILITY_POPUP(player, ABILITY_ROOTSNARE);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SMACK_DOWN, player);
+        ABILITY_POPUP(player, ABILITY_ROOTSNARE);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SMACK_DOWN, player);
     }
 }

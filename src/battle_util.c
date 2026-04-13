@@ -6475,7 +6475,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_CHLOROFUMES)
+        if (HasBattlerAbility(battler, ABILITY_ROOTSNARE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
@@ -6484,10 +6484,10 @@ if (triggeringAbility != ABILITY_NONE)
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_CHLOROFUMES);
+            SetBattlerTriggeredAbility(battler, ABILITY_ROOTSNARE);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
-            gCalledMove = MOVE_LEECH_SEED;
+            gCalledMove = MOVE_SMACK_DOWN;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();

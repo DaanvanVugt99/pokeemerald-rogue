@@ -10023,7 +10023,7 @@ BattleScript_AbilityUsesCalledMove::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
-BattleScript_ChlorofumesActivates::
+BattleScript_RootsnareActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
 	setseeded

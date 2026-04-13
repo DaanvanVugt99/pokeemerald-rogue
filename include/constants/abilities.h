@@ -345,7 +345,7 @@
 // Uniques
 #define ABILITY_STRONG_WINDS        312
 #define ABILITY_UPDRAFT             313
-#define ABILITY_CHLOROFUMES         314
+#define ABILITY_ROOTSNARE           314
 #define ABILITY_SHELL_FORMATION     315
 #define ABILITY_SLEEP_DUST          316
 #define ABILITY_VENOM_RUSH          317
