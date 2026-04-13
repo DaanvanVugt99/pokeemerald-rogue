@@ -11220,6 +11220,19 @@ BattleScript_SplitInstinctTargetStatLower_End:
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	end3
 
+BattleScript_FrightmareActivates::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	copybyte gBattlerAttacker, gBattlerTarget
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_FrightmareActivates_End
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_FrightmareActivates_End:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	end3
+
 @@@ MAX MOVES @@@
 BattleScript_EffectMaxMove::
 	attackcanceler

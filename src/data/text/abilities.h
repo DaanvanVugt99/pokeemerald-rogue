@@ -345,6 +345,9 @@ static const u8 sDuelistDescription[] = _("At half HP, slicing moves get +1 prio
 static const u8 sSplitInstinctDescription[] = _("Turn end: +1 Speed, heal 1/8, or lower foe's top stat.");
 static const u8 sGlacialMassDescription[] = _("Hit by contact: uses Icy Wind.");
 static const u8 sToxicDelugeDescription[] = _("Switch-in: Acid Rain. In Acid Rain, Poison moves don't miss.");
+static const u8 sCrackedShellDescription[] = _("Hit by a super effective move: uses Shell Smash.");
+static const u8 sFrightmareDescription[] = _("On foe switch-in: lowers its lowest stat by 1.");
+static const u8 sSubterraneanDescription[] = _("In sand or underground: halves super-effective damage and can't flinch.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -704,6 +707,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SPLIT_INSTINCT] = _("Split Instinct"),
     [ABILITY_GLACIAL_MASS] = _("Glacial Mass"),
     [ABILITY_TOXIC_DELUGE] = _("Toxic Deluge"),
+    [ABILITY_CRACKED_SHELL] = _("Cracked Shell"),
+    [ABILITY_FRIGHTMARE] = _("Frightmare"),
+    [ABILITY_SUBTERRANEAN] = _("Subterranean"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1063,6 +1069,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SPLIT_INSTINCT] = _("SplitInstnct"),
     [ABILITY_GLACIAL_MASS] = _("GlacialMass"),
     [ABILITY_TOXIC_DELUGE] = _("ToxicDeluge"),
+    [ABILITY_CRACKED_SHELL] = _("CrackdShell"),
+    [ABILITY_FRIGHTMARE] = _("Frightmare"),
+    [ABILITY_SUBTERRANEAN] = _("Subterrain"),
 };
 #endif
 
@@ -1423,4 +1432,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SPLIT_INSTINCT] = sSplitInstinctDescription,
     [ABILITY_GLACIAL_MASS] = sGlacialMassDescription,
     [ABILITY_TOXIC_DELUGE] = sToxicDelugeDescription,
+    [ABILITY_CRACKED_SHELL] = sCrackedShellDescription,
+    [ABILITY_FRIGHTMARE] = sFrightmareDescription,
+    [ABILITY_SUBTERRANEAN] = sSubterraneanDescription,
 };

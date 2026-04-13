@@ -13,6 +13,7 @@ extern const u8 BattleScript_SinkholeActivates[];
 extern const u8 BattleScript_UpdraftActivates[];
 extern const u8 BattleScript_ShellFormationActivates[];
 extern const u8 BattleScript_ToxicDelugeActivates[];
+extern const u8 BattleScript_FrightmareActivates[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
 extern const u8 BattleScript_TantrumActivates[];
 extern const u8 BattleScript_ClairvoyantActivates[];

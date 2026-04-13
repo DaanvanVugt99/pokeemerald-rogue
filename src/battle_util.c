@@ -4387,6 +4387,33 @@ static inline bool32 IsFinalMultiHitStrike(void)
     return (gMultiHitCounter == 0 || gMultiHitCounter == 1);
 }
 
+static inline u32 GetLowestBaseStatId(u32 battler)
+{
+    u16 species = gBattleMons[battler].species;
+    u32 lowestId = STAT_ATK;
+    u32 lowest = gSpeciesInfo[species].baseAttack;
+
+    if (gSpeciesInfo[species].baseDefense < lowest)
+    {
+        lowest = gSpeciesInfo[species].baseDefense;
+        lowestId = STAT_DEF;
+    }
+    if (gSpeciesInfo[species].baseSpeed < lowest)
+    {
+        lowest = gSpeciesInfo[species].baseSpeed;
+        lowestId = STAT_SPEED;
+    }
+    if (gSpeciesInfo[species].baseSpAttack < lowest)
+    {
+        lowest = gSpeciesInfo[species].baseSpAttack;
+        lowestId = STAT_SPATK;
+    }
+    if (gSpeciesInfo[species].baseSpDefense < lowest)
+        lowestId = STAT_SPDEF;
+
+    return lowestId;
+}
+
 // Supreme Overlord adds a x0.1 damage boost for each fainted ally.
 static inline uq4_12_t GetSupremeOverlordModifier(u32 battler)
 {
@@ -4527,6 +4554,41 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
                 BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
                 return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FRIGHTMARE) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 lowestStat;
+
+            uniqueDone = TRUE;
+            if (!IsBattlerAlive(opposingBattler) || GetBattlerSide(opposingBattler) == GetBattlerSide(battler))
+            {
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                    {
+                        opposingBattler = i;
+                        break;
+                    }
+                }
+            }
+
+            if (IsBattlerAlive(opposingBattler) && GetBattlerSide(opposingBattler) != GetBattlerSide(battler))
+            {
+                lowestStat = GetLowestBaseStatId(opposingBattler);
+                if (CompareStat(opposingBattler, lowestStat, MIN_STAT_STAGE, CMP_GREATER_THAN))
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_FRIGHTMARE);
+                    gBattlerAttacker = battler;
+                    gBattlerTarget = opposingBattler;
+                    SET_STATCHANGER(lowestStat, 1, TRUE);
+                    gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                    gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                    BattleScriptPushCursorAndCallback(BattleScript_FrightmareActivates);
+                    return 1;
+                }
             }
         }
 
@@ -6457,6 +6519,27 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = moveEndAttacker;
             gCalledMove = MOVE_ICY_WIND;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CRACKED_SHELL)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_CRACKED_SHELL);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_SHELL_SMASH;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
@@ -10978,6 +11061,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
 
 static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
 {
+    if (HasBattlerAbility(battlerDef, ABILITY_SUBTERRANEAN)
+     && typeEffectivenessModifier >= UQ_4_12(2.0)
+     && ((gStatuses3[battlerDef] & STATUS3_UNDERGROUND)
+      || IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM)))
+    {
+        return UQ_4_12(0.5);
+    }
+
     switch (abilityDef)
     {
     case ABILITY_MULTISCALE:

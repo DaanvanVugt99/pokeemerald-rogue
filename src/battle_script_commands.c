@@ -3346,25 +3346,34 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 }
                 break;
             case MOVE_EFFECT_FLINCH:
-                if (battlerAbility == ABILITY_INNER_FOCUS)
                 {
-                    if (primary == TRUE || certain == MOVE_EFFECT_CERTAIN)
+                    u16 flinchPreventionAbility = ABILITY_NONE;
+
+                    if (HasBattlerAbility(gEffectBattler, ABILITY_INNER_FOCUS))
+                        flinchPreventionAbility = ABILITY_INNER_FOCUS;
+                    else if (HasBattlerAbility(gEffectBattler, ABILITY_SUBTERRANEAN))
+                        flinchPreventionAbility = ABILITY_SUBTERRANEAN;
+
+                    if (flinchPreventionAbility != ABILITY_NONE)
                     {
-                        gLastUsedAbility = ABILITY_INNER_FOCUS;
-                        gBattlerAbility = gEffectBattler;
-                        RecordAbilityBattle(gEffectBattler, ABILITY_INNER_FOCUS);
-                        gBattlescriptCurrInstr = BattleScript_FlinchPrevention;
+                        if (primary == TRUE || certain == MOVE_EFFECT_CERTAIN)
+                        {
+                            gLastUsedAbility = flinchPreventionAbility;
+                            gBattlerAbility = gEffectBattler;
+                            RecordAbilityBattle(gEffectBattler, flinchPreventionAbility);
+                            gBattlescriptCurrInstr = BattleScript_FlinchPrevention;
+                        }
+                        else
+                        {
+                            gBattlescriptCurrInstr++;
+                        }
                     }
-                    else
+                    else if (GetBattlerTurnOrderNum(gEffectBattler) > gCurrentTurnActionNumber
+                            && !IsDynamaxed(gEffectBattler))
                     {
+                        gBattleMons[gEffectBattler].status2 |= sStatusFlagsForMoveEffects[gBattleScripting.moveEffect];
                         gBattlescriptCurrInstr++;
                     }
-                }
-                else if (GetBattlerTurnOrderNum(gEffectBattler) > gCurrentTurnActionNumber
-                        && !IsDynamaxed(gEffectBattler))
-                {
-                    gBattleMons[gEffectBattler].status2 |= sStatusFlagsForMoveEffects[gBattleScripting.moveEffect];
-                    gBattlescriptCurrInstr++;
                 }
                 break;
             case MOVE_EFFECT_UPROAR:
@@ -3880,7 +3889,10 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     u8 randomLowerDefenseChance = RandomPercentage(RNG_TRIPLE_ARROWS_DEFENSE_DOWN, CalcSecondaryEffectChance(gBattlerAttacker, 50, EFFECT_DEFENSE_DOWN_HIT));
                     u8 randomFlinchChance = RandomPercentage(RNG_TRIPLE_ARROWS_FLINCH, CalcSecondaryEffectChance(gBattlerAttacker, 30, EFFECT_FLINCH_HIT));
 
-                    if (randomFlinchChance && battlerAbility != ABILITY_INNER_FOCUS && GetBattlerTurnOrderNum(gEffectBattler) > gCurrentTurnActionNumber)
+                    if (randomFlinchChance
+                     && !HasBattlerAbility(gEffectBattler, ABILITY_INNER_FOCUS)
+                     && !HasBattlerAbility(gEffectBattler, ABILITY_SUBTERRANEAN)
+                     && GetBattlerTurnOrderNum(gEffectBattler) > gCurrentTurnActionNumber)
                         gBattleMons[gEffectBattler].status2 |= sStatusFlagsForMoveEffects[MOVE_EFFECT_FLINCH];
 
                     if (randomLowerDefenseChance)
