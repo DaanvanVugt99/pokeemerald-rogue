@@ -1591,6 +1591,9 @@ static bool8 JumpIfMoveAffectedByProtect(u16 move)
 
 static bool32 AccuracyCalcHelper(u16 move)
 {
+    u32 moveType;
+    GET_MOVE_TYPE(move, moveType);
+
     if ((gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
      || (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON))
      || gStatuses4[gBattlerTarget] & STATUS4_GLAIVE_RUSH)
@@ -1639,7 +1642,14 @@ static bool32 AccuracyCalcHelper(u16 move)
 
     if (WEATHER_HAS_EFFECT)
     {
-        if (IsBattlerWeatherAffected(gBattlerTarget, B_WEATHER_RAIN) &&
+        if (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_DELUGE)
+         && IsBattlerWeatherAffected(gBattlerTarget, B_WEATHER_ACID_RAIN)
+         && moveType == TYPE_POISON)
+        {
+            JumpIfMoveFailed(7, move);
+            return TRUE;
+        }
+        else if (IsBattlerWeatherAffected(gBattlerTarget, B_WEATHER_RAIN) &&
             (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE ||
             move == MOVE_BLEAKWIND_STORM || move == MOVE_WILDBOLT_STORM || move == MOVE_SANDSEAR_STORM))
         {

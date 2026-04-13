@@ -343,6 +343,8 @@ static const u8 sAftershockDescription[] = _("Ground move: extra 30 BP Bulldoze.
 static const u8 sSightingSystemDescription[] = _("<=50% Accuracy: perfect hit, crit, -3 priority.");
 static const u8 sDuelistDescription[] = _("At half HP, slicing moves get +1 priority and heal 1/8.");
 static const u8 sSplitInstinctDescription[] = _("Turn end: +1 Speed, heal 1/8, or lower foe's top stat.");
+static const u8 sGlacialMassDescription[] = _("Hit by contact: uses Icy Wind.");
+static const u8 sToxicDelugeDescription[] = _("Switch-in: Acid Rain. In Acid Rain, Poison moves don't miss.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -700,6 +702,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SIGHTING_SYSTEM] = _("Sighting System"),
     [ABILITY_DUELIST] = _("Duelist"),
     [ABILITY_SPLIT_INSTINCT] = _("Split Instinct"),
+    [ABILITY_GLACIAL_MASS] = _("Glacial Mass"),
+    [ABILITY_TOXIC_DELUGE] = _("Toxic Deluge"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1057,6 +1061,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SIGHTING_SYSTEM] = _("SightingSyst"),
     [ABILITY_DUELIST] = _("Duelist"),
     [ABILITY_SPLIT_INSTINCT] = _("SplitInstnct"),
+    [ABILITY_GLACIAL_MASS] = _("GlacialMass"),
+    [ABILITY_TOXIC_DELUGE] = _("ToxicDeluge"),
 };
 #endif
 
@@ -1415,4 +1421,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SIGHTING_SYSTEM] = sSightingSystemDescription,
     [ABILITY_DUELIST] = sDuelistDescription,
     [ABILITY_SPLIT_INSTINCT] = sSplitInstinctDescription,
+    [ABILITY_GLACIAL_MASS] = sGlacialMassDescription,
+    [ABILITY_TOXIC_DELUGE] = sToxicDelugeDescription,
 };
