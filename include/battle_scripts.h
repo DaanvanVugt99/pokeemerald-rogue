@@ -485,6 +485,8 @@ extern const u8 BattleScript_SymbiosisActivates[];
 extern const u8 BattleScript_MultiHitPrintStrings[];
 extern const u8 BattleScript_BurnUpRemoveType[];
 extern const u8 BattleScript_TargetAbilityStatRaiseRet[];
+extern const u8 BattleScript_IntensiveCareActivates[];
+extern const u8 BattleScript_LivingRootsActivates[];
 extern const u8 BattleScript_SplitInstinctTargetStatLower[];
 extern const u8 BattleScript_DoubleShockRemoveType[];
 extern const u8 BattleScript_SeedSowerActivates[];

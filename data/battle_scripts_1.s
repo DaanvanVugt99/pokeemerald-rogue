@@ -11221,6 +11221,25 @@ BattleScript_TargetAbilityStatRaiseRet_End:
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return
 
+BattleScript_IntensiveCareActivates::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	copybyte gBattlerAttacker, gEffectBattler
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_IntensiveCareActivates_End
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_IntensiveCareActivates_End:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	return
+
+BattleScript_LivingRootsActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNPLANTEDROOTS
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_SplitInstinctTargetStatLower::
 	copybyte sSAVED_BATTLER, gBattlerAttacker
 	call BattleScript_AbilityPopUp

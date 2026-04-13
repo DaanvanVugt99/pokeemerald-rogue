@@ -105,6 +105,12 @@
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
+enum
+{
+    SWITCH_IN_TRANSFER_NONE = 0,
+    SWITCH_IN_TRANSFER_INGRAIN = (1 << 0),
+};
+
 // table to avoid ugly powing on gba (courtesy of doesnt)
 // this returns (i^2.5)/4
 // the quarters cancel so no need to re-quadruple them in actual calculation
@@ -6501,6 +6507,39 @@ static void Cmd_getswitchedmondata(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
+static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct BattlePokemon *outgoingMon)
+{
+    gBattleStruct->switchInTransferFlags[battler] = SWITCH_IN_TRANSFER_NONE;
+
+    // Fainted mons did not switch out, so they cannot transfer switch-out effects.
+    if (outgoingMon->hp == 0)
+        return;
+
+    if (HasBattlerAbility(battler, ABILITY_LIVING_ROOTS)) {
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_INGRAIN;
+    }
+}
+
+static bool32 TryApplySwitchInTransferEffects(u32 battler)
+{
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_INGRAIN)
+    {
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_INGRAIN;
+        if (!(gStatuses3[battler] & STATUS3_ROOTED))
+        {
+            gStatuses3[battler] |= STATUS3_ROOTED;
+            gBattlerAttacker = battler;
+            gBattlerTarget = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_LIVING_ROOTS);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_LivingRootsActivates;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static void Cmd_switchindataupdate(void)
 {
     CMD_ARGS(u8 battler);
@@ -6514,6 +6553,7 @@ static void Cmd_switchindataupdate(void)
 
     battler = GetBattlerForBattleScript(cmd->battler);
     oldData = gBattleMons[battler];
+    QueueSwitchInTransferEffectsFromOutgoing(battler, &oldData);
     monData = (u8 *)(&gBattleMons[battler]);
 
     for (i = 0; i < sizeof(struct BattlePokemon); i++)
@@ -7303,6 +7343,10 @@ static void Cmd_switchineffects(void)
         BattleScriptPushCursor();
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_Z_HP_TRAP;
         gBattlescriptCurrInstr = BattleScript_HealReplacementZMove;
+        return;
+    }
+    else if (TryApplySwitchInTransferEffects(battler))
+    {
         return;
     }
     else

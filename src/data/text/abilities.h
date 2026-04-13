@@ -358,6 +358,8 @@ static const u8 sUppercutDescription[] = _("First Punching move after switch-in 
 static const u8 sTasteTestDescription[] = _("On switch-in: uses Lick.");
 static const u8 sToxisphereDescription[] = _("Switch-in: Acid Rain. In Acid Rain, blocks additional move effects.");
 static const u8 sShatterDescription[] = _("On KO: sets Stealth Rock.");
+static const u8 sIntensiveCareDescription[] = _("Ally-targeted move: ally gets +1 Sp. Def.");
+static const u8 sLivingRootsDescription[] = _("On switch-out: incoming ally gains Ingrain.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -730,6 +732,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TASTE_TEST] = _("Taste Test"),
     [ABILITY_TOXISPHERE] = _("Toxisphere"),
     [ABILITY_SHATTER] = _("Shatter"),
+    [ABILITY_INTENSIVE_CARE] = _("Intensive Care"),
+    [ABILITY_LIVING_ROOTS] = _("Living Roots"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1102,6 +1106,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TASTE_TEST] = _("Taste Test"),
     [ABILITY_TOXISPHERE] = _("Toxisphere"),
     [ABILITY_SHATTER] = _("Shatter"),
+    [ABILITY_INTENSIVE_CARE] = _("IntensiveCr"),
+    [ABILITY_LIVING_ROOTS] = _("LivingRoots"),
 };
 #endif
 
@@ -1475,4 +1481,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_TASTE_TEST] = sTasteTestDescription,
     [ABILITY_TOXISPHERE] = sToxisphereDescription,
     [ABILITY_SHATTER] = sShatterDescription,
+    [ABILITY_INTENSIVE_CARE] = sIntensiveCareDescription,
+    [ABILITY_LIVING_ROOTS] = sLivingRootsDescription,
 };

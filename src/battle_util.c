@@ -6881,6 +6881,31 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_INTENSIVE_CARE)
+         && IsBattlerAlive(battler)
+         && IsFinalMultiHitStrike()
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && gBattleStruct->moveTarget[battler] < gBattlersCount
+         && gBattleStruct->moveTarget[battler] != battler
+         && IsBattlerAlive(gBattleStruct->moveTarget[battler])
+         && GetBattlerSide(gBattleStruct->moveTarget[battler]) == GetBattlerSide(battler))
+        {
+            u32 allyTarget = gBattleStruct->moveTarget[battler];
+            bool32 canRaiseSpDef = CompareStat(allyTarget, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN);
+
+            if (canRaiseSpDef)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_INTENSIVE_CARE);
+                gBattlerAbility = battler;
+                gEffectBattler = allyTarget;
+                SET_STATCHANGER(STAT_SPDEF, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPDEF);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_IntensiveCareActivates;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_AQUATIC_ARMOR)
          && IsBattlerAlive(battler)
          && moveType == TYPE_WATER
