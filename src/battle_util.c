@@ -71,6 +71,7 @@ static bool32 CanBeInfinitelyConfused(u32 battler);
 static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability);
 static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
+static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 *const gBattlescriptsForRunningByItem[];
@@ -4192,6 +4193,95 @@ bool32 HasNoMonsToSwitch(u32 battler, u8 partyIdBattlerOn1, u8 partyIdBattlerOn2
     }
 }
 
+static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId)
+{
+    u32 side = GetBattlerSide(battler);
+    u32 flankId;
+    u32 playerId;
+
+    if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
+    {
+        *party = GetBattlerParty(battler);
+        if (side == B_SIDE_OPPONENT && WILD_DOUBLE_BATTLE)
+        {
+            *firstMonId = 0;
+            *lastMonId = PARTY_SIZE;
+            return;
+        }
+
+        playerId = ((battler & BIT_FLANK) / 2);
+        *firstMonId = playerId * MULTI_PARTY_SIZE;
+        *lastMonId = *firstMonId + MULTI_PARTY_SIZE;
+        return;
+    }
+
+    if (gBattleTypeFlags & BATTLE_TYPE_MULTI)
+    {
+        if (gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI)
+        {
+            if (side == B_SIDE_PLAYER)
+            {
+                *party = gPlayerParty;
+                flankId = GetBattlerMultiplayerId(battler);
+                playerId = GetLinkTrainerFlankId(flankId);
+            }
+            else
+            {
+                *party = gEnemyParty;
+                if (battler == 1)
+                    playerId = 0;
+                else
+                    playerId = 1;
+            }
+        }
+        else
+        {
+            flankId = GetBattlerMultiplayerId(battler);
+            *party = GetBattlerParty(battler);
+            playerId = GetLinkTrainerFlankId(flankId);
+        }
+
+        *firstMonId = playerId * MULTI_PARTY_SIZE;
+        *lastMonId = *firstMonId + MULTI_PARTY_SIZE;
+        return;
+    }
+
+    if ((gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && side == B_SIDE_OPPONENT)
+    {
+        *party = gEnemyParty;
+        if (battler == 1)
+            *firstMonId = 0;
+        else
+            *firstMonId = MULTI_PARTY_SIZE;
+        *lastMonId = *firstMonId + MULTI_PARTY_SIZE;
+        return;
+    }
+
+    *party = GetBattlerParty(battler);
+    *firstMonId = 0;
+    *lastMonId = PARTY_SIZE;
+}
+
+bool32 IsOnlyAliveMonInParty(u32 battler)
+{
+    u32 i;
+    u32 aliveMonsCount = 0;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        if (IsValidForBattle(&party[i]))
+            aliveMonsCount++;
+    }
+
+    return (aliveMonsCount == 1
+            && gBattlerPartyIndexes[battler] >= firstMonId
+            && gBattlerPartyIndexes[battler] < lastMonId
+            && IsValidForBattle(&party[gBattlerPartyIndexes[battler]]));
+}
+
 static const u32 sWeatherFlagsInfo[][3] =
 {
     [ENUM_WEATHER_RAIN] = {B_WEATHER_RAIN_TEMPORARY, B_WEATHER_RAIN_PERMANENT, HOLD_EFFECT_DAMP_ROCK},
@@ -4589,6 +4679,43 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     BattleScriptPushCursorAndCallback(BattleScript_FrightmareActivates);
                     return 1;
                 }
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_VOLT_BREAK) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+
+            uniqueDone = TRUE;
+            if (!IsBattlerAlive(opposingBattler) || GetBattlerSide(opposingBattler) == GetBattlerSide(battler))
+            {
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                    {
+                        opposingBattler = i;
+                        break;
+                    }
+                }
+            }
+
+            if (IsBattlerAlive(opposingBattler)
+             && GetBattlerSide(opposingBattler) != GetBattlerSide(battler)
+             && !(gStatuses3[opposingBattler] & STATUS3_GASTRO_ACID)
+             && gBattleMons[opposingBattler].ability != ABILITY_NONE
+             && !IsGastroAcidBannedAbility(gBattleMons[opposingBattler].ability))
+            {
+                if (gBattleMons[opposingBattler].ability == ABILITY_NEUTRALIZING_GAS)
+                    gSpecialStatuses[opposingBattler].neutralizingGasRemoved = TRUE;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_VOLT_BREAK);
+                gStatuses3[opposingBattler] |= STATUS3_GASTRO_ACID;
+                gBattlerAttacker = battler;
+                gBattlerTarget = opposingBattler;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursorAndCallback(BattleScript_VoltBreakActivates);
+                return 1;
             }
         }
 
@@ -6526,6 +6653,28 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ALL_ALONE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && IsFinalMultiHitStrike()
+         && IsOnlyAliveMonInParty(battler)
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ALL_ALONE);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndAttacker;
+            gCalledMove = MOVE_BONE_CLUB;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_CRACKED_SHELL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -6649,6 +6798,54 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DREAMWEAVER)
+         && IsBattlerAlive(battler)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DREAMWEAVER);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_DREAM_EATER;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_MULTITASK)
+         && IsBattlerAlive(battler)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_MULTITASK);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_CONFUSION;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_AQUATIC_ARMOR)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_WATER
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            gProtectStructs[battler].uniqueAbilityActive = TRUE;
         }
 
         if (HasBattlerAbility(battler, ABILITY_ROOTSNARE)
@@ -11061,6 +11258,12 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
 
 static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
 {
+    if (HasBattlerAbility(battlerDef, ABILITY_AQUATIC_ARMOR)
+     && gProtectStructs[battlerDef].uniqueAbilityActive)
+    {
+        return UQ_4_12(0.5);
+    }
+
     if (HasBattlerAbility(battlerDef, ABILITY_SUBTERRANEAN)
      && typeEffectivenessModifier >= UQ_4_12(2.0)
      && ((gStatuses3[battlerDef] & STATUS3_UNDERGROUND)

@@ -348,6 +348,11 @@ static const u8 sToxicDelugeDescription[] = _("Switch-in: Acid Rain. In Acid Rai
 static const u8 sCrackedShellDescription[] = _("Hit by a super effective move: uses Shell Smash.");
 static const u8 sFrightmareDescription[] = _("On foe switch-in: lowers its lowest stat by 1.");
 static const u8 sSubterraneanDescription[] = _("In sand or underground: halves super-effective damage and can't flinch.");
+static const u8 sDreamweaverDescription[] = _("After a status move: uses 30 BP Dream Eater.");
+static const u8 sAquaticArmorDescription[] = _("After Water move: take half damage this turn.");
+static const u8 sVoltBreakDescription[] = _("On switch-in: foe's Ability is suppressed.\nSound moves gain +1 priority.");
+static const u8 sMultitaskDescription[] = _("After a status move: uses 30 BP Confusion.");
+static const u8 sAllAloneDescription[] = _("If alone in party, contact hit: uses Bone Club.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -710,6 +715,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CRACKED_SHELL] = _("Cracked Shell"),
     [ABILITY_FRIGHTMARE] = _("Frightmare"),
     [ABILITY_SUBTERRANEAN] = _("Subterranean"),
+    [ABILITY_DREAMWEAVER] = _("Dreamweaver"),
+    [ABILITY_AQUATIC_ARMOR] = _("Aquatic Armor"),
+    [ABILITY_VOLT_BREAK] = _("Volt Break"),
+    [ABILITY_MULTITASK] = _("Multitask"),
+    [ABILITY_ALL_ALONE] = _("All Alone"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1072,6 +1082,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CRACKED_SHELL] = _("CrackdShell"),
     [ABILITY_FRIGHTMARE] = _("Frightmare"),
     [ABILITY_SUBTERRANEAN] = _("Subterrain"),
+    [ABILITY_DREAMWEAVER] = _("Dreamweaver"),
+    [ABILITY_AQUATIC_ARMOR] = _("AquaticArmor"),
+    [ABILITY_VOLT_BREAK] = _("VoltBreak"),
+    [ABILITY_MULTITASK] = _("Multitask"),
+    [ABILITY_ALL_ALONE] = _("All Alone"),
 };
 #endif
 
@@ -1435,4 +1450,9 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_CRACKED_SHELL] = sCrackedShellDescription,
     [ABILITY_FRIGHTMARE] = sFrightmareDescription,
     [ABILITY_SUBTERRANEAN] = sSubterraneanDescription,
+    [ABILITY_DREAMWEAVER] = sDreamweaverDescription,
+    [ABILITY_AQUATIC_ARMOR] = sAquaticArmorDescription,
+    [ABILITY_VOLT_BREAK] = sVoltBreakDescription,
+    [ABILITY_MULTITASK] = sMultitaskDescription,
+    [ABILITY_ALL_ALONE] = sAllAloneDescription,
 };

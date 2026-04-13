@@ -141,6 +141,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType);
 void SetAtkCancellerForCalledMove(void);
 u8 AtkCanceller_UnableToUseMove2(void);
 bool32 HasNoMonsToSwitch(u32 battler, u8 r1, u8 r2);
+bool32 IsOnlyAliveMonInParty(u32 battler);
 bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility);
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg);
 bool32 TryPrimalReversion(u32 battler);

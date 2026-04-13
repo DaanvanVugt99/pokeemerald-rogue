@@ -8834,6 +8834,13 @@ BattleScript_ToxicDelugeActivates::
 	call BattleScript_ActivateWeatherAbilities
 	end3
 
+BattleScript_VoltBreakActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNSABILITYSUPPRESSED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_AbilityRaisesDefenderStat::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
