@@ -4911,6 +4911,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_UPPERCUT)
+     && gBattleMoves[move].punchingMove
+     && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+    {
+        priority++;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 

@@ -439,6 +439,7 @@ struct BattleMove
     u32 highCritRatio:1;
     u32 twoTurnMove:1;
     u32 punchingMove:1;
+    u32 kickingMove:1;
     u32 sheerForceBoost:1;
     u32 bitingMove:1;
     u32 pulseMove:1;

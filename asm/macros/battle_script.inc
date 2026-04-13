@@ -2119,6 +2119,10 @@
 	various \battler, VARIOUS_TRY_ACTIVATE_BATTLE_BOND
 	.endm
 
+	.macro tryactivateshatter battler:req
+	various \battler, VARIOUS_TRY_ACTIVATE_SHATTER
+	.endm
+
 	.macro jumpifcantreverttoprimal jumpInstr:req
 	various BS_ATTACKER, VARIOUS_JUMP_IF_CANT_REVERT_TO_PRIMAL
 	.4byte \jumpInstr

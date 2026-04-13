@@ -6662,6 +6662,7 @@ BattleScript_FaintTarget::
 	tryactivatebeastboost BS_ATTACKER
 	tryactivategrimneigh BS_ATTACKER    @ and as one shadow rider
 	tryactivatebattlebond BS_ATTACKER
+	tryactivateshatter BS_ATTACKER
 	trytrainerslidefirstdownmsg BS_TARGET
 	return
 
@@ -9801,6 +9802,14 @@ BattleScript_RaiseStatOnFaintingTarget::
 BattleScript_RaiseStatOnFaintingTarget_End:
 	return
 
+BattleScript_ShatterActivates::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	setstealthrock BattleScript_MoveEnd
+	printfromtable gDmgHazardsStringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_AttackerAbilityStatRaise::
 	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_AttackerAbilityStatRaise_End
 	copybyte gBattlerAbility, gBattlerAttacker
@@ -10123,7 +10132,7 @@ BattleScript_AttackerUsedAnExtraMoveOnSwitchIn::
 	critcalc
 	damagecalc
 	adjustdamage
-	playmoveanimation BS_ATTACKER, MOVE_NONE
+	attackanimation
 	waitanimation
 	effectivenesssound
 	hitanimation BS_TARGET

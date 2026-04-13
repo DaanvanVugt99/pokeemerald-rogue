@@ -2993,6 +2993,18 @@ void SetMoveEffect(bool32 primary, u32 certain)
      // Just in case this flag is still set
     gBattleScripting.moveEffect &= ~MOVE_EFFECT_CERTAIN;
 
+    if (HasBattlerAbility(gEffectBattler, ABILITY_TOXISPHERE)
+     && WEATHER_HAS_EFFECT
+     && (gBattleWeather & B_WEATHER_ACID_RAIN)
+     && !IS_MOVE_STATUS(gCurrentMove)
+     && !(gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
+     && !primary
+     && (gBattleScripting.moveEffect <= MOVE_EFFECT_TRI_ATTACK || gBattleScripting.moveEffect >= MOVE_EFFECT_SMACK_DOWN)) // Exclude stat lowering effects
+    {
+        RecordAbilityBattle(gEffectBattler, ABILITY_TOXISPHERE);
+        INCREMENT_RESET_RETURN
+    }
+
     if ((battlerAbility == ABILITY_SHIELD_DUST
      || GetBattlerHoldEffect(gEffectBattler, TRUE) == HOLD_EFFECT_COVERT_CLOAK)
       && !(gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
@@ -10560,6 +10572,21 @@ static void Cmd_various(void)
             gBattleMons[gBattlerAttacker].species = SPECIES_GRENINJA_ASH;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_BattleBondActivatesOnMoveEndAttacker;
+            return;
+        }
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_SHATTER:
+    {
+        VARIOUS_ARGS();
+        if (HasBattlerAbility(battler, ABILITY_SHATTER)
+            && HasAttackerFaintedTarget()
+            && !(gSideStatuses[GetBattlerSide(gBattlerTarget)] & SIDE_STATUS_STEALTH_ROCK))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SHATTER);
+            BattleScriptPush(cmd->nextInstr);
+            gBattlerAttacker = battler;
+            gBattlescriptCurrInstr = BattleScript_ShatterActivates;
             return;
         }
         break;

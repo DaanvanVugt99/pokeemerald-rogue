@@ -353,6 +353,11 @@ static const u8 sAquaticArmorDescription[] = _("After Water move: take half dama
 static const u8 sVoltBreakDescription[] = _("On switch-in: foe's Ability is suppressed.\nSound moves gain +1 priority.");
 static const u8 sMultitaskDescription[] = _("After a status move: uses 30 BP Confusion.");
 static const u8 sAllAloneDescription[] = _("If alone in party, contact hit: uses Bone Club.");
+static const u8 sStrikerDescription[] = _("Kicking moves deal 1.5x damage when moving first.");
+static const u8 sUppercutDescription[] = _("First Punching move after switch-in gets +1 priority.");
+static const u8 sTasteTestDescription[] = _("On switch-in: uses Lick.");
+static const u8 sToxisphereDescription[] = _("Switch-in: Acid Rain. In Acid Rain, blocks additional move effects.");
+static const u8 sShatterDescription[] = _("On KO: sets Stealth Rock.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -720,6 +725,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VOLT_BREAK] = _("Volt Break"),
     [ABILITY_MULTITASK] = _("Multitask"),
     [ABILITY_ALL_ALONE] = _("All Alone"),
+    [ABILITY_STRIKER] = _("Striker"),
+    [ABILITY_UPPERCUT] = _("Uppercut"),
+    [ABILITY_TASTE_TEST] = _("Taste Test"),
+    [ABILITY_TOXISPHERE] = _("Toxisphere"),
+    [ABILITY_SHATTER] = _("Shatter"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1087,6 +1097,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VOLT_BREAK] = _("VoltBreak"),
     [ABILITY_MULTITASK] = _("Multitask"),
     [ABILITY_ALL_ALONE] = _("All Alone"),
+    [ABILITY_STRIKER] = _("Striker"),
+    [ABILITY_UPPERCUT] = _("Uppercut"),
+    [ABILITY_TASTE_TEST] = _("Taste Test"),
+    [ABILITY_TOXISPHERE] = _("Toxisphere"),
+    [ABILITY_SHATTER] = _("Shatter"),
 };
 #endif
 
@@ -1455,4 +1470,9 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_VOLT_BREAK] = sVoltBreakDescription,
     [ABILITY_MULTITASK] = sMultitaskDescription,
     [ABILITY_ALL_ALONE] = sAllAloneDescription,
+    [ABILITY_STRIKER] = sStrikerDescription,
+    [ABILITY_UPPERCUT] = sUppercutDescription,
+    [ABILITY_TASTE_TEST] = sTasteTestDescription,
+    [ABILITY_TOXISPHERE] = sToxisphereDescription,
+    [ABILITY_SHATTER] = sShatterDescription,
 };

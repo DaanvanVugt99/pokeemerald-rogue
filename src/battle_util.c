@@ -4647,6 +4647,36 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TASTE_TEST) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!IsBattlerAlive(opposingBattler))
+                    continue;
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_TASTE_TEST);
+                gBattlerAttacker = battler;
+                gBattlerTarget = opposingBattler;
+                gTempMove = gCurrentMove;
+                gCurrentMove = MOVE_LICK;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+                VarSet(VAR_TEMP_MOVEEFFECT, 0);
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FRIGHTMARE) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -5140,6 +5170,19 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
             break;
         case ABILITY_TOXIC_DELUGE:
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_ToxicDelugeActivates);
+                effect++;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT && !gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                effect++;
+            }
+            break;
+        case ABILITY_TOXISPHERE:
             if (TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_ToxicDelugeActivates);
@@ -6846,6 +6889,16 @@ if (triggeringAbility != ABILITY_NONE)
          && IsFinalMultiHitStrike())
         {
             gProtectStructs[battler].uniqueAbilityActive = TRUE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_UPPERCUT)
+         && gBattleMoves[move].punchingMove
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
         }
 
         if (HasBattlerAbility(battler, ABILITY_ROOTSNARE)
@@ -10497,6 +10550,14 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case ABILITY_SUPREME_OVERLORD:
         modifier = uq4_12_multiply(modifier, GetSupremeOverlordModifier(battlerAtk));
         break;
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_STRIKER)
+     && gBattleMoves[move].kickingMove
+     && gCurrentTurnActionNumber < gBattlersCount
+     && GetBattlerTurnOrderNum(battlerDef) > gCurrentTurnActionNumber)
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
     }
 
     // field abilities
