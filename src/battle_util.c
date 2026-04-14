@@ -7570,7 +7570,12 @@ static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability)
         return TRUE;
 
     if (IsNeutralizingGasOnField() && !IsNeutralizingGasBannedAbility(ability))
-        return TRUE;
+    {
+        // Neutralizing Gas suppresses other battlers, but not the holder itself.
+        if (!(gBattleMons[battler].ability == ABILITY_NEUTRALIZING_GAS
+           && !(gStatuses3[battler] & STATUS3_GASTRO_ACID)))
+            return TRUE;
+    }
 
     if (IsMyceliumMightOnField())
         return TRUE;

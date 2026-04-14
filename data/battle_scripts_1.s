@@ -3539,6 +3539,15 @@ BattleScript_MoveMissed::
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
 
+BattleScript_PrintMoveMissedEnd3::
+	attackstring
+	ppreduce
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_ATTACKMISSED
+	waitmessage B_WAIT_TIME_LONG
+	moveendall
+	end3
+
 BattleScript_EffectDarkVoid::
 .if B_DARK_VOID_FAIL >= GEN_7
 	jumpifspecies BS_ATTACKER, SPECIES_DARKRAI, BattleScript_EffectSleep
@@ -10128,7 +10137,7 @@ BattleScript_AttackerUsedAnExtraMoveOnSwitchIn::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
 	attackcanceler
-	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	accuracycheck BattleScript_PrintMoveMissedEnd3, ACC_CURR_MOVE
 	critcalc
 	damagecalc
 	adjustdamage
