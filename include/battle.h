@@ -634,6 +634,7 @@ struct BattleStruct
     u8 savedTurnActionNumber;
     u8 switchInAbilitiesCounter;
     u8 switchInTransferFlags[MAX_BATTLERS_COUNT];
+    u8 switchInTransferSourcePartyIdx[MAX_BATTLERS_COUNT];
     u8 faintedActionsState;
     u8 faintedActionsBattlerId;
     u8 scriptPartyIdx; // for printing the nickname

@@ -6499,6 +6499,7 @@ static void Cmd_getswitchedmondata(void)
     if (gBattleControllerExecFlags)
         return;
 
+    gBattleStruct->switchInTransferSourcePartyIdx[battler] = gBattlerPartyIndexes[battler];
     gBattlerPartyIndexes[battler] = gBattleStruct->monToSwitchIntoId[battler];
 
     BtlController_EmitGetMonData(battler, BUFFER_A, REQUEST_ALL_BATTLE, gBitTable[gBattlerPartyIndexes[battler]]);
@@ -6513,10 +6514,17 @@ static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct B
 
     // Fainted mons did not switch out, so they cannot transfer switch-out effects.
     if (outgoingMon->hp == 0)
+    {
+        gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
         return;
+    }
 
     if (HasBattlerAbility(battler, ABILITY_LIVING_ROOTS)) {
         gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_INGRAIN;
+    }
+    else
+    {
+        gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
     }
 }
 
@@ -6524,6 +6532,8 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
 {
     if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_INGRAIN)
     {
+        u8 sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battler];
+
         gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_INGRAIN;
         if (!(gStatuses3[battler] & STATUS3_ROOTED))
         {
@@ -6531,12 +6541,14 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
             gBattlerAttacker = battler;
             gBattlerTarget = battler;
             SetBattlerTriggeredAbility(battler, ABILITY_LIVING_ROOTS);
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = sourcePartyIdx;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_LivingRootsActivates;
             return TRUE;
         }
     }
 
+    gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
     return FALSE;
 }
 
@@ -12481,11 +12493,24 @@ static void Cmd_tryKO(void)
     }
     else
     {
-        if ((((gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS)
-                && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
-            || GetBattlerAbility(gBattlerAttacker) == ABILITY_NO_GUARD
-            || targetAbility == ABILITY_NO_GUARD)
-            && gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level)
+        bool32 isPiercingJudgmentHornDrill =
+            HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_JUDGMENT)
+            && gCurrentMove == MOVE_HORN_DRILL;
+
+        if (isPiercingJudgmentHornDrill)
+        {
+            if (gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level
+             && ((u32)gBattleMons[gBattlerTarget].hp * 2) <= gBattleMons[gBattlerTarget].maxHP)
+            {
+                lands = TRUE;
+                RecordAbilityBattle(gBattlerAttacker, ABILITY_PIERCING_JUDGMENT);
+            }
+        }
+        else if ((((gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS)
+                 && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
+              || GetBattlerAbility(gBattlerAttacker) == ABILITY_NO_GUARD
+              || targetAbility == ABILITY_NO_GUARD)
+             && gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level)
         {
             lands = TRUE;
         }

@@ -32,6 +32,7 @@
 #include "item_use.h"
 #include "test_runner.h"
 #include "constants/battle_anim.h"
+#include "constants/abilities.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "constants/items.h"
@@ -3177,13 +3178,24 @@ static void ClearAbilityName(u8 spriteId1, u8 spriteId2)
                         7, 9, 1);
 }
 
-static void PrintBattlerOnAbilityPopUp(u8 battlerId, u8 spriteId1, u8 spriteId2)
+static void PrintBattlerOnAbilityPopUp(u8 battlerId, u8 spriteId1, u8 spriteId2, u8 sourcePartyIdx)
 {
     int i;
     u8 lastChar;
     u8* textPtr;
     u8 monName[POKEMON_NAME_LENGTH + 3] = {0};
+    u8 sourceNick[POKEMON_NAME_LENGTH + 1];
     u8* nick = gBattleMons[battlerId].nickname; // This needs to be updated for Illusion support
+
+    if (sourcePartyIdx < PARTY_SIZE)
+    {
+        if (GetBattlerSide(battlerId) == B_SIDE_OPPONENT)
+            GetMonData(&gEnemyParty[sourcePartyIdx], MON_DATA_NICKNAME, sourceNick);
+        else
+            GetMonData(&gPlayerParty[sourcePartyIdx], MON_DATA_NICKNAME, sourceNick);
+        StringGet_Nickname(sourceNick);
+        nick = sourceNick;
+    }
 
     for (i = 0; i < POKEMON_NAME_LENGTH; ++i)
     {
@@ -3346,6 +3358,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
 {
     const s16 (*coords)[2];
     u8 spriteId1, spriteId2, battlerPosition, taskId;
+    u8 sourcePartyIdx = PARTY_SIZE;
 
     if (B_ABILITY_POP_UP == FALSE)
         return;
@@ -3416,7 +3429,13 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     StartSpriteAnim(&gSprites[spriteId1], 0);
     StartSpriteAnim(&gSprites[spriteId2], 0);
 
-    PrintBattlerOnAbilityPopUp(battlerId, spriteId1, spriteId2);
+    if (ability == ABILITY_LIVING_ROOTS)
+    {
+        sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battlerId];
+        gBattleStruct->switchInTransferSourcePartyIdx[battlerId] = PARTY_SIZE;
+    }
+
+    PrintBattlerOnAbilityPopUp(battlerId, spriteId1, spriteId2, sourcePartyIdx);
     PrintAbilityOnAbilityPopUp(ability, spriteId1, spriteId2);
     RestoreOverwrittenPixels((void*)(OBJ_VRAM0) + (gSprites[spriteId1].oam.tileNum * 32));
 }

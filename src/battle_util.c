@@ -5821,6 +5821,35 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
             }
 
+            if (HasBattlerAbility(battler, ABILITY_MARKSMAN) && gDisableStructs[battler].isFirstTurn != 2)
+            {
+                bool32 canRaiseAccuracy = CompareStat(battler, STAT_ACC, MAX_STAT_STAGE, CMP_LESS_THAN);
+                bool32 canRaiseCrit = gBattleStruct->bonusCritStages[battler] < 4;
+                bool32 raiseCrit;
+
+                if (canRaiseAccuracy || canRaiseCrit)
+                {
+                    if (canRaiseAccuracy && canRaiseCrit)
+                        raiseCrit = RandomUniform(RNG_ROGUE_MARKSMAN, 0, 1);
+                    else
+                        raiseCrit = canRaiseCrit;
+
+                    SetBattlerTriggeredAbility(battler, ABILITY_MARKSMAN);
+                    if (raiseCrit)
+                    {
+                        gBattleStruct->bonusCritStages[battler]++;
+                        BattleScriptPushCursorAndCallback(BattleScript_MarksmanCritBoostActivates);
+                    }
+                    else
+                    {
+                        gBattleScripting.battler = battler;
+                        SET_STATCHANGER(STAT_ACC, 1, FALSE);
+                        BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+                    }
+                    effect++;
+                }
+            }
+
             if(shedSkinAbilityActivate || shedSkinCharmActive)
             {
                 if (gBattleMons[battler].status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON))
@@ -6990,6 +7019,26 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = gBattlerAbility = battler;
             gCalledMove = MOVE_MEAN_LOOK;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_MATERNAL_INSTINCT)
+         && move == MOVE_PROTECT
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+         && IsFinalMultiHitStrike()
+         && IsBattlerAlive(BATTLE_PARTNER(battler))
+         && CanUseExtraMove(battler, BATTLE_PARTNER(battler)))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_MATERNAL_INSTINCT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = BATTLE_PARTNER(battler);
+            gCalledMove = MOVE_HELPING_HAND;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;

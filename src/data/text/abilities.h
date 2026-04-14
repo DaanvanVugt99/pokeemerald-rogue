@@ -360,6 +360,9 @@ static const u8 sToxisphereDescription[] = _("Switch-in: Acid Rain. In Acid Rain
 static const u8 sShatterDescription[] = _("On KO: sets Stealth Rock.");
 static const u8 sIntensiveCareDescription[] = _("Ally-targeted move: ally gets +1 Sp. Def.");
 static const u8 sLivingRootsDescription[] = _("On switch-out: incoming ally gains Ingrain.");
+static const u8 sMaternalInstinctDescription[] = _("In doubles, using Protect also uses Helping Hand.");
+static const u8 sMarksmanDescription[] = _("Turn end: +1 Accuracy or +1 critical-hit ratio.");
+static const u8 sPiercingJudgmentDescription[] = _("Horn Drill ignores accuracy, but fails above 50% HP.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -734,6 +737,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SHATTER] = _("Shatter"),
     [ABILITY_INTENSIVE_CARE] = _("Intensive Care"),
     [ABILITY_LIVING_ROOTS] = _("Living Roots"),
+    [ABILITY_MATERNAL_INSTINCT] = _("MaternalInstinct"),
+    [ABILITY_MARKSMAN] = _("Marksman"),
+    [ABILITY_PIERCING_JUDGMENT] = _("PiercingJudgment"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1108,6 +1114,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SHATTER] = _("Shatter"),
     [ABILITY_INTENSIVE_CARE] = _("IntensiveCr"),
     [ABILITY_LIVING_ROOTS] = _("LivingRoots"),
+    [ABILITY_MATERNAL_INSTINCT] = _("MaternalInst"),
+    [ABILITY_MARKSMAN] = _("Marksman"),
+    [ABILITY_PIERCING_JUDGMENT] = _("PierceJudgmnt"),
 };
 #endif
 
@@ -1483,4 +1492,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SHATTER] = sShatterDescription,
     [ABILITY_INTENSIVE_CARE] = sIntensiveCareDescription,
     [ABILITY_LIVING_ROOTS] = sLivingRootsDescription,
+    [ABILITY_MATERNAL_INSTINCT] = sMaternalInstinctDescription,
+    [ABILITY_MARKSMAN] = sMarksmanDescription,
+    [ABILITY_PIERCING_JUDGMENT] = sPiercingJudgmentDescription,
 };
