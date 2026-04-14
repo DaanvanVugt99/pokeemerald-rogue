@@ -4617,6 +4617,25 @@ static void ApplyAbilityDisableMove(u32 attacker, u32 target, u32 ability, u16 m
     BattleScriptPushCursorAndCallback(BattleScript_ClairvoyantActivates);
 }
 
+static bool32 TryApplyAbilitySuppressionWithGastroAcid(u32 attacker, u32 target, u32 ability)
+{
+    if (!IsBattlerAlive(target)
+     || GetBattlerSide(target) == GetBattlerSide(attacker)
+     || (gStatuses3[target] & STATUS3_GASTRO_ACID)
+     || gBattleMons[target].ability == ABILITY_NONE
+     || IsGastroAcidBannedAbility(gBattleMons[target].ability))
+        return FALSE;
+
+    if (gBattleMons[target].ability == ABILITY_NEUTRALIZING_GAS)
+        gSpecialStatuses[target].neutralizingGasRemoved = TRUE;
+
+    SetBattlerTriggeredAbility(attacker, ability);
+    gStatuses3[target] |= STATUS3_GASTRO_ACID;
+    gBattlerAttacker = attacker;
+    gBattlerTarget = target;
+    return TRUE;
+}
+
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg)
 {
     u32 effect = 0;
@@ -4807,19 +4826,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
             }
 
-            if (IsBattlerAlive(opposingBattler)
-             && GetBattlerSide(opposingBattler) != GetBattlerSide(battler)
-             && !(gStatuses3[opposingBattler] & STATUS3_GASTRO_ACID)
-             && gBattleMons[opposingBattler].ability != ABILITY_NONE
-             && !IsGastroAcidBannedAbility(gBattleMons[opposingBattler].ability))
+            if (TryApplyAbilitySuppressionWithGastroAcid(battler, opposingBattler, ABILITY_VOLT_BREAK))
             {
-                if (gBattleMons[opposingBattler].ability == ABILITY_NEUTRALIZING_GAS)
-                    gSpecialStatuses[opposingBattler].neutralizingGasRemoved = TRUE;
-
-                SetBattlerTriggeredAbility(battler, ABILITY_VOLT_BREAK);
-                gStatuses3[opposingBattler] |= STATUS3_GASTRO_ACID;
-                gBattlerAttacker = battler;
-                gBattlerTarget = opposingBattler;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
                 BattleScriptPushCursorAndCallback(BattleScript_VoltBreakActivates);
@@ -7400,6 +7408,19 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_DRAGON_MAJESTY)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_DRAGON
+         && TryApplyAbilitySuppressionWithGastroAcid(battler, gBattlerTarget, ABILITY_DRAGON_MAJESTY))
+        {
+            BattleScriptPushCursorAndCallback(BattleScript_VoltBreakActivates);
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PRIMORDIAL_WAKE)
          && IsBattlerAlive(battler)
          && gDisableStructs[battler].uniquePersistentStateActive
@@ -7591,6 +7612,25 @@ if (triggeringAbility != ABILITY_NONE)
             if (healedHp == 0)
                 healedHp = 1;
             gBattleMoveDamage = -healedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DuelistActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DEEP_SLEEP)
+         && move == MOVE_YAWN
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 healAmount = gBattleMons[battler].maxHP / 4;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_DEEP_SLEEP);
+            if (healAmount == 0)
+                healAmount = 1;
+            gBattleMoveDamage = -healAmount;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_DuelistActivates;
             effect++;

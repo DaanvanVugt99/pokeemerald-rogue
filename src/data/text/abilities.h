@@ -380,6 +380,9 @@ static const u8 sSmolderDescription[] = _("Opposing Pokemon are treated as burne
 static const u8 sDebugDescription[] = _("Bug moves heal 3/4 of damage dealt.");
 static const u8 sPrimordialWakeDescription[] = _("Water move: next Rock move also uses Ancient Power.");
 static const u8 sExhumedDescription[] = _("Rock move: next slicing move also uses Rock Tomb.");
+static const u8 sDeepSleepDescription[] = _("Using Yawn heals 1/4 of max HP.");
+static const u8 sDragonMajestyDescription[] = _("Dragon hit suppresses target's Ability until switch-out.");
+static const u8 sOneMindDescription[] = _("Psychic moves always move first.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -774,6 +777,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DEBUG] = _("Debug"),
     [ABILITY_PRIMORDIAL_WAKE] = _("Primordial Wake"),
     [ABILITY_EXHUMED] = _("Exhumed"),
+    [ABILITY_DEEP_SLEEP] = _("Deep Sleep"),
+    [ABILITY_DRAGON_MAJESTY] = _("Dragon Majesty"),
+    [ABILITY_ONE_MIND] = _("One Mind"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1168,6 +1174,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DEBUG] = _("Debug"),
     [ABILITY_PRIMORDIAL_WAKE] = _("PrimordialWk"),
     [ABILITY_EXHUMED] = _("Exhumed"),
+    [ABILITY_DEEP_SLEEP] = _("Deep Sleep"),
+    [ABILITY_DRAGON_MAJESTY] = _("DragnMajesty"),
+    [ABILITY_ONE_MIND] = _("One Mind"),
 };
 #endif
 
@@ -1563,4 +1572,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DEBUG] = sDebugDescription,
     [ABILITY_PRIMORDIAL_WAKE] = sPrimordialWakeDescription,
     [ABILITY_EXHUMED] = sExhumedDescription,
+    [ABILITY_DEEP_SLEEP] = sDeepSleepDescription,
+    [ABILITY_DRAGON_MAJESTY] = sDragonMajestyDescription,
+    [ABILITY_ONE_MIND] = sOneMindDescription,
 };

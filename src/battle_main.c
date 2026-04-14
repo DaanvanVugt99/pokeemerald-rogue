@@ -4934,6 +4934,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_ONE_MIND)
+     && gBattleMoves[move].type == TYPE_PSYCHIC)
+    {
+        // Ensure this move wins priority checks regardless of normal priority stack.
+        priority = 127;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 
