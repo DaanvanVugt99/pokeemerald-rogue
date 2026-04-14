@@ -371,6 +371,15 @@ static const u8 sDynamoFistsDescription[] = _("Electric move: next punch gets +1
 static const u8 sFlameheartDescription[] = _("Always burned; burn damage becomes 1/8 max HP healing.");
 static const u8 sBurrowingHornsDescription[] = _("Contact: lower foe's Speed. In Infested Terrain, also traps.");
 static const u8 sOpenFieldDescription[] = _("+1 priority vs full-HP targets; 1.2x in Plain Terrain.");
+static const u8 sDreadDescription[] = _("In rain: end turn lowers a random foe stat by 1.");
+static const u8 sStillWaterDescription[] = _("End turn: heal 1/8 max HP if no damage was taken.");
+static const u8 sStabilizeDescription[] = _("Switch-in: clears all stat stage changes on the field.");
+static const u8 sBodyOfWaterDescription[] = _("First turn out: takes half damage.");
+static const u8 sIonizeDescription[] = _("End turn: non-Electric/Ground mons lose 1/16 max HP.");
+static const u8 sSmolderDescription[] = _("Opposing Pokemon are treated as burned for damage calc.");
+static const u8 sDebugDescription[] = _("Bug moves heal 3/4 of damage dealt.");
+static const u8 sAbyssalDescription[] = _("Rock moves lower the target's Sp. Def by 1.");
+static const u8 sRiptideDescription[] = _("Slicing moves: if damage is 50% or less, lower Defense.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -756,6 +765,15 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FLAMEHEART] = _("Flameheart"),
     [ABILITY_BURROWING_HORNS] = _("Burrowing Horns"),
     [ABILITY_OPEN_FIELD] = _("Open Field"),
+    [ABILITY_DREAD] = _("Dread"),
+    [ABILITY_STILL_WATER] = _("Still Water"),
+    [ABILITY_STABILIZE] = _("Stabilize"),
+    [ABILITY_BODY_OF_WATER] = _("Body of Water"),
+    [ABILITY_IONIZE] = _("Ionize"),
+    [ABILITY_SMOLDER] = _("Smolder"),
+    [ABILITY_DEBUG] = _("Debug"),
+    [ABILITY_ABYSSAL] = _("Abyssal"),
+    [ABILITY_RIPTIDE] = _("Riptide"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1141,6 +1159,15 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FLAMEHEART] = _("Flameheart"),
     [ABILITY_BURROWING_HORNS] = _("BurrowHorns"),
     [ABILITY_OPEN_FIELD] = _("Open Field"),
+    [ABILITY_DREAD] = _("Dread"),
+    [ABILITY_STILL_WATER] = _("StillWater"),
+    [ABILITY_STABILIZE] = _("Stabilize"),
+    [ABILITY_BODY_OF_WATER] = _("BodyofWater"),
+    [ABILITY_IONIZE] = _("Ionize"),
+    [ABILITY_SMOLDER] = _("Smolder"),
+    [ABILITY_DEBUG] = _("Debug"),
+    [ABILITY_ABYSSAL] = _("Abyssal"),
+    [ABILITY_RIPTIDE] = _("Riptide"),
 };
 #endif
 
@@ -1527,4 +1554,13 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_FLAMEHEART] = sFlameheartDescription,
     [ABILITY_BURROWING_HORNS] = sBurrowingHornsDescription,
     [ABILITY_OPEN_FIELD] = sOpenFieldDescription,
+    [ABILITY_DREAD] = sDreadDescription,
+    [ABILITY_STILL_WATER] = sStillWaterDescription,
+    [ABILITY_STABILIZE] = sStabilizeDescription,
+    [ABILITY_BODY_OF_WATER] = sBodyOfWaterDescription,
+    [ABILITY_IONIZE] = sIonizeDescription,
+    [ABILITY_SMOLDER] = sSmolderDescription,
+    [ABILITY_DEBUG] = sDebugDescription,
+    [ABILITY_ABYSSAL] = sAbyssalDescription,
+    [ABILITY_RIPTIDE] = sRiptideDescription,
 };

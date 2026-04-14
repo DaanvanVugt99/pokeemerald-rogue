@@ -9482,6 +9482,40 @@ BattleScript_BadDreams_HidePopUp:
 	tryfaintmon BS_TARGET
 	goto BattleScript_BadDreamsIncrement
 
+BattleScript_IonizeActivates::
+	setbyte gBattlerTarget, 0
+BattleScript_IonizeLoop:
+	jumpifabsent BS_TARGET, BattleScript_IonizeIncrement
+	jumpifhasnohp BS_TARGET, BattleScript_IonizeIncrement
+	setword gBattleMoveDamage, 0
+	copyarraywithindex gBattleMoveDamage, gIonizeDmgByBattler, gBattlerTarget, 1
+	jumpifword CMP_EQUAL, gBattleMoveDamage, 0, BattleScript_IonizeIncrement
+	jumpifbyteequal sFIXED_ABILITY_POPUP, sZero, BattleScript_Ionize_ShowPopUp
+BattleScript_Ionize_DmgAfterPopUp:
+	printstring STRINGID_IONIZEDMG
+	waitmessage B_WAIT_TIME_LONG
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	jumpifhasnohp BS_TARGET, BattleScript_Ionize_HidePopUp
+BattleScript_IonizeIncrement:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_IonizeLoop
+	jumpifbyteequal sFIXED_ABILITY_POPUP, sZero, BattleScript_IonizeEnd
+	destroyabilitypopup
+	pause 15
+BattleScript_IonizeEnd:
+	end3
+BattleScript_Ionize_ShowPopUp:
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	setbyte sFIXED_ABILITY_POPUP, TRUE
+	goto BattleScript_Ionize_DmgAfterPopUp
+BattleScript_Ionize_HidePopUp:
+	destroyabilitypopup
+	tryfaintmon BS_TARGET
+	goto BattleScript_IonizeIncrement
+
 BattleScript_TookAttack::
 	attackstring
 	pause B_WAIT_TIME_SHORT
@@ -11284,6 +11318,13 @@ BattleScript_LivingRootsActivates::
 	printstring STRINGID_PKMNPLANTEDROOTS
 	waitmessage B_WAIT_TIME_LONG
 	return
+
+BattleScript_StabilizeActivates::
+	call BattleScript_AbilityPopUp
+	normalisebuffs
+	printstring STRINGID_STATCHANGESGONE
+	waitmessage B_WAIT_TIME_LONG
+	end3
 
 BattleScript_SplitInstinctTargetStatLower::
 	copybyte sSAVED_BATTLER, gBattlerAttacker

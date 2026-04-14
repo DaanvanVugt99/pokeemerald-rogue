@@ -78,6 +78,8 @@ extern const u8 *const gBattlescriptsForRunningByItem[];
 extern const u8 *const gBattlescriptsForUsingItem[];
 extern const u8 *const gBattlescriptsForSafariActions[];
 
+u8 gIonizeDmgByBattler[MAX_BATTLERS_COUNT];
+
 static const u8 sPkblToEscapeFactor[][3] = {
     {
         [B_MSG_MON_CURIOUS]    = 0,
@@ -4769,6 +4771,25 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_STABILIZE) && !uniqueDone)
+        {
+            bool32 didReset = FALSE;
+
+            uniqueDone = TRUE;
+            for (i = 0; i < gBattlersCount; i++)
+                didReset |= TryResetBattlerStatChanges(i);
+
+            if (didReset)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_STABILIZE);
+                gBattlerAttacker = battler;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursorAndCallback(BattleScript_StabilizeActivates);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_VOLT_BREAK) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -5927,6 +5948,96 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                         SET_STATCHANGER(STAT_ACC, 1, FALSE);
                         BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
                     }
+                    effect++;
+                }
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_DREAD)
+             && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN))
+            {
+                u32 target = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
+                u32 validToLower = 0;
+                u32 stat;
+
+                if (!IsBattlerAlive(target) || GetBattlerSide(target) == GetBattlerSide(battler))
+                {
+                    target = gBattlersCount;
+                    for (i = 0; i < gBattlersCount; i++)
+                    {
+                        if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                        {
+                            target = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (target < gBattlersCount)
+                {
+                    for (stat = STAT_ATK; stat <= STAT_SPDEF; stat++)
+                    {
+                        if (CompareStat(target, stat, MIN_STAT_STAGE, CMP_GREATER_THAN))
+                            validToLower |= gBitTable[stat];
+                    }
+
+                    if (validToLower != 0)
+                    {
+                        do
+                        {
+                            stat = RandomUniform(RNG_ROGUE_DREAD, STAT_ATK, STAT_SPDEF);
+                        } while (!(validToLower & gBitTable[stat]));
+
+                        SetBattlerTriggeredAbility(battler, ABILITY_DREAD);
+                        gBattlerTarget = target;
+                        SET_STATCHANGER(stat, 1, TRUE);
+                        BattleScriptPushCursorAndCallback(BattleScript_FrightmareActivates);
+                        effect++;
+                    }
+                }
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_STILL_WATER)
+             && !BATTLER_MAX_HP(battler)
+             && gProtectStructs[battler].physicalDmg == 0
+             && gProtectStructs[battler].specialDmg == 0
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
+
+                if (healAmount == 0)
+                    healAmount = 1;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_STILL_WATER);
+                gBattleMoveDamage = -healAmount;
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect++;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_IONIZE))
+            {
+                bool32 shouldTrigger = FALSE;
+
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    gIonizeDmgByBattler[i] = 0;
+
+                    if (!IsBattlerAlive(i))
+                        continue;
+                    if (IS_BATTLER_OF_TYPE(i, TYPE_ELECTRIC) || IS_BATTLER_OF_TYPE(i, TYPE_GROUND))
+                        continue;
+                    if (HasBattlerAbility(i, ABILITY_MAGIC_GUARD))
+                        continue;
+
+                    gIonizeDmgByBattler[i] = GetNonDynamaxMaxHP(i) / 16;
+                    if (gIonizeDmgByBattler[i] == 0)
+                        gIonizeDmgByBattler[i] = 1;
+                    shouldTrigger = TRUE;
+                }
+
+                if (shouldTrigger)
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_IONIZE);
+                    BattleScriptPushCursorAndCallback(BattleScript_IonizeActivates);
                     effect++;
                 }
             }
@@ -7269,6 +7380,39 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ABYSSAL)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_ROCK)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ABYSSAL);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_RIPTIDE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].slicingMove
+         && gSpecialStatuses[gBattlerTarget].shellBellDmg <= (gBattleMons[gBattlerTarget].maxHP / 2))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_RIPTIDE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_DEF_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ACIDIC_MUCUS)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
@@ -7360,6 +7504,26 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleMoveDamage = -drainedHp;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DEBUG)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_BUG
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 healedHp = (gSpecialStatuses[gBattlerTarget].shellBellDmg * 3) / 4;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_DEBUG);
+            if (healedHp == 0)
+                healedHp = 1;
+            gBattleMoveDamage = -healedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DuelistActivates;
             effect++;
         }
 
@@ -11546,7 +11710,10 @@ static uq4_12_t GetWeatherDamageModifier(u32 battlerAtk, u32 move, u32 moveType,
 
 static inline uq4_12_t GetBurnOrFrostBiteModifier(u32 battlerAtk, u32 move, u32 abilityAtk)
 {
-    if (gBattleMons[battlerAtk].status1 & STATUS1_BURN
+    bool32 burnedForDamageCalc = (gBattleMons[battlerAtk].status1 & STATUS1_BURN)
+        || IsAbilityOnOpposingSide(battlerAtk, ABILITY_SMOLDER);
+
+    if (burnedForDamageCalc
         && IS_MOVE_PHYSICAL(move)
         && (B_BURN_FACADE_DMG < GEN_6 || gBattleMoves[move].effect != EFFECT_FACADE)
         && abilityAtk != ABILITY_GUTS)
@@ -11655,6 +11822,12 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
 
 static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
 {
+    if (HasBattlerAbility(battlerDef, ABILITY_BODY_OF_WATER)
+     && gDisableStructs[battlerDef].isFirstTurn)
+    {
+        return UQ_4_12(0.5);
+    }
+
     if (HasBattlerAbility(battlerDef, ABILITY_AQUATIC_ARMOR)
      && gProtectStructs[battlerDef].uniqueAbilityActive)
     {
