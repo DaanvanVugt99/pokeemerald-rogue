@@ -7045,6 +7045,16 @@ if (triggeringAbility != ABILITY_NONE)
             gProtectStructs[battler].uniqueAbilityActive = TRUE;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_ELECTRIC
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_UPPERCUT)
          && gBattleMoves[move].punchingMove
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -7053,6 +7063,15 @@ if (triggeringAbility != ABILITY_NONE)
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
+         && gBattleMoves[move].punchingMove
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
         }
 
         if (HasBattlerAbility(battler, ABILITY_ROOTSNARE)
@@ -7176,6 +7195,21 @@ if (triggeringAbility != ABILITY_NONE)
                 ApplyAbilityDisableMove(battler, target, ABILITY_STARLOCK, disableMove, 3);
                 effect++;
             }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SWEET_NOTHINGS)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].kissingMove)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SWEET_NOTHINGS);
+            gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_GNAW_DOWN)
@@ -10771,6 +10805,20 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
      && GetBattlerTurnOrderNum(battlerDef) > gCurrentTurnActionNumber)
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_SWEET_NOTHINGS)
+     && gBattleMoves[move].kissingMove)
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_DYNAMO_FISTS)
+     && gBattleMoves[move].punchingMove
+     && gDisableStructs[battlerAtk].uniquePersistentStateActive
+     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_ELECTRIC_TERRAIN))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
     // field abilities

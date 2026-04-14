@@ -366,6 +366,8 @@ static const u8 sPiercingJudgmentDescription[] = _("Horn Drill ignores accuracy,
 static const u8 sStarlockDescription[] = _("Using Recover disables the target's last move for 2 turns.");
 static const u8 sImprovDescription[] = _("After using a status move, also uses Metronome.");
 static const u8 sSwarmAssaultDescription[] = _("Contact move: extra 10 BP Bug hit; 20 BP in Infested Terrain.");
+static const u8 sSweetNothingsDescription[] = _("Kissing moves: 2x damage and lower target's Attack.");
+static const u8 sDynamoFistsDescription[] = _("Electric move: next punch gets +1 priority; 1.2x in Electric Terrain.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -746,6 +748,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_STARLOCK] = _("Starlock"),
     [ABILITY_IMPROV] = _("Improv"),
     [ABILITY_SWARM_ASSAULT] = _("Swarm Assault"),
+    [ABILITY_SWEET_NOTHINGS] = _("Sweet Nothings"),
+    [ABILITY_DYNAMO_FISTS] = _("Dynamo Fists"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1126,6 +1130,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_STARLOCK] = _("Starlock"),
     [ABILITY_IMPROV] = _("Improv"),
     [ABILITY_SWARM_ASSAULT] = _("SwarmAssault"),
+    [ABILITY_SWEET_NOTHINGS] = _("SweetNothings"),
+    [ABILITY_DYNAMO_FISTS] = _("DynamoFists"),
 };
 #endif
 
@@ -1507,4 +1513,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_STARLOCK] = sStarlockDescription,
     [ABILITY_IMPROV] = sImprovDescription,
     [ABILITY_SWARM_ASSAULT] = sSwarmAssaultDescription,
+    [ABILITY_SWEET_NOTHINGS] = sSweetNothingsDescription,
+    [ABILITY_DYNAMO_FISTS] = sDynamoFistsDescription,
 };

@@ -4918,6 +4918,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
+     && gBattleMoves[move].punchingMove
+     && gDisableStructs[battler].uniquePersistentStateActive)
+    {
+        priority++;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 

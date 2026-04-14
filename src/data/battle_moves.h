@@ -2538,6 +2538,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_STATUS,
         .zMoveEffect = Z_EFFECT_SPD_UP_1,
+        .kissingMove = TRUE,
         .magicCoatAffected = TRUE,
     },
 
@@ -3354,6 +3355,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_STATUS,
         .zMoveEffect = Z_EFFECT_SPATK_UP_1,
+        .kissingMove = TRUE,
         .magicCoatAffected = TRUE,
     },
 
@@ -10124,6 +10126,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .argument = 75, // restores 75% HP instead of 50% HP
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,
+        .kissingMove = TRUE,
         .healBlockBanned = B_HEAL_BLOCKING >= GEN_6,
     },
 
