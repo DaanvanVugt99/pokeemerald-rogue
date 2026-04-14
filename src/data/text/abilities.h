@@ -378,8 +378,8 @@ static const u8 sBodyOfWaterDescription[] = _("First turn out: takes half damage
 static const u8 sIonizeDescription[] = _("End turn: non-Electric/Ground mons lose 1/16 max HP.");
 static const u8 sSmolderDescription[] = _("Opposing Pokemon are treated as burned for damage calc.");
 static const u8 sDebugDescription[] = _("Bug moves heal 3/4 of damage dealt.");
-static const u8 sAbyssalDescription[] = _("Rock moves lower the target's Sp. Def by 1.");
-static const u8 sRiptideDescription[] = _("Slicing moves: if damage is 50% or less, lower Defense.");
+static const u8 sPrimordialWakeDescription[] = _("Water move: next Rock move also uses Ancient Power.");
+static const u8 sExhumedDescription[] = _("Rock move: next slicing move also uses Rock Tomb.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -772,8 +772,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_IONIZE] = _("Ionize"),
     [ABILITY_SMOLDER] = _("Smolder"),
     [ABILITY_DEBUG] = _("Debug"),
-    [ABILITY_ABYSSAL] = _("Abyssal"),
-    [ABILITY_RIPTIDE] = _("Riptide"),
+    [ABILITY_PRIMORDIAL_WAKE] = _("Primordial Wake"),
+    [ABILITY_EXHUMED] = _("Exhumed"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1166,8 +1166,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_IONIZE] = _("Ionize"),
     [ABILITY_SMOLDER] = _("Smolder"),
     [ABILITY_DEBUG] = _("Debug"),
-    [ABILITY_ABYSSAL] = _("Abyssal"),
-    [ABILITY_RIPTIDE] = _("Riptide"),
+    [ABILITY_PRIMORDIAL_WAKE] = _("PrimordialWk"),
+    [ABILITY_EXHUMED] = _("Exhumed"),
 };
 #endif
 
@@ -1561,6 +1561,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_IONIZE] = sIonizeDescription,
     [ABILITY_SMOLDER] = sSmolderDescription,
     [ABILITY_DEBUG] = sDebugDescription,
-    [ABILITY_ABYSSAL] = sAbyssalDescription,
-    [ABILITY_RIPTIDE] = sRiptideDescription,
+    [ABILITY_PRIMORDIAL_WAKE] = sPrimordialWakeDescription,
+    [ABILITY_EXHUMED] = sExhumedDescription,
 };

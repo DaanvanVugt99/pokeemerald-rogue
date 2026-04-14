@@ -418,8 +418,8 @@
 #define ABILITY_IONIZE              384
 #define ABILITY_SMOLDER             385
 #define ABILITY_DEBUG               386
-#define ABILITY_ABYSSAL             387
-#define ABILITY_RIPTIDE             388
+#define ABILITY_PRIMORDIAL_WAKE     387
+#define ABILITY_EXHUMED             388
 
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
