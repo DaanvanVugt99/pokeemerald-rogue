@@ -4925,6 +4925,15 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_OPEN_FIELD)
+     && gBattleStruct->moveTarget[battler] < gBattlersCount
+     && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
+     && IsBattlerAlive(gBattleStruct->moveTarget[battler])
+     && BATTLER_MAX_HP(gBattleStruct->moveTarget[battler]))
+    {
+        priority++;
+    }
+
     if (gProtectStructs[battler].quash)
         priority = -8;
 

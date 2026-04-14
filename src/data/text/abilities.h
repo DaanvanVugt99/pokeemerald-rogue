@@ -368,6 +368,9 @@ static const u8 sImprovDescription[] = _("After using a status move, also uses M
 static const u8 sSwarmAssaultDescription[] = _("Contact move: extra 10 BP Bug hit; 20 BP in Infested Terrain.");
 static const u8 sSweetNothingsDescription[] = _("Kissing moves: 2x damage and lower target's Attack.");
 static const u8 sDynamoFistsDescription[] = _("Electric move: next punch gets +1 priority; 1.2x in Electric Terrain.");
+static const u8 sFlameheartDescription[] = _("Always burned; burn damage becomes 1/8 max HP healing.");
+static const u8 sBurrowingHornsDescription[] = _("Contact: lower foe's Speed. In Infested Terrain, also traps.");
+static const u8 sOpenFieldDescription[] = _("+1 priority vs full-HP targets; 1.2x in Plain Terrain.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -750,6 +753,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SWARM_ASSAULT] = _("Swarm Assault"),
     [ABILITY_SWEET_NOTHINGS] = _("Sweet Nothings"),
     [ABILITY_DYNAMO_FISTS] = _("Dynamo Fists"),
+    [ABILITY_FLAMEHEART] = _("Flameheart"),
+    [ABILITY_BURROWING_HORNS] = _("Burrowing Horns"),
+    [ABILITY_OPEN_FIELD] = _("Open Field"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1132,6 +1138,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SWARM_ASSAULT] = _("SwarmAssault"),
     [ABILITY_SWEET_NOTHINGS] = _("SweetNothings"),
     [ABILITY_DYNAMO_FISTS] = _("DynamoFists"),
+    [ABILITY_FLAMEHEART] = _("Flameheart"),
+    [ABILITY_BURROWING_HORNS] = _("BurrowHorns"),
+    [ABILITY_OPEN_FIELD] = _("Open Field"),
 };
 #endif
 
@@ -1515,4 +1524,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SWARM_ASSAULT] = sSwarmAssaultDescription,
     [ABILITY_SWEET_NOTHINGS] = sSweetNothingsDescription,
     [ABILITY_DYNAMO_FISTS] = sDynamoFistsDescription,
+    [ABILITY_FLAMEHEART] = sFlameheartDescription,
+    [ABILITY_BURROWING_HORNS] = sBurrowingHornsDescription,
+    [ABILITY_OPEN_FIELD] = sOpenFieldDescription,
 };

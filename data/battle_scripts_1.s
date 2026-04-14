@@ -8493,6 +8493,25 @@ BattleScript_PoisonHealActivates::
 	datahpupdate BS_ATTACKER
 	end2
 
+BattleScript_FlameheartActivates::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNSXRESTOREDHPALITTLE2
+	waitmessage B_WAIT_TIME_LONG
+	statusanimation BS_ATTACKER
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	end2
+
+BattleScript_FlameheartBurnsSelf::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	setbyte cMULTISTRING_CHOOSER, 0
+	copybyte gEffectBattler, gBattlerAttacker
+	call BattleScript_MoveEffectBurn
+	end2
+
 BattleScript_BurnTurnDmg::
 	printstring STRINGID_PKMNHURTBYBURN
 	waitmessage B_WAIT_TIME_LONG
@@ -10005,6 +10024,14 @@ BattleScript_AbilityStatusEffect::
 	waitstate
 	call BattleScript_AbilityPopUp
 	seteffectsecondary
+	return
+
+BattleScript_BurrowingHornsTrap::
+	waitstate
+	call BattleScript_AbilityPopUp
+	seteffectsecondary
+	printstring STRINGID_THUNDERCAGETRAPPED
+	waitmessage B_WAIT_TIME_LONG
 	return
 
 BattleScript_ToxicBloomActivates::

@@ -2902,18 +2902,35 @@ u8 DoBattlerEndTurnEffects(void)
                 && gBattleMons[battler].hp != 0)
             {
                 MAGIC_GUARD_CHECK;
-                gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / (B_BURN_DAMAGE >= GEN_7 ? 16 : 8);
-                if (ability == ABILITY_HEATPROOF)
+
+                if (HasBattlerAbility(battler, ABILITY_FLAMEHEART))
                 {
-                    if (gBattleMoveDamage > (gBattleMoveDamage / 2) + 1) // Record ability if the burn takes less damage than it normally would.
-                        RecordAbilityBattle(battler, ABILITY_HEATPROOF);
-                    gBattleMoveDamage /= 2;
+                    if (!BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                    {
+                        gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+                        if (gBattleMoveDamage == 0)
+                            gBattleMoveDamage = 1;
+                        gBattleMoveDamage *= -1;
+                        SetBattlerTriggeredAbility(battler, ABILITY_FLAMEHEART);
+                        BattleScriptExecute(BattleScript_FlameheartActivates);
+                        effect++;
+                    }
                 }
-                if (gBattleMoveDamage == 0)
-                    gBattleMoveDamage = 1;
-                HandleAlphaMonStatusEndure(battler);
-                BattleScriptExecute(BattleScript_BurnTurnDmg);
-                effect++;
+                else
+                {
+                    gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / (B_BURN_DAMAGE >= GEN_7 ? 16 : 8);
+                    if (ability == ABILITY_HEATPROOF)
+                    {
+                        if (gBattleMoveDamage > (gBattleMoveDamage / 2) + 1) // Record ability if the burn takes less damage than it normally would.
+                            RecordAbilityBattle(battler, ABILITY_HEATPROOF);
+                        gBattleMoveDamage /= 2;
+                    }
+                    if (gBattleMoveDamage == 0)
+                        gBattleMoveDamage = 1;
+                    HandleAlphaMonStatusEndure(battler);
+                    BattleScriptExecute(BattleScript_BurnTurnDmg);
+                    effect++;
+                }
             }
             gBattleStruct->turnEffectsTracker++;
             break;
@@ -5576,6 +5593,18 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
             break;
         }
+
+        if (HasBattlerAbility(battler, ABILITY_FLAMEHEART)
+         && gBattleMons[battler].status1 != STATUS1_BURN)
+        {
+            gBattleMons[battler].status1 = STATUS1_BURN;
+            gBattlerAttacker = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_FLAMEHEART);
+            BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
+            MarkBattlerForControllerExec(battler);
+            BattleScriptExecute(BattleScript_FlameheartBurnsSelf);
+            effect++;
+        }
         break;
     case ABILITYEFFECT_ENDTURN: // 1
         if (gBattleMons[battler].hp != 0)
@@ -5779,6 +5808,18 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     effect++;
                 }
                 break;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_FLAMEHEART)
+             && gBattleMons[battler].status1 != STATUS1_BURN)
+            {
+                gBattleMons[battler].status1 = STATUS1_BURN;
+                gBattlerAttacker = battler;
+                SetBattlerTriggeredAbility(battler, ABILITY_FLAMEHEART);
+                BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
+                MarkBattlerForControllerExec(battler);
+                BattleScriptExecute(BattleScript_FlameheartBurnsSelf);
+                effect++;
             }
 
             if (HasBattlerAbility(battler, ABILITY_TOXIC_BLOOM))
@@ -7240,6 +7281,33 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_2;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BURROWING_HORNS)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && IsMoveMakingContact(move, battler))
+        {
+            bool32 infestedTrapApplied = FALSE;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_BURROWING_HORNS);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
+
+            if (IsBattlerTerrainAffected(battler, STATUS_FIELD_INFESTED_TERRAIN)
+             && !(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+            {
+                gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+                gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
+                infestedTrapApplied = TRUE;
+            }
+
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = infestedTrapApplied ? BattleScript_BurrowingHornsTrap : BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
@@ -10817,6 +10885,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
      && gBattleMoves[move].punchingMove
      && gDisableStructs[battlerAtk].uniquePersistentStateActive
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_ELECTRIC_TERRAIN))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_OPEN_FIELD)
+     && BATTLER_MAX_HP(battlerDef)
+     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PLAIN_TERRAIN))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
