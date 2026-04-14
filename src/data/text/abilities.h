@@ -363,6 +363,9 @@ static const u8 sLivingRootsDescription[] = _("On switch-out: incoming ally gain
 static const u8 sMaternalInstinctDescription[] = _("In doubles, using Protect also uses Helping Hand.");
 static const u8 sMarksmanDescription[] = _("Turn end: +1 Accuracy or +1 critical-hit ratio.");
 static const u8 sPiercingJudgmentDescription[] = _("Horn Drill ignores accuracy, but fails above 50% HP.");
+static const u8 sStarlockDescription[] = _("Using Recover disables the target's last move for 2 turns.");
+static const u8 sImprovDescription[] = _("After using a status move, also uses Metronome.");
+static const u8 sSwarmAssaultDescription[] = _("Contact move: extra 10 BP Bug hit; 20 BP in Infested Terrain.");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -740,6 +743,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MATERNAL_INSTINCT] = _("MaternalInstinct"),
     [ABILITY_MARKSMAN] = _("Marksman"),
     [ABILITY_PIERCING_JUDGMENT] = _("PiercingJudgment"),
+    [ABILITY_STARLOCK] = _("Starlock"),
+    [ABILITY_IMPROV] = _("Improv"),
+    [ABILITY_SWARM_ASSAULT] = _("Swarm Assault"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1117,6 +1123,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MATERNAL_INSTINCT] = _("MaternalInst"),
     [ABILITY_MARKSMAN] = _("Marksman"),
     [ABILITY_PIERCING_JUDGMENT] = _("PierceJudgmnt"),
+    [ABILITY_STARLOCK] = _("Starlock"),
+    [ABILITY_IMPROV] = _("Improv"),
+    [ABILITY_SWARM_ASSAULT] = _("SwarmAssault"),
 };
 #endif
 
@@ -1495,4 +1504,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_MATERNAL_INSTINCT] = sMaternalInstinctDescription,
     [ABILITY_MARKSMAN] = sMarksmanDescription,
     [ABILITY_PIERCING_JUDGMENT] = sPiercingJudgmentDescription,
+    [ABILITY_STARLOCK] = sStarlockDescription,
+    [ABILITY_IMPROV] = sImprovDescription,
+    [ABILITY_SWARM_ASSAULT] = sSwarmAssaultDescription,
 };

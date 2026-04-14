@@ -4520,6 +4520,84 @@ static inline bool32 HadMoreThanHalfHpNowHasLess(u32 battler)
              && gBattleMons[battler].hp < cutoff);
 }
 
+static inline bool32 CanAbilityDisableBattler(u32 battler)
+{
+    return gDisableStructs[battler].disabledMove == MOVE_NONE
+        && !IsAbilityOnSide(battler, ABILITY_AROMA_VEIL)
+        && !IsDynamaxed(battler);
+}
+
+static u16 GetLastUsableMoveForDisable(u32 battler)
+{
+    u32 slot;
+    u16 move = gLastMoves[battler];
+
+    if (move == MOVE_NONE)
+        return MOVE_NONE;
+
+    for (slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        if (gBattleMons[battler].moves[slot] == move
+         && gBattleMons[battler].pp[slot] != 0)
+            return move;
+    }
+
+    return MOVE_NONE;
+}
+
+static u16 GetLowestPowerUsableMoveForDisable(u32 battler)
+{
+    u32 slot;
+    u32 lowestPower = 0xFFFFFFFF;
+    u32 tieCount = 0;
+    u16 lowestPowerMove = MOVE_NONE;
+    u16 move;
+
+    for (slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        move = gBattleMons[battler].moves[slot];
+        if (move == MOVE_NONE
+         || gBattleMons[battler].pp[slot] == 0
+         || gBattleMoves[move].power == 0)
+            continue;
+
+        if (gBattleMoves[move].power < lowestPower)
+        {
+            lowestPower = gBattleMoves[move].power;
+            lowestPowerMove = move;
+            tieCount = 1;
+        }
+        else if (gBattleMoves[move].power == lowestPower)
+        {
+            tieCount++;
+            if ((Random() % tieCount) == 0)
+                lowestPowerMove = move;
+        }
+    }
+
+    return lowestPowerMove;
+}
+
+static u8 GetDefaultDisableTimerFromGenConfig(void)
+{
+    if (B_DISABLE_TURNS >= GEN_5)
+        return 4;
+    if (B_DISABLE_TURNS >= GEN_4)
+        return (Random() & 3) + 4; // 4-7 turns
+    return (Random() & 3) + 2; // 2-5 turns
+}
+
+static void ApplyAbilityDisableMove(u32 attacker, u32 target, u32 ability, u16 move, u8 disableTimer)
+{
+    SetBattlerTriggeredAbility(attacker, ability);
+    gDisableStructs[target].disabledMove = move;
+    gDisableStructs[target].disableTimer = disableTimer;
+    PREPARE_MOVE_BUFFER(gBattleTextBuff1, move);
+    gBattlerAttacker = attacker;
+    gBattlerTarget = target;
+    BattleScriptPushCursorAndCallback(BattleScript_ClairvoyantActivates);
+}
+
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg)
 {
     u32 effect = 0;
@@ -4562,58 +4640,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         if (HasBattlerAbility(battler, ABILITY_CLAIRVOYANT) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
-            u32 lowestPower = 0xFFFFFFFF;
-            u32 tieCount = 0;
-            u32 slot;
-            u16 lowestPowerMove = MOVE_NONE;
+            u16 disableMove = MOVE_NONE;
 
             uniqueDone = TRUE;
 
             if (IsBattlerAlive(opposingBattler)
-             && gDisableStructs[opposingBattler].disabledMove == MOVE_NONE
-             && !IsAbilityOnSide(opposingBattler, ABILITY_AROMA_VEIL)
-             && !IsDynamaxed(opposingBattler))
+             && CanAbilityDisableBattler(opposingBattler))
+                disableMove = GetLowestPowerUsableMoveForDisable(opposingBattler);
+
+            if (disableMove != MOVE_NONE)
             {
-                for (slot = 0; slot < MAX_MON_MOVES; slot++)
-                {
-                    move = gBattleMons[opposingBattler].moves[slot];
-                    if (move == MOVE_NONE
-                     || gBattleMons[opposingBattler].pp[slot] == 0
-                     || gBattleMoves[move].power == 0)
-                        continue;
-
-                    if (gBattleMoves[move].power < lowestPower)
-                    {
-                        lowestPower = gBattleMoves[move].power;
-                        lowestPowerMove = move;
-                        tieCount = 1;
-                    }
-                    else if (gBattleMoves[move].power == lowestPower)
-                    {
-                        tieCount++;
-                        if ((Random() % tieCount) == 0)
-                            lowestPowerMove = move;
-                    }
-                }
-
-                if (lowestPowerMove != MOVE_NONE)
-                {
-                    SetBattlerTriggeredAbility(battler, ABILITY_CLAIRVOYANT);
-                    gDisableStructs[opposingBattler].disabledMove = lowestPowerMove;
-                    if (B_DISABLE_TURNS >= GEN_5)
-                        gDisableStructs[opposingBattler].disableTimer = 4;
-                    else if (B_DISABLE_TURNS >= GEN_4)
-                        gDisableStructs[opposingBattler].disableTimer = (Random() & 3) + 4; // 4-7 turns
-                    else
-                        gDisableStructs[opposingBattler].disableTimer = (Random() & 3) + 2; // 2-5 turns
-                    PREPARE_MOVE_BUFFER(gBattleTextBuff1, lowestPowerMove);
-                    gBattlerAttacker = battler;
-                    gBattlerTarget = opposingBattler;
-                    gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
-                    gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                    BattleScriptPushCursorAndCallback(BattleScript_ClairvoyantActivates);
-                    return 1;
-                }
+                ApplyAbilityDisableMove(battler, opposingBattler, ABILITY_CLAIRVOYANT, disableMove, GetDefaultDisableTimerFromGenConfig());
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                return 1;
             }
         }
 
@@ -6872,6 +6912,28 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SWARM_ASSAULT)
+         && IsBattlerAlive(battler)
+         && IsMoveMakingContact(move, battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SWARM_ASSAULT);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_X_SCISSOR;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            if (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN)
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+            else
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 10);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_DREAMWEAVER)
          && IsBattlerAlive(battler)
          && IS_MOVE_STATUS(move)
@@ -6908,6 +6970,44 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_IMPROV)
+         && IsBattlerAlive(battler)
+         && IS_MOVE_STATUS(move)
+         && move != MOVE_METRONOME
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            u32 target = gBattlerTarget;
+
+            if (!IsBattlerAlive(target) || GetBattlerSide(target) == GetBattlerSide(battler))
+            {
+                target = gBattlersCount;
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                    {
+                        target = i;
+                        break;
+                    }
+                }
+            }
+
+            if (target < gBattlersCount
+             && CanUseExtraMove(battler, target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_IMPROV);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_METRONOME;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_INTENSIVE_CARE)
@@ -7042,6 +7142,40 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_STARLOCK)
+         && move == MOVE_RECOVER
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !(gMoveResultFlags & MOVE_RESULT_FAILED)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            u32 target = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
+            u16 disableMove = MOVE_NONE;
+
+            if (!IsBattlerAlive(target) || GetBattlerSide(target) == GetBattlerSide(battler))
+            {
+                target = gBattlersCount;
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                    {
+                        target = i;
+                        break;
+                    }
+                }
+            }
+
+            if (target < gBattlersCount
+             && CanAbilityDisableBattler(target))
+                disableMove = GetLastUsableMoveForDisable(target);
+
+            if (disableMove != MOVE_NONE)
+            {
+                ApplyAbilityDisableMove(battler, target, ABILITY_STARLOCK, disableMove, 3);
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_GNAW_DOWN)
