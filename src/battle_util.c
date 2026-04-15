@@ -7670,7 +7670,7 @@ if (triggeringAbility != ABILITY_NONE)
             }
 
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = infestedTrapApplied ? BattleScript_BurrowingHornsTrap : BattleScript_AbilityStatusEffect;
+            gBattlescriptCurrInstr = infestedTrapApplied ? BattleScript_AbilityTrapsTarget : BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
@@ -7736,6 +7736,36 @@ if (triggeringAbility != ABILITY_NONE)
                 gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DEATH_ROLL)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].bitingMove
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            bool32 trapApplied = FALSE;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_DEATH_ROLL);
+
+            if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+            {
+                gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+                gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
+                trapApplied = TRUE;
+            }
+
+            if (trapApplied)
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityTrapsTarget;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
                 effect++;
             }
         }

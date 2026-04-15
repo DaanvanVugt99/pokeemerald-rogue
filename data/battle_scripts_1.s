@@ -10060,7 +10060,7 @@ BattleScript_AbilityStatusEffect::
 	seteffectsecondary
 	return
 
-BattleScript_BurrowingHornsTrap::
+BattleScript_AbilityTrapsTarget::
 	waitstate
 	call BattleScript_AbilityPopUp
 	seteffectsecondary

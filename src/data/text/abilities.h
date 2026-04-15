@@ -390,6 +390,8 @@ static const u8 sSolarCallDescription[] = _("If all party Pokemon share a type: 
 static const u8 sAdaptiveOriginDescription[] = _("If all party Pokemon have different type: All moves gain STAB");
 static const u8 sVerdantHavenDescription[] = _("On First healing move: Use Leech Seed");
 static const u8 sEruptionDescription[] = _("On First Fire move: Use Smokescreen");
+static const u8 sDeathRollDescription[] = _("On First bite move: Trap Target");
+
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -793,6 +795,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ADAPTIVE_ORIGIN] = _("Adaptive Origin"),
     [ABILITY_VERDANT_HAVEN] = _("Verdant Haven"),
     [ABILITY_ERUPTION] = _("Eruption"),
+    [ABILITY_DEATH_ROLL] = _("Death Roll"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1197,6 +1200,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ADAPTIVE_ORIGIN] = _("AdptveOrigin"),
     [ABILITY_VERDANT_HAVEN] = _("VerdantHaven"),
     [ABILITY_ERUPTION] = _("Eruption"),
+    [ABILITY_DEATH_ROLL] = _("Death Roll"),
 };
 #endif
 
@@ -1602,4 +1606,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_ADAPTIVE_ORIGIN] = sAdaptiveOriginDescription,
     [ABILITY_VERDANT_HAVEN] = sVerdantHavenDescription,
     [ABILITY_ERUPTION] = sEruptionDescription,
+    [ABILITY_DEATH_ROLL] = sDeathRollDescription,
 };
