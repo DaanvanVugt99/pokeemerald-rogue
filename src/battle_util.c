@@ -4339,6 +4339,42 @@ bool32 DoesPartyShareTypeWithBattler(u32 battler)
     return TRUE;
 }
 
+bool32 DoesPartyHaveUniqueTypes(u32 battler)
+{
+    u32 i;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+    bool32 seenTypes[NUMBER_OF_MON_TYPES] = {0};
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species;
+        u32 monType1, monType2;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+
+        species = GetMonData(&party[i], MON_DATA_SPECIES);
+        monType1 = gSpeciesInfo[species].types[0];
+        monType2 = gSpeciesInfo[species].types[1];
+
+        if (seenTypes[monType1])
+            return FALSE;
+        seenTypes[monType1] = TRUE;
+
+        if (monType2 != monType1)
+        {
+            if (seenTypes[monType2])
+                return FALSE;
+            seenTypes[monType2] = TRUE;
+        }
+    }
+
+    return TRUE;
+}
+
 static const u32 sWeatherFlagsInfo[][3] =
 {
     [ENUM_WEATHER_RAIN] = {B_WEATHER_RAIN_TEMPORARY, B_WEATHER_RAIN_PERMANENT, HOLD_EFFECT_DAMP_ROCK},
@@ -11870,13 +11906,26 @@ static inline uq4_12_t GetAdaptabilityCharmBoost(u32 battlerAtk)
 
 static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveType, u32 move, u32 abilityAtk)
 {
+    bool32 hasAdaptability = HasBattlerAbility(battlerAtk, ABILITY_ADAPTABILITY);
+
     if (gBattleStruct->pledgeMove && IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType))
-        return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
-    else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType)
-          || move == MOVE_STRUGGLE || move == MOVE_NONE)
+        return uq4_12_add(hasAdaptability ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
+    else if (move == MOVE_STRUGGLE || move == MOVE_NONE)
         return UQ_4_12(1.0);
+    else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType))
+    {
+        if (HasBattlerAbility(battlerAtk, ABILITY_ADAPTIVE_ORIGIN)
+         && DoesPartyHaveUniqueTypes(battlerAtk))
+        {
+            return uq4_12_add(hasAdaptability ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
+        }
+
+        return UQ_4_12(1.0);
+    }
     else
-        return uq4_12_add((abilityAtk == ABILITY_ADAPTABILITY) ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
+    {
+        return uq4_12_add(hasAdaptability ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
+    }
 }
 
 // Utility Umbrella holders take normal damage from what would be rain- and sun-weakened attacks.

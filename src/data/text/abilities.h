@@ -387,6 +387,7 @@ static const u8 sSkyTyrantDescription[] = _("If all party Pokemon share a type: 
 static const u8 sFrostCallDescription[] = _("If all party Pokemon share a type: Set permanent Snow");
 static const u8 sStormCallDescription[] = _("If all party Pokemon share a type: Set permanent Electric Terrain");
 static const u8 sSolarCallDescription[] = _("If all party Pokemon share a type: Set permanent Sun");
+static const u8 sAdaptiveOriginDescription[] = _("If all party Pokemon have different type: All moves gain STAB");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -787,6 +788,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FROST_CALL] = _("Frost Call"),
     [ABILITY_STORM_CALL] = _("Storm Call"),
     [ABILITY_SOLAR_CALL] = _("Solar Call"),
+    [ABILITY_ADAPTIVE_ORIGIN] = _("Adaptive Origin"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1188,6 +1190,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FROST_CALL] = _("Frost Call"),
     [ABILITY_STORM_CALL] = _("Storm Call"),
     [ABILITY_SOLAR_CALL] = _("Solar Call"),
+    [ABILITY_ADAPTIVE_ORIGIN] = _("AdptveOrigin"),
 };
 #endif
 
@@ -1590,4 +1593,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_FROST_CALL] = sFrostCallDescription,
     [ABILITY_STORM_CALL] = sStormCallDescription,
     [ABILITY_SOLAR_CALL] = sSolarCallDescription,
+    [ABILITY_ADAPTIVE_ORIGIN] = sAdaptiveOriginDescription,
 };
