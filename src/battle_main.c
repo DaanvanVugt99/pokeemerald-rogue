@@ -4925,6 +4925,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_SKY_TYRANT)
+     && gBattleMoves[move].type == TYPE_ROCK
+     && DoesPartyShareTypeWithBattler(battler))
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_OPEN_FIELD)
      && gBattleStruct->moveTarget[battler] < gBattlersCount
      && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)

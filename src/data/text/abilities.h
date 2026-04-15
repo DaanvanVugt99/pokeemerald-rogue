@@ -383,6 +383,10 @@ static const u8 sExhumedDescription[] = _("Rock move: next slicing move also use
 static const u8 sDeepSleepDescription[] = _("Using Yawn heals 1/4 of max HP.");
 static const u8 sDragonMajestyDescription[] = _("Dragon hit suppresses target's Ability until switch-out.");
 static const u8 sOneMindDescription[] = _("Psychic moves always move first.");
+static const u8 sSkyTyrantDescription[] = _("If all party Pokemon share a type: Rock gets +1 Priority");
+static const u8 sFrostCallDescription[] = _("If all party Pokemon share a type: Set permanent Snow");
+static const u8 sStormCallDescription[] = _("If all party Pokemon share a type: Set permanent Electric Terrain");
+static const u8 sSolarCallDescription[] = _("If all party Pokemon share a type: Set permanent Sun");
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -698,7 +702,6 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TERA_SHELL] = _("Tera Shell"),
     [ABILITY_TERAFORM_ZERO] = _("Teraform Zero"),
     [ABILITY_POISON_PUPPETEER] = _("Poison Puppeteer"),
-    
     [ABILITY_FORECAST_PRIORITY] = _("Instant Forecast"),
     [ABILITY_STRONG_WINDS] = _("Strong Winds"),
     [ABILITY_UPDRAFT] = _("Updraft"),
@@ -780,6 +783,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DEEP_SLEEP] = _("Deep Sleep"),
     [ABILITY_DRAGON_MAJESTY] = _("Dragon Majesty"),
     [ABILITY_ONE_MIND] = _("One Mind"),
+    [ABILITY_SKY_TYRANT] = _("Sky Tyrant"),
+    [ABILITY_FROST_CALL] = _("Frost Call"),
+    [ABILITY_STORM_CALL] = _("Storm Call"),
+    [ABILITY_SOLAR_CALL] = _("Solar Call"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1095,7 +1102,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TERA_SHELL] = _("Tera Shell"),
     [ABILITY_TERAFORM_ZERO] = _("TeraformZero"),
     [ABILITY_POISON_PUPPETEER] = _("PoisnPuppter"),
-    
+
     [ABILITY_FORECAST_PRIORITY] = _("Instant Forecast"),
     [ABILITY_STRONG_WINDS] = _("Strong Winds"),
     [ABILITY_UPDRAFT] = _("Updraft"),
@@ -1177,6 +1184,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DEEP_SLEEP] = _("Deep Sleep"),
     [ABILITY_DRAGON_MAJESTY] = _("DragnMajesty"),
     [ABILITY_ONE_MIND] = _("One Mind"),
+    [ABILITY_SKY_TYRANT] = _("Sky Tyrant"),
+    [ABILITY_FROST_CALL] = _("Frost Call"),
+    [ABILITY_STORM_CALL] = _("Storm Call"),
+    [ABILITY_SOLAR_CALL] = _("Solar Call"),
 };
 #endif
 
@@ -1493,7 +1504,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_TERA_SHELL] = sTeraShellDescription,
     [ABILITY_TERAFORM_ZERO] = sTeraformZeroDescription,
     [ABILITY_POISON_PUPPETEER] = sPoisonPuppeteerDescription,
-    
+
     [ABILITY_FORECAST_PRIORITY] = sForecastPriorityDescription,
     [ABILITY_STRONG_WINDS] = sStrongWindsDescription,
     [ABILITY_UPDRAFT] = sUpdraftDescription,
@@ -1575,4 +1586,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DEEP_SLEEP] = sDeepSleepDescription,
     [ABILITY_DRAGON_MAJESTY] = sDragonMajestyDescription,
     [ABILITY_ONE_MIND] = sOneMindDescription,
+    [ABILITY_SKY_TYRANT] = sSkyTyrantDescription,
+    [ABILITY_FROST_CALL] = sFrostCallDescription,
+    [ABILITY_STORM_CALL] = sStormCallDescription,
+    [ABILITY_SOLAR_CALL] = sSolarCallDescription,
 };

@@ -4301,6 +4301,44 @@ bool32 IsOnlyAliveMonInParty(u32 battler)
             && IsValidForBattle(&party[gBattlerPartyIndexes[battler]]));
 }
 
+bool32 DoesPartyShareTypeWithBattler(u32 battler)
+{
+    u32 i;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+    u16 battlerSpecies;
+    u32 battlerType1, battlerType2;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    battlerSpecies = GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES);
+    battlerType1 = gSpeciesInfo[battlerSpecies].types[0];
+    battlerType2 = gSpeciesInfo[battlerSpecies].types[1];
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species;
+        u32 monType1, monType2;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+
+        species = GetMonData(&party[i], MON_DATA_SPECIES);
+        monType1 = gSpeciesInfo[species].types[0];
+        monType2 = gSpeciesInfo[species].types[1];
+
+        if (monType1 != battlerType1
+         && monType1 != battlerType2
+         && monType2 != battlerType1
+         && monType2 != battlerType2)
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 static const u32 sWeatherFlagsInfo[][3] =
 {
     [ENUM_WEATHER_RAIN] = {B_WEATHER_RAIN_TEMPORARY, B_WEATHER_RAIN_PERMANENT, HOLD_EFFECT_DAMP_ROCK},
@@ -5255,6 +5293,25 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_SOLAR_CALL:
+            if (DoesPartyShareTypeWithBattler(battler))
+            {
+                if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+                {
+                    gBattleWeather |= B_WEATHER_SUN_PERMANENT;
+                    BattleScriptPushCursorAndCallback(BattleScript_DroughtActivates);
+                    effect++;
+                }
+                else if ((gBattleWeather & B_WEATHER_PRIMAL_ANY)
+                        && WEATHER_HAS_EFFECT
+                        && !gSpecialStatuses[battler].switchInAbilityDone)
+                {
+                    gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                    BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                    effect++;
+                }
+            }
+            break;
         case ABILITY_TOXIC_DELUGE:
             if (TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
             {
@@ -5299,12 +5356,48 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_FROST_CALL:
+            if (DoesPartyShareTypeWithBattler(battler))
+            {
+                if (B_SNOW_WARNING >= GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+                {
+                    gBattleWeather |= B_WEATHER_SNOW_PERMANENT;
+                    BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesSnow);
+                    effect++;
+                }
+                else if (B_SNOW_WARNING < GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_HAIL, TRUE))
+                {
+                    gBattleWeather |= B_WEATHER_HAIL_PERMANENT;
+                    BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesHail);
+                    effect++;
+                }
+                else if ((gBattleWeather & B_WEATHER_PRIMAL_ANY)
+                        && WEATHER_HAS_EFFECT
+                        && !gSpecialStatuses[battler].switchInAbilityDone)
+                {
+                    gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                    BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                    effect++;
+                }
+            }
+            break;
         case ABILITY_ELECTRIC_SURGE:
         case ABILITY_HADRON_ENGINE:
             if (TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_ElectricSurgeActivates);
                 effect++;
+            }
+            break;
+        case ABILITY_STORM_CALL:
+            if (DoesPartyShareTypeWithBattler(battler))
+            {
+                if (TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
+                {
+                    gFieldStatuses |= STATUS_FIELD_TERRAIN_PERMANENT;
+                    BattleScriptPushCursorAndCallback(BattleScript_ElectricSurgeActivates);
+                    effect++;
+                }
             }
             break;
         case ABILITY_GRASSY_SURGE:
