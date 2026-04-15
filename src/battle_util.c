@@ -7690,6 +7690,56 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_VERDANT_HAVEN)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsHealingMove(move)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            gBattlerTarget = BATTLE_OPPOSITE(battler);
+
+            if (!IsBattlerAlive(gBattlerTarget) || GetBattlerSide(gBattlerTarget) == GetBattlerSide(battler))
+            {
+                for (gBattlerTarget = 0; gBattlerTarget < gBattlersCount; gBattlerTarget++)
+                {
+                    if (GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler) && IsBattlerAlive(gBattlerTarget))
+                        break;
+                }
+            }
+
+            if (gBattlerTarget < gBattlersCount
+             && !(gStatuses3[gBattlerTarget] & STATUS3_LEECHSEED)
+             && !IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GRASS))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_VERDANT_HAVEN);
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_FungalInfectionActivates;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ERUPTION)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && moveType == TYPE_FIRE
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            if (gBattleStruct->moveTarget[battler] < gBattlersCount
+             && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
+             && IsBattlerAlive(gBattleStruct->moveTarget[battler]))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_ERUPTION);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = gBattleStruct->moveTarget[battler];
+                gCalledMove = MOVE_SMOKESCREEN;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_NEUROTOXIN)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
