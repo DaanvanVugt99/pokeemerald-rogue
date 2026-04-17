@@ -393,6 +393,9 @@ static const u8 sEruptionDescription[] = _("On First Fire move: Use Smokescreen"
 static const u8 sDeathRollDescription[] = _("On First bite move: Trap Target");
 static const u8 sScamperDescription[] = _("On full health switch-in: Use Substitute");
 static const u8 sNocturnalDescription[] = _("+1 priority vs Sleeping targets; 100% acc Hypnosis during Eclipse");
+static const u8 sFormationFighterDescription[] = _("If exactly 1 status move: Status moves +1 Priority; take 20% less damage");
+static const u8 sBroodingDescription[] = _("On switch-in, if foe has no hazards: Set Infested Terrain");
+static const u8 sAbyssalLightDescription[] = _("When hit super-effectively: lower attacker's Accuracy by 2");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -800,6 +803,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DEATH_ROLL] = _("Death Roll"),
     [ABILITY_SCAMPER] = _("Scamper"),
     [ABILITY_NOCTURNAL] = _("Nocturnal"),
+    [ABILITY_FORMATION_FIGHTER] = _("FormationFighter"),
+    [ABILITY_BROODING] = _("Brooding"),
+    [ABILITY_ABYSSAL_LIGHT] = _("Abyssal Light"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1207,6 +1213,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DEATH_ROLL] = _("Death Roll"),
     [ABILITY_SCAMPER] = _("Scamper"),
     [ABILITY_NOCTURNAL] = _("Nocturnal"),
+    [ABILITY_FORMATION_FIGHTER] = _("FormFighter"),
+    [ABILITY_BROODING] = _("Brooding"),
+    [ABILITY_ABYSSAL_LIGHT] = _("AbyssalLight"),
 };
 #endif
 
@@ -1615,4 +1624,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DEATH_ROLL] = sDeathRollDescription,
     [ABILITY_SCAMPER] = sScamperDescription,
     [ABILITY_NOCTURNAL] = sNocturnalDescription,
+    [ABILITY_FORMATION_FIGHTER] = sFormationFighterDescription,
+    [ABILITY_BROODING] = sBroodingDescription,
+    [ABILITY_ABYSSAL_LIGHT] = sAbyssalLightDescription,
 };

@@ -4375,6 +4375,31 @@ bool32 DoesPartyHaveUniqueTypes(u32 battler)
     return TRUE;
 }
 
+void GetBattlerKnownMoveCategoryCounts(u32 battler, u32 *damagingMoveCount, u32 *statusMoveCount)
+{
+    u32 i;
+    u32 damagingCount = 0;
+    u32 statusCount = 0;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        u16 move = gBattleMons[battler].moves[i];
+
+        if (move == MOVE_NONE || move == MOVE_UNAVAILABLE)
+            continue;
+
+        if (IS_MOVE_STATUS(move))
+            statusCount++;
+        else
+            damagingCount++;
+    }
+
+    if (damagingMoveCount != NULL)
+        *damagingMoveCount = damagingCount;
+    if (statusMoveCount != NULL)
+        *statusMoveCount = statusCount;
+}
+
 static const u32 sWeatherFlagsInfo[][3] =
 {
     [ENUM_WEATHER_RAIN] = {B_WEATHER_RAIN_TEMPORARY, B_WEATHER_RAIN_PERMANENT, HOLD_EFFECT_DAMP_ROCK},
@@ -5502,6 +5527,14 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
+                effect++;
+            }
+            break;
+        case ABILITY_BROODING:
+            if (!(gSideStatuses[GetBattlerSide(BATTLE_OPPOSITE(battler))] & SIDE_STATUS_HAZARDS_ANY)
+             && TryChangeBattleTerrain(battler, STATUS_FIELD_INFESTED_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_InfestedSurgeActivates);
                 effect++;
             }
             break;
@@ -7142,6 +7175,25 @@ if (triggeringAbility != ABILITY_NONE)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ABYSSAL_LIGHT)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(moveEndAttacker)
+         && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
+         && (CompareStat(moveEndAttacker, STAT_ACC, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(moveEndAttacker) == ABILITY_MIRROR_ARMOR)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ABYSSAL_LIGHT);
+            SET_STATCHANGER(STAT_ACC, 2, TRUE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_ACC_MINUS_2;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_GooeyActivates;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
         break;
@@ -12201,6 +12253,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
 
 static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
 {
+    if (HasBattlerAbility(battlerDef, ABILITY_FORMATION_FIGHTER))
+    {
+        u32 statusMoveCount;
+        GetBattlerKnownMoveCategoryCounts(battlerDef, NULL, &statusMoveCount);
+        if (statusMoveCount == 1)
+            return UQ_4_12(0.8);
+    }
+
     if (HasBattlerAbility(battlerDef, ABILITY_BODY_OF_WATER)
      && gDisableStructs[battlerDef].isFirstTurn)
     {

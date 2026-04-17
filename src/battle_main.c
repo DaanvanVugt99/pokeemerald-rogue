@@ -4867,6 +4867,15 @@ s8 GetMovePriority(u32 battler, u16 move)
     else if (ability == ABILITY_TRIAGE && IsHealingMove(move))
         priority += 3;
 
+    if (HasBattlerAbility(battler, ABILITY_FORMATION_FIGHTER)
+     && IS_MOVE_STATUS(move))
+    {
+        u32 statusMoveCount;
+        GetBattlerKnownMoveCategoryCounts(battler, NULL, &statusMoveCount);
+        if (statusMoveCount == 1)
+            priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_AMBUSH)
      && gDisableStructs[battler].isFirstTurn
      && gBattleMoves[move].bitingMove)
