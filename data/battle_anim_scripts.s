@@ -22714,13 +22714,13 @@ Move_ECLIPSE:
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 0, 6, RGB_BLACK
 	waitforvisualfinish
 	panse_adjustnone SE_M_NIGHTMARE, SOUND_PAN_ATTACKER, SOUND_PAN_TARGET, +1, 0
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -34, -52, 0, 1
+	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -34, -52, 0, 0
 	delay 8
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -42, -60, 0, 1
+	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -42, -60, 0, 0
 	delay 8
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -26, -64, 0, 1
+	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -26, -64, 0, 0
 	delay 8
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -38, -46, 0, 1
+	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -38, -46, 0, 0
 	waitforvisualfinish
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 6, 0, RGB_BLACK
 	waitforvisualfinish
@@ -28202,11 +28202,11 @@ General_Eclipse:
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 0, 4, RGB_BLACK
 	waitforvisualfinish
 	playsewithpan SE_M_NIGHTMARE, SOUND_PAN_ATTACKER
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -34, -52, 0, 1
+	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -34, -52, 0, 0
 	delay 6
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -42, -60, 0, 1
+	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -42, -60, 0, 0
 	delay 6
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -26, -64, 0, 1
+	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -26, -64, 0, 0
 	waitforvisualfinish
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 4, 0, RGB_BLACK
 	waitforvisualfinish

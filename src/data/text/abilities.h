@@ -391,6 +391,8 @@ static const u8 sAdaptiveOriginDescription[] = _("If all party Pokemon have diff
 static const u8 sVerdantHavenDescription[] = _("On First healing move: Use Leech Seed");
 static const u8 sEruptionDescription[] = _("On First Fire move: Use Smokescreen");
 static const u8 sDeathRollDescription[] = _("On First bite move: Trap Target");
+static const u8 sScamperDescription[] = _("On full health switch-in: Use Substitute");
+static const u8 sNocturnalDescription[] = _("+1 priority vs Sleeping targets; 100% acc Hypnosis during Eclipse");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -796,6 +798,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VERDANT_HAVEN] = _("Verdant Haven"),
     [ABILITY_ERUPTION] = _("Eruption"),
     [ABILITY_DEATH_ROLL] = _("Death Roll"),
+    [ABILITY_SCAMPER] = _("Scamper"),
+    [ABILITY_NOCTURNAL] = _("Nocturnal"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1201,6 +1205,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VERDANT_HAVEN] = _("VerdantHaven"),
     [ABILITY_ERUPTION] = _("Eruption"),
     [ABILITY_DEATH_ROLL] = _("Death Roll"),
+    [ABILITY_SCAMPER] = _("Scamper"),
+    [ABILITY_NOCTURNAL] = _("Nocturnal"),
 };
 #endif
 
@@ -1607,4 +1613,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_VERDANT_HAVEN] = sVerdantHavenDescription,
     [ABILITY_ERUPTION] = sEruptionDescription,
     [ABILITY_DEATH_ROLL] = sDeathRollDescription,
+    [ABILITY_SCAMPER] = sScamperDescription,
+    [ABILITY_NOCTURNAL] = sNocturnalDescription,
 };

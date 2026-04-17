@@ -4829,6 +4829,54 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SCAMPER)
+         && !uniqueDone
+         && AtMaxHp(battler)
+         && !(gBattleMons[battler].status2 & STATUS2_SUBSTITUTE))
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+            u32 battlerSide = GetBattlerSide(battler);
+
+            if ((gSideStatuses[battlerSide] & SIDE_STATUS_SPIKES)
+             && !HasBattlerAbility(battler, ABILITY_MAGIC_GUARD)
+             && IsBattlerAffectedByHazards(battler, FALSE))
+            {
+                if (IsBattlerGrounded(battler))
+                    return 0;
+            }
+
+            if ((gSideStatuses[battlerSide] & SIDE_STATUS_STEALTH_ROCK)
+             && !HasBattlerAbility(battler, ABILITY_MAGIC_GUARD)
+             && IsBattlerAffectedByHazards(battler, FALSE))
+            {
+                return 0;
+            }
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!IsBattlerAlive(opposingBattler))
+                    continue;
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                uniqueDone = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_SCAMPER);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_SUBSTITUTE;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FRIGHTMARE) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);

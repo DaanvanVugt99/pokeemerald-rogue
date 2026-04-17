@@ -4941,6 +4941,15 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_NOCTURNAL)
+     && gBattleStruct->moveTarget[battler] < gBattlersCount
+     && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
+     && IsBattlerAlive(gBattleStruct->moveTarget[battler])
+     && (gBattleMons[gBattleStruct->moveTarget[battler]].status1 & STATUS1_SLEEP))
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_ONE_MIND)
      && gBattleMoves[move].type == TYPE_PSYCHIC)
     {

@@ -1731,6 +1731,10 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
      && HasBattlerAbility(battlerAtk, ABILITY_SPIRAL_GAZE)
      && gDisableStructs[battlerAtk].isFirstTurn)
         moveAcc = 100;
+    if (move == MOVE_HYPNOSIS
+     && HasBattlerAbility(battlerAtk, ABILITY_NOCTURNAL)
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_ECLIPSE))
+        moveAcc = 100;
     // Check Thunder and Hurricane on sunny weather.
     if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_SUN)
       && (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
