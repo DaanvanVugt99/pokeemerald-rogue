@@ -396,6 +396,9 @@ static const u8 sNocturnalDescription[] = _("+1 priority vs Sleeping targets; 10
 static const u8 sFormationFighterDescription[] = _("If exactly 1 status move: Status moves +1 Priority; take 20% less damage");
 static const u8 sBroodingDescription[] = _("On switch-in, if foe has no hazards: Set Infested Terrain");
 static const u8 sAbyssalLightDescription[] = _("When hit super-effectively: lower attacker's Accuracy by 2");
+static const u8 sDivineFavorDescription[] = _("Once per battle: survive a KO blow with 1 HP");
+static const u8 sOmnisenseDescription[] = _("Reflect status moves; on switch-in, reveal foes' held items");
+static const u8 sBeaconDescription[] = _("Pulse moves lower the target's Sp. Def by 1");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -806,6 +809,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FORMATION_FIGHTER] = _("FormationFighter"),
     [ABILITY_BROODING] = _("Brooding"),
     [ABILITY_ABYSSAL_LIGHT] = _("Abyssal Light"),
+    [ABILITY_DIVINE_FAVOR] = _("Divine Favor"),
+    [ABILITY_OMNISENSE] = _("Omnisense"),
+    [ABILITY_BEACON] = _("Beacon"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1216,6 +1222,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FORMATION_FIGHTER] = _("FormFighter"),
     [ABILITY_BROODING] = _("Brooding"),
     [ABILITY_ABYSSAL_LIGHT] = _("AbyssalLight"),
+    [ABILITY_DIVINE_FAVOR] = _("DivineFavor"),
+    [ABILITY_OMNISENSE] = _("Omnisense"),
+    [ABILITY_BEACON] = _("Beacon"),
 };
 #endif
 
@@ -1627,4 +1636,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_FORMATION_FIGHTER] = sFormationFighterDescription,
     [ABILITY_BROODING] = sBroodingDescription,
     [ABILITY_ABYSSAL_LIGHT] = sAbyssalLightDescription,
+    [ABILITY_DIVINE_FAVOR] = sDivineFavorDescription,
+    [ABILITY_OMNISENSE] = sOmnisenseDescription,
+    [ABILITY_BEACON] = sBeaconDescription,
 };

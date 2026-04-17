@@ -3111,6 +3111,7 @@ static void BattleStartClearSetData(void)
     for (i = 0; i < ARRAY_COUNT(gSideTimers); i++)
     {
         gSideTimers[i].stickyWebBattlerId = 0xFF;
+        gBattleStruct->uniqueAbilityUsed[i] = 0;
     }
     gBattleStruct->appearedInBattle = 0;
     gBattleStruct->beatUpSlot = 0;

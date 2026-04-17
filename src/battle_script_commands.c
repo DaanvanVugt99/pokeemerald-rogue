@@ -1462,18 +1462,20 @@ static void Cmd_attackcanceler(void)
         }
         return;
     }
-    else if (HasBattlerAbility(gBattlerTarget, ABILITY_MAGIC_BOUNCE)
+    else if ((HasBattlerAbility(gBattlerTarget, ABILITY_MAGIC_BOUNCE)
+           || HasBattlerAbility(gBattlerTarget, ABILITY_OMNISENSE))
              && gBattleMoves[gCurrentMove].magicCoatAffected
              && !gProtectStructs[gBattlerAttacker].usesBouncedMove)
     {
+        u32 triggeredAbility = HasBattlerAbility(gBattlerTarget, ABILITY_OMNISENSE) ? ABILITY_OMNISENSE : ABILITY_MAGIC_BOUNCE;
         gProtectStructs[gBattlerTarget].usesBouncedMove = TRUE;
         gBattleCommunication[MULTISTRING_CHOOSER] = 1;
         // Edge case for bouncing a powder move against a grass type pokemon.
         SetAtkCancellerForCalledMove();
         BattleScriptPushCursor();
         gBattlescriptCurrInstr = BattleScript_MagicCoatBounce;
-        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_MAGIC_BOUNCE);
-        RecordAbilityBattle(gBattlerTarget, ABILITY_MAGIC_BOUNCE);
+        SetBattlerTriggeredAbility(gBattlerTarget, triggeredAbility);
+        RecordAbilityBattle(gBattlerTarget, triggeredAbility);
         return;
     }
 
@@ -2178,6 +2180,7 @@ static void Cmd_adjustdamage(void)
     u32 affectionScore = GetBattlerAffectionHearts(gBattlerTarget);
     u32 rand = Random() % 100;
     bool8 endureCharmActive = FALSE;
+    bool8 divineFavorActive = FALSE;
 
     GET_MOVE_TYPE(gCurrentMove, moveType);
 
@@ -2221,6 +2224,13 @@ static void Cmd_adjustdamage(void)
         RecordItemEffectBattle(gBattlerTarget, holdEffect);
         gSpecialStatuses[gBattlerTarget].focusSashed = TRUE;
     }
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_DIVINE_FAVOR)
+          && gBattleMoves[gCurrentMove].effect != EFFECT_FALSE_SWIPE
+          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerTarget)] & gBitTable[gBattlerPartyIndexes[gBattlerTarget]]))
+    {
+        RecordAbilityBattle(gBattlerTarget, ABILITY_DIVINE_FAVOR);
+        divineFavorActive = TRUE;
+    }
     else if (B_AFFECTION_MECHANICS == TRUE && GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER && affectionScore >= AFFECTION_THREE_HEARTS)
     {
         if ((affectionScore == AFFECTION_FIVE_HEARTS && rand < 20)
@@ -2239,6 +2249,7 @@ static void Cmd_adjustdamage(void)
         && !gSpecialStatuses[gBattlerTarget].focusSashed
         && (B_AFFECTION_MECHANICS == FALSE || !gSpecialStatuses[gBattlerTarget].affectionEndured)
         && !gSpecialStatuses[gBattlerTarget].sturdied
+        && !divineFavorActive
         && !endureCharmActive)
         goto END;
 
@@ -2259,6 +2270,12 @@ static void Cmd_adjustdamage(void)
     {
         gMoveResultFlags |= MOVE_RESULT_STURDIED;
         gLastUsedAbility = ABILITY_STURDY;
+    }
+    else if (divineFavorActive)
+    {
+        gMoveResultFlags |= MOVE_RESULT_STURDIED;
+        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_DIVINE_FAVOR);
+        gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerTarget)] |= gBitTable[gBattlerPartyIndexes[gBattlerTarget]];
     }
     else if (B_AFFECTION_MECHANICS == TRUE && gSpecialStatuses[gBattlerTarget].affectionEndured)
     {
@@ -12461,6 +12478,7 @@ static void Cmd_tryKO(void)
     u32 holdEffect = GetBattlerHoldEffect(gBattlerTarget, TRUE);
     u16 targetAbility = GetBattlerAbility(gBattlerTarget);
     bool8 endureCharmActive = FALSE;
+    bool8 divineFavorActive = FALSE;
 
     // Dynamaxed Pokemon cannot be hit by OHKO moves.
     if (IsDynamaxed(gBattlerTarget))
@@ -12482,6 +12500,12 @@ static void Cmd_tryKO(void)
     {
         gSpecialStatuses[gBattlerTarget].focusSashed = TRUE;
         RecordItemEffectBattle(gBattlerTarget, holdEffect);
+    }
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_DIVINE_FAVOR)
+          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerTarget)] & gBitTable[gBattlerPartyIndexes[gBattlerTarget]]))
+    {
+        RecordAbilityBattle(gBattlerTarget, ABILITY_DIVINE_FAVOR);
+        divineFavorActive = TRUE;
     }
     else
     {
@@ -12549,6 +12573,13 @@ static void Cmd_tryKO(void)
             {
                 gBattleMoveDamage = gBattleMons[gBattlerTarget].hp - 1;
                 gMoveResultFlags |= MOVE_RESULT_FOE_ENDURED;
+            }
+            else if (divineFavorActive)
+            {
+                gBattleMoveDamage = gBattleMons[gBattlerTarget].hp - 1;
+                gMoveResultFlags |= MOVE_RESULT_STURDIED;
+                SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_DIVINE_FAVOR);
+                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerTarget)] |= gBitTable[gBattlerPartyIndexes[gBattlerTarget]];
             }
             else
             {

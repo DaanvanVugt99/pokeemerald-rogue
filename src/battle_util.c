@@ -4854,6 +4854,17 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_OMNISENSE) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_OMNISENSE);
+            gBattlerAttacker = battler;
+            BattleScriptPushCursorAndCallback(BattleScript_FriskActivates);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SCAMPER)
          && !uniqueDone
          && AtMaxHp(battler)
@@ -6323,7 +6334,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
             else if (GetChosenMovePriority(gBattlerAttacker) > 0
                      && BlocksPrankster(move, gBattlerAttacker, gBattlerTarget, TRUE)
-                     && !(IS_MOVE_STATUS(move) && (targetAbility == ABILITY_MAGIC_BOUNCE || gProtectStructs[gBattlerTarget].bounceMove)))
+                     && !(IS_MOVE_STATUS(move) && (targetAbility == ABILITY_MAGIC_BOUNCE
+                                                || HasBattlerAbility(gBattlerTarget, ABILITY_OMNISENSE)
+                                                || gProtectStructs[gBattlerTarget].bounceMove)))
             {
                 if (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE) || !(moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY)))
                     CancelMultiTurnMoves(gBattlerAttacker); // Don't cancel moves that can hit two targets bc one target might not be protected
@@ -7903,6 +7916,24 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleMoveDamage = -drainedHp;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BEACON)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].pulseMove
+         && (CompareStat(gBattlerTarget, STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BEACON);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
 
