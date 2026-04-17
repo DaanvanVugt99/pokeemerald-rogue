@@ -399,6 +399,10 @@ static const u8 sAbyssalLightDescription[] = _("When hit super-effectively: lowe
 static const u8 sDivineFavorDescription[] = _("Once per battle: survive a KO blow with 1 HP");
 static const u8 sOmnisenseDescription[] = _("Reflect status moves; on switch-in, reveal foes' held items");
 static const u8 sBeaconDescription[] = _("Pulse moves lower the target's Sp. Def by 1");
+static const u8 sFestivalDescription[] = _("Using a dance move sets Grassy Terrain");
+static const u8 sBuoyancyDescription[] = _("Ignores entry hazards");
+static const u8 sDisguisedDescription[] = _("On hit: become Rock-type; gain +1 Attack and Defense");
+static const u8 sRoyalStormDescription[] = _("On switch-in: set rain; in rain, blocks opposing priority moves");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -812,6 +816,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DIVINE_FAVOR] = _("Divine Favor"),
     [ABILITY_OMNISENSE] = _("Omnisense"),
     [ABILITY_BEACON] = _("Beacon"),
+    [ABILITY_FESTIVAL] = _("Festival"),
+    [ABILITY_BUOYANCY] = _("Buoyancy"),
+    [ABILITY_DISGUISED] = _("Disguised"),
+    [ABILITY_ROYAL_STORM] = _("Royal Storm"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1225,6 +1233,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DIVINE_FAVOR] = _("DivineFavor"),
     [ABILITY_OMNISENSE] = _("Omnisense"),
     [ABILITY_BEACON] = _("Beacon"),
+    [ABILITY_FESTIVAL] = _("Festival"),
+    [ABILITY_BUOYANCY] = _("Buoyancy"),
+    [ABILITY_DISGUISED] = _("Disguised"),
+    [ABILITY_ROYAL_STORM] = _("Royal Storm"),
 };
 #endif
 
@@ -1639,4 +1651,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DIVINE_FAVOR] = sDivineFavorDescription,
     [ABILITY_OMNISENSE] = sOmnisenseDescription,
     [ABILITY_BEACON] = sBeaconDescription,
+    [ABILITY_FESTIVAL] = sFestivalDescription,
+    [ABILITY_BUOYANCY] = sBuoyancyDescription,
+    [ABILITY_DISGUISED] = sDisguisedDescription,
+    [ABILITY_ROYAL_STORM] = sRoyalStormDescription,
 };

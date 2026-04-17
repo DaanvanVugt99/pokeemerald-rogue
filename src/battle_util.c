@@ -4865,6 +4865,25 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ROYAL_STORM) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_STORM);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_RAIN, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_DrizzleActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SCAMPER)
          && !uniqueDone
          && AtMaxHp(battler)
@@ -6316,8 +6335,15 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlescriptCurrInstr = BattleScript_SoundproofProtected;
                 effect = 1;
             }
-            else if ((HasBattlerAbility(battler, ABILITY_DAZZLING) || HasBattlerAbility(battler, ABILITY_QUEENLY_MAJESTY) || HasBattlerAbility(battler, ABILITY_ARMOR_TAIL) || IsBattlerAlive(battler ^= BIT_FLANK))
-                  && (HasBattlerAbility(battler, ABILITY_DAZZLING) || HasBattlerAbility(battler, ABILITY_QUEENLY_MAJESTY) || HasBattlerAbility(battler, ABILITY_ARMOR_TAIL))
+            else if ((HasBattlerAbility(battler, ABILITY_DAZZLING)
+                   || HasBattlerAbility(battler, ABILITY_QUEENLY_MAJESTY)
+                   || HasBattlerAbility(battler, ABILITY_ARMOR_TAIL)
+                   || (HasBattlerAbility(battler, ABILITY_ROYAL_STORM) && (gBattleWeather & B_WEATHER_RAIN))
+                   || IsBattlerAlive(battler ^= BIT_FLANK))
+                  && (HasBattlerAbility(battler, ABILITY_DAZZLING)
+                   || HasBattlerAbility(battler, ABILITY_QUEENLY_MAJESTY)
+                   || HasBattlerAbility(battler, ABILITY_ARMOR_TAIL)
+                   || (HasBattlerAbility(battler, ABILITY_ROYAL_STORM) && (gBattleWeather & B_WEATHER_RAIN)))
                   && GetChosenMovePriority(gBattlerAttacker) > 0
                   && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
             {
@@ -6325,6 +6351,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     SetBattlerTriggeredAbility(battler, ABILITY_DAZZLING);
                 else if (HasBattlerAbility(battler, ABILITY_QUEENLY_MAJESTY))
                     SetBattlerTriggeredAbility(battler, ABILITY_QUEENLY_MAJESTY);
+                else if (HasBattlerAbility(battler, ABILITY_ROYAL_STORM) && (gBattleWeather & B_WEATHER_RAIN))
+                    SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_STORM);
                 else
                     SetBattlerTriggeredAbility(battler, ABILITY_ARMOR_TAIL);
                 if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
@@ -7111,6 +7139,21 @@ if (triggeringAbility != ABILITY_NONE)
             }
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_StaticChargeActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DISGUISED)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && !IS_BATTLER_OF_TYPE(battler, TYPE_ROCK))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DISGUISED);
+            SET_BATTLER_TYPE(battler, TYPE_ROCK);
+            PREPARE_TYPE_BUFFER(gBattleTextBuff1, TYPE_ROCK);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DisguisedActivates;
             effect++;
         }
 
@@ -7934,6 +7977,17 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FESTIVAL)
+         && gBattleMoves[move].danceMove
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && IsFinalMultiHitStrike()
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FESTIVAL);
+            BattleScriptPushCursorAndCallback(BattleScript_GrassySurgeActivates);
             effect++;
         }
 
@@ -13739,7 +13793,11 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
 {
     bool32 ret = TRUE;
     u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
-    if (toxicSpikes && holdEffect == HOLD_EFFECT_HEAVY_DUTY_BOOTS && !IS_BATTLER_OF_TYPE(battler, TYPE_POISON))
+    if (HasBattlerAbility(battler, ABILITY_BUOYANCY))
+    {
+        ret = FALSE;
+    }
+    else if (toxicSpikes && holdEffect == HOLD_EFFECT_HEAVY_DUTY_BOOTS && !IS_BATTLER_OF_TYPE(battler, TYPE_POISON))
     {
         ret = FALSE;
         RecordItemEffectBattle(battler, holdEffect);
