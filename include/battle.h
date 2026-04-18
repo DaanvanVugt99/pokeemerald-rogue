@@ -172,6 +172,7 @@ struct ProtectStruct
     u16 eatMirrorHerb:1;
     u16 uniqueAbilityActive:1;
     u16 extraMoveUsed:1;
+    u16 uniqueAbilityHealedThisTurn:1;
     u16 activateOpportunist:2; // 2 - to copy stats. 1 - stats copied (do not repeat). 0 - no stats to copy
     u32 physicalDmg;
     u32 specialDmg;

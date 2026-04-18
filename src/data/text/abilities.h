@@ -424,6 +424,8 @@ static const u8 sBattleTranceDescription[] = _("Critical hits trigger Bulk Up");
 static const u8 sColdReadDescription[] = _("Using Focus Energy also raises Speed by 1");
 static const u8 sHoneyRageDescription[] = _("Eating a Berry makes the next damaging move heal 1/4 damage dealt");
 static const u8 sBasaltShellDescription[] = _("Super-effective hits deal half damage before this Pokemon moves");
+static const u8 sPlowThroughDescription[] = _("Ground move: extra 20 BP Icy Wind; 40 BP in Snow");
+static const u8 sReefProtectionDescription[] = _("First heal each turn scatters a layer of Spikes");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -862,6 +864,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_COLD_READ] = _("Cold Read"),
     [ABILITY_HONEY_RAGE] = _("Honey Rage"),
     [ABILITY_BASALT_SHELL] = _("Basalt Shell"),
+    [ABILITY_PLOW_THROUGH] = _("Plow Through"),
+    [ABILITY_REEF_PROTECTION] = _("Reef Protection"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1300,6 +1304,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_COLD_READ] = _("Cold Read"),
     [ABILITY_HONEY_RAGE] = _("Honey Rage"),
     [ABILITY_BASALT_SHELL] = _("Basalt Shell"),
+    [ABILITY_PLOW_THROUGH] = _("Plow Through"),
+    [ABILITY_REEF_PROTECTION] = _("Reef Prot."),
 };
 #endif
 
@@ -1739,4 +1745,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_COLD_READ] = sColdReadDescription,
     [ABILITY_HONEY_RAGE] = sHoneyRageDescription,
     [ABILITY_BASALT_SHELL] = sBasaltShellDescription,
+    [ABILITY_PLOW_THROUGH] = sPlowThroughDescription,
+    [ABILITY_REEF_PROTECTION] = sReefProtectionDescription,
 };

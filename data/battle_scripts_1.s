@@ -7732,7 +7732,8 @@ BattleScript_SharpQuillsActivates::
 	copybyte gBattlerTarget, sSAVED_BATTLER
 	trysetspikes BattleScript_SharpQuillsRet
 	call BattleScript_AbilityPopUp
-	pause B_WAIT_TIME_SHORT
+	playmoveanimation BS_ATTACKER, MOVE_SPIKES
+	waitanimation
 	printstring STRINGID_SPIKESSCATTERED
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_SharpQuillsRet:
@@ -9027,6 +9028,18 @@ BattleScript_AbilityPopupEnd3::
 	waitmessage B_WAIT_TIME_SHORT
 	end3
 
+BattleScript_ReefProtectionActivates::
+	savetarget
+	trysetspikes BattleScript_MoveEnd
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_TARGET, MOVE_SPIKES
+	waitanimation
+	printstring STRINGID_SPIKESSCATTERED
+	waitmessage B_WAIT_TIME_LONG
+	restoretarget
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	return
+
 BattleScript_SplitInstinctSpeed::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_SPLITINSTINCTSPEED
@@ -9986,14 +9999,6 @@ BattleScript_RaiseStatOnFaintingTarget::
 BattleScript_RaiseStatOnFaintingTarget_End:
 	return
 
-BattleScript_ShatterActivates::
-	copybyte gBattlerAbility, gBattlerAttacker
-	call BattleScript_AbilityPopUp
-	setstealthrock BattleScript_MoveEnd
-	printfromtable gDmgHazardsStringIds
-	waitmessage B_WAIT_TIME_LONG
-	return
-
 BattleScript_AttackerAbilityStatRaise::
 	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_AttackerAbilityStatRaise_End
 	copybyte gBattlerAbility, gBattlerAttacker
@@ -10014,6 +10019,16 @@ BattleScript_FellStingerRaisesStat::
 	printfromtable gStatUpStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_FellStingerRaisesAtkEnd:
+	return
+
+BattleScript_ShatterActivates::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	setstealthrock BattleScript_MoveEnd
+	playmoveanimation BS_ATTACKER, MOVE_STEALTH_ROCK
+	waitanimation
+	printfromtable gDmgHazardsStringIds
+	waitmessage B_WAIT_TIME_LONG
 	return
 
 BattleScript_AttackerAbilityStatRaiseEnd3::
@@ -10279,6 +10294,8 @@ BattleScript_FungalInfectionActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
 	setseeded
+	playmoveanimation BS_ATTACKER, MOVE_LEECH_SEED
+	waitanimation
 	printfromtable gLeechSeedStringIds
 	waitmessage B_WAIT_TIME_LONG
 	return

@@ -7605,6 +7605,27 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PLOW_THROUGH)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_GROUND
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PLOW_THROUGH);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_ICY_WIND;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            if (IsBattlerWeatherAffected(battler, B_WEATHER_SNOW))
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
+            else
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SWARM_ASSAULT)
          && IsBattlerAlive(battler)
          && IsMoveMakingContact(move, battler)

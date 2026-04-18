@@ -17,6 +17,11 @@ SINGLE_BATTLE_TEST("Fungal Infection seeds damaged targets and drains at end of 
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        if (uniqueAbility == ABILITY_FUNGAL_INFECTION)
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_LEECH_SEED, player);
+        else
+            NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_LEECH_SEED, player);
     } THEN {
         if (uniqueAbility == ABILITY_FUNGAL_INFECTION)
             EXPECT_GT(player->hp, 50);

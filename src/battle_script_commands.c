@@ -2534,13 +2534,24 @@ static void Cmd_datahpupdate(void)
         }
         else
         {
+            bool32 triggerReefProtection = FALSE;
             gHitMarker &= ~HITMARKER_IGNORE_SUBSTITUTE;
             if (gBattleMoveDamage < 0)
             {
                 // Negative damage is HP gain
+                u16 oldHp = gBattleMons[battler].hp;
                 gBattleMons[battler].hp += -gBattleMoveDamage;
                 if (gBattleMons[battler].hp > gBattleMons[battler].maxHP)
                     gBattleMons[battler].hp = gBattleMons[battler].maxHP;
+
+                if (gBattleMons[battler].hp > oldHp
+                 && HasBattlerAbility(battler, ABILITY_REEF_PROTECTION)
+                 && !gProtectStructs[battler].uniqueAbilityHealedThisTurn
+                 && gSideTimers[BATTLE_OPPOSITE(GetBattlerSide(battler))].spikesAmount < 3)
+                {
+                    gProtectStructs[battler].uniqueAbilityHealedThisTurn = TRUE;
+                    triggerReefProtection = TRUE;
+                }
             }
             else
             {
@@ -2613,6 +2624,25 @@ static void Cmd_datahpupdate(void)
             // Send updated HP
             BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_HP_BATTLE, 0, sizeof(gBattleMons[battler].hp), &gBattleMons[battler].hp);
             MarkBattlerForControllerExec(battler);
+
+            if (triggerReefProtection)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_REEF_PROTECTION);
+                gBattleScripting.savedBattler = gBattlerAttacker;
+                gBattlerTarget = BATTLE_OPPOSITE(battler);
+                if (!IsBattlerAlive(gBattlerTarget) || GetBattlerSide(gBattlerTarget) == GetBattlerSide(battler))
+                {
+                    for (gBattlerTarget = 0; gBattlerTarget < gBattlersCount; gBattlerTarget++)
+                    {
+                        if (GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler) && IsBattlerAlive(gBattlerTarget))
+                            break;
+                    }
+                }
+                gBattlerAttacker = gBattlerAbility = battler;
+                BattleScriptPush(cmd->nextInstr);
+                gBattlescriptCurrInstr = BattleScript_ReefProtectionActivates;
+                return;
+            }
         }
     }
     else
