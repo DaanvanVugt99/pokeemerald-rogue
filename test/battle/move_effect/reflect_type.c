@@ -139,17 +139,17 @@ SINGLE_BATTLE_TEST("Reflect Type copies a target's pure type")
 {
     ASSUME(gSpeciesInfo[SPECIES_ARCANINE].types[0] == TYPE_FIRE);
     ASSUME(gSpeciesInfo[SPECIES_ARCANINE].types[1] == TYPE_FIRE);
-    ASSUME(gSpeciesInfo[SPECIES_SUDOWOODO].types[0] == TYPE_ROCK);
-    ASSUME(gSpeciesInfo[SPECIES_SUDOWOODO].types[1] == TYPE_ROCK);
+    ASSUME(gSpeciesInfo[SPECIES_NOSEPASS].types[0] == TYPE_ROCK);
+    ASSUME(gSpeciesInfo[SPECIES_NOSEPASS].types[1] == TYPE_ROCK);
     GIVEN {
         PLAYER(SPECIES_ARCANINE);
-        OPPONENT(SPECIES_SUDOWOODO);
+        OPPONENT(SPECIES_NOSEPASS);
     } WHEN {
         TURN { MOVE(player, MOVE_REFLECT_TYPE); }
     } SCENE {
         MESSAGE("Arcanine used Reflect Type!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_REFLECT_TYPE, player);
-        MESSAGE("Arcanine's type changed to match the Foe Sudowoodo's!");
+        MESSAGE("Arcanine's type changed to match the Foe Nosepass's!");
     } THEN {
         EXPECT_EQ(player->type1, TYPE_ROCK);
         EXPECT_EQ(player->type2, TYPE_ROCK);

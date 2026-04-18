@@ -103,11 +103,11 @@ SINGLE_BATTLE_TEST("Toxic Spikes do not poison airborne Pokemon")
     PARAMETRIZE { species = SPECIES_PIDGEY; move1 = MOVE_GRAVITY; airborne = FALSE; }
     PARAMETRIZE { species = SPECIES_PIDGEY; move1 = MOVE_INGRAIN; airborne = FALSE; }
 
-    ASSUME(gSpeciesInfo[SPECIES_UNOWN].abilities[0] == ABILITY_LEVITATE);
-    PARAMETRIZE { species = SPECIES_UNOWN; airborne = TRUE; }
-    PARAMETRIZE { species = SPECIES_UNOWN; item = ITEM_IRON_BALL; airborne = FALSE; }
-    PARAMETRIZE { species = SPECIES_UNOWN; move1 = MOVE_GRAVITY; airborne = FALSE; }
-    PARAMETRIZE { species = SPECIES_UNOWN; move1 = MOVE_INGRAIN; airborne = FALSE; }
+    ASSUME(gSpeciesInfo[SPECIES_MISDREAVUS].abilities[0] == ABILITY_LEVITATE);
+    PARAMETRIZE { species = SPECIES_MISDREAVUS; airborne = TRUE; }
+    PARAMETRIZE { species = SPECIES_MISDREAVUS; item = ITEM_IRON_BALL; airborne = FALSE; }
+    PARAMETRIZE { species = SPECIES_MISDREAVUS; move1 = MOVE_GRAVITY; airborne = FALSE; }
+    PARAMETRIZE { species = SPECIES_MISDREAVUS; move1 = MOVE_INGRAIN; airborne = FALSE; }
 
     PARAMETRIZE { move1 = MOVE_MAGNET_RISE; airborne = TRUE; }
     PARAMETRIZE { move1 = MOVE_MAGNET_RISE; item = ITEM_IRON_BALL; airborne = FALSE; }

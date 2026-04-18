@@ -428,6 +428,9 @@ static const u8 sPlowThroughDescription[] = _("Ground move: extra 20 BP Icy Wind
 static const u8 sReefProtectionDescription[] = _("First heal each turn scatters a layer of Spikes");
 static const u8 sAdaptiveArmoryDescription[] = _("With 4 attacking move types, using one changes type to match");
 static const u8 sSpecialDeliveryDescription[] = _("On switch-in, uses Present on a random target");
+static const u8 sDampeningDescription[] = _("On switch-in, lowers foes' Sp. Atk by 1");
+static const u8 sScrapDraftDescription[] = _("Using Whirlwind also scatters a layer of Spikes");
+static const u8 sInfernalRageDescription[] = _("Fire moves deal 30% more damage and cause 10% recoil");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -870,6 +873,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_REEF_PROTECTION] = _("Reef Protection"),
     [ABILITY_ADAPTIVE_ARMORY] = _("Adaptive Armory"),
     [ABILITY_SPECIAL_DELIVERY] = _("Special Delivery"),
+    [ABILITY_DAMPENING] = _("Dampening"),
+    [ABILITY_SCRAP_DRAFT] = _("Scrap Draft"),
+    [ABILITY_INFERNAL_RAGE] = _("Infernal Rage"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1312,6 +1318,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_REEF_PROTECTION] = _("Reef Prot."),
     [ABILITY_ADAPTIVE_ARMORY] = _("AdaptArmory"),
     [ABILITY_SPECIAL_DELIVERY] = _("SpecDelivry"),
+    [ABILITY_DAMPENING] = _("Dampening"),
+    [ABILITY_SCRAP_DRAFT] = _("Scrap Draft"),
+    [ABILITY_INFERNAL_RAGE] = _("InfernalRage"),
 };
 #endif
 
@@ -1755,4 +1764,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_REEF_PROTECTION] = sReefProtectionDescription,
     [ABILITY_ADAPTIVE_ARMORY] = sAdaptiveArmoryDescription,
     [ABILITY_SPECIAL_DELIVERY] = sSpecialDeliveryDescription,
+    [ABILITY_DAMPENING] = sDampeningDescription,
+    [ABILITY_SCRAP_DRAFT] = sScrapDraftDescription,
+    [ABILITY_INFERNAL_RAGE] = sInfernalRageDescription,
 };

@@ -5818,6 +5818,16 @@ special_delivery_done:
                 effect++;
             }
             break;
+        case ABILITY_DAMPENING:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = battler;
+                SET_STATCHANGER(STAT_SPATK, 1, TRUE);
+                BattleScriptPushCursorAndCallback(BattleScript_DampeningActivates);
+                effect++;
+            }
+            break;
         case ABILITY_STRONG_WINDS:
             if (!gSpecialStatuses[battler].switchInAbilityDone
              && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
@@ -10782,6 +10792,28 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             }
             break;
         }
+
+        if (IsBattlerAlive(gBattlerAttacker)
+         && HasBattlerAbility(gBattlerAttacker, ABILITY_INFERNAL_RAGE)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !HasBattlerAbility(gBattlerAttacker, ABILITY_MAGIC_GUARD)
+         && !gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage
+         && gSpecialStatuses[gBattlerAttacker].damagedMons)
+        {
+            u32 moveType;
+            GET_MOVE_TYPE(gCurrentMove, moveType);
+            if (moveType == TYPE_FIRE)
+            {
+                gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 10;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_INFERNAL_RAGE);
+                PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                effect = ITEM_HP_CHANGE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_InfernalRageActivates;
+            }
+        }
         break;
     case ITEMEFFECT_TARGET:
         if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
@@ -12874,6 +12906,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
     if (HasBattlerAbility(battlerAtk, ABILITY_TERRITORIAL)
      && IsBattlerTerrainAffected(battlerDef, STATUS_FIELD_TERRAIN_ANY))
         return UQ_4_12(2.0);
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_INFERNAL_RAGE))
+    {
+        u32 moveType;
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_FIRE)
+            return UQ_4_12(1.3);
+    }
 
     switch (abilityAtk)
     {

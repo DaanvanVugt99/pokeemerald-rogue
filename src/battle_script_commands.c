@@ -12384,6 +12384,16 @@ static void Cmd_forcerandomswitch(void)
             gBattleStruct->forcedSwitch |= gBitTable[gBattlerTarget];
             *(gBattleStruct->monToSwitchIntoId + gBattlerTarget) = validMons[RandomUniform(RNG_FORCE_RANDOM_SWITCH, 0, validMonsCount - 1)];
 
+            if (gCurrentMove == MOVE_WHIRLWIND
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_SCRAP_DRAFT)
+             && gSideTimers[GetBattlerSide(gBattlerTarget)].spikesAmount < 3)
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_SCRAP_DRAFT);
+                BattleScriptPush(BattleScript_RoarSuccessSwitch);
+                gBattlescriptCurrInstr = BattleScript_AttackerSpikesActivates;
+                return;
+            }
+
             if (!IsMultiBattle())
                 SwitchPartyOrder(gBattlerTarget);
 
@@ -12404,7 +12414,18 @@ static void Cmd_forcerandomswitch(void)
     {
         // In normal wild doubles, Roar will always fail if the user's level is less than the target's.
         if (gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level)
+        {
             gBattlescriptCurrInstr = BattleScript_RoarSuccessEndBattle;
+            if (gCurrentMove == MOVE_WHIRLWIND
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_SCRAP_DRAFT)
+             && gSideTimers[GetBattlerSide(gBattlerTarget)].spikesAmount < 3)
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_SCRAP_DRAFT);
+                BattleScriptPush(BattleScript_RoarSuccessEndBattle);
+                gBattlescriptCurrInstr = BattleScript_AttackerSpikesActivates;
+                return;
+            }
+        }
         else
             gBattlescriptCurrInstr = cmd->failInstr;
     }
