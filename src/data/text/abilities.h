@@ -403,6 +403,10 @@ static const u8 sFestivalDescription[] = _("Using a dance move sets Grassy Terra
 static const u8 sBuoyancyDescription[] = _("Ignores entry hazards");
 static const u8 sDisguisedDescription[] = _("On hit: become Rock-type; gain +1 Attack and Defense");
 static const u8 sRoyalStormDescription[] = _("On switch-in: set rain; in rain, blocks opposing priority moves");
+static const u8 sPollenPuffDescription[] = _("Ignores entry hazards; on switch-in lowers all other Pokemon's Speed");
+static const u8 sHandyworkDescription[] = _("After contact moves: use a 20 BP Scratch");
+static const u8 sSolarboostDescription[] = _("On switch-in: set sun; first turn out, Fire moves get +1 priority");
+static const u8 sAerodynamicDescription[] = _("Immune to Flying; when hit by Flying, gain +1 Speed");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -820,6 +824,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_BUOYANCY] = _("Buoyancy"),
     [ABILITY_DISGUISED] = _("Disguised"),
     [ABILITY_ROYAL_STORM] = _("Royal Storm"),
+    [ABILITY_POLLEN_PUFF] = _("Pollen Puff"),
+    [ABILITY_HANDYWORK] = _("Handywork"),
+    [ABILITY_SOLARBOOST] = _("Solarboost"),
+    [ABILITY_AERODYNAMIC] = _("Aerodynamic"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1237,6 +1245,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_BUOYANCY] = _("Buoyancy"),
     [ABILITY_DISGUISED] = _("Disguised"),
     [ABILITY_ROYAL_STORM] = _("Royal Storm"),
+    [ABILITY_POLLEN_PUFF] = _("Pollen Puff"),
+    [ABILITY_HANDYWORK] = _("Handywork"),
+    [ABILITY_SOLARBOOST] = _("Solarboost"),
+    [ABILITY_AERODYNAMIC] = _("Aerodynamic"),
 };
 #endif
 
@@ -1655,4 +1667,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_BUOYANCY] = sBuoyancyDescription,
     [ABILITY_DISGUISED] = sDisguisedDescription,
     [ABILITY_ROYAL_STORM] = sRoyalStormDescription,
+    [ABILITY_POLLEN_PUFF] = sPollenPuffDescription,
+    [ABILITY_HANDYWORK] = sHandyworkDescription,
+    [ABILITY_SOLARBOOST] = sSolarboostDescription,
+    [ABILITY_AERODYNAMIC] = sAerodynamicDescription,
 };

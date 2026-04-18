@@ -4928,6 +4928,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_SOLARBOOST)
+     && gDisableStructs[battler].isFirstTurn
+     && gBattleMoves[move].type == TYPE_FIRE)
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
      && gBattleMoves[move].punchingMove
      && gDisableStructs[battler].uniquePersistentStateActive)

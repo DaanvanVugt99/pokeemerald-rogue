@@ -16278,7 +16278,7 @@ void BS_JumpIfMoreThanHalfHP(void)
 
 void BS_JumpIfHoldEffect(void)
 {
-    u8 battler = gBattlescriptCurrInstr[5];
+    u8 battler = GetBattlerForBattleScript(gBattlescriptCurrInstr[5]);
     u16 holdEffect = T1_READ_16(gBattlescriptCurrInstr + 6);
 
     if (GetBattlerHoldEffect(battler, TRUE) == holdEffect)

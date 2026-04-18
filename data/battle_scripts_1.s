@@ -9266,6 +9266,61 @@ BattleScript_SinkholeContrary_WontIncrease:
 	printstring STRINGID_TARGETSTATWONTGOHIGHER
 	goto BattleScript_SinkholeEffect_WaitString
 
+BattleScript_PollenPuffActivates::
+	showabilitypopup BS_ATTACKER
+	copybyte sSAVED_BATTLER, gBattlerTarget
+	pause B_WAIT_TIME_LONG
+	destroyabilitypopup
+	setbyte gBattlerTarget, 0
+BattleScript_PollenPuffLoop:
+	jumpifbyteequal gBattlerTarget, gBattlerAttacker, BattleScript_PollenPuffLoopIncrement
+	jumpifabsent BS_TARGET, BattleScript_PollenPuffLoopIncrement
+	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_PollenPuffLoopIncrement
+	jumpiftype BS_TARGET, TYPE_GRASS, BattleScript_PollenPuffNoEffectPrint
+	jumpifability BS_TARGET, ABILITY_OVERCOAT, BattleScript_PollenPuffNoEffectAbility
+	jumpifability BS_TARGET, ABILITY_SHIELD_DUST, BattleScript_PollenPuffNoEffectAbility
+	jumpifholdeffect BS_TARGET, HOLD_EFFECT_SAFETY_GOGGLES, BattleScript_PollenPuffNoEffectSafetyGoggles
+	copybyte sBATTLER, gBattlerAttacker
+	setstatchanger STAT_SPEED, 1, TRUE
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_PollenPuffLoopIncrement
+	setgraphicalstatchangevalues
+	jumpifability BS_TARGET, ABILITY_CONTRARY, BattleScript_PollenPuffContrary
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+BattleScript_PollenPuffEffect_WaitString:
+	waitmessage B_WAIT_TIME_LONG
+	copybyte sBATTLER, gBattlerTarget
+	call BattleScript_TryAdrenalineOrb
+	goto BattleScript_PollenPuffLoopIncrement
+BattleScript_PollenPuffNoEffectAbility:
+	call BattleScript_AbilityPopUpTarget
+BattleScript_PollenPuffNoEffectPrint:
+	printstring STRINGID_ITDOESNTAFFECT
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_PollenPuffLoopIncrement
+BattleScript_PollenPuffNoEffectSafetyGoggles:
+	printstring STRINGID_SAFETYGOGGLESPROTECTED
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_PollenPuffLoopIncrement:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_PollenPuffLoop
+BattleScript_PollenPuffEnd:
+	copybyte sBATTLER, gBattlerAttacker
+	destroyabilitypopup
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	pause B_WAIT_TIME_MED
+	end3
+
+BattleScript_PollenPuffContrary:
+	call BattleScript_AbilityPopUpTarget
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_PollenPuffContrary_WontIncrease
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	goto BattleScript_PollenPuffEffect_WaitString
+BattleScript_PollenPuffContrary_WontIncrease:
+	printstring STRINGID_TARGETSTATWONTGOHIGHER
+	goto BattleScript_PollenPuffEffect_WaitString
+
 BattleScript_DroughtActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

@@ -4884,6 +4884,37 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SOLARBOOST) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_SOLARBOOST);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_DroughtActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_POLLEN_PUFF) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_POLLEN_PUFF);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_SPEED, 1, TRUE);
+            BattleScriptPushCursorAndCallback(BattleScript_PollenPuffActivates);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SCAMPER)
          && !uniqueDone
          && AtMaxHp(battler)
@@ -6414,6 +6445,11 @@ else if (moveType == TYPE_GRASS)
     if (HasBattlerAbility(battler, ABILITY_SAP_SIPPER))
         triggeringAbility = ABILITY_SAP_SIPPER, effect = 2, statId = STAT_ATK;
 }
+else if (moveType == TYPE_FLYING)
+{
+    if (HasBattlerAbility(battler, ABILITY_AERODYNAMIC))
+        triggeringAbility = ABILITY_AERODYNAMIC, effect = 2, statId = STAT_SPEED;
+}
 else if (moveType == TYPE_FIRE
     && (B_FLASH_FIRE_FROZEN >= GEN_5 || !(gBattleMons[battler].status1 & STATUS1_FREEZE))
     && HasBattlerAbility(battler, ABILITY_FLASH_FIRE))
@@ -7372,6 +7408,25 @@ if (triggeringAbility != ABILITY_NONE)
                 VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
             else
                 VarSet(VAR_EXTRA_MOVE_DAMAGE, 10);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_HANDYWORK)
+         && IsBattlerAlive(battler)
+         && IsMoveMakingContact(move, battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_HANDYWORK);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_SCRATCH;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
             VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
             VarSet(VAR_TEMP_MOVEEFFECT, 0);
             BattleScriptPushCursor();
@@ -13793,7 +13848,8 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
 {
     bool32 ret = TRUE;
     u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
-    if (HasBattlerAbility(battler, ABILITY_BUOYANCY))
+    if (HasBattlerAbility(battler, ABILITY_BUOYANCY)
+     || HasBattlerAbility(battler, ABILITY_POLLEN_PUFF))
     {
         ret = FALSE;
     }
