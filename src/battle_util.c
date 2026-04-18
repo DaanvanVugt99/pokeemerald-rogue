@@ -7896,6 +7896,20 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_COLD_READ)
+         && move == MOVE_FOCUS_ENERGY
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_COLD_READ);
+            gEffectBattler = battler;
+            SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_MATERNAL_INSTINCT)
          && move == MOVE_PROTECT
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -8349,6 +8363,34 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_VampiricActivates;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_HONEY_RAGE)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && gBattleMoves[move].split != SPLIT_STATUS
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && TARGET_TURN_DAMAGED)
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+
+                if (!BATTLER_MAX_HP(battler)
+                 && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                {
+                s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
+
+                    SetBattlerTriggeredAbility(battler, ABILITY_HONEY_RAGE);
+                    if (drainedHp == 0)
+                        drainedHp = 1;
+                    gBattleMoveDamage = -drainedHp;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+                    effect++;
+                }
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_BEACON)
@@ -10847,7 +10889,11 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
 
     // Berry was successfully used on a Pokemon.
     if (effect && (gLastUsedItem >= FIRST_BERRY_INDEX && gLastUsedItem <= LAST_BERRY_INDEX))
+    {
         gBattleStruct->ateBerry[battler & BIT_SIDE] |= gBitTable[gBattlerPartyIndexes[battler]];
+        if (HasBattlerAbility(battler, ABILITY_HONEY_RAGE))
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+    }
 
     return effect;
 }
@@ -12778,6 +12824,14 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
      && typeEffectivenessModifier >= UQ_4_12(2.0)
      && ((gStatuses3[battlerDef] & STATUS3_UNDERGROUND)
       || IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM)))
+    {
+        return UQ_4_12(0.5);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_BASALT_SHELL)
+     && typeEffectivenessModifier >= UQ_4_12(2.0)
+     && gCurrentTurnActionNumber < gBattlersCount
+     && GetBattlerTurnOrderNum(battlerDef) > gCurrentTurnActionNumber)
     {
         return UQ_4_12(0.5);
     }
