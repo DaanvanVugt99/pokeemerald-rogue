@@ -7012,6 +7012,10 @@ if (triggeringAbility != ABILITY_NONE)
                 }
             }
             break;
+        case ABILITY_TOXIC_MONSOON:
+            if (gBattleWeather & B_WEATHER_ACID_RAIN)
+                goto POISON_POINT;
+            break;
         POISON_POINT:
         case ABILITY_POISON_POINT:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -7020,7 +7024,7 @@ if (triggeringAbility != ABILITY_NONE)
              && TARGET_TURN_DAMAGED
              && CanBePoisoned(gBattlerTarget, gBattlerAttacker)
              && IsMoveMakingContact(move, gBattlerAttacker)
-             && RandomWeighted(RNG_POISON_POINT, 2, 1))
+             && (gLastUsedAbility == ABILITY_TOXIC_MONSOON || RandomWeighted(RNG_POISON_POINT, 2, 1)))
             {
                 gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_POISON;
                 PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
@@ -7432,6 +7436,25 @@ if (triggeringAbility != ABILITY_NONE)
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
+
+        if (HasBattlerAbility(battler, ABILITY_SILVER_LINING)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SILVER_LINING);
+            gBattlerAttacker = battler;
+            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            gBattleMoveDamage *= -1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DuelistActivates;
+            effect++;
+        }
+
         break;
     }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
@@ -7534,6 +7557,29 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gCalledMove = MOVE_TORMENT;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BATTLE_TRANCE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && TARGET_TURN_DAMAGED
+         && gIsCriticalHit
+         && IsFinalMultiHitStrike()
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+         && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BATTLE_TRANCE);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_BULK_UP;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
@@ -8323,6 +8369,17 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TOXIC_MONSOON)
+         && moveType == TYPE_POISON
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && IsFinalMultiHitStrike()
+         && TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TOXIC_MONSOON);
+            BattleScriptPushCursorAndCallback(BattleScript_ToxicDelugeActivates);
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FESTIVAL)
          && gBattleMoves[move].danceMove
          && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
@@ -8750,6 +8807,7 @@ if (triggeringAbility != ABILITY_NONE)
             }
             break;
         }
+
         break;
     }
 
@@ -9078,6 +9136,7 @@ bool32 CanSleep(u32 battler)
     if (HasBattlerAbility(battler, ABILITY_INSOMNIA)
       || HasBattlerAbility(battler, ABILITY_VITAL_SPIRIT)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
+      || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
       || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
       || gBattleMons[battler].status1 & STATUS1_ANY
@@ -9095,6 +9154,7 @@ bool32 CanBePoisoned(u32 battlerAttacker, u32 battlerTarget)
      || gBattleMons[battlerTarget].status1 & STATUS1_ANY
      || HasBattlerAbility(battlerTarget, ABILITY_IMMUNITY)
      || HasBattlerAbility(battlerTarget, ABILITY_COMATOSE)
+     || HasBattlerAbility(battlerTarget, ABILITY_SILVER_LINING)
      || HasBattlerAbility(battlerTarget, ABILITY_PURIFYING_SALT)
      || IsAbilityOnSide(battlerTarget, ABILITY_PASTEL_VEIL)
      || IsAbilityStatusProtected(battlerTarget)
@@ -9111,6 +9171,7 @@ bool32 CanBeBurned(u32 battler)
       || HasBattlerAbility(battler, ABILITY_WATER_VEIL)
       || HasBattlerAbility(battler, ABILITY_WATER_BUBBLE)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
+      || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
       || HasBattlerAbility(battler, ABILITY_THERMAL_EXCHANGE)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
       || IsAbilityStatusProtected(battler)
@@ -9125,6 +9186,7 @@ bool32 CanBeParalyzed(u32 battler)
         || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
         || HasBattlerAbility(battler, ABILITY_LIMBER)
         || HasBattlerAbility(battler, ABILITY_COMATOSE)
+        || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
         || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
         || gBattleMons[battler].status1 & STATUS1_ANY
         || IsAbilityStatusProtected(battler)
@@ -9140,6 +9202,7 @@ bool32 CanBeFrozen(u32 battler)
       || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
       || HasBattlerAbility(battler, ABILITY_MAGMA_ARMOR)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
+      || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)
@@ -9154,6 +9217,7 @@ bool32 CanGetFrostbite(u32 battler)
       || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
       || HasBattlerAbility(battler, ABILITY_MAGMA_ARMOR)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
+      || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)

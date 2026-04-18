@@ -418,6 +418,9 @@ static const u8 sFortifiedSpinDescription[] = _("Protect clears your hazards and
 static const u8 sBurrowDescription[] = _("First switch-in: go underground; Dig skips charge; attacking ends it");
 static const u8 sSandSkimmerDescription[] = _("In sandstorm, this Pokemon cannot have its stats lowered");
 static const u8 sBrutalChargeDescription[] = _("First turn out: 2x Speed and 1.5x Attack");
+static const u8 sToxicMonsoonDescription[] = _("Poison moves set Acid Rain; in Acid Rain, contact poisons foes");
+static const u8 sSilverLiningDescription[] = _("Immune to status; after each hit, restore 1/16 max HP");
+static const u8 sBattleTranceDescription[] = _("Critical hits trigger Bulk Up");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -850,6 +853,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_BURROW] = _("Burrow"),
     [ABILITY_SAND_SKIMMER] = _("Sand Skimmer"),
     [ABILITY_BRUTAL_CHARGE] = _("Brutal Charge"),
+    [ABILITY_TOXIC_MONSOON] = _("Toxic Monsoon"),
+    [ABILITY_SILVER_LINING] = _("Silver Lining"),
+    [ABILITY_BATTLE_TRANCE] = _("Battle Trance"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1282,6 +1288,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_BURROW] = _("Burrow"),
     [ABILITY_SAND_SKIMMER] = _("SandSkimmer"),
     [ABILITY_BRUTAL_CHARGE] = _("BrutalCharge"),
+    [ABILITY_TOXIC_MONSOON] = _("ToxicMonsoon"),
+    [ABILITY_SILVER_LINING] = _("SilverLining"),
+    [ABILITY_BATTLE_TRANCE] = _("BattleTrance"),
 };
 #endif
 
@@ -1715,4 +1724,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_BURROW] = sBurrowDescription,
     [ABILITY_SAND_SKIMMER] = sSandSkimmerDescription,
     [ABILITY_BRUTAL_CHARGE] = sBrutalChargeDescription,
+    [ABILITY_TOXIC_MONSOON] = sToxicMonsoonDescription,
+    [ABILITY_SILVER_LINING] = sSilverLiningDescription,
+    [ABILITY_BATTLE_TRANCE] = sBattleTranceDescription,
 };
