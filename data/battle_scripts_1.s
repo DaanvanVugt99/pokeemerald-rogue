@@ -10389,6 +10389,14 @@ BattleScript_FungalInfectionActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_TimeloopActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	setseeded
+	playmoveanimation BS_ATTACKER, MOVE_LEECH_SEED
+	waitanimation
+	end3
+
 BattleScript_NeurotoxinActivates::
 	waitstate
 	call BattleScript_AbilityPopUp

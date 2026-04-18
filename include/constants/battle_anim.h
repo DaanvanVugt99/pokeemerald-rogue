@@ -575,6 +575,7 @@
 #define B_ANIM_TAILLWIND                50
 #define B_ANIM_ECLIPSE_CONTINUES        51
 #define B_ANIM_ACID_RAIN_CONTINUES      52
+#define B_ANIM_LEECH_SEED_SET           53
 
 // special animations table (gBattleAnims_Special)
 #define B_ANIM_LVL_UP                   0

@@ -1040,6 +1040,7 @@ gBattleAnims_General::
 	.4byte General_Tailwind                 @ B_ANIM_TAILLWIND
 	.4byte General_Eclipse                  @ B_ANIM_ECLIPSE_CONTINUES
 	.4byte General_AcidRain                 @ B_ANIM_ACID_RAIN_CONTINUES
+	.4byte General_LeechSeedSet             @ B_ANIM_LEECH_SEED_SET
 
 	.align 2
 gBattleAnims_Special::
@@ -18310,6 +18311,21 @@ FireBlastCross:
 	return
 
 Move_LEECH_SEED:
+	loadspritegfx ANIM_TAG_SEED
+	playsewithpan SE_M_POISON_POWDER, SOUND_PAN_ATTACKER
+	createsprite gLeechSeedSpriteTemplate, ANIM_TARGET, 2, 15, 0, 0, 24, 35, -32
+	delay 8
+	playsewithpan SE_M_POISON_POWDER, SOUND_PAN_ATTACKER
+	createsprite gLeechSeedSpriteTemplate, ANIM_TARGET, 2, 15, 0, -16, 24, 35, -40
+	delay 8
+	playsewithpan SE_M_POISON_POWDER, SOUND_PAN_ATTACKER
+	createsprite gLeechSeedSpriteTemplate, ANIM_TARGET, 2, 15, 0, 16, 24, 35, -37
+	delay 12
+	loopsewithpan SE_M_TAIL_WHIP, SOUND_PAN_TARGET, 10, 8
+	waitforvisualfinish
+	end
+
+General_LeechSeedSet:
 	loadspritegfx ANIM_TAG_SEED
 	playsewithpan SE_M_POISON_POWDER, SOUND_PAN_ATTACKER
 	createsprite gLeechSeedSpriteTemplate, ANIM_TARGET, 2, 15, 0, 0, 24, 35, -32

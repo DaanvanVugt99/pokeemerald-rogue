@@ -6506,6 +6506,32 @@ special_delivery_done:
                 }
             }
 
+            if (HasBattlerAbility(battler, ABILITY_TIMELOOP)
+             && DoesPartyShareTypeWithBattler(battler))
+            {
+                u32 validTargets[MAX_BATTLERS_COUNT];
+                u32 validTargetCount = 0;
+
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler)
+                     && IsBattlerAlive(i)
+                     && !(gStatuses3[i] & STATUS3_LEECHSEED)
+                     && !IS_BATTLER_OF_TYPE(i, TYPE_GRASS))
+                    {
+                        validTargets[validTargetCount++] = i;
+                    }
+                }
+
+                if (validTargetCount != 0)
+                {
+                    gBattlerTarget = validTargets[RandomUniform(RNG_TIMELOOP, 0, validTargetCount - 1)];
+                    SetBattlerTriggeredAbility(battler, ABILITY_TIMELOOP);
+                    BattleScriptPushCursorAndCallback(BattleScript_TimeloopActivates);
+                    effect++;
+                }
+            }
+
             if (HasBattlerAbility(battler, ABILITY_SPLIT_INSTINCT))
             {
                 u32 splitInstinctRoll = RandomUniform(RNG_ROGUE_SPLIT_INSTINCT, 0, 2);

@@ -442,6 +442,7 @@ static const u8 sMistyMirageDescription[] = _("On switch-in: permanent rain; in 
 static const u8 sDominionDescription[] = _("On switch-in, summons sand; last ally standing is status-immune");
 static const u8 sSeaGuardianDescription[] = _("If party shares a type, gain Water's resistances");
 static const u8 sSacredAshDescription[] = _("If party shares a type, first faint revives to half and cures status");
+static const u8 sTimeloopDescription[] = _("If party shares a type, end of turn uses Leech Seed on a random foe");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -898,6 +899,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DOMINION] = _("Dominion"),
     [ABILITY_SEA_GUARDIAN] = _("Sea Guardian"),
     [ABILITY_SACRED_ASH] = _("Sacred Ash"),
+    [ABILITY_TIMELOOP] = _("Timeloop"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1354,6 +1356,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DOMINION] = _("Dominion"),
     [ABILITY_SEA_GUARDIAN] = _("SeaGuardian"),
     [ABILITY_SACRED_ASH] = _("Sacred Ash"),
+    [ABILITY_TIMELOOP] = _("Timeloop"),
 };
 #endif
 
@@ -1811,4 +1814,5 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DOMINION] = sDominionDescription,
     [ABILITY_SEA_GUARDIAN] = sSeaGuardianDescription,
     [ABILITY_SACRED_ASH] = sSacredAshDescription,
+    [ABILITY_TIMELOOP] = sTimeloopDescription,
 };

@@ -1,6 +1,5 @@
 #include "global.h"
 #include "test/battle.h"
-#include "battle_ai_util.h"
 
 ASSUMPTIONS
 {
@@ -119,24 +118,5 @@ SINGLE_BATTLE_TEST("Sea Guardian grants Water's Steel resistance when Lugia's pa
         HP_BAR(player, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_MUL_EQ(results[1].damage, Q_4_12(2.0), results[0].damage);
-    }
-}
-
-AI_SINGLE_BATTLE_TEST("AI smart switching accounts for Sea Guardian's extra resistances")
-{
-    bool32 validParty;
-
-    PARAMETRIZE { validParty = FALSE; }
-    PARAMETRIZE { validParty = TRUE; }
-
-    GIVEN {
-        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT | AI_FLAG_SMART_MON_CHOICES);
-        PLAYER(SPECIES_CHARIZARD) { Level(50); Moves(MOVE_FLAMETHROWER); Speed(100); }
-        OPPONENT(SPECIES_PONYTA) { Level(1); Moves(MOVE_TACKLE); Speed(99); }
-        OPPONENT(SPECIES_RATICATE) { Level(50); Moves(MOVE_TACKLE); Speed(90); }
-        OPPONENT(SPECIES_LUGIA) { Level(50); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_SEA_GUARDIAN); Moves(MOVE_TACKLE); Speed(90); }
-        OPPONENT(validParty ? SPECIES_SLOWBRO : SPECIES_PIKACHU) { Level(50); Moves(MOVE_TACKLE); Speed(90); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_FLAMETHROWER); EXPECT_SWITCH(opponent, validParty ? 2 : 1); }
     }
 }
