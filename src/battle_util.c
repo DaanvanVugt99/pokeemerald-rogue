@@ -4652,6 +4652,33 @@ static inline u32 GetLowestBaseStatId(u32 battler)
     return lowestId;
 }
 
+static inline u32 GetHighestBaseStatId(u32 battler)
+{
+    u16 species = gBattleMons[battler].species;
+    u32 highestId = STAT_ATK;
+    u32 highest = gSpeciesInfo[species].baseAttack;
+
+    if (gSpeciesInfo[species].baseDefense > highest)
+    {
+        highest = gSpeciesInfo[species].baseDefense;
+        highestId = STAT_DEF;
+    }
+    if (gSpeciesInfo[species].baseSpeed > highest)
+    {
+        highest = gSpeciesInfo[species].baseSpeed;
+        highestId = STAT_SPEED;
+    }
+    if (gSpeciesInfo[species].baseSpAttack > highest)
+    {
+        highest = gSpeciesInfo[species].baseSpAttack;
+        highestId = STAT_SPATK;
+    }
+    if (gSpeciesInfo[species].baseSpDefense > highest)
+        highestId = STAT_SPDEF;
+
+    return highestId;
+}
+
 // Supreme Overlord adds a x0.1 damage boost for each fainted ally.
 static inline uq4_12_t GetSupremeOverlordModifier(u32 battler)
 {
@@ -7541,6 +7568,27 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_HEXCRAFT)
+         && IsBattlerAlive(battler)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_HEXCRAFT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_HEX;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_MULTITASK)
          && IsBattlerAlive(battler)
          && IS_MOVE_STATUS(move)
@@ -7834,6 +7882,47 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ROYAL_DECREE)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            u32 highestStat = GetHighestBaseStatId(gBattlerTarget);
+
+            if (CompareStat(gBattlerTarget, highestStat, MIN_STAT_STAGE, CMP_GREATER_THAN)
+             || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_DECREE);
+                switch (highestStat)
+                {
+                case STAT_ATK:
+                    gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
+                    break;
+                case STAT_DEF:
+                    gBattleScripting.moveEffect = MOVE_EFFECT_DEF_MINUS_1;
+                    break;
+                case STAT_SPEED:
+                    gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
+                    break;
+                case STAT_SPATK:
+                    gBattleScripting.moveEffect = MOVE_EFFECT_SP_ATK_MINUS_1;
+                    break;
+                case STAT_SPDEF:
+                default:
+                    gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
+                    break;
+                }
+
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_DRAGON_MAJESTY)
@@ -12323,8 +12412,9 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
         return UQ_4_12(1.0);
     else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType))
     {
-        if (HasBattlerAbility(battlerAtk, ABILITY_ADAPTIVE_ORIGIN)
-         && DoesPartyHaveUniqueTypes(battlerAtk))
+        if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
+         || (HasBattlerAbility(battlerAtk, ABILITY_ADAPTIVE_ORIGIN)
+          && DoesPartyHaveUniqueTypes(battlerAtk)))
         {
             return uq4_12_add(hasAdaptability ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
         }

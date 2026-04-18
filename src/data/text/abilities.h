@@ -410,6 +410,9 @@ static const u8 sAerodynamicDescription[] = _("Immune to Flying; when hit by Fly
 static const u8 sPrecognitionDescription[] = _("Opposing status moves trigger Future Sight on the user");
 static const u8 sShadowCarapaceDescription[] = _("Hit by special moves: foe loses 1 Sp. Def; in Eclipse, 20% evasion");
 static const u8 sRingleaderDescription[] = _("Crits torment; with 2 other Dark allies, sets Tailwind on switch-in");
+static const u8 sRoyalDecreeDescription[] = _("Status moves lower the target's highest stat by 1");
+static const u8 sHexcraftDescription[] = _("Status moves on foes also use a 30 BP Hex");
+static const u8 sMysticPowerDescription[] = _("All moves gain STAB regardless of typing");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -834,6 +837,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_PRECOGNITION] = _("Precognition"),
     [ABILITY_SHADOW_CARAPACE] = _("Shadow Carapace"),
     [ABILITY_RINGLEADER] = _("Ringleader"),
+    [ABILITY_ROYAL_DECREE] = _("Royal Decree"),
+    [ABILITY_HEXCRAFT] = _("Hexcraft"),
+    [ABILITY_MYSTIC_POWER] = _("Mystic Power"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1258,6 +1264,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_PRECOGNITION] = _("Precognition"),
     [ABILITY_SHADOW_CARAPACE] = _("Shadow Carapace"),
     [ABILITY_RINGLEADER] = _("Ringleader"),
+    [ABILITY_ROYAL_DECREE] = _("Royal Decree"),
+    [ABILITY_HEXCRAFT] = _("Hexcraft"),
+    [ABILITY_MYSTIC_POWER] = _("Mystic Power"),
 };
 #endif
 
@@ -1683,4 +1692,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_PRECOGNITION] = sPrecognitionDescription,
     [ABILITY_SHADOW_CARAPACE] = sShadowCarapaceDescription,
     [ABILITY_RINGLEADER] = sRingleaderDescription,
+    [ABILITY_ROYAL_DECREE] = sRoyalDecreeDescription,
+    [ABILITY_HEXCRAFT] = sHexcraftDescription,
+    [ABILITY_MYSTIC_POWER] = sMysticPowerDescription,
 };

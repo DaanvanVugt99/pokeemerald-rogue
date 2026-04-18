@@ -54,6 +54,8 @@ This file documents practical repo-specific guidance for coding agents and contr
 
 - Extra validation logs (e.g. quest/hub/bake verify blocks) are normal during test runs.
 - Focus pass/fail decisions on the final per-test summary and failed assertion lines.
+- `UniqueAbility(ABILITY_NONE)` does not reliably clear a species-default unique ability in the battle test harness.
+- For control cases, prefer a neutral species without a built-in unique ability rather than trying to remove the species-default unique ability in-place.
 
 ## macOS / clangd IDE Diagnostics Caveat
 
