@@ -4666,6 +4666,44 @@ static inline bool32 IsFinalMultiHitStrike(void)
     return (gMultiHitCounter == 0 || gMultiHitCounter == 1);
 }
 
+static bool32 ClearSideEntryHazards(u32 side)
+{
+    bool32 hazardsCleared = FALSE;
+
+    if (gSideStatuses[side] & SIDE_STATUS_SPIKES)
+    {
+        gSideStatuses[side] &= ~SIDE_STATUS_SPIKES;
+        gSideTimers[side].spikesAmount = 0;
+        hazardsCleared = TRUE;
+    }
+    if (gSideStatuses[side] & SIDE_STATUS_TOXIC_SPIKES)
+    {
+        gSideStatuses[side] &= ~SIDE_STATUS_TOXIC_SPIKES;
+        gSideTimers[side].toxicSpikesAmount = 0;
+        hazardsCleared = TRUE;
+    }
+    if (gSideStatuses[side] & SIDE_STATUS_STICKY_WEB)
+    {
+        gSideStatuses[side] &= ~SIDE_STATUS_STICKY_WEB;
+        gSideTimers[side].stickyWebAmount = 0;
+        hazardsCleared = TRUE;
+    }
+    if (gSideStatuses[side] & SIDE_STATUS_STEALTH_ROCK)
+    {
+        gSideStatuses[side] &= ~SIDE_STATUS_STEALTH_ROCK;
+        gSideTimers[side].stealthRockAmount = 0;
+        hazardsCleared = TRUE;
+    }
+    if (gSideStatuses[side] & SIDE_STATUS_STEELSURGE)
+    {
+        gSideStatuses[side] &= ~SIDE_STATUS_STEELSURGE;
+        gSideTimers[side].steelsurgeAmount = 0;
+        hazardsCleared = TRUE;
+    }
+
+    return hazardsCleared;
+}
+
 static inline u32 GetLowestBaseStatId(u32 battler)
 {
     u16 species = gBattleMons[battler].species;
@@ -5043,6 +5081,32 @@ special_delivery_done:
             else if (TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PSIONIC_PARADOX) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_PSIONIC_PARADOX);
+
+            if (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
+            {
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = battler;
+                gCalledMove = MOVE_TRICK_ROOM;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                return 1;
+            }
+            else if (TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_PlainSurgeActivates);
                 return 1;
             }
         }
@@ -7710,6 +7774,37 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_RUMBLE_ROLL)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_GROUND
+         && !IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            bool32 hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
+            bool32 canRaiseDef = CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN);
+
+            if (hazardsCleared || canRaiseDef)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_RUMBLE_ROLL);
+                if (canRaiseDef)
+                {
+                    gBattlerAttacker = battler;
+                    SET_STATCHANGER(STAT_DEF, 1, FALSE);
+                    PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_DEF);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+                }
+                else
+                {
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+                }
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SWARM_ASSAULT)
          && IsBattlerAlive(battler)
          && IsMoveMakingContact(move, battler)
@@ -8001,6 +8096,25 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_STORYBOARD)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_STORYBOARD);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_COPYCAT;
+            gLastUsedMove = gBattleStruct->lastTakenMoveFrom[battler][battler];
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_COLD_READ)
          && move == MOVE_FOCUS_ENERGY
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -8041,40 +8155,8 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gMoveResultFlags & MOVE_RESULT_FAILED)
          && IsFinalMultiHitStrike())
         {
-            u32 side = GetBattlerSide(battler);
-            bool32 hazardsCleared = FALSE;
+            bool32 hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
             bool32 healed = FALSE;
-
-            if (gSideStatuses[side] & SIDE_STATUS_SPIKES)
-            {
-                gSideStatuses[side] &= ~SIDE_STATUS_SPIKES;
-                gSideTimers[side].spikesAmount = 0;
-                hazardsCleared = TRUE;
-            }
-            if (gSideStatuses[side] & SIDE_STATUS_TOXIC_SPIKES)
-            {
-                gSideStatuses[side] &= ~SIDE_STATUS_TOXIC_SPIKES;
-                gSideTimers[side].toxicSpikesAmount = 0;
-                hazardsCleared = TRUE;
-            }
-            if (gSideStatuses[side] & SIDE_STATUS_STICKY_WEB)
-            {
-                gSideStatuses[side] &= ~SIDE_STATUS_STICKY_WEB;
-                gSideTimers[side].stickyWebAmount = 0;
-                hazardsCleared = TRUE;
-            }
-            if (gSideStatuses[side] & SIDE_STATUS_STEALTH_ROCK)
-            {
-                gSideStatuses[side] &= ~SIDE_STATUS_STEALTH_ROCK;
-                gSideTimers[side].stealthRockAmount = 0;
-                hazardsCleared = TRUE;
-            }
-            if (gSideStatuses[side] & SIDE_STATUS_STEELSURGE)
-            {
-                gSideStatuses[side] &= ~SIDE_STATUS_STEELSURGE;
-                gSideTimers[side].steelsurgeAmount = 0;
-                hazardsCleared = TRUE;
-            }
 
             if (!(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
              && gBattleMons[battler].hp < gBattleMons[battler].maxHP)
@@ -8470,6 +8552,26 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_DEBUG)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_BUG
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 drainedHp = (gSpecialStatuses[gBattlerTarget].shellBellDmg * 3) / 4;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_DEBUG);
+            if (drainedHp == 0)
+                drainedHp = 1;
+            gBattleMoveDamage = -drainedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_HONEY_RAGE)
          && gDisableStructs[battler].uniquePersistentStateActive
          && gBattleMoves[move].split != SPLIT_STATUS
@@ -8535,26 +8637,6 @@ if (triggeringAbility != ABILITY_NONE)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_FESTIVAL);
             BattleScriptPushCursorAndCallback(BattleScript_GrassySurgeActivates);
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_DEBUG)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && TARGET_TURN_DAMAGED
-         && IsFinalMultiHitStrike()
-         && moveType == TYPE_BUG
-         && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
-        {
-            s32 healedHp = (gSpecialStatuses[gBattlerTarget].shellBellDmg * 3) / 4;
-
-            SetBattlerTriggeredAbility(battler, ABILITY_DEBUG);
-            if (healedHp == 0)
-                healedHp = 1;
-            gBattleMoveDamage = -healedHp;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_DuelistActivates;
             effect++;
         }
 

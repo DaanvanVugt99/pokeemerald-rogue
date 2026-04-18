@@ -431,6 +431,9 @@ static const u8 sSpecialDeliveryDescription[] = _("On switch-in, uses Present on
 static const u8 sDampeningDescription[] = _("On switch-in, lowers foes' Sp. Atk by 1");
 static const u8 sScrapDraftDescription[] = _("Using Whirlwind also scatters a layer of Spikes");
 static const u8 sInfernalRageDescription[] = _("Fire moves deal 30% more damage and cause 10% recoil");
+static const u8 sRumbleRollDescription[] = _("Ground attacks raise Defense by 1 and clear your hazards");
+static const u8 sPsionicParadoxDescription[] = _("On switch-in: set Plain Terrain; if already active, use Trick Room");
+static const u8 sStoryboardDescription[] = _("First status move after switch-in is followed by Copycat");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -876,6 +879,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DAMPENING] = _("Dampening"),
     [ABILITY_SCRAP_DRAFT] = _("Scrap Draft"),
     [ABILITY_INFERNAL_RAGE] = _("Infernal Rage"),
+    [ABILITY_RUMBLE_ROLL] = _("Rumble Roll"),
+    [ABILITY_PSIONIC_PARADOX] = _("Psionic Paradox"),
+    [ABILITY_STORYBOARD] = _("Storyboard"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1321,6 +1327,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DAMPENING] = _("Dampening"),
     [ABILITY_SCRAP_DRAFT] = _("Scrap Draft"),
     [ABILITY_INFERNAL_RAGE] = _("InfernalRage"),
+    [ABILITY_RUMBLE_ROLL] = _("Rumble Roll"),
+    [ABILITY_PSIONIC_PARADOX] = _("PsionicParadox"),
+    [ABILITY_STORYBOARD] = _("Storyboard"),
 };
 #endif
 
@@ -1767,4 +1776,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DAMPENING] = sDampeningDescription,
     [ABILITY_SCRAP_DRAFT] = sScrapDraftDescription,
     [ABILITY_INFERNAL_RAGE] = sInfernalRageDescription,
+    [ABILITY_RUMBLE_ROLL] = sRumbleRollDescription,
+    [ABILITY_PSIONIC_PARADOX] = sPsionicParadoxDescription,
+    [ABILITY_STORYBOARD] = sStoryboardDescription,
 };

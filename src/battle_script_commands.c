@@ -1360,6 +1360,11 @@ static void Cmd_attackcanceler(void)
     if (AtkCanceller_UnableToUseMove(moveType))
         return;
 
+    // Preserve the pre-move last-used state for Storyboard. Nested called moves
+    // should keep the original top-level source move instead of overwriting it.
+    if (!gBattleStruct->isAtkCancelerForCalledMove)
+        gBattleStruct->lastTakenMoveFrom[gBattlerAttacker][gBattlerAttacker] = gLastUsedMove;
+
     if (WEATHER_HAS_EFFECT && gBattleMoves[gCurrentMove].power)
     {
         if (moveType == TYPE_FIRE && (gBattleWeather & B_WEATHER_RAIN_PRIMAL))
