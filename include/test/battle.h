@@ -915,6 +915,7 @@ enum { TURN_CLOSED, TURN_OPEN, TURN_CLOSING };
 
 #define FORCED_MOVE(battler) ForcedMove(__LINE__, battler)
 #define SWITCH(battler, partyIndex) Switch(__LINE__, battler, partyIndex)
+#define SWITCH_WITH_RNG(battler, partyIndex, ...) SwitchWithContext(__LINE__, battler, partyIndex, (struct SwitchContext) { APPEND_TRUE(__VA_ARGS__) })
 #define SKIP_TURN(battler) SkipTurn(__LINE__, battler)
 #define SEND_OUT(battler, partyIndex) SendOut(__LINE__, battler, partyIndex)
 #define RUN_AWAY(battler) RunAway(__LINE__, battler)
@@ -962,6 +963,12 @@ struct ItemContext
     u16 explicitMove:1;
 };
 
+struct SwitchContext
+{
+    struct TurnRNG rng;
+    bool8 explicitRNG;
+};
+
 void OpenTurn(u32 sourceLine);
 void CloseTurn(u32 sourceLine);
 void Move(u32 sourceLine, struct BattlePokemon *, struct MoveContext);
@@ -972,6 +979,7 @@ void ExpectSwitch(u32 sourceLine, struct BattlePokemon *battler, u32 partyIndex)
 void Score(u32 sourceLine, struct BattlePokemon *battler, u32 cmp, bool32 toValue, struct TestAIScoreStruct cmpCtx);
 void ForcedMove(u32 sourceLine, struct BattlePokemon *);
 void Switch(u32 sourceLine, struct BattlePokemon *, u32 partyIndex);
+void SwitchWithContext(u32 sourceLine, struct BattlePokemon *, u32 partyIndex, struct SwitchContext);
 void SkipTurn(u32 sourceLine, struct BattlePokemon *);
 void UseItem(u32 sourceLine, struct BattlePokemon *, struct ItemContext);
 void SendOut(u32 sourceLine, struct BattlePokemon *, u32 partyIndex);

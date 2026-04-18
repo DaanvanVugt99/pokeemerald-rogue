@@ -426,6 +426,8 @@ static const u8 sHoneyRageDescription[] = _("Eating a Berry makes the next damag
 static const u8 sBasaltShellDescription[] = _("Super-effective hits deal half damage before this Pokemon moves");
 static const u8 sPlowThroughDescription[] = _("Ground move: extra 20 BP Icy Wind; 40 BP in Snow");
 static const u8 sReefProtectionDescription[] = _("First heal each turn scatters a layer of Spikes");
+static const u8 sAdaptiveArmoryDescription[] = _("With 4 attacking move types, using one changes type to match");
+static const u8 sSpecialDeliveryDescription[] = _("On switch-in, uses Present on a random target");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -866,6 +868,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_BASALT_SHELL] = _("Basalt Shell"),
     [ABILITY_PLOW_THROUGH] = _("Plow Through"),
     [ABILITY_REEF_PROTECTION] = _("Reef Protection"),
+    [ABILITY_ADAPTIVE_ARMORY] = _("Adaptive Armory"),
+    [ABILITY_SPECIAL_DELIVERY] = _("Special Delivery"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1306,6 +1310,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_BASALT_SHELL] = _("Basalt Shell"),
     [ABILITY_PLOW_THROUGH] = _("Plow Through"),
     [ABILITY_REEF_PROTECTION] = _("Reef Prot."),
+    [ABILITY_ADAPTIVE_ARMORY] = _("AdaptArmory"),
+    [ABILITY_SPECIAL_DELIVERY] = _("SpecDelivry"),
 };
 #endif
 
@@ -1747,4 +1753,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_BASALT_SHELL] = sBasaltShellDescription,
     [ABILITY_PLOW_THROUGH] = sPlowThroughDescription,
     [ABILITY_REEF_PROTECTION] = sReefProtectionDescription,
+    [ABILITY_ADAPTIVE_ARMORY] = sAdaptiveArmoryDescription,
+    [ABILITY_SPECIAL_DELIVERY] = sSpecialDeliveryDescription,
 };

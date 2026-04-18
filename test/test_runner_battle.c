@@ -2230,6 +2230,11 @@ void ExpectMoves(u32 sourceLine, struct BattlePokemon *battler, bool32 notExpect
 
 void Switch(u32 sourceLine, struct BattlePokemon *battler, u32 partyIndex)
 {
+    SwitchWithContext(sourceLine, battler, partyIndex, (struct SwitchContext){0});
+}
+
+void SwitchWithContext(u32 sourceLine, struct BattlePokemon *battler, u32 partyIndex, struct SwitchContext ctx)
+{
     s32 i;
     s32 battlerId = battler - gBattleMons;
     INVALID_IF(DATA.turnState == TURN_CLOSED, "SWITCH outside TURN");
@@ -2242,6 +2247,9 @@ void Switch(u32 sourceLine, struct BattlePokemon *battler, u32 partyIndex)
         if (battlerId != i && (battlerId & BIT_SIDE) == (i & BIT_SIDE))
             INVALID_IF(DATA.currentMonIndexes[i] == partyIndex, "SWITCH to battler");
     }
+
+    if (ctx.explicitRNG)
+        DATA.battleRecordTurns[DATA.turns][battlerId].rng = ctx.rng;
 
     PushBattlerAction(sourceLine, battlerId, RECORDED_ACTION_TYPE, B_ACTION_SWITCH);
     PushBattlerAction(sourceLine, battlerId, RECORDED_PARTY_INDEX, partyIndex);

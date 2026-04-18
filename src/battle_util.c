@@ -4413,6 +4413,39 @@ bool32 DoesPartyHaveUniqueTypes(u32 battler)
     return TRUE;
 }
 
+u32 GetBattlerKnownDistinctDamagingMoveTypeCount(u32 battler)
+{
+    u32 i;
+    u32 distinctTypeCount = 0;
+    bool32 seenTypes[NUMBER_OF_MON_TYPES] = {0};
+    u8 savedDynamicMoveType = gBattleStruct->dynamicMoveType;
+    u8 savedAteBoost = gBattleStruct->ateBoost[battler];
+    bool8 savedGemBoost = gSpecialStatuses[battler].gemBoost;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        u16 move = gBattleMons[battler].moves[i];
+        u32 moveType;
+
+        if (move == MOVE_NONE || move == MOVE_UNAVAILABLE || IS_MOVE_STATUS(move))
+            continue;
+
+        SetTypeBeforeUsingMove(move, battler);
+        GET_MOVE_TYPE(move, moveType);
+        if (moveType >= NUMBER_OF_MON_TYPES || seenTypes[moveType])
+            continue;
+
+        seenTypes[moveType] = TRUE;
+        distinctTypeCount++;
+    }
+
+    gBattleStruct->dynamicMoveType = savedDynamicMoveType;
+    gBattleStruct->ateBoost[battler] = savedAteBoost;
+    gSpecialStatuses[battler].gemBoost = savedGemBoost;
+
+    return distinctTypeCount;
+}
+
 void GetBattlerKnownMoveCategoryCounts(u32 battler, u32 *damagingMoveCount, u32 *statusMoveCount)
 {
     u32 i;
@@ -4918,6 +4951,47 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 return 1;
             }
         }
+
+        if (HasBattlerAbility(battler, ABILITY_SPECIAL_DELIVERY) && !uniqueDone)
+        {
+            u32 validTargets[MAX_BATTLERS_COUNT];
+            u32 targetCount = 0;
+            u32 i;
+            bool32 canUseSpecialDelivery = IsBattlerAlive(battler)
+                && !gProtectStructs[battler].confusionSelfDmg
+                && !gProtectStructs[battler].extraMoveUsed
+                && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+                && !(gBattleMons[battler].status1 & STATUS1_FREEZE);
+
+            if (!canUseSpecialDelivery)
+                goto special_delivery_done;
+
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (i != battler && !CanUseExtraMove(battler, i))
+                    continue;
+
+                validTargets[targetCount++] = i;
+            }
+
+            if (targetCount != 0)
+            {
+                uniqueDone = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_SPECIAL_DELIVERY);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = validTargets[RandomUniform(RNG_SPECIAL_DELIVERY, 0, targetCount - 1)];
+                gCalledMove = MOVE_PRESENT;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                return 1;
+            }
+        }
+special_delivery_done:
 
         if (HasBattlerAbility(battler, ABILITY_OMNISENSE) && !uniqueDone)
         {

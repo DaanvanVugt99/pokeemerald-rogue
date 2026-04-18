@@ -1283,16 +1283,28 @@ static bool32 TryAegiFormChange(void)
     return TRUE;
 }
 
-bool32 ProteanTryChangeType(u32 battler, u32 ability, u32 move, u32 moveType)
+bool32 ProteanTryChangeType(u32 battler, u32 ability, u32 move, u32 moveType, bool32 setTriggerAbility)
 {
-      if ((ability == ABILITY_PROTEAN || ability == ABILITY_LIBERO)
-         && !gDisableStructs[gBattlerAttacker].usedProteanLibero
-         && (gBattleMons[battler].type1 != moveType || gBattleMons[battler].type2 != moveType
-             || (gBattleMons[battler].type3 != moveType && gBattleMons[battler].type3 != TYPE_MYSTERY))
-         && move != MOVE_STRUGGLE
-         && !IsTerastallized(battler))
+    bool32 canUseAdaptiveArmory = FALSE;
+
+    if (HasBattlerAbility(battler, ABILITY_ADAPTIVE_ARMORY))
+    {
+        u32 damagingMoveCount;
+        GetBattlerKnownMoveCategoryCounts(battler, &damagingMoveCount, NULL);
+        canUseAdaptiveArmory = (damagingMoveCount == MAX_MON_MOVES
+                             && GetBattlerKnownDistinctDamagingMoveTypeCount(battler) == MAX_MON_MOVES);
+    }
+
+    if ((ability == ABILITY_PROTEAN || ability == ABILITY_LIBERO || canUseAdaptiveArmory)
+     && !gDisableStructs[gBattlerAttacker].usedProteanLibero
+     && (gBattleMons[battler].type1 != moveType || gBattleMons[battler].type2 != moveType
+         || (gBattleMons[battler].type3 != moveType && gBattleMons[battler].type3 != TYPE_MYSTERY))
+    && move != MOVE_STRUGGLE
+     && !IsTerastallized(battler))
     {
         SET_BATTLER_TYPE(battler, moveType);
+        if (canUseAdaptiveArmory && setTriggerAbility)
+            SetBattlerTriggeredAbility(battler, ABILITY_ADAPTIVE_ARMORY);
         return TRUE;
     }
     return FALSE;
@@ -1380,12 +1392,13 @@ static void Cmd_attackcanceler(void)
     }
 
     // Check Protean activation.
-    if (ProteanTryChangeType(gBattlerAttacker, attackerAbility, gCurrentMove, moveType))
+    if (ProteanTryChangeType(gBattlerAttacker, attackerAbility, gCurrentMove, moveType, TRUE))
     {
         if (B_PROTEAN_LIBERO == GEN_9)
             gDisableStructs[gBattlerAttacker].usedProteanLibero = TRUE;
         PREPARE_TYPE_BUFFER(gBattleTextBuff1, moveType);
-        gBattlerAbility = gBattlerAttacker;
+        if (gBattleScripting.abilityPopupOverwrite == 0)
+            gBattlerAbility = gBattlerAttacker;
         BattleScriptPushCursor();
         PrepareStringBattle(STRINGID_EMPTYSTRING3, gBattlerAttacker);
         gBattleCommunication[MSG_DISPLAY] = 1;
@@ -13759,6 +13772,7 @@ static void Cmd_presentdamagecalculation(void)
     CMD_ARGS();
 
     u32 rand = Random() & 0xFF;
+    bool32 targetIsAlly = (GetBattlerSide(gBattlerAttacker) == GetBattlerSide(gBattlerTarget));
 
     /* Don't reroll present effect/power for the second hit of Parental Bond.
      * Not sure if this is the correct behaviour, but bulbapedia states
@@ -13768,25 +13782,25 @@ static void Cmd_presentdamagecalculation(void)
      */
     if (gSpecialStatuses[gBattlerAttacker].parentalBondState != PARENTAL_BOND_2ND_HIT)
     {
-        if (rand < 102)
-        {
-            gBattleStruct->presentBasePower = 40;
-        }
-        else if (rand < 178)
-        {
-            gBattleStruct->presentBasePower = 80;
-        }
-        else if (rand < 204)
-        {
-            gBattleStruct->presentBasePower = 120;
-        }
-        else
+        if (targetIsAlly)
         {
             gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 4;
             if (gBattleMoveDamage == 0)
                 gBattleMoveDamage = 1;
             gBattleMoveDamage *= -1;
             gBattleStruct->presentBasePower = 0;
+        }
+        else if (rand < 128)
+        {
+            gBattleStruct->presentBasePower = 40;
+        }
+        else if (rand < 224)
+        {
+            gBattleStruct->presentBasePower = 80;
+        }
+        else
+        {
+            gBattleStruct->presentBasePower = 120;
         }
     }
 
