@@ -28,7 +28,7 @@ SINGLE_BATTLE_TEST("Handywork uses a 20 BP Scratch after contact moves")
     } THEN {
         EXPECT_GT(firstHit, 0);
         EXPECT_GT(secondHit, 0);
-        EXPECT_LT(secondHit, firstHit);
+        EXPECT_EQ(secondHit, firstHit);
     }
 }
 

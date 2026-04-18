@@ -4339,6 +4339,36 @@ bool32 DoesPartyShareTypeWithBattler(u32 battler)
     return TRUE;
 }
 
+u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler)
+{
+    u32 i;
+    u32 firstMonId, lastMonId;
+    u32 count = 0;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species;
+        u32 monType1, monType2;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+        if (excludeBattler && i == gBattlerPartyIndexes[battler])
+            continue;
+
+        species = GetMonData(&party[i], MON_DATA_SPECIES);
+        monType1 = gSpeciesInfo[species].types[0];
+        monType2 = gSpeciesInfo[species].types[1];
+
+        if (monType1 == type || monType2 == type)
+            count++;
+    }
+
+    return count;
+}
+
 bool32 DoesPartyHaveUniqueTypes(u32 battler)
 {
     u32 i;
@@ -4912,6 +4942,23 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gBattlerAttacker = battler;
             SET_STATCHANGER(STAT_SPEED, 1, TRUE);
             BattleScriptPushCursorAndCallback(BattleScript_PollenPuffActivates);
+            return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_RINGLEADER)
+         && !uniqueDone
+         && CountPartyMonsOfType(battler, TYPE_DARK, TRUE) >= 2
+         && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_RINGLEADER);
+            gBattlerAttacker = battler;
+            gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TAILWIND;
+            gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = gBattlerAttacker;
+            gSideTimers[GetBattlerSide(battler)].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
+            BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
             return 1;
         }
 
@@ -7288,6 +7335,25 @@ if (triggeringAbility != ABILITY_NONE)
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
+
+        if (HasBattlerAbility(battler, ABILITY_SHADOW_CARAPACE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(moveEndAttacker)
+         && gBattleMoves[move].split == SPLIT_SPECIAL
+         && (CompareStat(moveEndAttacker, STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(moveEndAttacker) == ABILITY_MIRROR_ARMOR)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SHADOW_CARAPACE);
+            SET_STATCHANGER(STAT_SPDEF, 1, TRUE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_GooeyActivates;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
         break;
     }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
@@ -7370,6 +7436,28 @@ if (triggeringAbility != ABILITY_NONE)
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_RINGLEADER)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && TARGET_TURN_DAMAGED
+         && gIsCriticalHit
+         && IsFinalMultiHitStrike()
+         && IsBattlerAlive(gBattlerTarget)
+         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_TORMENT)
+         && !IsDynamaxed(gBattlerTarget)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_RINGLEADER);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_TORMENT;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -8135,6 +8223,7 @@ if (triggeringAbility != ABILITY_NONE)
             }
             break;
         }
+
         break;
     case ABILITYEFFECT_OPPORTUNIST:
         /* Similar to ABILITYEFFECT_IMMUNITY in that it loops through all battlers.

@@ -407,6 +407,9 @@ static const u8 sPollenPuffDescription[] = _("Ignores entry hazards; on switch-i
 static const u8 sHandyworkDescription[] = _("After contact moves: use a 20 BP Scratch");
 static const u8 sSolarboostDescription[] = _("On switch-in: set sun; first turn out, Fire moves get +1 priority");
 static const u8 sAerodynamicDescription[] = _("Immune to Flying; when hit by Flying, gain +1 Speed");
+static const u8 sPrecognitionDescription[] = _("Opposing status moves trigger Future Sight on the user");
+static const u8 sShadowCarapaceDescription[] = _("Hit by special moves: foe loses 1 Sp. Def; in Eclipse, 20% evasion");
+static const u8 sRingleaderDescription[] = _("Crits torment; with 2 other Dark allies, sets Tailwind on switch-in");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -828,6 +831,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_HANDYWORK] = _("Handywork"),
     [ABILITY_SOLARBOOST] = _("Solarboost"),
     [ABILITY_AERODYNAMIC] = _("Aerodynamic"),
+    [ABILITY_PRECOGNITION] = _("Precognition"),
+    [ABILITY_SHADOW_CARAPACE] = _("Shadow Carapace"),
+    [ABILITY_RINGLEADER] = _("Ringleader"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1249,6 +1255,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_HANDYWORK] = _("Handywork"),
     [ABILITY_SOLARBOOST] = _("Solarboost"),
     [ABILITY_AERODYNAMIC] = _("Aerodynamic"),
+    [ABILITY_PRECOGNITION] = _("Precognition"),
+    [ABILITY_SHADOW_CARAPACE] = _("Shadow Carapace"),
+    [ABILITY_RINGLEADER] = _("Ringleader"),
 };
 #endif
 
@@ -1671,4 +1680,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_HANDYWORK] = sHandyworkDescription,
     [ABILITY_SOLARBOOST] = sSolarboostDescription,
     [ABILITY_AERODYNAMIC] = sAerodynamicDescription,
+    [ABILITY_PRECOGNITION] = sPrecognitionDescription,
+    [ABILITY_SHADOW_CARAPACE] = sShadowCarapaceDescription,
+    [ABILITY_RINGLEADER] = sRingleaderDescription,
 };

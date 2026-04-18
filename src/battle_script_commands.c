@@ -1784,6 +1784,10 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
         break;
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_SHADOW_CARAPACE)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
+        calc = (calc * 80) / 100;
+
     // Attacker's ally's ability
     switch (atkAllyAbility)
     {
@@ -6380,6 +6384,42 @@ static void Cmd_moveend(void)
                         effect = TRUE;
                 }
             }
+
+            if (IS_MOVE_STATUS(gCurrentMove)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE))
+            {
+                u8 battlers[4] = {0, 1, 2, 3};
+
+                SortBattlersBySpeed(battlers, FALSE);
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    u8 battler = battlers[i];
+
+                    if (battler == gBattlerAttacker
+                     || !HasBattlerAbility(battler, ABILITY_PRECOGNITION)
+                     || !IsBattlerAlive(battler)
+                     || GetBattlerSide(battler) == GetBattlerSide(gBattlerAttacker)
+                     || !IsBattlerAlive(gBattlerAttacker)
+                     || gProtectStructs[battler].confusionSelfDmg
+                     || gProtectStructs[battler].extraMoveUsed
+                     || (gBattleMons[battler].status1 & STATUS1_SLEEP)
+                     || (gBattleMons[battler].status1 & STATUS1_FREEZE))
+                        continue;
+
+                    SetBattlerTriggeredAbility(battler, ABILITY_PRECOGNITION);
+                    gBattleStruct->atkCancellerTracker = 0;
+                    gBattlerTarget = gBattlerAttacker;
+                    gBattlerAttacker = gBattlerAbility = battler;
+                    gCalledMove = MOVE_FUTURE_SIGHT;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[battler].extraMoveUsed = TRUE;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                    effect = TRUE;
+                    break;
+                }
+            }
+
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_EMERGENCY_EXIT: // Special case, because moves hitting multiple opponents stop after switching out
