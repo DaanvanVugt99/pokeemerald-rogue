@@ -24,6 +24,7 @@ extern const u8 BattleScript_AttackerUsedAnExtraMoveOnSwitchIn[];
 extern const u8 BattleScript_DuelistActivates[];
 extern const u8 BattleScript_AbilityPopupReturn[];
 extern const u8 BattleScript_AbilityPopupEnd3[];
+extern const u8 BattleScript_PasturizedActivates[];
 extern const u8 BattleScript_AttackerSpikesActivates[];
 extern const u8 BattleScript_InfernalRageActivates[];
 extern const u8 BattleScript_ReefProtectionActivates[];

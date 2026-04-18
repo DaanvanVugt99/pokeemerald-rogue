@@ -9093,6 +9093,15 @@ BattleScript_CheekPouchActivates::
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return
 
+BattleScript_PasturizedActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PASTURIZEDHEAL
+	waitmessage B_WAIT_TIME_LONG
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	end3
+
 BattleScript_HarvestActivates::
 	pause 5
 	tryrecycleitem BattleScript_HarvestActivatesEnd

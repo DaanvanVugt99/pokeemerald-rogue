@@ -723,8 +723,9 @@
 #define STRINGID_SPLITINSTINCTHEAL                    721
 #define STRINGID_SPLITINSTINCTDEBUFF                  722
 #define STRINGID_IONIZEDMG                            723
+#define STRINGID_PASTURIZEDHEAL                       724
 
-#define BATTLESTRINGS_COUNT                           724
+#define BATTLESTRINGS_COUNT                           725
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

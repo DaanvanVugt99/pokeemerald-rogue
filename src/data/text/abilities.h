@@ -434,6 +434,11 @@ static const u8 sInfernalRageDescription[] = _("Fire moves deal 30% more damage 
 static const u8 sRumbleRollDescription[] = _("Ground attacks raise Defense by 1 and clear your hazards");
 static const u8 sPsionicParadoxDescription[] = _("On switch-in: set Plain Terrain; if already active, use Trick Room");
 static const u8 sStoryboardDescription[] = _("First status move after switch-in is followed by Copycat");
+static const u8 sBreakdanceDescription[] = _("If moving first, kicking moves lower the target's Attack");
+static const u8 sPasturizedDescription[] = _("Milk Drink sets Plain Terrain; allies in it heal 1/16 each turn");
+static const u8 sLightningFieldDescription[] = _("On switch-in: permanent Electric Terrain; in it, Sp. Def is halved");
+static const u8 sScorchedReignDescription[] = _("On switch-in: permanent sun; in sun, Attack is halved");
+static const u8 sMistyMirageDescription[] = _("On switch-in: permanent rain; in rain, Defense is halved");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -882,6 +887,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_RUMBLE_ROLL] = _("Rumble Roll"),
     [ABILITY_PSIONIC_PARADOX] = _("Psionic Paradox"),
     [ABILITY_STORYBOARD] = _("Storyboard"),
+    [ABILITY_BREAKDANCE] = _("Breakdance"),
+    [ABILITY_PASTURIZED] = _("Pasturized"),
+    [ABILITY_LIGHTNING_FIELD] = _("Lightning Field"),
+    [ABILITY_SCORCHED_REIGN] = _("Scorched Reign"),
+    [ABILITY_MISTY_MIRAGE] = _("Misty Mirage"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1330,6 +1340,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_RUMBLE_ROLL] = _("Rumble Roll"),
     [ABILITY_PSIONIC_PARADOX] = _("PsionicParadox"),
     [ABILITY_STORYBOARD] = _("Storyboard"),
+    [ABILITY_BREAKDANCE] = _("Breakdance"),
+    [ABILITY_PASTURIZED] = _("Pasturized"),
+    [ABILITY_LIGHTNING_FIELD] = _("LightnField"),
+    [ABILITY_SCORCHED_REIGN] = _("ScorchReign"),
+    [ABILITY_MISTY_MIRAGE] = _("MistyMirage"),
 };
 #endif
 
@@ -1779,4 +1794,9 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_RUMBLE_ROLL] = sRumbleRollDescription,
     [ABILITY_PSIONIC_PARADOX] = sPsionicParadoxDescription,
     [ABILITY_STORYBOARD] = sStoryboardDescription,
+    [ABILITY_BREAKDANCE] = sBreakdanceDescription,
+    [ABILITY_PASTURIZED] = sPasturizedDescription,
+    [ABILITY_LIGHTNING_FIELD] = sLightningFieldDescription,
+    [ABILITY_SCORCHED_REIGN] = sScorchedReignDescription,
+    [ABILITY_MISTY_MIRAGE] = sMistyMirageDescription,
 };

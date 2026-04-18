@@ -5111,6 +5111,76 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_LIGHTNING_FIELD) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_LIGHTNING_FIELD);
+
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                gFieldStatuses |= STATUS_FIELD_TERRAIN_PERMANENT;
+                BattleScriptPushCursorAndCallback(BattleScript_ElectricSurgeActivates);
+                return 1;
+            }
+            else if ((gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN) && !(gFieldStatuses & STATUS_FIELD_TERRAIN_PERMANENT))
+            {
+                gFieldStatuses |= STATUS_FIELD_TERRAIN_PERMANENT;
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SCORCHED_REIGN) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_SCORCHED_REIGN);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+            {
+                gBattleWeather |= B_WEATHER_SUN_PERMANENT;
+                BattleScriptPushCursorAndCallback(BattleScript_DroughtActivates);
+                return 1;
+            }
+            else if ((gBattleWeather & B_WEATHER_SUN) && !(gBattleWeather & B_WEATHER_SUN_PERMANENT))
+            {
+                gBattleWeather |= B_WEATHER_SUN_PERMANENT;
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_MISTY_MIRAGE) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_MISTY_MIRAGE);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_RAIN, TRUE))
+            {
+                gBattleWeather |= B_WEATHER_RAIN_PERMANENT;
+                BattleScriptPushCursorAndCallback(BattleScript_DrizzleActivates);
+                return 1;
+            }
+            else if ((gBattleWeather & B_WEATHER_RAIN) && !(gBattleWeather & B_WEATHER_RAIN_PERMANENT))
+            {
+                gBattleWeather |= B_WEATHER_RAIN_PERMANENT;
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ROYAL_STORM) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -6563,6 +6633,30 @@ special_delivery_done:
                 gBattleMoveDamage = -healAmount;
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                 effect++;
+            }
+
+            if ((gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
+             && IsBattlerTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                u32 pasturizedBattler = IsAbilityOnSide(battler, ABILITY_PASTURIZED);
+
+                if (pasturizedBattler != 0)
+                {
+                    s32 healAmount = GetNonDynamaxMaxHP(battler) / 16;
+
+                    if (healAmount == 0)
+                        healAmount = 1;
+
+                    SetBattlerTriggeredAbility(pasturizedBattler - 1, ABILITY_PASTURIZED);
+                    gBattlerAttacker = pasturizedBattler - 1;
+                    gBattlerTarget = battler;
+                    gBattleScripting.battler = pasturizedBattler - 1;
+                    gBattleMoveDamage = -healAmount;
+                    BattleScriptPushCursorAndCallback(BattleScript_PasturizedActivates);
+                    effect++;
+                }
             }
 
             if (HasBattlerAbility(battler, ABILITY_IONIZE))
@@ -8126,6 +8220,35 @@ if (triggeringAbility != ABILITY_NONE)
             SET_STATCHANGER(STAT_SPEED, 1, FALSE);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BREAKDANCE)
+         && gBattleMoves[move].kickingMove
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && GetBattlerTurnOrderNum(battler) < GetBattlerTurnOrderNum(gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BREAKDANCE);
+            gEffectBattler = gBattlerTarget;
+            gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PASTURIZED)
+         && move == MOVE_MILK_DRINK
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !(gMoveResultFlags & MOVE_RESULT_FAILED)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PASTURIZED);
+            BattleScriptPushCursorAndCallback(BattleScript_PlainSurgeActivates);
             effect++;
         }
 
@@ -12531,6 +12654,13 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_SCORCHED_REIGN)
+     && IS_MOVE_PHYSICAL(move)
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
+    }
+
     // target's abilities
     switch (defAbility)
     {
@@ -12781,6 +12911,21 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
      && AreBattlersOfOppositeGender(battlerAtk, battlerDef))
     {
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_LIGHTNING_FIELD)
+     && !usesDefStat
+     && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
+     && IsBattlerTerrainAffected(battlerDef, STATUS_FIELD_ELECTRIC_TERRAIN))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_MISTY_MIRAGE)
+     && usesDefStat
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
     }
 
     // The defensive stats of a Player's Pokémon are boosted by x1.1 (+10%) if they have the 5th badge and 7th badges.
