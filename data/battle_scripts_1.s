@@ -9059,6 +9059,15 @@ BattleScript_ReefProtectionActivates::
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return
 
+BattleScript_SacredAshActivates::
+	call BattleScript_AbilityPopUp
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
+	healthbarupdate BS_SCRIPTING
+	datahpupdate BS_SCRIPTING
+	curestatus BS_SCRIPTING
+	updatestatusicon BS_SCRIPTING
+	return
+
 BattleScript_SplitInstinctSpeed::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_SPLITINSTINCTSPEED

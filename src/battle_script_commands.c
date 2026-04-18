@@ -4138,6 +4138,20 @@ static void Cmd_tryfaintmon(void)
         if (!(gAbsentBattlerFlags & gBitTable[battler])
          && gBattleMons[battler].hp == 0)
         {
+            if (HasBattlerAbility(battler, ABILITY_SACRED_ASH)
+             && DoesPartyShareTypeWithBattler(battler)
+             && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+            {
+                RecordAbilityBattle(battler, ABILITY_SACRED_ASH);
+                SetBattlerTriggeredAbility(battler, ABILITY_SACRED_ASH);
+                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+                gBattleMoveDamage = -(gBattleMons[battler].maxHP / 2);
+                gBattleScripting.battler = battler;
+                BattleScriptPush(cmd->nextInstr);
+                gBattlescriptCurrInstr = BattleScript_SacredAshActivates;
+                return;
+            }
+
             gHitMarker |= HITMARKER_FAINTED(battler);
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = faintScript;
@@ -7414,12 +7428,7 @@ static void Cmd_switchineffects(void)
         }
         else if (IsBattlerAffectedByHazards(battler, TRUE))
         {
-            if (!(gBattleMons[battler].status1 & STATUS1_ANY)
-                && !IS_BATTLER_OF_TYPE(battler, TYPE_STEEL)
-                && !HasBattlerAbility(battler, ABILITY_IMMUNITY)
-                && !IsAbilityOnSide(battler, ABILITY_PASTEL_VEIL)
-                && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD)
-                && !(gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN))
+            if (CanBePoisoned(battler, battler))
             {
                 if (gSideTimers[GetBattlerSide(battler)].toxicSpikesAmount >= 2)
                     gBattleMons[battler].status1 |= STATUS1_TOXIC_POISON;

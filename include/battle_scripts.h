@@ -28,6 +28,7 @@ extern const u8 BattleScript_PasturizedActivates[];
 extern const u8 BattleScript_AttackerSpikesActivates[];
 extern const u8 BattleScript_InfernalRageActivates[];
 extern const u8 BattleScript_ReefProtectionActivates[];
+extern const u8 BattleScript_SacredAshActivates[];
 extern const u8 BattleScript_SplitInstinctSpeed[];
 extern const u8 BattleScript_SplitInstinctHeal[];
 extern const u8 BattleScript_OpportunistCopyStatChange[];

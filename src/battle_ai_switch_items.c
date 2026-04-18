@@ -32,6 +32,45 @@ static bool32 AI_ShouldHeal(u32 battler, u32 healAmount);
 static bool32 AI_OpponentCanFaintAiWithMod(u32 battler, u32 healAmount);
 static u32 GetSwitchinHazardsDamage(u32 battler, struct BattlePokemon *battleMon);
 
+static bool32 DoesPartyShareTypeWithPartyMon(struct Pokemon *party, s32 firstId, s32 lastId, s32 monPartyId)
+{
+    s32 i;
+    u16 species = GetMonData(&party[monPartyId], MON_DATA_SPECIES);
+    u32 monType1 = gSpeciesInfo[species].types[0];
+    u32 monType2 = gSpeciesInfo[species].types[1];
+
+    for (i = firstId; i < lastId; i++)
+    {
+        u16 otherSpecies;
+        u32 otherType1, otherType2;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+
+        otherSpecies = GetMonData(&party[i], MON_DATA_SPECIES);
+        otherType1 = gSpeciesInfo[otherSpecies].types[0];
+        otherType2 = gSpeciesInfo[otherSpecies].types[1];
+
+        if (otherType1 != monType1
+         && otherType1 != monType2
+         && otherType2 != monType1
+         && otherType2 != monType2)
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+static uq4_12_t ApplySeaGuardianMatchupModifier(uq4_12_t typeEffectiveness, u8 atkType1, u8 atkType2)
+{
+    typeEffectiveness = uq4_12_multiply(typeEffectiveness, GetTypeModifier(atkType1, TYPE_WATER));
+    if (atkType2 != atkType1)
+        typeEffectiveness = uq4_12_multiply(typeEffectiveness, GetTypeModifier(atkType2, TYPE_WATER));
+    return typeEffectiveness;
+}
+
 static void InitializeSwitchinCandidate(struct Pokemon *mon)
 {
     PokemonToBattleMon(mon, &AI_DATA->switchinCandidate.battleMon);
@@ -144,6 +183,9 @@ static bool8 HasBadOdds(u32 battler)
         if (atkType2 != atkType1)
             typeEffectiveness = uq4_12_multiply(typeEffectiveness, (GetTypeModifier(atkType2, defType2)));
     }
+
+    if (aiAbility == ABILITY_SEA_GUARDIAN && DoesPartyShareTypeWithBattler(battler))
+        typeEffectiveness = ApplySeaGuardianMatchupModifier(typeEffectiveness, atkType1, atkType2);
 
     // Get max damage mon could take
     for (i = 0; i < MAX_MON_MOVES; i++)
@@ -1175,6 +1217,11 @@ static u32 GetBestMonTypeMatchup(struct Pokemon *party, int firstId, int lastId,
                     if (atkType2 != atkType1)
                         typeEffectiveness = uq4_12_multiply(typeEffectiveness, (GetTypeModifier(atkType2, defType2)));
                 }
+
+                if (GetMonAbility(&party[i]) == ABILITY_SEA_GUARDIAN
+                 && DoesPartyShareTypeWithPartyMon(party, firstId, lastId, i))
+                    typeEffectiveness = ApplySeaGuardianMatchupModifier(typeEffectiveness, atkType1, atkType2);
+
                 if (typeEffectiveness < bestResist)
                 {
                     bestResist = typeEffectiveness;
@@ -1612,7 +1659,7 @@ static u32 GetSwitchinHitsToKO(s32 damageTaken, u32 battler)
     return hitsToKO;
 }
 
-static u16 GetSwitchinTypeMatchup(u32 opposingBattler, struct BattlePokemon battleMon)
+static u16 GetSwitchinTypeMatchup(u32 opposingBattler, struct BattlePokemon battleMon, struct Pokemon *party, s32 firstId, s32 lastId, s32 monPartyId)
 {
 
     // Check type matchup
@@ -1630,6 +1677,11 @@ static u16 GetSwitchinTypeMatchup(u32 opposingBattler, struct BattlePokemon batt
         if (atkType2 != atkType1)
             typeEffectiveness = uq4_12_multiply(typeEffectiveness, (GetTypeModifier(atkType2, defType2)));
     }
+
+    if (battleMon.ability == ABILITY_SEA_GUARDIAN
+     && DoesPartyShareTypeWithPartyMon(party, firstId, lastId, monPartyId))
+        typeEffectiveness = ApplySeaGuardianMatchupModifier(typeEffectiveness, atkType1, atkType2);
+
     return typeEffectiveness;
 }
 
@@ -1735,7 +1787,7 @@ static u32 GetBestMonIntegrated(struct Pokemon *party, int firstId, int lastId, 
                 defensiveMonId = i;
         }
 
-        typeMatchup = GetSwitchinTypeMatchup(opposingBattler, AI_DATA->switchinCandidate.battleMon);
+        typeMatchup = GetSwitchinTypeMatchup(opposingBattler, AI_DATA->switchinCandidate.battleMon, party, firstId, lastId, i);
 
         // Check that good type matchups gets at least two turns and set GetBestMonTypeMatchup if applicable
         if (typeMatchup < bestResist)

@@ -4347,6 +4347,12 @@ bool32 DoesPartyShareTypeWithBattler(u32 battler)
     return TRUE;
 }
 
+static bool32 HasSeaGuardianResistances(u32 battler)
+{
+    return HasBattlerAbility(battler, ABILITY_SEA_GUARDIAN)
+        && DoesPartyShareTypeWithBattler(battler);
+}
+
 u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler)
 {
     u32 i;
@@ -5177,6 +5183,20 @@ special_delivery_done:
             else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
             {
                 BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DOMINION) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_DOMINION);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SANDSTORM, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_SandstreamActivates);
                 return 1;
             }
         }
@@ -9490,6 +9510,7 @@ bool32 CanSleep(u32 battler)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
       || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
+      || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityOnSide(battler, ABILITY_SWEET_VEIL)
@@ -9508,6 +9529,7 @@ bool32 CanBePoisoned(u32 battlerAttacker, u32 battlerTarget)
      || HasBattlerAbility(battlerTarget, ABILITY_COMATOSE)
      || HasBattlerAbility(battlerTarget, ABILITY_SILVER_LINING)
      || HasBattlerAbility(battlerTarget, ABILITY_PURIFYING_SALT)
+     || (HasBattlerAbility(battlerTarget, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battlerTarget))
      || IsAbilityOnSide(battlerTarget, ABILITY_PASTEL_VEIL)
      || IsAbilityStatusProtected(battlerTarget)
      || IsBattlerTerrainAffected(battlerTarget, STATUS_FIELD_MISTY_TERRAIN))
@@ -9524,6 +9546,7 @@ bool32 CanBeBurned(u32 battler)
       || HasBattlerAbility(battler, ABILITY_WATER_BUBBLE)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
       || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
+      || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || HasBattlerAbility(battler, ABILITY_THERMAL_EXCHANGE)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
       || IsAbilityStatusProtected(battler)
@@ -9539,6 +9562,7 @@ bool32 CanBeParalyzed(u32 battler)
         || HasBattlerAbility(battler, ABILITY_LIMBER)
         || HasBattlerAbility(battler, ABILITY_COMATOSE)
         || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
+        || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
         || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
         || gBattleMons[battler].status1 & STATUS1_ANY
         || IsAbilityStatusProtected(battler)
@@ -9555,6 +9579,7 @@ bool32 CanBeFrozen(u32 battler)
       || HasBattlerAbility(battler, ABILITY_MAGMA_ARMOR)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
       || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
+      || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)
@@ -9570,6 +9595,7 @@ bool32 CanGetFrostbite(u32 battler)
       || HasBattlerAbility(battler, ABILITY_MAGMA_ARMOR)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
       || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
+      || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)
@@ -13541,6 +13567,9 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
     if (recordAbilities && (illusionSpecies = GetIllusionMonSpecies(battlerDef)))
         TryNoticeIllusionInTypeEffectiveness(move, moveType, battlerAtk, battlerDef, modifier, illusionSpecies);
 
+    if (HasSeaGuardianResistances(battlerDef))
+        modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
+
     if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)
     {
         modifier = UQ_4_12(1.0);
@@ -13640,6 +13669,9 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
     if (GetBattlerType(battlerDef, 2, FALSE) != TYPE_MYSTERY && GetBattlerType(battlerDef, 2, FALSE) != GetBattlerType(battlerDef, 1, FALSE)
         && GetBattlerType(battlerDef, 2, FALSE) != GetBattlerType(battlerDef, 0, FALSE))
         MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 2, FALSE), battlerAtk, recordAbilities);
+
+    if (HasSeaGuardianResistances(battlerDef))
+        modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
 
     if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)
     {

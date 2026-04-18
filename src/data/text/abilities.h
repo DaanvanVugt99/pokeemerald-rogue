@@ -439,6 +439,9 @@ static const u8 sPasturizedDescription[] = _("Milk Drink sets Plain Terrain; all
 static const u8 sLightningFieldDescription[] = _("On switch-in: permanent Electric Terrain; in it, Sp. Def is halved");
 static const u8 sScorchedReignDescription[] = _("On switch-in: permanent sun; in sun, Attack is halved");
 static const u8 sMistyMirageDescription[] = _("On switch-in: permanent rain; in rain, Defense is halved");
+static const u8 sDominionDescription[] = _("On switch-in, summons sand; last ally standing is status-immune");
+static const u8 sSeaGuardianDescription[] = _("If party shares a type, gain Water's resistances");
+static const u8 sSacredAshDescription[] = _("If party shares a type, first faint revives to half and cures status");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -892,6 +895,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_LIGHTNING_FIELD] = _("Lightning Field"),
     [ABILITY_SCORCHED_REIGN] = _("Scorched Reign"),
     [ABILITY_MISTY_MIRAGE] = _("Misty Mirage"),
+    [ABILITY_DOMINION] = _("Dominion"),
+    [ABILITY_SEA_GUARDIAN] = _("Sea Guardian"),
+    [ABILITY_SACRED_ASH] = _("Sacred Ash"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1345,6 +1351,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_LIGHTNING_FIELD] = _("LightnField"),
     [ABILITY_SCORCHED_REIGN] = _("ScorchReign"),
     [ABILITY_MISTY_MIRAGE] = _("MistyMirage"),
+    [ABILITY_DOMINION] = _("Dominion"),
+    [ABILITY_SEA_GUARDIAN] = _("SeaGuardian"),
+    [ABILITY_SACRED_ASH] = _("Sacred Ash"),
 };
 #endif
 
@@ -1799,4 +1808,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_LIGHTNING_FIELD] = sLightningFieldDescription,
     [ABILITY_SCORCHED_REIGN] = sScorchedReignDescription,
     [ABILITY_MISTY_MIRAGE] = sMistyMirageDescription,
+    [ABILITY_DOMINION] = sDominionDescription,
+    [ABILITY_SEA_GUARDIAN] = sSeaGuardianDescription,
+    [ABILITY_SACRED_ASH] = sSacredAshDescription,
 };
