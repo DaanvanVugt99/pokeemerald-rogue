@@ -16441,6 +16441,10 @@ static u16 GetStatLossPreventionAbility(u32 battler, bool8 byIntimidate)
         return ABILITY_FULL_METAL_BODY;
     if (HasBattlerAbility(battler, ABILITY_WHITE_SMOKE))
         return ABILITY_WHITE_SMOKE;
+    if (HasBattlerAbility(battler, ABILITY_SAND_SKIMMER)
+     && WEATHER_HAS_EFFECT
+     && (gBattleWeather & B_WEATHER_SANDSTORM))
+        return ABILITY_SAND_SKIMMER;
 
     if (byIntimidate && (B_UPDATED_INTIMIDATE >= GEN_8))
     {

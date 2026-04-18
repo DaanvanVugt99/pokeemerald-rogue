@@ -413,6 +413,11 @@ static const u8 sRingleaderDescription[] = _("Crits torment; with 2 other Dark a
 static const u8 sRoyalDecreeDescription[] = _("Status moves lower the target's highest stat by 1");
 static const u8 sHexcraftDescription[] = _("Status moves on foes also use a 30 BP Hex");
 static const u8 sMysticPowerDescription[] = _("All moves gain STAB regardless of typing");
+static const u8 sHeadspaceDescription[] = _("On switch-in: set Psychic Terrain; if already active, use Trick Room");
+static const u8 sFortifiedSpinDescription[] = _("Protect clears your hazards and restores 1/8 max HP");
+static const u8 sBurrowDescription[] = _("First switch-in: go underground; Dig skips charge; attacking ends it");
+static const u8 sSandSkimmerDescription[] = _("In sandstorm, this Pokemon cannot have its stats lowered");
+static const u8 sBrutalChargeDescription[] = _("First turn out: 2x Speed and 1.5x Attack");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -840,6 +845,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ROYAL_DECREE] = _("Royal Decree"),
     [ABILITY_HEXCRAFT] = _("Hexcraft"),
     [ABILITY_MYSTIC_POWER] = _("Mystic Power"),
+    [ABILITY_HEADSPACE] = _("Headspace"),
+    [ABILITY_FORTIFIED_SPIN] = _("Fortified Spin"),
+    [ABILITY_BURROW] = _("Burrow"),
+    [ABILITY_SAND_SKIMMER] = _("Sand Skimmer"),
+    [ABILITY_BRUTAL_CHARGE] = _("Brutal Charge"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1267,6 +1277,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ROYAL_DECREE] = _("Royal Decree"),
     [ABILITY_HEXCRAFT] = _("Hexcraft"),
     [ABILITY_MYSTIC_POWER] = _("Mystic Power"),
+    [ABILITY_HEADSPACE] = _("Headspace"),
+    [ABILITY_FORTIFIED_SPIN] = _("Fortified Spin"),
+    [ABILITY_BURROW] = _("Burrow"),
+    [ABILITY_SAND_SKIMMER] = _("SandSkimmer"),
+    [ABILITY_BRUTAL_CHARGE] = _("BrutalCharge"),
 };
 #endif
 
@@ -1695,4 +1710,9 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_ROYAL_DECREE] = sRoyalDecreeDescription,
     [ABILITY_HEXCRAFT] = sHexcraftDescription,
     [ABILITY_MYSTIC_POWER] = sMysticPowerDescription,
+    [ABILITY_HEADSPACE] = sHeadspaceDescription,
+    [ABILITY_FORTIFIED_SPIN] = sFortifiedSpinDescription,
+    [ABILITY_BURROW] = sBurrowDescription,
+    [ABILITY_SAND_SKIMMER] = sSandSkimmerDescription,
+    [ABILITY_BRUTAL_CHARGE] = sBrutalChargeDescription,
 };

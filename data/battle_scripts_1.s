@@ -5726,6 +5726,7 @@ BattleScript_BeatUpEnd::
 .endif
 
 BattleScript_EffectSemiInvulnerable::
+	jumpifmove MOVE_DIG, BattleScript_EffectSemiInvulnerableDig
 	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
 	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
 	jumpifmove MOVE_FLY, BattleScript_FirstTurnFly
@@ -5733,6 +5734,12 @@ BattleScript_EffectSemiInvulnerable::
 	jumpifmove MOVE_BOUNCE, BattleScript_FirstTurnBounce
 	jumpifmove MOVE_PHANTOM_FORCE, BattleScript_FirstTurnPhantomForce
 	jumpifmove MOVE_SHADOW_FORCE, BattleScript_FirstTurnPhantomForce
+	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_DIG
+	goto BattleScript_FirstTurnSemiInvulnerable
+BattleScript_EffectSemiInvulnerableDig:
+	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
+	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
+	jumpifstatus3 BS_ATTACKER, STATUS3_UNDERGROUND, BattleScript_BurrowSecondTurnSemiInvulnerable
 	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_DIG
 	goto BattleScript_FirstTurnSemiInvulnerable
 BattleScript_FirstTurnBounce::
@@ -5758,6 +5765,16 @@ BattleScript_SecondTurnSemiInvulnerable::
 	clearstatusfromeffect BS_ATTACKER
 	orword gHitMarker, HITMARKER_NO_PPDEDUCT
 	argumenttomoveeffect
+	goto BattleScript_SemiInvulnerableTryHit
+BattleScript_BurrowSecondTurnSemiInvulnerable::
+	attackcanceler
+	ppreduce
+	clearsemiinvulnerablebit
+	setmoveeffect MOVE_EFFECT_CHARGING
+	setbyte sB_ANIM_TURN, 1
+	clearstatusfromeffect BS_ATTACKER
+	argumenttomoveeffect
+	goto BattleScript_SemiInvulnerableTryHit
 BattleScript_SemiInvulnerableTryHit::
 	accuracycheck BattleScript_SemiInvulnerableMiss, ACC_CURR_MOVE
 	clearsemiinvulnerablebit
@@ -9000,6 +9017,15 @@ BattleScript_AbilityHpHeal:
 BattleScript_DuelistActivates::
 	call BattleScript_AbilityHpHeal
 	return
+
+BattleScript_AbilityPopupReturn::
+	call BattleScript_AbilityPopUp
+	return
+
+BattleScript_AbilityPopupEnd3::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	end3
 
 BattleScript_SplitInstinctSpeed::
 	call BattleScript_AbilityPopUp

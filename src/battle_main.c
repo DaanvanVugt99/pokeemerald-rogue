@@ -4740,7 +4740,6 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
             }
         }
     }
-
     // stat stages
     speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
     speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
@@ -4783,7 +4782,15 @@ u32 GetBattlerTotalSpeedStat(u32 battler)
 {
     u32 ability = GetBattlerAbility(battler);
     u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
-    return GetBattlerTotalSpeedStatArgs(battler, ability, holdEffect);
+    u32 speed = GetBattlerTotalSpeedStatArgs(battler, ability, holdEffect);
+
+    if (HasBattlerAbility(battler, ABILITY_BRUTAL_CHARGE)
+     && gDisableStructs[battler].isFirstTurn)
+    {
+        speed *= 2;
+    }
+
+    return speed;
 }
 
 s8 GetChosenMovePriority(u32 battler)

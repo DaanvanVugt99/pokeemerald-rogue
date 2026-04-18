@@ -21,6 +21,8 @@ extern const u8 BattleScript_ClairvoyantActivates[];
 extern const u8 BattleScript_AttackerUsedAnExtraMove[];
 extern const u8 BattleScript_AttackerUsedAnExtraMoveOnSwitchIn[];
 extern const u8 BattleScript_DuelistActivates[];
+extern const u8 BattleScript_AbilityPopupReturn[];
+extern const u8 BattleScript_AbilityPopupEnd3[];
 extern const u8 BattleScript_SplitInstinctSpeed[];
 extern const u8 BattleScript_SplitInstinctHeal[];
 extern const u8 BattleScript_OpportunistCopyStatChange[];

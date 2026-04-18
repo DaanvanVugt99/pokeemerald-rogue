@@ -3051,6 +3051,8 @@ static void SafariTextIntoHealthboxObject(void *dest, u8 *windowTileData, u32 wi
 }
 
 #define ABILITY_POP_UP_TAG 0xD720
+#define ABILITY_POP_UP_TILE_TAG_BASE 0xD730
+#define ABILITY_POP_UP_TILE_TAG(battler) (ABILITY_POP_UP_TILE_TAG_BASE + (battler))
 
 // for sprite
 #define tOriginalX      data[0]
@@ -3067,10 +3069,6 @@ static void SafariTextIntoHealthboxObject(void *dest, u8 *windowTileData, u32 wi
 static const u8 ALIGNED(4) sAbilityPopUpGfx[] = INCBIN_U8("graphics/battle_interface/ability_pop_up.4bpp");
 static const u16 sAbilityPopUpPalette[] = INCBIN_U16("graphics/battle_interface/ability_pop_up.gbapal");
 
-static const struct SpriteSheet sSpriteSheet_AbilityPopUp =
-{
-    sAbilityPopUpGfx, sizeof(sAbilityPopUpGfx), ABILITY_POP_UP_TAG
-};
 static const struct SpritePalette sSpritePalette_AbilityPopUp =
 {
     sAbilityPopUpPalette, ABILITY_POP_UP_TAG
@@ -3359,11 +3357,17 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     const s16 (*coords)[2];
     u8 spriteId1, spriteId2, battlerPosition, taskId;
     u8 sourcePartyIdx = PARTY_SIZE;
+    struct SpriteTemplate spriteTemplate = sSpriteTemplate_AbilityPopUp;
+    struct SpriteSheet spriteSheet = {
+        sAbilityPopUpGfx,
+        sizeof(sAbilityPopUpGfx),
+        ABILITY_POP_UP_TILE_TAG(battlerId)
+    };
 
     if (B_ABILITY_POP_UP == FALSE)
         return;
 
-    if (gBattleScripting.abilityPopupOverwrite != 0)
+    if (gBattleScripting.abilityPopupOverwrite != 0 && battlerId == gBattlerAbility)
         ability = gBattleScripting.abilityPopupOverwrite;
 
     if (gTestRunnerEnabled)
@@ -3374,12 +3378,11 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     }
 
     if (!gBattleStruct->activeAbilityPopUps)
-    {
-        LoadSpriteSheet(&sSpriteSheet_AbilityPopUp);
         LoadSpritePalette(&sSpritePalette_AbilityPopUp);
-    }
+    LoadSpriteSheet(&spriteSheet);
     gBattleStruct->activeAbilityPopUps |= gBitTable[battlerId];
     battlerPosition = GetBattlerPosition(battlerId);
+    spriteTemplate.tileTag = ABILITY_POP_UP_TILE_TAG(battlerId);
 
     if (isDoubleBattle)
         coords = sAbilityPopUpCoordsDoubles;
@@ -3388,10 +3391,10 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
 
     if ((battlerPosition & BIT_SIDE) == B_SIDE_PLAYER)
     {
-        spriteId1 = CreateSprite(&sSpriteTemplate_AbilityPopUp,
+        spriteId1 = CreateSprite(&spriteTemplate,
                                 coords[battlerPosition][0] - ABILITY_POP_UP_POS_X_SLIDE,
                                 coords[battlerPosition][1], 0);
-        spriteId2 = CreateSprite(&sSpriteTemplate_AbilityPopUp,
+        spriteId2 = CreateSprite(&spriteTemplate,
                                 coords[battlerPosition][0] - ABILITY_POP_UP_POS_X_SLIDE + ABILITY_POP_UP_POS_X_DIFF,
                                 coords[battlerPosition][1], 1); //Appears below
 
@@ -3400,10 +3403,10 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     }
     else
     {
-        spriteId1 = CreateSprite(&sSpriteTemplate_AbilityPopUp,
+        spriteId1 = CreateSprite(&spriteTemplate,
                                 coords[battlerPosition][0] + ABILITY_POP_UP_POS_X_SLIDE,
                                 coords[battlerPosition][1], 0);
-        spriteId2 = CreateSprite(&sSpriteTemplate_AbilityPopUp,
+        spriteId2 = CreateSprite(&spriteTemplate,
                                 coords[battlerPosition][0] + ABILITY_POP_UP_POS_X_SLIDE + ABILITY_POP_UP_POS_X_DIFF,
                                 coords[battlerPosition][1], 1); //Appears below
 
@@ -3421,6 +3424,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     taskId = CreateTask(Task_FreeAbilityPopUpGfx, 5);
     gTasks[taskId].tSpriteId1 = spriteId1;
     gTasks[taskId].tSpriteId2 = spriteId2;
+    gTasks[taskId].data[2] = battlerId;
 
     gSprites[spriteId1].tIsMain = TRUE;
     gSprites[spriteId1].tBattlerId = battlerId;
@@ -3444,7 +3448,9 @@ void UpdateAbilityPopup(u8 battlerId)
 {
     u8 spriteId1 = gBattleStruct->abilityPopUpSpriteIds[battlerId][0];
     u8 spriteId2 = gBattleStruct->abilityPopUpSpriteIds[battlerId][1];
-    u16 ability = (gBattleScripting.abilityPopupOverwrite != 0) ? gBattleScripting.abilityPopupOverwrite : gBattleMons[battlerId].ability;
+    u16 ability = (gBattleScripting.abilityPopupOverwrite != 0 && battlerId == gBattlerAbility)
+                    ? gBattleScripting.abilityPopupOverwrite
+                    : gBattleMons[battlerId].ability;
 
     ClearAbilityName(spriteId1, spriteId2);
     PrintAbilityOnAbilityPopUp(ability, spriteId1, spriteId2);
@@ -3503,10 +3509,11 @@ static void Task_FreeAbilityPopUpGfx(u8 taskId)
 {
     if (!gSprites[gTasks[taskId].tSpriteId1].inUse
         && !gSprites[gTasks[taskId].tSpriteId2].inUse
-        && !gBattleStruct->activeAbilityPopUps)
+       )
     {
-        FreeSpriteTilesByTag(ABILITY_POP_UP_TAG);
-        FreeSpritePaletteByTag(ABILITY_POP_UP_TAG);
+        FreeSpriteTilesByTag(ABILITY_POP_UP_TILE_TAG(gTasks[taskId].data[2]));
+        if (!gBattleStruct->activeAbilityPopUps)
+            FreeSpritePaletteByTag(ABILITY_POP_UP_TAG);
         DestroyTask(taskId);
     }
 }
