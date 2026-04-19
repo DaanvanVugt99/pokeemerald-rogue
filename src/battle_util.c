@@ -1608,7 +1608,12 @@ u32 TrySetCantSelectMoveBattleScript(u32 battler)
         }
     }
 
-    if (DYNAMAX_BYPASS_CHECK && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE && move == gLastMoves[battler] && move != MOVE_STRUGGLE && (gBattleMons[battler].status2 & STATUS2_TORMENT))
+    if (DYNAMAX_BYPASS_CHECK
+     && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE
+     && move == gLastMoves[battler]
+     && move != MOVE_STRUGGLE
+     && ((gBattleMons[battler].status2 & STATUS2_TORMENT)
+      || HasBattlerAbility(battler, ABILITY_SWITCHSTEP)))
     {
         CancelMultiTurnMoves(battler);
         if (gBattleTypeFlags & BATTLE_TYPE_PALACE)
@@ -1851,7 +1856,10 @@ u8 CheckMoveLimitations(u32 battler, u8 unusableMoves, u16 check)
         else if (check & MOVE_LIMITATION_DISABLED && gBattleMons[battler].moves[i] == gDisableStructs[battler].disabledMove)
             unusableMoves |= gBitTable[i];
         // Torment
-        else if (check & MOVE_LIMITATION_TORMENTED && gBattleMons[battler].moves[i] == gLastMoves[battler] && gBattleMons[battler].status2 & STATUS2_TORMENT)
+        else if (check & MOVE_LIMITATION_TORMENTED
+              && gBattleMons[battler].moves[i] == gLastMoves[battler]
+              && ((gBattleMons[battler].status2 & STATUS2_TORMENT)
+               || HasBattlerAbility(battler, ABILITY_SWITCHSTEP)))
             unusableMoves |= gBitTable[i];
         // Taunt
         else if (check & MOVE_LIMITATION_TAUNT && gDisableStructs[battler].tauntTimer && IS_MOVE_STATUS(gBattleMons[battler].moves[i]))
@@ -4996,6 +5004,72 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SILKEN_THREAD) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!IsBattlerAlive(opposingBattler))
+                    continue;
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_SILKEN_THREAD);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_STRING_SHOT;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ALLURE) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!IsBattlerAlive(opposingBattler))
+                    continue;
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+                if (gBattleMons[opposingBattler].status2 & STATUS2_INFATUATION)
+                    continue;
+                if (HasBattlerAbility(opposingBattler, ABILITY_OBLIVIOUS))
+                    continue;
+                if (!AreBattlersOfOppositeGender(battler, opposingBattler))
+                    continue;
+                if (IsAbilityOnSide(opposingBattler, ABILITY_AROMA_VEIL))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_ALLURE);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_ATTRACT;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SPECIAL_DELIVERY) && !uniqueDone)
         {
             u32 validTargets[MAX_BATTLERS_COUNT];
@@ -7328,8 +7402,11 @@ if (triggeringAbility != ABILITY_NONE)
              && TARGET_TURN_DAMAGED
              && CanBePoisoned(gBattlerTarget, gBattlerAttacker)
              && IsMoveMakingContact(move, gBattlerAttacker)
-             && (gLastUsedAbility == ABILITY_TOXIC_MONSOON || RandomWeighted(RNG_POISON_POINT, 2, 1)))
+             && (gLastUsedAbility == ABILITY_TOXIC_MONSOON
+              || RandomWeighted(RNG_POISON_POINT, 2, 1)))
             {
+                if (gLastUsedAbility == ABILITY_TOXIC_MONSOON)
+                    SetBattlerTriggeredAbility(battler, gLastUsedAbility);
                 gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_POISON;
                 PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
                 BattleScriptPushCursor();
@@ -7585,6 +7662,23 @@ if (triggeringAbility != ABILITY_NONE)
             gStatuses3[moveEndAttacker] |= STATUS3_YAWN_TURN(2);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_SleepDustActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_REPELLANT)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && CanBePoisoned(moveEndTarget, moveEndAttacker)
+         && IsMoveMakingContact(move, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_REPELLANT);
+            gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_TOXIC;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
 
@@ -8833,6 +8927,24 @@ if (triggeringAbility != ABILITY_NONE)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_BEACON);
             gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FULL_MOON)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE)
+         && (CompareStat(gBattlerTarget, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FULL_MOON);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
@@ -13245,6 +13357,9 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         if (moveType == TYPE_FIRE)
             return UQ_4_12(1.3);
     }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_SWITCHSTEP))
+        return UQ_4_12(1.5);
 
     switch (abilityAtk)
     {

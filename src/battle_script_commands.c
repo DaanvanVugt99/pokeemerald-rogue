@@ -1806,6 +1806,9 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
         calc = (calc * 80) / 100;
 
+    if (HasBattlerAbility(battlerDef, ABILITY_FULL_MOON))
+        calc = (calc * 80) / 100;
+
     // Attacker's ally's ability
     switch (atkAllyAbility)
     {

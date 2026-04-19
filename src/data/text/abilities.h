@@ -446,6 +446,11 @@ static const u8 sTimeloopDescription[] = _("If the party shares a type, at the e
 static const u8 sSunstalkerDescription[] = _("First slicing move each switch-in gets +1 priority. In sun, all slicing moves do.");
 static const u8 sFloodplainDescription[] = _("Take 0.9x damage from special moves. In rain, restore 1/16 max HP each turn.");
 static const u8 sFlashFirestormDescription[] = _("First time taking damage each switch-in, set sun.");
+static const u8 sFullMoonDescription[] = _("Gain 20% evasion. In Eclipse, attacks lower the target's Speed by 1.");
+static const u8 sSwitchstepDescription[] = _("Moves deal 1.5x damage, but this Pokemon can't use the same move twice.");
+static const u8 sSilkenThreadDescription[] = _("On switch-in, use String Shot.");
+static const u8 sAllureDescription[] = _("On switch-in, infatuate the opposing Pokemon if possible.");
+static const u8 sRepellantDescription[] = _("When hit by a contact move, the attacker is badly poisoned.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -906,6 +911,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SUNSTALKER] = _("Sunstalker"),
     [ABILITY_FLOODPLAIN] = _("Floodplain"),
     [ABILITY_FLASH_FIRESTORM] = _("Flash Firestorm"),
+    [ABILITY_FULL_MOON] = _("Full Moon"),
+    [ABILITY_SWITCHSTEP] = _("Switchstep"),
+    [ABILITY_SILKEN_THREAD] = _("Silken Thread"),
+    [ABILITY_ALLURE] = _("Allure"),
+    [ABILITY_REPELLANT] = _("Repellant"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1366,6 +1376,11 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SUNSTALKER] = _("Sunstalker"),
     [ABILITY_FLOODPLAIN] = _("Floodplain"),
     [ABILITY_FLASH_FIRESTORM] = _("FlashFirestrm"),
+    [ABILITY_FULL_MOON] = _("Full Moon"),
+    [ABILITY_SWITCHSTEP] = _("Switchstep"),
+    [ABILITY_SILKEN_THREAD] = _("Silk Thread"),
+    [ABILITY_ALLURE] = _("Allure"),
+    [ABILITY_REPELLANT] = _("Repellant"),
 };
 #endif
 
@@ -1827,4 +1842,9 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SUNSTALKER] = sSunstalkerDescription,
     [ABILITY_FLOODPLAIN] = sFloodplainDescription,
     [ABILITY_FLASH_FIRESTORM] = sFlashFirestormDescription,
+    [ABILITY_FULL_MOON] = sFullMoonDescription,
+    [ABILITY_SWITCHSTEP] = sSwitchstepDescription,
+    [ABILITY_SILKEN_THREAD] = sSilkenThreadDescription,
+    [ABILITY_ALLURE] = sAllureDescription,
+    [ABILITY_REPELLANT] = sRepellantDescription,
 };
