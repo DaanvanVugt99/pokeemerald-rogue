@@ -464,6 +464,9 @@ static const u8 sDistortionDescription[] = _("Damaging sound moves always taunt 
 static const u8 sGravityWellDescription[] = _("On switch-in, set Gravity for 5 turns.");
 static const u8 sHeartbreakDescription[] = _("Damaging moves infatuate regardless of gender. Infatuated foes lose 1/8 HP each turn.");
 static const u8 sGemstashDescription[] = _("Using a Gem raises Defense by 1. End of turn: 50% to obtain a Gem matching a move type.");
+static const u8 sVicejawDescription[] = _("Biting moves deal 1.5x damage to targets that already moved this turn.");
+static const u8 sIronShardsDescription[] = _("If hit for 25% HP or less by a move, set Stealth Rock.");
+static const u8 sEmptyHandDescription[] = _("The first punching move after switch-in also uses Meditate.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -942,6 +945,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_GRAVITY_WELL] = _("Gravity Well"),
     [ABILITY_HEARTBREAK] = _("Heartbreak"),
     [ABILITY_GEMSTASH] = _("Gemstash"),
+    [ABILITY_VICEJAW] = _("Vicejaw"),
+    [ABILITY_IRON_SHARDS] = _("Iron Shards"),
+    [ABILITY_EMPTY_HAND] = _("Empty Hand"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1420,6 +1426,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_GRAVITY_WELL] = _("Gravity Well"),
     [ABILITY_HEARTBREAK] = _("Heartbreak"),
     [ABILITY_GEMSTASH] = _("Gemstash"),
+    [ABILITY_VICEJAW] = _("Vicejaw"),
+    [ABILITY_IRON_SHARDS] = _("IronShards"),
+    [ABILITY_EMPTY_HAND] = _("Empty Hand"),
 };
 #endif
 
@@ -1899,4 +1908,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_GRAVITY_WELL] = sGravityWellDescription,
     [ABILITY_HEARTBREAK] = sHeartbreakDescription,
     [ABILITY_GEMSTASH] = sGemstashDescription,
+    [ABILITY_VICEJAW] = sVicejawDescription,
+    [ABILITY_IRON_SHARDS] = sIronShardsDescription,
+    [ABILITY_EMPTY_HAND] = sEmptyHandDescription,
 };

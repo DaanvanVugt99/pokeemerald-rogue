@@ -7947,6 +7947,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_IRON_SHARDS)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && !(gSideStatuses[GetBattlerSide(moveEndAttacker)] & SIDE_STATUS_STEALTH_ROCK))
+        {
+            u32 damageTaken = gSpecialStatuses[moveEndTarget].physicalDmg + gSpecialStatuses[moveEndTarget].specialDmg;
+            u32 threshold = gBattleMons[moveEndTarget].maxHP / 4;
+
+            if (damageTaken != 0 && damageTaken <= threshold)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_IRON_SHARDS);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_IronShardsActivates;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_GLACIAL_MASS)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -8549,6 +8567,23 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gCalledMove = MOVE_IRON_DEFENSE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_EMPTY_HAND)
+         && gBattleMoves[move].punchingMove
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_EMPTY_HAND);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_MEDITATE;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
@@ -13682,6 +13717,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SWITCHSTEP))
         return UQ_4_12(1.5);
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_VICEJAW)
+     && gBattleMoves[gCurrentMove].bitingMove
+     && gCurrentTurnActionNumber < gBattlersCount
+     && GetBattlerTurnOrderNum(battlerDef) < gCurrentTurnActionNumber)
+    {
+        return UQ_4_12(1.5);
+    }
 
     switch (abilityAtk)
     {

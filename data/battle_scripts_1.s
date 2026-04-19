@@ -10163,6 +10163,23 @@ BattleScript_ShatterActivates::
 	waitmessage B_WAIT_TIME_SHORT
 	return
 
+BattleScript_IronShardsActivates::
+	savetarget
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAttacker, gBattlerTarget
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	setstealthrock BattleScript_IronShardsRet
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_STEALTH_ROCK
+	waitanimation
+	printstring STRINGID_POINTEDSTONESFLOAT
+	waitmessage B_WAIT_TIME_SHORT
+
+BattleScript_IronShardsRet::
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	restoretarget
+	return
+
 BattleScript_AttackerAbilityStatRaiseEnd3::
 	call BattleScript_AttackerAbilityStatRaise
 	end3
