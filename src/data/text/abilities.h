@@ -467,6 +467,9 @@ static const u8 sGemstashDescription[] = _("Using a Gem raises Defense by 1. End
 static const u8 sVicejawDescription[] = _("Biting moves deal 1.5x damage to targets that already moved this turn.");
 static const u8 sIronShardsDescription[] = _("If hit for 25% HP or less by a move, set Stealth Rock.");
 static const u8 sEmptyHandDescription[] = _("The first punching move after switch-in also uses Meditate.");
+static const u8 sFlashFangDescription[] = _("On the first turn out, biting moves have +1 priority.");
+static const u8 sPositiveChargeDescription[] = _("If the party contains Minus, gain 1.2x Sp. Atk and Speed.");
+static const u8 sNegativeChargeDescription[] = _("If the party contains Plus, take 0.8x damage and restore 1/16 each turn.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -948,6 +951,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VICEJAW] = _("Vicejaw"),
     [ABILITY_IRON_SHARDS] = _("Iron Shards"),
     [ABILITY_EMPTY_HAND] = _("Empty Hand"),
+    [ABILITY_FLASH_FANG] = _("Flash Fang"),
+    [ABILITY_POSITIVE_CHARGE] = _("Positive Charge"),
+    [ABILITY_NEGATIVE_CHARGE] = _("Negative Charge"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1429,6 +1435,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_VICEJAW] = _("Vicejaw"),
     [ABILITY_IRON_SHARDS] = _("IronShards"),
     [ABILITY_EMPTY_HAND] = _("Empty Hand"),
+    [ABILITY_FLASH_FANG] = _("Flash Fang"),
+    [ABILITY_POSITIVE_CHARGE] = _("PosCharge"),
+    [ABILITY_NEGATIVE_CHARGE] = _("NegCharge"),
 };
 #endif
 
@@ -1911,4 +1920,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_VICEJAW] = sVicejawDescription,
     [ABILITY_IRON_SHARDS] = sIronShardsDescription,
     [ABILITY_EMPTY_HAND] = sEmptyHandDescription,
+    [ABILITY_FLASH_FANG] = sFlashFangDescription,
+    [ABILITY_POSITIVE_CHARGE] = sPositiveChargeDescription,
+    [ABILITY_NEGATIVE_CHARGE] = sNegativeChargeDescription,
 };

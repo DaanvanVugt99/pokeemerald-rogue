@@ -4740,6 +4740,11 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
             }
         }
     }
+    if (HasBattlerAbility(battler, ABILITY_POSITIVE_CHARGE)
+     && DoesPartyContainAbility(battler, ABILITY_MINUS, TRUE))
+    {
+        speed = (speed * 120) / 100;
+    }
     // stat stages
     speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
     speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
@@ -4885,6 +4890,13 @@ s8 GetMovePriority(u32 battler, u16 move)
     }
 
     if (HasBattlerAbility(battler, ABILITY_AMBUSH)
+     && gDisableStructs[battler].isFirstTurn
+     && gBattleMoves[move].bitingMove)
+    {
+        priority++;
+    }
+
+    if (HasBattlerAbility(battler, ABILITY_FLASH_FANG)
      && gDisableStructs[battler].isFirstTurn
      && gBattleMoves[move].bitingMove)
     {

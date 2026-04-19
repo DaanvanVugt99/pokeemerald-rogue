@@ -4429,6 +4429,43 @@ bool32 IsTruantLoafingSuppressed(u32 battler)
         && DoesPartyShareTypeWithBattler(battler);
 }
 
+bool32 DoesPartyContainAbility(u32 battler, u32 ability, bool32 excludeBattler)
+{
+    u32 i, j;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        if (!IsValidForBattle(&party[i]))
+            continue;
+        if (excludeBattler && i == gBattlerPartyIndexes[battler])
+            continue;
+
+        for (j = 0; j < gBattlersCount; j++)
+        {
+            if (IsBattlerAlive(j)
+             && GetBattlerParty(j) == party
+             && gBattlerPartyIndexes[j] == i)
+            {
+                if (GetBattlerAbility(j) == ability)
+                    return TRUE;
+                goto next_party_mon;
+            }
+        }
+
+        if (GetMonAbility(&party[i]) == ability)
+            return TRUE;
+
+next_party_mon:
+        ;
+    }
+
+    return FALSE;
+}
+
 static bool32 HasSeaGuardianResistances(u32 battler)
 {
     return HasBattlerAbility(battler, ABILITY_SEA_GUARDIAN)
@@ -6955,6 +6992,22 @@ special_delivery_done:
                     healAmount = 1;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_FLOODPLAIN);
+                gBattleMoveDamage = -healAmount;
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect++;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_NEGATIVE_CHARGE)
+             && DoesPartyContainAbility(battler, ABILITY_PLUS, TRUE)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                s32 healAmount = GetNonDynamaxMaxHP(battler) / 16;
+
+                if (healAmount == 0)
+                    healAmount = 1;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_NEGATIVE_CHARGE);
                 gBattleMoveDamage = -healAmount;
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                 effect++;
@@ -13726,6 +13779,13 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         return UQ_4_12(1.5);
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_POSITIVE_CHARGE)
+     && IS_MOVE_SPECIAL(gCurrentMove)
+     && DoesPartyContainAbility(battlerAtk, ABILITY_MINUS, TRUE))
+    {
+        return UQ_4_12(1.2);
+    }
+
     switch (abilityAtk)
     {
     case ABILITY_NEUROFORCE:
@@ -13786,6 +13846,12 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
      && IS_MOVE_SPECIAL(move))
     {
         return UQ_4_12(0.9);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_NEGATIVE_CHARGE)
+     && DoesPartyContainAbility(battlerDef, ABILITY_PLUS, TRUE))
+    {
+        return UQ_4_12(0.8);
     }
 
     switch (abilityDef)
