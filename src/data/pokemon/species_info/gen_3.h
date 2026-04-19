@@ -1965,7 +1965,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
             .baseSpeed     = 60,
             .baseSpAttack  = 80,
         #endif
-        .types = { TYPE_BUG, TYPE_FLYING },
+        .types = { TYPE_BUG, TYPE_WATER },
         .catchRate = 75,
         .expYield = 159,
         .evYield_SpAttack = 1,

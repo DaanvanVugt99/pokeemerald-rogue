@@ -454,6 +454,9 @@ static const u8 sRepellantDescription[] = _("When hit by a contact move, the att
 static const u8 sCarnivalDescription[] = _("On switch-in in rain, use Teeter Dance.");
 static const u8 sForestAmbushDescription[] = _("First status move each switch-in lowers Speed. In Eclipse or Grassy Terrain, it also flinches.");
 static const u8 sBraveryDescription[] = _("Using a Flying move below full HP raises Attack by 1.");
+static const u8 sMonsoonDescription[] = _("On switch-in, set rain. In rain, moves deal 0.9x damage but can't miss.");
+static const u8 sMoonveilDescription[] = _("The first Dark move used against this Pokemon each switch-in fails.");
+static const u8 sWaterGlideDescription[] = _("Flying moves gain STAB and lower the target's Sp. Def by 1.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -922,6 +925,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CARNIVAL] = _("Carnival"),
     [ABILITY_FOREST_AMBUSH] = _("Forest Ambush"),
     [ABILITY_BRAVERY] = _("Bravery"),
+    [ABILITY_MONSOON] = _("Monsoon"),
+    [ABILITY_MOONVEIL] = _("Moonveil"),
+    [ABILITY_WATER_GLIDE] = _("Water Glide"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1390,6 +1396,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CARNIVAL] = _("Carnival"),
     [ABILITY_FOREST_AMBUSH] = _("ForestAmbush"),
     [ABILITY_BRAVERY] = _("Bravery"),
+    [ABILITY_MONSOON] = _("Monsoon"),
+    [ABILITY_MOONVEIL] = _("Moonveil"),
+    [ABILITY_WATER_GLIDE] = _("Water Glide"),
 };
 #endif
 
@@ -1859,4 +1868,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_CARNIVAL] = sCarnivalDescription,
     [ABILITY_FOREST_AMBUSH] = sForestAmbushDescription,
     [ABILITY_BRAVERY] = sBraveryDescription,
+    [ABILITY_MONSOON] = sMonsoonDescription,
+    [ABILITY_MOONVEIL] = sMoonveilDescription,
+    [ABILITY_WATER_GLIDE] = sWaterGlideDescription,
 };

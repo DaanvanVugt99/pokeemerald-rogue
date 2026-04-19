@@ -1540,6 +1540,9 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
 
     // discouraged from hitting
     weather = AI_GetWeather(AI_DATA);
+    if (AI_DATA->abilities[battlerAtk] == ABILITY_MONSOON && (weather & B_WEATHER_RAIN))
+        return TRUE;
+
     if ((weather & B_WEATHER_SUN)
       && (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
         return FALSE;

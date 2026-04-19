@@ -5324,6 +5324,25 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_MONSOON) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_MONSOON);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_RAIN, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_DrizzleActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SOLARBOOST) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -9006,6 +9025,24 @@ if (triggeringAbility != ABILITY_NONE)
           || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_BEACON);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_WATER_GLIDE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_FLYING
+         && (CompareStat(gBattlerTarget, STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_WATER_GLIDE);
             gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
@@ -13291,6 +13328,7 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
     else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType))
     {
         if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
+         || (HasBattlerAbility(battlerAtk, ABILITY_WATER_GLIDE) && moveType == TYPE_FLYING)
          || (HasBattlerAbility(battlerAtk, ABILITY_ADAPTIVE_ORIGIN)
           && DoesPartyHaveUniqueTypes(battlerAtk)))
         {
@@ -13436,6 +13474,12 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         GET_MOVE_TYPE(gCurrentMove, moveType);
         if (moveType == TYPE_FIRE)
             return UQ_4_12(1.3);
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_MONSOON)
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_RAIN))
+    {
+        return UQ_4_12(0.9);
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SWITCHSTEP))
@@ -13849,7 +13893,22 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
     if (HasSeaGuardianResistances(battlerDef))
         modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
 
-    if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)
+    if (moveType == TYPE_DARK
+     && HasBattlerAbility(battlerDef, ABILITY_MOONVEIL)
+     && !gDisableStructs[battlerDef].uniqueOncePerSwitchInUsed)
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            gDisableStructs[battlerDef].uniqueOncePerSwitchInUsed = TRUE;
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_MOONVEIL);
+            gMoveResultFlags |= MOVE_RESULT_MISSED;
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_MOONVEIL);
+        }
+    }
+    else if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)
     {
         modifier = UQ_4_12(1.0);
         if (B_GLARE_GHOST < GEN_4 && move == MOVE_GLARE && IS_BATTLER_OF_TYPE(battlerDef, TYPE_GHOST))

@@ -1666,6 +1666,21 @@ static bool32 AccuracyCalcHelper(u16 move)
         return TRUE;
     }
 
+    if (gBattleMoves[move].split == SPLIT_STATUS
+     && moveType == TYPE_DARK
+     && HasBattlerAbility(gBattlerTarget, ABILITY_MOONVEIL)
+     && !gDisableStructs[gBattlerTarget].uniqueOncePerSwitchInUsed)
+    {
+        gDisableStructs[gBattlerTarget].uniqueOncePerSwitchInUsed = TRUE;
+        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_MOONVEIL);
+        gMoveResultFlags |= MOVE_RESULT_MISSED;
+        gLastLandedMoves[gBattlerTarget] = 0;
+        gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+        RecordAbilityBattle(gBattlerTarget, ABILITY_MOONVEIL);
+        JumpIfMoveFailed(7, move);
+        return TRUE;
+    }
+
     if (WEATHER_HAS_EFFECT)
     {
         if (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_DELUGE)
@@ -1680,6 +1695,12 @@ static bool32 AccuracyCalcHelper(u16 move)
             move == MOVE_BLEAKWIND_STORM || move == MOVE_WILDBOLT_STORM || move == MOVE_SANDSEAR_STORM))
         {
             // thunder/hurricane/genie moves ignore acc checks in rain unless target is holding utility umbrella
+            JumpIfMoveFailed(7, move);
+            return TRUE;
+        }
+        else if (HasBattlerAbility(gBattlerAttacker, ABILITY_MONSOON)
+              && IsBattlerWeatherAffected(gBattlerAttacker, B_WEATHER_RAIN))
+        {
             JumpIfMoveFailed(7, move);
             return TRUE;
         }
@@ -2769,7 +2790,9 @@ static void Cmd_resultmessage(void)
     if (gMoveResultFlags & MOVE_RESULT_MISSED && (!(gMoveResultFlags & MOVE_RESULT_DOESNT_AFFECT_FOE) || gBattleCommunication[MISS_TYPE] > B_MSG_AVOIDED_ATK))
     {
         if (gBattleCommunication[MISS_TYPE] > B_MSG_AVOIDED_ATK) // Wonder Guard or Levitate - show the ability pop-up
-            CreateAbilityPopUp(gBattlerTarget, gBattleMons[gBattlerTarget].ability, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) != 0);
+            CreateAbilityPopUp(gBattlerTarget,
+                               gBattleScripting.abilityPopupOverwrite != 0 ? gBattleScripting.abilityPopupOverwrite : gBattleMons[gBattlerTarget].ability,
+                               (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) != 0);
         stringId = gMissStringIds[gBattleCommunication[MISS_TYPE]];
         gBattleCommunication[MSG_DISPLAY] = 1;
     }
