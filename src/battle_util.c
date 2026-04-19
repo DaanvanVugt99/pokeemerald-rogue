@@ -6681,6 +6681,22 @@ special_delivery_done:
                 effect++;
             }
 
+            if (HasBattlerAbility(battler, ABILITY_FLOODPLAIN)
+             && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                s32 healAmount = GetNonDynamaxMaxHP(battler) / 16;
+
+                if (healAmount == 0)
+                    healAmount = 1;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_FLOODPLAIN);
+                gBattleMoveDamage = -healAmount;
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect++;
+            }
+
             if ((gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
              && IsBattlerTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN)
              && !BATTLER_MAX_HP(battler)
@@ -7610,6 +7626,31 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_FLASH_FIRESTORM)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_FLASH_FIRESTORM);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_BlockedByPrimalWeatherRet;
+                effect++;
+            }
+            else if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_FLASH_FIRESTORM);
+                gBattleScripting.battler = battler;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_FlashFirestormActivates;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SHARP_QUILLS)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -8153,6 +8194,17 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
+         && gBattleMoves[move].slicingMove
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
@@ -13248,6 +13300,12 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
      && GetBattlerTurnOrderNum(battlerDef) > gCurrentTurnActionNumber)
     {
         return UQ_4_12(0.5);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_FLOODPLAIN)
+     && IS_MOVE_SPECIAL(move))
+    {
+        return UQ_4_12(0.9);
     }
 
     switch (abilityDef)

@@ -4935,6 +4935,14 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
+     && gBattleMoves[move].slicingMove
+     && (IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
+      || !gDisableStructs[battler].uniqueOncePerSwitchInUsed))
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_SOLARBOOST)
      && gDisableStructs[battler].isFirstTurn
      && gBattleMoves[move].type == TYPE_FIRE)

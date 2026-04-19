@@ -443,6 +443,9 @@ static const u8 sDominionDescription[] = _("On switch-in, summon sand. If this i
 static const u8 sSeaGuardianDescription[] = _("If the party shares a type, gain Water's resistances.");
 static const u8 sSacredAshDescription[] = _("If the party shares a type, the first faint revives to half HP and cures status.");
 static const u8 sTimeloopDescription[] = _("If the party shares a type, at the end of turn use Leech Seed on a random foe.");
+static const u8 sSunstalkerDescription[] = _("First slicing move each switch-in gets +1 priority. In sun, all slicing moves do.");
+static const u8 sFloodplainDescription[] = _("Take 0.9x damage from special moves. In rain, restore 1/16 max HP each turn.");
+static const u8 sFlashFirestormDescription[] = _("First time taking damage each switch-in, set sun.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -900,6 +903,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SEA_GUARDIAN] = _("Sea Guardian"),
     [ABILITY_SACRED_ASH] = _("Sacred Ash"),
     [ABILITY_TIMELOOP] = _("Timeloop"),
+    [ABILITY_SUNSTALKER] = _("Sunstalker"),
+    [ABILITY_FLOODPLAIN] = _("Floodplain"),
+    [ABILITY_FLASH_FIRESTORM] = _("Flash Firestorm"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1357,6 +1363,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SEA_GUARDIAN] = _("SeaGuardian"),
     [ABILITY_SACRED_ASH] = _("Sacred Ash"),
     [ABILITY_TIMELOOP] = _("Timeloop"),
+    [ABILITY_SUNSTALKER] = _("Sunstalker"),
+    [ABILITY_FLOODPLAIN] = _("Floodplain"),
+    [ABILITY_FLASH_FIRESTORM] = _("FlashFirestrm"),
 };
 #endif
 
@@ -1815,4 +1824,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SEA_GUARDIAN] = sSeaGuardianDescription,
     [ABILITY_SACRED_ASH] = sSacredAshDescription,
     [ABILITY_TIMELOOP] = sTimeloopDescription,
+    [ABILITY_SUNSTALKER] = sSunstalkerDescription,
+    [ABILITY_FLOODPLAIN] = sFloodplainDescription,
+    [ABILITY_FLASH_FIRESTORM] = sFlashFirestormDescription,
 };
