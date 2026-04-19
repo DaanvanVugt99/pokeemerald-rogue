@@ -457,6 +457,10 @@ static const u8 sBraveryDescription[] = _("Using a Flying move below full HP rai
 static const u8 sMonsoonDescription[] = _("On switch-in, set rain. In rain, moves deal 0.9x damage but can't miss.");
 static const u8 sMoonveilDescription[] = _("The first Dark move used against this Pokemon each switch-in fails.");
 static const u8 sWaterGlideDescription[] = _("Flying moves gain STAB and lower the target's Sp. Def by 1.");
+static const u8 sKingsDomainDescription[] = _("If the party shares a type, this Pokemon ignores loafing from Truant.");
+static const u8 sSkitterstepDescription[] = _("Ignore trapping. In Infested Terrain, also ignore entry hazards.");
+static const u8 sHollowNestDescription[] = _("Ignore entry hazards. In Infested Terrain, also ignore weather damage.");
+static const u8 sDistortionDescription[] = _("Damaging sound moves always taunt or confuse the target, 50/50.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -928,6 +932,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MONSOON] = _("Monsoon"),
     [ABILITY_MOONVEIL] = _("Moonveil"),
     [ABILITY_WATER_GLIDE] = _("Water Glide"),
+    [ABILITY_KINGS_DOMAIN] = _("King's Domain"),
+    [ABILITY_SKITTERSTEP] = _("Skitterstep"),
+    [ABILITY_HOLLOW_NEST] = _("Hollow Nest"),
+    [ABILITY_DISTORTION] = _("Distortion"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1399,6 +1407,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MONSOON] = _("Monsoon"),
     [ABILITY_MOONVEIL] = _("Moonveil"),
     [ABILITY_WATER_GLIDE] = _("Water Glide"),
+    [ABILITY_KINGS_DOMAIN] = _("KingsDomain"),
+    [ABILITY_SKITTERSTEP] = _("Skitterstep"),
+    [ABILITY_HOLLOW_NEST] = _("Hollow Nest"),
+    [ABILITY_DISTORTION] = _("Distortion"),
 };
 #endif
 
@@ -1871,4 +1883,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_MONSOON] = sMonsoonDescription,
     [ABILITY_MOONVEIL] = sMoonveilDescription,
     [ABILITY_WATER_GLIDE] = sWaterGlideDescription,
+    [ABILITY_KINGS_DOMAIN] = sKingsDomainDescription,
+    [ABILITY_SKITTERSTEP] = sSkitterstepDescription,
+    [ABILITY_HOLLOW_NEST] = sHollowNestDescription,
+    [ABILITY_DISTORTION] = sDistortionDescription,
 };

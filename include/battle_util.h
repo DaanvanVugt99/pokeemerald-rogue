@@ -144,6 +144,7 @@ bool32 HasNoMonsToSwitch(u32 battler, u8 r1, u8 r2);
 bool32 IsOnlyAliveMonInParty(u32 battler);
 bool32 DoesPartyShareTypeWithBattler(u32 battler);
 bool32 DoesPartyHaveUniqueTypes(u32 battler);
+bool32 IsTruantLoafingSuppressed(u32 battler);
 u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler);
 u32 GetBattlerKnownDistinctDamagingMoveTypeCount(u32 battler);
 void GetBattlerKnownMoveCategoryCounts(u32 battler, u32 *damagingMoveCount, u32 *statusMoveCount);

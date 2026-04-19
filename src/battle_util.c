@@ -3689,7 +3689,9 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
             gBattleStruct->atkCancellerTracker++;
             break;
         case CANCELLER_TRUANT: // truant
-            if (GetBattlerAbility(gBattlerAttacker) == ABILITY_TRUANT && gDisableStructs[gBattlerAttacker].truantCounter)
+            if (GetBattlerAbility(gBattlerAttacker) == ABILITY_TRUANT
+             && gDisableStructs[gBattlerAttacker].truantCounter
+             && !IsTruantLoafingSuppressed(gBattlerAttacker))
             {
                 CancelMultiTurnMoves(gBattlerAttacker);
                 gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
@@ -4353,6 +4355,12 @@ bool32 DoesPartyShareTypeWithBattler(u32 battler)
     }
 
     return TRUE;
+}
+
+bool32 IsTruantLoafingSuppressed(u32 battler)
+{
+    return HasBattlerAbility(battler, ABILITY_KINGS_DOMAIN)
+        && DoesPartyShareTypeWithBattler(battler);
 }
 
 static bool32 HasSeaGuardianResistances(u32 battler)
@@ -8604,6 +8612,43 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DISTORTION)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && !IS_MOVE_STATUS(move)
+         && gBattleMoves[move].soundMove)
+        {
+            switch (RandomWeighted(RNG_SECONDARY_EFFECT, 1, 1))
+            {
+            case 0:
+                if (CanBeConfused(gBattlerTarget))
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_DISTORTION);
+                    gBattleScripting.moveEffect = MOVE_EFFECT_CONFUSION;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                    gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                    effect++;
+                }
+                break;
+            case 1:
+                if (!HasBattlerAbility(gBattlerTarget, ABILITY_OBLIVIOUS)
+                 && gDisableStructs[gBattlerTarget].tauntTimer == 0)
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_DISTORTION);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_DistortionTauntActivates;
+                    effect++;
+                }
+                break;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_ROYAL_DECREE)
@@ -14997,6 +15042,9 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
     u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
     if (HasBattlerAbility(battler, ABILITY_BUOYANCY)
      || HasBattlerAbility(battler, ABILITY_POLLEN_PUFF)
+     || HasBattlerAbility(battler, ABILITY_HOLLOW_NEST)
+     || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
+      && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))
      || (HasBattlerAbility(battler, ABILITY_BURROW)
       && (gDisableStructs[battler].uniquePersistentStateActive
        || !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))))

@@ -3742,8 +3742,13 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 }
                 break;
             case MOVE_EFFECT_PREVENT_ESCAPE:
-                gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
-                gDisableStructs[gBattlerTarget].battlerPreventingEscape = gBattlerAttacker;
+                if (!(B_GHOSTS_ESCAPE >= GEN_6
+                   && (IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GHOST)
+                    || HasBattlerAbility(gBattlerTarget, ABILITY_SKITTERSTEP))))
+                {
+                    gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+                    gDisableStructs[gBattlerTarget].battlerPreventingEscape = gBattlerAttacker;
+                }
                 gBattlescriptCurrInstr++;
                 break;
             case MOVE_EFFECT_NIGHTMARE:
@@ -3945,19 +3950,32 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 }
                 break;
             case MOVE_EFFECT_TRAP_BOTH:
-                if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION) && !(gBattleMons[gBattlerAttacker].status2 & STATUS2_ESCAPE_PREVENTION))
+                if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION)
+                 && !(gBattleMons[gBattlerAttacker].status2 & STATUS2_ESCAPE_PREVENTION))
                 {
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
                     gBattlescriptCurrInstr = BattleScript_BothCanNoLongerEscape;
                 }
-                if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+                if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION)
+                 && !(B_GHOSTS_ESCAPE >= GEN_6
+                   && (IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GHOST)
+                    || HasBattlerAbility(gBattlerTarget, ABILITY_SKITTERSTEP))))
                     gDisableStructs[gBattlerTarget].battlerPreventingEscape = gBattlerAttacker;
 
-                if (!(gBattleMons[gBattlerAttacker].status2 & STATUS2_ESCAPE_PREVENTION))
+                if (!(gBattleMons[gBattlerAttacker].status2 & STATUS2_ESCAPE_PREVENTION)
+                 && !(B_GHOSTS_ESCAPE >= GEN_6
+                   && (IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_GHOST)
+                    || HasBattlerAbility(gBattlerAttacker, ABILITY_SKITTERSTEP))))
                     gDisableStructs[gBattlerAttacker].battlerPreventingEscape = gBattlerTarget;
 
-                gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
-                gBattleMons[gBattlerAttacker].status2 |= STATUS2_ESCAPE_PREVENTION;
+                if (!(B_GHOSTS_ESCAPE >= GEN_6
+                   && (IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GHOST)
+                    || HasBattlerAbility(gBattlerTarget, ABILITY_SKITTERSTEP))))
+                    gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+                if (!(B_GHOSTS_ESCAPE >= GEN_6
+                   && (IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_GHOST)
+                    || HasBattlerAbility(gBattlerAttacker, ABILITY_SKITTERSTEP))))
+                    gBattleMons[gBattlerAttacker].status2 |= STATUS2_ESCAPE_PREVENTION;
                 break;
             case MOVE_EFFECT_BURN_UP:
                 // This seems unnecessary but is done to make it work properly with Parental Bond
@@ -12781,6 +12799,9 @@ static void Cmd_weatherdamage(void)
     gBattleMoveDamage = 0;
     if (IsBattlerAlive(gBattlerAttacker) && WEATHER_HAS_EFFECT && ability != ABILITY_MAGIC_GUARD)
     {
+        bool32 hollowNestWeatherImmune = HasBattlerAbility(gBattlerAttacker, ABILITY_HOLLOW_NEST)
+            && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN);
+
         if (gBattleWeather & B_WEATHER_SANDSTORM)
         {
             if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_ROCK)
@@ -12791,6 +12812,7 @@ static void Cmd_weatherdamage(void)
                 && ability != ABILITY_SAND_RUSH
                 && ability != ABILITY_OVERCOAT
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
+                && !hollowNestWeatherImmune
                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
@@ -12816,6 +12838,7 @@ static void Cmd_weatherdamage(void)
                 && ability != ABILITY_OVERCOAT
                 && ability != ABILITY_ICE_BODY
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
+                && !hollowNestWeatherImmune
                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
@@ -12852,6 +12875,7 @@ static void Cmd_weatherdamage(void)
             else if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON)
                 && ability != ABILITY_OVERCOAT
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
+                && !hollowNestWeatherImmune
                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
@@ -17220,9 +17244,14 @@ void BS_TrySetOctolock(void)
     }
     else
     {
-        gDisableStructs[battler].octolock = TRUE;
-        gBattleMons[battler].status2 |= STATUS2_ESCAPE_PREVENTION;
-        gDisableStructs[battler].battlerPreventingEscape = gBattlerAttacker;
+        if (!(B_GHOSTS_ESCAPE >= GEN_6
+           && (IS_BATTLER_OF_TYPE(battler, TYPE_GHOST)
+            || HasBattlerAbility(battler, ABILITY_SKITTERSTEP))))
+        {
+            gDisableStructs[battler].octolock = TRUE;
+            gBattleMons[battler].status2 |= STATUS2_ESCAPE_PREVENTION;
+            gDisableStructs[battler].battlerPreventingEscape = gBattlerAttacker;
+        }
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
 }

@@ -10303,6 +10303,15 @@ BattleScript_AbilityTrapsTarget::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_DistortionTauntActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	jumpifability BS_TARGET_SIDE, ABILITY_AROMA_VEIL, BattleScript_AromaVeilProtects
+	settaunt BattleScript_AbilityPopupReturn
+	printstring STRINGID_PKMNFELLFORTAUNT
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_ToxicBloomActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
