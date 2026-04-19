@@ -72,6 +72,8 @@ static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability);
 static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
 static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
+static u16 GetGemItemForType(u32 type);
+static u16 GetRandomGemstashItemForBattler(u32 battler);
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 *const gBattlescriptsForRunningByItem[];
@@ -79,6 +81,70 @@ extern const u8 *const gBattlescriptsForUsingItem[];
 extern const u8 *const gBattlescriptsForSafariActions[];
 
 u8 gIonizeDmgByBattler[MAX_BATTLERS_COUNT];
+u8 gHeartbreakDmgByBattler[MAX_BATTLERS_COUNT];
+
+static u16 GetGemItemForType(u32 type)
+{
+    switch (type)
+    {
+    case TYPE_NORMAL: return ITEM_NORMAL_GEM;
+    case TYPE_FIRE: return ITEM_FIRE_GEM;
+    case TYPE_WATER: return ITEM_WATER_GEM;
+    case TYPE_ELECTRIC: return ITEM_ELECTRIC_GEM;
+    case TYPE_GRASS: return ITEM_GRASS_GEM;
+    case TYPE_ICE: return ITEM_ICE_GEM;
+    case TYPE_FIGHTING: return ITEM_FIGHTING_GEM;
+    case TYPE_POISON: return ITEM_POISON_GEM;
+    case TYPE_GROUND: return ITEM_GROUND_GEM;
+    case TYPE_FLYING: return ITEM_FLYING_GEM;
+    case TYPE_PSYCHIC: return ITEM_PSYCHIC_GEM;
+    case TYPE_BUG: return ITEM_BUG_GEM;
+    case TYPE_ROCK: return ITEM_ROCK_GEM;
+    case TYPE_GHOST: return ITEM_GHOST_GEM;
+    case TYPE_DRAGON: return ITEM_DRAGON_GEM;
+    case TYPE_DARK: return ITEM_DARK_GEM;
+    case TYPE_STEEL: return ITEM_STEEL_GEM;
+    case TYPE_FAIRY: return ITEM_FAIRY_GEM;
+    default: return ITEM_NONE;
+    }
+}
+
+static u16 GetRandomGemstashItemForBattler(u32 battler)
+{
+    u32 i;
+    u32 validMoveCount = 0;
+    u16 gemItems[MAX_MON_MOVES];
+    u8 savedDynamicMoveType = gBattleStruct->dynamicMoveType;
+    u8 savedAteBoost = gBattleStruct->ateBoost[battler];
+    bool8 savedGemBoost = gSpecialStatuses[battler].gemBoost;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        u16 move = gBattleMons[battler].moves[i];
+        u32 moveType;
+        u16 gemItem;
+
+        if (move == MOVE_NONE || move == MOVE_UNAVAILABLE)
+            continue;
+
+        SetTypeBeforeUsingMove(move, battler);
+        GET_MOVE_TYPE(move, moveType);
+        gemItem = GetGemItemForType(moveType);
+        if (gemItem == ITEM_NONE)
+            continue;
+
+        gemItems[validMoveCount++] = gemItem;
+    }
+
+    gBattleStruct->dynamicMoveType = savedDynamicMoveType;
+    gBattleStruct->ateBoost[battler] = savedAteBoost;
+    gSpecialStatuses[battler].gemBoost = savedGemBoost;
+
+    if (validMoveCount == 0)
+        return ITEM_NONE;
+
+    return gemItems[RandomUniform(RNG_ROGUE_GEMSTASH_TYPE, 0, validMoveCount - 1)];
+}
 
 static const u8 sPkblToEscapeFactor[][3] = {
     {
@@ -5203,6 +5269,25 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_GRAVITY_WELL)
+         && !uniqueDone
+         && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_GRAVITY_WELL);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_GRAVITY;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PSIONIC_PARADOX) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -6633,6 +6718,53 @@ special_delivery_done:
                     gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
                     BattleScriptPushCursorAndCallback(BattleScript_ToxicBloomActivates);
                     gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                    effect++;
+                }
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_HEARTBREAK))
+            {
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    gHeartbreakDmgByBattler[i] = 0;
+
+                    if (GetBattlerSide(i) == GetBattlerSide(battler)
+                     || !IsBattlerAlive(i)
+                     || HasBattlerAbility(i, ABILITY_MAGIC_GUARD)
+                     || !(gBattleMons[i].status2 & STATUS2_INFATUATED_WITH(battler)))
+                        continue;
+
+                    gHeartbreakDmgByBattler[i] = GetNonDynamaxMaxHP(i) / 8;
+                    if (gHeartbreakDmgByBattler[i] == 0)
+                        gHeartbreakDmgByBattler[i] = 1;
+                }
+
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (gHeartbreakDmgByBattler[i] != 0)
+                    {
+                        SetBattlerTriggeredAbility(battler, ABILITY_HEARTBREAK);
+                        PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                        BattleScriptPushCursorAndCallback(BattleScript_HeartbreakDrains);
+                        effect++;
+                        break;
+                    }
+                }
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_GEMSTASH)
+             && gBattleMons[battler].item == ITEM_NONE
+             && gBattleStruct->changedItems[battler] == ITEM_NONE
+             && RandomPercentage(RNG_ROGUE_GEMSTASH_PROC, 50))
+            {
+                u16 gemItem = GetRandomGemstashItemForBattler(battler);
+
+                if (gemItem != ITEM_NONE)
+                {
+                    gBattleStruct->usedHeldItems[gBattlerPartyIndexes[battler]][GetBattlerSide(battler)] = gemItem;
+                    gLastUsedItem = gemItem;
+                    SetBattlerTriggeredAbility(battler, ABILITY_GEMSTASH);
+                    BattleScriptPushCursorAndCallback(BattleScript_HarvestActivates);
                     effect++;
                 }
             }
@@ -8649,6 +8781,27 @@ if (triggeringAbility != ABILITY_NONE)
                 }
                 break;
             }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_HEARTBREAK)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && !IS_MOVE_STATUS(move)
+         && !DoesSubstituteBlockMove(gBattlerAttacker, gBattlerTarget, gCurrentMove)
+         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_INFATUATION)
+         && !HasBattlerAbility(gBattlerTarget, ABILITY_OBLIVIOUS)
+         && !IsAbilityOnSide(gBattlerTarget, ABILITY_AROMA_VEIL))
+        {
+            gBattleMons[gBattlerTarget].status2 |= STATUS2_INFATUATED_WITH(gBattlerAttacker);
+            SetBattlerTriggeredAbility(battler, ABILITY_HEARTBREAK);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_HeartbreakInfatuates;
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_ROYAL_DECREE)

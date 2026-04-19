@@ -8263,6 +8263,19 @@ static void Cmd_removeitem(void)
     ClearBattlerItemEffectHistory(battler);
     if (!TryCheekPouch(battler, itemId) && !TrySymbiosis(battler, itemId))
         gBattlescriptCurrInstr = cmd->nextInstr;
+
+    if (battler == gBattlerAttacker
+     && ItemId_GetHoldEffect(itemId) == HOLD_EFFECT_GEMS
+     && gSpecialStatuses[battler].gemBoost
+     && HasBattlerAbility(battler, ABILITY_GEMSTASH)
+     && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+    {
+        SetBattlerTriggeredAbility(battler, ABILITY_GEMSTASH);
+        gBattleScripting.battler = gBattlerAbility = battler;
+        SET_STATCHANGER(STAT_DEF, 1, FALSE);
+        BattleScriptPush(gBattlescriptCurrInstr);
+        gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+    }
 }
 
 static void Cmd_atknameinbuff1(void)

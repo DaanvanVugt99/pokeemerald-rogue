@@ -461,6 +461,9 @@ static const u8 sKingsDomainDescription[] = _("If the party shares a type, this 
 static const u8 sSkitterstepDescription[] = _("Ignore trapping. In Infested Terrain, also ignore entry hazards.");
 static const u8 sHollowNestDescription[] = _("Ignore entry hazards. In Infested Terrain, also ignore weather damage.");
 static const u8 sDistortionDescription[] = _("Damaging sound moves always taunt or confuse the target, 50/50.");
+static const u8 sGravityWellDescription[] = _("On switch-in, set Gravity for 5 turns.");
+static const u8 sHeartbreakDescription[] = _("Damaging moves infatuate regardless of gender. Infatuated foes lose 1/8 HP each turn.");
+static const u8 sGemstashDescription[] = _("Using a Gem raises Defense by 1. End of turn: 50% to obtain a Gem matching a move type.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -936,6 +939,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SKITTERSTEP] = _("Skitterstep"),
     [ABILITY_HOLLOW_NEST] = _("Hollow Nest"),
     [ABILITY_DISTORTION] = _("Distortion"),
+    [ABILITY_GRAVITY_WELL] = _("Gravity Well"),
+    [ABILITY_HEARTBREAK] = _("Heartbreak"),
+    [ABILITY_GEMSTASH] = _("Gemstash"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1411,6 +1417,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SKITTERSTEP] = _("Skitterstep"),
     [ABILITY_HOLLOW_NEST] = _("Hollow Nest"),
     [ABILITY_DISTORTION] = _("Distortion"),
+    [ABILITY_GRAVITY_WELL] = _("Gravity Well"),
+    [ABILITY_HEARTBREAK] = _("Heartbreak"),
+    [ABILITY_GEMSTASH] = _("Gemstash"),
 };
 #endif
 
@@ -1887,4 +1896,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SKITTERSTEP] = sSkitterstepDescription,
     [ABILITY_HOLLOW_NEST] = sHollowNestDescription,
     [ABILITY_DISTORTION] = sDistortionDescription,
+    [ABILITY_GRAVITY_WELL] = sGravityWellDescription,
+    [ABILITY_HEARTBREAK] = sHeartbreakDescription,
+    [ABILITY_GEMSTASH] = sGemstashDescription,
 };

@@ -9683,6 +9683,40 @@ BattleScript_BadDreams_HidePopUp:
 	tryfaintmon BS_TARGET
 	goto BattleScript_BadDreamsIncrement
 
+BattleScript_HeartbreakDrains::
+	setbyte gBattlerTarget, 0
+BattleScript_HeartbreakDrainLoop:
+	jumpifabsent BS_TARGET, BattleScript_HeartbreakDrainIncrement
+	jumpifhasnohp BS_TARGET, BattleScript_HeartbreakDrainIncrement
+	setword gBattleMoveDamage, 0
+	copyarraywithindex gBattleMoveDamage, gHeartbreakDmgByBattler, gBattlerTarget, 1
+	jumpifword CMP_EQUAL, gBattleMoveDamage, 0, BattleScript_HeartbreakDrainIncrement
+BattleScript_HeartbreakDrainDoDamage:
+	jumpifbyteequal sFIXED_ABILITY_POPUP, sZero, BattleScript_HeartbreakDrainShowPopUp
+BattleScript_HeartbreakDrainAfterPopUp:
+	swapattackerwithtarget
+	call BattleScript_HurtAttacker
+	swapattackerwithtarget
+	jumpifhasnohp BS_TARGET, BattleScript_HeartbreakDrainHidePopUp
+	goto BattleScript_HeartbreakDrainIncrement
+BattleScript_HeartbreakDrainIncrement:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_HeartbreakDrainLoop
+	jumpifbyteequal sFIXED_ABILITY_POPUP, sZero, BattleScript_HeartbreakDrainEnd
+	destroyabilitypopup
+	pause 15
+BattleScript_HeartbreakDrainEnd:
+	end3
+BattleScript_HeartbreakDrainShowPopUp:
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	setbyte sFIXED_ABILITY_POPUP, TRUE
+	goto BattleScript_HeartbreakDrainAfterPopUp
+BattleScript_HeartbreakDrainHidePopUp:
+	destroyabilitypopup
+	tryfaintmon BS_TARGET
+	goto BattleScript_HeartbreakDrainIncrement
+
 BattleScript_IonizeActivates::
 	setbyte gBattlerTarget, 0
 BattleScript_IonizeLoop:
@@ -10271,6 +10305,16 @@ BattleScript_CuteCharmActivates::
 	printstring STRINGID_PKMNSXINFATUATEDY
 	waitmessage B_WAIT_TIME_LONG
 	call BattleScript_TryDestinyKnotTarget
+	return
+
+BattleScript_HeartbreakInfatuates::
+	call BattleScript_AbilityPopUp
+	swapattackerwithtarget
+	status2animation BS_ATTACKER, STATUS2_INFATUATION
+	printstring STRINGID_PKMNSXINFATUATEDY
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_TryDestinyKnotTarget
+	swapattackerwithtarget
 	return
 
 BattleScript_GooeyActivates::
