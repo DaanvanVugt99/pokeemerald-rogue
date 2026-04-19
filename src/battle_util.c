@@ -5070,6 +5070,36 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CARNIVAL)
+         && !uniqueDone
+         && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN))
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!IsBattlerAlive(opposingBattler))
+                    continue;
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                uniqueDone = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_CARNIVAL);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_TEETER_DANCE;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SPECIAL_DELIVERY) && !uniqueDone)
         {
             u32 validTargets[MAX_BATTLERS_COUNT];
@@ -8596,6 +8626,56 @@ if (triggeringAbility != ABILITY_NONE)
                 gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
                 effect++;
             }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FOREST_AMBUSH)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            bool32 flinchToo = IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE)
+                || IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN);
+
+            SetBattlerTriggeredAbility(battler, ABILITY_FOREST_AMBUSH);
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+
+            if (flinchToo)
+            {
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_ForestAmbushActivates;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
+            else
+            {
+                gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BRAVERY)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_FLYING
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && gBattleMons[battler].hp < gBattleMons[battler].maxHP
+         && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BRAVERY);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_ATK, 1, FALSE);
+            PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_DRAGON_MAJESTY)

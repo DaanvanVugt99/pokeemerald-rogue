@@ -10286,6 +10286,15 @@ BattleScript_AbilityStatusEffect::
 	seteffectsecondary
 	return
 
+BattleScript_ForestAmbushActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	setmoveeffect MOVE_EFFECT_SPD_MINUS_1 | MOVE_EFFECT_CERTAIN
+	seteffectsecondary
+	setmoveeffect MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN
+	seteffectsecondary
+	return
+
 BattleScript_AbilityTrapsTarget::
 	waitstate
 	call BattleScript_AbilityPopUp
