@@ -303,7 +303,7 @@ static const u8 sTeraformZeroDescription[] = _("Removes weather and terrain.");
 static const u8 sPoisonPuppeteerDescription[] = _("Confuses poisoned foes.");
 
 static const u8 sForecastPriorityDescription[] = _("Weather moves go first.");
-static const u8 sStrongWindsDescription[] = _("On entry, sets Tailwind.");
+static const u8 sStrongWindsDescription[] = _("On switch-in, sets Tailwind.");
 static const u8 sUpdraftDescription[] = _("The first Fire move after switch-in also uses Tailwind.");
 static const u8 sRootsnareDescription[] = _("The first Grass move after switch-in also uses Smack Down.");
 static const u8 sShellFormationDescription[] = _("First Water move after switch-in also uses Iron Defense.");
@@ -470,6 +470,9 @@ static const u8 sEmptyHandDescription[] = _("The first punching move after switc
 static const u8 sFlashFangDescription[] = _("On the first turn out, biting moves have +1 priority.");
 static const u8 sPositiveChargeDescription[] = _("If the party contains Minus, gain 1.2x Sp. Atk and Speed.");
 static const u8 sNegativeChargeDescription[] = _("If the party contains Plus, take 0.8x damage and restore 1/16 each turn.");
+static const u8 sCallDescription[] = _("If the party contains a Fairy type, status moves gain +1 priority.");
+static const u8 sResponseDescription[] = _("If the party contains an Electric type, status moves gain +1 priority.");
+static const u8 sUnmovableDescription[] = _("Cannot be forced out. First contact hit each switch-in forces the attacker out.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -954,6 +957,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FLASH_FANG] = _("Flash Fang"),
     [ABILITY_POSITIVE_CHARGE] = _("Positive Charge"),
     [ABILITY_NEGATIVE_CHARGE] = _("Negative Charge"),
+    [ABILITY_CALL] = _("Call"),
+    [ABILITY_RESPONSE] = _("Response"),
+    [ABILITY_UNMOVABLE] = _("Unmovable"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1438,6 +1444,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FLASH_FANG] = _("Flash Fang"),
     [ABILITY_POSITIVE_CHARGE] = _("PosCharge"),
     [ABILITY_NEGATIVE_CHARGE] = _("NegCharge"),
+    [ABILITY_CALL] = _("Call"),
+    [ABILITY_RESPONSE] = _("Response"),
+    [ABILITY_UNMOVABLE] = _("Unmovable"),
 };
 #endif
 
@@ -1923,4 +1932,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_FLASH_FANG] = sFlashFangDescription,
     [ABILITY_POSITIVE_CHARGE] = sPositiveChargeDescription,
     [ABILITY_NEGATIVE_CHARGE] = sNegativeChargeDescription,
+    [ABILITY_CALL] = sCallDescription,
+    [ABILITY_RESPONSE] = sResponseDescription,
+    [ABILITY_UNMOVABLE] = sUnmovableDescription,
 };

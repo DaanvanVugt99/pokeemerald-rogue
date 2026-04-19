@@ -3618,7 +3618,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
             .baseDefense   = 55,
             .baseSpDefense = 75,
         #endif
-        .types = { TYPE_BUG, TYPE_BUG },
+        .types = { TYPE_BUG, TYPE_ELECTRIC },
         .catchRate = 150,
         .expYield = 151,
         .evYield_Speed = 1,
@@ -3671,7 +3671,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
             .baseDefense   = 55,
             .baseSpDefense = 75,
         #endif
-        .types = { TYPE_BUG, TYPE_BUG },
+        .types = { TYPE_BUG, TYPE_FAIRY },
         .catchRate = 150,
         .expYield = 151,
         .evYield_Speed = 1,

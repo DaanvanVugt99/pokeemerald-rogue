@@ -6392,6 +6392,44 @@ static void Cmd_moveend(void)
             }
             gBattleScripting.moveendState++;
             break;
+        case MOVEEND_UNIQUE_ABILITY:
+            if ((gBattleMoves[gCurrentMove].effect != EFFECT_HIT_SWITCH_TARGET || gBattleStruct->hitSwitchTargetFailed)
+              && IsBattlerAlive(gBattlerAttacker)
+              && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
+              && !HasBattlerAbility(gBattlerAttacker, ABILITY_GUARD_DOG))
+            {
+                u8 battlers[4] = {0, 1, 2, 3};
+                SortBattlersBySpeed(battlers, FALSE);
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    u8 battler = battlers[i];
+                    if (battler != gBattlerAttacker
+                      && IsBattlerAlive(battler)
+                      && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)
+                      && HasBattlerAbility(battler, ABILITY_UNMOVABLE)
+                      && BATTLER_TURN_DAMAGED(battler)
+                      && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+                      && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+                      && CanBattlerSwitch(gBattlerAttacker))
+                    {
+                        SetBattlerTriggeredAbility(battler, ABILITY_UNMOVABLE);
+                        gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                        gTempMove = gCurrentMove;
+                        gCurrentMove = MOVE_CIRCLE_THROW;
+                        gBattleStruct->savedBattlerTarget = gBattleScripting.battler = battler;
+                        gEffectBattler = gBattlerAttacker;
+                        if (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE)
+                            gBattlescriptCurrInstr = BattleScript_MoveEnd;
+                        BattleScriptPushCursor();
+                        gBattlescriptCurrInstr = BattleScript_UnmovableActivates;
+                        gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
+                        effect = TRUE;
+                        break;
+                    }
+                }
+            }
+            gBattleScripting.moveendState++;
+            break;
         case MOVEEND_EJECT_PACK:
             {
                 u8 battlers[4] = {0, 1, 2, 3};

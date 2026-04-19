@@ -4903,6 +4903,20 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_CALL)
+     && IS_MOVE_STATUS(move)
+     && CountPartyMonsOfType(battler, TYPE_FAIRY, TRUE) >= 1)
+    {
+        priority++;
+    }
+
+    if (HasBattlerAbility(battler, ABILITY_RESPONSE)
+     && IS_MOVE_STATUS(move)
+     && CountPartyMonsOfType(battler, TYPE_ELECTRIC, TRUE) >= 1)
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_TERRITORIAL)
      && (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
      && gBattleMoves[move].type == TYPE_FLYING

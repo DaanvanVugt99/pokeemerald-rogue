@@ -2460,6 +2460,7 @@ BattleScript_EffectHitSwitchTarget:
 	tryfaintmon BS_TARGET
 	jumpiffainted BS_TARGET, TRUE, BattleScript_MoveEnd
 	jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_AbilityPreventsPhasingOut
+	jumpifability BS_TARGET, ABILITY_UNMOVABLE, BattleScript_AbilityPreventsPhasingOut
 	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
 	jumpiftargetdynamaxed BattleScript_HitSwitchTargetDynamaxed
 	tryhitswitchtarget BattleScript_MoveEnd
@@ -4047,6 +4048,7 @@ BattleScript_EffectRoar::
 	jumpifroarfails BattleScript_ButItFailed
 	jumpifability BS_TARGET, ABILITY_GUARD_DOG, BattleScript_ButItFailed
 	jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_AbilityPreventsPhasingOut
+	jumpifability BS_TARGET, ABILITY_UNMOVABLE, BattleScript_AbilityPreventsPhasingOut
 	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
 	jumpiftargetdynamaxed BattleScript_RoarBlockedByDynamax
 	accuracycheck BattleScript_ButItFailed, NO_ACC_CALC_CHECK_LOCK_ON
@@ -10459,6 +10461,36 @@ BattleScript_AbilityUsesCalledMove::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_UnmovableActivates::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	swapattackerwithtarget
+	attackanimation
+	waitanimation
+	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_UnmovableIngrain
+	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_UnmovableSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_UnmovableSuctionCups
+	jumpiftargetdynamaxed BattleScript_UnmovableDynamaxed
+	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
+	forcerandomswitch BattleScript_UnmovableEnd
+BattleScript_UnmovableEnd:
+	return
+BattleScript_UnmovableIngrain:
+	printstring STRINGID_PKMNANCHOREDITSELF
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+BattleScript_UnmovableSuctionCups:
+	printstring STRINGID_PKMNANCHORSITSELFWITH
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+BattleScript_UnmovableDynamaxed:
+	printstring STRINGID_MOVEBLOCKEDBYDYNAMAX
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+
 BattleScript_RootsnareActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
@@ -11456,6 +11488,7 @@ BattleScript_RedCardActivates::
 	swapattackerwithtarget
 	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_RedCardIngrain
 	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_RedCardSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_RedCardSuctionCups
 	jumpiftargetdynamaxed BattleScript_RedCardDynamaxed
 	removeitem BS_SCRIPTING
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD

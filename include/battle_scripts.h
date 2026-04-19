@@ -18,6 +18,7 @@ extern const u8 BattleScript_ToxicDelugeActivates[];
 extern const u8 BattleScript_FrightmareActivates[];
 extern const u8 BattleScript_VoltBreakActivates[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
+extern const u8 BattleScript_UnmovableActivates[];
 extern const u8 BattleScript_TantrumActivates[];
 extern const u8 BattleScript_ClairvoyantActivates[];
 extern const u8 BattleScript_AttackerUsedAnExtraMove[];
