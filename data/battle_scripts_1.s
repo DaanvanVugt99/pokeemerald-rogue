@@ -7735,7 +7735,7 @@ BattleScript_SharpQuillsActivates::
 	playmoveanimation BS_ATTACKER, MOVE_SPIKES
 	waitanimation
 	printstring STRINGID_SPIKESSCATTERED
-	waitmessage B_WAIT_TIME_LONG
+	waitmessage B_WAIT_TIME_SHORT
 BattleScript_SharpQuillsRet:
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	restoretarget
@@ -9054,7 +9054,7 @@ BattleScript_ReefProtectionActivates::
 	playmoveanimation BS_TARGET, MOVE_SPIKES
 	waitanimation
 	printstring STRINGID_SPIKESSCATTERED
-	waitmessage B_WAIT_TIME_LONG
+	waitmessage B_WAIT_TIME_SHORT
 	restoretarget
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return
@@ -10116,8 +10116,8 @@ BattleScript_ShatterActivates::
 	setstealthrock BattleScript_MoveEnd
 	playmoveanimation BS_ATTACKER, MOVE_STEALTH_ROCK
 	waitanimation
-	printfromtable gDmgHazardsStringIds
-	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_POINTEDSTONESFLOAT
+	waitmessage B_WAIT_TIME_SHORT
 	return
 
 BattleScript_AttackerAbilityStatRaiseEnd3::
