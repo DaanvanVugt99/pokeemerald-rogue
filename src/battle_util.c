@@ -8304,6 +8304,56 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_STONE_SPIKES)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IS_MOVE_PHYSICAL(move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_STONE_SPIKES);
+            gBattleMoveDamage = GetNonDynamaxMaxHP(moveEndAttacker) / 16;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RoughSkinActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ICY_MIRROR)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IS_MOVE_SPECIAL(move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ICY_MIRROR);
+            gBattleMoveDamage = GetNonDynamaxMaxHP(moveEndAttacker) / 16;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RoughSkinActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_IRON_MAIDEN)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && gBattleMoves[move].split == SPLIT_STATUS)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_IRON_MAIDEN);
+            gBattleMoveDamage = GetNonDynamaxMaxHP(moveEndAttacker) / 16;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RoughSkinActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_DISGUISED)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -14053,6 +14103,9 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     if (HasBattlerAbility(battlerAtk, ABILITY_INSIGHT)
      && moveType == TYPE_PSYCHIC
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PSYCHIC_TERRAIN))
+        defStage = DEFAULT_STAT_STAGE;
+    if (HasBattlerAbility(battlerAtk, ABILITY_HIVE_MIND)
+     && DoesPartyShareTypeWithBattler(battlerAtk))
         defStage = DEFAULT_STAT_STAGE;
 
     defStat *= gStatStageRatios[defStage][0];

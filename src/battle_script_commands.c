@@ -1641,6 +1641,14 @@ static bool32 AccuracyCalcHelper(u16 move)
             RecordAbilityBattle(gBattlerTarget, ABILITY_NO_GUARD);
         return TRUE;
     }
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_HIVE_MIND)
+          && (move != MOVE_SKY_DROP || gBattleStruct->skyDropTargets[gBattlerTarget] == 0xFF)
+          && DoesPartyShareTypeWithBattler(gBattlerAttacker))
+    {
+        if (!JumpIfMoveFailed(7, move))
+            RecordAbilityBattle(gBattlerAttacker, ABILITY_HIVE_MIND);
+        return TRUE;
+    }
     // If the target is under the effects of Telekinesis, and the move isn't a OH-KO move, move hits.
     else if (gStatuses3[gBattlerTarget] & STATUS3_TELEKINESIS
              && !(gStatuses3[gBattlerTarget] & STATUS3_SEMI_INVULNERABLE)

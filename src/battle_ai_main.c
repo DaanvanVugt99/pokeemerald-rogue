@@ -403,10 +403,11 @@ static u32 Ai_SetMoveAccuracy(struct AiLogicData *aiData, u32 battlerAtk, u32 ba
 {
     u32 accuracy;
     u32 abilityAtk = aiData->abilities[battlerAtk];
-    u32 abilityDef = aiData->abilities[battlerAtk];
+    u32 abilityDef = aiData->abilities[battlerDef];
     if (abilityAtk == ABILITY_NO_GUARD
      || abilityDef == ABILITY_NO_GUARD
      || gBattleMoves[move].accuracy == 0
+     || (abilityAtk == ABILITY_HIVE_MIND && DoesPartyShareTypeWithBattler(battlerAtk))
      || (abilityAtk == ABILITY_MONSOON && AI_GetWeather(aiData) & B_WEATHER_RAIN)) // Moves with accuracy 0 or no guard ability always hit.
         accuracy = 100;
     else
