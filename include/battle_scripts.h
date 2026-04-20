@@ -27,6 +27,7 @@ extern const u8 BattleScript_TragicBeautyParalyzesSelf[];
 extern const u8 BattleScript_UnmovableActivates[];
 extern const u8 BattleScript_TantrumActivates[];
 extern const u8 BattleScript_ClairvoyantActivates[];
+extern const u8 BattleScript_ColdSnapActivates[];
 extern const u8 BattleScript_AttackerUsedAnExtraMove[];
 extern const u8 BattleScript_AttackerUsedAnExtraMoveOnSwitchIn[];
 extern const u8 BattleScript_DuelistActivates[];

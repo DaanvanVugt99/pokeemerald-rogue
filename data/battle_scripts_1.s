@@ -5558,7 +5558,11 @@ BattleScript_EffectSpecialAttackUpHit::
 
 BattleScript_EffectAllStatsUpHit::
 	@ Handle clangorous soulblaze boosting itself twice in doubles
-	jumpifword CMP_NO_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING | HITMARKER_NO_PPDEDUCT, BattleScript_NoMoveEffect
+	jumpifword CMP_NO_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING | HITMARKER_NO_PPDEDUCT, BattleScript_EffectAllStatsUpHit_Setup
+	@ Called extra moves (ability-triggered) should still be able to roll Ancient Power's omniboost.
+	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_ALLOW_NO_PP, BattleScript_EffectAllStatsUpHit_Setup
+	goto BattleScript_NoMoveEffect
+BattleScript_EffectAllStatsUpHit_Setup::
 	setmoveeffect MOVE_EFFECT_ALL_STATS_UP | MOVE_EFFECT_AFFECTS_USER
 	goto BattleScript_EffectHit
 
@@ -9274,6 +9278,15 @@ BattleScript_FlashFirestormActivates::
 	printstring STRINGID_PKMNSXINTENSIFIEDSUN
 	waitstate
 	playanimation BS_BATTLER_0, B_ANIM_SUN_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	return
+
+BattleScript_ColdSnapActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_STARTEDHAIL
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_HAIL_CONTINUES
 	call BattleScript_ActivateWeatherAbilities
 	return
 
