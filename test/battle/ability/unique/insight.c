@@ -22,7 +22,7 @@ SINGLE_BATTLE_TEST("Psychic does not affect Dark-types without Insight")
 SINGLE_BATTLE_TEST("Insight makes Psychic hit Dark-types")
 {
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(ABILITY_INSIGHT); Moves(MOVE_PSYCHIC); }
+        PLAYER(SPECIES_BEHEEYEM) { Ability(ABILITY_TELEPATHY); Moves(MOVE_PSYCHIC); }
         OPPONENT(SPECIES_UMBREON);
     } WHEN {
         TURN { MOVE(player, MOVE_PSYCHIC); }
@@ -33,41 +33,41 @@ SINGLE_BATTLE_TEST("Insight makes Psychic hit Dark-types")
 
 SINGLE_BATTLE_TEST("Insight ignores defensive stat boosts for Psychic moves in Psychic Terrain", s16 damage)
 {
-    u16 uniqueAbility;
+    bool32 raiseSpDef;
 
-    PARAMETRIZE { uniqueAbility = ABILITY_NONE; }
-    PARAMETRIZE { uniqueAbility = ABILITY_INSIGHT; }
+    PARAMETRIZE { raiseSpDef = FALSE; }
+    PARAMETRIZE { raiseSpDef = TRUE; }
 
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility); Moves(MOVE_CELEBRATE, MOVE_PSYCHIC); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_PSYCHIC_TERRAIN, MOVE_AMNESIA, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_BEHEEYEM) { Ability(ABILITY_TELEPATHY); Moves(MOVE_CELEBRATE, MOVE_PSYCHIC); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_PSYCHIC_TERRAIN, MOVE_CELEBRATE, MOVE_AMNESIA); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_PSYCHIC_TERRAIN); }
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_AMNESIA); }
-        TURN { MOVE(player, MOVE_PSYCHIC); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } FINALLY {
-        EXPECT_GT(results[1].damage, results[0].damage);
-    }
-}
-
-SINGLE_BATTLE_TEST("Insight does not ignore defensive stat boosts for Psychic moves outside Psychic Terrain", s16 damage)
-{
-    u16 uniqueAbility;
-
-    PARAMETRIZE { uniqueAbility = ABILITY_NONE; }
-    PARAMETRIZE { uniqueAbility = ABILITY_INSIGHT; }
-
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility); Moves(MOVE_CELEBRATE, MOVE_PSYCHIC); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_AMNESIA, MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_AMNESIA); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, raiseSpDef ? MOVE_AMNESIA : MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_PSYCHIC); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Insight does not ignore defensive stat boosts for Psychic moves outside Psychic Terrain", s16 damage)
+{
+    bool32 raiseSpDef;
+
+    PARAMETRIZE { raiseSpDef = FALSE; }
+    PARAMETRIZE { raiseSpDef = TRUE; }
+
+    GIVEN {
+        PLAYER(SPECIES_BEHEEYEM) { Ability(ABILITY_TELEPATHY); Moves(MOVE_CELEBRATE, MOVE_PSYCHIC); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_AMNESIA, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, raiseSpDef ? MOVE_AMNESIA : MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_PSYCHIC); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_GT(results[0].damage, results[1].damage);
     }
 }

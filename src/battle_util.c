@@ -5266,6 +5266,32 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ROSE_GARDEN) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                uniqueDone = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_ROSE_GARDEN);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_TOXIC_SPIKES;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_HIVE_MIND)
          && !uniqueDone
          && DoesPartyShareTypeWithBattler(battler))
@@ -8572,6 +8598,44 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_WIND_CHIMES)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsFinalMultiHitStrike())
+        {
+            u32 target = moveEndAttacker;
+            bool32 foundTarget = CanUseExtraMove(battler, target);
+
+            if (!foundTarget)
+            {
+                u32 opposingBattler = BATTLE_OPPOSITE(battler);
+                u32 i;
+
+                for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+                {
+                    if (CanUseExtraMove(battler, opposingBattler))
+                    {
+                        target = opposingBattler;
+                        foundTarget = TRUE;
+                        break;
+                    }
+                }
+            }
+
+            if (foundTarget)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_WIND_CHIMES);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_HYPER_VOICE;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
         if (HasBattlerAbility(battler, ABILITY_SHARP_QUILLS)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -13699,6 +13763,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         break;
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_WIND_CHIMES)
+     && gBattleMoves[move].soundMove
+     && !IS_MOVE_STATUS(move))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_STRIKER)
      && gBattleMoves[move].kickingMove
      && gCurrentTurnActionNumber < gBattlersCount
@@ -14394,11 +14465,17 @@ static inline uq4_12_t GetTargetDamageModifier(u32 move, u32 battlerAtk, u32 bat
 
 static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
 {
+    u32 moveType;
+
     if (gSpecialStatuses[battlerAtk].parentalBondState != PARENTAL_BOND_2ND_HIT)
         return UQ_4_12(1.0);
+    GET_MOVE_TYPE(move, moveType);
     if (HasBattlerAbility(battlerAtk, ABILITY_CHAMPION)
      && gBattleMoves[move].punchingMove)
         return UQ_4_12(0.25);
+    if (HasBattlerAbility(battlerAtk, ABILITY_TOXIC_TANDEM)
+     && moveType == TYPE_POISON)
+        return UQ_4_12(0.4);
     return B_PARENTAL_BOND_DMG >= GEN_7 ? UQ_4_12(0.25) : UQ_4_12(0.5);
 }
 
@@ -16388,6 +16465,10 @@ u32 GetBattlerMoveTargetType(u32 battler, u32 move)
         return MOVE_TARGET_BOTH;
     else if (gBattleMoves[move].effect == EFFECT_TERA_STARSTORM
         && gBattleMons[battler].species == SPECIES_TERAPAGOS_STELLAR)
+        return MOVE_TARGET_BOTH;
+    else if (HasBattlerAbility(battler, ABILITY_WIND_CHIMES)
+        && gBattleMoves[move].soundMove
+        && !IS_MOVE_STATUS(move))
         return MOVE_TARGET_BOTH;
 
     return gBattleMoves[move].target;

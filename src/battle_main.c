@@ -4725,21 +4725,6 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
         speed = (speed * 150) / 100;
 
     // unique abilities
-    if (HasBattlerAbility(battler, ABILITY_VENOM_RUSH))
-    {
-        u32 i;
-        for (i = 0; i < gBattlersCount; i++)
-        {
-            if (GetBattlerSide(i) != GetBattlerSide(battler)
-             && IsBattlerAlive(i)
-             && ((gBattleMons[i].status1 & STATUS1_PSN_ANY)
-              || (gBattleMons[i].statStages[STAT_SPEED] < DEFAULT_STAT_STAGE)))
-            {
-                speed *= 2;
-                break;
-            }
-        }
-    }
     if (HasBattlerAbility(battler, ABILITY_POSITIVE_CHARGE)
      && DoesPartyContainAbility(battler, ABILITY_MINUS, TRUE))
     {

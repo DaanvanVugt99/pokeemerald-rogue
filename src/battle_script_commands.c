@@ -1385,7 +1385,8 @@ static void Cmd_attackcanceler(void)
 
     if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_OFF
     && (GetBattlerAbility(gBattlerAttacker) == ABILITY_PARENTAL_BOND
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_CHAMPION) && gBattleMoves[gCurrentMove].punchingMove))
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_CHAMPION) && gBattleMoves[gCurrentMove].punchingMove)
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON))
     && IsMoveAffectedByParentalBond(gCurrentMove, gBattlerAttacker)
     && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
     && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE)
