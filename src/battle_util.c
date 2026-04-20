@@ -5613,6 +5613,60 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_METEOROLOGY) && !uniqueDone)
+        {
+            u32 weatherEnum = ENUM_WEATHER_NONE;
+            const u8 *weatherScript = NULL;
+            u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
+
+            switch (holdEffect)
+            {
+            case HOLD_EFFECT_HEAT_ROCK:
+                weatherEnum = ENUM_WEATHER_SUN;
+                weatherScript = BattleScript_DroughtActivates;
+                break;
+            case HOLD_EFFECT_DAMP_ROCK:
+                weatherEnum = ENUM_WEATHER_RAIN;
+                weatherScript = BattleScript_DrizzleActivates;
+                break;
+            case HOLD_EFFECT_SMOOTH_ROCK:
+                weatherEnum = ENUM_WEATHER_SANDSTORM;
+                weatherScript = BattleScript_SandstreamActivates;
+                break;
+            case HOLD_EFFECT_ICY_ROCK:
+                if (B_SNOW_WARNING >= GEN_9)
+                {
+                    weatherEnum = ENUM_WEATHER_SNOW;
+                    weatherScript = BattleScript_SnowWarningActivatesSnow;
+                }
+                else
+                {
+                    weatherEnum = ENUM_WEATHER_HAIL;
+                    weatherScript = BattleScript_SnowWarningActivatesHail;
+                }
+                break;
+            }
+
+            if (weatherEnum != ENUM_WEATHER_NONE)
+            {
+                uniqueDone = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                SetBattlerTriggeredAbility(battler, ABILITY_METEOROLOGY);
+
+                if (TryChangeBattleWeather(battler, weatherEnum, TRUE))
+                {
+                    BattleScriptPushCursorAndCallback(weatherScript);
+                    return 1;
+                }
+                else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+                {
+                    BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                    return 1;
+                }
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_RINGLEADER)
          && !uniqueDone
          && CountPartyMonsOfType(battler, TYPE_DARK, TRUE) >= 2
@@ -6630,6 +6684,38 @@ special_delivery_done:
             BattleScriptExecute(BattleScript_FlameheartBurnsSelf);
             effect++;
         }
+
+        if (HasBattlerAbility(battler, ABILITY_TRAGIC_BEAUTY)
+         && gBattleMons[battler].status1 == STATUS1_NONE)
+        {
+            u32 tragicBeautyRoll = RandomUniform(RNG_ROGUE_TRAGIC_BEAUTY, 0, 2);
+
+            gBattlerAttacker = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_TRAGIC_BEAUTY);
+
+            if (tragicBeautyRoll == 0)
+            {
+                gBattleMons[battler].status1 = STATUS1_BURN;
+                BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
+                MarkBattlerForControllerExec(battler);
+                BattleScriptExecute(BattleScript_TragicBeautyBurnsSelf);
+            }
+            else if (tragicBeautyRoll == 1)
+            {
+                gBattleMons[battler].status1 = STATUS1_POISON;
+                BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
+                MarkBattlerForControllerExec(battler);
+                BattleScriptExecute(BattleScript_TragicBeautyPoisonsSelf);
+            }
+            else
+            {
+                gBattleMons[battler].status1 = STATUS1_PARALYSIS;
+                BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
+                MarkBattlerForControllerExec(battler);
+                BattleScriptExecute(BattleScript_TragicBeautyParalyzesSelf);
+            }
+            effect++;
+        }
         break;
     case ABILITYEFFECT_ENDTURN: // 1
         if (gBattleMons[battler].hp != 0)
@@ -7097,6 +7183,21 @@ special_delivery_done:
                     healAmount = 1;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_STILL_WATER);
+                gBattleMoveDamage = -healAmount;
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect++;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_TRAGIC_BEAUTY)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
+
+                if (healAmount == 0)
+                    healAmount = 1;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_TRAGIC_BEAUTY);
                 gBattleMoveDamage = -healAmount;
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                 effect++;
@@ -8867,6 +8968,23 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gCalledMove = MOVE_IRON_DEFENSE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FOSSIL_DRILL)
+         && moveType == TYPE_ROCK
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FOSSIL_DRILL);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_RAPID_SPIN;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
