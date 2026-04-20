@@ -487,6 +487,9 @@ static const u8 sVendettaDescription[] = _("Deal 1.5x damage to Normal foes; KOs
 static const u8 sMoonTotemDescription[] = _("In Eclipse on switch-in, raise Sp. Atk by 1. Dark moves gain STAB.");
 static const u8 sSunTotemDescription[] = _("In sun on switch-in, raise Attack by 1. Fire moves gain STAB.");
 static const u8 sElectrocytesDescription[] = _("Electric moves gain STAB. In rain, Water moves have a 30% chance to paralyze.");
+static const u8 sFirstBloodDescription[] = _("Deal 1.4x damage to full-HP targets, but 0.8x otherwise.");
+static const u8 sAncientIdolDescription[] = _("Use Defense for physical damage and Sp. Def for special damage.");
+static const u8 sPetrifyingRootsDescription[] = _("Contact lowers the foe's Speed by 1. In Grassy Terrain, also lower Attack.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -988,6 +991,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MOON_TOTEM] = _("Moon Totem"),
     [ABILITY_SUN_TOTEM] = _("Sun Totem"),
     [ABILITY_ELECTROCYTES] = _("Electrocytes"),
+    [ABILITY_FIRST_BLOOD] = _("First Blood"),
+    [ABILITY_ANCIENT_IDOL] = _("Ancient Idol"),
+    [ABILITY_PETRIFYING_ROOTS] = _("Petrifying Roots"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1489,6 +1495,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MOON_TOTEM] = _("Moon Totem"),
     [ABILITY_SUN_TOTEM] = _("Sun Totem"),
     [ABILITY_ELECTROCYTES] = _("Electrocytes"),
+    [ABILITY_FIRST_BLOOD] = _("First Blood"),
+    [ABILITY_ANCIENT_IDOL] = _("Ancient Idol"),
+    [ABILITY_PETRIFYING_ROOTS] = _("PetrifyRoot"),
 };
 #endif
 
@@ -1991,4 +2000,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_MOON_TOTEM] = sMoonTotemDescription,
     [ABILITY_SUN_TOTEM] = sSunTotemDescription,
     [ABILITY_ELECTROCYTES] = sElectrocytesDescription,
+    [ABILITY_FIRST_BLOOD] = sFirstBloodDescription,
+    [ABILITY_ANCIENT_IDOL] = sAncientIdolDescription,
+    [ABILITY_PETRIFYING_ROOTS] = sPetrifyingRootsDescription,
 };

@@ -10,6 +10,7 @@ extern const u8 BattleScript_ToxicBloomActivates[];
 extern const u8 BattleScript_FungalInfectionActivates[];
 extern const u8 BattleScript_TimeloopActivates[];
 extern const u8 BattleScript_NeurotoxinActivates[];
+extern const u8 BattleScript_PetrifyingRootsActivates[];
 extern const u8 BattleScript_SinkholeActivates[];
 extern const u8 BattleScript_DampeningActivates[];
 extern const u8 BattleScript_UpdraftActivates[];

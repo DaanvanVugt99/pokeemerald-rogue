@@ -10613,6 +10613,17 @@ BattleScript_NeurotoxinTrySpDef:
 BattleScript_NeurotoxinRet:
 	return
 
+BattleScript_PetrifyingRootsActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	swapattackerwithtarget
+	setmoveeffect MOVE_EFFECT_SPD_MINUS_1 | MOVE_EFFECT_CERTAIN
+	seteffectsecondary
+	setmoveeffect MOVE_EFFECT_ATK_MINUS_1 | MOVE_EFFECT_CERTAIN
+	seteffectsecondary
+	swapattackerwithtarget
+	return
+
 BattleScript_AttackerUsedAnExtraMove::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT

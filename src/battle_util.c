@@ -8045,6 +8045,38 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PETRIFYING_ROOTS)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker))
+        {
+            bool32 grassyTerrain = gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN;
+            bool32 canLowerSpeed = CompareStat(moveEndAttacker, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN);
+            bool32 canLowerAttack = CompareStat(moveEndAttacker, STAT_ATK, MIN_STAT_STAGE, CMP_GREATER_THAN);
+            bool32 canReflect = GetBattlerAbility(moveEndAttacker) == ABILITY_MIRROR_ARMOR;
+
+            if ((grassyTerrain && (canLowerSpeed || canLowerAttack || canReflect))
+             || (!grassyTerrain && (canLowerSpeed || canReflect)))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_PETRIFYING_ROOTS);
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                if (grassyTerrain)
+                {
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_PetrifyingRootsActivates;
+                }
+                else
+                {
+                    gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_GooeyActivates;
+                }
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_STATIC_CHARGE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -13395,6 +13427,8 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     u32 atkStat;
     uq4_12_t modifier;
     u16 atkBaseSpeciesId;
+    bool32 usesOwnAttackStat = FALSE;
+    bool32 usesOwnSpAttackStat = FALSE;
     bool32 usesOwnOffensiveStat = FALSE;
 
     atkBaseSpeciesId = GET_BASE_SPECIES_ID(gBattleMons[battlerAtk].species);
@@ -13412,6 +13446,19 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             atkStage = gBattleMons[battlerDef].statStages[STAT_SPATK];
         }
     }
+    else if (HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL))
+    {
+        if (IS_MOVE_PHYSICAL(move))
+        {
+            atkStat = gBattleMons[battlerAtk].defense;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
+        }
+        else
+        {
+            atkStat = gBattleMons[battlerAtk].spDefense;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_SPDEF];
+        }
+    }
     else if (gBattleMoves[move].effect == EFFECT_BODY_PRESS)
     {
         atkStat = gBattleMons[battlerAtk].defense;
@@ -13423,12 +13470,14 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         {
             atkStat = gBattleMons[battlerAtk].attack;
             atkStage = gBattleMons[battlerAtk].statStages[STAT_ATK];
+            usesOwnAttackStat = TRUE;
             usesOwnOffensiveStat = TRUE;
         }
         else
         {
             atkStat = gBattleMons[battlerAtk].spAttack;
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPATK];
+            usesOwnSpAttackStat = TRUE;
             usesOwnOffensiveStat = TRUE;
         }
     }
@@ -13451,19 +13500,19 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     {
     case ABILITY_HUGE_POWER:
     case ABILITY_PURE_POWER:
-        if (IS_MOVE_PHYSICAL(move))
+        if (usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         break;
     case ABILITY_SLOW_START:
-        if (gDisableStructs[battlerAtk].slowStartTimer != 0)
+        if (gDisableStructs[battlerAtk].slowStartTimer != 0 && usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
         break;
     case ABILITY_SOLAR_POWER:
-        if (IS_MOVE_SPECIAL(move) && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN))
+        if (usesOwnSpAttackStat && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN))
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_DEFEATIST:
-        if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
+        if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2) && usesOwnOffensiveStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
         break;
     case ABILITY_FLASH_FIRE:
@@ -13487,7 +13536,7 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_PLUS:
-        if (IS_MOVE_SPECIAL(move) && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
+        if (usesOwnSpAttackStat && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
         {
             u32 partnerAbility = GetBattlerAbility(BATTLE_PARTNER(battlerAtk));
             if (partnerAbility == ABILITY_MINUS
@@ -13496,7 +13545,7 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         }
         break;
     case ABILITY_MINUS:
-        if (IS_MOVE_SPECIAL(move) && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
+        if (usesOwnSpAttackStat && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
         {
             u32 partnerAbility = GetBattlerAbility(BATTLE_PARTNER(battlerAtk));
             if (partnerAbility == ABILITY_PLUS
@@ -13505,11 +13554,11 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         }
         break;
     case ABILITY_FLOWER_GIFT:
-        if (gBattleMons[battlerAtk].species == SPECIES_CHERRIM_SUNSHINE && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN) && IS_MOVE_PHYSICAL(move))
+        if (gBattleMons[battlerAtk].species == SPECIES_CHERRIM_SUNSHINE && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN) && usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_HUSTLE:
-        if (IS_MOVE_PHYSICAL(move))
+        if (usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_STAKEOUT:
@@ -13517,20 +13566,20 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         break;
     case ABILITY_GUTS:
-        if (gBattleMons[battlerAtk].status1 & STATUS1_ANY && IS_MOVE_PHYSICAL(move))
+        if (gBattleMons[battlerAtk].status1 & STATUS1_ANY && usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_BRUTAL_CHARGE)
      && gDisableStructs[battlerAtk].isFirstTurn
-     && IS_MOVE_PHYSICAL(move))
+     && usesOwnAttackStat)
     {
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SCORCHED_REIGN)
-     && IS_MOVE_PHYSICAL(move)
+     && usesOwnAttackStat
      && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN))
     {
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
@@ -13581,49 +13630,51 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         switch (GetBattlerAbility(BATTLE_PARTNER(battlerAtk)))
         {
         case ABILITY_FLOWER_GIFT:
-            if (gBattleMons[BATTLE_PARTNER(battlerAtk)].species == SPECIES_CHERRIM_SUNSHINE && IsBattlerWeatherAffected(BATTLE_PARTNER(battlerAtk), B_WEATHER_SUN) && IS_MOVE_PHYSICAL(move))
+            if (gBattleMons[BATTLE_PARTNER(battlerAtk)].species == SPECIES_CHERRIM_SUNSHINE && IsBattlerWeatherAffected(BATTLE_PARTNER(battlerAtk), B_WEATHER_SUN) && usesOwnAttackStat)
                 modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
             break;
         }
     }
 
     // field abilities
-    if (IsAbilityOnField(ABILITY_VESSEL_OF_RUIN) && atkAbility != ABILITY_VESSEL_OF_RUIN && IS_MOVE_SPECIAL(move))
+    if (IsAbilityOnField(ABILITY_VESSEL_OF_RUIN) && atkAbility != ABILITY_VESSEL_OF_RUIN && usesOwnSpAttackStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
 
-    if (IsAbilityOnField(ABILITY_TABLETS_OF_RUIN) && atkAbility != ABILITY_TABLETS_OF_RUIN && IS_MOVE_PHYSICAL(move))
+    if (IsAbilityOnField(ABILITY_TABLETS_OF_RUIN) && atkAbility != ABILITY_TABLETS_OF_RUIN && usesOwnAttackStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
 
     // attacker's hold effect
     switch (holdEffectAtk)
     {
     case HOLD_EFFECT_THICK_CLUB:
-        if ((atkBaseSpeciesId == SPECIES_CUBONE || atkBaseSpeciesId == SPECIES_MAROWAK) && IS_MOVE_PHYSICAL(move))
+        if ((atkBaseSpeciesId == SPECIES_CUBONE || atkBaseSpeciesId == SPECIES_MAROWAK) && usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         break;
     case HOLD_EFFECT_DEEP_SEA_TOOTH:
-        if (gBattleMons[battlerAtk].species == SPECIES_CLAMPERL && IS_MOVE_SPECIAL(move))
+        if (gBattleMons[battlerAtk].species == SPECIES_CLAMPERL && usesOwnSpAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         break;
     case HOLD_EFFECT_LIGHT_BALL:
-        if (atkBaseSpeciesId == SPECIES_PIKACHU && (B_LIGHT_BALL_ATTACK_BOOST >= GEN_4 || IS_MOVE_SPECIAL(move)))
+        if (atkBaseSpeciesId == SPECIES_PIKACHU
+         && ((B_LIGHT_BALL_ATTACK_BOOST >= GEN_4 && usesOwnOffensiveStat)
+          || (B_LIGHT_BALL_ATTACK_BOOST < GEN_4 && usesOwnSpAttackStat)))
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         break;
     case HOLD_EFFECT_CHOICE_BAND:
-        if (IS_MOVE_PHYSICAL(move) && !IsDynamaxed(battlerAtk))
+        if (usesOwnAttackStat && !IsDynamaxed(battlerAtk))
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case HOLD_EFFECT_CHOICE_SPECS:
-        if (IS_MOVE_SPECIAL(move) && !IsDynamaxed(battlerAtk))
+        if (usesOwnSpAttackStat && !IsDynamaxed(battlerAtk))
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     }
 
     // The offensive stats of a Player's Pokémon are boosted by x1.1 (+10%) if they have the 1st badge and 7th badges.
     // Having the 1st badge boosts physical attack while having the 7th badge boosts special attack.
-    if (ShouldGetStatBadgeBoost(FLAG_BADGE01_GET, battlerAtk) && IS_MOVE_PHYSICAL(move))
+    if (ShouldGetStatBadgeBoost(FLAG_BADGE01_GET, battlerAtk) && usesOwnAttackStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.1));
-    if (ShouldGetStatBadgeBoost(FLAG_BADGE07_GET, battlerAtk) && IS_MOVE_SPECIAL(move))
+    if (ShouldGetStatBadgeBoost(FLAG_BADGE07_GET, battlerAtk) && usesOwnSpAttackStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.1));
 
     return uq4_12_multiply_by_int_half_down(modifier, atkStat);
@@ -13930,18 +13981,18 @@ static uq4_12_t GetWeatherDamageModifier(u32 battlerAtk, u32 move, u32 moveType,
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetBurnOrFrostBiteModifier(u32 battlerAtk, u32 move, u32 abilityAtk)
+static inline uq4_12_t GetBurnOrFrostBiteModifier(u32 battlerAtk, u32 move, u32 abilityAtk, bool32 usesOwnAttackStat, bool32 usesOwnSpAttackStat)
 {
     bool32 burnedForDamageCalc = (gBattleMons[battlerAtk].status1 & STATUS1_BURN)
         || IsAbilityOnOpposingSide(battlerAtk, ABILITY_SMOLDER);
 
     if (burnedForDamageCalc
-        && IS_MOVE_PHYSICAL(move)
+        && usesOwnAttackStat
         && (B_BURN_FACADE_DMG < GEN_6 || gBattleMoves[move].effect != EFFECT_FACADE)
         && abilityAtk != ABILITY_GUTS)
         return UQ_4_12(0.5);
     if (gBattleMons[battlerAtk].status1 & STATUS1_FROSTBITE
-        && IS_MOVE_SPECIAL(move)
+        && usesOwnSpAttackStat
         && (B_BURN_FACADE_DMG < GEN_6 || gBattleMoves[move].effect != EFFECT_FACADE)
         && abilityAtk != ABILITY_GUTS)
         return UQ_4_12(0.5);
@@ -14054,6 +14105,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
      && DoesPartyContainAbility(battlerAtk, ABILITY_MINUS, TRUE))
     {
         return UQ_4_12(1.2);
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_FIRST_BLOOD))
+    {
+        if (BATTLER_MAX_HP(battlerDef))
+            return UQ_4_12(1.4);
+        else
+            return UQ_4_12(0.8);
     }
 
     switch (abilityAtk)
@@ -14273,6 +14332,8 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     s32 dmg;
     u32 userFinalAttack;
     u32 targetFinalDefense;
+    bool32 usesOwnAttackStat;
+    bool32 usesOwnSpAttackStat;
 
     if (fixedBasePower)
         gBattleMovePower = fixedBasePower;
@@ -14281,6 +14342,13 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
 
     userFinalAttack = CalcAttackStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectAtk);
     targetFinalDefense = CalcDefenseStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectDef, weather);
+    usesOwnAttackStat = IS_MOVE_PHYSICAL(move)
+        && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
+        && gBattleMoves[move].effect != EFFECT_BODY_PRESS
+        && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL);
+    usesOwnSpAttackStat = IS_MOVE_SPECIAL(move)
+        && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
+        && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL);
 
     dmg = CalculateBaseDamage(gBattleMovePower, userFinalAttack, gBattleMons[battlerAtk].level, targetFinalDefense);
     DAMAGE_APPLY_MODIFIER(GetTargetDamageModifier(move, battlerAtk, battlerDef));
@@ -14304,7 +14372,7 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
         DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk));
     }
     DAMAGE_APPLY_MODIFIER(typeEffectivenessModifier);
-    DAMAGE_APPLY_MODIFIER(GetBurnOrFrostBiteModifier(battlerAtk, move, abilityAtk));
+    DAMAGE_APPLY_MODIFIER(GetBurnOrFrostBiteModifier(battlerAtk, move, abilityAtk, usesOwnAttackStat, usesOwnSpAttackStat));
     DAMAGE_APPLY_MODIFIER(GetZMaxMoveAgainstProtectionModifier(battlerDef, move));
     DAMAGE_APPLY_MODIFIER(GetOtherModifiers(move, moveType, battlerAtk, battlerDef, isCrit, typeEffectivenessModifier, updateFlags, abilityAtk, abilityDef, holdEffectAtk, holdEffectDef));
 
