@@ -8600,25 +8600,20 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_WIND_CHIMES)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && IsFinalMultiHitStrike())
+         && IsFinalMultiHitStrike()
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+         && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
         {
-            u32 target = moveEndAttacker;
-            bool32 foundTarget = CanUseExtraMove(battler, target);
+            u32 target = BATTLE_OPPOSITE(battler);
+            bool32 foundTarget = IsBattlerAlive(target);
 
-            if (!foundTarget)
+            if (!foundTarget && gBattlersCount > 2)
             {
-                u32 opposingBattler = BATTLE_OPPOSITE(battler);
-                u32 i;
-
-                for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
-                {
-                    if (CanUseExtraMove(battler, opposingBattler))
-                    {
-                        target = opposingBattler;
-                        foundTarget = TRUE;
-                        break;
-                    }
-                }
+                target ^= BIT_FLANK;
+                foundTarget = IsBattlerAlive(target);
             }
 
             if (foundTarget)

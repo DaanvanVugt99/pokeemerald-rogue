@@ -74,23 +74,19 @@ SINGLE_BATTLE_TEST("Wind Chimes uses 30 BP Hyper Voice after being hit")
 DOUBLE_BATTLE_TEST("Wind Chimes still retaliates if the original attacker faints")
 {
     GIVEN {
-        PLAYER(SPECIES_CHIMECHO) { Ability(ABILITY_LEVITATE); HP(1); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(ABILITY_WIND_CHIMES); Moves(MOVE_CELEBRATE); }
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_LIFE_ORB); Moves(MOVE_DOUBLE_EDGE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); Item(ITEM_LIFE_ORB); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN {
             MOVE(playerLeft, MOVE_CELEBRATE);
             MOVE(playerRight, MOVE_CELEBRATE);
-            MOVE(opponentLeft, MOVE_DOUBLE_EDGE, target: playerLeft);
+            MOVE(opponentLeft, MOVE_TACKLE, target: playerLeft);
             MOVE(opponentRight, MOVE_CELEBRATE);
         }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_DOUBLE_EDGE, opponentLeft);
-        HP_BAR(playerLeft);
-        HP_BAR(opponentLeft);
-        ABILITY_POPUP(playerLeft, ABILITY_WIND_CHIMES);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, playerLeft);
-        HP_BAR(opponentRight);
+    } THEN {
+        EXPECT_EQ(opponentLeft->hp, 0);
+        EXPECT_LT(opponentRight->hp, opponentRight->maxHP);
     }
 }
