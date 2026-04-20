@@ -5310,6 +5310,19 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_STUMBLE) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_STUMBLE);
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCurrentMove = MOVE_TEETER_DANCE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            BattleScriptPushCursorAndCallback(BattleScript_StumbleActivates);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_GRAVITY_WELL)
          && !uniqueDone
          && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
@@ -8026,6 +8039,19 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_DESERT_SHROUD)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && gDisableStructs[battler].isFirstTurn
+         && !IS_MOVE_STATUS(move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DESERT_SHROUD);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DesertShroudActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FLASH_FIRESTORM)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -8449,6 +8475,20 @@ if (triggeringAbility != ABILITY_NONE)
             VarSet(VAR_TEMP_MOVEEFFECT, 0);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_NEEDLEBURST)
+         && IsMoveMakingContact(move, battler)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gSideTimers[GetBattlerSide(gBattlerTarget)].spikesAmount < 3)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_NEEDLEBURST);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerSpikesActivates;
             effect++;
         }
 
@@ -13251,6 +13291,7 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     u32 atkStat;
     uq4_12_t modifier;
     u16 atkBaseSpeciesId;
+    bool32 usesOwnOffensiveStat = FALSE;
 
     atkBaseSpeciesId = GET_BASE_SPECIES_ID(gBattleMons[battlerAtk].species);
 
@@ -13278,11 +13319,13 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         {
             atkStat = gBattleMons[battlerAtk].attack;
             atkStage = gBattleMons[battlerAtk].statStages[STAT_ATK];
+            usesOwnOffensiveStat = TRUE;
         }
         else
         {
             atkStat = gBattleMons[battlerAtk].spAttack;
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPATK];
+            usesOwnOffensiveStat = TRUE;
         }
     }
 
@@ -13401,6 +13444,10 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         }
         break;
     }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_STUMBLE)
+     && usesOwnOffensiveStat)
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
 
     if (HasBattlerAbility(battlerDef, ABILITY_GIFTED_MIND)
      && (moveType == TYPE_BUG || moveType == TYPE_DARK || moveType == TYPE_GHOST))
@@ -13929,6 +13976,12 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         return UQ_4_12(0.5);
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
+     && gDisableStructs[battlerDef].isFirstTurn)
+    {
+        return UQ_4_12(0.5);
+    }
+
     if (HasBattlerAbility(battlerDef, ABILITY_AQUATIC_ARMOR)
      && gProtectStructs[battlerDef].uniqueAbilityActive)
     {
@@ -14354,6 +14407,21 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
             RecordAbilityBattle(battlerDef, ABILITY_SOFT_BODY);
         }
     }
+    else if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
+          && gDisableStructs[battlerDef].isFirstTurn
+          && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM)
+          && gBattleMoves[move].split != SPLIT_STATUS)
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_DESERT_SHROUD);
+            gMoveResultFlags |= MOVE_RESULT_MISSED;
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_DESERT_SHROUD);
+        }
+    }
     else if (B_SHEER_COLD_IMMUNITY >= GEN_7 && move == MOVE_SHEER_COLD && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE))
     {
         modifier = UQ_4_12(0.0);
@@ -14455,6 +14523,21 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
             gLastLandedMoves[battlerDef] = 0;
             gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
             RecordAbilityBattle(battlerDef, ABILITY_SOFT_BODY);
+        }
+    }
+    else if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
+          && gDisableStructs[battlerDef].isFirstTurn
+          && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM)
+          && gBattleMoves[move].split != SPLIT_STATUS)
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            gLastUsedAbility = ABILITY_DESERT_SHROUD;
+            gMoveResultFlags |= MOVE_RESULT_MISSED;
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_DESERT_SHROUD);
         }
     }
     else if (B_SHEER_COLD_IMMUNITY >= GEN_7 && move == MOVE_SHEER_COLD && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE))

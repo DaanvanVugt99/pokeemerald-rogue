@@ -9601,6 +9601,13 @@ BattleScript_TidalFloodActivatesNoHeal::
 	waitanimation
 	end3
 
+BattleScript_DesertShroudActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_DESERTSHROUDSOFTENED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_AttackWeakenedByStrongWinds::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_ATTACKWEAKENEDBSTRONGWINDS
@@ -10512,6 +10519,34 @@ BattleScript_AbilityUsesCalledMove::
 	setbyte sB_ANIM_TARGETS_HIT, 0
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
+
+BattleScript_StumbleActivates::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	setbyte gBattlerTarget, 0
+BattleScript_StumbleLoop::
+	movevaluescleanup
+	setmoveeffect MOVE_EFFECT_CONFUSION
+	jumpifability BS_TARGET, ABILITY_OWN_TEMPO, BattleScript_StumbleOwnTempoPrevents
+	jumpifsubstituteblocks BattleScript_StumbleLoopIncrement
+	jumpifstatus2 BS_TARGET, STATUS2_CONFUSION, BattleScript_StumbleLoopIncrement
+	jumpifhasnohp BS_TARGET, BattleScript_StumbleLoopIncrement
+	accuracycheck BattleScript_TeeterDanceMissed, ACC_CURR_MOVE
+	jumpifsafeguard BattleScript_StumbleLoopIncrement
+	attackanimation
+	waitanimation
+	seteffectprimary
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_StumbleLoopIncrement::
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_StumbleLoop
+	end3
+BattleScript_StumbleOwnTempoPrevents::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_PKMNPREVENTSCONFUSIONWITH
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_StumbleLoopIncrement
 
 BattleScript_UnmovableActivates::
 	call BattleScript_AbilityPopUp

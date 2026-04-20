@@ -478,6 +478,9 @@ static const u8 sFeedingFrenzyDescription[] = _("If a hit leaves the target belo
 static const u8 sTidalFloodDescription[] = _("On switch-in, clear entry hazards. If any were removed, restore 1/4 max HP.");
 static const u8 sSmolderingShellDescription[] = _("On switch-in, set sun. When hit by a physical move, set Mist on your side.");
 static const u8 sScrambleDescription[] = _("On switch-in, set Psychic Terrain. In Psychic Terrain, damaging moves have a 30% chance to confuse.");
+static const u8 sStumbleDescription[] = _("On switch-in, all Pokemon become confused. This Pokemon's Attack and Sp. Atk are doubled.");
+static const u8 sDesertShroudDescription[] = _("On first turn out, take half damage. In sand, damaging moves miss instead.");
+static const u8 sNeedleburstDescription[] = _("After using a contact move, set a layer of Spikes.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -970,6 +973,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TIDAL_FLOOD] = _("Tidal Flood"),
     [ABILITY_SMOLDERING_SHELL] = _("Smoldering Shell"),
     [ABILITY_SCRAMBLE] = _("Scramble"),
+    [ABILITY_STUMBLE] = _("Stumble"),
+    [ABILITY_DESERT_SHROUD] = _("Desert Shroud"),
+    [ABILITY_NEEDLEBURST] = _("Needleburst"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1462,6 +1468,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TIDAL_FLOOD] = _("TidalFlood"),
     [ABILITY_SMOLDERING_SHELL] = _("SmolderShell"),
     [ABILITY_SCRAMBLE] = _("Scramble"),
+    [ABILITY_STUMBLE] = _("Stumble"),
+    [ABILITY_DESERT_SHROUD] = _("DesertShroud"),
+    [ABILITY_NEEDLEBURST] = _("Needleburst"),
 };
 #endif
 
@@ -1955,4 +1964,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_TIDAL_FLOOD] = sTidalFloodDescription,
     [ABILITY_SMOLDERING_SHELL] = sSmolderingShellDescription,
     [ABILITY_SCRAMBLE] = sScrambleDescription,
+    [ABILITY_STUMBLE] = sStumbleDescription,
+    [ABILITY_DESERT_SHROUD] = sDesertShroudDescription,
+    [ABILITY_NEEDLEBURST] = sNeedleburstDescription,
 };
