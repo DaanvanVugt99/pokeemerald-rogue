@@ -531,6 +531,8 @@ extern const u8 BattleScript_SupremeOverlordActivates[];
 extern const u8 BattleScript_CostarActivates[];
 extern const u8 BattleScript_ZeroToHeroActivates[];
 extern const u8 BattleScript_HospitalityActivates[];
+extern const u8 BattleScript_TidalFloodActivates[];
+extern const u8 BattleScript_TidalFloodActivatesNoHeal[];
 extern const u8 BattleScript_ToxicDebrisActivates[];
 extern const u8 BattleScript_SharpQuillsActivates[];
 extern const u8 BattleScript_EarthEaterActivates[];

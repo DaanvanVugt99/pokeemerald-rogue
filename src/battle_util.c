@@ -5296,6 +5296,20 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SCRAMBLE) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_SCRAMBLE);
+
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_GRAVITY_WELL)
          && !uniqueDone
          && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
@@ -5492,6 +5506,54 @@ special_delivery_done:
             SET_STATCHANGER(STAT_SPEED, 1, TRUE);
             BattleScriptPushCursorAndCallback(BattleScript_PollenPuffActivates);
             return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD) && !uniqueDone)
+        {
+            bool32 hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
+
+            if (hazardsCleared)
+            {
+                uniqueDone = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                SetBattlerTriggeredAbility(battler, ABILITY_TIDAL_FLOOD);
+                gBattlerAttacker = battler;
+
+                if (gBattleMons[battler].hp < gBattleMons[battler].maxHP)
+                {
+                    gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 4;
+                    if (gBattleMoveDamage == 0)
+                        gBattleMoveDamage = 1;
+                    gBattleMoveDamage *= -1;
+                    BattleScriptPushCursorAndCallback(BattleScript_TidalFloodActivates);
+                }
+                else
+                {
+                    BattleScriptPushCursorAndCallback(BattleScript_TidalFloodActivatesNoHeal);
+                }
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SMOLDERING_SHELL) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SMOLDERING_SHELL);
+                BattleScriptPushCursorAndCallback(BattleScript_DroughtActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SMOLDERING_SHELL);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_RINGLEADER)
@@ -8116,6 +8178,27 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SMOLDERING_SHELL)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].split == SPLIT_PHYSICAL
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && !gSideTimers[GetBattlerSide(battler)].mistTimer
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SMOLDERING_SHELL);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_MIST;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SILVER_LINING)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
@@ -9420,6 +9503,25 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleMoveDamage = -healAmount;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_DuelistActivates;
+            effect++;
+        }
+
+        if ((battler = IsAbilityOnField(ABILITY_SCRAMBLE))
+         && (gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && !IS_MOVE_STATUS(move)
+         && CanBeConfused(gBattlerTarget)
+         && RandomWeighted(RNG_SECONDARY_EFFECT, 70, 30))
+        {
+            battler--;
+            SetBattlerTriggeredAbility(battler, ABILITY_SCRAMBLE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_CONFUSION;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
         break;
@@ -15311,6 +15413,7 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
     u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
     if (HasBattlerAbility(battler, ABILITY_BUOYANCY)
      || HasBattlerAbility(battler, ABILITY_POLLEN_PUFF)
+     || HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD)
      || HasBattlerAbility(battler, ABILITY_HOLLOW_NEST)
      || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
       && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))

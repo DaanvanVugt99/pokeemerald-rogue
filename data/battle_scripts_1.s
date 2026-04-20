@@ -9582,6 +9582,25 @@ BattleScript_HospitalityActivates::
 	datahpupdate BS_TARGET
 	end3
 
+BattleScript_TidalFloodActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_SURF
+	waitanimation
+	printstring STRINGID_TIDALFLOODWASHEDAWAY
+	waitmessage B_WAIT_TIME_LONG
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	end3
+
+BattleScript_TidalFloodActivatesNoHeal::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_SURF
+	waitanimation
+	end3
+
 BattleScript_AttackWeakenedByStrongWinds::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_ATTACKWEAKENEDBSTRONGWINDS

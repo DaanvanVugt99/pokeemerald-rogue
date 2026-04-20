@@ -475,6 +475,9 @@ static const u8 sResponseDescription[] = _("If the party contains an Electric ty
 static const u8 sUnmovableDescription[] = _("Cannot be forced out. First contact hit each switch-in forces the attacker out.");
 static const u8 sBottomlessDescription[] = _("At the end of each turn, use Stockpile.");
 static const u8 sFeedingFrenzyDescription[] = _("If a hit leaves the target below half HP, also use Bite at 30 BP.");
+static const u8 sTidalFloodDescription[] = _("On switch-in, clear entry hazards. If any were removed, restore 1/4 max HP.");
+static const u8 sSmolderingShellDescription[] = _("On switch-in, set sun. When hit by a physical move, set Mist on your side.");
+static const u8 sScrambleDescription[] = _("On switch-in, set Psychic Terrain. In Psychic Terrain, damaging moves have a 30% chance to confuse.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -964,6 +967,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_UNMOVABLE] = _("Unmovable"),
     [ABILITY_BOTTOMLESS] = _("Bottomless"),
     [ABILITY_FEEDING_FRENZY] = _("Feeding Frenzy"),
+    [ABILITY_TIDAL_FLOOD] = _("Tidal Flood"),
+    [ABILITY_SMOLDERING_SHELL] = _("Smoldering Shell"),
+    [ABILITY_SCRAMBLE] = _("Scramble"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1453,6 +1459,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_UNMOVABLE] = _("Unmovable"),
     [ABILITY_BOTTOMLESS] = _("Bottomless"),
     [ABILITY_FEEDING_FRENZY] = _("FeedFrenzy"),
+    [ABILITY_TIDAL_FLOOD] = _("TidalFlood"),
+    [ABILITY_SMOLDERING_SHELL] = _("SmolderShell"),
+    [ABILITY_SCRAMBLE] = _("Scramble"),
 };
 #endif
 
@@ -1943,4 +1952,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_UNMOVABLE] = sUnmovableDescription,
     [ABILITY_BOTTOMLESS] = sBottomlessDescription,
     [ABILITY_FEEDING_FRENZY] = sFeedingFrenzyDescription,
+    [ABILITY_TIDAL_FLOOD] = sTidalFloodDescription,
+    [ABILITY_SMOLDERING_SHELL] = sSmolderingShellDescription,
+    [ABILITY_SCRAMBLE] = sScrambleDescription,
 };
