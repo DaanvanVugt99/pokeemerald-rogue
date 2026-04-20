@@ -513,7 +513,7 @@
 #define ABILITY_CALL                479
 #define ABILITY_RESPONSE            480
 #define ABILITY_UNMOVABLE           481
-#define ABILITY_BOTTOMLESS          482
+#define ABILITY_ACID_REFLUX         482
 #define ABILITY_FEEDING_FRENZY      483
 #define ABILITY_TIDAL_FLOOD         484
 #define ABILITY_SMOLDERING_SHELL    485

@@ -1768,6 +1768,9 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
         buff = MAX_STAT_STAGE;
 
     moveAcc = gBattleMoves[move].accuracy;
+    if (move == MOVE_SING
+     && HasBattlerAbility(battlerAtk, ABILITY_SOFT_BODY))
+        moveAcc = 90;
     if (move == MOVE_HYPNOSIS
      && HasBattlerAbility(battlerAtk, ABILITY_SPIRAL_GAZE)
      && gDisableStructs[battlerAtk].isFirstTurn)

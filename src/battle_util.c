@@ -5642,20 +5642,6 @@ special_delivery_done:
             return 1;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_COTTON_GUARDING)
-         && !uniqueDone
-         && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
-        {
-            uniqueDone = TRUE;
-            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
-            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-            SetBattlerTriggeredAbility(battler, ABILITY_COTTON_GUARDING);
-            gBattlerAttacker = battler;
-            SET_STATCHANGER(STAT_DEF, 1, FALSE);
-            BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
-            return 1;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_JUMPSCARE) && !uniqueDone)
         {
             u32 target = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
@@ -6633,7 +6619,15 @@ special_delivery_done:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
                 gBattlerAttacker = battler;
-                if (IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW)
+                if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
+                 && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_REFLECT))
+                {
+                    gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                    gCurrentMove = MOVE_REFLECT;
+                    BattleScriptPushCursorAndCallback(BattleScript_RevelryReflect);
+                    effect++;
+                }
+                else if (IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW)
                  && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_LIGHTSCREEN))
                 {
                     gSpecialStatuses[battler].switchInAbilityDone = TRUE;
@@ -6955,17 +6949,6 @@ special_delivery_done:
                 BattleScriptPushCursorAndCallback(BattleScript_CudChewActivates);
                 effect++;
                 break;
-            }
-
-            if (HasBattlerAbility(battler, ABILITY_BOTTOMLESS)
-             && !gProtectStructs[battler].extraMoveUsed
-             && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
-             && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_BOTTOMLESS);
-                gBattlerAttacker = battler;
-                BattleScriptPushCursorAndCallback(BattleScript_BottomlessActivates);
-                effect++;
             }
 
             if (HasBattlerAbility(battler, ABILITY_TROPICAL_CANOPY)
@@ -8566,6 +8549,24 @@ if (triggeringAbility != ABILITY_NONE)
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ACID_REFLUX)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ACID_REFLUX);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndAttacker;
+            gCalledMove = MOVE_ACID;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -14734,6 +14735,15 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
             return UQ_4_12(0.5);
         break;
     }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_COTTON_GUARDING))
+    {
+        if (!IsMoveMakingContact(move, battlerAtk) && moveType == TYPE_FIRE)
+            return UQ_4_12(4.0);
+        if (IsMoveMakingContact(move, battlerAtk) && moveType != TYPE_FIRE)
+            return UQ_4_12(0.25);
+    }
+
     return UQ_4_12(1.0);
 }
 

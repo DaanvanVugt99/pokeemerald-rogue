@@ -9002,39 +9002,6 @@ BattleScript_SpeedBoostActivates::
 BattleScript_SpeedBoostActivatesEnd:
 	end3
 
-BattleScript_BottomlessActivates::
-	call BattleScript_AbilityPopUp
-	waitmessage B_WAIT_TIME_SHORT
-	sethword gMoveResultFlags, 0
-	stockpile 0
-	playmoveanimation BS_ATTACKER, MOVE_STOCKPILE
-	waitanimation
-	printfromtable gStockpileUsedStringIds
-	waitmessage B_WAIT_TIME_LONG
-	.if B_STOCKPILE_RAISES_DEFS < GEN_4
-	goto BattleScript_BottomlessEnd
-	.endif
-	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_CANT_STOCKPILE, BattleScript_BottomlessEnd
-	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_DEF, MAX_STAT_STAGE, BattleScript_BottomlessDef
-	jumpifstat BS_ATTACKER, CMP_EQUAL, STAT_SPDEF, MAX_STAT_STAGE, BattleScript_BottomlessEnd
-BattleScript_BottomlessDef:
-	setbyte sSTAT_ANIM_PLAYED, FALSE
-	playstatchangeanimation BS_ATTACKER, BIT_DEF | BIT_SPDEF, 0
-	setstatchanger STAT_DEF, 1, FALSE
-	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_BottomlessSpDef
-	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_BottomlessSpDef
-	printfromtable gStatUpStringIds
-	waitmessage B_WAIT_TIME_LONG
-BattleScript_BottomlessSpDef::
-	setstatchanger STAT_SPDEF, 1, FALSE
-	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_BottomlessEnd
-	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_BottomlessEnd
-	printfromtable gStatUpStringIds
-	waitmessage B_WAIT_TIME_LONG
-BattleScript_BottomlessEnd:
-	stockpile 1
-	end3
-
 BattleScript_MarksmanCritBoostActivates::
 	call BattleScript_AbilityPopUp
 	setstatchanger STAT_ATK, 0, FALSE @ used only for stat change animation
