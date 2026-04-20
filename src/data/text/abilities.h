@@ -481,6 +481,9 @@ static const u8 sScrambleDescription[] = _("On switch-in, set Psychic Terrain. I
 static const u8 sStumbleDescription[] = _("On switch-in, all Pokemon become confused. This Pokemon's Attack and Sp. Atk are doubled.");
 static const u8 sDesertShroudDescription[] = _("On first turn out, take half damage. In sand, damaging moves miss instead.");
 static const u8 sNeedleburstDescription[] = _("After using a contact move, set a layer of Spikes.");
+static const u8 sCottonGuardingDescription[] = _("On switch-in, raise Defense by 1 stage.");
+static const u8 sAntivenomDescription[] = _("Always crits Poison foes; KOs restore 1/8 max HP.");
+static const u8 sVendettaDescription[] = _("Deal 1.5x damage to Normal foes; KOs raise Speed by 1.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -976,6 +979,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_STUMBLE] = _("Stumble"),
     [ABILITY_DESERT_SHROUD] = _("Desert Shroud"),
     [ABILITY_NEEDLEBURST] = _("Needleburst"),
+    [ABILITY_COTTON_GUARDING] = _("Cotton Guarding"),
+    [ABILITY_ANTIVENOM] = _("Antivenom"),
+    [ABILITY_VENDETTA] = _("Vendetta"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1471,6 +1477,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_STUMBLE] = _("Stumble"),
     [ABILITY_DESERT_SHROUD] = _("DesertShroud"),
     [ABILITY_NEEDLEBURST] = _("Needleburst"),
+    [ABILITY_COTTON_GUARDING] = _("CottonGuard"),
+    [ABILITY_ANTIVENOM] = _("Antivenom"),
+    [ABILITY_VENDETTA] = _("Vendetta"),
 };
 #endif
 
@@ -1967,4 +1976,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_STUMBLE] = sStumbleDescription,
     [ABILITY_DESERT_SHROUD] = sDesertShroudDescription,
     [ABILITY_NEEDLEBURST] = sNeedleburstDescription,
+    [ABILITY_COTTON_GUARDING] = sCottonGuardingDescription,
+    [ABILITY_ANTIVENOM] = sAntivenomDescription,
+    [ABILITY_VENDETTA] = sVendettaDescription,
 };

@@ -5521,6 +5521,20 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_COTTON_GUARDING)
+         && !uniqueDone
+         && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_COTTON_GUARDING);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_DEF, 1, FALSE);
+            BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD) && !uniqueDone)
         {
             bool32 hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
@@ -8512,6 +8526,47 @@ if (triggeringAbility != ABILITY_NONE)
             VarSet(VAR_TEMP_MOVEEFFECT, 0);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ANTIVENOM)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !IS_MOVE_STATUS(move)
+         && TARGET_TURN_DAMAGED
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && gBattleMons[gBattlerTarget].hp == 0
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+         && IsFinalMultiHitStrike())
+        {
+            s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
+
+            if (healAmount == 0)
+                healAmount = 1;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_ANTIVENOM);
+            gBattleMoveDamage = -healAmount;
+            BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_VENDETTA)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !IS_MOVE_STATUS(move)
+         && TARGET_TURN_DAMAGED
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && gBattleMons[gBattlerTarget].hp == 0
+         && IsFinalMultiHitStrike()
+         && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_VENDETTA);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+            PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
             effect++;
         }
 
@@ -13448,6 +13503,13 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     if (HasBattlerAbility(battlerAtk, ABILITY_STUMBLE)
      && usesOwnOffensiveStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_VENDETTA)
+     && GetBattlerSide(battlerAtk) != GetBattlerSide(battlerDef)
+     && IS_BATTLER_OF_TYPE(battlerDef, TYPE_NORMAL))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+    }
 
     if (HasBattlerAbility(battlerDef, ABILITY_GIFTED_MIND)
      && (moveType == TYPE_BUG || moveType == TYPE_DARK || moveType == TYPE_GHOST))
