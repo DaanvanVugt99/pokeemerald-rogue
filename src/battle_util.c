@@ -5105,17 +5105,16 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     continue;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_CHEAP_TACTICS);
-                gBattlerAttacker = battler;
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
-                gTempMove = gCurrentMove;
-                gCurrentMove = MOVE_SCRATCH;
+                gCalledMove = MOVE_SCRATCH;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
-                VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
-                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
-                VarSet(VAR_TEMP_MOVEEFFECT, 0);
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
                 return 1;
             }
         }
@@ -5133,17 +5132,46 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     continue;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_TASTE_TEST);
-                gBattlerAttacker = battler;
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
-                gTempMove = gCurrentMove;
-                gCurrentMove = MOVE_LICK;
+                gCalledMove = MOVE_LICK;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
-                VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
-                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
-                VarSet(VAR_TEMP_MOVEEFFECT, 0);
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursorAndCallback(BattleScript_AttackerUsedAnExtraMoveOnSwitchIn);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CHANGE_OF_HEART)
+         && !uniqueDone
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+                SetBattlerTriggeredAbility(battler, ABILITY_CHANGE_OF_HEART);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_HEART_SWAP;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
                 return 1;
             }
         }
@@ -9414,6 +9442,28 @@ if (triggeringAbility != ABILITY_NONE)
             gCalledMove = MOVE_COPYCAT;
             gLastUsedMove = gBattleStruct->lastTakenMoveFrom[battler][battler];
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_STARFALL)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_STARFALL);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_WISH;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
@@ -14148,6 +14198,14 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         break;
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_BLUBBER)
+     && (moveType == TYPE_FIRE || moveType == TYPE_FIGHTING))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_BLUBBER);
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_STUMBLE)
      && usesOwnOffensiveStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
@@ -14470,6 +14528,9 @@ static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
         return UQ_4_12(0.25);
     if (HasBattlerAbility(battlerAtk, ABILITY_TOXIC_TANDEM)
      && moveType == TYPE_POISON)
+        return UQ_4_12(0.4);
+    if (HasBattlerAbility(battlerAtk, ABILITY_ABYSSAL_MAW)
+     && gBattleMoves[move].bitingMove)
         return UQ_4_12(0.4);
     return B_PARENTAL_BOND_DMG >= GEN_7 ? UQ_4_12(0.25) : UQ_4_12(0.5);
 }

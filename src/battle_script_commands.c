@@ -1386,7 +1386,8 @@ static void Cmd_attackcanceler(void)
     if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_OFF
     && (GetBattlerAbility(gBattlerAttacker) == ABILITY_PARENTAL_BOND
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_CHAMPION) && gBattleMoves[gCurrentMove].punchingMove)
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON))
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON)
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_ABYSSAL_MAW) && gBattleMoves[gCurrentMove].bitingMove))
     && IsMoveAffectedByParentalBond(gCurrentMove, gBattlerAttacker)
     && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
     && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE)
@@ -2054,7 +2055,8 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
     s32 critChance = 0;
 
     if (gSideStatuses[battlerDef] & SIDE_STATUS_LUCKY_CHANT || gStatuses3[battlerAtk] & STATUS3_CANT_SCORE_A_CRIT
-       || abilityDef == ABILITY_BATTLE_ARMOR || abilityDef == ABILITY_SHELL_ARMOR)
+       || abilityDef == ABILITY_BATTLE_ARMOR || abilityDef == ABILITY_SHELL_ARMOR
+       || HasBattlerAbility(battlerDef, ABILITY_CRYSTAL_ARMOR))
     {
         critChance = -1;
     }
@@ -2089,8 +2091,13 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
             critChance += (s32)GetCharmValue(EFFECT_CRIT_CHANCE);
 
         // Record ability only if move had at least +3 chance to get a crit
-        if (critChance >= 3 && recordAbility && (abilityDef == ABILITY_BATTLE_ARMOR || abilityDef == ABILITY_SHELL_ARMOR))
-            RecordAbilityBattle(battlerDef, abilityDef);
+        if (critChance >= 3 && recordAbility)
+        {
+            if (abilityDef == ABILITY_BATTLE_ARMOR || abilityDef == ABILITY_SHELL_ARMOR)
+                RecordAbilityBattle(battlerDef, abilityDef);
+            else if (HasBattlerAbility(battlerDef, ABILITY_CRYSTAL_ARMOR))
+                RecordAbilityBattle(battlerDef, ABILITY_CRYSTAL_ARMOR);
+        }
 
         if (critChance >= ARRAY_COUNT(sCriticalHitChance))
             critChance = ARRAY_COUNT(sCriticalHitChance) - 1;
@@ -16636,6 +16643,8 @@ static u16 GetStatLossPreventionAbility(u32 battler, bool8 byIntimidate)
 {
     if (HasBattlerAbility(battler, ABILITY_CLEAR_BODY))
         return ABILITY_CLEAR_BODY;
+    if (HasBattlerAbility(battler, ABILITY_CRYSTAL_ARMOR))
+        return ABILITY_CRYSTAL_ARMOR;
     if (HasBattlerAbility(battler, ABILITY_FULL_METAL_BODY))
         return ABILITY_FULL_METAL_BODY;
     if (HasBattlerAbility(battler, ABILITY_WHITE_SMOKE))
