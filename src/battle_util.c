@@ -5681,6 +5681,26 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_OMEN) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_OMEN);
+                BattleScriptPushCursorAndCallback(BattleScript_OmenActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_OMEN);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_METEOROLOGY) && !uniqueDone)
         {
             u32 weatherEnum = ENUM_WEATHER_NONE;
@@ -6829,6 +6849,21 @@ special_delivery_done:
                 SetBattlerTriggeredAbility(battler, ABILITY_BOTTOMLESS);
                 gBattlerAttacker = battler;
                 BattleScriptPushCursorAndCallback(BattleScript_BottomlessActivates);
+                effect++;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_TROPICAL_CANOPY)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                u32 healDivisor = IsBattlerWeatherAffected(battler, B_WEATHER_SUN) ? 8 : 16;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_TROPICAL_CANOPY);
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / healDivisor;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+                gBattleMoveDamage *= -1;
                 effect++;
             }
 
@@ -13928,6 +13963,10 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     // certain moves also ignore stat changes
     if (gBattleMoves[move].ignoresTargetDefenseEvasionStages)
         defStage = DEFAULT_STAT_STAGE;
+    if (HasBattlerAbility(battlerAtk, ABILITY_INSIGHT)
+     && moveType == TYPE_PSYCHIC
+     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PSYCHIC_TERRAIN))
+        defStage = DEFAULT_STAT_STAGE;
 
     defStat *= gStatStageRatios[defStage][0];
     defStat /= gStatStageRatios[defStage][1];
@@ -14257,6 +14296,8 @@ static inline uq4_12_t GetCollisionCourseElectroDriftModifier(u32 move, uq4_12_t
 
 static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 isCrit, u32 abilityAtk)
 {
+    u32 moveType;
+
     if (HasBattlerAbility(battlerAtk, ABILITY_TERRITORIAL)
      && IsBattlerTerrainAffected(battlerDef, STATUS_FIELD_TERRAIN_ANY))
         return UQ_4_12(2.0);
@@ -14273,6 +14314,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
      && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_RAIN))
     {
         return UQ_4_12(0.9);
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_TROPICAL_CANOPY)
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN))
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_FLYING)
+            return UQ_4_12(1.2);
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SWITCHSTEP))
@@ -14643,6 +14692,14 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
 
     if (moveType == TYPE_PSYCHIC && defType == TYPE_DARK && gStatuses3[battlerDef] & STATUS3_MIRACLE_EYED && mod == UQ_4_12(0.0))
         mod = UQ_4_12(1.0);
+    if (moveType == TYPE_PSYCHIC
+     && defType == TYPE_DARK
+     && HasBattlerAbility(battlerAtk, ABILITY_INSIGHT))
+    {
+        mod = UQ_4_12(2.0);
+        if (recordAbilities)
+            RecordAbilityBattle(battlerAtk, ABILITY_INSIGHT);
+    }
     if (gBattleMoves[move].effect == EFFECT_FREEZE_DRY && defType == TYPE_WATER)
         mod = UQ_4_12(2.0);
     if ((moveType == TYPE_FLYING || moveType == TYPE_BUG)

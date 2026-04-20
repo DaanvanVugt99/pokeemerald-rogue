@@ -8951,6 +8951,15 @@ BattleScript_ToxicDelugeActivates::
 	call BattleScript_ActivateWeatherAbilities
 	end3
 
+BattleScript_OmenActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ECLIPSESTARTED
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_ECLIPSE_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	end3
+
 BattleScript_VoltBreakActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

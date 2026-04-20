@@ -16,6 +16,7 @@ extern const u8 BattleScript_DampeningActivates[];
 extern const u8 BattleScript_UpdraftActivates[];
 extern const u8 BattleScript_ShellFormationActivates[];
 extern const u8 BattleScript_ToxicDelugeActivates[];
+extern const u8 BattleScript_OmenActivates[];
 extern const u8 BattleScript_FrightmareActivates[];
 extern const u8 BattleScript_VoltBreakActivates[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
