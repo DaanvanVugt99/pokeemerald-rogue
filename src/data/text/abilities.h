@@ -484,6 +484,9 @@ static const u8 sNeedleburstDescription[] = _("After using a contact move, set a
 static const u8 sCottonGuardingDescription[] = _("On switch-in, raise Defense by 1 stage.");
 static const u8 sAntivenomDescription[] = _("Always crits Poison foes; KOs restore 1/8 max HP.");
 static const u8 sVendettaDescription[] = _("Deal 1.5x damage to Normal foes; KOs raise Speed by 1.");
+static const u8 sMoonTotemDescription[] = _("In Eclipse on switch-in, raise Sp. Atk by 1. Dark moves gain STAB.");
+static const u8 sSunTotemDescription[] = _("In sun on switch-in, raise Attack by 1. Fire moves gain STAB.");
+static const u8 sElectrocytesDescription[] = _("Electric moves gain STAB. In rain, Water moves have a 30% chance to paralyze.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -982,6 +985,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_COTTON_GUARDING] = _("Cotton Guarding"),
     [ABILITY_ANTIVENOM] = _("Antivenom"),
     [ABILITY_VENDETTA] = _("Vendetta"),
+    [ABILITY_MOON_TOTEM] = _("Moon Totem"),
+    [ABILITY_SUN_TOTEM] = _("Sun Totem"),
+    [ABILITY_ELECTROCYTES] = _("Electrocytes"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1480,6 +1486,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_COTTON_GUARDING] = _("CottonGuard"),
     [ABILITY_ANTIVENOM] = _("Antivenom"),
     [ABILITY_VENDETTA] = _("Vendetta"),
+    [ABILITY_MOON_TOTEM] = _("Moon Totem"),
+    [ABILITY_SUN_TOTEM] = _("Sun Totem"),
+    [ABILITY_ELECTROCYTES] = _("Electrocytes"),
 };
 #endif
 
@@ -1979,4 +1988,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_COTTON_GUARDING] = sCottonGuardingDescription,
     [ABILITY_ANTIVENOM] = sAntivenomDescription,
     [ABILITY_VENDETTA] = sVendettaDescription,
+    [ABILITY_MOON_TOTEM] = sMoonTotemDescription,
+    [ABILITY_SUN_TOTEM] = sSunTotemDescription,
+    [ABILITY_ELECTROCYTES] = sElectrocytesDescription,
 };

@@ -5535,6 +5535,36 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_MOON_TOTEM)
+         && !uniqueDone
+         && IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE)
+         && CompareStat(battler, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_MOON_TOTEM);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_SPATK, 1, FALSE);
+            BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+            return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SUN_TOTEM)
+         && !uniqueDone
+         && IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
+         && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_SUN_TOTEM);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_ATK, 1, FALSE);
+            BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD) && !uniqueDone)
         {
             bool32 hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
@@ -9515,6 +9545,25 @@ if (triggeringAbility != ABILITY_NONE)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_WATER_GLIDE);
             gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ELECTROCYTES)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_WATER
+         && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN)
+         && CanBeParalyzed(gBattlerTarget)
+         && RandomWeighted(RNG_SECONDARY_EFFECT, 70, 30))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ELECTROCYTES);
+            gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
@@ -13833,6 +13882,9 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
     {
         if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
          || (HasBattlerAbility(battlerAtk, ABILITY_WATER_GLIDE) && moveType == TYPE_FLYING)
+         || (HasBattlerAbility(battlerAtk, ABILITY_MOON_TOTEM) && moveType == TYPE_DARK)
+         || (HasBattlerAbility(battlerAtk, ABILITY_SUN_TOTEM) && moveType == TYPE_FIRE)
+         || (HasBattlerAbility(battlerAtk, ABILITY_ELECTROCYTES) && moveType == TYPE_ELECTRIC)
          || (HasBattlerAbility(battlerAtk, ABILITY_ADAPTIVE_ORIGIN)
           && DoesPartyHaveUniqueTypes(battlerAtk)))
         {
