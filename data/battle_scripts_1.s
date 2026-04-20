@@ -5729,6 +5729,8 @@ BattleScript_BeatUpEnd::
 
 BattleScript_EffectSemiInvulnerable::
 	jumpifmove MOVE_DIG, BattleScript_EffectSemiInvulnerableDig
+	jumpifmove MOVE_PHANTOM_FORCE, BattleScript_EffectSemiInvulnerablePhantomForce
+	jumpifmove MOVE_SHADOW_FORCE, BattleScript_EffectSemiInvulnerableShadowForce
 	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
 	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
 	jumpifmove MOVE_FLY, BattleScript_FirstTurnFly
@@ -5743,6 +5745,18 @@ BattleScript_EffectSemiInvulnerableDig:
 	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
 	jumpifstatus3 BS_ATTACKER, STATUS3_UNDERGROUND, BattleScript_BurrowSecondTurnSemiInvulnerable
 	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_DIG
+	goto BattleScript_FirstTurnSemiInvulnerable
+BattleScript_EffectSemiInvulnerablePhantomForce:
+	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
+	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
+	jumpifstatus3 BS_ATTACKER, STATUS3_PHANTOM_FORCE, BattleScript_BurrowSecondTurnSemiInvulnerable
+	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_PHANTOM_FORCE
+	goto BattleScript_FirstTurnSemiInvulnerable
+BattleScript_EffectSemiInvulnerableShadowForce:
+	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
+	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
+	jumpifstatus3 BS_ATTACKER, STATUS3_PHANTOM_FORCE, BattleScript_BurrowSecondTurnSemiInvulnerable
+	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_PHANTOM_FORCE
 	goto BattleScript_FirstTurnSemiInvulnerable
 BattleScript_FirstTurnBounce::
 	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_BOUNCE
@@ -7006,10 +7020,14 @@ BattleScript_PursuitSwitchDmgLoop::
 	swapattackerwithtarget
 	trysetdestinybondtohappen
 	jumpifmove MOVE_FLAME_CHARGE, BattleScript_CallHotPursuitDmgOnSwitchOut
+	jumpifmove MOVE_SHADOW_SNEAK, BattleScript_CallShadowGraspDmgOnSwitchOut
 	call BattleScript_PursuitDmgOnSwitchOut
 	goto BattleScript_PursuitSwitchDmgDone
 BattleScript_CallHotPursuitDmgOnSwitchOut:
 	call BattleScript_HotPursuitDmgOnSwitchOut
+	goto BattleScript_PursuitSwitchDmgDone
+BattleScript_CallShadowGraspDmgOnSwitchOut:
+	call BattleScript_ShadowGraspDmgOnSwitchOut
 BattleScript_PursuitSwitchDmgDone:
 	swapattackerwithtarget
 BattleScript_DoSwitchOut::
@@ -7089,6 +7107,32 @@ BattleScript_HotPursuit_AfterSpeedRaise:
 	seteffectprimary
 	tryfaintmon BS_TARGET
 BattleScript_HotPursuitDmgOnSwitchOutRet:
+	return
+
+BattleScript_ShadowGraspDmgOnSwitchOut::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	attackstring
+	critcalc
+	damagecalc
+	adjustdamage
+	attackanimation
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_TARGET
+	moveendfromto MOVEEND_ABILITIES, MOVEEND_CHOICE_MOVE
+	jumpiffainted BS_TARGET, FALSE, BattleScript_ShadowGraspDmgOnSwitchOutRet
+	setbyte sGIVEEXP_STATE, 0
+	getexp BS_TARGET
+BattleScript_ShadowGraspDmgOnSwitchOutRet:
 	return
 
 BattleScript_Pausex20::
@@ -9452,6 +9496,21 @@ BattleScript_DampeningContrary:
 BattleScript_DampeningContrary_WontIncrease:
 	printstring STRINGID_TARGETSTATWONTGOHIGHER
 	goto BattleScript_DampeningEffect_WaitString
+
+BattleScript_JumpscareActivates::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	copybyte gBattlerAttacker, gBattlerTarget
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_JumpscareActivates_End
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+	copybyte sBATTLER, gBattlerTarget
+	call BattleScript_TryAdrenalineOrb
+BattleScript_JumpscareActivates_End:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	end3
 
 BattleScript_PollenPuffActivates::
 	showabilitypopup BS_ATTACKER

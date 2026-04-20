@@ -416,11 +416,15 @@ void HandleAction_UseMove(void)
         gCurrentMove = gChosenMove = gBattleMons[gBattlerAttacker].moves[gCurrMovePos];
     }
 
-    if (HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW)
+    if ((HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW)
+      || HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH))
      && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
     {
         gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
-        if (gCurrentMove != MOVE_DIG)
+        if ((HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW) && gCurrentMove != MOVE_DIG)
+         || (HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH)
+          && gCurrentMove != MOVE_SHADOW_FORCE
+          && gCurrentMove != MOVE_PHANTOM_FORCE))
             gStatuses3[gBattlerAttacker] &= ~STATUS3_SEMI_INVULNERABLE;
     }
 
@@ -5270,6 +5274,23 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_STEALTH)
+         && !uniqueDone
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            uniqueDone = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            gStatuses3[battler] |= STATUS3_PHANTOM_FORCE;
+            BtlController_EmitSpriteInvisibility(battler, BUFFER_A, TRUE);
+            MarkBattlerForControllerExec(battler);
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_STEALTH);
+            BattleScriptPushCursorAndCallback(BattleScript_AbilityPopupEnd3);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_HEADSPACE) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -5533,6 +5554,53 @@ special_delivery_done:
             SET_STATCHANGER(STAT_DEF, 1, FALSE);
             BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
             return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_JUMPSCARE) && !uniqueDone)
+        {
+            u32 target = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
+
+            if (!IsBattlerAlive(target) || GetBattlerSide(target) == GetBattlerSide(battler))
+            {
+                target = gBattlersCount;
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                    {
+                        target = i;
+                        break;
+                    }
+                }
+            }
+
+            if (target < gBattlersCount)
+            {
+                uniqueDone = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                SetBattlerTriggeredAbility(battler, ABILITY_JUMPSCARE);
+
+                if (IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE))
+                {
+                    gBattleStruct->atkCancellerTracker = 0;
+                    gBattlerAttacker = gBattlerAbility = battler;
+                    gBattlerTarget = target;
+                    gCalledMove = MOVE_SCARY_FACE;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[battler].extraMoveUsed = TRUE;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                    return 1;
+                }
+                else if (CompareStat(target, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN))
+                {
+                    gBattlerAttacker = battler;
+                    gBattlerTarget = target;
+                    SET_STATCHANGER(STAT_SPEED, 1, TRUE);
+                    BattleScriptPushCursorAndCallback(BattleScript_JumpscareActivates);
+                    return 1;
+                }
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_MOON_TOTEM)
@@ -15800,7 +15868,8 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
      || HasBattlerAbility(battler, ABILITY_HOLLOW_NEST)
      || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
       && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))
-     || (HasBattlerAbility(battler, ABILITY_BURROW)
+     || ((HasBattlerAbility(battler, ABILITY_BURROW)
+       || HasBattlerAbility(battler, ABILITY_STEALTH))
       && (gDisableStructs[battler].uniquePersistentStateActive
        || !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))))
     {

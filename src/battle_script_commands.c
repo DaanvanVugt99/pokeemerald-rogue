@@ -14082,6 +14082,16 @@ static void Cmd_jumpifnopursuitswitchdmg(void)
         gCurrentMove = MOVE_FLAME_CHARGE;
         doSwitchIntercept = TRUE;
     }
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_SHADOW_GRASP)
+          && !(gBattleMons[gBattlerTarget].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+          && gBattleMons[gBattlerAttacker].hp
+          && gBattleMons[gBattlerTarget].hp
+          && !gDisableStructs[gBattlerTarget].truantCounter)
+    {
+        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_SHADOW_GRASP);
+        gCurrentMove = MOVE_SHADOW_SNEAK;
+        doSwitchIntercept = TRUE;
+    }
 
     if (doSwitchIntercept)
     {
