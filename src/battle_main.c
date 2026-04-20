@@ -4745,6 +4745,14 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
     {
         speed = (speed * 120) / 100;
     }
+    if (HasBattlerAbility(battler, ABILITY_UNKNOWN_BIOLOGY))
+    {
+        if (gBattleMons[battler].status1 & STATUS1_SLEEP)
+            speed = (speed * 150) / 100;
+
+        if (gBattleMons[battler].status1 & (STATUS1_SLEEP | STATUS1_PARALYSIS))
+            RecordAbilityBattle(battler, ABILITY_UNKNOWN_BIOLOGY);
+    }
     // stat stages
     speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
     speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
@@ -4774,7 +4782,9 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
         speed *= 2;
 
     // paralysis drop
-    if (gBattleMons[battler].status1 & STATUS1_PARALYSIS && ability != ABILITY_QUICK_FEET)
+    if (gBattleMons[battler].status1 & STATUS1_PARALYSIS
+     && ability != ABILITY_QUICK_FEET
+     && !HasBattlerAbility(battler, ABILITY_UNKNOWN_BIOLOGY))
         speed /= B_PARALYSIS_SPEED >= GEN_7 ? 2 : 4;
 
     if (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SWAMP)

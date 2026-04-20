@@ -1535,10 +1535,6 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
     if (AI_DATA->abilities[battlerDef] == ABILITY_NO_GUARD || AI_DATA->abilities[battlerAtk] == ABILITY_NO_GUARD)
         return TRUE;
 
-    if (AI_DATA->abilities[battlerAtk] == ABILITY_HIVE_MIND
-     && DoesPartyShareTypeWithBattler(battlerAtk))
-        return TRUE;
-
     if (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(battlerAtk, TYPE_POISON))
         return TRUE;
 
@@ -2817,6 +2813,7 @@ bool32 AI_CanSleep(u32 battler, u32 ability)
 {
     if (AI_HasAbility(battler, ABILITY_INSOMNIA)
       || AI_HasAbility(battler, ABILITY_VITAL_SPIRIT)
+      || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
@@ -2840,6 +2837,7 @@ static bool32 AI_CanBePoisoned(u32 battlerAtk, u32 battlerDef, u32 move)
     if (!(CanPoisonType(battlerAtk, battlerDef))
      || gSideStatuses[GetBattlerSide(battlerDef)] & SIDE_STATUS_SAFEGUARD
      || gBattleMons[battlerDef].status1 & STATUS1_ANY
+     || AI_HasAbility(battlerDef, ABILITY_UNKNOWN_BIOLOGY)
      || AI_HasAbility(battlerDef, ABILITY_IMMUNITY)
      || AI_HasAbility(battlerDef, ABILITY_COMATOSE)
      || AI_IsAbilityOnSide(battlerDef, ABILITY_PASTEL_VEIL)
@@ -2883,6 +2881,7 @@ bool32 AI_CanPoison(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u3
 static bool32 AI_CanBeParalyzed(u32 battler, u32 ability)
 {
     if (AI_HasAbility(battler, ABILITY_LIMBER)
+      || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
       || IS_BATTLER_OF_TYPE(battler, TYPE_ELECTRIC)
       || gBattleMons[battler].status1 & STATUS1_ANY
@@ -2929,6 +2928,7 @@ bool32 AI_CanBeBurned(u32 battler, u32 ability)
 {
     if (AI_HasAbility(battler, ABILITY_WATER_VEIL)
       || AI_HasAbility(battler, ABILITY_WATER_BUBBLE)
+      || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
       || IS_BATTLER_OF_TYPE(battler, TYPE_FIRE)
       || gBattleMons[battler].status1 & STATUS1_ANY
@@ -2941,6 +2941,7 @@ bool32 AI_CanBeBurned(u32 battler, u32 ability)
 bool32 AI_CanGetFrostbite(u32 battler, u32 ability)
 {
     if (AI_HasAbility(battler, ABILITY_MAGMA_ARMOR)
+      || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
       || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
       || gBattleMons[battler].status1 & STATUS1_ANY
