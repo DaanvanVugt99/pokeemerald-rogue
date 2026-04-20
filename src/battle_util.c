@@ -5064,8 +5064,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
             {
-                if (!IsBattlerAlive(opposingBattler))
-                    continue;
                 if (!CanUseExtraMove(battler, opposingBattler))
                     continue;
 
@@ -5094,8 +5092,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
             {
-                if (!IsBattlerAlive(opposingBattler))
-                    continue;
                 if (!CanUseExtraMove(battler, opposingBattler))
                     continue;
 
@@ -5124,8 +5120,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
             {
-                if (!IsBattlerAlive(opposingBattler))
-                    continue;
                 if (!CanUseExtraMove(battler, opposingBattler))
                     continue;
 
@@ -5153,8 +5147,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
             {
-                if (!IsBattlerAlive(opposingBattler))
-                    continue;
                 if (!CanUseExtraMove(battler, opposingBattler))
                     continue;
                 if (gBattleMons[opposingBattler].status2 & STATUS2_INFATUATION)
@@ -5190,8 +5182,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
             {
-                if (!IsBattlerAlive(opposingBattler))
-                    continue;
                 if (!CanUseExtraMove(battler, opposingBattler))
                     continue;
 
@@ -6528,6 +6518,7 @@ special_delivery_done:
             bool8 shedSkinAbilityActivate = FALSE;
             bool8 shedSkinCharmActive = FALSE;
             u8 extraShedSkinChance = 0;
+            u32 primaryAbility = GetBattlerAbility(battler);
 
             gBattlerAttacker = battler;
 
@@ -6557,7 +6548,18 @@ special_delivery_done:
                 break;
             }
 
-            switch (gLastUsedAbility)
+            if (HasBattlerAbility(battler, ABILITY_BOTTOMLESS)
+             && !gProtectStructs[battler].extraMoveUsed
+             && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+             && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_BOTTOMLESS);
+                gBattlerAttacker = battler;
+                BattleScriptPushCursorAndCallback(BattleScript_BottomlessActivates);
+                effect++;
+            }
+
+            switch (primaryAbility)
             {
             case ABILITY_HARVEST:
                 if ((IsBattlerWeatherAffected(battler, B_WEATHER_SUN) || Random() % 2 == 0)
@@ -8020,8 +8022,6 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_GLACIAL_MASS)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[moveEndAttacker].hp != 0
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsMoveMakingContact(move, moveEndAttacker)
          && IsFinalMultiHitStrike()
@@ -8041,8 +8041,6 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_ALL_ALONE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[moveEndAttacker].hp != 0
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsMoveMakingContact(move, moveEndAttacker)
          && IsFinalMultiHitStrike()
@@ -8063,8 +8061,6 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_CRACKED_SHELL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[moveEndAttacker].hp != 0
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
          && IsFinalMultiHitStrike()
@@ -8190,7 +8186,6 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_VOLCANIC_RAGE)
-         && IsBattlerAlive(battler)
          && moveType == TYPE_FIRE
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -8208,7 +8203,6 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_PASSIVE_INCOME)
-         && IsBattlerAlive(battler)
          && moveType == TYPE_NORMAL
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -8230,10 +8224,8 @@ if (triggeringAbility != ABILITY_NONE)
          && TARGET_TURN_DAMAGED
          && gIsCriticalHit
          && IsFinalMultiHitStrike()
-         && IsBattlerAlive(gBattlerTarget)
          && !(gBattleMons[gBattlerTarget].status2 & STATUS2_TORMENT)
          && !IsDynamaxed(gBattlerTarget)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && CanUseExtraMove(battler, gBattlerTarget))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_RINGLEADER);
@@ -8271,7 +8263,6 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_AFTERSHOCK)
-         && IsBattlerAlive(battler)
          && moveType == TYPE_GROUND
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -8289,7 +8280,6 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_PLOW_THROUGH)
-         && IsBattlerAlive(battler)
          && moveType == TYPE_GROUND
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -8341,7 +8331,6 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_SWARM_ASSAULT)
-         && IsBattlerAlive(battler)
          && IsMoveMakingContact(move, battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
@@ -8363,7 +8352,6 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_HANDYWORK)
-         && IsBattlerAlive(battler)
          && IsMoveMakingContact(move, battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
@@ -8381,8 +8369,30 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_FEEDING_FRENZY)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !IS_MOVE_STATUS(move)
+         && TARGET_TURN_DAMAGED
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && (gBattleMons[gBattlerTarget].hp * 2) < gBattleMons[gBattlerTarget].maxHP
+         && ((gBattleMons[gBattlerTarget].hp + gHpDealt) * 2) >= gBattleMons[gBattlerTarget].maxHP
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FEEDING_FRENZY);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_BITE;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_DREAMWEAVER)
-         && IsBattlerAlive(battler)
          && IS_MOVE_STATUS(move)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
@@ -8401,10 +8411,8 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_HEXCRAFT)
-         && IsBattlerAlive(battler)
          && IS_MOVE_STATUS(move)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && IsBattlerAlive(gBattlerTarget)
          && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -8422,7 +8430,6 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_MULTITASK)
-         && IsBattlerAlive(battler)
          && IS_MOVE_STATUS(move)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()

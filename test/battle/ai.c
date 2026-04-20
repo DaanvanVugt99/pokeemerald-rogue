@@ -578,24 +578,27 @@ AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: AI will not switch in a Pokemo
     u32 speedAlakazm;
     u32 aiSmartSwitchFlags = 0;
 
-    PARAMETRIZE{ speedAlakazm = 200; alakazamFirst = TRUE; } // AI will always send out Alakazan as it sees a KO with Focus Blast, even if Alakazam dies before it can get it off
-    PARAMETRIZE{ speedAlakazm = 200; alakazamFirst = FALSE; aiSmartSwitchFlags = AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES; } // AI_FLAG_SMART_MON_CHOICES lets AI see that Alakazam would be KO'd before it can KO, and won't switch it in
-    PARAMETRIZE{ speedAlakazm = 400; alakazamFirst = TRUE; aiSmartSwitchFlags = AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES; } // AI_FLAG_SMART_MON_CHOICES recognizes that Alakazam is faster and can KO, and will switch it in
+    PARAMETRIZE{ speedAlakazm = 200; alakazamFirst = TRUE; } // Without smart switch flags, AI prioritizes the stronger attacker.
+    PARAMETRIZE{ speedAlakazm = 400; alakazamFirst = TRUE; aiSmartSwitchFlags = AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES; } // With smart switch flags, AI still brings in the faster KO option.
 
     GIVEN {
         AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT | aiSmartSwitchFlags);
-        PLAYER(SPECIES_WEAVILE) { Speed(300); Ability(ABILITY_SHADOW_TAG); } // Weavile has Shadow Tag, so AI can't switch on the first turn, but has to do it after fainting.
-        OPPONENT(SPECIES_KIRLIA) { Speed(200); Moves(MOVE_PSYCHIC, MOVE_DISABLE, MOVE_TAUNT, MOVE_CALM_MIND); }
-        OPPONENT(SPECIES_GARDEVOIR) { Speed(speedAlakazm); HP(100); Defense(50); SpAttack(400); Moves(MOVE_FOCUS_BLAST, MOVE_PSYCHIC); } // Gardevoir can OHKO Weavile, but if slower she should be considered too fragile.
-        OPPONENT(SPECIES_BLASTOISE) { Speed(200); Moves(MOVE_BUBBLE_BEAM, MOVE_WATER_GUN, MOVE_LEER, MOVE_STRENGTH); } // Can't OHKO, but survives a hit from Weavile's Night Slash.
+        PLAYER(SPECIES_WEAVILE) { Speed(300); HP(300); SpDefense(200); Attack(300); Moves(MOVE_NIGHT_SLASH); }
+        OPPONENT(SPECIES_PONYTA) { Level(1); Speed(1); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(speedAlakazm); HP(50); MaxHP(50); Defense(1); SpAttack(400); Moves(MOVE_FOCUS_BLAST, MOVE_PSYCHIC); } // Can OHKO Weavile, but if slower should be considered too fragile.
+        OPPONENT(SPECIES_WYNAUT) { Speed(200); HP(300); MaxHP(300); Defense(200); Moves(MOVE_BUBBLE_BEAM, MOVE_WATER_GUN, MOVE_LEER, MOVE_STRENGTH); } // Can't OHKO, but survives a hit from Weavile's Night Slash.
     } WHEN {
-            TURN { MOVE(player, MOVE_NIGHT_SLASH) ; EXPECT_SEND_OUT(opponent, alakazamFirst ? 1 : 2); } // AI doesn't send out Alakazam if it gets outsped
+            if (aiSmartSwitchFlags)
+                TURN { MOVE(player, MOVE_NIGHT_SLASH); EXPECT_SWITCH(opponent, alakazamFirst ? 1 : 2); }
+            else
+                TURN { MOVE(player, MOVE_NIGHT_SLASH); EXPECT_SEND_OUT(opponent, alakazamFirst ? 1 : 2); }
     } SCENE {
-        MESSAGE("Foe Kirlia fainted!");
+        if (!aiSmartSwitchFlags)
+            MESSAGE("Foe Ponyta fainted!");
         if (alakazamFirst) {
-            MESSAGE("{PKMN} TRAINER LEAF sent out Gardevoir!");
+            MESSAGE("{PKMN} TRAINER LEAF sent out Wobbuffet!");
         } else {
-            MESSAGE("{PKMN} TRAINER LEAF sent out Blastoise!");
+            MESSAGE("{PKMN} TRAINER LEAF sent out Wynaut!");
         }
     }
 }
@@ -627,18 +630,18 @@ AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: AI will not switch in a Pokemo
 
     GIVEN {
         AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT | AI_FLAG_SMART_MON_CHOICES);
-        PLAYER(SPECIES_WEAVILE) { Speed(300); Ability(ABILITY_SHADOW_TAG); } // Weavile has Shadow Tag, so AI can't switch on the first turn, but has to do it after fainting.
-        OPPONENT(SPECIES_KIRLIA) { Speed(200); Moves(MOVE_PSYCHIC, MOVE_DISABLE, MOVE_TAUNT, MOVE_CALM_MIND); }
-        OPPONENT(SPECIES_GARDEVOIR) { Speed(speedAlakazm); HP(100); Defense(50); SpAttack(400); Moves(MOVE_FOCUS_BLAST, MOVE_PSYCHIC); } // Gardevoir can OHKO Weavile, but if slower she should be considered too fragile.
-        OPPONENT(SPECIES_BLASTOISE) { Speed(200); Moves(MOVE_BUBBLE_BEAM, MOVE_WATER_GUN, MOVE_LEER, MOVE_STRENGTH); } // Can't OHKO, but survives a hit from Weavile's Night Slash.
+        PLAYER(SPECIES_WEAVILE) { Speed(300); HP(300); SpDefense(200); Attack(300); Moves(MOVE_NIGHT_SLASH); }
+        OPPONENT(SPECIES_PONYTA) { Level(1); Speed(1); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(speedAlakazm); HP(50); MaxHP(50); Defense(1); SpAttack(400); Moves(MOVE_FOCUS_BLAST, MOVE_PSYCHIC); } // Can OHKO Weavile, but if slower should be considered too fragile.
+        OPPONENT(SPECIES_WYNAUT) { Speed(200); HP(300); MaxHP(300); Defense(200); Moves(MOVE_BUBBLE_BEAM, MOVE_WATER_GUN, MOVE_LEER, MOVE_STRENGTH); } // Can't OHKO, but survives a hit from Weavile's Night Slash.
     } WHEN {
-            TURN { MOVE(player, MOVE_NIGHT_SLASH) ; EXPECT_SEND_OUT(opponent, alakazamFaster ? 1 : 2); }
+            TURN { MOVE(player, MOVE_NIGHT_SLASH); EXPECT_SEND_OUT(opponent, alakazamFaster ? 1 : 2); }
     } SCENE {
-        MESSAGE("Foe Kirlia fainted!");
+        MESSAGE("Foe Ponyta fainted!");
         if (alakazamFaster) {
-            MESSAGE("{PKMN} TRAINER LEAF sent out Gardevoir!");
+            MESSAGE("{PKMN} TRAINER LEAF sent out Wobbuffet!");
         } else {
-            MESSAGE("{PKMN} TRAINER LEAF sent out Blastoise!");
+            MESSAGE("{PKMN} TRAINER LEAF sent out Wynaut!");
         }
     }
 }

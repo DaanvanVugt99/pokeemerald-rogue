@@ -61,6 +61,6 @@ DOUBLE_BATTLE_TEST("Negative Charge uses the active teammate's live ability, not
     } SCENE {
         HP_BAR(playerLeft, captureDamage: &results[i].damage);
     } FINALLY {
-        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.8), results[1].damage);
+        EXPECT_MUL_EQ(results[1].damage, UQ_4_12(0.8), results[0].damage);
     }
 }

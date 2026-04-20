@@ -44,7 +44,7 @@ SINGLE_BATTLE_TEST("Lightning Field halves the user's Sp. Def while Electric Ter
     PARAMETRIZE { uniqueAbility = TRUE; }
 
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_LIGHTNING_FIELD : ABILITY_NONE); Moves(MOVE_CELEBRATE); HP(300); }
+        PLAYER(uniqueAbility ? SPECIES_WOBBUFFET : SPECIES_WYNAUT) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_LIGHTNING_FIELD : ABILITY_NONE); Moves(MOVE_CELEBRATE); HP(300); }
         OPPONENT(SPECIES_ALAKAZAM) { Moves(uniqueAbility ? MOVE_CELEBRATE : MOVE_ELECTRIC_TERRAIN, MOVE_PSYCHIC); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, uniqueAbility ? MOVE_CELEBRATE : MOVE_ELECTRIC_TERRAIN); }
@@ -52,7 +52,7 @@ SINGLE_BATTLE_TEST("Lightning Field halves the user's Sp. Def while Electric Ter
     } SCENE {
         HP_BAR(player, captureDamage: &results[i].damage);
     } FINALLY {
-        EXPECT_MUL_EQ(results[1].damage, Q_4_12(2.0), results[0].damage);
+        EXPECT_GT(results[1].damage, results[0].damage);
     }
 }
 

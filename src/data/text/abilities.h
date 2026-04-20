@@ -473,6 +473,8 @@ static const u8 sNegativeChargeDescription[] = _("If the party contains Plus, ta
 static const u8 sCallDescription[] = _("If the party contains a Fairy type, status moves gain +1 priority.");
 static const u8 sResponseDescription[] = _("If the party contains an Electric type, status moves gain +1 priority.");
 static const u8 sUnmovableDescription[] = _("Cannot be forced out. First contact hit each switch-in forces the attacker out.");
+static const u8 sBottomlessDescription[] = _("At the end of each turn, use Stockpile.");
+static const u8 sFeedingFrenzyDescription[] = _("If a hit leaves the target below half HP, also use Bite at 30 BP.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -960,6 +962,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CALL] = _("Call"),
     [ABILITY_RESPONSE] = _("Response"),
     [ABILITY_UNMOVABLE] = _("Unmovable"),
+    [ABILITY_BOTTOMLESS] = _("Bottomless"),
+    [ABILITY_FEEDING_FRENZY] = _("Feeding Frenzy"),
 };
 #else   // 12 characters
 const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
@@ -1447,6 +1451,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CALL] = _("Call"),
     [ABILITY_RESPONSE] = _("Response"),
     [ABILITY_UNMOVABLE] = _("Unmovable"),
+    [ABILITY_BOTTOMLESS] = _("Bottomless"),
+    [ABILITY_FEEDING_FRENZY] = _("FeedFrenzy"),
 };
 #endif
 
@@ -1935,4 +1941,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_CALL] = sCallDescription,
     [ABILITY_RESPONSE] = sResponseDescription,
     [ABILITY_UNMOVABLE] = sUnmovableDescription,
+    [ABILITY_BOTTOMLESS] = sBottomlessDescription,
+    [ABILITY_FEEDING_FRENZY] = sFeedingFrenzyDescription,
 };
