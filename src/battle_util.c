@@ -10041,6 +10041,27 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ADRENALINE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].punchingMove
+         && (gBattleMons[battler].status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON))
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_ADRENALINE);
+            if (drainedHp == 0)
+                drainedHp = 1;
+            gBattleMoveDamage = -drainedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_VAMPIRIC)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
