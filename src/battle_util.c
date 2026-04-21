@@ -9916,37 +9916,32 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_VERDANT_HAVEN)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsHealingMove(move)
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].isFirstTurn
+         && !gProtectStructs[battler].extraMoveUsed)
         {
-            gBattlerTarget = BATTLE_OPPOSITE(battler);
-
-            if (!IsBattlerAlive(gBattlerTarget) || GetBattlerSide(gBattlerTarget) == GetBattlerSide(battler))
-            {
-                for (gBattlerTarget = 0; gBattlerTarget < gBattlersCount; gBattlerTarget++)
-                {
-                    if (GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler) && IsBattlerAlive(gBattlerTarget))
-                        break;
-                }
-            }
-
-            if (gBattlerTarget < gBattlersCount
-             && !(gStatuses3[gBattlerTarget] & STATUS3_LEECHSEED)
-             && !IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GRASS))
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_VERDANT_HAVEN);
-                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_FungalInfectionActivates;
-                effect++;
-            }
+            SetBattlerTriggeredAbility(battler, ABILITY_VERDANT_HAVEN);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_AROMATHERAPY;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_ERUPTION)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && moveType == TYPE_FIRE
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].isFirstTurn
+         && !gProtectStructs[battler].extraMoveUsed)
         {
             if (gBattleStruct->moveTarget[battler] < gBattlersCount
              && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
@@ -9956,9 +9951,9 @@ if (triggeringAbility != ABILITY_NONE)
                 gBattleStruct->atkCancellerTracker = 0;
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = gBattleStruct->moveTarget[battler];
-                gCalledMove = MOVE_SMOKESCREEN;
+                gCalledMove = MOVE_FLAME_CHARGE;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
                 effect++;
@@ -9966,31 +9961,26 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_DEATH_ROLL)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[gBattlerTarget].hp != 0
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && TARGET_TURN_DAMAGED
-         && IsFinalMultiHitStrike()
          && gBattleMoves[move].bitingMove
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].isFirstTurn
+         && !gProtectStructs[battler].extraMoveUsed)
         {
-            bool32 trapApplied = FALSE;
-
-            SetBattlerTriggeredAbility(battler, ABILITY_DEATH_ROLL);
-
-            if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+            if (gBattleStruct->moveTarget[battler] < gBattlersCount
+             && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
+             && IsBattlerAlive(gBattleStruct->moveTarget[battler]))
             {
-                gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
-                gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
-                trapApplied = TRUE;
-            }
-
-            if (trapApplied)
-            {
-                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_DEATH_ROLL);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = gBattleStruct->moveTarget[battler];
+                gCalledMove = MOVE_SCREECH;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
                 BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityTrapsTarget;
-                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
                 effect++;
             }
         }
