@@ -4964,6 +4964,20 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_VENDETTA)
+     && gBattleMoves[move].slicingMove
+     && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+    {
+        priority++;
+    }
+
+    if (HasBattlerAbility(battler, ABILITY_SIDEWINDER)
+     && gBattleMoves[move].bitingMove
+     && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_SOLARBOOST)
      && gDisableStructs[battler].isFirstTurn
      && gBattleMoves[move].type == TYPE_FIRE)

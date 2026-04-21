@@ -522,8 +522,8 @@
 #define ABILITY_DESERT_SHROUD       488
 #define ABILITY_NEEDLEBURST         489
 #define ABILITY_COTTON_GUARDING     490
-#define ABILITY_ANTIVENOM           491
-#define ABILITY_VENDETTA            492
+#define ABILITY_VENDETTA            491
+#define ABILITY_SIDEWINDER          492
 #define ABILITY_MOON_TOTEM          493
 #define ABILITY_SUN_TOTEM           494
 #define ABILITY_ELECTROCYTES        495
