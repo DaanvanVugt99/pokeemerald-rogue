@@ -9319,14 +9319,14 @@ if (triggeringAbility != ABILITY_NONE)
          && moveType == TYPE_FIRE
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_UPDRAFT);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gCalledMove = MOVE_TAILWIND;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -9335,15 +9335,15 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_SHELL_FORMATION)
          && moveType == TYPE_WATER
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && IsFinalMultiHitStrike()
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+         && !gProtectStructs[battler].extraMoveUsed
+         && IsFinalMultiHitStrike())
         {
             SetBattlerTriggeredAbility(battler, ABILITY_SHELL_FORMATION);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
-            gCalledMove = MOVE_IRON_DEFENSE;
+            gCalledMove = MOVE_WITHDRAW;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;

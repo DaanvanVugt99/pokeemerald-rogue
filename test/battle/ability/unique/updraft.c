@@ -28,7 +28,7 @@ SINGLE_BATTLE_TEST("Updraft triggers only on the first Fire-type move after swit
     }
 }
 
-SINGLE_BATTLE_TEST("Updraft refreshes after the user switches out and back in")
+SINGLE_BATTLE_TEST("Updraft does not refresh after the user switches out and back in")
 {
     GIVEN {
         PLAYER(SPECIES_CHARIZARD) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_UPDRAFT); Moves(MOVE_EMBER, MOVE_CELEBRATE); }
@@ -43,7 +43,11 @@ SINGLE_BATTLE_TEST("Updraft refreshes after the user switches out and back in")
     } SCENE {
         ABILITY_POPUP(player, ABILITY_UPDRAFT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
-        ABILITY_POPUP(player, ABILITY_UPDRAFT);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_UPDRAFT);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
+        }
+    } THEN {
+        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
