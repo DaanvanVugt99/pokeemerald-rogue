@@ -4539,6 +4539,36 @@ u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler)
     return count;
 }
 
+u32 CountPartyMonsWithAnyTypes(u32 battler, u32 typeMask, bool32 excludeBattler)
+{
+    u32 i;
+    u32 firstMonId, lastMonId;
+    u32 count = 0;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species;
+        u32 monType1, monType2;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+        if (excludeBattler && i == gBattlerPartyIndexes[battler])
+            continue;
+
+        species = GetMonData(&party[i], MON_DATA_SPECIES);
+        monType1 = gSpeciesInfo[species].types[0];
+        monType2 = gSpeciesInfo[species].types[1];
+
+        if ((typeMask & gBitTable[monType1]) || (typeMask & gBitTable[monType2]))
+            count++;
+    }
+
+    return count;
+}
+
 bool32 DoesPartyHaveUniqueTypes(u32 battler)
 {
     u32 i;
@@ -7460,7 +7490,9 @@ special_delivery_done:
             }
 
             if (HasBattlerAbility(battler, ABILITY_FLOODPLAIN)
-             && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN)
+             && CountPartyMonsWithAnyTypes(battler,
+                                           gBitTable[TYPE_WATER] | gBitTable[TYPE_GROUND] | gBitTable[TYPE_ROCK],
+                                           TRUE) >= 3
              && !BATTLER_MAX_HP(battler)
              && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
             {
@@ -8535,31 +8567,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_FLASH_FIRESTORM)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
-         && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
-        {
-            if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
-            {
-                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-                SetBattlerTriggeredAbility(battler, ABILITY_FLASH_FIRESTORM);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_BlockedByPrimalWeatherRet;
-                effect++;
-            }
-            else if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
-            {
-                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-                SetBattlerTriggeredAbility(battler, ABILITY_FLASH_FIRESTORM);
-                gBattleScripting.battler = battler;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_FlashFirestormActivates;
-                effect++;
-            }
-        }
-
         if (HasBattlerAbility(battler, ABILITY_COLD_SNAP)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -9270,7 +9277,9 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
-         && !IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
+         && CountPartyMonsWithAnyTypes(battler,
+                                       gBitTable[TYPE_GRASS] | gBitTable[TYPE_DRAGON] | gBitTable[TYPE_DARK],
+                                       TRUE) >= 3
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
@@ -9466,6 +9475,28 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FLASH_FIRESTORM)
+         && gBattleMoves[move].kickingMove
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && CanBeBurned(gBattlerTarget)
+         && CountPartyMonsWithAnyTypes(battler,
+                                       gBitTable[TYPE_FIRE] | gBitTable[TYPE_FIGHTING] | gBitTable[TYPE_ELECTRIC],
+                                       TRUE) >= 3
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FLASH_FIRESTORM);
+            gBattleScripting.moveEffect = MOVE_EFFECT_BURN;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
 
@@ -13813,6 +13844,50 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_SUNSTALKER)
+     && gBattleMoves[move].slicingMove)
+    {
+        u32 allyCount = CountPartyMonsWithAnyTypes(battlerAtk,
+                                                   gBitTable[TYPE_GRASS] | gBitTable[TYPE_DRAGON] | gBitTable[TYPE_DARK],
+                                                   TRUE);
+
+        switch (allyCount)
+        {
+        case 1:
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.1));
+            break;
+        case 2:
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+            break;
+        default:
+            if (allyCount >= 3)
+                modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+            break;
+        }
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_FLASH_FIRESTORM)
+     && gBattleMoves[move].kickingMove)
+    {
+        u32 allyCount = CountPartyMonsWithAnyTypes(battlerAtk,
+                                                   gBitTable[TYPE_FIRE] | gBitTable[TYPE_FIGHTING] | gBitTable[TYPE_ELECTRIC],
+                                                   TRUE);
+
+        switch (allyCount)
+        {
+        case 1:
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.1));
+            break;
+        case 2:
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+            break;
+        default:
+            if (allyCount >= 3)
+                modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+            break;
+        }
+    }
+
     // field abilities
     if ((IsAbilityOnField(ABILITY_DARK_AURA) && moveType == TYPE_DARK)
      || (IsAbilityOnField(ABILITY_FAIRY_AURA) && moveType == TYPE_FAIRY))
@@ -14807,7 +14882,16 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
     if (HasBattlerAbility(battlerDef, ABILITY_FLOODPLAIN)
      && IS_MOVE_SPECIAL(move))
     {
-        return UQ_4_12(0.9);
+        u32 allyCount = CountPartyMonsWithAnyTypes(battlerDef,
+                                                   gBitTable[TYPE_WATER] | gBitTable[TYPE_GROUND] | gBitTable[TYPE_ROCK],
+                                                   TRUE);
+
+        if (allyCount >= 3)
+            return UQ_4_12(0.7);
+        if (allyCount >= 2)
+            return UQ_4_12(0.8);
+        if (allyCount >= 1)
+            return UQ_4_12(0.9);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_NEGATIVE_CHARGE)

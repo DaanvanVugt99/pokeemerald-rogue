@@ -4958,8 +4958,10 @@ s8 GetMovePriority(u32 battler, u16 move)
 
     if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
      && gBattleMoves[move].slicingMove
-     && (IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
-      || !gDisableStructs[battler].uniqueOncePerSwitchInUsed))
+     && CountPartyMonsWithAnyTypes(battler,
+                                   gBitTable[TYPE_GRASS] | gBitTable[TYPE_DRAGON] | gBitTable[TYPE_DARK],
+                                   TRUE) >= 3
+     && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
     {
         priority++;
     }

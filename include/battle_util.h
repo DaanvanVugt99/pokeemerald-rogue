@@ -147,6 +147,7 @@ bool32 DoesPartyHaveUniqueTypes(u32 battler);
 bool32 IsTruantLoafingSuppressed(u32 battler);
 bool32 DoesPartyContainAbility(u32 battler, u32 ability, bool32 excludeBattler);
 u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler);
+u32 CountPartyMonsWithAnyTypes(u32 battler, u32 typeMask, bool32 excludeBattler);
 u32 GetBattlerKnownDistinctDamagingMoveTypeCount(u32 battler);
 void GetBattlerKnownMoveCategoryCounts(u32 battler, u32 *damagingMoveCount, u32 *statusMoveCount);
 bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility);
