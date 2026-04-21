@@ -163,7 +163,7 @@ AI_SINGLE_BATTLE_TEST("AI scores Thunder Wave below Tackle against revealed uniq
     }
 }
 
-AI_SINGLE_BATTLE_TEST("AI scores harmful status moves below Tackle against revealed Unknown Biology")
+AI_SINGLE_BATTLE_TEST("AI scores harmful status moves below Tackle against Unknown Biology")
 {
     u16 statusMove;
 
@@ -176,7 +176,7 @@ AI_SINGLE_BATTLE_TEST("AI scores harmful status moves below Tackle against revea
         PLAYER(SPECIES_DEOXYS_NORMAL) { Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_UNKNOWN_BIOLOGY); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_PIKACHU) { Moves(statusMove, MOVE_TACKLE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, statusMove); }
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_TACKLE); }
         TURN { SCORE_GT(opponent, MOVE_TACKLE, statusMove); }
     }
 }
