@@ -23,6 +23,21 @@ SINGLE_BATTLE_TEST("Atlas uses Gravity on switch-in if all Pokémon on the team 
     }
 }
 
+SINGLE_BATTLE_TEST("Atlas uses Gravity when sent out at battle start")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_GROUDON) { Ability(ABILITY_DROUGHT); UniqueAbility(ABILITY_ATLAS); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(opponent, ABILITY_ATLAS);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, opponent);
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_GRAVITY);
+    }
+}
+
 SINGLE_BATTLE_TEST("Atlas does not use Gravity on switch-in if a teammate does not share a type with the user")
 {
     GIVEN {

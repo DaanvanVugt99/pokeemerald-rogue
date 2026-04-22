@@ -26,6 +26,7 @@
 #include "trig.h"
 #include "window.h"
 #include "battle_message.h"
+#include "battle_main.h"
 #include "battle_ai_main.h"
 #include "battle_ai_util.h"
 #include "event_data.h"
@@ -4853,6 +4854,21 @@ static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
 }
 
+static void StartAbilityCalledMoveScript(void)
+{
+    if (gBattleMainFunc == RunBattleScriptCommands
+     || gBattleMainFunc == RunBattleScriptCommands_PopCallbacksStack
+     || gBattleMainFunc == HandleAction_RunBattleScript)
+    {
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+    }
+    else
+    {
+        BattleScriptExecute(BattleScript_AbilityUsesCalledMove);
+    }
+}
+
 static inline bool32 IsFinalMultiHitStrike(void)
 {
     return (gMultiHitCounter == 0 || gMultiHitCounter == 1);
@@ -5135,7 +5151,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     continue;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_CHEAP_TACTICS);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_SCRATCH;
@@ -5143,8 +5159,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5162,7 +5177,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     continue;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_TASTE_TEST);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_LICK;
@@ -5170,8 +5185,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5192,7 +5206,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
                 gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
                 SetBattlerTriggeredAbility(battler, ABILITY_CHANGE_OF_HEART);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_HEART_SWAP;
@@ -5200,8 +5214,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5219,7 +5232,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     continue;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_SILKEN_THREAD);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_STRING_SHOT;
@@ -5227,8 +5240,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5254,7 +5266,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     continue;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_ALLURE);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_ATTRACT;
@@ -5262,8 +5274,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5282,7 +5293,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
                 uniqueDone = TRUE;
                 SetBattlerTriggeredAbility(battler, ABILITY_CARNIVAL);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_TEETER_DANCE;
@@ -5290,8 +5301,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5310,7 +5320,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
                 uniqueDone = TRUE;
                 SetBattlerTriggeredAbility(battler, ABILITY_ABYSS);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_WHIRLPOOL;
@@ -5318,8 +5328,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5336,7 +5345,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
                 uniqueDone = TRUE;
                 SetBattlerTriggeredAbility(battler, ABILITY_ROSE_GARDEN);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_TOXIC_SPIKES;
@@ -5344,8 +5353,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5356,7 +5364,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         {
             uniqueDone = TRUE;
             SetBattlerTriggeredAbility(battler, ABILITY_HIVE_MIND);
-            gBattleStruct->atkCancellerTracker = 0;
+            SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             gCalledMove = MOVE_MAGNET_RISE;
@@ -5364,8 +5372,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            StartAbilityCalledMoveScript();
             return 1;
         }
 
@@ -5395,7 +5402,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             {
                 uniqueDone = TRUE;
                 SetBattlerTriggeredAbility(battler, ABILITY_SPECIAL_DELIVERY);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = validTargets[RandomUniform(RNG_SPECIAL_DELIVERY, 0, targetCount - 1)];
                 gCalledMove = MOVE_PRESENT;
@@ -5403,8 +5410,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
         }
@@ -5464,14 +5470,13 @@ special_delivery_done:
 
             if (gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN)
             {
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = battler;
                 gCalledMove = MOVE_TRICK_ROOM;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
             else if (TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
@@ -5514,7 +5519,7 @@ special_delivery_done:
         {
             uniqueDone = TRUE;
             SetBattlerTriggeredAbility(battler, ABILITY_GRAVITY_WELL);
-            gBattleStruct->atkCancellerTracker = 0;
+            SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             gCalledMove = MOVE_GRAVITY;
@@ -5522,8 +5527,7 @@ special_delivery_done:
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            StartAbilityCalledMoveScript();
             return 1;
         }
 
@@ -5534,7 +5538,7 @@ special_delivery_done:
         {
             uniqueDone = TRUE;
             SetBattlerTriggeredAbility(battler, ABILITY_ATLAS);
-            gBattleStruct->atkCancellerTracker = 0;
+            SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             gCalledMove = MOVE_GRAVITY;
@@ -5542,8 +5546,7 @@ special_delivery_done:
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            StartAbilityCalledMoveScript();
             return 1;
         }
 
@@ -5556,14 +5559,13 @@ special_delivery_done:
 
             if (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
             {
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = battler;
                 gCalledMove = MOVE_TRICK_ROOM;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 return 1;
             }
             else if (TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
@@ -5752,14 +5754,13 @@ special_delivery_done:
 
                 if (IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE))
                 {
-                    gBattleStruct->atkCancellerTracker = 0;
+                    SetAtkCancellerForCalledMove();
                     gBattlerAttacker = gBattlerAbility = battler;
                     gBattlerTarget = target;
                     gCalledMove = MOVE_SCARY_FACE;
                     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                     gProtectStructs[battler].extraMoveUsed = TRUE;
-                    BattleScriptPushCursor();
-                    gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                    StartAbilityCalledMoveScript();
                     return 1;
                 }
                 else if (CompareStat(target, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN))
@@ -5975,15 +5976,14 @@ special_delivery_done:
 
                 uniqueDone = TRUE;
                 SetBattlerTriggeredAbility(battler, ABILITY_SCAMPER);
-                gBattleStruct->atkCancellerTracker = 0;
+                SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_SUBSTITUTE;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                StartAbilityCalledMoveScript();
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
                 return 1;
@@ -10801,6 +10801,7 @@ bool32 HasBattlerAbilityIgnoreMoldBreaker(u32 battler, u32 ability)
 static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability)
 {
     bool32 attackerIgnoresAbilities;
+    u32 attackerTurnOrderNum;
 
     if (ability == ABILITY_NONE)
         return FALSE;
@@ -10813,10 +10814,16 @@ static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability)
     if (!attackerIgnoresAbilities && !gBattleMoves[gCurrentMove].ignoresTargetAbility)
         return FALSE;
 
+    if (gCurrentTurnActionNumber >= gBattlersCount || gBattlerAttacker >= gBattlersCount)
+        return FALSE;
+
+    attackerTurnOrderNum = GetBattlerTurnOrderNum(gBattlerAttacker);
+    if (attackerTurnOrderNum >= gBattlersCount)
+        return FALSE;
+
     return sAbilitiesAffectedByMoldBreaker[ability]
         && gBattlerByTurnOrder[gCurrentTurnActionNumber] == gBattlerAttacker
-        && gActionsByTurnOrder[gBattlerByTurnOrder[gBattlerAttacker]] == B_ACTION_USE_MOVE
-        && gCurrentTurnActionNumber < gBattlersCount;
+        && gActionsByTurnOrder[attackerTurnOrderNum] == B_ACTION_USE_MOVE;
 }
 
 u32 GetBattlerPrimaryAbilityIgnoreMoldBreaker(u32 battler)
