@@ -31,6 +31,19 @@ SINGLE_BATTLE_TEST("Toxisphere sets Acid Rain on switch-in even with Neutralizin
     }
 }
 
+SINGLE_BATTLE_TEST("Toxisphere sets extended Acid Rain with Acid Rock")
+{
+    GIVEN {
+        PLAYER(SPECIES_WEEZING) { Item(ITEM_ACID_ROCK); Ability(ABILITY_LEVITATE); UniqueAbility(ABILITY_TOXISPHERE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(gBattleWeather & B_WEATHER_ACID_RAIN);
+        EXPECT_EQ(gWishFutureKnock.weatherDuration, WEATHER_DURATION_EXTENDED - 1);
+    }
+}
+
 SINGLE_BATTLE_TEST("Toxisphere blocks secondary effects from damaging moves during Acid Rain")
 {
     GIVEN {

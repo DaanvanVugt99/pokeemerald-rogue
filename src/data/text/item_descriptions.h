@@ -2352,6 +2352,16 @@ static const u8 sIcyRockDesc[] = _(
     "of the move Hail\n"
     "used by the holder.");
 
+static const u8 sAcidRockDesc[] = _(
+    "Extends the length\n"
+    "of Acid Rain if\n"
+    "used by the holder.");
+
+static const u8 sDimRockDesc[] = _(
+    "Extends the length\n"
+    "of Eclipse if\n"
+    "used by the holder.");
+
 // Terrain Seeds
 static const u8 sElectricSeedDesc[] = _(
     "Boosts Defense on\n"

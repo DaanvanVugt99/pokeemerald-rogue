@@ -65,3 +65,16 @@ SINGLE_BATTLE_TEST("Acid rain does not heal Poison-type Pokemon at max HP")
         NOT MESSAGE("The acid rain restored Foe Koffing's HP a little!");
     }
 }
+
+SINGLE_BATTLE_TEST("Acid Rain lasts for 12 turns with Acid Rock")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_ACID_ROCK); Moves(MOVE_CORROSIVE_CLOUDS); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CORROSIVE_CLOUDS); }
+    } THEN {
+        EXPECT(gBattleWeather & B_WEATHER_ACID_RAIN);
+        EXPECT_EQ(gWishFutureKnock.weatherDuration, WEATHER_DURATION_EXTENDED - 1);
+    }
+}

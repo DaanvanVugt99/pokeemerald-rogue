@@ -4674,8 +4674,8 @@ static const u32 sWeatherFlagsInfo[][3] =
     [ENUM_WEATHER_HAIL] = {B_WEATHER_HAIL_TEMPORARY, B_WEATHER_HAIL_PERMANENT, HOLD_EFFECT_ICY_ROCK},
     [ENUM_WEATHER_STRONG_WINDS] = {B_WEATHER_STRONG_WINDS, B_WEATHER_STRONG_WINDS, HOLD_EFFECT_NONE},
     [ENUM_WEATHER_SNOW] = {B_WEATHER_SNOW_TEMPORARY, B_WEATHER_SNOW_PERMANENT, HOLD_EFFECT_ICY_ROCK},
-    [ENUM_WEATHER_ACID_RAIN] = {B_WEATHER_ACID_RAIN_TEMPORARY, B_WEATHER_ACID_RAIN_PERMANENT, HOLD_EFFECT_NONE},
-    [ENUM_WEATHER_ECLIPSE] = {B_WEATHER_ECLIPSE_TEMPORARY, B_WEATHER_ECLIPSE_PERMANENT, HOLD_EFFECT_NONE},
+    [ENUM_WEATHER_ACID_RAIN] = {B_WEATHER_ACID_RAIN_TEMPORARY, B_WEATHER_ACID_RAIN_PERMANENT, HOLD_EFFECT_ACID_ROCK},
+    [ENUM_WEATHER_ECLIPSE] = {B_WEATHER_ECLIPSE_TEMPORARY, B_WEATHER_ECLIPSE_PERMANENT, HOLD_EFFECT_DIM_ROCK},
 };
 
 static void ShouldChangeFormInWeather(u32 battler)
@@ -5903,6 +5903,14 @@ special_delivery_done:
                     weatherEnum = ENUM_WEATHER_HAIL;
                     weatherScript = BattleScript_SnowWarningActivatesHail;
                 }
+                break;
+            case HOLD_EFFECT_ACID_ROCK:
+                weatherEnum = ENUM_WEATHER_ACID_RAIN;
+                weatherScript = BattleScript_ToxicDelugeActivates;
+                break;
+            case HOLD_EFFECT_DIM_ROCK:
+                weatherEnum = ENUM_WEATHER_ECLIPSE;
+                weatherScript = BattleScript_OmenActivates;
                 break;
             }
 

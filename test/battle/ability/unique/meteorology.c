@@ -32,18 +32,25 @@ SINGLE_BATTLE_TEST("Meteorology sets weather from the held rock and Forecast tra
     }
 }
 
-SINGLE_BATTLE_TEST("Meteorology sets Sandstorm from Smooth Rock and Castform stays normal")
+SINGLE_BATTLE_TEST("Meteorology sets weather from the held rock and Castform stays normal")
 {
+    u16 item;
+    u32 weather;
+
+    PARAMETRIZE { item = ITEM_SMOOTH_ROCK; weather = B_WEATHER_SANDSTORM; }
+    PARAMETRIZE { item = ITEM_ACID_ROCK; weather = B_WEATHER_ACID_RAIN; }
+    PARAMETRIZE { item = ITEM_DIM_ROCK; weather = B_WEATHER_ECLIPSE; }
+
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); Item(ITEM_SMOOTH_ROCK); }
+        PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); Item(item); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_METEOROLOGY);
     } THEN {
-        EXPECT(gBattleWeather & B_WEATHER_SANDSTORM);
+        EXPECT(gBattleWeather & weather);
         EXPECT_EQ(player->species, SPECIES_CASTFORM_NORMAL);
     }
 }

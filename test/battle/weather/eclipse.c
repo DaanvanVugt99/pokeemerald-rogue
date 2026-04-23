@@ -47,3 +47,16 @@ SINGLE_BATTLE_TEST("Eclipse multiplies the power of Fairy-type moves by 0.5x", s
         EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.5), results[1].damage);
     }
 }
+
+SINGLE_BATTLE_TEST("Eclipse lasts for 12 turns with Dim Rock")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_DIM_ROCK); Moves(MOVE_ECLIPSE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_ECLIPSE); }
+    } THEN {
+        EXPECT(gBattleWeather & B_WEATHER_ECLIPSE);
+        EXPECT_EQ(gWishFutureKnock.weatherDuration, WEATHER_DURATION_EXTENDED - 1);
+    }
+}

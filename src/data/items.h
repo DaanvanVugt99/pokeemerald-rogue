@@ -5511,6 +5511,30 @@ const struct Item gItems[] =
         .flingPower = 40,
     },
 
+    [ITEM_ACID_ROCK] =
+    {
+        .name = _("Acid Rock"),
+        .price = 4000,
+        .holdEffect = HOLD_EFFECT_ACID_ROCK,
+        .description = sAcidRockDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .flingPower = 30,
+    },
+
+    [ITEM_DIM_ROCK] =
+    {
+        .name = _("Dim Rock"),
+        .price = 4000,
+        .holdEffect = HOLD_EFFECT_DIM_ROCK,
+        .description = sDimRockDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .flingPower = 30,
+    },
+
 // Terrain Seeds
 
     [ITEM_ELECTRIC_SEED] =

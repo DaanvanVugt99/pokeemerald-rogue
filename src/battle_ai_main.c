@@ -4157,6 +4157,8 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         if (!(gBattleWeather & (B_WEATHER_ECLIPSE | B_WEATHER_PRIMAL_ANY)))
         {
             ADJUST_SCORE(1);
+            if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_DIM_ROCK)
+                ADJUST_SCORE(1);
             if (HasMoveWithType(battlerAtk, TYPE_DARK) || HasMoveWithType(BATTLE_PARTNER(battlerAtk), TYPE_DARK))
                 ADJUST_SCORE(1);
             if (HasMoveWithType(battlerDef, TYPE_FAIRY) || HasMoveWithType(BATTLE_PARTNER(battlerDef), TYPE_FAIRY))
