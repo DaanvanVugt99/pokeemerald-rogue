@@ -858,6 +858,7 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_COLD_SNAP] = _("Cold Snap"),
     [MOVE_NIGHTFALL] = _("Nightfall"),
     [MOVE_JETSTREAM] = _("Jetstream"),
+    [MOVE_THUNDERCRUSH] = _("Thundercrush"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("Max Guard"),
     [MOVE_MAX_STRIKE] = _("Max Strike"),
@@ -1773,6 +1774,7 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_COLD_SNAP] = _("Cold Snap"),
     [MOVE_NIGHTFALL] = _("Nightfall"),
     [MOVE_JETSTREAM] = _("Jetstream"),
+    [MOVE_THUNDERCRUSH] = _("Thundrcrush"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("M-Guard"),
     [MOVE_MAX_STRIKE] = _("M-Strike"),

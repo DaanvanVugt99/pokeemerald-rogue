@@ -2280,6 +2280,10 @@ static const u8 sJetstreamDescription[] = _(
     "A rushing strike that uses\n"
     "the user's Speed.");
 
+static const u8 sThundercrushDescription[] = _(
+    "A thunderous blow with a\n"
+    "high critical-hit ratio.");
+
 static const u8 sDisarmingVoiceDescription[] = _(
     "Lets out a charming cry\n"
     "that cannot be evaded.");
@@ -4216,6 +4220,7 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_COLD_SNAP - 1] = sColdSnapDescription,
     [MOVE_NIGHTFALL - 1] = sNightfallDescription,
     [MOVE_JETSTREAM - 1] = sJetstreamDescription,
+    [MOVE_THUNDERCRUSH - 1] = sThundercrushDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,

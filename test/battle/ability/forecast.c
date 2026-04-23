@@ -221,12 +221,12 @@ SINGLE_BATTLE_TEST("Forecast transforms Castform back to normal when weather exp
     u16 turns;
 
     GIVEN {
-        PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); }
-        OPPONENT(SPECIES_WOBBUFFET);
+        PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); Moves(MOVE_RAIN_DANCE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_RAIN_DANCE); }
         for (turns = 0; turns < WEATHER_DURATION_TURNS; turns++)
-            TURN {}
+            TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         // transforms
         ABILITY_POPUP(player, ABILITY_FORECAST);

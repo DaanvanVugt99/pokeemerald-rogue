@@ -103,11 +103,9 @@ SINGLE_BATTLE_TEST("Protosynthesis ability pop up activates only once during the
         MESSAGE("The harsh sunlight activated Bellsprout's Protosynthesis!");
         MESSAGE("Bellsprout's Attack was heightened!");
         NONE_OF {
-            for (turns = 0; turns < WEATHER_DURATION_TURNS - 1; turns++) {
-                ABILITY_POPUP(player, ABILITY_PROTOSYNTHESIS);
-                MESSAGE("The harsh sunlight activated Bellsprout's Protosynthesis!");
-                MESSAGE("Bellsprout's Attack was heightened!");
-            }
+            ABILITY_POPUP(player, ABILITY_PROTOSYNTHESIS);
+            MESSAGE("The harsh sunlight activated Bellsprout's Protosynthesis!");
+            MESSAGE("Bellsprout's Attack was heightened!");
         }
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SUNNY_DAY, opponent);
         ABILITY_POPUP(player, ABILITY_PROTOSYNTHESIS);
