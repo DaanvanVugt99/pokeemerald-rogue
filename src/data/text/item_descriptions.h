@@ -3084,7 +3084,7 @@ static const u8 sTM10Desc[] = _(
 static const u8 sTM11Desc[] = _(
     "Raises the power of\n"
     "Fire-type moves\n"
-    "for 5 turns.");
+    "for 8 turns.");
 
 static const u8 sTM12Desc[] = _(
     "Enrages the foe so\n"
@@ -3119,7 +3119,7 @@ static const u8 sTM17Desc[] = _(
 static const u8 sTM18Desc[] = _(
     "Raises the power of\n"
     "Water-type moves\n"
-    "for 5 turns.");
+    "for 8 turns.");
 
 static const u8 sTM19Desc[] = _(
     "Recovers half the\n"

@@ -94,7 +94,7 @@ SINGLE_BATTLE_TEST("Protosynthesis ability pop up activates only once during the
         PLAYER(SPECIES_BELLSPROUT) { Ability(ABILITY_PROTOSYNTHESIS); }
         OPPONENT(SPECIES_NINETALES) { Ability(ABILITY_DROUGHT); };
     } WHEN {
-        for (turns = 0; turns < 5; turns++)
+        for (turns = 0; turns < WEATHER_DURATION_TURNS; turns++)
             TURN {}
         TURN { MOVE(opponent, MOVE_SUNNY_DAY); }
     } SCENE {
@@ -103,7 +103,7 @@ SINGLE_BATTLE_TEST("Protosynthesis ability pop up activates only once during the
         MESSAGE("The harsh sunlight activated Bellsprout's Protosynthesis!");
         MESSAGE("Bellsprout's Attack was heightened!");
         NONE_OF {
-            for (turns = 0; turns < 4; turns++) {
+            for (turns = 0; turns < WEATHER_DURATION_TURNS - 1; turns++) {
                 ABILITY_POPUP(player, ABILITY_PROTOSYNTHESIS);
                 MESSAGE("The harsh sunlight activated Bellsprout's Protosynthesis!");
                 MESSAGE("Bellsprout's Attack was heightened!");

@@ -133,31 +133,43 @@ SINGLE_BATTLE_TEST("Psychic Terrain doesn't block priority field moves")
     }
 }
 
-SINGLE_BATTLE_TEST("Psychic Terrain lasts for 5 turns")
+SINGLE_BATTLE_TEST("Psychic Terrain lasts for 8 turns")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_PSYCHIC_TERRAIN); }
-        TURN {}
-        TURN {}
-        TURN {}
-        TURN {}
-    } SCENE {
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYCHIC_TERRAIN, player);
-        MESSAGE("The battlefield got weird!");
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN);
+        EXPECT_EQ(gFieldTimers.terrainTimer, TERRAIN_DURATION_TURNS - 1);
+    }
+}
 
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
+SINGLE_BATTLE_TEST("Psychic Terrain lasts for 12 turns with Terrain Extender")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_TERRAIN_EXTENDER); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_PSYCHIC_TERRAIN); }
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN);
+        EXPECT_EQ(gFieldTimers.terrainTimer, TERRAIN_DURATION_EXTENDED - 1);
+    }
+}
 
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("The weirdness disappeared from the battlefield.");
+SINGLE_BATTLE_TEST("Terrain still overwrites correctly")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_ELECTRIC_TERRAIN, MOVE_PSYCHIC_TERRAIN); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_ELECTRIC_TERRAIN); }
+        TURN { MOVE(player, MOVE_PSYCHIC_TERRAIN); }
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN);
+        EXPECT(!(gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN));
+        EXPECT_EQ(gFieldTimers.terrainTimer, TERRAIN_DURATION_TURNS - 1);
     }
 }

@@ -4713,9 +4713,9 @@ bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility)
     {
         gBattleWeather = (sWeatherFlagsInfo[weatherEnumId][0]);
         if (GetBattlerHoldEffect(battler, TRUE) == sWeatherFlagsInfo[weatherEnumId][2])
-            gWishFutureKnock.weatherDuration = 8;
+            gWishFutureKnock.weatherDuration = WEATHER_DURATION_EXTENDED;
         else
-            gWishFutureKnock.weatherDuration = 5;
+            gWishFutureKnock.weatherDuration = WEATHER_DURATION_TURNS;
         ShouldChangeFormInWeather(battler);
         return TRUE;
     }
@@ -4731,9 +4731,9 @@ static bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer)
         gDisableStructs[battler].terrainAbilityDone = FALSE;
 
         if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_TERRAIN_EXTENDER)
-            *timer = 8;
+            *timer = TERRAIN_DURATION_EXTENDED;
         else
-            *timer = 5;
+            *timer = TERRAIN_DURATION_TURNS;
 
         gBattleScripting.battler = battler;
         return TRUE;

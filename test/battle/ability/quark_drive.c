@@ -95,7 +95,7 @@ SINGLE_BATTLE_TEST("Quark Drive ability pop up activates only once during the du
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_ELECTRIC_TERRAIN); }
-        for (turns = 0; turns < 4; turns++)
+        for (turns = 0; turns < TERRAIN_DURATION_TURNS - 1; turns++)
             TURN {}
         TURN { MOVE(opponent, MOVE_ELECTRIC_TERRAIN); }
     } SCENE {
@@ -104,7 +104,7 @@ SINGLE_BATTLE_TEST("Quark Drive ability pop up activates only once during the du
         MESSAGE("The Electric Terrain activated Bellsprout's Quark Drive!");
         MESSAGE("Bellsprout's Attack was heightened!");
         NONE_OF {
-            for (turns = 0; turns < 4; turns++) {
+            for (turns = 0; turns < TERRAIN_DURATION_TURNS - 1; turns++) {
                 ABILITY_POPUP(player, ABILITY_QUARK_DRIVE);
                 MESSAGE("The Electric Terrain activated Bellsprout's Quark Drive!");
                 MESSAGE("Bellsprout's Attack was heightened!");

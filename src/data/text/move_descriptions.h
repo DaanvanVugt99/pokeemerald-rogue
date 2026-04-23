@@ -982,19 +982,19 @@ static const u8 sTwisterDescription[] = _(
 
 static const u8 sRainDanceDescription[] = _(
     "Boosts the power of Water-\n"
-    "type moves for 5 turns.");
+    "type moves for 8 turns.");
 
 static const u8 sSunnyDayDescription[] = _(
     "Boosts the power of Fire-\n"
-    "type moves for 5 turns.");
+    "type moves for 8 turns.");
 
 static const u8 sEclipseDescription[] = _(
     "Boosts Dark moves and\n"
-    "weakens Fairy for 5 turns.");
+    "weakens Fairy for 8 turns.");
 
 static const u8 sInfestedTerrainDescription[] = _(
     "Switching causes Bug-\n"
-    "type damage for 5 turns.");
+    "type damage for 8 turns.");
 
 static const u8 sPlainTerrainDescription[] = _(
     "Boosts Normal moves and\n"
@@ -2290,11 +2290,11 @@ static const u8 sFlowerShieldDescription[] = _(
 
 static const u8 sGrassyTerrainDescription[] = _(
     "The ground turns to grass\n"
-    "for 5 turns. Restores HP.");
+    "for 8 turns. Restores HP.");
 
 static const u8 sMistyTerrainDescription[] = _(
     "Covers the ground with mist\n"
-    "for 5 turns. Blocks status.");
+    "for 8 turns. Blocks status.");
 
 static const u8 sElectrifyDescription[] = _(
     "Electrifies the foe, making\n"
@@ -2386,7 +2386,7 @@ static const u8 sHappyHourDescription[] = _(
 
 static const u8 sElectricTerrainDescription[] = _(
     "Electrifies the ground for\n"
-    "5 turns. Prevents sleep.");
+    "8 turns. Prevents sleep.");
 
 static const u8 sDazzlingGleamDescription[] = _(
     "Damages foes by emitting\n"
@@ -2526,7 +2526,7 @@ static const u8 sAnchorShotDescription[] = _(
 
 static const u8 sPsychicTerrainDescription[] = _(
     "The ground turns weird for\n"
-    "5 turns. Blocks priority.");
+    "8 turns. Blocks priority.");
 
 static const u8 sLungeDescription[] = _(
     "Lunges at the foe to lower\n"
@@ -3207,7 +3207,7 @@ static const u8 sTidyUpDescription[] = _(
 
 static const u8 sSnowscapeDescription[] = _(
     "Summons a snowstorm that\n"
-    "lasts for five turns.");
+    "lasts for eight turns.");
 
 static const u8 sPounceDescription[] = _(
     "The user pounces on the foe,\n"

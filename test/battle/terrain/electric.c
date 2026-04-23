@@ -67,31 +67,15 @@ SINGLE_BATTLE_TEST("Electric Terrain increases power of Electric-type moves by 3
     }
 }
 
-SINGLE_BATTLE_TEST("Electric Terrain lasts for 5 turns")
+SINGLE_BATTLE_TEST("Electric Terrain lasts for 8 turns")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_ELECTRIC_TERRAIN); }
-        TURN {}
-        TURN {}
-        TURN {}
-        TURN {}
-    } SCENE {
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_ELECTRIC_TERRAIN, player);
-        MESSAGE("An electric current runs across the battlefield!");
-
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("The electricity disappeared from the battlefield.");
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN);
+        EXPECT_EQ(gFieldTimers.terrainTimer, TERRAIN_DURATION_TURNS - 1);
     }
 }

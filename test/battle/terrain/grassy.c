@@ -84,31 +84,15 @@ SINGLE_BATTLE_TEST("Grassy Terrain decreases power of Earthquake and Bulldoze by
     }
 }
 
-SINGLE_BATTLE_TEST("Grassy Terrain lasts for 5 turns")
+SINGLE_BATTLE_TEST("Grassy Terrain lasts for 8 turns")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_GRASSY_TERRAIN); }
-        TURN {}
-        TURN {}
-        TURN {}
-        TURN {}
-    } SCENE {
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_GRASSY_TERRAIN, player);
-        MESSAGE("Grass grew to cover the battlefield!");
-
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("Wobbuffet used Celebrate!");
-        MESSAGE("Foe Wobbuffet used Celebrate!");
-
-        MESSAGE("The grass disappeared from the battlefield.");
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN);
+        EXPECT_EQ(gFieldTimers.terrainTimer, TERRAIN_DURATION_TURNS - 1);
     }
 }

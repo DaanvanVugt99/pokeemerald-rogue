@@ -717,9 +717,9 @@ void BS_SetMaxMoveEffect(void)
                 gFieldStatuses &= ~STATUS_FIELD_TERRAIN_ANY;
                 gFieldStatuses |= statusFlag;
                 if (GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_TERRAIN_EXTENDER)
-                    gFieldTimers.terrainTimer = 8;
+                    gFieldTimers.terrainTimer = TERRAIN_DURATION_EXTENDED;
                 else
-                    gFieldTimers.terrainTimer = 5;
+                    gFieldTimers.terrainTimer = TERRAIN_DURATION_TURNS;
                 BattleScriptPush(gBattlescriptCurrInstr + 1);
                 gBattlescriptCurrInstr = BattleScript_EffectSetTerrain;
                 effect++;

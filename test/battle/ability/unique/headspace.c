@@ -21,6 +21,19 @@ SINGLE_BATTLE_TEST("Headspace sets Psychic Terrain on switch-in")
     }
 }
 
+SINGLE_BATTLE_TEST("Headspace terrain lasts for 8 turns")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_GIRAFARIG) { Ability(ABILITY_INNER_FOCUS); UniqueAbility(ABILITY_HEADSPACE); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN);
+        EXPECT_EQ(gFieldTimers.terrainTimer, TERRAIN_DURATION_TURNS - 1);
+    }
+}
+
 SINGLE_BATTLE_TEST("Headspace uses Trick Room on switch-in if Psychic Terrain is already active")
 {
     GIVEN {

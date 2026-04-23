@@ -310,6 +310,11 @@
 #define B_WEATHER_ECLIPSE_PERMANENT   0
 #define B_WEATHER_ECLIPSE             B_WEATHER_ECLIPSE_TEMPORARY
 
+#define WEATHER_DURATION_TURNS        8
+#define WEATHER_DURATION_EXTENDED     12
+#define TERRAIN_DURATION_TURNS        8
+#define TERRAIN_DURATION_EXTENDED     12
+
 // Battle Weather as enum
 #define ENUM_WEATHER_NONE                 0
 #define ENUM_WEATHER_RAIN                 1

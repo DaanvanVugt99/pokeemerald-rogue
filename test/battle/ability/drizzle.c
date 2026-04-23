@@ -22,3 +22,16 @@ SINGLE_BATTLE_TEST("Drizzle summons rain", s16 damage)
         EXPECT_MUL_EQ(results[1].damage, Q_4_12(1.5), results[0].damage);
     }
 }
+
+SINGLE_BATTLE_TEST("Drizzle weather lasts for 8 turns")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_DRIZZLE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(gBattleWeather & B_WEATHER_RAIN);
+        EXPECT_EQ(gWishFutureKnock.weatherDuration, WEATHER_DURATION_TURNS - 1);
+    }
+}

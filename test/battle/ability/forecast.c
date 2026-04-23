@@ -218,16 +218,15 @@ SINGLE_BATTLE_TEST("Forecast transforms Castform in primal weather")
 
 SINGLE_BATTLE_TEST("Forecast transforms Castform back to normal when weather expires")
 {
+    u16 turns;
+
     GIVEN {
         PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(player, MOVE_RAIN_DANCE); }
-        TURN {}
-        TURN {}
-        TURN {}
-        TURN {}
-        TURN {}
+        for (turns = 0; turns < WEATHER_DURATION_TURNS; turns++)
+            TURN {}
     } SCENE {
         // transforms
         ABILITY_POPUP(player, ABILITY_FORECAST);
