@@ -14589,6 +14589,21 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .zMoveEffect = Z_EFFECT_NONE,
     },
 
+    [MOVE_COLD_SNAP] =
+    {
+        .effect = EFFECT_SUCKER_PUNCH,
+        .power = 60,
+        .type = TYPE_ICE,
+        .accuracy = 100,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 1,
+        .split = SPLIT_PHYSICAL,
+        .zMoveEffect = Z_EFFECT_NONE,
+        .makesContact = TRUE,
+    },
+
     [MOVE_TERA_STARSTORM] =
     {
         .effect = EFFECT_TERA_STARSTORM,

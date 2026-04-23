@@ -4589,6 +4589,14 @@ const struct ContestMove gContestMoves[MOVES_COUNT] =
         .comboMoves = {0}
     },
 
+    [MOVE_COLD_SNAP] =
+    {
+        .effect = CONTEST_EFFECT_BETTER_IF_FIRST,
+        .contestCategory = CONTEST_CATEGORY_SMART,
+        .comboStarterId = 0,
+        .comboMoves = {0}
+    },
+
     [MOVE_DISARMING_VOICE] =
     {
         .effect = CONTEST_EFFECT_BETTER_IF_FIRST,

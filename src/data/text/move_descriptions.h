@@ -2268,6 +2268,10 @@ static const u8 sShimmerDescription[] = _(
     "Attacks with a strange\n"
     "shimmer. Strong on Fairy.");
 
+static const u8 sColdSnapDescription[] = _(
+    "Strikes first with a chill\n"
+    "if the foe readies attacks.");
+
 static const u8 sDisarmingVoiceDescription[] = _(
     "Lets out a charming cry\n"
     "that cannot be evaded.");
@@ -4201,6 +4205,7 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_INFESTED_TERRAIN - 1] = sInfestedTerrainDescription,
     [MOVE_PLAIN_TERRAIN - 1] = sPlainTerrainDescription,
     [MOVE_SHIMMER - 1] = sShimmerDescription,
+    [MOVE_COLD_SNAP - 1] = sColdSnapDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,
