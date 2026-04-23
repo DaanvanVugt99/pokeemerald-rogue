@@ -137,19 +137,19 @@ SINGLE_BATTLE_TEST("Reflect Type copies a target's dual types")
 
 SINGLE_BATTLE_TEST("Reflect Type copies a target's pure type")
 {
-    ASSUME(gSpeciesInfo[SPECIES_ARCANINE].types[0] == TYPE_FIRE);
-    ASSUME(gSpeciesInfo[SPECIES_ARCANINE].types[1] == TYPE_FIRE);
-    ASSUME(gSpeciesInfo[SPECIES_NOSEPASS].types[0] == TYPE_ROCK);
-    ASSUME(gSpeciesInfo[SPECIES_NOSEPASS].types[1] == TYPE_ROCK);
+    ASSUME(gSpeciesInfo[SPECIES_DARUMAKA].types[0] == TYPE_FIRE);
+    ASSUME(gSpeciesInfo[SPECIES_DARUMAKA].types[1] == TYPE_FIRE);
+    ASSUME(gSpeciesInfo[SPECIES_ROGGENROLA].types[0] == TYPE_ROCK);
+    ASSUME(gSpeciesInfo[SPECIES_ROGGENROLA].types[1] == TYPE_ROCK);
     GIVEN {
-        PLAYER(SPECIES_ARCANINE);
-        OPPONENT(SPECIES_NOSEPASS);
+        PLAYER(SPECIES_DARUMAKA);
+        OPPONENT(SPECIES_ROGGENROLA);
     } WHEN {
         TURN { MOVE(player, MOVE_REFLECT_TYPE); }
     } SCENE {
-        MESSAGE("Arcanine used Reflect Type!");
+        MESSAGE("Darumaka used Reflect Type!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_REFLECT_TYPE, player);
-        MESSAGE("Arcanine's type changed to match the Foe Nosepass's!");
+        MESSAGE("Darumaka's type changed to match the Foe Roggenrola's!");
     } THEN {
         EXPECT_EQ(player->type1, TYPE_ROCK);
         EXPECT_EQ(player->type2, TYPE_ROCK);

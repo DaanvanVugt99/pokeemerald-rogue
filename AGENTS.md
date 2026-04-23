@@ -56,6 +56,10 @@ This file documents practical repo-specific guidance for coding agents and contr
 - Focus pass/fail decisions on the final per-test summary and failed assertion lines.
 - `UniqueAbility(ABILITY_NONE)` does not reliably clear a species-default unique ability in the battle test harness.
 - For control cases, prefer a neutral species without a built-in unique ability rather than trying to remove the species-default unique ability in-place.
+- For stubborn `SCENE { MESSAGE(...) }` mismatches, a useful temporary debug hook is in `test/test_runner_battle.c` inside the queued-message matcher:
+  - `MgbaPrintf_("Looking for: %S Found: %S\\n", event->pattern, string);`
+  - Uncomment it to see the expected pattern and each candidate runtime string during headless test runs.
+  - Always revert this after debugging so test output stays clean.
 
 ## macOS / clangd IDE Diagnostics Caveat
 
