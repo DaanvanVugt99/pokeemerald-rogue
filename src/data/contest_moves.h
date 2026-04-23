@@ -4597,6 +4597,22 @@ const struct ContestMove gContestMoves[MOVES_COUNT] =
         .comboMoves = {0}
     },
 
+    [MOVE_NIGHTFALL] =
+    {
+        .effect = CONTEST_EFFECT_USER_MORE_EASILY_STARTLED,
+        .contestCategory = CONTEST_CATEGORY_BEAUTY,
+        .comboStarterId = 0,
+        .comboMoves = {0}
+    },
+
+    [MOVE_JETSTREAM] =
+    {
+        .effect = CONTEST_EFFECT_BETTER_IF_FIRST,
+        .contestCategory = CONTEST_CATEGORY_COOL,
+        .comboStarterId = 0,
+        .comboMoves = {0}
+    },
+
     [MOVE_DISARMING_VOICE] =
     {
         .effect = CONTEST_EFFECT_BETTER_IF_FIRST,

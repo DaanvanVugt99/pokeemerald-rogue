@@ -14132,8 +14132,19 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     }
     else if (gBattleMoves[move].effect == EFFECT_BODY_PRESS)
     {
-        atkStat = gBattleMons[battlerAtk].defense;
-        atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
+        if (move == MOVE_JETSTREAM)
+        {
+            // Jetstream scales from the user's Speed stat and stat stages only.
+            // It intentionally does not use turn-order modifiers such as Tailwind,
+            // Choice Scarf, Swift Swim, or paralysis adjustments.
+            atkStat = gBattleMons[battlerAtk].speed;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_SPEED];
+        }
+        else
+        {
+            atkStat = gBattleMons[battlerAtk].defense;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
+        }
     }
     else
     {

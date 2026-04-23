@@ -2272,6 +2272,14 @@ static const u8 sColdSnapDescription[] = _(
     "Strikes first with a chill\n"
     "if the foe readies attacks.");
 
+static const u8 sNightfallDescription[] = _(
+    "A dark blast that harshly\n"
+    "lowers Sp. Atk.");
+
+static const u8 sJetstreamDescription[] = _(
+    "A rushing strike that uses\n"
+    "the user's Speed.");
+
 static const u8 sDisarmingVoiceDescription[] = _(
     "Lets out a charming cry\n"
     "that cannot be evaded.");
@@ -4206,6 +4214,8 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_PLAIN_TERRAIN - 1] = sPlainTerrainDescription,
     [MOVE_SHIMMER - 1] = sShimmerDescription,
     [MOVE_COLD_SNAP - 1] = sColdSnapDescription,
+    [MOVE_NIGHTFALL - 1] = sNightfallDescription,
+    [MOVE_JETSTREAM - 1] = sJetstreamDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,

@@ -881,6 +881,8 @@ gBattleAnims_Moves::
 	.4byte Move_PLAIN_TERRAIN
 	.4byte Move_FREEZE_DRY
 	.4byte Move_SUCKER_PUNCH
+	.4byte Move_DARK_PULSE
+	.4byte Move_AERIAL_ACE
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
 	.4byte Move_ALL_OUT_PUMMELING
