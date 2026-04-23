@@ -854,6 +854,7 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_ECLIPSE] = _("Eclipse"),
     [MOVE_INFESTED_TERRAIN] = _("Infested Terrain"),
     [MOVE_PLAIN_TERRAIN] = _("Plain Terrain"),
+    [MOVE_SHIMMER] = _("Shimmer"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("Max Guard"),
     [MOVE_MAX_STRIKE] = _("Max Strike"),
@@ -1765,6 +1766,7 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_ECLIPSE] = _("Eclipse"),
     [MOVE_INFESTED_TERRAIN] = _("InfstTerr"),
     [MOVE_PLAIN_TERRAIN] = _("PlainTerr"),
+    [MOVE_SHIMMER] = _("Shimmer"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("M-Guard"),
     [MOVE_MAX_STRIKE] = _("M-Strike"),

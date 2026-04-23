@@ -14575,6 +14575,20 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .skyBattleBanned = TRUE,
     },
 
+    [MOVE_SHIMMER] =
+    {
+        .effect = EFFECT_HIT,
+        .power = 70,
+        .type = TYPE_BUG,
+        .accuracy = 100,
+        .pp = 20,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 0,
+        .split = SPLIT_SPECIAL,
+        .zMoveEffect = Z_EFFECT_NONE,
+    },
+
     [MOVE_TERA_STARSTORM] =
     {
         .effect = EFFECT_TERA_STARSTORM,

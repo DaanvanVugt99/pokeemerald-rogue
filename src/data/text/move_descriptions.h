@@ -2264,6 +2264,10 @@ static const u8 sFreezeDryDescription[] = _(
     "Super effective on Water-\n"
     "types. May cause freezing.");
 
+static const u8 sShimmerDescription[] = _(
+    "Attacks with a strange\n"
+    "shimmer. Strong on Fairy.");
+
 static const u8 sDisarmingVoiceDescription[] = _(
     "Lets out a charming cry\n"
     "that cannot be evaded.");
@@ -4196,6 +4200,7 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_ECLIPSE - 1] = sEclipseDescription,
     [MOVE_INFESTED_TERRAIN - 1] = sInfestedTerrainDescription,
     [MOVE_PLAIN_TERRAIN - 1] = sPlainTerrainDescription,
+    [MOVE_SHIMMER - 1] = sShimmerDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,
