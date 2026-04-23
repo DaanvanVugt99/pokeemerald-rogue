@@ -14432,7 +14432,9 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     if (HasBattlerAbility(battlerAtk, ABILITY_INSIGHT)
      && moveType == TYPE_PSYCHIC
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PSYCHIC_TERRAIN))
+    {
         defStage = DEFAULT_STAT_STAGE;
+    }
     defStat *= gStatStageRatios[defStage][0];
     defStat /= gStatStageRatios[defStage][1];
 

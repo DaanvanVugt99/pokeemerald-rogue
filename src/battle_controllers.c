@@ -707,6 +707,37 @@ static void PrepareBufferDataTransfer(u32 battler, u32 bufferId, u8 *data, u16 s
     }
 }
 
+static u16 GetAbilityForPrintString(u32 abilityBattler)
+{
+    if (abilityBattler >= gBattlersCount)
+        return gLastUsedAbility;
+
+    if (gBattleScripting.abilityPopupOverwrite != 0)
+        return gBattleScripting.abilityPopupOverwrite;
+
+    if (abilityBattler == gBattlerAbility
+     && gLastUsedAbility != ABILITY_NONE
+     && gBattleMons[abilityBattler].ability != gLastUsedAbility
+     && !HasBattlerAbility(abilityBattler, gLastUsedAbility))
+        return gLastUsedAbility;
+
+    if (gLastUsedAbility != ABILITY_NONE && HasBattlerAbility(abilityBattler, gLastUsedAbility))
+        return gLastUsedAbility;
+
+    return gBattleMons[abilityBattler].ability;
+}
+
+static u16 GetDisplayedAbilityForPrintBattler(u32 battler)
+{
+    if (gBattleScripting.abilityPopupOverwrite != 0 && battler == gBattlerAbility)
+        return gBattleScripting.abilityPopupOverwrite;
+
+    if (gLastUsedAbility != ABILITY_NONE && HasBattlerAbility(battler, gLastUsedAbility))
+        return gLastUsedAbility;
+
+    return gBattleMons[battler].ability;
+}
+
 static void CreateTasksForSendRecvLinkBuffers(void)
 {
     sLinkSendTaskId = CreateTask(Task_HandleSendLinkBuffersData, 0);
@@ -1120,7 +1151,7 @@ void BtlController_EmitPrintString(u32 battler, u32 bufferId, u16 stringID)
     stringInfo->currentMove = gCurrentMove;
     stringInfo->originallyUsedMove = gChosenMove;
     stringInfo->lastItem = gLastUsedItem;
-    stringInfo->lastAbility = gLastUsedAbility;
+    stringInfo->lastAbility = GetAbilityForPrintString(gBattlerAbility);
     stringInfo->scrActive = gBattleScripting.battler;
     stringInfo->bakScriptPartyIdx = gBattleStruct->scriptPartyIdx;
     stringInfo->hpScale = gBattleStruct->hpScale;
@@ -1129,7 +1160,7 @@ void BtlController_EmitPrintString(u32 battler, u32 bufferId, u16 stringID)
     stringInfo->abilityBattler = gBattlerAbility;
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
-        stringInfo->abilities[i] = gBattleMons[i].ability;
+        stringInfo->abilities[i] = GetDisplayedAbilityForPrintBattler(i);
     for (i = 0; i < TEXT_BUFF_ARRAY_COUNT; i++)
     {
         stringInfo->textBuffs[0][i] = gBattleTextBuff1[i];
@@ -1153,13 +1184,13 @@ void BtlController_EmitPrintSelectionString(u32 battler, u32 bufferId, u16 strin
     stringInfo->currentMove = gCurrentMove;
     stringInfo->originallyUsedMove = gChosenMove;
     stringInfo->lastItem = gLastUsedItem;
-    stringInfo->lastAbility = gLastUsedAbility;
+    stringInfo->lastAbility = GetAbilityForPrintString(gBattlerAbility);
     stringInfo->scrActive = gBattleScripting.battler;
     stringInfo->bakScriptPartyIdx = gBattleStruct->scriptPartyIdx;
     stringInfo->abilityBattler = gBattlerAbility;
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
-        stringInfo->abilities[i] = gBattleMons[i].ability;
+        stringInfo->abilities[i] = GetDisplayedAbilityForPrintBattler(i);
     for (i = 0; i < TEXT_BUFF_ARRAY_COUNT; i++)
     {
         stringInfo->textBuffs[0][i] = gBattleTextBuff1[i];

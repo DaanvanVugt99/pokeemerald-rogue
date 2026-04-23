@@ -3852,7 +3852,7 @@ static void TryDoEventsBeforeFirstTurn(void)
     // Check all switch in abilities happening from the fastest mon to slowest.
     while (gBattleStruct->switchInAbilitiesCounter < gBattlersCount)
     {
-        gBattlerAttacker = gBattlerByTurnOrder[gBattleStruct->switchInAbilitiesCounter++];
+        gBattlerAttacker = gBattlerByTurnOrder[gBattleStruct->switchInAbilitiesCounter];
 
         if (TryPrimalReversion(gBattlerAttacker))
             return;
@@ -3861,6 +3861,8 @@ static void TryDoEventsBeforeFirstTurn(void)
          || (gFieldStatuses & STATUS_FIELD_TERRAIN_ANY && AbilityBattleEffects(ABILITYEFFECT_ON_TERRAIN, gBattlerAttacker, 0, 0, 0))
          || AbilityBattleEffects(ABILITYEFFECT_TRACE2, 0, 0, 0, 0))
             return;
+
+        gBattleStruct->switchInAbilitiesCounter++;
     }
     // Check all switch in items having effect from the fastest mon to slowest.
     while (gBattleStruct->switchInItemsCounter < gBattlersCount)
