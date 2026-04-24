@@ -6358,6 +6358,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BEEDRILL[] =
 	{ .move=MOVE_AGILITY, .level=38 },
 	{ .move=MOVE_ENDEAVOR, .level=41 },
 	{ .move=MOVE_FELL_STINGER, .level=44 },
+	{ .move=MOVE_ATTACK_ORDER, .level=56 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -22618,6 +22619,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MAGNEMITE[] =
 	{ .move=MOVE_LIGHT_SCREEN, .level=44 },
 	{ .move=MOVE_LOCK_ON, .level=48 },
 	{ .move=MOVE_ZAP_CANNON, .level=52 },
+	{ .move=MOVE_THUNDER_CAGE, .level=60 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -22903,6 +22905,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MAGNETON[] =
 	{ .move=MOVE_LIGHT_SCREEN, .level=52 },
 	{ .move=MOVE_LOCK_ON, .level=58 },
 	{ .move=MOVE_ZAP_CANNON, .level=64 },
+	{ .move=MOVE_THUNDER_CAGE, .level=64 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -32972,6 +32975,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HORSEA[] =
 	{ .move=MOVE_HYDRO_PUMP, .level=45 },
 	{ .move=MOVE_DRAGON_DANCE, .level=50 },
 	{ .move=MOVE_RAIN_DANCE, .level=55 },
+	{ .move=MOVE_SNIPE_SHOT, .level=60 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -33068,6 +33072,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SEADRA[] =
 	{ .move=MOVE_DRAGON_PULSE, .level=44 },
 	{ .move=MOVE_HYDRO_PUMP, .level=51 },
 	{ .move=MOVE_DRAGON_DANCE, .level=58 },
+	{ .move=MOVE_SNIPE_SHOT, .level=64 },
 	{ .move=MOVE_RAIN_DANCE, .level=65 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -33139,6 +33144,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GOLDEEN[] =
 	{ .move=MOVE_SOAK, .level=40 },
 	{ .move=MOVE_MEGAHORN, .level=45 },
 	{ .move=MOVE_HORN_DRILL, .level=50 },
+	{ .move=MOVE_HYPER_DRILL, .level=54 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -33241,6 +33247,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SEAKING[] =
 	{ .move=MOVE_SOAK, .level=44 },
 	{ .move=MOVE_MEGAHORN, .level=51 },
 	{ .move=MOVE_HORN_DRILL, .level=58 },
+	{ .move=MOVE_HYPER_DRILL, .level=58 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -46648,6 +46655,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_CHIKORITA[] =
 	{ .move=MOVE_SAFEGUARD, .level=39 },
 	{ .move=MOVE_GIGA_DRAIN, .level=42 },
 	{ .move=MOVE_SOLAR_BEAM, .level=45 },
+	{ .move=MOVE_JUNGLE_HEALING, .level=58 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -46753,6 +46761,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BAYLEEF[] =
 	{ .move=MOVE_SAFEGUARD, .level=46 },
 	{ .move=MOVE_GIGA_DRAIN, .level=50 },
 	{ .move=MOVE_SOLAR_BEAM, .level=54 },
+	{ .move=MOVE_JUNGLE_HEALING, .level=62 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -46831,6 +46840,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MEGANIUM[] =
 	{ .move=MOVE_SAFEGUARD, .level=54 },
 	{ .move=MOVE_GIGA_DRAIN, .level=60 },
 	{ .move=MOVE_SOLAR_BEAM, .level=65 },
+	{ .move=MOVE_JUNGLE_HEALING, .level=66 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -64036,6 +64046,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_REMORAID[] =
 	{ .move=MOVE_HYDRO_PUMP, .level=36 },
 	{ .move=MOVE_SOAK, .level=40 },
 	{ .move=MOVE_HYPER_BEAM, .level=44 },
+	{ .move=MOVE_SNIPE_SHOT, .level=58 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -64133,6 +64144,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_OCTILLERY[] =
 	{ .move=MOVE_OCTOLOCK, .level=46 },
 	{ .move=MOVE_SOAK, .level=48 },
 	{ .move=MOVE_HYPER_BEAM, .level=54 },
+	{ .move=MOVE_SNIPE_SHOT, .level=62 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -66108,6 +66120,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_KINGDRA[] =
 	{ .move=MOVE_TWISTER, .level=1 },
 	{ .move=MOVE_WHIRLPOOL, .level=1 },
 	{ .move=MOVE_YAWN, .level=1 },
+	{ .move=MOVE_SNIPE_SHOT, .level=1 },
 	{ .move=MOVE_FOCUS_ENERGY, .level=15 },
 	{ .move=MOVE_DRAGON_BREATH, .level=20 },
 	{ .move=MOVE_BUBBLE_BEAM, .level=25 },
@@ -80479,6 +80492,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SEEDOT[] =
 	{ .move=MOVE_SYNTHESIS, .level=27 },
 	{ .move=MOVE_SUCKER_PUNCH, .level=30 },
 	{ .move=MOVE_EXPLOSION, .level=33 },
+	{ .move=MOVE_FALSE_SURRENDER, .level=50 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -80571,6 +80585,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_NUZLEAF[] =
 	{ .move=MOVE_SUNNY_DAY, .level=36 },
 	{ .move=MOVE_EXTRASENSORY, .level=43 },
 	{ .move=MOVE_SUCKER_PUNCH, .level=50 },
+	{ .move=MOVE_FALSE_SURRENDER, .level=54 },
 	{ .move=MOVE_LEAF_BLADE, .level=57 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -80656,6 +80671,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SHIFTRY[] =
 	{ .move=MOVE_AIR_CUTTER, .level=1 },
 	{ .move=MOVE_PAYBACK, .level=1 },
 	{ .move=MOVE_HURRICANE, .level=1 },
+	{ .move=MOVE_FALSE_SURRENDER, .level=1 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -86833,6 +86849,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_NOSEPASS[] =
 	{ .move=MOVE_STONE_EDGE, .level=40 },
 	{ .move=MOVE_ZAP_CANNON, .level=43 },
 	{ .move=MOVE_LOCK_ON, .level=43 },
+	{ .move=MOVE_TACHYON_CUTTER, .level=58 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -87176,6 +87193,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SABLEYE[] =
 	{ .move=MOVE_ZEN_HEADBUTT, .level=42 },
 	{ .move=MOVE_SHADOW_BALL, .level=45 },
 	{ .move=MOVE_FOUL_PLAY, .level=48 },
+	{ .move=MOVE_MAKE_IT_RAIN, .level=74 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -91878,6 +91896,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ROSELIA[] =
 	{ .move=MOVE_AROMATHERAPY, .level=50 },
 	{ .move=MOVE_INGRAIN, .level=55 },
 	{ .move=MOVE_PETAL_DANCE, .level=60 },
+	{ .move=MOVE_FLOWER_TRICK, .level=62 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -92102,6 +92121,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GULPIN[] =
 	{ .move=MOVE_GASTRO_ACID, .level=36 },
 	{ .move=MOVE_BELCH, .level=41 },
 	{ .move=MOVE_PAIN_SPLIT, .level=44 },
+	{ .move=MOVE_STUFF_CHEEKS, .level=46 },
 	{ .move=MOVE_GUNK_SHOT, .level=49 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -92185,6 +92205,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SWALOT[] =
 	{ .move=MOVE_SLUDGE_BOMB, .level=37 },
 	{ .move=MOVE_GASTRO_ACID, .level=42 },
 	{ .move=MOVE_BELCH, .level=49 },
+	{ .move=MOVE_STUFF_CHEEKS, .level=50 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -97828,6 +97849,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_LUNATONE[] =
 	{ .move=MOVE_FUTURE_SIGHT, .level=40 },
 	{ .move=MOVE_MAGIC_ROOM, .level=45 },
 	{ .move=MOVE_EXPLOSION, .level=50 },
+	{ .move=MOVE_MOONGEIST_BEAM, .level=78 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -98026,6 +98048,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SOLROCK[] =
 	{ .move=MOVE_SOLAR_BEAM, .level=40 },
 	{ .move=MOVE_WONDER_ROOM, .level=45 },
 	{ .move=MOVE_EXPLOSION, .level=50 },
+	{ .move=MOVE_SUNSTEEL_STRIKE, .level=78 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -104412,6 +104435,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_HUNTAIL[
 
 static struct LevelUpMove const sLevelUpMoves_SPECIES_GOREBYSS[] =
 {
+	{ .move=MOVE_TAKE_HEART, .level=0 },
 	{ .move=MOVE_CONFUSION, .level=1 },
 	{ .move=MOVE_WHIRLPOOL, .level=1 },
 	{ .move=MOVE_WATER_SPORT, .level=5 },
@@ -118049,6 +118073,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ROSERADE[] =
 	{ .move=MOVE_PETAL_BLIZZARD, .level=1 },
 	{ .move=MOVE_GRASSY_TERRAIN, .level=1 },
 	{ .move=MOVE_VENOM_DRENCH, .level=1 },
+	{ .move=MOVE_FLOWER_TRICK, .level=1 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -133806,6 +133831,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MAGNEZONE[] =
 	{ .move=MOVE_LIGHT_SCREEN, .level=52 },
 	{ .move=MOVE_LOCK_ON, .level=58 },
 	{ .move=MOVE_ZAP_CANNON, .level=64 },
+	{ .move=MOVE_THUNDER_CAGE, .level=68 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -140954,6 +140980,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PROBOPASS[] =
 	{ .move=MOVE_STONE_EDGE, .level=40 },
 	{ .move=MOVE_ZAP_CANNON, .level=43 },
 	{ .move=MOVE_LOCK_ON, .level=43 },
+	{ .move=MOVE_TACHYON_CUTTER, .level=62 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -162772,7 +162799,6 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MARACTUS[] =
 	{ .move=MOVE_ABSORB, .level=1 },
 	{ .move=MOVE_INGRAIN, .level=1 },
 	{ .move=MOVE_AFTER_YOU, .level=1 },
-	{ .move=MOVE_SPIKY_SHIELD, .level=1 },
 	{ .move=MOVE_GROWTH, .level=4 },
 	{ .move=MOVE_MEGA_DRAIN, .level=8 },
 	{ .move=MOVE_LEECH_SEED, .level=12 },
@@ -162786,6 +162812,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MARACTUS[] =
 	{ .move=MOVE_SUNNY_DAY, .level=44 },
 	{ .move=MOVE_SOLAR_BEAM, .level=48 },
 	{ .move=MOVE_ACUPRESSURE, .level=52 },
+	{ .move=MOVE_SPIKY_SHIELD, .level=52 },
 	{ .move=MOVE_PETAL_DANCE, .level=56 },
 	{ .move=MOVE_COTTON_GUARD, .level=60 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -163490,6 +163517,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SCRAGGY[] =
 	{ .move=MOVE_CRUNCH, .level=40 },
 	{ .move=MOVE_HIGH_JUMP_KICK, .level=44 },
 	{ .move=MOVE_FOCUS_PUNCH, .level=48 },
+	{ .move=MOVE_OBSTRUCT, .level=50 },
 	{ .move=MOVE_HEAD_SMASH, .level=52 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -163710,6 +163738,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SCRAFTY[] =
 	{ .move=MOVE_CRUNCH, .level=42 },
 	{ .move=MOVE_HIGH_JUMP_KICK, .level=48 },
 	{ .move=MOVE_FOCUS_PUNCH, .level=54 },
+	{ .move=MOVE_OBSTRUCT, .level=54 },
 	{ .move=MOVE_HEAD_SMASH, .level=60 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -164447,6 +164476,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_YAMASK[] =
 	{ .move=MOVE_GUARD_SPLIT, .level=48 },
 	{ .move=MOVE_POWER_SPLIT, .level=48 },
 	{ .move=MOVE_DESTINY_BOND, .level=52 },
+	{ .move=MOVE_INFERNAL_PARADE, .level=60 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -164549,6 +164579,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_COFAGRIGUS[] =
 	{ .move=MOVE_GUARD_SPLIT, .level=56 },
 	{ .move=MOVE_POWER_SPLIT, .level=56 },
 	{ .move=MOVE_DESTINY_BOND, .level=62 },
+	{ .move=MOVE_INFERNAL_PARADE, .level=64 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -165873,6 +165904,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TRUBBISH[] =
 	{ .move=MOVE_PAIN_SPLIT, .level=37 },
 	{ .move=MOVE_GUNK_SHOT, .level=39 },
 	{ .move=MOVE_EXPLOSION, .level=42 },
+	{ .move=MOVE_BANEFUL_BUNKER, .level=54 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -166020,6 +166052,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GARBODOR[] =
 	{ .move=MOVE_PAIN_SPLIT, .level=39 },
 	{ .move=MOVE_GUNK_SHOT, .level=43 },
 	{ .move=MOVE_EXPLOSION, .level=48 },
+	{ .move=MOVE_BANEFUL_BUNKER, .level=58 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -172252,6 +172285,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_JOLTIK[] =
 	{ .move=MOVE_SCREECH, .level=40 },
 	{ .move=MOVE_GASTRO_ACID, .level=44 },
 	{ .move=MOVE_BUG_BUZZ, .level=48 },
+	{ .move=MOVE_SILK_TRAP, .level=54 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -172413,6 +172447,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GALVANTULA[] =
 	{ .move=MOVE_SCREECH, .level=44 },
 	{ .move=MOVE_GASTRO_ACID, .level=50 },
 	{ .move=MOVE_BUG_BUZZ, .level=56 },
+	{ .move=MOVE_SILK_TRAP, .level=58 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -195721,6 +195756,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FLABEBE[] =
 	{ .move=MOVE_MOONBLAST, .level=41 },
 	{ .move=MOVE_PETAL_DANCE, .level=45 },
 	{ .move=MOVE_SOLAR_BEAM, .level=48 },
+	{ .move=MOVE_FLEUR_CANNON, .level=64 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -195821,6 +195857,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FLOETTE[] =
 	{ .move=MOVE_MOONBLAST, .level=46 },
 	{ .move=MOVE_PETAL_DANCE, .level=51 },
 	{ .move=MOVE_SOLAR_BEAM, .level=58 },
+	{ .move=MOVE_FLEUR_CANNON, .level=68 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -195889,6 +195926,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FLORGES[] =
 	{ .move=MOVE_DISARMING_VOICE, .level=1 },
 	{ .move=MOVE_GRASSY_TERRAIN, .level=1 },
 	{ .move=MOVE_MISTY_TERRAIN, .level=1 },
+	{ .move=MOVE_FLEUR_CANNON, .level=1 },
 	{ .move=MOVE_MOONBLAST, .level=5 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -199231,6 +199269,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_INKAY[] =
 	{ .move=MOVE_FOUL_PLAY, .level=33 },
 	{ .move=MOVE_TOPSY_TURVY, .level=36 },
 	{ .move=MOVE_SUPERPOWER, .level=39 },
+	{ .move=MOVE_FALSE_SURRENDER, .level=56 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -199403,6 +199442,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MALAMAR[] =
 	{ .move=MOVE_FOUL_PLAY, .level=37 },
 	{ .move=MOVE_TOPSY_TURVY, .level=42 },
 	{ .move=MOVE_SUPERPOWER, .level=47 },
+	{ .move=MOVE_FALSE_SURRENDER, .level=60 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -224188,6 +224228,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DRAMPA[] =
 	{ .move=MOVE_FLY, .level=45 },
 	{ .move=MOVE_HYPER_VOICE, .level=50 },
 	{ .move=MOVE_OUTRAGE, .level=55 },
+	{ .move=MOVE_DRAGON_ENERGY, .level=70 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -244450,6 +244491,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PERRSERKER[] =
 	{ .move=MOVE_SLASH, .level=42 },
 	{ .move=MOVE_METAL_SOUND, .level=48 },
 	{ .move=MOVE_THRASH, .level=54 },
+	{ .move=MOVE_DOUBLE_IRON_BASH, .level=68 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -245024,6 +245066,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_RUNERIGUS[] =
 	{ .move=MOVE_GUARD_SPLIT, .level=56 },
 	{ .move=MOVE_POWER_SPLIT, .level=56 },
 	{ .move=MOVE_DESTINY_BOND, .level=62 },
+	{ .move=MOVE_INFERNAL_PARADE, .level=64 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -258653,6 +258696,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MEOWTH_GALARIAN[] =
 	{ .move=MOVE_SLASH, .level=36 },
 	{ .move=MOVE_METAL_SOUND, .level=40 },
 	{ .move=MOVE_THRASH, .level=44 },
+	{ .move=MOVE_DOUBLE_IRON_BASH, .level=64 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -262176,6 +262220,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_YAMASK_GALARIAN[] =
 	{ .move=MOVE_GUARD_SPLIT, .level=48 },
 	{ .move=MOVE_POWER_SPLIT, .level=48 },
 	{ .move=MOVE_DESTINY_BOND, .level=52 },
+	{ .move=MOVE_INFERNAL_PARADE, .level=60 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
