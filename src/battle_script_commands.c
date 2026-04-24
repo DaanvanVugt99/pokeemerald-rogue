@@ -10863,6 +10863,8 @@ static void Cmd_various(void)
         VARIOUS_ARGS();
         if (HasBattlerAbility(battler, ABILITY_SHATTER)
             && HasAttackerFaintedTarget()
+            && !((GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER && NoAliveMonsForPlayer())
+              || (GetBattlerSide(gBattlerTarget) == B_SIDE_OPPONENT && NoAliveMonsForOpponent()))
             && !(gSideStatuses[GetBattlerSide(gBattlerTarget)] & SIDE_STATUS_STEALTH_ROCK))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_SHATTER);
