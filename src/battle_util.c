@@ -11428,6 +11428,91 @@ static u8 ItemHealHp(u32 battler, u32 itemId, bool32 end2, bool32 percentHeal)
     return 0;
 }
 
+static u8 RottenBerryEffect(u32 battler, u32 itemId, bool32 end2)
+{
+    if (!HasEnoughHpToEatBerry(battler, 2, itemId))
+        return 0;
+
+    gBattleScripting.battler = battler;
+
+    if (IS_BATTLER_OF_TYPE(battler, TYPE_GRASS)
+     || IS_BATTLER_OF_TYPE(battler, TYPE_POISON)
+     || IS_BATTLER_OF_TYPE(battler, TYPE_BUG))
+    {
+        if (B_HEAL_BLOCKING < GEN_5 || !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 3;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            gBattleMoveDamage *= -1;
+
+            if (HasBattlerAbility(battler, ABILITY_RIPEN))
+            {
+                gBattleMoveDamage *= 2;
+                gBattlerAbility = battler;
+            }
+            else
+            {
+                gBattlerAbility = battler;
+            }
+
+            if (end2)
+                BattleScriptExecute(BattleScript_ItemHealHP_RemoveItemEnd2);
+            else
+            {
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_ItemHealHP_RemoveItemRet;
+            }
+
+            if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_EMERGENCY_EXIT
+             && GetNonDynamaxHP(battler) >= GetNonDynamaxMaxHP(battler) / 2)
+                gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_EMERGENCY_EXIT;
+
+            return ITEM_HP_CHANGE;
+        }
+        return 0;
+    }
+
+    if (CanBePoisoned(battler, battler))
+    {
+        gBattleMons[battler].status1 = STATUS1_TOXIC_POISON;
+        gEffectBattler = battler;
+        if (end2)
+            BattleScriptExecute(BattleScript_RottenBerryToxicEnd2);
+        else
+        {
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RottenBerryToxicRet;
+        }
+        return ITEM_STATUS_CHANGE;
+    }
+
+    if (!HasBattlerAbility(battler, ABILITY_MAGIC_GUARD))
+    {
+        gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+        if (gBattleMoveDamage == 0)
+            gBattleMoveDamage = 1;
+        PREPARE_ITEM_BUFFER(gBattleTextBuff1, itemId);
+        if (end2)
+            BattleScriptExecute(BattleScript_RottenBerryHurtEnd2);
+        else
+        {
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RottenBerryHurtRet;
+        }
+        return ITEM_HP_CHANGE;
+    }
+
+    if (end2)
+        BattleScriptExecute(BattleScript_RottenBerryConsumedEnd2);
+    else
+    {
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_RottenBerryConsumedRet;
+    }
+    return ITEM_EFFECT_OTHER;
+}
+
 static bool32 UnnerveOn(u32 battler, u32 itemId)
 {
     if (ItemId_GetPocket(itemId) == POCKET_BERRIES && IsUnnerveAbilityOnOpposingSide(battler))
@@ -11579,6 +11664,9 @@ static u8 ItemEffectMoveEnd(u32 battler, u16 holdEffect)
     case HOLD_EFFECT_RESTORE_PCT_HP:
         if (B_BERRIES_INSTANT >= GEN_4)
             effect = ItemHealHp(battler, gLastUsedItem, FALSE, TRUE);
+        break;
+    case HOLD_EFFECT_ROTTEN_BERRY:
+        effect = RottenBerryEffect(battler, gLastUsedItem, FALSE);
         break;
     case HOLD_EFFECT_RESTORE_PP:
         if (B_BERRIES_INSTANT >= GEN_4)
@@ -12020,6 +12108,9 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 if (B_BERRIES_INSTANT >= GEN_4)
                     effect = ItemHealHp(battler, gLastUsedItem, TRUE, TRUE);
                 break;
+            case HOLD_EFFECT_ROTTEN_BERRY:
+                effect = RottenBerryEffect(battler, gLastUsedItem, TRUE);
+                break;
             case HOLD_EFFECT_AIR_BALLOON:
                 effect = ITEM_EFFECT_OTHER;
                 gBattleScripting.battler = battler;
@@ -12112,6 +12203,10 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             case HOLD_EFFECT_RESTORE_PCT_HP:
                 if (!moveTurn)
                     effect = ItemHealHp(battler, gLastUsedItem, TRUE, TRUE);
+                break;
+            case HOLD_EFFECT_ROTTEN_BERRY:
+                if (!moveTurn)
+                    effect = RottenBerryEffect(battler, gLastUsedItem, TRUE);
                 break;
             case HOLD_EFFECT_RESTORE_PP:
                 if (!moveTurn)
@@ -12744,7 +12839,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
     }
 
     // Berry was successfully used on a Pokemon.
-    if (effect && (gLastUsedItem >= FIRST_BERRY_INDEX && gLastUsedItem <= LAST_BERRY_INDEX))
+    if (effect && ItemId_GetPocket(gLastUsedItem) == POCKET_BERRIES)
     {
         gBattleStruct->ateBerry[battler & BIT_SIDE] |= gBitTable[gBattlerPartyIndexes[battler]];
         if (HasBattlerAbility(battler, ABILITY_HONEY_RAGE))
@@ -13332,6 +13427,7 @@ const struct TypePower gNaturalGiftTable[] =
     [ITEM_TO_BERRY(ITEM_ROWAP_BERRY)] = {TYPE_DARK, 100},
     [ITEM_TO_BERRY(ITEM_KEE_BERRY)] = {TYPE_FAIRY, 100},
     [ITEM_TO_BERRY(ITEM_MARANGA_BERRY)] = {TYPE_DARK, 100},
+    [ITEM_TO_BERRY(ITEM_ROTTEN_BERRY)] = {TYPE_POISON, 100},
 };
 
 u32 CalcRolloutBasePower(u32 battlerAtk, u32 basePower, u32 rolloutTimer)

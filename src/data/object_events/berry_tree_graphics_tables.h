@@ -701,6 +701,7 @@ const struct SpriteFrameImage *const gBerryTreePicTablePointers[] = {
     [ITEM_KEE_BERRY - FIRST_BERRY_INDEX]              = sPicTable_PechaBerryTree,
     [ITEM_MARANGA_BERRY - FIRST_BERRY_INDEX]          = sPicTable_OccaBerryTree,
     [ITEM_ENIGMA_BERRY_E_READER - FIRST_BERRY_INDEX]  = sPicTable_DurinBerryTree,
+    [ITEM_ROTTEN_BERRY - FIRST_BERRY_INDEX]           = sPicTable_DurinBerryTree,
 };
 
 const u8 *const gBerryTreePaletteSlotTablePointers[] = {
@@ -772,6 +773,7 @@ const u8 *const gBerryTreePaletteSlotTablePointers[] = {
     [ITEM_KEE_BERRY - FIRST_BERRY_INDEX] = gBerryTreePaletteSlotTable_Pecha,
     [ITEM_MARANGA_BERRY - FIRST_BERRY_INDEX] = gBerryTreePaletteSlotTable_Occa,
     [ITEM_ENIGMA_BERRY_E_READER - FIRST_BERRY_INDEX] = gBerryTreePaletteSlotTable_Durin,
+    [ITEM_ROTTEN_BERRY - FIRST_BERRY_INDEX] = gBerryTreePaletteSlotTable_Durin,
 };
 
 const u16 *const gBerryTreeObjectEventGraphicsIdTablePointers[] = {
@@ -843,4 +845,5 @@ const u16 *const gBerryTreeObjectEventGraphicsIdTablePointers[] = {
     [ITEM_KEE_BERRY - FIRST_BERRY_INDEX] = gBerryTreeObjectEventGraphicsIdTable,
     [ITEM_MARANGA_BERRY - FIRST_BERRY_INDEX] = gBerryTreeObjectEventGraphicsIdTable,
     [ITEM_ENIGMA_BERRY_E_READER - FIRST_BERRY_INDEX] = gBerryTreeObjectEventGraphicsIdTable,
+    [ITEM_ROTTEN_BERRY - FIRST_BERRY_INDEX] = gBerryTreeObjectEventGraphicsIdTable,
 };

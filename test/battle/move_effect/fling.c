@@ -396,3 +396,30 @@ SINGLE_BATTLE_TEST("Fling deals damage based on items fling power")
         EXPECT_EQ(damage[0], damage[1]);
     }
 }
+
+SINGLE_BATTLE_TEST("Fling makes Rotten Berry badly poison a non-Grass/Poison/Bug target")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_ROTTEN_BERRY); Moves(MOVE_FLING); }
+        OPPONENT(SPECIES_CHARMANDER) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_FLING); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(opponent->status1 & STATUS1_TOXIC_POISON);
+        EXPECT_EQ(player->item, ITEM_NONE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Fling makes Rotten Berry deal 1/8 HP damage if bad poison cannot be applied")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_ROTTEN_BERRY); Moves(MOVE_FLING); Attack(1); }
+        OPPONENT(SPECIES_KLINK) { HP(40); MaxHP(80); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_FLING); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(opponent->hp, 29);
+        EXPECT_EQ(opponent->status1, STATUS1_NONE);
+        EXPECT_EQ(player->item, ITEM_NONE);
+    }
+}

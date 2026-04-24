@@ -8849,6 +8849,52 @@ BattleScript_ToxicOrb::
 	call BattleScript_MoveEffectToxic
 	end2
 
+BattleScript_RottenBerryToxicRet::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	setbyte cMULTISTRING_CHOOSER, 0
+	call BattleScript_MoveEffectToxic
+	removeitem BS_SCRIPTING
+	return
+
+BattleScript_RottenBerryToxicEnd2::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	setbyte cMULTISTRING_CHOOSER, 0
+	call BattleScript_MoveEffectToxic
+	removeitem BS_SCRIPTING
+	end2
+
+BattleScript_RottenBerryHurtRet::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE | HITMARKER_IGNORE_DISGUISE
+	healthbarupdate BS_SCRIPTING
+	datahpupdate BS_SCRIPTING
+	printstring STRINGID_HURTBYITEM
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_SCRIPTING
+	removeitem BS_SCRIPTING
+	return
+
+BattleScript_RottenBerryHurtEnd2::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE | HITMARKER_IGNORE_DISGUISE
+	healthbarupdate BS_SCRIPTING
+	datahpupdate BS_SCRIPTING
+	printstring STRINGID_HURTBYITEM
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_SCRIPTING
+	removeitem BS_SCRIPTING
+	end2
+
+BattleScript_RottenBerryConsumedRet::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	removeitem BS_SCRIPTING
+	return
+
+BattleScript_RottenBerryConsumedEnd2::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	removeitem BS_SCRIPTING
+	end2
+
 BattleScript_FlameOrb::
 	setbyte cMULTISTRING_CHOOSER, 0
 	copybyte gEffectBattler, gBattlerAttacker

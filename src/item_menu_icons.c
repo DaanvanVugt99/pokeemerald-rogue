@@ -373,6 +373,7 @@ static const struct CompressedTilesPal sBerryPicTable[] =
     [ITEM_TO_BERRY(ITEM_PERSIM_BERRY) - 1]          = {gBerryPic_Persim, gBerryPalette_Persim},
     [ITEM_TO_BERRY(ITEM_LUM_BERRY)    - 1]          = {gBerryPic_Lum,    gBerryPalette_Lum},
     [ITEM_TO_BERRY(ITEM_SITRUS_BERRY) - 1]          = {gBerryPic_Sitrus, gBerryPalette_Sitrus},
+    [ITEM_TO_BERRY(ITEM_ROTTEN_BERRY) - 1]          = {gBerryPic_Sitrus, gBerryPalette_Sitrus},
     [ITEM_TO_BERRY(ITEM_FIGY_BERRY)   - 1]          = {gBerryPic_Figy,   gBerryPalette_Figy},
     [ITEM_TO_BERRY(ITEM_WIKI_BERRY)   - 1]          = {gBerryPic_Wiki,   gBerryPalette_Wiki},
     [ITEM_TO_BERRY(ITEM_MAGO_BERRY)   - 1]          = {gBerryPic_Mago,   gBerryPalette_Mago},

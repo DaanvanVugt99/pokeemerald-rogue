@@ -2750,6 +2750,11 @@ static const u8 sSitrusBerryDesc[] = _(
     "battle.");
 #endif
 
+static const u8 sRottenBerryDesc[] = _(
+    "A spoiled Berry.\n"
+    "Some Pokémon heal,\n"
+    "others suffer.");
+
 static const u8 sFigyBerryDesc[] = _(
     "A hold item that\n"
     "restores HP but\n"

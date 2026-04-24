@@ -32,6 +32,34 @@ static bool32 AI_ShouldHeal(u32 battler, u32 healAmount);
 static bool32 AI_OpponentCanFaintAiWithMod(u32 battler, u32 healAmount);
 static u32 GetSwitchinHazardsDamage(u32 battler, struct BattlePokemon *battleMon);
 
+static bool32 IsSwitchinCandidateOfType(u32 type)
+{
+    const struct BattlePokemon *battleMon = &AI_DATA->switchinCandidate.battleMon;
+
+    return battleMon->type1 == type
+        || battleMon->type2 == type
+        || (battleMon->type3 != TYPE_MYSTERY && battleMon->type3 == type);
+}
+
+static bool32 CanSwitchinCandidateBeBadlyPoisoned(u32 battler)
+{
+    const struct BattlePokemon *battleMon = &AI_DATA->switchinCandidate.battleMon;
+    u32 ability = battleMon->ability;
+
+    if (IsSwitchinCandidateOfType(TYPE_POISON)
+        || IsSwitchinCandidateOfType(TYPE_STEEL)
+        || (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD)
+        || (battleMon->status1 & STATUS1_ANY)
+        || ability == ABILITY_IMMUNITY
+        || ability == ABILITY_COMATOSE
+        || ability == ABILITY_SILVER_LINING
+        || ability == ABILITY_PURIFYING_SALT
+        || IsAbilityOnSide(battler, ABILITY_PASTEL_VEIL))
+        return FALSE;
+
+    return TRUE;
+}
+
 static bool32 DoesPartyShareTypeWithPartyMon(struct Pokemon *party, s32 firstId, s32 lastId, s32 monPartyId)
 {
     s32 i;
@@ -1613,6 +1641,40 @@ static u32 GetSwitchinHitsToKO(s32 damageTaken, u32 battler)
                     singleUseItemHeal = holdEffectParam;
                     if (singleUseItemHeal == 0)
                         singleUseItemHeal = 1;
+                }
+                else if (opposingAbility != ABILITY_UNNERVE
+                    && heldItemEffect == HOLD_EFFECT_ROTTEN_BERRY)
+                {
+                    if (IsSwitchinCandidateOfType(TYPE_GRASS)
+                        || IsSwitchinCandidateOfType(TYPE_POISON)
+                        || IsSwitchinCandidateOfType(TYPE_BUG))
+                    {
+                        singleUseItemHeal = maxHP / 3;
+                        if (singleUseItemHeal == 0)
+                            singleUseItemHeal = 1;
+                    }
+                    else if (CanSwitchinCandidateBeBadlyPoisoned(battler))
+                    {
+                        AI_DATA->switchinCandidate.battleMon.status1 = STATUS1_TOXIC_POISON | STATUS1_TOXIC_TURN(1);
+                        AI_DATA->switchinCandidate.hypotheticalStatus = TRUE;
+                        statusDamage = maxHP / 16;
+                        if (statusDamage == 0)
+                            statusDamage = 1;
+                        usedSingleUseHealingItem = TRUE;
+                    }
+                    else if (AI_DATA->switchinCandidate.battleMon.ability != ABILITY_MAGIC_GUARD)
+                    {
+                        u32 rottenBerryDamage = maxHP / 8;
+
+                        if (rottenBerryDamage == 0)
+                            rottenBerryDamage = 1;
+                        currentHP -= rottenBerryDamage;
+                        usedSingleUseHealingItem = TRUE;
+                    }
+                    else
+                    {
+                        usedSingleUseHealingItem = TRUE;
+                    }
                 }
             }
             else if (currentHP < maxHP / CONFUSE_BERRY_HP_FRACTION

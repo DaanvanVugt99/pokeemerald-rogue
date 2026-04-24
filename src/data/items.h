@@ -6467,6 +6467,18 @@ const struct Item gItems[] =
         .flingPower = 10,
     },
 
+    [ITEM_ROTTEN_BERRY] =
+    {
+        .name = _("Rotten Berry"),
+        .price = 20,
+        .holdEffect = HOLD_EFFECT_ROTTEN_BERRY,
+        .description = sRottenBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .flingPower = 10,
+    },
+
     [ITEM_FIGY_BERRY] =
     {
         .name = _("Figy Berry"),

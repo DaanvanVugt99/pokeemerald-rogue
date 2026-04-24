@@ -48,6 +48,8 @@ static const u8 sBerryDescriptionPart1_Lum[] = _("Slow to grow. If raised with l
 static const u8 sBerryDescriptionPart2_Lum[] = _("care, it may grow two Berries.");
 static const u8 sBerryDescriptionPart1_Sitrus[] = _("Closely related to Oran. The large");
 static const u8 sBerryDescriptionPart2_Sitrus[] = _("Berry has a well-rounded flavor.");
+static const u8 sBerryDescriptionPart1_Rotten[] = _("This spoiled Berry gives off a foul");
+static const u8 sBerryDescriptionPart2_Rotten[] = _("odor. Some Pokémon still prize it.");
 static const u8 sBerryDescriptionPart1_Figy[] = _("The Berry, which looks chewed up,");
 static const u8 sBerryDescriptionPart2_Figy[] = _("brims with spicy substances.");
 static const u8 sBerryDescriptionPart1_Wiki[] = _("The Berry is said to have grown lumpy");
@@ -1388,6 +1390,24 @@ const struct Berry gBerries[] =
         .sour = 40,
         .smoothness = 40,
     },
+
+    [ITEM_ROTTEN_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Rotten"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .size = 95,
+        .maxYield = 4,
+        .minYield = 2,
+        .description1 = sBerryDescriptionPart1_Rotten,
+        .description2 = sBerryDescriptionPart2_Rotten,
+        .stageDuration = 24,
+        .spicy = 5,
+        .dry = 5,
+        .sweet = 5,
+        .bitter = 35,
+        .sour = 35,
+        .smoothness = 25,
+    },
 };
 
 const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
@@ -1433,7 +1453,8 @@ const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
     [ITEM_APICOT_BERRY - FIRST_BERRY_INDEX]          = {.difficulty = 180, .powder = 500},
     [ITEM_LANSAT_BERRY - FIRST_BERRY_INDEX]          = {.difficulty = 200, .powder = 750},
     [ITEM_STARF_BERRY - FIRST_BERRY_INDEX]           = {.difficulty = 200, .powder = 750},
-    [ITEM_ENIGMA_BERRY_E_READER - FIRST_BERRY_INDEX] = {.difficulty = 150, .powder = 200}
+    [ITEM_ENIGMA_BERRY_E_READER - FIRST_BERRY_INDEX] = {.difficulty = 150, .powder = 200},
+    [ITEM_ROTTEN_BERRY - FIRST_BERRY_INDEX] = {.difficulty = 80, .powder = 60}
 };
 
 const struct BerryTree gBlankBerryTree = {};
