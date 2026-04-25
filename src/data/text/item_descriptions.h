@@ -3305,8 +3305,10 @@ static const u8 sTM52Desc[] = _(
     "The user summons corrosive\n"
     "rain for 8 turns.");
 
-static const u8 sTM53Desc[] = _( // Todo
-    "?????");
+static const u8 sTM53Desc[] = _(
+    "The user covers the\n"
+    "field with crawling\n"
+    "pests.");
 
 static const u8 sTM54Desc[] = _( // Todo
     "?????");
