@@ -3296,8 +3296,10 @@ static const u8 sTM50Desc[] = _(
     "attack, but sharply\n"
     "lowers Sp. Atk.");
 
-static const u8 sTM51Desc[] = _( // Todo
-    "?????");
+static const u8 sTM51Desc[] = _(
+    "Summons an eclipse\n"
+    "that strengthens Dark\n"
+    "moves for 8 turns.");
 
 static const u8 sTM52Desc[] = _( // Todo
     "?????");
