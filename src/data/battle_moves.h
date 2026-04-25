@@ -1313,7 +1313,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
             .effect = EFFECT_SPECIAL_ATTACK_UP,
         #endif
         .power = 0,
-        .type = TYPE_NORMAL,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .type = TYPE_GRASS,
+        #else
+            .type = TYPE_NORMAL,
+        #endif
         .accuracy = 0,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_USER,
@@ -2712,7 +2716,10 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_CRABHAMMER] =
     {
-        #if B_UPDATED_MOVE_DATA >= GEN_6
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 100,
+            .accuracy = 95,
+        #elif B_UPDATED_MOVE_DATA >= GEN_6
             .power = 100,
             .accuracy = 90,
         #elif B_UPDATED_MOVE_DATA == GEN_5
@@ -3563,13 +3570,17 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_BONE_RUSH] =
     {
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 30,
+        #else
+            .power = 25,
+        #endif
         #if B_UPDATED_MOVE_DATA >= GEN_5
             .accuracy = 90,
         #else
             .accuracy = 80,
         #endif
         .effect = EFFECT_MULTI_HIT,
-        .power = 25,
         .type = TYPE_GROUND,
         .pp = 10,
         .secondaryEffectChance = 0,
@@ -7829,7 +7840,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .type = TYPE_STEEL,
         .accuracy = 100,
         .pp = 15,
-        .secondaryEffectChance = 30,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .secondaryEffectChance = 20,
+        #else
+            .secondaryEffectChance = 30,
+        #endif
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
         .split = SPLIT_PHYSICAL,
@@ -9460,7 +9475,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_NIGHT_DAZE] =
     {
         .effect = EFFECT_ACCURACY_DOWN_HIT,
-        .power = 85,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 90,
+        #else
+            .power = 85,
+        #endif
         .type = TYPE_DARK,
         .accuracy = 95,
         .pp = 10,
@@ -10250,7 +10269,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .type = TYPE_FAIRY,
         .accuracy = 100,
         .pp = 15,
-        .secondaryEffectChance = 30,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .secondaryEffectChance = 10,
+        #else
+            .secondaryEffectChance = 30,
+        #endif
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
         .split = SPLIT_SPECIAL,
@@ -10895,7 +10918,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_FIRST_IMPRESSION] =
     {
         .effect = EFFECT_FAKE_OUT,
-        .power = 90,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 100,
+        #else
+            .power = 90,
+        #endif
         .type = TYPE_BUG,
         .accuracy = 100,
         .pp = 10,
@@ -10930,7 +10957,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_SPIRIT_SHACKLE] =
     {
         .effect = EFFECT_HIT_PREVENT_ESCAPE,
-        .power = 80,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 90,
+        #else
+            .power = 80,
+        #endif
         .type = TYPE_GHOST,
         .accuracy = 100,
         .pp = 10,
@@ -11226,7 +11257,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_FIRE_LASH] =
     {
         .effect = EFFECT_DEFENSE_DOWN_HIT,
-        .power = 80,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 90,
+        #else
+            .power = 80,
+        #endif
         .type = TYPE_FIRE,
         .accuracy = 100,
         .pp = 15,
@@ -11348,7 +11383,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_TROP_KICK] =
     {
         .effect = EFFECT_ATTACK_DOWN_HIT,
-        .power = 70,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 85,
+        #else
+            .power = 70,
+        #endif
         .type = TYPE_GRASS,
         .accuracy = 100,
         .pp = 15,
@@ -11383,7 +11422,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_BEAK_BLAST] =
     {
         .effect = EFFECT_BEAK_BLAST,
-        .power = 100,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 120,
+        #else
+            .power = 100,
+        #endif
         .type = TYPE_FLYING,
         .accuracy = 100,
         .pp = 15,
@@ -12333,7 +12376,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_TRAP,
         .power = 35,
-        .type = TYPE_GRASS,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .type = TYPE_STEEL,
+        #else
+            .type = TYPE_GRASS,
+        #endif
         .accuracy = 100,
         .pp = 15,
         .secondaryEffectChance = 100,
@@ -12472,7 +12519,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_APPLE_ACID] =
     {
         .effect = EFFECT_SPECIAL_DEFENSE_DOWN_HIT,
-        .power = 80,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 90,
+        #else
+            .power = 80,
+        #endif
         .type = TYPE_GRASS,
         .accuracy = 100,
         .pp = 10,
@@ -12488,7 +12539,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_GRAV_APPLE] =
     {
         .effect = EFFECT_GRAV_APPLE,
-        .power = 80,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 90,
+        #else
+            .power = 80,
+        #endif
         .type = TYPE_GRASS,
         .accuracy = 100,
         .pp = 10,
@@ -13126,14 +13181,15 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         #if B_UPDATED_MOVE_DATA >= GEN_9
             .power = 80,
+            .secondaryEffectChance = 30,
         #else
             .power = 60,
+            .secondaryEffectChance = 50,
         #endif
         .effect = EFFECT_DIRE_CLAW,
         .type = TYPE_POISON,
         .accuracy = 100,
         .pp = 15,
-        .secondaryEffectChance = 50,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
         .split = SPLIT_PHYSICAL,
@@ -13145,7 +13201,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_PSYSHIELD_BASH] =
     {
         .effect = EFFECT_DEFENSE_UP_HIT,
-        .power = 70,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 90,
+        #else
+            .power = 70,
+        #endif
         .type = TYPE_PSYCHIC,
         .accuracy = 90,
         .pp = 10,
@@ -13290,7 +13350,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_MOUNTAIN_GALE] =
     {
         .effect = EFFECT_FLINCH_HIT,
-        .power = 100,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 120,
+        #else
+            .power = 100,
+        #endif
         .type = TYPE_ICE,
         .accuracy = 85,
         .pp = 5,
@@ -13440,7 +13504,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_INFERNAL_PARADE] =
     {
         .effect = EFFECT_INFERNAL_PARADE,
-        .power = 60,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .power = 65,
+        #else
+            .power = 60,
+        #endif
         .type = TYPE_GHOST,
         .accuracy = 100,
         .pp = 15,
@@ -14464,7 +14532,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .effect = EFFECT_SYRUP_BOMB,
         .power = 60,
         .type = TYPE_GRASS,
-        .accuracy = 85,
+        #if B_UPDATED_MOVE_DATA >= GEN_9
+            .accuracy = 90,
+        #else
+            .accuracy = 85,
+        #endif
         .pp = 10,
         .secondaryEffectChance = 100, // syrup bomb volatile status
         .target = MOVE_TARGET_SELECTED,
