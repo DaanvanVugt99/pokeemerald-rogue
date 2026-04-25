@@ -299314,6 +299314,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TAUROS_PALDEAN_AQUA_BREED[
 	{ .move=MOVE_RAGING_BULL, .level=35 },
 	{ .move=MOVE_REST, .level=40 },
 	{ .move=MOVE_SWAGGER, .level=45 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=46 },
 	{ .move=MOVE_THRASH, .level=50 },
 	{ .move=MOVE_WAVE_CRASH, .level=55 },
 	{ .move=MOVE_CLOSE_COMBAT, .level=60 },
