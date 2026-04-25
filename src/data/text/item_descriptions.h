@@ -3310,8 +3310,10 @@ static const u8 sTM53Desc[] = _(
     "field with crawling\n"
     "pests.");
 
-static const u8 sTM54Desc[] = _( // Todo
-    "?????");
+static const u8 sTM54Desc[] = _(
+    "The user makes the\n"
+    "field ordinary for\n"
+    "8 turns.");
 
 static const u8 sTM55Desc[] = _( // Todo
     "?????");

@@ -7249,6 +7249,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_RATTATA[] =
 	{ .move=MOVE_CRUNCH, .level=22 },
 	{ .move=MOVE_SUCKER_PUNCH, .level=25 },
 	{ .move=MOVE_SUPER_FANG, .level=28 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=30 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=31 },
 	{ .move=MOVE_ENDEAVOR, .level=34 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -7304,6 +7305,7 @@ static u16 const sTutorMoves_SPECIES_RATTATA[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -7361,6 +7363,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_RATICATE[] =
 	{ .move=MOVE_ASSURANCE, .level=19 },
 	{ .move=MOVE_CRUNCH, .level=24 },
 	{ .move=MOVE_SUCKER_PUNCH, .level=29 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=30 },
 	{ .move=MOVE_SUPER_FANG, .level=34 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=39 },
 	{ .move=MOVE_ENDEAVOR, .level=44 },
@@ -7414,6 +7417,7 @@ static u16 const sTutorMoves_SPECIES_RATICATE[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -7623,6 +7627,7 @@ static u16 const sTutorMoves_SPECIES_SPEAROW[] =
 	MOVE_UPROAR,
 	MOVE_WHIRLWIND,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -7710,6 +7715,7 @@ static u16 const sTutorMoves_SPECIES_FEAROW[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -12607,6 +12613,7 @@ static u16 const sTutorMoves_SPECIES_JIGGLYPUFF[] =
 	MOVE_WATER_PULSE,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -12731,6 +12738,7 @@ static u16 const sTutorMoves_SPECIES_WIGGLYTUFF[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WISH,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -14771,6 +14779,7 @@ static u16 const sTutorMoves_SPECIES_MEOWTH[] =
 	MOVE_TRAILBLAZE,
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -14968,6 +14977,7 @@ static u16 const sTutorMoves_SPECIES_PERSIAN[] =
 	MOVE_TRAILBLAZE,
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -23474,6 +23484,7 @@ static u16 const sTutorMoves_SPECIES_DODUO[] =
 	MOVE_THROAT_CHOP,
 	MOVE_UPROAR,
 	MOVE_WHIRLWIND,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -23646,6 +23657,7 @@ static u16 const sTutorMoves_SPECIES_DODRIO[] =
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
 	MOVE_WHIRLWIND,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -30398,6 +30410,7 @@ static u16 const sTutorMoves_SPECIES_LICKITUNG[] =
 	MOVE_WISH,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -31557,6 +31570,7 @@ static u16 const sTutorMoves_SPECIES_CHANSEY[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WISH,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -32390,6 +32404,7 @@ static u16 const sTutorMoves_SPECIES_KANGASKHAN[] =
 	MOVE_UPROAR,
 	MOVE_WHIRLPOOL,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -35832,6 +35847,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TAUROS[] =
 	{ .move=MOVE_RAGING_BULL, .level=35 },
 	{ .move=MOVE_REST, .level=40 },
 	{ .move=MOVE_SWAGGER, .level=45 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=46 },
 	{ .move=MOVE_THRASH, .level=50 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=55 },
 	{ .move=MOVE_GIGA_IMPACT, .level=60 },
@@ -35892,6 +35908,7 @@ static u16 const sTutorMoves_SPECIES_TAUROS[] =
 	MOVE_TRAILBLAZE,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -37723,6 +37740,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DITTO[] =
 
 static u16 const sTutorMoves_SPECIES_DITTO[] =
 {
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -37871,6 +37889,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_EEVEE[] =
 	{ .move=MOVE_COPYCAT, .level=30 },
 	{ .move=MOVE_BATON_PASS, .level=35 },
 	{ .move=MOVE_TAKE_DOWN, .level=40 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=40 },
 	{ .move=MOVE_CHARM, .level=45 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=50 },
 	{ .move=MOVE_LAST_RESORT, .level=55 },
@@ -37913,6 +37932,7 @@ static u16 const sTutorMoves_SPECIES_EEVEE[] =
 	MOVE_WEATHER_BALL,
 	MOVE_WISH,
 	MOVE_YAWN,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -38957,6 +38977,7 @@ static u16 const sTutorMoves_SPECIES_PORYGON[] =
 	MOVE_TRICK,
 	MOVE_TRICK_ROOM,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -41021,6 +41042,7 @@ static u16 const sTutorMoves_SPECIES_SNORLAX[] =
 	MOVE_WHIRLWIND,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -48002,6 +48024,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SENTRET[] =
 	{ .move=MOVE_FOLLOW_ME, .level=19 },
 	{ .move=MOVE_SLAM, .level=25 },
 	{ .move=MOVE_REST, .level=28 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=30 },
 	{ .move=MOVE_SUCKER_PUNCH, .level=31 },
 	{ .move=MOVE_AMNESIA, .level=36 },
 	{ .move=MOVE_BATON_PASS, .level=39 },
@@ -48067,6 +48090,7 @@ static u16 const sTutorMoves_SPECIES_SENTRET[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -48091,6 +48115,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FURRET[] =
 	{ .move=MOVE_HELPING_HAND, .level=17 },
 	{ .move=MOVE_FOLLOW_ME, .level=21 },
 	{ .move=MOVE_SLAM, .level=28 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=30 },
 	{ .move=MOVE_REST, .level=32 },
 	{ .move=MOVE_SUCKER_PUNCH, .level=36 },
 	{ .move=MOVE_AMNESIA, .level=42 },
@@ -48162,6 +48187,7 @@ static u16 const sTutorMoves_SPECIES_FURRET[] =
 	MOVE_UPROAR,
 	MOVE_WATER_PULSE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -54288,6 +54314,7 @@ static u16 const sTutorMoves_SPECIES_AIPOM[] =
 	MOVE_TRAILBLAZE,
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -57320,6 +57347,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GIRAFARIG[] =
 	{ .move=MOVE_TWIN_BEAM, .level=32 },
 	{ .move=MOVE_CRUNCH, .level=37 },
 	{ .move=MOVE_BATON_PASS, .level=41 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=44 },
 	{ .move=MOVE_NASTY_PLOT, .level=46 },
 	{ .move=MOVE_PSYCHIC, .level=50 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -57395,6 +57423,7 @@ static u16 const sTutorMoves_SPECIES_GIRAFARIG[] =
 	MOVE_WISH,
 	MOVE_ZEN_HEADBUTT,
 	MOVE_ECLIPSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -57950,6 +57979,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DUNSPARCE[] =
 	{ .move=MOVE_HYPER_DRILL, .level=32 },
 	{ .move=MOVE_ROOST, .level=36 },
 	{ .move=MOVE_DRAGON_RUSH, .level=40 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=42 },
 	{ .move=MOVE_COIL, .level=44 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=48 },
 	{ .move=MOVE_ENDEAVOR, .level=52 },
@@ -58031,6 +58061,7 @@ static u16 const sTutorMoves_SPECIES_DUNSPARCE[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -58940,6 +58971,7 @@ static u16 const sTutorMoves_SPECIES_SNUBBULL[] =
 	MOVE_UPROAR,
 	MOVE_WATER_PULSE,
 	MOVE_WILD_CHARGE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -59192,6 +59224,7 @@ static u16 const sTutorMoves_SPECIES_GRANBULL[] =
 	MOVE_UPROAR,
 	MOVE_WATER_PULSE,
 	MOVE_WILD_CHARGE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -62973,6 +63006,7 @@ static u16 const sTutorMoves_SPECIES_TEDDIURSA[] =
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
 	MOVE_YAWN,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -63110,6 +63144,7 @@ static u16 const sTutorMoves_SPECIES_URSARING[] =
 	MOVE_THUNDER_PUNCH,
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -67602,6 +67637,7 @@ static u16 const sTutorMoves_SPECIES_PORYGON2[] =
 	MOVE_TRICK,
 	MOVE_TRICK_ROOM,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -68438,6 +68474,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_STANTLER[] =
 	{ .move=MOVE_CALM_MIND, .level=27 },
 	{ .move=MOVE_ROLE_PLAY, .level=32 },
 	{ .move=MOVE_ZEN_HEADBUTT, .level=37 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=44 },
 	{ .move=MOVE_IMPRISON, .level=49 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=55 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -68510,6 +68547,7 @@ static u16 const sTutorMoves_SPECIES_STANTLER[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -68571,6 +68609,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_STANTLER
 static struct LevelUpMove const sLevelUpMoves_SPECIES_SMEARGLE[] =
 {
 	{ .move=MOVE_SKETCH, .level=1 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=44 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -68609,6 +68648,7 @@ static u16 const sTutorMoves_SPECIES_SMEARGLE[] =
 	MOVE_TRANSFORM,
 	MOVE_WHIRLWIND,
 	MOVE_WIDE_GUARD,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -69904,6 +69944,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MILTANK[] =
 	{ .move=MOVE_MILK_DRINK, .level=35 },
 	{ .move=MOVE_BODY_SLAM, .level=40 },
 	{ .move=MOVE_PLAY_ROUGH, .level=45 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=46 },
 	{ .move=MOVE_CHARM, .level=50 },
 	{ .move=MOVE_HIGH_HORSEPOWER, .level=55 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -69972,6 +70013,7 @@ static u16 const sTutorMoves_SPECIES_MILTANK[] =
 	MOVE_WHIRLPOOL,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -70224,6 +70266,7 @@ static u16 const sTutorMoves_SPECIES_BLISSEY[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WISH,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -79362,6 +79405,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ZIGZAGOON[] =
 	{ .move=MOVE_TAKE_DOWN, .level=24 },
 	{ .move=MOVE_FLING, .level=27 },
 	{ .move=MOVE_FLAIL, .level=30 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=32 },
 	{ .move=MOVE_BELLY_DRUM, .level=33 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=36 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -79410,6 +79454,7 @@ static u16 const sTutorMoves_SPECIES_ZIGZAGOON[] =
 	MOVE_TRICK,
 	MOVE_WHIRLPOOL,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -79469,6 +79514,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_LINOONE[] =
 	{ .move=MOVE_FURY_SWIPES, .level=18 },
 	{ .move=MOVE_REST, .level=23 },
 	{ .move=MOVE_TAKE_DOWN, .level=28 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=32 },
 	{ .move=MOVE_FLING, .level=33 },
 	{ .move=MOVE_FLAIL, .level=38 },
 	{ .move=MOVE_BELLY_DRUM, .level=43 },
@@ -79523,6 +79569,7 @@ static u16 const sTutorMoves_SPECIES_LINOONE[] =
 	MOVE_TRICK,
 	MOVE_WHIRLPOOL,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -84776,6 +84823,7 @@ static u16 const sTutorMoves_SPECIES_SLAKOTH[] =
 	MOVE_TICKLE,
 	MOVE_X_SCISSOR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -84880,6 +84928,7 @@ static u16 const sTutorMoves_SPECIES_VIGOROTH[] =
 	MOVE_UPROAR,
 	MOVE_X_SCISSOR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -85043,6 +85092,7 @@ static u16 const sTutorMoves_SPECIES_SLAKING[] =
 	MOVE_WILD_CHARGE,
 	MOVE_X_SCISSOR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -86089,6 +86139,7 @@ static u16 const sTutorMoves_SPECIES_WHISMUR[] =
 	MOVE_WHIRLWIND,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -86179,6 +86230,7 @@ static u16 const sTutorMoves_SPECIES_LOUDRED[] =
 	MOVE_UPROAR,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -86273,6 +86325,7 @@ static u16 const sTutorMoves_SPECIES_EXPLOUD[] =
 	MOVE_WHIRLPOOL,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -87142,6 +87195,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SKITTY[] =
 	{ .move=MOVE_ASSIST, .level=31 },
 	{ .move=MOVE_COVET, .level=34 },
 	{ .move=MOVE_HEAL_BELL, .level=37 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=38 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=40 },
 	{ .move=MOVE_CAPTIVATE, .level=43 },
 	{ .move=MOVE_PLAY_ROUGH, .level=46 },
@@ -87205,6 +87259,7 @@ static u16 const sTutorMoves_SPECIES_SKITTY[] =
 	MOVE_WISH,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -87239,6 +87294,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DELCATTY[] =
 	{ .move=MOVE_SING, .level=1 },
 	{ .move=MOVE_ATTRACT, .level=1 },
 	{ .move=MOVE_FAKE_OUT, .level=1 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=1 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -87294,6 +87350,7 @@ static u16 const sTutorMoves_SPECIES_DELCATTY[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -95366,6 +95423,7 @@ static u16 const sTutorMoves_SPECIES_SPINDA[] =
 	MOVE_WISH,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -96641,6 +96699,7 @@ static u16 const sTutorMoves_SPECIES_SWABLU[] =
 	MOVE_TERA_BLAST,
 	MOVE_THIEF,
 	MOVE_TRAILBLAZE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -96752,6 +96811,7 @@ static u16 const sTutorMoves_SPECIES_ALTARIA[] =
 	MOVE_TRAILBLAZE,
 	MOVE_WEATHER_BALL,
 	MOVE_WILL_O_WISP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -117263,6 +117323,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BIDOOF[] =
 	{ .move=MOVE_YAWN, .level=21 },
 	{ .move=MOVE_CRUNCH, .level=25 },
 	{ .move=MOVE_TAKE_DOWN, .level=29 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=32 },
 	{ .move=MOVE_SUPER_FANG, .level=33 },
 	{ .move=MOVE_SWORDS_DANCE, .level=37 },
 	{ .move=MOVE_AMNESIA, .level=41 },
@@ -117323,6 +117384,7 @@ static u16 const sTutorMoves_SPECIES_BIDOOF[] =
 	MOVE_THUNDERBOLT,
 	MOVE_WATER_SPORT,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -117409,6 +117471,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BIBAREL[] =
 	{ .move=MOVE_HYPER_FANG, .level=18 },
 	{ .move=MOVE_YAWN, .level=23 },
 	{ .move=MOVE_CRUNCH, .level=28 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=32 },
 	{ .move=MOVE_TAKE_DOWN, .level=33 },
 	{ .move=MOVE_SUPER_FANG, .level=38 },
 	{ .move=MOVE_SWORDS_DANCE, .level=43 },
@@ -117471,6 +117534,7 @@ static u16 const sTutorMoves_SPECIES_BIBAREL[] =
 	MOVE_WATER_PULSE,
 	MOVE_WATERFALL,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -121916,6 +121980,7 @@ static u16 const sTutorMoves_SPECIES_AMBIPOM[] =
 	MOVE_TRIPLE_AXEL,
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -122718,6 +122783,7 @@ static u16 const sTutorMoves_SPECIES_BUNEARY[] =
 	MOVE_TRIPLE_AXEL,
 	MOVE_UPROAR,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -122922,6 +122988,7 @@ static u16 const sTutorMoves_SPECIES_LOPUNNY[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -124096,6 +124163,7 @@ static u16 const sTutorMoves_SPECIES_GLAMEOW[] =
 	MOVE_WAKE_UP_SLAP,
 	MOVE_WATER_PULSE,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -124208,6 +124276,7 @@ static u16 const sTutorMoves_SPECIES_PURUGLY[] =
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -126027,6 +126096,7 @@ static u16 const sTutorMoves_SPECIES_HAPPINY[] =
 	MOVE_TERA_BLAST,
 	MOVE_THUNDER_WAVE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -128562,6 +128632,7 @@ static u16 const sTutorMoves_SPECIES_MUNCHLAX[] =
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -135004,6 +135075,7 @@ static u16 const sTutorMoves_SPECIES_LICKILICKY[] =
 	MOVE_WISH,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -139793,6 +139865,7 @@ static u16 const sTutorMoves_SPECIES_PORYGON_Z[] =
 	MOVE_TRICK_ROOM,
 	MOVE_UPROAR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -151281,6 +151354,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PATRAT[] =
 	{ .move=MOVE_WORK_UP, .level=28 },
 	{ .move=MOVE_HYPER_FANG, .level=31 },
 	{ .move=MOVE_NASTY_PLOT, .level=33 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=34 },
 	{ .move=MOVE_MEAN_LOOK, .level=36 },
 	{ .move=MOVE_BATON_PASS, .level=38 },
 	{ .move=MOVE_SLAM, .level=41 },
@@ -151334,6 +151408,7 @@ static u16 const sTutorMoves_SPECIES_PATRAT[] =
 	MOVE_THUNDERBOLT,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -151379,6 +151454,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_WATCHOG[] =
 	{ .move=MOVE_AFTER_YOU, .level=25 },
 	{ .move=MOVE_FOCUS_ENERGY, .level=29 },
 	{ .move=MOVE_PSYCH_UP, .level=32 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=34 },
 	{ .move=MOVE_HYPER_FANG, .level=36 },
 	{ .move=MOVE_NASTY_PLOT, .level=39 },
 	{ .move=MOVE_MEAN_LOOK, .level=43 },
@@ -151442,6 +151518,7 @@ static u16 const sTutorMoves_SPECIES_WATCHOG[] =
 	MOVE_THUNDERBOLT,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -151483,6 +151560,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_LILLIPUP[] =
 	{ .move=MOVE_TAKE_DOWN, .level=28 },
 	{ .move=MOVE_HELPING_HAND, .level=32 },
 	{ .move=MOVE_REVERSAL, .level=36 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=36 },
 	{ .move=MOVE_ROAR, .level=40 },
 	{ .move=MOVE_LAST_RESORT, .level=44 },
 	{ .move=MOVE_GIGA_IMPACT, .level=48 },
@@ -151531,6 +151609,7 @@ static u16 const sTutorMoves_SPECIES_LILLIPUP[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
 	MOVE_YAWN,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -151585,6 +151664,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HERDIER[] =
 	{ .move=MOVE_PLAY_ROUGH, .level=24 },
 	{ .move=MOVE_CRUNCH, .level=30 },
 	{ .move=MOVE_TAKE_DOWN, .level=36 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=36 },
 	{ .move=MOVE_HELPING_HAND, .level=42 },
 	{ .move=MOVE_REVERSAL, .level=48 },
 	{ .move=MOVE_ROAR, .level=54 },
@@ -151629,6 +151709,7 @@ static u16 const sTutorMoves_SPECIES_HERDIER[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -151655,6 +151736,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_STOUTLAND[] =
 	{ .move=MOVE_BABY_DOLL_EYES, .level=19 },
 	{ .move=MOVE_PLAY_ROUGH, .level=24 },
 	{ .move=MOVE_CRUNCH, .level=30 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=36 },
 	{ .move=MOVE_TAKE_DOWN, .level=38 },
 	{ .move=MOVE_HELPING_HAND, .level=46 },
 	{ .move=MOVE_REVERSAL, .level=54 },
@@ -151707,6 +151789,7 @@ static u16 const sTutorMoves_SPECIES_STOUTLAND[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -153771,6 +153854,7 @@ static u16 const sTutorMoves_SPECIES_PIDOVE[] =
 	MOVE_UPROAR,
 	MOVE_WISH,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -153842,6 +153926,7 @@ static u16 const sTutorMoves_SPECIES_TRANQUILL[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -153905,6 +153990,7 @@ static u16 const sTutorMoves_SPECIES_UNFEZANT[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -156600,6 +156686,7 @@ static u16 const sTutorMoves_SPECIES_AUDINO[] =
 	MOVE_WORK_UP,
 	MOVE_YAWN,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -167169,6 +167256,7 @@ static u16 const sTutorMoves_SPECIES_MINCCINO[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_WAKE_UP_SLAP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -167341,6 +167429,7 @@ static u16 const sTutorMoves_SPECIES_CINCCINO[] =
 	MOVE_TRIPLE_AXEL,
 	MOVE_U_TURN,
 	MOVE_UPROAR,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -169727,6 +169816,7 @@ static u16 const sTutorMoves_SPECIES_DEERLING[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WORRY_SEED,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -169885,6 +169975,7 @@ static u16 const sTutorMoves_SPECIES_SAWSBUCK[] =
 	MOVE_TRAILBLAZE,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -180908,6 +180999,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BOUFFALANT[] =
 	{ .move=MOVE_THROAT_CHOP, .level=35 },
 	{ .move=MOVE_HEAD_CHARGE, .level=40 },
 	{ .move=MOVE_SWORDS_DANCE, .level=45 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=46 },
 	{ .move=MOVE_MEGAHORN, .level=50 },
 	{ .move=MOVE_GIGA_IMPACT, .level=55 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -180969,6 +181061,7 @@ static u16 const sTutorMoves_SPECIES_BOUFFALANT[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -193970,6 +194063,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BUNNELBY[] =
 	{ .move=MOVE_TAKE_DOWN, .level=30 },
 	{ .move=MOVE_SWORDS_DANCE, .level=33 },
 	{ .move=MOVE_EARTHQUAKE, .level=36 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=36 },
 	{ .move=MOVE_SUPER_FANG, .level=39 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -194014,6 +194108,7 @@ static u16 const sTutorMoves_SPECIES_BUNNELBY[] =
 	MOVE_U_TURN,
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -194160,6 +194255,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DIGGERSBY[] =
 	{ .move=MOVE_BULLDOZE, .level=23 },
 	{ .move=MOVE_DIG, .level=28 },
 	{ .move=MOVE_BOUNCE, .level=33 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=36 },
 	{ .move=MOVE_TAKE_DOWN, .level=38 },
 	{ .move=MOVE_SWORDS_DANCE, .level=43 },
 	{ .move=MOVE_EARTHQUAKE, .level=48 },
@@ -194225,6 +194321,7 @@ static u16 const sTutorMoves_SPECIES_DIGGERSBY[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -194592,6 +194689,7 @@ static u16 const sTutorMoves_SPECIES_FLETCHLING[] =
 	MOVE_TERA_BLAST,
 	MOVE_THIEF,
 	MOVE_U_TURN,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -194751,6 +194849,7 @@ static u16 const sTutorMoves_SPECIES_FLETCHINDER[] =
 	MOVE_THIEF,
 	MOVE_U_TURN,
 	MOVE_WILL_O_WISP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -194888,6 +194987,7 @@ static u16 const sTutorMoves_SPECIES_TALONFLAME[] =
 	MOVE_THIEF,
 	MOVE_U_TURN,
 	MOVE_WILL_O_WISP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -195837,6 +195937,7 @@ static u16 const sTutorMoves_SPECIES_LITLEO[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WILL_O_WISP,
 	MOVE_YAWN,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -195963,6 +196064,7 @@ static u16 const sTutorMoves_SPECIES_PYROAR[] =
 	MOVE_TRAILBLAZE,
 	MOVE_WILD_CHARGE,
 	MOVE_WILL_O_WISP,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -197301,6 +197403,7 @@ static u16 const sTutorMoves_SPECIES_FURFROU[] =
 	MOVE_WILD_CHARGE,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -201531,6 +201634,7 @@ static u16 const sTutorMoves_SPECIES_HELIOPTILE[] =
 	MOVE_U_TURN,
 	MOVE_VOLT_SWITCH,
 	MOVE_WILD_CHARGE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -201664,6 +201768,7 @@ static u16 const sTutorMoves_SPECIES_HELIOLISK[] =
 	MOVE_VOLT_SWITCH,
 	MOVE_WEATHER_BALL,
 	MOVE_WILD_CHARGE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -214053,6 +214158,7 @@ static u16 const sTutorMoves_SPECIES_PIKIPEK[] =
 	MOVE_THIEF,
 	MOVE_U_TURN,
 	MOVE_UPROAR,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -214169,6 +214275,7 @@ static u16 const sTutorMoves_SPECIES_TRUMBEAK[] =
 	MOVE_THIEF,
 	MOVE_U_TURN,
 	MOVE_UPROAR,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -214252,6 +214359,7 @@ static u16 const sTutorMoves_SPECIES_TOUCANNON[] =
 	MOVE_THROAT_CHOP,
 	MOVE_U_TURN,
 	MOVE_UPROAR,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -214387,6 +214495,7 @@ static u16 const sTutorMoves_SPECIES_YUNGOOS[] =
 	MOVE_U_TURN,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -214488,6 +214597,7 @@ static u16 const sTutorMoves_SPECIES_GUMSHOOS[] =
 	MOVE_U_TURN,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -219972,6 +220082,7 @@ static u16 const sTutorMoves_SPECIES_STUFFUL[] =
 	MOVE_THUNDER_PUNCH,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -220069,6 +220180,7 @@ static u16 const sTutorMoves_SPECIES_BEWEAR[] =
 	MOVE_THUNDER_PUNCH,
 	MOVE_WORK_UP,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -221070,6 +221182,7 @@ static u16 const sTutorMoves_SPECIES_ORANGURU[] =
 	MOVE_TRICK_ROOM,
 	MOVE_YAWN,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -221281,6 +221394,7 @@ static u16 const sTutorMoves_SPECIES_PASSIMIAN[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_VACUUM_WAVE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -223191,6 +223305,7 @@ static u16 const sTutorMoves_SPECIES_KOMALA[] =
 	MOVE_U_TURN,
 	MOVE_WISH,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -238448,6 +238563,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SKWOVET[] =
 	{ .move=MOVE_REST, .level=25 },
 	{ .move=MOVE_COUNTER, .level=30 },
 	{ .move=MOVE_BULLET_SEED, .level=35 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=36 },
 	{ .move=MOVE_SUPER_FANG, .level=40 },
 	{ .move=MOVE_BELCH, .level=45 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -238485,6 +238601,7 @@ static u16 const sTutorMoves_SPECIES_SKWOVET[] =
 	MOVE_TERA_BLAST,
 	MOVE_THIEF,
 	MOVE_TRAILBLAZE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -238511,6 +238628,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GREEDENT[] =
 	{ .move=MOVE_BODY_SLAM, .level=20 },
 	{ .move=MOVE_REST, .level=27 },
 	{ .move=MOVE_COUNTER, .level=34 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=36 },
 	{ .move=MOVE_BULLET_SEED, .level=41 },
 	{ .move=MOVE_SUPER_FANG, .level=48 },
 	{ .move=MOVE_BELCH, .level=55 },
@@ -238561,6 +238679,7 @@ static u16 const sTutorMoves_SPECIES_GREEDENT[] =
 	MOVE_THIEF,
 	MOVE_THUNDER_FANG,
 	MOVE_WILD_CHARGE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -240129,6 +240248,7 @@ static u16 const sTutorMoves_SPECIES_WOOLOO[] =
 	MOVE_SWAGGER,
 	MOVE_THUNDER_WAVE,
 	MOVE_WILD_CHARGE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -240189,6 +240309,7 @@ static u16 const sTutorMoves_SPECIES_DUBWOOL[] =
 	MOVE_THUNDER_WAVE,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -246869,6 +246990,7 @@ static u16 const sTutorMoves_SPECIES_INDEEDEE[] =
 	MOVE_TRICK,
 	MOVE_TRICK_ROOM,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -252874,6 +252996,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_WYRDEER[] =
 	{ .move=MOVE_CALM_MIND, .level=27 },
 	{ .move=MOVE_ROLE_PLAY, .level=32 },
 	{ .move=MOVE_ZEN_HEADBUTT, .level=37 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=44 },
 	{ .move=MOVE_IMPRISON, .level=49 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=55 },
 	{ .move=MOVE_MEGAHORN, .level=62 },
@@ -252939,6 +253062,7 @@ static u16 const sTutorMoves_SPECIES_WYRDEER[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -253246,6 +253370,7 @@ static u16 const sTutorMoves_SPECIES_URSALUNA[] =
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
 	MOVE_VACUUM_WAVE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -254437,6 +254562,7 @@ static u16 const sTutorMoves_SPECIES_RATTATA_ALOLAN[] =
 	MOVE_UPROAR,
 	MOVE_ZEN_HEADBUTT,
 	MOVE_ECLIPSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -254539,6 +254665,7 @@ static u16 const sTutorMoves_SPECIES_RATICATE_ALOLAN[] =
 	MOVE_VENOSHOCK,
 	MOVE_ZEN_HEADBUTT,
 	MOVE_ECLIPSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -279900,6 +280027,7 @@ static u16 const sTutorMoves_SPECIES_INDEEDEE_FEMALE[] =
 	MOVE_TRICK,
 	MOVE_TRICK_ROOM,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -282798,6 +282926,7 @@ static u16 const sTutorMoves_SPECIES_LECHONK[] =
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -282874,6 +283003,7 @@ static u16 const sTutorMoves_SPECIES_OINKOLOGNE[] =
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -282964,6 +283094,7 @@ static u16 const sTutorMoves_SPECIES_OINKOLOGNE_FEMALE[] =
 	MOVE_TRAILBLAZE,
 	MOVE_UPROAR,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -283817,6 +283948,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TANDEMAUS[] =
 	{ .move=MOVE_CHARM, .level=33 },
 	{ .move=MOVE_BEAT_UP, .level=37 },
 	{ .move=MOVE_COPYCAT, .level=41 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=42 },
 	{ .move=MOVE_POPULATION_BOMB, .level=46 },
 	{ .move=MOVE_NONE, .level=0 },
 };
@@ -283866,6 +283998,7 @@ static u16 const sTutorMoves_SPECIES_TANDEMAUS[] =
 	MOVE_TICKLE,
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -283895,6 +284028,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MAUSHOLD[] =
 	{ .move=MOVE_HYPER_VOICE, .level=33 },
 	{ .move=MOVE_CHARM, .level=37 },
 	{ .move=MOVE_BEAT_UP, .level=41 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=42 },
 	{ .move=MOVE_COPYCAT, .level=46 },
 	{ .move=MOVE_POPULATION_BOMB, .level=53 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -283944,6 +284078,7 @@ static u16 const sTutorMoves_SPECIES_MAUSHOLD[] =
 	MOVE_TRAILBLAZE,
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -284078,6 +284213,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MAUSHOLD_FAMILY_OF_FOUR[] 
 	{ .move=MOVE_HYPER_VOICE, .level=33 },
 	{ .move=MOVE_CHARM, .level=37 },
 	{ .move=MOVE_BEAT_UP, .level=41 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=42 },
 	{ .move=MOVE_COPYCAT, .level=46 },
 	{ .move=MOVE_POPULATION_BOMB, .level=53 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -284129,6 +284265,7 @@ static u16 const sTutorMoves_SPECIES_MAUSHOLD_FAMILY_OF_FOUR[] =
 	MOVE_TRAILBLAZE,
 	MOVE_U_TURN,
 	MOVE_WATER_PULSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -289493,6 +289630,7 @@ static u16 const sTutorMoves_SPECIES_CYCLIZAR[] =
 	MOVE_U_TURN,
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -291932,6 +292070,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FARIGIRAF[] =
 	{ .move=MOVE_TWIN_BEAM, .level=32 },
 	{ .move=MOVE_CRUNCH, .level=37 },
 	{ .move=MOVE_BATON_PASS, .level=41 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=44 },
 	{ .move=MOVE_NASTY_PLOT, .level=46 },
 	{ .move=MOVE_PSYCHIC, .level=50 },
 	{ .move=MOVE_NONE, .level=0 },
@@ -292005,6 +292144,7 @@ static u16 const sTutorMoves_SPECIES_FARIGIRAF[] =
 	MOVE_WISH,
 	MOVE_ZEN_HEADBUTT,
 	MOVE_ECLIPSE,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -292152,6 +292292,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DUDUNSPARCE[] =
 	{ .move=MOVE_HYPER_DRILL, .level=32 },
 	{ .move=MOVE_ROOST, .level=36 },
 	{ .move=MOVE_DRAGON_RUSH, .level=40 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=42 },
 	{ .move=MOVE_COIL, .level=44 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=48 },
 	{ .move=MOVE_ENDEAVOR, .level=52 },
@@ -292237,6 +292378,7 @@ static u16 const sTutorMoves_SPECIES_DUDUNSPARCE[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -292399,6 +292541,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DUDUNSPARCE_THREE_SEGMENT[
 	{ .move=MOVE_HYPER_DRILL, .level=32 },
 	{ .move=MOVE_ROOST, .level=36 },
 	{ .move=MOVE_DRAGON_RUSH, .level=40 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=42 },
 	{ .move=MOVE_COIL, .level=44 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=48 },
 	{ .move=MOVE_ENDEAVOR, .level=52 },
@@ -292484,6 +292627,7 @@ static u16 const sTutorMoves_SPECIES_DUDUNSPARCE_THREE_SEGMENT[] =
 	MOVE_UPROAR,
 	MOVE_WILD_CHARGE,
 	MOVE_ZEN_HEADBUTT,
+	MOVE_PLAIN_TERRAIN,
 	MOVE_NONE,
 };
 
@@ -298875,6 +299019,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TAUROS_PALDEAN_COMBAT_BREE
 	{ .move=MOVE_RAGING_BULL, .level=35 },
 	{ .move=MOVE_REST, .level=40 },
 	{ .move=MOVE_SWAGGER, .level=45 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=46 },
 	{ .move=MOVE_THRASH, .level=50 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=55 },
 	{ .move=MOVE_CLOSE_COMBAT, .level=60 },
@@ -298981,6 +299126,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TAUROS_PALDEAN_BLAZE_BREED
 	{ .move=MOVE_RAGING_BULL, .level=35 },
 	{ .move=MOVE_REST, .level=40 },
 	{ .move=MOVE_SWAGGER, .level=45 },
+	{ .move=MOVE_PLAIN_TERRAIN, .level=46 },
 	{ .move=MOVE_THRASH, .level=50 },
 	{ .move=MOVE_FLARE_BLITZ, .level=55 },
 	{ .move=MOVE_CLOSE_COMBAT, .level=60 },
