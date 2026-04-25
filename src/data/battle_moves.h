@@ -5519,6 +5519,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,
         .sheerForceBoost = TRUE,
+        .slicingMove = B_UPDATED_MOVE_FLAGS >= GEN_9,
     },
 
     [MOVE_BLAST_BURN] =
@@ -6056,6 +6057,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .split = SPLIT_PHYSICAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,
+        .slicingMove = B_UPDATED_MOVE_FLAGS >= GEN_9,
     },
 
     [MOVE_FRENZY_PLANT] =
@@ -7500,6 +7502,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,
         .highCritRatio = TRUE,
+        .slicingMove = B_UPDATED_MOVE_FLAGS >= GEN_9,
     },
 
     [MOVE_THUNDER_FANG] =
@@ -14844,6 +14847,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_STATUS,
         .zMoveEffect = Z_EFFECT_NONE,
+        .soundMove = B_UPDATED_MOVE_FLAGS >= GEN_9,
         .ignoresSubstitute = TRUE,
     },
 
