@@ -1,9 +1,9 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Freeze has a 20% chance of being thawed")
+SINGLE_BATTLE_TEST("Freeze has a 25% chance of being thawed")
 {
-    PASSES_RANDOMLY(20, 100, RNG_FROZEN);
+    PASSES_RANDOMLY(1, 4, RNG_FROZEN);
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Status1(STATUS1_FREEZE); }
         OPPONENT(SPECIES_WOBBUFFET);
@@ -11,6 +11,24 @@ SINGLE_BATTLE_TEST("Freeze has a 20% chance of being thawed")
         TURN { MOVE(player, MOVE_CELEBRATE); }
     } SCENE {
         STATUS_ICON(player, none: TRUE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Freeze always thaws on the third attempted turn")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Status1(STATUS1_FREEZE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_FROZEN, FALSE)); }
+        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_FROZEN, FALSE)); }
+        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_FROZEN, FALSE)); }
+    } SCENE {
+        MESSAGE("Wobbuffet is frozen solid!");
+        MESSAGE("Wobbuffet is frozen solid!");
+        MESSAGE("Wobbuffet was defrosted!");
+        STATUS_ICON(player, none: TRUE);
+        MESSAGE("Wobbuffet used Celebrate!");
     }
 }
 

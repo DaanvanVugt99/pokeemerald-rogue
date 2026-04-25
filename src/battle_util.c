@@ -3293,7 +3293,9 @@ u8 DoBattlerEndTurnEffects(void)
                     }
                     else
                     {
-                        if (B_SLEEP_TURNS >= GEN_5)
+                        if (B_SLEEP_TURNS >= GEN_9)
+                            gBattleMons[battler].status1 |= STATUS1_SLEEP_TURN(RandomUniform(RNG_SLEEP_TURNS, 0, 2) == 0 ? 3 : 4);
+                        else if (B_SLEEP_TURNS >= GEN_5)
                             gBattleMons[battler].status1 |= ((Random() % 3) + 2);
                         else
                             gBattleMons[battler].status1 |= ((Random() % 4) + 3);
@@ -3766,7 +3768,13 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
         case CANCELLER_FROZEN: // check being frozen
             if (gBattleMons[gBattlerAttacker].status1 & STATUS1_FREEZE && !(gBattleMoves[gCurrentMove].thawsUser))
             {
-                if (!RandomPercentage(RNG_FROZEN, 20))
+                u8 thawChance = B_FREEZE_THAW_CHANCE >= GEN_9 ? 25 : 20;
+
+                if (B_FREEZE_AUTO_THAW >= GEN_9 && gDisableStructs[gBattlerAttacker].frozenTurns < 3)
+                    gDisableStructs[gBattlerAttacker].frozenTurns++;
+
+                if (!((B_FREEZE_AUTO_THAW >= GEN_9 && gDisableStructs[gBattlerAttacker].frozenTurns >= 3)
+                   || RandomPercentage(RNG_FROZEN, thawChance)))
                 {
                     if (HasBattlerAbility(gBattlerAttacker, ABILITY_UNKNOWN_BIOLOGY))
                     {
@@ -3781,6 +3789,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 else // unfreeze
                 {
                     gBattleMons[gBattlerAttacker].status1 &= ~STATUS1_FREEZE;
+                    gDisableStructs[gBattlerAttacker].frozenTurns = 0;
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_MoveUsedUnfroze;
                     gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_DEFROSTED;
@@ -3921,7 +3930,9 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
             if (!gBattleStruct->isAtkCancelerForCalledMove
              && (gBattleMons[gBattlerAttacker].status1 & STATUS1_PARALYSIS)
              && !HasBattlerAbility(gBattlerAttacker, ABILITY_UNKNOWN_BIOLOGY)
-             && !RandomPercentage(RNG_PARALYSIS, 75))
+             && (B_PARALYSIS_SKIP_CHANCE >= GEN_9
+                 ? RandomUniform(RNG_PARALYSIS, 0, 7) == 0
+                 : !RandomPercentage(RNG_PARALYSIS, 75)))
             {
                 gProtectStructs[gBattlerAttacker].prlzImmobility = TRUE;
                 // This is removed in FRLG and Emerald for some reason

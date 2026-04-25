@@ -6,14 +6,13 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_HYPNOSIS].effect == EFFECT_SLEEP);
 }
 
-SINGLE_BATTLE_TEST("Hypnosis inflicts 1-3 turns of sleep")
+SINGLE_BATTLE_TEST("Hypnosis inflicts 2-3 turns of sleep")
 {
-    u32 turns, count;
-    ASSUME(B_SLEEP_TURNS >= GEN_5);
-    PARAMETRIZE { turns = 1; }
-    PARAMETRIZE { turns = 2; }
-    PARAMETRIZE { turns = 3; }
-    PASSES_RANDOMLY(1, 3, RNG_SLEEP_TURNS);
+    u32 turns, count, passes;
+    ASSUME(B_SLEEP_TURNS >= GEN_9);
+    PARAMETRIZE { turns = 2; passes = 1; }
+    PARAMETRIZE { turns = 3; passes = 2; }
+    PASSES_RANDOMLY(passes, 3, RNG_SLEEP_TURNS);
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);

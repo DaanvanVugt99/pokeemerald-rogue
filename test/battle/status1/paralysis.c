@@ -30,9 +30,9 @@ SINGLE_BATTLE_TEST("Paralysis reduces Speed by 50%")
     }
 }
 
-SINGLE_BATTLE_TEST("Paralysis has a 25% chance of skipping the turn")
+SINGLE_BATTLE_TEST("Paralysis has a 12.5% chance of skipping the turn")
 {
-    PASSES_RANDOMLY(25, 100, RNG_PARALYSIS);
+    PASSES_RANDOMLY(1, 8, RNG_PARALYSIS);
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Status1(STATUS1_PARALYSIS); }
         OPPONENT(SPECIES_WOBBUFFET);
