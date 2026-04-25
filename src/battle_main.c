@@ -4840,7 +4840,7 @@ static bool32 IsWeatherAffectedMove(u16 move)
         case MOVE_BLIZZARD:
         case MOVE_SNOWSCAPE:
         case MOVE_CHILLY_RECEPTION:
-        case MOVE_CORROSIVE_CLOUDS:
+        case MOVE_ACID_RAIN:
         case MOVE_ECLIPSE:
         case MOVE_SANDSTORM:
         case MOVE_SHORE_UP:

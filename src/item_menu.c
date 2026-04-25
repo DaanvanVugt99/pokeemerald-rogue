@@ -1273,7 +1273,7 @@ static void BagMenu_ItemPrintCallback(u8 windowId, u32 itemIndex, u8 y)
         // Draw TM icon
         if (itemId >= ITEM_TR01 && itemId <= ITEM_TR50)
             BlitBitmapToWindow(windowId, gBagMenuTRIcon_Gfx, 8, y - 1, 16, 16);
-        if (itemId >= ITEM_TM01 && itemId <= ITEM_TM51)
+        if (itemId >= ITEM_TM01 && itemId <= ITEM_TM52)
             BlitBitmapToWindow(windowId, gBagMenuTMIcon_Gfx, 8, y - 1, 16, 16);
         else if (itemId >= ITEM_HM01 && itemId <= ITEM_HM08)
             BlitBitmapToWindow(windowId, gBagMenuHMIcon_Gfx, 8, y - 1, 16, 16);

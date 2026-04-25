@@ -14507,7 +14507,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .sheerForceBoost = TRUE, //(uncomment when effect is implemented, otherwise it breaks the Sheer Force Test)
     },
 
-    [MOVE_CORROSIVE_CLOUDS] =
+    [MOVE_ACID_RAIN] =
     {
         .effect = EFFECT_CORROSIVE_CLOUDS,
         .power = 0,

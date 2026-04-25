@@ -3320,7 +3320,7 @@ static const u8 sElectroShotDescription[] = _(
     "Absorbs electricity in one turn,\n"
     "then attacks next turn.");
 
-static const u8 sCorrosiveCloudsDescription[] = _(
+static const u8 sAcidRainDescription[] = _(
     "Whips up acidic clouds to\n"
     "cause acid rain.");
 
@@ -4212,7 +4212,7 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_SYRUP_BOMB - 1] = sSyrupBombDescription,
     [MOVE_IVY_CUDGEL - 1] = sIvyCudgelDescription,
     [MOVE_ELECTRO_SHOT - 1] = sElectroShotDescription,
-    [MOVE_CORROSIVE_CLOUDS - 1] = sCorrosiveCloudsDescription,
+    [MOVE_ACID_RAIN - 1] = sAcidRainDescription,
     [MOVE_ECLIPSE - 1] = sEclipseDescription,
     [MOVE_INFESTED_TERRAIN - 1] = sInfestedTerrainDescription,
     [MOVE_PLAIN_TERRAIN - 1] = sPlainTerrainDescription,

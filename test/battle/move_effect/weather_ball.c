@@ -4,7 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_WEATHER_BALL].effect == EFFECT_WEATHER_BALL);
-    ASSUME(gBattleMoves[MOVE_CORROSIVE_CLOUDS].effect == EFFECT_CORROSIVE_CLOUDS);
+    ASSUME(gBattleMoves[MOVE_ACID_RAIN].effect == EFFECT_CORROSIVE_CLOUDS);
     ASSUME(gBattleMoves[MOVE_ECLIPSE].effect == EFFECT_ECLIPSE);
     ASSUME(gSpeciesInfo[SPECIES_MEGANIUM].types[0] == TYPE_GRASS
         || gSpeciesInfo[SPECIES_MEGANIUM].types[1] == TYPE_GRASS);
@@ -97,7 +97,7 @@ SINGLE_BATTLE_TEST("Weather Ball doubles its power and turns to a Poison-type mo
 {
     u16 move;
     PARAMETRIZE{ move = MOVE_CELEBRATE; }
-    PARAMETRIZE{ move = MOVE_CORROSIVE_CLOUDS; }
+    PARAMETRIZE{ move = MOVE_ACID_RAIN; }
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WIGGLYTUFF) { Item(ITEM_SAFETY_GOGGLES); };

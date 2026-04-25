@@ -2281,7 +2281,7 @@ bool8 Rogue_IsItemEnabled(u16 itemId)
             return FALSE;
 
         // These TMs aren't setup
-        if(itemId >= ITEM_TM52 && itemId <= ITEM_TM100)
+        if(itemId >= ITEM_TM53 && itemId <= ITEM_TM100)
             return FALSE;
 
         // Ignore fossils for now
