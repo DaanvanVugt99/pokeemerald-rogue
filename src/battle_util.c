@@ -9096,6 +9096,35 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SPILLWAY)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_WATER
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && ClearSideEntryHazards(GetBattlerSide(battler)))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SPILLWAY);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CALL_ALLIES)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].soundMove
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_INFESTED_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_CALL_ALLIES);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_CallAlliesActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SWARM_ASSAULT)
          && IsMoveMakingContact(move, battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -14092,6 +14121,14 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
      && gBattleMoves[move].punchingMove
      && gDisableStructs[battlerAtk].uniquePersistentStateActive
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_ELECTRIC_TERRAIN))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_CALL_ALLIES)
+     && gBattleMoves[move].soundMove
+     && !IS_MOVE_STATUS(move)
+     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_INFESTED_TERRAIN))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }

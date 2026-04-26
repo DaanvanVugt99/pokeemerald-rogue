@@ -523,6 +523,9 @@ static const u8 sAdrenalineDescription[] = _("If poisoned, punching moves restor
 static const u8 sUprootDescription[] = _("First Grass move uses Ingrain. Rooted Grass moves use Defense.");
 static const u8 sSpellfistDescription[] = _("First punch uses Focus Energy. Punches target Sp. Def.");
 static const u8 sRegalDecreeDescription[] = _("First status move uses Metal Sound. Sound moves become Steel.");
+static const u8 sAerialAssaultDescription[] = _("If moving first, recoil moves do not hurt it.");
+static const u8 sSpillwayDescription[] = _("Water moves clear entry hazards from its side.");
+static const u8 sCallAlliesDescription[] = _("Sound moves gain priority and set Infested Terrain.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -876,6 +879,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_UPROOT] = _("Uproot"),
     [ABILITY_SPELLFIST] = _("Spellfist"),
     [ABILITY_REGAL_DECREE] = _("Regal Decree"),
+    [ABILITY_AERIAL_ASSAULT] = _("Aerial Assault"),
+    [ABILITY_SPILLWAY] = _("Spillway"),
+    [ABILITY_CALL_ALLIES] = _("Call Allies"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1413,6 +1419,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_UPROOT] = _("Uproot"),
     [ABILITY_SPELLFIST] = _("Spellfist"),
     [ABILITY_REGAL_DECREE] = _("Regal Decree"),
+    [ABILITY_AERIAL_ASSAULT] = _("AerialAssault"),
+    [ABILITY_SPILLWAY] = _("Spillway"),
+    [ABILITY_CALL_ALLIES] = _("CallAllies"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2135,4 +2144,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_UPROOT] = sUprootDescription,
     [ABILITY_SPELLFIST] = sSpellfistDescription,
     [ABILITY_REGAL_DECREE] = sRegalDecreeDescription,
+    [ABILITY_AERIAL_ASSAULT] = sAerialAssaultDescription,
+    [ABILITY_SPILLWAY] = sSpillwayDescription,
+    [ABILITY_CALL_ALLIES] = sCallAlliesDescription,
 };

@@ -365,6 +365,7 @@ static void BestowItem(u32 battlerAtk, u32 battlerDef);
 static bool8 IsFinalStrikeEffect(u16 move);
 static void TryUpdateRoundTurnOrder(void);
 static bool32 ChangeOrderTargetAfterAttacker(void);
+static bool32 AerialAssaultIgnoresRecoil(void);
 void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBattler);
 static void RemoveAllWeather(void);
 static void RemoveAllTerrains(void);
@@ -3010,6 +3011,12 @@ u8 GetBattlerTurnOrderNum(u8 battler)
             break;
     }
     return i;
+}
+
+static bool32 AerialAssaultIgnoresRecoil(void)
+{
+    return HasBattlerAbility(gBattlerAttacker, ABILITY_AERIAL_ASSAULT)
+        && GetBattlerTurnOrderNum(gBattlerAttacker) < GetBattlerTurnOrderNum(gBattlerTarget);
 }
 
 static void CheckSetUnburden(u8 battler)
@@ -5835,7 +5842,8 @@ static void Cmd_moveend(void)
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
                 && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
                 && IsBattlerAlive(gBattlerAttacker)
-                && gBattleScripting.savedDmg != 0) // Some checks may be redundant alongside this one
+                && gBattleScripting.savedDmg != 0 // Some checks may be redundant alongside this one
+                && !AerialAssaultIgnoresRecoil())
             {
                 switch (gBattleMoves[gCurrentMove].effect)
                 {
