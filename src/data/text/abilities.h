@@ -526,6 +526,9 @@ static const u8 sRegalDecreeDescription[] = _("First status move uses Metal Soun
 static const u8 sAerialAssaultDescription[] = _("If moving first, recoil moves do not hurt it.");
 static const u8 sSpillwayDescription[] = _("Water moves clear entry hazards from its side.");
 static const u8 sCallAlliesDescription[] = _("Sound moves gain priority and set Infested Terrain.");
+static const u8 sXRayJawsDescription[] = _("Biting moves hit through protection and defense boosts.");
+static const u8 sThickSkullDescription[] = _("At full HP, endures one-hit KOs and cannot flinch.");
+static const u8 sImpenetrableDescription[] = _("Special supereffective hits deal neutral damage.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -882,6 +885,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_AERIAL_ASSAULT] = _("Aerial Assault"),
     [ABILITY_SPILLWAY] = _("Spillway"),
     [ABILITY_CALL_ALLIES] = _("Call Allies"),
+    [ABILITY_X_RAY_JAWS] = _("X-Ray Jaws"),
+    [ABILITY_THICK_SKULL] = _("Thick Skull"),
+    [ABILITY_IMPENETRABLE] = _("Impenetrable"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1422,6 +1428,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_AERIAL_ASSAULT] = _("AerialAssault"),
     [ABILITY_SPILLWAY] = _("Spillway"),
     [ABILITY_CALL_ALLIES] = _("CallAllies"),
+    [ABILITY_X_RAY_JAWS] = _("X-Ray Jaws"),
+    [ABILITY_THICK_SKULL] = _("ThickSkull"),
+    [ABILITY_IMPENETRABLE] = _("Impenetrable"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2147,4 +2156,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_AERIAL_ASSAULT] = sAerialAssaultDescription,
     [ABILITY_SPILLWAY] = sSpillwayDescription,
     [ABILITY_CALL_ALLIES] = sCallAlliesDescription,
+    [ABILITY_X_RAY_JAWS] = sXRayJawsDescription,
+    [ABILITY_THICK_SKULL] = sThickSkullDescription,
+    [ABILITY_IMPENETRABLE] = sImpenetrableDescription,
 };

@@ -2274,9 +2274,11 @@ static void Cmd_adjustdamage(void)
         RecordItemEffectBattle(gBattlerTarget, holdEffect);
         gSpecialStatuses[gBattlerTarget].focusBanded = TRUE;
     }
-    else if (B_STURDY >= GEN_5 && GetBattlerAbility(gBattlerTarget) == ABILITY_STURDY && BATTLER_MAX_HP(gBattlerTarget))
+    else if (B_STURDY >= GEN_5
+          && (GetBattlerAbility(gBattlerTarget) == ABILITY_STURDY || HasBattlerAbility(gBattlerTarget, ABILITY_THICK_SKULL))
+          && BATTLER_MAX_HP(gBattlerTarget))
     {
-        RecordAbilityBattle(gBattlerTarget, ABILITY_STURDY);
+        RecordAbilityBattle(gBattlerTarget, GetBattlerAbility(gBattlerTarget) == ABILITY_STURDY ? ABILITY_STURDY : ABILITY_THICK_SKULL);
         gSpecialStatuses[gBattlerTarget].sturdied = TRUE;
     }
     else if (holdEffect == HOLD_EFFECT_FOCUS_SASH && BATTLER_MAX_HP(gBattlerTarget))
@@ -2329,7 +2331,7 @@ static void Cmd_adjustdamage(void)
     else if (gSpecialStatuses[gBattlerTarget].sturdied)
     {
         gMoveResultFlags |= MOVE_RESULT_STURDIED;
-        gLastUsedAbility = ABILITY_STURDY;
+        SetBattlerTriggeredAbility(gBattlerTarget, GetBattlerAbility(gBattlerTarget) == ABILITY_STURDY ? ABILITY_STURDY : ABILITY_THICK_SKULL);
     }
     else if (divineFavorActive)
     {
@@ -3492,6 +3494,8 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
                     if (HasBattlerAbility(gEffectBattler, ABILITY_INNER_FOCUS))
                         flinchPreventionAbility = ABILITY_INNER_FOCUS;
+                    else if (HasBattlerAbility(gEffectBattler, ABILITY_THICK_SKULL))
+                        flinchPreventionAbility = ABILITY_THICK_SKULL;
                     else if (HasBattlerAbility(gEffectBattler, ABILITY_SUBTERRANEAN))
                         flinchPreventionAbility = ABILITY_SUBTERRANEAN;
 
@@ -3499,8 +3503,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     {
                         if (primary == TRUE || certain == MOVE_EFFECT_CERTAIN)
                         {
-                            gLastUsedAbility = flinchPreventionAbility;
-                            gBattlerAbility = gEffectBattler;
+                            SetBattlerTriggeredAbility(gEffectBattler, flinchPreventionAbility);
                             RecordAbilityBattle(gEffectBattler, flinchPreventionAbility);
                             gBattlescriptCurrInstr = BattleScript_FlinchPrevention;
                         }
@@ -4050,6 +4053,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
                     if (randomFlinchChance
                      && !HasBattlerAbility(gEffectBattler, ABILITY_INNER_FOCUS)
+                     && !HasBattlerAbility(gEffectBattler, ABILITY_THICK_SKULL)
                      && !HasBattlerAbility(gEffectBattler, ABILITY_SUBTERRANEAN)
                      && GetBattlerTurnOrderNum(gEffectBattler) > gCurrentTurnActionNumber)
                         gBattleMons[gEffectBattler].status2 |= sStatusFlagsForMoveEffects[MOVE_EFFECT_FLINCH];
@@ -12752,12 +12756,11 @@ static void Cmd_tryKO(void)
         endureCharmActive = ActivateEndureCharm(gBattlerTarget);
     }
 
-    if (targetAbility == ABILITY_STURDY)
+    if (targetAbility == ABILITY_STURDY || HasBattlerAbility(gBattlerTarget, ABILITY_THICK_SKULL))
     {
         gMoveResultFlags |= MOVE_RESULT_MISSED;
-        gLastUsedAbility = ABILITY_STURDY;
+        SetBattlerTriggeredAbility(gBattlerTarget, targetAbility == ABILITY_STURDY ? ABILITY_STURDY : ABILITY_THICK_SKULL);
         gBattlescriptCurrInstr = BattleScript_SturdyPreventsOHKO;
-        gBattlerAbility = gBattlerTarget;
     }
     else
     {
@@ -15431,6 +15434,8 @@ bool32 DoesSubstituteBlockMove(u32 battlerAtk, u32 battlerDef, u32 move)
     else if (gBattleMoves[move].ignoresSubstitute)
         return FALSE;
     else if (HasBattlerAbility(battlerAtk, ABILITY_INFILTRATOR))
+        return FALSE;
+    else if (HasBattlerAbility(battlerAtk, ABILITY_X_RAY_JAWS) && gBattleMoves[move].bitingMove)
         return FALSE;
     else
         return TRUE;

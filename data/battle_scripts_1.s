@@ -8236,6 +8236,7 @@ BattleScript_EnduredMsg::
 
 BattleScript_SturdiedMsg::
 	pause B_WAIT_TIME_SHORTEST
+	copyhword sABILITY_OVERWRITE, gLastUsedAbility
 	call BattleScript_AbilityPopUpTarget
 	printstring STRINGID_ENDUREDSTURDY
 	waitmessage B_WAIT_TIME_LONG
@@ -9948,6 +9949,7 @@ BattleScript_TookAttack::
 
 BattleScript_SturdyPreventsOHKO::
 	pause B_WAIT_TIME_SHORT
+	copyhword sABILITY_OVERWRITE, gLastUsedAbility
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PKMNPROTECTEDBY
 	pause B_WAIT_TIME_LONG

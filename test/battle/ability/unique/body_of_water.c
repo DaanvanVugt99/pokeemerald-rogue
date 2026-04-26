@@ -43,6 +43,19 @@ SINGLE_BATTLE_TEST("Body of Water only applies on the first turn out")
     }
 }
 
+SINGLE_BATTLE_TEST("Body of Water shows a popup when it reduces damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_VAPOREON) { Speed(100); Ability(ABILITY_WATER_ABSORB); UniqueAbility(ABILITY_BODY_OF_WATER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Ability(ABILITY_SHADOW_TAG); Moves(MOVE_THUNDERBOLT); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_THUNDERBOLT); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_BODY_OF_WATER);
+        MESSAGE("Vaporeon's Body of Water softened the attack!");
+    }
+}
+
 SINGLE_BATTLE_TEST("Body of Water refreshes after switching out and back in")
 {
     s16 firstSwitchInDamage;

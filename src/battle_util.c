@@ -74,6 +74,7 @@ static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
+static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef);
 static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
 static u16 GetGemItemForType(u32 type);
 static u16 GetRandomGemstashItemForBattler(u32 battler);
@@ -1073,7 +1074,9 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_STURDY] = 1,
     [ABILITY_SUCTION_CUPS] = 1,
     [ABILITY_TANGLED_FEET] = 1,
+    [ABILITY_THICK_SKULL] = 1,
     [ABILITY_THICK_FAT] = 1,
+    [ABILITY_IMPENETRABLE] = 1,
     [ABILITY_UNAWARE] = 1,
     [ABILITY_VITAL_SPIRIT] = 1,
     [ABILITY_VOLT_ABSORB] = 1,
@@ -8635,6 +8638,30 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BODY_OF_WATER)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && gDisableStructs[battler].isFirstTurn
+         && !IS_MOVE_STATUS(move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BODY_OF_WATER);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DesertShroudActivates;
+            effect++;
+        }
+
+        if (ShouldImpenetrableSoftenMove(move, moveEndAttacker, battler)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_IMPENETRABLE);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DesertShroudActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_COLD_SNAP)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -13327,6 +13354,10 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
         && (gBattleMoves[move].makesContact || (gBattleMoves[move].effect == EFFECT_SHELL_SIDE_ARM && gBattleStruct->swapDamageCategory))
         && !gProtectStructs[battler].maxGuarded) // Max Guard cannot be bypassed by Unseen Fist
         return FALSE;
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_X_RAY_JAWS)
+        && gBattleMoves[move].bitingMove
+        && !gProtectStructs[battler].maxGuarded)
+        return FALSE;
     else if (gBattleMoves[move].ignoresProtect)
         return FALSE;
     else if (gProtectStructs[battler].protected)
@@ -14103,6 +14134,12 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_X_RAY_JAWS)
+     && gBattleMoves[move].bitingMove)
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_STRIKER)
      && gBattleMoves[move].kickingMove
      && gCurrentTurnActionNumber < gBattlersCount
@@ -14721,6 +14758,12 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     // certain moves also ignore stat changes
     if (gBattleMoves[move].ignoresTargetDefenseEvasionStages)
         defStage = DEFAULT_STAT_STAGE;
+    if (HasBattlerAbility(battlerAtk, ABILITY_X_RAY_JAWS)
+     && gBattleMoves[move].bitingMove
+     && defStage > DEFAULT_STAT_STAGE)
+    {
+        defStage = DEFAULT_STAT_STAGE;
+    }
     if (HasBattlerAbility(battlerAtk, ABILITY_INSIGHT)
      && moveType == TYPE_PSYCHIC
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PSYCHIC_TERRAIN))
@@ -15701,9 +15744,38 @@ uq4_12_t CalcTypeEffectivenessMultiplier(u32 move, u32 moveType, u32 battlerAtk,
             modifier = CalcTypeEffectivenessMultiplierInternal(move, gBattleMoves[move].argument, battlerAtk, battlerDef, recordAbilities, modifier, defAbility);
     }
 
+    if (modifier > UQ_4_12(1.0) && IS_MOVE_SPECIAL(move) && HasBattlerAbility(battlerDef, ABILITY_IMPENETRABLE))
+    {
+        modifier = UQ_4_12(1.0);
+        if (recordAbilities)
+        {
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_IMPENETRABLE);
+            RecordAbilityBattle(battlerDef, ABILITY_IMPENETRABLE);
+        }
+    }
+
     if (recordAbilities)
         UpdateMoveResultFlags(modifier);
     return modifier;
+}
+
+static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef)
+{
+    u32 moveType;
+    uq4_12_t modifier = UQ_4_12(1.0);
+
+    if (!HasBattlerAbility(battlerDef, ABILITY_IMPENETRABLE) || !IS_MOVE_SPECIAL(move))
+        return FALSE;
+
+    GET_MOVE_TYPE(move, moveType);
+    if (move == MOVE_STRUGGLE || moveType == TYPE_MYSTERY)
+        return FALSE;
+
+    modifier = CalcTypeEffectivenessMultiplierInternal(move, moveType, battlerAtk, battlerDef, FALSE, modifier, GetBattlerAbility(battlerDef));
+    if (gBattleMoves[move].effect == EFFECT_TWO_TYPED_MOVE)
+        modifier = CalcTypeEffectivenessMultiplierInternal(move, gBattleMoves[move].argument, battlerAtk, battlerDef, FALSE, modifier, GetBattlerAbility(battlerDef));
+
+    return modifier > UQ_4_12(1.0);
 }
 
 static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, bool32 recordAbilities, uq4_12_t modifier, u32 defAbility)
@@ -15817,6 +15889,16 @@ uq4_12_t CalcTypeEffectivenessMultiplierForUI(u32 move, u32 moveType, u32 battle
         modifier = CalcTypeEffectivenessMultiplierForUIInternal(move, moveType, battlerAtk, battlerDef, recordAbilities, modifier, defAbility);
         if (gBattleMoves[move].effect == EFFECT_TWO_TYPED_MOVE)
             modifier = CalcTypeEffectivenessMultiplierForUIInternal(move, gBattleMoves[move].argument, battlerAtk, battlerDef, recordAbilities, modifier, defAbility);
+    }
+
+    if (modifier > UQ_4_12(1.0) && IS_MOVE_SPECIAL(move) && HasBattlerAbility(battlerDef, ABILITY_IMPENETRABLE))
+    {
+        modifier = UQ_4_12(1.0);
+        if (recordAbilities)
+        {
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_IMPENETRABLE);
+            RecordAbilityBattle(battlerDef, ABILITY_IMPENETRABLE);
+        }
     }
 
     if (recordAbilities)
