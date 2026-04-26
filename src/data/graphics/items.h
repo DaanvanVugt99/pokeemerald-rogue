@@ -1300,8 +1300,14 @@ const u32 gItemIconPalette_ToxicOrb[] = INCBIN_U32("graphics/items/icon_palettes
 const u32 gItemIcon_DampRock[] = INCBIN_U32("graphics/items/icons/damp_rock.4bpp.lz");
 const u32 gItemIconPalette_DampRock[] = INCBIN_U32("graphics/items/icon_palettes/damp_rock.gbapal.lz");
 
+const u32 gItemIcon_AcidRock[] = INCBIN_U32("graphics/items/icons/acid_rock.4bpp.lz");
+const u32 gItemIconPalette_AcidRock[] = INCBIN_U32("graphics/items/icon_palettes/acid_rock.gbapal.lz");
+
 const u32 gItemIcon_HeatRock[] = INCBIN_U32("graphics/items/icons/heat_rock.4bpp.lz");
 const u32 gItemIconPalette_HeatRock[] = INCBIN_U32("graphics/items/icon_palettes/heat_rock.gbapal.lz");
+
+const u32 gItemIcon_DimRock[] = INCBIN_U32("graphics/items/icons/dim_rock.4bpp.lz");
+const u32 gItemIconPalette_DimRock[] = INCBIN_U32("graphics/items/icon_palettes/dim_rock.gbapal.lz");
 
 const u32 gItemIcon_SmoothRock[] = INCBIN_U32("graphics/items/icons/smooth_rock.4bpp.lz");
 const u32 gItemIconPalette_SmoothRock[] = INCBIN_U32("graphics/items/icon_palettes/smooth_rock.gbapal.lz");
@@ -1533,6 +1539,9 @@ const u32 gItemIconPalette_LumBerry[] = INCBIN_U32("graphics/items/icon_palettes
 
 const u32 gItemIcon_SitrusBerry[] = INCBIN_U32("graphics/items/icons/sitrus_berry.4bpp.lz");
 const u32 gItemIconPalette_SitrusBerry[] = INCBIN_U32("graphics/items/icon_palettes/sitrus_berry.gbapal.lz");
+
+const u32 gItemIcon_RottenBerry[] = INCBIN_U32("graphics/items/icons/rotten_berry.4bpp.lz");
+const u32 gItemIconPalette_RottenBerry[] = INCBIN_U32("graphics/items/icon_palettes/rotten_berry.gbapal.lz");
 
 const u32 gItemIcon_FigyBerry[] = INCBIN_U32("graphics/items/icons/figy_berry.4bpp.lz");
 const u32 gItemIconPalette_FigyBerry[] = INCBIN_U32("graphics/items/icon_palettes/figy_berry.gbapal.lz");
