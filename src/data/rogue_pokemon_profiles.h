@@ -116167,19 +116167,21 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INFERNAP
 
 static struct LevelUpMove const sLevelUpMoves_SPECIES_PIPLUP[] =
 {
-	{ .move=MOVE_POUND, .level=1 },
+	{ .move=MOVE_ROUND, .level=1 },
 	{ .move=MOVE_GROWL, .level=4 },
 	{ .move=MOVE_WATER_GUN, .level=8 },
 	{ .move=MOVE_CHARM, .level=11 },
+	{ .move=MOVE_ECHOED_VOICE, .level=11 },
 	{ .move=MOVE_PECK, .level=15 },
 	{ .move=MOVE_BUBBLE_BEAM, .level=18 },
-	{ .move=MOVE_SWAGGER, .level=22 },
+	{ .move=MOVE_METAL_SOUND, .level=22 },
 	{ .move=MOVE_FURY_ATTACK, .level=25 },
 	{ .move=MOVE_BRINE, .level=29 },
 	{ .move=MOVE_WHIRLPOOL, .level=32 },
-	{ .move=MOVE_MIST, .level=36 },
+	{ .move=MOVE_UPROAR, .level=36 },
 	{ .move=MOVE_DRILL_PECK, .level=39 },
 	{ .move=MOVE_HYDRO_PUMP, .level=43 },
+	{ .move=MOVE_HYPER_VOICE, .level=47 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -116262,18 +116264,20 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_PIPLUP[]
 static struct LevelUpMove const sLevelUpMoves_SPECIES_PRINPLUP[] =
 {
 	{ .move=MOVE_METAL_CLAW, .level=0 },
-	{ .move=MOVE_TACKLE, .level=1 },
+	{ .move=MOVE_ROUND, .level=1 },
 	{ .move=MOVE_GROWL, .level=1 },
 	{ .move=MOVE_WATER_GUN, .level=1 },
+	{ .move=MOVE_ECHOED_VOICE, .level=11 },
 	{ .move=MOVE_PECK, .level=15 },
 	{ .move=MOVE_BUBBLE_BEAM, .level=19 },
-	{ .move=MOVE_SWAGGER, .level=24 },
+	{ .move=MOVE_METAL_SOUND, .level=24 },
 	{ .move=MOVE_FURY_ATTACK, .level=28 },
 	{ .move=MOVE_BRINE, .level=33 },
 	{ .move=MOVE_WHIRLPOOL, .level=37 },
-	{ .move=MOVE_MIST, .level=42 },
+	{ .move=MOVE_UPROAR, .level=42 },
 	{ .move=MOVE_DRILL_PECK, .level=46 },
 	{ .move=MOVE_HYDRO_PUMP, .level=50 },
+	{ .move=MOVE_HYPER_VOICE, .level=54 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -116375,20 +116379,21 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_PRINPLUP
 static struct LevelUpMove const sLevelUpMoves_SPECIES_EMPOLEON[] =
 {
 	{ .move=MOVE_AQUA_JET, .level=0 },
-	{ .move=MOVE_TACKLE, .level=1 },
+	{ .move=MOVE_ROUND, .level=1 },
 	{ .move=MOVE_GROWL, .level=1 },
 	{ .move=MOVE_WATER_GUN, .level=1 },
 	{ .move=MOVE_METAL_CLAW, .level=1 },
-	{ .move=MOVE_SWORDS_DANCE, .level=11 },
+	{ .move=MOVE_ECHOED_VOICE, .level=11 },
 	{ .move=MOVE_PECK, .level=15 },
 	{ .move=MOVE_BUBBLE_BEAM, .level=19 },
-	{ .move=MOVE_SWAGGER, .level=24 },
+	{ .move=MOVE_METAL_SOUND, .level=24 },
 	{ .move=MOVE_FURY_ATTACK, .level=28 },
 	{ .move=MOVE_BRINE, .level=33 },
 	{ .move=MOVE_WHIRLPOOL, .level=39 },
-	{ .move=MOVE_MIST, .level=46 },
+	{ .move=MOVE_UPROAR, .level=46 },
 	{ .move=MOVE_DRILL_PECK, .level=52 },
 	{ .move=MOVE_HYDRO_PUMP, .level=59 },
+	{ .move=MOVE_HYPER_VOICE, .level=62 },
 	{ .move=MOVE_WAVE_CRASH, .level=66 },
 	{ .move=MOVE_NONE, .level=0 },
 };

@@ -71,6 +71,8 @@ static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
 static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability);
 static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
+static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
+static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
 static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
 static u16 GetGemItemForType(u32 type);
@@ -4856,13 +4858,60 @@ static inline u8 GetBattlerSideFaintCounter(u32 battler)
 
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget)
 {
-    return IsBattlerAlive(battlerAttacker)
+    return battlerAttacker != battlerTarget
         && IsBattlerAlive(battlerTarget)
-        && battlerAttacker != battlerTarget
+        && CanUseSelfExtraMove(battlerAttacker);
+}
+
+static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
+{
+    return IsBattlerAlive(battlerAttacker)
         && !gProtectStructs[battlerAttacker].confusionSelfDmg
         && !gProtectStructs[battlerAttacker].extraMoveUsed
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_SLEEP)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
+}
+
+static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move)
+{
+    u32 pendingDamage = 0;
+
+    if (CanUseSelfExtraMove(battlerAttacker))
+    {
+        if (move == MOVE_STRUGGLE || !HasBattlerAbility(battlerAttacker, ABILITY_ROCK_HEAD))
+        {
+            switch (gBattleMoves[move].effect)
+            {
+            case EFFECT_RECOIL_25:
+                pendingDamage += max(1, gBattleScripting.savedDmg / 4);
+                break;
+            case EFFECT_RECOIL_33:
+            case EFFECT_RECOIL_33_STATUS:
+                pendingDamage += max(1, gBattleScripting.savedDmg / 3);
+                break;
+            case EFFECT_RECOIL_50:
+                pendingDamage += max(1, gBattleScripting.savedDmg / 2);
+                break;
+            case EFFECT_RECOIL_HP_25:
+                pendingDamage += max(1, GetNonDynamaxMaxHP(battlerAttacker) / 4);
+                break;
+            }
+        }
+
+        if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && TARGET_TURN_DAMAGED
+         && IsMoveMakingContact(move, battlerAttacker)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerHoldEffect(gBattlerTarget, TRUE) == HOLD_EFFECT_ROCKY_HELMET
+         && !HasBattlerAbility(battlerAttacker, ABILITY_MAGIC_GUARD))
+        {
+            pendingDamage += max(1, GetNonDynamaxMaxHP(battlerAttacker) / 6);
+        }
+
+        return gBattleMons[battlerAttacker].hp > pendingDamage;
+    }
+
+    return FALSE;
 }
 
 static void StartAbilityCalledMoveScript(void)
@@ -9343,6 +9392,73 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_UPROOT)
+         && moveType == TYPE_GRASS
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_UPROOT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_INGRAIN;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SPELLFIST)
+         && gBattleMoves[move].punchingMove
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SPELLFIST);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_FOCUS_ENERGY;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_REGAL_DECREE)
+         && IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            u32 target = BATTLE_OPPOSITE(battler);
+
+            if (!IsBattlerAlive(target) && gBattlersCount > 2)
+                target ^= BIT_FLANK;
+
+            if (CanUseExtraMove(battler, target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_REGAL_DECREE);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_METAL_SOUND;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_UPDRAFT)
          && moveType == TYPE_FIRE
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -10958,7 +11074,7 @@ u32 IsAbilityPreventingEscape(u32 battler)
     return 0;
 }
 
-bool32 CanBattlerEscape(u32 battler) // no ability check
+bool32 CanBattlerEscape(u32 battler)
 {
     if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_SHED_SHELL)
         return TRUE;
@@ -10966,7 +11082,7 @@ bool32 CanBattlerEscape(u32 battler) // no ability check
         return TRUE;
     else if (gBattleMons[battler].status2 & (STATUS2_ESCAPE_PREVENTION | STATUS2_WRAPPED))
         return FALSE;
-    else if (gStatuses3[battler] & STATUS3_ROOTED)
+    else if ((gStatuses3[battler] & STATUS3_ROOTED) && !HasBattlerAbility(battler, ABILITY_UPROOT))
         return FALSE;
     else if (gFieldStatuses & STATUS_FIELD_FAIRY_LOCK)
         return FALSE;
@@ -14253,6 +14369,13 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
         }
     }
+    else if (HasBattlerAbility(battlerAtk, ABILITY_UPROOT)
+          && (gStatuses3[battlerAtk] & STATUS3_ROOTED)
+          && moveType == TYPE_GRASS)
+    {
+        atkStat = gBattleMons[battlerAtk].defense;
+        atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
+    }
     else
     {
         if (IS_MOVE_PHYSICAL(move))
@@ -14529,7 +14652,13 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         spDef = gBattleMons[battlerDef].spDefense;
     }
 
-    if (gBattleMoves[move].effect == EFFECT_PSYSHOCK || IS_MOVE_PHYSICAL(move)) // uses defense stat instead of sp.def
+    if (HasBattlerAbility(battlerAtk, ABILITY_SPELLFIST) && gBattleMoves[move].punchingMove)
+    {
+        defStat = spDef;
+        defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
+        usesDefStat = FALSE;
+    }
+    else if (gBattleMoves[move].effect == EFFECT_PSYSHOCK || IS_MOVE_PHYSICAL(move)) // uses defense stat instead of sp.def
     {
         defStat = def;
         defStage = gBattleMons[battlerDef].statStages[STAT_DEF];

@@ -520,6 +520,9 @@ static const u8 sFirstBloodDescription[] = _("Deal 1.4x damage to full-HP target
 static const u8 sAncientIdolDescription[] = _("Use Defense for physical damage and Sp. Def for special damage.");
 static const u8 sPetrifyingRootsDescription[] = _("Contact lowers the foe's Speed by 1. In Grassy Terrain, also lower Attack.");
 static const u8 sAdrenalineDescription[] = _("If poisoned, punching moves restore 1/4 of the damage dealt.");
+static const u8 sUprootDescription[] = _("First Grass move uses Ingrain. Rooted Grass moves use Defense.");
+static const u8 sSpellfistDescription[] = _("First punch uses Focus Energy. Punches target Sp. Def.");
+static const u8 sRegalDecreeDescription[] = _("First status move uses Metal Sound. Sound moves become Steel.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -870,6 +873,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ABYSSAL_MAW] = _("Abyssal Maw"),
     [ABILITY_CHANGE_OF_HEART] = _("Change of Heart"),
     [ABILITY_STARFALL] = _("Starfall"),
+    [ABILITY_UPROOT] = _("Uproot"),
+    [ABILITY_SPELLFIST] = _("Spellfist"),
+    [ABILITY_REGAL_DECREE] = _("Regal Decree"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1404,6 +1410,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ABYSSAL_MAW] = _("Abyssal Maw"),
     [ABILITY_CHANGE_OF_HEART] = _("ChangeHeart"),
     [ABILITY_STARFALL] = _("Starfall"),
+    [ABILITY_UPROOT] = _("Uproot"),
+    [ABILITY_SPELLFIST] = _("Spellfist"),
+    [ABILITY_REGAL_DECREE] = _("Regal Decree"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2123,4 +2132,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_ANCIENT_IDOL] = sAncientIdolDescription,
     [ABILITY_PETRIFYING_ROOTS] = sPetrifyingRootsDescription,
     [ABILITY_ADRENALINE] = sAdrenalineDescription,
+    [ABILITY_UPROOT] = sUprootDescription,
+    [ABILITY_SPELLFIST] = sSpellfistDescription,
+    [ABILITY_REGAL_DECREE] = sRegalDecreeDescription,
 };
