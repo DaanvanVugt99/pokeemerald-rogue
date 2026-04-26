@@ -1,6 +1,28 @@
 #include "global.h"
 #include "test/test.h"
+#include "constants/moves.h"
+#include "constants/species.h"
 #include "constants/form_change_types.h"
+#include "pokemon.h"
+
+TEST("Eevee can evolve into Sylveon through Rogue's move-type evolution")
+{
+    struct Pokemon mon;
+    u32 i;
+    u16 move;
+
+    CreateMon(&mon, SPECIES_EEVEE, 50, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        move = MOVE_TACKLE;
+        SetMonData(&mon, MON_DATA_MOVE1 + i, &move);
+    }
+    EXPECT_NE(GetEvolutionTargetSpecies(&mon, EVO_MODE_NORMAL, ITEM_NONE, NULL), SPECIES_SYLVEON);
+
+    move = MOVE_BABY_DOLL_EYES;
+    SetMonData(&mon, MON_DATA_MOVE1, &move);
+    EXPECT_EQ(GetEvolutionTargetSpecies(&mon, EVO_MODE_NORMAL, ITEM_NONE, NULL), SPECIES_SYLVEON);
+}
 
 TEST("Form species ID tables are shared between all forms")
 {
