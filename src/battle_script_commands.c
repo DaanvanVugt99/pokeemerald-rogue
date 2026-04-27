@@ -1868,7 +1868,7 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     if (gProtectStructs[battlerAtk].usedMicleBerry)
     {
         gProtectStructs[battlerAtk].usedMicleBerry = FALSE;
-        if (atkAbility == ABILITY_RIPEN)
+        if (atkAbility == ABILITY_RIPEN || HasBattlerAbility(battlerAtk, ABILITY_WINTER_STASH))
             calc = (calc * 140) / 100;  // ripen gives 40% acc boost
         else
             calc = (calc * 120) / 100;  // 20% acc boost
@@ -2051,6 +2051,7 @@ static void Cmd_ppreduce(void)
 #endif // B_CRIT_CHANCE
 
 #define BENEFITS_FROM_LEEK(battler, holdEffect)((holdEffect == HOLD_EFFECT_LEEK) && (GET_BASE_SPECIES_ID(gBattleMons[battler].species) == SPECIES_FARFETCHD || gBattleMons[battler].species == SPECIES_SIRFETCHD))
+#define HIVE_COMMAND_ACTIVE(battler) (HasBattlerAbility((battler), ABILITY_HIVE_COMMAND) && CountPartyMonsOfType((battler), TYPE_BUG, TRUE) >= 2)
 s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 recordAbility, u32 abilityAtk, u32 abilityDef, u32 holdEffectAtk)
 {
     s32 critChance = 0;
@@ -2074,6 +2075,7 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
     {
         critChance  = 2 * ((gBattleMons[battlerAtk].status2 & STATUS2_FOCUS_ENERGY) != 0)
                     + (gBattleMoves[gCurrentMove].highCritRatio)
+                    + (move == MOVE_ATTACK_ORDER && HIVE_COMMAND_ACTIVE(battlerAtk))
                     + (holdEffectAtk == HOLD_EFFECT_SCOPE_LENS)
                     + 2 * (holdEffectAtk == HOLD_EFFECT_LUCKY_PUNCH && gBattleMons[battlerAtk].species == SPECIES_CHANSEY)
                     + 2 * BENEFITS_FROM_LEEK(battlerAtk, holdEffectAtk)
@@ -2112,6 +2114,7 @@ s32 CalcCritChanceStage(u32 battlerAtk, u32 battlerDef, u32 move, bool32 recordA
     return CalcCritChanceStageArgs(battlerAtk, battlerDef, move, recordAbility, abilityAtk, abilityDef, holdEffectAtk);
 }
 #undef BENEFITS_FROM_LEEK
+#undef HIVE_COMMAND_ACTIVE
 
 s32 GetCritHitChance(s32 critChanceIndex)
 {
@@ -8241,8 +8244,11 @@ static void Cmd_setgravity(void)
 
 static bool32 TryCheekPouch(u32 battler, u32 itemId)
 {
+    bool32 hasCheekPouch = HasBattlerAbility(battler, ABILITY_CHEEK_POUCH);
+    bool32 hasWinterStash = HasBattlerAbility(battler, ABILITY_WINTER_STASH) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW);
+
     if (ItemId_GetPocket(itemId) == POCKET_BERRIES
-        && HasBattlerAbility(battler, ABILITY_CHEEK_POUCH)
+        && (hasCheekPouch || hasWinterStash)
         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
         && gBattleStruct->ateBerry[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]
         && !BATTLER_MAX_HP(battler))
@@ -8251,7 +8257,7 @@ static bool32 TryCheekPouch(u32 battler, u32 itemId)
         if (gBattleMoveDamage == 0)
             gBattleMoveDamage = 1;
         gBattleMoveDamage *= -1;
-        SetBattlerTriggeredAbility(battler, ABILITY_CHEEK_POUCH);
+        SetBattlerTriggeredAbility(battler, hasWinterStash ? ABILITY_WINTER_STASH : ABILITY_CHEEK_POUCH);
         BattleScriptPush(gBattlescriptCurrInstr + 2);
         gBattlescriptCurrInstr = BattleScript_CheekPouchActivates;
         return TRUE;
@@ -11528,7 +11534,12 @@ static void Cmd_tryhealhalfhealth(void)
     if (cmd->battler == BS_ATTACKER)
         gBattlerTarget = gBattlerAttacker;
 
-    gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 2;
+    if (gCurrentMove == MOVE_HEAL_ORDER
+     && HasBattlerAbility(gBattlerTarget, ABILITY_HIVE_COMMAND)
+     && CountPartyMonsOfType(gBattlerTarget, TYPE_BUG, TRUE) >= 2)
+        gBattleMoveDamage = (GetNonDynamaxMaxHP(gBattlerTarget) * 2) / 3;
+    else
+        gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 2;
     if (gBattleMoveDamage == 0)
         gBattleMoveDamage = 1;
     gBattleMoveDamage *= -1;
@@ -12264,8 +12275,19 @@ static void Cmd_statbuffchange(void)
     u16 flags = cmd->flags;
     const u8 *ptrBefore = gBattlescriptCurrInstr;
     const u8 *failInstr = cmd->failInstr;
+    u8 statId = GET_STAT_BUFF_ID(gBattleScripting.statChanger);
+    u8 statChange = GET_STAT_BUFF_VALUE_WITH_SIGN(gBattleScripting.statChanger);
 
-    if (ChangeStatBuffs(GET_STAT_BUFF_VALUE_WITH_SIGN(gBattleScripting.statChanger), GET_STAT_BUFF_ID(gBattleScripting.statChanger), flags, failInstr) == STAT_CHANGE_WORKED)
+    if (gCurrentMove == MOVE_DEFEND_ORDER
+     && statId == STAT_SPDEF
+     && statChange == SET_STAT_BUFF_VALUE(1)
+     && HasBattlerAbility(gBattlerAttacker, ABILITY_HIVE_COMMAND)
+     && CountPartyMonsOfType(gBattlerAttacker, TYPE_BUG, TRUE) >= 2)
+    {
+        statChange = SET_STAT_BUFF_VALUE(2);
+    }
+
+    if (ChangeStatBuffs(statChange, statId, flags, failInstr) == STAT_CHANGE_WORKED)
         gBattlescriptCurrInstr = cmd->nextInstr;
     else if (gBattlescriptCurrInstr == ptrBefore) // Prevent infinite looping.
         gBattlescriptCurrInstr = failInstr;

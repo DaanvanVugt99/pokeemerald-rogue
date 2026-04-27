@@ -529,6 +529,10 @@ static const u8 sCallAlliesDescription[] = _("Sound moves gain priority and set 
 static const u8 sXRayJawsDescription[] = _("Biting moves hit through protection and defense boosts.");
 static const u8 sThickSkullDescription[] = _("At full HP, endures one-hit KOs and cannot flinch.");
 static const u8 sImpenetrableDescription[] = _("Special supereffective hits deal neutral damage.");
+static const u8 sEnvironmentalDescription[] = _("In weather or terrain, takes less damage and gains matching STAB.");
+static const u8 sMigrationDescription[] = _("On switch-in, statused foes cause Infested Terrain.");
+static const u8 sHiveCommandDescription[] = _("With two Bug allies, Order moves are improved.");
+static const u8 sWinterStashDescription[] = _("Berries have double effect. In Snow, also heal 1/3 HP.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -888,6 +892,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_X_RAY_JAWS] = _("X-Ray Jaws"),
     [ABILITY_THICK_SKULL] = _("Thick Skull"),
     [ABILITY_IMPENETRABLE] = _("Impenetrable"),
+    [ABILITY_ENVIRONMENTAL] = _("Environmental"),
+    [ABILITY_MIGRATION] = _("Migration"),
+    [ABILITY_HIVE_COMMAND] = _("Hive Command"),
+    [ABILITY_WINTER_STASH] = _("Winter Stash"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1431,6 +1439,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_X_RAY_JAWS] = _("X-Ray Jaws"),
     [ABILITY_THICK_SKULL] = _("ThickSkull"),
     [ABILITY_IMPENETRABLE] = _("Impenetrable"),
+    [ABILITY_ENVIRONMENTAL] = _("Environmntl"),
+    [ABILITY_MIGRATION] = _("Migration"),
+    [ABILITY_HIVE_COMMAND] = _("HiveCommand"),
+    [ABILITY_WINTER_STASH] = _("WinterStash"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2159,4 +2171,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_X_RAY_JAWS] = sXRayJawsDescription,
     [ABILITY_THICK_SKULL] = sThickSkullDescription,
     [ABILITY_IMPENETRABLE] = sImpenetrableDescription,
+    [ABILITY_ENVIRONMENTAL] = sEnvironmentalDescription,
+    [ABILITY_MIGRATION] = sMigrationDescription,
+    [ABILITY_HIVE_COMMAND] = sHiveCommandDescription,
+    [ABILITY_WINTER_STASH] = sWinterStashDescription,
 };

@@ -4530,7 +4530,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
             ADJUST_SCORE(1);
         if (IsRecycleEncouragedItem(GetUsedHeldItem(battlerAtk)))
             ADJUST_SCORE(1);
-        if (aiData->abilities[battlerAtk] == ABILITY_RIPEN)
+        if (AI_HasAbility(battlerAtk, ABILITY_RIPEN) || AI_HasAbility(battlerAtk, ABILITY_WINTER_STASH))
         {
             u32 item = GetUsedHeldItem(battlerAtk);
             u32 toHeal = (ItemId_GetHoldEffectParam(item) == 10) ? 10 : gBattleMons[battlerAtk].maxHP / ItemId_GetHoldEffectParam(item);

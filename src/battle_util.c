@@ -75,6 +75,10 @@ static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
 static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef);
+static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
+static bool32 IsAnyEnvironmentalTypeActive(u32 battler);
+static bool32 IsAnyOpposingBattlerStatused(u32 battler);
+static bool32 HasBerryDoubleEffect(u32 battler);
 static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
 static u16 GetGemItemForType(u32 type);
 static u16 GetRandomGemstashItemForBattler(u32 battler);
@@ -1076,6 +1080,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_TANGLED_FEET] = 1,
     [ABILITY_THICK_SKULL] = 1,
     [ABILITY_THICK_FAT] = 1,
+    [ABILITY_ENVIRONMENTAL] = 1,
     [ABILITY_IMPENETRABLE] = 1,
     [ABILITY_UNAWARE] = 1,
     [ABILITY_VITAL_SPIRIT] = 1,
@@ -6713,6 +6718,14 @@ special_delivery_done:
                 effect++;
             }
             break;
+        case ABILITY_MIGRATION:
+            if (IsAnyOpposingBattlerStatused(battler)
+             && TryChangeBattleTerrain(battler, STATUS_FIELD_INFESTED_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_InfestedSurgeActivates);
+                effect++;
+            }
+            break;
         case ABILITY_INTIMIDATE:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -11331,7 +11344,7 @@ static u8 HealConfuseBerry(u32 battler, u32 itemId, u32 flavorId, bool32 end2)
             gBattleMoveDamage = 1;
         gBattleMoveDamage *= -1;
 
-        if (HasBattlerAbility(battler, ABILITY_RIPEN))
+        if (HasBerryDoubleEffect(battler))
         {
             gBattleMoveDamage *= 2;
             gBattlerAbility = battler;
@@ -11364,7 +11377,7 @@ static u8 StatRaiseBerry(u32 battler, u32 itemId, u32 statId, bool32 end2)
     {
         BufferStatChange(battler, statId, STRINGID_STATROSE);
         gEffectBattler = battler;
-        if (HasBattlerAbility(battler, ABILITY_RIPEN))
+        if (HasBerryDoubleEffect(battler))
             SET_STATCHANGER(statId, 2, FALSE);
         else
             SET_STATCHANGER(statId, 1, FALSE);
@@ -11415,7 +11428,7 @@ static u8 RandomStatRaiseBerry(u32 battler, u32 itemId, bool32 end2)
         gBattleTextBuff2[6] = stringId >> 8;
         gBattleTextBuff2[7] = EOS;
         gEffectBattler = battler;
-        if (battlerAbility == ABILITY_RIPEN)
+        if (HasBerryDoubleEffect(battler))
             SET_STATCHANGER(i + 1, 4, FALSE);
         else
             SET_STATCHANGER(i + 1, 2, FALSE);
@@ -11467,7 +11480,7 @@ static u8 TrySetEnigmaBerry(u32 battler)
     {
         gBattleScripting.battler = battler;
         gBattleMoveDamage = (gBattleMons[battler].maxHP * 25 / 100) * -1;
-        if (HasBattlerAbility(battler, ABILITY_RIPEN))
+        if (HasBerryDoubleEffect(battler))
             gBattleMoveDamage *= 2;
 
         BattleScriptPushCursor();
@@ -11491,7 +11504,7 @@ static u8 DamagedStatBoostBerryEffect(u32 battler, u8 statId, u8 split)
         BufferStatChange(battler, statId, STRINGID_STATROSE);
 
         gEffectBattler = battler;
-        if (HasBattlerAbility(battler, ABILITY_RIPEN))
+        if (HasBerryDoubleEffect(battler))
             SET_STATCHANGER(statId, 2, FALSE);
         else
             SET_STATCHANGER(statId, 1, FALSE);
@@ -11546,7 +11559,7 @@ static u32 ItemRestorePp(u32 battler, u32 itemId, bool32 execute)
         {
             u32 ppRestored = GetBattlerItemHoldEffectParam(battler, itemId);
 
-            if (HasBattlerAbility(battler, ABILITY_RIPEN))
+            if (HasBerryDoubleEffect(battler))
             {
                 ppRestored *= 2;
                 gBattlerAbility = battler;
@@ -11589,7 +11602,7 @@ static u8 ItemHealHp(u32 battler, u32 itemId, bool32 end2, bool32 percentHeal)
             gBattleMoveDamage = GetBattlerItemHoldEffectParam(battler, itemId) * -1;
 
         // check ripen
-        if (ItemId_GetPocket(itemId) == POCKET_BERRIES && HasBattlerAbility(battler, ABILITY_RIPEN))
+        if (ItemId_GetPocket(itemId) == POCKET_BERRIES && HasBerryDoubleEffect(battler))
             gBattleMoveDamage *= 2;
 
         gBattlerAbility = battler;    // in SWSH, berry juice shows ability pop up but has no effect. This is mimicked here
@@ -11629,7 +11642,7 @@ static u8 RottenBerryEffect(u32 battler, u32 itemId, bool32 end2)
                 gBattleMoveDamage = 1;
             gBattleMoveDamage *= -1;
 
-            if (HasBattlerAbility(battler, ABILITY_RIPEN))
+            if (HasBerryDoubleEffect(battler))
             {
                 gBattleMoveDamage *= 2;
                 gBattlerAbility = battler;
@@ -12919,7 +12932,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 8;
                     if (gBattleMoveDamage == 0)
                         gBattleMoveDamage = 1;
-                    if (HasBattlerAbility(battler, ABILITY_RIPEN))
+                    if (HasBerryDoubleEffect(battler))
                         gBattleMoveDamage *= 2;
 
                     effect = ITEM_HP_CHANGE;
@@ -12939,7 +12952,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 8;
                     if (gBattleMoveDamage == 0)
                         gBattleMoveDamage = 1;
-                    if (HasBattlerAbility(battler, ABILITY_RIPEN))
+                    if (HasBerryDoubleEffect(battler))
                         gBattleMoveDamage *= 2;
 
                     effect = ITEM_HP_CHANGE;
@@ -14989,6 +15002,7 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
          || (HasBattlerAbility(battlerAtk, ABILITY_MOON_TOTEM) && moveType == TYPE_DARK)
          || (HasBattlerAbility(battlerAtk, ABILITY_SUN_TOTEM) && moveType == TYPE_FIRE)
          || (HasBattlerAbility(battlerAtk, ABILITY_ELECTROCYTES) && moveType == TYPE_ELECTRIC)
+         || (HasBattlerAbilityIgnoreMoldBreaker(battlerAtk, ABILITY_ENVIRONMENTAL) && IsEnvironmentalTypeActive(battlerAtk, moveType))
          || (HasBattlerAbility(battlerAtk, ABILITY_ADAPTIVE_ORIGIN)
           && DoesPartyHaveUniqueTypes(battlerAtk)))
         {
@@ -15202,6 +15216,12 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
 
 static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
 {
+    if (HasBattlerAbility(battlerDef, ABILITY_ENVIRONMENTAL)
+     && IsAnyEnvironmentalTypeActive(battlerDef))
+    {
+        return UQ_4_12(0.7);
+    }
+
     if (HasBattlerAbility(battlerDef, ABILITY_FORMATION_FIGHTER))
     {
         u32 statusMoveCount;
@@ -15353,7 +15373,7 @@ static inline uq4_12_t GetDefenderItemsModifier(u32 moveType, u32 battlerDef, uq
         {
             if (updateFlags)
                 gSpecialStatuses[battlerDef].berryReduced = TRUE;
-            return (abilityDef == ABILITY_RIPEN) ? UQ_4_12(0.25) : UQ_4_12(0.5);
+            return (abilityDef == ABILITY_RIPEN || HasBattlerAbility(battlerDef, ABILITY_WINTER_STASH)) ? UQ_4_12(0.25) : UQ_4_12(0.5);
         }
         break;
     }
@@ -15757,6 +15777,68 @@ uq4_12_t CalcTypeEffectivenessMultiplier(u32 move, u32 moveType, u32 battlerAtk,
     if (recordAbilities)
         UpdateMoveResultFlags(modifier);
     return modifier;
+}
+
+static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type)
+{
+    switch (type)
+    {
+    case TYPE_NORMAL:
+        return IsBattlerTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN);
+    case TYPE_FIRE:
+        return IsBattlerWeatherAffected(battler, B_WEATHER_SUN);
+    case TYPE_WATER:
+        return IsBattlerWeatherAffected(battler, B_WEATHER_RAIN);
+    case TYPE_ELECTRIC:
+        return IsBattlerTerrainAffected(battler, STATUS_FIELD_ELECTRIC_TERRAIN);
+    case TYPE_GRASS:
+        return IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN);
+    case TYPE_ICE:
+        return IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW);
+    case TYPE_POISON:
+        return IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN);
+    case TYPE_FLYING:
+        return IsBattlerWeatherAffected(battler, B_WEATHER_STRONG_WINDS);
+    case TYPE_PSYCHIC:
+        return IsBattlerTerrainAffected(battler, STATUS_FIELD_PSYCHIC_TERRAIN);
+    case TYPE_BUG:
+        return IsBattlerTerrainAffected(battler, STATUS_FIELD_INFESTED_TERRAIN);
+    case TYPE_ROCK:
+        return IsBattlerWeatherAffected(battler, B_WEATHER_SANDSTORM);
+    case TYPE_DARK:
+        return IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE);
+    case TYPE_FAIRY:
+        return IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN);
+    default:
+        return FALSE;
+    }
+}
+
+static bool32 IsAnyEnvironmentalTypeActive(u32 battler)
+{
+    return IsBattlerWeatherAffected(battler, B_WEATHER_ANY)
+        || IsBattlerTerrainAffected(battler, STATUS_FIELD_TERRAIN_ANY);
+}
+
+static bool32 IsAnyOpposingBattlerStatused(u32 battler)
+{
+    u32 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != GetBattlerSide(battler)
+         && IsBattlerAlive(i)
+         && (gBattleMons[i].status1 & STATUS1_ANY))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool32 HasBerryDoubleEffect(u32 battler)
+{
+    return HasBattlerAbility(battler, ABILITY_RIPEN)
+        || HasBattlerAbility(battler, ABILITY_WINTER_STASH);
 }
 
 static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef)
