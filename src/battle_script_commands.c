@@ -363,6 +363,7 @@ static void SpriteCB_MonIconOnLvlUpBanner(struct Sprite *sprite);
 static bool32 CriticalCapture(u32 odds);
 static void BestowItem(u32 battlerAtk, u32 battlerDef);
 static bool8 IsFinalStrikeEffect(u16 move);
+static void TrySepticFumesPoisonPartyMon(u32 battlerAtk, u32 poisonedBattler);
 static void TryUpdateRoundTurnOrder(void);
 static bool32 ChangeOrderTargetAfterAttacker(void);
 static bool32 AerialAssaultIgnoresRecoil(void);
@@ -1752,12 +1753,12 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     gPotentialItemEffectBattler = battlerDef;
     accStage = gBattleMons[battlerAtk].statStages[STAT_ACC];
     evasionStage = gBattleMons[battlerDef].statStages[STAT_EVASION];
-    if (atkAbility == ABILITY_UNAWARE || ApplyUnawareCurse(battlerAtk, evasionStage) || atkAbility == ABILITY_KEEN_EYE || atkAbility == ABILITY_MINDS_EYE
+    if (atkAbility == ABILITY_UNAWARE || IsAbilityOnField(ABILITY_EQUILIBRIUM) || ApplyUnawareCurse(battlerAtk, evasionStage) || atkAbility == ABILITY_KEEN_EYE || atkAbility == ABILITY_MINDS_EYE
             || (B_ILLUMINATE_EFFECT >= GEN_9 && atkAbility == ABILITY_ILLUMINATE))
         evasionStage = DEFAULT_STAT_STAGE;
     if (gBattleMoves[move].ignoresTargetDefenseEvasionStages)
         evasionStage = DEFAULT_STAT_STAGE;
-    if (defAbility == ABILITY_UNAWARE || ApplyUnawareCurse(battlerDef, evasionStage))
+    if (defAbility == ABILITY_UNAWARE || IsAbilityOnField(ABILITY_EQUILIBRIUM) || ApplyUnawareCurse(battlerDef, evasionStage))
         accStage = DEFAULT_STAT_STAGE;
 
     if (gBattleMons[battlerDef].status2 & STATUS2_FORESIGHT || gStatuses3[battlerDef] & STATUS3_MIRACLE_EYED)
@@ -3403,7 +3404,24 @@ void SetMoveEffect(bool32 primary, u32 certain)
         }
         if (statusChanged == TRUE)
         {
+            bool32 septicFumesActivated = FALSE;
+
+            if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
+             && gBattleScripting.battler < gBattlersCount
+             && gEffectBattler < gBattlersCount
+             && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)
+             && HasBattlerAbility(gBattleScripting.battler, ABILITY_SEPTIC_FUMES))
+            {
+                septicFumesActivated = TRUE;
+                gBattlerAbility = gBattleScripting.battler;
+                SetBattlerTriggeredAbility(gBattleScripting.battler, ABILITY_SEPTIC_FUMES);
+                RecordAbilityBattle(gBattleScripting.battler, ABILITY_SEPTIC_FUMES);
+                TrySepticFumesPoisonPartyMon(gBattleScripting.battler, gEffectBattler);
+            }
+
             BattleScriptPush(gBattlescriptCurrInstr + 1);
+            if (septicFumesActivated)
+                BattleScriptPush(BattleScript_SepticFumesActivates);
 
             if (sStatusFlagsForMoveEffects[gBattleScripting.moveEffect] == STATUS1_SLEEP)
             {
@@ -8808,6 +8826,75 @@ bool32 CanPoisonType(u8 battlerAttacker, u8 battlerTarget)
 {
     return HasBattlerAbility(battlerAttacker, ABILITY_CORROSION)
         || (!IS_BATTLER_OF_TYPE(battlerTarget, TYPE_STEEL) && !IS_BATTLER_OF_TYPE(battlerTarget, TYPE_POISON));
+}
+
+static bool32 CanSepticFumesPoisonPartyMon(u32 battlerAtk, u32 battlerTarget, struct Pokemon *mon)
+{
+    u32 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+    u32 ability;
+    u32 uniqueAbility;
+
+    if (species == SPECIES_NONE
+     || species == SPECIES_EGG
+     || GetMonData(mon, MON_DATA_HP) == 0
+     || GetMonData(mon, MON_DATA_STATUS) & STATUS1_ANY)
+        return FALSE;
+
+    ability = GetMonAbility(mon);
+    uniqueAbility = GetUniqueAbilityBySpecies(species);
+
+    if (!HasBattlerAbility(battlerAtk, ABILITY_CORROSION)
+     && (gSpeciesInfo[species].types[0] == TYPE_POISON
+      || gSpeciesInfo[species].types[1] == TYPE_POISON
+      || gSpeciesInfo[species].types[0] == TYPE_STEEL
+      || gSpeciesInfo[species].types[1] == TYPE_STEEL))
+        return FALSE;
+
+    if (ability == ABILITY_IMMUNITY
+     || ability == ABILITY_COMATOSE
+     || ability == ABILITY_SILVER_LINING
+     || ability == ABILITY_PURIFYING_SALT
+     || uniqueAbility == ABILITY_IMMUNITY
+     || uniqueAbility == ABILITY_COMATOSE
+     || uniqueAbility == ABILITY_SILVER_LINING
+     || uniqueAbility == ABILITY_PURIFYING_SALT)
+        return FALSE;
+
+    if (gSideStatuses[GetBattlerSide(battlerTarget)] & SIDE_STATUS_SAFEGUARD
+     || IsAbilityOnSide(battlerTarget, ABILITY_PASTEL_VEIL))
+        return FALSE;
+
+    return TRUE;
+}
+
+static void TrySepticFumesPoisonPartyMon(u32 battlerAtk, u32 poisonedBattler)
+{
+    u32 i, battler;
+    u32 count = 0;
+    u8 candidates[PARTY_SIZE];
+    u32 status = STATUS1_POISON;
+    struct Pokemon *party = GetBattlerParty(poisonedBattler);
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        bool32 isActive = FALSE;
+
+        for (battler = 0; battler < gBattlersCount; battler++)
+        {
+            if (GetBattlerSide(battler) == GetBattlerSide(poisonedBattler)
+             && gBattlerPartyIndexes[battler] == i)
+            {
+                isActive = TRUE;
+                break;
+            }
+        }
+
+        if (!isActive && CanSepticFumesPoisonPartyMon(battlerAtk, poisonedBattler, &party[i]))
+            candidates[count++] = i;
+    }
+
+    if (count != 0)
+        SetMonData(&party[candidates[Random() % count]], MON_DATA_STATUS, &status);
 }
 
 bool32 CanParalyzeType(u8 battlerAttacker, u8 battlerTarget)

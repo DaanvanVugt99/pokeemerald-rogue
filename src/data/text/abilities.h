@@ -537,6 +537,9 @@ static const u8 sUndertowDescription[] = _("After using a Water move, switches o
 static const u8 sAdaptiveSlimeDescription[] = _("Hit by attacks, trades one defense for the other.");
 static const u8 sInflatableDescription[] = _("Fire or Flying hits raise both defenses.");
 static const u8 sBunnyEarsDescription[] = _("First contact move lowers the target's Defense.");
+static const u8 sFatalGraceDescription[] = _("Damaging moves gain priority against weakened foes.");
+static const u8 sSepticFumesDescription[] = _("Poisoning a foe lowers Attack and poisons its party.");
+static const u8 sEquilibriumDescription[] = _("While active, stat changes on the field are ignored.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -904,6 +907,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ADAPTIVE_SLIME] = _("Adaptive Slime"),
     [ABILITY_INFLATABLE] = _("Inflatable"),
     [ABILITY_BUNNY_EARS] = _("Bunny Ears"),
+    [ABILITY_FATAL_GRACE] = _("Fatal Grace"),
+    [ABILITY_SEPTIC_FUMES] = _("Septic Fumes"),
+    [ABILITY_EQUILIBRIUM] = _("Equilibrium"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1455,6 +1461,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ADAPTIVE_SLIME] = _("AdaptSlime"),
     [ABILITY_INFLATABLE] = _("Inflatable"),
     [ABILITY_BUNNY_EARS] = _("BunnyEars"),
+    [ABILITY_FATAL_GRACE] = _("FatalGrace"),
+    [ABILITY_SEPTIC_FUMES] = _("SepticFume"),
+    [ABILITY_EQUILIBRIUM] = _("Equilbrum"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2191,4 +2200,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_ADAPTIVE_SLIME] = sAdaptiveSlimeDescription,
     [ABILITY_INFLATABLE] = sInflatableDescription,
     [ABILITY_BUNNY_EARS] = sBunnyEarsDescription,
+    [ABILITY_FATAL_GRACE] = sFatalGraceDescription,
+    [ABILITY_SEPTIC_FUMES] = sSepticFumesDescription,
+    [ABILITY_EQUILIBRIUM] = sEquilibriumDescription,
 };

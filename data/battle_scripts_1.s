@@ -10659,6 +10659,18 @@ BattleScript_ToxicBloomNext:
 	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_ToxicBloomLoop
 	end3
 
+BattleScript_SepticFumesActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_ATK, 1, TRUE
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_SepticFumesEnd
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SepticFumesEnd:
+	return
+
 BattleScript_SleepDustActivates::
 	waitstate
 	call BattleScript_AbilityPopUp

@@ -4750,8 +4750,11 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
             RecordAbilityBattle(battler, ABILITY_UNKNOWN_BIOLOGY);
     }
     // stat stages
-    speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
-    speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
+    if (!IsAbilityOnField(ABILITY_EQUILIBRIUM))
+    {
+        speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
+        speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
+    }
 
     // player's badge boost
     if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_FRONTIER))
@@ -5023,6 +5026,16 @@ s8 GetMovePriority(u32 battler, u16 move)
      && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
      && IsBattlerAlive(gBattleStruct->moveTarget[battler])
      && BATTLER_MAX_HP(gBattleStruct->moveTarget[battler]))
+    {
+        priority++;
+    }
+
+    if (HasBattlerAbility(battler, ABILITY_FATAL_GRACE)
+     && !IS_MOVE_STATUS(move)
+     && gBattleStruct->moveTarget[battler] < gBattlersCount
+     && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
+     && IsBattlerAlive(gBattleStruct->moveTarget[battler])
+     && gBattleMons[gBattleStruct->moveTarget[battler]].hp <= (gBattleMons[gBattleStruct->moveTarget[battler]].maxHP / 2))
     {
         priority++;
     }

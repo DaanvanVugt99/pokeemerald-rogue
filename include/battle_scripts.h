@@ -7,6 +7,7 @@ extern const u8 BattleScript_RevelryLightScreen[];
 extern const u8 BattleScript_RevelryReflect[];
 extern const u8 BattleScript_VampiricActivates[];
 extern const u8 BattleScript_ToxicBloomActivates[];
+extern const u8 BattleScript_SepticFumesActivates[];
 extern const u8 BattleScript_FungalInfectionActivates[];
 extern const u8 BattleScript_TimeloopActivates[];
 extern const u8 BattleScript_NeurotoxinActivates[];

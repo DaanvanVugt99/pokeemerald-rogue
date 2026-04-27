@@ -1084,6 +1084,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_ENVIRONMENTAL] = 1,
     [ABILITY_IMPENETRABLE] = 1,
     [ABILITY_UNAWARE] = 1,
+    [ABILITY_EQUILIBRIUM] = 1,
     [ABILITY_VITAL_SPIRIT] = 1,
     [ABILITY_VOLT_ABSORB] = 1,
     [ABILITY_WATER_ABSORB] = 1,
@@ -14565,7 +14566,7 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     if (isCrit && atkStage < DEFAULT_STAT_STAGE)
         atkStage = DEFAULT_STAT_STAGE;
     // pokemon with unaware ignore attack stat changes while taking damage
-    if (defAbility == ABILITY_UNAWARE || ApplyUnawareCurse(battlerDef, atkStage))
+    if (defAbility == ABILITY_UNAWARE || IsAbilityOnField(ABILITY_EQUILIBRIUM) || ApplyUnawareCurse(battlerDef, atkStage))
         atkStage = DEFAULT_STAT_STAGE;
 
     atkStat *= gStatStageRatios[atkStage][0];
@@ -14846,7 +14847,7 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     if (isCrit && defStage > DEFAULT_STAT_STAGE)
         defStage = DEFAULT_STAT_STAGE;
     // pokemon with unaware ignore defense stat changes while dealing damage
-    if (atkAbility == ABILITY_UNAWARE || ApplyUnawareCurse(battlerAtk, defStage))
+    if (atkAbility == ABILITY_UNAWARE || IsAbilityOnField(ABILITY_EQUILIBRIUM) || ApplyUnawareCurse(battlerAtk, defStage))
         defStage = DEFAULT_STAT_STAGE;
     // certain moves also ignore stat changes
     if (gBattleMoves[move].ignoresTargetDefenseEvasionStages)
