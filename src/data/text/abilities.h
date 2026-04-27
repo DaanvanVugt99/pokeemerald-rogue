@@ -533,6 +533,10 @@ static const u8 sEnvironmentalDescription[] = _("In weather or terrain, takes le
 static const u8 sMigrationDescription[] = _("On switch-in, statused foes cause Infested Terrain.");
 static const u8 sHiveCommandDescription[] = _("With two Bug allies, Order moves are improved.");
 static const u8 sWinterStashDescription[] = _("Berries have double effect. In Snow, also heal 1/3 HP.");
+static const u8 sUndertowDescription[] = _("After using a Water move, switches out.");
+static const u8 sAdaptiveSlimeDescription[] = _("Hit by attacks, trades one defense for the other.");
+static const u8 sInflatableDescription[] = _("Fire or Flying hits raise both defenses.");
+static const u8 sBunnyEarsDescription[] = _("First contact move lowers the target's Defense.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -896,6 +900,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MIGRATION] = _("Migration"),
     [ABILITY_HIVE_COMMAND] = _("Hive Command"),
     [ABILITY_WINTER_STASH] = _("Winter Stash"),
+    [ABILITY_UNDERTOW] = _("Undertow"),
+    [ABILITY_ADAPTIVE_SLIME] = _("Adaptive Slime"),
+    [ABILITY_INFLATABLE] = _("Inflatable"),
+    [ABILITY_BUNNY_EARS] = _("Bunny Ears"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1443,6 +1451,10 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MIGRATION] = _("Migration"),
     [ABILITY_HIVE_COMMAND] = _("HiveCommand"),
     [ABILITY_WINTER_STASH] = _("WinterStash"),
+    [ABILITY_UNDERTOW] = _("Undertow"),
+    [ABILITY_ADAPTIVE_SLIME] = _("AdaptSlime"),
+    [ABILITY_INFLATABLE] = _("Inflatable"),
+    [ABILITY_BUNNY_EARS] = _("BunnyEars"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2175,4 +2187,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_MIGRATION] = sMigrationDescription,
     [ABILITY_HIVE_COMMAND] = sHiveCommandDescription,
     [ABILITY_WINTER_STASH] = sWinterStashDescription,
+    [ABILITY_UNDERTOW] = sUndertowDescription,
+    [ABILITY_ADAPTIVE_SLIME] = sAdaptiveSlimeDescription,
+    [ABILITY_INFLATABLE] = sInflatableDescription,
+    [ABILITY_BUNNY_EARS] = sBunnyEarsDescription,
 };

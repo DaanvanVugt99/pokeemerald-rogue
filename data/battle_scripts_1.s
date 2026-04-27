@@ -713,6 +713,28 @@ BattleScript_MoveSwitchOpenPartyScreen:
 BattleScript_MoveSwitchEnd:
 	end
 
+BattleScript_UndertowActivates::
+	call BattleScript_AbilityPopUp
+	jumpifbattletype BATTLE_TYPE_ARENA, BattleScript_UndertowEnd
+	jumpifcantswitch SWITCH_IGNORE_ESCAPE_PREVENTION | BS_ATTACKER, BattleScript_UndertowEnd
+	openpartyscreen BS_ATTACKER, BattleScript_UndertowEnd
+	switchoutabilities BS_ATTACKER
+	waitstate
+	switchhandleorder BS_ATTACKER, 2
+	returntoball BS_ATTACKER, FALSE
+	getswitchedmondata BS_ATTACKER
+	switchindataupdate BS_ATTACKER
+	hpthresholds BS_ATTACKER
+	trytoclearprimalweather
+	printstring STRINGID_EMPTYSTRING3
+	waitmessage 1
+	printstring STRINGID_SWITCHINMON
+	switchinanim BS_ATTACKER, TRUE
+	waitstate
+	switchineffects BS_ATTACKER
+BattleScript_UndertowEnd:
+	return
+
 BattleScript_EffectPledge::
 	attackcanceler
 	setpledge BattleScript_HitFromAccCheck
@@ -7752,6 +7774,46 @@ BattleScript_AngerShellTrySpeed:
 BattleScript_AngerShellRet:
 	return
 
+BattleScript_AdaptiveSlimePhysical::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAbility, gEffectBattler
+	copybyte gBattlerAttacker, gEffectBattler
+	sethword sABILITY_OVERWRITE, ABILITY_ADAPTIVE_SLIME
+	call BattleScript_AbilityPopUp
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	modifybattlerstatstage BS_ATTACKER, STAT_DEF, INCREASE, 1, BattleScript_AdaptiveSlimePhysicalTrySpDef, ANIM_ON
+BattleScript_AdaptiveSlimePhysicalTrySpDef:
+	modifybattlerstatstage BS_ATTACKER, STAT_SPDEF, DECREASE, 1, BattleScript_AdaptiveSlimeRet, ANIM_ON
+BattleScript_AdaptiveSlimeRet:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	return
+
+BattleScript_AdaptiveSlimeSpecial::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAbility, gEffectBattler
+	copybyte gBattlerAttacker, gEffectBattler
+	sethword sABILITY_OVERWRITE, ABILITY_ADAPTIVE_SLIME
+	call BattleScript_AbilityPopUp
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	modifybattlerstatstage BS_ATTACKER, STAT_SPDEF, INCREASE, 1, BattleScript_AdaptiveSlimeSpecialTryDef, ANIM_ON
+BattleScript_AdaptiveSlimeSpecialTryDef:
+	modifybattlerstatstage BS_ATTACKER, STAT_DEF, DECREASE, 1, BattleScript_AdaptiveSlimeRet, ANIM_ON
+	goto BattleScript_AdaptiveSlimeRet
+
+BattleScript_InflatableActivates::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAbility, gEffectBattler
+	copybyte gBattlerAttacker, gEffectBattler
+	sethword sABILITY_OVERWRITE, ABILITY_INFLATABLE
+	call BattleScript_AbilityPopUp
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	modifybattlerstatstage BS_ATTACKER, STAT_DEF, INCREASE, 1, BattleScript_InflatableTrySpDef, ANIM_ON
+BattleScript_InflatableTrySpDef:
+	modifybattlerstatstage BS_ATTACKER, STAT_SPDEF, INCREASE, 1, BattleScript_InflatableRet, ANIM_ON
+BattleScript_InflatableRet:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	return
+
 BattleScript_WindPowerActivates::
 	call BattleScript_AbilityPopUp
 	setcharge BS_TARGET
@@ -9997,8 +10059,24 @@ BattleScript_MoveStatDrain::
 .endif
 BattleScript_MoveStatDrain_Cont:
 	clearsemiinvulnerablebit
+	call BattleScript_TryPostAbsorbAdaptiveSlime
 	tryfaintmon BS_ATTACKER
 	goto BattleScript_MoveEnd
+
+BattleScript_TryPostAbsorbAdaptiveSlime:
+	jumpifbyteequal gEffectBattler, gBattlerTarget, BattleScript_TryPostAbsorbAdaptiveSlimeCheckSplit
+	goto BattleScript_TryPostAbsorbAdaptiveSlimeRet
+BattleScript_TryPostAbsorbAdaptiveSlimeCheckSplit:
+	jumpifbyte CMP_EQUAL, sSAVED_BATTLER, SPLIT_PHYSICAL, BattleScript_TryPostAbsorbAdaptiveSlimePhysical
+	jumpifbyte CMP_EQUAL, sSAVED_BATTLER, SPLIT_SPECIAL, BattleScript_TryPostAbsorbAdaptiveSlimeSpecial
+BattleScript_TryPostAbsorbAdaptiveSlimeRet:
+	return
+BattleScript_TryPostAbsorbAdaptiveSlimePhysical:
+	call BattleScript_AdaptiveSlimePhysical
+	return
+BattleScript_TryPostAbsorbAdaptiveSlimeSpecial:
+	call BattleScript_AdaptiveSlimeSpecial
+	return
 
 BattleScript_MonMadeMoveUseless_PPLoss::
 	ppreduce
@@ -10008,6 +10086,7 @@ BattleScript_MonMadeMoveUseless::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PKMNSXMADEYUSELESS
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_TryPostAbsorbAdaptiveSlime
 	tryfaintmon BS_ATTACKER
 	orhalfword gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
 	goto BattleScript_MoveEnd

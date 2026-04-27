@@ -6460,6 +6460,28 @@ static void Cmd_moveend(void)
                     }
                 }
             }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_UNDERTOW)
+             && IsBattlerAlive(gBattlerAttacker)
+             && moveType == TYPE_WATER
+             && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE
+             && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
+             && CountUsablePartyMons(gBattlerAttacker) > 0
+             && gProtectStructs[gBattlerAttacker].targetAffected
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && gBattleOutcome == 0
+             && !NoAliveMonsForEitherParty())
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_UNDERTOW);
+                gBattlerAbility = gBattlerAttacker;
+                gBattleScripting.battler = gBattlerAttacker;
+                gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_UndertowActivates;
+                effect = TRUE;
+            }
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_EJECT_PACK:

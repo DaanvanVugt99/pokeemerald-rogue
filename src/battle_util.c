@@ -74,6 +74,7 @@ static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
+static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move);
 static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef);
 static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
 static bool32 IsAnyEnvironmentalTypeActive(u32 battler);
@@ -4922,6 +4923,26 @@ static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 mov
     return FALSE;
 }
 
+static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move)
+{
+    if (!HasBattlerAbility(battler, ABILITY_ADAPTIVE_SLIME))
+        return FALSE;
+
+    if (IS_MOVE_PHYSICAL(move))
+    {
+        return CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN)
+            || CompareStat(battler, STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN);
+    }
+
+    if (IS_MOVE_SPECIAL(move))
+    {
+        return CompareStat(battler, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN)
+            || CompareStat(battler, STAT_DEF, MIN_STAT_STAGE, CMP_GREATER_THAN);
+    }
+
+    return FALSE;
+}
+
 static void StartAbilityCalledMoveScript(void)
 {
     if (gBattleMainFunc == RunBattleScriptCommands
@@ -7866,9 +7887,14 @@ if (triggeringAbility != ABILITY_NONE)
             }
             else if (effect == 2) // Boost Stat ability;
             {
+                bool32 shouldAdaptiveSlime = triggeringAbility == ABILITY_STORM_DRAIN && ShouldTriggerAdaptiveSlime(battler, move);
+
+                gEffectBattler = shouldAdaptiveSlime ? battler : gBattlersCount;
+                gBattleScripting.savedBattler = shouldAdaptiveSlime ? gBattleMoves[move].split : SPLIT_STATUS;
+
                 if (!CompareStat(battler, statId, MAX_STAT_STAGE, CMP_LESS_THAN))
                 {
-                    if ((gProtectStructs[gBattlerAttacker].notFirstStrike))
+                    if (gProtectStructs[gBattlerAttacker].notFirstStrike)
                         gBattlescriptCurrInstr = BattleScript_MonMadeMoveUseless;
                     else
                         gBattlescriptCurrInstr = BattleScript_MonMadeMoveUseless_PPLoss;
@@ -8741,6 +8767,38 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ADAPTIVE_SLIME)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && moveEndAttacker != battler
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && ShouldTriggerAdaptiveSlime(battler, move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ADAPTIVE_SLIME);
+            gEffectBattler = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = IS_MOVE_PHYSICAL(move) ? BattleScript_AdaptiveSlimePhysical : BattleScript_AdaptiveSlimeSpecial;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_INFLATABLE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && moveEndAttacker != battler
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && (moveType == TYPE_FIRE || moveType == TYPE_FLYING)
+         && (CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN)
+          || CompareStat(battler, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN)))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_INFLATABLE);
+            gEffectBattler = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_InflatableActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_WIND_CHIMES)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsFinalMultiHitStrike()
@@ -9042,6 +9100,28 @@ if (triggeringAbility != ABILITY_NONE)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BUNNY_EARS)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && IsMoveMakingContact(move, battler)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && (CompareStat(gBattlerTarget, STAT_DEF, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BUNNY_EARS);
+            gBattleScripting.moveEffect = MOVE_EFFECT_DEF_MINUS_1;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
 
