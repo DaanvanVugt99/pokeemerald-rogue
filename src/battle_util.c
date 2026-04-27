@@ -9629,6 +9629,26 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_KOMBO)
+         && moveType == TYPE_POISON
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_KOMBO);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_KNOCK_OFF;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_UPDRAFT)
          && moveType == TYPE_FIRE
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -14252,6 +14272,23 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
      && gBattleMoves[move].bitingMove)
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_AURA))
+    {
+        u32 hp = gBattleMons[battlerAtk].hp;
+        u32 maxHp = gBattleMons[battlerAtk].maxHP;
+
+        if (hp * 8 <= maxHp)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        else if (hp * 4 <= maxHp)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.4));
+        else if (hp * 5 <= maxHp * 2)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+        else if (hp * 5 <= maxHp * 3)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+        else if (hp * 5 <= maxHp * 4)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.1));
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_STRIKER)

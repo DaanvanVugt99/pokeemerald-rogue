@@ -543,6 +543,9 @@ static const u8 sEquilibriumDescription[] = _("While active, stat changes on the
 static const u8 sChatterboxDescription[] = _("Flying moves prime the next sound move for priority.");
 static const u8 sCascadeDescription[] = _("Lowering a foe's stat also lowers a random stat.");
 static const u8 sSandOnslaughtDescription[] = _("On shared-type teams, damaging foes raises Speed.");
+static const u8 sAuraDescription[] = _("Moves deal more damage as HP gets lower.");
+static const u8 sSandmanDescription[] = _("Ground and Rock moves may make foes drowsy.");
+static const u8 sKomboDescription[] = _("First Poison move each switch-in uses weak Knock Off.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -916,6 +919,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CHATTERBOX] = _("Chatterbox"),
     [ABILITY_CASCADE] = _("Cascade"),
     [ABILITY_SAND_ONSLAUGHT] = _("Sand Onslaught"),
+    [ABILITY_AURA] = _("Aura"),
+    [ABILITY_SANDMAN] = _("Sandman"),
+    [ABILITY_KOMBO] = _("Kombo"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1473,6 +1479,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_CHATTERBOX] = _("Chatterbox"),
     [ABILITY_CASCADE] = _("Cascade"),
     [ABILITY_SAND_ONSLAUGHT] = _("SandOnslgt"),
+    [ABILITY_AURA] = _("Aura"),
+    [ABILITY_SANDMAN] = _("Sandman"),
+    [ABILITY_KOMBO] = _("Kombo"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2215,4 +2224,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_CHATTERBOX] = sChatterboxDescription,
     [ABILITY_CASCADE] = sCascadeDescription,
     [ABILITY_SAND_ONSLAUGHT] = sSandOnslaughtDescription,
+    [ABILITY_AURA] = sAuraDescription,
+    [ABILITY_SANDMAN] = sSandmanDescription,
+    [ABILITY_KOMBO] = sKomboDescription,
 };

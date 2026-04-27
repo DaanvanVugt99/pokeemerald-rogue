@@ -6481,6 +6481,25 @@ static void Cmd_moveend(void)
                 }
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_SANDMAN)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && (moveType == TYPE_GROUND || moveType == TYPE_ROCK)
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && CanSleep(gBattlerTarget)
+             && RandomPercentage(RNG_ROGUE_SANDMAN, 10))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_SANDMAN);
+                gBattleScripting.moveEffect = MOVE_EFFECT_SLEEP;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect = TRUE;
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_UNDERTOW)
              && IsBattlerAlive(gBattlerAttacker)
              && moveType == TYPE_WATER
