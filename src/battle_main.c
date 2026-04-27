@@ -4955,6 +4955,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
+     && gBattleMoves[move].soundMove
+     && gDisableStructs[battler].uniquePersistentStateActive)
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_SIGHTING_SYSTEM)
      && gBattleMoves[move].accuracy != 0
      && gBattleMoves[move].accuracy <= 50)

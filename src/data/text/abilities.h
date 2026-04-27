@@ -540,6 +540,9 @@ static const u8 sBunnyEarsDescription[] = _("First contact move lowers the targe
 static const u8 sFatalGraceDescription[] = _("Damaging moves gain priority against weakened foes.");
 static const u8 sSepticFumesDescription[] = _("Poisoning a foe lowers Attack and poisons its party.");
 static const u8 sEquilibriumDescription[] = _("While active, stat changes on the field are ignored.");
+static const u8 sChatterboxDescription[] = _("Flying moves prime the next sound move for priority.");
+static const u8 sCascadeDescription[] = _("Lowering a foe's stat also lowers a random stat.");
+static const u8 sSandOnslaughtDescription[] = _("On shared-type teams, damaging foes raises Speed.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -910,6 +913,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FATAL_GRACE] = _("Fatal Grace"),
     [ABILITY_SEPTIC_FUMES] = _("Septic Fumes"),
     [ABILITY_EQUILIBRIUM] = _("Equilibrium"),
+    [ABILITY_CHATTERBOX] = _("Chatterbox"),
+    [ABILITY_CASCADE] = _("Cascade"),
+    [ABILITY_SAND_ONSLAUGHT] = _("Sand Onslaught"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("Toxic Tandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -1464,6 +1470,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FATAL_GRACE] = _("FatalGrace"),
     [ABILITY_SEPTIC_FUMES] = _("SepticFume"),
     [ABILITY_EQUILIBRIUM] = _("Equilbrum"),
+    [ABILITY_CHATTERBOX] = _("Chatterbox"),
+    [ABILITY_CASCADE] = _("Cascade"),
+    [ABILITY_SAND_ONSLAUGHT] = _("SandOnslgt"),
     [ABILITY_SLEEP_DUST] = _("Sleep Dust"),
     [ABILITY_TOXIC_TANDEM] = _("ToxicTandem"),
     [ABILITY_GNAW_DOWN] = _("Gnaw Down"),
@@ -2203,4 +2212,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_FATAL_GRACE] = sFatalGraceDescription,
     [ABILITY_SEPTIC_FUMES] = sSepticFumesDescription,
     [ABILITY_EQUILIBRIUM] = sEquilibriumDescription,
+    [ABILITY_CHATTERBOX] = sChatterboxDescription,
+    [ABILITY_CASCADE] = sCascadeDescription,
+    [ABILITY_SAND_ONSLAUGHT] = sSandOnslaughtDescription,
 };

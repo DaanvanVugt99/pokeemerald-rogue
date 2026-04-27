@@ -9480,6 +9480,26 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
+         && gBattleMoves[move].soundMove
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_FLYING
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_UPPERCUT)
          && gBattleMoves[move].punchingMove
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)

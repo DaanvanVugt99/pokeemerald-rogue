@@ -351,6 +351,8 @@ static const u16 sWhiteOutBadgeMoney[9] = { 8, 16, 24, 36, 48, 64, 80, 100, 120 
 
 static void TrySetDestinyBondToHappen(void);
 static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr);
+static bool32 TryQueueCascadeStatDrop(u32 battlerAtk, u32 battlerDef, u32 originalStat);
+static bool32 DidBattlerDamageOpponentThisTurn(u32 battler);
 static bool32 IsMonGettingExpSentOut(void);
 static void InitLevelUpBanner(void);
 static bool8 SlideInLevelUpBanner(void);
@@ -6500,6 +6502,41 @@ static void Cmd_moveend(void)
                 gBattlescriptCurrInstr = BattleScript_UndertowActivates;
                 effect = TRUE;
             }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_CASCADE)
+             && gProtectStructs[gBattlerAttacker].uniqueAbilityActive)
+            {
+                if (IsBattlerAlive(gBattlerAttacker)
+                 && IsBattlerAlive(gBattleScripting.savedBattler)
+                 && !NoAliveMonsForEitherParty())
+                {
+                    gBattlerTarget = gBattleScripting.savedBattler;
+                    gBattleScripting.statChanger = gBattleScripting.savedStatChanger;
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_CASCADE);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_CascadeActivates;
+                    effect = TRUE;
+                }
+                else
+                {
+                    gProtectStructs[gBattlerAttacker].uniqueAbilityActive = FALSE;
+                }
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_SAND_ONSLAUGHT)
+             && IsBattlerAlive(gBattlerAttacker)
+             && DidBattlerDamageOpponentThisTurn(gBattlerAttacker)
+             && DoesPartyShareTypeWithBattler(gBattlerAttacker)
+             && CompareStat(gBattlerAttacker, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN)
+             && !NoAliveMonsForEitherParty())
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_SAND_ONSLAUGHT);
+                SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+                effect = TRUE;
+            }
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_EJECT_PACK:
@@ -12377,6 +12414,54 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
     return STAT_CHANGE_WORKED;
 }
 
+static bool32 TryQueueCascadeStatDrop(u32 battlerAtk, u32 battlerDef, u32 originalStat)
+{
+    u32 stat;
+    u32 validStats[NUM_BATTLE_STATS];
+    u32 validStatCount = 0;
+    u32 defAbility = GetBattlerAbility(battlerDef);
+
+    for (stat = STAT_ATK; stat <= STAT_SPDEF; stat++)
+    {
+        if (stat == originalStat
+         || !CompareStat(battlerDef, stat, MIN_STAT_STAGE, CMP_GREATER_THAN)
+         || GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_CLEAR_AMULET
+         || GetStatLossPreventionAbility(battlerDef, FALSE) != ABILITY_NONE
+         || IsFlowerVeilProtected(battlerDef)
+         || (defAbility == ABILITY_HYPER_CUTTER && stat == STAT_ATK)
+         || (defAbility == ABILITY_BIG_PECKS && stat == STAT_DEF))
+            continue;
+
+        validStats[validStatCount++] = stat;
+    }
+
+    if (validStatCount == 0)
+        return FALSE;
+
+    stat = validStats[RandomUniform(RNG_ROGUE_CASCADE, 0, validStatCount - 1)];
+
+    SetBattlerTriggeredAbility(battlerAtk, ABILITY_CASCADE);
+    SET_STATCHANGER2(gBattleScripting.savedStatChanger, stat, 1, TRUE);
+    gBattleScripting.savedBattler = battlerDef;
+    gProtectStructs[battlerAtk].uniqueAbilityActive = TRUE;
+
+    return TRUE;
+}
+
+static bool32 DidBattlerDamageOpponentThisTurn(u32 battler)
+{
+    u32 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != GetBattlerSide(battler)
+         && (gSpecialStatuses[battler].damagedMons & gBitTable[i]))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static void Cmd_statbuffchange(void)
 {
     CMD_ARGS(u16 flags, const u8 *failInstr);
@@ -12385,7 +12470,12 @@ static void Cmd_statbuffchange(void)
     const u8 *ptrBefore = gBattlescriptCurrInstr;
     const u8 *failInstr = cmd->failInstr;
     u8 statId = GET_STAT_BUFF_ID(gBattleScripting.statChanger);
-    u8 statChange = GET_STAT_BUFF_VALUE_WITH_SIGN(gBattleScripting.statChanger);
+    s8 statChange = GET_STAT_BUFF_VALUE_WITH_SIGN(gBattleScripting.statChanger);
+    u8 battler = (flags & MOVE_EFFECT_AFFECTS_USER) ? gBattlerAttacker : gBattlerTarget;
+    u8 statStageBefore = gBattleMons[battler].statStages[statId];
+    bool32 isCascadeDrop = gBattlescriptCurrInstr == BattleScript_CascadeStatDrop
+                         && gProtectStructs[gBattlerAttacker].uniqueAbilityActive
+                         && HasBattlerAbility(gBattlerAttacker, ABILITY_CASCADE);
 
     if (gCurrentMove == MOVE_DEFEND_ORDER
      && statId == STAT_SPDEF
@@ -12397,9 +12487,28 @@ static void Cmd_statbuffchange(void)
     }
 
     if (ChangeStatBuffs(statChange, statId, flags, failInstr) == STAT_CHANGE_WORKED)
+    {
         gBattlescriptCurrInstr = cmd->nextInstr;
+        if (isCascadeDrop)
+        {
+            gProtectStructs[gBattlerAttacker].uniqueAbilityActive = FALSE;
+        }
+        else if (HasBattlerAbility(gBattlerAttacker, ABILITY_CASCADE)
+              && statChange < 0
+              && statStageBefore > gBattleMons[battler].statStages[statId]
+              && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
+        {
+            // Queue this until move-end so the original stat-drop script can
+            // consume its own statChanger/message state first.
+            TryQueueCascadeStatDrop(gBattlerAttacker, battler, statId);
+        }
+    }
     else if (gBattlescriptCurrInstr == ptrBefore) // Prevent infinite looping.
+    {
+        if (isCascadeDrop)
+            gProtectStructs[gBattlerAttacker].uniqueAbilityActive = FALSE;
         gBattlescriptCurrInstr = failInstr;
+    }
 }
 
 bool32 TryResetBattlerStatChanges(u8 battler)

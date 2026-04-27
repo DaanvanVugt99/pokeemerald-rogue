@@ -10671,6 +10671,18 @@ BattleScript_SepticFumesActivates::
 BattleScript_SepticFumesEnd:
 	return
 
+BattleScript_CascadeActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+BattleScript_CascadeStatDrop::
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_CascadeEnd
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_CascadeEnd:
+	return
+
 BattleScript_SleepDustActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
