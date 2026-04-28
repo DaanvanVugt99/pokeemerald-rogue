@@ -4492,6 +4492,13 @@ bool32 IsTruantLoafingSuppressed(u32 battler)
         && DoesPartyShareTypeWithBattler(battler);
 }
 
+static bool32 HasColossalPartyComposition(u32 battler)
+{
+    return CountPartyMonsOfType(battler, TYPE_STEEL, FALSE) > 0
+        && CountPartyMonsOfType(battler, TYPE_ICE, FALSE) > 0
+        && CountPartyMonsOfType(battler, TYPE_ROCK, FALSE) > 0;
+}
+
 bool32 DoesPartyContainAbility(u32 battler, u32 ability, bool32 excludeBattler)
 {
     u32 i, j;
@@ -5711,6 +5718,25 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TEMPORAL_LOCK)
+         && !uniqueDone
+         && DoesPartyShareTypeWithBattler(battler)
+         && !(gFieldStatuses & STATUS_FIELD_TRICK_ROOM))
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_TEMPORAL_LOCK);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_TRICK_ROOM;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            StartAbilityCalledMoveScript();
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PSIONIC_PARADOX) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -6474,6 +6500,11 @@ special_delivery_done:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
                 gDisableStructs[battler].slowStartTimer = 5;
+                if (HasBattlerAbility(battler, ABILITY_COLOSSAL)
+                 && HasColossalPartyComposition(battler))
+                {
+                    gDisableStructs[battler].slowStartTimer = 1;
+                }
                 gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SWITCHIN_SLOWSTART;
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
                 BattleScriptPushCursorAndCallback(BattleScript_SwitchInAbilityMsg);
@@ -10413,6 +10444,24 @@ if (triggeringAbility != ABILITY_NONE)
 
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = infestedTrapApplied ? BattleScript_AbilityTrapsTarget : BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_MAGMA_SEAL)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_FIRE
+         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_MAGMA_SEAL);
+            gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+            gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityTrapsTarget;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
