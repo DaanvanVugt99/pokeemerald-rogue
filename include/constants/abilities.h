@@ -581,7 +581,7 @@
 #define ABILITY_SEPTIC_FUMES       547
 #define ABILITY_EQUILIBRIUM        548
 #define ABILITY_CHATTERBOX         549
-#define ABILITY_CASCADE            550
+#define ABILITY_FAIRY_ABSORB       550
 #define ABILITY_SAND_ONSLAUGHT     551
 #define ABILITY_AURA               552
 #define ABILITY_SANDMAN            553

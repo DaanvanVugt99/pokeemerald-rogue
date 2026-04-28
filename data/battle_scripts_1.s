@@ -461,7 +461,6 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectEclipse                 @ EFFECT_ECLIPSE
 	.4byte BattleScript_EffectInfestedTerrain         @ EFFECT_INFESTED_TERRAIN
 	.4byte BattleScript_EffectPlainTerrain            @ EFFECT_PLAIN_TERRAIN
-	.4byte BattleScript_EffectCelebrate               @ EFFECT_CELEBRATE
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -4872,30 +4871,6 @@ BattleScript_EffectCelebrateMessage:
 BattleScript_EffectHappyHour:
 	setmoveeffect MOVE_EFFECT_HAPPY_HOUR
 	seteffectprimary
-	goto BattleScript_MoveEnd
-
-BattleScript_EffectCelebrate::
-	attackcanceler
-	attackstring
-	ppreduce
-	jumpifstat BS_ATTACKER, CMP_NOT_EQUAL, STAT_SPEED, MAX_STAT_STAGE, BattleScript_EffectCelebrateDoMove
-	jumpiffullhp BS_ATTACKER, BattleScript_AlreadyAtFullHp
-BattleScript_EffectCelebrateDoMove:
-	attackanimation
-	waitanimation
-	tryhealquarterhealth BS_ATTACKER, BattleScript_EffectCelebrateTrySpeed
-	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
-	healthbarupdate BS_ATTACKER
-	datahpupdate BS_ATTACKER
-	printstring STRINGID_PKMNREGAINEDHEALTH
-	waitmessage B_WAIT_TIME_LONG
-BattleScript_EffectCelebrateTrySpeed:
-	setstatchanger STAT_SPEED, 1, FALSE
-	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_MoveEnd
-	setgraphicalstatchangevalues
-	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
-	printfromtable gStatUpStringIds
-	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
 
 BattleScript_EffectDisable::
@@ -10778,18 +10753,6 @@ BattleScript_SepticFumesActivates::
 BattleScript_SepticFumesEnd:
 	return
 
-BattleScript_CascadeActivates::
-	waitstate
-	call BattleScript_AbilityPopUp
-BattleScript_CascadeStatDrop::
-	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_CascadeEnd
-	setgraphicalstatchangevalues
-	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
-	printfromtable gStatDownStringIds
-	waitmessage B_WAIT_TIME_LONG
-BattleScript_CascadeEnd:
-	return
-
 BattleScript_SleepDustActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
@@ -10853,6 +10816,41 @@ BattleScript_ShellFormationActivates::
 BattleScript_AbilityUsesCalledMove::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
+	setbyte sB_ANIM_TURN, 0
+	setbyte sB_ANIM_TARGETS_HIT, 0
+	orword gHitMarker, HITMARKER_ALLOW_NO_PP
+	jumptocalledmove TRUE
+
+BattleScript_VictoryActivates::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_VictoryCelebrate
+	tryhealquarterhealth BS_ATTACKER, BattleScript_VictoryCelebrate
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_VictoryCelebrate
+
+BattleScript_VictoryActivatesSpeed::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_VictorySpeed
+	tryhealquarterhealth BS_ATTACKER, BattleScript_VictorySpeed
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_VictorySpeed:
+	setstatchanger STAT_SPEED, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_VictoryCelebrate
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_VictoryCelebrate:
 	setbyte sB_ANIM_TURN, 0
 	setbyte sB_ANIM_TARGETS_HIT, 0
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP

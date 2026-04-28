@@ -1090,6 +1090,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_VITAL_SPIRIT] = 1,
     [ABILITY_VOLT_ABSORB] = 1,
     [ABILITY_WATER_ABSORB] = 1,
+    [ABILITY_FAIRY_ABSORB] = 1,
     [ABILITY_WATER_VEIL] = 1,
     [ABILITY_WHITE_SMOKE] = 1,
     [ABILITY_WONDER_GUARD] = 1,
@@ -8104,6 +8105,11 @@ else if (moveType == TYPE_GRASS)
 {
     if (HasBattlerAbility(battler, ABILITY_SAP_SIPPER))
         triggeringAbility = ABILITY_SAP_SIPPER, effect = 2, statId = STAT_ATK;
+}
+else if (moveType == TYPE_FAIRY)
+{
+    if (HasBattlerAbility(battler, ABILITY_FAIRY_ABSORB))
+        triggeringAbility = ABILITY_FAIRY_ABSORB;
 }
 else if (moveType == TYPE_FLYING)
 {
