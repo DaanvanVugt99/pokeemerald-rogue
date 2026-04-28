@@ -5702,6 +5702,66 @@ static u32 GetNextTarget(u32 moveTarget)
     return i;
 }
 
+static const u8 *TryCreationSetField(u32 battler, u32 moveType)
+{
+    switch (moveType)
+    {
+    case TYPE_NORMAL:
+        if (TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
+            return BattleScript_PlainSurgeActivates;
+        break;
+    case TYPE_FIRE:
+        if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+            return BattleScript_DroughtActivates;
+        break;
+    case TYPE_WATER:
+        if (TryChangeBattleWeather(battler, ENUM_WEATHER_RAIN, TRUE))
+            return BattleScript_DrizzleActivates;
+        break;
+    case TYPE_POISON:
+        if (TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
+            return BattleScript_ToxicDelugeActivates;
+        break;
+    case TYPE_ROCK:
+        if (TryChangeBattleWeather(battler, ENUM_WEATHER_SANDSTORM, TRUE))
+            return BattleScript_SandstreamActivates;
+        break;
+    case TYPE_BUG:
+        if (TryChangeBattleTerrain(battler, STATUS_FIELD_INFESTED_TERRAIN, &gFieldTimers.terrainTimer))
+            return BattleScript_InfestedSurgeActivates;
+        break;
+    case TYPE_GHOST:
+    case TYPE_DARK:
+        if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
+            return BattleScript_OmenActivates;
+        break;
+    case TYPE_GRASS:
+        if (TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer))
+            return BattleScript_GrassySurgeActivates;
+        break;
+    case TYPE_ELECTRIC:
+        if (TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
+            return BattleScript_ElectricSurgeActivates;
+        break;
+    case TYPE_PSYCHIC:
+        if (TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
+            return BattleScript_PsychicSurgeActivates;
+        break;
+    case TYPE_ICE:
+        if (B_SNOW_WARNING >= GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+            return BattleScript_SnowWarningActivatesSnow;
+        else if (B_SNOW_WARNING < GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_HAIL, TRUE))
+            return BattleScript_SnowWarningActivatesHail;
+        break;
+    case TYPE_FAIRY:
+        if (TryChangeBattleTerrain(battler, STATUS_FIELD_MISTY_TERRAIN, &gFieldTimers.terrainTimer))
+            return BattleScript_MistySurgeActivates;
+        break;
+    }
+
+    return NULL;
+}
+
 static void Cmd_moveend(void)
 {
     CMD_ARGS(u8 endMode, u8 endState);
@@ -6791,6 +6851,30 @@ static void Cmd_moveend(void)
                         gBattlescriptCurrInstr = BattleScript_TidebornCureActivates;
                     }
 
+                    effect = TRUE;
+                }
+            }
+
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_CREATION)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IS_MOVE_STATUS(gCurrentMove)
+             && DoesPartyShareCurrentTypeWithBattler(gBattlerAttacker)
+             && GetBattlerCreationType(gBattlerAttacker) == moveType
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]))
+            {
+                const u8 *creationScript = TryCreationSetField(gBattlerAttacker, moveType);
+
+                if (creationScript != NULL)
+                {
+                    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] |= gBitTable[gBattlerPartyIndexes[gBattlerAttacker]];
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_CREATION);
+                    gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                    BattleScriptPushCursorAndCallback(creationScript);
                     effect = TRUE;
                 }
             }
@@ -10106,6 +10190,30 @@ static void Cmd_various(void)
             if (battlerAbility == ABILITY_AS_ONE_ICE_RIDER)
                 gBattleScripting.abilityPopupOverwrite = gLastUsedAbility = ABILITY_CHILLING_NEIGH;
             gBattlescriptCurrInstr = BattleScript_RaiseStatOnFaintingTarget;
+            return;
+        }
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_VICTORY:
+    {
+        VARIOUS_ARGS();
+
+        if (HasBattlerAbility(battler, ABILITY_VICTORY)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && DoesPartyShareTypeWithBattler(battler)
+         && (CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN)
+          || gBattleMons[battler].hp < gBattleMons[battler].maxHP))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_VICTORY);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_CELEBRATE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             return;
         }
         break;

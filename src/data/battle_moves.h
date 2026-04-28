@@ -10632,11 +10632,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_CELEBRATE] =
     {
-        .effect = EFFECT_DO_NOTHING,
+        .effect = EFFECT_CELEBRATE,
         .power = 0,
         .type = TYPE_NORMAL,
         .accuracy = 0,
-        .pp = 40,
+        .pp = 10,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_USER,
         .priority = 0,
@@ -10644,6 +10644,8 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .zMoveEffect = Z_EFFECT_ALL_STATS_UP_1,
         .ignoresProtect = TRUE,
         .mirrorMoveBanned = TRUE,
+        .healBlockBanned = TRUE,
+        .snatchAffected = TRUE,
         .metronomeBanned = TRUE,
         .mimicBanned = TRUE,
         .copycatBanned = TRUE,

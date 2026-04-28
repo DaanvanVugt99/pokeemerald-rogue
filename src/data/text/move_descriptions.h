@@ -2413,8 +2413,8 @@ static const u8 sDazzlingGleamDescription[] = _(
     "a bright flash.");
 
 static const u8 sCelebrateDescription[] = _(
-    "Congratulates you on your\n"
-    "special day.");
+    "Restores HP and raises\n"
+    "the user's Speed.");
 
 static const u8 sHoldHandsDescription[] = _(
     "The user and ally hold hands\n"

@@ -4486,6 +4486,67 @@ bool32 DoesPartyShareTypeWithBattler(u32 battler)
     return TRUE;
 }
 
+static bool32 DoesPartyMonShareCreationType(struct Pokemon *mon, u32 type)
+{
+    u16 species = GetMonData(mon, MON_DATA_SPECIES);
+    u16 item = GetMonData(mon, MON_DATA_HELD_ITEM);
+    u32 holdEffect = ItemId_GetHoldEffect(item);
+    u32 itemType = ItemId_GetSecondaryId(item);
+
+    if (GET_BASE_SPECIES_ID(species) == SPECIES_ARCEUS
+     && (holdEffect == HOLD_EFFECT_PLATE || holdEffect == HOLD_EFFECT_Z_CRYSTAL)
+     && IS_STANDARD_TYPE(itemType))
+        return itemType == type;
+
+    return gSpeciesInfo[species].types[0] == type || gSpeciesInfo[species].types[1] == type;
+}
+
+u32 GetBattlerCreationType(u32 battler)
+{
+    u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
+    u32 itemType = ItemId_GetSecondaryId(gBattleMons[battler].item);
+
+    if (GET_BASE_SPECIES_ID(gBattleMons[battler].species) == SPECIES_ARCEUS
+     && (holdEffect == HOLD_EFFECT_PLATE || holdEffect == HOLD_EFFECT_Z_CRYSTAL)
+     && IS_STANDARD_TYPE(itemType))
+        return itemType;
+
+    if (IS_STANDARD_TYPE(GetBattlerType(battler, 0, FALSE)))
+        return GetBattlerType(battler, 0, FALSE);
+    if (IS_STANDARD_TYPE(GetBattlerType(battler, 1, FALSE)))
+        return GetBattlerType(battler, 1, FALSE);
+    if (IS_STANDARD_TYPE(GetBattlerType(battler, 2, FALSE)))
+        return GetBattlerType(battler, 2, FALSE);
+
+    return TYPE_MYSTERY;
+}
+
+bool32 DoesPartyShareCurrentTypeWithBattler(u32 battler)
+{
+    u32 i;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+    u32 battlerType = GetBattlerCreationType(battler);
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    if (!IS_STANDARD_TYPE(battlerType))
+        return FALSE;
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        if (!IsValidForBattle(&party[i]))
+            continue;
+        if (i == gBattlerPartyIndexes[battler])
+            continue;
+
+        if (!DoesPartyMonShareCreationType(&party[i], battlerType))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
 bool32 IsTruantLoafingSuppressed(u32 battler)
 {
     return HasBattlerAbility(battler, ABILITY_KINGS_DOMAIN)
@@ -4754,7 +4815,7 @@ bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility)
     return FALSE;
 }
 
-static bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer)
+bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer)
 {
     if ((!(gFieldStatuses & statusFlag) && (!gBattleStruct->isSkyBattle)))
     {
@@ -5747,6 +5808,24 @@ special_delivery_done:
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             gCalledMove = MOVE_IMPRISON;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            StartAbilityCalledMoveScript();
+            return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BLOOMING_CASCADE)
+         && !uniqueDone
+         && CountPartyMonsOfType(battler, TYPE_GRASS, TRUE) >= 2)
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_BLOOMING_CASCADE);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_AROMATHERAPY;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
@@ -7345,6 +7424,14 @@ special_delivery_done:
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_BITING_COLD);
                 BattleScriptPushCursorAndCallback(BattleScript_DampeningActivates);
+                effect++;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_NIGHT_TERROR)
+             && IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_NIGHT_TERROR);
+                BattleScriptPushCursorAndCallback(BattleScript_BadDreamsActivates);
                 effect++;
             }
 

@@ -1743,6 +1743,10 @@
 	various \battler, VARIOUS_TRY_ACTIVATE_MOXIE
 	.endm
 
+	.macro tryactivatevictory battler:req
+	various \battler, VARIOUS_TRY_ACTIVATE_VICTORY
+	.endm
+
 	.macro tryactivatebeastboost battler:req
 	various \battler, VARIOUS_TRY_ACTIVATE_BEAST_BOOST
 	.endm

@@ -461,6 +461,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectEclipse                 @ EFFECT_ECLIPSE
 	.4byte BattleScript_EffectInfestedTerrain         @ EFFECT_INFESTED_TERRAIN
 	.4byte BattleScript_EffectPlainTerrain            @ EFFECT_PLAIN_TERRAIN
+	.4byte BattleScript_EffectCelebrate               @ EFFECT_CELEBRATE
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -4853,7 +4854,7 @@ BattleScript_EffectDoNothing::
 	jumpifmove MOVE_HOLD_HANDS, BattleScript_EffectHoldHands
 	attackanimation
 	waitanimation
-	jumpifmove MOVE_CELEBRATE, BattleScript_EffectCelebrate
+	jumpifmove MOVE_CELEBRATE, BattleScript_EffectCelebrateMessage
 	jumpifmove MOVE_HAPPY_HOUR, BattleScript_EffectHappyHour
 	printstring STRINGID_BUTNOTHINGHAPPENED
 	waitmessage B_WAIT_TIME_LONG
@@ -4864,13 +4865,37 @@ BattleScript_EffectHoldHands:
 	attackanimation
 	waitanimation
 	goto BattleScript_MoveEnd
-BattleScript_EffectCelebrate:
+BattleScript_EffectCelebrateMessage:
 	printstring STRINGID_CELEBRATEMESSAGE
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
 BattleScript_EffectHappyHour:
 	setmoveeffect MOVE_EFFECT_HAPPY_HOUR
 	seteffectprimary
+	goto BattleScript_MoveEnd
+
+BattleScript_EffectCelebrate::
+	attackcanceler
+	attackstring
+	ppreduce
+	jumpifstat BS_ATTACKER, CMP_NOT_EQUAL, STAT_SPEED, MAX_STAT_STAGE, BattleScript_EffectCelebrateDoMove
+	jumpiffullhp BS_ATTACKER, BattleScript_AlreadyAtFullHp
+BattleScript_EffectCelebrateDoMove:
+	attackanimation
+	waitanimation
+	tryhealquarterhealth BS_ATTACKER, BattleScript_EffectCelebrateTrySpeed
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_EffectCelebrateTrySpeed:
+	setstatchanger STAT_SPEED, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_MoveEnd
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
 
 BattleScript_EffectDisable::
@@ -6770,6 +6795,7 @@ BattleScript_FaintTarget::
 	tryactivatesoulheart
 	tryactivatereceiver BS_TARGET
 	tryactivatemoxie BS_ATTACKER        @ and chilling neigh, as one ice rider
+	tryactivatevictory BS_ATTACKER
 	tryactivatebeastboost BS_ATTACKER
 	tryactivategrimneigh BS_ATTACKER    @ and as one shadow rider
 	tryactivatebattlebond BS_ATTACKER
