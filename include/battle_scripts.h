@@ -214,6 +214,8 @@ extern const u8 BattleScript_MarksmanCritBoostActivates[];
 extern const u8 BattleScript_TraceActivates[];
 extern const u8 BattleScript_TraceActivatesEnd3[];
 extern const u8 BattleScript_RainDishActivates[];
+extern const u8 BattleScript_TidebornActivates[];
+extern const u8 BattleScript_TidebornCureActivates[];
 extern const u8 BattleScript_SandstreamActivates[];
 extern const u8 BattleScript_ShedSkinActivates[];
 extern const u8 BattleScript_ShedSkinCharmActivates[];

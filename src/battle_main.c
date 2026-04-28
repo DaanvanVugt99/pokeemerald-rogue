@@ -3215,6 +3215,7 @@ void SwitchInClearSetData(u32 battler)
     gLastLandedMoves[battler] = MOVE_NONE;
     gLastHitByType[battler] = 0;
     gLastResultingMoves[battler] = MOVE_NONE;
+    gProtectStructs[battler].driftSongMoveUsed = FALSE;
     gLastPrintedMoves[battler] = MOVE_NONE;
     gLastHitBy[battler] = 0xFF;
 
@@ -3345,6 +3346,7 @@ const u8* FaintClearSetData(u32 battler)
     gLastLandedMoves[battler] = MOVE_NONE;
     gLastHitByType[battler] = 0;
     gLastResultingMoves[battler] = MOVE_NONE;
+    gProtectStructs[battler].driftSongMoveUsed = FALSE;
     gLastPrintedMoves[battler] = MOVE_NONE;
     gLastHitBy[battler] = 0xFF;
 

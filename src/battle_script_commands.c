@@ -2610,10 +2610,10 @@ static void Cmd_datahpupdate(void)
 
                 if (gBattleMons[battler].hp > oldHp
                  && HasBattlerAbility(battler, ABILITY_REEF_PROTECTION)
-                 && !gProtectStructs[battler].uniqueAbilityHealedThisTurn
+                 && !gProtectStructs[battler].reefProtectionHealedThisTurn
                  && gSideTimers[BATTLE_OPPOSITE(GetBattlerSide(battler))].spikesAmount < 3)
                 {
-                    gProtectStructs[battler].uniqueAbilityHealedThisTurn = TRUE;
+                    gProtectStructs[battler].reefProtectionHealedThisTurn = TRUE;
                     triggerReefProtection = TRUE;
                 }
             }
@@ -6185,6 +6185,14 @@ static void Cmd_moveend(void)
                         gLastMoves[gBattlerAttacker] = gChosenMove;
                         RecordKnownMove(gBattlerAttacker, gChosenMove);
                         gLastResultingMoves[gBattlerAttacker] = gCurrentMove;
+
+                        if (HasBattlerAbility(gBattlerAttacker, ABILITY_DRIFT_SONG)
+                         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+                         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+                         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+                         && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+                         && (moveType == TYPE_WATER || gBattleMoves[gCurrentMove].soundMove))
+                            gProtectStructs[gBattlerAttacker].driftSongMoveUsed = TRUE;
                     }
                 }
                 else
@@ -6749,6 +6757,42 @@ static void Cmd_moveend(void)
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_IronWillActivates;
                 effect = TRUE;
+            }
+
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_TIDEBORN)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IS_MOVE_STATUS(gCurrentMove)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]))
+            {
+                bool32 canHeal = !BATTLER_MAX_HP(gBattlerAttacker) && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK);
+                bool32 canCureStatus = gBattleMons[gBattlerAttacker].status1 != STATUS1_NONE;
+
+                if (canHeal || canCureStatus)
+                {
+                    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] |= gBitTable[gBattlerPartyIndexes[gBattlerAttacker]];
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_TIDEBORN);
+                    gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                    BattleScriptPushCursor();
+
+                    if (canHeal)
+                    {
+                        gBattleMoveDamage = -(GetNonDynamaxMaxHP(gBattlerAttacker) / 4);
+                        if (gBattleMoveDamage == 0)
+                            gBattleMoveDamage = -1;
+                        gBattlescriptCurrInstr = BattleScript_TidebornActivates;
+                    }
+                    else
+                    {
+                        gBattlescriptCurrInstr = BattleScript_TidebornCureActivates;
+                    }
+
+                    effect = TRUE;
+                }
             }
 
             gBattleScripting.moveendState++;

@@ -5737,6 +5737,24 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_LUNAR_EDICT)
+         && !uniqueDone
+         && !(gStatuses3[battler] & STATUS3_IMPRISONED_OTHERS))
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_LUNAR_EDICT);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_IMPRISON;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            StartAbilityCalledMoveScript();
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PSIONIC_PARADOX) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -6094,6 +6112,30 @@ special_delivery_done:
             else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_OMEN);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DARK_DIMENSION)
+         && !uniqueDone
+         && CountPartyMonsOfType(battler, TYPE_GHOST, TRUE) >= 2
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            uniqueDone = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_DARK_DIMENSION);
+                BattleScriptPushCursorAndCallback(BattleScript_OmenActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_DARK_DIMENSION);
                 BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
                 return 1;
             }
@@ -7728,6 +7770,26 @@ special_delivery_done:
                 gBattleMoveDamage = -healAmount;
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                 effect++;
+            }
+
+            if (gProtectStructs[battler].driftSongMoveUsed)
+            {
+                gProtectStructs[battler].driftSongMoveUsed = FALSE;
+
+                if (HasBattlerAbility(battler, ABILITY_DRIFT_SONG)
+                 && !BATTLER_MAX_HP(battler)
+                 && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                {
+                    s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
+
+                    if (healAmount == 0)
+                        healAmount = 1;
+
+                    SetBattlerTriggeredAbility(battler, ABILITY_DRIFT_SONG);
+                    gBattleMoveDamage = -healAmount;
+                    BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                    effect++;
+                }
             }
 
             if (HasBattlerAbility(battler, ABILITY_TRAGIC_BEAUTY)

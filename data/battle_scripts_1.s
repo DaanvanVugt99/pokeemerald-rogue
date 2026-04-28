@@ -9354,6 +9354,20 @@ BattleScript_RainDishActivates::
 	call BattleScript_AbilityHpHeal
 	end3
 
+BattleScript_TidebornActivates::
+	call BattleScript_AbilityHpHeal
+	jumpifstatus BS_ATTACKER, STATUS1_ANY, BattleScript_TidebornCureStatus
+	return
+
+BattleScript_TidebornCureActivates::
+	call BattleScript_AbilityPopUp
+BattleScript_TidebornCureStatus:
+	curestatus BS_ATTACKER
+	updatestatusicon BS_ATTACKER
+	printstring STRINGID_PKMNSTATUSNORMAL
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_CheekPouchActivates::
 	copybyte sSAVED_BATTLER, gBattlerAttacker
 	copybyte gBattlerAttacker, gBattlerAbility
