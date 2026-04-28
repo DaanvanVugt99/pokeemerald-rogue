@@ -6692,6 +6692,65 @@ static void Cmd_moveend(void)
                 }
             }
 
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_STILL_MIND)
+             && IsBattlerAlive(gBattlerAttacker)
+             && moveType == TYPE_WATER
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && gProtectStructs[gBattlerAttacker].targetAffected
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && !(gSideStatuses[GetBattlerSide(gBattlerAttacker)] & SIDE_STATUS_RAINBOW))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_STILL_MIND);
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                gBattleScripting.savedBattler = gBattlerAttacker;
+                gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_StillMindActivates;
+                effect = TRUE;
+            }
+
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_BURNING_HEART)
+             && IsBattlerAlive(gBattlerAttacker)
+             && moveType == TYPE_FIRE
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && gProtectStructs[gBattlerAttacker].targetAffected
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && !(gSideStatuses[GetBattlerSide(BATTLE_OPPOSITE(gBattlerAttacker))] & SIDE_STATUS_SEA_OF_FIRE))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BURNING_HEART);
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                gBattleScripting.savedBattler = gBattlerTarget;
+                gBattlerTarget = BATTLE_OPPOSITE(gBattlerAttacker);
+                gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_BurningHeartActivates;
+                effect = TRUE;
+            }
+
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_IRON_WILL)
+             && IsBattlerAlive(gBattlerAttacker)
+             && moveType == TYPE_GRASS
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && gProtectStructs[gBattlerAttacker].targetAffected
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && !(gSideStatuses[GetBattlerSide(BATTLE_OPPOSITE(gBattlerAttacker))] & SIDE_STATUS_SWAMP))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_IRON_WILL);
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                gBattleScripting.savedBattler = gBattlerTarget;
+                gBattlerTarget = BATTLE_OPPOSITE(gBattlerAttacker);
+                gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_IronWillActivates;
+                effect = TRUE;
+            }
+
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_EMERGENCY_EXIT: // Special case, because moves hitting multiple opponents stop after switching out

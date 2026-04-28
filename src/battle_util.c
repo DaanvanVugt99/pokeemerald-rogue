@@ -5064,6 +5064,35 @@ static inline uq4_12_t GetSupremeOverlordModifier(u32 battler)
     return UQ_4_12(1.0) + (UQ_4_12(0.1) * gBattleStruct->supremeOverlordCounter[battler]);
 }
 
+static inline u32 CountFaintedPartyAllies(u32 battler)
+{
+    u32 i;
+    u32 firstMonId, lastMonId;
+    u32 count = 0;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        if (i == gBattlerPartyIndexes[battler])
+            continue;
+        if (GetMonData(&party[i], MON_DATA_SPECIES) == SPECIES_NONE)
+            continue;
+        if (GetMonData(&party[i], MON_DATA_IS_EGG))
+            continue;
+        if (GetMonData(&party[i], MON_DATA_HP) == 0)
+            count++;
+    }
+
+    return count;
+}
+
+static inline uq4_12_t GetShortCircuitModifier(u32 battler)
+{
+    return UQ_4_12(1.0) + (UQ_4_12(0.2) * min(5, CountFaintedPartyAllies(battler)));
+}
+
 static inline bool32 HadMoreThanHalfHpNowHasLess(u32 battler)
 {
     u32 cutoff = gBattleMons[battler].maxHP / 2;
@@ -14391,6 +14420,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case ABILITY_SUPREME_OVERLORD:
         modifier = uq4_12_multiply(modifier, GetSupremeOverlordModifier(battlerAtk));
         break;
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_SHORT_CIRCUIT)
+     && moveType == TYPE_ELECTRIC
+     && DoesPartyShareTypeWithBattler(battlerAtk))
+    {
+        modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_WIND_CHIMES)

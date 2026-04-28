@@ -760,6 +760,18 @@ BattleScript_TheRainbowDisappeared::
 	waitmessage B_WAIT_TIME_LONG
 	end2
 
+BattleScript_StillMindActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	setpledgestatus BS_ABILITY_BATTLER, SIDE_STATUS_RAINBOW
+	pause B_WAIT_TIME_SHORTEST
+	printstring STRINGID_ARAINBOWAPPEAREDONSIDE
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_ABILITY_BATTLER, B_ANIM_RAINBOW
+	waitanimation
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	return
+
 BattleScript_EffectCombinedPledge_Fire::
 	call BattleScript_EffectHit_Pledge
 	setpledgestatus BS_TARGET, SIDE_STATUS_SEA_OF_FIRE
@@ -780,6 +792,18 @@ BattleScript_TheSeaOfFireDisappeared::
 	waitmessage B_WAIT_TIME_LONG
 	end2
 
+BattleScript_BurningHeartActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	setpledgestatus BS_TARGET, SIDE_STATUS_SEA_OF_FIRE
+	pause B_WAIT_TIME_SHORTEST
+	printstring STRINGID_SEAOFFIREENVELOPEDSIDE
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_TARGET, B_ANIM_SEA_OF_FIRE
+	waitanimation
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	return
+
 BattleScript_EffectCombinedPledge_Grass::
 	call BattleScript_EffectHit_Pledge
 	setpledgestatus BS_TARGET, SIDE_STATUS_SWAMP
@@ -794,6 +818,18 @@ BattleScript_TheSwampDisappeared::
 	printstring STRINGID_THESWAMPDISAPPEARED
 	waitmessage B_WAIT_TIME_LONG
 	end2
+
+BattleScript_IronWillActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	setpledgestatus BS_TARGET, SIDE_STATUS_SWAMP
+	pause B_WAIT_TIME_SHORTEST
+	printstring STRINGID_SWAMPENVELOPEDSIDE
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_TARGET, B_ANIM_SWAMP
+	waitanimation
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	return
 
 BattleScript_EffectHit_Pledge::
 	pause B_WAIT_TIME_MED
