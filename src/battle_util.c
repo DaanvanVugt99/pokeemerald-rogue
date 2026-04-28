@@ -426,11 +426,13 @@ void HandleAction_UseMove(void)
     }
 
     if ((HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW)
-      || HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH))
+      || HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH)
+      || HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE))
      && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
     {
         gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
         if ((HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW) && gCurrentMove != MOVE_DIG)
+         || (HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE) && gCurrentMove != MOVE_DIVE)
          || (HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH)
           && gCurrentMove != MOVE_SHADOW_FORCE
           && gCurrentMove != MOVE_PHANTOM_FORCE))
@@ -5254,6 +5256,32 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TRAPPER) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_TRAPPER);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_SNAP_TRAP;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_TASTE_TEST) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -5524,13 +5552,12 @@ special_delivery_done:
             uniqueDone = TRUE;
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
-            gStatuses3[battler] |= STATUS3_UNDERGROUND;
-            BtlController_EmitSpriteInvisibility(battler, BUFFER_A, TRUE);
-            MarkBattlerForControllerExec(battler);
+            gBattlerAttacker = battler;
+            gCurrentMove = MOVE_DIG;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             SetBattlerTriggeredAbility(battler, ABILITY_BURROW);
-            BattleScriptPushCursorAndCallback(BattleScript_AbilityPopupEnd3);
+            BattleScriptPushCursorAndCallback(BattleScript_BurrowSwitchInActivates);
             return 1;
         }
 
@@ -5541,13 +5568,28 @@ special_delivery_done:
             uniqueDone = TRUE;
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
-            gStatuses3[battler] |= STATUS3_PHANTOM_FORCE;
-            BtlController_EmitSpriteInvisibility(battler, BUFFER_A, TRUE);
-            MarkBattlerForControllerExec(battler);
+            gBattlerAttacker = battler;
+            gCurrentMove = MOVE_PHANTOM_FORCE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             SetBattlerTriggeredAbility(battler, ABILITY_STEALTH);
-            BattleScriptPushCursorAndCallback(BattleScript_AbilityPopupEnd3);
+            BattleScriptPushCursorAndCallback(BattleScript_StealthSwitchInActivates);
+            return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SUBMERGE)
+         && !uniqueDone
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            uniqueDone = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            gBattlerAttacker = battler;
+            gCurrentMove = MOVE_DIVE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_SUBMERGE);
+            BattleScriptPushCursorAndCallback(BattleScript_SubmergeSwitchInActivates);
             return 1;
         }
 
@@ -10117,6 +10159,30 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = battler;
             SET_STATCHANGER(STAT_ATK, 1, FALSE);
             PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TOXIC_TECHNIQUE)
+         && IsBattlerAlive(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && ((IS_MOVE_PHYSICAL(move) && CompareStat(battler, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+          || (IS_MOVE_SPECIAL(move) && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TOXIC_TECHNIQUE);
+            gBattlerAttacker = battler;
+            if (IS_MOVE_PHYSICAL(move))
+            {
+                SET_STATCHANGER(STAT_SPATK, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPATK);
+            }
+            else
+            {
+                SET_STATCHANGER(STAT_ATK, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+            }
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
             effect++;
@@ -17037,7 +17103,8 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
      || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
       && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))
      || ((HasBattlerAbility(battler, ABILITY_BURROW)
-       || HasBattlerAbility(battler, ABILITY_STEALTH))
+       || HasBattlerAbility(battler, ABILITY_STEALTH)
+       || HasBattlerAbility(battler, ABILITY_SUBMERGE))
       && (gDisableStructs[battler].uniquePersistentStateActive
        || !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))))
     {

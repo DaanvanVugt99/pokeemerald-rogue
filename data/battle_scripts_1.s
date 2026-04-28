@@ -5755,6 +5755,7 @@ BattleScript_BeatUpEnd::
 
 BattleScript_EffectSemiInvulnerable::
 	jumpifmove MOVE_DIG, BattleScript_EffectSemiInvulnerableDig
+	jumpifmove MOVE_DIVE, BattleScript_EffectSemiInvulnerableDive
 	jumpifmove MOVE_PHANTOM_FORCE, BattleScript_EffectSemiInvulnerablePhantomForce
 	jumpifmove MOVE_SHADOW_FORCE, BattleScript_EffectSemiInvulnerableShadowForce
 	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
@@ -5771,6 +5772,12 @@ BattleScript_EffectSemiInvulnerableDig:
 	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
 	jumpifstatus3 BS_ATTACKER, STATUS3_UNDERGROUND, BattleScript_BurrowSecondTurnSemiInvulnerable
 	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_DIG
+	goto BattleScript_FirstTurnSemiInvulnerable
+BattleScript_EffectSemiInvulnerableDive:
+	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
+	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_SecondTurnSemiInvulnerable
+	jumpifstatus3 BS_ATTACKER, STATUS3_UNDERWATER, BattleScript_BurrowSecondTurnSemiInvulnerable
+	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_DIVE
 	goto BattleScript_FirstTurnSemiInvulnerable
 BattleScript_EffectSemiInvulnerablePhantomForce:
 	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_SecondTurnSemiInvulnerable
@@ -9218,6 +9225,30 @@ BattleScript_AbilityPopupReturn::
 BattleScript_AbilityPopupEnd3::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
+	end3
+
+BattleScript_BurrowSwitchInActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_DIG
+	waitanimation
+	setsemiinvulnerablebit
+	makeinvisible BS_ATTACKER
+	end3
+
+BattleScript_SubmergeSwitchInActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_DIVE
+	waitanimation
+	setsemiinvulnerablebit
+	makeinvisible BS_ATTACKER
+	end3
+
+BattleScript_StealthSwitchInActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_PHANTOM_FORCE
+	waitanimation
+	setsemiinvulnerablebit
+	makeinvisible BS_ATTACKER
 	end3
 
 BattleScript_AttackerSpikesActivates::
