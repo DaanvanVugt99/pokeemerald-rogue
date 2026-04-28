@@ -5984,6 +5984,46 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_WHITE_CANOPY) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (B_SNOW_WARNING >= GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
+                BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesSnow);
+                return 1;
+            }
+            else if (B_SNOW_WARNING < GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_HAIL, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
+                BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesHail);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_WHITEOUT) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_MISTY_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_WHITEOUT);
+                BattleScriptPushCursorAndCallback(BattleScript_MistySurgeActivates);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_OMEN) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -7195,6 +7235,14 @@ special_delivery_done:
                 if (gBattleMoveDamage == 0)
                     gBattleMoveDamage = 1;
                 gBattleMoveDamage *= -1;
+                effect++;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_BITING_COLD)
+             && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_BITING_COLD);
+                BattleScriptPushCursorAndCallback(BattleScript_DampeningActivates);
                 effect++;
             }
 
@@ -9223,6 +9271,24 @@ if (triggeringAbility != ABILITY_NONE)
                 VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
             else
                 VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_WHITE_CANOPY)
+         && moveType == TYPE_GRASS
+         && IsFinalMultiHitStrike()
+         && IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW)
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_ICY_WIND;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -15372,6 +15438,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         GET_MOVE_TYPE(gCurrentMove, moveType);
         if (moveType == TYPE_FLYING)
             return UQ_4_12(1.2);
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_SYLVAN_SURGE)
+     && typeEffectivenessModifier <= UQ_4_12(0.5))
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_GRASS)
+            return UQ_4_12(2.0);
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SWITCHSTEP))

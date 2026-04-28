@@ -4741,6 +4741,11 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
     {
         speed = (speed * 120) / 100;
     }
+    if (HasBattlerAbility(battler, ABILITY_SYLVAN_SURGE)
+     && IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN))
+    {
+        speed = (speed * 150) / 100;
+    }
     if (HasBattlerAbility(battler, ABILITY_UNKNOWN_BIOLOGY))
     {
         if (gBattleMons[battler].status1 & STATUS1_SLEEP)
