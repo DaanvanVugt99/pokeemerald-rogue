@@ -74,6 +74,12 @@ This file documents practical repo-specific guidance for coding agents and contr
   - `make mostlyclean`
   - `make clean`
 
+## Item Icon Asset Notes
+
+- Item icons are converted to 4bpp for GBA sprites, so only palette indices `0-15` survive conversion.
+- Transparent pixels must use palette index `0` in the indexed PNG. Do not leave transparency on index `255`; it can render as a solid square in-game.
+- Keep matching JASC `.pal` files CRLF-terminated. `gbagfx` rejects LF-only JASC palettes.
+
 ## Large Assembly File Editing
 
 - Large assembly/script files such as `data/battle_anim_scripts.s` can cause `apply_patch` to hang or stall on otherwise small edits.
