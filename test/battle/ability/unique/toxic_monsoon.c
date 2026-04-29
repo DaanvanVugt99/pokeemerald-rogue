@@ -6,6 +6,8 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_SLUDGE_BOMB].type == TYPE_POISON);
     ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
     ASSUME(!gBattleMoves[MOVE_WATER_GUN].makesContact);
+    ASSUME(gSpeciesInfo[SPECIES_MAGNEMITE].types[0] == TYPE_ELECTRIC || gSpeciesInfo[SPECIES_MAGNEMITE].types[1] == TYPE_ELECTRIC);
+    ASSUME(gSpeciesInfo[SPECIES_MAGNEMITE].types[0] == TYPE_STEEL || gSpeciesInfo[SPECIES_MAGNEMITE].types[1] == TYPE_STEEL);
 }
 
 SINGLE_BATTLE_TEST("Toxic Monsoon sets Acid Rain after using a Poison-type move")
@@ -17,6 +19,20 @@ SINGLE_BATTLE_TEST("Toxic Monsoon sets Acid Rain after using a Poison-type move"
         TURN { MOVE(player, MOVE_SLUDGE_BOMB); MOVE(opponent, MOVE_CELEBRATE); }
     } THEN {
         EXPECT(gBattleWeather & B_WEATHER_ACID_RAIN);
+    }
+}
+
+SINGLE_BATTLE_TEST("Toxic Monsoon does not set Acid Rain if the Poison move has no effect")
+{
+    GIVEN {
+        PLAYER(SPECIES_QWILFISH) { Ability(ABILITY_SWIFT_SWIM); UniqueAbility(ABILITY_TOXIC_MONSOON); Moves(MOVE_SLUDGE_BOMB); }
+        OPPONENT(SPECIES_MAGNEMITE) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SLUDGE_BOMB); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NOT ABILITY_POPUP(player, ABILITY_TOXIC_MONSOON);
+    } THEN {
+        EXPECT(!(gBattleWeather & B_WEATHER_ACID_RAIN));
     }
 }
 

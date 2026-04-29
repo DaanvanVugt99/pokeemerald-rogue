@@ -4,6 +4,8 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_WATER_GUN].type == TYPE_WATER);
+    ASSUME(gBattleMoves[MOVE_HYDRO_PUMP].type == TYPE_WATER);
+    ASSUME(gBattleMoves[MOVE_HYDRO_PUMP].accuracy != 0);
     ASSUME(gBattleMoves[MOVE_AQUA_RING].type == TYPE_WATER);
     ASSUME(gBattleMoves[MOVE_TACKLE].type != TYPE_WATER);
     ASSUME(gBattleMoves[MOVE_POWER_GEM].type == TYPE_ROCK);
@@ -27,6 +29,24 @@ SINGLE_BATTLE_TEST("Primordial Wake makes the next Rock-type move also use Ancie
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_GT(results[1].damage, results[0].damage * 13 / 10);
+    }
+}
+
+SINGLE_BATTLE_TEST("Primordial Wake does not prepare Ancient Power if the Water move misses")
+{
+    GIVEN {
+        PLAYER(SPECIES_OMASTAR) { Ability(ABILITY_SWIFT_SWIM); UniqueAbility(ABILITY_PRIMORDIAL_WAKE); Moves(MOVE_HYDRO_PUMP, MOVE_POWER_GEM); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_BATTLE_ARMOR); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HYDRO_PUMP, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_POWER_GEM); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_PRIMORDIAL_WAKE);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_ANCIENT_POWER, player);
+        }
+    } THEN {
+        EXPECT(!gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniquePersistentStateActive);
     }
 }
 

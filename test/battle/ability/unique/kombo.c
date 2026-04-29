@@ -4,9 +4,27 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_POISON_GAS].type == TYPE_POISON);
+    ASSUME(gBattleMoves[MOVE_POISON_GAS].accuracy != 0);
     ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
     ASSUME(gBattleMoves[MOVE_KNOCK_OFF].effect == EFFECT_KNOCK_OFF);
     ASSUME(gBattleMoves[MOVE_KNOCK_OFF].power > 30);
+}
+
+SINGLE_BATTLE_TEST("Kombo does not trigger if the Poison move misses")
+{
+    GIVEN {
+        PLAYER(SPECIES_DRAPION) { UniqueAbility(ABILITY_KOMBO); Moves(MOVE_POISON_GAS); }
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_ORAN_BERRY); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_POISON_GAS, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_KOMBO);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_KNOCK_OFF, player);
+        }
+    } THEN {
+        EXPECT_EQ(opponent->item, ITEM_ORAN_BERRY);
+    }
 }
 
 SINGLE_BATTLE_TEST("Kombo uses 30 BP Knock Off the first time the user uses a Poison move")

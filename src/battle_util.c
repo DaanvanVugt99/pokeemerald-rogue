@@ -9397,6 +9397,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_VOLCANIC_RAGE)
          && moveType == TYPE_FIRE
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
         {
@@ -9414,6 +9415,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_PASSIVE_INCOME)
          && moveType == TYPE_NORMAL
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
         {
@@ -9496,6 +9498,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_AFTERSHOCK)
          && moveType == TYPE_GROUND
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
         {
@@ -9513,6 +9516,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_PLOW_THROUGH)
          && moveType == TYPE_GROUND
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
         {
@@ -9533,6 +9537,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_WHITE_CANOPY)
          && moveType == TYPE_GRASS
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW)
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -9553,6 +9558,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsBattlerAlive(battler)
          && moveType == TYPE_GROUND
          && !IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9583,6 +9589,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_SPILLWAY)
          && IsBattlerAlive(battler)
          && moveType == TYPE_WATER
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -9631,6 +9638,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_SWARM_ASSAULT)
          && IsMoveMakingContact(move, battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -9652,6 +9660,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_HANDYWORK)
          && IsMoveMakingContact(move, battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -9707,6 +9716,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_DREAMWEAVER)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -9725,6 +9735,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_HEXCRAFT)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
          && IsFinalMultiHitStrike()
@@ -9744,6 +9755,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_MULTITASK)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
@@ -9764,6 +9776,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsBattlerAlive(battler)
          && IS_MOVE_STATUS(move)
          && move != MOVE_METRONOME
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike())
         {
@@ -9826,6 +9839,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_AQUATIC_ARMOR)
          && IsBattlerAlive(battler)
          && moveType == TYPE_WATER
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9836,6 +9850,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_PRIMORDIAL_WAKE)
          && IsBattlerAlive(battler)
          && moveType == TYPE_WATER
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9846,6 +9861,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_EXHUMED)
          && IsBattlerAlive(battler)
          && moveType == TYPE_ROCK
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9856,6 +9872,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
          && IsBattlerAlive(battler)
          && moveType == TYPE_ELECTRIC
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9866,6 +9883,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
          && gBattleMoves[move].soundMove
          && gDisableStructs[battler].uniquePersistentStateActive
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9876,6 +9894,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
          && IsBattlerAlive(battler)
          && moveType == TYPE_FLYING
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9885,6 +9904,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_UPPERCUT)
          && gBattleMoves[move].punchingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -9895,6 +9915,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
          && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -9908,6 +9929,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_VENDETTA)
          && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -9918,6 +9940,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
          && gBattleMoves[move].punchingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -9947,6 +9970,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_UPROOT)
          && moveType == TYPE_GRASS
+         && DidMoveSucceedForMoveEndEffects(battler)
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
@@ -9967,6 +9991,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_SPELLFIST)
          && gBattleMoves[move].punchingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
@@ -9987,6 +10012,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_REGAL_DECREE)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
@@ -10014,6 +10040,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_KOMBO)
          && moveType == TYPE_POISON
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
@@ -10034,6 +10061,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_UPDRAFT)
          && moveType == TYPE_FIRE
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
@@ -10051,6 +10079,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_SHELL_FORMATION)
          && moveType == TYPE_WATER
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[battler].extraMoveUsed
          && IsFinalMultiHitStrike())
@@ -10068,6 +10097,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_FOSSIL_DRILL)
          && moveType == TYPE_ROCK
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
@@ -10085,6 +10115,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_EMPTY_HAND)
          && gBattleMoves[move].punchingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
@@ -10102,6 +10133,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_STRIKE_FEAR)
          && move == MOVE_GLARE
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && CanUseExtraMove(battler, gBattlerTarget))
         {
@@ -10117,6 +10149,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_STORYBOARD)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -10136,6 +10169,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_STARFALL)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsBattlerAlive(battler)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
@@ -10158,6 +10192,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_COLD_READ)
          && move == MOVE_FOCUS_ENERGY
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
@@ -10223,6 +10258,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_MATERNAL_INSTINCT)
          && move == MOVE_PROTECT
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
          && IsFinalMultiHitStrike()
@@ -10419,6 +10455,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsBattlerAlive(gBattlerTarget)
          && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike())
         {
@@ -10491,6 +10528,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_BRAVERY)
          && IsBattlerAlive(battler)
          && moveType == TYPE_FLYING
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && gBattleMons[battler].hp < gBattleMons[battler].maxHP
@@ -10507,6 +10545,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_TOXIC_TECHNIQUE)
          && IsBattlerAlive(battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && ((IS_MOVE_PHYSICAL(move) && CompareStat(battler, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))
@@ -10545,6 +10584,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_PRIMORDIAL_WAKE)
          && gDisableStructs[battler].uniquePersistentStateActive
          && moveType == TYPE_ROCK
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike())
         {
@@ -10583,6 +10623,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_EXHUMED)
          && gDisableStructs[battler].uniquePersistentStateActive
          && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike())
         {
@@ -10696,6 +10737,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_VERDANT_HAVEN)
          && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -10716,6 +10758,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_ERUPTION)
          && moveType == TYPE_FIRE
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -10741,6 +10784,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_DEATH_ROLL)
          && gBattleMoves[move].bitingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -10766,6 +10810,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_SIDEWINDER)
          && gBattleMoves[move].bitingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -10975,7 +11020,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_TOXIC_MONSOON)
          && moveType == TYPE_POISON
-         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
         {
@@ -10986,7 +11031,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_FESTIVAL)
          && gBattleMoves[move].danceMove
-         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer))
         {
@@ -10997,6 +11042,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_DEEP_SLEEP)
          && move == MOVE_YAWN
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -11017,6 +11063,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_DUELIST)
          && IsBattlerAlive(battler)
          && IsFinalMultiHitStrike()
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && gBattleMoves[move].slicingMove
