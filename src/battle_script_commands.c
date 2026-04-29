@@ -5972,10 +5972,26 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_ABILITIES_ATTACKER: // Poison Touch, possibly other in the future
-            if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END_ATTACKER, gBattlerAttacker, 0, 0, 0))
+        {
+            u32 moveEndMove = 0;
+
+            if (gCurrentTurnActionNumber < gBattlersCount
+             && gBattlerByTurnOrder[gCurrentTurnActionNumber] < gBattlersCount)
+            {
+                u32 turnBattler = gBattlerByTurnOrder[gCurrentTurnActionNumber];
+
+                if (gBattleStruct->successfulForceSwitchMove[turnBattler] != MOVE_NONE
+                 && gProtectStructs[turnBattler].targetAffected)
+                {
+                    gBattlerAttacker = turnBattler;
+                    moveEndMove = gBattleStruct->successfulForceSwitchMove[turnBattler];
+                }
+            }
+            if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END_ATTACKER, gBattlerAttacker, 0, 0, moveEndMove))
                 effect = TRUE;
             gBattleScripting.moveendState++;
             break;
+        }
         case MOVEEND_OPPORTUNIST:
             if (AbilityBattleEffects(ABILITYEFFECT_OPPORTUNIST, 0, 0, 0, 0))
                 effect = TRUE; // it loops through all battlers, so we increment after its done with all battlers
@@ -6928,6 +6944,7 @@ static void Cmd_moveend(void)
             gBattleStruct->targetsDone[gBattlerAttacker] = 0;
             gProtectStructs[gBattlerAttacker].usesBouncedMove = FALSE;
             gProtectStructs[gBattlerAttacker].targetAffected = FALSE;
+            gBattleStruct->successfulForceSwitchMove[gBattlerAttacker] = MOVE_NONE;
             gProtectStructs[gBattlerAttacker].shellTrap = FALSE;
             gBattleStruct->ateBoost[gBattlerAttacker] = 0;
             gStatuses3[gBattlerAttacker] &= ~STATUS3_ME_FIRST;
@@ -12914,6 +12931,9 @@ static void Cmd_forcerandomswitch(void)
         }
         else
         {
+            gProtectStructs[gBattlerAttacker].targetAffected = TRUE;
+            if (gBattleMoves[gCurrentMove].effect == EFFECT_ROAR)
+                gBattleStruct->successfulForceSwitchMove[gBattlerAttacker] = gCurrentMove;
             *(gBattleStruct->battlerPartyIndexes + gBattlerTarget) = gBattlerPartyIndexes[gBattlerTarget];
             gBattlescriptCurrInstr = BattleScript_RoarSuccessSwitch;
             gBattleStruct->forcedSwitch |= gBitTable[gBattlerTarget];
@@ -12928,7 +12948,6 @@ static void Cmd_forcerandomswitch(void)
                 gBattlescriptCurrInstr = BattleScript_AttackerSpikesActivates;
                 return;
             }
-
             if (!IsMultiBattle())
                 SwitchPartyOrder(gBattlerTarget);
 
@@ -12950,6 +12969,9 @@ static void Cmd_forcerandomswitch(void)
         // In normal wild doubles, Roar will always fail if the user's level is less than the target's.
         if (gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level)
         {
+            gProtectStructs[gBattlerAttacker].targetAffected = TRUE;
+            if (gBattleMoves[gCurrentMove].effect == EFFECT_ROAR)
+                gBattleStruct->successfulForceSwitchMove[gBattlerAttacker] = gCurrentMove;
             gBattlescriptCurrInstr = BattleScript_RoarSuccessEndBattle;
             if (gCurrentMove == MOVE_WHIRLWIND
              && HasBattlerAbility(gBattlerAttacker, ABILITY_SCRAP_DRAFT)

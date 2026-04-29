@@ -8,6 +8,7 @@ ASSUMPTIONS
     ASSUME(!IS_MOVE_STATUS(MOVE_ECHOED_VOICE));
     ASSUME(gBattleMoves[MOVE_HYPER_VOICE].soundMove);
     ASSUME(!IS_MOVE_STATUS(MOVE_HYPER_VOICE));
+    ASSUME(gBattleMoves[MOVE_ROAR].soundMove);
     ASSUME(!gBattleMoves[MOVE_TACKLE].soundMove);
     ASSUME(gBattleMoves[MOVE_INFESTED_TERRAIN].effect == EFFECT_INFESTED_TERRAIN);
 }
@@ -49,6 +50,22 @@ SINGLE_BATTLE_TEST("Call Allies does not set Infested Terrain after a non-sound 
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_CALL_ALLIES);
+        }
+    } THEN {
+        EXPECT(!(gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN));
+    }
+}
+
+SINGLE_BATTLE_TEST("Call Allies does not set Infested Terrain after failed Roar")
+{
+    GIVEN {
+        PLAYER(SPECIES_KRICKETUNE) { Ability(ABILITY_SWARM); UniqueAbility(ABILITY_CALL_ALLIES); Moves(MOVE_ROAR); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_ROAR); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_CALL_ALLIES);
         }

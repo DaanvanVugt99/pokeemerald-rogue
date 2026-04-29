@@ -1390,7 +1390,7 @@ bool32 AI_IsBattlerGrounded(u32 battlerId)
         return FALSE;
     else if (holdEffect == HOLD_EFFECT_AIR_BALLOON)
         return FALSE;
-    else if (AI_HasAbility(battlerId, ABILITY_LEVITATE))
+    else if (AI_HasAbility(battlerId, ABILITY_LEVITATE) || AI_HasAbility(battlerId, ABILITY_SHORT_CIRCUIT))
         return FALSE;
     else if (IS_BATTLER_OF_TYPE(battlerId, TYPE_FLYING))
         return FALSE;

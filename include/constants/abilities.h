@@ -507,7 +507,7 @@
 #define ABILITY_VICEJAW             473
 #define ABILITY_IRON_SHARDS         474
 #define ABILITY_EMPTY_HAND          475
-#define ABILITY_FLASH_FANG          476
+#define ABILITY_CHARGED_CRY          476
 #define ABILITY_POSITIVE_CHARGE     477
 #define ABILITY_NEGATIVE_CHARGE     478
 #define ABILITY_CALL                479

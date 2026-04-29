@@ -74,6 +74,7 @@ static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
+static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move);
 static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef);
 static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
@@ -1062,6 +1063,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_KEEN_EYE] = 1,
     [ABILITY_LEAF_GUARD] = 1,
     [ABILITY_LEVITATE] = 1,
+    [ABILITY_SHORT_CIRCUIT] = 1,
     [ABILITY_LIGHTNING_ROD] = 1,
     [ABILITY_LIMBER] = 1,
     [ABILITY_MAGMA_ARMOR] = 1,
@@ -4944,6 +4946,12 @@ static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget)
         && CanUseSelfExtraMove(battlerAttacker);
 }
 
+static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker)
+{
+    return !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
+        || gProtectStructs[battlerAttacker].targetAffected;
+}
+
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
 {
     return IsBattlerAlive(battlerAttacker)
@@ -5157,9 +5165,38 @@ static inline u32 CountFaintedPartyAllies(u32 battler)
     return count;
 }
 
+static inline u32 CountFaintedPartyAlliesOfType(u32 battler, u32 type)
+{
+    u32 i;
+    u32 firstMonId, lastMonId;
+    u32 count = 0;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species;
+
+        if (i == gBattlerPartyIndexes[battler])
+            continue;
+        species = GetMonData(&party[i], MON_DATA_SPECIES);
+        if (species == SPECIES_NONE)
+            continue;
+        if (GetMonData(&party[i], MON_DATA_IS_EGG))
+            continue;
+        if (GetMonData(&party[i], MON_DATA_HP) != 0)
+            continue;
+        if (gSpeciesInfo[species].types[0] == type || gSpeciesInfo[species].types[1] == type)
+            count++;
+    }
+
+    return count;
+}
+
 static inline uq4_12_t GetShortCircuitModifier(u32 battler)
 {
-    return UQ_4_12(1.0) + (UQ_4_12(0.2) * min(5, CountFaintedPartyAllies(battler)));
+    return UQ_4_12(1.0) + (UQ_4_12(0.2) * gBattleStruct->supremeOverlordCounter[battler]);
 }
 
 static inline bool32 HadMoreThanHalfHpNowHasLess(u32 battler)
@@ -7241,6 +7278,9 @@ special_delivery_done:
                     effect++;
                 }
             }
+            break;
+        case ABILITY_SHORT_CIRCUIT:
+            gBattleStruct->supremeOverlordCounter[battler] = min(5, CountFaintedPartyAlliesOfType(battler, TYPE_ELECTRIC));
             break;
         case ABILITY_COSTAR:
             if (!gSpecialStatuses[battler].switchInAbilityDone
@@ -9557,7 +9597,7 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_CALL_ALLIES)
          && IsBattlerAlive(battler)
          && gBattleMoves[move].soundMove
-         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
@@ -9566,6 +9606,26 @@ if (triggeringAbility != ABILITY_NONE)
             SetBattlerTriggeredAbility(battler, ABILITY_CALL_ALLIES);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_CallAlliesActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CHARGED_CRY)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].soundMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_CHARGED_CRY);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_CHARGE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
         }
 
@@ -13908,7 +13968,7 @@ static bool32 IsBattlerGrounded2(u32 battler, bool32 considerInverse)
         return FALSE;
     if (holdEffect == HOLD_EFFECT_AIR_BALLOON)
         return FALSE;
-    if (HasBattlerAbility(battler, ABILITY_LEVITATE))
+    if (HasBattlerAbility(battler, ABILITY_LEVITATE) || HasBattlerAbility(battler, ABILITY_SHORT_CIRCUIT))
         return FALSE;
     if (IS_BATTLER_OF_TYPE(battler, TYPE_FLYING) && (!considerInverse || !FlagGet(B_FLAG_INVERSE_BATTLE)))
         return FALSE;
@@ -14627,8 +14687,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SHORT_CIRCUIT)
-     && moveType == TYPE_ELECTRIC
-     && DoesPartyShareTypeWithBattler(battlerAtk))
+     && moveType == TYPE_ELECTRIC)
     {
         modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
@@ -16209,6 +16268,14 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
             gBattleCommunication[MISS_TYPE] = B_MSG_GROUND_MISS;
             RecordAbilityBattle(battlerDef, ABILITY_LEVITATE);
         }
+        else if (recordAbilities && HasBattlerAbility(battlerDef, ABILITY_SHORT_CIRCUIT))
+        {
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_SHORT_CIRCUIT);
+            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_GROUND_MISS;
+            RecordAbilityBattle(battlerDef, ABILITY_SHORT_CIRCUIT);
+        }
     }
     else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOFT_BODY))
     {
@@ -16417,6 +16484,14 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
             gLastLandedMoves[battlerDef] = 0;
             gBattleCommunication[MISS_TYPE] = B_MSG_GROUND_MISS;
             RecordAbilityBattle(battlerDef, ABILITY_LEVITATE);
+        }
+        else if (recordAbilities && HasBattlerAbility(battlerDef, ABILITY_SHORT_CIRCUIT))
+        {
+            gLastUsedAbility = ABILITY_SHORT_CIRCUIT;
+            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_GROUND_MISS;
+            RecordAbilityBattle(battlerDef, ABILITY_SHORT_CIRCUIT);
         }
     }
     else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOFT_BODY))
