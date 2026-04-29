@@ -75,6 +75,8 @@ static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
+static bool32 CanBloomBurstUseFlowerShield(u32 battler);
+static void StartAbilityCalledMoveScriptAt(const u8 *script);
 static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move);
 static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef);
 static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
@@ -4961,6 +4963,24 @@ static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
 }
 
+static bool32 CanBloomBurstUseFlowerShield(u32 battler)
+{
+    u32 i;
+
+    if (!CanUseSelfExtraMove(battler))
+        return FALSE;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (IsBattlerAlive(i)
+         && IS_BATTLER_OF_TYPE(i, TYPE_GRASS)
+         && CompareStat(i, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move)
 {
     u32 pendingDamage = 0;
@@ -5025,16 +5045,21 @@ static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move)
 
 static void StartAbilityCalledMoveScript(void)
 {
+    StartAbilityCalledMoveScriptAt(BattleScript_AbilityUsesCalledMove);
+}
+
+static void StartAbilityCalledMoveScriptAt(const u8 *script)
+{
     if (gBattleMainFunc == RunBattleScriptCommands
      || gBattleMainFunc == RunBattleScriptCommands_PopCallbacksStack
      || gBattleMainFunc == HandleAction_RunBattleScript)
     {
         BattleScriptPushCursor();
-        gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+        gBattlescriptCurrInstr = script;
     }
     else
     {
-        BattleScriptExecute(BattleScript_AbilityUsesCalledMove);
+        BattleScriptExecute(script);
     }
 }
 
@@ -5864,6 +5889,26 @@ special_delivery_done:
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             gCalledMove = MOVE_AROMATHERAPY;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            StartAbilityCalledMoveScript();
+            return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BLOOM_BURST)
+         && !uniqueDone
+         && IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
+         && CanBloomBurstUseFlowerShield(battler))
+        {
+            uniqueDone = TRUE;
+            gDisableStructs[battler].weatherAbilityDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_BLOOM_BURST);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_FLOWER_SHIELD;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
@@ -9011,12 +9056,13 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_DESERT_SHROUD)
+         && gProtectStructs[battler].uniqueAbilityActive
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && gDisableStructs[battler].isFirstTurn
          && !IS_MOVE_STATUS(move))
         {
+            gProtectStructs[battler].uniqueAbilityActive = FALSE;
             SetBattlerTriggeredAbility(battler, ABILITY_DESERT_SHROUD);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_DesertShroudActivates;
@@ -9024,15 +9070,45 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_BODY_OF_WATER)
+         && gProtectStructs[battler].uniqueAbilityActive
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && gDisableStructs[battler].isFirstTurn
          && !IS_MOVE_STATUS(move))
         {
+            gProtectStructs[battler].uniqueAbilityActive = FALSE;
             SetBattlerTriggeredAbility(battler, ABILITY_BODY_OF_WATER);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_DesertShroudActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PSYCHIC_PARRY)
+         && gProtectStructs[battler].uniqueAbilityActive
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && !IS_MOVE_STATUS(move))
+        {
+            gProtectStructs[battler].uniqueAbilityActive = FALSE;
+            SetBattlerTriggeredAbility(battler, ABILITY_PSYCHIC_PARRY);
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            if (IsBattlerAlive(moveEndAttacker)
+             && IsMoveMakingContact(move, moveEndAttacker)
+             && (CompareStat(moveEndAttacker, STAT_ATK, MIN_STAT_STAGE, CMP_GREATER_THAN)
+              || GetBattlerAbility(moveEndAttacker) == ABILITY_MIRROR_ARMOR))
+            {
+                SET_STATCHANGER(STAT_ATK, 1, TRUE);
+                gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_PsychicParryContactActivates;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            }
+            else
+            {
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_PsychicParryActivates;
+            }
             effect++;
         }
 
@@ -9878,6 +9954,27 @@ if (triggeringAbility != ABILITY_NONE)
          && IsFinalMultiHitStrike())
         {
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PSYCHIC_PARRY)
+         && IsBattlerAlive(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            if (gBattleMoves[move].slicingMove)
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_PSYCHIC_PARRY);
+                PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_PsychicParryPrepared;
+                effect++;
+            }
+            else
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
@@ -11393,6 +11490,28 @@ if (triggeringAbility != ABILITY_NONE)
     case ABILITYEFFECT_ON_WEATHER: // For ability effects that activate when the battle weather changes.
         battler = gBattlerAbility = gBattleScripting.battler;
         gLastUsedAbility = GetBattlerAbility(battler);
+        bool32 bloomBurstPending = FALSE;
+
+        if (HasBattlerAbility(battler, ABILITY_BLOOM_BURST))
+        {
+            if (!IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
+            {
+                gDisableStructs[battler].weatherAbilityDone = FALSE;
+            }
+            else if (!gDisableStructs[battler].weatherAbilityDone
+                  && CanBloomBurstUseFlowerShield(battler))
+            {
+                bloomBurstPending = TRUE;
+                gDisableStructs[battler].weatherAbilityDone = TRUE;
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = battler;
+                gCalledMove = MOVE_FLOWER_SHIELD;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+            }
+        }
+
         switch (gLastUsedAbility)
         {
         case ABILITY_FORECAST:
@@ -11403,6 +11522,12 @@ if (triggeringAbility != ABILITY_NONE)
                  || !WEATHER_HAS_EFFECT) // Air Lock active
                  && TryBattleFormChange(battler, FORM_CHANGE_BATTLE_WEATHER))
             {
+                if (bloomBurstPending)
+                {
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_BloomBurstUsesCalledMove;
+                    bloomBurstPending = FALSE;
+                }
                 BattleScriptPushCursorAndCallback(BattleScript_BattlerFormChangeWithStringEnd3);
                 effect++;
             }
@@ -11430,6 +11555,11 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
+        }
+        if (bloomBurstPending)
+        {
+            StartAbilityCalledMoveScriptAt(BattleScript_BloomBurstUsesCalledMove);
+            effect++;
         }
         break;
     case ABILITYEFFECT_ON_TERRAIN:  // For ability effects that activate when the field terrain changes.
@@ -14737,6 +14867,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
 
+    if ((gBattleStruct->switchInTransferFlags[battlerAtk] & SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE)
+     && gDisableStructs[battlerAtk].isFirstTurn
+     && !IS_MOVE_STATUS(move))
+    {
+        modifier = uq4_12_multiply(modifier, IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN) ? UQ_4_12(1.5) : UQ_4_12(1.2));
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_WIND_CHIMES)
      && gBattleMoves[move].soundMove
      && !IS_MOVE_STATUS(move))
@@ -15836,7 +15973,7 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 abilityDef)
+static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 updateFlags, u32 abilityDef)
 {
     if (HasBattlerAbility(battlerDef, ABILITY_ENVIRONMENTAL)
      && IsAnyEnvironmentalTypeActive(battlerDef))
@@ -15853,20 +15990,56 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_BODY_OF_WATER)
-     && gDisableStructs[battlerDef].isFirstTurn)
+     && gDisableStructs[battlerDef].isFirstTurn
+     && !gDisableStructs[battlerDef].uniquePersistentStateActive)
     {
+        if (updateFlags)
+        {
+            gDisableStructs[battlerDef].uniquePersistentStateActive = TRUE;
+            gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
+        }
         return UQ_4_12(0.5);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
+     && gDisableStructs[battlerDef].isFirstTurn
+     && !gDisableStructs[battlerDef].uniquePersistentStateActive)
+    {
+        if (updateFlags)
+        {
+            gDisableStructs[battlerDef].uniquePersistentStateActive = TRUE;
+            gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
+        }
+        return UQ_4_12(0.5);
+    }
+
+    if ((gBattleStruct->switchInTransferFlags[battlerDef] & SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE)
      && gDisableStructs[battlerDef].isFirstTurn)
     {
-        return UQ_4_12(0.5);
+        if (updateFlags)
+        {
+            gBattleStruct->switchInTransferFlags[battlerDef] &= ~SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE;
+            if (gBattleStruct->switchInTransferFlags[battlerDef] == SWITCH_IN_TRANSFER_NONE)
+                gBattleStruct->switchInTransferSourcePartyIdx[battlerDef] = PARTY_SIZE;
+        }
+        return IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN) ? UQ_4_12(0.5) : UQ_4_12(0.8);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_AQUATIC_ARMOR)
      && gProtectStructs[battlerDef].uniqueAbilityActive)
     {
+        return UQ_4_12(0.5);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_PSYCHIC_PARRY)
+     && gDisableStructs[battlerDef].uniquePersistentStateActive
+     && !IS_MOVE_STATUS(move))
+    {
+        if (updateFlags)
+        {
+            gDisableStructs[battlerDef].uniquePersistentStateActive = FALSE;
+            gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
+        }
         return UQ_4_12(0.5);
     }
 
@@ -16030,14 +16203,14 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
     if (unmodifiedAttackerSpeed >= unmodifiedDefenderSpeed)
     {
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
-        DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, abilityDef));
+        DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(battlerAtk, typeEffectivenessModifier, holdEffectAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(moveType, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
     }
     else
     {
-        DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, abilityDef));
+        DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(moveType, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
@@ -16336,12 +16509,15 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
     }
     else if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
           && gDisableStructs[battlerDef].isFirstTurn
+          && !gDisableStructs[battlerDef].uniquePersistentStateActive
           && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM)
           && gBattleMoves[move].split != SPLIT_STATUS)
     {
         modifier = UQ_4_12(0.0);
         if (recordAbilities)
         {
+            gDisableStructs[battlerDef].uniquePersistentStateActive = TRUE;
+            gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
             SetBattlerTriggeredAbility(battlerDef, ABILITY_DESERT_SHROUD);
             gMoveResultFlags |= MOVE_RESULT_MISSED;
             gLastLandedMoves[battlerDef] = 0;
@@ -16553,12 +16729,15 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
     }
     else if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
           && gDisableStructs[battlerDef].isFirstTurn
+          && !gDisableStructs[battlerDef].uniquePersistentStateActive
           && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM)
           && gBattleMoves[move].split != SPLIT_STATUS)
     {
         modifier = UQ_4_12(0.0);
         if (recordAbilities)
         {
+            gDisableStructs[battlerDef].uniquePersistentStateActive = TRUE;
+            gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
             gLastUsedAbility = ABILITY_DESERT_SHROUD;
             gMoveResultFlags |= MOVE_RESULT_MISSED;
             gLastLandedMoves[battlerDef] = 0;

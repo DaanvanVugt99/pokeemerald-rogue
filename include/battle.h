@@ -1002,6 +1002,14 @@ struct QueuedStatBoost
     s8 statChanges[NUM_BATTLE_STATS - 1];    // highest bit being set decreases the stat
 }; /* size = 8 */
 
+#define SWITCH_IN_TRANSFER_NONE                    0
+#define SWITCH_IN_TRANSFER_INGRAIN                 (1 << 0)
+#define SWITCH_IN_TRANSFER_ROOT_NETWORK            (1 << 1)
+#define SWITCH_IN_TRANSFER_SCORCHING_RELAY         (1 << 2)
+#define SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE  (1 << 3)
+#define SWITCH_IN_TRANSFER_TIDAL_SWITCH            (1 << 4)
+#define SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE     (1 << 5)
+
 // All battle variables are declared in battle_main.c
 extern u16 gBattle_BG0_X;
 extern u16 gBattle_BG0_Y;

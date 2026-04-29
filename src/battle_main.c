@@ -5286,7 +5286,15 @@ static void TurnValuesCleanUp(bool8 var0)
             memset(&gQueuedStatBoosts[i], 0, sizeof(struct QueuedStatBoost));
 
             if (gDisableStructs[i].isFirstTurn)
+            {
+                if (gDisableStructs[i].isFirstTurn == 1)
+                {
+                    gBattleStruct->switchInTransferFlags[i] &= ~(SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE | SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE);
+                    if (gBattleStruct->switchInTransferFlags[i] == SWITCH_IN_TRANSFER_NONE)
+                        gBattleStruct->switchInTransferSourcePartyIdx[i] = PARTY_SIZE;
+                }
                 gDisableStructs[i].isFirstTurn--;
+            }
 
             if (gDisableStructs[i].rechargeTimer)
             {

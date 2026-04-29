@@ -9871,6 +9871,29 @@ BattleScript_DesertShroudActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_PsychicParryPrepared::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PSYCHICPARRYREADY
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_PsychicParryActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PSYCHICPARRIED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_PsychicParryContactActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PSYCHICPARRIED
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget  @ for defiant, mirror armor
+	seteffectsecondary
+	return
+
 BattleScript_AttackWeakenedByStrongWinds::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_ATTACKWEAKENEDBSTRONGWINDS
@@ -10820,6 +10843,10 @@ BattleScript_AbilityUsesCalledMove::
 	setbyte sB_ANIM_TARGETS_HIT, 0
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
+
+BattleScript_BloomBurstUsesCalledMove::
+	sethword sABILITY_OVERWRITE, ABILITY_BLOOM_BURST
+	goto BattleScript_AbilityUsesCalledMove
 
 BattleScript_VictoryActivates::
 	call BattleScript_AbilityPopUp
@@ -12108,6 +12135,27 @@ BattleScript_IntensiveCareActivates_End:
 BattleScript_LivingRootsActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PKMNPLANTEDROOTS
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_RootNetworkActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ROOTNETWORKRESTORED
+	waitmessage B_WAIT_TIME_LONG
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	return
+
+BattleScript_ScorchingRelayActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_SCORCHINGRELAYCHARGED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_TidalSwitchActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TIDALSWITCHGUARDED
 	waitmessage B_WAIT_TIME_LONG
 	return
 

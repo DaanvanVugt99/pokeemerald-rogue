@@ -105,12 +105,6 @@
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
-enum
-{
-    SWITCH_IN_TRANSFER_NONE = 0,
-    SWITCH_IN_TRANSFER_INGRAIN = (1 << 0),
-};
-
 // table to avoid ugly powing on gba (courtesy of doesnt)
 // this returns (i^2.5)/4
 // the quarters cancel so no need to re-quadruple them in actual calculation
@@ -7035,8 +7029,21 @@ static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct B
         return;
     }
 
-    if (HasBattlerAbility(battler, ABILITY_LIVING_ROOTS)) {
+    if (HasBattlerAbility(battler, ABILITY_LIVING_ROOTS))
+    {
         gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_INGRAIN;
+    }
+    else if (HasBattlerAbility(battler, ABILITY_ROOT_NETWORK))
+    {
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROOT_NETWORK;
+    }
+    else if (HasBattlerAbility(battler, ABILITY_SCORCHING_RELAY))
+    {
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_SCORCHING_RELAY;
+    }
+    else if (HasBattlerAbility(battler, ABILITY_TIDAL_SWITCH))
+    {
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_TIDAL_SWITCH;
     }
     else
     {
@@ -7064,7 +7071,70 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
         }
     }
 
-    gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROOT_NETWORK)
+    {
+        u8 sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battler];
+
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_ROOT_NETWORK;
+        if (gBattleMons[battler].hp != 0 && gBattleMons[battler].hp < gBattleMons[battler].maxHP)
+        {
+            u32 divisor = (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN) ? 3 : 6;
+
+            gBattleMoveDamage = gBattleMons[battler].maxHP / divisor;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            gBattleMoveDamage *= -1;
+            gBattlerAttacker = battler;
+            gBattlerTarget = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_ROOT_NETWORK);
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = sourcePartyIdx;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RootNetworkActivates;
+            return TRUE;
+        }
+    }
+
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_SCORCHING_RELAY)
+    {
+        u8 sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battler];
+
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_SCORCHING_RELAY;
+        if (gBattleMons[battler].hp != 0)
+        {
+            gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE;
+            gBattlerAttacker = battler;
+            gBattlerTarget = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_SCORCHING_RELAY);
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = sourcePartyIdx;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_ScorchingRelayActivates;
+            return TRUE;
+        }
+    }
+
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_TIDAL_SWITCH)
+    {
+        u8 sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battler];
+
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_TIDAL_SWITCH;
+        if (gBattleMons[battler].hp != 0)
+        {
+            gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE;
+            gBattlerAttacker = battler;
+            gBattlerTarget = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_TIDAL_SWITCH);
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = sourcePartyIdx;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_TidalSwitchActivates;
+            return TRUE;
+        }
+    }
+
+    if (gBattleStruct->switchInTransferFlags[battler] == SWITCH_IN_TRANSFER_NONE)
+        gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
     return FALSE;
 }
 

@@ -3433,7 +3433,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     StartSpriteAnim(&gSprites[spriteId1], 0);
     StartSpriteAnim(&gSprites[spriteId2], 0);
 
-    if (ability == ABILITY_LIVING_ROOTS)
+    if (ability == ABILITY_LIVING_ROOTS || ability == ABILITY_ROOT_NETWORK || ability == ABILITY_SCORCHING_RELAY || ability == ABILITY_TIDAL_SWITCH)
     {
         sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battlerId];
         gBattleStruct->switchInTransferSourcePartyIdx[battlerId] = PARTY_SIZE;
