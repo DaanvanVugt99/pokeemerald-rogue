@@ -959,7 +959,7 @@ void BS_TrySetStatus1(void)
             if (CanSleep(gBattlerTarget))
             {
             #if B_SLEEP_TURNS >= GEN_9
-                gBattleMons[gBattlerTarget].status1 |= STATUS1_SLEEP_TURN((Random() % 3) == 0 ? 3 : 4);
+                gBattleMons[gBattlerTarget].status1 |= STATUS1_SLEEP_TURN((Random() % 3) == 0 ? 2 : 3);
             #elif B_SLEEP_TURNS >= GEN_5
                 gBattleMons[gBattlerTarget].status1 |=  STATUS1_SLEEP_TURN((Random() % 3) + 2);
             #else

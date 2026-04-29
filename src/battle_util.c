@@ -3311,7 +3311,7 @@ u8 DoBattlerEndTurnEffects(void)
                     else
                     {
                         if (B_SLEEP_TURNS >= GEN_9)
-                            gBattleMons[battler].status1 |= STATUS1_SLEEP_TURN(RandomUniform(RNG_SLEEP_TURNS, 0, 2) == 0 ? 3 : 4);
+                            gBattleMons[battler].status1 |= STATUS1_SLEEP_TURN(RandomUniform(RNG_SLEEP_TURNS, 0, 2) == 0 ? 2 : 3);
                         else if (B_SLEEP_TURNS >= GEN_5)
                             gBattleMons[battler].status1 |= ((Random() % 3) + 2);
                         else
