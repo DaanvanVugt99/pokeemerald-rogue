@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_ROCK_THROW].type == TYPE_ROCK);
+    ASSUME(gBattleMoves[MOVE_ROCK_POLISH].type == TYPE_ROCK);
     ASSUME(gBattleMoves[MOVE_TACKLE].type != TYPE_ROCK);
     ASSUME(gBattleMoves[MOVE_LEAF_BLADE].slicingMove);
 }
@@ -50,5 +51,24 @@ SINGLE_BATTLE_TEST("Exhumed is consumed after one slicing move")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ROCK_TOMB, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Exhumed saves its Rock Tomb trigger if the slicing move knocks out the target")
+{
+    GIVEN {
+        PLAYER(SPECIES_KABUTOPS) { Attack(999); Ability(ABILITY_SWIFT_SWIM); UniqueAbility(ABILITY_EXHUMED); Moves(MOVE_ROCK_POLISH, MOVE_LEAF_BLADE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); MaxHP(100); Defense(1); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1000); MaxHP(1000); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_ROCK_POLISH); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_LEAF_BLADE); SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_LEAF_BLADE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ROCK_POLISH, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
+        ABILITY_POPUP(player, ABILITY_EXHUMED);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ROCK_TOMB, player);
     }
 }

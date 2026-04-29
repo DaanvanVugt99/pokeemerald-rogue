@@ -10563,11 +10563,10 @@ if (triggeringAbility != ABILITY_NONE)
                 }
             }
 
-            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
-
             if (target < gBattlersCount
              && CanUseExtraMove(battler, target))
             {
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
                 SetBattlerTriggeredAbility(battler, ABILITY_PRIMORDIAL_WAKE);
                 gBattleStruct->atkCancellerTracker = 0;
                 gBattlerAttacker = gBattlerAbility = battler;
@@ -10602,11 +10601,10 @@ if (triggeringAbility != ABILITY_NONE)
                 }
             }
 
-            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
-
             if (target < gBattlersCount
              && CanUseExtraMove(battler, target))
             {
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
                 SetBattlerTriggeredAbility(battler, ABILITY_EXHUMED);
                 gBattleStruct->atkCancellerTracker = 0;
                 gBattlerAttacker = gBattlerAbility = battler;

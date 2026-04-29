@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_WATER_GUN].type == TYPE_WATER);
+    ASSUME(gBattleMoves[MOVE_AQUA_RING].type == TYPE_WATER);
     ASSUME(gBattleMoves[MOVE_TACKLE].type != TYPE_WATER);
     ASSUME(gBattleMoves[MOVE_POWER_GEM].type == TYPE_ROCK);
     ASSUME(gBattleMoves[MOVE_ANCIENT_POWER].effect == EFFECT_ALL_STATS_UP_HIT);
@@ -60,5 +61,26 @@ SINGLE_BATTLE_TEST("Primordial Wake's Ancient Power can grant the all-stats boos
         EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
         EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 1);
         EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Primordial Wake saves its Ancient Power trigger if the Rock move knocks out the target")
+{
+    GIVEN {
+        PLAYER(SPECIES_OMASTAR) { SpAttack(999); Ability(ABILITY_SWIFT_SWIM); UniqueAbility(ABILITY_PRIMORDIAL_WAKE); Moves(MOVE_AQUA_RING, MOVE_POWER_GEM); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); MaxHP(100); SpDefense(1); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1000); MaxHP(1000); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_AQUA_RING); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_POWER_GEM); SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_POWER_GEM); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_AQUA_RING, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_POWER_GEM, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_POWER_GEM, player);
+        ABILITY_POPUP(player, ABILITY_PRIMORDIAL_WAKE);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ANCIENT_POWER, player);
+    } THEN {
+        EXPECT(!gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniquePersistentStateActive);
     }
 }
