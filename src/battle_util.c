@@ -2147,6 +2147,7 @@ u8 DoFieldEndTurnEffects(void)
             for (i = 0; i < gBattlersCount; i++)
             {
                 gBattlerByTurnOrder[i] = i;
+                gBattleStruct->hpBefore[i] = gBattleMons[i].hp;
             }
             for (i = 0; i < gBattlersCount - 1; i++)
             {
@@ -4946,6 +4947,37 @@ static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget)
     return battlerAttacker != battlerTarget
         && IsBattlerAlive(battlerTarget)
         && CanUseSelfExtraMove(battlerAttacker);
+}
+
+static bool32 TryGetOpposingExtraMoveTarget(u32 battler, u32 *target)
+{
+    u32 i;
+    u32 opposite = BATTLE_OPPOSITE(battler);
+
+    if (CanUseExtraMove(battler, opposite))
+    {
+        *target = opposite;
+        return TRUE;
+    }
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != GetBattlerSide(battler) && CanUseExtraMove(battler, i))
+        {
+            *target = i;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static bool32 BattlerTookNoDamageThisTurn(u32 battler)
+{
+    return gProtectStructs[battler].physicalDmg == 0
+        && gProtectStructs[battler].specialDmg == 0
+        && gBattleMons[battler].hp >= gBattleStruct->hpBefore[battler]
+        && !BATTLER_TURN_DAMAGED(battler);
 }
 
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker)
@@ -7970,8 +8002,7 @@ special_delivery_done:
 
             if (HasBattlerAbility(battler, ABILITY_STILL_WATER)
              && !BATTLER_MAX_HP(battler)
-             && gProtectStructs[battler].physicalDmg == 0
-             && gProtectStructs[battler].specialDmg == 0
+             && BattlerTookNoDamageThisTurn(battler)
              && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
             {
                 s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
@@ -7983,6 +8014,27 @@ special_delivery_done:
                 gBattleMoveDamage = -healAmount;
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                 effect++;
+            }
+
+            {
+                u32 target;
+
+                if (HasBattlerAbility(battler, ABILITY_DREAM_MIST)
+                 && BattlerTookNoDamageThisTurn(battler)
+                 && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
+                 && TryGetOpposingExtraMoveTarget(battler, &target))
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_DREAM_MIST);
+                    SetAtkCancellerForCalledMove();
+                    gBattlerAttacker = gBattlerAbility = battler;
+                    gBattlerTarget = target;
+                    gCalledMove = MOVE_HYPNOSIS;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[battler].extraMoveUsed = TRUE;
+                    gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+                    StartAbilityCalledMoveScript();
+                    effect++;
+                }
             }
 
             if (gProtectStructs[battler].driftSongMoveUsed)
@@ -15231,6 +15283,13 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPDEF];
         }
     }
+    else if (HasBattlerAbility(battlerAtk, ABILITY_REDLINE)
+          && gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP
+          && moveType == TYPE_ELECTRIC)
+    {
+        atkStat = gBattleMons[battlerAtk].speed;
+        atkStage = gBattleMons[battlerAtk].statStages[STAT_SPEED];
+    }
     else if (gBattleMoves[move].effect == EFFECT_BODY_PRESS)
     {
         if (move == MOVE_JETSTREAM)
@@ -15937,6 +15996,21 @@ static inline uq4_12_t GetCollisionCourseElectroDriftModifier(u32 move, uq4_12_t
     return UQ_4_12(1.0);
 }
 
+static bool32 IsWingMove(u32 move)
+{
+    switch (move)
+    {
+    case MOVE_WING_ATTACK:
+    case MOVE_STEEL_WING:
+    case MOVE_OBLIVION_WING:
+    case MOVE_DUAL_WINGBEAT:
+    case MOVE_ESPER_WING:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
 static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 isCrit, u32 abilityAtk)
 {
     u32 moveType;
@@ -15990,6 +16064,10 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         if (moveType == TYPE_WATER)
             return UQ_4_12(1.2);
     }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_SOARING_GALE)
+     && (gBattleMoves[gCurrentMove].windMove || IsWingMove(gCurrentMove)))
+        return UQ_4_12(1.3);
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SYLVAN_SURGE)
      && typeEffectivenessModifier <= UQ_4_12(0.5))

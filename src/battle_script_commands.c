@@ -2603,10 +2603,10 @@ static void Cmd_datahpupdate(void)
 
                 if (gBattleMons[battler].hp > oldHp
                  && HasBattlerAbility(battler, ABILITY_REEF_PROTECTION)
-                 && !gProtectStructs[battler].reefProtectionHealedThisTurn
+                 && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
                  && gSideTimers[BATTLE_OPPOSITE(GetBattlerSide(battler))].spikesAmount < 3)
                 {
-                    gProtectStructs[battler].reefProtectionHealedThisTurn = TRUE;
+                    gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
                     triggerReefProtection = TRUE;
                 }
             }
@@ -14239,7 +14239,10 @@ static void Cmd_settailwind(void)
     {
         gSideStatuses[side] |= SIDE_STATUS_TAILWIND;
         gSideTimers[side].tailwindBattlerId = gBattlerAttacker;
-        gSideTimers[side].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
+        if (HasBattlerAbility(gBattlerAttacker, ABILITY_SOARING_GALE))
+            gSideTimers[side].tailwindTimer = 6;
+        else
+            gSideTimers[side].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
     else

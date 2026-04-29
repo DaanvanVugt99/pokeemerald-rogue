@@ -7202,6 +7202,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .zMoveEffect = Z_EFFECT_NONE,
         .sheerForceBoost = TRUE,
         .slicingMove = TRUE,
+        .windMove = TRUE,
     },
 
     [MOVE_X_SCISSOR] =
@@ -7686,6 +7687,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .zMoveEffect = Z_EFFECT_ACC_UP_1,
         //.ignoresSubstitute = TRUE,
         .magicCoatAffected = B_UPDATED_MOVE_FLAGS >= GEN_5,
+        .windMove = TRUE,
     },
 
     [MOVE_TRICK_ROOM] =
@@ -9438,7 +9440,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .split = SPLIT_SPECIAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .sheerForceBoost = TRUE,
-        //.windMove = TRUE,
+        .windMove = TRUE,
     },
 
     [MOVE_STEAMROLLER] =
