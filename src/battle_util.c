@@ -6098,6 +6098,25 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_GEODE_HEART) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_GEODE_HEART);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SANDSTORM, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_SandstreamActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ROYAL_STORM) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -8013,6 +8032,20 @@ special_delivery_done:
                 SetBattlerTriggeredAbility(battler, ABILITY_STILL_WATER);
                 gBattleMoveDamage = -healAmount;
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect++;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_MOOD_SWING)
+             && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn)
+            {
+                bool32 elated = RandomPercentage(RNG_ROGUE_MOOD_SWING, 50);
+
+                SetBattlerTriggeredAbility(battler, ABILITY_MOOD_SWING);
+                gBattlerAttacker = gBattlerAbility = battler;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                gDisableStructs[battler].uniquePersistentStateActive = elated;
+                gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+                BattleScriptPushCursorAndCallback(elated ? BattleScript_MoodSwingElated : BattleScript_MoodSwingAnxious);
                 effect++;
             }
 
@@ -14959,6 +14992,14 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_TERRAFORM)
+     && gProtectStructs[battlerAtk].uniqueAbilityActive
+     && moveType == TYPE_GROUND
+     && !IS_MOVE_STATUS(move))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+    }
+
     if ((gBattleStruct->switchInTransferFlags[battlerAtk] & SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE)
      && gDisableStructs[battlerAtk].isFirstTurn
      && !IS_MOVE_STATUS(move))
@@ -15440,6 +15481,14 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.5));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_MOOD_SWING)
+     && gDisableStructs[battlerAtk].uniqueOncePerSwitchInUsed
+     && gDisableStructs[battlerAtk].uniquePersistentStateActive
+     && usesOwnSpAttackStat)
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_UNKNOWN_BIOLOGY)
      && (gBattleMons[battlerAtk].status1 & STATUS1_BURN)
      && usesOwnSpAttackStat)
@@ -15600,6 +15649,17 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         defStat = spDef;
         defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
         usesDefStat = FALSE;
+    }
+    else if (HasBattlerAbility(battlerAtk, ABILITY_GEODE_HEART)
+          && gDisableStructs[battlerAtk].uniquePersistentStateActive
+          && moveType == TYPE_ROCK
+          && !IS_MOVE_STATUS(move))
+    {
+        defStat = spDef;
+        defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
+        usesDefStat = FALSE;
+        if (updateFlags)
+            gProtectStructs[battlerAtk].uniqueAbilityActive = TRUE;
     }
     else if (gBattleMoves[move].effect == EFFECT_PSYSHOCK || IS_MOVE_PHYSICAL(move)) // uses defense stat instead of sp.def
     {

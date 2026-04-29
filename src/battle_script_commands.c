@@ -603,6 +603,8 @@ static void Cmd_settypebasedhalvers(void);
 static void Cmd_jumpifsubstituteblocks(void);
 static void Cmd_tryrecycleitem(void);
 static void Cmd_settypetoterrain(void);
+
+static bool32 TryActivateTerraform(const u8 *resumeInstr);
 static void Cmd_pursuitdoubles(void);
 static void Cmd_snatchsetbattlers(void);
 static void Cmd_removelightscreenreflect(void);
@@ -2127,6 +2129,9 @@ static void Cmd_critcalc(void)
     u16 partySlot;
     s32 critChance = CalcCritChanceStage(gBattlerAttacker, gBattlerTarget, gCurrentMove, TRUE);
     gPotentialItemEffectBattler = gBattlerAttacker;
+
+    if (TryActivateTerraform(gBattlescriptCurrInstr))
+        return;
 
     if (gBattleTypeFlags & (BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_FIRST_BATTLE))
         gIsCriticalHit = FALSE;
@@ -6653,6 +6658,38 @@ static void Cmd_moveend(void)
                 }
             }
             if (!effect
+             && IS_MOVE_SPECIAL(gCurrentMove)
+             && IsBattlerAlive(gBattlerAttacker)
+             && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg)
+            {
+                u8 battlers[4] = {0, 1, 2, 3};
+                SortBattlersBySpeed(battlers, FALSE);
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    u8 battler = battlers[i];
+                    if (battler != gBattlerAttacker
+                     && IsBattlerAlive(battler)
+                     && HasBattlerAbility(battler, ABILITY_GEODE_HEART)
+                     && !gDisableStructs[battler].uniquePersistentStateActive
+                     && gProtectStructs[battler].specialDmg
+                     && gProtectStructs[battler].specialBattlerId == gBattlerAttacker
+                     && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove))
+                    {
+                        SetBattlerTriggeredAbility(battler, ABILITY_GEODE_HEART);
+                        gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+                        gBattlerTarget = battler;
+                        PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                        BattleScriptPushCursor();
+                        gBattlescriptCurrInstr = BattleScript_GeodeHeartCharged;
+                        effect = TRUE;
+                        break;
+                    }
+                }
+                if (effect)
+                    break;
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_SLEIGHT_OF_HAND)
              && IsBattlerAlive(gBattlerAttacker)
              && IsBattlerAlive(gBattlerTarget)
@@ -6749,6 +6786,30 @@ static void Cmd_moveend(void)
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
                 effect = TRUE;
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_GEODE_HEART)
+             && gProtectStructs[gBattlerAttacker].uniqueAbilityActive)
+            {
+                gProtectStructs[gBattlerAttacker].uniqueAbilityActive = FALSE;
+                if (DidBattlerDamageOpponentThisTurn(gBattlerAttacker)
+                 && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+                 && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+                 && IsBattlerAlive(gBattlerAttacker))
+                {
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_GEODE_HEART);
+                    gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
+                    PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_GeodeHeartReleased;
+                    effect = TRUE;
+                }
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_TERRAFORM)
+             && gProtectStructs[gBattlerAttacker].uniqueAbilityActive)
+            {
+                gProtectStructs[gBattlerAttacker].uniqueAbilityActive = FALSE;
             }
             gBattleScripting.moveendState++;
             break;
@@ -9418,6 +9479,26 @@ static void RemoveAllTerrains(void)
         break;
     }
     gFieldStatuses &= ~STATUS_FIELD_TERRAIN_ANY;    // remove the terrain
+}
+
+static bool32 TryActivateTerraform(const u8 *resumeInstr)
+{
+    u32 moveType;
+
+    GET_MOVE_TYPE(gCurrentMove, moveType);
+    if (!HasBattlerAbility(gBattlerAttacker, ABILITY_TERRAFORM)
+     || !(gFieldStatuses & STATUS_FIELD_TERRAIN_ANY)
+     || moveType != TYPE_GROUND
+     || IS_MOVE_STATUS(gCurrentMove)
+     || gProtectStructs[gBattlerAttacker].confusionSelfDmg)
+        return FALSE;
+
+    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_TERRAFORM);
+    gProtectStructs[gBattlerAttacker].uniqueAbilityActive = TRUE;
+    RemoveAllTerrains();
+    BattleScriptPush(resumeInstr);
+    gBattlescriptCurrInstr = BattleScript_TerraformActivates;
+    return TRUE;
 }
 
 #define DEFOG_CLEAR(status, structField, battlescript, move)\

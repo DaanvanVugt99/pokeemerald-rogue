@@ -731,8 +731,12 @@
 #define STRINGID_ROOTNETWORKRESTORED                  729
 #define STRINGID_SCORCHINGRELAYCHARGED                730
 #define STRINGID_TIDALSWITCHGUARDED                   731
+#define STRINGID_GEODEHEARTCHARGED                    732
+#define STRINGID_GEODEHEARTRELEASED                   733
+#define STRINGID_MOODSWINGELATED                      734
+#define STRINGID_MOODSWINGANXIOUS                     735
 
-#define BATTLESTRINGS_COUNT                           732
+#define BATTLESTRINGS_COUNT                           736
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

@@ -9894,6 +9894,42 @@ BattleScript_PsychicParryContactActivates::
 	seteffectsecondary
 	return
 
+BattleScript_GeodeHeartCharged::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_GEODEHEARTCHARGED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_GeodeHeartReleased::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_GEODEHEARTRELEASED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_MoodSwingElated::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_MOODSWINGELATED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_MoodSwingAnxious::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_MOODSWINGANXIOUS
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_TerraformActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playanimation BS_ATTACKER, B_ANIM_RESTORE_BG
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_AttackWeakenedByStrongWinds::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_ATTACKWEAKENEDBSTRONGWINDS
