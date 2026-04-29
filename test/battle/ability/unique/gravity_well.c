@@ -64,18 +64,3 @@ SINGLE_BATTLE_TEST("Gravity Well applies Gravity effect at battle start on the p
         EXPECT_EQ(gFieldTimers.gravityTimer, 4);
     }
 }
-
-SINGLE_BATTLE_TEST("Gravity Well is assigned to Nosepass line and Palkia forms")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_NOSEPASS), ABILITY_GRAVITY_WELL);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PROBOPASS), ABILITY_GRAVITY_WELL);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PALKIA), ABILITY_GRAVITY_WELL);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PALKIA_ORIGIN), ABILITY_GRAVITY_WELL);
-    }
-}

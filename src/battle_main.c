@@ -4748,6 +4748,11 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
     {
         speed = (speed * 150) / 100;
     }
+    if (HasBattlerAbility(battler, ABILITY_RUSH_CURRENT)
+     && CountPartyMonsOfType(battler, TYPE_FIRE, TRUE) > 0)
+    {
+        speed = (speed * 130) / 100;
+    }
     if (HasBattlerAbility(battler, ABILITY_UNKNOWN_BIOLOGY))
     {
         if (gBattleMons[battler].status1 & STATUS1_SLEEP)

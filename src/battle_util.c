@@ -15967,6 +15967,30 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
             return UQ_4_12(1.2);
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_NATURAL_FLOW)
+     && CountPartyMonsOfType(battlerAtk, TYPE_WATER, TRUE) > 0)
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_GRASS)
+            return UQ_4_12(1.2);
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_WILD_EMBER)
+     && CountPartyMonsOfType(battlerAtk, TYPE_GRASS, TRUE) > 0)
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_FIRE)
+            return UQ_4_12(1.2);
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_RUSH_CURRENT)
+     && CountPartyMonsOfType(battlerAtk, TYPE_FIRE, TRUE) > 0)
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_WATER)
+            return UQ_4_12(1.2);
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_SYLVAN_SURGE)
      && typeEffectivenessModifier <= UQ_4_12(0.5))
     {

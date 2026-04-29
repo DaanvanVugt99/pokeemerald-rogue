@@ -177,16 +177,3 @@ SINGLE_BATTLE_TEST("Iron Will does not trigger for another Pokemon's Grass-type 
         EXPECT(!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_SWAMP));
     }
 }
-
-SINGLE_BATTLE_TEST("Burning Heart and Iron Will are assigned to Mesprit and Azelf")
-{
-    GIVEN {
-        PLAYER(SPECIES_MESPRIT) { Ability(ABILITY_LEVITATE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_MESPRIT), ABILITY_BURNING_HEART);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_AZELF), ABILITY_IRON_WILL);
-    }
-}

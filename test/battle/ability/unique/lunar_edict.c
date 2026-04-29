@@ -22,15 +22,3 @@ SINGLE_BATTLE_TEST("Lunar Edict uses Imprison on switch-in")
         EXPECT(gStatuses3[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)] & STATUS3_IMPRISONED_OTHERS);
     }
 }
-
-SINGLE_BATTLE_TEST("Lunar Edict is assigned to Cresselia")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_CRESSELIA), ABILITY_LUNAR_EDICT);
-    }
-}

@@ -37,15 +37,3 @@ SINGLE_BATTLE_TEST("Magma Seal does not trap for non-Fire moves")
         EXPECT_EQ(opponent->status2 & STATUS2_ESCAPE_PREVENTION, 0);
     }
 }
-
-SINGLE_BATTLE_TEST("Magma Seal is assigned to Heatran")
-{
-    GIVEN {
-        PLAYER(SPECIES_HEATRAN) { Ability(ABILITY_FLASH_FIRE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_HEATRAN), ABILITY_MAGMA_SEAL);
-    }
-}

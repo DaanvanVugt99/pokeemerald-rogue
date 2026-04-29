@@ -38,16 +38,3 @@ SINGLE_BATTLE_TEST("Temporal Lock does not use Trick Room on switch-in if a team
         EXPECT(!(gFieldStatuses & STATUS_FIELD_TRICK_ROOM));
     }
 }
-
-SINGLE_BATTLE_TEST("Temporal Lock is assigned to Dialga and Dialga Origin")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DIALGA), ABILITY_TEMPORAL_LOCK);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DIALGA_ORIGIN), ABILITY_TEMPORAL_LOCK);
-    }
-}

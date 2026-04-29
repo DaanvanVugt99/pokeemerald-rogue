@@ -6675,6 +6675,26 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_WILD_EMBER)
+             && CountPartyMonsOfType(gBattlerAttacker, TYPE_GRASS, TRUE) > 0
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && CanBeBurned(gBattlerTarget)
+             && RandomPercentage(RNG_ROGUE_WILD_EMBER, 30))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_WILD_EMBER);
+                gBattleScripting.moveEffect = MOVE_EFFECT_BURN;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect = TRUE;
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_SANDMAN)
              && IsBattlerAlive(gBattlerAttacker)
              && IsBattlerAlive(gBattlerTarget)
@@ -12475,6 +12495,10 @@ static void Cmd_setdrainedhp(void)
 
     if (gBattleMoveDamage == 0)
         gBattleMoveDamage = 1;
+
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_NATURAL_FLOW)
+     && CountPartyMonsOfType(gBattlerAttacker, TYPE_WATER, TRUE) > 0)
+        gBattleMoveDamage = (gBattleMoveDamage * 3) / 2;
 
     gBattlescriptCurrInstr = cmd->nextInstr;
 }

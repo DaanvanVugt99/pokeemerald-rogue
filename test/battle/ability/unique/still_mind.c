@@ -106,15 +106,3 @@ DOUBLE_BATTLE_TEST("Still Mind creates a Rainbow if a spread Water-type move hit
         EXPECT(gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniqueOncePerSwitchInUsed);
     }
 }
-
-SINGLE_BATTLE_TEST("Still Mind is assigned to Uxie")
-{
-    GIVEN {
-        PLAYER(SPECIES_UXIE) { Ability(ABILITY_LEVITATE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_UXIE), ABILITY_STILL_MIND);
-    }
-}

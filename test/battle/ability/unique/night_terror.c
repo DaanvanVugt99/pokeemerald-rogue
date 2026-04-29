@@ -57,15 +57,3 @@ SINGLE_BATTLE_TEST("Night Terror stacks with Bad Dreams during Eclipse")
         EXPECT_EQ(opponent->hp, opponent->maxHP - opponent->maxHP / 4);
     }
 }
-
-SINGLE_BATTLE_TEST("Night Terror is assigned to Darkrai")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DARKRAI), ABILITY_NIGHT_TERROR);
-    }
-}

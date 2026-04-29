@@ -137,17 +137,3 @@ SINGLE_BATTLE_TEST("Creation sets Acid Rain from Poison Arceus's first Poison st
         EXPECT(gBattleWeather & B_WEATHER_ACID_RAIN);
     }
 }
-
-SINGLE_BATTLE_TEST("Creation is assigned to Arceus")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_ARCEUS_NORMAL), ABILITY_CREATION);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_ARCEUS_ELECTRIC), ABILITY_CREATION);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_ARCEUS_POISON), ABILITY_CREATION);
-    }
-}

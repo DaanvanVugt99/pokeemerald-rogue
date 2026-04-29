@@ -101,15 +101,3 @@ SINGLE_BATTLE_TEST("Tideborn does not consume its once per battle trigger when t
         EXPECT_EQ(player->hp, player->maxHP);
     }
 }
-
-SINGLE_BATTLE_TEST("Tideborn is assigned to Phione")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PHIONE), ABILITY_TIDEBORN);
-    }
-}

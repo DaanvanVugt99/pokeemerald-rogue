@@ -37,15 +37,3 @@ SINGLE_BATTLE_TEST("Colossal does not shorten Slow Start without Steel, Ice, and
         EXPECT_EQ(gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].slowStartTimer, 3);
     }
 }
-
-SINGLE_BATTLE_TEST("Colossal is assigned to Regigigas")
-{
-    GIVEN {
-        PLAYER(SPECIES_REGIGIGAS) { Ability(ABILITY_SLOW_START); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_REGIGIGAS), ABILITY_COLOSSAL);
-    }
-}

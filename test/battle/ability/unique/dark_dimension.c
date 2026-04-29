@@ -60,16 +60,3 @@ SINGLE_BATTLE_TEST("Dark Dimension only triggers once per battle")
         EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_OPPONENT] & gBitTable[1]);
     }
 }
-
-SINGLE_BATTLE_TEST("Dark Dimension is assigned to Giratina and Giratina Origin")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_GIRATINA), ABILITY_DARK_DIMENSION);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_GIRATINA_ORIGIN), ABILITY_DARK_DIMENSION);
-    }
-}

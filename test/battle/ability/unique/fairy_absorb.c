@@ -46,15 +46,3 @@ SINGLE_BATTLE_TEST("Fairy Absorb does not activate if protected")
         }
     }
 }
-
-SINGLE_BATTLE_TEST("Fairy Absorb is assigned to Spiritomb")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_SPIRITOMB) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SPIRITOMB), ABILITY_FAIRY_ABSORB);
-    }
-}

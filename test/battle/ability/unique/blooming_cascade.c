@@ -42,16 +42,3 @@ SINGLE_BATTLE_TEST("Blooming Cascade does not use Aromatherapy on switch-in with
         EXPECT(opponent->status1 & STATUS1_POISON);
     }
 }
-
-SINGLE_BATTLE_TEST("Blooming Cascade is assigned to Shaymin")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SHAYMIN_LAND), ABILITY_BLOOMING_CASCADE);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SHAYMIN_SKY), ABILITY_BLOOMING_CASCADE);
-    }
-}

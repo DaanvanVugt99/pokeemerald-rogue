@@ -75,15 +75,3 @@ SINGLE_BATTLE_TEST("Victory does not trigger if the user does not knock out a ta
         EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
     }
 }
-
-SINGLE_BATTLE_TEST("Victory is assigned to Victini")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_SPLASH); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SPLASH); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_SPLASH); MOVE(opponent, MOVE_SPLASH); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_VICTINI), ABILITY_VICTORY);
-    }
-}

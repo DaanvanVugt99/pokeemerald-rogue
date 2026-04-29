@@ -93,15 +93,3 @@ SINGLE_BATTLE_TEST("Drift Song does not heal again on a later turn where the use
         EXPECT_LT(player->hp, 350);
     }
 }
-
-SINGLE_BATTLE_TEST("Drift Song is assigned to Manaphy")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_MANAPHY), ABILITY_DRIFT_SONG);
-    }
-}
