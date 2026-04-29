@@ -11945,6 +11945,29 @@ BattleScript_PickpocketPrevented:
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_SleightOfHandActivates::
+	call BattleScript_AbilityPopUp
+	tryswapitems BattleScript_SleightOfHandReturn
+	printstring STRINGID_PKMNSWITCHEDITEMS
+	waitmessage B_WAIT_TIME_LONG
+	printfromtable gItemSwapStringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_SleightOfHandReturn:
+	return
+
+BattleScript_SleightOfHandStickyHold::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	copybyte gBattlerAbility, gBattlerTarget
+	call BattleScript_AbilityPopUp
+	swapattackerwithtarget
+	printstring STRINGID_ITEMCANNOTBEREMOVED
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+
 BattleScript_StickyBarbTransfer::
 	playanimation BS_TARGET, B_ANIM_ITEM_STEAL
 	printstring STRINGID_STICKYBARBTRANSFER

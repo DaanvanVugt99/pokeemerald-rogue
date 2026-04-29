@@ -365,7 +365,7 @@ static bool32 AerialAssaultIgnoresRecoil(void);
 void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBattler);
 static void RemoveAllWeather(void);
 static void RemoveAllTerrains(void);
-static u16 GetStatLossPreventionAbility(u32 battler, bool8 isIntimidate);
+static u16 GetStatLossPreventionAbility(u32 battler, u32 statId, bool8 isIntimidate);
 
 static void Cmd_attackcanceler(void);
 static void Cmd_accuracycheck(void);
@@ -3026,6 +3026,101 @@ static void CheckSetUnburden(u8 battler)
     {
         gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_UNBURDEN;
         RecordAbilityBattle(battler, ABILITY_UNBURDEN);
+    }
+}
+
+static void ClearUnburdenIfNeeded(u8 battler)
+{
+    if (GetBattlerAbility(battler) == ABILITY_UNBURDEN)
+        gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_UNBURDEN;
+}
+
+static bool32 CanBattlersSwapItems(u32 battlerAtk, u32 battlerDef)
+{
+    u8 sideAtk = GetBattlerSide(battlerAtk);
+    u8 sideDef = GetBattlerSide(battlerDef);
+    u16 itemAtk = gBattleMons[battlerAtk].item;
+    u16 itemDef = gBattleMons[battlerDef].item;
+
+    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL)
+        return FALSE;
+    if (sideAtk == B_SIDE_OPPONENT
+     && !(gBattleTypeFlags & (BATTLE_TYPE_LINK
+                           | BATTLE_TYPE_EREADER_TRAINER
+                           | BATTLE_TYPE_FRONTIER
+                           | BATTLE_TYPE_SECRET_BASE
+                           | BATTLE_TYPE_RECORDED_LINK
+                           | (B_TRAINERS_KNOCK_OFF_ITEMS == TRUE ? BATTLE_TYPE_TRAINER : 0))))
+        return FALSE;
+    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK
+                           | BATTLE_TYPE_EREADER_TRAINER
+                           | BATTLE_TYPE_FRONTIER
+                           | BATTLE_TYPE_SECRET_BASE
+                           | BATTLE_TYPE_RECORDED_LINK))
+     && ((gWishFutureKnock.knockedOffMons[sideAtk] & gBitTable[gBattlerPartyIndexes[battlerAtk]])
+      || (gWishFutureKnock.knockedOffMons[sideDef] & gBitTable[gBattlerPartyIndexes[battlerDef]])))
+        return FALSE;
+    if (itemAtk == ITEM_NONE && itemDef == ITEM_NONE)
+        return FALSE;
+    if (!CanBattlerGetOrLoseItem(battlerAtk, itemAtk)
+     || !CanBattlerGetOrLoseItem(battlerAtk, itemDef)
+     || !CanBattlerGetOrLoseItem(battlerDef, itemDef)
+     || !CanBattlerGetOrLoseItem(battlerDef, itemAtk))
+        return FALSE;
+
+    return TRUE;
+}
+
+static void SwapBattlerItems(u8 battlerAtk, u8 battlerDef)
+{
+    u8 sideAtk = GetBattlerSide(battlerAtk);
+    u8 sideDef = GetBattlerSide(battlerDef);
+    u16 oldItemAtk = gBattleMons[battlerAtk].item;
+    u16 oldItemDef = gBattleMons[battlerDef].item;
+    u16 *newItemAtk = &gBattleStruct->changedItems[battlerAtk];
+
+    *newItemAtk = oldItemDef;
+    gBattleMons[battlerAtk].item = ITEM_NONE;
+    gBattleMons[battlerDef].item = oldItemAtk;
+
+    RecordItemEffectBattle(battlerAtk, 0);
+    RecordItemEffectBattle(battlerDef, ItemId_GetHoldEffect(oldItemAtk));
+
+    BtlController_EmitSetMonData(battlerAtk, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(*newItemAtk), newItemAtk);
+    MarkBattlerForControllerExec(battlerAtk);
+
+    BtlController_EmitSetMonData(battlerDef, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[battlerDef].item), &gBattleMons[battlerDef].item);
+    MarkBattlerForControllerExec(battlerDef);
+
+    gBattleStruct->choicedMove[battlerAtk] = MOVE_NONE;
+    gBattleStruct->choicedMove[battlerDef] = MOVE_NONE;
+
+    PREPARE_ITEM_BUFFER(gBattleTextBuff1, oldItemDef);
+    PREPARE_ITEM_BUFFER(gBattleTextBuff2, oldItemAtk);
+
+    if (!(sideAtk == sideDef && IsPartnerMonFromSameTrainer(battlerAtk)))
+    {
+        if (sideAtk == B_SIDE_PLAYER)
+            TrySaveExchangedItem(battlerAtk, oldItemAtk);
+        if (sideDef == B_SIDE_PLAYER)
+            TrySaveExchangedItem(battlerDef, oldItemDef);
+    }
+
+    if (oldItemAtk != ITEM_NONE && oldItemDef != ITEM_NONE)
+    {
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_BOTH;
+    }
+    else if (oldItemAtk == ITEM_NONE && oldItemDef != ITEM_NONE)
+    {
+        ClearUnburdenIfNeeded(battlerAtk);
+        CheckSetUnburden(battlerDef);
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_TAKEN;
+    }
+    else
+    {
+        CheckSetUnburden(battlerAtk);
+        ClearUnburdenIfNeeded(battlerDef);
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_GIVEN;
     }
 }
 
@@ -6556,6 +6651,28 @@ static void Cmd_moveend(void)
                         break;
                     }
                 }
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_SLEIGHT_OF_HAND)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && TARGET_TURN_DAMAGED
+             && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && !DoesSubstituteBlockMove(gBattlerAttacker, gBattlerTarget, gCurrentMove)
+             && CanBattlersSwapItems(gBattlerAttacker, gBattlerTarget))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_SLEIGHT_OF_HAND);
+                BattleScriptPushCursor();
+                if (HasBattlerAbility(gBattlerTarget, ABILITY_STICKY_HOLD))
+                {
+                    gBattlescriptCurrInstr = BattleScript_SleightOfHandStickyHold;
+                }
+                else
+                {
+                    gBattlescriptCurrInstr = BattleScript_SleightOfHandActivates;
+                }
+                effect = TRUE;
             }
             if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_SANDMAN)
@@ -12505,7 +12622,7 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
             return STAT_CHANGE_DIDNT_WORK;
         }
         else if ((battlerHoldEffect == HOLD_EFFECT_CLEAR_AMULET
-              || (preventionAbility = GetStatLossPreventionAbility(battler, GetBattlerAbility(gBattlerAttacker) == ABILITY_INTIMIDATE)) != ABILITY_NONE)
+              || (preventionAbility = GetStatLossPreventionAbility(battler, statId, GetBattlerAbility(gBattlerAttacker) == ABILITY_INTIMIDATE)) != ABILITY_NONE)
               && (!affectsUser || mirrorArmored) && !certain && gCurrentMove != MOVE_CURSE)
         {
             if (flags == STAT_CHANGE_ALLOW_PTR)
@@ -15143,107 +15260,22 @@ static void Cmd_tryswapitems(void)
 {
     CMD_ARGS(const u8 *failInstr);
 
-    // opponent can't swap items with player in regular battles
-    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL
-        || (GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT
-            && !(gBattleTypeFlags & (BATTLE_TYPE_LINK
-                                  | BATTLE_TYPE_EREADER_TRAINER
-                                  | BATTLE_TYPE_FRONTIER
-                                  | BATTLE_TYPE_SECRET_BASE
-                                  | BATTLE_TYPE_RECORDED_LINK
-                                  | (B_TRAINERS_KNOCK_OFF_ITEMS == TRUE ? BATTLE_TYPE_TRAINER : 0)
-                                  ))))
+    if (!CanBattlersSwapItems(gBattlerAttacker, gBattlerTarget))
     {
         gBattlescriptCurrInstr = cmd->failInstr;
     }
+    // check if ability prevents swapping
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_STICKY_HOLD))
+    {
+        gBattlescriptCurrInstr = BattleScript_StickyHoldActivates;
+        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_STICKY_HOLD);
+        RecordAbilityBattle(gBattlerTarget, ABILITY_STICKY_HOLD);
+    }
+    // took a while, but all checks passed and items can be safely swapped
     else
     {
-        u8 sideAttacker = GetBattlerSide(gBattlerAttacker);
-        u8 sideTarget = GetBattlerSide(gBattlerTarget);
-
-        // You can't swap items if they were knocked off in regular battles
-        if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK
-                             | BATTLE_TYPE_EREADER_TRAINER
-                             | BATTLE_TYPE_FRONTIER
-                             | BATTLE_TYPE_SECRET_BASE
-                             | BATTLE_TYPE_RECORDED_LINK))
-            && (gWishFutureKnock.knockedOffMons[sideAttacker] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]
-                || gWishFutureKnock.knockedOffMons[sideTarget] & gBitTable[gBattlerPartyIndexes[gBattlerTarget]]))
-        {
-            gBattlescriptCurrInstr = cmd->failInstr;
-        }
-        // can't swap if two pokemon don't have an item
-        // or if either of them is an enigma berry or a mail
-        else if ((gBattleMons[gBattlerAttacker].item == ITEM_NONE && gBattleMons[gBattlerTarget].item == ITEM_NONE)
-                 || !CanBattlerGetOrLoseItem(gBattlerAttacker, gBattleMons[gBattlerAttacker].item)
-                 || !CanBattlerGetOrLoseItem(gBattlerAttacker, gBattleMons[gBattlerTarget].item)
-                 || !CanBattlerGetOrLoseItem(gBattlerTarget, gBattleMons[gBattlerTarget].item)
-                 || !CanBattlerGetOrLoseItem(gBattlerTarget, gBattleMons[gBattlerAttacker].item))
-        {
-            gBattlescriptCurrInstr = cmd->failInstr;
-        }
-        // check if ability prevents swapping
-        else if (HasBattlerAbility(gBattlerTarget, ABILITY_STICKY_HOLD))
-        {
-            gBattlescriptCurrInstr = BattleScript_StickyHoldActivates;
-            SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_STICKY_HOLD);
-            RecordAbilityBattle(gBattlerTarget, ABILITY_STICKY_HOLD);
-        }
-        // took a while, but all checks passed and items can be safely swapped
-        else
-        {
-            u16 oldItemAtk, *newItemAtk;
-
-            newItemAtk = &gBattleStruct->changedItems[gBattlerAttacker];
-            oldItemAtk = gBattleMons[gBattlerAttacker].item;
-            *newItemAtk = gBattleMons[gBattlerTarget].item;
-
-            gBattleMons[gBattlerAttacker].item = ITEM_NONE;
-            gBattleMons[gBattlerTarget].item = oldItemAtk;
-
-            RecordItemEffectBattle(gBattlerAttacker, 0);
-            RecordItemEffectBattle(gBattlerTarget, ItemId_GetHoldEffect(oldItemAtk));
-
-            BtlController_EmitSetMonData(gBattlerAttacker, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(*newItemAtk), newItemAtk);
-            MarkBattlerForControllerExec(gBattlerAttacker);
-
-            BtlController_EmitSetMonData(gBattlerTarget, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[gBattlerTarget].item), &gBattleMons[gBattlerTarget].item);
-            MarkBattlerForControllerExec(gBattlerTarget);
-
-            gBattleStruct->choicedMove[gBattlerTarget] = MOVE_NONE;
-            gBattleStruct->choicedMove[gBattlerAttacker] = MOVE_NONE;
-
-            gBattlescriptCurrInstr = cmd->nextInstr;
-
-            PREPARE_ITEM_BUFFER(gBattleTextBuff1, *newItemAtk)
-            PREPARE_ITEM_BUFFER(gBattleTextBuff2, oldItemAtk)
-
-            if (!(sideAttacker == sideTarget && IsPartnerMonFromSameTrainer(gBattlerAttacker)))
-            {
-                // if targeting your own side and you aren't in a multi battle, don't save items as stolen
-                if (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER)
-                    TrySaveExchangedItem(gBattlerAttacker, oldItemAtk);
-                if (GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER)
-                    TrySaveExchangedItem(gBattlerTarget, *newItemAtk);
-            }
-
-            if (oldItemAtk != ITEM_NONE && *newItemAtk != ITEM_NONE)
-            {
-                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_BOTH;  // attacker's item -> <- target's item
-            }
-            else if (oldItemAtk == ITEM_NONE && *newItemAtk != ITEM_NONE)
-            {
-                if (GetBattlerAbility(gBattlerAttacker) == ABILITY_UNBURDEN && gBattleResources->flags->flags[gBattlerAttacker] & RESOURCE_FLAG_UNBURDEN)
-                    gBattleResources->flags->flags[gBattlerAttacker] &= ~RESOURCE_FLAG_UNBURDEN;
-
-                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_TAKEN; // nothing -> <- target's item
-            }
-            else
-            {
-                CheckSetUnburden(gBattlerAttacker);
-                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_GIVEN; // attacker's item -> <- nothing
-            }
-        }
+        SwapBattlerItems(gBattlerAttacker, gBattlerTarget);
+        gBattlescriptCurrInstr = cmd->nextInstr;
     }
 }
 
@@ -17142,7 +17174,7 @@ static bool8 IsFinalStrikeEffect(u16 move)
     return FALSE;
 }
 
-static u16 GetStatLossPreventionAbility(u32 battler, bool8 byIntimidate)
+static u16 GetStatLossPreventionAbility(u32 battler, u32 statId, bool8 byIntimidate)
 {
     if (HasBattlerAbility(battler, ABILITY_CLEAR_BODY))
         return ABILITY_CLEAR_BODY;
@@ -17156,6 +17188,10 @@ static u16 GetStatLossPreventionAbility(u32 battler, bool8 byIntimidate)
      && WEATHER_HAS_EFFECT
      && (gBattleWeather & B_WEATHER_SANDSTORM))
         return ABILITY_SAND_SKIMMER;
+    if (statId == STAT_SPEED
+     && HasBattlerAbility(battler, ABILITY_FIELD_RUNNER)
+     && IsBattlerTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN))
+        return ABILITY_FIELD_RUNNER;
 
     if (byIntimidate && (B_UPDATED_INTIMIDATE >= GEN_8))
     {

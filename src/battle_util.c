@@ -5917,6 +5917,32 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SENTRY_POST) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler)
+                 || (gBattleMons[opposingBattler].status2 & STATUS2_FORESIGHT))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_SENTRY_POST);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_FORESIGHT;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PSIONIC_PARADOX) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -5936,6 +5962,20 @@ special_delivery_done:
                 return 1;
             }
             else if (TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_PlainSurgeActivates);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FIELD_RUNNER) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_FIELD_RUNNER);
+
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_PlainSurgeActivates);
                 return 1;
@@ -15324,6 +15364,12 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     if (HasBattlerAbility(battlerAtk, ABILITY_BRUTAL_CHARGE)
      && gDisableStructs[battlerAtk].isFirstTurn
      && usesOwnAttackStat)
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_SENTRY_POST)
+     && gDisableStructs[battlerDef].isFirstTurn == 2)
     {
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
     }

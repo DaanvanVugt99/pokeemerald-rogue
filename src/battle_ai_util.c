@@ -1762,7 +1762,10 @@ bool32 ShouldLowerStat(u32 battler, u32 battlerAbility, u32 stat)
         if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_CLEAR_AMULET
          || battlerAbility == ABILITY_CLEAR_BODY
          || battlerAbility == ABILITY_WHITE_SMOKE
-         || battlerAbility == ABILITY_FULL_METAL_BODY)
+         || battlerAbility == ABILITY_FULL_METAL_BODY
+         || (stat == STAT_SPEED
+          && battlerAbility == ABILITY_FIELD_RUNNER
+          && AI_IsTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN)))
             return FALSE;
 
         // If AI is faster and doesn't have any mons left, lowering speed doesn't give any
@@ -1878,6 +1881,7 @@ bool32 ShouldLowerSpeed(u32 battlerAtk, u32 battlerDef, u32 defAbility)
       && defAbility != ABILITY_CLEAR_BODY
       && defAbility != ABILITY_FULL_METAL_BODY
       && defAbility != ABILITY_WHITE_SMOKE
+      && !(defAbility == ABILITY_FIELD_RUNNER && AI_IsTerrainAffected(battlerDef, STATUS_FIELD_PLAIN_TERRAIN))
       && AI_DATA->holdEffects[battlerDef] != HOLD_EFFECT_CLEAR_AMULET)
         return TRUE;
     return FALSE;
