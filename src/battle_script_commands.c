@@ -7036,6 +7036,23 @@ static void Cmd_moveend(void)
             }
 
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_RADIANT)
+             && IsBattlerAlive(gBattlerAttacker)
+             && moveType == TYPE_FIRE
+             && DoesPartyShareTypeWithBattler(gBattlerAttacker)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && gProtectStructs[gBattlerAttacker].targetAffected
+             && TryChangeBattleWeather(gBattlerAttacker, ENUM_WEATHER_SUN, TRUE))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_RADIANT);
+                gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_RadiantActivates;
+                effect = TRUE;
+            }
+
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_IRON_WILL)
              && IsBattlerAlive(gBattlerAttacker)
              && moveType == TYPE_GRASS
@@ -7190,6 +7207,13 @@ static void Cmd_moveend(void)
             gBattleStruct->ateBoost[gBattlerAttacker] = 0;
             gStatuses3[gBattlerAttacker] &= ~STATUS3_ME_FIRST;
             gSpecialStatuses[gBattlerAttacker].gemBoost = FALSE;
+            if ((HasBattlerAbility(gBattlerAttacker, ABILITY_IRON_RESOLVE)
+              || HasBattlerAbility(gBattlerAttacker, ABILITY_VENGEFUL_FORCE)
+              || HasBattlerAbility(gBattlerAttacker, ABILITY_VERDANT_VOW))
+             && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && DidBattlerDamageOpponentThisTurn(gBattlerAttacker))
+                gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
             gSpecialStatuses[gBattlerAttacker].damagedMons = 0;
             gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = 0;
             gSpecialStatuses[gBattlerTarget].berryReduced = FALSE;
@@ -10575,6 +10599,56 @@ static void Cmd_various(void)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = raiseSpeed ? BattleScript_VictoryActivatesSpeed : BattleScript_VictoryActivates;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_GALE_COMMAND)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && CountPartyMonsOfType(battler, TYPE_FLYING, TRUE) >= 2
+         && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_GALE_COMMAND);
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_GaleCommandActivates;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_APOCALYPSE)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && DoesPartyShareTypeWithBattler(battler)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+         && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_APOCALYPSE);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_NASTY_PLOT;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_STORM_COMMAND)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && CountPartyMonsOfType(battler, TYPE_FLYING, TRUE) > 0
+         && CountPartyMonsOfType(battler, TYPE_ELECTRIC, TRUE) > 0
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_STORM_COMMAND);
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_StormCommandActivates;
             return;
         }
         break;

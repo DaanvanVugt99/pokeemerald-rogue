@@ -9194,6 +9194,18 @@ BattleScript_MarksmanCritBoostActivates::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_IronResolveActivates::
+	call BattleScript_AbilityPopUp
+	end3
+
+BattleScript_VengefulForceActivates::
+	call BattleScript_AbilityPopUp
+	end3
+
+BattleScript_VerdantVowActivates::
+	call BattleScript_AbilityPopUp
+	end3
+
 BattleScript_BattleFuryActivates::
 	call BattleScript_AbilityPopUp
 	call BattleScript_BattleFuryAttackBoost
@@ -11023,6 +11035,36 @@ BattleScript_InsectivoreActivates::
 	printstring STRINGID_PKMNREGAINEDHEALTH
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_InsectivoreEnd:
+	return
+
+BattleScript_RadiantActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNSXINTENSIFIEDSUN
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_SUN_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	return
+
+BattleScript_StormCommandActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TERRAINBECOMESELECTRIC
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	return
+
+BattleScript_GaleCommandActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	settailwind BattleScript_GaleCommandEnd
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
+	waitanimation
+	call BattleScript_TryTailwindAbilitiesLoop
+BattleScript_GaleCommandEnd:
 	return
 
 BattleScript_StumbleActivates::

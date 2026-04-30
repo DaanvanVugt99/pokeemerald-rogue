@@ -5998,6 +5998,66 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_IRON_RESOLVE)
+         && !uniqueDone
+         && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_IRON_RESOLVE);
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            if (CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                gBattlerAttacker = battler;
+                SET_STATCHANGER(STAT_DEF, 1, FALSE);
+                BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+                return 1;
+            }
+            BattleScriptPushCursorAndCallback(BattleScript_IronResolveActivates);
+            return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_VENGEFUL_FORCE)
+         && !uniqueDone
+         && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_VENGEFUL_FORCE);
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            if (CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                gBattlerAttacker = battler;
+                SET_STATCHANGER(STAT_ATK, 1, FALSE);
+                BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+                return 1;
+            }
+            BattleScriptPushCursorAndCallback(BattleScript_VengefulForceActivates);
+            return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_VERDANT_VOW)
+         && !uniqueDone
+         && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_VERDANT_VOW);
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            if (CompareStat(battler, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                gBattlerAttacker = battler;
+                SET_STATCHANGER(STAT_SPDEF, 1, FALSE);
+                BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+                return 1;
+            }
+            BattleScriptPushCursorAndCallback(BattleScript_VerdantVowActivates);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SEASONS_GREETING)
          && !uniqueDone
          && (gFieldStatuses & (STATUS_FIELD_GRASSY_TERRAIN | STATUS_FIELD_PLAIN_TERRAIN)))
@@ -15792,6 +15852,15 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
      && !IS_MOVE_STATUS(move))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+    }
+
+    if ((HasBattlerAbility(battlerAtk, ABILITY_IRON_RESOLVE)
+      || HasBattlerAbility(battlerAtk, ABILITY_VENGEFUL_FORCE)
+      || HasBattlerAbility(battlerAtk, ABILITY_VERDANT_VOW))
+     && gDisableStructs[battlerAtk].uniquePersistentStateActive
+     && !IS_MOVE_STATUS(move))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
     }
 
     if ((gBattleStruct->switchInTransferFlags[battlerAtk] & SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE)
