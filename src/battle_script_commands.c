@@ -104,6 +104,7 @@
 #define MEMBERS_8(a, b, c, d, e, f, g, h) a; b; c; d; e; f; g; h;
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
+extern const u8 BattleScript_WarpathHeal[];
 
 // table to avoid ugly powing on gba (courtesy of doesnt)
 // this returns (i^2.5)/4
@@ -3940,6 +3941,8 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     gBattleMoveDamage = 1;
                 if (GetBattlerAbility(gEffectBattler) == ABILITY_PARENTAL_BOND)
                     gBattleMoveDamage *= 2;
+                if (IsBattlerAlive(gBattlerTarget) && HasBattlerAbility(gBattlerTarget, ABILITY_WARPATH))
+                    gBattleMoveDamage *= 2;
 
                 BattleScriptPush(gBattlescriptCurrInstr + 1);
                 gBattlescriptCurrInstr = BattleScript_MoveEffectRecoil;
@@ -6040,24 +6043,32 @@ static void Cmd_moveend(void)
                 {
                 case EFFECT_RECOIL_25: // Take Down, 25% recoil
                     gBattleMoveDamage = max(1, gBattleScripting.savedDmg / 4);
+                    if (HasBattlerAbility(gBattlerTarget, ABILITY_WARPATH))
+                        gBattleMoveDamage *= 2;
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_MoveEffectRecoil;
                     effect = TRUE;
                     break;
                 case EFFECT_RECOIL_33: // Double Edge, 33 % recoil
                     gBattleMoveDamage = max(1, gBattleScripting.savedDmg / 3);
+                    if (HasBattlerAbility(gBattlerTarget, ABILITY_WARPATH))
+                        gBattleMoveDamage *= 2;
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_MoveEffectRecoil;
                     effect = TRUE;
                     break;
                 case EFFECT_RECOIL_50: // Head Smash, 50 % recoil
                     gBattleMoveDamage = max(1, gBattleScripting.savedDmg / 2);
+                    if (HasBattlerAbility(gBattlerTarget, ABILITY_WARPATH))
+                        gBattleMoveDamage *= 2;
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_MoveEffectRecoil;
                     effect = TRUE;
                     break;
                 case EFFECT_RECOIL_33_STATUS: // Flare Blitz - can burn, Volt Tackle - can paralyze
                     gBattleMoveDamage = max(1, gBattleScripting.savedDmg / 3);
+                    if (HasBattlerAbility(gBattlerTarget, ABILITY_WARPATH))
+                        gBattleMoveDamage *= 2;
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_MoveEffectRecoilWithStatus;
                     effect = TRUE;
@@ -6418,6 +6429,23 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_MAGICIAN:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+                && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+                && IsBattlerAlive(gBattlerAttacker)
+                && IS_EFFECT_RECOIL(gBattleMoves[gCurrentMove].effect)
+                && gBattleScripting.savedDmg != 0
+                && !AerialAssaultIgnoresRecoil()
+                && !HasBattlerAbility(gBattlerAttacker, ABILITY_ROCK_HEAD)
+                && HasBattlerAbility(gBattlerAttacker, ABILITY_WARPATH)
+                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK)
+                && gBattleMons[gBattlerAttacker].hp < gBattleMons[gBattlerAttacker].maxHP)
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_WARPATH);
+                gBattleMoveDamage = -max(1, gBattleScripting.savedDmg / 4);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_WarpathHeal;
+                effect = TRUE;
+            }
             if (HasBattlerAbility(gBattlerAttacker, ABILITY_MAGICIAN)
               && gCurrentMove != MOVE_FLING && gCurrentMove != MOVE_NATURAL_GIFT
               && gBattleMons[gBattlerAttacker].item == ITEM_NONE
@@ -10504,6 +10532,20 @@ static void Cmd_various(void)
     case VARIOUS_TRY_ACTIVATE_VICTORY:
     {
         VARIOUS_ARGS();
+
+        if (HasBattlerAbility(battler, ABILITY_INSECTIVORE)
+         && battler == gBattlerAttacker
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_BUG))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_INSECTIVORE);
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_InsectivoreActivates;
+            return;
+        }
 
         if (HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTY)
          && GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER

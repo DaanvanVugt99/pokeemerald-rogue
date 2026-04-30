@@ -77,6 +77,7 @@ static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 mov
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static bool32 CanBloomBurstUseFlowerShield(u32 battler);
+static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
 static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move);
 static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef);
@@ -1574,6 +1575,30 @@ void PrepareStringBattle(u16 stringId, u32 battler)
             SET_STATCHANGER(STAT_ATK, 1, FALSE);
             gBattlescriptCurrInstr = BattleScript_StreetFighterActivates;
         }
+    }
+    else if ((stringId == STRINGID_DEFENDERSSTATFELL
+           || stringId == STRINGID_ATTACKERSSTATFELL
+           || stringId == STRINGID_STATFELL
+           || stringId == STRINGID_PKMNCUTSATTACKWITH)
+             && HasBattlerAbility(gBattlerTarget, ABILITY_COLONY_GUARDIAN)
+             && (CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN)
+              || CompareStat(gBattlerTarget, STAT_ACC, MAX_STAT_STAGE, CMP_LESS_THAN))
+             && GetBattlerSide(gSpecialStatuses[gBattlerTarget].changedStatsBattlerId) != targetSide
+             && gSpecialStatuses[gBattlerTarget].changedStatsBattlerId != BATTLE_PARTNER(gBattlerTarget)
+             && ((gSpecialStatuses[gBattlerTarget].changedStatsBattlerId != gBattlerTarget) || gBattleScripting.stickyWebStatDrop == 1)
+             && !(gBattleScripting.stickyWebStatDrop == 1 && gSideTimers[targetSide].stickyWebBattlerSide == targetSide)
+             && CanUseSelfExtraMove(gBattlerTarget))
+    {
+        gBattleScripting.stickyWebStatDrop = 0;
+        gBattlerAbility = gBattlerTarget;
+        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_COLONY_GUARDIAN);
+        SetAtkCancellerForCalledMove();
+        gBattlerAttacker = gBattlerTarget;
+        gCalledMove = MOVE_HONE_CLAWS;
+        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+        gProtectStructs[gBattlerTarget].extraMoveUsed = TRUE;
+        BattleScriptPushCursor();
+        StartAbilityCalledMoveScript();
     }
 #if  B_UPDATED_INTIMIDATE >= GEN_8
     else if (stringId == STRINGID_PKMNCUTSATTACKWITH && targetAbility == ABILITY_RATTLED
@@ -7744,6 +7769,20 @@ special_delivery_done:
                 effect++;
             }
 
+            if (HasBattlerAbility(battler, ABILITY_CARRION_HOUR)
+             && IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_CARRION_HOUR);
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+                gBattleMoveDamage *= -1;
+                effect++;
+            }
+
             switch (primaryAbility)
             {
             case ABILITY_HARVEST:
@@ -8529,6 +8568,18 @@ else if (moveType == TYPE_FAIRY)
 {
     if (HasBattlerAbility(battler, ABILITY_FAIRY_ABSORB))
         triggeringAbility = ABILITY_FAIRY_ABSORB;
+}
+else if (moveType == TYPE_BUG)
+{
+    if (HasBattlerAbility(battler, ABILITY_INSECTIVORE))
+    {
+        triggeringAbility = ABILITY_INSECTIVORE;
+        effect = 3;
+        if (gProtectStructs[gBattlerAttacker].notFirstStrike)
+            gBattlescriptCurrInstr = BattleScript_MonMadeMoveUseless;
+        else
+            gBattlescriptCurrInstr = BattleScript_MonMadeMoveUseless_PPLoss;
+    }
 }
 else if (moveType == TYPE_FLYING)
 {
@@ -9604,6 +9655,41 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BATTLE_FURY)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && battler == moveEndTarget
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
+         && IsBattlerAlive(battler))
+        {
+            bool32 canRaiseAttack = CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN);
+            bool32 canRaiseCrit = gBattleStruct->bonusCritStages[battler] < 4;
+
+            if (canRaiseAttack || canRaiseCrit)
+            {
+                if (canRaiseCrit)
+                    gBattleStruct->bonusCritStages[battler]++;
+                if (canRaiseAttack)
+                {
+                    gBattleMons[battler].statStages[STAT_ATK]++;
+                    PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+                }
+                SetBattlerTriggeredAbility(battler, ABILITY_BATTLE_FURY);
+                gBattlerAttacker = gBattlerAbility = battler;
+                gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+                if (canRaiseAttack && canRaiseCrit)
+                    BattleScriptPushCursorAndCallback(BattleScript_BattleFuryActivates);
+                else if (canRaiseAttack)
+                    BattleScriptPushCursorAndCallback(BattleScript_BattleFuryAttackOnlyActivates);
+                else
+                    BattleScriptPushCursorAndCallback(BattleScript_BattleFuryCritOnlyActivates);
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_PANIC_SHED)
@@ -17054,6 +17140,12 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
             return UQ_4_12(0.8);
         if (allyCount >= 1)
             return UQ_4_12(0.9);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_CARRION_HOUR)
+     && IS_MOVE_SPECIAL(move))
+    {
+        return UQ_4_12(0.9);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_NEGATIVE_CHARGE)

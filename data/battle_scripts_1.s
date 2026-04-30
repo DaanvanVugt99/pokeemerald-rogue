@@ -9083,6 +9083,15 @@ BattleScript_DoRecoil::
 BattleScript_RecoilEnd::
 	return
 
+BattleScript_WarpathHeal::
+	call BattleScript_AbilityPopUp
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_EffectWithChance::
 	seteffectwithchance
 	return
@@ -9185,7 +9194,38 @@ BattleScript_MarksmanCritBoostActivates::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
-@ Can't compare directly to a value, have to compare to value at pointer
+BattleScript_BattleFuryActivates::
+	call BattleScript_AbilityPopUp
+	call BattleScript_BattleFuryAttackBoost
+	goto BattleScript_BattleFuryCritBoost
+
+BattleScript_BattleFuryAttackOnlyActivates::
+	call BattleScript_AbilityPopUp
+	call BattleScript_BattleFuryAttackBoost
+	end3
+
+BattleScript_BattleFuryCritOnlyActivates::
+	call BattleScript_AbilityPopUp
+	goto BattleScript_BattleFuryCritBoost
+
+BattleScript_BattleFuryAttackBoost:
+	setstatchanger STAT_ATK, 1, FALSE
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_ATTACKERABILITYSTATRAISE
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_BattleFuryCritBoost:
+	setstatchanger STAT_ATK, 0, FALSE @ used only for stat change animation
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_PKMNGETTINGPUMPED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+	@ Can't compare directly to a value, have to compare to value at pointer
 sZero:
 .byte 0
 
@@ -10971,6 +11011,19 @@ BattleScript_VictoryCelebrate:
 	setbyte sB_ANIM_TARGETS_HIT, 0
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
+
+BattleScript_InsectivoreActivates::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_InsectivoreEnd
+	tryhealhalfhealth BattleScript_InsectivoreEnd, BS_ATTACKER
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_InsectivoreEnd:
+	return
 
 BattleScript_StumbleActivates::
 	call BattleScript_AbilityPopUp
