@@ -9325,6 +9325,28 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_QUIET_MIND)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_QUIET_MIND);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndAttacker;
+            gCalledMove = MOVE_CALM_MIND;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ACID_REFLUX)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsFinalMultiHitStrike()
@@ -10390,6 +10412,22 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TUFTED_AWAY)
+         && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TUFTED_AWAY);
+            gBattlerAttacker = battler;
+            gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TAILWIND;
+            gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = battler;
+            gSideTimers[GetBattlerSide(battler)].tailwindTimer = 2;
+            BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SHELL_FORMATION)
          && moveType == TYPE_WATER
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -11144,6 +11182,23 @@ if (triggeringAbility != ABILITY_NONE)
             SetBattlerTriggeredAbility(battler, ABILITY_NEUROTOXIN);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_NeurotoxinActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ACID_CONVERSION)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && CanBePoisoned(gBattlerAttacker, gBattlerTarget)
+         && RandomWeighted(RNG_SECONDARY_EFFECT, 4, 1))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ACID_CONVERSION);
+            gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
 
@@ -16170,6 +16225,21 @@ static bool32 IsWingMove(u32 move)
     }
 }
 
+static bool32 IsAnyActiveBattlerBelowHalfHp(void)
+{
+    u32 battler;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (!IsBattlerAlive(battler))
+            continue;
+        if ((gBattleMons[battler].hp * 2) < gBattleMons[battler].maxHP)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 isCrit, u32 abilityAtk)
 {
     u32 moveType;
@@ -16266,6 +16336,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
             return UQ_4_12(0.8);
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_BLOOD_SCENT)
+     && typeEffectivenessModifier > UQ_4_12(0.0)
+     && typeEffectivenessModifier < UQ_4_12(1.0)
+     && IsAnyActiveBattlerBelowHalfHp())
+    {
+        return uq4_12_divide(UQ_4_12(1.0), typeEffectivenessModifier);
+    }
+
     switch (abilityAtk)
     {
     case ABILITY_NEUROFORCE:
@@ -16290,6 +16368,14 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
      && IsAnyEnvironmentalTypeActive(battlerDef))
     {
         return UQ_4_12(0.7);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_ACID_CONVERSION)
+     && (gBattleWeather & B_WEATHER_ACID_RAIN))
+    {
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_ACID_CONVERSION);
+        return UQ_4_12(0.75);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_FORMATION_FIGHTER))
@@ -16338,6 +16424,13 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
 
     if (HasBattlerAbility(battlerDef, ABILITY_AQUATIC_ARMOR)
      && gProtectStructs[battlerDef].uniqueAbilityActive)
+    {
+        return UQ_4_12(0.5);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_PRETTY_PETALS)
+     && gProtectStructs[battlerDef].uniqueAbilityActive
+     && !IS_MOVE_STATUS(move))
     {
         return UQ_4_12(0.5);
     }

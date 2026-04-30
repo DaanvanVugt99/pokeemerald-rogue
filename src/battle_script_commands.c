@@ -6796,6 +6796,16 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_PRETTY_PETALS)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IS_MOVE_STATUS(gCurrentMove)
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg)
+            {
+                gProtectStructs[gBattlerAttacker].uniqueAbilityActive = TRUE;
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_GEODE_HEART)
              && gProtectStructs[gBattlerAttacker].uniqueAbilityActive)
             {
@@ -10489,6 +10499,18 @@ static void Cmd_various(void)
     case VARIOUS_TRY_ACTIVATE_VICTORY:
     {
         VARIOUS_ARGS();
+
+        if (HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTY)
+         && GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
+         && HasAttackerFaintedTarget()
+         && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)))
+        {
+            u16 payDay = gPaydayMoney;
+            SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BOUNTY);
+            gPaydayMoney += (gBattleMons[gBattlerAttacker].level * 5);
+            if (payDay > gPaydayMoney)
+                gPaydayMoney = 0xFFFF;
+        }
 
         if (HasBattlerAbility(battler, ABILITY_VICTORY)
          && HasAttackerFaintedTarget()

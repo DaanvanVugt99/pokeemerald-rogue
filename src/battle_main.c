@@ -4921,13 +4921,6 @@ s8 GetMovePriority(u32 battler, u16 move)
             priority++;
     }
 
-    if (HasBattlerAbility(battler, ABILITY_AMBUSH)
-     && gDisableStructs[battler].isFirstTurn
-     && gBattleMoves[move].bitingMove)
-    {
-        priority++;
-    }
-
     if (HasBattlerAbility(battler, ABILITY_CALL)
      && IS_MOVE_STATUS(move)
      && CountPartyMonsOfType(battler, TYPE_FAIRY, TRUE) >= 1)
