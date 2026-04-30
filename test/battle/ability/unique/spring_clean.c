@@ -14,7 +14,7 @@ ASSUMPTIONS
 SINGLE_BATTLE_TEST("Spring Clean clears Spikes, Toxic Spikes, Stealth Rock, and Sticky Web from its side after a multi-strike move")
 {
     GIVEN {
-        PLAYER(SPECIES_CINCCINO) { Ability(ABILITY_CUTE_CHARM); UniqueAbility(ABILITY_SPRING_CLEAN); Moves(MOVE_CELEBRATE, MOVE_TAIL_SLAP); }
+        PLAYER(SPECIES_CINCCINO) { Ability(ABILITY_CUTE_CHARM); UniqueAbility(ABILITY_SPRING_CLEAN); Speed(1); Moves(MOVE_CELEBRATE, MOVE_TAIL_SLAP); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(200); Moves(MOVE_SPIKES, MOVE_TOXIC_SPIKES, MOVE_STEALTH_ROCK, MOVE_STICKY_WEB); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_SPIKES); }

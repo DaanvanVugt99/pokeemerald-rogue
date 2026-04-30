@@ -8197,7 +8197,7 @@ special_delivery_done:
 
             if (HasBattlerAbility(battler, ABILITY_CELL_DIVISION)
              && !BATTLER_MAX_HP(battler)
-             && BATTLER_TURN_DAMAGED(battler)
+             && (gProtectStructs[battler].physicalDmg != 0 || gProtectStructs[battler].specialDmg != 0)
              && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
             {
                 s32 healAmount = (gProtectStructs[battler].physicalDmg + gProtectStructs[battler].specialDmg) / 4;
@@ -9046,22 +9046,6 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
-        case ABILITY_TRIPWIRE:
-            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-             && gBattleMons[gBattlerAttacker].hp != 0
-             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-             && TARGET_TURN_DAMAGED
-             && IsMoveMakingContact(move, gBattlerAttacker)
-             && CanBeConfused(gBattlerAttacker))
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_TRIPWIRE);
-                gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CONFUSION;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-                effect++;
-            }
-            break;
         case ABILITY_CUTE_CHARM:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
              && gBattleMons[gBattlerAttacker].hp != 0
@@ -9373,6 +9357,22 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TRIPWIRE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && CanBeConfused(moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TRIPWIRE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CONFUSION;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_STONE_SPIKES)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -9619,6 +9619,8 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = moveEndAttacker;
+            if (gLastMoves[moveEndAttacker] == MOVE_NONE || gLastMoves[moveEndAttacker] == MOVE_UNAVAILABLE)
+                gLastMoves[moveEndAttacker] = move;
             gCalledMove = MOVE_ENCORE;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
@@ -9900,6 +9902,8 @@ if (triggeringAbility != ABILITY_NONE)
     }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
     {
+        u32 moveEndTarget = gBattlerTarget;
+
         switch (gLastUsedAbility)
         {
         case ABILITY_POISON_TOUCH:
@@ -10004,7 +10008,7 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_POWER_PLAY)
-         && move == MOVE_SUCKER_PUNCH
+         && (move == MOVE_SUCKER_PUNCH || gChosenMove == MOVE_SUCKER_PUNCH)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && (gMoveResultFlags & (MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE | MOVE_RESULT_NO_EFFECT))
          && IsFinalMultiHitStrike()
@@ -10015,7 +10019,9 @@ if (triggeringAbility != ABILITY_NONE)
             SetBattlerTriggeredAbility(battler, ABILITY_POWER_PLAY);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndTarget;
             gCalledMove = MOVE_TORMENT;
+            gMoveResultFlags = 0;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();

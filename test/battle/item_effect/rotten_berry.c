@@ -11,8 +11,8 @@ SINGLE_BATTLE_TEST("Rotten Berry heals Grass-, Poison-, and Bug-type holders at 
     u16 species;
 
     PARAMETRIZE { species = SPECIES_SNIVY; }
-    PARAMETRIZE { species = SPECIES_TRUBBISH; }
-    PARAMETRIZE { species = SPECIES_KRICKETOT; }
+    PARAMETRIZE { species = SPECIES_ZUBAT; }
+    PARAMETRIZE { species = SPECIES_CATERPIE; }
 
     GIVEN {
         PLAYER(species) { Item(ITEM_ROTTEN_BERRY); HP(45); MaxHP(90); Moves(MOVE_CELEBRATE); }

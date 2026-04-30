@@ -7682,10 +7682,12 @@ BattleScript_ToxicSpikesPoisoned::
 
 BattleScript_StickyWebOnSwitchIn::
 	savetarget
+	copybyte sSAVED_BATTLER, gBattlerAttacker
 	copybyte gBattlerTarget, sBATTLER
 	setbyte sSTICKY_WEB_STAT_DROP, 1
 	printstring STRINGID_STICKYWEBSWITCHIN
 	waitmessage B_WAIT_TIME_LONG
+	setattackertostickywebuser
 	jumpifability BS_TARGET, ABILITY_MIRROR_ARMOR, BattleScript_MirrorArmorReflectStickyWeb
 	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_StickyWebOnSwitchInEnd
 	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_StickyWebOnSwitchInStatAnim
@@ -7699,6 +7701,7 @@ BattleScript_StickyWebOnSwitchInPrintStatMsg:
 	printfromtable gStatDownStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_StickyWebOnSwitchInEnd:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
 	restoretarget
 	return
 
