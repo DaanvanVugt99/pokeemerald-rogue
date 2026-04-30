@@ -6096,6 +6096,20 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BIOLUMINESCENCE) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_BIOLUMINESCENCE);
+
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_ElectricSurgeActivates);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SCORCHED_REIGN) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -8317,6 +8331,23 @@ special_delivery_done:
                 effect++;
             }
 
+            if (HasBattlerAbility(battler, ABILITY_FLASH_FREEZE)
+             && (gBattleWeather & B_WEATHER_SNOW)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+             && !(gStatuses3[battler] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)))
+            {
+                s32 healAmount = GetNonDynamaxMaxHP(battler) / 16;
+
+                if (healAmount == 0)
+                    healAmount = 1;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_FLASH_FREEZE);
+                gBattleMoveDamage = -healAmount;
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect++;
+            }
+
             if ((gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
              && IsBattlerTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN)
              && !BATTLER_MAX_HP(battler)
@@ -8503,6 +8534,17 @@ else if (moveType == TYPE_FLYING)
 {
     if (HasBattlerAbility(battler, ABILITY_AERODYNAMIC))
         triggeringAbility = ABILITY_AERODYNAMIC, effect = 2, statId = STAT_SPEED;
+}
+else if (moveType == TYPE_FIRE && HasBattlerAbility(battler, ABILITY_FLASH_FREEZE))
+{
+    bool32 snowStarted = TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE);
+
+    triggeringAbility = ABILITY_FLASH_FREEZE;
+    if (gProtectStructs[gBattlerAttacker].notFirstStrike)
+        gBattlescriptCurrInstr = snowStarted ? BattleScript_FlashFreezeActivates : BattleScript_MonMadeMoveUseless;
+    else
+        gBattlescriptCurrInstr = snowStarted ? BattleScript_FlashFreezeActivates_PPLoss : BattleScript_MonMadeMoveUseless_PPLoss;
+    effect = 3;
 }
 else if (moveType == TYPE_FIRE
     && (B_FLASH_FIRE_FROZEN >= GEN_5 || !(gBattleMons[battler].status1 & STATUS1_FREEZE))
@@ -11755,6 +11797,24 @@ if (triggeringAbility != ABILITY_NONE)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_ELECTROCYTES);
             gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FROSTBITE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && moveType == TYPE_ICE
+         && CanGetFrostbite(gBattlerTarget)
+         && RandomWeighted(RNG_SECONDARY_EFFECT, 90, 10))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FROSTBITE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_FROSTBITE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
@@ -16441,6 +16501,8 @@ static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
     if (HasBattlerAbility(battlerAtk, ABILITY_ABYSSAL_MAW)
      && gBattleMoves[move].bitingMove)
         return UQ_4_12(0.4);
+    if (HasBattlerAbility(battlerAtk, ABILITY_BRUTAL))
+        return UQ_4_12(0.25);
     return B_PARENTAL_BOND_DMG >= GEN_7 ? UQ_4_12(0.25) : UQ_4_12(0.5);
 }
 
@@ -16715,6 +16777,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
     if (HasBattlerAbility(battlerAtk, ABILITY_SOARING_GALE)
      && (gBattleMoves[gCurrentMove].windMove || IsWingMove(gCurrentMove)))
         return UQ_4_12(1.3);
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_FROSTBITE)
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SNOW))
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_ICE)
+            return UQ_4_12(1.3);
+    }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_BREAK_FORM)
      && CountBattlerStatIncreases(battlerDef, FALSE) > 0)
@@ -18894,7 +18964,9 @@ bool32 AreBattlersOfSameGender(u32 battler1, u32 battler2)
 u32 CalcSecondaryEffectChance(u32 battler, u8 secondaryEffectChance, u16 moveEffect)
 {
     bool8 hasSereneGrace = (GetBattlerAbility(battler) == ABILITY_SERENE_GRACE);
+    bool8 hasPyromancy = HasBattlerAbility(battler, ABILITY_PYROMANCY);
     bool8 hasRainbow = (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_RAINBOW) != 0;
+    u8 moveType = TYPE_MYSTERY;
 
     if (hasRainbow && hasSereneGrace && moveEffect == EFFECT_FLINCH_HIT)
         return secondaryEffectChance *= 2;
@@ -18903,6 +18975,12 @@ u32 CalcSecondaryEffectChance(u32 battler, u8 secondaryEffectChance, u16 moveEff
         secondaryEffectChance *= 2;
     if (hasRainbow && moveEffect != EFFECT_SECRET_POWER)
         secondaryEffectChance *= 2;
+    if (hasPyromancy && moveEffect == EFFECT_BURN_HIT)
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_FIRE)
+            secondaryEffectChance = min((u32)secondaryEffectChance * 5, 100);
+    }
 
     // Charm applies a multiplier to the chance i.e. 5% chance X 1.75
     {
