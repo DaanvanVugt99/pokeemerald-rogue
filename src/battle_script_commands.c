@@ -15823,6 +15823,19 @@ static void Cmd_switchoutabilities(void)
     }
     else
     {
+        if (HasBattlerAbility(battler, ABILITY_MIGRATION))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_MIGRATION);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_RAIN_DANCE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
         switch (GetBattlerAbility(battler))
         {
         case ABILITY_NATURAL_CURE:

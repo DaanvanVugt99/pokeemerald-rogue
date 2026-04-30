@@ -5956,6 +5956,24 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SEASONS_GREETING)
+         && !uniqueDone
+         && (gFieldStatuses & (STATUS_FIELD_GRASSY_TERRAIN | STATUS_FIELD_PLAIN_TERRAIN)))
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_SEASONS_GREETING);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_AROMATHERAPY;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            StartAbilityCalledMoveScript();
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BLOOM_BURST)
          && !uniqueDone
          && IsBattlerWeatherAffected(battler, B_WEATHER_SUN)
@@ -6409,6 +6427,26 @@ special_delivery_done:
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_WHITEOUT);
                 BattleScriptPushCursorAndCallback(BattleScript_MistySurgeActivates);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FREEZING_FLAVOR) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_FREEZING_FLAVOR);
+                BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesSnow);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_FREEZING_FLAVOR);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
                 return 1;
             }
         }
@@ -7240,7 +7278,7 @@ special_delivery_done:
                 effect++;
             }
             break;
-        case ABILITY_MIGRATION:
+        case ABILITY_PESTILENT_DRIFT:
             if (IsAnyOpposingBattlerStatused(battler)
              && TryChangeBattleTerrain(battler, STATUS_FIELD_INFESTED_TERRAIN, &gFieldTimers.terrainTimer))
             {
@@ -12391,6 +12429,7 @@ bool32 CanBePoisoned(u32 battlerAttacker, u32 battlerTarget)
      || HasBattlerAbility(battlerTarget, ABILITY_IMMUNITY)
      || HasBattlerAbility(battlerTarget, ABILITY_COMATOSE)
      || HasBattlerAbility(battlerTarget, ABILITY_SILVER_LINING)
+     || (HasBattlerAbility(battlerTarget, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(battlerTarget, B_WEATHER_SNOW))
      || HasBattlerAbility(battlerTarget, ABILITY_PURIFYING_SALT)
      || (HasBattlerAbility(battlerTarget, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battlerTarget))
      || IsAbilityOnSide(battlerTarget, ABILITY_PASTEL_VEIL)
@@ -12409,6 +12448,7 @@ bool32 CanBeBurned(u32 battler)
       || HasBattlerAbility(battler, ABILITY_WATER_BUBBLE)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
       || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
+      || (HasBattlerAbility(battler, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW))
       || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || HasBattlerAbility(battler, ABILITY_THERMAL_EXCHANGE)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
@@ -12425,6 +12465,7 @@ bool32 CanBeParalyzed(u32 battler)
         || HasBattlerAbility(battler, ABILITY_LIMBER)
         || HasBattlerAbility(battler, ABILITY_COMATOSE)
         || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
+        || (HasBattlerAbility(battler, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW))
         || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
         || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
         || gBattleMons[battler].status1 & STATUS1_ANY

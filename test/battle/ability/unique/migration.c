@@ -1,51 +1,48 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Migration sets Infested Terrain on switch-in if the foe is statused")
+ASSUMPTIONS
 {
-    GIVEN {
-        PLAYER(SPECIES_MOTHIM) { Ability(ABILITY_SWARM); UniqueAbility(ABILITY_MIGRATION); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Status1(STATUS1_BURN); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ABILITY_POPUP(player, ABILITY_MIGRATION);
-    } THEN {
-        EXPECT(gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN);
-    }
+    ASSUME(gBattleMoves[MOVE_RAIN_DANCE].effect == EFFECT_RAIN_DANCE);
 }
 
-SINGLE_BATTLE_TEST("Migration does not set Infested Terrain on switch-in if the foe is not statused")
+SINGLE_BATTLE_TEST("Migration uses Rain Dance when switching out")
 {
-    GIVEN {
-        PLAYER(SPECIES_MOTHIM) { Ability(ABILITY_SWARM); UniqueAbility(ABILITY_MIGRATION); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        NOT ABILITY_POPUP(player, ABILITY_MIGRATION);
-    } THEN {
-        EXPECT(!(gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN));
-    }
-}
+    u16 species;
 
-DOUBLE_BATTLE_TEST("Migration checks both opposing active battlers for status")
-{
+    PARAMETRIZE { species = SPECIES_DUCKLETT; }
+    PARAMETRIZE { species = SPECIES_SWANNA; }
+
     GIVEN {
-        PLAYER(SPECIES_MOTHIM) { Ability(ABILITY_SWARM); UniqueAbility(ABILITY_MIGRATION); Moves(MOVE_CELEBRATE); }
+        PLAYER(species) { Ability(ABILITY_KEEN_EYE); Moves(MOVE_CELEBRATE); }
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Status1(STATUS1_PARALYSIS); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_CELEBRATE);
-            MOVE(playerRight, MOVE_CELEBRATE);
-            MOVE(opponentLeft, MOVE_CELEBRATE);
-            MOVE(opponentRight, MOVE_CELEBRATE);
-        }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(playerLeft, ABILITY_MIGRATION);
+        ABILITY_POPUP(player, ABILITY_MIGRATION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RAIN_DANCE, player);
+        MESSAGE("It started to rain!");
     } THEN {
-        EXPECT(gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN);
+        EXPECT((gBattleWeather & B_WEATHER_RAIN) != 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Migration does not trigger if the user faints instead of switching out")
+{
+    GIVEN {
+        PLAYER(SPECIES_SWANNA) { HP(1); Ability(ABILITY_KEEN_EYE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_QUICK_ATTACK); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_QUICK_ATTACK); SEND_OUT(player, 1); }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_MIGRATION);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_RAIN_DANCE, player);
+            MESSAGE("It started to rain!");
+        }
+    } THEN {
+        EXPECT((gBattleWeather & B_WEATHER_RAIN) == 0);
     }
 }
