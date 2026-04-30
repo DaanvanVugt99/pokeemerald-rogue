@@ -10880,6 +10880,25 @@ BattleScript_AbilityUsesCalledMove::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_DemolitionActivates::
+	copybyte gBattlerAbility, gBattlerAttacker
+	sethword sABILITY_OVERWRITE, ABILITY_DEMOLITION
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_THEWALLSHATTERED
+	waitmessage B_WAIT_TIME_LONG
+	setstatchanger STAT_DEF, 2, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR | STAT_CHANGE_NOT_PROTECT_AFFECTED, BattleScript_DemolitionActivatesEnd
+	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_DemolitionActivatesAnim
+	goto BattleScript_DemolitionActivatesPrintString
+BattleScript_DemolitionActivatesAnim:
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+BattleScript_DemolitionActivatesPrintString:
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_DemolitionActivatesEnd:
+	return
+
 BattleScript_BloomBurstUsesCalledMove::
 	sethword sABILITY_OVERWRITE, ABILITY_BLOOM_BURST
 	goto BattleScript_AbilityUsesCalledMove

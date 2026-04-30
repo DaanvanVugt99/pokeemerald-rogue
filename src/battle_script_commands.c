@@ -1719,6 +1719,14 @@ static bool32 AccuracyCalcHelper(u16 move)
         return TRUE;
     }
 
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_THROWING_FORM)
+     && (gBattleMoves[move].effect == EFFECT_ROAR
+      || gBattleMoves[move].effect == EFFECT_HIT_SWITCH_TARGET))
+    {
+        JumpIfMoveFailed(7, move);
+        return TRUE;
+    }
+
     if (B_MINIMIZE_DMG_ACC >= GEN_6
      && (gStatuses3[gBattlerTarget] & STATUS3_MINIMIZED)
      && gBattleMoves[move].minimizeDoubleDamage)

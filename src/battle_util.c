@@ -64,6 +64,7 @@ functions instead of at the top of the file with the other declarations.
 */
 
 static bool32 TryRemoveScreens(u32 battler);
+static bool32 TryRemoveTargetSideScreens(u32 target);
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static u32 GetFlingPowerFromItemId(u32 itemId);
 static void SetRandomMultiHitCounter();
@@ -7844,6 +7845,34 @@ special_delivery_done:
                 }
             }
 
+            if (HasBattlerAbility(battler, ABILITY_RESTORATIVE_AURA))
+            {
+                bool32 healedAny = FALSE;
+
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (!IsBattlerAlive(i)
+                     || BATTLER_MAX_HP(i)
+                     || (gStatuses3[i] & STATUS3_HEAL_BLOCK))
+                        continue;
+
+                    gBattleMoveDamage = GetNonDynamaxMaxHP(i) / 8;
+                    if (gBattleMoveDamage == 0)
+                        gBattleMoveDamage = 1;
+
+                    gBattleMons[i].hp += gBattleMoveDamage;
+                    if (gBattleMons[i].hp > gBattleMons[i].maxHP)
+                        gBattleMons[i].hp = gBattleMons[i].maxHP;
+
+                    BtlController_EmitSetMonData(i, BUFFER_A, REQUEST_HP_BATTLE, 0, sizeof(gBattleMons[i].hp), &gBattleMons[i].hp);
+                    MarkBattlerForControllerExec(i);
+                    healedAny = TRUE;
+                }
+
+                if (healedAny)
+                    SetBattlerTriggeredAbility(battler, ABILITY_RESTORATIVE_AURA);
+            }
+
             if (HasBattlerAbility(battler, ABILITY_GEMSTASH)
              && gBattleMons[battler].item == ITEM_NONE
              && gBattleStruct->changedItems[battler] == ITEM_NONE
@@ -9314,6 +9343,25 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_FROGSONG)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, moveEndAttacker)
+         && (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN)
+          || RandomPercentage(RNG_ROGUE_FROGSONG, 30)))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FROGSONG);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndAttacker;
+            gCalledMove = MOVE_SING;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ADAPTIVE_SLIME)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && moveEndAttacker != battler
@@ -10230,6 +10278,49 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_WEB_TAILOR)
+         && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CountPartyMonsWithAnyTypes(battler, gBitTable[TYPE_BUG], TRUE) >= 2)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_WEB_TAILOR);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_STICKY_WEB;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DEMOLITION)
+         && gBattleMoves[move].punchingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            u32 target = gBattleStruct->moveTarget[battler];
+
+            if (target < gBattlersCount
+             && target != battler
+             && IsBattlerAlive(target)
+             && GetBattlerSide(target) != GetBattlerSide(battler)
+             && TryRemoveTargetSideScreens(target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_DEMOLITION);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_DemolitionActivates;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_REGAL_DECREE)
@@ -14992,6 +15083,14 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_THROWING_FORM)
+     && !IS_MOVE_STATUS(move)
+     && (gBattleMoves[move].effect == EFFECT_ROAR
+      || gBattleMoves[move].effect == EFFECT_HIT_SWITCH_TARGET))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_TERRAFORM)
      && gProtectStructs[battlerAtk].uniqueAbilityActive
      && moveType == TYPE_GROUND
@@ -16128,6 +16227,10 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
     if (HasBattlerAbility(battlerAtk, ABILITY_SOARING_GALE)
      && (gBattleMoves[gCurrentMove].windMove || IsWingMove(gCurrentMove)))
         return UQ_4_12(1.3);
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_BREAK_FORM)
+     && CountBattlerStatIncreases(battlerDef, FALSE) > 0)
+        return UQ_4_12(1.5);
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SYLVAN_SURGE)
      && typeEffectivenessModifier <= UQ_4_12(0.5))
@@ -17670,6 +17773,22 @@ static bool32 TryRemoveScreens(u32 battler)
     }
 
     return removed;
+}
+
+static bool32 TryRemoveTargetSideScreens(u32 target)
+{
+    u32 side = GetBattlerSide(target);
+
+    if (gSideStatuses[side] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_AURORA_VEIL))
+    {
+        gSideStatuses[side] &= ~(SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_AURORA_VEIL);
+        gSideTimers[side].reflectTimer = 0;
+        gSideTimers[side].lightscreenTimer = 0;
+        gSideTimers[side].auroraVeilTimer = 0;
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler)

@@ -22,6 +22,7 @@ extern const u8 BattleScript_FrightmareActivates[];
 extern const u8 BattleScript_VoltBreakActivates[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
 extern const u8 BattleScript_BloomBurstUsesCalledMove[];
+extern const u8 BattleScript_DemolitionActivates[];
 extern const u8 BattleScript_VictoryActivates[];
 extern const u8 BattleScript_VictoryActivatesSpeed[];
 extern const u8 BattleScript_StumbleActivates[];
