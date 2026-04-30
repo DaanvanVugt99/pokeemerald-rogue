@@ -4060,8 +4060,8 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_DRAGON_BREATH] =
     {
         .effect = EFFECT_PARALYZE_HIT,
-        .power = 60,
-        .type = TYPE_DRAGON,
+        .power = 70,
+        .type = TYPE_FIRE,
         .accuracy = 100,
         .pp = 20,
         .secondaryEffectChance = 30,

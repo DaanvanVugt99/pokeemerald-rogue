@@ -9046,6 +9046,22 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
+        case ABILITY_TRIPWIRE:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && gBattleMons[gBattlerAttacker].hp != 0
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && TARGET_TURN_DAMAGED
+             && IsMoveMakingContact(move, gBattlerAttacker)
+             && CanBeConfused(gBattlerAttacker))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_TRIPWIRE);
+                gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CONFUSION;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
+            break;
         case ABILITY_CUTE_CHARM:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
              && gBattleMons[gBattlerAttacker].hp != 0
@@ -9590,6 +9606,28 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PANIC_SHED)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PANIC_SHED);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndAttacker;
+            gCalledMove = MOVE_ENCORE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ACID_REFLUX)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsFinalMultiHitStrike()
@@ -9965,6 +10003,26 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_POWER_PLAY)
+         && move == MOVE_SUCKER_PUNCH
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && (gMoveResultFlags & (MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE | MOVE_RESULT_NO_EFFECT))
+         && IsFinalMultiHitStrike()
+         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_TORMENT)
+         && !IsDynamaxed(gBattlerTarget)
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_POWER_PLAY);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_TORMENT;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BUNNY_EARS)
          && IsBattlerAlive(battler)
          && IsBattlerAlive(gBattlerTarget)
@@ -10223,6 +10281,25 @@ if (triggeringAbility != ABILITY_NONE)
             gCurrentMove = MOVE_SCRATCH;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ROCKET_FIST)
+         && gBattleMoves[move].punchingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ROCKET_FIST);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_SMACK_DOWN;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, GetBattlerAbility(battler) == ABILITY_IRON_FIST ? 48 : 40); // 20 BP Smack Down; 1.2x with Iron Fist
             VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
             VarSet(VAR_TEMP_MOVEEFFECT, 0);
             BattleScriptPushCursor();
@@ -15602,6 +15679,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_TREASURE_HOARD)
+     && move == MOVE_DRAGON_BREATH
+     && (holdEffectAtk == HOLD_EFFECT_GEMS || gBattleMons[battlerAtk].item == ITEM_AMULET_COIN))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_THROWING_FORM)
      && !IS_MOVE_STATUS(move)
      && (gBattleMoves[move].effect == EFFECT_ROAR
@@ -17260,6 +17344,8 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
     if (gBattleMoves[move].effect == EFFECT_FREEZE_DRY && defType == TYPE_WATER)
         mod = UQ_4_12(2.0);
     if (move == MOVE_SHIMMER && defType == TYPE_FAIRY)
+        mod = UQ_4_12(2.0);
+    if (move == MOVE_DRAGON_BREATH && defType == TYPE_DRAGON)
         mod = UQ_4_12(2.0);
     if ((moveType == TYPE_FLYING || moveType == TYPE_BUG)
      && defType == TYPE_GRASS

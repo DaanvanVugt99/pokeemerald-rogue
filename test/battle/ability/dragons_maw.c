@@ -16,7 +16,7 @@ SINGLE_BATTLE_TEST("Dragon's Maw increases Dragon-type move damage", s16 damage)
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].type != TYPE_DRAGON);
         ASSUME(gBattleMoves[MOVE_DRAGON_CLAW].type == TYPE_DRAGON);
-        ASSUME(gBattleMoves[MOVE_DRAGON_BREATH].type == TYPE_DRAGON);
+        ASSUME(gBattleMoves[MOVE_DRAGON_BREATH].type == TYPE_FIRE);
         ASSUME(gBattleMoves[MOVE_DRAGON_CLAW].split == SPLIT_PHYSICAL);
         ASSUME(gBattleMoves[MOVE_DRAGON_BREATH].split == SPLIT_SPECIAL);
         PLAYER(SPECIES_REGIDRAGO) { Ability(ability); }
@@ -28,6 +28,6 @@ SINGLE_BATTLE_TEST("Dragon's Maw increases Dragon-type move damage", s16 damage)
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage); // Tackle should be unaffected
         EXPECT_MUL_EQ(results[2].damage, Q_4_12(1.5), results[3].damage); // Dragon Claw should be affected
-        EXPECT_MUL_EQ(results[4].damage, Q_4_12(1.5), results[5].damage); // Dragon Breath should be affected
+        EXPECT_EQ(results[4].damage, results[5].damage); // Dragon Breath should be unaffected
     }
 }

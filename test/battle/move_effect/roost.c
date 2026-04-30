@@ -22,7 +22,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_THUNDER_SHOCK].type == TYPE_ELECTRIC);
     ASSUME(gBattleMoves[MOVE_CONFUSION].type == TYPE_PSYCHIC);
     ASSUME(gBattleMoves[MOVE_ICE_BEAM].type == TYPE_ICE);
-    ASSUME(gBattleMoves[MOVE_DRAGON_BREATH].type == TYPE_DRAGON);
+    ASSUME(gBattleMoves[MOVE_DRAGON_BREATH].type == TYPE_FIRE);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_DISARMING_VOICE].type == TYPE_FAIRY);
 }
