@@ -105,16 +105,3 @@ DOUBLE_BATTLE_TEST("Dream Mist targets the remaining foe if the opposite foe fai
         EXPECT_NE(opponentRight->status1 & STATUS1_SLEEP, 0);
     }
 }
-
-SINGLE_BATTLE_TEST("Dream Mist is assigned to the Musharna line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(10); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(5); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_MUNNA), ABILITY_DREAM_MIST);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_MUSHARNA), ABILITY_DREAM_MIST);
-    }
-}

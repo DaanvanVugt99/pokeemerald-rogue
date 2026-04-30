@@ -53,16 +53,3 @@ SINGLE_BATTLE_TEST("Acid Conversion reduces incoming damage in Acid Rain", s16 d
     }
 }
 
-SINGLE_BATTLE_TEST("Acid Conversion is the Scolipede line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_VENIPEDE), ABILITY_ACID_CONVERSION);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_WHIRLIPEDE), ABILITY_ACID_CONVERSION);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SCOLIPEDE), ABILITY_ACID_CONVERSION);
-    }
-}

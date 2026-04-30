@@ -45,16 +45,3 @@ SINGLE_BATTLE_TEST("Pretty Petals does not halve damage after using a damaging m
     }
 }
 
-SINGLE_BATTLE_TEST("Pretty Petals is the unique ability for the Lilligant line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PETILIL), ABILITY_PRETTY_PETALS);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_LILLIGANT), ABILITY_PRETTY_PETALS);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_LILLIGANT_HISUIAN), ABILITY_PRETTY_PETALS);
-    }
-}

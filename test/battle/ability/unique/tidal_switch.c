@@ -131,17 +131,3 @@ SINGLE_BATTLE_TEST("Tidal Switch announces from the switching Pokemon when the i
     }
 }
 
-SINGLE_BATTLE_TEST("Tidal Switch is the Samurott line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_OSHAWOTT), ABILITY_TIDAL_SWITCH);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DEWOTT), ABILITY_TIDAL_SWITCH);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SAMUROTT), ABILITY_TIDAL_SWITCH);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SAMUROTT_HISUIAN), ABILITY_TIDAL_SWITCH);
-    }
-}

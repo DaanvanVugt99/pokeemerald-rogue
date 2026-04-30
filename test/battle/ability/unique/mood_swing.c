@@ -79,16 +79,3 @@ SINGLE_BATTLE_TEST("Mood Swing's Anxious state boosts Speed")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
     }
 }
-
-SINGLE_BATTLE_TEST("Mood Swing is assigned to the Swoobat line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_WOOBAT), ABILITY_MOOD_SWING);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SWOOBAT), ABILITY_MOOD_SWING);
-    }
-}

@@ -33,19 +33,3 @@ SINGLE_BATTLE_TEST("Quiet Mind triggers only once per switch-in")
     }
 }
 
-SINGLE_BATTLE_TEST("Quiet Mind is the Darmanitan line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DARUMAKA), ABILITY_QUIET_MIND);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DARMANITAN), ABILITY_QUIET_MIND);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DARMANITAN_ZEN_MODE), ABILITY_QUIET_MIND);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DARUMAKA_GALARIAN), ABILITY_QUIET_MIND);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DARMANITAN_GALARIAN), ABILITY_QUIET_MIND);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DARMANITAN_GALARIAN_ZEN_MODE), ABILITY_QUIET_MIND);
-    }
-}

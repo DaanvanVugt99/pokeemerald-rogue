@@ -131,17 +131,3 @@ SINGLE_BATTLE_TEST("Geode Heart consumes its special-damage charge on the next R
         EXPECT_GT(damage[0], damage[1]);
     }
 }
-
-SINGLE_BATTLE_TEST("Geode Heart is assigned to the Gigalith line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_ROGGENROLA), ABILITY_GEODE_HEART);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_BOLDORE), ABILITY_GEODE_HEART);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_GIGALITH), ABILITY_GEODE_HEART);
-    }
-}

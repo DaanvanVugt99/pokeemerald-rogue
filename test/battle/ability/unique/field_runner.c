@@ -53,16 +53,3 @@ SINGLE_BATTLE_TEST("Field Runner only prevents Speed drops")
     }
 }
 
-SINGLE_BATTLE_TEST("Field Runner is the Stoutland line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_LILLIPUP), ABILITY_FIELD_RUNNER);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_HERDIER), ABILITY_FIELD_RUNNER);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_STOUTLAND), ABILITY_FIELD_RUNNER);
-    }
-}

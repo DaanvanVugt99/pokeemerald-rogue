@@ -2070,6 +2070,8 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
     }
     else if (gStatuses3[battlerAtk] & STATUS3_LASER_FOCUS
              || gBattleMoves[move].effect == EFFECT_ALWAYS_CRIT
+             || (HasBattlerAbility(battlerAtk, ABILITY_GRAND_REVEAL)
+                 && gProtectStructs[battlerAtk].uniqueAbilityTriggeredThisTurn)
              || (abilityAtk == ABILITY_MERCILESS && gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY)
              || (HasBattlerAbility(battlerAtk, ABILITY_SIGHTING_SYSTEM)
                  && gBattleMoves[move].accuracy != 0
@@ -10030,6 +10032,8 @@ static void Cmd_various(void)
         VARIOUS_ARGS();
         if (GetIllusionMonPtr(battler) != NULL)
         {
+            if (HasBattlerAbility(battler, ABILITY_GRAND_REVEAL))
+                gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
             gBattlescriptCurrInstr = cmd->nextInstr;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_IllusionOff;

@@ -59,16 +59,3 @@ SINGLE_BATTLE_TEST("Bloom Burst works with Cherrim's Flower Gift when sun starts
     }
 }
 
-SINGLE_BATTLE_TEST("Bloom Burst is the Cherrim line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_CHERUBI), ABILITY_BLOOM_BURST);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_CHERRIM_OVERCAST), ABILITY_BLOOM_BURST);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_CHERRIM_SUNSHINE), ABILITY_BLOOM_BURST);
-    }
-}

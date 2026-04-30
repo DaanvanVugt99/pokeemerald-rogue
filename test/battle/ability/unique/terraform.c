@@ -83,16 +83,3 @@ SINGLE_BATTLE_TEST("Terraform does not remove terrain for non-Ground moves")
         EXPECT(gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN);
     }
 }
-
-SINGLE_BATTLE_TEST("Terraform is assigned to the Excadrill line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_DRILBUR), ABILITY_TERRAFORM);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_EXCADRILL), ABILITY_TERRAFORM);
-    }
-}

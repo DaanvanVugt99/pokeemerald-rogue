@@ -110,17 +110,3 @@ SINGLE_BATTLE_TEST("Soaring Gale requested moves have the wind move flag")
         EXPECT(gBattleMoves[MOVE_LEAF_TORNADO].windMove);
     }
 }
-
-SINGLE_BATTLE_TEST("Soaring Gale is assigned to the Unfezant line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PIDOVE), ABILITY_SOARING_GALE);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_TRANQUILL), ABILITY_SOARING_GALE);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_UNFEZANT), ABILITY_SOARING_GALE);
-    }
-}

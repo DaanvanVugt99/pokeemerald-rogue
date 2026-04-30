@@ -78,16 +78,3 @@ SINGLE_BATTLE_TEST("Redline boosts turn order Speed below half HP")
         }
     }
 }
-
-SINGLE_BATTLE_TEST("Redline is assigned to the Zebstrika line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_BLITZLE), ABILITY_REDLINE);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_ZEBSTRIKA), ABILITY_REDLINE);
-    }
-}

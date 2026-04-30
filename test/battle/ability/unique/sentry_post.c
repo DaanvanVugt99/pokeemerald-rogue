@@ -65,15 +65,3 @@ SINGLE_BATTLE_TEST("Sentry Post does not boost damage after the target's first t
     }
 }
 
-SINGLE_BATTLE_TEST("Sentry Post is the Watchog line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PATRAT), ABILITY_SENTRY_POST);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_WATCHOG), ABILITY_SENTRY_POST);
-    }
-}

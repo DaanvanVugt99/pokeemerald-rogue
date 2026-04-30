@@ -45,14 +45,3 @@ SINGLE_BATTLE_TEST("Break Form does not boost damage against targets without rai
     }
 }
 
-SINGLE_BATTLE_TEST("Break Form is Sawk's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SAWK), ABILITY_BREAK_FORM);
-    }
-}

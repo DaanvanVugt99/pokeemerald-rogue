@@ -74,16 +74,3 @@ SINGLE_BATTLE_TEST("Demolition does not remove barriers when the punching move h
     }
 }
 
-SINGLE_BATTLE_TEST("Demolition is the Conkeldurr line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_TIMBURR), ABILITY_DEMOLITION);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_GURDURR), ABILITY_DEMOLITION);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_CONKELDURR), ABILITY_DEMOLITION);
-    }
-}

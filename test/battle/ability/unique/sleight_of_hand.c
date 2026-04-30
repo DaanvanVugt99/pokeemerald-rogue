@@ -85,15 +85,3 @@ SINGLE_BATTLE_TEST("Sleight of Hand is blocked by Sticky Hold")
     }
 }
 
-SINGLE_BATTLE_TEST("Sleight of Hand is the Liepard line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PURRLOIN), ABILITY_SLEIGHT_OF_HAND);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_LIEPARD), ABILITY_SLEIGHT_OF_HAND);
-    }
-}

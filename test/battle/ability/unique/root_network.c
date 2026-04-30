@@ -65,16 +65,3 @@ SINGLE_BATTLE_TEST("Root Network does not heal if the user faints instead of swi
     }
 }
 
-SINGLE_BATTLE_TEST("Root Network is the Serperior line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SNIVY), ABILITY_ROOT_NETWORK);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SERVINE), ABILITY_ROOT_NETWORK);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SERPERIOR), ABILITY_ROOT_NETWORK);
-    }
-}

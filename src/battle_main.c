@@ -5090,6 +5090,10 @@ u32 GetWhichBattlerFasterArgs(u32 battler1, u32 battler2, bool32 ignoreChosenMov
                               u32 holdEffectBattler1, u32 holdEffectBattler2, u32 speedBattler1, u32 speedBattler2, s32 priority1, s32 priority2)
 {
     u32 strikesFirst = 0;
+    bool32 reverseOrder = (gFieldStatuses & STATUS_FIELD_TRICK_ROOM);
+
+    if (IsAbilityOnField(ABILITY_TWISTED_HOUR))
+        reverseOrder = !reverseOrder;
 
     if (priority1 == priority2)
     {
@@ -5126,7 +5130,7 @@ u32 GetWhichBattlerFasterArgs(u32 battler1, u32 battler2, bool32 ignoreChosenMov
             else if (speedBattler1 < speedBattler2)
             {
                 // battler2 has more speed
-                if (gFieldStatuses & STATUS_FIELD_TRICK_ROOM)
+                if (reverseOrder)
                     strikesFirst = 0;
                 else
                     strikesFirst = 1;
@@ -5134,7 +5138,7 @@ u32 GetWhichBattlerFasterArgs(u32 battler1, u32 battler2, bool32 ignoreChosenMov
             else
             {
                 // battler1 has more speed
-                if (gFieldStatuses & STATUS_FIELD_TRICK_ROOM)
+                if (reverseOrder)
                     strikesFirst = 1;
                 else
                     strikesFirst = 0;

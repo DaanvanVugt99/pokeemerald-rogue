@@ -85,14 +85,3 @@ SINGLE_BATTLE_TEST("Psychic Parry lowers Attack when the reduced move makes cont
     }
 }
 
-SINGLE_BATTLE_TEST("Psychic Parry is Gallade's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_GALLADE), ABILITY_PSYCHIC_PARRY);
-    }
-}

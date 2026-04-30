@@ -8126,6 +8126,22 @@ special_delivery_done:
                 effect++;
             }
 
+            if (HasBattlerAbility(battler, ABILITY_CELL_DIVISION)
+             && !BATTLER_MAX_HP(battler)
+             && BATTLER_TURN_DAMAGED(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                s32 healAmount = (gProtectStructs[battler].physicalDmg + gProtectStructs[battler].specialDmg) / 4;
+
+                if (healAmount == 0)
+                    healAmount = 1;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_CELL_DIVISION);
+                gBattleMoveDamage = -healAmount;
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect++;
+            }
+
             if (HasBattlerAbility(battler, ABILITY_MOOD_SWING)
              && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn)
             {
@@ -8955,6 +8971,8 @@ if (triggeringAbility != ABILITY_NONE)
         case ABILITY_ILLUSION:
             if (gBattleStruct->illusion[gBattlerTarget].on && !gBattleStruct->illusion[gBattlerTarget].broken && TARGET_TURN_DAMAGED)
             {
+                if (HasBattlerAbility(gBattlerTarget, ABILITY_GRAND_REVEAL))
+                    gProtectStructs[gBattlerTarget].uniqueAbilityTriggeredThisTurn = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_IllusionOff;
                 effect++;
@@ -10417,6 +10435,50 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SPRING_CLEAN)
+         && (gBattleMoves[move].effect == EFFECT_MULTI_HIT || gBattleMoves[move].strikeCount > 1)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            u32 side = GetBattlerSide(battler);
+            bool32 clearedHazards = FALSE;
+
+            if (gSideStatuses[side] & SIDE_STATUS_SPIKES)
+            {
+                gSideStatuses[side] &= ~SIDE_STATUS_SPIKES;
+                gSideTimers[side].spikesAmount = 0;
+                clearedHazards = TRUE;
+            }
+            if (gSideStatuses[side] & SIDE_STATUS_TOXIC_SPIKES)
+            {
+                gSideStatuses[side] &= ~SIDE_STATUS_TOXIC_SPIKES;
+                gSideTimers[side].toxicSpikesAmount = 0;
+                clearedHazards = TRUE;
+            }
+            if (gSideStatuses[side] & SIDE_STATUS_STEALTH_ROCK)
+            {
+                gSideStatuses[side] &= ~SIDE_STATUS_STEALTH_ROCK;
+                gSideTimers[side].stealthRockAmount = 0;
+                clearedHazards = TRUE;
+            }
+            if (gSideStatuses[side] & SIDE_STATUS_STICKY_WEB)
+            {
+                gSideStatuses[side] &= ~SIDE_STATUS_STICKY_WEB;
+                gSideTimers[side].stickyWebAmount = 0;
+                clearedHazards = TRUE;
+            }
+
+            if (clearedHazards)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SPRING_CLEAN);
+                gBattlerAttacker = battler;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_DEMOLITION)

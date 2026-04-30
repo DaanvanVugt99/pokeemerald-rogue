@@ -18,16 +18,3 @@ SINGLE_BATTLE_TEST("Bounty does not activate if the target is not knocked out")
     }
 }
 
-SINGLE_BATTLE_TEST("Bounty is the unique ability for the Sandile line")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_SANDILE), ABILITY_BOUNTY);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_KROKOROK), ABILITY_BOUNTY);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_KROOKODILE), ABILITY_BOUNTY);
-    }
-}

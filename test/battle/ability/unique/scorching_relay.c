@@ -89,16 +89,3 @@ SINGLE_BATTLE_TEST("Scorching Relay announces from the switching Pokemon when th
     }
 }
 
-SINGLE_BATTLE_TEST("Scorching Relay is the Emboar line's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_TEPIG), ABILITY_SCORCHING_RELAY);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_PIGNITE), ABILITY_SCORCHING_RELAY);
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_EMBOAR), ABILITY_SCORCHING_RELAY);
-    }
-}

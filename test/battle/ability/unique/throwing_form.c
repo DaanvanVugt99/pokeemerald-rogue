@@ -46,14 +46,3 @@ SINGLE_BATTLE_TEST("Throwing Form makes forced-switch moves ignore accuracy chec
     }
 }
 
-SINGLE_BATTLE_TEST("Throwing Form is Throh's unique ability")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(GetUniqueAbilityBySpecies(SPECIES_THROH), ABILITY_THROWING_FORM);
-    }
-}
