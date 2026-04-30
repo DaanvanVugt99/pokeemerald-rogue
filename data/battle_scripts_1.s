@@ -9134,6 +9134,24 @@ BattleScript_AbilityRaisesDefenderStat::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_StreetFighterActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	statbuffchange 0, BattleScript_StreetFighterTryDefense
+	setgraphicalstatchangevalues
+	playanimation BS_ABILITY_BATTLER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_DEFENDERSSTATROSE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_StreetFighterTryDefense:
+	setstatchanger STAT_DEF, 1, FALSE
+	statbuffchange 0, BattleScript_StreetFighterEnd
+	setgraphicalstatchangevalues
+	playanimation BS_ABILITY_BATTLER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_DEFENDERSSTATROSE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_StreetFighterEnd:
+	return
+
 BattleScript_AbilityPopUpTarget:
 	copybyte gBattlerAbility, gBattlerTarget
 BattleScript_AbilityPopUp:

@@ -84,6 +84,9 @@ static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
 static bool32 IsAnyEnvironmentalTypeActive(u32 battler);
 static bool32 IsAnyOpposingBattlerStatused(u32 battler);
 static bool32 HasBerryDoubleEffect(u32 battler);
+static bool32 IsPetrifyStatLoweringBlocked(u32 attacker, u32 target, u32 statId);
+static bool32 CanPetrifyClearPositiveStatStages(u32 attacker, u32 target);
+static bool32 TryClearPositiveStatStagesForPetrify(u32 attacker, u32 target);
 static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
 static u16 GetGemItemForType(u32 type);
 static u16 GetRandomGemstashItemForBattler(u32 battler);
@@ -1546,10 +1549,14 @@ void PrepareStringBattle(u16 stringId, u32 battler)
     else if (stringId == STRINGID_STATSWONTINCREASE2 && battlerAbility == ABILITY_CONTRARY)
         stringId = STRINGID_STATSWONTDECREASE2;
 
-    // Check Defiant and Competitive stat raise whenever a stat is lowered.
+    // Check Defiant/Competitive/Street Fighter stat raise whenever a stat is lowered.
     else if ((stringId == STRINGID_DEFENDERSSTATFELL || stringId == STRINGID_PKMNCUTSATTACKWITH)
               && ((targetAbility == ABILITY_DEFIANT && CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
-                 || (targetAbility == ABILITY_COMPETITIVE && CompareStat(gBattlerTarget, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN)))
+                 || (targetAbility == ABILITY_COMPETITIVE && CompareStat(gBattlerTarget, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+                 || (targetAbility == ABILITY_CHEAP_TRICK
+                     && (CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN)
+                      || CompareStat(gBattlerTarget, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))))
+              && GetBattlerSide(gSpecialStatuses[gBattlerTarget].changedStatsBattlerId) != targetSide
               && gSpecialStatuses[gBattlerTarget].changedStatsBattlerId != BATTLE_PARTNER(gBattlerTarget)
               && ((gSpecialStatuses[gBattlerTarget].changedStatsBattlerId != gBattlerTarget) || gBattleScripting.stickyWebStatDrop == 1)
               && !(gBattleScripting.stickyWebStatDrop == 1 && gSideTimers[targetSide].stickyWebBattlerSide == targetSide)) // Sticky Web must have been set by the foe
@@ -1560,8 +1567,13 @@ void PrepareStringBattle(u16 stringId, u32 battler)
         gBattlescriptCurrInstr = BattleScript_AbilityRaisesDefenderStat;
         if (targetAbility == ABILITY_DEFIANT)
             SET_STATCHANGER(STAT_ATK, 2, FALSE);
-        else
+        else if (targetAbility == ABILITY_COMPETITIVE)
             SET_STATCHANGER(STAT_SPATK, 2, FALSE);
+        else
+        {
+            SET_STATCHANGER(STAT_ATK, 1, FALSE);
+            gBattlescriptCurrInstr = BattleScript_StreetFighterActivates;
+        }
     }
 #if  B_UPDATED_INTIMIDATE >= GEN_8
     else if (stringId == STRINGID_PKMNCUTSATTACKWITH && targetAbility == ABILITY_RATTLED
@@ -5825,6 +5837,20 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PSIONIC_FIELD) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_PSIONIC_FIELD);
+
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_STUMBLE) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -6230,6 +6256,42 @@ special_delivery_done:
                     BattleScriptPushCursorAndCallback(BattleScript_JumpscareActivates);
                     return 1;
                 }
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PETRIFY) && !uniqueDone)
+        {
+            bool32 shouldTrigger = FALSE;
+
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (GetBattlerSide(i) == GetBattlerSide(battler) || !IsBattlerAlive(i))
+                    continue;
+
+                if (CompareStat(i, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN)
+                 || GetBattlerAbility(i) == ABILITY_MIRROR_ARMOR
+                 || CanPetrifyClearPositiveStatStages(battler, i))
+                    shouldTrigger = TRUE;
+            }
+
+            if (shouldTrigger)
+            {
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) == GetBattlerSide(battler) || !IsBattlerAlive(i))
+                        continue;
+
+                    TryClearPositiveStatStagesForPetrify(battler, i);
+                }
+
+                uniqueDone = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                SetBattlerTriggeredAbility(battler, ABILITY_PETRIFY);
+                gBattlerAttacker = battler;
+                SET_STATCHANGER(STAT_SPEED, 1, TRUE);
+                BattleScriptPushCursorAndCallback(BattleScript_SinkholeActivates);
+                return 1;
             }
         }
 
@@ -8099,6 +8161,22 @@ special_delivery_done:
                 }
             }
 
+            if (HasBattlerAbility(battler, ABILITY_TRASH_HEAP)
+             && gBattleStruct->usedHeldItems[gBattlerPartyIndexes[battler]][GetBattlerSide(battler)] != ITEM_NONE
+             && gBattleMons[battler].item == ITEM_NONE
+             && CanUseSelfExtraMove(battler))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_TRASH_HEAP);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = battler;
+                gCalledMove = MOVE_RECYCLE;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                StartAbilityCalledMoveScript();
+                effect++;
+            }
+
             if (gProtectStructs[battler].driftSongMoveUsed)
             {
                 gProtectStructs[battler].driftSongMoveUsed = FALSE;
@@ -9141,6 +9219,26 @@ if (triggeringAbility != ABILITY_NONE)
             }
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_StaticChargeActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRICKLY)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PRICKLY);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndAttacker;
+            gCalledMove = MOVE_TWINEEDLE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
         }
 
@@ -10654,6 +10752,23 @@ if (triggeringAbility != ABILITY_NONE)
                 gBattlescriptCurrInstr = healed ? BattleScript_DuelistActivates : BattleScript_AbilityPopupReturn;
                 effect++;
             }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TIDECALL)
+         && move == MOVE_PROTECT
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TIDECALL);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_RAIN_DANCE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            StartAbilityCalledMoveScript();
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_STARLOCK)
@@ -15508,6 +15623,12 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         atkStat = gBattleMons[battlerAtk].defense;
         atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
     }
+    else if (HasBattlerAbility(battlerAtk, ABILITY_LOAD_BEARING)
+          && IS_MOVE_PHYSICAL(move))
+    {
+        atkStat = gBattleMons[battlerAtk].defense;
+        atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
+    }
     else
     {
         if (IS_MOVE_PHYSICAL(move))
@@ -16291,6 +16412,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
     {
         GET_MOVE_TYPE(gCurrentMove, moveType);
         if (moveType == TYPE_WATER)
+            return UQ_4_12(1.2);
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_TIDECALL)
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_RAIN))
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_ROCK)
             return UQ_4_12(1.2);
     }
 
@@ -18382,6 +18511,74 @@ static bool32 CanBeInfinitelyConfused(u32 battler)
         return FALSE;
     }
     return TRUE;
+}
+
+static bool32 IsPetrifyStatLoweringBlocked(u32 attacker, u32 target, u32 statId)
+{
+    u32 ability = GetBattlerAbility(target);
+
+    if (gSideTimers[GetBattlerSide(target)].mistTimer
+     && GetBattlerAbility(attacker) != ABILITY_INFILTRATOR)
+        return TRUE;
+
+    if (GetBattlerHoldEffect(target, TRUE) == HOLD_EFFECT_CLEAR_AMULET)
+        return TRUE;
+
+    if (IsFlowerVeilProtected(target))
+        return TRUE;
+
+    if (ability == ABILITY_CLEAR_BODY
+     || ability == ABILITY_FULL_METAL_BODY
+     || ability == ABILITY_WHITE_SMOKE)
+        return TRUE;
+
+    if ((ability == ABILITY_KEEN_EYE || ability == ABILITY_MINDS_EYE) && statId == STAT_ACC)
+        return TRUE;
+
+    if (B_ILLUMINATE_EFFECT >= GEN_9 && ability == ABILITY_ILLUMINATE && statId == STAT_ACC)
+        return TRUE;
+
+    if (ability == ABILITY_HYPER_CUTTER && statId == STAT_ATK)
+        return TRUE;
+
+    if (ability == ABILITY_BIG_PECKS && statId == STAT_DEF)
+        return TRUE;
+
+    return FALSE;
+}
+
+static bool32 CanPetrifyClearPositiveStatStages(u32 attacker, u32 target)
+{
+    u32 statId;
+
+    for (statId = STAT_ATK; statId <= STAT_EVASION; statId++)
+    {
+        if (gBattleMons[target].statStages[statId] > DEFAULT_STAT_STAGE
+         && !IsPetrifyStatLoweringBlocked(attacker, target, statId))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool32 TryClearPositiveStatStagesForPetrify(u32 attacker, u32 target)
+{
+    bool32 changed = FALSE;
+    u32 statId;
+
+    for (statId = STAT_ATK; statId <= STAT_EVASION; statId++)
+    {
+        if (gBattleMons[target].statStages[statId] <= DEFAULT_STAT_STAGE)
+            continue;
+
+        if (IsPetrifyStatLoweringBlocked(attacker, target, statId))
+            continue;
+
+        gBattleMons[target].statStages[statId] = DEFAULT_STAT_STAGE;
+        changed = TRUE;
+    }
+
+    return changed;
 }
 
 u8 GetBattlerGender(u32 battler)

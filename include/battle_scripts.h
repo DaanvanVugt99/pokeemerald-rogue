@@ -409,6 +409,7 @@ extern const u8 BattleScript_PlainSurgeActivates[];
 extern const u8 BattleScript_SpectralThiefSteal[];
 extern const u8 BattleScript_StatUpMsg[];
 extern const u8 BattleScript_AbilityRaisesDefenderStat[];
+extern const u8 BattleScript_StreetFighterActivates[];
 extern const u8 BattleScript_PowderMoveNoEffect[];
 extern const u8 BattleScript_GrassyTerrainHeals[];
 extern const u8 BattleScript_VCreateStatLoss[];

@@ -49,6 +49,7 @@ This file documents practical repo-specific guidance for coding agents and contr
 - Use filtered runs first for rapid iteration:
   - `--filter "Exact or unique prefix"`.
 - Canon behavior should win over existing test assumptions when they conflict.
+- Do not add tests that only assert species -> unique-ability mapping (for example, "`X` is the `Y` line's unique ability"); these are low-value and redundant.
 
 ## Known Harness/Output Behavior
 

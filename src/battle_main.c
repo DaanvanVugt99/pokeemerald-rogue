@@ -4985,6 +4985,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_FALLEN_SKIES)
+     && gBattleMoves[move].type == TYPE_FLYING
+     && gBattleMons[battler].hp <= (gBattleMons[battler].maxHP / 2))
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_UPPERCUT)
      && gBattleMoves[move].punchingMove
      && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
