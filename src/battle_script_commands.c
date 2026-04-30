@@ -6790,6 +6790,69 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_WHITE_INFERNO)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && moveType == TYPE_FIRE
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && CountPositiveStatStages(gBattlerTarget) > 0
+             && CanBeBurned(gBattlerTarget))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_WHITE_INFERNO);
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                gBattleScripting.moveEffect = MOVE_EFFECT_BURN;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect = TRUE;
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_BLACK_THUNDER)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && moveType == TYPE_ELECTRIC
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && CountPositiveStatStages(gBattlerTarget) > 0
+             && CanBeParalyzed(gBattlerTarget))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BLACK_THUNDER);
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect = TRUE;
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_ABSOLUTE_ZERO)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && moveType == TYPE_ICE
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && CountPositiveStatStages(gBattlerTarget) > 0
+             && CanBeFrozen(gBattlerTarget))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_ABSOLUTE_ZERO);
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                gBattleScripting.moveEffect = MOVE_EFFECT_FREEZE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect = TRUE;
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_UNDERTOW)
              && IsBattlerAlive(gBattlerAttacker)
              && moveType == TYPE_WATER

@@ -10399,6 +10399,33 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ENCORE_ARIA)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].soundMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            u32 target;
+
+            if (TryGetOpposingExtraMoveTarget(battler, &target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_ENCORE_ARIA);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_ENCORE;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                StartAbilityCalledMoveScript();
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SWARM_ASSAULT)
          && IsMoveMakingContact(move, battler)
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -10454,6 +10481,25 @@ if (triggeringAbility != ABILITY_NONE)
             VarSet(VAR_EXTRA_MOVE_DAMAGE, GetBattlerAbility(battler) == ABILITY_IRON_FIST ? 48 : 40); // 20 BP Smack Down; 1.2x with Iron Fist
             VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
             VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_LIKE_WATER)
+         && moveType == TYPE_FIGHTING
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_LIKE_WATER);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_WATER_PULSE;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
             effect++;
@@ -10694,15 +10740,41 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniquePersistentStateActive = FALSE;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
-         && IsBattlerAlive(battler)
-         && moveType == TYPE_FLYING
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsFinalMultiHitStrike())
         {
-            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            bool32 finalLessonWasPrimed = gDisableStructs[battler].uniquePersistentStateActive;
+
+            if (HasBattlerAbility(battler, ABILITY_FINAL_LESSON)
+             && gDisableStructs[battler].uniquePersistentStateActive
+             && (moveType == TYPE_WATER || moveType == TYPE_FIGHTING)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && IsFinalMultiHitStrike())
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
+             && IsBattlerAlive(battler)
+             && moveType == TYPE_FLYING
+             && DidMoveSucceedForMoveEndEffects(battler)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && IsFinalMultiHitStrike())
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            }
+
+            if (HasBattlerAbility(battler, ABILITY_FINAL_LESSON)
+             && IsBattlerAlive(battler)
+             && IS_MOVE_STATUS(move)
+             && (!finalLessonWasPrimed || (moveType != TYPE_WATER && moveType != TYPE_FIGHTING))
+             && DidMoveSucceedForMoveEndEffects(battler)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && IsFinalMultiHitStrike())
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_UPPERCUT)
@@ -15021,6 +15093,10 @@ bool32 IsMoveMakingContact(u32 move, u32 battlerAtk)
 
 bool32 IsBattlerProtected(u32 battler, u32 move)
 {
+    u32 moveType;
+
+    GET_MOVE_TYPE(move, moveType);
+
     // Decorate bypasses protect and detect, but not crafty shield
     if (move == MOVE_DECORATE)
     {
@@ -15054,6 +15130,11 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
         && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
         && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
         && (gBattleMoves[move].type == TYPE_FLYING || gBattleMoves[move].type == TYPE_ELECTRIC)
+        && !gProtectStructs[battler].maxGuarded)
+        return FALSE;
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_LESSON)
+        && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+        && (moveType == TYPE_WATER || moveType == TYPE_FIGHTING)
         && !gProtectStructs[battler].maxGuarded)
         return FALSE;
     else if (gBattleMoves[move].ignoresProtect)
@@ -16906,14 +16987,19 @@ static inline uq4_12_t GetAirborneModifier(u32 move, u32 battlerDef)
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetScreensModifier(u32 move, u32 battlerAtk, u32 battlerDef, bool32 isCrit, u32 abilityAtk)
+static inline uq4_12_t GetScreensModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, bool32 isCrit, u32 abilityAtk)
 {
     u32 sideStatus = gSideStatuses[GetBattlerSide(battlerDef)];
     bool32 lightScreen = (sideStatus & SIDE_STATUS_LIGHTSCREEN) && IS_MOVE_SPECIAL(move);
     bool32 reflect = (sideStatus & SIDE_STATUS_REFLECT) && IS_MOVE_PHYSICAL(move);
     bool32 auroraVeil = sideStatus & SIDE_STATUS_AURORA_VEIL;
 
-    if (isCrit || abilityAtk == ABILITY_INFILTRATOR || gProtectStructs[battlerAtk].confusionSelfDmg)
+    if (isCrit
+     || abilityAtk == ABILITY_INFILTRATOR
+     || gProtectStructs[battlerAtk].confusionSelfDmg
+     || (HasBattlerAbility(battlerAtk, ABILITY_FINAL_LESSON)
+      && gDisableStructs[battlerAtk].uniquePersistentStateActive
+      && (moveType == TYPE_WATER || moveType == TYPE_FIGHTING)))
         return UQ_4_12(1.0);
     if (reflect || lightScreen || auroraVeil)
         return (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? UQ_4_12(0.667) : UQ_4_12(0.5);
@@ -17340,7 +17426,7 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
     DAMAGE_MULTIPLY_MODIFIER(GetUndergroundModifier(move, battlerDef));
     DAMAGE_MULTIPLY_MODIFIER(GetDiveModifier(move, battlerDef));
     DAMAGE_MULTIPLY_MODIFIER(GetAirborneModifier(move, battlerDef));
-    DAMAGE_MULTIPLY_MODIFIER(GetScreensModifier(move, battlerAtk, battlerDef, isCrit, abilityAtk));
+    DAMAGE_MULTIPLY_MODIFIER(GetScreensModifier(move, moveType, battlerAtk, battlerDef, isCrit, abilityAtk));
     DAMAGE_MULTIPLY_MODIFIER(GetCollisionCourseElectroDriftModifier(move, typeEffectivenessModifier));
 
     if (unmodifiedAttackerSpeed >= unmodifiedDefenderSpeed)
