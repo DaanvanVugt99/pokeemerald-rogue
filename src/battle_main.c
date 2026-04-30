@@ -5030,6 +5030,13 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_GLIDER)
+     && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+     && (gBattleMoves[move].type == TYPE_FLYING || gBattleMoves[move].type == TYPE_ELECTRIC))
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
      && gBattleMoves[move].punchingMove
      && gDisableStructs[battler].uniquePersistentStateActive)

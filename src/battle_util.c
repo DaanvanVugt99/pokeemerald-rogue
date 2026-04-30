@@ -5738,7 +5738,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 special_delivery_done:
-
         if (HasBattlerAbility(battler, ABILITY_OMNISENSE) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -9898,6 +9897,26 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_KNIGHTLY)
+         && IsBattlerAlive(battler)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && IsMoveMakingContact(move, battler)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_KNIGHTLY);
+            SET_STATCHANGER(STAT_DEF, 1, FALSE);
+            PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_DEF);
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BATTLE_TRANCE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && TARGET_TURN_DAMAGED
@@ -10380,6 +10399,15 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_GLIDER)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
         {
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
         }
@@ -12345,6 +12373,8 @@ u32 IsAbilityPreventingEscape(u32 battler)
     if ((id = IsAbilityOnOpposingSide(battler, ABILITY_ARENA_TRAP)) && IsBattlerGrounded(battler))
         return id;
     if ((id = IsAbilityOnOpposingSide(battler, ABILITY_MAGNET_PULL)) && IS_BATTLER_OF_TYPE(battler, TYPE_STEEL))
+        return id;
+    if ((id = IsAbilityOnOpposingSide(battler, ABILITY_SPOREFIELD)) && IS_BATTLER_OF_TYPE(battler, TYPE_FAIRY))
         return id;
 
     return 0;
@@ -14579,6 +14609,12 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
         return FALSE;
     else if (HasBattlerAbility(gBattlerAttacker, ABILITY_X_RAY_JAWS)
         && gBattleMoves[move].bitingMove
+        && !gProtectStructs[battler].maxGuarded)
+        return FALSE;
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_GLIDER)
+        && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+        && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
+        && (gBattleMoves[move].type == TYPE_FLYING || gBattleMoves[move].type == TYPE_ELECTRIC)
         && !gProtectStructs[battler].maxGuarded)
         return FALSE;
     else if (gBattleMoves[move].ignoresProtect)
