@@ -7395,6 +7395,19 @@ special_delivery_done:
                 effect++;
             }
             break;
+        case ABILITY_POLAR_BEACON:
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesSnow);
+                effect++;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT && !gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                effect++;
+            }
+            break;
         case ABILITY_FROST_CALL:
             if (DoesPartyShareTypeWithBattler(battler))
             {
@@ -11369,6 +11382,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ALGAE_BLOOM)
+         && moveType == TYPE_POISON
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ALGAE_BLOOM);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_SMOG;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_UPDRAFT)
          && moveType == TYPE_FIRE
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -12462,6 +12493,31 @@ if (triggeringAbility != ABILITY_NONE)
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
 
             SetBattlerTriggeredAbility(battler, ABILITY_PREDATOR);
+            if (drainedHp == 0)
+                drainedHp = 1;
+            gBattleMoveDamage = -drainedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SERENE_VOICE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].soundMove
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg;
+
+            if (IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
+                drainedHp /= 4;
+            else
+                drainedHp /= 8;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_SERENE_VOICE);
             if (drainedHp == 0)
                 drainedHp = 1;
             gBattleMoveDamage = -drainedHp;
@@ -16451,6 +16507,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_PRIMAL_STORM)
+     && gBattleMoves[move].bitingMove
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SANDSTORM))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_AURA))
     {
         u32 hp = gBattleMons[battlerAtk].hp;
@@ -16557,6 +16620,12 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
             modifier = uq4_12_multiply(modifier, UQ_4_12(0.75));
         else
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.33));
+    }
+    if (IsAbilityOnField(ABILITY_POLAR_BEACON)
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SNOW)
+     && moveType == TYPE_ROCK)
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
     // attacker partner's abilities
@@ -17643,6 +17712,12 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         return uq4_12_divide(UQ_4_12(1.0), typeEffectivenessModifier);
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_DEADLY_SHOT)
+     && typeEffectivenessModifier >= UQ_4_12(2.0))
+    {
+        return UQ_4_12(1.35);
+    }
+
     switch (abilityAtk)
     {
     case ABILITY_NEUROFORCE:
@@ -17785,6 +17860,13 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
 
     if (HasBattlerAbility(battlerDef, ABILITY_NEGATIVE_CHARGE)
      && DoesPartyContainAbility(battlerDef, ABILITY_PLUS, TRUE))
+    {
+        return UQ_4_12(0.8);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_POLAR_BEACON)
+     && IS_MOVE_SPECIAL(move)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
     {
         return UQ_4_12(0.8);
     }

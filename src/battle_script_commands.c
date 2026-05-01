@@ -10853,6 +10853,27 @@ static void Cmd_various(void)
             return;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_STORM)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+         && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_STORM);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_SANDSTORM;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_STORM_COMMAND)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()
