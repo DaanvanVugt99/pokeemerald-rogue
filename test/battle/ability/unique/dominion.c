@@ -23,11 +23,22 @@ SINGLE_BATTLE_TEST("Dominion makes the last remaining Pokemon immune to status c
     PARAMETRIZE { move = MOVE_SING; }
 
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(ABILITY_DOMINION); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_TYRANITAR) { Ability(ABILITY_SAND_STREAM); Moves(MOVE_CELEBRATE); }
         PLAYER(SPECIES_WOBBUFFET) { HP(0); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(move); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_NO_GUARD); Moves(move); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, move); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DOMINION);
+        if (move == MOVE_TOXIC) {
+            MESSAGE("Tyranitar's Dominion prevents poisoning!");
+        } else if (move == MOVE_WILL_O_WISP) {
+            MESSAGE("Tyranitar's Dominion prevents burns!");
+        } else if (move == MOVE_THUNDER_WAVE) {
+            MESSAGE("Tyranitar's Dominion prevents paralysis!");
+        } else {
+            MESSAGE("It doesn't affect Tyranitar…");
+        }
     } THEN {
         EXPECT_EQ(player->status1, STATUS1_NONE);
     }

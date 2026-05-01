@@ -28,6 +28,14 @@ SINGLE_BATTLE_TEST("Freezing Flavor blocks burn, poison, and paralysis while sno
         OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_NO_GUARD); Moves(move); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, move); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_FREEZING_FLAVOR);
+        if (move == MOVE_TOXIC)
+            MESSAGE("Vanilluxe's Freez Flavor prevents poisoning!");
+        else if (move == MOVE_WILL_O_WISP)
+            MESSAGE("Vanilluxe's Freez Flavor prevents burns!");
+        else
+            MESSAGE("Vanilluxe's Freez Flavor prevents paralysis!");
     } THEN {
         EXPECT_EQ(player->status1, STATUS1_NONE);
     }

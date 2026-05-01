@@ -3619,6 +3619,7 @@ BattleScript_EffectSleep::
 	jumpifsubstituteblocks BattleScript_ButItFailed
 	jumpifstatus BS_TARGET, STATUS1_SLEEP, BattleScript_AlreadyAsleep
 	jumpifuproarwakes BattleScript_CantMakeAsleep
+	jumpifability BS_TARGET, ABILITY_SILVER_LINING, BattleScript_AbilityProtectsDoesntAffect
 	jumpifability BS_TARGET, ABILITY_INSOMNIA, BattleScript_InsomniaProtects
 	jumpifability BS_TARGET, ABILITY_VITAL_SPIRIT, BattleScript_InsomniaProtects
 	jumpifability BS_TARGET, ABILITY_COMATOSE, BattleScript_AbilityProtectsDoesntAffect
@@ -4228,7 +4229,9 @@ BattleScript_EffectToxic::
 	attackcanceler
 	attackstring
 	ppreduce
+	jumpifability BS_TARGET, ABILITY_SILVER_LINING, BattleScript_SilverLiningPoisonProtected
 	jumpifability BS_TARGET, ABILITY_IMMUNITY, BattleScript_ImmunityProtected
+	jumpifability BS_TARGET, ABILITY_METABOLISM, BattleScript_ImmunityProtected
 	jumpifability BS_TARGET, ABILITY_COMATOSE, BattleScript_AbilityProtectsDoesntAffect
 	jumpifability BS_TARGET, ABILITY_PURIFYING_SALT, BattleScript_AbilityProtectsDoesntAffect
 	jumpifability BS_TARGET_SIDE, ABILITY_PASTEL_VEIL, BattleScript_PastelVeilProtects
@@ -4260,6 +4263,13 @@ BattleScript_AlreadyPoisoned::
 BattleScript_ImmunityProtected::
 	copybyte gEffectBattler, gBattlerTarget
 	call BattleScript_AbilityPopUp
+	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
+	call BattleScript_PSNPrevention
+	goto BattleScript_MoveEnd
+
+BattleScript_SilverLiningPoisonProtected::
+	call BattleScript_AbilityPopUp
+	copybyte gEffectBattler, gBattlerTarget
 	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
 	call BattleScript_PSNPrevention
 	goto BattleScript_MoveEnd
@@ -4581,7 +4591,9 @@ BattleScript_EffectPoison::
 	attackcanceler
 	attackstring
 	ppreduce
+	jumpifability BS_TARGET, ABILITY_SILVER_LINING, BattleScript_SilverLiningPoisonProtected
 	jumpifability BS_TARGET, ABILITY_IMMUNITY, BattleScript_ImmunityProtected
+	jumpifability BS_TARGET, ABILITY_METABOLISM, BattleScript_ImmunityProtected
 	jumpifability BS_TARGET, ABILITY_COMATOSE, BattleScript_AbilityProtectsDoesntAffect
 	jumpifability BS_TARGET, ABILITY_PURIFYING_SALT, BattleScript_AbilityProtectsDoesntAffect
 	jumpifability BS_TARGET_SIDE, ABILITY_PASTEL_VEIL, BattleScript_PastelVeilProtects
@@ -4608,6 +4620,7 @@ BattleScript_EffectParalyze:
 	attackcanceler
 	attackstring
 	ppreduce
+	jumpifability BS_TARGET, ABILITY_SILVER_LINING, BattleScript_SilverLiningParalysisProtected
 	jumpifability BS_TARGET, ABILITY_LIMBER, BattleScript_LimberProtected
 	jumpifability BS_TARGET, ABILITY_COMATOSE, BattleScript_AbilityProtectsDoesntAffect
 	jumpifability BS_TARGET, ABILITY_PURIFYING_SALT, BattleScript_AbilityProtectsDoesntAffect
@@ -4647,6 +4660,13 @@ BattleScript_AlreadyParalyzed:
 	goto BattleScript_MoveEnd
 
 BattleScript_LimberProtected::
+	copybyte gEffectBattler, gBattlerTarget
+	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
+	call BattleScript_PRLZPrevention
+	goto BattleScript_MoveEnd
+
+BattleScript_SilverLiningParalysisProtected::
+	call BattleScript_AbilityPopUp
 	copybyte gEffectBattler, gBattlerTarget
 	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
 	call BattleScript_PRLZPrevention
@@ -6089,8 +6109,10 @@ BattleScript_EffectWillOWisp::
 	jumpifsubstituteblocks BattleScript_ButItFailed
 	jumpifstatus BS_TARGET, STATUS1_BURN, BattleScript_AlreadyBurned
 	jumpiftype BS_TARGET, TYPE_FIRE, BattleScript_NotAffected
+	jumpifability BS_TARGET, ABILITY_SILVER_LINING, BattleScript_SilverLiningBurnProtected
 	jumpifability BS_TARGET, ABILITY_WATER_VEIL, BattleScript_WaterVeilPrevents
 	jumpifability BS_TARGET, ABILITY_WATER_BUBBLE, BattleScript_WaterVeilPrevents
+	jumpifability BS_TARGET, ABILITY_METABOLISM, BattleScript_WaterVeilPrevents
 	jumpifability BS_TARGET, ABILITY_COMATOSE, BattleScript_AbilityProtectsDoesntAffect
 	jumpifability BS_TARGET, ABILITY_PURIFYING_SALT, BattleScript_AbilityProtectsDoesntAffect
 	jumpifflowerveil BattleScript_FlowerVeilProtects
@@ -6107,6 +6129,13 @@ BattleScript_EffectWillOWisp::
 	goto BattleScript_MoveEnd
 
 BattleScript_WaterVeilPrevents::
+	call BattleScript_AbilityPopUp
+	copybyte gEffectBattler, gBattlerTarget
+	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
+	call BattleScript_BRNPrevention
+	goto BattleScript_MoveEnd
+
+BattleScript_SilverLiningBurnProtected::
 	call BattleScript_AbilityPopUp
 	copybyte gEffectBattler, gBattlerTarget
 	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
@@ -10399,16 +10428,31 @@ BattleScript_BRNPrevention::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_BRNPreventionWithAbilityPopUp::
+	call BattleScript_AbilityPopUp
+	call BattleScript_BRNPrevention
+	return
+
 BattleScript_PRLZPrevention::
 	pause B_WAIT_TIME_SHORT
 	printfromtable gPRLZPreventionStringIds
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_PRLZPreventionWithAbilityPopUp::
+	call BattleScript_AbilityPopUp
+	call BattleScript_PRLZPrevention
+	return
+
 BattleScript_PSNPrevention::
 	pause B_WAIT_TIME_SHORT
 	printfromtable gPSNPreventionStringIds
 	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_PSNPreventionWithAbilityPopUp::
+	call BattleScript_AbilityPopUp
+	call BattleScript_PSNPrevention
 	return
 
 BattleScript_ObliviousPreventsAttraction::
@@ -11012,6 +11056,7 @@ BattleScript_ShellFormationActivates::
 BattleScript_AbilityUsesCalledMove::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
+BattleScript_AbilityUsesCalledMoveNoPopup::
 	setbyte sB_ANIM_TURN, 0
 	setbyte sB_ANIM_TARGETS_HIT, 0
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP

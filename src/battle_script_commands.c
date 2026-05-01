@@ -3325,6 +3325,9 @@ void SetMoveEffect(bool32 primary, u32 certain)
     if (gBattleScripting.moveEffect <= PRIMARY_STATUS_MOVE_EFFECT) // status change
     {
         const u8 *cancelMultiTurnMovesResult = NULL;
+        bool32 dominionStatusProtected = HasBattlerAbility(gEffectBattler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(gEffectBattler);
+        bool32 freezingFlavorStatusProtected = HasBattlerAbility(gEffectBattler, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(gEffectBattler, B_WEATHER_SNOW);
+
         switch (sStatusFlagsForMoveEffects[gBattleScripting.moveEffect])
         {
         case STATUS1_SLEEP:
@@ -3341,6 +3344,14 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
             if (i != gBattlersCount)
                 break;
+            if (dominionStatusProtected && (primary == TRUE || certain == MOVE_EFFECT_CERTAIN))
+            {
+                SetBattlerTriggeredAbility(gEffectBattler, ABILITY_DOMINION);
+                RecordAbilityBattle(gEffectBattler, ABILITY_DOMINION);
+                BattleScriptPush(gBattlescriptCurrInstr + 1);
+                gBattlescriptCurrInstr = BattleScript_AbilityProtectsDoesntAffectRet;
+                RESET_RETURN
+            }
             if (!CanSleep(gEffectBattler))
                 break;
 
@@ -3355,6 +3366,14 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
                 if (HasBattlerAbility(gEffectBattler, ABILITY_IMMUNITY))
                     statusAbility = ABILITY_IMMUNITY;
+                else if (HasBattlerAbility(gEffectBattler, ABILITY_METABOLISM))
+                    statusAbility = ABILITY_METABOLISM;
+                else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
+                    statusAbility = ABILITY_SILVER_LINING;
+                else if (freezingFlavorStatusProtected)
+                    statusAbility = ABILITY_FREEZING_FLAVOR;
+                else if (dominionStatusProtected)
+                    statusAbility = ABILITY_DOMINION;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_PASTEL_VEIL))
                     statusAbility = ABILITY_PASTEL_VEIL;
                 else if (IsLeafGuardProtected(gEffectBattler))
@@ -3367,7 +3386,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     RecordAbilityBattle(gEffectBattler, statusAbility);
 
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
-                    gBattlescriptCurrInstr = BattleScript_PSNPrevention;
+                    gBattlescriptCurrInstr = BattleScript_PSNPreventionWithAbilityPopUp;
 
                     if (gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
                     {
@@ -3407,6 +3426,14 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     statusAbility = ABILITY_WATER_VEIL;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_WATER_BUBBLE))
                     statusAbility = ABILITY_WATER_BUBBLE;
+                else if (HasBattlerAbility(gEffectBattler, ABILITY_METABOLISM))
+                    statusAbility = ABILITY_METABOLISM;
+                else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
+                    statusAbility = ABILITY_SILVER_LINING;
+                else if (freezingFlavorStatusProtected)
+                    statusAbility = ABILITY_FREEZING_FLAVOR;
+                else if (dominionStatusProtected)
+                    statusAbility = ABILITY_DOMINION;
                 else if (IsLeafGuardProtected(gEffectBattler))
                     statusAbility = ABILITY_LEAF_GUARD;
 
@@ -3417,7 +3444,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     RecordAbilityBattle(gEffectBattler, statusAbility);
 
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
-                    gBattlescriptCurrInstr = BattleScript_BRNPrevention;
+                    gBattlescriptCurrInstr = BattleScript_BRNPreventionWithAbilityPopUp;
                     if (gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
                     {
                         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ABILITY_PREVENTS_ABILITY_STATUS;
@@ -3447,6 +3474,14 @@ void SetMoveEffect(bool32 primary, u32 certain)
             statusChanged = TRUE;
             break;
         case STATUS1_FREEZE:
+            if (dominionStatusProtected && (primary == TRUE || certain == MOVE_EFFECT_CERTAIN))
+            {
+                SetBattlerTriggeredAbility(gEffectBattler, ABILITY_DOMINION);
+                RecordAbilityBattle(gEffectBattler, ABILITY_DOMINION);
+                BattleScriptPush(gBattlescriptCurrInstr + 1);
+                gBattlescriptCurrInstr = BattleScript_AbilityProtectsDoesntAffectRet;
+                RESET_RETURN
+            }
             if (!CanBeFrozen(gEffectBattler))
                 break;
 
@@ -3457,17 +3492,31 @@ void SetMoveEffect(bool32 primary, u32 certain)
             break;
         case STATUS1_PARALYSIS:
             if (HasBattlerAbility(gEffectBattler, ABILITY_LIMBER)
+              || HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING)
+              || freezingFlavorStatusProtected
+              || dominionStatusProtected
               || IsLeafGuardProtected(gEffectBattler))
             {
                 if (primary == TRUE || certain == MOVE_EFFECT_CERTAIN)
                 {
-                    u16 statusAbility = IsLeafGuardProtected(gEffectBattler) ? ABILITY_LEAF_GUARD : ABILITY_LIMBER;
+                    u16 statusAbility;
+
+                    if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
+                        statusAbility = ABILITY_SILVER_LINING;
+                    else if (freezingFlavorStatusProtected)
+                        statusAbility = ABILITY_FREEZING_FLAVOR;
+                    else if (dominionStatusProtected)
+                        statusAbility = ABILITY_DOMINION;
+                    else if (IsLeafGuardProtected(gEffectBattler))
+                        statusAbility = ABILITY_LEAF_GUARD;
+                    else
+                        statusAbility = ABILITY_LIMBER;
 
                     SetBattlerTriggeredAbility(gEffectBattler, statusAbility);
                     RecordAbilityBattle(gEffectBattler, statusAbility);
 
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
-                    gBattlescriptCurrInstr = BattleScript_PRLZPrevention;
+                    gBattlescriptCurrInstr = BattleScript_PRLZPreventionWithAbilityPopUp;
 
                     if (gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
                     {
@@ -3506,6 +3555,14 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
                 if (HasBattlerAbility(gEffectBattler, ABILITY_IMMUNITY))
                     statusAbility = ABILITY_IMMUNITY;
+                else if (HasBattlerAbility(gEffectBattler, ABILITY_METABOLISM))
+                    statusAbility = ABILITY_METABOLISM;
+                else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
+                    statusAbility = ABILITY_SILVER_LINING;
+                else if (freezingFlavorStatusProtected)
+                    statusAbility = ABILITY_FREEZING_FLAVOR;
+                else if (dominionStatusProtected)
+                    statusAbility = ABILITY_DOMINION;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_PASTEL_VEIL))
                     statusAbility = ABILITY_PASTEL_VEIL;
 
@@ -3516,7 +3573,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     RecordAbilityBattle(gEffectBattler, statusAbility);
 
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
-                    gBattlescriptCurrInstr = BattleScript_PSNPrevention;
+                    gBattlescriptCurrInstr = BattleScript_PSNPreventionWithAbilityPopUp;
 
                     if (gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
                     {
@@ -3556,6 +3613,14 @@ void SetMoveEffect(bool32 primary, u32 certain)
             }
             break;
         case STATUS1_FROSTBITE:
+            if (dominionStatusProtected && (primary == TRUE || certain == MOVE_EFFECT_CERTAIN))
+            {
+                SetBattlerTriggeredAbility(gEffectBattler, ABILITY_DOMINION);
+                RecordAbilityBattle(gEffectBattler, ABILITY_DOMINION);
+                BattleScriptPush(gBattlescriptCurrInstr + 1);
+                gBattlescriptCurrInstr = BattleScript_AbilityProtectsDoesntAffectRet;
+                RESET_RETURN
+            }
             if (!CanGetFrostbite(gEffectBattler))
                 break;
 
