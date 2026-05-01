@@ -9082,6 +9082,18 @@ static bool32 TryCheekPouch(u32 battler, u32 itemId)
     return FALSE;
 }
 
+static void TrySugarRush(u32 battler, u32 itemId)
+{
+    if (ItemId_GetPocket(itemId) == POCKET_BERRIES
+        && HasBattlerAbility(battler, ABILITY_SUGAR_RUSH)
+        && gBattleStruct->ateBerry[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]
+        && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+    {
+        SetBattlerTriggeredAbility(battler, ABILITY_SUGAR_RUSH);
+        gBattleMons[battler].statStages[STAT_SPEED] = min(MAX_STAT_STAGE, gBattleMons[battler].statStages[STAT_SPEED] + 2);
+    }
+}
+
 // Used by Bestow and Symbiosis to take an item from one battler and give to another.
 static void BestowItem(u32 battlerAtk, u32 battlerDef)
 {
@@ -9151,8 +9163,14 @@ static void Cmd_removeitem(void)
     MarkBattlerForControllerExec(battler);
 
     ClearBattlerItemEffectHistory(battler);
-    if (!TryCheekPouch(battler, itemId) && !TrySymbiosis(battler, itemId))
-        gBattlescriptCurrInstr = cmd->nextInstr;
+    if (!TryCheekPouch(battler, itemId))
+    {
+        TrySugarRush(battler, itemId);
+        if (!TrySymbiosis(battler, itemId))
+        {
+            gBattlescriptCurrInstr = cmd->nextInstr;
+        }
+    }
 
     if (battler == gBattlerAttacker
      && ItemId_GetHoldEffect(itemId) == HOLD_EFFECT_GEMS

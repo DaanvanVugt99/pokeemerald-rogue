@@ -9385,6 +9385,12 @@ BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return
 
+BattleScript_BarnacleWallActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TARGETISBEINGSALTCURED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_AbilityPopupEnd3::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT

@@ -4288,6 +4288,33 @@ u8 AtkCanceller_UnableToUseMove2(void)
             }
             gBattleStruct->atkCancellerTracker++;
             break;
+        case CANCELLER_AUTHORITY:
+            if (GetChosenMovePriority(gBattlerAttacker) > 0
+                && gBattleMoves[gCurrentMove].target != MOVE_TARGET_ALL_BATTLERS
+                && gBattleMoves[gCurrentMove].target != MOVE_TARGET_OPPONENTS_FIELD
+                && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gBattlerTarget))
+            {
+                u32 i;
+
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(gBattlerTarget)
+                     || !IsBattlerAlive(i)
+                     || !HasBattlerAbility(i, ABILITY_AUTHORITY))
+                        continue;
+
+                    CancelMultiTurnMoves(gBattlerAttacker);
+                    SetBattlerTriggeredAbility(i, ABILITY_AUTHORITY);
+                    if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
+                        gHitMarker |= HITMARKER_NO_PPDEDUCT;
+                    gBattlescriptCurrInstr = BattleScript_DazzlingProtected;
+                    gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
+                    effect = 1;
+                    break;
+                }
+            }
+            gBattleStruct->atkCancellerTracker++;
+            break;
         case CANCELLER_END2:
             break;
         }
@@ -9586,6 +9613,26 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BARNACLE_WALL)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn)
+        {
+            gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+            if (!(gStatuses4[moveEndAttacker] & STATUS4_SALT_CURE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_BARNACLE_WALL);
+                gBattlerTarget = moveEndAttacker;
+                gStatuses4[moveEndAttacker] |= STATUS4_SALT_CURE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_BarnacleWallActivates;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_STONE_SPIKES)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -10011,7 +10058,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
          && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
         {
-            u32 target = BATTLE_OPPOSITE(battler);
+            u32 target = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
             bool32 foundTarget = IsBattlerAlive(target);
 
             if (!foundTarget && gBattlersCount > 2)
@@ -11400,6 +11447,24 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ATOMIZER)
+         && IsHealingMove(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ATOMIZER);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_MISTY_TERRAIN;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SHELL_FORMATION)
          && moveType == TYPE_WATER
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -11488,6 +11553,33 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_INVERSION)
+         && IS_MOVE_STATUS(move)
+         && move != MOVE_TOPSY_TURVY
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            u32 target = BATTLE_OPPOSITE(battler);
+
+            if (!IsBattlerAlive(target) && gBattlersCount > 2)
+                target ^= BIT_FLANK;
+
+            if (CanUseExtraMove(battler, target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_INVERSION);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_TOPSY_TURVY;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_STARFALL)
