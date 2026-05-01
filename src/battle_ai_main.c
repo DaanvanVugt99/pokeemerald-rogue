@@ -851,6 +851,9 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         // target ability checks
         if (!DoesBattlerIgnoreAbilityChecks(aiData->abilities[battlerAtk], move))
         {
+            if (gBattleMoves[move].slicingMove && AI_HasAbility(battlerDef, ABILITY_EDGEPROOF))
+                RETURN_SCORE_MINUS(10);
+
             switch (aiData->abilities[battlerDef])
             {
             case ABILITY_MAGIC_GUARD:

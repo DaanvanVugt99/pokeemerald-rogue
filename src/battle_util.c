@@ -1149,6 +1149,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_WONDER_SKIN] = 1,
     [ABILITY_AROMA_VEIL] = 1,
     [ABILITY_BULLETPROOF] = 1,
+    [ABILITY_EDGEPROOF] = 1,
     [ABILITY_FLOWER_VEIL] = 1,
     [ABILITY_FUR_COAT] = 1,
     [ABILITY_OVERCOAT] = 1,
@@ -6767,6 +6768,28 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_LAST_FAREWELL)
+         && !uniqueDone
+         && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_LAST_FAREWELL);
+                BattleScriptPushCursorAndCallback(BattleScript_OmenActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_LAST_FAREWELL);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_METEOROLOGY) && !uniqueDone)
         {
             u32 weatherEnum = ENUM_WEATHER_NONE;
@@ -7534,6 +7557,14 @@ special_delivery_done:
             break;
         case ABILITY_HEARTWING:
             if (DoesPartyShareTypeWithBattler(battler)
+             && TryChangeBattleTerrain(battler, STATUS_FIELD_MISTY_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_MistySurgeActivates);
+                effect++;
+            }
+            break;
+        case ABILITY_LIFE_BLOSSOM:
+            if (CountFaintedPartyAllies(battler) == 0
              && TryChangeBattleTerrain(battler, STATUS_FIELD_MISTY_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_MistySurgeActivates);
@@ -8740,10 +8771,13 @@ special_delivery_done:
             u16 targetAbility = GetBattlerAbility(gBattlerTarget);
 
             if ((HasBattlerAbility(battler, ABILITY_SOUNDPROOF) && gBattleMoves[move].soundMove && !(moveTarget & MOVE_TARGET_USER))
-             || (HasBattlerAbility(battler, ABILITY_BULLETPROOF) && gBattleMoves[move].ballisticMove))
+             || (HasBattlerAbility(battler, ABILITY_BULLETPROOF) && gBattleMoves[move].ballisticMove)
+             || (HasBattlerAbility(battler, ABILITY_EDGEPROOF) && gBattleMoves[move].slicingMove))
             {
                 if (gBattleMoves[move].soundMove)
                     SetBattlerTriggeredAbility(battler, ABILITY_SOUNDPROOF);
+                else if (gBattleMoves[move].slicingMove)
+                    SetBattlerTriggeredAbility(battler, ABILITY_EDGEPROOF);
                 else
                     SetBattlerTriggeredAbility(battler, ABILITY_BULLETPROOF);
                 if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
@@ -10165,6 +10199,25 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PRESSURE_VALVE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && moveEndAttacker != battler
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniquePersistentStateActive
+         && (moveType == TYPE_FIRE || moveType == TYPE_WATER))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PRESSURE_VALVE);
+            gEffectBattler = battler;
+            gBattlerAbility = battler;
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_WIND_CHIMES)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsFinalMultiHitStrike()
@@ -10282,6 +10335,26 @@ if (triggeringAbility != ABILITY_NONE)
             gCalledMove = MOVE_SHELL_SMASH;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FACET_CUT)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FACET_CUT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = IS_MOVE_PHYSICAL(move) ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -11256,9 +11329,26 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_RIFT)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
          && gBattleMoves[move].punchingMove
          && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRESSURE_VALVE)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && gBattlerAttacker == battler
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike())
@@ -15825,6 +15915,11 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
         && (gBattleMoves[move].type == TYPE_FLYING || gBattleMoves[move].type == TYPE_ELECTRIC)
         && !gProtectStructs[battler].maxGuarded)
         return FALSE;
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_RIFT)
+        && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+        && !IS_MOVE_STATUS(move)
+        && !gProtectStructs[battler].maxGuarded)
+        return FALSE;
     else if (gBattleMoves[move].ignoresProtect)
         return FALSE;
     else if (gProtectStructs[battler].protected)
@@ -16693,6 +16788,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
      && gBattleMoves[move].punchingMove
      && gDisableStructs[battlerAtk].uniquePersistentStateActive
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_ELECTRIC_TERRAIN))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_PRESSURE_VALVE)
+     && gDisableStructs[battlerAtk].uniquePersistentStateActive
+     && !IS_MOVE_STATUS(move))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
@@ -18023,6 +18125,14 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         return UQ_4_12(0.5);
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_PERMAFROST)
+     && (moveType == TYPE_FIGHTING || moveType == TYPE_ROCK || moveType == TYPE_STEEL))
+    {
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_PERMAFROST);
+        return UQ_4_12(0.5);
+    }
+
     switch (abilityDef)
     {
     case ABILITY_MULTISCALE:
@@ -18327,6 +18437,11 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
      && defType == TYPE_GRASS
      && battlerAtk < gBattlersCount
      && HasBattlerAbility(battlerAtk, ABILITY_GRAVE_GROVE))
+        mod = UQ_4_12(2.0);
+    if (gBattleMoves[move].soundMove
+     && (defType == TYPE_ROCK || defType == TYPE_STEEL || defType == TYPE_ICE)
+     && battlerAtk < gBattlersCount
+     && HasBattlerAbility(battlerAtk, ABILITY_RESONANCE))
         mod = UQ_4_12(2.0);
     if (moveType == TYPE_GROUND && defType == TYPE_FLYING && IsBattlerGrounded(battlerDef) && mod == UQ_4_12(0.0))
         mod = UQ_4_12(1.0);

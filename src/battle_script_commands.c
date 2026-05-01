@@ -1404,6 +1404,15 @@ static void Cmd_attackcanceler(void)
         }
     }
 
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_RIFT)
+     && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+     && !gBattleStruct->isAtkCancelerForCalledMove
+     && !IS_MOVE_STATUS(gCurrentMove))
+    {
+        gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+        gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = TRUE;
+    }
+
     // Final Step should only be consumed once the move is actually going through.
     if ((HasBattlerAbility(gBattlerAttacker, ABILITY_OPENING_VERSE)
       || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
