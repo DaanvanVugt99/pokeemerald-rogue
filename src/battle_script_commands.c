@@ -1618,6 +1618,11 @@ static bool32 JumpIfMoveFailed(u8 adder, u16 move)
 {
     if (gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
     {
+        if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
+        {
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+        }
         gLastLandedMoves[gBattlerTarget] = 0;
         gLastHitByType[gBattlerTarget] = 0;
         gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);
@@ -1671,6 +1676,8 @@ static bool32 AccuracyCalcHelper(u16 move)
        || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
       && gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
       && gBattleMoves[move].soundMove)
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_HAUTE_COUTURE)
+      && moveType == TYPE_NORMAL)
      || (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
      || (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON))
      || gStatuses4[gBattlerTarget] & STATUS4_GLAIVE_RUSH)
@@ -2111,6 +2118,9 @@ static void Cmd_ppreduce(void)
 s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 recordAbility, u32 abilityAtk, u32 abilityDef, u32 holdEffectAtk)
 {
     s32 critChance = 0;
+    u32 moveType;
+
+    GET_MOVE_TYPE(move, moveType);
 
     if (gSideStatuses[battlerDef] & SIDE_STATUS_LUCKY_CHANT || gStatuses3[battlerAtk] & STATUS3_CANT_SCORE_A_CRIT
        || abilityDef == ABILITY_BATTLE_ARMOR || abilityDef == ABILITY_SHELL_ARMOR
@@ -2139,6 +2149,7 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
         critChance  = 2 * ((gBattleMons[battlerAtk].status2 & STATUS2_FOCUS_ENERGY) != 0)
                     + (gBattleMoves[gCurrentMove].highCritRatio)
                     + (move == MOVE_ATTACK_ORDER && HIVE_COMMAND_ACTIVE(battlerAtk))
+                    + (HasBattlerAbility(battlerAtk, ABILITY_HAUTE_COUTURE) && moveType == TYPE_NORMAL)
                     + (holdEffectAtk == HOLD_EFFECT_SCOPE_LENS)
                     + 2 * (holdEffectAtk == HOLD_EFFECT_LUCKY_PUNCH && gBattleMons[battlerAtk].species == SPECIES_CHANSEY)
                     + 2 * BENEFITS_FROM_LEEK(battlerAtk, holdEffectAtk)
@@ -7399,6 +7410,11 @@ static void Cmd_moveend(void)
             gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = 0;
             gSpecialStatuses[gBattlerTarget].berryReduced = FALSE;
             gBattleScripting.moveEffect = 0;
+            if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
+            {
+                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+                VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            }
             // clear attacker z move data
             gBattleStruct->zmove.active = FALSE;
             gBattleStruct->zmove.toBeUsed[gBattlerAttacker] = MOVE_NONE;

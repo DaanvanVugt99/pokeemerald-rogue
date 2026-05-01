@@ -95,6 +95,8 @@ static bool32 HasBerryDoubleEffect(u32 battler);
 static bool32 IsPetrifyStatLoweringBlocked(u32 attacker, u32 target, u32 statId);
 static bool32 CanPetrifyClearPositiveStatStages(u32 attacker, u32 target);
 static bool32 TryClearPositiveStatStagesForPetrify(u32 attacker, u32 target);
+static bool32 HasNegativeStatStage(u32 battler);
+static bool32 TryResetNegativeStatStages(u32 battler);
 static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
 static u16 GetGemItemForType(u32 type);
 static u16 GetRandomGemstashItemForBattler(u32 battler);
@@ -7891,6 +7893,17 @@ special_delivery_done:
                 effect++;
             }
 
+            if (HasBattlerAbility(battler, ABILITY_OVERGROWTH)
+             && IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN)
+             && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_OVERGROWTH);
+                gBattleScripting.battler = battler;
+                SET_STATCHANGER(STAT_DEF, 1, FALSE);
+                BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+                effect++;
+            }
+
             if (HasBattlerAbility(battler, ABILITY_NIGHT_TERROR)
              && IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE))
             {
@@ -9865,6 +9878,37 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SECOND_WIND)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && battler == moveEndTarget
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
+         && IsBattlerAlive(battler))
+        {
+            bool32 canCureStatus = gBattleMons[battler].status1 != STATUS1_NONE;
+            bool32 canResetStats = HasNegativeStatStage(battler);
+
+            if (canCureStatus || canResetStats)
+            {
+                if (canResetStats)
+                    TryResetNegativeStatStages(battler);
+
+                SetBattlerTriggeredAbility(battler, ABILITY_SECOND_WIND);
+                gBattlerAttacker = gBattlerAbility = gEffectBattler = battler;
+                gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+                if (canCureStatus && canResetStats)
+                    BattleScriptPushCursorAndCallback(BattleScript_SecondWindStatusAndStatsActivates);
+                else if (canCureStatus)
+                    BattleScriptPushCursorAndCallback(BattleScript_SecondWindStatusActivates);
+                else
+                    BattleScriptPushCursorAndCallback(BattleScript_SecondWindStatsActivates);
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PANIC_SHED)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
@@ -10714,6 +10758,27 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_WINDSURGE)
+         && moveType == TYPE_FLYING
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_WINDSURGE);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_FLAME_CHARGE;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 25);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 100);
+            VarSet(VAR_TEMP_MOVEEFFECT, MOVE_EFFECT_SPD_PLUS_1 | MOVE_EFFECT_AFFECTS_USER);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_NEEDLEBURST)
          && IsMoveMakingContact(move, battler)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -11440,6 +11505,26 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             gCalledMove = MOVE_WISH;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SCREEN_TEST)
+         && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SCREEN_TEST);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = RandomWeighted(RNG_ROGUE_SCREEN_TEST, 1, 1) == 0 ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
@@ -19583,6 +19668,36 @@ static bool32 TryClearPositiveStatStagesForPetrify(u32 attacker, u32 target)
     }
 
     return changed;
+}
+
+static bool32 HasNegativeStatStage(u32 battler)
+{
+    u32 statId;
+
+    for (statId = STAT_ATK; statId < NUM_BATTLE_STATS; statId++)
+    {
+        if (gBattleMons[battler].statStages[statId] < DEFAULT_STAT_STAGE)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool32 TryResetNegativeStatStages(u32 battler)
+{
+    u32 statId;
+    bool32 reset = FALSE;
+
+    for (statId = STAT_ATK; statId < NUM_BATTLE_STATS; statId++)
+    {
+        if (gBattleMons[battler].statStages[statId] < DEFAULT_STAT_STAGE)
+        {
+            gBattleMons[battler].statStages[statId] = DEFAULT_STAT_STAGE;
+            reset = TRUE;
+        }
+    }
+
+    return reset;
 }
 
 u8 GetBattlerGender(u32 battler)

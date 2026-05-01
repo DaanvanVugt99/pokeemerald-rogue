@@ -9249,6 +9249,30 @@ BattleScript_BattleFuryCritOnlyActivates::
 	call BattleScript_AbilityPopUp
 	goto BattleScript_BattleFuryCritBoost
 
+BattleScript_SecondWindStatusAndStatsActivates::
+	call BattleScript_AbilityPopUp
+	curestatus BS_ATTACKER
+	updatestatusicon BS_ATTACKER
+	printstring STRINGID_PKMNSTATUSNORMAL
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_CURIOUSMEDICINEENTERS
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_SecondWindStatusActivates::
+	call BattleScript_AbilityPopUp
+	curestatus BS_ATTACKER
+	updatestatusicon BS_ATTACKER
+	printstring STRINGID_PKMNSTATUSNORMAL
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_SecondWindStatsActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_CURIOUSMEDICINEENTERS
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_BattleFuryAttackBoost:
 	setstatchanger STAT_ATK, 1, FALSE
 	setgraphicalstatchangevalues
