@@ -13854,7 +13854,10 @@ static void Cmd_weatherdamage(void)
     u32 ability = GetBattlerAbility(gBattlerAttacker);
 
     gBattleMoveDamage = 0;
-    if (IsBattlerAlive(gBattlerAttacker) && WEATHER_HAS_EFFECT && ability != ABILITY_MAGIC_GUARD)
+    if (IsBattlerAlive(gBattlerAttacker)
+     && WEATHER_HAS_EFFECT
+     && ability != ABILITY_MAGIC_GUARD
+     && !HasBattlerAbility(gBattlerAttacker, ABILITY_CLUELESS))
     {
         bool32 hollowNestWeatherImmune = HasBattlerAbility(gBattlerAttacker, ABILITY_HOLLOW_NEST)
             && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN);

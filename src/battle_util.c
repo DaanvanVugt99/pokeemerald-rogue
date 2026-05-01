@@ -4273,8 +4273,7 @@ u8 AtkCanceller_UnableToUseMove2(void)
         case CANCELLER_END:
             gBattleStruct->atkCancellerTracker++;
         case CANCELLER_PSYCHIC_TERRAIN:
-            if (gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN
-                && IsBattlerGrounded(gBattlerTarget)
+            if (IsBattlerTerrainAffected(gBattlerTarget, STATUS_FIELD_PSYCHIC_TERRAIN)
                 && GetChosenMovePriority(gBattlerAttacker) > 0
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_ALL_BATTLERS
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_OPPONENTS_FIELD
@@ -13106,6 +13105,8 @@ bool32 IsBattlerTerrainAffected(u32 battler, u32 terrainFlag)
 {
     if (!(gFieldStatuses & terrainFlag))
         return FALSE;
+    else if (HasBattlerAbility(battler, ABILITY_CLUELESS))
+        return FALSE;
     else if (gStatuses3[battler] & STATUS3_SEMI_INVULNERABLE)
         return FALSE;
 
@@ -15759,7 +15760,7 @@ static inline u32 CalcMoveBasePower(u32 move, u32 battlerAtk, u32 battlerDef, u3
             basePower *= 2;
         break;
     case EFFECT_EXPLOSION:
-        if (move == MOVE_MISTY_EXPLOSION && gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN && IsBattlerGrounded(battlerAtk))
+        if (move == MOVE_MISTY_EXPLOSION && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_MISTY_TERRAIN))
             basePower = uq4_12_multiply(basePower, UQ_4_12(1.5));
         break;
     case EFFECT_DYNAMAX_DOUBLE_DMG:
@@ -15786,8 +15787,7 @@ static inline u32 CalcMoveBasePower(u32 move, u32 battlerAtk, u32 battlerDef, u3
             basePower = uq4_12_multiply(basePower, UQ_4_12(1.5));
         break;
     case EFFECT_TERRAIN_PULSE:
-        if ((gFieldStatuses & STATUS_FIELD_TERRAIN_ANY)
-            && IsBattlerGrounded(battlerAtk))
+        if (IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_TERRAIN_ANY))
             basePower *= 2;
         break;
     case EFFECT_EXPANDING_FORCE:
@@ -15884,7 +15884,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case EFFECT_BULLDOZE:
     case EFFECT_MAGNITUDE:
     case EFFECT_EARTHQUAKE:
-        if (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN && !(gStatuses3[battlerDef] & STATUS3_SEMI_INVULNERABLE))
+        if (IsBattlerTerrainAffected(battlerDef, STATUS_FIELD_GRASSY_TERRAIN))
             modifier = uq4_12_multiply(modifier, UQ_4_12(0.5));
         break;
     case EFFECT_KNOCK_OFF:
@@ -17030,9 +17030,11 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
 }
 
 // Utility Umbrella holders take normal damage from what would be rain- and sun-weakened attacks.
-static uq4_12_t GetWeatherDamageModifier(u32 battlerAtk, u32 move, u32 moveType, u32 holdEffectAtk, u32 holdEffectDef, u32 weather)
+static uq4_12_t GetWeatherDamageModifier(u32 battlerAtk, u32 battlerDef, u32 move, u32 moveType, u32 holdEffectAtk, u32 holdEffectDef, u32 weather)
 {
     if (weather == B_WEATHER_NONE)
+        return UQ_4_12(1.0);
+    if (HasBattlerAbility(battlerAtk, ABILITY_CLUELESS) || HasBattlerAbility(battlerDef, ABILITY_CLUELESS))
         return UQ_4_12(1.0);
     if (gBattleMoves[move].effect == EFFECT_HYDRO_STEAM && (weather & B_WEATHER_SUN) && holdEffectAtk != HOLD_EFFECT_UTILITY_UMBRELLA)
         return UQ_4_12(1.5);
@@ -17624,7 +17626,7 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     dmg = CalculateBaseDamage(gBattleMovePower, userFinalAttack, gBattleMons[battlerAtk].level, targetFinalDefense);
     DAMAGE_APPLY_MODIFIER(GetTargetDamageModifier(move, battlerAtk, battlerDef));
     DAMAGE_APPLY_MODIFIER(GetParentalBondModifier(battlerAtk, move));
-    DAMAGE_APPLY_MODIFIER(GetWeatherDamageModifier(battlerAtk, move, moveType, holdEffectAtk, holdEffectDef, weather));
+    DAMAGE_APPLY_MODIFIER(GetWeatherDamageModifier(battlerAtk, battlerDef, move, moveType, holdEffectAtk, holdEffectDef, weather));
     DAMAGE_APPLY_MODIFIER(GetCriticalModifier(isCrit));
     DAMAGE_APPLY_MODIFIER(GetGlaiveRushModifier(battlerDef));
 
@@ -19255,6 +19257,9 @@ bool32 IsBattlerWeatherAffected(u32 battler, u32 weatherFlags)
 {
     if (gBattleWeather & weatherFlags && WEATHER_HAS_EFFECT)
     {
+        if (HasBattlerAbility(battler, ABILITY_CLUELESS))
+            return FALSE;
+
         // given weather is active -> check if its sun, rain against utility umbrella ( since only 1 weather can be active at once)
         if (gBattleWeather & (B_WEATHER_SUN | B_WEATHER_RAIN) && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_UTILITY_UMBRELLA)
             return FALSE; // utility umbrella blocks sun, rain effects
