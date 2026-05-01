@@ -581,8 +581,8 @@ static const u8 sPoisonGasDescription[] = _(
     "gas that may poison.");
 
 static const u8 sBarrageDescription[] = _(
-    "Hurls round objects at the\n"
-    "foe 2 to 5 times.");
+    "Hits 2 to 5 times. Hits\n"
+    "5 times in sunshine.");
 
 static const u8 sLeechLifeDescription[] = _(
     "An attack that steals half\n"

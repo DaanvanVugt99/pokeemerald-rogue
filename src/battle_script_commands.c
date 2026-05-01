@@ -1310,6 +1310,26 @@ bool32 ProteanTryChangeType(u32 battler, u32 ability, u32 move, u32 moveType, bo
     return FALSE;
 }
 
+static bool32 TryModularChangeType(u32 battler, u32 move, u32 moveType)
+{
+    if (!HasBattlerAbility(battler, ABILITY_MODULAR)
+     || move != MOVE_TECHNO_BLAST
+     || GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_DRIVE
+     || IsTerastallized(battler))
+        return FALSE;
+
+    if (gBattleMons[battler].type1 == moveType
+     && gBattleMons[battler].type2 == TYPE_STEEL
+     && gBattleMons[battler].type3 == TYPE_MYSTERY)
+        return FALSE;
+
+    gBattleMons[battler].type1 = moveType;
+    gBattleMons[battler].type2 = TYPE_STEEL;
+    gBattleMons[battler].type3 = TYPE_MYSTERY;
+    SetBattlerTriggeredAbility(battler, ABILITY_MODULAR);
+    return TRUE;
+}
+
 bool32 ShouldTeraShellDistortTypeMatchups(u32 move, u32 battlerDef)
 {
     if (!(gBattleStruct->distortedTypeMatchups & gBitTable[battlerDef])
@@ -1383,6 +1403,17 @@ static void Cmd_attackcanceler(void)
         }
     }
 
+    // Final Step should only be consumed once the move is actually going through.
+    if ((HasBattlerAbility(gBattlerAttacker, ABILITY_OPENING_VERSE)
+      || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
+     && gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+     && !gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+     && gBattleMoves[gCurrentMove].soundMove)
+    {
+        gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = FALSE;
+        gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn = TRUE;
+    }
+
     if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_OFF
     && (GetBattlerAbility(gBattlerAttacker) == ABILITY_PARENTAL_BOND
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_CHAMPION) && gBattleMoves[gCurrentMove].punchingMove)
@@ -1396,6 +1427,19 @@ static void Cmd_attackcanceler(void)
         gSpecialStatuses[gBattlerAttacker].parentalBondState = PARENTAL_BOND_1ST_HIT;
         gMultiHitCounter = 2;
         PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)
+        return;
+    }
+
+    // Check Modular activation.
+    if (TryModularChangeType(gBattlerAttacker, gCurrentMove, moveType))
+    {
+        PREPARE_TYPE_BUFFER(gBattleTextBuff1, moveType);
+        if (gBattleScripting.abilityPopupOverwrite == 0)
+            gBattlerAbility = gBattlerAttacker;
+        BattleScriptPushCursor();
+        PrepareStringBattle(STRINGID_EMPTYSTRING3, gBattlerAttacker);
+        gBattleCommunication[MSG_DISPLAY] = 1;
+        gBattlescriptCurrInstr = BattleScript_ModularActivates;
         return;
     }
 
@@ -1623,7 +1667,11 @@ static bool32 AccuracyCalcHelper(u16 move)
     u32 moveType;
     GET_MOVE_TYPE(move, moveType);
 
-    if ((gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
+    if (((HasBattlerAbility(gBattlerAttacker, ABILITY_OPENING_VERSE)
+       || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
+      && gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
+      && gBattleMoves[move].soundMove)
+     || (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
      || (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON))
      || gStatuses4[gBattlerTarget] & STATUS4_GLAIVE_RUSH)
     {
@@ -2074,6 +2122,11 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
              || gBattleMoves[move].effect == EFFECT_ALWAYS_CRIT
              || (HasBattlerAbility(battlerAtk, ABILITY_GRAND_REVEAL)
                  && gProtectStructs[battlerAtk].uniqueAbilityTriggeredThisTurn)
+             || ((HasBattlerAbility(battlerAtk, ABILITY_OPENING_VERSE)
+               || HasBattlerAbility(battlerAtk, ABILITY_FINAL_STEP))
+                 && gProtectStructs[battlerAtk].uniqueAbilityTriggeredThisTurn
+                 && gBattleMoves[move].soundMove
+                 && !IS_MOVE_STATUS(move))
              || (abilityAtk == ABILITY_MERCILESS && gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY)
              || (HasBattlerAbility(battlerAtk, ABILITY_SIGHTING_SYSTEM)
                  && gBattleMoves[move].accuracy != 0

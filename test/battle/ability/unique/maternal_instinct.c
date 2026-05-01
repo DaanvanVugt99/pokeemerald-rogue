@@ -3,38 +3,44 @@
 
 ASSUMPTIONS
 {
-    ASSUME(gBattleMoves[MOVE_PROTECT].effect == EFFECT_PROTECT);
-    ASSUME(gBattleMoves[MOVE_HELPING_HAND].effect == EFFECT_HELPING_HAND);
+    ASSUME(gBattleMoves[MOVE_SAFEGUARD].effect == EFFECT_SAFEGUARD);
+    ASSUME(gBattleMoves[MOVE_DRAGON_RAGE].effect == EFFECT_DRAGON_RAGE);
 }
 
-DOUBLE_BATTLE_TEST("Maternal Instinct uses Helping Hand after Protect in doubles")
+SINGLE_BATTLE_TEST("Maternal Instinct sets Safeguard once when Kangaskhan falls below half HP")
 {
     GIVEN {
-        PLAYER(SPECIES_KANGASKHAN) { Speed(100); Ability(ABILITY_EARLY_BIRD); UniqueAbility(ABILITY_MATERNAL_INSTINCT); Moves(MOVE_PROTECT); }
-        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(40); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(30); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_KANGASKHAN) { Ability(ABILITY_EARLY_BIRD); UniqueAbility(ABILITY_MATERNAL_INSTINCT); HP(81); MaxHP(160); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_DRAGON_RAGE); }
     } WHEN {
-        TURN { MOVE(playerLeft, MOVE_PROTECT); MOVE(playerRight, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_DRAGON_RAGE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_DRAGON_RAGE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, playerLeft);
-        ABILITY_POPUP(playerLeft, ABILITY_MATERNAL_INSTINCT);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_HELPING_HAND, playerLeft);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
+        ABILITY_POPUP(player, ABILITY_MATERNAL_INSTINCT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SAFEGUARD, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_MATERNAL_INSTINCT);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SAFEGUARD, player);
+        }
+    } THEN {
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_SAFEGUARD);
     }
 }
 
-SINGLE_BATTLE_TEST("Maternal Instinct does not trigger in singles")
+SINGLE_BATTLE_TEST("Maternal Instinct does not trigger if Kangaskhan faints")
 {
     GIVEN {
-        PLAYER(SPECIES_KANGASKHAN) { Speed(100); Ability(ABILITY_EARLY_BIRD); UniqueAbility(ABILITY_MATERNAL_INSTINCT); Moves(MOVE_PROTECT); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_KANGASKHAN) { Ability(ABILITY_EARLY_BIRD); UniqueAbility(ABILITY_MATERNAL_INSTINCT); HP(40); MaxHP(160); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_DRAGON_RAGE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_PROTECT); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_DRAGON_RAGE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_MATERNAL_INSTINCT);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_HELPING_HAND, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SAFEGUARD, player);
         }
     }
 }

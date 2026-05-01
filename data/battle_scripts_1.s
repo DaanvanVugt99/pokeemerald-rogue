@@ -9596,6 +9596,50 @@ BattleScript_IntimidateEnd:
 	pause B_WAIT_TIME_MED
 	end3
 
+BattleScript_RoyalCharmActivates::
+	showabilitypopup BS_ATTACKER
+	copybyte sSAVED_BATTLER, gBattlerTarget
+	pause B_WAIT_TIME_LONG
+	destroyabilitypopup
+	setbyte gBattlerTarget, 0
+BattleScript_RoyalCharmLoop:
+	jumpifbyteequal gBattlerTarget, gBattlerAttacker, BattleScript_RoyalCharmLoopIncrement
+	jumpiftargetally BattleScript_RoyalCharmLoopIncrement
+	jumpifabsent BS_TARGET, BattleScript_RoyalCharmLoopIncrement
+	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_RoyalCharmLoopIncrement
+	jumpifoppositegenders BattleScript_RoyalCharmLowerAttack
+	setstatchanger STAT_SPATK, 1, TRUE
+	goto BattleScript_RoyalCharmEffect
+BattleScript_RoyalCharmLowerAttack:
+	setstatchanger STAT_ATK, 1, TRUE
+BattleScript_RoyalCharmEffect:
+	copybyte sBATTLER, gBattlerAttacker
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_RoyalCharmLoopIncrement
+	setgraphicalstatchangevalues
+	jumpifability BS_TARGET, ABILITY_CONTRARY, BattleScript_RoyalCharmContrary
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+BattleScript_RoyalCharmEffect_WaitString:
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_RoyalCharmLoopIncrement:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_RoyalCharmLoop
+	copybyte sBATTLER, gBattlerAttacker
+	destroyabilitypopup
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	pause B_WAIT_TIME_MED
+	end3
+
+BattleScript_RoyalCharmContrary:
+	call BattleScript_AbilityPopUpTarget
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_RoyalCharmContrary_WontIncrease
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	goto BattleScript_RoyalCharmEffect_WaitString
+BattleScript_RoyalCharmContrary_WontIncrease:
+	printstring STRINGID_TARGETSTATWONTGOHIGHER
+	goto BattleScript_RoyalCharmEffect_WaitString
+
 BattleScript_IntimidateContrary:
 	call BattleScript_AbilityPopUpTarget
 	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_IntimidateContrary_WontIncrease
@@ -10486,6 +10530,13 @@ BattleScript_ProteanActivates::
 	pause B_WAIT_TIME_SHORTEST
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PKMNCHANGEDTYPE
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_ModularActivates::
+	pause B_WAIT_TIME_SHORTEST
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNMAINTYPECHANGED
 	waitmessage B_WAIT_TIME_LONG
 	return
 

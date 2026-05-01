@@ -26,25 +26,19 @@ SINGLE_BATTLE_TEST("Territorial doubles damage only when the target is terrain-a
     }
 }
 
-SINGLE_BATTLE_TEST("Territorial gives +1 priority to Flying-type moves in Plain Terrain against grounded targets")
+SINGLE_BATTLE_TEST("Territorial uses Focus Energy after Flying-type moves in Plain Terrain")
 {
-    u16 targetAbility;
-    PARAMETRIZE { targetAbility = ABILITY_SHADOW_TAG; }
-    PARAMETRIZE { targetAbility = ABILITY_LEVITATE; }
-
     GIVEN {
         PLAYER(SPECIES_FEAROW) { Speed(50); Ability(ABILITY_KEEN_EYE); UniqueAbility(ABILITY_TERRITORIAL); Moves(MOVE_PLAIN_TERRAIN, MOVE_AERIAL_ACE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Ability(targetAbility); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_PLAIN_TERRAIN); MOVE(opponent, MOVE_TACKLE); }
-        TURN { MOVE(player, MOVE_AERIAL_ACE); MOVE(opponent, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_PLAIN_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_AERIAL_ACE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        if (targetAbility == ABILITY_SHADOW_TAG) {
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_AERIAL_ACE, player);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
-        } else {
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_AERIAL_ACE, player);
-        }
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_AERIAL_ACE, player);
+        ABILITY_POPUP(player, ABILITY_TERRITORIAL);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FOCUS_ENERGY, player);
+    } THEN {
+        EXPECT(gBattleMons[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].status2 & STATUS2_FOCUS_ENERGY);
     }
 }

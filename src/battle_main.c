@@ -4935,17 +4935,6 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
-    if (HasBattlerAbility(battler, ABILITY_TERRITORIAL)
-     && (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
-     && gBattleMoves[move].type == TYPE_FLYING
-     && gBattleStruct->moveTarget[battler] < gBattlersCount
-     && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
-     && IsBattlerAlive(gBattleStruct->moveTarget[battler])
-     && IsBattlerGrounded(gBattleStruct->moveTarget[battler]))
-    {
-        priority++;
-    }
-
     if (HasBattlerAbility(battler, ABILITY_TANTRUM)
      && gDisableStructs[battler].uniquePersistentStateActive)
     {
