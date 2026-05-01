@@ -9368,7 +9368,7 @@ BattleScript_ReceiverActivates::
 	settracedability BS_ABILITY_BATTLER
 	return
 
-BattleScript_AbilityHpHeal:
+BattleScript_AbilityHpHeal::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PKMNSXRESTOREDHPALITTLE2
 	waitmessage B_WAIT_TIME_LONG

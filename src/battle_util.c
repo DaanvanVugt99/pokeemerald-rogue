@@ -4655,6 +4655,46 @@ bool32 DoesPartyShareCurrentTypeWithBattler(u32 battler)
     return TRUE;
 }
 
+static bool32 DoesPartyHaveUniqueTypeCombinations(u32 battler)
+{
+    u32 i, j;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 speciesA;
+        u32 typeA1, typeA2;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+
+        speciesA = GetMonData(&party[i], MON_DATA_SPECIES);
+        typeA1 = min(gSpeciesInfo[speciesA].types[0], gSpeciesInfo[speciesA].types[1]);
+        typeA2 = max(gSpeciesInfo[speciesA].types[0], gSpeciesInfo[speciesA].types[1]);
+
+        for (j = i + 1; j < lastMonId; j++)
+        {
+            u16 speciesB;
+            u32 typeB1, typeB2;
+
+            if (!IsValidForBattle(&party[j]))
+                continue;
+
+            speciesB = GetMonData(&party[j], MON_DATA_SPECIES);
+            typeB1 = min(gSpeciesInfo[speciesB].types[0], gSpeciesInfo[speciesB].types[1]);
+            typeB2 = max(gSpeciesInfo[speciesB].types[0], gSpeciesInfo[speciesB].types[1]);
+
+            if (typeA1 == typeB1 && typeA2 == typeB2)
+                return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 bool32 IsTruantLoafingSuppressed(u32 battler)
 {
     return HasBattlerAbility(battler, ABILITY_KINGS_DOMAIN)
@@ -5674,6 +5714,32 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_GROWL;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_HAUNTED_HARVEST) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_HAUNTED_HARVEST);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_TRICK_OR_TREAT;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
@@ -8450,6 +8516,23 @@ special_delivery_done:
             {
                 u32 target;
 
+                if (HasBattlerAbility(battler, ABILITY_SLUDGE_SHIFT)
+                 && (gBattleMons[battler].status1 & STATUS1_ANY)
+                 && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
+                 && TryGetOpposingExtraMoveTarget(battler, &target))
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_SLUDGE_SHIFT);
+                    SetAtkCancellerForCalledMove();
+                    gBattlerAttacker = gBattlerAbility = battler;
+                    gBattlerTarget = target;
+                    gCalledMove = MOVE_PSYCHO_SHIFT;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[battler].extraMoveUsed = TRUE;
+                    gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+                    StartAbilityCalledMoveScript();
+                    effect++;
+                }
+
                 if (HasBattlerAbility(battler, ABILITY_DREAM_MIST)
                  && BattlerTookNoDamageThisTurn(battler)
                  && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
@@ -9603,6 +9686,26 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = moveEndAttacker;
             gCalledMove = MOVE_TWINEEDLE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_GRAVE_GROVE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_GRAVE_GROVE);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = moveEndAttacker;
+            gCalledMove = MOVE_FORESTS_CURSE;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
@@ -11361,6 +11464,27 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_KEYRING)
+         && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && DoesPartyHaveUniqueTypeCombinations(battler)
+         && gBattlerTarget < gBattlersCount
+         && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler)
+         && CanAbilityDisableBattler(gBattlerTarget))
+        {
+            u16 disableMove = GetLastUsableMoveForDisable(gBattlerTarget);
+
+            if (disableMove != MOVE_NONE)
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                ApplyAbilityDisableMove(battler, gBattlerTarget, ABILITY_KEYRING, disableMove, 3);
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_KOMBO)
          && moveType == TYPE_POISON
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -11395,6 +11519,26 @@ if (triggeringAbility != ABILITY_NONE)
             gCalledMove = MOVE_SMOG;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SWITCHBOARD)
+         && move == MOVE_NUZZLE
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SWITCHBOARD);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_ENCORE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -17871,6 +18015,14 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         return UQ_4_12(0.8);
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_MAIN_EVENT)
+     && moveType == TYPE_FIGHTING)
+    {
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_MAIN_EVENT);
+        return UQ_4_12(0.5);
+    }
+
     switch (abilityDef)
     {
     case ABILITY_MULTISCALE:
@@ -18170,6 +18322,11 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
      && (defType == TYPE_FLYING || defType == TYPE_BUG)
      && battlerAtk < gBattlersCount
      && HasBattlerAbility(battlerAtk, ABILITY_CARNIVOROUS))
+        mod = UQ_4_12(2.0);
+    if (moveType == TYPE_GHOST
+     && defType == TYPE_GRASS
+     && battlerAtk < gBattlersCount
+     && HasBattlerAbility(battlerAtk, ABILITY_GRAVE_GROVE))
         mod = UQ_4_12(2.0);
     if (moveType == TYPE_GROUND && defType == TYPE_FLYING && IsBattlerGrounded(battlerDef) && mod == UQ_4_12(0.0))
         mod = UQ_4_12(1.0);

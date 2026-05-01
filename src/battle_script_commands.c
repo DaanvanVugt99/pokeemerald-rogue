@@ -105,6 +105,7 @@
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 BattleScript_WarpathHeal[];
+extern const u8 BattleScript_AbilityHpHeal[];
 
 // table to avoid ugly powing on gba (courtesy of doesnt)
 // this returns (i^2.5)/4
@@ -7301,6 +7302,26 @@ static void Cmd_moveend(void)
             }
 
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_MOONGLASS)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IS_MOVE_STATUS(gCurrentMove)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !BATTLER_MAX_HP(gBattlerAttacker)
+             && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_MOONGLASS);
+                gBattleMoveDamage = -(GetNonDynamaxMaxHP(gBattlerAttacker) / 8);
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = -1;
+                gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
+                effect = TRUE;
+            }
+
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_CREATION)
              && IsBattlerAlive(gBattlerAttacker)
              && IS_MOVE_STATUS(gCurrentMove)
@@ -10779,6 +10800,20 @@ static void Cmd_various(void)
          && IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_BUG))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_INSECTIVORE);
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_InsectivoreActivates;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_MAIN_EVENT)
+         && battler == gBattlerAttacker
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_FIGHTING))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_MAIN_EVENT);
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             BattleScriptPush(cmd->nextInstr);
