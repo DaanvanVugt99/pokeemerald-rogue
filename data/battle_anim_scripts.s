@@ -22715,12 +22715,12 @@ Move_RAIN_DANCE:
 	end
 
 Move_CORROSIVE_CLOUDS:
-	loadspritegfx ANIM_TAG_RAIN_DROPS
+	loadspritegfx ANIM_TAG_ACID_RAIN_DROPS
 	playsewithpan SE_M_RAIN_DANCE, SOUND_PAN_ATTACKER
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 0, 4, RGB_GREEN
 	waitforvisualfinish
-	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
-	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 120
+	createvisualtask AnimTask_CreateAcidRaindrops, 2, 0, 3, 120
+	createvisualtask AnimTask_CreateAcidRaindrops, 2, 0, 3, 120
 	delay 120
 	delay 30
 	waitforvisualfinish
@@ -22729,25 +22729,26 @@ Move_CORROSIVE_CLOUDS:
 	end
 
 Move_ECLIPSE:
-	loadspritegfx ANIM_TAG_ECLIPSING_ORB
+	loadspritegfx ANIM_TAG_ECLIPSE_RAY
 	monbg ANIM_ATK_PARTNER
 	setalpha 13, 3
-	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 0, 6, RGB_BLACK
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 0, 8, RGB_BLACK
 	waitforvisualfinish
 	panse_adjustnone SE_M_NIGHTMARE, SOUND_PAN_ATTACKER, SOUND_PAN_TARGET, +1, 0
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -34, -52, 0, 0
-	delay 8
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -42, -60, 0, 0
-	delay 8
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -26, -64, 0, 0
-	delay 8
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -38, -46, 0, 0
+	call EclipseLightRay
+	call EclipseLightRay
+	call EclipseLightRay
 	waitforvisualfinish
-	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 6, 0, RGB_BLACK
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 8, 0, RGB_BLACK
 	waitforvisualfinish
 	clearmonbg ANIM_ATK_PARTNER
 	blendoff
 	end
+
+EclipseLightRay:
+	createsprite gEclipseRaySpriteTemplate, ANIM_ATTACKER, 40
+	delay 10
+	return
 
 Move_INFESTED_TERRAIN:
 	loadspritegfx ANIM_TAG_ORBS
@@ -28179,12 +28180,12 @@ General_Rain:
 	end
 
 General_AcidRain:
-	loadspritegfx ANIM_TAG_RAIN_DROPS
+	loadspritegfx ANIM_TAG_ACID_RAIN_DROPS
 	playsewithpan SE_M_RAIN_DANCE, SOUND_PAN_ATTACKER
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 0, 4, RGB_GREEN
 	waitforvisualfinish
-	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 60
-	createvisualtask AnimTask_CreateRaindrops, 2, 0, 3, 60
+	createvisualtask AnimTask_CreateAcidRaindrops, 2, 0, 3, 60
+	createvisualtask AnimTask_CreateAcidRaindrops, 2, 0, 3, 60
 	delay 50
 	waitforvisualfinish
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 2, 4, 0, RGB_GREEN
@@ -28217,23 +28218,7 @@ General_Snow:
 	goto Move_SNOWSCAPE
 
 General_Eclipse:
-	loadspritegfx ANIM_TAG_ECLIPSING_ORB
-	monbg ANIM_ATK_PARTNER
-	setalpha 13, 3
-	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 0, 4, RGB_BLACK
-	waitforvisualfinish
-	playsewithpan SE_M_NIGHTMARE, SOUND_PAN_ATTACKER
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -34, -52, 0, 0
-	delay 6
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -42, -60, 0, 0
-	delay 6
-	createsprite gEclipsingOrbSpriteTemplate, ANIM_ATTACKER, 2, -26, -64, 0, 0
-	waitforvisualfinish
-	createvisualtask AnimTask_BlendBattleAnimPal, 10, (F_PAL_BG | F_PAL_BATTLERS_2), 1, 4, 0, RGB_BLACK
-	waitforvisualfinish
-	clearmonbg ANIM_ATK_PARTNER
-	blendoff
-	end
+	goto Move_ECLIPSE
 
 General_LeechSeedDrain:
 	createvisualtask AnimTask_GetBattlersFromArg, 5

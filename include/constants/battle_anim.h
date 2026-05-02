@@ -407,6 +407,8 @@
 #define ANIM_TAG_SYRUP_SPLAT_YELLOW         (ANIM_SPRITES_START + 393)
 #define ANIM_TAG_TERA_CRYSTAL               (ANIM_SPRITES_START + 394)
 #define ANIM_TAG_TERA_SHATTER               (ANIM_SPRITES_START + 395)
+#define ANIM_TAG_ECLIPSE_RAY                (ANIM_SPRITES_START + 396)
+#define ANIM_TAG_ACID_RAIN_DROPS            (ANIM_SPRITES_START + 397)
 
 // battlers
 #define ANIM_ATTACKER         0

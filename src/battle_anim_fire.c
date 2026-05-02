@@ -218,6 +218,17 @@ const struct SpriteTemplate gSunlightRaySpriteTemplate =
     .callback = AnimSunlight,
 };
 
+const struct SpriteTemplate gEclipseRaySpriteTemplate =
+{
+    .tileTag = ANIM_TAG_ECLIPSE_RAY,
+    .paletteTag = ANIM_TAG_ECLIPSE_RAY,
+    .oam = &gOamData_AffineNormal_ObjBlend_32x32,
+    .anims = gDummySpriteAnimTable,
+    .images = NULL,
+    .affineAnims = sAffineAnims_SunlightRay,
+    .callback = AnimSunlight,
+};
+
 static const union AnimCmd sAnim_BasicFire[] =
 {
     ANIMCMD_FRAME(0, 4),

@@ -15,6 +15,7 @@
 
 static void AnimRainDrop(struct Sprite *);
 static void AnimRainDrop_Step(struct Sprite *);
+static void AnimTask_CreateRaindropsWithTemplate(u8 taskId, const struct SpriteTemplate *spriteTemplate);
 static void AnimWaterBubbleProjectile(struct Sprite *);
 static void AnimWaterBubbleProjectile_Step1(struct Sprite *);
 static void AnimWaterBubbleProjectile_Step2(struct Sprite *);
@@ -78,6 +79,17 @@ const struct SpriteTemplate gRainDropSpriteTemplate =
 {
     .tileTag = ANIM_TAG_RAIN_DROPS,
     .paletteTag = ANIM_TAG_RAIN_DROPS,
+    .oam = &gOamData_AffineOff_ObjNormal_16x32,
+    .anims = sAnims_RainDrop,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = AnimRainDrop,
+};
+
+static const struct SpriteTemplate sAcidRainDropSpriteTemplate =
+{
+    .tileTag = ANIM_TAG_ACID_RAIN_DROPS,
+    .paletteTag = ANIM_TAG_ACID_RAIN_DROPS,
     .oam = &gOamData_AffineOff_ObjNormal_16x32,
     .anims = sAnims_RainDrop,
     .images = NULL,
@@ -653,6 +665,16 @@ static void AnimKnockOffAquaTailStep(struct Sprite *sprite)
 
 void AnimTask_CreateRaindrops(u8 taskId)
 {
+    AnimTask_CreateRaindropsWithTemplate(taskId, &gRainDropSpriteTemplate);
+}
+
+void AnimTask_CreateAcidRaindrops(u8 taskId)
+{
+    AnimTask_CreateRaindropsWithTemplate(taskId, &sAcidRainDropSpriteTemplate);
+}
+
+static void AnimTask_CreateRaindropsWithTemplate(u8 taskId, const struct SpriteTemplate *spriteTemplate)
+{
     u8 x, y;
 
     if (gTasks[taskId].data[0] == 0)
@@ -666,7 +688,7 @@ void AnimTask_CreateRaindrops(u8 taskId)
     {
         x = Random2() % DISPLAY_WIDTH;
         y = Random2() % (DISPLAY_HEIGHT / 2);
-        CreateSprite(&gRainDropSpriteTemplate, x, y, 4);
+        CreateSprite(spriteTemplate, x, y, 4);
     }
     if (gTasks[taskId].data[0] == gTasks[taskId].data[3])
         DestroyAnimVisualTask(taskId);

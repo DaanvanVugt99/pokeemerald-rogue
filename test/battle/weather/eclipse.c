@@ -60,3 +60,31 @@ SINGLE_BATTLE_TEST("Eclipse lasts for 12 turns with Dim Rock")
         EXPECT_EQ(gWishFutureKnock.weatherDuration, WEATHER_DURATION_EXTENDED - 1);
     }
 }
+
+SINGLE_BATTLE_TEST("Eclipse move animation can be used from either side")
+{
+    bool32 playerUsesEclipse;
+    PARAMETRIZE { playerUsesEclipse = TRUE; }
+    PARAMETRIZE { playerUsesEclipse = FALSE; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_ECLIPSE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_ECLIPSE, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN {
+            if (playerUsesEclipse) {
+                MOVE(player, MOVE_ECLIPSE);
+                MOVE(opponent, MOVE_CELEBRATE);
+            } else {
+                MOVE(player, MOVE_CELEBRATE);
+                MOVE(opponent, MOVE_ECLIPSE);
+            }
+        }
+    } SCENE {
+        if (playerUsesEclipse)
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_ECLIPSE, player);
+        else
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_ECLIPSE, opponent);
+        MESSAGE("An eclipse blotted out the sun!");
+    }
+}
