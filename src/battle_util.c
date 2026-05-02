@@ -5506,6 +5506,45 @@ static bool32 TryApplyAbilitySuppressionWithGastroAcid(u32 attacker, u32 target,
     return TRUE;
 }
 
+static u32 GetForecastFrillSecondaryType(u32 battler)
+{
+    if (!WEATHER_HAS_EFFECT)
+        return gSpeciesInfo[gBattleMons[battler].species].types[1];
+
+    if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
+        return TYPE_FIRE;
+    if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN))
+        return TYPE_WATER;
+    if (IsBattlerWeatherAffected(battler, B_WEATHER_SANDSTORM))
+        return TYPE_GROUND;
+    if (IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW))
+        return TYPE_ICE;
+    if (IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN))
+        return TYPE_POISON;
+    if (IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE))
+        return TYPE_DARK;
+
+    return gSpeciesInfo[gBattleMons[battler].species].types[1];
+}
+
+static bool32 TryForecastFrillChangeSecondaryType(u32 battler)
+{
+    u32 newType;
+
+    if (!HasBattlerAbility(battler, ABILITY_FORECAST_FRILL)
+     || gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
+        return FALSE;
+
+    newType = GetForecastFrillSecondaryType(battler);
+    if (gBattleMons[battler].type2 == newType)
+        return FALSE;
+
+    gBattleMons[battler].type2 = newType;
+    gBattleMons[battler].type3 = TYPE_MYSTERY;
+    SetBattlerTriggeredAbility(battler, ABILITY_FORECAST_FRILL);
+    return TRUE;
+}
+
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg)
 {
     u32 effect = 0;
@@ -13318,6 +13357,13 @@ if (triggeringAbility != ABILITY_NONE)
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
             }
+        }
+
+        if (TryForecastFrillChangeSecondaryType(battler))
+        {
+            BattleScriptPushCursorAndCallback(BattleScript_ForecastFrillTypeChange);
+            effect++;
+            break;
         }
 
         switch (gLastUsedAbility)

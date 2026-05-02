@@ -605,6 +605,7 @@ extern const u8 BattleScript_EarthEaterActivates[];
 extern const u8 BattleScript_MimicryActivates_End3[];
 extern const u8 BattleScript_IceFaceNullsDamage[];
 extern const u8 BattleScript_BattlerFormChangeWithStringEnd3[];
+extern const u8 BattleScript_ForecastFrillTypeChange[];
 extern const u8 BattleScript_DampPreventsAftermath[];
 extern const u8 BattleScript_HealingWishActivates[];
 extern const u8 BattleScript_LunarDanceActivates[];

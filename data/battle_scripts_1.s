@@ -8586,6 +8586,14 @@ BattleScript_BattlerFormChangeWithStringEnd3::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_ForecastFrillTypeChange::
+	pause 5
+	call BattleScript_AbilityPopUp
+	flushtextbox
+	playanimation BS_ABILITY_BATTLER, B_ANIM_FORM_CHANGE, NULL
+	waitanimation
+	end3
+
 BattleScript_IllusionOff::
 	spriteignore0hp TRUE
 	playanimation BS_TARGET, B_ANIM_ILLUSION_OFF
