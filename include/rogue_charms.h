@@ -55,6 +55,8 @@ u16 GetCurseValue(u8 effectType);
 
 void Rogue_RemoveCharmsFromBag(void);
 void Rogue_RemoveCursesFromBag(void);
+void Rogue_AddTemporaryDarkDealCurse(u16 itemId);
+void Rogue_ClearTemporaryDarkDealCurse(void);
 
 u16 Rogue_GetMaxPartySize(void);
 

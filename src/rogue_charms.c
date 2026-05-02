@@ -334,6 +334,32 @@ void Rogue_RemoveCursesFromBag(void)
     }
 }
 
+void Rogue_AddTemporaryDarkDealCurse(u16 itemId)
+{
+    if(itemId != ITEM_NONE && AddBagItem(itemId, 1))
+    {
+        gRogueRun.temporaryDarkDealCurseItem = itemId;
+        Rogue_PushPopup_AddItem(itemId, 1);
+        RecalcCharmCurseValues();
+    }
+}
+
+void Rogue_ClearTemporaryDarkDealCurse(void)
+{
+    u16 itemId = gRogueRun.temporaryDarkDealCurseItem;
+
+    if(itemId != ITEM_NONE)
+    {
+        if(RemoveBagItem(itemId, 1))
+        {
+            Rogue_PushPopup_LostItem(itemId, 1);
+            RecalcCharmCurseValues();
+        }
+
+        gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+    }
+}
+
 static bool8 BufferContainsValue(u16* buffer, u16 count, u16 value)
 {
     u16 i;

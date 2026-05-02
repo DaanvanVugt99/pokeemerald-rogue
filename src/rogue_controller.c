@@ -6646,6 +6646,8 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
             if(isBossTrainer)
             {
+                Rogue_ClearTemporaryDarkDealCurse();
+
                 if(IsCurseActive(EFFECT_SNOWBALL_CURSES) && Rogue_GetCurrentDifficulty() < ROGUE_MAX_BOSS_COUNT)
                 {
                     // Add new curse

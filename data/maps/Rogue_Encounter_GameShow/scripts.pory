@@ -12,7 +12,8 @@ const VAR_GAMESHOW_TRIGGERED = VAR_TEMP_1
 const VAR_CURRENT_REWARD_COUNTER = VAR_TEMP_2
 const VAR_CURRENT_REWARD_ITEM = VAR_TEMP_3
 const VAR_CURRENT_REWARD_COUNT = VAR_TEMP_4
-const VAR_GOOD_BOX = VAR_TEMP_5
+const VAR_BEST_REWARD_ITEM = VAR_TEMP_5
+const VAR_BEST_REWARD_COUNT = VAR_TEMP_6
 
 // WTP Vars
 const VAR_CURRENT_SPECIES = VAR_TEMP_A
@@ -34,6 +35,8 @@ script Rogue_Encounter_GameShow_OnLoad
     special(GameShow_RestartGameShow)
 
     setvar(VAR_CURRENT_REWARD_COUNTER, 0)
+    setvar(VAR_BEST_REWARD_ITEM, ITEM_NONE)
+    setvar(VAR_BEST_REWARD_COUNT, 0)
     special(GameShow_SelectRewardItem)
 
     clearflag(FLAG_HIDE_HOST)
@@ -69,7 +72,7 @@ script Rogue_Encounter_GameShow_TriggerIntro
     }
     else
     {
-        msgbox(format("In each Game Show, we will have a specific game we will play.\pEach game will consist of several rounds.\pOnce you complete a round, you will earn a reward, you may then choose to finish the Game Show or try to push further to get an even better reward!\pIt's all or nothing!"), MSGBOX_DEFAULT)
+        msgbox(format("In each Game Show, we will have a specific game we will play.\pEach game will consist of several rounds.\pOnce you complete a round, you will earn a reward, you may then choose to finish the Game Show or try to push further to get an even better reward!\pIf you miss, you still keep the best reward you've earned so far!"), MSGBOX_DEFAULT)
     }
 
     msgbox(format("For our show today, the game will be… … …"), MSGBOX_DEFAULT)
@@ -104,9 +107,17 @@ script Rogue_Encounter_GameShow_TriggerIntro
     applymovement(NPC_HOST, GameShow_Host_Spin)
     waitmovement(0)
 
+    if(var(VAR_CURRENT_ROUND) == FAIL_ROUND_COUNTER && var(VAR_BEST_REWARD_ITEM) != ITEM_NONE)
+    {
+        copyvar(VAR_CURRENT_REWARD_ITEM, VAR_BEST_REWARD_ITEM)
+        copyvar(VAR_CURRENT_REWARD_COUNT, VAR_BEST_REWARD_COUNT)
+        bufferitemnameplural(STR_VAR_1, VAR_CURRENT_REWARD_ITEM, VAR_CURRENT_REWARD_COUNT)
+        msgbox(format("But don't worry!\pYou've still earned yourself…\p{STR_VAR_1}!"), MSGBOX_DEFAULT)
+    }
+
     msgbox(format("That's all for now folks!\nKe ke ke"), MSGBOX_DEFAULT)
 
-    if(var(VAR_CURRENT_ROUND) != FAIL_ROUND_COUNTER)
+    if(var(VAR_CURRENT_ROUND) != FAIL_ROUND_COUNTER || var(VAR_BEST_REWARD_ITEM) != ITEM_NONE)
     {
         // Place reward
         clearflag(FLAG_ROGUE_HIDE_GAMESHOW_REWARD)
@@ -410,13 +421,15 @@ script Rogue_Encounter_GameShow_DisplayReward
 {
     copyvar(VAR_0x8004, VAR_CURRENT_REWARD_ITEM)
     copyvar(VAR_0x8005, VAR_CURRENT_REWARD_COUNT)
+    copyvar(VAR_BEST_REWARD_ITEM, VAR_CURRENT_REWARD_ITEM)
+    copyvar(VAR_BEST_REWARD_COUNT, VAR_CURRENT_REWARD_COUNT)
     special(GameShow_SelectRewardItem)
     bufferitemnameplural(STR_VAR_1, VAR_0x8004, VAR_0x8005) // current reward if stop now
     bufferitemnameplural(STR_VAR_2, VAR_CURRENT_REWARD_ITEM, VAR_CURRENT_REWARD_COUNT) // next reward
 
     if(var(VAR_CURRENT_REWARD_ITEM) == ITEM_NONE)
     {
-        msgbox(format("If you stop now, you can win yourself…\p{STR_VAR_1}!\pOr you can risk it to upgrade your prize to…\p{STR_VAR_2}!\nOr even better!\nAll or nothing!\pSo, do you want to risk it and play another round?"), MSGBOX_YESNO)
+        msgbox(format("If you stop now, you can win yourself…\p{STR_VAR_1}!\pOr you can play another round to try for something even better!\pIf you miss, you still keep this prize.\pSo, do you want to play another round?"), MSGBOX_YESNO)
     
         if(var(VAR_RESULT) == NO)
         {
@@ -439,7 +452,7 @@ script Rogue_Encounter_GameShow_DisplayReward
         }
         else
         {
-            msgbox(format("You just won yourself…\p{STR_VAR_1}!\pNext round you could upgrade your prize to…\p{STR_VAR_2}!\pDo you want to risk it and play another round?"), MSGBOX_YESNO)
+            msgbox(format("You just won yourself…\p{STR_VAR_1}!\pNext round you could upgrade your prize to…\p{STR_VAR_2}!\pIf you miss, you still keep your best prize.\pDo you want to play another round?"), MSGBOX_YESNO)
         
             if(var(VAR_RESULT) == NO)
             {

@@ -267,6 +267,7 @@ struct RogueRunData
     } campaignData;
     u32 honeyTreePokeblockTypeFlags;
     u16 baseSeed;
+    u16 temporaryDarkDealCurseItem;
     u16 rivalTrainerNum;
     u16 teamBossTrainerNum;
     u16 teamEncounterNum;

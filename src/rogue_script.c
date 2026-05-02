@@ -809,6 +809,11 @@ void Rogue_ClearCurses(void)
     Rogue_RemoveCursesFromBag();
 }
 
+void Rogue_GiveTemporaryDarkDealCurse(void)
+{
+    Rogue_AddTemporaryDarkDealCurse(VarGet(VAR_ROGUE_ITEM10));
+}
+
 void Rogue_IsRoamerActive(void)
 {
     gSpecialVar_Result = gRogueRun.wildEncounters.roamer.species != SPECIES_NONE;
@@ -2106,10 +2111,10 @@ void Rogue_PrepareForTrade()
     }
 }
 
-#define VAR_WAGER_PARAM0 VAR_TEMP_1
-#define VAR_WAGER_PARAM1 VAR_TEMP_2
+#define VAR_PRIZE_PARAM0 VAR_TEMP_1
+#define VAR_PRIZE_PARAM1 VAR_TEMP_2
 
-void Rogue_BattleSim_WagerItem()
+void Rogue_BattleSim_SelectPrizeItem()
 {
     // TODO - Choose special items 
     // e.g.
@@ -2160,70 +2165,22 @@ void Rogue_BattleSim_WagerItem()
         amount = targetAmount / ItemId_GetPrice(itemId);
     }
 
-    VarSet(VAR_WAGER_PARAM0, itemId);
-    VarSet(VAR_WAGER_PARAM1, amount);
+    VarSet(VAR_PRIZE_PARAM0, itemId);
+    VarSet(VAR_PRIZE_PARAM1, amount);
     gRngRogueValue = startSeed;
 }
 
-void Rogue_BattleSim_HandleItemWager()
+void Rogue_BattleSim_HandleItemPrize()
 {
-    u16 wagerItem = VarGet(VAR_WAGER_PARAM0);
-    u16 wagerAmount = VarGet(VAR_WAGER_PARAM1);
+    u16 prizeItem = VarGet(VAR_PRIZE_PARAM0);
+    u16 prizeAmount = VarGet(VAR_PRIZE_PARAM1);
 
-    // won wager
     if(gSpecialVar_Result == TRUE)
     {
-        if(AddBagItem(wagerItem, wagerAmount))
-            Rogue_PushPopup_AddItem(wagerItem, wagerAmount);
+        if(AddBagItem(prizeItem, prizeAmount))
+            Rogue_PushPopup_AddItem(prizeItem, prizeAmount);
         else
-            Rogue_PushPopup_CannotTakeItem(wagerItem, wagerAmount);
-    }
-    // lost wager
-    else
-    {
-        // Attempt to match the value of the wager
-        u32 p, pocket, i;
-        s32 remainingMoney = min(ItemId_GetPrice(wagerItem) * wagerAmount, ItemId_GetPrice(ITEM_RARE_CANDY) * 10);
-
-        // Populate query with all valid items we can remove
-        RogueItemQuery_Begin();
-        RogueItemQuery_Reset(QUERY_FUNC_EXCLUDE);
-
-        for(p = 0; p < POCKETS_COUNT; ++p)
-        {
-            pocket = p + 1; // conver to POCKET_ variant
-
-            // Ignore these pockets
-            if(pocket == POCKET_KEY_ITEMS)
-                continue;
-
-            for(i = 0; i < gBagPockets[p].capacity; ++i)
-            {
-                u16 itemId = BagGetItemIdByPocketPosition(pocket, i);
-                if(ItemId_GetPrice(itemId) > 50)
-                {
-                    RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, itemId);
-                }
-            }
-        }
-
-        // Attempt to match item cost but at most take 5 item stacks
-        for(i = 0; i < 5 && remainingMoney > 0 && RogueMiscQuery_AnyActiveElements(); ++i)
-        {
-            u16 itemId = RogueMiscQuery_SelectRandomElement(Random());
-            u16 count = GetItemCountInBag(itemId);
-            s32 stackPrice = ItemId_GetPrice(itemId) * count;
-
-            RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, itemId);
-            if(RemoveBagItem(itemId, count))
-            {
-                Rogue_PushPopup_LostItem(itemId, count);
-                remainingMoney -= stackPrice;
-            }
-            ++i;
-        }
-
-        RogueItemQuery_End();
+            Rogue_PushPopup_CannotTakeItem(prizeItem, prizeAmount);
     }
 }
 
@@ -2232,35 +2189,26 @@ void Rogue_BattleSim_HandleItemIVs()
     u32 ivAmount;
     u32 statId;
     u32 delta = 10;
-    u16 slot = VarGet(VAR_WAGER_PARAM0);
+    u16 slot = VarGet(VAR_PRIZE_PARAM0);
+
+    if(!gSpecialVar_Result)
+        return;
 
     for(statId = MON_DATA_HP_IV; statId <= MON_DATA_SPDEF_IV; ++statId)
     {
         ivAmount = GetMonData(&gPlayerParty[slot], statId);
 
-        if(gSpecialVar_Result) // won wager: add IVs
-        {
-            ivAmount += delta;
-            ivAmount = min(31, ivAmount);
-        }
-        else // lost wager: Remove IVs
-        {
-            if(ivAmount < delta)
-                ivAmount = 0;
-            else
-                ivAmount -= delta;
-        }
-
+        ivAmount += delta;
+        ivAmount = min(31, ivAmount);
         SetMonData(&gPlayerParty[slot], statId, &ivAmount);
-        CalculateMonStats(&gPlayerParty[slot]);
     }
 
-    Rogue_PushPopup_MonStatChange(slot, gSpecialVar_Result);
+    CalculateMonStats(&gPlayerParty[slot]);
+    Rogue_PushPopup_MonStatChange(slot, TRUE);
 }
 
 void Rogue_BattleSim_HandleItemMoney()
 {
-    // won wager
     if(gSpecialVar_Result == TRUE)
     {
         if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
@@ -2279,19 +2227,10 @@ void Rogue_BattleSim_HandleItemMoney()
             Rogue_PushPopup_AddMoney(5000);
         }
     }
-    // lost wager
-    else
-    {
-        // take half of money
-        u32 money = GetMoney(&gSaveBlock1Ptr->money) / 2;
-
-        RemoveMoney(&gSaveBlock1Ptr->money, money);
-        Rogue_PushPopup_LostMoney(money);
-    }
 }
 
-#undef VAR_WAGER_PARAM0
-#undef VAR_WAGER_PARAM1
+#undef VAR_PRIZE_PARAM0
+#undef VAR_PRIZE_PARAM1
 
 void Rogue_FixPartyMonDetails()
 {

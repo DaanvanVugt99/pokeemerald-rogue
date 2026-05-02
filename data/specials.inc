@@ -215,6 +215,7 @@ gSpecials::
 	def_special Rogue_ClearCharmsAndCurses
 	def_special Rogue_ClearCharms
 	def_special Rogue_ClearCurses
+	def_special Rogue_GiveTemporaryDarkDealCurse
 	def_special Rogue_IsRoamerActive
 	def_special Rogue_BufferRoamerName
 	def_special Rogue_GetActiveCampaign
@@ -257,8 +258,8 @@ gSpecials::
 	def_special Rogue_WaitForNextPlayerStatus
 	def_special Rogue_WaitForNextPlayerStatusCancellable
 	def_special Rogue_PrepareForTrade
-	def_special Rogue_BattleSim_WagerItem
-	def_special Rogue_BattleSim_HandleItemWager
+	def_special Rogue_BattleSim_SelectPrizeItem
+	def_special Rogue_BattleSim_HandleItemPrize
 	def_special Rogue_BattleSim_HandleItemIVs
 	def_special Rogue_BattleSim_HandleItemMoney
 	def_special Rogue_FixPartyMonDetails
