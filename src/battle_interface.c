@@ -211,6 +211,12 @@ static void MegaIndicator_CreateSprite(u32 battlerId, u32 healthboxSpriteId);
 static void MegaIndicator_UpdateOamPriority(u32 healthboxId, u32 oamPriority);
 static void SpriteCb_MegaIndicator(struct Sprite *);
 
+static void TypeIndicator_CreateSprites(u32 battlerId);
+static void TypeIndicator_SetVisibilities(u32 healthboxId, bool32 invisible);
+static void TypeIndicator_UpdateOamPriority(u32 healthboxId, u32 oamPriority);
+static void TypeIndicator_UpdateTypes(u32 battlerId);
+static void SpriteCb_TypeIndicator(struct Sprite *);
+
 static u8 GetStatusIconForBattlerId(u8, u8);
 static s32 CalcNewBarValue(s32, s32, s32, s32 *, u8, u16);
 static u8 GetScaledExpFraction(s32, s32, s32, u8);
@@ -870,6 +876,8 @@ u8 CreateBattlerHealthboxSprites(u8 battlerId)
     // Create tera indicator sprites.
     TeraIndicator_CreateSprite(battlerId, healthboxLeftSpriteId);
 
+    TypeIndicator_CreateSprites(battlerId);
+
     gBattleStruct->ballSpriteIds[0] = MAX_SPRITES;
     gBattleStruct->ballSpriteIds[1] = MAX_SPRITES;
 
@@ -954,6 +962,7 @@ void SetHealthboxSpriteInvisible(u8 healthboxSpriteId)
     gSprites[gSprites[healthboxSpriteId].oam.affineParam].invisible = TRUE;
     MegaIndicator_SetVisibilities(healthboxSpriteId, TRUE);
     TeraIndicator_SetVisibilities(healthboxSpriteId, TRUE);
+    TypeIndicator_SetVisibilities(healthboxSpriteId, TRUE);
 }
 
 void SetHealthboxSpriteVisible(u8 healthboxSpriteId)
@@ -963,6 +972,7 @@ void SetHealthboxSpriteVisible(u8 healthboxSpriteId)
     gSprites[gSprites[healthboxSpriteId].oam.affineParam].invisible = FALSE;
     MegaIndicator_SetVisibilities(healthboxSpriteId, FALSE);
     TeraIndicator_SetVisibilities(healthboxSpriteId, FALSE);
+    TypeIndicator_SetVisibilities(healthboxSpriteId, FALSE);
 }
 
 static void UpdateSpritePos(u8 spriteId, s16 x, s16 y)
@@ -990,6 +1000,7 @@ static void TryToggleHealboxVisibility(u32 priority, u32 healthboxLeftSpriteId, 
     gSprites[healthbarSpriteId].invisible = invisible;
     MegaIndicator_SetVisibilities(healthboxLeftSpriteId, invisible);
     TeraIndicator_SetVisibilities(healthboxLeftSpriteId, invisible);
+    TypeIndicator_SetVisibilities(healthboxLeftSpriteId, invisible);
 }
 
 void UpdateOamPriorityInAllHealthboxes(u8 priority, bool32 hideHPBoxes)
@@ -1007,6 +1018,7 @@ void UpdateOamPriorityInAllHealthboxes(u8 priority, bool32 hideHPBoxes)
         gSprites[healthbarSpriteId].oam.priority = priority;
 
         MegaIndicator_UpdateOamPriority(healthboxLeftSpriteId, priority);
+        TypeIndicator_UpdateOamPriority(healthboxLeftSpriteId, priority);
 
         if (B_HIDE_HEALTHBOX_IN_ANIMS == TRUE && hideHPBoxes && IsBattlerAlive(i))
             TryToggleHealboxVisibility(priority, healthboxLeftSpriteId, healthboxRightSpriteId, healthbarSpriteId);
@@ -1846,6 +1858,234 @@ static void SpriteCb_MegaIndicator(struct Sprite *sprite)
 #undef tPosX
 #undef tLevelXDelta
 
+// Code for current battler type icons visible on the battler's healthbox.
+static const u16 sTypeIndicatorTileTags[NUMBER_OF_MON_TYPES] =
+{
+    [TYPE_NORMAL] = TAG_NORMAL_INDICATOR_TILE,
+    [TYPE_FIGHTING] = TAG_FIGHTING_INDICATOR_TILE,
+    [TYPE_FLYING] = TAG_FLYING_INDICATOR_TILE,
+    [TYPE_POISON] = TAG_POISON_INDICATOR_TILE,
+    [TYPE_GROUND] = TAG_GROUND_INDICATOR_TILE,
+    [TYPE_ROCK] = TAG_ROCK_INDICATOR_TILE,
+    [TYPE_BUG] = TAG_BUG_INDICATOR_TILE,
+    [TYPE_GHOST] = TAG_GHOST_INDICATOR_TILE,
+    [TYPE_STEEL] = TAG_STEEL_INDICATOR_TILE,
+    [TYPE_MYSTERY] = TAG_NORMAL_INDICATOR_TILE,
+    [TYPE_FIRE] = TAG_FIRE_INDICATOR_TILE,
+    [TYPE_WATER] = TAG_WATER_INDICATOR_TILE,
+    [TYPE_GRASS] = TAG_GRASS_INDICATOR_TILE,
+    [TYPE_ELECTRIC] = TAG_ELECTRIC_INDICATOR_TILE,
+    [TYPE_PSYCHIC] = TAG_PSYCHIC_INDICATOR_TILE,
+    [TYPE_ICE] = TAG_ICE_INDICATOR_TILE,
+    [TYPE_DRAGON] = TAG_DRAGON_INDICATOR_TILE,
+    [TYPE_DARK] = TAG_DARK_INDICATOR_TILE,
+    [TYPE_FAIRY] = TAG_FAIRY_INDICATOR_TILE,
+    [TYPE_STELLAR] = TAG_STELLAR_INDICATOR_TILE,
+};
+
+static const struct OamData sOamData_TypeIndicator =
+{
+    .shape = SPRITE_SHAPE(16x16),
+    .size = SPRITE_SIZE(16x16),
+    .priority = 0,
+};
+
+static const struct SpriteTemplate sSpriteTemplate_TypeIndicator =
+{
+    .tileTag = TAG_NORMAL_INDICATOR_TILE,
+    .paletteTag = TAG_TERA_INDICATOR_PAL,
+    .oam = &sOamData_TypeIndicator,
+    .anims = gDummySpriteAnimTable,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCb_TypeIndicator,
+};
+
+#define TYPE_INDICATOR_PLAYER_X_OFFSET      -22
+#define TYPE_INDICATOR_OPPONENT_X_OFFSET     72
+#define TYPE_INDICATOR_PLAYER_Y_OFFSET       -7
+#define TYPE_INDICATOR_OPPONENT_Y_OFFSET    -10
+#define TYPE_INDICATOR_ICON_Y_SPACING        13
+
+#define tBattler            data[0]
+#define tTypeSlot           data[1]
+#define tPosX               data[2]
+#define tPosY               data[3]
+#define tType               data[4]
+#define tHealthboxHidden    data[5]
+
+static bool32 TypeIndicator_IsDisplayableType(u32 type)
+{
+    return type < ARRAY_COUNT(sTypeIndicatorTileTags)
+        && type != TYPE_NONE
+        && type != TYPE_MYSTERY;
+}
+
+static u32 TypeIndicator_GetType(u32 battlerId, u32 slot)
+{
+    u32 i, type;
+    u32 typeCount = 0;
+    u32 types[2] = {TYPE_MYSTERY, TYPE_MYSTERY};
+
+    for (i = 0; i < 3 && typeCount < ARRAY_COUNT(types); i++)
+    {
+        type = GetBattlerType(battlerId, i, FALSE);
+
+        if (!TypeIndicator_IsDisplayableType(type))
+            continue;
+        if (typeCount != 0 && type == types[0])
+            continue;
+
+        types[typeCount++] = type;
+    }
+
+    if (typeCount == 1)
+        types[1] = types[0];
+
+    return types[slot];
+}
+
+static bool32 TypeIndicator_ShouldBeInvisible(struct Sprite *sprite)
+{
+    return sprite->tHealthboxHidden || sprite->tType == TYPE_NONE;
+}
+
+static u8 TypeIndicator_GetSpriteId(u32 battlerId, u32 slot)
+{
+    if (battlerId >= MAX_BATTLERS_COUNT || slot >= ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]))
+        return MAX_SPRITES;
+
+    return gBattleStruct->healthboxTypeSpriteIds[battlerId][slot];
+}
+
+static void TypeIndicator_UpdateSprite(struct Sprite *sprite)
+{
+    u32 type = TypeIndicator_GetType(sprite->tBattler, sprite->tTypeSlot);
+
+    if (sprite->tType != type)
+    {
+        sprite->tType = type;
+        sprite->oam.tileNum = GetSpriteTileStartByTag(sTypeIndicatorTileTags[type]);
+    }
+
+    sprite->invisible = TypeIndicator_ShouldBeInvisible(sprite);
+}
+
+void InitHealthboxTypeIndicatorSpriteIds(void)
+{
+    u32 battlerId, slot;
+
+    for (battlerId = 0; battlerId < MAX_BATTLERS_COUNT; battlerId++)
+    {
+        for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
+            gBattleStruct->healthboxTypeSpriteIds[battlerId][slot] = MAX_SPRITES;
+    }
+}
+
+static void TypeIndicator_CreateSprites(u32 battlerId)
+{
+    u32 slot;
+    bool32 isPlayer = GetBattlerSide(battlerId) == B_SIDE_PLAYER;
+    s32 x = isPlayer ? TYPE_INDICATOR_PLAYER_X_OFFSET : TYPE_INDICATOR_OPPONENT_X_OFFSET;
+    s32 y = isPlayer ? TYPE_INDICATOR_PLAYER_Y_OFFSET : TYPE_INDICATOR_OPPONENT_Y_OFFSET;
+
+    if (Rogue_UseSafariBattle())
+        return;
+
+    for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
+    {
+        u8 spriteId = CreateSprite(&sSpriteTemplate_TypeIndicator, 0, 0, 0);
+
+        if (spriteId >= MAX_SPRITES)
+            continue;
+
+        gBattleStruct->healthboxTypeSpriteIds[battlerId][slot] = spriteId;
+        gSprites[spriteId].tBattler = battlerId;
+        gSprites[spriteId].tTypeSlot = slot;
+        gSprites[spriteId].tPosX = x;
+        gSprites[spriteId].tPosY = y + slot * TYPE_INDICATOR_ICON_Y_SPACING;
+        gSprites[spriteId].tType = TYPE_NONE;
+        gSprites[spriteId].tHealthboxHidden = TRUE;
+        gSprites[spriteId].invisible = TRUE;
+        TypeIndicator_UpdateSprite(&gSprites[spriteId]);
+    }
+}
+
+static void TypeIndicator_SetVisibilities(u32 healthboxId, bool32 invisible)
+{
+    u32 slot;
+    u32 battlerId = gSprites[healthboxId].hMain_Battler;
+
+    if (Rogue_UseSafariBattle())
+        return;
+
+    for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
+    {
+        u8 spriteId = TypeIndicator_GetSpriteId(battlerId, slot);
+
+        if (spriteId >= MAX_SPRITES)
+            continue;
+
+        gSprites[spriteId].tHealthboxHidden = invisible;
+        TypeIndicator_UpdateSprite(&gSprites[spriteId]);
+    }
+}
+
+static void TypeIndicator_UpdateOamPriority(u32 healthboxId, u32 oamPriority)
+{
+    u32 slot;
+    u32 battlerId = gSprites[healthboxId].hMain_Battler;
+
+    (void)oamPriority;
+
+    for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
+    {
+        u8 spriteId = TypeIndicator_GetSpriteId(battlerId, slot);
+
+        if (spriteId < MAX_SPRITES)
+            gSprites[spriteId].oam.priority = 0;
+    }
+}
+
+static void TypeIndicator_UpdateTypes(u32 battlerId)
+{
+    u32 slot;
+
+    for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
+    {
+        u8 spriteId = TypeIndicator_GetSpriteId(battlerId, slot);
+
+        if (spriteId < MAX_SPRITES)
+            TypeIndicator_UpdateSprite(&gSprites[spriteId]);
+    }
+}
+
+static void SpriteCb_TypeIndicator(struct Sprite *sprite)
+{
+    u32 battlerId = sprite->tBattler;
+    u32 healthboxSpriteId = gHealthboxSpriteIds[battlerId];
+
+    sprite->x = gSprites[healthboxSpriteId].x + sprite->tPosX;
+    sprite->y = gSprites[healthboxSpriteId].y + sprite->tPosY;
+    sprite->x2 = gSprites[healthboxSpriteId].x2;
+    sprite->y2 = gSprites[healthboxSpriteId].y2;
+
+    TypeIndicator_UpdateSprite(sprite);
+}
+
+#undef TYPE_INDICATOR_PLAYER_X_OFFSET
+#undef TYPE_INDICATOR_OPPONENT_X_OFFSET
+#undef TYPE_INDICATOR_PLAYER_Y_OFFSET
+#undef TYPE_INDICATOR_OPPONENT_Y_OFFSET
+#undef TYPE_INDICATOR_ICON_Y_SPACING
+
+#undef tBattler
+#undef tTypeSlot
+#undef tPosX
+#undef tPosY
+#undef tType
+#undef tHealthboxHidden
+
 #define tBattler                data[0]
 #define tSummaryBarSpriteId     data[1]
 #define tBallIconSpriteId(n)    data[3 + n]
@@ -2614,7 +2854,10 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
 
     // This fixes a bug that should likely never happen involving switching between two Teras.
     if (elementId == HEALTHBOX_ALL)
+    {
         TeraIndicator_UpdateType(battlerId, healthboxSpriteId);
+        TypeIndicator_UpdateTypes(battlerId);
+    }
 
     if (GetBattlerSide(battlerId) == B_SIDE_PLAYER)
     {

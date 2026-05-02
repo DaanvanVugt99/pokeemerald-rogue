@@ -714,6 +714,7 @@ struct BattleStruct
     struct ZMoveData zmove;
     struct DynamaxData dynamax;
     struct TeraData tera;
+    u8 healthboxTypeSpriteIds[MAX_BATTLERS_COUNT][2];
     const u8 *trainerSlideMsg;
     bool8 trainerSlideLowHpMsgDone;
     u8 introState;
