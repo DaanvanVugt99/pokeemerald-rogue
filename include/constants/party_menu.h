@@ -52,6 +52,7 @@
 #define PARTY_ACTION_REUSABLE_ITEM      14  // Unused. The only reusable items are handled separately
 #define PARTY_ACTION_CHOOSE_RELEASE     PARTY_ACTION_REUSABLE_ITEM
 #define PARTY_ACTION_CHOOSE_FAINTED_MON 15
+#define PARTY_ACTION_SWAP_ITEM          16
 
 // IDs for DisplayPartyMenuStdMessage, to display the message at the bottom of the party menu
 #define PARTY_MSG_CHOOSE_MON                0
@@ -84,6 +85,7 @@
 #define PARTY_MSG_WHICH_APPLIANCE           27
 #define PARTY_MSG_CHOOSE_SECOND_FUSION      28
 #define PARTY_MSG_WHICH_DEOXYS_FORM         29
+#define PARTY_MSG_SWAP_WITH_WHICH_MON       30
 #define PARTY_MSG_NONE                      127
 
 // IDs for DisplayPartyPokemonDescriptionText, to display a message in the party pokemon's box
