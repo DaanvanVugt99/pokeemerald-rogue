@@ -1127,6 +1127,7 @@ extern const u8 gText_ThatItemIsSoldOut[];
 extern const u8 gText_SoldOut[];
 extern const u8 gText_ShopUpgrade[];
 extern const u8 gText_ShopAreas[];
+extern const u8 gText_ShopMoveArea[];
 
 extern const u8 gText_OhABite[];
 extern const u8 gText_PokemonOnHook[];

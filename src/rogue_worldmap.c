@@ -49,24 +49,41 @@ struct WorldMapData
     s16 playerY;
     u8 currentArea;
     u8 playerArea;
+    u8 mode;
+    u8 movingArea;
+    bool8 areaMoved;
 };
 
 EWRAM_DATA static struct WorldMapData *sWorldMapData = NULL;
 EWRAM_DATA static u8 *sWorldMapTilemapPtr = NULL;
+static u8 sPendingWorldMapMode = 0;
+
+enum WorldMapMode
+{
+    WORLD_MAP_MODE_VIEW,
+    WORLD_MAP_MODE_MOVE_SELECT,
+    WORLD_MAP_MODE_MOVE_PLACE,
+};
 
 static u8 const sText_BasicDesc[] = _("{STR_VAR_1}");
 static u8 const sText_TeleportDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} Teleport");
+static u8 const sText_MoveSelectDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} Move");
+static u8 const sText_CannotMoveDesc[] = _("{STR_VAR_1}\n{COLOR RED}{FONT_SHORT}Can't move");
+static u8 const sText_MovePlaceDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} Place {B_BUTTON}{FONT_SHORT} Back");
+static u8 const sText_MoveCannotPlaceDesc[] = _("{STR_VAR_1}\n{COLOR RED}{FONT_SHORT}Can't place");
 
 static void MainCB2(void);
 static void InitData();
 static void Task_WorldMapFadeIn(u8);
 static void Task_WorldMapWaitForKeyPress(u8);
+static void Task_WorldMapWaitForMoveKeyPress(u8);
 static void Task_WorldMapFadeOut(u8);
 static void Task_WorldMapWarpOut(u8);
 static void DrawWorldMapTiles();
 static void DisplayTitleText(void);
 static void DisplayDescText(void);
 static void DisplayIcons(void);
+static bool8 IsCoordOnWorldMap(s16 x, s16 y);
 static void InitWorldMapBg(void);
 static void InitWorldMapWindow(void);
 static void PrintWorldMapText(u8, u8 const*, u8, u8);
@@ -189,6 +206,16 @@ static const u32* const sWorldMapTilemaps[] =
 
 void Rogue_OpenWorldMap(MainCallback callback)
 {
+    sPendingWorldMapMode = WORLD_MAP_MODE_VIEW;
+    gMain.savedCallback = callback;
+    SetMainCallback2(CB2_ShowWorldMap);
+    LockPlayerFieldControls();
+}
+
+void Rogue_OpenWorldMapMoveArea(MainCallback callback)
+{
+    sPendingWorldMapMode = WORLD_MAP_MODE_MOVE_SELECT;
+    VarSet(VAR_RESULT, FALSE);
     gMain.savedCallback = callback;
     SetMainCallback2(CB2_ShowWorldMap);
     LockPlayerFieldControls();
@@ -278,11 +305,18 @@ static void InitData()
 
     sWorldMapData->centreX = RogueHub_GetAreaCoords(HUB_AREA_ADVENTURE_ENTRANCE).x;
     sWorldMapData->centreY = RogueHub_GetAreaCoords(HUB_AREA_ADVENTURE_ENTRANCE).y;
+    sWorldMapData->mode = sPendingWorldMapMode;
+    sWorldMapData->movingArea = HUB_AREA_NONE;
+    sWorldMapData->areaMoved = FALSE;
+    sPendingWorldMapMode = WORLD_MAP_MODE_VIEW;
 
 }
 
 static bool8 CanTeleport()
 {
+    if(sWorldMapData->mode != WORLD_MAP_MODE_VIEW)
+        return FALSE;
+
     if(FlagGet(FLAG_ROGUE_UNLOCKED_MAP_TELEPORT))
     {
         if(!Rogue_IsRunActive())
@@ -298,7 +332,12 @@ static bool8 CanTeleport()
 static void Task_WorldMapFadeIn(u8 taskId)
 {
     if (!gPaletteFade.active)
-        gTasks[taskId].func = Task_WorldMapWaitForKeyPress;
+    {
+        if(sWorldMapData->mode == WORLD_MAP_MODE_VIEW)
+            gTasks[taskId].func = Task_WorldMapWaitForKeyPress;
+        else
+            gTasks[taskId].func = Task_WorldMapWaitForMoveKeyPress;
+    }
 }
 
 static void Task_WorldMapWaitForKeyPress(u8 taskId)
@@ -346,6 +385,133 @@ static void Task_WorldMapWaitForKeyPress(u8 taskId)
         sWorldMapData->posX = RogueHub_GetAreaCoords(desiredArea).x;
         sWorldMapData->posY = RogueHub_GetAreaCoords(desiredArea).y;
 
+        DrawWorldMapTiles();
+        DisplayDescText();
+        DisplayIcons();
+    }
+}
+
+static void Task_WorldMapWaitForMoveKeyPress(u8 taskId)
+{
+    u8 desiredArea = sWorldMapData->currentArea;
+    bool8 redraw = FALSE;
+
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+
+        if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
+        {
+            struct Coords8 coords;
+            sWorldMapData->mode = WORLD_MAP_MODE_MOVE_SELECT;
+            sWorldMapData->currentArea = sWorldMapData->movingArea;
+            coords = RogueHub_GetAreaCoords(sWorldMapData->currentArea);
+            sWorldMapData->posX = coords.x;
+            sWorldMapData->posY = coords.y;
+            redraw = TRUE;
+        }
+        else
+        {
+            if(sWorldMapData->areaMoved)
+                VarSet(VAR_RESULT, 2);
+
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_WorldMapFadeOut;
+            return;
+        }
+    }
+
+    if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_SELECT)
+    {
+        if(JOY_NEW(A_BUTTON))
+        {
+            if(RogueHub_CanMoveArea(sWorldMapData->currentArea))
+            {
+                PlaySE(SE_SELECT);
+                sWorldMapData->mode = WORLD_MAP_MODE_MOVE_PLACE;
+                sWorldMapData->movingArea = sWorldMapData->currentArea;
+                redraw = TRUE;
+            }
+            else
+            {
+                PlaySE(SE_FAILURE);
+            }
+        }
+
+        if(JOY_NEW(DPAD_LEFT))
+            desiredArea = RogueHub_FindAreaAtCoord(sWorldMapData->posX - 1, sWorldMapData->posY);
+        if(JOY_NEW(DPAD_RIGHT))
+            desiredArea = RogueHub_FindAreaAtCoord(sWorldMapData->posX + 1, sWorldMapData->posY);
+        if(JOY_NEW(DPAD_UP))
+            desiredArea = RogueHub_FindAreaAtCoord(sWorldMapData->posX, sWorldMapData->posY + 1);
+        if(JOY_NEW(DPAD_DOWN))
+            desiredArea = RogueHub_FindAreaAtCoord(sWorldMapData->posX, sWorldMapData->posY - 1);
+
+        if(desiredArea != HUB_AREA_NONE && sWorldMapData->currentArea != desiredArea)
+        {
+            PlaySE(SE_SELECT);
+            sWorldMapData->currentArea = desiredArea;
+            sWorldMapData->posX = RogueHub_GetAreaCoords(desiredArea).x;
+            sWorldMapData->posY = RogueHub_GetAreaCoords(desiredArea).y;
+            redraw = TRUE;
+        }
+    }
+    else if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
+    {
+        if(JOY_NEW(DPAD_LEFT))
+        {
+            if(IsCoordOnWorldMap(sWorldMapData->posX - 1, sWorldMapData->posY))
+            {
+                --sWorldMapData->posX;
+                redraw = TRUE;
+            }
+        }
+        if(JOY_NEW(DPAD_RIGHT))
+        {
+            if(IsCoordOnWorldMap(sWorldMapData->posX + 1, sWorldMapData->posY))
+            {
+                ++sWorldMapData->posX;
+                redraw = TRUE;
+            }
+        }
+        if(JOY_NEW(DPAD_UP))
+        {
+            if(IsCoordOnWorldMap(sWorldMapData->posX, sWorldMapData->posY + 1))
+            {
+                ++sWorldMapData->posY;
+                redraw = TRUE;
+            }
+        }
+        if(JOY_NEW(DPAD_DOWN))
+        {
+            if(IsCoordOnWorldMap(sWorldMapData->posX, sWorldMapData->posY - 1))
+            {
+                --sWorldMapData->posY;
+                redraw = TRUE;
+            }
+        }
+
+        if(JOY_NEW(A_BUTTON))
+        {
+            if(RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY))
+            {
+                PlaySE(SE_SELECT);
+                RogueHub_MoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY);
+                sWorldMapData->areaMoved = TRUE;
+                sWorldMapData->mode = WORLD_MAP_MODE_MOVE_SELECT;
+                sWorldMapData->currentArea = sWorldMapData->movingArea;
+                sWorldMapData->movingArea = HUB_AREA_NONE;
+                redraw = TRUE;
+            }
+            else
+            {
+                PlaySE(SE_FAILURE);
+            }
+        }
+    }
+
+    if(redraw)
+    {
         DrawWorldMapTiles();
         DisplayDescText();
         DisplayIcons();
@@ -414,38 +580,87 @@ static u8 GetDisplayWindowOffsetY()
         return 0;
 }
 
+static bool8 TryGetWorldMapTileCoords(s16 x, s16 y, u8 *tileX, u8 *tileY)
+{
+    s16 const xOffset = 15;
+    s16 const yOffset = 8;
+    s16 tx = xOffset + x * 2;
+    s16 ty = yOffset - y * 2;
+
+    if(tx < 0 || tx >= 32 || ty < 0 || ty >= 32)
+        return FALSE;
+
+    *tileX = tx;
+    *tileY = ty;
+    return TRUE;
+}
+
+static bool8 IsCoordOnWorldMap(s16 x, s16 y)
+{
+    u8 tileX, tileY;
+    return RogueHub_IsCoordInTownGrid(x, y) && TryGetWorldMapTileCoords(x, y, &tileX, &tileY);
+}
+
+static void DrawMarkerAtWorldMapCoord(s16 x, s16 y, u8 tile)
+{
+    u8 tileX, tileY;
+
+    if(TryGetWorldMapTileCoords(x, y, &tileX, &tileY))
+        FillBgTilemapBufferRect_Palette0(1, tile, tileX, tileY, 1, 1);
+}
+
 static void DrawWorldMapTiles()
 {
-    // Centre coord
-    s16 const xOffset = 15;
-    s16 const yOffset = 8; // could be 9 too tbh
     u8 i;
+
+    LZDecompressWram(sWorldMapTilemaps[RogueHub_GetHubVariantNumber() % ARRAY_COUNT(sWorldMapTilemaps)], sWorldMapTilemapPtr);
 
     for(i = 0; i < HUB_AREA_COUNT; ++i)
     {
         if(RogueHub_HasAreaBuilt(i))
         {
             struct Coords8 coords = RogueHub_GetAreaCoords(i);
-            coords.y *= -1; // flip so south is towards the bottom lol
 
             if(i == sWorldMapData->playerArea)
-                FillBgTilemapBufferRect_Palette0(1, TILE_YELLOW_MARKER, xOffset + coords.x * 2, yOffset + coords.y * 2, 1, 1);
+                DrawMarkerAtWorldMapCoord(coords.x, coords.y, TILE_YELLOW_MARKER);
             else
-                FillBgTilemapBufferRect_Palette0(1, TILE_RED_MARKER, xOffset + coords.x * 2, yOffset + coords.y * 2, 1, 1);
+                DrawMarkerAtWorldMapCoord(coords.x, coords.y, TILE_RED_MARKER);
 
             if(RogueHub_FindAreaInDir(i, HUB_AREA_CONN_SOUTH) != HUB_AREA_NONE)
-                FillBgTilemapBufferRect_Palette0(1, TILE_PATH, xOffset + coords.x * 2, yOffset + coords.y * 2 + 1, 1, 1);
+            {
+                u8 tileX, tileY;
+                if(TryGetWorldMapTileCoords(coords.x, coords.y, &tileX, &tileY) && tileY + 1 < 32)
+                    FillBgTilemapBufferRect_Palette0(1, TILE_PATH, tileX, tileY + 1, 1, 1);
+            }
 
             if(RogueHub_FindAreaInDir(i, HUB_AREA_CONN_EAST) != HUB_AREA_NONE)
-                FillBgTilemapBufferRect_Palette0(1, TILE_PATH, xOffset + coords.x * 2 + 1, yOffset + coords.y * 2, 1, 1);
+            {
+                u8 tileX, tileY;
+                if(TryGetWorldMapTileCoords(coords.x, coords.y, &tileX, &tileY) && tileX + 1 < 32)
+                    FillBgTilemapBufferRect_Palette0(1, TILE_PATH, tileX + 1, tileY, 1, 1);
+            }
 
             if(i == HUB_AREA_ADVENTURE_ENTRANCE)
             {
+                u8 tileX, tileY;
                 // Place indicator that this is where the adventure entrance is above
-                FillBgTilemapBufferRect_Palette0(1, TILE_PATH_GREEN_FADE, xOffset + coords.x * 2, yOffset + coords.y * 2 - 1, 1, 1);
-                FillBgTilemapBufferRect_Palette0(1, TILE_GREEN_MARKER, xOffset + coords.x * 2, yOffset + coords.y * 2 - 2, 1, 1);
+                if(TryGetWorldMapTileCoords(coords.x, coords.y, &tileX, &tileY))
+                {
+                    if(tileY >= 1)
+                        FillBgTilemapBufferRect_Palette0(1, TILE_PATH_GREEN_FADE, tileX, tileY - 1, 1, 1);
+                    if(tileY >= 2)
+                        FillBgTilemapBufferRect_Palette0(1, TILE_GREEN_MARKER, tileX, tileY - 2, 1, 1);
+                }
             }
         }
+    }
+
+    if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
+    {
+        u8 marker = RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY)
+            ? TILE_GREEN_MARKER
+            : TILE_RED_MARKER;
+        DrawMarkerAtWorldMapCoord(sWorldMapData->posX, sWorldMapData->posY, marker);
     }
 
     // Move to right
@@ -469,10 +684,28 @@ static void DisplayDescText(void)
 
     StringCopyN(gStringVar1, gRogueHubAreas[sWorldMapData->currentArea].areaName, ITEM_NAME_LENGTH);
 
-    if(CanTeleport())
+    if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_SELECT)
+    {
+        if(RogueHub_CanMoveArea(sWorldMapData->currentArea))
+            StringExpandPlaceholders(gStringVar4, sText_MoveSelectDesc);
+        else
+            StringExpandPlaceholders(gStringVar4, sText_CannotMoveDesc);
+    }
+    else if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
+    {
+        if(RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY))
+            StringExpandPlaceholders(gStringVar4, sText_MovePlaceDesc);
+        else
+            StringExpandPlaceholders(gStringVar4, sText_MoveCannotPlaceDesc);
+    }
+    else if(CanTeleport())
+    {
         StringExpandPlaceholders(gStringVar4, sText_TeleportDesc);
+    }
     else
+    {
         StringExpandPlaceholders(gStringVar4, sText_BasicDesc);
+    }
         
     PrintWorldMapText(WIN_DESC, gStringVar4, 25, 0);
 

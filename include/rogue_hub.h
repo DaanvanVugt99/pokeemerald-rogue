@@ -18,6 +18,7 @@ bool8 RogueHub_HasAreaBuilt(u8 area);
 void RogueHub_BuildArea(u8 area, s8 x, s8 y);
 void RogueHub_BuildAreaInConnDir(u8 area, u8 connDir);
 bool8 RogueHub_HasAreaBuildRequirements(u8 area);
+bool8 RogueHub_CanMoveArea(u8 area);
 
 u8 RogueHub_FindAreaAtCoord(s8 x, s8 y);
 struct Coords8 RogueHub_GetAreaCoords(u8 area);
@@ -25,6 +26,9 @@ u8 RogueHub_FindAreaInDir(u8 area, u8 dir);
 bool8 RogueHub_AreaHasFreeConnection(u8 area, u8 dir);
 u8 RogueHub_GetAreaAtConnection(u8 area, u8 dir);
 bool8 RogueHub_CanBuildConnectionBetween(u8 fromArea, u8 toArea, u8 dir);
+bool8 RogueHub_IsCoordInTownGrid(s8 x, s8 y);
+bool8 RogueHub_CanMoveAreaToCoord(u8 area, s8 x, s8 y);
+void RogueHub_MoveAreaToCoord(u8 area, s8 x, s8 y);
 
 u8 RogueHub_GetAreaFromCurrentMap();
 

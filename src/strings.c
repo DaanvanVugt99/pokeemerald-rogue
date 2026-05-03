@@ -395,6 +395,7 @@ const u8 gText_ThatItemIsSoldOut[] = _("I'm sorry, but that item is sold out.{PA
 const u8 gText_SoldOut[] = _("Sold Out");
 const u8 gText_ShopUpgrade[] = _("Upgrade Areas");
 const u8 gText_ShopAreas[] = _("Build new Area");
+const u8 gText_ShopMoveArea[] = _("Move Area");
 const u8 gText_InBagVar1[] = _("In Bag: {STR_VAR_1}");
 const u8 gText_FromVar1[] = _("From: {STR_VAR_1}");
 const u8 gText_QuitShopping[] = _("Quit shopping.");

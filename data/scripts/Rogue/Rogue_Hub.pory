@@ -41,7 +41,7 @@ script Rogue_Area_WorkbenchOptions
     if(var(VAR_RESULT) == TRUE)
     {
         fadescreen(FADE_TO_BLACK)
-        
+
         call(Rogue_Area_PlayBuildSound)
 
         msgbox(format("{POKEMON_HUB} has been upgraded!"), MSGBOX_DEFAULT)
@@ -49,8 +49,24 @@ script Rogue_Area_WorkbenchOptions
         waitfanfare
         special(ReloadWarpSilent)
     }
+    elif(var(VAR_RESULT) == 2)
+    {
+        call(Rogue_Area_HubMoveCompleteMessage)
+    }
 
     release
+}
+
+script Rogue_Area_HubMoveCompleteMessage
+{
+    fadescreen(FADE_TO_BLACK)
+
+    call(Rogue_Area_PlayBuildSound)
+
+    msgbox(format("{POKEMON_HUB} has been rearranged!"), MSGBOX_DEFAULT)
+
+    waitfanfare
+    special(ReloadWarpSilent)
 }
 
 // Utils

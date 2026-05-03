@@ -6,6 +6,7 @@
 
 #include "event_data.h"
 #include "event_object_movement.h"
+#include "field_camera.h"
 #include "fieldmap.h"
 #include "field_player_avatar.h"
 #include "menu.h"
@@ -28,6 +29,11 @@
 #define TREE_TYPE_SPARSE    1
 
 #define HOME_AREA_DISPLAY_MONS 4
+
+#define HUB_TOWN_GRID_MIN_X -7
+#define HUB_TOWN_GRID_MAX_X 7
+#define HUB_TOWN_GRID_MIN_Y -5
+#define HUB_TOWN_GRID_MAX_Y 4
 
 struct RegionCoords
 {
@@ -545,6 +551,14 @@ static bool8 IsReservedCoord(s8 x, s8 y)
     return FALSE;
 }
 
+bool8 RogueHub_IsCoordInTownGrid(s8 x, s8 y)
+{
+    return x >= HUB_TOWN_GRID_MIN_X
+        && x <= HUB_TOWN_GRID_MAX_X
+        && y >= HUB_TOWN_GRID_MIN_Y
+        && y <= HUB_TOWN_GRID_MAX_Y;
+}
+
 struct Coords8 RogueHub_GetAreaCoords(u8 area)
 {
     AGB_ASSERT(RogueHub_HasAreaBuilt(area));
@@ -608,6 +622,242 @@ bool8 RogueHub_CanBuildConnectionBetween(u8 fromArea, u8 toArea, u8 dir)
 {
     u8 invDir = InvertConnDirection(dir);
     return RogueHub_AreaHasFreeConnection(fromArea, dir) && CanAreaConnect(toArea, invDir);
+}
+
+static struct Coords8 GetAreaCoordsAfterMove(u8 area, u8 movingArea, s8 x, s8 y)
+{
+    if(area == movingArea)
+    {
+        struct Coords8 coords = {x, y};
+        return coords;
+    }
+
+    return GetActiveHubMap()->areaCoords[area];
+}
+
+static bool8 IsReservedCoordAfterMove(s8 x, s8 y, u8 movingArea, s8 movingX, s8 movingY)
+{
+    struct Coords8 coords = GetAreaCoordsAfterMove(HUB_AREA_ADVENTURE_ENTRANCE, movingArea, movingX, movingY);
+    if(coords.x == x && coords.y + 1 == y)
+        return TRUE;
+
+    coords = GetAreaCoordsAfterMove(HUB_AREA_SAFARI_ZONE, movingArea, movingX, movingY);
+    if(coords.x == x && coords.y + 1 == y)
+        return TRUE;
+
+    return FALSE;
+}
+
+static bool8 AnyAreaOccupiesReservedCoordAfterMove(u8 movingArea, s8 movingX, s8 movingY)
+{
+    u8 i;
+
+    for(i = 0; i < HUB_AREA_COUNT; ++i)
+    {
+        if(RogueHub_HasAreaBuilt(i))
+        {
+            struct Coords8 coords = GetAreaCoordsAfterMove(i, movingArea, movingX, movingY);
+            if(IsReservedCoordAfterMove(coords.x, coords.y, movingArea, movingX, movingY))
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static u8 GetDirectionBetweenCoords(struct Coords8 from, struct Coords8 to)
+{
+    if(from.x == to.x)
+    {
+        if(from.y - 1 == to.y)
+            return HUB_AREA_CONN_SOUTH;
+        if(from.y + 1 == to.y)
+            return HUB_AREA_CONN_NORTH;
+    }
+    else if(from.y == to.y)
+    {
+        if(from.x - 1 == to.x)
+            return HUB_AREA_CONN_WEST;
+        if(from.x + 1 == to.x)
+            return HUB_AREA_CONN_EAST;
+    }
+
+    return HUB_AREA_CONN_COUNT;
+}
+
+static bool8 CanAreasConnectAfterMove(u8 fromArea, u8 toArea, u8 movingArea, s8 movingX, s8 movingY)
+{
+    struct Coords8 fromCoords = GetAreaCoordsAfterMove(fromArea, movingArea, movingX, movingY);
+    struct Coords8 toCoords = GetAreaCoordsAfterMove(toArea, movingArea, movingX, movingY);
+    u8 dir = GetDirectionBetweenCoords(fromCoords, toCoords);
+
+    if(dir == HUB_AREA_CONN_COUNT)
+        return FALSE;
+
+    return CanAreaConnect(fromArea, dir) && CanAreaConnect(toArea, InvertConnDirection(dir));
+}
+
+static bool8 AreaHasAnyConnectionAfterMove(u8 area, u8 movingArea, s8 movingX, s8 movingY)
+{
+    u8 i;
+
+    for(i = 0; i < HUB_AREA_COUNT; ++i)
+    {
+        if(i != area && RogueHub_HasAreaBuilt(i) && CanAreasConnectAfterMove(area, i, movingArea, movingX, movingY))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 WouldHubRemainConnectedAfterMove(u8 movingArea, s8 movingX, s8 movingY)
+{
+    bool8 visited[HUB_AREA_COUNT] = {0};
+    u8 queue[HUB_AREA_COUNT];
+    u8 builtCount = 0;
+    u8 visitedCount = 0;
+    u8 read = 0;
+    u8 write = 0;
+    u8 startArea = HUB_AREA_NONE;
+    u8 i;
+
+    for(i = 0; i < HUB_AREA_COUNT; ++i)
+    {
+        if(RogueHub_HasAreaBuilt(i))
+        {
+            ++builtCount;
+            if(startArea == HUB_AREA_NONE)
+                startArea = i;
+        }
+    }
+
+    if(startArea == HUB_AREA_NONE)
+        return FALSE;
+
+    visited[startArea] = TRUE;
+    queue[write++] = startArea;
+    visitedCount = 1;
+
+    while(read < write)
+    {
+        u8 fromArea = queue[read++];
+
+        for(i = 0; i < HUB_AREA_COUNT; ++i)
+        {
+            if(!visited[i] && RogueHub_HasAreaBuilt(i) && CanAreasConnectAfterMove(fromArea, i, movingArea, movingX, movingY))
+            {
+                visited[i] = TRUE;
+                queue[write++] = i;
+                ++visitedCount;
+            }
+        }
+    }
+
+    return visitedCount == builtCount;
+}
+
+static bool8 WouldHubRemainConnectedWithoutArea(u8 removedArea)
+{
+    bool8 visited[HUB_AREA_COUNT] = {0};
+    u8 queue[HUB_AREA_COUNT];
+    u8 builtCount = 0;
+    u8 visitedCount = 0;
+    u8 read = 0;
+    u8 write = 0;
+    u8 startArea = HUB_AREA_NONE;
+    u8 i;
+
+    for(i = 0; i < HUB_AREA_COUNT; ++i)
+    {
+        if(i != removedArea && RogueHub_HasAreaBuilt(i))
+        {
+            ++builtCount;
+            if(startArea == HUB_AREA_NONE)
+                startArea = i;
+        }
+    }
+
+    if(builtCount <= 1)
+        return TRUE;
+
+    visited[startArea] = TRUE;
+    queue[write++] = startArea;
+    visitedCount = 1;
+
+    while(read < write)
+    {
+        u8 fromArea = queue[read++];
+
+        for(i = 0; i < HUB_AREA_COUNT; ++i)
+        {
+            if(i != removedArea && !visited[i] && RogueHub_HasAreaBuilt(i) && CanAreasConnectAfterMove(fromArea, i, HUB_AREA_NONE, 0, 0))
+            {
+                visited[i] = TRUE;
+                queue[write++] = i;
+                ++visitedCount;
+            }
+        }
+    }
+
+    return visitedCount == builtCount;
+}
+
+bool8 RogueHub_CanMoveArea(u8 area)
+{
+    if(area >= HUB_AREA_COUNT || !RogueHub_HasAreaBuilt(area))
+        return FALSE;
+
+    if(area == HUB_AREA_ADVENTURE_ENTRANCE)
+        return FALSE;
+
+    if(area == RogueHub_GetAreaFromCurrentMap())
+        return FALSE;
+
+    return WouldHubRemainConnectedWithoutArea(area);
+}
+
+bool8 RogueHub_CanMoveAreaToCoord(u8 area, s8 x, s8 y)
+{
+    struct Coords8 oldCoords;
+    u8 i;
+
+    if(!RogueHub_CanMoveArea(area))
+        return FALSE;
+
+    if(!RogueHub_IsCoordInTownGrid(x, y))
+        return FALSE;
+
+    oldCoords = RogueHub_GetAreaCoords(area);
+    if(oldCoords.x == x && oldCoords.y == y)
+        return FALSE;
+
+    if(IsReservedCoordAfterMove(x, y, area, x, y))
+        return FALSE;
+
+    if(AnyAreaOccupiesReservedCoordAfterMove(area, x, y))
+        return FALSE;
+
+    for(i = 0; i < HUB_AREA_COUNT; ++i)
+    {
+        if(i != area && RogueHub_HasAreaBuilt(i))
+        {
+            struct Coords8 coords = RogueHub_GetAreaCoords(i);
+            if(coords.x == x && coords.y == y)
+                return FALSE;
+        }
+    }
+
+    if(!AreaHasAnyConnectionAfterMove(area, area, x, y))
+        return FALSE;
+
+    return WouldHubRemainConnectedAfterMove(area, x, y);
+}
+
+void RogueHub_MoveAreaToCoord(u8 area, s8 x, s8 y)
+{
+    AGB_ASSERT(RogueHub_CanMoveAreaToCoord(area, x, y));
+    GetActiveHubMap()->areaCoords[area].x = x;
+    GetActiveHubMap()->areaCoords[area].y = y;
 }
 
 u8 RogueHub_GetAreaAtConnection(u8 area, u8 dir)
@@ -3520,6 +3770,13 @@ static void FixupTileCommon(struct TileFixup* settings)
 
 void RogueHub_ReloadObjectsAndTiles()
 {
+    if(GetAreaForLayout(gMapHeader.mapLayoutId) != HUB_AREA_NONE)
+    {
+        RogueHub_UpdateWarpStates();
+        RogueHub_ApplyMapMetatiles();
+        DrawWholeMapView();
+    }
+
     if(RogueHub_IsPlayerBaseLayout(gMapHeader.mapLayoutId))
     {
         TrySpawnObjectEvents(0, 0);

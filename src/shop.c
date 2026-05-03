@@ -48,6 +48,7 @@
 #include "rogue_query.h"
 #include "rogue_quest.h"
 #include "rogue_settings.h"
+#include "rogue_worldmap.h"
 
 typedef void (*ShopCallback)();
 
@@ -180,6 +181,7 @@ static void Task_HandleShopMenuBuy(u8 taskId);
 static void Task_HandleShopMenuSell(u8 taskId);
 static void Task_HandleShopMenuUpgrades(u8 taskId);
 static void Task_HandleShopMenuAreas(u8 taskId);
+static void Task_HandleShopMenuMoveArea(u8 taskId);
 static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, struct ListMenu *list);
 static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y);
 
@@ -215,6 +217,7 @@ static const struct MenuAction sShopMenuActions_BuildQuit[] =
 {
     { gText_ShopUpgrade, {.void_u8=Task_HandleShopMenuUpgrades} },
     { gText_ShopAreas, {.void_u8=Task_HandleShopMenuAreas} },
+    { gText_ShopMoveArea, {.void_u8=Task_HandleShopMenuMoveArea} },
     { gText_ShopQuit, {.void_u8=Task_HandleShopMenuQuit} }
 };
 
@@ -401,6 +404,7 @@ static u8 CreateShopMenu(u8 martType)
         struct WindowTemplate winTemplate;
         winTemplate = sShopMenuWindowTemplates[0];
         winTemplate.width = GetMaxWidthInMenuTable(sShopMenuActions_BuildQuit, ARRAY_COUNT(sShopMenuActions_BuildQuit));
+        winTemplate.height = ARRAY_COUNT(sShopMenuActions_BuildQuit) * 2;
         sMartInfo.windowId = AddWindow(&winTemplate);
         sMartInfo.menuActions = sShopMenuActions_BuildQuit;
         numMenuItems = ARRAY_COUNT(sShopMenuActions_BuildQuit);
@@ -518,6 +522,16 @@ static void Task_HandleShopMenuAreas(u8 taskId)
 {
     sMartInfo.martType = MART_TYPE_HUB_AREAS;
     gTasks[taskId].func = Task_HandleShopMenuBuy;
+}
+
+static void Task_HandleShopMenuMoveArea(u8 taskId)
+{
+    ClearStdWindowAndFrameToTransparent(sMartInfo.windowId, 2);
+    RemoveWindow(sMartInfo.windowId);
+    UnlockPlayerFieldControls();
+    DestroyTask(taskId);
+
+    Rogue_OpenWorldMapMoveArea(CB2_ReturnToFieldContinueScript);
 }
 
 void CB2_ExitSellMenu(void)

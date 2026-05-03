@@ -225,9 +225,7 @@ void Special_ViewVoltorbFlip(void)
 
 void Special_ViewWorldMap(void)
 {
-    gMain.savedCallback = CB2_ReturnToFieldContinueScript;
-    SetMainCallback2(CB2_ShowWorldMap);
-    LockPlayerFieldControls();
+    Rogue_OpenWorldMap(CB2_ReturnToFieldContinueScript);
 }
 
 void ResetCyclingRoadChallengeData(void)
