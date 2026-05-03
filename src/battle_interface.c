@@ -1909,6 +1909,7 @@ static const struct SpriteTemplate sSpriteTemplate_TypeIndicator =
 #define tPosY               data[3]
 #define tType               data[4]
 #define tHealthboxHidden    data[5]
+#define tTypeKey            data[6]
 
 struct TypeIndicatorCoords
 {
@@ -1937,31 +1938,68 @@ static bool32 TypeIndicator_IsDisplayableType(u32 type)
         && type != TYPE_MYSTERY;
 }
 
+static void TypeIndicator_GetResolvedTypes(u32 battlerId, u8 *types)
+{
+    u32 teraType;
+
+    types[0] = gBattleMons[battlerId].type1;
+    types[1] = gBattleMons[battlerId].type2;
+    types[2] = gBattleMons[battlerId].type3;
+
+    if (IsTerastallized(battlerId))
+    {
+        teraType = GetBattlerTeraType(battlerId);
+        if (teraType != TYPE_STELLAR)
+        {
+            types[0] = teraType;
+            types[1] = teraType;
+            types[2] = TYPE_MYSTERY;
+        }
+    }
+    else if (gBattleResources->flags->flags[battlerId] & RESOURCE_FLAG_ROOST)
+    {
+        if (types[0] == TYPE_FLYING && types[1] == TYPE_FLYING)
+        {
+            types[0] = B_ROOST_PURE_FLYING >= GEN_5 ? TYPE_NORMAL : TYPE_MYSTERY;
+            types[1] = B_ROOST_PURE_FLYING >= GEN_5 ? TYPE_NORMAL : TYPE_MYSTERY;
+        }
+        else
+        {
+            if (types[0] == TYPE_FLYING)
+                types[0] = TYPE_MYSTERY;
+            if (types[1] == TYPE_FLYING)
+                types[1] = TYPE_MYSTERY;
+        }
+    }
+}
+
 static u32 TypeIndicator_GetType(u32 battlerId, u32 slot)
 {
     u32 i, type;
     u32 typeCount = 0;
-    u32 types[2] = {TYPE_MYSTERY, TYPE_MYSTERY};
+    u8 resolvedTypes[3];
+    u32 displayTypes[2] = {TYPE_MYSTERY, TYPE_MYSTERY};
 
-    for (i = 0; i < 3 && typeCount < ARRAY_COUNT(types); i++)
+    TypeIndicator_GetResolvedTypes(battlerId, resolvedTypes);
+    for (i = 0; i < ARRAY_COUNT(resolvedTypes) && typeCount < ARRAY_COUNT(displayTypes); i++)
     {
-        type = GetBattlerType(battlerId, i, FALSE);
+        type = resolvedTypes[i];
 
         if (!TypeIndicator_IsDisplayableType(type))
             continue;
-        if (typeCount != 0 && type == types[0])
+        if (typeCount != 0 && type == displayTypes[0])
             continue;
 
-        types[typeCount++] = type;
+        displayTypes[typeCount++] = type;
     }
 
     if (typeCount == 1)
-        types[1] = types[0];
+        displayTypes[1] = displayTypes[0];
 
     if (typeCount == 0)
         return TYPE_NONE;
 
-    return types[slot];
+    return displayTypes[slot];
 }
 
 static bool32 TypeIndicator_ShouldBeInvisible(struct Sprite *sprite)
@@ -1975,6 +2013,14 @@ static u8 TypeIndicator_GetSpriteId(u32 battlerId, u32 slot)
         return MAX_SPRITES;
 
     return gBattleStruct->healthboxTypeSpriteIds[battlerId][slot];
+}
+
+static u16 TypeIndicator_GetTypeKey(u32 battlerId)
+{
+    u8 types[3];
+
+    TypeIndicator_GetResolvedTypes(battlerId, types);
+    return types[0] | (types[1] << 5) | (types[2] << 10);
 }
 
 static bool32 TypeIndicator_ShouldSkipBattler(u32 battlerId)
@@ -2082,6 +2128,7 @@ static void TypeIndicator_UpdateOamPriority(u32 healthboxId, u32 oamPriority)
 static void TypeIndicator_UpdateTypes(u32 battlerId)
 {
     u32 slot;
+    u8 firstSpriteId = TypeIndicator_GetSpriteId(battlerId, 0);
 
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
     {
@@ -2090,12 +2137,34 @@ static void TypeIndicator_UpdateTypes(u32 battlerId)
         if (spriteId < MAX_SPRITES)
             TypeIndicator_UpdateSprite(&gSprites[spriteId]);
     }
+
+    if (firstSpriteId < MAX_SPRITES)
+        gSprites[firstSpriteId].tTypeKey = TypeIndicator_GetTypeKey(battlerId);
+}
+
+static void TypeIndicator_UpdateTypesIfNeeded(u32 battlerId)
+{
+    u8 spriteId = TypeIndicator_GetSpriteId(battlerId, 0);
+    u16 typeKey;
+
+    if (spriteId >= MAX_SPRITES)
+        return;
+
+    typeKey = TypeIndicator_GetTypeKey(battlerId);
+    if (gSprites[spriteId].tTypeKey != typeKey)
+    {
+        gSprites[spriteId].tTypeKey = typeKey;
+        TypeIndicator_UpdateTypes(battlerId);
+    }
 }
 
 static void SpriteCb_TypeIndicator(struct Sprite *sprite)
 {
     u32 battlerId = sprite->tBattler;
     u32 healthboxSpriteId = gHealthboxSpriteIds[battlerId];
+
+    if (sprite->tTypeSlot == 0)
+        TypeIndicator_UpdateTypesIfNeeded(battlerId);
 
     sprite->x = gSprites[healthboxSpriteId].x + sprite->tPosX;
     sprite->y = gSprites[healthboxSpriteId].y + sprite->tPosY;
@@ -2111,6 +2180,7 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
 #undef tPosY
 #undef tType
 #undef tHealthboxHidden
+#undef tTypeKey
 
 #define tBattler                data[0]
 #define tSummaryBarSpriteId     data[1]

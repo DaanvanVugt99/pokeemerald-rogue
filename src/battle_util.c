@@ -13532,11 +13532,10 @@ bool32 IsMoldBreakerTypeAbility(u32 ability)
 
 static u32 GetBattlerUniqueAbilityRaw(u32 battler)
 {
-    u32 ability;
-
 #if TESTING
     if (gTestRunnerEnabled)
     {
+        u32 ability;
         u32 side = GetBattlerSide(battler);
         u32 partyIndex = gBattlerPartyIndexes[battler];
 
@@ -13573,8 +13572,21 @@ static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability)
 
 bool32 HasBattlerAbilityIgnoreMoldBreaker(u32 battler, u32 ability)
 {
-    return GetBattlerPrimaryAbilityIgnoreMoldBreaker(battler) == ability
-        || GetBattlerUniqueAbilityIgnoreMoldBreaker(battler) == ability;
+    bool32 hasPrimaryAbility;
+    bool32 hasUniqueAbility;
+
+    if (ability == ABILITY_NONE)
+        return GetBattlerPrimaryAbilityIgnoreMoldBreaker(battler) == ability
+            || GetBattlerUniqueAbilityIgnoreMoldBreaker(battler) == ability;
+
+    hasPrimaryAbility = (gBattleMons[battler].ability == ability);
+    hasUniqueAbility = (GetBattlerUniqueAbilityRaw(battler) == ability);
+
+    if (!hasPrimaryAbility && !hasUniqueAbility)
+        return FALSE;
+
+    return (hasPrimaryAbility && GetBattlerPrimaryAbilityIgnoreMoldBreaker(battler) == ability)
+        || (hasUniqueAbility && GetBattlerUniqueAbilityIgnoreMoldBreaker(battler) == ability);
 }
 
 static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability)
@@ -13657,8 +13669,21 @@ u32 GetBattlerAbility(u32 battler)
 
 bool32 HasBattlerAbility(u32 battler, u32 ability)
 {
-    return GetBattlerPrimaryAbility(battler) == ability
-        || GetBattlerUniqueAbility(battler) == ability;
+    bool32 hasPrimaryAbility;
+    bool32 hasUniqueAbility;
+
+    if (ability == ABILITY_NONE)
+        return GetBattlerPrimaryAbility(battler) == ability
+            || GetBattlerUniqueAbility(battler) == ability;
+
+    hasPrimaryAbility = (gBattleMons[battler].ability == ability);
+    hasUniqueAbility = (GetBattlerUniqueAbilityRaw(battler) == ability);
+
+    if (!hasPrimaryAbility && !hasUniqueAbility)
+        return FALSE;
+
+    return (hasPrimaryAbility && GetBattlerPrimaryAbility(battler) == ability)
+        || (hasUniqueAbility && GetBattlerUniqueAbility(battler) == ability);
 }
 
 u32 IsAbilityOnSide(u32 battler, u32 ability)
@@ -16734,40 +16759,40 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         break;
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_SHORT_CIRCUIT)
-     && moveType == TYPE_ELECTRIC)
+    if (moveType == TYPE_ELECTRIC
+     && HasBattlerAbility(battlerAtk, ABILITY_SHORT_CIRCUIT))
     {
         modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_TREASURE_HOARD)
-     && move == MOVE_DRAGON_BREATH
-     && (holdEffectAtk == HOLD_EFFECT_GEMS || gBattleMons[battlerAtk].item == ITEM_AMULET_COIN))
+    if (move == MOVE_DRAGON_BREATH
+     && (holdEffectAtk == HOLD_EFFECT_GEMS || gBattleMons[battlerAtk].item == ITEM_AMULET_COIN)
+     && HasBattlerAbility(battlerAtk, ABILITY_TREASURE_HOARD))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_THROWING_FORM)
-     && !IS_MOVE_STATUS(move)
+    if (!IS_MOVE_STATUS(move)
      && (gBattleMoves[move].effect == EFFECT_ROAR
-      || gBattleMoves[move].effect == EFFECT_HIT_SWITCH_TARGET))
+      || gBattleMoves[move].effect == EFFECT_HIT_SWITCH_TARGET)
+     && HasBattlerAbility(battlerAtk, ABILITY_THROWING_FORM))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_TERRAFORM)
-     && gProtectStructs[battlerAtk].uniqueAbilityActive
+    if (gProtectStructs[battlerAtk].uniqueAbilityActive
      && moveType == TYPE_GROUND
-     && !IS_MOVE_STATUS(move))
+     && !IS_MOVE_STATUS(move)
+     && HasBattlerAbility(battlerAtk, ABILITY_TERRAFORM))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
     }
 
-    if ((HasBattlerAbility(battlerAtk, ABILITY_IRON_RESOLVE)
+    if (gDisableStructs[battlerAtk].uniquePersistentStateActive
+     && !IS_MOVE_STATUS(move)
+     && (HasBattlerAbility(battlerAtk, ABILITY_IRON_RESOLVE)
       || HasBattlerAbility(battlerAtk, ABILITY_VENGEFUL_FORCE)
-      || HasBattlerAbility(battlerAtk, ABILITY_VERDANT_VOW))
-     && gDisableStructs[battlerAtk].uniquePersistentStateActive
-     && !IS_MOVE_STATUS(move))
+      || HasBattlerAbility(battlerAtk, ABILITY_VERDANT_VOW)))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
     }
@@ -16779,22 +16804,22 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN) ? UQ_4_12(1.5) : UQ_4_12(1.2));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_WIND_CHIMES)
-     && gBattleMoves[move].soundMove
-     && !IS_MOVE_STATUS(move))
+    if (gBattleMoves[move].soundMove
+     && !IS_MOVE_STATUS(move)
+     && HasBattlerAbility(battlerAtk, ABILITY_WIND_CHIMES))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_X_RAY_JAWS)
-     && gBattleMoves[move].bitingMove)
+    if (gBattleMoves[move].bitingMove
+     && HasBattlerAbility(battlerAtk, ABILITY_X_RAY_JAWS))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_PRIMAL_STORM)
-     && gBattleMoves[move].bitingMove
-     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SANDSTORM))
+    if (gBattleMoves[move].bitingMove
+     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SANDSTORM)
+     && HasBattlerAbility(battlerAtk, ABILITY_PRIMAL_STORM))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
@@ -16816,39 +16841,39 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.1));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_STRIKER)
-     && gBattleMoves[move].kickingMove
+    if (gBattleMoves[move].kickingMove
      && gCurrentTurnActionNumber < gBattlersCount
-     && GetBattlerTurnOrderNum(battlerDef) > gCurrentTurnActionNumber)
+     && GetBattlerTurnOrderNum(battlerDef) > gCurrentTurnActionNumber
+     && HasBattlerAbility(battlerAtk, ABILITY_STRIKER))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_SWEET_NOTHINGS)
-     && gBattleMoves[move].kissingMove)
+    if (gBattleMoves[move].kissingMove
+     && HasBattlerAbility(battlerAtk, ABILITY_SWEET_NOTHINGS))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_DYNAMO_FISTS)
-     && gBattleMoves[move].punchingMove
+    if (gBattleMoves[move].punchingMove
      && gDisableStructs[battlerAtk].uniquePersistentStateActive
-     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_ELECTRIC_TERRAIN))
+     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_ELECTRIC_TERRAIN)
+     && HasBattlerAbility(battlerAtk, ABILITY_DYNAMO_FISTS))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_PRESSURE_VALVE)
-     && gDisableStructs[battlerAtk].uniquePersistentStateActive
-     && !IS_MOVE_STATUS(move))
-    {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
-    }
-
-    if (HasBattlerAbility(battlerAtk, ABILITY_CALL_ALLIES)
-     && gBattleMoves[move].soundMove
+    if (gDisableStructs[battlerAtk].uniquePersistentStateActive
      && !IS_MOVE_STATUS(move)
-     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_INFESTED_TERRAIN))
+     && HasBattlerAbility(battlerAtk, ABILITY_PRESSURE_VALVE))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
+    if (gBattleMoves[move].soundMove
+     && !IS_MOVE_STATUS(move)
+     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_INFESTED_TERRAIN)
+     && HasBattlerAbility(battlerAtk, ABILITY_CALL_ALLIES))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
