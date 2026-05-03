@@ -57,10 +57,10 @@
 #include "rogue_quest.h"
 
 enum {
+    PSS_PAGE_UNIQUE_ABILITY,
     PSS_PAGE_INFO,
     PSS_PAGE_SKILLS,
     PSS_PAGE_BATTLE_MOVES,
-    PSS_PAGE_UNIQUE_ABILITY,
     PSS_PAGE_COUNT,
 };
 
@@ -248,6 +248,9 @@ static void PssScrollRight(u8);
 static void PssScrollRightEnd(u8);
 static void PssScrollLeft(u8);
 static void PssScrollLeftEnd(u8);
+static void EnableSummaryScrollClip(void);
+static void DisableSummaryScrollClip(void);
+static void UpdateSummaryScrollClip(void);
 static void TryDrawExperienceProgressBar(void);
 static void SwitchToMoveSelection(u8);
 static void Task_HandleInput_MoveSelect(u8);
@@ -1412,16 +1415,18 @@ void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, 
     {
     case SUMMARY_MODE_NORMAL:
     case SUMMARY_MODE_BOX:
-        sMonSummaryScreen->minPageIndex = 0;
-        sMonSummaryScreen->maxPageIndex = PSS_PAGE_UNIQUE_ABILITY;
+        sMonSummaryScreen->minPageIndex = PSS_PAGE_UNIQUE_ABILITY;
+        sMonSummaryScreen->maxPageIndex = PSS_PAGE_BATTLE_MOVES;
+        sMonSummaryScreen->currPageIndex = PSS_PAGE_INFO;
         break;
     case SUMMARY_MODE_LOCK_MOVES:
-        sMonSummaryScreen->minPageIndex = 0;
-        sMonSummaryScreen->maxPageIndex = PSS_PAGE_UNIQUE_ABILITY;
+        sMonSummaryScreen->minPageIndex = PSS_PAGE_UNIQUE_ABILITY;
+        sMonSummaryScreen->maxPageIndex = PSS_PAGE_BATTLE_MOVES;
+        sMonSummaryScreen->currPageIndex = PSS_PAGE_INFO;
         sMonSummaryScreen->lockMovesFlag = TRUE;
         break;
     case SUMMARY_MODE_SELECT_MOVE:
-        sMonSummaryScreen->minPageIndex = 0;
+        sMonSummaryScreen->minPageIndex = PSS_PAGE_UNIQUE_ABILITY;
         sMonSummaryScreen->maxPageIndex = PSS_PAGE_BATTLE_MOVES;
         sMonSummaryScreen->currPageIndex = PSS_PAGE_BATTLE_MOVES;
         sMonSummaryScreen->lockMonFlag = TRUE;
@@ -1617,6 +1622,7 @@ static void InitBGs(void)
     ScheduleBgCopyTilemapToVram(3);
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
+    DisableSummaryScrollClip();
     ShowBg(0);
     ShowBg(1);
     ShowBg(2);
@@ -1652,7 +1658,7 @@ static bool8 DecompressGraphics(void)
         sMonSummaryScreen->switchCounter++;
         break;
     case 5:
-        LZDecompressWram(gSummaryPage_UniqueAbility_Tilemap, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_UNIQUE_ABILITY][1]);
+        LZDecompressWram(gSummaryPage_UniqueAbility_Tilemap, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_UNIQUE_ABILITY][0]);
         sMonSummaryScreen->switchCounter++;
         break;
     case 6:
@@ -1837,6 +1843,7 @@ static void FreeSummaryScreen(void)
 
 static void BeginCloseSummaryScreen(u8 taskId)
 {
+    DisableSummaryScrollClip();
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     gTasks[taskId].func = CloseSummaryScreen;
 }
@@ -2177,7 +2184,9 @@ static void PssScrollRight(u8 taskId) // Scroll right
             ScheduleBgCopyTilemapToVram(2);
         }
         ChangeBgX(data[1], 0, BG_COORD_SET);
-        SetBgTilemapBuffer(data[1], sMonSummaryScreen->bgTilemapBuffers[sMonSummaryScreen->currPageIndex][0]);
+        if (sMonSummaryScreen->currPageIndex != PSS_PAGE_INFO)
+            SetBgTilemapBuffer(data[1], sMonSummaryScreen->bgTilemapBuffers[sMonSummaryScreen->currPageIndex][0]);
+        EnableSummaryScrollClip();
         ShowBg(1);
         ShowBg(2);
     }
@@ -2195,6 +2204,7 @@ static void PssScrollRightEnd(u8 taskId) // display right
     data[0] = 0;
     DrawPagination();
     PutPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
+    UpdateSummaryScrollClip();
     SetTypeIcons();
     TryDrawExperienceProgressBar();
     SwitchTaskToFollowupFunc(taskId);
@@ -2210,6 +2220,15 @@ static void PssScrollLeft(u8 taskId) // Scroll left
         else
             data[1] = 1;
         ChangeBgX(data[1], 0x10000, BG_COORD_SET);
+
+        if (sMonSummaryScreen->currPageIndex == PSS_PAGE_UNIQUE_ABILITY)
+        {
+            SetBgTilemapBuffer(data[1], sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_UNIQUE_ABILITY][0]);
+            ScheduleBgCopyTilemapToVram(data[1]);
+            ShowBg(data[1]);
+        }
+
+        EnableSummaryScrollClip();
 
         if(sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE && !sMonSummaryScreen->doneMoveLearnHack)
         {
@@ -2248,7 +2267,7 @@ static void PssScrollLeftEnd(u8 taskId) // display left
         SetBgAttribute(1, BG_ATTR_PRIORITY, 2);
         ScheduleBgCopyTilemapToVram(1);
     }
-    if (sMonSummaryScreen->currPageIndex > 1)
+    if (sMonSummaryScreen->currPageIndex > PSS_PAGE_SKILLS)
     {
         SetBgTilemapBuffer(data[1], sMonSummaryScreen->bgTilemapBuffers[sMonSummaryScreen->currPageIndex - 1][0]);
         ChangeBgX(data[1], 0x10000, BG_COORD_SET);
@@ -2260,9 +2279,34 @@ static void PssScrollLeftEnd(u8 taskId) // display left
     data[0] = 0;
     DrawPagination();
     PutPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
+    UpdateSummaryScrollClip();
     SetTypeIcons();
     TryDrawExperienceProgressBar();
     SwitchTaskToFollowupFunc(taskId);
+}
+
+static void EnableSummaryScrollClip(void)
+{
+    SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(80, DISPLAY_WIDTH));
+    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(16, DISPLAY_HEIGHT));
+    SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_ALL);
+    SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG3 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR);
+    SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON);
+}
+
+static void DisableSummaryScrollClip(void)
+{
+    ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON);
+    SetGpuReg(REG_OFFSET_WININ, 0);
+    SetGpuReg(REG_OFFSET_WINOUT, 0);
+}
+
+static void UpdateSummaryScrollClip(void)
+{
+    if (sMonSummaryScreen->currPageIndex == PSS_PAGE_UNIQUE_ABILITY)
+        EnableSummaryScrollClip();
+    else
+        DisableSummaryScrollClip();
 }
 
 static void TryDrawExperienceProgressBar(void)
