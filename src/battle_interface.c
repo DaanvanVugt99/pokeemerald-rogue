@@ -1901,10 +1901,6 @@ static const struct SpriteTemplate sSpriteTemplate_TypeIndicator =
     .callback = SpriteCb_TypeIndicator,
 };
 
-#define TYPE_INDICATOR_PLAYER_X_OFFSET      -22
-#define TYPE_INDICATOR_OPPONENT_X_OFFSET     72
-#define TYPE_INDICATOR_PLAYER_Y_OFFSET       -7
-#define TYPE_INDICATOR_OPPONENT_Y_OFFSET    -10
 #define TYPE_INDICATOR_ICON_Y_SPACING        13
 
 #define tBattler            data[0]
@@ -1913,6 +1909,26 @@ static const struct SpriteTemplate sSpriteTemplate_TypeIndicator =
 #define tPosY               data[3]
 #define tType               data[4]
 #define tHealthboxHidden    data[5]
+
+struct TypeIndicatorCoords
+{
+    s8 x;
+    s8 y;
+};
+
+static const struct TypeIndicatorCoords sTypeIndicatorSinglesCoords[NUM_BATTLE_SIDES] =
+{
+    [B_SIDE_PLAYER] = {-22, -7},
+    [B_SIDE_OPPONENT] = {72, -10},
+};
+
+static const struct TypeIndicatorCoords sTypeIndicatorDoublesCoords[MAX_BATTLERS_COUNT] =
+{
+    [B_POSITION_PLAYER_LEFT] = {-22, -11},
+    [B_POSITION_OPPONENT_LEFT] = {72, -11},
+    [B_POSITION_PLAYER_RIGHT] = {-22, -11},
+    [B_POSITION_OPPONENT_RIGHT] = {72, -11},
+};
 
 static bool32 TypeIndicator_IsDisplayableType(u32 type)
 {
@@ -1942,12 +1958,15 @@ static u32 TypeIndicator_GetType(u32 battlerId, u32 slot)
     if (typeCount == 1)
         types[1] = types[0];
 
+    if (typeCount == 0)
+        return TYPE_NONE;
+
     return types[slot];
 }
 
 static bool32 TypeIndicator_ShouldBeInvisible(struct Sprite *sprite)
 {
-    return sprite->tHealthboxHidden || sprite->tType == TYPE_NONE;
+    return sprite->tHealthboxHidden || !TypeIndicator_IsDisplayableType(sprite->tType);
 }
 
 static u8 TypeIndicator_GetSpriteId(u32 battlerId, u32 slot)
@@ -1958,6 +1977,11 @@ static u8 TypeIndicator_GetSpriteId(u32 battlerId, u32 slot)
     return gBattleStruct->healthboxTypeSpriteIds[battlerId][slot];
 }
 
+static bool32 TypeIndicator_ShouldSkipBattler(u32 battlerId)
+{
+    return Rogue_UseSafariBattle() && GetBattlerSide(battlerId) == B_SIDE_PLAYER;
+}
+
 static void TypeIndicator_UpdateSprite(struct Sprite *sprite)
 {
     u32 type = TypeIndicator_GetType(sprite->tBattler, sprite->tTypeSlot);
@@ -1965,9 +1989,15 @@ static void TypeIndicator_UpdateSprite(struct Sprite *sprite)
     if (sprite->tType != type)
     {
         sprite->tType = type;
-        sprite->oam.tileNum = GetSpriteTileStartByTag(sTypeIndicatorTileTags[type]);
+        if (TypeIndicator_IsDisplayableType(type))
+            sprite->oam.tileNum = GetSpriteTileStartByTag(sTypeIndicatorTileTags[type]);
     }
 
+    sprite->invisible = TypeIndicator_ShouldBeInvisible(sprite);
+}
+
+static void TypeIndicator_UpdateVisibility(struct Sprite *sprite)
+{
     sprite->invisible = TypeIndicator_ShouldBeInvisible(sprite);
 }
 
@@ -1985,12 +2015,14 @@ void InitHealthboxTypeIndicatorSpriteIds(void)
 static void TypeIndicator_CreateSprites(u32 battlerId)
 {
     u32 slot;
-    bool32 isPlayer = GetBattlerSide(battlerId) == B_SIDE_PLAYER;
-    s32 x = isPlayer ? TYPE_INDICATOR_PLAYER_X_OFFSET : TYPE_INDICATOR_OPPONENT_X_OFFSET;
-    s32 y = isPlayer ? TYPE_INDICATOR_PLAYER_Y_OFFSET : TYPE_INDICATOR_OPPONENT_Y_OFFSET;
+    u32 side = GetBattlerSide(battlerId);
+    const struct TypeIndicatorCoords *coords = &sTypeIndicatorSinglesCoords[side];
 
-    if (Rogue_UseSafariBattle())
+    if (TypeIndicator_ShouldSkipBattler(battlerId))
         return;
+
+    if (WhichBattleCoords(battlerId))
+        coords = &sTypeIndicatorDoublesCoords[GetBattlerPosition(battlerId)];
 
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
     {
@@ -2002,8 +2034,8 @@ static void TypeIndicator_CreateSprites(u32 battlerId)
         gBattleStruct->healthboxTypeSpriteIds[battlerId][slot] = spriteId;
         gSprites[spriteId].tBattler = battlerId;
         gSprites[spriteId].tTypeSlot = slot;
-        gSprites[spriteId].tPosX = x;
-        gSprites[spriteId].tPosY = y + slot * TYPE_INDICATOR_ICON_Y_SPACING;
+        gSprites[spriteId].tPosX = coords->x;
+        gSprites[spriteId].tPosY = coords->y + slot * TYPE_INDICATOR_ICON_Y_SPACING;
         gSprites[spriteId].tType = TYPE_NONE;
         gSprites[spriteId].tHealthboxHidden = TRUE;
         gSprites[spriteId].invisible = TRUE;
@@ -2016,7 +2048,7 @@ static void TypeIndicator_SetVisibilities(u32 healthboxId, bool32 invisible)
     u32 slot;
     u32 battlerId = gSprites[healthboxId].hMain_Battler;
 
-    if (Rogue_UseSafariBattle())
+    if (TypeIndicator_ShouldSkipBattler(battlerId))
         return;
 
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
@@ -2027,7 +2059,7 @@ static void TypeIndicator_SetVisibilities(u32 healthboxId, bool32 invisible)
             continue;
 
         gSprites[spriteId].tHealthboxHidden = invisible;
-        TypeIndicator_UpdateSprite(&gSprites[spriteId]);
+        TypeIndicator_UpdateVisibility(&gSprites[spriteId]);
     }
 }
 
@@ -2069,14 +2101,8 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
     sprite->y = gSprites[healthboxSpriteId].y + sprite->tPosY;
     sprite->x2 = gSprites[healthboxSpriteId].x2;
     sprite->y2 = gSprites[healthboxSpriteId].y2;
-
-    TypeIndicator_UpdateSprite(sprite);
 }
 
-#undef TYPE_INDICATOR_PLAYER_X_OFFSET
-#undef TYPE_INDICATOR_OPPONENT_X_OFFSET
-#undef TYPE_INDICATOR_PLAYER_Y_OFFSET
-#undef TYPE_INDICATOR_OPPONENT_Y_OFFSET
 #undef TYPE_INDICATOR_ICON_Y_SPACING
 
 #undef tBattler
