@@ -298,6 +298,7 @@ static void DisplayPartyPokemonDataForWirelessMinigame(u8);
 static void DisplayPartyPokemonDataForBattlePyramidHeldItem(u8);
 static bool8 DisplayPartyPokemonDataForMoveTutorOrEvolutionItem(u8);
 static void DisplayPartyPokemonDataForNatureMint(u8);
+static void DisplayPartyPokemonDataForAbilityModifier(u8);
 static void DisplayPartyPokemonData(u8);
 static void DisplayPartyPokemonNickname(struct Pokemon *, struct PartyMenuBox *, u8);
 static void DisplayPartyPokemonLevelCheck(struct Pokemon *, struct PartyMenuBox *, u8);
@@ -306,6 +307,7 @@ static void DisplayPartyPokemonHPCheck(struct Pokemon *, struct PartyMenuBox *, 
 static void DisplayPartyPokemonMaxHPCheck(struct Pokemon *, struct PartyMenuBox *, u8);
 static void DisplayPartyPokemonHPBarCheck(struct Pokemon *, struct PartyMenuBox *);
 static void DisplayPartyPokemonDescriptionText(u8, struct PartyMenuBox *, u8);
+static void DisplayPartyPokemonDescriptionCustomText(const u8 *, struct PartyMenuBox *, u8);
 static bool8 IsMonAllowedInMinigame(u8);
 static void DisplayPartyPokemonDataToTeachMove(u8, u16);
 static u8 CanTeachMove(struct Pokemon *, u16);
@@ -439,6 +441,7 @@ static void Task_TryLearningNextMove(u8);
 static void Task_HandleReplaceMoveYesNoInput(u8);
 static void Task_ShowSummaryScreenToForgetMove(u8);
 static void StopLearningMovePrompt(u8);
+static void Task_ReturnToUseOnWhichMonAfterText(u8);
 static void CB2_ShowSummaryScreenToForgetMove(void);
 static void CB2_ReturnToPartyMenuWhileLearningMove(void);
 static void Task_ReturnToPartyMenuWhileLearningMove(u8);
@@ -1045,6 +1048,8 @@ static void RenderPartyMenuBox(u8 slot)
                 DisplayPartyPokemonDataForBattlePyramidHeldItem(slot);
             else if (gPartyMenu.menuType == PARTY_MENU_TYPE_USE_NATURE_MINT)
                 DisplayPartyPokemonDataForNatureMint(slot);
+            else if (gPartyMenu.menuType == PARTY_MENU_TYPE_USE_ABILITY_MODIFIER)
+                DisplayPartyPokemonDataForAbilityModifier(slot);
             else if (!DisplayPartyPokemonDataForMoveTutorOrEvolutionItem(slot))
                 DisplayPartyPokemonData(slot);
 
@@ -1195,6 +1200,25 @@ static void DisplayPartyPokemonDataForNatureMint(u8 slot)
 {
     struct Pokemon *currentPokemon = &gPlayerParty[slot];
     DisplayPartyPokemonDescriptionData(slot, PARTYBOX_DESC_FIRST_NATURE + GetNature(currentPokemon));
+}
+
+static void DisplayPartyPokemonDataForAbilityModifier(u8 slot)
+{
+    struct Pokemon *mon = &gPlayerParty[slot];
+    u16 ability;
+
+    if (GetMonData(mon, MON_DATA_IS_EGG))
+    {
+        DisplayPartyPokemonDescriptionData(slot, PARTYBOX_DESC_NO_USE);
+        return;
+    }
+
+    ability = GetMonAbility(mon);
+    sPartyMenuBoxes[slot].infoRects->blitFunc(sPartyMenuBoxes[slot].windowId, 0, 0, 0, 0, TRUE);
+    DisplayPartyPokemonNickname(mon, &sPartyMenuBoxes[slot], 0);
+    DisplayPartyPokemonLevelCheck(mon, &sPartyMenuBoxes[slot], 0);
+    DisplayPartyPokemonGenderNidoranCheck(mon, &sPartyMenuBoxes[slot], 0);
+    DisplayPartyPokemonDescriptionCustomText(gAbilityNames[ability], &sPartyMenuBoxes[slot], 0);
 }
 
 static void DisplayPartyPokemonDataForTeraShard(u8 slot)
@@ -2787,6 +2811,18 @@ static void DisplayPartyPokemonDescriptionText(u8 stringID, struct PartyMenuBox 
         AddTextPrinterParameterized3(menuBox->windowId, FONT_NORMAL, menuBox->infoRects->descTextLeft, menuBox->infoRects->descTextTop, sFontColorTable[0], 0, sDescriptionStringTable[stringID]);
 }
 
+static void DisplayPartyPokemonDescriptionCustomText(const u8 *text, struct PartyMenuBox *menuBox, u8 c)
+{
+    if (c)
+    {
+        int width = ((menuBox->infoRects->descTextLeft % 8) + menuBox->infoRects->descTextWidth + 7) / 8;
+        int height = ((menuBox->infoRects->descTextTop % 8) + menuBox->infoRects->descTextHeight + 7) / 8;
+        menuBox->infoRects->blitFunc(menuBox->windowId, menuBox->infoRects->descTextLeft >> 3, menuBox->infoRects->descTextTop >> 3, width, height, TRUE);
+    }
+    if (c != 2)
+        AddTextPrinterParameterized3(menuBox->windowId, FONT_SMALL, menuBox->infoRects->descTextLeft, menuBox->infoRects->descTextTop, sFontColorTable[0], 0, text);
+}
+
 static void PartyMenuRemoveWindow(u8 *ptr)
 {
     if (*ptr != WINDOW_NONE)
@@ -3077,6 +3113,7 @@ static u8 GetPartyMenuActionsType(struct Pokemon *mon)
     {
     case PARTY_MENU_TYPE_FIELD:
     case PARTY_MENU_TYPE_USE_NATURE_MINT:
+    case PARTY_MENU_TYPE_USE_ABILITY_MODIFIER:
         if (InMultiPartnerRoom() == TRUE || GetMonData(mon, MON_DATA_IS_EGG))
             actionType = ACTIONS_SWITCH;
         else
@@ -3177,7 +3214,7 @@ static void Task_HandleSelectionMenuInput(u8 taskId)
     {
         if(JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
         {
-            if(gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD || gPartyMenu.menuType == PARTY_MENU_TYPE_USE_NATURE_MINT)
+            if(gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD || gPartyMenu.menuType == PARTY_MENU_TYPE_USE_NATURE_MINT || gPartyMenu.menuType == PARTY_MENU_TYPE_USE_ABILITY_MODIFIER)
             {
                 sCursorOptions[MENU_CYCLE_SUBMENU].func(taskId);
             }
@@ -4955,6 +4992,9 @@ void CB2_ShowPartyMenuForItemUse(void)
     {
         if(ItemId_GetFieldFunc(gSpecialVar_ItemId) == ItemUseOutOfBattle_NatureMint)
             menuType = PARTY_MENU_TYPE_USE_NATURE_MINT;
+        else if (ItemId_GetFieldFunc(gSpecialVar_ItemId) == ItemUseOutOfBattle_AbilityCapsule
+              || ItemId_GetFieldFunc(gSpecialVar_ItemId) == ItemUseOutOfBattle_AbilityPatch)
+            menuType = PARTY_MENU_TYPE_USE_ABILITY_MODIFIER;
         else
             menuType = PARTY_MENU_TYPE_FIELD;
 
@@ -5306,7 +5346,7 @@ void Task_AbilityCapsule(u8 taskId)
             PlaySE(SE_SELECT);
             DisplayPartyMenuMessage(gText_WontHaveEffect, 1);
             ScheduleBgCopyTilemapToVram(2);
-            gTasks[taskId].func = Task_ClosePartyMenuAfterText;
+            gTasks[taskId].func = Task_ReturnToUseOnWhichMonAfterText;
             return;
         }
         gPartyMenuUseExitCallback = TRUE;
@@ -5394,7 +5434,7 @@ void Task_AbilityPatch(u8 taskId)
             PlaySE(SE_SELECT);
             DisplayPartyMenuMessage(gText_WontHaveEffect, 1);
             ScheduleBgCopyTilemapToVram(2);
-            gTasks[taskId].func = Task_ClosePartyMenuAfterText;
+            gTasks[taskId].func = Task_ReturnToUseOnWhichMonAfterText;
             return;
         }
         gPartyMenuUseExitCallback = TRUE;
@@ -6105,6 +6145,19 @@ static void ReturnToUseOnWhichMon(u8 taskId)
     sPartyMenuInternal->exitCallback = NULL;
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
     DisplayPartyMenuStdMessage(PARTY_MSG_USE_ON_WHICH_MON);
+}
+
+static void Task_ReturnToUseOnWhichMonAfterText(u8 taskId)
+{
+    if (IsPartyMenuTextPrinterActive() != TRUE)
+    {
+        ClearStdWindowAndFrameToTransparent(WIN_MSG, FALSE);
+        ClearWindowTilemap(WIN_MSG);
+        gPartyMenuUseExitCallback = FALSE;
+        sPartyMenuInternal->exitCallback = NULL;
+        DisplayPartyMenuStdMessage(PARTY_MSG_USE_ON_WHICH_MON);
+        gTasks[taskId].func = Task_HandleChooseMonInput;
+    }
 }
 
 static void TryUseItemOnMove(u8 taskId)
