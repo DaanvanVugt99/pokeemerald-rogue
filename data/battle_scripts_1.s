@@ -4502,6 +4502,12 @@ BattleScript_EffectAttackUp2::
 	goto BattleScript_EffectStatUp
 
 BattleScript_EffectDefenseUp2::
+	jumpifmove MOVE_ACID_ARMOR, BattleScript_EffectAcidArmor
+	setstatchanger STAT_DEF, 2, FALSE
+	goto BattleScript_EffectStatUp
+
+BattleScript_EffectAcidArmor:
+	jumpifweatheraffected BS_ATTACKER, B_WEATHER_ACID_RAIN, BattleScript_EffectDefenseUp3
 	setstatchanger STAT_DEF, 2, FALSE
 	goto BattleScript_EffectStatUp
 

@@ -11767,7 +11767,10 @@ static void Cmd_various(void)
     case VARIOUS_TRY_HEAL_QUARTER_HP:
     {
         VARIOUS_ARGS(const u8 *failInstr);
-        gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 4;
+        if (gCurrentMove == MOVE_LUNAR_BLESSING && IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE))
+            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 2;
+        else
+            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 4;
         if (gBattleMoveDamage == 0)
             gBattleMoveDamage = 1;
         gBattleMoveDamage *= -1;
@@ -14097,6 +14100,7 @@ static void Cmd_weatherdamage(void)
                 gBattleMoveDamage *= -1;
             }
             else if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON)
+                && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_BUG)
                 && ability != ABILITY_OVERCOAT
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
@@ -15423,6 +15427,8 @@ static void Cmd_recoverbasedonsunlight(void)
         {
             if (!(gBattleWeather & B_WEATHER_ANY) || !WEATHER_HAS_EFFECT || GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_UTILITY_UMBRELLA)
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 2;
+            else if (gCurrentMove == MOVE_MOONLIGHT && gBattleWeather & B_WEATHER_ECLIPSE)
+                gBattleMoveDamage = 20 * GetNonDynamaxMaxHP(gBattlerAttacker) / 30;
             else if (gBattleWeather & B_WEATHER_SUN)
                 gBattleMoveDamage = 20 * GetNonDynamaxMaxHP(gBattlerAttacker) / 30;
             else // not sunny weather

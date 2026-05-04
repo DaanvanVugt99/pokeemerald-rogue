@@ -16555,8 +16555,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         if (gBattleMons[battlerDef].hp <= (gBattleMons[battlerDef].maxHP / 2))
             modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
         break;
-    case EFFECT_BARB_BARRAGE:
     case EFFECT_VENOSHOCK:
+        if (gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY)
+            modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
+        if (IsBattlerWeatherAffected(battlerAtk, B_WEATHER_ACID_RAIN))
+            modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
+        break;
+    case EFFECT_BARB_BARRAGE:
         if (gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY)
             modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
         break;

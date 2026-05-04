@@ -30,6 +30,18 @@ SINGLE_BATTLE_TEST("Moonlight recovers 2/3 of the user's max HP in Sunlight")
     }
 }
 
+SINGLE_BATTLE_TEST("Moonlight recovers 2/3 of the user's max HP in Eclipse")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); MaxHP(300); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_ECLIPSE); MOVE(player, MOVE_MOONLIGHT); }
+    } SCENE {
+        HP_BAR(player, damage: -(300 / 1.5));
+    }
+}
+
 SINGLE_BATTLE_TEST("Moonlight recovers 1/4 of the user's max HP in Rain, Sandstorm, Hail, and Snow")
 {
     u32 move;
