@@ -10,7 +10,7 @@ ASSUMPTIONS
 SINGLE_BATTLE_TEST("Tidal Flood clears entry hazards on switch-in and heals 1/4 max HP if any were removed")
 {
     GIVEN {
-        PLAYER(SPECIES_WAILMER) { HP(200); MaxHP(200); Ability(ABILITY_WATER_VEIL); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WAILMER) { HP(200); MaxHP(200); Ability(ABILITY_OBLIVIOUS); Moves(MOVE_CELEBRATE); }
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SEISMIC_TOSS, MOVE_SPIKES, MOVE_STEALTH_ROCK, MOVE_CELEBRATE); }
     } WHEN {
@@ -32,7 +32,7 @@ SINGLE_BATTLE_TEST("Tidal Flood ignores entry hazards on switch-in while clearin
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        PLAYER(SPECIES_WAILORD) { HP(120); MaxHP(200); Ability(ABILITY_WATER_VEIL); }
+        PLAYER(SPECIES_WAILORD) { HP(120); MaxHP(200); Ability(ABILITY_OBLIVIOUS); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SPIKES, MOVE_STEALTH_ROCK, MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_SPIKES); }
@@ -53,7 +53,7 @@ SINGLE_BATTLE_TEST("Tidal Flood does nothing on switch-in if no hazards are pres
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        PLAYER(SPECIES_WAILORD) { HP(120); MaxHP(200); Ability(ABILITY_WATER_VEIL); }
+        PLAYER(SPECIES_WAILORD) { HP(120); MaxHP(200); Ability(ABILITY_OBLIVIOUS); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }

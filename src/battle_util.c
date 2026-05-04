@@ -7661,6 +7661,17 @@ special_delivery_done:
                 effect++;
             }
             break;
+        case ABILITY_WATER_VEIL:
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && !(gStatuses3[battler] & STATUS3_AQUA_RING))
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gStatuses3[battler] |= STATUS3_AQUA_RING;
+                gBattlerAttacker = gBattlerAbility = battler;
+                BattleScriptPushCursorAndCallback(BattleScript_WaterVeilAquaRing);
+                effect++;
+            }
+            break;
         case ABILITY_ROYAL_CHARM:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -8135,7 +8146,7 @@ special_delivery_done:
                  && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
                 {
                     BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
-                    gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / (gLastUsedAbility == ABILITY_RAIN_DISH ? 16 : 8);
+                    gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
                     if (gBattleMoveDamage == 0)
                         gBattleMoveDamage = 1;
                     gBattleMoveDamage *= -1;

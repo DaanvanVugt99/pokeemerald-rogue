@@ -153,3 +153,35 @@ SINGLE_BATTLE_TEST("Hyper Cutter doesn't prevent receiving negative Attack stage
         EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE - 1);
     }
 }
+
+SINGLE_BATTLE_TEST("Hyper Cutter increases contact move critical-hit ratio by one stage")
+{
+    PASSES_RANDOMLY(1, 8, RNG_CRITICAL_HIT);
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].makesContact == TRUE);
+        PLAYER(SPECIES_KRABBY) { Ability(ABILITY_HYPER_CUTTER); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        MESSAGE("A critical hit!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Hyper Cutter does not increase non-contact move critical-hit ratio")
+{
+    PASSES_RANDOMLY(1, 24, RNG_CRITICAL_HIT);
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SWIFT].makesContact == FALSE);
+        PLAYER(SPECIES_KRABBY) { Ability(ABILITY_HYPER_CUTTER); Moves(MOVE_SWIFT); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_SWIFT); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWIFT, player);
+        MESSAGE("A critical hit!");
+    }
+}

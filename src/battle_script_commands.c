@@ -2156,6 +2156,7 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
     {
         critChance  = 2 * ((gBattleMons[battlerAtk].status2 & STATUS2_FOCUS_ENERGY) != 0)
                     + (gBattleMoves[gCurrentMove].highCritRatio)
+                    + (abilityAtk == ABILITY_HYPER_CUTTER && IsMoveMakingContact(move, battlerAtk))
                     + (move == MOVE_ATTACK_ORDER && HIVE_COMMAND_ACTIVE(battlerAtk))
                     + (HasBattlerAbility(battlerAtk, ABILITY_HAUTE_COUTURE) && moveType == TYPE_NORMAL)
                     + (holdEffectAtk == HOLD_EFFECT_SCOPE_LENS)

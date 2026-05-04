@@ -10,7 +10,7 @@ SINGLE_BATTLE_TEST("Abyss uses Whirlpool on switch-in and traps if all Pokémon 
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_NO_GUARD); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WAILMER) { Ability(ABILITY_WATER_VEIL); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WAILMER) { Ability(ABILITY_OBLIVIOUS); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_KYOGRE) { Ability(ABILITY_NO_GUARD); UniqueAbility(ABILITY_ABYSS); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }

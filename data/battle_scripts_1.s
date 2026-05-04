@@ -8249,6 +8249,12 @@ BattleScript_AquaRingHeal::
 	printstring STRINGID_AQUARINGHEAL
 	goto BattleScript_TurnHeal
 
+BattleScript_WaterVeilAquaRing::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNSURROUNDEDWITHVEILOFWATER
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_PrintMonIsRooted::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_PKMNANCHOREDITSELF
@@ -8681,13 +8687,31 @@ BattleScript_MoveUsedWokeUp::
 	printfromtable gWokeUpStringIds
 	waitmessage B_WAIT_TIME_LONG
 	updatestatusicon BS_ATTACKER
+	call BattleScript_EarlyBirdWakeSpeedBoostAttacker
 	return
 
 BattleScript_MonWokeUpInUproar::
 	printstring STRINGID_PKMNWOKEUPINUPROAR
 	waitmessage B_WAIT_TIME_LONG
 	updatestatusicon BS_ATTACKER
+	call BattleScript_EarlyBirdWakeSpeedBoostAttacker
 	end2
+
+BattleScript_EarlyBirdWakeSpeedBoostAttacker:
+	jumpifability BS_ATTACKER, ABILITY_EARLY_BIRD, BattleScript_EarlyBirdWakeSpeedBoostAttackerCheck
+	return
+BattleScript_EarlyBirdWakeSpeedBoostAttackerCheck:
+	jumpifstat BS_ATTACKER, CMP_EQUAL, STAT_SPEED, MAX_STAT_STAGE, BattleScript_EarlyBirdWakeSpeedBoostRet
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_SPEED, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN | STAT_CHANGE_NOT_PROTECT_AFFECTED, BattleScript_EarlyBirdWakeSpeedBoostRet
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_EarlyBirdWakeSpeedBoostRet:
+	return
 
 BattleScript_PoisonTurnDmg::
 	printstring STRINGID_PKMNHURTBYPOISON
@@ -8950,6 +8974,22 @@ BattleScript_TargetWokeUp::
 	printstring STRINGID_TARGETWOKEUP
 	waitmessage B_WAIT_TIME_LONG
 	updatestatusicon BS_TARGET
+	call BattleScript_EarlyBirdWakeSpeedBoostTarget
+	return
+
+BattleScript_EarlyBirdWakeSpeedBoostTarget:
+	jumpifability BS_TARGET, ABILITY_EARLY_BIRD, BattleScript_EarlyBirdWakeSpeedBoostTargetCheck
+	return
+BattleScript_EarlyBirdWakeSpeedBoostTargetCheck:
+	jumpifstat BS_TARGET, CMP_EQUAL, STAT_SPEED, MAX_STAT_STAGE, BattleScript_EarlyBirdWakeSpeedBoostRet
+	copybyte gBattlerAbility, gBattlerTarget
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_SPEED, 1, FALSE
+	statbuffchange MOVE_EFFECT_CERTAIN | STAT_CHANGE_NOT_PROTECT_AFFECTED, BattleScript_EarlyBirdWakeSpeedBoostRet
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
 	return
 
 BattleScript_TargetBurnHeal::
