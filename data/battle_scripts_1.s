@@ -9669,6 +9669,49 @@ BattleScript_IntimidateEnd:
 	pause B_WAIT_TIME_MED
 	end3
 
+BattleScript_IlluminateActivates::
+	showabilitypopup BS_ATTACKER
+	copybyte sSAVED_BATTLER, gBattlerTarget
+	pause B_WAIT_TIME_LONG
+	destroyabilitypopup
+	setbyte gBattlerTarget, 0
+BattleScript_IlluminateLoop:
+	jumpifbyteequal gBattlerTarget, gBattlerAttacker, BattleScript_IlluminateLoopIncrement
+	jumpiftargetally BattleScript_IlluminateLoopIncrement
+	jumpifabsent BS_TARGET, BattleScript_IlluminateLoopIncrement
+	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_IlluminateLoopIncrement
+	copybyte sBATTLER, gBattlerAttacker
+	setstatchanger STAT_ACC, 1, TRUE
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_IlluminateLoopIncrement
+	setgraphicalstatchangevalues
+	jumpifability BS_TARGET, ABILITY_CONTRARY, BattleScript_IlluminateContrary
+	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_IlluminateDoAnim
+	goto BattleScript_IlluminatePrintString
+BattleScript_IlluminateDoAnim:
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+BattleScript_IlluminatePrintString:
+	printfromtable gStatDownStringIds
+BattleScript_IlluminateEffect_WaitString:
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_IlluminateLoopIncrement:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_IlluminateLoop
+	copybyte sBATTLER, gBattlerAttacker
+	destroyabilitypopup
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	pause B_WAIT_TIME_MED
+	end3
+
+BattleScript_IlluminateContrary:
+	call BattleScript_AbilityPopUpTarget
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_IlluminateContrary_WontIncrease
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	goto BattleScript_IlluminateEffect_WaitString
+BattleScript_IlluminateContrary_WontIncrease:
+	printstring STRINGID_TARGETSTATWONTGOHIGHER
+	goto BattleScript_IlluminateEffect_WaitString
+
 BattleScript_RoyalCharmActivates::
 	showabilitypopup BS_ATTACKER
 	copybyte sSAVED_BATTLER, gBattlerTarget

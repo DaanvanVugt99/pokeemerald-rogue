@@ -4757,6 +4757,11 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
     {
         speed = (speed * 150) / 100;
     }
+    if (HasBattlerAbility(battler, ABILITY_BRUTAL_CHARGE)
+     && gDisableStructs[battler].isFirstTurn)
+    {
+        speed *= 2;
+    }
     if (HasBattlerAbility(battler, ABILITY_MOOD_SWING)
      && gDisableStructs[battler].uniqueOncePerSwitchInUsed
      && !gDisableStructs[battler].uniquePersistentStateActive)
@@ -4830,15 +4835,7 @@ u32 GetBattlerTotalSpeedStat(u32 battler)
 {
     u32 ability = GetBattlerAbility(battler);
     u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
-    u32 speed = GetBattlerTotalSpeedStatArgs(battler, ability, holdEffect);
-
-    if (HasBattlerAbility(battler, ABILITY_BRUTAL_CHARGE)
-     && gDisableStructs[battler].isFirstTurn)
-    {
-        speed *= 2;
-    }
-
-    return speed;
+    return GetBattlerTotalSpeedStatArgs(battler, ability, holdEffect);
 }
 
 s8 GetChosenMovePriority(u32 battler)

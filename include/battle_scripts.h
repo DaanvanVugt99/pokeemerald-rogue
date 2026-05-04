@@ -246,6 +246,7 @@ extern const u8 BattleScript_ShedSkinCharmActivates[];
 extern const u8 BattleScript_FlameheartActivates[];
 extern const u8 BattleScript_FlameheartBurnsSelf[];
 extern const u8 BattleScript_IntimidateActivates[];
+extern const u8 BattleScript_IlluminateActivates[];
 extern const u8 BattleScript_DroughtActivates[];
 extern const u8 BattleScript_AlphaMonActivates[];
 extern const u8 BattleScript_TookAttack[];

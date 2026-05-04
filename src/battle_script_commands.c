@@ -1825,8 +1825,7 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     gPotentialItemEffectBattler = battlerDef;
     accStage = gBattleMons[battlerAtk].statStages[STAT_ACC];
     evasionStage = gBattleMons[battlerDef].statStages[STAT_EVASION];
-    if (atkAbility == ABILITY_UNAWARE || IsAbilityOnField(ABILITY_EQUILIBRIUM) || ApplyUnawareCurse(battlerAtk, evasionStage) || atkAbility == ABILITY_KEEN_EYE || atkAbility == ABILITY_MINDS_EYE
-            || (B_ILLUMINATE_EFFECT >= GEN_9 && atkAbility == ABILITY_ILLUMINATE))
+    if (atkAbility == ABILITY_UNAWARE || IsAbilityOnField(ABILITY_EQUILIBRIUM) || ApplyUnawareCurse(battlerAtk, evasionStage) || atkAbility == ABILITY_KEEN_EYE || atkAbility == ABILITY_MINDS_EYE)
         evasionStage = DEFAULT_STAT_STAGE;
     if (gBattleMoves[move].ignoresTargetDefenseEvasionStages)
         evasionStage = DEFAULT_STAT_STAGE;
@@ -1844,6 +1843,9 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
         buff = MAX_STAT_STAGE;
 
     moveAcc = gBattleMoves[move].accuracy;
+    if (move == MOVE_FOCUS_BLAST
+     && HasBattlerAbility(battlerAtk, ABILITY_INNER_FOCUS))
+        moveAcc = 90;
     if (move == MOVE_SING
      && HasBattlerAbility(battlerAtk, ABILITY_SOFT_BODY))
         moveAcc = 90;
@@ -5823,7 +5825,6 @@ static void Cmd_playstatchangeanimation(void)
                         && ability != ABILITY_FULL_METAL_BODY
                         && ability != ABILITY_WHITE_SMOKE
                         && !((ability == ABILITY_KEEN_EYE || ability == ABILITY_MINDS_EYE) && currStat == STAT_ACC)
-                        && !(B_ILLUMINATE_EFFECT >= GEN_9 && ability == ABILITY_ILLUMINATE && currStat == STAT_ACC)
                         && !(ability == ABILITY_HYPER_CUTTER && currStat == STAT_ATK)
                         && !(ability == ABILITY_BIG_PECKS && currStat == STAT_DEF))
                 {
@@ -8495,7 +8496,7 @@ static void Cmd_switchineffects(void)
 
         // Don't activate switch-in abilities if the opposing field is empty.
         // This could happen when a mon uses explosion and causes everyone to faint.
-        if ((battlerAbility == ABILITY_INTIMIDATE || battlerAbility == ABILITY_SINKHOLE || battlerAbility == ABILITY_SUPERSWEET_SYRUP || battlerAbility == ABILITY_DOWNLOAD)
+        if ((battlerAbility == ABILITY_INTIMIDATE || battlerAbility == ABILITY_ILLUMINATE || battlerAbility == ABILITY_SINKHOLE || battlerAbility == ABILITY_SUPERSWEET_SYRUP || battlerAbility == ABILITY_DOWNLOAD)
          && !IsBattlerAlive(BATTLE_OPPOSITE(battler))
          && !IsBattlerAlive(BATTLE_PARTNER(BATTLE_OPPOSITE(battler))))
         {
@@ -13255,7 +13256,6 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
         }
         else if (!certain
                 && (((battlerAbility == ABILITY_KEEN_EYE || battlerAbility == ABILITY_MINDS_EYE) && statId == STAT_ACC)
-                || (B_ILLUMINATE_EFFECT >= GEN_9 && battlerAbility == ABILITY_ILLUMINATE && statId == STAT_ACC)
                 || (battlerAbility == ABILITY_HYPER_CUTTER && statId == STAT_ATK)
                 || (battlerAbility == ABILITY_BIG_PECKS && statId == STAT_DEF)))
         {
@@ -15783,7 +15783,12 @@ static void Cmd_jumpifnodamage(void)
     CMD_ARGS(const u8 *jumpInstr);
 
     if (gProtectStructs[gBattlerAttacker].physicalDmg || gProtectStructs[gBattlerAttacker].specialDmg)
-        gBattlescriptCurrInstr = cmd->nextInstr;
+    {
+        if (gCurrentMove == MOVE_FOCUS_PUNCH && HasBattlerAbility(gBattlerAttacker, ABILITY_INNER_FOCUS))
+            gBattlescriptCurrInstr = cmd->jumpInstr;
+        else
+            gBattlescriptCurrInstr = cmd->nextInstr;
+    }
     else
         gBattlescriptCurrInstr = cmd->jumpInstr;
 }

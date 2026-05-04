@@ -55,3 +55,43 @@ SINGLE_BATTLE_TEST("Inner Focus is ignored by Mold Breaker")
         MESSAGE("Foe Zubat flinched!");
     }
 }
+
+SINGLE_BATTLE_TEST("Inner Focus raises Focus Blast accuracy to 90 percent")
+{
+    PASSES_RANDOMLY(90, 100, RNG_ACCURACY);
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_FOCUS_BLAST].accuracy == 70);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_INNER_FOCUS); Moves(MOVE_FOCUS_BLAST); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_FOCUS_BLAST, WITH_RNG(RNG_SECONDARY_EFFECT, FALSE)); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FOCUS_BLAST, player);
+        HP_BAR(opponent);
+    }
+}
+
+SINGLE_BATTLE_TEST("Inner Focus lets Focus Punch activate after taking damage at half damage", s16 damage)
+{
+    u32 move;
+    PARAMETRIZE { move = MOVE_LEER; }
+    PARAMETRIZE { move = MOVE_TACKLE; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_FOCUS_PUNCH].effect == EFFECT_FOCUS_PUNCH);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Ability(ABILITY_INNER_FOCUS); Moves(MOVE_FOCUS_PUNCH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); Moves(move); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_FOCUS_PUNCH); MOVE(opponent, move); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_FOCUS_PUNCH_SETUP, player);
+        ANIMATION(ANIM_TYPE_MOVE, move, opponent);
+        if (move == MOVE_TACKLE)
+            HP_BAR(player);
+        MESSAGE("Wobbuffet used Focus Punch!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FOCUS_PUNCH, player);
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.5), results[1].damage);
+    }
+}

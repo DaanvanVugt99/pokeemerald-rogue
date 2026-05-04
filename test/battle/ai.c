@@ -265,8 +265,8 @@ AI_SINGLE_BATTLE_TEST("AI prefers moves which deal more damage instead of moves 
 
     // Scald and Poison Jab take 3 hits, Waterfall takes 2.
     PARAMETRIZE { move1 = MOVE_WATERFALL; move2 = MOVE_SCALD; move3 = MOVE_POISON_JAB; move4 = MOVE_WATER_GUN; expectedMove = MOVE_WATERFALL; turns = 2; }
-    // Poison Jab takes 3 hits, Water gun 5. Immunity so there's no poison chip damage.
-    PARAMETRIZE { move1 = MOVE_POISON_JAB; move2 = MOVE_WATER_GUN; expectedMove = MOVE_POISON_JAB; abilityDef = ABILITY_IMMUNITY; turns = 3; }
+    // Poison Jab takes 3 hits, Water gun 5. Shield Dust prevents poison chip damage.
+    PARAMETRIZE { move1 = MOVE_POISON_JAB; move2 = MOVE_WATER_GUN; expectedMove = MOVE_POISON_JAB; abilityDef = ABILITY_SHIELD_DUST; turns = 3; }
 
     GIVEN {
         AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);

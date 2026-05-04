@@ -9,7 +9,7 @@ ASSUMPTIONS
 SINGLE_BATTLE_TEST("Call gives +1 priority to status moves if the party contains a Fairy-type Pokemon")
 {
     GIVEN {
-        PLAYER(SPECIES_VOLBEAT) { Speed(50); Ability(ABILITY_ILLUMINATE); UniqueAbility(ABILITY_CALL); Moves(MOVE_GROWL); }
+        PLAYER(SPECIES_VOLBEAT) { Speed(50); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_CALL); Moves(MOVE_GROWL); }
         PLAYER(SPECIES_CLEFAIRY) { Speed(1); Ability(ABILITY_CUTE_CHARM); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Moves(MOVE_CELEBRATE); }
     } WHEN {
@@ -23,7 +23,7 @@ SINGLE_BATTLE_TEST("Call gives +1 priority to status moves if the party contains
 SINGLE_BATTLE_TEST("Call does not give +1 priority without a Fairy-type Pokemon in the party")
 {
     GIVEN {
-        PLAYER(SPECIES_VOLBEAT) { Speed(50); Ability(ABILITY_ILLUMINATE); UniqueAbility(ABILITY_CALL); Moves(MOVE_GROWL); }
+        PLAYER(SPECIES_VOLBEAT) { Speed(50); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_CALL); Moves(MOVE_GROWL); }
         PLAYER(SPECIES_PIKACHU) { Speed(1); Ability(ABILITY_STATIC); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Moves(MOVE_CELEBRATE); }
     } WHEN {
@@ -37,7 +37,7 @@ SINGLE_BATTLE_TEST("Call does not give +1 priority without a Fairy-type Pokemon 
 SINGLE_BATTLE_TEST("Call still affects Dark-type targets")
 {
     GIVEN {
-        PLAYER(SPECIES_VOLBEAT) { Speed(50); Ability(ABILITY_ILLUMINATE); UniqueAbility(ABILITY_CALL); Moves(MOVE_GROWL); }
+        PLAYER(SPECIES_VOLBEAT) { Speed(50); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_CALL); Moves(MOVE_GROWL); }
         PLAYER(SPECIES_CLEFAIRY) { Speed(1); Ability(ABILITY_CUTE_CHARM); }
         OPPONENT(SPECIES_UMBREON) { Speed(60); Ability(ABILITY_SYNCHRONIZE); Moves(MOVE_CELEBRATE); }
     } WHEN {

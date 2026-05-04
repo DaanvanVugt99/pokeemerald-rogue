@@ -7651,6 +7651,16 @@ special_delivery_done:
                 effect++;
             }
             break;
+        case ABILITY_ILLUMINATE:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = battler;
+                SET_STATCHANGER(STAT_ACC, 1, TRUE);
+                BattleScriptPushCursorAndCallback(BattleScript_IlluminateActivates);
+                effect++;
+            }
+            break;
         case ABILITY_ROYAL_CHARM:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -8887,7 +8897,7 @@ if (moveType == TYPE_ELECTRIC && gBattleMoves[move].target != MOVE_TARGET_ALL_BA
     else if (HasBattlerAbility(battler, ABILITY_MOTOR_DRIVE))
         triggeringAbility = ABILITY_MOTOR_DRIVE, effect = 2, statId = STAT_SPEED;
     else if (HasBattlerAbility(battler, ABILITY_LIGHTNING_ROD))
-        triggeringAbility = ABILITY_LIGHTNING_ROD, effect = 2, statId = STAT_SPATK;
+        triggeringAbility = ABILITY_LIGHTNING_ROD, effect = 2, statId = (gBattleMons[battler].attack > gBattleMons[battler].spAttack) ? STAT_ATK : STAT_SPATK;
 }
 else if (moveType == TYPE_WATER)
 {
@@ -18403,6 +18413,10 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     DAMAGE_APPLY_MODIFIER(GetBurnOrFrostBiteModifier(battlerAtk, move, abilityAtk, usesOwnAttackStat, usesOwnSpAttackStat));
     DAMAGE_APPLY_MODIFIER(GetZMaxMoveAgainstProtectionModifier(battlerDef, move));
     DAMAGE_APPLY_MODIFIER(GetOtherModifiers(move, moveType, battlerAtk, battlerDef, isCrit, typeEffectivenessModifier, updateFlags, abilityAtk, abilityDef, holdEffectAtk, holdEffectDef));
+    if (move == MOVE_FOCUS_PUNCH
+     && HasBattlerAbility(battlerAtk, ABILITY_INNER_FOCUS)
+     && (gProtectStructs[battlerAtk].physicalDmg || gProtectStructs[battlerAtk].specialDmg))
+        DAMAGE_APPLY_MODIFIER(UQ_4_12(0.5));
 
     if (dmg == 0)
         dmg = 1;
@@ -20143,9 +20157,6 @@ static bool32 IsPetrifyStatLoweringBlocked(u32 attacker, u32 target, u32 statId)
         return TRUE;
 
     if ((ability == ABILITY_KEEN_EYE || ability == ABILITY_MINDS_EYE) && statId == STAT_ACC)
-        return TRUE;
-
-    if (B_ILLUMINATE_EFFECT >= GEN_9 && ability == ABILITY_ILLUMINATE && statId == STAT_ACC)
         return TRUE;
 
     if (ability == ABILITY_HYPER_CUTTER && statId == STAT_ATK)

@@ -31,7 +31,7 @@ SINGLE_BATTLE_TEST("Royal Charm lowers Sp. Atk for genderless opponents on switc
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(ABILITY_ROYAL_CHARM); Gender(MON_FEMALE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_STARYU) { Ability(ABILITY_ILLUMINATE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_STARYU) { Ability(ABILITY_NATURAL_CURE); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
     } THEN {
@@ -68,7 +68,7 @@ SINGLE_BATTLE_TEST("Regal Pressure does not trigger against genderless targets")
 {
     GIVEN {
         PLAYER(SPECIES_NIDOKING) { Ability(ABILITY_POISON_POINT); Gender(MON_MALE); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_STARYU) { HP(1000); MaxHP(1000); Ability(ABILITY_ILLUMINATE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_STARYU) { HP(1000); MaxHP(1000); Ability(ABILITY_NATURAL_CURE); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
     } THEN {
