@@ -1888,10 +1888,6 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     // Target's ability
     switch (defAbility)
     {
-    case ABILITY_SAND_VEIL:
-        if (WEATHER_HAS_EFFECT && gBattleWeather & B_WEATHER_SANDSTORM)
-            calc = (calc * 80) / 100; // 1.2 sand veil loss
-        break;
     case ABILITY_SNOW_CLOAK:
         if (WEATHER_HAS_EFFECT && (gBattleWeather & (B_WEATHER_HAIL | B_WEATHER_SNOW)))
             calc = (calc * 80) / 100; // 1.2 snow cloak loss
@@ -6810,6 +6806,26 @@ static void Cmd_moveend(void)
                 for (i = 0; i < gBattlersCount; i++)
                 {
                     u8 battler = battlers[i];
+                    if (battler != gBattlerAttacker
+                      && IsBattlerAlive(battler)
+                      && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)
+                      && HasBattlerAbility(battler, ABILITY_STENCH)
+                      && BATTLER_TURN_DAMAGED(battler)
+                      && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+                      && RandomWeighted(RNG_STENCH, 4, 1)
+                      && CanBattlerSwitch(gBattlerAttacker))
+                    {
+                        SetBattlerTriggeredAbility(battler, ABILITY_STENCH);
+                        gBattleStruct->savedBattlerTarget = gBattleScripting.battler = battler;
+                        gEffectBattler = gBattlerAttacker;
+                        if (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE)
+                            gBattlescriptCurrInstr = BattleScript_MoveEnd;
+                        BattleScriptPushCursor();
+                        gBattlescriptCurrInstr = BattleScript_StenchActivates;
+                        gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
+                        effect = TRUE;
+                        break;
+                    }
                     if (battler != gBattlerAttacker
                       && IsBattlerAlive(battler)
                       && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)

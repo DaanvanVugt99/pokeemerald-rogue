@@ -11265,6 +11265,34 @@ BattleScript_UnmovableDynamaxed:
 	swapattackerwithtarget
 	return
 
+BattleScript_StenchActivates::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	swapattackerwithtarget
+	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_StenchIngrain
+	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_StenchSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_StenchSuctionCups
+	jumpiftargetdynamaxed BattleScript_StenchDynamaxed
+	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
+	forcerandomswitch BattleScript_StenchEnd
+BattleScript_StenchEnd:
+	return
+BattleScript_StenchIngrain:
+	printstring STRINGID_PKMNANCHOREDITSELF
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+BattleScript_StenchSuctionCups:
+	printstring STRINGID_PKMNANCHORSITSELFWITH
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+BattleScript_StenchDynamaxed:
+	printstring STRINGID_MOVEBLOCKEDBYDYNAMAX
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+
 BattleScript_RootsnareActivates::
 	waitstate
 	call BattleScript_AbilityPopUp

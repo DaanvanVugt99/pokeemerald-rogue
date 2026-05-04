@@ -10501,23 +10501,6 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
-        case ABILITY_STENCH:
-            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-             && gBattleMons[gBattlerTarget].hp != 0
-             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-             && RandomWeighted(RNG_STENCH, 9, 1)
-             && TARGET_TURN_DAMAGED
-             && gBattleMoves[gCurrentMove].effect != EFFECT_FLINCH_HIT
-             && gBattleMoves[gCurrentMove].effect != EFFECT_FLINCH_STATUS
-             && gBattleMoves[gCurrentMove].effect != EFFECT_TRIPLE_ARROWS)
-            {
-                gBattleScripting.moveEffect = MOVE_EFFECT_FLINCH;
-                BattleScriptPushCursor();
-                SetMoveEffect(FALSE, 0);
-                BattleScriptPop();
-                effect++;
-            }
-            break;
         case ABILITY_GULP_MISSILE:
             if (((gCurrentMove == MOVE_SURF && TARGET_TURN_DAMAGED) || gStatuses3[gBattlerAttacker] & STATUS3_UNDERWATER)
              && TryBattleFormChange(gBattlerAttacker, FORM_CHANGE_BATTLE_HP_PERCENT))
@@ -15335,8 +15318,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                         && TARGET_TURN_DAMAGED
                         && !gBattleMoves[gCurrentMove].ignoresKingsRock
                         && gBattleMons[gBattlerTarget].hp
-                        && RandomPercentage(RNG_HOLD_EFFECT_FLINCH, atkHoldEffectParam)
-                        && ability != ABILITY_STENCH)
+                        && RandomPercentage(RNG_HOLD_EFFECT_FLINCH, atkHoldEffectParam))
                     {
                         shouldFlinch = TRUE;
                     }
@@ -18221,6 +18203,18 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
     case ABILITY_PRISM_ARMOR:
         if (typeEffectivenessModifier >= UQ_4_12(2.0))
             return UQ_4_12(0.75);
+        break;
+    case ABILITY_BATTLE_ARMOR:
+        if (IsMoveMakingContact(move, battlerAtk))
+            return UQ_4_12(0.8);
+        break;
+    case ABILITY_SAND_VEIL:
+        if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM))
+            return UQ_4_12(0.7);
+        break;
+    case ABILITY_DAMP:
+        if (moveType == TYPE_FIRE)
+            return UQ_4_12(0.5);
         break;
     case ABILITY_FLUFFY:
         if (!IsMoveMakingContact(move, battlerAtk) && moveType == TYPE_FIRE)

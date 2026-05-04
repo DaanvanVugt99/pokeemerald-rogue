@@ -1,12 +1,12 @@
 static const u8 sNoneDescription[] = _("No special ability.");
-static const u8 sStenchDescription[] = _("May cause a foe to flinch.");
+static const u8 sStenchDescription[] = _("Hit by contact: 20% chance to force the attacker out.");
 static const u8 sDrizzleDescription[] = _("Summons rain in battle.");
 static const u8 sSpeedBoostDescription[] = _("Gradually boosts Speed.");
-static const u8 sBattleArmorDescription[] = _("Blocks critical hits.");
+static const u8 sBattleArmorDescription[] = _("Blocks critical hits and takes less contact damage.");
 static const u8 sSturdyDescription[] = _("Negates 1-hit KO attacks.");
-static const u8 sDampDescription[] = _("Prevents self-destruction.");
-static const u8 sLimberDescription[] = _("Prevents paralysis.");
-static const u8 sSandVeilDescription[] = _("Ups evasion in a sandstorm.");
+static const u8 sDampDescription[] = _("Prevents self-destruction and halves Fire damage.");
+static const u8 sLimberDescription[] = _("Prevents paralysis and ignores Speed changes for move order.");
+static const u8 sSandVeilDescription[] = _("Immune to sandstorm and takes less damage in it.");
 static const u8 sStaticDescription[] = _("Paralyzes on contact.");
 static const u8 sVoltAbsorbDescription[] = _("Turns electricity into HP.");
 static const u8 sWaterAbsorbDescription[] = _("Changes water into HP.");

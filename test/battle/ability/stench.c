@@ -1,82 +1,60 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Stench has a 10% chance to flinch")
+SINGLE_BATTLE_TEST("Stench has a 20% chance to force out attackers when hit by contact")
 {
-    PASSES_RANDOMLY(1, 10, RNG_STENCH);
+    PASSES_RANDOMLY(1, 5, RNG_STENCH);
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
+        ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
         PLAYER(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
-        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WYNAUT);
     } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(opponent, MOVE_TACKLE); }
     } SCENE {
-        MESSAGE("Foe Wobbuffet flinched!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ABILITY_POPUP(player, ABILITY_STENCH);
+        MESSAGE("Foe Wynaut was dragged out!");
+    } THEN {
+        EXPECT_EQ(opponent->species, SPECIES_WYNAUT);
     }
 }
 
-SINGLE_BATTLE_TEST("Stench does not stack with King's Rock")
-{
-    PASSES_RANDOMLY(1, 10, RNG_STENCH);
-    GIVEN {
-        ASSUME(gItems[ITEM_KINGS_ROCK].holdEffect == HOLD_EFFECT_FLINCH);
-        ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
-
-        PLAYER(SPECIES_GRIMER) { Ability(ABILITY_STENCH); Item(ITEM_KINGS_ROCK); }
-        OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        MESSAGE("Foe Wobbuffet flinched!");
-    }
-}
-
-DOUBLE_BATTLE_TEST("Stench only triggers if target takes damage")
+SINGLE_BATTLE_TEST("Stench does not force out attackers when hit by non-contact moves")
 {
     GIVEN {
-        ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
-        ASSUME(gBattleMoves[MOVE_FAKE_OUT].effect == EFFECT_FAKE_OUT);
-        PLAYER(SPECIES_WOBBUFFET);
-        PLAYER(SPECIES_WYNAUT);
-        OPPONENT(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
-        OPPONENT(SPECIES_WOBBUFFET);
+        ASSUME(gBattleMoves[MOVE_SWIFT].power > 0);
+        ASSUME(!gBattleMoves[MOVE_SWIFT].makesContact);
+        PLAYER(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SWIFT); }
+        OPPONENT(SPECIES_WYNAUT);
     } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_FAKE_OUT, target: opponentLeft);
-            MOVE(opponentLeft, MOVE_TACKLE, WITH_RNG(RNG_STENCH, TRUE),  target: playerRight);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
-        }
-        TURN {
-            MOVE(opponentLeft, MOVE_SCARY_FACE, WITH_RNG(RNG_STENCH, TRUE),  target: playerRight);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
-        }
+        TURN { MOVE(opponent, MOVE_SWIFT, WITH_RNG(RNG_STENCH, TRUE)); }
     } SCENE {
-        NONE_OF { MESSAGE("Wynaut flinched!"); }
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWIFT, opponent);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_STENCH);
+            MESSAGE("Foe Wynaut was dragged out!");
+        }
+    } THEN {
+        EXPECT_EQ(opponent->species, SPECIES_WOBBUFFET);
     }
 }
 
-DOUBLE_BATTLE_TEST("Stench doesn't trigger if partner uses a move")
+SINGLE_BATTLE_TEST("Stench does not trigger if the attacker cannot switch out")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
-        ASSUME(gBattleMoves[MOVE_FAKE_OUT].effect == EFFECT_FAKE_OUT);
-        PLAYER(SPECIES_WOBBUFFET) { Speed(20); }
-        PLAYER(SPECIES_WYNAUT) { Speed(10); }
-        OPPONENT(SPECIES_GRIMER) { Speed(100); Ability(ABILITY_STENCH); }
-        OPPONENT(SPECIES_WOBBUFFET) {Speed(50); }
+        ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
+        PLAYER(SPECIES_GRIMER) { Ability(ABILITY_STENCH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
     } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_FAKE_OUT, target: opponentLeft);
-            MOVE(opponentRight, MOVE_TACKLE, target: playerRight);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
-        }
+        TURN { MOVE(opponent, MOVE_TACKLE, WITH_RNG(RNG_STENCH, TRUE)); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_FAKE_OUT, playerLeft);
-        MESSAGE("Foe Grimer flinched!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponentRight);
-        NOT MESSAGE("Wynaut flinched!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerRight);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NOT ABILITY_POPUP(player, ABILITY_STENCH);
+    } THEN {
+        EXPECT_EQ(opponent->species, SPECIES_WOBBUFFET);
     }
 }
-
-// TODO: Test against interaction with multi hits

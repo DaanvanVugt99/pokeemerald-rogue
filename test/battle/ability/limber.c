@@ -31,3 +31,30 @@ SINGLE_BATTLE_TEST("Unique Limber prevents paralysis")
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Limber ignores Speed stage changes when determining move order")
+{
+    u32 ability;
+    PARAMETRIZE { ability = ABILITY_NONE; }
+    PARAMETRIZE { ability = ABILITY_LIMBER; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ability); Speed(100); }
+        OPPONENT(SPECIES_WYNAUT) { Ability(ABILITY_PRANKSTER); Speed(60); Moves(MOVE_SCARY_FACE, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SCARY_FACE); MOVE(player, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        MESSAGE("Foe Wynaut used Scary Face!");
+        MESSAGE("Wobbuffet used Celebrate!");
+        if (ability == ABILITY_NONE) {
+            MESSAGE("Foe Wynaut used Tackle!");
+            MESSAGE("Wobbuffet used Celebrate!");
+        } else {
+            MESSAGE("Wobbuffet used Celebrate!");
+            MESSAGE("Foe Wynaut used Tackle!");
+        }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE - 2);
+    }
+}

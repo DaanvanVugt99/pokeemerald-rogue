@@ -4705,8 +4705,7 @@ static bool8 ActivateMovePriorityCharm(u8 battler)
     }
 }
 
-// For AI, so it doesn't 'cheat' by knowing player's ability
-u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
+static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 holdEffect, bool32 ignoreLimberSpeedStages)
 {
     u32 speed = gBattleMons[battler].speed;
     u32 highestStat = GetHighestStatId(battler);
@@ -4773,7 +4772,8 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
             RecordAbilityBattle(battler, ABILITY_UNKNOWN_BIOLOGY);
     }
     // stat stages
-    if (!IsAbilityOnField(ABILITY_EQUILIBRIUM))
+    if (!IsAbilityOnField(ABILITY_EQUILIBRIUM)
+     && !(ignoreLimberSpeedStages && HasBattlerAbility(battler, ABILITY_LIMBER)))
     {
         speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
         speed /= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][1];
@@ -4813,6 +4813,17 @@ u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
         speed /= 4;
 
     return speed;
+}
+
+// For AI, so it doesn't 'cheat' by knowing player's ability
+u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
+{
+    return GetBattlerTotalSpeedStatArgsInternal(battler, ability, holdEffect, FALSE);
+}
+
+static u32 GetBattlerMoveOrderSpeedStat(u32 battler, u32 ability, u32 holdEffect)
+{
+    return GetBattlerTotalSpeedStatArgsInternal(battler, ability, holdEffect, TRUE);
 }
 
 u32 GetBattlerTotalSpeedStat(u32 battler)
@@ -5163,11 +5174,11 @@ u32 GetWhichBattlerFaster(u32 battler1, u32 battler2, bool32 ignoreChosenMoves)
 {
     s32 priority1 = 0, priority2 = 0;
     u32 ability1 = GetBattlerAbility(battler1);
-    u32 speedBattler1 = GetBattlerTotalSpeedStat(battler1);
     u32 holdEffectBattler1 = GetBattlerHoldEffect(battler1, TRUE);
-    u32 speedBattler2 = GetBattlerTotalSpeedStat(battler2);
     u32 holdEffectBattler2 = GetBattlerHoldEffect(battler2, TRUE);
     u32 ability2 = GetBattlerAbility(battler2);
+    u32 speedBattler1 = GetBattlerMoveOrderSpeedStat(battler1, ability1, holdEffectBattler1);
+    u32 speedBattler2 = GetBattlerMoveOrderSpeedStat(battler2, ability2, holdEffectBattler2);
 
     if (!ignoreChosenMoves)
     {

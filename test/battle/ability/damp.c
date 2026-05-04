@@ -73,3 +73,29 @@ SINGLE_BATTLE_TEST("Damp prevents damage from aftermath")
         NONE_OF { HP_BAR(player); }
     }
 }
+
+SINGLE_BATTLE_TEST("Damp halves damage taken from Fire-type moves only", s16 damage)
+{
+    u32 move;
+    u32 ability;
+
+    PARAMETRIZE { move = MOVE_EMBER; ability = ABILITY_NONE; }
+    PARAMETRIZE { move = MOVE_EMBER; ability = ABILITY_DAMP; }
+    PARAMETRIZE { move = MOVE_WATER_GUN; ability = ABILITY_NONE; }
+    PARAMETRIZE { move = MOVE_WATER_GUN; ability = ABILITY_DAMP; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+        ASSUME(gBattleMoves[MOVE_WATER_GUN].type == TYPE_WATER);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ability); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, move); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, move, opponent);
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.5), results[1].damage);
+        EXPECT_EQ(results[2].damage, results[3].damage);
+    }
+}
