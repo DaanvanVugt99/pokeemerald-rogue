@@ -6809,6 +6809,28 @@ static void Cmd_moveend(void)
                     if (battler != gBattlerAttacker
                       && IsBattlerAlive(battler)
                       && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)
+                      && GetBattlerSide(battler) != GetBattlerSide(gBattlerAttacker)
+                      && HasBattlerAbility(battler, ABILITY_SUCTION_CUPS)
+                      && BATTLER_TURN_DAMAGED(battler)
+                      && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+                      && !(gBattleMons[gBattlerAttacker].status2 & STATUS2_WRAPPED))
+                    {
+                        SetBattlerTriggeredAbility(battler, ABILITY_SUCTION_CUPS);
+                        gBattleMons[gBattlerAttacker].status2 |= STATUS2_WRAPPED;
+                        gDisableStructs[gBattlerAttacker].wrapTurns = RandomWeighted(RNG_SUCTION_CUPS, 1, 1) + 2;
+                        gBattleStruct->wrappedMove[gBattlerAttacker] = MOVE_WRAP;
+                        gBattleStruct->wrappedBy[gBattlerAttacker] = battler;
+                        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_WRAPPED_WRAP;
+                        gBattleStruct->savedBattlerTarget = gBattleScripting.battler = battler;
+                        gBattlerTarget = battler;
+                        BattleScriptPushCursor();
+                        gBattlescriptCurrInstr = BattleScript_SuctionCupsActivates;
+                        effect = TRUE;
+                        break;
+                    }
+                    if (battler != gBattlerAttacker
+                      && IsBattlerAlive(battler)
+                      && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)
                       && HasBattlerAbility(battler, ABILITY_STENCH)
                       && BATTLER_TURN_DAMAGED(battler)
                       && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
@@ -8359,6 +8381,7 @@ static void Cmd_switchineffects(void)
     else if (!(gDisableStructs[battler].spikesDone)
         && (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SPIKES)
         && !HasBattlerAbility(battler, ABILITY_MAGIC_GUARD)
+        && !HasBattlerAbility(battler, ABILITY_SHIELD_DUST)
         && IsBattlerAffectedByHazards(battler, FALSE)
         && IsBattlerGrounded(battler))
     {
@@ -8373,7 +8396,8 @@ static void Cmd_switchineffects(void)
     else if (!(gDisableStructs[battler].stealthRockDone)
         && (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_STEALTH_ROCK)
         && IsBattlerAffectedByHazards(battler, FALSE)
-        && !HasBattlerAbility(battler, ABILITY_MAGIC_GUARD))
+        && !HasBattlerAbility(battler, ABILITY_MAGIC_GUARD)
+        && !HasBattlerAbility(battler, ABILITY_SHIELD_DUST))
     {
         gDisableStructs[battler].stealthRockDone = TRUE;
         gBattleMoveDamage = GetStealthHazardDamage(gBattleMoves[MOVE_STEALTH_ROCK].type, battler);
@@ -8434,7 +8458,8 @@ static void Cmd_switchineffects(void)
     else if (!(gDisableStructs[battler].steelSurgeDone)
         && (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_STEELSURGE)
         && IsBattlerAffectedByHazards(battler, FALSE)
-        && !HasBattlerAbility(battler, ABILITY_MAGIC_GUARD))
+        && !HasBattlerAbility(battler, ABILITY_MAGIC_GUARD)
+        && !HasBattlerAbility(battler, ABILITY_SHIELD_DUST))
     {
         gDisableStructs[battler].steelSurgeDone = TRUE;
         gBattleMoveDamage = GetStealthHazardDamage(gBattleMoves[MOVE_G_MAX_STEELSURGE].type, battler);
@@ -14117,6 +14142,7 @@ static void Cmd_weatherdamage(void)
             }
             else if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON)
                 && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_BUG)
+                && !HasBattlerAbility(gBattlerAttacker, ABILITY_IMMUNITY)
                 && ability != ABILITY_OVERCOAT
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
@@ -17765,6 +17791,9 @@ static u16 GetStatLossPreventionAbility(u32 battler, u32 statId, bool8 byIntimid
      && WEATHER_HAS_EFFECT
      && (gBattleWeather & B_WEATHER_SANDSTORM))
         return ABILITY_SAND_SKIMMER;
+    if (statId == STAT_SPEED
+     && HasBattlerAbility(battler, ABILITY_INSOMNIA))
+        return ABILITY_INSOMNIA;
     if (statId == STAT_SPEED
      && HasBattlerAbility(battler, ABILITY_FIELD_RUNNER)
      && IsBattlerTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN))

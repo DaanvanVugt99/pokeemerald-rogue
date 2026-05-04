@@ -17713,6 +17713,7 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
     {
         if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
          || (HasBattlerAbility(battlerAtk, ABILITY_WATER_GLIDE) && moveType == TYPE_FLYING)
+         || (HasBattlerAbility(battlerAtk, ABILITY_LEVITATE) && moveType == TYPE_FLYING)
          || (HasBattlerAbility(battlerAtk, ABILITY_MOON_TOTEM) && moveType == TYPE_DARK)
          || (HasBattlerAbility(battlerAtk, ABILITY_SUN_TOTEM) && moveType == TYPE_FIRE)
          || (HasBattlerAbility(battlerAtk, ABILITY_ELECTROCYTES) && moveType == TYPE_ELECTRIC)
@@ -18214,6 +18215,10 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         break;
     case ABILITY_DAMP:
         if (moveType == TYPE_FIRE)
+            return UQ_4_12(0.5);
+        break;
+    case ABILITY_IMMUNITY:
+        if (moveType == TYPE_POISON)
             return UQ_4_12(0.5);
         break;
     case ABILITY_FLUFFY:

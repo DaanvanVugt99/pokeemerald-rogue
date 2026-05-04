@@ -95,3 +95,34 @@ SINGLE_BATTLE_TEST("Unique Vital Spirit prevents yawn")
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Insomnia prevents Speed from being lowered")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SCARY_FACE].effect == EFFECT_SPEED_DOWN_2);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_INSOMNIA); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SCARY_FACE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SCARY_FACE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_INSOMNIA);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Insomnia does not prevent non-Speed stats from being lowered")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_GROWL].effect == EFFECT_ATTACK_DOWN);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_INSOMNIA); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_GROWL); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_GROWL); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE - 1);
+    }
+}

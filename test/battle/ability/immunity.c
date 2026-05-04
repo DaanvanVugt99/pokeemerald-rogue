@@ -76,3 +76,48 @@ SINGLE_BATTLE_TEST("Unique Immunity prevents Toxic bad poison")
         NOT STATUS_ICON(opponent, poison: TRUE);
     }
 }
+
+SINGLE_BATTLE_TEST("Immunity halves damage taken from Poison-type moves only", s16 damage)
+{
+    u32 move;
+    u32 ability;
+
+    PARAMETRIZE { move = MOVE_SLUDGE; ability = ABILITY_NONE; }
+    PARAMETRIZE { move = MOVE_SLUDGE; ability = ABILITY_IMMUNITY; }
+    PARAMETRIZE { move = MOVE_WATER_GUN; ability = ABILITY_NONE; }
+    PARAMETRIZE { move = MOVE_WATER_GUN; ability = ABILITY_IMMUNITY; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SLUDGE].type == TYPE_POISON);
+        ASSUME(gBattleMoves[MOVE_WATER_GUN].type == TYPE_WATER);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(move); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ability); }
+    } WHEN {
+        TURN { MOVE(player, move); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, move, player);
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.5), results[1].damage);
+        EXPECT_EQ(results[2].damage, results[3].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Immunity prevents acid rain damage")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ACID_RAIN].effect == EFFECT_CORROSIVE_CLOUDS);
+        ASSUME(gSpeciesInfo[SPECIES_WOBBUFFET].types[0] != TYPE_POISON && gSpeciesInfo[SPECIES_WOBBUFFET].types[1] != TYPE_POISON);
+        ASSUME(gSpeciesInfo[SPECIES_WOBBUFFET].types[0] != TYPE_BUG && gSpeciesInfo[SPECIES_WOBBUFFET].types[1] != TYPE_BUG);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_IMMUNITY); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_ACID_RAIN, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_ACID_RAIN); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            MESSAGE("Wobbuffet is scorched by acid rain!");
+            HP_BAR(player);
+        }
+    }
+}

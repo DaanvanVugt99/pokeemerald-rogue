@@ -11293,6 +11293,15 @@ BattleScript_StenchDynamaxed:
 	swapattackerwithtarget
 	return
 
+BattleScript_SuctionCupsActivates::
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	swapattackerwithtarget
+	printfromtable gWrappedStringIds
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	return
+
 BattleScript_RootsnareActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
