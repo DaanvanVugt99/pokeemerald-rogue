@@ -612,15 +612,15 @@ bool32 IsBattlerTrapped(u32 battler, bool32 checkSwitch)
         return FALSE;
     if (checkSwitch && holdEffect == HOLD_EFFECT_SHED_SHELL)
         return FALSE;
-    else if (!checkSwitch && AI_HasAbility(battler, ABILITY_RUN_AWAY))
+    else if (gStatuses3[battler] & (STATUS3_ROOTED | STATUS3_SKY_DROPPED))
+        return TRUE;
+    else if (gFieldStatuses & STATUS_FIELD_FAIRY_LOCK)
+        return TRUE;
+    else if (AI_HasAbility(battler, ABILITY_RUN_AWAY))
         return FALSE;
     else if (!checkSwitch && holdEffect == HOLD_EFFECT_CAN_ALWAYS_RUN)
         return FALSE;
     else if (gBattleMons[battler].status2 & (STATUS2_ESCAPE_PREVENTION | STATUS2_WRAPPED))
-        return TRUE;
-    else if (gStatuses3[battler] & (STATUS3_ROOTED | STATUS3_SKY_DROPPED))
-        return TRUE;
-    else if (gFieldStatuses & STATUS_FIELD_FAIRY_LOCK)
         return TRUE;
     else if (IsAbilityPreventingEscape(battler))
         return TRUE;

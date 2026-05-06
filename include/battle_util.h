@@ -173,7 +173,7 @@ u32 IsAbilityOnField(u32 ability);
 u32 IsAbilityOnFieldExcept(u32 battler, u32 ability);
 u32 IsAbilityPreventingEscape(u32 battler);
 bool32 IsBattlerProtected(u32 battler, u32 move);
-bool32 CanBattlerEscape(u32 battler); // no ability check
+bool32 CanBattlerEscape(u32 battler);
 void BattleScriptExecute(const u8 *BS_ptr);
 void BattleScriptPushCursorAndCallback(const u8 *BS_ptr);
 u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn);

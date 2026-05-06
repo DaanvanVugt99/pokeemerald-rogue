@@ -7672,6 +7672,16 @@ special_delivery_done:
                 effect++;
             }
             break;
+        case ABILITY_PICKUP:
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && ClearSideEntryHazards(GetBattlerSide(battler)))
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = gBattlerAbility = battler;
+                BattleScriptPushCursorAndCallback(BattleScript_PickupClearsHazards);
+                effect++;
+            }
+            break;
         case ABILITY_ROYAL_CHARM:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -8161,7 +8171,7 @@ special_delivery_done:
                 }
                 break;
             case ABILITY_SHED_SKIN:
-                if ((gBattleMons[battler].status1 & STATUS1_ANY) && (Random() % 3) == 0)
+                if (gBattleMons[battler].status1 & STATUS1_ANY)
                 {
                     shedSkinAbilityActivate = TRUE;
                 }
@@ -9303,12 +9313,14 @@ if (triggeringAbility != ABILITY_NONE)
             break;
         case ABILITY_GOOEY:
         case ABILITY_TANGLING_HAIR:
+        case ABILITY_STICKY_HOLD:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
              && gBattleMons[gBattlerAttacker].hp != 0
              && (CompareStat(gBattlerAttacker, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN) || GetBattlerAbility(gBattlerAttacker) == ABILITY_MIRROR_ARMOR)
              && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
              && TARGET_TURN_DAMAGED
-             && IsMoveMakingContact(move, gBattlerAttacker))
+             && IsMoveMakingContact(move, gBattlerAttacker)
+             && (gLastUsedAbility != ABILITY_STICKY_HOLD || RandomPercentage(RNG_STICKY_HOLD, 50)))
             {
                 SET_STATCHANGER(STAT_SPEED, 1, TRUE);
                 gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
@@ -13734,6 +13746,8 @@ u32 IsAbilityOnFieldExcept(u32 battler, u32 ability)
 u32 IsAbilityPreventingEscape(u32 battler)
 {
     u32 id;
+    if (HasBattlerAbility(battler, ABILITY_RUN_AWAY))
+        return 0;
     if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
         return 0;
     if ((id = IsAbilityOnOpposingSide(battler, ABILITY_SHADOW_TAG))
@@ -13755,13 +13769,15 @@ bool32 CanBattlerEscape(u32 battler)
         return TRUE;
     else if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
         return TRUE;
-    else if (gBattleMons[battler].status2 & (STATUS2_ESCAPE_PREVENTION | STATUS2_WRAPPED))
-        return FALSE;
     else if ((gStatuses3[battler] & STATUS3_ROOTED) && !HasBattlerAbility(battler, ABILITY_UPROOT))
         return FALSE;
     else if (gFieldStatuses & STATUS_FIELD_FAIRY_LOCK)
         return FALSE;
     else if (gStatuses3[battler] & STATUS3_SKY_DROPPED)
+        return FALSE;
+    else if (HasBattlerAbility(battler, ABILITY_RUN_AWAY))
+        return TRUE;
+    else if (gBattleMons[battler].status2 & (STATUS2_ESCAPE_PREVENTION | STATUS2_WRAPPED))
         return FALSE;
     else
         return TRUE;
@@ -17280,7 +17296,7 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         break;
     case ABILITY_HUSTLE:
         if (usesOwnAttackStat)
-            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.4));
         break;
     case ABILITY_STAKEOUT:
         if (gDisableStructs[battlerDef].isFirstTurn == 2) // just switched in
@@ -19893,6 +19909,7 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
     if (HasBattlerAbility(battler, ABILITY_BUOYANCY)
      || HasBattlerAbility(battler, ABILITY_POLLEN_PUFF)
      || HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD)
+     || HasBattlerAbility(battler, ABILITY_PICKUP)
      || HasBattlerAbility(battler, ABILITY_HOLLOW_NEST)
      || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
       && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))

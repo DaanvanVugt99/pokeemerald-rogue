@@ -736,8 +736,9 @@
 #define STRINGID_MOODSWINGELATED                      734
 #define STRINGID_MOODSWINGANXIOUS                     735
 #define STRINGID_PKMNMAINTYPECHANGED                  736
+#define STRINGID_PICKUPCLEAREDHAZARDS                 737
 
-#define BATTLESTRINGS_COUNT                           737
+#define BATTLESTRINGS_COUNT                           738
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

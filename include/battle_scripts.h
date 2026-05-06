@@ -594,6 +594,7 @@ extern const u8 BattleScript_ZeroToHeroActivates[];
 extern const u8 BattleScript_HospitalityActivates[];
 extern const u8 BattleScript_TidalFloodActivates[];
 extern const u8 BattleScript_TidalFloodActivatesNoHeal[];
+extern const u8 BattleScript_PickupClearsHazards[];
 extern const u8 BattleScript_DesertShroudActivates[];
 extern const u8 BattleScript_PsychicParryPrepared[];
 extern const u8 BattleScript_PsychicParryActivates[];

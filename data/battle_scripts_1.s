@@ -10137,6 +10137,13 @@ BattleScript_TidalFloodActivatesNoHeal::
 	waitanimation
 	end3
 
+BattleScript_PickupClearsHazards::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PICKUPCLEAREDHAZARDS
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_DesertShroudActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
