@@ -4732,9 +4732,9 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
         speed *= 2;
     else if (ability == ABILITY_SLOW_START && gDisableStructs[battler].slowStartTimer != 0)
         speed /= 2;
-    else if (ability == ABILITY_PROTOSYNTHESIS && gBattleWeather & B_WEATHER_SUN && highestStat == STAT_SPEED)
+    else if (ability == ABILITY_PROTOSYNTHESIS && (gBattleWeather & B_WEATHER_SUN || IsBoosterEnergyActive(battler)) && highestStat == STAT_SPEED)
         speed = (speed * 150) / 100;
-    else if (ability == ABILITY_QUARK_DRIVE && gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN && highestStat == STAT_SPEED)
+    else if (ability == ABILITY_QUARK_DRIVE && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN || IsBoosterEnergyActive(battler)) && highestStat == STAT_SPEED)
         speed = (speed * 150) / 100;
 
     // unique abilities
@@ -5799,8 +5799,7 @@ static void HandleEndTurn_FinishBattle(void)
             TestRunner_Battle_AfterLastTurn();
         BeginFastPaletteFade(3);
         FadeOutMapMusic(5);
-        if (B_TRAINERS_KNOCK_OFF_ITEMS == TRUE || B_RESTORE_HELD_BATTLE_ITEMS == TRUE)
-            TryRestoreHeldItems();
+        TryRestoreHeldItems();
 
         // Undo Dynamax HP multiplier before recalculating stats.
         for (i = 0; i < gBattlersCount; ++i)

@@ -3151,7 +3151,9 @@ static bool32 CanBattlersSwapItems(u32 battlerAtk, u32 battlerDef)
     if (!CanBattlerGetOrLoseItem(battlerAtk, itemAtk)
      || !CanBattlerGetOrLoseItem(battlerAtk, itemDef)
      || !CanBattlerGetOrLoseItem(battlerDef, itemDef)
-     || !CanBattlerGetOrLoseItem(battlerDef, itemAtk))
+     || !CanBattlerGetOrLoseItem(battlerDef, itemAtk)
+     || !CanTransferBoosterEnergy(battlerAtk, battlerDef, itemAtk)
+     || !CanTransferBoosterEnergy(battlerDef, battlerAtk, itemDef))
         return FALSE;
 
     return TRUE;
@@ -5894,6 +5896,7 @@ static bool32 TryKnockOffBattleScript(u32 battlerDef)
 {
     if (gBattleMons[battlerDef].item != 0
         && CanBattlerGetOrLoseItem(battlerDef, gBattleMons[battlerDef].item)
+        && CanTransferBoosterEnergy(battlerDef, battlerDef, gBattleMons[battlerDef].item)
         && !NoAliveMonsForEitherParty())
     {
         if (HasBattlerAbility(battlerDef, ABILITY_STICKY_HOLD) && IsBattlerAlive(battlerDef))
@@ -5928,6 +5931,7 @@ static bool32 TryKnockOffBattleScript(u32 battlerDef)
     && gBattleMons[ally].item != ITEM_NONE                         \
     && CanBattlerGetOrLoseItem(battler, gBattleMons[ally].item)    \
     && CanBattlerGetOrLoseItem(ally, gBattleMons[ally].item)       \
+    && CanTransferBoosterEnergy(ally, battler, gBattleMons[ally].item) \
     && gBattleMons[battler].hp != 0                                \
     && gBattleMons[ally].hp != 0
 
@@ -11549,6 +11553,7 @@ static void Cmd_various(void)
             || gBattleMons[gBattlerTarget].item != ITEM_NONE
             || !CanBattlerGetOrLoseItem(gBattlerAttacker, gBattleMons[gBattlerAttacker].item)
             || !CanBattlerGetOrLoseItem(gBattlerTarget, gBattleMons[gBattlerAttacker].item)
+            || !CanTransferBoosterEnergy(gBattlerAttacker, gBattlerTarget, gBattleMons[gBattlerAttacker].item)
             || gWishFutureKnock.knockedOffMons[GetBattlerSide(gBattlerTarget)] & gBitTable[gBattlerPartyIndexes[gBattlerTarget]])
         {
             gBattlescriptCurrInstr = cmd->failInstr;
@@ -17219,19 +17224,20 @@ static void Cmd_rogue_caughtmon(void)
 
 static void Cmd_givecaughtmon(void)
 {
-    u32 customMonId = RogueGift_GetCustomMonId(&gEnemyParty[gBattlerPartyIndexes[gBattlerAttacker ^ BIT_SIDE]]);
+    u32 caughtPartyIndex = gBattlerPartyIndexes[GetCatchingBattler()];
+    u32 customMonId = RogueGift_GetCustomMonId(&gEnemyParty[caughtPartyIndex]);
     u8 giveSlot;
     CMD_ARGS();
 
-    Rogue_OnAcceptCaughtMon(&gEnemyParty[gBattlerPartyIndexes[GetCatchingBattler()]]);
+    Rogue_OnAcceptCaughtMon(&gEnemyParty[caughtPartyIndex]);
 
     if(customMonId != 0 || IsCurseActive(EFFECT_SNAG_TRAINER_MON))
     {
-        giveSlot = GiveTradedMonToPlayer(&gEnemyParty[gBattlerPartyIndexes[GetCatchingBattler()]]);
+        giveSlot = GiveTradedMonToPlayer(&gEnemyParty[caughtPartyIndex]);
     }
     else
     {
-        giveSlot = GiveMonToPlayer(&gEnemyParty[gBattlerPartyIndexes[GetCatchingBattler()]]);
+        giveSlot = GiveMonToPlayer(&gEnemyParty[caughtPartyIndex]);
     }
 
     if (giveSlot != MON_GIVEN_TO_PARTY)
@@ -17895,7 +17901,9 @@ void BS_JumpIfCantLoseItem(void)
     u8 battler = GetBattlerForBattleScript(cmd->battler);
     u16 item = gBattleMons[battler].item;
 
-    if (item == ITEM_NONE || !CanBattlerGetOrLoseItem(battler, item))
+    if (item == ITEM_NONE
+     || !CanBattlerGetOrLoseItem(battler, item)
+     || !CanTransferBoosterEnergy(battler, battler, item))
         gBattlescriptCurrInstr = cmd->jumpInstr;
     else
         gBattlescriptCurrInstr = cmd->nextInstr;

@@ -10085,6 +10085,16 @@ BattleScript_ProtosynthesisActivates::
 	waitmessage B_WAIT_TIME_MED
 	end3
 
+BattleScript_BoosterEnergyActivates::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	printstring STRINGID_BOOSTERENERGYACTIVATEDABILITY
+	waitmessage B_WAIT_TIME_MED
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_STATWASHEIGHTENED
+	waitmessage B_WAIT_TIME_MED
+	removeitem BS_SCRIPTING
+	end2
+
 BattleScript_GluttonyActivates::
 	copybyte sSAVED_BATTLER, gBattlerAttacker
 	copybyte gEffectBattler, gBattlerAbility

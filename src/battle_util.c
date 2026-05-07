@@ -14208,6 +14208,31 @@ u8 TryHandleSeed(u32 battler, u32 terrainFlag, u8 statId, u16 itemId, bool32 exe
     return 0;
 }
 
+static bool32 TryBoosterEnergy(u32 battler)
+{
+    u32 ability = GetBattlerAbility(battler);
+
+    if (IsBoosterEnergyActive(battler))
+        return FALSE;
+
+    if ((ability == ABILITY_PROTOSYNTHESIS && !IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
+     || (ability == ABILITY_QUARK_DRIVE && !IsBattlerTerrainAffected(battler, STATUS_FIELD_ELECTRIC_TERRAIN)))
+    {
+        gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_BOOSTER_ENERGY;
+        if (ability == ABILITY_PROTOSYNTHESIS)
+            gDisableStructs[battler].weatherAbilityDone = TRUE;
+        else
+            gDisableStructs[battler].terrainAbilityDone = TRUE;
+        PREPARE_STAT_BUFFER(gBattleTextBuff1, GetHighestStatId(battler));
+        gLastUsedAbility = ability;
+        gBattlerAbility = gBattleScripting.battler = battler;
+        BattleScriptExecute(BattleScript_BoosterEnergyActivates);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 static u32 ItemRestorePp(u32 battler, u32 itemId, bool32 execute)
 {
     struct Pokemon *party = GetBattlerParty(battler);
@@ -15008,6 +15033,10 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     break;
                 }
                 break;
+            case HOLD_EFFECT_BOOSTER_ENERGY:
+                if (TryBoosterEnergy(battler))
+                    effect = ITEM_EFFECT_OTHER;
+                break;
             case HOLD_EFFECT_EJECT_PACK:
                 if (gProtectStructs[battler].statFell
                  && gProtectStructs[battler].disableEjectPack == 0
@@ -15074,6 +15103,10 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             case HOLD_EFFECT_ROTTEN_BERRY:
                 if (!moveTurn)
                     effect = RottenBerryEffect(battler, gLastUsedItem, TRUE);
+                break;
+            case HOLD_EFFECT_BOOSTER_ENERGY:
+                if (!moveTurn && TryBoosterEnergy(battler))
+                    effect = ITEM_EFFECT_OTHER;
                 break;
             case HOLD_EFFECT_RESTORE_PP:
                 if (!moveTurn)
@@ -16651,7 +16684,8 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case EFFECT_KNOCK_OFF:
         if (B_KNOCK_OFF_DMG >= GEN_6
             && gBattleMons[battlerDef].item != ITEM_NONE
-            && CanBattlerGetOrLoseItem(battlerDef, gBattleMons[battlerDef].item))
+            && CanBattlerGetOrLoseItem(battlerDef, gBattleMons[battlerDef].item)
+            && CanTransferBoosterEnergy(battlerDef, battlerDef, gBattleMons[battlerDef].item))
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
     }
@@ -16793,7 +16827,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case ABILITY_PROTOSYNTHESIS:
         {
             u8 atkHighestStat = GetHighestStatId(battlerAtk);
-            if (weather & B_WEATHER_SUN
+            if ((weather & B_WEATHER_SUN || IsBoosterEnergyActive(battlerAtk))
             && ((IS_MOVE_PHYSICAL(move) && atkHighestStat == STAT_ATK) || (IS_MOVE_SPECIAL(move) && atkHighestStat == STAT_SPATK)))
                 modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
         }
@@ -16801,7 +16835,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case ABILITY_QUARK_DRIVE:
         {
             u8 atkHighestStat = GetHighestStatId(battlerAtk);
-            if (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN
+            if ((gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN || IsBoosterEnergyActive(battlerAtk))
             && ((IS_MOVE_PHYSICAL(move) && atkHighestStat == STAT_ATK) || (IS_MOVE_SPECIAL(move) && atkHighestStat == STAT_SPATK)))
                 modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
         }
@@ -17047,7 +17081,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case ABILITY_PROTOSYNTHESIS:
         {
             u8 defHighestStat = GetHighestStatId(battlerDef);
-            if (weather & B_WEATHER_SUN
+            if ((weather & B_WEATHER_SUN || IsBoosterEnergyActive(battlerDef))
             && ((IS_MOVE_PHYSICAL(move) && defHighestStat == STAT_DEF) || (IS_MOVE_SPECIAL(move) && defHighestStat == STAT_SPDEF)))
                 modifier = uq4_12_multiply(modifier, UQ_4_12(0.7));
         }
@@ -17055,7 +17089,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case ABILITY_QUARK_DRIVE:
         {
             u8 defHighestStat = GetHighestStatId(battlerDef);
-            if (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN
+            if ((gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN || IsBoosterEnergyActive(battlerDef))
             && ((IS_MOVE_PHYSICAL(move) && defHighestStat == STAT_DEF) || (IS_MOVE_SPECIAL(move) && defHighestStat == STAT_SPDEF)))
                 modifier = uq4_12_multiply(modifier, UQ_4_12(0.7));
         }
@@ -19581,6 +19615,50 @@ bool32 CanBattlerGetOrLoseItem(u32 battler, u16 itemId)
         return TRUE;
 }
 
+static bool32 IsBoosterEnergyLockedSpecies(u16 species)
+{
+    switch (species)
+    {
+    case SPECIES_GREAT_TUSK:
+    case SPECIES_SCREAM_TAIL:
+    case SPECIES_BRUTE_BONNET:
+    case SPECIES_FLUTTER_MANE:
+    case SPECIES_SLITHER_WING:
+    case SPECIES_SANDY_SHOCKS:
+    case SPECIES_ROARING_MOON:
+    case SPECIES_WALKING_WAKE:
+    case SPECIES_GOUGING_FIRE:
+    case SPECIES_RAGING_BOLT:
+    case SPECIES_IRON_TREADS:
+    case SPECIES_IRON_BUNDLE:
+    case SPECIES_IRON_HANDS:
+    case SPECIES_IRON_JUGULIS:
+    case SPECIES_IRON_MOTH:
+    case SPECIES_IRON_THORNS:
+    case SPECIES_IRON_VALIANT:
+    case SPECIES_IRON_LEAVES:
+    case SPECIES_IRON_BOULDER:
+    case SPECIES_IRON_CROWN:
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool32 CanTransferBoosterEnergy(u32 battlerFrom, u32 battlerTo, u16 itemId)
+{
+    if (itemId != ITEM_BOOSTER_ENERGY)
+        return TRUE;
+
+    return !IsBoosterEnergyLockedSpecies(gBattleMons[battlerFrom].species)
+        && !IsBoosterEnergyLockedSpecies(gBattleMons[battlerTo].species);
+}
+
+bool32 IsBoosterEnergyActive(u32 battler)
+{
+    return (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_BOOSTER_ENERGY) != 0;
+}
+
 struct Pokemon *GetIllusionMonPtr(u32 battler)
 {
     if (gBattleStruct->illusion[battler].broken)
@@ -19784,6 +19862,7 @@ bool32 CanFling(u32 battler)
       || gFieldStatuses & STATUS_FIELD_MAGIC_ROOM
       || gDisableStructs[battler].embargoTimer != 0
       || GetFlingPowerFromItemId(item) == 0
+      || (item == ITEM_BOOSTER_ENERGY && !CanTransferBoosterEnergy(battler, battler, item))
       || !CanBattlerGetOrLoseItem(battler, item))
         return FALSE;
 
@@ -19915,7 +19994,9 @@ void TryRestoreHeldItems(void)
 
     for (i = 0; i < PARTY_SIZE; i++)
     {
-        if (B_RESTORE_HELD_BATTLE_ITEMS == TRUE || gBattleStruct->itemLost[i].stolen)
+        if (B_RESTORE_HELD_BATTLE_ITEMS == TRUE
+         || gBattleStruct->itemLost[i].stolen
+         || gBattleStruct->usedHeldItems[i][B_SIDE_PLAYER] == ITEM_BOOSTER_ENERGY)
         {
             lostItem = gBattleStruct->itemLost[i].originalItem;
             if (lostItem != ITEM_NONE && ItemId_GetPocket(lostItem) != POCKET_BERRIES)
@@ -19957,6 +20038,9 @@ bool32 CanStealItem(u32 battlerStealing, u32 battlerItem, u16 item)
 
     if (!CanBattlerGetOrLoseItem(battlerItem, item)      // Battler with item cannot have it stolen
       ||!CanBattlerGetOrLoseItem(battlerStealing, item)) // Stealer cannot take the item
+        return FALSE;
+
+    if (!CanTransferBoosterEnergy(battlerItem, battlerStealing, item))
         return FALSE;
 
     return TRUE;

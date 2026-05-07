@@ -739,8 +739,9 @@
 #define STRINGID_PICKUPCLEAREDHAZARDS                 737
 #define STRINGID_ITSEXTREMELYEFFECTIVE                738
 #define STRINGID_ITSMOSTLYINEFFECTIVE                 739
+#define STRINGID_BOOSTERENERGYACTIVATEDABILITY        740
 
-#define BATTLESTRINGS_COUNT                           740
+#define BATTLESTRINGS_COUNT                           741
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

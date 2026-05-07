@@ -64,6 +64,7 @@ struct ResourceFlags
 #define RESOURCE_FLAG_NEUTRALIZING_GAS  0x40
 #define RESOURCE_FLAG_ICE_FACE          0x80
 #define RESOURCE_FLAG_STEADFAST_USED    0x100
+#define RESOURCE_FLAG_BOOSTER_ENERGY    0x200
 
 struct DisableStruct
 {

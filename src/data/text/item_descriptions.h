@@ -3867,9 +3867,9 @@ static const u8 sAuspiciousArmorDesc[] = _(
     "Causes evolution.");
 
 static const u8 sBoosterEnergyDesc[] = _(
-    "Encapsuled energy\n"
-    "ups Pokémon with\n"
-    "certain Abilities.");
+    "Activates certain\n"
+    "Abilities when held\n"
+    "then is consumed.");
 
 static const u8 sBigBambooShootDesc[] = _(
     "A large and rare\n"
