@@ -8005,7 +8005,7 @@ special_delivery_done:
             SetBattlerTriggeredAbility(battler, ABILITY_FLAMEHEART);
             BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
             MarkBattlerForControllerExec(battler);
-            BattleScriptExecute(BattleScript_FlameheartBurnsSelf);
+            BattleScriptPushCursorAndCallback(BattleScript_FlameheartBurnsSelfEnd3);
             effect++;
         }
 
@@ -8022,21 +8022,21 @@ special_delivery_done:
                 gBattleMons[battler].status1 = STATUS1_BURN;
                 BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
                 MarkBattlerForControllerExec(battler);
-                BattleScriptExecute(BattleScript_TragicBeautyBurnsSelf);
+                BattleScriptPushCursorAndCallback(BattleScript_TragicBeautyBurnsSelfEnd3);
             }
             else if (tragicBeautyRoll == 1)
             {
                 gBattleMons[battler].status1 = STATUS1_POISON;
                 BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
                 MarkBattlerForControllerExec(battler);
-                BattleScriptExecute(BattleScript_TragicBeautyPoisonsSelf);
+                BattleScriptPushCursorAndCallback(BattleScript_TragicBeautyPoisonsSelfEnd3);
             }
             else
             {
                 gBattleMons[battler].status1 = STATUS1_PARALYSIS;
                 BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[battler].status1);
                 MarkBattlerForControllerExec(battler);
-                BattleScriptExecute(BattleScript_TragicBeautyParalyzesSelf);
+                BattleScriptPushCursorAndCallback(BattleScript_TragicBeautyParalyzesSelfEnd3);
             }
             effect++;
         }

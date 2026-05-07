@@ -1,6 +1,12 @@
 #include "global.h"
 #include "test/battle.h"
 
+ASSUMPTIONS
+{
+    ASSUME(gBattleMoves[MOVE_STICKY_WEB].effect == EFFECT_STICKY_WEB);
+    ASSUME(gItems[ITEM_WHITE_HERB].holdEffect == HOLD_EFFECT_RESTORE_STATS);
+}
+
 SINGLE_BATTLE_TEST("Flameheart burns the user on switch-in and shows burn status")
 {
     GIVEN {
@@ -12,6 +18,27 @@ SINGLE_BATTLE_TEST("Flameheart burns the user on switch-in and shows burn status
         ABILITY_POPUP(player, ABILITY_FLAMEHEART);
         MESSAGE("Magmar was burned!");
         STATUS_ICON(player, burn: TRUE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Flameheart continues switch-in effects after burning the user")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_STICKY_WEB, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_MAGMAR) { Ability(ABILITY_FLAME_BODY); UniqueAbility(ABILITY_FLAMEHEART); Item(ITEM_WHITE_HERB); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_STICKY_WEB); }
+        TURN { SWITCH(opponent, 1); }
+        TURN {}
+    } SCENE {
+        MESSAGE("Foe Magmar was caught in a Sticky Web!");
+        ABILITY_POPUP(opponent, ABILITY_FLAMEHEART);
+        MESSAGE("Foe Magmar was burned!");
+        MESSAGE("Foe Magmar's White Herb restored its status!");
+    } THEN {
+        EXPECT_EQ(opponent->item, ITEM_NONE);
+        EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
     }
 }
 

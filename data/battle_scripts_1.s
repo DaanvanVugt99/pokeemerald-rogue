@@ -8750,36 +8750,42 @@ BattleScript_FlameheartActivates::
 	end2
 
 BattleScript_FlameheartBurnsSelf::
+	call BattleScript_FlameheartBurnsSelf_Ret
+	end2
+BattleScript_FlameheartBurnsSelfEnd3::
+	call BattleScript_FlameheartBurnsSelf_Ret
+	end3
+BattleScript_FlameheartBurnsSelf_Ret:
 	copybyte gBattlerAbility, gBattlerAttacker
 	call BattleScript_AbilityPopUp
 	setbyte cMULTISTRING_CHOOSER, 0
 	copybyte gEffectBattler, gBattlerAttacker
 	call BattleScript_MoveEffectBurn
-	end2
+	return
 
-BattleScript_TragicBeautyBurnsSelf::
+BattleScript_TragicBeautyBurnsSelfEnd3::
 	copybyte gBattlerAbility, gBattlerAttacker
 	call BattleScript_AbilityPopUp
 	setbyte cMULTISTRING_CHOOSER, 0
 	copybyte gEffectBattler, gBattlerAttacker
 	call BattleScript_MoveEffectBurn
-	end2
+	end3
 
-BattleScript_TragicBeautyPoisonsSelf::
+BattleScript_TragicBeautyPoisonsSelfEnd3::
 	copybyte gBattlerAbility, gBattlerAttacker
 	call BattleScript_AbilityPopUp
 	setbyte cMULTISTRING_CHOOSER, 0
 	copybyte gEffectBattler, gBattlerAttacker
 	call BattleScript_MoveEffectPoison
-	end2
+	end3
 
-BattleScript_TragicBeautyParalyzesSelf::
+BattleScript_TragicBeautyParalyzesSelfEnd3::
 	copybyte gBattlerAbility, gBattlerAttacker
 	call BattleScript_AbilityPopUp
 	setbyte cMULTISTRING_CHOOSER, 0
 	copybyte gEffectBattler, gBattlerAttacker
 	call BattleScript_MoveEffectParalysis
-	end2
+	end3
 
 BattleScript_BurnTurnDmg::
 	printstring STRINGID_PKMNHURTBYBURN
