@@ -725,7 +725,10 @@ void BattleTv_SetDataBasedOnString(u16 stringId)
     u8 *perishCount;
     u16 *statStringId, *finishedMoveId;
 
-    if (!(gBattleTypeFlags & BATTLE_TYPE_LINK) && stringId != STRINGID_ITDOESNTAFFECT && stringId != STRINGID_NOTVERYEFFECTIVE)
+    if (!(gBattleTypeFlags & BATTLE_TYPE_LINK)
+     && stringId != STRINGID_ITDOESNTAFFECT
+     && stringId != STRINGID_NOTVERYEFFECTIVE
+     && stringId != STRINGID_ITSMOSTLYINEFFECTIVE)
         return;
 
     tvPtr = &gBattleStruct->tv;
@@ -769,11 +772,13 @@ void BattleTv_SetDataBasedOnString(u16 stringId)
             TrySetBattleSeminarShow();
         break;
     case STRINGID_NOTVERYEFFECTIVE:
+    case STRINGID_ITSMOSTLYINEFFECTIVE:
         AddMovePoints(PTS_EFFECTIVENESS, moveSlot, 1, 0);
         if (!(gBattleTypeFlags & BATTLE_TYPE_LINK) && GetMonData(defMon, MON_DATA_HP, NULL) != 0)
             TrySetBattleSeminarShow();
         break;
     case STRINGID_SUPEREFFECTIVE:
+    case STRINGID_ITSEXTREMELYEFFECTIVE:
         AddMovePoints(PTS_EFFECTIVENESS, moveSlot, 0, 0);
         break;
     case STRINGID_PKMNFORESAWATTACK:

@@ -18638,6 +18638,8 @@ static inline void TryNoticeIllusionInTypeEffectiveness(u32 move, u32 moveType, 
 
 static void UpdateMoveResultFlags(uq4_12_t modifier)
 {
+    gMoveResultEffectiveness = modifier;
+
     if (modifier == UQ_4_12(0.0))
     {
         gMoveResultFlags |= MOVE_RESULT_DOESNT_AFFECT_FOE;
