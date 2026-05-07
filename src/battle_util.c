@@ -9152,6 +9152,23 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
+        case ABILITY_SWARM:
+        case ABILITY_TORRENT:
+        case ABILITY_BLAZE:
+        case ABILITY_OVERGROW:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && IsBattlerAlive(battler)
+             && HadMoreThanHalfHpNowHasLess(battler)
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove)))
+            {
+                SetBattlerTriggeredAbility(battler, gLastUsedAbility);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+                effect++;
+            }
+            break;
         case ABILITY_EMERGENCY_EXIT:
         case ABILITY_WIMP_OUT:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -17257,20 +17274,40 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_SWARM:
-        if (moveType == TYPE_BUG && gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 3))
-            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        if (moveType == TYPE_BUG)
+        {
+            if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+            else
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+        }
         break;
     case ABILITY_TORRENT:
-        if (moveType == TYPE_WATER && gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 3))
-            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        if (moveType == TYPE_WATER)
+        {
+            if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+            else
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+        }
         break;
     case ABILITY_BLAZE:
-        if (moveType == TYPE_FIRE && gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 3))
-            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        if (moveType == TYPE_FIRE)
+        {
+            if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+            else
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+        }
         break;
     case ABILITY_OVERGROW:
-        if (moveType == TYPE_GRASS && gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 3))
-            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        if (moveType == TYPE_GRASS)
+        {
+            if (gBattleMons[battlerAtk].hp <= (gBattleMons[battlerAtk].maxHP / 2))
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+            else
+                modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.2));
+        }
         break;
     case ABILITY_PLUS:
         if (usesOwnSpAttackStat && IsBattlerAlive(BATTLE_PARTNER(battlerAtk)))
@@ -17305,6 +17342,10 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     case ABILITY_GUTS:
         if (gBattleMons[battlerAtk].status1 & STATUS1_ANY && usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        break;
+    case ABILITY_LIQUID_OOZE:
+        if (gBattleMoves[move].effect == EFFECT_ABSORB)
+            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.3));
         break;
     }
 
