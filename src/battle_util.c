@@ -5399,11 +5399,15 @@ static inline uq4_12_t GetShortCircuitModifier(u32 battler)
     return UQ_4_12(1.0) + (UQ_4_12(0.2) * gBattleStruct->supremeOverlordCounter[battler]);
 }
 
+static inline u32 GetHalfHpCutoff(u32 maxHP)
+{
+    return maxHP / 2 + (maxHP % 2);
+}
+
 static inline bool32 HadMoreThanHalfHpNowHasLess(u32 battler)
 {
-    u32 cutoff = gBattleMons[battler].maxHP / 2;
-    if (gBattleMons[battler].maxHP % 2 == 1)
-        cutoff++;
+    u32 cutoff = GetHalfHpCutoff(gBattleMons[battler].maxHP);
+
     // Had more than half of hp before, now has less
      return (gBattleStruct->hpBefore[battler] >= cutoff
              && gBattleMons[battler].hp < cutoff);
@@ -9149,6 +9153,21 @@ if (triggeringAbility != ABILITY_NONE)
                 SET_STATCHANGER(STAT_SPATK, 1, FALSE);
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+                effect++;
+            }
+            break;
+        case ABILITY_STEADFAST:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && IsBattlerAlive(battler)
+             && HadMoreThanHalfHpNowHasLess(battler)
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+             && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_STEADFAST_USED)
+             && (CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN)
+              || CompareStat(battler, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN)))
+            {
+                gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_STEADFAST_PENDING | RESOURCE_FLAG_STEADFAST_USED;
                 effect++;
             }
             break;
@@ -14262,8 +14281,11 @@ static u8 ItemHealHp(u32 battler, u32 itemId, bool32 end2, bool32 percentHeal)
             gBattlescriptCurrInstr = BattleScript_ItemHealHP_RemoveItemRet;
         }
         if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_EMERGENCY_EXIT
-         && GetNonDynamaxHP(battler) >= GetNonDynamaxMaxHP(battler)  / 2)
+         && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
             gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_EMERGENCY_EXIT;
+        if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_STEADFAST_PENDING
+         && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
+            gBattleResources->flags->flags[battler] &= ~(RESOURCE_FLAG_STEADFAST_PENDING | RESOURCE_FLAG_STEADFAST_USED);
 
         return ITEM_HP_CHANGE;
     }
@@ -14307,8 +14329,11 @@ static u8 RottenBerryEffect(u32 battler, u32 itemId, bool32 end2)
             }
 
             if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_EMERGENCY_EXIT
-             && GetNonDynamaxHP(battler) >= GetNonDynamaxMaxHP(battler) / 2)
+             && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
                 gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_EMERGENCY_EXIT;
+            if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_STEADFAST_PENDING
+             && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
+                gBattleResources->flags->flags[battler] &= ~(RESOURCE_FLAG_STEADFAST_PENDING | RESOURCE_FLAG_STEADFAST_USED);
 
             return ITEM_HP_CHANGE;
         }
@@ -16674,11 +16699,11 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         break;
     case ABILITY_RECKLESS:
         if (IS_MOVE_RECOIL(move))
-           modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+           modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
         break;
     case ABILITY_IRON_FIST:
         if (gBattleMoves[move].punchingMove)
-           modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+           modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
         break;
     case ABILITY_SHEER_FORCE:
         if (gBattleMoves[move].sheerForceBoost)
@@ -18291,6 +18316,10 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         break;
     case ABILITY_SAND_VEIL:
         if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM))
+            return UQ_4_12(0.7);
+        break;
+    case ABILITY_SNOW_CLOAK:
+        if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_HAIL | B_WEATHER_SNOW))
             return UQ_4_12(0.7);
         break;
     case ABILITY_DAMP:

@@ -1890,10 +1890,6 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     // Target's ability
     switch (defAbility)
     {
-    case ABILITY_SNOW_CLOAK:
-        if (WEATHER_HAS_EFFECT && (gBattleWeather & (B_WEATHER_HAIL | B_WEATHER_SNOW)))
-            calc = (calc * 80) / 100; // 1.2 snow cloak loss
-        break;
     case ABILITY_TANGLED_FEET:
         if (gBattleMons[battlerDef].status2 & STATUS2_CONFUSION)
             calc = (calc * 50) / 100; // 1.5 tangled feet loss
@@ -7402,6 +7398,15 @@ static void Cmd_moveend(void)
         case MOVEEND_EMERGENCY_EXIT: // Special case, because moves hitting multiple opponents stop after switching out
             for (i = 0; i < gBattlersCount; i++)
             {
+                if (gBattleResources->flags->flags[i] & RESOURCE_FLAG_STEADFAST_PENDING)
+                {
+                    gBattleResources->flags->flags[i] &= ~RESOURCE_FLAG_STEADFAST_PENDING;
+                    gBattlerTarget = gBattlerAbility = gEffectBattler = i;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_SteadfastHalfHp;
+                    return;
+                }
+
                 if (gBattleResources->flags->flags[i] & RESOURCE_FLAG_EMERGENCY_EXIT)
                 {
                     gBattleResources->flags->flags[i] &= ~RESOURCE_FLAG_EMERGENCY_EXIT;
@@ -9170,6 +9175,25 @@ static void TrySugarRush(u32 battler, u32 itemId)
     }
 }
 
+static bool32 TrySetGluttonyBerryStatBoost(u32 battler, u32 itemId)
+{
+    u32 statId;
+
+    if (ItemId_GetPocket(itemId) != POCKET_BERRIES
+        || !HasBattlerAbility(battler, ABILITY_GLUTTONY)
+        || !(gBattleStruct->ateBerry[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        return FALSE;
+
+    statId = GetHighestStatId(battler);
+    if (!CompareStat(battler, statId, MAX_STAT_STAGE, CMP_LESS_THAN))
+        return FALSE;
+
+    SET_STATCHANGER(statId, 1, FALSE);
+    SetBattlerTriggeredAbility(battler, ABILITY_GLUTTONY);
+    gBattleScripting.battler = battler;
+    return TRUE;
+}
+
 // Used by Bestow and Symbiosis to take an item from one battler and give to another.
 static void BestowItem(u32 battlerAtk, u32 battlerDef)
 {
@@ -9215,6 +9239,7 @@ static void Cmd_removeitem(void)
 
     u32 battler;
     u16 itemId = 0;
+    bool32 gluttonyStatBoost;
 
     if (gBattleScripting.overrideBerryRequirements)
     {
@@ -9239,12 +9264,21 @@ static void Cmd_removeitem(void)
     MarkBattlerForControllerExec(battler);
 
     ClearBattlerItemEffectHistory(battler);
+    gluttonyStatBoost = TrySetGluttonyBerryStatBoost(battler, itemId);
     if (!TryCheekPouch(battler, itemId))
     {
         TrySugarRush(battler, itemId);
         if (!TrySymbiosis(battler, itemId))
         {
-            gBattlescriptCurrInstr = cmd->nextInstr;
+            if (gluttonyStatBoost)
+            {
+                BattleScriptPush(cmd->nextInstr);
+                gBattlescriptCurrInstr = BattleScript_GluttonyActivates;
+            }
+            else
+            {
+                gBattlescriptCurrInstr = cmd->nextInstr;
+            }
         }
     }
 

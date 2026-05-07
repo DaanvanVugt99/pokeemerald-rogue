@@ -10085,6 +10085,18 @@ BattleScript_ProtosynthesisActivates::
 	waitmessage B_WAIT_TIME_MED
 	end3
 
+BattleScript_GluttonyActivates::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gEffectBattler, gBattlerAbility
+	copybyte gBattlerAttacker, gBattlerAbility
+	call BattleScript_AbilityPopUp
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_GluttonyActivatesEnd
+	setgraphicalstatchangevalues
+	call BattleScript_StatUp
+BattleScript_GluttonyActivatesEnd:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	return
+
 BattleScript_QuarkDriveActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_ELECTRICTERRAINACTIVATEDABILITY
@@ -12602,6 +12614,24 @@ BattleScript_TargetAbilityStatRaiseRet::
 	setgraphicalstatchangevalues
 	call BattleScript_StatUp
 BattleScript_TargetAbilityStatRaiseRet_End:
+	copybyte gBattlerAttacker, sSAVED_BATTLER
+	return
+
+BattleScript_SteadfastHalfHp::
+	copybyte sSAVED_BATTLER, gBattlerAttacker
+	copybyte gBattlerAbility, gEffectBattler
+	copybyte gBattlerAttacker, gEffectBattler
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_DEF, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_SteadfastTrySpDef
+	setgraphicalstatchangevalues
+	call BattleScript_StatUp
+BattleScript_SteadfastTrySpDef:
+	setstatchanger STAT_SPDEF, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN, BattleScript_SteadfastEnd
+	setgraphicalstatchangevalues
+	call BattleScript_StatUp
+BattleScript_SteadfastEnd:
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return
 
