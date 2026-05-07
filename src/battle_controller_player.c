@@ -5,6 +5,7 @@
 #include "battle_controllers.h"
 #include "battle_dome.h"
 #include "battle_interface.h"
+#include "battle_main.h"
 #include "battle_message.h"
 #include "battle_setup.h"
 #include "battle_tv.h"
@@ -1758,40 +1759,42 @@ static void MoveSelectionDisplayPpNumber(u32 battler)
 
 static u8 GetMoveDisplayTyping(u32 battler, u16 move)
 {
-    u8 moveType = gBattleMoves[move].type;
+    u8 moveType;
+    u8 savedDynamicMoveType;
+    u8 savedAteBoost;
+    u8 savedGemParam;
+    bool8 savedGemBoost;
 
-    if(move == MOVE_HIDDEN_POWER)
-        return CalcMonHiddenPowerType(&gPlayerParty[gBattlerPartyIndexes[battler]]);
+    if (move == MOVE_NONE || move == MOVE_UNAVAILABLE)
+        return TYPE_MYSTERY;
 
 #ifdef ROGUE_EXPANSION
-    else if (move == MOVE_IVY_CUDGEL)
-    {
-        struct Pokemon* mon = &GetSideParty(GetBattlerSide(battler))[gBattlerPartyIndexes[battler]];
-        u32 itemId = GetMonData(mon, MON_DATA_HELD_ITEM);
-
-        if (ItemId_GetHoldEffect(itemId) == HOLD_EFFECT_MASK)
-            moveType = ItemId_GetSecondaryId(itemId);
-        else
-            moveType = gBattleMoves[MOVE_IVY_CUDGEL].type;
-        return moveType;
-    }
-    else if (move == MOVE_TERA_BLAST)
+    if (move == MOVE_TERA_BLAST)
     {
         if (gBattleStruct->tera.playerSelect || IsTerastallized(battler))
-            moveType = GetBattlerTeraType(battler);
+            return GetBattlerTeraType(battler);
     }
     else if (move == MOVE_TERA_STARSTORM)
     {
         if (gBattleMons[battler].species == SPECIES_TERAPAGOS_STELLAR
         || (gBattleStruct->tera.playerSelect && gBattleMons[battler].species == SPECIES_TERAPAGOS_TERASTAL))
-            moveType = TYPE_STELLAR;
+            return TYPE_STELLAR;
     }
-
-    //SetTypeBeforeUsingMove(move, battler);
 #endif
-    
-    //GET_MOVE_TYPE(move, moveType);
-    
+
+    savedDynamicMoveType = gBattleStruct->dynamicMoveType;
+    savedAteBoost = gBattleStruct->ateBoost[battler];
+    savedGemParam = gSpecialStatuses[battler].gemParam;
+    savedGemBoost = gSpecialStatuses[battler].gemBoost;
+
+    SetTypeBeforeUsingMove(move, battler);
+    GET_MOVE_TYPE(move, moveType);
+
+    gBattleStruct->dynamicMoveType = savedDynamicMoveType;
+    gBattleStruct->ateBoost[battler] = savedAteBoost;
+    gSpecialStatuses[battler].gemParam = savedGemParam;
+    gSpecialStatuses[battler].gemBoost = savedGemBoost;
+
     return moveType;
 }
 
