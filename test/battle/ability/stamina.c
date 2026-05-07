@@ -105,6 +105,25 @@ SINGLE_BATTLE_TEST("Stamina activates for every hit of a multi hit move")
     }
 }
 
+SINGLE_BATTLE_TEST("Stamina maxes Defense when hit by a critical hit")
+{
+    GIVEN {
+        PLAYER(SPECIES_MUDBRAY) { Ability(ABILITY_STAMINA); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE, criticalHit: TRUE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        HP_BAR(player);
+        MESSAGE("A critical hit!");
+        ABILITY_POPUP(player, ABILITY_STAMINA);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
+        MESSAGE("Mudbray's Stamina maxed its Defense!");
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_DEF], MAX_STAT_STAGE);
+    }
+}
+
 SINGLE_BATTLE_TEST("Stamina is not activated by users own Substitute")
 {
     GIVEN {

@@ -8236,7 +8236,6 @@ special_delivery_done:
                 effect++;
                 break;
             SOLAR_POWER_HP_DROP:
-            case ABILITY_SOLAR_POWER:
                 if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
                 {
                     BattleScriptPushCursorAndCallback(BattleScript_SolarPowerActivates);
@@ -9133,10 +9132,45 @@ if (triggeringAbility != ABILITY_NONE)
              && IsBattlerAlive(battler)
              && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
             {
-                gEffectBattler = battler;
-                SET_STATCHANGER(STAT_DEF, 1, FALSE);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+                if (gIsCriticalHit)
+                {
+                    gBattlerAbility = battler;
+                    SET_STATCHANGER(STAT_DEF, MAX_STAT_STAGE - gBattleMons[battler].statStages[STAT_DEF], FALSE);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_TargetsStatWasMaxedOut;
+                }
+                else
+                {
+                    gEffectBattler = battler;
+                    SET_STATCHANGER(STAT_DEF, 1, FALSE);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+                }
+                effect++;
+            }
+            break;
+        case ABILITY_ANGER_POINT:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gBattlerTarget)
+             && IS_MOVE_PHYSICAL(move)
+             && TARGET_TURN_DAMAGED
+             && IsBattlerAlive(battler)
+             && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                if (gIsCriticalHit)
+                {
+                    gBattlerAbility = battler;
+                    SET_STATCHANGER(STAT_ATK, MAX_STAT_STAGE - gBattleMons[battler].statStages[STAT_ATK], FALSE);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_TargetsStatWasMaxedOut;
+                }
+                else
+                {
+                    gEffectBattler = battler;
+                    SET_STATCHANGER(STAT_ATK, 1, FALSE);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+                }
                 effect++;
             }
             break;
@@ -9316,19 +9350,6 @@ if (triggeringAbility != ABILITY_NONE)
                     effect++;
                     break;
                 }
-            }
-            break;
-        case ABILITY_ANGER_POINT:
-            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-             && gIsCriticalHit
-             && TARGET_TURN_DAMAGED
-             && IsBattlerAlive(battler)
-             && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
-            {
-                SET_STATCHANGER(STAT_ATK, MAX_STAT_STAGE - gBattleMons[battler].statStages[STAT_ATK], FALSE);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_TargetsStatWasMaxedOut;
-                effect++;
             }
             break;
         case ABILITY_COLOR_CHANGE:
@@ -18326,6 +18347,10 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
             RecordAbilityBattle(battlerDef, ABILITY_PERMAFROST);
         return UQ_4_12(0.5);
     }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_HYDRATION)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
+        return UQ_4_12(0.8);
 
     switch (abilityDef)
     {

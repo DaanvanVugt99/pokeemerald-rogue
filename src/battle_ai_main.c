@@ -4450,7 +4450,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
             ADJUST_SCORE(3);
             break;
         case HOLD_EFFECT_UTILITY_UMBRELLA:
-            if (aiData->abilities[battlerAtk] != ABILITY_SOLAR_POWER && aiData->abilities[battlerAtk] != ABILITY_DRY_SKIN)
+            if (aiData->abilities[battlerAtk] != ABILITY_DRY_SKIN)
             {
                 switch (aiData->abilities[battlerDef])
                 {
