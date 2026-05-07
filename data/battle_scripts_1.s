@@ -1956,6 +1956,7 @@ BattleScript_EffectVCreate:
 	goto BattleScript_EffectHit
 
 BattleScript_VCreateStatLoss::
+	jumpifability BS_ATTACKER, ABILITY_VITAL_SPIRIT, BattleScript_VCreateVitalSpirit
 	jumpifstat BS_ATTACKER, CMP_GREATER_THAN, STAT_DEF, MIN_STAT_STAGE, BattleScript_VCreateStatAnim
 	jumpifstat BS_ATTACKER, CMP_GREATER_THAN, STAT_SPDEF, MIN_STAT_STAGE, BattleScript_VCreateStatAnim
 	jumpifstat BS_ATTACKER, CMP_EQUAL, STAT_SPEED, MIN_STAT_STAGE, BattleScript_VCreateStatLossRet
@@ -1980,6 +1981,11 @@ BattleScript_VCreateTrySpeed:
 	printfromtable gStatDownStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_VCreateStatLossRet:
+	return
+BattleScript_VCreateVitalSpirit:
+	copybyte gBattlerAbility, gBattlerAttacker
+	copybyte sBATTLER, gBattlerAttacker
+	call BattleScript_AbilityNoStatLoss
 	return
 
 BattleScript_SpectralThiefSteal::

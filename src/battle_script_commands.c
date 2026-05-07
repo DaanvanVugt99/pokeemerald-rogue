@@ -3258,6 +3258,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
     bool32 mirrorArmorReflected = (GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR);
     u32 flags = 0;
     u16 battlerAbility;
+    const u8 *currInstrBeforeStatChange;
     bool8 activateAfterFaint = FALSE;
 
     if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_1ST_HIT
@@ -3908,11 +3909,12 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 if (mirrorArmorReflected && !affectsUser)
                     flags |= STAT_CHANGE_ALLOW_PTR;
 
+                currInstrBeforeStatChange = gBattlescriptCurrInstr;
                 if (ChangeStatBuffs(SET_STAT_BUFF_VALUE(1) | STAT_BUFF_NEGATIVE,
                                     gBattleScripting.moveEffect - MOVE_EFFECT_ATK_MINUS_1 + 1,
                                     flags | STAT_CHANGE_UPDATE_MOVE_EFFECT, gBattlescriptCurrInstr + 1))
                 {
-                    if (!mirrorArmorReflected)
+                    if (!mirrorArmorReflected && gBattlescriptCurrInstr == currInstrBeforeStatChange)
                         gBattlescriptCurrInstr++;
                 }
                 else
@@ -3955,11 +3957,12 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 flags = affectsUser;
                 if (mirrorArmorReflected && !affectsUser)
                     flags |= STAT_CHANGE_ALLOW_PTR;
+                currInstrBeforeStatChange = gBattlescriptCurrInstr;
                 if (ChangeStatBuffs(SET_STAT_BUFF_VALUE(2) | STAT_BUFF_NEGATIVE,
                                     gBattleScripting.moveEffect - MOVE_EFFECT_ATK_MINUS_2 + 1,
                                     flags | STAT_CHANGE_UPDATE_MOVE_EFFECT, gBattlescriptCurrInstr + 1))
                 {
-                    if (!mirrorArmorReflected)
+                    if (!mirrorArmorReflected && gBattlescriptCurrInstr == currInstrBeforeStatChange)
                         gBattlescriptCurrInstr++;
                 }
                 else
@@ -13292,6 +13295,27 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
         else if (flags == 0 && battlerHoldEffect == HOLD_EFFECT_COVERT_CLOAK)
         {
             RecordItemEffectBattle(battler, HOLD_EFFECT_COVERT_CLOAK);
+            return STAT_CHANGE_DIDNT_WORK;
+        }
+        else if (affectsUser
+              && gBattleMoves[gCurrentMove].power != 0
+              && HasBattlerAbility(battler, ABILITY_VITAL_SPIRIT))
+        {
+            if (gSpecialStatuses[battler].statLowered)
+            {
+                if (BS_ptr != NULL)
+                    gBattlescriptCurrInstr = BS_ptr;
+            }
+            else if (BS_ptr != NULL)
+            {
+                BattleScriptPush(BS_ptr);
+                gBattleScripting.battler = battler;
+                gBattlerAbility = battler;
+                gBattlescriptCurrInstr = BattleScript_AbilityNoStatLoss;
+                SetBattlerTriggeredAbility(battler, ABILITY_VITAL_SPIRIT);
+                RecordAbilityBattle(battler, ABILITY_VITAL_SPIRIT);
+                gSpecialStatuses[battler].statLowered = TRUE;
+            }
             return STAT_CHANGE_DIDNT_WORK;
         }
         else // try to decrease

@@ -16692,8 +16692,6 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     case ABILITY_RIVALRY:
         if (AreBattlersOfSameGender(battlerAtk, battlerDef))
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.25));
-        else if (AreBattlersOfOppositeGender(battlerAtk, battlerDef))
-            modifier = uq4_12_multiply(modifier, UQ_4_12(0.75));
         break;
     case ABILITY_ANALYTIC:
         if (GetBattlerTurnOrderNum(battlerAtk) == gBattlersCount - 1 && move != MOVE_FUTURE_SIGHT && move != MOVE_DOOM_DESIRE)
@@ -18285,6 +18283,10 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         break;
     case ABILITY_BATTLE_ARMOR:
         if (IsMoveMakingContact(move, battlerAtk))
+            return UQ_4_12(0.8);
+        break;
+    case ABILITY_SHELL_ARMOR:
+        if (!IsMoveMakingContact(move, battlerAtk))
             return UQ_4_12(0.8);
         break;
     case ABILITY_SAND_VEIL:
