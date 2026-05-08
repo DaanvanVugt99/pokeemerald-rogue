@@ -4215,9 +4215,12 @@ static void SetupRogueRunBag()
 
 static void BeginRogueRun(void)
 {
+    bool8 runningToggleActive = gRogueLocal.runningToggleActive;
+
     DebugPrint("BeginRogueRun");
 
     memset(&gRogueLocal, 0, sizeof(gRogueLocal));
+    gRogueLocal.runningToggleActive = runningToggleActive;
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
     ClearHoneyTreePokeblock();
