@@ -36,7 +36,7 @@ SINGLE_BATTLE_TEST("Liechi Berry raises the holder's Attack by one stage when HP
     }
 }
 
-SINGLE_BATTLE_TEST("Liechi Berry raises Attack by one stage when HP drops to 1/2 or below if holder has Gluttony")
+SINGLE_BATTLE_TEST("Liechi Berry raises Attack and Gluttony boosts it again when HP drops to 1/2 or below")
 {
     GIVEN {
         PLAYER(SPECIES_BELLSPROUT) { MaxHP(80); HP(80); Ability(ABILITY_GLUTTONY); Item(ITEM_LIECHI_BERRY); }
@@ -48,7 +48,7 @@ SINGLE_BATTLE_TEST("Liechi Berry raises Attack by one stage when HP drops to 1/2
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Using Liechi Berry, the Attack of Bellsprout rose!");
     } THEN {
-        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
     }
 }
 

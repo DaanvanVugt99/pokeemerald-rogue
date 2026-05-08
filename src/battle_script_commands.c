@@ -2909,12 +2909,18 @@ static void Cmd_resultmessage(void)
                 if (GetBattlerSide(gBattlerTarget) != B_SIDE_PLAYER && gBattleStruct->trainerSlideFirstSuperEffectiveHitMsgState != 2)
                     gBattleStruct->trainerSlideFirstSuperEffectiveHitMsgState = 1;
 
-                stringId = STRINGID_SUPEREFFECTIVE;
+                stringId = gMoveResultEffectiveness == UQ_4_12(4.0)
+                         ? STRINGID_ITSEXTREMELYEFFECTIVE
+                         : STRINGID_SUPEREFFECTIVE;
             }
             break;
         case MOVE_RESULT_NOT_VERY_EFFECTIVE:
             if (!gMultiHitCounter)
-                stringId = STRINGID_NOTVERYEFFECTIVE;
+            {
+                stringId = gMoveResultEffectiveness == UQ_4_12(0.25)
+                         ? STRINGID_ITSMOSTLYINEFFECTIVE
+                         : STRINGID_NOTVERYEFFECTIVE;
+            }
             break;
         case MOVE_RESULT_ONE_HIT_KO:
             stringId = STRINGID_ONEHITKO;
@@ -6310,8 +6316,14 @@ static void Cmd_moveend(void)
             switch (gBattleStruct->moveEffect2)
             {
             case MOVE_EFFECT_KNOCK_OFF:
-                effect = TryKnockOffBattleScript(gBattlerTarget);
+            {
+                u32 target = gBattleStruct->moveTarget[gBattlerAttacker];
+
+                if (target >= gBattlersCount)
+                    target = gBattlerTarget;
+                effect = TryKnockOffBattleScript(target);
                 break;
+            }
             case MOVE_EFFECT_STOCKPILE_WORE_OFF:
                 if (gDisableStructs[gBattlerAttacker].stockpileCounter != 0)
                 {

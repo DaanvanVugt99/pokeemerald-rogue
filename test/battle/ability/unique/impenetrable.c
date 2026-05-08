@@ -48,7 +48,7 @@ SINGLE_BATTLE_TEST("Impenetrable does not weaken super effective physical moves"
         TURN { MOVE(opponent, MOVE_BRICK_BREAK, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
     } SCENE {
         HP_BAR(player, captureDamage: &results[i].damage);
-        MESSAGE("It's super effective!");
+        MESSAGE("It's extremely effective!");
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage);
     }

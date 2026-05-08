@@ -25,6 +25,9 @@ SINGLE_BATTLE_TEST("Ivy Cudgel changes the move type depending on the mask the u
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_IVY_CUDGEL, player);
         HP_BAR(opponent);
-        MESSAGE("It's super effective!");
+        if (item == ITEM_CORNERSTONE_MASK)
+            MESSAGE("It's extremely effective!");
+        else
+            MESSAGE("It's super effective!");
     }
 }

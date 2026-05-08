@@ -311,15 +311,15 @@ AI_SINGLE_BATTLE_TEST("AI prefers a weaker move over a one with a downside effec
     u16 hp, expectedMove, turns;
 
     // Both moves require the same number of turns but Flamethrower will be chosen over Overheat (powerful effect)
-    PARAMETRIZE { move1 = MOVE_OVERHEAT; move2 = MOVE_FLAMETHROWER; hp = 300; expectedMove = MOVE_FLAMETHROWER; turns = 2; }
+    PARAMETRIZE { move1 = MOVE_OVERHEAT; move2 = MOVE_FLAMETHROWER; hp = 200; expectedMove = MOVE_FLAMETHROWER; turns = 2; }
     // Overheat kill in least amount of turns
-    PARAMETRIZE { move1 = MOVE_OVERHEAT; move2 = MOVE_FLAMETHROWER; hp = 250; expectedMove = MOVE_OVERHEAT; turns = 1; }
+    PARAMETRIZE { move1 = MOVE_OVERHEAT; move2 = MOVE_FLAMETHROWER; hp = 150; expectedMove = MOVE_OVERHEAT; turns = 1; }
 
     GIVEN {
         AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
         PLAYER(SPECIES_WOBBUFFET) { HP(hp); }
         PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_TYPHLOSION) { Moves(move1, move2, move3, move4); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpAttack(200); Ability(ABILITY_NONE); Moves(move1, move2, move3, move4); }
     } WHEN {
         switch (turns)
         {

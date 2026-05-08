@@ -33,3 +33,19 @@ SINGLE_BATTLE_TEST("Glacial Mass does not trigger on non-contact moves")
         EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
     }
 }
+
+SINGLE_BATTLE_TEST("Glacial Mass does not make Knock Off remove the attacker's item")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_KNOCK_OFF].effect == EFFECT_KNOCK_OFF);
+        ASSUME(gBattleMoves[MOVE_KNOCK_OFF].makesContact);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_LEFTOVERS); Moves(MOVE_KNOCK_OFF); }
+        OPPONENT(SPECIES_DEWGONG) { Ability(ABILITY_THICK_FAT); UniqueAbility(ABILITY_GLACIAL_MASS); Item(ITEM_SITRUS_BERRY); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_KNOCK_OFF); }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_LEFTOVERS);
+        EXPECT_EQ(opponent->item, ITEM_NONE);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE - 1);
+    }
+}
