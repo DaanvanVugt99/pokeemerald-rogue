@@ -70,6 +70,12 @@ enum {
     WIN_QUANTITY_IN_BAG,
     WIN_QUANTITY_PRICE,
     WIN_MESSAGE,
+    WIN_TMHM_MON_ICON_0,
+    WIN_TMHM_MON_ICON_1,
+    WIN_TMHM_MON_ICON_2,
+    WIN_TMHM_MON_ICON_3,
+    WIN_TMHM_MON_ICON_4,
+    WIN_TMHM_MON_ICON_5,
 };
 
 enum {
@@ -184,6 +190,10 @@ static void Task_HandleShopMenuAreas(u8 taskId);
 static void Task_HandleShopMenuMoveArea(u8 taskId);
 static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, struct ListMenu *list);
 static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y);
+static bool8 BuyMenuShouldShowTmHmPartyPreview(void);
+static void BuyMenuDrawTmHmPartyPreviewBg(void);
+static void BuyMenuUpdateTmHmPartyPreview(u16 itemId);
+static void BuyMenuRemoveItemIcons(void);
 
 static void CopyShopItemName(u16 item, u8* name);
 static const u8* GetShopItemDescription(u16 item);
@@ -362,6 +372,60 @@ static const struct WindowTemplate sShopBuyMenuWindowTemplates[] =
         .height = 4,
         .paletteNum = 15,
         .baseBlock = 0x01A2,
+    },
+    [WIN_TMHM_MON_ICON_0] = {
+        .bg = 0,
+        .tilemapLeft = 1,
+        .tilemapTop = 4,
+        .width = 4,
+        .height = 4,
+        .paletteNum = 2,
+        .baseBlock = 0x0222,
+    },
+    [WIN_TMHM_MON_ICON_1] = {
+        .bg = 0,
+        .tilemapLeft = 5,
+        .tilemapTop = 4,
+        .width = 4,
+        .height = 4,
+        .paletteNum = 3,
+        .baseBlock = 0x0222 + 16 * 1,
+    },
+    [WIN_TMHM_MON_ICON_2] = {
+        .bg = 0,
+        .tilemapLeft = 9,
+        .tilemapTop = 4,
+        .width = 4,
+        .height = 4,
+        .paletteNum = 4,
+        .baseBlock = 0x0222 + 16 * 2,
+    },
+    [WIN_TMHM_MON_ICON_3] = {
+        .bg = 0,
+        .tilemapLeft = 1,
+        .tilemapTop = 8,
+        .width = 4,
+        .height = 4,
+        .paletteNum = 5,
+        .baseBlock = 0x0222 + 16 * 3,
+    },
+    [WIN_TMHM_MON_ICON_4] = {
+        .bg = 0,
+        .tilemapLeft = 5,
+        .tilemapTop = 8,
+        .width = 4,
+        .height = 4,
+        .paletteNum = 6,
+        .baseBlock = 0x0222 + 16 * 4,
+    },
+    [WIN_TMHM_MON_ICON_5] = {
+        .bg = 0,
+        .tilemapLeft = 9,
+        .tilemapTop = 8,
+        .width = 4,
+        .height = 4,
+        .paletteNum = 7,
+        .baseBlock = 0x0222 + 16 * 5,
     },
     DUMMY_WIN_TEMPLATE
 };
@@ -765,13 +829,24 @@ static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, s
     if (onInit != TRUE)
         PlaySE(SE_SELECT);
 
-    if (item != LIST_CANCEL)
-        BuyMenuAddItemIcon(item, sShopData->iconSlot);
+    if (BuyMenuShouldShowTmHmPartyPreview())
+    {
+        BuyMenuRemoveItemIcons();
+    }
     else
-        BuyMenuAddItemIcon(ITEM_LIST_END, sShopData->iconSlot);
+    {
+        if (item != LIST_CANCEL)
+            BuyMenuAddItemIcon(item, sShopData->iconSlot);
+        else
+            BuyMenuAddItemIcon(ITEM_LIST_END, sShopData->iconSlot);
 
-    BuyMenuRemoveItemIcon(item, sShopData->iconSlot ^ 1);
-    sShopData->iconSlot ^= 1;
+        BuyMenuRemoveItemIcon(item, sShopData->iconSlot ^ 1);
+        sShopData->iconSlot ^= 1;
+    }
+
+    if (BuyMenuShouldShowTmHmPartyPreview())
+        BuyMenuUpdateTmHmPartyPreview(item == LIST_CANCEL ? ITEM_NONE : item);
+
     if (item != LIST_CANCEL)
     {
         description = GetShopItemDescription(item);
@@ -783,6 +858,70 @@ static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, s
 
     FillWindowPixelBuffer(WIN_ITEM_DESCRIPTION, PIXEL_FILL(0));
     BuyMenuPrint(WIN_ITEM_DESCRIPTION, description, 3, 1, 0, COLORID_NORMAL);
+}
+
+static bool8 BuyMenuShouldShowTmHmPartyPreview(void)
+{
+    return sMartInfo.dynamicMartCategory == ROGUE_SHOP_TMS;
+}
+
+static void BuyMenuDrawTmHmPartyPreviewBg(void)
+{
+    u8 x;
+    u8 y;
+    const u8 left = 0;
+    const u8 top = 3;
+    const u8 right = 13;
+    const u8 bottom = 12;
+
+    if (!BuyMenuShouldShowTmHmPartyPreview())
+        return;
+
+    sShopData->tilemapBuffers[0][top * 32 + left] = 0x0006;
+    sShopData->tilemapBuffers[0][top * 32 + left + 1] = 0x0007;
+    for (x = left + 2; x < right; x++)
+        sShopData->tilemapBuffers[0][top * 32 + x] = 0x0008;
+    sShopData->tilemapBuffers[0][top * 32 + right] = 0x0013;
+
+    for (y = top + 1; y < bottom; y++)
+    {
+        sShopData->tilemapBuffers[0][y * 32 + left] = 0x0014;
+        for (x = left + 1; x < right; x++)
+            sShopData->tilemapBuffers[0][y * 32 + x] = 0x000d;
+        sShopData->tilemapBuffers[0][y * 32 + right] = 0x0015;
+    }
+
+    sShopData->tilemapBuffers[0][bottom * 32 + left] = 0x0009;
+    sShopData->tilemapBuffers[0][bottom * 32 + left + 1] = 0x000a;
+    for (x = left + 2; x < right; x++)
+        sShopData->tilemapBuffers[0][bottom * 32 + x] = 0x000b;
+    sShopData->tilemapBuffers[0][bottom * 32 + right] = 0x000c;
+}
+
+static void BuyMenuUpdateTmHmPartyPreview(u16 itemId)
+{
+    static const u8 sShopTmHmPreviewWindows[PARTY_SIZE] =
+    {
+        WIN_TMHM_MON_ICON_0,
+        WIN_TMHM_MON_ICON_1,
+        WIN_TMHM_MON_ICON_2,
+        WIN_TMHM_MON_ICON_3,
+        WIN_TMHM_MON_ICON_4,
+        WIN_TMHM_MON_ICON_5,
+    };
+
+    if (itemId != ITEM_NONE && ItemId_GetPocket(itemId) == POCKET_TM_HM)
+        BlitTmHmPartyPreviewForItem(sShopTmHmPreviewWindows, itemId);
+    else
+        ClearTmHmPartyPreview(sShopTmHmPreviewWindows);
+
+    ScheduleBgCopyTilemapToVram(0);
+}
+
+static void BuyMenuRemoveItemIcons(void)
+{
+    BuyMenuRemoveItemIcon(ITEM_NONE, 0);
+    BuyMenuRemoveItemIcon(ITEM_NONE, 1);
 }
 
 static u32 Mart_GetItemPrice(u16 itemId)
@@ -969,6 +1108,7 @@ static void BuyMenuDecompressBgGraphics(void)
 {
     DecompressAndCopyTileDataToVram(1, gShopMenu_Gfx, 0x3A0, 0x3E3, 0);
     LZDecompressWram(gShopMenu_Tilemap, sShopData->tilemapBuffers[0]);
+    BuyMenuDrawTmHmPartyPreviewBg();
     LoadCompressedPalette(gShopMenu_Pal, BG_PLTT_ID(12), PLTT_SIZE_4BPP);
 }
 

@@ -3466,6 +3466,35 @@ static void BlitMonSlotIconForItem(u8 windowId, u16 slot, u16 itemId)
     CopyWindowToVram(windowId, COPYWIN_GFX);
 }
 
+void ClearTmHmPartyPreview(const u8 *windowIds)
+{
+    u8 i;
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        FillWindowPixelBuffer(windowIds[i], PIXEL_FILL(0));
+        ClearWindowTilemap(windowIds[i]);
+        CopyWindowToVram(windowIds[i], COPYWIN_GFX);
+    }
+}
+
+void BlitTmHmPartyPreviewForItem(const u8 *windowIds, u16 itemId)
+{
+    u8 i;
+
+    if (itemId == ITEM_NONE || ItemIdToBattleMoveId(itemId) == MOVE_NONE)
+    {
+        ClearTmHmPartyPreview(windowIds);
+        return;
+    }
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        BlitMonSlotIconForItem(windowIds[i], i, itemId);
+        PutWindowTilemap(windowIds[i]);
+    }
+}
+
 static void PrintTMHMMoveData(u16 itemId)
 {
     u8 i;
@@ -3529,11 +3558,18 @@ static void PrintTMHMMoveData(u16 itemId)
         CopyWindowToVram(WIN_TMHM_INFO, COPYWIN_GFX);
 
         // Blit mon icons
-        BlitMonSlotIconForItem(WIN_MON_ICON_0, 0, itemId);
-        BlitMonSlotIconForItem(WIN_MON_ICON_1, 1, itemId);
-        BlitMonSlotIconForItem(WIN_MON_ICON_2, 2, itemId);
-        BlitMonSlotIconForItem(WIN_MON_ICON_3, 3, itemId);
-        BlitMonSlotIconForItem(WIN_MON_ICON_4, 4, itemId);
-        BlitMonSlotIconForItem(WIN_MON_ICON_5, 5, itemId);
+        {
+            static const u8 sBagTmHmPreviewWindows[PARTY_SIZE] =
+            {
+                WIN_MON_ICON_0,
+                WIN_MON_ICON_1,
+                WIN_MON_ICON_2,
+                WIN_MON_ICON_3,
+                WIN_MON_ICON_4,
+                WIN_MON_ICON_5,
+            };
+
+            BlitTmHmPartyPreviewForItem(sBagTmHmPreviewWindows, itemId);
+        }
     }
 }

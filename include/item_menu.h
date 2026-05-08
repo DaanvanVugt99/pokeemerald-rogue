@@ -111,4 +111,6 @@ void DisplayItemMessageOnField(u8 taskId, const u8 *src, TaskFunc callback);
 void CloseItemMessage(u8 taskId);
 void ItemMenu_RotomCatalog(u8 taskId);
 s32 RegisteredItemIndex(u16 item);
+void BlitTmHmPartyPreviewForItem(const u8 *windowIds, u16 itemId);
+void ClearTmHmPartyPreview(const u8 *windowIds);
 #endif //GUARD_ITEM_MENU_H
