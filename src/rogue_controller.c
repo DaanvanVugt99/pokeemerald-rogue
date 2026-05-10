@@ -179,6 +179,7 @@ EWRAM_DATA struct RogueLocalData gRogueLocal = {};
 EWRAM_DATA struct RogueAdvPath gRogueAdvPath = {};
 
 static void ResetHotTracking();
+static void ClearRogueLocalDataPreservingInputState(void);
 
 static u8 CalculateWildLevel(u8 variation);
 
@@ -3486,6 +3487,14 @@ void Rogue_MainLateCB(void)
     RogueDebug_MainCB();
 }
 
+static void ClearRogueLocalDataPreservingInputState(void)
+{
+    bool8 runningToggleActive = gRogueLocal.runningToggleActive;
+
+    memset(&gRogueLocal, 0, sizeof(gRogueLocal));
+    gRogueLocal.runningToggleActive = runningToggleActive;
+}
+
 void Rogue_OverworldCB(u16 newKeys, u16 heldKeys, bool8 inputActive)
 {
     if(inputActive)
@@ -4215,12 +4224,9 @@ static void SetupRogueRunBag()
 
 static void BeginRogueRun(void)
 {
-    bool8 runningToggleActive = gRogueLocal.runningToggleActive;
-
     DebugPrint("BeginRogueRun");
 
-    memset(&gRogueLocal, 0, sizeof(gRogueLocal));
-    gRogueLocal.runningToggleActive = runningToggleActive;
+    ClearRogueLocalDataPreservingInputState();
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
     ClearHoneyTreePokeblock();
