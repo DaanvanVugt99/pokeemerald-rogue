@@ -6003,6 +6003,143 @@ void RunBattleScriptCommands(void)
         gBattleScriptingCommandsTable[gBattlescriptCurrInstr[0]]();
 }
 
+static bool32 MonHasMoveTypeAbility(struct Pokemon *mon, u32 ability)
+{
+    u32 species = GetMonData(mon, MON_DATA_SPECIES);
+
+    return GetMonAbility(mon) == ability
+        || GetUniqueAbilityBySpecies(species) == ability;
+}
+
+static bool32 MoveCanReceiveNormalTypeAbilityOverride(u32 move)
+{
+    u32 effect = gBattleMoves[move].effect;
+
+    return effect != EFFECT_HIDDEN_POWER
+        && effect != EFFECT_WEATHER_BALL
+        && effect != EFFECT_CHANGE_TYPE_ON_ITEM
+        && effect != EFFECT_NATURAL_GIFT;
+}
+
+u8 GetMonMoveType(u32 move, struct Pokemon *mon)
+{
+    u32 species = GetMonData(mon, MON_DATA_SPECIES);
+    u32 ability = GetMonAbility(mon);
+    u32 item;
+    u32 holdEffect;
+    u32 moveType;
+    u32 ateType = TYPE_MYSTERY;
+
+    if (move == MOVE_NONE || move == MOVE_UNAVAILABLE)
+        return TYPE_MYSTERY;
+    if (move == MOVE_STRUGGLE)
+        return TYPE_NORMAL;
+
+    item = GetMonData(mon, MON_DATA_HELD_ITEM);
+    holdEffect = ItemId_GetHoldEffect(item);
+    moveType = gBattleMoves[move].type;
+
+    switch (gBattleMoves[move].effect)
+    {
+    case EFFECT_HIDDEN_POWER:
+        moveType = CalcMonHiddenPowerType(mon);
+        break;
+    case EFFECT_WEATHER_BALL:
+        if (gMain.inBattle && WEATHER_HAS_EFFECT)
+        {
+            if (gBattleWeather & B_WEATHER_RAIN && holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA)
+                moveType = TYPE_WATER;
+            else if (gBattleWeather & B_WEATHER_SANDSTORM)
+                moveType = TYPE_ROCK;
+            else if (gBattleWeather & B_WEATHER_SUN && holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA)
+                moveType = TYPE_FIRE;
+            else if (gBattleWeather & (B_WEATHER_HAIL | B_WEATHER_SNOW))
+                moveType = TYPE_ICE;
+            else if (gBattleWeather & B_WEATHER_ACID_RAIN)
+                moveType = TYPE_POISON;
+            else if (gBattleWeather & B_WEATHER_ECLIPSE)
+                moveType = TYPE_DARK;
+            else
+                moveType = TYPE_NORMAL;
+        }
+        break;
+    case EFFECT_CHANGE_TYPE_ON_ITEM:
+        if (holdEffect == gBattleMoves[move].argument)
+            moveType = ItemId_GetSecondaryId(item);
+        break;
+    case EFFECT_REVELATION_DANCE:
+        if (gSpeciesInfo[species].types[0] != TYPE_MYSTERY)
+            moveType = gSpeciesInfo[species].types[0];
+        else if (gSpeciesInfo[species].types[1] != TYPE_MYSTERY)
+            moveType = gSpeciesInfo[species].types[1];
+        break;
+    case EFFECT_RAGING_BULL:
+        if (species == SPECIES_TAUROS_PALDEAN_COMBAT_BREED
+         || species == SPECIES_TAUROS_PALDEAN_BLAZE_BREED
+         || species == SPECIES_TAUROS_PALDEAN_AQUA_BREED)
+            moveType = gSpeciesInfo[species].types[1];
+        break;
+    case EFFECT_NATURAL_GIFT:
+        if (ItemId_GetPocket(item) == POCKET_BERRIES)
+            moveType = gNaturalGiftTable[ITEM_TO_BERRY(item)].type;
+        break;
+    case EFFECT_TERRAIN_PULSE:
+        if (gMain.inBattle)
+        {
+            if (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
+                moveType = TYPE_ELECTRIC;
+            else if (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN)
+                moveType = TYPE_GRASS;
+            else if (gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN)
+                moveType = TYPE_FAIRY;
+            else if (gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN)
+                moveType = TYPE_PSYCHIC;
+            else if (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN)
+                moveType = TYPE_BUG;
+            else if (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
+                moveType = TYPE_NORMAL;
+        }
+        break;
+    }
+
+    if (gBattleMoves[move].type == TYPE_NORMAL
+     && MoveCanReceiveNormalTypeAbilityOverride(move)
+     && ((ability == ABILITY_PIXILATE && (ateType = TYPE_FAIRY))
+      || (ability == ABILITY_REFRIGERATE && (ateType = TYPE_ICE))
+      || (ability == ABILITY_AERILATE && (ateType = TYPE_FLYING))
+      || (ability == ABILITY_GALVANIZE && (ateType = TYPE_ELECTRIC))
+      || (MonHasMoveTypeAbility(mon, ABILITY_IMMOLATE) && (ateType = TYPE_FIRE))))
+    {
+        moveType = ateType;
+    }
+    else if (gBattleMoves[move].type != TYPE_NORMAL
+          && MoveCanReceiveNormalTypeAbilityOverride(move)
+          && ability == ABILITY_NORMALIZE)
+    {
+        moveType = TYPE_NORMAL;
+    }
+    else if (gBattleMoves[move].soundMove && ability == ABILITY_LIQUID_VOICE)
+    {
+        moveType = TYPE_WATER;
+    }
+    else if (gBattleMoves[move].soundMove && MonHasMoveTypeAbility(mon, ABILITY_REGAL_DECREE))
+    {
+        moveType = TYPE_STEEL;
+    }
+    else if (move == MOVE_AURA_WHEEL && species == SPECIES_MORPEKO_HANGRY)
+    {
+        moveType = TYPE_DARK;
+    }
+
+    if (MonHasMoveTypeAbility(mon, ABILITY_ROCK_HEAD) && moveType == TYPE_NORMAL)
+        moveType = TYPE_ROCK;
+
+    if (gMain.inBattle && (gFieldStatuses & STATUS_FIELD_ION_DELUGE) && moveType == TYPE_NORMAL)
+        moveType = TYPE_ELECTRIC;
+
+    return moveType;
+}
+
 void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
 {
     u32 moveType, ateType, attackerAbility;

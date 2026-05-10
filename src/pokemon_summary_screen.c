@@ -2,6 +2,7 @@
 #include "main.h"
 #include "battle.h"
 #include "battle_anim.h"
+#include "battle_main.h"
 #include "frontier_util.h"
 #include "battle_message.h"
 #include "battle_tent.h"
@@ -4454,17 +4455,12 @@ static void SetMoveTypeIcons(void)
 {
     u8 i;
     struct PokeSummary *summary = &sMonSummaryScreen->summary;
+    struct Pokemon *mon = &sMonSummaryScreen->currentMon;
+
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
-        if (summary->moves[i] == MOVE_HIDDEN_POWER)
-            SetTypeSpritePosAndPal(summary->hiddenPowerType, 85, 32 + (i * 16), i + SPRITE_ARR_ID_TYPE);
-        else if (summary->moves[i] != MOVE_NONE)
-        {
-            if (summary->moves[i] == MOVE_IVY_CUDGEL && ItemId_GetHoldEffect(summary->item) == HOLD_EFFECT_MASK)
-                SetTypeSpritePosAndPal(ItemId_GetSecondaryId(summary->item), 85, 32 + (i * 16), i + SPRITE_ARR_ID_TYPE);
-            else
-                SetTypeSpritePosAndPal(gBattleMoves[summary->moves[i]].type, 85, 32 + (i * 16), i + SPRITE_ARR_ID_TYPE);
-        }
+        if (summary->moves[i] != MOVE_NONE)
+            SetTypeSpritePosAndPal(GetMonMoveType(summary->moves[i], mon), 85, 32 + (i * 16), i + SPRITE_ARR_ID_TYPE);
         else
             SetSpriteInvisibility(i + SPRITE_ARR_ID_TYPE, TRUE);
     }
@@ -4478,12 +4474,7 @@ static void SetNewMoveTypeIcon(void)
     }
     else
     {
-        struct PokeSummary *summary = &sMonSummaryScreen->summary;
-
-        if (sMonSummaryScreen->newMove == MOVE_HIDDEN_POWER)
-            SetTypeSpritePosAndPal(summary->hiddenPowerType, 85, 96, SPRITE_ARR_ID_TYPE + 4);
-        else
-            SetTypeSpritePosAndPal(gBattleMoves[sMonSummaryScreen->newMove].type, 85, 96, SPRITE_ARR_ID_TYPE + 4);
+        SetTypeSpritePosAndPal(GetMonMoveType(sMonSummaryScreen->newMove, &sMonSummaryScreen->currentMon), 85, 96, SPRITE_ARR_ID_TYPE + 4);
     }
 }
 
