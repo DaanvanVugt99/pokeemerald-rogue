@@ -108,3 +108,37 @@ SINGLE_BATTLE_TEST("Leaf Guard prevents Rest during sun")
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Leaf Guard boosts Defense and Sp. Defense during sun", s16 damage)
+{
+    bool32 sun;
+    u32 ability;
+    u32 move;
+
+    PARAMETRIZE { sun = FALSE; ability = ABILITY_LEAF_GUARD; move = MOVE_TACKLE; }
+    PARAMETRIZE { sun = TRUE;  ability = ABILITY_NONE;       move = MOVE_TACKLE; }
+    PARAMETRIZE { sun = TRUE;  ability = ABILITY_LEAF_GUARD; move = MOVE_TACKLE; }
+    PARAMETRIZE { sun = FALSE; ability = ABILITY_LEAF_GUARD; move = MOVE_POWER_GEM; }
+    PARAMETRIZE { sun = TRUE;  ability = ABILITY_NONE;       move = MOVE_POWER_GEM; }
+    PARAMETRIZE { sun = TRUE;  ability = ABILITY_LEAF_GUARD; move = MOVE_POWER_GEM; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].split == SPLIT_PHYSICAL);
+        ASSUME(gBattleMoves[MOVE_POWER_GEM].split == SPLIT_SPECIAL);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Ability(ability); Moves(MOVE_SUNNY_DAY, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_TACKLE, MOVE_POWER_GEM); }
+    } WHEN {
+        if (sun)
+            TURN { MOVE(player, MOVE_SUNNY_DAY); MOVE(opponent, move); }
+        else
+            TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, move); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, move, opponent);
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+        EXPECT_MUL_EQ(results[1].damage, Q_4_12(0.8), results[2].damage);
+        EXPECT_EQ(results[3].damage, results[4].damage);
+        EXPECT_MUL_EQ(results[4].damage, Q_4_12(0.8), results[5].damage);
+    }
+}

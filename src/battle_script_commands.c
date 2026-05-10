@@ -1902,6 +1902,8 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
 
     if (HasBattlerAbility(battlerDef, ABILITY_FULL_MOON))
         calc = (calc * 80) / 100;
+    if (HasBattlerAbility(battlerDef, ABILITY_SUPER_LUCK))
+        calc = (calc * 90) / 100;
 
     // Attacker's ally's ability
     switch (atkAllyAbility)
@@ -5909,7 +5911,7 @@ static bool32 TryKnockOffBattleScript(u32 battlerDef)
         {
             SetBattlerTriggeredAbility(battlerDef, ABILITY_STICKY_HOLD);
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_StickyHoldActivates;
+            gBattlescriptCurrInstr = BattleScript_StickyHoldActivatesRet;
             RecordAbilityBattle(battlerDef, ABILITY_STICKY_HOLD);
         }
         else
@@ -6366,6 +6368,25 @@ static void Cmd_moveend(void)
                     }
                 }
                 break; // MOVE_EFFECT_REMOVE_STATUS
+            }
+            if (gCurrentMove != MOVE_KNOCK_OFF
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_KLUTZ)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && gBattlerAttacker != gBattlerTarget
+             && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gBattlerTarget)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && TryKnockOffBattleScript(gBattlerTarget))
+            {
+                if (gBattleMons[gBattlerTarget].item == ITEM_NONE)
+                {
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_KLUTZ);
+                    gBattlescriptCurrInstr = BattleScript_KlutzKnockedOff;
+                }
+                effect = TRUE;
             }
             gBattleStruct->moveEffect2 = 0;
             gBattleScripting.moveendState++;

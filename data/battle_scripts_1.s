@@ -8331,6 +8331,10 @@ BattleScript_KnockedOff::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_KlutzKnockedOff::
+	call BattleScript_AbilityPopUp
+	goto BattleScript_KnockedOff
+
 BattleScript_MoveUsedIsImprisoned::
 	printstring STRINGID_PKMNCANTUSEMOVESEALED
 	waitmessage B_WAIT_TIME_LONG
@@ -10708,6 +10712,13 @@ BattleScript_StickyHoldActivates::
 	printstring STRINGID_PKMNSXMADEYINEFFECTIVE
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
+
+BattleScript_StickyHoldActivatesRet::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNSXMADEYINEFFECTIVE
+	waitmessage B_WAIT_TIME_LONG
+	return
 
 BattleScript_ColorChangeActivates::
 	call BattleScript_AbilityPopUp

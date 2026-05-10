@@ -17717,6 +17717,13 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         if (updateFlags)
             RecordAbilityBattle(battlerDef, ABILITY_UNKNOWN_BIOLOGY);
     }
+    if (HasBattlerAbility(battlerDef, ABILITY_LEAF_GUARD)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SUN))
+    {
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.25));
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_LEAF_GUARD);
+    }
 
     // ally's abilities
     if (IsBattlerAlive(BATTLE_PARTNER(battlerDef)))

@@ -62,3 +62,26 @@ SINGLE_BATTLE_TEST("Sticky Hold does not lower attackers' Speed on non-contact")
         EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
     }
 }
+
+SINGLE_BATTLE_TEST("Sticky Hold blocks Klutz item removal")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SWIFT].power > 0);
+        ASSUME(!gBattleMoves[MOVE_SWIFT].makesContact);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Moves(MOVE_SWIFT); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_STICKY_HOLD); Item(ITEM_POTION); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SWIFT); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWIFT, player);
+        ABILITY_POPUP(opponent, ABILITY_STICKY_HOLD);
+        MESSAGE("Foe Wobbuffet's Sticky Hold made Swift ineffective!");
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_KLUTZ);
+            MESSAGE("Wobbuffet knocked off Foe Wobbuffet's Potion!");
+            MESSAGE("Wobbuffet's Speed fell!");
+        }
+    } THEN {
+        EXPECT_EQ(opponent->item, ITEM_POTION);
+    }
+}
