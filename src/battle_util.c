@@ -4993,7 +4993,9 @@ static u8 GetInitialBattleWeather()
         return GetCurrentWeather();
 }
 
-static void ForewarnChooseMove(u32 battler)
+static inline bool32 CanAbilityDisableBattler(u32 battler);
+
+static bool32 ForewarnChooseMove(u32 battler, u32 *target, u16 *move)
 {
     struct Forewarn {
         u8 battler;
@@ -5008,9 +5010,14 @@ static void ForewarnChooseMove(u32 battler)
     {
         if (IsBattlerAlive(i) && GetBattlerSide(i) != GetBattlerSide(battler))
         {
+            if (!CanAbilityDisableBattler(i))
+                continue;
+
             for (j = 0; j < MAX_MON_MOVES; j++)
             {
                 if (gBattleMons[i].moves[j] == MOVE_NONE)
+                    continue;
+                if (gBattleMons[i].pp[j] == 0)
                     continue;
                 data[count].moveId = gBattleMons[i].moves[j];
                 data[count].battler = i;
@@ -5036,6 +5043,12 @@ static void ForewarnChooseMove(u32 battler)
         }
     }
 
+    if (count == 0)
+    {
+        Free(data);
+        return FALSE;
+    }
+
     for (bestId = 0, i = 1; i < count; i++)
     {
         if (data[i].power > data[bestId].power)
@@ -5044,11 +5057,13 @@ static void ForewarnChooseMove(u32 battler)
             bestId = i;
     }
 
-    gBattlerTarget = data[bestId].battler;
-    PREPARE_MOVE_BUFFER(gBattleTextBuff1, data[bestId].moveId)
-    RecordKnownMove(gBattlerTarget, data[bestId].moveId);
+    *target = data[bestId].battler;
+    *move = data[bestId].moveId;
+    PREPARE_MOVE_BUFFER(gBattleTextBuff1, *move);
+    RecordKnownMove(*target, *move);
 
     Free(data);
+    return TRUE;
 }
 
 bool32 ChangeTypeBasedOnTerrain(u32 battler)
@@ -7298,7 +7313,8 @@ special_delivery_done:
                         {
                             move = gBattleMons[i].moves[j];
                             GET_MOVE_TYPE(move, moveType);
-                            if (CalcTypeEffectivenessMultiplier(move, moveType, i, battler, ABILITY_ANTICIPATION, FALSE) >= UQ_4_12(2.0))
+                            if (gBattleMoves[move].effect == EFFECT_OHKO
+                             || CalcTypeEffectivenessMultiplier(move, moveType, i, battler, ABILITY_ANTICIPATION, FALSE) >= UQ_4_12(2.0))
                             {
                                 effect++;
                                 break;
@@ -7309,9 +7325,10 @@ special_delivery_done:
 
                 if (effect != 0)
                 {
-                    gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SWITCHIN_ANTICIPATION;
+                    gBattlerAttacker = battler;
+                    SET_STATCHANGER(STAT_EVASION, 1, FALSE);
                     gSpecialStatuses[battler].switchInAbilityDone = TRUE;
-                    BattleScriptPushCursorAndCallback(BattleScript_SwitchInAbilityMsg);
+                    BattleScriptPushCursorAndCallback(BattleScript_AnticipationActivates);
                 }
             }
             break;
@@ -7327,11 +7344,23 @@ special_delivery_done:
         case ABILITY_FOREWARN:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
-                ForewarnChooseMove(battler);
-                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SWITCHIN_FOREWARN;
-                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
-                BattleScriptPushCursorAndCallback(BattleScript_SwitchInAbilityMsg);
-                effect++;
+                u32 target;
+                u16 forewarnMove;
+
+                if (ForewarnChooseMove(battler, &target, &forewarnMove))
+                {
+                    if (!CanAbilityDisableBattler(target))
+                        break;
+
+                    SetBattlerTriggeredAbility(battler, ABILITY_FOREWARN);
+                    gDisableStructs[target].disabledMove = forewarnMove;
+                    gDisableStructs[target].disableTimer = 4;
+                    gBattlerAttacker = battler;
+                    gBattlerTarget = target;
+                    gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                    BattleScriptPushCursorAndCallback(BattleScript_ForewarnActivates);
+                    effect++;
+                }
             }
             break;
         case ABILITY_DOWNLOAD:
@@ -18367,10 +18396,13 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
             return UQ_4_12(0.5);
         break;
     case ABILITY_FILTER:
-    case ABILITY_SOLID_ROCK:
     case ABILITY_PRISM_ARMOR:
         if (typeEffectivenessModifier >= UQ_4_12(2.0))
-            return UQ_4_12(0.75);
+            return abilityDef == ABILITY_FILTER ? UQ_4_12(0.65) : UQ_4_12(0.75);
+        break;
+    case ABILITY_SOLID_ROCK:
+        if (typeEffectivenessModifier >= UQ_4_12(2.0))
+            return IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM) ? UQ_4_12(0.5) : UQ_4_12(0.75);
         break;
     case ABILITY_BATTLE_ARMOR:
         if (IsMoveMakingContact(move, battlerAtk))

@@ -8658,10 +8658,18 @@ BattleScript_CottonDownReturn:
 
 BattleScript_AnticipationActivates::
 	pause 5
+	copybyte gBattlerAbility, gBattlerAttacker
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_ANTICIPATIONACTIVATES
 	waitmessage B_WAIT_TIME_LONG
-	return
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_NOT_PROTECT_AFFECTED | MOVE_EFFECT_CERTAIN | STAT_CHANGE_ALLOW_PTR, BattleScript_AnticipationActivatesEnd
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_BATTLERABILITYRAISEDSTAT
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_AnticipationActivatesEnd:
+	end3
 
 BattleScript_AftermathDmg::
 	pause B_WAIT_TIME_SHORT
@@ -10778,6 +10786,14 @@ BattleScript_CursedBodyActivates::
 
 BattleScript_ClairvoyantActivates::
 	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNMOVEWASDISABLED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_ForewarnActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_FOREWARNACTIVATES
+	waitmessage B_WAIT_TIME_LONG
 	printstring STRINGID_PKMNMOVEWASDISABLED
 	waitmessage B_WAIT_TIME_LONG
 	end3

@@ -41,6 +41,7 @@ extern const u8 BattleScript_StenchActivates[];
 extern const u8 BattleScript_SuctionCupsActivates[];
 extern const u8 BattleScript_TantrumActivates[];
 extern const u8 BattleScript_ClairvoyantActivates[];
+extern const u8 BattleScript_ForewarnActivates[];
 extern const u8 BattleScript_ColdSnapActivates[];
 extern const u8 BattleScript_RottenBerryToxicRet[];
 extern const u8 BattleScript_RottenBerryToxicEnd2[];
