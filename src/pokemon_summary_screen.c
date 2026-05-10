@@ -239,6 +239,7 @@ static void PssScrollLeftEnd(u8);
 static void EnableSummaryScrollClip(void);
 static void DisableSummaryScrollClip(void);
 static void UpdateSummaryScrollClip(void);
+static void SetSummaryPageBgState(void);
 static void TryDrawExperienceProgressBar(void);
 static void SwitchToMoveSelection(u8);
 static void Task_HandleInput_MoveSelect(u8);
@@ -1546,6 +1547,7 @@ static bool8 LoadGraphics(void)
         break;
     case 21:
         SetTypeIcons();
+        SetSummaryPageBgState();
         gMain.state++;
         break;
     case 22:
@@ -2094,6 +2096,27 @@ static void ChangePage(u8 taskId, s8 delta)
         return;
 
     PlaySE(SE_SELECT);
+    if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BATTLE_MOVES)
+    {
+        u8 powerAccTaskId = FindTaskIdByFunc(Task_ShowPowerAccWindow);
+        if (powerAccTaskId != TASK_NONE)
+        {
+            s16 *powerAccData = gTasks[powerAccTaskId].data;
+            bool8 isClosing = powerAccData[0] > 0;
+
+            HandlePowerAccTilemap(0, isClosing ? 0xFF : 0);
+            if (isClosing)
+            {
+                if (!gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_STATUS]].invisible)
+                    PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATUS);
+                PutWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_SPECIES);
+                ScheduleBgCopyTilemapToVram(0);
+            }
+            ScheduleBgCopyTilemapToVram(1);
+            ScheduleBgCopyTilemapToVram(2);
+            DestroyTask(powerAccTaskId);
+        }
+    }
     ClearPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
     sMonSummaryScreen->currPageIndex += delta;
     sMonSummaryScreen->currTabIndex = 0;
@@ -2165,7 +2188,7 @@ static void PssScrollRightEnd(u8 taskId) // display right
     data[0] = 0;
     DrawPagination();
     PutPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
-    UpdateSummaryScrollClip();
+    SetSummaryPageBgState();
     SetTypeIcons();
     TryDrawExperienceProgressBar();
     SwitchTaskToFollowupFunc(taskId);
@@ -2240,7 +2263,7 @@ static void PssScrollLeftEnd(u8 taskId) // display left
     data[0] = 0;
     DrawPagination();
     PutPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
-    UpdateSummaryScrollClip();
+    SetSummaryPageBgState();
     SetTypeIcons();
     TryDrawExperienceProgressBar();
     SwitchTaskToFollowupFunc(taskId);
@@ -2268,6 +2291,47 @@ static void UpdateSummaryScrollClip(void)
         EnableSummaryScrollClip();
     else
         DisableSummaryScrollClip();
+}
+
+static void SetSummaryPageBgState(void)
+{
+    switch (sMonSummaryScreen->currPageIndex)
+    {
+    case PSS_PAGE_INFO:
+        SetBgTilemapBuffer(1, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_SKILLS][0]);
+        SetBgTilemapBuffer(2, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BATTLE_MOVES][0]);
+        SetBgTilemapBuffer(3, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_INFO][0]);
+        sMonSummaryScreen->bgDisplayOrder = 0;
+        ChangeBgX(1, 0, BG_COORD_SET);
+        ChangeBgX(2, 0, BG_COORD_SET);
+        LimitEggSummaryPageDisplay();
+        ScheduleBgCopyTilemapToVram(1);
+        ScheduleBgCopyTilemapToVram(2);
+        ScheduleBgCopyTilemapToVram(3);
+        HideBg(1);
+        HideBg(2);
+        DisableSummaryScrollClip();
+        break;
+    case PSS_PAGE_UNIQUE_ABILITY:
+        SetBgTilemapBuffer(1, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_UNIQUE_ABILITY][0]);
+        SetBgTilemapBuffer(2, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_SKILLS][0]);
+        sMonSummaryScreen->bgDisplayOrder = 0;
+        ChangeBgX(1, 0, BG_COORD_SET);
+        ChangeBgX(2, 0, BG_COORD_SET);
+        SetBgAttribute(1, BG_ATTR_PRIORITY, 1);
+        SetBgAttribute(2, BG_ATTR_PRIORITY, 2);
+        ScheduleBgCopyTilemapToVram(1);
+        ScheduleBgCopyTilemapToVram(2);
+        ShowBg(1);
+        HideBg(2);
+        EnableSummaryScrollClip();
+        break;
+    default:
+        ShowBg(1);
+        ShowBg(2);
+        UpdateSummaryScrollClip();
+        break;
+    }
 }
 
 static void TryDrawExperienceProgressBar(void)
