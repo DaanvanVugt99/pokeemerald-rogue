@@ -10798,6 +10798,24 @@ BattleScript_ForewarnActivates::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_InterrogationActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNMOVEWASDISABLED
+	waitmessage B_WAIT_TIME_LONG
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	statbuffchange STAT_CHANGE_ALLOW_PTR | STAT_CHANGE_NOT_PROTECT_AFFECTED, BattleScript_InterrogationEnd
+	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_InterrogationDoAnim
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_FELL_EMPTY, BattleScript_InterrogationEnd
+	goto BattleScript_InterrogationPrintString
+BattleScript_InterrogationDoAnim:
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+BattleScript_InterrogationPrintString:
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_InterrogationEnd:
+	end3
+
 BattleScript_MummyActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_ATTACKERACQUIREDABILITY

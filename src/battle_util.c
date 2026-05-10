@@ -4995,6 +4995,23 @@ static u8 GetInitialBattleWeather()
 
 static inline bool32 CanAbilityDisableBattler(u32 battler);
 
+static u8 GetForewarnMovePower(u16 move)
+{
+    switch (gBattleMoves[move].effect)
+    {
+    case EFFECT_OHKO:
+        return 150;
+    case EFFECT_COUNTER:
+    case EFFECT_MIRROR_COAT:
+    case EFFECT_METAL_BURST:
+        return 120;
+    default:
+        if (gBattleMoves[move].power == 1)
+            return 80;
+        return gBattleMoves[move].power;
+    }
+}
+
 static bool32 ForewarnChooseMove(u32 battler, u32 *target, u16 *move)
 {
     struct Forewarn {
@@ -5021,23 +5038,7 @@ static bool32 ForewarnChooseMove(u32 battler, u32 *target, u16 *move)
                     continue;
                 data[count].moveId = gBattleMons[i].moves[j];
                 data[count].battler = i;
-                switch (gBattleMoves[data[count].moveId].effect)
-                {
-                case EFFECT_OHKO:
-                    data[count].power = 150;
-                    break;
-                case EFFECT_COUNTER:
-                case EFFECT_MIRROR_COAT:
-                case EFFECT_METAL_BURST:
-                    data[count].power = 120;
-                    break;
-                default:
-                    if (gBattleMoves[data[count].moveId].power == 1)
-                        data[count].power = 80;
-                    else
-                        data[count].power = gBattleMoves[data[count].moveId].power;
-                    break;
-                }
+                data[count].power = GetForewarnMovePower(data[count].moveId);
                 count++;
             }
         }
@@ -5453,6 +5454,37 @@ static u16 GetLastUsableMoveForDisable(u32 battler)
     return MOVE_NONE;
 }
 
+static u16 GetStrongestUsableMoveForDisable(u32 battler)
+{
+    u32 slot;
+    u32 strongestPower = 0;
+    u32 tieCount = 0;
+    u16 strongestMove = MOVE_NONE;
+    u16 move;
+
+    for (slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        move = gBattleMons[battler].moves[slot];
+        if (move == MOVE_NONE || gBattleMons[battler].pp[slot] == 0)
+            continue;
+
+        if (GetForewarnMovePower(move) > strongestPower)
+        {
+            strongestPower = GetForewarnMovePower(move);
+            strongestMove = move;
+            tieCount = 1;
+        }
+        else if (GetForewarnMovePower(move) == strongestPower)
+        {
+            tieCount++;
+            if ((Random() % tieCount) == 0)
+                strongestMove = move;
+        }
+    }
+
+    return strongestMove;
+}
+
 static u16 GetLowestPowerUsableMoveForDisable(u32 battler)
 {
     u32 slot;
@@ -5504,6 +5536,26 @@ static void ApplyAbilityDisableMove(u32 attacker, u32 target, u32 ability, u16 m
     gBattlerAttacker = attacker;
     gBattlerTarget = target;
     BattleScriptPushCursorAndCallback(BattleScript_ClairvoyantActivates);
+}
+
+static void ApplyInterrogationDisableMove(u32 attacker, u32 target, u16 move, bool32 lowerDefense)
+{
+    SetBattlerTriggeredAbility(attacker, ABILITY_INTERROGATION);
+    gDisableStructs[target].disabledMove = move;
+    gDisableStructs[target].disableTimer = 4;
+    PREPARE_MOVE_BUFFER(gBattleTextBuff1, move);
+    gBattlerAttacker = attacker;
+    gBattlerTarget = target;
+
+    if (lowerDefense)
+    {
+        SET_STATCHANGER(STAT_DEF, 1, TRUE);
+        BattleScriptPushCursorAndCallback(BattleScript_InterrogationActivates);
+    }
+    else
+    {
+        BattleScriptPushCursorAndCallback(BattleScript_ClairvoyantActivates);
+    }
 }
 
 static bool32 TryApplyAbilitySuppressionWithGastroAcid(u32 attacker, u32 target, u32 ability)
@@ -11176,6 +11228,25 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_HOT_SHELLS)
+         && (gBattleMoves[move].soundMove || gBattleMoves[move].ballisticMove)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_HOT_SHELLS);
+            gTempMove = gCurrentMove;
+            gCurrentMove = MOVE_EMBER;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+            VarSet(VAR_TEMP_MOVEEFFECT, 0);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_LIKE_WATER)
          && moveType == TYPE_FIGHTING
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -11772,6 +11843,32 @@ if (triggeringAbility != ABILITY_NONE)
             {
                 gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
                 ApplyAbilityDisableMove(battler, gBattlerTarget, ABILITY_KEYRING, disableMove, 3);
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_INTERROGATION)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && gBattlerTarget < gBattlersCount
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler)
+         && CanAbilityDisableBattler(gBattlerTarget))
+        {
+            u16 disableMove = GetStrongestUsableMoveForDisable(gBattlerTarget);
+
+            if (disableMove != MOVE_NONE)
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                ApplyInterrogationDisableMove(
+                    battler,
+                    gBattlerTarget,
+                    disableMove,
+                    gCurrentTurnActionNumber < gBattlersCount
+                 && GetBattlerTurnOrderNum(gBattlerTarget) < gCurrentTurnActionNumber);
                 effect++;
             }
         }
@@ -12778,6 +12875,7 @@ if (triggeringAbility != ABILITY_NONE)
                 gCalledMove = MOVE_FLAME_CHARGE;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
                 effect++;
