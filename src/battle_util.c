@@ -6826,6 +6826,66 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_NIGHT_HUNTER)
+         && !uniqueDone
+         && CountPartyMonsOfType(battler, TYPE_GHOST, TRUE) == 0)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_NIGHT_HUNTER);
+                BattleScriptPushCursorAndCallback(BattleScript_OmenActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_NIGHT_HUNTER);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SHOWDOWN)
+         && !uniqueDone
+         && CountPartyMonsOfType(battler, TYPE_DARK, TRUE) == 0)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SHOWDOWN);
+                BattleScriptPushCursorAndCallback(BattleScript_OmenActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SHOWDOWN);
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SOLO_SERENADE)
+         && !uniqueDone
+         && CountPartyMonsOfType(battler, TYPE_FAIRY, TRUE) == 0)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_MISTY_TERRAIN, &gFieldTimers.terrainTimer))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SOLO_SERENADE);
+                BattleScriptPushCursorAndCallback(BattleScript_MistySurgeActivates);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_LAST_FAREWELL)
          && !uniqueDone
          && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
