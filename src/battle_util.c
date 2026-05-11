@@ -10859,6 +10859,27 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BEGUILE)
+         && (move == MOVE_ENCORE || move == MOVE_DISABLE || move == MOVE_TORMENT || move == MOVE_ATTRACT)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && gBattlerTarget < gBattlersCount
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler)
+         && (move == MOVE_ATTRACT
+             ? (gBattleMons[gBattlerTarget].status2 & STATUS2_INFATUATED_WITH(battler))
+             : DidMoveSucceedForMoveEndEffects(battler))
+         && CanBePoisoned(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BEGUILE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_TOXIC;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_POWER_PLAY)
          && (move == MOVE_SUCKER_PUNCH || gChosenMove == MOVE_SUCKER_PUNCH)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -12110,6 +12131,40 @@ if (triggeringAbility != ABILITY_NONE)
                 gBattlerAttacker = battler;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FLOWER_CHAIN)
+         && IsBattlerAlive(battler)
+         && (IsHealingMove(move) || gBattleMoves[move].effect == EFFECT_HIT_ENEMY_HEAL_ALLY)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            u32 healTarget = battler;
+
+            if (gBattleMoves[move].effect == EFFECT_HEAL_PULSE
+             || gBattleMoves[move].effect == EFFECT_HIT_ENEMY_HEAL_ALLY)
+            {
+                healTarget = gBattleStruct->moveTarget[battler];
+                if (healTarget >= gBattlersCount
+                 || GetBattlerSide(healTarget) != GetBattlerSide(battler))
+                    healTarget = gBattlersCount;
+            }
+
+            if (healTarget < gBattlersCount
+             && IsBattlerAlive(healTarget)
+             && gBattleMons[healTarget].hp > gBattleStruct->hpBefore[healTarget]
+             && CompareStat(healTarget, STAT_SPDEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_FLOWER_CHAIN);
+                gBattlerAbility = battler;
+                gEffectBattler = healTarget;
+                SET_STATCHANGER(STAT_SPDEF, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPDEF);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_IntensiveCareActivates;
                 effect++;
             }
         }
@@ -18735,6 +18790,12 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
      && IS_MOVE_SPECIAL(move))
     {
         return UQ_4_12(0.9);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_MONKEY_MIND)
+     && IS_MOVE_SPECIAL(move))
+    {
+        return IsBattlerTerrainAffected(battlerDef, STATUS_FIELD_PSYCHIC_TERRAIN | STATUS_FIELD_PLAIN_TERRAIN) ? UQ_4_12(0.75) : UQ_4_12(0.9);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_NEGATIVE_CHARGE)
