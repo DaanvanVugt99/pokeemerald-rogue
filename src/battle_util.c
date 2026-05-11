@@ -10051,6 +10051,44 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_NUMBING_SPINES)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && !(gStatuses3[moveEndAttacker] & STATUS3_HEAL_BLOCK))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_NUMBING_SPINES);
+            gBattlerTarget = moveEndAttacker;
+            gStatuses3[moveEndAttacker] |= STATUS3_HEAL_BLOCK;
+            gDisableStructs[moveEndAttacker].healBlockTimer = 5;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_NumbingSpinesActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BUBBLE_NET)
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[battler].hp != 0
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && !(gBattleMons[moveEndAttacker].status2 & STATUS2_ESCAPE_PREVENTION))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BUBBLE_NET);
+            gBattleMons[moveEndAttacker].status2 |= STATUS2_ESCAPE_PREVENTION;
+            gDisableStructs[moveEndAttacker].battlerPreventingEscape = battler;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            gBattlerAttacker = battler;
+            gBattlerTarget = moveEndAttacker;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_BubbleNetActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BARNACLE_WALL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -12167,6 +12205,26 @@ if (triggeringAbility != ABILITY_NONE)
                 gBattlescriptCurrInstr = BattleScript_IntensiveCareActivates;
                 effect++;
             }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SPORELIGHT)
+         && IsHealingMove(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMove(battler)
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SPORELIGHT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_SPOTLIGHT;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_ATOMIZER)
@@ -17339,6 +17397,13 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, GetShortCircuitModifier(battlerAtk));
     }
 
+    if (moveType == TYPE_GRASS
+     && gBattleStruct->ateBoost[battlerAtk]
+     && HasBattlerAbility(battlerAtk, ABILITY_MANTIS_MIMICRY))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
+    }
+
     if (move == MOVE_DRAGON_BREATH
      && (holdEffectAtk == HOLD_EFFECT_GEMS || gBattleMons[battlerAtk].item == ITEM_AMULET_COIN)
      && HasBattlerAbility(battlerAtk, ABILITY_TREASURE_HOARD))
@@ -17454,14 +17519,6 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
 
     if (HasBattlerAbility(battlerAtk, ABILITY_OPEN_FIELD)
      && BATTLER_MAX_HP(battlerDef)
-     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PLAIN_TERRAIN))
-    {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
-    }
-
-    if (HasBattlerAbility(battlerAtk, ABILITY_TRAILBREAKER)
-     && moveType == TYPE_GROUND
-     && !IS_MOVE_STATUS(move)
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PLAIN_TERRAIN))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));

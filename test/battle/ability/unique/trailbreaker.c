@@ -43,7 +43,7 @@ SINGLE_BATTLE_TEST("Trailbreaker does not set Plain Terrain after non-Ground mov
     }
 }
 
-SINGLE_BATTLE_TEST("Trailbreaker boosts Ground-type moves in Plain Terrain", s16 damage)
+SINGLE_BATTLE_TEST("Trailbreaker does not boost Ground-type moves in Plain Terrain", s16 damage)
 {
     bool32 terrain;
 
@@ -61,6 +61,6 @@ SINGLE_BATTLE_TEST("Trailbreaker boosts Ground-type moves in Plain Terrain", s16
     } SCENE {
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
-        EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.2), results[1].damage);
+        EXPECT_EQ(results[0].damage, results[1].damage);
     }
 }

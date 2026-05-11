@@ -9479,6 +9479,19 @@ BattleScript_DynamoRaiseSpeed:
 BattleScript_DynamoEnd:
 	return
 
+BattleScript_NumbingSpinesActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNPREVENTEDFROMHEALING
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_BubbleNetActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_THUNDERCAGETRAPPED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return

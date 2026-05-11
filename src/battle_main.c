@@ -6134,6 +6134,9 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
     if (MonHasMoveTypeAbility(mon, ABILITY_ROCK_HEAD) && moveType == TYPE_NORMAL)
         moveType = TYPE_ROCK;
 
+    if (MonHasMoveTypeAbility(mon, ABILITY_MANTIS_MIMICRY) && moveType == TYPE_BUG)
+        moveType = TYPE_GRASS;
+
     if (gMain.inBattle && (gFieldStatuses & STATUS_FIELD_ION_DELUGE) && moveType == TYPE_NORMAL)
         moveType = TYPE_ELECTRIC;
 
@@ -6291,6 +6294,13 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     GET_MOVE_TYPE(move, moveType);
     if (HasBattlerAbility(battlerAtk, ABILITY_ROCK_HEAD) && moveType == TYPE_NORMAL)
         gBattleStruct->dynamicMoveType = TYPE_ROCK | F_DYNAMIC_TYPE_SET;
+
+    GET_MOVE_TYPE(move, moveType);
+    if (HasBattlerAbility(battlerAtk, ABILITY_MANTIS_MIMICRY) && moveType == TYPE_BUG)
+    {
+        gBattleStruct->dynamicMoveType = TYPE_GRASS | F_DYNAMIC_TYPE_SET;
+        gBattleStruct->ateBoost[battlerAtk] = 1;
+    }
 
     GET_MOVE_TYPE(move, moveType);
     if ((gFieldStatuses & STATUS_FIELD_ION_DELUGE && moveType == TYPE_NORMAL)
