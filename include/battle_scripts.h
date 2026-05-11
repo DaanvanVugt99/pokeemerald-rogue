@@ -23,6 +23,7 @@ extern const u8 BattleScript_FrightmareActivates[];
 extern const u8 BattleScript_VoltBreakActivates[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
 extern const u8 BattleScript_AbilityUsesCalledMoveNoPopup[];
+extern const u8 BattleScript_BreakFormationAfterFormChange[];
 extern const u8 BattleScript_BarnacleWallActivates[];
 extern const u8 BattleScript_BloomBurstUsesCalledMove[];
 extern const u8 BattleScript_DemolitionActivates[];

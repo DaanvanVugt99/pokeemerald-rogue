@@ -10310,6 +10310,48 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BREAK_FORMATION)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, moveEndAttacker))
+        {
+            if (GetBattlerAbility(battler) == ABILITY_SCHOOLING
+             && gBattleMons[battler].level >= 20
+             && TryBattleFormChange(battler, FORM_CHANGE_BATTLE_HP_PERCENT))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_BREAK_FORMATION);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = battler;
+                gBattlerTarget = moveEndAttacker;
+                gCalledMove = MOVE_U_TURN;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_BreakFormationAfterFormChange;
+            }
+            else
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_BREAK_FORMATION);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = moveEndAttacker;
+                gCalledMove = MOVE_U_TURN;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            }
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BATTLE_FURY)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && battler == moveEndTarget
@@ -11321,6 +11363,28 @@ if (triggeringAbility != ABILITY_NONE)
             VarSet(VAR_TEMP_MOVEEFFECT, 0);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_INSTINCT)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !IS_MOVE_STATUS(move)
+         && TARGET_TURN_DAMAGED
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && HadMoreThanHalfHpNowHasLess(gBattlerTarget)
+         && IsFinalMultiHitStrike()
+         && !(gStatuses3[battler] & STATUS3_LASER_FOCUS)
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_INSTINCT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_LASER_FOCUS;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
         }
 

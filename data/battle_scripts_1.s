@@ -11295,6 +11295,10 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_BreakFormationAfterFormChange::
+	call BattleScript_AttackerFormChangeNoPopup
+	goto BattleScript_AbilityUsesCalledMove
+
 BattleScript_DemolitionActivates::
 	copybyte gBattlerAbility, gBattlerAttacker
 	sethword sABILITY_OVERWRITE, ABILITY_DEMOLITION
