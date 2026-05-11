@@ -5215,6 +5215,34 @@ static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 mov
     return FALSE;
 }
 
+static bool32 TryUseDozingCalledMove(u32 battler, u32 move)
+{
+    u32 target;
+
+    if (move == MOVE_SLEEP_TALK)
+    {
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+        target = battler;
+    }
+    else
+    {
+        if (!TryGetOpposingExtraMoveTarget(battler, &target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_DOZING);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move)
 {
     if (!HasBattlerAbility(battler, ABILITY_ADAPTIVE_SLIME))
@@ -8809,6 +8837,28 @@ special_delivery_done:
                 effect++;
             }
 
+            if (HasBattlerAbility(battler, ABILITY_DOZING)
+             && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn)
+            {
+                if (!gDisableStructs[battler].uniquePersistentStateActive)
+                {
+                    gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+                }
+                else
+                {
+                    u16 firstMove = RandomWeighted(RNG_ROGUE_DOZING, 1, 1) == 0 ? MOVE_SLEEP_TALK : MOVE_SNORE;
+                    u16 secondMove = firstMove == MOVE_SLEEP_TALK ? MOVE_SNORE : MOVE_SLEEP_TALK;
+
+                    if (TryUseDozingCalledMove(battler, firstMove)
+                     || TryUseDozingCalledMove(battler, secondMove))
+                    {
+                        effect++;
+                    }
+
+                    gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+                }
+            }
+
             if (HasBattlerAbility(battler, ABILITY_MOOD_SWING)
              && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn)
             {
@@ -9171,6 +9221,11 @@ else if (moveType == TYPE_FAIRY)
 {
     if (HasBattlerAbility(battler, ABILITY_FAIRY_ABSORB))
         triggeringAbility = ABILITY_FAIRY_ABSORB;
+}
+else if (moveType == TYPE_ROCK)
+{
+    if (HasBattlerAbility(battler, ABILITY_MORTAR_SHELL))
+        triggeringAbility = ABILITY_MORTAR_SHELL, effect = 2, statId = STAT_DEF;
 }
 else if (moveType == TYPE_BUG)
 {
@@ -11914,6 +11969,28 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             gCalledMove = MOVE_INGRAIN;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_OVERCLOCK)
+         && move == MOVE_MULTI_ATTACK
+         && ItemId_GetHoldEffect(gBattleMons[battler].item) == HOLD_EFFECT_MEMORY
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_OVERCLOCK);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_AUTOTOMIZE;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;

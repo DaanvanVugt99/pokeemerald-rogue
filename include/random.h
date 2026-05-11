@@ -159,6 +159,7 @@ enum RandomTag
     RNG_TIMELOOP,
     RNG_TRACE,
     RNG_FICKLE_BEAM,
+    RNG_ROGUE_DOZING,
 };
 
 #define RandomWeighted(tag, ...) \
