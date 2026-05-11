@@ -29,6 +29,7 @@ extern const u8 BattleScript_BloomBurstUsesCalledMove[];
 extern const u8 BattleScript_DemolitionActivates[];
 extern const u8 BattleScript_VictoryActivates[];
 extern const u8 BattleScript_VictoryActivatesSpeed[];
+extern const u8 BattleScript_RoyalGardenActivates[];
 extern const u8 BattleScript_InsectivoreActivates[];
 extern const u8 BattleScript_RadiantActivates[];
 extern const u8 BattleScript_StormCommandActivates[];

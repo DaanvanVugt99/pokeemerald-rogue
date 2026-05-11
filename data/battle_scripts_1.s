@@ -11388,6 +11388,15 @@ BattleScript_StormCommandActivates::
 	call BattleScript_ActivateTerrainEffects
 	return
 
+BattleScript_RoyalGardenActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TERRAINBECOMESGRASSY
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	return
+
 BattleScript_GaleCommandActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

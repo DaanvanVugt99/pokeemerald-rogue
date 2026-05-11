@@ -11039,6 +11039,18 @@ static void Cmd_various(void)
             return;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ROYAL_GARDEN)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_GARDEN);
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_RoyalGardenActivates;
+            return;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_STORM_COMMAND)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()

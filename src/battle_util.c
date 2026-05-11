@@ -9935,6 +9935,24 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ROYAL_GARDEN)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && (CompareStat(moveEndAttacker, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(moveEndAttacker) == ABILITY_MIRROR_ARMOR))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_GARDEN);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_GooeyActivates;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_THORN_BULWARK)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -10986,6 +11004,17 @@ if (triggeringAbility != ABILITY_NONE)
                 VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TRAILBREAKER)
+         && moveType == TYPE_GROUND
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && IsFinalMultiHitStrike()
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TRAILBREAKER);
+            BattleScriptPushCursorAndCallback(BattleScript_PlainSurgeActivates);
             effect++;
         }
 
@@ -17370,6 +17399,14 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
 
     if (HasBattlerAbility(battlerAtk, ABILITY_OPEN_FIELD)
      && BATTLER_MAX_HP(battlerDef)
+     && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PLAIN_TERRAIN))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_TRAILBREAKER)
+     && moveType == TYPE_GROUND
+     && !IS_MOVE_STATUS(move)
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PLAIN_TERRAIN))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
