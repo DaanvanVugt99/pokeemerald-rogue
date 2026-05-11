@@ -1429,7 +1429,11 @@ static void Cmd_attackcanceler(void)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_CHAMPION) && gBattleMoves[gCurrentMove].punchingMove)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_ABYSSAL_MAW) && gBattleMoves[gCurrentMove].bitingMove)
-     || HasBattlerAbility(gBattlerAttacker, ABILITY_BRUTAL))
+     || HasBattlerAbility(gBattlerAttacker, ABILITY_BRUTAL)
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_CENTER_STAGE)
+      && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+      && moveType == TYPE_FLYING
+      && !gBattleStruct->isAtkCancelerForCalledMove))
     && IsMoveAffectedByParentalBond(gCurrentMove, gBattlerAttacker)
     && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
     && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE)

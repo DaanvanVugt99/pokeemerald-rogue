@@ -9459,6 +9459,26 @@ BattleScript_DuelistActivates::
 	call BattleScript_AbilityHpHeal
 	return
 
+BattleScript_DynamoHealActivates::
+	call BattleScript_AbilityHpHeal
+	return
+
+BattleScript_DynamoSpeedActivates::
+	call BattleScript_AbilityPopUp
+	goto BattleScript_DynamoRaiseSpeed
+
+BattleScript_DynamoHealSpeedActivates::
+	call BattleScript_AbilityHpHeal
+BattleScript_DynamoRaiseSpeed:
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_DynamoEnd
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_DynamoEnd
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_DynamoEnd:
+	return
+
 BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return
