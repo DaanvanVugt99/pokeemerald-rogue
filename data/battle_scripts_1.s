@@ -8595,6 +8595,17 @@ BattleScript_TargetFormChangeWithStringNoPopup::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_TargetFormChangeUnspeakable::
+	copybyte sSAVED_BATTLER, gBattlerTarget
+	copybyte sBATTLER, gBattlerAttacker
+	call BattleScript_TargetFormChangeNoPopup
+	call BattleScript_AbilityPopUpTarget
+	copybyte gBattlerAttacker, sBATTLER
+	copybyte gEffectBattler, gBattlerAttacker
+	call BattleScript_LowerAtkSpAtk
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	return
+
 BattleScript_BattlerFormChangeWithStringEnd3::
 	pause 5
 	call BattleScript_AbilityPopUp
@@ -10016,6 +10027,50 @@ BattleScript_DampeningContrary_WontIncrease:
 	printstring STRINGID_TARGETSTATWONTGOHIGHER
 	goto BattleScript_DampeningEffect_WaitString
 
+BattleScript_GraverustActivates::
+	showabilitypopup BS_ATTACKER
+	copybyte sSAVED_BATTLER, gBattlerTarget
+	pause B_WAIT_TIME_LONG
+	destroyabilitypopup
+	setbyte gBattlerTarget, 0
+BattleScript_GraverustLoop:
+	jumpifbyteequal gBattlerTarget, gBattlerAttacker, BattleScript_GraverustLoopIncrement
+	jumpiftargetally BattleScript_GraverustLoopIncrement
+	jumpifabsent BS_TARGET, BattleScript_GraverustLoopIncrement
+	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_GraverustLoopIncrement
+	jumpifmorethanhalfHP BS_TARGET, BattleScript_GraverustLoopIncrement
+BattleScript_GraverustEffect:
+	copybyte sBATTLER, gBattlerAttacker
+	setstatchanger STAT_SPEED, 1, TRUE
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_GraverustLoopIncrement
+	setgraphicalstatchangevalues
+	jumpifability BS_TARGET, ABILITY_CONTRARY, BattleScript_GraverustContrary
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+BattleScript_GraverustEffect_WaitString:
+	waitmessage B_WAIT_TIME_LONG
+	copybyte sBATTLER, gBattlerTarget
+	call BattleScript_TryAdrenalineOrb
+BattleScript_GraverustLoopIncrement:
+	addbyte gBattlerTarget, 1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_GraverustLoop
+BattleScript_GraverustEnd:
+	copybyte sBATTLER, gBattlerAttacker
+	destroyabilitypopup
+	copybyte gBattlerTarget, sSAVED_BATTLER
+	pause B_WAIT_TIME_MED
+	end3
+
+BattleScript_GraverustContrary:
+	call BattleScript_AbilityPopUpTarget
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_GraverustContrary_WontIncrease
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	goto BattleScript_GraverustEffect_WaitString
+BattleScript_GraverustContrary_WontIncrease:
+	printstring STRINGID_TARGETSTATWONTGOHIGHER
+	goto BattleScript_GraverustEffect_WaitString
+
 BattleScript_JumpscareActivates::
 	copybyte sSAVED_BATTLER, gBattlerAttacker
 	call BattleScript_AbilityPopUp
@@ -11214,6 +11269,14 @@ BattleScript_DistortionTauntActivates::
 	call BattleScript_AbilityPopUp
 	jumpifability BS_TARGET_SIDE, ABILITY_AROMA_VEIL, BattleScript_AromaVeilProtects
 	settaunt BattleScript_AbilityPopupReturn
+	printstring STRINGID_PKMNFELLFORTAUNT
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_PsychicMawTauntActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	jumpifability BS_TARGET_SIDE, ABILITY_AROMA_VEIL, BattleScript_AromaVeilProtects
 	printstring STRINGID_PKMNFELLFORTAUNT
 	waitmessage B_WAIT_TIME_LONG
 	return

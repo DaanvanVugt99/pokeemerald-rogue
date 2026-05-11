@@ -2671,6 +2671,9 @@ static void Cmd_datahpupdate(void)
         {
             // TODO: Convert this to a proper FORM_CHANGE type.
             u32 side = GetBattlerSide(battler);
+            bool32 triggerUnspeakable = HasBattlerAbility(battler, ABILITY_UNSPEAKABLE)
+                                     && IsBattlerAlive(gBattlerAttacker)
+                                     && !gDisableStructs[battler].uniqueOncePerSwitchInUsed;
             gBattleScripting.battler = battler;
             if (gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] == SPECIES_NONE)
                 gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] = gBattleMons[battler].species;
@@ -2678,7 +2681,16 @@ static void Cmd_datahpupdate(void)
             if (B_DISGUISE_HP_LOSS >= GEN_8)
                 gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
             BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_TargetFormChange;
+            if (triggerUnspeakable)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_UNSPEAKABLE);
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                gBattlescriptCurrInstr = BattleScript_TargetFormChangeUnspeakable;
+            }
+            else
+            {
+                gBattlescriptCurrInstr = BattleScript_TargetFormChange;
+            }
             return;
         }
         else
