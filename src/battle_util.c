@@ -1133,6 +1133,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_VITAL_SPIRIT] = 1,
     [ABILITY_VOLT_ABSORB] = 1,
     [ABILITY_WATER_ABSORB] = 1,
+    [ABILITY_LOW_TIDE] = 1,
     [ABILITY_FAIRY_ABSORB] = 1,
     [ABILITY_WATER_VEIL] = 1,
     [ABILITY_WHITE_SMOKE] = 1,
@@ -5860,6 +5861,32 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_WASHED_ASHORE) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_WASHED_ASHORE);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_SOAK;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ALLURE) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -6361,6 +6388,44 @@ special_delivery_done:
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             StartAbilityCalledMoveScript();
             return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ADAPTIVE_PLATING) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                u32 opposingAtk;
+                u32 opposingSpAtk;
+                u32 statId;
+
+                if (!IsBattlerAlive(opposingBattler))
+                    continue;
+
+                opposingAtk = gBattleMons[opposingBattler].attack
+                           * gStatStageRatios[gBattleMons[opposingBattler].statStages[STAT_ATK]][0]
+                           / gStatStageRatios[gBattleMons[opposingBattler].statStages[STAT_ATK]][1];
+                opposingSpAtk = gBattleMons[opposingBattler].spAttack
+                             * gStatStageRatios[gBattleMons[opposingBattler].statStages[STAT_SPATK]][0]
+                             / gStatStageRatios[gBattleMons[opposingBattler].statStages[STAT_SPATK]][1];
+
+                statId = (opposingAtk > opposingSpAtk) ? STAT_DEF : STAT_SPDEF;
+                if (CompareStat(battler, statId, MAX_STAT_STAGE, CMP_LESS_THAN))
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_ADAPTIVE_PLATING);
+                    gBattlerAttacker = battler;
+                    SET_STATCHANGER(statId, 1, FALSE);
+                    BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+                    return 1;
+                }
+                break;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_SENTRY_POST) && !uniqueDone)
@@ -9072,6 +9137,30 @@ else if (moveType == TYPE_WATER)
         triggeringAbility = ABILITY_DRY_SKIN;
     else if (HasBattlerAbility(battler, ABILITY_STORM_DRAIN))
         triggeringAbility = ABILITY_STORM_DRAIN, effect = 2, statId = STAT_SPATK;
+    else if (HasBattlerAbility(battler, ABILITY_LOW_TIDE))
+    {
+        u32 originalAttacker = gBattlerAttacker;
+
+        triggeringAbility = ABILITY_LOW_TIDE;
+        effect = 3;
+
+        if (HasBattlerAbility(battler, ABILITY_WATER_COMPACTION)
+         && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            u32 stageGain = 3;
+            if (gBattleMons[battler].statStages[STAT_DEF] + stageGain > MAX_STAT_STAGE)
+                stageGain = MAX_STAT_STAGE - gBattleMons[battler].statStages[STAT_DEF];
+            gBattleMons[battler].statStages[STAT_DEF] += stageGain;
+        }
+
+        SetAtkCancellerForCalledMove();
+        gBattlerAttacker = gBattlerAbility = battler;
+        gBattlerTarget = originalAttacker;
+        gCalledMove = MOVE_MUD_SHOT;
+        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+        VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+        gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+    }
 }
 else if (moveType == TYPE_GRASS)
 {
@@ -9265,6 +9354,7 @@ if (triggeringAbility != ABILITY_NONE)
                 gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
                 effect++;
             }
+
             break;
         case ABILITY_STAMINA:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -12564,6 +12654,23 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BEAR_HUG)
+         && IsMoveMakingContact(move, battler)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BEAR_HUG);
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_BearHugActivates;
             effect++;
         }
 
@@ -16671,6 +16778,9 @@ static bool32 IsBattlerGrounded2(u32 battler, bool32 considerInverse)
     if (holdEffect == HOLD_EFFECT_AIR_BALLOON)
         return FALSE;
     if (HasBattlerAbility(battler, ABILITY_LEVITATE) || HasBattlerAbility(battler, ABILITY_SHORT_CIRCUIT))
+        return FALSE;
+    if (HasBattlerAbility(battler, ABILITY_BRANCH_SWING)
+     && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN))
         return FALSE;
     if (IS_BATTLER_OF_TYPE(battler, TYPE_FLYING) && (!considerInverse || !FlagGet(B_FLAG_INVERSE_BATTLE)))
         return FALSE;

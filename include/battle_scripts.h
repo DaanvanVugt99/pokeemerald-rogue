@@ -50,6 +50,7 @@ extern const u8 BattleScript_DynamoSpeedActivates[];
 extern const u8 BattleScript_DynamoHealSpeedActivates[];
 extern const u8 BattleScript_NumbingSpinesActivates[];
 extern const u8 BattleScript_BubbleNetActivates[];
+extern const u8 BattleScript_BearHugActivates[];
 extern const u8 BattleScript_ColdSnapActivates[];
 extern const u8 BattleScript_RottenBerryToxicRet[];
 extern const u8 BattleScript_RottenBerryToxicEnd2[];

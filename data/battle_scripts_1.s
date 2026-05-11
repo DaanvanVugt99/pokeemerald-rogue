@@ -9492,6 +9492,15 @@ BattleScript_BubbleNetActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_BearHugActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	setmoveeffect MOVE_EFFECT_ATK_MINUS_1
+	seteffectsecondary
+	setmoveeffect MOVE_EFFECT_SPD_MINUS_1
+	seteffectsecondary
+	return
+
 BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return

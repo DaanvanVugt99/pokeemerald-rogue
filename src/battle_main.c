@@ -4748,6 +4748,11 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
     {
         speed = (speed * 150) / 100;
     }
+    if (HasBattlerAbility(battler, ABILITY_BRANCH_SWING)
+     && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN))
+    {
+        speed = (speed * 150) / 100;
+    }
     if (HasBattlerAbility(battler, ABILITY_RUSH_CURRENT)
      && CountPartyMonsOfType(battler, TYPE_FIRE, TRUE) > 0)
     {
