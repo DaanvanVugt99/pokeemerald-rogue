@@ -8,6 +8,9 @@ SINGLE_BATTLE_TEST("Unspeakable lowers attacker's Attack and Sp. Atk when Disgui
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_ASTONISH); }
     } WHEN {
         TURN { MOVE(opponent, MOVE_ASTONISH); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DISGUISE);
+        ABILITY_POPUP(player, ABILITY_UNSPEAKABLE);
     } THEN {
         EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE - 1);
         EXPECT_EQ(opponent->statStages[STAT_SPATK], DEFAULT_STAT_STAGE - 1);

@@ -678,7 +678,6 @@ static s32 TryHP(s32 i, s32 n, u32 battlerId, u32 oldHP, u32 newHP)
             continue;
 
         event = &DATA.queuedEvents[i].as.hp;
-
         if (event->battlerId == battlerId)
         {
             if (event->address <= 0xFFFF)

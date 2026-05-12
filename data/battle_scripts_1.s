@@ -2525,6 +2525,14 @@ BattleScript_EffectHitSwitchTarget:
 	jumpiffainted BS_TARGET, TRUE, BattleScript_MoveEnd
 	jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_AbilityPreventsPhasingOut
 	jumpifability BS_TARGET, ABILITY_UNMOVABLE, BattleScript_AbilityPreventsPhasingOut
+	jumpifability BS_TARGET, ABILITY_ROOTED_SHRINE, BattleScript_HitSwitchTargetTryRootedShrine
+	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
+	jumpiftargetdynamaxed BattleScript_HitSwitchTargetDynamaxed
+	tryhitswitchtarget BattleScript_MoveEnd
+	forcerandomswitch BattleScript_HitSwitchTargetForceRandomSwitchFailed
+	goto BattleScript_MoveEnd
+BattleScript_HitSwitchTargetTryRootedShrine:
+	jumpifterrainaffected BS_TARGET, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_AbilityPreventsPhasingOut
 	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
 	jumpiftargetdynamaxed BattleScript_HitSwitchTargetDynamaxed
 	tryhitswitchtarget BattleScript_MoveEnd
@@ -4114,6 +4122,15 @@ BattleScript_EffectRoar::
 	jumpifability BS_TARGET, ABILITY_GUARD_DOG, BattleScript_ButItFailed
 	jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_AbilityPreventsPhasingOut
 	jumpifability BS_TARGET, ABILITY_UNMOVABLE, BattleScript_AbilityPreventsPhasingOut
+	jumpifability BS_TARGET, ABILITY_ROOTED_SHRINE, BattleScript_RoarTryRootedShrine
+	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
+	jumpiftargetdynamaxed BattleScript_RoarBlockedByDynamax
+	accuracycheck BattleScript_ButItFailed, NO_ACC_CALC_CHECK_LOCK_ON
+	accuracycheck BattleScript_MoveMissedPause, ACC_CURR_MOVE
+	jumpifbattletype BATTLE_TYPE_ARENA, BattleScript_ButItFailed
+	forcerandomswitch BattleScript_ButItFailed
+BattleScript_RoarTryRootedShrine:
+	jumpifterrainaffected BS_TARGET, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_AbilityPreventsPhasingOut
 	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
 	jumpiftargetdynamaxed BattleScript_RoarBlockedByDynamax
 	accuracycheck BattleScript_ButItFailed, NO_ACC_CALC_CHECK_LOCK_ON
@@ -8596,14 +8613,12 @@ BattleScript_TargetFormChangeWithStringNoPopup::
 	return
 
 BattleScript_TargetFormChangeUnspeakable::
-	copybyte sSAVED_BATTLER, gBattlerTarget
-	copybyte sBATTLER, gBattlerAttacker
-	call BattleScript_TargetFormChangeNoPopup
-	call BattleScript_AbilityPopUpTarget
-	copybyte gBattlerAttacker, sBATTLER
+	call BattleScript_TargetFormChange
+	copybyte gBattlerAbility, sBATTLER
+	sethword sABILITY_OVERWRITE, ABILITY_UNSPEAKABLE
+	call BattleScript_AbilityPopUp
 	copybyte gEffectBattler, gBattlerAttacker
 	call BattleScript_LowerAtkSpAtk
-	copybyte gBattlerTarget, sSAVED_BATTLER
 	return
 
 BattleScript_BattlerFormChangeWithStringEnd3::
@@ -11531,6 +11546,12 @@ BattleScript_UnmovableActivates::
 	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_UnmovableIngrain
 	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_UnmovableSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_UnmovableSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_ROOTED_SHRINE, BattleScript_UnmovableTryRootedShrine
+	jumpiftargetdynamaxed BattleScript_UnmovableDynamaxed
+	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
+	forcerandomswitch BattleScript_UnmovableEnd
+BattleScript_UnmovableTryRootedShrine:
+	jumpifterrainaffected BS_EFFECT_BATTLER, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_UnmovableSuctionCups
 	jumpiftargetdynamaxed BattleScript_UnmovableDynamaxed
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
 	forcerandomswitch BattleScript_UnmovableEnd
@@ -11559,6 +11580,12 @@ BattleScript_StenchActivates::
 	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_StenchIngrain
 	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_StenchSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_StenchSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_ROOTED_SHRINE, BattleScript_StenchTryRootedShrine
+	jumpiftargetdynamaxed BattleScript_StenchDynamaxed
+	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
+	forcerandomswitch BattleScript_StenchEnd
+BattleScript_StenchTryRootedShrine:
+	jumpifterrainaffected BS_EFFECT_BATTLER, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_StenchSuctionCups
 	jumpiftargetdynamaxed BattleScript_StenchDynamaxed
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
 	forcerandomswitch BattleScript_StenchEnd
@@ -12631,6 +12658,7 @@ BattleScript_RedCardActivates::
 	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_RedCardIngrain
 	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_RedCardSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_RedCardSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_ROOTED_SHRINE, BattleScript_RedCardTryRootedShrine
 	jumpiftargetdynamaxed BattleScript_RedCardDynamaxed
 	removeitem BS_SCRIPTING
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
@@ -12638,6 +12666,12 @@ BattleScript_RedCardActivates::
 	@ changes the current battle script. the rest happens in BattleScript_RoarSuccessSwitch_Ret, if switch is successful
 BattleScript_RedCardEnd:
 	return
+BattleScript_RedCardTryRootedShrine:
+	jumpifterrainaffected BS_EFFECT_BATTLER, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_RedCardSuctionCups
+	jumpiftargetdynamaxed BattleScript_RedCardDynamaxed
+	removeitem BS_SCRIPTING
+	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
+	forcerandomswitch BattleScript_RedCardEnd
 BattleScript_RedCardIngrain:
 	printstring STRINGID_PKMNANCHOREDITSELF
 	waitmessage B_WAIT_TIME_LONG

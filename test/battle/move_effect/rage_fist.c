@@ -255,16 +255,15 @@ SINGLE_BATTLE_TEST("Rage Fist base power is increased if Disguise breaks")
     s16 timesGotHit[2];
 
     GIVEN {
-        PLAYER(SPECIES_MIMIKYU_DISGUISED) { Ability(ABILITY_DISGUISE); }
+        PLAYER(SPECIES_MIMIKYU_DISGUISED) { Ability(ABILITY_DISGUISE); UniqueAbility(ABILITY_NONE); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
-        TURN { MOVE(player, MOVE_RAGE_FIST); MOVE(opponent, MOVE_ROCK_THROW); }
-        TURN { MOVE(player, MOVE_RAGE_FIST); }
+        TURN { MOVE(player, MOVE_RAGE_FIST, WITH_RNG(RNG_CRITICAL_HIT, FALSE)); MOVE(opponent, MOVE_ROCK_THROW); }
+        TURN { MOVE(player, MOVE_RAGE_FIST, WITH_RNG(RNG_CRITICAL_HIT, FALSE)); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RAGE_FIST, player);
         HP_BAR(opponent, captureDamage: &timesGotHit[0]);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ROCK_THROW, opponent);
-        ABILITY_POPUP(player, ABILITY_DISGUISE);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RAGE_FIST, player);
         HP_BAR(opponent, captureDamage: &timesGotHit[1]);
     } THEN {

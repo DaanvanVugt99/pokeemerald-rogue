@@ -10,10 +10,10 @@ SINGLE_BATTLE_TEST("Innards Out deal dmg on fainting equal to the amount of dmg 
     PARAMETRIZE { hp = 100; } // This takes out Wobbuffet.
 
     GIVEN {
-        PLAYER(SPECIES_PYUKUMUKU) { HP(hp); Ability(ABILITY_INNARDS_OUT); }
-        PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_WOBBUFFET) { HP(70); SpAttack(1000); }
-        OPPONENT(SPECIES_WOBBUFFET);
+        PLAYER(SPECIES_WOBBUFFET) { HP(hp); Speed(1); Ability(ABILITY_INNARDS_OUT); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(70); Speed(1000); SpAttack(1000); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1000); }
         ASSUME(gBattleMoves[MOVE_PSYCHIC].power != 0);
     } WHEN {
         TURN { MOVE(opponent, MOVE_PSYCHIC); SEND_OUT(player, 1); if (hp == 100) { SEND_OUT(opponent, 1); } }
@@ -28,9 +28,9 @@ SINGLE_BATTLE_TEST("Innards Out deal dmg on fainting equal to the amount of dmg 
 SINGLE_BATTLE_TEST("Innards Out does not trigger after Gastro Acid has been used")
 {
     GIVEN {
-        PLAYER(SPECIES_PYUKUMUKU) { HP(1); Ability(ABILITY_INNARDS_OUT); }
-        PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_WOBBUFFET);
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); Speed(1); Ability(ABILITY_INNARDS_OUT); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1000); }
         ASSUME(gBattleMoves[MOVE_PSYCHIC].power != 0);
         ASSUME(gBattleMoves[MOVE_GASTRO_ACID].effect == EFFECT_GASTRO_ACID);
     } WHEN {
@@ -38,6 +38,8 @@ SINGLE_BATTLE_TEST("Innards Out does not trigger after Gastro Acid has been used
         TURN { MOVE(opponent, MOVE_PSYCHIC); SEND_OUT(player, 1); }
     } SCENE {
         MESSAGE("Foe Wobbuffet used Gastro Acid!");
+        MESSAGE("Wobbuffet used Celebrate!");
+        MESSAGE("Congratulations, 1!");
         MESSAGE("Foe Wobbuffet used Psychic!");
         HP_BAR(player);
         NONE_OF {
@@ -51,9 +53,9 @@ SINGLE_BATTLE_TEST("Innards Out does not trigger after Gastro Acid has been used
 SINGLE_BATTLE_TEST("Innards Out does not damage Magic Guard Pokemon")
 {
     GIVEN {
-        PLAYER(SPECIES_PYUKUMUKU) { HP(1); Ability(ABILITY_INNARDS_OUT); }
-        PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_CLEFABLE) { Ability(ABILITY_MAGIC_GUARD); }
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); Speed(1); Ability(ABILITY_INNARDS_OUT); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); }
+        OPPONENT(SPECIES_CLEFABLE) { Speed(1000); Ability(ABILITY_MAGIC_GUARD); }
         ASSUME(gBattleMoves[MOVE_PSYCHIC].power != 0);
     } WHEN {
         TURN { MOVE(opponent, MOVE_PSYCHIC); SEND_OUT(player, 1); }

@@ -32,6 +32,6 @@ SINGLE_BATTLE_TEST("Branch Swing makes the user ungrounded in Grassy Terrain")
         TURN { MOVE(opponent, MOVE_EARTHQUAKE); MOVE(player, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRASSY_TERRAIN, opponent);
-        MESSAGE("It doesn't affect Passimian...");
+        MESSAGE("It doesn't affect Passimian…");
     }
 }

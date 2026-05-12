@@ -1694,6 +1694,9 @@ static bool32 AccuracyCalcHelper(u16 move)
       && moveType == TYPE_NORMAL)
      || (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
      || (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON))
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_ORACLE_SHRINE)
+      && IS_MOVE_STATUS(move)
+      && IsBattlerTerrainAffected(gBattlerAttacker, STATUS_FIELD_PSYCHIC_TERRAIN))
      || gStatuses4[gBattlerTarget] & STATUS4_GLAIVE_RUSH)
     {
         JumpIfMoveFailed(7, move);
@@ -2678,13 +2681,14 @@ static void Cmd_datahpupdate(void)
             if (gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] == SPECIES_NONE)
                 gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] = gBattleMons[battler].species;
             gBattleMons[battler].species = SPECIES_MIMIKYU_BUSTED;
-            if (B_DISGUISE_HP_LOSS >= GEN_8)
+            if (B_DISGUISE_HP_LOSS >= GEN_8 && !gProtectStructs[battler].confusionSelfDmg)
                 gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+            SetBattlerTriggeredAbility(battler, ABILITY_DISGUISE);
             BattleScriptPush(cmd->nextInstr);
             if (triggerUnspeakable)
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_UNSPEAKABLE);
                 gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                RecordAbilityBattle(battler, ABILITY_UNSPEAKABLE);
                 gBattlescriptCurrInstr = BattleScript_TargetFormChangeUnspeakable;
             }
             else
@@ -3349,6 +3353,16 @@ void SetMoveEffect(bool32 primary, u32 certain)
             RecordAbilityBattle(gEffectBattler, battlerAbility);
         else
             RecordItemEffectBattle(gEffectBattler, HOLD_EFFECT_COVERT_CLOAK);
+        INCREMENT_RESET_RETURN
+    }
+
+    if (HasBattlerAbility(gEffectBattler, ABILITY_MISTBOUND_SHRINE)
+     && IsBattlerTerrainAffected(gEffectBattler, STATUS_FIELD_MISTY_TERRAIN)
+     && !(gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
+     && !primary
+     && !IS_MOVE_STATUS(gCurrentMove))
+    {
+        RecordAbilityBattle(gEffectBattler, ABILITY_MISTBOUND_SHRINE);
         INCREMENT_RESET_RETURN
     }
 

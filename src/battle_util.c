@@ -6266,6 +6266,72 @@ special_delivery_done:
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PROTO_ORBIT) && !uniqueDone)
+        {
+            bool32 needsGravity = !(gFieldStatuses & STATUS_FIELD_GRAVITY);
+            bool32 needsTrickRoom = !(gFieldStatuses & STATUS_FIELD_TRICK_ROOM);
+
+            if (gDisableStructs[battler].uniquePersistentStateActive)
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+                uniqueDone = TRUE;
+
+                if (needsTrickRoom)
+                {
+                    SetBattlerTriggeredAbility(battler, ABILITY_PROTO_ORBIT);
+                    SetAtkCancellerForCalledMove();
+                    gBattlerAttacker = gBattlerAbility = battler;
+                    gBattlerTarget = battler;
+                    gCalledMove = MOVE_TRICK_ROOM;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[battler].extraMoveUsed = TRUE;
+                    gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                    gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                    StartAbilityCalledMoveScript();
+                    return 1;
+                }
+            }
+            else if (needsGravity && CanUseSelfExtraMove(battler))
+            {
+                uniqueDone = !needsTrickRoom;
+                gDisableStructs[battler].uniquePersistentStateActive = needsTrickRoom;
+                SetBattlerTriggeredAbility(battler, ABILITY_PROTO_ORBIT);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = battler;
+                gCalledMove = MOVE_GRAVITY;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+            else if (needsTrickRoom && CanUseSelfExtraMove(battler))
+            {
+                uniqueDone = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_PROTO_ORBIT);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = battler;
+                gCalledMove = MOVE_TRICK_ROOM;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+            else
+            {
+                uniqueDone = TRUE;
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+            }
+
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_LUNAR_EDICT)
          && !uniqueDone
          && !(gStatuses3[battler] & STATUS3_IMPRISONED_OTHERS))
@@ -6691,6 +6757,25 @@ special_delivery_done:
             else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
             {
                 BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SOLAR_CORE)
+         && !uniqueDone
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && !(gBattleWeather & B_WEATHER_ANY)
+         && !(gFieldStatuses & STATUS_FIELD_TERRAIN_ANY))
+        {
+            uniqueDone = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SOLAR_CORE);
+                BattleScriptPushCursorAndCallback(BattleScript_DroughtActivates);
                 return 1;
             }
         }
@@ -10760,6 +10845,34 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ECLIPSE_CORE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && moveEndAttacker != battler
+         && BATTLER_TURN_DAMAGED(battler)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            u32 damageTaken = gSpecialStatuses[battler].physicalDmg + gSpecialStatuses[battler].specialDmg;
+
+            if (damageTaken != 0
+             && gBattleMons[battler].hp + damageTaken >= gBattleMons[battler].maxHP)
+            {
+                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+                SetBattlerTriggeredAbility(battler, ABILITY_ECLIPSE_CORE);
+                if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
+                {
+                    BattleScriptPushCursorAndCallback(BattleScript_OmenActivates);
+                    effect++;
+                }
+                else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+                {
+                    BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                    effect++;
+                }
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_WIND_CHIMES)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsFinalMultiHitStrike()
@@ -14604,6 +14717,9 @@ u32 IsAbilityOnFieldExcept(u32 battler, u32 ability)
 u32 IsAbilityPreventingEscape(u32 battler)
 {
     u32 id;
+    if (HasBattlerAbility(battler, ABILITY_ROOTED_SHRINE)
+     && IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN))
+        return 0;
     if (HasBattlerAbility(battler, ABILITY_RUN_AWAY))
         return 0;
     if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
@@ -14626,6 +14742,9 @@ bool32 CanBattlerEscape(u32 battler)
     if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_SHED_SHELL)
         return TRUE;
     else if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
+        return TRUE;
+    else if (HasBattlerAbility(battler, ABILITY_ROOTED_SHRINE)
+          && IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN))
         return TRUE;
     else if ((gStatuses3[battler] & STATUS3_ROOTED) && !HasBattlerAbility(battler, ABILITY_UPROOT))
         return FALSE;
@@ -16855,7 +16974,9 @@ bool32 IsMoveMakingContact(u32 move, u32 battlerAtk)
     }
     else if ((atkHoldEffect == HOLD_EFFECT_PUNCHING_GLOVE && gBattleMoves[move].punchingMove)
            || atkHoldEffect == HOLD_EFFECT_PROTECTIVE_PADS
-           || HasBattlerAbility(battlerAtk, ABILITY_LONG_REACH))
+           || HasBattlerAbility(battlerAtk, ABILITY_LONG_REACH)
+           || (HasBattlerAbility(battlerAtk, ABILITY_CRACKLING_SHRINE)
+            && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_ELECTRIC_TERRAIN)))
     {
         return FALSE;
     }

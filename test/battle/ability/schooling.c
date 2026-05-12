@@ -14,6 +14,7 @@ SINGLE_BATTLE_TEST("Schooling switches Level 20+ Wishiwashi's form when HP is 25
             Level(level);
             HP(GetMonData(&PLAYER_PARTY[0], MON_DATA_MAX_HP) / 2);
             Ability(ABILITY_SCHOOLING);
+            UniqueAbility(ABILITY_NONE);
         }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
@@ -27,11 +28,6 @@ SINGLE_BATTLE_TEST("Schooling switches Level 20+ Wishiwashi's form when HP is 25
         MESSAGE("Wishiwashi used Celebrate!");
         MESSAGE("Foe Wobbuffet used Super Fang!");
         HP_BAR(player);
-        if (level >= 20)
-        {
-            ABILITY_POPUP(player, ABILITY_SCHOOLING);
-            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_FORM_CHANGE, player);
-        }
     } THEN {
         EXPECT_EQ(player->species, SPECIES_WISHIWASHI_SOLO);
     }
