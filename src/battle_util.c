@@ -413,6 +413,7 @@ void HandleAction_UseMove(void)
     {
         gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
     }
+    gDisableStructs[gBattlerAttacker].ultraAscentActive = FALSE;
 
     gIsCriticalHit = FALSE;
     gBattleStruct->atkCancellerTracker = 0;
@@ -4558,6 +4559,34 @@ bool32 IsOnlyAliveMonInParty(u32 battler)
             && IsValidForBattle(&party[gBattlerPartyIndexes[battler]]));
 }
 
+bool32 IsOnlyUltraBeastInParty(u32 battler)
+{
+    u32 i;
+    u32 count = 0;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+
+        species = GetMonData(&party[i], MON_DATA_SPECIES);
+        if (gSpeciesInfo[species].isUltraBeast)
+            count++;
+    }
+
+    return count == 1
+        && gBattlerPartyIndexes[battler] >= firstMonId
+        && gBattlerPartyIndexes[battler] < lastMonId
+        && IsValidForBattle(&party[gBattlerPartyIndexes[battler]])
+        && gSpeciesInfo[GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES)].isUltraBeast;
+}
+
 bool32 DoesPartyShareTypeWithBattler(u32 battler)
 {
     u32 i;
@@ -7962,6 +7991,22 @@ special_delivery_done:
             {
                 BattleScriptPushCursorAndCallback(BattleScript_InfestedSurgeActivates);
                 effect++;
+            }
+            break;
+        case ABILITY_ULTRA_FALLOUT:
+            if (IsOnlyUltraBeastInParty(battler) && IsAnyOpposingBattlerStatused(battler))
+            {
+                if (TryChangeBattleWeather(battler, ENUM_WEATHER_ACID_RAIN, TRUE))
+                {
+                    BattleScriptPushCursorAndCallback(BattleScript_ToxicDelugeActivates);
+                    effect++;
+                }
+                else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT && !gSpecialStatuses[battler].switchInAbilityDone)
+                {
+                    gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                    BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                    effect++;
+                }
             }
             break;
         case ABILITY_INTIMIDATE:
@@ -11460,6 +11505,83 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = battler;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ULTRA_SWOLE)
+         && IsOnlyUltraBeastInParty(battler)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].punchingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ULTRA_SWOLE);
+            SET_STATCHANGER(STAT_DEF, 1, FALSE);
+            PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_DEF);
+            gBattlerAttacker = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ULTRA_STRUT)
+         && IsOnlyUltraBeastInParty(battler)
+         && IsBattlerAlive(battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            if (IsBattlerAlive(gBattlerTarget)
+             && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+             && gBattleStruct->hpBefore[gBattlerTarget] == gBattleMons[gBattlerTarget].maxHP
+             && CanBeConfused(gBattlerTarget))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_ULTRA_STRUT);
+                gBattleScripting.moveEffect = MOVE_EFFECT_CONFUSION;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ULTRA_CONDUCTOR)
+         && IsOnlyUltraBeastInParty(battler)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_ELECTRIC
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ULTRA_CONDUCTOR);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_StormCommandActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ULTRA_ASCENT)
+         && IsOnlyUltraBeastInParty(battler)
+         && IsBattlerAlive(battler)
+         && (moveType == TYPE_FLYING || IsHealingMove(move))
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ULTRA_ASCENT);
+            gDisableStructs[battler].ultraAscentActive = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
             effect++;
         }
 
@@ -19152,6 +19274,14 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
     {
         if (updateFlags)
             RecordAbilityBattle(battlerDef, ABILITY_ACID_CONVERSION);
+        return UQ_4_12(0.75);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_ULTRA_ASCENT)
+     && IsOnlyUltraBeastInParty(battlerDef)
+     && gDisableStructs[battlerDef].ultraAscentActive
+     && !IS_MOVE_STATUS(move))
+    {
         return UQ_4_12(0.75);
     }
 
