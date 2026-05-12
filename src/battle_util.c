@@ -8009,6 +8009,18 @@ special_delivery_done:
                 }
             }
             break;
+        case ABILITY_ULTRA_BASTION:
+            if (IsOnlyUltraBeastInParty(battler)
+             && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+             && !(gSideStatuses[GetBattlerSide(BATTLE_OPPOSITE(battler))] & SIDE_STATUS_STEALTH_ROCK))
+            {
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = BATTLE_OPPOSITE(battler);
+                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+                BattleScriptPushCursorAndCallback(BattleScript_UltraBastionActivates);
+                effect++;
+            }
+            break;
         case ABILITY_INTIMIDATE:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -11962,6 +11974,29 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CLOCKWORK_WISH)
+         && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && IsFinalMultiHitStrike()
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_CLOCKWORK_WISH);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_HEAL_BELL;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_IMPROV)
          && IsBattlerAlive(battler)
          && IS_MOVE_STATUS(move)
@@ -12519,6 +12554,26 @@ if (triggeringAbility != ABILITY_NONE)
             gCalledMove = MOVE_SMOG;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ULTRA_INJECTION)
+         && moveType == TYPE_POISON
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && IsOnlyUltraBeastInParty(battler)
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ULTRA_INJECTION);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_DRAGON_PULSE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -18709,6 +18764,13 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     if (HasBattlerAbility(battlerAtk, ABILITY_INSIGHT)
      && moveType == TYPE_PSYCHIC
      && IsBattlerTerrainAffected(battlerAtk, STATUS_FIELD_PSYCHIC_TERRAIN))
+    {
+        defStage = DEFAULT_STAT_STAGE;
+    }
+    if (HasBattlerAbility(battlerAtk, ABILITY_ULTRA_EDGE)
+     && IsOnlyUltraBeastInParty(battlerAtk)
+     && gBattleMoves[move].slicingMove
+     && defStage > DEFAULT_STAT_STAGE)
     {
         defStage = DEFAULT_STAT_STAGE;
     }

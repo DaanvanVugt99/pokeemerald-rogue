@@ -9566,6 +9566,16 @@ BattleScript_StealthSwitchInActivates::
 	makeinvisible BS_ATTACKER
 	end3
 
+BattleScript_UltraBastionActivates::
+	call BattleScript_AbilityPopUp
+	setstealthrock BattleScript_UltraBastionEnd
+	playmoveanimation BS_ATTACKER, MOVE_STEALTH_ROCK
+	waitanimation
+	printstring STRINGID_POINTEDSTONESFLOAT
+	waitmessage B_WAIT_TIME_SHORT
+BattleScript_UltraBastionEnd:
+	end3
+
 BattleScript_AttackerSpikesActivates::
 	trysetspikes BattleScript_MoveEnd
 	call BattleScript_AbilityPopUp

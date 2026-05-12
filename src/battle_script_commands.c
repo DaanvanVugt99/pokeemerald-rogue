@@ -3687,6 +3687,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
         if (statusChanged == TRUE)
         {
             bool32 septicFumesActivated = FALSE;
+            bool32 ultraVeninActivated = FALSE;
 
             if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
              && gBattleScripting.battler < gBattlersCount
@@ -3701,9 +3702,27 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 TrySepticFumesPoisonPartyMon(gBattleScripting.battler, gEffectBattler);
             }
 
+            if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
+             && gBattleScripting.battler < gBattlersCount
+             && gEffectBattler < gBattlersCount
+             && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)
+             && HasBattlerAbility(gBattleScripting.battler, ABILITY_ULTRA_VENIN)
+             && IsOnlyUltraBeastInParty(gBattleScripting.battler)
+             && CompareStat(gBattleScripting.battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                ultraVeninActivated = TRUE;
+                gBattlerAttacker = gBattleScripting.battler;
+                SetBattlerTriggeredAbility(gBattleScripting.battler, ABILITY_ULTRA_VENIN);
+                RecordAbilityBattle(gBattleScripting.battler, ABILITY_ULTRA_VENIN);
+                SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+            }
+
             BattleScriptPush(gBattlescriptCurrInstr + 1);
             if (septicFumesActivated)
                 BattleScriptPush(BattleScript_SepticFumesActivates);
+            if (ultraVeninActivated)
+                BattleScriptPush(BattleScript_AttackerAbilityStatRaise);
 
             if (sStatusFlagsForMoveEffects[gBattleScripting.moveEffect] == STATUS1_SLEEP)
             {
@@ -10970,6 +10989,20 @@ static void Cmd_various(void)
          && IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_FIGHTING))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_MAIN_EVENT);
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_InsectivoreActivates;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_ULTRA_DEVOUR)
+         && battler == gBattlerAttacker
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && IsOnlyUltraBeastInParty(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_ULTRA_DEVOUR);
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             BattleScriptPush(cmd->nextInstr);
