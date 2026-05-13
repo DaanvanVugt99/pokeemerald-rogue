@@ -5845,6 +5845,79 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_MISCHIEF) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_MISCHIEF);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_WORRY_SEED;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TAKE_AIM) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_TAKE_AIM);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_LOCK_ON;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PLAYMAKER) && !uniqueDone)
+        {
+            u32 partnerBattler = BATTLE_PARTNER(battler);
+
+            uniqueDone = TRUE;
+            if (IsBattlerAlive(partnerBattler) && CanUseExtraMove(battler, partnerBattler))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_PLAYMAKER);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = partnerBattler;
+                gCalledMove = MOVE_HELPING_HAND;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_CHANGE_OF_HEART)
          && !uniqueDone
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
@@ -16966,6 +17039,26 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
     // Berry was successfully used on a Pokemon.
     if (effect && ItemId_GetPocket(gLastUsedItem) == POCKET_BERRIES)
     {
+        if (HasBattlerAbility(battler, ABILITY_MESSY_EATER))
+        {
+            u32 target;
+
+            if (TryGetOpposingExtraMoveTarget(battler, &target))
+            {
+                u32 move = (RandomUniform(RNG_ROGUE_SPLIT_INSTINCT, 0, 1) == 0) ? MOVE_LEECH_SEED : MOVE_WORRY_SEED;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_MESSY_EATER);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = move;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+                StartAbilityCalledMoveScript();
+            }
+        }
+
         gBattleStruct->ateBerry[battler & BIT_SIDE] |= gBitTable[gBattlerPartyIndexes[battler]];
         if (HasBattlerAbility(battler, ABILITY_HONEY_RAGE))
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
