@@ -36,6 +36,8 @@
 #include "pokedex.h"
 #include "mail.h"
 #include "field_weather.h"
+#include "rogue.h"
+#include "rogue_adventurepaths.h"
 #include "constants/abilities.h"
 #include "constants/battle_anim.h"
 #include "constants/battle_move_effects.h"
@@ -55,6 +57,7 @@
 #include "rogue_charms.h"
 #include "rogue_safari.h"
 #include "rogue_quest.h"
+#include "rogue_timeofday.h"
 
 /*
 NOTE: The data and functions in this file up until (but not including) sSoundMovesTable
@@ -91,6 +94,8 @@ static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battler
 static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
 static bool32 IsAnyEnvironmentalTypeActive(u32 battler);
 static bool32 IsAnyOpposingBattlerStatused(u32 battler);
+static u8 GetInitialBattleWeather(void);
+static bool32 ShouldStartNightRouteEclipse(u8 weather);
 static bool32 HasBerryDoubleEffect(u32 battler);
 static bool32 IsPetrifyStatLoweringBlocked(u32 attacker, u32 target, u32 statId);
 static bool32 CanPetrifyClearPositiveStatStages(u32 attacker, u32 target);
@@ -2534,7 +2539,11 @@ u8 DoFieldEndTurnEffects(void)
         case ENDTURN_ECLIPSE:
             if (gBattleWeather & B_WEATHER_ECLIPSE)
             {
-                if (!(gBattleWeather & B_WEATHER_ECLIPSE_PERMANENT)
+                if (ShouldStartNightRouteEclipse(GetInitialBattleWeather()))
+                {
+                    gBattlescriptCurrInstr = BattleScript_EclipseContinues;
+                }
+                else if (!(gBattleWeather & B_WEATHER_ECLIPSE_PERMANENT)
                  && --gWishFutureKnock.weatherDuration == 0)
                 {
                     gBattleWeather &= ~B_WEATHER_ECLIPSE_TEMPORARY;
@@ -5023,6 +5032,31 @@ static u8 GetInitialBattleWeather()
         return GetCurrentWeather();
 }
 
+static bool32 IsBattleWeatherSetByOverworldWeather(u8 weather)
+{
+    switch (weather)
+    {
+    case WEATHER_RAIN:
+    case WEATHER_SNOW:
+    case WEATHER_RAIN_THUNDERSTORM:
+    case WEATHER_SANDSTORM:
+    case WEATHER_DROUGHT:
+    case WEATHER_DOWNPOUR:
+    case WEATHER_ABNORMAL:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
+static bool32 ShouldStartNightRouteEclipse(u8 weather)
+{
+    return Rogue_IsRunActive()
+        && gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE
+        && RogueToD_IsNight()
+        && !IsBattleWeatherSetByOverworldWeather(weather);
+}
+
 static inline bool32 CanAbilityDisableBattler(u32 battler);
 
 static u8 GetForewarnMovePower(u16 move)
@@ -7465,10 +7499,15 @@ special_delivery_done:
         }
     break;
     case ABILITYEFFECT_SWITCH_IN_WEATHER:
+    {
+        bool32 startedNightRouteEclipse = FALSE;
+
         gBattleScripting.battler = battler;
         if (!(gBattleTypeFlags & BATTLE_TYPE_RECORDED))
         {
-            switch (GetInitialBattleWeather())
+            u8 initialWeather = GetInitialBattleWeather();
+
+            switch (initialWeather)
             {
             case WEATHER_RAIN:
             case WEATHER_RAIN_THUNDERSTORM:
@@ -7513,13 +7552,31 @@ special_delivery_done:
                 }
                 break;
             }
+
+            if (effect == 0 && ShouldStartNightRouteEclipse(initialWeather))
+            {
+                gBattleWeather = B_WEATHER_ECLIPSE;
+                gWishFutureKnock.weatherDuration = WEATHER_DURATION_TURNS;
+                gBattleScripting.animArg1 = B_ANIM_ECLIPSE_CONTINUES;
+                startedNightRouteEclipse = TRUE;
+                effect++;
+            }
         }
         if (effect != 0)
         {
-            gBattleCommunication[MULTISTRING_CHOOSER] = GetInitialBattleWeather();
-            BattleScriptPushCursorAndCallback(BattleScript_OverworldWeatherStarts);
+            if (startedNightRouteEclipse)
+            {
+                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_ECLIPSE;
+                BattleScriptPushCursorAndCallback(BattleScript_OverworldEclipseStarts);
+            }
+            else
+            {
+                gBattleCommunication[MULTISTRING_CHOOSER] = GetInitialBattleWeather();
+                BattleScriptPushCursorAndCallback(BattleScript_OverworldWeatherStarts);
+            }
         }
         break;
+    }
     case ABILITYEFFECT_ON_SWITCHIN: // 0
         gBattleScripting.battler = battler;
         switch (gLastUsedAbility)
@@ -21065,7 +21122,7 @@ u8 GetSplitBasedOnStats(u32 battler)
 
 static u32 GetFlingPowerFromItemId(u32 itemId)
 {
-    if (itemId >= ITEM_TM01 && itemId <= ITEM_HM08)
+    if ((itemId >= ITEM_TM01 && itemId <= ITEM_HM08) || (itemId >= ITEM_TR01 && itemId <= ITEM_TR50))
     {
         u32 power = gBattleMoves[ItemIdToBattleMoveId(itemId)].power;
         if (power > 1)

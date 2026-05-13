@@ -1485,7 +1485,7 @@ static void Task_BuyHowManyDialogueInit(u8 taskId)
             maxQuantity = min(maxQuantity, Rogue_GetBagPocketAmountPerItem(ItemId_GetPocket(tItemId) - 1));
 
             // Can only buy 1 of infinite items
-            if(tItemId <= ITEM_TM01 && tItemId >= ITEM_HM08)
+            if((tItemId >= ITEM_TM01 && tItemId <= ITEM_HM08) || (tItemId >= ITEM_TR01 && tItemId <= ITEM_TR50))
                 maxQuantity = 1;
         }
 
@@ -2163,8 +2163,8 @@ static u32 GetShopItemPrice(u16 item)
 
         if(sMartInfo.dynamicMartCategory == ROGUE_SHOP_TMS)
         {
-            // Override TMs/HMs price if we have them
-            if(item >= ITEM_TM01 && item <= ITEM_HM08 && CheckBagHasItem(item, 1))
+            // Override TMs/HMs/TRs price if we have them
+            if(((item >= ITEM_TM01 && item <= ITEM_HM08) || (item >= ITEM_TR01 && item <= ITEM_TR50)) && CheckBagHasItem(item, 1))
                 price = 0;
         }
 

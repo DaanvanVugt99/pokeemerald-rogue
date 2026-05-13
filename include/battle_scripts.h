@@ -137,6 +137,7 @@ extern const u8 BattleScript_SunlightFaded[];
 extern const u8 BattleScript_EclipseContinues[];
 extern const u8 BattleScript_EclipseFaded[];
 extern const u8 BattleScript_OverworldWeatherStarts[];
+extern const u8 BattleScript_OverworldEclipseStarts[];
 extern const u8 BattleScript_OverworldTerrain[];
 extern const u8 BattleScript_SideStatusWoreOff[];
 extern const u8 BattleScript_SafeguardProtected[];

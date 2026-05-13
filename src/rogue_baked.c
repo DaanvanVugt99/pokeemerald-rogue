@@ -1141,18 +1141,12 @@ u16 Rogue_GetPrice(u16 itemId)
         price = 4000;
     }
 
-    if(itemId >= ITEM_TR01 && itemId <= ITEM_TR50)
-    {
-        u16 move = ItemIdToBattleMoveId(itemId);
-        price = Rogue_CalculateMovePrice(move);
-    }
-
-    if(itemId >= ITEM_TM01 && itemId <= ITEM_HM08)
+    if((itemId >= ITEM_TM01 && itemId <= ITEM_HM08) || (itemId >= ITEM_TR01 && itemId <= ITEM_TR50))
     {
         u16 move = ItemIdToBattleMoveId(itemId);
 
         // increase as these are re-usable
-        price = Rogue_CalculateMovePrice(move) * 4;
+        price = Rogue_CalculateMovePrice(move) * 3;
         applyDefaultHubIncrease = TRUE;
     }
 

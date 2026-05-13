@@ -1288,8 +1288,8 @@ static void BagMenu_ItemPrintCallback(u8 windowId, u32 itemIndex, u8 y)
         }
         else if(gBagPosition.pocket == TMHM_POCKET)
         {
-            // Prefer not to print item quantity for regular TMs/HMs as they are infinite use
-            if(itemQuantity > 1 || (itemId >= ITEM_TR01 && itemId <= ITEM_TR50))
+            // Prefer not to print item quantity for TMs/HMs/TRs as they are infinite use
+            if(itemQuantity > 1)
             {
                 // Print item quantity
                 ConvertIntToDecimalStringN(gStringVar1, itemQuantity, STR_CONV_MODE_RIGHT_ALIGN, BAG_ITEM_CAPACITY_DIGITS);
@@ -1599,6 +1599,11 @@ void CloseItemMessage(u8 taskId)
 static void AddItemQuantityWindow(u8 windowType)
 {
     PrintItemQuantity(BagMenu_AddWindow(windowType), 1);
+}
+
+static void AddItemQuantityWindowWithQuantity(u8 windowType, s16 quantity)
+{
+    PrintItemQuantity(BagMenu_AddWindow(windowType), quantity);
 }
 
 static void PrintItemQuantity(u8 windowId, s16 quantity)
@@ -2379,7 +2384,7 @@ static void ItemMenu_Toss(u8 taskId)
     s16 *data = gTasks[taskId].data;
 
     RemoveContextWindow();
-    tItemCount = 1;
+    tItemCount = tQuantity;
     if (tQuantity == 1)
     {
         AskTossItems(taskId);
@@ -2390,7 +2395,7 @@ static void ItemMenu_Toss(u8 taskId)
         StringExpandPlaceholders(gStringVar4, gText_TossHowManyVar1s);
         FillWindowPixelBuffer(WIN_DESCRIPTION, PIXEL_FILL(0));
         BagMenu_Print(WIN_DESCRIPTION, FONT_NORMAL, gStringVar4, 3, 1, 0, 0, 0, COLORID_NORMAL);
-        AddItemQuantityWindow(ITEMWIN_QUANTITY);
+        AddItemQuantityWindowWithQuantity(ITEMWIN_QUANTITY, tItemCount);
         gTasks[taskId].func = Task_ChooseHowManyToToss;
     }
 }
@@ -2897,7 +2902,7 @@ static void Task_ItemContext_Sell(u8 taskId)
     }
     else
     {
-        tItemCount = 1;
+        tItemCount = tQuantity;
         if (tQuantity == 1)
         {
             DisplayCurrentMoneyWindow();
@@ -2947,7 +2952,7 @@ static void InitSellHowManyInput(u8 taskId)
     s16 *data = gTasks[taskId].data;
     u8 windowId = BagMenu_AddWindow(ITEMWIN_QUANTITY_WIDE);
 
-    PrintItemSoldAmount(windowId, 1, (ItemId_GetPrice(gSpecialVar_ItemId) / ITEM_SELL_FACTOR) * tItemCount);
+    PrintItemSoldAmount(windowId, tItemCount, (ItemId_GetPrice(gSpecialVar_ItemId) / ITEM_SELL_FACTOR) * tItemCount);
     DisplayCurrentMoneyWindow();
     gTasks[taskId].func = Task_ChooseHowManyToSell;
 }
