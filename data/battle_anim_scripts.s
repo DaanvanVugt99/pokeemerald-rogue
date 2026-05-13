@@ -881,9 +881,9 @@ gBattleAnims_Moves::
 	.4byte Move_PLAIN_TERRAIN
 	.4byte Move_SHIMMER
 	.4byte Move_COLD_SNAP
-	.4byte Move_DARK_PULSE
+	.4byte Move_NIGHTFALL
 	.4byte Move_JETSTREAM
-	.4byte Move_STONE_EDGE
+	.4byte Move_THUNDERCRUSH
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
 	.4byte Move_ALL_OUT_PUMMELING
@@ -3961,6 +3961,50 @@ Move_STONE_EDGE:
 	delay 4
 	createsprite gBasicHitSplatSpriteTemplate, 131, 4, 32, 20, 1, 3
 	playsewithpan SE_M_COMET_PUNCH, SOUND_PAN_TARGET
+	waitforvisualfinish
+	clearmonbg ANIM_DEF_PARTNER
+	blendoff
+	end
+
+Move_THUNDERCRUSH:
+	loadspritegfx ANIM_TAG_STONE_EDGE
+	loadspritegfx ANIM_TAG_ELECTRICITY
+	loadspritegfx ANIM_TAG_SPARK_2
+	loadspritegfx ANIM_TAG_IMPACT
+	monbg ANIM_DEF_PARTNER
+	setalpha 12, 8
+	playsewithpan SE_M_ROCK_THROW, SOUND_PAN_TARGET
+	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 28, 528, 30, 13, 50, 1
+	delay 2
+	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 32, 480, 20, 16, -46, 1
+	delay 2
+	loopsewithpan SE_M_THUNDERBOLT, SOUND_PAN_TARGET, 18, 3
+	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 33, 576, 20, 8, 42, 1
+	delay 2
+	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 31, 400, 25, 11, -42, 1
+	delay 2
+	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 28, 512, 25, 16, 46, 1
+	delay 2
+	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 33, 464, 30, 15, 49, 1
+	delay 6
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 2, 0, 10, RGB(31, 31, 0)
+	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, 5, 0, 5, 0
+	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, -5, 10, 5, 1
+	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, 15, 20, 5, 2
+	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, -15, -10, 5, 0
+	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, 25, 0, 5, 1
+	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, -8, 8, 5, 2
+	createsprite gSparkElectricitySpriteTemplate, ANIM_ATTACKER, 0, 32, 24, 190, 12, 0, 1, 0
+	createsprite gSparkElectricitySpriteTemplate, ANIM_ATTACKER, 0, 80, 24, 22, 12, 0, 1, 0
+	delay 4
+	playsewithpan SE_M_COMET_PUNCH, SOUND_PAN_TARGET
+	createsprite gBasicHitSplatSpriteTemplate, 131, 4, -24, -10, 1, 3
+	createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 4, 0, 12, 1
+	delay 4
+	createsprite gRandomPosHitSplatSpriteTemplate, 131, 2, 1, 3
+	playsewithpan SE_M_COMET_PUNCH, SOUND_PAN_TARGET
+	waitforvisualfinish
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 2, 10, 0, RGB(31, 31, 0)
 	waitforvisualfinish
 	clearmonbg ANIM_DEF_PARTNER
 	blendoff
@@ -22887,6 +22931,42 @@ Move_PLAIN_TERRAIN:
 	delay 4
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 3, 4, 0, RGB(24, 24, 24)
 	waitforvisualfinish
+	end
+
+Move_NIGHTFALL:
+	loadspritegfx ANIM_TAG_THIN_RING
+	loadspritegfx ANIM_TAG_PURPLE_FLAME
+	loadspritegfx ANIM_TAG_RED_ORB
+	loadspritegfx ANIM_TAG_ECLIPSE_RAY
+	monbg ANIM_TARGET
+	setalpha 12, 8
+	fadetobg BG_DARK
+	waitbgfadein
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 1, 0, 10, RGB_BLACK
+	waitforvisualfinish
+	panse_adjustnone SE_M_NIGHTMARE, SOUND_PAN_ATTACKER, SOUND_PAN_TARGET, +1, 0
+	createvisualtask AnimTask_SpiteTargetShadow, 2
+	createsprite gNightDazeVioletRingsTemplate, ANIM_ATTACKER, 3, 0, 0, 0, 0, 31, 8
+	createsprite gNightDazeVioletCirclesTemplate, ANIM_TARGET, 2, 0
+	createsprite gNightDazeVioletCirclesTemplate, ANIM_TARGET, 2, 32
+	createsprite gNightDazeVioletCirclesTemplate, ANIM_TARGET, 2, 64
+	createsprite gNightDazeVioletCirclesTemplate, ANIM_TARGET, 2, 96
+	delay 8
+	createsprite gNightDazeVioletRingsTemplate, ANIM_ATTACKER, 3, 0, 0, 0, 0, 31, 8
+	call EclipseLightRay
+	delay 8
+	createsprite gNightDazeVioletRingsTemplate, ANIM_ATTACKER, 3, 0, 0, 0, 0, 31, 8
+	delay 6
+	playsewithpan SE_M_SUPERSONIC, SOUND_PAN_TARGET
+	createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 4, 0, 14, 1
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 2, 0, 10, RGB(16, 0, 18)
+	waitforvisualfinish
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 2, 10, 0, RGB(16, 0, 18)
+	waitforvisualfinish
+	clearmonbg ANIM_TARGET
+	blendoff
+	restorebg
+	waitbgfadein
 	end
 
 Move_BITE:
