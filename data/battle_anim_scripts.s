@@ -879,10 +879,10 @@ gBattleAnims_Moves::
 	.4byte Move_ECLIPSE
 	.4byte Move_INFESTED_TERRAIN
 	.4byte Move_PLAIN_TERRAIN
-	.4byte Move_FREEZE_DRY
-	.4byte Move_SUCKER_PUNCH
+	.4byte Move_SHIMMER
+	.4byte Move_COLD_SNAP
 	.4byte Move_DARK_PULSE
-	.4byte Move_AERIAL_ACE
+	.4byte Move_JETSTREAM
 	.4byte Move_STONE_EDGE
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
@@ -8865,6 +8865,51 @@ Move_FREEZE_DRY::
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, 4, 2, 9, 0, RGB(12, 26, 31)
 	waitforvisualfinish
 	createsprite gSimplePaletteBlendSpriteTemplate, ANIM_ATTACKER, 2, 1, 0, 7, 0, RGB_BLACK
+	waitforvisualfinish
+	clearmonbg ANIM_DEF_PARTNER
+	blendoff
+	end
+
+Move_SHIMMER:
+	loadspritegfx ANIM_TAG_MIST_CLOUD
+	loadspritegfx ANIM_TAG_SPARKLE_6
+	monbg ANIM_DEF_PARTNER
+	setalpha 12, 8
+	createvisualtask AnimTask_BlendParticle, 5, ANIM_TAG_MIST_CLOUD, 0, 6, 6, RGB(26, 0, 26)
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 1, 0, 8, RGB(25, 14, 31)
+	panse SE_M_GUST, SOUND_PAN_ATTACKER, SOUND_PAN_TARGET, +2, 0
+	playsewithpan SE_M_MORNING_SUN, SOUND_PAN_ATTACKER
+	createsprite gMistCloudSpriteTemplate, ANIM_TARGET, 2, 0, -24, 48, 240, 1, 1
+	delay 4
+	createsprite gMistCloudSpriteTemplate, ANIM_TARGET, 2, 0, -24, 48, 240, 1, 1
+	delay 4
+	createsprite gMistCloudSpriteTemplate, ANIM_TARGET, 2, 0, -24, 48, 240, 1, 1
+	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_TARGET, 66, -20, 12, 0, 5, 2, 2, 1
+	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_TARGET, 66, 12, -8, 96, 4, 2, 3, 1
+	delay 4
+	createsprite gSilverWindMediumSparkSpriteTemplate, ANIM_TARGET, 66, -10, 10, 160, 5, 1, 2, 1
+	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_TARGET, 66, 18, 6, 224, 4, 1, 2, 1
+	playsewithpan SE_M_SWIFT, SOUND_PAN_TARGET
+	createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 2, 0, 8, 1
+	waitforvisualfinish
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 1, 8, 0, RGB(25, 14, 31)
+	waitforvisualfinish
+	clearmonbg ANIM_DEF_PARTNER
+	blendoff
+	end
+
+Move_COLD_SNAP:
+	loadspritegfx ANIM_TAG_ICE_CRYSTALS
+	monbg ANIM_DEF_PARTNER
+	setalpha 12, 8
+	playsewithpan SE_M_LEER, SOUND_PAN_ATTACKER
+	createvisualtask AnimTask_Flash, 2
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 0, 0, 8, RGB(12, 26, 31)
+	delay 6
+	call IceCrystalEffectShort
+	createvisualtask AnimTask_ShakeMon, 2, ANIM_TARGET, 2, 0, 5, 1
+	waitforvisualfinish
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 0, 8, 0, RGB(12, 26, 31)
 	waitforvisualfinish
 	clearmonbg ANIM_DEF_PARTNER
 	blendoff
@@ -21787,6 +21832,26 @@ Move_AERIAL_ACE:
 	createvisualtask AnimTask_ShakeMon, 2, ANIM_TARGET, 0, 3, 10, 1
 	createsprite gComplexPaletteBlendSpriteTemplate, ANIM_ATTACKER, 2, F_PAL_BG | F_PAL_BATTLERS, 3, 1, RGB_BLACK, 10, RGB_BLACK, 0
 	playsewithpan SE_M_RAZOR_WIND, SOUND_PAN_TARGET
+	waitforvisualfinish
+	clearmonbg ANIM_TARGET
+	blendoff
+	end
+
+Move_JETSTREAM:
+	loadspritegfx ANIM_TAG_SPEED_DUST
+	loadspritegfx ANIM_TAG_CUT
+	call SetHighSpeedBg
+	monbg ANIM_TARGET
+	setalpha 12, 8
+	createvisualtask AnimTask_TranslateMonEllipticalRespectSide, 2, ANIM_ATTACKER, 24, 6, 1, 5
+	createvisualtask AnimTask_TraceMonBlended, 2, 0, 4, 7, 3
+	playsewithpan SE_M_RAZOR_WIND2, SOUND_PAN_ATTACKER
+	delay 2
+	createvisualtask AnimTask_SpeedDust, 2
+	createsprite gCuttingSliceSpriteTemplate, ANIM_ATTACKER, 2, 34, -20, 0
+	playsewithpan SE_M_RAZOR_WIND, SOUND_PAN_TARGET
+	createvisualtask AnimTask_ShakeMon, 2, ANIM_TARGET, 2, 0, 5, 1
+	call UnsetHighSpeedBg
 	waitforvisualfinish
 	clearmonbg ANIM_TARGET
 	blendoff
