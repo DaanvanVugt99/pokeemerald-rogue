@@ -3,63 +3,58 @@
 
 ASSUMPTIONS
 {
-    ASSUME(gBattleMoves[MOVE_BITE].bitingMove);
-    ASSUME(!gBattleMoves[MOVE_TACKLE].bitingMove);
+    ASSUME(gBattleMoves[MOVE_BITE].power > 0);
+    ASSUME(gBattleMoves[MOVE_VISE_GRIP].power > 0);
+    ASSUME(gBattleMoves[MOVE_CRUNCH].power > 0);
+    ASSUME(gBattleMoves[MOVE_FIRE_FANG].power > 0);
 }
 
-SINGLE_BATTLE_TEST("Vicejaw boosts biting damage against targets that already moved this turn", s16 damage)
+SINGLE_BATTLE_TEST("Vicejaw uses a random jaw move after Bite")
 {
-    u16 uniqueAbility;
-
-    PARAMETRIZE { uniqueAbility = ABILITY_NONE; }
-    PARAMETRIZE { uniqueAbility = ABILITY_VICEJAW; }
-
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility); Moves(MOVE_BITE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_MAWILE) { Ability(ABILITY_HYPER_CUTTER); UniqueAbility(ABILITY_VICEJAW); Moves(MOVE_BITE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_BITE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_BITE, WITH_RNG(RNG_ROGUE_VICEJAW, MOVE_CRUNCH)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } FINALLY {
-        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, player);
+        ABILITY_POPUP(player, ABILITY_VICEJAW);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CRUNCH, player);
+        HP_BAR(opponent);
+    } THEN {
+        EXPECT(gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].hp < gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].maxHP);
     }
 }
 
-SINGLE_BATTLE_TEST("Vicejaw does not boost biting damage if the target has not moved yet", s16 damage)
+SINGLE_BATTLE_TEST("Vicejaw uses a random jaw move after Vice Grip")
 {
-    u16 uniqueAbility;
-
-    PARAMETRIZE { uniqueAbility = ABILITY_NONE; }
-    PARAMETRIZE { uniqueAbility = ABILITY_VICEJAW; }
-
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility); Moves(MOVE_BITE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_MAWILE) { Ability(ABILITY_HYPER_CUTTER); UniqueAbility(ABILITY_VICEJAW); Moves(MOVE_VISE_GRIP); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_BITE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_VISE_GRIP, WITH_RNG(RNG_ROGUE_VICEJAW, MOVE_FIRE_FANG)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } FINALLY {
-        EXPECT_EQ(results[0].damage, results[1].damage);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_VISE_GRIP, player);
+        ABILITY_POPUP(player, ABILITY_VICEJAW);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_FANG, player);
+        HP_BAR(opponent);
+    } THEN {
+        EXPECT(gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].hp < gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].maxHP);
     }
 }
 
-SINGLE_BATTLE_TEST("Vicejaw does not boost non-biting moves", s16 damage)
+SINGLE_BATTLE_TEST("Vicejaw does not trigger after other jaw moves")
 {
-    u16 uniqueAbility;
-
-    PARAMETRIZE { uniqueAbility = ABILITY_NONE; }
-    PARAMETRIZE { uniqueAbility = ABILITY_VICEJAW; }
-
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_MAWILE) { Ability(ABILITY_HYPER_CUTTER); UniqueAbility(ABILITY_VICEJAW); Moves(MOVE_CRUNCH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CRUNCH, WITH_RNG(RNG_ROGUE_VICEJAW, MOVE_FIRE_FANG)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } FINALLY {
-        EXPECT_EQ(results[0].damage, results[1].damage);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CRUNCH, player);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_VICEJAW);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_FANG, player);
+        }
     }
 }
