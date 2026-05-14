@@ -11022,6 +11022,23 @@ static void Cmd_various(void)
                 gPaydayMoney = 0xFFFF;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_MOUTHFUL)
+         && battler == gBattlerAttacker
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty())
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_MOUTHFUL);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_STOCKPILE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_VICTORY)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty())
@@ -14302,7 +14319,14 @@ static void Cmd_weatherdamage(void)
         }
         if (gBattleWeather & B_WEATHER_ACID_RAIN)
         {
-            if (IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON)
+            if (HasBattlerAbility(gBattlerAttacker, ABILITY_CORROSIVE_AMP)
+                && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)))
+            {
+                gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+            }
+            else if (IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON)
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !BATTLER_MAX_HP(gBattlerAttacker)
                 && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK))
