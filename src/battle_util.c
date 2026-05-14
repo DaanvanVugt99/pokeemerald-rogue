@@ -6684,6 +6684,32 @@ special_delivery_done:
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BLOODHOUND) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler)
+                 || (gBattleMons[opposingBattler].status2 & STATUS2_FORESIGHT))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_BLOODHOUND);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_ODOR_SLEUTH;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PSIONIC_PARADOX) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -11259,6 +11285,20 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_GRAZING_FIELD)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(battler)
+         && IsBattlerAlive(battler)
+         && IS_MOVE_PHYSICAL(move)
+         && CountPartyMonsOfType(battler, TYPE_NORMAL, TRUE) >= 2
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_PLAIN_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_GRAZING_FIELD);
+            BattleScriptPushCursorAndCallback(BattleScript_PlainSurgeActivates);
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SMOLDERING_SHELL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
@@ -13512,6 +13552,23 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_RIPJAW)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].bitingMove
+         && !(gStatuses3[gBattlerTarget] & STATUS3_HEAL_BLOCK))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_RIPJAW);
+            gStatuses3[gBattlerTarget] |= STATUS3_HEAL_BLOCK;
+            gDisableStructs[gBattlerTarget].healBlockTimer = 3;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_NumbingSpinesActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PSYCHIC_MAW)
          && IsBattlerAlive(battler)
          && IsBattlerAlive(gBattlerTarget)
@@ -14136,6 +14193,27 @@ if (triggeringAbility != ABILITY_NONE)
                 drainedHp /= 8;
 
             SetBattlerTriggeredAbility(battler, ABILITY_SERENE_VOICE);
+            if (drainedHp == 0)
+                drainedHp = 1;
+            gBattleMoveDamage = -drainedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BLOODHOUND)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].split != SPLIT_STATUS
+         && (gBattleMons[gBattlerTarget].status2 & STATUS2_FORESIGHT)
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_BLOODHOUND);
             if (drainedHp == 0)
                 drainedHp = 1;
             gBattleMoveDamage = -drainedHp;
