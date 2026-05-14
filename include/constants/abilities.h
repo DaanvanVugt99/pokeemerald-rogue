@@ -803,8 +803,8 @@
 #define ABILITY_RED_WAKE           769
 #define ABILITY_CORROSIVE_AMP      770
 #define ABILITY_MOLTEN_BURROW      771
-#define ABILITY_DRAG_BELOW         772
-#define ABILITY_BITTER_BREW        773
+#define ABILITY_OCTOLOCK           772
+#define ABILITY_TEA_SERVICE        773
 #define ABILITY_WITCHING_HOUR      774
 #define ABILITY_BAD_INFLUENCE      775
 #define ABILITY_HECKLER            776

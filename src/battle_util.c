@@ -112,6 +112,8 @@ static bool32 TryUseKeyringCalledMove(u32 battler);
 static bool32 TryUseWreckageCalledMove(u32 battler, u32 target);
 static bool32 TryUseAdaptiveForceCalledMove(u32 battler);
 static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target);
+static bool32 TryUseOctolockCalledMove(u32 battler, u32 target);
+static bool32 TryUseTeaServiceCalledMove(u32 battler);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
@@ -6466,6 +6468,104 @@ static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target)
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static const u16 sOctolockMoves[] =
+{
+    MOVE_BIND,
+    MOVE_WRAP,
+    MOVE_CLAMP,
+    MOVE_SUBMISSION,
+    MOVE_CIRCLE_THROW,
+    MOVE_LOW_SWEEP,
+    MOVE_BULK_UP,
+    MOVE_FOCUS_ENERGY,
+    MOVE_DETECT,
+    MOVE_REVENGE,
+};
+
+static bool32 TryUseOctolockCalledMove(u32 battler, u32 target)
+{
+    u16 move;
+
+    gBattlerAttacker = battler;
+    move = RandomElement(RNG_ROGUE_OCTOLOCK, sOctolockMoves);
+
+    if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
+    {
+        target = battler;
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+    }
+    else
+    {
+        if (target >= gBattlersCount
+         || !IsBattlerAlive(target)
+         || target == battler
+         || GetBattlerSide(target) == GetBattlerSide(battler)
+         || !CanUseExtraMove(battler, target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_OCTOLOCK);
+    SetAtkCancellerForCalledMove();
+    gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static const u16 sTeaServiceMoves[] =
+{
+    MOVE_AROMATHERAPY,
+    MOVE_SWEET_SCENT,
+    MOVE_STRENGTH_SAP,
+    MOVE_WILL_O_WISP,
+    MOVE_CONFUSE_RAY,
+    MOVE_GIGA_DRAIN,
+    MOVE_SHADOW_BALL,
+    MOVE_TRICK,
+    MOVE_NASTY_PLOT,
+    MOVE_RECOVER,
+};
+
+static bool32 TryUseTeaServiceCalledMove(u32 battler)
+{
+    u32 target = BATTLE_OPPOSITE(battler);
+    u16 move;
+
+    gBattlerAttacker = battler;
+    move = RandomElement(RNG_ROGUE_TEA_SERVICE, sTeaServiceMoves);
+
+    if (GetBattlerMoveTargetType(battler, move) & MOVE_TARGET_USER)
+    {
+        target = battler;
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+    }
+    else
+    {
+        if (!IsBattlerAlive(target) && gBattlersCount > 2)
+            target ^= BIT_FLANK;
+        if (target >= gBattlersCount
+         || !IsBattlerAlive(target)
+         || GetBattlerSide(target) == GetBattlerSide(battler)
+         || !CanUseExtraMove(battler, target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_TEA_SERVICE);
+    SetAtkCancellerForCalledMove();
+    gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
     StartAbilityCalledMoveScript();
     return TRUE;
 }
@@ -13211,6 +13311,17 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_OCTOLOCK)
+         && move == MOVE_OCTOLOCK
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && TryUseOctolockCalledMove(battler, gBattlerTarget))
+        {
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_WORK_CREW)
          && moveType == TYPE_GROUND
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -14516,31 +14627,15 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_BITTER_BREW)
-         && IS_MOVE_STATUS(move)
+        if (HasBattlerAbility(battler, ABILITY_TEA_SERVICE)
+         && move == MOVE_TEATIME
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[battler].confusionSelfDmg
-         && IsFinalMultiHitStrike())
+         && IsFinalMultiHitStrike()
+         && TryUseTeaServiceCalledMove(battler))
         {
-            u32 target = BATTLE_OPPOSITE(battler);
-
-            if (!IsBattlerAlive(target) && gBattlersCount > 2)
-                target ^= BIT_FLANK;
-
-            if (CanUseExtraMove(battler, target))
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_BITTER_BREW);
-                gBattleStruct->atkCancellerTracker = 0;
-                gBattlerAttacker = gBattlerAbility = battler;
-                gBattlerTarget = target;
-                gCalledMove = MOVE_ASTONISH;
-                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-                effect++;
-            }
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_WISHMAKER)

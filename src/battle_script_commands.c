@@ -107,22 +107,6 @@ extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 BattleScript_WarpathHeal[];
 extern const u8 BattleScript_AbilityHpHeal[];
 
-static bool32 TrySetupDragBelowOnTrap(u32 trapper, u32 target)
-{
-    if (!HasBattlerAbility(trapper, ABILITY_DRAG_BELOW)
-     || !IsBattlerAlive(target)
-     || GetBattlerSide(trapper) == GetBattlerSide(target)
-     || !CompareStat(target, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN))
-        return FALSE;
-
-    SetBattlerTriggeredAbility(trapper, ABILITY_DRAG_BELOW);
-    gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
-    gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-    gBattlerAttacker = trapper;
-    gBattlerTarget = target;
-    return TRUE;
-}
-
 // table to avoid ugly powing on gba (courtesy of doesnt)
 // this returns (i^2.5)/4
 // the quarters cancel so no need to re-quadruple them in actual calculation
@@ -3938,17 +3922,8 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     gBattleStruct->wrappedMove[gEffectBattler] = gCurrentMove;
                     gBattleStruct->wrappedBy[gEffectBattler] = gBattlerAttacker;
 
-                    if (TrySetupDragBelowOnTrap(gBattlerAttacker, gEffectBattler))
-                    {
-                        BattleScriptPush(gBattlescriptCurrInstr + 1);
-                        BattleScriptPush(wrapEffectScript);
-                        gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-                    }
-                    else
-                    {
-                        BattleScriptPush(gBattlescriptCurrInstr + 1);
-                        gBattlescriptCurrInstr = wrapEffectScript;
-                    }
+                    BattleScriptPush(gBattlescriptCurrInstr + 1);
+                    gBattlescriptCurrInstr = wrapEffectScript;
 
                     for (gBattleCommunication[MULTISTRING_CHOOSER] = 0; gBattleCommunication[MULTISTRING_CHOOSER] < NUM_TRAPPING_MOVES; gBattleCommunication[MULTISTRING_CHOOSER]++)
                     {
@@ -4120,25 +4095,15 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 break;
             case MOVE_EFFECT_PREVENT_ESCAPE:
             {
-                bool32 trappedTarget = FALSE;
                 if (!(B_GHOSTS_ESCAPE >= GEN_6
                    && (IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GHOST)
                     || HasBattlerAbility(gBattlerTarget, ABILITY_SKITTERSTEP))))
                 {
-                    trappedTarget = !(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION);
                     gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
                     gDisableStructs[gBattlerTarget].battlerPreventingEscape = gBattlerAttacker;
                 }
 
-                if (trappedTarget && TrySetupDragBelowOnTrap(gBattlerAttacker, gBattlerTarget))
-                {
-                    BattleScriptPush(gBattlescriptCurrInstr + 1);
-                    gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-                }
-                else
-                {
-                    gBattlescriptCurrInstr++;
-                }
+                gBattlescriptCurrInstr++;
                 break;
             }
             case MOVE_EFFECT_NIGHTMARE:
@@ -4345,7 +4310,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 break;
             case MOVE_EFFECT_TRAP_BOTH:
             {
-                bool32 trappedTarget = FALSE;
                 if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION)
                  && !(gBattleMons[gBattlerAttacker].status2 & STATUS2_ESCAPE_PREVENTION))
                 {
@@ -4368,7 +4332,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                    && (IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_GHOST)
                     || HasBattlerAbility(gBattlerTarget, ABILITY_SKITTERSTEP))))
                 {
-                    trappedTarget = !(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION);
                     gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
                 }
                 if (!(B_GHOSTS_ESCAPE >= GEN_6
@@ -4376,11 +4339,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     || HasBattlerAbility(gBattlerAttacker, ABILITY_SKITTERSTEP))))
                     gBattleMons[gBattlerAttacker].status2 |= STATUS2_ESCAPE_PREVENTION;
 
-                if (trappedTarget && TrySetupDragBelowOnTrap(gBattlerAttacker, gBattlerTarget))
-                {
-                    BattleScriptPush(gBattlescriptCurrInstr + 1);
-                    gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-                }
                 break;
             }
             case MOVE_EFFECT_BURN_UP:
@@ -18794,12 +18752,6 @@ void BS_TrySetOctolock(void)
             gBattleMons[battler].status2 |= STATUS2_ESCAPE_PREVENTION;
             gDisableStructs[battler].battlerPreventingEscape = gBattlerAttacker;
 
-            if (TrySetupDragBelowOnTrap(gBattlerAttacker, battler))
-            {
-                BattleScriptPush(cmd->nextInstr);
-                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-                return;
-            }
         }
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
