@@ -537,7 +537,7 @@
 #define ABILITY_JUMPSCARE          503
 #define ABILITY_SHADOW_GRASP       504
 #define ABILITY_TROPICAL_CANOPY    505
-#define ABILITY_INSIGHT            506
+#define ABILITY_ODD_SIGNAL         506
 #define ABILITY_OMEN               507
 #define ABILITY_COLD_SNAP          508
 #define ABILITY_LIVING_FOSSIL      509
@@ -597,7 +597,7 @@
 #define ABILITY_STILL_MIND         563
 #define ABILITY_BURNING_HEART      564
 #define ABILITY_IRON_WILL          565
-#define ABILITY_TEMPORAL_LOCK      566
+#define ABILITY_TIME_RIFT          566
 #define ABILITY_MAGMA_SEAL         567
 #define ABILITY_COLOSSAL           568
 #define ABILITY_DARK_DIMENSION     569
@@ -638,7 +638,7 @@
 #define ABILITY_BOUNTY             604
 #define ABILITY_QUIET_MIND         605
 #define ABILITY_PRICKLY            606
-#define ABILITY_LOAD_BEARING       607
+#define ABILITY_SHELL_WORK         607
 #define ABILITY_PSIONIC_FIELD      608
 #define ABILITY_PETRIFY            609
 #define ABILITY_TIDECALL           610
@@ -663,7 +663,7 @@
 #define ABILITY_BIOLUMINESCENCE    629
 #define ABILITY_PYROMANCY          630
 #define ABILITY_BRUTAL             631
-#define ABILITY_FROSTBITE          632
+#define ABILITY_ICE_FLOE           632
 #define ABILITY_FLASH_FREEZE       633
 #define ABILITY_PANIC_SHED         634
 #define ABILITY_TRIPWIRE           635
@@ -692,10 +692,10 @@
 #define ABILITY_MODULAR            658
 #define ABILITY_FINAL_STEP         659
 #define ABILITY_CLUELESS           660
-#define ABILITY_THORN_BULWARK      661
-#define ABILITY_MYSTIC_RITE        662
-#define ABILITY_SHADESTEP          663
-#define ABILITY_METABOLISM         664
+#define ABILITY_BRAMBLE_GUARD      661
+#define ABILITY_SPELLBOOK          662
+#define ABILITY_NINJA_TOOLS        663
+#define ABILITY_WORK_CREW          664
 #define ABILITY_DUSTSTORM          665
 #define ABILITY_BATTLECRY          666
 #define ABILITY_FLOWER_RITUAL      667

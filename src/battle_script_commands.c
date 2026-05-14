@@ -3444,8 +3444,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
                 if (HasBattlerAbility(gEffectBattler, ABILITY_IMMUNITY))
                     statusAbility = ABILITY_IMMUNITY;
-                else if (HasBattlerAbility(gEffectBattler, ABILITY_METABOLISM))
-                    statusAbility = ABILITY_METABOLISM;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
                     statusAbility = ABILITY_SILVER_LINING;
                 else if (freezingFlavorStatusProtected)
@@ -3504,8 +3502,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     statusAbility = ABILITY_WATER_VEIL;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_WATER_BUBBLE))
                     statusAbility = ABILITY_WATER_BUBBLE;
-                else if (HasBattlerAbility(gEffectBattler, ABILITY_METABOLISM))
-                    statusAbility = ABILITY_METABOLISM;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
                     statusAbility = ABILITY_SILVER_LINING;
                 else if (freezingFlavorStatusProtected)
@@ -3633,8 +3629,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
                 if (HasBattlerAbility(gEffectBattler, ABILITY_IMMUNITY))
                     statusAbility = ABILITY_IMMUNITY;
-                else if (HasBattlerAbility(gEffectBattler, ABILITY_METABOLISM))
-                    statusAbility = ABILITY_METABOLISM;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
                     statusAbility = ABILITY_SILVER_LINING;
                 else if (freezingFlavorStatusProtected)
