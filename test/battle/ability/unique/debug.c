@@ -3,41 +3,58 @@
 
 ASSUMPTIONS
 {
-    ASSUME(gBattleMoves[MOVE_BUG_BITE].type == TYPE_BUG);
-    ASSUME(gBattleMoves[MOVE_SWIFT].type != TYPE_BUG);
+    ASSUME(gBattleMoves[MOVE_CONVERSION].effect == EFFECT_CONVERSION);
+    ASSUME(gBattleMoves[MOVE_CONVERSION_2].effect == EFFECT_CONVERSION_2);
+    ASSUME(gBattleMoves[MOVE_PSYBEAM].power > 0);
+    ASSUME(gBattleMoves[MOVE_SHARPEN].effect == EFFECT_ATTACK_UP);
 }
 
-SINGLE_BATTLE_TEST("Debug heals for three-quarters of damage dealt by Bug-type moves")
+SINGLE_BATTLE_TEST("Debug uses a random glitch move after Conversion")
 {
-    s16 damage;
-    s16 healed;
-
     GIVEN {
-        PLAYER(SPECIES_PORYGON) { HP(60); Speed(100); Ability(ABILITY_TRACE); UniqueAbility(ABILITY_DEBUG); Moves(MOVE_BUG_BITE); }
+        PLAYER(SPECIES_PORYGON) { Speed(100); Ability(ABILITY_ANALYTIC); UniqueAbility(ABILITY_DEBUG); Moves(MOVE_THUNDERBOLT, MOVE_CONVERSION); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_BUG_BITE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CONVERSION, WITH_RNG(RNG_ROGUE_DEBUG, MOVE_SHARPEN)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_BUG_BITE, player);
-        HP_BAR(opponent, captureDamage: &damage);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CONVERSION, player);
         ABILITY_POPUP(player, ABILITY_DEBUG);
-        HP_BAR(player, captureDamage: &healed);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHARPEN, player);
     } THEN {
-        EXPECT_MUL_EQ(damage, Q_4_12(-3.0 / 4.0), healed);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 1);
     }
 }
 
-SINGLE_BATTLE_TEST("Debug does not heal from non-Bug moves")
+SINGLE_BATTLE_TEST("Debug uses a random glitch move after Conversion 2")
 {
     GIVEN {
-        PLAYER(SPECIES_PORYGON) { HP(60); Speed(100); Ability(ABILITY_TRACE); UniqueAbility(ABILITY_DEBUG); Moves(MOVE_SWIFT); }
+        PLAYER(SPECIES_PORYGON2) { Speed(50); Ability(ABILITY_ANALYTIC); UniqueAbility(ABILITY_DEBUG); Moves(MOVE_CONVERSION_2); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CONVERSION_2, WITH_RNG(RNG_ROGUE_DEBUG, MOVE_PSYBEAM)); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CONVERSION_2, player);
+        ABILITY_POPUP(player, ABILITY_DEBUG);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYBEAM, player);
+        HP_BAR(opponent);
+    } THEN {
+        EXPECT_LT(opponent->hp, opponent->maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Debug does not trigger after other moves")
+{
+    GIVEN {
+        PLAYER(SPECIES_PORYGON_Z) { Speed(100); Ability(ABILITY_ANALYTIC); UniqueAbility(ABILITY_DEBUG); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_SWIFT); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_DEBUG, MOVE_PSYBEAM)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_DEBUG);
-            HP_BAR(player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYBEAM, player);
         }
     }
 }

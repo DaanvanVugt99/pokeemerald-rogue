@@ -1,62 +1,133 @@
 #include "global.h"
-#include "pokemon.h"
 #include "test/battle.h"
 
 ASSUMPTIONS
 {
-    ASSUME(gBattleMoves[MOVE_ECLIPSE].effect == EFFECT_ECLIPSE);
+    ASSUME(gBattleMoves[MOVE_SHADOW_FORCE].effect == EFFECT_SEMI_INVULNERABLE);
+    ASSUME(gBattleMoves[MOVE_GRAVITY].effect == EFFECT_GRAVITY);
+    ASSUME(gBattleMoves[MOVE_OMINOUS_WIND].power > 0);
 }
 
-SINGLE_BATTLE_TEST("Dark Dimension sets Eclipse on switch-in if the party has 2 other Ghost-type Pokemon")
+SINGLE_BATTLE_TEST("Dark Dimension uses a random dimension move after Shadow Force")
 {
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(120); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_MISDREAVUS) { Speed(100); Ability(ABILITY_LEVITATE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_GIRATINA) { Speed(50); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); }
-        OPPONENT(SPECIES_GASTLY) { Speed(40); Ability(ABILITY_LEVITATE); }
-        OPPONENT(SPECIES_DUSKULL) { Speed(30); Ability(ABILITY_LEVITATE); }
+        PLAYER(SPECIES_GIRATINA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Item(ITEM_POWER_HERB); Moves(MOVE_SHADOW_FORCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Speed(50); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_SHADOW_FORCE, WITH_RNG(RNG_ROGUE_DARK_DIMENSION, MOVE_GRAVITY)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(opponent, ABILITY_DARK_DIMENSION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHADOW_FORCE, player);
+        HP_BAR(opponent);
+        ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
     } THEN {
-        EXPECT(gBattleWeather & B_WEATHER_ECLIPSE);
+        EXPECT(gFieldStatuses & STATUS_FIELD_GRAVITY);
+        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
 
-SINGLE_BATTLE_TEST("Dark Dimension does not set Eclipse on switch-in without 2 other Ghost-type Pokemon")
+SINGLE_BATTLE_TEST("Dark Dimension triggers after Shadow Force hits without Power Herb")
 {
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(120); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_PIKACHU) { Speed(100); Ability(ABILITY_STATIC); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_GIRATINA) { Speed(50); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); }
-        OPPONENT(SPECIES_GASTLY) { Speed(40); Ability(ABILITY_LEVITATE); }
-        OPPONENT(SPECIES_MAGIKARP) { Speed(30); Ability(ABILITY_SWIFT_SWIM); }
+        PLAYER(SPECIES_GIRATINA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Moves(MOVE_SHADOW_FORCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Speed(50); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_SHADOW_FORCE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SKIP_TURN(player); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        NOT ABILITY_POPUP(opponent, ABILITY_DARK_DIMENSION);
+        MESSAGE("Giratina used Shadow Force!");
+        MESSAGE("Giratina used Shadow Force!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHADOW_FORCE, player);
+        HP_BAR(opponent);
+        ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_MEAN_LOOK, player);
     } THEN {
-        EXPECT(!(gBattleWeather & B_WEATHER_ECLIPSE));
+        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
 
-SINGLE_BATTLE_TEST("Dark Dimension only triggers once per battle")
+SINGLE_BATTLE_TEST("Dark Dimension can choose an attacking dimension move after Shadow Force")
 {
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Speed(120); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_MISDREAVUS) { Speed(100); Ability(ABILITY_LEVITATE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_GIRATINA) { Speed(50); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_GASTLY) { Speed(40); Ability(ABILITY_LEVITATE); }
-        OPPONENT(SPECIES_DUSKULL) { Speed(30); Ability(ABILITY_LEVITATE); }
+        PLAYER(SPECIES_GIRATINA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Item(ITEM_POWER_HERB); Moves(MOVE_SHADOW_FORCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Speed(50); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
-        TURN { SWITCH(opponent, 0); MOVE(player, MOVE_CELEBRATE); }
-        TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_SHADOW_FORCE, WITH_RNG(RNG_ROGUE_DARK_DIMENSION, MOVE_OMINOUS_WIND)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(opponent, ABILITY_DARK_DIMENSION);
-        NOT ABILITY_POPUP(opponent, ABILITY_DARK_DIMENSION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHADOW_FORCE, player);
+        HP_BAR(opponent);
+        ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_OMINOUS_WIND, player);
+        HP_BAR(opponent);
     } THEN {
-        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_OPPONENT] & gBitTable[1]);
+        EXPECT_LT(opponent->hp, opponent->maxHP);
+        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
+    }
+}
+
+SINGLE_BATTLE_TEST("Dark Dimension can choose every dimension move")
+{
+    static const u16 expectedMoves[] =
+    {
+        MOVE_TRICK_ROOM,
+        MOVE_MAGIC_ROOM,
+        MOVE_WONDER_ROOM,
+        MOVE_GRAVITY,
+        MOVE_CURSE,
+        MOVE_SPITE,
+        MOVE_OMINOUS_WIND,
+        MOVE_MEAN_LOOK,
+    };
+
+    PASSES_RANDOMLY(ARRAY_COUNT(expectedMoves), ARRAY_COUNT(expectedMoves), RNG_ROGUE_DARK_DIMENSION);
+
+    GIVEN {
+        PLAYER(SPECIES_GIRATINA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Item(ITEM_POWER_HERB); Moves(MOVE_SHADOW_FORCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Speed(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SHADOW_FORCE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHADOW_FORCE, player);
+        HP_BAR(opponent);
+        ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
+    } THEN {
+        EXPECT_EQ(gCalledMove, expectedMoves[gBattleTestRunnerState->runTrial]);
+        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
+    }
+}
+
+SINGLE_BATTLE_TEST("Dark Dimension does not trigger after other moves")
+{
+    GIVEN {
+        PLAYER(SPECIES_GIRATINA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Moves(MOVE_SHADOW_BALL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SHADOW_BALL, WITH_RNG(RNG_ROGUE_DARK_DIMENSION, MOVE_GRAVITY)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHADOW_BALL, player);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
+        }
+    } THEN {
+        EXPECT_EQ(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0], 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Dark Dimension only triggers once each battle")
+{
+    GIVEN {
+        PLAYER(SPECIES_GIRATINA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Item(ITEM_POWER_HERB); Moves(MOVE_SHADOW_FORCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Speed(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SHADOW_FORCE, WITH_RNG(RNG_ROGUE_DARK_DIMENSION, MOVE_GRAVITY)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_SHADOW_FORCE, WITH_RNG(RNG_ROGUE_DARK_DIMENSION, MOVE_GRAVITY)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SKIP_TURN(player); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
+        NOT ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
+    } THEN {
+        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }

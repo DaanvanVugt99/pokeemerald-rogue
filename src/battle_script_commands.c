@@ -7247,6 +7247,21 @@ static void Cmd_moveend(void)
             {
                 gProtectStructs[gBattlerAttacker].uniqueAbilityActive = FALSE;
             }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_DARK_DIMENSION)
+             && gCurrentMove == MOVE_SHADOW_FORCE
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && TARGET_TURN_DAMAGED
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]])
+             && TryUseDarkDimensionCalledMove(gBattlerAttacker))
+            {
+                effect = TRUE;
+            }
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_EJECT_PACK:

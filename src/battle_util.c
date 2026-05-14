@@ -94,6 +94,10 @@ static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target);
 static bool32 TryUseDeliveryBagCalledMove(u32 battler);
 static bool32 TryUseWishmakerCalledMove(u32 battler);
 static bool32 TryUseBloomBurstCalledMove(u32 battler);
+static bool32 TryUseDebugCalledMove(u32 battler);
+static bool32 TryUseTimeRiftCalledMove(u32 battler);
+static bool32 TryUseSpaceRiftCalledMove(u32 battler);
+bool32 TryUseDarkDimensionCalledMove(u32 battler);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
@@ -5672,6 +5676,203 @@ static bool32 TryUseBloomBurstCalledMove(u32 battler)
     return TRUE;
 }
 
+static const u16 sDebugMoves[] =
+{
+    MOVE_TRI_ATTACK,
+    MOVE_PSYBEAM,
+    MOVE_SIGNAL_BEAM,
+    MOVE_ZAP_CANNON,
+    MOVE_LOCK_ON,
+    MOVE_MAGIC_ROOM,
+    MOVE_WONDER_ROOM,
+    MOVE_RECYCLE,
+    MOVE_SHARPEN,
+    MOVE_AGILITY,
+    MOVE_CHARGE_BEAM,
+    MOVE_PSYWAVE,
+};
+
+static bool32 TryUseDebugCalledMove(u32 battler)
+{
+    u32 target;
+    u16 move;
+
+    gBattlerAttacker = battler;
+    move = RandomElement(RNG_ROGUE_DEBUG, sDebugMoves);
+    target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
+
+    if (target >= gBattlersCount || !IsBattlerAlive(target))
+        return FALSE;
+
+    if (target == battler)
+    {
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+    }
+    else
+    {
+        if (GetBattlerSide(target) == GetBattlerSide(battler)
+         || !CanUseExtraMove(battler, target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_DEBUG);
+    SetAtkCancellerForCalledMove();
+    gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static const u16 sTimeRiftMoves[] =
+{
+    MOVE_TRICK_ROOM,
+    MOVE_MAGIC_ROOM,
+    MOVE_WONDER_ROOM,
+    MOVE_FUTURE_SIGHT,
+    MOVE_GRAVITY,
+    MOVE_IMPRISON,
+    MOVE_SAFEGUARD,
+    MOVE_ANCIENT_POWER,
+};
+
+static bool32 TryUseTimeRiftCalledMove(u32 battler)
+{
+    u32 target;
+    u16 move;
+
+    gBattlerAttacker = battler;
+    move = RandomElement(RNG_ROGUE_TIME_RIFT, sTimeRiftMoves);
+    target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
+
+    if (target >= gBattlersCount || !IsBattlerAlive(target))
+        return FALSE;
+
+    if (target == battler)
+    {
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+    }
+    else
+    {
+        if (GetBattlerSide(target) == GetBattlerSide(battler)
+         || !CanUseExtraMove(battler, target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_TEMPORAL_LOCK);
+    SetAtkCancellerForCalledMove();
+    gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static const u16 sSpaceRiftMoves[] =
+{
+    MOVE_GRAVITY,
+    MOVE_TELEPORT,
+    MOVE_TRICK_ROOM,
+    MOVE_MAGIC_ROOM,
+    MOVE_WONDER_ROOM,
+    MOVE_COSMIC_POWER,
+    MOVE_AERIAL_ACE,
+    MOVE_WATER_PULSE,
+    MOVE_ANCIENT_POWER,
+    MOVE_CONFUSE_RAY,
+};
+
+static bool32 TryUseSpaceRiftCalledMove(u32 battler)
+{
+    u32 target;
+    u16 move;
+
+    gBattlerAttacker = battler;
+    move = RandomElement(RNG_ROGUE_SPACE_RIFT, sSpaceRiftMoves);
+    target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
+
+    if (target >= gBattlersCount || !IsBattlerAlive(target))
+        return FALSE;
+
+    if (target == battler)
+    {
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+    }
+    else
+    {
+        if (GetBattlerSide(target) == GetBattlerSide(battler)
+         || !CanUseExtraMove(battler, target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_SPACE_RIFT);
+    SetAtkCancellerForCalledMove();
+    gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static const u16 sDarkDimensionMoves[] =
+{
+    MOVE_TRICK_ROOM,
+    MOVE_MAGIC_ROOM,
+    MOVE_WONDER_ROOM,
+    MOVE_GRAVITY,
+    MOVE_CURSE,
+    MOVE_SPITE,
+    MOVE_OMINOUS_WIND,
+    MOVE_MEAN_LOOK,
+};
+
+bool32 TryUseDarkDimensionCalledMove(u32 battler)
+{
+    u32 target;
+    u16 move;
+
+    gBattlerAttacker = battler;
+    move = RandomElement(RNG_ROGUE_DARK_DIMENSION, sDarkDimensionMoves);
+    target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
+
+    if (target >= gBattlersCount || !IsBattlerAlive(target))
+        return FALSE;
+
+    if (target == battler)
+    {
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+    }
+    else
+    {
+        if (GetBattlerSide(target) == GetBattlerSide(battler)
+         || !CanUseExtraMove(battler, target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_DARK_DIMENSION);
+    SetAtkCancellerForCalledMove();
+    gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static const u16 sVarietyActMoves[] =
 {
     MOVE_GROWL,
@@ -6835,25 +7036,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             return 1;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_TEMPORAL_LOCK)
-         && !uniqueDone
-         && DoesPartyShareTypeWithBattler(battler)
-         && !(gFieldStatuses & STATUS_FIELD_TRICK_ROOM))
-        {
-            uniqueDone = TRUE;
-            SetBattlerTriggeredAbility(battler, ABILITY_TEMPORAL_LOCK);
-            SetAtkCancellerForCalledMove();
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = battler;
-            gCalledMove = MOVE_TRICK_ROOM;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
-            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-            StartAbilityCalledMoveScript();
-            return 1;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_PROTO_ORBIT) && !uniqueDone)
         {
             bool32 needsGravity = !(gFieldStatuses & STATUS_FIELD_GRAVITY);
@@ -7635,30 +7817,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_OMEN);
-                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
-                return 1;
-            }
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_DARK_DIMENSION)
-         && !uniqueDone
-         && CountPartyMonsOfType(battler, TYPE_GHOST, TRUE) >= 2
-         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
-        {
-            uniqueDone = TRUE;
-            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
-            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
-            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-
-            if (TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE))
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_DARK_DIMENSION);
-                BattleScriptPushCursorAndCallback(BattleScript_OmenActivates);
-                return 1;
-            }
-            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_DARK_DIMENSION);
                 BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
                 return 1;
             }
@@ -12721,6 +12879,41 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_DEBUG)
+         && (move == MOVE_CONVERSION || move == MOVE_CONVERSION_2)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && TryUseDebugCalledMove(battler))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TEMPORAL_LOCK)
+         && move == MOVE_ROAR_OF_TIME
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && TryUseTimeRiftCalledMove(battler))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SPACE_RIFT)
+         && move == MOVE_SPACIAL_REND
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && TryUseSpaceRiftCalledMove(battler))
+        {
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_HEXCRAFT)
          && IS_MOVE_STATUS(move)
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -14723,26 +14916,6 @@ if (triggeringAbility != ABILITY_NONE)
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 3;
 
             SetBattlerTriggeredAbility(battler, ABILITY_VAMPIRIC);
-            if (drainedHp == 0)
-                drainedHp = 1;
-            gBattleMoveDamage = -drainedHp;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_DEBUG)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && TARGET_TURN_DAMAGED
-         && IsFinalMultiHitStrike()
-         && moveType == TYPE_BUG
-         && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
-        {
-            s32 drainedHp = (gSpecialStatuses[gBattlerTarget].shellBellDmg * 3) / 4;
-
-            SetBattlerTriggeredAbility(battler, ABILITY_DEBUG);
             if (drainedHp == 0)
                 drainedHp = 1;
             gBattleMoveDamage = -drainedHp;
