@@ -575,7 +575,7 @@
 #define ABILITY_WINTER_STASH       541
 #define ABILITY_UNDERTOW           542
 #define ABILITY_ADAPTIVE_SLIME     543
-#define ABILITY_INFLATABLE         544
+#define ABILITY_BALLOON_BURST         544
 #define ABILITY_BUNNY_EARS         545
 #define ABILITY_FATAL_GRACE        546
 #define ABILITY_SEPTIC_FUMES       547
@@ -639,7 +639,7 @@
 #define ABILITY_QUIET_MIND         605
 #define ABILITY_PRICKLY            606
 #define ABILITY_SHELL_WORK         607
-#define ABILITY_PSIONIC_FIELD      608
+#define ABILITY_ADAPTIVE_FORCE     608
 #define ABILITY_PETRIFY            609
 #define ABILITY_TIDECALL           610
 #define ABILITY_CHEAP_TRICK        611
@@ -762,7 +762,7 @@
 #define ABILITY_ELEMENTALIST       728
 #define ABILITY_UNSPEAKABLE        729
 #define ABILITY_WAR_CHOIR          730
-#define ABILITY_GRAVERUST          731
+#define ABILITY_WRECKAGE           731
 #define ABILITY_QUILLBURST         732
 #define ABILITY_CRACKLING_SHRINE   733
 #define ABILITY_ORACLE_SHRINE      734
@@ -791,7 +791,7 @@
 #define ABILITY_MESSY_EATER        757
 #define ABILITY_FORCEFIELD         758
 #define ABILITY_SKY_PATROL         759
-#define ABILITY_STICKY_FINGERS     760
+#define ABILITY_BAG_OF_TRICKS      760
 #define ABILITY_SEEDCLOUD          761
 #define ABILITY_GRAZING_FIELD      762
 #define ABILITY_RIPJAW             763

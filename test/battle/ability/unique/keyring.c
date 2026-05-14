@@ -5,77 +5,113 @@ ASSUMPTIONS
 {
     ASSUME(IS_MOVE_STATUS(MOVE_GROWL));
     ASSUME(!IS_MOVE_STATUS(MOVE_TACKLE));
-    ASSUME(gSpeciesInfo[SPECIES_KLEFKI].types[0] == TYPE_STEEL || gSpeciesInfo[SPECIES_KLEFKI].types[1] == TYPE_STEEL);
-    ASSUME(gSpeciesInfo[SPECIES_KLEFKI].types[0] == TYPE_FAIRY || gSpeciesInfo[SPECIES_KLEFKI].types[1] == TYPE_FAIRY);
-    ASSUME(gSpeciesInfo[SPECIES_MAWILE].types[0] == TYPE_STEEL || gSpeciesInfo[SPECIES_MAWILE].types[1] == TYPE_STEEL);
-    ASSUME(gSpeciesInfo[SPECIES_MAWILE].types[0] == TYPE_FAIRY || gSpeciesInfo[SPECIES_MAWILE].types[1] == TYPE_FAIRY);
+    ASSUME(gBattleMoves[MOVE_DISABLE].effect == EFFECT_DISABLE);
+    ASSUME(gBattleMoves[MOVE_TORMENT].effect == EFFECT_TORMENT);
+    ASSUME(gBattleMoves[MOVE_ENCORE].effect == EFFECT_ENCORE);
+    ASSUME(gBattleMoves[MOVE_MAGIC_ROOM].effect == EFFECT_MAGIC_ROOM);
+    ASSUME(gBattleMoves[MOVE_REFLECT].effect == EFFECT_REFLECT);
+    ASSUME(gBattleMoves[MOVE_LIGHT_SCREEN].effect == EFFECT_LIGHT_SCREEN);
+    ASSUME(gBattleMoves[MOVE_METAL_SOUND].effect == EFFECT_SPECIAL_DEFENSE_DOWN_2);
+    ASSUME(gBattleMoves[MOVE_LOCK_ON].effect == EFFECT_LOCK_ON);
+    ASSUME(gBattleMoves[MOVE_SPIKES].effect == EFFECT_SPIKES);
 }
 
-SINGLE_BATTLE_TEST("Keyring disables the target's last used move for 2 turns after the first status move")
+SINGLE_BATTLE_TEST("Keyring uses a random key trick after the first status move each switch-in")
 {
     GIVEN {
-        PLAYER(SPECIES_KLEFKI) { Speed(1); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
-        PLAYER(SPECIES_PIKACHU) { Speed(25); }
-        PLAYER(SPECIES_CHARMANDER) { Speed(25); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_KLEFKI) { Speed(100); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_GROWL); }
+        TURN { MOVE(player, MOVE_GROWL, WITH_RNG(RNG_ROGUE_KEYRING, MOVE_REFLECT)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, player);
         ABILITY_POPUP(player, ABILITY_KEYRING);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_REFLECT, player);
     } THEN {
-        EXPECT_EQ(gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].disabledMove, MOVE_TACKLE);
-        EXPECT_EQ((u32)gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].disableTimer, 2);
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_REFLECT);
     }
 }
 
-SINGLE_BATTLE_TEST("Keyring does not trigger if party type combinations are duplicated")
+SINGLE_BATTLE_TEST("Keyring does not trigger after non-status moves")
 {
     GIVEN {
-        PLAYER(SPECIES_KLEFKI) { Speed(1); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
-        PLAYER(SPECIES_MAWILE) { Speed(25); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_KLEFKI) { Speed(100); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_GROWL); }
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_KEYRING, MOVE_REFLECT)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         NOT ABILITY_POPUP(player, ABILITY_KEYRING);
     } THEN {
-        EXPECT_EQ(gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].disabledMove, MOVE_NONE);
-        EXPECT_EQ((u32)gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].disableTimer, 0);
+        EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_REFLECT));
     }
 }
 
 SINGLE_BATTLE_TEST("Keyring only triggers once per switch-in")
 {
     GIVEN {
-        PLAYER(SPECIES_KLEFKI) { Speed(1); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
-        PLAYER(SPECIES_PIKACHU) { Speed(25); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_KLEFKI) { Speed(100); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_GROWL); }
-        TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_GROWL); }
+        TURN { MOVE(player, MOVE_GROWL, WITH_RNG(RNG_ROGUE_KEYRING, MOVE_REFLECT)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_GROWL, WITH_RNG(RNG_ROGUE_KEYRING, MOVE_LIGHT_SCREEN)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_KEYRING);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_KEYRING);
-        }
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_REFLECT, player);
+        NOT ABILITY_POPUP(player, ABILITY_KEYRING);
+    } THEN {
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_REFLECT);
+        EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_LIGHTSCREEN));
     }
 }
 
 SINGLE_BATTLE_TEST("Keyring refreshes after switching out and back in")
 {
     GIVEN {
-        PLAYER(SPECIES_KLEFKI) { Speed(1); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
-        PLAYER(SPECIES_PIKACHU) { Speed(25); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_KLEFKI) { Speed(100); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
+        PLAYER(SPECIES_PIKACHU) { Speed(100); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_GROWL); }
+        TURN { MOVE(player, MOVE_GROWL, WITH_RNG(RNG_ROGUE_KEYRING, MOVE_REFLECT)); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { SWITCH(player, 0); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_GROWL, WITH_RNG(RNG_ROGUE_KEYRING, MOVE_LIGHT_SCREEN)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_KEYRING);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_REFLECT, player);
+        ABILITY_POPUP(player, ABILITY_KEYRING);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LIGHT_SCREEN, player);
+    } THEN {
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_REFLECT);
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_LIGHTSCREEN);
+    }
+}
+
+SINGLE_BATTLE_TEST("Keyring chooses from every key trick")
+{
+    static const u16 expectedMoves[] =
+    {
+        MOVE_DISABLE,
+        MOVE_TORMENT,
+        MOVE_ENCORE,
+        MOVE_MAGIC_ROOM,
+        MOVE_REFLECT,
+        MOVE_LIGHT_SCREEN,
+        MOVE_METAL_SOUND,
+        MOVE_LOCK_ON,
+        MOVE_SPIKES,
+    };
+
+    PASSES_RANDOMLY(ARRAY_COUNT(expectedMoves), ARRAY_COUNT(expectedMoves), RNG_ROGUE_KEYRING);
+
+    GIVEN {
+        PLAYER(SPECIES_KLEFKI) { Speed(1); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_GROWL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE); }
+    } WHEN {
         TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_GROWL); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_KEYRING);
-        ABILITY_POPUP(player, ABILITY_KEYRING);
+    } THEN {
+        EXPECT_EQ(gCalledMove, expectedMoves[gBattleTestRunnerState->runTrial]);
     }
 }
