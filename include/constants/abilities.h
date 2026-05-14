@@ -434,7 +434,7 @@
 #define ABILITY_SCAMPER             400
 #define ABILITY_NOCTURNAL           401
 #define ABILITY_FORMATION_FIGHTER   402
-#define ABILITY_BROODING            403
+#define ABILITY_WEB_TRAP            403
 #define ABILITY_ABYSSAL_LIGHT       404
 #define ABILITY_DIVINE_FAVOR        405
 #define ABILITY_OMNISENSE           406
@@ -467,7 +467,7 @@
 #define ABILITY_PLOW_THROUGH        433
 #define ABILITY_REEF_PROTECTION     434
 #define ABILITY_ADAPTIVE_ARMORY     435
-#define ABILITY_SPECIAL_DELIVERY    436
+#define ABILITY_DELIVERY_BAG        436
 #define ABILITY_DAMPENING           437
 #define ABILITY_SCRAP_DRAFT         438
 #define ABILITY_INFERNAL_RAGE       439
@@ -558,7 +558,7 @@
 #define ABILITY_CRYSTAL_ARMOR      524
 #define ABILITY_ABYSSAL_MAW        525
 #define ABILITY_CHANGE_OF_HEART    526
-#define ABILITY_STARFALL           527
+#define ABILITY_WISHMAKER          527
 #define ABILITY_ADRENALINE         528
 #define ABILITY_UPROOT             529
 #define ABILITY_SPELLFIST          530

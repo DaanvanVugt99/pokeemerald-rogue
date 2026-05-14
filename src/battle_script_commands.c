@@ -375,6 +375,7 @@ static void DrawLevelUpBannerText(void);
 static void SpriteCB_MonIconOnLvlUpBanner(struct Sprite *sprite);
 static bool32 CriticalCapture(u32 odds);
 static void BestowItem(u32 battlerAtk, u32 battlerDef);
+static void MarkDeliveryBagPendingForItemLoss(u32 battler);
 static bool8 IsFinalStrikeEffect(u16 move);
 static void TrySepticFumesPoisonPartyMon(u32 battlerAtk, u32 poisonedBattler);
 static void TryUpdateRoundTurnOrder(void);
@@ -3211,6 +3212,9 @@ static void SwapBattlerItems(u8 battlerAtk, u8 battlerDef)
     u16 oldItemDef = gBattleMons[battlerDef].item;
     u16 *newItemAtk = &gBattleStruct->changedItems[battlerAtk];
 
+    MarkDeliveryBagPendingForItemLoss(battlerAtk);
+    MarkDeliveryBagPendingForItemLoss(battlerDef);
+
     *newItemAtk = oldItemDef;
     gBattleMons[battlerAtk].item = ITEM_NONE;
     gBattleMons[battlerDef].item = oldItemAtk;
@@ -3260,6 +3264,7 @@ static void SwapBattlerItems(u8 battlerAtk, u8 battlerDef)
 void StealTargetItem(u8 battlerStealer, u8 battlerItem)
 {
     gLastUsedItem = gBattleMons[battlerItem].item;
+    MarkDeliveryBagPendingForItemLoss(battlerItem);
     gBattleMons[battlerItem].item = 0;
 
     RecordItemEffectBattle(battlerItem, 0);
@@ -4318,6 +4323,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                  || (B_INCINERATE_GEMS >= GEN_6 && GetBattlerHoldEffect(gEffectBattler, FALSE) == HOLD_EFFECT_GEMS))
                 {
                     gLastUsedItem = gBattleMons[gEffectBattler].item;
+                    MarkDeliveryBagPendingForItemLoss(gEffectBattler);
                     gBattleMons[gEffectBattler].item = 0;
                     CheckSetUnburden(gEffectBattler);
 
@@ -4333,6 +4339,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 {
                     // target loses their berry
                     gLastUsedItem = gBattleMons[gEffectBattler].item;
+                    MarkDeliveryBagPendingForItemLoss(gEffectBattler);
                     gBattleMons[gEffectBattler].item = 0;
                     CheckSetUnburden(gEffectBattler);
 
@@ -6020,6 +6027,7 @@ static bool32 TryKnockOffBattleScript(u32 battlerDef)
             u32 side = GetBattlerSide(battlerDef);
 
             gLastUsedItem = gBattleMons[battlerDef].item;
+            MarkDeliveryBagPendingForItemLoss(battlerDef);
             gBattleMons[battlerDef].item = 0;
             if (gBattleMons[battlerDef].ability != ABILITY_GORILLA_TACTICS)
                 gBattleStruct->choicedMove[battlerDef] = 0;
@@ -7587,6 +7595,12 @@ static void Cmd_moveend(void)
                 }
             }
             gBattleScripting.moveendState++;
+            break;
+        case MOVEEND_DELIVERY_BAG:
+            if (TryUsePendingDeliveryBagCalledMove())
+                effect = TRUE;
+            else
+                gBattleScripting.moveendState++;
             break;
         case MOVEEND_SAME_MOVE_TURNS:
             if (gCurrentMove != gLastResultingMoves[gBattlerAttacker] || gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -9332,11 +9346,18 @@ static bool32 TrySetGluttonyBerryStatBoost(u32 battler, u32 itemId)
     return TRUE;
 }
 
+static void MarkDeliveryBagPendingForItemLoss(u32 battler)
+{
+    if (gBattleMons[battler].item != ITEM_NONE)
+        gBattleStruct->deliveryBagPending[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+}
+
 // Used by Bestow and Symbiosis to take an item from one battler and give to another.
 static void BestowItem(u32 battlerAtk, u32 battlerDef)
 {
     gLastUsedItem = gBattleMons[battlerAtk].item;
 
+    MarkDeliveryBagPendingForItemLoss(battlerAtk);
     gBattleMons[battlerAtk].item = ITEM_NONE;
     BtlController_EmitSetMonData(battlerAtk, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[battlerAtk].item), &gBattleMons[battlerAtk].item);
     MarkBattlerForControllerExec(battlerAtk);
@@ -9388,6 +9409,7 @@ static void Cmd_removeitem(void)
 
     battler = GetBattlerForBattleScript(cmd->battler);
     itemId = gBattleMons[battler].item;
+    MarkDeliveryBagPendingForItemLoss(battler);
 
     // Popped Air Balloon cannot be restored by any means.
     // Corroded items cannot be restored either.

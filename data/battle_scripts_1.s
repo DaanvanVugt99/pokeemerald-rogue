@@ -11435,10 +11435,6 @@ BattleScript_DemolitionActivatesPrintString:
 BattleScript_DemolitionActivatesEnd:
 	return
 
-BattleScript_BloomBurstUsesCalledMove::
-	sethword sABILITY_OVERWRITE, ABILITY_BLOOM_BURST
-	goto BattleScript_AbilityUsesCalledMove
-
 BattleScript_VictoryActivates::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT

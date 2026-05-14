@@ -3,61 +3,56 @@
 
 ASSUMPTIONS
 {
-    ASSUME(gBattleMoves[MOVE_ACID].power == 40);
-    ASSUME(gBattleMoves[MOVE_ACID].type == TYPE_POISON);
+    ASSUME(gBattleMoves[MOVE_STOCKPILE].effect == EFFECT_STOCKPILE);
+    ASSUME(gBattleMoves[MOVE_ACID].power > 0);
+    ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
+    ASSUME(gBattleMoves[MOVE_AMNESIA].target == MOVE_TARGET_USER);
 }
 
-SINGLE_BATTLE_TEST("Acid Reflux uses Acid after this Pokemon takes damage")
+SINGLE_BATTLE_TEST("Acid Reflux uses a random stomach move after Stockpile")
 {
     GIVEN {
-        PLAYER(SPECIES_GULPIN) { Ability(ABILITY_LIQUID_OOZE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_SWALOT) { Ability(ABILITY_LIQUID_OOZE); UniqueAbility(ABILITY_ACID_REFLUX); Moves(MOVE_STOCKPILE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_STOCKPILE, WITH_RNG(RNG_ROGUE_ACID_REFLUX, MOVE_ACID)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
-        HP_BAR(player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_STOCKPILE, player);
         ABILITY_POPUP(player, ABILITY_ACID_REFLUX);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ACID, player);
         HP_BAR(opponent);
+    } THEN {
+        EXPECT_LT(opponent->hp, opponent->maxHP);
     }
 }
 
-SINGLE_BATTLE_TEST("Acid Reflux uses Acid at 20 BP", s16 damage)
+SINGLE_BATTLE_TEST("Acid Reflux can choose a self-target stomach move after Stockpile")
 {
-    u16 uniqueAbility;
-
-    PARAMETRIZE { uniqueAbility = ABILITY_NONE; }
-    PARAMETRIZE { uniqueAbility = ABILITY_ACID_REFLUX; }
-
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility); Moves(MOVE_ACID, MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE, MOVE_TACKLE); }
+        PLAYER(SPECIES_SWALOT) { Ability(ABILITY_LIQUID_OOZE); UniqueAbility(ABILITY_ACID_REFLUX); Moves(MOVE_STOCKPILE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
-        if (uniqueAbility == ABILITY_NONE)
-            TURN { MOVE(player, MOVE_ACID); MOVE(opponent, MOVE_CELEBRATE); }
-        else
-            TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_STOCKPILE, WITH_RNG(RNG_ROGUE_ACID_REFLUX, MOVE_AMNESIA)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        HP_BAR(opponent, captureDamage: &results[i].damage);
-    } FINALLY {
-        EXPECT_MUL_EQ(results[1].damage, UQ_4_12(2.0), results[0].damage);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_STOCKPILE, player);
+        ABILITY_POPUP(player, ABILITY_ACID_REFLUX);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_AMNESIA, player);
     }
 }
 
-SINGLE_BATTLE_TEST("Acid Reflux does not trigger if this Pokemon takes no damage")
+SINGLE_BATTLE_TEST("Acid Reflux does not trigger after other moves")
 {
     GIVEN {
-        PLAYER(SPECIES_GULPIN) { Ability(ABILITY_LIQUID_OOZE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_GROWL); }
+        PLAYER(SPECIES_SWALOT) { Ability(ABILITY_LIQUID_OOZE); UniqueAbility(ABILITY_ACID_REFLUX); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_GROWL); }
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_ACID_REFLUX, MOVE_ACID)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        HP_BAR(opponent);
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_ACID_REFLUX);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_ACID, player);
-            HP_BAR(opponent);
         }
     }
 }
