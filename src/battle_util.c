@@ -11240,6 +11240,25 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_FORCEFIELD)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(moveEndAttacker)
+         && gBattleMoves[move].split == SPLIT_SPECIAL
+         && (CompareStat(moveEndAttacker, STAT_SPATK, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(moveEndAttacker) == ABILITY_MIRROR_ARMOR)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FORCEFIELD);
+            SET_STATCHANGER(STAT_SPATK, 1, TRUE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SP_ATK_MINUS_1;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_GooeyActivates;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SMOLDERING_SHELL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
@@ -12948,6 +12967,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_STICKY_FINGERS)
+         && moveType == TYPE_DARK
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_STICKY_FINGERS);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_COVET;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FOSSIL_DRILL)
          && moveType == TYPE_ROCK
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -14315,6 +14352,22 @@ if (triggeringAbility != ABILITY_NONE)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_TOXIC_MONSOON);
             BattleScriptPushCursorAndCallback(BattleScript_ToxicDelugeActivates);
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SEEDCLOUD)
+         && gBattleMoves[move].powderMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && IsFinalMultiHitStrike()
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 healAmount = max(1, GetNonDynamaxMaxHP(battler) / 4);
+
+            SetBattlerTriggeredAbility(battler, ABILITY_SEEDCLOUD);
+            gBattleMoveDamage = -healAmount;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DuelistActivates;
             effect++;
         }
 
