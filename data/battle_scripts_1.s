@@ -11404,6 +11404,12 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_FossilMemoryUsesCalledMove::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_FOSSILMEMORYAWAKENED
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_BreakFormationAfterFormChange::
 	call BattleScript_AttackerFormChangeNoPopup
 	goto BattleScript_AbilityUsesCalledMove

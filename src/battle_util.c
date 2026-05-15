@@ -115,6 +115,7 @@ static bool32 TryUseAdaptiveForceCalledMove(u32 battler);
 static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target);
 static bool32 TryUseOctolockCalledMove(u32 battler, u32 target);
 static bool32 TryUseTeaServiceCalledMove(u32 battler);
+static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
@@ -5243,6 +5244,15 @@ static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 mov
             pendingDamage += max(1, GetNonDynamaxMaxHP(battlerAttacker) / 6);
         }
 
+        if (GetBattlerHoldEffect(battlerAttacker, TRUE) == HOLD_EFFECT_LIFE_ORB
+         && !TestSheerForceFlag(battlerAttacker, move)
+         && !HasBattlerAbility(battlerAttacker, ABILITY_MAGIC_GUARD)
+         && !gSpecialStatuses[battlerAttacker].preventLifeOrbDamage
+         && gSpecialStatuses[battlerAttacker].damagedMons)
+        {
+            pendingDamage += max(1, GetNonDynamaxMaxHP(battlerAttacker) / 10);
+        }
+
         return gBattleMons[battlerAttacker].hp > pendingDamage;
     }
 
@@ -6618,6 +6628,144 @@ static bool32 TryUseFormationCalledMove(u32 battler)
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+enum FossilMemoryHalf
+{
+    FOSSIL_MEMORY_DRACO,
+    FOSSIL_MEMORY_ZOLT,
+    FOSSIL_MEMORY_ARCTO,
+    FOSSIL_MEMORY_VISH,
+};
+
+struct FossilMemoryPool
+{
+    const u16 *moves;
+    u32 count;
+};
+
+static const u16 sFossilMemoryDracoMoves[] =
+{
+    MOVE_DRAGON_BREATH,
+    MOVE_TWISTER,
+    MOVE_SCARY_FACE,
+    MOVE_DRAGON_TAIL,
+};
+
+static const u16 sFossilMemoryZoltMoves[] =
+{
+    MOVE_THUNDER_FANG,
+    MOVE_CHARGE,
+    MOVE_SPARK,
+    MOVE_THUNDER_WAVE,
+};
+
+static const u16 sFossilMemoryArctoMoves[] =
+{
+    MOVE_ICY_WIND,
+    MOVE_AURORA_BEAM,
+    MOVE_HAZE,
+    MOVE_POWDER_SNOW,
+};
+
+static const u16 sFossilMemoryVishMoves[] =
+{
+    MOVE_WATER_PULSE,
+    MOVE_WHIRLPOOL,
+    MOVE_AQUA_JET,
+    MOVE_CLAMP,
+};
+
+static const struct FossilMemoryPool sFossilMemoryPools[] =
+{
+    [FOSSIL_MEMORY_DRACO] = {sFossilMemoryDracoMoves, ARRAY_COUNT(sFossilMemoryDracoMoves)},
+    [FOSSIL_MEMORY_ZOLT] = {sFossilMemoryZoltMoves, ARRAY_COUNT(sFossilMemoryZoltMoves)},
+    [FOSSIL_MEMORY_ARCTO] = {sFossilMemoryArctoMoves, ARRAY_COUNT(sFossilMemoryArctoMoves)},
+    [FOSSIL_MEMORY_VISH] = {sFossilMemoryVishMoves, ARRAY_COUNT(sFossilMemoryVishMoves)},
+};
+
+static bool32 GetFossilMemoryHalves(u32 species, u32 *firstHalf, u32 *secondHalf)
+{
+    switch (species)
+    {
+    case SPECIES_DRACOZOLT:
+        *firstHalf = FOSSIL_MEMORY_DRACO;
+        *secondHalf = FOSSIL_MEMORY_ZOLT;
+        return TRUE;
+    case SPECIES_ARCTOZOLT:
+        *firstHalf = FOSSIL_MEMORY_ARCTO;
+        *secondHalf = FOSSIL_MEMORY_ZOLT;
+        return TRUE;
+    case SPECIES_DRACOVISH:
+        *firstHalf = FOSSIL_MEMORY_DRACO;
+        *secondHalf = FOSSIL_MEMORY_VISH;
+        return TRUE;
+    case SPECIES_ARCTOVISH:
+        *firstHalf = FOSSIL_MEMORY_ARCTO;
+        *secondHalf = FOSSIL_MEMORY_VISH;
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
+static u16 GetRandomFossilMemoryMove(u32 battler)
+{
+    u32 firstHalf, secondHalf, i, count = 0;
+    u16 moves[ARRAY_COUNT(sFossilMemoryDracoMoves) + ARRAY_COUNT(sFossilMemoryZoltMoves)];
+    const struct FossilMemoryPool *pool;
+
+    if (!GetFossilMemoryHalves(gBattleMons[battler].species, &firstHalf, &secondHalf))
+        return MOVE_NONE;
+
+    pool = &sFossilMemoryPools[firstHalf];
+    for (i = 0; i < pool->count; i++)
+        moves[count++] = pool->moves[i];
+
+    pool = &sFossilMemoryPools[secondHalf];
+    for (i = 0; i < pool->count; i++)
+        moves[count++] = pool->moves[i];
+
+    return *(const u16 *)RandomElementArray(RNG_ROGUE_FOSSIL_MEMORY, moves, sizeof(moves[0]), count);
+}
+
+static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target)
+{
+    u16 move = GetRandomFossilMemoryMove(battler);
+
+    if (move == MOVE_NONE)
+        return FALSE;
+
+    if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
+    {
+        target = battler;
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+    }
+    else
+    {
+        if (target >= gBattlersCount
+         || !IsBattlerAlive(target)
+         || target == battler
+         || GetBattlerSide(target) == GetBattlerSide(battler))
+        {
+            if (!TryGetOpposingExtraMoveTarget(battler, &target))
+                return FALSE;
+        }
+
+        if (!CanUseExtraMove(battler, target))
+            return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_FOSSIL_MEMORY);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScriptAt(BattleScript_FossilMemoryUsesCalledMove);
     return TRUE;
 }
 
@@ -13127,6 +13275,24 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && TrySetupIronStampHazards(battler, gBattlerTarget))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FOSSIL_MEMORY)
+         && IsBattlerAlive(battler)
+         && !IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && gBattleScripting.savedDmg != 0
+         && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseFossilMemoryCalledMove(battler, gBattlerTarget))
         {
             effect++;
         }
