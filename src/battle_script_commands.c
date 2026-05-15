@@ -2261,10 +2261,7 @@ static void Cmd_damagecalc(void)
 
     GET_MOVE_TYPE(gCurrentMove, moveType);
     if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
-    {
         movePower = VarGet(VAR_EXTRA_MOVE_DAMAGE);
-        VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
-    }
     gBattleMoveDamage = CalculateMoveDamage(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType, movePower, gIsCriticalHit, TRUE, TRUE);
 
     if((IsCurseActive(EFFECT_ONE_HIT) || Rogue_GetActiveCampaign() == ROGUE_CAMPAIGN_ONE_HP) && gBattleMoveDamage != 0)
@@ -7609,6 +7606,7 @@ static void Cmd_moveend(void)
             gBattleScripting.moveEffect = 0;
             if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
             {
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
                 VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
                 VarSet(VAR_TEMP_MOVEEFFECT, 0);
             }
@@ -11186,20 +11184,14 @@ static void Cmd_various(void)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()
          && IsBattlerAlive(battler)
-         && !gProtectStructs[battler].confusionSelfDmg
-         && !gProtectStructs[battler].extraMoveUsed
-         && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
-         && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
+         && !gProtectStructs[battler].confusionSelfDmg)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_WITCHING_HOUR);
-            SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
-            gCalledMove = MOVE_TRICK_ROOM;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gCurrentMove = MOVE_TRICK_ROOM;
             BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            gBattlescriptCurrInstr = BattleScript_WitchingHourActivates;
             return;
         }
         break;

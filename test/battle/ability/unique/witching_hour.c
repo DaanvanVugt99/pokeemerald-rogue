@@ -13,11 +13,30 @@ SINGLE_BATTLE_TEST("Witching Hour sets Trick Room after this Pokemon knocks out 
         OPPONENT(SPECIES_CATERPIE) { HP(1); MaxHP(1); Ability(ABILITY_SHIELD_DUST); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_PSYCHIC); }
+        TURN { MOVE(player, MOVE_PSYCHIC); SEND_OUT(opponent, 1); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_WITCHING_HOUR);
     } THEN {
         EXPECT(gFieldStatuses & STATUS_FIELD_TRICK_ROOM);
+    }
+}
+
+SINGLE_BATTLE_TEST("Witching Hour activates Room Service after setting Trick Room")
+{
+    GIVEN {
+        PLAYER(SPECIES_HATTERENE) { Ability(ABILITY_MAGIC_BOUNCE); UniqueAbility(ABILITY_WITCHING_HOUR); Moves(MOVE_PSYCHIC); }
+        OPPONENT(SPECIES_CATERPIE) { HP(1); MaxHP(1); Ability(ABILITY_SHIELD_DUST); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); Item(ITEM_ROOM_SERVICE); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_PSYCHIC); SEND_OUT(opponent, 1); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_WITCHING_HOUR);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TRICK_ROOM, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, opponent);
+    } THEN {
+        EXPECT(gFieldStatuses & STATUS_FIELD_TRICK_ROOM);
+        EXPECT_EQ(opponent->item, ITEM_NONE);
+        EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE - 1);
     }
 }
 

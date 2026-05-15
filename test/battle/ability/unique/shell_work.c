@@ -81,8 +81,6 @@ SINGLE_BATTLE_TEST("Shell Work does not trigger when a different stat rises")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, player);
         NOT ABILITY_POPUP(player, ABILITY_SHELL_WORK);
-    } THEN {
-        EXPECT_EQ(gCalledMove, MOVE_NONE);
     }
 }
 

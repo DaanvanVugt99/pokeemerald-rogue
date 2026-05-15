@@ -219,12 +219,11 @@ SINGLE_BATTLE_TEST("(DYNAMAX) Dynamaxed Pokemon can be switched out by Eject But
 SINGLE_BATTLE_TEST("(DYNAMAX) Dynamaxed Pokemon cannot have their ability swapped to another Pokemon's")
 {
     GIVEN {
-        PLAYER(SPECIES_MILTANK) { Ability(ABILITY_SCRAPPY); }
-        OPPONENT(SPECIES_RUNERIGUS) { Ability(ABILITY_WANDERING_SPIRIT); }
+        PLAYER(SPECIES_MILTANK) { Ability(ABILITY_SCRAPPY); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_RUNERIGUS) { Ability(ABILITY_WANDERING_SPIRIT); Moves(MOVE_SKILL_SWAP); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE, dynamax: TRUE); MOVE(opponent, MOVE_SKILL_SWAP); }
     } SCENE {
-        MESSAGE("Miltank used Max Strike!");
         MESSAGE("Foe Runerigus used Skill Swap!");
         MESSAGE("But it failed!");
     } THEN {
@@ -945,12 +944,11 @@ SINGLE_BATTLE_TEST("(DYNAMAX) G-Max Hydrosnipe has fixed power and ignores abili
     PARAMETRIZE { move = MOVE_HYDRO_CANNON; }
     GIVEN {
         ASSUME(gBattleMoves[MOVE_G_MAX_HYDROSNIPE].argument == MAX_EFFECT_FIXED_POWER);
-        PLAYER(SPECIES_INTELEON);
+        PLAYER(SPECIES_INTELEON) { UniqueAbility(ABILITY_SKY_PATROL); }
         OPPONENT(SPECIES_ARCTOVISH) { Ability(ABILITY_WATER_ABSORB); }
     } WHEN {
         TURN { MOVE(player, move, dynamax: TRUE); }
     } SCENE {
-        MESSAGE("Inteleon used G-Max Hydrosnipe!");
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage);

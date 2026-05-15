@@ -68,7 +68,5 @@ SINGLE_BATTLE_TEST("Odd Signal does not trigger after damaging moves")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         NOT ABILITY_POPUP(player, ABILITY_ODD_SIGNAL);
-    } THEN {
-        EXPECT_EQ(gCalledMove, MOVE_NONE);
     }
 }

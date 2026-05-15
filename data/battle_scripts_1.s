@@ -7146,6 +7146,7 @@ BattleScript_PursuitSwitchDmgLoop::
 	trysetdestinybondtohappen
 	jumpifmove MOVE_FLAME_CHARGE, BattleScript_CallHotPursuitDmgOnSwitchOut
 	jumpifmove MOVE_SHADOW_SNEAK, BattleScript_CallShadowGraspDmgOnSwitchOut
+	jumpifmove MOVE_DEFOG, BattleScript_CallSkyPatrolDefogOnSwitchOut
 	call BattleScript_PursuitDmgOnSwitchOut
 	goto BattleScript_PursuitSwitchDmgDone
 BattleScript_CallHotPursuitDmgOnSwitchOut:
@@ -7153,6 +7154,9 @@ BattleScript_CallHotPursuitDmgOnSwitchOut:
 	goto BattleScript_PursuitSwitchDmgDone
 BattleScript_CallShadowGraspDmgOnSwitchOut:
 	call BattleScript_ShadowGraspDmgOnSwitchOut
+	goto BattleScript_PursuitSwitchDmgDone
+BattleScript_CallSkyPatrolDefogOnSwitchOut:
+	call BattleScript_SkyPatrolDefogOnSwitchOut
 BattleScript_PursuitSwitchDmgDone:
 	swapattackerwithtarget
 BattleScript_DoSwitchOut::
@@ -7259,6 +7263,33 @@ BattleScript_ShadowGraspDmgOnSwitchOut::
 	getexp BS_TARGET
 BattleScript_ShadowGraspDmgOnSwitchOutRet:
 	return
+
+BattleScript_SkyPatrolDefogOnSwitchOut::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_EVASION, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_SkyPatrolDefogTryHazardsWithAnim
+	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_SkyPatrolDefogDoAnim
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_FELL_EMPTY, BattleScript_SkyPatrolDefogTryHazardsWithAnim
+	pause B_WAIT_TIME_SHORT
+	goto BattleScript_SkyPatrolDefogPrintString
+BattleScript_SkyPatrolDefogDoAnim:
+	attackanimation
+	waitanimation
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+BattleScript_SkyPatrolDefogPrintString:
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SkyPatrolDefogTryHazards:
+	copybyte gEffectBattler, gBattlerAttacker
+	trydefog TRUE, NULL
+	copybyte gBattlerAttacker, gEffectBattler
+	return
+BattleScript_SkyPatrolDefogTryHazardsWithAnim:
+	attackanimation
+	waitanimation
+	goto BattleScript_SkyPatrolDefogTryHazards
 
 BattleScript_Pausex20::
 	pause B_WAIT_TIME_SHORT
@@ -11447,6 +11478,26 @@ BattleScript_RoyalGardenActivates::
 	waitmessage B_WAIT_TIME_LONG
 	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
 	call BattleScript_ActivateTerrainEffects
+	return
+
+BattleScript_WitchingHourActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	setroom
+	playmoveanimation BS_ATTACKER, MOVE_TRICK_ROOM
+	waitanimation
+	printfromtable gRoomsStringIds
+	waitmessage B_WAIT_TIME_LONG
+	savetarget
+	setbyte gBattlerTarget, 0
+BattleScript_WitchingHourRoomServiceLoop:
+	copybyte sBATTLER, gBattlerTarget
+	tryroomservice BS_TARGET, BattleScript_WitchingHourRoomServiceLoop_NextBattler
+	removeitem BS_TARGET
+BattleScript_WitchingHourRoomServiceLoop_NextBattler:
+	addbyte gBattlerTarget, 0x1
+	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_WitchingHourRoomServiceLoop
+	restoretarget
 	return
 
 BattleScript_GaleCommandActivates::
