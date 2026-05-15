@@ -1698,8 +1698,12 @@ static bool32 AccuracyCalcHelper(u16 move)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_ORACLE_SHRINE)
       && IS_MOVE_STATUS(move)
       && IsBattlerTerrainAffected(gBattlerAttacker, STATUS_FIELD_PSYCHIC_TERRAIN))
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_INTENT)
+      && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
      || gStatuses4[gBattlerTarget] & STATUS4_GLAIVE_RUSH)
     {
+        if (HasBattlerAbility(gBattlerAttacker, ABILITY_INTENT))
+            gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
         JumpIfMoveFailed(7, move);
         return TRUE;
     }
@@ -16538,6 +16542,33 @@ static void Cmd_unused2(void)
 {
 }
 
+static bool32 IsJungleLashTarget(u32 battler, u32 target)
+{
+    if (!IsBattlerAlive(target) || GetBattlerSide(battler) == GetBattlerSide(target))
+        return FALSE;
+    if (HasBattlerAbility(target, ABILITY_MAGIC_GUARD))
+        return FALSE;
+    if (gStatuses3[target] & STATUS3_LEECHSEED)
+        return TRUE;
+    if (gBattleMons[target].status2 & (STATUS2_WRAPPED | STATUS2_ESCAPE_PREVENTION))
+        return TRUE;
+
+    return FALSE;
+}
+
+static bool32 HasJungleLashTarget(u32 battler)
+{
+    u32 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (IsJungleLashTarget(battler, i))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static void Cmd_switchoutabilities(void)
 {
     CMD_ARGS(u8 battler);
@@ -16565,6 +16596,15 @@ static void Cmd_switchoutabilities(void)
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_JUNGLE_LASH) && HasJungleLashTarget(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_JUNGLE_LASH);
+            gBattlerAbility = gBattlerAttacker = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_JungleLashActivates;
             return;
         }
 
@@ -17921,6 +17961,21 @@ void BS_CalcMetalBurstDmg(void)
     {
         gBattlescriptCurrInstr = cmd->failInstr;
     }
+}
+
+void BS_JungleLashDamage(void)
+{
+    NATIVE_ARGS();
+
+    gBattleMoveDamage = 0;
+    if (IsJungleLashTarget(gBattlerAbility, gBattlerTarget))
+    {
+        gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 8;
+        if (gBattleMoveDamage == 0)
+            gBattleMoveDamage = 1;
+    }
+
+    gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
 void BS_JumpIfCantFling(void)

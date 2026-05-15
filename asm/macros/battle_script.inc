@@ -1522,6 +1522,10 @@
 	callnative BS_DamageNonTypes
 	.endm
 
+	.macro junglelashdamage
+	callnative BS_JungleLashDamage
+	.endm
+
 	.macro trysetstatus1, ptr:req
 	callnative BS_TrySetStatus1
 	.4byte \ptr

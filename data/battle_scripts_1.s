@@ -9598,6 +9598,28 @@ BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return
 
+BattleScript_JungleLashActivates::
+	call BattleScript_AbilityPopUp
+	setbyte gBattleCommunication, 0
+BattleScript_JungleLashLoop::
+	copyarraywithindex gBattlerTarget, gBattlerByTurnOrder, gBattleCommunication, 1
+	junglelashdamage
+	jumpifword CMP_EQUAL, gBattleMoveDamage, 0, BattleScript_JungleLashLoopIncrement
+	effectivenesssound
+	hitanimation BS_TARGET
+	orword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE | HITMARKER_GRUDGE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	tryfaintmon BS_TARGET
+	checkteamslost BattleScript_JungleLashLoopIncrement
+BattleScript_JungleLashLoopIncrement::
+	jumpifbyte CMP_NOT_EQUAL, gBattleOutcome, 0, BattleScript_JungleLashEnd
+	addbyte gBattleCommunication, 1
+	jumpifbytenotequal gBattleCommunication, gBattlersCount, BattleScript_JungleLashLoop
+BattleScript_JungleLashEnd::
+	bicword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE | HITMARKER_GRUDGE
+	return
+
 BattleScript_BarnacleWallActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_TARGETISBEINGSALTCURED

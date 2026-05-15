@@ -19,12 +19,13 @@ This file documents practical repo-specific guidance for coding agents and contr
 
 ## Test Commands
 
-- Build test ELF only:
+- Full split-suite validation:
+  - `./scripts/launch_build_test.sh --check-all-suites`
+- Focused suite validation:
+  - `./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"`
+- Legacy monolithic test ELF build:
   - `./scripts/launch_build_test.sh --build`
-- Run headless checks:
-  - `./scripts/launch_build_test.sh --check`
-- Run only tests matching prefix:
-  - `./scripts/launch_build_test.sh --check --filter "Intimidate"`
+  - This all-in-one test ROM is near the 32 MiB linker layout limit and may fail with `tests`/`dacs` overlap. Do not treat this as the required day-to-day full validation path.
 - Run in emulator UI:
   - `./scripts/launch_build_test.sh --ui`
 
@@ -47,7 +48,8 @@ This file documents practical repo-specific guidance for coding agents and contr
   - Use message/state assertions for order-sensitive interactions.
   - Avoid over-constraining animation sequencing when not behavior-critical.
 - Use filtered runs first for rapid iteration:
-  - `--filter "Exact or unique prefix"`.
+  - `--check --suite ability --filter "Exact or unique prefix"`.
+- Use `--check-all-suites` for full validation instead of the legacy monolithic `--build` target.
 - Canon behavior should win over existing test assumptions when they conflict.
 - Do not add tests that only assert species -> unique-ability mapping (for example, "`X` is the `Y` line's unique ability"); these are low-value and redundant.
 

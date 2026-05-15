@@ -5,33 +5,42 @@ script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(cd "$script_dir/.." && pwd)"
 cd "$repo_root" || exit 1
 
-mode="build" # build | check | ui
+mode="check" # build | check | ui
 test_to_run_prefix="${TESTS:-}"
 test_suite="${TEST_SUITE:-}"
 check_all_suites=0
 all_suites=(core ai ability moves items forms rogue)
 
+if [ $# -eq 0 ]; then
+    check_all_suites=1
+fi
+
 usage() {
-    echo "Usage: $0 [--build|--check|--ui] [--suite SUITE] [--filter \"Test name prefix\"]"
-    echo "  --build   Build pokeemerald-test.elf only (default)"
-    echo "  --check   Build and run headless tests via 'make check'"
-    echo "  --ui      Build and launch pokeemerald-test.elf in mGBA"
-    echo "  --suite   Compile only one test suite: core, ai, ability, moves, items, forms, rogue"
+    echo "Usage: $0 [--check-all-suites|--check|--build|--ui] [--suite SUITE] [--filter \"Test name prefix\"]"
     echo "  --check-all-suites"
-    echo "            Run all split test suites sequentially"
+    echo "            Recommended full validation: run all split test suites sequentially (default)"
+    echo "  --check   Build and run headless tests via 'make check'"
+    echo "            Recommended focused validation: --check --suite ability --filter \"Some Test\""
+    echo "  --suite   Compile only one test suite: core, ai, ability, moves, items, forms, rogue"
     echo "  --filter  Set TESTS prefix filter and compile only matching test files"
+    echo "  --build   Legacy: build the monolithic all-in-one pokeemerald-test.elf only"
+    echo "            This target may fail near the 32 MiB test ROM linker limit; use --check-all-suites for full validation."
+    echo "  --ui      Build and launch the monolithic pokeemerald-test.elf in mGBA"
 }
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --build)
             mode="build"
+            check_all_suites=0
             ;;
         --check)
             mode="check"
+            check_all_suites=0
             ;;
         --ui)
             mode="ui"
+            check_all_suites=0
             ;;
         --filter)
             shift
@@ -132,6 +141,14 @@ else
             echo "mGBA not found in PATH; build succeeded but ROM not launched."
             exit_code=127
         fi
+    fi
+
+    if [ $exit_code -ne 0 ] && [ "$mode" = "build" ]; then
+        echo
+        echo "Note: --build is the legacy monolithic all-in-one test ROM target."
+        echo "It can fail when the combined test ROM exceeds the 32 MiB linker layout,"
+        echo "especially with tests/dacs overlap errors. For normal full validation, run:"
+        echo "  $0 --check-all-suites"
     fi
 fi
 

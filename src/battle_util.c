@@ -13432,6 +13432,25 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_INTENT)
+         && IsBattlerAlive(battler)
+         && !IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike())
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_INTENT);
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_CALL_ALLIES)
          && IsBattlerAlive(battler)
          && gBattleMoves[move].soundMove
