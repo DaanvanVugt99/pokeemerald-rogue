@@ -161,6 +161,10 @@ SINGLE_BATTLE_TEST("Raichu can Mega Evolve into Mega Raichu X holding Raichunite
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } SCENE {
+        MESSAGE("Raichu's Raichunite X is reacting to 1's Mega Ring!");
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
+        MESSAGE("Raichu has Mega Evolved into Mega Raichu!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_RAICHU_MEGA_X);
     }
@@ -173,6 +177,10 @@ SINGLE_BATTLE_TEST("Raichu can Mega Evolve into Mega Raichu Y holding Raichunite
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } SCENE {
+        MESSAGE("Raichu's Raichunite Y is reacting to 1's Mega Ring!");
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
+        MESSAGE("Raichu has Mega Evolved into Mega Raichu!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_RAICHU_MEGA_Y);
     }
@@ -185,6 +193,10 @@ SINGLE_BATTLE_TEST("Darkrai can Mega Evolve holding Darkranite")
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } SCENE {
+        MESSAGE("Darkrai's Darkranite is reacting to 1's Mega Ring!");
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
+        MESSAGE("Darkrai has Mega Evolved into Mega Darkrai!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_DARKRAI_MEGA);
     }
@@ -197,6 +209,10 @@ SINGLE_BATTLE_TEST("Victreebel can Mega Evolve holding Victreebelite")
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } SCENE {
+        MESSAGE("Victreebel's Victreebelite is reacting to 1's Mega Ring!");
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_MEGA_EVOLUTION, player);
+        MESSAGE("Victreebel has Mega Evolved into Mega Victreebel!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_VICTREEBEL_MEGA);
     }

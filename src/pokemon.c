@@ -2247,7 +2247,7 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
             retVal = boxMon->isBadEgg ? SPECIES_EGG : substruct0->species;
             break;
         case MON_DATA_HELD_ITEM:
-            retVal = substruct0->heldItem;
+            retVal = substruct0->heldItem | (substruct0->heldItemHi << 10);
             break;
         case MON_DATA_EXP:
             retVal = substruct0->experience;
@@ -2703,8 +2703,13 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
             break;
         }
         case MON_DATA_HELD_ITEM:
-            SET16(substruct0->heldItem);
+        {
+            u16 heldItem;
+            SET16(heldItem);
+            substruct0->heldItem = heldItem & 0x3FF;
+            substruct0->heldItemHi = (heldItem >> 10) & 1;
             break;
+        }
         case MON_DATA_EXP:
             SET32(substruct0->experience);
             break;
