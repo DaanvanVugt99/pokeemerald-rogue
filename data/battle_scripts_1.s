@@ -11402,6 +11402,13 @@ BattleScript_SleepDustActivates::
 	swapattackerwithtarget
 	return
 
+BattleScript_DirgeActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNWASMADEDROWSY
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_StaticChargeActivates::
 	setstatchanger STAT_SPEED, 1, FALSE
 	copybyte gEffectBattler, gBattlerTarget
@@ -11561,6 +11568,15 @@ BattleScript_RoyalGardenActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_TERRAINBECOMESGRASSY
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	return
+
+BattleScript_SpringCommandActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TERRAINBECOMESMISTY
 	waitmessage B_WAIT_TIME_LONG
 	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
 	call BattleScript_ActivateTerrainEffects

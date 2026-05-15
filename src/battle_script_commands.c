@@ -11203,6 +11203,21 @@ static void Cmd_various(void)
             return;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SPRING_COMMAND)
+         && battler == gBattlerAttacker
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && CountPartyMonsOfType(battler, TYPE_FLYING, TRUE) > 0
+         && CountPartyMonsOfType(battler, TYPE_FAIRY, TRUE) > 0
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_MISTY_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SPRING_COMMAND);
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_SpringCommandActivates;
+            return;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_WITCHING_HOUR)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()

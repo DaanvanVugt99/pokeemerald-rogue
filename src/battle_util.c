@@ -117,6 +117,7 @@ static bool32 TryUseOctolockCalledMove(u32 battler, u32 target);
 static bool32 TryUseTeaServiceCalledMove(u32 battler);
 static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target);
 static bool32 TryUseShardstormCalledMove(u32 battler, u32 target);
+static bool32 TryUseFalseApplauseCalledMove(u32 battler, u32 target);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
@@ -6815,6 +6816,31 @@ static bool32 TryUseShardstormCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
+static bool32 TryUseFalseApplauseCalledMove(u32 battler, u32 target)
+{
+    if (target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || target == battler
+     || GetBattlerSide(target) == GetBattlerSide(battler))
+    {
+        if (!TryGetOpposingExtraMoveTarget(battler, &target))
+            return FALSE;
+    }
+
+    if (!CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_FALSE_APPLAUSE);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_TORMENT;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static const u16 sVarietyActMoves[] =
 {
     MOVE_GROWL,
@@ -11645,8 +11671,7 @@ if (triggeringAbility != ABILITY_NONE)
              && TARGET_TURN_DAMAGED
              && CanBePoisoned(gBattlerTarget, gBattlerAttacker)
              && IsMoveMakingContact(move, gBattlerAttacker)
-             && (gLastUsedAbility == ABILITY_TOXIC_MONSOON
-              || RandomWeighted(RNG_POISON_POINT, 2, 1)))
+             && (gLastUsedAbility == ABILITY_TOXIC_MONSOON || RandomWeighted(RNG_POISON_POINT, 2, 1)))
             {
                 if (gLastUsedAbility == ABILITY_TOXIC_MONSOON)
                     SetBattlerTriggeredAbility(battler, gLastUsedAbility);
@@ -11906,6 +11931,24 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_BARBED_MONSOON)
+         && IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && CanBePoisoned(moveEndTarget, moveEndAttacker)
+         && IsMoveMakingContact(move, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BARBED_MONSOON);
+            gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_POISON;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, ABILITY_BARBED_MONSOON);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_SLEEP_DUST)
@@ -13086,6 +13129,24 @@ if (triggeringAbility != ABILITY_NONE)
             break;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BARBED_MONSOON)
+         && IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && CanBePoisoned(gBattlerAttacker, gBattlerTarget)
+         && IsMoveMakingContact(move, gBattlerAttacker)
+         && TARGET_TURN_DAMAGED)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BARBED_MONSOON);
+            gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, ABILITY_BARBED_MONSOON);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_VOLCANIC_RAGE)
          && moveType == TYPE_FIRE
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -13474,6 +13535,77 @@ if (triggeringAbility != ABILITY_NONE)
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
          && TryUseShardstormCalledMove(battler, gBattlerTarget))
         {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FALSE_APPLAUSE)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && IsMoveMakingContact(move, battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && gBattleScripting.savedDmg != 0
+         && IsFinalMultiHitStrike()
+         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_TORMENT)
+         && !IsDynamaxed(gBattlerTarget)
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseFalseApplauseCalledMove(battler, gBattlerTarget))
+            effect++;
+
+        if (HasBattlerAbility(battler, ABILITY_DIRGE)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && gBattleMoves[move].soundMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && gBattleScripting.savedDmg != 0
+         && IsFinalMultiHitStrike()
+         && !(gStatuses3[gBattlerTarget] & STATUS3_YAWN)
+         && CanSleep(gBattlerTarget)
+         && !UproarWakeUpCheck(gBattlerTarget)
+         && !IsBattlerTerrainAffected(gBattlerTarget, STATUS_FIELD_ELECTRIC_TERRAIN | STATUS_FIELD_MISTY_TERRAIN))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DIRGE);
+            gStatuses3[gBattlerTarget] |= STATUS3_YAWN_TURN(2);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_DirgeActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SHOWSTOPPER)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && gBattleMoves[move].danceMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && gBattleScripting.savedDmg != 0
+         && IsFinalMultiHitStrike()
+         && (CompareStat(gBattlerTarget, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN)
+          || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SHOWSTOPPER);
+            gBattleScripting.moveEffect = MOVE_EFFECT_SPD_MINUS_1;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
 
