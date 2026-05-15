@@ -21623,6 +21623,15 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         return UQ_4_12(0.5);
     }
 
+    if (HasBattlerAbility(battlerDef, ABILITY_FROZEN_BASTION)
+     && typeEffectivenessModifier >= UQ_4_12(2.0)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
+    {
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_FROZEN_BASTION);
+        return UQ_4_12(0.65);
+    }
+
     if (HasBattlerAbility(battlerDef, ABILITY_HYDRATION)
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
         return UQ_4_12(0.8);
@@ -22053,7 +22062,21 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
     if (HasSeaGuardianResistances(battlerDef))
         modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
 
-    if (moveType == TYPE_DARK
+    if (moveType == TYPE_GHOST
+     && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)
+     && DoesPartyShareTypeWithBattler(battlerDef))
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_SHADOWMERE);
+            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_SHADOWMERE);
+        }
+    }
+    else if (moveType == TYPE_DARK
      && HasBattlerAbility(battlerDef, ABILITY_MOONVEIL)
      && !gDisableStructs[battlerDef].uniqueOncePerSwitchInUsed)
     {
@@ -22288,7 +22311,21 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
     if (HasSeaGuardianResistances(battlerDef))
         modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
 
-    if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)
+    if (moveType == TYPE_GHOST
+     && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)
+     && DoesPartyShareTypeWithBattler(battlerDef))
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            gLastUsedAbility = ABILITY_SHADOWMERE;
+            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_SHADOWMERE);
+        }
+    }
+    else if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)
     {
         modifier = UQ_4_12(1.0);
         if (B_GLARE_GHOST < GEN_4 && move == MOVE_GLARE && IS_BATTLER_OF_TYPE(battlerDef, TYPE_GHOST))
