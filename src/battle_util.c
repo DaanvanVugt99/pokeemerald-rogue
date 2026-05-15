@@ -1195,6 +1195,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[] =
     [ABILITY_DISGUISE] = 1,
     [ABILITY_FLUFFY] = 1,
     [ABILITY_QUEENLY_MAJESTY] = 1,
+    [ABILITY_GRIDLOCK] = 1,
     [ABILITY_WATER_BUBBLE] = 1,
     [ABILITY_MIRROR_ARMOR] = 1,
     [ABILITY_PUNK_ROCK] = 1,
@@ -4325,6 +4326,24 @@ u8 AtkCanceller_UnableToUseMove2(void)
             {
                 CancelMultiTurnMoves(gBattlerAttacker);
                 gBattlescriptCurrInstr = BattleScript_MoveUsedPsychicTerrainPrevents;
+                gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
+                effect = 1;
+            }
+            gBattleStruct->atkCancellerTracker++;
+            break;
+        case CANCELLER_GRIDLOCK:
+            if (HasBattlerAbility(gBattlerTarget, ABILITY_GRIDLOCK)
+                && IsBattlerTerrainAffected(gBattlerTarget, STATUS_FIELD_ELECTRIC_TERRAIN)
+                && GetChosenMovePriority(gBattlerAttacker) > 0
+                && gBattleMoves[gCurrentMove].target != MOVE_TARGET_ALL_BATTLERS
+                && gBattleMoves[gCurrentMove].target != MOVE_TARGET_OPPONENTS_FIELD
+                && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gBattlerTarget))
+            {
+                CancelMultiTurnMoves(gBattlerAttacker);
+                SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_GRIDLOCK);
+                if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
+                    gHitMarker |= HITMARKER_NO_PPDEDUCT;
+                gBattlescriptCurrInstr = BattleScript_DazzlingProtected;
                 gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
                 effect = 1;
             }
@@ -15009,7 +15028,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SCREEN_TEST)
+        if ((HasBattlerAbility(battler, ABILITY_SCREEN_TEST) || HasBattlerAbility(battler, ABILITY_REGAL_AEGIS))
          && IS_MOVE_STATUS(move)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -15017,10 +15036,13 @@ if (triggeringAbility != ABILITY_NONE)
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseSelfExtraMove(battler))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_SCREEN_TEST);
+            u32 ability = HasBattlerAbility(battler, ABILITY_REGAL_AEGIS) ? ABILITY_REGAL_AEGIS : ABILITY_SCREEN_TEST;
+            u32 rng = ability == ABILITY_REGAL_AEGIS ? RNG_ROGUE_REGAL_AEGIS : RNG_ROGUE_SCREEN_TEST;
+
+            SetBattlerTriggeredAbility(battler, ability);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
-            gCalledMove = RandomWeighted(RNG_ROGUE_SCREEN_TEST, 1, 1) == 0 ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
+            gCalledMove = RandomWeighted(rng, 1, 1) == 0 ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
@@ -20847,9 +20869,8 @@ static bool32 CanEvolve(u32 species)
     return FALSE;
 }
 
-static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, bool32 isCrit, bool32 updateFlags, u32 atkAbility, u32 defAbility, u32 holdEffectDef, u32 weather)
+static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, bool32 isCrit, bool32 updateFlags, u32 atkAbility, u32 defAbility, u32 holdEffectDef, u32 weather, bool32 usesDefStat)
 {
-    bool32 usesDefStat;
     u8 defStage;
     u32 defStat, def, spDef;
     uq4_12_t modifier;
@@ -20865,34 +20886,15 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         spDef = gBattleMons[battlerDef].spDefense;
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_SPELLFIST) && gBattleMoves[move].punchingMove)
-    {
-        defStat = spDef;
-        defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
-        usesDefStat = FALSE;
-    }
-    else if (HasBattlerAbility(battlerAtk, ABILITY_GEODE_HEART)
-          && gDisableStructs[battlerAtk].uniquePersistentStateActive
-          && moveType == TYPE_ROCK
-          && !IS_MOVE_STATUS(move))
-    {
-        defStat = spDef;
-        defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
-        usesDefStat = FALSE;
-        if (updateFlags)
-            gProtectStructs[battlerAtk].uniqueAbilityActive = TRUE;
-    }
-    else if (gBattleMoves[move].effect == EFFECT_PSYSHOCK || IS_MOVE_PHYSICAL(move)) // uses defense stat instead of sp.def
+    if (usesDefStat)
     {
         defStat = def;
         defStage = gBattleMons[battlerDef].statStages[STAT_DEF];
-        usesDefStat = TRUE;
     }
-    else // is special
+    else
     {
         defStat = spDef;
         defStage = gBattleMons[battlerDef].statStages[STAT_SPDEF];
-        usesDefStat = FALSE;
     }
 
     // Self-destruct / Explosion cut defense in half
@@ -21068,6 +21070,46 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.1));
 
     return uq4_12_multiply_by_int_half_down(modifier, defStat);
+}
+
+static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, bool32 isCrit, bool32 updateFlags, u32 atkAbility, u32 defAbility, u32 holdEffectDef, u32 weather)
+{
+    bool32 usesDefStat;
+
+    if (HasBattlerAbility(battlerAtk, ABILITY_SPELLFIST) && gBattleMoves[move].punchingMove)
+    {
+        usesDefStat = FALSE;
+    }
+    else if (HasBattlerAbility(battlerAtk, ABILITY_GEODE_HEART)
+          && gDisableStructs[battlerAtk].uniquePersistentStateActive
+          && moveType == TYPE_ROCK
+          && !IS_MOVE_STATUS(move))
+    {
+        usesDefStat = FALSE;
+        if (updateFlags)
+            gProtectStructs[battlerAtk].uniqueAbilityActive = TRUE;
+    }
+    else if (HasBattlerAbility(battlerAtk, ABILITY_CROWN_OF_FANGS)
+          && moveType == TYPE_DRAGON
+          && !IS_MOVE_STATUS(move))
+    {
+        u32 defStat = CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, FALSE, atkAbility, defAbility, holdEffectDef, weather, TRUE);
+        u32 spDefStat = CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, FALSE, atkAbility, defAbility, holdEffectDef, weather, FALSE);
+
+        usesDefStat = defStat <= spDefStat;
+        if (updateFlags)
+            RecordAbilityBattle(battlerAtk, ABILITY_CROWN_OF_FANGS);
+    }
+    else if (gBattleMoves[move].effect == EFFECT_PSYSHOCK || IS_MOVE_PHYSICAL(move)) // uses defense stat instead of sp.def
+    {
+        usesDefStat = TRUE;
+    }
+    else // is special
+    {
+        usesDefStat = FALSE;
+    }
+
+    return CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, atkAbility, defAbility, holdEffectDef, weather, usesDefStat);
 }
 
 // base damage formula before adding any modifiers
