@@ -145,6 +145,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Chesnaught, 1),
         .footprint = gMonFootprint_Chesnaught,
         LEARNSETS(Chesnaught),
+        .formChangeTable = sChesnaughtFormChangeTable,
     },
 #endif //P_FAMILY_CHESPIN
 
@@ -290,6 +291,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Delphox, 0),
         .footprint = gMonFootprint_Delphox,
         LEARNSETS(Delphox),
+        .formChangeTable = sDelphoxFormChangeTable,
     },
 #endif //P_FAMILY_FENNEKIN
 
@@ -439,7 +441,8 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         .abilities = { ABILITY_TORRENT, ABILITY_NONE, ABILITY_PROTEAN },
         .frontAnimId = ANIM_V_STRETCH,
         .backAnimId = BACK_ANIM_JOLT_RIGHT,
-    },
+           .formChangeTable = sGreninjaFormChangeTable,
+ },
 
     [SPECIES_GRENINJA_BATTLE_BOND] =
     {
@@ -1148,6 +1151,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON_FEMALE(Pyroar, 2),
         .footprint = gMonFootprint_Pyroar,
         LEARNSETS(Pyroar),
+        .formChangeTable = sPyroarFormChangeTable,
     },
 #endif //P_FAMILY_LITLEO
 
@@ -1355,6 +1359,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         BACK_PIC(FloetteEternalFlower, 64, 64),
         .backPicYOffset = 2,
         LEARNSETS(FloetteEternalFlower),
+        .formChangeTable = sFloetteEternalFormChangeTable,
     },
 
 #define FLORGES_MISC_INFO(Form, iconPal)                                        \
@@ -1879,6 +1884,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         PALETTES(MeowsticMale),
         ICON(MeowsticMale, 0),
         LEARNSETS(MeowsticMale),
+        .formChangeTable = sMeowsticMFormChangeTable,
     },
 
     [SPECIES_MEOWSTIC_FEMALE] =
@@ -1898,6 +1904,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         PALETTES(MeowsticFemale),
         ICON(MeowsticFemale, 0),
         LEARNSETS(MeowsticFemale),
+        .formChangeTable = sMeowsticFFormChangeTable,
     },
 #endif //P_FAMILY_ESPURR
 
@@ -2377,6 +2384,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Malamar, 2),
         .footprint = gMonFootprint_Malamar,
         LEARNSETS(Malamar),
+        .formChangeTable = sMalamarFormChangeTable,
     },
 #endif //P_FAMILY_INKAY
 
@@ -2475,6 +2483,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Barbaracle, 2),
         .footprint = gMonFootprint_Barbaracle,
         LEARNSETS(Barbaracle),
+        .formChangeTable = sBarbaracleFormChangeTable,
     },
 #endif //P_FAMILY_BINACLE
 
@@ -2572,6 +2581,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Dragalge, 5),
         .footprint = gMonFootprint_Dragalge,
         LEARNSETS(Dragalge),
+        .formChangeTable = sDragalgeFormChangeTable,
     },
 #endif //P_FAMILY_SKRELP
 
@@ -3017,6 +3027,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Hawlucha, 0),
         .footprint = gMonFootprint_Hawlucha,
         LEARNSETS(Hawlucha),
+        .formChangeTable = sHawluchaFormChangeTable,
     },
 #endif //P_FAMILY_HAWLUCHA
 

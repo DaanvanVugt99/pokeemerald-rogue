@@ -3458,6 +3458,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         ICON(Falinks, 0),
         .footprint = gMonFootprint_Falinks,
         LEARNSETS(Falinks),
+        .formChangeTable = sFalinksFormChangeTable,
     },
 #endif //P_FAMILY_FALINKS
 

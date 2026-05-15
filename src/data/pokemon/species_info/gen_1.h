@@ -2139,6 +2139,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
         PALETTES(Raichu),
         ICON(Raichu, 0),
         LEARNSETS(Raichu),
+        .formChangeTable = sRaichuFormChangeTable,
     },
 
 #if P_ALOLAN_FORMS
@@ -2807,6 +2808,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
         ICON(Clefable, 0),
         .footprint = gMonFootprint_Clefable,
         LEARNSETS(Clefable),
+        .formChangeTable = sClefableFormChangeTable,
     },
 #endif //P_FAMILY_CLEFAIRY
 
@@ -5337,6 +5339,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
         ICON(Victreebel, 1),
         .footprint = gMonFootprint_Victreebel,
         LEARNSETS(Victreebel),
+        .formChangeTable = sVictreebelFormChangeTable,
     },
 #endif //P_FAMILY_BELLSPROUT
 
@@ -9261,6 +9264,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
         ICON(Starmie, 2),
         .footprint = gMonFootprint_Starmie,
         LEARNSETS(Starmie),
+        .formChangeTable = sStarmieFormChangeTable,
     },
 #endif //P_FAMILY_STARYU
 
@@ -12044,6 +12048,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
         ICON(Dragonite, 2),
         .footprint = gMonFootprint_Dragonite,
         LEARNSETS(Dragonite),
+        .formChangeTable = sDragoniteFormChangeTable,
     },
 #endif //P_FAMILY_DRATINI
 

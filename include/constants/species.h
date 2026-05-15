@@ -1776,7 +1776,58 @@
 #define SPECIES_WOBBUFFET_PUNCHING                      SPECIES_ROGUE_START + 1
 #define SPECIES_PIKIN_MEGA                              SPECIES_ROGUE_START + 2
 
-#define SPECIES_EGG SPECIES_PIKIN_MEGA + 1
+// Legends Z-A and Mega Dimension Mega Evolutions
+#define SPECIES_CLEFABLE_MEGA                           SPECIES_PIKIN_MEGA + 1
+#define SPECIES_VICTREEBEL_MEGA                         SPECIES_PIKIN_MEGA + 2
+#define SPECIES_STARMIE_MEGA                            SPECIES_PIKIN_MEGA + 3
+#define SPECIES_DRAGONITE_MEGA                          SPECIES_PIKIN_MEGA + 4
+#define SPECIES_MEGANIUM_MEGA                           SPECIES_PIKIN_MEGA + 5
+#define SPECIES_FERALIGATR_MEGA                         SPECIES_PIKIN_MEGA + 6
+#define SPECIES_SKARMORY_MEGA                           SPECIES_PIKIN_MEGA + 7
+#define SPECIES_FROSLASS_MEGA                           SPECIES_PIKIN_MEGA + 8
+#define SPECIES_EMBOAR_MEGA                             SPECIES_PIKIN_MEGA + 9
+#define SPECIES_EXCADRILL_MEGA                          SPECIES_PIKIN_MEGA + 10
+#define SPECIES_SCOLIPEDE_MEGA                          SPECIES_PIKIN_MEGA + 11
+#define SPECIES_SCRAFTY_MEGA                            SPECIES_PIKIN_MEGA + 12
+#define SPECIES_EELEKTROSS_MEGA                         SPECIES_PIKIN_MEGA + 13
+#define SPECIES_CHANDELURE_MEGA                         SPECIES_PIKIN_MEGA + 14
+#define SPECIES_CHESNAUGHT_MEGA                         SPECIES_PIKIN_MEGA + 15
+#define SPECIES_DELPHOX_MEGA                            SPECIES_PIKIN_MEGA + 16
+#define SPECIES_GRENINJA_MEGA                           SPECIES_PIKIN_MEGA + 17
+#define SPECIES_PYROAR_MEGA                             SPECIES_PIKIN_MEGA + 18
+#define SPECIES_MALAMAR_MEGA                            SPECIES_PIKIN_MEGA + 19
+#define SPECIES_DRAGALGE_MEGA                           SPECIES_PIKIN_MEGA + 20
+#define SPECIES_HAWLUCHA_MEGA                           SPECIES_PIKIN_MEGA + 21
+#define SPECIES_FLOETTE_MEGA                            SPECIES_PIKIN_MEGA + 22
+#define SPECIES_BARBARACLE_MEGA                         SPECIES_PIKIN_MEGA + 23
+#define SPECIES_ZYGARDE_MEGA                            SPECIES_PIKIN_MEGA + 24
+#define SPECIES_DRAMPA_MEGA                             SPECIES_PIKIN_MEGA + 25
+#define SPECIES_FALINKS_MEGA                            SPECIES_PIKIN_MEGA + 26
+#define SPECIES_HEATRAN_MEGA                            SPECIES_PIKIN_MEGA + 27
+#define SPECIES_DARKRAI_MEGA                            SPECIES_PIKIN_MEGA + 28
+#define SPECIES_ZERAORA_MEGA                            SPECIES_PIKIN_MEGA + 29
+#define SPECIES_RAICHU_MEGA_X                           SPECIES_PIKIN_MEGA + 30
+#define SPECIES_RAICHU_MEGA_Y                           SPECIES_PIKIN_MEGA + 31
+#define SPECIES_CHIMECHO_MEGA                           SPECIES_PIKIN_MEGA + 32
+#define SPECIES_ABSOL_MEGA_Z                            SPECIES_PIKIN_MEGA + 33
+#define SPECIES_STARAPTOR_MEGA                          SPECIES_PIKIN_MEGA + 34
+#define SPECIES_GARCHOMP_MEGA_Z                         SPECIES_PIKIN_MEGA + 35
+#define SPECIES_LUCARIO_MEGA_Z                          SPECIES_PIKIN_MEGA + 36
+#define SPECIES_GOLURK_MEGA                             SPECIES_PIKIN_MEGA + 37
+#define SPECIES_MEOWSTIC_M_MEGA                         SPECIES_PIKIN_MEGA + 38
+#define SPECIES_MEOWSTIC_F_MEGA                         SPECIES_PIKIN_MEGA + 39
+#define SPECIES_CRABOMINABLE_MEGA                       SPECIES_PIKIN_MEGA + 40
+#define SPECIES_GOLISOPOD_MEGA                          SPECIES_PIKIN_MEGA + 41
+#define SPECIES_MAGEARNA_MEGA                           SPECIES_PIKIN_MEGA + 42
+#define SPECIES_MAGEARNA_ORIGINAL_MEGA                  SPECIES_PIKIN_MEGA + 43
+#define SPECIES_SCOVILLAIN_MEGA                         SPECIES_PIKIN_MEGA + 44
+#define SPECIES_BAXCALIBUR_MEGA                         SPECIES_PIKIN_MEGA + 45
+#define SPECIES_TATSUGIRI_CURLY_MEGA                    SPECIES_PIKIN_MEGA + 46
+#define SPECIES_TATSUGIRI_DROOPY_MEGA                   SPECIES_PIKIN_MEGA + 47
+#define SPECIES_TATSUGIRI_STRETCHY_MEGA                 SPECIES_PIKIN_MEGA + 48
+#define SPECIES_GLIMMORA_MEGA                           SPECIES_PIKIN_MEGA + 49
+
+#define SPECIES_EGG SPECIES_GLIMMORA_MEGA + 1
 
 #define NUM_SPECIES SPECIES_EGG
 

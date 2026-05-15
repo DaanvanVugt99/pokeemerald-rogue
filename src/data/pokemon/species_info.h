@@ -264,6 +264,7 @@ const struct SpeciesInfo gSpeciesInfo[] =
     #include "species_info/gen_7.h"
     #include "species_info/gen_8.h"
     #include "species_info/gen_9.h"
+    #include "species_info/za_megas.h"
 
     [SPECIES_EGG] =
     {

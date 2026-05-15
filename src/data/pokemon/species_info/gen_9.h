@@ -2379,6 +2379,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         ICON(Scovillain, 1),
         //.footprint = gMonFootprint_Scovillain,
         LEARNSETS(Scovillain),
+        .formChangeTable = sScovillainFormChangeTable,
     },
 #endif //P_FAMILY_CAPSAKID
 
@@ -3286,6 +3287,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         ICON(Glimmora, 0),
         //.footprint = gMonFootprint_Glimmora,
         LEARNSETS(Glimmora),
+        .formChangeTable = sGlimmoraFormChangeTable,
     },
 #endif //P_FAMILY_GLIMMET
 
@@ -3682,7 +3684,8 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         BACK_PIC(TatsugiriCurly, 64, 64),
         PALETTES(TatsugiriCurly),
         ICON(TatsugiriCurly, 0),
-    },
+           .formChangeTable = sTatsugiriCurlyFormChangeTable,
+ },
 
     [SPECIES_TATSUGIRI_DROOPY] =
     {
@@ -3697,7 +3700,8 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         BACK_PIC(TatsugiriDroopy, 64, 64),
         PALETTES(TatsugiriDroopy),
         ICON(TatsugiriDroopy, 0),
-    },
+           .formChangeTable = sTatsugiriDroopyFormChangeTable,
+ },
 
     [SPECIES_TATSUGIRI_STRETCHY] =
     {
@@ -3712,7 +3716,8 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         BACK_PIC(TatsugiriStretchy, 64, 64),
         PALETTES(TatsugiriStretchy),
         ICON(TatsugiriStretchy, 0),
-    },
+           .formChangeTable = sTatsugiriStretchyFormChangeTable,
+ },
 #endif //P_FAMILY_TATSUGIRI
 
 #if P_FAMILY_GREAT_TUSK
@@ -4461,6 +4466,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         ICON(Baxcalibur, 0),
         //.footprint = gMonFootprint_Baxcalibur,
         LEARNSETS(Baxcalibur),
+        .formChangeTable = sBaxcaliburFormChangeTable,
     },
 #endif //P_FAMILY_FRIGIBAX
 

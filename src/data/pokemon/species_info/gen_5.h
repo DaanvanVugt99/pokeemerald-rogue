@@ -341,6 +341,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         ICON(Emboar, 0),
         .footprint = gMonFootprint_Emboar,
         LEARNSETS(Emboar),
+        .formChangeTable = sEmboarFormChangeTable,
     },
 #endif //P_FAMILY_TEPIG
 
@@ -1852,6 +1853,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         ICON(Excadrill, 0),
         .footprint = gMonFootprint_Excadrill,
         LEARNSETS(Excadrill),
+        .formChangeTable = sExcadrillFormChangeTable,
     },
 #endif //P_FAMILY_DRILBUR
 
@@ -2647,6 +2649,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         ICON(Scolipede, 2),
         .footprint = gMonFootprint_Scolipede,
         LEARNSETS(Scolipede),
+        .formChangeTable = sScolipedeFormChangeTable,
     },
 #endif //P_FAMILY_VENIPEDE
 
@@ -3711,6 +3714,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         ICON(Scrafty, 0),
         .footprint = gMonFootprint_Scrafty,
         LEARNSETS(Scrafty),
+        .formChangeTable = sScraftyFormChangeTable,
     },
 #endif //P_FAMILY_SCRAGGY
 
@@ -6164,6 +6168,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         ICON(Eelektross, 0),
         .footprint = gMonFootprint_Eelektross,
         LEARNSETS(Eelektross),
+        .formChangeTable = sEelektrossFormChangeTable,
     },
 #endif //P_FAMILY_TYNAMO
 
@@ -6421,6 +6426,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         ICON(Chandelure, 2),
         .footprint = gMonFootprint_Chandelure,
         LEARNSETS(Chandelure),
+        .formChangeTable = sChandelureFormChangeTable,
     },
 #endif //P_FAMILY_LITWICK
 
@@ -7152,6 +7158,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         ICON(Golurk, 0),
         .footprint = gMonFootprint_Golurk,
         LEARNSETS(Golurk),
+        .formChangeTable = sGolurkFormChangeTable,
     },
 #endif //P_FAMILY_GOLETT
 

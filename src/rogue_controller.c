@@ -2453,7 +2453,7 @@ bool8 Rogue_IsItemEnabled(u16 itemId)
                 return TRUE;
         }
 
-        if(itemId >= ITEM_RED_ORB && itemId <= ITEM_DIANCITE)
+        if((itemId >= ITEM_RED_ORB && itemId <= ITEM_BLUE_ORB) || IS_MEGA_STONE_ITEM(itemId))
         {
             if(Rogue_IsRunActive())
                 return IsMegaEvolutionEnabled();
@@ -5741,7 +5741,7 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
                                 break;
 #ifdef ROGUE_EXPANSION
                             case POCKET_STONES:
-                                if(itemId >= ITEM_RED_ORB && itemId <= ITEM_DIANCITE)
+                                if((itemId >= ITEM_RED_ORB && itemId <= ITEM_BLUE_ORB) || IS_MEGA_STONE_ITEM(itemId))
                                     objectEvents[write].graphicsId = OBJ_EVENT_GFX_ITEM_MEGA_STONE;
                                 else if(itemId >= ITEM_NORMALIUM_Z && itemId <= ITEM_ULTRANECROZIUM_Z)
                                     objectEvents[write].graphicsId = OBJ_EVENT_GFX_ITEM_Z_CRYSTAL;

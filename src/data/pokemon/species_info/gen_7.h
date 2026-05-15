@@ -968,6 +968,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Crabominable, 2),
         .footprint = gMonFootprint_Crabominable,
         LEARNSETS(Crabominable),
+        .formChangeTable = sCrabominableFormChangeTable,
     },
 #endif //P_FAMILY_CRABRAWLER
 
@@ -2530,6 +2531,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Golisopod, 2),
         .footprint = gMonFootprint_Golisopod,
         LEARNSETS(Golisopod),
+        .formChangeTable = sGolisopodFormChangeTable,
     },
 #endif //P_FAMILY_WIMPOD
 
@@ -3212,6 +3214,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Drampa, 0),
         .footprint = gMonFootprint_Drampa,
         LEARNSETS(Drampa),
+        .formChangeTable = sDrampaFormChangeTable,
     },
 #endif //P_FAMILY_DRAMPA
 
@@ -4399,7 +4402,8 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
             "than 500 years ago, can understand human\n"
             "speech but cannot itself speak. Its true\n"
             "self is its Soul-Heart, an artificial soul."),
-    },
+           .formChangeTable = sMagearnaFormChangeTable,
+ },
     [SPECIES_MAGEARNA_ORIGINAL_COLOR] =
     {
         MAGEARNA_MISC_INFO(MagearnaOriginalColor),
@@ -4409,7 +4413,8 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
             "years ago. Its body is nothing more\n"
             "than a container-its artificial heart\n"
             "is the actual life-form."),
-    },
+           .formChangeTable = sMagearnaOriginalColorFormChangeTable,
+ },
 #endif //P_FAMILY_MAGEARNA
 
 #if P_FAMILY_MARSHADOW
@@ -4709,6 +4714,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Zeraora, 0),
         .footprint = gMonFootprint_Zeraora,
         LEARNSETS(Zeraora),
+        .formChangeTable = sZeraoraFormChangeTable,
     },
 #endif //P_FAMILY_ZERAORA
 

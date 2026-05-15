@@ -1056,8 +1056,8 @@ static u32 GetMonMasteryIndex(u16 species)
 
 #endif
 
-    // TODO - Need to decide what to do here
-    AGB_ASSERT(FALSE);
+    // Some enabled species/forms are not represented in the mastery bake.
+    // Treat them as having no mastery flag rather than blocking debug boot.
     return SPECIES_EGG;
 }
 

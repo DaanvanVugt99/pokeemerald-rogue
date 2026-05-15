@@ -4094,6 +4094,70 @@ const struct Item gItems[] =
         .flingPower = 80,
     },
 
+#define ZA_MEGA_STONE_ITEM(item, stoneName, monName)     \
+    [item] =                                             \
+    {                                                    \
+        .name = _(stoneName),                            \
+        .price = 0,                                      \
+        .holdEffect = HOLD_EFFECT_MEGA_STONE,            \
+        .description = COMPOUND_STRING(                  \
+            "This stone enables\n"                       \
+            monName " to Mega\n"                         \
+            "Evolve in battle."),                        \
+        .pocket = POCKET_ITEMS,                          \
+        .type = ITEM_USE_BAG_MENU,                       \
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,    \
+        .flingPower = 80,                                \
+    }
+
+    ZA_MEGA_STONE_ITEM(ITEM_CLEFABLITE, "Clefablite", "Clefable"),
+    ZA_MEGA_STONE_ITEM(ITEM_VICTREEBELITE, "Victreebelite", "Victreebel"),
+    ZA_MEGA_STONE_ITEM(ITEM_STARMINITE, "Starminite", "Starmie"),
+    ZA_MEGA_STONE_ITEM(ITEM_DRAGONINITE, "Dragoninite", "Dragonite"),
+    ZA_MEGA_STONE_ITEM(ITEM_MEGANIUMITE, "Meganiumite", "Meganium"),
+    ZA_MEGA_STONE_ITEM(ITEM_FERALIGITE, "Feraligite", "Feraligatr"),
+    ZA_MEGA_STONE_ITEM(ITEM_SKARMORITE, "Skarmorite", "Skarmory"),
+    ZA_MEGA_STONE_ITEM(ITEM_FROSLASSITE, "Froslassite", "Froslass"),
+    ZA_MEGA_STONE_ITEM(ITEM_EMBOARITE, "Emboarite", "Emboar"),
+    ZA_MEGA_STONE_ITEM(ITEM_EXCADRITE, "Excadrite", "Excadrill"),
+    ZA_MEGA_STONE_ITEM(ITEM_SCOLIPITE, "Scolipite", "Scolipede"),
+    ZA_MEGA_STONE_ITEM(ITEM_SCRAFTINITE, "Scraftinite", "Scrafty"),
+    ZA_MEGA_STONE_ITEM(ITEM_EELEKTROSSITE, "Eelektrossite", "Eelektross"),
+    ZA_MEGA_STONE_ITEM(ITEM_CHANDELURITE, "Chandelurite", "Chandelure"),
+    ZA_MEGA_STONE_ITEM(ITEM_CHESNAUGHTITE, "Chesnaughtite", "Chesnaught"),
+    ZA_MEGA_STONE_ITEM(ITEM_DELPHOXITE, "Delphoxite", "Delphox"),
+    ZA_MEGA_STONE_ITEM(ITEM_GRENINJITE, "Greninjite", "Greninja"),
+    ZA_MEGA_STONE_ITEM(ITEM_PYROARITE, "Pyroarite", "Pyroar"),
+    ZA_MEGA_STONE_ITEM(ITEM_FLOETTITE, "Floettite", "Floette"),
+    ZA_MEGA_STONE_ITEM(ITEM_MALAMARITE, "Malamarite", "Malamar"),
+    ZA_MEGA_STONE_ITEM(ITEM_BARBARACITE, "Barbaracite", "Barbaracle"),
+    ZA_MEGA_STONE_ITEM(ITEM_DRAGALGITE, "Dragalgite", "Dragalge"),
+    ZA_MEGA_STONE_ITEM(ITEM_HAWLUCHANITE, "Hawluchanite", "Hawlucha"),
+    ZA_MEGA_STONE_ITEM(ITEM_ZYGARDITE, "Zygardite", "Zygarde"),
+    ZA_MEGA_STONE_ITEM(ITEM_DRAMPANITE, "Drampanite", "Drampa"),
+    ZA_MEGA_STONE_ITEM(ITEM_FALINKSITE, "Falinksite", "Falinks"),
+    ZA_MEGA_STONE_ITEM(ITEM_HEATRANITE, "Heatranite", "Heatran"),
+    ZA_MEGA_STONE_ITEM(ITEM_DARKRANITE, "Darkranite", "Darkrai"),
+    ZA_MEGA_STONE_ITEM(ITEM_ZERAORITE, "Zeraorite", "Zeraora"),
+    ZA_MEGA_STONE_ITEM(ITEM_RAICHUNITE_X, "Raichunite X", "Raichu"),
+    ZA_MEGA_STONE_ITEM(ITEM_RAICHUNITE_Y, "Raichunite Y", "Raichu"),
+    ZA_MEGA_STONE_ITEM(ITEM_CHIMECHITE, "Chimechite", "Chimecho"),
+    ZA_MEGA_STONE_ITEM(ITEM_ABSOLITE_Z, "Absolite Z", "Absol"),
+    ZA_MEGA_STONE_ITEM(ITEM_STARAPTITE, "Staraptite", "Staraptor"),
+    ZA_MEGA_STONE_ITEM(ITEM_GARCHOMPITE_Z, "Garchompite Z", "Garchomp"),
+    ZA_MEGA_STONE_ITEM(ITEM_LUCARIONITE_Z, "Lucarionite Z", "Lucario"),
+    ZA_MEGA_STONE_ITEM(ITEM_GOLURKITE, "Golurkite", "Golurk"),
+    ZA_MEGA_STONE_ITEM(ITEM_MEOWSTICITE, "Meowsticite", "Meowstic"),
+    ZA_MEGA_STONE_ITEM(ITEM_CRABOMINITE, "Crabominite", "Crabominable"),
+    ZA_MEGA_STONE_ITEM(ITEM_GOLISOPITE, "Golisopite", "Golisopod"),
+    ZA_MEGA_STONE_ITEM(ITEM_MAGEARNITE, "Magearnite", "Magearna"),
+    ZA_MEGA_STONE_ITEM(ITEM_SCOVILLAINITE, "Scovillainite", "Scovillain"),
+    ZA_MEGA_STONE_ITEM(ITEM_BAXCALIBRITE, "Baxcalibrite", "Baxcalibur"),
+    ZA_MEGA_STONE_ITEM(ITEM_TATSUGIRINITE, "Tatsugirinite", "Tatsugiri"),
+    ZA_MEGA_STONE_ITEM(ITEM_GLIMMORANITE, "Glimmoranite", "Glimmora"),
+
+#undef ZA_MEGA_STONE_ITEM
+
 // Gems
 
     [ITEM_NORMAL_GEM] =

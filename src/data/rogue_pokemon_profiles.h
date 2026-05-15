@@ -315807,4 +315807,396 @@ struct RoguePokemonProfile const gRoguePokemonProfiles[NUM_SPECIES] =
 		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_MAREEP),
 		.monFlags = MON_FLAGS_SPECIES_MAREEP,
 	},
+	[SPECIES_CLEFABLE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CLEFABLE,
+		.tutorMoves = sTutorMoves_SPECIES_CLEFABLE,
+		.competitiveSets = sCompetitiveSets_SPECIES_CLEFABLE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CLEFABLE),
+		.monFlags = MON_FLAGS_SPECIES_CLEFABLE,
+	},
+	[SPECIES_VICTREEBEL_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_VICTREEBEL,
+		.tutorMoves = sTutorMoves_SPECIES_VICTREEBEL,
+		.competitiveSets = sCompetitiveSets_SPECIES_VICTREEBEL,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_VICTREEBEL),
+		.monFlags = MON_FLAGS_SPECIES_VICTREEBEL,
+	},
+	[SPECIES_STARMIE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_STARMIE,
+		.tutorMoves = sTutorMoves_SPECIES_STARMIE,
+		.competitiveSets = sCompetitiveSets_SPECIES_STARMIE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_STARMIE),
+		.monFlags = MON_FLAGS_SPECIES_STARMIE,
+	},
+	[SPECIES_DRAGONITE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_DRAGONITE,
+		.tutorMoves = sTutorMoves_SPECIES_DRAGONITE,
+		.competitiveSets = sCompetitiveSets_SPECIES_DRAGONITE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_DRAGONITE),
+		.monFlags = MON_FLAGS_SPECIES_DRAGONITE,
+	},
+	[SPECIES_MEGANIUM_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_MEGANIUM,
+		.tutorMoves = sTutorMoves_SPECIES_MEGANIUM,
+		.competitiveSets = sCompetitiveSets_SPECIES_MEGANIUM,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_MEGANIUM),
+		.monFlags = MON_FLAGS_SPECIES_MEGANIUM,
+	},
+	[SPECIES_FERALIGATR_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_FERALIGATR,
+		.tutorMoves = sTutorMoves_SPECIES_FERALIGATR,
+		.competitiveSets = sCompetitiveSets_SPECIES_FERALIGATR,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_FERALIGATR),
+		.monFlags = MON_FLAGS_SPECIES_FERALIGATR,
+	},
+	[SPECIES_SKARMORY_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_SKARMORY,
+		.tutorMoves = sTutorMoves_SPECIES_SKARMORY,
+		.competitiveSets = sCompetitiveSets_SPECIES_SKARMORY,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_SKARMORY),
+		.monFlags = MON_FLAGS_SPECIES_SKARMORY,
+	},
+	[SPECIES_FROSLASS_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_FROSLASS,
+		.tutorMoves = sTutorMoves_SPECIES_FROSLASS,
+		.competitiveSets = sCompetitiveSets_SPECIES_FROSLASS,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_FROSLASS),
+		.monFlags = MON_FLAGS_SPECIES_FROSLASS,
+	},
+	[SPECIES_EMBOAR_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_EMBOAR,
+		.tutorMoves = sTutorMoves_SPECIES_EMBOAR,
+		.competitiveSets = sCompetitiveSets_SPECIES_EMBOAR,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_EMBOAR),
+		.monFlags = MON_FLAGS_SPECIES_EMBOAR,
+	},
+	[SPECIES_EXCADRILL_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_EXCADRILL,
+		.tutorMoves = sTutorMoves_SPECIES_EXCADRILL,
+		.competitiveSets = sCompetitiveSets_SPECIES_EXCADRILL,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_EXCADRILL),
+		.monFlags = MON_FLAGS_SPECIES_EXCADRILL,
+	},
+	[SPECIES_SCOLIPEDE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_SCOLIPEDE,
+		.tutorMoves = sTutorMoves_SPECIES_SCOLIPEDE,
+		.competitiveSets = sCompetitiveSets_SPECIES_SCOLIPEDE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_SCOLIPEDE),
+		.monFlags = MON_FLAGS_SPECIES_SCOLIPEDE,
+	},
+	[SPECIES_SCRAFTY_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_SCRAFTY,
+		.tutorMoves = sTutorMoves_SPECIES_SCRAFTY,
+		.competitiveSets = sCompetitiveSets_SPECIES_SCRAFTY,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_SCRAFTY),
+		.monFlags = MON_FLAGS_SPECIES_SCRAFTY,
+	},
+	[SPECIES_EELEKTROSS_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_EELEKTROSS,
+		.tutorMoves = sTutorMoves_SPECIES_EELEKTROSS,
+		.competitiveSets = sCompetitiveSets_SPECIES_EELEKTROSS,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_EELEKTROSS),
+		.monFlags = MON_FLAGS_SPECIES_EELEKTROSS,
+	},
+	[SPECIES_CHANDELURE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CHANDELURE,
+		.tutorMoves = sTutorMoves_SPECIES_CHANDELURE,
+		.competitiveSets = sCompetitiveSets_SPECIES_CHANDELURE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CHANDELURE),
+		.monFlags = MON_FLAGS_SPECIES_CHANDELURE,
+	},
+	[SPECIES_CHESNAUGHT_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CHESNAUGHT,
+		.tutorMoves = sTutorMoves_SPECIES_CHESNAUGHT,
+		.competitiveSets = sCompetitiveSets_SPECIES_CHESNAUGHT,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CHESNAUGHT),
+		.monFlags = MON_FLAGS_SPECIES_CHESNAUGHT,
+	},
+	[SPECIES_DELPHOX_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_DELPHOX,
+		.tutorMoves = sTutorMoves_SPECIES_DELPHOX,
+		.competitiveSets = sCompetitiveSets_SPECIES_DELPHOX,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_DELPHOX),
+		.monFlags = MON_FLAGS_SPECIES_DELPHOX,
+	},
+	[SPECIES_GRENINJA_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_GRENINJA,
+		.tutorMoves = sTutorMoves_SPECIES_GRENINJA,
+		.competitiveSets = sCompetitiveSets_SPECIES_GRENINJA,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_GRENINJA),
+		.monFlags = MON_FLAGS_SPECIES_GRENINJA,
+	},
+	[SPECIES_PYROAR_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_PYROAR,
+		.tutorMoves = sTutorMoves_SPECIES_PYROAR,
+		.competitiveSets = sCompetitiveSets_SPECIES_PYROAR,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_PYROAR),
+		.monFlags = MON_FLAGS_SPECIES_PYROAR,
+	},
+	[SPECIES_MALAMAR_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_MALAMAR,
+		.tutorMoves = sTutorMoves_SPECIES_MALAMAR,
+		.competitiveSets = sCompetitiveSets_SPECIES_MALAMAR,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_MALAMAR),
+		.monFlags = MON_FLAGS_SPECIES_MALAMAR,
+	},
+	[SPECIES_DRAGALGE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_DRAGALGE,
+		.tutorMoves = sTutorMoves_SPECIES_DRAGALGE,
+		.competitiveSets = sCompetitiveSets_SPECIES_DRAGALGE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_DRAGALGE),
+		.monFlags = MON_FLAGS_SPECIES_DRAGALGE,
+	},
+	[SPECIES_HAWLUCHA_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_HAWLUCHA,
+		.tutorMoves = sTutorMoves_SPECIES_HAWLUCHA,
+		.competitiveSets = sCompetitiveSets_SPECIES_HAWLUCHA,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_HAWLUCHA),
+		.monFlags = MON_FLAGS_SPECIES_HAWLUCHA,
+	},
+	[SPECIES_FLOETTE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_FLOETTE,
+		.tutorMoves = sTutorMoves_SPECIES_FLOETTE,
+		.competitiveSets = sCompetitiveSets_SPECIES_FLOETTE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_FLOETTE),
+		.monFlags = MON_FLAGS_SPECIES_FLOETTE,
+	},
+	[SPECIES_BARBARACLE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_BARBARACLE,
+		.tutorMoves = sTutorMoves_SPECIES_BARBARACLE,
+		.competitiveSets = sCompetitiveSets_SPECIES_BARBARACLE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_BARBARACLE),
+		.monFlags = MON_FLAGS_SPECIES_BARBARACLE,
+	},
+	[SPECIES_ZYGARDE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_ZYGARDE,
+		.tutorMoves = sTutorMoves_SPECIES_ZYGARDE,
+		.competitiveSets = sCompetitiveSets_SPECIES_ZYGARDE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_ZYGARDE),
+		.monFlags = MON_FLAGS_SPECIES_ZYGARDE,
+	},
+	[SPECIES_DRAMPA_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_DRAMPA,
+		.tutorMoves = sTutorMoves_SPECIES_DRAMPA,
+		.competitiveSets = sCompetitiveSets_SPECIES_DRAMPA,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_DRAMPA),
+		.monFlags = MON_FLAGS_SPECIES_DRAMPA,
+	},
+	[SPECIES_FALINKS_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_FALINKS,
+		.tutorMoves = sTutorMoves_SPECIES_FALINKS,
+		.competitiveSets = sCompetitiveSets_SPECIES_FALINKS,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_FALINKS),
+		.monFlags = MON_FLAGS_SPECIES_FALINKS,
+	},
+	[SPECIES_HEATRAN_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_HEATRAN,
+		.tutorMoves = sTutorMoves_SPECIES_HEATRAN,
+		.competitiveSets = sCompetitiveSets_SPECIES_HEATRAN,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_HEATRAN),
+		.monFlags = MON_FLAGS_SPECIES_HEATRAN,
+	},
+	[SPECIES_DARKRAI_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_DARKRAI,
+		.tutorMoves = sTutorMoves_SPECIES_DARKRAI,
+		.competitiveSets = sCompetitiveSets_SPECIES_DARKRAI,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_DARKRAI),
+		.monFlags = MON_FLAGS_SPECIES_DARKRAI,
+	},
+	[SPECIES_ZERAORA_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_ZERAORA,
+		.tutorMoves = sTutorMoves_SPECIES_ZERAORA,
+		.competitiveSets = sCompetitiveSets_SPECIES_ZERAORA,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_ZERAORA),
+		.monFlags = MON_FLAGS_SPECIES_ZERAORA,
+	},
+	[SPECIES_RAICHU_MEGA_X] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_RAICHU,
+		.tutorMoves = sTutorMoves_SPECIES_RAICHU,
+		.competitiveSets = sCompetitiveSets_SPECIES_RAICHU,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_RAICHU),
+		.monFlags = MON_FLAGS_SPECIES_RAICHU,
+	},
+	[SPECIES_RAICHU_MEGA_Y] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_RAICHU,
+		.tutorMoves = sTutorMoves_SPECIES_RAICHU,
+		.competitiveSets = sCompetitiveSets_SPECIES_RAICHU,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_RAICHU),
+		.monFlags = MON_FLAGS_SPECIES_RAICHU,
+	},
+	[SPECIES_CHIMECHO_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CHIMECHO,
+		.tutorMoves = sTutorMoves_SPECIES_CHIMECHO,
+		.competitiveSets = sCompetitiveSets_SPECIES_CHIMECHO,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CHIMECHO),
+		.monFlags = MON_FLAGS_SPECIES_CHIMECHO,
+	},
+	[SPECIES_ABSOL_MEGA_Z] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_ABSOL,
+		.tutorMoves = sTutorMoves_SPECIES_ABSOL,
+		.competitiveSets = sCompetitiveSets_SPECIES_ABSOL,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_ABSOL),
+		.monFlags = MON_FLAGS_SPECIES_ABSOL,
+	},
+	[SPECIES_STARAPTOR_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_STARAPTOR,
+		.tutorMoves = sTutorMoves_SPECIES_STARAPTOR,
+		.competitiveSets = sCompetitiveSets_SPECIES_STARAPTOR,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_STARAPTOR),
+		.monFlags = MON_FLAGS_SPECIES_STARAPTOR,
+	},
+	[SPECIES_GARCHOMP_MEGA_Z] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_GARCHOMP,
+		.tutorMoves = sTutorMoves_SPECIES_GARCHOMP,
+		.competitiveSets = sCompetitiveSets_SPECIES_GARCHOMP,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_GARCHOMP),
+		.monFlags = MON_FLAGS_SPECIES_GARCHOMP,
+	},
+	[SPECIES_LUCARIO_MEGA_Z] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_LUCARIO,
+		.tutorMoves = sTutorMoves_SPECIES_LUCARIO,
+		.competitiveSets = sCompetitiveSets_SPECIES_LUCARIO,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_LUCARIO),
+		.monFlags = MON_FLAGS_SPECIES_LUCARIO,
+	},
+	[SPECIES_GOLURK_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_GOLURK,
+		.tutorMoves = sTutorMoves_SPECIES_GOLURK,
+		.competitiveSets = sCompetitiveSets_SPECIES_GOLURK,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_GOLURK),
+		.monFlags = MON_FLAGS_SPECIES_GOLURK,
+	},
+	[SPECIES_MEOWSTIC_M_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_MEOWSTIC,
+		.tutorMoves = sTutorMoves_SPECIES_MEOWSTIC,
+		.competitiveSets = sCompetitiveSets_SPECIES_MEOWSTIC,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_MEOWSTIC),
+		.monFlags = MON_FLAGS_SPECIES_MEOWSTIC,
+	},
+	[SPECIES_MEOWSTIC_F_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_MEOWSTIC_FEMALE,
+		.tutorMoves = sTutorMoves_SPECIES_MEOWSTIC_FEMALE,
+		.competitiveSets = sCompetitiveSets_SPECIES_MEOWSTIC_FEMALE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_MEOWSTIC_FEMALE),
+		.monFlags = MON_FLAGS_SPECIES_MEOWSTIC_FEMALE,
+	},
+	[SPECIES_CRABOMINABLE_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CRABOMINABLE,
+		.tutorMoves = sTutorMoves_SPECIES_CRABOMINABLE,
+		.competitiveSets = sCompetitiveSets_SPECIES_CRABOMINABLE,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CRABOMINABLE),
+		.monFlags = MON_FLAGS_SPECIES_CRABOMINABLE,
+	},
+	[SPECIES_GOLISOPOD_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_GOLISOPOD,
+		.tutorMoves = sTutorMoves_SPECIES_GOLISOPOD,
+		.competitiveSets = sCompetitiveSets_SPECIES_GOLISOPOD,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_GOLISOPOD),
+		.monFlags = MON_FLAGS_SPECIES_GOLISOPOD,
+	},
+	[SPECIES_MAGEARNA_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_MAGEARNA,
+		.tutorMoves = sTutorMoves_SPECIES_MAGEARNA,
+		.competitiveSets = sCompetitiveSets_SPECIES_MAGEARNA,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_MAGEARNA),
+		.monFlags = MON_FLAGS_SPECIES_MAGEARNA,
+	},
+	[SPECIES_MAGEARNA_ORIGINAL_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_MAGEARNA,
+		.tutorMoves = sTutorMoves_SPECIES_MAGEARNA,
+		.competitiveSets = sCompetitiveSets_SPECIES_MAGEARNA,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_MAGEARNA),
+		.monFlags = MON_FLAGS_SPECIES_MAGEARNA,
+	},
+	[SPECIES_SCOVILLAIN_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_SCOVILLAIN,
+		.tutorMoves = sTutorMoves_SPECIES_SCOVILLAIN,
+		.competitiveSets = sCompetitiveSets_SPECIES_SCOVILLAIN,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_SCOVILLAIN),
+		.monFlags = MON_FLAGS_SPECIES_SCOVILLAIN,
+	},
+	[SPECIES_BAXCALIBUR_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_BAXCALIBUR,
+		.tutorMoves = sTutorMoves_SPECIES_BAXCALIBUR,
+		.competitiveSets = sCompetitiveSets_SPECIES_BAXCALIBUR,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_BAXCALIBUR),
+		.monFlags = MON_FLAGS_SPECIES_BAXCALIBUR,
+	},
+	[SPECIES_TATSUGIRI_CURLY_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_TATSUGIRI,
+		.tutorMoves = sTutorMoves_SPECIES_TATSUGIRI,
+		.competitiveSets = sCompetitiveSets_SPECIES_TATSUGIRI,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_TATSUGIRI),
+		.monFlags = MON_FLAGS_SPECIES_TATSUGIRI,
+	},
+	[SPECIES_TATSUGIRI_DROOPY_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_TATSUGIRI_DROOPY,
+		.tutorMoves = sTutorMoves_SPECIES_TATSUGIRI_DROOPY,
+		.competitiveSets = sCompetitiveSets_SPECIES_TATSUGIRI_DROOPY,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_TATSUGIRI_DROOPY),
+		.monFlags = MON_FLAGS_SPECIES_TATSUGIRI_DROOPY,
+	},
+	[SPECIES_TATSUGIRI_STRETCHY_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_TATSUGIRI_STRETCHY,
+		.tutorMoves = sTutorMoves_SPECIES_TATSUGIRI_STRETCHY,
+		.competitiveSets = sCompetitiveSets_SPECIES_TATSUGIRI_STRETCHY,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_TATSUGIRI_STRETCHY),
+		.monFlags = MON_FLAGS_SPECIES_TATSUGIRI_STRETCHY,
+	},
+	[SPECIES_GLIMMORA_MEGA] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_GLIMMORA,
+		.tutorMoves = sTutorMoves_SPECIES_GLIMMORA,
+		.competitiveSets = sCompetitiveSets_SPECIES_GLIMMORA,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_GLIMMORA),
+		.monFlags = MON_FLAGS_SPECIES_GLIMMORA,
+	},
 };

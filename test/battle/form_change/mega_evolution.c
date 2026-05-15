@@ -153,3 +153,51 @@ SINGLE_BATTLE_TEST("Regular Mega Evolution and Fervent Wish Mega Evolution can h
         EXPECT_EQ(opponent->species, SPECIES_GARDEVOIR_MEGA);
     }
 }
+
+SINGLE_BATTLE_TEST("Raichu can Mega Evolve into Mega Raichu X holding Raichunite X")
+{
+    GIVEN {
+        PLAYER(SPECIES_RAICHU) { Item(ITEM_RAICHUNITE_X); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_RAICHU_MEGA_X);
+    }
+}
+
+SINGLE_BATTLE_TEST("Raichu can Mega Evolve into Mega Raichu Y holding Raichunite Y")
+{
+    GIVEN {
+        PLAYER(SPECIES_RAICHU) { Item(ITEM_RAICHUNITE_Y); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_RAICHU_MEGA_Y);
+    }
+}
+
+SINGLE_BATTLE_TEST("Darkrai can Mega Evolve holding Darkranite")
+{
+    GIVEN {
+        PLAYER(SPECIES_DARKRAI) { Item(ITEM_DARKRANITE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_DARKRAI_MEGA);
+    }
+}
+
+SINGLE_BATTLE_TEST("Victreebel can Mega Evolve holding Victreebelite")
+{
+    GIVEN {
+        PLAYER(SPECIES_VICTREEBEL) { Item(ITEM_VICTREEBELITE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_VICTREEBEL_MEGA);
+    }
+}
