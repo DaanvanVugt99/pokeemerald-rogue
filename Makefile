@@ -299,11 +299,32 @@ TEST_SRCS_IN := $(wildcard $(TEST_SUBDIR)/*.c $(TEST_SUBDIR)/*/*.c $(TEST_SUBDIR
 TEST_SRCS_ALL := $(foreach src,$(TEST_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
 TEST_HARNESS_SRCS := $(TEST_SUBDIR)/test_runner.c $(TEST_SUBDIR)/test_runner_args.c $(TEST_SUBDIR)/test_runner_battle.c
 TEST_CASE_SRCS := $(filter-out $(TEST_HARNESS_SRCS),$(TEST_SRCS_ALL))
+TEST_SUITE ?=
+ifneq ($(strip $(TEST_SUITE)),)
+ifeq ($(TEST_SUITE),ability)
+TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/ability/%,$(TEST_CASE_SRCS))
+else ifeq ($(TEST_SUITE),moves)
+TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/move.c $(TEST_SUBDIR)/battle/move_effect/% $(TEST_SUBDIR)/battle/move_flags/% $(TEST_SUBDIR)/battle/status1/% $(TEST_SUBDIR)/battle/terrain/% $(TEST_SUBDIR)/battle/weather/% $(TEST_SUBDIR)/battle/type_effectiveness_messages.c $(TEST_SUBDIR)/battle/crit_chance.c $(TEST_SUBDIR)/battle/damage_formula.c,$(TEST_CASE_SRCS))
+else ifeq ($(TEST_SUITE),items)
+TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/hold_effect/% $(TEST_SUBDIR)/battle/item_effect/%,$(TEST_CASE_SRCS))
+else ifeq ($(TEST_SUITE),forms)
+TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/form_change/% $(TEST_SUBDIR)/battle/gimmick/% $(TEST_SUBDIR)/species.c,$(TEST_CASE_SRCS))
+else ifeq ($(TEST_SUITE),rogue)
+TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/rogue/% $(TEST_SUBDIR)/rogue_%.c,$(TEST_CASE_SRCS))
+else ifeq ($(TEST_SUITE),ai)
+TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/ai%.c $(TEST_SUBDIR)/battle/trainer_control.c,$(TEST_CASE_SRCS))
+else ifeq ($(TEST_SUITE),core)
+TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/fpmath.c $(TEST_SUBDIR)/random.c $(TEST_SUBDIR)/sprite.c $(TEST_SUBDIR)/battle/exp.c,$(TEST_CASE_SRCS))
+else
+$(error Unknown TEST_SUITE '$(TEST_SUITE)'. Expected one of: ability moves items forms rogue ai core)
+endif
+endif
 # TESTS is also used at runtime as a prefix filter. For focused runs, compile
 # only source files containing that literal string so the test ELF stays small.
 TEST_COMPILE_FILTER ?= $(TESTS)
 ifneq ($(strip $(TEST_COMPILE_FILTER)),)
-TEST_CASE_SRCS := $(shell find $(TEST_SUBDIR) -type f -name '*.c' ! -name 'test_runner*.c' -exec grep -lF -- "$(TEST_COMPILE_FILTER)" {} +)
+TEST_FILTERED_CASE_SRCS := $(shell find $(TEST_SUBDIR) -type f -name '*.c' ! -name 'test_runner*.c' -exec grep -lF -- "$(TEST_COMPILE_FILTER)" {} +)
+TEST_CASE_SRCS := $(filter $(TEST_FILTERED_CASE_SRCS),$(TEST_CASE_SRCS))
 endif
 TEST_SRCS := $(TEST_HARNESS_SRCS) $(TEST_CASE_SRCS)
 TEST_OBJS := $(patsubst $(TEST_SUBDIR)/%.c,$(TEST_BUILDDIR)/%.o,$(TEST_SRCS))

@@ -7,12 +7,18 @@ cd "$repo_root" || exit 1
 
 mode="build" # build | check | ui
 test_to_run_prefix="${TESTS:-}"
+test_suite="${TEST_SUITE:-}"
+check_all_suites=0
+all_suites=(core ai ability moves items forms rogue)
 
 usage() {
-    echo "Usage: $0 [--build|--check|--ui] [--filter \"Test name prefix\"]"
+    echo "Usage: $0 [--build|--check|--ui] [--suite SUITE] [--filter \"Test name prefix\"]"
     echo "  --build   Build pokeemerald-test.elf only (default)"
     echo "  --check   Build and run headless tests via 'make check'"
     echo "  --ui      Build and launch pokeemerald-test.elf in mGBA"
+    echo "  --suite   Compile only one test suite: core, ai, ability, moves, items, forms, rogue"
+    echo "  --check-all-suites"
+    echo "            Run all split test suites sequentially"
     echo "  --filter  Set TESTS prefix filter and compile only matching test files"
 }
 
@@ -35,6 +41,19 @@ while [ $# -gt 0 ]; do
                 exit 2
             fi
             test_to_run_prefix="$1"
+            ;;
+        --suite)
+            shift
+            if [ $# -eq 0 ]; then
+                echo "Error: --suite requires a value."
+                usage
+                exit 2
+            fi
+            test_suite="$1"
+            ;;
+        --check-all-suites)
+            mode="check"
+            check_all_suites=1
             ;;
         -h|--help)
             usage
@@ -63,19 +82,46 @@ fi
 
 echo "Working Directory: $PWD"
 echo "Mode: $mode"
+if [ -n "$test_suite" ]; then
+    echo "TEST_SUITE: $test_suite"
+fi
 if [ -n "$test_to_run_prefix" ]; then
     echo "TESTS filter: $test_to_run_prefix"
 fi
 
 exit_code=0
 
-if [ "$mode" = "check" ]; then
-    echo "Running headless tests.. [make -j$num_cores check RELEASE=0 TESTS=\"$test_to_run_prefix\"]"
-    make -j"$num_cores" check RELEASE=0 TESTS="$test_to_run_prefix"
+run_make() {
+    local target="$1"
+    local suite="$2"
+
+    if [ -n "$suite" ]; then
+        make -j"$num_cores" "$target" RELEASE=0 TESTS="$test_to_run_prefix" TEST_SUITE="$suite"
+    else
+        make -j"$num_cores" "$target" RELEASE=0 TESTS="$test_to_run_prefix"
+    fi
+}
+
+if [ "$check_all_suites" -eq 1 ]; then
+    for suite in "${all_suites[@]}"; do
+        echo "Running headless tests.. [make -j$num_cores check RELEASE=0 TEST_SUITE=\"$suite\" TESTS=\"$test_to_run_prefix\"]"
+        run_make check "$suite"
+        exit_code=$?
+        if [ $exit_code -ne 0 ]; then
+            break
+        fi
+    done
+elif [ "$mode" = "check" ]; then
+    echo "Running headless tests.. [make -j$num_cores check RELEASE=0 TEST_SUITE=\"$test_suite\" TESTS=\"$test_to_run_prefix\"]"
+    run_make check "$test_suite"
     exit_code=$?
 else
-    echo "Running test build.. [make -j$num_cores pokeemerald-test.elf TEST=1 RELEASE=0 TESTS=\"$test_to_run_prefix\"]"
-    make -j"$num_cores" pokeemerald-test.elf TEST=1 RELEASE=0 TESTS="$test_to_run_prefix"
+    echo "Running test build.. [make -j$num_cores pokeemerald-test.elf TEST=1 RELEASE=0 TEST_SUITE=\"$test_suite\" TESTS=\"$test_to_run_prefix\"]"
+    if [ -n "$test_suite" ]; then
+        make -j"$num_cores" pokeemerald-test.elf TEST=1 RELEASE=0 TESTS="$test_to_run_prefix" TEST_SUITE="$test_suite"
+    else
+        make -j"$num_cores" pokeemerald-test.elf TEST=1 RELEASE=0 TESTS="$test_to_run_prefix"
+    fi
     exit_code=$?
 
     if [ $exit_code -eq 0 ] && [ "$mode" = "ui" ]; then
