@@ -9516,6 +9516,42 @@ BattleScript_DuelistActivates::
 	call BattleScript_AbilityHpHeal
 	return
 
+BattleScript_FreshlyBakedHealActivates::
+	call BattleScript_AbilityHpHeal
+	end3
+
+BattleScript_FreshlyBakedMistActivates::
+	call BattleScript_AbilityPopUp
+	setmist
+	playmoveanimation BS_ATTACKER, MOVE_MIST
+	waitanimation
+	printfromtable gMistUsedStringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_FreshlyBakedHealMistActivates::
+	call BattleScript_AbilityHpHeal
+	setmist
+	playmoveanimation BS_ATTACKER, MOVE_MIST
+	waitanimation
+	printfromtable gMistUsedStringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_RallyHealActivates::
+	call BattleScript_AbilityHpHeal
+	jumpifstatus BS_ATTACKER, STATUS1_ANY, BattleScript_RallyCureStatus
+	return
+
+BattleScript_RallyCureOnlyActivates::
+	call BattleScript_AbilityPopUp
+BattleScript_RallyCureStatus:
+	curestatus BS_ATTACKER
+	updatestatusicon BS_ATTACKER
+	printstring STRINGID_PKMNSTATUSNORMAL
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_DynamoHealActivates::
 	call BattleScript_AbilityHpHeal
 	return
