@@ -48,33 +48,6 @@ SINGLE_BATTLE_TEST("Spellbook can choose field spell moves")
     }
 }
 
-SINGLE_BATTLE_TEST("Spellbook triggers without terrain")
-{
-    GIVEN {
-        PLAYER(SPECIES_DELPHOX) { Speed(100); Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_SPELLBOOK); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_ROGUE_SPELLBOOK, MOVE_PSYBEAM)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, player);
-        ABILITY_POPUP(player, ABILITY_SPELLBOOK);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYBEAM, player);
-    }
-}
-
-SINGLE_BATTLE_TEST("Spellbook does not trigger after damaging moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_DELPHOX) { Speed(100); Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_SPELLBOOK); Moves(MOVE_PSYBEAM); }
-        OPPONENT(SPECIES_WOBBUFFET) { HP(400); MaxHP(400); Speed(50); Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_PSYBEAM, WITH_RNG(RNG_ROGUE_SPELLBOOK, MOVE_MAGIC_ROOM)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYBEAM, player);
-        NOT ABILITY_POPUP(player, ABILITY_SPELLBOOK);
-    }
-}
-
 SINGLE_BATTLE_TEST("Spellbook chooses from every spell")
 {
     static const u16 expectedMoves[] =

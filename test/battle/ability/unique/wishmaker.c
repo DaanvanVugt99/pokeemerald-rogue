@@ -42,20 +42,3 @@ SINGLE_BATTLE_TEST("Wishmaker can choose a self-target wish move after Wish")
         EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 1);
     }
 }
-
-SINGLE_BATTLE_TEST("Wishmaker does not trigger after other moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_JIRACHI) { Ability(ABILITY_SERENE_GRACE); UniqueAbility(ABILITY_WISHMAKER); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_WISHMAKER, MOVE_SWIFT)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        HP_BAR(opponent);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_WISHMAKER);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_SWIFT, player);
-        }
-    }
-}

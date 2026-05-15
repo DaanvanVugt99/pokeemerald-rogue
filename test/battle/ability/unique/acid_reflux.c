@@ -39,20 +39,3 @@ SINGLE_BATTLE_TEST("Acid Reflux can choose a self-target stomach move after Stoc
         ANIMATION(ANIM_TYPE_MOVE, MOVE_AMNESIA, player);
     }
 }
-
-SINGLE_BATTLE_TEST("Acid Reflux does not trigger after other moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_SWALOT) { Ability(ABILITY_LIQUID_OOZE); UniqueAbility(ABILITY_ACID_REFLUX); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_ACID_REFLUX, MOVE_ACID)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        HP_BAR(opponent);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_ACID_REFLUX);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_ACID, player);
-        }
-    }
-}

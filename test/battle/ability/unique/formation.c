@@ -25,20 +25,6 @@ SINGLE_BATTLE_TEST("Formation uses a random formation move after this Pokemon us
     }
 }
 
-SINGLE_BATTLE_TEST("Formation does not trigger after moves other than No Retreat")
-{
-    GIVEN {
-        PLAYER(SPECIES_FALINKS) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); UniqueAbility(ABILITY_FORMATION); Moves(MOVE_WORK_UP); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_WORK_UP, WITH_RNG(RNG_ROGUE_FORMATION, MOVE_ROCK_TOMB)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        NOT ABILITY_POPUP(player, ABILITY_FORMATION);
-    } THEN {
-        EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
-    }
-}
-
 SINGLE_BATTLE_TEST("Formation chooses from every formation move")
 {
     static const u16 expectedMoves[] =

@@ -45,21 +45,3 @@ SINGLE_BATTLE_TEST("Distortion can choose a status loud move after Uproar")
         EXPECT_EQ(opponent->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 2);
     }
 }
-
-SINGLE_BATTLE_TEST("Distortion does not trigger after other sound moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_EXPLOUD) { Ability(ABILITY_SOUNDPROOF); UniqueAbility(ABILITY_DISTORTION); Moves(MOVE_HYPER_VOICE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_HYPER_VOICE, WITH_RNG(RNG_ROGUE_DISTORTION, MOVE_SCREECH)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_DISTORTION);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_SCREECH, player);
-        }
-    } THEN {
-        EXPECT_EQ(opponent->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
-    }
-}

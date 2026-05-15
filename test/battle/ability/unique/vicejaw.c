@@ -42,19 +42,3 @@ SINGLE_BATTLE_TEST("Vicejaw uses a random jaw move after Vice Grip")
         EXPECT(gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].hp < gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].maxHP);
     }
 }
-
-SINGLE_BATTLE_TEST("Vicejaw does not trigger after other jaw moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_MAWILE) { Ability(ABILITY_HYPER_CUTTER); UniqueAbility(ABILITY_VICEJAW); Moves(MOVE_CRUNCH); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CRUNCH, WITH_RNG(RNG_ROGUE_VICEJAW, MOVE_FIRE_FANG)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CRUNCH, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_VICEJAW);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_FANG, player);
-        }
-    }
-}

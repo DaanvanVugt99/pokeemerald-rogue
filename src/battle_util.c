@@ -21436,6 +21436,12 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         return uq4_12_divide(UQ_4_12(1.0), typeEffectivenessModifier);
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_DUELISTS_LAW)
+     && typeEffectivenessModifier > UQ_4_12(0.0)
+     && typeEffectivenessModifier < UQ_4_12(1.0)
+     && DoesPartyShareTypeWithBattler(battlerAtk))
+        return UQ_4_12(2.0);
+
     if (HasBattlerAbility(battlerAtk, ABILITY_DEADLY_SHOT)
      && typeEffectivenessModifier >= UQ_4_12(2.0))
     {
@@ -21851,6 +21857,17 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
      && HasBattlerAbility(battlerAtk, ABILITY_INNER_FOCUS)
      && (gProtectStructs[battlerAtk].physicalDmg || gProtectStructs[battlerAtk].specialDmg))
         DAMAGE_APPLY_MODIFIER(UQ_4_12(0.5));
+
+    if (HasBattlerAbility(battlerDef, ABILITY_SHIELD_WALL)
+     && DoesPartyShareTypeWithBattler(battlerDef))
+    {
+        s32 damageCap = gBattleMons[battlerDef].maxHP / 2;
+
+        if (damageCap == 0)
+            damageCap = 1;
+        if (dmg > damageCap)
+            dmg = damageCap;
+    }
 
     if (dmg == 0)
         dmg = 1;

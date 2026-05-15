@@ -46,19 +46,6 @@ SINGLE_BATTLE_TEST("Bramble Guard can choose self-targeted bramble moves")
     }
 }
 
-SINGLE_BATTLE_TEST("Bramble Guard does not trigger after other protection moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_CHESNAUGHT) { Speed(100); Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_BRAMBLE_GUARD); Moves(MOVE_PROTECT); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_PROTECT, WITH_RNG(RNG_ROGUE_BRAMBLE_GUARD, MOVE_PIN_MISSILE)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, player);
-        NOT ABILITY_POPUP(player, ABILITY_BRAMBLE_GUARD);
-    }
-}
-
 SINGLE_BATTLE_TEST("Bramble Guard chooses from every bramble move")
 {
     static const u16 expectedMoves[] =

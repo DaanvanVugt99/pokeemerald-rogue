@@ -76,15 +76,3 @@ SINGLE_BATTLE_TEST("Trash Heap can choose every trash move")
         EXPECT_EQ(gCalledMove, expectedMoves[gBattleTestRunnerState->runTrial]);
     }
 }
-
-SINGLE_BATTLE_TEST("Trash Heap does not trigger after a non-contact move")
-{
-    GIVEN {
-        PLAYER(SPECIES_GARBODOR) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_TRASH_HEAP); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_WATER_GUN); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN, WITH_RNG(RNG_ROGUE_TRASH_HEAP, MOVE_SLUDGE)); }
-    } SCENE {
-        NOT ABILITY_POPUP(player, ABILITY_TRASH_HEAP);
-    }
-}

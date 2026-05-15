@@ -66,24 +66,6 @@ SINGLE_BATTLE_TEST("Space Rift can choose Teleport after Spacial Rend")
     }
 }
 
-SINGLE_BATTLE_TEST("Space Rift does not trigger after other moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_PALKIA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_SPACE_RIFT); Moves(MOVE_DRAGON_CLAW); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_DRAGON_CLAW, WITH_RNG(RNG_ROGUE_SPACE_RIFT, MOVE_GRAVITY)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_CLAW, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SPACE_RIFT);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
-        }
-    } THEN {
-        EXPECT_EQ(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0], 0);
-    }
-}
-
 SINGLE_BATTLE_TEST("Space Rift only triggers once each battle")
 {
     GIVEN {

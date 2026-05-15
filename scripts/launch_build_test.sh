@@ -13,7 +13,7 @@ usage() {
     echo "  --build   Build pokeemerald-test.elf only (default)"
     echo "  --check   Build and run headless tests via 'make check'"
     echo "  --ui      Build and launch pokeemerald-test.elf in mGBA"
-    echo "  --filter  Set TESTS prefix filter (same behavior as make TESTS=...)"
+    echo "  --filter  Set TESTS prefix filter and compile only matching test files"
 }
 
 while [ $# -gt 0 ]; do

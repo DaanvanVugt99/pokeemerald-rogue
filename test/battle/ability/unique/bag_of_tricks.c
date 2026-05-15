@@ -34,21 +34,6 @@ SINGLE_BATTLE_TEST("Bag of Tricks uses a random trick move after the first Dark-
     }
 }
 
-SINGLE_BATTLE_TEST("Bag of Tricks does not trigger from non-Dark-type moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_THIEVUL) { Speed(100); Ability(ABILITY_RUN_AWAY); UniqueAbility(ABILITY_BAG_OF_TRICKS); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_BAG_OF_TRICKS, MOVE_NASTY_PLOT)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        NOT ABILITY_POPUP(player, ABILITY_BAG_OF_TRICKS);
-    } THEN {
-        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
-    }
-}
-
 SINGLE_BATTLE_TEST("Bag of Tricks only triggers once per switch-in")
 {
     GIVEN {

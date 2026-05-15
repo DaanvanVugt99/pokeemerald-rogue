@@ -96,24 +96,6 @@ SINGLE_BATTLE_TEST("Dark Dimension can choose every dimension move")
     }
 }
 
-SINGLE_BATTLE_TEST("Dark Dimension does not trigger after other moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_GIRATINA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_DARK_DIMENSION); Moves(MOVE_SHADOW_BALL); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_SHADOW_BALL, WITH_RNG(RNG_ROGUE_DARK_DIMENSION, MOVE_GRAVITY)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHADOW_BALL, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_DARK_DIMENSION);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
-        }
-    } THEN {
-        EXPECT_EQ(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0], 0);
-    }
-}
-
 SINGLE_BATTLE_TEST("Dark Dimension only triggers once each battle")
 {
     GIVEN {

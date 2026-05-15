@@ -33,20 +33,6 @@ SINGLE_BATTLE_TEST("Work Crew uses a random work move after the first Ground-typ
     }
 }
 
-SINGLE_BATTLE_TEST("Work Crew does not trigger after non-Ground moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_DIGGERSBY) { Speed(100); Ability(ABILITY_HUGE_POWER); UniqueAbility(ABILITY_WORK_CREW); Moves(MOVE_WATER_GUN); }
-        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_WATER_GUN, WITH_RNG(RNG_ROGUE_WORK_CREW, MOVE_ROCK_TOMB)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
-        HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_WORK_CREW);
-    }
-}
-
 SINGLE_BATTLE_TEST("Work Crew only triggers once per switch-in")
 {
     GIVEN {

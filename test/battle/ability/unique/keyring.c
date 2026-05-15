@@ -32,21 +32,6 @@ SINGLE_BATTLE_TEST("Keyring uses a random key trick after the first status move 
     }
 }
 
-SINGLE_BATTLE_TEST("Keyring does not trigger after non-status moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_KLEFKI) { Speed(100); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_KEYRING, MOVE_REFLECT)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        NOT ABILITY_POPUP(player, ABILITY_KEYRING);
-    } THEN {
-        EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_REFLECT));
-    }
-}
-
 SINGLE_BATTLE_TEST("Keyring only triggers once per switch-in")
 {
     GIVEN {

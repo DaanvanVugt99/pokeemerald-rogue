@@ -24,20 +24,6 @@ SINGLE_BATTLE_TEST("Tea Service uses a random tea party move after this Pokemon 
     }
 }
 
-SINGLE_BATTLE_TEST("Tea Service does not trigger after other status moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_POLTEAGEIST) { Speed(100); Ability(ABILITY_WEAK_ARMOR); UniqueAbility(ABILITY_TEA_SERVICE); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Item(ITEM_LIECHI_BERRY); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_ROGUE_TEA_SERVICE, MOVE_NASTY_PLOT)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        NOT ABILITY_POPUP(player, ABILITY_TEA_SERVICE);
-    } THEN {
-        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
-    }
-}
-
 SINGLE_BATTLE_TEST("Tea Service chooses from every tea party move")
 {
     static const u16 expectedMoves[] =

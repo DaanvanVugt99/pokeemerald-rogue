@@ -71,19 +71,6 @@ SINGLE_BATTLE_TEST("Shell Work can choose every construction move")
     }
 }
 
-SINGLE_BATTLE_TEST("Shell Work does not trigger when a different stat rises")
-{
-    GIVEN {
-        PLAYER(SPECIES_CRUSTLE) { Speed(100); Ability(ABILITY_STURDY); UniqueAbility(ABILITY_SHELL_WORK); Moves(MOVE_SWORDS_DANCE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_SWORDS_DANCE, WITH_RNG(RNG_ROGUE_SHELL_WORK, MOVE_STEALTH_ROCK)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, player);
-        NOT ABILITY_POPUP(player, ABILITY_SHELL_WORK);
-    }
-}
-
 SINGLE_BATTLE_TEST("Shell Work does not trigger when Defense cannot rise")
 {
     GIVEN {

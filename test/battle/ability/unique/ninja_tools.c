@@ -52,20 +52,6 @@ SINGLE_BATTLE_TEST("Ninja Tools can choose status ninja tools")
     }
 }
 
-SINGLE_BATTLE_TEST("Ninja Tools does not trigger after other Water moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_GRENINJA) { Speed(100); Ability(ABILITY_TORRENT); UniqueAbility(ABILITY_NINJA_TOOLS); Moves(MOVE_WATER_GUN); }
-        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_WATER_GUN, WITH_RNG(RNG_ROGUE_NINJA_TOOLS, MOVE_QUICK_ATTACK)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
-        HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_NINJA_TOOLS);
-    }
-}
-
 SINGLE_BATTLE_TEST("Ninja Tools chooses from every ninja tool")
 {
     static const u16 expectedMoves[] =

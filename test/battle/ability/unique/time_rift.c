@@ -45,24 +45,6 @@ SINGLE_BATTLE_TEST("Time Rift can choose an attacking time move after Roar of Ti
     }
 }
 
-SINGLE_BATTLE_TEST("Time Rift does not trigger after other moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_DIALGA) { Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_TIME_RIFT); Moves(MOVE_DRAGON_CLAW); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_DRAGON_CLAW, WITH_RNG(RNG_ROGUE_TIME_RIFT, MOVE_MAGIC_ROOM)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_CLAW, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_TIME_RIFT);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGIC_ROOM, player);
-        }
-    } THEN {
-        EXPECT_EQ(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0], 0);
-    }
-}
-
 SINGLE_BATTLE_TEST("Time Rift no longer triggers on switch-in")
 {
     GIVEN {

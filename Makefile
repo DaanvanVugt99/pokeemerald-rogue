@@ -263,7 +263,7 @@ MAKEFLAGS += --no-print-directory
 # Secondary expansion is required for dependency variables in object rules.
 .SECONDEXPANSION:
 
-.PHONY: all rom clean compare tidy tools check-tools mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall agbcc modern tidymodern tidynonmodern check
+.PHONY: all rom clean compare tidy tools check-tools mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall agbcc modern tidymodern tidynonmodern check FORCE
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
@@ -296,7 +296,16 @@ C_SRCS := $(foreach src,$(C_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
 C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
 
 TEST_SRCS_IN := $(wildcard $(TEST_SUBDIR)/*.c $(TEST_SUBDIR)/*/*.c $(TEST_SUBDIR)/*/*/*.c $(TEST_SUBDIR)/*/*/*/*.c)
-TEST_SRCS := $(foreach src,$(TEST_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
+TEST_SRCS_ALL := $(foreach src,$(TEST_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
+TEST_HARNESS_SRCS := $(TEST_SUBDIR)/test_runner.c $(TEST_SUBDIR)/test_runner_args.c $(TEST_SUBDIR)/test_runner_battle.c
+TEST_CASE_SRCS := $(filter-out $(TEST_HARNESS_SRCS),$(TEST_SRCS_ALL))
+# TESTS is also used at runtime as a prefix filter. For focused runs, compile
+# only source files containing that literal string so the test ELF stays small.
+TEST_COMPILE_FILTER ?= $(TESTS)
+ifneq ($(strip $(TEST_COMPILE_FILTER)),)
+TEST_CASE_SRCS := $(shell find $(TEST_SUBDIR) -type f -name '*.c' ! -name 'test_runner*.c' -exec grep -lF -- "$(TEST_COMPILE_FILTER)" {} +)
+endif
+TEST_SRCS := $(TEST_HARNESS_SRCS) $(TEST_CASE_SRCS)
 TEST_OBJS := $(patsubst $(TEST_SUBDIR)/%.c,$(TEST_BUILDDIR)/%.o,$(TEST_SRCS))
 TEST_OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(TEST_OBJS))
 
@@ -583,7 +592,7 @@ PARTIAL_TEST_OBJ := test/partial_test_objs.o
 
 # Work around command-line length limit
 # On Msys2 the max command line is 32 000 characters.  --via option?
-$(OBJ_DIR)/$(PARTIAL_TEST_OBJ): $(TEST_OBJS)
+$(OBJ_DIR)/$(PARTIAL_TEST_OBJ): $(TEST_OBJS) FORCE
 	@echo "$(LD) -r -o $(OBJ_DIR)/$(PARTIAL_TEST_OBJ) <test objects>"
 	@$(LD) -r -o $(OBJ_DIR)/$(PARTIAL_TEST_OBJ) $(TEST_OBJS)
 

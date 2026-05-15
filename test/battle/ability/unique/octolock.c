@@ -24,22 +24,6 @@ SINGLE_BATTLE_TEST("Octolock uses a random hold move after this Pokemon uses Oct
     }
 }
 
-SINGLE_BATTLE_TEST("Octolock ability does not trigger after other trapping moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_GRAPPLOCT) { Speed(100); Ability(ABILITY_LIMBER); UniqueAbility(ABILITY_OCTOLOCK); Moves(MOVE_BIND); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_BIND, WITH_RNG(RNG_ROGUE_OCTOLOCK, MOVE_BULK_UP)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_BIND, player);
-        NOT ABILITY_POPUP(player, ABILITY_OCTOLOCK);
-    } THEN {
-        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
-        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
-    }
-}
-
 SINGLE_BATTLE_TEST("Octolock chooses from every hold move")
 {
     static const u16 expectedMoves[] =

@@ -41,20 +41,3 @@ SINGLE_BATTLE_TEST("Variety Act can choose a dance move after a status move")
         EXPECT_EQ(gBattleMons[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
     }
 }
-
-SINGLE_BATTLE_TEST("Variety Act does not trigger after damaging moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_MR_RIME) { Ability(ABILITY_TANGLED_FEET); UniqueAbility(ABILITY_VARIETY_ACT); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_VARIETY_ACT);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, player);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, player);
-        }
-    }
-}

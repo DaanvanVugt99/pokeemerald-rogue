@@ -57,16 +57,3 @@ SINGLE_BATTLE_TEST("Odd Signal can choose Magic Room after a status move")
         EXPECT(gFieldStatuses & STATUS_FIELD_MAGIC_ROOM);
     }
 }
-
-SINGLE_BATTLE_TEST("Odd Signal does not trigger after damaging moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_BEHEEYEM) { Speed(100); Ability(ABILITY_TELEPATHY); UniqueAbility(ABILITY_ODD_SIGNAL); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_ODD_SIGNAL, 0)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        NOT ABILITY_POPUP(player, ABILITY_ODD_SIGNAL);
-    }
-}

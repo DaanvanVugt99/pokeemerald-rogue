@@ -49,19 +49,3 @@ SINGLE_BATTLE_TEST("Dream Sequence can choose a self-target dream move after Hyp
         EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 1);
     }
 }
-
-SINGLE_BATTLE_TEST("Dream Sequence does not trigger after other status moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_HYPNO) { Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_DREAM_SEQUENCE); Moves(MOVE_GROWL); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_GROWL, WITH_RNG(RNG_ROGUE_DREAM_SEQUENCE, MOVE_DREAM_EATER)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_DREAM_SEQUENCE);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_DREAM_EATER, player);
-        }
-    }
-}

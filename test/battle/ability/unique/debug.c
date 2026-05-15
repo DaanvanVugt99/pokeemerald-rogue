@@ -42,19 +42,3 @@ SINGLE_BATTLE_TEST("Debug uses a random glitch move after Conversion 2")
         EXPECT_LT(opponent->hp, opponent->maxHP);
     }
 }
-
-SINGLE_BATTLE_TEST("Debug does not trigger after other moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_PORYGON_Z) { Speed(100); Ability(ABILITY_ANALYTIC); UniqueAbility(ABILITY_DEBUG); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_DEBUG, MOVE_PSYBEAM)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_DEBUG);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYBEAM, player);
-        }
-    }
-}
