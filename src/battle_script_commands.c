@@ -2903,6 +2903,25 @@ static void Cmd_resultmessage(void)
         gBattleResources->flags->flags[gBattlerTarget] &= ~(RESOURCE_FLAG_ICE_FACE);
         gBattleMons[gBattlerTarget].species = SPECIES_EISCUE_NOICE_FACE;
         gBattleScripting.battler = gBattlerTarget; // For STRINGID_PKMNTRANSFORMED
+
+        if (HasBattlerAbility(gBattlerTarget, ABILITY_BLACK_ICE)
+         && gBattlerTarget != gBattlerAttacker
+         && IsBattlerAlive(gBattlerAttacker)
+         && IsBattlerAlive(gBattlerTarget)
+         && !gProtectStructs[gBattlerTarget].confusionSelfDmg
+         && !gProtectStructs[gBattlerTarget].extraMoveUsed
+         && !(gBattleMons[gBattlerTarget].status1 & STATUS1_SLEEP)
+         && !(gBattleMons[gBattlerTarget].status1 & STATUS1_FREEZE))
+        {
+            SetAtkCancellerForCalledMove();
+            gCalledMove = MOVE_SCARY_FACE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[gBattlerTarget].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_IceFaceNullsDamageBlackIce;
+            return;
+        }
+
         BattleScriptPushCursor();
         gBattlescriptCurrInstr = BattleScript_IceFaceNullsDamage;
         return;

@@ -247013,7 +247013,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8UU | MON_FLAGS_GEN9NATIONALDEXMONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247028,7 +247028,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8RU),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247043,7 +247043,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8RU),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247058,7 +247058,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8RU),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247073,7 +247073,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8VGC2020),
 		.heldItem=ITEM_FOCUS_SASH,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247088,7 +247088,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8MONOTYPE),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_MODEST,
@@ -247103,7 +247103,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8MONOTYPE),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247118,7 +247118,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8MONOTYPE),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247133,7 +247133,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8NATIONALDEXMONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247148,7 +247148,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9OU),
 		.heldItem=ITEM_TERRAIN_EXTENDER,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_FAIRY,
 		.nature=NATURE_TIMID,
@@ -247163,7 +247163,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9UU),
 		.heldItem=ITEM_TERRAIN_EXTENDER,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_STEEL,
 		.nature=NATURE_TIMID,
@@ -247178,7 +247178,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9MONOTYPE | MON_FLAGS_GEN9MONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -247193,7 +247193,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9MONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -280049,7 +280049,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8DOUBLESOU),
 		.heldItem=ITEM_EJECT_BUTTON,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_BOLD,
@@ -280064,7 +280064,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8DOUBLESOU),
 		.heldItem=ITEM_EJECT_BUTTON,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_BOLD,
@@ -280079,7 +280079,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8VGC2020),
 		.heldItem=ITEM_FOCUS_SASH,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -280094,7 +280094,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9PU),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -280109,7 +280109,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9DOUBLESOU),
 		.heldItem=ITEM_SAFETY_GOGGLES,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_FAIRY,
 		.nature=NATURE_SASSY,
@@ -280124,7 +280124,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9DOUBLESOU),
 		.heldItem=ITEM_PSYCHIC_SEED,
-		.ability=ABILITY_PSYCHIC_SURGE,
+		.ability=ABILITY_TELEPATHY,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_SASSY,

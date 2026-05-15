@@ -76,6 +76,7 @@ enum
 static bool32 TryRemoveScreens(u32 battler);
 static bool32 TryRemoveTargetSideScreens(u32 target);
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
+static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
@@ -9422,6 +9423,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             break;
         case ABILITY_ELECTRIC_SURGE:
         case ABILITY_HADRON_ENGINE:
+        case ABILITY_SEA_MINE:
             if (TryChangeBattleTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_ElectricSurgeActivates);
@@ -9470,6 +9472,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
             break;
         case ABILITY_PSYCHIC_SURGE:
+        case ABILITY_STAGE_PRESENCE:
             if (TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
@@ -11763,6 +11766,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SEA_MINE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanBeParalyzed(moveEndAttacker)
+         && IsMoveMakingContact(move, moveEndAttacker))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SEA_MINE);
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_PARALYSIS;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PRICKLY)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -13096,6 +13117,20 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_IRON_STAMP)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_STEEL
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && TrySetupIronStampHazards(battler, gBattlerTarget))
+        {
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_CALL_ALLIES)
          && IsBattlerAlive(battler)
          && gBattleMoves[move].soundMove
@@ -13286,6 +13321,26 @@ if (triggeringAbility != ABILITY_NONE)
          && CanUseSelfExtraMove(battler))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_CHARGED_CRY);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_CHARGE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SHORT_FUSE)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_DARK
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SHORT_FUSE);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
             gCalledMove = MOVE_CHARGE;
@@ -14566,6 +14621,27 @@ if (triggeringAbility != ABILITY_NONE)
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SUGAR_COAT)
+         && IsHealingMove(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && gBattleMons[battler].hp > gBattleStruct->hpBefore[battler]
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SUGAR_COAT);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_DECORATE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
@@ -22820,6 +22896,51 @@ static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler)
       || IsAbilityOnOpposingSide(battler, ABILITY_AS_ONE_SHADOW_RIDER))
         return TRUE;
     return FALSE;
+}
+
+static bool32 TrySetupIronStampHazards(u32 battler, u32 target)
+{
+    u32 side = GetBattlerSide(target);
+    s32 damage = 0;
+    bool32 affectedByHazards = IsBattlerAffectedByHazards(target, FALSE)
+        && !HasBattlerAbility(target, ABILITY_MAGIC_GUARD)
+        && !HasBattlerAbility(target, ABILITY_SHIELD_DUST);
+
+    if (!IsBattlerAlive(target) || GetBattlerSide(battler) == side || !affectedByHazards)
+        return FALSE;
+
+    if ((gSideStatuses[side] & SIDE_STATUS_SPIKES) && IsBattlerGrounded(target))
+    {
+        u8 spikesDmg = (5 - gSideTimers[side].spikesAmount) * 2;
+        s32 spikeDamage = GetNonDynamaxMaxHP(target) / spikesDmg;
+
+        if (spikeDamage == 0)
+            spikeDamage = 1;
+        damage += spikeDamage;
+        gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_PKMNHURTBYSPIKES;
+    }
+
+    if (gSideStatuses[side] & SIDE_STATUS_STEALTH_ROCK)
+    {
+        s32 stealthRockDamage = GetStealthHazardDamage(gBattleMoves[MOVE_STEALTH_ROCK].type, target);
+
+        if (stealthRockDamage != 0)
+        {
+            if (damage == 0)
+                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STEALTHROCKDMG;
+            damage += stealthRockDamage;
+        }
+    }
+
+    if (damage == 0)
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_IRON_STAMP);
+    gBattleMoveDamage = damage;
+    gBattlerTarget = gBattleScripting.battler = target;
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = BattleScript_IronStampHazardsActivates;
+    return TRUE;
 }
 
 // Photon Geyser, Light That Burns the Sky, Tera Blast

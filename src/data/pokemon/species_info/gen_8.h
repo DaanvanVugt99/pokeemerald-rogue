@@ -3479,7 +3479,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .friendship = STANDARD_FRIENDSHIP,
         .growthRate = GROWTH_MEDIUM_FAST,
         .eggGroups = { EGG_GROUP_WATER_1, EGG_GROUP_AMORPHOUS },
-        .abilities = { ABILITY_LIGHTNING_ROD, ABILITY_NONE, ABILITY_ELECTRIC_SURGE },
+        .abilities = { ABILITY_LIGHTNING_ROD, ABILITY_NONE, ABILITY_INNARDS_OUT },
         .bodyColor = BODY_COLOR_PURPLE,
         .speciesName = _("Pincurchin"),
         .cryId = CRY_PINCURCHIN,
@@ -3770,7 +3770,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .baseSpDefense = 95,
         .evYield_SpAttack = 2,
         .genderRatio = MON_MALE,
-        .abilities = { ABILITY_INNER_FOCUS, ABILITY_SYNCHRONIZE, ABILITY_PSYCHIC_SURGE },
+        .abilities = { ABILITY_INNER_FOCUS, ABILITY_SYNCHRONIZE, ABILITY_TELEPATHY },
         .cryId = CRY_INDEEDEE_MALE,
         .description = POKEDEX_DESC_STRING(
             "It uses the horns on its head to sense the\n"
@@ -3800,7 +3800,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .baseSpDefense = 105,
         .evYield_SpDefense = 2,
         .genderRatio = MON_FEMALE,
-        .abilities = { ABILITY_OWN_TEMPO, ABILITY_SYNCHRONIZE, ABILITY_PSYCHIC_SURGE },
+        .abilities = { ABILITY_OWN_TEMPO, ABILITY_SYNCHRONIZE, ABILITY_TELEPATHY },
         .cryId = CRY_INDEEDEE_FEMALE,
         .description = POKEDEX_DESC_STRING(
             "They diligently serve people and\n"
