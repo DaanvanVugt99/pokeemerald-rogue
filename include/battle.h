@@ -708,6 +708,8 @@ struct BattleStruct
     u8 presentBasePower;
     u8 roostTypes[MAX_BATTLERS_COUNT][2];
     u8 savedBattlerTarget;
+    u8 savedFaintBattlerAttacker;
+    u8 savedFaintBattlerTarget;
     bool8 ateBoost[MAX_BATTLERS_COUNT];
     u8 activeAbilityPopUps; // as bits for each battler
     u8 abilityPopUpSpriteIds[MAX_BATTLERS_COUNT][2];    // two per battler

@@ -244,6 +244,10 @@
 #define VARIOUS_APPLY_TERASTALLIZATION                151
 #define VARIOUS_TRY_ACTIVATE_SHATTER                 152
 #define VARIOUS_TRY_ACTIVATE_VICTORY                 153
+#define VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS            154
+#define VARIOUS_RESTORE_ATTACKER_AND_TARGET          155
+#define VARIOUS_TRY_ACTIVATE_TUMBLEWEED              156
+#define VARIOUS_TRY_ACTIVATE_DROP_OFF                157
 
 // Cmd_manipulatedamage
 #define DMG_CHANGE_SIGN            0

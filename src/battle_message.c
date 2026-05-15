@@ -882,9 +882,11 @@ static const u8 sText_PkmnTerastallizedInto[] = _("{B_ATK_NAME_WITH_PREFIX} tera
 static const u8 sText_ElectroShotCharging[] = _("{B_ATK_NAME_WITH_PREFIX} absorbed\nelectricity!");
 static const u8 sText_PasturizedHeal[] = _("{B_DEF_NAME_WITH_PREFIX} restored HP\nusing {B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}!");
 static const u8 sText_FossilMemoryAwakened[] = _("{B_ATK_NAME_WITH_PREFIX}'s fossil\nmemory awakened!");
+static const u8 sText_TumbleweedClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Tumbleweed\ncleared away the hazards!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_TUMBLEWEEDCLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_TumbleweedClearedHazards,
     [STRINGID_FOSSILMEMORYAWAKENED - BATTLESTRINGS_TABLE_START] = sText_FossilMemoryAwakened,
     [STRINGID_PKMNTERASTALLIZEDINTO - BATTLESTRINGS_TABLE_START] = sText_PkmnTerastallizedInto,
     [STRINGID_SUPERSWEETAROMAWAFTS - BATTLESTRINGS_TABLE_START] = sText_SupersweetAromaWafts,

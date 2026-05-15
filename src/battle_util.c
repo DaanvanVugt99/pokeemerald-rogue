@@ -1127,7 +1127,7 @@ void HandleAction_ActionFinished(void)
     }
 }
 
-static const u8 sAbilitiesAffectedByMoldBreaker[] =
+static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
 {
     [ABILITY_BATTLE_ARMOR] = 1,
     [ABILITY_CLEAR_BODY] = 1,
@@ -5246,6 +5246,21 @@ static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
 }
 
+static bool32 ShouldDualitySwapOffensiveStats(u32 battlerAtk, u32 move, u32 moveType)
+{
+    return HasBattlerAbility(battlerAtk, ABILITY_DUALITY)
+        && gDisableStructs[battlerAtk].uniquePersistentStateActive
+        && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
+        && gBattleMoves[move].effect != EFFECT_BODY_PRESS
+        && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL)
+        && !(HasBattlerAbility(battlerAtk, ABILITY_REDLINE)
+          && gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP
+          && moveType == TYPE_ELECTRIC)
+        && !(HasBattlerAbility(battlerAtk, ABILITY_UPROOT)
+          && (gStatuses3[battlerAtk] & STATUS3_ROOTED)
+          && moveType == TYPE_GRASS);
+}
+
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move)
 {
     u32 pendingDamage = 0;
@@ -5979,6 +5994,35 @@ static bool32 TryUseTrashHeapCalledMove(u32 battler, u32 target)
     gCalledMove = move;
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static const u16 sStarmobileMoves[] =
+{
+    MOVE_BLAZING_TORQUE,
+    MOVE_WICKED_TORQUE,
+    MOVE_NOXIOUS_TORQUE,
+    MOVE_COMBAT_TORQUE,
+    MOVE_MAGICAL_TORQUE,
+};
+
+static bool32 TryUseStarmobileCalledMove(u32 battler, u32 target)
+{
+    u16 move;
+
+    if (!CanUseExtraMove(battler, target))
+        return FALSE;
+
+    move = RandomElement(RNG_ROGUE_STARMOBILE, sStarmobileMoves);
+    SetBattlerTriggeredAbility(battler, ABILITY_STARMOBILE);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
     StartAbilityCalledMoveScript();
     return TRUE;
 }
@@ -7416,6 +7460,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         bool32 primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
         bool32 uniqueDone = gSpecialStatuses[battler].switchInUniqueAbilityDone;
 
+        if (HasBattlerAbility(battler, ABILITY_CARVING_RUSH))
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+
         if (uniqueAbility != ABILITY_NONE && uniqueAbility != primaryAbility)
         {
             gSpecialStatuses[battler].switchInAbilityDone = uniqueDone;
@@ -7577,6 +7624,58 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_LOCK_ON;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DIRTY_TRICKS) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_DIRTY_TRICKS);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_SAND_ATTACK;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DROP_OFF) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!CanUseExtraMove(battler, opposingBattler) || !CanFling(battler))
+                    continue;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_DROP_OFF);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                gCalledMove = MOVE_FLING;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
@@ -8762,6 +8861,22 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 {
                     BattleScriptPushCursorAndCallback(BattleScript_TidalFloodActivatesNoHeal);
                 }
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TUMBLEWEED) && !uniqueDone)
+        {
+            bool32 hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
+
+            if (hazardsCleared)
+            {
+                uniqueDone = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                SetBattlerTriggeredAbility(battler, ABILITY_TUMBLEWEED);
+                gBattlerAttacker = battler;
+                BattleScriptPushCursorAndCallback(BattleScript_TumbleweedClearsHazards);
                 return 1;
             }
         }
@@ -10260,6 +10375,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             u32 primaryAbility = GetBattlerAbility(battler);
 
             gBattlerAttacker = battler;
+
+            if (HasBattlerAbility(battler, ABILITY_DUALITY))
+                gDisableStructs[battler].uniquePersistentStateActive ^= TRUE;
 
             if(GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT)
                 extraShedSkinChance = GetCurseValue(EFFECT_SHED_SKIN_CHANCE);
@@ -12187,6 +12305,18 @@ if (triggeringAbility != ABILITY_NONE)
          && IsMoveMakingContact(move, moveEndAttacker)
          && IsFinalMultiHitStrike()
          && TryUseTrashHeapCalledMove(battler, moveEndAttacker))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_STARMOBILE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && IsFinalMultiHitStrike()
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && TryUseStarmobileCalledMove(battler, moveEndAttacker))
         {
             effect++;
         }
@@ -15734,6 +15864,20 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CARVING_RUSH)
+         && move == MOVE_FILLET_AWAY
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !(gMoveResultFlags & MOVE_RESULT_FAILED)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniquePersistentStateActive)
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_CARVING_RUSH);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FORTIFIED_SPIN)
          && move == MOVE_PROTECT
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -16552,6 +16696,27 @@ if (triggeringAbility != ABILITY_NONE)
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
 
             SetBattlerTriggeredAbility(battler, ABILITY_BLOODHOUND);
+            if (drainedHp == 0)
+                drainedHp = 1;
+            gBattleMoveDamage = -drainedHp;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CARVING_RUSH)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].slicingMove
+         && !BATTLER_MAX_HP(battler)
+         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_CARVING_RUSH);
             if (drainedHp == 0)
                 drainedHp = 1;
             gBattleMoveDamage = -drainedHp;
@@ -17394,7 +17559,8 @@ static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability)
     if (attackerTurnOrderNum >= gBattlersCount)
         return FALSE;
 
-    return sAbilitiesAffectedByMoldBreaker[ability]
+    return ability < ABILITIES_COUNT
+        && sAbilitiesAffectedByMoldBreaker[ability]
         && gBattlerByTurnOrder[gCurrentTurnActionNumber] == gBattlerAttacker
         && gActionsByTurnOrder[attackerTurnOrderNum] == B_ACTION_USE_MOVE;
 }
@@ -21072,7 +21238,25 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     }
     else
     {
-        if (IS_MOVE_PHYSICAL(move))
+        if (IS_MOVE_PHYSICAL(move) && ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
+        {
+            atkStat = gBattleMons[battlerAtk].spAttack;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_SPATK];
+            usesOwnSpAttackStat = TRUE;
+            usesOwnOffensiveStat = TRUE;
+            if (updateFlags)
+                RecordAbilityBattle(battlerAtk, ABILITY_DUALITY);
+        }
+        else if (IS_MOVE_SPECIAL(move) && ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
+        {
+            atkStat = gBattleMons[battlerAtk].attack;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_ATK];
+            usesOwnAttackStat = TRUE;
+            usesOwnOffensiveStat = TRUE;
+            if (updateFlags)
+                RecordAbilityBattle(battlerAtk, ABILITY_DUALITY);
+        }
+        else if (IS_MOVE_PHYSICAL(move))
         {
             atkStat = gBattleMons[battlerAtk].attack;
             atkStage = gBattleMons[battlerAtk].statStages[STAT_ATK];
@@ -22380,13 +22564,21 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
 
     userFinalAttack = CalcAttackStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectAtk);
     targetFinalDefense = CalcDefenseStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectDef, weather);
-    usesOwnAttackStat = IS_MOVE_PHYSICAL(move)
-        && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
-        && gBattleMoves[move].effect != EFFECT_BODY_PRESS
-        && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL);
-    usesOwnSpAttackStat = IS_MOVE_SPECIAL(move)
-        && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
-        && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL);
+    if (ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
+    {
+        usesOwnAttackStat = IS_MOVE_SPECIAL(move);
+        usesOwnSpAttackStat = IS_MOVE_PHYSICAL(move);
+    }
+    else
+    {
+        usesOwnAttackStat = IS_MOVE_PHYSICAL(move)
+            && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
+            && gBattleMoves[move].effect != EFFECT_BODY_PRESS
+            && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL);
+        usesOwnSpAttackStat = IS_MOVE_SPECIAL(move)
+            && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
+            && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL);
+    }
 
     dmg = CalculateBaseDamage(gBattleMovePower, userFinalAttack, gBattleMons[battlerAtk].level, targetFinalDefense);
     DAMAGE_APPLY_MODIFIER(GetTargetDamageModifier(move, battlerAtk, battlerDef));
@@ -24011,6 +24203,7 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
      || HasBattlerAbility(battler, ABILITY_POLLEN_PUFF)
      || HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD)
      || HasBattlerAbility(battler, ABILITY_PICKUP)
+     || HasBattlerAbility(battler, ABILITY_TUMBLEWEED)
      || HasBattlerAbility(battler, ABILITY_HOLLOW_NEST)
      || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
       && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))

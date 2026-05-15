@@ -11006,6 +11006,13 @@ static void Cmd_various(void)
         gBattlerTarget = gBattleStruct->savedBattlerTarget;
         break;
     }
+    case VARIOUS_RESTORE_ATTACKER_AND_TARGET:
+    {
+        VARIOUS_ARGS();
+        gBattlerAttacker = gBattleStruct->savedFaintBattlerAttacker;
+        gBattlerTarget = gBattleStruct->savedFaintBattlerTarget;
+        break;
+    }
     case VARIOUS_INSTANT_HP_DROP:
     {
         VARIOUS_ARGS();
@@ -11288,6 +11295,129 @@ static void Cmd_various(void)
             return;
         }
         break;
+    }
+    case VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS:
+    {
+        u32 target = gBattlersCount;
+
+        VARIOUS_ARGS();
+
+        if (!HasBattlerAbility(battler, ABILITY_DIRTY_TRICKS))
+            break;
+
+        if (gBattlerAttacker < gBattlersCount
+         && IsBattlerAlive(gBattlerAttacker)
+         && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
+        {
+            target = gBattlerAttacker;
+        }
+        else if (gBattlerTarget < gBattlersCount
+              && IsBattlerAlive(gBattlerTarget)
+              && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler))
+        {
+            target = gBattlerTarget;
+        }
+        else
+        {
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (IsBattlerAlive(i) && GetBattlerSide(i) != GetBattlerSide(battler))
+                {
+                    target = i;
+                    break;
+                }
+            }
+        }
+
+        if (target < gBattlersCount)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DIRTY_TRICKS);
+            SetAtkCancellerForCalledMove();
+            gBattleStruct->savedFaintBattlerAttacker = gBattlerAttacker;
+            gBattleStruct->savedFaintBattlerTarget = gBattlerTarget;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = target;
+            gCalledMove = MOVE_METRONOME;
+            gHitMarker = (gHitMarker & ~HITMARKER_ATTACKSTRING_PRINTED) | HITMARKER_NO_ATTACKSTRING;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            BattleScriptPush(BattleScript_DirtyTricksRestoreAfterMetronome);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_DROP_OFF:
+    {
+        u32 target = gBattlersCount;
+
+        VARIOUS_ARGS();
+
+        if (!HasBattlerAbility(battler, ABILITY_DROP_OFF))
+            break;
+
+        if (gBattlerAttacker < gBattlersCount
+         && IsBattlerAlive(gBattlerAttacker)
+         && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
+        {
+            target = gBattlerAttacker;
+        }
+        else if (gBattlerTarget < gBattlersCount
+              && IsBattlerAlive(gBattlerTarget)
+              && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler))
+        {
+            target = gBattlerTarget;
+        }
+        else
+        {
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (IsBattlerAlive(i) && GetBattlerSide(i) != GetBattlerSide(battler))
+                {
+                    target = i;
+                    break;
+                }
+            }
+        }
+
+        if (target < gBattlersCount)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DROP_OFF);
+            SetAtkCancellerForCalledMove();
+            gBattleStruct->savedFaintBattlerAttacker = gBattlerAttacker;
+            gBattleStruct->savedFaintBattlerTarget = gBattlerTarget;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = target;
+            gCalledMove = MOVE_PRESENT;
+            gHitMarker = (gHitMarker & ~HITMARKER_ATTACKSTRING_PRINTED) | HITMARKER_NO_ATTACKSTRING;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            BattleScriptPush(BattleScript_DropOffRestoreAfterPresent);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_TUMBLEWEED:
+    {
+        u32 side;
+
+        VARIOUS_ARGS();
+
+        side = GetBattlerSide(battler);
+        if (!HasBattlerAbility(battler, ABILITY_TUMBLEWEED)
+         || (gSideStatuses[side] & SIDE_STATUS_TAILWIND))
+            break;
+
+        SetBattlerTriggeredAbility(battler, ABILITY_TUMBLEWEED);
+        gBattleStruct->savedFaintBattlerAttacker = gBattlerAttacker;
+        gBattleStruct->savedFaintBattlerTarget = gBattlerTarget;
+        gBattlerAttacker = gBattlerAbility = battler;
+        BattleScriptPush(cmd->nextInstr);
+        gBattlescriptCurrInstr = BattleScript_TumbleweedTailwind;
+        return;
     }
     case VARIOUS_TRY_ACTIVATE_RECEIVER: // Partner gets fainted's ally ability
     {
@@ -12684,7 +12814,8 @@ static void Cmd_various(void)
         {
             VARIOUS_ARGS(const u8 *failInstr);
             u16 ability = GetBattlerAbility(battler);
-            if (GetBattlerSide(battler) == GetBattlerSide(gBattlerAttacker)
+            if (IsBattlerAlive(battler)
+             && GetBattlerSide(battler) == GetBattlerSide(gBattlerAttacker)
              && (ability == ABILITY_WIND_RIDER || ability == ABILITY_WIND_POWER))
             {
                 gLastUsedAbility = ability;

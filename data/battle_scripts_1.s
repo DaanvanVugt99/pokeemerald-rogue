@@ -6803,6 +6803,9 @@ BattleScript_EffectCamouflage::
 	goto BattleScript_MoveEnd
 
 BattleScript_FaintAttacker::
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_DROP_OFF
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_TUMBLEWEED
 	tryillusionoff BS_ATTACKER
 	playfaintcry BS_ATTACKER
 	pause B_WAIT_TIME_LONG
@@ -6815,6 +6818,9 @@ BattleScript_FaintAttacker::
 	return
 
 BattleScript_FaintTarget::
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_DROP_OFF
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_TUMBLEWEED
 	tryillusionoff BS_TARGET
 	playfaintcry BS_TARGET
 	pause B_WAIT_TIME_LONG
@@ -11468,6 +11474,36 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	setbyte sB_ANIM_TARGETS_HIT, 0
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
+
+BattleScript_DirtyTricksRestoreAfterMetronome::
+	bicword gHitMarker, HITMARKER_NO_ATTACKSTRING
+	various BS_ATTACKER, VARIOUS_RESTORE_ATTACKER_AND_TARGET
+	return
+
+BattleScript_DropOffRestoreAfterPresent::
+	bicword gHitMarker, HITMARKER_NO_ATTACKSTRING
+	various BS_ATTACKER, VARIOUS_RESTORE_ATTACKER_AND_TARGET
+	return
+
+BattleScript_TumbleweedClearsHazards::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TUMBLEWEEDCLEAREDHAZARDS
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_TumbleweedTailwind::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	settailwind BattleScript_TumbleweedTailwindEnd
+	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
+	waitanimation
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_TryTailwindAbilitiesLoop
+BattleScript_TumbleweedTailwindEnd:
+	various BS_ATTACKER, VARIOUS_RESTORE_ATTACKER_AND_TARGET
+	return
 
 BattleScript_FossilMemoryUsesCalledMove::
 	call BattleScript_AbilityPopUp
