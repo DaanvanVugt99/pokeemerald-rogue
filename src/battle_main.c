@@ -4890,6 +4890,24 @@ static bool32 IsWeatherAffectedMove(u16 move)
     return FALSE;
 }
 
+static bool32 IsPivotMove(u16 move)
+{
+    switch (move)
+    {
+    case MOVE_U_TURN:
+    case MOVE_VOLT_SWITCH:
+    case MOVE_FLIP_TURN:
+    case MOVE_PARTING_SHOT:
+    case MOVE_BATON_PASS:
+    case MOVE_TELEPORT:
+    case MOVE_CHILLY_RECEPTION:
+    case MOVE_SHED_TAIL:
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 s8 GetMovePriority(u32 battler, u16 move)
 {
     s8 priority;
@@ -5056,6 +5074,12 @@ s8 GetMovePriority(u32 battler, u16 move)
     if (HasBattlerAbility(battler, ABILITY_SKY_TYRANT)
      && gBattleMoves[move].type == TYPE_ROCK
      && DoesPartyShareTypeWithBattler(battler))
+    {
+        priority++;
+    }
+
+    if (HasBattlerAbility(battler, ABILITY_EJECT)
+     && IsPivotMove(move))
     {
         priority++;
     }
@@ -6059,7 +6083,11 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
         moveType = CalcMonHiddenPowerType(mon);
         break;
     case EFFECT_WEATHER_BALL:
-        if (gMain.inBattle && WEATHER_HAS_EFFECT)
+        if (gMain.inBattle && ability == ABILITY_MEGA_SOL)
+        {
+            moveType = TYPE_FIRE;
+        }
+        else if (gMain.inBattle && WEATHER_HAS_EFFECT)
         {
             if (gBattleWeather & B_WEATHER_RAIN && holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA)
                 moveType = TYPE_WATER;
@@ -6122,6 +6150,7 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
       || (ability == ABILITY_REFRIGERATE && (ateType = TYPE_ICE))
       || (ability == ABILITY_AERILATE && (ateType = TYPE_FLYING))
       || (ability == ABILITY_GALVANIZE && (ateType = TYPE_ELECTRIC))
+      || (ability == ABILITY_DRAGONIZE && (ateType = TYPE_DRAGON))
       || (MonHasMoveTypeAbility(mon, ABILITY_IMMOLATE) && (ateType = TYPE_FIRE))))
     {
         moveType = ateType;
@@ -6177,7 +6206,11 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
 
     if (gBattleMoves[move].effect == EFFECT_WEATHER_BALL)
     {
-        if (WEATHER_HAS_EFFECT)
+        if (HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL))
+        {
+            gBattleStruct->dynamicMoveType = TYPE_FIRE | F_DYNAMIC_TYPE_SET;
+        }
+        else if (WEATHER_HAS_EFFECT)
         {
             if (gBattleWeather & B_WEATHER_RAIN && holdEffect != HOLD_EFFECT_UTILITY_UMBRELLA)
                 gBattleStruct->dynamicMoveType = TYPE_WATER | F_DYNAMIC_TYPE_SET;
@@ -6281,6 +6314,7 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
                  || (attackerAbility == ABILITY_REFRIGERATE && (ateType = TYPE_ICE))
                  || (attackerAbility == ABILITY_AERILATE && (ateType = TYPE_FLYING))
                  || ((attackerAbility == ABILITY_GALVANIZE) && (ateType = TYPE_ELECTRIC))
+                 || (attackerAbility == ABILITY_DRAGONIZE && (ateType = TYPE_DRAGON))
                  || (HasBattlerAbility(battlerAtk, ABILITY_IMMOLATE) && (ateType = TYPE_FIRE))
                 )
              )

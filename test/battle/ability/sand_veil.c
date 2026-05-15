@@ -14,30 +14,29 @@ SINGLE_BATTLE_TEST("Sand Veil prevents damage from sandstorm")
     }
 }
 
-SINGLE_BATTLE_TEST("Sand Veil takes 30 percent less damage during sandstorm", s16 damage)
+SINGLE_BATTLE_TEST("Sand Veil takes 30 percent less physical damage during sandstorm", s16 damage)
 {
-    bool32 sandstorm;
     u32 ability;
+    u32 move;
 
-    PARAMETRIZE { sandstorm = FALSE; ability = ABILITY_NONE; }
-    PARAMETRIZE { sandstorm = FALSE; ability = ABILITY_SAND_VEIL; }
-    PARAMETRIZE { sandstorm = TRUE; ability = ABILITY_NONE; }
-    PARAMETRIZE { sandstorm = TRUE; ability = ABILITY_SAND_VEIL; }
+    PARAMETRIZE { ability = ABILITY_NONE;      move = MOVE_TACKLE; }
+    PARAMETRIZE { ability = ABILITY_SAND_VEIL; move = MOVE_TACKLE; }
+    PARAMETRIZE { ability = ABILITY_NONE;      move = MOVE_ROUND; }
+    PARAMETRIZE { ability = ABILITY_SAND_VEIL; move = MOVE_ROUND; }
 
     GIVEN {
-        ASSUME(gBattleMoves[MOVE_TACKLE].power != 0);
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_SANDSTORM, MOVE_TACKLE); }
+        ASSUME(gBattleMoves[MOVE_TACKLE].split == SPLIT_PHYSICAL);
+        ASSUME(gBattleMoves[MOVE_ROUND].split == SPLIT_SPECIAL);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_SANDSTORM, MOVE_TACKLE, MOVE_ROUND); }
         OPPONENT(SPECIES_WOBBUFFET) { Ability(ability); }
     } WHEN {
-        if (sandstorm)
-            TURN { MOVE(player, MOVE_SANDSTORM); }
-        TURN { MOVE(player, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_SANDSTORM); }
+        TURN { MOVE(player, move); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        ANIMATION(ANIM_TYPE_MOVE, move, player);
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
-        EXPECT_EQ(results[0].damage, results[1].damage);
-        EXPECT_EQ(results[0].damage, results[2].damage);
-        EXPECT_MUL_EQ(results[2].damage, Q_4_12(0.7), results[3].damage);
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.7), results[1].damage);
+        EXPECT_EQ(results[2].damage, results[3].damage);
     }
 }

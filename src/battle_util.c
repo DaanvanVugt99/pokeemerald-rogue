@@ -11605,6 +11605,21 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
+        case ABILITY_SPICY_SPRAY:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && gBattleMons[gBattlerAttacker].hp != 0
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && TARGET_TURN_DAMAGED
+             && CanBeBurned(gBattlerAttacker))
+            {
+                SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_SPICY_SPRAY);
+                gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_BURN;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
+            break;
         case ABILITY_CUTE_CHARM:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
              && gBattleMons[gBattlerAttacker].hp != 0
@@ -19277,49 +19292,9 @@ bool32 IsMoveMakingContact(u32 move, u32 battlerAtk)
     }
 }
 
-bool32 IsBattlerProtected(u32 battler, u32 move)
+static bool32 IsMoveBlockedByProtectLike(u32 battler, u32 move)
 {
-    // Decorate bypasses protect and detect, but not crafty shield
-    if (move == MOVE_DECORATE)
-    {
-        if (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_CRAFTY_SHIELD)
-            return TRUE;
-        else if (gProtectStructs[battler].protected)
-            return FALSE;
-    }
-
-    // Z-Moves and Max Moves bypass protection (except Max Guard).
-    if ((IsMaxMove(move) || gBattleStruct->zmove.active)
-         && (!gProtectStructs[battler].maxGuarded
-             || gBattleMoves[move].argument == MAX_EFFECT_BYPASS_PROTECT))
-        return FALSE;
-
-    // Max Guard is silly about the moves it blocks, including Teatime.
-    if (gProtectStructs[battler].maxGuarded && IsMoveBlockedByMaxGuard(move))
-        return TRUE;
-
-    // Protective Pads doesn't stop Unseen Fist from bypassing Protect effects, so IsMoveMakingContact() isn't used here.
-    // This means extra logic is needed to handle Shell Side Arm.
-    if (HasBattlerAbility(gBattlerAttacker, ABILITY_UNSEEN_FIST)
-        && (gBattleMoves[move].makesContact || (gBattleMoves[move].effect == EFFECT_SHELL_SIDE_ARM && gBattleStruct->swapDamageCategory))
-        && !gProtectStructs[battler].maxGuarded) // Max Guard cannot be bypassed by Unseen Fist
-        return FALSE;
-    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_X_RAY_JAWS)
-        && gBattleMoves[move].bitingMove
-        && !gProtectStructs[battler].maxGuarded)
-        return FALSE;
-    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_GLIDER)
-        && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
-        && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
-        && (gBattleMoves[move].type == TYPE_FLYING || gBattleMoves[move].type == TYPE_ELECTRIC)
-        && !gProtectStructs[battler].maxGuarded)
-        return FALSE;
-    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_RIFT)
-        && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
-        && !IS_MOVE_STATUS(move)
-        && !gProtectStructs[battler].maxGuarded)
-        return FALSE;
-    else if (gBattleMoves[move].ignoresProtect)
+    if (gBattleMoves[move].ignoresProtect)
         return FALSE;
     else if (gProtectStructs[battler].protected)
         return TRUE;
@@ -19349,6 +19324,60 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
         return TRUE;
     else
         return FALSE;
+}
+
+bool32 IsBattlerProtected(u32 battler, u32 move)
+{
+    // Decorate bypasses protect and detect, but not crafty shield
+    if (move == MOVE_DECORATE)
+    {
+        if (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_CRAFTY_SHIELD)
+            return TRUE;
+        else if (gProtectStructs[battler].protected)
+            return FALSE;
+    }
+
+    // Z-Moves and Max Moves bypass protection (except Max Guard).
+    if ((IsMaxMove(move) || gBattleStruct->zmove.active)
+         && (!gProtectStructs[battler].maxGuarded
+             || gBattleMoves[move].argument == MAX_EFFECT_BYPASS_PROTECT))
+        return FALSE;
+
+    // Max Guard is silly about the moves it blocks, including Teatime.
+    if (gProtectStructs[battler].maxGuarded && IsMoveBlockedByMaxGuard(move))
+        return TRUE;
+
+    // Protective Pads doesn't stop Unseen Fist from bypassing Protect effects, so IsMoveMakingContact() isn't used here.
+    // This means extra logic is needed to handle Shell Side Arm.
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_DRILL)
+        && IsMoveMakingContact(move, gBattlerAttacker)
+        && IsMoveBlockedByProtectLike(battler, move)
+        && !gProtectStructs[battler].maxGuarded)
+    {
+        gProtectStructs[gBattlerAttacker].touchedProtectLike = TRUE;
+        return FALSE;
+    }
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_UNSEEN_FIST)
+        && (gBattleMoves[move].makesContact || (gBattleMoves[move].effect == EFFECT_SHELL_SIDE_ARM && gBattleStruct->swapDamageCategory))
+        && !gProtectStructs[battler].maxGuarded) // Max Guard cannot be bypassed by Unseen Fist
+        return FALSE;
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_X_RAY_JAWS)
+        && gBattleMoves[move].bitingMove
+        && !gProtectStructs[battler].maxGuarded)
+        return FALSE;
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_GLIDER)
+        && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+        && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
+        && (gBattleMoves[move].type == TYPE_FLYING || gBattleMoves[move].type == TYPE_ELECTRIC)
+        && !gProtectStructs[battler].maxGuarded)
+        return FALSE;
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_RIFT)
+        && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+        && !IS_MOVE_STATUS(move)
+        && !gProtectStructs[battler].maxGuarded)
+        return FALSE;
+
+    return IsMoveBlockedByProtectLike(battler, move);
 }
 
 // Only called directly when calculating damage type effectiveness
@@ -19664,7 +19693,7 @@ static inline u32 CalcMoveBasePower(u32 move, u32 battlerAtk, u32 battlerDef, u3
             basePower *= 2;
         break;
     case EFFECT_WEATHER_BALL:
-        if (weather & B_WEATHER_ANY)
+        if (weather & B_WEATHER_ANY || HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL))
             basePower *= 2;
         break;
     case EFFECT_PURSUIT:
@@ -19901,7 +19930,8 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
             modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
         break;
     case EFFECT_SOLAR_BEAM:
-        if (IsBattlerWeatherAffected(battlerAtk, (B_WEATHER_HAIL | B_WEATHER_SANDSTORM | B_WEATHER_RAIN | B_WEATHER_SNOW)))
+        if (!HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL)
+         && IsBattlerWeatherAffected(battlerAtk, (B_WEATHER_HAIL | B_WEATHER_SANDSTORM | B_WEATHER_RAIN | B_WEATHER_SNOW)))
             modifier = uq4_12_multiply(modifier, UQ_4_12(0.5));
         break;
     case EFFECT_ELECTRO_SHOT:
@@ -20031,6 +20061,10 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         break;
     case ABILITY_AERILATE:
         if (moveType == TYPE_FLYING && gBattleStruct->ateBoost[battlerAtk])
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+        break;
+    case ABILITY_DRAGONIZE:
+        if (moveType == TYPE_DRAGON && gBattleStruct->ateBoost[battlerAtk])
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
         break;
     case ABILITY_NORMALIZE:
@@ -21005,10 +21039,10 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
     }
 
     // sandstorm sp.def boost for rock types
-    if (B_SANDSTORM_SPDEF_BOOST >= GEN_4 && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ROCK) && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM) && !usesDefStat)
+    if (B_SANDSTORM_SPDEF_BOOST >= GEN_4 && !HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL) && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ROCK) && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM) && !usesDefStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
     // snow def boost for ice types
-    if (IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE) && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW) && usesDefStat)
+    if (!HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL) && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ICE) && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW) && usesDefStat)
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
 
     if (HasBattlerAbility(battlerDef, ABILITY_LIGHTNING_FIELD)
@@ -21044,9 +21078,17 @@ static inline s32 CalculateBaseDamage(u32 power, u32 userFinalAttack, u32 level,
 
 static inline uq4_12_t GetTargetDamageModifier(u32 move, u32 battlerAtk, u32 battlerDef)
 {
+    uq4_12_t modifier = UQ_4_12(1.0);
+
     if (GetMoveTargetCount(move, battlerAtk, battlerDef) >= 2)
-        return B_MULTIPLE_TARGETS_DMG >= GEN_4 ? UQ_4_12(0.75) : UQ_4_12(0.5);
-    return UQ_4_12(1.0);
+        modifier = uq4_12_multiply(modifier, B_MULTIPLE_TARGETS_DMG >= GEN_4 ? UQ_4_12(0.75) : UQ_4_12(0.5));
+    if (HasBattlerAbility(battlerAtk, ABILITY_PIERCING_DRILL)
+     && IsMoveMakingContact(move, battlerAtk)
+     && IsMoveBlockedByProtectLike(battlerDef, move)
+     && !gProtectStructs[battlerDef].maxGuarded)
+        modifier = uq4_12_multiply(modifier, UQ_4_12(0.25));
+
+    return modifier;
 }
 
 static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
@@ -21130,11 +21172,16 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
 // Utility Umbrella holders take normal damage from what would be rain- and sun-weakened attacks.
 static uq4_12_t GetWeatherDamageModifier(u32 battlerAtk, u32 battlerDef, u32 move, u32 moveType, u32 holdEffectAtk, u32 holdEffectDef, u32 weather)
 {
+    bool32 megaSolSun = HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL);
+
+    if (megaSolSun)
+        weather = B_WEATHER_SUN;
+
     if (weather == B_WEATHER_NONE)
         return UQ_4_12(1.0);
     if (HasBattlerAbility(battlerAtk, ABILITY_CLUELESS) || HasBattlerAbility(battlerDef, ABILITY_CLUELESS))
         return UQ_4_12(1.0);
-    if (gBattleMoves[move].effect == EFFECT_HYDRO_STEAM && (weather & B_WEATHER_SUN) && holdEffectAtk != HOLD_EFFECT_UTILITY_UMBRELLA)
+    if (gBattleMoves[move].effect == EFFECT_HYDRO_STEAM && (weather & B_WEATHER_SUN) && (megaSolSun || holdEffectAtk != HOLD_EFFECT_UTILITY_UMBRELLA))
         return UQ_4_12(1.5);
     if (holdEffectDef == HOLD_EFFECT_UTILITY_UMBRELLA)
         return UQ_4_12(1.0);
@@ -21599,11 +21646,15 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
             return UQ_4_12(0.8);
         break;
     case ABILITY_SAND_VEIL:
-        if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM))
+        if (!HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL)
+         && IS_MOVE_PHYSICAL(move)
+         && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM))
             return UQ_4_12(0.7);
         break;
     case ABILITY_SNOW_CLOAK:
-        if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_HAIL | B_WEATHER_SNOW))
+        if (!HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL)
+         && IS_MOVE_SPECIAL(move)
+         && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
             return UQ_4_12(0.7);
         break;
     case ABILITY_DAMP:
@@ -23507,6 +23558,10 @@ u16 GetUsedHeldItem(u32 battler)
 
 bool32 IsBattlerWeatherAffected(u32 battler, u32 weatherFlags)
 {
+    if ((weatherFlags & B_WEATHER_SUN)
+     && HasBattlerAbility(battler, ABILITY_MEGA_SOL))
+        return TRUE;
+
     if (gBattleWeather & weatherFlags && WEATHER_HAS_EFFECT)
     {
         if (HasBattlerAbility(battler, ABILITY_CLUELESS))
