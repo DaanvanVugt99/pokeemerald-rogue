@@ -116,6 +116,7 @@ static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target);
 static bool32 TryUseOctolockCalledMove(u32 battler, u32 target);
 static bool32 TryUseTeaServiceCalledMove(u32 battler);
 static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target);
+static bool32 TryUseShardstormCalledMove(u32 battler, u32 target);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
@@ -6788,6 +6789,32 @@ static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
+static bool32 TryUseShardstormCalledMove(u32 battler, u32 target)
+{
+    if (target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || target == battler
+     || GetBattlerSide(target) == GetBattlerSide(battler))
+    {
+        if (!TryGetOpposingExtraMoveTarget(battler, &target))
+            return FALSE;
+    }
+
+    if (!CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_SHARDSTORM);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_ROCK_TOMB;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static const u16 sVarietyActMoves[] =
 {
     MOVE_GROWL,
@@ -13432,6 +13459,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SHARDSTORM)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && gBattleScripting.savedDmg != 0
+         && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseShardstormCalledMove(battler, gBattlerTarget))
+        {
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_INTENT)
          && IsBattlerAlive(battler)
          && !IS_MOVE_STATUS(move)
@@ -15952,6 +15997,26 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_MAGMA_SEAL);
+            gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+            gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityTrapsTarget;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_DEATH_CURRENT)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && (moveType == TYPE_WATER || moveType == TYPE_GHOST)
+         && (gSideTimers[B_SIDE_PLAYER].retaliateTimer == 1
+          || gSideTimers[B_SIDE_OPPONENT].retaliateTimer == 1)
+         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DEATH_CURRENT);
             gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
             gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
             BattleScriptPushCursor();
@@ -21064,6 +21129,13 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
     {
         defStage = DEFAULT_STAT_STAGE;
     }
+    if (HasBattlerAbility(battlerAtk, ABILITY_HIGH_CLIMBER)
+     && IsMoveMakingContact(move, battlerAtk)
+     && !IsBattlerGrounded(battlerDef)
+     && defStage > DEFAULT_STAT_STAGE)
+    {
+        defStage = DEFAULT_STAT_STAGE;
+    }
     defStat *= gStatStageRatios[defStage][0];
     defStat /= gStatStageRatios[defStage][1];
 
@@ -21788,6 +21860,19 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
     {
         return UQ_4_12(0.8);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_SKYSCRAPER)
+     && IS_MOVE_SPECIAL(move)
+     && typeEffectivenessModifier > UQ_4_12(0.0)
+     && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battlerDef)] & gBitTable[gBattlerPartyIndexes[battlerDef]]))
+    {
+        if (updateFlags)
+        {
+            RecordAbilityBattle(battlerDef, ABILITY_SKYSCRAPER);
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battlerDef)] |= gBitTable[gBattlerPartyIndexes[battlerDef]];
+        }
+        return UQ_4_12(0.5);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_MAIN_EVENT)
