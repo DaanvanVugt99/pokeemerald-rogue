@@ -3707,6 +3707,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
         {
             bool32 septicFumesActivated = FALSE;
             bool32 ultraVeninActivated = FALSE;
+            bool32 feverDreamActivated = FALSE;
 
             if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
              && gBattleScripting.battler < gBattlersCount
@@ -3737,7 +3738,31 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
             }
 
+            if (gBattleScripting.moveEffect == MOVE_EFFECT_SLEEP
+             && gBattleScripting.battler < gBattlersCount
+             && gEffectBattler < gBattlersCount
+             && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)
+             && IsBattlerAlive(gBattleScripting.battler)
+             && !gProtectStructs[gBattleScripting.battler].confusionSelfDmg
+             && !gProtectStructs[gBattleScripting.battler].extraMoveUsed
+             && !(gBattleMons[gBattleScripting.battler].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+             && HasBattlerAbility(gBattleScripting.battler, ABILITY_FEVER_DREAM))
+            {
+                feverDreamActivated = TRUE;
+                gBattlerAttacker = gBattlerAbility = gBattleScripting.battler;
+                gBattlerTarget = gEffectBattler;
+                gCalledMove = MOVE_METRONOME;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[gBattleScripting.battler].extraMoveUsed = TRUE;
+                gDisableStructs[gBattleScripting.battler].uniquePersistentStateActive = TRUE;
+                SetBattlerTriggeredAbility(gBattleScripting.battler, ABILITY_FEVER_DREAM);
+                RecordAbilityBattle(gBattleScripting.battler, ABILITY_FEVER_DREAM);
+                SetAtkCancellerForCalledMove();
+            }
+
             BattleScriptPush(gBattlescriptCurrInstr + 1);
+            if (feverDreamActivated)
+                BattleScriptPush(BattleScript_AbilityUsesCalledMove);
             if (septicFumesActivated)
                 BattleScriptPush(BattleScript_SepticFumesActivates);
             if (ultraVeninActivated)
@@ -4467,8 +4492,15 @@ static void Cmd_seteffectwithchance(void)
         u32 tempChance = VarGet(VAR_TEMP_MOVEEFECT_CHANCE);
         u32 tempEffect = VarGet(VAR_TEMP_MOVEEFFECT);
 
-        if (tempChance != 0)
+        if (tempChance == TEMP_MOVEEFFECT_CLEAR)
+        {
+            gBattleScripting.moveEffect = 0;
+            percentChance = 0;
+        }
+        else if (tempChance != 0)
+        {
             percentChance = tempChance;
+        }
         if (tempEffect != 0)
             gBattleScripting.moveEffect = tempEffect;
 

@@ -119,6 +119,7 @@
 #define VAR_EXTRA_MOVE_DAMAGE                VAR_UNUSED_0x404A
 #define VAR_TEMP_MOVEEFFECT                  VAR_UNUSED_0x404B
 #define VAR_TEMP_MOVEEFECT_CHANCE            VAR_UNUSED_0x404C
+#define TEMP_MOVEEFFECT_CLEAR                0xFFFF
 
 #define VAR_ROGUE_ITEM0                      0x4061 
 #define VAR_ROGUE_ITEM1                      0x4062 

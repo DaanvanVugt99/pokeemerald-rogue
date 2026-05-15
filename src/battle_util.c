@@ -118,6 +118,8 @@ static bool32 TryUseTeaServiceCalledMove(u32 battler);
 static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target);
 static bool32 TryUseShardstormCalledMove(u32 battler, u32 target);
 static bool32 TryUseFalseApplauseCalledMove(u32 battler, u32 target);
+static bool32 TryUseCapsaicinCrazeCalledMove(u32 battler, u32 target);
+static bool32 TryUseFuneralRiteCalledMove(u32 battler);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
@@ -4234,6 +4236,9 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
             gBattleStruct->atkCancellerTracker++;
             break;
         case CANCELLER_MULTIHIT_MOVES:
+        {
+            bool32 isMultiHitMove = FALSE;
+
             if (gBattleMoves[gCurrentMove].effect == EFFECT_MULTI_HIT)
             {
                 u16 ability = gBattleMons[gBattlerAttacker].ability;
@@ -4258,6 +4263,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 }
 
                 PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)
+                isMultiHitMove = TRUE;
             }
             else if (gBattleMoves[gCurrentMove].strikeCount > 1)
             {
@@ -4270,6 +4276,16 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                     gMultiHitCounter = gBattleMoves[gCurrentMove].strikeCount;
                     PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 3, 0)
                 }
+
+                isMultiHitMove = TRUE;
+            }
+
+            if (isMultiHitMove
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_FAMILY_FEUD)
+             && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
+            {
+                gMultiHitCounter++;
+                gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
             }
             else if (B_BEAT_UP >= GEN_5 && gBattleMoves[gCurrentMove].effect == EFFECT_BEAT_UP)
             {
@@ -4288,12 +4304,13 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 gBattleStruct->beatUpSlot = 0;
                 PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)
             }
-            else
+            else if (!isMultiHitMove)
             {
                 gMultiHitCounter = 0;
             }
             gBattleStruct->atkCancellerTracker++;
             break;
+        }
         case CANCELLER_END:
             break;
         }
@@ -6835,6 +6852,57 @@ static bool32 TryUseFalseApplauseCalledMove(u32 battler, u32 target)
     gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
     gCalledMove = MOVE_TORMENT;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static const u16 sCapsaicinCrazeMoves[] =
+{
+    MOVE_LEAFAGE,
+    MOVE_MAGICAL_LEAF,
+    MOVE_FIRE_PUNCH,
+    MOVE_EMBER,
+};
+
+static bool32 TryUseCapsaicinCrazeCalledMove(u32 battler, u32 target)
+{
+    if (target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || target == battler
+     || GetBattlerSide(target) == GetBattlerSide(battler))
+    {
+        if (!TryGetOpposingExtraMoveTarget(battler, &target))
+            return FALSE;
+    }
+
+    if (!CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_CAPSAICIN_CRAZE);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = RandomElement(RNG_ROGUE_CAPSAICIN_CRAZE, sCapsaicinCrazeMoves);
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
+    VarSet(VAR_TEMP_MOVEEFECT_CHANCE, TEMP_MOVEEFFECT_CLEAR);
+    VarSet(VAR_TEMP_MOVEEFFECT, 0);
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryUseFuneralRiteCalledMove(u32 battler)
+{
+    if (!CanUseSelfExtraMove(battler))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_FUNERAL_RITE);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+    gCalledMove = MOVE_TRICK_ROOM;
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     StartAbilityCalledMoveScript();
@@ -11951,6 +12019,22 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_FAMILY_FEUD)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniquePersistentStateActive)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FAMILY_FEUD);
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SLEEP_DUST)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -13609,6 +13693,34 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CAPSAICIN_CRAZE)
+         && IsBattlerAlive(battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseCapsaicinCrazeCalledMove(battler, gBattlerTarget))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FUNERAL_RITE)
+         && IsBattlerAlive(battler)
+         && move == MOVE_REVIVAL_BLESSING
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseFuneralRiteCalledMove(battler))
+        {
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_INTENT)
          && IsBattlerAlive(battler)
          && !IS_MOVE_STATUS(move)
@@ -14408,6 +14520,45 @@ if (triggeringAbility != ABILITY_NONE)
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FEVER_DREAM)
+         && IsBattlerAlive(battler)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && gProtectStructs[battler].extraMoveUsed
+         && gCalledMove == MOVE_METRONOME
+         && !gProtectStructs[battler].confusionSelfDmg
+         && !(gBattleMons[battler].status1 & (STATUS1_SLEEP | STATUS1_FREEZE)))
+        {
+            u32 target = gBattlerTarget;
+
+            if (target >= gBattlersCount
+             || !IsBattlerAlive(target)
+             || GetBattlerSide(target) == GetBattlerSide(battler))
+            {
+                target = gBattlersCount;
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                    {
+                        target = i;
+                        break;
+                    }
+                }
+            }
+
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+            if (target < gBattlersCount)
+            {
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_METRONOME;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMoveNoPopup;
                 effect++;
             }
         }
