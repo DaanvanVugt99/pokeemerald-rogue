@@ -820,6 +820,7 @@ static const u8 sAuraDescription[] = _("Moves deal more damage as HP gets lower.
 static const u8 sSandmanDescription[] = _("Ground and Rock moves may make foes drowsy.");
 static const u8 sKomboDescription[] = _("First Poison move each switch-in uses weak Knock Off.");
 static const u8 sToxicTechniqueDescription[] = _("Physical and special moves raise the opposite attack.");
+static const u8 sGrafittiTagDescription[] = _("On switch-in, tags foes. Tagged foes leave Toxic Spikes when switching out.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1350,6 +1351,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DROP_OFF] = _("Drop Off"),
     [ABILITY_STARMOBILE] = _("Starmobile"),
     [ABILITY_CARVING_RUSH] = _("Carving Rush"),
+    [ABILITY_GRAFITTI_TAG] = _("Grafitti Tag"),
     [ABILITY_GLIDER] = _("Glider"),
     [ABILITY_KNIGHTLY] = _("Knightly"),
     [ABILITY_SPOREFIELD] = _("Sporefield"),
@@ -2183,6 +2185,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_DROP_OFF] = _("Drop Off"),
     [ABILITY_STARMOBILE] = _("Starmobile"),
     [ABILITY_CARVING_RUSH] = _("CarvingRush"),
+    [ABILITY_GRAFITTI_TAG] = _("GrafittiTag"),
     [ABILITY_GLIDER] = _("Glider"),
     [ABILITY_KNIGHTLY] = _("Knightly"),
     [ABILITY_SPOREFIELD] = _("Sporefield"),
@@ -3201,6 +3204,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DROP_OFF] = sDropOffDescription,
     [ABILITY_STARMOBILE] = sStarmobileDescription,
     [ABILITY_CARVING_RUSH] = sCarvingRushDescription,
+    [ABILITY_GRAFITTI_TAG] = sGrafittiTagDescription,
     [ABILITY_GLIDER] = sGliderDescription,
     [ABILITY_KNIGHTLY] = sKnightlyDescription,
     [ABILITY_SPOREFIELD] = sSporefieldDescription,

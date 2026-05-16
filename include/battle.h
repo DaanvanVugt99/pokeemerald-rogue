@@ -124,6 +124,7 @@ struct DisableStruct
     u8 usedProteanLibero:1;
     u8 uniqueOncePerSwitchInUsed:1;
     u8 ultraAscentActive:1;
+    u8 grafittiTagged:1;
     u8 frozenTurns:2;
     bool8 uniquePersistentStateActive;
 };

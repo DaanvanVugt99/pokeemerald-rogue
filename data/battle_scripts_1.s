@@ -9604,6 +9604,17 @@ BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return
 
+BattleScript_GrafittiTagActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_GRAFITTAGGED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_GrafittiTagToxicSpikes::
+	printstring STRINGID_POISONSPIKESSCATTERED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_JungleLashActivates::
 	call BattleScript_AbilityPopUp
 	setbyte gBattleCommunication, 0

@@ -16764,6 +16764,21 @@ static void Cmd_switchoutabilities(void)
     }
     else
     {
+        if (gDisableStructs[battler].grafittiTagged)
+        {
+            gDisableStructs[battler].grafittiTagged = FALSE;
+            gBattlerTarget = battler;
+
+            if (gSideTimers[GetBattlerSide(battler)].toxicSpikesAmount < 2)
+            {
+                gSideTimers[GetBattlerSide(battler)].toxicSpikesAmount++;
+                gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TOXIC_SPIKES;
+                BattleScriptPush(cmd->nextInstr);
+                gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
+                return;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_MIGRATION))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_MIGRATION);

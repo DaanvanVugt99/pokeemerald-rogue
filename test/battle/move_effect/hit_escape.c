@@ -101,7 +101,7 @@ SINGLE_BATTLE_TEST("U-turn switches the user out after Ice Face activates")
         ASSUME(P_GEN_8_POKEMON == TRUE);
         PLAYER(SPECIES_BEEDRILL);
         PLAYER(SPECIES_WYNAUT);
-        OPPONENT(SPECIES_EISCUE) { Ability(ABILITY_ICE_FACE); }
+        OPPONENT(SPECIES_EISCUE) { Ability(ABILITY_ICE_FACE); UniqueAbility(ABILITY_LIMBER); }
     } WHEN {
         TURN { MOVE(player, MOVE_U_TURN); SEND_OUT(player, 1); }
     } SCENE {

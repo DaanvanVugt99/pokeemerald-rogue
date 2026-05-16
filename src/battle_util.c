@@ -36,6 +36,7 @@
 #include "pokedex.h"
 #include "mail.h"
 #include "field_weather.h"
+#include "palette.h"
 #include "rogue.h"
 #include "rogue_adventurepaths.h"
 #include "constants/abilities.h"
@@ -51,6 +52,7 @@
 #include "constants/trainers.h"
 #include "constants/weather.h"
 #include "constants/pokemon.h"
+#include "constants/rgb.h"
 #include "constants/vars.h"
 
 #include "rogue_controller.h"
@@ -78,6 +80,7 @@ static bool32 TryRemoveTargetSideScreens(u32 target);
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
+static void ApplyGrafittiTagPalette(u32 battler);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
@@ -7551,6 +7554,35 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
                 StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_GRAFITTI_TAG) && !uniqueDone)
+        {
+            u32 opposingBattler = BATTLE_OPPOSITE(battler);
+            bool32 tagged = FALSE;
+            u32 i;
+
+            uniqueDone = TRUE;
+
+            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
+            {
+                if (!IsBattlerAlive(opposingBattler) || GetBattlerSide(battler) == GetBattlerSide(opposingBattler))
+                    continue;
+
+                gDisableStructs[opposingBattler].grafittiTagged = TRUE;
+                ApplyGrafittiTagPalette(opposingBattler);
+                tagged = TRUE;
+            }
+
+            if (tagged)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_GRAFITTI_TAG);
+                gBattlerAttacker = gBattlerAbility = battler;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                BattleScriptPushCursorAndCallback(BattleScript_GrafittiTagActivates);
                 return 1;
             }
         }
@@ -23901,6 +23933,13 @@ static bool32 TryRemoveTargetSideScreens(u32 target)
     }
 
     return FALSE;
+}
+
+static void ApplyGrafittiTagPalette(u32 battler)
+{
+    u32 paletteNum = gSprites[gBattlerSpriteIds[battler]].oam.paletteNum;
+
+    BlendPalette(OBJ_PLTT_ID(paletteNum), 16, 6, RGB(31, 0, 31));
 }
 
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler)
