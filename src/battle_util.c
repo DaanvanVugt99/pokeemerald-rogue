@@ -12218,9 +12218,10 @@ if (triggeringAbility != ABILITY_NONE)
          && !gDisableStructs[battler].uniquePersistentStateActive)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_FAMILY_FEUD);
+            gBattleScripting.battler = battler;
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            gBattlescriptCurrInstr = BattleScript_FamilyFeudReadied;
             effect++;
         }
 
@@ -13937,7 +13938,7 @@ if (triggeringAbility != ABILITY_NONE)
             SetBattlerTriggeredAbility(battler, ABILITY_INTENT);
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            gBattlescriptCurrInstr = BattleScript_IntentFocused;
             effect++;
         }
 
@@ -15945,7 +15946,7 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
             SetBattlerTriggeredAbility(battler, ABILITY_CARVING_RUSH);
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            gBattlescriptCurrInstr = BattleScript_CarvingRushReadied;
             effect++;
         }
 

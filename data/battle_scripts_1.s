@@ -9647,6 +9647,26 @@ BattleScript_TripwirePrintStatMsg:
 BattleScript_TripwireEnd:
 	return
 
+BattleScript_IntentFocused::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_INTENTFOCUSED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_FamilyFeudReadied::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_FAMILYFEUDREADIED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_CarvingRushReadied::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_SWORDS_DANCE
+	waitanimation
+	printstring STRINGID_CARVINGRUSHREADIED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_JungleLashActivates::
 	call BattleScript_AbilityPopUp
 	setbyte gBattleCommunication, 0

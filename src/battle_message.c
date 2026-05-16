@@ -885,9 +885,15 @@ static const u8 sText_FossilMemoryAwakened[] = _("{B_ATK_NAME_WITH_PREFIX}'s fos
 static const u8 sText_TumbleweedClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Tumbleweed\ncleared away the hazards!");
 static const u8 sText_GrafittiTagged[] = _("{B_ATK_NAME_WITH_PREFIX} tagged\nthe opposing Pokemon!");
 static const u8 sText_TripwireActivates[] = _("{B_DEF_NAME_WITH_PREFIX} was caught\nin {B_ATK_NAME_WITH_PREFIX}'s tripwire!");
+static const u8 sText_IntentFocused[] = _("{B_ATK_NAME_WITH_PREFIX} focused\nits intent!");
+static const u8 sText_FamilyFeudReadied[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} readied\nan extra hit!");
+static const u8 sText_CarvingRushReadied[] = _("{B_ATK_NAME_WITH_PREFIX}'s slicing moves\nwill drain HP!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_CARVINGRUSHREADIED - BATTLESTRINGS_TABLE_START] = sText_CarvingRushReadied,
+    [STRINGID_FAMILYFEUDREADIED - BATTLESTRINGS_TABLE_START] = sText_FamilyFeudReadied,
+    [STRINGID_INTENTFOCUSED - BATTLESTRINGS_TABLE_START] = sText_IntentFocused,
     [STRINGID_TRIPWIREACTIVATES - BATTLESTRINGS_TABLE_START] = sText_TripwireActivates,
     [STRINGID_GRAFITTAGGED - BATTLESTRINGS_TABLE_START] = sText_GrafittiTagged,
     [STRINGID_TUMBLEWEEDCLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_TumbleweedClearedHazards,

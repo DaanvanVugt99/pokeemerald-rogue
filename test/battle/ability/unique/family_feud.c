@@ -29,6 +29,7 @@ SINGLE_BATTLE_TEST("Family Feud adds one hit to the next multi-hit move after be
             ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
             HP_BAR(player);
             ABILITY_POPUP(player, ABILITY_FAMILY_FEUD);
+            MESSAGE("Tandemaus readied\nan extra hit!");
         }
         else
         {
@@ -66,6 +67,7 @@ SINGLE_BATTLE_TEST("Family Feud is not spent by a single-hit move before the nex
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
         HP_BAR(player);
         ABILITY_POPUP(player, ABILITY_FAMILY_FEUD);
+        MESSAGE("Tandemaus readied\nan extra hit!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_BULLET_SEED, player);

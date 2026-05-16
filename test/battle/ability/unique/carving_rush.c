@@ -22,6 +22,8 @@ SINGLE_BATTLE_TEST("Carving Rush makes slicing moves restore 1/4 damage dealt af
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_FILLET_AWAY, player);
         ABILITY_POPUP(player, ABILITY_CARVING_RUSH);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, player);
+        MESSAGE("Veluza's slicing moves\nwill drain HP!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         HP_BAR(opponent, captureDamage: &damage);
         ABILITY_POPUP(player, ABILITY_CARVING_RUSH);
