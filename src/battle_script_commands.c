@@ -608,6 +608,7 @@ static void Cmd_tryrecycleitem(void);
 static void Cmd_settypetoterrain(void);
 
 static bool32 TryActivateTerraform(const u8 *resumeInstr);
+static bool32 TrySetGrafittiTagToxicSpikes(u32 battler);
 static void Cmd_pursuitdoubles(void);
 static void Cmd_snatchsetbattlers(void);
 static void Cmd_removelightscreenreflect(void);
@@ -8525,6 +8526,8 @@ static void Cmd_switchineffects(void)
     s32 i;
     u32 battler = GetBattlerForBattleScript(cmd->battler);
 
+    ReapplyGrafittiTagPalettes();
+
     UpdateSentPokesToOpponentValue(battler);
 
     gHitMarker &= ~HITMARKER_FAINTED(battler);
@@ -11419,6 +11422,24 @@ static void Cmd_various(void)
         gBattlescriptCurrInstr = BattleScript_TumbleweedTailwind;
         return;
     }
+    case VARIOUS_TRY_ACTIVATE_GRAFITTI_TAG:
+    {
+        VARIOUS_ARGS();
+
+        if (TrySetGrafittiTagToxicSpikes(battler))
+        {
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
+            return;
+        }
+
+        break;
+    }
+    case VARIOUS_APPLY_GRAFITTI_TAG_PALETTES:
+        VARIOUS_ARGS();
+
+        ReapplyGrafittiTagPalettes();
+        break;
     case VARIOUS_TRY_ACTIVATE_RECEIVER: // Partner gets fainted's ally ability
     {
         VARIOUS_ARGS();
@@ -16747,6 +16768,24 @@ static bool32 HasJungleLashTarget(u32 battler)
     return FALSE;
 }
 
+static bool32 TrySetGrafittiTagToxicSpikes(u32 battler)
+{
+    u32 side = GetBattlerSide(battler);
+
+    if (!gDisableStructs[battler].grafittiTagged)
+        return FALSE;
+
+    gDisableStructs[battler].grafittiTagged = FALSE;
+    gBattlerTarget = battler;
+
+    if (gSideTimers[side].toxicSpikesAmount >= 2)
+        return FALSE;
+
+    gSideTimers[side].toxicSpikesAmount++;
+    gSideStatuses[side] |= SIDE_STATUS_TOXIC_SPIKES;
+    return TRUE;
+}
+
 static void Cmd_switchoutabilities(void)
 {
     CMD_ARGS(u8 battler);
@@ -16764,19 +16803,11 @@ static void Cmd_switchoutabilities(void)
     }
     else
     {
-        if (gDisableStructs[battler].grafittiTagged)
+        if (TrySetGrafittiTagToxicSpikes(battler))
         {
-            gDisableStructs[battler].grafittiTagged = FALSE;
-            gBattlerTarget = battler;
-
-            if (gSideTimers[GetBattlerSide(battler)].toxicSpikesAmount < 2)
-            {
-                gSideTimers[GetBattlerSide(battler)].toxicSpikesAmount++;
-                gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TOXIC_SPIKES;
-                BattleScriptPush(cmd->nextInstr);
-                gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
-                return;
-            }
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
+            return;
         }
 
         if (HasBattlerAbility(battler, ABILITY_MIGRATION))

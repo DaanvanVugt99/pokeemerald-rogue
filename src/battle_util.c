@@ -80,7 +80,6 @@ static bool32 TryRemoveTargetSideScreens(u32 target);
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
-static void ApplyGrafittiTagPalette(u32 battler);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
@@ -7571,8 +7570,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 if (!IsBattlerAlive(opposingBattler) || GetBattlerSide(battler) == GetBattlerSide(opposingBattler))
                     continue;
 
-                gDisableStructs[opposingBattler].grafittiTagged = TRUE;
-                ApplyGrafittiTagPalette(opposingBattler);
+                if (!tagged)
+                    gBattlerTarget = opposingBattler;
+                SetGrafittiTag(opposingBattler);
                 tagged = TRUE;
             }
 
@@ -23935,11 +23935,36 @@ static bool32 TryRemoveTargetSideScreens(u32 target)
     return FALSE;
 }
 
+static const u16 sGrafittiTagColors[] =
+{
+    RGB(31, 0, 31),
+    RGB(31, 4, 0),
+    RGB(0, 24, 31),
+    RGB(4, 31, 0),
+};
+
 static void ApplyGrafittiTagPalette(u32 battler)
 {
     u32 paletteNum = gSprites[gBattlerSpriteIds[battler]].oam.paletteNum;
 
-    BlendPalette(OBJ_PLTT_ID(paletteNum), 16, 6, RGB(31, 0, 31));
+    BlendPalette(OBJ_PLTT_ID(paletteNum), 16, 6, sGrafittiTagColors[gDisableStructs[battler].grafittiTagColor]);
+}
+
+void SetGrafittiTag(u32 battler)
+{
+    gDisableStructs[battler].grafittiTagged = TRUE;
+    gDisableStructs[battler].grafittiTagColor = Random2() & 3;
+}
+
+void ReapplyGrafittiTagPalettes(void)
+{
+    u32 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (gDisableStructs[i].grafittiTagged && IsBattlerAlive(i))
+            ApplyGrafittiTagPalette(i);
+    }
 }
 
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler)

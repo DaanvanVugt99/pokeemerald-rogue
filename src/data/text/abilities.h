@@ -820,7 +820,7 @@ static const u8 sAuraDescription[] = _("Moves deal more damage as HP gets lower.
 static const u8 sSandmanDescription[] = _("Ground and Rock moves may make foes drowsy.");
 static const u8 sKomboDescription[] = _("First Poison move each switch-in uses weak Knock Off.");
 static const u8 sToxicTechniqueDescription[] = _("Physical and special moves raise the opposite attack.");
-static const u8 sGrafittiTagDescription[] = _("On switch-in, tags foes. Tagged foes leave Toxic Spikes when switching out.");
+static const u8 sGrafittiTagDescription[] = _("On switch-in, tags foes. Tagged foes leave Toxic Spikes when switching or fainting.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE

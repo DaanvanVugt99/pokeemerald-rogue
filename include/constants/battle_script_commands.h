@@ -248,6 +248,8 @@
 #define VARIOUS_RESTORE_ATTACKER_AND_TARGET          155
 #define VARIOUS_TRY_ACTIVATE_TUMBLEWEED              156
 #define VARIOUS_TRY_ACTIVATE_DROP_OFF                157
+#define VARIOUS_TRY_ACTIVATE_GRAFITTI_TAG            158
+#define VARIOUS_APPLY_GRAFITTI_TAG_PALETTES          159
 
 // Cmd_manipulatedamage
 #define DMG_CHANGE_SIGN            0

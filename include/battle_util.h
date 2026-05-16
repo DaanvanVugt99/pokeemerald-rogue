@@ -160,6 +160,8 @@ void GetBattlerKnownMoveCategoryCounts(u32 battler, u32 *damagingMoveCount, u32 
 bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility);
 bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer);
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg);
+void SetGrafittiTag(u32 battler);
+void ReapplyGrafittiTagPalettes(void);
 bool32 TryPrimalReversion(u32 battler);
 bool32 IsNeutralizingGasOnField(void);
 bool32 IsMoldBreakerTypeAbility(u32 ability);

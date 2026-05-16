@@ -6811,6 +6811,7 @@ BattleScript_FaintAttacker::
 	pause B_WAIT_TIME_LONG
 	dofaintanimation BS_ATTACKER
 	printstring STRINGID_ATTACKERFAINTED
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_GRAFITTI_TAG
 	cleareffectsonfaint BS_ATTACKER
 	tryactivatesoulheart
 	tryactivatereceiver BS_ATTACKER
@@ -6826,6 +6827,7 @@ BattleScript_FaintTarget::
 	pause B_WAIT_TIME_LONG
 	dofaintanimation BS_TARGET
 	printstring STRINGID_TARGETFAINTED
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_GRAFITTI_TAG
 	cleareffectsonfaint BS_TARGET
 	tryactivatefellstinger BS_ATTACKER
 	tryactivatesoulheart
@@ -9606,6 +9608,9 @@ BattleScript_AbilityPopupReturn::
 
 BattleScript_GrafittiTagActivates::
 	call BattleScript_AbilityPopUp
+	playanimation BS_TARGET, B_ANIM_GRAFITTI_TAG, NULL
+	waitanimation
+	various BS_TARGET, VARIOUS_APPLY_GRAFITTI_TAG_PALETTES
 	printstring STRINGID_GRAFITTAGGED
 	waitmessage B_WAIT_TIME_LONG
 	end3

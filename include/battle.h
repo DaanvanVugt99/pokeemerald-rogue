@@ -125,6 +125,7 @@ struct DisableStruct
     u8 uniqueOncePerSwitchInUsed:1;
     u8 ultraAscentActive:1;
     u8 grafittiTagged:1;
+    u8 grafittiTagColor:2;
     u8 frozenTurns:2;
     bool8 uniquePersistentStateActive;
 };
