@@ -884,9 +884,11 @@ static const u8 sText_PasturizedHeal[] = _("{B_DEF_NAME_WITH_PREFIX} restored HP
 static const u8 sText_FossilMemoryAwakened[] = _("{B_ATK_NAME_WITH_PREFIX}'s fossil\nmemory awakened!");
 static const u8 sText_TumbleweedClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Tumbleweed\ncleared away the hazards!");
 static const u8 sText_GrafittiTagged[] = _("{B_ATK_NAME_WITH_PREFIX} tagged\nthe opposing Pokemon!");
+static const u8 sText_TripwireActivates[] = _("{B_DEF_NAME_WITH_PREFIX} was caught\nin {B_ATK_NAME_WITH_PREFIX}'s tripwire!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_TRIPWIREACTIVATES - BATTLESTRINGS_TABLE_START] = sText_TripwireActivates,
     [STRINGID_GRAFITTAGGED - BATTLESTRINGS_TABLE_START] = sText_GrafittiTagged,
     [STRINGID_TUMBLEWEEDCLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_TumbleweedClearedHazards,
     [STRINGID_FOSSILMEMORYAWAKENED - BATTLESTRINGS_TABLE_START] = sText_FossilMemoryAwakened,

@@ -743,8 +743,9 @@
 #define STRINGID_FOSSILMEMORYAWAKENED                 741
 #define STRINGID_TUMBLEWEEDCLEAREDHAZARDS             742
 #define STRINGID_GRAFITTAGGED                         743
+#define STRINGID_TRIPWIREACTIVATES                    744
 
-#define BATTLESTRINGS_COUNT                           744
+#define BATTLESTRINGS_COUNT                           745
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

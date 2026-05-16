@@ -9620,6 +9620,33 @@ BattleScript_GrafittiTagToxicSpikes::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_TripwireActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TRIPWIREACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	jumpifability BS_TARGET, ABILITY_MAGIC_GUARD, BattleScript_TripwireTrySpeed
+	dmg_1_8_targethp
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	tryfaintmon BS_TARGET
+	tryfaintmon_spikes BS_TARGET, BattleScript_DmgHazardsOnTargetFainted
+BattleScript_TripwireTrySpeed:
+	setstatchanger STAT_SPEED, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_TripwireEnd
+	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_TripwireStatAnim
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_FELL_EMPTY, BattleScript_TripwireEnd
+	pause B_WAIT_TIME_SHORT
+	goto BattleScript_TripwirePrintStatMsg
+BattleScript_TripwireStatAnim:
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+BattleScript_TripwirePrintStatMsg:
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_TripwireEnd:
+	return
+
 BattleScript_JungleLashActivates::
 	call BattleScript_AbilityPopUp
 	setbyte gBattleCommunication, 0

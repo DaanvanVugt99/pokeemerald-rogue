@@ -80,6 +80,7 @@ static bool32 TryRemoveTargetSideScreens(u32 target);
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
+static bool32 TryActivateTripwire(u32 battler);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
@@ -7443,6 +7444,41 @@ static bool32 TryForecastFrillChangeSecondaryType(u32 battler)
     return TRUE;
 }
 
+static bool32 TryActivateTripwire(u32 battler)
+{
+    u32 i;
+
+    if (!IsBattlerAlive(battler))
+        return FALSE;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 tripwireBattler = gBattlerByTurnOrder[i];
+        u32 side;
+        u32 partyBit;
+
+        if (!IsBattlerAlive(tripwireBattler)
+         || GetBattlerSide(tripwireBattler) == GetBattlerSide(battler)
+         || !HasBattlerAbility(tripwireBattler, ABILITY_TRIPWIRE))
+            continue;
+
+        side = GetBattlerSide(tripwireBattler);
+        partyBit = gBitTable[gBattlerPartyIndexes[tripwireBattler]];
+        if (gBattleStruct->uniqueAbilityUsed[side] & partyBit)
+            continue;
+
+        gBattleStruct->uniqueAbilityUsed[side] |= partyBit;
+        SetBattlerTriggeredAbility(tripwireBattler, ABILITY_TRIPWIRE);
+        gBattlerAttacker = gBattlerAbility = tripwireBattler;
+        gBattlerTarget = battler;
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_TripwireActivates;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg)
 {
     u32 effect = 0;
@@ -7484,6 +7520,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (effect != 0)
                 return effect;
         }
+
+        if (TryActivateTripwire(battler))
+            return 1;
 
         if (HasBattlerAbility(battler, ABILITY_CLAIRVOYANT) && !uniqueDone)
         {
@@ -12467,7 +12506,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_TRIPWIRE)
+        if (HasBattlerAbility(battler, ABILITY_SNAREWIRE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -12475,7 +12514,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsMoveMakingContact(move, moveEndAttacker)
          && CanBeConfused(moveEndAttacker))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_TRIPWIRE);
+            SetBattlerTriggeredAbility(battler, ABILITY_SNAREWIRE);
             gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CONFUSION;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
