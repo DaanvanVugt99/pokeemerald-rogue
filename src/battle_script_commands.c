@@ -1432,6 +1432,10 @@ static void Cmd_attackcanceler(void)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_ABYSSAL_MAW) && gBattleMoves[gCurrentMove].bitingMove)
      || HasBattlerAbility(gBattlerAttacker, ABILITY_BRUTAL)
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_IMPACT)
+      && IsOnlyParadoxInParty(gBattlerAttacker)
+      && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+      && !gBattleStruct->isAtkCancelerForCalledMove)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_CENTER_STAGE)
       && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
       && moveType == TYPE_FLYING
@@ -1440,6 +1444,8 @@ static void Cmd_attackcanceler(void)
     && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
     && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE)
     {
+        if (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_IMPACT))
+            gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
         gSpecialStatuses[gBattlerAttacker].parentalBondState = PARENTAL_BOND_1ST_HIT;
         gMultiHitCounter = 2;
         PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)
@@ -1694,6 +1700,8 @@ static bool32 AccuracyCalcHelper(u16 move)
       && gBattleMoves[move].soundMove)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_HAUTE_COUTURE)
       && moveType == TYPE_NORMAL)
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_TARGETING)
+      && IsOnlyParadoxInParty(gBattlerAttacker))
      || (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
      || (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON))
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_ORACLE_SHRINE)

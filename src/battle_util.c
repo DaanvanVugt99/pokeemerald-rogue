@@ -1204,6 +1204,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
     [ABILITY_FLUFFY] = 1,
     [ABILITY_QUEENLY_MAJESTY] = 1,
     [ABILITY_GRIDLOCK] = 1,
+    [ABILITY_SINGULARITY_AIRSPACE] = 1,
     [ABILITY_WATER_BUBBLE] = 1,
     [ABILITY_MIRROR_ARMOR] = 1,
     [ABILITY_PUNK_ROCK] = 1,
@@ -4329,6 +4330,9 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
     return effect;
 }
 
+static bool32 IsSwitchingMove(u32 move);
+static u32 GetSingularityAirspaceBattler(u32 battler);
+
 // After Protean Activation.
 u8 AtkCanceller_UnableToUseMove2(void)
 {
@@ -4369,6 +4373,24 @@ u8 AtkCanceller_UnableToUseMove2(void)
                 gBattlescriptCurrInstr = BattleScript_DazzlingProtected;
                 gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
                 effect = 1;
+            }
+            gBattleStruct->atkCancellerTracker++;
+            break;
+        case CANCELLER_SINGULARITY_AIRSPACE:
+            {
+                u32 airspaceBattler = GetSingularityAirspaceBattler(gBattlerAttacker);
+
+                if (airspaceBattler != MAX_BATTLERS_COUNT
+                 && (GetChosenMovePriority(gBattlerAttacker) > 0 || IsSwitchingMove(gCurrentMove)))
+                {
+                    CancelMultiTurnMoves(gBattlerAttacker);
+                    SetBattlerTriggeredAbility(airspaceBattler, ABILITY_SINGULARITY_AIRSPACE);
+                    if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
+                        gHitMarker |= HITMARKER_NO_PPDEDUCT;
+                    gBattlescriptCurrInstr = BattleScript_DazzlingProtected;
+                    gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
+                    effect = 1;
+                }
             }
             gBattleStruct->atkCancellerTracker++;
             break;
@@ -4694,6 +4716,40 @@ bool32 IsOnlyParadoxInParty(u32 battler)
         && gBattlerPartyIndexes[battler] < lastMonId
         && IsValidForBattle(&party[gBattlerPartyIndexes[battler]])
         && RoguePokedex_IsSpeciesParadox(GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES));
+}
+
+static bool32 IsSwitchingMove(u32 move)
+{
+    switch (move)
+    {
+    case MOVE_U_TURN:
+    case MOVE_VOLT_SWITCH:
+    case MOVE_FLIP_TURN:
+    case MOVE_PARTING_SHOT:
+    case MOVE_BATON_PASS:
+    case MOVE_TELEPORT:
+    case MOVE_CHILLY_RECEPTION:
+    case MOVE_SHED_TAIL:
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static u32 GetSingularityAirspaceBattler(u32 battler)
+{
+    u32 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != GetBattlerSide(battler)
+         && IsBattlerAlive(i)
+         && HasBattlerAbility(i, ABILITY_SINGULARITY_AIRSPACE)
+         && IsOnlyParadoxInParty(i))
+            return i;
+    }
+
+    return MAX_BATTLERS_COUNT;
 }
 
 bool32 DoesPartyShareTypeWithBattler(u32 battler)
@@ -22224,6 +22280,9 @@ static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
         return UQ_4_12(0.4);
     if (HasBattlerAbility(battlerAtk, ABILITY_BRUTAL))
         return UQ_4_12(0.25);
+    if (HasBattlerAbility(battlerAtk, ABILITY_SINGULARITY_IMPACT)
+     && IsOnlyParadoxInParty(battlerAtk))
+        return UQ_4_12(0.2);
     if (HasBattlerAbility(battlerAtk, ABILITY_CENTER_STAGE)
      && gDisableStructs[battlerAtk].uniquePersistentStateActive)
         return UQ_4_12(0.25);
