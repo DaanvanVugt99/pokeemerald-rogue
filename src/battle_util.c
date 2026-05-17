@@ -5278,6 +5278,24 @@ static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
 }
 
+static bool32 TryUsePrimalCurrentCalledMove(u32 battler)
+{
+    if (!HasBattlerAbility(battler, ABILITY_PRIMAL_CURRENT)
+     || !IsOnlyParadoxInParty(battler)
+     || (gStatuses3[battler] & STATUS3_MAGNET_RISE)
+     || !CanUseSelfExtraMove(battler))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_CURRENT);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+    gCalledMove = MOVE_MAGNET_RISE;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static bool32 ShouldDualitySwapOffensiveStats(u32 battlerAtk, u32 move, u32 moveType)
 {
     return HasBattlerAbility(battlerAtk, ABILITY_DUALITY)
@@ -9004,6 +9022,58 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 SetBattlerTriggeredAbility(battler, ABILITY_TUMBLEWEED);
                 gBattlerAttacker = battler;
                 BattleScriptPushCursorAndCallback(BattleScript_TumbleweedClearsHazards);
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_DRIVE)
+         && !uniqueDone
+         && IsOnlyParadoxInParty(battler))
+        {
+            bool32 canSetGravity = !(gFieldStatuses & STATUS_FIELD_GRAVITY);
+            bool32 hazardsCleared;
+
+            if (gDisableStructs[battler].uniquePersistentStateActive)
+            {
+                gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+                uniqueDone = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_DRIVE);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+                gCalledMove = MOVE_GRAVITY;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                StartAbilityCalledMoveScriptAt(BattleScript_AbilityUsesCalledMoveNoPopup);
+                return 1;
+            }
+
+            hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
+
+            if (hazardsCleared || canSetGravity)
+            {
+                uniqueDone = !hazardsCleared || !canSetGravity;
+                gDisableStructs[battler].uniquePersistentStateActive = hazardsCleared && canSetGravity;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_DRIVE);
+
+                if (hazardsCleared)
+                {
+                    gBattlerAttacker = gBattlerAbility = battler;
+                    BattleScriptPushCursorAndCallback(BattleScript_SingularityDriveClearsHazards);
+                }
+                else
+                {
+                    SetAtkCancellerForCalledMove();
+                    gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+                    gCalledMove = MOVE_GRAVITY;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[battler].extraMoveUsed = TRUE;
+                    StartAbilityCalledMoveScript();
+                }
+
                 return 1;
             }
         }
@@ -13062,6 +13132,33 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_PrimalMoltingActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_STORM_GLIDER)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && moveEndAttacker != battler
+         && battler == moveEndTarget
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && IsFinalMultiHitStrike()
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            bool32 useCharge = gBattleMoves[move].windMove && CanUseSelfExtraMove(battler);
+
+            SetBattlerTriggeredAbility(battler, ABILITY_STORM_GLIDER);
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            if (useCharge)
+            {
+                SetAtkCancellerForCalledMove();
+                gCalledMove = MOVE_CHARGE;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+            }
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = useCharge ? BattleScript_StormGliderTailwindCharge : BattleScript_StormGliderTailwind;
             effect++;
         }
 
@@ -17597,6 +17694,14 @@ if (triggeringAbility != ABILITY_NONE)
         battler = gBattlerAbility = gBattleScripting.battler;
         gLastUsedAbility = GetBattlerAbility(battler);
 
+        if ((gBattleWeather & B_WEATHER_SANDSTORM)
+         && WEATHER_HAS_EFFECT
+         && TryUsePrimalCurrentCalledMove(battler))
+        {
+            effect++;
+            break;
+        }
+
         if (TryForecastFrillChangeSecondaryType(battler))
         {
             BattleScriptPushCursorAndCallback(BattleScript_ForecastFrillTypeChange);
@@ -17645,6 +17750,14 @@ if (triggeringAbility != ABILITY_NONE)
         break;
     case ABILITYEFFECT_ON_TERRAIN:  // For ability effects that activate when the field terrain changes.
         gLastUsedAbility = GetBattlerAbility(battler);
+
+        if ((gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
+         && TryUsePrimalCurrentCalledMove(battler))
+        {
+            effect++;
+            break;
+        }
+
         switch (gLastUsedAbility)
         {
         case ABILITY_MIMICRY:
@@ -24516,6 +24629,8 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
      || HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD)
      || HasBattlerAbility(battler, ABILITY_PICKUP)
      || HasBattlerAbility(battler, ABILITY_TUMBLEWEED)
+     || (HasBattlerAbility(battler, ABILITY_SINGULARITY_DRIVE)
+      && IsOnlyParadoxInParty(battler))
      || HasBattlerAbility(battler, ABILITY_HOLLOW_NEST)
      || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
       && (gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))

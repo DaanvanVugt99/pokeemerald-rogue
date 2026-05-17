@@ -11567,6 +11567,13 @@ BattleScript_TumbleweedClearsHazards::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_SingularityDriveClearsHazards::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_SINGULARITYDRIVECLEAREDHAZARDS
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_TumbleweedTailwind::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
@@ -11579,6 +11586,30 @@ BattleScript_TumbleweedTailwind::
 BattleScript_TumbleweedTailwindEnd:
 	various BS_ATTACKER, VARIOUS_RESTORE_ATTACKER_AND_TARGET
 	return
+
+BattleScript_StormGliderTailwind::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	settailwind BattleScript_StormGliderTailwindEnd
+	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
+	waitanimation
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_TryTailwindAbilitiesLoop
+BattleScript_StormGliderTailwindEnd:
+	return
+
+BattleScript_StormGliderTailwindCharge::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	settailwind BattleScript_StormGliderCharge
+	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
+	waitanimation
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_TryTailwindAbilitiesLoop
+BattleScript_StormGliderCharge:
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
 
 BattleScript_FossilMemoryUsesCalledMove::
 	call BattleScript_AbilityPopUp
