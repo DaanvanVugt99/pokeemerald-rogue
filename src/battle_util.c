@@ -5352,6 +5352,60 @@ static bool32 TryUsePrimalCurrentCalledMove(u32 battler)
     return TRUE;
 }
 
+static bool32 TryUseSingularityReactorCalledMove(u32 battler, u32 target)
+{
+    if (target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || GetBattlerSide(target) == GetBattlerSide(battler)
+     || (gBattleMons[target].status2 & STATUS2_WRAPPED)
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_REACTOR);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_FIRE_SPIN;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryUseSingularityOverloadCalledMove(u32 battler, u32 move)
+{
+    u32 target;
+
+    if (move == MOVE_CHARGE)
+    {
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+
+        target = battler;
+        gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+    }
+    else
+    {
+        if (gSideStatuses[GetBattlerSide(BATTLE_OPPOSITE(battler))] & SIDE_STATUS_STEALTH_ROCK)
+            return FALSE;
+        if (!TryGetOpposingExtraMoveTarget(battler, &target))
+            return FALSE;
+
+        gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_OVERLOAD);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static bool32 ShouldDualitySwapOffensiveStats(u32 battlerAtk, u32 move, u32 moveType)
 {
     return HasBattlerAbility(battlerAtk, ABILITY_DUALITY)
@@ -12886,6 +12940,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_AVALANCHE_HIDE)
+         && gProtectStructs[battler].uniqueAbilityActive
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && moveType == TYPE_FIRE
+         && IsFinalMultiHitStrike())
+        {
+            gProtectStructs[battler].uniqueAbilityActive = FALSE;
+            if (IsBattlerAlive(battler) && TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_AVALANCHE_HIDE);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AvalancheHideActivates;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PSYCHIC_PARRY)
          && gProtectStructs[battler].uniqueAbilityActive
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -14417,6 +14489,60 @@ if (triggeringAbility != ABILITY_NONE)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_REACTOR)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_FIRE
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseSingularityReactorCalledMove(battler, gBattlerTarget))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_OVERLOAD)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_ELECTRIC
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseSingularityOverloadCalledMove(battler, MOVE_CHARGE))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_OVERLOAD)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_ROCK
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !gDisableStructs[battler].uniquePersistentStateActive
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUseSingularityOverloadCalledMove(battler, MOVE_STEALTH_ROCK))
+        {
             effect++;
         }
 
@@ -22790,6 +22916,20 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         {
             RecordAbilityBattle(battlerDef, ABILITY_SKYSCRAPER);
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battlerDef)] |= gBitTable[gBattlerPartyIndexes[battlerDef]];
+        }
+        return UQ_4_12(0.5);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_AVALANCHE_HIDE)
+     && moveType == TYPE_FIRE
+     && typeEffectivenessModifier > UQ_4_12(0.0)
+     && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battlerDef)] & gBitTable[gBattlerPartyIndexes[battlerDef]]))
+    {
+        if (updateFlags)
+        {
+            RecordAbilityBattle(battlerDef, ABILITY_AVALANCHE_HIDE);
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battlerDef)] |= gBitTable[gBattlerPartyIndexes[battlerDef]];
+            gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
         }
         return UQ_4_12(0.5);
     }
