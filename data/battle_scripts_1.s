@@ -2525,6 +2525,7 @@ BattleScript_EffectHitSwitchTarget:
 	jumpiffainted BS_TARGET, TRUE, BattleScript_MoveEnd
 	jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_AbilityPreventsPhasingOut
 	jumpifability BS_TARGET, ABILITY_UNMOVABLE, BattleScript_AbilityPreventsPhasingOut
+	jumpifability BS_TARGET, ABILITY_STRANGE_GUEST, BattleScript_AbilityPreventsPhasingOut
 	jumpifability BS_TARGET, ABILITY_ROOTED_SHRINE, BattleScript_HitSwitchTargetTryRootedShrine
 	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
 	jumpiftargetdynamaxed BattleScript_HitSwitchTargetDynamaxed
@@ -4122,6 +4123,7 @@ BattleScript_EffectRoar::
 	jumpifability BS_TARGET, ABILITY_GUARD_DOG, BattleScript_ButItFailed
 	jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_AbilityPreventsPhasingOut
 	jumpifability BS_TARGET, ABILITY_UNMOVABLE, BattleScript_AbilityPreventsPhasingOut
+	jumpifability BS_TARGET, ABILITY_STRANGE_GUEST, BattleScript_AbilityPreventsPhasingOut
 	jumpifability BS_TARGET, ABILITY_ROOTED_SHRINE, BattleScript_RoarTryRootedShrine
 	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_PrintMonIsRooted
 	jumpiftargetdynamaxed BattleScript_RoarBlockedByDynamax
@@ -11802,6 +11804,7 @@ BattleScript_UnmovableActivates::
 	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_UnmovableIngrain
 	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_UnmovableSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_UnmovableSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_STRANGE_GUEST, BattleScript_UnmovableSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_ROOTED_SHRINE, BattleScript_UnmovableTryRootedShrine
 	jumpiftargetdynamaxed BattleScript_UnmovableDynamaxed
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
@@ -11836,6 +11839,7 @@ BattleScript_StenchActivates::
 	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_StenchIngrain
 	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_StenchSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_StenchSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_STRANGE_GUEST, BattleScript_StenchSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_ROOTED_SHRINE, BattleScript_StenchTryRootedShrine
 	jumpiftargetdynamaxed BattleScript_StenchDynamaxed
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
@@ -12914,6 +12918,7 @@ BattleScript_RedCardActivates::
 	jumpifstatus3 BS_EFFECT_BATTLER, STATUS3_ROOTED, BattleScript_RedCardIngrain
 	jumpifability BS_EFFECT_BATTLER, ABILITY_SUCTION_CUPS, BattleScript_RedCardSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_UNMOVABLE, BattleScript_RedCardSuctionCups
+	jumpifability BS_EFFECT_BATTLER, ABILITY_STRANGE_GUEST, BattleScript_RedCardSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_ROOTED_SHRINE, BattleScript_RedCardTryRootedShrine
 	jumpiftargetdynamaxed BattleScript_RedCardDynamaxed
 	removeitem BS_SCRIPTING

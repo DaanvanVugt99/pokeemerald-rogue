@@ -8949,6 +8949,27 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TIDAL_DAWN)
+         && !uniqueDone
+         && DoesPartyShareTypeWithBattler(battler))
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_TIDAL_DAWN);
+
+            if (TryChangeBattleWeather(battler, ENUM_WEATHER_SUN, TRUE))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_DroughtActivates);
+                return 1;
+            }
+            else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SOLAR_CORE)
          && !uniqueDone
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
@@ -14568,6 +14589,27 @@ if (triggeringAbility != ABILITY_NONE)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             StartAbilityCalledMoveScript();
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_PRISM)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_PRISM);
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
             effect++;
         }
 
