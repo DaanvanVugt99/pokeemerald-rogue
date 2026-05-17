@@ -5471,8 +5471,7 @@ static const u16 sVicejawMoves[] =
     MOVE_POISON_FANG,
     MOVE_PSYCHIC_FANGS,
     MOVE_HYPER_FANG,
-    MOVE_CLAMP,
-    MOVE_BIND,
+    MOVE_JAW_LOCK,
 };
 
 static bool32 TryUseVicejawCalledMove(u32 battler)
@@ -5496,6 +5495,7 @@ static bool32 TryUseVicejawCalledMove(u32 battler)
     gCalledMove = move;
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
+    VarSet(VAR_EXTRA_MOVE_DAMAGE, max(1, gBattleMoves[move].power / 4));
     StartAbilityCalledMoveScript();
     return TRUE;
 }
@@ -16833,7 +16833,7 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_VICEJAW)
-         && (move == MOVE_VISE_GRIP || move == MOVE_BITE)
+         && (move == MOVE_BITE || move == MOVE_CRUNCH)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[battler].confusionSelfDmg
