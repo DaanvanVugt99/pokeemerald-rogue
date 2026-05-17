@@ -14546,6 +14546,31 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_EDGE)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_EDGE);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_DETECT;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            StartAbilityCalledMoveScript();
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SWALLOWED)
          && IsBattlerAlive(battler)
          && gBattleMoves[move].bitingMove
@@ -17009,6 +17034,29 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlescriptCurrInstr = BattleScript_AbilityTrapsTarget;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_TIRANNY)
+         && IsOnlyParadoxInParty(battler)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gBattleMoves[move].bitingMove)
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+            if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_TIRANNY);
+                gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+                gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityTrapsTarget;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_FUNGAL_INFECTION)

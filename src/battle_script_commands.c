@@ -11225,6 +11225,50 @@ static void Cmd_various(void)
             return;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_ROAR)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && DoesPartyShareTypeWithBattler(battler)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+         && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_ROAR);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_BULK_UP;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SYNTHETIC_SCREECH)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && DoesPartyShareTypeWithBattler(battler)
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && !gProtectStructs[battler].extraMoveUsed
+         && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+         && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SYNTHETIC_SCREECH);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_CALM_MIND;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PRIMAL_STORM)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()
@@ -15819,6 +15863,13 @@ static void Cmd_jumpifnopursuitswitchdmg(void)
         SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_SKY_PATROL);
         gCurrentMove = MOVE_DEFOG;
         doSwitchIntercept = TRUE;
+    }
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_PRIMAL_TIRANNY)
+          && IsOnlyParadoxInParty(gBattlerTarget)
+          && gBattleMons[gBattlerAttacker].hp
+          && gBattleMons[gBattlerTarget].hp)
+    {
+        gDisableStructs[gBattlerTarget].uniquePersistentStateActive = TRUE;
     }
 
     if (doSwitchIntercept)
