@@ -59,6 +59,7 @@
 #include "rogue_charms.h"
 #include "rogue_safari.h"
 #include "rogue_quest.h"
+#include "rogue_pokedex.h"
 #include "rogue_timeofday.h"
 
 /*
@@ -4667,6 +4668,34 @@ bool32 IsOnlyUltraBeastInParty(u32 battler)
         && gSpeciesInfo[GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES)].isUltraBeast;
 }
 
+bool32 IsOnlyParadoxInParty(u32 battler)
+{
+    u32 i;
+    u32 count = 0;
+    u32 firstMonId, lastMonId;
+    struct Pokemon *party;
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species;
+
+        if (!IsValidForBattle(&party[i]))
+            continue;
+
+        species = GetMonData(&party[i], MON_DATA_SPECIES);
+        if (RoguePokedex_IsSpeciesParadox(species))
+            count++;
+    }
+
+    return count == 1
+        && gBattlerPartyIndexes[battler] >= firstMonId
+        && gBattlerPartyIndexes[battler] < lastMonId
+        && IsValidForBattle(&party[gBattlerPartyIndexes[battler]])
+        && RoguePokedex_IsSpeciesParadox(GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES));
+}
+
 bool32 DoesPartyShareTypeWithBattler(u32 battler)
 {
     u32 i;
@@ -6875,6 +6904,33 @@ static bool32 TryUseShardstormCalledMove(u32 battler, u32 target)
     gCalledMove = MOVE_ROCK_TOMB;
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
+    VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryUsePrimalEchoCalledMove(u32 battler, u32 target, u32 move)
+{
+    if (target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || target == battler
+     || GetBattlerSide(target) == GetBattlerSide(battler))
+    {
+        if (!TryGetOpposingExtraMoveTarget(battler, &target))
+            return FALSE;
+    }
+
+    if (!CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_ECHO);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
     VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
     StartAbilityCalledMoveScript();
     return TRUE;
@@ -14242,6 +14298,50 @@ if (triggeringAbility != ABILITY_NONE)
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
                 StartAbilityCalledMoveScript();
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_ECHO)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].soundMove
+         && gBattleMoves[move].power != 0
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUsePrimalEchoCalledMove(battler, gBattlerTarget, move))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_WRAITH)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && moveType == TYPE_GHOST
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanAbilityDisableBattler(gBattlerTarget))
+        {
+            u16 moveToDisable = GetLastUsableMoveForDisable(gBattlerTarget);
+
+            if (moveToDisable != MOVE_NONE)
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                ApplyAbilityDisableMove(battler, gBattlerTarget, ABILITY_PRIMAL_WRAITH, moveToDisable, GetDefaultDisableTimerFromGenConfig());
                 effect++;
             }
         }

@@ -3709,6 +3709,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
             bool32 septicFumesActivated = FALSE;
             bool32 ultraVeninActivated = FALSE;
             bool32 feverDreamActivated = FALSE;
+            bool32 primalParasiteActivated = FALSE;
 
             if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
              && gBattleScripting.battler < gBattlersCount
@@ -3761,7 +3762,25 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 SetAtkCancellerForCalledMove();
             }
 
+            if (gBattleScripting.battler < gBattlersCount
+             && gEffectBattler < gBattlersCount
+             && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)
+             && IsBattlerAlive(gBattleScripting.battler)
+             && HasBattlerAbility(gBattleScripting.battler, ABILITY_PRIMAL_PARASITE)
+             && IsOnlyParadoxInParty(gBattleScripting.battler)
+             && !(gStatuses3[gEffectBattler] & STATUS3_LEECHSEED)
+             && !IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_GRASS))
+            {
+                primalParasiteActivated = TRUE;
+                gBattlerAttacker = gBattlerAbility = gBattleScripting.battler;
+                gBattlerTarget = gEffectBattler;
+                SetBattlerTriggeredAbility(gBattleScripting.battler, ABILITY_PRIMAL_PARASITE);
+                RecordAbilityBattle(gBattleScripting.battler, ABILITY_PRIMAL_PARASITE);
+            }
+
             BattleScriptPush(gBattlescriptCurrInstr + 1);
+            if (primalParasiteActivated)
+                BattleScriptPush(BattleScript_FungalInfectionActivates);
             if (feverDreamActivated)
                 BattleScriptPush(BattleScript_AbilityUsesCalledMove);
             if (septicFumesActivated)

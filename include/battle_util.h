@@ -147,6 +147,7 @@ u8 AtkCanceller_UnableToUseMove2(void);
 bool32 HasNoMonsToSwitch(u32 battler, u8 r1, u8 r2);
 bool32 IsOnlyAliveMonInParty(u32 battler);
 bool32 IsOnlyUltraBeastInParty(u32 battler);
+bool32 IsOnlyParadoxInParty(u32 battler);
 bool32 DoesPartyShareTypeWithBattler(u32 battler);
 bool32 DoesPartyShareCurrentTypeWithBattler(u32 battler);
 u32 GetBattlerCreationType(u32 battler);
