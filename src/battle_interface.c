@@ -2004,7 +2004,9 @@ static u32 TypeIndicator_GetType(u32 battlerId, u32 slot)
 
 static bool32 TypeIndicator_ShouldBeInvisible(struct Sprite *sprite)
 {
-    return sprite->tHealthboxHidden || !TypeIndicator_IsDisplayableType(sprite->tType);
+    return sprite->tHealthboxHidden
+        || gBattleSpritesDataPtr->healthBoxesData[sprite->tBattler].partyStatusSummaryShown
+        || !TypeIndicator_IsDisplayableType(sprite->tType);
 }
 
 static u8 TypeIndicator_GetSpriteId(u32 battlerId, u32 slot)
@@ -2025,7 +2027,7 @@ static u16 TypeIndicator_GetTypeKey(u32 battlerId)
 
 static bool32 TypeIndicator_ShouldSkipBattler(u32 battlerId)
 {
-    return Rogue_UseSafariBattle() && GetBattlerSide(battlerId) == B_SIDE_PLAYER;
+    return (GetSafariZoneFlag() || Rogue_UseSafariBattle()) && GetBattlerSide(battlerId) == B_SIDE_PLAYER;
 }
 
 static void TypeIndicator_UpdateSprite(struct Sprite *sprite)
@@ -2166,6 +2168,7 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
     if (sprite->tTypeSlot == 0)
         TypeIndicator_UpdateTypesIfNeeded(battlerId);
 
+    sprite->invisible = TypeIndicator_ShouldBeInvisible(sprite);
     sprite->x = gSprites[healthboxSpriteId].x + sprite->tPosX;
     sprite->y = gSprites[healthboxSpriteId].y + sprite->tPosY;
     sprite->x2 = gSprites[healthboxSpriteId].x2;

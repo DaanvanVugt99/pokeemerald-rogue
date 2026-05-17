@@ -44,10 +44,12 @@
 
 #include "rogue_assistant.h"
 #include "rogue_automation.h"
+#include "rogue_battlehud.h"
 #include "rogue_campaign.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
 #include "rogue_player_customisation.h"
+#include "rogue_pokedex.h"
 
 static void PlayerBufferExecCompleted(u32 battler);
 static void PlayerHandleLoadMonSprite(u32 battler);
@@ -62,6 +64,7 @@ static void PlayerHandleMoveAnimation(u32 battler);
 static void PlayerHandlePrintString(u32 battler);
 static void PlayerHandlePrintSelectionString(u32 battler);
 static void PlayerHandleChooseAction(u32 battler);
+static void PrintPlayerBattleMenu(u32 battler);
 static void PlayerHandleYesNoBox(u32 battler);
 static void PlayerHandleChooseMove(u32 battler);
 static void PlayerHandleChooseItem(u32 battler);
@@ -326,6 +329,27 @@ static void HandleInputChooseAction(u32 battler)
     }
 #endif
 
+    if (RogueBH_IsStatViewActive())
+    {
+        RogueBH_HandleStatViewUpdate(battler);
+
+        if (RogueBH_IsStatViewActive())
+        {
+            if (JOY_NEW(A_BUTTON))
+            {
+                PlaySE(SE_SELECT);
+                BtlController_EmitTwoReturnValues(battler, BUFFER_B, B_ACTION_USE_ITEM, 0);
+                PlayerBufferExecCompleted(battler);
+            }
+        }
+        else
+        {
+            PrintPlayerBattleMenu(battler);
+        }
+
+        return;
+    }
+
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
@@ -429,12 +453,18 @@ static void HandleInputChooseAction(u32 battler)
         SwapHpBarsWithHpText();
     }
 #if DEBUG_BATTLE_MENU == TRUE
-    else if (JOY_NEW(SELECT_BUTTON))
+    else if (JOY_NEW(SELECT_BUTTON) && JOY_HELD(R_BUTTON))
     {
         BtlController_EmitTwoReturnValues(battler, BUFFER_B, B_ACTION_DEBUG, 0);
         PlayerBufferExecCompleted(battler);
     }
 #endif
+    else if (JOY_NEW(SELECT_BUTTON))
+    {
+        PlaySE(SE_WIN_OPEN);
+        RogueBH_ToggleStatView();
+        PrintPlayerBattleMenu(battler);
+    }
 #if B_LAST_USED_BALL == TRUE && B_LAST_USED_BALL_CYCLE == FALSE
     else if (JOY_NEW(B_LAST_USED_BALL_BUTTON) && CanThrowLastUsedBall())
     {
@@ -1661,10 +1691,23 @@ static void OpenBagAndChooseItem(u32 battler)
 {
     if (!gPaletteFade.active)
     {
+        bool8 openPokedex = RogueBH_IsStatViewActive();
+
+        if (openPokedex)
+            RogueBH_RemoveBattleOverlay(FALSE);
+
         gBattlerControllerFuncs[battler] = CompleteWhenChoseItem;
         ReshowBattleScreenDummy();
         FreeAllWindowBuffers();
-        CB2_BagMenuFromBattle();
+        if (openPokedex)
+        {
+            gSpecialVar_ItemId = ITEM_NONE;
+            Rogue_ShowPokedexFromBattle();
+        }
+        else
+        {
+            CB2_BagMenuFromBattle();
+        }
     }
 }
 
@@ -2229,26 +2272,47 @@ static void HandleChooseActionAfterDma3(u32 battler)
 
 static void PlayerHandleChooseAction(u32 battler)
 {
-    s32 i;
+    RogueBH_CreateBattleOverlay();
 
     PUSH_ASSISTANT_STATE2(BATTLE, CHOOSE_ACTION);
 
     gBattlerControllerFuncs[battler] = HandleChooseActionAfterDma3;
     BattleTv_ClearExplosionFaintCause();
 
-    if(gBattleTypeFlags & BATTLE_TYPE_TRAINER)
-        BattlePutTextOnWindow(gText_TrainerBattleMenu, B_WIN_ACTION_MENU);
+    PrintPlayerBattleMenu(battler);
+}
+
+static void PrintPlayerBattleMenu(u32 battler)
+{
+    s32 i;
+
+    if (RogueBH_IsStatViewActive())
+    {
+        gBattle_BG0_Y = 0;
+
+        for (i = 0; i < 4; i++)
+            ActionSelectionDestroyCursorAt(i);
+
+        RogueBH_PrintStatView();
+    }
     else
-        BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
+    {
+        gBattle_BG0_Y = DISPLAY_HEIGHT;
 
-    for (i = 0; i < 4; i++)
-        ActionSelectionDestroyCursorAt(i);
+        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+            BattlePutTextOnWindow(gText_TrainerBattleMenu, B_WIN_ACTION_MENU);
+        else
+            BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
 
-    TryRestoreLastUsedBall();
-    ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
-    PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, battler, gBattlerPartyIndexes[battler]);
-    BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
-    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+        for (i = 0; i < 4; i++)
+            ActionSelectionDestroyCursorAt(i);
+
+        TryRestoreLastUsedBall();
+        ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
+        PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, battler, gBattlerPartyIndexes[battler]);
+        BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
+        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+    }
 }
 
 static void PlayerHandleYesNoBox(u32 battler)
