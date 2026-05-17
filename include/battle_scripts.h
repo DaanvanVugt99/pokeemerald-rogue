@@ -74,6 +74,7 @@ extern const u8 BattleScript_FreshlyBakedMistActivates[];
 extern const u8 BattleScript_FreshlyBakedHealMistActivates[];
 extern const u8 BattleScript_RallyHealActivates[];
 extern const u8 BattleScript_RallyCureOnlyActivates[];
+extern const u8 BattleScript_PrimalMoltingActivates[];
 extern const u8 BattleScript_AbilityPopupReturn[];
 extern const u8 BattleScript_JungleLashActivates[];
 extern const u8 BattleScript_GrafittiTagActivates[];

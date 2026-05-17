@@ -828,6 +828,7 @@ static const u8 sChefsPickDescription[] = _("The first Dragon move each battle u
 static const u8 sPrimalEchoDescription[] = _("If no other Paradox allies, first damaging sound move repeats at 40 BP.");
 static const u8 sPrimalParasiteDescription[] = _("If no other Paradox allies, statused targets are also seeded.");
 static const u8 sPrimalWraithDescription[] = _("If no other Paradox allies, first Ghost move each switch-in disables.");
+static const u8 sPrimalMoltingDescription[] = _("If no other Paradox allies, first drop below half cures status and uses Harden.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1366,6 +1367,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_PRIMAL_ECHO] = _("Primal Echo"),
     [ABILITY_PRIMAL_PARASITE] = _("Primal Parasite"),
     [ABILITY_PRIMAL_WRAITH] = _("Primal Wraith"),
+    [ABILITY_PRIMAL_MOLTING] = _("Primal Molting"),
     [ABILITY_GLIDER] = _("Glider"),
     [ABILITY_KNIGHTLY] = _("Knightly"),
     [ABILITY_SPOREFIELD] = _("Sporefield"),
@@ -2207,6 +2209,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_PRIMAL_ECHO] = _("PrimalEcho"),
     [ABILITY_PRIMAL_PARASITE] = _("PrimalPara"),
     [ABILITY_PRIMAL_WRAITH] = _("PrimalWraith"),
+    [ABILITY_PRIMAL_MOLTING] = _("PrimalMolt"),
     [ABILITY_GLIDER] = _("Glider"),
     [ABILITY_KNIGHTLY] = _("Knightly"),
     [ABILITY_SPOREFIELD] = _("Sporefield"),
@@ -3233,6 +3236,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_PRIMAL_ECHO] = sPrimalEchoDescription,
     [ABILITY_PRIMAL_PARASITE] = sPrimalParasiteDescription,
     [ABILITY_PRIMAL_WRAITH] = sPrimalWraithDescription,
+    [ABILITY_PRIMAL_MOLTING] = sPrimalMoltingDescription,
     [ABILITY_GLIDER] = sGliderDescription,
     [ABILITY_KNIGHTLY] = sKnightlyDescription,
     [ABILITY_SPOREFIELD] = sSporefieldDescription,

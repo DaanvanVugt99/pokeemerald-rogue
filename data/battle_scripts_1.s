@@ -9560,6 +9560,18 @@ BattleScript_RallyCureStatus:
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_PrimalMoltingActivates::
+	call BattleScript_AbilityPopUp
+	jumpifstatus BS_ATTACKER, STATUS1_ANY, BattleScript_PrimalMoltingCureStatus
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
+BattleScript_PrimalMoltingCureStatus:
+	curestatus BS_ATTACKER
+	updatestatusicon BS_ATTACKER
+	printstring STRINGID_PKMNSTATUSNORMAL
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_DynamoHealActivates::
 	call BattleScript_AbilityHpHeal
 	return

@@ -13041,6 +13041,30 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_MOLTING)
+         && IsOnlyParadoxInParty(battler)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && battler == moveEndTarget
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[battler].extraMoveUsed
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_MOLTING);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_HARDEN;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_PrimalMoltingActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PANIC_SHED)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
