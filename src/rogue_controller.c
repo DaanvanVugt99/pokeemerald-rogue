@@ -2,6 +2,7 @@
 #include "constants/abilities.h"
 #include "constants/battle.h"
 #include "constants/battle_string_ids.h"
+#include "constants/berry.h"
 #include "constants/event_objects.h"
 #include "constants/heal_locations.h"
 #include "constants/hold_effects.h"
@@ -142,6 +143,8 @@ struct RogueLocalData
     u16 wildEncounterHistoryBuffer[3];
     u16 victoryLapHistoryBuffer[8];
     u16 recentObjectEventLoadedLayout;
+    s16 autoPickupLastX;
+    s16 autoPickupLastY;
     bool8 runningToggleActive : 1;
     bool8 hasQuickLoadPending : 1;
     bool8 hasValidQuickSave : 1;
@@ -3498,6 +3501,87 @@ static void ClearRogueLocalDataPreservingInputState(void)
     gRogueLocal.runningToggleActive = runningToggleActive;
 }
 
+static void TryAutoItemPickup(void)
+{
+    u8 i, elevation;
+    s16 x, y;
+    struct ObjectEventTemplate *template;
+
+    if (ScriptContext_IsEnabled() || ArePlayerFieldControlsLocked())
+        return;
+
+    GetXYCoordsOneStepInFrontOfPlayer(&x, &y);
+    elevation = PlayerGetElevation();
+
+    if (gRogueLocal.autoPickupLastX == x && gRogueLocal.autoPickupLastY == y)
+        return;
+
+    if (Rogue_IsRunActive()
+     && (gRogueAdvPath.currentRoomType == ADVPATH_ROOM_DARK_DEAL
+      || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LAB))
+        return;
+
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        if (!gObjectEvents[i].active || i == gPlayerAvatar.objectEventId)
+            continue;
+
+        if (gObjectEvents[i].currentCoords.x != x
+         || gObjectEvents[i].currentCoords.y != y
+         || gObjectEvents[i].currentElevation != elevation)
+            continue;
+
+        template = GetBaseTemplateForObjectEvent(&gObjectEvents[i]);
+        if (template != NULL)
+        {
+            if (template->flagId >= FLAG_ROGUE_ITEM_START && template->flagId <= FLAG_ROGUE_ITEM_END)
+            {
+                u16 amount;
+                u16 idx = template->flagId - FLAG_ROGUE_ITEM_START;
+                u16 itemId = VarGet(VAR_ROGUE_ITEM_START + idx);
+
+                VarSet(VAR_0x8001, itemId);
+                amount = Rogue_ModifyItemPickupAmount(itemId, 1);
+
+                if (AddBagItem(itemId, amount))
+                {
+                    Rogue_PushPopup_AddItem(itemId, amount);
+                    RemoveObjectEventByLocalIdAndMap(gObjectEvents[i].localId, gObjectEvents[i].mapNum, gObjectEvents[i].mapGroup);
+                }
+            }
+            else if (template->movementType == MOVEMENT_TYPE_BERRY_TREE_GROWTH)
+            {
+                u16 stage;
+
+                gSelectedObjectEvent = i;
+                gSpecialVar_LastTalked = gObjectEvents[i].localId;
+
+                ObjectEventInteractionGetBerryTreeData();
+                stage = gSpecialVar_0x8004;
+
+                if (stage == BERRY_STAGE_BERRIES)
+                {
+                    u8 id = GetObjectEventBerryTreeId(i);
+                    u16 berry = GetBerryTypeByBerryTreeId(id);
+                    u16 itemId = BerryTypeToItemId(berry);
+                    u16 amount = Rogue_ModifyItemPickupAmount(itemId, GetBerryCountByBerryTreeId(id));
+
+                    if (AddBagItem(itemId, amount))
+                    {
+                        Rogue_PushPopup_AddItem(itemId, amount);
+                        ObjectEventInteractionRemoveBerryTree();
+                    }
+                }
+            }
+        }
+
+        break;
+    }
+
+    gRogueLocal.autoPickupLastX = x;
+    gRogueLocal.autoPickupLastY = y;
+}
+
 void Rogue_OverworldCB(u16 newKeys, u16 heldKeys, bool8 inputActive)
 {
     if(inputActive)
@@ -3510,6 +3594,9 @@ void Rogue_OverworldCB(u16 newKeys, u16 heldKeys, bool8 inputActive)
                 gRogueLocal.runningToggleActive = !gRogueLocal.runningToggleActive;
             }
         }
+
+        if(gSaveBlock2Ptr->optionsItemPickupAutomatic)
+            TryAutoItemPickup();
     }
 
     START_TIMER(ROGUE_ASSISTANT_CALLBACK);
