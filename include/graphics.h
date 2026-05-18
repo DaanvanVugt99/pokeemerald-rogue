@@ -680,6 +680,8 @@ extern const u8 gTrainerBackPic_Ethan[];
 extern const u8 gTrainerBackPic_Lyra[];
 extern const u8 gTrainerBackPic_Lucas[];
 extern const u8 gTrainerBackPic_Dawn[];
+extern const u8 gTrainerBackPic_Calem[];
+extern const u8 gTrainerBackPic_Serena[];
 extern const u8 gTrainerBackPic_CommunityZefa[];
 extern const u32 gTrainerBackPicPalette_Red[];
 extern const u32 gTrainerBackPicPalette_Leaf[];
