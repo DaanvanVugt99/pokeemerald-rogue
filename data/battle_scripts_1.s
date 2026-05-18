@@ -9683,6 +9683,7 @@ BattleScript_CarvingRushReadied::
 
 BattleScript_JungleLashActivates::
 	call BattleScript_AbilityPopUp
+	savetarget
 	setbyte gBattleCommunication, 0
 BattleScript_JungleLashLoop::
 	copyarraywithindex gBattlerTarget, gBattlerByTurnOrder, gBattleCommunication, 1
@@ -9701,6 +9702,7 @@ BattleScript_JungleLashLoopIncrement::
 	jumpifbytenotequal gBattleCommunication, gBattlersCount, BattleScript_JungleLashLoop
 BattleScript_JungleLashEnd::
 	bicword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE | HITMARKER_GRUDGE
+	restoretarget
 	return
 
 BattleScript_BarnacleWallActivates::
@@ -10624,6 +10626,7 @@ BattleScript_PlainSurgeActivates::
 	end3
 
 BattleScript_BadDreamsActivates::
+	savetarget
 	setbyte gBattlerTarget, 0
 BattleScript_BadDreamsLoop:
 	jumpiftargetally BattleScript_BadDreamsIncrement
@@ -10648,6 +10651,7 @@ BattleScript_BadDreamsIncrement:
 	destroyabilitypopup
 	pause 15
 BattleScript_BadDreamsEnd:
+	restoretarget
 	end3
 BattleScript_BadDreams_ShowPopUp:
 	copybyte gBattlerAbility, gBattlerAttacker
@@ -10660,6 +10664,7 @@ BattleScript_BadDreams_HidePopUp:
 	goto BattleScript_BadDreamsIncrement
 
 BattleScript_HeartbreakDrains::
+	savetarget
 	setbyte gBattlerTarget, 0
 BattleScript_HeartbreakDrainLoop:
 	jumpifabsent BS_TARGET, BattleScript_HeartbreakDrainIncrement
@@ -10682,6 +10687,7 @@ BattleScript_HeartbreakDrainIncrement:
 	destroyabilitypopup
 	pause 15
 BattleScript_HeartbreakDrainEnd:
+	restoretarget
 	end3
 BattleScript_HeartbreakDrainShowPopUp:
 	copybyte gBattlerAbility, gBattlerAttacker
@@ -10694,6 +10700,7 @@ BattleScript_HeartbreakDrainHidePopUp:
 	goto BattleScript_HeartbreakDrainIncrement
 
 BattleScript_IonizeActivates::
+	savetarget
 	setbyte gBattlerTarget, 0
 BattleScript_IonizeLoop:
 	jumpifabsent BS_TARGET, BattleScript_IonizeIncrement
@@ -10716,6 +10723,7 @@ BattleScript_IonizeIncrement:
 	destroyabilitypopup
 	pause 15
 BattleScript_IonizeEnd:
+	restoretarget
 	end3
 BattleScript_Ionize_ShowPopUp:
 	copybyte gBattlerAbility, gBattlerAttacker
@@ -11458,6 +11466,7 @@ BattleScript_PsychicMawTauntActivates::
 BattleScript_ToxicBloomActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
+	savetarget
 	setbyte gBattlerTarget, 0
 BattleScript_ToxicBloomLoop:
 	jumpiftargetally BattleScript_ToxicBloomNext
@@ -11471,6 +11480,7 @@ BattleScript_ToxicBloomLoop:
 BattleScript_ToxicBloomNext:
 	addbyte gBattlerTarget, 1
 	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_ToxicBloomLoop
+	restoretarget
 	end3
 
 BattleScript_SepticFumesActivates::
@@ -11770,6 +11780,7 @@ BattleScript_GaleCommandEnd:
 BattleScript_StumbleActivates::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
+	savetarget
 	setbyte gBattlerTarget, 0
 BattleScript_StumbleLoop::
 	movevaluescleanup
@@ -11778,7 +11789,7 @@ BattleScript_StumbleLoop::
 	jumpifsubstituteblocks BattleScript_StumbleLoopIncrement
 	jumpifstatus2 BS_TARGET, STATUS2_CONFUSION, BattleScript_StumbleLoopIncrement
 	jumpifhasnohp BS_TARGET, BattleScript_StumbleLoopIncrement
-	accuracycheck BattleScript_TeeterDanceMissed, ACC_CURR_MOVE
+	accuracycheck BattleScript_StumbleMissed, ACC_CURR_MOVE
 	jumpifsafeguard BattleScript_StumbleLoopIncrement
 	attackanimation
 	waitanimation
@@ -11788,7 +11799,12 @@ BattleScript_StumbleLoop::
 BattleScript_StumbleLoopIncrement::
 	addbyte gBattlerTarget, 1
 	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_StumbleLoop
+	restoretarget
 	end3
+BattleScript_StumbleMissed::
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_StumbleLoopIncrement
 BattleScript_StumbleOwnTempoPrevents::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_PKMNPREVENTSCONFUSIONWITH
@@ -11815,6 +11831,7 @@ BattleScript_UnmovableTryRootedShrine:
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
 	forcerandomswitch BattleScript_UnmovableEnd
 BattleScript_UnmovableEnd:
+	swapattackerwithtarget
 	return
 BattleScript_UnmovableIngrain:
 	printstring STRINGID_PKMNANCHOREDITSELF
@@ -11850,6 +11867,7 @@ BattleScript_StenchTryRootedShrine:
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
 	forcerandomswitch BattleScript_StenchEnd
 BattleScript_StenchEnd:
+	swapattackerwithtarget
 	return
 BattleScript_StenchIngrain:
 	printstring STRINGID_PKMNANCHOREDITSELF
@@ -12926,6 +12944,7 @@ BattleScript_RedCardActivates::
 	forcerandomswitch BattleScript_RedCardEnd
 	@ changes the current battle script. the rest happens in BattleScript_RoarSuccessSwitch_Ret, if switch is successful
 BattleScript_RedCardEnd:
+	swapattackerwithtarget
 	return
 BattleScript_RedCardTryRootedShrine:
 	jumpifterrainaffected BS_EFFECT_BATTLER, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_RedCardSuctionCups
