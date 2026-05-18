@@ -93,6 +93,9 @@ namespace PokemonDataGenerator.Pokedex
 				fullDexes.Add(GatherDexData("national_gen7", "Gen. 7", 7, "national"));
 				fullDexes.Add(GatherDexData("national_gen8", "Gen. 8", 8, "national"));
 				fullDexes.Add(GatherDexData("national_gen9", "Gen. 9", 9, "national"));
+
+				fullDexes.Add(GatherDexData("legends_za", "Z-A", 9, "lumiose-city"));
+				fullDexes.Add(GatherDexData("legends_zafulldlc", "Z-A + DLC", 9, "lumiose-city", "hyperspace"));
 			}
 
 			Dictionary<string, List<PokedexData>> regionVariants = new Dictionary<string, List<PokedexData>>();

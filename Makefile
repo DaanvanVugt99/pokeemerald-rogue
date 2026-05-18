@@ -447,6 +447,10 @@ $(CRY_SUBDIR)/%.bin: $(CRY_SUBDIR)/%.aif ; $(AIF) $< $@ --compress
 sound/%.bin: sound/%.aif ; $(AIF) $< $@
 data/%.inc: data/%.pory; $(PORYSCRIPT) -i $< -o $@ $(PORYSCRIPTARGS)
 
+MAP_SCRIPT_PORYS := $(wildcard data/maps/*/scripts.pory)
+MAP_SCRIPT_INCS := $(patsubst %.pory,%.inc,$(MAP_SCRIPT_PORYS))
+$(DATA_ASM_BUILDDIR)/event_scripts.o: $(MAP_SCRIPT_INCS)
+
 
 ifeq ($(MODERN),0)
 $(C_BUILDDIR)/libc.o: CC1 := tools/agbcc/bin/old_agbcc$(EXE)

@@ -207,6 +207,8 @@ struct BoxPokemon* Rogue_GetDaycareBoxMon(u8 slot);
 u8 Rogue_GetCurrentDaycareSlotCount();
 void Rogue_SwapMonInDaycare(struct Pokemon* partyMon, u8 daycareSlot);
 void Rogue_DaycareMultichoiceCallback(struct MenuAction* outList, u8* outCount, u8 listCapacity);
+void Rogue_RefillDayCareCharges(bool8 createPopup);
+void Rogue_OnDayCareChargeUsed();
 void Rogue_BeginCatchingContest(u8 type, u8 stat);
 void Rogue_EndCatchingContest();
 bool8 Rogue_IsCatchingContestActive();

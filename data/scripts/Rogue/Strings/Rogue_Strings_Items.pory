@@ -473,6 +473,11 @@ text gHubUpgradeDesc_Lab_UniqueMonRarity3
     format("Allows Legendary Unique {PKMN} to be tracked.")
 }
 
+text gHubUpgradeDesc_Lab_UniqueMonTyping
+{
+    format("Unique {PKMN} can have alternative typing.")
+}
+
 
 text gHubUpgradeDesc_AdventureEntrance_RandomStarter
 {
@@ -569,6 +574,11 @@ text gHubUpgradeDesc_DayCare_BreederSeenDex
 text gHubUpgradeDesc_DayCare_Phone
 {
     format("Remotely access Day Care in and out of Adventures.")
+}
+
+text gHubUpgradeDesc_DayCare_Phone1
+{
+    format("Increases charges for remote Day Care access.")
 }
 
 text gHubUpgradeDesc_DayCare_Bakery

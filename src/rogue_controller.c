@@ -1919,6 +1919,9 @@ u8 SpeciesToGen(u16 species)
     if(species >= SPECIES_SPRIGATITO && species <= SPECIES_PECHARUNT)
         return 9;
 
+    if(species == SPECIES_FLOETTE_ETERNAL_FLOWER)
+        return 9;
+
     if(species >= SPECIES_RATTATA_ALOLAN && species <= SPECIES_MAROWAK_ALOLAN)
         return 7;
     if(species >= SPECIES_MEOWTH_GALARIAN && species <= SPECIES_STUNFISK_GALARIAN)
@@ -4254,6 +4257,7 @@ static void BeginRogueRun(void)
 
     gRogueRun.victoryLapTotalWins = 0;
     Rogue_RefillFlightCharges(FALSE);
+    Rogue_RefillDayCareCharges(FALSE);
 
     Rogue_PreActivateDesiredCampaign();
 
@@ -4341,7 +4345,6 @@ static void BeginRogueRun(void)
     FlagClear(FLAG_ROGUE_TERASTALLIZE_BATTLE);
     FlagClear(FLAG_ROGUE_IN_SNAG_BATTLE);
 
-    FlagSet(FLAG_ROGUE_DAYCARE_PHONE_CHARGED);
     FlagSet(FLAG_ROGUE_TERA_ORB_CHARGED);
 
     Rogue_PostActivateDesiredCampaign();
@@ -4661,13 +4664,16 @@ static u16 ChooseTeamEncounterNum()
 #ifdef ROGUE_EXPANSION
     if(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH))
         RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, TEAM_NUM_GALACTIC);
-//
-    //if(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA))
-    //    filter->trainerFlagsInclude |= TRAINER_FLAG_REGION_UNOVA;
-//
-    //if(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS))
-    //    filter->trainerFlagsInclude |= TRAINER_FLAG_REGION_KALOS;
-//
+
+    if(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA))
+    {
+        RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, TEAM_NUM_PLASMA);
+        RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, TEAM_NUM_NEOPLASMA);
+    }
+
+    if(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS))
+        RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, TEAM_NUM_FLARE);
+
     //if(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA))
     //    filter->trainerFlagsInclude |= TRAINER_FLAG_REGION_ALOLA;
 //
@@ -5375,7 +5381,6 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
             {
                 case ADVPATH_ROOM_RESTSTOP:
                 {
-                    FlagSet(FLAG_ROGUE_DAYCARE_PHONE_CHARGED);
                     FlagSet(FLAG_ROGUE_COURIER_READY);
                     FlagClear(FLAG_ROGUE_VENDING_MACHINE_USED);
                     TryRandomanSpawn(33);
@@ -8301,6 +8306,34 @@ void Rogue_DaycareMultichoiceCallback(struct MenuAction* outList, u8* outCount, 
     }
 
     *outCount = i;
+}
+
+static u32 GetMaxDayCareCharges(void)
+{
+    if(RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_PHONE2))
+        return 3;
+
+    if(RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_PHONE1))
+        return 2;
+
+    return 1;
+}
+
+void Rogue_RefillDayCareCharges(bool8 createPopup)
+{
+    if(VarGet(VAR_ROGUE_DAYCARE_PHONE_REMAINING_CHARGES) != GetMaxDayCareCharges())
+    {
+        VarSet(VAR_ROGUE_DAYCARE_PHONE_REMAINING_CHARGES, GetMaxDayCareCharges());
+
+        if(createPopup)
+            Rogue_PushPopup_DaycareChargeRefilled(GetMaxDayCareCharges());
+    }
+}
+
+void Rogue_OnDayCareChargeUsed(void)
+{
+    if(Rogue_IsRunActive())
+        Rogue_PushPopup_DaycareChargeUsed(VarGet(VAR_ROGUE_DAYCARE_PHONE_REMAINING_CHARGES), GetMaxDayCareCharges());
 }
 
 void Rogue_BeginCatchingContest(u8 type, u8 stat)

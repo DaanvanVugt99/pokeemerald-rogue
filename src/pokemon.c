@@ -3179,6 +3179,33 @@ u16 GetAbilityBySpecies(u16 species, u8 abilityNum, u32 otId)
 #endif
 }
 
+u8 GetTypeBySpecies(u16 species, u8 typeSlot, u32 otId)
+{
+    u8 type = TYPE_NONE;
+
+#ifdef ROGUE_EXPANSION
+    if(IsOtherTrainer(otId))
+    {
+        u32 customMonId = RogueGift_GetCustomMonIdBySpecies(species, otId);
+        if(customMonId != 0)
+            type = RogueGift_GetCustomMonType(customMonId, typeSlot);
+    }
+#endif
+
+    if(type == TYPE_NONE)
+    {
+#ifdef ROGUE_EXPANSION
+        type = gSpeciesInfo[species].types[typeSlot];
+#else
+        type = gBaseStats[species].type1;
+        if(typeSlot == 1)
+            type = gBaseStats[species].type2;
+#endif
+    }
+
+    return type;
+}
+
 static const u16 sUniqueAbilityBySpecies[NUM_SPECIES + 1] =
 {
     [SPECIES_BULBASAUR] = ABILITY_ROOTSNARE,
@@ -4947,8 +4974,8 @@ void PokemonToBattleMon(struct Pokemon *src, struct BattlePokemon *dst)
     dst->spDefense = GetMonData(src, MON_DATA_SPDEF, NULL);
     dst->abilityNum = GetMonData(src, MON_DATA_ABILITY_NUM, NULL);
     dst->otId = GetMonData(src, MON_DATA_OT_ID, NULL);
-    dst->type1 = gSpeciesInfo[dst->species].types[0];
-    dst->type2 = gSpeciesInfo[dst->species].types[1];
+    dst->type1 = GetTypeBySpecies(dst->species, 0, dst->otId);
+    dst->type2 = GetTypeBySpecies(dst->species, 1, dst->otId);
     dst->type3 = TYPE_MYSTERY;
     dst->ability = GetAbilityBySpecies(dst->species, dst->abilityNum, dst->otId);
     GetMonData(src, MON_DATA_NICKNAME, nickname);

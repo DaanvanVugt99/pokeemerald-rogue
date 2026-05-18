@@ -113,7 +113,7 @@
 #define VAR_UNUSED_0x405D                    0x405D
 #define VAR_UNUSED_0x405E                    0x405E
 #define VAR_UNUSED_0x405F                    0x405F 
-#define VAR_UNUSED_0x4060                    0x4060
+#define VAR_ROGUE_DAYCARE_PHONE_REMAINING_CHARGES 0x4060
 
 // Battle-only temp overrides for ability-induced extra moves.
 #define VAR_EXTRA_MOVE_DAMAGE                VAR_UNUSED_0x404A

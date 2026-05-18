@@ -4174,6 +4174,7 @@ bool8 RoguePokedex_IsSpeciesLegendary(u16 species)
         case SPECIES_DIANCIE:
         case SPECIES_HOOPA:
         case SPECIES_VOLCANION:
+        case SPECIES_FLOETTE_ETERNAL_FLOWER:
         
         case SPECIES_TYPE_NULL:
         case SPECIES_SILVALLY:
@@ -4299,6 +4300,7 @@ bool8 RoguePokedex_IsSpeciesValidBoxLegendary(u16 species)
         case SPECIES_XERNEAS:
         case SPECIES_YVELTAL:
         case SPECIES_ZYGARDE:
+        case SPECIES_FLOETTE_ETERNAL_FLOWER:
 
         case SPECIES_COSMOEM:
         case SPECIES_SOLGALEO:
