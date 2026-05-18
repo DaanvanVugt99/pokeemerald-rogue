@@ -820,9 +820,9 @@ const u8 gText_TimeMidday[] = _("Day");
 const u8 gText_TimeDusk[] = _("Dusk");
 const u8 gText_TimeMidnight[] = _("Night");
 
-const u8 gText_PieSmall[] = _("Small    (Uses x3 {POKEBLOCK})");    // based on PIE_SMALL_FILLING_AMOUNT
-const u8 gText_PieMedium[] = _("Medium (Uses x6 {POKEBLOCK})");     // based on PIE_MEDIUM_FILLING_AMOUNT
-const u8 gText_PieLarge[] = _("Large   (Uses x9 {POKEBLOCK})");     // based on PIE_LARGE_FILLING_AMOUNT
+const u8 gText_PieSmall[] = _("Small    (Uses x1 {POKEBLOCK})");    // based on PIE_SMALL_FILLING_AMOUNT
+const u8 gText_PieMedium[] = _("Medium (Uses x3 {POKEBLOCK})");     // based on PIE_MEDIUM_FILLING_AMOUNT
+const u8 gText_PieLarge[] = _("Large   (Uses x6 {POKEBLOCK})");     // based on PIE_LARGE_FILLING_AMOUNT
 
 const u8 gText_Classic[] = _("Classic");
 const u8 gText_Modern[] = _("Modern");

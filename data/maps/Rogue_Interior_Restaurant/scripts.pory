@@ -155,7 +155,7 @@ movement Movement_ChefWalkInPlace {
 script Rogue_Interior_Restaurant_SelectCrustPokeblock
 {
     // based on PIE_CRUST_AMOUNT
-    msgbox(format("Firstly, what type {POKEBLOCK} would you like the Crust (Uses x3 {POKEBLOCK}) to be made from?"), MSGBOX_DEFAULT)
+    msgbox(format("Firstly, what type {POKEBLOCK} would you like the Crust (Uses x2 {POKEBLOCK}) to be made from?"), MSGBOX_DEFAULT)
     fadescreen(FADE_TO_BLACK)
 
     special(Bag_ChoosePokeblock)
@@ -293,7 +293,7 @@ script Rogue_Interior_Restaurant_TalkShinyChef
             setvar(VAR_FILLING_AMOUNT, PIE_SMALL_FILLING_AMOUNT)
             setvar(VAR_FILLING_ITEM, ITEM_POKEBLOCK_SHINY)
 
-            msgbox(format("Finally, I will need x3 Shiny {POKEBLOCK} for the filling.")) // based on PIE_SMALL_FILLING_AMOUNT
+            msgbox(format("Finally, I will need x1 Shiny {POKEBLOCK} for the filling.")) // based on PIE_SMALL_FILLING_AMOUNT
     
             checkitem(VAR_FILLING_ITEM, VAR_FILLING_AMOUNT)
             if(var(VAR_RESULT) == YES)
