@@ -1679,7 +1679,6 @@ void PrepareStringBattle(u16 stringId, u32 battler)
         gCalledMove = MOVE_HONE_CLAWS;
         gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
         gProtectStructs[gBattlerTarget].extraMoveUsed = TRUE;
-        BattleScriptPushCursor();
         StartAbilityCalledMoveScript();
     }
 #if  B_UPDATED_INTIMIDATE >= GEN_8
@@ -5319,6 +5318,14 @@ static bool32 BattlerTookNoDamageThisTurn(u32 battler)
         && !BATTLER_TURN_DAMAGED(battler);
 }
 
+static bool32 IsCurrentMoveSwitchingUser(void)
+{
+    u32 effect = gBattleMoves[gCurrentMove].effect;
+
+    return (effect == EFFECT_HIT_ESCAPE || effect == EFFECT_PARTING_SHOT)
+        && CanBattlerSwitch(gBattlerAttacker);
+}
+
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker)
 {
     return !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
@@ -5328,6 +5335,7 @@ static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker)
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
 {
     return IsBattlerAlive(battlerAttacker)
+        && !IsCurrentMoveSwitchingUser()
         && !gProtectStructs[battlerAttacker].confusionSelfDmg
         && !gProtectStructs[battlerAttacker].extraMoveUsed
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_SLEEP)

@@ -31,3 +31,19 @@ SINGLE_BATTLE_TEST("Quillburst does not trigger after a non-contact move")
         NOT ABILITY_POPUP(player, ABILITY_QUILLBURST);
     }
 }
+
+SINGLE_BATTLE_TEST("U-turn switches the user out after hitting Quillburst")
+{
+    GIVEN {
+        PLAYER(SPECIES_BEEDRILL);
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_TOGEDEMARU) { Ability(ABILITY_BATTLE_ARMOR); UniqueAbility(ABILITY_QUILLBURST); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_U_TURN); SEND_OUT(player, 1); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
+        HP_BAR(opponent);
+        NOT ABILITY_POPUP(opponent, ABILITY_QUILLBURST);
+        MESSAGE("Go! Wynaut!");
+    }
+}

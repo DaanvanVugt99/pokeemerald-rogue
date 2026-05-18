@@ -113,6 +113,25 @@ SINGLE_BATTLE_TEST("U-turn switches the user out after Ice Face activates")
     }
 }
 
+SINGLE_BATTLE_TEST("U-turn switches the user out after Ice Face activates with Black Ice")
+{
+    GIVEN {
+        ASSUME(P_GEN_8_POKEMON == TRUE);
+        PLAYER(SPECIES_BEEDRILL);
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_EISCUE) { Ability(ABILITY_ICE_FACE); UniqueAbility(ABILITY_BLACK_ICE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_U_TURN); SEND_OUT(player, 1); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
+        HP_BAR(opponent);
+        ABILITY_POPUP(opponent, ABILITY_ICE_FACE);
+        MESSAGE("Foe Eiscue transformed!");
+        NOT ABILITY_POPUP(opponent, ABILITY_BLACK_ICE);
+        MESSAGE("Go! Wynaut!");
+    }
+}
+
 SINGLE_BATTLE_TEST("Held items are consumed immediately after a mon switched in by U-turn and Intimidate activates after it: player side")
 {
     GIVEN {

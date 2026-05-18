@@ -2919,6 +2919,8 @@ static void Cmd_resultmessage(void)
 
         if (HasBattlerAbility(gBattlerTarget, ABILITY_BLACK_ICE)
          && gBattlerTarget != gBattlerAttacker
+         && !((gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE || gBattleMoves[gCurrentMove].effect == EFFECT_PARTING_SHOT)
+           && CanBattlerSwitch(gBattlerAttacker))
          && IsBattlerAlive(gBattlerAttacker)
          && IsBattlerAlive(gBattlerTarget)
          && !gProtectStructs[gBattlerTarget].confusionSelfDmg
