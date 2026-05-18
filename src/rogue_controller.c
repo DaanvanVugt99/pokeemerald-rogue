@@ -3165,6 +3165,7 @@ void Rogue_OnNewGame(void)
     StringCopy(gSaveBlock2Ptr->playerName, gText_TrainerName_Default);
     StringCopy(gSaveBlock2Ptr->pokemonHubName, gText_ExpandedPlaceholder_PokemonHub);
     memset(&gRogueRun.completedBadges[0], TYPE_NONE, sizeof(gRogueRun.completedBadges));
+    memset(&gRogueRun.lastShopVisitDifficulty[0], ROGUE_MAX_BOSS_COUNT, sizeof(gRogueRun.lastShopVisitDifficulty));
 
     SetMoney(&gSaveBlock1Ptr->money, 0);
     memset(&gRogueLocal, 0, sizeof(gRogueLocal));
@@ -4402,7 +4403,14 @@ static void BeginRogueRun(void)
     // Apply some base seed for anything which needs to be randomly setup
     SeedRogueRng(gRogueRun.baseSeed * 23151 + 29867);
 
+    {
+        u32 i;
+        for(i = 0; i < ROGUE_SUBSEED_COUNT; ++i)
+            gRogueRun.subSeeds[i] = RogueRandom();
+    }
+
     memset(&gRogueRun.completedBadges[0], TYPE_NONE, sizeof(gRogueRun.completedBadges));
+    memset(&gRogueRun.lastShopVisitDifficulty[0], ROGUE_MAX_BOSS_COUNT, sizeof(gRogueRun.lastShopVisitDifficulty));
 
     VarSet(VAR_ROGUE_DIFFICULTY, Rogue_GetCurrentDifficulty());
     VarSet(VAR_ROGUE_CURRENT_ROOM_IDX, 0);
@@ -8576,16 +8584,59 @@ void Rogue_GetCatchingContestResults(u16* caughtSpecies, bool8* didWin, u16* win
     }
 }
 
-void Rogue_OpenMartQuery(u16 itemCategory, u16* minSalePrice)
+static void ApplyMartSeed(u16 itemCategory)
+{
+    if(!Rogue_IsRunActive())
+        return;
+
+    switch (itemCategory)
+    {
+    case ROGUE_SHOP_GENERAL:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_GENERAL]);
+        break;
+    case ROGUE_SHOP_BALLS:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_BALLS]);
+        break;
+    case ROGUE_SHOP_TMS:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_TMS]);
+        break;
+    case ROGUE_SHOP_BATTLE_ENHANCERS:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_BATTLE_ENHANCERS]);
+        break;
+    case ROGUE_SHOP_HELD_ITEMS:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_HELD_ITEMS]);
+        break;
+    case ROGUE_SHOP_RARE_HELD_ITEMS:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_RARE_HELD_ITEMS]);
+        break;
+    case ROGUE_SHOP_BERRIES:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_BERRIES]);
+        break;
+    case ROGUE_SHOP_TREATS:
+        SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_TREATS]);
+        break;
+
+    default:
+        // Use whatever the active seed is.
+        break;
+    }
+}
+
+void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
 {
     bool8 applyRandomChance = FALSE;
     bool8 applyPriceRange = TRUE;
     u16 randomChanceMinimum = 0;
     u16 maxPriceRange = 65000;
-    u16 difficulty = Rogue_GetModeRules()->forceFullShopInventory ? ROGUE_FINAL_CHAMP_DIFFICULTY : Rogue_GetCurrentDifficulty();
     u16 originalItemCategory = itemCategory;
+    u16 randomSeed;
+
+    if(Rogue_GetModeRules()->forceFullShopInventory)
+        difficulty = ROGUE_FINAL_CHAMP_DIFFICULTY;
 
     gRogueLocal.rngSeedToRestore = gRngRogueValue;
+    ApplyMartSeed(itemCategory);
+    randomSeed = RogueRandom();
 
     if(itemCategory == ROGUE_SHOP_COURIER)
     {
@@ -8618,7 +8669,6 @@ void Rogue_OpenMartQuery(u16 itemCategory, u16* minSalePrice)
         difficulty = ROGUE_FINAL_CHAMP_DIFFICULTY;
     }
 
-    RogueItemQuery_Begin();
     RogueItemQuery_IsItemActive();
 
     RogueItemQuery_IsStoredInPocket(QUERY_FUNC_EXCLUDE, POCKET_KEY_ITEMS);
@@ -8914,7 +8964,7 @@ void Rogue_OpenMartQuery(u16 itemCategory, u16* minSalePrice)
 
             if(applyRandomChance)
             {
-                u8 chance = 100;
+                u32 chance = 100;
 
                 if(difficulty < ROGUE_ELITE_START_DIFFICULTY)
                 {
@@ -8928,7 +8978,7 @@ void Rogue_OpenMartQuery(u16 itemCategory, u16* minSalePrice)
                 chance = max(randomChanceMinimum, chance);
 
                 if(chance < 100)
-                    RogueMiscQuery_FilterByChance(RogueRandom(), QUERY_FUNC_INCLUDE, chance, 1);
+                    RogueMiscQuery_FilterByChance(randomSeed, QUERY_FUNC_INCLUDE, chance, 1);
             }
         }
     }
@@ -8936,7 +8986,6 @@ void Rogue_OpenMartQuery(u16 itemCategory, u16* minSalePrice)
 
 void Rogue_CloseMartQuery()
 {
-    RogueItemQuery_End();
     gRngRogueValue = gRogueLocal.rngSeedToRestore;
 }
 

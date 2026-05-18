@@ -95,6 +95,7 @@ static u16 Query_GetEggSpecies(u16 species);
 static void Query_ApplyEvolutions(u16 species, u8 level, bool8 items, bool8 removeWhenEvo);
 
 static u16 Query_MaxBitCount();
+static u16 Query_MaxByteCount();
 static u16 Query_GetWeightArrayCount();
 
 static void AllocQuery(u8 type)
@@ -247,6 +248,17 @@ static bool8 GetQueryBitFlag(u16 elem)
     return (sRogueQuery.bitFlags[idx] & bitMask) != 0;
 }
 
+static bool8 GetQueryBitFlagCustom(u16 elem, u8* bitFlags)
+{
+    u32 idx = elem / 8;
+    u8 bit = elem % 8;
+    u8 bitMask = 1 << bit;
+
+    AGB_ASSERT(idx < MAX_QUERY_BYTE_COUNT);
+
+    return (bitFlags[idx] & bitMask) != 0;
+}
+
 // MISC QUERY
 //
 void RogueQuery_Init()
@@ -279,6 +291,11 @@ bool8 RogueMiscQuery_CheckState(u16 elem)
     return GetQueryBitFlag(elem);
 }
 
+bool8 RogueMiscQuery_CheckStateCustom(u16 elem, u8* bitFlags)
+{
+    return GetQueryBitFlagCustom(elem, bitFlags);
+}
+
 bool8 RogueMiscQuery_AnyActiveStates(u16 fromId, u16 toId)
 {
     u32 i;
@@ -294,6 +311,7 @@ bool8 RogueMiscQuery_AnyActiveStates(u16 fromId, u16 toId)
 
 void RogueMiscQuery_FilterByChance(u16 rngSeed, u8 func, u8 chance, u8 minCount)
 {
+    bool8 state;
     u32 elem;
     u32 count = Query_MaxBitCount();
     RAND_TYPE startSeed = gRngRogueValue;
@@ -302,20 +320,22 @@ void RogueMiscQuery_FilterByChance(u16 rngSeed, u8 func, u8 chance, u8 minCount)
 
     SeedRogueRng(rngSeed);
 
-    for(elem = 1; elem < count && sRogueQuery.bitCount > minCount; ITERATOR_INC(elem))
+    for(elem = 1; elem < count && sRogueQuery.bitCount > minCount; ++elem)
     {
+        state = RogueRandomChance(chance, 0);
+
         if(GetQueryBitFlag(elem))
         {
             if(func == QUERY_FUNC_INCLUDE)
             {
-                if(!RogueRandomChance(chance, 0))
+                if(!state)
                 {
                     SetQueryBitFlag(elem, FALSE);
                 }
             }
             else if(func == QUERY_FUNC_EXCLUDE)
             {
-                if(RogueRandomChance(chance, 0))
+                if(state)
                 {
                     SetQueryBitFlag(elem, FALSE);
                 }
@@ -1167,6 +1187,20 @@ void RogueItemQuery_End()
     }
 }
 
+u8* RogueItemQuery_EndWithBitwiseCloneAlloc()
+{
+    u8* bitFlags = Alloc(sizeof(u8) * Query_MaxByteCount());
+
+    if(bitFlags != NULL)
+    {
+        memcpy(bitFlags, sRogueQuery.bitFlags, sizeof(u8) * Query_MaxByteCount());
+    }
+
+    RogueItemQuery_End();
+
+    return bitFlags;
+}
+
 void RogueItemQuery_Reset(u8 func)
 {
     u32 itemId;
@@ -1681,6 +1715,11 @@ static u16 Query_MaxBitCount()
     }
 }
 
+static u16 Query_MaxByteCount()
+{
+    return 1 + Query_MaxBitCount() / 8;
+}
+
 static u16 Query_GetWeightArrayCount()
 {
     ASSERT_WEIGHT_QUERY;
@@ -1896,7 +1935,21 @@ void RogueListQuery_End()
 
 bool8 SortItemPlaceBefore(u8 sortMode, u16 itemIdA, u16 itemIdB, u16 quantityA, u16 quantityB);
 
-static void SortInsertItem(u16 itemId, u16* buffer, u16 currBufferCount, u8 sortMode, bool8 flipSort)
+static bool8 SortItemPlaceBeforeCustom(u8 sortMode, u16 itemIdA, u16 itemIdB, u16 quantityA, u16 quantityB, u8* prevItemFlags)
+{
+    if(prevItemFlags != NULL)
+    {
+        bool8 prevActiveA = GetQueryBitFlagCustom(itemIdA, prevItemFlags);
+        bool8 prevActiveB = GetQueryBitFlagCustom(itemIdB, prevItemFlags);
+
+        if(prevActiveA != prevActiveB)
+            return !prevActiveA;
+    }
+
+    return SortItemPlaceBefore(sortMode, itemIdA, itemIdB, quantityA, quantityB);
+}
+
+static void SortInsertItem(u16 itemId, u16* buffer, u16 currBufferCount, u8 sortMode, bool8 flipSort, u8* prevItemFlags)
 {
     if(currBufferCount == 0)
     {
@@ -1905,7 +1958,7 @@ static void SortInsertItem(u16 itemId, u16* buffer, u16 currBufferCount, u8 sort
     }
     else if(currBufferCount == 1)
     {
-        if(SortItemPlaceBefore(sortMode, itemId, buffer[0], 1, 1) != flipSort)
+        if(SortItemPlaceBeforeCustom(sortMode, itemId, buffer[0], 1, 1, prevItemFlags) != flipSort)
         {
             buffer[currBufferCount] = buffer[0];
             buffer[0] = itemId;
@@ -1928,7 +1981,7 @@ static void SortInsertItem(u16 itemId, u16* buffer, u16 currBufferCount, u8 sort
 
             index = (maxIndex + minIndex) / 2;
 
-            if(SortItemPlaceBefore(sortMode, itemId, buffer[index], 1, 1) != flipSort)
+            if(SortItemPlaceBeforeCustom(sortMode, itemId, buffer[index], 1, 1, prevItemFlags) != flipSort)
             {
                 if(maxIndex == index)
                     --maxIndex;
@@ -1949,7 +2002,7 @@ static void SortInsertItem(u16 itemId, u16* buffer, u16 currBufferCount, u8 sort
         // Special case to sort the end of the list
         if(minIndex == currBufferCount - 1)
         {
-            if(SortItemPlaceBefore(sortMode, itemId, buffer[currBufferCount - 1], 1, 1) != flipSort)
+            if(SortItemPlaceBeforeCustom(sortMode, itemId, buffer[currBufferCount - 1], 1, 1, prevItemFlags) != flipSort)
             {
                 buffer[currBufferCount] = buffer[currBufferCount - 1];
                 buffer[currBufferCount - 1] = itemId;
@@ -1976,7 +2029,7 @@ static void SortInsertItem(u16 itemId, u16* buffer, u16 currBufferCount, u8 sort
     }
 }
 
-u16 const* RogueListQuery_CollapseItems(u8 sortMode, bool8 flipSort)
+u16 const* RogueListQuery_CollapseItems(u8 sortMode, bool8 flipSort, u8* prevItemFlags)
 {
     u32 itemId;
     u32 index;
@@ -1989,7 +2042,7 @@ u16 const* RogueListQuery_CollapseItems(u8 sortMode, bool8 flipSort)
     {
         if(GetQueryBitFlag(itemId))
         {
-            SortInsertItem(itemId, sRogueQuery.listArray, index, sortMode, flipSort);
+            SortInsertItem(itemId, sRogueQuery.listArray, index, sortMode, flipSort, prevItemFlags);
             ++index;
 
             if(index >= sRogueQuery.arrayCapacity - 1)

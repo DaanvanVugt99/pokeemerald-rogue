@@ -46,6 +46,19 @@
 #define UNUSED_RELEASE UNUSED
 #endif
 
+// Sub-Seeds
+//
+#define ROGUE_SUBSEED_SHOP_GENERAL              0
+#define ROGUE_SUBSEED_SHOP_BALLS                1
+#define ROGUE_SUBSEED_SHOP_TMS                  2
+#define ROGUE_SUBSEED_SHOP_BATTLE_ENHANCERS     3
+#define ROGUE_SUBSEED_SHOP_HELD_ITEMS           4
+#define ROGUE_SUBSEED_SHOP_RARE_HELD_ITEMS      5
+#define ROGUE_SUBSEED_SHOP_BERRIES              6
+#define ROGUE_SUBSEED_SHOP_TREATS               7
+#define ROGUE_SUBSEED_MOVE_TUTOR                8
+#define ROGUE_SUBSEED_COUNT                     9
+
 // Items
 //
 #define ROGUE_SHOP_NONE                 0
@@ -62,6 +75,7 @@
 #define ROGUE_SHOP_CHARMS               12
 #define ROGUE_SHOP_HUB_UPGRADES         13
 #define ROGUE_SHOP_COURIER              14
+#define ROGUE_SHOP_COUNT                15
 
 #define ITEM_LINK_CABLE                 (ITEM_ROGUE_ITEM_FIRST + 0)
 #define ITEM_QUEST_LOG                  (ITEM_ROGUE_ITEM_FIRST + 1)
