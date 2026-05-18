@@ -2472,10 +2472,9 @@ bool8 Rogue_IsItemEnabled(u16 itemId)
 
         if((itemId >= ITEM_RED_ORB && itemId <= ITEM_BLUE_ORB) || IS_MEGA_STONE_ITEM(itemId))
         {
-            if(Rogue_IsRunActive())
-                return IsMegaEvolutionEnabled();
-            else
-                return TRUE;
+            return IsMegaEvolutionEnabled()
+                && Rogue_IsFormItem(itemId)
+                && GetFormItemFlag(itemId);
         }
 
         if(itemId >= ITEM_NORMALIUM_Z && itemId <= ITEM_ULTRANECROZIUM_Z)
