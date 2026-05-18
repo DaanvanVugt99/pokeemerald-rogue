@@ -425,6 +425,7 @@ static void UpdatePartyMonHPBar(u8, struct Pokemon *);
 static void SpriteCB_UpdatePartyMonIcon(struct Sprite *);
 static void SpriteCB_BouncePartyMonIcon(struct Sprite *);
 static void ShowOrHideHeldItemSprite(u16, struct PartyMenuBox *);
+static void ClearDisplayedItemSprite(bool32);
 static void UpdateDisplayedItem(u8);
 static void CreateHeldItemSpriteForTrade(u8, bool8);
 static void SpriteCB_HeldItem(struct Sprite *);
@@ -680,6 +681,7 @@ static bool8 ShowPartyMenu(void)
         break;
     case 3:
         ResetSpriteData();
+        ClearDisplayedItemSprite(FALSE);
         gMain.state++;
         break;
     case 4:
@@ -803,6 +805,7 @@ static bool8 ReloadPartyMenu(void)
         break;
     case 3:
         ResetSpriteData();
+        ClearDisplayedItemSprite(FALSE);
         gMain.state++;
         break;
     case 4:
@@ -5150,6 +5153,26 @@ static void ShowOrHideHeldItemSprite(u16 item, struct PartyMenuBox *menuBox)
     }
 }
 
+static void ClearDisplayedItemSprite(bool32 destroySprite)
+{
+    u8 spriteId;
+
+    if (sPartyMenuInternal == NULL)
+        return;
+
+    spriteId = sPartyMenuInternal->displayItemSpriteId;
+    if (destroySprite && spriteId != SPRITE_NONE && spriteId < MAX_SPRITES && gSprites[spriteId].inUse)
+    {
+        gSprites[spriteId].invisible = TRUE;
+        FreeSpriteTilesByTag(TAG_PARTY_DISPLAY_ITEM);
+        FreeSpritePaletteByTag(TAG_PARTY_DISPLAY_ITEM);
+        DestroySprite(&gSprites[spriteId]);
+    }
+
+    sPartyMenuInternal->displayItemId = ITEM_NONE;
+    sPartyMenuInternal->displayItemSpriteId = SPRITE_NONE;
+}
+
 static void UpdateDisplayedItem(u8 slot)
 {
     u8 i;
@@ -5163,25 +5186,26 @@ static void UpdateDisplayedItem(u8 slot)
 
     if (displayedItem != sPartyMenuInternal->displayItemId)
     {
+        ClearDisplayedItemSprite(TRUE);
         sPartyMenuInternal->displayItemId = displayedItem;
-        if (sPartyMenuInternal->displayItemSpriteId != SPRITE_NONE)
-        {
-            DestroySpriteAndFreeResources(&gSprites[sPartyMenuInternal->displayItemSpriteId]);
-            sPartyMenuInternal->displayItemSpriteId = SPRITE_NONE;
-        }
+    }
+    else if (sPartyMenuInternal->displayItemSpriteId != SPRITE_NONE)
+    {
+        gSprites[sPartyMenuInternal->displayItemSpriteId].invisible = TRUE;
+    }
 
-        if (displayedItem != ITEM_NONE)
-        {
-            sPartyMenuInternal->displayItemSpriteId = AddItemIconSprite(TAG_PARTY_DISPLAY_ITEM, TAG_PARTY_DISPLAY_ITEM, displayedItem);
-            if (sPartyMenuInternal->displayItemSpriteId == MAX_SPRITES)
-                sPartyMenuInternal->displayItemSpriteId = SPRITE_NONE;
-        }
+    if (displayedItem != ITEM_NONE && sPartyMenuInternal->displayItemSpriteId == SPRITE_NONE)
+    {
+        sPartyMenuInternal->displayItemSpriteId = AddItemIconSprite(TAG_PARTY_DISPLAY_ITEM, TAG_PARTY_DISPLAY_ITEM, displayedItem);
+        if (sPartyMenuInternal->displayItemSpriteId == MAX_SPRITES)
+            sPartyMenuInternal->displayItemSpriteId = SPRITE_NONE;
     }
 
     if (slot < PARTY_SIZE && sPartyMenuInternal->displayItemSpriteId != SPRITE_NONE)
     {
         gSprites[sPartyMenuInternal->displayItemSpriteId].x = sPartyMenuBoxes[slot].spriteCoords[2] + 8;
         gSprites[sPartyMenuInternal->displayItemSpriteId].y = sPartyMenuBoxes[slot].spriteCoords[3] + 4;
+        gSprites[sPartyMenuInternal->displayItemSpriteId].invisible = FALSE;
     }
 
     for (i = 0; i < PARTY_SIZE; i++)

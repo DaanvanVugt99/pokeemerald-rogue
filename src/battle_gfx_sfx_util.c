@@ -5,6 +5,7 @@
 #include "battle_anim.h"
 #include "constants/battle_anim.h"
 #include "battle_interface.h"
+#include "battle_util.h"
 #include "main.h"
 #include "dma3.h"
 #include "malloc.h"
@@ -635,6 +636,7 @@ void BattleLoadMonSpriteGfx(struct Pokemon *mon, u32 battler)
     LZDecompressWram(lzPaletteData, gDecompressionBuffer);
     LoadPalette(gDecompressionBuffer, paletteOffset, PLTT_SIZE_4BPP);
     LoadPalette(gDecompressionBuffer, BG_PLTT_ID(8) + BG_PLTT_ID(battler), PLTT_SIZE_4BPP);
+    ResetGrafittiTagPaletteCache(battler);
 
     // transform's pink color
     if (gBattleSpritesDataPtr->battlerData[battler].transformSpecies != SPECIES_NONE)

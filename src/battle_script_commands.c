@@ -2617,7 +2617,10 @@ static void Cmd_waitanimation(void)
     CMD_ARGS();
 
     if (gBattleControllerExecFlags == 0)
+    {
+        ReapplyGrafittiTagPalettes();
         gBattlescriptCurrInstr = cmd->nextInstr;
+    }
 }
 
 static void Cmd_healthbarupdate(void)
@@ -5703,7 +5706,10 @@ static void Cmd_waitstate(void)
     CMD_ARGS();
 
     if (gBattleControllerExecFlags == 0)
+    {
+        ReapplyGrafittiTagPalettes();
         gBattlescriptCurrInstr = cmd->nextInstr;
+    }
 }
 
 static void Cmd_healthbar_update(void)

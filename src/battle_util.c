@@ -24624,10 +24624,32 @@ static const u16 sGrafittiTagColors[] =
     RGB(4, 31, 0),
 };
 
+static bool8 sGrafittiTagPaletteCached[MAX_BATTLERS_COUNT];
+static u8 sGrafittiTagCachedPaletteNum[MAX_BATTLERS_COUNT];
+static u16 sGrafittiTagBasePalettes[MAX_BATTLERS_COUNT][16];
+
 static void ApplyGrafittiTagPalette(u32 battler)
 {
-    u32 paletteNum = gSprites[gBattlerSpriteIds[battler]].oam.paletteNum;
+    u32 spriteId;
+    u8 paletteNum;
 
+    if (battler >= gBattlersCount)
+        return;
+
+    spriteId = gBattlerSpriteIds[battler];
+    if (spriteId == MAX_SPRITES)
+        return;
+
+    paletteNum = gSprites[spriteId].oam.paletteNum;
+
+    if (!sGrafittiTagPaletteCached[battler] || sGrafittiTagCachedPaletteNum[battler] != paletteNum)
+    {
+        CpuCopy16(&gPlttBufferUnfaded[OBJ_PLTT_ID(paletteNum)], sGrafittiTagBasePalettes[battler], sizeof(sGrafittiTagBasePalettes[battler]));
+        sGrafittiTagPaletteCached[battler] = TRUE;
+        sGrafittiTagCachedPaletteNum[battler] = paletteNum;
+    }
+
+    LoadPalette(sGrafittiTagBasePalettes[battler], OBJ_PLTT_ID(paletteNum), PLTT_SIZE_4BPP);
     BlendPalette(OBJ_PLTT_ID(paletteNum), 16, 6, sGrafittiTagColors[gDisableStructs[battler].grafittiTagColor]);
 }
 
@@ -24635,6 +24657,13 @@ void SetGrafittiTag(u32 battler)
 {
     gDisableStructs[battler].grafittiTagged = TRUE;
     gDisableStructs[battler].grafittiTagColor = Random2() & 3;
+    sGrafittiTagPaletteCached[battler] = FALSE;
+}
+
+void ResetGrafittiTagPaletteCache(u32 battler)
+{
+    if (battler < ARRAY_COUNT(sGrafittiTagPaletteCached))
+        sGrafittiTagPaletteCached[battler] = FALSE;
 }
 
 void ReapplyGrafittiTagPalettes(void)
@@ -24645,6 +24674,8 @@ void ReapplyGrafittiTagPalettes(void)
     {
         if (gDisableStructs[i].grafittiTagged && IsBattlerAlive(i))
             ApplyGrafittiTagPalette(i);
+        else
+            sGrafittiTagPaletteCached[i] = FALSE;
     }
 }
 

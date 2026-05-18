@@ -2074,7 +2074,12 @@ static void TypeIndicator_CreateSprites(u32 battlerId)
 
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
     {
-        u8 spriteId = CreateSprite(&sSpriteTemplate_TypeIndicator, 0, 0, 0);
+        u8 spriteId;
+
+        if (TypeIndicator_GetSpriteId(battlerId, slot) < MAX_SPRITES)
+            continue;
+
+        spriteId = CreateSpriteAtEnd(&sSpriteTemplate_TypeIndicator, 0, 0, 0);
 
         if (spriteId >= MAX_SPRITES)
             continue;
@@ -2099,6 +2104,9 @@ static void TypeIndicator_SetVisibilities(u32 healthboxId, bool32 invisible)
     if (TypeIndicator_ShouldSkipBattler(battlerId))
         return;
 
+    // If initial creation failed due sprite pressure, retry now.
+    TypeIndicator_CreateSprites(battlerId);
+
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
     {
         u8 spriteId = TypeIndicator_GetSpriteId(battlerId, slot);
@@ -2118,6 +2126,8 @@ static void TypeIndicator_UpdateOamPriority(u32 healthboxId, u32 oamPriority)
 
     (void)oamPriority;
 
+    TypeIndicator_CreateSprites(battlerId);
+
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
     {
         u8 spriteId = TypeIndicator_GetSpriteId(battlerId, slot);
@@ -2130,6 +2140,9 @@ static void TypeIndicator_UpdateOamPriority(u32 healthboxId, u32 oamPriority)
 static void TypeIndicator_UpdateTypes(u32 battlerId)
 {
     u32 slot;
+
+    TypeIndicator_CreateSprites(battlerId);
+
     u8 firstSpriteId = TypeIndicator_GetSpriteId(battlerId, 0);
 
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
@@ -2164,6 +2177,12 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
 {
     u32 battlerId = sprite->tBattler;
     u32 healthboxSpriteId = gHealthboxSpriteIds[battlerId];
+
+    if (healthboxSpriteId >= MAX_SPRITES)
+    {
+        sprite->invisible = TRUE;
+        return;
+    }
 
     if (sprite->tTypeSlot == 0)
         TypeIndicator_UpdateTypesIfNeeded(battlerId);
