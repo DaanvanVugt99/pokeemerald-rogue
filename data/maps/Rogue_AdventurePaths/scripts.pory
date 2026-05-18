@@ -19,7 +19,8 @@ script Rogue_AdventurePaths_OnLoad
     //special(SpawnCameraObject)
     //applymovement(OBJ_EVENT_ID_CAMERA, AdventurePaths_OffsetCamera)
 
-    special(RogueAdv_ApplyAdventureMetatiles)
+    // Applied from Rogue_OnLoadMap so the dynamic path is drawn once per map load.
+    //special(RogueAdv_ApplyAdventureMetatiles)
 }
 
 script Rogue_AdventurePaths_PreviewCutscene

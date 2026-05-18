@@ -3749,6 +3749,11 @@ void Rogue_OnLoadMap(void)
         RandomiseSafariWildEncounters();
         //Rogue_PushPopup(POPUP_MSG_SAFARI_ENCOUNTERS, 0);
     }
+    else if(Rogue_IsRunActive())
+    {
+        if(RogueAdv_IsViewingPath())
+            RogueAdv_ApplyAdventureMetatiles();
+    }
     else if(!Rogue_IsRunActive())
     {
         // Apply metatiles for the map we're in
