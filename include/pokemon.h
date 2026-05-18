@@ -103,6 +103,7 @@ enum {
     MON_DATA_SPDEF2,
     MON_DATA_TERA_TYPE,
     MON_DATA_GIGANTAMAX_FACTOR,
+    MON_DATA_TUTOR_MOVE_LVL,
 };
 
 struct PokemonSubstruct0
@@ -149,7 +150,8 @@ struct PokemonSubstruct3
 
  /* 0x02 */ u16 metLevel:7;
  /* 0x02 */ u16 metGame:4;
- /* 0x03 */ u16 unused1:4; // dynamaxLevel?
+ /* 0x03 */ u16 tutorMoveLvl:3;
+ /* 0x03 */ u16 unused1:1; // dynamaxLevel?
  /* 0x03 */ u16 otGender:1;
 
  /* 0x04 */ u32 hpIV:5;

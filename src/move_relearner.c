@@ -1222,8 +1222,16 @@ static void CreateLearnableMovesList(void)
 
     for (i = 0; i < sMoveRelearnerStruct->numMenuChoices; i++)
     {
-        sMoveRelearnerStruct->menuItems[i].name = gMoveNames[sMoveRelearnerStruct->movesToLearn[i]];
-        sMoveRelearnerStruct->menuItems[i].id = sMoveRelearnerStruct->movesToLearn[i];
+        if(sMoveRelearnerStruct->movesToLearn[i] == MOVE_UNAVAILABLE)
+        {
+            sMoveRelearnerStruct->menuItems[i].name = gText_ThreeQuestionMarks;
+            sMoveRelearnerStruct->menuItems[i].id = LIST_CANCEL;
+        }
+        else
+        {
+            sMoveRelearnerStruct->menuItems[i].name = gMoveNames[sMoveRelearnerStruct->movesToLearn[i]];
+            sMoveRelearnerStruct->menuItems[i].id = sMoveRelearnerStruct->movesToLearn[i];
+        }
     }
 
     BufferMonNickname(gStringVar1);

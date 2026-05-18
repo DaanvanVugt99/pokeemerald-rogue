@@ -10,7 +10,8 @@ struct RoguePartyMon
     u8 lastPopupLevel : 7;
 
     bool8 isSafariIllegal : 1;
-    u8 pad0 : 7;
+    u8 runTutorMoveLvl : 3;
+    u8 pad0 : 4;
 
     u8 pad1[2];
 };

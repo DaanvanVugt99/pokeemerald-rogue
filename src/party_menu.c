@@ -2375,7 +2375,48 @@ static u8 CanTeachMove(struct Pokemon *mon, u16 move)
 
 u8 GetTutorMoves(struct Pokemon *pokemon, u16 *tutorMoves, u16 tutorMovesCapacity)
 {
-    return GetTutorMovesForSpecies(GetMonData(pokemon, MON_DATA_SPECIES), tutorMoves, tutorMovesCapacity);
+    u16 read = 0;
+    u16 write = 0;
+    u16 species = GetMonData(pokemon, MON_DATA_SPECIES);
+    u8 tutorMoveLvlCount = Rogue_IsRunActive() ? TUTOR_MOVE_LVL_COUNT_RUN : TUTOR_MOVE_LVL_COUNT_HUB;
+    u8 tutorMoveLvl = Rogue_IsRunActive() ? pokemon->rogueExtraData.runTutorMoveLvl : GetMonData(pokemon, MON_DATA_TUTOR_MOVE_LVL);
+    u32 compatValue;
+    u32 uniqueMoveSet = Rogue_IsRunActive() ? GetMonData(pokemon, MON_DATA_PERSONALITY) : GetMonData(pokemon, MON_DATA_OT_ID);
+    const struct RoguePokemonProfile *pokemonProfile = &gRoguePokemonProfiles[species];
+
+    for(read = 0; pokemonProfile->tutorMoves[read] != MOVE_NONE; ++read)
+    {
+        if(write >= tutorMovesCapacity)
+        {
+            AGB_ASSERT(FALSE);
+            break;
+        }
+
+        compatValue = (((uniqueMoveSet >> ((read / tutorMoveLvlCount) % 32)) & 0x3) + read) % tutorMoveLvlCount;
+
+        if(tutorMoveLvlCount <= 1 || compatValue <= tutorMoveLvl)
+        {
+            // If this move has a TM, ignore it
+            if(BattleMoveIdToItemId(pokemonProfile->tutorMoves[read]) != ITEM_NONE)
+                continue;
+
+            tutorMoves[write++] = pokemonProfile->tutorMoves[read];
+        }
+    }
+
+    if(tutorMoveLvl + 1 < tutorMoveLvlCount)
+    {
+        if(write >= tutorMovesCapacity)
+        {
+            AGB_ASSERT(FALSE);
+        }
+        else
+        {
+            tutorMoves[write++] = MOVE_UNAVAILABLE;
+        }
+    }
+
+    return write;
 }
 
 u8 GetTutorMovesForSpecies(u16 species, u16 *tutorMoves, u16 tutorMovesCapacity)

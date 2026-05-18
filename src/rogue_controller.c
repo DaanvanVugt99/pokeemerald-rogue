@@ -3861,11 +3861,7 @@ u16 Rogue_PostRunRewardLvls()
     u16 lvlCount = 2;
     u16 targettedMons = CalculateRewardLvlMonCount();
 
-    if(targettedMons == 0)
-    {
-        lvlCount = 0;
-    }
-    else if(targettedMons > 1)
+    if(targettedMons > 1)
     {
         // Only give 1 lvl per mon
         lvlCount = 1;
@@ -3893,6 +3889,18 @@ u16 Rogue_PostRunRewardLvls()
 
                 // Increase friendship from these levels
                 AdjustFriendship(&gPlayerParty[i], FRIENDSHIP_EVENT_GROW_LEVEL);
+            }
+
+            // Increase hub tutor move access for party Pokémon after winning a run.
+            if(Rogue_GetCurrentDifficulty() >= ROGUE_MAX_BOSS_COUNT)
+            {
+                u8 tutorMoveLvl = GetMonData(&gPlayerParty[i], MON_DATA_TUTOR_MOVE_LVL);
+
+                if(tutorMoveLvl + 1 < TUTOR_MOVE_LVL_COUNT_HUB)
+                {
+                    ++tutorMoveLvl;
+                    SetMonData(&gPlayerParty[i], MON_DATA_TUTOR_MOVE_LVL, &tutorMoveLvl);
+                }
             }
         }
 
@@ -4119,6 +4127,7 @@ static void BeginRogueRun_ModifyParty(void)
                 SetMonData(&gPlayerParty[i], MON_DATA_SPEED_EV, &temp);
                 SetMonData(&gPlayerParty[i], MON_DATA_SPATK_EV, &temp);
                 SetMonData(&gPlayerParty[i], MON_DATA_SPDEF_EV, &temp);
+                gPlayerParty[i].rogueExtraData.runTutorMoveLvl = 0;
 
                 // Force to starter lvl
                 exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL)].growthRate, STARTER_MON_LEVEL);
@@ -6728,6 +6737,17 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
                 gRogueRun.currentLevelOffset = nextLevel - prevLevel;
                 gRogueRun.wildEncounters.roamerActiveThisPath = TRUE;
 
+                // Increase run tutor move access for the Pokémon that earned this badge.
+                {
+                    u16 i;
+
+                    for(i = 0; i < gPlayerPartyCount; ++i)
+                    {
+                        if(gPlayerParty[i].rogueExtraData.runTutorMoveLvl + 1 < TUTOR_MOVE_LVL_COUNT_RUN)
+                            ++gPlayerParty[i].rogueExtraData.runTutorMoveLvl;
+                    }
+                }
+
                 if(Rogue_GetCurrentDifficulty() >= ROGUE_MAX_BOSS_COUNT)
                 {
                     // Snapshot HoF team
@@ -8989,72 +9009,13 @@ void Rogue_CloseMartQuery()
     gRngRogueValue = gRogueLocal.rngSeedToRestore;
 }
 
-static void ApplyTutorMoveCapacity(u8* count, u16* moves, u16 capacity)
-{
-    u16 i;
-    u16 randIdx;
-    RAND_TYPE startSeed = gRngRogueValue;
-
-    while(*count > capacity)
-    {
-
-        if(Rogue_IsRunActive())
-            randIdx = RogueRandom() % *count;
-        else
-            randIdx = 0; // Always take from the front, as that's where the "good moves" are
-
-        --*count;
-
-        for(i = randIdx; i < *count; ++i)
-        {
-            moves[i] = moves[i + 1];
-        }
-    }
-
-    gRngRogueValue = startSeed;
-}
-
 void Rogue_ModifyTutorMoves(struct Pokemon* mon, u8 tutorType, u8* count, u8* hiddenCount, u16* moves)
 {
+    *hiddenCount = 0;
+
     if(tutorType != 0) // TEACH_STATE_RELEARN
     {
-        u16 difficulty;
-        u16 capacity = 0; // MAX is 0
-        u8 startCount = *count;
-
-        if(Rogue_IsRunActive())
-        {
-            difficulty = Rogue_GetCurrentDifficulty();
-
-            //if(FlagGet(FLAG_ROGUE_GAUNTLET_MODE))
-            //    difficulty = 13;
-
-            if(difficulty < 8)
-                capacity = 3 + difficulty * 1;
-        }
-        else
-        {
-            // TODO - Reimplement moves maybe?
-
-            //capacity = 5;
-//
-            //if(IsQuestCollected(QUEST_NoFainting2) && IsQuestCollected(QUEST_NoFainting3))
-            //    capacity = 0;
-            //else if(IsQuestCollected(QUEST_NoFainting2) || IsQuestCollected(QUEST_NoFainting3))
-            //    capacity += 5;
-        }
-
-        // TEMP
-        capacity = 0;
-
-        if(capacity != 0)
-        {
-            ApplyTutorMoveCapacity(count, moves, capacity);
-        }
-
-        *hiddenCount = startCount - *count;
-
-        // Remove moves we already know (We want to do this after capacity so the randomisation is consistent)
+        // Remove moves we already know.
         {
             u16 readIdx;
             u16 writeIdx = 0;

@@ -2380,6 +2380,9 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
         case MON_DATA_GENDER_FLAG:
             retVal = substruct3->genderFlag;
             break;
+        case MON_DATA_TUTOR_MOVE_LVL:
+            retVal = substruct3->tutorMoveLvl;
+            break;
         case MON_DATA_SMART_RIBBON:
             retVal = substruct3->smartRibbon;
             break;
@@ -2842,6 +2845,9 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
             break;
     case MON_DATA_GENDER_FLAG:
             SET8(substruct3->genderFlag);
+            break;
+        case MON_DATA_TUTOR_MOVE_LVL:
+            SET8(substruct3->tutorMoveLvl);
             break;
         case MON_DATA_CUTE_RIBBON:
             SET8(substruct3->cuteRibbon);
