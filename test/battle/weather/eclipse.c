@@ -6,6 +6,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_ECLIPSE].effect == EFFECT_ECLIPSE);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_FAIRY_WIND].type == TYPE_FAIRY);
+    ASSUME(gSpeciesInfo[SPECIES_GASTLY].types[0] == TYPE_GHOST || gSpeciesInfo[SPECIES_GASTLY].types[1] == TYPE_GHOST);
 }
 
 SINGLE_BATTLE_TEST("Eclipse multiplies the power of Dark-type moves by 1.5x", s16 damage)
@@ -45,6 +46,39 @@ SINGLE_BATTLE_TEST("Eclipse multiplies the power of Fairy-type moves by 0.5x", s
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Eclipse makes Ghost-type Pokemon immune to Dark-type moves")
+{
+    u32 setupMove;
+
+    PARAMETRIZE { setupMove = MOVE_CELEBRATE; }
+    PARAMETRIZE { setupMove = MOVE_ECLIPSE; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(200); Moves(MOVE_CELEBRATE, MOVE_ECLIPSE, MOVE_BITE); }
+        OPPONENT(SPECIES_GASTLY) { HP(1000); MaxHP(1000); Defense(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, setupMove); }
+        TURN { MOVE(player, MOVE_BITE); }
+    } SCENE {
+        if (setupMove == MOVE_CELEBRATE)
+        {
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, player);
+            HP_BAR(opponent);
+        }
+        else
+        {
+            NONE_OF {
+                HP_BAR(opponent);
+            }
+        }
+    } THEN {
+        if (setupMove == MOVE_CELEBRATE)
+            EXPECT_LT(opponent->hp, opponent->maxHP);
+        else
+            EXPECT_EQ(opponent->hp, opponent->maxHP);
     }
 }
 

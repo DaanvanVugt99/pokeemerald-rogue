@@ -23495,7 +23495,13 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
     if (HasSeaGuardianResistances(battlerDef))
         modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
 
-    if (moveType == TYPE_GHOST
+    if (moveType == TYPE_DARK
+     && IS_BATTLER_OF_TYPE(battlerDef, TYPE_GHOST)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
+    {
+        modifier = UQ_4_12(0.0);
+    }
+    else if (moveType == TYPE_GHOST
      && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)
      && DoesPartyShareTypeWithBattler(battlerDef))
     {
@@ -23744,7 +23750,13 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
     if (HasSeaGuardianResistances(battlerDef))
         modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
 
-    if (moveType == TYPE_GHOST
+    if (moveType == TYPE_DARK
+     && IS_BATTLER_OF_TYPE(battlerDef, TYPE_GHOST)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
+    {
+        modifier = UQ_4_12(0.0);
+    }
+    else if (moveType == TYPE_GHOST
      && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)
      && DoesPartyShareTypeWithBattler(battlerDef))
     {
