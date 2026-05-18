@@ -784,6 +784,11 @@ u16 Rogue_ModifyPlayBGM(u16 songNum)
             u32 mapFlags = gRogueRouteTable.routes[gRogueRun.currentRouteIndex].mapFlags;
             songNum = ModifyBattleSongByMap(songNum, mapFlags);
         }
+        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BATTLE_TOWER)
+        {
+            if(songNum == MUS_VS_TRAINER)
+                songNum = MUS_DP_VS_TRAINER;
+        }
     }
     else
     {
@@ -1611,6 +1616,12 @@ static u32 CalculateBattleWinnings(u16 trainerNum)
             moneyReward = 6 * lastMonLevel * 2 * gTrainerMoneyTable[i].value;
         else
             moneyReward = 6 * lastMonLevel * gTrainerMoneyTable[i].value;
+
+        if(Rogue_IsRunActive() && gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BATTLE_TOWER)
+        {
+            // 66% boost
+            moneyReward = (moneyReward * 5) / 3;
+        }
     }
 
     return moneyReward;
@@ -5652,6 +5663,32 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     break;
                 }
 
+                case ADVPATH_ROOM_BATTLE_TOWER:
+                {
+                    u8 const battleWeather[] =
+                    {
+                        WEATHER_NONE,
+                        WEATHER_SUNNY,
+                        WEATHER_SANDSTORM,
+                        WEATHER_DROUGHT,
+                        WEATHER_DOWNPOUR,
+                        WEATHER_LEAVES,
+                        WEATHER_RAIN_THUNDERSTORM,
+                        WEATHER_PSYCHIC_FOG,
+                        WEATHER_SNOW,
+                        WEATHER_MISTY_FOG,
+                    };
+
+                    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, RogueRandom());
+
+                    if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) != DIFFICULTY_LEVEL_EASY)
+                        VarSet(VAR_ROGUE_DESIRED_WEATHER, battleWeather[RogueRandomRange(ARRAY_COUNT(battleWeather), 0)]);
+
+                    ResetTrainerBattles();
+                    RandomiseEnabledTrainers();
+                    break;
+                }
+
                 case ADVPATH_ROOM_GAMESHOW:
                 {
                     FlagClear(FLAG_ROGUE_HIDE_GAMESHOW_REWARD);
@@ -5727,7 +5764,7 @@ static bool8 IsHubMapGroup()
 
 static bool8 ShouldAdjustRouteObjectEvents()
 {
-    return gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BOSS;
+    return gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BOSS || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BATTLE_TOWER;
 }
 
 void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave, struct ObjectEventTemplate *objectEvents, u8* objectEventCount, u8 objectEventCapacity)
@@ -9410,14 +9447,30 @@ static void RandomiseEnabledTrainers()
 {
     u16 i;
     u16 activeTrainers = 0;
-    u16 trainerBuffer[ROGUE_TRAINER_COUNT];
+    u16 trainerBuffer[ROGUE_MAX_ACTIVE_TRAINER_COUNT];
 
     if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT)
         Rogue_ChooseTeamHideoutTrainers(trainerBuffer, ARRAY_COUNT(trainerBuffer));
-    else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BOSS)
+    else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BOSS || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BATTLE_TOWER)
         Rogue_ChooseSpectatorTrainers(trainerBuffer, ARRAY_COUNT(trainerBuffer));
     else
         Rogue_ChooseRouteTrainers(trainerBuffer, ARRAY_COUNT(trainerBuffer));
+
+    if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BATTLE_TOWER)
+    {
+        u16 enabledCount = 2 + RogueRandomRange(3, 0);
+
+        if(RogueRandomChance(20, 0))
+            enabledCount = 4 + RogueRandomRange(3, 0);
+
+        for(i = 0; i < ROGUE_MAX_ACTIVE_TRAINER_COUNT; ++i)
+            Rogue_SetDynamicTrainer(i, TRAINER_NONE);
+
+        for(i = 0; i < enabledCount; ++i)
+            Rogue_SetDynamicTrainer(i, trainerBuffer[i]);
+
+        return;
+    }
 
     for(i = 0; i < ROGUE_MAX_ACTIVE_TRAINER_COUNT; ++i)
     {

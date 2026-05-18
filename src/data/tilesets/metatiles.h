@@ -163,6 +163,9 @@ const u16 gMetatileAttributes_EliteFour[] = INCBIN_U16("data/tilesets/secondary/
 const u16 gMetatiles_BattleFrontier[] = INCBIN_U16("data/tilesets/secondary/battle_frontier/metatiles.bin");
 const u16 gMetatileAttributes_BattleFrontier[] = INCBIN_U16("data/tilesets/secondary/battle_frontier/metatile_attributes.bin");
 
+const u16 gMetatiles_BattleFrontierTower[] = INCBIN_U16("data/tilesets/secondary/battle_frontier_tower/metatiles.bin");
+const u16 gMetatileAttributes_BattleFrontierTower[] = INCBIN_U16("data/tilesets/secondary/battle_frontier_tower/metatile_attributes.bin");
+
 const u16 gMetatiles_BattlePalace[] = INCBIN_U16("data/tilesets/secondary/battle_palace/metatiles.bin");
 const u16 gMetatileAttributes_BattlePalace[] = INCBIN_U16("data/tilesets/secondary/battle_palace/metatile_attributes.bin");
 

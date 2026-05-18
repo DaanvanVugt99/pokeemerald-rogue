@@ -872,6 +872,8 @@ EventScript_VsSeekerChargingDone::
 
 	.include "data/maps/Rogue_Encounter_BattleSim/scripts.inc"
 
+	.include "data/maps/Rogue_Encounter_BattleTower/scripts.inc"
+
 	.include "data/maps/Rogue_Encounter_MtChimney/scripts.inc"
 
 	.include "data/maps/Rogue_Encounter_MagmaHideout/scripts.inc"

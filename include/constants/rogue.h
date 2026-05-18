@@ -224,8 +224,9 @@
 #define ADVPATH_ROOM_BATTLE_SIM         14
 
 #define ADVPATH_ROOM_BOSS               15
+#define ADVPATH_ROOM_BATTLE_TOWER       16
 
-#define ADVPATH_ROOM_COUNT              16
+#define ADVPATH_ROOM_COUNT              17
 
 
 #define ADVPATH_SUBROOM_ROUTE_CALM          0

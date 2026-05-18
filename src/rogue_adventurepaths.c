@@ -424,7 +424,11 @@ static u8 SelectRoomType_CalculateWeight(u16 weightIndex, u16 roomType, void* da
     case ADVPATH_ROOM_CATCHING_CONTEST:
     case ADVPATH_ROOM_SIGN:
     case ADVPATH_ROOM_BATTLE_SIM:
-        count = CountRoomType(roomType);
+    case ADVPATH_ROOM_BATTLE_TOWER:
+        if(roomType == ADVPATH_ROOM_BATTLE_SIM || roomType == ADVPATH_ROOM_BATTLE_TOWER)
+            count = CountRoomType(ADVPATH_ROOM_BATTLE_SIM) + CountRoomType(ADVPATH_ROOM_BATTLE_TOWER);
+        else
+            count = CountRoomType(roomType);
         if(count != 0)
             return 0;
         break;
@@ -533,6 +537,7 @@ static u8 ReplaceRoomEncounters_CalculateWeight(u16 weightIndex, u16 roomId, voi
     case ADVPATH_ROOM_CATCHING_CONTEST:
     case ADVPATH_ROOM_GAMESHOW:
     case ADVPATH_ROOM_BATTLE_SIM:
+    case ADVPATH_ROOM_BATTLE_TOWER:
         // Don't want to place in first column
         if(existingRoom->coords.x + 1 == gRogueAdvPath.pathLength)
             weight -= 40;
@@ -726,9 +731,14 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     if((Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) || GetPathGenerationDifficulty() == gRogueRun.shrineSpawnDifficulty)
         validEncounterList[validEncounterCount++] = ADVPATH_ROOM_SHRINE;
 
-    // Battle sim
-    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET && GetPathGenerationDifficulty() >= 1 && RogueRandomChance(33, 0))
-        validEncounterList[validEncounterCount++] = ADVPATH_ROOM_BATTLE_SIM;
+    // Battle sim / Battle Tower
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET && GetPathGenerationDifficulty() >= 1)
+    {
+        if(RogueRandomChance(50, 0))
+            validEncounterList[validEncounterCount++] = ADVPATH_ROOM_BATTLE_SIM;
+        else
+            validEncounterList[validEncounterCount++] = ADVPATH_ROOM_BATTLE_TOWER;
+    }
 
     {
         bool8 allowDarkDeal = (GetPathGenerationDifficulty() % 3 != 0);
@@ -1013,6 +1023,9 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
         case ADVPATH_ROOM_SIGN:
             // Use same RNG seed as boss so we can generate their team
             gRogueAdvPath.rooms[roomId].rngSeed = gRogueAdvPath.rooms[FindRoomOfType(ADVPATH_ROOM_BOSS)].rngSeed;
+            break;
+
+        case ADVPATH_ROOM_BATTLE_TOWER:
             break;
     }
 
@@ -1602,6 +1615,11 @@ static void ApplyCurrentNodeWarp(struct WarpData *warp)
             warp->mapGroup = MAP_GROUP(ROGUE_ENCOUNTER_BATTLE_SIM);
             warp->mapNum = MAP_NUM(ROGUE_ENCOUNTER_BATTLE_SIM);
             break;
+
+        case ADVPATH_ROOM_BATTLE_TOWER:
+            warp->mapGroup = MAP_GROUP(ROGUE_ENCOUNTER_BATTLE_TOWER);
+            warp->mapNum = MAP_NUM(ROGUE_ENCOUNTER_BATTLE_TOWER);
+            break;
     }
 }
 
@@ -1851,6 +1869,9 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
 
         case ADVPATH_ROOM_BATTLE_SIM:
             return OBJ_EVENT_GFX_YOUNGSTER;
+
+        case ADVPATH_ROOM_BATTLE_TOWER:
+            return OBJ_EVENT_GFX_MISC_YOUNG_COUPLE_F;
 
         case ADVPATH_ROOM_BOSS:
             return OBJ_EVENT_GFX_BATTLE_STATUE;
