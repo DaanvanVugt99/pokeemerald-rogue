@@ -3955,7 +3955,7 @@ u16 Rogue_PostRunRewardLvls()
 
 u16 Rogue_PostRunRewardMoney()
 {
-    u16 amount = 0;
+    u32 amount = 0;
 
     if(gRogueRun.enteredRoomCounter > 1)
     {
@@ -6697,6 +6697,9 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
             VarSet(VAR_TEMP_1, gRogueRun.victoryLapTotalWins);
 
+            if(IsTerastallizeEnabled())
+                FlagSet(FLAG_ROGUE_TERA_ORB_CHARGED);
+
             if(gRogueRun.victoryLapTotalWins == 5)
             {
                 if(!CheckBagHasItem(ITEM_BATTLE_ITEM_CURSE, 1))
@@ -7392,6 +7395,11 @@ void Rogue_ApplyMonCompetitiveSet(struct Pokemon* mon, u8 level, struct RoguePok
                 SetMonData(mon, MON_DATA_ABILITY_NUM, &i);
             }
         }
+    }
+
+    if(!rules->skipNature)
+    {
+        SetNature(mon, preset->nature);
     }
 
     if(!rules->skipHeldItem)

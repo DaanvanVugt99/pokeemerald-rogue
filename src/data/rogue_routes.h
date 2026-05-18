@@ -239,18 +239,18 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     },
 };
 
-const struct RogueRouteData gRogueRouteTable = 
+const struct RogueRouteData gRogueRouteTable =
 {
     .routeCount = ARRAY_COUNT(sRogueRouteTable),
     .routes = sRogueRouteTable,
 };
 
-static const struct RogueEncounterMap sRogueLegendaryEncounters[] = 
+static const struct RogueEncounterMap sRogueLegendaryEncounters[] =
 {
     ENCOUNTER_MAP(SPECIES_ARTICUNO, ROGUE_SPECIAL_ARTICUNO),
     ENCOUNTER_MAP(SPECIES_ZAPDOS, ROGUE_SPECIAL_ZAPDOS),
     ENCOUNTER_MAP(SPECIES_MOLTRES, ROGUE_SPECIAL_MOLTRES),
-    
+
     ENCOUNTER_MAP(SPECIES_MEWTWO, ROGUE_SPECIAL_MEWTWO),
     ENCOUNTER_MAP(SPECIES_MEW, ROGUE_SPECIAL_MEW),
 
@@ -379,37 +379,41 @@ static const struct RogueEncounterMap sRogueLegendaryEncounters[] =
     ENCOUNTER_MAP(SPECIES_MUNKIDORI, ROGUE_SPECIAL_GEN9_MON),
     ENCOUNTER_MAP(SPECIES_FEZANDIPITI, ROGUE_SPECIAL_GEN9_MON),
     ENCOUNTER_MAP(SPECIES_OGERPON, ROGUE_SPECIAL_GEN9_MON),
-    
+
     // Forms
     ENCOUNTER_MAP(SPECIES_KYUREM_WHITE, ROGUE_SPECIAL_GEN5_MON),
     ENCOUNTER_MAP(SPECIES_KYUREM_BLACK, ROGUE_SPECIAL_GEN5_MON),
 
     ENCOUNTER_MAP(SPECIES_NECROZMA_DUSK_MANE, ROGUE_SPECIAL_GEN7_MON),
     ENCOUNTER_MAP(SPECIES_NECROZMA_DAWN_WINGS, ROGUE_SPECIAL_GEN7_MON),
-    
+
     ENCOUNTER_MAP(SPECIES_URSHIFU_RAPID_STRIKE_STYLE, ROGUE_SPECIAL_GEN8_MON),
     ENCOUNTER_MAP(SPECIES_CALYREX_ICE_RIDER, ROGUE_SPECIAL_GEN8_MON),
     ENCOUNTER_MAP(SPECIES_CALYREX_SHADOW_RIDER, ROGUE_SPECIAL_GEN8_MON),
 
     ENCOUNTER_MAP(SPECIES_FLOETTE_ETERNAL_FLOWER, ROGUE_SPECIAL_GEN6_MON),
-    
+
+	ENCOUNTER_MAP(SPECIES_ARTICUNO_GALARIAN, ROGUE_SPECIAL_GEN8_MON),
+    ENCOUNTER_MAP(SPECIES_ZAPDOS_GALARIAN, ROGUE_SPECIAL_GEN8_MON),
+    ENCOUNTER_MAP(SPECIES_MOLTRES_GALARIAN, ROGUE_SPECIAL_GEN8_MON),
+
 #endif
 };
 
-const struct RogueEncounterData gRogueLegendaryEncounterInfo = 
+const struct RogueEncounterData gRogueLegendaryEncounterInfo =
 {
     .mapCount = ARRAY_COUNT(sRogueLegendaryEncounters),
     .mapTable = sRogueLegendaryEncounters
 };
 
-static const struct RogueEncounterMap sRogueTeamEncounters[] = 
+static const struct RogueEncounterMap sRogueTeamEncounters[] =
 {
     ENCOUNTER_MAP(TEAM_NUM_KANTO_ROCKET, ROGUE_ENCOUNTER_ROCKET_HIDEOUT),
     ENCOUNTER_MAP(TEAM_NUM_KANTO_ROCKET + TEAM_PRE_LEGEND_MAP_OFFSET, ROGUE_ENCOUNTER_SILPH_CO),
 
     ENCOUNTER_MAP(TEAM_NUM_JOHTO_ROCKET, ROGUE_ENCOUNTER_ROCKET_HIDEOUT),
     ENCOUNTER_MAP(TEAM_NUM_JOHTO_ROCKET + TEAM_PRE_LEGEND_MAP_OFFSET, ROGUE_ENCOUNTER_SILPH_CO),
-    
+
     ENCOUNTER_MAP(TEAM_NUM_AQUA, ROGUE_ENCOUNTER_AQUA_HIDEOUT),
     ENCOUNTER_MAP(TEAM_NUM_AQUA + TEAM_PRE_LEGEND_MAP_OFFSET, ROGUE_ENCOUNTER_SEAFLOOR_CAVERN),
 
@@ -429,13 +433,13 @@ static const struct RogueEncounterMap sRogueTeamEncounters[] =
     ENCOUNTER_MAP(TEAM_NUM_FLARE + TEAM_PRE_LEGEND_MAP_OFFSET, ROGUE_ENCOUNTER_LYSANDRE_LABS),
 };
 
-const struct RogueEncounterData gRogueTeamEncounterInfo = 
+const struct RogueEncounterData gRogueTeamEncounterInfo =
 {
     .mapCount = ARRAY_COUNT(sRogueTeamEncounters),
     .mapTable = sRogueTeamEncounters
 };
 
-static const struct RogueEncounterMap sRouteMapsRestStop[] = 
+static const struct RogueEncounterMap sRouteMapsRestStop[] =
 {
     [ADVPATH_SUBROOM_RESTSTOP_FULL] = ENCOUNTER_MAP(OBJ_EVENT_GFX_NURSE, ROGUE_ENCOUNTER_REST_STOP),
     [ADVPATH_SUBROOM_RESTSTOP_SHOP] = ENCOUNTER_MAP(OBJ_EVENT_GFX_MART_EMPLOYEE, ROGUE_ENCOUNTER_SHOPS),
@@ -443,7 +447,7 @@ static const struct RogueEncounterMap sRouteMapsRestStop[] =
     [ADVPATH_SUBROOM_RESTSTOP_BATTLE] = ENCOUNTER_MAP(OBJ_EVENT_GFX_MYSTERY_GIFT_MAN, ROGUE_ENCOUNTER_TUTORS),
 };
 
-const struct RogueEncounterData gRogueRestStopEncounterInfo = 
+const struct RogueEncounterData gRogueRestStopEncounterInfo =
 {
     .mapCount = ARRAY_COUNT(sRouteMapsRestStop),
     .mapTable = sRouteMapsRestStop

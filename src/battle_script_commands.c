@@ -1335,12 +1335,18 @@ static bool32 TryModularChangeType(u32 battler, u32 move, u32 moveType)
 
 bool32 ShouldTeraShellDistortTypeMatchups(u32 move, u32 battlerDef)
 {
+    u32 moveType;
+    u32 abilityTarget = GetBattlerAbility(battlerDef);
+
+    GET_MOVE_TYPE(move, moveType);
+
     if (!(gBattleStruct->distortedTypeMatchups & gBitTable[battlerDef])
      && GetBattlerAbility(battlerDef) == ABILITY_TERA_SHELL
      && gBattleMons[battlerDef].species == SPECIES_TERAPAGOS_TERASTAL
      && !IS_MOVE_STATUS(move)
      && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-     && gBattleMons[battlerDef].hp == gBattleMons[battlerDef].maxHP)
+     && gBattleMons[battlerDef].hp == gBattleMons[battlerDef].maxHP
+     && CalcTypeEffectivenessMultiplier(move, moveType, gBattlerAttacker, battlerDef, abilityTarget, FALSE) > UQ_4_12(0.5))
         return TRUE;
 
     return FALSE;
@@ -2356,7 +2362,8 @@ static void Cmd_adjustdamage(void)
         gBattleStruct->enduredDamage |= gBitTable[gBattlerTarget];
         goto END;
     }
-    if (GetBattlerAbility(gBattlerTarget) == ABILITY_ICE_FACE && IS_MOVE_PHYSICAL(gCurrentMove) && gBattleMons[gBattlerTarget].species == SPECIES_EISCUE)
+    if (GetBattlerAbility(gBattlerTarget) == ABILITY_ICE_FACE && IS_MOVE_PHYSICAL(gCurrentMove) && gBattleMons[gBattlerTarget].species == SPECIES_EISCUE
+        && !(gBattleMons[gBattlerTarget].status2 & STATUS2_TRANSFORMED))
     {
         // Damage deals typeless 0 HP.
         gMoveResultFlags &= ~(MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE);
@@ -3383,6 +3390,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
      || GetBattlerHoldEffect(gEffectBattler, TRUE) == HOLD_EFFECT_COVERT_CLOAK)
       && !(gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
       && !primary
+      && affectsUser != MOVE_EFFECT_AFFECTS_USER
       && (gBattleScripting.moveEffect <= MOVE_EFFECT_TRI_ATTACK || gBattleScripting.moveEffect >= MOVE_EFFECT_SMACK_DOWN)) // Exclude stat lowering effects
     {
         if (battlerAbility == ABILITY_SHIELD_DUST)
@@ -3720,6 +3728,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
             bool32 ultraVeninActivated = FALSE;
             bool32 feverDreamActivated = FALSE;
             bool32 primalParasiteActivated = FALSE;
+            bool32 poisonPuppeteerActivated = FALSE;
 
             if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
              && gBattleScripting.battler < gBattlersCount
@@ -3735,6 +3744,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
             }
 
             if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
+             && !primary
              && gBattleScripting.battler < gBattlersCount
              && gEffectBattler < gBattlersCount
              && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)
@@ -3748,6 +3758,19 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 RecordAbilityBattle(gBattleScripting.battler, ABILITY_ULTRA_VENIN);
                 SET_STATCHANGER(STAT_SPEED, 1, FALSE);
                 PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+            }
+
+            if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
+             && gBattleScripting.battler < gBattlersCount
+             && gEffectBattler < gBattlersCount
+             && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)
+             && IsBattlerAlive(gBattleScripting.battler)
+             && HasBattlerAbility(gBattleScripting.battler, ABILITY_POISON_PUPPETEER))
+            {
+                poisonPuppeteerActivated = TRUE;
+                gBattlerAttacker = gBattleScripting.battler;
+                gBattlerTarget = gEffectBattler;
+                RecordAbilityBattle(gBattleScripting.battler, ABILITY_POISON_PUPPETEER);
             }
 
             if (gBattleScripting.moveEffect == MOVE_EFFECT_SLEEP
@@ -3789,6 +3812,8 @@ void SetMoveEffect(bool32 primary, u32 certain)
             }
 
             BattleScriptPush(gBattlescriptCurrInstr + 1);
+            if (poisonPuppeteerActivated)
+                BattleScriptPush(BattleScript_EffectConfusePoisonPuppeteerRet);
             if (primalParasiteActivated)
                 BattleScriptPush(BattleScript_FungalInfectionActivates);
             if (feverDreamActivated)
@@ -4286,51 +4311,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                         gBattlescriptCurrInstr = BattleScript_HyperspaceFuryRemoveProtect;
                     else
                         gBattlescriptCurrInstr = BattleScript_MoveEffectFeint;
-                }
-                break;
-            case MOVE_EFFECT_SPECTRAL_THIEF:
-                if (!NoAliveMonsForEitherParty())
-                {
-                    gBattleStruct->stolenStats[0] = 0; // Stats to steal.
-                    gBattleScripting.animArg1 = 0;
-                    for (i = STAT_ATK; i < NUM_BATTLE_STATS; i++)
-                    {
-                        if (gBattleMons[gBattlerTarget].statStages[i] > DEFAULT_STAT_STAGE && gBattleMons[gBattlerAttacker].statStages[i] != MAX_STAT_STAGE)
-                        {
-                            bool32 byTwo = FALSE;
-
-                            gBattleStruct->stolenStats[0] |= gBitTable[i];
-                            // Store by how many stages to raise the stat.
-                            gBattleStruct->stolenStats[i] = gBattleMons[gBattlerTarget].statStages[i] - DEFAULT_STAT_STAGE;
-                            while (gBattleMons[gBattlerAttacker].statStages[i] + gBattleStruct->stolenStats[i] > MAX_STAT_STAGE)
-                                gBattleStruct->stolenStats[i]--;
-                            gBattleMons[gBattlerTarget].statStages[i] = DEFAULT_STAT_STAGE;
-
-                            if (gBattleStruct->stolenStats[i] >= 2)
-                                byTwo++;
-
-                            if (gBattleScripting.animArg1 == 0)
-                            {
-                                if (byTwo)
-                                    gBattleScripting.animArg1 = STAT_ANIM_PLUS2 + i;
-                                else
-                                    gBattleScripting.animArg1 = STAT_ANIM_PLUS1 + i;
-                            }
-                            else
-                            {
-                                if (byTwo)
-                                    gBattleScripting.animArg1 = STAT_ANIM_MULTIPLE_PLUS2;
-                                else
-                                    gBattleScripting.animArg1 = STAT_ANIM_MULTIPLE_PLUS1;
-                            }
-                        }
-                    }
-
-                    if (gBattleStruct->stolenStats[0] != 0)
-                    {
-                        BattleScriptPush(gBattlescriptCurrInstr + 1);
-                        gBattlescriptCurrInstr = BattleScript_SpectralThiefSteal;
-                    }
                 }
                 break;
             case MOVE_EFFECT_V_CREATE:
@@ -6850,19 +6830,22 @@ static void Cmd_moveend(void)
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
             && gMultiHitCounter
-            && !(gCurrentMove == MOVE_PRESENT && gBattleStruct->presentBasePower == 0)) // Silly edge case
+            && !(gBattleMoves[gCurrentMove].effect == EFFECT_PRESENT && gBattleStruct->presentBasePower == 0)) // Silly edge case
             {
+                gMultiHitCounter--;
+
                 gBattleScripting.multihitString[4]++;
-                if (--gMultiHitCounter == 0)
+                if (gMultiHitCounter == 0 || !gBattleMons[gBattlerTarget].hp)
                 {
+                    BattleScriptPushCursor();
                     if (gBattleMoves[gCurrentMove].argument == MOVE_EFFECT_SCALE_SHOT && !NoAliveMonsForEitherParty())
                     {
-                        BattleScriptPush(gBattlescriptCurrInstr + 1);
-                        gBattlescriptCurrInstr = BattleScript_DefDownSpeedUp;
+                        BattleScriptPush(BattleScript_DefDownSpeedUp);
+                        gBattlescriptCurrInstr = BattleScript_MultiHitPrintStrings;
                     }
+                    else
+                        gBattlescriptCurrInstr = BattleScript_MultiHitPrintStrings;
 
-                    BattleScriptPushCursor();
-                    gBattlescriptCurrInstr = BattleScript_MultiHitPrintStrings;
                     effect = TRUE;
                 }
                 else
@@ -7328,6 +7311,36 @@ static void Cmd_moveend(void)
         case MOVEEND_LIFEORB_SHELLBELL:
             if (ItemBattleEffects(ITEMEFFECT_LIFEORB_SHELLBELL, 0, FALSE))
                 effect = TRUE;
+            gBattleScripting.moveendState++;
+            break;
+        case MOVEEND_SPREAD_MOVE_WITH_EFFECT:
+            if (IsBattlerAlive(gBattlerAttacker)
+                && ( (gBattleMoves[gCurrentMove].target == MOVE_TARGET_BOTH) || (gBattleMoves[gCurrentMove].target == MOVE_TARGET_FOES_AND_ALLY) )
+                && gBattleMoves[gCurrentMove].spreadMoveAndEffect
+                && (gSpecialStatuses[gBattlerAttacker].damagedMons)
+                && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)) // needless, since we check which battler was hit. Safety net I guess
+                {
+                    u32 scriptCount = 1;
+
+                    if (gCurrentMove == MOVE_DIAMOND_STORM)
+                    {
+                        scriptCount = 0;
+                        for (i = 0; i < gBattlersCount; i++)
+                        {
+                            if (gSpecialStatuses[gBattlerAttacker].damagedMons & gBitTable[i])
+                                scriptCount++;
+                        }
+                    }
+
+                    if (scriptCount != 0)
+                    {
+                        BattleScriptPushCursor();
+                        while (--scriptCount != 0)
+                            BattleScriptPush(gBattleMoves[gCurrentMove].argument2);
+                        gBattlescriptCurrInstr = gBattleMoves[gCurrentMove].argument2;
+                        effect = TRUE;
+                    }
+                }
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_PICKPOCKET:
@@ -14887,7 +14900,10 @@ static void Cmd_setsubstitute(void)
 
         gBattleMons[gBattlerAttacker].status2 |= STATUS2_SUBSTITUTE;
         gBattleMons[gBattlerAttacker].status2 &= ~STATUS2_WRAPPED;
-        gDisableStructs[gBattlerAttacker].substituteHP = gBattleMoveDamage;
+        if (factor == 2)
+			gDisableStructs[gBattlerAttacker].substituteHP = gBattleMoveDamage / 2;
+		else
+			gDisableStructs[gBattlerAttacker].substituteHP = gBattleMoveDamage;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SET_SUBSTITUTE;
         gHitMarker |= HITMARKER_IGNORE_SUBSTITUTE;
     }
@@ -18506,6 +18522,78 @@ void BS_TrySymbiosis(void)
     }
 
     gBattlescriptCurrInstr = cmd->nextInstr;
+}
+
+static bool32 BattlerHasPositiveStatChanges(u32 battler)
+{
+    u32 i = 0;
+
+    for (i = STAT_ATK; i < NUM_BATTLE_STATS; i++)
+    {
+        if (gBattleMons[battler].statStages[i] > DEFAULT_STAT_STAGE)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+void BS_TrySpectralThief(void)
+{
+    NATIVE_ARGS(const u8 *spectralThiefSteal);
+    u32 moveType, i;
+    u32 targetAbility = GetBattlerAbility(gBattlerTarget);
+    GET_MOVE_TYPE(gCurrentMove, moveType);
+    if (gBattleScripting.moveEffect == MOVE_EFFECT_SPECTRAL_THIEF
+        && BattlerHasPositiveStatChanges(gBattlerTarget)
+        && CalcTypeEffectivenessMultiplier(gCurrentMove, moveType, gBattlerAttacker, gBattlerTarget, targetAbility, FALSE))
+    {
+        // Target has positive stats changes and isn't immune to our move, let's steal their buff
+        gBattleStruct->stolenStats[0] = 0; // Stats to steal.
+        gBattleScripting.animArg1 = 0;
+        for (i = STAT_ATK; i < NUM_BATTLE_STATS; i++)
+        {
+            if (gBattleMons[gBattlerTarget].statStages[i] > DEFAULT_STAT_STAGE && gBattleMons[gBattlerAttacker].statStages[i] != MAX_STAT_STAGE)
+            {
+                bool32 byTwo = FALSE;
+                gBattleStruct->stolenStats[0] |= gBitTable[i];
+                // Store by how many stages to raise the stat.
+                gBattleStruct->stolenStats[i] = gBattleMons[gBattlerTarget].statStages[i] - DEFAULT_STAT_STAGE;
+                while (gBattleMons[gBattlerAttacker].statStages[i] + gBattleStruct->stolenStats[i] > MAX_STAT_STAGE)
+                    gBattleStruct->stolenStats[i]--;
+                gBattleMons[gBattlerTarget].statStages[i] = DEFAULT_STAT_STAGE;
+                if (gBattleStruct->stolenStats[i] >= 2)
+                    byTwo++;
+                if (gBattleScripting.animArg1 == 0)
+                {
+                    if (byTwo)
+                        gBattleScripting.animArg1 = STAT_ANIM_PLUS2 + i;
+                    else
+                        gBattleScripting.animArg1 = STAT_ANIM_PLUS1 + i;
+                }
+                else
+                {
+                    if (byTwo)
+                        gBattleScripting.animArg1 = STAT_ANIM_MULTIPLE_PLUS2;
+                    else
+                        gBattleScripting.animArg1 = STAT_ANIM_MULTIPLE_PLUS1;
+                }
+            }
+        }
+        if (gBattleStruct->stolenStats[0] != 0)
+        {
+            gBattleScripting.moveEffect = 0;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = cmd->spectralThiefSteal;
+        }
+        else
+        {
+            gBattlescriptCurrInstr = cmd->nextInstr;
+        }
+    }
+    else
+    {
+        gBattlescriptCurrInstr = cmd->nextInstr;
+    }
 }
 
 void BS_SetZEffect(void)

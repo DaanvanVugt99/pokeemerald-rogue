@@ -1,3 +1,5 @@
+#include "battle_scripts.h"
+
 const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 {
     [MOVE_NONE] =
@@ -10376,11 +10378,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_DIAMOND_STORM] =
     {
-        #if B_UPDATED_MOVE_DATA >= GEN_7
-            .effect = EFFECT_DEFENSE_UP2_HIT,
-        #else
-            .effect = EFFECT_DEFENSE_UP_HIT,
-        #endif
+        .effect = EFFECT_HIT,
         .power = 100,
         .type = TYPE_ROCK,
         .accuracy = 95,
@@ -10390,8 +10388,10 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_PHYSICAL,
         .zMoveEffect = Z_EFFECT_NONE,
+        .argument2 = BattleScript_EffectDiamondStorm,
         .sheerForceBoost = TRUE,
         .metronomeBanned = TRUE,
+        .spreadMoveAndEffect = TRUE,
     },
 
     [MOVE_STEAM_ERUPTION] =
@@ -11452,7 +11452,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_CLANGING_SCALES] =
     {
-        .effect = EFFECT_ATTACKER_DEFENSE_DOWN_HIT,
+        .effect = EFFECT_HIT,
         .power = 110,
         .type = TYPE_DRAGON,
         .accuracy = 100,
@@ -11462,8 +11462,10 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_SPECIAL,
         .zMoveEffect = Z_EFFECT_NONE,
+        .argument2 = BattleScript_EffectClangingScales,
         .ignoresSubstitute = B_UPDATED_MOVE_FLAGS >= GEN_6,
         .soundMove = TRUE,
+        .spreadMoveAndEffect = TRUE,
     },
 
     [MOVE_DRAGON_HAMMER] =
@@ -14023,7 +14025,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_MAKE_IT_RAIN] =
     {
-        .effect = EFFECT_MAKE_IT_RAIN,
+        .effect = EFFECT_PAY_DAY,
         .power = 120,
         .type = TYPE_STEEL,
         .accuracy = 100,
@@ -14033,7 +14035,9 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_SPECIAL,
         .zMoveEffect = Z_EFFECT_NONE,
+        .argument2 = BattleScript_EffectMakeItRain,
         .metronomeBanned = TRUE,
+        .spreadMoveAndEffect = TRUE,
     },
 
     [MOVE_RUINATION] =
@@ -15338,8 +15342,10 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_SPECIAL,
         .zMoveEffect = 0,
+        .argument2 = BattleScript_EffectClangorousSoulblaze,
         .soundMove = TRUE,
         .ignoresSubstitute = B_UPDATED_MOVE_FLAGS >= GEN_6,
+        .spreadMoveAndEffect = TRUE,
     },
     [MOVE_GUARDIAN_OF_ALOLA] =
     {

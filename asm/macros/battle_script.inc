@@ -1417,6 +1417,11 @@
 	callnative BS_SetZEffect
 	.endm
 
+	.macro handleSpectralThief spectralThiefSteal:req
+	callnative BS_TrySpectralThief
+	.4byte \spectralThiefSteal
+	.endm
+
 	@ Used by effects that may proc Symbiosis but do not call removeitem.
 	.macro trysymbiosis
 	callnative BS_TrySymbiosis
