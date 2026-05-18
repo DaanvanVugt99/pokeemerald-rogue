@@ -3132,9 +3132,9 @@ static const u8 sTM17Desc[] = _(
     "in succession.");
 
 static const u8 sTM18Desc[] = _(
-    "Raises the power of\n"
-    "Water-type moves\n"
-    "for 8 turns.");
+    "Summons a snowstorm\n"
+    "that lasts for\n"
+    "eight turns.");
 
 static const u8 sTM19Desc[] = _(
     "Recovers half the\n"
@@ -3207,9 +3207,9 @@ static const u8 sTM32Desc[] = _(
     "elusiveness.");
 
 static const u8 sTM33Desc[] = _(
-    "Creates a wall of\n"
-    "light that weakens\n"
-    "physical attacks.");
+    "Raises Sp. Atk,\n"
+    "Sp. Def, and\n"
+    "Speed.");
 
 static const u8 sTM34Desc[] = _(
     "Zaps the foe with a\n"

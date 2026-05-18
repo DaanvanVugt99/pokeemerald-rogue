@@ -7466,7 +7466,7 @@ const struct Item gItems[] =
         .pocket = POCKET_TM_HM,
         .type = ITEM_USE_PARTY_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_TMHM,
-        .secondaryId = MOVE_RAIN_DANCE,
+        .secondaryId = MOVE_SNOWSCAPE,
     },
 
     [ITEM_TM_GIGA_DRAIN] =
@@ -7646,7 +7646,7 @@ const struct Item gItems[] =
         .pocket = POCKET_TM_HM,
         .type = ITEM_USE_PARTY_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_TMHM,
-        .secondaryId = MOVE_REFLECT,
+        .secondaryId = MOVE_QUIVER_DANCE,
     },
 
     [ITEM_TM_SHOCK_WAVE] =
