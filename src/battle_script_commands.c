@@ -3744,7 +3744,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
             }
 
             if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
-             && !primary
              && gBattleScripting.battler < gBattlersCount
              && gEffectBattler < gBattlersCount
              && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)

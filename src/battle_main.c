@@ -5250,14 +5250,18 @@ static void SetActionsAndBattlersTurnOrder(void)
     s32 turnOrderId = 0;
     s32 i, j, battler;
 
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        gBattleStruct->quickClawRandom[battler] = RandomPercentage(RNG_QUICK_CLAW, GetBattlerHoldEffectParam(battler));
+        gBattleStruct->quickDrawRandom[battler] = RandomPercentage(RNG_QUICK_DRAW, 30);
+    }
+
     if (gBattleTypeFlags & BATTLE_TYPE_SAFARI)
     {
         for (battler = 0; battler < gBattlersCount; battler++)
         {
             gActionsByTurnOrder[turnOrderId] = gChosenActionByBattler[battler];
             gBattlerByTurnOrder[turnOrderId] = battler;
-            gBattleStruct->quickClawRandom[battler] = RandomPercentage(RNG_QUICK_CLAW, GetBattlerHoldEffectParam(battler));
-            gBattleStruct->quickDrawRandom[battler] = RandomPercentage(RNG_QUICK_DRAW, 30);
             turnOrderId++;
         }
     }
