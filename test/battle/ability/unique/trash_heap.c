@@ -47,6 +47,25 @@ SINGLE_BATTLE_TEST("Trash Heap can choose a self-targeting trash move after cont
     }
 }
 
+SINGLE_BATTLE_TEST("Trash Heap does not trigger after the user faints to a contact move")
+{
+    GIVEN {
+        PLAYER(SPECIES_TRUBBISH) { HP(1); MaxHP(100); Defense(1); Ability(ABILITY_STENCH); UniqueAbility(ABILITY_TRASH_HEAP); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_AZUMARILL) { Attack(200); Speed(100); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE, criticalHit: TRUE, WITH_RNG(RNG_ROGUE_TRASH_HEAP, MOVE_SLUDGE)); }
+    } SCENE {
+        MESSAGE("A critical hit!");
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_TRASH_HEAP);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SLUDGE, player);
+        }
+        MESSAGE("Trubbish fainted!");
+    } THEN {
+        EXPECT_EQ(player->hp, 0);
+    }
+}
+
 SINGLE_BATTLE_TEST("Trash Heap can choose every trash move")
 {
     static const u16 expectedMoves[] =

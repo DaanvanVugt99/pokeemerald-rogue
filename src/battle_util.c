@@ -6141,7 +6141,6 @@ static bool32 TryUseTrashHeapCalledMove(u32 battler, u32 target)
 {
     u16 move;
 
-    gBattlerAttacker = battler;
     move = RandomElement(RNG_ROGUE_TRASH_HEAP, sTrashHeapMoves);
     if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
     {
@@ -6157,7 +6156,7 @@ static bool32 TryUseTrashHeapCalledMove(u32 battler, u32 target)
 
     SetBattlerTriggeredAbility(battler, ABILITY_TRASH_HEAP);
     SetAtkCancellerForCalledMove();
-    gBattlerAbility = battler;
+    gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
     gCalledMove = move;
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
