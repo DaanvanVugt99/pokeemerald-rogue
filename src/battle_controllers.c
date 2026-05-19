@@ -3058,6 +3058,12 @@ void BtlController_HandleDrawPartyStatusSummary(u32 battler, u32 side, bool32 co
         }
 
         gBattlerStatusSummaryTaskId[battler] = CreatePartyStatusSummarySprites(battler, (struct HpAndStatus *)&gBattleResources->bufferA[battler][4], gBattleResources->bufferA[battler][1], gBattleResources->bufferA[battler][2]);
+        if (gBattlerStatusSummaryTaskId[battler] == TASK_NONE)
+        {
+            BattleControllerComplete(battler);
+            return;
+        }
+
         gBattleSpritesDataPtr->healthBoxesData[battler].partyStatusDelayTimer = 0;
 
         // If intro, skip the delay after drawing

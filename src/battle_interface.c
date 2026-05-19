@@ -2166,6 +2166,12 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
     u32 battlerId = sprite->tBattler;
     u32 healthboxSpriteId = gHealthboxSpriteIds[battlerId];
 
+    if (healthboxSpriteId >= MAX_SPRITES || !gSprites[healthboxSpriteId].inUse)
+    {
+        sprite->invisible = TRUE;
+        return;
+    }
+
     if (sprite->tTypeSlot == 0)
         TypeIndicator_UpdateTypesIfNeeded(battlerId);
 
@@ -2191,6 +2197,20 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
 #define tBallIconSpriteId(n)    data[3 + n]
 #define tIsBattleStart          data[10]
 #define tBlend                  data[15]
+
+static u32 CountFreeSpriteSlots(void)
+{
+    u32 i;
+    u32 count = 0;
+
+    for (i = 0; i < MAX_SPRITES; i++)
+    {
+        if (!gSprites[i].inUse)
+            count++;
+    }
+
+    return count;
+}
 
 u8 CreatePartyStatusSummarySprites(u8 battlerId, struct HpAndStatus *partyInfo, bool8 skipPlayer, bool8 isBattleStart)
 {
@@ -2229,6 +2249,12 @@ u8 CreatePartyStatusSummarySprites(u8 battlerId, struct HpAndStatus *partyInfo, 
         bar_X = 104, bar_Y = 40;
         bar_pos2_X = -100;
         bar_data0 = 5;
+    }
+
+    if (CountFreeSpriteSlots() < PARTY_SIZE + 1)
+    {
+        gBattleSpritesDataPtr->healthBoxesData[battlerId].partyStatusSummaryShown = 0;
+        return TASK_NONE;
     }
 
     LoadCompressedSpriteSheetUsingHeap(&sStatusSummaryBarSpriteSheet);

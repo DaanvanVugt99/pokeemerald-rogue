@@ -39,6 +39,7 @@
 #define HUD_TAG_SPRITE_DEX_PROMPT           0x120B
 
 #define MAX_OVERLAY_SPRITES 40
+#define MIN_FREE_SPRITES_AFTER_OVERLAY 16
 
 // Want to sit at default priority (2) so we sort  
 
@@ -341,6 +342,49 @@ struct RogueBattleOverlay
 
 EWRAM_DATA struct RogueBattleOverlay* gRogueBattleOverlay = NULL;
 
+static bool32 RogueBH_IsValidSpriteId(u8 spriteId)
+{
+    return spriteId < MAX_SPRITES && gSprites[spriteId].inUse;
+}
+
+static u32 RogueBH_CountFreeSpriteSlots(void)
+{
+    u32 i;
+    u32 count = 0;
+
+    for (i = 0; i < MAX_SPRITES; i++)
+    {
+        if (!gSprites[i].inUse)
+            count++;
+    }
+
+    return count;
+}
+
+static void RogueBH_DestroyOverlaySprite(u8 spriteId)
+{
+    if (!RogueBH_IsValidSpriteId(spriteId))
+        return;
+
+    FreeSpriteOamMatrix(&gSprites[spriteId]);
+    DestroySprite(&gSprites[spriteId]);
+}
+
+static void RogueBH_StoreOverlaySprite(u8 *spriteCount, u8 spriteId)
+{
+    if (!RogueBH_IsValidSpriteId(spriteId))
+        return;
+
+    if (*spriteCount >= MAX_OVERLAY_SPRITES
+     || RogueBH_CountFreeSpriteSlots() < MIN_FREE_SPRITES_AFTER_OVERLAY)
+    {
+        RogueBH_DestroyOverlaySprite(spriteId);
+        return;
+    }
+
+    gRogueBattleOverlay->sprites[(*spriteCount)++] = spriteId;
+}
+
 
 void RogueBH_CreateBattleOverlay()
 {
@@ -389,7 +433,7 @@ void RogueBH_CreateBattleOverlay()
                 LoadSpriteSheet(&sSpriteSheet_Overlay_Rain);
 
                 for(i = 0; i < 4; ++i)
-                    gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sAcidRainDropSpriteTemplate, 0, 0, 4);
+                    RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sAcidRainDropSpriteTemplate, 0, 0, 4));
             }
             else if(weather & B_WEATHER_ECLIPSE)
             {
@@ -398,9 +442,11 @@ void RogueBH_CreateBattleOverlay()
                 for(i = 0; i < 4; ++i)
                 {
                     u8 sprite = CreateSprite(&sEclipseRaySpriteTemplate, 0, 0, 4);
-                    gSprites[sprite].data[0] = i * 10;
-
-                    gRogueBattleOverlay->sprites[spriteCount++] = sprite;
+                    if (RogueBH_IsValidSpriteId(sprite))
+                    {
+                        gSprites[sprite].data[0] = i * 10;
+                        RogueBH_StoreOverlaySprite(&spriteCount, sprite);
+                    }
                 }
             }
             else if(weather & B_WEATHER_RAIN)
@@ -408,14 +454,14 @@ void RogueBH_CreateBattleOverlay()
                 LoadSpriteSheet(&sSpriteSheet_Overlay_Rain);
 
                 for(i = 0; i < 4; ++i)
-                    gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sRainDropSpriteTemplate, 0, 0, 4);
+                    RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sRainDropSpriteTemplate, 0, 0, 4));
             }
             else if(weather & B_WEATHER_SANDSTORM)
             {
                 LoadSpriteSheet(&sSpriteSheet_Overlay_Sandstorm);
 
                 for(i = 0; i < 8; ++i)
-                    gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSandstormSpriteTemplate, 0, 0, 4);
+                    RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSandstormSpriteTemplate, 0, 0, 4));
             }
             else if(weather & B_WEATHER_SUN)
             {
@@ -424,9 +470,11 @@ void RogueBH_CreateBattleOverlay()
                 for(i = 0; i < 4; ++i)
                 {
                     u8 sprite = CreateSprite(&sSunlightRaySpriteTemplate, 0, 0, 4);
-                    gSprites[sprite].data[0] = i * 10;
-                    
-                    gRogueBattleOverlay->sprites[spriteCount++] = sprite;
+                    if (RogueBH_IsValidSpriteId(sprite))
+                    {
+                        gSprites[sprite].data[0] = i * 10;
+                        RogueBH_StoreOverlaySprite(&spriteCount, sprite);
+                    }
                 }
             }
             else if(weather & (B_WEATHER_HAIL | B_WEATHER_SNOW))
@@ -436,10 +484,12 @@ void RogueBH_CreateBattleOverlay()
                 for(i = 0; i < 8; ++i)
                 {
                     u8 sprite = CreateSprite(&sSnowSpriteTemplate, 0, 0, 4);
-                    gSprites[sprite].data[0] = i * 40;
-                    gSprites[sprite].data[1] = 10 + (Random2() % 40);
-                    
-                    gRogueBattleOverlay->sprites[spriteCount++] = sprite;
+                    if (RogueBH_IsValidSpriteId(sprite))
+                    {
+                        gSprites[sprite].data[0] = i * 40;
+                        gSprites[sprite].data[1] = 10 + (Random2() % 40);
+                        RogueBH_StoreOverlaySprite(&spriteCount, sprite);
+                    }
                 }
             }
         }
@@ -478,53 +528,53 @@ void RogueBH_CreateBattleOverlay()
 
             // Sticky web
             if(hasStickyWeb)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpiderWebSpriteTemplate, 66, 107, SUBPRIORITY_PLAYER_BELOW + 1);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpiderWebSpriteTemplate, 66, 107, SUBPRIORITY_PLAYER_BELOW + 1));
 
 
             // Reflect
             if(hasReflect)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sReflectWallSpriteTemplate, 62, 72, SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sReflectWallSpriteTemplate, 62, 72, SUBPRIORITY_PLAYER_BELOW));
 
 
             // Light Screen
             if(hasLightscreen)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sLightScreenWallSpriteTemplate, 70, 78, SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sLightScreenWallSpriteTemplate, 70, 78, SUBPRIORITY_PLAYER_BELOW));
 
 
             // Stealth Rock
             if(hasStealthRock)
             {
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sStealthRockSpriteTemplate, 41, 107, SUBPRIORITY_PLAYER_ABOVE);
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sStealthRockSpriteTemplate, 66, 107, SUBPRIORITY_PLAYER_ABOVE);
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sStealthRockSpriteTemplate, 91, 107, SUBPRIORITY_PLAYER_ABOVE);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sStealthRockSpriteTemplate, 41, 107, SUBPRIORITY_PLAYER_ABOVE));
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sStealthRockSpriteTemplate, 66, 107, SUBPRIORITY_PLAYER_ABOVE));
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sStealthRockSpriteTemplate, 91, 107, SUBPRIORITY_PLAYER_ABOVE));
             }
 
 
             // Spikes
             if(spikeCount >= 1)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpikesSpriteTemplate, 24, 98, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpikesSpriteTemplate, 24, 98, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW));
             
             if(spikeCount >= 2)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpikesSpriteTemplate, 20, 102, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpikesSpriteTemplate, 20, 102, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW));
             
             if(spikeCount >= 3)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpikesSpriteTemplate, 16, 106, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpikesSpriteTemplate, 16, 106, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW));
 
 
             // Toxic Spikes
             if(toxicSpikeCount >= 1)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sToxicSpikesSpriteTemplate, 106, 98, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sToxicSpikesSpriteTemplate, 106, 98, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW));
             
             if(toxicSpikeCount >= 2)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sToxicSpikesSpriteTemplate, 110, 102, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sToxicSpikesSpriteTemplate, 110, 102, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW));
             
             if(toxicSpikeCount >= 3)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sToxicSpikesSpriteTemplate, 114, 106, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sToxicSpikesSpriteTemplate, 114, 106, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? SUBPRIORITY_PLAYER_ABOVE : SUBPRIORITY_PLAYER_BELOW));
 
 
             // Tailwind
             if(hasTailwind)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sWhirlwindSpriteTemplate, -64, 82, SUBPRIORITY_PLAYER_ABOVE);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sWhirlwindSpriteTemplate, -64, 82, SUBPRIORITY_PLAYER_ABOVE));
         }
 
         // Opponent
@@ -559,53 +609,53 @@ void RogueBH_CreateBattleOverlay()
 
             // Sticky web
             if(hasStickyWeb)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpiderWebSpriteTemplate, 176, 66, SUBPRIORITY_ENEMY_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpiderWebSpriteTemplate, 176, 66, SUBPRIORITY_ENEMY_BELOW));
 
 
             // Reflect
             if(hasReflect)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sReflectWallSpriteTemplate, 168, 35, SUBPRIORITY_ENEMY_ABOVE);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sReflectWallSpriteTemplate, 168, 35, SUBPRIORITY_ENEMY_ABOVE));
 
 
             // Light Screen
             if(hasLightscreen)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sLightScreenWallSpriteTemplate, 176, 41, SUBPRIORITY_ENEMY_ABOVE);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sLightScreenWallSpriteTemplate, 176, 41, SUBPRIORITY_ENEMY_ABOVE));
 
 
             // Stealth Rock
             if(hasStealthRock)
             {
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sStealthRockSpriteTemplate, 151, 63, SUBPRIORITY_ENEMY_ABOVE);
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sStealthRockSpriteTemplate, 176, 63, SUBPRIORITY_ENEMY_ABOVE);
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sStealthRockSpriteTemplate, 201, 63, SUBPRIORITY_ENEMY_ABOVE);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sStealthRockSpriteTemplate, 151, 63, SUBPRIORITY_ENEMY_ABOVE));
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sStealthRockSpriteTemplate, 176, 63, SUBPRIORITY_ENEMY_ABOVE));
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sStealthRockSpriteTemplate, 201, 63, SUBPRIORITY_ENEMY_ABOVE));
             }
 
 
             // Spikes
             if(spikeCount >= 1)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpikesSpriteTemplate, 134, 50, SUBPRIORITY_ENEMY_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpikesSpriteTemplate, 134, 50, SUBPRIORITY_ENEMY_BELOW));
             
             if(spikeCount >= 2)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpikesSpriteTemplate, 130, 54, SUBPRIORITY_ENEMY_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpikesSpriteTemplate, 130, 54, SUBPRIORITY_ENEMY_BELOW));
                 
             if(spikeCount >= 3)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sSpikesSpriteTemplate, 126, 58, SUBPRIORITY_ENEMY_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSpikesSpriteTemplate, 126, 58, SUBPRIORITY_ENEMY_BELOW));
 
 
             // Toxic Spikes
             if(toxicSpikeCount >= 1)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sToxicSpikesSpriteTemplate, 216, 50, SUBPRIORITY_ENEMY_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sToxicSpikesSpriteTemplate, 216, 50, SUBPRIORITY_ENEMY_BELOW));
 
             if(toxicSpikeCount >= 2)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sToxicSpikesSpriteTemplate, 220, 54, SUBPRIORITY_ENEMY_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sToxicSpikesSpriteTemplate, 220, 54, SUBPRIORITY_ENEMY_BELOW));
 
             if(toxicSpikeCount >= 3)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sToxicSpikesSpriteTemplate, 224, 58, SUBPRIORITY_ENEMY_BELOW);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sToxicSpikesSpriteTemplate, 224, 58, SUBPRIORITY_ENEMY_BELOW));
 
 
             // Tailwind
             if(hasTailwind)
-                gRogueBattleOverlay->sprites[spriteCount++] = CreateSprite(&sWhirlwindSpriteTemplate, 264, 32, SUBPRIORITY_ENEMY_ABOVE);
+                RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sWhirlwindSpriteTemplate, 264, 32, SUBPRIORITY_ENEMY_ABOVE));
         }
 
         AGB_ASSERT(spriteCount <= MAX_OVERLAY_SPRITES);
@@ -621,9 +671,10 @@ void RogueBH_RemoveBattleOverlay(bool32 fromResetSprites)
 
         for(i = 0; i < gRogueBattleOverlay->spriteCount; ++i)
         {
-            FreeSpriteOamMatrix(&gSprites[gRogueBattleOverlay->sprites[i]]);
+            if (RogueBH_IsValidSpriteId(gRogueBattleOverlay->sprites[i]))
+                FreeSpriteOamMatrix(&gSprites[gRogueBattleOverlay->sprites[i]]);
         }
-        if(gRogueBattleOverlay->dexPromptSprite != SPRITE_NONE)
+        if(RogueBH_IsValidSpriteId(gRogueBattleOverlay->dexPromptSprite))
             FreeSpriteOamMatrix(&gSprites[gRogueBattleOverlay->dexPromptSprite]);
 
         // Remove sprites manually, as the scene is not being fully reset
@@ -646,10 +697,19 @@ void RogueBH_RemoveBattleOverlay(bool32 fromResetSprites)
 
             for(i = 0; i < gRogueBattleOverlay->spriteCount; ++i)
             {
-                DestroySprite(&gSprites[gRogueBattleOverlay->sprites[i]]);
+                if (RogueBH_IsValidSpriteId(gRogueBattleOverlay->sprites[i]))
+                    DestroySprite(&gSprites[gRogueBattleOverlay->sprites[i]]);
             }
-            if(gRogueBattleOverlay->dexPromptSprite != SPRITE_NONE)
+
+            if(RogueBH_IsValidSpriteId(gRogueBattleOverlay->dexPromptSprite))
+            {
                 DestroySprite(&gSprites[gRogueBattleOverlay->dexPromptSprite]);
+                gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
+            }
+            else if (gRogueBattleOverlay->dexPromptSprite != SPRITE_NONE)
+            {
+                gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
+            }
         }
 
 
@@ -714,6 +774,15 @@ void RogueBH_HandleStatViewUpdate(u32 battler)
     if(gRogueBattleOverlay->dexPromptSprite == SPRITE_NONE)
     {
         gRogueBattleOverlay->dexPromptSprite = CreateSprite(&sDexPromptSpriteTemplate, 84, 108, SUBPRIORITY_PLAYER_ABOVE);
+        if (gRogueBattleOverlay->dexPromptSprite >= MAX_SPRITES)
+        {
+            gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
+        }
+        else if (RogueBH_CountFreeSpriteSlots() < MIN_FREE_SPRITES_AFTER_OVERLAY)
+        {
+            RogueBH_DestroyOverlaySprite(gRogueBattleOverlay->dexPromptSprite);
+            gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
+        }
     }
 
 
@@ -727,7 +796,7 @@ void RogueBH_HandleStatViewUpdate(u32 battler)
         PlaySE(SE_WIN_OPEN);
         RogueBH_ToggleStatView();
 
-        if(gRogueBattleOverlay->dexPromptSprite != SPRITE_NONE)
+        if(RogueBH_IsValidSpriteId(gRogueBattleOverlay->dexPromptSprite))
         {
             DestroySprite(&gSprites[gRogueBattleOverlay->dexPromptSprite]);
             gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
