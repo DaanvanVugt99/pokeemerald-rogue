@@ -590,8 +590,8 @@ static const struct PlayerOutfit sPlayerOutfits[PLAYER_OUTFIT_COUNT] =
         .objectEventLayerPal = gObjectEventPal_PlayerCalemLayers,
         .trainerFrontBasePal = gTrainerPalette_PlayerCalemFrontBase,
         .trainerFrontLayerPal = gTrainerPalette_PlayerCalemFrontLayers,
-        .trainerBackBasePal = NULL,
-        .trainerBackLayerPal = NULL,
+        .trainerBackBasePal = gTrainerPalette_PlayerCalemFrontBase,
+        .trainerBackLayerPal = gTrainerPalette_PlayerCalemFrontLayers,
         .supportedLayers = 
         {
             [PLAYER_OUTFIT_STYLE_APPEARANCE] = TRUE,
@@ -616,8 +616,8 @@ static const struct PlayerOutfit sPlayerOutfits[PLAYER_OUTFIT_COUNT] =
         .objectEventLayerPal = gObjectEventPal_PlayerSerenaLayers,
         .trainerFrontBasePal = gTrainerPalette_PlayerSerenaFrontBase,
         .trainerFrontLayerPal = gTrainerPalette_PlayerSerenaFrontLayers,
-        .trainerBackBasePal = NULL,
-        .trainerBackLayerPal = NULL,
+        .trainerBackBasePal = gTrainerPalette_PlayerSerenaFrontBase,
+        .trainerBackLayerPal = gTrainerPalette_PlayerSerenaFrontLayers,
         .supportedLayers = 
         {
             [PLAYER_OUTFIT_STYLE_APPEARANCE] = TRUE,
