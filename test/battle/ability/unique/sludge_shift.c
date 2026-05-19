@@ -26,3 +26,16 @@ SINGLE_BATTLE_TEST("Sludge Shift does not trigger if the user has no status cond
         EXPECT_EQ(opponent->status1, STATUS1_NONE);
     }
 }
+
+SINGLE_BATTLE_TEST("Sludge Shift does not trigger if the target is already statused")
+{
+    GIVEN {
+        PLAYER(SPECIES_GOODRA) { Speed(50); Ability(ABILITY_SAP_SIPPER); UniqueAbility(ABILITY_SLUDGE_SHIFT); Status1(STATUS1_BURN); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(10); Status1(STATUS1_PARALYSIS); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->status1, STATUS1_BURN);
+        EXPECT_EQ(opponent->status1, STATUS1_PARALYSIS);
+    }
+}

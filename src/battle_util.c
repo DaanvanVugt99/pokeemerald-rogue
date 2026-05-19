@@ -11310,7 +11310,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 if (HasBattlerAbility(battler, ABILITY_SLUDGE_SHIFT)
                  && (gBattleMons[battler].status1 & STATUS1_ANY)
                  && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
-                 && TryGetOpposingExtraMoveTarget(battler, &target))
+                 && TryGetOpposingExtraMoveTarget(battler, &target)
+                 && !(gBattleMons[target].status1 & STATUS1_ANY))
                 {
                     SetBattlerTriggeredAbility(battler, ABILITY_SLUDGE_SHIFT);
                     SetAtkCancellerForCalledMove();
