@@ -15954,14 +15954,16 @@ if (triggeringAbility != ABILITY_NONE)
          && IS_MOVE_STATUS(move)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && IsFinalMultiHitStrike()
-         && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
+         && IsFinalMultiHitStrike())
         {
+            u32 side = GetBattlerSide(battler);
+
             SetBattlerTriggeredAbility(battler, ABILITY_TUFTED_AWAY);
             gBattlerAttacker = battler;
-            gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TAILWIND;
-            gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = battler;
-            gSideTimers[GetBattlerSide(battler)].tailwindTimer = 2;
+            gSideStatuses[side] |= SIDE_STATUS_TAILWIND;
+            gSideTimers[side].tailwindBattlerId = battler;
+            if (gSideTimers[side].tailwindTimer < 2)
+                gSideTimers[side].tailwindTimer = 2;
             BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
             effect++;
         }
