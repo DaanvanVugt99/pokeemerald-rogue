@@ -347,6 +347,13 @@ static bool32 RogueBH_IsValidSpriteId(u8 spriteId)
     return spriteId < MAX_SPRITES && gSprites[spriteId].inUse;
 }
 
+static bool32 RogueBH_IsValidBattlerSprite(u32 battler)
+{
+    return battler < MAX_BATTLERS_COUNT
+        && gBattlerSpriteIds[battler] < MAX_SPRITES
+        && gSprites[gBattlerSpriteIds[battler]].inUse;
+}
+
 static u32 RogueBH_CountFreeSpriteSlots(void)
 {
     u32 i;
@@ -669,6 +676,9 @@ void RogueBH_RemoveBattleOverlay(bool32 fromResetSprites)
     {
         u32 i;
 
+        if (gRogueBattleOverlay->statViewActive && RogueBH_IsValidBattlerSprite(gMultiUsePlayerCursor))
+            gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
+
         for(i = 0; i < gRogueBattleOverlay->spriteCount; ++i)
         {
             if (RogueBH_IsValidSpriteId(gRogueBattleOverlay->sprites[i]))
@@ -789,6 +799,9 @@ void RogueBH_HandleStatViewUpdate(u32 battler)
     if(gMultiUsePlayerCursor == MAX_BATTLERS_COUNT)
     {
         gMultiUsePlayerCursor = battler;
+        if (RogueBH_IsValidBattlerSprite(gMultiUsePlayerCursor))
+            gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
+        RogueBH_PrintStatView();
     }
 
     if (JOY_NEW(SELECT_BUTTON | B_BUTTON))
@@ -802,7 +815,8 @@ void RogueBH_HandleStatViewUpdate(u32 battler)
             gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
         }
 
-        gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
+        if (RogueBH_IsValidBattlerSprite(gMultiUsePlayerCursor))
+            gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
         return;
     }
     else if (JOY_NEW(DPAD_ANY))
@@ -822,9 +836,10 @@ void RogueBH_HandleStatViewUpdate(u32 battler)
 
     if(prevCursorPos != gMultiUsePlayerCursor)
     {
-        gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
+        if (RogueBH_IsValidBattlerSprite(gMultiUsePlayerCursor))
+            gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
 
-        if(prevCursorPos < MAX_BATTLERS_COUNT)
+        if(prevCursorPos < MAX_BATTLERS_COUNT && RogueBH_IsValidBattlerSprite(prevCursorPos))
             gSprites[gBattlerSpriteIds[prevCursorPos]].callback = SpriteCB_HideAsMoveTarget;
 
         RogueBH_PrintStatView();

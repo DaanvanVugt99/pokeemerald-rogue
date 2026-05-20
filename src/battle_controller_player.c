@@ -90,6 +90,7 @@ static void PlayerHandleBattleDebug(u32 battler);
 static void PlayerBufferRunCommand(u32 battler);
 static void HandleInputChooseTarget(u32 battler);
 static void HandleInputChooseMove(u32 battler);
+static void CleanupConfirmedMoveSelection(void);
 static void MoveSelectionDisplayPpNumber(u32 battler);
 static void MoveSelectionDisplayPpString(u32 battler);
 static void MoveSelectionDisplayMoveType(u32 battler);
@@ -512,6 +513,7 @@ static void HandleInputChooseTarget(u32 battler)
         EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
         TryHideLastUsedBall();
         HideTriggerSprites();
+        CleanupConfirmedMoveSelection();
         PlayerBufferExecCompleted(battler);
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
@@ -674,6 +676,7 @@ static void HandleInputShowEntireFieldTargets(u32 battler)
         else
             BtlController_EmitTwoReturnValues(battler, BUFFER_B, 10, gMoveSelectionCursor[battler] | (gMultiUsePlayerCursor << 8));
         HideTriggerSprites();
+        CleanupConfirmedMoveSelection();
         PlayerBufferExecCompleted(battler);
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
@@ -709,6 +712,7 @@ static void HandleInputShowTargets(u32 battler)
             BtlController_EmitTwoReturnValues(battler, BUFFER_B, 10, gMoveSelectionCursor[battler] | (gMultiUsePlayerCursor << 8));
         HideTriggerSprites();
         TryHideLastUsedBall();
+        CleanupConfirmedMoveSelection();
         PlayerBufferExecCompleted(battler);
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
@@ -825,6 +829,7 @@ static void HandleInputChooseMove(u32 battler)
                 BtlController_EmitTwoReturnValues(battler, BUFFER_B, 10, gMoveSelectionCursor[battler] | (gMultiUsePlayerCursor << 8));
             HideTriggerSprites();
             TryHideLastUsedBall();
+            CleanupConfirmedMoveSelection();
             PlayerBufferExecCompleted(battler);
             break;
         case 1:
@@ -976,6 +981,12 @@ static void HandleInputChooseMove(u32 battler)
             PlaySE(SE_SELECT);
         }
     }
+}
+
+static void CleanupConfirmedMoveSelection(void)
+{
+    RogueBH_RemoveBattleOverlay(FALSE);
+    gBattle_BG0_X = 0;
 }
 
 static void ReloadMoveNames(u32 battler)
@@ -1663,6 +1674,7 @@ static void OpenPartyMenuToChooseMon(u32 battler)
     {
         u8 caseId;
 
+        RogueBH_RemoveBattleOverlay(FALSE);
         gBattlerControllerFuncs[battler] = WaitForMonSelection;
         caseId = gTasks[gBattleControllerData[battler]].data[0];
         DestroyTask(gBattleControllerData[battler]);
@@ -1693,8 +1705,7 @@ static void OpenBagAndChooseItem(u32 battler)
     {
         bool8 openPokedex = RogueBH_IsStatViewActive();
 
-        if (openPokedex)
-            RogueBH_RemoveBattleOverlay(FALSE);
+        RogueBH_RemoveBattleOverlay(FALSE);
 
         gBattlerControllerFuncs[battler] = CompleteWhenChoseItem;
         ReshowBattleScreenDummy();

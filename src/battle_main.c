@@ -3887,6 +3887,7 @@ static void TryDoEventsBeforeFirstTurn(void)
         gChosenMoveByBattler[i] = MOVE_NONE;
     }
     TurnValuesCleanUp(FALSE);
+    gHitMarker &= ~(HITMARKER_NO_ATTACKSTRING | HITMARKER_ATTACKSTRING_PRINTED | HITMARKER_NO_PPDEDUCT);
     SpecialStatusesClear();
     *(&gBattleStruct->absentBattlerFlags) = gAbsentBattlerFlags;
     BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
@@ -3971,6 +3972,8 @@ void BattleTurnPassed(void)
 
     TurnValuesCleanUp(FALSE);
     gHitMarker &= ~HITMARKER_NO_ATTACKSTRING;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gHitMarker &= ~HITMARKER_NO_PPDEDUCT;
     gHitMarker &= ~HITMARKER_UNABLE_TO_USE_MOVE;
     gHitMarker &= ~HITMARKER_PLAYER_FAINTED;
     gHitMarker &= ~HITMARKER_PASSIVE_DAMAGE;
