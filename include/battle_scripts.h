@@ -24,6 +24,8 @@ extern const u8 BattleScript_FrightmareActivates[];
 extern const u8 BattleScript_VoltBreakActivates[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
 extern const u8 BattleScript_AbilityUsesCalledMoveNoPopup[];
+extern const u8 BattleScript_LowTideUsesMudShot_PPLoss[];
+extern const u8 BattleScript_LowTideUsesMudShot[];
 extern const u8 BattleScript_DirtyTricksRestoreAfterMetronome[];
 extern const u8 BattleScript_DropOffRestoreAfterPresent[];
 extern const u8 BattleScript_TumbleweedClearsHazards[];

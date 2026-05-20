@@ -11622,8 +11622,6 @@ else if (moveType == TYPE_WATER)
         triggeringAbility = ABILITY_STORM_DRAIN, effect = 2, statId = STAT_SPATK;
     else if (HasBattlerAbility(battler, ABILITY_LOW_TIDE))
     {
-        u32 originalAttacker = gBattlerAttacker;
-
         triggeringAbility = ABILITY_LOW_TIDE;
         effect = 3;
 
@@ -11637,12 +11635,13 @@ else if (moveType == TYPE_WATER)
         }
 
         SetAtkCancellerForCalledMove();
-        gBattlerAttacker = gBattlerAbility = battler;
-        gBattlerTarget = originalAttacker;
         gCalledMove = MOVE_MUD_SHOT;
         gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
         VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
-        gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+        if (gProtectStructs[gBattlerAttacker].notFirstStrike)
+            gBattlescriptCurrInstr = BattleScript_LowTideUsesMudShot;
+        else
+            gBattlescriptCurrInstr = BattleScript_LowTideUsesMudShot_PPLoss;
     }
 }
 else if (moveType == TYPE_GRASS)

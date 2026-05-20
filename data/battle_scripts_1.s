@@ -10871,6 +10871,20 @@ BattleScript_MonMadeMoveUseless::
 	orhalfword gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
 	goto BattleScript_MoveEnd
 
+BattleScript_LowTideUsesMudShot_PPLoss::
+	ppreduce
+BattleScript_LowTideUsesMudShot::
+	attackstring
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_LOWTIDEMADEYUSELESS
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_ATTACKER
+	swapattackerwithtarget
+	sethword gMoveResultFlags, 0
+	bicword gHitMarker, HITMARKER_ATTACKSTRING_PRINTED
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_FlashFireBoost_PPLoss::
 	ppreduce
 BattleScript_FlashFireBoost::
