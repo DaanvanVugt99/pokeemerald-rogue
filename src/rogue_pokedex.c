@@ -70,6 +70,7 @@ enum
     PAGE_SEARCH,
     PAGE_OVERVIEW,
     PAGE_MON_STATS,
+    PAGE_MON_UNIQUE_ABILITY,
     PAGE_MON_MOVES,
     PAGE_MON_EVOS,
     PAGE_MON_FORMS,
@@ -166,6 +167,7 @@ static const struct WindowTemplate sMonEntryWinTemplates[WIN_COUNT + 1] =
 
 #ifdef ROGUE_EXPANSION
 static const u8 sTitle_Stats[] = _("Stats");
+static const u8 sTitle_UniqueAbility[] = _("Unique");
 static const u8 sTitle_Moves[] = _("Moves");
 static const u8 sTitle_Evolutions[] = _("Evolutions");
 static const u8 sTitle_Forms[] = _("Forms");
@@ -173,6 +175,7 @@ static const u8 sTitle_Riding[] = _("Poké Ride");
 
 static const u8 sText_Types[] = _("Types");
 static const u8 sText_Abilities[] = _("Abilities");
+static const u8 sText_NoUniqueAbility[] = _("No unique ability.");
 
 static const u8 sText_Total[] = _("Total");
 
@@ -204,6 +207,7 @@ static const u8 sText_Debug[] = _("{COLOR RED}{SHADOW LIGHT_RED}DEBUG VIEW ONLY"
 static const u8 sText_NoFormData[] = _("{COLOR RED}{SHADOW LIGHT_RED}No Form data found");
 #else
 static const u8 sTitle_Stats[] = _("STATS");
+static const u8 sTitle_UniqueAbility[] = _("UNIQUE");
 static const u8 sTitle_Moves[] = _("MOVES");
 static const u8 sTitle_Evolutions[] = _("EVOLUTIONS");
 static const u8 sTitle_Forms[] = _("FORMS");
@@ -211,6 +215,7 @@ static const u8 sTitle_Riding[] = _("POKé RIDE");
 
 static const u8 sText_Types[] = _("TYPES");
 static const u8 sText_Abilities[] = _("ABILITIES");
+static const u8 sText_NoUniqueAbility[] = _("NO UNIQUE ABILITY.");
 
 static const u8 sText_Total[] = _("TOTAL");
 static const u8 sText_HP[] = _("HP");
@@ -245,6 +250,7 @@ static void DisplayTitleScreenCountersText(void);
 static void DisplayTitleDexVariantText(void);
 static void DisplayMonEntryText(void);
 static void DisplayMonStatsText(void);
+static void DisplayMonUniqueAbilityText(void);
 static void DisplayMonMovesText(void);
 static void DisplayMonEvosText(void);
 static void DisplayMonFormsText(void);
@@ -284,6 +290,9 @@ static void MonInfo_DestroySprites();
 
 // Mon stats
 static void MonStats_HandleInput(u8);
+
+// Mon unique ability
+static void MonUniqueAbility_HandleInput(u8);
 
 // Mon moves
 static void MonMoves_HandleInput(u8);
@@ -702,11 +711,13 @@ static void InitPageResources(u8 fromPage, u8 toPage)
         break;
 
     case PAGE_MON_MOVES:
+    case PAGE_MON_UNIQUE_ABILITY:
         {
             LZDecompressWram(sPageListsTilemap, sTilemapBufferPtr);
             CopyBgTilemapBufferToVram(1);
 
-            MonEvos_OpenMoveQuery();
+            if (toPage == PAGE_MON_MOVES)
+                MonEvos_OpenMoveQuery();
 
             InitMonEntryWindows();
             // Text printed below
@@ -798,8 +809,10 @@ static void DestroyPageResources(u8 fromPage, u8 toPage)
         break;
 
     case PAGE_MON_MOVES:
+    case PAGE_MON_UNIQUE_ABILITY:
         {
-            MonEvos_CloseMoveQuery();
+            if (fromPage == PAGE_MON_MOVES)
+                MonEvos_CloseMoveQuery();
 
             MonInfo_DestroySprites();
             FreeMonIconPalettes();
@@ -883,6 +896,11 @@ static void Task_PageFadeIn(u8 taskId)
         DisplayMonStatsText();
         break;
 
+    case PAGE_MON_UNIQUE_ABILITY:
+        DisplayMonEntryText();
+        DisplayMonUniqueAbilityText();
+        break;
+
     case PAGE_MON_MOVES:
         DisplayMonEntryText();
         DisplayMonMovesText();
@@ -943,6 +961,10 @@ static void Task_PageWaitForKeyPress(u8 taskId)
 
     case PAGE_MON_STATS:
         MonStats_HandleInput(taskId);
+        break;
+
+    case PAGE_MON_UNIQUE_ABILITY:
+        MonUniqueAbility_HandleInput(taskId);
         break;
 
     case PAGE_MON_MOVES:
@@ -1424,6 +1446,116 @@ static void DisplayMonStatsText(void)
 
 #undef GET_STAT_COLOUR
 #undef GET_STAT_COLOUR_RANGE
+
+static u16 GetMonEntryUniqueAbility(void)
+{
+    return GetUniqueAbilityBySpecies(sPokedexMenu->viewBaseSpecies);
+}
+
+static void BufferWrappedPokedexAbilityDescription(u8 *dst, const u8 *src, u32 maxWidth)
+{
+    u8 currentLine[256];
+    u8 word[128];
+    u8 candidate[256];
+    const u8 *cursor = src;
+    int len;
+
+    dst[0] = EOS;
+    currentLine[0] = EOS;
+
+    while (*cursor != EOS)
+    {
+        while (*cursor == CHAR_SPACE)
+            cursor++;
+
+        if (*cursor == EOS)
+            break;
+
+        if (*cursor == CHAR_NEWLINE)
+        {
+            if (dst[0] != EOS)
+            {
+                len = StringLength(dst);
+                dst[len++] = CHAR_NEWLINE;
+                dst[len] = EOS;
+            }
+            StringAppend(dst, currentLine);
+            currentLine[0] = EOS;
+            cursor++;
+            continue;
+        }
+
+        len = 0;
+        while (*cursor != EOS && *cursor != CHAR_SPACE && *cursor != CHAR_NEWLINE)
+            word[len++] = *cursor++;
+        word[len] = EOS;
+
+        if (currentLine[0] == EOS)
+        {
+            StringCopy(currentLine, word);
+        }
+        else
+        {
+            StringCopy(candidate, currentLine);
+            len = StringLength(candidate);
+            candidate[len++] = CHAR_SPACE;
+            candidate[len] = EOS;
+            StringAppend(candidate, word);
+
+            if (GetStringWidth(FONT_NARROW, candidate, 0) <= maxWidth)
+            {
+                StringCopy(currentLine, candidate);
+            }
+            else
+            {
+                len = StringLength(dst);
+                if (dst[0] != EOS)
+                    dst[len++] = CHAR_NEWLINE;
+                dst[len] = EOS;
+                StringAppend(dst, currentLine);
+                StringCopy(currentLine, word);
+            }
+        }
+    }
+
+    if (currentLine[0] != EOS)
+    {
+        len = StringLength(dst);
+        if (dst[0] != EOS)
+            dst[len++] = CHAR_NEWLINE;
+        dst[len] = EOS;
+        StringAppend(dst, currentLine);
+    }
+}
+
+static void DisplayMonUniqueAbilityText(void)
+{
+    const u8 ySpacing = 16;
+    u8 headerColor[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
+    u8 textColor[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_BLUE, TEXT_COLOR_LIGHT_GRAY };
+    u16 ability = GetMonEntryUniqueAbility();
+    u16 nameOffset;
+
+    AddTitleText(sTitle_UniqueAbility);
+
+    FillWindowPixelBuffer(WIN_MON_PAGE_CONTENT, PIXEL_FILL(0));
+
+    if (ability == ABILITY_NONE)
+    {
+        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, 0, 0, 0, textColor, TEXT_SKIP_DRAW, sText_NoUniqueAbility);
+    }
+    else
+    {
+        nameOffset = GetStringCenterAlignXOffset(FONT_NORMAL, gAbilityNames[ability], sMonEntryWinTemplates[WIN_MON_PAGE_CONTENT].width * 8);
+        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, nameOffset, 0, 0, 0, headerColor, TEXT_SKIP_DRAW, gAbilityNames[ability]);
+
+        BufferWrappedPokedexAbilityDescription(gStringVar4, gAbilityDescriptionPointers[ability], 132);
+        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, ySpacing, 0, 0, textColor, TEXT_SKIP_DRAW, gStringVar4);
+    }
+
+    PutWindowTilemap(WIN_MON_PAGE_CONTENT);
+    CopyWindowToVram(WIN_MON_PAGE_CONTENT, COPYWIN_FULL);
+}
 
 #define MAX_LIST_DISPLAY_COUNT 8
 
@@ -3583,6 +3715,10 @@ static void MonStats_HandleInput(u8 taskId)
     MonInfo_HandleInput(taskId);
 }
 
+static void MonUniqueAbility_HandleInput(u8 taskId)
+{
+    MonInfo_HandleInput(taskId);
+}
 
 static void MonMoves_HandleInput(u8 taskId)
 {
