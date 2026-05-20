@@ -1286,6 +1286,51 @@ bool32 AI_HasAbility(u32 battlerId, u32 ability)
         || AI_DATA->uniqueAbilities[battlerId] == ability;
 }
 
+bool32 AI_AbilityAbsorbsMoveType(u32 ability, u32 moveType)
+{
+    switch (moveType)
+    {
+    case TYPE_ELECTRIC:
+        return ability == ABILITY_VOLT_ABSORB
+            || ability == ABILITY_MOTOR_DRIVE
+            || ability == ABILITY_LIGHTNING_ROD;
+    case TYPE_WATER:
+        return ability == ABILITY_WATER_ABSORB
+            || ability == ABILITY_DRY_SKIN
+            || ability == ABILITY_STORM_DRAIN
+            || ability == ABILITY_LOW_TIDE;
+    case TYPE_GRASS:
+        return ability == ABILITY_SAP_SIPPER;
+    case TYPE_FAIRY:
+        return ability == ABILITY_FAIRY_ABSORB;
+    case TYPE_GROUND:
+        return ability == ABILITY_EARTH_EATER;
+    case TYPE_FIRE:
+        return ability == ABILITY_FLASH_FIRE
+            || ability == ABILITY_FLASH_FREEZE;
+    case TYPE_ROCK:
+        return ability == ABILITY_MORTAR_SHELL;
+    case TYPE_BUG:
+        return ability == ABILITY_INSECTIVORE;
+    case TYPE_FLYING:
+        return ability == ABILITY_AERODYNAMIC;
+    }
+
+    return FALSE;
+}
+
+bool32 AI_BattlerHasMoveAbsorbingAbility(u32 battlerId, u32 moveType)
+{
+    return AI_AbilityAbsorbsMoveType(AI_DATA->abilities[battlerId], moveType)
+        || AI_AbilityAbsorbsMoveType(AI_DATA->uniqueAbilities[battlerId], moveType);
+}
+
+bool32 AI_MonHasMoveAbsorbingAbility(u32 species, u32 ability, u32 moveType)
+{
+    return AI_AbilityAbsorbsMoveType(ability, moveType)
+        || AI_AbilityAbsorbsMoveType(GetUniqueAbilityBySpecies(species), moveType);
+}
+
 // does NOT include ability suppression checks
 s32 AI_DecideKnownAbilityForTurn(u32 battlerId)
 {

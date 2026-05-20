@@ -140,6 +140,25 @@ AI_SINGLE_BATTLE_TEST("AI scores Knock Off below Tackle against revealed unique 
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI scores absorbed moves below safe moves against known unique absorbers")
+{
+    u16 species, ability, absorbedMove, safeMove;
+
+    PARAMETRIZE { species = SPECIES_PALOSSAND; ability = ABILITY_LOW_TIDE; absorbedMove = MOVE_WATER_GUN; safeMove = MOVE_TACKLE; }
+    PARAMETRIZE { species = SPECIES_TURTONATOR; ability = ABILITY_MORTAR_SHELL; absorbedMove = MOVE_ROCK_THROW; safeMove = MOVE_TACKLE; }
+    PARAMETRIZE { species = SPECIES_HEATMOR; ability = ABILITY_INSECTIVORE; absorbedMove = MOVE_FURY_CUTTER; safeMove = MOVE_TACKLE; }
+    PARAMETRIZE { species = SPECIES_YANMEGA; ability = ABILITY_AERODYNAMIC; absorbedMove = MOVE_PECK; safeMove = MOVE_TACKLE; }
+    PARAMETRIZE { species = SPECIES_CRYOGONAL; ability = ABILITY_FLASH_FREEZE; absorbedMove = MOVE_EMBER; safeMove = MOVE_TACKLE; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(species) { UniqueAbility(ability); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(absorbedMove, safeMove); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, safeMove, absorbedMove); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI scores Thunder Wave below Tackle against known Limber")
 {
     GIVEN {
