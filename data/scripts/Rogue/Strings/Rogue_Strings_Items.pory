@@ -45,7 +45,7 @@ text gItemDesc_TM
 
 text gItemDesc_TR
 {
-    format("Single use machine for teaching {PKMN} one specific move.")
+    format("Reusable machine for teaching {PKMN} one specific move.")
 }
 
 text gItemDesc_MaxMushroom

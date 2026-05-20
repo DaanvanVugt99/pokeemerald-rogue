@@ -1146,6 +1146,7 @@ u16 Rogue_GetPrice(u16 itemId)
         u16 move = ItemIdToBattleMoveId(itemId);
 
         price = Rogue_CalculateMovePrice(move, itemId);
+        applyDefaultHubIncrease = TRUE;
     }
 
     if(itemId >= ITEM_TM01 && itemId <= ITEM_HM08)
@@ -1725,9 +1726,11 @@ u32 Rogue_CalculateMovePrice(u16 move, u16 itemId)
         if(Rogue_IsRunActive())
             cost *= 2;
     }
-    else if(itemId >= ITEM_TM01 && itemId <= ITEM_HM08)
+    else if((itemId >= ITEM_TM01 && itemId <= ITEM_HM08) || (itemId >= ITEM_TR01 && itemId <= ITEM_TR50))
     {
-        cost *= 4 * 2;
+        cost *= 3;
+        if(cost > HELD_ITEM_HIGH_PRICE)
+            cost = HELD_ITEM_HIGH_PRICE;
     }
 
     return cost;
