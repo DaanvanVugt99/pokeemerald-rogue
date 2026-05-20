@@ -11285,6 +11285,27 @@ BattleScript_AttackerAbilityStatRaise::
 BattleScript_AttackerAbilityStatRaise_End:
 	return
 
+BattleScript_RumbleRollClearsHazards::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_RUMBLEROLLCLEAREDHAZARDS
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_RumbleRollClearsHazardsAndRaisesDef::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_RUMBLEROLLCLEAREDHAZARDS
+	waitmessage B_WAIT_TIME_LONG
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_RumbleRollClearsHazardsAndRaisesDef_End
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_ATTACKERABILITYSTATRAISE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_RumbleRollClearsHazardsAndRaisesDef_End:
+	return
+
 BattleScript_FellStingerRaisesStat::
 	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_FellStingerRaisesAtkEnd
 	jumpifbyte CMP_GREATER_THAN, cMULTISTRING_CHOOSER, B_MSG_DEFENDER_STAT_ROSE, BattleScript_FellStingerRaisesAtkEnd

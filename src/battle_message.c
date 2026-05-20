@@ -891,9 +891,11 @@ static const u8 sText_FamilyFeudReadied[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} r
 static const u8 sText_CarvingRushReadied[] = _("{B_ATK_NAME_WITH_PREFIX}'s slicing moves\nwill drain HP!");
 static const u8 sText_SingularityDriveClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Singularity Drive\ncleared away the hazards!");
 static const u8 sText_LowTideMadeYUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Low Tide\nmade {B_CURRENT_MOVE} useless!");
+static const u8 sText_RumbleRollClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Rumble Roll\ncleared away the hazards!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_RUMBLEROLLCLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_RumbleRollClearedHazards,
     [STRINGID_LOWTIDEMADEYUSELESS - BATTLESTRINGS_TABLE_START] = sText_LowTideMadeYUseless,
     [STRINGID_SINGULARITYDRIVECLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_SingularityDriveClearedHazards,
     [STRINGID_CARVINGRUSHREADIED - BATTLESTRINGS_TABLE_START] = sText_CarvingRushReadied,

@@ -14081,18 +14081,21 @@ if (triggeringAbility != ABILITY_NONE)
             if (hazardsCleared || canRaiseDef)
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_RUMBLE_ROLL);
+                gBattlerAttacker = battler;
+
                 if (canRaiseDef)
                 {
-                    gBattlerAttacker = battler;
                     SET_STATCHANGER(STAT_DEF, 1, FALSE);
                     PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_DEF);
                     BattleScriptPushCursor();
-                    gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+                    gBattlescriptCurrInstr = hazardsCleared
+                        ? BattleScript_RumbleRollClearsHazardsAndRaisesDef
+                        : BattleScript_AttackerAbilityStatRaise;
                 }
                 else
                 {
                     BattleScriptPushCursor();
-                    gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+                    gBattlescriptCurrInstr = BattleScript_RumbleRollClearsHazards;
                 }
                 effect++;
             }
