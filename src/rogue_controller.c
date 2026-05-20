@@ -15,6 +15,7 @@
 #include "constants/trainer_types.h"
 #include "constants/weather.h"
 #include "data.h"
+#include "decompress.h"
 #include "gba/isagbprint.h"
 
 #include "battle.h"
@@ -3229,6 +3230,7 @@ void Rogue_OnNewGame(void)
     memset(gRogueSaveBlock->daycarePokemon, 0, sizeof(gRogueSaveBlock->daycarePokemon));
     memset(gRogueSaveBlock->adventureReplay, 0, sizeof(gRogueSaveBlock->adventureReplay));
     memset(gRogueSaveBlock->monMasteryFlags, 0, sizeof(gRogueSaveBlock->monMasteryFlags));
+    gRogueSaveBlock->lastKnownNumSpecies = NUM_SPECIES;
 
     Rogue_ClearPopupQueue();
 }
@@ -3279,6 +3281,26 @@ void Rogue_NotifySaveVersionUpdated(u16 fromNumber, u16 toNumber)
     // TODO - Hook up warnings here??
     //if(IsPreReleaseCompatVersion(gSaveBlock1Ptr->rogueCompatVersion))
     //    FlagSet(FLAG_ROGUE_PRE_RELEASE_COMPAT_WARNING);
+
+    if(gRogueSaveBlock->lastKnownNumSpecies != NUM_SPECIES)
+    {
+        u32 prevArraySize = ROUND_BITS_TO_BYTES(gRogueSaveBlock->lastKnownNumSpecies);
+        u8 *tempBuffer = gDecompressionBuffer;
+
+        AGB_ASSERT(gRogueSaveBlock->lastKnownNumSpecies < NUM_SPECIES);
+        AGB_ASSERT(prevArraySize * 2 <= 0x4000);
+
+        memcpy(tempBuffer, &gSaveBlock1Ptr->pokedexBitFlags1[0], prevArraySize);
+        memcpy(tempBuffer + prevArraySize, &gSaveBlock1Ptr->pokedexBitFlags2[0], prevArraySize);
+
+        memset(&gSaveBlock1Ptr->pokedexBitFlags1[0], 0, sizeof(gSaveBlock1Ptr->pokedexBitFlags1));
+        memset(&gSaveBlock1Ptr->pokedexBitFlags2[0], 0, sizeof(gSaveBlock1Ptr->pokedexBitFlags2));
+
+        memcpy(&gSaveBlock1Ptr->pokedexBitFlags1[0], tempBuffer, prevArraySize);
+        memcpy(&gSaveBlock1Ptr->pokedexBitFlags2[0], tempBuffer + prevArraySize, prevArraySize);
+
+        gRogueSaveBlock->lastKnownNumSpecies = NUM_SPECIES;
+    }
 }
 
 void Rogue_NotifySaveLoaded(void)
@@ -6088,6 +6110,7 @@ void RemoveMonAtSlot(u8 slot, bool8 keepItems, bool8 compactPartySlots)
                 // Try to put held item back in bag
                 if(heldItem != ITEM_NONE && AddBagItem(heldItem, 1))
                 {
+                    Rogue_PushPopup_AddItem(heldItem, 1);
                     heldItem = ITEM_NONE;
                     SetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM, &heldItem);
                 }
@@ -6195,8 +6218,8 @@ void RemoveAnyFaintedMons(bool8 keepItems)
                 {
                     // Dead so give back held item
                     u16 heldItem = GetMonData(&gPlayerParty[read], MON_DATA_HELD_ITEM);
-                    if(heldItem != ITEM_NONE)
-                        AddBagItem(heldItem, 1);
+                    if(heldItem != ITEM_NONE && AddBagItem(heldItem, 1))
+                        Rogue_PushPopup_AddItem(heldItem, 1);
                 }
 
                 // Only push mons if run is active
@@ -6762,7 +6785,10 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
                     FlagSet(FLAG_IS_CHAMPION);
                     FlagSet(FLAG_ROGUE_RUN_COMPLETED);
-                    RogueQuest_SetMonMasteryFlagFromParty();
+
+                    if(!Rogue_ShouldDisableMainQuests())
+                        RogueQuest_SetMonMasteryFlagFromParty();
+
                     RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_HALL_OF_FAME);
                     RogueQuest_OnTrigger(QUEST_TRIGGER_MISC_UPDATE);
 
@@ -8567,6 +8593,10 @@ void Rogue_EndCatchingContest()
 
     // Store caught mon for later
     CopyMon(&gEnemyParty[0], &gPlayerParty[0], sizeof(struct Pokemon));
+    {
+        u32 item = ITEM_NONE;
+        SetMonData(&gEnemyParty[0], MON_DATA_HELD_ITEM, &item);
+    }
 
     // Hack to hide follower
     ZeroMonData(&gPlayerParty[0]);
@@ -8657,7 +8687,8 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
 {
     bool8 applyRandomChance = FALSE;
     bool8 applyPriceRange = TRUE;
-    u16 randomChanceMinimum = 0;
+    u16 randomChanceMinimum = 10;
+    u16 randomChanceGymRate = 5;
     u16 maxPriceRange = 65000;
     u16 originalItemCategory = itemCategory;
     u16 randomSeed;
@@ -8810,7 +8841,8 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
             }
         }
         applyRandomChance = TRUE;
-        randomChanceMinimum = 50;
+        randomChanceMinimum = 20;
+        randomChanceGymRate = 3;
         break;
 
     case ROGUE_SHOP_HELD_ITEMS:
@@ -8999,14 +9031,12 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
 
                 if(difficulty < ROGUE_ELITE_START_DIFFICULTY)
                 {
-                    chance = 10 + 5 * difficulty;
+                    chance = randomChanceMinimum + randomChanceGymRate * difficulty;
                 }
                 else if(difficulty < ROGUE_CHAMP_START_DIFFICULTY)
                 {
                     chance = 60 + 10 * (difficulty - ROGUE_ELITE_START_DIFFICULTY);
                 }
-
-                chance = max(randomChanceMinimum, chance);
 
                 if(chance < 100)
                     RogueMiscQuery_FilterByChance(randomSeed, QUERY_FUNC_INCLUDE, chance, 1);

@@ -246,6 +246,7 @@ static void Task_SwapToPage(u8);
 static void Task_PageFadeIn(u8);
 static void Task_PageWaitForKeyPress(u8);
 static void Task_PageFadeOutAndExit(u8);
+static void Task_PageFadeOutExitAndRelaunch(u8);
 static void DisplayTitleScreenCountersText(void);
 static void DisplayTitleDexVariantText(void);
 static void DisplayMonEntryText(void);
@@ -1023,6 +1024,28 @@ static void Task_PageFadeOutAndExit(u8 taskId)
         {
             SetMainCallback2(gMain.savedCallback);
         }
+    }
+}
+
+static void Task_PageFadeOutExitAndRelaunch(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        if(sPokedexViewReq.dexVariantToRestore != POKEDEX_INVALID_VARIANT)
+            RoguePokedex_SetDexVariant(sPokedexViewReq.dexVariantToRestore);
+
+        DestroyPageResources(sPokedexMenu->currentPage, PAGE_NONE);
+
+        Free(sPokedexMenu);
+        sPokedexMenu = NULL;
+
+        Free(sTilemapBufferPtr);
+        sTilemapBufferPtr = NULL;
+        DestroyTask(taskId);
+
+        FreeAllWindowBuffers();
+
+        SetupPokedexViewDefault();
     }
 }
 
@@ -2205,6 +2228,8 @@ static const struct BgTemplate sDiplomaBgTemplates[2] =
 
 static void InitOverviewBg(void)
 {
+    FreeAllWindowBuffers();
+
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sDiplomaBgTemplates, ARRAY_COUNT(sDiplomaBgTemplates));
     SetBgTilemapBuffer(1, sTilemapBufferPtr);
@@ -3186,8 +3211,8 @@ static void Overview_HandleInput(u8 taskId)
         }
         else
         {
-            sPokedexMenu->desiredPage = PAGE_TITLE_SCREEN;
-            gTasks[taskId].func = Task_SwapToPage;
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_PageFadeOutExitAndRelaunch;
 
             PlaySE(SE_SELECT);
         }
@@ -4245,7 +4270,14 @@ u16 RoguePokedex_RedirectSpeciesGetSetFlag(u16 species)
 bool8 RoguePokedex_IsSpeciesLegendary(u16 species)
 {
 #ifdef ROGUE_EXPANSION
-    species = GET_BASE_SPECIES_ID(species);
+    switch (species)
+    {
+    case SPECIES_FLOETTE_ETERNAL_FLOWER:
+        break;
+    default:
+        species = GET_BASE_SPECIES_ID(species);
+        break;
+    }
 #endif
 
     switch(species)

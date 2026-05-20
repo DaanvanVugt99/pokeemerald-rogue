@@ -1221,6 +1221,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
     [ABILITY_GOOD_AS_GOLD] = 1,
     [ABILITY_PURIFYING_SALT] = 1,
     [ABILITY_WELL_BAKED_BODY] = 1,
+    [ABILITY_THERMAL_EXCHANGE] = 1,
 };
 
 static const u8 sAbilitiesNotTraced[ABILITIES_COUNT] =
@@ -24351,6 +24352,12 @@ bool32 TryBattleFormChange(u32 battler, u16 method)
         SetMonData(&party[monId], MON_DATA_SPECIES, &targetSpecies);
         gBattleMons[battler].species = targetSpecies;
         RecalcBattlerStats(battler, &party[monId]);
+
+        if(side == B_SIDE_PLAYER)
+            HandleSetPokedexFlag(targetSpecies, IsMonShiny(&party[monId]) ? FLAG_SET_CAUGHT_SHINY : FLAG_SET_CAUGHT, gBattleMons[battler].personality);
+        else
+            HandleSetPokedexFlag(targetSpecies, FLAG_SET_SEEN, gBattleMons[battler].personality);
+
         return TRUE;
     }
     else if (gBattleStruct->changedSpecies[side][monId] != SPECIES_NONE)
