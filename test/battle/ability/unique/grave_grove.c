@@ -5,11 +5,13 @@ ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_BITE].makesContact);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
+    ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
     ASSUME(!gBattleMoves[MOVE_WATER_GUN].makesContact);
     ASSUME(gBattleMoves[MOVE_FORESTS_CURSE].effect == EFFECT_THIRD_TYPE);
     ASSUME(gBattleMoves[MOVE_FORESTS_CURSE].argument == TYPE_GRASS);
     ASSUME(gBattleMoves[MOVE_SHADOW_BALL].type == TYPE_GHOST);
     ASSUME(gSpeciesInfo[SPECIES_WOBBUFFET].types[0] != TYPE_GRASS && gSpeciesInfo[SPECIES_WOBBUFFET].types[1] != TYPE_GRASS);
+    ASSUME(gSpeciesInfo[SPECIES_ODDISH].types[0] == TYPE_GRASS || gSpeciesInfo[SPECIES_ODDISH].types[1] == TYPE_GRASS);
 }
 
 SINGLE_BATTLE_TEST("Grave Grove uses Forest's Curse after being hit by a contact move")
@@ -34,6 +36,20 @@ SINGLE_BATTLE_TEST("Grave Grove does not trigger after a non-contact move")
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_WATER_GUN); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN); }
+    } SCENE {
+        NOT ABILITY_POPUP(player, ABILITY_GRAVE_GROVE);
+    } THEN {
+        EXPECT_EQ(opponent->type3, TYPE_MYSTERY);
+    }
+}
+
+SINGLE_BATTLE_TEST("Grave Grove does not trigger if the attacker is already Grass-type")
+{
+    GIVEN {
+        PLAYER(SPECIES_TREVENANT) { Ability(ABILITY_NATURAL_CURE); UniqueAbility(ABILITY_GRAVE_GROVE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_ODDISH) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
     } SCENE {
         NOT ABILITY_POPUP(player, ABILITY_GRAVE_GROVE);
     } THEN {

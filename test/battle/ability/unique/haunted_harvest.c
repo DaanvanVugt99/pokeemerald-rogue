@@ -5,6 +5,7 @@ ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_TRICK_OR_TREAT].effect == EFFECT_THIRD_TYPE);
     ASSUME(gBattleMoves[MOVE_TRICK_OR_TREAT].argument == TYPE_GHOST);
+    ASSUME(gSpeciesInfo[SPECIES_GASTLY].types[0] == TYPE_GHOST || gSpeciesInfo[SPECIES_GASTLY].types[1] == TYPE_GHOST);
 }
 
 SINGLE_BATTLE_TEST("Haunted Harvest uses Trick-or-Treat on switch-in")
@@ -35,5 +36,17 @@ SINGLE_BATTLE_TEST("Haunted Harvest uses Trick-or-Treat at battle start")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TRICK_OR_TREAT, opponent);
     } THEN {
         EXPECT_EQ(player->type3, TYPE_GHOST);
+    }
+}
+
+SINGLE_BATTLE_TEST("Haunted Harvest does not trigger if the target is already Ghost-type")
+{
+    GIVEN {
+        PLAYER(SPECIES_GASTLY) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_PUMPKABOO_SMALL) { Ability(ABILITY_FRISK); UniqueAbility(ABILITY_HAUNTED_HARVEST); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NOT ABILITY_POPUP(opponent, ABILITY_HAUNTED_HARVEST);
     }
 }

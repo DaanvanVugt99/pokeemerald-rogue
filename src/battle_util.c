@@ -8062,7 +8062,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
             {
-                if (!CanUseExtraMove(battler, opposingBattler))
+                if (!CanUseExtraMove(battler, opposingBattler)
+                 || IS_BATTLER_OF_TYPE(opposingBattler, TYPE_GHOST))
                     continue;
 
                 SetBattlerTriggeredAbility(battler, ABILITY_HAUNTED_HARVEST);
@@ -12763,6 +12764,7 @@ if (triggeringAbility != ABILITY_NONE)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsMoveMakingContact(move, moveEndAttacker)
          && IsFinalMultiHitStrike()
+         && !IS_BATTLER_OF_TYPE(moveEndAttacker, TYPE_GRASS)
          && CanUseExtraMove(battler, moveEndAttacker))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_GRAVE_GROVE);
