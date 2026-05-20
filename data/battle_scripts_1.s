@@ -11624,6 +11624,8 @@ BattleScript_ShellFormationActivates::
 	return
 
 BattleScript_AbilityUsesCalledMove::
+	copybyte gBattlerAttacker, sBATTLER
+	copybyte gBattlerAbility, sBATTLER
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
 BattleScript_AbilityUsesCalledMoveNoPopup::

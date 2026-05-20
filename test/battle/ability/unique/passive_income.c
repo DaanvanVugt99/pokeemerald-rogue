@@ -8,6 +8,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_FURY_SWIPES].type == TYPE_NORMAL);
     ASSUME(gBattleMoves[MOVE_PAY_DAY].power > 0);
     ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+    ASSUME(gBattleMoves[MOVE_FAKE_OUT].type == TYPE_NORMAL);
 }
 
 SINGLE_BATTLE_TEST("Passive Income adds Pay Day after Normal-type moves")
@@ -61,5 +62,20 @@ SINGLE_BATTLE_TEST("Passive Income adds Pay Day after Fury Swipes")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_FURY_SWIPES, player);
         ABILITY_POPUP(player, ABILITY_PASSIVE_INCOME);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_PAY_DAY, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Passive Income popup is shown on the user after Fake Out")
+{
+    GIVEN {
+        PLAYER(SPECIES_INTELEON) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_MEOWTH) { Ability(ABILITY_PICKUP); UniqueAbility(ABILITY_PASSIVE_INCOME); Speed(100); Moves(MOVE_FAKE_OUT); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_FAKE_OUT); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FAKE_OUT, opponent);
+        HP_BAR(player);
+        ABILITY_POPUP(opponent, ABILITY_PASSIVE_INCOME);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PAY_DAY, opponent);
     }
 }

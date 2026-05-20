@@ -18284,6 +18284,7 @@ u32 GetBattlerUniqueAbility(u32 battler)
 void SetBattlerTriggeredAbility(u32 battler, u32 ability)
 {
     gBattlerAbility = battler;
+    gBattleScripting.battler = battler;
     gLastUsedAbility = ability;
     gBattleScripting.abilityPopupOverwrite = (ability != ABILITY_NONE && gBattleMons[battler].ability != ability) ? ability : 0;
 }
