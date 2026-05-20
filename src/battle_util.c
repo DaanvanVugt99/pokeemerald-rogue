@@ -133,7 +133,6 @@ static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
 static bool32 IsAnyEnvironmentalTypeActive(u32 battler);
 static bool32 IsAnyOpposingBattlerStatused(u32 battler);
 static u8 GetInitialBattleWeather(void);
-static bool32 ShouldStartNightRouteEclipse(u8 weather);
 static bool32 HasBerryDoubleEffect(u32 battler);
 static bool32 IsPetrifyStatLoweringBlocked(u32 attacker, u32 target, u32 statId);
 static bool32 CanPetrifyClearPositiveStatStages(u32 attacker, u32 target);
@@ -2584,7 +2583,7 @@ u8 DoFieldEndTurnEffects(void)
         case ENDTURN_ECLIPSE:
             if (gBattleWeather & B_WEATHER_ECLIPSE)
             {
-                if (ShouldStartNightRouteEclipse(GetInitialBattleWeather()))
+                if (GetInitialBattleWeather() == WEATHER_ECLIPSE)
                 {
                     gBattlescriptCurrInstr = BattleScript_EclipseContinues;
                 }
@@ -2629,7 +2628,11 @@ u8 DoFieldEndTurnEffects(void)
         case ENDTURN_ACID_RAIN:
             if (gBattleWeather & B_WEATHER_ACID_RAIN)
             {
-                if (!(gBattleWeather & B_WEATHER_ACID_RAIN_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
+                if (GetInitialBattleWeather() == WEATHER_ACID_RAIN)
+                {
+                    gBattlescriptCurrInstr = BattleScript_DamagingWeatherContinues;
+                }
+                else if (!(gBattleWeather & B_WEATHER_ACID_RAIN_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
                 {
                     gBattleWeather &= ~B_WEATHER_ACID_RAIN_TEMPORARY;
                     gBattlescriptCurrInstr = BattleScript_SandStormHailSnowEnds;
@@ -5151,31 +5154,6 @@ static u8 GetInitialBattleWeather()
         return VarGet(VAR_ROGUE_DESIRED_WEATHER);
     else
         return GetCurrentWeather();
-}
-
-static bool32 IsBattleWeatherSetByOverworldWeather(u8 weather)
-{
-    switch (weather)
-    {
-    case WEATHER_RAIN:
-    case WEATHER_SNOW:
-    case WEATHER_RAIN_THUNDERSTORM:
-    case WEATHER_SANDSTORM:
-    case WEATHER_DROUGHT:
-    case WEATHER_DOWNPOUR:
-    case WEATHER_ABNORMAL:
-        return TRUE;
-    default:
-        return FALSE;
-    }
-}
-
-static bool32 ShouldStartNightRouteEclipse(u8 weather)
-{
-    return Rogue_IsRunActive()
-        && gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE
-        && RogueToD_IsNight()
-        && !IsBattleWeatherSetByOverworldWeather(weather);
 }
 
 static inline bool32 CanAbilityDisableBattler(u32 battler);
@@ -9732,11 +9710,25 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             BattleScriptPushCursorAndCallback(BattleScript_OverworldTerrain);
             effect++;
         }
+        else if (GetInitialBattleWeather() == WEATHER_PLAIN_TERRAIN
+              && !(gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN))
+        {
+            gFieldStatuses = (STATUS_FIELD_PLAIN_TERRAIN | STATUS_FIELD_TERRAIN_PERMANENT);
+            gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_SET_PLAIN;
+            BattleScriptPushCursorAndCallback(BattleScript_OverworldTerrain);
+            effect++;
+        }
+        else if (GetInitialBattleWeather() == WEATHER_INFESTED_TERRAIN
+              && !(gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))
+        {
+            gFieldStatuses = (STATUS_FIELD_INFESTED_TERRAIN | STATUS_FIELD_TERRAIN_PERMANENT);
+            gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TERRAIN_SET_INFESTED;
+            BattleScriptPushCursorAndCallback(BattleScript_OverworldTerrain);
+            effect++;
+        }
     break;
     case ABILITYEFFECT_SWITCH_IN_WEATHER:
     {
-        bool32 startedNightRouteEclipse = FALSE;
-
         gBattleScripting.battler = battler;
         if (!(gBattleTypeFlags & BATTLE_TYPE_RECORDED))
         {
@@ -9786,20 +9778,27 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                     effect++;
                 }
                 break;
-            }
-
-            if (effect == 0 && ShouldStartNightRouteEclipse(initialWeather))
-            {
-                gBattleWeather = B_WEATHER_ECLIPSE;
-                gWishFutureKnock.weatherDuration = WEATHER_DURATION_TURNS;
-                gBattleScripting.animArg1 = B_ANIM_ECLIPSE_CONTINUES;
-                startedNightRouteEclipse = TRUE;
-                effect++;
+            case WEATHER_ACID_RAIN:
+                if (!(gBattleWeather & B_WEATHER_ACID_RAIN))
+                {
+                    gBattleWeather = B_WEATHER_ACID_RAIN;
+                    gBattleScripting.animArg1 = B_ANIM_ACID_RAIN_CONTINUES;
+                    effect++;
+                }
+                break;
+            case WEATHER_ECLIPSE:
+                if (!(gBattleWeather & B_WEATHER_ECLIPSE))
+                {
+                    gBattleWeather = B_WEATHER_ECLIPSE;
+                    gBattleScripting.animArg1 = B_ANIM_ECLIPSE_CONTINUES;
+                    effect++;
+                }
+                break;
             }
         }
         if (effect != 0)
         {
-            if (startedNightRouteEclipse)
+            if (GetInitialBattleWeather() == WEATHER_ECLIPSE)
             {
                 gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_ECLIPSE;
                 BattleScriptPushCursorAndCallback(BattleScript_OverworldEclipseStarts);

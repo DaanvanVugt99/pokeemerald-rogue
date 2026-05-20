@@ -363,7 +363,7 @@ static const u8 sText_Popup_QuestsDisabledSubtitle[] = _("{COLOR LIGHT_BLUE}{SHA
 
 static const u8 sText_Popup_WeatherActive[] = _("{COLOR LIGHT_BLUE}{SHADOW BLUE}Weather Active");
 
-static const u8 sWeatherNames[22][14] = {
+static const u8 sWeatherNames[WEATHER_COUNT][14] = {
     [WEATHER_NONE]               = _("None"),
     [WEATHER_SUNNY_CLOUDS]       = _("Sunny"),
     [WEATHER_SUNNY]              = _("Sunny"),
@@ -385,6 +385,10 @@ static const u8 sWeatherNames[22][14] = {
     [WEATHER_DOWNPOUR]           = _("Downpour"),
     [WEATHER_UNDERWATER_BUBBLES] = _("Bubbles"),
     [WEATHER_ABNORMAL]           = _("Abnormal"),
+    [WEATHER_ECLIPSE]            = _("Eclipse"),
+    [WEATHER_ACID_RAIN]          = _("Acid Rain"),
+    [WEATHER_PLAIN_TERRAIN]      = _("Plain"),
+    [WEATHER_INFESTED_TERRAIN]   = _("Infested"),
     [WEATHER_ROUTE119_CYCLE]     = _("???"),
     [WEATHER_ROUTE123_CYCLE]     = _("???"),
 };

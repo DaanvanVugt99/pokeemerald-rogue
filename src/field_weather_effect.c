@@ -7,6 +7,7 @@
 #include "random.h"
 #include "script.h"
 #include "constants/weather.h"
+#include "constants/rgb.h"
 #include "constants/songs.h"
 #include "sound.h"
 #include "sprite.h"
@@ -22,6 +23,27 @@ EWRAM_DATA static u16 sUnusedWeatherRelated = 0;
 const u16 gCloudsWeatherPalette[] = INCBIN_U16("graphics/weather/cloud.gbapal");
 const u16 gSandstormWeatherPalette[] = INCBIN_U16("graphics/weather/sandstorm.gbapal");
 const u16 gLeavesWeatherPalette[] = INCBIN_U16("graphics/weather/leaves.gbapal");
+static const u16 sAcidRainWeatherPalette[] =
+{
+    RGB(0, 0, 0), RGB(18, 31, 10), RGB(12, 25, 8), RGB(25, 16, 31),
+    RGB(8, 18, 6), RGB(22, 31, 16), RGB(17, 10, 24), RGB(28, 25, 31),
+    RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0),
+    RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0),
+};
+static const u16 sPlainTerrainWeatherPalette[] =
+{
+    RGB(26, 29, 31), RGB(31, 31, 28), RGB(24, 27, 31), RGB(30, 31, 31),
+    RGB(22, 25, 28), RGB(31, 30, 24), RGB(0, 0, 0), RGB(0, 0, 0),
+    RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0),
+    RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0),
+};
+static const u16 sInfestedTerrainWeatherPalette[] =
+{
+    RGB(20, 28, 7), RGB(10, 18, 6), RGB(25, 20, 5), RGB(14, 24, 8),
+    RGB(6, 12, 5), RGB(24, 31, 10), RGB(18, 14, 5), RGB(8, 20, 4),
+    RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0),
+    RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0), RGB(0, 0, 0),
+};
 const u8 gWeatherFogDiagonalTiles[] = INCBIN_U8("graphics/weather/fog_diagonal.4bpp");
 const u8 gWeatherFogHorizontalTiles[] = INCBIN_U8("graphics/weather/fog_horizontal.4bpp");
 const u8 gWeatherCloudTiles[] = INCBIN_U8("graphics/weather/cloud.4bpp");
@@ -185,7 +207,10 @@ static void CreateCloudSprites(void)
         return;
 
     LoadSpriteSheet(&sCloudSpriteSheet);
-    LoadCustomWeatherSpritePalette(gCloudsWeatherPalette);
+    if (gWeatherPtr->currWeather == WEATHER_PLAIN_TERRAIN)
+        LoadCustomWeatherSpritePalette(sPlainTerrainWeatherPalette);
+    else
+        LoadCustomWeatherSpritePalette(gCloudsWeatherPalette);
     for (i = 0; i < NUM_CLOUD_SPRITES; i++)
     {
         spriteId = CreateSprite(&sCloudSpriteTemplate, 0, 0, 0xFF);
@@ -450,6 +475,17 @@ static const struct SpriteTemplate sRainSpriteTemplate =
     .callback = UpdateRainSprite,
 };
 
+static const struct SpriteTemplate sAcidRainSpriteTemplate =
+{
+    .tileTag = GFXTAG_RAIN,
+    .paletteTag = PALTAG_WEATHER_2,
+    .oam = &sRainSpriteOamData,
+    .anims = sRainSpriteAnimCmds,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = UpdateRainSprite,
+};
+
 // Q28.4 fixed-point format values
 static const s16 sRainSpriteMovement[][2] =
 {
@@ -666,19 +702,23 @@ static void InitRainSpriteMovement(struct Sprite *sprite, u16 val)
 static void LoadRainSpriteSheet(void)
 {
     LoadSpriteSheet(&sRainSpriteSheet);
+
+    if (gWeatherPtr->currWeather == WEATHER_ACID_RAIN)
+        LoadCustomWeatherSpritePalette(sAcidRainWeatherPalette);
 }
 
 static bool8 CreateRainSprite(void)
 {
     u8 spriteIndex;
     u8 spriteId;
+    const struct SpriteTemplate *template;
 
     if (gWeatherPtr->rainSpriteCount == MAX_RAIN_SPRITES)
         return FALSE;
 
     spriteIndex = gWeatherPtr->rainSpriteCount;
-    spriteId = CreateSpriteAtEnd(&sRainSpriteTemplate,
-      sRainSpriteCoords[spriteIndex].x, sRainSpriteCoords[spriteIndex].y, 78);
+    template = (gWeatherPtr->currWeather == WEATHER_ACID_RAIN) ? &sAcidRainSpriteTemplate : &sRainSpriteTemplate;
+    spriteId = CreateSpriteAtEnd(template, sRainSpriteCoords[spriteIndex].x, sRainSpriteCoords[spriteIndex].y, 78);
 
     if (spriteId != MAX_SPRITES)
     {
@@ -2430,7 +2470,10 @@ static void CreateLeavesSprites(void)
     if (!gWeatherPtr->leavesSpritesCreated)
     {
         LoadSpriteSheet(&sLeavesSpriteSheet);
-        LoadCustomWeatherSpritePalette(gLeavesWeatherPalette);
+        if (gWeatherPtr->currWeather == WEATHER_INFESTED_TERRAIN)
+            LoadCustomWeatherSpritePalette(sInfestedTerrainWeatherPalette);
+        else
+            LoadCustomWeatherSpritePalette(gLeavesWeatherPalette);
         for (i = 0; i < NUM_LEAVES_SPRITES; i++)
         {
             spriteId = CreateSpriteAtEnd(&sLeavesSpriteTemplate, 0, (i / 5) * 64, 1);
@@ -2908,6 +2951,10 @@ static u8 TranslateWeatherNum(u8 weather)
     case WEATHER_UNDERWATER_BUBBLES: return WEATHER_UNDERWATER_BUBBLES;
     case WEATHER_ABNORMAL:           return WEATHER_ABNORMAL;
     case WEATHER_LEAVES:             return WEATHER_LEAVES;
+    case WEATHER_ECLIPSE:            return WEATHER_ECLIPSE;
+    case WEATHER_ACID_RAIN:          return WEATHER_ACID_RAIN;
+    case WEATHER_PLAIN_TERRAIN:      return WEATHER_PLAIN_TERRAIN;
+    case WEATHER_INFESTED_TERRAIN:   return WEATHER_INFESTED_TERRAIN;
     case WEATHER_ROUTE119_CYCLE:     return sWeatherCycleRoute119[gSaveBlock1Ptr->weatherCycleStage];
     case WEATHER_ROUTE123_CYCLE:     return sWeatherCycleRoute123[gSaveBlock1Ptr->weatherCycleStage];
     default:                         return WEATHER_NONE;
@@ -2927,5 +2974,3 @@ static void UpdateRainCounter(u8 newWeather, u8 oldWeather)
     // && (newWeather == WEATHER_RAIN || newWeather == WEATHER_RAIN_THUNDERSTORM))
     //    IncrementGameStat(GAME_STAT_GOT_RAINED_ON);
 }
-
-

@@ -153,6 +153,10 @@ script Rogue_Debug_SetWeather
     appenddynamicmultichoice("Psychic Fog", WEATHER_PSYCHIC_FOG)
     appenddynamicmultichoice("Misty Fog", WEATHER_MISTY_FOG)
     appenddynamicmultichoice("Leaves", WEATHER_LEAVES)
+    appenddynamicmultichoice("Eclipse", WEATHER_ECLIPSE)
+    appenddynamicmultichoice("Acid Rain", WEATHER_ACID_RAIN)
+    appenddynamicmultichoice("Plain Terrain", WEATHER_PLAIN_TERRAIN)
+    appenddynamicmultichoice("Infested Terrain", WEATHER_INFESTED_TERRAIN)
 
     appenddynamicmultichoice("Sunny Clouds", WEATHER_SUNNY_CLOUDS)
     appenddynamicmultichoice("Volcanic Ash", WEATHER_VOLCANIC_ASH)

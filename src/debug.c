@@ -2118,7 +2118,7 @@ static void DebugAction_Util_CheckROMSpace(u8 taskId)
     ScriptContext_SetupScript(Debug_CheckROMSpace);
 }
 
-static const u8 sWeatherNames[22][24] = {
+static const u8 sWeatherNames[WEATHER_COUNT][24] = {
     [WEATHER_NONE]               = _("NONE"),
     [WEATHER_SUNNY_CLOUDS]       = _("SUNNY CLOUDS"),
     [WEATHER_SUNNY]              = _("SUNNY"),
@@ -2135,6 +2135,10 @@ static const u8 sWeatherNames[22][24] = {
     [WEATHER_DOWNPOUR]           = _("DOWNPOUR"),
     [WEATHER_UNDERWATER_BUBBLES] = _("UNDERWATER BUBBLES"),
     [WEATHER_ABNORMAL]           = _("ABNORMAL(NOT WORKING)"),
+    [WEATHER_ECLIPSE]            = _("ECLIPSE"),
+    [WEATHER_ACID_RAIN]          = _("ACID RAIN"),
+    [WEATHER_PLAIN_TERRAIN]      = _("PLAIN TERRAIN"),
+    [WEATHER_INFESTED_TERRAIN]   = _("INFESTED TERRAIN"),
     [WEATHER_ROUTE119_CYCLE]     = _("ROUTE119 CYCLE"),
     [WEATHER_ROUTE123_CYCLE]     = _("ROUTE123 CYCLE"),
 };
@@ -2175,8 +2179,8 @@ static void DebugAction_Util_Weather_SelectId(u8 taskId)
         if (JOY_NEW(DPAD_UP))
         {
             gTasks[taskId].tInput += sPowersOfTen[gTasks[taskId].tDigit];
-            if (gTasks[taskId].tInput > WEATHER_ROUTE123_CYCLE)
-                gTasks[taskId].tInput = WEATHER_ROUTE123_CYCLE;
+            if (gTasks[taskId].tInput > WEATHER_MAX)
+                gTasks[taskId].tInput = WEATHER_MAX;
         }
         if (JOY_NEW(DPAD_DOWN))
         {

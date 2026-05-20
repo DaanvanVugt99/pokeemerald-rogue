@@ -484,6 +484,7 @@ static bool8 IsExpensiveWeatherActive()
     switch (GetSavedWeather())
     {
     case WEATHER_RAIN:
+    case WEATHER_ACID_RAIN:
     //case WEATHER_SNOW:
     case WEATHER_RAIN_THUNDERSTORM:
     case WEATHER_FOG_HORIZONTAL:
@@ -492,6 +493,7 @@ static bool8 IsExpensiveWeatherActive()
     case WEATHER_FOG_DIAGONAL:
     case WEATHER_DOWNPOUR:
     case WEATHER_LEAVES:
+    case WEATHER_INFESTED_TERRAIN:
         return TRUE;
     }
 

@@ -104,6 +104,10 @@ static const struct WeatherCallbacks sWeatherFuncs[] =
     [WEATHER_DOWNPOUR]           = {Downpour_InitVars,      Thunderstorm_Main,  Downpour_InitAll,      Thunderstorm_Finish},
     [WEATHER_UNDERWATER_BUBBLES] = {Bubbles_InitVars,       Bubbles_Main,       Bubbles_InitAll,       Bubbles_Finish},
     [WEATHER_LEAVES]             = {Leaves_InitVars,        Leaves_Main,        Leaves_InitAll,        Leaves_Finish},
+    [WEATHER_ECLIPSE]            = {Shade_InitVars,         Shade_Main,         Shade_InitAll,         Shade_Finish},
+    [WEATHER_ACID_RAIN]          = {Rain_InitVars,          Rain_Main,          Rain_InitAll,          Rain_Finish},
+    [WEATHER_PLAIN_TERRAIN]      = {Clouds_InitVars,        Clouds_Main,        Clouds_InitAll,        Clouds_Finish},
+    [WEATHER_INFESTED_TERRAIN]   = {Leaves_InitVars,        Leaves_Main,        Leaves_InitAll,        Leaves_Finish},
 };
 
 void (*const gWeatherPalStateFuncs[])(void) =
@@ -398,7 +402,9 @@ static void FadeInScreenWithWeather(void)
     case WEATHER_RAIN:
     case WEATHER_RAIN_THUNDERSTORM:
     case WEATHER_DOWNPOUR:
+    case WEATHER_ACID_RAIN:
     case WEATHER_SHADE:
+    case WEATHER_ECLIPSE:
         if (FadeInScreen_RainShowShade() == FALSE)
         {
             gWeatherPtr->colorMapIndex = 3;
@@ -791,8 +797,10 @@ void FadeScreen(u8 mode, s8 delay)
     case WEATHER_RAIN:
     case WEATHER_RAIN_THUNDERSTORM:
     case WEATHER_DOWNPOUR:
+    case WEATHER_ACID_RAIN:
     case WEATHER_FOG_HORIZONTAL:
     case WEATHER_SHADE:
+    case WEATHER_ECLIPSE:
     case WEATHER_DROUGHT:
         useWeatherPal = TRUE;
         break;

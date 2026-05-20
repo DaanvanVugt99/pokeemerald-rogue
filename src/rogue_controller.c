@@ -5698,6 +5698,10 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                         WEATHER_PSYCHIC_FOG,
                         WEATHER_SNOW,
                         WEATHER_MISTY_FOG,
+                        WEATHER_ACID_RAIN,
+                        WEATHER_PLAIN_TERRAIN,
+                        WEATHER_INFESTED_TERRAIN,
+                        WEATHER_ECLIPSE,
                     };
 
                     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, RogueRandom());

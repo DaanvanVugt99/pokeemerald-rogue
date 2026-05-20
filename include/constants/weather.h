@@ -18,9 +18,15 @@
 #define WEATHER_UNDERWATER_BUBBLES      14
 #define WEATHER_ABNORMAL                15  // The alternating weather during Groudon/Kyogre conflict
 #define WEATHER_LEAVES                  16  // Grassy Terrain
+#define WEATHER_ECLIPSE                 17
 #define WEATHER_ROUTE119_CYCLE          20
 #define WEATHER_ROUTE123_CYCLE          21
 #define WEATHER_DEFAULT                 22
+#define WEATHER_ACID_RAIN               23
+#define WEATHER_PLAIN_TERRAIN           24
+#define WEATHER_INFESTED_TERRAIN        25
+#define WEATHER_COUNT                   26
+#define WEATHER_MAX                     (WEATHER_COUNT - 1)
 
 #define WEATHER_PSYCHIC_FOG             WEATHER_FOG_HORIZONTAL
 #define WEATHER_MISTY_FOG               WEATHER_FOG_DIAGONAL
