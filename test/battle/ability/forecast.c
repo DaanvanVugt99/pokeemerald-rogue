@@ -41,6 +41,9 @@ SINGLE_BATTLE_TEST("Forecast transforms Castform in weather from its own move")
     PARAMETRIZE { move = MOVE_RAIN_DANCE; }
     PARAMETRIZE { move = MOVE_HAIL; }
     PARAMETRIZE { move = MOVE_SNOWSCAPE; }
+    PARAMETRIZE { move = MOVE_SANDSTORM; }
+    PARAMETRIZE { move = MOVE_ECLIPSE; }
+    PARAMETRIZE { move = MOVE_ACID_RAIN; }
     GIVEN {
         PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); }
         OPPONENT(SPECIES_WOBBUFFET);
@@ -62,6 +65,15 @@ SINGLE_BATTLE_TEST("Forecast transforms Castform in weather from its own move")
         case MOVE_HAIL:
         case MOVE_SNOWSCAPE:
             EXPECT_EQ(player->species, SPECIES_CASTFORM_SNOWY);
+            break;
+        case MOVE_SANDSTORM:
+            EXPECT_EQ(player->species, SPECIES_CASTFORM_SANDY);
+            break;
+        case MOVE_ECLIPSE:
+            EXPECT_EQ(player->species, SPECIES_CASTFORM_ECLIPSE);
+            break;
+        case MOVE_ACID_RAIN:
+            EXPECT_EQ(player->species, SPECIES_CASTFORM_ACID_RAIN);
             break;
         }
     }
@@ -241,7 +253,7 @@ SINGLE_BATTLE_TEST("Forecast transforms Castform back to normal when weather exp
     }
 }
 
-SINGLE_BATTLE_TEST("Forecast transforms Castform back to normal when Sandstorm is active")
+SINGLE_BATTLE_TEST("Forecast transforms Castform into its sandy form when Sandstorm is active")
 {
     GIVEN {
         PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); }
@@ -254,12 +266,12 @@ SINGLE_BATTLE_TEST("Forecast transforms Castform back to normal when Sandstorm i
         ABILITY_POPUP(player, ABILITY_FORECAST);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_FORM_CHANGE, player);
         MESSAGE("Castform transformed!");
-        // back to normal
+        // sandy form
         ABILITY_POPUP(player, ABILITY_FORECAST);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_FORM_CHANGE, player);
         MESSAGE("Castform transformed!");
     } THEN {
-        EXPECT_EQ(player->species, SPECIES_CASTFORM_NORMAL);
+        EXPECT_EQ(player->species, SPECIES_CASTFORM_SANDY);
     }
 }
 

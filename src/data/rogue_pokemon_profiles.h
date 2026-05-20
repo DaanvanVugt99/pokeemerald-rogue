@@ -313943,6 +313943,30 @@ struct RoguePokemonProfile const gRoguePokemonProfiles[NUM_SPECIES] =
 		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CASTFORM),
 		.monFlags = MON_FLAGS_SPECIES_CASTFORM,
 	},
+	[SPECIES_CASTFORM_SANDY] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CASTFORM,
+		.tutorMoves = sTutorMoves_SPECIES_CASTFORM,
+		.competitiveSets = sCompetitiveSets_SPECIES_CASTFORM,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CASTFORM),
+		.monFlags = MON_FLAGS_SPECIES_CASTFORM,
+	},
+	[SPECIES_CASTFORM_ECLIPSE] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CASTFORM,
+		.tutorMoves = sTutorMoves_SPECIES_CASTFORM,
+		.competitiveSets = sCompetitiveSets_SPECIES_CASTFORM,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CASTFORM),
+		.monFlags = MON_FLAGS_SPECIES_CASTFORM,
+	},
+	[SPECIES_CASTFORM_ACID_RAIN] =
+	{
+		.levelUpMoves = sLevelUpMoves_SPECIES_CASTFORM,
+		.tutorMoves = sTutorMoves_SPECIES_CASTFORM,
+		.competitiveSets = sCompetitiveSets_SPECIES_CASTFORM,
+		.competitiveSetCount = ARRAY_COUNT(sCompetitiveSets_SPECIES_CASTFORM),
+		.monFlags = MON_FLAGS_SPECIES_CASTFORM,
+	},
 	[SPECIES_BURMY_SANDY_CLOAK] =
 	{
 		.levelUpMoves = sLevelUpMoves_SPECIES_BURMY,

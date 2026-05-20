@@ -4352,6 +4352,24 @@ const u8 gMonFootprint_QuestionMark[] = INCBIN_U8("graphics/pokemon/question_mar
     const u32 gMonBackPic_CastformSnowy[] = INCBIN_U32("graphics/pokemon/castform/snowy/back.4bpp.lz");
     const u32 gMonShinyPalette_CastformSnowy[] = INCBIN_U32("graphics/pokemon/castform/snowy/shiny.gbapal.lz");
     const u8 gMonIcon_CastformSnowy[] = INCBIN_U8("graphics/pokemon/castform/snowy/icon.4bpp");
+
+    const u32 gMonFrontPic_CastformSandy[] = INCBIN_U32("graphics/pokemon/castform/sandy/anim_front.4bpp.lz");
+    const u32 gMonPalette_CastformSandy[] = INCBIN_U32("graphics/pokemon/castform/sandy/normal.gbapal.lz");
+    const u32 gMonBackPic_CastformSandy[] = INCBIN_U32("graphics/pokemon/castform/sandy/back.4bpp.lz");
+    const u32 gMonShinyPalette_CastformSandy[] = INCBIN_U32("graphics/pokemon/castform/sandy/shiny.gbapal.lz");
+    const u8 gMonIcon_CastformSandy[] = INCBIN_U8("graphics/pokemon/castform/sandy/icon.4bpp");
+
+    const u32 gMonFrontPic_CastformEclipse[] = INCBIN_U32("graphics/pokemon/castform/eclipse/anim_front.4bpp.lz");
+    const u32 gMonPalette_CastformEclipse[] = INCBIN_U32("graphics/pokemon/castform/eclipse/normal.gbapal.lz");
+    const u32 gMonBackPic_CastformEclipse[] = INCBIN_U32("graphics/pokemon/castform/eclipse/back.4bpp.lz");
+    const u32 gMonShinyPalette_CastformEclipse[] = INCBIN_U32("graphics/pokemon/castform/eclipse/shiny.gbapal.lz");
+    const u8 gMonIcon_CastformEclipse[] = INCBIN_U8("graphics/pokemon/castform/eclipse/icon.4bpp");
+
+    const u32 gMonFrontPic_CastformAcidRain[] = INCBIN_U32("graphics/pokemon/castform/acid_rain/anim_front.4bpp.lz");
+    const u32 gMonPalette_CastformAcidRain[] = INCBIN_U32("graphics/pokemon/castform/acid_rain/normal.gbapal.lz");
+    const u32 gMonBackPic_CastformAcidRain[] = INCBIN_U32("graphics/pokemon/castform/acid_rain/back.4bpp.lz");
+    const u32 gMonShinyPalette_CastformAcidRain[] = INCBIN_U32("graphics/pokemon/castform/acid_rain/shiny.gbapal.lz");
+    const u8 gMonIcon_CastformAcidRain[] = INCBIN_U8("graphics/pokemon/castform/acid_rain/icon.4bpp");
 #endif //P_FAMILY_CASTFORM
 
 #if P_FAMILY_KECLEON
@@ -11144,4 +11162,3 @@ const u8 gMonFootprint_QuestionMark[] = INCBIN_U8("graphics/pokemon/question_mar
     const u32 gMonFrontPic_Egg[] = INCBIN_U32("graphics/pokemon/egg/anim_front.4bpp.lz");
     const u32 gMonPalette_Egg[] = INCBIN_U32("graphics/pokemon/egg/normal.gbapal.lz");
     const u8 gMonIcon_Egg[] = INCBIN_U8("graphics/pokemon/egg/icon.4bpp");
-

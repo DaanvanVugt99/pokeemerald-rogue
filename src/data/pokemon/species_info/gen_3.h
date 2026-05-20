@@ -5883,6 +5883,72 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
         PALETTES(CastformSnowy),
         ICON(CastformSnowy, 0),
     },
+
+    [SPECIES_CASTFORM_SANDY] =
+    {
+        CASTFORM_MISC_INFO,
+        .types = { TYPE_ROCK, TYPE_ROCK },
+        .bodyColor = BODY_COLOR_BROWN,
+        .description = POKEDEX_DESC_STRING(
+            "This is Castform's form in a sandstorm.\n"
+            "Whipping sand hardens its cells into a\n"
+            "rough shell. Its body is dry and warm\n"
+            "to the touch."),
+        FRONT_PIC(CastformSandy, 56, 64),
+        .frontPicYOffset = 4,
+        .frontAnimFrames = sAnims_CastformNormal,
+        .frontAnimId = ANIM_H_SLIDE_WOBBLE,
+        .enemyMonElevation = 4,
+        BACK_PIC(CastformSandy, 64, 64),
+        .backPicYOffset = 0,
+        .backAnimId = BACK_ANIM_CONVEX_DOUBLE_ARC,
+        PALETTES(CastformSandy),
+        ICON(CastformSandy, 5),
+    },
+
+    [SPECIES_CASTFORM_ECLIPSE] =
+    {
+        CASTFORM_MISC_INFO,
+        .types = { TYPE_DARK, TYPE_DARK },
+        .bodyColor = BODY_COLOR_BLACK,
+        .description = POKEDEX_DESC_STRING(
+            "This is Castform's form during an eclipse.\n"
+            "Dim light causes its cells to compress,\n"
+            "giving its body an eerie shadow-like\n"
+            "appearance."),
+        FRONT_PIC(CastformEclipse, 48, 56),
+        .frontPicYOffset = 7,
+        .frontAnimFrames = sAnims_CastformNormal,
+        .frontAnimId = ANIM_H_SLIDE_WOBBLE,
+        .enemyMonElevation = 6,
+        BACK_PIC(CastformEclipse, 56, 56),
+        .backPicYOffset = 0,
+        .backAnimId = BACK_ANIM_CONVEX_DOUBLE_ARC,
+        PALETTES(CastformEclipse),
+        ICON(CastformEclipse, 0),
+    },
+
+    [SPECIES_CASTFORM_ACID_RAIN] =
+    {
+        CASTFORM_MISC_INFO,
+        .types = { TYPE_POISON, TYPE_POISON },
+        .bodyColor = BODY_COLOR_PURPLE,
+        .description = POKEDEX_DESC_STRING(
+            "This is Castform's form in acid rain.\n"
+            "Corrosive droplets alter its cells and\n"
+            "leave its body slick with a strange\n"
+            "venomous film."),
+        FRONT_PIC(CastformAcidRain, 56, 56),
+        .frontPicYOffset = 6,
+        .frontAnimFrames = sAnims_CastformNormal,
+        .frontAnimId = ANIM_H_SLIDE_WOBBLE,
+        .enemyMonElevation = 5,
+        BACK_PIC(CastformAcidRain, 64, 64),
+        .backPicYOffset = 0,
+        .backAnimId = BACK_ANIM_CONVEX_DOUBLE_ARC,
+        PALETTES(CastformAcidRain),
+        ICON(CastformAcidRain, 4),
+    },
 #endif //P_FAMILY_CASTFORM
 
 #if P_FAMILY_KECLEON
