@@ -2004,7 +2004,14 @@ static u32 TypeIndicator_GetType(u32 battlerId, u32 slot)
 
 static bool32 TypeIndicator_ShouldBeInvisible(struct Sprite *sprite)
 {
+    u32 healthboxSpriteId = gHealthboxSpriteIds[sprite->tBattler];
+
+    if (healthboxSpriteId >= MAX_SPRITES || !gSprites[healthboxSpriteId].inUse)
+        return TRUE;
+
     return sprite->tHealthboxHidden
+        || gSprites[healthboxSpriteId].invisible
+        || gSprites[healthboxSpriteId].x2 != 0
         || gBattleSpritesDataPtr->healthBoxesData[sprite->tBattler].partyStatusSummaryShown
         || !TypeIndicator_IsDisplayableType(sprite->tType);
 }
