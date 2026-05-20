@@ -13276,6 +13276,28 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CLIFFSIDE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && battler == moveEndTarget
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN)
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_CLIFFSIDE);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_ROCK_POLISH;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            StartAbilityCalledMoveScript();
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PRIMAL_MOLTING)
          && IsOnlyParadoxInParty(battler)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
