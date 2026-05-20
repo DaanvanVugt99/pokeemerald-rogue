@@ -1,6 +1,7 @@
 #include "global.h"
 #include "constants/battle.h"
 #include "constants/battle_anim.h"
+#include "constants/rgb.h"
 #include "constants/songs.h"
 
 #include "battle_anim.h"
@@ -24,6 +25,7 @@
 
 #define HUD_TAG_PALETTE_0                   0x1100
 #define HUD_TAG_PALETTE_1                   0x1101
+#define HUD_TAG_PALETTE_ACID_RAIN           0x1102
 
 #define HUD_TAG_SPRITE_BLUE_LIGHT_WALL      0x1200
 #define HUD_TAG_SPRITE_GREEN_LIGHT_WALL     0x1201
@@ -68,6 +70,13 @@ static const u8 sSpriteGfx_Sandstorm[] = INCBIN_U8("graphics/rogue_battlehud/spr
 
 static const u16 sSpritePal_0[] = INCBIN_U16("graphics/rogue_battlehud/palettes/pal0.gbapal");
 static const u16 sSpritePal_1[] = INCBIN_U16("graphics/rogue_battlehud/palettes/pal1.gbapal");
+static const u16 sSpritePal_AcidRain[] =
+{
+    RGB(12, 2, 2), RGB(1, 1, 1), RGB(9, 7, 3), RGB(20, 18, 9),
+    RGB(16, 14, 6), RGB(6, 5, 2), RGB(13, 7, 16), RGB(20, 20, 20),
+    RGB(8, 18, 6), RGB(8, 8, 8), RGB(18, 31, 10), RGB(16, 16, 16),
+    RGB(24, 31, 14), RGB(31, 31, 31), RGB(0, 0, 0), RGB(0, 0, 0),
+};
 
 
 static const struct SpriteSheet sSpriteSheet_Overlay[] =
@@ -93,6 +102,7 @@ static const struct SpritePalette sSpritePalette_Overlay[] =
 {
     { sSpritePal_0, HUD_TAG_PALETTE_0 },
     { sSpritePal_1, HUD_TAG_PALETTE_1 },
+    { sSpritePal_AcidRain, HUD_TAG_PALETTE_ACID_RAIN },
     {},
 };
 
@@ -234,7 +244,7 @@ static const struct SpriteTemplate sRainDropSpriteTemplate =
 static const struct SpriteTemplate sAcidRainDropSpriteTemplate =
 {
     .tileTag = HUD_TAG_SPRITE_RAIN,
-    .paletteTag = HUD_TAG_PALETTE_0,
+    .paletteTag = HUD_TAG_PALETTE_ACID_RAIN,
     .oam = &gOamData_AffineOff_ObjNormal_16x32,
     .anims = sAnims_RainDrop,
     .images = NULL,
