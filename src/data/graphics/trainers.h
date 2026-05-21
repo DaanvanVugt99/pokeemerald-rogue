@@ -343,8 +343,12 @@ const u32 gTrainerPalette_PlayerRosaFrontLayers[] = INCBIN_U32("graphics/rogue_p
 
 const u32 gTrainerPalette_PlayerCalemFrontBase[] = INCBIN_U32("graphics/rogue_palettes/calem/trainer_front_base.gbapal.lz");
 const u32 gTrainerPalette_PlayerCalemFrontLayers[] = INCBIN_U32("graphics/rogue_palettes/calem/trainer_front_layers.gbapal.lz");
+const u32 gTrainerPalette_PlayerCalemBackBase[] = INCBIN_U32("graphics/rogue_palettes/calem/trainer_back_base.gbapal.lz");
+const u32 gTrainerPalette_PlayerCalemBackLayers[] = INCBIN_U32("graphics/rogue_palettes/calem/trainer_back_layers.gbapal.lz");
 const u32 gTrainerPalette_PlayerSerenaFrontBase[] = INCBIN_U32("graphics/rogue_palettes/serena/trainer_front_base.gbapal.lz");
 const u32 gTrainerPalette_PlayerSerenaFrontLayers[] = INCBIN_U32("graphics/rogue_palettes/serena/trainer_front_layers.gbapal.lz");
+const u32 gTrainerPalette_PlayerSerenaBackBase[] = INCBIN_U32("graphics/rogue_palettes/serena/trainer_back_base.gbapal.lz");
+const u32 gTrainerPalette_PlayerSerenaBackLayers[] = INCBIN_U32("graphics/rogue_palettes/serena/trainer_back_layers.gbapal.lz");
 
 const u32 gTrainerPalette_PlayerElioFrontBase[] = INCBIN_U32("graphics/rogue_palettes/elio/trainer_front_base.gbapal.lz");
 const u32 gTrainerPalette_PlayerElioFrontLayers[] = INCBIN_U32("graphics/rogue_palettes/elio/trainer_front_layers.gbapal.lz");

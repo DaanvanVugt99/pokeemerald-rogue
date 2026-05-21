@@ -535,8 +535,12 @@ extern const u32 gTrainerPalette_PlayerRosaFrontLayers[];
 
 extern const u32 gTrainerPalette_PlayerCalemFrontBase[];
 extern const u32 gTrainerPalette_PlayerCalemFrontLayers[];
+extern const u32 gTrainerPalette_PlayerCalemBackBase[];
+extern const u32 gTrainerPalette_PlayerCalemBackLayers[];
 extern const u32 gTrainerPalette_PlayerSerenaFrontBase[];
 extern const u32 gTrainerPalette_PlayerSerenaFrontLayers[];
+extern const u32 gTrainerPalette_PlayerSerenaBackBase[];
+extern const u32 gTrainerPalette_PlayerSerenaBackLayers[];
 
 extern const u32 gTrainerPalette_PlayerElioFrontBase[];
 extern const u32 gTrainerPalette_PlayerElioFrontLayers[];
