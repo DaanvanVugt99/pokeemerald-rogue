@@ -145,6 +145,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Chesnaught, 1),
         .footprint = gMonFootprint_Chesnaught,
         LEARNSETS(Chesnaught),
+        .formSpeciesIdTable = sChesnaughtFormSpeciesIdTable,
         .formChangeTable = sChesnaughtFormChangeTable,
     },
 #endif //P_FAMILY_CHESPIN
@@ -291,6 +292,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Delphox, 0),
         .footprint = gMonFootprint_Delphox,
         LEARNSETS(Delphox),
+        .formSpeciesIdTable = sDelphoxFormSpeciesIdTable,
         .formChangeTable = sDelphoxFormChangeTable,
     },
 #endif //P_FAMILY_FENNEKIN
@@ -1151,6 +1153,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON_FEMALE(Pyroar, 2),
         .footprint = gMonFootprint_Pyroar,
         LEARNSETS(Pyroar),
+        .formSpeciesIdTable = sPyroarFormSpeciesIdTable,
         .formChangeTable = sPyroarFormChangeTable,
     },
 #endif //P_FAMILY_LITLEO
@@ -2384,6 +2387,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Malamar, 2),
         .footprint = gMonFootprint_Malamar,
         LEARNSETS(Malamar),
+        .formSpeciesIdTable = sMalamarFormSpeciesIdTable,
         .formChangeTable = sMalamarFormChangeTable,
     },
 #endif //P_FAMILY_INKAY
@@ -2483,6 +2487,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Barbaracle, 2),
         .footprint = gMonFootprint_Barbaracle,
         LEARNSETS(Barbaracle),
+        .formSpeciesIdTable = sBarbaracleFormSpeciesIdTable,
         .formChangeTable = sBarbaracleFormChangeTable,
     },
 #endif //P_FAMILY_BINACLE
@@ -2581,6 +2586,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Dragalge, 5),
         .footprint = gMonFootprint_Dragalge,
         LEARNSETS(Dragalge),
+        .formSpeciesIdTable = sDragalgeFormSpeciesIdTable,
         .formChangeTable = sDragalgeFormChangeTable,
     },
 #endif //P_FAMILY_SKRELP
@@ -3027,6 +3033,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         ICON(Hawlucha, 0),
         .footprint = gMonFootprint_Hawlucha,
         LEARNSETS(Hawlucha),
+        .formSpeciesIdTable = sHawluchaFormSpeciesIdTable,
         .formChangeTable = sHawluchaFormChangeTable,
     },
 #endif //P_FAMILY_HAWLUCHA

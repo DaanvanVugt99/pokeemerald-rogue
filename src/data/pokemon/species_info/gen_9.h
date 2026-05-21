@@ -2379,6 +2379,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         ICON(Scovillain, 1),
         //.footprint = gMonFootprint_Scovillain,
         LEARNSETS(Scovillain),
+        .formSpeciesIdTable = sScovillainFormSpeciesIdTable,
         .formChangeTable = sScovillainFormChangeTable,
     },
 #endif //P_FAMILY_CAPSAKID
@@ -3287,6 +3288,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         ICON(Glimmora, 0),
         //.footprint = gMonFootprint_Glimmora,
         LEARNSETS(Glimmora),
+        .formSpeciesIdTable = sGlimmoraFormSpeciesIdTable,
         .formChangeTable = sGlimmoraFormChangeTable,
     },
 #endif //P_FAMILY_GLIMMET
@@ -4466,6 +4468,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         ICON(Baxcalibur, 0),
         //.footprint = gMonFootprint_Baxcalibur,
         LEARNSETS(Baxcalibur),
+        .formSpeciesIdTable = sBaxcaliburFormSpeciesIdTable,
         .formChangeTable = sBaxcaliburFormChangeTable,
     },
 #endif //P_FAMILY_FRIGIBAX

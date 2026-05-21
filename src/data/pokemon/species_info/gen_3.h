@@ -6454,6 +6454,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
         ICON(Chimecho, 0),
         .footprint = gMonFootprint_Chimecho,
         LEARNSETS(Chimecho),
+        .formSpeciesIdTable = sChimechoFormSpeciesIdTable,
         .formChangeTable = sChimechoFormChangeTable,
     },
 #endif //P_FAMILY_CHIMECHO
@@ -6735,6 +6736,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
         ICON(Froslass, 0),
         .footprint = gMonFootprint_Froslass,
         LEARNSETS(Froslass),
+        .formSpeciesIdTable = sFroslassFormSpeciesIdTable,
         .formChangeTable = sFroslassFormChangeTable,
     },
 #endif //P_GEN_4_CROSS_EVOS

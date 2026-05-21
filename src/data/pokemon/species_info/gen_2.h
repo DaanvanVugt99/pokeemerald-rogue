@@ -149,6 +149,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
         ICON(Meganium, 1),
         .footprint = gMonFootprint_Meganium,
         LEARNSETS(Meganium),
+        .formSpeciesIdTable = sMeganiumFormSpeciesIdTable,
         .formChangeTable = sMeganiumFormChangeTable,
     },
 #endif //P_FAMILY_CHIKORITA
@@ -489,6 +490,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
         ICON(Feraligatr, 0),
         .footprint = gMonFootprint_Feraligatr,
         LEARNSETS(Feraligatr),
+        .formSpeciesIdTable = sFeraligatrFormSpeciesIdTable,
         .formChangeTable = sFeraligatrFormChangeTable,
     },
 #endif //P_FAMILY_TOTODILE
@@ -4893,6 +4895,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
         ICON(Skarmory, 0),
         .footprint = gMonFootprint_Skarmory,
         LEARNSETS(Skarmory),
+        .formSpeciesIdTable = sSkarmoryFormSpeciesIdTable,
         .formChangeTable = sSkarmoryFormChangeTable,
     },
 #endif //P_FAMILY_SKARMORY

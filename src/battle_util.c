@@ -24018,8 +24018,8 @@ s32 GetStealthHazardDamageByTypesAndHP(u8 hazardType, u8 type1, u8 type2, u32 ma
 
 s32 GetStealthHazardDamage(u8 hazardType, u32 battler)
 {
-    u8 type1 = GetBattlerType(battler, 1, FALSE);
-    u8 type2 = GetBattlerType(battler, 2, FALSE);
+    u8 type1 = GetBattlerType(battler, 0, FALSE);
+    u8 type2 = GetBattlerType(battler, 1, FALSE);
     u32 maxHp = gBattleMons[battler].maxHP;
 
     return GetStealthHazardDamageByTypesAndHP(hazardType, type1, type2, maxHp);
@@ -24308,8 +24308,9 @@ u16 GetBattleFormChangeTargetSpecies(u32 battler, u16 method)
                         targetSpecies = formChange.targetSpecies;
                     }
                     // Otherwise, just check for a match between the weather and the form change table.
-                    else if (gBattleWeather & formChange.param1
-                        || (gBattleWeather == B_WEATHER_NONE && formChange.param1 == B_WEATHER_NONE))
+                    else if (WEATHER_HAS_EFFECT
+                        && (gBattleWeather & formChange.param1
+                         || (gBattleWeather == B_WEATHER_NONE && formChange.param1 == B_WEATHER_NONE)))
                     {
                         targetSpecies = formChange.targetSpecies;
                     }

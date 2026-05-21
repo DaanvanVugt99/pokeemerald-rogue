@@ -605,6 +605,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         ICON(Staraptor, 0),
         .footprint = gMonFootprint_Staraptor,
         LEARNSETS(Staraptor),
+        .formSpeciesIdTable = sStaraptorFormSpeciesIdTable,
         .formChangeTable = sStaraptorFormChangeTable,
     },
 #endif //P_FAMILY_STARLY
@@ -4034,6 +4035,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         ICON(Heatran, 0),
         .footprint = gMonFootprint_Heatran,
         LEARNSETS(Heatran),
+        .formSpeciesIdTable = sHeatranFormSpeciesIdTable,
         .formChangeTable = sHeatranFormChangeTable,
     },
 #endif //P_FAMILY_HEATRAN
@@ -4376,6 +4378,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         ICON(Darkrai, 0),
         .footprint = gMonFootprint_Darkrai,
         LEARNSETS(Darkrai),
+        .formSpeciesIdTable = sDarkraiFormSpeciesIdTable,
         .formChangeTable = sDarkraiFormChangeTable,
     },
 #endif //P_FAMILY_DARKRAI

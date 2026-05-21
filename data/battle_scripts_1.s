@@ -13013,6 +13013,7 @@ BattleScript_StickyBarbTransfer::
 	return
 
 BattleScript_RedCardActivates::
+	copybyte sSAVED_BATTLER, sBATTLER
 	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
 	printstring STRINGID_REDCARDACTIVATE
 	waitmessage B_WAIT_TIME_LONG
@@ -13023,6 +13024,7 @@ BattleScript_RedCardActivates::
 	jumpifability BS_EFFECT_BATTLER, ABILITY_STRANGE_GUEST, BattleScript_RedCardSuctionCups
 	jumpifability BS_EFFECT_BATTLER, ABILITY_ROOTED_SHRINE, BattleScript_RedCardTryRootedShrine
 	jumpiftargetdynamaxed BattleScript_RedCardDynamaxed
+	copybyte sBATTLER, sSAVED_BATTLER
 	removeitem BS_SCRIPTING
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
 	forcerandomswitch BattleScript_RedCardEnd
@@ -13033,24 +13035,28 @@ BattleScript_RedCardEnd:
 BattleScript_RedCardTryRootedShrine:
 	jumpifterrainaffected BS_EFFECT_BATTLER, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_RedCardSuctionCups
 	jumpiftargetdynamaxed BattleScript_RedCardDynamaxed
+	copybyte sBATTLER, sSAVED_BATTLER
 	removeitem BS_SCRIPTING
 	setbyte sSWITCH_CASE, B_SWITCH_RED_CARD
 	forcerandomswitch BattleScript_RedCardEnd
 BattleScript_RedCardIngrain:
 	printstring STRINGID_PKMNANCHOREDITSELF
 	waitmessage B_WAIT_TIME_LONG
+	copybyte sBATTLER, sSAVED_BATTLER
 	removeitem BS_SCRIPTING
 	swapattackerwithtarget
 	return
 BattleScript_RedCardSuctionCups:
 	printstring STRINGID_PKMNANCHORSITSELFWITH
 	waitmessage B_WAIT_TIME_LONG
+	copybyte sBATTLER, sSAVED_BATTLER
 	removeitem BS_SCRIPTING
 	swapattackerwithtarget
 	return
 BattleScript_RedCardDynamaxed:
 	printstring STRINGID_MOVEBLOCKEDBYDYNAMAX
 	waitmessage B_WAIT_TIME_LONG
+	copybyte sBATTLER, sSAVED_BATTLER
 	removeitem BS_SCRIPTING
 	swapattackerwithtarget
 	return

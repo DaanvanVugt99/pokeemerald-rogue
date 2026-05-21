@@ -968,6 +968,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Crabominable, 2),
         .footprint = gMonFootprint_Crabominable,
         LEARNSETS(Crabominable),
+        .formSpeciesIdTable = sCrabominableFormSpeciesIdTable,
         .formChangeTable = sCrabominableFormChangeTable,
     },
 #endif //P_FAMILY_CRABRAWLER
@@ -2531,6 +2532,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Golisopod, 2),
         .footprint = gMonFootprint_Golisopod,
         LEARNSETS(Golisopod),
+        .formSpeciesIdTable = sGolisopodFormSpeciesIdTable,
         .formChangeTable = sGolisopodFormChangeTable,
     },
 #endif //P_FAMILY_WIMPOD
@@ -3214,6 +3216,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Drampa, 0),
         .footprint = gMonFootprint_Drampa,
         LEARNSETS(Drampa),
+        .formSpeciesIdTable = sDrampaFormSpeciesIdTable,
         .formChangeTable = sDrampaFormChangeTable,
     },
 #endif //P_FAMILY_DRAMPA
@@ -4714,6 +4717,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
         ICON(Zeraora, 0),
         .footprint = gMonFootprint_Zeraora,
         LEARNSETS(Zeraora),
+        .formSpeciesIdTable = sZeraoraFormSpeciesIdTable,
         .formChangeTable = sZeraoraFormChangeTable,
     },
 #endif //P_FAMILY_ZERAORA

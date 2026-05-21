@@ -50,6 +50,31 @@ DOUBLE_BATTLE_TEST("Red Card switches the target with a random non-battler, non-
     }
 }
 
+DOUBLE_BATTLE_TEST("Red Card targets the attacker correctly when Symbiosis replaces the consumed card")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_RED_CARD); }
+        PLAYER(SPECIES_WYNAUT) { Ability(ABILITY_SYMBIOSIS); Item(ITEM_ORAN_BERRY); }
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_BULBASAUR);
+    } WHEN {
+        TURN { MOVE(opponentLeft, MOVE_TACKLE, target: playerLeft); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponentLeft);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, playerLeft);
+        MESSAGE("Wobbuffet held up its Red Card against Foe Wobbuffet!");
+        ABILITY_POPUP(playerRight, ABILITY_SYMBIOSIS);
+        MESSAGE("Wynaut passed its Oran Berry to Wobbuffet through Symbiosis!");
+        MESSAGE("Foe Bulbasaur was dragged out!");
+    } THEN {
+        EXPECT_EQ(playerLeft->item, ITEM_ORAN_BERRY);
+        EXPECT_EQ(playerRight->item, ITEM_NONE);
+        EXPECT_EQ(opponentLeft->species, SPECIES_BULBASAUR);
+        EXPECT_EQ(opponentRight->species, SPECIES_WYNAUT);
+    }
+}
+
 SINGLE_BATTLE_TEST("Red Card does not activate if holder faints")
 {
     GIVEN {
