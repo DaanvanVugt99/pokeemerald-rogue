@@ -159,6 +159,75 @@ AI_SINGLE_BATTLE_TEST("AI scores absorbed moves below safe moves against known u
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI scores reflected status moves below safe moves against known Omnisense")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_XATU) { Ability(ABILITY_SYNCHRONIZE); UniqueAbility(ABILITY_OMNISENSE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TOXIC, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_TOXIC); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores priority moves below safe moves against known Gridlock in Electric Terrain")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_QUICK_ATTACK].priority > 0);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_REGIELEKI) { Speed(100); Ability(ABILITY_TRANSISTOR); Moves(MOVE_ELECTRIC_TERRAIN, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_QUICK_ATTACK, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_ELECTRIC_TERRAIN); EXPECT_MOVES(opponent, MOVE_TACKLE, MOVE_QUICK_ATTACK); }
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_QUICK_ATTACK); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores priority and switching moves below safe moves against known Singularity Airspace")
+{
+    u16 blockedMove;
+
+    PARAMETRIZE { blockedMove = MOVE_QUICK_ATTACK; }
+    PARAMETRIZE { blockedMove = MOVE_U_TURN; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_QUICK_ATTACK].priority > 0);
+        ASSUME(gBattleMoves[MOVE_U_TURN].effect == EFFECT_HIT_ESCAPE);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_IRON_JUGULIS) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(blockedMove, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, blockedMove); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores phazing moves below default against known Strange Guest")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ROAR].effect == EFFECT_ROAR);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_OGERPON_TEAL_MASK) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_ROAR, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SCORE_LT_VAL(opponent, MOVE_ROAR, AI_SCORE_DEFAULT); }
+    }
+}
+
+AI_DOUBLE_BATTLE_TEST("AI scores partner-targeted moves higher when a unique ability absorbs them")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_HP_AWARE);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_WATER_GUN, MOVE_TACKLE); }
+        OPPONENT(SPECIES_PALOSSAND) { Speed(50); HP(40); MaxHP(100); UniqueAbility(ABILITY_LOW_TIDE); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SCORE_GT(opponentLeft, MOVE_WATER_GUN, MOVE_TACKLE, target:opponentRight); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI scores Thunder Wave below Tackle against known Limber")
 {
     GIVEN {

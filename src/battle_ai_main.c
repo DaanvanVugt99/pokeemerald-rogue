@@ -55,6 +55,8 @@ static s32 AI_Roaming(u32 battlerAtk, u32 battlerDef, u32 move, s32 score);
 static s32 AI_Safari(u32 battlerAtk, u32 battlerDef, u32 move, s32 score);
 static s32 AI_FirstBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score);
 static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score);
+static bool32 AI_IsSwitchingMove(u32 move);
+static bool32 AI_IsOpposingSingularityAirspaceActive(u32 battler);
 
 static s32 (*const sBattleAiFuncTable[])(u32, u32, u32, s32) =
 {
@@ -857,6 +859,15 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             if (AI_BattlerHasMoveAbsorbingAbility(battlerDef, moveType))
                 return 0;
 
+            if (atkPriority > 0
+              && AI_HasAbility(battlerDef, ABILITY_GRIDLOCK)
+              && AI_IsTerrainAffected(battlerDef, STATUS_FIELD_ELECTRIC_TERRAIN))
+                RETURN_SCORE_MINUS(10);
+
+            if ((atkPriority > 0 || AI_IsSwitchingMove(move))
+              && AI_IsOpposingSingularityAirspaceActive(battlerAtk))
+                RETURN_SCORE_MINUS(10);
+
             switch (aiData->abilities[battlerDef])
             {
             case ABILITY_MAGIC_GUARD:
@@ -1438,7 +1449,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case EFFECT_ROAR:
             if (CountUsablePartyMons(battlerDef) == 0)
                 ADJUST_SCORE(-10);
-            else if (aiData->abilities[battlerDef] == ABILITY_SUCTION_CUPS)
+            else if (AI_HasAbility(battlerDef, ABILITY_SUCTION_CUPS) || AI_HasAbility(battlerDef, ABILITY_STRANGE_GUEST))
                 ADJUST_SCORE(-10);
             else if (IsDynamaxed(battlerDef))
                 ADJUST_SCORE(-10);
@@ -5242,6 +5253,40 @@ static s32 AI_PreferBatonPass(u32 battlerAtk, u32 battlerDef, u32 move, s32 scor
     return score;
 }
 
+static bool32 AI_IsSwitchingMove(u32 move)
+{
+    switch (move)
+    {
+    case MOVE_U_TURN:
+    case MOVE_VOLT_SWITCH:
+    case MOVE_FLIP_TURN:
+    case MOVE_PARTING_SHOT:
+    case MOVE_BATON_PASS:
+    case MOVE_TELEPORT:
+    case MOVE_CHILLY_RECEPTION:
+    case MOVE_SHED_TAIL:
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool32 AI_IsOpposingSingularityAirspaceActive(u32 battler)
+{
+    u32 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != GetBattlerSide(battler)
+         && IsBattlerAlive(i)
+         && AI_HasAbility(i, ABILITY_SINGULARITY_AIRSPACE)
+         && IsOnlyParadoxInParty(i))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static s32 AI_HPAware(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
 {
     u32 effect = gBattleMoves[move].effect;
@@ -5253,10 +5298,7 @@ static s32 AI_HPAware(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
     if (IS_TARGETING_PARTNER(battlerAtk, battlerDef))
     {
         if ((effect == EFFECT_HEAL_PULSE || effect == EFFECT_HIT_ENEMY_HEAL_ALLY)
-         || (moveType == TYPE_ELECTRIC && AI_DATA->abilities[BATTLE_PARTNER(battlerAtk)] == ABILITY_VOLT_ABSORB)
-         || (moveType == TYPE_WATER && (AI_DATA->abilities[BATTLE_PARTNER(battlerAtk)] == ABILITY_DRY_SKIN || AI_DATA->abilities[BATTLE_PARTNER(battlerAtk)] == ABILITY_WATER_ABSORB))
-         || (moveType == TYPE_FAIRY && AI_DATA->abilities[BATTLE_PARTNER(battlerAtk)] == ABILITY_FAIRY_ABSORB)
-         || (moveType == TYPE_GROUND && (AI_DATA->abilities[BATTLE_PARTNER(battlerAtk)] == ABILITY_EARTH_EATER)))
+         || AI_BattlerHasMoveAbsorbingAbility(BATTLE_PARTNER(battlerAtk), moveType))
         {
             if (gStatuses3[battlerDef] & STATUS3_HEAL_BLOCK)
                 return 0;
