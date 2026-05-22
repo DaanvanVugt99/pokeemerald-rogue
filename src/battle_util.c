@@ -9294,7 +9294,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_FREEZING_FLAVOR) && !uniqueDone)
+        if (HasBattlerAbility(battler, ABILITY_MELTDOWN) && !uniqueDone)
         {
             uniqueDone = TRUE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
@@ -9302,13 +9302,13 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             if (TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_FREEZING_FLAVOR);
+                SetBattlerTriggeredAbility(battler, ABILITY_MELTDOWN);
                 BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesSnow);
                 return 1;
             }
             else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_FREEZING_FLAVOR);
+                SetBattlerTriggeredAbility(battler, ABILITY_MELTDOWN);
                 BattleScriptPushCursorAndCallback(BattleScript_BlockedByPrimalWeatherEnd3);
                 return 1;
             }
@@ -11690,6 +11690,35 @@ else if (moveType == TYPE_FIRE && HasBattlerAbility(battler, ABILITY_FLASH_FREEZ
         gBattlescriptCurrInstr = snowStarted ? BattleScript_FlashFreezeActivates_PPLoss : BattleScript_MonMadeMoveUseless_PPLoss;
     effect = 3;
 }
+else if (moveType == TYPE_FIRE && HasBattlerAbility(battler, ABILITY_MELTDOWN))
+{
+    bool32 canHeal = !BATTLER_MAX_HP(battler) && !(B_HEAL_BLOCKING >= GEN_5 && gStatuses3[battler] & STATUS3_HEAL_BLOCK);
+
+    triggeringAbility = ABILITY_MELTDOWN;
+    SET_BATTLER_TYPE(battler, TYPE_WATER);
+    PREPARE_TYPE_BUFFER(gBattleTextBuff1, TYPE_WATER);
+
+    if (canHeal)
+    {
+        gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 4;
+        if (gBattleMoveDamage == 0)
+            gBattleMoveDamage = 1;
+        gBattleMoveDamage *= -1;
+
+        if (gProtectStructs[gBattlerAttacker].notFirstStrike)
+            gBattlescriptCurrInstr = BattleScript_MeltdownHealType;
+        else
+            gBattlescriptCurrInstr = BattleScript_MeltdownHealType_PPLoss;
+    }
+    else
+    {
+        if (gProtectStructs[gBattlerAttacker].notFirstStrike)
+            gBattlescriptCurrInstr = BattleScript_MeltdownType;
+        else
+            gBattlescriptCurrInstr = BattleScript_MeltdownType_PPLoss;
+    }
+    effect = 3;
+}
 else if (moveType == TYPE_FIRE
     && (B_FLASH_FIRE_FROZEN >= GEN_5 || !(gBattleMons[battler].status1 & STATUS1_FREEZE))
     && HasBattlerAbility(battler, ABILITY_FLASH_FIRE))
@@ -12621,6 +12650,24 @@ if (triggeringAbility != ABILITY_NONE)
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FALLEN_SKIES)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && battler == moveEndTarget
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && HadMoreThanHalfHpNowHasLess(battler)
+         && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+         && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+         && (CanBattlerSwitch(battler) || !(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+         && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
+         && CountUsablePartyMons(battler) > 0
+         && !(gStatuses3[battler] & STATUS3_SKY_DROPPED)
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES;
             effect++;
         }
 
@@ -18476,7 +18523,6 @@ bool32 CanBePoisoned(u32 battlerAttacker, u32 battlerTarget)
      || HasBattlerAbility(battlerTarget, ABILITY_IMMUNITY)
      || HasBattlerAbility(battlerTarget, ABILITY_COMATOSE)
      || HasBattlerAbility(battlerTarget, ABILITY_SILVER_LINING)
-     || (HasBattlerAbility(battlerTarget, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(battlerTarget, B_WEATHER_SNOW))
      || HasBattlerAbility(battlerTarget, ABILITY_PURIFYING_SALT)
      || (HasBattlerAbility(battlerTarget, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battlerTarget))
      || IsAbilityOnSide(battlerTarget, ABILITY_PASTEL_VEIL)
@@ -18495,7 +18541,6 @@ bool32 CanBeBurned(u32 battler)
       || HasBattlerAbility(battler, ABILITY_WATER_BUBBLE)
       || HasBattlerAbility(battler, ABILITY_COMATOSE)
       || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
-      || (HasBattlerAbility(battler, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW))
       || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || HasBattlerAbility(battler, ABILITY_THERMAL_EXCHANGE)
       || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
@@ -18512,7 +18557,6 @@ bool32 CanBeParalyzed(u32 battler)
         || HasBattlerAbility(battler, ABILITY_LIMBER)
         || HasBattlerAbility(battler, ABILITY_COMATOSE)
         || HasBattlerAbility(battler, ABILITY_SILVER_LINING)
-        || (HasBattlerAbility(battler, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW))
         || (HasBattlerAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
         || HasBattlerAbility(battler, ABILITY_PURIFYING_SALT)
         || gBattleMons[battler].status1 & STATUS1_ANY
@@ -18900,7 +18944,7 @@ static u8 ItemHealHp(u32 battler, u32 itemId, bool32 end2, bool32 percentHeal)
         }
         if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_EMERGENCY_EXIT
          && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
-            gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_EMERGENCY_EXIT;
+            gBattleResources->flags->flags[battler] &= ~(RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES);
         if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_STEADFAST_PENDING
          && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
             gBattleResources->flags->flags[battler] &= ~(RESOURCE_FLAG_STEADFAST_PENDING | RESOURCE_FLAG_STEADFAST_USED);
@@ -18948,7 +18992,7 @@ static u8 RottenBerryEffect(u32 battler, u32 itemId, bool32 end2)
 
             if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_EMERGENCY_EXIT
              && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
-                gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_EMERGENCY_EXIT;
+                gBattleResources->flags->flags[battler] &= ~(RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES);
             if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_STEADFAST_PENDING
              && (s32)GetNonDynamaxHP(battler) - gBattleMoveDamage >= GetHalfHpCutoff(GetNonDynamaxMaxHP(battler)))
                 gBattleResources->flags->flags[battler] &= ~(RESOURCE_FLAG_STEADFAST_PENDING | RESOURCE_FLAG_STEADFAST_USED);

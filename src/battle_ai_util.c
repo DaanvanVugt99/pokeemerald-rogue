@@ -1307,7 +1307,8 @@ bool32 AI_AbilityAbsorbsMoveType(u32 ability, u32 moveType)
         return ability == ABILITY_EARTH_EATER;
     case TYPE_FIRE:
         return ability == ABILITY_FLASH_FIRE
-            || ability == ABILITY_FLASH_FREEZE;
+            || ability == ABILITY_FLASH_FREEZE
+            || ability == ABILITY_MELTDOWN;
     case TYPE_ROCK:
         return ability == ABILITY_MORTAR_SHELL;
     case TYPE_BUG:

@@ -3430,7 +3430,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
     {
         const u8 *cancelMultiTurnMovesResult = NULL;
         bool32 dominionStatusProtected = HasBattlerAbility(gEffectBattler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(gEffectBattler);
-        bool32 freezingFlavorStatusProtected = HasBattlerAbility(gEffectBattler, ABILITY_FREEZING_FLAVOR) && IsBattlerWeatherAffected(gEffectBattler, B_WEATHER_SNOW);
 
         switch (sStatusFlagsForMoveEffects[gBattleScripting.moveEffect])
         {
@@ -3472,8 +3471,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     statusAbility = ABILITY_IMMUNITY;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
                     statusAbility = ABILITY_SILVER_LINING;
-                else if (freezingFlavorStatusProtected)
-                    statusAbility = ABILITY_FREEZING_FLAVOR;
                 else if (dominionStatusProtected)
                     statusAbility = ABILITY_DOMINION;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_PASTEL_VEIL))
@@ -3530,8 +3527,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     statusAbility = ABILITY_WATER_BUBBLE;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
                     statusAbility = ABILITY_SILVER_LINING;
-                else if (freezingFlavorStatusProtected)
-                    statusAbility = ABILITY_FREEZING_FLAVOR;
                 else if (dominionStatusProtected)
                     statusAbility = ABILITY_DOMINION;
                 else if (IsLeafGuardProtected(gEffectBattler))
@@ -3593,7 +3588,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
         case STATUS1_PARALYSIS:
             if (HasBattlerAbility(gEffectBattler, ABILITY_LIMBER)
               || HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING)
-              || freezingFlavorStatusProtected
               || dominionStatusProtected
               || IsLeafGuardProtected(gEffectBattler))
             {
@@ -3603,8 +3597,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
                     if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
                         statusAbility = ABILITY_SILVER_LINING;
-                    else if (freezingFlavorStatusProtected)
-                        statusAbility = ABILITY_FREEZING_FLAVOR;
                     else if (dominionStatusProtected)
                         statusAbility = ABILITY_DOMINION;
                     else if (IsLeafGuardProtected(gEffectBattler))
@@ -3657,8 +3649,6 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     statusAbility = ABILITY_IMMUNITY;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_SILVER_LINING))
                     statusAbility = ABILITY_SILVER_LINING;
-                else if (freezingFlavorStatusProtected)
-                    statusAbility = ABILITY_FREEZING_FLAVOR;
                 else if (dominionStatusProtected)
                     statusAbility = ABILITY_DOMINION;
                 else if (HasBattlerAbility(gEffectBattler, ABILITY_PASTEL_VEIL))
@@ -7622,9 +7612,17 @@ static void Cmd_moveend(void)
 
                 if (gBattleResources->flags->flags[i] & RESOURCE_FLAG_EMERGENCY_EXIT)
                 {
-                    gBattleResources->flags->flags[i] &= ~RESOURCE_FLAG_EMERGENCY_EXIT;
+                    bool32 fallenSkies = gBattleResources->flags->flags[i] & RESOURCE_FLAG_FALLEN_SKIES;
+
+                    gBattleResources->flags->flags[i] &= ~(RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES);
                     gSpecialStatuses[i].emergencyExited = TRUE;
                     gBattlerTarget = gBattlerAbility = i;
+                    if (fallenSkies
+                     && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(i)] & gBitTable[gBattlerPartyIndexes[i]]))
+                    {
+                        SetBattlerTriggeredAbility(i, ABILITY_FALLEN_SKIES);
+                        gBattleStruct->uniqueAbilityUsed[GetBattlerSide(i)] |= gBitTable[gBattlerPartyIndexes[i]];
+                    }
                     BattleScriptPushCursor();
                     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER || GetBattlerSide(i) == B_SIDE_PLAYER)
                     {
@@ -7707,6 +7705,16 @@ static void Cmd_moveend(void)
             gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = 0;
             gSpecialStatuses[gBattlerTarget].berryReduced = FALSE;
             gBattleScripting.moveEffect = 0;
+            if (gBattleResources->flags->flags[gBattlerAttacker] & RESOURCE_FLAG_FALLEN_SKIES)
+            {
+                gBattleResources->flags->flags[gBattlerAttacker] &= ~RESOURCE_FLAG_FALLEN_SKIES;
+                gBattleScripting.battler = gBattlerAttacker;
+                gBattleMons[gBattlerAttacker].hp = 0;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_FallenSkiesFaintAfterMove;
+                effect = TRUE;
+                break;
+            }
             if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
             {
                 VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
@@ -11063,6 +11071,13 @@ static void Cmd_various(void)
         gBattlerTarget = gBattleStruct->savedFaintBattlerTarget;
         break;
     }
+    case VARIOUS_RESTORE_FALLEN_SKIES_AFTER_MOVE:
+    {
+        VARIOUS_ARGS();
+        gBattlerAttacker = gBattleStruct->savedFaintBattlerAttacker;
+        gBattlerTarget = gBattleStruct->savedFaintBattlerTarget;
+        break;
+    }
     case VARIOUS_INSTANT_HP_DROP:
     {
         VARIOUS_ARGS();
@@ -11488,6 +11503,71 @@ static void Cmd_various(void)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPush(cmd->nextInstr);
             BattleScriptPush(BattleScript_DropOffRestoreAfterPresent);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_FALLEN_SKIES:
+    {
+        u32 target = gBattlersCount;
+        u32 moveCount = 0;
+        u16 moves[MAX_MON_MOVES];
+
+        VARIOUS_ARGS();
+
+        if (!HasBattlerAbility(battler, ABILITY_FALLEN_SKIES)
+         || gProtectStructs[battler].extraMoveUsed)
+            break;
+
+        for (i = 0; i < MAX_MON_MOVES; i++)
+        {
+            if (gBattleMons[battler].moves[i] != MOVE_NONE)
+                moves[moveCount++] = gBattleMons[battler].moves[i];
+        }
+
+        if (moveCount == 0)
+            break;
+
+        if (gBattlerAttacker < gBattlersCount
+         && IsBattlerAlive(gBattlerAttacker)
+         && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
+        {
+            target = gBattlerAttacker;
+        }
+        else if (gBattlerTarget < gBattlersCount
+              && IsBattlerAlive(gBattlerTarget)
+              && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler))
+        {
+            target = gBattlerTarget;
+        }
+        else
+        {
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (IsBattlerAlive(i) && GetBattlerSide(i) != GetBattlerSide(battler))
+                {
+                    target = i;
+                    break;
+                }
+            }
+        }
+
+        if (target < gBattlersCount)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_FALLEN_SKIES);
+            SetAtkCancellerForCalledMove();
+            gBattleStruct->savedFaintBattlerAttacker = gBattlerAttacker;
+            gBattleStruct->savedFaintBattlerTarget = gBattlerTarget;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = target;
+            gCalledMove = moves[RandomUniform(RNG_ROGUE_FALLEN_SKIES, 0, moveCount - 1)];
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gBattleMons[battler].hp = 1;
+            gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_FALLEN_SKIES;
+            BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             return;
         }

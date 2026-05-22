@@ -892,9 +892,13 @@ static const u8 sText_CarvingRushReadied[] = _("{B_ATK_NAME_WITH_PREFIX}'s slici
 static const u8 sText_SingularityDriveClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Singularity Drive\ncleared away the hazards!");
 static const u8 sText_LowTideMadeYUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Low Tide\nmade {B_CURRENT_MOVE} useless!");
 static const u8 sText_RumbleRollClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Rumble Roll\ncleared away the hazards!");
+static const u8 sText_MeltdownRestoredHp[] = _("{B_DEF_NAME_WITH_PREFIX} restored HP\nusing its Meltdown!");
+static const u8 sText_MeltdownMadeMoveUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Meltdown\nmade {B_CURRENT_MOVE} useless!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_MELTDOWNMADEMOVEUSELESS - BATTLESTRINGS_TABLE_START] = sText_MeltdownMadeMoveUseless,
+    [STRINGID_MELTDOWNRESTOREDHP - BATTLESTRINGS_TABLE_START] = sText_MeltdownRestoredHp,
     [STRINGID_RUMBLEROLLCLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_RumbleRollClearedHazards,
     [STRINGID_LOWTIDEMADEYUSELESS - BATTLESTRINGS_TABLE_START] = sText_LowTideMadeYUseless,
     [STRINGID_SINGULARITYDRIVECLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_SingularityDriveClearedHazards,

@@ -6852,6 +6852,7 @@ BattleScript_EffectCamouflage::
 BattleScript_FaintAttacker::
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_DROP_OFF
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_FALLEN_SKIES
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_TUMBLEWEED
 	tryillusionoff BS_ATTACKER
 	playfaintcry BS_ATTACKER
@@ -6868,6 +6869,7 @@ BattleScript_FaintAttacker::
 BattleScript_FaintTarget::
 	various BS_TARGET, VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS
 	various BS_TARGET, VARIOUS_TRY_ACTIVATE_DROP_OFF
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_FALLEN_SKIES
 	various BS_TARGET, VARIOUS_TRY_ACTIVATE_TUMBLEWEED
 	tryillusionoff BS_TARGET
 	playfaintcry BS_TARGET
@@ -10909,6 +10911,37 @@ BattleScript_FlashFreezeActivates::
 	tryfaintmon BS_ATTACKER
 	goto BattleScript_MoveEnd
 
+BattleScript_MeltdownHealType_PPLoss::
+	ppreduce
+BattleScript_MeltdownHealType::
+	attackstring
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	printstring STRINGID_MELTDOWNRESTOREDHP
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_TARGETCHANGEDTYPE
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_ATTACKER
+	orhalfword gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
+	goto BattleScript_MoveEnd
+
+BattleScript_MeltdownType_PPLoss::
+	ppreduce
+BattleScript_MeltdownType::
+	attackstring
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_MELTDOWNMADEMOVEUSELESS
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_TARGETCHANGEDTYPE
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_ATTACKER
+	orhalfword gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
+	goto BattleScript_MoveEnd
+
 BattleScript_AbilityPreventsPhasingOut::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
@@ -11674,6 +11707,16 @@ BattleScript_DirtyTricksRestoreAfterMetronome::
 BattleScript_DropOffRestoreAfterPresent::
 	bicword gHitMarker, HITMARKER_NO_ATTACKSTRING
 	various BS_ATTACKER, VARIOUS_RESTORE_ATTACKER_AND_TARGET
+	return
+
+BattleScript_FallenSkiesFaintAfterMove::
+	various BS_SCRIPTING, VARIOUS_RESTORE_FALLEN_SKIES_AFTER_MOVE
+	jumpifbyteequal sBATTLER, gBattlerAttacker, BattleScript_FallenSkiesFaintAttackerAfterMove
+	tryfaintmon BS_TARGET
+	return
+
+BattleScript_FallenSkiesFaintAttackerAfterMove::
+	tryfaintmon BS_ATTACKER
 	return
 
 BattleScript_TumbleweedClearsHazards::
