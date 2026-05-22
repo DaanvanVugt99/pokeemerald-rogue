@@ -12,6 +12,14 @@
 *.4bpp
 *.8bpp
 *.gbapal
+!graphics/object_events/pics/rogue/npc/team/flare_grunt_f.gbapal
+!graphics/object_events/pics/rogue/npc/team/flare_grunt_m.gbapal
+!graphics/object_events/pics/rogue/npc/team/galactic_grunt_f.gbapal
+!graphics/object_events/pics/rogue/npc/team/galactic_grunt_m.gbapal
+!graphics/object_events/pics/rogue/npc/team/neo_plasma_grunt_f.gbapal
+!graphics/object_events/pics/rogue/npc/team/neo_plasma_grunt_m.gbapal
+!graphics/object_events/pics/rogue/npc/team/plasma_grunt_f.gbapal
+!graphics/object_events/pics/rogue/npc/team/plasma_grunt_m.gbapal
 *.lz
 *.rl
 *.latfont

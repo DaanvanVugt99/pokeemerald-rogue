@@ -4126,6 +4126,14 @@ extern const u16 gObjectEventPal_LaterMannerNormal[];
 extern const u16 gObjectEventPal_DolphinNormal[];
 
 extern const u16 gObjectEventPal_PokabbieNormal[];
+extern const u16 gObjectEventPal_Team_Flare_Grunt_F[];
+extern const u16 gObjectEventPal_Team_Flare_Grunt_M[];
+extern const u16 gObjectEventPal_Team_Galactic_Grunt_F[];
+extern const u16 gObjectEventPal_Team_Galactic_Grunt_M[];
+extern const u16 gObjectEventPal_Team_Neo_Plasma_Grunt_F[];
+extern const u16 gObjectEventPal_Team_Neo_Plasma_Grunt_M[];
+extern const u16 gObjectEventPal_Team_Plasma_Grunt_F[];
+extern const u16 gObjectEventPal_Team_Plasma_Grunt_M[];
 
 extern const u16 gObjectEventPal_RubySapphireBrendan[];
 extern const u16 gObjectEventPal_RubySapphireMay[];

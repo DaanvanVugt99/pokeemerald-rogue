@@ -832,6 +832,14 @@ const u32 gObjectEventPic_Rival_Nemona[] = INCBIN_U32("graphics/object_events/pi
 const u32 gObjectEventPic_Rival_Penny[] = INCBIN_U32("graphics/object_events/pics/rogue/npc/rival/penny.4bpp");
 const u32 gObjectEventPic_Rival_Arven[] = INCBIN_U32("graphics/object_events/pics/rogue/npc/rival/arven.4bpp");
 
+const u16 gObjectEventPal_Team_Flare_Grunt_F[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/flare_grunt_f.gbapal");
+const u16 gObjectEventPal_Team_Flare_Grunt_M[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/flare_grunt_m.gbapal");
+const u16 gObjectEventPal_Team_Galactic_Grunt_F[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/galactic_grunt_f.gbapal");
+const u16 gObjectEventPal_Team_Galactic_Grunt_M[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/galactic_grunt_m.gbapal");
+const u16 gObjectEventPal_Team_Neo_Plasma_Grunt_F[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/neo_plasma_grunt_f.gbapal");
+const u16 gObjectEventPal_Team_Neo_Plasma_Grunt_M[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/neo_plasma_grunt_m.gbapal");
+const u16 gObjectEventPal_Team_Plasma_Grunt_F[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/plasma_grunt_f.gbapal");
+const u16 gObjectEventPal_Team_Plasma_Grunt_M[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/plasma_grunt_m.gbapal");
 const u16 gObjectEventPal_Team_Flare_Lysander[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/flare_lysander.gbapal");
 const u16 gObjectEventPal_Team_Galactic_Cyrus[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/galactic_cyrus.gbapal");
 const u16 gObjectEventPal_Team_Neo_Plasma_Colress[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/team/neo_plasma_colress.gbapal");
