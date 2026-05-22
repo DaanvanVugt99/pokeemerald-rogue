@@ -91,10 +91,10 @@ static u8 const sMenuName_BattleFormatSingles[] = _("{COLOR GREEN}{SHADOW LIGHT_
 static u8 const sMenuName_BattleFormatDoubles[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Doubles");
 static u8 const sMenuName_BattleFormatMixed[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Mixed");
 
-//static u8 const sMenuName_TrainerOrder[] = _("Trainer Order");
-//static u8 const sMenuName_TrainerOrderDefault[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Default");
-//static u8 const sMenuName_TrainerOrderRainbow[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Rainbow");
-//static u8 const sMenuName_TrainerOrderOfficial[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Official");
+static u8 const sMenuName_TrainerOrder[] = _("Trainer Order");
+static u8 const sMenuName_TrainerOrderDefault[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Default");
+static u8 const sMenuName_TrainerOrderRainbow[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Rainbow");
+static u8 const sMenuName_TrainerOrderOfficial[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Official");
 
 static u8 const sMenuName_GameMode_Standard[] = _("Standard");
 static u8 const sMenuName_GameMode_Rainbow[] = _("Rainbow");
@@ -201,6 +201,28 @@ static u8 const* const sMenuNameDesc_BattleFormat[] =
     [BATTLE_FORMAT_SINGLES] = sMenuNameDesc_BattleFormatSingles,
     [BATTLE_FORMAT_DOUBLES] = sMenuNameDesc_BattleFormatDoubles,
     [BATTLE_FORMAT_MIXED] = sMenuNameDesc_BattleFormatMixed,
+};
+
+static u8 const sMenuNameDesc_TrainerOrderDefault[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Trainers appear somewhat randomly\n"
+    "based on their Trainer Class."
+);
+static u8 const sMenuNameDesc_TrainerOrderRainbow[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Trainers appear randomly without\n"
+    "repeating types e.g. E4 can be Gyms."
+);
+static u8 const sMenuNameDesc_TrainerOrderOfficial[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Trainers appear in the order they appear\n"
+    "in official games. (Disables Challenges)"
+);
+static u8 const* const sMenuNameDesc_TrainerOrder[] =
+{
+    [TRAINER_ORDER_DEFAULT] = sMenuNameDesc_TrainerOrderDefault,
+    [TRAINER_ORDER_RAINBOW] = sMenuNameDesc_TrainerOrderRainbow,
+    [TRAINER_ORDER_OFFICIAL] = sMenuNameDesc_TrainerOrderOfficial,
 };
 
 const u8 sMenuNameDesc_Affection[] = _(
@@ -467,6 +489,7 @@ enum
     MENUITEM_MENU_SLIDER_ITEM,
     MENUITEM_MENU_SLIDER_LEGENDARY,
     MENUITEM_MENU_SLIDER_BATTLE_FORMAT,
+    MENUITEM_MENU_SLIDER_TRAINER_ORDER,
 
     MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD,
     MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW,
@@ -557,6 +580,8 @@ static u8 Empty_ProcessInput(u8 menuOffset, u8 selection);
 static void Empty_DrawChoices(u8 menuOffset, u8 selection);
 static u8 BattleFormat_ProcessInput(u8 menuOffset, u8 selection);
 static void BattleFormat_DrawChoices(u8 menuOffset, u8 selection);
+static u8 TrainerOrder_ProcessInput(u8 menuOffset, u8 selection);
+static void TrainerOrder_DrawChoices(u8 menuOffset, u8 selection);
 static u8 GameMode_ProcessInput(u8 menuOffset, u8 selection);
 static void GameMode_DrawChoices(u8 menuOffset, u8 selection);
 
@@ -805,6 +830,13 @@ static const struct MenuEntry sOptionMenuItems[] =
         .processInput = BattleFormat_ProcessInput,
         .drawChoices = BattleFormat_DrawChoices
     },
+    [MENUITEM_MENU_SLIDER_TRAINER_ORDER] =
+    {
+        .itemName = sMenuName_TrainerOrder,
+        .MULTI_DESC(sMenuNameDesc_TrainerOrder),
+        .processInput = TrainerOrder_ProcessInput,
+        .drawChoices = TrainerOrder_DrawChoices
+    },
 
     [MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD] = 
     {
@@ -1019,6 +1051,7 @@ static const struct MenuEntries sOptionMenuEntries[SUBMENUITEM_COUNT] =
     {
         .menuOptions = 
         {
+            MENUITEM_MENU_SLIDER_TRAINER_ORDER,
             MENUITEM_MENU_TOGGLE_TRAINER_KANTO,
             MENUITEM_MENU_TOGGLE_TRAINER_JOHTO,
             MENUITEM_MENU_TOGGLE_TRAINER_HOENN,
@@ -1039,10 +1072,7 @@ static const struct MenuEntries sOptionMenuEntries[SUBMENUITEM_COUNT] =
         .menuOptions = 
         {
             MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD,
-            MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW,
-            MENUITEM_MENU_SLIDER_GAME_MODE_OFFICIAL,
             MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET,
-            MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW_GAUNTLET,
             MENUITEM_CANCEL
         }
     },
@@ -1775,6 +1805,36 @@ static void BattleFormat_DrawChoices(u8 menuOffset, u8 selection)
     DrawOptionMenuChoice(text, XPOS_CHOICES, menuOffset * YPOS_SPACING, style);
 }
 
+static u8 TrainerOrder_ProcessInput(u8 menuOffset, u8 selection)
+{
+    return ProcessInputRange(menuOffset, selection, TRAINER_ORDER_COUNT);
+}
+
+static void TrainerOrder_DrawChoices(u8 menuOffset, u8 selection)
+{
+    const u8* text = NULL;
+    u8 style = 0;
+
+    DrawOptionMenuChoice(gText_32Spaces, XPOS_CHOICES, menuOffset * YPOS_SPACING, 0);
+
+    switch (selection)
+    {
+    case TRAINER_ORDER_DEFAULT:
+        text = sMenuName_TrainerOrderDefault;
+        break;
+
+    case TRAINER_ORDER_RAINBOW:
+        text = sMenuName_TrainerOrderRainbow;
+        break;
+
+    case TRAINER_ORDER_OFFICIAL:
+        text = sMenuName_TrainerOrderOfficial;
+        break;
+    }
+
+    DrawOptionMenuChoice(text, XPOS_CHOICES, menuOffset * YPOS_SPACING, style);
+}
+
 static u8 GameMode_ProcessInput(u8 menuOffset, u8 selection)
 {
     if(ShouldSkipInput())
@@ -2141,10 +2201,17 @@ static u8 GetMenuItemValue(u8 menuItem)
     case MENUITEM_MENU_SLIDER_BATTLE_FORMAT:
         return Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT);
 
+    case MENUITEM_MENU_SLIDER_TRAINER_ORDER:
+        return Rogue_GetConfigRange(CONFIG_RANGE_TRAINER_ORDER);
+
     case MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD:
+        return Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM) == ROGUE_GAME_MODE_STANDARD;
+
+    case MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET:
+        return Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM) == ROGUE_GAME_MODE_GAUNTLET;
+
     case MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW:
     case MENUITEM_MENU_SLIDER_GAME_MODE_OFFICIAL:
-    case MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET:
     case MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW_GAUNTLET:
         return Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM) == (ROGUE_GAME_MODE_STANDARD + menuItem - MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD);
 
@@ -2307,10 +2374,23 @@ static void SetMenuItemValue(u8 menuItem, u8 value)
         Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, value);
         break;
 
+    case MENUITEM_MENU_SLIDER_TRAINER_ORDER:
+        Rogue_SetConfigRange(CONFIG_RANGE_TRAINER_ORDER, value);
+        break;
+
     case MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD:
+        Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, value ? ROGUE_GAME_MODE_STANDARD : ROGUE_GAME_MODE_STANDARD);
+        break;
+
+    case MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET:
+        if(value != 0)
+            Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_GAUNTLET);
+        else
+            Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+        break;
+
     case MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW:
     case MENUITEM_MENU_SLIDER_GAME_MODE_OFFICIAL:
-    case MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET:
     case MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW_GAUNTLET:
         if(value != 0)
             Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD + menuItem - MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD);

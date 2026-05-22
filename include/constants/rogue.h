@@ -553,7 +553,8 @@
 #define CONFIG_RANGE_POKEDEX_VARIANT        4
 #define CONFIG_RANGE_GAME_MODE_NUM          5
 #define CONFIG_RANGE_DIFFICULTY_PRESET      6
-#define CONFIG_RANGE_COUNT                  7
+#define CONFIG_RANGE_TRAINER_ORDER          7
+#define CONFIG_RANGE_COUNT                  8
 
 #define DEBUG_START_VALUE           0x7FFF
 

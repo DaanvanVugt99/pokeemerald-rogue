@@ -290,9 +290,37 @@ bool8 Rogue_CanEditConfig()
 
 struct GameModeRules const* Rogue_GetModeRules()
 {
+    static struct GameModeRules sGeneratedModeRules;
     u8 mode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 trainerOrder = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER_ORDER);
+
     AGB_ASSERT(mode < ROGUE_GAME_MODE_COUNT);
-    return &sGameModeRules[mode];
+
+    // Rainbow and Official used to be full game modes. Keep those legacy values
+    // meaningful while exposing trainer order as its own setting in the UI.
+    switch (mode)
+    {
+    case ROGUE_GAME_MODE_RAINBOW:
+        mode = ROGUE_GAME_MODE_STANDARD;
+        trainerOrder = TRAINER_ORDER_RAINBOW;
+        break;
+    case ROGUE_GAME_MODE_OFFICIAL:
+        mode = ROGUE_GAME_MODE_STANDARD;
+        trainerOrder = TRAINER_ORDER_OFFICIAL;
+        break;
+    case ROGUE_GAME_MODE_RAINBOW_GAUNTLET:
+        mode = ROGUE_GAME_MODE_GAUNTLET;
+        trainerOrder = TRAINER_ORDER_RAINBOW;
+        break;
+    }
+
+    memcpy(&sGeneratedModeRules, &sGameModeRules[mode], sizeof(struct GameModeRules));
+    sGeneratedModeRules.trainerOrder = trainerOrder;
+
+    if(sGeneratedModeRules.trainerOrder == TRAINER_ORDER_OFFICIAL)
+        sGeneratedModeRules.disableChallengeQuests = TRUE;
+
+    return &sGeneratedModeRules;
 }
 
 bool8 Rogue_ShouldDisableMainQuests()
@@ -433,6 +461,7 @@ static void Rogue_ResetToDefaults(bool8 difficultySettingsOnly)
         Rogue_SetConfigToggle(CONFIG_TOGGLE_OVERWORLD_MONS, TRUE);
         Rogue_SetConfigToggle(CONFIG_TOGGLE_EXP_ALL, TRUE);
         Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, BATTLE_FORMAT_SINGLES);
+        Rogue_SetConfigRange(CONFIG_RANGE_TRAINER_ORDER, TRAINER_ORDER_DEFAULT);
     }
 }
 
