@@ -4002,107 +4002,115 @@ static void Task_ReleaseSelectedMonYesNoInput(u8 taskId)
 static void Task_QuickHealSelectedMonYesNo(u8 taskId);
 static void Task_QuickHealSelectedMonYesNoInput(u8 taskId);
 
-static const u16 sPrioritisedReviveItems[] =
+static u16 GetQuickHealRevivePriority(u16 itemId)
 {
-    ITEM_REVIVE,
-    ITEM_REVIVAL_HERB,
-    ITEM_MAX_REVIVE,
-};
+    switch (itemId)
+    {
+    case ITEM_REVIVE:
+        return 0;
+    case ITEM_REVIVAL_HERB:
+        return 1;
+    case ITEM_MAX_REVIVE:
+        return 2;
+    default:
+        return 3;
+    }
+}
 
-static const u16 sPrioritisedHealingItems[] =
+static u16 FindQuickHealReviveItem(void)
 {
-    ITEM_ORAN_BERRY,
-    ITEM_POTION,
-    ITEM_FRESH_WATER,
-    ITEM_SODA_POP,
-    ITEM_SUPER_POTION,
-    ITEM_LEMONADE,
-    ITEM_MOOMOO_MILK,
-    ITEM_HYPER_POTION,
-    ITEM_SITRUS_BERRY,
-    ITEM_MAX_POTION,
-    ITEM_FULL_RESTORE,
-};
+    u16 bestItem = ITEM_NONE;
+    u16 bestPriority = 0xFFFF;
+    u16 itemId;
 
-static const u16 sPrioritisedStatusItems_Sleep[] =
-{
-    ITEM_AWAKENING,
-    ITEM_CHESTO_BERRY,
-    ITEM_PEWTER_CRUNCHIES,
-    ITEM_RAGE_CANDY_BAR,
-    ITEM_LAVA_COOKIE,
-    ITEM_OLD_GATEAU,
-    ITEM_CASTELIACONE,
-    ITEM_LUMIOSE_GALETTE,
-    ITEM_SHALOUR_SABLE,
-    ITEM_BIG_MALASADA,
-    ITEM_FULL_HEAL,
-    ITEM_LUM_BERRY,
-};
+    for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
+    {
+        u16 priority;
 
-static const u16 sPrioritisedStatusItems_Poison[] =
-{
-    ITEM_ANTIDOTE,
-    ITEM_PECHA_BERRY,
-    ITEM_PEWTER_CRUNCHIES,
-    ITEM_RAGE_CANDY_BAR,
-    ITEM_LAVA_COOKIE,
-    ITEM_OLD_GATEAU,
-    ITEM_CASTELIACONE,
-    ITEM_LUMIOSE_GALETTE,
-    ITEM_SHALOUR_SABLE,
-    ITEM_BIG_MALASADA,
-    ITEM_FULL_HEAL,
-    ITEM_LUM_BERRY,
-};
+        if (!CheckBagHasItem(itemId, 1))
+            continue;
+        if (ItemId_GetBattleUsage(itemId) != EFFECT_ITEM_REVIVE)
+            continue;
 
-static const u16 sPrioritisedStatusItems_Burn[] =
-{
-    ITEM_BURN_HEAL,
-    ITEM_RAWST_BERRY,
-    ITEM_PEWTER_CRUNCHIES,
-    ITEM_RAGE_CANDY_BAR,
-    ITEM_LAVA_COOKIE,
-    ITEM_OLD_GATEAU,
-    ITEM_CASTELIACONE,
-    ITEM_LUMIOSE_GALETTE,
-    ITEM_SHALOUR_SABLE,
-    ITEM_BIG_MALASADA,
-    ITEM_FULL_HEAL,
-    ITEM_LUM_BERRY,
-};
+        priority = GetQuickHealRevivePriority(itemId);
+        if (priority < bestPriority || (priority == bestPriority && itemId < bestItem))
+        {
+            bestPriority = priority;
+            bestItem = itemId;
+        }
+    }
 
-static const u16 sPrioritisedStatusItems_Freeze[] =
-{
-    ITEM_ICE_HEAL,
-    ITEM_ASPEAR_BERRY,
-    ITEM_PEWTER_CRUNCHIES,
-    ITEM_RAGE_CANDY_BAR,
-    ITEM_LAVA_COOKIE,
-    ITEM_OLD_GATEAU,
-    ITEM_CASTELIACONE,
-    ITEM_LUMIOSE_GALETTE,
-    ITEM_SHALOUR_SABLE,
-    ITEM_BIG_MALASADA,
-    ITEM_FULL_HEAL,
-    ITEM_LUM_BERRY,
-};
+    return bestItem;
+}
 
-static const u16 sPrioritisedStatusItems_Paralysis[] =
+static u16 FindQuickHealHpItem(u32 maxHp)
 {
-    ITEM_PARALYZE_HEAL,
-    ITEM_CHERI_BERRY,
-    ITEM_PEWTER_CRUNCHIES,
-    ITEM_RAGE_CANDY_BAR,
-    ITEM_LAVA_COOKIE,
-    ITEM_OLD_GATEAU,
-    ITEM_CASTELIACONE,
-    ITEM_LUMIOSE_GALETTE,
-    ITEM_SHALOUR_SABLE,
-    ITEM_BIG_MALASADA,
-    ITEM_FULL_HEAL,
-    ITEM_LUM_BERRY,
-};
+    u16 bestItem = ITEM_NONE;
+    u32 bestHeal = 0xFFFFFFFF;
+    u16 itemId;
+
+    for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
+    {
+        u16 usage;
+        u32 healAmount;
+
+        if (!CheckBagHasItem(itemId, 1))
+            continue;
+
+        usage = ItemId_GetBattleUsage(itemId);
+        if (usage != EFFECT_ITEM_RESTORE_HP && usage != EFFECT_ITEM_HEAL_AND_CURE_STATUS)
+            continue;
+
+        healAmount = GetMedicineItemHealAmount(itemId, maxHp);
+        if (healAmount == 0)
+            continue;
+
+        // Prefer low-heal/low-waste medicine first.
+        if (healAmount < bestHeal
+            || (healAmount == bestHeal && ItemId_GetPrice(itemId) < ItemId_GetPrice(bestItem))
+            || (healAmount == bestHeal && ItemId_GetPrice(itemId) == ItemId_GetPrice(bestItem) && itemId < bestItem))
+        {
+            bestHeal = healAmount;
+            bestItem = itemId;
+        }
+    }
+
+    return bestItem;
+}
+
+static u16 FindQuickHealStatusItem(u32 status1)
+{
+    u16 bestItem = ITEM_NONE;
+    u16 bestPrice = 0xFFFF;
+    u16 itemId;
+
+    for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
+    {
+        u16 usage;
+        u32 statusMask;
+        u16 price;
+
+        if (!CheckBagHasItem(itemId, 1))
+            continue;
+
+        usage = ItemId_GetBattleUsage(itemId);
+        if (usage != EFFECT_ITEM_CURE_STATUS && usage != EFFECT_ITEM_HEAL_AND_CURE_STATUS)
+            continue;
+
+        statusMask = GetItemStatus1Mask(itemId);
+        if ((status1 & statusMask) == 0)
+            continue;
+
+        price = ItemId_GetPrice(itemId);
+        if (price < bestPrice || (price == bestPrice && itemId < bestItem))
+        {
+            bestPrice = price;
+            bestItem = itemId;
+        }
+    }
+
+    return bestItem;
+}
 
 static void CursorCb_QuickHeal(u8 taskId)
 {
@@ -4115,30 +4123,12 @@ static void CursorCb_QuickHeal(u8 taskId)
 
     if (hp == 0)
     {
-        u32 i;
-
-        for (i = 0; i < ARRAY_COUNT(sPrioritisedReviveItems); ++i)
-        {
-            if (CheckBagHasItem(sPrioritisedReviveItems[i], 1))
-            {
-                healingItemId = sPrioritisedReviveItems[i];
-                healingItemCount = 1;
-                break;
-            }
-        }
+        healingItemId = FindQuickHealReviveItem();
+        healingItemCount = healingItemId != ITEM_NONE;
     }
     else if (hp < maxHp)
     {
-        u32 i;
-
-        for (i = 0; i < ARRAY_COUNT(sPrioritisedHealingItems); ++i)
-        {
-            if (CheckBagHasItem(sPrioritisedHealingItems[i], 1))
-            {
-                healingItemId = sPrioritisedHealingItems[i];
-                break;
-            }
-        }
+        healingItemId = FindQuickHealHpItem(maxHp);
 
         if (healingItemId != ITEM_NONE)
         {
@@ -4154,49 +4144,8 @@ static void CursorCb_QuickHeal(u8 taskId)
     }
     if (hp != 0 && healingItemId == ITEM_NONE)
     {
-        u16 const *prioritisedStatusItems = NULL;
-        u32 prioritisedStatusItemCount = 0;
-
-        if (status & STATUS1_SLEEP)
-        {
-            prioritisedStatusItems = sPrioritisedStatusItems_Sleep;
-            prioritisedStatusItemCount = ARRAY_COUNT(sPrioritisedStatusItems_Sleep);
-        }
-        else if (status & STATUS1_PSN_ANY)
-        {
-            prioritisedStatusItems = sPrioritisedStatusItems_Poison;
-            prioritisedStatusItemCount = ARRAY_COUNT(sPrioritisedStatusItems_Poison);
-        }
-        else if (status & STATUS1_BURN)
-        {
-            prioritisedStatusItems = sPrioritisedStatusItems_Burn;
-            prioritisedStatusItemCount = ARRAY_COUNT(sPrioritisedStatusItems_Burn);
-        }
-        else if (status & STATUS1_FREEZE)
-        {
-            prioritisedStatusItems = sPrioritisedStatusItems_Freeze;
-            prioritisedStatusItemCount = ARRAY_COUNT(sPrioritisedStatusItems_Freeze);
-        }
-        else if (status & STATUS1_PARALYSIS)
-        {
-            prioritisedStatusItems = sPrioritisedStatusItems_Paralysis;
-            prioritisedStatusItemCount = ARRAY_COUNT(sPrioritisedStatusItems_Paralysis);
-        }
-
-        if (prioritisedStatusItems != NULL)
-        {
-            u32 i;
-
-            for (i = 0; i < prioritisedStatusItemCount; ++i)
-            {
-                if (CheckBagHasItem(prioritisedStatusItems[i], 1))
-                {
-                    healingItemId = prioritisedStatusItems[i];
-                    healingItemCount = 1;
-                    break;
-                }
-            }
-        }
+        healingItemId = FindQuickHealStatusItem(status);
+        healingItemCount = healingItemId != ITEM_NONE;
     }
 
     if (healingItemId == ITEM_NONE || healingItemCount == 0)
