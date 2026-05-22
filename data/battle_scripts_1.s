@@ -11593,6 +11593,17 @@ BattleScript_DirgeActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_WailingReefActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	copybyte sBATTLER, gBattlerAttacker
+	copybyte gBattlerAttacker, gBattlerTarget
+	status2animation BS_ATTACKER, STATUS2_CURSED
+	printstring STRINGID_PKMNAFFLICTEDBYCURSE
+	waitmessage B_WAIT_TIME_LONG
+	copybyte gBattlerAttacker, sBATTLER
+	return
+
 BattleScript_StaticChargeActivates::
 	setstatchanger STAT_SPEED, 1, FALSE
 	copybyte gEffectBattler, gBattlerTarget

@@ -10770,14 +10770,16 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
 
-            if (HasBattlerAbility(battler, ABILITY_OVERGROWTH)
-             && IsBattlerTerrainAffected(battler, STATUS_FIELD_GRASSY_TERRAIN)
-             && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))
+            if (HasBattlerAbility(battler, ABILITY_RUMINATE)
+             && gBattleMons[battler].hp * 2 < gBattleMons[battler].maxHP
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_OVERGROWTH);
-                gBattleScripting.battler = battler;
-                SET_STATCHANGER(STAT_DEF, 1, FALSE);
-                BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+                gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+                gBattleMoveDamage *= -1;
+                SetBattlerTriggeredAbility(battler, ABILITY_RUMINATE);
+                BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                 effect++;
             }
 
@@ -12719,46 +12721,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_WAILING_REEF)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && BATTLER_TURN_DAMAGED(battler)
-         && IsFinalMultiHitStrike()
-         && !(HasBattlerAbility(battler, ABILITY_WEAK_ARMOR)
-           && IsBattlerAlive(battler)
-           && IS_MOVE_PHYSICAL(gCurrentMove)
-           && (CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN)
-            || CompareStat(battler, STAT_DEF, MIN_STAT_STAGE, CMP_GREATER_THAN))))
-        {
-            u32 target = BATTLE_OPPOSITE(battler);
-
-            if (gSpecialStatuses[battler].physicalDmg != 0)
-                target = gSpecialStatuses[battler].physicalBattlerId;
-            else if (gSpecialStatuses[battler].specialDmg != 0)
-                target = gSpecialStatuses[battler].specialBattlerId;
-
-            if (target < gBattlersCount
-             && target != battler
-             && IsBattlerAlive(target)
-             && IsBattlerAlive(battler)
-             && !gProtectStructs[target].confusionSelfDmg
-             && !gProtectStructs[battler].extraMoveUsed
-             && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
-             && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_WAILING_REEF);
-                gBattleStruct->atkCancellerTracker = 0;
-                gBattlerAttacker = gBattlerAbility = battler;
-                gBattlerTarget = target;
-                gLastMoves[target] = gCurrentMove;
-                gCalledMove = MOVE_SPITE;
-                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-                gProtectStructs[battler].extraMoveUsed = TRUE;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-                effect++;
-            }
-        }
-
         if (HasBattlerAbility(battler, ABILITY_GRAVE_GROVE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -14234,6 +14196,27 @@ if (triggeringAbility != ABILITY_NONE)
             gStatuses3[gBattlerTarget] |= STATUS3_YAWN_TURN(2);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_DirgeActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_WAILING_REEF)
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && gBattleMoves[move].soundMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_CURSED))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_WAILING_REEF);
+            gBattleMons[gBattlerTarget].status2 |= STATUS2_CURSED;
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_WailingReefActivates;
             effect++;
         }
 
@@ -22299,13 +22282,6 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
     {
         defStage = DEFAULT_STAT_STAGE;
     }
-    if (HasBattlerAbility(battlerAtk, ABILITY_ULTRA_EDGE)
-     && IsOnlyUltraBeastInParty(battlerAtk)
-     && gBattleMoves[move].slicingMove
-     && defStage > DEFAULT_STAT_STAGE)
-    {
-        defStage = DEFAULT_STAT_STAGE;
-    }
     if (HasBattlerAbility(battlerAtk, ABILITY_HIGH_CLIMBER)
      && IsMoveMakingContact(move, battlerAtk)
      && !IsBattlerGrounded(battlerDef)
@@ -23453,6 +23429,13 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
      && (defType == TYPE_ROCK || defType == TYPE_STEEL || defType == TYPE_ICE)
      && battlerAtk < gBattlersCount
      && HasBattlerAbility(battlerAtk, ABILITY_RESONANCE))
+        mod = UQ_4_12(2.0);
+    if (moveType == TYPE_STEEL
+     && defType == TYPE_GRASS
+     && gBattleMoves[move].slicingMove
+     && battlerAtk < gBattlersCount
+     && HasBattlerAbility(battlerAtk, ABILITY_ULTRA_EDGE)
+     && IsOnlyUltraBeastInParty(battlerAtk))
         mod = UQ_4_12(2.0);
     if (moveType == TYPE_GROUND && defType == TYPE_FLYING && IsBattlerGrounded(battlerDef) && mod == UQ_4_12(0.0))
         mod = UQ_4_12(1.0);

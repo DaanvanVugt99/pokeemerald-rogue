@@ -702,7 +702,7 @@
 #define ABILITY_WINDSURGE          668
 #define ABILITY_HAUTE_COUTURE      669
 #define ABILITY_SECOND_WIND        670
-#define ABILITY_OVERGROWTH         671
+#define ABILITY_RUMINATE           671
 #define ABILITY_SCREEN_TEST        672
 #define ABILITY_ATOMIZER           673
 #define ABILITY_SUGAR_RUSH         674

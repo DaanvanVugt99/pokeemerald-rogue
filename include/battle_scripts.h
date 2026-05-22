@@ -45,6 +45,7 @@ extern const u8 BattleScript_StormCommandActivates[];
 extern const u8 BattleScript_SpringCommandActivates[];
 extern const u8 BattleScript_GaleCommandActivates[];
 extern const u8 BattleScript_DirgeActivates[];
+extern const u8 BattleScript_WailingReefActivates[];
 extern const u8 BattleScript_StumbleActivates[];
 extern const u8 BattleScript_TragicBeautyBurnsSelfEnd3[];
 extern const u8 BattleScript_TragicBeautyPoisonsSelfEnd3[];

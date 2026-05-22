@@ -6368,6 +6368,12 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     {
         gBattleStruct->dynamicMoveType = TYPE_STEEL | F_DYNAMIC_TYPE_SET;
     }
+    else if (gBattleMoves[move].slicingMove
+          && HasBattlerAbility(battlerAtk, ABILITY_ULTRA_EDGE)
+          && IsOnlyUltraBeastInParty(battlerAtk))
+    {
+        gBattleStruct->dynamicMoveType = TYPE_STEEL | F_DYNAMIC_TYPE_SET;
+    }
     else if (move == MOVE_AURA_WHEEL && gBattleMons[battlerAtk].species == SPECIES_MORPEKO_HANGRY)
     {
         gBattleStruct->dynamicMoveType = TYPE_DARK | F_DYNAMIC_TYPE_SET;
