@@ -4420,6 +4420,16 @@ static void BeginRogueRun(void)
         }
     }
 
+    if (Rogue_GetModeRules()->disableMainQuests || AnyCharmsActive())
+        FlagSet(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);
+    else
+        FlagClear(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);
+
+    if (Rogue_GetModeRules()->disableChallengeQuests || AnyCharmsActive())
+        FlagSet(FLAG_ROGUE_RUN_CHALLENGE_QUESTS_DISABLED);
+    else
+        FlagClear(FLAG_ROGUE_RUN_CHALLENGE_QUESTS_DISABLED);
+
     Rogue_SetCurrentDifficulty(GetStartDifficulty());
     gRogueRun.currentLevelOffset = Rogue_GetModeRules()->initialLevelOffset;
     gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;

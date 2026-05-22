@@ -1713,8 +1713,8 @@ static const struct SpritePalette sMegaIndicator_SpritePalettes[] =
 
 static const struct OamData sOamData_MegaIndicator =
 {
-    .shape = SPRITE_SHAPE(16x16),
-    .size = SPRITE_SIZE(16x16),
+    .shape = SPRITE_SHAPE(8x16),
+    .size = SPRITE_SIZE(8x16),
     .priority = 1,
 };
 
@@ -1739,10 +1739,10 @@ static const u16 sMegaIndicatorTags[][2] =
 
 static const s8 sIndicatorPositions[][2] =
 {
-    [B_POSITION_PLAYER_LEFT] = {52, -9},
-    [B_POSITION_OPPONENT_LEFT] = {44, -9},
-    [B_POSITION_PLAYER_RIGHT] = {52, -9},
-    [B_POSITION_OPPONENT_RIGHT] = {44, -9},
+    [B_POSITION_PLAYER_LEFT] = {48, -9},
+    [B_POSITION_OPPONENT_LEFT] = {40, -9},
+    [B_POSITION_PLAYER_RIGHT] = {48, -9},
+    [B_POSITION_OPPONENT_RIGHT] = {40, -9},
 };
 
 // for sprite data fields
@@ -1885,8 +1885,8 @@ static const u16 sTypeIndicatorTileTags[NUMBER_OF_MON_TYPES] =
 
 static const struct OamData sOamData_TypeIndicator =
 {
-    .shape = SPRITE_SHAPE(16x16),
-    .size = SPRITE_SIZE(16x16),
+    .shape = SPRITE_SHAPE(8x16),
+    .size = SPRITE_SIZE(8x16),
     .priority = 0,
 };
 
@@ -1919,16 +1919,16 @@ struct TypeIndicatorCoords
 
 static const struct TypeIndicatorCoords sTypeIndicatorSinglesCoords[NUM_BATTLE_SIDES] =
 {
-    [B_SIDE_PLAYER] = {-22, -7},
-    [B_SIDE_OPPONENT] = {72, -10},
+    [B_SIDE_PLAYER] = {-26, -7},
+    [B_SIDE_OPPONENT] = {68, -10},
 };
 
 static const struct TypeIndicatorCoords sTypeIndicatorDoublesCoords[MAX_BATTLERS_COUNT] =
 {
-    [B_POSITION_PLAYER_LEFT] = {-22, -11},
-    [B_POSITION_OPPONENT_LEFT] = {72, -11},
-    [B_POSITION_PLAYER_RIGHT] = {-22, -11},
-    [B_POSITION_OPPONENT_RIGHT] = {72, -11},
+    [B_POSITION_PLAYER_LEFT] = {-26, -11},
+    [B_POSITION_OPPONENT_LEFT] = {68, -11},
+    [B_POSITION_PLAYER_RIGHT] = {-26, -11},
+    [B_POSITION_OPPONENT_RIGHT] = {68, -11},
 };
 
 static bool32 TypeIndicator_IsDisplayableType(u32 type)

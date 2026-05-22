@@ -327,13 +327,13 @@ bool8 Rogue_ShouldDisableMainQuests()
 {
     struct AdventureReplay const* replay = &gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED];
 
-    if(Rogue_GetModeRules()->disableMainQuests)
+    if(Rogue_IsRunActive() && FlagGet(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED))
+        return TRUE;
+
+    if(!Rogue_IsRunActive() && Rogue_GetModeRules()->disableMainQuests)
         return TRUE;
 
     if(Rogue_IsRunActive() && FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) && replay->isValid)
-        return TRUE;
-
-    if(Rogue_IsRunActive() && AnyCharmsActive())
         return TRUE;
     
     return FALSE;
@@ -345,13 +345,13 @@ bool8 Rogue_ShouldDisableChallengeQuests()
 
     if(RogueQuest_HasUnlockedChallenges())
     {
-        if(Rogue_GetModeRules()->disableChallengeQuests)
+        if(Rogue_IsRunActive() && FlagGet(FLAG_ROGUE_RUN_CHALLENGE_QUESTS_DISABLED))
+            return TRUE;
+
+        if(!Rogue_IsRunActive() && Rogue_GetModeRules()->disableChallengeQuests)
             return TRUE;
 
         if(Rogue_IsRunActive() && FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) && replay->isValid)
-            return TRUE;
-
-        if(Rogue_IsRunActive() && AnyCharmsActive())
             return TRUE;
     }
     
