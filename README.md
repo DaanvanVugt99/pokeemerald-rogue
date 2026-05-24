@@ -24,6 +24,7 @@ inputs to this project rather than the project identity itself.
 - Baseline release: `DIV-v0.1.0`
 - Project changelog: [CHANGELOG_ROGUE.md](CHANGELOG_ROGUE.md)
 - Versioning policy: [VERSIONING.md](VERSIONING.md)
+- Design docs: [docs/design/README.md](docs/design/README.md)
 - Agent/contributor guidance: [AGENTS.md](AGENTS.md)
 
 Existing `EX-v*` and `vanilla-v*` tags and inherited branches are retained for

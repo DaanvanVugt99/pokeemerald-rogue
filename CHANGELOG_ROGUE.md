@@ -14,7 +14,10 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
-_No unreleased changes yet._
+### Docs
+
+- Added the Pokemon romhack tracker as the general design reference for unique
+  abilities and Pokemon notes.
 
 ## DIV-v0.1.0 - 2026-05-24
 

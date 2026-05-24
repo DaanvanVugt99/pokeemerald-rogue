@@ -18,6 +18,11 @@ This file documents practical repo-specific guidance for coding agents and contr
 - Keep upstream compatibility where it helps, but do not inherit upstream content or behavior blindly.
 - Prefer changes that make runs clearer, more replayable, and more distinct without losing the Emerald Rogue foundation.
 
+## Design References
+
+- Use `docs/design/pokemon_romhack_tracker.xlsx` as the general design tracker for unique abilities, Pokemon identity notes, species/form planning, and implementation status.
+- Keep the tracker aligned with meaningful design changes. Code and tests remain the source of truth for shipped behavior, but the tracker should capture design intent before and during implementation.
+
 ## Git Workflow
 
 - Work on `main` by default unless the user explicitly asks for a separate branch.
