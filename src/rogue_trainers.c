@@ -51,8 +51,10 @@ struct TrainerPartyScratch
     bool8 allowStrongLegends;
     bool8 forceLegends;
     bool8 preferStrongSpecies;
+    bool8 forcePrimaryType;
     u8 evoLevel;
     u8 partyCapacity;
+    u8 targetPartyCount;
     u8 partyCount;
     u8 subsetIndex;
     u8 subsetSampleCount;
@@ -74,6 +76,7 @@ static EWRAM_DATA struct TrainerTemp sTrainerTemp = {0};
 static u32 GetActiveTeamFlag();
 static void EnsureSubsetIsValid(struct TrainerPartyScratch* scratch);
 static u16 SampleNextSpecies(struct TrainerPartyScratch* scratch);
+static bool8 ShouldForcePrimaryTrainerType(struct TrainerPartyScratch* scratch);
 
 static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 monCount, u8 monCapacity, bool8 firstTrainer, u8 startIndex);
 static u8 CreateRivalPartyInternal(u16 trainerNum, struct Pokemon* party, u8 monCapacity);
@@ -2218,7 +2221,9 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     scratch.subsetSampleCount = 0;
     scratch.fallbackCount = 0;
     scratch.forceLegends = FALSE;
+    scratch.forcePrimaryType = FALSE;
     scratch.evoLevel = level;
+    scratch.targetPartyCount = monCount;
     scratch.allowItemEvos = FALSE;
     scratch.allowStrongLegends = FALSE;
     scratch.allowWeakLegends = FALSE;
@@ -2880,11 +2885,59 @@ static bool8 CanEntirelyAvoidWeakSpecies()
     return RoguePokedex_GetCurrentDexLimit() >= 380;
 }
 
+static bool8 SpeciesHasTrainerPrimaryType(u16 species, u16 primaryType)
+{
+    return RoguePokedex_GetSpeciesType(species, 0) == primaryType
+        || RoguePokedex_GetSpeciesType(species, 1) == primaryType;
+}
+
+static bool8 ShouldForcePrimaryTrainerType(struct TrainerPartyScratch* scratch)
+{
+    u8 i;
+    u8 primaryTypeCount = 0;
+    u8 minPrimaryTypeCount;
+    u8 remainingSlots;
+    struct RogueTrainer const* trainer = &gRogueTrainers[scratch->trainerNum];
+
+    if(!Rogue_GetConfigToggle(CONFIG_TOGGLE_DIVERSE_TRAINERS))
+        return FALSE;
+
+    if(!Rogue_IsBossTrainer(scratch->trainerNum))
+        return FALSE;
+
+    if(!IS_STANDARD_TYPE(trainer->typeAssignment))
+        return FALSE;
+
+    minPrimaryTypeCount = (scratch->targetPartyCount + 1) / 2;
+
+    for(i = 0; i < scratch->partyCount; ++i)
+    {
+        u16 species = GetMonData(&scratch->party[i], MON_DATA_SPECIES);
+
+        if(SpeciesHasTrainerPrimaryType(species, trainer->typeAssignment))
+            ++primaryTypeCount;
+    }
+
+    if(primaryTypeCount >= minPrimaryTypeCount)
+        return FALSE;
+
+    remainingSlots = scratch->targetPartyCount - scratch->partyCount;
+    return remainingSlots <= minPrimaryTypeCount - primaryTypeCount;
+}
+
 static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
 {
     u16 species;
     struct RogueTrainer const* trainer = &gRogueTrainers[scratch->trainerNum];
     bool8 allowSpeciesDuplicates = FALSE;
+    bool8 forcePrimaryType = ShouldForcePrimaryTrainerType(scratch);
+    u32 forcedPrimaryTypeFlags = forcePrimaryType ? MON_TYPE_VAL_TO_FLAGS(trainer->typeAssignment) : 0;
+
+    if(scratch->forcePrimaryType != forcePrimaryType)
+    {
+        scratch->forcePrimaryType = forcePrimaryType;
+        scratch->shouldRegenerateQuery = TRUE;
+    }
 
     // Always grab this
     if(scratch->subsetIndex < trainer->teamGenerator.subsetCount)
@@ -3007,6 +3060,12 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
         else
         {
             RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, fallbackTypeFlags);
+        }
+
+        if(forcedPrimaryTypeFlags != 0)
+        {
+            RogueMonQuery_EvosContainType(QUERY_FUNC_INCLUDE, forcedPrimaryTypeFlags);
+            RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, forcedPrimaryTypeFlags);
         }
 
         // Never give trainers unown
