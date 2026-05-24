@@ -4,7 +4,7 @@ This file documents practical repo-specific guidance for coding agents and contr
 
 ## Environment Baseline
 
-- Project: `pokeemerald-rogue` (modern + rogue expansion build).
+- Project: Pokemon Emerald Rogue: Divergence (`pokeemerald-rogue`).
 - Primary test launcher: `./scripts/launch_build_test.sh`.
 - Toolchain expected: `devkitARM` (`arm-none-eabi-*` in `PATH`).
 - For interactive test ROM runs: `mgba` in `PATH`.
@@ -16,6 +16,7 @@ This file documents practical repo-specific guidance for coding agents and contr
 - Treat this as a vertical-slice target, not a hard engine limitation.
 - Prefer decisions that preserve the Emerald/Hoenn feel for the first fully playable milestone.
 - Engine work may remain future-compatible with later generations, but content rollout, balancing, and unique-ability authoring should prioritize Gen 1-3 first.
+- Treat `expansion-abilities` as the active standalone project line unless a newer mainline branch is explicitly created.
 
 ## Test Commands
 
@@ -88,3 +89,17 @@ This file documents practical repo-specific guidance for coding agents and contr
 - Large assembly/script files such as `data/battle_anim_scripts.s` can cause `apply_patch` to hang or stall on otherwise small edits.
 - If that happens, prefer a narrow scripted replacement with tools like `perl -0pi` after first verifying the exact surrounding text with `sed`/`rg`.
 - After scripted edits to assembly animation/script files, always re-open the edited block and run a focused filtered test/build to confirm the replacement was exact.
+
+## Versioning and Change Notes
+
+- Use `CHANGELOG_ROGUE.md` for project-specific work on this fork.
+- Leave upstream `pokeemerald-expansion` changelog history in `CHANGELOG.md` and `docs/changelogs/`.
+- Treat Git tags as the release source of truth:
+  - `DIV-vX.Y.Z` for new Divergence releases.
+  - Existing `EX-v*` and `vanilla-v*` tags are inherited history.
+- Before release work, check both:
+  - `git status --short --branch`
+  - `git describe --tags --always --dirty`
+- Add a changelog bullet for meaningful user-facing changes, balance changes, asset updates, bug fixes, and docs-only release housekeeping.
+- Do not update upstream expansion version constants as a substitute for this fork's project version.
+- See `VERSIONING.md` for the full release checklist and tag policy.

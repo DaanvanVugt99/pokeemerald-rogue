@@ -109,7 +109,7 @@ __attribute__((section(".text.consts")))
 static const struct GFRomHeader sGFRomHeader = {
     .version = GAME_VERSION,
     .language = GAME_LANGUAGE,
-    .gameName = "pokemon emerald rogue version",
+    .gameName = "pokemon emerald rogue divergence",
     //.monFrontPics = gMonFrontPicTable, // Handled in gSpeciesInfo
     //.monBackPics = gMonBackPicTable, // Handled in gSpeciesInfo
     //.monNormalPalettes = gMonPaletteTable, // Handled in gSpeciesInfo
