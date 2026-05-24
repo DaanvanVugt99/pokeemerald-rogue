@@ -3,12 +3,14 @@ name: CI
 on:
   push:
     branches:
+      - main
       - vanilla
       - vanilla-dev
       - expansion
       - expansion-dev
   pull_request:
     branches:
+      - main
       - vanilla
       - vanilla-dev
       - expansion
@@ -82,7 +84,4 @@ jobs:
       - name: Test
         env:
           MODERN: 1
-          TEST: 1
-        run: |
-          make -j${nproc} -O pokeemerald-test.elf
-          make -j${nproc} check
+        run: ./scripts/launch_build_test.sh --check-all-suites

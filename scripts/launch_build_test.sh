@@ -111,7 +111,7 @@ parse_summary_count() {
 
     strip_ansi < "$log_file" \
         | awk -v label="$label" '
-            $0 ~ ("^" label ":[[:space:]]*") {
+            $0 ~ ("^[[:space:]]*(-[[:space:]]*)?" label ":[[:space:]]*") {
                 for (i = NF; i >= 1; i--) {
                     if ($i ~ /^[0-9]+$/) {
                         value = $i
@@ -184,6 +184,14 @@ print_split_suite_summary() {
                 echo "  - ${suite_names[$i]} exited with ${suite_exit_codes[$i]}"
             fi
         done
+    fi
+
+    if [ "$total_assumption_failed" -gt 0 ]; then
+        echo
+        echo "Assumption failures found; treating split-suite validation as failed."
+        if [ "$exit_code" -eq 0 ]; then
+            exit_code=1
+        fi
     fi
 }
 
