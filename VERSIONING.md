@@ -20,19 +20,12 @@ Use semantic-version-style numbers for project releases:
 Minor `.0` patch numbers may be omitted only for old compatibility tags. For
 new tags, prefer the full `X.Y.Z` shape so sorting and release notes stay clear.
 
-## Current Branch State
+## Current Baseline
 
-As of this cleanup, `expansion-abilities` describes as:
-
-```sh
-EX-v2.0-592-g24ed8ebcf6-dirty
-```
-
-`EX-v2.1` exists locally, but it is not an ancestor of the current branch.
-Before cutting the first `DIV` release, decide whether to merge, cherry-pick, or
-supersede the existing `EX-v2.1` line. If this project keeps
-`expansion-abilities` as the main development line, that decision should happen
-before renaming or retargeting the default branch.
+- `main` is the authoritative standalone development branch.
+- `DIV-v0.1.0` is the first standalone Divergence baseline, tagged on 2026-05-24.
+- Existing `EX-v*` and `vanilla-v*` tags are inherited history only.
+- Upstream work should be manually ported or cherry-picked deliberately, then recorded in `CHANGELOG_ROGUE.md`.
 
 ## Source of Truth
 
@@ -64,7 +57,11 @@ before renaming or retargeting the default branch.
    ## DIV-vX.Y.Z - YYYY-MM-DD
    ```
 
-5. Validate with the split-suite test launcher:
+5. Validate based on risk:
+
+   - Docs-only changes: `git diff --check`.
+   - Focused code or test changes: run the relevant filtered suite.
+   - Broad battle, content, engine, or release changes: run the full split-suite launcher.
 
    ```sh
    ./scripts/launch_build_test.sh --check-all-suites

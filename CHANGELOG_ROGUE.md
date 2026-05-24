@@ -14,12 +14,11 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
-Current local status at the time this changelog was introduced:
+_No unreleased changes yet._
 
-- Branch: `expansion-abilities`
-- Remote status: 3 commits ahead of `origin/expansion-abilities`
-- Nearest reachable release tag: `EX-v2.0`
-- `EX-v2.1` exists locally but is not an ancestor of this branch
+## DIV-v0.1.0 - 2026-05-24
+
+First standalone Divergence baseline.
 
 ### Changed
 
@@ -35,6 +34,12 @@ Current local status at the time this changelog was introduced:
 - Added project-specific versioning and changelog guidance.
 - Reframed the project README and marketing overview around Pokemon Emerald
   Rogue: Divergence as a standalone project identity.
+
+### Validation
+
+- `./scripts/launch_build_test.sh --check-all-suites`
+  - Completed successfully.
+  - Existing suite output still included known failing, TODO, and one assumption-failed count in `test/battle/move_effect/clanging_scales.c`.
 
 ## Release Notes Template
 

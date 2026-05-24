@@ -10,13 +10,21 @@ This file documents practical repo-specific guidance for coding agents and contr
 - For interactive test ROM runs: `mgba` in `PATH`.
 - For headless checks: `mgba-rom-test` in `PATH` (used via `make check` + hydra wrapper).
 
-## Current Product Scope
+## Project Direction
 
-- Long-term MVP content scope is Gen 1-3 only.
-- Treat this as a vertical-slice target, not a hard engine limitation.
-- Prefer decisions that preserve the Emerald/Hoenn feel for the first fully playable milestone.
-- Engine work may remain future-compatible with later generations, but content rollout, balancing, and unique-ability authoring should prioritize Gen 1-3 first.
-- Treat `expansion-abilities` as the active standalone project line unless a newer mainline branch is explicitly created.
+- Treat `main` as the authoritative standalone Divergence development branch.
+- Preserve Pokemon Emerald Rogue: Divergence as its own project identity rather than a temporary feature branch of upstream Emerald Rogue.
+- Prioritize expressive run variety, readable battle feedback, and deliberate balance/content choices.
+- Keep upstream compatibility where it helps, but do not inherit upstream content or behavior blindly.
+- Prefer changes that make runs clearer, more replayable, and more distinct without losing the Emerald Rogue foundation.
+
+## Git Workflow
+
+- Work on `main` by default unless the user explicitly asks for a separate branch.
+- Before edits, check `git status --short --branch` and preserve unrelated user changes.
+- Keep commits focused and use imperative commit messages.
+- Do not delete inherited branches or tags such as `origin/expansion-abilities`, `origin/vanilla`, `EX-v*`, or `vanilla-v*` unless explicitly requested.
+- Treat `pokabbie` and `upstream` as read-only source remotes. Do not push to them.
 
 ## Test Commands
 
@@ -29,6 +37,20 @@ This file documents practical repo-specific guidance for coding agents and contr
   - This all-in-one test ROM is near the 32 MiB linker layout limit and may fail with `tests`/`dacs` overlap. Do not treat this as the required day-to-day full validation path.
 - Run in emulator UI:
   - `./scripts/launch_build_test.sh --ui`
+
+## Risk-Based Validation
+
+- Docs-only changes: run `git diff --check`.
+- Focused code or test changes: run the relevant filtered suite first, for example `./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"`.
+- Broad battle, content, engine, or release changes: run `./scripts/launch_build_test.sh --check-all-suites`.
+- If validation cannot run because `devkitARM`, `mgba`, or `mgba-rom-test` is missing, record the exact missing dependency and do not report the check as passed.
+
+## Upstream Port Policy
+
+- Treat Pokabbie's Emerald Rogue and RHH's pokeemerald-expansion as source material for deliberate ports.
+- Prefer cherry-picking or manually porting understood changes over blind merges.
+- Record meaningful upstream ports in `CHANGELOG_ROGUE.md`.
+- When upstream assumptions conflict with Divergence direction, preserve Divergence behavior unless the user explicitly chooses otherwise.
 
 ## Headless Check Notes
 

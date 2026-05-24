@@ -1,9 +1,8 @@
 # Pokemon Emerald Rogue: Divergence
 
 Pokemon Emerald Rogue: Divergence is a standalone fork of Pokemon Emerald
-Rogue focused on expressive run variety, Gen 1-3-first content direction, and
-expanded battle identity through custom abilities, weather, terrain, items,
-maps, and quality-of-life systems.
+Rogue focused on expressive run variety and expanded battle identity through
+custom abilities, weather, terrain, items, maps, and quality-of-life systems.
 
 This repository is now treated as its own project. Upstream Emerald Rogue and
 pokeemerald-expansion changes may still be ported when useful, but they are
@@ -11,26 +10,24 @@ inputs to this project rather than the project identity itself.
 
 ## Project Direction
 
-- First playable milestone scope prioritizes Gen 1-3 content and an
-  Emerald/Hoenn feel.
-- Engine work may remain compatible with later generations where that keeps
-  future options open.
+- Preserve a standalone Divergence identity while keeping upstream credits
+  explicit.
 - Unique abilities and battle feedback should make Pokemon feel meaningfully
   distinct during a run.
 - Balance and content rollout should favor readable, replayable runs over
   simply enabling every available upstream feature.
+- Upstream changes may be ported deliberately when they strengthen the project.
 
 ## Current Development Line
 
-- Active branch: `expansion-abilities`
+- Active branch: `main`
+- Baseline release: `DIV-v0.1.0`
 - Project changelog: [CHANGELOG_ROGUE.md](CHANGELOG_ROGUE.md)
 - Versioning policy: [VERSIONING.md](VERSIONING.md)
 - Agent/contributor guidance: [AGENTS.md](AGENTS.md)
 
-At the time project versioning was cleaned up, `expansion-abilities` was ahead
-of `origin/expansion-abilities` and described from `EX-v2.0`. The existing
-`EX-v2.1` tag is not an ancestor of the active branch, so the next release line
-should explicitly decide whether to merge, cherry-pick, or supersede that tag.
+Existing `EX-v*` and `vanilla-v*` tags and inherited branches are retained for
+historical provenance. New project releases use the `DIV-vX.Y.Z` tag line.
 
 ## Build and Test
 
