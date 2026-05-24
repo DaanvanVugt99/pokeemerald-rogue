@@ -14,6 +14,10 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Changed
+
+- Assigned implemented design-doc unique abilities to additional Mega forms.
+
 ### Docs
 
 - Added the Pokemon romhack tracker as the general design reference for unique
