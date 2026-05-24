@@ -45,6 +45,7 @@
 #include "palette.h"
 #include "party_menu.h"
 #include "player_pc.h"
+#include "pokedex.h"
 #include "pokemon.h"
 #include "pokemon_icon.h"
 #include "pokemon_jump.h"
@@ -7732,6 +7733,7 @@ static void Task_TryItemUseFormChange(u8 taskId)
         targetSpecies = gTasks[taskId].tTargetSpecies;
         SetMonData(mon, MON_DATA_SPECIES, &targetSpecies);
         CalculateMonStats(mon);
+        HandleSetPokedexFlag(targetSpecies, IsMonShiny(mon) ? FLAG_SET_CAUGHT_SHINY : FLAG_SET_CAUGHT, GetMonData(mon, MON_DATA_PERSONALITY));
         gTasks[taskId].tState++;
         break;
     case 1:
@@ -7989,6 +7991,7 @@ void TryItemHoldFormChange(struct Pokemon *mon)
         FreeAndDestroyMonIconSprite(&gSprites[sPartyMenuBoxes[gPartyMenu.slotId].monSpriteId]);
         CreatePartyMonIconSpriteParameterized(targetSpecies, GetMonData(mon, MON_DATA_PERSONALITY, NULL), GetMonGender(mon), &sPartyMenuBoxes[gPartyMenu.slotId], 1);
         CalculateMonStats(mon);
+        HandleSetPokedexFlag(targetSpecies, IsMonShiny(mon) ? FLAG_SET_CAUGHT_SHINY : FLAG_SET_CAUGHT, GetMonData(mon, MON_DATA_PERSONALITY));
         UpdatePartyMonHeldItemSprite(mon, &sPartyMenuBoxes[gPartyMenu.slotId]);
     }
 }

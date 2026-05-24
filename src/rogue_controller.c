@@ -3546,7 +3546,7 @@ static void TryAutoItemPickup(void)
     GetXYCoordsOneStepInFrontOfPlayer(&x, &y);
     elevation = PlayerGetElevation();
 
-    if (gRogueLocal.autoPickupLastX == x && gRogueLocal.autoPickupLastY == y)
+    if ((gRogueLocal.autoPickupLastX == x && gRogueLocal.autoPickupLastY == y) || Rogue_IsRideMonFlying())
         return;
 
     if (Rogue_IsRunActive()
@@ -3582,6 +3582,31 @@ static void TryAutoItemPickup(void)
                     RemoveObjectEventByLocalIdAndMap(gObjectEvents[i].localId, gObjectEvents[i].mapNum, gObjectEvents[i].mapGroup);
                 }
             }
+            else if (template->graphicsId == OBJ_EVENT_GFX_ITEM_RARE_CANDY || template->graphicsId == OBJ_EVENT_GFX_ITEM_MASTER_BALL)
+            {
+                u16 amount;
+                u16 itemId = ITEM_NONE;
+
+                switch (template->graphicsId)
+                {
+                case OBJ_EVENT_GFX_ITEM_RARE_CANDY:
+                    itemId = ITEM_RARE_CANDY;
+                    break;
+
+                case OBJ_EVENT_GFX_ITEM_MASTER_BALL:
+                    itemId = ITEM_MASTER_BALL;
+                    break;
+                }
+
+                VarSet(VAR_0x8001, itemId);
+                amount = Rogue_ModifyItemPickupAmount(itemId, 1);
+
+                if (AddBagItem(itemId, amount))
+                {
+                    Rogue_PushPopup_AddItem(itemId, amount);
+                    RemoveObjectEventByLocalIdAndMap(gObjectEvents[i].localId, gObjectEvents[i].mapNum, gObjectEvents[i].mapGroup);
+                }
+            }
             else if (template->movementType == MOVEMENT_TYPE_BERRY_TREE_GROWTH)
             {
                 u16 stage;
@@ -3605,6 +3630,14 @@ static void TryAutoItemPickup(void)
                         ObjectEventInteractionRemoveBerryTree();
                     }
                 }
+            }
+            else if (template->graphicsId == OBJ_EVENT_GFX_BREAKABLE_ROCK
+                  || template->graphicsId == OBJ_EVENT_GFX_CUTTABLE_TREE
+                  || template->graphicsId == OBJ_EVENT_GFX_PUSHABLE_BOULDER)
+            {
+                gSelectedObjectEvent = i;
+                gSpecialVar_LastTalked = gObjectEvents[i].localId;
+                ScriptContext_SetupScript(template->script);
             }
         }
 
@@ -6133,6 +6166,11 @@ void RemoveMonAtSlot(u8 slot, bool8 keepItems, bool8 compactPartySlots)
 
             ZeroMonData(&gPlayerParty[slot]);
 
+#ifdef ROGUE_EXPANSION
+            if (gBattleStruct != NULL)
+                gBattleStruct->changedSpecies[B_SIDE_PLAYER][slot] = SPECIES_NONE;
+#endif
+
             if(compactPartySlots)
             {
                 CompactPartySlots();
@@ -6244,6 +6282,11 @@ void RemoveAnyFaintedMons(bool8 keepItems)
                 PushFaintedMonToLab(&gPlayerParty[read]);
 
                 ZeroMonData(&gPlayerParty[read]);
+
+#ifdef ROGUE_EXPANSION
+                if (gBattleStruct != NULL)
+                    gBattleStruct->changedSpecies[B_SIDE_PLAYER][read] = SPECIES_NONE;
+#endif
             }
         }
     }

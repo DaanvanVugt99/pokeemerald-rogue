@@ -13,6 +13,7 @@
 #include "malloc.h"
 #include "money.h"
 #include "pokedex.h"
+#include "pokemon.h"
 #include "string_util.h"
 
 #include "rogue.h"
@@ -1198,6 +1199,7 @@ static bool8 UNUSED QuestCondition_PartyContainsType(u16 questId, struct RogueQu
 {
     u8 i;
     u16 species, targetType;
+    u32 otId;
 
     ASSERT_PARAM_COUNT(1);
     targetType = trigger->params[0];
@@ -1205,8 +1207,9 @@ static bool8 UNUSED QuestCondition_PartyContainsType(u16 questId, struct RogueQu
     for(i = 0; i < gPlayerPartyCount; ++i)
     {
         species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+        otId = GetMonData(&gPlayerParty[i], MON_DATA_OT_ID);
 
-        if(RoguePokedex_GetSpeciesType(species, 0) == targetType || RoguePokedex_GetSpeciesType(species, 1) == targetType)
+        if(GetTypeBySpecies(species, 0, otId) == targetType || GetTypeBySpecies(species, 1, otId) == targetType)
         {
             return TRUE;
         }
@@ -1219,6 +1222,7 @@ static bool8 QuestCondition_PartyOnlyContainsType(u16 questId, struct RogueQuest
 {
     u8 i;
     u16 species, targetType;
+    u32 otId;
 
     ASSERT_PARAM_COUNT(1);
     targetType = trigger->params[0];
@@ -1226,8 +1230,9 @@ static bool8 QuestCondition_PartyOnlyContainsType(u16 questId, struct RogueQuest
     for(i = 0; i < gPlayerPartyCount; ++i)
     {
         species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+        otId = GetMonData(&gPlayerParty[i], MON_DATA_OT_ID);
 
-        if(RoguePokedex_GetSpeciesType(species, 0) != targetType && RoguePokedex_GetSpeciesType(species, 1) != targetType)
+        if(GetTypeBySpecies(species, 0, otId) != targetType && GetTypeBySpecies(species, 1, otId) != targetType)
         {
             return FALSE;
         }

@@ -4761,31 +4761,33 @@ static u32 GetSingularityAirspaceBattler(u32 battler)
     return MAX_BATTLERS_COUNT;
 }
 
+static void GetPartyMonTypes(struct Pokemon *mon, u32 *type1, u32 *type2)
+{
+    u16 species = GetMonData(mon, MON_DATA_SPECIES);
+    u32 otId = GetMonData(mon, MON_DATA_OT_ID);
+
+    *type1 = GetTypeBySpecies(species, 0, otId);
+    *type2 = GetTypeBySpecies(species, 1, otId);
+}
+
 bool32 DoesPartyShareTypeWithBattler(u32 battler)
 {
     u32 i;
     u32 firstMonId, lastMonId;
     struct Pokemon *party;
-    u16 battlerSpecies;
     u32 battlerType1, battlerType2;
 
     GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
-
-    battlerSpecies = GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES);
-    battlerType1 = gSpeciesInfo[battlerSpecies].types[0];
-    battlerType2 = gSpeciesInfo[battlerSpecies].types[1];
+    GetPartyMonTypes(&party[gBattlerPartyIndexes[battler]], &battlerType1, &battlerType2);
 
     for (i = firstMonId; i < lastMonId; i++)
     {
-        u16 species;
         u32 monType1, monType2;
 
         if (!IsValidForBattle(&party[i]))
             continue;
 
-        species = GetMonData(&party[i], MON_DATA_SPECIES);
-        monType1 = gSpeciesInfo[species].types[0];
-        monType2 = gSpeciesInfo[species].types[1];
+        GetPartyMonTypes(&party[i], &monType1, &monType2);
 
         if (monType1 != battlerType1
          && monType1 != battlerType2
@@ -4805,13 +4807,15 @@ static bool32 DoesPartyMonShareCreationType(struct Pokemon *mon, u32 type)
     u16 item = GetMonData(mon, MON_DATA_HELD_ITEM);
     u32 holdEffect = ItemId_GetHoldEffect(item);
     u32 itemType = ItemId_GetSecondaryId(item);
+    u32 monType1, monType2;
 
     if (GET_BASE_SPECIES_ID(species) == SPECIES_ARCEUS
      && (holdEffect == HOLD_EFFECT_PLATE || holdEffect == HOLD_EFFECT_Z_CRYSTAL)
      && IS_STANDARD_TYPE(itemType))
         return itemType == type;
 
-    return gSpeciesInfo[species].types[0] == type || gSpeciesInfo[species].types[1] == type;
+    GetPartyMonTypes(mon, &monType1, &monType2);
+    return monType1 == type || monType2 == type;
 }
 
 u32 GetBattlerCreationType(u32 battler)
@@ -4927,7 +4931,6 @@ u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler)
 
     for (i = firstMonId; i < lastMonId; i++)
     {
-        u16 species;
         u32 monType1, monType2;
 
         if (!IsValidForBattle(&party[i]))
@@ -4935,9 +4938,7 @@ u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler)
         if (excludeBattler && i == gBattlerPartyIndexes[battler])
             continue;
 
-        species = GetMonData(&party[i], MON_DATA_SPECIES);
-        monType1 = gSpeciesInfo[species].types[0];
-        monType2 = gSpeciesInfo[species].types[1];
+        GetPartyMonTypes(&party[i], &monType1, &monType2);
 
         if (monType1 == type || monType2 == type)
             count++;
@@ -4957,7 +4958,6 @@ u32 CountPartyMonsWithAnyTypes(u32 battler, u32 typeMask, bool32 excludeBattler)
 
     for (i = firstMonId; i < lastMonId; i++)
     {
-        u16 species;
         u32 monType1, monType2;
 
         if (!IsValidForBattle(&party[i]))
@@ -4965,9 +4965,7 @@ u32 CountPartyMonsWithAnyTypes(u32 battler, u32 typeMask, bool32 excludeBattler)
         if (excludeBattler && i == gBattlerPartyIndexes[battler])
             continue;
 
-        species = GetMonData(&party[i], MON_DATA_SPECIES);
-        monType1 = gSpeciesInfo[species].types[0];
-        monType2 = gSpeciesInfo[species].types[1];
+        GetPartyMonTypes(&party[i], &monType1, &monType2);
 
         if ((typeMask & gBitTable[monType1]) || (typeMask & gBitTable[monType2]))
             count++;
@@ -4987,15 +4985,12 @@ bool32 DoesPartyHaveUniqueTypes(u32 battler)
 
     for (i = firstMonId; i < lastMonId; i++)
     {
-        u16 species;
         u32 monType1, monType2;
 
         if (!IsValidForBattle(&party[i]))
             continue;
 
-        species = GetMonData(&party[i], MON_DATA_SPECIES);
-        monType1 = gSpeciesInfo[species].types[0];
-        monType2 = gSpeciesInfo[species].types[1];
+        GetPartyMonTypes(&party[i], &monType1, &monType2);
 
         if (seenTypes[monType1])
             return FALSE;
