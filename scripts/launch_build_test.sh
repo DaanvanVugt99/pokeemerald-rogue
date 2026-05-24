@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -u
+set -o pipefail
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(cd "$script_dir/.." && pwd)"
@@ -100,6 +101,92 @@ fi
 
 exit_code=0
 
+strip_ansi() {
+    perl -pe 's/\e\[[0-9;]*[[:alpha:]]//g'
+}
+
+parse_summary_count() {
+    local label="$1"
+    local log_file="$2"
+
+    strip_ansi < "$log_file" \
+        | awk -v label="$label" '
+            $0 ~ ("^" label ":[[:space:]]*") {
+                for (i = NF; i >= 1; i--) {
+                    if ($i ~ /^[0-9]+$/) {
+                        value = $i
+                        break
+                    }
+                }
+            }
+            END {
+                if (value == "")
+                    value = 0
+                print value
+            }
+        '
+}
+
+print_split_suite_summary() {
+    local total_failed=0
+    local total_known_failing_passed=0
+    local total_passed=0
+    local total_known_failing=0
+    local total_todo=0
+    local total_assumption_failed=0
+    local total_tests=0
+    local failed_suites=0
+    local i
+
+    echo
+    echo "Split-suite summary:"
+    printf "  %-10s %8s %8s %8s %8s %8s %8s %8s\n" "Suite" "Failed" "KF Pass" "Passed" "Known" "TODO" "Assume" "Total"
+
+    for i in "${!suite_names[@]}"; do
+        printf "  %-10s %8s %8s %8s %8s %8s %8s %8s\n" \
+            "${suite_names[$i]}" \
+            "${suite_failed[$i]}" \
+            "${suite_known_failing_passed[$i]}" \
+            "${suite_passed[$i]}" \
+            "${suite_known_failing[$i]}" \
+            "${suite_todo[$i]}" \
+            "${suite_assumption_failed[$i]}" \
+            "${suite_total[$i]}"
+
+        total_failed=$((total_failed + suite_failed[$i]))
+        total_known_failing_passed=$((total_known_failing_passed + suite_known_failing_passed[$i]))
+        total_passed=$((total_passed + suite_passed[$i]))
+        total_known_failing=$((total_known_failing + suite_known_failing[$i]))
+        total_todo=$((total_todo + suite_todo[$i]))
+        total_assumption_failed=$((total_assumption_failed + suite_assumption_failed[$i]))
+        total_tests=$((total_tests + suite_total[$i]))
+
+        if [ "${suite_exit_codes[$i]}" -ne 0 ]; then
+            failed_suites=$((failed_suites + 1))
+        fi
+    done
+
+    printf "  %-10s %8s %8s %8s %8s %8s %8s %8s\n" \
+        "TOTAL" \
+        "$total_failed" \
+        "$total_known_failing_passed" \
+        "$total_passed" \
+        "$total_known_failing" \
+        "$total_todo" \
+        "$total_assumption_failed" \
+        "$total_tests"
+
+    if [ "$failed_suites" -gt 0 ]; then
+        echo
+        echo "Suites with command failures:"
+        for i in "${!suite_names[@]}"; do
+            if [ "${suite_exit_codes[$i]}" -ne 0 ]; then
+                echo "  - ${suite_names[$i]} exited with ${suite_exit_codes[$i]}"
+            fi
+        done
+    fi
+}
+
 run_make() {
     local target="$1"
     local suite="$2"
@@ -112,14 +199,39 @@ run_make() {
 }
 
 if [ "$check_all_suites" -eq 1 ]; then
+    suite_logs_dir="$(mktemp -d "${TMPDIR:-/tmp}/pokeemerald-rogue-tests.XXXXXX")"
+    trap 'rm -rf "$suite_logs_dir"' EXIT
+    suite_names=()
+    suite_exit_codes=()
+    suite_failed=()
+    suite_known_failing_passed=()
+    suite_passed=()
+    suite_known_failing=()
+    suite_todo=()
+    suite_assumption_failed=()
+    suite_total=()
+
     for suite in "${all_suites[@]}"; do
+        suite_log="$suite_logs_dir/$suite.log"
         echo "Running headless tests.. [make -j$num_cores check RELEASE=0 TEST_SUITE=\"$suite\" TESTS=\"$test_to_run_prefix\"]"
-        run_make check "$suite"
-        exit_code=$?
-        if [ $exit_code -ne 0 ]; then
-            break
+        run_make check "$suite" 2>&1 | tee "$suite_log"
+        suite_exit_code=$?
+        if [ $suite_exit_code -ne 0 ] && { [ $exit_code -eq 0 ] || [ $suite_exit_code -gt $exit_code ]; }; then
+            exit_code=$suite_exit_code
         fi
+
+        suite_names+=("$suite")
+        suite_exit_codes+=("$suite_exit_code")
+        suite_failed+=("$(parse_summary_count "Tests FAILED" "$suite_log")")
+        suite_known_failing_passed+=("$(parse_summary_count "KNOWN_FAILING_PASSED" "$suite_log")")
+        suite_passed+=("$(parse_summary_count "Tests PASSED" "$suite_log")")
+        suite_known_failing+=("$(parse_summary_count "Tests KNOWN_FAILING" "$suite_log")")
+        suite_todo+=("$(parse_summary_count "Tests TO_DO" "$suite_log")")
+        suite_assumption_failed+=("$(parse_summary_count "ASSUMPTIONS_FAILED" "$suite_log")")
+        suite_total+=("$(parse_summary_count "Tests TOTAL" "$suite_log")")
     done
+
+    print_split_suite_summary
 elif [ "$mode" = "check" ]; then
     echo "Running headless tests.. [make -j$num_cores check RELEASE=0 TEST_SUITE=\"$test_suite\" TESTS=\"$test_to_run_prefix\"]"
     run_make check "$test_suite"
