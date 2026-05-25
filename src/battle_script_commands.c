@@ -2164,6 +2164,9 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
              || gBattleMoves[move].effect == EFFECT_ALWAYS_CRIT
              || (HasBattlerAbility(battlerAtk, ABILITY_GRAND_REVEAL)
                  && gProtectStructs[battlerAtk].uniqueAbilityTriggeredThisTurn)
+             || (HasBattlerAbility(battlerAtk, ABILITY_SOUL_BRAND)
+                 && gDisableStructs[battlerAtk].uniquePersistentStateActive
+                 && gBattleMoves[move].slicingMove)
              || ((HasBattlerAbility(battlerAtk, ABILITY_OPENING_VERSE)
                || HasBattlerAbility(battlerAtk, ABILITY_FINAL_STEP))
                  && gProtectStructs[battlerAtk].uniqueAbilityTriggeredThisTurn
@@ -6776,6 +6779,25 @@ static void Cmd_moveend(void)
                 gBattlescriptCurrInstr = BattleScript_WarpathHeal;
                 effect = TRUE;
             }
+            if (!effect
+                && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+                && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+                && IsBattlerAlive(gBattlerAttacker)
+                && HasBattlerAbility(gBattlerAttacker, ABILITY_OLIVE_GROVE)
+                && gBattleMoves[gCurrentMove].power != 0
+                && moveType == TYPE_GRASS
+                && TARGET_TURN_DAMAGED
+                && gBattleScripting.savedDmg != 0
+                && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN)
+                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK)
+                && gBattleMons[gBattlerAttacker].hp < gBattleMons[gBattlerAttacker].maxHP)
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_OLIVE_GROVE);
+                gBattleMoveDamage = -max(1, gBattleScripting.savedDmg / 4);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityHpHeal;
+                effect = TRUE;
+            }
             if (HasBattlerAbility(gBattlerAttacker, ABILITY_MAGICIAN)
               && gCurrentMove != MOVE_FLING && gCurrentMove != MOVE_NATURAL_GIFT
               && gBattleMons[gBattlerAttacker].item == ITEM_NONE
@@ -7004,6 +7026,19 @@ static void Cmd_moveend(void)
                 for (i = 0; i < gBattlersCount; i++)
                 {
                     u8 battler = battlers[i];
+                    if (battler != gBattlerAttacker
+                      && IsBattlerAlive(battler)
+                      && HasBattlerAbility(battler, ABILITY_OLIVE_GROVE)
+                      && BATTLER_TURN_DAMAGED(battler)
+                      && TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer))
+                    {
+                        SetBattlerTriggeredAbility(battler, ABILITY_OLIVE_GROVE);
+                        gBattleScripting.battler = battler;
+                        BattleScriptPushCursor();
+                        gBattlescriptCurrInstr = BattleScript_SeedSowerActivates;
+                        effect = TRUE;
+                        break;
+                    }
                     if (battler != gBattlerAttacker
                       && IsBattlerAlive(battler)
                       && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)

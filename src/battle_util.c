@@ -7613,20 +7613,13 @@ static bool32 TryActivateTripwire(u32 battler)
     for (i = 0; i < gBattlersCount; i++)
     {
         u32 tripwireBattler = gBattlerByTurnOrder[i];
-        u32 side;
-        u32 partyBit;
-
         if (!IsBattlerAlive(tripwireBattler)
          || GetBattlerSide(tripwireBattler) == GetBattlerSide(battler)
-         || !HasBattlerAbility(tripwireBattler, ABILITY_TRIPWIRE))
+         || !HasBattlerAbility(tripwireBattler, ABILITY_TRIPWIRE)
+         || gDisableStructs[tripwireBattler].uniqueOncePerSwitchInUsed)
             continue;
 
-        side = GetBattlerSide(tripwireBattler);
-        partyBit = gBitTable[gBattlerPartyIndexes[tripwireBattler]];
-        if (gBattleStruct->uniqueAbilityUsed[side] & partyBit)
-            continue;
-
-        gBattleStruct->uniqueAbilityUsed[side] |= partyBit;
+        gDisableStructs[tripwireBattler].uniqueOncePerSwitchInUsed = TRUE;
         SetBattlerTriggeredAbility(tripwireBattler, ABILITY_TRIPWIRE);
         gBattlerAttacker = gBattlerAbility = tripwireBattler;
         gBattlerTarget = battler;
@@ -12439,6 +12432,7 @@ if (triggeringAbility != ABILITY_NONE)
             }
             break;
         case ABILITY_SEED_SOWER:
+        case ABILITY_OLIVE_GROVE:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
              && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
              && TARGET_TURN_DAMAGED
@@ -15592,6 +15586,18 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniquePersistentStateActive = FALSE;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SOUL_BRAND)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && gBattlerAttacker == battler
+         && gBattleMoves[move].slicingMove
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_DYNAMO_FISTS)
          && gBattleMoves[move].punchingMove
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -15880,6 +15886,58 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TAR_CANNON)
+         && IS_MOVE_STATUS(move)
+         && moveType == TYPE_PSYCHIC
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            u32 target = gBattlerTarget;
+
+            if (target >= gBattlersCount
+             || !IsBattlerAlive(target)
+             || GetBattlerSide(target) == GetBattlerSide(battler))
+            {
+                target = BATTLE_OPPOSITE(battler);
+                if (!IsBattlerAlive(target) && gBattlersCount > 2)
+                    target ^= BIT_FLANK;
+            }
+
+            if (target < gBattlersCount
+             && IsBattlerAlive(target)
+             && GetBattlerSide(target) != GetBattlerSide(battler)
+             && CanUseExtraMove(battler, target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_TAR_CANNON);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_TAR_SHOT;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SOUL_BRAND)
+         && gBattlerAttacker == battler
+         && IS_MOVE_STATUS(move)
+         && moveType == TYPE_GHOST
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SOUL_BRAND);
+            gBattlerAttacker = gBattlerAbility = battler;
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_VARIETY_ACT)
          && IS_MOVE_STATUS(move)
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -16019,6 +16077,26 @@ if (triggeringAbility != ABILITY_NONE)
             gCalledMove = MOVE_TAILWIND;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_TEMPERED_EMBER)
+         && moveType == TYPE_FIRE
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TEMPERED_EMBER);
+            gBattleStruct->atkCancellerTracker = 0;
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_WORK_UP;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;

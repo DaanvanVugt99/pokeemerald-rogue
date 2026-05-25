@@ -287362,7 +287362,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_ARBOLIVA
 	{
 		.flags= (0 | MON_FLAGS_GEN9NU),
 		.heldItem=ITEM_SITRUS_BERRY,
-		.ability=ABILITY_SEED_SOWER,
+		.ability=ABILITY_HARVEST,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_MODEST,
@@ -287377,7 +287377,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_ARBOLIVA
 	{
 		.flags= (0 | MON_FLAGS_GEN9ZU),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_SEED_SOWER,
+		.ability=ABILITY_HARVEST,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_FAIRY,
 		.nature=NATURE_MODEST,
@@ -287391,7 +287391,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_ARBOLIVA
 	{
 		.flags= (0 | MON_FLAGS_GEN9ZU),
 		.heldItem=ITEM_EJECT_PACK,
-		.ability=ABILITY_SEED_SOWER,
+		.ability=ABILITY_HARVEST,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_FAIRY,
 		.nature=NATURE_MODEST,
@@ -287406,7 +287406,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_ARBOLIVA
 	{
 		.flags= (0 | MON_FLAGS_GEN9ZU),
 		.heldItem=ITEM_LEFTOVERS,
-		.ability=ABILITY_SEED_SOWER,
+		.ability=ABILITY_HARVEST,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_GHOST,
 		.nature=NATURE_BOLD,
@@ -287421,7 +287421,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_ARBOLIVA
 	{
 		.flags= (0 | MON_FLAGS_GEN9MONOTYPE),
 		.heldItem=ITEM_EJECT_BUTTON,
-		.ability=ABILITY_SEED_SOWER,
+		.ability=ABILITY_HARVEST,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_BOLD,

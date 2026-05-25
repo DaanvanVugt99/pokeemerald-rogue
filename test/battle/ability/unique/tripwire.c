@@ -21,7 +21,7 @@ SINGLE_BATTLE_TEST("Tripwire damages and lowers Speed when the first opposing Po
     }
 }
 
-SINGLE_BATTLE_TEST("Tripwire only triggers once each battle")
+SINGLE_BATTLE_TEST("Tripwire only triggers once each switch-in")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
@@ -41,6 +41,32 @@ SINGLE_BATTLE_TEST("Tripwire only triggers once each battle")
     } THEN {
         EXPECT_EQ(opponent->hp, 80);
         EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Tripwire refreshes after the user switches out and back in")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_SPIDOPS) { Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_TRIPWIRE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_CHARIZARD) { HP(80); MaxHP(80); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_BLASTOISE) { HP(80); MaxHP(80); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); SWITCH(opponent, 1); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); SWITCH(opponent, 2); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_TRIPWIRE);
+        MESSAGE("Foe Charizard was caught\nin Spidops's tripwire!");
+        ABILITY_POPUP(player, ABILITY_TRIPWIRE);
+        MESSAGE("Foe Blastoise was caught\nin Spidops's tripwire!");
+    } THEN {
+        EXPECT_EQ(opponent->species, SPECIES_BLASTOISE);
+        EXPECT_EQ(opponent->hp, 70);
+        EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE - 1);
     }
 }
 
