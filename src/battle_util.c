@@ -107,6 +107,7 @@ static bool32 TryUseSpaceRiftCalledMove(u32 battler);
 bool32 TryUseDarkDimensionCalledMove(u32 battler);
 static bool32 TryUseShellWorkCalledMove(u32 battler);
 static bool32 TryUseTrashHeapCalledMove(u32 battler, u32 target);
+static bool32 TryUseCausticBloomCalledMove(u32 battler, u32 target);
 static bool32 TryUseOddSignalCalledMove(u32 battler);
 static bool32 TryUseIceFloeCalledMove(u32 battler, u32 target);
 static bool32 TryUseBrambleGuardCalledMove(u32 battler);
@@ -6133,6 +6134,33 @@ static bool32 TryUseTrashHeapCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
+static bool32 TryUseCausticBloomCalledMove(u32 battler, u32 target)
+{
+    u32 targetSide;
+
+    if (!CanUseExtraMove(battler, target))
+        return FALSE;
+
+    targetSide = GetBattlerSide(target);
+    if (!(gSideStatuses[targetSide] & SIDE_STATUS_TOXIC_SPIKES)
+     || gSideTimers[targetSide].toxicSpikesAmount == 0)
+        return FALSE;
+
+    gSideTimers[targetSide].toxicSpikesAmount--;
+    if (gSideTimers[targetSide].toxicSpikesAmount == 0)
+        gSideStatuses[targetSide] &= ~SIDE_STATUS_TOXIC_SPIKES;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_CAUSTIC_BLOOM);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_ACID_SPRAY;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static const u16 sStarmobileMoves[] =
 {
     MOVE_BLAZING_TORQUE,
@@ -8589,6 +8617,29 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gBattlerAttacker = gBattlerAbility = battler;
             BattleScriptPushCursorAndCallback(BattleScript_DeathrattlePrimed);
             return 1;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_HERO_LANDING)
+         && !uniqueDone
+         && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
+        {
+            u32 target;
+
+            if (TryGetOpposingExtraMoveTarget(battler, &target))
+            {
+                uniqueDone = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_HERO_LANDING);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_AQUA_JET;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_VERDANT_VOW)
@@ -13331,6 +13382,28 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_IRON_PLATING)
+         && moveEndAttacker != battler
+         && battler == moveEndTarget
+         && gProtectStructs[battler].physicalDmg != 0
+         && gProtectStructs[battler].physicalBattlerId == moveEndAttacker
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN)
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_IRON_PLATING);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_IRON_DEFENSE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            StartAbilityCalledMoveScript();
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_PRIMAL_MOLTING)
          && IsOnlyParadoxInParty(battler)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -14912,6 +14985,17 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[battler].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && TryUseNinjaToolsCalledMove(battler))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_CAUSTIC_BLOOM)
+         && moveType == TYPE_ROCK
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[battler].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && TryUseCausticBloomCalledMove(battler, gBattlerTarget))
         {
             effect++;
         }
