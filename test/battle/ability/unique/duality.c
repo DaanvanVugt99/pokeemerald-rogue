@@ -7,6 +7,22 @@ ASSUMPTIONS
     ASSUME(IS_MOVE_SPECIAL(MOVE_WATER_GUN));
 }
 
+SINGLE_BATTLE_TEST("Duality announces its current offensive mode at end of turn")
+{
+    GIVEN {
+        PLAYER(SPECIES_ESPATHRA) { Speed(100); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Espathra's Duality\nshifted to Sp. Atk!");
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Espathra's Duality\nshifted to Attack!");
+    }
+}
+
 SINGLE_BATTLE_TEST("Duality swaps Attack and Sp. Atk every other turn for physical moves")
 {
     s16 firstHit;

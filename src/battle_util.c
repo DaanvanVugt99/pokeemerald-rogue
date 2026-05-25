@@ -79,6 +79,7 @@ enum
 static bool32 TryRemoveScreens(u32 battler);
 static bool32 TryRemoveTargetSideScreens(u32 target);
 extern const u8 BattleScript_RedlineEndTurn[];
+extern const u8 BattleScript_DualityEndTurn[];
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
@@ -10715,7 +10716,16 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gBattlerAttacker = battler;
 
             if (HasBattlerAbility(battler, ABILITY_DUALITY))
+            {
                 gDisableStructs[battler].uniquePersistentStateActive ^= TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_DUALITY);
+                gBattleCommunication[MULTISTRING_CHOOSER] = gDisableStructs[battler].uniquePersistentStateActive
+                    ? B_MSG_DUALITY_SPATK
+                    : B_MSG_DUALITY_ATTACK;
+                BattleScriptPushCursorAndCallback(BattleScript_DualityEndTurn);
+                effect++;
+                break;
+            }
 
             if (HasBattlerAbility(battler, ABILITY_REDLINE)
              && CompareStat(battler, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN))

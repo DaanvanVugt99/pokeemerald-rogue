@@ -894,9 +894,13 @@ static const u8 sText_LowTideMadeYUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Low 
 static const u8 sText_RumbleRollClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Rumble Roll\ncleared away the hazards!");
 static const u8 sText_MeltdownRestoredHp[] = _("{B_DEF_NAME_WITH_PREFIX} restored HP\nusing its Meltdown!");
 static const u8 sText_MeltdownMadeMoveUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Meltdown\nmade {B_CURRENT_MOVE} useless!");
+static const u8 sText_DualityShiftedToSpAtk[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s Duality\nshifted to Sp. Atk!");
+static const u8 sText_DualityShiftedToAttack[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s Duality\nshifted to Attack!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_DUALITYSHIFTEDTOATTACK - BATTLESTRINGS_TABLE_START] = sText_DualityShiftedToAttack,
+    [STRINGID_DUALITYSHIFTEDTOSPATK - BATTLESTRINGS_TABLE_START] = sText_DualityShiftedToSpAtk,
     [STRINGID_MELTDOWNMADEMOVEUSELESS - BATTLESTRINGS_TABLE_START] = sText_MeltdownMadeMoveUseless,
     [STRINGID_MELTDOWNRESTOREDHP - BATTLESTRINGS_TABLE_START] = sText_MeltdownRestoredHp,
     [STRINGID_RUMBLEROLLCLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_RumbleRollClearedHazards,
@@ -2171,6 +2175,12 @@ const u16 gDamageNonTypesDmgStringIds[] =
     [B_MSG_HURT_BY_VORTEX]       = STRINGID_PKMNHURTBYVORTEX,
     [B_MSG_BURNING_UP]           = STRINGID_PKMNBURNINGUP,
     [B_MSG_HURT_BY_ROCKS_THROWN] = STRINGID_PKMNHURTBYROCKSTHROWN,
+};
+
+const u16 gDualityStringIds[] =
+{
+    [B_MSG_DUALITY_SPATK] = STRINGID_DUALITYSHIFTEDTOSPATK,
+    [B_MSG_DUALITY_ATTACK] = STRINGID_DUALITYSHIFTEDTOATTACK,
 };
 
 const u8 gText_PkmnIsEvolving[] = _("What?\n{STR_VAR_1} is evolving!");

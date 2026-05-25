@@ -3184,6 +3184,45 @@ static void CheckSetUnburden(u8 battler)
     }
 }
 
+static bool32 CanScrapJobActivate(u32 battler)
+{
+    u32 targetSide;
+
+    if (battler >= gBattlersCount
+        || !IsBattlerAlive(battler)
+        || !HasBattlerAbility(battler, ABILITY_SCRAP_JOB)
+        || NoAliveMonsForEitherParty())
+        return FALSE;
+
+    targetSide = BATTLE_OPPOSITE(GetBattlerSide(battler));
+    return gSideTimers[targetSide].spikesAmount < 3;
+}
+
+static bool32 TryMarkScrapJobPending(u32 battler)
+{
+    if (!CanScrapJobActivate(battler))
+        return FALSE;
+
+    gBattleStruct->pendingScrapJobBattlers |= gBitTable[battler];
+    return TRUE;
+}
+
+static void TryQueueScrapJobAfterRemoveItem(u32 battler, const u8 *nextInstr)
+{
+    if (!TryMarkScrapJobPending(battler))
+        return;
+
+    if (gBattlescriptCurrInstr == nextInstr)
+    {
+        BattleScriptPush(nextInstr);
+        gBattlescriptCurrInstr = BattleScript_ScrapJobActivates;
+    }
+    else if (gBattlescriptCurrInstr != BattleScript_SymbiosisActivates)
+    {
+        BattleScriptPush(BattleScript_ScrapJobActivates);
+    }
+}
+
 static void ClearUnburdenIfNeeded(u8 battler)
 {
     if (GetBattlerAbility(battler) == ABILITY_UNBURDEN)
@@ -3265,18 +3304,22 @@ static void SwapBattlerItems(u8 battlerAtk, u8 battlerDef)
 
     if (oldItemAtk != ITEM_NONE && oldItemDef != ITEM_NONE)
     {
+        TryMarkScrapJobPending(battlerAtk);
+        TryMarkScrapJobPending(battlerDef);
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_BOTH;
     }
     else if (oldItemAtk == ITEM_NONE && oldItemDef != ITEM_NONE)
     {
         ClearUnburdenIfNeeded(battlerAtk);
         CheckSetUnburden(battlerDef);
+        TryMarkScrapJobPending(battlerDef);
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_TAKEN;
     }
     else
     {
         CheckSetUnburden(battlerAtk);
         ClearUnburdenIfNeeded(battlerDef);
+        TryMarkScrapJobPending(battlerAtk);
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_ITEM_SWAP_GIVEN;
     }
 }
@@ -3303,6 +3346,7 @@ void StealTargetItem(u8 battlerStealer, u8 battlerItem)
     gBattleStruct->choicedMove[battlerItem] = 0;
 
     TrySaveExchangedItem(battlerItem, gLastUsedItem);
+    TryMarkScrapJobPending(battlerItem);
 }
 
 #define INCREMENT_RESET_RETURN                  \
@@ -4326,6 +4370,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     gLastUsedItem = gBattleMons[gEffectBattler].item;
                     gBattleMons[gEffectBattler].item = 0;
                     CheckSetUnburden(gEffectBattler);
+                    TryMarkScrapJobPending(gEffectBattler);
 
                     BtlController_EmitSetMonData(gEffectBattler, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[gEffectBattler].item), &gBattleMons[gEffectBattler].item);
                     MarkBattlerForControllerExec(gEffectBattler);
@@ -4341,6 +4386,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     gLastUsedItem = gBattleMons[gEffectBattler].item;
                     gBattleMons[gEffectBattler].item = 0;
                     CheckSetUnburden(gEffectBattler);
+                    TryMarkScrapJobPending(gEffectBattler);
 
                     BtlController_EmitSetMonData(gEffectBattler, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[gEffectBattler].item), &gBattleMons[gEffectBattler].item);
                     MarkBattlerForControllerExec(gEffectBattler);
@@ -6034,6 +6080,7 @@ static bool32 TryKnockOffBattleScript(u32 battlerDef)
                 gBattleStruct->choicedMove[battlerDef] = 0;
             gWishFutureKnock.knockedOffMons[side] |= gBitTable[gBattlerPartyIndexes[battlerDef]];
             CheckSetUnburden(battlerDef);
+            TryMarkScrapJobPending(battlerDef);
 
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_KnockedOff;
@@ -9425,6 +9472,7 @@ static void BestowItem(u32 battlerAtk, u32 battlerDef)
     BtlController_EmitSetMonData(battlerAtk, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[battlerAtk].item), &gBattleMons[battlerAtk].item);
     MarkBattlerForControllerExec(battlerAtk);
     CheckSetUnburden(battlerAtk);
+    TryMarkScrapJobPending(battlerAtk);
 
     gBattleMons[battlerDef].item = gLastUsedItem;
     BtlController_EmitSetMonData(battlerDef, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[battlerDef].item), &gBattleMons[battlerDef].item);
@@ -9515,6 +9563,9 @@ static void Cmd_removeitem(void)
         BattleScriptPush(gBattlescriptCurrInstr);
         gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
     }
+
+    if (itemId != ITEM_NONE)
+        TryQueueScrapJobAfterRemoveItem(battler, cmd->nextInstr);
 }
 
 static void Cmd_atknameinbuff1(void)
@@ -11059,6 +11110,53 @@ static void Cmd_various(void)
         VARIOUS_ARGS();
         gBattlerAttacker = gBattleStruct->savedFaintBattlerAttacker;
         gBattlerTarget = gBattleStruct->savedFaintBattlerTarget;
+        break;
+    }
+    case VARIOUS_SAVE_SCRAP_JOB_ATTACKER:
+    {
+        VARIOUS_ARGS();
+        gBattleStruct->scrapJobSavedAttacker = gBattlerAttacker;
+        break;
+    }
+    case VARIOUS_PREPARE_SCRAP_JOB:
+    {
+        VARIOUS_ARGS(const u8 *failInstr);
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (gBattleStruct->pendingScrapJobBattlers & gBitTable[i])
+            {
+                gBattleStruct->pendingScrapJobBattlers &= ~gBitTable[i];
+                if (CanScrapJobActivate(i))
+                {
+                    SetBattlerTriggeredAbility(i, ABILITY_SCRAP_JOB);
+                    gBattlerAttacker = i;
+                    gBattlescriptCurrInstr = cmd->nextInstr;
+                    return;
+                }
+            }
+        }
+        gBattlescriptCurrInstr = cmd->failInstr;
+        return;
+    }
+    case VARIOUS_RESTORE_SCRAP_JOB_ATTACKER:
+    {
+        VARIOUS_ARGS();
+        gBattlerAttacker = gBattleStruct->scrapJobSavedAttacker;
+        break;
+    }
+    case VARIOUS_TRY_SET_SCRAP_JOB_SPIKES:
+    {
+        VARIOUS_ARGS(const u8 *failInstr);
+        side = BATTLE_OPPOSITE(GetBattlerSide(gBattlerAbility));
+
+        if (gSideTimers[side].spikesAmount == 3)
+        {
+            gBattlescriptCurrInstr = cmd->failInstr;
+            return;
+        }
+
+        gSideStatuses[side] |= SIDE_STATUS_SPIKES;
+        gSideTimers[side].spikesAmount++;
         break;
     }
     case VARIOUS_INSTANT_HP_DROP:

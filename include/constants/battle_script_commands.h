@@ -252,6 +252,10 @@
 #define VARIOUS_APPLY_GRAFITTI_TAG_PALETTES          159
 #define VARIOUS_TRY_ACTIVATE_FALLEN_SKIES            160
 #define VARIOUS_RESTORE_FALLEN_SKIES_AFTER_MOVE      161
+#define VARIOUS_SAVE_SCRAP_JOB_ATTACKER              162
+#define VARIOUS_PREPARE_SCRAP_JOB                    163
+#define VARIOUS_RESTORE_SCRAP_JOB_ATTACKER           164
+#define VARIOUS_TRY_SET_SCRAP_JOB_SPIKES             165
 
 // Cmd_manipulatedamage
 #define DMG_CHANGE_SIGN            0

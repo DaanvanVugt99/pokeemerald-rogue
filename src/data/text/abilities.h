@@ -846,6 +846,7 @@ static const u8 sTidalDawnDescription[] = _("If all party Pokemon share a type, 
 static const u8 sSingularityPrismDescription[] = _("If no other Paradox allies, first slicing move each battle sets Psychic Terrain.");
 static const u8 sStrangeGuestDescription[] = _("This Pokemon cannot be forced out.");
 static const u8 sCliffsideDescription[] = _("First time below half HP each switch-in, uses Rock Polish.");
+static const u8 sScrapJobDescription[] = _("Losing, consuming, or removing its held item scatters Spikes.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1402,6 +1403,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SINGULARITY_PRISM] = _("SingularityPrism"),
     [ABILITY_STRANGE_GUEST] = _("Strange Guest"),
     [ABILITY_CLIFFSIDE] = _("Cliffside"),
+    [ABILITY_SCRAP_JOB] = _("Scrap Job"),
     [ABILITY_GLIDER] = _("Glider"),
     [ABILITY_KNIGHTLY] = _("Knightly"),
     [ABILITY_SPOREFIELD] = _("Sporefield"),
@@ -2261,6 +2263,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_SINGULARITY_PRISM] = _("SingPrism"),
     [ABILITY_STRANGE_GUEST] = _("StrngGuest"),
     [ABILITY_CLIFFSIDE] = _("Cliffside"),
+    [ABILITY_SCRAP_JOB] = _("Scrap Job"),
     [ABILITY_GLIDER] = _("Glider"),
     [ABILITY_KNIGHTLY] = _("Knightly"),
     [ABILITY_SPOREFIELD] = _("Sporefield"),
@@ -3305,6 +3308,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_SINGULARITY_PRISM] = sSingularityPrismDescription,
     [ABILITY_STRANGE_GUEST] = sStrangeGuestDescription,
     [ABILITY_CLIFFSIDE] = sCliffsideDescription,
+    [ABILITY_SCRAP_JOB] = sScrapJobDescription,
     [ABILITY_GLIDER] = sGliderDescription,
     [ABILITY_KNIGHTLY] = sKnightlyDescription,
     [ABILITY_SPOREFIELD] = sSporefieldDescription,

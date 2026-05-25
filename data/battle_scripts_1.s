@@ -1922,6 +1922,7 @@ BattleScript_EffectIncinerate:
 BattleScript_MoveEffectIncinerate::
 	printstring STRINGID_INCINERATEBURN
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	return
 
 BattleScript_MoveEffectBugBite::
@@ -1934,6 +1935,7 @@ BattleScript_MoveEffectBugBite::
 	bicword gHitMarker, HITMARKER_DISABLE_ANIMATION
 	setbyte sBERRY_OVERRIDE, 0
 	trysymbiosis
+	call BattleScript_ScrapJobActivates
 	restoretarget
 	return
 
@@ -2298,6 +2300,7 @@ BattleScript_EffectBestow:
 	waitanimation
 	printstring STRINGID_BESTOWITEMGIVING
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	trysymbiosis
 	goto BattleScript_MoveEnd
 
@@ -6366,6 +6369,7 @@ BattleScript_EffectTrick::
 	waitmessage B_WAIT_TIME_LONG
 	printfromtable gItemSwapStringIds
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	goto BattleScript_MoveEnd
 
 BattleScript_EffectRolePlay::
@@ -8434,6 +8438,7 @@ BattleScript_KnockedOff::
 	playanimation BS_TARGET, B_ANIM_ITEM_KNOCKOFF
 	printstring STRINGID_PKMNKNOCKEDOFF
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	return
 
 BattleScript_KlutzKnockedOff::
@@ -9322,6 +9327,7 @@ BattleScript_ItemSteal::
 	playanimation BS_TARGET, B_ANIM_ITEM_STEAL
 	printstring STRINGID_PKMNSTOLEITEM
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	return
 
 BattleScript_DrizzleActivates::
@@ -9805,6 +9811,23 @@ BattleScript_AttackerSpikesActivates::
 	waitanimation
 	printstring STRINGID_SPIKESSCATTERED
 	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_ScrapJobActivates::
+	various BS_ATTACKER, VARIOUS_SAVE_SCRAP_JOB_ATTACKER
+BattleScript_ScrapJobLoop:
+	various BS_ATTACKER, VARIOUS_PREPARE_SCRAP_JOB
+	.4byte BattleScript_ScrapJobEnd
+	various BS_ATTACKER, VARIOUS_TRY_SET_SCRAP_JOB_SPIKES
+	.4byte BattleScript_ScrapJobLoop
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_SPIKES
+	waitanimation
+	printstring STRINGID_SPIKESSCATTERED
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_ScrapJobLoop
+BattleScript_ScrapJobEnd:
+	various BS_ATTACKER, VARIOUS_RESTORE_SCRAP_JOB_ATTACKER
 	return
 
 BattleScript_InfernalRageActivates::
@@ -11389,6 +11412,12 @@ BattleScript_RedlineEndTurn::
 	printfromtable gStatDownStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_RedlineEndTurn_End:
+	end3
+
+BattleScript_DualityEndTurn::
+	call BattleScript_AbilityPopUp
+	printfromtable gDualityStringIds
+	waitmessage B_WAIT_TIME_LONG
 	end3
 
 BattleScript_SwitchInAbilityMsg::
@@ -13054,6 +13083,7 @@ BattleScript_SleightOfHandActivates::
 	waitmessage B_WAIT_TIME_LONG
 	printfromtable gItemSwapStringIds
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	return
 
 BattleScript_SleightOfHandReturn:
@@ -13074,6 +13104,7 @@ BattleScript_StickyBarbTransfer::
 	playanimation BS_TARGET, B_ANIM_ITEM_STEAL
 	printstring STRINGID_STICKYBARBTRANSFER
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	removeitem BS_TARGET
 	return
 
@@ -13245,6 +13276,7 @@ BattleScript_SymbiosisActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_SYMBIOSISITEMPASS
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ScrapJobActivates
 	return
 
 BattleScript_TargetAbilityStatRaiseRet::

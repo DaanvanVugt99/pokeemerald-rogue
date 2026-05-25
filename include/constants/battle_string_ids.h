@@ -753,8 +753,10 @@
 #define STRINGID_RUMBLEROLLCLEAREDHAZARDS             751
 #define STRINGID_MELTDOWNRESTOREDHP                   752
 #define STRINGID_MELTDOWNMADEMOVEUSELESS              753
+#define STRINGID_DUALITYSHIFTEDTOSPATK                754
+#define STRINGID_DUALITYSHIFTEDTOATTACK               755
 
-#define BATTLESTRINGS_COUNT                           754
+#define BATTLESTRINGS_COUNT                           756
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
@@ -1094,5 +1096,9 @@
 #define B_MSG_HURT_BY_VORTEX    1
 #define B_MSG_BURNING_UP  2
 #define B_MSG_HURT_BY_ROCKS_THROWN 3
+
+// gDualityStringIds
+#define B_MSG_DUALITY_SPATK  0
+#define B_MSG_DUALITY_ATTACK 1
 
 #endif // GUARD_CONSTANTS_BATTLE_STRING_IDS_H
