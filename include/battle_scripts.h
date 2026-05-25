@@ -419,6 +419,7 @@ extern const u8 BattleScript_MoveStatDrain_PPLoss[];
 extern const u8 BattleScript_TargetsStatWasMaxedOut[];
 extern const u8 BattleScript_AttackerAbilityStatRaise[];
 extern const u8 BattleScript_AttackerAbilityStatRaiseEnd3[];
+extern const u8 BattleScript_RedlineEndTurn[];
 extern const u8 BattleScript_RumbleRollClearsHazards[];
 extern const u8 BattleScript_RumbleRollClearsHazardsAndRaisesDef[];
 extern const u8 BattleScript_PoisonHealActivates[];

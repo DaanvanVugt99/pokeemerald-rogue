@@ -78,6 +78,7 @@ enum
 
 static bool32 TryRemoveScreens(u32 battler);
 static bool32 TryRemoveTargetSideScreens(u32 target);
+extern const u8 BattleScript_RedlineEndTurn[];
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
@@ -5401,9 +5402,6 @@ static bool32 ShouldDualitySwapOffensiveStats(u32 battlerAtk, u32 move, u32 move
         && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
         && gBattleMoves[move].effect != EFFECT_BODY_PRESS
         && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL)
-        && !(HasBattlerAbility(battlerAtk, ABILITY_REDLINE)
-          && gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP
-          && moveType == TYPE_ELECTRIC)
         && !(HasBattlerAbility(battlerAtk, ABILITY_UPROOT)
           && (gStatuses3[battlerAtk] & STATUS3_ROOTED)
           && moveType == TYPE_GRASS);
@@ -8977,6 +8975,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_REDLINE)
+         && !uniqueDone
+         && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_REDLINE);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+            BattleScriptPushCursorAndCallback(BattleScript_BattlerAbilityStatRaiseOnSwitchIn);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_POLLEN_PUFF) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -10715,6 +10727,16 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             if (HasBattlerAbility(battler, ABILITY_DUALITY))
                 gDisableStructs[battler].uniquePersistentStateActive ^= TRUE;
+
+            if (HasBattlerAbility(battler, ABILITY_REDLINE)
+             && CompareStat(battler, STAT_SPEED, MIN_STAT_STAGE, CMP_GREATER_THAN))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_REDLINE);
+                SET_STATCHANGER(STAT_SPEED, 1, TRUE);
+                BattleScriptPushCursorAndCallback(BattleScript_RedlineEndTurn);
+                effect++;
+                break;
+            }
 
             if(GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT)
                 extraShedSkinChance = GetCurseValue(EFFECT_SHED_SKIN_CHANCE);
@@ -21937,13 +21959,6 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             atkStat = gBattleMons[battlerAtk].spDefense;
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPDEF];
         }
-    }
-    else if (HasBattlerAbility(battlerAtk, ABILITY_REDLINE)
-          && gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP
-          && moveType == TYPE_ELECTRIC)
-    {
-        atkStat = gBattleMons[battlerAtk].speed;
-        atkStage = gBattleMons[battlerAtk].statStages[STAT_SPEED];
     }
     else if (gBattleMoves[move].effect == EFFECT_BODY_PRESS)
     {

@@ -4764,11 +4764,6 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
     {
         speed = (speed * 130) / 100;
     }
-    if (HasBattlerAbility(battler, ABILITY_REDLINE)
-     && gBattleMons[battler].hp * 2 < gBattleMons[battler].maxHP)
-    {
-        speed = (speed * 150) / 100;
-    }
     if (HasBattlerAbility(battler, ABILITY_BRUTAL_CHARGE)
      && gDisableStructs[battler].isFirstTurn)
     {
