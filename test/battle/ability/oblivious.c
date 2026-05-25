@@ -5,6 +5,7 @@ SINGLE_BATTLE_TEST("Oblivious prevents Infatuation")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_ATTRACT].effect == EFFECT_ATTRACT);
+        ASSUME(gBattleMoves[MOVE_ATTRACT].type == TYPE_FAIRY);
         PLAYER(SPECIES_SLOWPOKE) { Ability(ABILITY_OBLIVIOUS); Gender(MON_MALE); }
         OPPONENT(SPECIES_WOBBUFFET) { Gender(MON_FEMALE); }
     } WHEN {

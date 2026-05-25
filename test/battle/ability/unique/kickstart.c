@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_MEGA_KICK].kickingMove);
+    ASSUME(gBattleMoves[MOVE_MEGA_KICK].type == TYPE_FIGHTING);
     ASSUME(!gBattleMoves[MOVE_TACKLE].kickingMove);
 }
 

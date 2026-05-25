@@ -7,6 +7,9 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_STOCKPILE].effect == EFFECT_STOCKPILE);
     ASSUME(gBattleMoves[MOVE_SWALLOW].effect == EFFECT_SWALLOW);
     ASSUME(gBattleMoves[MOVE_SPIT_UP].effect == EFFECT_SPIT_UP);
+    ASSUME(gBattleMoves[MOVE_STOCKPILE].type == TYPE_POISON);
+    ASSUME(gBattleMoves[MOVE_SWALLOW].type == TYPE_POISON);
+    ASSUME(gBattleMoves[MOVE_SPIT_UP].type == TYPE_POISON);
 }
 
 SINGLE_BATTLE_TEST("Stockpile's count can go up only to 3")
@@ -100,6 +103,33 @@ SINGLE_BATTLE_TEST("Spit Up's power raises depending on Stockpile's count", s16 
     } FINALLY {
         EXPECT_MUL_EQ(results[0].damage, Q_4_12(2.0), results[1].damage);
         EXPECT_MUL_EQ(results[0].damage, Q_4_12(3.0), results[2].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Spit Up uses Poison-type STAB and type matchups", s16 damage)
+{
+    u16 attackerSpecies;
+    u16 targetSpecies;
+
+    PARAMETRIZE { attackerSpecies = SPECIES_WOBBUFFET; targetSpecies = SPECIES_WOBBUFFET; }
+    PARAMETRIZE { attackerSpecies = SPECIES_KOFFING;   targetSpecies = SPECIES_WOBBUFFET; }
+    PARAMETRIZE { attackerSpecies = SPECIES_WOBBUFFET; targetSpecies = SPECIES_CLEFAIRY;  }
+
+    GIVEN {
+        ASSUME(gSpeciesInfo[SPECIES_KOFFING].types[0] == TYPE_POISON || gSpeciesInfo[SPECIES_KOFFING].types[1] == TYPE_POISON);
+        ASSUME(gSpeciesInfo[SPECIES_CLEFAIRY].types[0] == TYPE_FAIRY || gSpeciesInfo[SPECIES_CLEFAIRY].types[1] == TYPE_FAIRY);
+        PLAYER(attackerSpecies) { SpAttack(100); Moves(MOVE_STOCKPILE, MOVE_SPIT_UP); }
+        OPPONENT(targetSpecies) { HP(500); MaxHP(500); SpDefense(100); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_STOCKPILE); }
+        TURN { MOVE(player, MOVE_SPIT_UP, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_STOCKPILE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPIT_UP, player);
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.5), results[1].damage);
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(2.0), results[2].damage);
     }
 }
 

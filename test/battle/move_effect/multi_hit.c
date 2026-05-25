@@ -6,6 +6,23 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_BULLET_SEED].effect == EFFECT_MULTI_HIT);
 }
 
+SINGLE_BATTLE_TEST("Spike Cannon is a Steel-type 20 BP multi-hit move")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].effect, EFFECT_MULTI_HIT);
+        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].type, TYPE_STEEL);
+        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].split, SPLIT_PHYSICAL);
+        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].power, 20);
+        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].accuracy, 100);
+        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].pp, 15);
+    }
+}
+
 SINGLE_BATTLE_TEST("Multi hit Moves hit the maximum amount with Skill Link")
 {
     PASSES_RANDOMLY(100, 100, RNG_HITS);

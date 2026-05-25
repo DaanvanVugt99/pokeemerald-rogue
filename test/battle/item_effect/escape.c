@@ -22,6 +22,7 @@ WILD_BATTLE_TEST("Poke Toy lets the player escape from a wild battle even if a m
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_MEAN_LOOK].effect == EFFECT_MEAN_LOOK);
+        ASSUME(gBattleMoves[MOVE_MEAN_LOOK].type == TYPE_DARK);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {

@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_MEGA_PUNCH].punchingMove);
+    ASSUME(gBattleMoves[MOVE_MEGA_PUNCH].type == TYPE_FIGHTING);
     ASSUME(!gBattleMoves[MOVE_TACKLE].punchingMove);
     ASSUME(gBattleMoves[MOVE_SMACK_DOWN].power == 50);
 }

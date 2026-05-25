@@ -85,7 +85,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_HIT,
         .power = 80,
-        .type = TYPE_NORMAL,
+        .type = TYPE_FIGHTING,
         .accuracy = 85,
         .pp = 20,
         .secondaryEffectChance = 0,
@@ -215,7 +215,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_TWO_TURNS_ATTACK,
         .power = 80,
-        .type = TYPE_NORMAL,
+        .type = TYPE_FLYING,
         .accuracy = 100,
         .pp = 10,
         .secondaryEffectChance = 0,
@@ -445,7 +445,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_HIT,
         .power = 120,
-        .type = TYPE_NORMAL,
+        .type = TYPE_FIGHTING,
         .accuracy = 75,
         .pp = 5,
         .secondaryEffectChance = 0,
@@ -2331,7 +2331,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_MULTI_HIT,
         .power = 20,
-        .type = TYPE_NORMAL,
+        .type = TYPE_STEEL,
         .accuracy = 100,
         .pp = 15,
         .secondaryEffectChance = 0,
@@ -3849,7 +3849,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_MEAN_LOOK,
         .power = 0,
-        .type = TYPE_NORMAL,
+        .type = TYPE_DARK,
         .accuracy = 0,
         .pp = 5,
         .secondaryEffectChance = 0,
@@ -3865,7 +3865,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_ATTRACT,
         .power = 0,
-        .type = TYPE_NORMAL,
+        .type = TYPE_FAIRY,
         .accuracy = 100,
         .pp = 15,
         .secondaryEffectChance = 0,
@@ -4594,7 +4594,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         #endif
         .effect = EFFECT_STOCKPILE,
         .power = 0,
-        .type = TYPE_NORMAL,
+        .type = TYPE_POISON,
         .accuracy = 0,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_USER,
@@ -4614,7 +4614,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
             .power = 100,
         #endif
         .effect = EFFECT_SPIT_UP,
-        .type = TYPE_NORMAL,
+        .type = TYPE_POISON,
         .accuracy = 100,
         .pp = 10,
         .secondaryEffectChance = 0,
@@ -4629,7 +4629,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_SWALLOW,
         .power = 0,
-        .type = TYPE_NORMAL,
+        .type = TYPE_POISON,
         .accuracy = 0,
         .pp = 10,
         .secondaryEffectChance = 0,
@@ -6167,7 +6167,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
             .pp = 40,
         #endif
         .effect = EFFECT_THIEF,
-        .type = TYPE_NORMAL,
+        .type = TYPE_FAIRY,
         .accuracy = 100,
         .secondaryEffectChance = 100,
         .target = MOVE_TARGET_SELECTED,
@@ -7894,7 +7894,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     {
         .effect = EFFECT_CAPTIVATE,
         .power = 0,
-        .type = TYPE_NORMAL,
+        .type = TYPE_FAIRY,
         .accuracy = 100,
         .pp = 20,
         .secondaryEffectChance = 0,
