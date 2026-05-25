@@ -5,8 +5,8 @@ Divergence.
 
 ## Pokemon Romhack Tracker
 
-[pokemon_romhack_tracker.xlsx](pokemon_romhack_tracker.xlsx) is the general
-design tracker for Pokemon identity work, especially unique abilities and
+[pokemon_romhack_tracker.xlsx](pokemon_romhack_tracker.xlsx) is a working
+design notebook for Pokemon identity work, especially unique abilities and
 per-Pokemon notes.
 
 Use it as the planning source for:
@@ -24,6 +24,6 @@ Current workbook structure:
 - `Abilities`: ability identifiers, change flags, and changed-effect notes.
 - `Forms`: form and variant entries such as regional forms and Mega Evolutions.
 
-When implementing ability or Pokemon identity changes, update this tracker when
-the design intent changes. Code and tests remain the source of truth for shipped
-behavior, but this workbook should explain what the behavior is meant to become.
+Treat the workbook as a sketch space for intent, experiments, and notes. Code
+and tests remain the source of truth for shipped behavior, and tracker cleanup
+can be handled with manual review passes when useful.

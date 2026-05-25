@@ -12,15 +12,15 @@ ASSUMPTIONS
 SINGLE_BATTLE_TEST("Tideborn heals 1/4 max HP and cures status after the first status move each battle")
 {
     GIVEN {
-        PLAYER(SPECIES_PHIONE) { Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); Status1(STATUS1_BURN); HP(200); MaxHP(400); Moves(MOVE_GROWL); }
+        PLAYER(SPECIES_MANAPHY) { Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); Status1(STATUS1_BURN); HP(200); MaxHP(400); Moves(MOVE_GROWL); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_TIDEBORN);
-        MESSAGE("Phione's Tideborn restored its HP a little!");
+        MESSAGE("Manaphy's Tideborn restored its HP a little!");
         HP_BAR(player, damage: -100);
-        MESSAGE("Phione's status returned to normal!");
+        MESSAGE("Manaphy's status returned to normal!");
     } THEN {
         EXPECT_EQ(player->hp, 300);
         EXPECT_EQ(player->status1, STATUS1_NONE);
@@ -30,7 +30,7 @@ SINGLE_BATTLE_TEST("Tideborn heals 1/4 max HP and cures status after the first s
 SINGLE_BATTLE_TEST("Tideborn only triggers once per battle")
 {
     GIVEN {
-        PLAYER(SPECIES_PHIONE) { Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); Status1(STATUS1_BURN); HP(200); MaxHP(400); Moves(MOVE_GROWL, MOVE_TAIL_WHIP); }
+        PLAYER(SPECIES_MANAPHY) { Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); Status1(STATUS1_BURN); HP(200); MaxHP(400); Moves(MOVE_GROWL, MOVE_TAIL_WHIP); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_CELEBRATE); }
@@ -38,9 +38,9 @@ SINGLE_BATTLE_TEST("Tideborn only triggers once per battle")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, player);
         ABILITY_POPUP(player, ABILITY_TIDEBORN);
-        MESSAGE("Phione's Tideborn restored its HP a little!");
+        MESSAGE("Manaphy's Tideborn restored its HP a little!");
         HP_BAR(player, damage: -100);
-        MESSAGE("Phione's status returned to normal!");
+        MESSAGE("Manaphy's status returned to normal!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAIL_WHIP, player);
         NOT ABILITY_POPUP(player, ABILITY_TIDEBORN);
     } THEN {
@@ -52,7 +52,7 @@ SINGLE_BATTLE_TEST("Tideborn only triggers once per battle")
 SINGLE_BATTLE_TEST("Tideborn does not trigger after a damaging move")
 {
     GIVEN {
-        PLAYER(SPECIES_PHIONE) { Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); HP(200); MaxHP(400); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_MANAPHY) { Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); HP(200); MaxHP(400); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
@@ -66,7 +66,7 @@ SINGLE_BATTLE_TEST("Tideborn does not trigger after a damaging move")
 SINGLE_BATTLE_TEST("Tideborn does not consume its once per battle trigger on a failed status move")
 {
     GIVEN {
-        PLAYER(SPECIES_PHIONE) { Speed(100); Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); HP(200); MaxHP(400); Moves(MOVE_GROWL, MOVE_TAIL_WHIP); }
+        PLAYER(SPECIES_MANAPHY) { Speed(100); Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); HP(200); MaxHP(400); Moves(MOVE_GROWL, MOVE_TAIL_WHIP); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_PROTECT, MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(opponent, MOVE_PROTECT); MOVE(player, MOVE_GROWL); }
@@ -76,7 +76,7 @@ SINGLE_BATTLE_TEST("Tideborn does not consume its once per battle trigger on a f
         NOT ABILITY_POPUP(player, ABILITY_TIDEBORN);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAIL_WHIP, player);
         ABILITY_POPUP(player, ABILITY_TIDEBORN);
-        MESSAGE("Phione's Tideborn restored its HP a little!");
+        MESSAGE("Manaphy's Tideborn restored its HP a little!");
         HP_BAR(player);
     } THEN {
         EXPECT_EQ(player->hp, 300);
@@ -86,7 +86,7 @@ SINGLE_BATTLE_TEST("Tideborn does not consume its once per battle trigger on a f
 SINGLE_BATTLE_TEST("Tideborn does not consume its once per battle trigger when the user has no HP or status to restore")
 {
     GIVEN {
-        PLAYER(SPECIES_PHIONE) { Speed(100); Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); HP(400); MaxHP(400); Moves(MOVE_GROWL, MOVE_TAIL_WHIP); }
+        PLAYER(SPECIES_MANAPHY) { Speed(100); Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_TIDEBORN); HP(400); MaxHP(400); Moves(MOVE_GROWL, MOVE_TAIL_WHIP); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Attack(200); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_TACKLE); }
@@ -96,7 +96,7 @@ SINGLE_BATTLE_TEST("Tideborn does not consume its once per battle trigger when t
         NOT ABILITY_POPUP(player, ABILITY_TIDEBORN);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAIL_WHIP, player);
         ABILITY_POPUP(player, ABILITY_TIDEBORN);
-        MESSAGE("Phione's Tideborn restored its HP a little!");
+        MESSAGE("Manaphy's Tideborn restored its HP a little!");
     } THEN {
         EXPECT_EQ(player->hp, player->maxHP);
     }
