@@ -6856,6 +6856,7 @@ BattleScript_EffectCamouflage::
 BattleScript_FaintAttacker::
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_DROP_OFF
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_DEATHRATTLE
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_FALLEN_SKIES
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_TUMBLEWEED
 	tryillusionoff BS_ATTACKER
@@ -6873,6 +6874,7 @@ BattleScript_FaintAttacker::
 BattleScript_FaintTarget::
 	various BS_TARGET, VARIOUS_TRY_ACTIVATE_DIRTY_TRICKS
 	various BS_TARGET, VARIOUS_TRY_ACTIVATE_DROP_OFF
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_DEATHRATTLE
 	various BS_TARGET, VARIOUS_TRY_ACTIVATE_FALLEN_SKIES
 	various BS_TARGET, VARIOUS_TRY_ACTIVATE_TUMBLEWEED
 	tryillusionoff BS_TARGET
@@ -9434,6 +9436,10 @@ BattleScript_VerdantVowActivates::
 	call BattleScript_AbilityPopUp
 	end3
 
+BattleScript_DeathrattlePrimed::
+	call BattleScript_AbilityPopUp
+	end3
+
 BattleScript_BattleFuryActivates::
 	call BattleScript_AbilityPopUp
 	call BattleScript_BattleFuryAttackBoost
@@ -9672,6 +9678,22 @@ BattleScript_BearHugActivates::
 
 BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
+	return
+
+BattleScript_DeathrattleActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_CURSE
+	waitanimation
+	copybyte sBATTLER, gBattlerAttacker
+	copybyte gBattlerAttacker, gBattlerTarget
+	status2animation BS_ATTACKER, STATUS2_CURSED
+	printstring STRINGID_PKMNAFFLICTEDBYCURSE
+	waitmessage B_WAIT_TIME_LONG
+	copybyte gBattlerAttacker, sBATTLER
+	return
+
+BattleScript_DeathrattleRestoreAfterCurse::
+	various BS_SCRIPTING, VARIOUS_RESTORE_ATTACKER_AND_TARGET
 	return
 
 BattleScript_GrafittiTagActivates::

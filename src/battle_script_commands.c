@@ -6783,6 +6783,24 @@ static void Cmd_moveend(void)
                 && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
                 && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
                 && IsBattlerAlive(gBattlerAttacker)
+                && HasBattlerAbility(gBattlerAttacker, ABILITY_DEATHRATTLE)
+                && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+                && !IS_MOVE_STATUS(gCurrentMove)
+                && TARGET_TURN_DAMAGED
+                && gBattleScripting.savedDmg != 0
+                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK)
+                && gBattleMons[gBattlerAttacker].hp < gBattleMons[gBattlerAttacker].maxHP)
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_DEATHRATTLE);
+                gBattleMoveDamage = -max(1, gBattleScripting.savedDmg / 4);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_WarpathHeal;
+                effect = TRUE;
+            }
+            if (!effect
+                && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+                && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+                && IsBattlerAlive(gBattlerAttacker)
                 && HasBattlerAbility(gBattlerAttacker, ABILITY_OLIVE_GROVE)
                 && gBattleMoves[gCurrentMove].power != 0
                 && moveType == TYPE_GRASS
@@ -7770,7 +7788,8 @@ static void Cmd_moveend(void)
             gSpecialStatuses[gBattlerAttacker].gemBoost = FALSE;
             if ((HasBattlerAbility(gBattlerAttacker, ABILITY_IRON_RESOLVE)
               || HasBattlerAbility(gBattlerAttacker, ABILITY_VENGEFUL_FORCE)
-              || HasBattlerAbility(gBattlerAttacker, ABILITY_VERDANT_VOW))
+              || HasBattlerAbility(gBattlerAttacker, ABILITY_VERDANT_VOW)
+              || HasBattlerAbility(gBattlerAttacker, ABILITY_DEATHRATTLE))
              && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
              && !IS_MOVE_STATUS(gCurrentMove)
              && DidBattlerDamageOpponentThisTurn(gBattlerAttacker))
@@ -11717,6 +11736,56 @@ static void Cmd_various(void)
         {
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
+            return;
+        }
+
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_DEATHRATTLE:
+    {
+        u32 target = gBattlersCount;
+
+        VARIOUS_ARGS();
+
+        if (!HasBattlerAbility(battler, ABILITY_DEATHRATTLE))
+            break;
+
+        if (gBattlerAttacker < gBattlersCount
+         && IsBattlerAlive(gBattlerAttacker)
+         && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
+        {
+            target = gBattlerAttacker;
+        }
+        else if (gBattlerTarget < gBattlersCount
+              && IsBattlerAlive(gBattlerTarget)
+              && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler))
+        {
+            target = gBattlerTarget;
+        }
+        else
+        {
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (IsBattlerAlive(i) && GetBattlerSide(i) != GetBattlerSide(battler))
+                {
+                    target = i;
+                    break;
+                }
+            }
+        }
+
+        if (target < gBattlersCount
+         && !(gBattleMons[target].status2 & STATUS2_CURSED))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_DEATHRATTLE);
+            gBattleMons[target].status2 |= STATUS2_CURSED;
+            gBattleStruct->savedFaintBattlerAttacker = gBattlerAttacker;
+            gBattleStruct->savedFaintBattlerTarget = gBattlerTarget;
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = target;
+            BattleScriptPush(cmd->nextInstr);
+            BattleScriptPush(BattleScript_DeathrattleRestoreAfterCurse);
+            gBattlescriptCurrInstr = BattleScript_DeathrattleActivates;
             return;
         }
 

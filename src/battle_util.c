@@ -8577,6 +8577,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_DEATHRATTLE)
+         && !uniqueDone
+         && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_DEATHRATTLE);
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPushCursorAndCallback(BattleScript_DeathrattlePrimed);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_VERDANT_VOW)
          && !uniqueDone
          && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)

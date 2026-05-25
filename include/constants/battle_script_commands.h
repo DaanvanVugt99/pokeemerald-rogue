@@ -256,6 +256,7 @@
 #define VARIOUS_PREPARE_SCRAP_JOB                    163
 #define VARIOUS_RESTORE_SCRAP_JOB_ATTACKER           164
 #define VARIOUS_TRY_SET_SCRAP_JOB_SPIKES             165
+#define VARIOUS_TRY_ACTIVATE_DEATHRATTLE             166
 
 // Cmd_manipulatedamage
 #define DMG_CHANGE_SIGN            0
