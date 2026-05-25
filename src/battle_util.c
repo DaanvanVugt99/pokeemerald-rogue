@@ -5702,7 +5702,7 @@ static const u16 sDeliveryBagMoves[] =
     MOVE_RECYCLE,
     MOVE_HAPPY_HOUR,
     MOVE_ICE_SHARD,
-    MOVE_ICY_WIND,
+    MOVE_BABY_DOLL_EYES,
 };
 
 static bool32 TryUseDeliveryBagCalledMove(u32 battler)
@@ -5740,28 +5740,17 @@ static bool32 TryUseDeliveryBagCalledMove(u32 battler)
     return TRUE;
 }
 
-bool32 TryUsePendingDeliveryBagCalledMove(void)
+bool32 TryUseDeliveryBagCalledMoveOnStatusMove(void)
 {
-    u32 battler;
+    u32 battler = gBattlerAttacker;
 
-    for (battler = 0; battler < gBattlersCount; battler++)
-    {
-        u32 side = GetBattlerSide(battler);
-        u32 partyIndex = gBattlerPartyIndexes[battler];
+    if (!IS_MOVE_STATUS(gCurrentMove))
+        return FALSE;
 
-        if (!(gBattleStruct->deliveryBagPending[side] & gBitTable[partyIndex]))
-            continue;
+    if (!HasBattlerAbility(battler, ABILITY_DELIVERY_BAG))
+        return FALSE;
 
-        gBattleStruct->deliveryBagPending[side] &= ~gBitTable[partyIndex];
-        if (HasBattlerAbility(battler, ABILITY_DELIVERY_BAG)
-         && TryUseDeliveryBagCalledMove(battler))
-            return TRUE;
-    }
-
-    for (battler = 0; battler < NUM_BATTLE_SIDES; battler++)
-        gBattleStruct->deliveryBagPending[battler] = 0;
-
-    return FALSE;
+    return TryUseDeliveryBagCalledMove(battler);
 }
 
 static const u16 sWishmakerMoves[] =
