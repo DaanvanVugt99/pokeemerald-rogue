@@ -4738,7 +4738,7 @@ static u16 SelectLegendarySpecies(u8 legendId)
         }
         else
         {
-            AGB_ASSERT(FALSE);
+            DebugPrintf("No legendary species candidates for slot %d", legendId);
             species = SPECIES_NONE;
         }
     }
@@ -4748,7 +4748,8 @@ static u16 SelectLegendarySpecies(u8 legendId)
 
 #ifdef ROGUE_DEBUG
     // Call this to throw asserts early
-    Rogue_GetLegendaryRoomForSpecies(species);
+    if(species != SPECIES_NONE)
+        Rogue_GetLegendaryRoomForSpecies(species);
 #endif
 
     return species;
