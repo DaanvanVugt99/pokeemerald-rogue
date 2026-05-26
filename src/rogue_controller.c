@@ -21,10 +21,12 @@
 #include "battle.h"
 #include "battle_util.h"
 #include "battle_setup.h"
+#include "battle_transition.h"
 #include "berry.h"
 #include "event_data.h"
 #include "field_effect.h"
 #include "graphics.h"
+#include "international_string_util.h"
 #include "item.h"
 #include "item_menu.h"
 #include "event_object_movement.h"
@@ -33,6 +35,7 @@
 #include "load_save.h"
 #include "malloc.h"
 #include "main.h"
+#include "menu.h"
 #include "money.h"
 #include "m4a.h"
 #include "overworld.h"
@@ -52,6 +55,8 @@
 #include "siirtc.h"
 #include "strings.h"
 #include "string_util.h"
+#include "sound.h"
+#include "task.h"
 #include "text.h"
 #include "trainer_card.h"
 
@@ -4392,7 +4397,20 @@ static void SetupRogueRunBag()
     //SetMoney(&gSaveBlock1Ptr->money, VarGet(VAR_ROGUE_ADVENTURE_MONEY));
 }
 
-static void BeginRogueRun(void)
+enum
+{
+    BEGIN_RUN_PHASE_RESET,
+    BEGIN_RUN_PHASE_WORLD_STATE,
+    BEGIN_RUN_PHASE_PARTY_AND_BAG,
+    BEGIN_RUN_PHASE_SPECIAL_CLAUSES,
+    BEGIN_RUN_PHASE_LEGENDS,
+    BEGIN_RUN_PHASE_TEAM_ENCOUNTERS,
+    BEGIN_RUN_PHASE_TRAINERS,
+    BEGIN_RUN_PHASE_FINALIZE,
+    BEGIN_RUN_PHASE_COUNT,
+};
+
+static void BeginRogueRunPhase_Reset(void)
 {
     DebugPrint("BeginRogueRun");
 
@@ -4492,7 +4510,10 @@ static void BeginRogueRun(void)
 
     VarSet(VAR_ROGUE_FLASK_HEALS_USED, 0);
     VarSet(VAR_ROGUE_FLASK_HEALS_MAX, 3);
+}
 
+static void BeginRogueRunPhase_WorldState(void)
+{
     ClearBerryTreeRange(BERRY_TREE_ROUTE_FIRST, BERRY_TREE_ROUTE_LAST);
     ClearBerryTreeRange(BERRY_TREE_DAYCARE_FIRST, BERRY_TREE_DAYCARE_LAST);
 
@@ -4518,7 +4539,10 @@ static void BeginRogueRun(void)
 
     // After we've decided what items are active, cache the rare shop state
     gRogueRun.rareShopEnabled = IsRareShopActiveInternal();
+}
 
+static void BeginRogueRunPhase_PartyAndBag(void)
+{
     BeginRogueRun_ModifyParty();
     SetupRogueRunBag();
 
@@ -4535,32 +4559,42 @@ static void BeginRogueRun(void)
 
     FlagClear(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES);
     FlagClear(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES);
+}
 
-    {
-        bool8 weakSpeciesInDaycare;
-        bool8 strongSpeciesInDaycare;
-        u16 weakSpecies = GetActiveWeakLegendary(&weakSpeciesInDaycare);
-        u16 strongSpecies = GetActiveStrongLegendary(&strongSpeciesInDaycare);
+static void BeginRogueRunPhase_SpecialClauses(void)
+{
+    bool8 weakSpeciesInDaycare;
+    bool8 strongSpeciesInDaycare;
+    u16 weakSpecies = GetActiveWeakLegendary(&weakSpeciesInDaycare);
+    u16 strongSpecies = GetActiveStrongLegendary(&strongSpeciesInDaycare);
 
-        if(weakSpecies != SPECIES_NONE)
-            FlagSet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES);
+    if(weakSpecies != SPECIES_NONE)
+        FlagSet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES);
 
-        if(strongSpecies != SPECIES_NONE)
-            FlagSet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES);
+    if(strongSpecies != SPECIES_NONE)
+        FlagSet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES);
 
-        if(strongSpecies != SPECIES_NONE)
-            Rogue_PushPopup_StrongPokemonClause(strongSpecies, strongSpeciesInDaycare);
-        else if(weakSpecies != SPECIES_NONE)
-            Rogue_PushPopup_WeakPokemonClause(weakSpecies, weakSpeciesInDaycare);
-
-    }
+    if(strongSpecies != SPECIES_NONE)
+        Rogue_PushPopup_StrongPokemonClause(strongSpecies, strongSpeciesInDaycare);
+    else if(weakSpecies != SPECIES_NONE)
+        Rogue_PushPopup_WeakPokemonClause(weakSpecies, weakSpeciesInDaycare);
 
     GiveMonPartnerRibbon();
+}
 
+static void BeginRogueRunPhase_Legends(void)
+{
     // Choose legendaries before trainers so rival can avoid these legends
     ChooseLegendarysForNewAdventure();
-    ChooseTeamEncountersForNewAdventure();
+}
 
+static void BeginRogueRunPhase_TeamEncounters(void)
+{
+    ChooseTeamEncountersForNewAdventure();
+}
+
+static void BeginRogueRunPhase_Trainers(void)
+{
     // Choose bosses last
     Rogue_ChooseRivalTrainerForNewAdventure();
     Rogue_ChooseBossTrainersForNewAdventure();
@@ -4569,14 +4603,16 @@ static void BeginRogueRun(void)
     gRogueRun.shrineSpawnDifficulty = 1 + RogueRandomRange(ROGUE_MAX_BOSS_COUNT, 0);
 
     RogueSafari_CompactEmptyEntries();
+}
 
+static void BeginRogueRunPhase_Finalize(void)
+{
     IncrementGameStat(GAME_STAT_TOTAL_RUNS);
 
     // Trigger before and after as we may have hub/run only quests which are interested in this trigger
     RogueQuest_OnTrigger(QUEST_TRIGGER_RUN_START);
     RogueQuest_ActivateQuestsFor(QUEST_CONST_ACTIVE_IN_RUN);
     RogueQuest_OnTrigger(QUEST_TRIGGER_RUN_START);
-
 
     Rogue_AddPartySnapshot();
 
@@ -4586,8 +4622,6 @@ static void BeginRogueRun(void)
     if(Rogue_ShouldDisableChallengeQuests())
         Rogue_PushPopup_ChallengeQuestsDisabled();
 
-    // Remember adventure replay
-    //
     gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].isValid = TRUE;
     gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].baseSeed = gRogueRun.baseSeed;
 
@@ -4603,6 +4637,52 @@ static void BeginRogueRun(void)
     }
 
     RogueQuest_CheckQuestRequirements();
+}
+
+static void BeginRogueRunPhase(u8 phase)
+{
+    switch(phase)
+    {
+    case BEGIN_RUN_PHASE_RESET:
+        BeginRogueRunPhase_Reset();
+        break;
+
+    case BEGIN_RUN_PHASE_WORLD_STATE:
+        BeginRogueRunPhase_WorldState();
+        break;
+
+    case BEGIN_RUN_PHASE_PARTY_AND_BAG:
+        BeginRogueRunPhase_PartyAndBag();
+        break;
+
+    case BEGIN_RUN_PHASE_SPECIAL_CLAUSES:
+        BeginRogueRunPhase_SpecialClauses();
+        break;
+
+    case BEGIN_RUN_PHASE_LEGENDS:
+        BeginRogueRunPhase_Legends();
+        break;
+
+    case BEGIN_RUN_PHASE_TEAM_ENCOUNTERS:
+        BeginRogueRunPhase_TeamEncounters();
+        break;
+
+    case BEGIN_RUN_PHASE_TRAINERS:
+        BeginRogueRunPhase_Trainers();
+        break;
+
+    case BEGIN_RUN_PHASE_FINALIZE:
+        BeginRogueRunPhase_Finalize();
+        break;
+    }
+}
+
+static void BeginRogueRun(void)
+{
+    u8 phase;
+
+    for(phase = 0; phase < BEGIN_RUN_PHASE_COUNT; ++phase)
+        BeginRogueRunPhase(phase);
 }
 
 static u16 GetRequiredBadgesForEggToHatch(u16 species)
@@ -5363,6 +5443,145 @@ static void ResetSpecialEncounterStates(void)
     // Reset ledgendary encounters
     //FlagSet(FLAG_HIDE_SOUTHERN_ISLAND_EON_STONE);
 }
+
+enum
+{
+    RUN_PORTAL_STATE_WAIT_TRANSITION,
+    RUN_PORTAL_STATE_PREPARE_RUN_PHASE,
+    RUN_PORTAL_STATE_RUN_PHASE,
+};
+
+enum
+{
+    RUN_PORTAL_LOADING_WINDOW_WIDTH = 12,
+    RUN_PORTAL_LOADING_WINDOW_HEIGHT = 2,
+    RUN_PORTAL_LOADING_WINDOW_PALETTE = 15,
+    RUN_PORTAL_LOADING_WINDOW_TILE_START = 0x1E0,
+};
+
+static const u16 sRunPortalLoadingPalette[16] =
+{
+    RGB_BLACK,
+    RGB_WHITE,
+    RGB(8, 8, 8),
+};
+
+static const u8 sText_RunPortalLoading0[] = _("Loading");
+static const u8 sText_RunPortalLoading1[] = _("Loading.");
+static const u8 sText_RunPortalLoading2[] = _("Loading..");
+static const u8 sText_RunPortalLoading3[] = _("Loading...");
+static const u8 *const sRunPortalLoadingTexts[] =
+{
+    sText_RunPortalLoading0,
+    sText_RunPortalLoading1,
+    sText_RunPortalLoading2,
+    sText_RunPortalLoading3,
+};
+static const u8 sRunPortalLoadingTextColors[] = {0, 1, 2};
+static const struct WindowTemplate sRunPortalLoadingWindowTemplate =
+{
+    .bg = 0,
+    .tilemapLeft = (30 - RUN_PORTAL_LOADING_WINDOW_WIDTH) / 2,
+    .tilemapTop = 9,
+    .width = RUN_PORTAL_LOADING_WINDOW_WIDTH,
+    .height = RUN_PORTAL_LOADING_WINDOW_HEIGHT,
+    .paletteNum = RUN_PORTAL_LOADING_WINDOW_PALETTE,
+    .baseBlock = RUN_PORTAL_LOADING_WINDOW_TILE_START,
+};
+
+#define tRunPortalState data[0]
+#define tSavedFadeSpeed data[1]
+#define tLoadingWindowId data[2]
+#define tDotCount data[4]
+#define tSetupPhase data[6]
+
+static void RunPortal_PrintLoadingText(u8 windowId, u8 dotCount)
+{
+    const u8 *text = sRunPortalLoadingTexts[dotCount % ARRAY_COUNT(sRunPortalLoadingTexts)];
+    u8 x = GetStringCenterAlignXOffset(FONT_NORMAL, text, RUN_PORTAL_LOADING_WINDOW_WIDTH * 8);
+
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
+    AddTextPrinterParameterized3(windowId, FONT_NORMAL, x, 1, sRunPortalLoadingTextColors, TEXT_SKIP_DRAW, text);
+    PutWindowTilemap(windowId);
+    CopyWindowToVram(windowId, COPYWIN_FULL);
+}
+
+static u8 RunPortal_CreateLoadingTextWindow(void)
+{
+    u8 windowId = AddWindow(&sRunPortalLoadingWindowTemplate);
+
+    if(windowId != WINDOW_NONE)
+    {
+        LoadPalette(sRunPortalLoadingPalette, BG_PLTT_ID(RUN_PORTAL_LOADING_WINDOW_PALETTE), sizeof(sRunPortalLoadingPalette));
+        RunPortal_PrintLoadingText(windowId, 0);
+    }
+
+    return windowId;
+}
+
+static void RunPortal_FinishTransitionTask(u8 taskId)
+{
+    gSaveBlock2Ptr->optionsFadeSpeed = gTasks[taskId].tSavedFadeSpeed;
+    ScriptContext_Enable();
+    DestroyTask(taskId);
+}
+
+static void Task_RogueRunPortalTransition(u8 taskId)
+{
+    switch(gTasks[taskId].tRunPortalState)
+    {
+    case RUN_PORTAL_STATE_WAIT_TRANSITION:
+        if(IsBattleTransitionDone())
+        {
+            BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
+            gTasks[taskId].tLoadingWindowId = RunPortal_CreateLoadingTextWindow();
+            gTasks[taskId].tDotCount = 0;
+            gTasks[taskId].tSetupPhase = 0;
+            gTasks[taskId].tRunPortalState = RUN_PORTAL_STATE_PREPARE_RUN_PHASE;
+        }
+        break;
+
+    case RUN_PORTAL_STATE_PREPARE_RUN_PHASE:
+        if(gTasks[taskId].tSetupPhase >= BEGIN_RUN_PHASE_COUNT)
+        {
+            RunPortal_FinishTransitionTask(taskId);
+        }
+        else
+        {
+            if(gTasks[taskId].tLoadingWindowId != WINDOW_NONE)
+                RunPortal_PrintLoadingText(gTasks[taskId].tLoadingWindowId, gTasks[taskId].tDotCount++);
+
+            gTasks[taskId].tRunPortalState = RUN_PORTAL_STATE_RUN_PHASE;
+        }
+        break;
+
+    case RUN_PORTAL_STATE_RUN_PHASE:
+        BeginRogueRunPhase(gTasks[taskId].tSetupPhase);
+        gTasks[taskId].tSetupPhase++;
+        gTasks[taskId].tRunPortalState = RUN_PORTAL_STATE_PREPARE_RUN_PHASE;
+        break;
+    }
+}
+
+void Rogue_StartRunPortalTransition(void)
+{
+    if(!FuncIsActiveTask(Task_RogueRunPortalTransition))
+    {
+        u8 taskId = CreateTask(Task_RogueRunPortalTransition, 1);
+        gTasks[taskId].tSavedFadeSpeed = gSaveBlock2Ptr->optionsFadeSpeed;
+
+        // Fast fade skips battle transitions entirely, so force this scripted portal to be visible.
+        gSaveBlock2Ptr->optionsFadeSpeed = OPTIONS_TEXT_SPEED_MID;
+        PlaySE(SE_WARP_OUT);
+        BattleTransition_StartOnField(B_TRANSITION_BLUR);
+    }
+}
+
+#undef tRunPortalState
+#undef tSavedFadeSpeed
+#undef tLoadingWindowId
+#undef tDotCount
+#undef tSetupPhase
 
 void Rogue_OnWarpIntoMap(void)
 {

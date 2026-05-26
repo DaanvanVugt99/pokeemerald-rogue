@@ -435,6 +435,8 @@ script Rogue_StartAdventureCommon
 
             setflag(FLAG_ROGUE_LEFT_ON_RUN)
             setrespawn(HEAL_LOCATION_ROGUE_HUB)
+            special(Rogue_StartRunPortalTransition)
+            waitstate
             warp(MAP_ROGUE_HUB_TRANSITION, 0)
             waitstate
         }
