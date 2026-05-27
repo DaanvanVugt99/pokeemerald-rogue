@@ -1495,9 +1495,18 @@ static bool8 QuestCondition_IsPokedexRegion(u16 questId, struct RogueQuestTrigge
 
 static bool8 UNUSED QuestCondition_IsPokedexVariant(u16 questId, struct RogueQuestTrigger const* trigger)
 {
-    u16 variant = trigger->params[0];
-    ASSERT_PARAM_COUNT(1);
-    return RoguePokedex_GetDexVariant() == variant;
+    u16 i;
+    u16 variant = RoguePokedex_GetDexVariant();
+
+    AGB_ASSERT(trigger->paramCount > 0);
+
+    for(i = 0; i < trigger->paramCount; ++i)
+    {
+        if(variant == trigger->params[i])
+            return TRUE;
+    }
+
+    return FALSE;
 }
 
 static bool8 QuestCondition_CurrentlyInMap(u16 questId, struct RogueQuestTrigger const* trigger)
