@@ -1420,6 +1420,16 @@ static void Cmd_attackcanceler(void)
         gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = TRUE;
     }
 
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_ARRAY)
+     && IsOnlyParadoxInParty(gBattlerAttacker)
+     && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+     && !gBattleStruct->isAtkCancelerForCalledMove
+     && !IS_MOVE_STATUS(gCurrentMove))
+    {
+        gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+        gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = TRUE;
+    }
+
     // Final Step should only be consumed once the move is actually going through.
     if ((HasBattlerAbility(gBattlerAttacker, ABILITY_OPENING_VERSE)
       || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
@@ -6895,6 +6905,8 @@ static void Cmd_moveend(void)
                 gHitMarker |= HITMARKER_NO_ATTACKSTRING;
                 gHitMarker &= ~HITMARKER_NO_PPDEDUCT;
             }
+            if (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_ARRAY))
+                gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
             RecordLastUsedMoveBy(gBattlerAttacker, gCurrentMove);
             gBattleScripting.moveendState++;
             break;

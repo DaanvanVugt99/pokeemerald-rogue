@@ -123,6 +123,7 @@ static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target);
 static bool32 TryUseOctolockCalledMove(u32 battler, u32 target);
 static bool32 TryUseTeaServiceCalledMove(u32 battler);
 static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target);
+static bool32 TryUsePrimalSignatureCalledMove(u32 battler, u32 target, u32 ability, u32 calledMove);
 static bool32 TryUseShardstormCalledMove(u32 battler, u32 target);
 static bool32 TryUseFalseApplauseCalledMove(u32 battler, u32 target);
 static bool32 TryUseCapsaicinCrazeCalledMove(u32 battler, u32 target);
@@ -5357,6 +5358,34 @@ static bool32 TryUseSingularityReactorCalledMove(u32 battler, u32 target)
     gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
     gCalledMove = MOVE_FIRE_SPIN;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryUsePrimalSignatureCalledMove(u32 battler, u32 target, u32 ability, u32 calledMove)
+{
+    if (calledMove == MOVE_BURNING_BULWARK)
+    {
+        if (!CanUseSelfExtraMove(battler))
+            return FALSE;
+        target = battler;
+    }
+    else if (target >= gBattlersCount
+          || !IsBattlerAlive(target)
+          || GetBattlerSide(target) == GetBattlerSide(battler)
+          || !CanUseExtraMove(battler, target))
+    {
+        return FALSE;
+    }
+
+    SetBattlerTriggeredAbility(battler, ability);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = calledMove;
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
@@ -14695,6 +14724,42 @@ if (triggeringAbility != ABILITY_NONE)
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
          && TryUseSingularityReactorCalledMove(battler, gBattlerTarget))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_CREST)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_FIRE
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUsePrimalSignatureCalledMove(battler, battler, ABILITY_PRIMAL_CREST, MOVE_BURNING_BULWARK))
+        {
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_PRIMAL_THUNDER)
+         && IsOnlyParadoxInParty(battler)
+         && IsBattlerAlive(battler)
+         && moveType == TYPE_DRAGON
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
+         && TryUsePrimalSignatureCalledMove(battler, gBattlerTarget, ABILITY_PRIMAL_THUNDER, MOVE_THUNDERCLAP))
         {
             effect++;
         }
@@ -25413,6 +25478,12 @@ u32 GetBattlerMoveTargetType(u32 battler, u32 move)
         return MOVE_TARGET_BOTH;
     else if (gBattleMoves[move].effect == EFFECT_TERA_STARSTORM
         && gBattleMons[battler].species == SPECIES_TERAPAGOS_STELLAR)
+        return MOVE_TARGET_BOTH;
+    else if (HasBattlerAbility(battler, ABILITY_SINGULARITY_ARRAY)
+        && IsOnlyParadoxInParty(battler)
+        && (!gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         || gDisableStructs[battler].uniquePersistentStateActive)
+        && !IS_MOVE_STATUS(move))
         return MOVE_TARGET_BOTH;
     else if (HasBattlerAbility(battler, ABILITY_WIND_CHIMES)
         && gBattleMoves[move].soundMove

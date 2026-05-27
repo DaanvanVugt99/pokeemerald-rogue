@@ -5521,6 +5521,14 @@ static u8 RunPortal_CreateLoadingTextWindow(void)
 
 static void RunPortal_FinishTransitionTask(u8 taskId)
 {
+    u8 windowId = gTasks[taskId].tLoadingWindowId;
+
+    if(windowId != WINDOW_NONE)
+    {
+        ClearWindowTilemap(windowId);
+        RemoveWindow(windowId);
+    }
+
     gSaveBlock2Ptr->optionsFadeSpeed = gTasks[taskId].tSavedFadeSpeed;
     ScriptContext_Enable();
     DestroyTask(taskId);

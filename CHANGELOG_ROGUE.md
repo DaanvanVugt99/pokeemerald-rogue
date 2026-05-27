@@ -14,6 +14,12 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Added
+
+- Added Iron Crown's Singularity Array unique ability.
+- Added Gouging Fire's Primal Crest and Raging Bolt's Primal Thunder unique
+  abilities.
+
 ### Changed
 
 - Assigned implemented design-doc unique abilities to additional Mega forms.
