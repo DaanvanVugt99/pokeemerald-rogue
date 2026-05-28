@@ -62,3 +62,25 @@ SINGLE_BATTLE_TEST("Grafitti Tag makes a tagged foe leave Toxic Spikes when fain
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 1);
     }
 }
+
+DOUBLE_BATTLE_TEST("Grafitti Tag only tags the directly opposing foe in doubles")
+{
+    GIVEN {
+        PLAYER(SPECIES_GRAFAIAI) { Ability(ABILITY_UNBURDEN); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_CHARIZARD) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(playerLeft, MOVE_CELEBRATE); MOVE(playerRight, MOVE_CELEBRATE); MOVE(opponentLeft, MOVE_CELEBRATE); MOVE(opponentRight, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(playerLeft, ABILITY_GRAFITTI_TAG);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponentLeft);
+        MESSAGE("Grafaiai tagged\nthe opposing Pokemon!");
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponentRight);
+        }
+    } THEN {
+        EXPECT(gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].grafittiTagged);
+        EXPECT(!gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT)].grafittiTagged);
+    }
+}

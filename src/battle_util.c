@@ -7808,26 +7808,15 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         if (HasBattlerAbility(battler, ABILITY_GRAFITTI_TAG) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
-            bool32 tagged = FALSE;
-            u32 i;
 
             uniqueDone = TRUE;
 
-            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
-            {
-                if (!IsBattlerAlive(opposingBattler) || GetBattlerSide(battler) == GetBattlerSide(opposingBattler))
-                    continue;
-
-                if (!tagged)
-                    gBattlerTarget = opposingBattler;
-                SetGrafittiTag(opposingBattler);
-                tagged = TRUE;
-            }
-
-            if (tagged)
+            if (IsBattlerAlive(opposingBattler) && GetBattlerSide(battler) != GetBattlerSide(opposingBattler))
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_GRAFITTI_TAG);
                 gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = opposingBattler;
+                SetGrafittiTag(opposingBattler);
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
                 BattleScriptPushCursorAndCallback(BattleScript_GrafittiTagActivates);
