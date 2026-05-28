@@ -5157,6 +5157,83 @@ bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer)
     return FALSE;
 }
 
+struct WorldPrismFieldEffect
+{
+    bool8 isWeather;
+    u16 field;
+    const u8 *script;
+};
+
+static const struct WorldPrismFieldEffect sWorldPrismFieldEffects[] =
+{
+    {FALSE, STATUS_FIELD_PLAIN_TERRAIN,    BattleScript_PlainSurgeActivates},
+    {FALSE, STATUS_FIELD_GRASSY_TERRAIN,   BattleScript_GrassySurgeActivates},
+    {FALSE, STATUS_FIELD_ELECTRIC_TERRAIN, BattleScript_ElectricSurgeActivates},
+    {FALSE, STATUS_FIELD_PSYCHIC_TERRAIN,  BattleScript_PsychicSurgeActivates},
+    {FALSE, STATUS_FIELD_MISTY_TERRAIN,    BattleScript_MistySurgeActivates},
+    {FALSE, STATUS_FIELD_INFESTED_TERRAIN, BattleScript_InfestedSurgeActivates},
+    {TRUE,  ENUM_WEATHER_SUN,              BattleScript_DroughtActivates},
+    {TRUE,  ENUM_WEATHER_RAIN,             BattleScript_DrizzleActivates},
+    {TRUE,  ENUM_WEATHER_SANDSTORM,        BattleScript_SandstreamActivates},
+#if B_SNOW_WARNING >= GEN_9
+    {TRUE,  ENUM_WEATHER_SNOW,             BattleScript_SnowWarningActivatesSnow},
+#else
+    {TRUE,  ENUM_WEATHER_HAIL,             BattleScript_SnowWarningActivatesHail},
+#endif
+    {TRUE,  ENUM_WEATHER_ACID_RAIN,        BattleScript_ToxicDelugeActivates},
+    {TRUE,  ENUM_WEATHER_ECLIPSE,          BattleScript_OmenActivates},
+};
+
+static bool32 CanWorldPrismSetField(u32 battler, const struct WorldPrismFieldEffect *effect)
+{
+    if (!effect->isWeather)
+        return !(gFieldStatuses & effect->field) && !gBattleStruct->isSkyBattle;
+
+    if (gBattleWeather & B_WEATHER_PRIMAL_ANY)
+    {
+        u16 battlerAbility = GetBattlerAbility(battler);
+
+        if (battlerAbility != ABILITY_DESOLATE_LAND
+         && battlerAbility != ABILITY_PRIMORDIAL_SEA
+         && battlerAbility != ABILITY_DELTA_STREAM)
+            return FALSE;
+    }
+
+    if (B_ABILITY_WEATHER < GEN_6)
+        return !(gBattleWeather & sWeatherFlagsInfo[effect->field][1]);
+
+    return !(gBattleWeather & (sWeatherFlagsInfo[effect->field][0] | sWeatherFlagsInfo[effect->field][1]));
+}
+
+static const u8 *TryStartWorldPrismFieldEffect(u32 battler)
+{
+    u32 i, count = 0;
+    u8 candidates[ARRAY_COUNT(sWorldPrismFieldEffects)];
+    const struct WorldPrismFieldEffect *effect;
+
+    for (i = 0; i < ARRAY_COUNT(sWorldPrismFieldEffects); i++)
+    {
+        if (CanWorldPrismSetField(battler, &sWorldPrismFieldEffects[i]))
+            candidates[count++] = i;
+    }
+
+    if (count == 0)
+        return NULL;
+
+    effect = &sWorldPrismFieldEffects[candidates[RandomUniform(RNG_ROGUE_WORLD_PRISM, 0, count - 1)]];
+    if (effect->isWeather)
+    {
+        if (TryChangeBattleWeather(battler, effect->field, TRUE))
+            return effect->script;
+    }
+    else if (TryChangeBattleTerrain(battler, effect->field, &gFieldTimers.terrainTimer))
+    {
+        return effect->script;
+    }
+
+    return NULL;
+}
+
 static u8 GetInitialBattleWeather()
 {
     // Instant weather override to avoid anims
@@ -14843,6 +14920,30 @@ if (triggeringAbility != ABILITY_NONE)
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_WORLD_PRISM)
+         && IsBattlerAlive(battler)
+         && move == MOVE_TERA_STARSTORM
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && !(gBattleStruct->lastMoveFailed & gBitTable[battler])
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move))
+        {
+            const u8 *worldPrismScript = TryStartWorldPrismFieldEffect(battler);
+
+            if (worldPrismScript != NULL)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_WORLD_PRISM);
+                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+                BattleScriptPushCursorAndCallback(worldPrismScript);
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_SWALLOWED)

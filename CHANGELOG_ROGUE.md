@@ -19,6 +19,7 @@ Format follows Keep a Changelog loosely:
 - Added Iron Crown's Singularity Array unique ability.
 - Added Gouging Fire's Primal Crest and Raging Bolt's Primal Thunder unique
   abilities.
+- Added Terapagos's World Prism unique ability.
 
 ### Changed
 
