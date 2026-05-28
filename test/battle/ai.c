@@ -277,17 +277,17 @@ AI_SINGLE_BATTLE_TEST("AI prefers moves with better accuracy, but only if they b
     abilityAtk = ABILITY_NONE;
     expectedMove2 = MOVE_NONE;
 
-    // Here it's a simple test, both Slam and Strength deal the same damage, but Strength always hits, whereas Slam often misses.
-    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_STRENGTH; move3 = MOVE_TACKLE; hp = 490; expectedMove = MOVE_STRENGTH; turns = 4; }
-    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 365; expectedMove = MOVE_STRENGTH; turns = 3; }
-    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 245; expectedMove = MOVE_STRENGTH; turns = 2; }
-    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 125; expectedMove = MOVE_STRENGTH; turns = 1; }
-    // Take Down deals more damage, but can miss more often. Here, AI should choose Take Down if it can faint target in less number of turns than Strength. Otherwise, it should use Strength.
-    PARAMETRIZE { move1 = MOVE_TAKE_DOWN; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 140; expectedMove = MOVE_TAKE_DOWN; turns = 1; }
-    PARAMETRIZE { move1 = MOVE_TAKE_DOWN; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 245; expectedMove = MOVE_STRENGTH; turns = 2; }
+    // Here it's a simple test, both Slam and Extreme Speed deal the same damage, but Extreme Speed is more accurate.
+    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_TACKLE; hp = 490; expectedMove = MOVE_EXTREME_SPEED; turns = 4; }
+    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 365; expectedMove = MOVE_EXTREME_SPEED; turns = 3; }
+    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 245; expectedMove = MOVE_EXTREME_SPEED; turns = 2; }
+    PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 125; expectedMove = MOVE_EXTREME_SPEED; turns = 1; }
+    // Take Down deals more damage, but can miss more often. Here, AI should choose Take Down if it can faint target in less number of turns than Extreme Speed. Otherwise, it should use Extreme Speed.
+    PARAMETRIZE { move1 = MOVE_TAKE_DOWN; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 140; expectedMove = MOVE_TAKE_DOWN; turns = 1; }
+    PARAMETRIZE { move1 = MOVE_TAKE_DOWN; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 245; expectedMove = MOVE_EXTREME_SPEED; turns = 2; }
     // Swift always hits and Guts has accuracy of 100%. Hustle lowers accuracy of all physical moves.
-    PARAMETRIZE { abilityAtk = ABILITY_HUSTLE; move1 = MOVE_MEGA_KICK; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 5; expectedMove = MOVE_SWIFT; turns = 1; }
-    PARAMETRIZE { abilityAtk = ABILITY_HUSTLE; move1 = MOVE_MEGA_KICK; move2 = MOVE_STRENGTH; move3 = MOVE_GUST; move4 = MOVE_TACKLE; hp = 5; expectedMove = MOVE_GUST; turns = 1; }
+    PARAMETRIZE { abilityAtk = ABILITY_HUSTLE; move1 = MOVE_MEGA_KICK; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 5; expectedMove = MOVE_SWIFT; turns = 1; }
+    PARAMETRIZE { abilityAtk = ABILITY_HUSTLE; move1 = MOVE_MEGA_KICK; move2 = MOVE_EXTREME_SPEED; move3 = MOVE_GUST; move4 = MOVE_TACKLE; hp = 5; expectedMove = MOVE_GUST; turns = 1; }
     // Mega Kick and Slam both have lower accuracy. Gust and Tackle both have 100, so AI can choose either of them.
     PARAMETRIZE { move1 = MOVE_MEGA_KICK; move2 = MOVE_SLAM; move3 = MOVE_TACKLE; move4 = MOVE_GUST; hp = 5; expectedMove = MOVE_GUST; expectedMove2 = MOVE_TACKLE; turns = 1; }
     // All moves hit with No guard ability
@@ -301,16 +301,16 @@ AI_SINGLE_BATTLE_TEST("AI prefers moves with better accuracy, but only if they b
         PLAYER(SPECIES_WOBBUFFET) { HP(hp); }
         PLAYER(SPECIES_WOBBUFFET);
         ASSUME(gBattleMoves[MOVE_SWIFT].accuracy == 0);
-        ASSUME(gBattleMoves[MOVE_SLAM].power == gBattleMoves[MOVE_STRENGTH].power);
-        ASSUME(gBattleMoves[MOVE_TAKE_DOWN].power > gBattleMoves[MOVE_STRENGTH].power);
-        ASSUME(gBattleMoves[MOVE_SLAM].accuracy < gBattleMoves[MOVE_STRENGTH].accuracy);
-        ASSUME(gBattleMoves[MOVE_TAKE_DOWN].accuracy < gBattleMoves[MOVE_STRENGTH].accuracy);
+        ASSUME(gBattleMoves[MOVE_SLAM].power == gBattleMoves[MOVE_EXTREME_SPEED].power);
+        ASSUME(gBattleMoves[MOVE_TAKE_DOWN].power > gBattleMoves[MOVE_EXTREME_SPEED].power);
+        ASSUME(gBattleMoves[MOVE_SLAM].accuracy < gBattleMoves[MOVE_EXTREME_SPEED].accuracy);
+        ASSUME(gBattleMoves[MOVE_TAKE_DOWN].accuracy < gBattleMoves[MOVE_EXTREME_SPEED].accuracy);
         ASSUME(gBattleMoves[MOVE_TACKLE].accuracy == 100);
         ASSUME(gBattleMoves[MOVE_GUST].accuracy == 100);
         ASSUME(gBattleMoves[MOVE_SHOCK_WAVE].accuracy == 0);
         ASSUME(gBattleMoves[MOVE_THUNDERBOLT].accuracy == 100);
         ASSUME(gBattleMoves[MOVE_ICY_WIND].accuracy != 100);
-        OPPONENT(SPECIES_EXPLOUD) { Moves(move1, move2, move3, move4); Ability(abilityAtk); SpAttack(50); } // Low Sp.Atk, so Swift deals less damage than Strength.
+        OPPONENT(SPECIES_EXPLOUD) { Moves(move1, move2, move3, move4); Ability(abilityAtk); SpAttack(50); } // Low Sp.Atk, so Swift deals less damage than Extreme Speed.
     } WHEN {
             switch (turns)
             {
@@ -445,10 +445,10 @@ AI_SINGLE_BATTLE_TEST("AI can choose a status move that boosts the attack by two
         AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
         PLAYER(SPECIES_WOBBUFFET) { HP(277); };
         PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_KANGASKHAN) { Moves(MOVE_STRENGTH, MOVE_HORN_ATTACK, MOVE_SWORDS_DANCE); }
+        OPPONENT(SPECIES_KANGASKHAN) { Moves(MOVE_BODY_SLAM, MOVE_HORN_ATTACK, MOVE_SWORDS_DANCE); }
     } WHEN {
-        TURN { EXPECT_MOVES(opponent, MOVE_STRENGTH, MOVE_SWORDS_DANCE); }
-        TURN { EXPECT_MOVE(opponent, MOVE_STRENGTH); SEND_OUT(player, 1); }
+        TURN { EXPECT_MOVES(opponent, MOVE_BODY_SLAM, MOVE_SWORDS_DANCE); }
+        TURN { EXPECT_MOVE(opponent, MOVE_BODY_SLAM); SEND_OUT(player, 1); }
     }
 }
 
