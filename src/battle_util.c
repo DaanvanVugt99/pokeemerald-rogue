@@ -16621,6 +16621,27 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_PUPPET_MASTER)
+         && IS_MOVE_STATUS(move)
+         && DoesPartyShareTypeWithBattler(battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gBattleStruct->isAtkCancelerForCalledMove
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_PUPPET_MASTER);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_COPYCAT;
+            gLastUsedMove = gBattleStruct->lastTakenMoveFrom[battler][battler];
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            StartAbilityCalledMoveScript();
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_INVERSION)
          && IS_MOVE_STATUS(move)
          && move != MOVE_TOPSY_TURVY

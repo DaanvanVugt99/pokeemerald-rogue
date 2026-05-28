@@ -20,6 +20,7 @@ Format follows Keep a Changelog loosely:
 - Added Gouging Fire's Primal Crest and Raging Bolt's Primal Thunder unique
   abilities.
 - Added Terapagos's World Prism unique ability.
+- Added Pecharunt's Puppet Master unique ability.
 
 ### Changed
 
