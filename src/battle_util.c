@@ -1684,12 +1684,22 @@ void PrepareStringBattle(u16 stringId, u32 battler)
         gBattleScripting.stickyWebStatDrop = 0;
         gBattlerAbility = gBattlerTarget;
         SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_COLONY_GUARDIAN);
-        SetAtkCancellerForCalledMove();
-        gBattlerAttacker = gBattlerTarget;
-        gCalledMove = MOVE_HONE_CLAWS;
-        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
         gProtectStructs[gBattlerTarget].extraMoveUsed = TRUE;
-        StartAbilityCalledMoveScript();
+        if (stringId == STRINGID_PKMNCUTSATTACKWITH)
+        {
+            // Intimidate runs from a switch-in callback, so use a returning
+            // stat script instead of a full called move.
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_ColonyGuardianRaisesStats;
+        }
+        else
+        {
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerTarget;
+            gCalledMove = MOVE_HONE_CLAWS;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            StartAbilityCalledMoveScript();
+        }
     }
 #if  B_UPDATED_INTIMIDATE >= GEN_8
     else if (stringId == STRINGID_PKMNCUTSATTACKWITH && targetAbility == ABILITY_RATTLED

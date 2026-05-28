@@ -9394,6 +9394,25 @@ BattleScript_StreetFighterTryDefense:
 BattleScript_StreetFighterEnd:
 	return
 
+BattleScript_ColonyGuardianRaisesStats::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_ATK, 1, FALSE
+	statbuffchange 0, BattleScript_ColonyGuardianTryAccuracy
+	setgraphicalstatchangevalues
+	playanimation BS_ABILITY_BATTLER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_DEFENDERSSTATROSE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ColonyGuardianTryAccuracy:
+	setstatchanger STAT_ACC, 1, FALSE
+	statbuffchange 0, BattleScript_ColonyGuardianEnd
+	setgraphicalstatchangevalues
+	playanimation BS_ABILITY_BATTLER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_DEFENDERSSTATROSE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ColonyGuardianEnd:
+	return
+
 BattleScript_AbilityPopUpTarget:
 	copybyte gBattlerAbility, gBattlerTarget
 BattleScript_AbilityPopUp:
