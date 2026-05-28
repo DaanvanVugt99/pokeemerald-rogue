@@ -282,9 +282,9 @@ AI_SINGLE_BATTLE_TEST("AI prefers moves with better accuracy, but only if they b
     PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 365; expectedMove = MOVE_STRENGTH; turns = 3; }
     PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 245; expectedMove = MOVE_STRENGTH; turns = 2; }
     PARAMETRIZE { move1 = MOVE_SLAM; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 125; expectedMove = MOVE_STRENGTH; turns = 1; }
-    // Mega Kick deals more damage, but can miss more often. Here, AI should choose Mega Kick if it can faint target in less number of turns than Strength. Otherwise, it should use Strength.
-    PARAMETRIZE { move1 = MOVE_MEGA_KICK; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 170; expectedMove = MOVE_MEGA_KICK; turns = 1; }
-    PARAMETRIZE { move1 = MOVE_MEGA_KICK; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 245; expectedMove = MOVE_STRENGTH; turns = 2; }
+    // Take Down deals more damage, but can miss more often. Here, AI should choose Take Down if it can faint target in less number of turns than Strength. Otherwise, it should use Strength.
+    PARAMETRIZE { move1 = MOVE_TAKE_DOWN; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 140; expectedMove = MOVE_TAKE_DOWN; turns = 1; }
+    PARAMETRIZE { move1 = MOVE_TAKE_DOWN; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 245; expectedMove = MOVE_STRENGTH; turns = 2; }
     // Swift always hits and Guts has accuracy of 100%. Hustle lowers accuracy of all physical moves.
     PARAMETRIZE { abilityAtk = ABILITY_HUSTLE; move1 = MOVE_MEGA_KICK; move2 = MOVE_STRENGTH; move3 = MOVE_SWIFT; move4 = MOVE_TACKLE; hp = 5; expectedMove = MOVE_SWIFT; turns = 1; }
     PARAMETRIZE { abilityAtk = ABILITY_HUSTLE; move1 = MOVE_MEGA_KICK; move2 = MOVE_STRENGTH; move3 = MOVE_GUST; move4 = MOVE_TACKLE; hp = 5; expectedMove = MOVE_GUST; turns = 1; }
@@ -302,9 +302,9 @@ AI_SINGLE_BATTLE_TEST("AI prefers moves with better accuracy, but only if they b
         PLAYER(SPECIES_WOBBUFFET);
         ASSUME(gBattleMoves[MOVE_SWIFT].accuracy == 0);
         ASSUME(gBattleMoves[MOVE_SLAM].power == gBattleMoves[MOVE_STRENGTH].power);
-        ASSUME(gBattleMoves[MOVE_MEGA_KICK].power > gBattleMoves[MOVE_STRENGTH].power);
+        ASSUME(gBattleMoves[MOVE_TAKE_DOWN].power > gBattleMoves[MOVE_STRENGTH].power);
         ASSUME(gBattleMoves[MOVE_SLAM].accuracy < gBattleMoves[MOVE_STRENGTH].accuracy);
-        ASSUME(gBattleMoves[MOVE_MEGA_KICK].accuracy < gBattleMoves[MOVE_STRENGTH].accuracy);
+        ASSUME(gBattleMoves[MOVE_TAKE_DOWN].accuracy < gBattleMoves[MOVE_STRENGTH].accuracy);
         ASSUME(gBattleMoves[MOVE_TACKLE].accuracy == 100);
         ASSUME(gBattleMoves[MOVE_GUST].accuracy == 100);
         ASSUME(gBattleMoves[MOVE_SHOCK_WAVE].accuracy == 0);

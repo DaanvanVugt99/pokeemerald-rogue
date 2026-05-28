@@ -1360,6 +1360,7 @@ BattleScript_EffectFling:
 	damagecalc
 	adjustdamage
 	removeitem BS_ATTACKER
+	waitstate
 	attackanimation
 	waitanimation
 	effectivenesssound
@@ -1391,10 +1392,13 @@ BattleScript_EffectFlingConsumeBerry:
 BattleScript_FlingEnd:
 	tryfaintmon BS_TARGET
 	trysymbiosis
+	call BattleScript_ScrapJobActivates
 	goto BattleScript_MoveEnd
 
 BattleScript_FlingFailConsumeItem::
 	removeitem BS_ATTACKER
+	waitstate
+	call BattleScript_ScrapJobActivates
 	goto BattleScript_FailedFromAtkString
 
 BattleScript_FlingFlameOrb:
@@ -6363,6 +6367,7 @@ BattleScript_EffectTrick::
 	jumpifsubstituteblocks BattleScript_ButItFailed
 	accuracycheck BattleScript_ButItFailed, ACC_CURR_MOVE
 	tryswapitems BattleScript_ButItFailed
+	waitstate
 	attackanimation
 	waitanimation
 	printstring STRINGID_PKMNSWITCHEDITEMS

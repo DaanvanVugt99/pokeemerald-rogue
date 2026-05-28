@@ -3225,6 +3225,9 @@ static void TryQueueScrapJobAfterRemoveItem(u32 battler, const u8 *nextInstr)
     if (!TryMarkScrapJobPending(battler))
         return;
 
+    if (gBattleMoves[gCurrentMove].effect == EFFECT_FLING)
+        return;
+
     if (gBattlescriptCurrInstr == nextInstr)
     {
         BattleScriptPush(nextInstr);
