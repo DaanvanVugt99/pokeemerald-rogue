@@ -24,6 +24,11 @@ Format follows Keep a Changelog loosely:
 
 - Assigned implemented design-doc unique abilities to additional Mega forms.
 
+### Fixed
+
+- Fixed trainer team generation assertions when recoverable species-form fallbacks
+  are selected.
+
 ### Docs
 
 - Added the Pokemon romhack tracker as the general design reference for unique

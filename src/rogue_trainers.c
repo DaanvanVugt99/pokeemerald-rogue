@@ -3216,11 +3216,6 @@ static u16 SampleNextSpecies(struct TrainerPartyScratch* scratch)
         else
         {
 #ifdef ROGUE_EXPANSION
-            // Common bug species :(
-            // (Not really sure what the underlying cause is so handle these here)
-            AGB_ASSERT(species != SPECIES_GIMMIGHOUL_ROAMING);
-            AGB_ASSERT(species != SPECIES_MAGEARNA_ORIGINAL_COLOR);
-
             if(species == SPECIES_GIMMIGHOUL_ROAMING)
             {
                 if(scratch->allowItemEvos)
