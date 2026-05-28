@@ -24,12 +24,15 @@ SINGLE_BATTLE_TEST("Scrap Job scatters Spikes when Tinkaton consumes its item")
 SINGLE_BATTLE_TEST("Scrap Job scatters Spikes when Tinkaton loses its item with Fling")
 {
     GIVEN {
-        PLAYER(SPECIES_TINKATON) { Item(ITEM_IRON_BALL); Moves(MOVE_FLING); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_TINKATON) { Item(ITEM_REPEL); Moves(MOVE_FLING); }
+        OPPONENT(SPECIES_WOBBUFFET) { MaxHP(1000); HP(1000); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_FLING); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Tinkaton used Fling!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FLING, player);
+        HP_BAR(opponent);
     } THEN {
-        EXPECT_EQ(player->item, ITEM_NONE);
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].spikesAmount, 1);
     }
 }
@@ -62,15 +65,16 @@ SINGLE_BATTLE_TEST("Scrap Job scatters Spikes on the player's side when opposing
     }
 }
 
-SINGLE_BATTLE_TEST("Scrap Job scatters Spikes when Tinkaton gives away its item")
+SINGLE_BATTLE_TEST("Scrap Job scatters Spikes when Tinkaton swaps away its item")
 {
     GIVEN {
         PLAYER(SPECIES_TINKATON) { Item(ITEM_LEFTOVERS); Moves(MOVE_TRICK); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_ORAN_BERRY); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_TRICK); MOVE(opponent, MOVE_CELEBRATE); }
     } THEN {
-        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT_EQ(player->item, ITEM_ORAN_BERRY);
+        EXPECT_EQ(opponent->item, ITEM_LEFTOVERS);
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].spikesAmount, 1);
     }
 }
