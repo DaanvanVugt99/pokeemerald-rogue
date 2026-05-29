@@ -46,6 +46,8 @@ Format follows Keep a Changelog loosely:
 
 - Fixed attacker-side move-end unique abilities, including Vicejaw and Handywork,
   failing after the target's contact ability retargeted battle script state first.
+- Fixed attacker-side move-end unique abilities, including Windsurge, being
+  attributed to the target when move-end script state changed the attacker first.
 - Fixed the Game Modes submenu being hidden on early saves, which made Fast Path
   unavailable from the Config Lab.
 - Ported upstream item-PC deposit fix so Rogue-generated normal items such as

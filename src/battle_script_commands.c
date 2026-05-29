@@ -6219,6 +6219,7 @@ static void Cmd_moveend(void)
         switch (gBattleScripting.moveendState)
         {
         case MOVEEND_SUM_DAMAGE: // Sum and store damage dealt for multi strike recoil
+            gBattleStruct->moveEndAttacker = gBattlerAttacker;
             gBattleScripting.savedDmg += gHpDealt;
             gBattleScripting.moveendState++;
             break;
@@ -6411,20 +6412,20 @@ static void Cmd_moveend(void)
         case MOVEEND_ABILITIES_ATTACKER: // Poison Touch, possibly other in the future
         {
             u32 moveEndMove = 0;
+            u32 moveEndAttacker = gBattleStruct->moveEndAttacker;
 
-            if (gCurrentTurnActionNumber < gBattlersCount
-             && gBattlerByTurnOrder[gCurrentTurnActionNumber] < gBattlersCount)
+            if (moveEndAttacker >= gBattlersCount)
+                moveEndAttacker = gBattlerAttacker;
+
+            if (moveEndAttacker < gBattlersCount)
             {
-                u32 turnBattler = gBattlerByTurnOrder[gCurrentTurnActionNumber];
-
-                if (gBattleStruct->successfulForceSwitchMove[turnBattler] != MOVE_NONE
-                 && gProtectStructs[turnBattler].targetAffected)
-                {
-                    gBattlerAttacker = turnBattler;
-                    moveEndMove = gBattleStruct->successfulForceSwitchMove[turnBattler];
-                }
+                if (gBattleStruct->successfulForceSwitchMove[moveEndAttacker] != MOVE_NONE
+                 && gProtectStructs[moveEndAttacker].targetAffected)
+                    moveEndMove = gBattleStruct->successfulForceSwitchMove[moveEndAttacker];
             }
-            if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END_ATTACKER, gBattlerAttacker, 0, 0, moveEndMove))
+
+            gBattlerAttacker = moveEndAttacker;
+            if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END_ATTACKER, moveEndAttacker, 0, 0, moveEndMove))
                 effect = TRUE;
             gBattleScripting.moveendState++;
             break;

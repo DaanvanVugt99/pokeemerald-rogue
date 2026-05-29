@@ -12165,6 +12165,7 @@ BattleScript_PetrifyingRootsActivates::
 	return
 
 BattleScript_AttackerUsedAnExtraMove::
+	copybyte gBattlerAbility, gBattlerAttacker
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
 	attackcanceler
@@ -12189,6 +12190,7 @@ BattleScript_AttackerUsedAnExtraMove::
 	return
 
 BattleScript_AttackerUsedAnExtraMoveOnSwitchIn::
+	copybyte gBattlerAbility, gBattlerAttacker
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
 	attackcanceler

@@ -3,9 +3,13 @@
 #include "test/battle.h"
 #include "constants/vars.h"
 
+#define PLAYER_LEFT_BATTLER (&gBattleMons[0])
+#define OPPONENT_LEFT_BATTLER (&gBattleMons[1])
+
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_AERIAL_ACE].type == TYPE_FLYING);
+    ASSUME(gBattleMoves[MOVE_ACROBATICS].type == TYPE_FLYING);
     ASSUME(gBattleMoves[MOVE_PECK].type == TYPE_FLYING);
     ASSUME(gBattleMoves[MOVE_TACKLE].type != TYPE_FLYING);
     ASSUME(gBattleMoves[MOVE_FLAME_CHARGE].type == TYPE_FIRE);
@@ -22,12 +26,34 @@ SINGLE_BATTLE_TEST("Windsurge uses Flame Charge after the first Flying move each
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_PECK, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_WINDSURGE);
+        ABILITY_POPUP(PLAYER_LEFT_BATTLER, ABILITY_WINDSURGE);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_FLAME_CHARGE, player);
         HP_BAR(opponent);
     } THEN {
         EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
         EXPECT(gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniqueOncePerSwitchInUsed);
+    }
+}
+
+SINGLE_BATTLE_TEST("Windsurge belongs to the actual attacker after hitting a target with Windsurge")
+{
+    GIVEN {
+        PLAYER(SPECIES_CHARIZARD) { Speed(1); HP(1000); MaxHP(1000); Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_WINDSURGE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_TALONFLAME) { Speed(100); Ability(ABILITY_FLAME_BODY); UniqueAbility(ABILITY_WINDSURGE); Moves(MOVE_ACROBATICS); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_ACROBATICS); MOVE(player, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ACROBATICS, opponent);
+        ABILITY_POPUP(OPPONENT_LEFT_BATTLER, ABILITY_WINDSURGE);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FLAME_CHARGE, OPPONENT_LEFT_BATTLER);
+        NONE_OF {
+            ABILITY_POPUP(PLAYER_LEFT_BATTLER, ABILITY_WINDSURGE);
+        }
+    } THEN {
+        EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+        EXPECT(gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].uniqueOncePerSwitchInUsed);
+        EXPECT(!gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniqueOncePerSwitchInUsed);
     }
 }
 
@@ -41,7 +67,7 @@ SINGLE_BATTLE_TEST("Windsurge does not trigger after non-Flying moves")
     } SCENE {
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_WINDSURGE);
+            ABILITY_POPUP(PLAYER_LEFT_BATTLER, ABILITY_WINDSURGE);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_FLAME_CHARGE, player);
         }
     } THEN {
@@ -58,9 +84,9 @@ SINGLE_BATTLE_TEST("Windsurge only triggers once per switch-in")
         TURN { MOVE(player, MOVE_PECK); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_PECK); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_WINDSURGE);
+        ABILITY_POPUP(PLAYER_LEFT_BATTLER, ABILITY_WINDSURGE);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_WINDSURGE);
+            ABILITY_POPUP(PLAYER_LEFT_BATTLER, ABILITY_WINDSURGE);
         }
     } THEN {
         EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
@@ -88,7 +114,7 @@ SINGLE_BATTLE_TEST("Windsurge Flame Charge is 25 BP", s16 damage)
         if (windsurge) {
             ANIMATION(ANIM_TYPE_MOVE, MOVE_PECK, player);
             HP_BAR(opponent);
-            ABILITY_POPUP(player, ABILITY_WINDSURGE);
+            ABILITY_POPUP(PLAYER_LEFT_BATTLER, ABILITY_WINDSURGE);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_FLAME_CHARGE, player);
         } else {
             ANIMATION(ANIM_TYPE_MOVE, MOVE_FLAME_CHARGE, player);
@@ -109,7 +135,7 @@ SINGLE_BATTLE_TEST("Windsurge clears its temporary move effect when Flame Charge
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_AERIAL_ACE, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_WINDSURGE);
+        ABILITY_POPUP(PLAYER_LEFT_BATTLER, ABILITY_WINDSURGE);
     } THEN {
         EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
         EXPECT_EQ(VarGet(VAR_TEMP_MOVEEFECT_CHANCE), 0);
