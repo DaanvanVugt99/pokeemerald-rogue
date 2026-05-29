@@ -612,6 +612,17 @@ static void ReplaceRoomEncounter(u8 fromRoomType, u8 toRoomType)
     }
 }
 
+static bool8 FastPathAreRoutesHidden()
+{
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH)
+        return FALSE;
+
+    if(GetPathGenerationDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
+        return FALSE;
+
+    return (GetPathGenerationDifficulty() % 2) == 1;
+}
+
 static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
 {
     u8 i;
@@ -619,6 +630,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     u8 validEncounterCount = 0;
     u16 validEncounterList[ADVPATH_ROOM_COUNT];
     u16 minReplaceCount = 1;
+    bool8 fastPathHideRoutes = FastPathAreRoutesHidden();
 
     // Place gym at very end
     GenerateRoomInstance(0, ADVPATH_ROOM_BOSS);
@@ -703,35 +715,9 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         ++minReplaceCount;
     }
 
-    // Legends
-    for(i = 0; i < ADVPATH_LEGEND_COUNT; ++i)
-    {
-        if(gRogueRun.legendarySpecies[i] != SPECIES_NONE && gRogueRun.legendaryDifficulties[i] == GetPathGenerationDifficulty())
-        {
-            validEncounterList[validEncounterCount++] = ADVPATH_ROOM_LEGENDARY;
-            ++minReplaceCount;
-            break;
-        }
-    }
-
-    // Team Encounters
-    for(i = 0; i < ADVPATH_TEAM_ENCOUNTER_COUNT; ++i)
-    {
-        if(gRogueRun.teamEncounterDifficulties[i] == GetPathGenerationDifficulty())
-        {
-            validEncounterList[validEncounterCount++] = ADVPATH_ROOM_TEAM_HIDEOUT;
-            ++minReplaceCount;
-            break;
-        }
-    }
-
     // Honey tree
     if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET && GetPathGenerationDifficulty() >= 1 && RogueRandomChance(60, 0))
         validEncounterList[validEncounterCount++] = ADVPATH_ROOM_HONEY_TREE;
-
-    // Catching contest
-    if(RogueRandomChance(33, 0))
-        validEncounterList[validEncounterCount++] = ADVPATH_ROOM_CATCHING_CONTEST;
 
     // Mysterious Sign
     if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET && GetPathGenerationDifficulty() < ROGUE_ELITE_START_DIFFICULTY && RogueRandomChance(40, 0))
@@ -741,59 +727,88 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     if((Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) || GetPathGenerationDifficulty() == gRogueRun.shrineSpawnDifficulty)
         validEncounterList[validEncounterCount++] = ADVPATH_ROOM_SHRINE;
 
-    // Battle sim / Battle Tower
-    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET && GetPathGenerationDifficulty() >= 1)
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH || !fastPathHideRoutes)
     {
-        if(RogueRandomChance(50, 0))
-            validEncounterList[validEncounterCount++] = ADVPATH_ROOM_BATTLE_SIM;
-        else
-            validEncounterList[validEncounterCount++] = ADVPATH_ROOM_BATTLE_TOWER;
-    }
-
-    {
-        bool8 allowDarkDeal = (GetPathGenerationDifficulty() % 3 != 0);
-        bool8 allowLab = (GetPathGenerationDifficulty() % 3 != 1);
-        bool8 allowGameShow = RogueRandomChance(50, 0);
-
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+        // Legends
+        for(i = 0; i < ADVPATH_LEGEND_COUNT; ++i)
         {
-            allowDarkDeal = TRUE;
-            allowLab = FALSE;
-            allowGameShow = FALSE;
+            if(gRogueRun.legendarySpecies[i] != SPECIES_NONE && gRogueRun.legendaryDifficulties[i] == GetPathGenerationDifficulty())
+            {
+                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_LEGENDARY;
+                ++minReplaceCount;
+                break;
+            }
         }
 
-        allowDarkDeal = (allowDarkDeal && RogueRandomChance(25, 0));
-        allowLab = (allowLab && RogueRandomChance(25, 0));
-
-
-        if(allowLab)
+        // Team Encounters
+        for(i = 0; i < ADVPATH_TEAM_ENCOUNTER_COUNT; ++i)
         {
-            // Lab
-            if(GetPathGenerationDifficulty() >= ROGUE_GYM_MID_DIFFICULTY - 1)
-                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_LAB;
+            if(gRogueRun.teamEncounterDifficulties[i] == GetPathGenerationDifficulty())
+            {
+                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_TEAM_HIDEOUT;
+                ++minReplaceCount;
+                break;
+            }
         }
 
-        // Dark deal / Game show
-        if(GetPathGenerationDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
-        {
-            // Only dark deals
-            if(allowDarkDeal)
-                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_DARK_DEAL;
-        }
-        else if(GetPathGenerationDifficulty() >= ROGUE_GYM_MID_DIFFICULTY - 1)
-        {
-            // Mix of both
-            if(allowDarkDeal)
-                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_DARK_DEAL;
+        // Catching contest
+        if(RogueRandomChance(33, 0))
+            validEncounterList[validEncounterCount++] = ADVPATH_ROOM_CATCHING_CONTEST;
 
-            if(allowGameShow)
-                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_GAMESHOW;
-        }
-        else
+        // Battle sim / Battle Tower
+        if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET && GetPathGenerationDifficulty() >= 1)
         {
-            // Only game show
-            if(allowGameShow)
-                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_GAMESHOW;
+            if(RogueRandomChance(50, 0))
+                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_BATTLE_SIM;
+            else
+                validEncounterList[validEncounterCount++] = ADVPATH_ROOM_BATTLE_TOWER;
+        }
+
+        {
+            bool8 allowDarkDeal = (GetPathGenerationDifficulty() % 3 != 0);
+            bool8 allowLab = (GetPathGenerationDifficulty() % 3 != 1);
+            bool8 allowGameShow = RogueRandomChance(50, 0);
+
+            if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+            {
+                allowDarkDeal = TRUE;
+                allowLab = FALSE;
+                allowGameShow = FALSE;
+            }
+
+            allowDarkDeal = (allowDarkDeal && RogueRandomChance(25, 0));
+            allowLab = (allowLab && RogueRandomChance(25, 0));
+
+
+            if(allowLab)
+            {
+                // Lab
+                if(GetPathGenerationDifficulty() >= ROGUE_GYM_MID_DIFFICULTY - 1)
+                    validEncounterList[validEncounterCount++] = ADVPATH_ROOM_LAB;
+            }
+
+            // Dark deal / Game show
+            if(GetPathGenerationDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
+            {
+                // Only dark deals
+                if(allowDarkDeal)
+                    validEncounterList[validEncounterCount++] = ADVPATH_ROOM_DARK_DEAL;
+            }
+            else if(GetPathGenerationDifficulty() >= ROGUE_GYM_MID_DIFFICULTY - 1)
+            {
+                // Mix of both
+                if(allowDarkDeal)
+                    validEncounterList[validEncounterCount++] = ADVPATH_ROOM_DARK_DEAL;
+
+                if(allowGameShow)
+                    validEncounterList[validEncounterCount++] = ADVPATH_ROOM_GAMESHOW;
+            }
+            else
+            {
+                // Only game show
+                if(allowGameShow)
+                    validEncounterList[validEncounterCount++] = ADVPATH_ROOM_GAMESHOW;
+            }
         }
     }
 
@@ -815,6 +830,9 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
             break;
         }
 
+        if(fastPathHideRoutes)
+            replacePerc = 100;
+
         replaceCount = (replaceCount * replacePerc) / 100;
         replaceCount = max(replaceCount, minReplaceCount);
         replaceCount = max(replaceCount, freeRoomCount);
@@ -833,6 +851,15 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     }
 
     // Wild dens
+    if(fastPathHideRoutes)
+    {
+        for(i = 0; i < gRogueAdvPath.roomCount; ++i)
+        {
+            if(gRogueAdvPath.rooms[i].roomType == ADVPATH_ROOM_ROUTE)
+                GenerateRoomInstance(i, ADVPATH_ROOM_WILD_DEN);
+        }
+    }
+    else
     {
         u8 chance;
         u8 chanceFalloff;
@@ -1123,14 +1150,26 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
         bool8 isNewGeneration = gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID;
 
         pathSettings.generator = &generator;
-        pathSettings.totalLength = 3 + 2; // +2 to account for final encounter and initial split
 
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+        switch(Rogue_GetModeRules()->adventureGenerator)
         {
+        case ADV_GENERATOR_GAUNTLET:
             if(Rogue_GetCurrentDifficulty() == 0)
                 pathSettings.totalLength = 5 + 2;
             else
                 pathSettings.totalLength = 2;
+            break;
+
+        case ADV_GENERATOR_FAST_PATH:
+            if(GetPathGenerationDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
+                pathSettings.totalLength = 3 + 2;
+            else
+                pathSettings.totalLength = (FastPathAreRoutesHidden() ? 2 : 4) + 2;
+            break;
+
+        default:
+            pathSettings.totalLength = 3 + 2; // +2 to account for final encounter and initial split
+            break;
         }
 
         // Select the correct seed
@@ -1170,6 +1209,43 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
                     generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_TOP] = 40;
                     generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_MID] = 40;
                     generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_BOT] = 40;
+                }
+                else if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH && !FastPathAreRoutesHidden())
+                {
+                    // Reduce variation to avoid splitting too wide during longer Fast Path segments.
+                    switch (RogueRandom() % 3)
+                    {
+                    // Branches
+                    case 0:
+                        generator.connectionsSettingsPerColumn[i].minCount = 1;
+                        generator.connectionsSettingsPerColumn[i].maxCount = 2;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_TOP] = 40;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_MID] = 0;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_BOT] = 40;
+                        break;
+
+                    // Lines
+                    case 1:
+                        generator.connectionsSettingsPerColumn[i].minCount = 2;
+                        generator.connectionsSettingsPerColumn[i].maxCount = 2;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_TOP] = 10;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_MID] = 50;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_BOT] = 10;
+                        break;
+
+                    // Wiggling line
+                    case 2:
+                        generator.connectionsSettingsPerColumn[i].minCount = 1;
+                        generator.connectionsSettingsPerColumn[i].maxCount = 1;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_TOP] = 40;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_MID] = 0;
+                        generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_BOT] = 40;
+                        break;
+
+                    default:
+                        AGB_ASSERT(FALSE);
+                        break;
+                    }
                 }
                 else
                 {
@@ -1487,7 +1563,7 @@ static u32 GetMountainMetatile(u8 oldWalkDir, u8 currWalkDir, u8 lookDir, u32 la
 
 void RogueAdv_ApplyAdventureMetatiles()
 {
-    struct Coords16 treesCoords[24];
+    struct Coords16 treesCoords[32];
     const struct MetatileOffset *treeDecorations[ARRAY_COUNT(treesCoords)];
     u32 metatile;
     u16 x, y;

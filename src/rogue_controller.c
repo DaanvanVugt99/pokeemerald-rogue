@@ -1637,10 +1637,6 @@ void Rogue_ModifyBattleWinnings(u16 trainerNum, u32* money)
 {
     if(Rogue_IsRunActive())
     {
-        // Once we've gotten champion we want to give a bit more money
-        u8 difficulty = Rogue_GetCurrentDifficulty();
-        u8 difficultyModifier = Rogue_GetEncounterDifficultyModifier();
-
         // Increase by 20%
         *money = (CalculateBattleWinnings(trainerNum) * 120) / 100;
 
@@ -1671,6 +1667,11 @@ void Rogue_ModifyBattleWinnings(u16 trainerNum, u32* money)
                 *money *= 2;
             }
             break;
+        }
+
+        if(Rogue_GetModeRules()->trainerBattleWinningsPerc != 0)
+        {
+            *money = ((*money) * Rogue_GetModeRules()->trainerBattleWinningsPerc) / 100;
         }
 
         //if(FlagGet(FLAG_ROGUE_HARD_ITEMS))
@@ -4877,18 +4878,34 @@ static void ChooseLegendarysForNewAdventure()
     {
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : ROGUE_ELITE_START_DIFFICULTY - 1 + RogueRandomRange(3, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_BOX] = SelectLegendarySpecies(ADVPATH_LEGEND_BOX);
+
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+        {
+            // Fast Path hides routes every other path, so place special encounters on reset paths.
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] / 2) * 2;
+        }
     }
 
     if(spawnRoamer)
     {
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : 1 + RogueRandomRange(5, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER] = SelectLegendarySpecies(ADVPATH_LEGEND_ROAMER);
+
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+        {
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] / 2) * 2;
+        }
     }
 
     if(spawnMinor)
     {
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : 4 + RogueRandomRange(4, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_MINOR] = SelectLegendarySpecies(ADVPATH_LEGEND_MINOR);
+
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+        {
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] / 2) * 2;
+        }
     }
 
     // DEBUG - Force all legends to spawn at specific difficulties
@@ -4899,14 +4916,18 @@ static void ChooseLegendarysForNewAdventure()
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = 2;
     }
 
-    if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
-        ++gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR];
+    {
+        u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH) ? 2 : 1;
 
-    if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
-        ++gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX];
+        if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] += collisionStep;
 
-    if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
-        ++gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX];
+        if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] += collisionStep;
+
+        if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] += collisionStep;
+    }
 }
 
 static u16 ChooseTeamEncounterNum()
@@ -5004,17 +5025,41 @@ static void ChooseTeamEncountersForNewAdventure()
     gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_PRE_LEGEND] = gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX];
 
     // Early can be anytime from badge 2 to badge 5 (provided there is no legend at that time)
-    while(TRUE)
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
     {
-        gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] = 2 + RogueRandomRange(3, 0);
+        u8 candidates[] = {2, 4, 6};
+        u8 validCandidates[ARRAY_COUNT(candidates)];
+        u8 validCount = 0;
 
-        if(gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
-            continue;
-        if(gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER])
-            continue;
+        for(i = 0; i < ARRAY_COUNT(candidates); ++i)
+        {
+            if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
+                continue;
+            if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER])
+                continue;
+            if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
+                continue;
 
-        break;
-    };
+            validCandidates[validCount++] = candidates[i];
+        }
+
+        if(validCount != 0)
+            gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] = validCandidates[RogueRandomRange(validCount, 0)];
+    }
+    else
+    {
+        while(TRUE)
+        {
+            gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] = 2 + RogueRandomRange(3, 0);
+
+            if(gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
+                continue;
+            if(gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER])
+                continue;
+
+            break;
+        };
+    }
 }
 
 u8 Rogue_GetCurrentLegendaryEncounterId()
@@ -10075,13 +10120,13 @@ u8 GetCurrentDropRarity()
     switch (gRogueAdvPath.currentRoomType)
     {
     case ADVPATH_ROOM_ROUTE:
-        return gRogueRouteTable.routes[gRogueRun.currentRouteIndex].dropRarity;
+        return Rogue_GetModeRules()->itemDropRarityInc + gRogueRouteTable.routes[gRogueRun.currentRouteIndex].dropRarity;
 
     case ADVPATH_ROOM_TEAM_HIDEOUT:
-        return 3;
+        return Rogue_GetModeRules()->itemDropRarityInc + 3;
     }
 
-    return 0;
+    return Rogue_GetModeRules()->itemDropRarityInc;
 }
 
 static void RandomiseItemContent(u8 difficultyLevel)

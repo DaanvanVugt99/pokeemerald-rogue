@@ -598,7 +598,8 @@
 #define ROGUE_GAME_MODE_OFFICIAL                2
 #define ROGUE_GAME_MODE_GAUNTLET                3
 #define ROGUE_GAME_MODE_RAINBOW_GAUNTLET        4
-#define ROGUE_GAME_MODE_COUNT                   5
+#define ROGUE_GAME_MODE_FAST_PATH               5
+#define ROGUE_GAME_MODE_COUNT                   6
 
 // Order
 #define TRAINER_ORDER_DEFAULT                   0
@@ -609,6 +610,7 @@
 // Generators
 #define ADV_GENERATOR_STANDARD                  0
 #define ADV_GENERATOR_GAUNTLET                  1
+#define ADV_GENERATOR_FAST_PATH                 2
 
 
 // Rogue Campaigns OLD
