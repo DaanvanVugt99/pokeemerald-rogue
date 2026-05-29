@@ -42,6 +42,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ported upstream riding stability fixes for ride-mon sprite allocation,
+  remount state reset, and safer ride cycling.
+- Ported upstream unique-mon lab pool fix so exotic unique Pokemon must opt in
+  to default spawning.
 - Fixed Gauntlet entry accepting the full six-Pokemon Hub party through the
   active adventure entrance flow.
 - Fixed Fast Path sometimes skipping the early evil-team encounter when all
