@@ -5406,6 +5406,7 @@ static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker)
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
 {
     return IsBattlerAlive(battlerAttacker)
+        && !NoAliveMonsForEitherParty()
         && !IsCurrentMoveSwitchingUser()
         && !gProtectStructs[battlerAttacker].confusionSelfDmg
         && !gProtectStructs[battlerAttacker].extraMoveUsed
@@ -16335,6 +16336,7 @@ if (triggeringAbility != ABILITY_NONE)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
+         && CanUseSelfExtraMove(battler)
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_UPDRAFT);

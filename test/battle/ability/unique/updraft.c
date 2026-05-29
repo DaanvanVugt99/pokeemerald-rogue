@@ -51,3 +51,23 @@ SINGLE_BATTLE_TEST("Updraft does not refresh after the user switches out and bac
         EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
+
+SINGLE_BATTLE_TEST("Updraft does not trigger when the Fire-type move ends the battle")
+{
+    GIVEN {
+        PLAYER(SPECIES_CHARIZARD) { SpAttack(255); Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_UPDRAFT); Moves(MOVE_EMBER); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); MaxHP(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
+        HP_BAR(opponent);
+        MESSAGE("Foe Wobbuffet fainted!");
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_UPDRAFT);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
+        }
+    } THEN {
+        EXPECT(!(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]));
+    }
+}
