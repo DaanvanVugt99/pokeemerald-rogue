@@ -5047,6 +5047,19 @@ static void ChooseTeamEncountersForNewAdventure()
             validCandidates[validCount++] = candidates[i];
         }
 
+        if(validCount == 0)
+        {
+            // Prefer not to stack with the box legend, because pre-legend team
+            // already uses that path. Minor/roamer overlap is better than no early team encounter.
+            for(i = 0; i < ARRAY_COUNT(candidates); ++i)
+            {
+                if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
+                    continue;
+
+                validCandidates[validCount++] = candidates[i];
+            }
+        }
+
         if(validCount != 0)
             gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_EARLY] = validCandidates[RogueRandomRange(validCount, 0)];
     }

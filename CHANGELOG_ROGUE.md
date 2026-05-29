@@ -35,6 +35,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Fast Path sometimes skipping the early evil-team encounter when all
+  reset-path candidate difficulties were occupied by legends.
 - Fixed trainer team generation assertions when recoverable species-form fallbacks
   are selected.
 - Fixed Colony Guardian freezing when switch-in Intimidate triggered it.
