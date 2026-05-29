@@ -42,6 +42,7 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ported upstream shiny palette fixes for Mothim and Galarian Cursola.
 - Ported upstream shop new-stock indicator fix so General, Ball, Rare Held Item,
   and Treat shops can show the sparkle icon when their stock expands.
 - Ported upstream Item Courier seeding fix so courier inventory stays stable
