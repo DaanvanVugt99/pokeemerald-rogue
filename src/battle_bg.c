@@ -232,12 +232,21 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
     },
     [B_WIN_DUMMY] = {
         .bg = 0,
+#ifdef ROGUE_DEBUG
+        .tilemapLeft = 0,
+        .tilemapTop = 0,
+        .width = 8,
+        .height = 2,
+        .paletteNum = 5,
+        .baseBlock = 0x0350,
+#else
         .tilemapLeft = 21,
         .tilemapTop = 57,
         .width = 0,
         .height = 0,
         .paletteNum = 5,
         .baseBlock = 0x0298,
+#endif
     },
     [B_WIN_PP_REMAINING] = {
         .bg = 0,
@@ -453,12 +462,21 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
     },
     [B_WIN_DUMMY] = {
         .bg = 0,
+#ifdef ROGUE_DEBUG
+        .tilemapLeft = 0,
+        .tilemapTop = 0,
+        .width = 8,
+        .height = 2,
+        .paletteNum = 5,
+        .baseBlock = 0x0350,
+#else
         .tilemapLeft = 21,
         .tilemapTop = 57,
         .width = 0,
         .height = 0,
         .paletteNum = 5,
         .baseBlock = 0x0298,
+#endif
     },
     [B_WIN_PP_REMAINING] = {
         .bg = 0,

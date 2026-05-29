@@ -41,7 +41,7 @@
 #define HUD_TAG_SPRITE_DEX_PROMPT           0x120B
 
 #define MAX_OVERLAY_SPRITES 40
-#define MIN_FREE_SPRITES_AFTER_OVERLAY 16
+#define MIN_FREE_SPRITES_AFTER_OVERLAY 28
 
 // Want to sit at default priority (2) so we sort  
 
@@ -402,6 +402,76 @@ static void RogueBH_StoreOverlaySprite(u8 *spriteCount, u8 spriteId)
     gRogueBattleOverlay->sprites[(*spriteCount)++] = spriteId;
 }
 
+static void RogueBH_CreateWeatherOverlay(u8 *spriteCount, u16 weather)
+{
+    u8 i;
+
+    if(weather & B_WEATHER_ACID_RAIN)
+    {
+        LoadSpriteSheet(&sSpriteSheet_Overlay_Rain);
+
+        for(i = 0; i < 4; ++i)
+            RogueBH_StoreOverlaySprite(spriteCount, CreateSprite(&sAcidRainDropSpriteTemplate, 0, 0, 4));
+    }
+    else if(weather & B_WEATHER_ECLIPSE)
+    {
+        LoadSpriteSheet(&sSpriteSheet_Overlay_Sun);
+
+        for(i = 0; i < 4; ++i)
+        {
+            u8 sprite = CreateSprite(&sEclipseRaySpriteTemplate, 0, 0, 4);
+            if (RogueBH_IsValidSpriteId(sprite))
+            {
+                gSprites[sprite].data[0] = i * 10;
+                RogueBH_StoreOverlaySprite(spriteCount, sprite);
+            }
+        }
+    }
+    else if(weather & B_WEATHER_RAIN)
+    {
+        LoadSpriteSheet(&sSpriteSheet_Overlay_Rain);
+
+        for(i = 0; i < 4; ++i)
+            RogueBH_StoreOverlaySprite(spriteCount, CreateSprite(&sRainDropSpriteTemplate, 0, 0, 4));
+    }
+    else if(weather & B_WEATHER_SANDSTORM)
+    {
+        LoadSpriteSheet(&sSpriteSheet_Overlay_Sandstorm);
+
+        for(i = 0; i < 8; ++i)
+            RogueBH_StoreOverlaySprite(spriteCount, CreateSprite(&sSandstormSpriteTemplate, 0, 0, 4));
+    }
+    else if(weather & B_WEATHER_SUN)
+    {
+        LoadSpriteSheet(&sSpriteSheet_Overlay_Sun);
+
+        for(i = 0; i < 4; ++i)
+        {
+            u8 sprite = CreateSprite(&sSunlightRaySpriteTemplate, 0, 0, 4);
+            if (RogueBH_IsValidSpriteId(sprite))
+            {
+                gSprites[sprite].data[0] = i * 10;
+                RogueBH_StoreOverlaySprite(spriteCount, sprite);
+            }
+        }
+    }
+    else if(weather & (B_WEATHER_HAIL | B_WEATHER_SNOW))
+    {
+        LoadSpriteSheet(&sSpriteSheet_Overlay_Snow);
+
+        for(i = 0; i < 8; ++i)
+        {
+            u8 sprite = CreateSprite(&sSnowSpriteTemplate, 0, 0, 4);
+            if (RogueBH_IsValidSpriteId(sprite))
+            {
+                gSprites[sprite].data[0] = i * 40;
+                gSprites[sprite].data[1] = 10 + (Random2() % 40);
+                RogueBH_StoreOverlaySprite(spriteCount, sprite);
+            }
+        }
+    }
+}
+
 
 void RogueBH_CreateBattleOverlay()
 {
@@ -440,76 +510,6 @@ void RogueBH_CreateBattleOverlay()
             }
         }
 #endif
-
-        // Field
-        {
-            u8 i;
-
-            if(weather & B_WEATHER_ACID_RAIN)
-            {
-                LoadSpriteSheet(&sSpriteSheet_Overlay_Rain);
-
-                for(i = 0; i < 4; ++i)
-                    RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sAcidRainDropSpriteTemplate, 0, 0, 4));
-            }
-            else if(weather & B_WEATHER_ECLIPSE)
-            {
-                LoadSpriteSheet(&sSpriteSheet_Overlay_Sun);
-
-                for(i = 0; i < 4; ++i)
-                {
-                    u8 sprite = CreateSprite(&sEclipseRaySpriteTemplate, 0, 0, 4);
-                    if (RogueBH_IsValidSpriteId(sprite))
-                    {
-                        gSprites[sprite].data[0] = i * 10;
-                        RogueBH_StoreOverlaySprite(&spriteCount, sprite);
-                    }
-                }
-            }
-            else if(weather & B_WEATHER_RAIN)
-            {
-                LoadSpriteSheet(&sSpriteSheet_Overlay_Rain);
-
-                for(i = 0; i < 4; ++i)
-                    RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sRainDropSpriteTemplate, 0, 0, 4));
-            }
-            else if(weather & B_WEATHER_SANDSTORM)
-            {
-                LoadSpriteSheet(&sSpriteSheet_Overlay_Sandstorm);
-
-                for(i = 0; i < 8; ++i)
-                    RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sSandstormSpriteTemplate, 0, 0, 4));
-            }
-            else if(weather & B_WEATHER_SUN)
-            {
-                LoadSpriteSheet(&sSpriteSheet_Overlay_Sun);
-
-                for(i = 0; i < 4; ++i)
-                {
-                    u8 sprite = CreateSprite(&sSunlightRaySpriteTemplate, 0, 0, 4);
-                    if (RogueBH_IsValidSpriteId(sprite))
-                    {
-                        gSprites[sprite].data[0] = i * 10;
-                        RogueBH_StoreOverlaySprite(&spriteCount, sprite);
-                    }
-                }
-            }
-            else if(weather & (B_WEATHER_HAIL | B_WEATHER_SNOW))
-            {
-                LoadSpriteSheet(&sSpriteSheet_Overlay_Snow);
-
-                for(i = 0; i < 8; ++i)
-                {
-                    u8 sprite = CreateSprite(&sSnowSpriteTemplate, 0, 0, 4);
-                    if (RogueBH_IsValidSpriteId(sprite))
-                    {
-                        gSprites[sprite].data[0] = i * 40;
-                        gSprites[sprite].data[1] = 10 + (Random2() % 40);
-                        RogueBH_StoreOverlaySprite(&spriteCount, sprite);
-                    }
-                }
-            }
-        }
 
         // Side
 
@@ -674,6 +674,10 @@ void RogueBH_CreateBattleOverlay()
             if(hasTailwind)
                 RogueBH_StoreOverlaySprite(&spriteCount, CreateSprite(&sWhirlwindSpriteTemplate, 264, 32, SUBPRIORITY_ENEMY_ABOVE));
         }
+
+        // Weather particles are decorative and should lose sprite budget before
+        // side-condition markers or transient battle feedback.
+        RogueBH_CreateWeatherOverlay(&spriteCount, weather);
 
         AGB_ASSERT(spriteCount <= MAX_OVERLAY_SPRITES);
         gRogueBattleOverlay->spriteCount = spriteCount;

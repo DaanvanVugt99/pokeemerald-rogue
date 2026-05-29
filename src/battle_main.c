@@ -102,6 +102,9 @@ static void SpriteCB_Idle(struct Sprite *sprite);
 static void SpriteCB_BattleSpriteSlideLeft(struct Sprite *sprite);
 static void TurnValuesCleanUp(bool8 var0);
 static void SpriteCB_BounceEffect(struct Sprite *sprite);
+#ifdef ROGUE_DEBUG
+static void Debug_UpdateBattleSpriteCount(void);
+#endif
 static void BattleStartClearSetData(void);
 static void DoBattleIntro(void);
 static void TryDoEventsBeforeFirstTurn(void);
@@ -1841,6 +1844,10 @@ void BattleMainCB2(void)
         }
     }
 
+#ifdef ROGUE_DEBUG
+    Debug_UpdateBattleSpriteCount();
+#endif
+
 #ifdef ROGUE_FEATURE_AUTOMATION
     Rogue_PushAutomationInputState(AUTO_INPUT_STATE_BATTLE);
 #endif
@@ -3004,6 +3011,30 @@ static void BattleMainCB1(void)
     for (battler = 0; battler < gBattlersCount; battler++)
         gBattlerControllerFuncs[battler](battler);
 }
+
+#ifdef ROGUE_DEBUG
+static void Debug_UpdateBattleSpriteCount(void)
+{
+    u32 i;
+    u32 count = 0;
+    static const u8 sText_SpriteCount[] = _("OBJ {STR_VAR_1}/64");
+
+    if (gTestRunnerEnabled)
+        return;
+    if ((gMain.vblankCounter1 & 7) != 0)
+        return;
+
+    for (i = 0; i < MAX_SPRITES; i++)
+    {
+        if (gSprites[i].inUse)
+            count++;
+    }
+
+    ConvertIntToDecimalStringN(gStringVar1, count, STR_CONV_MODE_RIGHT_ALIGN, 2);
+    StringExpandPlaceholders(gStringVar4, sText_SpriteCount);
+    BattlePutTextOnWindow(gStringVar4, B_WIN_DUMMY);
+}
+#endif
 
 static void BattleStartClearSetData(void)
 {
