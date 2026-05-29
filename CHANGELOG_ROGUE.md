@@ -29,6 +29,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Fast Path segments with a pending rival battle now guarantee at
+  least one starting Route or Honey Tree option for pre-rival leveling.
 - Ported upstream Gauntlet pacing so Gauntlet and Rainbow Gauntlet runs start
   incoming Pokemon at level 100.
 - Ported upstream Average trainer pacing so the late Gyms and Rival use larger

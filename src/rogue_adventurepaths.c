@@ -134,6 +134,7 @@ static void GeneratePath(struct AdvPathSettings* pathSettings);
 static void GenerateFloorLayout(struct Coords8 currentCoords, struct AdvPathSettings* pathSettings);
 static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings);
 static void GenerateRoomInstance(u8 roomId, u8 roomType);
+static void EnsureFastPathRivalStartingLevelingRoom(void);
 static u8 CountRoomConnections(u8 mask);
 
 static u8 GenerateRoomConnectionMask(struct Coords8 coords, struct AdvPathSettings* pathSettings);
@@ -623,6 +624,67 @@ static bool8 FastPathAreRoutesHidden()
     return (GetPathGenerationDifficulty() % 2) == 1;
 }
 
+static bool8 IsStartingPathRoom(struct RogueAdvPathRoom* room)
+{
+    return room->coords.x + 1 == gRogueAdvPath.pathLength;
+}
+
+static bool8 IsLevelingRoomType(u16 roomType)
+{
+    return roomType == ADVPATH_ROOM_ROUTE || roomType == ADVPATH_ROOM_HONEY_TREE;
+}
+
+static bool8 IsFastPathRivalLevelingFallbackType(u16 roomType)
+{
+    switch(roomType)
+    {
+    case ADVPATH_ROOM_SIGN:
+    case ADVPATH_ROOM_GAMESHOW:
+    case ADVPATH_ROOM_BATTLE_SIM:
+    case ADVPATH_ROOM_BATTLE_TOWER:
+    case ADVPATH_ROOM_CATCHING_CONTEST:
+    case ADVPATH_ROOM_DARK_DEAL:
+    case ADVPATH_ROOM_LAB:
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static void EnsureFastPathRivalStartingLevelingRoom(void)
+{
+    u8 i;
+    u8 fallbackRoom = (u8)-1;
+    u8 backupFallbackRoom = (u8)-1;
+
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH)
+        return;
+
+    if(!gRogueRun.hasPendingRivalBattle)
+        return;
+
+    for(i = 0; i < gRogueAdvPath.roomCount; ++i)
+    {
+        if(!IsStartingPathRoom(&gRogueAdvPath.rooms[i]))
+            continue;
+
+        if(IsLevelingRoomType(gRogueAdvPath.rooms[i].roomType))
+            return;
+
+        if(fallbackRoom == (u8)-1 && gRogueAdvPath.rooms[i].roomType == ADVPATH_ROOM_WILD_DEN)
+            fallbackRoom = i;
+
+        if(backupFallbackRoom == (u8)-1 && IsFastPathRivalLevelingFallbackType(gRogueAdvPath.rooms[i].roomType))
+            backupFallbackRoom = i;
+    }
+
+    if(fallbackRoom == (u8)-1)
+        fallbackRoom = backupFallbackRoom;
+
+    if(fallbackRoom != (u8)-1)
+        GenerateRoomInstance(fallbackRoom, ADVPATH_ROOM_ROUTE);
+}
+
 static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
 {
     u8 i;
@@ -914,6 +976,8 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
             }
         }
     }
+
+    EnsureFastPathRivalStartingLevelingRoom();
 }
 
 static u8 FindRoomOfType(u16 type)
