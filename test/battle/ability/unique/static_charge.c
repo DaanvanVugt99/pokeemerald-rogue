@@ -36,3 +36,17 @@ SINGLE_BATTLE_TEST("Static Charge does not trigger on non-contact moves")
         EXPECT_EQ(opponent->hp, opponent->maxHP);
     }
 }
+
+SINGLE_BATTLE_TEST("Static Charge does not trigger if the holder faints from the contact move")
+{
+    GIVEN {
+        PLAYER(SPECIES_RAICHU) { Ability(ABILITY_STATIC); UniqueAbility(ABILITY_STATIC_CHARGE); HP(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } THEN {
+        EXPECT_EQ(player->hp, 0);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponent->hp, opponent->maxHP);
+    }
+}

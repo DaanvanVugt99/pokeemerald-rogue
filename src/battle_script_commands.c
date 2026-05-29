@@ -7049,34 +7049,60 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_UNIQUE_ABILITY:
-            if (HasBattlerAbility(gBattlerAttacker, ABILITY_ROADBURN)
-             && (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE || gBattleMoves[gCurrentMove].effect == EFFECT_PARTING_SHOT)
-             && CanBattlerSwitch(gBattlerAttacker)
-             && IsBattlerAlive(gBattlerAttacker)
-             && IsBattlerAlive(gBattlerTarget)
-             && GetBattlerSide(gBattlerTarget) != GetBattlerSide(gBattlerAttacker)
-             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-             && !gProtectStructs[gBattlerAttacker].extraMoveUsed
-             && gProtectStructs[gBattlerAttacker].targetAffected
-             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-             && !(gBattleMons[gBattlerAttacker].status1 & STATUS1_SLEEP)
-             && !(gBattleMons[gBattlerAttacker].status1 & STATUS1_FREEZE))
             {
-                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_ROADBURN);
-                SetAtkCancellerForCalledMove();
-                gBattlerAbility = gBattlerAttacker;
-                gTempMove = gCurrentMove;
-                gCurrentMove = MOVE_RAPID_SPIN;
-                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-                gProtectStructs[gBattlerAttacker].extraMoveUsed = TRUE;
-                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
-                VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 100);
-                VarSet(VAR_TEMP_MOVEEFFECT, MOVE_EFFECT_RAPIDSPIN | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
-                effect = TRUE;
-                break;
+                bool32 isRoadburnMove = (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE
+                                      || gBattleMoves[gCurrentMove].effect == EFFECT_PARTING_SHOT
+                                      || gBattleMoves[gCurrentMove].effect == EFFECT_SHED_TAIL);
+                bool32 isShedTail = (gBattleMoves[gCurrentMove].effect == EFFECT_SHED_TAIL);
+                bool32 targetAffected = (gProtectStructs[gBattlerAttacker].targetAffected
+                                      && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT));
+                u32 roadburnTarget = gBattlerTarget;
+
+                if (isShedTail)
+                {
+                    roadburnTarget = BATTLE_OPPOSITE(gBattlerAttacker);
+                    if (!IsBattlerAlive(roadburnTarget) || GetBattlerSide(roadburnTarget) == GetBattlerSide(gBattlerAttacker))
+                    {
+                        for (i = 0; i < gBattlersCount; i++)
+                        {
+                            if (IsBattlerAlive(i) && GetBattlerSide(i) != GetBattlerSide(gBattlerAttacker))
+                            {
+                                roadburnTarget = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (HasBattlerAbility(gBattlerAttacker, ABILITY_ROADBURN)
+                 && isRoadburnMove
+                 && CanBattlerSwitch(gBattlerAttacker)
+                 && IsBattlerAlive(gBattlerAttacker)
+                 && IsBattlerAlive(roadburnTarget)
+                 && GetBattlerSide(roadburnTarget) != GetBattlerSide(gBattlerAttacker)
+                 && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+                 && !gProtectStructs[gBattlerAttacker].extraMoveUsed
+                 && (isShedTail || targetAffected)
+                 && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+                 && !(gBattleMons[gBattlerAttacker].status1 & STATUS1_SLEEP)
+                 && !(gBattleMons[gBattlerAttacker].status1 & STATUS1_FREEZE))
+                {
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_ROADBURN);
+                    SetAtkCancellerForCalledMove();
+                    gBattlerAbility = gBattlerAttacker;
+                    gBattlerTarget = roadburnTarget;
+                    gTempMove = gCurrentMove;
+                    gCurrentMove = MOVE_RAPID_SPIN;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[gBattlerAttacker].extraMoveUsed = TRUE;
+                    VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+                    VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 100);
+                    VarSet(VAR_TEMP_MOVEEFFECT, MOVE_EFFECT_RAPIDSPIN | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+                    effect = TRUE;
+                    break;
+                }
             }
 
             if ((gBattleMoves[gCurrentMove].effect != EFFECT_HIT_SWITCH_TARGET || gBattleStruct->hitSwitchTargetFailed)

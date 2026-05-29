@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_U_TURN].effect == EFFECT_HIT_ESCAPE);
+    ASSUME(gBattleMoves[MOVE_SHED_TAIL].effect == EFFECT_SHED_TAIL);
     ASSUME(gBattleMoves[MOVE_RAPID_SPIN].effect == EFFECT_RAPID_SPIN);
     ASSUME(gBattleMoves[MOVE_SPIKES].effect == EFFECT_SPIKES);
     ASSUME(gBattleMoves[MOVE_PROTECT].effect == EFFECT_PROTECT);
@@ -26,6 +27,26 @@ SINGLE_BATTLE_TEST("Roadburn uses Rapid Spin before a switching move switches Cy
         HP_BAR(opponent);
     } THEN {
         EXPECT_EQ(player->species, SPECIES_WYNAUT);
+    }
+}
+
+SINGLE_BATTLE_TEST("Roadburn uses Rapid Spin before Shed Tail switches Cyclizar out")
+{
+    GIVEN {
+        PLAYER(SPECIES_CYCLIZAR) { HP(100); MaxHP(100); Speed(100); Ability(ABILITY_SHED_SKIN); UniqueAbility(ABILITY_ROADBURN); Moves(MOVE_SHED_TAIL); }
+        PLAYER(SPECIES_WYNAUT) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Defense(100); Speed(1); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SHED_TAIL); SEND_OUT(player, 1); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SHED_TAIL, player);
+        HP_BAR(player);
+        ABILITY_POPUP(player, ABILITY_ROADBURN);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RAPID_SPIN, player);
+        HP_BAR(opponent);
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_WYNAUT);
+        EXPECT(player->status2 & STATUS2_SUBSTITUTE);
     }
 }
 

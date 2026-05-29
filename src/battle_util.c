@@ -12796,6 +12796,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && gBattleMons[battler].hp != 0
          && IsMoveMakingContact(move, moveEndAttacker))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_STATIC_CHARGE);
