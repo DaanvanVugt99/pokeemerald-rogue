@@ -42,6 +42,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ported upstream shop new-stock indicator fix so General, Ball, Rare Held Item,
+  and Treat shops can show the sparkle icon when their stock expands.
 - Ported upstream Item Courier seeding fix so courier inventory stays stable
   within the same adventure room.
 - Ported upstream tutor move progression fix so badge rewards unlock run tutor

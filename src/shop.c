@@ -2105,32 +2105,35 @@ static u16 QueryShopItemListCallback(u16 index)
         u8 currDifficulty;
         u8 sortMode = ITEM_SORT_MODE_TYPE;
         bool8 flipSort = FALSE;
-        bool8 showInventoryChanges = TRUE;
+        bool8 showInventoryChanges = FALSE;
 
         currDifficulty = Rogue_GetCurrentDifficulty();
         prevDifficulty = currDifficulty;
 
         switch (sMartInfo.dynamicMartCategory)
         {
-        case ROGUE_SHOP_BERRIES:
-        case ROGUE_SHOP_HELD_ITEMS:
-        case ROGUE_SHOP_BATTLE_ENHANCERS:
-        case ROGUE_SHOP_CHARMS:
-        case ROGUE_SHOP_CURSES:
         case ROGUE_SHOP_TMS:
+        case ROGUE_SHOP_BATTLE_ENHANCERS:
+        case ROGUE_SHOP_HELD_ITEMS:
+        case ROGUE_SHOP_BERRIES:
             sortMode = ITEM_SORT_MODE_NAME;
             showInventoryChanges = TRUE;
             break;
 
-        case ROGUE_SHOP_COURIER:
-            sortMode = ITEM_SORT_MODE_NAME;
-            showInventoryChanges = FALSE;
+        case ROGUE_SHOP_GENERAL:
+        case ROGUE_SHOP_BALLS:
+        case ROGUE_SHOP_RARE_HELD_ITEMS:
+        case ROGUE_SHOP_TREATS:
+            showInventoryChanges = TRUE;
             break;
 
-        //case ROGUE_SHOP_BALLS:
-        //    sortMode = ITEM_SORT_MODE_VALUE;
-        //    flipSort = TRUE;
-        //    break;
+        case ROGUE_SHOP_COURIER:
+        case ROGUE_SHOP_CHARMS:
+        case ROGUE_SHOP_CURSES:
+        case ROGUE_SHOP_HUB_UPGRADES:
+        case ROGUE_SHOP_QUEST_REWARDS:
+            sortMode = ITEM_SORT_MODE_NAME;
+            break;
         }
 
         if(Rogue_IsRunActive())
