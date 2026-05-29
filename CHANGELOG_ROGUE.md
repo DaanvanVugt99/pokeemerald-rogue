@@ -42,6 +42,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed the Game Modes submenu being hidden on early saves, which made Fast Path
+  unavailable from the Config Lab.
 - Ported upstream item-PC deposit fix so Rogue-generated normal items such as
   Pokeblocks are not incorrectly treated as important items.
 - Ported upstream shiny palette fixes for Mothim and Galarian Cursola.

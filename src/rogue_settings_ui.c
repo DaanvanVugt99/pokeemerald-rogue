@@ -1337,7 +1337,6 @@ static u8 GetMenuItemUnlockLevel(u8 menuOption)
     switch (menuOption)
     {
     case MENUITEM_MENU_TRAINERS_SUBMENU:
-    case MENUITEM_MENU_GAME_MODES_SUBMENU:
         return SETTINGS_UNLOCK_LEVEL_POST_GAME;
 
     case MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET:
