@@ -42,6 +42,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ported upstream item-PC deposit fix so Rogue-generated normal items such as
+  Pokeblocks are not incorrectly treated as important items.
 - Ported upstream shiny palette fixes for Mothim and Galarian Cursola.
 - Ported upstream shop new-stock indicator fix so General, Ball, Rare Held Item,
   and Treat shops can show the sparkle icon when their stock expands.
