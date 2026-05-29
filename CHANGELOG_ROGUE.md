@@ -42,6 +42,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ported upstream auto-pickup fix for Rare Candy and Master Ball overworld
+  pickups that could be missed when object events overlapped.
 - Ported upstream regional-dex display fix so seen regional forms only replace
   base species entries when that form is active in the selected dex.
 - Ported upstream riding stability fixes for ride-mon sprite allocation,
