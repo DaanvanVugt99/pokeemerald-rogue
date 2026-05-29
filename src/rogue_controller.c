@@ -151,7 +151,6 @@ struct RogueLocalData
     u16 recentObjectEventLoadedLayout;
     s16 autoPickupLastX;
     s16 autoPickupLastY;
-    bool8 runningToggleActive : 1;
     bool8 hasQuickLoadPending : 1;
     bool8 hasValidQuickSave : 1;
     bool8 hasSaveWarningPending : 1;
@@ -188,7 +187,7 @@ EWRAM_DATA struct RogueLocalData gRogueLocal = {};
 EWRAM_DATA struct RogueAdvPath gRogueAdvPath = {};
 
 static void ResetHotTracking();
-static void ClearRogueLocalDataPreservingInputState(void);
+static void ClearRogueLocalData(void);
 
 static u8 CalculateWildLevel(u8 variation);
 
@@ -3536,12 +3535,9 @@ void Rogue_MainLateCB(void)
     RogueDebug_MainCB();
 }
 
-static void ClearRogueLocalDataPreservingInputState(void)
+static void ClearRogueLocalData(void)
 {
-    bool8 runningToggleActive = gRogueLocal.runningToggleActive;
-
     memset(&gRogueLocal, 0, sizeof(gRogueLocal));
-    gRogueLocal.runningToggleActive = runningToggleActive;
 }
 
 static void TryAutoItemPickup(void)
@@ -3667,7 +3663,7 @@ void Rogue_OverworldCB(u16 newKeys, u16 heldKeys, bool8 inputActive)
             // Update running toggle
             if(gSaveBlock2Ptr->optionsAutoRunToggle && (newKeys & B_BUTTON) != 0)
             {
-                gRogueLocal.runningToggleActive = !gRogueLocal.runningToggleActive;
+                gSaveBlock2Ptr->optionsAutoRunActive = !gSaveBlock2Ptr->optionsAutoRunActive;
             }
         }
 
@@ -3708,7 +3704,7 @@ bool8 Rogue_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEvent* 
 
 bool8 Rogue_IsRunningToggledOn()
 {
-    return gRogueLocal.runningToggleActive;
+    return gSaveBlock2Ptr->optionsAutoRunActive;
 }
 
 void Rogue_OnSpawnObjectEvent(struct ObjectEvent *objectEvent, u8 objectEventId)
@@ -4423,7 +4419,7 @@ static void BeginRogueRunPhase_Reset(void)
 {
     DebugPrint("BeginRogueRun");
 
-    ClearRogueLocalDataPreservingInputState();
+    ClearRogueLocalData();
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
     ClearHoneyTreePokeblock();

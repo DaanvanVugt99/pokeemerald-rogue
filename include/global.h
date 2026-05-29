@@ -557,6 +557,7 @@ struct SaveBlock2
              // ...
              u32 optionsLowHealthBeep:2; // OPTIONS_HEALTH_BEEP_[...]
              u32 optionsAutoRunToggle:1; // whether running is trigger by a B toggle or a hold
+             u32 optionsAutoRunActive:1; // current persisted state when using the running toggle
              u32 optionsSound:1; // OPTIONS_SOUND_[MONO/STEREO]
              u32 optionsPopupSoundOff:1;
              u32 timeOfDayVisuals:1;
@@ -565,7 +566,7 @@ struct SaveBlock2
              u32 regionMapZoom:1; // whether the map is zoomed in
              u32 optionsFadeSpeed:3; // OPTIONS_TEXT_SPEED_[SLOW/MID/FAST]
              u32 optionsItemPickupAutomatic:1; // whether to manually pickup items or automatically
-             u32 settingsReserved:21; // unused/reserved bits
+             u32 settingsReserved:20; // unused/reserved bits
     /*0x18*/ struct Pokedex pokedex;
              s8 playerStyles[8];
              u32 playerOutfitUnlockFlags;
