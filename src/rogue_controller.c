@@ -3176,6 +3176,8 @@ void Rogue_OnNewGame(void)
     SetMoney(&gSaveBlock1Ptr->money, 0);
     memset(&gRogueLocal, 0, sizeof(gRogueLocal));
 
+    FlagSet(FLAG_ROGUE_SETTINGS_MENU_DISPLAY_HIGHLIGHT);
+
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     FlagClear(FLAG_ROGUE_IS_VICTORY_LAP);
     FlagClear(FLAG_ROGUE_WILD_SAFARI);
@@ -3272,6 +3274,8 @@ extern const u8 Rogue_Ridemon_PlayerIsTrapped[];
 void Rogue_NotifySaveVersionUpdated(u16 fromNumber, u16 toNumber)
 {
     u32 i;
+
+    FlagSet(FLAG_ROGUE_SETTINGS_MENU_DISPLAY_HIGHLIGHT);
 
     if(Rogue_IsRunActive())
         gRogueLocal.hasSaveWarningPending = TRUE;

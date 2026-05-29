@@ -152,7 +152,7 @@
 #define VAR_UNUSED_0x4079                    0x4079 
 #define VAR_UNUSED_0x407A                    0x407A 
 #define VAR_UNUSED_0x407B                    0x407B
-#define VAR_UNUSED_0x407C                    0x407C 
+#define VAR_ROGUE_SETTINGS_MENU_DISPLAY_LVL  0x407C
 #define VAR_ROGUE_DIFFICULTY                 0x407D
 #define VAR_ROGUE_FURTHEST_DIFFICULTY        0x407E
 #define VAR_ROGUE_STARTER0                   0x407F

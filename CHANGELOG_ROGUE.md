@@ -19,6 +19,8 @@ Format follows Keep a Changelog loosely:
 - Ported upstream Fast Path game mode, replacing the old Experimental pacing
   experiment with shorter alternating adventure segments and stricter economy
   pressure.
+- Ported upstream C-Gear/Config Lab sparkle highlights for newly unlocked or
+  newly added settings.
 - Added Iron Crown's Singularity Array unique ability.
 - Added Gouging Fire's Primal Crest and Raging Bolt's Primal Thunder unique
   abilities.
