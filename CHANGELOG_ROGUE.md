@@ -29,6 +29,13 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Ported upstream Gauntlet pacing so Gauntlet and Rainbow Gauntlet runs start
+  incoming Pokemon at level 100.
+- Ported upstream Average trainer pacing so the late Gyms and Rival use larger
+  teams, and all Elite Four fights use full teams.
+- Ported upstream battle economy and charm balance updates: Amulet Coin battle
+  winnings are capped at 15,000, Endure Charm is 60%, and Adaptability Curse is
+  30%.
 - Ported upstream Potion Cauldron crafting to the Mart UI flow, allowing bulk
   potion crafting with Oran Berries.
 - Assigned implemented design-doc unique abilities to additional Mega forms.

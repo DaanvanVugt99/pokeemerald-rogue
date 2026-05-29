@@ -9224,7 +9224,18 @@ static u32 GetTrainerMoneyToGive(u16 trainerId)
 {
     u32 moneyReward = 0;
     Rogue_ModifyBattleWinnings(trainerId, &moneyReward);
-    return moneyReward * gBattleStruct->moneyMultiplier;
+
+    // Amulet Coin can only boost battle winnings up to 15000.
+    if(gBattleStruct->moneyMultiplierItem)
+    {
+        u32 scaledMoneyReward = min(15000, moneyReward * 2);
+        moneyReward = max(moneyReward, scaledMoneyReward);
+    }
+
+    if(gBattleStruct->moneyMultiplierMove)
+        moneyReward *= 2;
+
+    return moneyReward;
 }
 
 static void Cmd_getmoneyreward(void)

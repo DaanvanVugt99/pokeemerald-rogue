@@ -4157,6 +4157,10 @@ static bool8 CanBringInHeldItem(u16 itemId)
 static void BeginRogueRun_ModifyParty(void)
 {
     u16 starterSpecies = VarGet(VAR_STARTER_SWAP_SPECIES);
+    u32 startLevel = STARTER_MON_LEVEL;
+
+    if(Rogue_GetModeRules()->initialLevelOverride != 0)
+        startLevel = Rogue_GetModeRules()->initialLevelOverride;
 
     FlagClear(FLAG_ROGUE_HAS_RANDOM_STARTER);
 
@@ -4194,7 +4198,7 @@ static void BeginRogueRun_ModifyParty(void)
                 gPlayerParty[i].rogueExtraData.runTutorMoveLvl = 0;
 
                 // Force to starter lvl
-                exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL)].growthRate, STARTER_MON_LEVEL);
+                exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL)].growthRate, startLevel);
                 SetMonData(&gPlayerParty[i], MON_DATA_EXP, &exp);
 
                 if(starterSpecies != SPECIES_NONE)
@@ -4227,7 +4231,7 @@ static void BeginRogueRun_ModifyParty(void)
 
             if(species != SPECIES_NONE)
             {
-                u32 exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[species].growthRate, STARTER_MON_LEVEL);
+                u32 exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[species].growthRate, startLevel);
                 SetBoxMonData(boxMon, MON_DATA_EXP, &exp);
 
                 temp = 0;

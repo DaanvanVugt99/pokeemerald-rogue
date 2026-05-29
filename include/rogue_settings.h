@@ -7,6 +7,7 @@ typedef void (*RogueDifficultyMenuCallback)(void);
 
 struct GameModeRules
 {
+    u8 initialLevelOverride;
     u8 initialLevelOffset;
     u8 levelOffsetInterval;
     u8 enterPartySize;

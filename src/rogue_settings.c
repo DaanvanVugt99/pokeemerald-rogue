@@ -55,8 +55,9 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
     },
     [ROGUE_GAME_MODE_GAUNTLET] = 
     {
-        .initialLevelOffset = 80,
-        .levelOffsetInterval = 10,
+        .initialLevelOverride = 100,
+        .initialLevelOffset = 0,
+        .levelOffsetInterval = 0,
         .enterPartySize = PARTY_SIZE,
         .trainerOrder = TRAINER_ORDER_DEFAULT,
         .disableChallengeQuests = TRUE,
@@ -71,8 +72,9 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
     },
     [ROGUE_GAME_MODE_RAINBOW_GAUNTLET] = 
     {
-        .initialLevelOffset = 80,
-        .levelOffsetInterval = 10,
+        .initialLevelOverride = 100,
+        .initialLevelOffset = 0,
+        .levelOffsetInterval = 0,
         .enterPartySize = PARTY_SIZE,
         .trainerOrder = TRAINER_ORDER_RAINBOW,
         .disableChallengeQuests = TRUE,
