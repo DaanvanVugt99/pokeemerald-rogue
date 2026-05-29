@@ -364,6 +364,7 @@ static void TrySepticFumesPoisonPartyMon(u32 battlerAtk, u32 poisonedBattler);
 static void TryUpdateRoundTurnOrder(void);
 static bool32 ChangeOrderTargetAfterAttacker(void);
 static bool32 AerialAssaultIgnoresRecoil(void);
+static void TryActivateBountyOnFaintingTarget(void);
 void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBattler);
 static void RemoveAllWeather(void);
 static void RemoveAllTerrains(void);
@@ -4671,6 +4672,9 @@ static void Cmd_tryfaintmon(void)
             }
 
             gHitMarker |= HITMARKER_FAINTED(battler);
+            if (battler == gBattlerTarget)
+                TryActivateBountyOnFaintingTarget();
+
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = faintScript;
             if (GetBattlerSide(battler) == B_SIDE_PLAYER)
@@ -10136,6 +10140,21 @@ static bool32 HasAttackerFaintedTarget(void)
         return FALSE;
 }
 
+static void TryActivateBountyOnFaintingTarget(void)
+{
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTY)
+     && GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
+     && HasAttackerFaintedTarget()
+     && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)))
+    {
+        u16 payDay = gPaydayMoney;
+        SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BOUNTY);
+        gPaydayMoney += (gBattleMons[gBattlerAttacker].level * 5);
+        if (payDay > gPaydayMoney)
+            gPaydayMoney = 0xFFFF;
+    }
+}
+
 bool32 CanPoisonType(u8 battlerAttacker, u8 battlerTarget)
 {
     return HasBattlerAbility(battlerAttacker, ABILITY_CORROSION)
@@ -11392,18 +11411,6 @@ static void Cmd_various(void)
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_InsectivoreActivates;
             return;
-        }
-
-        if (HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTY)
-         && GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
-         && HasAttackerFaintedTarget()
-         && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)))
-        {
-            u16 payDay = gPaydayMoney;
-            SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BOUNTY);
-            gPaydayMoney += (gBattleMons[gBattlerAttacker].level * 5);
-            if (payDay > gPaydayMoney)
-                gPaydayMoney = 0xFFFF;
         }
 
         if (HasBattlerAbility(battler, ABILITY_MOUTHFUL)
