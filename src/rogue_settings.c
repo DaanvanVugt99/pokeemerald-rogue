@@ -634,6 +634,9 @@ u8 Rogue_GetStartingMonCapacity()
     if(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT) == BATTLE_FORMAT_DOUBLES || Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT) == BATTLE_FORMAT_MIXED)
         partySize = 2;
 
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+        partySize = PARTY_SIZE;
+
     partySize = max(partySize, Rogue_GetModeRules()->enterPartySize);
 
     return partySize;

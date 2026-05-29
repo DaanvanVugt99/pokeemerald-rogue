@@ -42,6 +42,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Gauntlet entry accepting the full six-Pokemon Hub party through the
+  active adventure entrance flow.
 - Fixed Fast Path sometimes skipping the early evil-team encounter when all
   reset-path candidate difficulties were occupied by legends.
 - Fixed trainer team generation assertions when recoverable species-form fallbacks
