@@ -42,6 +42,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ported upstream regional-dex display fix so seen regional forms only replace
+  base species entries when that form is active in the selected dex.
 - Ported upstream riding stability fixes for ride-mon sprite allocation,
   remount state reset, and safer ride cycling.
 - Ported upstream unique-mon lab pool fix so exotic unique Pokemon must opt in
