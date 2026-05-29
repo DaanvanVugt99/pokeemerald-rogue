@@ -27,6 +27,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Ported upstream Potion Cauldron crafting to the Mart UI flow, allowing bulk
+  potion crafting with Oran Berries.
 - Assigned implemented design-doc unique abilities to additional Mega forms.
 
 ### Fixed
