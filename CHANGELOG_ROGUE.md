@@ -42,6 +42,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ported upstream Item Courier seeding fix so courier inventory stays stable
+  within the same adventure room.
 - Ported upstream tutor move progression fix so badge rewards unlock run tutor
   move buckets at the intended cap.
 - Ported upstream auto-pickup fix for Rare Candy and Master Ball overworld

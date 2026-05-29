@@ -9023,6 +9023,9 @@ static void ApplyMartSeed(u16 itemCategory)
     case ROGUE_SHOP_TREATS:
         SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_TREATS]);
         break;
+    case ROGUE_SHOP_COURIER:
+        SeedRogueRng(gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed);
+        break;
 
     default:
         // Use whatever the active seed is.
