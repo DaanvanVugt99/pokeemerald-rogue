@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
+    ASSUME(gBattleMoves[MOVE_BITE].makesContact);
     ASSUME(gBattleMoves[MOVE_CRUNCH].power > 0);
     ASSUME(gBattleMoves[MOVE_FIRE_FANG].power > 0);
     ASSUME(gBattleMoves[MOVE_JAW_LOCK].bitingMove);
@@ -47,6 +48,24 @@ SINGLE_BATTLE_TEST("Vicejaw does not trigger after Vise Grip")
             ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_FANG, player);
         }
     } THEN {
+        EXPECT(gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].hp < gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Vicejaw still triggers after the target's contact ability")
+{
+    GIVEN {
+        PLAYER(SPECIES_MAWILE) { Ability(ABILITY_HYPER_CUTTER); UniqueAbility(ABILITY_VICEJAW); Moves(MOVE_BITE); }
+        OPPONENT(SPECIES_BARBARACLE) { HP(1000); MaxHP(1000); Ability(ABILITY_TOUGH_CLAWS); UniqueAbility(ABILITY_BARNACLE_WALL); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_BITE, WITH_RNG(RNG_ROGUE_VICEJAW, MOVE_FIRE_FANG)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, player);
+        ABILITY_POPUP(opponent, ABILITY_BARNACLE_WALL);
+        ABILITY_POPUP(player, ABILITY_VICEJAW);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_FANG, player);
+    } THEN {
+        EXPECT(gStatuses4[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)] & STATUS4_SALT_CURE);
         EXPECT(gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].hp < gBattleMons[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].maxHP);
     }
 }

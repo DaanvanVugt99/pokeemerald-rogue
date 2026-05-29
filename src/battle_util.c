@@ -94,7 +94,7 @@ static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 mov
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
 static bool32 TryUseDreamSequenceCalledMove(u32 battler);
 static bool32 TryUseDistortionCalledMove(u32 battler);
-static bool32 TryUseVicejawCalledMove(u32 battler);
+static bool32 TryUseVicejawCalledMove(u32 battler, u32 target);
 static bool32 TryUseVarietyActCalledMove(u32 battler);
 static bool32 TryUseAcidRefluxCalledMove(u32 battler);
 static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target);
@@ -5706,9 +5706,8 @@ static const u16 sVicejawMoves[] =
     MOVE_JAW_LOCK,
 };
 
-static bool32 TryUseVicejawCalledMove(u32 battler)
+static bool32 TryUseVicejawCalledMove(u32 battler, u32 target)
 {
-    u32 target = gBattlerTarget;
     u16 move;
 
     if (target >= gBattlersCount
@@ -13959,7 +13958,10 @@ if (triggeringAbility != ABILITY_NONE)
     }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
     {
-        u32 moveEndTarget = gBattlerTarget;
+        u32 moveEndTarget = gBattleStruct->moveTarget[battler];
+
+        if (moveEndTarget < gBattlersCount)
+            gBattlerTarget = moveEndTarget;
 
         switch (gLastUsedAbility)
         {
@@ -17659,7 +17661,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[battler].confusionSelfDmg
          && IsFinalMultiHitStrike()
-         && TryUseVicejawCalledMove(battler))
+         && TryUseVicejawCalledMove(battler, gBattleStruct->moveTarget[battler]))
         {
             effect++;
         }
