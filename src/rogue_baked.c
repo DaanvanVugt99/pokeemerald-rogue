@@ -1729,7 +1729,7 @@ u32 Rogue_CalculateMovePrice(u16 move, u16 itemId)
     }
     else if((itemId >= ITEM_TM01 && itemId <= ITEM_HM08) || (itemId >= ITEM_TR01 && itemId <= ITEM_TR50))
     {
-        cost *= 3;
+        cost *= 4;
         if(cost > HELD_ITEM_HIGH_PRICE)
             cost = HELD_ITEM_HIGH_PRICE;
     }

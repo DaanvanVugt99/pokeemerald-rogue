@@ -3021,6 +3021,8 @@ static void Debug_UpdateBattleSpriteCount(void)
 
     if (gTestRunnerEnabled)
         return;
+    if (IsTextPrinterActive(B_WIN_MSG))
+        return;
     if ((gMain.vblankCounter1 & 7) != 0)
         return;
 
