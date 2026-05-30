@@ -10144,11 +10144,24 @@ static bool32 HasAttackerFaintedTarget(void)
         return FALSE;
 }
 
+static bool32 HasPursuitInterceptFaintedTarget(void)
+{
+    if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+        && gBattleMoves[gCurrentMove].effect == EFFECT_PURSUIT
+        && gBattleMoves[gCurrentMove].power != 0
+        && gHpDealt > 0
+        && gBattleMons[gBattlerTarget].hp == 0
+        && gBattlerTarget != gBattlerAttacker)
+        return TRUE;
+    else
+        return FALSE;
+}
+
 static void TryActivateBountyOnFaintingTarget(void)
 {
     if (HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTY)
      && GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
-     && HasAttackerFaintedTarget()
+     && (HasAttackerFaintedTarget() || HasPursuitInterceptFaintedTarget())
      && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)))
     {
         u16 payDay = gPaydayMoney;
@@ -16217,6 +16230,17 @@ static void Cmd_jumpifnopursuitswitchdmg(void)
 
         gCurrentMove = gChosenMoveByBattler[gBattlerTarget];
         gCurrMovePos = gChosenMovePos = *(gBattleStruct->chosenMovePositions + gBattlerTarget);
+        gBattleScripting.battler = 0xFF;
+        doSwitchIntercept = TRUE;
+    }
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_BOUNTY)
+          && !(gBattleMons[gBattlerTarget].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+          && gBattleMons[gBattlerAttacker].hp
+          && gBattleMons[gBattlerTarget].hp
+          && !gDisableStructs[gBattlerTarget].truantCounter)
+    {
+        SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_BOUNTY);
+        gCurrentMove = MOVE_PURSUIT;
         doSwitchIntercept = TRUE;
     }
     else if (HasBattlerAbility(gBattlerTarget, ABILITY_HOT_PURSUIT)

@@ -7215,7 +7215,15 @@ BattleScript_PursuitSwitchDmgLoop::
 	jumpifmove MOVE_FLAME_CHARGE, BattleScript_CallHotPursuitDmgOnSwitchOut
 	jumpifmove MOVE_SHADOW_SNEAK, BattleScript_CallShadowGraspDmgOnSwitchOut
 	jumpifmove MOVE_DEFOG, BattleScript_CallSkyPatrolDefogOnSwitchOut
+	jumpifmove MOVE_PURSUIT, BattleScript_CheckBountyPursuitDmgOnSwitchOut
 	call BattleScript_PursuitDmgOnSwitchOut
+	goto BattleScript_PursuitSwitchDmgDone
+BattleScript_CheckBountyPursuitDmgOnSwitchOut:
+	jumpifbyteequal sBATTLER, gBattlerAttacker, BattleScript_CallBountyPursuitDmgOnSwitchOut
+	call BattleScript_PursuitDmgOnSwitchOut
+	goto BattleScript_PursuitSwitchDmgDone
+BattleScript_CallBountyPursuitDmgOnSwitchOut:
+	call BattleScript_BountyPursuitDmgOnSwitchOut
 	goto BattleScript_PursuitSwitchDmgDone
 BattleScript_CallHotPursuitDmgOnSwitchOut:
 	call BattleScript_HotPursuitDmgOnSwitchOut
@@ -7275,6 +7283,32 @@ BattleScript_PursuitDmgOnSwitchOut::
 	setbyte sGIVEEXP_STATE, 0
 	getexp BS_TARGET
 BattleScript_PursuitDmgOnSwitchOutRet:
+	return
+
+BattleScript_BountyPursuitDmgOnSwitchOut::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	attackstring
+	critcalc
+	damagecalc
+	adjustdamage
+	attackanimation
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_TARGET
+	moveendfromto MOVEEND_ABILITIES, MOVEEND_CHOICE_MOVE
+	jumpiffainted BS_TARGET, FALSE, BattleScript_BountyPursuitDmgOnSwitchOutRet
+	setbyte sGIVEEXP_STATE, 0
+	getexp BS_TARGET
+BattleScript_BountyPursuitDmgOnSwitchOutRet:
 	return
 
 BattleScript_HotPursuitDmgOnSwitchOut::

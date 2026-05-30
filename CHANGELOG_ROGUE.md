@@ -31,6 +31,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked Krookodile's Bounty unique ability so opposing switch-outs are
+  punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its
   first successful Rest each switch-in instead of after biting moves.
 - Ported upstream battle heap optimization so battler sprite graphics allocate
