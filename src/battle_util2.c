@@ -58,7 +58,8 @@ void AllocateBattleResources(void)
     gLinkBattleSendBuffer = AllocZeroed(BATTLE_BUFFER_LINK_SIZE);
     gLinkBattleRecvBuffer = AllocZeroed(BATTLE_BUFFER_LINK_SIZE);
 
-    AllocateBattleGfxResources();
+    gBattleAnimBgTileBuffer = AllocZeroed(0x2000);
+    gBattleAnimBgTilemapBuffer = AllocZeroed(0x1000);
 }
 
 void FreeBattleResources(void)

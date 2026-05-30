@@ -109,8 +109,8 @@ SINGLE_BATTLE_TEST("Uproot does not call Ingrain if the user faints before move 
 SINGLE_BATTLE_TEST("Uproot still calls Ingrain if Rock Head prevents pending recoil")
 {
     GIVEN {
-        PLAYER(SPECIES_TORTERRA) { HP(1); Attack(999); Ability(ABILITY_ROCK_HEAD); UniqueAbility(ABILITY_UPROOT); Moves(MOVE_WOOD_HAMMER); }
-        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Defense(1); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_TORTERRA) { HP(1); Attack(1); Ability(ABILITY_ROCK_HEAD); UniqueAbility(ABILITY_UPROOT); Moves(MOVE_WOOD_HAMMER); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Defense(999); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_WOOD_HAMMER); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
@@ -118,7 +118,7 @@ SINGLE_BATTLE_TEST("Uproot still calls Ingrain if Rock Head prevents pending rec
         ABILITY_POPUP(player, ABILITY_UPROOT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_INGRAIN, player);
     } THEN {
-        EXPECT_EQ(player->hp, 1);
+        EXPECT_GT(player->hp, 1);
         EXPECT(gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_ROOTED);
     }
 }

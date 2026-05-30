@@ -6418,6 +6418,7 @@ static void Cmd_moveend(void)
         {
             u32 moveEndMove = 0;
             u32 moveEndAttacker = gBattleStruct->moveEndAttacker;
+            u32 savedBattlerTarget = gBattlerTarget;
 
             if (moveEndAttacker >= gBattlersCount)
                 moveEndAttacker = gBattlerAttacker;
@@ -6432,6 +6433,8 @@ static void Cmd_moveend(void)
             gBattlerAttacker = moveEndAttacker;
             if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END_ATTACKER, moveEndAttacker, 0, 0, moveEndMove))
                 effect = TRUE;
+            else
+                gBattlerTarget = savedBattlerTarget;
             gBattleScripting.moveendState++;
             break;
         }
