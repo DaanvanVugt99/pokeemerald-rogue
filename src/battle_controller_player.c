@@ -9,6 +9,7 @@
 #include "battle_message.h"
 #include "battle_setup.h"
 #include "battle_tv.h"
+#include "battle_util2.h"
 #include "battle_z_move.h"
 #include "bg.h"
 #include "data.h"
@@ -1678,7 +1679,7 @@ static void OpenPartyMenuToChooseMon(u32 battler)
         gBattlerControllerFuncs[battler] = WaitForMonSelection;
         caseId = gTasks[gBattleControllerData[battler]].data[0];
         DestroyTask(gBattleControllerData[battler]);
-        FreeAllWindowBuffers();
+        CloseMainBattleScreen();
         OpenPartyMenuInBattle(caseId);
     }
 }
@@ -1709,7 +1710,7 @@ static void OpenBagAndChooseItem(u32 battler)
 
         gBattlerControllerFuncs[battler] = CompleteWhenChoseItem;
         ReshowBattleScreenDummy();
-        FreeAllWindowBuffers();
+        CloseMainBattleScreen();
         if (openPokedex)
         {
             gSpecialVar_ItemId = ITEM_NONE;

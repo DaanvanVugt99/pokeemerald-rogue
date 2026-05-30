@@ -21,6 +21,7 @@
 #include "strings.h"
 #include "battle_ai_main.h"
 #include "battle_ai_util.h"
+#include "battle_util2.h"
 #include "list_menu.h"
 #include "decompress.h"
 #include "trainer_pokemon_sprites.h"
@@ -1248,7 +1249,7 @@ static void Task_DebugMenuFadeOut(u8 taskId)
         if (data->secondaryListTaskId != 0xFF)
             DestroyListMenuTask(data->secondaryListTaskId, 0, 0);
 
-        FreeAllWindowBuffers();
+        CloseMainBattleScreen();
         UpdateMonData(data);
         gBattleStruct->debugBattler = data->battlerId;
         Free(data);

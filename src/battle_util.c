@@ -12669,18 +12669,27 @@ if (triggeringAbility != ABILITY_NONE)
             }
             break;
         case ABILITY_TOXIC_DEBRIS:
+        {
+            u32 toxicSpikesTarget = BATTLE_OPPOSITE(moveEndTarget);
+
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
              && (!gBattleStruct->isSkyBattle)
              && !gProtectStructs[moveEndAttacker].confusionSelfDmg
              && IS_MOVE_PHYSICAL(move)
              && BATTLER_TURN_DAMAGED(moveEndTarget)
-             && (gSideTimers[GetBattlerSide(moveEndAttacker)].toxicSpikesAmount < 2))
+             && (gSideTimers[GetBattlerSide(toxicSpikesTarget)].toxicSpikesAmount < 2))
             {
+                gBattleScripting.savedBattler = moveEndAttacker;
+                gBattleStruct->savedBattlerTarget = moveEndTarget;
+                gBattlerAttacker = moveEndTarget;
+                gBattlerTarget = toxicSpikesTarget;
+                SetBattlerTriggeredAbility(moveEndTarget, gLastUsedAbility);
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_ToxicDebrisActivates;
                 effect++;
             }
             break;
+        }
         }
 
         if (HasBattlerAbility(battler, ABILITY_BARBED_MONSOON)
@@ -20575,7 +20584,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             switch (battlerHoldEffect)
             {
             case HOLD_EFFECT_AIR_BALLOON:
-                if (TARGET_TURN_DAMAGED)
+                if (gSpecialStatuses[gBattlerAttacker].damagedMons & gBitTable[battler])
                 {
                     effect = ITEM_EFFECT_OTHER;
                     BattleScriptPushCursor();

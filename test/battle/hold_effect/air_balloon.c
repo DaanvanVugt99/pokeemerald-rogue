@@ -7,6 +7,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_EARTHQUAKE].type == TYPE_GROUND);
     ASSUME(gBattleMoves[MOVE_TACKLE].type != TYPE_GROUND);
     ASSUME(gBattleMoves[MOVE_RECYCLE].effect == EFFECT_RECYCLE);
+    ASSUME(gBattleMoves[MOVE_SUBSTITUTE].effect == EFFECT_SUBSTITUTE);
 }
 
 SINGLE_BATTLE_TEST("Air Balloon prevents the holder from taking damage from ground type moves")
@@ -118,5 +119,42 @@ SINGLE_BATTLE_TEST("Air Balloon pops before it can be stolen with Thief or Covet
         MESSAGE("Wobbuffet floats in the air with its Air Balloon!");
         MESSAGE("Wobbuffet's Air Balloon popped!");
         NOT MESSAGE("Foe Wobbuffet stole Wobbuffet's Air Balloon!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Air Balloon pops if a damaging move hits the holder's Substitute")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_AIR_BALLOON); Speed(2); };
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); };
+    } WHEN {
+        TURN {
+            MOVE(player, MOVE_SUBSTITUTE);
+            MOVE(opponent, MOVE_TACKLE);
+        }
+    } SCENE {
+        MESSAGE("Wobbuffet floats in the air with its Air Balloon!");
+        MESSAGE("Wobbuffet used Substitute!");
+        MESSAGE("Foe Wobbuffet used Tackle!");
+        MESSAGE("Wobbuffet's Air Balloon popped!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Air Balloon pops when the holder faints from a damaging move")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_AIR_BALLOON); HP(1); };
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        MESSAGE("Wobbuffet floats in the air with its Air Balloon!");
+        MESSAGE("Foe Wobbuffet used Tackle!");
+        MESSAGE("Wobbuffet fainted!");
+        MESSAGE("Wobbuffet's Air Balloon popped!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
     }
 }

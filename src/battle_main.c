@@ -13,6 +13,7 @@
 #include "battle_setup.h"
 #include "battle_tower.h"
 #include "battle_util.h"
+#include "battle_util2.h"
 #include "berry.h"
 #include "bg.h"
 #include "data.h"
@@ -5984,7 +5985,7 @@ static void TrySpecialEvolution(void) // Attempts to perform non-level related b
         if (species != SPECIES_NONE && !(sTriedEvolving & gBitTable[i]))
         {
             sTriedEvolving |= gBitTable[i];
-            FreeAllWindowBuffers();
+            CloseMainBattleScreen();
             gBattleMainFunc = WaitForEvoSceneToFinish;
             EvolutionScene(&gPlayerParty[i], species, TRUE, i);
             return;

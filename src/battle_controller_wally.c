@@ -6,6 +6,7 @@
 #include "battle_message.h"
 #include "battle_setup.h"
 #include "battle_tv.h"
+#include "battle_util2.h"
 #include "bg.h"
 #include "data.h"
 #include "item.h"
@@ -206,7 +207,7 @@ static void OpenBagAfterPaletteFade(u32 battler)
     {
         gBattlerControllerFuncs[battler] = CompleteOnChosenItem;
         ReshowBattleScreenDummy();
-        FreeAllWindowBuffers();
+        CloseMainBattleScreen();
         DoWallyTutorialBagMenu();
     }
 }

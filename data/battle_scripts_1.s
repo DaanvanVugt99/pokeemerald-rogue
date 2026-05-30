@@ -8027,13 +8027,9 @@ BattleScript_WindPowerActivates_Ret:
 	return
 
 BattleScript_ToxicDebrisActivates::
-	savetarget
-	copybyte sSAVED_BATTLER, gBattlerAttacker
-	copybyte gBattlerAttacker, gBattlerTarget
-	copybyte gBattlerTarget, sSAVED_BATTLER
-	settoxicspikes BattleScript_ToxicDebrisRet
 	call BattleScript_AbilityPopUp
 	pause B_WAIT_TIME_SHORT
+	settoxicspikes BattleScript_ToxicDebrisRet
 	printstring STRINGID_POISONSPIKESSCATTERED
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_ToxicDebrisRet:

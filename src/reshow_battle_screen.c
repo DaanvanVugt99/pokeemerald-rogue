@@ -14,6 +14,7 @@
 #include "constants/trainers.h"
 #include "battle_interface.h"
 #include "battle_anim.h"
+#include "battle_util2.h"
 #include "data.h"
 
 #include "rogue_player_customisation.h"
@@ -46,6 +47,7 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
     {
     case 0:
         ScanlineEffect_Clear();
+        AllocateBattleGfxResources();
         BattleInitBgsAndWindows();
         SetBgAttribute(1, BG_ATTR_CHARBASEINDEX, 0);
         SetBgAttribute(2, BG_ATTR_CHARBASEINDEX, 0);
@@ -305,12 +307,14 @@ static void CreateHealthboxSprite(u8 battler)
 
         if (GetBattlerSide(battler) != B_SIDE_PLAYER)
         {
-            if (GetMonData(&gEnemyParty[gBattlerPartyIndexes[battler]], MON_DATA_HP) == 0)
+            if (GetMonData(&gEnemyParty[gBattlerPartyIndexes[battler]], MON_DATA_HP) == 0
+             || ((gAbsentBattlerFlags | gBattleStruct->absentBattlerFlags) & (1u << battler)))
                 SetHealthboxSpriteInvisible(healthboxSpriteId);
         }
         else if (!(gBattleTypeFlags & BATTLE_TYPE_SAFARI))
         {
-            if (!IsValidForBattle(&gPlayerParty[gBattlerPartyIndexes[battler]]))
+            if (!IsValidForBattle(&gPlayerParty[gBattlerPartyIndexes[battler]])
+             || ((gAbsentBattlerFlags | gBattleStruct->absentBattlerFlags) & (1u << battler)))
                 SetHealthboxSpriteInvisible(healthboxSpriteId);
         }
     }
