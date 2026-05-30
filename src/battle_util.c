@@ -5414,6 +5414,16 @@ static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
 }
 
+static bool32 CanUseSwallowedRestExtraMove(u32 battlerAttacker)
+{
+    return IsBattlerAlive(battlerAttacker)
+        && !NoAliveMonsForEitherParty()
+        && !IsCurrentMoveSwitchingUser()
+        && !gProtectStructs[battlerAttacker].confusionSelfDmg
+        && !gProtectStructs[battlerAttacker].extraMoveUsed
+        && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
+}
+
 static bool32 TryUsePrimalCurrentCalledMove(u32 battler)
 {
     if (!HasBattlerAbility(battler, ABILITY_PRIMAL_CURRENT)
@@ -14952,13 +14962,13 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (HasBattlerAbility(battler, ABILITY_SWALLOWED)
          && IsBattlerAlive(battler)
-         && gBattleMoves[move].bitingMove
+         && move == MOVE_REST
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
-         && CanUseSelfExtraMove(battler))
+         && CanUseSwallowedRestExtraMove(battler))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_SWALLOWED);
             SetAtkCancellerForCalledMove();
