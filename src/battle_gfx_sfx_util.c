@@ -1001,7 +1001,7 @@ void BattleLoadSubstituteOrMonSpriteGfx(u8 battler, bool8 loadMonSprite)
         else
             LZDecompressVram(gBattleAnimSpriteGfx_SubstituteBack, gMonSpritesGfxPtr->sprites.ptr[position]);
 
-        for (i = 1; i < 4; i++)
+        for (i = 1; i < MAX_MON_PIC_FRAMES; i++)
         {
             Dma3CopyLarge32_(gMonSpritesGfxPtr->sprites.ptr[position], &gMonSpritesGfxPtr->sprites.byte[position][MON_PIC_SIZE * i], MON_PIC_SIZE);
         }
@@ -1308,18 +1308,16 @@ void ClearTemporarySpeciesSpriteData(u8 battler, bool8 dontClearSubstitute)
 
 void AllocateMonSpritesGfx(void)
 {
-    u8 i = 0, j;
-
     gMonSpritesGfxPtr = NULL;
     gMonSpritesGfxPtr = AllocZeroed(sizeof(*gMonSpritesGfxPtr));
-    gMonSpritesGfxPtr->firstDecompressed = AllocZeroed(MON_PIC_SIZE * 4 * MAX_BATTLERS_COUNT);
+    gMonSpritesGfxPtr->firstDecompressed = AllocZeroed(MON_PIC_SIZE * MAX_MON_PIC_FRAMES * MAX_BATTLERS_COUNT);
 
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    for (u32 i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
-        gMonSpritesGfxPtr->sprites.ptr[i] = gMonSpritesGfxPtr->firstDecompressed + (i * MON_PIC_SIZE * 4);
+        gMonSpritesGfxPtr->sprites.ptr[i] = gMonSpritesGfxPtr->firstDecompressed + (i * MON_PIC_SIZE * MAX_MON_PIC_FRAMES);
         *(gMonSpritesGfxPtr->templates + i) = gBattlerSpriteTemplates[i];
 
-        for (j = 0; j < 4; j++)
+        for (u32 j = 0; j < MAX_MON_PIC_FRAMES; j++)
         {
             if (gMonSpritesGfxPtr->sprites.ptr[i])
             {

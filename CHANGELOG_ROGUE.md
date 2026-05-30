@@ -33,6 +33,8 @@ Format follows Keep a Changelog loosely:
 
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its
   first successful Rest each switch-in instead of after biting moves.
+- Ported upstream battle heap optimization so battler sprite graphics allocate
+  two mon frames per battler instead of four.
 - Fast Path segments with a pending rival battle now guarantee at
   least one starting Route or Honey Tree option for pre-rival leveling.
 - Ported upstream Gauntlet pacing so Gauntlet and Rainbow Gauntlet runs start
