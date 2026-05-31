@@ -626,8 +626,10 @@ BattleScript_EffectDoodle::
 	ppreduce
 	attackanimation
 	waitanimation
-	setbyte gBattleCommunication, 0
+	setbyte gBattleCommunication + 2, 0
+	copybyte gBattleCommunication + 7, gBattlerTarget
 BattleScript_EffectDoodle_CopyAbility:
+	copybyte gBattlerTarget, gBattleCommunication + 7
 	trycopyability BS_ATTACKER, BattleScript_ButItFailed
 .if B_ABILITY_POP_UP == TRUE
 	setbyte sFIXED_ABILITY_POPUP, TRUE
@@ -641,9 +643,12 @@ BattleScript_EffectDoodle_CopyAbility:
 .endif
 	printstring STRINGID_PKMNCOPIEDFOE
 	waitmessage B_WAIT_TIME_LONG
-	switchinabilities BS_ATTACKER
-	jumpifbyte CMP_NOT_EQUAL, gBattleCommunication, 0x0, BattleScript_MoveEnd
-	addbyte gBattleCommunication, 1
+	addbyte gBattleCommunication + 2, 1
+	switchinchangedability BS_ATTACKER
+	copybyte gBattlerTarget, gBattleCommunication + 7
+	jumpifbyte CMP_EQUAL, gBattleCommunication + 2, 0x1, BattleScript_EffectDoodle_TryAlly
+	setallytonextattacker BattleScript_MoveEnd
+BattleScript_EffectDoodle_TryAlly:
 	jumpifnoally BS_TARGET, BattleScript_MoveEnd
 	setallytonextattacker BattleScript_EffectDoodle_CopyAbility
 	goto BattleScript_MoveEnd
@@ -6397,7 +6402,7 @@ BattleScript_EffectRolePlay::
 .endif
 	printstring STRINGID_PKMNCOPIEDFOE
 	waitmessage B_WAIT_TIME_LONG
-	switchinabilities BS_ATTACKER
+	switchinchangedability BS_ATTACKER
 	goto BattleScript_MoveEnd
 
 BattleScript_EffectWish::
@@ -6558,8 +6563,10 @@ BattleScript_EffectSkillSwap:
 	printstring STRINGID_PKMNSWAPPEDABILITIES
 	waitmessage B_WAIT_TIME_LONG
 .if B_SKILL_SWAP >= GEN_4
-	switchinabilities BS_ATTACKER
-	switchinabilities BS_TARGET
+	savetarget
+	switchinchangedability BS_ATTACKER
+	restoretarget
+	switchinchangedability BS_TARGET
 .endif
 	goto BattleScript_MoveEnd
 
@@ -9641,7 +9648,7 @@ BattleScript_TraceActivates::
 	printstring STRINGID_PKMNTRACED
 	waitmessage B_WAIT_TIME_LONG
 	settracedability BS_SCRIPTING
-	switchinabilities BS_SCRIPTING
+	switchinchangedability BS_SCRIPTING
 	return
 
 BattleScript_TraceActivatesEnd3::
@@ -9929,6 +9936,7 @@ BattleScript_ScrapJobLoop:
 	waitanimation
 	printstring STRINGID_SPIKESSCATTERED
 	waitmessage B_WAIT_TIME_LONG
+	sethword sABILITY_OVERWRITE, 0
 	goto BattleScript_ScrapJobLoop
 BattleScript_ScrapJobEnd:
 	various BS_ATTACKER, VARIOUS_RESTORE_SCRAP_JOB_ATTACKER
@@ -11345,8 +11353,10 @@ BattleScript_WanderingSpiritActivates::
 .endif
 	printstring STRINGID_SWAPPEDABILITIES
 	waitmessage B_WAIT_TIME_LONG
-	switchinabilities BS_ATTACKER
-	switchinabilities BS_TARGET
+	savetarget
+	switchinchangedability BS_ATTACKER
+	restoretarget
+	switchinchangedability BS_TARGET
 	return
 
 BattleScript_TargetsStatWasMaxedOut::

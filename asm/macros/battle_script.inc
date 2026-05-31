@@ -1728,6 +1728,10 @@
 	various \battler, VARIOUS_SWITCHIN_ABILITIES
 	.endm
 
+	.macro switchinchangedability battler:req
+	various \battler, VARIOUS_SWITCHIN_CHANGED_ABILITY
+	.endm
+
 	.macro savetarget
 	various BS_TARGET, VARIOUS_SAVE_TARGET
 	.endm

@@ -11245,6 +11245,17 @@ static void Cmd_various(void)
         AbilityBattleEffects(ABILITYEFFECT_OPPORTUNIST, battler, 0, 0, 0);
         return;
     }
+    case VARIOUS_SWITCHIN_CHANGED_ABILITY:
+    {
+        VARIOUS_ARGS();
+        gBattlescriptCurrInstr = cmd->nextInstr;
+        AbilityBattleEffects(ABILITYEFFECT_NEUTRALIZINGGAS, battler, 0, 0, 0);
+        gSpecialStatuses[battler].switchInAbilityDone = FALSE;
+        AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, battler, 0, GetBattlerAbility(battler), 0);
+        AbilityBattleEffects(ABILITYEFFECT_TRACE2, battler, 0, 0, 0);
+        AbilityBattleEffects(ABILITYEFFECT_OPPORTUNIST, battler, 0, 0, 0);
+        return;
+    }
     case VARIOUS_SAVE_TARGET:
     {
         VARIOUS_ARGS();
@@ -11316,7 +11327,8 @@ static void Cmd_various(void)
 
         gSideStatuses[side] |= SIDE_STATUS_SPIKES;
         gSideTimers[side].spikesAmount++;
-        break;
+        gBattlescriptCurrInstr = cmd->nextInstr;
+        return;
     }
     case VARIOUS_INSTANT_HP_DROP:
     {
