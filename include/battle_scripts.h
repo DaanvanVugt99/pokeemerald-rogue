@@ -615,6 +615,8 @@ extern const u8 BattleScript_ApplyMimicry[];
 extern const u8 BattleScript_AttackerFormChangeEnd3NoPopup[];
 extern const u8 BattleScript_AttackerFormChangeWithStringEnd3NoPopup[];
 extern const u8 BattleScript_AttackerFormChangeMoveEffect[];
+extern const u8 BattleScript_CounterpunchFormChange[];
+extern const u8 BattleScript_CounterpunchFormChangeAndRaiseAtk[];
 extern const u8 BattleScript_BothCanNoLongerEscape[];
 extern const u8 BattleScript_OctolockEndTurn[];
 extern const u8 BattleScript_NeutralizingGasExits[];

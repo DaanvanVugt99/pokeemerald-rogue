@@ -8692,6 +8692,34 @@ BattleScript_AttackerFormChangeMoveEffect::
 	handleformchange BS_ATTACKER, 2
 	return
 
+BattleScript_CounterpunchFormChange::
+	pause 5
+	copybyte gBattlerAbility, gBattlerAttacker
+.if B_ABILITY_POP_UP == TRUE
+	copyhword sABILITY_OVERWRITE, gLastUsedAbility
+	showabilitypopup BS_ABILITY_BATTLER
+	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_SHORT
+.endif
+	flushtextbox
+	handleformchange BS_ATTACKER, 0
+	handleformchange BS_ATTACKER, 1
+	playanimation BS_ATTACKER, B_ANIM_FORM_CHANGE
+	waitanimation
+	handleformchange BS_ATTACKER, 2
+	sethword sABILITY_OVERWRITE, 0
+	return
+
+BattleScript_CounterpunchFormChangeAndRaiseAtk::
+	call BattleScript_CounterpunchFormChange
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_CounterpunchFormChangeAndRaiseAtk_End
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_ATTACKERABILITYSTATRAISE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_CounterpunchFormChangeAndRaiseAtk_End:
+	return
+
 BattleScript_BallFetch::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_FETCHEDPOKEBALL

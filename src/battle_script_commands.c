@@ -1266,20 +1266,6 @@ static bool32 TryAegiFormChange(void)
         gBattleMons[gBattlerAttacker].species = SPECIES_AEGISLASH_SHIELD;
         break;
 
-    case SPECIES_WOBBUFFET: // Regular -> Punching
-        if (IS_MOVE_STATUS(gCurrentMove))
-            return FALSE;
-
-        if (gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[gBattlerAttacker]] == SPECIES_NONE)
-            gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[gBattlerAttacker]] = gBattleMons[gBattlerAttacker].species;
-
-        gBattleMons[gBattlerAttacker].species = SPECIES_WOBBUFFET_PUNCHING;
-        break;
-    case SPECIES_WOBBUFFET_PUNCHING: // Punching -> Regular
-        if (gCurrentMove != MOVE_KINGS_SHIELD)
-            return FALSE;
-        gBattleMons[gBattlerAttacker].species = SPECIES_WOBBUFFET;
-        break;
     }
 
     BattleScriptPushCursor();

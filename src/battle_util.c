@@ -129,6 +129,10 @@ static bool32 TryUseFalseApplauseCalledMove(u32 battler, u32 target);
 static bool32 TryUseCapsaicinCrazeCalledMove(u32 battler, u32 target);
 static bool32 TryUseFuneralRiteCalledMove(u32 battler);
 static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker);
+static inline bool32 IsFinalMultiHitStrike(void);
+static bool32 TrySetCounterpunchWobbuffetForm(u32 battler, u16 targetSpecies);
+static bool32 TryTriggerCounterpunchAfterCounterMove(u32 battler, u32 move);
+static bool32 TryTriggerCounterpunchAfterPunchingMove(u32 battler, u32 move);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
 static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move);
@@ -5401,6 +5405,96 @@ static bool32 DidMoveSucceedForMoveEndEffects(u32 battlerAttacker)
 {
     return !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
         || gProtectStructs[battlerAttacker].targetAffected;
+}
+
+static bool32 TrySetCounterpunchWobbuffetForm(u32 battler, u16 targetSpecies)
+{
+    u32 side;
+
+    if (gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
+        return FALSE;
+
+    switch (gBattleMons[battler].species)
+    {
+    case SPECIES_WOBBUFFET:
+        if (targetSpecies != SPECIES_WOBBUFFET_PUNCHING)
+            return FALSE;
+        break;
+    case SPECIES_WOBBUFFET_PUNCHING:
+        if (targetSpecies != SPECIES_WOBBUFFET)
+            return FALSE;
+        break;
+    default:
+        return FALSE;
+    }
+
+    side = GetBattlerSide(battler);
+    if (gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] == SPECIES_NONE)
+        gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] = gBattleMons[battler].species;
+
+    gBattleMons[battler].species = targetSpecies;
+    return TRUE;
+}
+
+static bool32 TryTriggerCounterpunchAfterCounterMove(u32 battler, u32 move)
+{
+    bool32 formChanged;
+    bool32 canRaiseAtk;
+
+    if (!HasBattlerAbility(battler, ABILITY_COUNTERPUNCH)
+     || !IsBattlerAlive(battler)
+     || (move != MOVE_COUNTER && move != MOVE_MIRROR_COAT)
+     || !DidMoveSucceedForMoveEndEffects(battler)
+     || (gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+     || (gBattleStruct->lastMoveFailed & gBitTable[battler])
+     || (gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+     || gProtectStructs[gBattlerAttacker].confusionSelfDmg
+     || !TARGET_TURN_DAMAGED
+     || !IsFinalMultiHitStrike())
+        return FALSE;
+
+    formChanged = TrySetCounterpunchWobbuffetForm(battler, SPECIES_WOBBUFFET_PUNCHING);
+    canRaiseAtk = CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN);
+    if (!formChanged && !canRaiseAtk)
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_COUNTERPUNCH);
+    gBattlerAttacker = battler;
+
+    if (canRaiseAtk)
+    {
+        SET_STATCHANGER(STAT_ATK, 1, FALSE);
+        PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+    }
+
+    BattleScriptPushCursor();
+    if (formChanged && canRaiseAtk)
+        gBattlescriptCurrInstr = BattleScript_CounterpunchFormChangeAndRaiseAtk;
+    else if (formChanged)
+        gBattlescriptCurrInstr = BattleScript_CounterpunchFormChange;
+    else
+        gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+
+    return TRUE;
+}
+
+static bool32 TryTriggerCounterpunchAfterPunchingMove(u32 battler, u32 move)
+{
+    if (!HasBattlerAbility(battler, ABILITY_COUNTERPUNCH)
+     || !IsBattlerAlive(battler)
+     || !gBattleMoves[move].punchingMove
+     || !DidMoveSucceedForMoveEndEffects(battler)
+     || (gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+     || gProtectStructs[gBattlerAttacker].confusionSelfDmg
+     || !IsFinalMultiHitStrike()
+     || !TrySetCounterpunchWobbuffetForm(battler, SPECIES_WOBBUFFET))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_COUNTERPUNCH);
+    gBattlerAttacker = battler;
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = BattleScript_CounterpunchFormChange;
+    return TRUE;
 }
 
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker)
@@ -14012,6 +14106,12 @@ if (triggeringAbility != ABILITY_NONE)
             }
             break;
         }
+
+        if (TryTriggerCounterpunchAfterCounterMove(battler, move))
+            effect++;
+
+        if (TryTriggerCounterpunchAfterPunchingMove(battler, move))
+            effect++;
 
         if (HasBattlerAbility(battler, ABILITY_BARBED_MONSOON)
          && IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN)

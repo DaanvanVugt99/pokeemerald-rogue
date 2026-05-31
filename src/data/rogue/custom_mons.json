@@ -446,9 +446,11 @@
                 "held_item": "ITEM_KINGS_ROCK",
                 "moves":
                 [
+                    "MOVE_COUNTER",
+                    "MOVE_MIRROR_COAT",
                     "MOVE_DRAIN_PUNCH",
-                    "MOVE_KINGS_SHIELD",
                     "MOVE_POWER_UP_PUNCH",
+
                     "MOVE_SHADOW_PUNCH",
 
                     "MOVE_BULLET_PUNCH",
@@ -460,7 +462,7 @@
                 ],
                 "abilities":
                 [
-                    "ABILITY_STANCE_CHANGE"
+                    "ABILITY_SHADOW_TAG"
                 ]
             },
 
