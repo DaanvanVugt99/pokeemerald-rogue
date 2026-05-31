@@ -558,6 +558,8 @@ static const struct PopupRequestTemplate sPopupRequestTemplates[] =
 
 static void ShowQuestPopup(void);
 static void HideQuestPopUpWindow(void);
+static void SuspendQuestPopUpWindow(void);
+static void CloseQuestPopUpWindow(bool8 consumePopup);
 
 static u8 GetActiveOnScreenDisplayTimer();
 static void Task_QuestPopUpWindow(u8 taskId);
@@ -754,7 +756,10 @@ void Rogue_UpdatePopups(bool8 inOverworld, bool8 inputEnabled)
     else
     {
         if (FuncIsActiveTask(Task_QuestPopUpWindow))
-            HideQuestPopUpWindow();
+        {
+            // Keep interrupted popups queued so fast pickups are still shown in order.
+            SuspendQuestPopUpWindow();
+        }
     }
 
     sRoguePopups.wasEnabled = enabled;
@@ -926,6 +931,16 @@ static void Task_QuestPopUpWindow(u8 taskId)
 
 static void HideQuestPopUpWindow(void)
 {
+    CloseQuestPopUpWindow(TRUE);
+}
+
+static void SuspendQuestPopUpWindow(void)
+{
+    CloseQuestPopUpWindow(FALSE);
+}
+
+static void CloseQuestPopUpWindow(bool8 consumePopup)
+{
     if (FuncIsActiveTask(Task_QuestPopUpWindow))
     {
         ClearStdWindowAndFrame(GetQuestPopUpWindowId(), TRUE);
@@ -941,8 +956,9 @@ static void HideQuestPopUpWindow(void)
         SetGpuReg_ForcedBlank(REG_OFFSET_BG0VOFS, 0);
         SetGpuReg_ForcedBlank(REG_OFFSET_BG0HOFS, 0);
         DestroyTask(sRoguePopups.taskId);
-        
-        sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
+
+        if(consumePopup)
+            sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
     }
 }
 
