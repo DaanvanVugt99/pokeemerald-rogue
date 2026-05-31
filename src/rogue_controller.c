@@ -9029,9 +9029,44 @@ static void ApplyMartSeed(u16 itemCategory)
     }
 }
 
+struct BattleEnhancerShopChance
+{
+    u16 difficulty;
+    u8 defaultChance;
+};
+
+static u8 GetBattleEnhancerShopChance(u16 itemId, void* usrData)
+{
+    struct BattleEnhancerShopChance const* data = usrData;
+    u16 chance;
+
+    if(Rogue_IsEvolutionItem(itemId))
+    {
+        chance = 40 + 15 * data->difficulty;
+        return min(100, chance);
+    }
+
+#ifdef ROGUE_EXPANSION
+    if(itemId == ITEM_ABILITY_CAPSULE)
+    {
+        chance = 35 + 12 * data->difficulty;
+        return min(100, chance);
+    }
+
+    if(itemId == ITEM_ABILITY_PATCH)
+    {
+        chance = 25 + 10 * data->difficulty;
+        return min(100, chance);
+    }
+#endif
+
+    return data->defaultChance;
+}
+
 void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
 {
     bool8 applyRandomChance = FALSE;
+    bool8 applyBattleEnhancerChance = FALSE;
     bool8 applyPriceRange = TRUE;
     u16 randomChanceMinimum = 10;
     u16 randomChanceGymRate = 5;
@@ -9187,6 +9222,7 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
             }
         }
         applyRandomChance = TRUE;
+        applyBattleEnhancerChance = TRUE;
         randomChanceMinimum = 20;
         randomChanceGymRate = 3;
         break;
@@ -9385,7 +9421,21 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
                 }
 
                 if(chance < 100)
-                    RogueMiscQuery_FilterByChance(randomSeed, QUERY_FUNC_INCLUDE, chance, 1);
+                {
+                    if(applyBattleEnhancerChance)
+                    {
+                        struct BattleEnhancerShopChance shopChance =
+                        {
+                            .difficulty = difficulty,
+                            .defaultChance = chance,
+                        };
+                        RogueMiscQuery_FilterByChanceCallback(randomSeed, QUERY_FUNC_INCLUDE, GetBattleEnhancerShopChance, &shopChance, 1);
+                    }
+                    else
+                    {
+                        RogueMiscQuery_FilterByChance(randomSeed, QUERY_FUNC_INCLUDE, chance, 1);
+                    }
+                }
             }
         }
     }

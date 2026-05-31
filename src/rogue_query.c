@@ -346,6 +346,43 @@ void RogueMiscQuery_FilterByChance(u16 rngSeed, u8 func, u8 chance, u8 minCount)
     gRngRogueValue = startSeed;
 }
 
+void RogueMiscQuery_FilterByChanceCallback(u16 rngSeed, u8 func, QueryChanceCallback chanceFunc, void* usrData, u8 minCount)
+{
+    bool8 state;
+    u32 elem;
+    u32 count = Query_MaxBitCount();
+    RAND_TYPE startSeed = gRngRogueValue;
+
+    ASSERT_ANY_QUERY;
+
+    SeedRogueRng(rngSeed);
+
+    for(elem = 1; elem < count && sRogueQuery.bitCount > minCount; ++elem)
+    {
+        state = RogueRandomChance(chanceFunc(elem, usrData), 0);
+
+        if(GetQueryBitFlag(elem))
+        {
+            if(func == QUERY_FUNC_INCLUDE)
+            {
+                if(!state)
+                {
+                    SetQueryBitFlag(elem, FALSE);
+                }
+            }
+            else if(func == QUERY_FUNC_EXCLUDE)
+            {
+                if(state)
+                {
+                    SetQueryBitFlag(elem, FALSE);
+                }
+            }
+        }
+    }
+
+    gRngRogueValue = startSeed;
+}
+
 bool8 RogueMiscQuery_AnyActiveElements()
 {
     ASSERT_ANY_QUERY;
