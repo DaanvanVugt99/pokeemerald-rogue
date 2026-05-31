@@ -258,6 +258,7 @@
 #define VARIOUS_TRY_SET_SCRAP_JOB_SPIKES             165
 #define VARIOUS_TRY_ACTIVATE_DEATHRATTLE             166
 #define VARIOUS_SWITCHIN_CHANGED_ABILITY             167
+#define VARIOUS_SET_TARGET_OPPOSING_SIDE             168
 
 // Cmd_manipulatedamage
 #define DMG_CHANGE_SIGN            0

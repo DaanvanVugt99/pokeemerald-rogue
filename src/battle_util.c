@@ -13832,7 +13832,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && IS_MOVE_PHYSICAL(move)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && gSideTimers[GetBattlerSide(moveEndAttacker)].spikesAmount < 3)
+         && gSideTimers[BATTLE_OPPOSITE(GetBattlerSide(battler))].spikesAmount < 3)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_SHARP_QUILLS);
             BattleScriptPushCursor();
@@ -13844,7 +13844,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && !(gSideStatuses[GetBattlerSide(moveEndAttacker)] & SIDE_STATUS_STEALTH_ROCK))
+         && !(gSideStatuses[BATTLE_OPPOSITE(GetBattlerSide(battler))] & SIDE_STATUS_STEALTH_ROCK))
         {
             u32 damageTaken = gSpecialStatuses[moveEndTarget].physicalDmg + gSpecialStatuses[moveEndTarget].specialDmg;
             u32 threshold = gBattleMons[moveEndTarget].maxHP / 4;
@@ -15454,11 +15454,11 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && TARGET_TURN_DAMAGED
          && IsFinalMultiHitStrike()
-         && gSideTimers[GetBattlerSide(gBattlerTarget)].spikesAmount < 3)
+         && gSideTimers[BATTLE_OPPOSITE(GetBattlerSide(battler))].spikesAmount < 3)
         {
             SetBattlerTriggeredAbility(battler, ABILITY_NEEDLEBURST);
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AttackerSpikesActivates;
+            gBattlescriptCurrInstr = BattleScript_NeedleburstActivates;
             effect++;
         }
 

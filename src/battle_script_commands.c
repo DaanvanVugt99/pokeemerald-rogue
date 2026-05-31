@@ -11256,6 +11256,21 @@ static void Cmd_various(void)
         AbilityBattleEffects(ABILITYEFFECT_OPPORTUNIST, battler, 0, 0, 0);
         return;
     }
+    case VARIOUS_SET_TARGET_OPPOSING_SIDE:
+    {
+        VARIOUS_ARGS();
+        side = BATTLE_OPPOSITE(GetBattlerSide(battler));
+        gBattlerTarget = GetBattlerAtPosition(side);
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (GetBattlerSide(i) == side && IsBattlerAlive(i))
+            {
+                gBattlerTarget = i;
+                break;
+            }
+        }
+        break;
+    }
     case VARIOUS_SAVE_TARGET:
     {
         VARIOUS_ARGS();

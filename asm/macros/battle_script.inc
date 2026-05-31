@@ -1732,6 +1732,10 @@
 	various \battler, VARIOUS_SWITCHIN_CHANGED_ABILITY
 	.endm
 
+	.macro settargetopposingside battler:req
+	various \battler, VARIOUS_SET_TARGET_OPPOSING_SIDE
+	.endm
+
 	.macro savetarget
 	various BS_TARGET, VARIOUS_SAVE_TARGET
 	.endm

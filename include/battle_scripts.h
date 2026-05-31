@@ -104,6 +104,7 @@ extern const u8 BattleScript_StealthSwitchInActivates[];
 extern const u8 BattleScript_UltraBastionActivates[];
 extern const u8 BattleScript_PasturizedActivates[];
 extern const u8 BattleScript_AttackerSpikesActivates[];
+extern const u8 BattleScript_NeedleburstActivates[];
 extern const u8 BattleScript_ScrapJobActivates[];
 extern const u8 BattleScript_InfernalRageActivates[];
 extern const u8 BattleScript_ReefProtectionActivates[];

@@ -55,3 +55,23 @@ SINGLE_BATTLE_TEST("Needleburst does not set Spikes if the contact move is block
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].spikesAmount, 0);
     }
 }
+
+DOUBLE_BATTLE_TEST("Needleburst sets Spikes on the opposing side after using a contact move into an ally")
+{
+    GIVEN {
+        PLAYER(SPECIES_CACTURNE) { Ability(ABILITY_SAND_VEIL); Moves(MOVE_SCRATCH); }
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN {
+            MOVE(playerLeft, MOVE_SCRATCH, target: playerRight);
+            MOVE(playerRight, MOVE_CELEBRATE);
+            MOVE(opponentLeft, MOVE_CELEBRATE);
+            MOVE(opponentRight, MOVE_CELEBRATE);
+        }
+    } THEN {
+        EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].spikesAmount, 1);
+        EXPECT_EQ(gSideTimers[B_SIDE_PLAYER].spikesAmount, 0);
+    }
+}

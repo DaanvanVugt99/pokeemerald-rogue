@@ -8081,8 +8081,8 @@ BattleScript_ToxicDebrisRet:
 BattleScript_SharpQuillsActivates::
 	savetarget
 	copybyte sSAVED_BATTLER, gBattlerAttacker
-	copybyte gBattlerAttacker, gBattlerTarget
-	copybyte gBattlerTarget, sSAVED_BATTLER
+	copybyte gBattlerAttacker, gBattlerAbility
+	settargetopposingside BS_ATTACKER
 	trysetspikes BattleScript_SharpQuillsRet
 	call BattleScript_AbilityPopUp
 	playmoveanimation BS_ATTACKER, MOVE_SPIKES
@@ -9924,6 +9924,19 @@ BattleScript_AttackerSpikesActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_NeedleburstActivates::
+	savetarget
+	settargetopposingside BS_ATTACKER
+	trysetspikes BattleScript_NeedleburstRet
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_SPIKES
+	waitanimation
+	printstring STRINGID_SPIKESSCATTERED
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_NeedleburstRet:
+	restoretarget
+	return
+
 BattleScript_ScrapJobActivates::
 	various BS_ATTACKER, VARIOUS_SAVE_SCRAP_JOB_ATTACKER
 BattleScript_ScrapJobLoop:
@@ -11499,8 +11512,8 @@ BattleScript_ShatterActivates::
 BattleScript_IronShardsActivates::
 	savetarget
 	copybyte sSAVED_BATTLER, gBattlerAttacker
-	copybyte gBattlerAttacker, gBattlerTarget
-	copybyte gBattlerTarget, sSAVED_BATTLER
+	copybyte gBattlerAttacker, gBattlerAbility
+	settargetopposingside BS_ATTACKER
 	setstealthrock BattleScript_IronShardsRet
 	call BattleScript_AbilityPopUp
 	playmoveanimation BS_ATTACKER, MOVE_STEALTH_ROCK
