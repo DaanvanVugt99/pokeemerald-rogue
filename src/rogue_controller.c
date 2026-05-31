@@ -9718,12 +9718,44 @@ bool8 Rogue_CanScatterPokeblock(u16 itemId)
     return FALSE;
 }
 
+static bool8 IsNewWildGrassEncounterSpecies(u16 species, void* usrData UNUSED)
+{
+    u8 i;
+    u8 count = GetCurrentWildEncounterCount();
+
+#ifdef ROGUE_EXPANSION
+    species = GET_BASE_SPECIES_ID(species);
+#endif
+
+    for(i = 0; i < count; ++i)
+    {
+        u16 encounterSpecies = GetWildGrassEncounter(i);
+
+        if(encounterSpecies == SPECIES_NONE)
+            continue;
+
+#ifdef ROGUE_EXPANSION
+        encounterSpecies = GET_BASE_SPECIES_ID(encounterSpecies);
+#endif
+
+        if(encounterSpecies == species)
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
 bool8 Rogue_RerollSingleWildSpecies(u8 type)
 {
     bool8 success = FALSE;
+    u8 encounterCount = GetCurrentWildEncounterCount();
+
+    if(encounterCount == 0)
+        return FALSE;
 
     BeginWildEncounterQuery();
     RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, MON_TYPE_VAL_TO_FLAGS(type));
+    RogueMonQuery_CustomFilter(IsNewWildGrassEncounterSpecies, NULL);
 
     {
         RogueWeightQuery_Begin();
@@ -9732,7 +9764,7 @@ bool8 Rogue_RerollSingleWildSpecies(u8 type)
         if(RogueWeightQuery_HasAnyWeights())
         {
             u16 species = RogueWeightQuery_SelectRandomFromWeights(Random());
-            u8 index = Random() % GetCurrentWildEncounterCount();
+            u8 index = Random() % encounterCount;
 
             gRogueRun.wildEncounters.species[index] = species;
             success = TRUE;
