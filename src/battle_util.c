@@ -5370,6 +5370,51 @@ static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget)
         && CanUseSelfExtraMove(battlerAttacker);
 }
 
+static bool32 CanSludgeShiftStatusToTarget(u32 battler, u32 target)
+{
+    u32 status = gBattleMons[battler].status1 & STATUS1_ANY;
+
+    if (status & STATUS1_POISON)
+        return CanBePoisoned(battler, target);
+    if (status & STATUS1_TOXIC_POISON)
+        return CanBePoisoned(battler, target);
+    if (status & STATUS1_BURN)
+        return CanBeBurned(target);
+    if (status & STATUS1_PARALYSIS)
+        return CanBeParalyzed(target);
+    if (status & STATUS1_SLEEP)
+        return CanSleep(target);
+    if (status & STATUS1_FROSTBITE)
+        return CanBeFrozen(target);
+
+    return FALSE;
+}
+
+static bool32 TryGetSludgeShiftTarget(u32 battler, u32 *target)
+{
+    u32 i;
+    u32 opposite = BATTLE_OPPOSITE(battler);
+
+    if (CanUseExtraMove(battler, opposite) && CanSludgeShiftStatusToTarget(battler, opposite))
+    {
+        *target = opposite;
+        return TRUE;
+    }
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != GetBattlerSide(battler)
+         && CanUseExtraMove(battler, i)
+         && CanSludgeShiftStatusToTarget(battler, i))
+        {
+            *target = i;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static bool32 TryGetOpposingExtraMoveTarget(u32 battler, u32 *target)
 {
     u32 i;
@@ -11598,8 +11643,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 if (HasBattlerAbility(battler, ABILITY_SLUDGE_SHIFT)
                  && (gBattleMons[battler].status1 & STATUS1_ANY)
                  && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
-                 && TryGetOpposingExtraMoveTarget(battler, &target)
-                 && !(gBattleMons[target].status1 & STATUS1_ANY))
+                 && TryGetSludgeShiftTarget(battler, &target))
                 {
                     SetBattlerTriggeredAbility(battler, ABILITY_SLUDGE_SHIFT);
                     SetAtkCancellerForCalledMove();

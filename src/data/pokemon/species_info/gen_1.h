@@ -7031,11 +7031,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
                                 {EVO_ITEM, ITEM_LINKING_CORD, SPECIES_GENGAR}),
     },
 
-#if P_UPDATED_ABILITIES >= GEN_7
-#define GENGAR_ABILITIES {ABILITY_CURSED_BODY, ABILITY_NONE}
-#else
 #define GENGAR_ABILITIES {ABILITY_LEVITATE, ABILITY_NONE}
-#endif
 
 #define GENGAR_MISC_INFO                                            \
         .types = { TYPE_GHOST, TYPE_POISON },                       \
