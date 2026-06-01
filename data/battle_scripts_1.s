@@ -11919,6 +11919,27 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_MaliciousMindUsesConfuseRayAndDisable::
+	copybyte gBattlerAttacker, sBATTLER
+	copybyte gBattlerAbility, sBATTLER
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	jumpifability BS_TARGET, ABILITY_OWN_TEMPO, BattleScript_MaliciousMindDisableNoPopup
+	jumpifsubstituteblocks BattleScript_MaliciousMindDisableNoPopup
+	jumpifstatus2 BS_TARGET, STATUS2_CONFUSION, BattleScript_MaliciousMindDisableNoPopup
+	jumpifterrainaffected BS_TARGET, STATUS_FIELD_MISTY_TERRAIN, BattleScript_MaliciousMindDisableNoPopup
+	jumpifsafeguard BattleScript_MaliciousMindDisableNoPopup
+	various BS_TARGET, VARIOUS_JUMP_IF_PROTECTED_FROM_CONFUSE_RAY
+	.4byte BattleScript_MaliciousMindDisableNoPopup
+	playmoveanimation BS_ATTACKER, MOVE_CONFUSE_RAY
+	waitanimation
+	setmoveeffect MOVE_EFFECT_CONFUSION
+	seteffectprimary
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_MaliciousMindDisableNoPopup:
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_DirtyTricksRestoreAfterMetronome::
 	bicword gHitMarker, HITMARKER_NO_ATTACKSTRING
 	various BS_ATTACKER, VARIOUS_RESTORE_ATTACKER_AND_TARGET

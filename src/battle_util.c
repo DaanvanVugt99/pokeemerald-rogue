@@ -16278,6 +16278,44 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_MALICIOUS_MIND)
+         && IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            u32 target = gBattlerTarget;
+
+            if (target >= gBattlersCount
+             || !IsBattlerAlive(target)
+             || GetBattlerSide(target) == GetBattlerSide(battler))
+            {
+                target = BATTLE_OPPOSITE(battler);
+                if (!IsBattlerAlive(target) && gBattlersCount > 2)
+                    target ^= BIT_FLANK;
+            }
+
+            if (target < gBattlersCount
+             && IsBattlerAlive(target)
+             && GetBattlerSide(target) != GetBattlerSide(battler)
+             && CanUseExtraMove(battler, target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_MALICIOUS_MIND);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_DISABLE;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                StartAbilityCalledMoveScriptAt((gBattleMons[target].status1 & STATUS1_PSN_ANY)
+                    ? BattleScript_MaliciousMindUsesConfuseRayAndDisable
+                    : BattleScript_AbilityUsesCalledMove);
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_TAR_CANNON)
          && IS_MOVE_STATUS(move)
          && moveType == TYPE_PSYCHIC

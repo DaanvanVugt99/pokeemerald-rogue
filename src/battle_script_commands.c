@@ -10815,6 +10815,15 @@ static void Cmd_various(void)
         gLastUsedItem = gBattleMons[battler].item;
         break;
     }
+    case VARIOUS_JUMP_IF_PROTECTED_FROM_CONFUSE_RAY:
+    {
+        VARIOUS_ARGS(const u8 *jumpInstr);
+        if (IsBattlerProtected(battler, MOVE_CONFUSE_RAY))
+            gBattlescriptCurrInstr = cmd->jumpInstr;
+        else
+            gBattlescriptCurrInstr = cmd->nextInstr;
+        return;
+    }
     case VARIOUS_TRY_FAIRY_LOCK:
     {
         VARIOUS_ARGS(const u8 *failInstr);
