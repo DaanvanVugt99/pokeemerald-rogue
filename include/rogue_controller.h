@@ -164,6 +164,9 @@ bool8 Rogue_IsBattleAlphaMon(u16 species);
 bool8 Rogue_IsBattleRoamerMon(u16 species);
 u16 Rogue_SelectWildDenEncounterRoom(void);
 u16 Rogue_SelectHoneyTreeEncounterRoom(void);
+u16 RogueDebug_GetWildFormFamilyKey(u16 species);
+u16 RogueDebug_GetWildApprovedFamilyForm(u16 species, u16 randValue);
+u16 RogueDebug_SelectWildSpeciesFromCurrentQuery(u16 familyRand, u16 formRand, bool8 excludeSelectedFamily);
 
 void Rogue_SelectMiniBossRewardMons();
 

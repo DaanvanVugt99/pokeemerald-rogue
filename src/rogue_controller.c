@@ -5223,6 +5223,630 @@ static u8 UNUSED RandomMonType(u16 seedFlag)
     return type;
 }
 
+#ifdef ROGUE_EXPANSION
+#define WILD_FORM_QUERY_NUM_SPECIES (PLACEHOLDER_START + 1)
+#define WILD_FORM_FAMILY_CAPACITY WILD_FORM_QUERY_NUM_SPECIES
+
+enum
+{
+    WILD_FORM_FAMILY_UNOWN = NUM_SPECIES + 1,
+    WILD_FORM_FAMILY_ROTOM,
+    WILD_FORM_FAMILY_SQUAWKABILLY,
+    WILD_FORM_FAMILY_VIVILLON,
+    WILD_FORM_FAMILY_FURFROU,
+    WILD_FORM_FAMILY_ALCREMIE,
+    WILD_FORM_FAMILY_TATSUGIRI,
+    WILD_FORM_FAMILY_MAUSHOLD,
+    WILD_FORM_FAMILY_DUDUNSPARCE,
+    WILD_FORM_FAMILY_MINIOR,
+    WILD_FORM_FAMILY_BURMY,
+    WILD_FORM_FAMILY_WORMADAM,
+    WILD_FORM_FAMILY_SHELLOS,
+    WILD_FORM_FAMILY_GASTRODON,
+    WILD_FORM_FAMILY_BASCULIN,
+    WILD_FORM_FAMILY_BASCULEGION,
+    WILD_FORM_FAMILY_DEERLING,
+    WILD_FORM_FAMILY_SAWSBUCK,
+    WILD_FORM_FAMILY_ORICORIO,
+    WILD_FORM_FAMILY_LYCANROC,
+    WILD_FORM_FAMILY_TOXTRICITY,
+    WILD_FORM_FAMILY_PUMPKABOO,
+    WILD_FORM_FAMILY_GOURGEIST,
+    WILD_FORM_FAMILY_FLABEBE,
+    WILD_FORM_FAMILY_FLOETTE,
+    WILD_FORM_FAMILY_FLORGES,
+    WILD_FORM_FAMILY_URSHIFU,
+    WILD_FORM_FAMILY_PALDEAN_TAUROS,
+    WILD_FORM_FAMILY_OINKOLOGNE,
+    WILD_FORM_FAMILY_MEOWSTIC,
+    WILD_FORM_FAMILY_INDEEDEE,
+    WILD_FORM_FAMILY_SINISTEA,
+    WILD_FORM_FAMILY_POLTEAGEIST,
+};
+
+static const u16 sWildUnownForms[] = {
+    SPECIES_UNOWN,
+    SPECIES_UNOWN_B,
+    SPECIES_UNOWN_C,
+    SPECIES_UNOWN_D,
+    SPECIES_UNOWN_E,
+    SPECIES_UNOWN_F,
+    SPECIES_UNOWN_G,
+    SPECIES_UNOWN_H,
+    SPECIES_UNOWN_I,
+    SPECIES_UNOWN_J,
+    SPECIES_UNOWN_K,
+    SPECIES_UNOWN_L,
+    SPECIES_UNOWN_M,
+    SPECIES_UNOWN_N,
+    SPECIES_UNOWN_O,
+    SPECIES_UNOWN_P,
+    SPECIES_UNOWN_Q,
+    SPECIES_UNOWN_R,
+    SPECIES_UNOWN_S,
+    SPECIES_UNOWN_T,
+    SPECIES_UNOWN_U,
+    SPECIES_UNOWN_V,
+    SPECIES_UNOWN_W,
+    SPECIES_UNOWN_X,
+    SPECIES_UNOWN_Y,
+    SPECIES_UNOWN_Z,
+    SPECIES_UNOWN_EMARK,
+    SPECIES_UNOWN_QMARK,
+};
+
+static const u16 sWildSquawkabillyForms[] = {
+    SPECIES_SQUAWKABILLY_GREEN_PLUMAGE,
+    SPECIES_SQUAWKABILLY_BLUE_PLUMAGE,
+    SPECIES_SQUAWKABILLY_YELLOW_PLUMAGE,
+    SPECIES_SQUAWKABILLY_WHITE_PLUMAGE,
+};
+
+static const u16 sWildVivillonForms[] = {
+    SPECIES_VIVILLON_ICY_SNOW,
+    SPECIES_VIVILLON_POLAR,
+    SPECIES_VIVILLON_TUNDRA,
+    SPECIES_VIVILLON_CONTINENTAL,
+    SPECIES_VIVILLON_GARDEN,
+    SPECIES_VIVILLON_ELEGANT,
+    SPECIES_VIVILLON_MEADOW,
+    SPECIES_VIVILLON_MODERN,
+    SPECIES_VIVILLON_MARINE,
+    SPECIES_VIVILLON_ARCHIPELAGO,
+    SPECIES_VIVILLON_HIGH_PLAINS,
+    SPECIES_VIVILLON_SANDSTORM,
+    SPECIES_VIVILLON_RIVER,
+    SPECIES_VIVILLON_MONSOON,
+    SPECIES_VIVILLON_SAVANNA,
+    SPECIES_VIVILLON_SUN,
+    SPECIES_VIVILLON_OCEAN,
+    SPECIES_VIVILLON_JUNGLE,
+    SPECIES_VIVILLON_FANCY,
+    SPECIES_VIVILLON_POKE_BALL,
+};
+
+static const u16 sWildFurfrouForms[] = {
+    SPECIES_FURFROU_NATURAL,
+    SPECIES_FURFROU_HEART_TRIM,
+    SPECIES_FURFROU_STAR_TRIM,
+    SPECIES_FURFROU_DIAMOND_TRIM,
+    SPECIES_FURFROU_DEBUTANTE_TRIM,
+    SPECIES_FURFROU_MATRON_TRIM,
+    SPECIES_FURFROU_DANDY_TRIM,
+    SPECIES_FURFROU_LA_REINE_TRIM,
+    SPECIES_FURFROU_KABUKI_TRIM,
+    SPECIES_FURFROU_PHARAOH_TRIM,
+};
+
+static const u16 sWildMiniorForms[] = {
+    SPECIES_MINIOR_METEOR_RED,
+    SPECIES_MINIOR_METEOR_ORANGE,
+    SPECIES_MINIOR_METEOR_YELLOW,
+    SPECIES_MINIOR_METEOR_GREEN,
+    SPECIES_MINIOR_METEOR_BLUE,
+    SPECIES_MINIOR_METEOR_INDIGO,
+    SPECIES_MINIOR_METEOR_VIOLET,
+};
+
+static const u16 sWildAlcremieForms[] = {
+    SPECIES_ALCREMIE_STRAWBERRY_VANILLA_CREAM,
+    SPECIES_ALCREMIE_STRAWBERRY_RUBY_CREAM,
+    SPECIES_ALCREMIE_STRAWBERRY_MATCHA_CREAM,
+    SPECIES_ALCREMIE_STRAWBERRY_MINT_CREAM,
+    SPECIES_ALCREMIE_STRAWBERRY_LEMON_CREAM,
+    SPECIES_ALCREMIE_STRAWBERRY_SALTED_CREAM,
+    SPECIES_ALCREMIE_STRAWBERRY_RUBY_SWIRL,
+    SPECIES_ALCREMIE_STRAWBERRY_CARAMEL_SWIRL,
+    SPECIES_ALCREMIE_STRAWBERRY_RAINBOW_SWIRL,
+    SPECIES_ALCREMIE_BERRY_VANILLA_CREAM,
+    SPECIES_ALCREMIE_BERRY_RUBY_CREAM,
+    SPECIES_ALCREMIE_BERRY_MATCHA_CREAM,
+    SPECIES_ALCREMIE_BERRY_MINT_CREAM,
+    SPECIES_ALCREMIE_BERRY_LEMON_CREAM,
+    SPECIES_ALCREMIE_BERRY_SALTED_CREAM,
+    SPECIES_ALCREMIE_BERRY_RUBY_SWIRL,
+    SPECIES_ALCREMIE_BERRY_CARAMEL_SWIRL,
+    SPECIES_ALCREMIE_BERRY_RAINBOW_SWIRL,
+    SPECIES_ALCREMIE_LOVE_VANILLA_CREAM,
+    SPECIES_ALCREMIE_LOVE_RUBY_CREAM,
+    SPECIES_ALCREMIE_LOVE_MATCHA_CREAM,
+    SPECIES_ALCREMIE_LOVE_MINT_CREAM,
+    SPECIES_ALCREMIE_LOVE_LEMON_CREAM,
+    SPECIES_ALCREMIE_LOVE_SALTED_CREAM,
+    SPECIES_ALCREMIE_LOVE_RUBY_SWIRL,
+    SPECIES_ALCREMIE_LOVE_CARAMEL_SWIRL,
+    SPECIES_ALCREMIE_LOVE_RAINBOW_SWIRL,
+    SPECIES_ALCREMIE_STAR_VANILLA_CREAM,
+    SPECIES_ALCREMIE_STAR_RUBY_CREAM,
+    SPECIES_ALCREMIE_STAR_MATCHA_CREAM,
+    SPECIES_ALCREMIE_STAR_MINT_CREAM,
+    SPECIES_ALCREMIE_STAR_LEMON_CREAM,
+    SPECIES_ALCREMIE_STAR_SALTED_CREAM,
+    SPECIES_ALCREMIE_STAR_RUBY_SWIRL,
+    SPECIES_ALCREMIE_STAR_CARAMEL_SWIRL,
+    SPECIES_ALCREMIE_STAR_RAINBOW_SWIRL,
+    SPECIES_ALCREMIE_CLOVER_VANILLA_CREAM,
+    SPECIES_ALCREMIE_CLOVER_RUBY_CREAM,
+    SPECIES_ALCREMIE_CLOVER_MATCHA_CREAM,
+    SPECIES_ALCREMIE_CLOVER_MINT_CREAM,
+    SPECIES_ALCREMIE_CLOVER_LEMON_CREAM,
+    SPECIES_ALCREMIE_CLOVER_SALTED_CREAM,
+    SPECIES_ALCREMIE_CLOVER_RUBY_SWIRL,
+    SPECIES_ALCREMIE_CLOVER_CARAMEL_SWIRL,
+    SPECIES_ALCREMIE_CLOVER_RAINBOW_SWIRL,
+    SPECIES_ALCREMIE_FLOWER_VANILLA_CREAM,
+    SPECIES_ALCREMIE_FLOWER_RUBY_CREAM,
+    SPECIES_ALCREMIE_FLOWER_MATCHA_CREAM,
+    SPECIES_ALCREMIE_FLOWER_MINT_CREAM,
+    SPECIES_ALCREMIE_FLOWER_LEMON_CREAM,
+    SPECIES_ALCREMIE_FLOWER_SALTED_CREAM,
+    SPECIES_ALCREMIE_FLOWER_RUBY_SWIRL,
+    SPECIES_ALCREMIE_FLOWER_CARAMEL_SWIRL,
+    SPECIES_ALCREMIE_FLOWER_RAINBOW_SWIRL,
+    SPECIES_ALCREMIE_RIBBON_VANILLA_CREAM,
+    SPECIES_ALCREMIE_RIBBON_RUBY_CREAM,
+    SPECIES_ALCREMIE_RIBBON_MATCHA_CREAM,
+    SPECIES_ALCREMIE_RIBBON_MINT_CREAM,
+    SPECIES_ALCREMIE_RIBBON_LEMON_CREAM,
+    SPECIES_ALCREMIE_RIBBON_SALTED_CREAM,
+    SPECIES_ALCREMIE_RIBBON_RUBY_SWIRL,
+    SPECIES_ALCREMIE_RIBBON_CARAMEL_SWIRL,
+    SPECIES_ALCREMIE_RIBBON_RAINBOW_SWIRL,
+};
+
+static const u16 sWildTatsugiriForms[] = {
+    SPECIES_TATSUGIRI_CURLY,
+    SPECIES_TATSUGIRI_DROOPY,
+    SPECIES_TATSUGIRI_STRETCHY,
+};
+
+static bool8 IsSpeciesInRange(u16 species, u16 fromSpecies, u16 toSpecies)
+{
+    return species >= fromSpecies && species <= toSpecies;
+}
+
+static u16 GetWildFormFamilyKey(u16 species)
+{
+    if(species == SPECIES_UNOWN || IsSpeciesInRange(species, SPECIES_UNOWN_B, SPECIES_UNOWN_QMARK))
+        return WILD_FORM_FAMILY_UNOWN;
+
+    switch(species)
+    {
+    case SPECIES_ROTOM:
+    case SPECIES_ROTOM_HEAT:
+    case SPECIES_ROTOM_WASH:
+    case SPECIES_ROTOM_FROST:
+    case SPECIES_ROTOM_FAN:
+    case SPECIES_ROTOM_MOW:
+        return WILD_FORM_FAMILY_ROTOM;
+
+    case SPECIES_SQUAWKABILLY_GREEN_PLUMAGE:
+    case SPECIES_SQUAWKABILLY_BLUE_PLUMAGE:
+    case SPECIES_SQUAWKABILLY_YELLOW_PLUMAGE:
+    case SPECIES_SQUAWKABILLY_WHITE_PLUMAGE:
+        return WILD_FORM_FAMILY_SQUAWKABILLY;
+
+    case SPECIES_FURFROU_NATURAL:
+    case SPECIES_FURFROU_HEART_TRIM:
+    case SPECIES_FURFROU_STAR_TRIM:
+    case SPECIES_FURFROU_DIAMOND_TRIM:
+    case SPECIES_FURFROU_DEBUTANTE_TRIM:
+    case SPECIES_FURFROU_MATRON_TRIM:
+    case SPECIES_FURFROU_DANDY_TRIM:
+    case SPECIES_FURFROU_LA_REINE_TRIM:
+    case SPECIES_FURFROU_KABUKI_TRIM:
+    case SPECIES_FURFROU_PHARAOH_TRIM:
+        return WILD_FORM_FAMILY_FURFROU;
+
+    case SPECIES_TATSUGIRI_CURLY:
+    case SPECIES_TATSUGIRI_DROOPY:
+    case SPECIES_TATSUGIRI_STRETCHY:
+        return WILD_FORM_FAMILY_TATSUGIRI;
+
+    case SPECIES_MAUSHOLD_FAMILY_OF_THREE:
+    case SPECIES_MAUSHOLD_FAMILY_OF_FOUR:
+        return WILD_FORM_FAMILY_MAUSHOLD;
+
+    case SPECIES_DUDUNSPARCE_TWO_SEGMENT:
+    case SPECIES_DUDUNSPARCE_THREE_SEGMENT:
+        return WILD_FORM_FAMILY_DUDUNSPARCE;
+
+    case SPECIES_BURMY_PLANT_CLOAK:
+    case SPECIES_BURMY_SANDY_CLOAK:
+    case SPECIES_BURMY_TRASH_CLOAK:
+        return WILD_FORM_FAMILY_BURMY;
+
+    case SPECIES_WORMADAM_PLANT_CLOAK:
+    case SPECIES_WORMADAM_SANDY_CLOAK:
+    case SPECIES_WORMADAM_TRASH_CLOAK:
+        return WILD_FORM_FAMILY_WORMADAM;
+
+    case SPECIES_SHELLOS_WEST_SEA:
+    case SPECIES_SHELLOS_EAST_SEA:
+        return WILD_FORM_FAMILY_SHELLOS;
+
+    case SPECIES_GASTRODON_WEST_SEA:
+    case SPECIES_GASTRODON_EAST_SEA:
+        return WILD_FORM_FAMILY_GASTRODON;
+
+    case SPECIES_BASCULIN_RED_STRIPED:
+    case SPECIES_BASCULIN_BLUE_STRIPED:
+    case SPECIES_BASCULIN_WHITE_STRIPED:
+        return WILD_FORM_FAMILY_BASCULIN;
+
+    case SPECIES_BASCULEGION_MALE:
+    case SPECIES_BASCULEGION_FEMALE:
+        return WILD_FORM_FAMILY_BASCULEGION;
+
+    case SPECIES_DEERLING_SPRING:
+    case SPECIES_DEERLING_SUMMER:
+    case SPECIES_DEERLING_AUTUMN:
+    case SPECIES_DEERLING_WINTER:
+        return WILD_FORM_FAMILY_DEERLING;
+
+    case SPECIES_SAWSBUCK_SPRING:
+    case SPECIES_SAWSBUCK_SUMMER:
+    case SPECIES_SAWSBUCK_AUTUMN:
+    case SPECIES_SAWSBUCK_WINTER:
+        return WILD_FORM_FAMILY_SAWSBUCK;
+
+    case SPECIES_ORICORIO_BAILE:
+    case SPECIES_ORICORIO_POM_POM:
+    case SPECIES_ORICORIO_PAU:
+    case SPECIES_ORICORIO_SENSU:
+        return WILD_FORM_FAMILY_ORICORIO;
+
+    case SPECIES_LYCANROC_MIDDAY:
+    case SPECIES_LYCANROC_MIDNIGHT:
+    case SPECIES_LYCANROC_DUSK:
+        return WILD_FORM_FAMILY_LYCANROC;
+
+    case SPECIES_TOXTRICITY_AMPED:
+    case SPECIES_TOXTRICITY_LOW_KEY:
+        return WILD_FORM_FAMILY_TOXTRICITY;
+
+    case SPECIES_PUMPKABOO_AVERAGE:
+    case SPECIES_PUMPKABOO_SMALL:
+    case SPECIES_PUMPKABOO_LARGE:
+    case SPECIES_PUMPKABOO_SUPER:
+        return WILD_FORM_FAMILY_PUMPKABOO;
+
+    case SPECIES_GOURGEIST_AVERAGE:
+    case SPECIES_GOURGEIST_SMALL:
+    case SPECIES_GOURGEIST_LARGE:
+    case SPECIES_GOURGEIST_SUPER:
+        return WILD_FORM_FAMILY_GOURGEIST;
+
+    case SPECIES_FLABEBE_RED_FLOWER:
+    case SPECIES_FLABEBE_YELLOW_FLOWER:
+    case SPECIES_FLABEBE_ORANGE_FLOWER:
+    case SPECIES_FLABEBE_BLUE_FLOWER:
+    case SPECIES_FLABEBE_WHITE_FLOWER:
+        return WILD_FORM_FAMILY_FLABEBE;
+
+    case SPECIES_FLOETTE_RED_FLOWER:
+    case SPECIES_FLOETTE_YELLOW_FLOWER:
+    case SPECIES_FLOETTE_ORANGE_FLOWER:
+    case SPECIES_FLOETTE_BLUE_FLOWER:
+    case SPECIES_FLOETTE_WHITE_FLOWER:
+        return WILD_FORM_FAMILY_FLOETTE;
+
+    case SPECIES_FLORGES_RED_FLOWER:
+    case SPECIES_FLORGES_YELLOW_FLOWER:
+    case SPECIES_FLORGES_ORANGE_FLOWER:
+    case SPECIES_FLORGES_BLUE_FLOWER:
+    case SPECIES_FLORGES_WHITE_FLOWER:
+        return WILD_FORM_FAMILY_FLORGES;
+
+    case SPECIES_URSHIFU_SINGLE_STRIKE_STYLE:
+    case SPECIES_URSHIFU_RAPID_STRIKE_STYLE:
+        return WILD_FORM_FAMILY_URSHIFU;
+
+    case SPECIES_TAUROS_PALDEAN_COMBAT_BREED:
+    case SPECIES_TAUROS_PALDEAN_BLAZE_BREED:
+    case SPECIES_TAUROS_PALDEAN_AQUA_BREED:
+        return WILD_FORM_FAMILY_PALDEAN_TAUROS;
+
+    case SPECIES_OINKOLOGNE_MALE:
+    case SPECIES_OINKOLOGNE_FEMALE:
+        return WILD_FORM_FAMILY_OINKOLOGNE;
+
+    case SPECIES_MEOWSTIC_MALE:
+    case SPECIES_MEOWSTIC_FEMALE:
+        return WILD_FORM_FAMILY_MEOWSTIC;
+
+    case SPECIES_INDEEDEE_MALE:
+    case SPECIES_INDEEDEE_FEMALE:
+        return WILD_FORM_FAMILY_INDEEDEE;
+
+    case SPECIES_SINISTEA_PHONY:
+    case SPECIES_SINISTEA_ANTIQUE:
+        return WILD_FORM_FAMILY_SINISTEA;
+
+    case SPECIES_POLTEAGEIST_PHONY:
+    case SPECIES_POLTEAGEIST_ANTIQUE:
+        return WILD_FORM_FAMILY_POLTEAGEIST;
+    }
+
+    if(species == SPECIES_VIVILLON_ICY_SNOW
+        || IsSpeciesInRange(species, SPECIES_VIVILLON_POLAR, SPECIES_VIVILLON_POKE_BALL))
+        return WILD_FORM_FAMILY_VIVILLON;
+    if(species == SPECIES_MINIOR_METEOR_RED
+        || IsSpeciesInRange(species, SPECIES_MINIOR_METEOR_ORANGE, SPECIES_MINIOR_CORE_VIOLET))
+        return WILD_FORM_FAMILY_MINIOR;
+    if(species == SPECIES_ALCREMIE_STRAWBERRY_VANILLA_CREAM
+        || IsSpeciesInRange(species, SPECIES_ALCREMIE_STRAWBERRY_RUBY_CREAM, SPECIES_ALCREMIE_STRAWBERRY_RAINBOW_SWIRL)
+        || IsSpeciesInRange(species, SPECIES_ALCREMIE_BERRY_VANILLA_CREAM, SPECIES_ALCREMIE_RIBBON_RAINBOW_SWIRL))
+        return WILD_FORM_FAMILY_ALCREMIE;
+
+    return species;
+}
+
+static bool8 GetWildApprovedFormList(u16 familyKey, const u16 **speciesList, u16 *speciesCount)
+{
+    *speciesList = NULL;
+    *speciesCount = 0;
+
+    switch(familyKey)
+    {
+    case WILD_FORM_FAMILY_UNOWN:
+        *speciesList = sWildUnownForms;
+        *speciesCount = ARRAY_COUNT(sWildUnownForms);
+        return TRUE;
+    case WILD_FORM_FAMILY_SQUAWKABILLY:
+        *speciesList = sWildSquawkabillyForms;
+        *speciesCount = ARRAY_COUNT(sWildSquawkabillyForms);
+        return TRUE;
+    case WILD_FORM_FAMILY_VIVILLON:
+        *speciesList = sWildVivillonForms;
+        *speciesCount = ARRAY_COUNT(sWildVivillonForms);
+        return TRUE;
+    case WILD_FORM_FAMILY_FURFROU:
+        *speciesList = sWildFurfrouForms;
+        *speciesCount = ARRAY_COUNT(sWildFurfrouForms);
+        return TRUE;
+    case WILD_FORM_FAMILY_MINIOR:
+        *speciesList = sWildMiniorForms;
+        *speciesCount = ARRAY_COUNT(sWildMiniorForms);
+        return TRUE;
+    case WILD_FORM_FAMILY_ALCREMIE:
+        *speciesList = sWildAlcremieForms;
+        *speciesCount = ARRAY_COUNT(sWildAlcremieForms);
+        return TRUE;
+    case WILD_FORM_FAMILY_TATSUGIRI:
+        *speciesList = sWildTatsugiriForms;
+        *speciesCount = ARRAY_COUNT(sWildTatsugiriForms);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+#else
+#define WILD_FORM_QUERY_NUM_SPECIES NUM_SPECIES
+#define WILD_FORM_FAMILY_CAPACITY WILD_FORM_QUERY_NUM_SPECIES
+
+static u16 GetWildFormFamilyKey(u16 species)
+{
+    return species;
+}
+
+static bool8 GetWildApprovedFormList(u16 familyKey, const u16 **speciesList, u16 *speciesCount)
+{
+    *speciesList = NULL;
+    *speciesCount = 0;
+    return FALSE;
+}
+#endif
+
+static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue);
+static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily);
+
+static u8 WildFormFlatWeight(u16 weightIndex UNUSED, u16 species UNUSED, void* data UNUSED)
+{
+    return 1;
+}
+
+u16 RogueDebug_GetWildFormFamilyKey(u16 species)
+{
+    return GetWildFormFamilyKey(species);
+}
+
+u16 RogueDebug_GetWildApprovedFamilyForm(u16 species, u16 randValue)
+{
+    return SelectWildSpeciesFromApprovedForms(GetWildFormFamilyKey(species), randValue);
+}
+
+u16 RogueDebug_SelectWildSpeciesFromCurrentQuery(u16 familyRand, u16 formRand, bool8 excludeSelectedFamily)
+{
+    return SelectWildSpeciesFromFormFamilies(familyRand, formRand, WildFormFlatWeight, NULL, excludeSelectedFamily);
+}
+
+static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *familyCount, u16 *totalWeight, WeightCallback weightFunc, void *data)
+{
+    u16 species;
+    u16 weightIndex = 0;
+
+    *familyCount = 0;
+    *totalWeight = 0;
+
+    for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species))
+        {
+            u8 weight = weightFunc(weightIndex, species, data);
+
+            ++weightIndex;
+
+            if(weight != 0)
+            {
+                u16 i;
+                u16 familyKey = GetWildFormFamilyKey(species);
+                bool8 addNewWeight = FALSE;
+
+                for(i = 0; i < *familyCount; ++i)
+                {
+                    if(familyKeys[i] == familyKey)
+                        break;
+                }
+
+                if(i == *familyCount)
+                {
+                    AGB_ASSERT(*familyCount < WILD_FORM_FAMILY_CAPACITY);
+
+                    if(*familyCount < WILD_FORM_FAMILY_CAPACITY)
+                    {
+                        familyKeys[i] = familyKey;
+                        familyWeights[i] = weight;
+                        addNewWeight = TRUE;
+                        ++(*familyCount);
+                    }
+                }
+                else if(weight > familyWeights[i])
+                {
+                    *totalWeight -= familyWeights[i];
+                    familyWeights[i] = weight;
+                    addNewWeight = TRUE;
+                }
+
+                if(addNewWeight)
+                    *totalWeight += weight;
+            }
+        }
+    }
+}
+
+static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue)
+{
+    const u16 *speciesList;
+    u16 speciesCount;
+
+    if(GetWildApprovedFormList(familyKey, &speciesList, &speciesCount) && speciesCount != 0)
+        return speciesList[randValue % speciesCount];
+
+    return SPECIES_NONE;
+}
+
+static u16 SelectWildSpeciesFromEligibleFamily(u16 familyKey, u16 randValue, WeightCallback weightFunc, void *data)
+{
+    u16 species;
+    u16 weightIndex = 0;
+    u16 eligibleCount = 0;
+    u16 target;
+
+    for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species))
+        {
+            if(GetWildFormFamilyKey(species) == familyKey
+                && weightFunc(weightIndex, species, data) != 0)
+                ++eligibleCount;
+
+            ++weightIndex;
+        }
+    }
+
+    if(eligibleCount == 0)
+        return SPECIES_NONE;
+
+    target = randValue % eligibleCount;
+    weightIndex = 0;
+
+    for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species))
+        {
+            if(GetWildFormFamilyKey(species) == familyKey
+                && weightFunc(weightIndex, species, data) != 0)
+            {
+                if(target == 0)
+                    return species;
+
+                --target;
+            }
+
+            ++weightIndex;
+        }
+    }
+
+    AGB_ASSERT(FALSE);
+    return SPECIES_NONE;
+}
+
+static void ExcludeWildFormFamilyFromQuery(u16 familyKey)
+{
+    u16 species;
+
+    for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species) && GetWildFormFamilyKey(species) == familyKey)
+            RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, species);
+    }
+}
+
+static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
+{
+    u16 familyKeys[WILD_FORM_FAMILY_CAPACITY];
+    u8 familyWeights[WILD_FORM_FAMILY_CAPACITY];
+    u16 familyCount;
+    u16 totalWeight;
+    u16 targetWeight;
+    u16 i;
+    u16 selectedFamilyKey;
+    u16 species;
+
+    BuildWildFormFamilyWeights(familyKeys, familyWeights, &familyCount, &totalWeight, weightFunc, data);
+
+    if(totalWeight == 0)
+        return SPECIES_NONE;
+
+    targetWeight = familyRand % totalWeight;
+    selectedFamilyKey = SPECIES_NONE;
+
+    for(i = 0; i < familyCount; ++i)
+    {
+        if(targetWeight < familyWeights[i])
+        {
+            selectedFamilyKey = familyKeys[i];
+            break;
+        }
+
+        targetWeight -= familyWeights[i];
+    }
+
+    AGB_ASSERT(selectedFamilyKey != SPECIES_NONE);
+
+    species = SelectWildSpeciesFromApprovedForms(selectedFamilyKey, formRand);
+
+    if(species == SPECIES_NONE)
+        species = SelectWildSpeciesFromEligibleFamily(selectedFamilyKey, formRand, weightFunc, data);
+
+    if(excludeSelectedFamily)
+        ExcludeWildFormFamilyFromQuery(selectedFamilyKey);
+
+    return species;
+}
+
 static u8 WildDenEncounter_CalculateWeight(u16 index, u16 species, void* data)
 {
     if(RoguePokedex_IsSpeciesParadox(species))
@@ -5256,24 +5880,12 @@ u16 Rogue_SelectWildDenEncounterRoom(void)
     RogueMonQuery_TransformIntoEggSpecies();
     RogueMonQuery_TransformIntoEvos(Rogue_CalculatePlayerMonLvl(), TRUE, FALSE);
 
-    // Remove random entries until we can safely calcualte weights without going over
-    while(RogueWeightQuery_IsOverSafeCapacity())
-    {
-        RogueMiscQuery_FilterByChance(RogueRandom(), QUERY_FUNC_INCLUDE, 50, 1);
-    }
-
     // Now transform back into egg species, so the spawning should still be deteministic
     // (although the type hints could be invalid)
     if(IsCurseActive(EFFECT_WILD_EGG_SPECIES))
         RogueMonQuery_TransformIntoEggSpecies();
 
-    RogueWeightQuery_Begin();
-    {
-        RogueWeightQuery_CalculateWeights(WildDenEncounter_CalculateWeight, NULL);
-
-        species = RogueWeightQuery_SelectRandomFromWeights(RogueRandom());
-    }
-    RogueWeightQuery_End();
+    species = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), WildDenEncounter_CalculateWeight, NULL, FALSE);
 
     RogueMonQuery_End();
 
@@ -5351,40 +5963,25 @@ u16 Rogue_SelectHoneyTreeEncounterRoom(void)
             }
         }
 
-        // Remove random entries until we can safely calcualte weights without going over
-        while(RogueWeightQuery_IsOverSafeCapacity())
-        {
-            RogueMiscQuery_FilterByChance(Random(), QUERY_FUNC_INCLUDE, 50, 1);
-        }
-
         // Now transform back into egg species, so the spawning should still be deteministic
         // (although the type hints could be invalid)
         if(IsCurseActive(EFFECT_WILD_EGG_SPECIES))
             RogueMonQuery_TransformIntoEggSpecies();
 
-        RogueWeightQuery_Begin();
+        species = SelectWildSpeciesFromFormFamilies(Random(), Random(), WildFormFlatWeight, NULL, FALSE);
+
+        if(species == SPECIES_NONE)
         {
-            RogueWeightQuery_FillWeights(1);
-            //RogueWeightQuery_CalculateWeights(HoneyTree_CalculateWeight, NULL);
+            // Randomly remove one of the type flags for the next attempt
+            u8 randType = Random() % NUMBER_OF_MON_TYPES;
 
-            if(RogueWeightQuery_HasAnyWeights())
+            while(!IS_STANDARD_TYPE(randType) || (typeFlags & MON_TYPE_VAL_TO_FLAGS(randType)) == 0)
             {
-                species = RogueWeightQuery_SelectRandomFromWeights(Random());
+                randType = Random() % NUMBER_OF_MON_TYPES;
             }
-            else
-            {
-                // Randomly remove one of the type flags for the next attempt
-                u8 randType = Random() % NUMBER_OF_MON_TYPES;
 
-                while(!IS_STANDARD_TYPE(randType) || (typeFlags & MON_TYPE_VAL_TO_FLAGS(randType)) == 0)
-                {
-                    randType = Random() % NUMBER_OF_MON_TYPES;
-                }
-
-                typeFlags &= ~MON_TYPE_VAL_TO_FLAGS(randType);
-            }
+            typeFlags &= ~MON_TYPE_VAL_TO_FLAGS(randType);
         }
-        RogueWeightQuery_End();
 
         RogueMonQuery_End();
     }
@@ -9644,11 +10241,6 @@ static void BeginWildEncounterQuery()
     if(IsCurseActive(EFFECT_WILD_EGG_SPECIES))
         RogueMonQuery_TransformIntoEggSpecies();
 
-    // Remove random entries until we can safely calcualte weights without going over
-    while(RogueWeightQuery_IsOverSafeCapacity())
-    {
-        RogueMiscQuery_FilterByChance(RogueRandom(), QUERY_FUNC_INCLUDE, 50, WILD_ENCOUNTER_GRASS_CAPACITY);
-    }
 }
 
 static void EndWildEncounterQuery()
@@ -9662,42 +10254,26 @@ static void RandomiseWildEncounters(void)
     {
         u8 i;
         u8 typeHint = Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[gRogueRun.adventureRoomId]);
-        RogueWeightQuery_Begin();
-
-        // Initial query will only allow mons of type hint
-        RogueWeightQuery_CalculateWeights(RandomiseWildEncounters_CalculateInitialWeight, &typeHint);
 
         for(i = 0; i < WILD_ENCOUNTER_GRASS_CAPACITY; ++i)
         {
             if(i == 0)
             {
-                if(RogueWeightQuery_HasAnyWeights())
+                gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseWildEncounters_CalculateInitialWeight, &typeHint, TRUE);
+
+                if(gRogueRun.wildEncounters.species[i] != SPECIES_NONE)
                 {
                     // We actually have a mon of this type
-                    gRogueRun.wildEncounters.species[i] = RogueWeightQuery_SelectRandomFromWeightsWithUpdate(RogueRandom(), 0);
-
-                    // Reroll query to allow anything now
-                    RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, gRogueRun.wildEncounters.species[i]);
-                    RogueWeightQuery_CalculateWeights(RandomiseWildEncounters_CalculateWeight, NULL);
+                    gRogueRun.wildEncounters.catchCounts[i] = 0;
                     continue;
                 }
-                else
-                {
-                    // Reroll query to allow anything and fallback to below (Can hit here if no mon of hint type e.g. gen 1 on dark hint route)
-                    RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, gRogueRun.wildEncounters.species[i]);
-                    RogueWeightQuery_CalculateWeights(RandomiseWildEncounters_CalculateWeight, NULL);
-                }
+
+                // Fallback below can hit if no mon of hint type exists, e.g. gen 1 on a dark hint route.
             }
 
-            if(RogueWeightQuery_HasAnyWeights())
-                gRogueRun.wildEncounters.species[i] = RogueWeightQuery_SelectRandomFromWeightsWithUpdate(RogueRandom(), 0);
-            else
-                gRogueRun.wildEncounters.species[i] = SPECIES_NONE;
-
+            gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseWildEncounters_CalculateWeight, NULL, TRUE);
             gRogueRun.wildEncounters.catchCounts[i] = 0;
         }
-
-        RogueWeightQuery_End();
     }
     EndWildEncounterQuery();
 }
@@ -9722,10 +10298,7 @@ static bool8 IsNewWildGrassEncounterSpecies(u16 species, void* usrData UNUSED)
 {
     u8 i;
     u8 count = GetCurrentWildEncounterCount();
-
-#ifdef ROGUE_EXPANSION
-    species = GET_BASE_SPECIES_ID(species);
-#endif
+    u16 speciesFamilyKey = GetWildFormFamilyKey(species);
 
     for(i = 0; i < count; ++i)
     {
@@ -9734,11 +10307,7 @@ static bool8 IsNewWildGrassEncounterSpecies(u16 species, void* usrData UNUSED)
         if(encounterSpecies == SPECIES_NONE)
             continue;
 
-#ifdef ROGUE_EXPANSION
-        encounterSpecies = GET_BASE_SPECIES_ID(encounterSpecies);
-#endif
-
-        if(encounterSpecies == species)
+        if(GetWildFormFamilyKey(encounterSpecies) == speciesFamilyKey)
             return FALSE;
     }
 
@@ -9758,23 +10327,15 @@ bool8 Rogue_RerollSingleWildSpecies(u8 type)
     RogueMonQuery_CustomFilter(IsNewWildGrassEncounterSpecies, NULL);
 
     {
-        RogueWeightQuery_Begin();
-        RogueWeightQuery_FillWeights(1);
+        u16 species = SelectWildSpeciesFromFormFamilies(Random(), Random(), WildFormFlatWeight, NULL, FALSE);
 
-        if(RogueWeightQuery_HasAnyWeights())
+        if(species != SPECIES_NONE)
         {
-            u16 species = RogueWeightQuery_SelectRandomFromWeights(Random());
             u8 index = Random() % encounterCount;
 
             gRogueRun.wildEncounters.species[index] = species;
             success = TRUE;
         }
-        else
-        {
-            success = FALSE;
-        }
-
-        RogueWeightQuery_End();
     }
 
     EndWildEncounterQuery();
@@ -9841,21 +10402,12 @@ static void RandomiseFishingEncounters(void)
 
     {
         u8 i;
-        RogueWeightQuery_Begin();
-
-        RogueWeightQuery_CalculateWeights(RandomiseFishingEncounters_CalculateWeight, NULL);
 
         for(i = 0; i < WILD_ENCOUNTER_WATER_CAPACITY; ++i)
         {
-            if(RogueWeightQuery_HasAnyWeights())
-                gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = RogueWeightQuery_SelectRandomFromWeightsWithUpdate(RogueRandom(), 0);
-            else
-                gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SPECIES_NONE;
-
+            gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseFishingEncounters_CalculateWeight, NULL, TRUE);
             gRogueRun.wildEncounters.catchCounts[WILD_ENCOUNTER_GRASS_CAPACITY + i] = 0;
         }
-
-        RogueWeightQuery_End();
     }
 
     RogueMonQuery_End();

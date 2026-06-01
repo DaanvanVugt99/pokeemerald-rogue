@@ -4210,7 +4210,7 @@ u16 RoguePokedex_RedirectSpeciesGetSetFlag(u16 species)
         return SPECIES_ARCEUS;
 
     if(species >= SPECIES_VIVILLON_POLAR && species <= SPECIES_VIVILLON_POKE_BALL)
-        return SPECIES_ARCEUS;
+        return SPECIES_VIVILLON;
 
     if(species >= SPECIES_FLABEBE_YELLOW_FLOWER && species <= SPECIES_FLORGES_WHITE_FLOWER)
         return GET_BASE_SPECIES_ID(species);
