@@ -3955,6 +3955,7 @@ static bool32 IsDomeDefensiveMoveEffect(u32 effect)
     case EFFECT_EVASION_UP:
     case EFFECT_DEFENSE_UP:
     case EFFECT_DEFENSE_UP_2:
+    case EFFECT_SHELTER:
     case EFFECT_SPECIAL_DEFENSE_UP:
     case EFFECT_SPECIAL_DEFENSE_UP_2:
     case EFFECT_MINIMIZE:

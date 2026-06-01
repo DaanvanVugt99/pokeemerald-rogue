@@ -553,6 +553,7 @@ extern const u8 BattleScript_TotemFlaredToLife[];
 extern const u8 BattleScript_AnnounceAirLockCloudNine[];
 extern const u8 BattleScript_ActivateTeraformZero[];
 extern const u8 BattleScript_BattlerAbilityStatRaiseOnSwitchIn[];
+extern const u8 BattleScript_ShelterAbilityActivates[];
 extern const u8 BattleScript_JumpscareActivates[];
 extern const u8 BattleScript_CottonDownActivates[];
 extern const u8 BattleScript_BallFetch[];

@@ -865,6 +865,7 @@ static const u8 sSpicySprayDescription[] = _("Burns attackers that damage it.");
 static const u8 sMeanStreakDescription[] = _("Attack changes poison a foe. First hit on a poisoned foe uses Payback.");
 static const u8 sMaliciousMindDescription[] = _("First status move uses Disable. If foe is poisoned, also uses Confuse Ray.");
 static const u8 sToxicVanityDescription[] = _("First weak move uses Draining Kiss. Double power if foe is poisoned.");
+static const u8 sShelterDescription[] = _("On switch-in, raises Defense and restores 1/3 max HP.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1565,6 +1566,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MEAN_STREAK] = _("Mean Streak"),
     [ABILITY_MALICIOUS_MIND] = _("Malicious Mind"),
     [ABILITY_TOXIC_VANITY] = _("Toxic Vanity"),
+    [ABILITY_SHELTER] = _("Shelter"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2444,6 +2446,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_MEAN_STREAK] = _("MeanStreak"),
     [ABILITY_MALICIOUS_MIND] = _("Malicious"),
     [ABILITY_TOXIC_VANITY] = _("ToxicVnty"),
+    [ABILITY_SHELTER] = _("Shelter"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3501,5 +3504,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_MEAN_STREAK] = sMeanStreakDescription,
     [ABILITY_MALICIOUS_MIND] = sMaliciousMindDescription,
     [ABILITY_TOXIC_VANITY] = sToxicVanityDescription,
+    [ABILITY_SHELTER] = sShelterDescription,
 
 };

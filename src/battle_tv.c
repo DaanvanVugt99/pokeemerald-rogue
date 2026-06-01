@@ -138,6 +138,7 @@ static const u16 sPoints_MoveEffect[NUM_BATTLE_MOVE_EFFECTS] =
     [EFFECT_CONFUSE]                    = 4,
     [EFFECT_ATTACK_UP_2]                = 1,
     [EFFECT_DEFENSE_UP_2]               = 1,
+    [EFFECT_SHELTER]                    = 3,
     [EFFECT_SPEED_UP_2]                 = 1,
     [EFFECT_SPECIAL_ATTACK_UP_2]        = 1,
     [EFFECT_SPECIAL_DEFENSE_UP_2]       = 1,

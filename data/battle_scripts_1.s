@@ -468,6 +468,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectStaticBurst             @ EFFECT_STATIC_BURST
 	.4byte BattleScript_EffectCheapTrick              @ EFFECT_CHEAP_TRICK
 	.4byte BattleScript_EffectBrainstorm              @ EFFECT_BRAINSTORM
+	.4byte BattleScript_EffectShelter                 @ EFFECT_SHELTER
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -4001,6 +4002,34 @@ BattleScript_EffectAttackUp::
 BattleScript_EffectDefenseUp::
 	setstatchanger STAT_DEF, 1, FALSE
 	goto BattleScript_EffectStatUp
+
+BattleScript_EffectShelter::
+	attackcanceler
+	attackstring
+	ppreduce
+	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_DEF, MAX_STAT_STAGE, BattleScript_ShelterDoMoveAnim
+	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_ButItFailed
+	various BS_ATTACKER, VARIOUS_JUMP_IF_FULL_HP
+	.4byte BattleScript_ButItFailed
+BattleScript_ShelterDoMoveAnim:
+	attackanimation
+	waitanimation
+	jumpifstat BS_ATTACKER, CMP_EQUAL, STAT_DEF, MAX_STAT_STAGE, BattleScript_ShelterTryHeal
+	playstatchangeanimation BS_ATTACKER, BIT_DEF, 0
+	setstatchanger STAT_DEF, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_ShelterTryHeal
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_ShelterTryHeal
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ShelterTryHeal:
+	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_MoveEnd
+	various BS_ATTACKER, VARIOUS_TRY_SHELTER_HEAL
+	.4byte BattleScript_MoveEnd
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
 
 BattleScript_EffectSpecialAttackUp::
 	setstatchanger STAT_SPATK, 1, FALSE
@@ -11637,6 +11666,26 @@ BattleScript_BattlerAbilityStatRaiseOnSwitchIn::
 	waitanimation
 	printstring STRINGID_BATTLERABILITYRAISEDSTAT
 	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_ShelterAbilityActivates::
+	copybyte gBattlerAbility, gBattlerAttacker
+	call BattleScript_AbilityPopUp
+	jumpifstat BS_ATTACKER, CMP_EQUAL, STAT_DEF, MAX_STAT_STAGE, BattleScript_ShelterAbilityTryHeal
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_NOT_PROTECT_AFFECTED | MOVE_EFFECT_CERTAIN, NULL
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_BATTLERABILITYRAISEDSTAT
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ShelterAbilityTryHeal:
+	various BS_ATTACKER, VARIOUS_TRY_SHELTER_HEAL
+	.4byte BattleScript_ShelterAbilityEnd
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ShelterAbilityEnd:
 	end3
 
 BattleScript_ScriptingAbilityStatRaise::

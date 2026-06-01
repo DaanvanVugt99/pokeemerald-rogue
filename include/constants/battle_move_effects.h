@@ -445,7 +445,8 @@
 #define EFFECT_STATIC_BURST                 439
 #define EFFECT_CHEAP_TRICK                  440
 #define EFFECT_BRAINSTORM                   441
+#define EFFECT_SHELTER                      442
 
-#define NUM_BATTLE_MOVE_EFFECTS             442
+#define NUM_BATTLE_MOVE_EFFECTS             443
 
 #endif  // GUARD_CONSTANTS_BATTLE_MOVE_EFFECTS_H

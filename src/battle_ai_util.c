@@ -2253,6 +2253,7 @@ bool32 IsStatRaisingEffect(u32 effect)
 	case EFFECT_DEFENSE_UP:
 	case EFFECT_DEFENSE_UP_2:
     case EFFECT_DEFENSE_UP_3:
+    case EFFECT_SHELTER:
 	case EFFECT_SPEED_UP:
 	case EFFECT_SPEED_UP_2:
     case EFFECT_ROCK_POLISH:
