@@ -462,6 +462,12 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectInfestedTerrain         @ EFFECT_INFESTED_TERRAIN
 	.4byte BattleScript_EffectPlainTerrain            @ EFFECT_PLAIN_TERRAIN
 	.4byte BattleScript_EffectRockPolish              @ EFFECT_ROCK_POLISH
+	.4byte BattleScript_EffectFoulMixture             @ EFFECT_FOUL_MIXTURE
+	.4byte BattleScript_EffectStageFright             @ EFFECT_STAGE_FRIGHT
+	.4byte BattleScript_EffectWildGrowth              @ EFFECT_WILD_GROWTH
+	.4byte BattleScript_EffectStaticBurst             @ EFFECT_STATIC_BURST
+	.4byte BattleScript_EffectCheapTrick              @ EFFECT_CHEAP_TRICK
+	.4byte BattleScript_EffectBrainstorm              @ EFFECT_BRAINSTORM
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -4091,6 +4097,93 @@ BattleScript_StatDownPrintString::
 BattleScript_StatDownEnd::
 	goto BattleScript_MoveEnd
 
+BattleScript_EffectStageFright:
+	setstatchanger STAT_SPATK, 1, TRUE
+	attackcanceler
+	jumpifsubstituteblocks BattleScript_FailedFromAtkString
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	attackstring
+	ppreduce
+	jumpifstat BS_TARGET, CMP_EQUAL, STAT_SPATK, MIN_STAT_STAGE, BattleScript_StageFrightStatDropFailed
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_MoveEnd
+	jumpifbyte CMP_NOT_EQUAL, cMULTISTRING_CHOOSER, B_MSG_DEFENDER_STAT_FELL, BattleScript_MoveEnd
+	pause B_WAIT_TIME_SHORT
+	attackanimation
+	waitanimation
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+	various BS_ATTACKER, VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL
+	.byte RANDOM_MOVE_POOL_FEAR
+	jumptocalledmove TRUE
+BattleScript_StageFrightStatDropFailed:
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_STATSWONTDECREASE
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+
+BattleScript_EffectWildGrowth:
+	attackcanceler
+	attackstring
+	ppreduce
+	various BS_ATTACKER, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
+	.4byte BattleScript_AlreadyAtFullHp
+	attackanimation
+	waitanimation
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printstring STRINGID_PKMNREGAINEDHEALTH
+	waitmessage B_WAIT_TIME_LONG
+	various BS_ATTACKER, VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL
+	.byte RANDOM_MOVE_POOL_OVERGROWTH
+	jumptocalledmove TRUE
+
+BattleScript_EffectStaticBurst:
+	call BattleScript_EffectHit_Ret
+	jumpifmovehadnoeffect BattleScript_MoveEnd
+	tryfaintmon BS_TARGET
+	jumpiffainted BS_TARGET, TRUE, BattleScript_MoveEnd
+	various BS_ATTACKER, VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL
+	.byte RANDOM_MOVE_POOL_STATIC
+	jumptocalledmove TRUE
+
+BattleScript_EffectBrainstorm:
+	call BattleScript_EffectHit_Ret
+	jumpifmovehadnoeffect BattleScript_MoveEnd
+	tryfaintmon BS_TARGET
+	jumpiffainted BS_TARGET, TRUE, BattleScript_MoveEnd
+	various BS_ATTACKER, VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL
+	.byte RANDOM_MOVE_POOL_MENTAL
+	jumptocalledmove TRUE
+
+BattleScript_EffectCheapTrick:
+	setstatchanger STAT_ACC, 1, TRUE
+	attackcanceler
+	jumpifnotfirstturn BattleScript_FailedFromAtkString
+	jumpifsubstituteblocks BattleScript_FailedFromAtkString
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	attackstring
+	ppreduce
+	jumpifstat BS_TARGET, CMP_EQUAL, STAT_ACC, MIN_STAT_STAGE, BattleScript_CheapTrickStatDropFailed
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_MoveEnd
+	jumpifbyte CMP_NOT_EQUAL, cMULTISTRING_CHOOSER, B_MSG_DEFENDER_STAT_FELL, BattleScript_MoveEnd
+	pause B_WAIT_TIME_SHORT
+	attackanimation
+	waitanimation
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+	various BS_ATTACKER, VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL
+	.byte RANDOM_MOVE_POOL_CHEAP_TRICK
+	jumptocalledmove TRUE
+BattleScript_CheapTrickStatDropFailed:
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_STATSWONTDECREASE
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+
 BattleScript_MirrorArmorReflect::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
@@ -4723,6 +4816,87 @@ BattleScript_EffectPoison::
 	jumpifability BS_ATTACKER, ABILITY_POISON_PUPPETEER, BattleScript_EffectConfusePoisonPuppeteer
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
+
+BattleScript_EffectFoulMixture::
+	attackcanceler
+	attackstring
+	ppreduce
+	jumpifsubstituteblocks BattleScript_ButItFailed
+	accuracycheck BattleScript_ButItFailed, ACC_CURR_MOVE
+	jumpifability BS_TARGET, ABILITY_SILVER_LINING, BattleScript_FoulMixtureSilverLiningProtected
+	jumpifability BS_TARGET, ABILITY_IMMUNITY, BattleScript_FoulMixtureImmunityProtected
+	jumpifability BS_TARGET, ABILITY_COMATOSE, BattleScript_FoulMixtureAbilityProtects
+	jumpifability BS_TARGET, ABILITY_PURIFYING_SALT, BattleScript_FoulMixtureAbilityProtects
+	jumpifability BS_TARGET_SIDE, ABILITY_PASTEL_VEIL, BattleScript_FoulMixturePastelVeilProtects
+	jumpifflowerveil BattleScript_FoulMixtureFlowerVeilProtects
+	jumpifleafguardprotected BS_TARGET, BattleScript_FoulMixtureAbilityProtects
+	jumpifshieldsdown BS_TARGET, BattleScript_FoulMixtureAbilityProtects
+	jumpifstatus BS_TARGET, STATUS1_POISON, BattleScript_FoulMixtureAlreadyPoisoned
+	jumpifstatus BS_TARGET, STATUS1_TOXIC_POISON, BattleScript_FoulMixtureAlreadyPoisoned
+	trypoisontype BS_ATTACKER, BS_TARGET, BattleScript_FoulMixtureNotAffected
+	jumpifstatus BS_TARGET, STATUS1_ANY, BattleScript_FoulMixtureButItFailed
+	jumpifterrainaffected BS_TARGET, STATUS_FIELD_MISTY_TERRAIN, BattleScript_FoulMixtureMistyTerrainPrevents
+	jumpifsafeguard BattleScript_FoulMixtureSafeguardProtected
+	attackanimation
+	waitanimation
+	setmoveeffect MOVE_EFFECT_POISON
+	seteffectprimary
+	resultmessage
+	jumpifability BS_ATTACKER, ABILITY_POISON_PUPPETEER, BattleScript_FoulMixtureConfusePoisonPuppeteer
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_FoulMixtureUseRandomMove
+BattleScript_FoulMixtureAlreadyPoisoned:
+	setalreadystatusedmoveattempt BS_ATTACKER
+	pause B_WAIT_TIME_LONG
+	printstring STRINGID_PKMNALREADYPOISONED
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureImmunityProtected:
+	copybyte gEffectBattler, gBattlerTarget
+	call BattleScript_AbilityPopUp
+	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
+	call BattleScript_PSNPrevention
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureSilverLiningProtected:
+	call BattleScript_AbilityPopUp
+	copybyte gEffectBattler, gBattlerTarget
+	setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS
+	call BattleScript_PSNPrevention
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureAbilityProtects:
+	call BattleScript_AbilityProtectsDoesntAffectRet
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixturePastelVeilProtects:
+	call BattleScript_PastelVeilProtectsRet
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureFlowerVeilProtects:
+	call BattleScript_FlowerVeilProtectsRet
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureNotAffected:
+	pause B_WAIT_TIME_LONG
+	printstring STRINGID_ITDOESNTAFFECT
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureButItFailed:
+	pause B_WAIT_TIME_LONG
+	printstring STRINGID_BUTITFAILED
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureMistyTerrainPrevents:
+	printstring STRINGID_MISTYTERRAINPREVENTS
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureSafeguardProtected:
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_PKMNUSEDSAFEGUARD
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+BattleScript_FoulMixtureConfusePoisonPuppeteer:
+	call BattleScript_EffectConfusePoisonPuppeteerRet
+BattleScript_FoulMixtureUseRandomMove:
+	various BS_ATTACKER, VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL
+	.byte RANDOM_MOVE_POOL_CHEMICAL
+	jumptocalledmove TRUE
 
 BattleScript_EffectConfusePoisonPuppeteer:
 	jumpifability BS_TARGET, ABILITY_OWN_TEMPO, BattleScript_OwnTempoPrevents

@@ -3372,6 +3372,30 @@ static const u8 sMalignantChainDescription[] = _(
     "A corrosive chain attack\n"
     "that may badly poison.");
 
+static const u8 sFoulMixtureDescription[] = _(
+    "Poisons the target, then\n"
+    "triggers a chemical reaction.");
+
+static const u8 sStageFrightDescription[] = _(
+    "Lowers Sp. Atk, then uses\n"
+    "a random fear move.");
+
+static const u8 sWildGrowthDescription[] = _(
+    "Restores a little HP, then\n"
+    "triggers wild plant growth.");
+
+static const u8 sStaticBurstDescription[] = _(
+    "Deals damage, then triggers\n"
+    "random static interference.");
+
+static const u8 sCheapTrickDescription[] = _(
+    "First turn only: lowers Acc,\n"
+    "then uses a cheap trick.");
+
+static const u8 sBrainstormDescription[] = _(
+    "Deals damage, then triggers\n"
+    "a random mental effect.");
+
 const u8 gNotDoneYetDescription[] = _(
     "This move can't be used. Its\n"
     "effect is in development.");
@@ -4225,6 +4249,12 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_NIGHTFALL - 1] = sNightfallDescription,
     [MOVE_JETSTREAM - 1] = sJetstreamDescription,
     [MOVE_THUNDERCRUSH - 1] = sThundercrushDescription,
+    [MOVE_FOUL_MIXTURE - 1] = sFoulMixtureDescription,
+    [MOVE_STAGE_FRIGHT - 1] = sStageFrightDescription,
+    [MOVE_WILD_GROWTH - 1] = sWildGrowthDescription,
+    [MOVE_STATIC_BURST - 1] = sStaticBurstDescription,
+    [MOVE_CHEAP_TRICK - 1] = sCheapTrickDescription,
+    [MOVE_BRAINSTORM - 1] = sBrainstormDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,

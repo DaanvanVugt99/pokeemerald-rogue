@@ -13736,6 +13736,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PARAS[] =
 
 static u16 const sTutorMoves_SPECIES_PARAS[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_AERIAL_ACE,
 	MOVE_AFTER_YOU,
 	MOVE_AGILITY,
@@ -13855,6 +13856,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PARASECT[] =
 
 static u16 const sTutorMoves_SPECIES_PARASECT[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_AERIAL_ACE,
 	MOVE_AFTER_YOU,
 	MOVE_ATTRACT,
@@ -14836,6 +14838,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MEOWTH[] =
 
 static u16 const sTutorMoves_SPECIES_MEOWTH[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AERIAL_ACE,
 	MOVE_AGILITY,
 	MOVE_AMNESIA,
@@ -15034,6 +15037,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PERSIAN[] =
 
 static u16 const sTutorMoves_SPECIES_PERSIAN[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AERIAL_ACE,
 	MOVE_AGILITY,
 	MOVE_AMNESIA,
@@ -17521,6 +17525,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ABRA[] =
 
 static u16 const sTutorMoves_SPECIES_ABRA[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_BODY_SLAM,
@@ -17747,6 +17752,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_KADABRA[] =
 
 static u16 const sTutorMoves_SPECIES_KADABRA[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_BODY_SLAM,
@@ -18003,6 +18009,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ALAKAZAM[] =
 
 static u16 const sTutorMoves_SPECIES_ALAKAZAM[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_BODY_SLAM,
@@ -19184,6 +19191,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BELLSPROUT[] =
 
 static u16 const sTutorMoves_SPECIES_BELLSPROUT[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ACID_SPRAY,
 	MOVE_BULLET_SEED,
 	MOVE_CLEAR_SMOG,
@@ -19337,6 +19345,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_WEEPINBELL[] =
 
 static u16 const sTutorMoves_SPECIES_WEEPINBELL[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_BUG_BITE,
@@ -19425,6 +19434,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_VICTREEBEL[] =
 
 static u16 const sTutorMoves_SPECIES_VICTREEBEL[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_BUG_BITE,
@@ -24284,6 +24294,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GRIMER[] =
 
 static u16 const sTutorMoves_SPECIES_GRIMER[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_CONFUSE_RAY,
@@ -24421,6 +24432,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MUK[] =
 
 static u16 const sTutorMoves_SPECIES_MUK[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
@@ -25641,6 +25653,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GASTLY[] =
 
 static u16 const sTutorMoves_SPECIES_GASTLY[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ACID_SPRAY,
 	MOVE_ASTONISH,
 	MOVE_CLEAR_SMOG,
@@ -25899,6 +25912,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HAUNTER[] =
 
 static u16 const sTutorMoves_SPECIES_HAUNTER[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ACID_SPRAY,
 	MOVE_CONFUSE_RAY,
 	MOVE_CURSE,
@@ -26175,6 +26189,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GENGAR[] =
 
 static u16 const sTutorMoves_SPECIES_GENGAR[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
@@ -28132,6 +28147,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DROWZEE[] =
 
 static u16 const sTutorMoves_SPECIES_DROWZEE[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
 	MOVE_CALM_MIND,
@@ -28264,6 +28280,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HYPNO[] =
 
 static u16 const sTutorMoves_SPECIES_HYPNO[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_BATON_PASS,
 	MOVE_BELLY_DRUM,
 	MOVE_BODY_PRESS,
@@ -28781,6 +28798,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_VOLTORB[] =
 
 static u16 const sTutorMoves_SPECIES_VOLTORB[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_CHARGE,
 	MOVE_CHARGE_BEAM,
@@ -28929,6 +28947,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ELECTRODE[] =
 
 static u16 const sTutorMoves_SPECIES_ELECTRODE[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_CHARGE,
 	MOVE_CHARGE_BEAM,
@@ -29223,6 +29242,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_EXEGGCUTE[] =
 
 static u16 const sTutorMoves_SPECIES_EXEGGCUTE[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ANCIENT_POWER,
 	MOVE_BLOCK,
 	MOVE_BULLET_SEED,
@@ -29349,6 +29369,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_EXEGGUTOR[] =
 
 static u16 const sTutorMoves_SPECIES_EXEGGUTOR[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_BODY_SLAM,
 	MOVE_BULLDOZE,
 	MOVE_BULLET_SEED,
@@ -30682,6 +30703,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_KOFFING[] =
 
 static u16 const sTutorMoves_SPECIES_KOFFING[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_CURSE,
@@ -30864,6 +30886,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_WEEZING[] =
 
 static u16 const sTutorMoves_SPECIES_WEEZING[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_CURSE,
@@ -32243,6 +32266,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TANGELA[] =
 
 static u16 const sTutorMoves_SPECIES_TANGELA[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_AMNESIA,
 	MOVE_ATTRACT,
 	MOVE_BODY_SLAM,
@@ -34361,6 +34385,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MR_MIME[] =
 
 static u16 const sTutorMoves_SPECIES_MR_MIME[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_BATON_PASS,
@@ -48863,6 +48888,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_NOCTOWL[] =
 
 static u16 const sTutorMoves_SPECIES_NOCTOWL[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ACROBATICS,
 	MOVE_AERIAL_ACE,
 	MOVE_AGILITY,
@@ -51757,6 +51783,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MAREEP[] =
 
 static u16 const sTutorMoves_SPECIES_MAREEP[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AFTER_YOU,
 	MOVE_AGILITY,
 	MOVE_BODY_SLAM,
@@ -51859,6 +51886,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FLAAFFY[] =
 
 static u16 const sTutorMoves_SPECIES_FLAAFFY[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
@@ -51942,6 +51970,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_AMPHAROS[] =
 
 static u16 const sTutorMoves_SPECIES_AMPHAROS[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BODY_SLAM,
 	MOVE_BREAKING_SWIPE,
@@ -55824,6 +55853,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ESPEON[] =
 
 static u16 const sTutorMoves_SPECIES_ESPEON[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_BATON_PASS,
 	MOVE_BODY_SLAM,
 	MOVE_CALM_MIND,
@@ -56832,6 +56862,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MURKROW[] =
 
 static u16 const sTutorMoves_SPECIES_MURKROW[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ACROBATICS,
 	MOVE_AERIAL_ACE,
 	MOVE_AIR_CUTTER,
@@ -57485,6 +57516,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MISDREAVUS[] =
 
 static u16 const sTutorMoves_SPECIES_MISDREAVUS[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_BURNING_JEALOUSY,
 	MOVE_CALM_MIND,
 	MOVE_CHARGE_BEAM,
@@ -63135,6 +63167,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SNEASEL[] =
 
 static u16 const sTutorMoves_SPECIES_SNEASEL[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AERIAL_ACE,
 	MOVE_AGILITY,
 	MOVE_AVALANCHE,
@@ -81351,6 +81384,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SEEDOT[] =
 
 static u16 const sTutorMoves_SPECIES_SEEDOT[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_AMNESIA,
 	MOVE_BODY_SLAM,
 	MOVE_BULLET_SEED,
@@ -81446,6 +81480,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_NUZLEAF[] =
 
 static u16 const sTutorMoves_SPECIES_NUZLEAF[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_AIR_CUTTER,
 	MOVE_AMNESIA,
 	MOVE_BODY_SLAM,
@@ -81532,6 +81567,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SHIFTRY[] =
 
 static u16 const sTutorMoves_SPECIES_SHIFTRY[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ABSORB,
 	MOVE_AERIAL_ACE,
 	MOVE_AIR_CUTTER,
@@ -88077,6 +88113,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SABLEYE[] =
 
 static u16 const sTutorMoves_SPECIES_SABLEYE[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AERIAL_ACE,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
@@ -91421,6 +91458,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ELECTRIKE[] =
 
 static u16 const sTutorMoves_SPECIES_ELECTRIKE[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_ATTRACT,
 	MOVE_BODY_SLAM,
@@ -91524,6 +91562,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MANECTRIC[] =
 
 static u16 const sTutorMoves_SPECIES_MANECTRIC[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_ATTRACT,
 	MOVE_BODY_SLAM,
@@ -92192,6 +92231,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PLUSLE[] =
 
 static u16 const sTutorMoves_SPECIES_PLUSLE[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BATON_PASS,
 	MOVE_CHARGE,
@@ -92305,6 +92345,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MINUN[] =
 
 static u16 const sTutorMoves_SPECIES_MINUN[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BATON_PASS,
 	MOVE_CHARGE,
@@ -93015,6 +93056,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GULPIN[] =
 
 static u16 const sTutorMoves_SPECIES_GULPIN[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_ARMOR,
 	MOVE_ACID_SPRAY,
 	MOVE_AMNESIA,
@@ -93100,6 +93142,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SWALOT[] =
 
 static u16 const sTutorMoves_SPECIES_SWALOT[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_ARMOR,
 	MOVE_ACID_SPRAY,
 	MOVE_AMNESIA,
@@ -95616,6 +95659,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SPOINK[] =
 
 static u16 const sTutorMoves_SPECIES_SPOINK[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_AMNESIA,
 	MOVE_BODY_SLAM,
 	MOVE_CALM_MIND,
@@ -95721,6 +95765,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GRUMPIG[] =
 
 static u16 const sTutorMoves_SPECIES_GRUMPIG[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_AMNESIA,
 	MOVE_BODY_PRESS,
 	MOVE_BODY_SLAM,
@@ -96848,6 +96893,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_CACNEA[] =
 
 static u16 const sTutorMoves_SPECIES_CACNEA[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ACID,
 	MOVE_BELCH,
 	MOVE_BLOCK,
@@ -97008,6 +97054,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_CACTURNE[] =
 
 static u16 const sTutorMoves_SPECIES_CACTURNE[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
 	MOVE_BULLDOZE,
@@ -98564,6 +98611,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SEVIPER[] =
 
 static u16 const sTutorMoves_SPECIES_SEVIPER[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_ASSURANCE,
 	MOVE_BODY_SLAM,
@@ -102390,6 +102438,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SHUPPET[] =
 
 static u16 const sTutorMoves_SPECIES_SHUPPET[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_CALM_MIND,
 	MOVE_CHARGE_BEAM,
 	MOVE_CONFUSE_RAY,
@@ -102490,6 +102539,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BANETTE[] =
 
 static u16 const sTutorMoves_SPECIES_BANETTE[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_BURNING_JEALOUSY,
 	MOVE_CALM_MIND,
 	MOVE_CHARGE_BEAM,
@@ -102867,6 +102917,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DUSKULL[] =
 
 static u16 const sTutorMoves_SPECIES_DUSKULL[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_BLIZZARD,
 	MOVE_CALM_MIND,
 	MOVE_CHARGE_BEAM,
@@ -103041,6 +103092,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DUSCLOPS[] =
 
 static u16 const sTutorMoves_SPECIES_DUSCLOPS[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ALLY_SWITCH,
 	MOVE_BLIZZARD,
 	MOVE_BODY_SLAM,
@@ -103488,6 +103540,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_CHIMECHO[] =
 
 static u16 const sTutorMoves_SPECIES_CHIMECHO[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_BATON_PASS,
 	MOVE_CALM_MIND,
@@ -123019,6 +123072,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DRIFLOON[] =
 
 static u16 const sTutorMoves_SPECIES_DRIFLOON[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ACROBATICS,
 	MOVE_AERIAL_ACE,
 	MOVE_AIR_CUTTER,
@@ -123122,6 +123176,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DRIFBLIM[] =
 
 static u16 const sTutorMoves_SPECIES_DRIFBLIM[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ACROBATICS,
 	MOVE_AERIAL_ACE,
 	MOVE_AIR_CUTTER,
@@ -124384,6 +124439,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MISMAGIUS[] =
 
 static u16 const sTutorMoves_SPECIES_MISMAGIUS[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_BURNING_JEALOUSY,
 	MOVE_CALM_MIND,
 	MOVE_CHARGE_BEAM,
@@ -124704,6 +124760,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HONCHKROW[] =
 
 static u16 const sTutorMoves_SPECIES_HONCHKROW[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ACROBATICS,
 	MOVE_AERIAL_ACE,
 	MOVE_AIR_CUTTER,
@@ -125923,6 +125980,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BRONZOR[] =
 
 static u16 const sTutorMoves_SPECIES_BRONZOR[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_BODY_SLAM,
 	MOVE_BULLDOZE,
 	MOVE_CALM_MIND,
@@ -126197,6 +126255,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BRONZONG[] =
 
 static u16 const sTutorMoves_SPECIES_BRONZONG[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_ANCIENT_POWER,
 	MOVE_BODY_PRESS,
@@ -132019,6 +132078,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_CROAGUNK[] =
 
 static u16 const sTutorMoves_SPECIES_CROAGUNK[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_AERIAL_ACE,
 	MOVE_BATON_PASS,
@@ -132284,6 +132344,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TOXICROAK[] =
 
 static u16 const sTutorMoves_SPECIES_TOXICROAK[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_AERIAL_ACE,
 	MOVE_BATON_PASS,
@@ -132773,6 +132834,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_CARNIVINE[] =
 
 static u16 const sTutorMoves_SPECIES_CARNIVINE[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ACID_SPRAY,
 	MOVE_ATTRACT,
 	MOVE_BIND,
@@ -134189,6 +134251,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_WEAVILE[] =
 
 static u16 const sTutorMoves_SPECIES_WEAVILE[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AERIAL_ACE,
 	MOVE_AGILITY,
 	MOVE_AVALANCHE,
@@ -136694,6 +136757,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TANGROWTH[] =
 
 static u16 const sTutorMoves_SPECIES_TANGROWTH[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_AMNESIA,
 	MOVE_ATTRACT,
 	MOVE_BODY_SLAM,
@@ -142369,6 +142433,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DUSKNOIR[] =
 
 static u16 const sTutorMoves_SPECIES_DUSKNOIR[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_BLIZZARD,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
@@ -153075,6 +153140,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PURRLOIN[] =
 
 static u16 const sTutorMoves_SPECIES_PURRLOIN[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ASSURANCE,
 	MOVE_ATTRACT,
 	MOVE_BATON_PASS,
@@ -153198,6 +153264,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_LIEPARD[] =
 
 static u16 const sTutorMoves_SPECIES_LIEPARD[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ASSURANCE,
 	MOVE_ATTRACT,
 	MOVE_BATON_PASS,
@@ -154606,6 +154673,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MUNNA[] =
 
 static u16 const sTutorMoves_SPECIES_MUNNA[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_AMNESIA,
 	MOVE_ATTRACT,
@@ -154713,6 +154781,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MUSHARNA[] =
 
 static u16 const sTutorMoves_SPECIES_MUSHARNA[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_AMNESIA,
 	MOVE_ATTRACT,
@@ -155264,6 +155333,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BLITZLE[] =
 
 static u16 const sTutorMoves_SPECIES_BLITZLE[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BATON_PASS,
 	MOVE_BODY_SLAM,
@@ -155398,6 +155468,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ZEBSTRIKA[] =
 
 static u16 const sTutorMoves_SPECIES_ZEBSTRIKA[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BATON_PASS,
 	MOVE_BODY_SLAM,
@@ -165300,6 +165371,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SCRAGGY[] =
 
 static u16 const sTutorMoves_SPECIES_SCRAGGY[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ACID_SPRAY,
 	MOVE_AMNESIA,
 	MOVE_BRICK_BREAK,
@@ -165522,6 +165594,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SCRAFTY[] =
 
 static u16 const sTutorMoves_SPECIES_SCRAFTY[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ACID_SPRAY,
 	MOVE_AMNESIA,
 	MOVE_BODY_SLAM,
@@ -166262,6 +166335,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_YAMASK[] =
 
 static u16 const sTutorMoves_SPECIES_YAMASK[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_CALM_MIND,
@@ -166367,6 +166441,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_COFAGRIGUS[] =
 
 static u16 const sTutorMoves_SPECIES_COFAGRIGUS[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_BODY_PRESS,
@@ -167694,6 +167769,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TRUBBISH[] =
 
 static u16 const sTutorMoves_SPECIES_TRUBBISH[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_AMNESIA,
 	MOVE_ATTRACT,
 	MOVE_AUTOTOMIZE,
@@ -167844,6 +167920,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GARBODOR[] =
 
 static u16 const sTutorMoves_SPECIES_GARBODOR[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_AMNESIA,
 	MOVE_ATTRACT,
 	MOVE_BODY_PRESS,
@@ -169648,6 +169725,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SOLOSIS[] =
 
 static u16 const sTutorMoves_SPECIES_SOLOSIS[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ACID_ARMOR,
 	MOVE_ASTONISH,
 	MOVE_CALM_MIND,
@@ -169790,6 +169868,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DUOSION[] =
 
 static u16 const sTutorMoves_SPECIES_DUOSION[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ACID_ARMOR,
 	MOVE_ASTONISH,
 	MOVE_CALM_MIND,
@@ -169979,6 +170058,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_REUNICLUS[] =
 
 static u16 const sTutorMoves_SPECIES_REUNICLUS[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ACID_ARMOR,
 	MOVE_ASTONISH,
 	MOVE_BODY_SLAM,
@@ -172235,6 +172315,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FOONGUS[] =
 
 static u16 const sTutorMoves_SPECIES_FOONGUS[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_BODY_SLAM,
 	MOVE_BULLET_SEED,
 	MOVE_DEFENSE_CURL,
@@ -172360,6 +172441,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_AMOONGUSS[] =
 
 static u16 const sTutorMoves_SPECIES_AMOONGUSS[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_BODY_SLAM,
 	MOVE_BULLET_SEED,
 	MOVE_ENDURE,
@@ -174098,6 +174180,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_JOLTIK[] =
 };
 static u16 const sTutorMoves_SPECIES_JOLTIK[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BUG_BITE,
 	MOVE_BUG_BUZZ,
@@ -174262,6 +174345,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GALVANTULA[] =
 };
 static u16 const sTutorMoves_SPECIES_GALVANTULA[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_BUG_BITE,
 	MOVE_BUG_BUZZ,
@@ -174681,6 +174765,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FERROSEED[] =
 
 static u16 const sTutorMoves_SPECIES_FERROSEED[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ACID_SPRAY,
 	MOVE_ASSURANCE,
 	MOVE_ATTRACT,
@@ -174990,6 +175075,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FERROTHORN[] =
 
 static u16 const sTutorMoves_SPECIES_FERROTHORN[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ASSURANCE,
 	MOVE_ATTRACT,
 	MOVE_BODY_PRESS,
@@ -176401,6 +176487,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TYNAMO[] =
 
 static u16 const sTutorMoves_SPECIES_TYNAMO[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_CHARGE,
 	MOVE_CHARGE_BEAM,
 	MOVE_HIDDEN_POWER,
@@ -176443,6 +176530,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_EELEKTRIK[] =
 
 static u16 const sTutorMoves_SPECIES_EELEKTRIK[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_ACID_SPRAY,
 	MOVE_ACROBATICS,
 	MOVE_BODY_SLAM,
@@ -176539,6 +176627,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_EELEKTROSS[] =
 
 static u16 const sTutorMoves_SPECIES_EELEKTROSS[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_ACID_SPRAY,
 	MOVE_ACROBATICS,
 	MOVE_BODY_PRESS,
@@ -176802,6 +176891,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ELGYEM[] =
 
 static u16 const sTutorMoves_SPECIES_ELGYEM[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_AGILITY,
 	MOVE_ALLY_SWITCH,
 	MOVE_ASTONISH,
@@ -176916,6 +177006,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BEHEEYEM[] =
 
 static u16 const sTutorMoves_SPECIES_BEHEEYEM[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_AGILITY,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
@@ -202003,6 +202094,8 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_INKAY[] =
 
 static u16 const sTutorMoves_SPECIES_INKAY[] =
 {
+	MOVE_BRAINSTORM,
+	MOVE_CHEAP_TRICK,
 	MOVE_ACUPRESSURE,
 	MOVE_AERIAL_ACE,
 	MOVE_BATON_PASS,
@@ -202178,6 +202271,8 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MALAMAR[] =
 
 static u16 const sTutorMoves_SPECIES_MALAMAR[] =
 {
+	MOVE_BRAINSTORM,
+	MOVE_CHEAP_TRICK,
 	MOVE_ACUPRESSURE,
 	MOVE_AERIAL_ACE,
 	MOVE_BATON_PASS,
@@ -202867,6 +202962,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SKRELP[] =
 
 static u16 const sTutorMoves_SPECIES_SKRELP[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_ARMOR,
 	MOVE_ACID_SPRAY,
 	MOVE_CHILLING_WATER,
@@ -203037,6 +203133,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DRAGALGE[] =
 
 static u16 const sTutorMoves_SPECIES_DRAGALGE[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_CHILLING_WATER,
 	MOVE_DRACO_METEOR,
@@ -203857,6 +203954,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HELIOPTILE[] =
 
 static u16 const sTutorMoves_SPECIES_HELIOPTILE[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
@@ -203976,6 +204074,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HELIOLISK[] =
 
 static u16 const sTutorMoves_SPECIES_HELIOLISK[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
@@ -208519,6 +208618,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PHANTUMP[] =
 
 static u16 const sTutorMoves_SPECIES_PHANTUMP[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ALLY_SWITCH,
 	MOVE_BULLDOZE,
 	MOVE_CONFUSE_RAY,
@@ -208665,6 +208765,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TREVENANT[] =
 
 static u16 const sTutorMoves_SPECIES_TREVENANT[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ALLY_SWITCH,
 	MOVE_BULLDOZE,
 	MOVE_BURNING_JEALOUSY,
@@ -209002,6 +209103,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PUMPKABOO[] =
 
 static u16 const sTutorMoves_SPECIES_PUMPKABOO[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_BULLET_SEED,
@@ -209082,6 +209184,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GOURGEIST[] =
 
 static u16 const sTutorMoves_SPECIES_GOURGEIST[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_BRUTAL_SWING,
@@ -221847,6 +221950,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SALANDIT[] =
 
 static u16 const sTutorMoves_SPECIES_SALANDIT[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_AGILITY,
 	MOVE_BELCH,
@@ -222016,6 +222120,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SALAZZLE[] =
 
 static u16 const sTutorMoves_SPECIES_SALAZZLE[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_ACROBATICS,
 	MOVE_AGILITY,
@@ -226142,6 +226247,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TOGEDEMARU[] =
 
 static u16 const sTutorMoves_SPECIES_TOGEDEMARU[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_AGILITY,
 	MOVE_ASSURANCE,
 	MOVE_ATTRACT,
@@ -242453,6 +242559,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_NICKIT[] =
 
 static u16 const sTutorMoves_SPECIES_NICKIT[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AGILITY,
 	MOVE_ASSURANCE,
 	MOVE_ATTRACT,
@@ -242517,6 +242624,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_THIEVUL[] =
 
 static u16 const sTutorMoves_SPECIES_THIEVUL[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ACROBATICS,
 	MOVE_AGILITY,
 	MOVE_ASSURANCE,
@@ -243800,6 +243908,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_APPLIN[] =
 
 static u16 const sTutorMoves_SPECIES_APPLIN[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_DEFENSE_CURL,
 	MOVE_HIDDEN_POWER,
 	MOVE_POUNCE,
@@ -243844,6 +243953,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_FLAPPLE[] =
 
 static u16 const sTutorMoves_SPECIES_FLAPPLE[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_ACID_SPRAY,
 	MOVE_ACROBATICS,
 	MOVE_AERIAL_ACE,
@@ -243995,6 +244105,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_APPLETUN[] =
 
 static u16 const sTutorMoves_SPECIES_APPLETUN[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_AMNESIA,
 	MOVE_BODY_PRESS,
 	MOVE_BODY_SLAM,
@@ -245686,6 +245797,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SINISTEA[] =
 
 static u16 const sTutorMoves_SPECIES_SINISTEA[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ALLY_SWITCH,
 	MOVE_BATON_PASS,
 	MOVE_CALM_MIND,
@@ -245756,6 +245868,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_POLTEAGEIST[] =
 
 static u16 const sTutorMoves_SPECIES_POLTEAGEIST[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_BATON_PASS,
 	MOVE_CALM_MIND,
 	MOVE_CONFUSE_RAY,
@@ -245946,6 +246059,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HATENNA[] =
 
 static u16 const sTutorMoves_SPECIES_HATENNA[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_AFTER_YOU,
 	MOVE_BATON_PASS,
 	MOVE_CALM_MIND,
@@ -246035,6 +246149,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HATTREM[] =
 
 static u16 const sTutorMoves_SPECIES_HATTREM[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_BATON_PASS,
 	MOVE_CALM_MIND,
 	MOVE_CHARM,
@@ -246199,6 +246314,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HATTERENE[] =
 
 static u16 const sTutorMoves_SPECIES_HATTERENE[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_AGILITY,
 	MOVE_BATON_PASS,
 	MOVE_CALM_MIND,
@@ -246657,6 +246773,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_IMPIDIMP[] =
 
 static u16 const sTutorMoves_SPECIES_IMPIDIMP[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_BURNING_JEALOUSY,
 	MOVE_CHILLING_WATER,
 	MOVE_DARK_PULSE,
@@ -246773,6 +246890,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MORGREM[] =
 
 static u16 const sTutorMoves_SPECIES_MORGREM[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_BURNING_JEALOUSY,
 	MOVE_CHILLING_WATER,
 	MOVE_DARK_PULSE,
@@ -246864,6 +246982,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GRIMMSNARL[] =
 
 static u16 const sTutorMoves_SPECIES_GRIMMSNARL[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_BODY_PRESS,
 	MOVE_BODY_SLAM,
 	MOVE_BRICK_BREAK,
@@ -248147,6 +248266,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MR_RIME[] =
 
 static u16 const sTutorMoves_SPECIES_MR_RIME[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_ALLY_SWITCH,
 	MOVE_ATTRACT,
 	MOVE_AVALANCHE,
@@ -248888,6 +249008,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PINCURCHIN[] =
 
 static u16 const sTutorMoves_SPECIES_PINCURCHIN[] =
 {
+	MOVE_STATIC_BURST,
 	MOVE_BODY_SLAM,
 	MOVE_CHARGE,
 	MOVE_CHARGE_BEAM,
@@ -249586,6 +249707,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_INDEEDEE[] =
 
 static u16 const sTutorMoves_SPECIES_INDEEDEE[] =
 {
+	MOVE_BRAINSTORM,
 	MOVE_BODY_SLAM,
 	MOVE_CALM_MIND,
 	MOVE_DAZZLING_GLEAM,
@@ -259478,6 +259600,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MEOWTH_ALOLAN[] =
 
 static u16 const sTutorMoves_SPECIES_MEOWTH_ALOLAN[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AERIAL_ACE,
 	MOVE_AGILITY,
 	MOVE_AMNESIA,
@@ -259615,6 +259738,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_PERSIAN_ALOLAN[] =
 
 static u16 const sTutorMoves_SPECIES_PERSIAN_ALOLAN[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_AERIAL_ACE,
 	MOVE_AGILITY,
 	MOVE_AMNESIA,
@@ -289436,6 +289560,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GRAFAIAI[] =
 
 static u16 const sTutorMoves_SPECIES_GRAFAIAI[] =
 {
+	MOVE_CHEAP_TRICK,
 	MOVE_ACID_SPRAY,
 	MOVE_ACROBATICS,
 	MOVE_BATON_PASS,
@@ -289627,6 +289752,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BRAMBLIN[] =
 
 static u16 const sTutorMoves_SPECIES_BRAMBLIN[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_BEAT_UP,
 	MOVE_BLOCK,
 	MOVE_BULLET_SEED,
@@ -289744,6 +289870,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_BRAMBLEGHAST[] =
 
 static u16 const sTutorMoves_SPECIES_BRAMBLEGHAST[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_BULLET_SEED,
 	MOVE_CONFUSE_RAY,
 	MOVE_CURSE,
@@ -292179,6 +292306,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_VAROOM[] =
 
 static u16 const sTutorMoves_SPECIES_VAROOM[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_BULLDOZE,
@@ -292256,6 +292384,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_REVAVROOM[] =
 
 static u16 const sTutorMoves_SPECIES_REVAVROOM[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_BODY_SLAM,
 	MOVE_BULLDOZE,
@@ -292707,6 +292836,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GLIMMET[] =
 
 static u16 const sTutorMoves_SPECIES_GLIMMET[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_CONFUSE_RAY,
 	MOVE_DAZZLING_GLEAM,
@@ -292827,6 +292957,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GLIMMORA[] =
 
 static u16 const sTutorMoves_SPECIES_GLIMMORA[] =
 {
+	MOVE_FOUL_MIXTURE,
 	MOVE_ACID_SPRAY,
 	MOVE_CONFUSE_RAY,
 	MOVE_DAZZLING_GLEAM,
@@ -293308,6 +293439,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GREAVARD[] =
 
 static u16 const sTutorMoves_SPECIES_GREAVARD[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_ALLY_SWITCH,
 	MOVE_BULLDOZE,
 	MOVE_CHARM,
@@ -293407,6 +293539,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HOUNDSTONE[] =
 
 static u16 const sTutorMoves_SPECIES_HOUNDSTONE[] =
 {
+	MOVE_STAGE_FRIGHT,
 	MOVE_BODY_PRESS,
 	MOVE_BULLDOZE,
 	MOVE_CHARM,
@@ -303105,6 +303238,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DIPPLIN[] =
 
 static u16 const sTutorMoves_SPECIES_DIPPLIN[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_BODY_SLAM,
 	MOVE_BUG_BITE,
 	MOVE_BULLET_SEED,
@@ -305514,6 +305648,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HYDRAPPLE[] =
 
 static u16 const sTutorMoves_SPECIES_HYDRAPPLE[] =
 {
+	MOVE_WILD_GROWTH,
 	MOVE_BODY_PRESS,
 	MOVE_BODY_SLAM,
 	MOVE_BREAKING_SWIPE,

@@ -108,6 +108,8 @@ extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 BattleScript_WarpathHeal[];
 extern const u8 BattleScript_AbilityHpHeal[];
 
+static u16 GetRandomMoveFromPool(u8 pool);
+
 // table to avoid ugly powing on gba (courtesy of doesnt)
 // this returns (i^2.5)/4
 // the quarters cancel so no need to re-quadruple them in actual calculation
@@ -325,6 +327,76 @@ static const s32 sExperienceScalingFactors[] =
     157872,
     159767,
 };
+
+static u16 GetRandomMoveFromPool(u8 pool)
+{
+    static const u16 sChemicalMovePool[] =
+    {
+        MOVE_ACID_SPRAY,
+        MOVE_SMOKESCREEN,
+        MOVE_GASTRO_ACID,
+        MOVE_VENOM_DRENCH,
+        MOVE_CLEAR_SMOG,
+    };
+    static const u16 sFearMovePool[] =
+    {
+        MOVE_SCARY_FACE,
+        MOVE_CONFUSE_RAY,
+        MOVE_ASTONISH,
+        MOVE_SCREECH,
+        MOVE_MEAN_LOOK,
+    };
+    static const u16 sOvergrowthMovePool[] =
+    {
+        MOVE_INGRAIN,
+        MOVE_LEECH_SEED,
+        MOVE_WORRY_SEED,
+        MOVE_GRASS_KNOT,
+        MOVE_GROWTH,
+    };
+    static const u16 sStaticMovePool[] =
+    {
+        MOVE_THUNDER_WAVE,
+        MOVE_CHARGE,
+        MOVE_EERIE_IMPULSE,
+        MOVE_SHOCK_WAVE,
+        MOVE_MAGNET_RISE,
+    };
+    static const u16 sCheapTrickMovePool[] =
+    {
+        MOVE_FAKE_OUT,
+        MOVE_TAUNT,
+        MOVE_TORMENT,
+        MOVE_THIEF,
+        MOVE_SAND_ATTACK,
+    };
+    static const u16 sMentalMovePool[] =
+    {
+        MOVE_CONFUSION,
+        MOVE_KINESIS,
+        MOVE_DISABLE,
+        MOVE_PSYWAVE,
+        MOVE_CALM_MIND,
+    };
+
+    switch (pool)
+    {
+    case RANDOM_MOVE_POOL_CHEMICAL:
+        return RandomElement(RNG_ROGUE_RANDOM_MOVE_POOL, sChemicalMovePool);
+    case RANDOM_MOVE_POOL_FEAR:
+        return RandomElement(RNG_ROGUE_RANDOM_MOVE_POOL, sFearMovePool);
+    case RANDOM_MOVE_POOL_OVERGROWTH:
+        return RandomElement(RNG_ROGUE_RANDOM_MOVE_POOL, sOvergrowthMovePool);
+    case RANDOM_MOVE_POOL_STATIC:
+        return RandomElement(RNG_ROGUE_RANDOM_MOVE_POOL, sStaticMovePool);
+    case RANDOM_MOVE_POOL_CHEAP_TRICK:
+        return RandomElement(RNG_ROGUE_RANDOM_MOVE_POOL, sCheapTrickMovePool);
+    case RANDOM_MOVE_POOL_MENTAL:
+        return RandomElement(RNG_ROGUE_RANDOM_MOVE_POOL, sMentalMovePool);
+    default:
+        return MOVE_NONE;
+    }
+}
 
 static const u16 sTrappingMoves[NUM_TRAPPING_MOVES] =
 {
@@ -11021,6 +11093,21 @@ static void Cmd_various(void)
 
             gBattlescriptCurrInstr = cmd->nextInstr;
         }
+        return;
+    }
+    case VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL:
+    {
+        VARIOUS_ARGS(u8 pool);
+        gCalledMove = GetRandomMoveFromPool(cmd->pool);
+        SetAtkCancellerForCalledMove();
+        VarSet(VAR_EXTRA_MOVE_DAMAGE, gBattleMoves[gCalledMove].power);
+        VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
+        VarSet(VAR_TEMP_MOVEEFFECT, 0);
+        gBattlerAttacker = battler;
+        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+        gHitMarker |= HITMARKER_NO_PPDEDUCT;
+        gProtectStructs[battler].extraMoveUsed = TRUE;
+        gBattlescriptCurrInstr = cmd->nextInstr;
         return;
     }
     case VARIOUS_GRAVITY_ON_AIRBORNE_MONS:

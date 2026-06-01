@@ -14728,6 +14728,97 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .highCritRatio = TRUE,
     },
 
+    [MOVE_FOUL_MIXTURE] =
+    {
+        .effect = EFFECT_FOUL_MIXTURE,
+        .power = 0,
+        .type = TYPE_POISON,
+        .accuracy = 95,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 0,
+        .split = SPLIT_STATUS,
+        .zMoveEffect = Z_EFFECT_SPDEF_UP_1,
+        .magicCoatAffected = TRUE,
+        .mirrorMoveBanned = TRUE,
+    },
+
+    [MOVE_STAGE_FRIGHT] =
+    {
+        .effect = EFFECT_STAGE_FRIGHT,
+        .power = 0,
+        .type = TYPE_GHOST,
+        .accuracy = 100,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 0,
+        .split = SPLIT_STATUS,
+        .zMoveEffect = Z_EFFECT_SPATK_UP_1,
+        .magicCoatAffected = TRUE,
+        .mirrorMoveBanned = TRUE,
+    },
+
+    [MOVE_WILD_GROWTH] =
+    {
+        .effect = EFFECT_WILD_GROWTH,
+        .power = 0,
+        .type = TYPE_GRASS,
+        .accuracy = 100,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 0,
+        .split = SPLIT_STATUS,
+        .zMoveEffect = Z_EFFECT_SPDEF_UP_1,
+        .mirrorMoveBanned = TRUE,
+    },
+
+    [MOVE_STATIC_BURST] =
+    {
+        .effect = EFFECT_STATIC_BURST,
+        .power = 40,
+        .type = TYPE_ELECTRIC,
+        .accuracy = 100,
+        .pp = 15,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 0,
+        .split = SPLIT_SPECIAL,
+        .zMoveEffect = Z_EFFECT_NONE,
+    },
+
+    [MOVE_CHEAP_TRICK] =
+    {
+        .effect = EFFECT_CHEAP_TRICK,
+        .power = 0,
+        .type = TYPE_DARK,
+        .accuracy = 100,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 3,
+        .split = SPLIT_STATUS,
+        .zMoveEffect = Z_EFFECT_EVSN_UP_1,
+        .magicCoatAffected = TRUE,
+        .mirrorMoveBanned = TRUE,
+    },
+
+    [MOVE_BRAINSTORM] =
+    {
+        .effect = EFFECT_BRAINSTORM,
+        .power = 60,
+        .type = TYPE_PSYCHIC,
+        .accuracy = 100,
+        .pp = 10,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 0,
+        .split = SPLIT_SPECIAL,
+        .zMoveEffect = Z_EFFECT_NONE,
+    },
+
     [MOVE_TERA_STARSTORM] =
     {
         .effect = EFFECT_TERA_STARSTORM,

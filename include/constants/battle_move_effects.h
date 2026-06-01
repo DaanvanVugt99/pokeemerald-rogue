@@ -439,7 +439,13 @@
 #define EFFECT_INFESTED_TERRAIN             433
 #define EFFECT_PLAIN_TERRAIN                434
 #define EFFECT_ROCK_POLISH                  435
+#define EFFECT_FOUL_MIXTURE                 436
+#define EFFECT_STAGE_FRIGHT                 437
+#define EFFECT_WILD_GROWTH                  438
+#define EFFECT_STATIC_BURST                 439
+#define EFFECT_CHEAP_TRICK                  440
+#define EFFECT_BRAINSTORM                   441
 
-#define NUM_BATTLE_MOVE_EFFECTS             436
+#define NUM_BATTLE_MOVE_EFFECTS             442
 
 #endif  // GUARD_CONSTANTS_BATTLE_MOVE_EFFECTS_H
