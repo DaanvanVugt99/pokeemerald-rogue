@@ -7092,7 +7092,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_ROCK_POLISH] =
     {
-        .effect = EFFECT_SPEED_UP_2,
+        .effect = EFFECT_ROCK_POLISH,
         .power = 0,
         .type = TYPE_ROCK,
         .accuracy = 0,
@@ -14928,7 +14928,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .pp = 15,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_SELECTED,
-        .priority = 3,
+        .priority = 4,
         .split = SPLIT_PHYSICAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,

@@ -438,7 +438,8 @@
 #define EFFECT_ECLIPSE                      432
 #define EFFECT_INFESTED_TERRAIN             433
 #define EFFECT_PLAIN_TERRAIN                434
+#define EFFECT_ROCK_POLISH                  435
 
-#define NUM_BATTLE_MOVE_EFFECTS             435
+#define NUM_BATTLE_MOVE_EFFECTS             436
 
 #endif  // GUARD_CONSTANTS_BATTLE_MOVE_EFFECTS_H

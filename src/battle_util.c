@@ -3121,6 +3121,10 @@ u8 DoBattlerEndTurnEffects(void)
                         effect++;
                     }
                 }
+                else if (ability == ABILITY_TOXIC_BOOST)
+                {
+                    RecordAbilityBattle(battler, ABILITY_TOXIC_BOOST);
+                }
                 else
                 {
                     gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
@@ -3159,6 +3163,10 @@ u8 DoBattlerEndTurnEffects(void)
                         }
                         effect++;
                     }
+                }
+                else if (ability == ABILITY_TOXIC_BOOST)
+                {
+                    RecordAbilityBattle(battler, ABILITY_TOXIC_BOOST);
                 }
                 else
                 {
@@ -10692,12 +10700,10 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
             break;
         case ABILITY_SUPERSWEET_SYRUP:
-            if (!gSpecialStatuses[battler].switchInAbilityDone
-                    && !(gBattleStruct->supersweetSyrup[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
                 gBattlerAttacker = battler;
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
-                gBattleStruct->supersweetSyrup[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
                 BattleScriptPushCursorAndCallback(BattleScript_SupersweetSyrupActivates);
                 effect++;
             }
