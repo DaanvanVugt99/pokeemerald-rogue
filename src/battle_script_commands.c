@@ -7265,6 +7265,27 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_MEAN_STREAK)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && TARGET_TURN_DAMAGED
+             && !gProtectStructs[gBattlerAttacker].extraMoveUsed
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && (gBattleMons[gBattlerTarget].status1 & STATUS1_PSN_ANY))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_MEAN_STREAK);
+                SetAtkCancellerForCalledMove();
+                gBattlerAbility = gBattlerAttacker;
+                gCalledMove = MOVE_PAYBACK;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[gBattlerAttacker].extraMoveUsed = TRUE;
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect = TRUE;
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_SANDMAN)
              && IsBattlerAlive(gBattlerAttacker)
              && IsBattlerAlive(gBattlerTarget)
@@ -10162,6 +10183,52 @@ bool32 CanPoisonType(u8 battlerAttacker, u8 battlerTarget)
 {
     return HasBattlerAbility(battlerAttacker, ABILITY_CORROSION)
         || (!IS_BATTLER_OF_TYPE(battlerTarget, TYPE_STEEL) && !IS_BATTLER_OF_TYPE(battlerTarget, TYPE_POISON));
+}
+
+static bool32 TryActivateMeanStreakPoison(u32 battler)
+{
+    u32 i;
+    u32 target = MAX_BATTLERS_COUNT;
+
+    if (!HasBattlerAbility(battler, ABILITY_MEAN_STREAK)
+     || !IsBattlerAlive(battler))
+        return FALSE;
+
+    if (gBattlerAttacker < gBattlersCount
+     && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler)
+     && IsBattlerAlive(gBattlerAttacker))
+    {
+        target = gBattlerAttacker;
+    }
+    else if (gBattlerTarget < gBattlersCount
+          && GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler)
+          && IsBattlerAlive(gBattlerTarget))
+    {
+        target = gBattlerTarget;
+    }
+    else
+    {
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+            {
+                target = i;
+                break;
+            }
+        }
+    }
+
+    if (target >= gBattlersCount || !CanBePoisoned(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_MEAN_STREAK);
+    gBattleStruct->savedFaintBattlerAttacker = gBattlerAttacker;
+    gBattleStruct->savedFaintBattlerTarget = gBattlerTarget;
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
+    gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+    return TRUE;
 }
 
 static bool32 CanSepticFumesPoisonPartyMon(u32 battlerAtk, u32 battlerTarget, struct Pokemon *mon)
@@ -14373,6 +14440,7 @@ static void Cmd_statbuffchange(void)
     const u8 *failInstr = cmd->failInstr;
     u8 statId = GET_STAT_BUFF_ID(gBattleScripting.statChanger);
     s8 statChange = GET_STAT_BUFF_VALUE_WITH_SIGN(gBattleScripting.statChanger);
+    u32 battler = (flags & MOVE_EFFECT_AFFECTS_USER) ? gBattlerAttacker : gBattlerTarget;
 
     if (gCurrentMove == MOVE_DEFEND_ORDER
      && statId == STAT_SPDEF
@@ -14385,7 +14453,16 @@ static void Cmd_statbuffchange(void)
 
     if (ChangeStatBuffs(statChange, statId, flags, failInstr) == STAT_CHANGE_WORKED)
     {
-        gBattlescriptCurrInstr = cmd->nextInstr;
+        if (statId == STAT_ATK && TryActivateMeanStreakPoison(battler))
+        {
+            BattleScriptPush(cmd->nextInstr);
+            BattleScriptPush(BattleScript_MeanStreakRestoreAfterPoison);
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+        }
+        else
+        {
+            gBattlescriptCurrInstr = cmd->nextInstr;
+        }
     }
     else if (gBattlescriptCurrInstr == ptrBefore) // Prevent infinite looping.
     {

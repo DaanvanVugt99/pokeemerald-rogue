@@ -862,6 +862,7 @@ static const u8 sMegaSolDescription[] = _("Uses moves as if in harsh sunlight.")
 static const u8 sDragonizeDescription[] = _("Normal moves become Dragon and gain power.");
 static const u8 sPiercingDrillDescription[] = _("Contact moves pierce protection for reduced damage.");
 static const u8 sSpicySprayDescription[] = _("Burns attackers that damage it.");
+static const u8 sMeanStreakDescription[] = _("Attack changes poison a foe. First hit on a poisoned foe uses Payback.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1559,6 +1560,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ORCHARD] = _("Orchard"),
     [ABILITY_QUICKSAND] = _("Quicksand"),
     [ABILITY_COUNTERPUNCH] = _("Counterpunch"),
+    [ABILITY_MEAN_STREAK] = _("Mean Streak"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2435,6 +2437,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ORCHARD] = _("Orchard"),
     [ABILITY_QUICKSAND] = _("Quicksand"),
     [ABILITY_COUNTERPUNCH] = _("Counterpunch"),
+    [ABILITY_MEAN_STREAK] = _("MeanStreak"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3489,5 +3492,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_DRAGONIZE] = sDragonizeDescription,
     [ABILITY_PIERCING_DRILL] = sPiercingDrillDescription,
     [ABILITY_SPICY_SPRAY] = sSpicySprayDescription,
+    [ABILITY_MEAN_STREAK] = sMeanStreakDescription,
 
 };

@@ -11760,6 +11760,10 @@ BattleScript_AbilityStatusEffect::
 	seteffectsecondary
 	return
 
+BattleScript_MeanStreakRestoreAfterPoison::
+	various BS_SCRIPTING, VARIOUS_RESTORE_ATTACKER_AND_TARGET
+	return
+
 BattleScript_ForestAmbushActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
