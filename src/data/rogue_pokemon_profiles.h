@@ -102187,7 +102187,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_KECLEON[] =
 	{ .move=MOVE_ANCIENT_POWER, .level=21 },
 	{ .move=MOVE_SLASH, .level=25 },
 	{ .move=MOVE_CAMOUFLAGE, .level=30 },
-	{ .move=MOVE_SHADOW_CLAW, .level=33 },
+	{ .move=MOVE_PHANTOM_FORCE, .level=33 },
 	{ .move=MOVE_SCREECH, .level=38 },
 	{ .move=MOVE_SUBSTITUTE, .level=42 },
 	{ .move=MOVE_SUCKER_PUNCH, .level=46 },
