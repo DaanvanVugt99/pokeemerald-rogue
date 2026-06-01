@@ -14,6 +14,7 @@ SINGLE_BATTLE_TEST("Grafitti Tag makes a tagged foe leave Toxic Spikes when swit
         ABILITY_POPUP(player, ABILITY_GRAFITTI_TAG);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponent);
         MESSAGE("Grafaiai tagged\nthe opposing Pokemon!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, opponent);
         MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_TOXIC_SPIKES);
@@ -34,6 +35,7 @@ SINGLE_BATTLE_TEST("Grafitti Tag is consumed after the tagged foe switches out")
     } SCENE {
         ABILITY_POPUP(player, ABILITY_GRAFITTI_TAG);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, opponent);
         MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
         NONE_OF {
             MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
@@ -56,6 +58,7 @@ SINGLE_BATTLE_TEST("Grafitti Tag makes a tagged foe leave Toxic Spikes when fain
         MESSAGE("Grafaiai tagged\nthe opposing Pokemon!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         MESSAGE("Foe Wobbuffet fainted!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
         MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_TOXIC_SPIKES);

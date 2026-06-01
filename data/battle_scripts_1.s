@@ -9795,6 +9795,8 @@ BattleScript_GrafittiTagActivates::
 	end3
 
 BattleScript_GrafittiTagToxicSpikes::
+	playmoveanimation BS_ATTACKER, MOVE_TOXIC_SPIKES
+	waitanimation
 	printstring STRINGID_POISONSPIKESSCATTERED
 	waitmessage B_WAIT_TIME_LONG
 	return
