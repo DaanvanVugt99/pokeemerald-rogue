@@ -4,7 +4,6 @@
 ASSUMPTIONS
 {
     ASSUME(P_GEN_8_POKEMON == TRUE);
-    ASSUME(B_PROTEAN_LIBERO == GEN_9);
 }
 
 SINGLE_BATTLE_TEST("Dauntless Shield raises Attack by one stage")
