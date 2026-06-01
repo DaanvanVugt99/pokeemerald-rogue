@@ -19,6 +19,49 @@ SINGLE_BATTLE_TEST("Smolder applies a burn-like physical damage penalty to oppos
     }
 }
 
+DOUBLE_BATTLE_TEST("Smolder applies a burn-like physical damage penalty to allied Pokemon", s16 damage)
+{
+    u16 uniqueAbility;
+    PARAMETRIZE { uniqueAbility = ABILITY_OPEN_FIELD; }
+    PARAMETRIZE { uniqueAbility = ABILITY_SMOLDER; }
+
+    GIVEN {
+        PLAYER(SPECIES_FLAREON) { Ability(ABILITY_FLASH_FIRE); UniqueAbility(uniqueAbility); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { HP(400); MaxHP(400); Moves(MOVE_STRENGTH); }
+        OPPONENT(SPECIES_WYNAUT) { HP(400); MaxHP(400); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN {
+            MOVE(playerLeft, MOVE_CELEBRATE);
+            MOVE(playerRight, MOVE_STRENGTH, target: opponentLeft);
+            MOVE(opponentLeft, MOVE_CELEBRATE);
+            MOVE(opponentRight, MOVE_CELEBRATE);
+        }
+    } SCENE {
+        HP_BAR(opponentLeft, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Smolder activates Guts for damage calculation", s16 damage)
+{
+    u16 uniqueAbility;
+    PARAMETRIZE { uniqueAbility = ABILITY_OPEN_FIELD; }
+    PARAMETRIZE { uniqueAbility = ABILITY_SMOLDER; }
+
+    GIVEN {
+        PLAYER(SPECIES_FLAREON) { Ability(ABILITY_GUTS); UniqueAbility(uniqueAbility); Moves(MOVE_STRENGTH); }
+        OPPONENT(SPECIES_WYNAUT) { HP(400); MaxHP(400); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_STRENGTH); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
 SINGLE_BATTLE_TEST("Smolder does not affect opposing special damage", s16 damage)
 {
     u16 uniqueAbility;

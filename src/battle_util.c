@@ -19096,6 +19096,12 @@ bool32 CanBeBurned(u32 battler)
     return TRUE;
 }
 
+bool32 IsBattlerEffectivelyBurned(u32 battler)
+{
+    return (gBattleMons[battler].status1 & STATUS1_BURN)
+        || IsAbilityOnField(ABILITY_SMOLDER);
+}
+
 bool32 CanBeParalyzed(u32 battler)
 {
     if ((B_PARALYZE_ELECTRIC >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_ELECTRIC))
@@ -21676,7 +21682,7 @@ static inline u32 CalcMoveBasePower(u32 move, u32 battlerAtk, u32 battlerDef, u3
         break;
     case EFFECT_HEX:
     case EFFECT_INFERNAL_PARADE:
-        if (gBattleMons[battlerDef].status1 & STATUS1_ANY || abilityDef == ABILITY_COMATOSE)
+        if (gBattleMons[battlerDef].status1 & STATUS1_ANY || abilityDef == ABILITY_COMATOSE || IsBattlerEffectivelyBurned(battlerDef))
             basePower *= 2;
         break;
     case EFFECT_ASSURANCE:
@@ -21875,7 +21881,8 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     switch (gBattleMoves[move].effect)
     {
     case EFFECT_FACADE:
-        if (gBattleMons[battlerAtk].status1 & (STATUS1_BURN | STATUS1_PSN_ANY | STATUS1_PARALYSIS | STATUS1_FROSTBITE))
+        if (gBattleMons[battlerAtk].status1 & (STATUS1_BURN | STATUS1_PSN_ANY | STATUS1_PARALYSIS | STATUS1_FROSTBITE)
+         || IsBattlerEffectivelyBurned(battlerAtk))
             modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
         break;
     case EFFECT_BRINE:
@@ -21962,7 +21969,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_FLARE_BOOST:
-        if (gBattleMons[battlerAtk].status1 & STATUS1_BURN && IS_MOVE_SPECIAL(move))
+        if (IsBattlerEffectivelyBurned(battlerAtk) && IS_MOVE_SPECIAL(move))
            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_TOXIC_BOOST:
@@ -22658,7 +22665,7 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(2.0));
         break;
     case ABILITY_GUTS:
-        if (gBattleMons[battlerAtk].status1 & STATUS1_ANY && usesOwnAttackStat)
+        if ((gBattleMons[battlerAtk].status1 & STATUS1_ANY || IsBattlerEffectivelyBurned(battlerAtk)) && usesOwnAttackStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_LIQUID_OOZE:
@@ -22889,7 +22896,7 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
     switch (defAbility)
     {
     case ABILITY_MARVEL_SCALE:
-        if (gBattleMons[battlerDef].status1 & STATUS1_ANY && usesDefStat)
+        if ((gBattleMons[battlerDef].status1 & STATUS1_ANY || IsBattlerEffectivelyBurned(battlerDef)) && usesDefStat)
         {
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
             if (updateFlags)
@@ -23210,8 +23217,7 @@ static uq4_12_t GetWeatherDamageModifier(u32 battlerAtk, u32 battlerDef, u32 mov
 
 static inline uq4_12_t GetBurnOrFrostBiteModifier(u32 battlerAtk, u32 move, u32 abilityAtk, bool32 usesOwnAttackStat, bool32 usesOwnSpAttackStat)
 {
-    bool32 burnedForDamageCalc = (gBattleMons[battlerAtk].status1 & STATUS1_BURN)
-        || IsAbilityOnOpposingSide(battlerAtk, ABILITY_SMOLDER);
+    bool32 burnedForDamageCalc = IsBattlerEffectivelyBurned(battlerAtk);
     bool32 unknownBiologyWithActualBurn = HasBattlerAbility(battlerAtk, ABILITY_UNKNOWN_BIOLOGY)
         && (gBattleMons[battlerAtk].status1 & STATUS1_BURN);
 

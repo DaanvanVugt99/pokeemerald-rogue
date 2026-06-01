@@ -4768,7 +4768,7 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
     }
 
     // other abilities
-    if (ability == ABILITY_QUICK_FEET && gBattleMons[battler].status1 & STATUS1_ANY)
+    if (ability == ABILITY_QUICK_FEET && (gBattleMons[battler].status1 & STATUS1_ANY || IsBattlerEffectivelyBurned(battler)))
         speed = (speed * 150) / 100;
     else if (ability == ABILITY_SURGE_SURFER && gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
         speed *= 2;

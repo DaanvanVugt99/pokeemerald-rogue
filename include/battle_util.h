@@ -265,6 +265,7 @@ bool32 IsEntrainmentTargetOrSimpleBeamBannedAbility(u16 ability);
 bool32 CanSleep(u32 battler);
 bool32 CanBePoisoned(u32 battlerAttacker, u32 battlerTarget);
 bool32 CanBeBurned(u32 battler);
+bool32 IsBattlerEffectivelyBurned(u32 battler);
 bool32 CanBeParalyzed(u32 battler);
 bool32 CanBeFrozen(u32 battler);
 bool32 CanGetFrostbite(u32 battler);
