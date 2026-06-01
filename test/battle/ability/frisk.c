@@ -35,6 +35,25 @@ SINGLE_BATTLE_TEST("Frisk triggers in a Single Battle")
     }
 }
 
+SINGLE_BATTLE_TEST("Frisk disables the revealed held item")
+{
+    GIVEN {
+        ASSUME(gItems[ITEM_FOCUS_SASH].holdEffect == HOLD_EFFECT_FOCUS_SASH);
+        ASSUME(gBattleMoves[MOVE_DRAGON_RAGE].effect == EFFECT_DRAGON_RAGE);
+        PLAYER(SPECIES_FURRET) { Ability(ABILITY_FRISK); Moves(MOVE_CELEBRATE, MOVE_DRAGON_RAGE); }
+        OPPONENT(SPECIES_SENTRET) { MaxHP(40); HP(40); Item(ITEM_FOCUS_SASH); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_FRISK);
+        MESSAGE("Furret frisked Foe Sentret and found its Focus Sash!");
+    } THEN {
+        EXPECT(gStatuses3[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)] & STATUS3_EMBARGO);
+        EXPECT_EQ(gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].embargoTimer, 2);
+    }
+}
+
 DOUBLE_BATTLE_TEST("Frisk triggers for player in a Double Battle after switching-in after fainting")
 {
     bool32 targetLeft;

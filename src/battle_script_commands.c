@@ -10793,6 +10793,8 @@ static void Cmd_various(void)
                 && gBattleMons[gBattlerTarget].item != ITEM_NONE)
             {
                 gLastUsedItem = gBattleMons[gBattlerTarget].item;
+                gStatuses3[gBattlerTarget] |= STATUS3_EMBARGO;
+                gDisableStructs[gBattlerTarget].embargoTimer = 4;
                 RecordItemEffectBattle(gBattlerTarget, GetBattlerHoldEffect(gBattlerTarget, FALSE));
                 BattleScriptPushCursor();
                 // If Frisk identifies two mons' items, show the pop-up only once.
