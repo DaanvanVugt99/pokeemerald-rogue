@@ -10119,6 +10119,30 @@ BattleScript_HealerActivates::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_RestorativeAuraHeals::
+	call BattleScript_AbilityPopUp
+	various BS_PLAYER1, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
+	.4byte BattleScript_RestorativeAuraTryPlayer2
+	healthbarupdate BS_PLAYER1
+	datahpupdate BS_PLAYER1
+BattleScript_RestorativeAuraTryPlayer2:
+	various BS_PLAYER2, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
+	.4byte BattleScript_RestorativeAuraTryOpponent1
+	healthbarupdate BS_PLAYER2
+	datahpupdate BS_PLAYER2
+BattleScript_RestorativeAuraTryOpponent1:
+	various BS_OPPONENT1, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
+	.4byte BattleScript_RestorativeAuraTryOpponent2
+	healthbarupdate BS_OPPONENT1
+	datahpupdate BS_OPPONENT1
+BattleScript_RestorativeAuraTryOpponent2:
+	various BS_OPPONENT2, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
+	.4byte BattleScript_RestorativeAuraEnd
+	healthbarupdate BS_OPPONENT2
+	datahpupdate BS_OPPONENT2
+BattleScript_RestorativeAuraEnd:
+	end3
+
 BattleScript_SandstreamActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

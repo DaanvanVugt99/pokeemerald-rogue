@@ -260,6 +260,7 @@
 #define VARIOUS_SWITCHIN_CHANGED_ABILITY             167
 #define VARIOUS_SET_TARGET_OPPOSING_SIDE             168
 #define VARIOUS_JUMP_IF_PROTECTED_FROM_CONFUSE_RAY   169
+#define VARIOUS_TRY_RESTORATIVE_AURA_HEAL            170
 
 // Cmd_manipulatedamage
 #define DMG_CHANGE_SIGN            0

@@ -11336,21 +11336,17 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                      || (gStatuses3[i] & STATUS3_HEAL_BLOCK))
                         continue;
 
-                    gBattleMoveDamage = GetNonDynamaxMaxHP(i) / 8;
-                    if (gBattleMoveDamage == 0)
-                        gBattleMoveDamage = 1;
-
-                    gBattleMons[i].hp += gBattleMoveDamage;
-                    if (gBattleMons[i].hp > gBattleMons[i].maxHP)
-                        gBattleMons[i].hp = gBattleMons[i].maxHP;
-
-                    BtlController_EmitSetMonData(i, BUFFER_A, REQUEST_HP_BATTLE, 0, sizeof(gBattleMons[i].hp), &gBattleMons[i].hp);
-                    MarkBattlerForControllerExec(i);
                     healedAny = TRUE;
+                    break;
                 }
 
                 if (healedAny)
+                {
                     SetBattlerTriggeredAbility(battler, ABILITY_RESTORATIVE_AURA);
+                    BattleScriptPushCursorAndCallback(BattleScript_RestorativeAuraHeals);
+                    effect++;
+                    break;
+                }
             }
 
             if (HasBattlerAbility(battler, ABILITY_GEMSTASH)

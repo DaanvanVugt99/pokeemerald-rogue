@@ -11003,6 +11003,26 @@ static void Cmd_various(void)
         }
         return;
     }
+    case VARIOUS_TRY_RESTORATIVE_AURA_HEAL:
+    {
+        VARIOUS_ARGS(const u8 *failInstr);
+        if (!IsBattlerAlive(battler)
+         || BATTLER_MAX_HP(battler)
+         || (gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        {
+            gBattlescriptCurrInstr = cmd->failInstr;
+        }
+        else
+        {
+            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            gBattleMoveDamage *= -1;
+
+            gBattlescriptCurrInstr = cmd->nextInstr;
+        }
+        return;
+    }
     case VARIOUS_GRAVITY_ON_AIRBORNE_MONS:
     {
         VARIOUS_ARGS();
