@@ -7286,6 +7286,34 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_VANITY)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && gBattleMoves[gCurrentMove].power > 0
+             && gBattleMoves[gCurrentMove].power <= 60
+             && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && TARGET_TURN_DAMAGED
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !gProtectStructs[gBattlerAttacker].extraMoveUsed
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && GetBattlerSide(gBattlerTarget) != GetBattlerSide(gBattlerAttacker))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_TOXIC_VANITY);
+                SetAtkCancellerForCalledMove();
+                gBattlerAbility = gBattlerAttacker;
+                gCalledMove = MOVE_DRAINING_KISS;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[gBattlerAttacker].extraMoveUsed = TRUE;
+                VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
+                gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = (gBattleMons[gBattlerTarget].status1 & STATUS1_PSN_ANY) != 0;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect = TRUE;
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_SANDMAN)
              && IsBattlerAlive(gBattlerAttacker)
              && IsBattlerAlive(gBattlerTarget)

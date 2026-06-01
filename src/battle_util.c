@@ -21844,6 +21844,13 @@ static inline u32 CalcMoveBasePower(u32 move, u32 battlerAtk, u32 battlerDef, u3
     // Move-specific base power changes
     switch (move)
     {
+    case MOVE_DRAINING_KISS:
+        if (HasBattlerAbility(battlerAtk, ABILITY_TOXIC_VANITY)
+         && gProtectStructs[battlerAtk].extraMoveUsed
+         && gDisableStructs[battlerAtk].uniquePersistentStateActive
+         && (gBattleMons[battlerDef].status1 & STATUS1_PSN_ANY))
+            basePower *= 2;
+        break;
     case MOVE_WATER_SHURIKEN:
         if (gBattleMons[battlerAtk].species == SPECIES_GRENINJA_ASH)
             basePower = 20;
