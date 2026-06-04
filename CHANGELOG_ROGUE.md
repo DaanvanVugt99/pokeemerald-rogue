@@ -49,6 +49,9 @@ Format follows Keep a Changelog loosely:
 - Ported upstream Potion Cauldron crafting to the Mart UI flow, allowing bulk
   potion crafting with Oran Berries.
 - Assigned implemented design-doc unique abilities to additional Mega forms.
+- Updated Mega Raichu X to Electric Surge and Mega Raichu Y to No Guard.
+- Fixed Rotom form appliance abilities being assigned as normal abilities
+  instead of hidden abilities.
 
 ### Fixed
 

@@ -167,6 +167,7 @@ SINGLE_BATTLE_TEST("Raichu can Mega Evolve into Mega Raichu X holding Raichunite
         MESSAGE("Raichu has Mega Evolved into Mega Raichu!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_RAICHU_MEGA_X);
+        EXPECT_EQ(player->ability, ABILITY_ELECTRIC_SURGE);
     }
 }
 
@@ -183,6 +184,7 @@ SINGLE_BATTLE_TEST("Raichu can Mega Evolve into Mega Raichu Y holding Raichunite
         MESSAGE("Raichu has Mega Evolved into Mega Raichu!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_RAICHU_MEGA_Y);
+        EXPECT_EQ(player->ability, ABILITY_NO_GUARD);
     }
 }
 
