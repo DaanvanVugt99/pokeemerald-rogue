@@ -5262,6 +5262,7 @@ enum
     WILD_FORM_FAMILY_INDEEDEE,
     WILD_FORM_FAMILY_SINISTEA,
     WILD_FORM_FAMILY_POLTEAGEIST,
+    WILD_FORM_FAMILY_GIMMIGHOUL,
 };
 
 static const u16 sWildUnownForms[] = {
@@ -5418,6 +5419,10 @@ static const u16 sWildTatsugiriForms[] = {
     SPECIES_TATSUGIRI_CURLY,
     SPECIES_TATSUGIRI_DROOPY,
     SPECIES_TATSUGIRI_STRETCHY,
+};
+
+static const u16 sWildGimmighoulForms[] = {
+    SPECIES_GIMMIGHOUL_CHEST,
 };
 
 static bool8 IsSpeciesInRange(u16 species, u16 fromSpecies, u16 toSpecies)
@@ -5586,6 +5591,10 @@ static u16 GetWildFormFamilyKey(u16 species)
     case SPECIES_POLTEAGEIST_PHONY:
     case SPECIES_POLTEAGEIST_ANTIQUE:
         return WILD_FORM_FAMILY_POLTEAGEIST;
+
+    case SPECIES_GIMMIGHOUL_CHEST:
+    case SPECIES_GIMMIGHOUL_ROAMING:
+        return WILD_FORM_FAMILY_GIMMIGHOUL;
     }
 
     if(species == SPECIES_VIVILLON_ICY_SNOW
@@ -5636,6 +5645,10 @@ static bool8 GetWildApprovedFormList(u16 familyKey, const u16 **speciesList, u16
     case WILD_FORM_FAMILY_TATSUGIRI:
         *speciesList = sWildTatsugiriForms;
         *speciesCount = ARRAY_COUNT(sWildTatsugiriForms);
+        return TRUE;
+    case WILD_FORM_FAMILY_GIMMIGHOUL:
+        *speciesList = sWildGimmighoulForms;
+        *speciesCount = ARRAY_COUNT(sWildGimmighoulForms);
         return TRUE;
     }
 

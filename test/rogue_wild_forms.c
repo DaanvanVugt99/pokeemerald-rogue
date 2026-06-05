@@ -57,6 +57,20 @@ TEST("Wild encounter approved random forms exclude Minior core forms")
 #endif
 }
 
+TEST("Wild encounter approved random forms only spawn Gimmighoul Chest Form")
+{
+#if defined(ROGUE_EXPANSION)
+    u16 i;
+
+    EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_GIMMIGHOUL_CHEST), RogueDebug_GetWildFormFamilyKey(SPECIES_GIMMIGHOUL_ROAMING));
+
+    for(i = 0; i < 8; ++i)
+        EXPECT_EQ(RogueDebug_GetWildApprovedFamilyForm(SPECIES_GIMMIGHOUL_ROAMING, i), SPECIES_GIMMIGHOUL_CHEST);
+#else
+    ASSUME(FALSE);
+#endif
+}
+
 TEST("Wild encounter family selection can select beyond old raw weight capacity")
 {
 #if defined(ROGUE_EXPANSION)
