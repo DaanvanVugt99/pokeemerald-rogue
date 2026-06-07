@@ -55,6 +55,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Ariados and Spinarak's Web Trap unique ability so any opposing Speed
+  stage drop can trigger a queued random web move.
 - Fixed attacker-side move-end unique abilities, including Vicejaw and Handywork,
   failing after the target's contact ability retargeted battle script state first.
 - Fixed attacker-side move-end unique abilities, including Windsurge, being

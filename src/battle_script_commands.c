@@ -3276,8 +3276,7 @@ static bool32 TryMarkScrapJobPending(u32 battler)
     if (!CanScrapJobActivate(battler))
         return FALSE;
 
-    gBattleStruct->pendingScrapJobBattlers |= gBitTable[battler];
-    return TRUE;
+    return QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_SCRAP_JOB, battler, battler);
 }
 
 static void TryQueueScrapJobAfterRemoveItem(u32 battler, const u8 *nextInstr)
@@ -7045,6 +7044,11 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         }
+        case MOVEEND_PENDING_UNIQUE_ABILITY:
+            if (TryActivatePendingUniqueAbilityEffect())
+                effect = TRUE;
+            gBattleScripting.moveendState++;
+            break;
         case MOVEEND_EJECT_BUTTON:
             if (gBattleMoves[gCurrentMove].effect != EFFECT_HIT_SWITCH_TARGET
               && IsBattlerAlive(gBattlerAttacker)
@@ -8998,6 +9002,10 @@ static void Cmd_switchineffects(void)
         return;
     }
     else if (TryApplySwitchInTransferEffects(battler))
+    {
+        return;
+    }
+    else if (TryActivatePendingUniqueAbilityEffect())
     {
         return;
     }
@@ -11533,7 +11541,7 @@ static void Cmd_various(void)
     case VARIOUS_SAVE_SCRAP_JOB_ATTACKER:
     {
         VARIOUS_ARGS();
-        gBattleStruct->scrapJobSavedAttacker = gBattlerAttacker;
+        gBattleStruct->pendingUniqueAbilitySavedAttacker = gBattlerAttacker;
         break;
     }
     case VARIOUS_PREPARE_SCRAP_JOB:
@@ -11541,9 +11549,9 @@ static void Cmd_various(void)
         VARIOUS_ARGS(const u8 *failInstr);
         for (i = 0; i < gBattlersCount; i++)
         {
-            if (gBattleStruct->pendingScrapJobBattlers & gBitTable[i])
+            if (GetPendingUniqueAbilityEffect(i) == PENDING_UNIQUE_EFFECT_SCRAP_JOB)
             {
-                gBattleStruct->pendingScrapJobBattlers &= ~gBitTable[i];
+                ClearPendingUniqueAbilityEffect(i);
                 if (CanScrapJobActivate(i))
                 {
                     SetBattlerTriggeredAbility(i, ABILITY_SCRAP_JOB);
@@ -11559,7 +11567,7 @@ static void Cmd_various(void)
     case VARIOUS_RESTORE_SCRAP_JOB_ATTACKER:
     {
         VARIOUS_ARGS();
-        gBattlerAttacker = gBattleStruct->scrapJobSavedAttacker;
+        gBattlerAttacker = gBattleStruct->pendingUniqueAbilitySavedAttacker;
         break;
     }
     case VARIOUS_TRY_SET_SCRAP_JOB_SPIKES:
@@ -13640,6 +13648,13 @@ static void Cmd_various(void)
         }
         return;
     }
+    case VARIOUS_TRY_ACTIVATE_PENDING_UNIQUE_ABILITY:
+    {
+        VARIOUS_ARGS();
+        gBattlescriptCurrInstr = cmd->nextInstr;
+        TryActivatePendingUniqueAbilityEffect();
+        return;
+    }
     } // End of switch (cmd->id)
 
     gBattlescriptCurrInstr = cmd->nextInstr;
@@ -14571,6 +14586,11 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
         gBattleMons[battler].statStages[statId] = MIN_STAT_STAGE;
     if (gBattleMons[battler].statStages[statId] > MAX_STAT_STAGE)
         gBattleMons[battler].statStages[statId] = MAX_STAT_STAGE;
+
+    if (statId == STAT_SPEED
+     && statValue < 0
+     && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_DECREASE)
+        QueueWebTrapForSpeedDrop(battler);
 
     if (gBattleCommunication[MULTISTRING_CHOOSER] == B_MSG_STAT_WONT_INCREASE && flags & STAT_CHANGE_ALLOW_PTR)
         gMoveResultFlags |= MOVE_RESULT_MISSED;

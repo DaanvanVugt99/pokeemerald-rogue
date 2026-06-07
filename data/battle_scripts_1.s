@@ -493,6 +493,7 @@ BattleScript_SyrupBombEndTurn::
 	printfromtable gStatDownStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_SyrupBombTurnDmgEnd:
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_PENDING_UNIQUE_ABILITY
 	end2
 
 BattleScript_EffectMatchaGotcha::
@@ -8163,6 +8164,7 @@ BattleScript_StickyWebOnSwitchInPrintStatMsg:
 	printfromtable gStatDownStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_StickyWebOnSwitchInEnd:
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_PENDING_UNIQUE_ABILITY
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	restoretarget
 	return

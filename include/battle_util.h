@@ -161,6 +161,19 @@ u32 GetBattlerKnownDistinctDamagingMoveTypeCount(u32 battler);
 void GetBattlerKnownMoveCategoryCounts(u32 battler, u32 *damagingMoveCount, u32 *statusMoveCount);
 bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility);
 bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer);
+
+enum PendingUniqueAbilityEffect
+{
+    PENDING_UNIQUE_EFFECT_NONE,
+    PENDING_UNIQUE_EFFECT_WEB_TRAP,
+    PENDING_UNIQUE_EFFECT_SCRAP_JOB,
+};
+
+bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 target);
+u32 GetPendingUniqueAbilityEffect(u32 battler);
+void ClearPendingUniqueAbilityEffect(u32 battler);
+void QueueWebTrapForSpeedDrop(u32 slowedBattler);
+bool32 TryActivatePendingUniqueAbilityEffect(void);
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg);
 void SetGrafittiTag(u32 battler);
 void ResetGrafittiTagPaletteCache(u32 battler);

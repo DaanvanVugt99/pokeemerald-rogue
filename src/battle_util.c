@@ -5971,6 +5971,103 @@ static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
+#define PENDING_UNIQUE_EFFECT_BITS         4
+#define PENDING_UNIQUE_EFFECT_KIND_MASK    0xF
+#define PENDING_UNIQUE_EFFECT_TARGET_BITS  2
+#define PENDING_UNIQUE_EFFECT_TARGET_MASK  0x3
+
+u32 GetPendingUniqueAbilityEffect(u32 battler)
+{
+    return (gBattleStruct->pendingUniqueAbilityEffects >> (battler * PENDING_UNIQUE_EFFECT_BITS)) & PENDING_UNIQUE_EFFECT_KIND_MASK;
+}
+
+static u32 GetPendingUniqueAbilityTarget(u32 battler)
+{
+    return (gBattleStruct->pendingUniqueAbilityTargets >> (battler * PENDING_UNIQUE_EFFECT_TARGET_BITS)) & PENDING_UNIQUE_EFFECT_TARGET_MASK;
+}
+
+static bool32 IsPendingUniqueAbilityEffectQueued(u32 effect)
+{
+    u32 battler;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (GetPendingUniqueAbilityEffect(battler) == effect)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+void ClearPendingUniqueAbilityEffect(u32 battler)
+{
+    gBattleStruct->pendingUniqueAbilityEffects &= ~(PENDING_UNIQUE_EFFECT_KIND_MASK << (battler * PENDING_UNIQUE_EFFECT_BITS));
+    gBattleStruct->pendingUniqueAbilityTargets &= ~(PENDING_UNIQUE_EFFECT_TARGET_MASK << (battler * PENDING_UNIQUE_EFFECT_TARGET_BITS));
+}
+
+bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 target)
+{
+    if (effect == PENDING_UNIQUE_EFFECT_NONE
+     || effect > PENDING_UNIQUE_EFFECT_KIND_MASK
+     || battler >= gBattlersCount
+     || target >= gBattlersCount
+     || GetPendingUniqueAbilityEffect(battler) != PENDING_UNIQUE_EFFECT_NONE)
+        return FALSE;
+
+    gBattleStruct->pendingUniqueAbilityEffects |= effect << (battler * PENDING_UNIQUE_EFFECT_BITS);
+    gBattleStruct->pendingUniqueAbilityTargets |= target << (battler * PENDING_UNIQUE_EFFECT_TARGET_BITS);
+    return TRUE;
+}
+
+void QueueWebTrapForSpeedDrop(u32 slowedBattler)
+{
+    u32 i;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+
+    if (slowedBattler >= gBattlersCount
+     || !IsBattlerAlive(slowedBattler)
+     || IsPendingUniqueAbilityEffectQueued(PENDING_UNIQUE_EFFECT_WEB_TRAP))
+        return;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+
+        if (IsBattlerAlive(battler)
+         && GetBattlerSide(battler) != GetBattlerSide(slowedBattler)
+         && HasBattlerAbility(battler, ABILITY_WEB_TRAP)
+         && CanUseExtraMove(battler, slowedBattler))
+        {
+            QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_WEB_TRAP, battler, slowedBattler);
+            return;
+        }
+    }
+}
+
+bool32 TryActivatePendingUniqueAbilityEffect(void)
+{
+    u32 i;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+
+        if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_WEB_TRAP)
+        {
+            u32 target = GetPendingUniqueAbilityTarget(battler);
+
+            ClearPendingUniqueAbilityEffect(battler);
+            if (TryUseWebTrapCalledMove(battler, target))
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static const u16 sDeliveryBagMoves[] =
 {
     MOVE_PRESENT,
@@ -15603,23 +15700,6 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[battler].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && TryUseAcidRefluxCalledMove(battler))
-        {
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_WEB_TRAP)
-         && IsBattlerAlive(battler)
-         && IsBattlerAlive(gBattlerTarget)
-         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
-         && (gBattleMoves[move].effect == EFFECT_SPEED_DOWN
-          || gBattleMoves[move].effect == EFFECT_SPEED_DOWN_2
-          || gBattleMoves[move].effect == EFFECT_SPEED_DOWN_HIT)
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && !gProtectStructs[battler].confusionSelfDmg
-         && gProtectStructs[gBattlerTarget].statFell
-         && IsFinalMultiHitStrike()
-         && TryUseWebTrapCalledMove(battler, gBattlerTarget))
         {
             effect++;
         }
