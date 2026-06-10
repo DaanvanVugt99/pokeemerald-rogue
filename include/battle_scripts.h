@@ -96,6 +96,8 @@ extern const u8 BattleScript_AbilityPopupReturn[];
 extern const u8 BattleScript_JungleLashActivates[];
 extern const u8 BattleScript_GrafittiTagActivates[];
 extern const u8 BattleScript_TripwireActivates[];
+extern const u8 BattleScript_AromaTrailActivates[];
+extern const u8 BattleScript_RestorePendingUniqueAbilityContext[];
 extern const u8 BattleScript_IntentFocused[];
 extern const u8 BattleScript_FamilyFeudReadied[];
 extern const u8 BattleScript_CarvingRushReadied[];

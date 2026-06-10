@@ -487,7 +487,7 @@ BattleScript_SyrupBombActivates::
 
 BattleScript_SyrupBombEndTurn::
 	flushtextbox
-	playanimation BS_ATTACKER, B_ANIM_SYRUP_BOMB_SPEED_DROP
+	playanimation BS_TARGET, B_ANIM_SYRUP_BOMB_SPEED_DROP
 	setstatchanger STAT_SPEED, 1, TRUE
 	statbuffchange STAT_CHANGE_ALLOW_PTR | STAT_CHANGE_NOT_PROTECT_AFFECTED, BattleScript_SyrupBombTurnDmgEnd
 	printfromtable gStatDownStringIds
@@ -10080,6 +10080,28 @@ BattleScript_TripwirePrintStatMsg:
 BattleScript_TripwireEnd:
 	return
 
+BattleScript_AromaTrailActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_ACC, 1, TRUE
+	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_AromaTrailEnd
+	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_AromaTrailStatAnim
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_FELL_EMPTY, BattleScript_AromaTrailEnd
+	pause B_WAIT_TIME_SHORT
+	goto BattleScript_AromaTrailPrintStatMsg
+BattleScript_AromaTrailStatAnim:
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+BattleScript_AromaTrailPrintStatMsg:
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_AromaTrailEnd:
+	return
+
+BattleScript_RestorePendingUniqueAbilityContext::
+	various BS_ATTACKER, VARIOUS_RESTORE_PENDING_UNIQUE_ABILITY_CONTEXT
+	return
+
 BattleScript_IntentFocused::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_INTENTFOCUSED
@@ -10192,21 +10214,19 @@ BattleScript_NeedleburstRet:
 	return
 
 BattleScript_ScrapJobActivates::
-	various BS_ATTACKER, VARIOUS_SAVE_SCRAP_JOB_ATTACKER
 BattleScript_ScrapJobLoop:
 	various BS_ATTACKER, VARIOUS_PREPARE_SCRAP_JOB
 	.4byte BattleScript_ScrapJobEnd
 	various BS_ATTACKER, VARIOUS_TRY_SET_SCRAP_JOB_SPIKES
 	.4byte BattleScript_ScrapJobLoop
 	call BattleScript_AbilityPopUp
-	playmoveanimation BS_ATTACKER, MOVE_SPIKES
+	playmoveanimation BS_ABILITY_BATTLER, MOVE_SPIKES
 	waitanimation
 	printstring STRINGID_SPIKESSCATTERED
 	waitmessage B_WAIT_TIME_LONG
 	sethword sABILITY_OVERWRITE, 0
 	goto BattleScript_ScrapJobLoop
 BattleScript_ScrapJobEnd:
-	various BS_ATTACKER, VARIOUS_RESTORE_SCRAP_JOB_ATTACKER
 	return
 
 BattleScript_InfernalRageActivates::

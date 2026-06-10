@@ -3602,6 +3602,7 @@ u8 DoBattlerEndTurnEffects(void)
             {
                 if (gDisableStructs[battler].syrupBombTimer > 0 && --gDisableStructs[battler].syrupBombTimer == 0)
                     gStatuses4[battler] &= ~STATUS4_SYRUP_BOMB;
+                gBattlerAttacker = gBattleStruct->stickySyrupdBy[battler];
                 gBattlerTarget = battler;
                 PREPARE_MOVE_BUFFER(gBattleTextBuff1, MOVE_SYRUP_BOMB);
                 gBattlescriptCurrInstr = BattleScript_SyrupBombEndTurn;
@@ -5953,6 +5954,7 @@ static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target)
 
     if (target >= gBattlersCount
      || !IsBattlerAlive(target)
+     || !HasBattlerAbility(battler, ABILITY_WEB_TRAP)
      || target == battler
      || GetBattlerSide(target) == GetBattlerSide(battler)
      || !CanUseExtraMove(battler, target))
@@ -5971,19 +5973,39 @@ static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
+static bool32 TryActivateWebTrap(u32 battler, u32 source, u32 target)
+{
+    if (source >= gBattlersCount)
+        return FALSE;
+
+    return TryUseWebTrapCalledMove(battler, target);
+}
+
 #define PENDING_UNIQUE_EFFECT_BITS         4
 #define PENDING_UNIQUE_EFFECT_KIND_MASK    0xF
-#define PENDING_UNIQUE_EFFECT_TARGET_BITS  2
-#define PENDING_UNIQUE_EFFECT_TARGET_MASK  0x3
+#define PENDING_UNIQUE_BATTLER_BITS        4
+#define PENDING_UNIQUE_BATTLER_MASK        0xF
+#define PENDING_UNIQUE_SOURCE_SHIFT        2
+#define PENDING_UNIQUE_BATTLER_ID_MASK     0x3
 
 u32 GetPendingUniqueAbilityEffect(u32 battler)
 {
     return (gBattleStruct->pendingUniqueAbilityEffects >> (battler * PENDING_UNIQUE_EFFECT_BITS)) & PENDING_UNIQUE_EFFECT_KIND_MASK;
 }
 
+static u32 GetPendingUniqueAbilityBattlerData(u32 battler)
+{
+    return (gBattleStruct->pendingUniqueAbilityBattlers >> (battler * PENDING_UNIQUE_BATTLER_BITS)) & PENDING_UNIQUE_BATTLER_MASK;
+}
+
+static u32 GetPendingUniqueAbilitySource(u32 battler)
+{
+    return (GetPendingUniqueAbilityBattlerData(battler) >> PENDING_UNIQUE_SOURCE_SHIFT) & PENDING_UNIQUE_BATTLER_ID_MASK;
+}
+
 static u32 GetPendingUniqueAbilityTarget(u32 battler)
 {
-    return (gBattleStruct->pendingUniqueAbilityTargets >> (battler * PENDING_UNIQUE_EFFECT_TARGET_BITS)) & PENDING_UNIQUE_EFFECT_TARGET_MASK;
+    return GetPendingUniqueAbilityBattlerData(battler) & PENDING_UNIQUE_BATTLER_ID_MASK;
 }
 
 static bool32 IsPendingUniqueAbilityEffectQueued(u32 effect)
@@ -6002,29 +6024,31 @@ static bool32 IsPendingUniqueAbilityEffectQueued(u32 effect)
 void ClearPendingUniqueAbilityEffect(u32 battler)
 {
     gBattleStruct->pendingUniqueAbilityEffects &= ~(PENDING_UNIQUE_EFFECT_KIND_MASK << (battler * PENDING_UNIQUE_EFFECT_BITS));
-    gBattleStruct->pendingUniqueAbilityTargets &= ~(PENDING_UNIQUE_EFFECT_TARGET_MASK << (battler * PENDING_UNIQUE_EFFECT_TARGET_BITS));
+    gBattleStruct->pendingUniqueAbilityBattlers &= ~(PENDING_UNIQUE_BATTLER_MASK << (battler * PENDING_UNIQUE_BATTLER_BITS));
 }
 
-bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 target)
+bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target)
 {
     if (effect == PENDING_UNIQUE_EFFECT_NONE
      || effect > PENDING_UNIQUE_EFFECT_KIND_MASK
      || battler >= gBattlersCount
+     || source >= gBattlersCount
      || target >= gBattlersCount
      || GetPendingUniqueAbilityEffect(battler) != PENDING_UNIQUE_EFFECT_NONE)
         return FALSE;
 
     gBattleStruct->pendingUniqueAbilityEffects |= effect << (battler * PENDING_UNIQUE_EFFECT_BITS);
-    gBattleStruct->pendingUniqueAbilityTargets |= target << (battler * PENDING_UNIQUE_EFFECT_TARGET_BITS);
+    gBattleStruct->pendingUniqueAbilityBattlers |= ((source << PENDING_UNIQUE_SOURCE_SHIFT) | target) << (battler * PENDING_UNIQUE_BATTLER_BITS);
     return TRUE;
 }
 
-void QueueWebTrapForSpeedDrop(u32 slowedBattler)
+void QueueWebTrapForSpeedDrop(u32 slowedBattler, u32 sourceBattler)
 {
     u32 i;
     u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
 
     if (slowedBattler >= gBattlersCount
+     || sourceBattler >= gBattlersCount
      || !IsBattlerAlive(slowedBattler)
      || IsPendingUniqueAbilityEffectQueued(PENDING_UNIQUE_EFFECT_WEB_TRAP))
         return;
@@ -6039,10 +6063,45 @@ void QueueWebTrapForSpeedDrop(u32 slowedBattler)
          && HasBattlerAbility(battler, ABILITY_WEB_TRAP)
          && CanUseExtraMove(battler, slowedBattler))
         {
-            QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_WEB_TRAP, battler, slowedBattler);
+            QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_WEB_TRAP, battler, sourceBattler, slowedBattler);
             return;
         }
     }
+}
+
+void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler)
+{
+    if (loweredBattler >= gBattlersCount
+     || sourceBattler >= gBattlersCount
+     || !IsBattlerAlive(loweredBattler)
+     || !IsBattlerAlive(sourceBattler)
+     || GetBattlerSide(loweredBattler) == GetBattlerSide(sourceBattler)
+     || !HasBattlerAbility(loweredBattler, ABILITY_AROMA_TRAIL)
+     || (gBattleMons[sourceBattler].statStages[STAT_ACC] == MIN_STAT_STAGE
+      && GetBattlerAbility(sourceBattler) != ABILITY_MIRROR_ARMOR))
+        return;
+
+    QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_AROMA_TRAIL, loweredBattler, sourceBattler, sourceBattler);
+}
+
+static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
+{
+    if (!IsBattlerAlive(battler)
+     || !IsBattlerAlive(source)
+     || !IsBattlerAlive(target)
+     || !HasBattlerAbility(battler, ABILITY_AROMA_TRAIL)
+     || GetBattlerSide(battler) == GetBattlerSide(source)
+     || (gBattleMons[target].statStages[STAT_ACC] == MIN_STAT_STAGE
+      && GetBattlerAbility(target) != ABILITY_MIRROR_ARMOR))
+        return FALSE;
+
+    SET_STATCHANGER(STAT_ACC, 1, TRUE);
+    SetBattlerTriggeredAbility(battler, ABILITY_AROMA_TRAIL);
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = BattleScript_AromaTrailActivates;
+    return TRUE;
 }
 
 bool32 TryActivatePendingUniqueAbilityEffect(void)
@@ -6057,10 +6116,20 @@ bool32 TryActivatePendingUniqueAbilityEffect(void)
 
         if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_WEB_TRAP)
         {
+            u32 source = GetPendingUniqueAbilitySource(battler);
             u32 target = GetPendingUniqueAbilityTarget(battler);
 
             ClearPendingUniqueAbilityEffect(battler);
-            if (TryUseWebTrapCalledMove(battler, target))
+            if (TryActivateWebTrap(battler, source, target))
+                return TRUE;
+        }
+        else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_AROMA_TRAIL)
+        {
+            u32 source = GetPendingUniqueAbilitySource(battler);
+            u32 target = GetPendingUniqueAbilityTarget(battler);
+
+            ClearPendingUniqueAbilityEffect(battler);
+            if (TryActivateAromaTrail(battler, source, target))
                 return TRUE;
         }
     }

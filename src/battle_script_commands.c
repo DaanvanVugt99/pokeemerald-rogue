@@ -3276,7 +3276,75 @@ static bool32 TryMarkScrapJobPending(u32 battler)
     if (!CanScrapJobActivate(battler))
         return FALSE;
 
-    return QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_SCRAP_JOB, battler, battler);
+    return QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_SCRAP_JOB, battler, battler, battler);
+}
+
+#define PENDING_UNIQUE_CONTEXT_VALID        (1 << 7)
+#define PENDING_UNIQUE_CONTEXT_TARGET_SHIFT 3
+#define PENDING_UNIQUE_CONTEXT_BATTLER_MASK 0x7
+
+static u32 PackPendingUniqueAbilityContextBattler(u32 battler)
+{
+    return battler < MAX_BATTLERS_COUNT ? battler : MAX_BATTLERS_COUNT;
+}
+
+static void SavePendingUniqueAbilityBattleContext(void)
+{
+    gBattleStruct->pendingUniqueAbilitySavedContext = PENDING_UNIQUE_CONTEXT_VALID
+        | PackPendingUniqueAbilityContextBattler(gBattlerAttacker)
+        | (PackPendingUniqueAbilityContextBattler(gBattlerTarget) << PENDING_UNIQUE_CONTEXT_TARGET_SHIFT);
+}
+
+static void RestorePendingUniqueAbilityBattleContext(void)
+{
+    u32 savedContext = gBattleStruct->pendingUniqueAbilitySavedContext;
+
+    if (!(savedContext & PENDING_UNIQUE_CONTEXT_VALID))
+        return;
+
+    gBattlerAttacker = savedContext & PENDING_UNIQUE_CONTEXT_BATTLER_MASK;
+    gBattlerTarget = (savedContext >> PENDING_UNIQUE_CONTEXT_TARGET_SHIFT) & PENDING_UNIQUE_CONTEXT_BATTLER_MASK;
+    gBattleStruct->pendingUniqueAbilitySavedContext = 0;
+}
+
+static bool32 IsPendingUniqueAbilityScriptActive(void)
+{
+    return (gBattleStruct->pendingUniqueAbilitySavedContext & PENDING_UNIQUE_CONTEXT_VALID);
+}
+
+static bool32 TryStartPendingUniqueAbilityScript(const u8 *returnInstr, const u8 *noEffectInstr)
+{
+    u32 stackSize = gBattleResources->battleScriptsStack->size;
+
+    if (IsPendingUniqueAbilityScriptActive())
+        return FALSE;
+
+    BattleScriptPush(returnInstr);
+    gBattlescriptCurrInstr = BattleScript_RestorePendingUniqueAbilityContext;
+    SavePendingUniqueAbilityBattleContext();
+    if (TryActivatePendingUniqueAbilityEffect())
+        return TRUE;
+
+    gBattleResources->battleScriptsStack->size = stackSize;
+    gBattleStruct->pendingUniqueAbilitySavedContext = 0;
+    gBattlescriptCurrInstr = noEffectInstr;
+    return FALSE;
+}
+
+static bool32 TryContinuePendingUniqueAbilityDrain(const u8 *returnInstr, const u8 *noEffectInstr)
+{
+    RestorePendingUniqueAbilityBattleContext();
+    return TryStartPendingUniqueAbilityScript(returnInstr, noEffectInstr);
+}
+
+// Called moves can reach end/end2 instead of returning through the script stack.
+// Finish the active pending script there, then drain the next queued effect.
+static bool32 TryFinishPendingUniqueAbilityScriptAndContinueDrain(const u8 *returnInstr)
+{
+    if (!IsPendingUniqueAbilityScriptActive())
+        return FALSE;
+
+    return TryContinuePendingUniqueAbilityDrain(returnInstr, returnInstr);
 }
 
 static void TryQueueScrapJobAfterRemoveItem(u32 battler, const u8 *nextInstr)
@@ -5843,6 +5911,9 @@ static void Cmd_end(void)
 {
     CMD_ARGS();
 
+    if (TryFinishPendingUniqueAbilityScriptAndContinueDrain(gBattlescriptCurrInstr))
+        return;
+
     if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
         BattleArena_AddSkillPoints(gBattlerAttacker);
 
@@ -5853,6 +5924,9 @@ static void Cmd_end(void)
 static void Cmd_end2(void)
 {
     CMD_ARGS();
+
+    if (TryFinishPendingUniqueAbilityScriptAndContinueDrain(gBattlescriptCurrInstr))
+        return;
 
     gCurrentActionFuncId = B_ACTION_TRY_FINISH;
 }
@@ -6461,6 +6535,16 @@ static void Cmd_moveend(void)
             }
             gBattleScripting.moveendState++;
             break;
+        case MOVEEND_PENDING_UNIQUE_ABILITY:
+            if (TryStartPendingUniqueAbilityScript(gBattlescriptCurrInstr, gBattlescriptCurrInstr))
+            {
+                effect = TRUE;
+            }
+            else
+            {
+                gBattleScripting.moveendState++;
+            }
+            break;
         case MOVEEND_SYNCHRONIZE_TARGET: // target synchronize
             if (AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE, gBattlerTarget, 0, 0, 0))
                 effect = TRUE;
@@ -7044,11 +7128,6 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         }
-        case MOVEEND_PENDING_UNIQUE_ABILITY:
-            if (TryActivatePendingUniqueAbilityEffect())
-                effect = TRUE;
-            gBattleScripting.moveendState++;
-            break;
         case MOVEEND_EJECT_BUTTON:
             if (gBattleMoves[gCurrentMove].effect != EFFECT_HIT_SWITCH_TARGET
               && IsBattlerAlive(gBattlerAttacker)
@@ -9005,7 +9084,7 @@ static void Cmd_switchineffects(void)
     {
         return;
     }
-    else if (TryActivatePendingUniqueAbilityEffect())
+    else if (TryStartPendingUniqueAbilityScript(gBattlescriptCurrInstr, gBattlescriptCurrInstr))
     {
         return;
     }
@@ -11538,12 +11617,6 @@ static void Cmd_various(void)
         gBattlerTarget = gBattleStruct->savedFaintBattlerTarget;
         break;
     }
-    case VARIOUS_SAVE_SCRAP_JOB_ATTACKER:
-    {
-        VARIOUS_ARGS();
-        gBattleStruct->pendingUniqueAbilitySavedAttacker = gBattlerAttacker;
-        break;
-    }
     case VARIOUS_PREPARE_SCRAP_JOB:
     {
         VARIOUS_ARGS(const u8 *failInstr);
@@ -11555,7 +11628,6 @@ static void Cmd_various(void)
                 if (CanScrapJobActivate(i))
                 {
                     SetBattlerTriggeredAbility(i, ABILITY_SCRAP_JOB);
-                    gBattlerAttacker = i;
                     gBattlescriptCurrInstr = cmd->nextInstr;
                     return;
                 }
@@ -11563,12 +11635,6 @@ static void Cmd_various(void)
         }
         gBattlescriptCurrInstr = cmd->failInstr;
         return;
-    }
-    case VARIOUS_RESTORE_SCRAP_JOB_ATTACKER:
-    {
-        VARIOUS_ARGS();
-        gBattlerAttacker = gBattleStruct->pendingUniqueAbilitySavedAttacker;
-        break;
     }
     case VARIOUS_TRY_SET_SCRAP_JOB_SPIKES:
     {
@@ -13651,9 +13717,15 @@ static void Cmd_various(void)
     case VARIOUS_TRY_ACTIVATE_PENDING_UNIQUE_ABILITY:
     {
         VARIOUS_ARGS();
-        gBattlescriptCurrInstr = cmd->nextInstr;
-        TryActivatePendingUniqueAbilityEffect();
-        return;
+        if (TryContinuePendingUniqueAbilityDrain(gBattlescriptCurrInstr, cmd->nextInstr))
+            return;
+        break;
+    }
+    case VARIOUS_RESTORE_PENDING_UNIQUE_ABILITY_CONTEXT:
+    {
+        VARIOUS_ARGS();
+        RestorePendingUniqueAbilityBattleContext();
+        break;
     }
     } // End of switch (cmd->id)
 
@@ -14590,7 +14662,11 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
     if (statId == STAT_SPEED
      && statValue < 0
      && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_DECREASE)
-        QueueWebTrapForSpeedDrop(battler);
+        QueueWebTrapForSpeedDrop(battler, gBattlerAttacker);
+
+    if (statValue < 0
+     && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_DECREASE)
+        QueueAromaTrailForStatDrop(battler, gBattlerAttacker);
 
     if (gBattleCommunication[MULTISTRING_CHOOSER] == B_MSG_STAT_WONT_INCREASE && flags & STAT_CHANGE_ALLOW_PTR)
         gMoveResultFlags |= MOVE_RESULT_MISSED;

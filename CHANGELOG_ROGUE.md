@@ -26,6 +26,7 @@ Format follows Keep a Changelog loosely:
   abilities.
 - Added Terapagos's World Prism unique ability.
 - Added Pecharunt's Puppet Master unique ability.
+- Added the Lechonk line's Aroma Trail unique ability.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 

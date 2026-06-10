@@ -264,6 +264,7 @@
 #define VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL         171
 #define VARIOUS_TRY_SHELTER_HEAL                     172
 #define VARIOUS_TRY_ACTIVATE_PENDING_UNIQUE_ABILITY  173
+#define VARIOUS_RESTORE_PENDING_UNIQUE_ABILITY_CONTEXT 174
 
 // Argument labels for VARIOUS_PREPARE_RANDOM_MOVE_FROM_POOL
 #define RANDOM_MOVE_POOL_CHEMICAL        0
@@ -335,9 +336,9 @@
 #define MOVEEND_MIRROR_MOVE                       20
 #define MOVEEND_NEXT_TARGET                       21   // Everything up until here is handled for each strike of a multi-hit move
 #define MOVEEND_MULTIHIT_MOVE                     22
-#define MOVEEND_PENDING_UNIQUE_ABILITY            23
-#define MOVEEND_DEFROST                           24
-#define MOVEEND_RECOIL                            25
+#define MOVEEND_DEFROST                           23
+#define MOVEEND_RECOIL                            24
+#define MOVEEND_PENDING_UNIQUE_ABILITY            25
 #define MOVEEND_MAGICIAN                          26    // Occurs after final multi-hit strike, and after other items/abilities would activate
 #define MOVEEND_EJECT_BUTTON                      27
 #define MOVEEND_RED_CARD                          28
