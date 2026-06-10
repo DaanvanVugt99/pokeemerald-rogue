@@ -168,6 +168,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_WEB_TRAP,
     PENDING_UNIQUE_EFFECT_SCRAP_JOB,
     PENDING_UNIQUE_EFFECT_AROMA_TRAIL,
+    PENDING_UNIQUE_EFFECT_STRONG_WINDS,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -175,6 +176,7 @@ u32 GetPendingUniqueAbilityEffect(u32 battler);
 void ClearPendingUniqueAbilityEffect(u32 battler);
 void QueueWebTrapForSpeedDrop(u32 slowedBattler, u32 sourceBattler);
 void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler);
+void QueueStrongWindsForForcedSwitch(u32 sourceBattler, u32 forcedBattler);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg);
 void SetGrafittiTag(u32 battler);

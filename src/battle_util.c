@@ -6084,6 +6084,40 @@ void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler)
     QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_AROMA_TRAIL, loweredBattler, sourceBattler, sourceBattler);
 }
 
+void QueueStrongWindsForForcedSwitch(u32 sourceBattler, u32 forcedBattler)
+{
+    u32 i;
+    u32 sourceSide;
+    u32 forcedSide;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+
+    if (sourceBattler >= gBattlersCount
+     || forcedBattler >= gBattlersCount)
+        return;
+
+    sourceSide = GetBattlerSide(sourceBattler);
+    forcedSide = GetBattlerSide(forcedBattler);
+
+    if (sourceSide == forcedSide
+     || gSideStatuses[sourceSide] & SIDE_STATUS_TAILWIND
+     || IsPendingUniqueAbilityEffectQueued(PENDING_UNIQUE_EFFECT_STRONG_WINDS))
+        return;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+
+        if (IsBattlerAlive(battler)
+         && GetBattlerSide(battler) == sourceSide
+         && HasBattlerAbility(battler, ABILITY_STRONG_WINDS))
+        {
+            QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_STRONG_WINDS, battler, sourceBattler, forcedBattler);
+            return;
+        }
+    }
+}
+
 static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
 {
     if (!IsBattlerAlive(battler)
@@ -6101,6 +6135,29 @@ static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
     gBattlerTarget = target;
     BattleScriptPushCursor();
     gBattlescriptCurrInstr = BattleScript_AromaTrailActivates;
+    return TRUE;
+}
+
+static bool32 TryActivateStrongWinds(u32 battler, u32 source, u32 target)
+{
+    u32 side;
+
+    if (!IsBattlerAlive(battler)
+     || source >= gBattlersCount
+     || target >= gBattlersCount
+     || GetBattlerSide(source) == GetBattlerSide(target)
+     || GetBattlerSide(battler) != GetBattlerSide(source)
+     || !HasBattlerAbility(battler, ABILITY_STRONG_WINDS))
+        return FALSE;
+
+    side = GetBattlerSide(battler);
+    if (gSideStatuses[side] & SIDE_STATUS_TAILWIND)
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_STRONG_WINDS);
+    gBattlerAttacker = gBattlerAbility = battler;
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = BattleScript_StrongWindsPendingTailwind;
     return TRUE;
 }
 
@@ -6130,6 +6187,15 @@ bool32 TryActivatePendingUniqueAbilityEffect(void)
 
             ClearPendingUniqueAbilityEffect(battler);
             if (TryActivateAromaTrail(battler, source, target))
+                return TRUE;
+        }
+        else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_STRONG_WINDS)
+        {
+            u32 source = GetPendingUniqueAbilitySource(battler);
+            u32 target = GetPendingUniqueAbilityTarget(battler);
+
+            ClearPendingUniqueAbilityEffect(battler);
+            if (TryActivateStrongWinds(battler, source, target))
                 return TRUE;
         }
     }
@@ -10861,19 +10927,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
-        case ABILITY_STRONG_WINDS:
-            if (!gSpecialStatuses[battler].switchInAbilityDone
-             && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
-            {
-                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
-                gBattlerAttacker = battler;
-                gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TAILWIND;
-                gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = gBattlerAttacker;
-                gSideTimers[GetBattlerSide(battler)].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
-                BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
-                effect++;
-            }
-            break;
         case ABILITY_FROST_REVELRY:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -15524,12 +15577,12 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_WORK_CREW)
-         && moveType == TYPE_GROUND
+         && move == MOVE_DIG
+         && (gStatuses3[battler] & STATUS3_UNDERGROUND)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[battler].confusionSelfDmg
          && IsFinalMultiHitStrike()
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && TryUseWorkCrewCalledMove(battler))
         {
             effect++;
@@ -16222,7 +16275,7 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniquePersistentStateActive = FALSE;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_ROOTSNARE)
+        if (HasBattlerAbility(battler, ABILITY_VINE_LASH)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
@@ -16231,7 +16284,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_ROOTSNARE);
+            SetBattlerTriggeredAbility(battler, ABILITY_VINE_LASH);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gCalledMove = MOVE_SMACK_DOWN;
@@ -16695,22 +16748,22 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_UPDRAFT)
+        if (HasBattlerAbility(battler, ABILITY_THERMAL_LIFT)
          && moveType == TYPE_FIRE
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
-         && CanUseSelfExtraMove(battler)
+         && CanUseExtraMove(battler, gBattlerTarget)
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_UPDRAFT);
+            SetBattlerTriggeredAbility(battler, ABILITY_THERMAL_LIFT);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
-            gCalledMove = MOVE_TAILWIND;
+            gCalledMove = MOVE_SKY_ATTACK;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            StartAbilityCalledMoveScriptAt(BattleScript_ThermalLiftUsesSkyAttack);
             effect++;
         }
 

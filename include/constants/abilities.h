@@ -343,8 +343,8 @@
 #define ABILITY_FORECAST_PRIORITY   311
 
 // Uniques
-#define ABILITY_ROOTSNARE              314
-#define ABILITY_UPDRAFT                313
+#define ABILITY_VINE_LASH              314
+#define ABILITY_THERMAL_LIFT          313
 #define ABILITY_SHELL_FORMATION        315
 #define ABILITY_SLEEP_DUST             316
 #define ABILITY_TOXIC_TANDEM           317

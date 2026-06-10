@@ -11887,6 +11887,18 @@ BattleScript_StrongWindsActivated::
 	call BattleScript_TryTailwindAbilitiesLoop
 	end3
 
+BattleScript_StrongWindsPendingTailwind::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	settailwind BattleScript_StrongWindsPendingTailwindEnd
+	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
+	waitanimation
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_TryTailwindAbilitiesLoop
+BattleScript_StrongWindsPendingTailwindEnd:
+	return
+
 BattleScript_RevelryLightScreen::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
@@ -12159,18 +12171,6 @@ BattleScript_VampiricUpdateHp:
 	tryfaintmon BS_ATTACKER
 	return
 
-BattleScript_UpdraftActivates::
-	waitstate
-	call BattleScript_AbilityPopUp
-	settailwind BattleScript_UpdraftEnd
-	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
-	waitanimation
-	printstring STRINGID_TAILWINDBLEW
-	waitmessage B_WAIT_TIME_LONG
-	call BattleScript_TryTailwindAbilitiesLoop
-BattleScript_UpdraftEnd:
-	return
-
 BattleScript_ShellFormationActivates::
 	waitstate
 	setstatchanger STAT_DEF, 2, FALSE
@@ -12186,6 +12186,16 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	setbyte sB_ANIM_TURN, 0
 	setbyte sB_ANIM_TARGETS_HIT, 0
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
+	jumptocalledmove TRUE
+
+BattleScript_ThermalLiftUsesSkyAttack::
+	copybyte gBattlerAttacker, sBATTLER
+	copybyte gBattlerAbility, sBATTLER
+	call BattleScript_AbilityPopUp
+	waitmessage B_WAIT_TIME_SHORT
+	setbyte sB_ANIM_TURN, 0
+	setbyte sB_ANIM_TARGETS_HIT, 0
+	orword gHitMarker, HITMARKER_ALLOW_NO_PP | HITMARKER_NO_ATTACKSTRING
 	jumptocalledmove TRUE
 
 BattleScript_MaliciousMindUsesConfuseRayAndDisable::
@@ -12542,7 +12552,7 @@ BattleScript_SuctionCupsActivates::
 	swapattackerwithtarget
 	return
 
-BattleScript_RootsnareActivates::
+BattleScript_VineLashActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
 	setseeded
