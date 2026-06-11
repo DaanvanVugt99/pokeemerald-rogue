@@ -6118,6 +6118,41 @@ void QueueStrongWindsForForcedSwitch(u32 sourceBattler, u32 forcedBattler)
     }
 }
 
+void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount)
+{
+    u32 i;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+
+    if (healedBattler >= gBattlersCount
+     || healAmount == 0
+     || gBattleStruct->suppressMoonlightHealQueue)
+        return;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+
+        if (!IsBattlerAlive(battler)
+         || !HasBattlerAbility(battler, ABILITY_MOONLIGHT)
+         || gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+            continue;
+
+        if (battler == healedBattler)
+        {
+            u32 healedHp = min(gBattleMons[battler].maxHP, gBattleMons[battler].hp + healAmount);
+            if (healedHp >= gBattleMons[battler].maxHP)
+                continue;
+        }
+        else if (BATTLER_MAX_HP(battler))
+        {
+            continue;
+        }
+
+        QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_MOONLIGHT, battler, healedBattler, healedBattler);
+    }
+}
+
 static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
 {
     if (!IsBattlerAlive(battler)
@@ -6161,7 +6196,71 @@ static bool32 TryActivateStrongWinds(u32 battler, u32 source, u32 target)
     return TRUE;
 }
 
-bool32 TryActivatePendingUniqueAbilityEffect(void)
+static bool32 TryActivateMoonlight(u32 battler, u32 source, u32 target)
+{
+    if (!IsBattlerAlive(battler)
+     || source >= gBattlersCount
+     || target >= gBattlersCount
+     || !HasBattlerAbility(battler, ABILITY_MOONLIGHT)
+     || BATTLER_MAX_HP(battler)
+     || (gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_MOONLIGHT);
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+    if (gBattleMoveDamage == 0)
+        gBattleMoveDamage = 1;
+    gBattleMoveDamage *= -1;
+    gBattleStruct->suppressMoonlightHealQueue = TRUE;
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = BattleScript_MoonlightActivates;
+    return TRUE;
+}
+
+static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
+{
+    if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_WEB_TRAP)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateWebTrap(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_AROMA_TRAIL)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateAromaTrail(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_STRONG_WINDS)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateStrongWinds(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_MOONLIGHT)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateMoonlight(battler, source, target))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool32 TryActivatePendingUniqueAbilityEffectMatching(u32 effect, bool32 matchAny)
 {
     u32 i;
     u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
@@ -6171,36 +6270,22 @@ bool32 TryActivatePendingUniqueAbilityEffect(void)
     {
         u32 battler = battlers[i];
 
-        if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_WEB_TRAP)
-        {
-            u32 source = GetPendingUniqueAbilitySource(battler);
-            u32 target = GetPendingUniqueAbilityTarget(battler);
-
-            ClearPendingUniqueAbilityEffect(battler);
-            if (TryActivateWebTrap(battler, source, target))
-                return TRUE;
-        }
-        else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_AROMA_TRAIL)
-        {
-            u32 source = GetPendingUniqueAbilitySource(battler);
-            u32 target = GetPendingUniqueAbilityTarget(battler);
-
-            ClearPendingUniqueAbilityEffect(battler);
-            if (TryActivateAromaTrail(battler, source, target))
-                return TRUE;
-        }
-        else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_STRONG_WINDS)
-        {
-            u32 source = GetPendingUniqueAbilitySource(battler);
-            u32 target = GetPendingUniqueAbilityTarget(battler);
-
-            ClearPendingUniqueAbilityEffect(battler);
-            if (TryActivateStrongWinds(battler, source, target))
-                return TRUE;
-        }
+        if ((matchAny || GetPendingUniqueAbilityEffect(battler) == effect)
+         && TryActivatePendingUniqueAbilityEffectForBattler(battler))
+            return TRUE;
     }
 
     return FALSE;
+}
+
+bool32 TryActivatePendingUniqueAbilityEffect(void)
+{
+    return TryActivatePendingUniqueAbilityEffectMatching(PENDING_UNIQUE_EFFECT_NONE, TRUE);
+}
+
+bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect)
+{
+    return TryActivatePendingUniqueAbilityEffectMatching(effect, FALSE);
 }
 
 static const u16 sDeliveryBagMoves[] =
@@ -23218,8 +23303,6 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
             break;
         }
 
-        if (HasBattlerAbility(BATTLE_PARTNER(battlerDef), ABILITY_MOONLIGHT) && !usesDefStat)
-            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.25));
     }
 
     // field abilities

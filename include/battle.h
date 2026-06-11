@@ -730,6 +730,7 @@ struct BattleStruct
     u16 pendingUniqueAbilityEffects;
     u16 pendingUniqueAbilityBattlers;
     u8 pendingUniqueAbilitySavedContext;
+    bool8 suppressMoonlightHealQueue;
     u8 stolenStats[NUM_BATTLE_STATS]; // hp byte is used for which stats to raise, other inform about by how many stages
     u8 lastMoveFailed; // as bits for each battler, for the sake of Stomping Tantrum
     u8 lastMoveTarget[MAX_BATTLERS_COUNT]; // The last target on which each mon used a move, for the sake of Instruct

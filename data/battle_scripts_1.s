@@ -9923,6 +9923,13 @@ BattleScript_AbilityHpHeal::
 	datahpupdate BS_ATTACKER
 	return
 
+BattleScript_MoonlightActivates::
+	call BattleScript_AbilityHpHeal
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_PENDING_MOONLIGHT
+	.4byte BattleScript_MoonlightEnd
+BattleScript_MoonlightEnd:
+	return
+
 BattleScript_DuelistActivates::
 	call BattleScript_AbilityHpHeal
 	return
@@ -12195,7 +12202,7 @@ BattleScript_ThermalLiftUsesSkyAttack::
 	waitmessage B_WAIT_TIME_SHORT
 	setbyte sB_ANIM_TURN, 0
 	setbyte sB_ANIM_TARGETS_HIT, 0
-	orword gHitMarker, HITMARKER_ALLOW_NO_PP | HITMARKER_NO_ATTACKSTRING
+	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
 BattleScript_MaliciousMindUsesConfuseRayAndDisable::

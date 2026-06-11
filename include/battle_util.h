@@ -169,6 +169,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_SCRAP_JOB,
     PENDING_UNIQUE_EFFECT_AROMA_TRAIL,
     PENDING_UNIQUE_EFFECT_STRONG_WINDS,
+    PENDING_UNIQUE_EFFECT_MOONLIGHT,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -177,7 +178,9 @@ void ClearPendingUniqueAbilityEffect(u32 battler);
 void QueueWebTrapForSpeedDrop(u32 slowedBattler, u32 sourceBattler);
 void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler);
 void QueueStrongWindsForForcedSwitch(u32 sourceBattler, u32 forcedBattler);
+void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
+bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg);
 void SetGrafittiTag(u32 battler);
 void ResetGrafittiTagPaletteCache(u32 battler);

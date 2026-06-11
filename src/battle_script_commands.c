@@ -456,6 +456,8 @@ static void Cmd_attackanimation(void);
 static void Cmd_waitanimation(void);
 static void Cmd_healthbarupdate(void);
 static void Cmd_datahpupdate(void);
+static bool32 TryStartPendingUniqueAbilityScript(const u8 *returnInstr, const u8 *noEffectInstr);
+static bool32 TryStartPendingUniqueAbilityScriptOfKind(const u8 *returnInstr, const u8 *noEffectInstr, u32 effect);
 static void Cmd_critmessage(void);
 static void Cmd_effectivenesssound(void);
 static void Cmd_resultmessage(void);
@@ -2719,6 +2721,14 @@ static void Cmd_healthbarupdate(void)
 
             if (GetBattlerSide(battler) == B_SIDE_PLAYER && gBattleMoveDamage > 0)
                 gBattleResults.playerMonWasDamaged = TRUE;
+
+            if (gBattleMoveDamage < 0 && gBattleMons[battler].hp < gBattleMons[battler].maxHP)
+            {
+                if (gBattleStruct->suppressMoonlightHealQueue)
+                    gBattleStruct->suppressMoonlightHealQueue = FALSE;
+                else
+                    QueueMoonlightForHeal(battler, -gBattleMoveDamage);
+            }
         }
     }
 
@@ -2901,6 +2911,10 @@ static void Cmd_datahpupdate(void)
                 gBattlescriptCurrInstr = BattleScript_ReefProtectionActivates;
                 return;
             }
+
+            if (gBattleMoveDamage < 0
+             && TryStartPendingUniqueAbilityScriptOfKind(cmd->nextInstr, cmd->nextInstr, PENDING_UNIQUE_EFFECT_MOONLIGHT))
+                return;
         }
     }
     else
@@ -3312,7 +3326,7 @@ static bool32 IsPendingUniqueAbilityScriptActive(void)
     return (gBattleStruct->pendingUniqueAbilitySavedContext & PENDING_UNIQUE_CONTEXT_VALID);
 }
 
-static bool32 TryStartPendingUniqueAbilityScript(const u8 *returnInstr, const u8 *noEffectInstr)
+static bool32 TryStartPendingUniqueAbilityScriptInternal(const u8 *returnInstr, const u8 *noEffectInstr, u32 effect, bool32 matchAny)
 {
     u32 stackSize = gBattleResources->battleScriptsStack->size;
 
@@ -3322,7 +3336,7 @@ static bool32 TryStartPendingUniqueAbilityScript(const u8 *returnInstr, const u8
     BattleScriptPush(returnInstr);
     gBattlescriptCurrInstr = BattleScript_RestorePendingUniqueAbilityContext;
     SavePendingUniqueAbilityBattleContext();
-    if (TryActivatePendingUniqueAbilityEffect())
+    if (matchAny ? TryActivatePendingUniqueAbilityEffect() : TryActivatePendingUniqueAbilityEffectOfKind(effect))
         return TRUE;
 
     gBattleResources->battleScriptsStack->size = stackSize;
@@ -3331,10 +3345,26 @@ static bool32 TryStartPendingUniqueAbilityScript(const u8 *returnInstr, const u8
     return FALSE;
 }
 
+static bool32 TryStartPendingUniqueAbilityScript(const u8 *returnInstr, const u8 *noEffectInstr)
+{
+    return TryStartPendingUniqueAbilityScriptInternal(returnInstr, noEffectInstr, PENDING_UNIQUE_EFFECT_NONE, TRUE);
+}
+
+static bool32 TryStartPendingUniqueAbilityScriptOfKind(const u8 *returnInstr, const u8 *noEffectInstr, u32 effect)
+{
+    return TryStartPendingUniqueAbilityScriptInternal(returnInstr, noEffectInstr, effect, FALSE);
+}
+
 static bool32 TryContinuePendingUniqueAbilityDrain(const u8 *returnInstr, const u8 *noEffectInstr)
 {
     RestorePendingUniqueAbilityBattleContext();
     return TryStartPendingUniqueAbilityScript(returnInstr, noEffectInstr);
+}
+
+static bool32 TryContinuePendingUniqueAbilityDrainOfKind(const u8 *returnInstr, const u8 *noEffectInstr, u32 effect)
+{
+    RestorePendingUniqueAbilityBattleContext();
+    return TryStartPendingUniqueAbilityScriptOfKind(returnInstr, noEffectInstr, effect);
 }
 
 // Called moves can reach end/end2 instead of returning through the script stack.
@@ -13720,6 +13750,14 @@ static void Cmd_various(void)
         if (TryContinuePendingUniqueAbilityDrain(gBattlescriptCurrInstr, cmd->nextInstr))
             return;
         break;
+    }
+    case VARIOUS_TRY_ACTIVATE_PENDING_MOONLIGHT:
+    {
+        VARIOUS_ARGS(const u8 *failInstr);
+        if (TryContinuePendingUniqueAbilityDrainOfKind(gBattlescriptCurrInstr, cmd->failInstr, PENDING_UNIQUE_EFFECT_MOONLIGHT))
+            return;
+        gBattlescriptCurrInstr = cmd->failInstr;
+        return;
     }
     case VARIOUS_RESTORE_PENDING_UNIQUE_ABILITY_CONTEXT:
     {

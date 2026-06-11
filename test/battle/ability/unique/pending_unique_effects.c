@@ -9,6 +9,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_LUNGE].makesContact == TRUE);
     ASSUME(gBattleMoves[MOVE_ELECTROWEB].effect == EFFECT_SPEED_DOWN_HIT);
     ASSUME(gBattleMoves[MOVE_ELECTROWEB].target == MOVE_TARGET_BOTH);
+    ASSUME(gBattleMoves[MOVE_ROCK_TOMB].effect == EFFECT_SPEED_DOWN_HIT);
     ASSUME(gBattleMoves[MOVE_SCARY_FACE].effect == EFFECT_SPEED_DOWN_2);
     ASSUME(gBattleMoves[MOVE_STICKY_WEB].effect == EFFECT_STICKY_WEB);
     ASSUME(gBattleMoves[MOVE_SYRUP_BOMB].effect == EFFECT_SYRUP_BOMB);
@@ -143,6 +144,33 @@ DOUBLE_BATTLE_TEST("Pending unique effects keep called move-end context while a 
     } THEN {
         EXPECT_LT(playerLeft->hp, 100);
         EXPECT_EQ(playerRight->hp, 100);
+        EXPECT_EQ(gBattleStruct->pendingUniqueAbilityEffects, 0);
+        EXPECT_EQ(gBattleStruct->pendingUniqueAbilityBattlers, 0);
+        EXPECT_EQ(gBattleStruct->pendingUniqueAbilitySavedContext, 0);
+    }
+}
+
+DOUBLE_BATTLE_TEST("Moonlight heal drains do not pull unrelated pending effects forward")
+{
+    GIVEN {
+        PLAYER(SPECIES_ARIADOS) { Speed(100); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_WEB_TRAP); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_CLEFABLE) { Speed(50); HP(100); MaxHP(400); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_MOONLIGHT); Moves(MOVE_ROCK_TOMB); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(40); HP(110); MaxHP(400); Item(ITEM_SITRUS_BERRY); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(30); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN {
+            MOVE(playerLeft, MOVE_CELEBRATE);
+            MOVE(playerRight, MOVE_ROCK_TOMB, target: opponentLeft, WITH_RNG(RNG_ROGUE_WEB_TRAP, MOVE_SPIDER_WEB));
+            MOVE(opponentLeft, MOVE_CELEBRATE);
+            MOVE(opponentRight, MOVE_CELEBRATE);
+        }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ROCK_TOMB, playerRight);
+        HP_BAR(opponentLeft);
+        ABILITY_POPUP(playerLeft, ABILITY_WEB_TRAP);
+    } THEN {
+        EXPECT_EQ(opponentLeft->item, ITEM_NONE);
+        EXPECT_GT(playerRight->hp, 100);
         EXPECT_EQ(gBattleStruct->pendingUniqueAbilityEffects, 0);
         EXPECT_EQ(gBattleStruct->pendingUniqueAbilityBattlers, 0);
         EXPECT_EQ(gBattleStruct->pendingUniqueAbilitySavedContext, 0);

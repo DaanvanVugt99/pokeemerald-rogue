@@ -53,6 +53,8 @@ Format follows Keep a Changelog loosely:
 - Renamed the Bulbasaur line's Rootsnare unique ability to Vine Lash.
 - Replaced the Charizard line's Updraft unique ability with Thermal Lift, which
   makes its first Fire-type move each battle also use Sky Attack.
+- Reworked the Clefable line's Moonlight unique ability to restore HP when any
+  Pokemon is healed.
 - Reworked the Pidgeot line's Strong Winds unique ability to set Tailwind when
   a foe is forced out instead of on switch-in.
 - Updated Mega Raichu X to Electric Surge and Mega Raichu Y to No Guard.
