@@ -98,6 +98,7 @@ static bool32 TryUseVicejawCalledMove(u32 battler, u32 target);
 static bool32 TryUseVarietyActCalledMove(u32 battler);
 static bool32 TryUseAcidRefluxCalledMove(u32 battler);
 static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target);
+static bool32 TryUseBrutalChargeCalledMove(u32 battler, u32 target);
 static bool32 TryUseDeliveryBagCalledMove(u32 battler);
 static bool32 TryUseWishmakerCalledMove(u32 battler);
 static bool32 TryUseBloomBurstCalledMove(u32 battler);
@@ -5981,6 +5982,35 @@ static bool32 TryActivateWebTrap(u32 battler, u32 source, u32 target)
     return TryUseWebTrapCalledMove(battler, target);
 }
 
+static bool32 TryUseBrutalChargeCalledMove(u32 battler, u32 target)
+{
+    if (!IsBattlerAlive(battler)
+     || target >= gBattlersCount
+     || GetBattlerSide(battler) == GetBattlerSide(target)
+     || !HasBattlerAbility(battler, ABILITY_BRUTAL_CHARGE)
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_BRUTAL_CHARGE);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_HEADBUTT;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryActivateBrutalCharge(u32 battler, u32 source, u32 target)
+{
+    if (source >= gBattlersCount)
+        return FALSE;
+
+    return TryUseBrutalChargeCalledMove(battler, target);
+}
+
 #define PENDING_UNIQUE_EFFECT_BITS         4
 #define PENDING_UNIQUE_EFFECT_KIND_MASK    0xF
 #define PENDING_UNIQUE_BATTLER_BITS        4
@@ -6065,6 +6095,32 @@ void QueueWebTrapForSpeedDrop(u32 slowedBattler, u32 sourceBattler)
         {
             QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_WEB_TRAP, battler, sourceBattler, slowedBattler);
             return;
+        }
+    }
+}
+
+void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler)
+{
+    u32 i;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+
+    if (loweredBattler >= gBattlersCount
+     || sourceBattler >= gBattlersCount
+     || !IsBattlerAlive(loweredBattler))
+        return;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+
+        if (IsBattlerAlive(battler)
+         && GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_NONE
+         && GetBattlerSide(battler) != GetBattlerSide(loweredBattler)
+         && HasBattlerAbility(battler, ABILITY_BRUTAL_CHARGE)
+         && CanUseExtraMove(battler, loweredBattler))
+        {
+            QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_BRUTAL_CHARGE, battler, sourceBattler, loweredBattler);
         }
     }
 }
@@ -6254,6 +6310,15 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateMoonlight(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_BRUTAL_CHARGE)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateBrutalCharge(battler, source, target))
             return TRUE;
     }
 
@@ -23011,13 +23076,6 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         if (gBattleMoves[move].effect == EFFECT_ABSORB)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.3));
         break;
-    }
-
-    if (HasBattlerAbility(battlerAtk, ABILITY_BRUTAL_CHARGE)
-     && gDisableStructs[battlerAtk].isFirstTurn
-     && usesOwnAttackStat)
-    {
-        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_SENTRY_POST)

@@ -55,6 +55,8 @@ Format follows Keep a Changelog loosely:
   makes its first Fire-type move each battle also use Sky Attack.
 - Reworked the Clefable line's Moonlight unique ability to restore HP when any
   Pokemon is healed.
+- Reworked the Snubbull line's Brutal Charge unique ability to follow foe
+  Defense drops with a 40 BP Headbutt while keeping its first-turn Speed boost.
 - Reworked the Pidgeot line's Strong Winds unique ability to set Tailwind when
   a foe is forced out instead of on switch-in.
 - Updated Mega Raichu X to Electric Surge and Mega Raichu Y to No Guard.
