@@ -43,6 +43,7 @@ static u8 const sRarityToCustomTrainerIndex[] =
     [UNIQUE_RARITY_RARE]        = CUSTOM_TRAINER_RARE,
     [UNIQUE_RARITY_EPIC]        = CUSTOM_TRAINER_EPIC,
     [UNIQUE_RARITY_EXOTIC]      = CUSTOM_TRAINER_EXOTIC,
+    [UNIQUE_RARITY_LEGENDARY]   = CUSTOM_TRAINER_LEGEND,
 };
 
 static u16 const sDynamicCustomMonAbilities[] = 
@@ -157,6 +158,32 @@ static u16 const sDynamicCustomMonAbilities[] =
     ABILITY_SHELL_ARMOR,
     ABILITY_AIR_LOCK,
 #endif
+};
+
+static u16 const sDynamicCustomMonUniqueAbilities[] =
+{
+    ABILITY_IMPACT,
+    ABILITY_SILVER_LINING,
+    ABILITY_THICK_SKULL,
+    ABILITY_VAMPIRIC,
+    ABILITY_GLIDER,
+    ABILITY_BRUTAL_CHARGE,
+    ABILITY_SOLARBOOST,
+    ABILITY_DAMPENING,
+    ABILITY_PASTURIZED,
+    ABILITY_LIGHTNING_FIELD,
+    ABILITY_MISTY_MIRAGE,
+    ABILITY_SECOND_WIND,
+    ABILITY_BARNACLE_WALL,
+    ABILITY_GRAVE_GROVE,
+    ABILITY_LIFE_BLOSSOM,
+    ABILITY_NIGHT_HUNTER,
+    ABILITY_BEGUILE,
+    ABILITY_FLOWER_CHAIN,
+    ABILITY_BUBBLE_NET,
+    ABILITY_ADAPTIVE_PLATING,
+    ABILITY_BEAR_HUG,
+    ABILITY_BRANCH_SWING,
 };
 
 static u16 const sDynamicCustomMonMoves[] = 
@@ -294,6 +321,7 @@ static u16 const sDynamicCustomMonMoves[] =
 
 STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonAbilities) <= 63, SizeOfDynamicCustomMonAbilities);
 STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonMoves) <= 63, SizeOfDynamicCustomMonMoves);
+STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonUniqueAbilities) <= 127, SizeOfDynamicCustomMonUniqueAbilities);
 
 #include "data/rogue/custom_mons.h"
 
@@ -301,8 +329,8 @@ enum
 {
     COMPRESSED_FORMAT_ORIGINAL = 0,
     COMPRESSED_FORMAT_MON_TYPE,
-    COMPRESSED_FORMAT_UNUSED2,
-    COMPRESSED_FORMAT_UNUSED3,
+    COMPRESSED_FORMAT_ORIGINAL_UNIQUE_ABILITY,
+    COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY,
 };
 
 struct CompressedDynamicData
@@ -335,16 +363,41 @@ struct CompressedDynamicData_MonType
     u32 reserved:2;
 };
 
+struct CompressedDynamicData_OriginalUniqueAbility
+{
+    u32 move1:7; // 127 indices
+    u32 move2:7; // 127 indices
+    u32 uniqueAbility:7; // 127 indices
+    u32 format:2;
+    u32 ability:7; // 127 indices
+    u32 reserved:2;
+};
+
+struct CompressedDynamicData_MonTypeUniqueAbility
+{
+    u32 type:5;
+    u32 typeSlot:1;
+    u32 typeMoveFlip:1;
+    u32 move1:7; // 127 indices
+    u32 uniqueAbility:7; // 127 indices
+    u32 format:2;
+    u32 ability:7; // 127 indices
+    u32 reserved:2;
+};
+
 struct DynamicMonData
 {
     u16 moves[MAX_MON_MOVES];
     u16 movesCount;
     u8 types[2];
     u16 ability;
+    u16 uniqueAbility;
 };
 
 STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(struct CompressedDynamicData_Original), SizeOfCompressedDynamicData_Original);
 STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(struct CompressedDynamicData_MonType), SizeOfCompressedDynamicData_MonType);
+STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(struct CompressedDynamicData_OriginalUniqueAbility), SizeOfCompressedDynamicData_OriginalUniqueAbility);
+STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(struct CompressedDynamicData_MonTypeUniqueAbility), SizeOfCompressedDynamicData_MonTypeUniqueAbility);
 STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(u32), SizeOfDynamicCustomMonData);
 
 static u16 SelectTypeBasedExtraMove(u8 type, u8 rng)
@@ -437,6 +490,7 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
     struct CompressedDynamicData* compressedUntyped = (struct CompressedDynamicData*)&customMonId;
 
     outData->ability = ABILITY_NONE;
+    outData->uniqueAbility = ABILITY_NONE;
     outData->movesCount = 0;
     outData->types[0] = TYPE_NONE;
     outData->types[1] = TYPE_NONE;
@@ -456,6 +510,19 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
         if(compressedData->move3 != 0 && (compressedData->move3 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
             outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move3 - 1];
     }
+    else if(compressedUntyped->format == COMPRESSED_FORMAT_ORIGINAL_UNIQUE_ABILITY)
+    {
+        struct CompressedDynamicData_OriginalUniqueAbility* compressedData = (struct CompressedDynamicData_OriginalUniqueAbility*)compressedUntyped;
+
+        outData->ability = ((compressedData->ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[compressedData->ability - 1] : ABILITY_NONE;
+        outData->uniqueAbility = ((compressedData->uniqueAbility - 1) < ARRAY_COUNT(sDynamicCustomMonUniqueAbilities)) ? sDynamicCustomMonUniqueAbilities[compressedData->uniqueAbility - 1] : ABILITY_NONE;
+
+        if(compressedData->move1 != 0 && (compressedData->move1 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
+            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move1 - 1];
+
+        if(compressedData->move2 != 0 && (compressedData->move2 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
+            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move2 - 1];
+    }
     else if(compressedUntyped->format == COMPRESSED_FORMAT_MON_TYPE)
     {
         struct CompressedDynamicData_MonType* compressedData = (struct CompressedDynamicData_MonType*)compressedUntyped;
@@ -469,6 +536,18 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
 
         if(compressedData->move2 != 0 && (compressedData->move2 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
             outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move2 - 1];
+    }
+    else if(compressedUntyped->format == COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY)
+    {
+        struct CompressedDynamicData_MonTypeUniqueAbility* compressedData = (struct CompressedDynamicData_MonTypeUniqueAbility*)compressedUntyped;
+
+        outData->ability = ((compressedData->ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[compressedData->ability - 1] : ABILITY_NONE;
+        outData->uniqueAbility = ((compressedData->uniqueAbility - 1) < ARRAY_COUNT(sDynamicCustomMonUniqueAbilities)) ? sDynamicCustomMonUniqueAbilities[compressedData->uniqueAbility - 1] : ABILITY_NONE;
+        outData->types[compressedData->typeSlot] = compressedData->type;
+        outData->moves[outData->movesCount++] = SelectTypeBasedExtraMove(compressedData->type, compressedData->typeMoveFlip);
+
+        if(compressedData->move1 != 0 && (compressedData->move1 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
+            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move1 - 1];
     }
     else
     {
@@ -633,6 +712,18 @@ u16 RogueGift_GetCustomMonAbilityCount(u32 id)
     }
 }
 
+u16 RogueGift_GetCustomMonUniqueAbility(u32 id)
+{
+    if(id & OTID_FLAG_DYNAMIC_CUSTOM_MON)
+    {
+        struct DynamicMonData dynamicData;
+        UncompressDynamicMonData(id, &dynamicData);
+        return dynamicData.uniqueAbility;
+    }
+
+    return ABILITY_NONE;
+}
+
 u8 RogueGift_GetCustomMonType(u32 id, u8 i)
 {
     if(id & OTID_FLAG_DYNAMIC_CUSTOM_MON)
@@ -668,7 +759,7 @@ bool8 RogueGift_DisplayCustomMonRarity(u32 id)
     else
     {
         struct CustomMonData const* monData = &sCustomPokemon[id]; 
-        if(monData->customTrainerId == CUSTOM_TRAINER_EXOTIC)
+        if(monData->customTrainerId == CUSTOM_TRAINER_EXOTIC || monData->customTrainerId == CUSTOM_TRAINER_LEGEND)
             return TRUE;
     }
 
@@ -679,9 +770,17 @@ u8 RogueGift_GetCustomMonRarity(u32 id)
 {
     if(id & OTID_FLAG_DYNAMIC_CUSTOM_MON)
     {
+        struct DynamicMonData dynamicData;
         struct CompressedDynamicData* compressedUntyped = (struct CompressedDynamicData*)&id;
-        u16 moveCount = RogueGift_GetCustomMonMoveCount(id);
-        u16 abilityCount = RogueGift_GetCustomMonAbilityCount(id);
+        u16 moveCount;
+        u16 abilityCount;
+
+        UncompressDynamicMonData(id, &dynamicData);
+        if(dynamicData.uniqueAbility != ABILITY_NONE)
+            return UNIQUE_RARITY_LEGENDARY;
+
+        moveCount = RogueGift_GetCustomMonMoveCount(id);
+        abilityCount = RogueGift_GetCustomMonAbilityCount(id);
 
         if(compressedUntyped->format == COMPRESSED_FORMAT_MON_TYPE)
         {
@@ -724,6 +823,9 @@ u8 RogueGift_GetCustomMonRarity(u32 id)
         
         case CUSTOM_TRAINER_EXOTIC:
             return UNIQUE_RARITY_EXOTIC;
+
+        case CUSTOM_TRAINER_LEGEND:
+            return UNIQUE_RARITY_LEGENDARY;
         }
 
         // We expect most/all of these to be classed as exotic
@@ -746,6 +848,9 @@ u8 const* RogueGift_GetRarityName(u8 rarity)
     
     case UNIQUE_RARITY_EXOTIC:
         return sCustomTrainers[CUSTOM_TRAINER_EXOTIC].name;
+
+    case UNIQUE_RARITY_LEGENDARY:
+        return sCustomTrainers[CUSTOM_TRAINER_LEGEND].name;
     }
 
     AGB_ASSERT(FALSE);
@@ -892,6 +997,21 @@ static u32 SelectNextAbilityIndex(u16 species)
     return 0;
 }
 
+static u32 SelectNextUniqueAbilityIndex(u16 species)
+{
+    u32 idx;
+    u16 nativeUniqueAbility = GetUniqueAbilityBySpecies(species);
+
+    do
+    {
+        idx = Random() % ARRAY_COUNT(sDynamicCustomMonUniqueAbilities);
+    }
+    while (sDynamicCustomMonUniqueAbilities[idx] == ABILITY_NONE
+        || sDynamicCustomMonUniqueAbilities[idx] == nativeUniqueAbility);
+
+    return 1 + idx;
+}
+
 static u32 SelectRandomType(u16 species, u8 index)
 {
     u8 type;
@@ -924,6 +1044,14 @@ u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
 
     if(compressedDataUntyped.format == COMPRESSED_FORMAT_MON_TYPE && !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS))
         compressedDataUntyped.format = COMPRESSED_FORMAT_ORIGINAL;
+
+    if(rarity == UNIQUE_RARITY_LEGENDARY)
+    {
+        if(compressedDataUntyped.format == COMPRESSED_FORMAT_MON_TYPE)
+            compressedDataUntyped.format = COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY;
+        else
+            compressedDataUntyped.format = COMPRESSED_FORMAT_ORIGINAL_UNIQUE_ABILITY;
+    }
 
     // Start query with moves which are valid
     RogueCustomQuery_Begin();
@@ -962,8 +1090,25 @@ u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
         case UNIQUE_RARITY_EPIC:
             compressedData->move1 = SelectNextMoveIndex(species);
             compressedData->move2 = SelectNextMoveIndex(species);
-            compressedData->move3 = SelectNextMoveIndex(species);
             compressedData->ability = SelectNextAbilityIndex(species);
+            break;
+
+        default:
+            AGB_ASSERT(FALSE);
+            break;
+        }
+    }
+    else if(compressedDataUntyped.format == COMPRESSED_FORMAT_ORIGINAL_UNIQUE_ABILITY)
+    {
+        struct CompressedDynamicData_OriginalUniqueAbility* compressedData = (struct CompressedDynamicData_OriginalUniqueAbility*)&compressedDataUntyped;
+
+        switch (rarity)
+        {
+        case UNIQUE_RARITY_LEGENDARY:
+            compressedData->move1 = SelectNextMoveIndex(species);
+            compressedData->move2 = SelectNextMoveIndex(species);
+            compressedData->ability = SelectNextAbilityIndex(species);
+            compressedData->uniqueAbility = SelectNextUniqueAbilityIndex(species);
             break;
 
         default:
@@ -991,8 +1136,28 @@ u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
 
         case UNIQUE_RARITY_EPIC:
             compressedData->move1 = SelectNextMoveIndex(species);
-            compressedData->move2 = SelectNextMoveIndex(species);
             compressedData->ability = SelectNextAbilityIndex(species);
+            break;
+
+        default:
+            AGB_ASSERT(FALSE);
+            break;
+        }
+    }
+    else if(compressedDataUntyped.format == COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY)
+    {
+        struct CompressedDynamicData_MonTypeUniqueAbility* compressedData = (struct CompressedDynamicData_MonTypeUniqueAbility*)&compressedDataUntyped;
+        compressedData->typeSlot = Random() % 2;
+        compressedData->typeMoveFlip = Random() % 2;
+        compressedData->type = SelectRandomType(species, compressedData->typeSlot);
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, SelectTypeBasedExtraMove(compressedData->type, compressedData->typeMoveFlip));
+
+        switch (rarity)
+        {
+        case UNIQUE_RARITY_LEGENDARY:
+            compressedData->move1 = SelectNextMoveIndex(species);
+            compressedData->ability = SelectNextAbilityIndex(species);
+            compressedData->uniqueAbility = SelectNextUniqueAbilityIndex(species);
             break;
 
         default:
@@ -1031,24 +1196,28 @@ static u8 RandomRarity()
 {
     u8 rarity;
 
-    switch (Random() % 7)
+    switch (Random() % 8)
     {
     case 0:
-        rarity = UNIQUE_RARITY_EXOTIC;
+        rarity = UNIQUE_RARITY_LEGENDARY;
         break;
 
     case 1:
+        rarity = UNIQUE_RARITY_EXOTIC;
+        break;
+
     case 2:
+    case 3:
         rarity = UNIQUE_RARITY_EPIC;
         break;
 
-    case 3:
     case 4:
+    case 5:
         rarity = UNIQUE_RARITY_RARE;
         break;
     
-    case 5:
     case 6:
+    case 7:
         rarity = UNIQUE_RARITY_COMMON;
         break;
 
@@ -1057,6 +1226,9 @@ static u8 RandomRarity()
         rarity = UNIQUE_RARITY_COMMON;
         break;
     }
+
+    if(rarity == UNIQUE_RARITY_LEGENDARY && !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY))
+        rarity = UNIQUE_RARITY_EXOTIC;
 
     if(rarity == UNIQUE_RARITY_EXOTIC && !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EXOTIC))
         rarity = UNIQUE_RARITY_EPIC;

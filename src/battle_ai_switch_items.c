@@ -447,7 +447,7 @@ static bool8 FindMonThatAbsorbsOpponentsMove(u32 battler)
 
         monAbility = GetMonAbility(&party[i]);
 
-        if (AI_MonHasMoveAbsorbingAbility(GetMonData(&party[i], MON_DATA_SPECIES), monAbility, moveType) && Random() & 1)
+        if (AI_MonHasMoveAbsorbingAbility(GetMonData(&party[i], MON_DATA_SPECIES), GetMonData(&party[i], MON_DATA_OT_ID), monAbility, moveType) && Random() & 1)
         {
             // we found a mon.
             *(gBattleStruct->AI_monToSwitchIntoId + battler) = i;
@@ -804,7 +804,7 @@ static bool8 FindMonWithFlagsAndSuperEffective(u32 battler, u16 flags, u8 modulo
 
         species = GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG);
         monAbility = GetMonAbility(&party[i]);
-        CalcPartyMonTypeEffectivenessMultiplier(gLastLandedMoves[battler], species, monAbility);
+        CalcPartyMonTypeEffectivenessMultiplier(gLastLandedMoves[battler], species, GetMonData(&party[i], MON_DATA_OT_ID), monAbility);
         if (gMoveResultFlags & flags)
         {
             battlerIn1 = gLastHitBy[battler];

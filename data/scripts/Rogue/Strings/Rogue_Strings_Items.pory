@@ -470,7 +470,7 @@ text gHubUpgradeDesc_Lab_UniqueMonRarity2
 
 text gHubUpgradeDesc_Lab_UniqueMonRarity3
 {
-    format("Allows Legendary Unique {PKMN} to be tracked.")
+    format("Allows Legendary Unique {PKMN} to be tracked. (+Unique Abilities)")
 }
 
 text gHubUpgradeDesc_Lab_UniqueMonTyping

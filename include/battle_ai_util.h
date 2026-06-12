@@ -39,7 +39,7 @@ u32 AI_DecideKnownUniqueAbilityForTurn(u32 battlerId);
 bool32 AI_HasAbility(u32 battlerId, u32 ability);
 bool32 AI_AbilityAbsorbsMoveType(u32 ability, u32 moveType);
 bool32 AI_BattlerHasMoveAbsorbingAbility(u32 battlerId, u32 moveType);
-bool32 AI_MonHasMoveAbsorbingAbility(u32 species, u32 ability, u32 moveType);
+bool32 AI_MonHasMoveAbsorbingAbility(u32 species, u32 otId, u32 ability, u32 moveType);
 u32 AI_DecideHoldEffectForTurn(u32 battlerId);
 bool32 DoesBattlerIgnoreAbilityChecks(u32 atkAbility, u32 move);
 u32 AI_GetWeather(struct AiLogicData *aiData);

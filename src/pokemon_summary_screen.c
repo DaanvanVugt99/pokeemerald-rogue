@@ -3526,7 +3526,7 @@ static u16 GetSummaryUniqueAbility(void)
     if (sMonSummaryScreen->summary.isEgg)
         return ABILITY_NONE;
 
-    return GetUniqueAbilityBySpecies(sMonSummaryScreen->summary.species);
+    return GetUniqueAbilityBySpeciesAndOtId(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.OTID);
 }
 
 static void PrintUniqueAbilityName(void)

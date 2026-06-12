@@ -6,10 +6,11 @@
 
 enum
 {
-    UNIQUE_RARITY_COMMON,   // 2 moves
-    UNIQUE_RARITY_RARE,     // 1 moves & ability
-    UNIQUE_RARITY_EPIC,     // 4 moves & ability
-    UNIQUE_RARITY_EXOTIC,   // bespoke made mons for Quest rewards
+    UNIQUE_RARITY_COMMON,       // 2 moves, or type + 1 type move
+    UNIQUE_RARITY_RARE,         // 1 move & ability, or type + type move + 2 moves
+    UNIQUE_RARITY_EPIC,         // 2 moves & ability, or type + type move + 1 move & ability
+    UNIQUE_RARITY_EXOTIC,       // bespoke made mons for Quest rewards
+    UNIQUE_RARITY_LEGENDARY,    // Epic payload plus unique ability
 };
 
 u32 RogueGift_GetCustomMonId(struct Pokemon* mon);
@@ -21,6 +22,7 @@ u16 RogueGift_GetCustomMonMoveCount(u32 id);
 
 u16 RogueGift_GetCustomMonAbility(u32 id, u8 i);
 u16 RogueGift_GetCustomMonAbilityCount(u32 id);
+u16 RogueGift_GetCustomMonUniqueAbility(u32 id);
 
 u8 RogueGift_GetCustomMonType(u32 id, u8 i);
 

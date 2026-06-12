@@ -10461,7 +10461,7 @@ static bool32 CanSepticFumesPoisonPartyMon(u32 battlerAtk, u32 battlerTarget, st
         return FALSE;
 
     ability = GetMonAbility(mon);
-    uniqueAbility = GetUniqueAbilityBySpecies(species);
+    uniqueAbility = GetMonUniqueAbility(mon);
 
     if (!HasBattlerAbility(battlerAtk, ABILITY_CORROSION)
      && (gSpeciesInfo[species].types[0] == TYPE_POISON
@@ -16284,7 +16284,7 @@ static void Cmd_healpartystatus(void)
                     ability = GetAbilityBySpecies(species, abilityNum, otId);
 
                 if (ability != ABILITY_SOUNDPROOF
-                    && GetUniqueAbilityBySpecies(species) != ABILITY_SOUNDPROOF)
+                    && GetUniqueAbilityBySpeciesAndOtId(species, otId) != ABILITY_SOUNDPROOF)
                     toHeal |= (1 << i);
             }
         }

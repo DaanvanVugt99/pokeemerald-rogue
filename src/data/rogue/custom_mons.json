@@ -46,6 +46,10 @@
             {
                 "name": "Exotic",
                 "trainer_colour": 1
+            },
+            {
+                "name": "Legend",
+                "trainer_colour": 1
             }
         ]
     },

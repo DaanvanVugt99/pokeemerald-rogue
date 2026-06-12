@@ -1472,7 +1472,7 @@ static void DisplayMonStatsText(void)
 
 static u16 GetMonEntryUniqueAbility(void)
 {
-    return GetUniqueAbilityBySpecies(sPokedexMenu->viewBaseSpecies);
+    return GetUniqueAbilityBySpeciesAndOtId(sPokedexMenu->viewBaseSpecies, sPokedexMenu->viewOtId);
 }
 
 static void BufferWrappedPokedexAbilityDescription(u8 *dst, const u8 *src, u32 maxWidth)

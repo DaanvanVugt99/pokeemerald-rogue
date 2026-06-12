@@ -378,13 +378,13 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .descText = gHubUpgradeDesc_Lab_UniqueMonRarity2,
         .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EPIC, HUB_UPGRADE_NONE },
     },
-    [HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY] = // placeholder for supporting legendaries
+    [HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY]
     {
         .upgradeName = _("Legend Unique{PKMN}"),
         .targetArea = HUB_AREA_LABS,
-        .buildCost = 0, // 9
+        .buildCost = 9,
         .descText = gHubUpgradeDesc_Lab_UniqueMonRarity3,
-        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY, HUB_UPGRADE_NONE }, // requiring self will mean it's never built
+        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EXOTIC, HUB_UPGRADE_NONE },
     },
 
     // HUB_AREA_ADVENTURE_ENTRANCE

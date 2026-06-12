@@ -1,9 +1,21 @@
 #include "global.h"
+#include "constants/rogue.h"
+#include "pokemon.h"
 #include "test/battle.h"
 
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_SPIKES].effect == EFFECT_SPIKES);
+}
+
+#define TEST_FORMAT_ORIGINAL_UNIQUE_ABILITY 2
+
+static u32 DynamicSilverLiningCustomMonId(void)
+{
+    return OTID_FLAG_CUSTOM_MON
+        | OTID_FLAG_DYNAMIC_CUSTOM_MON
+        | (2 << 14)
+        | (TEST_FORMAT_ORIGINAL_UNIQUE_ABILITY << 21);
 }
 
 SINGLE_BATTLE_TEST("Unique abilities can affect battle behavior")
@@ -35,5 +47,26 @@ SINGLE_BATTLE_TEST("Unique abilities are suppressed by Neutralizing Gas")
 
         HP_BAR(player, damage: maxHP / 8);
         MESSAGE("Wynaut is hurt by spikes!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Dynamic custom unique abilities can affect battle behavior")
+{
+    u32 customMonId = DynamicSilverLiningCustomMonId();
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) {
+            CreateMon(gBattleTestRunnerState->data.currentMon, SPECIES_WOBBUFFET, 100, 0, TRUE, 0, OT_ID_CUSTOM_MON, customMonId);
+            Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE);
+        }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_NO_GUARD); Moves(MOVE_TOXIC); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TOXIC); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_SILVER_LINING);
+        MESSAGE("Wobbuffet's Silver Lining prevents poisoning!");
+    } THEN {
+        EXPECT_EQ(GetUniqueAbilityBySpeciesAndOtId(player->species, player->otId), ABILITY_SILVER_LINING);
+        EXPECT_EQ(player->status1, STATUS1_NONE);
     }
 }

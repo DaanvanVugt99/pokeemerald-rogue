@@ -19,6 +19,7 @@
 #include "strings.h"
 #include "task.h"
 #include "text.h"
+#include "constants/abilities.h"
 #include "constants/field_specials.h"
 #include "constants/items.h"
 #include "constants/rgb.h"
@@ -988,6 +989,7 @@ void ScriptMenu_DisplayTextInWindow(const u8* str, u8 x, u8 y, u8 width, u8 heig
 static u8 const sText_UniqueMonTitle[] = _("{STR_VAR_1} {FONT_SMALL_NARROW}{COLOR BLUE}({STR_VAR_2})");
 static u8 const sText_UniqueMonTitleRare[] = _("{STR_VAR_1} {FONT_SMALL_NARROW}{COLOR RED}({STR_VAR_2})");
 static u8 const sText_UniqueMonAbility[] = _("A/ {COLOR GREEN}{STR_VAR_1}");
+static u8 const sText_UniqueMonUniqueAbility[] = _("U/ {COLOR GREEN}{STR_VAR_1}");
 static u8 const sText_UniqueMonMove[] = _(" -{STR_VAR_1}");
 
 static void PrintUniqueMonInfoToWindow(u8 windowId)
@@ -1015,6 +1017,16 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
 
         StringCopy(gStringVar1, gAbilityNames[ability]);
         StringExpandPlaceholders(gStringVar4, sText_UniqueMonAbility);
+        AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+    }
+
+    // Unique Ability
+    if(RogueGift_GetCustomMonUniqueAbility(customMonId) != ABILITY_NONE)
+    {
+        u16 ability = RogueGift_GetCustomMonUniqueAbility(customMonId);
+
+        StringCopy(gStringVar1, gAbilityNames[ability]);
+        StringExpandPlaceholders(gStringVar4, sText_UniqueMonUniqueAbility);
         AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
     }
 

@@ -276,7 +276,7 @@ static void CopyBattlerDataToAIParty(u32 bPosition, u32 side)
     aiMon->level = bMon->level;
     aiMon->status = bMon->status1;
     aiMon->gender = GetBattlerGender(battler);
-    aiMon->uniqueAbility = GetUniqueAbilityBySpecies(bMon->species);
+    aiMon->uniqueAbility = GetUniqueAbilityBySpeciesAndOtId(bMon->species, bMon->otId);
     aiMon->isFainted = FALSE;
     aiMon->wasSentInBattle = TRUE;
     aiMon->switchInCount++;
@@ -316,7 +316,7 @@ void Ai_InitPartyStruct(void)
             AI_PARTY->mons[B_SIDE_PLAYER][i].item = GetMonData(mon, MON_DATA_HELD_ITEM);
             AI_PARTY->mons[B_SIDE_PLAYER][i].heldEffect = ItemId_GetHoldEffect(AI_PARTY->mons[B_SIDE_PLAYER][i].item);
             AI_PARTY->mons[B_SIDE_PLAYER][i].ability = GetMonAbility(mon);
-            AI_PARTY->mons[B_SIDE_PLAYER][i].uniqueAbility = GetUniqueAbilityBySpecies(GetMonData(mon, MON_DATA_SPECIES, NULL));
+            AI_PARTY->mons[B_SIDE_PLAYER][i].uniqueAbility = GetMonUniqueAbility(mon);
             for (j = 0; j < MAX_MON_MOVES; j++)
                 AI_PARTY->mons[B_SIDE_PLAYER][i].moves[j] = GetMonData(mon, MON_DATA_MOVE1 + j);
         }

@@ -6095,10 +6095,8 @@ void RunBattleScriptCommands(void)
 
 static bool32 MonHasMoveTypeAbility(struct Pokemon *mon, u32 ability)
 {
-    u32 species = GetMonData(mon, MON_DATA_SPECIES);
-
     return GetMonAbility(mon) == ability
-        || GetUniqueAbilityBySpecies(species) == ability;
+        || GetMonUniqueAbility(mon) == ability;
 }
 
 static bool32 MoveCanReceiveNormalTypeAbilityOverride(u32 move)

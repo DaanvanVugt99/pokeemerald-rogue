@@ -1326,10 +1326,10 @@ bool32 AI_BattlerHasMoveAbsorbingAbility(u32 battlerId, u32 moveType)
         || AI_AbilityAbsorbsMoveType(AI_DATA->uniqueAbilities[battlerId], moveType);
 }
 
-bool32 AI_MonHasMoveAbsorbingAbility(u32 species, u32 ability, u32 moveType)
+bool32 AI_MonHasMoveAbsorbingAbility(u32 species, u32 otId, u32 ability, u32 moveType)
 {
     return AI_AbilityAbsorbsMoveType(ability, moveType)
-        || AI_AbilityAbsorbsMoveType(GetUniqueAbilityBySpecies(species), moveType);
+        || AI_AbilityAbsorbsMoveType(GetUniqueAbilityBySpeciesAndOtId(species, otId), moveType);
 }
 
 // does NOT include ability suppression checks
@@ -1386,7 +1386,7 @@ u32 AI_DecideKnownUniqueAbilityForTurn(u32 battlerId)
     if (AI_PARTY->mons[side][partyIndex].uniqueAbility != ABILITY_NONE)
         return AI_PARTY->mons[side][partyIndex].uniqueAbility;
 
-    return GetUniqueAbilityBySpecies(gBattleMons[battlerId].species);
+    return GetUniqueAbilityBySpeciesAndOtId(gBattleMons[battlerId].species, gBattleMons[battlerId].otId);
 }
 
 u32 AI_DecideHoldEffectForTurn(u32 battlerId)

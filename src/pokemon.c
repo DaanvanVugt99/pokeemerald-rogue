@@ -4912,12 +4912,32 @@ u16 GetUniqueAbilityBySpecies(u16 species)
     return sUniqueAbilityBySpecies[species];
 }
 
+u16 GetUniqueAbilityBySpeciesAndOtId(u16 species, u32 otId)
+{
+    u32 customMonId = RogueGift_GetCustomMonIdBySpecies(species, otId);
+    if(customMonId != CUSTOM_MON_NONE)
+    {
+        u16 uniqueAbility = RogueGift_GetCustomMonUniqueAbility(customMonId);
+        if(uniqueAbility != ABILITY_NONE)
+            return uniqueAbility;
+    }
+
+    return GetUniqueAbilityBySpecies(species);
+}
+
 u16 GetMonAbility(struct Pokemon *mon)
 {
     u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
     u32 otId = GetMonData(mon, MON_DATA_OT_ID, NULL);
     u8 abilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM, NULL);
     return GetAbilityBySpecies(species, abilityNum, otId);
+}
+
+u16 GetMonUniqueAbility(struct Pokemon *mon)
+{
+    u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+    u32 otId = GetMonData(mon, MON_DATA_OT_ID, NULL);
+    return GetUniqueAbilityBySpeciesAndOtId(species, otId);
 }
 
 void CreateSecretBaseEnemyParty(struct SecretBase *secretBaseRecord)
