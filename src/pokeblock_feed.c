@@ -737,7 +737,7 @@ static bool8 LoadMonAndSceneGfx(struct Pokemon *mon)
         species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
         isShiny = GetMonData(mon, MON_DATA_IS_SHINY);
         gender = GetMonGender(mon);
-        LoadCompressedSpritePaletteWithTag(GetMonSpritePalFromSpecies(species, gender, isShiny), species);
+        LoadCompressedSpritePaletteWithTag(GetMonSpritePalFromSpecies(species, gender, isShiny, GetMonData(mon, MON_DATA_OT_ID)), species);
         SetMultiuseSpriteTemplateToPokemon(species, B_POSITION_OPPONENT_LEFT);
         sPokeblockFeed->loadGfxState++;
         break;

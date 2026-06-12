@@ -7,6 +7,7 @@
 #include "pokenav.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
+#include "rogue_controller.h"
 #include "sound.h"
 #include "string_util.h"
 #include "strings.h"
@@ -537,8 +538,13 @@ static void ConditionGraphDrawMonPic(s16 listId, u8 loadId)
     isShiny = GetBoxOrPartyMonData(boxId, monId, MON_DATA_IS_SHINY, NULL);
     genderFlag = GetGenderForSpecies(species, GetBoxOrPartyMonData(boxId, monId, MON_DATA_GENDER_FLAG, NULL));
     personality = GetBoxOrPartyMonData(boxId, monId, MON_DATA_PERSONALITY, NULL);
-    LoadSpecialPokePic(menu->monPicGfx[loadId], species, personality, GetGenderForSpecies(species, genderFlag), TRUE);
-    LZ77UnCompWram(GetMonSpritePalFromSpecies(species, GetGenderForSpecies(species, genderFlag), isShiny), menu->monPal[loadId]);
+    {
+        const u32 *lzPaletteData = GetMonSpritePalFromSpecies(species, GetGenderForSpecies(species, genderFlag), isShiny, GetBoxOrPartyMonData(boxId, monId, MON_DATA_OT_ID, NULL));
+
+        LoadSpecialPokePic(menu->monPicGfx[loadId], species, personality, GetGenderForSpecies(species, genderFlag), TRUE);
+        if(!Rogue_ModifyPaletteDecompress(lzPaletteData, menu->monPal[loadId]))
+            LZ77UnCompWram(lzPaletteData, menu->monPal[loadId]);
+    }
 }
 
 u16 GetMonListCount(void)

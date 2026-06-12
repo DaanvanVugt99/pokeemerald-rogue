@@ -133,12 +133,18 @@ struct RogueCatchingContest
     u8 isActive : 1;
 };
 
+struct RogueUniqueMonPalette
+{
+    u16 tempPalette[16];
+};
+
 // Temp data only ever stored in RAM
 struct RogueLocalData
 {
     struct RouteMonPreview encounterPreview[WILD_ENCOUNTER_GRASS_CAPACITY];
     struct RogueGameShow gameShow;
     struct RogueCatchingContest catchingContest;
+    struct RogueUniqueMonPalette uniqueMonPalette;
     RAND_TYPE rngSeedToRestore;
     RAND_TYPE rngToRestore;
     RAND_TYPE rng2ToRestore;
@@ -1434,6 +1440,22 @@ bool8 Rogue_ModifyObjectPaletteSlot(u16 graphicsId, u8* palSlot)
     return FALSE;
 }
 
+const u32 *Rogue_ModifyMonCompressedPalette(const u32 *compressedPal, u16 species, u8 gender, bool8 isShiny, u32 otId)
+{
+    u32 customMonId = RogueGift_GetCustomMonIdBySpecies(species, otId);
+
+    if(customMonId != 0)
+    {
+        u16 const *inputPal = (u16 const*)&gPaletteDecompressionBuffer[0];
+        LZ77UnCompWram(compressedPal, gPaletteDecompressionBuffer);
+
+        if(RogueGift_TryApplyPaletteModify(customMonId, isShiny, inputPal, NULL, gRogueLocal.uniqueMonPalette.tempPalette))
+            return gMonPalette_FrontPlaceholder;
+    }
+
+    return compressedPal;
+}
+
 bool8 Rogue_ModifyPaletteDecompress(const u32* input, void* buffer)
 {
     const u16* overrideBuffer = NULL;
@@ -1446,6 +1468,11 @@ bool8 Rogue_ModifyPaletteDecompress(const u32* input, void* buffer)
     if(input == gTrainerPalette_PlayerBackPlaceholder)
     {
         overrideBuffer = RoguePlayer_GetTrainerBackPalette();
+    }
+
+    if(input == gMonPalette_FrontPlaceholder)
+    {
+        overrideBuffer = gRogueLocal.uniqueMonPalette.tempPalette;
     }
 
     if(overrideBuffer != NULL)
@@ -6308,9 +6335,9 @@ void Rogue_OnWarpIntoMap(void)
         VarSet(VAR_ROGUE_STARTER1, starters.species[1]);
         VarSet(VAR_ROGUE_STARTER2, starters.species[2]);
 
-        FollowMon_SetGraphics(0, starters.species[0], starters.shinyState[0]);
-        FollowMon_SetGraphics(1, starters.species[1], starters.shinyState[1]);
-        FollowMon_SetGraphics(2, starters.species[2], starters.shinyState[2]);
+        FollowMon_SetGraphics(0, starters.species[0], starters.shinyState[0], 0);
+        FollowMon_SetGraphics(1, starters.species[1], starters.shinyState[1], 0);
+        FollowMon_SetGraphics(2, starters.species[2], starters.shinyState[2], 0);
     }
 
     if(Rogue_IsRunActive())
@@ -6574,7 +6601,8 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     FollowMon_SetGraphics(
                         0,
                         species,
-                        gRogueAdvPath.currentRoomParams.perType.legendary.shinyState
+                        gRogueAdvPath.currentRoomParams.perType.legendary.shinyState,
+                        0
                     );
                     break;
                 }
@@ -6587,7 +6615,8 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     FollowMon_SetGraphics(
                         0,
                         gRogueAdvPath.currentRoomParams.perType.wildDen.species,
-                        gRogueAdvPath.currentRoomParams.perType.wildDen.shinyState
+                        gRogueAdvPath.currentRoomParams.perType.wildDen.shinyState,
+                        0
                     );
                     break;
                 }
@@ -6602,7 +6631,8 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     FollowMon_SetGraphics(
                         0,
                         gRogueAdvPath.currentRoomParams.perType.honeyTree.species,
-                        gRogueAdvPath.currentRoomParams.perType.honeyTree.shinyState
+                        gRogueAdvPath.currentRoomParams.perType.honeyTree.shinyState,
+                        0
                     );
 
                     // Only clear the last scattered Pokeblock once we've actually entered the encounter

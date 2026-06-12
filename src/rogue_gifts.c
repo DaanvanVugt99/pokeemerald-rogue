@@ -4,10 +4,12 @@
 #include "constants/items.h"
 #include "constants/moves.h"
 #include "constants/region_map_sections.h"
+#include "constants/rgb.h"
 #include "event_data.h"
 #include "random.h"
 
 #include "rogue_baked.h"
+#include "rogue_colour_utils.h"
 #include "rogue_gifts.h"
 #include "rogue_hub.h"
 #include "rogue_pokedex.h"
@@ -322,6 +324,32 @@ static u16 const sDynamicCustomMonMoves[] =
 STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonAbilities) <= 63, SizeOfDynamicCustomMonAbilities);
 STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonMoves) <= 63, SizeOfDynamicCustomMonMoves);
 STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonUniqueAbilities) <= 127, SizeOfDynamicCustomMonUniqueAbilities);
+
+const u16 sTypeTintColors[NUMBER_OF_MON_TYPES] =
+{
+    [TYPE_NORMAL] = RGB_RANGE_255_TO_31(255, 236, 206),
+    [TYPE_FIGHTING] = RGB_RANGE_255_TO_31(179, 39, 27),
+    [TYPE_FLYING] = RGB_RANGE_255_TO_31(154, 217, 232),
+    [TYPE_POISON] = RGB_RANGE_255_TO_31(254, 20, 255),
+    [TYPE_GROUND] = RGB_RANGE_255_TO_31(142, 102, 59),
+    [TYPE_ROCK] = RGB_RANGE_255_TO_31(202, 162, 86),
+    [TYPE_BUG] = RGB_RANGE_255_TO_31(188, 202, 121),
+    [TYPE_GHOST] = RGB_WHITE,
+    [TYPE_STEEL] = RGB_RANGE_255_TO_31(142, 142, 142),
+    [TYPE_MYSTERY] = RGB_WHITE,
+    [TYPE_FIRE] = RGB_RANGE_255_TO_31(255, 170, 71),
+    [TYPE_WATER] = RGB_RANGE_255_TO_31(37, 178, 255),
+    [TYPE_GRASS] = RGB_RANGE_255_TO_31(33, 255, 32),
+    [TYPE_ELECTRIC] = RGB_RANGE_255_TO_31(255, 227, 20),
+    [TYPE_PSYCHIC] = RGB_RANGE_255_TO_31(254, 80, 255),
+    [TYPE_ICE] = RGB_RANGE_255_TO_31(163, 255, 253),
+    [TYPE_DRAGON] = RGB_RANGE_255_TO_31(43, 40, 255),
+    [TYPE_DARK] = RGB_RANGE_255_TO_31(91, 91, 91),
+#ifdef ROGUE_EXPANSION
+    [TYPE_FAIRY] = RGB_RANGE_255_TO_31(255, 192, 234),
+    [TYPE_STELLAR] = RGB(10, 18, 27),
+#endif
+};
 
 #include "data/rogue/custom_mons.h"
 
@@ -1478,4 +1506,63 @@ u32 RogueGift_TryFindEnabledDynamicCustomMonForSpecies(u16 species)
     }
 
     return 0;
+}
+
+static u8 ModifyShinyType(u8 type)
+{
+    if(type == TYPE_NONE)
+        return type;
+
+    do
+    {
+        type = (type + 5) % NUMBER_OF_MON_TYPES;
+    } while (!IS_STANDARD_TYPE(type));
+
+    return type;
+}
+
+bool8 RogueGift_TryApplyPaletteModify(u32 id, bool8 isShiny, u16 const* inputPal, u16 const* layerRefPal, u16* outputPal)
+{
+    u8 type1 = RogueGift_GetCustomMonType(id, 0);
+    u8 type2 = RogueGift_GetCustomMonType(id, 1);
+
+    if(type1 != TYPE_NONE || type2 != TYPE_NONE)
+    {
+        u16 layerPal[16];
+        u16 layerWhitePoints[PALETTE_MODIFY_LAYER_COUNT];
+        u16 colorsToApply[PALETTE_MODIFY_LAYER_COUNT];
+
+        if(isShiny)
+        {
+            type1 = ModifyShinyType(type1);
+            type2 = ModifyShinyType(type2);
+        }
+
+        colorsToApply[0] = RGB_ALPHA;
+        colorsToApply[1] = RGB_ALPHA;
+        colorsToApply[2] = RGB_ALPHA;
+
+        if(type1 != TYPE_NONE)
+            colorsToApply[0] = sTypeTintColors[type1];
+
+        if(type2 != TYPE_NONE)
+            colorsToApply[1] = sTypeTintColors[type2];
+
+        if(layerRefPal == NULL)
+        {
+            Rogue_GenerateLayerPaletteByHue(inputPal, inputPal, layerPal);
+            Rogue_GenerateWhitePointsPerLayers(inputPal, layerPal, layerWhitePoints, gDefaultPaletteLayerMasks);
+        }
+        else
+        {
+            Rogue_GenerateLayerPaletteByHue(layerRefPal, layerRefPal, layerPal);
+            Rogue_GenerateWhitePointsPerLayers(layerRefPal, layerPal, layerWhitePoints, gDefaultPaletteLayerMasks);
+            Rogue_GenerateLayerPaletteByHue(inputPal, layerRefPal, layerPal);
+        }
+
+        Rogue_ModifyPaletteByLayersHueShift(inputPal, layerPal, layerWhitePoints, outputPal, gDefaultPaletteLayerMasks, colorsToApply);
+        return TRUE;
+    }
+
+    return FALSE;
 }

@@ -1126,8 +1126,11 @@ void GetConditionMenuMonGfx(void *tilesDst, void *palDst, u16 boxId, u16 monId, 
         bool8 isShiny = GetBoxOrPartyMonData(boxId, monId, MON_DATA_IS_SHINY, NULL);
         u8 gender = GetGenderForSpecies(species, GetBoxOrPartyMonData(boxId, monId, MON_DATA_GENDER_FLAG, NULL));
 
+        const u32 *lzPaletteData = GetMonSpritePalFromSpecies(species, gender, isShiny, GetBoxOrPartyMonData(boxId, monId, MON_DATA_OT_ID, NULL));
+
         LoadSpecialPokePic(tilesDst, species, personality, gender, TRUE);
-        LZ77UnCompWram(GetMonSpritePalFromSpecies(species, gender, isShiny), palDst);
+        if(!Rogue_ModifyPaletteDecompress(lzPaletteData, palDst))
+            LZ77UnCompWram(lzPaletteData, palDst);
     }
 }
 

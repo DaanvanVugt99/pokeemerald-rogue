@@ -1246,7 +1246,7 @@ static void SetupRogueSprites(u8 snapshotIndex)
     {
         if(sRogueCreditsData->rogueSprites[ROGUE_SPRITE_MON_START + i].spriteIndex == SPRITE_NONE && sRogueCreditsData->currentPartySnapshot.partySpeciesGfx[i] != SPECIES_NONE)
         {
-            FollowMon_SetGraphicsRaw(i, sRogueCreditsData->currentPartySnapshot.partySpeciesGfx[i]);
+            FollowMon_SetGraphicsRaw(i, sRogueCreditsData->currentPartySnapshot.partySpeciesGfx[i], 0);
 
             spriteId = CreateObjectGraphicsSprite(
                     OBJ_EVENT_GFX_FOLLOW_MON_0 + i, 
