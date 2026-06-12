@@ -22,6 +22,8 @@ static const union AnimCmd sAnim_None_1[] =
     ANIMCMD_END,
 };
 
+PLACEHOLDER_ANIM_SINGLE_FRAME(SingleFramePlaceHolder);
+
 #if P_FAMILY_BULBASAUR
 static const union AnimCmd sAnim_Bulbasaur_1[] =
 {
@@ -10166,6 +10168,7 @@ static const union AnimCmd *const sAnims_##name[] = \
 
 
 SINGLE_ANIMATION(None);
+SINGLE_ANIMATION(SingleFramePlaceHolder);
 #if P_FAMILY_BULBASAUR
 SINGLE_ANIMATION(Bulbasaur);
 SINGLE_ANIMATION(Ivysaur);
