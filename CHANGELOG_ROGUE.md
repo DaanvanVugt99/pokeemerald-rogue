@@ -59,6 +59,8 @@ Format follows Keep a Changelog loosely:
   Defense drops with a 40 BP Headbutt while keeping its first-turn Speed boost.
 - Reworked the Pidgeot line's Strong Winds unique ability to set Tailwind when
   a foe is forced out instead of on switch-in.
+- Reworked the Litleo line's Battlecry unique ability to use an empowered Growl
+  only after an ally fainted last turn.
 - Added random unique abilities to Legendary dynamic Unique Pokemon, with the
   ability encoded in the existing custom mon ID.
 - Updated Mega Raichu X to Electric Surge and Mega Raichu Y to No Guard.

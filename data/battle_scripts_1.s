@@ -4079,8 +4079,43 @@ BattleScript_StatUpMsg::
 	return
 
 BattleScript_EffectAttackDown:
+	jumpifmove MOVE_GROWL, BattleScript_EffectAttackDownTryBattlecryGrowl
+BattleScript_EffectAttackDownDefault:
 	setstatchanger STAT_ATK, 1, TRUE
 	goto BattleScript_EffectStatDown
+
+BattleScript_EffectAttackDownTryBattlecryGrowl:
+	jumpifability BS_ATTACKER, ABILITY_BATTLECRY, BattleScript_EffectBattlecryGrowl
+	goto BattleScript_EffectAttackDownDefault
+
+BattleScript_EffectBattlecryGrowl:
+	attackcanceler
+	jumpifsubstituteblocks BattleScript_FailedFromAtkString
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	attackstring
+	ppreduce
+	jumpifstat BS_TARGET, CMP_GREATER_THAN, STAT_ATK, MIN_STAT_STAGE, BattleScript_BattlecryGrowlDoMoveAnim
+	jumpifstat BS_TARGET, CMP_EQUAL, STAT_SPATK, MIN_STAT_STAGE, BattleScript_CantLowerMultipleStats
+BattleScript_BattlecryGrowlDoMoveAnim::
+	attackanimation
+	waitanimation
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	playstatchangeanimation BS_TARGET, BIT_ATK | BIT_SPATK, STAT_CHANGE_NEGATIVE | STAT_CHANGE_MULTIPLE_STATS
+	playstatchangeanimation BS_TARGET, BIT_ATK, STAT_CHANGE_NEGATIVE
+	setstatchanger STAT_ATK, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_BattlecryGrowlTryLowerSpAtk
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_BattlecryGrowlTryLowerSpAtk
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_BattlecryGrowlTryLowerSpAtk::
+	playstatchangeanimation BS_TARGET, BIT_SPATK, STAT_CHANGE_NEGATIVE
+	setstatchanger STAT_SPATK, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_BattlecryGrowlEnd
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_BattlecryGrowlEnd
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_BattlecryGrowlEnd::
+	goto BattleScript_MoveEnd
 
 BattleScript_EffectDefenseDown:
 	setstatchanger STAT_DEF, 1, TRUE

@@ -8676,7 +8676,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_BATTLECRY) && !uniqueDone)
+        if (HasBattlerAbility(battler, ABILITY_BATTLECRY)
+         && !uniqueDone
+         && gSideTimers[GetBattlerSide(battler)].retaliateTimer == 1)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
             u32 i;
