@@ -32,14 +32,20 @@ enum {
     TAG_VERSION = 1000,
     TAG_PRESS_START_COPYRIGHT,
     TAG_LOGO_SHINE,
+    TAG_DIVERGENCE_SUBTITLE,
 };
 
 #define VERSION_BANNER_RIGHT_TILEOFFSET 64
+#define DIVERGENCE_SUBTITLE_RIGHT_TILEOFFSET 32
 #define VERSION_BANNER_LEFT_X 98
 #define VERSION_BANNER_RIGHT_X 162
 #define VERSION_BANNER_Y 2
 #define VERSION_BANNER_Y_GOAL 66
+#define DIVERGENCE_SUBTITLE_X 120
+#define DIVERGENCE_SUBTITLE_Y_START 24
+#define DIVERGENCE_SUBTITLE_Y 88
 #define START_BANNER_X 128
+#define START_BANNER_Y 128
 
 #define CLEAR_SAVE_BUTTON_COMBO (B_BUTTON | SELECT_BUTTON | DPAD_UP)
 #define RESET_RTC_BUTTON_COMBO (B_BUTTON | SELECT_BUTTON | DPAD_LEFT)
@@ -55,7 +61,7 @@ enum
     MUSIC_VARIANT_MUTED,
     MUSIC_VARIANT_COUNT,
 
-    MUSIC_VARIANT_LAST_ENABLED  = MUSIC_VARIANT_DP,
+    MUSIC_VARIANT_LAST_ENABLED = MUSIC_VARIANT_DP,
 };
 
 struct MusicVariantData
@@ -73,19 +79,19 @@ static struct MusicVariantData const sMusicVariant[MUSIC_VARIANT_COUNT] =
         .defaultCounterDuration = 256,
         .logoShineFrames = { 0, 64, 176 },
     },
-    [MUSIC_VARIANT_FRLG] = 
+    [MUSIC_VARIANT_FRLG] =
     {
         .songNum = MUS_RG_TITLE,
         .defaultCounterDuration = 80,
         .logoShineFrames = { 0, 10000, 10000 },
     },
-    [MUSIC_VARIANT_HGSS] = 
+    [MUSIC_VARIANT_HGSS] =
     {
         .songNum = MUS_HG_TITLE,
         .defaultCounterDuration = 220,
         .logoShineFrames = { 0, 29, 129 },
     },
-    [MUSIC_VARIANT_EMERALD] = 
+    [MUSIC_VARIANT_EMERALD] =
     {
         .songNum = MUS_TITLE,
         .defaultCounterDuration = 256,
@@ -113,7 +119,9 @@ static void UpdateLegendaryMarkingColor(u8);
 static void SpriteCB_VersionBannerLeft(struct Sprite *sprite);
 static void SpriteCB_VersionBannerRight(struct Sprite *sprite);
 static void SpriteCB_PressStartCopyrightBanner(struct Sprite *sprite);
+static void SpriteCB_DivergenceSubtitle(struct Sprite *sprite);
 static void SpriteCB_PokemonLogoShine(struct Sprite *sprite);
+static void CreateDivergenceSubtitle(s16, s16, u8);
 
 // const rom data
 static const u16 sUnusedUnknownPal[] = INCBIN_U16("graphics/title_screen/unused.gbapal");
@@ -370,6 +378,71 @@ static const struct SpritePalette sSpritePalette_PressStart[] =
     {},
 };
 
+static const struct OamData sDivergenceSubtitleOamData =
+{
+    .y = DISPLAY_HEIGHT,
+    .affineMode = ST_OAM_AFFINE_OFF,
+    .objMode = ST_OAM_OBJ_NORMAL,
+    .mosaic = FALSE,
+    .bpp = ST_OAM_4BPP,
+    .shape = SPRITE_SHAPE(64x32),
+    .x = 0,
+    .matrixNum = 0,
+    .size = SPRITE_SIZE(64x32),
+    .tileNum = 0,
+    .priority = 0,
+    .paletteNum = 0,
+    .affineParam = 0,
+};
+
+static const union AnimCmd sAnim_DivergenceSubtitle_Left[] =
+{
+    ANIMCMD_FRAME(0, 4),
+    ANIMCMD_END,
+};
+
+static const union AnimCmd sAnim_DivergenceSubtitle_Right[] =
+{
+    ANIMCMD_FRAME(DIVERGENCE_SUBTITLE_RIGHT_TILEOFFSET, 4),
+    ANIMCMD_END,
+};
+
+static const union AnimCmd *const sDivergenceSubtitleAnimTable[] =
+{
+    sAnim_DivergenceSubtitle_Left,
+    sAnim_DivergenceSubtitle_Right,
+};
+
+static const struct SpriteTemplate sDivergenceSubtitleSpriteTemplate =
+{
+    .tileTag = TAG_DIVERGENCE_SUBTITLE,
+    .paletteTag = TAG_DIVERGENCE_SUBTITLE,
+    .oam = &sDivergenceSubtitleOamData,
+    .anims = sDivergenceSubtitleAnimTable,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCB_DivergenceSubtitle,
+};
+
+static const struct CompressedSpriteSheet sSpriteSheet_DivergenceSubtitle[] =
+{
+    {
+        .data = gTitleScreenDivergenceSubtitleGfx,
+        .size = 0x800,
+        .tag = TAG_DIVERGENCE_SUBTITLE
+    },
+    {},
+};
+
+static const struct SpritePalette sSpritePalette_DivergenceSubtitle[] =
+{
+    {
+        .data = gTitleScreenDivergenceSubtitlePal,
+        .tag = TAG_DIVERGENCE_SUBTITLE
+    },
+    {},
+};
+
 static const struct OamData sPokemonLogoShineOamData =
 {
     .y = DISPLAY_HEIGHT,
@@ -461,6 +534,19 @@ static void SpriteCB_VersionBannerRight(struct Sprite *sprite)
     }
 }
 
+static void SpriteCB_DivergenceSubtitle(struct Sprite *sprite)
+{
+    if (gTasks[sprite->sParentTaskId].tSkipToNext)
+    {
+        sprite->y = DIVERGENCE_SUBTITLE_Y;
+    }
+    else
+    {
+        if (sprite->y != DIVERGENCE_SUBTITLE_Y)
+            sprite->y++;
+    }
+}
+
 // Sprite data for SpriteCB_PressStartCopyrightBanner
 #define sAnimate data[0]
 #define sTimer   data[1]
@@ -493,6 +579,19 @@ static void CreatePressStartBanner(s16 x, s16 y)
         StartSpriteAnim(&gSprites[spriteId], i);
         gSprites[spriteId].sAnimate = TRUE;
     }
+}
+
+static void CreateDivergenceSubtitle(s16 x, s16 y, u8 taskId)
+{
+    u8 spriteId;
+
+    spriteId = CreateSprite(&sDivergenceSubtitleSpriteTemplate, x - 32, y, 0);
+    StartSpriteAnim(&gSprites[spriteId], 0);
+    gSprites[spriteId].sParentTaskId = taskId;
+
+    spriteId = CreateSprite(&sDivergenceSubtitleSpriteTemplate, x + 32, y, 0);
+    StartSpriteAnim(&gSprites[spriteId], 1);
+    gSprites[spriteId].sParentTaskId = taskId;
 }
 
 static void CreateCopyrightBanner(s16 x, s16 y)
@@ -660,8 +759,8 @@ void CB2_InitTitleScreen(void)
     case 1:
         // bg2
         LZ77UnCompVram(gTitleScreenPokemonLogoGfx, (void *)(BG_CHAR_ADDR(0)));
-        LZ77UnCompVram(gTitleScreenPokemonLogoTilemap, (void *)(BG_SCREEN_ADDR(9)));
-        
+        LZ77UnCompVram(gTitleScreenPokemonLogoTilemap, (void *)(BG_SCREEN_ADDR(29)));
+
         // RogueNote: Adjust palette base on progress
         if(Rogue_Use200PercEffects())
             LoadPalette(gTitleScreenBgPalettes_Gold, BG_PLTT_ID(0), 15 * PLTT_SIZE_4BPP);
@@ -670,22 +769,24 @@ void CB2_InitTitleScreen(void)
         else
             LoadPalette(gTitleScreenBgPalettes_Default, BG_PLTT_ID(0), 15 * PLTT_SIZE_4BPP);
 
-        // bg3
-        LZ77UnCompVram(sTitleScreenRayquazaGfx, (void *)(BG_CHAR_ADDR(2)));
-        LZ77UnCompVram(sTitleScreenRayquazaTilemap, (void *)(BG_SCREEN_ADDR(26)));
+        // bg0
+        LZ77UnCompVram(gTitleScreenDivergenceGfx, (void *)(BG_CHAR_ADDR(1)));
+        LZ77UnCompVram(gTitleScreenDivergenceTilemap, (void *)(BG_SCREEN_ADDR(30)));
+        LoadPalette(gTitleScreenDivergencePal, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
         // bg1
         LZ77UnCompVram(sTitleScreenCloudsGfx, (void *)(BG_CHAR_ADDR(3)));
-        LZ77UnCompVram(gTitleScreenCloudsTilemap, (void *)(BG_SCREEN_ADDR(27)));
-        //ScanlineEffect_Stop();
+        LZ77UnCompVram(gTitleScreenCloudsTilemap, (void *)(BG_SCREEN_ADDR(28)));
         ResetTasks();
         ResetSpriteData();
         FreeAllSpritePalettes();
         gReservedSpritePaletteCount = 9;
         LoadCompressedSpriteSheet(&sSpriteSheet_EmeraldVersion[0]);
         LoadCompressedSpriteSheet(&sSpriteSheet_PressStart[0]);
+        LoadCompressedSpriteSheet(&sSpriteSheet_DivergenceSubtitle[0]);
         LoadCompressedSpriteSheet(&sPokemonLogoShineSpriteSheet[0]);
         LoadPalette(gTitleScreenEmeraldVersionPal, OBJ_PLTT_ID(0), PLTT_SIZE_4BPP);
         LoadSpritePalette(&sSpritePalette_PressStart[0]);
+        LoadSpritePalette(&sSpritePalette_DivergenceSubtitle[0]);
         gMain.state = 2;
         break;
     case 2:
@@ -703,7 +804,7 @@ void CB2_InitTitleScreen(void)
         gTasks[taskId].tSkipToNext = FALSE;
         gTasks[taskId].tPointless = -16;
         gTasks[taskId].tBg2Y = -32;
-        
+
         gBattle_BG1_Y = 0; // reset star bg pos
         gMain.state = 3;
         break;
@@ -728,9 +829,9 @@ void CB2_InitTitleScreen(void)
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG2 | BLDCNT_EFFECT_LIGHTEN);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
         SetGpuReg(REG_OFFSET_BLDY, 12);
-        SetGpuReg(REG_OFFSET_BG0CNT, BGCNT_PRIORITY(3) | BGCNT_CHARBASE(2) | BGCNT_SCREENBASE(26) | BGCNT_16COLOR | BGCNT_TXT256x256);
-        SetGpuReg(REG_OFFSET_BG1CNT, BGCNT_PRIORITY(2) | BGCNT_CHARBASE(3) | BGCNT_SCREENBASE(27) | BGCNT_16COLOR | BGCNT_TXT256x256);
-        SetGpuReg(REG_OFFSET_BG2CNT, BGCNT_PRIORITY(1) | BGCNT_CHARBASE(0) | BGCNT_SCREENBASE(9) | BGCNT_256COLOR | BGCNT_AFF256x256);
+        SetGpuReg(REG_OFFSET_BG0CNT, BGCNT_PRIORITY(3) | BGCNT_CHARBASE(1) | BGCNT_SCREENBASE(30) | BGCNT_16COLOR | BGCNT_TXT256x256);
+        SetGpuReg(REG_OFFSET_BG1CNT, BGCNT_PRIORITY(2) | BGCNT_CHARBASE(3) | BGCNT_SCREENBASE(28) | BGCNT_16COLOR | BGCNT_TXT256x256);
+        SetGpuReg(REG_OFFSET_BG2CNT, BGCNT_PRIORITY(1) | BGCNT_CHARBASE(0) | BGCNT_SCREENBASE(29) | BGCNT_256COLOR | BGCNT_AFF256x256);
         EnableInterrupts(INTR_FLAG_VBLANK);
         SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_MODE_1
                                     | DISPCNT_OBJ_1D_MAP
@@ -820,6 +921,8 @@ static void Task_TitleScreenPhase1(u8 taskId)
         spriteId = CreateSprite(&sVersionBannerRightSpriteTemplate, VERSION_BANNER_RIGHT_X, VERSION_BANNER_Y, 0);
         gSprites[spriteId].sParentTaskId = taskId;
 
+        CreateDivergenceSubtitle(DIVERGENCE_SUBTITLE_X, DIVERGENCE_SUBTITLE_Y_START, taskId);
+
         gTasks[taskId].tCounter = 144;
         gTasks[taskId].func = Task_TitleScreenPhase2;
     }
@@ -858,7 +961,7 @@ static void Task_TitleScreenPhase2(u8 taskId)
                                     | DISPCNT_BG1_ON
                                     | DISPCNT_BG2_ON
                                     | DISPCNT_OBJ_ON);
-        CreatePressStartBanner(START_BANNER_X, 108);
+        CreatePressStartBanner(START_BANNER_X, START_BANNER_Y);
         CreateCopyrightBanner(START_BANNER_X, 148);
         gTasks[taskId].tBg1Y = 0;
         gTasks[taskId].func = Task_TitleScreenPhase3;

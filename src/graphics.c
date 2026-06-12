@@ -2059,6 +2059,11 @@ const u32 gTitleScreenEmeraldVersionGfx[]  = INCBIN_U32("graphics/title_screen/e
 const u16 gTitleScreenPressStartPal[]      = INCBIN_U16("graphics/title_screen/press_start.gbapal");
 const u32 gTitleScreenPressStartGfx[]      = INCBIN_U32("graphics/title_screen/press_start.4bpp.lz");
 const u32 gTitleScreenPokemonLogoTilemap[] = INCBIN_U32("graphics/title_screen/pokemon_logo.bin.lz");
+const u16 gTitleScreenDivergencePal[]      = INCBIN_U16("graphics/title_screen/titlescreen.gbapal");
+const u32 gTitleScreenDivergenceGfx[]      = INCBIN_U32("graphics/title_screen/titlescreen.4bpp.lz");
+const u32 gTitleScreenDivergenceTilemap[]  = INCBIN_U32("graphics/title_screen/titlescreen.bin.lz");
+const u16 gTitleScreenDivergenceSubtitlePal[] = INCBIN_U16("graphics/title_screen/divergence_subtitle.gbapal");
+const u32 gTitleScreenDivergenceSubtitleGfx[] = INCBIN_U32("graphics/title_screen/divergence_subtitle.4bpp.lz");
 
 const u16 gFrontierPassBg_Pal[]                          = INCBIN_U16("graphics/frontier_pass/bg.gbapal"); // 8 x 16
 const u32 gFrontierPassBg_Gfx[]                          = INCBIN_U32("graphics/frontier_pass/bg.4bpp.lz");

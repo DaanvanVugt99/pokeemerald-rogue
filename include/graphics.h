@@ -2794,9 +2794,14 @@ extern const u32 gTitleScreenPressStartGfx[];
 extern const u32 gTitleScreenPokemonLogoGfx[];
 extern const u32 gTitleScreenPokemonLogoTilemap[];
 extern const u32 gTitleScreenCloudsTilemap[];
+extern const u32 gTitleScreenDivergenceGfx[];
+extern const u32 gTitleScreenDivergenceTilemap[];
+extern const u32 gTitleScreenDivergenceSubtitleGfx[];
 extern const u16 gTitleScreenBgPalettes_Default[];
 extern const u16 gTitleScreenBgPalettes_Green[];
 extern const u16 gTitleScreenBgPalettes_Gold[];
+extern const u16 gTitleScreenDivergencePal[];
+extern const u16 gTitleScreenDivergenceSubtitlePal[];
 extern const u16 gTitleScreenPressStartPal[];
 extern const u16 gTitleScreenEmeraldVersionPal[];
 
