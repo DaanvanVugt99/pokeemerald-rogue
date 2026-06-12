@@ -503,7 +503,11 @@ static const u8 sRootNetworkDescription[] = _("On switch-out, incoming ally heal
 static const u8 sScorchingRelayDescription[] = _("On switch-out, incoming ally's first turn deals 1.2x damage; 1.5x in sun.");
 static const u8 sTidalSwitchDescription[] = _("On switch-out, incoming ally's first turn takes 0.8x damage; 0.5x in rain.");
 static const u8 sMigrationDescription[] = _("When switching out, uses Rain Dance before exiting.");
-static const u8 sGliderDescription[] = _("First move after switch-in gets +1 priority if Flying/Electric. In Electric Terrain, it ignores Protect.");
+static const u8 sGliderDescription[] = _(
+    "1st Flying/Elec. move\n"
+    "gets +1 priority after switch.\n"
+    "In Elec. Terrain,\n"
+    "bypasses Protect.");
 static const u8 sBioluminescenceDescription[] = _("On switch-in, this Pokemon sets Electric Terrain.");
 static const u8 sLivewireNestDescription[] = _("First Bug/Electric move each switch-in sets Infested Terrain.");
 static const u8 sFactoryLineDescription[] = _("With 2 Steel allies, on switch-in this Pokemon uses Shift Gear.");

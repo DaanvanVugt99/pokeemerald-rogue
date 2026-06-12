@@ -716,6 +716,8 @@ static const struct WindowTemplate sPageUniqueAbilityTemplate[] =
     },
 };
 
+#define UNIQUE_ABILITY_DESC_TEXT_WIDTH (18 * 8)
+
 #define SUMMARY_TEXT_COLOR_RED 2
 #define SUMMARY_TEXT_COLOR_BLUE 3
 
@@ -3660,7 +3662,7 @@ static void PrintUniqueAbilityDescription(void)
         return;
     }
 
-    BufferWrappedSummaryAbilityDescription(gStringVar4, gAbilityDescriptionPointers[ability], 132);
+    BufferWrappedSummaryAbilityDescription(gStringVar4, gAbilityDescriptionPointers[ability], UNIQUE_ABILITY_DESC_TEXT_WIDTH);
     PrintTextOnWindow(windowId, gStringVar4, 0, 1, 1, 0);
 }
 
