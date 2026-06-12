@@ -180963,6 +180963,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DRUDDIGON[] =
 	{ .move=MOVE_METAL_CLAW, .level=15 },
 	{ .move=MOVE_SCARY_FACE, .level=20 },
 	{ .move=MOVE_SLASH, .level=25 },
+	{ .move=MOVE_DRAGON_BREATH, .level=28 },
 	{ .move=MOVE_DRAGON_CLAW, .level=30 },
 	{ .move=MOVE_HONE_CLAWS, .level=35 },
 	{ .move=MOVE_CRUNCH, .level=40 },
