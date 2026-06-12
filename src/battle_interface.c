@@ -4271,8 +4271,9 @@ static void Task_BounceBall(u8 taskId)
         if (!sprite->inUse)
         {
             gBattleStruct->ballSpriteIds[0] = AddItemIconSprite(102, 102, gBallToDisplay);
-            gSprites[gBattleStruct->ballSpriteIds[0]].x = LAST_USED_BALL_X_F;
-            gSprites[gBattleStruct->ballSpriteIds[0]].y = LAST_USED_BALL_Y_BNC;
+            sprite = &gSprites[gBattleStruct->ballSpriteIds[0]];
+            sprite->x = LAST_USED_BALL_X_F;
+            sprite->y = LAST_USED_BALL_Y_BNC;
             task->sState++;
         }  // Fallthrough
     case 3: // Bounce Down
@@ -4309,13 +4310,16 @@ void SwapBallToDisplay(bool32 sameBall)
 void ArrowsChangeColorLastBallCycle(bool32 showArrows)
 {
 #if B_LAST_USED_BALL == TRUE && B_LAST_USED_BALL_CYCLE == TRUE
-    u16 paletteNum = 16 + gSprites[gBattleStruct->ballSpriteIds[1]].oam.paletteNum;
+    u16 paletteNum;
     struct PlttData *defaultPlttArrow;
     struct PlttData *defaultPlttOutline;
     struct PlttData *pltArrow;
     struct PlttData *pltOutline;
+
     if (gBattleStruct->ballSpriteIds[1] == MAX_SPRITES)
         return;
+
+    paletteNum = 16 + gSprites[gBattleStruct->ballSpriteIds[1]].oam.paletteNum;
     paletteNum *= 16;
     pltArrow = (struct PlttData *)&gPlttBufferFaded[paletteNum + 9];  // Arrow color is in idx 9
     pltOutline = (struct PlttData *)&gPlttBufferFaded[paletteNum + 8];  // Arrow outline is in idx 8

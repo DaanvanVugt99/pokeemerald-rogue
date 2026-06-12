@@ -1274,14 +1274,14 @@ static bool8 IsSlotUnlocked(u8 slot)
 {
     if(RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_LAB))
     {
-        // 3 slots unlocked by default
-        if(slot <= 2)
+        // 4 slots unlocked by default
+        if(slot < 4)
             return TRUE;
 
-        if(slot == 3)
+        if(slot < 6)
             return RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_SLOTS0);
 
-        if(slot == 4)
+        if(slot < 8)
             return RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_SLOTS1);
     }
 

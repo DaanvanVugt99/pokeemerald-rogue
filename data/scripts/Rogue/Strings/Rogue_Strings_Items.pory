@@ -445,12 +445,12 @@ text gHubUpgradeDesc_Home_FieldShed
 
 text gHubUpgradeDesc_Lab_UniqueMonSlots0
 {
-    format("Increase number of Unique {PKMN} that can be tracked.")
+    format("Increase number of Unique {PKMN} that can be tracked to 6.")
 }
 
 text gHubUpgradeDesc_Lab_UniqueMonSlots1
 {
-    format("Increase number of Unique {PKMN} that can be tracked.")
+    format("Increase number of Unique {PKMN} that can be tracked to 8.")
 }
 
 text gHubUpgradeDesc_Lab_UniqueMonRarity0
