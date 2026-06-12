@@ -487,6 +487,48 @@ script Rogue_EventScript_UsePokeblockItem
     release
 }
 
+script Rogue_EventScript_UseUniqueScannerItem
+{
+    lock
+
+    message(format("Scanning for tracked Unique Pokémon…"))
+    waitmessage
+    closemessage
+
+    setvar(VAR_0x8004, 0)
+
+    while(var(VAR_0x8004) < DYNAMIC_UNIQUE_MON_COUNT)
+    {
+        special(Rogue_GetDynamicUniqueMonSpecies)
+
+        if(var(VAR_RESULT) != SPECIES_NONE)
+        {
+            showmonpic(VAR_RESULT, 2, 2)
+            playmoncry(VAR_RESULT, CRY_MODE_NORMAL)
+
+            callnative(ScriptMenu_DisplayUniqueMonInfo)
+            special(Rogue_BufferDynamicUniqueMonCountDown)
+            if(var(VAR_RESULT) == TRUE)
+            {
+                messageinstant(format("Tracking data expires in {STR_VAR_3}…"))
+            }
+            else
+            {
+                messageinstant(format("Tracking data expires soon…"))
+            }
+            waitstate
+            hidemonpic
+        }
+
+        addvar(VAR_0x8004, 1)
+    }
+
+    msgbox(format("Scan complete."))
+    waitmoncry
+
+    release
+}
+
 script Rogue_EventScript_UseDayCarePhoneItem
 {
     lock

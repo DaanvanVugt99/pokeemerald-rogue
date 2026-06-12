@@ -644,6 +644,33 @@
 
 
             {
+                "name": "A Unique Discovery",
+                "description": "During an Adventure, catch any Unique Pokémon.",
+                "triggers":
+                [
+                    {
+                        "on": [ "MON_UNIQUE_CAUGHT" ],
+                        "condition": "Always",
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    {
+                        "item": "ITEM_UNIQUE_SCANNER",
+                        "count": 1,
+                        "custom_popup":
+                        {
+                            "item_icon": "ITEM_UNIQUE_SCANNER",
+                            "title": "Unique Scanner",
+                            "subtitle": "{COLOR LIGHT_BLUE}{SHADOW BLUE}Key Item Obtained",
+                            "fanfare": "MUS_RG_OBTAIN_KEY_ITEM"
+                        }
+                    }
+                ]
+            },
+            {
                 "name": "True Legend",
                 "description": "During an Adventure, catch any Pokémon of Legends (Mythicals and other forms count as Legends too).",
                 "triggers":

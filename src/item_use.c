@@ -882,6 +882,19 @@ void ItemUseOutOfBattle_DayCarePhone(u8 taskId)
     SetUpItemUseOnFieldCallback(taskId);
 }
 
+static void ItemUseOnFieldCB_UniqueScanner(u8 taskId)
+{
+    LockPlayerFieldControls();
+    ScriptContext_SetupScript(Rogue_EventScript_UseUniqueScannerItem);
+    DestroyTask(taskId);
+}
+
+void ItemUseOutOfBattle_UniqueScanner(u8 taskId)
+{
+    sItemUseOnFieldCB = ItemUseOnFieldCB_UniqueScanner;
+    SetUpItemUseOnFieldCallback(taskId);
+}
+
 static void ItemUseOnFieldCB_GoldenSeed(u8 taskId)
 {
     LockPlayerFieldControls();

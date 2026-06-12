@@ -11,6 +11,7 @@ extern const u8 gItemDesc_BuildingSupplies[];
 extern const u8 gItemDesc_SmallCoinCase[];
 extern const u8 gItemDesc_LargeCoinCase[];
 extern const u8 gItemDesc_GoldenSeed[];
+extern const u8 gItemDesc_UniqueScanner[];
 
 extern const u8 gItemDesc_NormalPokeblock[];
 extern const u8 gItemDesc_FightingPokeblock[];
@@ -305,6 +306,24 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .iconPalette = gItemIconPalette_GoldenSeed,
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_GoldenSeed,
+    },
+
+    [ITEM_UNIQUE_SCANNER - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Unique Scanner"),
+#else
+        .name = _("UNIQUE SCANNER"),
+#endif
+        .itemId = ITEM_UNIQUE_SCANNER,
+        .price = 0,
+        .description = gItemDesc_UniqueScanner,
+        .pocket = POCKET_KEY_ITEMS,
+        .iconImage = gItemIcon_Scanner,
+        .iconPalette = gItemIconPalette_Scanner,
+        .type = ITEM_USE_FIELD,
+        .registrability = TRUE,
+        .fieldUseFunc = ItemUseOutOfBattle_UniqueScanner,
     },
 
     // Pokeblock

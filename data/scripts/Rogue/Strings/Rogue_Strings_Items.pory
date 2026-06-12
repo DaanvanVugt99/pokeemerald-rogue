@@ -478,7 +478,6 @@ text gHubUpgradeDesc_Lab_UniqueMonTyping
     format("Unique {PKMN} can have alternative typing.")
 }
 
-
 text gHubUpgradeDesc_AdventureEntrance_RandomStarter
 {
     format("Starter {PKMN} can be randomised when embarking on Runs.")

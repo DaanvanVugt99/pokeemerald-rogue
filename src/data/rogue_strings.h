@@ -64,6 +64,11 @@ const u8 gText_EscapeRopeDesc[] = _(
     "instantly from\n"
     "most encounters.");
 
+const u8 gItemDesc_UniqueScanner[] = _(
+    "A portable scanner\n"
+    "for tracked Unique\n"
+    "Pokémon.");
+
 // Difficulty/Config lab settings
 //
 

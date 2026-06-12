@@ -13,6 +13,7 @@ void ItemUseOutOfBattle_CGear(u8);
 void ItemUseOutOfBattle_WorldMap(u8);
 void ItemUseOutOfBattle_DayCarePhone(u8);
 void ItemUseOutOfBattle_GoldenSeed(u8);
+void ItemUseOutOfBattle_UniqueScanner(u8);
 void ItemUseOutOfBattle_CoinCase(u8);
 void ItemUseOutOfBattle_PowderJar(u8);
 void ItemUseOutOfBattle_SSTicket(u8);

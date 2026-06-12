@@ -82,7 +82,8 @@
                             "subtitle": "{COLOR LIGHT_BLUE}{SHADOW BLUE}Path Uncovered…",
                             "fanfare": "MUS_RG_OBTAIN_KEY_ITEM"
                         }
-                    }
+                    },
+                    { "quest": "A Unique Discovery" }
                 ]
             },
             {

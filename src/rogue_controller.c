@@ -1229,6 +1229,9 @@ void Rogue_OnAcceptCaughtMon(struct Pokemon *mon)
         if(RoguePokedex_IsSpeciesLegendary(species))
             RogueQuest_OnTrigger(QUEST_TRIGGER_MON_LEGEND_CAUGHT);
 
+        if(RogueGift_GetCustomMonId(mon) != CUSTOM_MON_NONE)
+            RogueQuest_OnTrigger(QUEST_TRIGGER_MON_UNIQUE_CAUGHT);
+
         if(IsMonShiny(mon))
             RogueQuest_OnTrigger(QUEST_TRIGGER_MON_SHINY_CAUGHT);
         else
