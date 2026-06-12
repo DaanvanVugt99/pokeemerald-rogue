@@ -4033,6 +4033,35 @@ static const struct SpriteSheet sSpriteSheet_LastUsedBallWindow =
 #define sState     data[0]
 #define sSameBall  data[1]
 
+static bool32 TrySelectLastUsedBallToDisplay(void)
+{
+    u32 i;
+
+    if (gBallToDisplay >= FIRST_BALL
+     && gBallToDisplay <= LAST_BALL
+     && CheckBagHasItem(gBallToDisplay, 1))
+        return TRUE;
+
+    // We're out of the displayed ball, so fall back to the first ball in the bag.
+    CompactItemsInBagPocket(&gBagPockets[BALLS_POCKET]);
+
+    for (i = 0; i < gBagPockets[BALLS_POCKET].capacity; i++)
+    {
+        u16 itemId = gBagPockets[BALLS_POCKET].itemSlots[i].itemId;
+
+        if (itemId >= FIRST_BALL
+         && itemId <= LAST_BALL
+         && GetBagItemQuantity(&gBagPockets[BALLS_POCKET].itemSlots[i].quantity) > 0)
+        {
+            gBallToDisplay = itemId;
+            return TRUE;
+        }
+    }
+
+    gBallToDisplay = ITEM_NONE;
+    return FALSE;
+}
+
 bool32 CanThrowLastUsedBall(void)
 {
     if (B_LAST_USED_BALL == FALSE)
@@ -4053,19 +4082,8 @@ void TryAddLastUsedBallItemSprites(void)
 {
     if (B_LAST_USED_BALL == FALSE)
         return;
-    if (gBallToDisplay == 0
-      || (gBallToDisplay != 0 && !CheckBagHasItem(gBallToDisplay, 1)))
-    {
-        // we're out of the last used ball, so just set it to the first ball in the bag
-        u16 firstBall;
 
-        // we have to compact the bag first bc it is typically only compacted when you open it
-        CompactItemsInBagPocket(&gBagPockets[BALLS_POCKET]);
-
-        firstBall = gBagPockets[BALLS_POCKET].itemSlots[0].itemId;
-        if (firstBall > ITEM_NONE)
-            gBallToDisplay = firstBall;
-    }
+    TrySelectLastUsedBallToDisplay();
 
     if (!CanThrowLastUsedBall())
         return;
@@ -4187,8 +4205,20 @@ void TryHideLastUsedBall(void)
 
 void TryRestoreLastUsedBall(void)
 {
+    u16 oldBallToDisplay;
+
     if (B_LAST_USED_BALL == FALSE)
         return;
+
+    oldBallToDisplay = gBallToDisplay;
+    if (!TrySelectLastUsedBallToDisplay())
+    {
+        TryHideLastUsedBall();
+        return;
+    }
+
+    if (gBattleStruct->ballSpriteIds[0] != MAX_SPRITES && oldBallToDisplay != gBallToDisplay)
+        DestroyLastUsedBallGfx(&gSprites[gBattleStruct->ballSpriteIds[0]]);
 
     if (gBattleStruct->ballSpriteIds[0] != MAX_SPRITES)
         TryHideOrRestoreLastUsedBall(1);
