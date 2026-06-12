@@ -991,6 +991,7 @@ static u8 const sText_UniqueMonTitleRare[] = _("{STR_VAR_1} {FONT_SMALL_NARROW}{
 static u8 const sText_UniqueMonAbility[] = _("A/ {COLOR GREEN}{STR_VAR_1}");
 static u8 const sText_UniqueMonUniqueAbility[] = _("U/ {COLOR GREEN}{STR_VAR_1}");
 static u8 const sText_UniqueMonMove[] = _(" -{STR_VAR_1}");
+static u8 const sText_UniqueMonOutOfDex[] = _("{COLOR RED}Not in current Dex");
 
 static void PrintUniqueMonInfoToWindow(u8 windowId)
 {
@@ -1009,6 +1010,9 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
     AddTextPrinterParameterized(windowId, FONT_NORMAL, gStringVar4, 2, 0, TEXT_SKIP_DRAW, NULL);
 
     line = 0;
+
+    if(!RoguePokedex_IsSpeciesEnabled(species))
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_UniqueMonOutOfDex, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
 
     // Ability
     if(RogueGift_GetCustomMonAbilityCount(customMonId) != 0)
@@ -1046,7 +1050,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
 void ScriptMenu_DisplayUniqueMonInfo()
 {
     u8 taskId;
-    u8 windowId = CreateWindowFromRectWithBaseBlockOffset(12, 1, 14, 10, 8 * 8);
+    u8 windowId = CreateWindowFromRectWithBaseBlockOffset(12, 1, 14, 11, 8 * 8);
 
     PrintUniqueMonInfoToWindow(windowId);
 

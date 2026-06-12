@@ -492,6 +492,7 @@ script Rogue_EventScript_UseUniqueScannerItem
     lock
 
     message(format("Scanning for tracked Unique Pokémon…"))
+    special(RogueGift_EnsureDynamicCustomMonsAreValid)
     waitmessage
     closemessage
 
