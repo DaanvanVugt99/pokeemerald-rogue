@@ -33,6 +33,22 @@ SINGLE_BATTLE_TEST("Work Crew uses a random work move after Dig's burrow turn")
     }
 }
 
+SINGLE_BATTLE_TEST("Work Crew keeps Dig active when its called work move fails")
+{
+    GIVEN {
+        PLAYER(SPECIES_DIGGERSBY) { Speed(100); Ability(ABILITY_HUGE_POWER); UniqueAbility(ABILITY_WORK_CREW); Moves(MOVE_DIG); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Speed(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_DIG, WITH_RNG(RNG_ROGUE_WORK_CREW, MOVE_ROTOTILLER)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DIG, player);
+        ABILITY_POPUP(player, ABILITY_WORK_CREW);
+        MESSAGE("But it failed!");
+    } THEN {
+        EXPECT(gStatuses3[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)] & STATUS3_UNDERGROUND);
+    }
+}
+
 SINGLE_BATTLE_TEST("Work Crew does not trigger after other Ground-type moves")
 {
     GIVEN {

@@ -6769,7 +6769,10 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_ATTACKER_VISIBLE: // make attacker sprite visible
-            if (gMoveResultFlags & MOVE_RESULT_NO_EFFECT
+            if ((gMoveResultFlags & MOVE_RESULT_NO_EFFECT
+                 && !(gBattleStruct->isAtkCancelerForCalledMove
+                   && HasBattlerAbility(gBattlerAttacker, ABILITY_WORK_CREW)
+                   && (gStatuses3[gBattlerAttacker] & STATUS3_UNDERGROUND)))
                 || !(gStatuses3[gBattlerAttacker] & (STATUS3_SEMI_INVULNERABLE))
                 || WasUnableToUseMove(gBattlerAttacker))
             {
