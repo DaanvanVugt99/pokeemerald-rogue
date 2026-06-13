@@ -775,6 +775,7 @@ static const u8 sMemoMiscTextColor[] = _("{COLOR WHITE}{SHADOW DARK_GRAY}"); // 
 static const u8 sStatsLeftColumnLayout[] = _("{DYNAMIC 0}/{DYNAMIC 1}\n{DYNAMIC 2}\n{DYNAMIC 3}");
 static const u8 sStatsLeftColumnLayout2[] = _("{DYNAMIC 0}  {DYNAMIC 1}\n{DYNAMIC 2}\n{DYNAMIC 3}");
 static const u8 sStatsRightColumnLayout[] = _("{DYNAMIC 0}\n{DYNAMIC 1}\n{DYNAMIC 2}");
+static const u8 sText_PkmnBase[] = _("BS");
 static const u8 sText_UniqueAbilityPageTitle[] = _("Unique");
 static const u8 sText_UniqueHeader[] = _("UNIQUE");
 static const u8 sText_NoUniqueAbility[] = _("No unique ability.");
@@ -1412,7 +1413,7 @@ void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, 
     }
 
     sMonSummaryScreen->minTabIndex = 0;
-    sMonSummaryScreen->maxTabIndex = 2;
+    sMonSummaryScreen->maxTabIndex = 3;
 
     if(sMonSummaryScreen->currPageIndex == PSS_PAGE_COUNT)
         sMonSummaryScreen->currPageIndex = sMonSummaryScreen->minPageIndex;
@@ -3996,27 +3997,35 @@ static void PrintFriendship(void)
 
 static void BufferLeftColumnStats(void)
 {
-    if(sMonSummaryScreen->currTabIndex != 0)
+    if(sMonSummaryScreen->currTabIndex == 3)
     {
+        ConvertIntToDecimalStringN(gStringVar1, gSpeciesInfo[sMonSummaryScreen->summary.species].baseHP, STR_CONV_MODE_LEFT_ALIGN, 3);
+        ConvertIntToDecimalStringN(gStringVar2, gSpeciesInfo[sMonSummaryScreen->summary.species].baseAttack, STR_CONV_MODE_LEFT_ALIGN, 3);
+        ConvertIntToDecimalStringN(gStringVar3, gSpeciesInfo[sMonSummaryScreen->summary.species].baseDefense, STR_CONV_MODE_LEFT_ALIGN, 3);
+    }
+    else if(sMonSummaryScreen->currTabIndex != 0)
+    {
+        const u8 *label = gText_PkmnEV;
         u8 *HPString = Alloc(8);
         u8 *atkString = Alloc(8);
         u8 *defString = Alloc(8);
 
         if(sMonSummaryScreen->currTabIndex == 1)
         {
+            label = gText_PkmnIV;
             ConvertIntToDecimalStringN(HPString, sMonSummaryScreen->summary.HPIV, STR_CONV_MODE_RIGHT_ALIGN, 3);
             ConvertIntToDecimalStringN(atkString, sMonSummaryScreen->summary.atkIV, STR_CONV_MODE_RIGHT_ALIGN, 7);
             ConvertIntToDecimalStringN(defString, sMonSummaryScreen->summary.defIV, STR_CONV_MODE_RIGHT_ALIGN, 7);
         }
-        else
+        else if(sMonSummaryScreen->currTabIndex == 2)
         {
+            label = gText_PkmnEV;
             ConvertIntToDecimalStringN(HPString, sMonSummaryScreen->summary.HPEV, STR_CONV_MODE_RIGHT_ALIGN, 3);
             ConvertIntToDecimalStringN(atkString, sMonSummaryScreen->summary.atkEV, STR_CONV_MODE_RIGHT_ALIGN, 7);
             ConvertIntToDecimalStringN(defString, sMonSummaryScreen->summary.defEV, STR_CONV_MODE_RIGHT_ALIGN, 7);
         }
-
         DynamicPlaceholderTextUtil_Reset();
-        DynamicPlaceholderTextUtil_SetPlaceholderPtr(0, (sMonSummaryScreen->currTabIndex == 1 ? gText_PkmnIV : gText_PkmnEV));
+        DynamicPlaceholderTextUtil_SetPlaceholderPtr(0, label);
         DynamicPlaceholderTextUtil_SetPlaceholderPtr(1, HPString);
         DynamicPlaceholderTextUtil_SetPlaceholderPtr(2, atkString);
         DynamicPlaceholderTextUtil_SetPlaceholderPtr(3, defString);
@@ -4054,7 +4063,23 @@ static void BufferLeftColumnStats(void)
 
 static void PrintLeftColumnStats(void)
 {
-    PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_LEFT), gStringVar4, 4, 1, 0, 0);
+    u8 windowId = AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_LEFT);
+    s32 x;
+
+    if(sMonSummaryScreen->currTabIndex == 3)
+    {
+        PrintTextOnWindow(windowId, sText_PkmnBase, 4, 1, 0, 0);
+        x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 44);
+        PrintTextOnWindow(windowId, gStringVar1, x, 1, 0, 0);
+        x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar2, 44);
+        PrintTextOnWindow(windowId, gStringVar2, x, 17, 0, 0);
+        x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar3, 44);
+        PrintTextOnWindow(windowId, gStringVar3, x, 33, 0, 0);
+    }
+    else
+    {
+        PrintTextOnWindow(windowId, gStringVar4, 4, 1, 0, 0);
+    }
 }
 
 static void BufferRightColumnStats(void)
@@ -4067,11 +4092,17 @@ static void BufferRightColumnStats(void)
             ConvertIntToDecimalStringN(gStringVar2, sMonSummaryScreen->summary.spdefIV, STR_CONV_MODE_RIGHT_ALIGN, 3);
             ConvertIntToDecimalStringN(gStringVar3, sMonSummaryScreen->summary.speedIV, STR_CONV_MODE_RIGHT_ALIGN, 3);
         }
-        else
+        else if(sMonSummaryScreen->currTabIndex == 2)
         {
             ConvertIntToDecimalStringN(gStringVar1, sMonSummaryScreen->summary.spatkEV, STR_CONV_MODE_RIGHT_ALIGN, 3);
             ConvertIntToDecimalStringN(gStringVar2, sMonSummaryScreen->summary.spdefEV, STR_CONV_MODE_RIGHT_ALIGN, 3);
             ConvertIntToDecimalStringN(gStringVar3, sMonSummaryScreen->summary.speedEV, STR_CONV_MODE_RIGHT_ALIGN, 3);
+        }
+        else
+        {
+            ConvertIntToDecimalStringN(gStringVar1, gSpeciesInfo[sMonSummaryScreen->summary.species].baseSpAttack, STR_CONV_MODE_RIGHT_ALIGN, 3);
+            ConvertIntToDecimalStringN(gStringVar2, gSpeciesInfo[sMonSummaryScreen->summary.species].baseSpDefense, STR_CONV_MODE_RIGHT_ALIGN, 3);
+            ConvertIntToDecimalStringN(gStringVar3, gSpeciesInfo[sMonSummaryScreen->summary.species].baseSpeed, STR_CONV_MODE_RIGHT_ALIGN, 3);
         }
     }
     else
