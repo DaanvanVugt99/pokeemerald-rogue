@@ -17141,6 +17141,31 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SNOWPLOW)
+         && (moveType == TYPE_ICE || moveType == TYPE_STEEL)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanUseExtraMove(battler, gBattlerTarget))
+        {
+            bool32 snowStarted;
+
+            SetBattlerTriggeredAbility(battler, ABILITY_SNOWPLOW);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_RAPID_SPIN;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            snowStarted = TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE);
+            if (snowStarted)
+                StartAbilityCalledMoveScriptAt(BattleScript_SnowplowActivates);
+            else
+                StartAbilityCalledMoveScript();
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_EMPTY_HAND)
          && gBattleMoves[move].punchingMove
          && DidMoveSucceedForMoveEndEffects(battler)

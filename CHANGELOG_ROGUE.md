@@ -55,6 +55,13 @@ Format follows Keep a Changelog loosely:
   makes its first Fire-type move each battle also use Sky Attack.
 - Reworked the Clefable line's Moonlight unique ability to restore HP when any
   Pokemon is healed.
+- Reworked the Alolan Meowth line's unique ability to Royal Treatment, healing
+  incoming allies after Parting Shot.
+- Reworked Alolan Raichu's unique ability to Brain Surf, letting Electric and
+  Psychic moves pivot into the other terrain while raising Sp. Atk once per
+  switch-in.
+- Reworked the Alolan Sandshrew line's unique ability to Snowplow, making its
+  first Ice or Steel move each switch-in start Snow and follow with Rapid Spin.
 - Reworked the Snubbull line's Brutal Charge unique ability to follow foe
   Defense drops with a 40 BP Headbutt while keeping its first-turn Speed boost.
 - Reworked the Pidgeot line's Strong Winds unique ability to set Tailwind when

@@ -7411,6 +7411,29 @@ static void Cmd_moveend(void)
                     break;
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_BRAIN_SURF)
+             && IsBattlerAlive(gBattlerAttacker)
+             && (moveType == TYPE_ELECTRIC || moveType == TYPE_PSYCHIC)
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1))
+            {
+                u32 terrain = (moveType == TYPE_ELECTRIC) ? STATUS_FIELD_PSYCHIC_TERRAIN : STATUS_FIELD_ELECTRIC_TERRAIN;
+
+                gBattleCommunication[MULTISTRING_CHOOSER] = (moveType == TYPE_ELECTRIC) ? B_MSG_TERRAIN_SET_PSYCHIC : B_MSG_TERRAIN_SET_ELECTRIC;
+                if (TryChangeBattleTerrain(gBattlerAttacker, terrain, &gFieldTimers.terrainTimer))
+                {
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BRAIN_SURF);
+                    gBattlerAbility = gBattlerAttacker;
+                    gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_BrainSurfActivates;
+                    effect = TRUE;
+                }
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_SLEIGHT_OF_HAND)
              && IsBattlerAlive(gBattlerAttacker)
              && IsBattlerAlive(gBattlerTarget)
@@ -8215,6 +8238,12 @@ static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct B
     {
         gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_TIDAL_SWITCH;
     }
+    else if (HasBattlerAbility(battler, ABILITY_ROYAL_TREATMENT)
+          && gBattlerAttacker == battler
+          && gBattleMoves[gCurrentMove].effect == EFFECT_PARTING_SHOT)
+    {
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_TREATMENT;
+    }
     else
     {
         gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
@@ -8299,6 +8328,28 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
             gBattleStruct->switchInTransferSourcePartyIdx[battler] = sourcePartyIdx;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_TidalSwitchActivates;
+            return TRUE;
+        }
+    }
+
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROYAL_TREATMENT)
+    {
+        u8 sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battler];
+
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_ROYAL_TREATMENT;
+        if (gBattleMons[battler].hp != 0 && gBattleMons[battler].hp < gBattleMons[battler].maxHP)
+        {
+            gBattleMoveDamage = gBattleMons[battler].maxHP / 4;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            gBattleMoveDamage *= -1;
+            gBattlerAttacker = battler;
+            gBattlerTarget = battler;
+            SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_TREATMENT);
+            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = sourcePartyIdx;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RoyalTreatmentActivates;
             return TRUE;
         }
     }

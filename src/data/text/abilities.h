@@ -871,6 +871,9 @@ static const u8 sMaliciousMindDescription[] = _("First status move uses Disable.
 static const u8 sToxicVanityDescription[] = _("First weak move uses Draining Kiss. Double power if foe is poisoned.");
 static const u8 sShelterDescription[] = _("On switch-in, raises Defense and restores 1/3 max HP.");
 static const u8 sAromaTrailDescription[] = _("When a foe lowers this Pokemon's stat, that foe's Accuracy falls.");
+static const u8 sRoyalTreatmentDescription[] = _("After Parting Shot, incoming ally restores 1/4 max HP.");
+static const u8 sBrainSurfDescription[] = _("Once per switch-in, Electric/Psychic moves set the other terrain and raise Sp. Atk.");
+static const u8 sSnowplowDescription[] = _("First Ice/Steel move each switch-in sets Snow, then uses Rapid Spin.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1573,6 +1576,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TOXIC_VANITY] = _("Toxic Vanity"),
     [ABILITY_SHELTER] = _("Shelter"),
     [ABILITY_AROMA_TRAIL] = _("Aroma Trail"),
+    [ABILITY_ROYAL_TREATMENT] = _("Royal Treatment"),
+    [ABILITY_BRAIN_SURF] = _("Brain Surf"),
+    [ABILITY_SNOWPLOW] = _("Snowplow"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2454,6 +2460,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TOXIC_VANITY] = _("ToxicVnty"),
     [ABILITY_SHELTER] = _("Shelter"),
     [ABILITY_AROMA_TRAIL] = _("AromaTrail"),
+    [ABILITY_ROYAL_TREATMENT] = _("RoyalTreat"),
+    [ABILITY_BRAIN_SURF] = _("BrainSurf"),
+    [ABILITY_SNOWPLOW] = _("Snowplow"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3513,5 +3522,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_TOXIC_VANITY] = sToxicVanityDescription,
     [ABILITY_SHELTER] = sShelterDescription,
     [ABILITY_AROMA_TRAIL] = sAromaTrailDescription,
+    [ABILITY_ROYAL_TREATMENT] = sRoyalTreatmentDescription,
+    [ABILITY_BRAIN_SURF] = sBrainSurfDescription,
+    [ABILITY_SNOWPLOW] = sSnowplowDescription,
 
 };

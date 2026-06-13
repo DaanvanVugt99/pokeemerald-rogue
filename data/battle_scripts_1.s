@@ -12240,6 +12240,14 @@ BattleScript_ThermalLiftUsesSkyAttack::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_SnowplowActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_SNOWWARNINGSNOW
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_SNOW_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_MaliciousMindUsesConfuseRayAndDisable::
 	copybyte gBattlerAttacker, sBATTLER
 	copybyte gBattlerAbility, sBATTLER
@@ -12434,6 +12442,22 @@ BattleScript_RoyalGardenActivates::
 	waitmessage B_WAIT_TIME_LONG
 	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
 	call BattleScript_ActivateTerrainEffects
+	return
+
+BattleScript_BrainSurfActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	setstatchanger STAT_SPATK, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_BrainSurfEnd
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_BrainSurfEnd:
 	return
 
 BattleScript_SpringCommandActivates::
@@ -13871,6 +13895,15 @@ BattleScript_TidalSwitchActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_TIDALSWITCHGUARDED
 	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_RoyalTreatmentActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ROOTNETWORKRESTORED
+	waitmessage B_WAIT_TIME_LONG
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
 	return
 
 BattleScript_StabilizeActivates::

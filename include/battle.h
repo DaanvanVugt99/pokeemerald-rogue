@@ -1025,6 +1025,7 @@ struct QueuedStatBoost
 #define SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE  (1 << 3)
 #define SWITCH_IN_TRANSFER_TIDAL_SWITCH            (1 << 4)
 #define SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE     (1 << 5)
+#define SWITCH_IN_TRANSFER_ROYAL_TREATMENT         (1 << 6)
 
 // All battle variables are declared in battle_main.c
 extern u16 gBattle_BG0_X;
