@@ -62,6 +62,13 @@ Format follows Keep a Changelog loosely:
   switch-in.
 - Reworked the Alolan Sandshrew line's unique ability to Snowplow, making its
   first Ice or Steel move each switch-in start Snow and follow with Rapid Spin.
+- Reworked the Alolan Diglett line's unique ability to Fault Finder, making its
+  first Ground move each switch-in use Magnet Rise and its first Steel move set
+  Stealth Rock.
+- Reworked the Alolan Rattata line's unique ability to Nest Boss, making its
+  STAB moves never miss and failed Sucker Punch use Swords Dance.
+- Reworked the Alolan Vulpix line's unique ability to Lanakila Law, giving
+  Encore and Hypnosis priority and perfect accuracy in Snow.
 - Reworked the Snubbull line's Brutal Charge unique ability to follow foe
   Defense drops with a 40 BP Headbutt while keeping its first-turn Speed boost.
 - Reworked the Pidgeot line's Strong Winds unique ability to set Tailwind when

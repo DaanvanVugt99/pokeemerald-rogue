@@ -874,6 +874,9 @@ static const u8 sAromaTrailDescription[] = _("When a foe lowers this Pokemon's s
 static const u8 sRoyalTreatmentDescription[] = _("After Parting Shot, incoming ally restores 1/4 max HP.");
 static const u8 sBrainSurfDescription[] = _("Once per switch-in, Electric/Psychic moves set the other terrain and raise Sp. Atk.");
 static const u8 sSnowplowDescription[] = _("First Ice/Steel move each switch-in sets Snow, then uses Rapid Spin.");
+static const u8 sFaultFinderDescription[] = _("First Ground move uses Magnet Rise; first Steel move sets Stealth Rock.");
+static const u8 sNestBossDescription[] = _("STAB moves never miss. Failed Sucker Punch uses Swords Dance.");
+static const u8 sLanakilaLawDescription[] = _("In Snow, Encore and Hypnosis have +1 priority and ignore accuracy.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1579,6 +1582,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ROYAL_TREATMENT] = _("Royal Treatment"),
     [ABILITY_BRAIN_SURF] = _("Brain Surf"),
     [ABILITY_SNOWPLOW] = _("Snowplow"),
+    [ABILITY_FAULT_FINDER] = _("Fault Finder"),
+    [ABILITY_NEST_BOSS] = _("Nest Boss"),
+    [ABILITY_LANAKILA_LAW] = _("Lanakila Law"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2463,6 +2469,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_ROYAL_TREATMENT] = _("RoyalTreat"),
     [ABILITY_BRAIN_SURF] = _("BrainSurf"),
     [ABILITY_SNOWPLOW] = _("Snowplow"),
+    [ABILITY_FAULT_FINDER] = _("FaultFind"),
+    [ABILITY_NEST_BOSS] = _("Nest Boss"),
+    [ABILITY_LANAKILA_LAW] = _("Lanakila"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3525,5 +3534,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_ROYAL_TREATMENT] = sRoyalTreatmentDescription,
     [ABILITY_BRAIN_SURF] = sBrainSurfDescription,
     [ABILITY_SNOWPLOW] = sSnowplowDescription,
+    [ABILITY_FAULT_FINDER] = sFaultFinderDescription,
+    [ABILITY_NEST_BOSS] = sNestBossDescription,
+    [ABILITY_LANAKILA_LAW] = sLanakilaLawDescription,
 
 };

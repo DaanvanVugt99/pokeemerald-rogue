@@ -1766,6 +1766,12 @@ static bool8 JumpIfMoveAffectedByProtect(u16 move)
     return affected;
 }
 
+static bool32 IsLanakilaLawMove(u16 move)
+{
+    return move == MOVE_ENCORE
+        || move == MOVE_HYPNOSIS;
+}
+
 static bool32 AccuracyCalcHelper(u16 move)
 {
     u32 moveType;
@@ -1775,17 +1781,22 @@ static bool32 AccuracyCalcHelper(u16 move)
        || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
       && gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
       && gBattleMoves[move].soundMove)
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_HAUTE_COUTURE)
-      && moveType == TYPE_NORMAL)
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_TARGETING)
-      && IsOnlyParadoxInParty(gBattlerAttacker))
+	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_HAUTE_COUTURE)
+	      && moveType == TYPE_NORMAL)
+	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_NEST_BOSS)
+	      && IS_BATTLER_OF_TYPE(gBattlerAttacker, moveType))
+	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_TARGETING)
+	      && IsOnlyParadoxInParty(gBattlerAttacker))
      || (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
      || (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON))
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_ORACLE_SHRINE)
-      && IS_MOVE_STATUS(move)
-      && IsBattlerTerrainAffected(gBattlerAttacker, STATUS_FIELD_PSYCHIC_TERRAIN))
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_INTENT)
-      && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
+	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_ORACLE_SHRINE)
+	      && IS_MOVE_STATUS(move)
+	      && IsBattlerTerrainAffected(gBattlerAttacker, STATUS_FIELD_PSYCHIC_TERRAIN))
+	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_LANAKILA_LAW)
+	      && IsLanakilaLawMove(move)
+	      && IsBattlerWeatherAffected(gBattlerAttacker, B_WEATHER_SNOW))
+	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_INTENT)
+	      && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
      || gStatuses4[gBattlerTarget] & STATUS4_GLAIVE_RUSH)
     {
         if (HasBattlerAbility(gBattlerAttacker, ABILITY_INTENT))

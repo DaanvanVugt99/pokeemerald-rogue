@@ -4945,6 +4945,12 @@ static bool32 IsPivotMove(u16 move)
     return FALSE;
 }
 
+static bool32 IsLanakilaLawMove(u16 move)
+{
+    return move == MOVE_ENCORE
+        || move == MOVE_HYPNOSIS;
+}
+
 s8 GetMovePriority(u32 battler, u16 move)
 {
     s8 priority;
@@ -5006,6 +5012,13 @@ s8 GetMovePriority(u32 battler, u16 move)
     if (HasBattlerAbility(battler, ABILITY_RESPONSE)
      && IS_MOVE_STATUS(move)
      && CountPartyMonsOfType(battler, TYPE_ELECTRIC, TRUE) >= 1)
+    {
+        priority++;
+    }
+
+    if (HasBattlerAbility(battler, ABILITY_LANAKILA_LAW)
+     && IsLanakilaLawMove(move)
+     && IsBattlerWeatherAffected(battler, B_WEATHER_SNOW))
     {
         priority++;
     }
