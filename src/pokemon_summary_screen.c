@@ -93,7 +93,8 @@ enum {
 #define PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER 15
 #define PSS_LABEL_WINDOW_PORTRAIT_NICKNAME 16 // The upper name
 #define PSS_LABEL_WINDOW_PORTRAIT_SPECIES 17 // The lower name
-#define PSS_LABEL_WINDOW_END 18
+#define PSS_LABEL_WINDOW_PORTRAIT_HOF_MARKER 18
+#define PSS_LABEL_WINDOW_END 19
 
 // Dynamic fields for the Pokemon Info page
 #define PSS_DATA_WINDOW_INFO_ORIGINAL_TRAINER 0
@@ -281,6 +282,7 @@ static void PrintInfoPageText(void);
 static void Task_PrintInfoPage(u8);
 static void PrintMonOTName(void);
 static void PrintMonOTID(void);
+static void PrintMonHoFMarker(void);
 static void PrintMonAbilityName(void);
 static void PrintMonAbilityDescription(void);
 static void BufferMonTrainerMemo(void);
@@ -573,6 +575,15 @@ static const struct WindowTemplate sSummaryTemplate[] =
         .height = 4,
         .paletteNum = 6,
         .baseBlock = 395,
+    },
+    [PSS_LABEL_WINDOW_PORTRAIT_HOF_MARKER] = {
+        .bg = 0,
+        .tilemapLeft = 7,
+        .tilemapTop = 2,
+        .width = 3,
+        .height = 2,
+        .paletteNum = 7,
+        .baseBlock = 431,
     },
     [PSS_LABEL_WINDOW_END] = DUMMY_WIN_TEMPLATE
 };
@@ -3097,6 +3108,7 @@ static void PrintTextOnWindow(u8 windowId, const u8 *string, u8 x, u8 y, u8 line
 static void PrintMonInfo(void)
 {
     FillWindowPixelBuffer(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, PIXEL_FILL(0));
+    FillWindowPixelBuffer(PSS_LABEL_WINDOW_PORTRAIT_HOF_MARKER, PIXEL_FILL(0));
     FillWindowPixelBuffer(PSS_LABEL_WINDOW_PORTRAIT_NICKNAME, PIXEL_FILL(0));
     FillWindowPixelBuffer(PSS_LABEL_WINDOW_PORTRAIT_SPECIES, PIXEL_FILL(0));
     if (!sMonSummaryScreen->summary.isEgg)
@@ -3139,6 +3151,7 @@ static void PrintNotEggInfo(void)
         else
             SetMonPicBackgroundPalette(TRUE);
     }
+    PrintMonHoFMarker();
     StringCopy(gStringVar1, gText_LevelSymbol);
     ConvertIntToDecimalStringN(gStringVar2, summary->level, STR_CONV_MODE_LEFT_ALIGN, 3);
     StringAppend(gStringVar1, gStringVar2);
@@ -3159,6 +3172,7 @@ static void PrintEggInfo(void)
     PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_NICKNAME, gStringVar1, 0, 1, 0, 1);
     PutWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_NICKNAME);
     ClearWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER);
+    ClearWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_HOF_MARKER);
     ClearWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_SPECIES);
 }
 
@@ -3433,6 +3447,7 @@ static void Task_PrintInfoPage(u8 taskId)
 }
 
 static u8 const sText_UniqueMon[] = _("Unique {PKMN}");
+static u8 const sText_HoFMarker[] = _("HoF");
 
 static void PrintMonOTName(void)
 {
@@ -3483,6 +3498,18 @@ static void PrintMonOTID(void)
             PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ID), gStringVar1, xPos, 1, 0, 1);
         }
     }
+}
+
+static void PrintMonHoFMarker(void)
+{
+    if (!RogueQuest_GetMonMasteryFlag(sMonSummaryScreen->summary.species))
+    {
+        ClearWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_HOF_MARKER);
+        return;
+    }
+
+    AddTextPrinterParameterized4(PSS_LABEL_WINDOW_PORTRAIT_HOF_MARKER, FONT_SMALL, 0, 1, 0, 0, sTextColors[SUMMARY_TEXT_COLOR_RED], 0, sText_HoFMarker);
+    PutWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_HOF_MARKER);
 }
 
 static u8 const sText_GmaxFactor[] = _("GMAX");
