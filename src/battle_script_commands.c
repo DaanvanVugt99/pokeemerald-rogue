@@ -9066,8 +9066,19 @@ static void Cmd_switchineffects(void)
         if (gBattleStruct->storedHealingWish & gBitTable[battler])
         {
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_HealingWishActivates;
+            if (gBattleStruct->storedFairyTaleWish & gBitTable[battler])
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_FAIRY_TALE);
+                gBattleStruct->switchInTransferSourcePartyIdx[battler] = gBattleStruct->fairyTaleWishSourcePartyIdx[battler];
+                gBattlescriptCurrInstr = BattleScript_HealingWishFairyTaleActivates;
+            }
+            else
+            {
+                gBattlescriptCurrInstr = BattleScript_HealingWishActivates;
+            }
             gBattleStruct->storedHealingWish  &= ~(gBitTable[battler]);
+            gBattleStruct->storedFairyTaleWish  &= ~(gBitTable[battler]);
+            gBattleStruct->fairyTaleWishSourcePartyIdx[battler] = PARTY_SIZE;
         }
         else // Lunar Dance
         {
@@ -13755,7 +13766,19 @@ static void Cmd_various(void)
         if (gCurrentMove == MOVE_LUNAR_DANCE)
             gBattleStruct->storedLunarDance |= gBitTable[battler];
         else
+        {
             gBattleStruct->storedHealingWish |= gBitTable[battler];
+            if (HasBattlerAbility(battler, ABILITY_FAIRY_TALE))
+            {
+                gBattleStruct->storedFairyTaleWish |= gBitTable[battler];
+                gBattleStruct->fairyTaleWishSourcePartyIdx[battler] = gBattlerPartyIndexes[battler];
+            }
+            else
+            {
+                gBattleStruct->storedFairyTaleWish &= ~(gBitTable[battler]);
+                gBattleStruct->fairyTaleWishSourcePartyIdx[battler] = PARTY_SIZE;
+            }
+        }
         break;
     }
     case VARIOUS_HIT_SWITCH_TARGET_FAILED:

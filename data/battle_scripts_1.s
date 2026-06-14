@@ -3183,6 +3183,11 @@ BattleScript_EffectHealingWishEnd:
 BattleScript_HealingWishActivates::
 	setbyte cMULTISTRING_CHOOSER, 0
 	goto BattleScript_EffectHealingWishRestore
+BattleScript_HealingWishFairyTaleActivates::
+	setbyte cMULTISTRING_CHOOSER, 0
+	call BattleScript_EffectHealingWishRestore
+	call BattleScript_FairyTaleActivates
+	return
 BattleScript_LunarDanceActivates::
 	setbyte cMULTISTRING_CHOOSER, 1
 	restorepp BS_ATTACKER
@@ -7874,6 +7879,14 @@ BattleScript_TerrainEnds_Ret::
 BattleScript_TerrainEnds::
 	call BattleScript_TerrainEnds_Ret
 	end2
+
+BattleScript_RailgunChargeEndsTerrain::
+	call BattleScript_AbilityPopUp
+	various BS_ATTACKER, VARIOUS_REMOVE_TERRAIN
+	playanimation BS_ATTACKER, B_ANIM_RESTORE_BG
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
 
 BattleScript_MudSportEnds::
 	printstring STRINGID_MUDSPORTENDS
@@ -13904,6 +13917,16 @@ BattleScript_RoyalTreatmentActivates::
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_TARGET
 	datahpupdate BS_TARGET
+	return
+
+BattleScript_FairyTaleActivates::
+	call BattleScript_AbilityPopUp
+	modifybattlerstatstage BS_ATTACKER, STAT_ATK, INCREASE, 1, BattleScript_FairyTaleTrySpAtk, ANIM_ON
+BattleScript_FairyTaleTrySpAtk:
+	modifybattlerstatstage BS_ATTACKER, STAT_SPATK, INCREASE, 1, BattleScript_FairyTaleTrySpeed, ANIM_ON
+BattleScript_FairyTaleTrySpeed:
+	modifybattlerstatstage BS_ATTACKER, STAT_SPEED, INCREASE, 1, BattleScript_FairyTaleEnd, ANIM_ON
+BattleScript_FairyTaleEnd:
 	return
 
 BattleScript_StabilizeActivates::

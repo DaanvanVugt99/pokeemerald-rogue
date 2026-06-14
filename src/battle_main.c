@@ -5127,6 +5127,14 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (HasBattlerAbility(battler, ABILITY_RAILGUN_CHARGE)
+     && gBattleMoves[move].type == TYPE_ROCK
+     && !IS_MOVE_STATUS(move)
+     && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN))
+    {
+        priority++;
+    }
+
     if (HasBattlerAbility(battler, ABILITY_EJECT)
      && IsPivotMove(move))
     {

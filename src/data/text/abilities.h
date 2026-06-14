@@ -877,6 +877,9 @@ static const u8 sSnowplowDescription[] = _("First Ice/Steel move each switch-in 
 static const u8 sFaultFinderDescription[] = _("First Ground move uses Magnet Rise; first Steel move sets Stealth Rock.");
 static const u8 sNestBossDescription[] = _("STAB moves never miss. Failed Sucker Punch uses Swords Dance.");
 static const u8 sLanakilaLawDescription[] = _("In Snow, Encore and Hypnosis have +1 priority and ignore accuracy.");
+static const u8 sFirespitMantleDescription[] = _("First Water/Ground hit is halved and burns the attacker.");
+static const u8 sRailgunChargeDescription[] = _("In Electric Terrain, Rock moves get +1 priority and 1.5x, then end it.");
+static const u8 sFairyTaleDescription[] = _("After Healing Wish, incoming ally gets +1 Atk, Sp. Atk, and Speed.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1585,6 +1588,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FAULT_FINDER] = _("Fault Finder"),
     [ABILITY_NEST_BOSS] = _("Nest Boss"),
     [ABILITY_LANAKILA_LAW] = _("Lanakila Law"),
+    [ABILITY_FIRESPIT_MANTLE] = _("Firespit Mantle"),
+    [ABILITY_RAILGUN_CHARGE] = _("Railgun Charge"),
+    [ABILITY_FAIRY_TALE] = _("Fairy Tale"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2472,6 +2478,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FAULT_FINDER] = _("FaultFind"),
     [ABILITY_NEST_BOSS] = _("Nest Boss"),
     [ABILITY_LANAKILA_LAW] = _("Lanakila"),
+    [ABILITY_FIRESPIT_MANTLE] = _("Firespit"),
+    [ABILITY_RAILGUN_CHARGE] = _("Railgun"),
+    [ABILITY_FAIRY_TALE] = _("FairyTale"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3537,5 +3546,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_FAULT_FINDER] = sFaultFinderDescription,
     [ABILITY_NEST_BOSS] = sNestBossDescription,
     [ABILITY_LANAKILA_LAW] = sLanakilaLawDescription,
+    [ABILITY_FIRESPIT_MANTLE] = sFirespitMantleDescription,
+    [ABILITY_RAILGUN_CHARGE] = sRailgunChargeDescription,
+    [ABILITY_FAIRY_TALE] = sFairyTaleDescription,
 
 };

@@ -13709,6 +13709,26 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_FIRESPIT_MANTLE)
+         && gProtectStructs[battler].uniqueAbilityActive
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[moveEndAttacker].hp != 0
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && (moveType == TYPE_WATER || moveType == TYPE_GROUND)
+         && !IS_MOVE_STATUS(move)
+         && IsFinalMultiHitStrike())
+        {
+            gProtectStructs[battler].uniqueAbilityActive = FALSE;
+            SetBattlerTriggeredAbility(battler, ABILITY_FIRESPIT_MANTLE);
+            gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_BURN;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
+            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_AVALANCHE_HIDE)
          && gProtectStructs[battler].uniqueAbilityActive
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -14593,6 +14613,21 @@ if (triggeringAbility != ABILITY_NONE)
             VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_RAILGUN_CHARGE)
+         && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
+         && moveType == TYPE_ROCK
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike())
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_RAILGUN_CHARGE);
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_RailgunChargeEndsTerrain;
             effect++;
         }
 
@@ -23886,6 +23921,14 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
             return UQ_4_12(1.2);
     }
 
+    if (HasBattlerAbility(battlerAtk, ABILITY_RAILGUN_CHARGE)
+     && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN))
+    {
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (moveType == TYPE_ROCK)
+            return UQ_4_12(1.5);
+    }
+
     if (HasBattlerAbility(battlerAtk, ABILITY_SOARING_GALE)
      && (gBattleMoves[gCurrentMove].windMove || IsWingMove(gCurrentMove)))
         return UQ_4_12(1.3);
@@ -24009,6 +24052,20 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         if (updateFlags)
         {
             gDisableStructs[battlerDef].uniquePersistentStateActive = TRUE;
+            gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
+        }
+        return UQ_4_12(0.5);
+    }
+
+    if (HasBattlerAbility(battlerDef, ABILITY_FIRESPIT_MANTLE)
+     && !gDisableStructs[battlerDef].uniqueOncePerSwitchInUsed
+     && (moveType == TYPE_WATER || moveType == TYPE_GROUND)
+     && typeEffectivenessModifier > UQ_4_12(0.0)
+     && !IS_MOVE_STATUS(move))
+    {
+        if (updateFlags)
+        {
+            gDisableStructs[battlerDef].uniqueOncePerSwitchInUsed = TRUE;
             gProtectStructs[battlerDef].uniqueAbilityActive = TRUE;
         }
         return UQ_4_12(0.5);
