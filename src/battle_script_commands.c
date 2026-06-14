@@ -6577,7 +6577,11 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_PENDING_UNIQUE_ABILITY:
-            if (TryStartPendingUniqueAbilityScript(gBattlescriptCurrInstr, gBattlescriptCurrInstr))
+            if (!IsFinalTargetOfMultiTargetMove())
+            {
+                gBattleScripting.moveendState++;
+            }
+            else if (TryStartPendingUniqueAbilityScript(gBattlescriptCurrInstr, gBattlescriptCurrInstr))
             {
                 effect = TRUE;
             }

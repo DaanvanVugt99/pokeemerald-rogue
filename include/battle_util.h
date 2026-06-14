@@ -183,6 +183,7 @@ void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount);
 void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);
+bool32 IsFinalTargetOfMultiTargetMove(void);
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg);
 void SetGrafittiTag(u32 battler);
 void ResetGrafittiTagPaletteCache(u32 battler);

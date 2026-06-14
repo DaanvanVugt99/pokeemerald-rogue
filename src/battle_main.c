@@ -4951,6 +4951,17 @@ static bool32 IsLanakilaLawMove(u16 move)
         || move == MOVE_HYPNOSIS;
 }
 
+static bool32 IsRailgunChargePriorityMove(u32 battler, u16 move)
+{
+    u32 moveType = gBattleMoves[move].type;
+
+    if (moveType == TYPE_NORMAL && HasBattlerAbility(battler, ABILITY_ROCK_HEAD))
+        moveType = TYPE_ROCK;
+
+    return moveType == TYPE_ROCK
+        && !IS_MOVE_STATUS(move);
+}
+
 s8 GetMovePriority(u32 battler, u16 move)
 {
     s8 priority;
@@ -5128,8 +5139,7 @@ s8 GetMovePriority(u32 battler, u16 move)
     }
 
     if (HasBattlerAbility(battler, ABILITY_RAILGUN_CHARGE)
-     && gBattleMoves[move].type == TYPE_ROCK
-     && !IS_MOVE_STATUS(move)
+     && IsRailgunChargePriorityMove(battler, move)
      && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN))
     {
         priority++;

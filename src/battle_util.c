@@ -7921,6 +7921,38 @@ static inline bool32 IsFinalMultiHitStrike(void)
     return (gMultiHitCounter == 0 || gMultiHitCounter == 1);
 }
 
+static inline bool32 IsFinalMultiHitStrikeAndTarget(void)
+{
+    return IsFinalMultiHitStrike()
+        && IsFinalTargetOfMultiTargetMove();
+}
+
+bool32 IsFinalTargetOfMultiTargetMove(void)
+{
+    u32 i;
+    u32 moveTarget = GetBattlerMoveTargetType(gBattlerAttacker, gCurrentMove);
+    u32 targetsDone;
+
+    if (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+     || (moveTarget != MOVE_TARGET_BOTH && moveTarget != MOVE_TARGET_FOES_AND_ALLY))
+        return TRUE;
+
+    targetsDone = gBattleStruct->targetsDone[gBattlerAttacker];
+    if (gBattlerTarget < gBattlersCount)
+        targetsDone |= gBitTable[gBattlerTarget];
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (i != gBattlerAttacker
+         && IsBattlerAlive(i)
+         && !(targetsDone & gBitTable[i])
+         && (GetBattlerSide(i) != GetBattlerSide(gBattlerAttacker) || moveTarget == MOVE_TARGET_FOES_AND_ALLY))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
 static bool32 ClearSideEntryHazards(u32 side)
 {
     bool32 hazardsCleared = FALSE;
@@ -14619,10 +14651,10 @@ if (triggeringAbility != ABILITY_NONE)
         if (HasBattlerAbility(battler, ABILITY_RAILGUN_CHARGE)
          && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
          && moveType == TYPE_ROCK
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !IS_MOVE_STATUS(move)
+         && DidMoveSucceedForMoveEndEffects(battler)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && TARGET_TURN_DAMAGED
-         && IsFinalMultiHitStrike())
+         && IsFinalMultiHitStrikeAndTarget())
         {
             SetBattlerTriggeredAbility(battler, ABILITY_RAILGUN_CHARGE);
             gBattlerAttacker = gBattlerAbility = battler;
@@ -17469,7 +17501,7 @@ if (triggeringAbility != ABILITY_NONE)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsFinalMultiHitStrike()
+         && IsFinalMultiHitStrikeAndTarget()
          && !gProtectStructs[battler].extraMoveUsed
          && !(gBattleWeather & B_WEATHER_HAIL && WEATHER_HAS_EFFECT))
         {

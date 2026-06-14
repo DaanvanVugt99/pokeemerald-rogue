@@ -12,7 +12,7 @@ SINGLE_BATTLE_TEST("Cheap Tactics uses Scratch immediately on switch-in")
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_RATTATA_ALOLAN) { Ability(ABILITY_GLUTTONY); }
+        OPPONENT(SPECIES_RATTATA_ALOLAN) { Ability(ABILITY_GLUTTONY); UniqueAbility(ABILITY_CHEAP_TACTICS); }
     } WHEN {
         TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
     } THEN {
@@ -39,7 +39,7 @@ SINGLE_BATTLE_TEST("Cheap Tactics safely resolves against a semi-invulnerable ta
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_BOUNCE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_RATTATA_ALOLAN) { Ability(ABILITY_GLUTTONY); }
+        OPPONENT(SPECIES_RATTATA_ALOLAN) { Ability(ABILITY_GLUTTONY); UniqueAbility(ABILITY_CHEAP_TACTICS); }
     } WHEN {
         TURN { MOVE(player, MOVE_BOUNCE); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { SWITCH(opponent, 1); SKIP_TURN(player); }

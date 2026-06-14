@@ -21,7 +21,7 @@ SINGLE_BATTLE_TEST("Frost Revelry sets Reflect on switch-in in sun")
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_SUNNY_DAY, MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_NINETALES_ALOLAN) { Ability(ABILITY_SNOW_CLOAK); }
+        OPPONENT(SPECIES_NINETALES_ALOLAN) { Ability(ABILITY_SNOW_CLOAK); UniqueAbility(ABILITY_FROST_REVELRY); }
     } WHEN {
         TURN { MOVE(player, MOVE_SUNNY_DAY); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
@@ -67,7 +67,7 @@ SINGLE_BATTLE_TEST("Frost Revelry checks weather before Snow Warning changes wea
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_SUNNY_DAY, MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_NINETALES_ALOLAN) { Ability(ABILITY_SNOW_WARNING); }
+        OPPONENT(SPECIES_NINETALES_ALOLAN) { Ability(ABILITY_SNOW_WARNING); UniqueAbility(ABILITY_FROST_REVELRY); }
     } WHEN {
         TURN { MOVE(player, MOVE_SUNNY_DAY); }
         TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }

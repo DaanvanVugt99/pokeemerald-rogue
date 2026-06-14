@@ -7,6 +7,7 @@ ASSUMPTIONS
     ASSUME(!IS_MOVE_STATUS(MOVE_TACKLE));
     ASSUME(gBattleMoves[MOVE_HAIL].effect == EFFECT_HAIL);
     ASSUME(gBattleMoves[MOVE_SNOWSCAPE].effect == EFFECT_SNOWSCAPE);
+    ASSUME(gBattleMoves[MOVE_LEER].target == MOVE_TARGET_BOTH);
 }
 
 SINGLE_BATTLE_TEST("Frostbite Ritual uses Hail after status moves")
@@ -77,5 +78,30 @@ SINGLE_BATTLE_TEST("Frostbite Ritual does not trigger after damaging moves")
         }
     } THEN {
         EXPECT(!(gBattleWeather & B_WEATHER_HAIL));
+    }
+}
+
+DOUBLE_BATTLE_TEST("Frostbite Ritual triggers after Leer affects both foes")
+{
+    GIVEN {
+        PLAYER(SPECIES_CRABOMINABLE) { Speed(100); Ability(ABILITY_HYPER_CUTTER); UniqueAbility(ABILITY_FROSTBITE_RITUAL); Moves(MOVE_LEER); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(10); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(50); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(40); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN {
+            MOVE(playerLeft, MOVE_LEER);
+            MOVE(playerRight, MOVE_CELEBRATE);
+            MOVE(opponentLeft, MOVE_CELEBRATE);
+            MOVE(opponentRight, MOVE_CELEBRATE);
+        }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LEER, playerLeft);
+        ABILITY_POPUP(playerLeft, ABILITY_FROSTBITE_RITUAL);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_HAIL, playerLeft);
+    } THEN {
+        EXPECT_EQ(opponentLeft->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+        EXPECT_EQ(opponentRight->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+        EXPECT(gBattleWeather & B_WEATHER_HAIL);
     }
 }
