@@ -9090,9 +9090,6 @@ static void TryApplyCustomMon(u16 species, struct Pokemon* mon)
         }
 
         // If we're here, we're allowed to apply unique species
-
-        // Only a chance to apply
-        if((Random() % 2) == 0)
         {
             u32 customMonId = RogueGift_TryFindEnabledDynamicCustomMonForSpecies(species);
 

@@ -463,11 +463,6 @@ text gHubUpgradeDesc_Lab_UniqueMonRarity1
     format("Allows Epic Unique {PKMN} to be tracked. (+Moves)")
 }
 
-text gHubUpgradeDesc_Lab_UniqueMonRarity2
-{
-    format("Allows Exotic Unique {PKMN} to be tracked. (+Designed Sets)")
-}
-
 text gHubUpgradeDesc_Lab_UniqueMonRarity3
 {
     format("Allows Legendary Unique {PKMN} to be tracked. (+Unique Abilities)")

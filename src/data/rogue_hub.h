@@ -23,7 +23,6 @@ extern const u8 gHubUpgradeDesc_Lab_UniqueMonSlots0[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonSlots1[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity0[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity1[];
-extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity2[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity3[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonTyping[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_RandomStarter[];
@@ -370,21 +369,13 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .descText = gHubUpgradeDesc_Lab_UniqueMonRarity1,
         .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_RARE, HUB_UPGRADE_NONE },
     },
-    [HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EXOTIC] = 
-    {
-        .upgradeName = _("Exotic Unique{PKMN}"),
-        .targetArea = HUB_AREA_LABS,
-        .buildCost = 7,
-        .descText = gHubUpgradeDesc_Lab_UniqueMonRarity2,
-        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EPIC, HUB_UPGRADE_NONE },
-    },
     [HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY]
     {
         .upgradeName = _("Legend Unique{PKMN}"),
         .targetArea = HUB_AREA_LABS,
         .buildCost = 9,
         .descText = gHubUpgradeDesc_Lab_UniqueMonRarity3,
-        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EXOTIC, HUB_UPGRADE_NONE },
+        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EPIC, HUB_UPGRADE_NONE },
     },
 
     // HUB_AREA_ADVENTURE_ENTRANCE

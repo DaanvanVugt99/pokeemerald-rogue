@@ -69,6 +69,10 @@ Format follows Keep a Changelog loosely:
   STAB moves never miss and failed Sucker Punch use Swords Dance.
 - Reworked the Alolan Vulpix line's unique ability to Lanakila Law, giving
   Encore and Hypnosis priority and perfect accuracy in Snow.
+- Made Exotic Unique Pokemon reward-only, removing them from tracker spawns
+  and removing the Exotic tracker upgrade from lab progression.
+- Made tracked Unique Pokemon guaranteed to appear as Unique when their species
+  is encountered in a valid room.
 - Reworked the Snubbull line's Brutal Charge unique ability to follow foe
   Defense drops with a 40 BP Headbutt while keeping its first-turn Speed boost.
 - Reworked the Pidgeot line's Strong Winds unique ability to set Tailwind when
