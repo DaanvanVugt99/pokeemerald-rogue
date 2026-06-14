@@ -37,6 +37,7 @@
 #include "rogue_followmon.h"
 
 #define subsprite_table(ptr) {.subsprites = ptr, .subspriteCount = (sizeof ptr) / (sizeof(struct Subsprite))}
+#define PAL_TAG_CUSTOM_MON_PIC_BOX 0xEE01
 
 EWRAM_DATA s32 gFieldEffectArguments[8] = {0};
 
@@ -1007,8 +1008,9 @@ u8 CreateMonSprite_PicBox(u16 species, s16 x, s16 y, u8 subpriority)
 
 u8 CreateMonSprite_PicBoxCustom(u16 species, u32 otId, s16 x, s16 y, u8 subpriority)
 {
-    s32 spriteId = CreateMonPicSprite(species, otId, 0x8000, GetGenderForSpecies(species, 0), TRUE, x, y, 0, species);
-    PreservePaletteInWeather(IndexOfSpritePaletteTag(species) + 0x10);
+    u16 paletteTag = otId != 0 ? PAL_TAG_CUSTOM_MON_PIC_BOX : species;
+    s32 spriteId = CreateMonPicSprite(species, otId, 0x8000, GetGenderForSpecies(species, 0), TRUE, x, y, 0, paletteTag);
+    PreservePaletteInWeather(IndexOfSpritePaletteTag(paletteTag) + 0x10);
     if (spriteId == 0xFFFF)
         return MAX_SPRITES;
     else
