@@ -896,9 +896,13 @@ static const u8 sText_MeltdownRestoredHp[] = _("{B_DEF_NAME_WITH_PREFIX} restore
 static const u8 sText_MeltdownMadeMoveUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Meltdown\nmade {B_CURRENT_MOVE} useless!");
 static const u8 sText_DualityShiftedToSpAtk[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s Duality\nshifted to Sp. Atk!");
 static const u8 sText_DualityShiftedToAttack[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s Duality\nshifted to Attack!");
+static const u8 sText_GalaricaRoundsLoaded[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}\nloaded a Galarica round!");
+static const u8 sText_TrashAlchemyFound[] = _("{B_ATK_NAME_WITH_PREFIX}'s Trash Alchemy\nfound {B_LAST_ITEM}!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_TRASHALCHEMYFOUND - BATTLESTRINGS_TABLE_START] = sText_TrashAlchemyFound,
+    [STRINGID_GALARICAROUNDSLOADED - BATTLESTRINGS_TABLE_START] = sText_GalaricaRoundsLoaded,
     [STRINGID_DUALITYSHIFTEDTOATTACK - BATTLESTRINGS_TABLE_START] = sText_DualityShiftedToAttack,
     [STRINGID_DUALITYSHIFTEDTOSPATK - BATTLESTRINGS_TABLE_START] = sText_DualityShiftedToSpAtk,
     [STRINGID_MELTDOWNMADEMOVEUSELESS - BATTLESTRINGS_TABLE_START] = sText_MeltdownMadeMoveUseless,

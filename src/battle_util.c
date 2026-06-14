@@ -151,6 +151,8 @@ static bool32 TryResetNegativeStatStages(u32 battler);
 static void GetBattlerPartyRange(u32 battler, struct Pokemon **party, u32 *firstMonId, u32 *lastMonId);
 static u16 GetGemItemForType(u32 type);
 static u16 GetRandomGemstashItemForBattler(u32 battler);
+static bool32 IsTrashAlchemyItemRejected(u32 item);
+static u16 GetRandomTrashAlchemyItem(void);
 static u32 GetMeloettaVerseState(u32 battler);
 static void SetMeloettaVerseState(u32 battler, u32 state);
 
@@ -243,6 +245,28 @@ static u16 GetRandomGemstashItemForBattler(u32 battler)
         return ITEM_NONE;
 
     return gemItems[RandomUniform(RNG_ROGUE_GEMSTASH_TYPE, 0, validMoveCount - 1)];
+}
+
+static bool32 IsTrashAlchemyItemRejected(u32 item)
+{
+    switch (ItemId_GetHoldEffect(item))
+    {
+    case HOLD_EFFECT_NONE:
+    case HOLD_EFFECT_PLATE:
+    case HOLD_EFFECT_DRIVE:
+    case HOLD_EFFECT_MEGA_STONE:
+    case HOLD_EFFECT_MEMORY:
+    case HOLD_EFFECT_Z_CRYSTAL:
+    case HOLD_EFFECT_MASK:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
+static u16 GetRandomTrashAlchemyItem(void)
+{
+    return RandomUniformExcept(RNG_ROGUE_TRASH_ALCHEMY_ITEM, ITEM_NONE + 1, ITEMS_COUNT - 1, IsTrashAlchemyItemRejected);
 }
 
 static const u8 sPkblToEscapeFactor[][3] = {
@@ -5685,6 +5709,21 @@ static bool32 ShouldDualitySwapOffensiveStats(u32 battlerAtk, u32 move, u32 move
           && moveType == TYPE_GRASS);
 }
 
+static u32 GetStagedOffensiveStat(u32 battler, u32 statId)
+{
+    u32 stat = (statId == STAT_ATK) ? gBattleMons[battler].attack : gBattleMons[battler].spAttack;
+    u32 stage = gBattleMons[battler].statStages[statId];
+
+    return stat * gStatStageRatios[stage][0] / gStatStageRatios[stage][1];
+}
+
+static bool32 ShouldTallTaleUseSpAttackForDragonHammer(u32 battlerAtk, u32 move)
+{
+    return move == MOVE_DRAGON_HAMMER
+        && HasBattlerAbility(battlerAtk, ABILITY_TALL_TALE)
+        && GetStagedOffensiveStat(battlerAtk, STAT_SPATK) > GetStagedOffensiveStat(battlerAtk, STAT_ATK);
+}
+
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move)
 {
     u32 pendingDamage = 0;
@@ -6825,6 +6864,15 @@ static const u16 sStarmobileMoves[] =
     MOVE_MAGICAL_TORQUE,
 };
 
+static const u16 sGalaricaRoundMoves[] =
+{
+    MOVE_ACID_SPRAY,
+    MOVE_CHILLING_WATER,
+    MOVE_MUD_SHOT,
+    MOVE_CHARGE_BEAM,
+    MOVE_MYSTICAL_FIRE,
+};
+
 static bool32 TryUseStarmobileCalledMove(u32 battler, u32 target)
 {
     u16 move;
@@ -6841,6 +6889,34 @@ static bool32 TryUseStarmobileCalledMove(u32 battler, u32 target)
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryUseGalaricaRoundsCalledMove(u32 battler, u32 target)
+{
+    gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+
+    if (target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || target == battler
+     || GetBattlerSide(target) == GetBattlerSide(battler))
+    {
+        if (!TryGetOpposingExtraMoveTarget(battler, &target))
+            return FALSE;
+    }
+
+    if (!CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_GALARICA_ROUNDS);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = RandomElement(RNG_ROGUE_GALARICA_ROUNDS, sGalaricaRoundMoves);
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
     StartAbilityCalledMoveScript();
     return TRUE;
 }
@@ -11826,6 +11902,48 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
             }
 
+            if (HasBattlerAbility(battler, ABILITY_TRASH_ALCHEMY)
+             && gBattleStruct->changedItems[battler] == ITEM_NONE)
+            {
+                u16 oldItem = gBattleMons[battler].item;
+                u16 newItem = GetRandomTrashAlchemyItem();
+
+                if (newItem != ITEM_NONE)
+                {
+                    if (oldItem != ITEM_NONE)
+                    {
+                        gBattleStruct->usedHeldItems[gBattlerPartyIndexes[battler]][GetBattlerSide(battler)] = oldItem;
+
+                        if (!BATTLER_MAX_HP(battler)
+                         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                        {
+                            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+                            if (gBattleMoveDamage == 0)
+                                gBattleMoveDamage = 1;
+                            gBattleMoveDamage *= -1;
+                        }
+                        else
+                        {
+                            gBattleMoveDamage = 0;
+                        }
+                    }
+                    else
+                    {
+                        gBattleMoveDamage = 0;
+                    }
+
+                    gBattleMons[battler].item = newItem;
+                    ClearBattlerItemEffectHistory(battler);
+                    BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[battler].item), &gBattleMons[battler].item);
+                    MarkBattlerForControllerExec(battler);
+
+                    gLastUsedItem = newItem;
+                    SetBattlerTriggeredAbility(battler, ABILITY_TRASH_ALCHEMY);
+                    BattleScriptPushCursorAndCallback(BattleScript_TrashAlchemyActivates);
+                    effect++;
+                }
+            }
+
             if (HasBattlerAbility(battler, ABILITY_TIMELOOP)
              && DoesPartyShareTypeWithBattler(battler))
             {
@@ -14439,6 +14557,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_GALARICA_ROUNDS)
+         && battler == moveEndTarget
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
+         && IsFinalMultiHitStrike()
+         && IsBattlerAlive(battler)
+         && !gDisableStructs[battler].uniquePersistentStateActive)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_GALARICA_ROUNDS);
+            gBattleScripting.battler = battler;
+            gBattlerAbility = battler;
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_GalaricaRoundsLoaded;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_ABYSSAL_LIGHT)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
@@ -14660,6 +14796,20 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlerAttacker = gBattlerAbility = battler;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_RailgunChargeEndsTerrain;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_GALARICA_ROUNDS)
+         && move == MOVE_SHELL_SIDE_ARM
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && TARGET_TURN_DAMAGED
+         && gHpDealt > 0
+         && !(gMoveResultFlags & (MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE | MOVE_RESULT_NO_EFFECT))
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrikeAndTarget()
+         && TryUseGalaricaRoundsCalledMove(battler, gBattlerTarget))
+        {
             effect++;
         }
 
@@ -23089,7 +23239,14 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     }
     else
     {
-        if (IS_MOVE_PHYSICAL(move) && ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
+        if (IS_MOVE_PHYSICAL(move) && ShouldTallTaleUseSpAttackForDragonHammer(battlerAtk, move))
+        {
+            atkStat = gBattleMons[battlerAtk].spAttack;
+            atkStage = gBattleMons[battlerAtk].statStages[STAT_SPATK];
+            usesOwnSpAttackStat = TRUE;
+            usesOwnOffensiveStat = TRUE;
+        }
+        else if (IS_MOVE_PHYSICAL(move) && ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
         {
             atkStat = gBattleMons[battlerAtk].spAttack;
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPATK];
@@ -24441,6 +24598,11 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     {
         usesOwnAttackStat = IS_MOVE_SPECIAL(move);
         usesOwnSpAttackStat = IS_MOVE_PHYSICAL(move);
+    }
+    else if (ShouldTallTaleUseSpAttackForDragonHammer(battlerAtk, move))
+    {
+        usesOwnAttackStat = FALSE;
+        usesOwnSpAttackStat = TRUE;
     }
     else
     {

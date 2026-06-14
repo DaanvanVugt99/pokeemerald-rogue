@@ -104,6 +104,8 @@ extern const u8 BattleScript_RestorePendingUniqueAbilityContext[];
 extern const u8 BattleScript_IntentFocused[];
 extern const u8 BattleScript_FamilyFeudReadied[];
 extern const u8 BattleScript_CarvingRushReadied[];
+extern const u8 BattleScript_GalaricaRoundsLoaded[];
+extern const u8 BattleScript_TrashAlchemyActivates[];
 extern const u8 BattleScript_AbilityPopupEnd3[];
 extern const u8 BattleScript_BurrowSwitchInActivates[];
 extern const u8 BattleScript_SubmergeSwitchInActivates[];

@@ -755,8 +755,10 @@
 #define STRINGID_MELTDOWNMADEMOVEUSELESS              753
 #define STRINGID_DUALITYSHIFTEDTOSPATK                754
 #define STRINGID_DUALITYSHIFTEDTOATTACK               755
+#define STRINGID_GALARICAROUNDSLOADED                 756
+#define STRINGID_TRASHALCHEMYFOUND                    757
 
-#define BATTLESTRINGS_COUNT                           756
+#define BATTLESTRINGS_COUNT                           758
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

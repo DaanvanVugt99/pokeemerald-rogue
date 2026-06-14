@@ -10169,6 +10169,12 @@ BattleScript_FamilyFeudReadied::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_GalaricaRoundsLoaded::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_GALARICAROUNDSLOADED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_CarvingRushReadied::
 	call BattleScript_AbilityPopUp
 	playmoveanimation BS_ATTACKER, MOVE_SWORDS_DANCE
@@ -13928,6 +13934,17 @@ BattleScript_FairyTaleTrySpeed:
 	modifybattlerstatstage BS_ATTACKER, STAT_SPEED, INCREASE, 1, BattleScript_FairyTaleEnd, ANIM_ON
 BattleScript_FairyTaleEnd:
 	return
+
+BattleScript_TrashAlchemyActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_TRASHALCHEMYFOUND
+	waitmessage B_WAIT_TIME_LONG
+	jumpifword CMP_EQUAL, gBattleMoveDamage, 0, BattleScript_TrashAlchemyEnd
+	orword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+BattleScript_TrashAlchemyEnd:
+	end3
 
 BattleScript_StabilizeActivates::
 	call BattleScript_AbilityPopUp

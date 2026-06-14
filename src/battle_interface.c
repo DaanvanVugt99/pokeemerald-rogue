@@ -3978,6 +3978,7 @@ static void Task_FreeAbilityPopUpGfx(u8 taskId)
 
 // last used ball
 #define LAST_BALL_WINDOW_TAG 0xD721
+#define LAST_BALL_WINDOW_PAL_TAG 0xD722
 
 static const struct OamData sOamData_LastUsedBall =
 {
@@ -3999,7 +4000,7 @@ static const struct OamData sOamData_LastUsedBall =
 static const struct SpriteTemplate sSpriteTemplate_LastUsedBallWindow =
 {
     .tileTag = LAST_BALL_WINDOW_TAG,
-    .paletteTag = ABILITY_POP_UP_TAG,
+    .paletteTag = LAST_BALL_WINDOW_PAL_TAG,
     .oam = &sOamData_LastUsedBall,
     .anims = gDummySpriteAnimTable,
     .images = NULL,
@@ -4019,6 +4020,31 @@ static const struct SpriteTemplate sSpriteTemplate_LastUsedBallWindow =
 static const struct SpriteSheet sSpriteSheet_LastUsedBallWindow =
 {
     sLastUsedBallWindowGfx, sizeof(sLastUsedBallWindowGfx), LAST_BALL_WINDOW_TAG
+};
+
+static const u16 sLastUsedBallWindowPalette[] =
+{
+    RGB(0, 22, 11),
+    RGB(20, 21, 19),
+    RGB(12, 12, 11),
+    RGB(10, 10, 10),
+    RGB(8, 8, 8),
+    RGB(14, 15, 13),
+    RGB(28, 29, 30),
+    RGB(31, 31, 31),
+    RGB(10, 10, 10),
+    RGB(14, 15, 13),
+    RGB(10, 10, 10),
+    RGB(14, 15, 13),
+    RGB(0, 0, 0),
+    RGB(20, 21, 19),
+    RGB(0, 0, 0),
+    RGB(0, 0, 0),
+};
+
+static const struct SpritePalette sSpritePalette_LastUsedBallWindow =
+{
+    sLastUsedBallWindowPalette, LAST_BALL_WINDOW_PAL_TAG
 };
 
 #define LAST_USED_BALL_X_F    14
@@ -4105,7 +4131,7 @@ void TryAddLastUsedBallItemSprites(void)
     }
 
     // window
-    LoadSpritePalette(&sSpritePalette_AbilityPopUp);
+    LoadSpritePalette(&sSpritePalette_LastUsedBallWindow);
     if (GetSpriteTileStartByTag(LAST_BALL_WINDOW_TAG) == 0xFFFF)
         LoadSpriteSheet(&sSpriteSheet_LastUsedBallWindow);
 
@@ -4124,7 +4150,7 @@ void TryAddLastUsedBallItemSprites(void)
 static void DestroyLastUsedBallWinGfx(struct Sprite *sprite)
 {
     FreeSpriteTilesByTag(LAST_BALL_WINDOW_TAG);
-    FreeSpritePaletteByTag(ABILITY_POP_UP_TAG);
+    FreeSpritePaletteByTag(LAST_BALL_WINDOW_PAL_TAG);
     DestroySprite(sprite);
     gBattleStruct->ballSpriteIds[1] = MAX_SPRITES;
 }

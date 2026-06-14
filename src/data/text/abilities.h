@@ -880,6 +880,9 @@ static const u8 sLanakilaLawDescription[] = _("In Snow, Encore and Hypnosis have
 static const u8 sFirespitMantleDescription[] = _("First Water/Ground hit is halved and burns the attacker.");
 static const u8 sRailgunChargeDescription[] = _("In Electric Terrain, Rock moves get +1 priority and 1.5x, then end it.");
 static const u8 sFairyTaleDescription[] = _("After Healing Wish, incoming ally gets +1 Atk, Sp. Atk, and Speed.");
+static const u8 sGalaricaRoundsDescription[] = _("SE hits load a round. Loaded Shell Side Arm has +1 priority and fires it at 40 BP.");
+static const u8 sTrashAlchemyDescription[] = _("End turn: eats item for HP, then finds a random held item.");
+static const u8 sTallTaleDescription[] = _("Dragon Hammer uses higher attacking stat. On KO, uses Growth.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1591,6 +1594,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FIRESPIT_MANTLE] = _("Firespit Mantle"),
     [ABILITY_RAILGUN_CHARGE] = _("Railgun Charge"),
     [ABILITY_FAIRY_TALE] = _("Fairy Tale"),
+    [ABILITY_GALARICA_ROUNDS] = _("Galarica Rounds"),
+    [ABILITY_TRASH_ALCHEMY] = _("Trash Alchemy"),
+    [ABILITY_TALL_TALE] = _("Tall Tale"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2481,6 +2487,9 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_FIRESPIT_MANTLE] = _("Firespit"),
     [ABILITY_RAILGUN_CHARGE] = _("Railgun"),
     [ABILITY_FAIRY_TALE] = _("FairyTale"),
+    [ABILITY_GALARICA_ROUNDS] = _("Galarica"),
+    [ABILITY_TRASH_ALCHEMY] = _("TrashAlch"),
+    [ABILITY_TALL_TALE] = _("TallTale"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3549,5 +3558,8 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_FIRESPIT_MANTLE] = sFirespitMantleDescription,
     [ABILITY_RAILGUN_CHARGE] = sRailgunChargeDescription,
     [ABILITY_FAIRY_TALE] = sFairyTaleDescription,
+    [ABILITY_GALARICA_ROUNDS] = sGalaricaRoundsDescription,
+    [ABILITY_TRASH_ALCHEMY] = sTrashAlchemyDescription,
+    [ABILITY_TALL_TALE] = sTallTaleDescription,
 
 };
