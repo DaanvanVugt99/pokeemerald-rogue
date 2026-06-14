@@ -67,7 +67,7 @@ script Rogue_Interior_BillsLab_TalkPC
 
         if(var(VAR_RESULT) != SPECIES_NONE)
         {
-            showmonpic(VAR_RESULT, 2, 2)
+            callnative(ScriptMenu_ShowDynamicUniqueMonPic)
             playmoncry(VAR_RESULT, CRY_MODE_NORMAL)
 
             callnative(ScriptMenu_DisplayUniqueMonInfo)

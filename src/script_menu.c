@@ -618,7 +618,7 @@ static void Task_PokemonPicWindow(u8 taskId)
     }
 }
 
-bool8 ScriptMenu_ShowPokemonPic(u16 species, u8 x, u8 y, bool8 isObscured)
+bool8 ScriptMenu_ShowPokemonPicCustom(u16 species, u32 otId, u8 x, u8 y, bool8 isObscured)
 {
     u8 taskId;
     u8 spriteId;
@@ -629,7 +629,10 @@ bool8 ScriptMenu_ShowPokemonPic(u16 species, u8 x, u8 y, bool8 isObscured)
     }
     else
     {
-        spriteId = CreateMonSprite_PicBox(species, x * 8 + 40, y * 8 + 40, 0);
+        spriteId = CreateMonSprite_PicBoxCustom(species, otId, x * 8 + 40, y * 8 + 40, 0);
+        if(spriteId == MAX_SPRITES)
+            return FALSE;
+
         taskId = CreateTask(Task_PokemonPicWindow, 0x50);
         gTasks[taskId].tWindowId = CreateWindowFromRect(x, y, 8, 8);
         gTasks[taskId].tState = 0;
@@ -648,6 +651,22 @@ bool8 ScriptMenu_ShowPokemonPic(u16 species, u8 x, u8 y, bool8 isObscured)
         SetStandardWindowBorderStyle(gTasks[taskId].tWindowId, TRUE);
         ScheduleBgCopyTilemapToVram(0);
         return TRUE;
+    }
+}
+
+bool8 ScriptMenu_ShowPokemonPic(u16 species, u8 x, u8 y, bool8 isObscured)
+{
+    return ScriptMenu_ShowPokemonPicCustom(species, 0, x, y, isObscured);
+}
+
+void ScriptMenu_ShowDynamicUniqueMonPic(void)
+{
+    AGB_ASSERT(gSpecialVar_0x8004 < DYNAMIC_UNIQUE_MON_COUNT);
+
+    if(RogueGift_IsDynamicMonSlotEnabled(gSpecialVar_0x8004))
+    {
+        struct UniqueMon* uniqueMon = RogueGift_GetDynamicUniqueMon(gSpecialVar_0x8004);
+        ScriptMenu_ShowPokemonPicCustom(uniqueMon->species, uniqueMon->customMonId, 2, 2, FALSE);
     }
 }
 

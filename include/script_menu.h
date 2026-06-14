@@ -13,6 +13,7 @@ bool8 ScriptMenu_MultichoiceWithDefault(u8 left, u8 top, u8 multichoiceId, bool8
 bool8 ScriptMenu_YesNo(u8 left, u8 top);
 bool8 ScriptMenu_MultichoiceGrid(u8 left, u8 top, u8 multichoiceId, bool8 ignoreBPress, u8 columnCount);
 bool8 ScriptMenu_ShowPokemonPic(u16 species, u8 x, u8 y, bool8 isObscured);
+bool8 ScriptMenu_ShowPokemonPicCustom(u16 species, u32 otId, u8 x, u8 y, bool8 isObscured);
 bool8 (*ScriptMenu_HidePokemonPic(void))(void);
 int ConvertPixelWidthToTileWidth(int width);
 u8 CreateWindowFromRect(u8 x, u8 y, u8 width, u8 height);
@@ -26,5 +27,6 @@ void ScriptMenu_ScrollingMultichoiceDynamicBegin(u16 capacity);
 void ScriptMenu_ScrollingMultichoiceDynamicAppendOption(u8 const* str, u16 value);
 void ScriptMenu_ScrollingMultichoiceDynamicEnd(void);
 void ScriptMenu_DisplayTextInWindow(const u8* str, u8 x, u8 y, u8 width, u8 height);
+void ScriptMenu_ShowDynamicUniqueMonPic(void);
 
 #endif //GUARD_SCRIPT_MENU_H
