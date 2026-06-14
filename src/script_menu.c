@@ -993,6 +993,29 @@ static void Task_DisplayTextInWindowInput(u8 taskId)
     }
 }
 
+static void Task_DisplayUniqueMonInfoInput(u8 taskId)
+{
+    u16 input = JOY_NEW(A_BUTTON | B_BUTTON | DPAD_LEFT | DPAD_RIGHT);
+
+    if(input != 0)
+    {
+        u8 windowId = gTasks[taskId].data[0];
+
+        if(input & B_BUTTON)
+            gSpecialVar_Result = UNIQUE_MON_PREVIEW_INPUT_CLOSE;
+        else if(input & DPAD_LEFT)
+            gSpecialVar_Result = UNIQUE_MON_PREVIEW_INPUT_PREV;
+        else
+            gSpecialVar_Result = UNIQUE_MON_PREVIEW_INPUT_NEXT;
+
+        ClearStdWindowAndFrame(windowId, TRUE);
+        RemoveWindow(windowId);
+
+        ScriptContext_Enable();
+        DestroyTask(taskId);
+    }
+}
+
 void ScriptMenu_DisplayTextInWindow(const u8* str, u8 x, u8 y, u8 width, u8 height)
 {
     u8 taskId;
@@ -1073,9 +1096,8 @@ void ScriptMenu_DisplayUniqueMonInfo()
 
     PrintUniqueMonInfoToWindow(windowId);
 
-    taskId = CreateTask(Task_DisplayTextInWindowInput, 0);
+    taskId = CreateTask(Task_DisplayUniqueMonInfoInput, 0);
     gTasks[taskId].data[0] = windowId;
-    gTasks[taskId].data[1] = RogueGift_GetDynamicUniqueMon(gSpecialVar_0x8004)->countDown;
 }
 
 static u8 const sText_PresetMonAbility_Has[] = _("Ability/ {COLOR GREEN}{STR_VAR_1}");

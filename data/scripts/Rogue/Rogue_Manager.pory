@@ -496,35 +496,46 @@ script Rogue_EventScript_UseUniqueScannerItem
     waitmessage
     closemessage
 
-    setvar(VAR_0x8004, 0)
+    special(Rogue_SelectFirstDynamicUniqueMonSlot)
 
-    while(var(VAR_0x8004) < DYNAMIC_UNIQUE_MON_COUNT)
+    while(var(VAR_RESULT) == TRUE)
     {
         special(Rogue_GetDynamicUniqueMonSpecies)
 
-        if(var(VAR_RESULT) != SPECIES_NONE)
+        callnative(ScriptMenu_ShowDynamicUniqueMonPic)
+        playmoncry(VAR_RESULT, CRY_MODE_NORMAL)
+
+        callnative(ScriptMenu_DisplayUniqueMonInfo)
+        special(Rogue_BufferDynamicUniqueMonCountDown)
+        if(var(VAR_RESULT) == TRUE)
         {
-            callnative(ScriptMenu_ShowDynamicUniqueMonPic)
-            playmoncry(VAR_RESULT, CRY_MODE_NORMAL)
-
-            callnative(ScriptMenu_DisplayUniqueMonInfo)
-            special(Rogue_BufferDynamicUniqueMonCountDown)
-            if(var(VAR_RESULT) == TRUE)
-            {
-                messageinstant(format("Tracking data expires in {STR_VAR_3}…"))
-            }
-            else
-            {
-                messageinstant(format("Tracking data expires soon…"))
-            }
-            waitstate
-            hidemonpic
+            messageinstant(format("Tracking data expires in {STR_VAR_3}…"))
         }
+        else
+        {
+            messageinstant(format("Tracking data expires soon…"))
+        }
+        waitstate
+        hidemonpic
 
-        addvar(VAR_0x8004, 1)
+        if(var(VAR_RESULT) == UNIQUE_MON_PREVIEW_INPUT_CLOSE)
+        {
+            break
+        }
+        elif(var(VAR_RESULT) == UNIQUE_MON_PREVIEW_INPUT_PREV)
+        {
+            special(Rogue_SelectPreviousDynamicUniqueMonSlot)
+        }
+        else
+        {
+            special(Rogue_SelectNextDynamicUniqueMonSlot)
+        }
     }
 
-    msgbox(format("Scan complete."))
+    if(var(VAR_RESULT) != UNIQUE_MON_PREVIEW_INPUT_CLOSE)
+    {
+        msgbox(format("Scan complete."))
+    }
     waitmoncry
 
     release

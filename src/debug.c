@@ -69,6 +69,7 @@
 
 #include "rogue_adventurepaths.h"
 #include "rogue_controller.h"
+#include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_popup.h"
 #include "rogue_query.h"
@@ -118,6 +119,7 @@ enum RogueUtilMenu
     DEBUG_ROGUE_UTIL_MENU_SET_WEATHER,
     DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT,
     DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM,
+    DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER,
 };
 
 enum PartyBoxesMenu
@@ -375,6 +377,7 @@ static void DebugAction_RogueUtil_GiveCommonItems(u8 taskId);
 static void DebugAction_RogueUtil_SetWeather(u8 taskId);
 static void DebugAction_RogueUtil_ChangeOutfit(u8 taskId);
 static void DebugAction_RogueUtil_RandomTradeTeam(u8 taskId);
+static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId);
 
 static void DebugAction_PartyBoxes_AccessPC(u8 taskId);
 static void DebugAction_PartyBoxes_MoveReminder(u8 taskId);
@@ -523,6 +526,7 @@ static const u8 sDebugText_RogueUtil_GiveCommonItems[] =     _("Give Common Item
 static const u8 sDebugText_RogueUtil_SetWeather[] =          _("Set Weather");
 static const u8 sDebugText_RogueUtil_ChangeOutfit[] =        _("Change Outfit");
 static const u8 sDebugText_RogueUtil_TradeTeam[] =           _("Trade Team");
+static const u8 sDebugText_RogueUtil_RerollUniqueTracker[] = _("Reroll Unique Tracker");
 // Party/Boxes Menu
 static const u8 sDebugText_PartyBoxes_AccessPC[] =           _("Access PC");
 static const u8 sDebugText_PartyBoxes_MoveReminder[] =       _("Move Reminder");
@@ -704,6 +708,7 @@ static const struct ListMenuItem sDebugMenu_Items_RogueUtilities[] =
     [DEBUG_ROGUE_UTIL_MENU_SET_WEATHER]         = {sDebugText_RogueUtil_SetWeather,      DEBUG_ROGUE_UTIL_MENU_SET_WEATHER},
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]       = {sDebugText_RogueUtil_ChangeOutfit,    DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT},
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]         = {sDebugText_RogueUtil_TradeTeam,       DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM},
+    [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = {sDebugText_RogueUtil_RerollUniqueTracker, DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER},
 };
 
 static const struct ListMenuItem sDebugMenu_Items_PartyBoxes[] =
@@ -866,6 +871,7 @@ static void (*const sDebugMenu_Actions_RogueUtilities[])(u8) =
     [DEBUG_ROGUE_UTIL_MENU_SET_WEATHER]       = DebugAction_RogueUtil_SetWeather,
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]     = DebugAction_RogueUtil_ChangeOutfit,
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]       = DebugAction_RogueUtil_RandomTradeTeam,
+    [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = DebugAction_RogueUtil_RerollUniqueTracker,
 };
 
 static void (*const sDebugMenu_Actions_PartyBoxes[])(u8) =
@@ -2334,6 +2340,13 @@ static void DebugAction_RogueUtil_RandomTradeTeam(u8 taskId)
     Debug_DestroyMenu_Full(taskId);
     LockPlayerFieldControls();
     ScriptContext_SetupScript(Rogue_Debug_RandomTradeTeam);
+}
+
+static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId)
+{
+    RogueGift_ClearDynamicCustomMons();
+    RogueGift_EnsureDynamicCustomMonsAreValid();
+    PlaySE(SE_USE_ITEM);
 }
 
 void BufferExpansionVersion(struct ScriptContext *ctx)

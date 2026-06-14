@@ -538,6 +538,71 @@ void Rogue_GetDynamicUniqueMonSpecies()
     }
 }
 
+static bool8 IsDynamicUniqueMonSlotVisible(u8 slot)
+{
+    return RogueGift_IsDynamicMonSlotEnabled(slot)
+        && RogueGift_GetDynamicUniqueMon(slot)->species != SPECIES_NONE;
+}
+
+void Rogue_SelectFirstDynamicUniqueMonSlot()
+{
+    u8 i;
+
+    for(i = 0; i < DYNAMIC_UNIQUE_MON_COUNT; ++i)
+    {
+        if(IsDynamicUniqueMonSlotVisible(i))
+        {
+            gSpecialVar_0x8004 = i;
+            gSpecialVar_Result = TRUE;
+            return;
+        }
+    }
+
+    gSpecialVar_Result = FALSE;
+}
+
+void Rogue_SelectNextDynamicUniqueMonSlot()
+{
+    u8 i;
+    u8 slot = gSpecialVar_0x8004;
+
+    for(i = 0; i < DYNAMIC_UNIQUE_MON_COUNT; ++i)
+    {
+        slot = (slot + 1) % DYNAMIC_UNIQUE_MON_COUNT;
+        if(IsDynamicUniqueMonSlotVisible(slot))
+        {
+            gSpecialVar_0x8004 = slot;
+            gSpecialVar_Result = TRUE;
+            return;
+        }
+    }
+
+    gSpecialVar_Result = FALSE;
+}
+
+void Rogue_SelectPreviousDynamicUniqueMonSlot()
+{
+    u8 i;
+    u8 slot = gSpecialVar_0x8004;
+
+    for(i = 0; i < DYNAMIC_UNIQUE_MON_COUNT; ++i)
+    {
+        if(slot == 0)
+            slot = DYNAMIC_UNIQUE_MON_COUNT - 1;
+        else
+            --slot;
+
+        if(IsDynamicUniqueMonSlotVisible(slot))
+        {
+            gSpecialVar_0x8004 = slot;
+            gSpecialVar_Result = TRUE;
+            return;
+        }
+    }
+
+    gSpecialVar_Result = FALSE;
+}
+
 static u8 const sText_Timer[] = _("{STR_VAR_1}:{STR_VAR_2} hours");
 
 void Rogue_BufferDynamicUniqueMonCountDown()

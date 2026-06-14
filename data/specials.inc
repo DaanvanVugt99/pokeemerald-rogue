@@ -198,6 +198,9 @@ gSpecials::
 	def_special RogueDebug_GiveDynamicUniqueMon
 	def_special RogueGift_EnsureDynamicCustomMonsAreValid
 	def_special Rogue_GetDynamicUniqueMonSpecies
+	def_special Rogue_SelectFirstDynamicUniqueMonSlot
+	def_special Rogue_SelectNextDynamicUniqueMonSlot
+	def_special Rogue_SelectPreviousDynamicUniqueMonSlot
 	def_special Rogue_BufferDynamicUniqueMonCountDown
 	def_special Rogue_QuestCollectNextReward
 	def_special Rogue_HasAnyNewQuests

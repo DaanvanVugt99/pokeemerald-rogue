@@ -7,6 +7,10 @@
 
 #define MULTI_B_PRESSED  127
 
+#define UNIQUE_MON_PREVIEW_INPUT_NEXT   0
+#define UNIQUE_MON_PREVIEW_INPUT_PREV   1
+#define UNIQUE_MON_PREVIEW_INPUT_CLOSE  2
+
 // Multichoice Ids
 #define MULTI_BRINEY_ON_DEWFORD            0
 #define MULTI_PC                           1 // Exit only, populated by CreatePCMultichoice

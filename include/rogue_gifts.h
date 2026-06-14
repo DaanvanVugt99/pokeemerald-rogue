@@ -36,6 +36,7 @@ void RogueGift_CreateMon(u32 customMonId, struct Pokemon* mon, u16 species, u8 l
 u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species);
 
 void RogueGift_EnsureDynamicCustomMonsAreValid();
+void RogueGift_ClearDynamicCustomMons();
 void RogueGift_CountDownDynamicCustomMons();
 void RogueGift_RemoveDynamicCustomMon(u32 customMonId);
 struct UniqueMon* RogueGift_GetDynamicUniqueMon(u8 slot);
