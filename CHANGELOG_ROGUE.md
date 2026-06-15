@@ -57,6 +57,8 @@ Format follows Keep a Changelog loosely:
   Pokemon is healed.
 - Reworked the Alolan Meowth line's unique ability to Royal Treatment, healing
   incoming allies after Parting Shot.
+- Changed Trash Alchemy to only trigger in trainer battles, and reduced its
+  healing from 1/8 HP to 1/16 HP.
 - Reworked Alolan Raichu's unique ability to Brain Surf, letting Electric and
   Psychic moves pivot into the other terrain while raising Sp. Atk once per
   switch-in.

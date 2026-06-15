@@ -11903,6 +11903,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
 
             if (HasBattlerAbility(battler, ABILITY_TRASH_ALCHEMY)
+             && (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
              && gBattleStruct->changedItems[battler] == ITEM_NONE)
             {
                 u16 oldItem = gBattleMons[battler].item;
@@ -11917,7 +11918,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                         if (!BATTLER_MAX_HP(battler)
                          && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
                         {
-                            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+                            gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
                             if (gBattleMoveDamage == 0)
                                 gBattleMoveDamage = 1;
                             gBattleMoveDamage *= -1;
