@@ -325,6 +325,26 @@ static u16 TakeSelectedPokemonFromDaycare(struct DaycareMon *daycareMon)
         ApplyDaycareExperience(&pokemon);
     }
 
+    if (Rogue_IsRunActive() && Rogue_PartyHasDuplicateSpecies(&pokemon, PARTY_SIZE, PARTY_SIZE))
+    {
+        if (CopyMonToPC(&pokemon) == MON_CANT_GIVE)
+            return SPECIES_NONE;
+
+        if (daycareMon->mail.message.itemId)
+            ClearDaycareMonMail(&daycareMon->mail);
+
+        ZeroBoxMonData(&daycareMon->mon);
+        daycareMon->steps = 0;
+        CalculatePlayerPartyCount();
+        return species;
+    }
+
+    if (!Rogue_TryRemoveDuplicateHeldItemForParty(&pokemon, PARTY_SIZE, PARTY_SIZE))
+    {
+        u16 item = ITEM_NONE;
+        SetMonData(&pokemon, MON_DATA_HELD_ITEM, &item);
+    }
+
     gPlayerParty[PARTY_SIZE - 1] = pokemon;
     if (daycareMon->mail.message.itemId)
     {
@@ -1544,4 +1564,3 @@ static u8 ModifyBreedingScoreForOvalCharm(u8 score)
 
     return score;
 }
-

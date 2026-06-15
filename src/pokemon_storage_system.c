@@ -97,6 +97,8 @@ enum {
     MSG_ITEM_IS_HELD,
     MSG_CHANGED_TO_ITEM,
     MSG_CANT_STORE_MAIL,
+    MSG_DUPLICATE_SPECIES,
+    MSG_DUPLICATE_ITEM,
 };
 
 // IDs for how to resolve variables in the above messages
@@ -576,6 +578,7 @@ EWRAM_DATA static u8 sDepositBoxId = 0;
 EWRAM_DATA static u8 sWhichToReshow = 0;
 EWRAM_DATA static u8 sLastUsedBox = 0;
 EWRAM_DATA static u16 sMovingItemId = 0;
+EWRAM_DATA static bool8 sBagItemBlockedByItemClause = FALSE;
 EWRAM_DATA static struct Pokemon sSavedMovingMon = {0};
 EWRAM_DATA static s8 sCursorArea = 0;
 EWRAM_DATA static s8 sCursorPosition = 0;
@@ -688,6 +691,13 @@ static bool8 IsRemovingLastPartyMon(void);
 static bool8 CanPlaceMon(void);
 static bool8 CanShiftMon(void);
 static bool8 IsMonBeingMoved(void);
+static bool8 WouldMovingMonDuplicatePartyAtSlot(u8 targetSlot);
+static bool8 WouldDisplayMonDuplicateParty(void);
+static bool8 WouldMovingMonDuplicatePartyHeldItemAtSlot(u8 targetSlot);
+static bool8 WouldDisplayMonDuplicatePartyHeldItem(void);
+static bool8 CanPartySlotReceiveHeldItem(u8 slot, u16 item);
+static bool8 CanCursorReceiveMovingItem(void);
+static bool8 CanCursorReceiveBagItem(void);
 static void TryRefreshDisplayMon(void);
 static void ReshowDisplayMon(void);
 static void SetDisplayMonData(void *, u8);
@@ -1108,6 +1118,8 @@ static const struct StorageMessage sMessages[] =
     [MSG_ITEM_IS_HELD]         = {gText_ItemIsNowHeld,           MSG_VAR_ITEM_NAME},
     [MSG_CHANGED_TO_ITEM]      = {gText_ChangedToNewItem,        MSG_VAR_ITEM_NAME},
     [MSG_CANT_STORE_MAIL]      = {gText_MailCantBeStored,        MSG_VAR_NONE},
+    [MSG_DUPLICATE_SPECIES]    = {gText_CantSelectSamePkmn,      MSG_VAR_NONE},
+    [MSG_DUPLICATE_ITEM]       = {gText_NoIdenticalHoldItems,    MSG_VAR_NONE},
 };
 
 static const struct WindowTemplate sYesNoWindowTemplate =
@@ -2022,6 +2034,7 @@ void EnterPokeStorage(u8 boxOption)
         sStorage->boxOption = boxOption;
         sStorage->isReopening = FALSE;
         sMovingItemId = ITEM_NONE;
+        sBagItemBlockedByItemClause = FALSE;
         sStorage->state = 0;
         sStorage->taskId = CreateTask(Task_InitPokeStorage, 3);
         sLastUsedBox = StorageGetCurrentBox();
@@ -2241,7 +2254,15 @@ static void Task_ReshowPokeStorage(u8 taskId)
         {
             if (sWhichToReshow == SCREEN_CHANGE_ITEM_FROM_BAG - 1 && gSpecialVar_ItemId != ITEM_NONE)
             {
-                PrintMessage(MSG_ITEM_IS_HELD);
+                if (sBagItemBlockedByItemClause)
+                {
+                    PrintMessage(MSG_DUPLICATE_ITEM);
+                    sBagItemBlockedByItemClause = FALSE;
+                }
+                else
+                {
+                    PrintMessage(MSG_ITEM_IS_HELD);
+                }
                 sStorage->state++;
             }
             else
@@ -2272,6 +2293,8 @@ enum {
     MSTATE_WAIT_MSG,
     MSTATE_ERROR_LAST_PARTY_MON,
     MSTATE_ERROR_HAS_MAIL,
+    MSTATE_ERROR_DUPLICATE_SPECIES,
+    MSTATE_ERROR_DUPLICATE_ITEM,
     MSTATE_WAIT_ERROR_MSG,
     MSTATE_MULTIMOVE_RUN,
     MSTATE_MULTIMOVE_RUN_CANCEL,
@@ -2393,7 +2416,12 @@ static void Task_PokeStorageMain(u8 taskId)
         case INPUT_SHIFT_MON:
             if (!CanShiftMon())
             {
-                sStorage->state = MSTATE_ERROR_LAST_PARTY_MON;
+                if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+                    sStorage->state = MSTATE_ERROR_DUPLICATE_SPECIES;
+                else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
+                    sStorage->state = MSTATE_ERROR_DUPLICATE_ITEM;
+                else
+                    sStorage->state = MSTATE_ERROR_LAST_PARTY_MON;
             }
             else
             {
@@ -2402,12 +2430,34 @@ static void Task_PokeStorageMain(u8 taskId)
             }
             break;
         case INPUT_WITHDRAW:
-            PlaySE(SE_SELECT);
-            SetPokeStorageTask(Task_WithdrawMon);
+            if (WouldDisplayMonDuplicateParty())
+            {
+                sStorage->state = MSTATE_ERROR_DUPLICATE_SPECIES;
+            }
+            else if (WouldDisplayMonDuplicatePartyHeldItem())
+            {
+                sStorage->state = MSTATE_ERROR_DUPLICATE_ITEM;
+            }
+            else
+            {
+                PlaySE(SE_SELECT);
+                SetPokeStorageTask(Task_WithdrawMon);
+            }
             break;
         case INPUT_PLACE_MON:
-            PlaySE(SE_SELECT);
-            SetPokeStorageTask(Task_PlaceMon);
+            if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+            {
+                sStorage->state = MSTATE_ERROR_DUPLICATE_SPECIES;
+            }
+            else if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
+            {
+                sStorage->state = MSTATE_ERROR_DUPLICATE_ITEM;
+            }
+            else
+            {
+                PlaySE(SE_SELECT);
+                SetPokeStorageTask(Task_PlaceMon);
+            }
             break;
         case INPUT_TAKE_ITEM:
             PlaySE(SE_SELECT);
@@ -2505,6 +2555,16 @@ static void Task_PokeStorageMain(u8 taskId)
     case MSTATE_ERROR_HAS_MAIL:
         PlaySE(SE_FAILURE);
         PrintMessage(MSG_PLEASE_REMOVE_MAIL);
+        sStorage->state = MSTATE_WAIT_ERROR_MSG;
+        break;
+    case MSTATE_ERROR_DUPLICATE_SPECIES:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_DUPLICATE_SPECIES);
+        sStorage->state = MSTATE_WAIT_ERROR_MSG;
+        break;
+    case MSTATE_ERROR_DUPLICATE_ITEM:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_DUPLICATE_ITEM);
         sStorage->state = MSTATE_WAIT_ERROR_MSG;
         break;
     case MSTATE_WAIT_ERROR_MSG:
@@ -2634,14 +2694,30 @@ static void Task_OnSelectedMon(u8 taskId)
             }
             break;
         case MENU_PLACE:
-            PlaySE(SE_SELECT);
-            ClearBottomWindow();
-            SetPokeStorageTask(Task_PlaceMon);
+            if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+            {
+                sStorage->state = 7;
+            }
+            else if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
+            {
+                sStorage->state = 8;
+            }
+            else
+            {
+                PlaySE(SE_SELECT);
+                ClearBottomWindow();
+                SetPokeStorageTask(Task_PlaceMon);
+            }
             break;
         case MENU_SHIFT:
             if (!CanShiftMon())
             {
-                sStorage->state = 3;
+                if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+                    sStorage->state = 7;
+                else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
+                    sStorage->state = 8;
+                else
+                    sStorage->state = 3;
             }
             else
             {
@@ -2651,9 +2727,20 @@ static void Task_OnSelectedMon(u8 taskId)
             }
             break;
         case MENU_WITHDRAW:
-            PlaySE(SE_SELECT);
-            ClearBottomWindow();
-            SetPokeStorageTask(Task_WithdrawMon);
+            if (WouldDisplayMonDuplicateParty())
+            {
+                sStorage->state = 7;
+            }
+            else if (WouldDisplayMonDuplicatePartyHeldItem())
+            {
+                sStorage->state = 8;
+            }
+            else
+            {
+                PlaySE(SE_SELECT);
+                ClearBottomWindow();
+                SetPokeStorageTask(Task_WithdrawMon);
+            }
             break;
         case MENU_STORE:
             if (IsRemovingLastPartyMon())
@@ -2730,6 +2817,16 @@ static void Task_OnSelectedMon(u8 taskId)
     case 5:
         PlaySE(SE_FAILURE);
         PrintMessage(MSG_CANT_RELEASE_EGG);
+        sStorage->state = 6;
+        break;
+    case 7:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_DUPLICATE_SPECIES);
+        sStorage->state = 6;
+        break;
+    case 8:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_DUPLICATE_ITEM);
         sStorage->state = 6;
         break;
     case 4:
@@ -2813,6 +2910,16 @@ static void Task_WithdrawMon(u8 taskId)
         if (CalculatePlayerPartyCount() == PARTY_SIZE)
         {
             PrintMessage(MSG_PARTY_FULL);
+            sStorage->state = 1;
+        }
+        else if (WouldDisplayMonDuplicateParty())
+        {
+            PrintMessage(MSG_DUPLICATE_SPECIES);
+            sStorage->state = 1;
+        }
+        else if (WouldDisplayMonDuplicatePartyHeldItem())
+        {
+            PrintMessage(MSG_DUPLICATE_ITEM);
             sStorage->state = 1;
         }
         else
@@ -3119,6 +3226,13 @@ static void Task_GiveMovingItemToMon(u8 taskId)
     switch (sStorage->state)
     {
     case 0:
+        if (!CanCursorReceiveMovingItem())
+        {
+            PlaySE(SE_FAILURE);
+            PrintMessage(MSG_DUPLICATE_ITEM);
+            sStorage->state = 3;
+            break;
+        }
         ClearBottomWindow();
         sStorage->state++;
         break;
@@ -3204,6 +3318,13 @@ static void Task_SwitchSelectedItem(u8 taskId)
     switch (sStorage->state)
     {
     case 0:
+        if (!CanCursorReceiveMovingItem())
+        {
+            PlaySE(SE_FAILURE);
+            PrintMessage(MSG_DUPLICATE_ITEM);
+            sStorage->state = 3;
+            break;
+        }
         if (!ItemIsMail(sStorage->displayMonItemId))
         {
             ClearBottomWindow();
@@ -3700,6 +3821,18 @@ static void Task_OnBPressed(u8 taskId)
                 PlaySE(SE_SELECT);
                 SetPokeStorageTask(Task_PlaceMon);
             }
+            else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+            {
+                PlaySE(SE_FAILURE);
+                PrintMessage(MSG_DUPLICATE_SPECIES);
+                sStorage->state = 1;
+            }
+            else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
+            {
+                PlaySE(SE_FAILURE);
+                PrintMessage(MSG_DUPLICATE_ITEM);
+                sStorage->state = 1;
+            }
             else
             {
                 SetPokeStorageTask(Task_PokeStorageMain);
@@ -3808,6 +3941,13 @@ static void GiveChosenBagItem(void)
         if (sInPartyMenu)
         {
             struct Pokemon *mon = &gPlayerParty[pos];
+
+            if (!CanCursorReceiveBagItem())
+            {
+                sBagItemBlockedByItemClause = TRUE;
+                return;
+            }
+
             SetMonData(&gPlayerParty[pos], MON_DATA_HELD_ITEM, &itemId);
             SetMonFormPSS(&mon->box);
         }
@@ -6875,6 +7015,12 @@ static bool8 CanPlaceMon(void)
 {
     if (sIsMonBeingMoved)
     {
+        if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+            return FALSE;
+
+        if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
+            return FALSE;
+
         if (sCursorArea == CURSOR_AREA_IN_PARTY && GetMonData(&gPlayerParty[sCursorPosition], MON_DATA_SPECIES) == SPECIES_NONE)
             return TRUE;
         else if (sCursorArea == CURSOR_AREA_IN_BOX && GetBoxMonDataAt(StorageGetCurrentBox(), sCursorPosition, MON_DATA_SPECIES_OR_EGG) == SPECIES_NONE)
@@ -6889,6 +7035,12 @@ static bool8 CanShiftMon(void)
 {
     if (sIsMonBeingMoved)
     {
+        if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+            return FALSE;
+
+        if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
+            return FALSE;
+
         if (sCursorArea == CURSOR_AREA_IN_PARTY && CountPartyAliveNonEggMonsExcept(sCursorPosition) == 0)
         {
             if (sStorage->displayMonIsEgg || GetMonData(&sStorage->movingMon, MON_DATA_HP) == 0)
@@ -6902,6 +7054,58 @@ static bool8 CanShiftMon(void)
 static bool8 IsMonBeingMoved(void)
 {
     return sIsMonBeingMoved;
+}
+
+static bool8 WouldMovingMonDuplicatePartyAtSlot(u8 targetSlot)
+{
+    if (!Rogue_IsRunActive())
+        return FALSE;
+
+    return Rogue_PartyHasDuplicateSpecies(&sStorage->movingMon, targetSlot, PARTY_SIZE);
+}
+
+static bool8 WouldDisplayMonDuplicateParty(void)
+{
+    struct Pokemon mon;
+
+    if (!Rogue_IsRunActive() || sCursorArea != CURSOR_AREA_IN_BOX)
+        return FALSE;
+
+    BoxMonAtToMon(StorageGetCurrentBox(), sCursorPosition, &mon);
+    return Rogue_PartyHasDuplicateSpecies(&mon, PARTY_SIZE, PARTY_SIZE);
+}
+
+static bool8 WouldMovingMonDuplicatePartyHeldItemAtSlot(u8 targetSlot)
+{
+    u16 item = GetMonData(&sStorage->movingMon, MON_DATA_HELD_ITEM);
+
+    return Rogue_PartyHasHeldItem(item, targetSlot, PARTY_SIZE);
+}
+
+static bool8 WouldDisplayMonDuplicatePartyHeldItem(void)
+{
+    u16 item;
+
+    if (sCursorArea != CURSOR_AREA_IN_BOX)
+        return FALSE;
+
+    item = GetCurrentBoxMonData(sCursorPosition, MON_DATA_HELD_ITEM);
+    return Rogue_PartyHasHeldItem(item, PARTY_SIZE, PARTY_SIZE);
+}
+
+static bool8 CanPartySlotReceiveHeldItem(u8 slot, u16 item)
+{
+    return !Rogue_PartyHasHeldItem(item, slot, PARTY_SIZE);
+}
+
+static bool8 CanCursorReceiveMovingItem(void)
+{
+    return sCursorArea != CURSOR_AREA_IN_PARTY || CanPartySlotReceiveHeldItem(sCursorPosition, sStorage->movingItemId);
+}
+
+static bool8 CanCursorReceiveBagItem(void)
+{
+    return !sInPartyMenu || CanPartySlotReceiveHeldItem(GetCursorPosition(), gSpecialVar_ItemId);
 }
 
 static bool8 IsCursorOnBoxTitle(void)

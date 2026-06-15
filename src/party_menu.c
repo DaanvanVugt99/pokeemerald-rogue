@@ -2101,6 +2101,18 @@ static void DisplaySwappedHeldItemsMessage(u8 slot1, u8 slot2)
     ScheduleBgCopyTilemapToVram(2);
 }
 
+static bool8 CanPartySlotReceiveHeldItem(u8 slot, u16 item)
+{
+    return !Rogue_PartyHasHeldItem(item, slot, PARTY_SIZE);
+}
+
+static void DisplayNoIdenticalHoldItemsMessage(u8 taskId, TaskFunc nextFunc)
+{
+    DisplayPartyMenuMessage(gText_NoIdenticalHoldItems, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = nextFunc;
+}
+
 static void SetMonHeldItemForSlot(u8 slot, u16 item)
 {
     u8 itemBytes[2];
@@ -3721,8 +3733,12 @@ static void CB2_GiveHoldItem(void)
     {
         sPartyMenuItemId = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_HELD_ITEM);
 
+        if (!CanPartySlotReceiveHeldItem(gPartyMenu.slotId, gSpecialVar_ItemId))
+        {
+            InitPartyMenu(gPartyMenu.menuType, KEEP_PARTY_LAYOUT, gPartyMenu.action, TRUE, PARTY_MSG_NO_SAME_HOLD_ITEMS, Task_TryCreateSelectionWindow, gPartyMenu.exitCallback);
+        }
         // Already holding item
-        if (sPartyMenuItemId != ITEM_NONE)
+        else if (sPartyMenuItemId != ITEM_NONE)
         {
             InitPartyMenu(gPartyMenu.menuType, KEEP_PARTY_LAYOUT, gPartyMenu.action, TRUE, PARTY_MSG_NONE, Task_SwitchHoldItemsPrompt, gPartyMenu.exitCallback);
         }
@@ -3778,6 +3794,12 @@ static void Task_HandleSwitchItemsYesNoInput(u8 taskId)
     switch (Menu_ProcessInputNoWrapClearOnChoose())
     {
     case 0: // Yes, switch items
+        if (!CanPartySlotReceiveHeldItem(gPartyMenu.slotId, gSpecialVar_ItemId))
+        {
+            DisplayNoIdenticalHoldItemsMessage(taskId, Task_ReturnToChooseMonAfterText);
+            break;
+        }
+
         RemoveBagItem(gSpecialVar_ItemId, 1);
 
         // No room to return held item to bag
@@ -8129,7 +8151,11 @@ void CB2_ChooseMonToGiveItem(void)
 static void TryGiveItemOrMailToSelectedMon(u8 taskId)
 {
     sPartyMenuItemId = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_HELD_ITEM);
-    if (sPartyMenuItemId == ITEM_NONE)
+    if (!CanPartySlotReceiveHeldItem(gPartyMenu.slotId, gPartyMenu.bagItem))
+    {
+        DisplayNoIdenticalHoldItemsMessage(taskId, Task_ReturnToChooseMonAfterText);
+    }
+    else if (sPartyMenuItemId == ITEM_NONE)
     {
         GiveItemOrMailToSelectedMon(taskId);
     }
@@ -8246,6 +8272,12 @@ static void Task_HandleSwitchItemsFromBagYesNoInput(u8 taskId)
     {
     case 0: // Yes, switch items
         item = gPartyMenu.bagItem;
+        if (!CanPartySlotReceiveHeldItem(gPartyMenu.slotId, item))
+        {
+            DisplayNoIdenticalHoldItemsMessage(taskId, Task_ReturnToChooseMonAfterText);
+            break;
+        }
+
         RemoveItemToGiveFromBag(item);
         if (AddBagItem(sPartyMenuItemId, 1) == FALSE)
         {

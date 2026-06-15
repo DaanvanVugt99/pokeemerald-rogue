@@ -1436,6 +1436,12 @@ static bool32 CannotUseBagBattleItem(u16 itemId)
     u16 battleUsage = ItemId_GetBattleUsage(itemId);
     const u8* failStr = NULL;
 
+    if (Rogue_IsRunActive() && battleUsage != EFFECT_ITEM_THROW_BALL)
+    {
+        StringExpandPlaceholders(gStringVar4, gText_CantUseHere);
+        return TRUE;
+    }
+
     // Embargo Check
     if ((gPartyMenu.slotId == 0 && gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_EMBARGO)
         || (gPartyMenu.slotId == 1 && gStatuses3[B_POSITION_PLAYER_RIGHT] & STATUS3_EMBARGO))

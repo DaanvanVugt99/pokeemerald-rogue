@@ -341,6 +341,81 @@ bool8 Rogue_CanChangeSafariBall(void)
     return !Rogue_IsCatchingContestActive();
 }
 
+bool8 Rogue_PartyContainsSpeciesChain(u16 checkSpecies, u8 ignoredSlot1, u8 ignoredSlot2)
+{
+    u8 i;
+
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        u16 species;
+
+        if(i == ignoredSlot1 || i == ignoredSlot2)
+            continue;
+
+#ifdef ROGUE_EXPANSION
+        species = GET_BASE_SPECIES_ID(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
+#else
+        species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+#endif
+
+        if(species != SPECIES_NONE && Rogue_GetEggSpecies(species) == checkSpecies)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 Rogue_PartyHasDuplicateSpecies(struct Pokemon *mon, u8 ignoredSlot1, u8 ignoredSlot2)
+{
+    u16 species;
+
+#ifdef ROGUE_EXPANSION
+    species = GET_BASE_SPECIES_ID(GetMonData(mon, MON_DATA_SPECIES));
+#else
+    species = GetMonData(mon, MON_DATA_SPECIES);
+#endif
+
+    if(species == SPECIES_NONE)
+        return FALSE;
+
+    return Rogue_PartyContainsSpeciesChain(Rogue_GetEggSpecies(species), ignoredSlot1, ignoredSlot2);
+}
+
+bool8 Rogue_PartyHasHeldItem(u16 itemId, u8 ignoredSlot1, u8 ignoredSlot2)
+{
+    u8 i;
+
+    if(itemId == ITEM_NONE)
+        return FALSE;
+
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        if(i == ignoredSlot1 || i == ignoredSlot2)
+            continue;
+
+        if(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+            && GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM) == itemId)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 Rogue_TryRemoveDuplicateHeldItemForParty(struct Pokemon *mon, u8 ignoredSlot1, u8 ignoredSlot2)
+{
+    u16 item = GetMonData(mon, MON_DATA_HELD_ITEM);
+
+    if(!Rogue_PartyHasHeldItem(item, ignoredSlot1, ignoredSlot2))
+        return TRUE;
+
+    if(!AddBagItem(item, 1))
+        return FALSE;
+
+    item = ITEM_NONE;
+    SetMonData(mon, MON_DATA_HELD_ITEM, &item);
+    return TRUE;
+}
+
 u8 Rogue_GetCurrentDifficulty(void)
 {
     return gRogueRun.currentDifficulty;
@@ -4244,6 +4319,11 @@ static void BeginRogueRun_ModifyParty(void)
                     temp = ITEM_NONE;
                     SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &temp);
                 }
+                else if(!Rogue_TryRemoveDuplicateHeldItemForParty(&gPlayerParty[i], i, PARTY_SIZE))
+                {
+                    temp = ITEM_NONE;
+                    SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &temp);
+                }
 
                 CalculateMonStats(&gPlayerParty[i]);
             }
@@ -7059,14 +7139,34 @@ bool8 Rogue_GiveLabEncounterMon(u16 index)
     {
         if(gPlayerPartyCount < PARTY_SIZE && index < LAB_MON_COUNT)
         {
-            CopyMon(&gPlayerParty[gPlayerPartyCount], &gEnemyParty[index], sizeof(gPlayerParty[gPlayerPartyCount]));
+            struct Pokemon mon;
+            bool8 gaveMon = FALSE;
+
+            CopyMon(&mon, &gEnemyParty[index], sizeof(mon));
 
             // Already in safari from? (Maybe should track index and then wipe here, as we could have higher priority)
-            gPlayerParty[gPlayerPartyCount].rogueExtraData.isSafariIllegal = TRUE;
+            mon.rogueExtraData.isSafariIllegal = TRUE;
 
-            gPlayerPartyCount = CalculatePlayerPartyCount();
-            ResetFaintedLabMonAtSlot(index);
-            return TRUE;
+            if(Rogue_PartyHasDuplicateSpecies(&mon, PARTY_SIZE, PARTY_SIZE))
+            {
+                gaveMon = CopyMonToPC(&mon) != MON_CANT_GIVE;
+            }
+            else if(!Rogue_TryRemoveDuplicateHeldItemForParty(&mon, PARTY_SIZE, PARTY_SIZE))
+            {
+                gaveMon = CopyMonToPC(&mon) != MON_CANT_GIVE;
+            }
+            else
+            {
+                CopyMon(&gPlayerParty[gPlayerPartyCount], &mon, sizeof(gPlayerParty[gPlayerPartyCount]));
+                gaveMon = TRUE;
+            }
+
+            if(gaveMon)
+            {
+                gPlayerPartyCount = CalculatePlayerPartyCount();
+                ResetFaintedLabMonAtSlot(index);
+                return TRUE;
+            }
         }
     }
 
@@ -8080,11 +8180,22 @@ static void TryRestorePartyHeldItems(bool8 allowThief)
             {
                 // We previously weren't holding anything but if we're allowed to steal then don't stomp over current held item
                 if(allowThief)
+                {
+                    if(!Rogue_TryRemoveDuplicateHeldItemForParty(&gPlayerParty[i], i, PARTY_SIZE))
+                    {
+                        item = ITEM_NONE;
+                        SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &item);
+                    }
                     continue;
+                }
             }
 
+            if(Rogue_PartyHasHeldItem(item, i, PARTY_SIZE))
+            {
+                item = ITEM_NONE;
+            }
             // Consume berries but attempt to auto re-equip from bag
-            if(item >= FIRST_BERRY_INDEX && item <= LAST_BERRY_INDEX)
+            else if(item >= FIRST_BERRY_INDEX && item <= LAST_BERRY_INDEX)
             {
                 if(RemoveBagItem(item, 1))
                     successBerryIcon = item;

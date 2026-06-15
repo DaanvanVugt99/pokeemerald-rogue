@@ -190,6 +190,7 @@ Route117_PokemonDayCare_EventScript_RetrieveMon::
 	applymovement LOCALID_DAYCARE_LADY, Route117_PokemonDayCare_Movement_RetrieveDaycareMon
 	waitmovement 0
 	specialvar VAR_RESULT, TakePokemonFromDaycare
+	goto_if_eq VAR_RESULT, SPECIES_NONE, Route117_PokemonDayCare_EventScript_NoRoom
 	special SubtractMoneyFromVar0x8005
 	playse SE_SHOP
 	msgbox Route117_PokemonDayCare_Text_HeresYourMon, MSGBOX_DEFAULT

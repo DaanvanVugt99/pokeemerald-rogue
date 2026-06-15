@@ -3006,6 +3006,9 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
 
     Rogue_ModifyGiveMon(mon);
 
+    if (Rogue_IsRunActive() && Rogue_PartyHasDuplicateSpecies(mon, PARTY_SIZE, PARTY_SIZE))
+        return CopyMonToPC(mon);
+
     for (i = 0; i < PARTY_SIZE; i++)
     {
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
@@ -3013,6 +3016,9 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
     }
 
     if (i >= PARTY_SIZE)
+        return CopyMonToPC(mon);
+
+    if (!Rogue_TryRemoveDuplicateHeldItemForParty(mon, PARTY_SIZE, PARTY_SIZE))
         return CopyMonToPC(mon);
 
     CopyMon(&gPlayerParty[i], mon, sizeof(*mon));

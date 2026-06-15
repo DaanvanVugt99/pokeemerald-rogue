@@ -17998,7 +17998,8 @@ static void Cmd_pickup(void)
                     percentTotal += sPickupTable[j].percentage[lvlDivBy10];
                     if (rand < percentTotal)
                     {
-                        SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &sPickupTable[j].itemId);
+                        if (!Rogue_PartyHasHeldItem(sPickupTable[j].itemId, i, PARTY_SIZE))
+                            SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &sPickupTable[j].itemId);
                         break;
                     }
                 }
@@ -18011,7 +18012,8 @@ static void Cmd_pickup(void)
                 if ((lvlDivBy10 + 1 ) * 5 > Random() % 100)
                 {
                     heldItem = ITEM_HONEY;
-                    SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &heldItem);
+                    if (!Rogue_PartyHasHeldItem(heldItem, i, PARTY_SIZE))
+                        SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &heldItem);
                 }
             }
             #if P_SHUCKLE_BERRY_JUICE == GEN_2
@@ -18020,7 +18022,8 @@ static void Cmd_pickup(void)
                 && (Random() % 16) == 0)
             {
                 heldItem = ITEM_BERRY_JUICE;
-                SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &heldItem);
+                if (!Rogue_PartyHasHeldItem(heldItem, i, PARTY_SIZE))
+                    SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &heldItem);
             }
             #endif
         }

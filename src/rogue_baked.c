@@ -1625,7 +1625,7 @@ void Rogue_ModifyItem(u16 itemId, struct Item* outItem)
         }
         else
         {
-            if(IsCurseActive(EFFECT_BATTLE_ITEM_BAN))
+            if(Rogue_IsRunActive())
                 outItem->battleUsage = 0;
         }
     }
