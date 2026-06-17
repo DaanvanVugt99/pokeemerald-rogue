@@ -80,6 +80,15 @@ extern const u16 gRogueBake_EggSpecies[];
 extern const u16 gRogueBake_EggSpecies_Count;
 #endif
 
+static bool8 Rogue_ShouldDisableBattleBagItems(void)
+{
+#ifdef ROGUE_BAKING
+    return FALSE;
+#else
+    return Rogue_IsBagClauseActive();
+#endif
+}
+
 void HistoryBufferPush(u16* buffer, u16 capacity, u16 value)
 {
     u16 i;
@@ -1625,7 +1634,7 @@ void Rogue_ModifyItem(u16 itemId, struct Item* outItem)
         }
         else
         {
-            if(Rogue_IsRunActive())
+            if(Rogue_ShouldDisableBattleBagItems())
                 outItem->battleUsage = 0;
         }
     }

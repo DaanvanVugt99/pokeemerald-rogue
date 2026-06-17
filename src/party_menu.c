@@ -67,6 +67,7 @@
 #include "union_room.h"
 #include "window.h"
 #include "follow_me.h"
+#include "constants/abilities.h"
 #include "constants/battle.h"
 #include "constants/battle_frontier.h"
 #include "constants/field_effects.h"
@@ -81,6 +82,7 @@
 #include "move_relearner.h"
 #include "rogue_controller.h"
 #include "rogue_charms.h"
+#include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
 
@@ -5734,19 +5736,39 @@ void ItemUseCB_Medicine(u8 taskId, TaskFunc task)
 #define tMonId      data[3]
 #define tOldFunc    4
 
+static u16 GetRawAbilityBySpecies(u16 species, u8 abilityNum, u32 otId)
+{
+    if (abilityNum >= NUM_ABILITY_SLOTS)
+        return ABILITY_NONE;
+
+#ifdef ROGUE_EXPANSION
+    if (IsOtherTrainer(otId))
+    {
+        u32 customMonId = RogueGift_GetCustomMonIdBySpecies(species, otId);
+
+        if (customMonId != 0 && RogueGift_GetCustomMonAbilityCount(customMonId) != 0)
+            return RogueGift_GetCustomMonAbility(customMonId, abilityNum);
+    }
+#endif
+
+    return gSpeciesInfo[species].abilities[abilityNum];
+}
+
 void Task_AbilityCapsule(u8 taskId)
 {
     static const u8 askText[] = _("Would you like to change {STR_VAR_1}'s\nability to {STR_VAR_2}?");
     static const u8 doneText[] = _("{STR_VAR_1}'s ability became\n{STR_VAR_2}!{PAUSE_UNTIL_PRESS}");
     s16 *data = gTasks[taskId].data;
     u32 otId = GetMonData(&gPlayerParty[tMonId], MON_DATA_OT_ID, NULL);
+    u16 targetAbility = GetAbilityBySpecies(tSpecies, tAbilityNum, otId);
 
     switch (tState)
     {
     case 0:
         // Can't use.
-        if (GetAbilityBySpecies(tSpecies, 0, otId) == GetAbilityBySpecies(tSpecies, 1, otId)
-            || GetAbilityBySpecies(tSpecies, 1, otId) == 0
+        if (GetRawAbilityBySpecies(tSpecies, tAbilityNum, otId) == ABILITY_NONE
+            || targetAbility == ABILITY_NONE
+            || targetAbility == GetMonAbility(&gPlayerParty[tMonId])
             || tAbilityNum > 1
             || !tSpecies)
         {
@@ -5759,7 +5781,7 @@ void Task_AbilityCapsule(u8 taskId)
         }
         gPartyMenuUseExitCallback = TRUE;
         GetMonNickname(&gPlayerParty[tMonId], gStringVar1);
-        StringCopy(gStringVar2, gAbilityNames[GetAbilityBySpecies(tSpecies, tAbilityNum, otId)]);
+        StringCopy(gStringVar2, gAbilityNames[targetAbility]);
         StringExpandPlaceholders(gStringVar4, askText);
         PlaySE(SE_SELECT);
         DisplayPartyMenuMessage(gStringVar4, 1);
@@ -5829,12 +5851,15 @@ void Task_AbilityPatch(u8 taskId)
     static const u8 doneText[] = _("{STR_VAR_1}'s ability became\n{STR_VAR_2}!{PAUSE_UNTIL_PRESS}");
     s16 *data = gTasks[taskId].data;
     u32 otId = GetMonData(&gPlayerParty[tMonId], MON_DATA_OT_ID, NULL);
+    u16 targetAbility = GetAbilityBySpecies(tSpecies, tAbilityNum, otId);
 
     switch (tState)
     {
     case 0:
         // Can't use.
-        if (GetAbilityBySpecies(tSpecies, tAbilityNum, otId) == 0
+        if (GetRawAbilityBySpecies(tSpecies, tAbilityNum, otId) == ABILITY_NONE
+            || targetAbility == ABILITY_NONE
+            || targetAbility == GetMonAbility(&gPlayerParty[tMonId])
             || !tSpecies
             )
         {
@@ -5847,7 +5872,7 @@ void Task_AbilityPatch(u8 taskId)
         }
         gPartyMenuUseExitCallback = TRUE;
         GetMonNickname(&gPlayerParty[tMonId], gStringVar1);
-        StringCopy(gStringVar2, gAbilityNames[GetAbilityBySpecies(tSpecies, tAbilityNum, otId)]);
+        StringCopy(gStringVar2, gAbilityNames[targetAbility]);
         StringExpandPlaceholders(gStringVar4, askText);
         PlaySE(SE_SELECT);
         DisplayPartyMenuMessage(gStringVar4, 1);

@@ -369,6 +369,9 @@ bool8 Rogue_PartyHasDuplicateSpecies(struct Pokemon *mon, u8 ignoredSlot1, u8 ig
 {
     u16 species;
 
+    if(!Rogue_IsSpeciesClauseActive())
+        return FALSE;
+
 #ifdef ROGUE_EXPANSION
     species = GET_BASE_SPECIES_ID(GetMonData(mon, MON_DATA_SPECIES));
 #else
@@ -384,6 +387,9 @@ bool8 Rogue_PartyHasDuplicateSpecies(struct Pokemon *mon, u8 ignoredSlot1, u8 ig
 bool8 Rogue_PartyHasHeldItem(u16 itemId, u8 ignoredSlot1, u8 ignoredSlot2)
 {
     u8 i;
+
+    if(!Rogue_IsHeldItemClauseActive())
+        return FALSE;
 
     if(itemId == ITEM_NONE)
         return FALSE;
@@ -414,6 +420,21 @@ bool8 Rogue_TryRemoveDuplicateHeldItemForParty(struct Pokemon *mon, u8 ignoredSl
     item = ITEM_NONE;
     SetMonData(mon, MON_DATA_HELD_ITEM, &item);
     return TRUE;
+}
+
+bool8 Rogue_IsBagClauseActive(void)
+{
+    return Rogue_IsRunActive() && Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE);
+}
+
+bool8 Rogue_IsSpeciesClauseActive(void)
+{
+    return Rogue_IsRunActive() && Rogue_GetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE);
+}
+
+bool8 Rogue_IsHeldItemClauseActive(void)
+{
+    return Rogue_IsRunActive() && Rogue_GetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE);
 }
 
 u8 Rogue_GetCurrentDifficulty(void)
@@ -7813,15 +7834,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
             if(IsTerastallizeEnabled())
                 FlagSet(FLAG_ROGUE_TERA_ORB_CHARGED);
 
-            if(gRogueRun.victoryLapTotalWins == 5)
-            {
-                if(!CheckBagHasItem(ITEM_BATTLE_ITEM_CURSE, 1))
-                {
-                    AddBagItem(ITEM_BATTLE_ITEM_CURSE, 1);
-                    Rogue_PushPopup_AddItem(ITEM_BATTLE_ITEM_CURSE, 1);
-                }
-            }
-            else if(gRogueRun.victoryLapTotalWins == 15)
+            if(gRogueRun.victoryLapTotalWins == 15)
             {
                 if(!CheckBagHasItem(ITEM_HEALING_FLASK, 1))
                 {

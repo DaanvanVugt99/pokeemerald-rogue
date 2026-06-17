@@ -85,6 +85,7 @@ static const s8 sAiAbilityRatings[ABILITIES_COUNT] =
     [ABILITY_DRY_SKIN] = 6,
     [ABILITY_EARLY_BIRD] = 4,
     [ABILITY_EFFECT_SPORE] = 4,
+    [ABILITY_EELEVATE] = 8,
     [ABILITY_ELECTRIC_SURGE] = 8,
     [ABILITY_EMERGENCY_EXIT] = 3,
     [ABILITY_FAIRY_AURA] = 6,
@@ -92,6 +93,7 @@ static const s8 sAiAbilityRatings[ABILITIES_COUNT] =
     [ABILITY_FLAME_BODY] = 4,
     [ABILITY_FLARE_BOOST] = 5,
     [ABILITY_FLASH_FIRE] = 6,
+    [ABILITY_FIRE_MANE] = 6,
     [ABILITY_FLOWER_GIFT] = 4,
     [ABILITY_FLOWER_VEIL] = 0,
     [ABILITY_FLUFFY] = 5,
@@ -1439,7 +1441,7 @@ bool32 AI_IsBattlerGrounded(u32 battlerId)
         return FALSE;
     else if (holdEffect == HOLD_EFFECT_AIR_BALLOON)
         return FALSE;
-    else if (AI_HasAbility(battlerId, ABILITY_LEVITATE) || AI_HasAbility(battlerId, ABILITY_SHORT_CIRCUIT))
+    else if (AI_HasAbility(battlerId, ABILITY_LEVITATE) || AI_HasAbility(battlerId, ABILITY_EELEVATE) || AI_HasAbility(battlerId, ABILITY_SHORT_CIRCUIT))
         return FALSE;
     else if (IS_BATTLER_OF_TYPE(battlerId, TYPE_FLYING))
         return FALSE;
@@ -2643,7 +2645,7 @@ static bool32 PartyBattlerShouldAvoidHazards(u32 currBattler, u32 switchBattler)
         hazardDamage += GetStealthHazardDamageByTypesAndHP(gBattleMoves[MOVE_STEALTH_ROCK].type, type1, type2, maxHp);
 
     if (flags & SIDE_STATUS_SPIKES && ((type1 != TYPE_FLYING && type2 != TYPE_FLYING
-        && ability != ABILITY_LEVITATE && holdEffect != HOLD_EFFECT_AIR_BALLOON)
+        && ability != ABILITY_LEVITATE && ability != ABILITY_EELEVATE && holdEffect != HOLD_EFFECT_AIR_BALLOON)
         || holdEffect == HOLD_EFFECT_IRON_BALL || gFieldStatuses & STATUS_FIELD_GRAVITY))
     {
         s32 spikesDmg = maxHp / ((5 - gSideTimers[GetBattlerSide(currBattler)].spikesAmount) * 2);

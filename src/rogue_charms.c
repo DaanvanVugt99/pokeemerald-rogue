@@ -397,6 +397,9 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
         case EFFECT_EXTRA_LIFE:
         case EFFECT_INFINITE_EXTRA_LIFE:
         case EFFECT_ALLOW_SAVE_SCUM:
+        // Retired rule curses now live as run config toggles.
+        case EFFECT_BATTLE_ITEM_BAN:
+        case EFFECT_SPECIES_CLAUSE:
         case EFFECT_SNOWBALL_CURSES:
         case EFFECT_RANDOMAN_ALWAYS_SPAWN:
         case EFFECT_AUTO_MOVE_SELECT:
@@ -407,8 +410,6 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
 
         // Disable these effects, once we already have one (They don't stack)
         case EFFECT_EVERSTONE_EVOS:
-        case EFFECT_BATTLE_ITEM_BAN:
-        case EFFECT_SPECIES_CLAUSE:
         case EFFECT_ITEM_SHUFFLE:
         case EFFECT_ENDURE_CHANCE:
         case EFFECT_TORMENT_STATUS:

@@ -883,6 +883,8 @@ static const u8 sFairyTaleDescription[] = _("After Healing Wish, incoming ally g
 static const u8 sGalaricaRoundsDescription[] = _("SE hits load a round. Loaded Shell Side Arm has +1 priority and fires it at 40 BP.");
 static const u8 sTrashAlchemyDescription[] = _("Trainer battles: eats item for 1/16 HP, then finds a held item.");
 static const u8 sTallTaleDescription[] = _("Dragon Hammer uses higher attacking stat. On KO, uses Growth.");
+static const u8 sEelevateDescription[] = _("Immune to Ground and grounded hazards. On KO, highest stat rises.");
+static const u8 sFireManeDescription[] = _("Fire-type moves deal 1.5x damage.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1597,6 +1599,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_GALARICA_ROUNDS] = _("Galarica Rounds"),
     [ABILITY_TRASH_ALCHEMY] = _("Trash Alchemy"),
     [ABILITY_TALL_TALE] = _("Tall Tale"),
+    [ABILITY_EELEVATE] = _("Eelevate"),
+    [ABILITY_FIRE_MANE] = _("Fire Mane"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2490,6 +2494,8 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_GALARICA_ROUNDS] = _("Galarica"),
     [ABILITY_TRASH_ALCHEMY] = _("TrashAlch"),
     [ABILITY_TALL_TALE] = _("TallTale"),
+    [ABILITY_EELEVATE] = _("Eelevate"),
+    [ABILITY_FIRE_MANE] = _("FireMane"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3561,5 +3567,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_GALARICA_ROUNDS] = sGalaricaRoundsDescription,
     [ABILITY_TRASH_ALCHEMY] = sTrashAlchemyDescription,
     [ABILITY_TALL_TALE] = sTallTaleDescription,
+    [ABILITY_EELEVATE] = sEelevateDescription,
+    [ABILITY_FIRE_MANE] = sFireManeDescription,
 
 };

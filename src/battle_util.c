@@ -1186,6 +1186,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
     [ABILITY_KEEN_EYE] = 1,
     [ABILITY_LEAF_GUARD] = 1,
     [ABILITY_LEVITATE] = 1,
+    [ABILITY_EELEVATE] = 1,
     [ABILITY_SHORT_CIRCUIT] = 1,
     [ABILITY_LIGHTNING_ROD] = 1,
     [ABILITY_LIMBER] = 1,
@@ -22077,7 +22078,9 @@ static bool32 IsBattlerGrounded2(u32 battler, bool32 considerInverse)
         return FALSE;
     if (holdEffect == HOLD_EFFECT_AIR_BALLOON)
         return FALSE;
-    if (HasBattlerAbility(battler, ABILITY_LEVITATE) || HasBattlerAbility(battler, ABILITY_SHORT_CIRCUIT))
+    if (HasBattlerAbility(battler, ABILITY_LEVITATE)
+     || HasBattlerAbility(battler, ABILITY_EELEVATE)
+     || HasBattlerAbility(battler, ABILITY_SHORT_CIRCUIT))
         return FALSE;
     if (HasBattlerAbility(battler, ABILITY_BRANCH_SWING)
      && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN))
@@ -22731,6 +22734,10 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         break;
     case ABILITY_STEELWORKER:
         if (moveType == TYPE_STEEL)
+           modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        break;
+    case ABILITY_FIRE_MANE:
+        if (moveType == TYPE_FIRE)
            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_PIXILATE:
@@ -23868,7 +23875,7 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
     {
         if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
          || (HasBattlerAbility(battlerAtk, ABILITY_WATER_GLIDE) && moveType == TYPE_FLYING)
-         || (HasBattlerAbility(battlerAtk, ABILITY_LEVITATE) && moveType == TYPE_FLYING)
+         || ((HasBattlerAbility(battlerAtk, ABILITY_LEVITATE) || HasBattlerAbility(battlerAtk, ABILITY_EELEVATE)) && moveType == TYPE_FLYING)
          || (HasBattlerAbility(battlerAtk, ABILITY_MOON_TOTEM) && moveType == TYPE_DARK)
          || (HasBattlerAbility(battlerAtk, ABILITY_SUN_TOTEM) && moveType == TYPE_FIRE)
          || (HasBattlerAbility(battlerAtk, ABILITY_ELECTROCYTES) && moveType == TYPE_ELECTRIC)
@@ -24892,13 +24899,13 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
     else if (moveType == TYPE_GROUND && !IsBattlerGrounded2(battlerDef, TRUE) && !(gBattleMoves[move].ignoreTypeIfFlyingAndUngrounded))
     {
         modifier = UQ_4_12(0.0);
-        if (recordAbilities && defAbility == ABILITY_LEVITATE)
+        if (recordAbilities && (defAbility == ABILITY_LEVITATE || defAbility == ABILITY_EELEVATE))
         {
-            SetBattlerTriggeredAbility(battlerDef, ABILITY_LEVITATE);
+            SetBattlerTriggeredAbility(battlerDef, defAbility);
             gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
             gLastLandedMoves[battlerDef] = 0;
             gBattleCommunication[MISS_TYPE] = B_MSG_GROUND_MISS;
-            RecordAbilityBattle(battlerDef, ABILITY_LEVITATE);
+            RecordAbilityBattle(battlerDef, defAbility);
         }
         else if (recordAbilities && HasBattlerAbility(battlerDef, ABILITY_SHORT_CIRCUIT))
         {
@@ -25132,13 +25139,13 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
     else if (moveType == TYPE_GROUND && !IsBattlerGrounded2(battlerDef, TRUE) && !(gBattleMoves[move].ignoreTypeIfFlyingAndUngrounded))
     {
         modifier = UQ_4_12(0.0);
-        if (recordAbilities && defAbility == ABILITY_LEVITATE)
+        if (recordAbilities && (defAbility == ABILITY_LEVITATE || defAbility == ABILITY_EELEVATE))
         {
-            gLastUsedAbility = ABILITY_LEVITATE;
+            gLastUsedAbility = defAbility;
             gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
             gLastLandedMoves[battlerDef] = 0;
             gBattleCommunication[MISS_TYPE] = B_MSG_GROUND_MISS;
-            RecordAbilityBattle(battlerDef, ABILITY_LEVITATE);
+            RecordAbilityBattle(battlerDef, defAbility);
         }
         else if (recordAbilities && HasBattlerAbility(battlerDef, ABILITY_SHORT_CIRCUIT))
         {
@@ -25253,7 +25260,7 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 o
                 MulByTypeEffectiveness(&modifier, move, moveType, 0, gSpeciesInfo[speciesDef].types[1], 0, FALSE);
         }
 
-        if (moveType == TYPE_GROUND && abilityDef == ABILITY_LEVITATE && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
+        if (moveType == TYPE_GROUND && (abilityDef == ABILITY_LEVITATE || abilityDef == ABILITY_EELEVATE) && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
             modifier = UQ_4_12(0.0);
         if (moveType == TYPE_FIGHTING
          && (abilityDef == ABILITY_SOFT_BODY || GetUniqueAbilityBySpeciesAndOtId(speciesDef, otIdDef) == ABILITY_SOFT_BODY))
@@ -26782,7 +26789,8 @@ bool8 CanMonParticipateInSkyBattle(struct Pokemon *mon)
     u16 species = GetMonData(mon, MON_DATA_SPECIES);
     u16 monAbilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM, NULL);
 
-    bool8 hasLevitateAbility = gSpeciesInfo[species].abilities[monAbilityNum] == ABILITY_LEVITATE;
+    bool8 hasLevitateAbility = gSpeciesInfo[species].abilities[monAbilityNum] == ABILITY_LEVITATE
+                             || gSpeciesInfo[species].abilities[monAbilityNum] == ABILITY_EELEVATE;
     bool8 isFlyingType = gSpeciesInfo[species].types[0] == TYPE_FLYING || gSpeciesInfo[species].types[1] == TYPE_FLYING;
     bool8 monIsValidAndNotEgg = GetMonData(mon, MON_DATA_SANITY_HAS_SPECIES) && !GetMonData(mon, MON_DATA_IS_EGG);
 

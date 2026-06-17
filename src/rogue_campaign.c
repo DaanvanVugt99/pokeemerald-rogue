@@ -1,6 +1,7 @@
 #include "global.h"
 #include "constants/game_stat.h"
 #include "constants/items.h"
+#include "constants/rogue.h"
 
 #include "event_data.h"
 #include "item.h"
@@ -11,6 +12,7 @@
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
 #include "rogue_save.h"
+#include "rogue_settings.h"
 
 extern const u8 gText_Campaign_None[];
 extern const u8 gText_Campaign_LowBST[];
@@ -148,6 +150,7 @@ void Rogue_PreActivateDesiredCampaign(void)
     {
     case ROGUE_CAMPAIGN_LOW_BST:
         Rogue_ResetConfigHubSettings();
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, TRUE);
 
         //FlagSet(FLAG_ROGUE_FORCE_BASIC_BAG);
 
@@ -189,7 +192,6 @@ void Rogue_PostActivateDesiredCampaign(void)
             CalculatePlayerPartyCount();
 
             AddBagItem(ITEM_EVERSTONE_CURSE, 1);
-            AddBagItem(ITEM_SPECIES_CLAUSE_CURSE, 1);
             AddBagItem(ITEM_LINK_CABLE, 50);
             AddBagItem(ITEM_RARE_CANDY, 8);
             

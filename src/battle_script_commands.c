@@ -12393,7 +12393,7 @@ static void Cmd_various(void)
     {
         VARIOUS_ARGS();
         i = GetHighestStatId(battler);
-        if (GetBattlerAbility(battler) == ABILITY_BEAST_BOOST
+        if ((GetBattlerAbility(battler) == ABILITY_BEAST_BOOST || GetBattlerAbility(battler) == ABILITY_EELEVATE)
             && HasAttackerFaintedTarget()
             && !NoAliveMonsForEitherParty()
             && CompareStat(gBattlerAttacker, i, MAX_STAT_STAGE, CMP_LESS_THAN))
@@ -12401,7 +12401,7 @@ static void Cmd_various(void)
             SET_STATCHANGER(i, 1, FALSE);
             PREPARE_STAT_BUFFER(gBattleTextBuff1, i);
             BattleScriptPush(cmd->nextInstr);
-            SetBattlerTriggeredAbility(battler, ABILITY_BEAST_BOOST);
+            SetBattlerTriggeredAbility(battler, GetBattlerAbility(battler));
             gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
             return;
         }
@@ -18297,46 +18297,6 @@ static void Cmd_removelightscreenreflect(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
-static bool8 PartyContainsSpeciesChain(u16 checkSpecies)
-{
-    u16 i;
-    for(i = 0; i < gPlayerPartyCount; ++i)
-    {
-#ifdef ROGUE_EXPANSION
-        u16 species = GET_BASE_SPECIES_ID(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
-#else
-        u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
-#endif
-        if(species != SPECIES_NONE)
-        {
-            species = Rogue_GetEggSpecies(species);
-
-            if(species == checkSpecies)
-                return TRUE;
-        }
-    }
-
-    return FALSE;
-}
-
-static bool8 CurseBlocksPokeball(void)
-{
-    if(IsCurseActive(EFFECT_SPECIES_CLAUSE))
-    {
-#ifdef ROGUE_EXPANSION
-        u16 species = GET_BASE_SPECIES_ID(gBattleMons[gBattlerTarget].species);
-#else
-        u16 species = gBattleMons[gBattlerTarget].species;
-#endif
-
-        if(PartyContainsSpeciesChain(Rogue_GetEggSpecies(species)))
-            return TRUE;
-
-    }
-
-    return FALSE;
-}
-
 static bool8 AlphaMonBlocksPokeball(void)
 {
     return (gBattleStruct->rogueAlphaMonActive != 0 && gBattleStruct->rogueAlphaMonWeakened == 0);
@@ -18382,12 +18342,6 @@ static void Cmd_handleballthrow(void)
 
         // Put ball back in bag
         AddBagItem(gLastUsedItem, 1);
-    }
-    else if(CurseBlocksPokeball())
-    {
-        BtlController_EmitBallThrowAnim(gBattlerAttacker, BUFFER_A, BALL_TRAINER_BLOCK);
-        MarkBattlerForControllerExec(gBattlerAttacker);
-        gBattlescriptCurrInstr = BattleScript_ExternalBallBlock;
     }
     else
     {

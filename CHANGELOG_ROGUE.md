@@ -27,6 +27,7 @@ Format follows Keep a Changelog loosely:
 - Added Terapagos's World Prism unique ability.
 - Added Pecharunt's Puppet Master unique ability.
 - Added the Lechonk line's Aroma Trail unique ability.
+- Added Eelevate and Fire Mane for the 1.1 champion Mega Evolution ability set.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 
@@ -83,7 +84,9 @@ Format follows Keep a Changelog loosely:
   only after an ally fainted last turn.
 - Added random unique abilities to Legendary dynamic Unique Pokemon, with the
   ability encoded in the existing custom mon ID.
-- Updated Mega Raichu X to Electric Surge and Mega Raichu Y to No Guard.
+- Updated the 1.1 champion Mega Evolution ability assignments.
+- Retired the obsolete Embargo Curse and Species Curse items now that Bag
+  Clause and Species Clause are handled by run config toggles.
 - Fixed Rotom form appliance abilities being assigned as normal abilities
   instead of hidden abilities.
 

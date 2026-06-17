@@ -107,6 +107,9 @@ static u8 const sMenuName_GameMode_FastPath[] = _("Fast Path");
 
 static u8 const sMenuName_Affection[] = _("Affection FX");
 static u8 const sMenuName_ReleaseMons[] = _("Release Fainted {PKMN}");
+static u8 const sMenuName_BagClause[] = _("Bag Clause");
+static u8 const sMenuName_SpeciesClause[] = _("Species Clause");
+static u8 const sMenuName_HeldItemClause[] = _("Held Item Clause");
 static u8 const sMenuName_TrainerDiversity[] = _("Diverse Trainer {PKMN}");
 
 static u8 const sMenuName_TrainerRogue[] = _("Rogue");
@@ -249,6 +252,54 @@ static u8 const* const sMenuNameDesc_ReleaseMons[] =
 {
     sMenuNameDesc_ReleaseMonsOff,
     sMenuNameDesc_ReleaseMonsOn,
+};
+
+const u8 sMenuNameDesc_BagClauseOff[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Battle items can be used from the Bag\n"
+    "during Adventures."
+);
+const u8 sMenuNameDesc_BagClauseOn[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Only Balls can be used from the Bag\n"
+    "during battle."
+);
+static u8 const* const sMenuNameDesc_BagClause[] =
+{
+    sMenuNameDesc_BagClauseOff,
+    sMenuNameDesc_BagClauseOn,
+};
+
+const u8 sMenuNameDesc_SpeciesClauseOff[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Duplicate species and evolutions can\n"
+    "be used in your party."
+);
+const u8 sMenuNameDesc_SpeciesClauseOn[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "No duplicate species or evolutions can\n"
+    "be used in your party."
+);
+static u8 const* const sMenuNameDesc_SpeciesClause[] =
+{
+    sMenuNameDesc_SpeciesClauseOff,
+    sMenuNameDesc_SpeciesClauseOn,
+};
+
+const u8 sMenuNameDesc_HeldItemClauseOff[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Multiple party {PKMN} can hold the same\n"
+    "item."
+);
+const u8 sMenuNameDesc_HeldItemClauseOn[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Each party {PKMN} must hold a different\n"
+    "item."
+);
+static u8 const* const sMenuNameDesc_HeldItemClause[] =
+{
+    sMenuNameDesc_HeldItemClauseOff,
+    sMenuNameDesc_HeldItemClauseOn,
 };
 
 const u8 sMenuNameDesc_TrainerDiversityOff[] = _(
@@ -479,6 +530,9 @@ enum
     MENUITEM_MENU_TOGGLE_DIVERSE_TRAINERS,
     MENUITEM_MENU_TOGGLE_AFFECTION,
     MENUITEM_MENU_TOGGLE_RELEASE_MONS,
+    MENUITEM_MENU_TOGGLE_BAG_CLAUSE,
+    MENUITEM_MENU_TOGGLE_SPECIES_CLAUSE,
+    MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE,
 
     MENUITEM_MENU_TOGGLE_TRAINER_ROGUE,
     MENUITEM_MENU_TOGGLE_TRAINER_KANTO,
@@ -732,6 +786,27 @@ static const struct MenuEntry sOptionMenuItems[] =
     {
         .itemName = sMenuName_ReleaseMons,
         .MULTI_DESC(sMenuNameDesc_ReleaseMons),
+        .processInput = Toggle_ProcessInput,
+        .drawChoices = Toggle_DrawChoices
+    },
+    [MENUITEM_MENU_TOGGLE_BAG_CLAUSE] =
+    {
+        .itemName = sMenuName_BagClause,
+        .MULTI_DESC(sMenuNameDesc_BagClause),
+        .processInput = Toggle_ProcessInput,
+        .drawChoices = Toggle_DrawChoices
+    },
+    [MENUITEM_MENU_TOGGLE_SPECIES_CLAUSE] =
+    {
+        .itemName = sMenuName_SpeciesClause,
+        .MULTI_DESC(sMenuNameDesc_SpeciesClause),
+        .processInput = Toggle_ProcessInput,
+        .drawChoices = Toggle_DrawChoices
+    },
+    [MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE] =
+    {
+        .itemName = sMenuName_HeldItemClause,
+        .MULTI_DESC(sMenuNameDesc_HeldItemClause),
         .processInput = Toggle_ProcessInput,
         .drawChoices = Toggle_DrawChoices
     },
@@ -1041,6 +1116,9 @@ static const struct MenuEntries sOptionMenuEntries[SUBMENUITEM_COUNT] =
             //MENUITEM_MENU_SLIDER_ITEM,
             //MENUITEM_MENU_SLIDER_LEGENDARY,
             MENUITEM_MENU_TOGGLE_RELEASE_MONS,
+            MENUITEM_MENU_TOGGLE_BAG_CLAUSE,
+            MENUITEM_MENU_TOGGLE_SPECIES_CLAUSE,
+            MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE,
             MENUITEM_MENU_TOGGLE_OVER_LVL,
             MENUITEM_MENU_TOGGLE_EV_GAIN,
 #ifdef ROGUE_EXPANSION
@@ -2274,6 +2352,15 @@ static u8 GetMenuItemValue(u8 menuItem)
     case MENUITEM_MENU_TOGGLE_RELEASE_MONS:
         return Rogue_GetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS);
 
+    case MENUITEM_MENU_TOGGLE_BAG_CLAUSE:
+        return Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE);
+
+    case MENUITEM_MENU_TOGGLE_SPECIES_CLAUSE:
+        return Rogue_GetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE);
+
+    case MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE:
+        return Rogue_GetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE);
+
     // Trainers
     //
     case MENUITEM_MENU_TOGGLE_TRAINER_ROGUE:
@@ -2435,6 +2522,18 @@ static void SetMenuItemValue(u8 menuItem, u8 value)
 
     case MENUITEM_MENU_TOGGLE_RELEASE_MONS:
         Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, value);
+        break;
+
+    case MENUITEM_MENU_TOGGLE_BAG_CLAUSE:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE, value);
+        break;
+
+    case MENUITEM_MENU_TOGGLE_SPECIES_CLAUSE:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, value);
+        break;
+
+    case MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, value);
         break;
 
     // Trainers

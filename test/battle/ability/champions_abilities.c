@@ -188,6 +188,99 @@ SINGLE_BATTLE_TEST("Piercing Drill non-contact moves do not bypass Protect")
     }
 }
 
+SINGLE_BATTLE_TEST("Eelevate boosts the most proficient stat when knocking out a target")
+{
+    u8 stats[] = {1, 1, 1, 1, 1};
+    PARAMETRIZE { stats[0] = 255; }
+    PARAMETRIZE { stats[1] = 255; }
+    PARAMETRIZE { stats[2] = 255; }
+    PARAMETRIZE { stats[3] = 255; }
+    PARAMETRIZE { stats[4] = 255; }
+    GIVEN {
+        PLAYER(SPECIES_EELEKTROSS_MEGA) { Ability(ABILITY_EELEVATE); Attack(stats[0]); Defense(stats[1]); SpAttack(stats[2]); SpDefense(stats[3]); Speed(stats[4]); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 1); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_EELEVATE);
+        switch(i) {
+            case 0:
+                MESSAGE("Eelektross's Eelevate raised its Attack!");
+                break;
+            case 1:
+                MESSAGE("Eelektross's Eelevate raised its Defense!");
+                break;
+            case 2:
+                MESSAGE("Eelektross's Eelevate raised its Sp. Atk!");
+                break;
+            case 3:
+                MESSAGE("Eelektross's Eelevate raised its Sp. Def!");
+                break;
+            case 4:
+                MESSAGE("Eelektross's Eelevate raised its Speed!");
+                break;
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Eelevate makes the Pokemon airborne")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_EARTHQUAKE].type == TYPE_GROUND);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_SPIKES, MOVE_EARTHQUAKE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_EELEKTROSS_MEGA) { Ability(ABILITY_EELEVATE); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SPIKES); }
+        TURN { MOVE(player, MOVE_CELEBRATE); SWITCH(opponent, 1); }
+        TURN { MOVE(player, MOVE_EARTHQUAKE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("2 sent out Eelektross!");
+        NOT MESSAGE("Foe Eelektross is hurt by spikes!");
+    } THEN {
+        EXPECT_EQ(opponent->hp, opponent->maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Eelevate's Ground immunity is bypassed by Mold Breaker")
+{
+    GIVEN {
+        PLAYER(SPECIES_EELEKTROSS_MEGA) { Ability(ABILITY_EELEVATE); }
+        OPPONENT(SPECIES_PINSIR) { Ability(ABILITY_MOLD_BREAKER); Moves(MOVE_EARTHQUAKE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_EARTHQUAKE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_EARTHQUAKE, opponent);
+        HP_BAR(player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Fire Mane boosts Fire-type moves", s16 damage)
+{
+    u32 ability;
+    u32 move;
+
+    PARAMETRIZE { ability = ABILITY_RUN_AWAY; move = MOVE_EMBER; }
+    PARAMETRIZE { ability = ABILITY_FIRE_MANE; move = MOVE_EMBER; }
+    PARAMETRIZE { ability = ABILITY_RUN_AWAY; move = MOVE_TACKLE; }
+    PARAMETRIZE { ability = ABILITY_FIRE_MANE; move = MOVE_TACKLE; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+        ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ability); Moves(move); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); }
+    } WHEN {
+        TURN { MOVE(player, move); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.5), results[1].damage);
+        EXPECT_EQ(results[2].damage, results[3].damage);
+    }
+}
+
 SINGLE_BATTLE_TEST("Spicy Spray burns attackers after direct move damage")
 {
     GIVEN {
