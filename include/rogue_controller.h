@@ -44,6 +44,10 @@ bool8 Rogue_PartyContainsSpeciesChain(u16 checkSpecies, u8 ignoredSlot1, u8 igno
 bool8 Rogue_PartyHasDuplicateSpecies(struct Pokemon *mon, u8 ignoredSlot1, u8 ignoredSlot2);
 bool8 Rogue_PartyHasHeldItem(u16 itemId, u8 ignoredSlot1, u8 ignoredSlot2);
 bool8 Rogue_TryRemoveDuplicateHeldItemForParty(struct Pokemon *mon, u8 ignoredSlot1, u8 ignoredSlot2);
+bool8 Rogue_CaughtMonFitsSpeciesClauseAfterRelease(struct Pokemon *mon, u8 releasedSlot);
+bool8 Rogue_CaughtMonFitsHeldItemClauseAfterRelease(struct Pokemon *mon, u8 releasedSlot);
+bool8 Rogue_CanAddCaughtMonToParty(struct Pokemon *mon);
+bool8 Rogue_CanReleasePartyMonForCaughtMon(struct Pokemon *mon, u8 slot);
 u8 Rogue_GetCurrentDifficulty(void);
 void Rogue_SetCurrentDifficulty(u8 difficulty);
 u16* Rogue_GetVictoryLapHistoryBufferPtr();

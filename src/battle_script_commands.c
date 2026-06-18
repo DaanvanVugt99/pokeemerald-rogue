@@ -18625,9 +18625,10 @@ static void Cmd_handleballthrow(void)
 
 static void Cmd_rogue_partyhasroom(void)
 {
+    u32 caughtPartyIndex = gBattlerPartyIndexes[GetCatchingBattler()];
     CMD_ARGS(const u8 *successInstr);
 
-    if(!Rogue_CheckPartyHasRoomForMon())
+    if(!Rogue_CanAddCaughtMonToParty(&gEnemyParty[caughtPartyIndex]))
     {
         // Continue
         gBattlescriptCurrInstr = cmd->nextInstr;
@@ -18641,16 +18642,18 @@ static void Cmd_rogue_partyhasroom(void)
 
 static void Cmd_rogue_caughtmon(void)
 {
+    u32 caughtPartyIndex = gBattlerPartyIndexes[GetCatchingBattler()];
+    struct Pokemon *caughtMon = &gEnemyParty[caughtPartyIndex];
     CMD_ARGS(u8 discarded);
 
     if(cmd->discarded)
     {
-        Rogue_DiscardedCaughtMon(&gEnemyParty[gBattlerPartyIndexes[gBattlerAttacker ^ BIT_SIDE]]);
+        Rogue_DiscardedCaughtMon(caughtMon);
     }
     else
     {
         // Modify before we've decided if we're going to release this or not
-        Rogue_ModifyCaughtMon(&gEnemyParty[gBattlerPartyIndexes[gBattlerAttacker ^ BIT_SIDE]]);
+        Rogue_ModifyCaughtMon(caughtMon);
     }
 
     gBattlescriptCurrInstr = cmd->nextInstr;

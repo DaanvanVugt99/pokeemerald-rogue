@@ -532,6 +532,7 @@ static void CursorCb_Trade2(u8);
 static void CursorCb_Toss(u8);
 static void CursorCb_Release(u8);
 static void CursorCb_ReleaseField(u8);
+static bool8 CanReleaseSelectedMonForCaughtMon(u8 slot);
 static void CursorCb_QuickHeal(u8);
 static void CursorCb_RenameField(u8);
 static void CursorCb_RelearnMoves(u8);
@@ -3974,6 +3975,15 @@ static void CursorCb_Toss(u8 taskId)
 
 static void CursorCb_Release(u8 taskId)
 {
+    if(!CanReleaseSelectedMonForCaughtMon(GetCursorSelectionMonId()))
+    {
+        PlaySE(SE_FAILURE);
+        PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+        PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+        gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
+        return;
+    }
+
     PlaySE(SE_SELECT);
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
@@ -3981,6 +3991,30 @@ static void CursorCb_Release(u8 taskId)
     ReleasePartyPokemon(GetCursorSelectionMonId(), FALSE);
 
     gTasks[taskId].func = Task_ClosePartyMenu;
+}
+
+static bool8 CanReleaseSelectedMonForCaughtMon(u8 slot)
+{
+    struct Pokemon *caughtMon;
+
+    if(!gMain.inBattle || gPartyMenu.action != PARTY_ACTION_CHOOSE_RELEASE)
+        return TRUE;
+
+    caughtMon = &gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]];
+
+    if(!Rogue_CaughtMonFitsSpeciesClauseAfterRelease(caughtMon, slot))
+    {
+        DisplayPartyMenuMessage(gText_CantSelectSamePkmn, TRUE);
+        return FALSE;
+    }
+
+    if(!Rogue_CaughtMonFitsHeldItemClauseAfterRelease(caughtMon, slot))
+    {
+        DisplayPartyMenuMessage(gText_NoIdenticalHoldItems, TRUE);
+        return FALSE;
+    }
+
+    return Rogue_CanReleasePartyMonForCaughtMon(caughtMon, slot);
 }
 
 static void Task_ReleaseSelectedMonYesNo(u8 taskId);

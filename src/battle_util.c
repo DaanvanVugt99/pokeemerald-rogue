@@ -252,12 +252,19 @@ static bool32 IsTrashAlchemyItemRejected(u32 item)
     switch (ItemId_GetHoldEffect(item))
     {
     case HOLD_EFFECT_NONE:
+    case HOLD_EFFECT_EXP_SHARE:
     case HOLD_EFFECT_PLATE:
     case HOLD_EFFECT_DRIVE:
     case HOLD_EFFECT_MEGA_STONE:
     case HOLD_EFFECT_MEMORY:
     case HOLD_EFFECT_Z_CRYSTAL:
     case HOLD_EFFECT_MASK:
+    case HOLD_EFFECT_PRIMAL_ORB:
+    case HOLD_EFFECT_SOUL_DEW:
+    case HOLD_EFFECT_ADAMANT_ORB:
+    case HOLD_EFFECT_LUSTROUS_ORB:
+    case HOLD_EFFECT_GRISEOUS_ORB:
+    case HOLD_EFFECT_BERSERK_GENE:
         return TRUE;
     default:
         return FALSE;

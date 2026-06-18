@@ -422,6 +422,126 @@ bool8 Rogue_TryRemoveDuplicateHeldItemForParty(struct Pokemon *mon, u8 ignoredSl
     return TRUE;
 }
 
+static bool8 Rogue_CanStoreItemWithoutNewBagSlot(u16 item, u16 count)
+{
+    u8 i;
+    u8 pocket;
+    u16 slotCapacity;
+
+    if(item == ITEM_NONE)
+        return TRUE;
+
+    pocket = ItemId_GetPocket(item);
+
+    if(pocket == POCKET_NONE)
+        return FALSE;
+
+    --pocket;
+    slotCapacity = Rogue_GetBagPocketAmountPerItem(pocket);
+
+    for(i = 0; i < gBagPockets[pocket].capacity; ++i)
+    {
+        if(gBagPockets[pocket].itemSlots[i].itemId == item)
+        {
+            u16 ownedCount = GetBagItemQuantity(&gBagPockets[pocket].itemSlots[i].quantity);
+            u16 freeCount = min(slotCapacity - ownedCount, count);
+
+            count -= freeCount;
+
+            if(count == 0)
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static void Rogue_AddRequiredBagSlotForItem(u16 item, u16 count, u16 *reservedSlots, u16 *unreservedSlots)
+{
+    u8 pocket;
+
+    if(item == ITEM_NONE || Rogue_CanStoreItemWithoutNewBagSlot(item, count))
+        return;
+
+    pocket = ItemId_GetPocket(item);
+
+    if(ItemPocketUsesReservedSlots(pocket))
+        ++*reservedSlots;
+    else
+        ++*unreservedSlots;
+}
+
+static bool8 Rogue_CanStoreCaughtMonHeldItemAfterRelease(struct Pokemon *mon, u8 releasedSlot)
+{
+    u16 caughtItem = GetMonData(mon, MON_DATA_HELD_ITEM);
+    u16 releasedItem = ITEM_NONE;
+    u16 reservedSlots = 0;
+    u16 unreservedSlots = 0;
+
+    if(!Rogue_PartyHasHeldItem(caughtItem, releasedSlot, PARTY_SIZE))
+        return TRUE;
+
+    if(releasedSlot < PARTY_SIZE)
+        releasedItem = GetMonData(&gPlayerParty[releasedSlot], MON_DATA_HELD_ITEM);
+
+    if(caughtItem == releasedItem)
+    {
+        Rogue_AddRequiredBagSlotForItem(caughtItem, 2, &reservedSlots, &unreservedSlots);
+    }
+    else
+    {
+        Rogue_AddRequiredBagSlotForItem(releasedItem, 1, &reservedSlots, &unreservedSlots);
+        Rogue_AddRequiredBagSlotForItem(caughtItem, 1, &reservedSlots, &unreservedSlots);
+    }
+
+    return reservedSlots <= GetBagReservedFreeSlots()
+        && unreservedSlots <= GetBagUnreservedFreeSlots();
+}
+
+bool8 Rogue_CaughtMonFitsSpeciesClauseAfterRelease(struct Pokemon *mon, u8 releasedSlot)
+{
+    return !Rogue_PartyHasDuplicateSpecies(mon, releasedSlot, PARTY_SIZE);
+}
+
+bool8 Rogue_CaughtMonFitsHeldItemClauseAfterRelease(struct Pokemon *mon, u8 releasedSlot)
+{
+    u16 item = GetMonData(mon, MON_DATA_HELD_ITEM);
+
+    if(!Rogue_PartyHasHeldItem(item, releasedSlot, PARTY_SIZE))
+        return TRUE;
+
+    return Rogue_CanStoreCaughtMonHeldItemAfterRelease(mon, releasedSlot);
+}
+
+bool8 Rogue_CanAddCaughtMonToParty(struct Pokemon *mon)
+{
+    if(Rogue_IsRunActive())
+    {
+        if(CalculatePlayerPartyCount() >= Rogue_GetMaxPartySize())
+            return FALSE;
+
+        if(!Rogue_CaughtMonFitsSpeciesClauseAfterRelease(mon, PARTY_SIZE))
+            return FALSE;
+
+        if(!Rogue_CaughtMonFitsHeldItemClauseAfterRelease(mon, PARTY_SIZE))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+bool8 Rogue_CanReleasePartyMonForCaughtMon(struct Pokemon *mon, u8 slot)
+{
+    if(!Rogue_IsRunActive())
+        return TRUE;
+
+    if(slot >= PARTY_SIZE || GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES) == SPECIES_NONE)
+        return FALSE;
+
+    return Rogue_CaughtMonFitsSpeciesClauseAfterRelease(mon, slot)
+        && Rogue_CaughtMonFitsHeldItemClauseAfterRelease(mon, slot);
+}
+
 bool8 Rogue_IsBagClauseActive(void)
 {
     return Rogue_IsRunActive() && Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE);
