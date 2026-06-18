@@ -9684,6 +9684,7 @@ BattleScript_RecoilEnd::
 
 BattleScript_WarpathHeal::
 	call BattleScript_AbilityPopUp
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_ATTACKER
 	datahpupdate BS_ATTACKER
@@ -9964,6 +9965,8 @@ BattleScript_ReceiverActivates::
 
 BattleScript_AbilityHpHeal::
 	call BattleScript_AbilityPopUp
+	@ Reassess after playtesting whether non-item ability heals should keep the held-item sparkle.
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	printstring STRINGID_PKMNSXRESTOREDHPALITTLE2
 	waitmessage B_WAIT_TIME_LONG
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
@@ -10337,6 +10340,7 @@ BattleScript_SplitInstinctHeal::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_SPLITINSTINCTHEAL
 	waitmessage B_WAIT_TIME_SHORT
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	printstring STRINGID_PKMNSXRESTOREDHPALITTLE2
 	waitmessage B_WAIT_TIME_LONG
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
@@ -10373,6 +10377,7 @@ BattleScript_PasturizedActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PASTURIZEDHEAL
 	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_TARGET, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_TARGET
 	datahpupdate BS_TARGET
@@ -10409,21 +10414,25 @@ BattleScript_RestorativeAuraHeals::
 	call BattleScript_AbilityPopUp
 	various BS_PLAYER1, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
 	.4byte BattleScript_RestorativeAuraTryPlayer2
+	playanimation BS_PLAYER1, B_ANIM_HELD_ITEM_EFFECT
 	healthbarupdate BS_PLAYER1
 	datahpupdate BS_PLAYER1
 BattleScript_RestorativeAuraTryPlayer2:
 	various BS_PLAYER2, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
 	.4byte BattleScript_RestorativeAuraTryOpponent1
+	playanimation BS_PLAYER2, B_ANIM_HELD_ITEM_EFFECT
 	healthbarupdate BS_PLAYER2
 	datahpupdate BS_PLAYER2
 BattleScript_RestorativeAuraTryOpponent1:
 	various BS_OPPONENT1, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
 	.4byte BattleScript_RestorativeAuraTryOpponent2
+	playanimation BS_OPPONENT1, B_ANIM_HELD_ITEM_EFFECT
 	healthbarupdate BS_OPPONENT1
 	datahpupdate BS_OPPONENT1
 BattleScript_RestorativeAuraTryOpponent2:
 	various BS_OPPONENT2, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
 	.4byte BattleScript_RestorativeAuraEnd
+	playanimation BS_OPPONENT2, B_ANIM_HELD_ITEM_EFFECT
 	healthbarupdate BS_OPPONENT2
 	datahpupdate BS_OPPONENT2
 BattleScript_RestorativeAuraEnd:
@@ -11424,6 +11433,7 @@ BattleScript_MeltdownHealType::
 	attackstring
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
+	playanimation BS_TARGET, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_TARGET
 	datahpupdate BS_TARGET
@@ -11764,6 +11774,7 @@ BattleScript_ShelterAbilityActivates::
 BattleScript_ShelterAbilityTryHeal:
 	various BS_ATTACKER, VARIOUS_TRY_SHELTER_HEAL
 	.4byte BattleScript_ShelterAbilityEnd
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	healthbarupdate BS_ATTACKER
 	datahpupdate BS_ATTACKER
 	printstring STRINGID_PKMNREGAINEDHEALTH
@@ -12393,6 +12404,7 @@ BattleScript_VictoryActivates::
 	waitmessage B_WAIT_TIME_SHORT
 	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_VictoryCelebrate
 	tryhealquarterhealth BS_ATTACKER, BattleScript_VictoryCelebrate
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_ATTACKER
 	datahpupdate BS_ATTACKER
@@ -12405,6 +12417,7 @@ BattleScript_VictoryActivatesSpeed::
 	waitmessage B_WAIT_TIME_SHORT
 	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_VictorySpeed
 	tryhealquarterhealth BS_ATTACKER, BattleScript_VictorySpeed
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_ATTACKER
 	datahpupdate BS_ATTACKER
@@ -12428,6 +12441,7 @@ BattleScript_InsectivoreActivates::
 	waitmessage B_WAIT_TIME_SHORT
 	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_InsectivoreEnd
 	tryhealhalfhealth BattleScript_InsectivoreEnd, BS_ATTACKER
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_ATTACKER
 	datahpupdate BS_ATTACKER
@@ -13899,6 +13913,7 @@ BattleScript_RootNetworkActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_ROOTNETWORKRESTORED
 	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_TARGET, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_TARGET
 	datahpupdate BS_TARGET
@@ -13920,6 +13935,7 @@ BattleScript_RoyalTreatmentActivates::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_ROOTNETWORKRESTORED
 	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_TARGET, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_TARGET
 	datahpupdate BS_TARGET
@@ -13937,13 +13953,14 @@ BattleScript_FairyTaleEnd:
 
 BattleScript_TrashAlchemyActivates::
 	call BattleScript_AbilityPopUp
-	printstring STRINGID_TRASHALCHEMYFOUND
-	waitmessage B_WAIT_TIME_LONG
 	jumpifword CMP_EQUAL, gBattleMoveDamage, 0, BattleScript_TrashAlchemyEnd
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
 	healthbarupdate BS_ATTACKER
 	datahpupdate BS_ATTACKER
 BattleScript_TrashAlchemyEnd:
+	printstring STRINGID_TRASHALCHEMYFOUND
+	waitmessage B_WAIT_TIME_LONG
 	end3
 
 BattleScript_StabilizeActivates::

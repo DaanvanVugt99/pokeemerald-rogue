@@ -61,6 +61,8 @@ Format follows Keep a Changelog loosely:
   incoming allies after Parting Shot.
 - Changed Trash Alchemy to only trigger in trainer battles, and reduced its
   healing from 1/8 HP to 1/16 HP.
+- Added clearer healing animations to Trash Alchemy and shared ability HP
+  restoration feedback.
 - Reworked Alolan Raichu's unique ability to Brain Surf, letting Electric and
   Psychic moves pivot into the other terrain while raising Sp. Atk once per
   switch-in.

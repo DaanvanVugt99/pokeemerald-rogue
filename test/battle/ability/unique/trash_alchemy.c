@@ -15,6 +15,8 @@ SINGLE_BATTLE_TEST("Trash Alchemy consumes a held item, heals for one sixteenth,
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_TRASH_ALCHEMY);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        HP_BAR(player, damage: -10);
     } THEN {
         EXPECT_EQ(player->hp, 90);
         EXPECT_NE(player->item, ITEM_NONE);
