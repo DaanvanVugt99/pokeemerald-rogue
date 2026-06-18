@@ -9004,6 +9004,22 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             return 1;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ROLLING_START) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_ROLLING_START);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_DEFENSE_CURL;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            StartAbilityCalledMoveScript();
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_OMNISENSE) && !uniqueDone)
         {
             uniqueDone = TRUE;

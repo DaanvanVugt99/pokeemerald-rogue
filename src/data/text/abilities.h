@@ -885,6 +885,7 @@ static const u8 sTrashAlchemyDescription[] = _("Trainer battles: eats item for 1
 static const u8 sTallTaleDescription[] = _("Dragon Hammer uses higher attacking stat. On KO, uses Growth.");
 static const u8 sEelevateDescription[] = _("Immune to Ground and grounded hazards. On KO, highest stat rises.");
 static const u8 sFireManeDescription[] = _("Fire-type moves deal 1.5x damage.");
+static const u8 sRollingStartDescription[] = _("On switch-in, uses Defense Curl. Rollout and Ice Ball never miss.");
 
 
 #if B_EXPANDED_ABILITY_NAMES == TRUE
@@ -1601,6 +1602,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TALL_TALE] = _("Tall Tale"),
     [ABILITY_EELEVATE] = _("Eelevate"),
     [ABILITY_FIRE_MANE] = _("Fire Mane"),
+    [ABILITY_ROLLING_START] = _("Rolling Start"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("Grazing Field"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -2496,6 +2498,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TALL_TALE] = _("TallTale"),
     [ABILITY_EELEVATE] = _("Eelevate"),
     [ABILITY_FIRE_MANE] = _("FireMane"),
+    [ABILITY_ROLLING_START] = _("RollingSt"),
     [ABILITY_RED_WAKE] = _("Red Wake"),
     [ABILITY_GRAZING_FIELD] = _("GrazingFld"),
     [ABILITY_SEEDCLOUD] = _("Seedcloud"),
@@ -3569,5 +3572,6 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_TALL_TALE] = sTallTaleDescription,
     [ABILITY_EELEVATE] = sEelevateDescription,
     [ABILITY_FIRE_MANE] = sFireManeDescription,
+    [ABILITY_ROLLING_START] = sRollingStartDescription,
 
 };

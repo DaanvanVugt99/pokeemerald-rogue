@@ -416,6 +416,8 @@ static u32 Ai_SetMoveAccuracy(struct AiLogicData *aiData, u32 battlerAtk, u32 ba
      || (abilityAtk == ABILITY_LANAKILA_LAW
       && (move == MOVE_ENCORE || move == MOVE_HYPNOSIS)
       && AI_GetWeather(aiData) & B_WEATHER_SNOW)
+     || ((abilityAtk == ABILITY_ROLLING_START || aiData->uniqueAbilities[battlerAtk] == ABILITY_ROLLING_START)
+      && (move == MOVE_ROLLOUT || move == MOVE_ICE_BALL))
      || (abilityAtk == ABILITY_NEST_BOSS && IS_BATTLER_OF_TYPE(battlerAtk, moveType)))
         accuracy = 100;
     else

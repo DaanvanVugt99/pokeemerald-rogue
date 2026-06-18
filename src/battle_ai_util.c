@@ -1605,6 +1605,10 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
     if (AI_DATA->abilities[battlerAtk] == ABILITY_MONSOON && (weather & B_WEATHER_RAIN))
         return TRUE;
 
+    if (AI_HasAbility(battlerAtk, ABILITY_ROLLING_START)
+     && (move == MOVE_ROLLOUT || move == MOVE_ICE_BALL))
+        return TRUE;
+
     if ((weather & B_WEATHER_SUN)
       && (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE))
         return FALSE;

@@ -28,6 +28,7 @@ Format follows Keep a Changelog loosely:
 - Added Pecharunt's Puppet Master unique ability.
 - Added the Lechonk line's Aroma Trail unique ability.
 - Added Eelevate and Fire Mane for the 1.1 champion Mega Evolution ability set.
+- Added the Hisuian Voltorb line's Rolling Start unique ability.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 
