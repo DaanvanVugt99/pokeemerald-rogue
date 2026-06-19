@@ -4731,6 +4731,20 @@ bool32 IsOnlyAliveMonInParty(u32 battler)
             && IsValidForBattle(&party[gBattlerPartyIndexes[battler]]));
 }
 
+bool32 IsBoneMove(u32 move)
+{
+    switch (move)
+    {
+    case MOVE_BONE_CLUB:
+    case MOVE_BONEMERANG:
+    case MOVE_BONE_RUSH:
+    case MOVE_SHADOW_BONE:
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 bool32 IsOnlyUltraBeastInParty(u32 battler)
 {
     u32 i;
@@ -14501,26 +14515,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_ALL_ALONE)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && IsMoveMakingContact(move, moveEndAttacker)
-         && IsFinalMultiHitStrike()
-         && IsOnlyAliveMonInParty(battler)
-         && CanUseExtraMove(battler, moveEndAttacker))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_ALL_ALONE);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = moveEndAttacker;
-            gCalledMove = MOVE_BONE_CLUB;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-            effect++;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_CRACKED_SHELL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
@@ -18411,6 +18405,44 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlescriptCurrInstr = BattleScript_AbilityTrapsTarget;
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_FUNERAL_DANCE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && IsBoneMove(move))
+        {
+            bool32 appliedTrap = FALSE;
+            bool32 appliedBurn = FALSE;
+
+            if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
+            {
+                gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
+                gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
+                appliedTrap = TRUE;
+            }
+
+            if (IsOnlyAliveMonInParty(battler) && CanBeBurned(gBattlerTarget))
+            {
+                gBattleScripting.moveEffect = MOVE_EFFECT_BURN;
+                appliedBurn = TRUE;
+            }
+            else
+            {
+                gBattleScripting.moveEffect = 0;
+            }
+
+            if (appliedTrap || appliedBurn)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_FUNERAL_DANCE);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = appliedTrap ? BattleScript_AbilityTrapsTarget : BattleScript_AbilityStatusEffect;
+                gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_DEATH_CURRENT)

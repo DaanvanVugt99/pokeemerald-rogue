@@ -393,7 +393,7 @@
 #define ABILITY_AQUATIC_ARMOR          358
 #define ABILITY_VOLT_BREAK             359
 #define ABILITY_MULTITASK              360
-#define ABILITY_ALL_ALONE              361
+#define ABILITY_BONE_KEEPER            361
 #define ABILITY_STRIKER                362
 #define ABILITY_UPPERCUT               363
 #define ABILITY_BREAKDANCE             443
@@ -921,9 +921,10 @@
 #define ABILITY_EELEVATE               887
 #define ABILITY_FIRE_MANE              888
 #define ABILITY_ROLLING_START          889
+#define ABILITY_FUNERAL_DANCE          890
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
-#define ABILITIES_COUNT_ROGUE       890
+#define ABILITIES_COUNT_ROGUE       891
 
 #define ABILITIES_COUNT ABILITIES_COUNT_ROGUE
 

@@ -153,6 +153,7 @@ bool32 DoesPartyShareTypeWithBattler(u32 battler);
 bool32 DoesPartyShareCurrentTypeWithBattler(u32 battler);
 u32 GetBattlerCreationType(u32 battler);
 bool32 DoesPartyHaveUniqueTypes(u32 battler);
+bool32 IsBoneMove(u32 move);
 bool32 IsTruantLoafingSuppressed(u32 battler);
 bool32 DoesPartyContainAbility(u32 battler, u32 ability, bool32 excludeBattler);
 u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler);

@@ -5,6 +5,7 @@
 #include "battle_anim.h"
 #include "battle_ai_util.h"
 #include "battle_ai_main.h"
+#include "battle_util.h"
 #include "battle_controllers.h"
 #include "battle_factory.h"
 #include "battle_setup.h"
@@ -418,7 +419,9 @@ static u32 Ai_SetMoveAccuracy(struct AiLogicData *aiData, u32 battlerAtk, u32 ba
       && AI_GetWeather(aiData) & B_WEATHER_SNOW)
      || ((abilityAtk == ABILITY_ROLLING_START || aiData->uniqueAbilities[battlerAtk] == ABILITY_ROLLING_START)
       && (move == MOVE_ROLLOUT || move == MOVE_ICE_BALL))
-     || (abilityAtk == ABILITY_NEST_BOSS && IS_BATTLER_OF_TYPE(battlerAtk, moveType)))
+     || (abilityAtk == ABILITY_NEST_BOSS && IS_BATTLER_OF_TYPE(battlerAtk, moveType))
+     || ((abilityAtk == ABILITY_BONE_KEEPER || aiData->uniqueAbilities[battlerAtk] == ABILITY_BONE_KEEPER)
+      && IsBoneMove(move)))
         accuracy = 100;
     else
         accuracy = GetTotalAccuracy(battlerAtk, battlerDef, move, abilityAtk, abilityDef, aiData->holdEffects[battlerAtk], aiData->holdEffects[battlerDef]);
