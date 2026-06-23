@@ -46,3 +46,42 @@ SINGLE_BATTLE_TEST("Blaze shows an ability popup when boosting a Fire-type attac
         HP_BAR(opponent);
     }
 }
+
+SINGLE_BATTLE_TEST("Blaze does not show an ability popup for self-confusion damage")
+{
+    PASSES_RANDOMLY(1, 3, RNG_CONFUSION);
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+        PLAYER(SPECIES_CHARMANDER) { Ability(ABILITY_BLAZE); MaxHP(100); HP(50); Speed(100); Moves(MOVE_CELEBRATE, MOVE_EMBER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CONFUSE_RAY, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CONFUSE_RAY); }
+        TURN { MOVE(player, MOVE_EMBER); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Charmander became confused!");
+        MESSAGE("Charmander is confused!");
+        NOT ABILITY_POPUP(player, ABILITY_BLAZE);
+        MESSAGE("It hurt itself in its confusion!");
+        HP_BAR(player);
+    }
+}
+
+DOUBLE_BATTLE_TEST("Blaze shows one ability popup for a boosted spread attack at half HP")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ERUPTION].type == TYPE_FIRE);
+        ASSUME(gBattleMoves[MOVE_ERUPTION].target == MOVE_TARGET_BOTH);
+        PLAYER(SPECIES_CHARMANDER) { Ability(ABILITY_BLAZE); MaxHP(100); HP(50); Speed(100); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
+    } WHEN {
+        TURN { MOVE(playerLeft, MOVE_ERUPTION); MOVE(playerRight, MOVE_CELEBRATE); MOVE(opponentLeft, MOVE_CELEBRATE); MOVE(opponentRight, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(playerLeft, ABILITY_BLAZE);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ERUPTION, playerLeft);
+        HP_BAR(opponentLeft);
+        NOT ABILITY_POPUP(playerLeft, ABILITY_BLAZE);
+    }
+}

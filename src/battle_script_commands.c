@@ -2377,22 +2377,20 @@ static bool32 IsBoostedAttackAbilityType(u32 ability, u32 moveType)
     return FALSE;
 }
 
-static void TryQueueBoostedAttackAbilityPopup(u32 moveType)
+static bool32 HasBoostedAttackAbilityPopupAlreadyShownThisMove(void)
 {
-    u32 ability = GetBattlerAbility(gBattlerAttacker);
+    u16 moveTarget = GetBattlerMoveTargetType(gBattlerAttacker, gCurrentMove);
 
-    if (gBattleMoveDamage == 0)
-        return;
-    if (!IsBattlerAlive(gBattlerAttacker))
-        return;
     if (gMultiHitCounter != 0 && gBattleScripting.multihitString[4] != 0)
-        return;
-    if (gBattleMons[gBattlerAttacker].hp > (gBattleMons[gBattlerAttacker].maxHP / 2))
-        return;
-    if (!IsBoostedAttackAbilityType(ability, moveType))
-        return;
+        return TRUE;
 
-    gBattleStruct->boostedAttackAbilityPopups |= gBitTable[gBattlerAttacker];
+    if ((moveTarget & MOVE_TARGET_BOTH
+      || moveTarget & MOVE_TARGET_FOES_AND_ALLY
+      || moveTarget & MOVE_TARGET_DEPENDS)
+     && gBattleScripting.animTargetsHit != 0)
+        return TRUE;
+
+    return FALSE;
 }
 
 static void Cmd_damagecalc(void)
@@ -2406,7 +2404,6 @@ static void Cmd_damagecalc(void)
     if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
         movePower = VarGet(VAR_EXTRA_MOVE_DAMAGE);
     gBattleMoveDamage = CalculateMoveDamage(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType, movePower, gIsCriticalHit, TRUE, TRUE);
-    TryQueueBoostedAttackAbilityPopup(moveType);
 
     if((IsCurseActive(EFFECT_ONE_HIT) || Rogue_GetActiveCampaign() == ROGUE_CAMPAIGN_ONE_HP) && gBattleMoveDamage != 0)
     {
@@ -18075,20 +18072,24 @@ static void Cmd_pickup(void)
 static void Cmd_tryboostedattackabilitypopup(void)
 {
     CMD_ARGS();
+    u8 moveType;
+    u32 ability = GetBattlerAbility(gBattlerAttacker);
 
-    if (gBattleStruct->boostedAttackAbilityPopups & gBitTable[gBattlerAttacker])
+    GET_MOVE_TYPE(gCurrentMove, moveType);
+
+    if (!(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+     && gBattleMoveDamage != 0
+     && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+     && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+     && IsBattlerAlive(gBattlerAttacker)
+     && gBattleMons[gBattlerAttacker].hp <= (gBattleMons[gBattlerAttacker].maxHP / 2)
+     && IsBoostedAttackAbilityType(ability, moveType)
+     && !HasBoostedAttackAbilityPopupAlreadyShownThisMove())
     {
-        gBattleStruct->boostedAttackAbilityPopups &= ~gBitTable[gBattlerAttacker];
-
-        if (!(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE))
-         && gBattleMoveDamage != 0
-         && IsBattlerAlive(gBattlerAttacker))
-        {
-            SetBattlerTriggeredAbility(gBattlerAttacker, GetBattlerAbility(gBattlerAttacker));
-            BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
-            return;
-        }
+        SetBattlerTriggeredAbility(gBattlerAttacker, ability);
+        BattleScriptPush(cmd->nextInstr);
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        return;
     }
 
     gBattlescriptCurrInstr = cmd->nextInstr;
