@@ -4061,6 +4061,40 @@ static void Task_ReleaseSelectedMonYesNoInput(u8 taskId)
 static void Task_QuickHealSelectedMonYesNo(u8 taskId);
 static void Task_QuickHealSelectedMonYesNoInput(u8 taskId);
 
+static bool8 IsQuickHealMedicineItem(u16 itemId)
+{
+    return ItemId_GetFieldFunc(itemId) == ItemUseOutOfBattle_Medicine;
+}
+
+static bool8 IsQuickHealReviveItem(u16 itemId)
+{
+    const u8 *effect = GetItemEffect(itemId);
+
+    return IsQuickHealMedicineItem(itemId)
+        && effect != NULL
+        && (effect[4] & ITEM4_REVIVE)
+        && (effect[4] & ITEM4_HEAL_HP);
+}
+
+static bool8 IsQuickHealHpItem(u16 itemId)
+{
+    const u8 *effect = GetItemEffect(itemId);
+
+    return IsQuickHealMedicineItem(itemId)
+        && effect != NULL
+        && (effect[4] & ITEM4_HEAL_HP)
+        && !(effect[4] & ITEM4_REVIVE);
+}
+
+static bool8 IsQuickHealStatusItem(u16 itemId)
+{
+    const u8 *effect = GetItemEffect(itemId);
+
+    return IsQuickHealMedicineItem(itemId)
+        && effect != NULL
+        && GetItemStatus1Mask(itemId) != 0;
+}
+
 static u16 GetQuickHealRevivePriority(u16 itemId)
 {
     switch (itemId)
@@ -4088,7 +4122,7 @@ static u16 FindQuickHealReviveItem(void)
 
         if (!CheckBagHasItem(itemId, 1))
             continue;
-        if (ItemId_GetBattleUsage(itemId) != EFFECT_ITEM_REVIVE)
+        if (!IsQuickHealReviveItem(itemId))
             continue;
 
         priority = GetQuickHealRevivePriority(itemId);
@@ -4110,14 +4144,12 @@ static u16 FindQuickHealHpItem(u32 maxHp)
 
     for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
     {
-        u16 usage;
         u32 healAmount;
 
         if (!CheckBagHasItem(itemId, 1))
             continue;
 
-        usage = ItemId_GetBattleUsage(itemId);
-        if (usage != EFFECT_ITEM_RESTORE_HP && usage != EFFECT_ITEM_HEAL_AND_CURE_STATUS)
+        if (!IsQuickHealHpItem(itemId))
             continue;
 
         healAmount = GetMedicineItemHealAmount(itemId, maxHp);
@@ -4145,15 +4177,13 @@ static u16 FindQuickHealStatusItem(u32 status1)
 
     for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
     {
-        u16 usage;
         u32 statusMask;
         u16 price;
 
         if (!CheckBagHasItem(itemId, 1))
             continue;
 
-        usage = ItemId_GetBattleUsage(itemId);
-        if (usage != EFFECT_ITEM_CURE_STATUS && usage != EFFECT_ITEM_HEAL_AND_CURE_STATUS)
+        if (!IsQuickHealStatusItem(itemId))
             continue;
 
         statusMask = GetItemStatus1Mask(itemId);
