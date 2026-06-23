@@ -1,7 +1,6 @@
 
 const FLAG_HIDE_BANK = FLAG_TEMP_1
 const FLAG_HIDE_TREATS = FLAG_TEMP_2
-const FLAG_HIDE_POKEBLOCK = FLAG_TEMP_3
 
 mapscripts Rogue_Area_Market_MapScripts 
 {
@@ -31,15 +30,6 @@ script Rogue_Area_Market_OnMapLoad
         setflag(FLAG_HIDE_TREATS)
     }
 
-    hubupgradeunlocked(HUB_UPGRADE_MARKET_POKEBLOCK_BLENDERS)
-    if(var(VAR_RESULT) == TRUE)
-    {
-        clearflag(FLAG_HIDE_POKEBLOCK)
-    }
-    else
-    {
-        setflag(FLAG_HIDE_POKEBLOCK)
-    }
 }
 
 
@@ -72,178 +62,164 @@ mart BankMart
     ITEM_LARGE_COIN_CASE
 }
 
+raw `
+    .align 2
+PokeblockTypeRecipes::
+    .2byte ITEM_POKEBLOCK_NORMAL
+    .2byte ITEM_LUM_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_FIGHTING
+    .2byte ITEM_RABUTA_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_FLYING
+    .2byte ITEM_LEPPA_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_POISON
+    .2byte ITEM_PECHA_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_GROUND
+    .2byte ITEM_LANSAT_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_ROCK
+    .2byte ITEM_SPELON_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_BUG
+    .2byte ITEM_WATMEL_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_GHOST
+    .2byte ITEM_NOMEL_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_STEEL
+    .2byte ITEM_MAGOST_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_FIRE
+    .2byte ITEM_RAWST_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_WATER
+    .2byte ITEM_BELUE_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_GRASS
+    .2byte ITEM_DURIN_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_ELECTRIC
+    .2byte ITEM_CHERI_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_PSYCHIC
+    .2byte ITEM_CHESTO_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_ICE
+    .2byte ITEM_ASPEAR_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_DRAGON
+    .2byte ITEM_PAMTRE_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_DARK
+    .2byte ITEM_CORNN_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_FAIRY
+    .2byte ITEM_KEE_BERRY
+    .2byte 5
+    .2byte ITEM_NONE
+    .2byte ITEM_NONE
+    .2byte 0
 
-script Rogue_Area_Market_BlendPokeblockNovice
+PokeblockStatRecipes::
+    .2byte ITEM_POKEBLOCK_HP
+    .2byte ITEM_ORAN_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_ATK
+    .2byte ITEM_KELPSY_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_DEF
+    .2byte ITEM_QUALOT_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_SPEED
+    .2byte ITEM_TAMATO_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_SPATK
+    .2byte ITEM_HONDEW_BERRY
+    .2byte 5
+    .2byte ITEM_POKEBLOCK_SPDEF
+    .2byte ITEM_GREPA_BERRY
+    .2byte 5
+    .2byte ITEM_NONE
+    .2byte ITEM_NONE
+    .2byte 0
+
+PokeblockShinyRecipes::
+    .2byte ITEM_POKEBLOCK_SHINY
+    .2byte ITEM_STARF_BERRY
+    .2byte 1
+    .2byte ITEM_NONE
+    .2byte ITEM_NONE
+    .2byte 0
+`
+
+
+script Rogue_Area_Market_CraftPokeblock
 {
-    setflag(FLAG_HIDE_LILYCOVE_CONTEST_HALL_BLEND_MASTER)
-    
     lock
 
-    // NOVICE_BERRY_COUNT
-    msgbox(format("Hello!\nI'm a {POKEBLOCK} Blending Novice.\pI can help you produce up to 10 {POKEBLOCK} per 20 berries.\pWould you like to blend some {POKEBLOCK} with me?"), MSGBOX_YESNO)
+    msgbox(format("Hello!\nI can help you craft {POKEBLOCK} from Berries.\pMost {POKEBLOCK} cost 5 matching Berries each."))
 
-    if(var(VAR_RESULT) == YES)
+    setvar(VAR_0x8009, YES)
+    while(var(VAR_0x8009) == YES)
     {
-        specialvar(VAR_RESULT, PlayerHasBerries)
+        begindynamicmultichoice
+        appenddynamicmultichoice("Type Blocks", 0)
+        appenddynamicmultichoice("Stat Blocks", 1)
+        appenddynamicmultichoice("Shiny Block", 2)
+        appenddynamicmultichoice("Exit", MULTI_B_PRESSED)
 
-        if(var(VAR_RESULT) == YES)
-        {
-            // NOVICE_BERRY_COUNT
-            setvar(VAR_0x800A, 20) // num berries
+        message(format("What would you like to craft?"))
+        waitmessage
+        enddynamicmultichoice(19, 2, 4, TRUE)
 
-            setvar(VAR_RESULT, YES)
-            while(var(VAR_RESULT) == YES)
-            {
-                call(Rogue_Area_Market_BlendPokeblockNoviceLoop)
-            }
-        }
-        else
+        switch(var(VAR_RESULT))
         {
-            msgbox(format("Oh.\pIt doesn't look like you have any berries to blend."))
+            case 0:
+                call(Rogue_Area_Market_CraftTypePokeblock)
+
+            case 1:
+                call(Rogue_Area_Market_CraftStatPokeblock)
+
+            case 2:
+                call(Rogue_Area_Market_CraftShinyPokeblock)
+
+            case MULTI_B_PRESSED:
+                setvar(VAR_0x8009, NO)
         }
     }
-    else
-    {
-        msgbox(format("I see.\nIf you change your mind feel free to speak with me again."))
-    }
 
+    msgbox(format("Please let me know if you'd like to craft anything else!"))
     release
 }
 
-script Rogue_Area_Market_BlendPokeblockNoviceLoop
+script Rogue_Area_Market_CraftTypePokeblock
 {
-    msgbox(format("Which berry would you like to blend?"))
-
-    fadescreen(FADE_TO_BLACK)
-    special(Bag_ChooseBerry)
-    waitstate
-
-    if(var(VAR_ITEM_ID) != 0)
-    {
-        special(Rogue_IsValidPokeblockBerry)
-        if(var(VAR_RESULT) == YES)
-        {
-            // NOVICE_BERRY_COUNT
-            checkitem(VAR_ITEM_ID, 20)
-
-            if(var(VAR_RESULT) == YES)
-            {
-                msgbox(format("OK.\pLet's blend!"))
-
-                waitse
-                setvar(VAR_0x8004, 1) // NUM_OPPONENTS
-                fadescreen(FADE_TO_BLACK)
-                special(DoBerryBlending)
-                waitstate
-
-                call(Rogue_Common_DisplayPopups)
-
-                msgbox(format("Would you like to blend more berries?"), MSGBOX_YESNO)
-            }
-            else
-            {
-                // NOVICE_BERRY_COUNT
-                msgbox(format("You don't have enough berries.\pYou need 20 berries to blend with me."))
-            }
-        }
-        else
-        {
-            msgbox(format("I'm afraid that berry won't produce any {POKEBLOCK}.\pYou can use the Check Tag option in your Bag to see which {POKEBLOCK} a berry will produce when blended."))
-        }
-    }
-    else
-    {
-        setvar(VAR_RESULT, NO)
-    }
+    message(format("Which type of {POKEBLOCK} would you like?"))
+    waitmessage
+    rogue_custompokemart_recipes(PokeblockTypeRecipes)
 }
 
-script Rogue_Area_Market_BlendPokeblockMaster
+script Rogue_Area_Market_CraftStatPokeblock
 {
-    clearflag(FLAG_HIDE_LILYCOVE_CONTEST_HALL_BLEND_MASTER)
-    
-    lock
-
-    // MASTER_BERRY_COUNT
-    msgbox(format("Hello!\nI'm a {POKEBLOCK} Blending Master.\pI can help you produce up to 30 {POKEBLOCK} per 70 berries.\pWould you like to blend some {POKEBLOCK} with me?"), MSGBOX_YESNO)
-
-    if(var(VAR_RESULT) == YES)
-    {
-        specialvar(VAR_RESULT, PlayerHasBerries)
-
-        if(var(VAR_RESULT) == YES)
-        {
-            // MASTER_BERRY_COUNT
-            setvar(VAR_0x800A, 70) // num berries
-
-            setvar(VAR_RESULT, YES)
-            while(var(VAR_RESULT) == YES)
-            {
-                call(Rogue_Area_Market_BlendPokeblockMasterLoop)
-            }
-        }
-        else
-        {
-            msgbox(format("Oh.\pIt doesn't look like you have any berries to blend."))
-        }
-    }
-    else
-    {
-        msgbox(format("I see.\nIf you change your mind feel free to speak with me again."))
-    }
-
-    release
+    message(format("Which stat {POKEBLOCK} would you like?"))
+    waitmessage
+    rogue_custompokemart_recipes(PokeblockStatRecipes)
 }
 
-script Rogue_Area_Market_BlendPokeblockMasterLoop
+script Rogue_Area_Market_CraftShinyPokeblock
 {
-    msgbox(format("Which berry would you like to blend?"))
-
-    fadescreen(FADE_TO_BLACK)
-    special(Bag_ChooseBerry)
-    waitstate
-
-    if(var(VAR_ITEM_ID) != 0)
-    {
-        special(Rogue_IsValidPokeblockBerry)
-        if(var(VAR_RESULT) == YES)
-        {
-            // MASTER_BERRY_COUNT
-            checkitem(VAR_ITEM_ID, 70)
-
-            if(var(VAR_RESULT) == YES)
-            {
-                msgbox(format("OK.\pLet's blend!"))
-
-                waitse
-                setvar(VAR_0x8004, 1) // NUM_OPPONENTS
-                fadescreen(FADE_TO_BLACK)
-                special(DoBerryBlending)
-                waitstate
-
-                call(Rogue_Common_DisplayPopups)
-
-                msgbox(format("Would you like to blend more berries?"), MSGBOX_YESNO)
-            }
-            else
-            {
-                msgbox(format("You don't have enough berries.\pYou need 70 berries to blend with me."))
-            }
-        }
-        else
-        {
-            msgbox(format("I'm afraid that berry won't produce any {POKEBLOCK}.\pYou can use the Check Tag option in your Bag to see which {POKEBLOCK} a berry will produce when blended."))
-        }
-    }
-    else
-    {
-        setvar(VAR_RESULT, NO)
-    }
+    message(format("Shiny {POKEBLOCK} can be crafted with Starf Berries."))
+    waitmessage
+    rogue_custompokemart_recipes(PokeblockShinyRecipes)
 }
 
-script Rogue_Area_Market_TalkBerryBlender
+script Rogue_Area_Market_TalkPokeblockCrafting
 {
     lock
-    msgbox(format("They're intensely focusing on using the Berry Blending Machine."))
+    msgbox(format("They're carefully sorting Berries for {POKEBLOCK} crafting."))
     release
 }
 

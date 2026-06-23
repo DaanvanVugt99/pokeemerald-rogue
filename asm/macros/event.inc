@@ -1201,6 +1201,19 @@
 	.2byte \currency
 	.endm
 
+	.macro rogue_custompokemart_single item:req currency:req price:req
+	.byte 0xf7
+	.2byte \item
+	.2byte \currency
+	.2byte \price
+	.endm
+
+	@ Opens a craft shop where each recipe row is product, currency, price.
+	.macro rogue_custompokemart_recipes products:req
+	.byte 0xf8
+	.4byte \products
+	.endm
+
 	@ Starts up the slot machine minigame. id is a SLOT_MACHINE_* value that influences probabilities of certain reel outcomes.
 	.macro playslotmachine id:req
 	.byte 0x89

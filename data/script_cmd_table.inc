@@ -247,6 +247,8 @@ gScriptCmdTable::
 	.4byte ScrCmd_multichoicedynamic                @ 0xf4
 	.4byte ScrCmd_hubupgradeunlocked                @ 0xf5
 	.4byte ScrCmd_rogue_custompokemart              @ 0xf6
+	.4byte ScrCmd_rogue_custompokemart_single       @ 0xf7
+	.4byte ScrCmd_rogue_custompokemart_recipes      @ 0xf8
 
 gScriptCmdTableEnd::
 	.4byte ScrCmd_nop

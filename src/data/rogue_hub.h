@@ -46,7 +46,6 @@ extern const u8 gHubUpgradeDesc_DayCare_BreederSeenDex[];
 extern const u8 gHubUpgradeDesc_DayCare_Phone[];
 extern const u8 gHubUpgradeDesc_DayCare_Phone1[];
 extern const u8 gHubUpgradeDesc_DayCare_Bakery[];
-extern const u8 gHubUpgradeDesc_DayCare_PokeblockBlenders[];
 extern const u8 gHubUpgradeDesc_DayCare_TreatShop[];
 extern const u8 gHubUpgradeDesc_DayCare_TreatShopStock[];
 extern const u8 gHubUpgradeDesc_DayCare_TreatShop_Vanilla[];
@@ -656,15 +655,16 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
     },
 
 
-    [HUB_UPGRADE_MARKET_POKEBLOCK_BLENDERS] = 
+    [HUB_UPGRADE_MARKET_UNUSED_0] =
     {
-        .upgradeName = _("{POKEBLOCK} Blender+"),
+        .upgradeName = _("Unused"),
         .targetArea = HUB_AREA_MARKET,
-        .buildCost = 3,
-        .descText = gHubUpgradeDesc_DayCare_PokeblockBlenders,
-        .requiredUpgrades = { HUB_UPGRADE_NONE }
+        .buildCost = 0,
+        .descText = gHubAreaDesc_Todo,
+        .requiredUpgrades = { HUB_UPGRADE_MARKET_UNUSED_0, HUB_UPGRADE_NONE },
+        .isHidden = TRUE
     },
-    [HUB_UPGRADE_MARKET_BAKERY] = 
+    [HUB_UPGRADE_MARKET_BAKERY] =
     {
         .upgradeName = _("Bakery"),
         .targetArea = HUB_AREA_MARKET,
@@ -698,7 +698,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .targetArea = HUB_AREA_MARKET,
         .buildCost = 5,
         .descText = gHubUpgradeDesc_DayCare_TreatShop_Vanilla,
-        .requiredUpgrades = { HUB_UPGRADE_MARKET_POKEBLOCK_BLENDERS, HUB_UPGRADE_NONE }
+        .requiredUpgrades = { HUB_UPGRADE_NONE }
     },
     [HUB_UPGRADE_MARKET_TREAT_SHOP_STOCK] = 
     {

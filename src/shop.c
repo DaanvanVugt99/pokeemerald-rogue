@@ -120,6 +120,7 @@ struct MartInfo
     u8 windowId;
     u8 martType;
     bool8 anythingBought;
+    bool8 usesRecipeCurrency;
 };
 
 struct ShopData
@@ -140,6 +141,8 @@ static EWRAM_DATA struct MartInfo sMartInfo = {0};
 static EWRAM_DATA struct ShopData *sShopData = NULL;
 static EWRAM_DATA struct ListMenuItem *sListMenuItems = NULL;
 static EWRAM_DATA u8 (*sItemNames)[ITEM_NAME_LENGTH + 4] = {0};
+static EWRAM_DATA u16 sSingleItemCustomShopBuffer[4] = {ITEM_NONE};
+static EWRAM_DATA u16 sSelectedCustomShopItem = ITEM_NONE;
 static EWRAM_DATA u8 sPurchaseHistoryId = 0;
 EWRAM_DATA struct ItemSlot gMartPurchaseHistory[SMARTSHOPPER_NUM_ITEMS] = {0};
 static EWRAM_DATA ShopCallback sFreeCallback = NULL;
@@ -179,6 +182,7 @@ static void Task_BuyHowManyDialogueInit(u8 taskId);
 static void BuyMenuConfirmPurchase(u8 taskId);
 static void BuyMenuPrintItemQuantityAndPrice(u8 taskId);
 static void BuyMenuPrintCraftItemQuantityAndPrice(u8 taskId);
+static void BuyMenuPrintCustomCurrencyAmount(bool8 withBorder);
 static bool8 BuyMenuIsBuildDirectionValid(u8 area, u8 dir);
 static void BuyMenuPrintBuildDirection(u8 taskId);
 static void Task_BuyHowManyDialogueHandleInput(u8 taskId);
@@ -205,6 +209,8 @@ static bool8 IsZeroPriceMarkedAsFree();
 
 static u32 GetShopCurrencyAmount();
 static void RemoveShopCurrencyAmount(u32 amount);
+static bool8 IsCustomCurrencyShop(void);
+static u16 GetCustomShopRecipeCurrency(u16 item);
 
 static const struct YesNoFuncTable sShopPurchaseYesNoFuncs =
 {
@@ -529,6 +535,7 @@ static void ResetMartInfo()
 {
     sMartInfo.dynamicMartCategory = 0;
     sMartInfo.currencyOverride = 0;
+    sMartInfo.usesRecipeCurrency = FALSE;
     sMartInfo.minPrice = 0;
     sMartInfo.anythingBought = FALSE;
     sMartInfo.listItemCallback = NULL;
@@ -690,7 +697,7 @@ static void Task_ReturnToShopMenu(u8 taskId)
 
 static void ShowShopMenuAfterExitingBuyOrSellMenu(u8 taskId)
 {
-    CreateShopMenu(sMartInfo.martType, sMartInfo.currencyOverride != 0);
+    CreateShopMenu(sMartInfo.martType, IsCustomCurrencyShop());
     DestroyTask(taskId);
 }
 
@@ -852,6 +859,13 @@ static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, s
     if (onInit != TRUE)
         PlaySE(SE_SELECT);
 
+    if (IsCustomCurrencyShop() && item != LIST_CANCEL)
+    {
+        sSelectedCustomShopItem = item;
+        BuyMenuPrintCustomCurrencyAmount(TRUE);
+        ScheduleBgCopyTilemapToVram(0);
+    }
+
     if (!ShowTMView())
     {
         if (item != LIST_CANCEL)
@@ -974,7 +988,7 @@ static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y)
                 STR_CONV_MODE_LEFT_ALIGN,
                 5);
 
-            if(sMartInfo.currencyOverride != 0)
+            if(IsCustomCurrencyShop())
                 StringExpandPlaceholders(gStringVar4, gText_CraftVar1);
             else if (sMartInfo.martType == MART_TYPE_HUB_AREAS || sMartInfo.martType == MART_TYPE_HUB_UPGRADES)
                 StringExpandPlaceholders(gStringVar4, gText_BuildVar1);
@@ -1142,16 +1156,25 @@ static void BuyMenuDisplayMessage(u8 taskId, const u8 *text, TaskFunc callback)
     ScheduleBgCopyTilemapToVram(0);
 }
 
+static void BuyMenuPrintCustomCurrencyAmount(bool8 withBorder)
+{
+    CopyItemName(GetCustomShopRecipeCurrency(sSelectedCustomShopItem), gStringVar2);
+
+    if(withBorder)
+        PrintMoneyAmountInMoneyBoxWithBorderCustom(0, 1, 13, GetShopCurrencyAmount(), gText_CraftVar1Var2);
+    else
+        PrintMoneyAmountInMoneyBoxCustom(0, GetShopCurrencyAmount(), 0, gText_CraftVar1Var2);
+}
+
 static void BuyMenuDrawGraphics(void)
 {
     BuyMenuDrawMapGraphics();
     BuyMenuCopyMenuBgToBg1TilemapBuffer();
     AddMoneyLabelObject(19, 11);
 
-    if(sMartInfo.currencyOverride != 0)
+    if(IsCustomCurrencyShop())
     {
-        CopyItemName(sMartInfo.currencyOverride, gStringVar2);
-        PrintMoneyAmountInMoneyBoxWithBorderCustom(0, 1, 13, GetShopCurrencyAmount(), gText_CraftVar1Var2);
+        BuyMenuPrintCustomCurrencyAmount(TRUE);
     }
     else if(sMartInfo.martType == MART_TYPE_HUB_AREAS || sMartInfo.martType == MART_TYPE_HUB_UPGRADES)
         PrintMoneyAmountInMoneyBoxWithBorderCustom(0, 1, 13, GetShopCurrencyAmount(), gText_BuildVar1);
@@ -1390,6 +1413,7 @@ static void Task_BuyMenu(u8 taskId)
             BuyMenuRemoveScrollIndicatorArrows();
             BuyMenuPrintCursor(tListTaskId, COLORID_GRAY_CURSOR);
 
+            sSelectedCustomShopItem = itemId;
             sShopData->totalCost = GetShopItemPrice(itemId);
 
             if(sShopData->totalCost == 0 && !IsZeroPriceMarkedAsFree())
@@ -1398,9 +1422,9 @@ static void Task_BuyMenu(u8 taskId)
             }
             else if (GetShopCurrencyAmount() < sShopData->totalCost)
             {
-                if(sMartInfo.currencyOverride != 0)
+                if(IsCustomCurrencyShop())
                 {
-                    CopyItemNameHandlePlural(sMartInfo.currencyOverride, gStringVar1, sShopData->totalCost);
+                    CopyItemNameHandlePlural(GetCustomShopRecipeCurrency(itemId), gStringVar1, sShopData->totalCost);
                     BuyMenuDisplayMessage(taskId, gText_YouDontHaveEnoughVar1, BuyMenuReturnToItemList);
                 }
                 else
@@ -1487,7 +1511,7 @@ static void Task_BuyHowManyDialogueInit(u8 taskId)
     tItemCount = 1;
     DrawStdFrameWithCustomTileAndPalette(WIN_QUANTITY_PRICE, FALSE, 1, 13);
 
-    if(sMartInfo.currencyOverride != 0)
+    if(IsCustomCurrencyShop())
         BuyMenuPrintCraftItemQuantityAndPrice(taskId);
     else if(sMartInfo.martType == MART_TYPE_HUB_AREAS)
         BuyMenuPrintBuildDirection(taskId);
@@ -1539,7 +1563,7 @@ static void Task_BuyHowManyDialogueHandleInput(u8 taskId)
     if (AdjustQuantityAccordingToDPadInput(&tItemCount, sShopData->maxQuantity) == TRUE)
     {
         sShopData->totalCost = GetShopItemPrice(tItemId) * tItemCount;
-        if(sMartInfo.currencyOverride != 0)
+        if(IsCustomCurrencyShop())
             BuyMenuPrintCraftItemQuantityAndPrice(taskId);
         else
             BuyMenuPrintItemQuantityAndPrice(taskId);
@@ -1556,11 +1580,11 @@ static void Task_BuyHowManyDialogueHandleInput(u8 taskId)
             PutWindowTilemap(WIN_ITEM_LIST);
             CopyShopItemName(tItemId, gStringVar1);
             ConvertIntToDecimalStringN(gStringVar2, tItemCount, STR_CONV_MODE_LEFT_ALIGN, SHOP_ITEM_CAPACITY_DIGITS);
-            if(sMartInfo.currencyOverride != 0)
-                CopyItemNameHandlePlural(sMartInfo.currencyOverride, gStringVar3, sShopData->totalCost);
+            if(IsCustomCurrencyShop())
+                CopyItemNameHandlePlural(GetCustomShopRecipeCurrency(tItemId), gStringVar3, sShopData->totalCost);
             else
                 ConvertIntToDecimalStringN(gStringVar3, sShopData->totalCost, STR_CONV_MODE_LEFT_ALIGN, 6);
-            BuyMenuDisplayMessage(taskId, sMartInfo.currencyOverride != 0 ? gText_CraftVar1AndYouWantedVar2 : gText_Var1AndYouWantedVar2, BuyMenuConfirmPurchase);
+            BuyMenuDisplayMessage(taskId, IsCustomCurrencyShop() ? gText_CraftVar1AndYouWantedVar2 : gText_Var1AndYouWantedVar2, BuyMenuConfirmPurchase);
         }
         else if (JOY_NEW(B_BUTTON))
         {
@@ -1723,14 +1747,16 @@ static void BuyMenuTryMakePurchase(u8 taskId)
 
 static void BuyMenuSubtractMoney(u8 taskId)
 {
+    s16 *data = gTasks[taskId].data;
+
     RemoveShopCurrencyAmount(sShopData->totalCost);
     PlaySE(SE_SHOP);
 
     sMartInfo.anythingBought = TRUE;
 
-    if(sMartInfo.currencyOverride != 0)
+    if(IsCustomCurrencyShop())
     {
-        CopyItemName(sMartInfo.currencyOverride, gStringVar2);
+        CopyItemName(GetCustomShopRecipeCurrency(tItemId), gStringVar2);
         PrintMoneyAmountInMoneyBoxCustom(0, GetShopCurrencyAmount(), 0, gText_CraftVar1Var2);
     }
     else if(sMartInfo.martType == MART_TYPE_HUB_AREAS || sMartInfo.martType == MART_TYPE_HUB_UPGRADES)
@@ -1856,7 +1882,8 @@ static void BuyMenuPrintCraftItemQuantityAndPrice(u8 taskId)
     s16 *data = gTasks[taskId].data;
 
     FillWindowPixelBuffer(WIN_QUANTITY_PRICE, PIXEL_FILL(1));
-    PrintMoneyAmountCustom(WIN_QUANTITY_PRICE, 32, 1, sShopData->totalCost, TEXT_SKIP_DRAW, gText_CraftVar1);
+    CopyItemName(GetCustomShopRecipeCurrency(tItemId), gStringVar2);
+    PrintMoneyAmountCustom(WIN_QUANTITY_PRICE, 32, 1, sShopData->totalCost, TEXT_SKIP_DRAW, gText_CraftVar1Var2);
     ConvertIntToDecimalStringN(gStringVar1, tItemCount, STR_CONV_MODE_LEADING_ZEROS, SHOP_ITEM_CAPACITY_DIGITS);
     StringExpandPlaceholders(gStringVar4, gText_xVar1);
     BuyMenuPrint(WIN_QUANTITY_PRICE, gStringVar4, 0, 1, 0, COLORID_NORMAL);
@@ -2211,11 +2238,51 @@ static u16 StaticCustomShopItemListCallback(u16 index)
     return items[index * 2];
 }
 
+static u16 RecipeCustomShopItemListCallback(u16 index)
+{
+    const u16* items = (const u16*)sMartInfo.listItemData;
+    return items[index * 3];
+}
+
+static bool8 IsCustomCurrencyShop(void)
+{
+    return sMartInfo.currencyOverride != 0 || sMartInfo.usesRecipeCurrency;
+}
+
+static u16 GetCustomShopRecipeCurrency(u16 item)
+{
+    if(sMartInfo.usesRecipeCurrency)
+    {
+        u16 i;
+        const u16* items = (const u16*)sMartInfo.listItemData;
+
+        for(i = 0; items[i] != ITEM_NONE; i += 3)
+        {
+            if(items[i] == item)
+                return items[i + 1];
+        }
+    }
+
+    return sMartInfo.currencyOverride;
+}
+
 static void SetCustomShopItemsFromStaticList(const u16 *items, u16 terminatorItem, u16 currency)
 {
     sMartInfo.dynamicMartCategory = 0;
     sMartInfo.currencyOverride = currency;
+    sMartInfo.usesRecipeCurrency = FALSE;
     sMartInfo.listItemCallback = StaticCustomShopItemListCallback;
+    sMartInfo.listItemData = (void*)items;
+    sMartInfo.prevShopItemBits = NULL;
+    sMartInfo.listItemTerminator = terminatorItem;
+}
+
+static void SetCustomShopItemsFromRecipeList(const u16 *items, u16 terminatorItem)
+{
+    sMartInfo.dynamicMartCategory = 0;
+    sMartInfo.currencyOverride = 0;
+    sMartInfo.usesRecipeCurrency = TRUE;
+    sMartInfo.listItemCallback = RecipeCustomShopItemListCallback;
     sMartInfo.listItemData = (void*)items;
     sMartInfo.prevShopItemBits = NULL;
     sMartInfo.listItemTerminator = terminatorItem;
@@ -2228,6 +2295,29 @@ void CreateCustomPokemartMenu(const u16 * buffer, u16 currency)
 
     CreateShopMenu(MART_TYPE_PURCHASE_ONLY, TRUE);
     SetCustomShopItemsFromStaticList(buffer, ITEM_NONE, currency);
+    sSelectedCustomShopItem = buffer[0];
+    ClearItemPurchases();
+    SetShopMenuCallback(ScriptContext_Enable);
+}
+
+void CreateSingleItemCustomPokemartMenu(u16 item, u16 currency, u16 price)
+{
+    sSingleItemCustomShopBuffer[0] = item;
+    sSingleItemCustomShopBuffer[1] = price;
+    sSingleItemCustomShopBuffer[2] = ITEM_NONE;
+    sSingleItemCustomShopBuffer[3] = 0;
+
+    CreateCustomPokemartMenu(sSingleItemCustomShopBuffer, currency);
+}
+
+void CreateCustomRecipePokemartMenu(const u16 * buffer)
+{
+    CheckPokemartState();
+    ResetMartInfo();
+
+    CreateShopMenu(MART_TYPE_PURCHASE_ONLY, TRUE);
+    SetCustomShopItemsFromRecipeList(buffer, ITEM_NONE);
+    sSelectedCustomShopItem = buffer[0];
     ClearItemPurchases();
     SetShopMenuCallback(ScriptContext_Enable);
 }
@@ -2298,21 +2388,23 @@ static const u8* GetShopItemDescription(u16 item)
 
 static u32 GetShopItemPrice(u16 item)
 {
-    if(sMartInfo.currencyOverride != 0)
+    if(IsCustomCurrencyShop())
     {
         u16 i;
         const u16* items = (const u16*)sMartInfo.listItemData;
+        u8 stride = sMartInfo.usesRecipeCurrency ? 3 : 2;
+        u8 priceOffset = sMartInfo.usesRecipeCurrency ? 2 : 1;
 
-        for(i = 0; items[i] != ITEM_NONE; i += 2)
+        for(i = 0; items[i] != ITEM_NONE; i += stride)
         {
             u16 checkItem = items[i];
-            u16 price = items[i + 1];
+            u16 price = items[i + priceOffset];
 
             if(checkItem == item)
                 return price;
         }
 
-        return items[1];
+        return items[priceOffset];
     }
     else if (sMartInfo.martType == MART_TYPE_NORMAL || sMartInfo.martType == MART_TYPE_PURCHASE_ONLY || sMartInfo.martType == MART_TYPE_SINGLE_PURCHASE)
     {
@@ -2360,7 +2452,7 @@ static bool8 IsZeroPriceMarkedAsFree()
 
 static bool8 BuyShopItem(u16 item, u16 count)
 {
-    if(sMartInfo.currencyOverride != 0)
+    if(IsCustomCurrencyShop())
     {
         return AddBagItem(item, count);
     }
@@ -2394,9 +2486,9 @@ static bool8 BuyShopItem(u16 item, u16 count)
 
 static u32 GetShopCurrencyAmount()
 {
-    if(sMartInfo.currencyOverride != 0)
+    if(IsCustomCurrencyShop())
     {
-        return GetItemCountInBag(sMartInfo.currencyOverride);
+        return GetItemCountInBag(GetCustomShopRecipeCurrency(sSelectedCustomShopItem));
     }
     else if (sMartInfo.martType == MART_TYPE_HUB_AREAS || sMartInfo.martType == MART_TYPE_HUB_UPGRADES)
     {
@@ -2408,9 +2500,9 @@ static u32 GetShopCurrencyAmount()
 
 static void RemoveShopCurrencyAmount(u32 amount)
 {
-    if(sMartInfo.currencyOverride != 0)
+    if(IsCustomCurrencyShop())
     {
-        RemoveBagItem(sMartInfo.currencyOverride, amount);
+        RemoveBagItem(GetCustomShopRecipeCurrency(sSelectedCustomShopItem), amount);
     }
     else if (sMartInfo.martType == MART_TYPE_HUB_AREAS || sMartInfo.martType == MART_TYPE_HUB_UPGRADES)
     {

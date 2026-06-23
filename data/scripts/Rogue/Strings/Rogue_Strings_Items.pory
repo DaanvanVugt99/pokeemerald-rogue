@@ -580,11 +580,6 @@ text gHubUpgradeDesc_DayCare_Bakery
     format("Bake {POKEBLOCK} into snacks used to improve IVs.")
 }
 
-text gHubUpgradeDesc_DayCare_PokeblockBlenders
-{
-    format("Create more {POKEBLOCK} at once.")
-}
-
 text gHubUpgradeDesc_DayCare_TreatShop_Vanilla
 {
     format("Shop for {POKEBLOCK}.")

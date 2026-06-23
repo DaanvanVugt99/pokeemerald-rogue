@@ -9,6 +9,8 @@ void CreateDecorationShop2Menu(const u16 *);
 void CreatePokemartMenuWithMinPrice(const u16 *, u16 minPrice);
 void CreateDynamicPokemartMenu(const u16 category);
 void CreateCustomPokemartMenu(const u16 * buffer, u16 currency);
+void CreateSingleItemCustomPokemartMenu(u16 item, u16 currency, u16 price);
+void CreateCustomRecipePokemartMenu(const u16 * buffer);
 void CB2_ExitSellMenu(void);
 
 #endif // GUARD_SHOP_H

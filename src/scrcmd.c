@@ -2100,6 +2100,26 @@ bool8 ScrCmd_rogue_custompokemart(struct ScriptContext *ctx)
     return TRUE;
 }
 
+bool8 ScrCmd_rogue_custompokemart_single(struct ScriptContext *ctx)
+{
+    u16 item = VarGet(ScriptReadHalfword(ctx));
+    u16 currency = VarGet(ScriptReadHalfword(ctx));
+    u16 price = VarGet(ScriptReadHalfword(ctx));
+
+    CreateSingleItemCustomPokemartMenu(item, currency, price);
+    ScriptContext_Stop();
+    return TRUE;
+}
+
+bool8 ScrCmd_rogue_custompokemart_recipes(struct ScriptContext *ctx)
+{
+    const void *ptr = (void *)ScriptReadWord(ctx);
+
+    CreateCustomRecipePokemartMenu(ptr);
+    ScriptContext_Stop();
+    return TRUE;
+}
+
 bool8 ScrCmd_playslotmachine(struct ScriptContext *ctx)
 {
     u8 machineId = VarGet(ScriptReadHalfword(ctx));

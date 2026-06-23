@@ -37,6 +37,8 @@ Format follows Keep a Changelog loosely:
 - Reworked Hub Safari acquisition so Safari-buffer Pokémon are purchased with
   suitable Pokéblocks from the sign or legendary cave instead of being caught
   through Safari battles.
+- Replaced Market Berry Blender minigames with direct Pokéblock crafting that
+  uses the Mart-style quantity UI and matching berries as item currency.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its
