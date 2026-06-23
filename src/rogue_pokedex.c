@@ -3152,11 +3152,13 @@ static void Overview_HandleInput(u8 taskId)
                                 }
                             }
 
-                            if(i >= ROGUE_SAFARI_TOTAL_MONS)
+                            if(i >= total)
                             {
                                 AGB_ASSERT(FALSE);
                                 gSpecialVar_Result = ROGUE_SAFARI_TOTAL_MONS;
                             }
+
+                            break;
                         }
 
                         default:

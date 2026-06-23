@@ -4,7 +4,13 @@ const VAR_SHAKE_NUM_SHAKES = VAR_0x8006
 const VAR_SHAKE_SHAKE_DELAY = VAR_0x8007
 
 const VAR_SAFARI_INDEX = VAR_0x8008
-const VAR_SAFARI_PRICE = VAR_0x8009
+const VAR_SAFARI_COST_COUNT = VAR_0x8004
+const VAR_SAFARI_COST_ITEM_0 = VAR_0x8005
+const VAR_SAFARI_COST_COUNT_0 = VAR_0x8006
+const VAR_SAFARI_COST_ITEM_1 = VAR_0x8007
+const VAR_SAFARI_COST_COUNT_1 = VAR_0x8009
+const VAR_SAFARI_COST_ITEM_2 = VAR_0x800A
+const VAR_SAFARI_COST_COUNT_2 = VAR_0x800B
 
 const SAFARI_PURCHASE_TO_PARTY = 0
 const SAFARI_PURCHASE_TO_PC = 1
@@ -68,49 +74,56 @@ script Rogue_Interior_SafariCave_InteractLegendSummon
 script Rogue_Interior_SafariCave_PurchaseSelectedMon
 {
     special(Rogue_BufferSafariMonInfo)
-    msgbox(format("What would you like to offer to {STR_VAR_1}?"), MSGBOX_DEFAULT)
+    special(Rogue_BufferSafariMonPurchaseCost)
+    setvar(VAR_RESULT, NO)
 
-    special(Bag_ChoosePokeblock)
-    waitstate
-
-    if(var(VAR_ITEM_ID) != ITEM_NONE)
+    switch(var(VAR_SAFARI_COST_COUNT))
     {
-        special(Rogue_CheckSafariMonLikesPokeblock)
-        if(var(VAR_RESULT) == YES)
+        case 1:
+            bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
+            msgbox(format("This Pokémon wants {STR_VAR_1}.\pMake this offering?"), MSGBOX_YESNO)
+
+        case 2:
+            bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
+            bufferitemnameplural(STR_VAR_2, VAR_SAFARI_COST_ITEM_1, VAR_SAFARI_COST_COUNT_1)
+            msgbox(format("This Pokémon wants {STR_VAR_1}\nand {STR_VAR_2}.\pMake this offering?"), MSGBOX_YESNO)
+
+        case 3:
+            bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
+            bufferitemnameplural(STR_VAR_2, VAR_SAFARI_COST_ITEM_1, VAR_SAFARI_COST_COUNT_1)
+            bufferitemnameplural(STR_VAR_3, VAR_SAFARI_COST_ITEM_2, VAR_SAFARI_COST_COUNT_2)
+            msgbox(format("This Pokémon wants {STR_VAR_1},\n{STR_VAR_2}, and {STR_VAR_3}.\pMake this offering?"), MSGBOX_YESNO)
+    }
+
+    if(var(VAR_RESULT) == YES)
+    {
+        special(Rogue_BufferSafariMonInfo)
+        special(Rogue_TryPurchaseSafariMon)
+
+        switch(var(VAR_RESULT))
         {
-            special(Rogue_BufferSafariMonPurchasePrice)
-            bufferitemnameplural(STR_VAR_2, VAR_ITEM_ID, VAR_SAFARI_PRICE)
-            msgbox(format("{STR_VAR_1} will join you for {STR_VAR_2}.\pMake this offering?"), MSGBOX_YESNO)
+            case SAFARI_PURCHASE_TO_PARTY:
+                msgbox(format("{STR_VAR_1} joined your party!"))
 
-            if(var(VAR_RESULT) == YES)
-            {
-                special(Rogue_TryPurchaseSafariMon)
+            case SAFARI_PURCHASE_TO_PC:
+                bufferboxname(STR_VAR_3, VAR_PC_BOX_TO_SEND_MON)
+                msgbox(format("{STR_VAR_1} was sent to {STR_VAR_3} in Pokémon Storage."))
 
-                switch(var(VAR_RESULT))
-                {
-                    case SAFARI_PURCHASE_TO_PARTY:
-                        msgbox(format("{STR_VAR_1} joined your party!"))
+            case SAFARI_PURCHASE_CANT_GIVE:
+                msgbox(format("There isn't enough room in Pokémon Storage."))
 
-                    case SAFARI_PURCHASE_TO_PC:
-                        bufferboxname(STR_VAR_3, VAR_PC_BOX_TO_SEND_MON)
-                        msgbox(format("{STR_VAR_1} was sent to {STR_VAR_3} in Pokémon Storage."))
+            case SAFARI_PURCHASE_NOT_ENOUGH:
+                msgbox(format("You don't have enough {POKEBLOCK}."))
 
-                    case SAFARI_PURCHASE_CANT_GIVE:
-                        msgbox(format("There isn't enough room in Pokémon Storage."))
-
-                    case SAFARI_PURCHASE_NOT_ENOUGH:
-                        msgbox(format("You don't have enough {POKEBLOCK}.\p{STR_VAR_2} are needed."))
-
-                    case SAFARI_PURCHASE_INVALID:
-                        msgbox(format("{STR_VAR_1} won't accept that offer."))
-                }
-            }
+            case SAFARI_PURCHASE_INVALID:
+                msgbox(format("{STR_VAR_1} won't accept that offer."))
         }
-        else
-        {
-            special(Rogue_BufferSafariMonInfo)
-            msgbox(format("{STR_VAR_1} won't accept that offer."))
-        }
+    }
+
+    if(var(VAR_SAFARI_COST_COUNT) == 0)
+    {
+        special(Rogue_BufferSafariMonInfo)
+        msgbox(format("{STR_VAR_1} won't accept any available {POKEBLOCK}."))
     }
 }
 

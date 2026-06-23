@@ -7921,6 +7921,63 @@ void EnableRivalEncounterIfRequired()
     }
 }
 
+static const u16 sRunRewardTypedPokeblocks[] =
+{
+    ITEM_POKEBLOCK_NORMAL,
+    ITEM_POKEBLOCK_FIGHTING,
+    ITEM_POKEBLOCK_FLYING,
+    ITEM_POKEBLOCK_POISON,
+    ITEM_POKEBLOCK_GROUND,
+    ITEM_POKEBLOCK_ROCK,
+    ITEM_POKEBLOCK_BUG,
+    ITEM_POKEBLOCK_GHOST,
+    ITEM_POKEBLOCK_STEEL,
+    ITEM_POKEBLOCK_FIRE,
+    ITEM_POKEBLOCK_WATER,
+    ITEM_POKEBLOCK_GRASS,
+    ITEM_POKEBLOCK_ELECTRIC,
+    ITEM_POKEBLOCK_PSYCHIC,
+    ITEM_POKEBLOCK_ICE,
+    ITEM_POKEBLOCK_DRAGON,
+    ITEM_POKEBLOCK_DARK,
+#ifdef ROGUE_EXPANSION
+    ITEM_POKEBLOCK_FAIRY,
+#endif
+};
+
+static const u16 sRunRewardStatPokeblocks[] =
+{
+    ITEM_POKEBLOCK_HP,
+    ITEM_POKEBLOCK_ATK,
+    ITEM_POKEBLOCK_DEF,
+    ITEM_POKEBLOCK_SPEED,
+    ITEM_POKEBLOCK_SPATK,
+    ITEM_POKEBLOCK_SPDEF,
+};
+
+static u16 ChooseRunRewardPokeblock(void)
+{
+    u16 roll = Random() % 100;
+
+    if(roll < 3)
+        return ITEM_POKEBLOCK_SHINY;
+
+    if(roll < 15)
+        return sRunRewardStatPokeblocks[Random() % ARRAY_COUNT(sRunRewardStatPokeblocks)];
+
+    return sRunRewardTypedPokeblocks[Random() % ARRAY_COUNT(sRunRewardTypedPokeblocks)];
+}
+
+static void GiveRunRewardPokeblock(void)
+{
+    u16 itemId = ChooseRunRewardPokeblock();
+
+    if(AddBagItem(itemId, 1))
+        Rogue_PushPopup_AddItem(itemId, 1);
+    else
+        Rogue_PushPopup_CannotTakeItem(itemId, 1);
+}
+
 void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 {
     if(Rogue_IsFinalQuestFinalBoss())
@@ -7989,6 +8046,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
                 gRogueRun.currentLevelOffset = nextLevel - prevLevel;
                 gRogueRun.wildEncounters.roamerActiveThisPath = TRUE;
+                GiveRunRewardPokeblock();
 
                 // Increase run tutor move access for the Pokémon that earned this badge.
                 {
@@ -10162,6 +10220,7 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
 #endif
         }
 
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, ITEM_POKEBLOCK_SHINY);
 
 #ifdef ROGUE_EXPANSION
         RogueMiscQuery_EditRange(QUERY_FUNC_INCLUDE, ITEM_LONELY_MINT, ITEM_SERIOUS_MINT);

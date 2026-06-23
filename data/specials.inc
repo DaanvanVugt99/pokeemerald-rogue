@@ -317,7 +317,7 @@ gSpecials::
 	def_special Rogue_CanOverLevel
 	def_special Rogue_AnyLegendsInSafari
 	def_special Rogue_CheckSafariMonLikesPokeblock
-	def_special Rogue_BufferSafariMonPurchasePrice
+	def_special Rogue_BufferSafariMonPurchaseCost
 	def_special Rogue_TryPurchaseSafariMon
 	def_special Rogue_AppendMultichoicePokeblockItems
 	def_special Rogue_AppendMultichoiceBerriesForPokeblock

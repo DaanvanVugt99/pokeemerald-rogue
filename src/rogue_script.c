@@ -92,6 +92,15 @@ static const u8 sStatNamesTable[NUM_STATS][13] = // a;t versopm pf gStatNamesTab
 static u8 const sText_The[] = _(" the ");
 static u8 const sText_TheShiny[] = _(" the shiny ");
 
+#define SAFARI_PURCHASE_MAX_COST_ITEMS 3
+
+struct SafariMonPurchaseCost
+{
+    u16 itemIds[SAFARI_PURCHASE_MAX_COST_ITEMS];
+    u16 counts[SAFARI_PURCHASE_MAX_COST_ITEMS];
+    u8 count;
+};
+
 enum
 {
     SAFARI_PURCHASE_GIVEN_TO_PARTY = MON_GIVEN_TO_PARTY,
@@ -1964,32 +1973,102 @@ void Rogue_AnyLegendsInSafari()
     }
 }
 
-static bool8 IsTypedPokeblockForSpecies(u16 pokeblockItem, u16 species)
+static const u16 sTypeToPokeblockItem[NUMBER_OF_MON_TYPES] =
 {
-    u8 type = ItemId_GetSecondaryId(pokeblockItem);
+    [TYPE_NORMAL] = ITEM_POKEBLOCK_NORMAL,
+    [TYPE_FIGHTING] = ITEM_POKEBLOCK_FIGHTING,
+    [TYPE_FLYING] = ITEM_POKEBLOCK_FLYING,
+    [TYPE_POISON] = ITEM_POKEBLOCK_POISON,
+    [TYPE_GROUND] = ITEM_POKEBLOCK_GROUND,
+    [TYPE_ROCK] = ITEM_POKEBLOCK_ROCK,
+    [TYPE_BUG] = ITEM_POKEBLOCK_BUG,
+    [TYPE_GHOST] = ITEM_POKEBLOCK_GHOST,
+    [TYPE_STEEL] = ITEM_POKEBLOCK_STEEL,
+    [TYPE_FIRE] = ITEM_POKEBLOCK_FIRE,
+    [TYPE_WATER] = ITEM_POKEBLOCK_WATER,
+    [TYPE_GRASS] = ITEM_POKEBLOCK_GRASS,
+    [TYPE_ELECTRIC] = ITEM_POKEBLOCK_ELECTRIC,
+    [TYPE_PSYCHIC] = ITEM_POKEBLOCK_PSYCHIC,
+    [TYPE_ICE] = ITEM_POKEBLOCK_ICE,
+    [TYPE_DRAGON] = ITEM_POKEBLOCK_DRAGON,
+    [TYPE_DARK] = ITEM_POKEBLOCK_DARK,
+    [TYPE_FAIRY] = ITEM_POKEBLOCK_FAIRY,
+};
 
-    if(IS_STANDARD_TYPE(type))
+static u16 GetPokeblockForType(u8 type)
+{
+    if(IS_STANDARD_TYPE(type) && type < ARRAY_COUNT(sTypeToPokeblockItem))
+        return sTypeToPokeblockItem[type];
+
+    return ITEM_NONE;
+}
+
+static bool8 TryGetSafariMonCustomMonId(struct RogueSafariMon const* safariMon, u32* customMonId)
+{
+    u8 idx;
+
+    if(safariMon->customMonLookup == 0 || safariMon->customMonLookup > ROGUE_SAFARI_TOTAL_CUSTOM_MONS)
+        return FALSE;
+
+    idx = safariMon->customMonLookup - 1;
+    *customMonId = gRogueSaveBlock->safariMonCustomIds[idx];
+
+    if(*customMonId == CUSTOM_MON_NONE)
+        return FALSE;
+
+    if(*customMonId & OTID_FLAG_DYNAMIC_CUSTOM_MON)
+        return (*customMonId & OTID_FLAG_CUSTOM_MON) != 0;
+
+    return *customMonId < CUSTOM_MON_COUNT;
+}
+
+static void AddSafariPurchaseCostItem(struct SafariMonPurchaseCost* cost, u16 itemId, u16 count)
+{
+    u8 i;
+
+    if(itemId == ITEM_NONE || count == 0)
+        return;
+
+    for(i = 0; i < cost->count; ++i)
     {
-        if(!(RoguePokedex_GetSpeciesType(species, 0) == type || RoguePokedex_GetSpeciesType(species, 1) == type))
+        if(cost->itemIds[i] == itemId)
         {
-            return FALSE;
+            cost->counts[i] += count;
+            return;
         }
-
-        return TRUE;
     }
 
-    return FALSE;
+    AGB_ASSERT(cost->count < SAFARI_PURCHASE_MAX_COST_ITEMS);
+
+    if(cost->count < SAFARI_PURCHASE_MAX_COST_ITEMS)
+    {
+        cost->itemIds[cost->count] = itemId;
+        cost->counts[cost->count] = count;
+        ++cost->count;
+    }
 }
 
-static bool8 WillSafariMonLikePokeblockInternal(u16 pokeblockItem, struct RogueSafariMon const* safariMon)
+static u8 GetSafariMonPurchaseType(struct RogueSafariMon const* safariMon, u8 typeIndex)
 {
-    if(safariMon->shinyFlag)
-        return pokeblockItem == ITEM_POKEBLOCK_SHINY;
+    u8 type = RoguePokedex_GetSpeciesType(safariMon->species, typeIndex);
 
-    return IsTypedPokeblockForSpecies(pokeblockItem, safariMon->species);
+    if(safariMon->customMonLookup != 0)
+    {
+        u32 customMonId;
+
+        if(TryGetSafariMonCustomMonId(safariMon, &customMonId))
+        {
+            u8 customType = RogueGift_GetCustomMonType(customMonId, typeIndex);
+
+            if(IS_STANDARD_TYPE(customType))
+                type = customType;
+        }
+    }
+
+    return type;
 }
 
-static u16 CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMon)
+static u16 CalculateSafariMonBasePurchaseCost(struct RogueSafariMon const* safariMon)
 {
     u16 species = safariMon->species;
     u16 bst = RoguePokedex_GetSpeciesBST(species);
@@ -1997,16 +2076,7 @@ static u16 CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMon
     u16 cost;
     u32 hash;
 
-    if(safariMon->shinyFlag)
-    {
-        cost = isLegendary ? 3 : 1;
-
-        if(bst >= 500)
-            ++cost;
-        if(bst >= 580)
-            ++cost;
-    }
-    else if(isLegendary)
+    if(isLegendary)
     {
         cost = 10;
 
@@ -2054,6 +2124,51 @@ static u16 CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMon
     return cost;
 }
 
+static void CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMon, struct SafariMonPurchaseCost* cost)
+{
+    u16 baseCost = CalculateSafariMonBasePurchaseCost(safariMon);
+    u8 type1 = GetSafariMonPurchaseType(safariMon, 0);
+    u8 type2 = GetSafariMonPurchaseType(safariMon, 1);
+    u16 pokeblock1 = GetPokeblockForType(type1);
+    u16 pokeblock2 = GetPokeblockForType(type2);
+
+    memset(cost, 0, sizeof(*cost));
+
+    if(pokeblock1 != ITEM_NONE && pokeblock2 != ITEM_NONE && pokeblock1 != pokeblock2 && baseCost > 1)
+    {
+        AddSafariPurchaseCostItem(cost, pokeblock1, (baseCost + 1) / 2);
+        AddSafariPurchaseCostItem(cost, pokeblock2, baseCost / 2);
+    }
+    else
+    {
+        AddSafariPurchaseCostItem(cost, pokeblock1 != ITEM_NONE ? pokeblock1 : pokeblock2, baseCost);
+    }
+
+    if(safariMon->shinyFlag)
+        AddSafariPurchaseCostItem(cost, ITEM_POKEBLOCK_SHINY, 1);
+}
+
+static bool8 CheckBagHasSafariPurchaseCost(struct SafariMonPurchaseCost const* cost)
+{
+    u8 i;
+
+    for(i = 0; i < cost->count; ++i)
+    {
+        if(!CheckBagHasItem(cost->itemIds[i], cost->counts[i]))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+static void RemoveSafariPurchaseCost(struct SafariMonPurchaseCost const* cost)
+{
+    u8 i;
+
+    for(i = 0; i < cost->count; ++i)
+        RemoveBagItem(cost->itemIds[i], cost->counts[i]);
+}
+
 static bool8 CreateMonFromSafariMon(struct RogueSafariMon* safariMon, struct Pokemon* mon)
 {
     u8 text[POKEMON_NAME_LENGTH + 1];
@@ -2078,34 +2193,64 @@ static bool8 CreateMonFromSafariMon(struct RogueSafariMon* safariMon, struct Pok
 
     if(safariMon->customMonLookup != 0)
     {
-        u8 idx = safariMon->customMonLookup - 1;
-        u32 customMonId = gRogueSaveBlock->safariMonCustomIds[idx];
+        u32 customMonId;
 
-        Rogue_ApplyCustomMonIdToMon(customMonId, mon);
+        if(TryGetSafariMonCustomMonId(safariMon, &customMonId))
+            Rogue_ApplyCustomMonIdToMon(customMonId, mon);
     }
 
     CalculateMonStats(mon);
     return TRUE;
 }
 
-void Rogue_CheckSafariMonLikesPokeblock()
+void Rogue_BufferSafariMonPurchaseCost()
 {
     u8 safariIndex = gSpecialVar_0x8008;
 
-    if(safariIndex < ROGUE_SAFARI_TOTAL_MONS)
-        gSpecialVar_Result = WillSafariMonLikePokeblockInternal(gSpecialVar_ItemId, &gRogueSaveBlock->safariMons[safariIndex]);
+    gSpecialVar_0x8004 = 0;
+    gSpecialVar_0x8005 = ITEM_NONE;
+    gSpecialVar_0x8006 = 0;
+    gSpecialVar_0x8007 = ITEM_NONE;
+    gSpecialVar_0x8009 = 0;
+    gSpecialVar_0x800A = ITEM_NONE;
+    gSpecialVar_0x800B = 0;
+
+    if(safariIndex < ROGUE_SAFARI_TOTAL_MONS && gRogueSaveBlock->safariMons[safariIndex].species != SPECIES_NONE)
+    {
+        struct SafariMonPurchaseCost cost;
+        CalculateSafariMonPurchaseCost(&gRogueSaveBlock->safariMons[safariIndex], &cost);
+
+        gSpecialVar_0x8004 = cost.count;
+
+        if(cost.count >= 1)
+        {
+            gSpecialVar_0x8005 = cost.itemIds[0];
+            gSpecialVar_0x8006 = cost.counts[0];
+        }
+
+        if(cost.count >= 2)
+        {
+            gSpecialVar_0x8007 = cost.itemIds[1];
+            gSpecialVar_0x8009 = cost.counts[1];
+        }
+
+        if(cost.count >= 3)
+        {
+            gSpecialVar_0x800A = cost.itemIds[2];
+            gSpecialVar_0x800B = cost.counts[2];
+        }
+
+        gSpecialVar_Result = cost.count;
+    }
     else
-        gSpecialVar_Result = FALSE;
+    {
+        gSpecialVar_Result = 0;
+    }
 }
 
-void Rogue_BufferSafariMonPurchasePrice()
+void Rogue_CheckSafariMonLikesPokeblock()
 {
-    u8 safariIndex = gSpecialVar_0x8008;
-
-    if(safariIndex < ROGUE_SAFARI_TOTAL_MONS)
-        gSpecialVar_0x8009 = CalculateSafariMonPurchaseCost(&gRogueSaveBlock->safariMons[safariIndex]);
-    else
-        gSpecialVar_0x8009 = 0;
+    Rogue_BufferSafariMonPurchaseCost();
 }
 
 void Rogue_TryPurchaseSafariMon()
@@ -2114,7 +2259,7 @@ void Rogue_TryPurchaseSafariMon()
     u8 giveResult;
     u8 safariIndex = gSpecialVar_0x8008;
     struct RogueSafariMon* safariMon;
-    u16 cost;
+    struct SafariMonPurchaseCost cost;
 
     if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS)
     {
@@ -2123,15 +2268,15 @@ void Rogue_TryPurchaseSafariMon()
     }
 
     safariMon = &gRogueSaveBlock->safariMons[safariIndex];
-    cost = CalculateSafariMonPurchaseCost(safariMon);
+    CalculateSafariMonPurchaseCost(safariMon, &cost);
 
-    if(safariMon->species == SPECIES_NONE || !WillSafariMonLikePokeblockInternal(gSpecialVar_ItemId, safariMon))
+    if(safariMon->species == SPECIES_NONE || cost.count == 0)
     {
         gSpecialVar_Result = SAFARI_PURCHASE_INVALID_OFFER;
         return;
     }
 
-    if(!CheckBagHasItem(gSpecialVar_ItemId, cost))
+    if(!CheckBagHasSafariPurchaseCost(&cost))
     {
         gSpecialVar_Result = SAFARI_PURCHASE_NOT_ENOUGH_POKEBLOCK;
         return;
@@ -2156,7 +2301,7 @@ void Rogue_TryPurchaseSafariMon()
             GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT_SHINY);
     }
 
-    RemoveBagItem(gSpecialVar_ItemId, cost);
+    RemoveSafariPurchaseCost(&cost);
     RogueSafari_ClearSafariMonAtIdx(safariIndex);
     gSpecialVar_Result = giveResult;
 }
@@ -2248,7 +2393,15 @@ void Rogue_EnqueueSafariBattle()
 void Rogue_BufferSafariMonInfo()
 {
     u8 safariIndex = gSpecialVar_0x8008;
-    u8 const* speciesName = RoguePokedex_GetSpeciesName(gRogueSaveBlock->safariMons[safariIndex].species);
+    u8 const* speciesName;
+
+    if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS || gRogueSaveBlock->safariMons[safariIndex].species == SPECIES_NONE)
+    {
+        StringCopy(gStringVar1, gText_QuestionMark);
+        return;
+    }
+
+    speciesName = RoguePokedex_GetSpeciesName(gRogueSaveBlock->safariMons[safariIndex].species);
 
     StringCopy_Nickname(gStringVar1, gRogueSaveBlock->safariMons[safariIndex].nickname);
 

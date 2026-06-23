@@ -34,11 +34,25 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
-- Reworked Hub Safari acquisition so Safari-buffer Pokémon are purchased with
-  suitable Pokéblocks from the sign or legendary cave instead of being caught
-  through Safari battles.
+- Reworked Hub Safari acquisition into a Pokéblock purchase economy: Safari
+  sign and legendary cave Pokémon now show typed Pokéblock costs, preserve
+  stored run traits, and grant low-level egg/baby species to the party or PC.
+- Changed Safari purchase pricing to use matching typed Pokéblocks, split
+  dual-type costs across both types, add Shiny Pokéblocks for shiny Pokémon,
+  and mildly scale prices by BST, evolution, legendary status, and individual
+  variation.
+- Added random Pokéblock drops to run boss rewards, with mostly typed
+  Pokéblocks, occasional stat Pokéblocks, and rare Shiny Pokéblocks.
 - Replaced Market Berry Blender minigames with direct Pokéblock crafting that
-  uses the Mart-style quantity UI and matching berries as item currency.
+  uses the Mart-style quantity UI, dynamic recipe lists, and matching berries
+  as item currency.
+- Removed the Berry Blender hub upgrade path and made Pokéblock crafting
+  available through the Market mixer without unlocking duplicate NPCs.
+- Added bundled Pokéblock quest rewards, usually in 5-count chunks, including
+  progression bundles, Safari-themed bundles, and 10 matching typed Pokéblocks
+  from each Type Master quest.
+- Removed Shiny Pokéblocks from Treat Shop stock so they remain tied to run
+  drops, quest rewards, and Starf Berry crafting.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its

@@ -29,6 +29,7 @@
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_NORMAL", "count": "5" },
                     { "quest": "Welcome Home" },
                     {
                         "flag": "FLAG_ROGUE_STUB",
@@ -59,7 +60,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_FIRE", "count": "5" }
                 ]
             },
             {
@@ -78,7 +80,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_WATER", "count": "5" }
                 ]
             },
             {
@@ -97,7 +100,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" }
                 ]
             },
             {
@@ -116,7 +120,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_ELECTRIC", "count": "5" }
                 ]
             },
             {
@@ -135,7 +140,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_FLYING", "count": "5" }
                 ]
             },
             {
@@ -154,7 +160,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_GROUND", "count": "5" }
                 ]
             },
             {
@@ -173,7 +180,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_PSYCHIC", "count": "5" }
                 ]
             },
             {
@@ -192,7 +200,8 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_DARK", "count": "5" }
                 ]
             },
 
@@ -212,7 +221,9 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_STEEL", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_DRAGON", "count": "5" }
                 ]
             },
             {
@@ -231,6 +242,10 @@
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_NORMAL", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_FIGHTING", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_GHOST", "count": "5" },
+                    { "#if": "defined(ROGUE_EXPANSION)", "item": "ITEM_POKEBLOCK_FAIRY", "count": "5" },
                     { 
                         "flag": "FLAG_ROGUE_UNLOCKED_VICTORY_LAP",
                         "custom_popup":
@@ -433,6 +448,7 @@
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_NORMAL", "count": "5" },
                     { "decor": "DECOR_ID_PC" },
                     { "quest": "Collector +" },
                     { "quest": "Collector S" },
@@ -460,6 +476,9 @@
                 [
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_FIRE", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_WATER", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" },
                     { "decor": "DECOR_ID_CUSHIONS" }
                 ]
             },
@@ -685,6 +704,8 @@
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_PSYCHIC", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_DRAGON", "count": "5" },
                     { 
                         "hub_upgrade": "HUB_UPGRADE_SAFARI_ZONE_LEGENDS_CAVE",
                         "custom_popup":
@@ -731,7 +752,9 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_BUG", "count": "5" }
                 ]
             },
             {
@@ -841,7 +864,9 @@
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
                     { "shop_item": "ITEM_SITRUS_BERRY" },
                     { "item": "ITEM_SITRUS_BERRY", "count": "1", "visibility": "INVISIBLE" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_POISON", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_DARK", "count": "5" }
                 ]
             },
             {

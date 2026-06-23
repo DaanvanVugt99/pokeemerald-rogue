@@ -211,6 +211,7 @@ static u32 GetShopCurrencyAmount();
 static void RemoveShopCurrencyAmount(u32 amount);
 static bool8 IsCustomCurrencyShop(void);
 static u16 GetCustomShopRecipeCurrency(u16 item);
+static void CopyCustomShopCurrencyCost(u16 item, u8 *dst, u32 quantity);
 
 static const struct YesNoFuncTable sShopPurchaseYesNoFuncs =
 {
@@ -1581,7 +1582,7 @@ static void Task_BuyHowManyDialogueHandleInput(u8 taskId)
             CopyShopItemName(tItemId, gStringVar1);
             ConvertIntToDecimalStringN(gStringVar2, tItemCount, STR_CONV_MODE_LEFT_ALIGN, SHOP_ITEM_CAPACITY_DIGITS);
             if(IsCustomCurrencyShop())
-                CopyItemNameHandlePlural(GetCustomShopRecipeCurrency(tItemId), gStringVar3, sShopData->totalCost);
+                CopyCustomShopCurrencyCost(tItemId, gStringVar3, sShopData->totalCost);
             else
                 ConvertIntToDecimalStringN(gStringVar3, sShopData->totalCost, STR_CONV_MODE_LEFT_ALIGN, 6);
             BuyMenuDisplayMessage(taskId, IsCustomCurrencyShop() ? gText_CraftVar1AndYouWantedVar2 : gText_Var1AndYouWantedVar2, BuyMenuConfirmPurchase);
@@ -2264,6 +2265,22 @@ static u16 GetCustomShopRecipeCurrency(u16 item)
     }
 
     return sMartInfo.currencyOverride;
+}
+
+static void CopyCustomShopCurrencyCost(u16 item, u8 *dst, u32 quantity)
+{
+    u16 currency = GetCustomShopRecipeCurrency(item);
+
+    if(currency >= FIRST_BERRY_INDEX && currency <= LAST_BERRY_INDEX)
+    {
+        dst = ConvertIntToDecimalStringN(dst, quantity, STR_CONV_MODE_LEFT_ALIGN, 6);
+        dst = StringAppend(dst, gText_Space);
+        CopyItemNameHandlePlural(currency, dst, quantity);
+    }
+    else
+    {
+        CopyItemNameHandlePlural(currency, dst, quantity);
+    }
 }
 
 static void SetCustomShopItemsFromStaticList(const u16 *items, u16 terminatorItem, u16 currency)

@@ -83,6 +83,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_NORMAL", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_SILK_SCARF" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_NORMALIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_NORMAL_TERA_SHARD" },
@@ -99,6 +100,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_FIGHTING", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_BLACK_BELT" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_FIGHTINIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_FIGHTING_TERA_SHARD" },
@@ -115,6 +117,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_FLYING", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_SHARP_BEAK" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_FLYINIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_FLYING_TERA_SHARD" },
@@ -131,6 +134,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_POISON", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_POISON_BARB" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_POISONIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_POISON_TERA_SHARD" },
@@ -147,6 +151,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_GROUND", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_SOFT_SAND" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_GROUNDIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_GROUND_TERA_SHARD" },
@@ -163,6 +168,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_ROCK", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_HARD_STONE" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_ROCKIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_ROCK_TERA_SHARD" },
@@ -179,6 +185,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_BUG", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_SILVER_POWDER" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_BUGINIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_BUG_TERA_SHARD" },
@@ -195,6 +202,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_GHOST", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_SPELL_TAG" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_GHOSTIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_GHOST_TERA_SHARD" },
@@ -211,6 +219,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_STEEL", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_METAL_COAT" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_STEELIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_STEEL_TERA_SHARD" },
@@ -227,6 +236,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_FIRE", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_CHARCOAL" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_FIRIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_FIRE_TERA_SHARD" },
@@ -243,6 +253,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_WATER", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_MYSTIC_WATER" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_WATERIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_WATER_TERA_SHARD" },
@@ -259,6 +270,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_MIRACLE_SEED" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_GRASSIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_GRASS_TERA_SHARD" },
@@ -275,6 +287,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_ELECTRIC", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_MAGNET" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_ELECTRIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_ELECTRIC_TERA_SHARD" },
@@ -291,6 +304,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_PSYCHIC", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_TWISTED_SPOON" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_PSYCHIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_PSYCHIC_TERA_SHARD" },
@@ -307,6 +321,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_ICE", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_NEVER_MELT_ICE" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_ICIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_ICE_TERA_SHARD" },
@@ -323,6 +338,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_DRAGON", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_DRAGON_FANG" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_DRAGONIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_DRAGON_TERA_SHARD" },
@@ -339,6 +355,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_DARK", "count": "10" },
                     { "#if": "!defined(ROGUE_EXPANSION)", "shop_item": "ITEM_BLACK_GLASSES" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_DARKINIUM_Z" },
                     { "#if": "defined(ROGUE_EXPANSION)", "shop_item": "ITEM_DARK_TERA_SHARD" },
@@ -356,6 +373,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_POKEBLOCK_FAIRY", "count": "10" },
                     { "shop_item": "ITEM_FAIRIUM_Z" },
                     { "shop_item": "ITEM_FAIRY_TERA_SHARD" },
                     { "shop_item": "ITEM_ROSELI_BERRY" }
