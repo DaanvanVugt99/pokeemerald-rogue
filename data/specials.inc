@@ -279,6 +279,7 @@ gSpecials::
 	def_special Rogue_RegisterRideMon
 	def_special Rogue_RunRewardLvls
 	def_special Rogue_RunRewardMoney
+	def_special Rogue_RunRewardPokeblocks
 	def_special Rogue_SetTimeAndSeason
 	def_special Popup_CannotTakeItem
 	def_special Popup_NewBadgeGet

@@ -1286,6 +1286,11 @@ void Rogue_RunRewardMoney()
     gSpecialVar_Result = Rogue_PostRunRewardMoney();
 }
 
+void Rogue_RunRewardPokeblocks()
+{
+    gSpecialVar_Result = Rogue_PostRunRewardPokeblocks();
+}
+
 void ReloadWarpSilent()
 {
     u8 mapGroup = gSaveBlock1Ptr->location.mapGroup;

@@ -137,6 +137,7 @@ bool8 Rogue_OnProcessPlayerFieldInput(void);
 bool8 Rogue_IsPartnerMonInTeam(void);
 u16 Rogue_PostRunRewardLvls();
 u16 Rogue_PostRunRewardMoney();
+u16 Rogue_PostRunRewardPokeblocks();
 
 void Rogue_MainInit(void);
 void Rogue_MainEarlyCB(void);

@@ -4297,6 +4297,22 @@ u16 Rogue_PostRunRewardMoney()
     return amount;
 }
 
+static u16 ChooseRunRewardPokeblock(void);
+
+u16 Rogue_PostRunRewardPokeblocks()
+{
+    u8 i;
+    u16 count = 0;
+
+    for(i = 0; i < ARRAY_COUNT(gRogueRun.completedBadges); ++i)
+    {
+        if(gRogueRun.completedBadges[i] != TYPE_NONE && AddBagItem(ChooseRunRewardPokeblock(), 1))
+            ++count;
+    }
+
+    return count;
+}
+
 static struct Pokemon* GetLabMon(u8 slot)
 {
     AGB_ASSERT(slot < LAB_MON_COUNT);
@@ -7968,16 +7984,6 @@ static u16 ChooseRunRewardPokeblock(void)
     return sRunRewardTypedPokeblocks[Random() % ARRAY_COUNT(sRunRewardTypedPokeblocks)];
 }
 
-static void GiveRunRewardPokeblock(void)
-{
-    u16 itemId = ChooseRunRewardPokeblock();
-
-    if(AddBagItem(itemId, 1))
-        Rogue_PushPopup_AddItem(itemId, 1);
-    else
-        Rogue_PushPopup_CannotTakeItem(itemId, 1);
-}
-
 void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 {
     if(Rogue_IsFinalQuestFinalBoss())
@@ -8046,7 +8052,6 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
                 gRogueRun.currentLevelOffset = nextLevel - prevLevel;
                 gRogueRun.wildEncounters.roamerActiveThisPath = TRUE;
-                GiveRunRewardPokeblock();
 
                 // Increase run tutor move access for the Pokémon that earned this badge.
                 {

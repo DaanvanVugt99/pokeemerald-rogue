@@ -468,7 +468,10 @@ script Rogue_ReturnAdventureInternal
     special(Rogue_RunRewardLvls)
     copyvar(VAR_0x8001, VAR_RESULT)
 
-    if(var(VAR_0x8000) != 0 || var(VAR_0x8001) != 0)
+    special(Rogue_RunRewardPokeblocks)
+    copyvar(VAR_0x8002, VAR_RESULT)
+
+    if(var(VAR_0x8000) != 0 || var(VAR_0x8001) != 0 || var(VAR_0x8002) != 0)
     {
         msgbox(format("Let's take a look and see what you managed to gather."), MSGBOX_DEFAULT)
 
@@ -516,6 +519,16 @@ script Rogue_ReturnAdventureInternal
             //    msgbox(format("Ah!\nIs this the first time your party has leveled in {POKEMON_HUB}?\pThese LVLs don't work entirely the same as they do whilst out on Adventures.\pPOKéMON will not naturally learn moves or evolve whilst in the HUB.\pYou will need to find specialist NPCs who will be able to help out, once your Pokémon has reached the correct level.\pAny levels you gain in the HUB will be temporarily reset when you embark on Adventures.\pThe HUB level will be restored once you return."))
             //    setflag(FLAG_ROGUE_LVL_TUTORIAL)
             //}
+        }
+
+        if(var(VAR_0x8002) != 0)
+        {
+            buffernumberstring(STR_VAR_1, VAR_0x8002)
+
+            message(format("You received {POKEBLOCK} x{STR_VAR_1}."))
+            playfanfare(MUS_OBTAIN_ITEM)
+            waitmessage
+            waitfanfare
         }
     }
     else
