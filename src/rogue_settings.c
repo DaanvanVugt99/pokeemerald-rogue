@@ -644,17 +644,7 @@ u8 Rogue_GetDifficultyRewardLevel()
 
 u8 Rogue_GetStartingMonCapacity()
 {
-    u8 partySize = 1;
-
-    if(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT) == BATTLE_FORMAT_DOUBLES || Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT) == BATTLE_FORMAT_MIXED)
-        partySize = 2;
-
-    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
-        partySize = PARTY_SIZE;
-
-    partySize = max(partySize, Rogue_GetModeRules()->enterPartySize);
-
-    return partySize;
+    return PARTY_SIZE;
 }
 
 static u16 GetCurrentNicknameMode()

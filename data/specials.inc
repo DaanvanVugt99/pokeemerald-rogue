@@ -187,6 +187,7 @@ gSpecials::
 	def_special Rogue_ApplyStatusToMon
 	def_special Rogue_ReleaseMonInSlot
 	def_special Rogue_CalcMaxPartySize
+	def_special Rogue_CheckPartyHasDuplicateStartSpecies
 	def_special Rogue_GetMonEvoCount
 	def_special Rogue_GetMonEvoParams
 	def_special RogueDebug_FillGenPC

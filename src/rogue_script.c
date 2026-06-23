@@ -362,6 +362,30 @@ u16 Rogue_CalcMaxPartySize(void)
     return Rogue_GetMaxPartySize();
 }
 
+void Rogue_CheckPartyHasDuplicateStartSpecies(void)
+{
+    u32 i, j;
+
+    gSpecialVar_Result = FALSE;
+
+    for(i = 0; i < gPlayerPartyCount; ++i)
+    {
+        u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+
+        if(species == SPECIES_NONE || species == SPECIES_EGG)
+            continue;
+
+        for(j = i + 1; j < gPlayerPartyCount; ++j)
+        {
+            if(GetMonData(&gPlayerParty[j], MON_DATA_SPECIES) == species)
+            {
+                gSpecialVar_Result = TRUE;
+                return;
+            }
+        }
+    }
+}
+
 u16 Rogue_GetMonEvoCount(void)
 {
     u16 monIdx = gSpecialVar_0x8004;

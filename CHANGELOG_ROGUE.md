@@ -53,6 +53,8 @@ Format follows Keep a Changelog loosely:
   from each Type Master quest.
 - Removed Shiny Pokéblocks from Treat Shop stock so they remain tied to run
   drops, quest rewards, and Starf Berry crafting.
+- Allow standard adventures to start with up to six party Pokémon, while
+  blocking duplicate species from entering the same run-start party.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its
