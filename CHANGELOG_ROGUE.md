@@ -118,6 +118,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Forced EXP trainer helper battles to use 4x battle speed regardless of the
+  trainer battle speed option.
 - Applied wild form-family encounter rules to catching contest spawns so they
   match normal route encounter filtering.
 - Fixed run boss Pokéblock rewards being added during the adventure, causing

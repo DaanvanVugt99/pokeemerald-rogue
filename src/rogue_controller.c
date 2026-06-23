@@ -628,9 +628,13 @@ static u8 GetBattleSceneOption()
         return gSaveBlock2Ptr->optionsWildBattleScene;
 }
 
+static bool8 IsCurrentExpTrainerBattle(void)
+{
+    return (gBattleTypeFlags & BATTLE_TYPE_TRAINER) != 0 && Rogue_IsExpTrainer(gTrainerBattleOpponent_A);
+}
+
 u8 Rogue_GetBattleSpeedScale(bool8 forHealthbar)
 {
-    u8 speedScale = 1;
     u8 battleSceneOption = GetBattleSceneOption();
 
     // Hold L to slow down
@@ -640,6 +644,9 @@ u8 Rogue_GetBattleSpeedScale(bool8 forHealthbar)
     // We want to speed up all anims until input selection starts
     if(InBattleChoosingMoves())
         gRogueLocal.hasBattleInputStarted = TRUE;
+
+    if(IsCurrentExpTrainerBattle())
+        battleSceneOption = OPTIONS_BATTLE_SCENE_4X;
 
     if(gRogueLocal.hasBattleInputStarted)
     {
