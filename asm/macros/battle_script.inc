@@ -29,8 +29,13 @@
 	.byte 0x6
 	.endm
 
+	.macro tryboostedattackabilitypopup
+	.byte 0xe6
+	.endm
+
 	.macro adjustdamage
 	.byte 0x7
+	tryboostedattackabilitypopup
 	.endm
 
 	.macro multihitresultmessage
@@ -1185,7 +1190,7 @@
 	.endm
 
 	.macro unused3
-	.byte 0xe6
+	tryboostedattackabilitypopup
 	.endm
 
 	.macro unused4

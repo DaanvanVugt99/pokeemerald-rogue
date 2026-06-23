@@ -12856,23 +12856,6 @@ if (triggeringAbility != ABILITY_NONE)
                 effect++;
             }
             break;
-        case ABILITY_SWARM:
-        case ABILITY_TORRENT:
-        case ABILITY_BLAZE:
-        case ABILITY_OVERGROW:
-            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-             && TARGET_TURN_DAMAGED
-             && IsBattlerAlive(battler)
-             && HadMoreThanHalfHpNowHasLess(battler)
-             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
-             && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove)))
-            {
-                SetBattlerTriggeredAbility(battler, gLastUsedAbility);
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
-                effect++;
-            }
-            break;
         case ABILITY_EMERGENCY_EXIT:
         case ABILITY_WIMP_OUT:
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)

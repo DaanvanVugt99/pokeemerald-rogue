@@ -19,7 +19,7 @@ SINGLE_BATTLE_TEST("Torrent boosts Water-type moves by more at half HP", s16 dam
     }
 }
 
-SINGLE_BATTLE_TEST("Torrent shows an ability popup when dropping below half HP")
+SINGLE_BATTLE_TEST("Torrent does not show an ability popup when dropping below half HP")
 {
     GIVEN {
         PLAYER(SPECIES_SQUIRTLE) { Ability(ABILITY_TORRENT); MaxHP(100); HP(60); }
@@ -28,6 +28,21 @@ SINGLE_BATTLE_TEST("Torrent shows an ability popup when dropping below half HP")
         TURN { MOVE(opponent, MOVE_DRAGON_RAGE); }
     } SCENE {
         HP_BAR(player);
+        NOT ABILITY_POPUP(player, ABILITY_TORRENT);
+    }
+}
+
+SINGLE_BATTLE_TEST("Torrent shows an ability popup when boosting a Water-type attack at half HP")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_BUBBLE].type == TYPE_WATER);
+        PLAYER(SPECIES_SQUIRTLE) { Ability(ABILITY_TORRENT); MaxHP(100); HP(50); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_BUBBLE); }
+    } SCENE {
         ABILITY_POPUP(player, ABILITY_TORRENT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BUBBLE, player);
+        HP_BAR(opponent);
     }
 }

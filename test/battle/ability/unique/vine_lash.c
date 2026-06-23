@@ -30,6 +30,21 @@ SINGLE_BATTLE_TEST("Vine Lash triggers only on the first Grass-type move after s
     }
 }
 
+SINGLE_BATTLE_TEST("Overgrow and Vine Lash can both show popups on the same boosted attack")
+{
+    GIVEN {
+        PLAYER(SPECIES_VENUSAUR) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_VINE_LASH); MaxHP(100); HP(50); Moves(MOVE_MAGICAL_LEAF); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_MAGICAL_LEAF); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_OVERGROW);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGICAL_LEAF, player);
+        ABILITY_POPUP(player, ABILITY_VINE_LASH);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SMACK_DOWN, player);
+    }
+}
+
 SINGLE_BATTLE_TEST("Vine Lash refreshes after the user switches out and back in")
 {
     GIVEN {

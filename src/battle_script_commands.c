@@ -675,7 +675,7 @@ static void Cmd_switchoutabilities(void);
 static void Cmd_jumpifhasnohp(void);
 static void Cmd_getsecretpowereffect(void);
 static void Cmd_pickup(void);
-static void Cmd_unused3(void);
+static void Cmd_tryboostedattackabilitypopup(void);
 static void Cmd_unused4(void);
 static void Cmd_settypebasedhalvers(void);
 static void Cmd_jumpifsubstituteblocks(void);
@@ -939,7 +939,7 @@ void (* const gBattleScriptingCommandsTable[])(void) =
     Cmd_jumpifhasnohp,                           //0xE3
     Cmd_getsecretpowereffect,                    //0xE4
     Cmd_pickup,                                  //0xE5
-    Cmd_unused3,                                 //0xE6
+    Cmd_tryboostedattackabilitypopup,            //0xE6
     Cmd_rogue_partyhasroom, // Cmd_unused4,      //0xE7
     Cmd_settypebasedhalvers,                     //0xE8
     Cmd_jumpifsubstituteblocks,                  //0xE9
@@ -2360,6 +2360,41 @@ static void Cmd_critcalc(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
+static bool32 IsBoostedAttackAbilityType(u32 ability, u32 moveType)
+{
+    switch (ability)
+    {
+    case ABILITY_SWARM:
+        return moveType == TYPE_BUG;
+    case ABILITY_TORRENT:
+        return moveType == TYPE_WATER;
+    case ABILITY_BLAZE:
+        return moveType == TYPE_FIRE;
+    case ABILITY_OVERGROW:
+        return moveType == TYPE_GRASS;
+    }
+
+    return FALSE;
+}
+
+static void TryQueueBoostedAttackAbilityPopup(u32 moveType)
+{
+    u32 ability = GetBattlerAbility(gBattlerAttacker);
+
+    if (gBattleMoveDamage == 0)
+        return;
+    if (!IsBattlerAlive(gBattlerAttacker))
+        return;
+    if (gMultiHitCounter != 0 && gBattleScripting.multihitString[4] != 0)
+        return;
+    if (gBattleMons[gBattlerAttacker].hp > (gBattleMons[gBattlerAttacker].maxHP / 2))
+        return;
+    if (!IsBoostedAttackAbilityType(ability, moveType))
+        return;
+
+    gBattleStruct->boostedAttackAbilityPopups |= gBitTable[gBattlerAttacker];
+}
+
 static void Cmd_damagecalc(void)
 {
     CMD_ARGS();
@@ -2371,6 +2406,7 @@ static void Cmd_damagecalc(void)
     if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
         movePower = VarGet(VAR_EXTRA_MOVE_DAMAGE);
     gBattleMoveDamage = CalculateMoveDamage(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType, movePower, gIsCriticalHit, TRUE, TRUE);
+    TryQueueBoostedAttackAbilityPopup(moveType);
 
     if((IsCurseActive(EFFECT_ONE_HIT) || Rogue_GetActiveCampaign() == ROGUE_CAMPAIGN_ONE_HP) && gBattleMoveDamage != 0)
     {
@@ -18036,8 +18072,26 @@ static void Cmd_pickup(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
-static void Cmd_unused3(void)
+static void Cmd_tryboostedattackabilitypopup(void)
 {
+    CMD_ARGS();
+
+    if (gBattleStruct->boostedAttackAbilityPopups & gBitTable[gBattlerAttacker])
+    {
+        gBattleStruct->boostedAttackAbilityPopups &= ~gBitTable[gBattlerAttacker];
+
+        if (!(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+         && gBattleMoveDamage != 0
+         && IsBattlerAlive(gBattlerAttacker))
+        {
+            SetBattlerTriggeredAbility(gBattlerAttacker, GetBattlerAbility(gBattlerAttacker));
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            return;
+        }
+    }
+
+    gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
 static void UNUSED Cmd_unused4(void)

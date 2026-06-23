@@ -19,7 +19,7 @@ SINGLE_BATTLE_TEST("Overgrow boosts Grass-type moves by more at half HP", s16 da
     }
 }
 
-SINGLE_BATTLE_TEST("Overgrow shows an ability popup when dropping below half HP")
+SINGLE_BATTLE_TEST("Overgrow does not show an ability popup when dropping below half HP")
 {
     GIVEN {
         PLAYER(SPECIES_BULBASAUR) { Ability(ABILITY_OVERGROW); MaxHP(100); HP(60); }
@@ -28,6 +28,21 @@ SINGLE_BATTLE_TEST("Overgrow shows an ability popup when dropping below half HP"
         TURN { MOVE(opponent, MOVE_DRAGON_RAGE); }
     } SCENE {
         HP_BAR(player);
+        NOT ABILITY_POPUP(player, ABILITY_OVERGROW);
+    }
+}
+
+SINGLE_BATTLE_TEST("Overgrow shows an ability popup when boosting a Grass-type attack at half HP")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_VINE_WHIP].type == TYPE_GRASS);
+        PLAYER(SPECIES_BULBASAUR) { Ability(ABILITY_OVERGROW); MaxHP(100); HP(50); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_VINE_WHIP); }
+    } SCENE {
         ABILITY_POPUP(player, ABILITY_OVERGROW);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_VINE_WHIP, player);
+        HP_BAR(opponent);
     }
 }
