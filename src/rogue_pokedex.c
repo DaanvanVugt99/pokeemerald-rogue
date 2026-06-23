@@ -45,6 +45,7 @@
 #include "rogue_query.h"
 #include "rogue_quest.h"
 #include "rogue_safari.h"
+#include "rogue_script.h"
 
 #ifdef ROGUE_EXPANSION
 #define DEX_GEN_LIMIT 9
@@ -268,6 +269,7 @@ static u16 GetVariantSpeciesAt(u8 variant, u16 index);
 static u16 GetVariantSpeciesCount(u8 variant);
 static u8 GetVariantGenLimit(u8 variant);
 static bool8 CheckVariantContainsSpecies(u8 variant, u16 species);
+static bool8 TryGetSafariIndexForDexIndex(u8 variant, u16 dexIndex, u16* safariIndex);
 
 // Title screen
 static void TitleScreen_HandleInput(u8);
@@ -2743,6 +2745,12 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
         {
             if(sPokedexViewReq.view == DEX_VIEW_SELECT_SAFARI_MON)
             {
+                u16 dexIndex = sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT + idx;
+                u16 safariIndex;
+
+                if(TryGetSafariIndexForDexIndex(RoguePokedex_GetDexVariant(), dexIndex, &safariIndex) && Rogue_CanPurchaseSafariMon(safariIndex))
+                    return ENTRY_TYPE_GREEN_CIRCLE;
+
                 return ENTRY_TYPE_EMPTY;
             }
             else
@@ -3136,23 +3144,11 @@ static void Overview_HandleInput(u8 taskId)
                         case POKEDEX_DYNAMIC_VARIANT_NORMAL_SAFARI:
                         case POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI:
                         {
-                            u16 i = (dexVariant == POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI) ? ROGUE_SAFARI_LEGENDS_START_INDEX : 0;
-                            u16 total = (dexVariant == POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI) ? ROGUE_SAFARI_TOTAL_MONS : ROGUE_SAFARI_LEGENDS_START_INDEX;
-                            u16 count = 0;
+                            u16 safariIndex;
 
-                            for(; i < total; ++i)
-                            {
-                                if(gRogueSaveBlock->safariMons[i].species != SPECIES_NONE)
-                                {
-                                    if(dexIndex == count++)
-                                    {
-                                        gSpecialVar_Result = i;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if(i >= total)
+                            if(TryGetSafariIndexForDexIndex(dexVariant, dexIndex, &safariIndex))
+                                gSpecialVar_Result = safariIndex;
+                            else
                             {
                                 AGB_ASSERT(FALSE);
                                 gSpecialVar_Result = ROGUE_SAFARI_TOTAL_MONS;
@@ -4769,6 +4765,33 @@ static u16 GetVariantSpeciesAt(u8 variant, u16 index)
 
         return SPECIES_BULBASAUR;
     }
+}
+
+static bool8 TryGetSafariIndexForDexIndex(u8 variant, u16 dexIndex, u16* safariIndex)
+{
+    u16 i;
+    u16 total;
+    u16 count = 0;
+
+    if(variant != POKEDEX_DYNAMIC_VARIANT_NORMAL_SAFARI && variant != POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI)
+        return FALSE;
+
+    i = (variant == POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI) ? ROGUE_SAFARI_LEGENDS_START_INDEX : 0;
+    total = (variant == POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI) ? ROGUE_SAFARI_TOTAL_MONS : ROGUE_SAFARI_LEGENDS_START_INDEX;
+
+    for(; i < total; ++i)
+    {
+        if(gRogueSaveBlock->safariMons[i].species != SPECIES_NONE)
+        {
+            if(dexIndex == count++)
+            {
+                *safariIndex = i;
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
 }
 
 static u16 GetVariantSpeciesCount(u8 variant)

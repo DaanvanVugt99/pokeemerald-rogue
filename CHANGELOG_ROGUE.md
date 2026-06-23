@@ -37,6 +37,8 @@ Format follows Keep a Changelog loosely:
 - Reworked Hub Safari acquisition into a Pokéblock purchase economy: Safari
   sign and legendary cave Pokémon now show typed Pokéblock costs, preserve
   stored run traits, and grant low-level egg/baby species to the party or PC.
+- Added an affordability marker to purchasable Hub Safari and legendary cave
+  Pokémon in the Safari selection grid.
 - Changed Safari purchase pricing to use matching typed Pokéblocks, split
   dual-type costs across both types, add Shiny Pokéblocks for shiny Pokémon,
   and mildly scale prices by BST, evolution, legendary status, and individual

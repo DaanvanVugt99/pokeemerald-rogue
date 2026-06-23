@@ -5,6 +5,7 @@
 
 
 bool8 Rogue_CheckPartyHasRoomForMon(void);
+bool8 Rogue_CanPurchaseSafariMon(u16 safariIndex);
 
 void Rogue_RandomisePartyMon(void);
 void Rogue_AlterMonIVs(void);

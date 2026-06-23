@@ -2190,6 +2190,17 @@ static bool8 CheckBagHasSafariPurchaseCost(struct SafariMonPurchaseCost const* c
     return TRUE;
 }
 
+bool8 Rogue_CanPurchaseSafariMon(u16 safariIndex)
+{
+    struct SafariMonPurchaseCost cost;
+
+    if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS || gRogueSaveBlock->safariMons[safariIndex].species == SPECIES_NONE)
+        return FALSE;
+
+    CalculateSafariMonPurchaseCost(&gRogueSaveBlock->safariMons[safariIndex], &cost);
+    return cost.count != 0 && CheckBagHasSafariPurchaseCost(&cost);
+}
+
 static void RemoveSafariPurchaseCost(struct SafariMonPurchaseCost const* cost)
 {
     u8 i;
@@ -2322,12 +2333,25 @@ void Rogue_TryPurchaseSafariMon()
 
     {
         u16 species = GetMonData(&mon, MON_DATA_SPECIES);
+        u8 const* speciesName = RoguePokedex_GetSpeciesName(species);
 
         GetSetPokedexSpeciesFlag(species, FLAG_SET_SEEN);
         GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT);
 
         if(IsMonShiny(&mon))
             GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT_SHINY);
+
+        GetMonData(&mon, MON_DATA_NICKNAME, gStringVar1);
+
+        if(IsMonShiny(&mon) || StringCompareN(gStringVar1, speciesName, POKEMON_NAME_LENGTH) != 0)
+        {
+            if(IsMonShiny(&mon))
+                StringAppend(gStringVar1, sText_TheShiny);
+            else
+                StringAppend(gStringVar1, sText_The);
+
+            StringAppend(gStringVar1, speciesName);
+        }
     }
 
     RemoveSafariPurchaseCost(&cost);
