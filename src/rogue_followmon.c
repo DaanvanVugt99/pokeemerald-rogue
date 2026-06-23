@@ -844,6 +844,7 @@ static u16 NextSpawnMonSlot()
 {
     u16 slot;
     u16 species;
+    u16 i;
     u32 customMonId = 0;
     u8 level; // ignore
     bool8 isShiny;
@@ -865,9 +866,17 @@ static u16 NextSpawnMonSlot()
     // All mon slots are in use
     if(slot == FOLLOWMON_MAX_SPAWN_SLOTS)
     {
-        // Cycle through so we remove the oldest mon first
-        sFollowMonData.spawnSlot = (sFollowMonData.spawnSlot + 1) % FOLLOWMON_MAX_SPAWN_SLOTS;
-        slot = sFollowMonData.spawnSlot;
+        // Cycle through valid slots only so reserved palette slots do not stall rotation.
+        for(i = 0; i < FOLLOWMON_MAX_SPAWN_SLOTS; ++i)
+        {
+            sFollowMonData.spawnSlot = (sFollowMonData.spawnSlot + 1) % FOLLOWMON_MAX_SPAWN_SLOTS;
+
+            if(IsSpawnSlotValid(sFollowMonData.spawnSlot))
+            {
+                slot = sFollowMonData.spawnSlot;
+                break;
+            }
+        }
     }
 
     if(!IsSpawnSlotValid(slot))
@@ -1150,7 +1159,7 @@ void FollowMon_OverworldCB()
         bool8 isShiny;
         u8 objectEventId;
 
-        for(gfxId = OBJ_EVENT_GFX_FOLLOW_MON_0; gfxId < OBJ_EVENT_GFX_FOLLOW_MON_LAST; ++gfxId)
+        for(gfxId = OBJ_EVENT_GFX_FOLLOW_MON_0; gfxId <= OBJ_EVENT_GFX_FOLLOW_MON_LAST; ++gfxId)
         {
             spawnSlot = gfxId - OBJ_EVENT_GFX_FOLLOW_MON_0;
             bitFlag = (1 << spawnSlot);
