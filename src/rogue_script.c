@@ -12,6 +12,7 @@
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "field_screen_effect.h"
+#include "item.h"
 #include "item_menu.h"
 #include "main.h"
 #include "money.h"
@@ -90,6 +91,15 @@ static const u8 sStatNamesTable[NUM_STATS][13] = // a;t versopm pf gStatNamesTab
 
 static u8 const sText_The[] = _(" the ");
 static u8 const sText_TheShiny[] = _(" the shiny ");
+
+enum
+{
+    SAFARI_PURCHASE_GIVEN_TO_PARTY = MON_GIVEN_TO_PARTY,
+    SAFARI_PURCHASE_GIVEN_TO_PC = MON_GIVEN_TO_PC,
+    SAFARI_PURCHASE_CANT_GIVE = MON_CANT_GIVE,
+    SAFARI_PURCHASE_NOT_ENOUGH_POKEBLOCK,
+    SAFARI_PURCHASE_INVALID_OFFER,
+};
 
 bool8 Rogue_CheckPartyHasRoomForMon(void)
 {
@@ -1954,7 +1964,7 @@ void Rogue_AnyLegendsInSafari()
     }
 }
 
-static bool8 WillSpeciesLikePokeblockInternal(u16 pokeblockItem, u16 species)
+static bool8 IsTypedPokeblockForSpecies(u16 pokeblockItem, u16 species)
 {
     u8 type = ItemId_GetSecondaryId(pokeblockItem);
 
@@ -1971,10 +1981,184 @@ static bool8 WillSpeciesLikePokeblockInternal(u16 pokeblockItem, u16 species)
     return FALSE;
 }
 
+static bool8 WillSafariMonLikePokeblockInternal(u16 pokeblockItem, struct RogueSafariMon const* safariMon)
+{
+    if(safariMon->shinyFlag)
+        return pokeblockItem == ITEM_POKEBLOCK_SHINY;
+
+    return IsTypedPokeblockForSpecies(pokeblockItem, safariMon->species);
+}
+
+static u16 CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMon)
+{
+    u16 species = safariMon->species;
+    u16 bst = RoguePokedex_GetSpeciesBST(species);
+    bool8 isLegendary = RoguePokedex_IsSpeciesLegendary(species);
+    u16 cost;
+    u32 hash;
+
+    if(safariMon->shinyFlag)
+    {
+        cost = isLegendary ? 3 : 1;
+
+        if(bst >= 500)
+            ++cost;
+        if(bst >= 580)
+            ++cost;
+    }
+    else if(isLegendary)
+    {
+        cost = 10;
+
+        if(bst >= 620)
+            ++cost;
+        if(bst >= 680)
+            ++cost;
+    }
+    else
+    {
+        cost = 2;
+
+        if(bst >= 420)
+            ++cost;
+        if(bst >= 500)
+            ++cost;
+        if(bst >= 570)
+            ++cost;
+
+        if(Rogue_GetEggSpecies(species) != species)
+            ++cost;
+    }
+
+    hash = species;
+    hash = hash * 1103515245 + safariMon->hpIV;
+    hash = hash * 1103515245 + safariMon->attackIV;
+    hash = hash * 1103515245 + safariMon->defenseIV;
+    hash = hash * 1103515245 + safariMon->speedIV;
+    hash = hash * 1103515245 + safariMon->spAttackIV;
+    hash = hash * 1103515245 + safariMon->spDefenseIV;
+    hash = hash * 1103515245 + safariMon->nature;
+
+    switch(hash % 3)
+    {
+    case 0:
+        if(cost > 1)
+            --cost;
+        break;
+
+    case 2:
+        ++cost;
+        break;
+    }
+
+    return cost;
+}
+
+static bool8 CreateMonFromSafariMon(struct RogueSafariMon* safariMon, struct Pokemon* mon)
+{
+    u8 text[POKEMON_NAME_LENGTH + 1];
+    u16 eggSpecies = Rogue_GetEggSpecies(safariMon->species);
+
+    ZeroMonData(mon);
+    CreateMon(mon, eggSpecies, STARTER_MON_LEVEL, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    RogueSafari_CopyFromSafariMon(safariMon, &mon->box);
+
+    // Match existing Safari behavior: acquired mons are rebuilt as their low-level egg species.
+    if(eggSpecies != safariMon->species)
+    {
+        SetMonData(mon, MON_DATA_SPECIES, &eggSpecies);
+        GetMonData(mon, MON_DATA_NICKNAME, text);
+
+        if(StringCompareN(text, RoguePokedex_GetSpeciesName(safariMon->species), POKEMON_NAME_LENGTH) == 0)
+        {
+            StringCopy_Nickname(text, RoguePokedex_GetSpeciesName(eggSpecies));
+            SetMonData(mon, MON_DATA_NICKNAME, text);
+        }
+    }
+
+    if(safariMon->customMonLookup != 0)
+    {
+        u8 idx = safariMon->customMonLookup - 1;
+        u32 customMonId = gRogueSaveBlock->safariMonCustomIds[idx];
+
+        Rogue_ApplyCustomMonIdToMon(customMonId, mon);
+    }
+
+    CalculateMonStats(mon);
+    return TRUE;
+}
+
 void Rogue_CheckSafariMonLikesPokeblock()
 {
     u8 safariIndex = gSpecialVar_0x8008;
-    gSpecialVar_Result = WillSpeciesLikePokeblockInternal(gSpecialVar_ItemId, gRogueSaveBlock->safariMons[safariIndex].species);
+
+    if(safariIndex < ROGUE_SAFARI_TOTAL_MONS)
+        gSpecialVar_Result = WillSafariMonLikePokeblockInternal(gSpecialVar_ItemId, &gRogueSaveBlock->safariMons[safariIndex]);
+    else
+        gSpecialVar_Result = FALSE;
+}
+
+void Rogue_BufferSafariMonPurchasePrice()
+{
+    u8 safariIndex = gSpecialVar_0x8008;
+
+    if(safariIndex < ROGUE_SAFARI_TOTAL_MONS)
+        gSpecialVar_0x8009 = CalculateSafariMonPurchaseCost(&gRogueSaveBlock->safariMons[safariIndex]);
+    else
+        gSpecialVar_0x8009 = 0;
+}
+
+void Rogue_TryPurchaseSafariMon()
+{
+    struct Pokemon mon;
+    u8 giveResult;
+    u8 safariIndex = gSpecialVar_0x8008;
+    struct RogueSafariMon* safariMon;
+    u16 cost;
+
+    if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS)
+    {
+        gSpecialVar_Result = SAFARI_PURCHASE_INVALID_OFFER;
+        return;
+    }
+
+    safariMon = &gRogueSaveBlock->safariMons[safariIndex];
+    cost = CalculateSafariMonPurchaseCost(safariMon);
+
+    if(safariMon->species == SPECIES_NONE || !WillSafariMonLikePokeblockInternal(gSpecialVar_ItemId, safariMon))
+    {
+        gSpecialVar_Result = SAFARI_PURCHASE_INVALID_OFFER;
+        return;
+    }
+
+    if(!CheckBagHasItem(gSpecialVar_ItemId, cost))
+    {
+        gSpecialVar_Result = SAFARI_PURCHASE_NOT_ENOUGH_POKEBLOCK;
+        return;
+    }
+
+    CreateMonFromSafariMon(safariMon, &mon);
+    giveResult = GiveMonToPlayer(&mon);
+
+    if(giveResult == MON_CANT_GIVE)
+    {
+        gSpecialVar_Result = SAFARI_PURCHASE_CANT_GIVE;
+        return;
+    }
+
+    {
+        u16 species = GetMonData(&mon, MON_DATA_SPECIES);
+
+        GetSetPokedexSpeciesFlag(species, FLAG_SET_SEEN);
+        GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT);
+
+        if(IsMonShiny(&mon))
+            GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT_SHINY);
+    }
+
+    RemoveBagItem(gSpecialVar_ItemId, cost);
+    RogueSafari_ClearSafariMonAtIdx(safariIndex);
+    gSpecialVar_Result = giveResult;
 }
 
 void Rogue_AppendMultichoicePokeblockItems()

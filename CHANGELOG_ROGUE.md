@@ -34,6 +34,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked Hub Safari acquisition so Safari-buffer Pokémon are purchased with
+  suitable Pokéblocks from the sign or legendary cave instead of being caught
+  through Safari battles.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its

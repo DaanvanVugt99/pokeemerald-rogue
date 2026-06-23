@@ -1350,6 +1350,11 @@ static void ModifyExistingMonToCustomMon(u32 customMonId, struct Pokemon* mon)
         SetMonData(mon, MON_DATA_NICKNAME, text);
 }
 
+void Rogue_ApplyCustomMonIdToMon(u32 customMonId, struct Pokemon* mon)
+{
+    ModifyExistingMonToCustomMon(customMonId, mon);
+}
+
 void Rogue_ModifyCaughtMon(struct Pokemon *mon)
 {
     if(Rogue_IsRunActive())

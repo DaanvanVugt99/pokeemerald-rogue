@@ -4,6 +4,13 @@ const VAR_SHAKE_NUM_SHAKES = VAR_0x8006
 const VAR_SHAKE_SHAKE_DELAY = VAR_0x8007
 
 const VAR_SAFARI_INDEX = VAR_0x8008
+const VAR_SAFARI_PRICE = VAR_0x8009
+
+const SAFARI_PURCHASE_TO_PARTY = 0
+const SAFARI_PURCHASE_TO_PC = 1
+const SAFARI_PURCHASE_CANT_GIVE = 2
+const SAFARI_PURCHASE_NOT_ENOUGH = 3
+const SAFARI_PURCHASE_INVALID = 4
 
 mapscripts Rogue_Interior_SafariCave_MapScripts {}
 
@@ -17,8 +24,7 @@ script Rogue_Interior_SafariCave_InteractLegendSummon
 
     if(var(VAR_RESULT) == YES)
     {
-        // ROGUE_SAFARI_LEGENDS_POKEBLOCK_COST
-        msgbox(format("Powerful Pokémon cries echo throughout the cave.\p10 {POKEBLOCK} can be offered in order to encounter one of these Pokemon."))
+        msgbox(format("Powerful Pokémon cries echo throughout the cave.\p{POKEBLOCK} can be offered in order to bring one of these Pokémon with you."))
 
         begindynamicmultichoice
         appenddynamicmultichoice("Make Offering", 0)
@@ -38,41 +44,7 @@ script Rogue_Interior_SafariCave_InteractLegendSummon
                 if(var(VAR_RESULT) != ROGUE_SAFARI_TOTAL_MONS)
                 {
                     copyvar(VAR_SAFARI_INDEX, VAR_RESULT)
-
-                    special(Rogue_BufferSafariMonInfo)
-                    msgbox(format("What would you like to offer to {STR_VAR_1}?"), MSGBOX_DEFAULT)
-
-                    special(Bag_ChoosePokeblock)
-                    waitstate
-
-                    if(var(VAR_ITEM_ID) != ITEM_NONE)
-                    {
-                        special(Rogue_CheckSafariMonLikesPokeblock)
-                        if(var(VAR_RESULT) == YES)
-                        {
-                            bufferitemnameplural(STR_VAR_2, VAR_ITEM_ID, ROGUE_SAFARI_LEGENDS_POKEBLOCK_COST)
-                            checkitem(VAR_ITEM_ID, ROGUE_SAFARI_LEGENDS_POKEBLOCK_COST)
-
-                            if(var(VAR_RESULT) == YES)
-                            {
-                                msgbox(format("{STR_VAR_2} were scattered near the statue…"))
-                                removeitem(VAR_ITEM_ID, ROGUE_SAFARI_LEGENDS_POKEBLOCK_COST)
-
-                                closemessage
-                                special(Rogue_EnqueueSafariBattle)
-                                call(Rogue_Interior_SafariCave_BattleSummonMon)
-                            }
-                            else
-                            {
-                                msgbox(format("That is not enough {POKEBLOCK}.\p{STR_VAR_2} are needed in order to make an offering."))
-                            }
-                        }
-                        else
-                        {
-                            special(Rogue_BufferSafariMonInfo)
-                            msgbox(format("{STR_VAR_1} won't like that type of {POKEBLOCK}."))
-                        }
-                    }
+                    call(Rogue_Interior_SafariCave_PurchaseSelectedMon)
                 }
 
             case 1:
@@ -91,6 +63,55 @@ script Rogue_Interior_SafariCave_InteractLegendSummon
     }
 
     release
+}
+
+script Rogue_Interior_SafariCave_PurchaseSelectedMon
+{
+    special(Rogue_BufferSafariMonInfo)
+    msgbox(format("What would you like to offer to {STR_VAR_1}?"), MSGBOX_DEFAULT)
+
+    special(Bag_ChoosePokeblock)
+    waitstate
+
+    if(var(VAR_ITEM_ID) != ITEM_NONE)
+    {
+        special(Rogue_CheckSafariMonLikesPokeblock)
+        if(var(VAR_RESULT) == YES)
+        {
+            special(Rogue_BufferSafariMonPurchasePrice)
+            bufferitemnameplural(STR_VAR_2, VAR_ITEM_ID, VAR_SAFARI_PRICE)
+            msgbox(format("{STR_VAR_1} will join you for {STR_VAR_2}.\pMake this offering?"), MSGBOX_YESNO)
+
+            if(var(VAR_RESULT) == YES)
+            {
+                special(Rogue_TryPurchaseSafariMon)
+
+                switch(var(VAR_RESULT))
+                {
+                    case SAFARI_PURCHASE_TO_PARTY:
+                        msgbox(format("{STR_VAR_1} joined your party!"))
+
+                    case SAFARI_PURCHASE_TO_PC:
+                        bufferboxname(STR_VAR_3, VAR_PC_BOX_TO_SEND_MON)
+                        msgbox(format("{STR_VAR_1} was sent to {STR_VAR_3} in Pokémon Storage."))
+
+                    case SAFARI_PURCHASE_CANT_GIVE:
+                        msgbox(format("There isn't enough room in Pokémon Storage."))
+
+                    case SAFARI_PURCHASE_NOT_ENOUGH:
+                        msgbox(format("You don't have enough {POKEBLOCK}.\p{STR_VAR_2} are needed."))
+
+                    case SAFARI_PURCHASE_INVALID:
+                        msgbox(format("{STR_VAR_1} won't accept that offer."))
+                }
+            }
+        }
+        else
+        {
+            special(Rogue_BufferSafariMonInfo)
+            msgbox(format("{STR_VAR_1} won't accept that offer."))
+        }
+    }
 }
 
 script Rogue_Interior_SafariCave_BattleSummonMon

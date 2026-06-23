@@ -218,6 +218,7 @@ void Rogue_SafariTypeForMap(u8* outArray, u8 arraySize);
 void Rogue_ModifyWildMon(struct Pokemon* mon);
 void Rogue_ModifyScriptMon(struct Pokemon* mon);
 void Rogue_ModifyGiveMon(struct Pokemon* mon);
+void Rogue_ApplyCustomMonIdToMon(u32 customMonId, struct Pokemon* mon);
 struct BoxPokemon* Rogue_GetDaycareBoxMon(u8 slot);
 u8 Rogue_GetCurrentDaycareSlotCount();
 void Rogue_SwapMonInDaycare(struct Pokemon* partyMon, u8 daycareSlot);

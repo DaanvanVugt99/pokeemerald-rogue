@@ -885,7 +885,12 @@ static u16 NextSpawnMonSlot()
 
     if(Rogue_InWildSafari())
     {
-        struct RogueSafariMon* mon = RogueSafari_ChooseSafariMonForSlot(slot);
+        struct RogueSafariMon* mon;
+
+        if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE || gMapHeader.mapLayoutId == LAYOUT_ROGUE_INTERIOR_SAFARI_CAVE)
+            return INVALID_SPAWN_SLOT;
+
+        mon = RogueSafari_ChooseSafariMonForSlot(slot);
 
         if(mon != NULL)
         {
