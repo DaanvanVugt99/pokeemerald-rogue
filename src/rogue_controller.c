@@ -9215,7 +9215,7 @@ void Rogue_CreateWildMon(u8 area, u16* species, u8* level, bool8* forceShiny)
             {
                 u8 stats[NUM_STATS];
 
-                *species = RogueMiscQuery_SelectRandomElement(RogueRandom());
+                *species = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), WildFormFlatWeight, NULL, FALSE);
                 *level = Rogue_CalculatePlayerMonLvl();
                 --gRogueLocal.catchingContest.spawnsRemaining;
 

@@ -118,6 +118,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Applied wild form-family encounter rules to catching contest spawns so they
+  match normal route encounter filtering.
 - Fixed run boss Pokéblock rewards being added during the adventure, causing
   them to be lost when the run bag was wiped on return to the hub.
 - Fixed Ariados and Spinarak's Web Trap unique ability so any opposing Speed
