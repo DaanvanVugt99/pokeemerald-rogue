@@ -8365,6 +8365,38 @@ static void RememberPartyHealth()
     }
 }
 
+static bool8 TryConsumeHeldItemFromBuffer(u16* heldItems, u16 itemId)
+{
+    u8 i;
+
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        if(heldItems[i] == itemId)
+        {
+            heldItems[i] = ITEM_NONE;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static bool8 IsItemInRememberedHeldItems(u16 itemId)
+{
+    u8 i;
+
+    if(itemId == ITEM_NONE)
+        return FALSE;
+
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        if(gRogueRun.partyHeldItems[i] == itemId)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static void TryRestorePartyHeldItems(bool8 allowThief)
 {
     if(Rogue_IsRunActive())
@@ -8373,6 +8405,74 @@ static void TryRestorePartyHeldItems(bool8 allowThief)
         u32 item;
         u16 successBerryIcon = ITEM_NONE;
         u16 failBerryIcon = ITEM_NONE;
+
+        if(IsCurseActive(EFFECT_ITEM_SHUFFLE))
+        {
+            u16 currentHeldItems[PARTY_SIZE];
+
+            for(i = 0; i < PARTY_SIZE; ++i)
+            {
+                if(i < gPlayerPartyCount)
+                {
+                    currentHeldItems[i] = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM);
+
+                    item = ITEM_NONE;
+                    SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &item);
+                }
+                else
+                {
+                    currentHeldItems[i] = ITEM_NONE;
+                }
+            }
+
+            for(i = 0; i < gPlayerPartyCount; ++i)
+            {
+                item = gRogueRun.partyHeldItems[i];
+
+                // Ignore fainted mons
+                if(GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
+                    continue;
+
+                if(item == ITEM_NONE)
+                {
+                    if(allowThief)
+                    {
+                        u16 currentItem = currentHeldItems[i];
+
+                        if(currentItem != ITEM_NONE && !IsItemInRememberedHeldItems(currentItem))
+                            SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &currentItem);
+                    }
+                    continue;
+                }
+
+                if(item >= FIRST_BERRY_INDEX && item <= LAST_BERRY_INDEX)
+                {
+                    if(TryConsumeHeldItemFromBuffer(currentHeldItems, item))
+                    {
+                        // Use the still-held shuffled berry without consuming a spare.
+                    }
+                    else if(RemoveBagItem(item, 1))
+                    {
+                        successBerryIcon = item;
+                    }
+                    else
+                    {
+                        failBerryIcon = item;
+                        item = ITEM_NONE;
+                    }
+                }
+
+                SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &item);
+            }
+
+            // Make a popup to indicate the berries have or haven't been requiped
+            if(failBerryIcon != ITEM_NONE)
+                Rogue_PushPopup_RequipBerryFail(failBerryIcon);
+            else if(successBerryIcon != ITEM_NONE)
+                Rogue_PushPopup_RequipBerrySuccess(successBerryIcon);
+
+            return;
+        }
 
         for(i = 0; i < gPlayerPartyCount; ++i)
         {
@@ -11343,7 +11443,7 @@ static u8 RouteItems_CalculateWeight(u16 index, u16 itemId, void* data)
     if(isPartySpecialItem)
         return context->isTeamHideout ? 80 : 45;
 
-    if(isSpecialItem && context->isTeamHideout)
+    if(isSpecialItem && context->isTeamHideout && ItemId_GetPrice(itemId) == 0)
         return 2;
 
     if(isPartyBoostItem)
