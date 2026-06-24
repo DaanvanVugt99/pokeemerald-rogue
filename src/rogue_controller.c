@@ -96,6 +96,7 @@ STATIC_ASSERT(sizeof(struct Pokemon) == sizeof(struct RoguePokemonFacade), SizeO
 #define HIDEOUT_SPECIAL_ITEM_DROP_CHANCE_PER_MILLE 50
 #define PARTY_SPECIAL_ITEM_WEIGHT 8
 #define OTHER_SPECIAL_ITEM_WEIGHT 1
+#define ROUTE_POKEBLOCK_BUNDLE_WEIGHT 4
 
 #ifdef ROGUE_DEBUG
 EWRAM_DATA u8 gDebug_CurrentTab = 0;
@@ -2572,6 +2573,85 @@ static bool8 GetFormItemFlag(u16 itemId)
 
 extern const struct RogueItem gRogueItems[];
 
+static bool8 IsBattleOnlyBagClauseReplacementItem(u16 itemId)
+{
+    switch(itemId)
+    {
+    case ITEM_X_ATTACK:
+    case ITEM_X_DEFENSE:
+    case ITEM_X_SP_ATK:
+    case ITEM_X_SP_DEF:
+    case ITEM_X_SPEED:
+    case ITEM_X_ACCURACY:
+    case ITEM_DIRE_HIT:
+    case ITEM_GUARD_SPEC:
+    case ITEM_POKE_DOLL:
+    case ITEM_FLUFFY_TAIL:
+#ifdef ROGUE_EXPANSION
+    case ITEM_POKE_TOY:
+#endif
+        return TRUE;
+
+    default:
+        return FALSE;
+    }
+}
+
+static bool8 IsBagClauseDisabledBattleOnlyItem(u16 itemId)
+{
+    return Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE)
+        && IsBattleOnlyBagClauseReplacementItem(itemId);
+}
+
+static u16 SanitizeRouteRewardItem(u16 itemId)
+{
+    if(itemId == ITEM_NONE || itemId == ITEM_LIST_END)
+        return itemId;
+
+    if(IsBattleOnlyBagClauseReplacementItem(itemId) || !Rogue_IsItemEnabled(itemId))
+        return ITEM_POKEBLOCK_BUNDLE;
+
+    return itemId;
+}
+
+static bool8 CanReplaceRouteRewardWithPokeblockBundle(u16 itemId)
+{
+    switch(itemId)
+    {
+    case ITEM_POKEBLOCK_BUNDLE:
+    case ITEM_BIG_POKEBLOCK_BUNDLE:
+    case ITEM_MASTER_BALL:
+    case ITEM_RARE_CANDY:
+    case ITEM_ESCAPE_ROPE:
+#ifdef ROGUE_EXPANSION
+    case ITEM_ABILITY_CAPSULE:
+    case ITEM_ABILITY_PATCH:
+#endif
+        return FALSE;
+    }
+
+    if(Rogue_IsEvolutionItem(itemId) || Rogue_IsFormItem(itemId))
+        return FALSE;
+
+#ifdef ROGUE_EXPANSION
+    if(itemId >= ITEM_LONELY_MINT && itemId <= ITEM_SERIOUS_MINT)
+        return FALSE;
+
+    if((itemId >= ITEM_BUG_TERA_SHARD && itemId <= ITEM_WATER_TERA_SHARD) || itemId == ITEM_STELLAR_TERA_SHARD)
+        return FALSE;
+#endif
+
+    switch(ItemId_GetPocket(itemId))
+    {
+    case POCKET_ITEMS:
+    case POCKET_MEDICINE:
+        return TRUE;
+
+    default:
+        return FALSE;
+    }
+}
+
 bool8 Rogue_IsItemEnabled(u16 itemId)
 {
     // Handle perma banned entries
@@ -2598,6 +2678,9 @@ bool8 Rogue_IsItemEnabled(u16 itemId)
             return FALSE;
 
         if(itemId >= ITEM_BLUE_FLUTE && itemId <= ITEM_WHITE_FLUTE)
+            return FALSE;
+
+        if(IsBagClauseDisabledBattleOnlyItem(itemId))
             return FALSE;
 
 #ifdef ROGUE_EXPANSION
@@ -3882,9 +3965,10 @@ static void TryAutoItemPickup(void)
             {
                 u16 amount;
                 u16 idx = template->flagId - FLAG_ROGUE_ITEM_START;
-                u16 itemId = VarGet(VAR_ROGUE_ITEM_START + idx);
+                u16 itemId = SanitizeRouteRewardItem(VarGet(VAR_ROGUE_ITEM_START + idx));
 
                 VarSet(VAR_0x8001, itemId);
+                VarSet(VAR_ROGUE_ITEM_START + idx, itemId);
                 amount = Rogue_ModifyItemPickupAmount(itemId, 1);
 
                 if (AddBagItem(itemId, amount))
@@ -4353,14 +4437,26 @@ u16 Rogue_PostRunRewardMoney()
 
 static u16 ChooseRunRewardPokeblock(void);
 
+#define POKEBLOCKS_PER_SMALL_BUNDLE 2
+#define POKEBLOCKS_PER_BIG_BUNDLE 5
+
 u16 Rogue_PostRunRewardPokeblocks()
 {
-    u8 i;
+    u16 i;
     u16 count = 0;
+    u16 bundleRewardCount = gRogueRun.pendingPokeblockBundleRewardCount;
 
     for(i = 0; i < ARRAY_COUNT(gRogueRun.completedBadges); ++i)
     {
         if(gRogueRun.completedBadges[i] != TYPE_NONE && AddBagItem(ChooseRunRewardPokeblock(), 1))
+            ++count;
+    }
+
+    gRogueRun.pendingPokeblockBundleRewardCount = 0;
+
+    for(i = 0; i < bundleRewardCount; ++i)
+    {
+        if(AddBagItem(ChooseRunRewardPokeblock(), 1))
             ++count;
     }
 
@@ -5056,6 +5152,10 @@ static void EndRogueRun(void)
             }
         }
     }
+
+    gRogueRun.pendingPokeblockBundleRewardCount =
+        POKEBLOCKS_PER_SMALL_BUNDLE * CountTotalItemQuantityInBag(ITEM_POKEBLOCK_BUNDLE) +
+        POKEBLOCKS_PER_BIG_BUNDLE * CountTotalItemQuantityInBag(ITEM_BIG_POKEBLOCK_BUNDLE);
 
     RogueSave_LoadHubStates();
     RogueGift_EnsureDynamicCustomMonsAreValid();
@@ -7107,6 +7207,11 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
         {
             u8 write, read;
             u16 trainerCounter;
+            bool8 shouldGuaranteePokeblockBundle = gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE
+                && Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE);
+            bool8 hasVisiblePokeblockBundle = FALSE;
+            u8 bundleCandidateObjects[OBJECT_EVENT_TEMPLATES_COUNT];
+            u8 bundleCandidateCount = 0;
 
             trainerCounter = 0;
             write = 0;
@@ -7144,7 +7249,9 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
                     if(!FlagGet(objectEvents[write].flagId))
                     {
                         u16 idx = objectEvents[write].flagId - FLAG_ROGUE_ITEM_START;
-                        u16 itemId = VarGet(VAR_ROGUE_ITEM_START + idx);
+                        u16 itemId = SanitizeRouteRewardItem(VarGet(VAR_ROGUE_ITEM_START + idx));
+
+                        VarSet(VAR_ROGUE_ITEM_START + idx, itemId);
 
                         // Default to a greyed out pokeball
                         objectEvents[write].graphicsId = OBJ_EVENT_GFX_ITEM_POKE_BALL;
@@ -7203,6 +7310,14 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
                             }
                         }
 
+                        if(shouldGuaranteePokeblockBundle)
+                        {
+                            if(itemId == ITEM_POKEBLOCK_BUNDLE)
+                                hasVisiblePokeblockBundle = TRUE;
+                            else if(CanReplaceRouteRewardWithPokeblockBundle(itemId))
+                                bundleCandidateObjects[bundleCandidateCount++] = write;
+                        }
+
                         // Accept this item
                         write++;
                     }
@@ -7211,6 +7326,22 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
                 {
                     // Accept all other types of object
                     write++;
+                }
+            }
+
+            if(shouldGuaranteePokeblockBundle && !hasVisiblePokeblockBundle && bundleCandidateCount != 0)
+            {
+                u8 i;
+                u8 selectedObject = bundleCandidateObjects[RogueRandomRange(bundleCandidateCount, FLAG_SET_SEED_ITEMS)];
+                u16 selectedFlag = objectEvents[selectedObject].flagId;
+                u16 selectedIdx = selectedFlag - FLAG_ROGUE_ITEM_START;
+
+                VarSet(VAR_ROGUE_ITEM_START + selectedIdx, ITEM_POKEBLOCK_BUNDLE);
+
+                for(i = 0; i < write; ++i)
+                {
+                    if(objectEvents[i].flagId == selectedFlag)
+                        objectEvents[i].graphicsId = OBJ_EVENT_GFX_ITEM_POKE_BALL;
                 }
             }
 
@@ -11557,6 +11688,9 @@ static u8 RouteItems_CalculateBaseWeight(u16 itemId)
 {
     u8 pocket = ItemId_GetPocket(itemId);
 
+    if(itemId == ITEM_POKEBLOCK_BUNDLE)
+        return ROUTE_POKEBLOCK_BUNDLE_WEIGHT;
+
     switch (pocket)
     {
     case POCKET_TM_HM:
@@ -11644,6 +11778,12 @@ static void RandomiseItemContent(u8 difficultyLevel)
         RogueItemQuery_IsStoredInPocket(QUERY_FUNC_EXCLUDE, POCKET_POKEBLOCK);
 
         RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, ITEM_PREMIER_BALL);
+        RogueMiscQuery_EditRange(QUERY_FUNC_EXCLUDE, ITEM_X_ATTACK, ITEM_GUARD_SPEC);
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, ITEM_POKE_DOLL);
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, ITEM_FLUFFY_TAIL);
+#ifdef ROGUE_EXPANSION
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, ITEM_POKE_TOY);
+#endif
 
         RogueItemQuery_InPriceRange(QUERY_FUNC_INCLUDE, 50 + 100 * (difficultyLevel + dropRarity), 300 + 800 * (difficultyLevel + dropRarity));
 
@@ -11655,6 +11795,11 @@ static void RandomiseItemContent(u8 difficultyLevel)
         if(difficultyLevel <= 3)
         {
             RogueItemQuery_IsHeldItem(QUERY_FUNC_EXCLUDE);
+        }
+
+        if(allowSpecialItemDrops && Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE))
+        {
+            RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, ITEM_POKEBLOCK_BUNDLE);
         }
 
         if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT)

@@ -82,7 +82,7 @@ script Rogue_Encounter_Shops_TalkVendingMachine
                                 giveitem(ITEM_SODA_POP, 1)
 
                             case 9:
-                                giveitem(ITEM_POKE_DOLL, 1)
+                                giveitem(ITEM_HYPER_POTION, 1)
                         }
                     }
                 }

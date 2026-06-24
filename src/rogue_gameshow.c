@@ -1,5 +1,6 @@
 #include "global.h"
 #include "constants/item.h"
+#include "constants/rogue.h"
 #include "easy_chat.h"
 #include "event_data.h"
 #include "item.h"
@@ -8,9 +9,11 @@
 #include "string_util.h"
 
 #include "rogue_baked.h"
+#include "rogue_controller.h"
 #include "rogue_gameshow.h"
 #include "rogue_pokedex.h"
 #include "rogue_query.h"
+#include "rogue_settings.h"
 
 #define VAR_CURRENT_ROUND           VAR_TEMP_0
 #define VAR_CURRENT_REWARD_COUNTER  VAR_TEMP_2
@@ -105,8 +108,18 @@ void GameShow_SelectRewardItem()
     u8 i;
     u16 itemId;
     u16 amount;
-    u32 targetPrice = 2000 + VarGet(VAR_CURRENT_REWARD_COUNTER) * 2000;
+    u16 rewardCounter = VarGet(VAR_CURRENT_REWARD_COUNTER);
+    u32 targetPrice = 2000 + rewardCounter * 2000;
     RAND_TYPE startSeed = gRngRogueValue;
+
+    if(Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE) && rewardCounter >= 4 && RogueRandomChance(15 + 5 * rewardCounter, 0))
+    {
+        VarSet(VAR_CURRENT_REWARD_ITEM, ITEM_BIG_POKEBLOCK_BUNDLE);
+        VarSet(VAR_CURRENT_REWARD_COUNT, 1);
+        gRngRogueValue = startSeed;
+        return;
+    }
+    gRngRogueValue = startSeed;
 
     RogueItemQuery_Begin();
     RogueItemQuery_IsItemActive();
@@ -122,7 +135,7 @@ void GameShow_SelectRewardItem()
     RogueItemQuery_InPriceRange(QUERY_FUNC_INCLUDE, targetPrice / 5, targetPrice);
 
     // Cycle RNG
-    for(i = 0; i < VarGet(VAR_CURRENT_REWARD_COUNTER);++i)
+    for(i = 0; i < rewardCounter;++i)
         RogueRandom();
 
     itemId = RogueMiscQuery_SelectRandomElement(RogueRandom());

@@ -8,6 +8,8 @@ extern const u8 gItemDesc_GoldRidingWhistle[];
 extern const u8 gItemDesc_CGear[];
 extern const u8 gItemDesc_DaycarePhone[];
 extern const u8 gItemDesc_BuildingSupplies[];
+extern const u8 gItemDesc_PokeblockBundle[];
+extern const u8 gItemDesc_BigPokeblockBundle[];
 extern const u8 gItemDesc_SmallCoinCase[];
 extern const u8 gItemDesc_LargeCoinCase[];
 extern const u8 gItemDesc_GoldenSeed[];
@@ -224,6 +226,42 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         //.iconImage = gItemIcon_OaksParcel,
         //.iconPalette = gItemIconPalette_OaksParcel,
+    },
+
+    [ITEM_POKEBLOCK_BUNDLE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Small Pkblk Pkg"),
+#else
+        .name = _("PKBLK PKG"),
+#endif
+        .itemId = ITEM_POKEBLOCK_BUNDLE,
+        .price = 0,
+        .description = gItemDesc_PokeblockBundle,
+        .pocket = POCKET_KEY_ITEMS,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_BuildResources,
+        .iconPalette = gItemIconPalette_BuildResources,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BIG_POKEBLOCK_BUNDLE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Big Pkblk Pkg"),
+#else
+        .name = _("BIG PKBLK PKG"),
+#endif
+        .itemId = ITEM_BIG_POKEBLOCK_BUNDLE,
+        .price = 0,
+        .description = gItemDesc_BigPokeblockBundle,
+        .pocket = POCKET_KEY_ITEMS,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_BuildResources,
+        .iconPalette = gItemIconPalette_BuildResources,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
 
 #ifdef ROGUE_EXPANSION

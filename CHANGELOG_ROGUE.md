@@ -69,6 +69,11 @@ Format follows Keep a Changelog loosely:
 - Reduced Pokémon-linked special item drops so matching party items are only
   favored after a rare special-item roll instead of increasing route special
   item frequency.
+- Removed battle-only Bag Clause dead items from generated item economies and
+  replaced the route shop vending machine's Poké Doll reward.
+- Added guaranteed small Pokéblock Bundle drops on normal routes for Bag
+  Clause runs, cashing small bundles into two random Pokéblocks and rare big
+  bundles into five when the run ends.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its

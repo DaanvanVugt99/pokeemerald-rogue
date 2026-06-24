@@ -2764,6 +2764,10 @@ void Rogue_BattleTower_GiveReward(void)
     {
         Rogue_PushPopup_AddItem(ITEM_ESCAPE_ROPE, 1);
     }
+    else if(Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE) && RogueRandomChance(20, 0) && AddBagItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1))
+    {
+        Rogue_PushPopup_AddItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1);
+    }
     else if(RogueRandomChance(20, 0) && AddBagItem(ITEM_MAX_POTION, 3))
     {
         Rogue_PushPopup_AddItem(ITEM_MAX_POTION, 3);

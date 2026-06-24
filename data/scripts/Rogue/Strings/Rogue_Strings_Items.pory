@@ -38,6 +38,16 @@ text gItemDesc_BuildingSupplies
     format("Supplies used to create and upgrade buildings.")
 }
 
+text gItemDesc_PokeblockBundle
+{
+    format("A small bundle that becomes Pokéblocks after an Adventure.")
+}
+
+text gItemDesc_BigPokeblockBundle
+{
+    format("A big bundle that becomes Pokéblocks after an Adventure.")
+}
+
 text gItemDesc_TM
 {
     format("Reusable machine for teaching {PKMN} one specific move.")
