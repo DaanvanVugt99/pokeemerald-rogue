@@ -57,6 +57,9 @@ Format follows Keep a Changelog loosely:
   drops, quest rewards, and Starf Berry crafting.
 - Allow standard adventures to start with up to six party Pokémon, while
   blocking duplicate species from entering the same run-start party.
+- Weighted route and Team Hideout item drops toward Pokémon-linked special
+  and evolution items when the matching evolution family is in the party, while
+  preventing duplicate linked special-item drops on the same route.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its

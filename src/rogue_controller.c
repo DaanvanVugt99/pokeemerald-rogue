@@ -4,6 +4,7 @@
 #include "constants/battle_string_ids.h"
 #include "constants/berry.h"
 #include "constants/event_objects.h"
+#include "constants/form_change_types.h"
 #include "constants/heal_locations.h"
 #include "constants/hold_effects.h"
 #include "constants/items.h"
@@ -90,6 +91,7 @@ STATIC_ASSERT(sizeof(struct Pokemon) == sizeof(struct RoguePokemonFacade), SizeO
 
 #define ROGUE_TRAINER_COUNT (FLAG_ROGUE_TRAINER_END - FLAG_ROGUE_TRAINER_START + 1)
 #define ROGUE_ITEM_COUNT (FLAG_ROGUE_ITEM_END - FLAG_ROGUE_ITEM_START + 1)
+#define ROUTE_SPECIAL_ITEM_CAPACITY 256
 
 #ifdef ROGUE_DEBUG
 EWRAM_DATA u8 gDebug_CurrentTab = 0;
@@ -11100,34 +11102,252 @@ static bool8 RogueRandomChanceBerry()
     return RogueRandomChance(chance, FLAG_SET_SEED_ITEMS);
 }
 
-static u8 RouteItems_CalculateWeight(u16 index, u16 itemId, void* data)
+struct RouteItemWeightContext
+{
+    u16 selectedItems[ROGUE_ITEM_COUNT];
+    u16 partySpecialItems[ROUTE_SPECIAL_ITEM_CAPACITY];
+    u16 otherSpecialItems[ROUTE_SPECIAL_ITEM_CAPACITY];
+    u16 partyBoostItems[ROUTE_SPECIAL_ITEM_CAPACITY];
+    u16 selectedItemCount;
+    u16 partySpecialItemCount;
+    u16 otherSpecialItemCount;
+    u16 partyBoostItemCount;
+    bool8 isTeamHideout;
+};
+
+static bool8 IsRouteSpecialDropFormChangeMethod(u16 method)
+{
+    switch (method)
+    {
+    case FORM_CHANGE_ITEM_HOLD:
+    case FORM_CHANGE_ITEM_USE:
+    case FORM_CHANGE_ITEM_USE_MULTICHOICE:
+    case FORM_CHANGE_BEGIN_BATTLE:
+    case FORM_CHANGE_END_BATTLE:
+    case FORM_CHANGE_BATTLE_MEGA_EVOLUTION_ITEM:
+    case FORM_CHANGE_BATTLE_PRIMAL_REVERSION:
+    case FORM_CHANGE_BATTLE_ULTRA_BURST:
+        return TRUE;
+
+    default:
+        return FALSE;
+    }
+}
+
+static bool8 IsRouteBoostedEvolutionMethod(u16 method)
+{
+    switch (method)
+    {
+    case EVO_ITEM:
+#ifdef ROGUE_EXPANSION
+    case EVO_ITEM_HOLD_DAY:
+    case EVO_ITEM_HOLD_NIGHT:
+    case EVO_ITEM_MALE:
+    case EVO_ITEM_FEMALE:
+    case EVO_ITEM_NIGHT:
+    case EVO_ITEM_DAY:
+    case EVO_ITEM_HOLD:
+#endif
+        return TRUE;
+
+    default:
+        return FALSE;
+    }
+}
+
+static bool8 IsRouteSpecialDropItemAllowed(u16 itemId)
+{
+    if(itemId == ITEM_NONE || itemId == ITEM_LIST_END)
+        return FALSE;
+
+    switch (ItemId_GetPocket(itemId))
+    {
+    case POCKET_KEY_ITEMS:
+    case POCKET_BERRIES:
+    case POCKET_POKEBLOCK:
+        return FALSE;
+
+    default:
+        return itemId != ITEM_NONE && itemId != ITEM_LIST_END && Rogue_IsItemEnabled(itemId);
+    }
+}
+
+static bool8 RouteItemContextContainsItem(const u16* items, u16 count, u16 itemId)
+{
+    u16 i;
+
+    for(i = 0; i < count; ++i)
+    {
+        if(items[i] == itemId)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static void RouteItemContextAppendUnique(u16* items, u16* count, u16 capacity, u16 itemId)
+{
+    if(!RouteItemContextContainsItem(items, *count, itemId))
+    {
+        AGB_ASSERT(*count < capacity);
+
+        if(*count < capacity)
+            items[(*count)++] = itemId;
+    }
+}
+
+static bool8 RouteItemContextPartyHasFamily(u16 species)
+{
+    u8 i;
+    u16 eggSpecies = Rogue_GetEggSpecies(species);
+
+    if(eggSpecies == SPECIES_NONE)
+        return FALSE;
+
+    for(i = 0; i < gPlayerPartyCount; ++i)
+    {
+        u16 partySpecies = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+
+        if(partySpecies != SPECIES_NONE && Rogue_GetEggSpecies(partySpecies) == eggSpecies)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static void InitRouteItemWeightContext(struct RouteItemWeightContext* context)
+{
+    u16 species;
+
+    memset(context, 0, sizeof(*context));
+    context->isTeamHideout = gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT;
+
+    for(species = SPECIES_NONE + 1; species < NUM_SPECIES; ++species)
+    {
+        u8 i;
+        u8 formChangeCount = Rogue_GetActiveFormChangeCount(species);
+
+        for(i = 0; i < formChangeCount; ++i)
+        {
+            struct FormChange formChange;
+
+            Rogue_ModifyFormChange(species, i, &formChange);
+
+            if(IsRouteSpecialDropFormChangeMethod(formChange.method) && IsRouteSpecialDropItemAllowed(formChange.param1))
+            {
+                if(RouteItemContextPartyHasFamily(species))
+                {
+                    RouteItemContextAppendUnique(context->partySpecialItems, &context->partySpecialItemCount, ARRAY_COUNT(context->partySpecialItems), formChange.param1);
+                    RouteItemContextAppendUnique(context->partyBoostItems, &context->partyBoostItemCount, ARRAY_COUNT(context->partyBoostItems), formChange.param1);
+                }
+                else
+                {
+                    RouteItemContextAppendUnique(context->otherSpecialItems, &context->otherSpecialItemCount, ARRAY_COUNT(context->otherSpecialItems), formChange.param1);
+                }
+            }
+        }
+
+        if(RouteItemContextPartyHasFamily(species))
+        {
+            struct Evolution evolution;
+            u8 evolutionCount = Rogue_GetMaxEvolutionCount(species);
+
+            for(i = 0; i < evolutionCount; ++i)
+            {
+                Rogue_ModifyEvolution(species, i, &evolution);
+
+                if(IsRouteBoostedEvolutionMethod(evolution.method) && IsRouteSpecialDropItemAllowed(evolution.param))
+                    RouteItemContextAppendUnique(context->partyBoostItems, &context->partyBoostItemCount, ARRAY_COUNT(context->partyBoostItems), evolution.param);
+            }
+        }
+    }
+}
+
+static bool8 RouteItemContextIsPartySpecialItem(struct RouteItemWeightContext* context, u16 itemId)
+{
+    return context != NULL && RouteItemContextContainsItem(context->partySpecialItems, context->partySpecialItemCount, itemId);
+}
+
+static bool8 RouteItemContextIsAnySpecialItem(struct RouteItemWeightContext* context, u16 itemId)
+{
+    return context != NULL
+        && (RouteItemContextContainsItem(context->partySpecialItems, context->partySpecialItemCount, itemId)
+            || RouteItemContextContainsItem(context->otherSpecialItems, context->otherSpecialItemCount, itemId));
+}
+
+static bool8 RouteItemContextWasSelected(struct RouteItemWeightContext* context, u16 itemId)
+{
+    return context != NULL && RouteItemContextContainsItem(context->selectedItems, context->selectedItemCount, itemId);
+}
+
+static bool8 RouteItemContextIsPartyBoostItem(struct RouteItemWeightContext* context, u16 itemId)
+{
+    return context != NULL && RouteItemContextContainsItem(context->partyBoostItems, context->partyBoostItemCount, itemId);
+}
+
+static void RouteItemContextRecordSelection(struct RouteItemWeightContext* context, u16 itemId)
+{
+    if(context != NULL)
+        RouteItemContextAppendUnique(context->selectedItems, &context->selectedItemCount, ARRAY_COUNT(context->selectedItems), itemId);
+}
+
+static void IncludeRouteSpecialItems(struct RouteItemWeightContext* context)
+{
+    u16 i;
+
+    for(i = 0; i < context->partySpecialItemCount; ++i)
+        RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, context->partySpecialItems[i]);
+
+    if(context->isTeamHideout)
+    {
+        for(i = 0; i < context->otherSpecialItemCount; ++i)
+            RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, context->otherSpecialItems[i]);
+    }
+}
+
+static u8 RouteItems_CalculateBaseWeight(u16 itemId)
 {
     u8 pocket = ItemId_GetPocket(itemId);
-    u8 weight;
 
     switch (pocket)
     {
     case POCKET_TM_HM:
-        weight = 3;
-        break;
+        return 3;
 
     case POCKET_HELD_ITEMS:
-        weight = 3;
-        break;
+        return 3;
 
     case POCKET_STONES:
-        weight = 6;
-        break;
+        return 6;
 
     case POCKET_MEDICINE:
     case POCKET_ITEMS:
-        weight = 20;
-        break;
+        return 20;
 
     default:
-        weight = 10;
-        break;
+        return 10;
     }
+}
+
+static u8 RouteItems_CalculateWeight(u16 index, u16 itemId, void* data)
+{
+    struct RouteItemWeightContext* context = data;
+    u8 weight = RouteItems_CalculateBaseWeight(itemId);
+    bool8 isPartySpecialItem = RouteItemContextIsPartySpecialItem(context, itemId);
+    bool8 isSpecialItem = isPartySpecialItem || RouteItemContextIsAnySpecialItem(context, itemId);
+    bool8 isPartyBoostItem = isPartySpecialItem || RouteItemContextIsPartyBoostItem(context, itemId);
+
+    if(RouteItemContextWasSelected(context, itemId))
+        return isSpecialItem ? 0 : 1;
+
+    if(isPartySpecialItem)
+        return context->isTeamHideout ? 80 : 45;
+
+    if(isSpecialItem && context->isTeamHideout)
+        return 2;
+
+    if(isPartyBoostItem)
+        weight = min(80, weight + 15);
 
     return weight;
 }
@@ -11150,6 +11370,7 @@ static void RandomiseItemContent(u8 difficultyLevel)
 {
     u8 difficultyModifier = Rogue_GetEncounterDifficultyModifier();
     u8 dropRarity = GetCurrentDropRarity();
+    struct RouteItemWeightContext routeItemContext;
 
     if(difficultyModifier == ADVPATH_SUBROOM_ROUTE_CALM) // Easy
     {
@@ -11161,6 +11382,8 @@ static void RandomiseItemContent(u8 difficultyLevel)
         if(dropRarity != 0)
             ++dropRarity;
     }
+
+    InitRouteItemWeightContext(&routeItemContext);
 
     RogueItemQuery_Begin();
     {
@@ -11191,17 +11414,20 @@ static void RandomiseItemContent(u8 difficultyLevel)
             RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, ITEM_ESCAPE_ROPE);
         }
 
+        IncludeRouteSpecialItems(&routeItemContext);
+
         RogueWeightQuery_Begin();
         {
             u8 i;
             u16 itemId;
 
-            RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, NULL);
-
             for(i = 0; i < ROGUE_ITEM_COUNT; ++i)
             {
-                // Make unlikely to get this item again, but not impossible
-                itemId = RogueWeightQuery_SelectRandomFromWeightsWithUpdate(RogueRandom(), 1);
+                RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, &routeItemContext);
+
+                AGB_ASSERT(RogueWeightQuery_HasAnyWeights());
+                itemId = RogueWeightQuery_SelectRandomFromWeights(RogueRandom());
+                RouteItemContextRecordSelection(&routeItemContext, itemId);
                 VarSet(VAR_ROGUE_ITEM_START + i, itemId);
             }
         }
