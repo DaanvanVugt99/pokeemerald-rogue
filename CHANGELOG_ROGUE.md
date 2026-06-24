@@ -130,6 +130,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Optimized route special item weighting to avoid long pauses when entering
+  route, hideout, boss, or miniboss nodes.
 - Fixed Shuffle Curse held item restoration deleting items when a shuffled party
   member was restored after battle or when the temporary Dark Deal curse expired.
 - Forced EXP trainer helper battles to use 4x battle speed regardless of the

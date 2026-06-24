@@ -2511,6 +2511,7 @@ static u8 ItemToGen(u16 item)
 }
 
 extern const u16 gRogueBake_EvoItems_Count;
+extern const u16 gRogueBake_FormItems[];
 extern const u16 gRogueBake_FormItems_Count;
 
 static void SetEvolutionItemFlag(u16 itemId, bool8 state)
@@ -3738,6 +3739,7 @@ bool8 Rogue_OnProcessPlayerFieldInput(void)
     return FALSE;
 }
 
+#ifdef ROGUE_FEATURE_HOT_TRACKING
 static hot_track_dat HotTrackingRtcToCounter(struct SiiRtcInfo* rtc)
 {
     return RtcGetDayCount(rtc) * 24 * 60 * 60 +
@@ -3753,7 +3755,7 @@ static hot_track_dat HotTrackingLocalRtcToCounter(void)
 
     return HotTrackingRtcToCounter(&localRtc);
 }
-
+#endif
 
 static void ResetHotTracking()
 {
@@ -11349,71 +11351,75 @@ static void RouteItemContextAppendUnique(u16* items, u16* count, u16 capacity, u
     }
 }
 
-static bool8 RouteItemContextPartyHasFamily(u16 species)
+static void AppendPartyFamilyRouteItems(struct RouteItemWeightContext* context, u16 species)
 {
     u8 i;
-    u16 eggSpecies = Rogue_GetEggSpecies(species);
+    struct FormChange formChange;
+    u8 formChangeCount = Rogue_GetActiveFormChangeCount(species);
+    struct Evolution evolution;
+    u8 evolutionCount = Rogue_GetMaxEvolutionCount(species);
 
-    if(eggSpecies == SPECIES_NONE)
-        return FALSE;
+    for(i = 0; i < formChangeCount; ++i)
+    {
+        Rogue_ModifyFormChange(species, i, &formChange);
+
+        if(IsRouteSpecialDropFormChangeMethod(formChange.method) && IsRouteSpecialDropItemAllowed(formChange.param1))
+        {
+            RouteItemContextAppendUnique(context->partySpecialItems, &context->partySpecialItemCount, ARRAY_COUNT(context->partySpecialItems), formChange.param1);
+            RouteItemContextAppendUnique(context->partyBoostItems, &context->partyBoostItemCount, ARRAY_COUNT(context->partyBoostItems), formChange.param1);
+        }
+    }
+
+    for(i = 0; i < evolutionCount; ++i)
+    {
+        Rogue_ModifyEvolution(species, i, &evolution);
+
+        if(evolution.method != 0 && evolution.targetSpecies != SPECIES_NONE)
+        {
+            if(IsRouteBoostedEvolutionMethod(evolution.method) && IsRouteSpecialDropItemAllowed(evolution.param))
+                RouteItemContextAppendUnique(context->partyBoostItems, &context->partyBoostItemCount, ARRAY_COUNT(context->partyBoostItems), evolution.param);
+
+            AppendPartyFamilyRouteItems(context, evolution.targetSpecies);
+        }
+    }
+}
+
+static void AppendActiveRouteSpecialItems(struct RouteItemWeightContext* context)
+{
+    u16 i;
+
+    for(i = 0; i < gRogueBake_FormItems_Count; ++i)
+    {
+        u16 itemId = gRogueBake_FormItems[i];
+
+        if(GetFormItemFlag(itemId)
+            && IsRouteSpecialDropItemAllowed(itemId)
+            && !RouteItemContextContainsItem(context->partySpecialItems, context->partySpecialItemCount, itemId))
+            RouteItemContextAppendUnique(context->otherSpecialItems, &context->otherSpecialItemCount, ARRAY_COUNT(context->otherSpecialItems), itemId);
+    }
+}
+
+static void InitRouteItemWeightContext(struct RouteItemWeightContext* context)
+{
+    u8 i;
+
+    memset(context, 0, sizeof(*context));
+    context->isTeamHideout = gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT;
 
     for(i = 0; i < gPlayerPartyCount; ++i)
     {
         u16 partySpecies = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
 
-        if(partySpecies != SPECIES_NONE && Rogue_GetEggSpecies(partySpecies) == eggSpecies)
-            return TRUE;
-    }
-
-    return FALSE;
-}
-
-static void InitRouteItemWeightContext(struct RouteItemWeightContext* context)
-{
-    u16 species;
-
-    memset(context, 0, sizeof(*context));
-    context->isTeamHideout = gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT;
-
-    for(species = SPECIES_NONE + 1; species < NUM_SPECIES; ++species)
-    {
-        u8 i;
-        u8 formChangeCount = Rogue_GetActiveFormChangeCount(species);
-
-        for(i = 0; i < formChangeCount; ++i)
+        if(partySpecies != SPECIES_NONE)
         {
-            struct FormChange formChange;
+            u16 eggSpecies = Rogue_GetEggSpecies(partySpecies);
 
-            Rogue_ModifyFormChange(species, i, &formChange);
-
-            if(IsRouteSpecialDropFormChangeMethod(formChange.method) && IsRouteSpecialDropItemAllowed(formChange.param1))
-            {
-                if(RouteItemContextPartyHasFamily(species))
-                {
-                    RouteItemContextAppendUnique(context->partySpecialItems, &context->partySpecialItemCount, ARRAY_COUNT(context->partySpecialItems), formChange.param1);
-                    RouteItemContextAppendUnique(context->partyBoostItems, &context->partyBoostItemCount, ARRAY_COUNT(context->partyBoostItems), formChange.param1);
-                }
-                else
-                {
-                    RouteItemContextAppendUnique(context->otherSpecialItems, &context->otherSpecialItemCount, ARRAY_COUNT(context->otherSpecialItems), formChange.param1);
-                }
-            }
-        }
-
-        if(RouteItemContextPartyHasFamily(species))
-        {
-            struct Evolution evolution;
-            u8 evolutionCount = Rogue_GetMaxEvolutionCount(species);
-
-            for(i = 0; i < evolutionCount; ++i)
-            {
-                Rogue_ModifyEvolution(species, i, &evolution);
-
-                if(IsRouteBoostedEvolutionMethod(evolution.method) && IsRouteSpecialDropItemAllowed(evolution.param))
-                    RouteItemContextAppendUnique(context->partyBoostItems, &context->partyBoostItemCount, ARRAY_COUNT(context->partyBoostItems), evolution.param);
-            }
+            if(eggSpecies != SPECIES_NONE)
+                AppendPartyFamilyRouteItems(context, eggSpecies);
         }
     }
+
+    AppendActiveRouteSpecialItems(context);
 }
 
 static bool8 RouteItemContextIsPartySpecialItem(struct RouteItemWeightContext* context, u16 itemId)
@@ -11610,6 +11616,8 @@ static void RandomiseItemContent(u8 difficultyLevel)
     u8 difficultyModifier = Rogue_GetEncounterDifficultyModifier();
     u8 dropRarity = GetCurrentDropRarity();
     struct RouteItemWeightContext routeItemContext;
+    bool8 allowSpecialItemDrops = gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE
+        || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT;
 
     if(difficultyModifier == ADVPATH_SUBROOM_ROUTE_CALM) // Easy
     {
@@ -11622,7 +11630,10 @@ static void RandomiseItemContent(u8 difficultyLevel)
             ++dropRarity;
     }
 
-    InitRouteItemWeightContext(&routeItemContext);
+    memset(&routeItemContext, 0, sizeof(routeItemContext));
+
+    if(allowSpecialItemDrops)
+        InitRouteItemWeightContext(&routeItemContext);
 
     RogueItemQuery_Begin();
     {
@@ -11653,7 +11664,8 @@ static void RandomiseItemContent(u8 difficultyLevel)
             RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, ITEM_ESCAPE_ROPE);
         }
 
-        ExcludeRouteSpecialItems(&routeItemContext);
+        if(allowSpecialItemDrops)
+            ExcludeRouteSpecialItems(&routeItemContext);
 
         RogueWeightQuery_Begin();
         {
@@ -11662,7 +11674,8 @@ static void RandomiseItemContent(u8 difficultyLevel)
 
             for(i = 0; i < ROGUE_ITEM_COUNT; ++i)
             {
-                bool8 selectedSpecialItem = !FlagGet(FLAG_ROGUE_ITEM_START + i)
+                bool8 selectedSpecialItem = allowSpecialItemDrops
+                    && !FlagGet(FLAG_ROGUE_ITEM_START + i)
                     && RollRouteSpecialItemDrop(&routeItemContext)
                     && TrySelectRouteSpecialItem(&routeItemContext, &itemId);
 
