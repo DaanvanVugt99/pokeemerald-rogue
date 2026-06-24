@@ -98,6 +98,7 @@ enum {
     MSG_CHANGED_TO_ITEM,
     MSG_CANT_STORE_MAIL,
     MSG_DUPLICATE_SPECIES,
+    MSG_LEGENDARY_CLAUSE,
     MSG_DUPLICATE_ITEM,
 };
 
@@ -693,6 +694,8 @@ static bool8 CanShiftMon(void);
 static bool8 IsMonBeingMoved(void);
 static bool8 WouldMovingMonDuplicatePartyAtSlot(u8 targetSlot);
 static bool8 WouldDisplayMonDuplicateParty(void);
+static bool8 WouldMovingMonViolateLegendaryClauseAtSlot(u8 targetSlot);
+static bool8 WouldDisplayMonViolateLegendaryClause(void);
 static bool8 WouldMovingMonDuplicatePartyHeldItemAtSlot(u8 targetSlot);
 static bool8 WouldDisplayMonDuplicatePartyHeldItem(void);
 static bool8 CanPartySlotReceiveHeldItem(u8 slot, u16 item);
@@ -1119,6 +1122,7 @@ static const struct StorageMessage sMessages[] =
     [MSG_CHANGED_TO_ITEM]      = {gText_ChangedToNewItem,        MSG_VAR_ITEM_NAME},
     [MSG_CANT_STORE_MAIL]      = {gText_MailCantBeStored,        MSG_VAR_NONE},
     [MSG_DUPLICATE_SPECIES]    = {gText_CantSelectSamePkmn,      MSG_VAR_NONE},
+    [MSG_LEGENDARY_CLAUSE]     = {gText_OnlyOneLegendaryMythical, MSG_VAR_NONE},
     [MSG_DUPLICATE_ITEM]       = {gText_NoIdenticalHoldItems,    MSG_VAR_NONE},
 };
 
@@ -2294,6 +2298,7 @@ enum {
     MSTATE_ERROR_LAST_PARTY_MON,
     MSTATE_ERROR_HAS_MAIL,
     MSTATE_ERROR_DUPLICATE_SPECIES,
+    MSTATE_ERROR_LEGENDARY_CLAUSE,
     MSTATE_ERROR_DUPLICATE_ITEM,
     MSTATE_WAIT_ERROR_MSG,
     MSTATE_MULTIMOVE_RUN,
@@ -2418,6 +2423,8 @@ static void Task_PokeStorageMain(u8 taskId)
             {
                 if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
                     sStorage->state = MSTATE_ERROR_DUPLICATE_SPECIES;
+                else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonViolateLegendaryClauseAtSlot(sCursorPosition))
+                    sStorage->state = MSTATE_ERROR_LEGENDARY_CLAUSE;
                 else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
                     sStorage->state = MSTATE_ERROR_DUPLICATE_ITEM;
                 else
@@ -2434,6 +2441,10 @@ static void Task_PokeStorageMain(u8 taskId)
             {
                 sStorage->state = MSTATE_ERROR_DUPLICATE_SPECIES;
             }
+            else if (WouldDisplayMonViolateLegendaryClause())
+            {
+                sStorage->state = MSTATE_ERROR_LEGENDARY_CLAUSE;
+            }
             else if (WouldDisplayMonDuplicatePartyHeldItem())
             {
                 sStorage->state = MSTATE_ERROR_DUPLICATE_ITEM;
@@ -2448,6 +2459,10 @@ static void Task_PokeStorageMain(u8 taskId)
             if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
             {
                 sStorage->state = MSTATE_ERROR_DUPLICATE_SPECIES;
+            }
+            else if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonViolateLegendaryClauseAtSlot(sCursorPosition))
+            {
+                sStorage->state = MSTATE_ERROR_LEGENDARY_CLAUSE;
             }
             else if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
             {
@@ -2560,6 +2575,11 @@ static void Task_PokeStorageMain(u8 taskId)
     case MSTATE_ERROR_DUPLICATE_SPECIES:
         PlaySE(SE_FAILURE);
         PrintMessage(MSG_DUPLICATE_SPECIES);
+        sStorage->state = MSTATE_WAIT_ERROR_MSG;
+        break;
+    case MSTATE_ERROR_LEGENDARY_CLAUSE:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_LEGENDARY_CLAUSE);
         sStorage->state = MSTATE_WAIT_ERROR_MSG;
         break;
     case MSTATE_ERROR_DUPLICATE_ITEM:
@@ -2698,6 +2718,10 @@ static void Task_OnSelectedMon(u8 taskId)
             {
                 sStorage->state = 7;
             }
+            else if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonViolateLegendaryClauseAtSlot(sCursorPosition))
+            {
+                sStorage->state = 9;
+            }
             else if (!CanPlaceMon() && sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
             {
                 sStorage->state = 8;
@@ -2714,6 +2738,8 @@ static void Task_OnSelectedMon(u8 taskId)
             {
                 if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
                     sStorage->state = 7;
+                else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonViolateLegendaryClauseAtSlot(sCursorPosition))
+                    sStorage->state = 9;
                 else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
                     sStorage->state = 8;
                 else
@@ -2730,6 +2756,10 @@ static void Task_OnSelectedMon(u8 taskId)
             if (WouldDisplayMonDuplicateParty())
             {
                 sStorage->state = 7;
+            }
+            else if (WouldDisplayMonViolateLegendaryClause())
+            {
+                sStorage->state = 9;
             }
             else if (WouldDisplayMonDuplicatePartyHeldItem())
             {
@@ -2824,6 +2854,11 @@ static void Task_OnSelectedMon(u8 taskId)
         PrintMessage(MSG_DUPLICATE_SPECIES);
         sStorage->state = 6;
         break;
+    case 9:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_LEGENDARY_CLAUSE);
+        sStorage->state = 6;
+        break;
     case 8:
         PlaySE(SE_FAILURE);
         PrintMessage(MSG_DUPLICATE_ITEM);
@@ -2915,6 +2950,11 @@ static void Task_WithdrawMon(u8 taskId)
         else if (WouldDisplayMonDuplicateParty())
         {
             PrintMessage(MSG_DUPLICATE_SPECIES);
+            sStorage->state = 1;
+        }
+        else if (WouldDisplayMonViolateLegendaryClause())
+        {
+            PrintMessage(MSG_LEGENDARY_CLAUSE);
             sStorage->state = 1;
         }
         else if (WouldDisplayMonDuplicatePartyHeldItem())
@@ -3825,6 +3865,12 @@ static void Task_OnBPressed(u8 taskId)
             {
                 PlaySE(SE_FAILURE);
                 PrintMessage(MSG_DUPLICATE_SPECIES);
+                sStorage->state = 1;
+            }
+            else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonViolateLegendaryClauseAtSlot(sCursorPosition))
+            {
+                PlaySE(SE_FAILURE);
+                PrintMessage(MSG_LEGENDARY_CLAUSE);
                 sStorage->state = 1;
             }
             else if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
@@ -7018,6 +7064,9 @@ static bool8 CanPlaceMon(void)
         if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
             return FALSE;
 
+        if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonViolateLegendaryClauseAtSlot(sCursorPosition))
+            return FALSE;
+
         if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
             return FALSE;
 
@@ -7036,6 +7085,9 @@ static bool8 CanShiftMon(void)
     if (sIsMonBeingMoved)
     {
         if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyAtSlot(sCursorPosition))
+            return FALSE;
+
+        if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonViolateLegendaryClauseAtSlot(sCursorPosition))
             return FALSE;
 
         if (sCursorArea == CURSOR_AREA_IN_PARTY && WouldMovingMonDuplicatePartyHeldItemAtSlot(sCursorPosition))
@@ -7073,6 +7125,25 @@ static bool8 WouldDisplayMonDuplicateParty(void)
 
     BoxMonAtToMon(StorageGetCurrentBox(), sCursorPosition, &mon);
     return Rogue_PartyHasDuplicateSpecies(&mon, PARTY_SIZE, PARTY_SIZE);
+}
+
+static bool8 WouldMovingMonViolateLegendaryClauseAtSlot(u8 targetSlot)
+{
+    if (!Rogue_IsRunActive())
+        return FALSE;
+
+    return Rogue_PartyHasExtraLegendaryOrMythical(&sStorage->movingMon, targetSlot, PARTY_SIZE);
+}
+
+static bool8 WouldDisplayMonViolateLegendaryClause(void)
+{
+    struct Pokemon mon;
+
+    if (!Rogue_IsRunActive() || sCursorArea != CURSOR_AREA_IN_BOX)
+        return FALSE;
+
+    BoxMonAtToMon(StorageGetCurrentBox(), sCursorPosition, &mon);
+    return Rogue_PartyHasExtraLegendaryOrMythical(&mon, PARTY_SIZE, PARTY_SIZE);
 }
 
 static bool8 WouldMovingMonDuplicatePartyHeldItemAtSlot(u8 targetSlot)

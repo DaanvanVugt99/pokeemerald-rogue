@@ -110,6 +110,7 @@ static u8 const sMenuName_ReleaseMons[] = _("Release Fainted {PKMN}");
 static u8 const sMenuName_BagClause[] = _("Bag Clause");
 static u8 const sMenuName_SpeciesClause[] = _("Species Clause");
 static u8 const sMenuName_HeldItemClause[] = _("Held Item Clause");
+static u8 const sMenuName_LegendaryClause[] = _("Legendary Clause");
 static u8 const sMenuName_TrainerDiversity[] = _("Diverse Trainer {PKMN}");
 
 static u8 const sMenuName_TrainerRogue[] = _("Rogue");
@@ -300,6 +301,22 @@ static u8 const* const sMenuNameDesc_HeldItemClause[] =
 {
     sMenuNameDesc_HeldItemClauseOff,
     sMenuNameDesc_HeldItemClauseOn,
+};
+
+const u8 sMenuNameDesc_LegendaryClauseOff[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Multiple Legendary or Mythical {PKMN}\n"
+    "can be used in your party."
+);
+const u8 sMenuNameDesc_LegendaryClauseOn[] = _(
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
+    "Only one Legendary or Mythical {PKMN}\n"
+    "can be used in your party."
+);
+static u8 const* const sMenuNameDesc_LegendaryClause[] =
+{
+    sMenuNameDesc_LegendaryClauseOff,
+    sMenuNameDesc_LegendaryClauseOn,
 };
 
 const u8 sMenuNameDesc_TrainerDiversityOff[] = _(
@@ -533,6 +550,7 @@ enum
     MENUITEM_MENU_TOGGLE_BAG_CLAUSE,
     MENUITEM_MENU_TOGGLE_SPECIES_CLAUSE,
     MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE,
+    MENUITEM_MENU_TOGGLE_LEGENDARY_CLAUSE,
 
     MENUITEM_MENU_TOGGLE_TRAINER_ROGUE,
     MENUITEM_MENU_TOGGLE_TRAINER_KANTO,
@@ -807,6 +825,13 @@ static const struct MenuEntry sOptionMenuItems[] =
     {
         .itemName = sMenuName_HeldItemClause,
         .MULTI_DESC(sMenuNameDesc_HeldItemClause),
+        .processInput = Toggle_ProcessInput,
+        .drawChoices = Toggle_DrawChoices
+    },
+    [MENUITEM_MENU_TOGGLE_LEGENDARY_CLAUSE] =
+    {
+        .itemName = sMenuName_LegendaryClause,
+        .MULTI_DESC(sMenuNameDesc_LegendaryClause),
         .processInput = Toggle_ProcessInput,
         .drawChoices = Toggle_DrawChoices
     },
@@ -1119,6 +1144,7 @@ static const struct MenuEntries sOptionMenuEntries[SUBMENUITEM_COUNT] =
             MENUITEM_MENU_TOGGLE_BAG_CLAUSE,
             MENUITEM_MENU_TOGGLE_SPECIES_CLAUSE,
             MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE,
+            MENUITEM_MENU_TOGGLE_LEGENDARY_CLAUSE,
             MENUITEM_MENU_TOGGLE_OVER_LVL,
             MENUITEM_MENU_TOGGLE_EV_GAIN,
 #ifdef ROGUE_EXPANSION
@@ -2361,6 +2387,9 @@ static u8 GetMenuItemValue(u8 menuItem)
     case MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE:
         return Rogue_GetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE);
 
+    case MENUITEM_MENU_TOGGLE_LEGENDARY_CLAUSE:
+        return Rogue_GetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE);
+
     // Trainers
     //
     case MENUITEM_MENU_TOGGLE_TRAINER_ROGUE:
@@ -2534,6 +2563,10 @@ static void SetMenuItemValue(u8 menuItem, u8 value)
 
     case MENUITEM_MENU_TOGGLE_HELD_ITEM_CLAUSE:
         Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, value);
+        break;
+
+    case MENUITEM_MENU_TOGGLE_LEGENDARY_CLAUSE:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE, value);
         break;
 
     // Trainers

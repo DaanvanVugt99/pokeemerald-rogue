@@ -325,7 +325,9 @@ static u16 TakeSelectedPokemonFromDaycare(struct DaycareMon *daycareMon)
         ApplyDaycareExperience(&pokemon);
     }
 
-    if (Rogue_IsRunActive() && Rogue_PartyHasDuplicateSpecies(&pokemon, PARTY_SIZE, PARTY_SIZE))
+    if (Rogue_IsRunActive()
+     && (Rogue_PartyHasDuplicateSpecies(&pokemon, PARTY_SIZE, PARTY_SIZE)
+      || Rogue_PartyHasExtraLegendaryOrMythical(&pokemon, PARTY_SIZE, PARTY_SIZE)))
     {
         if (CopyMonToPC(&pokemon) == MON_CANT_GIVE)
             return SPECIES_NONE;

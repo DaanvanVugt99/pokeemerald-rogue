@@ -142,8 +142,8 @@ const u8 gText_DifficultyItemsDesc[] = _(
 
 const u8 gText_DifficultyLegendariesDesc[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
-    "Decreases quality and quantity of\n"
-    "Legendary {PKMN} encounters."
+    "Brutal-only pressure when you bring\n"
+    "Legendary {PKMN} into Adventures."
 );
 
 // Campaigns

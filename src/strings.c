@@ -1885,6 +1885,7 @@ const u8 gText_TheseThreePkmnOkay[] = _("Are these three Pokémon OK?");
 const u8 gText_Yes2[] = _("Yes");
 const u8 gText_No2[] = _("No");
 const u8 gText_CantSelectSamePkmn[] = _("Can't select same {PKMN}.");
+const u8 gText_OnlyOneLegendaryMythical[] = _("Only one Legendary or Mythical.");
 const u8 gText_PkmnSwap[] = _("Pokémon Swap");
 const u8 gText_SelectPkmnToSwap[] = _("Select Pokémon to swap.");
 const u8 gText_SelectPkmnToAccept[] = _("Select Pokémon to accept.");

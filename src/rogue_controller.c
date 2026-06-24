@@ -386,6 +386,31 @@ bool8 Rogue_PartyHasDuplicateSpecies(struct Pokemon *mon, u8 ignoredSlot1, u8 ig
     return Rogue_PartyContainsSpeciesChain(Rogue_GetEggSpecies(species), ignoredSlot1, ignoredSlot2);
 }
 
+bool8 Rogue_PartyHasExtraLegendaryOrMythical(struct Pokemon *mon, u8 ignoredSlot1, u8 ignoredSlot2)
+{
+    u8 i;
+    u16 species;
+
+    if(!Rogue_IsLegendaryClauseActive())
+        return FALSE;
+
+    species = GetMonData(mon, MON_DATA_SPECIES);
+    if(species == SPECIES_NONE || !RoguePokedex_IsSpeciesLegendary(species))
+        return FALSE;
+
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        if(i == ignoredSlot1 || i == ignoredSlot2)
+            continue;
+
+        species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+        if(species != SPECIES_NONE && RoguePokedex_IsSpeciesLegendary(species))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 bool8 Rogue_PartyHasHeldItem(u16 itemId, u8 ignoredSlot1, u8 ignoredSlot2)
 {
     u8 i;
@@ -505,6 +530,11 @@ bool8 Rogue_CaughtMonFitsSpeciesClauseAfterRelease(struct Pokemon *mon, u8 relea
     return !Rogue_PartyHasDuplicateSpecies(mon, releasedSlot, PARTY_SIZE);
 }
 
+bool8 Rogue_CaughtMonFitsLegendaryClauseAfterRelease(struct Pokemon *mon, u8 releasedSlot)
+{
+    return !Rogue_PartyHasExtraLegendaryOrMythical(mon, releasedSlot, PARTY_SIZE);
+}
+
 bool8 Rogue_CaughtMonFitsHeldItemClauseAfterRelease(struct Pokemon *mon, u8 releasedSlot)
 {
     u16 item = GetMonData(mon, MON_DATA_HELD_ITEM);
@@ -525,6 +555,9 @@ bool8 Rogue_CanAddCaughtMonToParty(struct Pokemon *mon)
         if(!Rogue_CaughtMonFitsSpeciesClauseAfterRelease(mon, PARTY_SIZE))
             return FALSE;
 
+        if(!Rogue_CaughtMonFitsLegendaryClauseAfterRelease(mon, PARTY_SIZE))
+            return FALSE;
+
         if(!Rogue_CaughtMonFitsHeldItemClauseAfterRelease(mon, PARTY_SIZE))
             return FALSE;
     }
@@ -541,6 +574,7 @@ bool8 Rogue_CanReleasePartyMonForCaughtMon(struct Pokemon *mon, u8 slot)
         return FALSE;
 
     return Rogue_CaughtMonFitsSpeciesClauseAfterRelease(mon, slot)
+        && Rogue_CaughtMonFitsLegendaryClauseAfterRelease(mon, slot)
         && Rogue_CaughtMonFitsHeldItemClauseAfterRelease(mon, slot);
 }
 
@@ -557,6 +591,11 @@ bool8 Rogue_IsSpeciesClauseActive(void)
 bool8 Rogue_IsHeldItemClauseActive(void)
 {
     return Rogue_IsRunActive() && Rogue_GetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE);
+}
+
+bool8 Rogue_IsLegendaryClauseActive(void)
+{
+    return Rogue_IsRunActive() && Rogue_GetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE);
 }
 
 u8 Rogue_GetCurrentDifficulty(void)
@@ -4849,21 +4888,24 @@ static void BeginRogueRunPhase_PartyAndBag(void)
 
 static void BeginRogueRunPhase_SpecialClauses(void)
 {
-    bool8 weakSpeciesInDaycare;
-    bool8 strongSpeciesInDaycare;
-    u16 weakSpecies = GetActiveWeakLegendary(&weakSpeciesInDaycare);
-    u16 strongSpecies = GetActiveStrongLegendary(&strongSpeciesInDaycare);
+    if(Rogue_GetConfigRange(CONFIG_RANGE_LEGENDARY) == DIFFICULTY_LEVEL_BRUTAL)
+    {
+        bool8 weakSpeciesInDaycare;
+        bool8 strongSpeciesInDaycare;
+        u16 weakSpecies = GetActiveWeakLegendary(&weakSpeciesInDaycare);
+        u16 strongSpecies = GetActiveStrongLegendary(&strongSpeciesInDaycare);
 
-    if(weakSpecies != SPECIES_NONE)
-        FlagSet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES);
+        if(weakSpecies != SPECIES_NONE)
+            FlagSet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES);
 
-    if(strongSpecies != SPECIES_NONE)
-        FlagSet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES);
+        if(strongSpecies != SPECIES_NONE)
+            FlagSet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES);
 
-    if(strongSpecies != SPECIES_NONE)
-        Rogue_PushPopup_StrongPokemonClause(strongSpecies, strongSpeciesInDaycare);
-    else if(weakSpecies != SPECIES_NONE)
-        Rogue_PushPopup_WeakPokemonClause(weakSpecies, weakSpeciesInDaycare);
+        if(strongSpecies != SPECIES_NONE)
+            Rogue_PushPopup_StrongPokemonClause(strongSpecies, strongSpeciesInDaycare);
+        else if(weakSpecies != SPECIES_NONE)
+            Rogue_PushPopup_WeakPokemonClause(weakSpecies, weakSpeciesInDaycare);
+    }
 
     GiveMonPartnerRibbon();
 }
@@ -7318,7 +7360,8 @@ bool8 Rogue_GiveLabEncounterMon(u16 index)
             // Already in safari from? (Maybe should track index and then wipe here, as we could have higher priority)
             mon.rogueExtraData.isSafariIllegal = TRUE;
 
-            if(Rogue_PartyHasDuplicateSpecies(&mon, PARTY_SIZE, PARTY_SIZE))
+            if(Rogue_PartyHasDuplicateSpecies(&mon, PARTY_SIZE, PARTY_SIZE)
+            || Rogue_PartyHasExtraLegendaryOrMythical(&mon, PARTY_SIZE, PARTY_SIZE))
             {
                 gaveMon = CopyMonToPC(&mon) != MON_CANT_GIVE;
             }
@@ -8414,6 +8457,12 @@ static void TryRestorePartyHeldItems(bool8 allowThief)
             {
                 if(i < gPlayerPartyCount)
                 {
+                    if(GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
+                    {
+                        currentHeldItems[i] = ITEM_NONE;
+                        continue;
+                    }
+
                     currentHeldItems[i] = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM);
 
                     item = ITEM_NONE;

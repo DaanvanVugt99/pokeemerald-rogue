@@ -422,7 +422,7 @@ script Rogue_StartAdventureInternal
             special(Rogue_CheckPartyHasDuplicateStartSpecies)
             if(var(VAR_RESULT) == YES)
             {
-                msgbox(format("You can't start an Adventure with duplicate Pokémon species.\pPlease deposit or swap one of them at a PC first."), MSGBOX_DEFAULT)
+                msgbox(format("You can't start an Adventure with duplicate Pokémon species or more than one Legendary or Mythical Pokémon.\pPlease deposit or swap one of them at a PC first."), MSGBOX_DEFAULT)
                 return
             }
         }

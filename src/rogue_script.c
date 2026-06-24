@@ -365,6 +365,7 @@ u16 Rogue_CalcMaxPartySize(void)
 void Rogue_CheckPartyHasDuplicateStartSpecies(void)
 {
     u32 i, j;
+    bool8 hasLegendaryOrMythical = FALSE;
 
     gSpecialVar_Result = FALSE;
 
@@ -382,6 +383,18 @@ void Rogue_CheckPartyHasDuplicateStartSpecies(void)
                 gSpecialVar_Result = TRUE;
                 return;
             }
+        }
+
+        if(Rogue_GetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE)
+        && RoguePokedex_IsSpeciesLegendary(species))
+        {
+            if(hasLegendaryOrMythical)
+            {
+                gSpecialVar_Result = TRUE;
+                return;
+            }
+
+            hasLegendaryOrMythical = TRUE;
         }
     }
 }

@@ -4008,6 +4008,12 @@ static bool8 CanReleaseSelectedMonForCaughtMon(u8 slot)
         return FALSE;
     }
 
+    if(!Rogue_CaughtMonFitsLegendaryClauseAfterRelease(caughtMon, slot))
+    {
+        DisplayPartyMenuMessage(gText_OnlyOneLegendaryMythical, TRUE);
+        return FALSE;
+    }
+
     if(!Rogue_CaughtMonFitsHeldItemClauseAfterRelease(caughtMon, slot))
     {
         DisplayPartyMenuMessage(gText_NoIdenticalHoldItems, TRUE);

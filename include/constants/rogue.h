@@ -549,13 +549,14 @@
 #define CONFIG_TOGGLE_TRAINER_GALAR         20
 #define CONFIG_TOGGLE_TRAINER_PALDEA        21
 #endif
-#define CONFIG_TOGGLE_COUNT                 22
+#define CONFIG_TOGGLE_LEGENDARY_CLAUSE      22
+#define CONFIG_TOGGLE_COUNT                 23
 #define CONFIG_TOGGLE_BYTE_COUNT            (1 + CONFIG_TOGGLE_COUNT / 8)
 
 // CONFIG_RANGE_
 #define CONFIG_RANGE_TRAINER                0
 #define CONFIG_RANGE_ITEM                   1 // unused
-#define CONFIG_RANGE_LEGENDARY              2 // unused
+#define CONFIG_RANGE_LEGENDARY              2
 #define CONFIG_RANGE_BATTLE_FORMAT          3
 #define CONFIG_RANGE_POKEDEX_VARIANT        4
 #define CONFIG_RANGE_GAME_MODE_NUM          5
