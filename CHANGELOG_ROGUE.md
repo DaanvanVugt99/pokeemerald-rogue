@@ -39,6 +39,8 @@ Format follows Keep a Changelog loosely:
   stored run traits, and grant low-level egg/baby species to the party or PC.
 - Added an affordability marker to purchasable Hub Safari and legendary cave
   Pokémon in the Safari selection grid.
+- Added a shiny marker to shiny Hub Safari and legendary cave Pokémon in the
+  Safari selection grid.
 - Changed Safari purchase pricing to use matching typed Pokéblocks, split
   dual-type costs across both types, add Shiny Pokéblocks for shiny Pokémon,
   and mildly scale prices by BST, evolution, legendary status, and individual

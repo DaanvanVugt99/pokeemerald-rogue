@@ -2748,8 +2748,14 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
                 u16 dexIndex = sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT + idx;
                 u16 safariIndex;
 
-                if(TryGetSafariIndexForDexIndex(RoguePokedex_GetDexVariant(), dexIndex, &safariIndex) && Rogue_CanPurchaseSafariMon(safariIndex))
-                    return ENTRY_TYPE_GREEN_CIRCLE;
+                if(TryGetSafariIndexForDexIndex(RoguePokedex_GetDexVariant(), dexIndex, &safariIndex))
+                {
+                    if(gRogueSaveBlock->safariMons[safariIndex].shinyFlag)
+                        return ENTRY_TYPE_CAUGHT_SHINY;
+
+                    if(Rogue_CanPurchaseSafariMon(safariIndex))
+                        return ENTRY_TYPE_GREEN_CIRCLE;
+                }
 
                 return ENTRY_TYPE_EMPTY;
             }
