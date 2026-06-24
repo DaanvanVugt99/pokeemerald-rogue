@@ -15005,6 +15005,39 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_MOMENTUM)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && TARGET_TURN_DAMAGED
+         && gIsCriticalHit
+         && IsFinalMultiHitStrike()
+         && IsBattlerAlive(battler)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg)
+        {
+            u32 validStats = 0;
+
+            for (i = STAT_ATK; i < NUM_BATTLE_STATS; i++)
+            {
+                if (CompareStat(battler, i, MAX_STAT_STAGE, CMP_LESS_THAN))
+                    validStats |= gBitTable[i];
+            }
+
+            if (validStats != 0)
+            {
+                do
+                {
+                    i = (Random() % (NUM_BATTLE_STATS - 1)) + STAT_ATK;
+                } while (!(validStats & gBitTable[i]));
+
+                SetBattlerTriggeredAbility(battler, ABILITY_MOMENTUM);
+                gBattlerAttacker = gBattlerAbility = battler;
+                SET_STATCHANGER(i, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, i);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_AFTERSHOCK)
          && moveType == TYPE_GROUND
          && DidMoveSucceedForMoveEndEffects(battler)

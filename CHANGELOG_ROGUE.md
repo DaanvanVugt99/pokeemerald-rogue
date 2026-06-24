@@ -29,6 +29,8 @@ Format follows Keep a Changelog loosely:
 - Added the Lechonk line's Aroma Trail unique ability.
 - Added Eelevate and Fire Mane for the 1.1 champion Mega Evolution ability set.
 - Added the Hisuian Voltorb line's Rolling Start unique ability.
+- Added Hisuian Samurott's Momentum unique ability, raising a random stat after
+  it lands a critical hit.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 
