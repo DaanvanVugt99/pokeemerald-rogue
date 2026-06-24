@@ -145,6 +145,8 @@ Format follows Keep a Changelog loosely:
   match normal route encounter filtering.
 - Fixed run boss Pokéblock rewards being added during the adventure, causing
   them to be lost when the run bag was wiped on return to the hub.
+- Removed stale legacy Safari entrance and shiny-list text now that Safari
+  acquisition uses Pokéblock offers.
 - Fixed Ariados and Spinarak's Web Trap unique ability so any opposing Speed
   stage drop can trigger a queued random web move.
 - Fixed attacker-side move-end unique abilities, including Vicejaw and Handywork,

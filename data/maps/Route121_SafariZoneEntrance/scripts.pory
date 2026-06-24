@@ -128,4 +128,33 @@ Route121_SafariZoneEntrance_EventScript_TrainerTipSign::
 	msgbox Route121_SafariZoneEntrance_Text_TrainerTip, MSGBOX_SIGN
 	end
 
+Route121_SafariZoneEntrance_EventScript_SafariCounterClosed::
+	lockall
+	msgbox Route121_SafariZoneEntrance_Text_UseHubSafari, MSGBOX_DEFAULT
+	goto Route121_SafariZoneEntrance_EventScript_MovePlayerBackFromCounter
+	end
+
+Route121_SafariZoneEntrance_EventScript_PokeblockInfo::
+	msgbox Route121_SafariZoneEntrance_Text_PokeblockInfo, MSGBOX_NPC
+	end
+
+Route121_SafariZoneEntrance_EventScript_PokeblockSign::
+	msgbox Route121_SafariZoneEntrance_Text_PokeblockSign, MSGBOX_SIGN
+	end
+
+Route121_SafariZoneEntrance_Text_UseHubSafari:
+	.string "The old Safari game is closed.\p"
+	.string "Visit the Safari Area sign to offer\n"
+	.string "{POKEBLOCK} to Pokémon from your Adventures.$"
+
+Route121_SafariZoneEntrance_Text_PokeblockInfo:
+	.string "The Safari Area keeps track of Pokémon\n"
+	.string "from your Adventures now.\p"
+	.string "Offer {POKEBLOCK} at the Safari Area\n"
+	.string "sign to bring one home.$"
+
+Route121_SafariZoneEntrance_Text_PokeblockSign:
+	.string "Safari Area Pokémon can be brought\n"
+	.string "home with {POKEBLOCK} offers.$"
+
 `
