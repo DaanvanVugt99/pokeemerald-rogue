@@ -170,6 +170,11 @@ extern const struct SpriteTemplate gAncientPowerRockSpriteTemplate[];
 #define TIMER_POKEBALL_FADE              28
 #define TIMER_START_LEGENDARIES          43
 
+#define TIMER_GEEF_SPLASH_FADE_OUT       90
+#define TIMER_COPYRIGHT_SPLASH_START     92
+#define TIMER_COPYRIGHT_SPLASH_FADE_OUT 232
+#define TIMER_COPYRIGHT_SPLASH_END      233
+
 static EWRAM_DATA u16 sIntroCharacterGender = 0;
 static EWRAM_DATA u16 UNUSED sUnusedVar = 0;
 static EWRAM_DATA u16 sFlygonYOffset = 0;
@@ -177,6 +182,9 @@ static EWRAM_DATA u16 sFlygonYOffset = 0;
 u32 gIntroFrameCounter;
 struct GcmbStruct gMultibootProgramStruct;
 
+static const u16 sGeefLogo_Pal[]              = INCBIN_U16("graphics/intro/geef_logo.gbapal");
+static const u32 sGeefLogo_Gfx[]              = INCBIN_U32("graphics/intro/geef_logo.4bpp.lz");
+static const u32 sGeefLogo_Tilemap[]          = INCBIN_U32("graphics/intro/geef_logo.bin.lz");
 static const u16 sIntroDrops_Pal[]            = INCBIN_U16("graphics/intro/scene_1/drops.gbapal");
 static const u16 sIntroLogo_Pal[]             = INCBIN_U16("graphics/intro/scene_1/logo.gbapal");
 static const u32 sIntroDropsLogo_Gfx[]        = INCBIN_U32("graphics/intro/scene_1/drops_logo.4bpp.lz");
@@ -1064,6 +1072,13 @@ static void LoadCopyrightGraphics(u16 tilesetAddress, u16 tilemapAddress, u16 pa
     LoadPalette(gIntroCopyright_Pal, paletteOffset, PLTT_SIZE_4BPP);
 }
 
+static void LoadGeefLogoGraphics(u16 tilesetAddress, u16 tilemapAddress, u16 paletteOffset)
+{
+    LZ77UnCompVram(sGeefLogo_Gfx, (void *)(VRAM + tilesetAddress));
+    LZ77UnCompVram(sGeefLogo_Tilemap, (void *)(VRAM + tilemapAddress));
+    LoadPalette(sGeefLogo_Pal, paletteOffset, PLTT_SIZE_4BPP);
+}
+
 static void SerialCB_CopyrightScreen(void)
 {
     GameCubeMultiBoot_HandleSerialInterrupt(&gMultibootProgramStruct);
@@ -1086,7 +1101,7 @@ static u8 SetUpCopyrightScreen(void)
         CpuFill32(0, (void *)OAM, OAM_SIZE);
         CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
         ResetPaletteFade();
-        LoadCopyrightGraphics(0, 0x3800, BG_PLTT_ID(0));
+        LoadGeefLogoGraphics(0, 0x3800, BG_PLTT_ID(0));
         ScanlineEffect_Stop();
         ResetTasks();
         ResetSpriteData();
@@ -1108,10 +1123,38 @@ static u8 SetUpCopyrightScreen(void)
         REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON;
     default:
         UpdatePaletteFade();
-        gMain.state++;
+        if (!gPaletteFade.active && gMain.newKeys != 0)
+        {
+            if (gMain.state < TIMER_GEEF_SPLASH_FADE_OUT)
+                gMain.state = TIMER_GEEF_SPLASH_FADE_OUT;
+            else if (gMain.state >= TIMER_COPYRIGHT_SPLASH_START && gMain.state < TIMER_COPYRIGHT_SPLASH_FADE_OUT)
+                gMain.state = TIMER_COPYRIGHT_SPLASH_FADE_OUT;
+            else
+                gMain.state++;
+        }
+        else
+        {
+            gMain.state++;
+        }
         GameCubeMultiBoot_Main(&gMultibootProgramStruct);
         break;
-    case 140:
+    case TIMER_GEEF_SPLASH_FADE_OUT:
+        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        gMain.state++;
+        break;
+    case TIMER_GEEF_SPLASH_FADE_OUT + 1:
+        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+        if (UpdatePaletteFade())
+            break;
+        CpuFill32(0, (void *)VRAM, VRAM_SIZE);
+        CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
+        ResetPaletteFade();
+        LoadCopyrightGraphics(0, 0x3800, BG_PLTT_ID(0));
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+        gMain.state = TIMER_COPYRIGHT_SPLASH_START;
+        break;
+    case TIMER_COPYRIGHT_SPLASH_FADE_OUT:
         GameCubeMultiBoot_Main(&gMultibootProgramStruct);
         if (gMultibootProgramStruct.gcmb_field_2 != 1)
         {
@@ -1119,7 +1162,7 @@ static u8 SetUpCopyrightScreen(void)
             gMain.state++;
         }
         break;
-    case 141:
+    case TIMER_COPYRIGHT_SPLASH_END:
         if (UpdatePaletteFade())
             break;
 #if EXPANSION_INTRO == TRUE

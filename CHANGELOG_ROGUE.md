@@ -31,6 +31,7 @@ Format follows Keep a Changelog loosely:
 - Added the Hisuian Voltorb line's Rolling Start unique ability.
 - Added Hisuian Samurott's Momentum unique ability, raising a random stat after
   it lands a critical hit.
+- Added a new GEEF logo splash before the upstream boot credit screen.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 
