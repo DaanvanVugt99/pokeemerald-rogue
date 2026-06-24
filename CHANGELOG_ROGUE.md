@@ -66,6 +66,9 @@ Format follows Keep a Changelog loosely:
 - Weighted route and Team Hideout item drops toward Pokémon-linked special
   and evolution items when the matching evolution family is in the party, while
   preventing duplicate linked special-item drops on the same route.
+- Reduced Pokémon-linked special item drops so matching party items are only
+  favored after a rare special-item roll instead of increasing route special
+  item frequency.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
 - Reworked Dondozo's Swallowed unique ability to trigger Stockpile after its

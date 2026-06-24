@@ -92,6 +92,10 @@ STATIC_ASSERT(sizeof(struct Pokemon) == sizeof(struct RoguePokemonFacade), SizeO
 #define ROGUE_TRAINER_COUNT (FLAG_ROGUE_TRAINER_END - FLAG_ROGUE_TRAINER_START + 1)
 #define ROGUE_ITEM_COUNT (FLAG_ROGUE_ITEM_END - FLAG_ROGUE_ITEM_START + 1)
 #define ROUTE_SPECIAL_ITEM_CAPACITY 256
+#define ROUTE_SPECIAL_ITEM_DROP_CHANCE_PER_MILLE 3
+#define HIDEOUT_SPECIAL_ITEM_DROP_CHANCE_PER_MILLE 50
+#define PARTY_SPECIAL_ITEM_WEIGHT 8
+#define OTHER_SPECIAL_ITEM_WEIGHT 1
 
 #ifdef ROGUE_DEBUG
 EWRAM_DATA u8 gDebug_CurrentTab = 0;
@@ -11424,9 +11428,30 @@ static bool8 RouteItemContextIsAnySpecialItem(struct RouteItemWeightContext* con
             || RouteItemContextContainsItem(context->otherSpecialItems, context->otherSpecialItemCount, itemId));
 }
 
+static bool8 RouteItemContextHasAnySpecialItem(struct RouteItemWeightContext* context)
+{
+    return context != NULL && (context->partySpecialItemCount != 0 || context->otherSpecialItemCount != 0);
+}
+
 static bool8 RouteItemContextWasSelected(struct RouteItemWeightContext* context, u16 itemId)
 {
     return context != NULL && RouteItemContextContainsItem(context->selectedItems, context->selectedItemCount, itemId);
+}
+
+static bool8 RouteItemContextHasSelectedSpecialItem(struct RouteItemWeightContext* context)
+{
+    u16 i;
+
+    if(context == NULL)
+        return FALSE;
+
+    for(i = 0; i < context->selectedItemCount; ++i)
+    {
+        if(RouteItemContextIsAnySpecialItem(context, context->selectedItems[i]))
+            return TRUE;
+    }
+
+    return FALSE;
 }
 
 static bool8 RouteItemContextIsPartyBoostItem(struct RouteItemWeightContext* context, u16 itemId)
@@ -11440,18 +11465,86 @@ static void RouteItemContextRecordSelection(struct RouteItemWeightContext* conte
         RouteItemContextAppendUnique(context->selectedItems, &context->selectedItemCount, ARRAY_COUNT(context->selectedItems), itemId);
 }
 
-static void IncludeRouteSpecialItems(struct RouteItemWeightContext* context)
+static void ExcludeRouteSpecialItems(struct RouteItemWeightContext* context)
 {
     u16 i;
 
     for(i = 0; i < context->partySpecialItemCount; ++i)
-        RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, context->partySpecialItems[i]);
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, context->partySpecialItems[i]);
 
-    if(context->isTeamHideout)
+    for(i = 0; i < context->otherSpecialItemCount; ++i)
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, context->otherSpecialItems[i]);
+}
+
+static u16 GetRouteSpecialItemDropChancePerMille(struct RouteItemWeightContext* context)
+{
+    if(context != NULL && context->isTeamHideout)
+        return HIDEOUT_SPECIAL_ITEM_DROP_CHANCE_PER_MILLE;
+
+    return ROUTE_SPECIAL_ITEM_DROP_CHANCE_PER_MILLE;
+}
+
+static bool8 RollRouteSpecialItemDrop(struct RouteItemWeightContext* context)
+{
+    return RogueRandomRange(1000, FLAG_SET_SEED_ITEMS) < GetRouteSpecialItemDropChancePerMille(context);
+}
+
+static void AccumulateRouteSpecialItemWeight(struct RouteItemWeightContext* context, u16 itemId, u8 weight, u16* totalWeight)
+{
+    if(!RouteItemContextWasSelected(context, itemId))
+        *totalWeight += weight;
+}
+
+static bool8 TrySelectRouteSpecialItem(struct RouteItemWeightContext* context, u16* itemId)
+{
+    u16 i;
+    u16 totalWeight = 0;
+    u16 targetWeight;
+
+    if(context == NULL || !RouteItemContextHasAnySpecialItem(context) || RouteItemContextHasSelectedSpecialItem(context))
+        return FALSE;
+
+    for(i = 0; i < context->partySpecialItemCount; ++i)
+        AccumulateRouteSpecialItemWeight(context, context->partySpecialItems[i], PARTY_SPECIAL_ITEM_WEIGHT, &totalWeight);
+
+    for(i = 0; i < context->otherSpecialItemCount; ++i)
+        AccumulateRouteSpecialItemWeight(context, context->otherSpecialItems[i], OTHER_SPECIAL_ITEM_WEIGHT, &totalWeight);
+
+    if(totalWeight == 0)
+        return FALSE;
+
+    targetWeight = RogueRandom() % totalWeight;
+
+    for(i = 0; i < context->partySpecialItemCount; ++i)
     {
-        for(i = 0; i < context->otherSpecialItemCount; ++i)
-            RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, context->otherSpecialItems[i]);
+        if(!RouteItemContextWasSelected(context, context->partySpecialItems[i]))
+        {
+            if(targetWeight < PARTY_SPECIAL_ITEM_WEIGHT)
+            {
+                *itemId = context->partySpecialItems[i];
+                return TRUE;
+            }
+
+            targetWeight -= PARTY_SPECIAL_ITEM_WEIGHT;
+        }
     }
+
+    for(i = 0; i < context->otherSpecialItemCount; ++i)
+    {
+        if(!RouteItemContextWasSelected(context, context->otherSpecialItems[i]))
+        {
+            if(targetWeight < OTHER_SPECIAL_ITEM_WEIGHT)
+            {
+                *itemId = context->otherSpecialItems[i];
+                return TRUE;
+            }
+
+            targetWeight -= OTHER_SPECIAL_ITEM_WEIGHT;
+        }
+    }
+
+    AGB_ASSERT(FALSE);
+    return FALSE;
 }
 
 static u8 RouteItems_CalculateBaseWeight(u16 itemId)
@@ -11489,11 +11582,8 @@ static u8 RouteItems_CalculateWeight(u16 index, u16 itemId, void* data)
     if(RouteItemContextWasSelected(context, itemId))
         return isSpecialItem ? 0 : 1;
 
-    if(isPartySpecialItem)
-        return context->isTeamHideout ? 80 : 45;
-
-    if(isSpecialItem && context->isTeamHideout && ItemId_GetPrice(itemId) == 0)
-        return 2;
+    if(isSpecialItem)
+        return 0;
 
     if(isPartyBoostItem)
         weight = min(80, weight + 15);
@@ -11563,7 +11653,7 @@ static void RandomiseItemContent(u8 difficultyLevel)
             RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, ITEM_ESCAPE_ROPE);
         }
 
-        IncludeRouteSpecialItems(&routeItemContext);
+        ExcludeRouteSpecialItems(&routeItemContext);
 
         RogueWeightQuery_Begin();
         {
@@ -11572,10 +11662,18 @@ static void RandomiseItemContent(u8 difficultyLevel)
 
             for(i = 0; i < ROGUE_ITEM_COUNT; ++i)
             {
-                RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, &routeItemContext);
+                bool8 selectedSpecialItem = !FlagGet(FLAG_ROGUE_ITEM_START + i)
+                    && RollRouteSpecialItemDrop(&routeItemContext)
+                    && TrySelectRouteSpecialItem(&routeItemContext, &itemId);
 
-                AGB_ASSERT(RogueWeightQuery_HasAnyWeights());
-                itemId = RogueWeightQuery_SelectRandomFromWeights(RogueRandom());
+                if(!selectedSpecialItem)
+                {
+                    RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, &routeItemContext);
+
+                    AGB_ASSERT(RogueWeightQuery_HasAnyWeights());
+                    itemId = RogueWeightQuery_SelectRandomFromWeights(RogueRandom());
+                }
+
                 RouteItemContextRecordSelection(&routeItemContext, itemId);
                 VarSet(VAR_ROGUE_ITEM_START + i, itemId);
             }
