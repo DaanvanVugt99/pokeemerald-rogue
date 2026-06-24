@@ -62,6 +62,8 @@ static void SpriteCB_Sparkle(struct Sprite *sprite);
 static void SpriteCB_LogoLetter(struct Sprite *sprite);
 static void SpriteCB_GameFreakLogo(struct Sprite *sprite);
 static void SpriteCB_FlygonSilhouette(struct Sprite *sprite);
+static void SpriteCB_GeefShine(struct Sprite *sprite);
+static void CreateGeefShineSprite(void);
 
 // Scene 2 main tasks
 static void Task_Scene2_Load(u8);
@@ -127,6 +129,7 @@ extern const struct SpriteTemplate gAncientPowerRockSpriteTemplate[];
 
 #define TAG_FLYGON_SILHOUETTE 2002
 #define TAG_RAYQUAZA_ORB      2003
+#define TAG_GEEF_SHINE        2004
 
 #define COLOSSEUM_GAME_CODE 0x65366347 // "Gc6e" in ASCII
 
@@ -171,6 +174,7 @@ extern const struct SpriteTemplate gAncientPowerRockSpriteTemplate[];
 #define TIMER_START_LEGENDARIES          43
 
 #define TIMER_GEEF_SPLASH_FADE_OUT       90
+#define TIMER_GEEF_SHINE_START           24
 #define TIMER_COPYRIGHT_SPLASH_START     92
 #define TIMER_COPYRIGHT_SPLASH_FADE_OUT 232
 #define TIMER_COPYRIGHT_SPLASH_END      233
@@ -185,6 +189,7 @@ struct GcmbStruct gMultibootProgramStruct;
 static const u16 sGeefLogo_Pal[]              = INCBIN_U16("graphics/intro/geef_logo.gbapal");
 static const u32 sGeefLogo_Gfx[]              = INCBIN_U32("graphics/intro/geef_logo.4bpp.lz");
 static const u32 sGeefLogo_Tilemap[]          = INCBIN_U32("graphics/intro/geef_logo.bin.lz");
+static const u32 sGeefShine_Gfx[]             = INCBIN_U32("graphics/title_screen/logo_shine.4bpp.lz");
 static const u16 sIntroDrops_Pal[]            = INCBIN_U16("graphics/intro/scene_1/drops.gbapal");
 static const u16 sIntroLogo_Pal[]             = INCBIN_U16("graphics/intro/scene_1/logo.gbapal");
 static const u32 sIntroDropsLogo_Gfx[]        = INCBIN_U32("graphics/intro/scene_1/drops_logo.4bpp.lz");
@@ -1034,6 +1039,62 @@ static const struct SpritePalette sSpritePalette_RayquazaOrb[] =
     {},
 };
 
+static const u16 sGeefShine_Pal[] =
+{
+    [0] = RGB_BLACK,
+    [1] = RGB_BLACK,
+    [2] = RGB_BLACK,
+    [3] = RGB_WHITE,
+    [4] = RGB_WHITE,
+    [5] = RGB_WHITE,
+};
+
+static const struct CompressedSpriteSheet sSpriteSheet_GeefShine =
+{
+    .data = sGeefShine_Gfx,
+    .size = 0x800,
+    .tag = TAG_GEEF_SHINE,
+};
+
+static const struct SpritePalette sSpritePalette_GeefShine =
+{
+    .data = sGeefShine_Pal,
+    .tag = TAG_GEEF_SHINE,
+};
+
+static const struct OamData sOamData_GeefShine =
+{
+    .affineMode = ST_OAM_AFFINE_OFF,
+    .objMode = ST_OAM_OBJ_NORMAL,
+    .mosaic = FALSE,
+    .bpp = ST_OAM_4BPP,
+    .shape = SPRITE_SHAPE(64x64),
+    .size = SPRITE_SIZE(64x64),
+    .priority = 0,
+};
+
+static const union AnimCmd sAnim_GeefShineLeft[] =
+{
+    ANIMCMD_FRAME(0, 4),
+    ANIMCMD_END,
+};
+
+static const union AnimCmd *const sAnims_GeefShine[] =
+{
+    sAnim_GeefShineLeft,
+};
+
+static const struct SpriteTemplate sSpriteTemplate_GeefShine =
+{
+    .tileTag = TAG_GEEF_SHINE,
+    .paletteTag = TAG_GEEF_SHINE,
+    .oam = &sOamData_GeefShine,
+    .anims = sAnims_GeefShine,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCB_GeefShine,
+};
+
 
 static void VBlankCB_Intro(void)
 {
@@ -1079,6 +1140,24 @@ static void LoadGeefLogoGraphics(u16 tilesetAddress, u16 tilemapAddress, u16 pal
     LoadPalette(sGeefLogo_Pal, paletteOffset, PLTT_SIZE_4BPP);
 }
 
+static void CreateGeefShineSprite(void)
+{
+    u8 spriteId;
+
+    spriteId = CreateSprite(&sSpriteTemplate_GeefShine, 0, 80, 0);
+    gSprites[spriteId].oam.objMode = ST_OAM_OBJ_WINDOW;
+}
+
+#define GEEF_SHINE_SPEED 4
+static void SpriteCB_GeefShine(struct Sprite *sprite)
+{
+    if (sprite->x < DISPLAY_WIDTH + 32)
+        sprite->x += GEEF_SHINE_SPEED;
+    else
+        DestroySprite(sprite);
+}
+#undef GEEF_SHINE_SPEED
+
 static void SerialCB_CopyrightScreen(void)
 {
     GameCubeMultiBoot_HandleSerialInterrupt(&gMultibootProgramStruct);
@@ -1102,10 +1181,20 @@ static u8 SetUpCopyrightScreen(void)
         CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
         ResetPaletteFade();
         LoadGeefLogoGraphics(0, 0x3800, BG_PLTT_ID(0));
+        SetGpuReg(REG_OFFSET_WIN0H, 0);
+        SetGpuReg(REG_OFFSET_WIN0V, 0);
+        SetGpuReg(REG_OFFSET_WIN1H, 0);
+        SetGpuReg(REG_OFFSET_WIN1V, 0);
+        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN0_OBJ | WININ_WIN1_BG_ALL | WININ_WIN1_OBJ);
+        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG_ALL | WINOUT_WIN01_OBJ | WINOUT_WINOBJ_ALL);
+        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_LIGHTEN);
+        SetGpuReg(REG_OFFSET_BLDY, 12);
         ScanlineEffect_Stop();
         ResetTasks();
         ResetSpriteData();
         FreeAllSpritePalettes();
+        LoadCompressedSpriteSheet(&sSpriteSheet_GeefShine);
+        LoadSpritePalette(&sSpritePalette_GeefShine);
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_WHITEALPHA);
         SetGpuReg(REG_OFFSET_BG0CNT, BGCNT_PRIORITY(0)
                                    | BGCNT_CHARBASE(0)
@@ -1114,13 +1203,13 @@ static u8 SetUpCopyrightScreen(void)
                                    | BGCNT_TXT256x256);
         EnableInterrupts(INTR_FLAG_VBLANK);
         SetVBlankCallback(VBlankCB_Intro);
-        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON;
+        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJWIN_ON;
         SetSerialCallback(SerialCB_CopyrightScreen);
         GameCubeMultiBoot_Init(&gMultibootProgramStruct);
     // REG_DISPCNT needs to be overwritten the second time, because otherwise the intro won't show up on VBA 1.7.2 and John GBA Lite emulators.
     // The REG_DISPCNT overwrite is NOT needed in m-GBA, No$GBA, VBA 1.8.0, My Boy and Pizza Boy GBA emulators.
     case 1:
-        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON;
+        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJWIN_ON;
     default:
         UpdatePaletteFade();
         if (!gPaletteFade.active && gMain.newKeys != 0)
@@ -1138,6 +1227,15 @@ static u8 SetUpCopyrightScreen(void)
         }
         GameCubeMultiBoot_Main(&gMultibootProgramStruct);
         break;
+    case TIMER_GEEF_SHINE_START:
+        UpdatePaletteFade();
+        if (!gPaletteFade.active)
+        {
+            CreateGeefShineSprite();
+            gMain.state++;
+        }
+        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+        break;
     case TIMER_GEEF_SPLASH_FADE_OUT:
         GameCubeMultiBoot_Main(&gMultibootProgramStruct);
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
@@ -1148,10 +1246,18 @@ static u8 SetUpCopyrightScreen(void)
         if (UpdatePaletteFade())
             break;
         CpuFill32(0, (void *)VRAM, VRAM_SIZE);
+        CpuFill32(0, (void *)OAM, OAM_SIZE);
         CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
+        ResetSpriteData();
+        FreeAllSpritePalettes();
         ResetPaletteFade();
+        SetGpuReg(REG_OFFSET_WININ, 0);
+        SetGpuReg(REG_OFFSET_WINOUT, 0);
+        SetGpuReg(REG_OFFSET_BLDCNT, 0);
+        SetGpuReg(REG_OFFSET_BLDY, 0);
         LoadCopyrightGraphics(0, 0x3800, BG_PLTT_ID(0));
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON;
         gMain.state = TIMER_COPYRIGHT_SPLASH_START;
         break;
     case TIMER_COPYRIGHT_SPLASH_FADE_OUT:
@@ -1179,6 +1285,8 @@ static u8 SetUpCopyrightScreen(void)
         return 0;
     }
 
+    AnimateSprites();
+    BuildOamBuffer();
     return 1;
 }
 

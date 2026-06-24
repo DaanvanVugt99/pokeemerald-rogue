@@ -2229,11 +2229,32 @@ static bool8 CheckBagHasSafariPurchaseCost(struct SafariMonPurchaseCost const* c
 
     for(i = 0; i < cost->count; ++i)
     {
-        if(!CheckBagHasItem(cost->itemIds[i], cost->counts[i]))
+        if(CountTotalItemQuantityInBag(cost->itemIds[i]) < cost->counts[i])
             return FALSE;
     }
 
     return TRUE;
+}
+
+static bool8 TryGetMissingSafariPurchaseCostItem(struct SafariMonPurchaseCost const* cost, u16* itemId, u16* count)
+{
+    u8 i;
+
+    for(i = 0; i < cost->count; ++i)
+    {
+        u16 ownedCount = CountTotalItemQuantityInBag(cost->itemIds[i]);
+
+        if(ownedCount < cost->counts[i])
+        {
+            *itemId = cost->itemIds[i];
+            *count = cost->counts[i] - ownedCount;
+            return TRUE;
+        }
+    }
+
+    *itemId = ITEM_NONE;
+    *count = 0;
+    return FALSE;
 }
 
 bool8 Rogue_CanPurchaseSafariMon(u16 safariIndex)
@@ -2364,6 +2385,15 @@ void Rogue_TryPurchaseSafariMon()
 
     if(!CheckBagHasSafariPurchaseCost(&cost))
     {
+        u16 missingItemId;
+        u16 missingCount;
+
+        if(TryGetMissingSafariPurchaseCostItem(&cost, &missingItemId, &missingCount))
+        {
+            gSpecialVar_0x8005 = missingItemId;
+            gSpecialVar_0x8006 = missingCount;
+        }
+
         gSpecialVar_Result = SAFARI_PURCHASE_NOT_ENOUGH_POKEBLOCK;
         return;
     }

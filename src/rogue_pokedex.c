@@ -2755,6 +2755,9 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
                     bool8 isShiny = gRogueSaveBlock->safariMons[safariIndex].shinyFlag;
                     bool8 isUnique = gRogueSaveBlock->safariMons[safariIndex].customMonLookup != 0;
 
+                    if(Rogue_CanPurchaseSafariMon(safariIndex))
+                        return ENTRY_TYPE_GREEN_CIRCLE;
+
                     if(isShiny && isUnique)
                         return ENTRY_TYPE_SHINY_UNIQUE;
 
@@ -2763,9 +2766,6 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
 
                     if(isUnique)
                         return ENTRY_TYPE_UNIQUE;
-
-                    if(Rogue_CanPurchaseSafariMon(safariIndex))
-                        return ENTRY_TYPE_GREEN_CIRCLE;
                 }
 
                 return ENTRY_TYPE_EMPTY;

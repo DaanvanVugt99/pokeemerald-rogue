@@ -125,7 +125,8 @@ script Rogue_Interior_SafariCave_PurchaseSelectedMon
                 msgbox(format("There isn't enough room in Pokémon Storage."))
 
             case SAFARI_PURCHASE_NOT_ENOUGH:
-                msgbox(format("You don't have enough {POKEBLOCK}."))
+                bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
+                msgbox(format("You still need {STR_VAR_1}."))
 
             case SAFARI_PURCHASE_INVALID:
                 msgbox(format("{STR_VAR_1} won't accept that offer."))
