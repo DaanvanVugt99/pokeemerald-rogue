@@ -321,6 +321,7 @@ gSpecials::
 	def_special Rogue_CheckSafariMonLikesPokeblock
 	def_special Rogue_BufferSafariMonPurchaseCost
 	def_special Rogue_TryPurchaseSafariMon
+	def_special Rogue_DismissSafariMon
 	def_special Rogue_AppendMultichoicePokeblockItems
 	def_special Rogue_AppendMultichoiceBerriesForPokeblock
 	def_special Rogue_EnqueueSafariBattle

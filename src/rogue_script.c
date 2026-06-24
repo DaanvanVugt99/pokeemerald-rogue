@@ -101,6 +101,8 @@ struct SafariMonPurchaseCost
     u8 count;
 };
 
+void Rogue_BufferSafariMonInfo(void);
+
 enum
 {
     SAFARI_PURCHASE_GIVEN_TO_PARTY = MON_GIVEN_TO_PARTY,
@@ -2401,6 +2403,23 @@ void Rogue_TryPurchaseSafariMon()
     RemoveSafariPurchaseCost(&cost);
     RogueSafari_ClearSafariMonAtIdx(safariIndex);
     gSpecialVar_Result = giveResult;
+}
+
+void Rogue_DismissSafariMon()
+{
+    u8 safariIndex = gSpecialVar_0x8008;
+
+    Rogue_BufferSafariMonInfo();
+
+    if(safariIndex < ROGUE_SAFARI_TOTAL_MONS && gRogueSaveBlock->safariMons[safariIndex].species != SPECIES_NONE)
+    {
+        RogueSafari_ClearSafariMonAtIdx(safariIndex);
+        gSpecialVar_Result = TRUE;
+    }
+    else
+    {
+        gSpecialVar_Result = FALSE;
+    }
 }
 
 void Rogue_AppendMultichoicePokeblockItems()
