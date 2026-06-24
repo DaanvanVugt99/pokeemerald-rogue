@@ -231,17 +231,17 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
     [ITEM_POKEBLOCK_BUNDLE - ITEM_ROGUE_ITEM_FIRST] =
     {
 #ifdef ROGUE_EXPANSION
-        .name = _("Small Pkblk Pkg"),
+        .name = _("Small Bundle"),
 #else
-        .name = _("PKBLK PKG"),
+        .name = _("SMALL BUNDLE"),
 #endif
         .itemId = ITEM_POKEBLOCK_BUNDLE,
         .price = 0,
         .description = gItemDesc_PokeblockBundle,
         .pocket = POCKET_KEY_ITEMS,
         .registrability = FALSE,
-        .iconImage = gItemIcon_BuildResources,
-        .iconPalette = gItemIconPalette_BuildResources,
+        .iconImage = gItemIcon_Parcel,
+        .iconPalette = gItemIconPalette_Parcel,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
@@ -249,17 +249,17 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
     [ITEM_BIG_POKEBLOCK_BUNDLE - ITEM_ROGUE_ITEM_FIRST] =
     {
 #ifdef ROGUE_EXPANSION
-        .name = _("Big Pkblk Pkg"),
+        .name = _("Large Bundle"),
 #else
-        .name = _("BIG PKBLK PKG"),
+        .name = _("LARGE BUNDLE"),
 #endif
         .itemId = ITEM_BIG_POKEBLOCK_BUNDLE,
         .price = 0,
         .description = gItemDesc_BigPokeblockBundle,
         .pocket = POCKET_KEY_ITEMS,
         .registrability = FALSE,
-        .iconImage = gItemIcon_BuildResources,
-        .iconPalette = gItemIconPalette_BuildResources,
+        .iconImage = gItemIcon_Parcel,
+        .iconPalette = gItemIconPalette_Parcel,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
