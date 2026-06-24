@@ -2612,6 +2612,8 @@ enum
     ENTRY_TYPE_SEEN,
     ENTRY_TYPE_CAUGHT,
     ENTRY_TYPE_CAUGHT_SHINY,
+    ENTRY_TYPE_SHINY_UNIQUE,
+    ENTRY_TYPE_UNIQUE,
     ENTRY_TYPE_GREEN_CIRCLE,
     ENTRY_TYPE_RED_CROSS,
 };
@@ -2750,8 +2752,17 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
 
                 if(TryGetSafariIndexForDexIndex(RoguePokedex_GetDexVariant(), dexIndex, &safariIndex))
                 {
-                    if(gRogueSaveBlock->safariMons[safariIndex].shinyFlag)
+                    bool8 isShiny = gRogueSaveBlock->safariMons[safariIndex].shinyFlag;
+                    bool8 isUnique = gRogueSaveBlock->safariMons[safariIndex].customMonLookup != 0;
+
+                    if(isShiny && isUnique)
+                        return ENTRY_TYPE_SHINY_UNIQUE;
+
+                    if(isShiny)
                         return ENTRY_TYPE_CAUGHT_SHINY;
+
+                    if(isUnique)
+                        return ENTRY_TYPE_UNIQUE;
 
                     if(Rogue_CanPurchaseSafariMon(safariIndex))
                         return ENTRY_TYPE_GREEN_CIRCLE;
@@ -3034,6 +3045,14 @@ static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, 
 
         case ENTRY_TYPE_CAUGHT_SHINY:
             FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x35 : 0x22, tileX + 2, tileY + 4, 1, 1);
+            break;
+
+        case ENTRY_TYPE_SHINY_UNIQUE:
+            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x55 : 0x54, tileX + 2, tileY + 4, 1, 1);
+            break;
+
+        case ENTRY_TYPE_UNIQUE:
+            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x53 : 0x52, tileX + 2, tileY + 4, 1, 1);
             break;
 
         case ENTRY_TYPE_GREEN_CIRCLE:

@@ -41,6 +41,10 @@ Format follows Keep a Changelog loosely:
   Pokémon in the Safari selection grid.
 - Added a shiny marker to shiny Hub Safari and legendary cave Pokémon in the
   Safari selection grid.
+- Added a unique marker to unique Hub Safari and legendary cave Pokémon in the
+  Safari selection grid.
+- Added a combined shiny unique marker for Hub Safari and legendary cave
+  Pokémon that are both shiny and unique.
 - Changed Safari purchase pricing to use matching typed Pokéblocks, split
   dual-type costs across both types, add Shiny Pokéblocks for shiny Pokémon,
   and mildly scale prices by BST, evolution, legendary status, and individual
