@@ -2110,9 +2110,38 @@ static u8 GetSafariMonPurchaseType(struct RogueSafariMon const* safariMon, u8 ty
     return type;
 }
 
+static u16 GetSafariMonPricingSpecies(u16 species)
+{
+    u8 i;
+    u8 evoCount = Rogue_GetMaxEvolutionCount(species);
+    u16 bestSpecies = species;
+    u16 bestBst = RoguePokedex_GetSpeciesBST(species);
+    struct Evolution evo;
+
+    for(i = 0; i < evoCount; ++i)
+    {
+        Rogue_ModifyEvolution(species, i, &evo);
+
+        if(evo.targetSpecies != SPECIES_NONE)
+        {
+            u16 finalSpecies = GetSafariMonPricingSpecies(evo.targetSpecies);
+            u16 finalBst = RoguePokedex_GetSpeciesBST(finalSpecies);
+
+            if(finalBst > bestBst)
+            {
+                bestSpecies = finalSpecies;
+                bestBst = finalBst;
+            }
+        }
+    }
+
+    return bestSpecies;
+}
+
 static u16 CalculateSafariMonBasePurchaseCost(struct RogueSafariMon const* safariMon)
 {
-    u16 species = safariMon->species;
+    u16 species = GetSafariMonPricingSpecies(safariMon->species);
+    u16 eggSpecies = Rogue_GetEggSpecies(safariMon->species);
     u16 bst = RoguePokedex_GetSpeciesBST(species);
     bool8 isLegendary = RoguePokedex_IsSpeciesLegendary(species);
     u16 cost;
@@ -2120,29 +2149,31 @@ static u16 CalculateSafariMonBasePurchaseCost(struct RogueSafariMon const* safar
 
     if(isLegendary)
     {
-        cost = 10;
+        cost = 20;
 
         if(bst >= 620)
-            ++cost;
+            cost += 2;
         if(bst >= 680)
-            ++cost;
+            cost += 2;
     }
     else
     {
-        cost = 2;
+        cost = 1;
 
-        if(bst >= 420)
+        if(bst >= 300)
+            ++cost;
+        if(bst >= 400)
             ++cost;
         if(bst >= 500)
             ++cost;
-        if(bst >= 570)
+        if(bst >= 600)
             ++cost;
 
-        if(Rogue_GetEggSpecies(species) != species)
+        if(eggSpecies != species)
             ++cost;
     }
 
-    hash = species;
+    hash = safariMon->species;
     hash = hash * 1103515245 + safariMon->hpIV;
     hash = hash * 1103515245 + safariMon->attackIV;
     hash = hash * 1103515245 + safariMon->defenseIV;

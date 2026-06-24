@@ -43,6 +43,9 @@ Format follows Keep a Changelog loosely:
   dual-type costs across both types, add Shiny Pokéblocks for shiny Pokémon,
   and mildly scale prices by BST, evolution, legendary status, and individual
   variation.
+- Increased Legendary/Mythical Safari purchase prices, changed regular
+  Pokémon to cleaner BST price tiers, and now prices evolving lines by their
+  strongest final evolution.
 - Added random Pokéblock drops to run boss rewards, with mostly typed
   Pokéblocks, occasional stat Pokéblocks, and rare Shiny Pokéblocks.
 - Replaced Market Berry Blender minigames with direct Pokéblock crafting that
