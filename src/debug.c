@@ -73,6 +73,7 @@
 #include "rogue_pokedex.h"
 #include "rogue_popup.h"
 #include "rogue_query.h"
+#include "rogue_safari.h"
 
 #ifndef ROGUE_EXPANSION
 #define MON_DATA_SPECIES_OR_EGG MON_DATA_SPECIES2
@@ -120,6 +121,7 @@ enum RogueUtilMenu
     DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT,
     DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM,
     DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER,
+    DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI,
 };
 
 enum PartyBoxesMenu
@@ -378,6 +380,7 @@ static void DebugAction_RogueUtil_SetWeather(u8 taskId);
 static void DebugAction_RogueUtil_ChangeOutfit(u8 taskId);
 static void DebugAction_RogueUtil_RandomTradeTeam(u8 taskId);
 static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId);
+static void DebugAction_RogueUtil_FillSafari(u8 taskId);
 
 static void DebugAction_PartyBoxes_AccessPC(u8 taskId);
 static void DebugAction_PartyBoxes_MoveReminder(u8 taskId);
@@ -527,6 +530,7 @@ static const u8 sDebugText_RogueUtil_SetWeather[] =          _("Set Weather");
 static const u8 sDebugText_RogueUtil_ChangeOutfit[] =        _("Change Outfit");
 static const u8 sDebugText_RogueUtil_TradeTeam[] =           _("Trade Team");
 static const u8 sDebugText_RogueUtil_RerollUniqueTracker[] = _("Reroll Unique Tracker");
+static const u8 sDebugText_RogueUtil_FillSafari[] =          _("Fill Safari Buffer");
 // Party/Boxes Menu
 static const u8 sDebugText_PartyBoxes_AccessPC[] =           _("Access PC");
 static const u8 sDebugText_PartyBoxes_MoveReminder[] =       _("Move Reminder");
@@ -709,6 +713,7 @@ static const struct ListMenuItem sDebugMenu_Items_RogueUtilities[] =
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]       = {sDebugText_RogueUtil_ChangeOutfit,    DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT},
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]         = {sDebugText_RogueUtil_TradeTeam,       DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM},
     [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = {sDebugText_RogueUtil_RerollUniqueTracker, DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER},
+    [DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI]         = {sDebugText_RogueUtil_FillSafari,      DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI},
 };
 
 static const struct ListMenuItem sDebugMenu_Items_PartyBoxes[] =
@@ -872,6 +877,7 @@ static void (*const sDebugMenu_Actions_RogueUtilities[])(u8) =
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]     = DebugAction_RogueUtil_ChangeOutfit,
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]       = DebugAction_RogueUtil_RandomTradeTeam,
     [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = DebugAction_RogueUtil_RerollUniqueTracker,
+    [DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI]       = DebugAction_RogueUtil_FillSafari,
 };
 
 static void (*const sDebugMenu_Actions_PartyBoxes[])(u8) =
@@ -2346,6 +2352,12 @@ static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId)
 {
     RogueGift_ClearDynamicCustomMons();
     RogueGift_EnsureDynamicCustomMonsAreValid();
+    PlaySE(SE_USE_ITEM);
+}
+
+static void DebugAction_RogueUtil_FillSafari(u8 taskId)
+{
+    RogueDebug_FillSafariBuffer();
     PlaySE(SE_USE_ITEM);
 }
 

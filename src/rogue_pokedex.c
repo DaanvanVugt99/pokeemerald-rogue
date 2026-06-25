@@ -2614,7 +2614,6 @@ enum
     ENTRY_TYPE_CAUGHT_SHINY,
     ENTRY_TYPE_SHINY_UNIQUE,
     ENTRY_TYPE_UNIQUE,
-    ENTRY_TYPE_GREEN_CIRCLE,
     ENTRY_TYPE_RED_CROSS,
 };
 
@@ -2704,6 +2703,45 @@ static bool32 GetSpeciesDisplayDexFlag(u16 species, u8 dexFlag)
         return GetSetPokedexSpeciesFlag(species, dexFlag);
 }
 
+static bool8 Overview_TryGetSafariIndexForEntry(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY, u16* safariIndex)
+{
+    u8 idx;
+    u16 species;
+
+    entryX += deltaX;
+    entryY += deltaY;
+
+    if(entryX < 0 || entryX >= COLUMN_ENTRY_COUNT)
+        return FALSE;
+
+    if(entryY < 0 || entryY >= ROW_ENTRY_COUNT)
+        return FALSE;
+
+    idx = entryX + entryY * COLUMN_ENTRY_COUNT;
+    species = sPokedexMenu->overviewPageSpecies[idx];
+
+    if(species == SPECIES_NONE)
+        return FALSE;
+
+    return TryGetSafariIndexForDexIndex(
+        RoguePokedex_GetDexVariant(),
+        sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT + idx,
+        safariIndex);
+}
+
+static bool8 Overview_IsSafariEntryAffordable(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
+{
+    u16 safariIndex;
+
+    if(!IsCurrentlySelectingMon() || sPokedexViewReq.view != DEX_VIEW_SELECT_SAFARI_MON)
+        return FALSE;
+
+    if(!Overview_TryGetSafariIndexForEntry(entryX, entryY, deltaX, deltaY, &safariIndex))
+        return FALSE;
+
+    return Rogue_CanPurchaseSafariMon(safariIndex);
+}
+
 static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
 {
     u8 idx;
@@ -2747,16 +2785,12 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
         {
             if(sPokedexViewReq.view == DEX_VIEW_SELECT_SAFARI_MON)
             {
-                u16 dexIndex = sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT + idx;
                 u16 safariIndex;
 
-                if(TryGetSafariIndexForDexIndex(RoguePokedex_GetDexVariant(), dexIndex, &safariIndex))
+                if(Overview_TryGetSafariIndexForEntry(entryX, entryY, 0, 0, &safariIndex))
                 {
                     bool8 isShiny = gRogueSaveBlock->safariMons[safariIndex].shinyFlag;
                     bool8 isUnique = gRogueSaveBlock->safariMons[safariIndex].customMonLookup != 0;
-
-                    if(Rogue_CanPurchaseSafariMon(safariIndex))
-                        return ENTRY_TYPE_GREEN_CIRCLE;
 
                     if(isShiny && isUnique)
                         return ENTRY_TYPE_SHINY_UNIQUE;
@@ -2981,7 +3015,7 @@ static void Overview_FillEntryTileCentre_Header(u8 tileX, u8 tileY, u8 entryType
     }
 }
 
-static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, bool8 entrySelected)
+static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, bool8 entrySelected, bool8 canPurchase)
 {
     if(entryType == ENTRY_TYPE_NONE)
     {
@@ -3055,10 +3089,6 @@ static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, 
             FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x53 : 0x52, tileX + 2, tileY + 4, 1, 1);
             break;
 
-        case ENTRY_TYPE_GREEN_CIRCLE:
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3B : 0x27, tileX + 2, tileY + 4, 1, 1);
-            break;
-
         case ENTRY_TYPE_RED_CROSS:
             FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3C : 0x28, tileX + 2, tileY + 4, 1, 1);
             break;
@@ -3067,6 +3097,9 @@ static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, 
             FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3A : 0x21, tileX + 2, tileY + 4, 1, 1);
             break;
         }
+
+        if(canPurchase)
+            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3B : 0x27, tileX + 3, tileY + 4, 1, 1);
     }
 }
 
@@ -3298,6 +3331,7 @@ static void Overview_FillEntryBgInternal(u8 entryX, u8 entryY, bool8 includeHead
     u8 tileY = 0 + entryY * 5;
     u8 entryType[ENTRY_DIR_COUNT];
     bool8 entrySelected[ENTRY_DIR_COUNT];
+    bool8 entryCanPurchase;
 
     AGB_ASSERT(entryX + entryY * COLUMN_ENTRY_COUNT < COLUMN_ENTRY_COUNT * ROW_ENTRY_COUNT);
 
@@ -3308,6 +3342,8 @@ static void Overview_FillEntryBgInternal(u8 entryX, u8 entryY, bool8 includeHead
     entrySelected[ENTRY_DIR_LEFT] = Overview_IsEntrySelected(entryX, entryY, -1, 0);
     entrySelected[ENTRY_DIR_CENTRE] = Overview_IsEntrySelected(entryX, entryY, 0, 0);
     entrySelected[ENTRY_DIR_RIGHT] = Overview_IsEntrySelected(entryX, entryY, 1, 0);
+
+    entryCanPurchase = Overview_IsSafariEntryAffordable(entryX, entryY, 0, 0);
 
     if(includeHeader)
     {
@@ -3323,7 +3359,7 @@ static void Overview_FillEntryBgInternal(u8 entryX, u8 entryY, bool8 includeHead
 
     {
         Overview_FillEntryTileBoundary_Body(tileX, tileY, entryType[ENTRY_DIR_LEFT], entryType[ENTRY_DIR_CENTRE], entrySelected[ENTRY_DIR_LEFT], entrySelected[ENTRY_DIR_CENTRE]);
-        Overview_FillEntryTileCentre_Body(tileX, tileY, entryType[ENTRY_DIR_CENTRE], entrySelected[ENTRY_DIR_CENTRE]);
+        Overview_FillEntryTileCentre_Body(tileX, tileY, entryType[ENTRY_DIR_CENTRE], entrySelected[ENTRY_DIR_CENTRE], entryCanPurchase);
 
         // If we're in the last column (Or we are JUST refreshing this tile) handle right hand side
         if(entryX + 1 == COLUMN_ENTRY_COUNT || includeRightColumn)

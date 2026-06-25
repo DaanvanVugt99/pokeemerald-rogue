@@ -1,9 +1,12 @@
 #include "global.h"
 #include "constants/items.h"
 #include "constants/layouts.h"
+#include "constants/rogue.h"
+#include "constants/species.h"
 
 #include "event_data.h"
 #include "event_object_movement.h"
+#include "pokemon.h"
 #include "random.h"
 #include "string_util.h"
 
@@ -11,6 +14,7 @@
 #include "rogue_followmon.h"
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
+#include "rogue_query.h"
 #include "rogue_save.h"
 #include "rogue_safari.h"
 
@@ -436,8 +440,6 @@ static void CompactEmptyEntriesInternal(u8 fromIndex, u8 toIndex)
 {
     u8 i;
     u8 write = fromIndex;
-    u8 endIndex = toIndex;
-    bool8 loop = TRUE;
     //u8 count = 0;
 
     for(i = fromIndex; i <= toIndex; ++i)
@@ -491,4 +493,92 @@ void RogueSafari_ResetAllLegendEntries()
 
     for (i = ROGUE_SAFARI_LEGENDS_START_INDEX; i < ROGUE_SAFARI_TOTAL_MONS; ++i)
         ZeroSafariMon(&gRogueSaveBlock->safariMons[i]);
+}
+
+#ifdef ROGUE_DEBUG
+static void DebugSelectSafariSpecies(u16* speciesBuffer, u8 count, bool8 legendary)
+{
+    u8 i;
+
+    RogueMonQuery_Begin();
+    RogueMonQuery_IsSpeciesActive();
+    RogueMonQuery_IsLegendary(legendary ? QUERY_FUNC_INCLUDE : QUERY_FUNC_EXCLUDE);
+
+    while(RogueWeightQuery_IsOverSafeCapacity())
+        RogueMiscQuery_FilterByChance(Random(), QUERY_FUNC_INCLUDE, 50, count);
+
+    RogueWeightQuery_Begin();
+    RogueWeightQuery_FillWeights(1);
+
+    for(i = 0; i < count; ++i)
+    {
+        if(!RogueWeightQuery_HasAnyWeights())
+            RogueWeightQuery_FillWeights(1);
+
+        speciesBuffer[i] = RogueWeightQuery_SelectRandomFromWeightsWithUpdate(Random(), 0);
+    }
+
+    RogueWeightQuery_End();
+    RogueMonQuery_End();
+}
+
+static void DebugPushSafariMon(u16 species, u8 indexInRange, bool8 legendary)
+{
+    struct Pokemon mon;
+    bool8 shiny = (indexInRange % 9) == 2;
+    bool8 unique = (indexInRange % 6) == 3;
+
+    if(unique)
+    {
+        u8 rarity;
+        u16 customSpecies = Rogue_GetEggSpecies(species);
+
+        if(legendary)
+            rarity = UNIQUE_RARITY_LEGENDARY;
+        else
+            rarity = (indexInRange % 18 == 3) ? UNIQUE_RARITY_EPIC : ((indexInRange % 12 == 9) ? UNIQUE_RARITY_RARE : UNIQUE_RARITY_COMMON);
+
+        RogueGift_CreateMon(RogueGift_CreateDynamicMonId(rarity, customSpecies), &mon, species, STARTER_MON_LEVEL, USE_RANDOM_IVS);
+    }
+    else
+    {
+        CreateMon(&mon, species, STARTER_MON_LEVEL, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    }
+
+    SetMonData(&mon, MON_DATA_IS_SHINY, &shiny);
+    RogueSafari_PushBoxMon(&mon.box);
+}
+
+static void DebugFillSafariRange(u8 startIndex, u8 endIndex, bool8 legendary)
+{
+    u8 i;
+    u8 count = endIndex - startIndex + 1;
+    u16 speciesBuffer[ROGUE_SAFARI_TOTAL_MONS];
+
+    DebugSelectSafariSpecies(speciesBuffer, count, legendary);
+
+    for(i = 0; i < count; ++i)
+        DebugPushSafariMon(speciesBuffer[i], i, legendary);
+}
+#endif
+
+void RogueDebug_FillSafariBuffer()
+{
+#ifdef ROGUE_DEBUG
+    u8 dexVariantToRestore = RoguePokedex_GetDexVariant();
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_DEFAULT);
+
+    memset(gRogueSaveBlock->safariMonCustomIds, 0, sizeof(gRogueSaveBlock->safariMonCustomIds));
+
+    RogueSafari_ResetAllRegularEntries();
+    RogueSafari_ResetAllLegendEntries();
+    RogueSafari_ResetSpawns();
+
+    DebugFillSafariRange(0, ROGUE_SAFARI_LEGENDS_START_INDEX - 1, FALSE);
+    DebugFillSafariRange(ROGUE_SAFARI_LEGENDS_START_INDEX, ROGUE_SAFARI_TOTAL_MONS - 1, TRUE);
+    RogueSafari_ResetSpawns();
+
+    RoguePokedex_SetDexVariant(dexVariantToRestore);
+#endif
 }

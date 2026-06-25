@@ -30,4 +30,6 @@ void RogueSafari_CompactEmptyEntries();
 void RogueSafari_ResetAllRegularEntries();
 void RogueSafari_ResetAllLegendEntries();
 
+void RogueDebug_FillSafariBuffer();
+
 #endif

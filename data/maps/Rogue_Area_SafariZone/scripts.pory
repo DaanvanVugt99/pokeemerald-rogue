@@ -1,20 +1,6 @@
-const VAR_SAFARI_INDEX = VAR_0x8008
-const VAR_SAFARI_COST_COUNT = VAR_0x8004
-const VAR_SAFARI_COST_ITEM_0 = VAR_0x8005
-const VAR_SAFARI_COST_COUNT_0 = VAR_0x8006
-const VAR_SAFARI_COST_ITEM_1 = VAR_0x8007
-const VAR_SAFARI_COST_COUNT_1 = VAR_0x8009
-const VAR_SAFARI_COST_ITEM_2 = VAR_0x800A
-const VAR_SAFARI_COST_COUNT_2 = VAR_0x800B
-
-const SAFARI_PURCHASE_TO_PARTY = 0
-const SAFARI_PURCHASE_TO_PC = 1
-const SAFARI_PURCHASE_CANT_GIVE = 2
-const SAFARI_PURCHASE_NOT_ENOUGH = 3
-const SAFARI_PURCHASE_INVALID = 4
-
-const SAFARI_SELECTED_BUY = 10
-const SAFARI_SELECTED_DISMISS = 11
+const VAR_SAFARI_SELECTED_INDEX = VAR_TEMP_A
+const VAR_SAFARI_PURCHASE_CONTEXT = VAR_0x8000
+const SAFARI_PURCHASE_CONTEXT_AREA = 0
 
 mapscripts Rogue_Area_SafariZone_MapScripts {}
 
@@ -26,7 +12,7 @@ script Rogue_Area_SafariZone_TalkSign
 
     begindynamicmultichoice
     appenddynamicmultichoice("Offer {POKEBLOCK}", 0)
-    appenddynamicmultichoice("Dismiss Pokémon", 1)
+    appenddynamicmultichoice("Dismiss All", 1)
     appenddynamicmultichoice("Exit", MULTI_B_PRESSED)
     enddynamicmultichoice(1, 0, 3, TRUE)
 
@@ -39,8 +25,9 @@ script Rogue_Area_SafariZone_TalkSign
 
             if(var(VAR_RESULT) != ROGUE_SAFARI_TOTAL_MONS)
             {
-                copyvar(VAR_SAFARI_INDEX, VAR_RESULT)
-                call(Rogue_Area_SafariZone_PurchaseSelectedMon)
+                copyvar(VAR_SAFARI_SELECTED_INDEX, VAR_RESULT)
+                setvar(VAR_SAFARI_PURCHASE_CONTEXT, SAFARI_PURCHASE_CONTEXT_AREA)
+                call(RogueSafari_PurchaseSelectedMon)
             }
 
         case 1:
@@ -54,92 +41,4 @@ script Rogue_Area_SafariZone_TalkSign
     }
 
     release
-}
-
-script Rogue_Area_SafariZone_PurchaseSelectedMon
-{
-    special(Rogue_BufferSafariMonInfo)
-    special(Rogue_BufferSafariMonPurchaseCost)
-    setvar(VAR_RESULT, MULTI_B_PRESSED)
-
-    switch(var(VAR_SAFARI_COST_COUNT))
-    {
-        case 1:
-            bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
-            msgbox(format("This Pokémon wants {STR_VAR_1}."))
-
-        case 2:
-            bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
-            bufferitemnameplural(STR_VAR_2, VAR_SAFARI_COST_ITEM_1, VAR_SAFARI_COST_COUNT_1)
-            msgbox(format("This Pokémon wants {STR_VAR_1}\nand {STR_VAR_2}."))
-
-        case 3:
-            bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
-            bufferitemnameplural(STR_VAR_2, VAR_SAFARI_COST_ITEM_1, VAR_SAFARI_COST_COUNT_1)
-            bufferitemnameplural(STR_VAR_3, VAR_SAFARI_COST_ITEM_2, VAR_SAFARI_COST_COUNT_2)
-            msgbox(format("This Pokémon wants {STR_VAR_1},\n{STR_VAR_2}, and {STR_VAR_3}."))
-    }
-
-    if(var(VAR_SAFARI_COST_COUNT) != 0)
-    {
-        begindynamicmultichoice
-        appenddynamicmultichoice("Make Offer", SAFARI_SELECTED_BUY)
-        appenddynamicmultichoice("Dismiss {PKMN}", SAFARI_SELECTED_DISMISS)
-        appenddynamicmultichoice("Cancel", MULTI_B_PRESSED)
-        enddynamicmultichoice(1, 0, 3, TRUE)
-    }
-
-    if(var(VAR_RESULT) == SAFARI_SELECTED_BUY)
-    {
-        special(Rogue_BufferSafariMonInfo)
-        special(Rogue_TryPurchaseSafariMon)
-
-        switch(var(VAR_RESULT))
-        {
-            case SAFARI_PURCHASE_TO_PARTY:
-                msgbox(format("{STR_VAR_1} joined your party!"))
-
-            case SAFARI_PURCHASE_TO_PC:
-                bufferboxname(STR_VAR_3, VAR_PC_BOX_TO_SEND_MON)
-                msgbox(format("{STR_VAR_1} was sent to {STR_VAR_3} in Pokémon Storage."))
-
-            case SAFARI_PURCHASE_CANT_GIVE:
-                msgbox(format("There isn't enough room in Pokémon Storage."))
-
-            case SAFARI_PURCHASE_NOT_ENOUGH:
-                bufferitemnameplural(STR_VAR_1, VAR_SAFARI_COST_ITEM_0, VAR_SAFARI_COST_COUNT_0)
-                msgbox(format("You still need {STR_VAR_1}."))
-
-            case SAFARI_PURCHASE_INVALID:
-                msgbox(format("{STR_VAR_1} won't accept that offer."))
-        }
-    }
-
-    if(var(VAR_SAFARI_COST_COUNT) == 0)
-    {
-        special(Rogue_BufferSafariMonInfo)
-        msgbox(format("{STR_VAR_1} won't accept any available {POKEBLOCK}."))
-
-        begindynamicmultichoice
-        appenddynamicmultichoice("Dismiss {PKMN}", SAFARI_SELECTED_DISMISS)
-        appenddynamicmultichoice("Cancel", MULTI_B_PRESSED)
-        enddynamicmultichoice(1, 0, 2, TRUE)
-    }
-
-    if(var(VAR_RESULT) == SAFARI_SELECTED_DISMISS)
-    {
-        special(Rogue_BufferSafariMonInfo)
-        msgbox(format("Dismiss {STR_VAR_1} from the Safari Area?"), MSGBOX_YESNO)
-
-        if(var(VAR_RESULT) == YES)
-        {
-            special(Rogue_DismissSafariMon)
-
-            if(var(VAR_RESULT) == YES)
-            {
-                msgbox(format("{STR_VAR_1} left the Safari Area."))
-                special(ReloadWarpSilent)
-            }
-        }
-    }
 }

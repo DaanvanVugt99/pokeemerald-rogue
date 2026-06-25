@@ -91,6 +91,9 @@ static const u8 sStatNamesTable[NUM_STATS][13] = // a;t versopm pf gStatNamesTab
 
 static u8 const sText_The[] = _(" the ");
 static u8 const sText_TheShiny[] = _(" the shiny ");
+static u8 const sText_SafariCostHeader[] = _("This Pokémon wants:");
+static u8 const sText_SafariMissingCostHeader[] = _("You still need:");
+static u8 const sText_SafariNoCost[] = _("{STR_VAR_1} won't accept any\navailable {POKEBLOCK}.");
 
 #define SAFARI_PURCHASE_MAX_COST_ITEMS 3
 
@@ -2092,6 +2095,12 @@ static void AddSafariPurchaseCostItem(struct SafariMonPurchaseCost* cost, u16 it
     }
 }
 
+static void BufferSafariPurchaseCostCount(u8 costCount)
+{
+    gSpecialVar_0x8004 = costCount;
+    gSpecialVar_Result = costCount;
+}
+
 static u8 GetSafariMonPurchaseType(struct RogueSafariMon const* safariMon, u8 typeIndex)
 {
     u8 type = RoguePokedex_GetSpeciesType(safariMon->species, typeIndex);
@@ -2236,25 +2245,29 @@ static bool8 CheckBagHasSafariPurchaseCost(struct SafariMonPurchaseCost const* c
     return TRUE;
 }
 
-static bool8 TryGetMissingSafariPurchaseCostItem(struct SafariMonPurchaseCost const* cost, u16* itemId, u16* count)
+static u8 CountMissingSafariPurchaseCostItems(struct SafariMonPurchaseCost const* cost)
 {
     u8 i;
+    u8 missingCount = 0;
 
     for(i = 0; i < cost->count; ++i)
     {
-        u16 ownedCount = CountTotalItemQuantityInBag(cost->itemIds[i]);
-
-        if(ownedCount < cost->counts[i])
-        {
-            *itemId = cost->itemIds[i];
-            *count = cost->counts[i] - ownedCount;
-            return TRUE;
-        }
+        if(CountTotalItemQuantityInBag(cost->itemIds[i]) < cost->counts[i])
+            ++missingCount;
     }
 
-    *itemId = ITEM_NONE;
-    *count = 0;
-    return FALSE;
+    return missingCount;
+}
+
+static u8* AppendSafariCostProgress(u8* dest, u16 itemId, u16 ownedCount, u16 requiredCount)
+{
+    dest = StringCopy(dest, ItemId_GetName(itemId));
+    dest = StringAppend(dest, gText_Space);
+    dest = ConvertUIntToDecimalStringN(dest, ownedCount, STR_CONV_MODE_LEFT_ALIGN, 3);
+    dest = StringAppend(dest, gText_Slash);
+    dest = ConvertUIntToDecimalStringN(dest, requiredCount, STR_CONV_MODE_LEFT_ALIGN, 3);
+    *dest = EOS;
+    return dest;
 }
 
 bool8 Rogue_CanPurchaseSafariMon(u16 safariIndex)
@@ -2310,54 +2323,76 @@ static bool8 CreateMonFromSafariMon(struct RogueSafariMon* safariMon, struct Pok
     return TRUE;
 }
 
-void Rogue_BufferSafariMonPurchaseCost()
+static void BufferSafariPurchaseCostTextInternal(struct SafariMonPurchaseCost const* cost, bool8 missingOnly)
+{
+    u8 i;
+    u8 lineCount = 0;
+    u8* dest = StringCopy(gStringVar4, missingOnly ? sText_SafariMissingCostHeader : sText_SafariCostHeader);
+
+    for(i = 0; i < cost->count; ++i)
+    {
+        u16 ownedCount = CountTotalItemQuantityInBag(cost->itemIds[i]);
+
+        if(missingOnly && ownedCount >= cost->counts[i])
+            continue;
+
+        if(lineCount == 0 || lineCount == 2)
+            *dest++ = CHAR_NEWLINE;
+        else
+            *dest++ = CHAR_PROMPT_CLEAR;
+
+        *dest = EOS;
+        dest = AppendSafariCostProgress(dest, cost->itemIds[i], ownedCount, cost->counts[i]);
+        ++lineCount;
+    }
+
+    if(lineCount == 0)
+        StringCopy(gStringVar4, sText_SafariNoCost);
+}
+
+void Rogue_BufferSafariMonPurchaseCostText()
 {
     u8 safariIndex = gSpecialVar_0x8008;
 
-    gSpecialVar_0x8004 = 0;
-    gSpecialVar_0x8005 = ITEM_NONE;
-    gSpecialVar_0x8006 = 0;
-    gSpecialVar_0x8007 = ITEM_NONE;
-    gSpecialVar_0x8009 = 0;
-    gSpecialVar_0x800A = ITEM_NONE;
-    gSpecialVar_0x800B = 0;
+    Rogue_BufferSafariMonInfo();
 
     if(safariIndex < ROGUE_SAFARI_TOTAL_MONS && gRogueSaveBlock->safariMons[safariIndex].species != SPECIES_NONE)
     {
         struct SafariMonPurchaseCost cost;
         CalculateSafariMonPurchaseCost(&gRogueSaveBlock->safariMons[safariIndex], &cost);
+        BufferSafariPurchaseCostCount(cost.count);
 
-        gSpecialVar_0x8004 = cost.count;
-
-        if(cost.count >= 1)
-        {
-            gSpecialVar_0x8005 = cost.itemIds[0];
-            gSpecialVar_0x8006 = cost.counts[0];
-        }
-
-        if(cost.count >= 2)
-        {
-            gSpecialVar_0x8007 = cost.itemIds[1];
-            gSpecialVar_0x8009 = cost.counts[1];
-        }
-
-        if(cost.count >= 3)
-        {
-            gSpecialVar_0x800A = cost.itemIds[2];
-            gSpecialVar_0x800B = cost.counts[2];
-        }
-
-        gSpecialVar_Result = cost.count;
+        if(cost.count == 0)
+            StringExpandPlaceholders(gStringVar4, sText_SafariNoCost);
+        else
+            BufferSafariPurchaseCostTextInternal(&cost, FALSE);
     }
     else
     {
-        gSpecialVar_Result = 0;
+        BufferSafariPurchaseCostCount(0);
+        StringExpandPlaceholders(gStringVar4, sText_SafariNoCost);
     }
 }
 
-void Rogue_CheckSafariMonLikesPokeblock()
+void Rogue_BufferSafariMonMissingCostText()
 {
-    Rogue_BufferSafariMonPurchaseCost();
+    u8 safariIndex = gSpecialVar_0x8008;
+
+    Rogue_BufferSafariMonInfo();
+
+    if(safariIndex < ROGUE_SAFARI_TOTAL_MONS && gRogueSaveBlock->safariMons[safariIndex].species != SPECIES_NONE)
+    {
+        struct SafariMonPurchaseCost cost;
+
+        CalculateSafariMonPurchaseCost(&gRogueSaveBlock->safariMons[safariIndex], &cost);
+        BufferSafariPurchaseCostCount(CountMissingSafariPurchaseCostItems(&cost));
+        BufferSafariPurchaseCostTextInternal(&cost, TRUE);
+    }
+    else
+    {
+        BufferSafariPurchaseCostCount(0);
+        StringExpandPlaceholders(gStringVar4, sText_SafariNoCost);
+    }
 }
 
 void Rogue_TryPurchaseSafariMon()
@@ -2385,15 +2420,6 @@ void Rogue_TryPurchaseSafariMon()
 
     if(!CheckBagHasSafariPurchaseCost(&cost))
     {
-        u16 missingItemId;
-        u16 missingCount;
-
-        if(TryGetMissingSafariPurchaseCostItem(&cost, &missingItemId, &missingCount))
-        {
-            gSpecialVar_0x8005 = missingItemId;
-            gSpecialVar_0x8006 = missingCount;
-        }
-
         gSpecialVar_Result = SAFARI_PURCHASE_NOT_ENOUGH_POKEBLOCK;
         return;
     }

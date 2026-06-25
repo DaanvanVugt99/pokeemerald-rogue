@@ -318,8 +318,8 @@ gSpecials::
 	def_special Rogue_GiveCatchingContestMon
 	def_special Rogue_CanOverLevel
 	def_special Rogue_AnyLegendsInSafari
-	def_special Rogue_CheckSafariMonLikesPokeblock
-	def_special Rogue_BufferSafariMonPurchaseCost
+	def_special Rogue_BufferSafariMonPurchaseCostText
+	def_special Rogue_BufferSafariMonMissingCostText
 	def_special Rogue_TryPurchaseSafariMon
 	def_special Rogue_DismissSafariMon
 	def_special Rogue_AppendMultichoicePokeblockItems
