@@ -3587,7 +3587,7 @@ void Rogue_OnNewGame(void)
     VarSet(VAR_ROGUE_DIFFICULTY, 0);
     VarSet(VAR_ROGUE_FURTHEST_DIFFICULTY, 0);
     VarSet(VAR_ROGUE_CURRENT_ROOM_IDX, 0);
-    VarSet(VAR_ROGUE_ADVENTURE_MONEY, 0);
+    VarSet(VAR_ROGUE_ADVENTURE_MONEY_TIER, 0);
     VarSet(VAR_ROGUE_DESIRED_WEATHER, WEATHER_NONE);
 
     VarSet(VAR_ROGUE_REGION_DEX_LIMIT, 0);
@@ -4776,6 +4776,30 @@ static bool8 CanEnterWithItem(u16 itemId, bool8 isBasicBagEnabled)
     return FALSE;
 }
 
+static u32 GetAdventureFundStartMoney(void)
+{
+    switch(VarGet(VAR_ROGUE_ADVENTURE_MONEY_TIER))
+    {
+        case 1:
+            return 10000;
+
+        case 2:
+            return 20000;
+
+        case 3:
+            return 30000;
+
+        case 4:
+            return 40000;
+
+        case 5:
+            return 50000;
+
+        default:
+            return 0;
+    }
+}
+
 static void SetupRogueRunBag()
 {
     u16 i;
@@ -4794,22 +4818,12 @@ static void SetupRogueRunBag()
 
         if(itemId != ITEM_NONE && CanEnterWithItem(itemId, isBasicBagEnabled))
         {
-            switch (itemId)
-            {
-            case ITEM_SMALL_COIN_CASE:
-                AddMoney(&gSaveBlock1Ptr->money, 1000 * quantity);
-                break;
-
-            case ITEM_LARGE_COIN_CASE:
-                AddMoney(&gSaveBlock1Ptr->money, 10000 * quantity);
-                break;
-
-            default:
-                AddBagItem(itemId, quantity);
-                break;
-            }
+            AddBagItem(itemId, quantity);
         }
     }
+
+    if(!isBasicBagEnabled)
+        SetMoney(&gSaveBlock1Ptr->money, GetAdventureFundStartMoney());
 
     // Give basic inventory
     if(isBasicBagEnabled)
@@ -4819,9 +4833,6 @@ static void SetupRogueRunBag()
     }
 
     RecalcCharmCurseValues();
-
-    // TODO - Rework this??
-    //SetMoney(&gSaveBlock1Ptr->money, VarGet(VAR_ROGUE_ADVENTURE_MONEY));
 }
 
 enum

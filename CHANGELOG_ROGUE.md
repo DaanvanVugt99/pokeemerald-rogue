@@ -37,6 +37,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked the Bank into one-time Adventure Fund upgrades that set absolute
+  run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
+  to start with no money.
 - Reworked Hub Safari acquisition into a Pokéblock purchase economy: Safari
   sign and legendary cave Pokémon now show typed Pokéblock costs, preserve
   stored run traits, and grant low-level egg/baby species to the party or PC.

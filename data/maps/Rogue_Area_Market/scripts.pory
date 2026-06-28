@@ -38,12 +38,8 @@ script Rogue_Area_Market_ShopBank
 {
     lock
     faceplayer
-    message(format("Welcome to the Bank!\pI can provide you with Coin Cases which will convert into instantaneous Pokédollars whenever you embark on an Adventure.\pWould you like to buy and Coin Cases?"))
-    waitmessage
-
-    pokemart(BankMart)
-
-    msgbox("Come again soon!")
+    msgbox(format("Welcome to the Bank!\pI manage your ADVENTURE FUND, which sets how much money you start each Adventure with."), MSGBOX_DEFAULT)
+    call(RogueHub_Bank_OfferNextUpgrade)
     release
 }
 
@@ -54,12 +50,6 @@ script Rogue_Area_Market_BankSign
     {
         msgbox(format("The Bank"), MSGBOX_SIGN)
     }
-}
-
-mart BankMart
-{
-    ITEM_SMALL_COIN_CASE
-    ITEM_LARGE_COIN_CASE
 }
 
 raw `

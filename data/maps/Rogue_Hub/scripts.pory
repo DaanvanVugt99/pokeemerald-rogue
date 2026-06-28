@@ -490,74 +490,240 @@ script RogueHub_SpeakBank
     lock
     faceplayer
 
-    if(var(VAR_ROGUE_ADVENTURE_MONEY) == 0)
-    {
-        // Tutorial
-        msgbox(format("Why hello!\nYou must be {PLAYER} if I'm not mistaken?\pWonderful!\nYou see I'm rather useful when it comes to managing money and I was hoping to setup an ADVENTURE FUND for yourself."), MSGBOX_DEFAULT)
-        msgbox(format("What's an ADVENTURE FUND?\nIn essence, if you donate your HUB MONEY to myself, I will invest it on your behalf and then every time you head out on another adventure, I will give you some extra money to start with.\pSo rather than having to start with ¥0, by donating money to myself, you can start with ¥1000, ¥2000, ¥10000!\pThe sky is the limit really!\nOr rather I guess the limit would be your HUB MONEY."), MSGBOX_DEFAULT)
+    msgbox(format("Welcome to the Bank!\pI manage your ADVENTURE FUND, which sets how much money you start each Adventure with."), MSGBOX_DEFAULT)
+    call(RogueHub_Bank_OfferNextUpgrade)
 
-        msgbox(format("Here, let me get you started with a gift.\pI shall add ¥500 to your ADVENTURE FUND out of my own pocket!"), MSGBOX_DEFAULT)
-        setvar(VAR_ROGUE_ADVENTURE_MONEY, 500)
-        playse(SE_SHOP)
-        waitse
+    release
+}
+
+script RogueHub_Bank_OfferNextUpgrade
+{
+    if(var(VAR_ROGUE_ADVENTURE_MONEY_TIER) == 0)
+    {
+        call(RogueHub_Bank_UpgradeTo10000)
+        return
     }
 
+    if(var(VAR_ROGUE_ADVENTURE_MONEY_TIER) == 1)
+    {
+        call(RogueHub_Bank_UpgradeTo20000)
+        return
+    }
+
+    if(var(VAR_ROGUE_ADVENTURE_MONEY_TIER) == 2)
+    {
+        call(RogueHub_Bank_UpgradeTo30000)
+        return
+    }
+
+    if(var(VAR_ROGUE_ADVENTURE_MONEY_TIER) == 3)
+    {
+        call(RogueHub_Bank_UpgradeTo40000)
+        return
+    }
+
+    if(var(VAR_ROGUE_ADVENTURE_MONEY_TIER) == 4)
+    {
+        call(RogueHub_Bank_UpgradeTo50000)
+        return
+    }
+
+    msgbox(format("Your ADVENTURE FUND is fully upgraded.\pYou'll start each Adventure with ¥50000, unless your current rules prevent starting money."), MSGBOX_DEFAULT)
+}
+
+script RogueHub_Bank_UpgradeTo10000
+{
     showmoneybox(0, 0)
 
-    buffernumberstring(STR_VAR_2, VAR_ROGUE_ADVENTURE_MONEY)
-    if(var(VAR_ROGUE_ADVENTURE_MONEY) >= 25000)
+    msgbox(format("Your ADVENTURE FUND doesn't provide any starting money yet.\pI could upgrade it so you start each Adventure with ¥10000 for ¥10000?"), MSGBOX_YESNO)
+
+    if(var(VAR_RESULT) == YES)
     {
-        msgbox(format("Your fund currently has ¥{STR_VAR_2}.\pI'm afraid you can't donate any more money at the moment."), MSGBOX_DEFAULT)
+        checkconstantmoney(10000)
+        if(var(VAR_RESULT) == YES)
+        {
+            removeconstantmoney(10000)
+            updatemoneybox
+
+            playse(SE_SHOP)
+            waitse
+
+            setvar(VAR_ROGUE_ADVENTURE_MONEY_TIER, 1)
+
+            hidemoneybox
+            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}Your ADVENTURE FUND was upgraded to ¥10000!"))
+            waitmessage
+            playfanfare(MUS_EVOLVED)
+            waitfanfare
+
+            msgbox(format("From now on, you'll start each Adventure with ¥10000, unless your current rules prevent starting money."))
+        }
+        else
+        {
+            msgbox(format("I'm afraid you seem to be lacking the required funds currently."))
+            hidemoneybox
+        }
     }
     else
     {
-        message("Your fund currently has ¥{STR_VAR_2}.\nWould you like to deposit another ¥500?")
-        waitmessage
+        hidemoneybox
+    }
+}
 
-        multichoice(20, 6, MULTI_YESNOINFO, NO)
+script RogueHub_Bank_UpgradeTo20000
+{
+    showmoneybox(0, 0)
 
-        switch(var(VAR_RESULT))
-        {
-            case 0: // Yes
-                setvar(VAR_RESULT, YES)
+    msgbox(format("Your ADVENTURE FUND currently provides ¥10000.\pI could upgrade it so you start each Adventure with ¥20000 for ¥20000?"), MSGBOX_YESNO)
 
-            case 1: // No
-                setvar(VAR_RESULT, NO)
-                msgbox(format("I see...\nYou know where I am, if you change your mind."), MSGBOX_DEFAULT)
-
-            case 2: // Info
-                setvar(VAR_RESULT, NO)
-                msgbox(format("What's an ADVENTURE FUND?\nIn essence, if you donate your HUB MONEY to myself, I will invest it on your behalf and then every time you head out on another adventure, I will give you some extra money to start with.\pSo rather than having to start with ¥0, by donating money to myself, you can start with ¥1000, ¥2000, ¥10000!\pThe sky is the limit really!\nOr rather I guess the limit would be your HUB MONEY."), MSGBOX_DEFAULT)
-
-            case MULTI_B_PRESSED:
-                setvar(VAR_RESULT, NO)
-                msgbox(format("I see...\nYou know where I am, if you change your mind."), MSGBOX_DEFAULT)
-        }
-
+    if(var(VAR_RESULT) == YES)
+    {
+        checkconstantmoney(20000)
         if(var(VAR_RESULT) == YES)
         {
-            checkmoney(500)
-            if(var(VAR_RESULT) == NO)
-            {
-                msgbox(format("I'm afraid you seem to be lacking the required funds currently."), MSGBOX_YESNO)
-            }
-            else
-            {
-                removemoney(500)
-                updatemoneybox
+            removeconstantmoney(20000)
+            updatemoneybox
 
-                addvar(VAR_ROGUE_ADVENTURE_MONEY, 500)
-                buffernumberstring(STR_VAR_2, VAR_ROGUE_ADVENTURE_MONEY)
+            playse(SE_SHOP)
+            waitse
 
-                playse(SE_SHOP)
-                waitse
-                
-                msgbox(format("Thankyou very much!\nYour fund now contains ¥{STR_VAR_2}."), MSGBOX_DEFAULT)
-            }
+            setvar(VAR_ROGUE_ADVENTURE_MONEY_TIER, 2)
+
+            hidemoneybox
+            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}Your ADVENTURE FUND was upgraded to ¥20000!"))
+            waitmessage
+            playfanfare(MUS_EVOLVED)
+            waitfanfare
+
+            msgbox(format("From now on, you'll start each Adventure with ¥20000, unless your current rules prevent starting money."))
+        }
+        else
+        {
+            msgbox(format("I'm afraid you seem to be lacking the required funds currently."))
+            hidemoneybox
         }
     }
-    hidemoneybox
-    release
+    else
+    {
+        hidemoneybox
+    }
+}
+
+script RogueHub_Bank_UpgradeTo30000
+{
+    showmoneybox(0, 0)
+
+    msgbox(format("Your ADVENTURE FUND currently provides ¥20000.\pI could upgrade it so you start each Adventure with ¥30000 for ¥35000?"), MSGBOX_YESNO)
+
+    if(var(VAR_RESULT) == YES)
+    {
+        checkconstantmoney(35000)
+        if(var(VAR_RESULT) == YES)
+        {
+            removeconstantmoney(35000)
+            updatemoneybox
+
+            playse(SE_SHOP)
+            waitse
+
+            setvar(VAR_ROGUE_ADVENTURE_MONEY_TIER, 3)
+
+            hidemoneybox
+            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}Your ADVENTURE FUND was upgraded to ¥30000!"))
+            waitmessage
+            playfanfare(MUS_EVOLVED)
+            waitfanfare
+
+            msgbox(format("From now on, you'll start each Adventure with ¥30000, unless your current rules prevent starting money."))
+        }
+        else
+        {
+            msgbox(format("I'm afraid you seem to be lacking the required funds currently."))
+            hidemoneybox
+        }
+    }
+    else
+    {
+        hidemoneybox
+    }
+}
+
+script RogueHub_Bank_UpgradeTo40000
+{
+    showmoneybox(0, 0)
+
+    msgbox(format("Your ADVENTURE FUND currently provides ¥30000.\pI could upgrade it so you start each Adventure with ¥40000 for ¥55000?"), MSGBOX_YESNO)
+
+    if(var(VAR_RESULT) == YES)
+    {
+        checkconstantmoney(55000)
+        if(var(VAR_RESULT) == YES)
+        {
+            removeconstantmoney(55000)
+            updatemoneybox
+
+            playse(SE_SHOP)
+            waitse
+
+            setvar(VAR_ROGUE_ADVENTURE_MONEY_TIER, 4)
+
+            hidemoneybox
+            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}Your ADVENTURE FUND was upgraded to ¥40000!"))
+            waitmessage
+            playfanfare(MUS_EVOLVED)
+            waitfanfare
+
+            msgbox(format("From now on, you'll start each Adventure with ¥40000, unless your current rules prevent starting money."))
+        }
+        else
+        {
+            msgbox(format("I'm afraid you seem to be lacking the required funds currently."))
+            hidemoneybox
+        }
+    }
+    else
+    {
+        hidemoneybox
+    }
+}
+
+script RogueHub_Bank_UpgradeTo50000
+{
+    showmoneybox(0, 0)
+
+    msgbox(format("Your ADVENTURE FUND currently provides ¥40000.\pI could upgrade it so you start each Adventure with ¥50000 for ¥80000?"), MSGBOX_YESNO)
+
+    if(var(VAR_RESULT) == YES)
+    {
+        checkconstantmoney(80000)
+        if(var(VAR_RESULT) == YES)
+        {
+            removeconstantmoney(80000)
+            updatemoneybox
+
+            playse(SE_SHOP)
+            waitse
+
+            setvar(VAR_ROGUE_ADVENTURE_MONEY_TIER, 5)
+
+            hidemoneybox
+            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}Your ADVENTURE FUND was upgraded to ¥50000!"))
+            waitmessage
+            playfanfare(MUS_EVOLVED)
+            waitfanfare
+
+            msgbox(format("From now on, you'll start each Adventure with ¥50000, unless your current rules prevent starting money."))
+        }
+        else
+        {
+            msgbox(format("I'm afraid you seem to be lacking the required funds currently."))
+            hidemoneybox
+        }
+    }
+    else
+    {
+        hidemoneybox
+    }
 }
 
 script RogueHub_SpeakBerryMerchant
