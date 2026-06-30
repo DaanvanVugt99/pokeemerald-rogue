@@ -166,8 +166,6 @@ struct RogueLocalData
     s16 autoPickupLastY;
     bool8 hasQuickLoadPending : 1;
     bool8 hasValidQuickSave : 1;
-    bool8 hasSaveWarningPending : 1;
-    bool8 hasVersionUpdateMsgPending : 1;
     bool8 hasNicknameMonMsgPending : 1;
     bool8 hasBattleEventOccurred : 1;
     bool8 hasUsePlayerTeamTempSave : 1;
@@ -3649,55 +3647,11 @@ void Rogue_SetDefaultOptions(void)
 }
 
 extern const u8 Rogue_QuickSaveLoad[];
-extern const u8 Rogue_QuickSaveVersionWarning[];
-extern const u8 Rogue_QuickSaveVersionUpdate[];
 extern const u8 Rogue_ForceNicknameMon[];
 extern const u8 Rogue_AskNicknameMon[];
 extern const u8 Rogue_Encounter_RestStop_RandomMan[];
 extern const u8 Rogue_EventScript_AttemptSnagBattle[];
 extern const u8 Rogue_Ridemon_PlayerIsTrapped[];
-
-void Rogue_NotifySaveVersionUpdated(u16 fromNumber, u16 toNumber)
-{
-    u32 i;
-
-    FlagSet(FLAG_ROGUE_SETTINGS_MENU_DISPLAY_HIGHLIGHT);
-
-    if(Rogue_IsRunActive())
-        gRogueLocal.hasSaveWarningPending = TRUE;
-    else
-        gRogueLocal.hasVersionUpdateMsgPending = TRUE;
-
-    // Clear saved adventures
-    for(i = 0; i < ARRAY_COUNT(gRogueSaveBlock->adventureReplay); ++i)
-        gRogueSaveBlock->adventureReplay[i].isValid = FALSE;
-
-    FlagClear(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE);
-
-    // TODO - Hook up warnings here??
-    //if(IsPreReleaseCompatVersion(gSaveBlock1Ptr->rogueCompatVersion))
-    //    FlagSet(FLAG_ROGUE_PRE_RELEASE_COMPAT_WARNING);
-
-    if(gRogueSaveBlock->lastKnownNumSpecies != NUM_SPECIES)
-    {
-        u32 prevArraySize = ROUND_BITS_TO_BYTES(gRogueSaveBlock->lastKnownNumSpecies);
-        u8 *tempBuffer = gDecompressionBuffer;
-
-        AGB_ASSERT(gRogueSaveBlock->lastKnownNumSpecies < NUM_SPECIES);
-        AGB_ASSERT(prevArraySize * 2 <= 0x4000);
-
-        memcpy(tempBuffer, &gSaveBlock1Ptr->pokedexBitFlags1[0], prevArraySize);
-        memcpy(tempBuffer + prevArraySize, &gSaveBlock1Ptr->pokedexBitFlags2[0], prevArraySize);
-
-        memset(&gSaveBlock1Ptr->pokedexBitFlags1[0], 0, sizeof(gSaveBlock1Ptr->pokedexBitFlags1));
-        memset(&gSaveBlock1Ptr->pokedexBitFlags2[0], 0, sizeof(gSaveBlock1Ptr->pokedexBitFlags2));
-
-        memcpy(&gSaveBlock1Ptr->pokedexBitFlags1[0], tempBuffer, prevArraySize);
-        memcpy(&gSaveBlock1Ptr->pokedexBitFlags2[0], tempBuffer + prevArraySize, prevArraySize);
-
-        gRogueSaveBlock->lastKnownNumSpecies = NUM_SPECIES;
-    }
-}
 
 void Rogue_NotifySaveLoaded(void)
 {
@@ -3753,19 +3707,7 @@ void ForceRunRidemonTrappedCheck()
 
 bool8 Rogue_OnProcessPlayerFieldInput(void)
 {
-    if(gRogueLocal.hasSaveWarningPending)
-    {
-        gRogueLocal.hasSaveWarningPending = FALSE;
-        ScriptContext_SetupScript(Rogue_QuickSaveVersionWarning);
-        return TRUE;
-    }
-    else if(gRogueLocal.hasVersionUpdateMsgPending)
-    {
-        gRogueLocal.hasVersionUpdateMsgPending = FALSE;
-        ScriptContext_SetupScript(Rogue_QuickSaveVersionUpdate);
-        return TRUE;
-    }
-    else if(gRogueLocal.hasNicknameMonMsgPending)
+    if(gRogueLocal.hasNicknameMonMsgPending)
     {
         gRogueLocal.hasNicknameMonMsgPending = FALSE;
         if(Rogue_ShouldSkipAssignNicknameYesNoMessage())

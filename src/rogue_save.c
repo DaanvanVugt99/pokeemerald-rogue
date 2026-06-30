@@ -20,6 +20,7 @@
 #include "rogue_save.h"
 
 #define ROGUE_SAVE_BLOCK_CAPACITY (sizeof(struct BoxPokemon) * IN_BOX_COUNT * LEFTOVER_BOXES_COUNT)
+#define ROGUE_SAVE_SECRET_ID 0x4456
 
 enum
 {
@@ -140,13 +141,19 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
     // Block read/write mode
     SerializeData(stream, &saveBlock->currentBlockFormat, sizeof(saveBlock->currentBlockFormat));
 
-    // Secret ID to ensure this is a valid NEW Rogue save
-    secretId = 27615;
+    // Secret ID to ensure this is a valid Divergence Rogue save.
+    secretId = ROGUE_SAVE_SECRET_ID;
     SerializeData(stream, &secretId, sizeof(secretId));
 
-    if(secretId != 27615)
+    if(secretId != ROGUE_SAVE_SECRET_ID)
     {
-        DebugPrintf("Couldn't load save as missing secret ID (expected 27615, found %d)", secretId);
+        DebugPrintf("Couldn't load save as missing secret ID (expected %d, found %d)", ROGUE_SAVE_SECRET_ID, secretId);
+        return SAVE_VER_ID_UNKNOWN;
+    }
+
+    if(!stream->isWriteMode && saveBlock->saveVersion != ROGUE_SAVE_VERSION)
+    {
+        DebugPrintf("Discarding incompatible Rogue save version (expected %d, found %d)", ROGUE_SAVE_VERSION, saveBlock->saveVersion);
         return SAVE_VER_ID_UNKNOWN;
     }
 
@@ -156,19 +163,8 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
     rogueVersion = ROGUE_VERSION;
     SerializeData(stream, &rogueVersion, sizeof(rogueVersion)); // todo - should flag if version doesn't match (make sure to handle blank/new saves)
 
-    if(saveBlock->saveVersion >= 4)
-    {
-        saveBlock->lastKnownNumSpecies = NUM_SPECIES;
-        SerializeData(stream, &saveBlock->lastKnownNumSpecies, sizeof(saveBlock->lastKnownNumSpecies));
-    }
-    else
-    {
-#ifdef ROGUE_EXPANSION
-        saveBlock->lastKnownNumSpecies = SPECIES_PIKIN_MEGA + 1;
-#else
-        saveBlock->lastKnownNumSpecies = NUM_SPECIES;
-#endif
-    }
+    saveBlock->lastKnownNumSpecies = NUM_SPECIES;
+    SerializeData(stream, &saveBlock->lastKnownNumSpecies, sizeof(saveBlock->lastKnownNumSpecies));
 
     // Quests
     SerializeArray(stream, saveBlock->questStates, sizeof(saveBlock->questStates[0]), ARRAY_COUNT(saveBlock->questStates));
@@ -291,7 +287,10 @@ static u16 SerializeRogueBlock(bool8 inWriteMode)
         saveVersion = SerializeRogueBlockInternal(&stream, &blockCopy);
         DebugPrintf("RogueBlock READ (offset: %d, free: %d, size: %d)", stream.offset, (stream.size - stream.offset), stream.size);
 
-        memcpy(gRogueSaveBlock, &blockCopy, sizeof(struct RogueSaveBlock));
+        if(saveVersion == SAVE_VER_ID_UNKNOWN)
+            memset(gRogueSaveBlock, 0, sizeof(struct RogueSaveBlock));
+        else
+            memcpy(gRogueSaveBlock, &blockCopy, sizeof(struct RogueSaveBlock));
     }
 
     //Free(blockCopy);
@@ -319,34 +318,9 @@ void RogueSave_FormatForReading()
     }
 }
 
-u16 RogueSave_GetVersionIdFor(u16 saveVersion)
-{
-    switch (saveVersion)
-    {
-    case 0:
-        return SAVE_VER_ID_1_X;
-
-    case 1:
-        return SAVE_VER_ID_2_0_PRERELEASE;
-
-    case 2:
-        return SAVE_VER_ID_2_0;
-
-    case 3:
-        return SAVE_VER_ID_2_0_1;
-
-    case 4:
-        return SAVE_VER_ID_2_1_0;
-    
-    default:
-        AGB_ASSERT(FALSE);
-        return SAVE_VER_ID_UNKNOWN;
-    }
-}
-
 u16 RogueSave_GetVersionId()
 {
-    return RogueSave_GetVersionIdFor(gRogueSaveBlock->saveVersion);
+    return SAVE_VER_ID_LATEST;
 }
 
 void RogueSave_OnSaveLoaded()
@@ -354,11 +328,6 @@ void RogueSave_OnSaveLoaded()
     RAND_TYPE startSeed = gRngRogueValue;
 
     Rogue_NotifySaveLoaded();
-
-    if(gRogueSaveBlock->saveVersion != ROGUE_SAVE_VERSION)
-    {
-        Rogue_NotifySaveVersionUpdated(gRogueSaveBlock->saveVersion, ROGUE_SAVE_VERSION);
-    }
 
     if(Rogue_IsRunActive() && Rogue_GetCurrentDifficulty() < ROGUE_MAX_BOSS_COUNT)
     {

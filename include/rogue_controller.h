@@ -129,7 +129,6 @@ void Rogue_ResetConfigHubSettings(void);
 void Rogue_OnNewGame(void);
 void Rogue_GameClear(void);
 void Rogue_SetDefaultOptions(void);
-void Rogue_NotifySaveVersionUpdated(u16 fromNumber, u16 toNumber);
 void Rogue_NotifySaveLoaded(void);
 bool8 Rogue_IsObjectEventExcludedFromSave(struct ObjectEvent* objectEvent);
 void Rogue_OnSecondPassed(void);

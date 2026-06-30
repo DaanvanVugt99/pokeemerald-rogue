@@ -5,20 +5,16 @@
 
 extern struct RogueSaveBlock *gRogueSaveBlock;
 
-// The version to use for tracking/updating internal save game data
-// Update "RogueSave_GetVersionIdFor" every time the save structure changes
-#define ROGUE_SAVE_VERSION 4
+// First internal development save schema. Bump this when the serialized
+// Rogue block layout changes; incompatible development saves are discarded.
+#define ROGUE_SAVE_VERSION 1
 
 enum
 {
     SAVE_VER_ID_UNKNOWN,
-    SAVE_VER_ID_1_X,
-    SAVE_VER_ID_2_0_PRERELEASE,
-    SAVE_VER_ID_2_0,
-    SAVE_VER_ID_2_0_1,
-    SAVE_VER_ID_2_1_0,
+    SAVE_VER_ID_DEVELOPMENT_1_0,
 
-    SAVE_VER_ID_LATEST = SAVE_VER_ID_2_1_0,
+    SAVE_VER_ID_LATEST = SAVE_VER_ID_DEVELOPMENT_1_0,
 };
 
 void RogueSave_UpdatePointers();
@@ -28,7 +24,6 @@ void RogueSave_ClearData();
 void RogueSave_FormatForWriting();
 void RogueSave_FormatForReading();
 
-u16 RogueSave_GetVersionIdFor(u16 saveVersion);
 u16 RogueSave_GetVersionId();
 
 void RogueSave_OnSaveLoaded();

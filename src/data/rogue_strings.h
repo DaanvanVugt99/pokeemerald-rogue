@@ -1,9 +1,7 @@
 
 
 // When changing this, make sure to:
-// -bump ROGUE_SAVE_VERSION in rogue_save.c
-// -update SAVE_VER_ID_X_Y_Z enum in rogue_save.h
-// -update RogueSave_GetVersionIdFor()
+// -bump ROGUE_SAVE_VERSION in rogue_save.h if old development saves can be discarded
 const u8 gText_RogueVersion[] = _("v2.0.1a");
 
 #ifdef ROGUE_EXPANSION
