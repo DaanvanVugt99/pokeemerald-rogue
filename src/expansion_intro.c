@@ -253,7 +253,7 @@ void Task_HandleExpansionIntro(u8 taskId)
             tState++;
         break;
     case 2:
-        if (tFrameCounter == 208)
+        if (tFrameCounter == INTRO_BOOT_CREDITS_HOLD_FRAMES)
         {
             tState++;
             BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);

@@ -37,6 +37,7 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Matched the GEEF boot splash hold duration to the upstream boot credit screen.
 - Reworked the Bank into one-time Adventure Fund upgrades that set absolute
   run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
   to start with no money.

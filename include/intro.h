@@ -6,6 +6,8 @@
 // Exported RAM declarations
 
 // Exported ROM declarations
+#define INTRO_BOOT_CREDITS_HOLD_FRAMES 208
+
 void CB2_InitCopyrightScreenAfterBootup(void);
 void CB2_InitCopyrightScreenAfterTitleScreen(void);
 void PanFadeAndZoomScreen(u16, u16, u16, u16);

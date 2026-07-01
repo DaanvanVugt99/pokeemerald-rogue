@@ -173,15 +173,23 @@ extern const struct SpriteTemplate gAncientPowerRockSpriteTemplate[];
 #define TIMER_POKEBALL_FADE              28
 #define TIMER_START_LEGENDARIES          43
 
-#define TIMER_GEEF_SPLASH_FADE_OUT       90
+#define TIMER_GEEF_SPLASH_FADE_IN_END    16
+#define TIMER_GEEF_SPLASH_FADE_OUT      (TIMER_GEEF_SPLASH_FADE_IN_END + INTRO_BOOT_CREDITS_HOLD_FRAMES)
 #define TIMER_GEEF_SHINE_START           24
-#define TIMER_COPYRIGHT_SPLASH_START     92
-#define TIMER_COPYRIGHT_SPLASH_FADE_OUT 232
-#define TIMER_COPYRIGHT_SPLASH_END      233
+#define TIMER_COPYRIGHT_SPLASH_START      0
+#define TIMER_COPYRIGHT_SPLASH_FADE_OUT 140
+#define TIMER_COPYRIGHT_SPLASH_END      (TIMER_COPYRIGHT_SPLASH_FADE_OUT + 1)
+
+enum
+{
+    COPYRIGHT_SCREEN_PHASE_GEEF,
+    COPYRIGHT_SCREEN_PHASE_COPYRIGHT,
+};
 
 static EWRAM_DATA u16 sIntroCharacterGender = 0;
 static EWRAM_DATA u16 UNUSED sUnusedVar = 0;
 static EWRAM_DATA u16 sFlygonYOffset = 0;
+static EWRAM_DATA u8 sCopyrightScreenPhase = COPYRIGHT_SCREEN_PHASE_GEEF;
 
 u32 gIntroFrameCounter;
 struct GcmbStruct gMultibootProgramStruct;
@@ -1165,124 +1173,149 @@ static void SerialCB_CopyrightScreen(void)
 
 static u8 SetUpCopyrightScreen(void)
 {
-    switch (gMain.state)
+    if (sCopyrightScreenPhase == COPYRIGHT_SCREEN_PHASE_COPYRIGHT)
     {
-    case 0:
-        SetVBlankCallback(NULL);
-        SetGpuReg(REG_OFFSET_BLDCNT, 0);
-        SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-        SetGpuReg(REG_OFFSET_BLDY, 0);
-        *(u16 *)PLTT = RGB_WHITE;
-        SetGpuReg(REG_OFFSET_DISPCNT, 0);
-        SetGpuReg(REG_OFFSET_BG0HOFS, 0);
-        SetGpuReg(REG_OFFSET_BG0VOFS, 0);
-        CpuFill32(0, (void *)VRAM, VRAM_SIZE);
-        CpuFill32(0, (void *)OAM, OAM_SIZE);
-        CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
-        ResetPaletteFade();
-        LoadGeefLogoGraphics(0, 0x3800, BG_PLTT_ID(0));
-        SetGpuReg(REG_OFFSET_WIN0H, 0);
-        SetGpuReg(REG_OFFSET_WIN0V, 0);
-        SetGpuReg(REG_OFFSET_WIN1H, 0);
-        SetGpuReg(REG_OFFSET_WIN1V, 0);
-        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN0_OBJ | WININ_WIN1_BG_ALL | WININ_WIN1_OBJ);
-        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG_ALL | WINOUT_WIN01_OBJ | WINOUT_WINOBJ_ALL);
-        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_LIGHTEN);
-        SetGpuReg(REG_OFFSET_BLDY, 12);
-        ScanlineEffect_Stop();
-        ResetTasks();
-        ResetSpriteData();
-        FreeAllSpritePalettes();
-        LoadCompressedSpriteSheet(&sSpriteSheet_GeefShine);
-        LoadSpritePalette(&sSpritePalette_GeefShine);
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_WHITEALPHA);
-        SetGpuReg(REG_OFFSET_BG0CNT, BGCNT_PRIORITY(0)
-                                   | BGCNT_CHARBASE(0)
-                                   | BGCNT_SCREENBASE(7)
-                                   | BGCNT_16COLOR
-                                   | BGCNT_TXT256x256);
-        EnableInterrupts(INTR_FLAG_VBLANK);
-        SetVBlankCallback(VBlankCB_Intro);
-        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJWIN_ON;
-        SetSerialCallback(SerialCB_CopyrightScreen);
-        GameCubeMultiBoot_Init(&gMultibootProgramStruct);
-    // REG_DISPCNT needs to be overwritten the second time, because otherwise the intro won't show up on VBA 1.7.2 and John GBA Lite emulators.
-    // The REG_DISPCNT overwrite is NOT needed in m-GBA, No$GBA, VBA 1.8.0, My Boy and Pizza Boy GBA emulators.
-    case 1:
-        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJWIN_ON;
-    default:
-        UpdatePaletteFade();
-        if (!gPaletteFade.active && gMain.newKeys != 0)
+        switch (gMain.state)
         {
-            if (gMain.state < TIMER_GEEF_SPLASH_FADE_OUT)
-                gMain.state = TIMER_GEEF_SPLASH_FADE_OUT;
-            else if (gMain.state >= TIMER_COPYRIGHT_SPLASH_START && gMain.state < TIMER_COPYRIGHT_SPLASH_FADE_OUT)
-                gMain.state = TIMER_COPYRIGHT_SPLASH_FADE_OUT;
+        default:
+            UpdatePaletteFade();
+            if (!gPaletteFade.active && gMain.newKeys != 0)
+            {
+                if (gMain.state < TIMER_COPYRIGHT_SPLASH_FADE_OUT)
+                    gMain.state = TIMER_COPYRIGHT_SPLASH_FADE_OUT;
+                else
+                    gMain.state++;
+            }
             else
+            {
                 gMain.state++;
-        }
-        else
-        {
-            gMain.state++;
-        }
-        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
-        break;
-    case TIMER_GEEF_SHINE_START:
-        UpdatePaletteFade();
-        if (!gPaletteFade.active)
-        {
-            CreateGeefShineSprite();
-            gMain.state++;
-        }
-        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
-        break;
-    case TIMER_GEEF_SPLASH_FADE_OUT:
-        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-        gMain.state++;
-        break;
-    case TIMER_GEEF_SPLASH_FADE_OUT + 1:
-        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
-        if (UpdatePaletteFade())
+            }
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
             break;
-        CpuFill32(0, (void *)VRAM, VRAM_SIZE);
-        CpuFill32(0, (void *)OAM, OAM_SIZE);
-        CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
-        ResetSpriteData();
-        FreeAllSpritePalettes();
-        ResetPaletteFade();
-        SetGpuReg(REG_OFFSET_WININ, 0);
-        SetGpuReg(REG_OFFSET_WINOUT, 0);
-        SetGpuReg(REG_OFFSET_BLDCNT, 0);
-        SetGpuReg(REG_OFFSET_BLDY, 0);
-        LoadCopyrightGraphics(0, 0x3800, BG_PLTT_ID(0));
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
-        REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON;
-        gMain.state = TIMER_COPYRIGHT_SPLASH_START;
-        break;
-    case TIMER_COPYRIGHT_SPLASH_FADE_OUT:
-        GameCubeMultiBoot_Main(&gMultibootProgramStruct);
-        if (gMultibootProgramStruct.gcmb_field_2 != 1)
+        case TIMER_COPYRIGHT_SPLASH_FADE_OUT:
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+            if (gMultibootProgramStruct.gcmb_field_2 != 1)
+            {
+                BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                gMain.state++;
+            }
+            break;
+        case TIMER_COPYRIGHT_SPLASH_END:
+            if (UpdatePaletteFade())
+                break;
+#if EXPANSION_INTRO == TRUE
+            SetMainCallback2(CB2_ExpansionIntro);
+            CreateTask(Task_HandleExpansionIntro, 0);
+#else
+            CreateTask(Task_Scene1_Load, 0);
+            SetMainCallback2(MainCB2_Intro);
+#endif
+            {
+                GameCubeMultiBoot_Quit();
+                SetSerialCallback(SerialCB);
+            }
+            sCopyrightScreenPhase = COPYRIGHT_SCREEN_PHASE_GEEF;
+            return 0;
+        }
+    }
+    else
+    {
+        switch (gMain.state)
         {
+        case 0:
+            sCopyrightScreenPhase = COPYRIGHT_SCREEN_PHASE_GEEF;
+            SetVBlankCallback(NULL);
+            SetGpuReg(REG_OFFSET_BLDCNT, 0);
+            SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+            SetGpuReg(REG_OFFSET_BLDY, 0);
+            *(u16 *)PLTT = RGB_WHITE;
+            SetGpuReg(REG_OFFSET_DISPCNT, 0);
+            SetGpuReg(REG_OFFSET_BG0HOFS, 0);
+            SetGpuReg(REG_OFFSET_BG0VOFS, 0);
+            CpuFill32(0, (void *)VRAM, VRAM_SIZE);
+            CpuFill32(0, (void *)OAM, OAM_SIZE);
+            CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
+            ResetPaletteFade();
+            LoadGeefLogoGraphics(0, 0x3800, BG_PLTT_ID(0));
+            SetGpuReg(REG_OFFSET_WIN0H, 0);
+            SetGpuReg(REG_OFFSET_WIN0V, 0);
+            SetGpuReg(REG_OFFSET_WIN1H, 0);
+            SetGpuReg(REG_OFFSET_WIN1V, 0);
+            SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN0_OBJ | WININ_WIN1_BG_ALL | WININ_WIN1_OBJ);
+            SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG_ALL | WINOUT_WIN01_OBJ | WINOUT_WINOBJ_ALL);
+            SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_LIGHTEN);
+            SetGpuReg(REG_OFFSET_BLDY, 12);
+            ScanlineEffect_Stop();
+            ResetTasks();
+            ResetSpriteData();
+            FreeAllSpritePalettes();
+            LoadCompressedSpriteSheet(&sSpriteSheet_GeefShine);
+            LoadSpritePalette(&sSpritePalette_GeefShine);
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_WHITEALPHA);
+            SetGpuReg(REG_OFFSET_BG0CNT, BGCNT_PRIORITY(0)
+                                    | BGCNT_CHARBASE(0)
+                                    | BGCNT_SCREENBASE(7)
+                                    | BGCNT_16COLOR
+                                    | BGCNT_TXT256x256);
+            EnableInterrupts(INTR_FLAG_VBLANK);
+            SetVBlankCallback(VBlankCB_Intro);
+            REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJWIN_ON;
+            SetSerialCallback(SerialCB_CopyrightScreen);
+            GameCubeMultiBoot_Init(&gMultibootProgramStruct);
+        // REG_DISPCNT needs to be overwritten the second time, because otherwise the intro won't show up on VBA 1.7.2 and John GBA Lite emulators.
+        // The REG_DISPCNT overwrite is NOT needed in m-GBA, No$GBA, VBA 1.8.0, My Boy and Pizza Boy GBA emulators.
+        case 1:
+            REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJWIN_ON;
+        default:
+            UpdatePaletteFade();
+            if (!gPaletteFade.active && gMain.newKeys != 0)
+            {
+                if (gMain.state < TIMER_GEEF_SPLASH_FADE_OUT)
+                    gMain.state = TIMER_GEEF_SPLASH_FADE_OUT;
+                else
+                    gMain.state++;
+            }
+            else
+            {
+                gMain.state++;
+            }
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+            break;
+        case TIMER_GEEF_SHINE_START:
+            UpdatePaletteFade();
+            if (!gPaletteFade.active)
+            {
+                CreateGeefShineSprite();
+                gMain.state++;
+            }
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+            break;
+        case TIMER_GEEF_SPLASH_FADE_OUT:
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
             BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
             gMain.state++;
-        }
-        break;
-    case TIMER_COPYRIGHT_SPLASH_END:
-        if (UpdatePaletteFade())
             break;
-#if EXPANSION_INTRO == TRUE
-        SetMainCallback2(CB2_ExpansionIntro);
-        CreateTask(Task_HandleExpansionIntro, 0);
-#else
-        CreateTask(Task_Scene1_Load, 0);
-        SetMainCallback2(MainCB2_Intro);
-#endif
-        {
-            GameCubeMultiBoot_Quit();
-            SetSerialCallback(SerialCB);
+        case TIMER_GEEF_SPLASH_FADE_OUT + 1:
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+            if (UpdatePaletteFade())
+                break;
+            CpuFill32(0, (void *)VRAM, VRAM_SIZE);
+            CpuFill32(0, (void *)OAM, OAM_SIZE);
+            CpuFill16(0, (void *)(PLTT + 2), PLTT_SIZE - 2);
+            ResetSpriteData();
+            FreeAllSpritePalettes();
+            ResetPaletteFade();
+            SetGpuReg(REG_OFFSET_WININ, 0);
+            SetGpuReg(REG_OFFSET_WINOUT, 0);
+            SetGpuReg(REG_OFFSET_BLDCNT, 0);
+            SetGpuReg(REG_OFFSET_BLDY, 0);
+            LoadCopyrightGraphics(0, 0x3800, BG_PLTT_ID(0));
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+            REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON;
+            sCopyrightScreenPhase = COPYRIGHT_SCREEN_PHASE_COPYRIGHT;
+            gMain.state = TIMER_COPYRIGHT_SPLASH_START;
+            break;
         }
-        return 0;
     }
 
     AnimateSprites();
