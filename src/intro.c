@@ -64,8 +64,10 @@ static void SpriteCB_GameFreakLogo(struct Sprite *sprite);
 static void SpriteCB_FlygonSilhouette(struct Sprite *sprite);
 static void SpriteCB_GeefShine(struct Sprite *sprite);
 static void CreateGeefShineSprite(void);
-static void CreateGeefSoftShineSprite(void);
 static void CreateGeefSparkles(void);
+static void BeginGeefSlashEffect(void);
+static void UpdateGeefSlashEffect(u16 timer);
+static void EndGeefSlashEffect(void);
 
 // Scene 2 main tasks
 static void Task_Scene2_Load(u8);
@@ -178,7 +180,7 @@ extern const struct SpriteTemplate gAncientPowerRockSpriteTemplate[];
 #define TIMER_GEEF_SPLASH_FADE_IN_END    16
 #define TIMER_GEEF_SPLASH_FADE_OUT      (TIMER_GEEF_SPLASH_FADE_IN_END + INTRO_BOOT_CREDITS_HOLD_FRAMES)
 #define TIMER_GEEF_SHINE_START           24
-#define TIMER_GEEF_SECOND_SHINE_START   (TIMER_GEEF_SPLASH_FADE_OUT - 28)
+#define TIMER_GEEF_SLASH_START          (TIMER_GEEF_SPLASH_FADE_OUT - 28)
 #define TIMER_GEEF_SPARKLES_START       (TIMER_GEEF_SPLASH_FADE_IN_END + INTRO_BOOT_CREDITS_HOLD_FRAMES / 2)
 #define TIMER_COPYRIGHT_SPLASH_START      0
 #define TIMER_COPYRIGHT_SPLASH_FADE_OUT 140
@@ -1166,11 +1168,6 @@ static void CreateGeefShineSprite(void)
     CreateGeefShineSpriteAt(0, 80, 4);
 }
 
-static void CreateGeefSoftShineSprite(void)
-{
-    CreateGeefShineSpriteAt(-16, 82, 8);
-}
-
 #define sSpeed data[0]
 static void SpriteCB_GeefShine(struct Sprite *sprite)
 {
@@ -1196,6 +1193,85 @@ static void CreateGeefSparkles(void)
     for (i = 0; i < ARRAY_COUNT(sGeefSparkleCoords); i++)
         CreateSprite(&sSpriteTemplate_Sparkle, sGeefSparkleCoords[i][0], sGeefSparkleCoords[i][1], 0);
 }
+
+#define GEEF_SLASH_TOP_Y        58
+#define GEEF_SLASH_CUT_Y        78
+#define GEEF_SLASH_BOTTOM_Y    101
+#define GEEF_SLASH_MAX_OFFSET    4
+
+static u16 GetGeefSlashBgOffset(s16 offset)
+{
+    return (offset < 0) ? 0x100 + offset : offset;
+}
+
+static void WriteGeefSlashOffsetsToBuffer(u16 *buffer, s16 topOffset, s16 bottomOffset)
+{
+    u16 i;
+    u16 offset;
+
+    for (i = 0; i < DISPLAY_HEIGHT; i++)
+    {
+        if (i >= GEEF_SLASH_TOP_Y && i < GEEF_SLASH_CUT_Y)
+            offset = GetGeefSlashBgOffset(topOffset);
+        else if (i >= GEEF_SLASH_CUT_Y && i < GEEF_SLASH_BOTTOM_Y)
+            offset = GetGeefSlashBgOffset(bottomOffset);
+        else
+            offset = 0;
+
+        buffer[i] = offset;
+    }
+}
+
+static void WriteGeefSlashOffsetsToAllBuffers(s16 topOffset, s16 bottomOffset)
+{
+    WriteGeefSlashOffsetsToBuffer(gScanlineEffectRegBuffers[0], topOffset, bottomOffset);
+    WriteGeefSlashOffsetsToBuffer(gScanlineEffectRegBuffers[1], topOffset, bottomOffset);
+}
+
+static void WriteGeefSlashOffsets(s16 topOffset, s16 bottomOffset)
+{
+    WriteGeefSlashOffsetsToBuffer(gScanlineEffectRegBuffers[gScanlineEffect.srcBuffer], topOffset, bottomOffset);
+}
+
+static void BeginGeefSlashEffect(void)
+{
+    struct ScanlineEffectParams scanlineParams;
+
+    ScanlineEffect_Stop();
+    WriteGeefSlashOffsetsToAllBuffers(0, 0);
+
+    scanlineParams.dmaDest = &REG_BG0HOFS;
+    scanlineParams.dmaControl = SCANLINE_EFFECT_DMACNT_16BIT;
+    scanlineParams.initState = 1;
+    scanlineParams.unused9 = 0;
+    ScanlineEffect_SetParams(scanlineParams);
+    UpdateGeefSlashEffect(TIMER_GEEF_SLASH_START);
+}
+
+static void UpdateGeefSlashEffect(u16 timer)
+{
+    u16 elapsed = timer - TIMER_GEEF_SLASH_START;
+    s16 offset;
+
+    if (elapsed < GEEF_SLASH_MAX_OFFSET)
+        offset = elapsed + 1;
+    else
+        offset = GEEF_SLASH_MAX_OFFSET;
+
+    WriteGeefSlashOffsets(-offset, offset);
+}
+
+static void EndGeefSlashEffect(void)
+{
+    ScanlineEffect_Stop();
+    CpuFill16(0, gScanlineEffectRegBuffers, sizeof(gScanlineEffectRegBuffers));
+    SetGpuReg(REG_OFFSET_BG0HOFS, 0);
+}
+
+#undef GEEF_SLASH_TOP_Y
+#undef GEEF_SLASH_CUT_Y
+#undef GEEF_SLASH_BOTTOM_Y
+#undef GEEF_SLASH_MAX_OFFSET
 
 static void SerialCB_CopyrightScreen(void)
 {
@@ -1301,6 +1377,8 @@ static u8 SetUpCopyrightScreen(void)
             REG_DISPCNT = DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJWIN_ON;
         default:
             UpdatePaletteFade();
+            if (gMain.state > TIMER_GEEF_SLASH_START && gMain.state < TIMER_GEEF_SPLASH_FADE_OUT)
+                UpdateGeefSlashEffect(gMain.state);
             if (!gPaletteFade.active && gMain.newKeys != 0)
             {
                 if (gMain.state < TIMER_GEEF_SPLASH_FADE_OUT)
@@ -1319,15 +1397,17 @@ static u8 SetUpCopyrightScreen(void)
             if (!gPaletteFade.active)
             {
                 CreateGeefShineSprite();
+                PlaySE(SE_M_SWORDS_DANCE);
                 gMain.state++;
             }
             GameCubeMultiBoot_Main(&gMultibootProgramStruct);
             break;
-        case TIMER_GEEF_SECOND_SHINE_START:
+        case TIMER_GEEF_SLASH_START:
             UpdatePaletteFade();
             if (!gPaletteFade.active)
             {
-                CreateGeefSoftShineSprite();
+                BeginGeefSlashEffect();
+                PlaySE(SE_M_RAZOR_WIND);
                 gMain.state++;
             }
             GameCubeMultiBoot_Main(&gMultibootProgramStruct);
@@ -1337,6 +1417,7 @@ static u8 SetUpCopyrightScreen(void)
             if (!gPaletteFade.active)
             {
                 CreateGeefSparkles();
+                PlaySE(SE_SHINY);
                 gMain.state++;
             }
             GameCubeMultiBoot_Main(&gMultibootProgramStruct);
@@ -1356,6 +1437,7 @@ static u8 SetUpCopyrightScreen(void)
             ResetSpriteData();
             FreeAllSpritePalettes();
             ResetPaletteFade();
+            EndGeefSlashEffect();
             SetGpuReg(REG_OFFSET_WININ, 0);
             SetGpuReg(REG_OFFSET_WINOUT, 0);
             SetGpuReg(REG_OFFSET_BLDCNT, 0);
