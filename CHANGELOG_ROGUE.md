@@ -32,6 +32,7 @@ Format follows Keep a Changelog loosely:
 - Added Hisuian Samurott's Momentum unique ability, raising a random stat after
   it lands a critical hit.
 - Added a new GEEF logo splash before the upstream boot credit screen.
+- Added a delayed shine and sparkles to the GEEF boot splash.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 

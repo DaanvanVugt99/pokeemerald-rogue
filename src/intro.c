@@ -64,6 +64,8 @@ static void SpriteCB_GameFreakLogo(struct Sprite *sprite);
 static void SpriteCB_FlygonSilhouette(struct Sprite *sprite);
 static void SpriteCB_GeefShine(struct Sprite *sprite);
 static void CreateGeefShineSprite(void);
+static void CreateGeefSoftShineSprite(void);
+static void CreateGeefSparkles(void);
 
 // Scene 2 main tasks
 static void Task_Scene2_Load(u8);
@@ -176,6 +178,8 @@ extern const struct SpriteTemplate gAncientPowerRockSpriteTemplate[];
 #define TIMER_GEEF_SPLASH_FADE_IN_END    16
 #define TIMER_GEEF_SPLASH_FADE_OUT      (TIMER_GEEF_SPLASH_FADE_IN_END + INTRO_BOOT_CREDITS_HOLD_FRAMES)
 #define TIMER_GEEF_SHINE_START           24
+#define TIMER_GEEF_SECOND_SHINE_START   (TIMER_GEEF_SPLASH_FADE_OUT - 28)
+#define TIMER_GEEF_SPARKLES_START       (TIMER_GEEF_SPLASH_FADE_IN_END + INTRO_BOOT_CREDITS_HOLD_FRAMES / 2)
 #define TIMER_COPYRIGHT_SPLASH_START      0
 #define TIMER_COPYRIGHT_SPLASH_FADE_OUT 140
 #define TIMER_COPYRIGHT_SPLASH_END      (TIMER_COPYRIGHT_SPLASH_FADE_OUT + 1)
@@ -1148,23 +1152,50 @@ static void LoadGeefLogoGraphics(u16 tilesetAddress, u16 tilemapAddress, u16 pal
     LoadPalette(sGeefLogo_Pal, paletteOffset, PLTT_SIZE_4BPP);
 }
 
-static void CreateGeefShineSprite(void)
+static void CreateGeefShineSpriteAt(s16 x, s16 y, s16 speed)
 {
     u8 spriteId;
 
-    spriteId = CreateSprite(&sSpriteTemplate_GeefShine, 0, 80, 0);
+    spriteId = CreateSprite(&sSpriteTemplate_GeefShine, x, y, 0);
     gSprites[spriteId].oam.objMode = ST_OAM_OBJ_WINDOW;
+    gSprites[spriteId].data[0] = speed;
 }
 
-#define GEEF_SHINE_SPEED 4
+static void CreateGeefShineSprite(void)
+{
+    CreateGeefShineSpriteAt(0, 80, 4);
+}
+
+static void CreateGeefSoftShineSprite(void)
+{
+    CreateGeefShineSpriteAt(-16, 82, 8);
+}
+
+#define sSpeed data[0]
 static void SpriteCB_GeefShine(struct Sprite *sprite)
 {
     if (sprite->x < DISPLAY_WIDTH + 32)
-        sprite->x += GEEF_SHINE_SPEED;
+        sprite->x += sprite->sSpeed;
     else
         DestroySprite(sprite);
 }
-#undef GEEF_SHINE_SPEED
+#undef sSpeed
+
+static void CreateGeefSparkles(void)
+{
+    static const u8 sGeefSparkleCoords[][2] =
+    {
+        { 69, 80},
+        { 94, 68},
+        {120, 82},
+        {147, 70},
+        {172, 84},
+    };
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(sGeefSparkleCoords); i++)
+        CreateSprite(&sSpriteTemplate_Sparkle, sGeefSparkleCoords[i][0], sGeefSparkleCoords[i][1], 0);
+}
 
 static void SerialCB_CopyrightScreen(void)
 {
@@ -1251,6 +1282,8 @@ static u8 SetUpCopyrightScreen(void)
             FreeAllSpritePalettes();
             LoadCompressedSpriteSheet(&sSpriteSheet_GeefShine);
             LoadSpritePalette(&sSpritePalette_GeefShine);
+            LoadCompressedSpriteSheet(sSpriteSheet_Sparkle);
+            LoadSpritePalettes(sSpritePalette_Sparkle);
             BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_WHITEALPHA);
             SetGpuReg(REG_OFFSET_BG0CNT, BGCNT_PRIORITY(0)
                                     | BGCNT_CHARBASE(0)
@@ -1286,6 +1319,24 @@ static u8 SetUpCopyrightScreen(void)
             if (!gPaletteFade.active)
             {
                 CreateGeefShineSprite();
+                gMain.state++;
+            }
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+            break;
+        case TIMER_GEEF_SECOND_SHINE_START:
+            UpdatePaletteFade();
+            if (!gPaletteFade.active)
+            {
+                CreateGeefSoftShineSprite();
+                gMain.state++;
+            }
+            GameCubeMultiBoot_Main(&gMultibootProgramStruct);
+            break;
+        case TIMER_GEEF_SPARKLES_START:
+            UpdatePaletteFade();
+            if (!gPaletteFade.active)
+            {
+                CreateGeefSparkles();
                 gMain.state++;
             }
             GameCubeMultiBoot_Main(&gMultibootProgramStruct);
