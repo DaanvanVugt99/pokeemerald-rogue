@@ -1943,12 +1943,12 @@ static void DrawPocketIndicatorSquare(u8 x, bool8 isCurrentPocket)
     if (!isCurrentPocket)
     {
         if(gBagPockets[x].capacity == 0)
-            FillBgTilemapBufferRect_Palette0(2, 0x102C, x + offset, 3, 1, 1);
+            FillBgTilemapBufferRect_Palette0(2, 0x002C, x + offset, 3, 1, 1);
         else
-            FillBgTilemapBufferRect_Palette0(2, 0x1017, x + offset, 3, 1, 1);
+            FillBgTilemapBufferRect_Palette0(2, 0x0017, x + offset, 3, 1, 1);
     }
     else
-        FillBgTilemapBufferRect_Palette0(2, 0x102B, x + offset, 3, 1, 1);
+        FillBgTilemapBufferRect_Palette0(2, 0x002B, x + offset, 3, 1, 1);
 
     ScheduleBgCopyTilemapToVram(2);
 }

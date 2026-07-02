@@ -466,7 +466,7 @@ static const u8 sRoguePlayerUIWindowFontColors[][3] =
     [FONT_BLACK]        = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY,  TEXT_COLOR_LIGHT_GRAY},
     [FONT_WHITE]        = {TEXT_COLOR_WHITE, TEXT_COLOR_WHITE,      TEXT_COLOR_DARK_GRAY},
     [FONT_RED]          = {TEXT_COLOR_WHITE, TEXT_COLOR_RED,        TEXT_COLOR_LIGHT_GRAY},
-    [FONT_BLUE]         = {TEXT_COLOR_WHITE, TEXT_COLOR_BLUE,       TEXT_COLOR_LIGHT_GRAY},
+    [FONT_BLUE]         = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY,  TEXT_COLOR_LIGHT_GRAY},
     [FONT_GREEN]        = {TEXT_COLOR_WHITE, TEXT_COLOR_GREEN,      TEXT_COLOR_LIGHT_GRAY},
     [FONT_BRIGHT_GREEN] = {TEXT_COLOR_WHITE, TEXT_COLOR_GREEN,      TEXT_COLOR_LIGHT_GREEN},
 };
@@ -923,11 +923,9 @@ static bool8 RoguePlayerUI_LoadGraphics(void)
             LZDecompressWram(sRoguePlayerUITilemap, sBg1TilemapBuffer);
             sPlayerOutfitUIState->loadState++;
         }
-        LoadBgTiles(0, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, FREE_BLOCK_START);
+        LoadDarkUserWindowBorderGfxOnBg(0, FREE_BLOCK_START, BG_PLTT_ID(BG_PAL_ID_WINDOW_FRAMES));
         break;
     case 2:
-        LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(BG_PAL_ID_WINDOW_FRAMES), PLTT_SIZE_4BPP);
-
         LoadPalette(sRoguePlayerUIPalette, BG_PLTT_ID(BG_PAL_ID_BACKGROUND), PLTT_SIZE_4BPP);
         LoadPalette(gMessageBox_Pal, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
         sPlayerOutfitUIState->loadState++;
