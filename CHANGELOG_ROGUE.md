@@ -41,7 +41,7 @@ Format follows Keep a Changelog loosely:
 - Matched the GEEF boot splash hold duration to the upstream boot credit screen.
 - Retinted the title main menu, start menu, option and difficulty menu
   backdrops/window frames, dialogue prompt border, option menu label text, and
-  party menu panels toward a darker charcoal UI style.
+  party and summary menu panels toward a darker charcoal UI style.
 - Reworked the Bank into one-time Adventure Fund upgrades that set absolute
   run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
   to start with no money.
