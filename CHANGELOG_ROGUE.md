@@ -46,6 +46,10 @@ Format follows Keep a Changelog loosely:
 - Updated generic intro, credits, and system-facing title copy to use the
   Emerald Rogue: Divergence title while preserving Pokabbie's Emerald Rogue
   attribution.
+- Softened the Pokémon summary screen charcoal ramp so panels and headers read
+  lighter against the white information boxes.
+- Recolored the Rogue Pokédex page background stripes from blue to the same
+  dark grey stripe pair used by the summary screen.
 - Reworked the Bank into one-time Adventure Fund upgrades that set absolute
   run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
   to start with no money.
