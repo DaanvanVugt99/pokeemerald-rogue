@@ -1224,6 +1224,7 @@ static void CreateYesNoMenuAtPos(const struct WindowTemplate *window, u8 fontId,
     struct TextPrinterTemplate printer;
 
     sYesNoWindowId = AddWindow(window);
+    LoadDarkUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
     DrawStdFrameWithCustomTileAndPalette(sYesNoWindowId, TRUE, baseTileNum, paletteNum);
 
     printer.currentChar = gText_YesNo;
@@ -1671,6 +1672,7 @@ void CreateYesNoMenu(const struct WindowTemplate *window, u16 baseTileNum, u8 pa
     struct TextPrinterTemplate printer;
 
     sYesNoWindowId = AddWindow(window);
+    LoadDarkUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
     DrawStdFrameWithCustomTileAndPalette(sYesNoWindowId, TRUE, baseTileNum, paletteNum);
 
     printer.currentChar = gText_YesNo;
