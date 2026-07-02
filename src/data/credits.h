@@ -7,7 +7,7 @@
 // The index doesn't matter too much here, just make sure it's unique and that's fine
 #define FOR_EACH_CREDIT(method) \
     method(0, "", 0) \
-    method(1, "Pokémon Emerald Rogue", CREDITS_FLAG_TITLE) \
+    method(1, "Emerald Rogue: Divergence", CREDITS_FLAG_TITLE) \
     method(2, "Credits", CREDITS_FLAG_TITLE) \
     method(3, "", CREDITS_FLAG_BREAK) \
     \

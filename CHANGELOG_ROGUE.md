@@ -43,6 +43,9 @@ Format follows Keep a Changelog loosely:
   backdrops/window frames, dialogue prompt border, option menu label text, and
   party, summary, move relearner, bag, player outfit, naming screen, and
   yes/no prompt panels toward a darker charcoal UI style.
+- Updated generic intro, credits, and system-facing title copy to use the
+  Emerald Rogue: Divergence title while preserving Pokabbie's Emerald Rogue
+  attribution.
 - Reworked the Bank into one-time Adventure Fund upgrades that set absolute
   run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
   to start with no money.

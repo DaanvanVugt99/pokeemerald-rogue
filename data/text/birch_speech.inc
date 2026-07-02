@@ -3,7 +3,8 @@ gText_Birch_Welcome::
 	.string "$"
 
 gText_Birch_Pokemon::
-	.string "Welcome to POKéMON EMERALD ROGUE!\p"
+	.string "Welcome to EMERALD ROGUE:\n"
+	.string "DIVERGENCE!\p"
 	.string "$"
 
 gText_Birch_MainSpeech::

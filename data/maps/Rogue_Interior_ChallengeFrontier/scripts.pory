@@ -116,7 +116,7 @@ script Rogue_Interior_ChallengeFrontier_MegaStone
     {
         ROGUE_VERSION_VANILLA
         {
-            msgbox(format("It's a Mega Ring!\pThis item is only avaliable in Emerald Rogue EX version."))
+            msgbox(format("It's a Mega Ring!\pThis item is not available in this build."))
         }
         ROGUE_VERSION_EXPANSION
         {
@@ -167,7 +167,7 @@ script Rogue_Interior_ChallengeFrontier_ZCrystal
     {
         ROGUE_VERSION_VANILLA
         {
-            msgbox(format("It's a Z-Power Ring!\pThis item is only avaliable in Emerald Rogue EX version."))
+            msgbox(format("It's a Z-Power Ring!\pThis item is not available in this build."))
         }
         ROGUE_VERSION_EXPANSION
         {
@@ -241,7 +241,7 @@ script Rogue_Interior_ChallengeFrontier_Dynamax
     {
         ROGUE_VERSION_VANILLA
         {
-            msgbox(format("It's a Dynamax Band!\pThis item is only avaliable in Emerald Rogue EX version."))
+            msgbox(format("It's a Dynamax Band!\pThis item is not available in this build."))
         }
         ROGUE_VERSION_EXPANSION
         {
@@ -293,7 +293,7 @@ script Rogue_Interior_ChallengeFrontier_Tera
     {
         ROGUE_VERSION_VANILLA
         {
-            msgbox(format("It's a Tera Orb!\pThis item is only avaliable in Emerald Rogue EX version."))
+            msgbox(format("It's a Tera Orb!\pThis item is not available in this build."))
         }
         ROGUE_VERSION_EXPANSION
         {
