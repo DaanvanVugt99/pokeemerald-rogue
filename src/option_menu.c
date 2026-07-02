@@ -415,7 +415,7 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
    }
 };
 
-static const u16 sOptionMenuBg_Pal[] = {RGB(17, 18, 31)};
+static const u16 sOptionMenuBg_Pal[] = {RGB(4, 4, 5)};
 
 // code
 static void MainCB2(void)
@@ -479,12 +479,11 @@ void CB2_InitOptionMenu(void)
         gMain.state++;
         break;
     case 3:
-        LoadBgTiles(1, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, 0x1A2);
+        LoadDarkUserWindowBorderGfxOnBg(1, 0x1A2, 0x70);
         gMain.state++;
         break;
     case 4:
         LoadPalette(sOptionMenuBg_Pal, 0, sizeof(sOptionMenuBg_Pal));
-        LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, 0x70, 0x20);
         gMain.state++;
         break;
     case 5:
@@ -1054,8 +1053,7 @@ static u8 FrameType_ProcessInput(u8 menuOffset, u8 selection)
         else
             selection = 0;
 
-        LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
-        LoadPalette(GetWindowFrameTilesPal(selection)->pal, 0x70, 0x20);
+        LoadDarkWindowBorderGfxOnBg(1, selection, 0x1A2, 0x70);
         sArrowPressed = TRUE;
     }
     if (JOY_NEW(DPAD_LEFT))
@@ -1065,8 +1063,7 @@ static u8 FrameType_ProcessInput(u8 menuOffset, u8 selection)
         else
             selection = WINDOW_FRAMES_COUNT - 1;
 
-        LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
-        LoadPalette(GetWindowFrameTilesPal(selection)->pal, 0x70, 0x20);
+        LoadDarkWindowBorderGfxOnBg(1, selection, 0x1A2, 0x70);
         sArrowPressed = TRUE;
     }
     return selection;

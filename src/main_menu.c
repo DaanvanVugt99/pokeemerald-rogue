@@ -420,11 +420,66 @@ static const struct WindowTemplate sNewGameBirchSpeechTextWindows[] =
     DUMMY_WIN_TEMPLATE
 };
 
-static const u16 sMainMenuBgPal[] = INCBIN_U16("graphics/interface/main_menu_bg.gbapal");
-static const u16 sMainMenuTextPal[] = INCBIN_U16("graphics/interface/main_menu_text.gbapal");
+static const u16 sMainMenuBgPal[] =
+{
+    RGB(2, 2, 3),
+    RGB(31, 31, 31),
+    RGB(5, 5, 6),
+    RGB(10, 10, 11),
+    RGB(1, 1, 2),
+    RGB(15, 15, 16),
+    RGB(22, 22, 23),
+    RGB(18, 18, 19),
+    RGB(20, 20, 21),
+    RGB(4, 4, 5),
+    RGB(12, 12, 13),
+    RGB(8, 9, 10),
+    RGB(12, 13, 15),
+    RGB(16, 17, 19),
+    RGB(19, 20, 22),
+    RGB(24, 25, 27),
+};
+static const u16 sMainMenuTextPal[] =
+{
+    RGB(2, 2, 3),
+    RGB(29, 29, 30),
+    RGB(28, 28, 29),
+    RGB(18, 18, 19),
+    RGB(24, 24, 25),
+    RGB(28, 28, 29),
+    RGB(20, 20, 21),
+    RGB(28, 28, 29),
+    RGB(18, 19, 21),
+    RGB(24, 25, 27),
+    RGB(6, 6, 7),
+    RGB(9, 9, 10),
+    RGB(19, 19, 20),
+    RGB(0, 0, 0),
+    RGB(0, 0, 0),
+    RGB(0, 0, 0),
+};
+static const u16 sMainMenuFramePal[] =
+{
+    RGB(0, 0, 0),
+    RGB(2, 2, 3),
+    RGB(4, 4, 5),
+    RGB(7, 7, 8),
+    RGB(2, 2, 3),
+    RGB(10, 10, 11),
+    RGB(14, 14, 15),
+    RGB(21, 21, 22),
+    RGB(3, 3, 4),
+    RGB(6, 6, 7),
+    RGB(9, 9, 10),
+    RGB(12, 12, 13),
+    RGB(15, 15, 16),
+    RGB(18, 18, 19),
+    RGB(6, 6, 7),
+    RGB(26, 26, 27),
+};
 
-static const u8 sTextColor_Headers[] = {TEXT_DYNAMIC_COLOR_1, TEXT_DYNAMIC_COLOR_2, TEXT_DYNAMIC_COLOR_3};
-static const u8 sTextColor_MenuInfo[] = {TEXT_DYNAMIC_COLOR_1, TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_3};
+static const u8 sTextColor_Headers[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_3};
+static const u8 sTextColor_MenuInfo[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_3};
 static const u8 sTextColor_Version[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_3};
 
 extern const u8 gText_RogueVersion[];
@@ -681,7 +736,7 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_EFFECT_DARKEN | BLDCNT_TGT1_BG0);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-        SetGpuReg(REG_OFFSET_BLDY, 7);
+        SetGpuReg(REG_OFFSET_BLDY, 4);
 
         if (IsWirelessAdapterConnected())
             tWirelessAdapterConnected = TRUE;
@@ -768,7 +823,7 @@ static void Task_MainMenuCheckBattery(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_EFFECT_DARKEN | BLDCNT_TGT1_BG0);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-        SetGpuReg(REG_OFFSET_BLDY, 7);
+        SetGpuReg(REG_OFFSET_BLDY, 4);
 
 #if 1 //def ROGUE_FEATURE_SKIP_SAVE_WARNINGS
         gTasks[taskId].func = Task_DisplayMainMenu;
@@ -810,39 +865,21 @@ static void Task_DisplayMainMenu(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_EFFECT_DARKEN | BLDCNT_TGT1_BG0);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-        SetGpuReg(REG_OFFSET_BLDY, 7);
+        SetGpuReg(REG_OFFSET_BLDY, 4);
 
         palette = RGB_BLACK;
         LoadPalette(&palette, BG_PLTT_ID(15) + 14, PLTT_SIZEOF(1));
 
-        palette = RGB_WHITE;
+        palette = RGB(6, 6, 7);
         LoadPalette(&palette, BG_PLTT_ID(15) + 10, PLTT_SIZEOF(1));
 
-        palette = RGB(12, 12, 12);
+        palette = RGB(9, 9, 10);
         LoadPalette(&palette, BG_PLTT_ID(15) + 11, PLTT_SIZEOF(1));
 
-        palette = RGB(26, 26, 25);
+        palette = RGB(19, 19, 20);
         LoadPalette(&palette, BG_PLTT_ID(15) + 12, PLTT_SIZEOF(1));
 
-        // Note: If there is no save file, the save block is zeroed out,
-        // so the default gender is MALE.
-        switch (RoguePlayer_GetTextVariantId() % 3)
-        {
-        case 0:
-            // TEXT_COLOR_RED;
-            palette = RGB(28, 1, 1);
-            break;
-
-        case 1:
-            // TEXT_COLOR_GREEN;
-            palette = RGB(4, 19, 1);
-            break;
-
-        case 2:
-            // TEXT_COLOR_BLUE;
-            palette = RGB(6, 10, 25);
-            break;
-        }
+        palette = RGB(28, 28, 29);
 
         LoadPalette(&palette, 241, 2);
 
@@ -2527,6 +2564,8 @@ static void LoadMainMenuWindowFrameTiles(u8 bgId, u16 tileOffset)
 {
     LoadBgTiles(bgId, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, tileOffset);
     LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
+    if (tileOffset == MAIN_MENU_BORDER_TILE)
+        LoadPalette(sMainMenuFramePal, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
 }
 
 static void DrawMainMenuWindowBorder(const struct WindowTemplate *template, u16 baseTileNum)

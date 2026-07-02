@@ -48,6 +48,7 @@ void InitStandardTextBoxWindows(void);
 void InitTextBoxGfxAndPrinters(void);
 u16 RunTextPrintersAndIsPrinter0Active(void);
 void LoadMessageBoxAndBorderGfx(void);
+void LoadDarkMessageBoxAndBorderGfx(void);
 void LoadMessageBoxPalette(void);
 void DrawDialogueFrame(u8 windowId, bool8 copyToVram);
 void ClearStdWindowAndFrame(u8 windowId, bool8 copyToVram);

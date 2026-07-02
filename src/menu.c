@@ -18,6 +18,7 @@
 #include "task.h"
 #include "text_window.h"
 #include "window.h"
+#include "constants/rgb.h"
 #include "constants/songs.h"
 
 #include "rogue_controller.h"
@@ -75,7 +76,25 @@ static EWRAM_DATA bool8 sScheduledBgCopiesToVram[4] = {FALSE};
 static EWRAM_DATA u16 sTempTileDataBufferIdx = 0;
 static EWRAM_DATA void *sTempTileDataBuffer[0x20] = {NULL};
 
-const u16 gStandardMenuPalette[] = INCBIN_U16("graphics/interface/std_menu.gbapal");
+const u16 gStandardMenuPalette[] =
+{
+    RGB_WHITE,
+    RGB_WHITE,
+    RGB(12, 12, 13),
+    RGB(24, 24, 25),
+    RGB(24, 5, 5),
+    RGB(29, 18, 12),
+    RGB(7, 18, 8),
+    RGB(18, 26, 18),
+    RGB(9, 12, 16),
+    RGB(18, 20, 24),
+    RGB_BLACK,
+    RGB_BLACK,
+    RGB_BLACK,
+    RGB_BLACK,
+    RGB_BLACK,
+    RGB_BLACK,
+};
 
 static const u8 sTextSpeedFrameDelays[] =
 {
@@ -218,6 +237,12 @@ void LoadMessageBoxAndBorderGfx(void)
 {
     LoadMessageBoxGfx(0, DLG_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(DLG_WINDOW_PALETTE_NUM));
     LoadUserWindowBorderGfx(0, STD_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(STD_WINDOW_PALETTE_NUM));
+}
+
+void LoadDarkMessageBoxAndBorderGfx(void)
+{
+    LoadMessageBoxGfx(0, DLG_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(DLG_WINDOW_PALETTE_NUM));
+    LoadDarkUserWindowBorderGfx(0, STD_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(STD_WINDOW_PALETTE_NUM));
 }
 
 void LoadMessageBoxPalette(void)

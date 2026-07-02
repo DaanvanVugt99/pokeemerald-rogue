@@ -5,6 +5,7 @@
 #include "palette.h"
 #include "bg.h"
 #include "graphics.h"
+#include "constants/rgb.h"
 
 const u8 gTextWindowFrame1_Gfx[] = INCBIN_U8("graphics/text_window/1.4bpp");
 static const u8 sTextWindowFrame2_Gfx[] = INCBIN_U8("graphics/text_window/2.4bpp");
@@ -57,6 +58,26 @@ static const u16 sTextWindowPalettes[][16] =
     INCBIN_U16("graphics/text_window/text_pal4.gbapal")
 };
 
+static const u16 sDarkWindowFramePal[] =
+{
+    RGB(0, 0, 0),
+    RGB(2, 2, 3),
+    RGB(4, 4, 5),
+    RGB(7, 7, 8),
+    RGB(2, 2, 3),
+    RGB(10, 10, 11),
+    RGB(14, 14, 15),
+    RGB(21, 21, 22),
+    RGB(3, 3, 4),
+    RGB(6, 6, 7),
+    RGB(9, 9, 10),
+    RGB(12, 12, 13),
+    RGB(15, 15, 16),
+    RGB(18, 18, 19),
+    RGB(20, 20, 21),
+    RGB(26, 26, 27),
+};
+
 static const struct TilesPal sWindowFrames[WINDOW_FRAMES_COUNT] =
 {
     {gTextWindowFrame1_Gfx, gTextWindowFrame1_Pal},
@@ -107,9 +128,20 @@ void LoadWindowGfx(u8 windowId, u8 frameId, u16 destOffset, u8 palOffset)
     LoadPalette(sWindowFrames[frameId].pal, palOffset, PLTT_SIZE_4BPP);
 }
 
+void LoadDarkWindowGfx(u8 windowId, u8 frameId, u16 destOffset, u8 palOffset)
+{
+    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sWindowFrames[frameId].tiles, 0x120, destOffset);
+    LoadPalette(sDarkWindowFramePal, palOffset, PLTT_SIZE_4BPP);
+}
+
 void LoadUserWindowBorderGfx(u8 windowId, u16 destOffset, u8 palOffset)
 {
     LoadWindowGfx(windowId, gSaveBlock2Ptr->optionsWindowFrameType, destOffset, palOffset);
+}
+
+void LoadDarkUserWindowBorderGfx(u8 windowId, u16 destOffset, u8 palOffset)
+{
+    LoadDarkWindowGfx(windowId, gSaveBlock2Ptr->optionsWindowFrameType, destOffset, palOffset);
 }
 
 void DrawTextBorderOuter(u8 windowId, u16 tileNum, u8 palNum)
@@ -193,5 +225,16 @@ const u16 *GetOverworldTextboxPalettePtr(void)
 void LoadUserWindowBorderGfxOnBg(u8 bg, u16 destOffset, u8 palOffset)
 {
     LoadBgTiles(bg, sWindowFrames[gSaveBlock2Ptr->optionsWindowFrameType].tiles, 0x120, destOffset);
-    LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, palOffset, PLTT_SIZE_4BPP);
+    LoadPalette(sWindowFrames[gSaveBlock2Ptr->optionsWindowFrameType].pal, palOffset, PLTT_SIZE_4BPP);
+}
+
+void LoadDarkWindowBorderGfxOnBg(u8 bg, u8 frameId, u16 destOffset, u8 palOffset)
+{
+    LoadBgTiles(bg, sWindowFrames[frameId].tiles, 0x120, destOffset);
+    LoadPalette(sDarkWindowFramePal, palOffset, PLTT_SIZE_4BPP);
+}
+
+void LoadDarkUserWindowBorderGfxOnBg(u8 bg, u16 destOffset, u8 palOffset)
+{
+    LoadDarkWindowBorderGfxOnBg(bg, gSaveBlock2Ptr->optionsWindowFrameType, destOffset, palOffset);
 }
