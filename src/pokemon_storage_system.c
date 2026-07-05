@@ -1571,8 +1571,8 @@ static void Task_PCMainMenu(u8 taskId)
     switch (task->tState)
     {
     case STATE_LOAD:
+        LoadDarkMessageBoxAndBorderGfx();
         CreateMainMenu(task->tSelectedOption, &task->tWindowId);
-        LoadMessageBoxAndBorderGfx();
         DrawDialogueFrame(0, FALSE);
         FillWindowPixelBuffer(0, PIXEL_FILL(1));
         AddTextPrinterParameterized2(0, FONT_NORMAL, sMainMenuTexts[task->tSelectedOption].desc, TEXT_SKIP_DRAW, NULL, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY);
@@ -1711,7 +1711,7 @@ static void CreateMainMenu(u8 whichMenu, s16 *windowIdPtr)
     template.width = GetMaxWidthInMenuTable((void *)sMainMenuTexts, OPTIONS_COUNT);
     windowId = AddWindow(&template);
 
-    DrawStdWindowFrame(windowId, FALSE);
+    SetDarkStandardWindowBorderStyle(windowId, FALSE);
     PrintMenuTable(windowId, OPTIONS_COUNT, (void *)sMainMenuTexts);
     InitMenuInUpperLeftCornerNormal(windowId, OPTIONS_COUNT, whichMenu);
     *windowIdPtr = windowId;
@@ -4536,7 +4536,7 @@ static void PrintMessage(u8 id)
 
 static void ShowYesNoWindow(s8 cursorPos)
 {
-    CreateYesNoMenu(&sYesNoWindowTemplate, 11, 14, 0);
+    CreateYesNoMenuWithOriginalBorder(&sYesNoWindowTemplate, 11, 14, 0);
     Menu_MoveCursorNoWrapAround(cursorPos);
 }
 

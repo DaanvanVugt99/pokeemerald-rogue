@@ -394,7 +394,7 @@ static void CreatePCMultichoice(void)
     {
         numChoices = 4;
         windowId = CreateWindowFromRect(0, 0, width, 8);
-        SetStandardWindowBorderStyle(windowId, FALSE);
+        SetDarkStandardWindowBorderStyle(windowId, FALSE);
         AddTextPrinterParameterized(windowId, FONT_NORMAL, gText_HallOfFame, x, 33, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(windowId, FONT_NORMAL, gText_LogOff, x, 49, TEXT_SKIP_DRAW, NULL);
     }
@@ -402,7 +402,7 @@ static void CreatePCMultichoice(void)
     {
         numChoices = 3;
         windowId = CreateWindowFromRect(0, 0, width, 6);
-        SetStandardWindowBorderStyle(windowId, FALSE);
+        SetDarkStandardWindowBorderStyle(windowId, FALSE);
         AddTextPrinterParameterized(windowId, FONT_NORMAL, gText_LogOff, x, 33, TEXT_SKIP_DRAW, NULL);
     }
 

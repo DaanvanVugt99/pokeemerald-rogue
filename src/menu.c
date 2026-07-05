@@ -463,6 +463,12 @@ void SetStandardWindowBorderStyle(u8 windowId, bool8 copyToVram)
     DrawStdFrameWithCustomTileAndPalette(windowId, copyToVram, STD_WINDOW_BASE_TILE_NUM, STD_WINDOW_PALETTE_NUM);
 }
 
+void SetDarkStandardWindowBorderStyle(u8 windowId, bool8 copyToVram)
+{
+    LoadDarkUserWindowBorderGfx(windowId, STD_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(STD_WINDOW_PALETTE_NUM));
+    DrawStdFrameWithCustomTileAndPalette(windowId, copyToVram, STD_WINDOW_BASE_TILE_NUM, STD_WINDOW_PALETTE_NUM);
+}
+
 void LoadMessageBoxAndFrameGfx(u8 windowId, bool8 copyToVram)
 {
     LoadMessageBoxGfx(windowId, DLG_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(DLG_WINDOW_PALETTE_NUM));
@@ -1667,12 +1673,15 @@ void PrintMenuActionTextsInUpperLeftCorner(u8 windowId, u8 itemCount, const stru
     CopyWindowToVram(windowId, COPYWIN_GFX);
 }
 
-void CreateYesNoMenu(const struct WindowTemplate *window, u16 baseTileNum, u8 paletteNum, u8 initialCursorPos)
+static void CreateYesNoMenuInternal(const struct WindowTemplate *window, u16 baseTileNum, u8 paletteNum, u8 initialCursorPos, bool8 useDarkBorder)
 {
     struct TextPrinterTemplate printer;
 
     sYesNoWindowId = AddWindow(window);
-    LoadDarkUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
+    if (useDarkBorder)
+        LoadDarkUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
+    else
+        LoadUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
     DrawStdFrameWithCustomTileAndPalette(sYesNoWindowId, TRUE, baseTileNum, paletteNum);
 
     printer.currentChar = gText_YesNo;
@@ -1691,6 +1700,16 @@ void CreateYesNoMenu(const struct WindowTemplate *window, u16 baseTileNum, u8 pa
 
     AddTextPrinter(&printer, TEXT_SKIP_DRAW, NULL);
     InitMenuInUpperLeftCornerNormal(sYesNoWindowId, 2, initialCursorPos);
+}
+
+void CreateYesNoMenu(const struct WindowTemplate *window, u16 baseTileNum, u8 paletteNum, u8 initialCursorPos)
+{
+    CreateYesNoMenuInternal(window, baseTileNum, paletteNum, initialCursorPos, TRUE);
+}
+
+void CreateYesNoMenuWithOriginalBorder(const struct WindowTemplate *window, u16 baseTileNum, u8 paletteNum, u8 initialCursorPos)
+{
+    CreateYesNoMenuInternal(window, baseTileNum, paletteNum, initialCursorPos, FALSE);
 }
 
 void PrintMenuGridTable(u8 windowId, u8 optionWidth, u8 columns, u8 rows, const struct MenuAction *menuActions)

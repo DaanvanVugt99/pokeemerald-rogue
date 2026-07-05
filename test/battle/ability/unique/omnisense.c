@@ -18,15 +18,19 @@ SINGLE_BATTLE_TEST("Omnisense bounces back status moves")
     }
 }
 
-SINGLE_BATTLE_TEST("Omnisense reveals the foe's held item on switch-in")
+SINGLE_BATTLE_TEST("Omnisense reveals and disables the foe's held item on switch-in")
 {
     GIVEN {
-        PLAYER(SPECIES_SENTRET) { Item(ITEM_POTION); }
-        OPPONENT(SPECIES_XATU) { Ability(ABILITY_SYNCHRONIZE); UniqueAbility(ABILITY_OMNISENSE); }
+        PLAYER(SPECIES_SENTRET) { Item(ITEM_POTION); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_XATU) { Ability(ABILITY_SYNCHRONIZE); UniqueAbility(ABILITY_OMNISENSE); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { ; }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(opponent, ABILITY_OMNISENSE);
-        MESSAGE("Foe Xatu frisked Sentret and found its Potion!");
+        MESSAGE("Foe Xatu frisked Sentret and disabled its Potion!");
+    } THEN {
+        EXPECT(gStatuses3[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)] & STATUS3_EMBARGO);
+        EXPECT_EQ(gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].embargoTimer, 2);
     }
 }

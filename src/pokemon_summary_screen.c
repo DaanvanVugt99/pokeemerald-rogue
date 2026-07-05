@@ -193,6 +193,7 @@ static EWRAM_DATA struct PokemonSummaryScreenData
     u8 curMonIndex;
     u8 maxMonIndex;
     u8 currPageIndex;
+    bool8 infoAbilityExpanded;
     u8 minPageIndex;
     u8 maxPageIndex;
     u8 currTabIndex;
@@ -232,6 +233,11 @@ static void Task_ChangeSummaryMon(u8);
 static s8 AdvanceMonIndex(s8);
 static s8 AdvanceMultiBattleMonIndex(s8);
 static bool8 IsValidToViewInMulti(struct Pokemon *);
+static bool8 CanExpandInfoAbility(void);
+static void SetInfoAbilityExpanded(bool8);
+static void ToggleInfoAbilityExpanded(void);
+static void LoadInfoPageTilemap(void);
+static void ClearInfoPageDataWindows(void);
 static void ChangePage(u8, s8);
 static void ChangeTab(u8, s8);
 static void PssScrollRight(u8);
@@ -265,6 +271,7 @@ static void HandleStatusTilemap(u16, s16);
 static void Task_ShowStatusWindow(u8);
 static void TilemapFiveMovesDisplay(u16 *, u16, bool8);
 static void DrawPokerusCuredSymbol(struct Pokemon *);
+static void SetMonPicBackgroundPalette(bool8);
 static void DrawExperienceProgressBar(struct Pokemon *);
 static void LimitEggSummaryPageDisplay(void);
 static void ResetWindows(void);
@@ -280,11 +287,14 @@ static void PrintPageSpecificText(u8);
 static void CreateTextPrinterTask(u8);
 static void PrintInfoPageText(void);
 static void Task_PrintInfoPage(u8);
+static const struct WindowTemplate *GetPageInfoTemplate(void);
 static void PrintMonOTName(void);
 static void PrintMonOTID(void);
 static void PrintMonHoFMarker(void);
 static void PrintMonAbilityName(void);
 static void PrintMonAbilityDescription(void);
+static void BufferWrappedSummaryAbilityDescription(u8 *, const u8 *, u32, u8);
+static const u8 *GetAbilitySummaryExpandedDescription(u16 ability);
 static void BufferMonTrainerMemo(void);
 static void PrintMonTrainerMemo(void);
 static void BufferNatureString(void);
@@ -328,7 +338,6 @@ static void SwapMovesTypeSprites(u8, u8);
 static void PrintUniqueAbilityName(void);
 static void PrintUniqueAbilityDescription(void);
 static u16 GetSummaryUniqueAbility(void);
-static void BufferWrappedSummaryAbilityDescription(u8 *dst, const u8 *src, u32 maxWidth);
 static u8 LoadMonGfxAndSprite(struct Pokemon *, s16 *);
 static u8 CreateMonSprite(struct Pokemon *);
 static void SpriteCB_Pokemon(struct Sprite *);
@@ -626,6 +635,37 @@ static const struct WindowTemplate sPageInfoTemplate[] =
         .baseBlock = 559,
     },
 };
+static const struct WindowTemplate sPageInfoExpandedTemplate[] =
+{
+    [PSS_DATA_WINDOW_INFO_ORIGINAL_TRAINER] = {
+        .bg = 0,
+        .tilemapLeft = 11,
+        .tilemapTop = 4,
+        .width = 11,
+        .height = 2,
+        .paletteNum = 6,
+        .baseBlock = 451,
+    },
+    [PSS_DATA_WINDOW_INFO_ID] = {
+        .bg = 0,
+        .tilemapLeft = 22,
+        .tilemapTop = 4,
+        .width = 7,
+        .height = 2,
+        .paletteNum = 6,
+        .baseBlock = 473,
+    },
+    [PSS_DATA_WINDOW_INFO_ABILITY] = {
+        .bg = 0,
+        .tilemapLeft = 11,
+        .tilemapTop = 9,
+        .width = 18,
+        .height = 11,
+        .paletteNum = 6,
+        .baseBlock = 487,
+    },
+    [PSS_DATA_WINDOW_INFO_MEMO] = DUMMY_WIN_TEMPLATE,
+};
 static const struct WindowTemplate sPageSkillsTemplate[] =
 {
     [PSS_DATA_WINDOW_SKILLS_HELD_ITEM] = {
@@ -727,7 +767,10 @@ static const struct WindowTemplate sPageUniqueAbilityTemplate[] =
     },
 };
 
+#define INFO_ABILITY_DESC_TEXT_WIDTH (18 * 8)
 #define UNIQUE_ABILITY_DESC_TEXT_WIDTH (18 * 8)
+#define INFO_ABILITY_DESC_MAX_LINES 4
+#define UNIQUE_ABILITY_DESC_MAX_LINES 4
 
 #define SUMMARY_TEXT_COLOR_RED 2
 #define SUMMARY_TEXT_COLOR_BLUE 3
@@ -1858,10 +1901,14 @@ static void Task_HandleInput(u8 taskId)
         }
         else if (JOY_NEW(DPAD_LEFT))
         {
+            if (sMonSummaryScreen->infoAbilityExpanded)
+                SetInfoAbilityExpanded(FALSE);
             ChangePage(taskId, -1);
         }
         else if (JOY_NEW(DPAD_RIGHT))
         {
+            if (sMonSummaryScreen->infoAbilityExpanded)
+                SetInfoAbilityExpanded(FALSE);
             ChangePage(taskId, 1);
         }
         else if(GetLRKeysPressed() == MENU_L_PRESSED)
@@ -1886,9 +1933,16 @@ static void Task_HandleInput(u8 taskId)
             }
             else if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO)
             {
-                StopPokemonAnimations();
                 PlaySE(SE_SELECT);
-                BeginCloseSummaryScreen(taskId);
+                if (CanExpandInfoAbility())
+                {
+                    ToggleInfoAbilityExpanded();
+                }
+                else
+                {
+                    StopPokemonAnimations();
+                    BeginCloseSummaryScreen(taskId);
+                }
             }
             else if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BATTLE_MOVES)
             {
@@ -1987,6 +2041,11 @@ static void Task_ChangeSummaryMon(u8 taskId)
     case 4:
         if (ExtractMonDataToSummaryStruct(&sMonSummaryScreen->currentMon) == FALSE)
             return;
+        if (sMonSummaryScreen->infoAbilityExpanded && !CanExpandInfoAbility())
+        {
+            sMonSummaryScreen->infoAbilityExpanded = FALSE;
+            LoadInfoPageTilemap();
+        }
         break;
     case 5:
         RemoveAndCreateMonMarkingsSprite(&sMonSummaryScreen->currentMon);
@@ -2017,6 +2076,7 @@ static void Task_ChangeSummaryMon(u8 taskId)
     case 11:
         PrintPageNamesAndStats();
         PrintPageSpecificText(sMonSummaryScreen->currPageIndex);
+        PutPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
         LimitEggSummaryPageDisplay();
         break;
     case 12:
@@ -2096,6 +2156,55 @@ static bool8 IsValidToViewInMulti(struct Pokemon *mon)
         return TRUE;
     else
         return FALSE;
+}
+
+static bool8 CanExpandInfoAbility(void)
+{
+    return sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO
+        && sMonSummaryScreen->mode != SUMMARY_MODE_SELECT_MOVE
+        && !sMonSummaryScreen->summary.isEgg;
+}
+
+static void LoadInfoPageTilemap(void)
+{
+    const u32 *tilemap = sMonSummaryScreen->infoAbilityExpanded
+        ? gSummaryPage_InfoAbilityExpanded_Tilemap
+        : gSummaryPage_Info_Tilemap;
+
+    LZDecompressWram(tilemap, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_INFO][0]);
+    if (sMonSummaryScreen->summary.ailment == AILMENT_NONE)
+        HandleStatusTilemap(0, 0xFF);
+    SetMonPicBackgroundPalette(IsMonShiny(&sMonSummaryScreen->currentMon));
+    DrawPokerusCuredSymbol(&sMonSummaryScreen->currentMon);
+}
+
+static void ClearInfoPageDataWindows(void)
+{
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(sMonSummaryScreen->windowIds); i++)
+        RemoveWindowByIndex(i);
+}
+
+static void SetInfoAbilityExpanded(bool8 expanded)
+{
+    if (!CanExpandInfoAbility())
+        expanded = FALSE;
+
+    if (sMonSummaryScreen->infoAbilityExpanded == expanded)
+        return;
+
+    sMonSummaryScreen->infoAbilityExpanded = expanded;
+    ClearInfoPageDataWindows();
+    LoadInfoPageTilemap();
+    PrintPageSpecificText(PSS_PAGE_INFO);
+    PutPageWindowTilemaps(PSS_PAGE_INFO);
+    ScheduleBgCopyTilemapToVram(3);
+}
+
+static void ToggleInfoAbilityExpanded(void)
+{
+    SetInfoAbilityExpanded(!sMonSummaryScreen->infoAbilityExpanded);
 }
 
 static void ChangePage(u8 taskId, s8 delta)
@@ -3278,7 +3387,12 @@ static void PutPageWindowTilemaps(u8 page)
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TITLE);
         if (sMonSummaryScreen->mode != SUMMARY_MODE_SELECT_MOVE)
         {
-            PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
+            if (CanExpandInfoAbility())
+                PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
+            else
+                PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
         }
         if (InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE)
             PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL);
@@ -3324,6 +3438,7 @@ static void ClearPageWindowTilemaps(u8 page)
         if (sMonSummaryScreen->mode != SUMMARY_MODE_SELECT_MOVE)
         {
             ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
         }
         if (InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE)
             ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL);
@@ -3412,8 +3527,11 @@ static void PrintInfoPageText(void)
         PrintMonOTID();
         PrintMonAbilityName();
         PrintMonAbilityDescription();
-        BufferMonTrainerMemo();
-        PrintMonTrainerMemo();
+        if (!sMonSummaryScreen->infoAbilityExpanded)
+        {
+            BufferMonTrainerMemo();
+            PrintMonTrainerMemo();
+        }
     }
 }
 
@@ -3435,9 +3553,13 @@ static void Task_PrintInfoPage(u8 taskId)
         PrintMonAbilityDescription();
         break;
     case 5:
+        if (sMonSummaryScreen->infoAbilityExpanded)
+            break;
         BufferMonTrainerMemo();
         break;
     case 6:
+        if (sMonSummaryScreen->infoAbilityExpanded)
+            break;
         PrintMonTrainerMemo();
         break;
     case 7:
@@ -3450,13 +3572,20 @@ static void Task_PrintInfoPage(u8 taskId)
 static u8 const sText_UniqueMon[] = _("Unique {PKMN}");
 static u8 const sText_HoFMarker[] = _("HoF");
 
+static const struct WindowTemplate *GetPageInfoTemplate(void)
+{
+    if (sMonSummaryScreen->infoAbilityExpanded)
+        return sPageInfoExpandedTemplate;
+    return sPageInfoTemplate;
+}
+
 static void PrintMonOTName(void)
 {
     int x, windowId;
     if (InBattleFactory() != TRUE && InSlateportBattleTent() != TRUE)
     {
         u32 customMonId = RogueGift_GetCustomMonIdBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.OTID);
-        windowId = AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ORIGINAL_TRAINER);
+        windowId = AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ORIGINAL_TRAINER);
 
         if(customMonId != 0 && RogueGift_DisplayCustomMonRarity(customMonId))
         {
@@ -3488,15 +3617,15 @@ static void PrintMonOTID(void)
             xPos = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 56);
             
             if (sMonSummaryScreen->summary.OTGender == 0)
-                PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ID), gStringVar1, xPos, 1, 0, 5);
+                PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ID), gStringVar1, xPos, 1, 0, 5);
             else
-                PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ID), gStringVar1, xPos, 1, 0, 6);
+                PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ID), gStringVar1, xPos, 1, 0, 6);
         }
         else
         {
             ConvertIntToDecimalStringN(StringCopy(gStringVar1, gText_IDNumber2), (u16)sMonSummaryScreen->summary.OTID, STR_CONV_MODE_LEADING_ZEROS, 5);
             xPos = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 56);
-            PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ID), gStringVar1, xPos, 1, 0, 1);
+            PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ID), gStringVar1, xPos, 1, 0, 1);
         }
     }
 }
@@ -3537,18 +3666,27 @@ static bool32 HasAccessToGmaxForm(u16 species)
 static void PrintMonAbilityName(void)
 {
     u16 ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum, sMonSummaryScreen->summary.OTID);
-    PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilityNames[ability], 0, 1, 0, 1);
+    PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ABILITY), gAbilityNames[ability], 0, 1, 0, 1);
 
     if(IsDynamaxEnabled() && HasAccessToGmaxForm(sMonSummaryScreen->summary.species) && (sMonSummaryScreen->summary.gigatamaxFactor || RogueQuest_GetMonMasteryFlag(sMonSummaryScreen->summary.species)))
     {
-        PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), sText_GmaxFactor, 118, 1, 0, SUMMARY_TEXT_COLOR_RED);
+        PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ABILITY), sText_GmaxFactor, 118, 1, 0, SUMMARY_TEXT_COLOR_RED);
     }
 }
 
 static void PrintMonAbilityDescription(void)
 {
     u16 ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum, sMonSummaryScreen->summary.OTID);
-    PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilityDescriptionPointers[ability], 0, 17, 0, 0);
+
+    if (sMonSummaryScreen->infoAbilityExpanded)
+    {
+        BufferWrappedSummaryAbilityDescription(gStringVar4, GetAbilitySummaryExpandedDescription(ability), INFO_ABILITY_DESC_TEXT_WIDTH, INFO_ABILITY_DESC_MAX_LINES);
+        PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ABILITY), gStringVar4, 0, 17, 1, 0);
+    }
+    else
+    {
+        PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ABILITY), gAbilityDescriptionPointers[ability], 0, 17, 0, 0);
+    }
 }
 
 static u16 GetSummaryUniqueAbility(void)
@@ -3557,6 +3695,14 @@ static u16 GetSummaryUniqueAbility(void)
         return ABILITY_NONE;
 
     return GetUniqueAbilityBySpeciesAndOtId(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.OTID);
+}
+
+static const u8 *GetAbilitySummaryExpandedDescription(u16 ability)
+{
+    if (ability < ABILITIES_COUNT && gAbilityLongDescriptionPointers[ability] != NULL)
+        return gAbilityLongDescriptionPointers[ability];
+
+    return gAbilityDescriptionPointers[ability];
 }
 
 static void PrintUniqueAbilityName(void)
@@ -3575,7 +3721,77 @@ static void PrintUniqueAbilityName(void)
     }
 }
 
-static void BufferWrappedSummaryAbilityDescription(u8 *dst, const u8 *src, u32 maxWidth)
+static void AppendSummaryAbilityDescriptionEllipsis(u8 *text, u32 maxWidth)
+{
+    static const u8 sEllipsis[] = {CHAR_ELLIPSIS, EOS};
+    u8 *cursor;
+    u8 *lineStart = text;
+    u8 *lastSpace = NULL;
+
+    for (cursor = text; *cursor != EOS; cursor++)
+    {
+        if (*cursor == CHAR_NEWLINE)
+            lineStart = cursor + 1;
+    }
+
+    if (GetStringWidth(FONT_NORMAL, lineStart, 0) + GetStringWidth(FONT_NORMAL, sEllipsis, 0) <= maxWidth)
+    {
+        StringAppend(text, sEllipsis);
+        return;
+    }
+
+    for (cursor = lineStart; *cursor != EOS; cursor++)
+    {
+        if (*cursor == CHAR_SPACE)
+            lastSpace = cursor;
+    }
+
+    while (lastSpace != NULL)
+    {
+        *lastSpace = EOS;
+        if (GetStringWidth(FONT_NORMAL, lineStart, 0) + GetStringWidth(FONT_NORMAL, sEllipsis, 0) <= maxWidth)
+        {
+            StringAppend(text, sEllipsis);
+            return;
+        }
+
+        lastSpace = NULL;
+        for (cursor = lineStart; *cursor != EOS; cursor++)
+        {
+            if (*cursor == CHAR_SPACE)
+                lastSpace = cursor;
+        }
+    }
+}
+
+static void LimitSummaryAbilityDescriptionLines(u8 *text, u8 maxLines, u32 maxWidth)
+{
+    u8 lineCount = 1;
+    u8 *cursor = text;
+
+    if (maxLines == 0)
+    {
+        text[0] = EOS;
+        return;
+    }
+
+    while (*cursor != EOS)
+    {
+        if (*cursor == CHAR_NEWLINE)
+        {
+            lineCount++;
+            if (lineCount > maxLines)
+            {
+                *cursor = EOS;
+                AppendSummaryAbilityDescriptionEllipsis(text, maxWidth);
+                return;
+            }
+        }
+        cursor++;
+    }
+}
+
+static void BufferWrappedSummaryAbilityDescription(u8 *dst, const u8 *src, u32 maxWidth, u8 maxLines)
 {
     u8 currentLine[256];
     u8 word[128];
@@ -3677,6 +3893,8 @@ static void BufferWrappedSummaryAbilityDescription(u8 *dst, const u8 *src, u32 m
         dst[len] = EOS;
         StringAppend(dst, currentLine);
     }
+
+    LimitSummaryAbilityDescriptionLines(dst, maxLines, maxWidth);
 }
 
 static void PrintUniqueAbilityDescription(void)
@@ -3690,7 +3908,7 @@ static void PrintUniqueAbilityDescription(void)
         return;
     }
 
-    BufferWrappedSummaryAbilityDescription(gStringVar4, gAbilityDescriptionPointers[ability], UNIQUE_ABILITY_DESC_TEXT_WIDTH);
+    BufferWrappedSummaryAbilityDescription(gStringVar4, gAbilityDescriptionPointers[ability], UNIQUE_ABILITY_DESC_TEXT_WIDTH, UNIQUE_ABILITY_DESC_MAX_LINES);
     PrintTextOnWindow(windowId, gStringVar4, 0, 1, 1, 0);
 }
 

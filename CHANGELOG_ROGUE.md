@@ -33,6 +33,18 @@ Format follows Keep a Changelog loosely:
   it lands a critical hit.
 - Added a new GEEF logo splash before the upstream boot credit screen.
 - Added delayed slash, sparkle, and sound effects to the GEEF boot splash.
+- Added an expanded Pokémon summary Info view for reading wrapped ability
+  descriptions from the ability panel, which now stays open while switching
+  between Pokémon.
+- Added expanded canonical ability descriptions adapted from Pokémon Showdown
+  for unchanged inherited abilities, with local expanded text for
+  Divergence-modified abilities.
+- Tightened Divergence-modified ability short descriptions so they fit the
+  collapsed Pokémon Info ability panel.
+- Corrected Frisk and Infiltrator summary ability descriptions for the expanded
+  ability view.
+- Updated Frisk and Omnisense battle messaging and Omnisense copy to communicate
+  that the revealed item is disabled.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 
