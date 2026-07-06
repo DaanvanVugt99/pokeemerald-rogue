@@ -103,9 +103,6 @@ static void SpriteCB_Idle(struct Sprite *sprite);
 static void SpriteCB_BattleSpriteSlideLeft(struct Sprite *sprite);
 static void TurnValuesCleanUp(bool8 var0);
 static void SpriteCB_BounceEffect(struct Sprite *sprite);
-#ifdef ROGUE_DEBUG
-static void Debug_UpdateBattleSpriteCount(void);
-#endif
 static void BattleStartClearSetData(void);
 static void DoBattleIntro(void);
 static void TryDoEventsBeforeFirstTurn(void);
@@ -1845,10 +1842,6 @@ void BattleMainCB2(void)
         }
     }
 
-#ifdef ROGUE_DEBUG
-    Debug_UpdateBattleSpriteCount();
-#endif
-
 #ifdef ROGUE_FEATURE_AUTOMATION
     Rogue_PushAutomationInputState(AUTO_INPUT_STATE_BATTLE);
 #endif
@@ -3013,32 +3006,6 @@ static void BattleMainCB1(void)
         gBattlerControllerFuncs[battler](battler);
 }
 
-#ifdef ROGUE_DEBUG
-static void Debug_UpdateBattleSpriteCount(void)
-{
-    u32 i;
-    u32 count = 0;
-    static const u8 sText_SpriteCount[] = _("OBJ {STR_VAR_1}/64");
-
-    if (gTestRunnerEnabled)
-        return;
-    if (IsTextPrinterActive(B_WIN_MSG))
-        return;
-    if ((gMain.vblankCounter1 & 7) != 0)
-        return;
-
-    for (i = 0; i < MAX_SPRITES; i++)
-    {
-        if (gSprites[i].inUse)
-            count++;
-    }
-
-    ConvertIntToDecimalStringN(gStringVar1, count, STR_CONV_MODE_RIGHT_ALIGN, 2);
-    StringExpandPlaceholders(gStringVar4, sText_SpriteCount);
-    BattlePutTextOnWindow(gStringVar4, B_WIN_DUMMY);
-}
-#endif
-
 static void BattleStartClearSetData(void)
 {
     s32 i;
@@ -3417,8 +3384,8 @@ const u8* FaintClearSetData(u32 battler)
 
     gBattleResources->flags->flags[battler] = 0;
 
-    gBattleMons[battler].type1 = gSpeciesInfo[gBattleMons[battler].species].types[0];
-    gBattleMons[battler].type2 = gSpeciesInfo[gBattleMons[battler].species].types[1];
+    gBattleMons[battler].type1 = GetTypeBySpecies(gBattleMons[battler].species, 0, gBattleMons[battler].otId);
+    gBattleMons[battler].type2 = GetTypeBySpecies(gBattleMons[battler].species, 1, gBattleMons[battler].otId);
     gBattleMons[battler].type3 = TYPE_MYSTERY;
 
     Ai_UpdateFaintData(battler);
@@ -3522,8 +3489,8 @@ static void DoBattleIntro(void)
             else
             {
                 memcpy(&gBattleMons[battler], &gBattleResources->bufferB[battler][4], sizeof(struct BattlePokemon));
-                gBattleMons[battler].type1 = gSpeciesInfo[gBattleMons[battler].species].types[0];
-                gBattleMons[battler].type2 = gSpeciesInfo[gBattleMons[battler].species].types[1];
+                gBattleMons[battler].type1 = GetTypeBySpecies(gBattleMons[battler].species, 0, gBattleMons[battler].otId);
+                gBattleMons[battler].type2 = GetTypeBySpecies(gBattleMons[battler].species, 1, gBattleMons[battler].otId);
                 gBattleMons[battler].type3 = TYPE_MYSTERY;
                 gBattleMons[battler].ability = GetAbilityBySpecies(gBattleMons[battler].species, gBattleMons[battler].abilityNum, gBattleMons[battler].otId);
                 gBattleStruct->hpOnSwitchout[GetBattlerSide(battler)] = gBattleMons[battler].hp;

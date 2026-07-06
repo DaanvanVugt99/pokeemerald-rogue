@@ -90,6 +90,12 @@ struct RogueAdvPathRoomParams
         {
             u16 species;
             bool8 shinyState;
+            u32 customMonId;
+        } uniqueDen;
+        struct
+        {
+            u16 species;
+            bool8 shinyState;
         } honeyTree;
         struct
         {
@@ -259,6 +265,7 @@ struct RogueRunData
     u8 legendaryDifficulties[ADVPATH_LEGEND_COUNT];
     u8 teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_COUNT];
     u8 rivalEncounterDifficulties[ROGUE_RIVAL_MAX_ROUTE_ENCOUNTERS];
+    u8 uniqueDenDifficulty;
     u8 completedBadges[ROGUE_MAX_BOSS_COUNT];
     u8 lastShopVisitDifficulty[ROGUE_SHOP_COUNT];
     u8 activeEvoItemFlags[8];

@@ -776,6 +776,7 @@ static bool8 IsSpawnSlotValid(u16 slot)
             if(
                 gRogueAdvPath.currentRoomType != ADVPATH_ROOM_LEGENDARY &&
                 gRogueAdvPath.currentRoomType != ADVPATH_ROOM_WILD_DEN &&
+                gRogueAdvPath.currentRoomType != ADVPATH_ROOM_UNIQUE_DEN &&
                 gRogueAdvPath.currentRoomType != ADVPATH_ROOM_HONEY_TREE
             )
                 return TRUE;

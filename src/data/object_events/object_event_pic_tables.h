@@ -5433,6 +5433,10 @@ static const struct SpriteFrameImage sPicTable_GoldGrass[] = {
     obj_frame_tiles(gObjectEventPic_GoldGrass),
 };
 
+static const struct SpriteFrameImage sPicTable_UniqueDenGrass[] = {
+    obj_frame_tiles(gObjectEventPic_UniqueDenGrass),
+};
+
 static const struct SpriteFrameImage sPicTable_FlagAdventure[] = {
     overworld_frame(gObjectEventPic_FlagAdventure, 4, 4, 3),
     overworld_frame(gObjectEventPic_FlagAdventure, 4, 4, 3),

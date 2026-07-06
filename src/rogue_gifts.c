@@ -1052,7 +1052,7 @@ static u32 SelectRandomType(u16 species, u8 index)
     return type;
 }
 
-u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
+static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGate)
 {
     u16 i;
     u32 temp;
@@ -1069,7 +1069,7 @@ u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
         break;
     }
 
-    if(compressedDataUntyped.format == COMPRESSED_FORMAT_MON_TYPE && !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS))
+    if(compressedDataUntyped.format == COMPRESSED_FORMAT_MON_TYPE && !ignoreTypingUnlockGate && !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS))
         compressedDataUntyped.format = COMPRESSED_FORMAT_ORIGINAL;
 
     if(rarity == UNIQUE_RARITY_LEGENDARY)
@@ -1214,12 +1214,22 @@ u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
     return temp;
 }
 
+u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
+{
+    return CreateDynamicMonId(rarity, species, FALSE);
+}
+
+u32 RogueGift_CreateDynamicMonIdRaw(u8 rarity, u16 species)
+{
+    return CreateDynamicMonId(rarity, species, TRUE);
+}
+
 static bool8 IsDynamicUniqueMonValid(struct UniqueMon* mon)
 {
     return !(mon->species == SPECIES_NONE || mon->customMonId == 0 || mon->countDown == 0);
 }
 
-static u8 RandomRarity()
+u8 RogueGift_RollDynamicUniqueRarity(bool8 ignoreUnlockGates)
 {
     u8 rarity;
 
@@ -1250,6 +1260,9 @@ static u8 RandomRarity()
         rarity = UNIQUE_RARITY_COMMON;
         break;
     }
+
+    if(ignoreUnlockGates)
+        return rarity;
 
     if(rarity == UNIQUE_RARITY_LEGENDARY && !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY))
         rarity = UNIQUE_RARITY_EPIC;
@@ -1355,7 +1368,7 @@ void RogueGift_EnsureDynamicCustomMonsAreValid()
 
         if(!IsDynamicUniqueMonValid(&gRogueSaveBlock->dynamicUniquePokemon[i]))
         {
-            u8 rarity = RandomRarity();
+            u8 rarity = RogueGift_RollDynamicUniqueRarity(FALSE);
 
             gRogueSaveBlock->dynamicUniquePokemon[i].countDown = 60 + 30 * i; // Time remaining is based on the slot
 

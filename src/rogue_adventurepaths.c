@@ -20,6 +20,7 @@
 
 #include "rogue_adventurepaths.h"
 #include "rogue_campaign.h"
+#include "rogue_gifts.h"
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
 #include "rogue_query.h"
@@ -376,6 +377,7 @@ static u8 SelectRoomType_CalculateWeight(u16 weightIndex, u16 roomType, void* da
 
     // Only allow 1 but we really want to place it
     case ADVPATH_ROOM_LEGENDARY:
+    case ADVPATH_ROOM_UNIQUE_DEN:
         count = CountRoomType(roomType);
         if(count == 0)
             return 200;
@@ -507,6 +509,7 @@ static u8 ReplaceRoomEncounters_CalculateWeight(u16 weightIndex, u16 roomId, voi
         break;
 
     case ADVPATH_ROOM_LEGENDARY:
+    case ADVPATH_ROOM_UNIQUE_DEN:
         // Like being placed in the final column but can occasionally end up in other one
         if(existingRoom->coords.x <= 2)
             weight += 80;
@@ -520,7 +523,7 @@ static u8 ReplaceRoomEncounters_CalculateWeight(u16 weightIndex, u16 roomId, voi
             weight += 40;
 
         // We like having the legend be behind the team hideout
-        if(IsPrecededByRoomType(existingRoom, ADVPATH_ROOM_TEAM_HIDEOUT))
+        if(roomType == ADVPATH_ROOM_LEGENDARY && IsPrecededByRoomType(existingRoom, ADVPATH_ROOM_TEAM_HIDEOUT))
             weight += 200;
         break;
 
@@ -578,7 +581,7 @@ static u8 ReplaceRoomEncounters_CalculateWeight(u16 weightIndex, u16 roomId, voi
     return (u8)(min(255, max(0, weight)));
 }
 
-static void ReplaceRoomEncounter(u8 fromRoomType, u8 toRoomType)
+static bool8 ReplaceRoomEncounter(u8 fromRoomType, u8 toRoomType)
 {
     u16 replaceIndex = (u16)-1;
     u8 replaceRoomType = 0;
@@ -610,7 +613,10 @@ static void ReplaceRoomEncounter(u8 fromRoomType, u8 toRoomType)
     if(replaceIndex != (u16)-1)
     {
         GenerateRoomInstance(replaceIndex, replaceRoomType);
+        return TRUE;
     }
+
+    return FALSE;
 }
 
 static bool8 FastPathAreRoutesHidden()
@@ -874,6 +880,13 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         }
     }
 
+    // Unique Den
+    if((Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH || !fastPathHideRoutes) && gRogueRun.uniqueDenDifficulty == GetPathGenerationDifficulty())
+    {
+        if(ReplaceRoomEncounter(ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_UNIQUE_DEN))
+            --freeRoomCount;
+    }
+
     // Replace % of route with special encounters
     {
         u16 replacePerc = 0;
@@ -1092,6 +1105,19 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
             gRogueAdvPath.rooms[roomId].roomParams.perType.wildDen.species = Rogue_SelectWildDenEncounterRoom();
             gRogueAdvPath.rooms[roomId].roomParams.perType.wildDen.shinyState = Rogue_RollShinyState(SHINY_ROLL_STATIC);
             break;
+
+        case ADVPATH_ROOM_UNIQUE_DEN:
+        {
+            u16 species = Rogue_SelectUniqueDenEncounterRoom();
+            gRogueAdvPath.rooms[roomId].roomParams.roomIdx = 0;
+            gRogueAdvPath.rooms[roomId].roomParams.perType.uniqueDen.species = species;
+            gRogueAdvPath.rooms[roomId].roomParams.perType.uniqueDen.shinyState = Rogue_RollShinyState(SHINY_ROLL_STATIC);
+            gRogueAdvPath.rooms[roomId].roomParams.perType.uniqueDen.customMonId = RogueGift_CreateDynamicMonIdRaw(
+                RogueGift_RollDynamicUniqueRarity(TRUE),
+                species
+            );
+            break;
+        }
 
         case ADVPATH_ROOM_HONEY_TREE:
             gRogueAdvPath.rooms[roomId].roomParams.roomIdx = 0;
@@ -1968,6 +1994,7 @@ static void ApplyCurrentNodeWarp(struct WarpData *warp)
             break;
 
         case ADVPATH_ROOM_WILD_DEN:
+        case ADVPATH_ROOM_UNIQUE_DEN:
             warp->mapGroup = MAP_GROUP(ROGUE_ENCOUNTER_DEN);
             warp->mapNum = MAP_NUM(ROGUE_ENCOUNTER_DEN);
             break;
@@ -2250,6 +2277,9 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
 
         case ADVPATH_ROOM_WILD_DEN:
             return OBJ_EVENT_GFX_GRASS_DEFAULT;
+
+        case ADVPATH_ROOM_UNIQUE_DEN:
+            return OBJ_EVENT_GFX_UNIQUE_DEN_GRASS;
 
         case ADVPATH_ROOM_HONEY_TREE:
             return OBJ_EVENT_GFX_GOLD_GRASS;

@@ -213,6 +213,7 @@ static void HandleForfeitingInCatchingContest();
 
 void EnableRivalEncounterIfRequired();
 static void ChooseLegendarysForNewAdventure();
+static void ChooseUniqueDenForNewAdventure();
 static void ChooseTeamEncountersForNewAdventure();
 static void RememberPartyHeldItems();
 static void RememberPartyHealth();
@@ -4984,6 +4985,7 @@ static void BeginRogueRunPhase_Trainers(void)
     EnableRivalEncounterIfRequired();
 
     gRogueRun.shrineSpawnDifficulty = 1 + RogueRandomRange(ROGUE_MAX_BOSS_COUNT, 0);
+    ChooseUniqueDenForNewAdventure();
 
     RogueSafari_CompactEmptyEntries();
 }
@@ -5314,6 +5316,56 @@ static void ChooseLegendarysForNewAdventure()
         if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
             gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] += collisionStep;
     }
+}
+
+static void ChooseUniqueDenForNewAdventure()
+{
+    u8 i;
+    bool8 hadCollision;
+    u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH) ? 2 : 1;
+
+    gRogueRun.uniqueDenDifficulty = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+        ? 0
+        : 1 + RogueRandomRange(ROGUE_ELITE_START_DIFFICULTY - 1, 0);
+
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+    {
+        // Fast Path hides routes every other path, so place special encounters on reset paths.
+        gRogueRun.uniqueDenDifficulty = (gRogueRun.uniqueDenDifficulty / 2) * 2;
+    }
+
+    do
+    {
+        hadCollision = FALSE;
+
+        for(i = 0; i < ADVPATH_LEGEND_COUNT; ++i)
+        {
+            if(gRogueRun.uniqueDenDifficulty == gRogueRun.legendaryDifficulties[i])
+            {
+                gRogueRun.uniqueDenDifficulty += collisionStep;
+                hadCollision = TRUE;
+                break;
+            }
+        }
+
+        if(gRogueRun.uniqueDenDifficulty == gRogueRun.shrineSpawnDifficulty)
+        {
+            gRogueRun.uniqueDenDifficulty += collisionStep;
+            hadCollision = TRUE;
+            continue;
+        }
+
+        for(i = 0; i < ADVPATH_TEAM_ENCOUNTER_COUNT; ++i)
+        {
+            if(gRogueRun.uniqueDenDifficulty == gRogueRun.teamEncounterDifficulties[i])
+            {
+                gRogueRun.uniqueDenDifficulty += collisionStep;
+                hadCollision = TRUE;
+                break;
+            }
+        }
+    } while(hadCollision);
+
 }
 
 static u16 ChooseTeamEncounterNum()
@@ -6287,6 +6339,11 @@ u16 Rogue_SelectWildDenEncounterRoom(void)
     return species;
 }
 
+u16 Rogue_SelectUniqueDenEncounterRoom(void)
+{
+    return Rogue_SelectWildDenEncounterRoom();
+}
+
 //static u8 HoneyTree_CalculateWeight(u16 weightIndex, u16 species, void* data)
 //{
 //    u32 weight;
@@ -6972,6 +7029,20 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                         gRogueAdvPath.currentRoomParams.perType.wildDen.species,
                         gRogueAdvPath.currentRoomParams.perType.wildDen.shinyState,
                         0
+                    );
+                    break;
+                }
+
+                case ADVPATH_ROOM_UNIQUE_DEN:
+                {
+                    ResetSpecialEncounterStates();
+                    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, gRogueAdvPath.currentRoomParams.perType.uniqueDen.species);
+
+                    FollowMon_SetGraphics(
+                        0,
+                        gRogueAdvPath.currentRoomParams.perType.uniqueDen.species,
+                        gRogueAdvPath.currentRoomParams.perType.uniqueDen.shinyState,
+                        gRogueAdvPath.currentRoomParams.perType.uniqueDen.customMonId
                     );
                     break;
                 }
@@ -9353,7 +9424,7 @@ void Rogue_ModifyWildMonHeldItem(u16* itemId)
 {
     if(Rogue_IsRunActive())
     {
-        if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_WILD_DEN || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_CATCHING_CONTEST)
+        if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_WILD_DEN || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_UNIQUE_DEN || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_CATCHING_CONTEST)
         {
             *itemId = 0;
             return;
@@ -9632,6 +9703,21 @@ static void FillWithRoamerState(struct Pokemon* mon, u8 level)
     SetMonData(mon, MON_DATA_HP, &temp);
 }
 
+static void ApplyCustomMonToWildBattle(u32 customMonId, struct Pokemon* mon)
+{
+    if(customMonId != 0)
+    {
+        // Make sure shiny state isn't changed
+        u32 shinyState = GetMonData(mon, MON_DATA_IS_SHINY);
+
+        ModifyExistingMonToCustomMon(customMonId, mon);
+
+        SetMonData(mon, MON_DATA_IS_SHINY, &shinyState);
+
+        gRogueLocal.wildBattleCustomMonId = customMonId;
+    }
+}
+
 static void TryApplyCustomMon(u16 species, struct Pokemon* mon)
 {
     if(Rogue_IsRunActive())
@@ -9655,24 +9741,57 @@ static void TryApplyCustomMon(u16 species, struct Pokemon* mon)
 
             if(customMonId != 0)
             {
-                // Make sure shiny state isn't changed
-                u32 shinyState = GetMonData(mon, MON_DATA_IS_SHINY);
-
-                ModifyExistingMonToCustomMon(customMonId, mon);
-
-                SetMonData(mon, MON_DATA_IS_SHINY, &shinyState);
-
-                gRogueLocal.wildBattleCustomMonId = customMonId;
+                ApplyCustomMonToWildBattle(customMonId, mon);
             }
         }
     }
+}
+
+static void ApplyDenEncounterQuality(struct Pokemon* mon, u16 species, bool8 isUniqueDen)
+{
+    u16 presetIndex;
+    u16 presetCount = gRoguePokemonProfiles[species].competitiveSetCount;
+    u16 statA = (Random() % 6);
+    //u16 statB = (statA + 1 + (Random() % 5)) % 6;
+    u16 temp = 31;
+
+    if(presetCount != 0)
+    {
+        struct RoguePokemonCompetitiveSetRules rules;
+        memset(&rules, 0, sizeof(rules));
+
+        presetIndex = Random() % presetCount;
+        Rogue_ApplyMonCompetitiveSet(mon, GetMonData(mon, MON_DATA_LEVEL), &gRoguePokemonProfiles[species].competitiveSets[presetIndex], &rules);
+    }
+
+    // Clear friendship
+    temp = 0;
+    SetMonData(mon, MON_DATA_FRIENDSHIP, &temp);
+
+    // Bump 2 of the IVs to max
+    temp = 31;
+    SetMonData(mon, MON_DATA_HP_IV + statA, &temp);
+    //SetMonData(mon, MON_DATA_HP_IV + statB, &temp);
+
+    // Clear held item
+    temp = 0;
+    SetMonData(mon, MON_DATA_HELD_ITEM, &temp);
+
+    if(isUniqueDen)
+        ApplyCustomMonToWildBattle(gRogueAdvPath.currentRoomParams.perType.uniqueDen.customMonId, mon);
+    else
+        TryApplyCustomMon(species, mon);
 }
 
 void Rogue_ModifyWildMon(struct Pokemon* mon)
 {
     gRogueLocal.wildBattleCustomMonId = 0;
 
-    if(Rogue_InWildSafari())
+    if(Rogue_IsRunActive() && gRogueAdvPath.currentRoomType == ADVPATH_ROOM_UNIQUE_DEN)
+    {
+        ApplyDenEncounterQuality(mon, GetMonData(mon, MON_DATA_SPECIES), TRUE);
+    }
+    else if(Rogue_InWildSafari())
     {
         if(VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_CATCH_MON)
         {
@@ -9790,37 +9909,9 @@ void Rogue_ModifyWildMon(struct Pokemon* mon)
         {
             RogueGift_CreateMon(CUSTOM_MON_WAHEY_ELECTRODE, mon, SPECIES_ELECTRODE, GetMonData(mon, MON_DATA_LEVEL), 31);
         }
-        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_WILD_DEN)
+        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_WILD_DEN || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_UNIQUE_DEN)
         {
-            u16 presetIndex;
-            u16 presetCount = gRoguePokemonProfiles[species].competitiveSetCount;
-            u16 statA = (Random() % 6);
-            //u16 statB = (statA + 1 + (Random() % 5)) % 6;
-            u16 temp = 31;
-
-            if(presetCount != 0)
-            {
-                struct RoguePokemonCompetitiveSetRules rules;
-                memset(&rules, 0, sizeof(rules));
-
-                presetIndex = Random() % presetCount;
-                Rogue_ApplyMonCompetitiveSet(mon, GetMonData(mon, MON_DATA_LEVEL), &gRoguePokemonProfiles[species].competitiveSets[presetIndex], &rules);
-            }
-
-            // Clear friendship
-            temp = 0;
-            SetMonData(mon, MON_DATA_FRIENDSHIP, &temp);
-
-            // Bump 2 of the IVs to max
-            temp = 31;
-            SetMonData(mon, MON_DATA_HP_IV + statA, &temp);
-            //SetMonData(mon, MON_DATA_HP_IV + statB, &temp);
-
-            // Clear held item
-            temp = 0;
-            SetMonData(mon, MON_DATA_HELD_ITEM, &temp);
-
-            TryApplyCustomMon(species, mon);
+            ApplyDenEncounterQuality(mon, species, gRogueAdvPath.currentRoomType == ADVPATH_ROOM_UNIQUE_DEN);
         }
         else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY)
         {
@@ -11158,7 +11249,7 @@ static u8 CalculateWildLevel(u8 variation)
             wildLevel = GetLeadMonLevel();
         }
     }
-    else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_WILD_DEN)
+    else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_WILD_DEN || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_UNIQUE_DEN)
     {
         wildLevel = playerLevel - 5;
     }

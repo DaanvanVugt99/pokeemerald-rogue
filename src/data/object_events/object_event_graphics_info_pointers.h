@@ -499,6 +499,7 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_ItemTeraOrb;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_ItemTeraShard;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_GrassDefault;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_GoldGrass;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_UniqueDenGrass;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_FlagAdventure;
 
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorBed;
@@ -1066,6 +1067,7 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_ITEM_TERA_SHARD] =          &gObjectEventGraphicsInfo_ItemTeraShard,
     [OBJ_EVENT_GFX_GRASS_DEFAULT] =            &gObjectEventGraphicsInfo_GrassDefault,
     [OBJ_EVENT_GFX_GOLD_GRASS] =               &gObjectEventGraphicsInfo_GoldGrass,
+    [OBJ_EVENT_GFX_UNIQUE_DEN_GRASS] =         &gObjectEventGraphicsInfo_UniqueDenGrass,
     [OBJ_EVENT_GFX_FLAG_ADVENTURE] =           &gObjectEventGraphicsInfo_FlagAdventure,
 
     [OBJ_EVENT_GFX_DECOR_BED] =                &gObjectEventGraphicsInfo_DecorBed,

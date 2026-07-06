@@ -47,6 +47,9 @@ Format follows Keep a Changelog loosely:
   that the revealed item is disabled.
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
+- Added a once-per-run Unique Den map node with a custom tinted habitat icon
+  that uses the Den encounter map for a high-quality random Unique Pokémon
+  encounter before lab rarity and typing unlocks.
 
 ### Changed
 
@@ -190,6 +193,8 @@ Format follows Keep a Changelog loosely:
   stage drop can trigger a queued random web move.
 - Fixed attacker-side move-end unique abilities, including Vicejaw and Handywork,
   failing after the target's contact ability retargeted battle script state first.
+- Fixed Unique Den encounters with custom typing showing base species type icons
+  and untinted overworld preview sprites.
 - Fixed attacker-side move-end unique abilities, including Windsurge, being
   attributed to the target when move-end script state changed the attacker first.
 - Fixed the Game Modes submenu being hidden on early saves, which made Fast Path

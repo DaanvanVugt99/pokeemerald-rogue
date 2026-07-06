@@ -178,6 +178,7 @@ u8 Rogue_GetCurrentTeamHideoutEncounterId(void);
 bool8 Rogue_IsBattleAlphaMon(u16 species);
 bool8 Rogue_IsBattleRoamerMon(u16 species);
 u16 Rogue_SelectWildDenEncounterRoom(void);
+u16 Rogue_SelectUniqueDenEncounterRoom(void);
 u16 Rogue_SelectHoneyTreeEncounterRoom(void);
 u16 RogueDebug_GetWildFormFamilyKey(u16 species);
 u16 RogueDebug_GetWildApprovedFamilyForm(u16 species, u16 randValue);
