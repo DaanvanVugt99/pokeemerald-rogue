@@ -286,6 +286,7 @@ static void Overview_FillEntryBg(u8 entryX, u8 entryY, bool8 includeHeader);
 static void Overview_FillEntryBg_Selected(u8 entryX, u8 entryY, bool8 includeHeader);
 static u8 Overview_GetLastValidActiveIndex();
 static u8 Overview_GetMaxScrollAmount();
+static bool8 Overview_IsSafariSelectView(void);
 
 // MonInfo
 static void MonInfo_CreateSprites(bool8 includeType);
@@ -401,6 +402,8 @@ static const u32 sTitleScreenTiles[] = INCBIN_U32("graphics/rogue_pokedex/front_
 
 static const u32 sOverviewTilemap[] = INCBIN_U32("graphics/rogue_pokedex/info_screen.bin.lz");
 static const u32 sOverviewTiles[] = INCBIN_U32("graphics/rogue_pokedex/info_screen.4bpp.lz");
+static const u32 sSafariMarkerTiles[] = INCBIN_U32("graphics/rogue_pokedex/safari_markers.4bpp.lz");
+static const u16 sSafariMarkerPal[] = INCBIN_U16("graphics/rogue_pokedex/safari_markers.gbapal");
 
 static const u32 sPageSplitTableTilemap[] = INCBIN_U32("graphics/rogue_pokedex/page_split_table.bin.lz");
 static const u32 sPageListsTilemap[] = INCBIN_U32("graphics/rogue_pokedex/page_list.bin.lz");
@@ -408,6 +411,21 @@ static const u32 sPageFormsTilemap[] = INCBIN_U32("graphics/rogue_pokedex/page_f
 
 // above share the same tilemap
 static const u32 sPageTiles[] = INCBIN_U32("graphics/rogue_pokedex/page_tiles.4bpp.lz");
+
+#define SAFARI_MARKER_TILE_BASE 0x60
+#define SAFARI_MARKER_PAL_NUM 2
+
+enum
+{
+    SAFARI_MARKER_BLANK,
+    SAFARI_MARKER_UNCAUGHT,
+    SAFARI_MARKER_CAUGHT,
+    SAFARI_MARKER_SHINY,
+    SAFARI_MARKER_UNIQUE,
+    SAFARI_MARKER_SHINY_UNIQUE,
+    SAFARI_MARKER_AFFORDABLE,
+    SAFARI_MARKER_COUNT,
+};
 
 static u16 GetSpeciesAtSlot(u8 slot)
 {
@@ -536,6 +554,11 @@ void Rogue_SelectPokemonInSafari()
 static bool8 IsCurrentlySelectingMon()
 {
     return sPokedexViewReq.view == DEX_VIEW_SELECT_MON || sPokedexViewReq.view == DEX_VIEW_SELECT_SAFARI_MON;
+}
+
+static bool8 Overview_IsSafariSelectView(void)
+{
+    return IsCurrentlySelectingMon() && sPokedexViewReq.view == DEX_VIEW_SELECT_SAFARI_MON;
 }
 
 static void CB2_Rogue_ShowPokedex(void)
@@ -671,6 +694,15 @@ static void InitPageResources(u8 fromPage, u8 toPage)
             DecompressAndCopyTileDataToVram(1, &sOverviewTiles, 0, 0, 0);
             while (FreeTempTileDataBuffersIfPossible())
                 ;
+
+            if(Overview_IsSafariSelectView())
+            {
+                DecompressAndCopyTileDataToVram(1, &sSafariMarkerTiles, 0, SAFARI_MARKER_TILE_BASE, 0);
+                while (FreeTempTileDataBuffersIfPossible())
+                    ;
+                LoadPalette(sSafariMarkerPal, BG_PLTT_ID(SAFARI_MARKER_PAL_NUM), PLTT_SIZE_4BPP);
+            }
+
             LZDecompressWram(sOverviewTilemap, sTilemapBufferPtr);
             CopyBgTilemapBufferToVram(1);
 
@@ -2733,13 +2765,39 @@ static bool8 Overview_IsSafariEntryAffordable(s8 entryX, s8 entryY, s8 deltaX, s
 {
     u16 safariIndex;
 
-    if(!IsCurrentlySelectingMon() || sPokedexViewReq.view != DEX_VIEW_SELECT_SAFARI_MON)
+    if(!Overview_IsSafariSelectView())
         return FALSE;
 
     if(!Overview_TryGetSafariIndexForEntry(entryX, entryY, deltaX, deltaY, &safariIndex))
         return FALSE;
 
     return Rogue_CanPurchaseSafariMon(safariIndex);
+}
+
+static bool8 Overview_IsSafariEntryCaught(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
+{
+    u8 idx;
+    u16 species;
+
+    if(!Overview_IsSafariSelectView())
+        return FALSE;
+
+    entryX += deltaX;
+    entryY += deltaY;
+
+    if(entryX < 0 || entryX >= COLUMN_ENTRY_COUNT)
+        return FALSE;
+
+    if(entryY < 0 || entryY >= ROW_ENTRY_COUNT)
+        return FALSE;
+
+    idx = entryX + entryY * COLUMN_ENTRY_COUNT;
+    species = sPokedexMenu->overviewPageSpecies[idx];
+
+    if(species == SPECIES_NONE)
+        return FALSE;
+
+    return GetSpeciesDisplayDexFlag(species, FLAG_GET_CAUGHT);
 }
 
 static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
@@ -2828,6 +2886,40 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
     }
 
     return ENTRY_TYPE_QUESTION_MARK;
+}
+
+static u16 Overview_GetSafariMarkerTile(u8 marker, bool8 entrySelected)
+{
+    return SAFARI_MARKER_TILE_BASE + marker + (entrySelected ? SAFARI_MARKER_COUNT : 0);
+}
+
+static void Overview_FillSafariEntryMarker(u8 tileX, u8 tileY, u8 marker, bool8 entrySelected)
+{
+    FillBgTilemapBufferRect(1, Overview_GetSafariMarkerTile(marker, entrySelected), tileX, tileY, 1, 1, SAFARI_MARKER_PAL_NUM);
+}
+
+static void Overview_FillSafariEntryMarkers(u8 tileX, u8 tileY, u8 entryType, bool8 entrySelected, bool8 canPurchase, bool8 isCaught)
+{
+    u8 specialMarker = SAFARI_MARKER_BLANK;
+
+    switch (entryType)
+    {
+    case ENTRY_TYPE_CAUGHT_SHINY:
+        specialMarker = SAFARI_MARKER_SHINY;
+        break;
+
+    case ENTRY_TYPE_UNIQUE:
+        specialMarker = SAFARI_MARKER_UNIQUE;
+        break;
+
+    case ENTRY_TYPE_SHINY_UNIQUE:
+        specialMarker = SAFARI_MARKER_SHINY_UNIQUE;
+        break;
+    }
+
+    Overview_FillSafariEntryMarker(tileX + 1, tileY + 4, isCaught ? SAFARI_MARKER_CAUGHT : SAFARI_MARKER_UNCAUGHT, entrySelected);
+    Overview_FillSafariEntryMarker(tileX + 2, tileY + 4, specialMarker, entrySelected);
+    Overview_FillSafariEntryMarker(tileX + 3, tileY + 4, canPurchase ? SAFARI_MARKER_AFFORDABLE : SAFARI_MARKER_BLANK, entrySelected);
 }
 
 static bool8 Overview_IsEntrySelected(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
@@ -3015,7 +3107,7 @@ static void Overview_FillEntryTileCentre_Header(u8 tileX, u8 tileY, u8 entryType
     }
 }
 
-static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, bool8 entrySelected, bool8 canPurchase)
+static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, bool8 entrySelected, bool8 canPurchase, bool8 safariEntryCaught)
 {
     if(entryType == ENTRY_TYPE_NONE)
     {
@@ -3067,39 +3159,46 @@ static void Overview_FillEntryTileCentre_Body(u8 tileX, u8 tileY, u8 entryType, 
         FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x34 : 0x21, tileX + 1, tileY + 4, 1, 1);
         FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x34 | FLIP_HORIZONTAL : 0x21, tileX + 3, tileY + 4, 1, 1);
 
-        switch (entryType)
+        if(Overview_IsSafariSelectView())
         {
-        case ENTRY_TYPE_SEEN:
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x38 : 0x25, tileX + 2, tileY + 4, 1, 1);
-            break;
-
-        case ENTRY_TYPE_CAUGHT:
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x37 : 0x24, tileX + 2, tileY + 4, 1, 1);
-            break;
-
-        case ENTRY_TYPE_CAUGHT_SHINY:
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x35 : 0x22, tileX + 2, tileY + 4, 1, 1);
-            break;
-
-        case ENTRY_TYPE_SHINY_UNIQUE:
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x55 : 0x54, tileX + 2, tileY + 4, 1, 1);
-            break;
-
-        case ENTRY_TYPE_UNIQUE:
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x53 : 0x52, tileX + 2, tileY + 4, 1, 1);
-            break;
-
-        case ENTRY_TYPE_RED_CROSS:
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3C : 0x28, tileX + 2, tileY + 4, 1, 1);
-            break;
-
-        default: // ENTRY_TYPE_EMPTY
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3A : 0x21, tileX + 2, tileY + 4, 1, 1);
-            break;
+            Overview_FillSafariEntryMarkers(tileX, tileY, entryType, entrySelected, canPurchase, safariEntryCaught);
         }
+        else
+        {
+            switch (entryType)
+            {
+            case ENTRY_TYPE_SEEN:
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x38 : 0x25, tileX + 2, tileY + 4, 1, 1);
+                break;
 
-        if(canPurchase)
-            FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3B : 0x27, tileX + 3, tileY + 4, 1, 1);
+            case ENTRY_TYPE_CAUGHT:
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x37 : 0x24, tileX + 2, tileY + 4, 1, 1);
+                break;
+
+            case ENTRY_TYPE_CAUGHT_SHINY:
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x35 : 0x22, tileX + 2, tileY + 4, 1, 1);
+                break;
+
+            case ENTRY_TYPE_SHINY_UNIQUE:
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x55 : 0x54, tileX + 2, tileY + 4, 1, 1);
+                break;
+
+            case ENTRY_TYPE_UNIQUE:
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x53 : 0x52, tileX + 2, tileY + 4, 1, 1);
+                break;
+
+            case ENTRY_TYPE_RED_CROSS:
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3C : 0x28, tileX + 2, tileY + 4, 1, 1);
+                break;
+
+            default: // ENTRY_TYPE_EMPTY
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3A : 0x21, tileX + 2, tileY + 4, 1, 1);
+                break;
+            }
+
+            if(canPurchase)
+                FillBgTilemapBufferRect_Palette0(1, entrySelected ? 0x3B : 0x27, tileX + 3, tileY + 4, 1, 1);
+        }
     }
 }
 
@@ -3359,7 +3458,7 @@ static void Overview_FillEntryBgInternal(u8 entryX, u8 entryY, bool8 includeHead
 
     {
         Overview_FillEntryTileBoundary_Body(tileX, tileY, entryType[ENTRY_DIR_LEFT], entryType[ENTRY_DIR_CENTRE], entrySelected[ENTRY_DIR_LEFT], entrySelected[ENTRY_DIR_CENTRE]);
-        Overview_FillEntryTileCentre_Body(tileX, tileY, entryType[ENTRY_DIR_CENTRE], entrySelected[ENTRY_DIR_CENTRE], entryCanPurchase);
+        Overview_FillEntryTileCentre_Body(tileX, tileY, entryType[ENTRY_DIR_CENTRE], entrySelected[ENTRY_DIR_CENTRE], entryCanPurchase, Overview_IsSafariEntryCaught(entryX, entryY, 0, 0));
 
         // If we're in the last column (Or we are JUST refreshing this tile) handle right hand side
         if(entryX + 1 == COLUMN_ENTRY_COUNT || includeRightColumn)

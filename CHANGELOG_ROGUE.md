@@ -81,6 +81,8 @@ Format follows Keep a Changelog loosely:
   Safari selection grid.
 - Added a combined shiny unique marker for Hub Safari and legendary cave
   Pokémon that are both shiny and unique.
+- Split the Safari selection grid markers into left caught, middle
+  shiny/unique, and right affordability slots for clearer purchase scanning.
 - Added an option to dismiss only the selected Hub Safari or legendary cave
   Pokémon after choosing it from the Safari selection grid.
 - Changed Safari purchase pricing to use matching typed Pokéblocks, split
@@ -197,6 +199,8 @@ Format follows Keep a Changelog loosely:
   failing after the target's contact ability retargeted battle script state first.
 - Fixed Unique Den encounters with custom typing showing base species type icons
   and untinted overworld preview sprites.
+- Fixed purchasing Unique Pokémon from the Hub Safari so their custom identity
+  is preserved when sent to the party or PC.
 - Fixed attacker-side move-end unique abilities, including Windsurge, being
   attributed to the target when move-end script state changed the attacker first.
 - Fixed the Game Modes submenu being hidden on early saves, which made Fast Path

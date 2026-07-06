@@ -2050,6 +2050,25 @@ static u16 GetPokeblockForType(u8 type)
     return ITEM_NONE;
 }
 
+static void BufferSafariMonDisplayName(u8* dest, u8 const* nickname, u16 species, bool8 isShiny)
+{
+    u8 displayNickname[POKEMON_NAME_LENGTH + 1];
+    u8 const* speciesName = RoguePokedex_GetSpeciesName(species);
+
+    StringCopy_Nickname(displayNickname, nickname);
+    StringCopy(dest, displayNickname);
+
+    if(isShiny || StringCompareN(displayNickname, speciesName, POKEMON_NAME_LENGTH) != 0)
+    {
+        if(isShiny)
+            StringAppend(dest, sText_TheShiny);
+        else
+            StringAppend(dest, sText_The);
+
+        StringAppend(dest, speciesName);
+    }
+}
+
 static bool8 TryGetSafariMonCustomMonId(struct RogueSafariMon const* safariMon, u32* customMonId)
 {
     u8 idx;
@@ -2398,8 +2417,10 @@ void Rogue_BufferSafariMonMissingCostText()
 void Rogue_TryPurchaseSafariMon()
 {
     struct Pokemon mon;
+    u32 customMonId;
     u8 giveResult;
     u8 safariIndex = gSpecialVar_0x8008;
+    bool8 isCustomMon;
     struct RogueSafariMon* safariMon;
     struct SafariMonPurchaseCost cost;
 
@@ -2424,8 +2445,10 @@ void Rogue_TryPurchaseSafariMon()
         return;
     }
 
+    isCustomMon = TryGetSafariMonCustomMonId(safariMon, &customMonId);
+
     CreateMonFromSafariMon(safariMon, &mon);
-    giveResult = GiveMonToPlayer(&mon);
+    giveResult = isCustomMon ? GiveTradedMonToPlayer(&mon) : GiveMonToPlayer(&mon);
 
     if(giveResult == MON_CANT_GIVE)
     {
@@ -2435,7 +2458,7 @@ void Rogue_TryPurchaseSafariMon()
 
     {
         u16 species = GetMonData(&mon, MON_DATA_SPECIES);
-        u8 const* speciesName = RoguePokedex_GetSpeciesName(species);
+        u8 nickname[POKEMON_NAME_LENGTH + 1];
 
         GetSetPokedexSpeciesFlag(species, FLAG_SET_SEEN);
         GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT);
@@ -2443,17 +2466,8 @@ void Rogue_TryPurchaseSafariMon()
         if(IsMonShiny(&mon))
             GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT_SHINY);
 
-        GetMonData(&mon, MON_DATA_NICKNAME, gStringVar1);
-
-        if(IsMonShiny(&mon) || StringCompareN(gStringVar1, speciesName, POKEMON_NAME_LENGTH) != 0)
-        {
-            if(IsMonShiny(&mon))
-                StringAppend(gStringVar1, sText_TheShiny);
-            else
-                StringAppend(gStringVar1, sText_The);
-
-            StringAppend(gStringVar1, speciesName);
-        }
+        GetMonData(&mon, MON_DATA_NICKNAME, nickname);
+        BufferSafariMonDisplayName(gStringVar1, nickname, species, IsMonShiny(&mon));
     }
 
     RemoveSafariPurchaseCost(&cost);
@@ -2565,7 +2579,6 @@ void Rogue_EnqueueSafariBattle()
 void Rogue_BufferSafariMonInfo()
 {
     u8 safariIndex = gSpecialVar_0x8008;
-    u8 const* speciesName;
 
     if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS || gRogueSaveBlock->safariMons[safariIndex].species == SPECIES_NONE)
     {
@@ -2573,19 +2586,11 @@ void Rogue_BufferSafariMonInfo()
         return;
     }
 
-    speciesName = RoguePokedex_GetSpeciesName(gRogueSaveBlock->safariMons[safariIndex].species);
-
-    StringCopy_Nickname(gStringVar1, gRogueSaveBlock->safariMons[safariIndex].nickname);
-
-    if(gRogueSaveBlock->safariMons[safariIndex].shinyFlag || StringCompareN(gStringVar1, speciesName, POKEMON_NAME_LENGTH) != 0)
-    {
-        if(gRogueSaveBlock->safariMons[safariIndex].shinyFlag)
-            StringAppend(gStringVar1, sText_TheShiny);
-        else
-            StringAppend(gStringVar1, sText_The);
-
-        StringAppend(gStringVar1, speciesName);
-    }
+    BufferSafariMonDisplayName(
+        gStringVar1,
+        gRogueSaveBlock->safariMons[safariIndex].nickname,
+        gRogueSaveBlock->safariMons[safariIndex].species,
+        gRogueSaveBlock->safariMons[safariIndex].shinyFlag);
 }
 
 // Multiplayer scripts
