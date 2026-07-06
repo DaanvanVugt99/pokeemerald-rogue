@@ -50,6 +50,8 @@ Format follows Keep a Changelog loosely:
 - Added a once-per-run Unique Den map node with a custom tinted habitat icon
   that uses the Den encounter map for a high-quality random Unique Pokémon
   encounter before lab rarity and typing unlocks.
+- Expanded the dynamic Unique Pokémon regular and unique ability roll pools with
+  additional broadly useful and expressive options.
 
 ### Changed
 
