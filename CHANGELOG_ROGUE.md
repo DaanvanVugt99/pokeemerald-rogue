@@ -52,6 +52,9 @@ Format follows Keep a Changelog loosely:
   encounter before lab rarity and typing unlocks.
 - Expanded the dynamic Unique Pokémon regular and unique ability roll pools with
   additional broadly useful and expressive options.
+- Added a Trial Terminal to the Adventure Entrance with Solo Contract, Hoenn
+  Circuit, and Cursed Circuit challenge runs that temporarily apply
+  trial-specific rules.
 
 ### Changed
 

@@ -2,6 +2,7 @@
 #define GUARD_ROGUE_H
 
 #include "global.h"
+#include "rogue_trials.h"
 
 // Extra data for pokemon in party
 struct RoguePartyMon
@@ -251,6 +252,7 @@ struct RoguePartySnapshot
 
 struct RogueRunData
 {
+    struct RogueTrialRunState trialState;
     struct RogueWildEncounters wildEncounters;
     struct RoguePartySnapshot partySnapshots[ROGUE_MAX_BOSS_COUNT + 2];
     struct RoguePokemonFacade labParty[LAB_MON_COUNT];

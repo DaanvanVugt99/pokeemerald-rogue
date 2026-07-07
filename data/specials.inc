@@ -220,6 +220,13 @@ gSpecials::
 	def_special Rogue_ClearCharmsAndCurses
 	def_special Rogue_ClearCharms
 	def_special Rogue_ClearCurses
+	def_special RogueTrial_AppendTrialOptions
+	def_special RogueTrial_AppendDifficultyOptions
+	def_special RogueTrial_BufferTrialPreview
+	def_special RogueTrial_SetPendingSelectionFromScript
+	def_special RogueTrial_ClearPendingSelection
+	def_special RogueTrial_CanUseTerminal
+	def_special RogueTrial_RecordInitialParty
 	def_special Rogue_GiveTemporaryDarkDealCurse
 	def_special Rogue_IsRoamerActive
 	def_special Rogue_BufferRoamerName

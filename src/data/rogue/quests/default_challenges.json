@@ -19,6 +19,57 @@
         "default_group":
         [
             {
+                "name": "Solo Contract",
+                "description": "Start a Trial Terminal Solo Contract and win without adding Pokémon.",
+                "triggers":
+                [
+                    {
+                        "on": [ "ENTER_HALL_OF_FAME" ],
+                        "condition": "TrialComplete",
+                        "params": [ "ROGUE_TRIAL_SOLO_CONTRACT" ],
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_LARGE_MONEY" }
+                ]
+            },
+            {
+                "name": "Hoenn Circuit",
+                "description": "Start a Trial Terminal Hoenn Circuit and win with the locked Hoenn Pokédex.",
+                "triggers":
+                [
+                    {
+                        "on": [ "ENTER_HALL_OF_FAME" ],
+                        "condition": "TrialComplete",
+                        "params": [ "ROGUE_TRIAL_HOENN_CIRCUIT" ],
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" }
+                ]
+            },
+            {
+                "name": "Cursed Circuit",
+                "description": "Start a Trial Terminal Cursed Circuit and win with its forced curses active.",
+                "triggers":
+                [
+                    {
+                        "on": [ "ENTER_HALL_OF_FAME" ],
+                        "condition": "TrialComplete",
+                        "params": [ "ROGUE_TRIAL_CURSED_CIRCUIT" ],
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_LARGE_MONEY" }
+                ]
+            },
+            {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Mega Evolution",
                 "description": "Win a full Run with the Mega Ring.",

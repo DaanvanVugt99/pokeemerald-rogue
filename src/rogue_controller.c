@@ -78,6 +78,7 @@
 #include "rogue_pokedex.h"
 #include "rogue_popup.h"
 #include "rogue_query.h"
+#include "rogue_trials.h"
 #include "rogue_quest.h"
 #include "rogue_ridemon.h"
 #include "rogue_safari.h"
@@ -553,6 +554,9 @@ bool8 Rogue_CanAddCaughtMonToParty(struct Pokemon *mon)
 {
     if(Rogue_IsRunActive())
     {
+        if(!RogueTrial_CanAcceptCaughtMon())
+            return FALSE;
+
         if(CalculatePlayerPartyCount() >= Rogue_GetMaxPartySize())
             return FALSE;
 
@@ -573,6 +577,9 @@ bool8 Rogue_CanReleasePartyMonForCaughtMon(struct Pokemon *mon, u8 slot)
 {
     if(!Rogue_IsRunActive())
         return TRUE;
+
+    if(!RogueTrial_CanAcceptCaughtMon())
+        return FALSE;
 
     if(slot >= PARTY_SIZE || GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES) == SPECIES_NONE)
         return FALSE;
@@ -3458,7 +3465,21 @@ static struct StarterSelectionData SelectStarterMons(bool8 isSeeded)
 
 void Rogue_RandomiseStarters()
 {
-    struct StarterSelectionData starters = SelectStarterMons(FALSE);
+    struct StarterSelectionData starters;
+    u8 forcedDexVariant = RogueTrial_GetPendingForcedPokedexVariant();
+    u8 dexVariantToRestore = POKEDEX_VARIANT_NONE;
+
+    if (forcedDexVariant != POKEDEX_VARIANT_NONE)
+    {
+        dexVariantToRestore = RoguePokedex_GetDexVariant();
+        RoguePokedex_SetDexVariant(forcedDexVariant);
+    }
+
+    starters = SelectStarterMons(FALSE);
+
+    if (forcedDexVariant != POKEDEX_VARIANT_NONE)
+        RoguePokedex_SetDexVariant(dexVariantToRestore);
+
     VarSet(VAR_ROGUE_STARTER0, starters.species[0]);
     VarSet(VAR_ROGUE_STARTER1, starters.species[1]);
     VarSet(VAR_ROGUE_STARTER2, starters.species[2]);
@@ -4803,6 +4824,7 @@ static void BeginRogueRunPhase_Reset(void)
 
     RogueGift_EnsureDynamicCustomMonsAreValid();
     RogueSave_SaveHubStates();
+    RogueTrial_ApplyPendingSelection();
 
 #ifdef ROGUE_EXPANSION
     // Cache the results for the run (Must do before ActiveRun flag is set)

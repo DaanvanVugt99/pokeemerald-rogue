@@ -27,6 +27,7 @@
 #include "rogue_quest.h"
 #include "rogue_settings.h"
 #include "rogue_popup.h"
+#include "rogue_trials.h"
 
 // new quests
 
@@ -83,6 +84,7 @@ static bool8 QuestCondition_RunTimerLessThanMins(u16 questId, struct RogueQuestT
 static bool8 QuestCondition_IsConfigRangeEqualToAny(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_SpeciesMasteryComplete(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_CurrentEvilTeamIs(u16 questId, struct RogueQuestTrigger const* trigger);
+static bool8 QuestCondition_TrialComplete(u16 questId, struct RogueQuestTrigger const* trigger);
 
 static bool8 IsQuestSurpressed(u16 questId);
 static bool8 CanSurpressedQuestActivate(u16 questId);
@@ -1165,6 +1167,12 @@ static bool8 QuestCondition_IsStandardRunActive(u16 questId, struct RogueQuestTr
 {
     // TODO
     return TRUE;
+}
+
+static bool8 QuestCondition_TrialComplete(u16 questId UNUSED, struct RogueQuestTrigger const* trigger)
+{
+    ASSERT_PARAM_COUNT(1);
+    return RogueTrial_IsCompleteForQuest(trigger->params[0]);
 }
 
 static bool8 UNUSED QuestCondition_HasCompletedQuestAND(u16 triggerQuestId, struct RogueQuestTrigger const* trigger)

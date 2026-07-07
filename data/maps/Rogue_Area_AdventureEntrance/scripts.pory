@@ -330,6 +330,83 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
     releaseall
 }
 
+script Rogue_Area_AdventureEntrance_TrialTerminal
+{
+    lockall
+
+    if(var(VAR_ROGUE_INTRO_STATE) < ROGUE_INTRO_STATE_GO_ON_ADVENTURE)
+    {
+        msgbox(format("The Trial Terminal is locked until you're ready for Adventures."), MSGBOX_DEFAULT)
+        releaseall
+        return
+    }
+
+    if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
+    {
+        msgbox(format("The Trial Terminal is locked until you've met with the builder."), MSGBOX_DEFAULT)
+        releaseall
+        return
+    }
+
+    special(RogueTrial_CanUseTerminal)
+    if(var(VAR_RESULT) == NO)
+    {
+        if(flag(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE))
+        {
+            msgbox(format("Trial runs can't be started while Adventure Replay is active.\pLower the Replay flag first."), MSGBOX_DEFAULT)
+        }
+        else
+        {
+            msgbox(format("Trial runs aren't available in multiplayer yet."), MSGBOX_DEFAULT)
+        }
+
+        releaseall
+        return
+    }
+
+    msgbox(format("Trial Terminal\pChoose a curated challenge run?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) != YES)
+    {
+        releaseall
+        return
+    }
+
+    begindynamicmultichoice
+    special(RogueTrial_AppendTrialOptions)
+    enddynamicmultichoice(1, 0, 4, TRUE)
+    if(var(VAR_RESULT) == MULTI_B_PRESSED)
+    {
+        releaseall
+        return
+    }
+    copyvar(VAR_0x8004, VAR_RESULT)
+
+    begindynamicmultichoice
+    special(RogueTrial_AppendDifficultyOptions)
+    enddynamicmultichoice(1, 0, 5, TRUE)
+    if(var(VAR_RESULT) == MULTI_B_PRESSED)
+    {
+        releaseall
+        return
+    }
+    copyvar(VAR_0x8005, VAR_RESULT)
+
+    special(RogueTrial_BufferTrialPreview)
+    msgbox(format("{STR_VAR_1} ({STR_VAR_3})\p{STR_VAR_2}\pStart this trial?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == YES)
+    {
+        special(RogueTrial_SetPendingSelectionFromScript)
+        if(var(VAR_RESULT) == YES)
+        {
+            call(Rogue_ResetAdventureVars)
+            call(Rogue_StartAdventureInternal)
+            special(RogueTrial_ClearPendingSelection)
+        }
+    }
+
+    releaseall
+}
+
 movement Rogue_Adventure_QuestTutorial_Player1
 {
     walk_left * 5
@@ -426,6 +503,8 @@ script Rogue_StartAdventureInternal
                 return
             }
         }
+
+        special(RogueTrial_RecordInitialParty)
 
         msgbox(format("Good luck {PLAYER}!"))
         closemessage

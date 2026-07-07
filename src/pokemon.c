@@ -65,6 +65,7 @@
 #include "rogue_timeofday.h"
 #include "rogue_trainers.h"
 #include "rogue_quest.h"
+#include "rogue_trials.h"
 
 #if P_FRIENDSHIP_EVO_THRESHOLD >= GEN_9
 #define FRIENDSHIP_EVO_THRESHOLD 160
@@ -3005,6 +3006,7 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
     }
 
     Rogue_ModifyGiveMon(mon);
+    RogueTrial_OnMonGiven();
 
     if (Rogue_IsRunActive()
      && (Rogue_PartyHasDuplicateSpecies(mon, PARTY_SIZE, PARTY_SIZE)
