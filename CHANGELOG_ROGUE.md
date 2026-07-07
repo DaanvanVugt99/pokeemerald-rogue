@@ -85,13 +85,10 @@ Format follows Keep a Changelog loosely:
   shiny/unique, and right affordability slots for clearer purchase scanning.
 - Added an option to dismiss only the selected Hub Safari or legendary cave
   Pokémon after choosing it from the Safari selection grid.
-- Changed Safari purchase pricing to use matching typed Pokéblocks, split
-  dual-type costs across both types, add Shiny Pokéblocks for shiny Pokémon,
-  and mildly scale prices by BST, evolution, legendary status, and individual
-  variation.
-- Increased Legendary/Mythical Safari purchase prices, changed regular
-  Pokémon to cleaner BST price tiers, and now prices evolving lines by their
-  strongest final evolution.
+- Changed Safari purchase pricing to use refined final-BST cost tiers, split
+  dual-type costs across both matching types, remove hidden individual
+  variation, and charge extra Shiny Pokéblocks for shiny Legendary/Mythical
+  Pokémon.
 - Added random Pokéblock drops to run boss rewards, with mostly typed
   Pokéblocks, occasional stat Pokéblocks, and rare Shiny Pokéblocks.
 - Replaced Market Berry Blender minigames with direct Pokéblock crafting that

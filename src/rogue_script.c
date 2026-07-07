@@ -2171,57 +2171,35 @@ static u16 GetSafariMonPricingSpecies(u16 species)
 static u16 CalculateSafariMonBasePurchaseCost(struct RogueSafariMon const* safariMon)
 {
     u16 species = GetSafariMonPricingSpecies(safariMon->species);
-    u16 eggSpecies = Rogue_GetEggSpecies(safariMon->species);
     u16 bst = RoguePokedex_GetSpeciesBST(species);
     bool8 isLegendary = RoguePokedex_IsSpeciesLegendary(species);
     u16 cost;
-    u32 hash;
 
     if(isLegendary)
     {
-        cost = 20;
-
-        if(bst >= 620)
-            cost += 2;
         if(bst >= 680)
-            cost += 2;
+            cost = 25;
+        else if(bst >= 660)
+            cost = 21;
+        else if(bst >= 600)
+            cost = 17;
+        else
+            cost = 14;
     }
     else
     {
-        cost = 1;
-
-        if(bst >= 300)
-            ++cost;
-        if(bst >= 400)
-            ++cost;
-        if(bst >= 500)
-            ++cost;
         if(bst >= 600)
-            ++cost;
-
-        if(eggSpecies != species)
-            ++cost;
-    }
-
-    hash = safariMon->species;
-    hash = hash * 1103515245 + safariMon->hpIV;
-    hash = hash * 1103515245 + safariMon->attackIV;
-    hash = hash * 1103515245 + safariMon->defenseIV;
-    hash = hash * 1103515245 + safariMon->speedIV;
-    hash = hash * 1103515245 + safariMon->spAttackIV;
-    hash = hash * 1103515245 + safariMon->spDefenseIV;
-    hash = hash * 1103515245 + safariMon->nature;
-
-    switch(hash % 3)
-    {
-    case 0:
-        if(cost > 1)
-            --cost;
-        break;
-
-    case 2:
-        ++cost;
-        break;
+            cost = 9;
+        else if(bst >= 550)
+            cost = 7;
+        else if(bst >= 500)
+            cost = 6;
+        else if(bst >= 450)
+            cost = 5;
+        else if(bst >= 400)
+            cost = 4;
+        else
+            cost = 3;
     }
 
     return cost;
@@ -2229,6 +2207,7 @@ static u16 CalculateSafariMonBasePurchaseCost(struct RogueSafariMon const* safar
 
 static void CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMon, struct SafariMonPurchaseCost* cost)
 {
+    u16 pricingSpecies = GetSafariMonPricingSpecies(safariMon->species);
     u16 baseCost = CalculateSafariMonBasePurchaseCost(safariMon);
     u8 type1 = GetSafariMonPurchaseType(safariMon, 0);
     u8 type2 = GetSafariMonPurchaseType(safariMon, 1);
@@ -2248,7 +2227,7 @@ static void CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMo
     }
 
     if(safariMon->shinyFlag)
-        AddSafariPurchaseCostItem(cost, ITEM_POKEBLOCK_SHINY, 1);
+        AddSafariPurchaseCostItem(cost, ITEM_POKEBLOCK_SHINY, RoguePokedex_IsSpeciesLegendary(pricingSpecies) ? 2 : 1);
 }
 
 static bool8 CheckBagHasSafariPurchaseCost(struct SafariMonPurchaseCost const* cost)
