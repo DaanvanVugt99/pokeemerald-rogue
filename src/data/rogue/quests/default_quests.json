@@ -676,17 +676,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    {
-                        "item": "ITEM_UNIQUE_SCANNER",
-                        "count": 1,
-                        "custom_popup":
-                        {
-                            "item_icon": "ITEM_UNIQUE_SCANNER",
-                            "title": "Unique Scanner",
-                            "subtitle": "{COLOR LIGHT_BLUE}{SHADOW BLUE}Key Item Obtained",
-                            "fanfare": "MUS_RG_OBTAIN_KEY_ITEM"
-                        }
-                    }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
             {

@@ -52,6 +52,8 @@ Format follows Keep a Changelog loosely:
   encounter before lab rarity and typing unlocks.
 - Expanded the dynamic Unique Pokémon regular and unique ability roll pools with
   additional broadly useful and expressive options.
+- Added a Quest Log reward-details view so quest rewards can be read as text
+  instead of relying only on icons.
 
 ### Changed
 
@@ -67,6 +69,10 @@ Format follows Keep a Changelog loosely:
   lighter against the white information boxes.
 - Recolored the Rogue Pokédex page background stripes from blue to the same
   dark grey stripe pair used by the summary screen.
+- Made A Unique Discovery active from the start with discovery rewards, and
+  moved the Unique Scanner into Bill's first Unique Lab handoff.
+- Smoothed boss team sizes so Standard Elite Four battles use five Pokémon and
+  Hard mode reaches six-Pokémon boss teams starting at the Elite Four.
 - Reworked the Bank into one-time Adventure Fund upgrades that set absolute
   run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
   to start with no money.

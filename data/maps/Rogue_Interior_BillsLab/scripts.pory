@@ -35,7 +35,12 @@ script Rogue_Interior_BillsLab_TalkBill
     lock
     faceplayer
 
-    if(var(VAR_RUN_TUTORIAL) == 2)
+    checkitem(ITEM_UNIQUE_SCANNER)
+    if(var(VAR_RESULT) == FALSE)
+    {
+        call(Rogue_Interior_BillsLab_GiveUniqueScanner)
+    }
+    elif(var(VAR_RUN_TUTORIAL) == 2)
     {
         msgbox(format("Just walk right up to the PC and you'll be able to see which Unique Pokémon it is currently tracking!"))
     }
@@ -45,6 +50,20 @@ script Rogue_Interior_BillsLab_TalkBill
     }
 
     release
+}
+
+script Rogue_Interior_BillsLab_GiveUniqueScanner
+{
+    checkitem(ITEM_UNIQUE_SCANNER)
+    if(var(VAR_RESULT) == FALSE)
+    {
+        msgbox(format("Actually, take this before you go.\pIt's a portable scanner linked to my tracking system."))
+
+        giveitem(ITEM_UNIQUE_SCANNER)
+
+        msgbox(format("Use the Unique Scanner during an Adventure to check which tracked Unique Pokémon might appear."))
+    }
+    return
 }
 
 script Rogue_Interior_BillsLab_TalkPC
@@ -191,7 +210,9 @@ script Rogue_Interior_BillsLab_MeetBillCommon
         msgbox(format("Unique Pokémon are Pokémon which can learn moves that they usually can't!\pThey can even have different Abilities sometimes too!\pI'm pretty sure I saw a Ratatta use Transform when I was last out trying to catch some!"))
     }
 
-    msgbox(format("Oh what's that?\pYou already own a Unique Pokémon you got from completing a Quest, you say?\pThat's incredible!\pSay, I have an idea, {PLAYER}.\pWhy don't I help you track Unique Pokémon whilst you're out Adventuring!\pAnd in return, you can help me Upgrade my systems!\pYou seem super talented so I'm sure you'll run into them far more often than I would anyway!"))
+    msgbox(format("Unique Pokémon have been showing up more often lately.\pSome are found through careful tracking, and some seem to appear in strange habitats out in the wild.\pSay, I have an idea, {PLAYER}.\pWhy don't I help you track Unique Pokémon whilst you're out Adventuring!\pAnd in return, you can help me upgrade my systems!\pYou seem super talented so I'm sure you'll run into them far more often than I would anyway!"))
+
+    call(Rogue_Interior_BillsLab_GiveUniqueScanner)
 
     applymovement(OBJ_EVENT_ID_PLAYER, MeetBill_BillAppear_FaceUp)
     applymovement(NPC_OBJ_BILL, MeetBill_BillAppear_FaceUp)
