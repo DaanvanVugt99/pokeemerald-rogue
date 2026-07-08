@@ -232,6 +232,8 @@ Format follows Keep a Changelog loosely:
 - Fixed trainer team generation assertions when recoverable species-form fallbacks
   are selected.
 - Fixed Colony Guardian freezing when switch-in Intimidate triggered it.
+- Fixed Migration setting rain through Rain Dance and interrupting the switch-out
+  sequence; it now sets rain directly before switching.
 
 ### Docs
 

@@ -503,7 +503,7 @@ static const u8 sRootNetworkDescription[] = _("On switch-out, incoming ally heal
 static const u8 sScorchingRelayDescription[] = _("On switch-out, incoming ally's first turn deals 1.2x damage; 1.5x in sun.");
 static const u8 sTidalSwitchDescription[] = _("On switch-out, incoming ally's first turn takes 0.8x damage; 0.5x in rain.");
 static const u8 sMomentumDescription[] = _("After landing a critical hit, raise a random stat by 1.");
-static const u8 sMigrationDescription[] = _("When switching out, uses Rain Dance before exiting.");
+static const u8 sMigrationDescription[] = _("On switch-out, sets rain before exiting.");
 static const u8 sGliderDescription[] = _(
     "1st Flying/Elec. move\n"
     "gets +1 priority after switch.\n"

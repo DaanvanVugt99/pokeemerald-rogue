@@ -1,12 +1,7 @@
 #include "global.h"
 #include "test/battle.h"
 
-ASSUMPTIONS
-{
-    ASSUME(gBattleMoves[MOVE_RAIN_DANCE].effect == EFFECT_RAIN_DANCE);
-}
-
-SINGLE_BATTLE_TEST("Migration uses Rain Dance when switching out")
+SINGLE_BATTLE_TEST("Migration sets rain when switching out")
 {
     u16 species;
 
@@ -21,8 +16,10 @@ SINGLE_BATTLE_TEST("Migration uses Rain Dance when switching out")
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_MIGRATION);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_RAIN_DANCE, player);
-        MESSAGE("It started to rain!");
+        if (species == SPECIES_DUCKLETT)
+            MESSAGE("Ducklett's Migration made it rain!");
+        else
+            MESSAGE("Swanna's Migration made it rain!");
     } THEN {
         EXPECT((gBattleWeather & B_WEATHER_RAIN) != 0);
     }
@@ -39,8 +36,7 @@ SINGLE_BATTLE_TEST("Migration does not trigger if the user faints instead of swi
     } SCENE {
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_MIGRATION);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_RAIN_DANCE, player);
-            MESSAGE("It started to rain!");
+            MESSAGE("Swanna's Migration made it rain!");
         }
     } THEN {
         EXPECT((gBattleWeather & B_WEATHER_RAIN) == 0);

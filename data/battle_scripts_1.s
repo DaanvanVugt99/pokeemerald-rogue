@@ -9712,6 +9712,14 @@ BattleScript_DrizzleActivates::
 	call BattleScript_ActivateWeatherAbilities
 	end3
 
+BattleScript_MigrationActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNMADEITRAIN
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_RAIN_CONTINUES
+	return
+
 BattleScript_ToxicDelugeActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
