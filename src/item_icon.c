@@ -8,6 +8,7 @@
 #include "sprite.h"
 #include "window.h"
 #include "constants/items.h"
+#include "constants/rgb.h"
 
 // EWRAM vars
 EWRAM_DATA u8 *gItemIconDecompressionBuffer = NULL;
@@ -153,6 +154,38 @@ u8 BlitItemIconToWindow(u16 itemId, u8 windowId, u16 x, u16 y, void * paletteDes
     {
         LoadCompressedPalette(GetItemIconPicOrPalette(itemId, 1), BG_PLTT_ID(gWindows[windowId].window.paletteNum), PLTT_SIZE_4BPP);
     }
+    FreeItemIconTemporaryBuffers();
+    return 0;
+}
+
+u8 BlitItemIconToWindowWithBg(u16 itemId, u8 windowId, u16 x, u16 y, u8 bgIndex, void * paletteDest)
+{
+    u16 paletteOffset;
+
+    (void)bgIndex;
+
+    if (!AllocItemIconTemporaryBuffers())
+        return 16;
+
+    LZDecompressWram(GetItemIconPicOrPalette(itemId, 0), gItemIconDecompressionBuffer);
+    CopyItemIconPicTo4x4Buffer(gItemIconDecompressionBuffer, gItemIcon4x4Buffer);
+
+    BlitBitmapToWindow(windowId, gItemIcon4x4Buffer, x, y, 32, 32);
+
+    if (paletteDest)
+    {
+        LZDecompressWram(GetItemIconPicOrPalette(itemId, 1), gPaletteDecompressionBuffer);
+        ((u16 *)gPaletteDecompressionBuffer)[0] = RGB_WHITE;
+        CpuFastCopy(gPaletteDecompressionBuffer, paletteDest, PLTT_SIZE_4BPP);
+    }
+    else
+    {
+        paletteOffset = BG_PLTT_ID(gWindows[windowId].window.paletteNum);
+        LoadCompressedPalette(GetItemIconPicOrPalette(itemId, 1), paletteOffset, PLTT_SIZE_4BPP);
+        gPlttBufferUnfaded[paletteOffset] = RGB_WHITE;
+        gPlttBufferFaded[paletteOffset] = RGB_WHITE;
+    }
+
     FreeItemIconTemporaryBuffers();
     return 0;
 }

@@ -54,6 +54,8 @@ Format follows Keep a Changelog loosely:
   additional broadly useful and expressive options.
 - Added a Quest Log reward-details view so quest rewards can be read as text
   instead of relying only on icons.
+- Added a richer Pokémon Safari offer preview with a Pokémon portrait and exact
+  Pokéblock owned/required costs before buying or dismissing an offer.
 
 ### Changed
 
@@ -100,6 +102,8 @@ Format follows Keep a Changelog loosely:
 - Replaced Market Berry Blender minigames with direct Pokéblock crafting that
   uses the Mart-style quantity UI, dynamic recipe lists, and matching berries
   as item currency.
+- Made Pokéblock recipe selection open the crafting item list directly instead
+  of first showing a redundant Craft/Quit menu.
 - Removed the Berry Blender hub upgrade path and made Pokéblock crafting
   available through the Market mixer without unlocking duplicate NPCs.
 - Added bundled Pokéblock quest rewards, usually in 5-count chunks, including
