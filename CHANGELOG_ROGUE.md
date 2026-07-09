@@ -54,6 +54,8 @@ Format follows Keep a Changelog loosely:
   additional broadly useful and expressive options.
 - Added a Quest Log reward-details view so quest rewards can be read as text
   instead of relying only on icons.
+- Added Berry Field helper options to harvest all ripe berries and bulk plant
+  whole empty patches with 5, 10, or 20 selected berries.
 
 ### Changed
 

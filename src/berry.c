@@ -8,13 +8,19 @@
 #include "item.h"
 #include "item_menu.h"
 #include "main.h"
+#include "overworld.h"
 #include "random.h"
 #include "string_util.h"
 #include "text.h"
+#include "tv.h"
 #include "constants/event_object_movement.h"
+#include "constants/game_stat.h"
+#include "constants/berry.h"
 #include "constants/items.h"
+#include "constants/rogue_hub.h"
 
 #include "rogue_controller.h"
+#include "rogue_hub.h"
 #include "rogue_popup.h"
 
 static u32 GetEnigmaBerryChecksum(struct EnigmaBerry *enigmaBerry);
@@ -24,6 +30,28 @@ static u8 GetNumStagesWateredByBerryTreeId(u8 id);
 static u8 CalcBerryYieldInternal(u16 max, u16 min, u8 water);
 static u8 CalcBerryYield(struct BerryTree *tree);
 static u16 GetStageDurationByBerryType(u8);
+static bool8 RogueBerryField_IsPatchUnlocked(u8 patch);
+static bool8 RogueBerryField_IsPatchEmpty(u8 patch);
+static bool8 RogueBerryField_CanFitHarvest(const u16 *amounts);
+static void RogueBerryField_MarkTreeJustPicked(u8 treeId);
+
+#define ROGUE_BERRY_FIELD_PATCH_SIZE 5
+#define ROGUE_BERRY_FIELD_PATCH_COUNT 4
+#define ROGUE_BERRY_FIELD_ITEM_COUNT (LAST_BERRY_INDEX - FIRST_BERRY_INDEX + 1)
+
+#define ROGUE_BERRY_FIELD_RESULT_SUCCESS 0
+#define ROGUE_BERRY_FIELD_RESULT_NO_READY_BERRIES 1
+#define ROGUE_BERRY_FIELD_RESULT_BAG_FULL 2
+#define ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES 3
+#define ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES 4
+
+static const u8 sRogueBerryFieldPatchStarts[ROGUE_BERRY_FIELD_PATCH_COUNT] =
+{
+    BERRY_TREE_HUB_11,
+    BERRY_TREE_HUB_6,
+    BERRY_TREE_HUB_1,
+    BERRY_TREE_HUB_16,
+};
 
 //.rodata
 static const u8 sBerryDescriptionPart1_Cheri[] = _("Blooms with delicate pretty flowers.");
@@ -1874,6 +1902,243 @@ void ObjectEventInteractionRemoveBerryTree(void)
 bool8 PlayerHasBerries(void)
 {
     return IsBagPocketNonEmpty(POCKET_BERRIES);
+}
+
+static bool8 RogueBerryField_IsPatchUnlocked(u8 patch)
+{
+    switch (patch)
+    {
+    case 0:
+        return TRUE;
+    case 1:
+        return RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD0);
+    case 2:
+        return RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1);
+    case 3:
+        return RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD2);
+    default:
+        return FALSE;
+    }
+}
+
+static bool8 RogueBerryField_IsPatchEmpty(u8 patch)
+{
+    u8 i;
+    u8 start = sRogueBerryFieldPatchStarts[patch];
+
+    for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+    {
+        if (GetStageByBerryTreeId(start + i) != BERRY_STAGE_NO_BERRY)
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+static bool8 RogueBerryField_CanFitHarvest(const u16 *amounts)
+{
+    u16 itemIdx;
+    u16 reservedFreeSlots = GetBagReservedFreeSlots();
+    u16 unreservedFreeSlots = GetBagUnreservedFreeSlots();
+
+    for (itemIdx = 0; itemIdx < ROGUE_BERRY_FIELD_ITEM_COUNT; ++itemIdx)
+    {
+        u16 count = amounts[itemIdx];
+        u16 itemId;
+        u16 slotCapacity;
+        u16 slotsNeeded;
+        u8 pocket;
+        u8 i;
+
+        if (count == 0)
+            continue;
+
+        itemId = FIRST_BERRY_INDEX + itemIdx;
+        pocket = ItemId_GetPocket(itemId) - 1;
+        slotCapacity = Rogue_GetBagPocketAmountPerItem(pocket);
+
+        for (i = 0; i < gBagPockets[pocket].capacity; ++i)
+        {
+            if (gBagPockets[pocket].itemSlots[i].itemId == itemId)
+            {
+                u16 ownedCount = GetBagItemQuantity(&gBagPockets[pocket].itemSlots[i].quantity);
+                if (ownedCount < slotCapacity)
+                {
+                    u16 freeInStack = slotCapacity - ownedCount;
+                    if (count <= freeInStack)
+                    {
+                        count = 0;
+                        break;
+                    }
+
+                    count -= freeInStack;
+                }
+            }
+        }
+
+        if (count == 0)
+            continue;
+
+        slotsNeeded = (count + slotCapacity - 1) / slotCapacity;
+
+        if (ItemPocketUsesReservedSlots(ItemId_GetPocket(itemId)))
+        {
+            if (slotsNeeded > reservedFreeSlots)
+                return FALSE;
+            reservedFreeSlots -= slotsNeeded;
+        }
+        else
+        {
+            if (slotsNeeded > unreservedFreeSlots)
+                return FALSE;
+            unreservedFreeSlots -= slotsNeeded;
+        }
+    }
+
+    return TRUE;
+}
+
+static void RogueBerryField_MarkTreeJustPicked(u8 treeId)
+{
+    u8 i;
+
+    for (i = 0; i < OBJECT_EVENTS_COUNT; ++i)
+    {
+        if (gObjectEvents[i].active
+            && gObjectEvents[i].movementType == MOVEMENT_TYPE_BERRY_TREE_GROWTH
+            && gObjectEvents[i].trainerRange_berryTreeId == treeId)
+        {
+            SetBerryTreeJustPicked(gObjectEvents[i].localId, gObjectEvents[i].mapNum, gObjectEvents[i].mapGroup);
+            return;
+        }
+    }
+}
+
+void RogueBerryField_HarvestAll(void)
+{
+    u8 patch;
+    u16 itemIdx;
+    u16 totalHarvested = 0;
+    u16 amounts[ROGUE_BERRY_FIELD_ITEM_COUNT] = {0};
+
+    for (patch = 0; patch < ROGUE_BERRY_FIELD_PATCH_COUNT; ++patch)
+    {
+        u8 i;
+        u8 start = sRogueBerryFieldPatchStarts[patch];
+
+        if (!RogueBerryField_IsPatchUnlocked(patch))
+            continue;
+
+        for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+        {
+            u8 treeId = start + i;
+
+            if (GetStageByBerryTreeId(treeId) == BERRY_STAGE_BERRIES)
+            {
+                u16 itemId = BerryTypeToItemId(GetBerryTypeByBerryTreeId(treeId));
+                u16 amount = Rogue_ModifyItemPickupAmount(itemId, GetBerryCountByBerryTreeId(treeId));
+
+                amounts[itemId - FIRST_BERRY_INDEX] += amount;
+                totalHarvested += amount;
+            }
+        }
+    }
+
+    if (totalHarvested == 0)
+    {
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NO_READY_BERRIES;
+        return;
+    }
+
+    if (!RogueBerryField_CanFitHarvest(amounts))
+    {
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_BAG_FULL;
+        return;
+    }
+
+    for (itemIdx = 0; itemIdx < ROGUE_BERRY_FIELD_ITEM_COUNT; ++itemIdx)
+    {
+        if (amounts[itemIdx] != 0)
+            AddBagItem(FIRST_BERRY_INDEX + itemIdx, amounts[itemIdx]);
+    }
+
+    for (patch = 0; patch < ROGUE_BERRY_FIELD_PATCH_COUNT; ++patch)
+    {
+        u8 i;
+        u8 start = sRogueBerryFieldPatchStarts[patch];
+
+        if (!RogueBerryField_IsPatchUnlocked(patch))
+            continue;
+
+        for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+        {
+            u8 treeId = start + i;
+
+            if (GetStageByBerryTreeId(treeId) == BERRY_STAGE_BERRIES)
+            {
+                RemoveBerryTree(treeId);
+                RogueBerryField_MarkTreeJustPicked(treeId);
+                IncrementDailyPickedBerries();
+            }
+        }
+    }
+
+    gSpecialVar_0x8005 = totalHarvested;
+    gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_SUCCESS;
+}
+
+void RogueBerryField_BulkPlantSelected(void)
+{
+    u8 patch;
+    u8 targetPatchCount;
+    u8 selectedPatchCount = 0;
+    u8 selectedPatches[ROGUE_BERRY_FIELD_PATCH_COUNT];
+    u16 itemId = gSpecialVar_ItemId;
+    u16 requestedCount = gSpecialVar_0x8004;
+
+    if (itemId < FIRST_BERRY_INDEX || itemId > LAST_BERRY_INDEX || ItemId_GetPocket(itemId) != POCKET_BERRIES)
+    {
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES;
+        return;
+    }
+
+    if (CountTotalItemQuantityInBag(itemId) < requestedCount)
+    {
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES;
+        return;
+    }
+
+    targetPatchCount = requestedCount / ROGUE_BERRY_FIELD_PATCH_SIZE;
+
+    for (patch = 0; patch < ROGUE_BERRY_FIELD_PATCH_COUNT; ++patch)
+    {
+        if (RogueBerryField_IsPatchUnlocked(patch) && RogueBerryField_IsPatchEmpty(patch))
+            selectedPatches[selectedPatchCount++] = patch;
+    }
+
+    if (selectedPatchCount < targetPatchCount)
+    {
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES;
+        return;
+    }
+
+    RemoveBagItem(itemId, requestedCount);
+
+    for (patch = 0; patch < targetPatchCount; ++patch)
+    {
+        u8 i;
+        u8 start = sRogueBerryFieldPatchStarts[selectedPatches[patch]];
+
+        for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+        {
+            PlantBerryTree(start + i, ItemIdToBerryType(itemId), BERRY_STAGE_PLANTED, TRUE);
+            IncrementGameStat(GAME_STAT_PLANTED_BERRIES);
+            IncrementDailyPlantedBerries();
+        }
+    }
+
+    gSpecialVar_0x8005 = requestedCount;
+    gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_SUCCESS;
 }
 
 // Berry tree growth is frozen at their initial stage (usually, fully grown) until the player has seen the tree

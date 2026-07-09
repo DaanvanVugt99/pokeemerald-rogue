@@ -5,6 +5,21 @@ const FLAG_HIDE_CAULDREN = FLAG_TEMP_4
 
 const OBJ_EVENT_MART = 22
 
+const VAR_BULK_BERRY_COUNT = VAR_0x8004
+const VAR_BULK_BERRY_TOTAL = VAR_0x8005
+
+const BERRY_FIELD_MENU_HARVEST_ALL = 0
+const BERRY_FIELD_MENU_PLANT_5 = 1
+const BERRY_FIELD_MENU_PLANT_10 = 2
+const BERRY_FIELD_MENU_PLANT_20 = 3
+const BERRY_FIELD_MENU_BUY_BERRIES = 4
+
+const BERRY_FIELD_RESULT_SUCCESS = 0
+const BERRY_FIELD_RESULT_NO_READY_BERRIES = 1
+const BERRY_FIELD_RESULT_BAG_FULL = 2
+const BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES = 3
+const BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES = 4
+
 mapscripts Rogue_Area_FarmingField_MapScripts 
 {
     MAP_SCRIPT_ON_LOAD: Rogue_Area_FarmingField_OnMapLoad
@@ -85,4 +100,101 @@ script Rogue_Area_FarmingField_MakePotions
     turnobject(OBJ_EVENT_MART, DIR_SOUTH)
 
     release
+}
+
+script Rogue_Area_FarmingField_SpeakBerryMerchant
+{
+    lock
+    faceplayer
+
+    setvar(VAR_0x8009, TRUE)
+    while(var(VAR_0x8009) == TRUE)
+    {
+        begindynamicmultichoice
+        appenddynamicmultichoice("Harvest all", BERRY_FIELD_MENU_HARVEST_ALL)
+        appenddynamicmultichoice("Plant 5", BERRY_FIELD_MENU_PLANT_5)
+        appenddynamicmultichoice("Plant 10", BERRY_FIELD_MENU_PLANT_10)
+        appenddynamicmultichoice("Plant 20", BERRY_FIELD_MENU_PLANT_20)
+        appenddynamicmultichoice("Buy berries", BERRY_FIELD_MENU_BUY_BERRIES)
+        appenddynamicmultichoice("Exit", MULTI_B_PRESSED)
+
+        message(format("Welcome!\nHow can I help with the berry field?"))
+        waitmessage
+        enddynamicmultichoice(1, 0, 6, TRUE)
+
+        switch(var(VAR_RESULT))
+        {
+            case BERRY_FIELD_MENU_HARVEST_ALL:
+                call(Rogue_Area_FarmingField_HarvestAll)
+
+            case BERRY_FIELD_MENU_PLANT_5:
+                setvar(VAR_BULK_BERRY_COUNT, 5)
+                call(Rogue_Area_FarmingField_BulkPlant)
+
+            case BERRY_FIELD_MENU_PLANT_10:
+                setvar(VAR_BULK_BERRY_COUNT, 10)
+                call(Rogue_Area_FarmingField_BulkPlant)
+
+            case BERRY_FIELD_MENU_PLANT_20:
+                setvar(VAR_BULK_BERRY_COUNT, 20)
+                call(Rogue_Area_FarmingField_BulkPlant)
+
+            case BERRY_FIELD_MENU_BUY_BERRIES:
+                message("Which berries would you like?")
+                waitmessage
+                rogue_dynamicpokemart(ROGUE_SHOP_BERRIES)
+                lock
+
+            case MULTI_B_PRESSED:
+                setvar(VAR_0x8009, FALSE)
+        }
+    }
+
+    msgbox("Please come again!")
+    release
+}
+
+script Rogue_Area_FarmingField_HarvestAll
+{
+    special(RogueBerryField_HarvestAll)
+
+    switch(var(VAR_RESULT))
+    {
+        case BERRY_FIELD_RESULT_SUCCESS:
+            buffernumberstring(STR_VAR_1, VAR_BULK_BERRY_TOTAL)
+            msgbox(format("Harvested {STR_VAR_1} Berries!"))
+
+        case BERRY_FIELD_RESULT_NO_READY_BERRIES:
+            msgbox(format("There aren't any ripe Berries to harvest."))
+
+        case BERRY_FIELD_RESULT_BAG_FULL:
+            msgbox(format("The BAG is too full to harvest everything."))
+    }
+}
+
+script Rogue_Area_FarmingField_BulkPlant
+{
+    fadescreen(FADE_TO_BLACK)
+    closemessage
+    special(Bag_ChooseBerry)
+    waitstate
+
+    if(var(VAR_ITEM_ID) != 0)
+    {
+        bufferitemname(STR_VAR_1, VAR_ITEM_ID)
+        special(RogueBerryField_BulkPlantSelected)
+
+        switch(var(VAR_RESULT))
+        {
+            case BERRY_FIELD_RESULT_SUCCESS:
+                buffernumberstring(STR_VAR_1, VAR_BULK_BERRY_TOTAL)
+                msgbox(format("Planted {STR_VAR_1} Berries!"))
+
+            case BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES:
+                msgbox(format("There aren't enough empty berry patches."))
+
+            case BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES:
+                msgbox(format("You don't have enough {STR_VAR_1}."))
+        }
+    }
 }
