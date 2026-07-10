@@ -24922,6 +24922,20 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
     {
         modifier = UQ_4_12(0.0);
     }
+    else if (moveType == TYPE_DARK
+     && HasBattlerAbility(battlerDef, ABILITY_NOCTURNAL)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_NOCTURNAL);
+            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_NOCTURNAL);
+        }
+    }
     else if (moveType == TYPE_GHOST
      && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)
      && DoesPartyShareTypeWithBattler(battlerDef))
@@ -25176,6 +25190,20 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
     {
         modifier = UQ_4_12(0.0);
+    }
+    else if (moveType == TYPE_DARK
+     && HasBattlerAbility(battlerDef, ABILITY_NOCTURNAL)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+        {
+            gLastUsedAbility = ABILITY_NOCTURNAL;
+            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
+            RecordAbilityBattle(battlerDef, ABILITY_NOCTURNAL);
+        }
     }
     else if (moveType == TYPE_GHOST
      && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)

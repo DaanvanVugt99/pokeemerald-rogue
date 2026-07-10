@@ -649,7 +649,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
         .baseSpeed     = 70,
         .baseSpAttack  = P_UPDATED_STATS >= GEN_7 ? 86 : 76,
         .baseSpDefense = 96,
-        .types = { TYPE_GHOST, TYPE_FLYING },
+        .types = { TYPE_PSYCHIC, TYPE_FLYING },
         .catchRate = 90,
         .expYield = 158,
         .evYield_HP = 2,
