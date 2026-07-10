@@ -4,50 +4,9 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_HYPNOSIS].accuracy < 100);
-}
-
-DOUBLE_BATTLE_TEST("Nocturnal gives +1 priority when targeting a sleeping foe")
-{
-    GIVEN {
-        PLAYER(SPECIES_NOCTOWL)   { Speed(50); Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_NOCTURNAL); Moves(MOVE_TACKLE); }
-        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE); }
-
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(80); Status1(STATUS1_SLEEP); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(90); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_TACKLE, target: opponentLeft);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
-            MOVE(opponentRight, MOVE_CELEBRATE);
-        }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerLeft);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerRight);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentRight);
-    }
-}
-
-DOUBLE_BATTLE_TEST("Nocturnal does not give +1 priority when targeting an awake foe")
-{
-    GIVEN {
-        PLAYER(SPECIES_NOCTOWL)   { Speed(50); Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_NOCTURNAL); Moves(MOVE_TACKLE); }
-        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE); }
-
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(80); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(90); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_TACKLE, target: opponentLeft);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentRight);
-            MOVE(opponentLeft, MOVE_CELEBRATE);
-            MOVE(opponentRight, MOVE_CELEBRATE);
-        }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerRight);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentRight);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentLeft);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerLeft);
-    }
+    ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
+    ASSUME(gSpeciesInfo[SPECIES_NOCTOWL].types[0] == TYPE_PSYCHIC);
+    ASSUME(gSpeciesInfo[SPECIES_NOCTOWL].types[1] == TYPE_FLYING);
 }
 
 SINGLE_BATTLE_TEST("Nocturnal makes Hypnosis perfectly accurate during Eclipse")
@@ -63,23 +22,32 @@ SINGLE_BATTLE_TEST("Nocturnal makes Hypnosis perfectly accurate during Eclipse")
     }
 }
 
-DOUBLE_BATTLE_TEST("Nocturnal only gives priority against the sleeping target")
+SINGLE_BATTLE_TEST("Nocturnal grants Dark immunity during Eclipse")
 {
     GIVEN {
-        PLAYER(SPECIES_NOCTOWL)   { Speed(50); Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_NOCTURNAL); Moves(MOVE_TACKLE); }
-        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE); }
-
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(80); Status1(STATUS1_SLEEP); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(90); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_NOCTOWL)     { HP(200); MaxHP(200); Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_NOCTURNAL); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_ECLIPSE, MOVE_BITE); }
     } WHEN {
-        TURN {
-            MOVE(playerLeft, MOVE_TACKLE, target: opponentRight);
-            MOVE(playerRight, MOVE_TACKLE, target: opponentLeft);
-            MOVE(opponentRight, MOVE_CELEBRATE);
-        }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_ECLIPSE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_BITE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerRight);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentRight);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerLeft);
+        ABILITY_POPUP(player, ABILITY_NOCTURNAL);
+        NONE_OF { HP_BAR(player); }
+    } THEN {
+        EXPECT_EQ(player->hp, player->maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Nocturnal does not grant Dark immunity outside Eclipse")
+{
+    GIVEN {
+        PLAYER(SPECIES_NOCTOWL)     { HP(200); MaxHP(200); Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_NOCTURNAL); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_BITE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_BITE); }
+    } SCENE {
+        HP_BAR(player);
+    } THEN {
+        EXPECT_LT(player->hp, player->maxHP);
     }
 }

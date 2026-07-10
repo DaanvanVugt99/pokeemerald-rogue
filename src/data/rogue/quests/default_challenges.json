@@ -87,7 +87,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_LUCARIO",
                         "shiny": true,
@@ -113,7 +113,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_MIMIKYU",
                         "shiny": true,
@@ -139,7 +139,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_ELDEGOSS",
                         "shiny": true,
@@ -165,7 +165,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_CYCLIZAR",
                         "shiny": true,
@@ -195,7 +195,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
                     {
                         "species": "SPECIES_CHARIZARD",
                         "shiny": true,
@@ -221,7 +221,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
                     {
                         "species": "SPECIES_SHEDINJA",
                         "shiny": true,
@@ -267,7 +267,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "quest": "Chaos Master" },
                     {
                         "species": "SPECIES_CHIMECHO",
@@ -294,7 +294,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_ABSOL",
                         "shiny": true,
@@ -320,7 +320,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_CLEFAIRY",
                         "shiny": true,
@@ -346,7 +346,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "#if": "!defined(ROGUE_EXPANSION)",
                         "species": "SPECIES_PIKACHU",
@@ -382,7 +382,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_KECLEON",
                         "shiny": true,
@@ -408,7 +408,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_ARCANINE",
                         "shiny": true,
@@ -434,7 +434,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_GYARADOS",
                         "shiny": true,
@@ -462,7 +462,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_NINJASK",
                         "shiny": true,
@@ -487,7 +487,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "#if": "!defined(ROGUE_EXPANSION)",
                         "species": "SPECIES_NINETALES",
@@ -523,7 +523,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "#if": "!defined(ROGUE_EXPANSION)",
                         "species": "SPECIES_VOLTORB",
@@ -568,7 +568,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
                     {
                         "species": "SPECIES_SUNKERN",
                         "shiny": true,
@@ -593,7 +593,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_SMEARGLE",
                         "shiny": true,
@@ -627,7 +627,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
                     {
                         "species": "SPECIES_BANETTE",
                         "shiny": true,
@@ -652,7 +652,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "quest": "Iron Kaizo" },
                     {
                         "species": "SPECIES_CHANSEY",
@@ -681,7 +681,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
                     {
                         "#if": "!defined(ROGUE_EXPANSION)",
                         "species": "SPECIES_TOGEPI",
@@ -718,7 +718,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     {
                         "outfit_unlock": "OUTFIT_UNLOCK_TEAM_ROCKET",
                         "custom_popup":
@@ -757,7 +757,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     {
                         "outfit_unlock": "OUTFIT_UNLOCK_TEAM_AQUA",
                         "custom_popup":
@@ -796,7 +796,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     {
                         "outfit_unlock": "OUTFIT_UNLOCK_TEAM_MAGMA",
                         "custom_popup":
@@ -836,7 +836,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     {
                         "outfit_unlock": "OUTFIT_UNLOCK_TEAM_GALACTIC",
                         "custom_popup":
@@ -876,7 +876,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     {
                         "outfit_unlock": "OUTFIT_UNLOCK_TEAM_PLASMA",
                         "custom_popup":
@@ -916,7 +916,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     {
                         "outfit_unlock": "OUTFIT_UNLOCK_TEAM_FLARE",
                         "custom_popup":

@@ -55,9 +55,26 @@ Format follows Keep a Changelog loosely:
 - Added a Trial Terminal to the Adventure Entrance with Solo Contract, Hoenn
   Circuit, and Cursed Circuit challenge runs that temporarily apply
   trial-specific rules.
+- Added a Quest Log reward-details view so quest rewards can be read as text
+  instead of relying only on icons.
+- Added Berry Field helper options to harvest all ripe berries and bulk plant
+  whole empty patches with 5, 10, or 20 selected berries.
+- Added a richer Pokémon Safari offer preview with a Pokémon portrait and exact
+  Pokéblock owned/required costs before buying or dismissing an offer.
 
 ### Changed
 
+- Made challenge quest money rewards more generous, increasing total challenge
+  quest money from 182,000 to 552,000 by adding a 10,000 money tier for planned
+  full-run restrictions and reserving 20,000 for capstone challenges.
+- Increased Main quest money rewards for later progression, rare discoveries,
+  and full-run variant goals, raising total main quest money from 96,000 to
+  190,000.
+- Reworked the Snover and Abomasnow line's White Canopy unique ability to set
+  Snow and Grassy Terrain together on switch-in.
+- Reworked the Hoothoot and Noctowl line around Psychic/Flying Noctowl,
+  Eclipse-accurate Hypnosis, and Eclipse Dark immunity, and removed Techno
+  Blast from the Porygon line's level-up learnsets.
 - Matched the GEEF boot splash hold duration to the upstream boot credit screen.
 - Retinted the title main menu, start menu, option and difficulty menu
   backdrops/window frames, dialogue prompt border, option menu label text, and
@@ -70,6 +87,10 @@ Format follows Keep a Changelog loosely:
   lighter against the white information boxes.
 - Recolored the Rogue Pokédex page background stripes from blue to the same
   dark grey stripe pair used by the summary screen.
+- Made A Unique Discovery active from the start with discovery rewards, and
+  moved the Unique Scanner into Bill's first Unique Lab handoff.
+- Smoothed boss team sizes so Standard Elite Four battles use five Pokémon and
+  Hard mode reaches six-Pokémon boss teams starting at the Elite Four.
 - Reworked the Bank into one-time Adventure Fund upgrades that set absolute
   run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
   to start with no money.
@@ -97,6 +118,8 @@ Format follows Keep a Changelog loosely:
 - Replaced Market Berry Blender minigames with direct Pokéblock crafting that
   uses the Mart-style quantity UI, dynamic recipe lists, and matching berries
   as item currency.
+- Made Pokéblock recipe selection open the crafting item list directly instead
+  of first showing a redundant Craft/Quit menu.
 - Removed the Berry Blender hub upgrade path and made Pokéblock crafting
   available through the Market mixer without unlocking duplicate NPCs.
 - Added bundled Pokéblock quest rewards, usually in 5-count chunks, including
@@ -229,6 +252,8 @@ Format follows Keep a Changelog loosely:
 - Fixed trainer team generation assertions when recoverable species-form fallbacks
   are selected.
 - Fixed Colony Guardian freezing when switch-in Intimidate triggered it.
+- Fixed Migration setting rain through Rain Dance and interrupting the switch-out
+  sequence; it now sets rain directly before switching.
 
 ### Docs
 

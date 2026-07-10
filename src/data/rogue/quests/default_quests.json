@@ -139,7 +139,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_FLYING", "count": "5" }
                 ]
@@ -159,7 +159,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_GROUND", "count": "5" }
                 ]
@@ -179,7 +179,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_PSYCHIC", "count": "5" }
                 ]
@@ -199,7 +199,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_DARK", "count": "5" }
                 ]
@@ -220,7 +220,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_STEEL", "count": "5" },
                     { "item": "ITEM_POKEBLOCK_DRAGON", "count": "5" }
@@ -240,7 +240,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_NORMAL", "count": "5" },
                     { "item": "ITEM_POKEBLOCK_FIGHTING", "count": "5" },
@@ -278,7 +278,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_MEDIUM_BUILD_AMOUNT" },
                     { 
                         "flag": "FLAG_ROGUE_UNLOCKED_MAP_TELEPORT",
@@ -313,7 +313,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "quest": "Regional Style" },
                     { "quest": "Type Master" },
                     { "quest": "One Last Quest…" },
@@ -347,7 +347,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_MEDIUM_BUILD_AMOUNT" },
                     { "quest": "The Final Run." },
                     {
@@ -474,7 +474,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_FIRE", "count": "5" },
                     { "item": "ITEM_POKEBLOCK_WATER", "count": "5" },
@@ -501,7 +501,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "shop_item": "ITEM_STARF_BERRY" },
                     { "item": "ITEM_STARF_BERRY", "count": "3", "visibility": "INVISIBLE" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
@@ -532,7 +532,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "shop_item": "ITEM_MASTER_BALL" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_MEDIUM_BUILD_AMOUNT" }
                 ]
@@ -557,7 +557,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_MEDIUM_BUILD_AMOUNT" },
                     { "decor": "DECOR_ID_DOLL" }
                 ]
@@ -581,7 +581,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" },
                     { "decor": "DECOR_ID_PC_WANDERING_PKMN" }
                 ]
@@ -606,7 +606,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
@@ -630,7 +630,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "decor": "DECOR_ID_CUSHIONS" },
                     { "quest": "Big Saver" }
@@ -656,7 +656,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_MEDIUM_BUILD_AMOUNT" }
                 ]
             },
@@ -675,18 +675,8 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    {
-                        "item": "ITEM_UNIQUE_SCANNER",
-                        "count": 1,
-                        "custom_popup":
-                        {
-                            "item_icon": "ITEM_UNIQUE_SCANNER",
-                            "title": "Unique Scanner",
-                            "subtitle": "{COLOR LIGHT_BLUE}{SHADOW BLUE}Key Item Obtained",
-                            "fanfare": "MUS_RG_OBTAIN_KEY_ITEM"
-                        }
-                    }
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
             {
@@ -702,7 +692,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_PSYCHIC", "count": "5" },
                     { "item": "ITEM_POKEBLOCK_DRAGON", "count": "5" },
@@ -731,7 +721,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_POKEBLOCK_SHINY", "count": "5" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
@@ -751,7 +741,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" },
                     { "item": "ITEM_POKEBLOCK_BUG", "count": "5" }
@@ -771,7 +761,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
@@ -789,7 +779,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
@@ -807,7 +797,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
@@ -825,7 +815,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
@@ -843,7 +833,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
             },
@@ -861,7 +851,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "shop_item": "ITEM_SITRUS_BERRY" },
                     { "item": "ITEM_SITRUS_BERRY", "count": "1", "visibility": "INVISIBLE" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
@@ -883,7 +873,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "decor": "DECOR_ID_FLAG" }
                 ]
@@ -902,7 +892,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "decor": "DECOR_ID_BED" }
                 ]
@@ -928,7 +918,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_SMALL_MONEY" },
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "shop_item": "ITEM_ESCAPE_ROPE" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" }
                 ]
@@ -951,7 +941,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" }
                 ]
             },
@@ -983,7 +973,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "shop_item": "ITEM_LUM_BERRY" },
                     { "item": "ITEM_LUM_BERRY", "count": "1", "visibility": "INVISIBLE" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" }
@@ -1022,7 +1012,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "shop_item": "ITEM_LUM_BERRY" },
                     { "item": "ITEM_LUM_BERRY", "count": "1", "visibility": "INVISIBLE" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" }
@@ -1048,7 +1038,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" }
                 ]
             },
@@ -1068,7 +1058,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" },
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" }
                 ]
             }

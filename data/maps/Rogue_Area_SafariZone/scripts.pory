@@ -1,6 +1,7 @@
 const VAR_SAFARI_SELECTED_INDEX = VAR_TEMP_A
 const VAR_SAFARI_PURCHASE_CONTEXT = VAR_0x8000
 const SAFARI_PURCHASE_CONTEXT_AREA = 0
+const SAFARI_SELECTED_BACK = 12
 
 mapscripts Rogue_Area_SafariZone_MapScripts {}
 
@@ -11,7 +12,7 @@ script Rogue_Area_SafariZone_TalkSign
     msgbox(format("It's a sign which lists all of the Pokémon that have been recently sighted in the Safari Area!\pYou can offer {POKEBLOCK} to bring one back with you."))
 
     begindynamicmultichoice
-    appenddynamicmultichoice("Offer {POKEBLOCK}", 0)
+    appenddynamicmultichoice("View Pokémon", 0)
     appenddynamicmultichoice("Dismiss All", 1)
     appenddynamicmultichoice("Exit", MULTI_B_PRESSED)
     enddynamicmultichoice(1, 0, 3, TRUE)
@@ -19,15 +20,20 @@ script Rogue_Area_SafariZone_TalkSign
     switch(var(VAR_RESULT))
     {
         case 0:
-            special(RogueSafari_CompactEmptyEntries)
-            special(Special_SelectSafariMonInPokedex)
-            waitstate
-
-            if(var(VAR_RESULT) != ROGUE_SAFARI_TOTAL_MONS)
+            setvar(VAR_RESULT, SAFARI_SELECTED_BACK)
+            setvar(VAR_SAFARI_SELECTED_INDEX, ROGUE_SAFARI_TOTAL_MONS)
+            while(var(VAR_RESULT) == SAFARI_SELECTED_BACK)
             {
-                copyvar(VAR_SAFARI_SELECTED_INDEX, VAR_RESULT)
-                setvar(VAR_SAFARI_PURCHASE_CONTEXT, SAFARI_PURCHASE_CONTEXT_AREA)
-                call(RogueSafari_PurchaseSelectedMon)
+                special(RogueSafari_CompactEmptyEntries)
+                special(Special_SelectSafariMonInPokedex)
+                waitstate
+
+                if(var(VAR_RESULT) != ROGUE_SAFARI_TOTAL_MONS)
+                {
+                    copyvar(VAR_SAFARI_SELECTED_INDEX, VAR_RESULT)
+                    setvar(VAR_SAFARI_PURCHASE_CONTEXT, SAFARI_PURCHASE_CONTEXT_AREA)
+                    call(RogueSafari_PurchaseSelectedMon)
+                }
             }
 
         case 1:

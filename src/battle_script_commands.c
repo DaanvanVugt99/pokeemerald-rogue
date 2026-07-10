@@ -17821,6 +17821,20 @@ static bool32 TrySetGrafittiTagToxicSpikes(u32 battler)
     return TRUE;
 }
 
+static bool32 TrySetMigrationRain(u32 battler)
+{
+    if (gBattleWeather & (B_WEATHER_RAIN | B_WEATHER_PRIMAL_ANY))
+        return FALSE;
+
+    gBattleWeather = B_WEATHER_RAIN_TEMPORARY;
+    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_DAMP_ROCK)
+        gWishFutureKnock.weatherDuration = WEATHER_DURATION_EXTENDED;
+    else
+        gWishFutureKnock.weatherDuration = WEATHER_DURATION_TURNS;
+
+    return TRUE;
+}
+
 static void Cmd_switchoutabilities(void)
 {
     CMD_ARGS(u8 battler);
@@ -17845,16 +17859,13 @@ static void Cmd_switchoutabilities(void)
             return;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_MIGRATION))
+        if (HasBattlerAbility(battler, ABILITY_MIGRATION)
+         && TrySetMigrationRain(battler))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_MIGRATION);
-            SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = battler;
-            gCalledMove = MOVE_RAIN_DANCE;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            gBattlescriptCurrInstr = BattleScript_MigrationActivates;
             return;
         }
 

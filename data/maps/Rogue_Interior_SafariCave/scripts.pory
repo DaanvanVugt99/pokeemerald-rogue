@@ -6,6 +6,7 @@ const VAR_SHAKE_SHAKE_DELAY = VAR_0x8007
 const VAR_SAFARI_SELECTED_INDEX = VAR_TEMP_A
 const VAR_SAFARI_PURCHASE_CONTEXT = VAR_0x8000
 const SAFARI_PURCHASE_CONTEXT_CAVE = 1
+const SAFARI_SELECTED_BACK = 12
 
 mapscripts Rogue_Interior_SafariCave_MapScripts {}
 
@@ -22,7 +23,7 @@ script Rogue_Interior_SafariCave_InteractLegendSummon
         msgbox(format("Powerful Pokémon cries echo throughout the cave.\p{POKEBLOCK} can be offered in order to bring one of these Pokémon with you."))
 
         begindynamicmultichoice
-        appenddynamicmultichoice("Make Offering", 0)
+        appenddynamicmultichoice("View Pokémon", 0)
         appenddynamicmultichoice("Dismiss All", 1)
         appenddynamicmultichoice("Exit", MULTI_B_PRESSED)
         enddynamicmultichoice(1, 0, 3, TRUE)
@@ -32,15 +33,20 @@ script Rogue_Interior_SafariCave_InteractLegendSummon
             case 0:
                 msgbox(format("Which Pokémon would you like to make an offering to?"))
 
-                special(RogueSafari_CompactEmptyEntries)
-                special(Special_SelectSafariMonInPokedex)
-                waitstate
-
-                if(var(VAR_RESULT) != ROGUE_SAFARI_TOTAL_MONS)
+                setvar(VAR_RESULT, SAFARI_SELECTED_BACK)
+                setvar(VAR_SAFARI_SELECTED_INDEX, ROGUE_SAFARI_TOTAL_MONS)
+                while(var(VAR_RESULT) == SAFARI_SELECTED_BACK)
                 {
-                    copyvar(VAR_SAFARI_SELECTED_INDEX, VAR_RESULT)
-                    setvar(VAR_SAFARI_PURCHASE_CONTEXT, SAFARI_PURCHASE_CONTEXT_CAVE)
-                    call(RogueSafari_PurchaseSelectedMon)
+                    special(RogueSafari_CompactEmptyEntries)
+                    special(Special_SelectSafariMonInPokedex)
+                    waitstate
+
+                    if(var(VAR_RESULT) != ROGUE_SAFARI_TOTAL_MONS)
+                    {
+                        copyvar(VAR_SAFARI_SELECTED_INDEX, VAR_RESULT)
+                        setvar(VAR_SAFARI_PURCHASE_CONTEXT, SAFARI_PURCHASE_CONTEXT_CAVE)
+                        call(RogueSafari_PurchaseSelectedMon)
+                    }
                 }
 
             case 1:

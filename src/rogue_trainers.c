@@ -1871,7 +1871,7 @@ static u8 CalculatePartyMonCount(u16 trainerNum, u8 monCapacity, u8 monLevel)
                     monCount = Rogue_IsRivalTrainer(trainerNum) ? 2 : 3;
                 else if(difficulty <= 1)
                     monCount = 3;
-                else if(difficulty <= ROGUE_GYM_MID_DIFFICULTY + 2)
+                else if(difficulty <= ROGUE_GYM_MID_DIFFICULTY + 1)
                     monCount = 4;
                 else if(difficulty <= ROGUE_CHAMP_START_DIFFICULTY)
                     monCount = 5;
@@ -1884,9 +1884,9 @@ static u8 CalculatePartyMonCount(u16 trainerNum, u8 monCapacity, u8 monLevel)
                     monCount = Rogue_IsRivalTrainer(trainerNum) ? 2 : 3;
                 else if(difficulty <= 1)
                     monCount = 3;
-                else if(difficulty <= ROGUE_GYM_MID_DIFFICULTY + 2)
+                else if(difficulty <= ROGUE_GYM_MID_DIFFICULTY + 1)
                     monCount = Rogue_IsRivalTrainer(trainerNum) ? 5 : 4;
-                else if(difficulty < ROGUE_ELITE_START_DIFFICULTY)
+                else if(difficulty < ROGUE_CHAMP_START_DIFFICULTY)
                     monCount = 5;
                 else
                     monCount = 6;
@@ -1895,7 +1895,7 @@ static u8 CalculatePartyMonCount(u16 trainerNum, u8 monCapacity, u8 monLevel)
             case DIFFICULTY_LEVEL_HARD:
                 if(difficulty == 0)
                     monCount = Rogue_IsRivalTrainer(trainerNum) ? 3 : 4;
-                else if(difficulty <= ROGUE_GYM_MID_DIFFICULTY + 1)
+                else if(difficulty < ROGUE_ELITE_START_DIFFICULTY)
                     monCount = 5;
                 else
                     monCount = 6;

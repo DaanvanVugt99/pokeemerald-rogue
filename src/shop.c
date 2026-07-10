@@ -121,6 +121,8 @@ struct MartInfo
     u8 martType;
     bool8 anythingBought;
     bool8 usesRecipeCurrency;
+    bool8 skipInitialMenu;
+    bool8 closeOnBuyMenuExit;
 };
 
 struct ShopData
@@ -470,6 +472,12 @@ static u8 CreateShopMenu(u8 martType, bool8 isCrafting)
     LockPlayerFieldControls();
     sMartInfo.martType = martType;
 
+    if (isCrafting && sMartInfo.skipInitialMenu)
+    {
+        sMartInfo.skipInitialMenu = FALSE;
+        return CreateTask(Task_HandleShopMenuBuy, 8);
+    }
+
     if (martType == MART_TYPE_NORMAL)
     {
         struct WindowTemplate winTemplate = sShopMenuWindowTemplates[WIN_BUY_SELL_QUIT];
@@ -537,6 +545,8 @@ static void ResetMartInfo()
     sMartInfo.dynamicMartCategory = 0;
     sMartInfo.currencyOverride = 0;
     sMartInfo.usesRecipeCurrency = FALSE;
+    sMartInfo.skipInitialMenu = FALSE;
+    sMartInfo.closeOnBuyMenuExit = FALSE;
     sMartInfo.minPrice = 0;
     sMartInfo.anythingBought = FALSE;
     sMartInfo.listItemCallback = NULL;
@@ -544,6 +554,7 @@ static void ResetMartInfo()
     sMartInfo.prevShopItemBits = NULL;
     sMartInfo.listItemTerminator = 0;
     sMartInfo.itemCount = INVALID_ITEM_COUNT;
+    sMartInfo.windowId = WINDOW_NONE;
 }
 
 static void SetShopItemsFromStaticList(const u16 *items, u16 terminatorItem)
@@ -637,10 +648,11 @@ void CB2_ExitSellMenu(void)
 
 static void Task_HandleShopMenuQuit(u8 taskId)
 {
-    if (sMartInfo.martType != MART_TYPE_SINGLE_PURCHASE)
+    if (sMartInfo.martType != MART_TYPE_SINGLE_PURCHASE && sMartInfo.windowId != WINDOW_NONE)
     {
         ClearStdWindowAndFrameToTransparent(sMartInfo.windowId, 2); // Incorrect use, making it not copy it to vram.
         RemoveWindow(sMartInfo.windowId);
+        sMartInfo.windowId = WINDOW_NONE;
     }
 
     TryPutSmartShopperOnAir();
@@ -681,6 +693,12 @@ static void Task_ReturnToShopMenu(u8 taskId)
 {
     if (IsWeatherNotFadingIn() == TRUE)
     {
+        if (sMartInfo.closeOnBuyMenuExit)
+        {
+            gTasks[taskId].func = Task_HandleShopMenuQuit;
+            return;
+        }
+
         if(sMartInfo.martType == MART_TYPE_SINGLE_PURCHASE)
         {
             gTasks[taskId].func = Task_HandleShopMenuQuit;
@@ -2332,6 +2350,8 @@ void CreateCustomRecipePokemartMenu(const u16 * buffer)
     CheckPokemartState();
     ResetMartInfo();
 
+    sMartInfo.skipInitialMenu = TRUE;
+    sMartInfo.closeOnBuyMenuExit = TRUE;
     CreateShopMenu(MART_TYPE_PURCHASE_ONLY, TRUE);
     SetCustomShopItemsFromRecipeList(buffer, ITEM_NONE);
     sSelectedCustomShopItem = buffer[0];

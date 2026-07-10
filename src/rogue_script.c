@@ -91,6 +91,9 @@ static const u8 sStatNamesTable[NUM_STATS][13] = // a;t versopm pf gStatNamesTab
 
 static u8 const sText_The[] = _(" the ");
 static u8 const sText_TheShiny[] = _(" the shiny ");
+static u8 const sText_Shiny[] = _("Shiny ");
+static u8 const sText_Unique[] = _("Unique ");
+static u8 const sText_ShinyUnique[] = _("Shiny Unique ");
 static u8 const sText_SafariCostHeader[] = _("This Pokémon wants:");
 static u8 const sText_SafariMissingCostHeader[] = _("You still need:");
 static u8 const sText_SafariNoCost[] = _("{STR_VAR_1} won't accept any\navailable {POKEBLOCK}.");
@@ -2050,10 +2053,36 @@ static u16 GetPokeblockForType(u8 type)
     return ITEM_NONE;
 }
 
-static void BufferSafariMonDisplayName(u8* dest, u8 const* nickname, u16 species, bool8 isShiny)
+static u8 GetTypeForPokeblockItem(u16 itemId)
+{
+    u8 type;
+
+    for(type = 0; type < ARRAY_COUNT(sTypeToPokeblockItem); ++type)
+    {
+        if(sTypeToPokeblockItem[type] == itemId)
+            return type;
+    }
+
+    return TYPE_NONE;
+}
+
+static void BufferSafariMonDisplayName(u8* dest, u8 const* nickname, u16 species, bool8 isShiny, bool8 isUnique)
 {
     u8 displayNickname[POKEMON_NAME_LENGTH + 1];
     u8 const* speciesName = RoguePokedex_GetSpeciesName(species);
+
+    if(isShiny || isUnique)
+    {
+        if(isShiny && isUnique)
+            StringCopy(dest, sText_ShinyUnique);
+        else if(isUnique)
+            StringCopy(dest, sText_Unique);
+        else
+            StringCopy(dest, sText_Shiny);
+
+        StringAppend(dest, speciesName);
+        return;
+    }
 
     StringCopy_Nickname(displayNickname, nickname);
     StringCopy(dest, displayNickname);
@@ -2086,6 +2115,20 @@ static bool8 TryGetSafariMonCustomMonId(struct RogueSafariMon const* safariMon, 
         return (*customMonId & OTID_FLAG_CUSTOM_MON) != 0;
 
     return *customMonId < CUSTOM_MON_COUNT;
+}
+
+static u32 GetSafariMonDisplayPersonality(struct RogueSafariMon const* safariMon, u16 displaySpecies)
+{
+    u32 personality = ((u32)safariMon->species << 16) | ((u32)displaySpecies << 1) | safariMon->genderFlag;
+    u8 nature = GetNatureFromPersonality(personality);
+
+    if(nature != safariMon->nature)
+        personality += (safariMon->nature + NUM_NATURES - nature) % NUM_NATURES;
+
+    if(personality == 0)
+        personality = NUM_NATURES;
+
+    return personality;
 }
 
 static void AddSafariPurchaseCostItem(struct SafariMonPurchaseCost* cost, u16 itemId, u16 count)
@@ -2166,6 +2209,48 @@ static u16 GetSafariMonPricingSpecies(u16 species)
     }
 
     return bestSpecies;
+}
+
+static u16 GetSafariMonEggSpecies(u16 species)
+{
+    u8 depth;
+    u16 eggSpecies = Rogue_GetEggSpecies(species);
+
+    if(eggSpecies != species)
+        return eggSpecies;
+
+    for(depth = 0; depth < 3; ++depth)
+    {
+        u16 candidate;
+        bool8 foundPreEvolution = FALSE;
+
+        for(candidate = SPECIES_NONE + 1; candidate < NUM_SPECIES; ++candidate)
+        {
+            u8 i;
+            u8 evoCount = Rogue_GetMaxEvolutionCount(candidate);
+            struct Evolution evo;
+
+            for(i = 0; i < evoCount; ++i)
+            {
+                Rogue_ModifyEvolution(candidate, i, &evo);
+
+                if(evo.targetSpecies == species)
+                {
+                    species = candidate;
+                    foundPreEvolution = TRUE;
+                    break;
+                }
+            }
+
+            if(foundPreEvolution)
+                break;
+        }
+
+        if(!foundPreEvolution)
+            break;
+    }
+
+    return species;
 }
 
 static u16 CalculateSafariMonBasePurchaseCost(struct RogueSafariMon const* safariMon)
@@ -2279,6 +2364,55 @@ bool8 Rogue_CanPurchaseSafariMon(u16 safariIndex)
     return cost.count != 0 && CheckBagHasSafariPurchaseCost(&cost);
 }
 
+bool8 Rogue_GetSafariMonOfferDetails(u16 safariIndex, struct RogueSafariOfferDetails *details)
+{
+    u8 i;
+    u32 customMonId;
+    bool8 isCustomMon;
+    struct SafariMonPurchaseCost cost;
+    struct RogueSafariMon const *safariMon;
+
+    memset(details, 0, sizeof(*details));
+
+    if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS)
+        return FALSE;
+
+    safariMon = &gRogueSaveBlock->safariMons[safariIndex];
+
+    if(safariMon->species == SPECIES_NONE)
+        return FALSE;
+
+    CalculateSafariMonPurchaseCost(safariMon, &cost);
+
+    details->species = safariMon->species;
+    details->picSpecies = GetSafariMonEggSpecies(safariMon->species);
+    details->otId = NON_SHINY_PLACEHOLDER;
+    details->personality = GetSafariMonDisplayPersonality(safariMon, details->picSpecies);
+    details->isShiny = safariMon->shinyFlag;
+    details->canPurchase = cost.count != 0 && CheckBagHasSafariPurchaseCost(&cost);
+    details->gender = GetGenderForSpecies(details->picSpecies, safariMon->genderFlag);
+    details->type1 = GetSafariMonPurchaseType(safariMon, 0);
+    details->type2 = GetSafariMonPurchaseType(safariMon, 1);
+    details->costCount = min(cost.count, ROGUE_SAFARI_OFFER_MAX_COST_ITEMS);
+
+    isCustomMon = TryGetSafariMonCustomMonId(safariMon, &customMonId);
+    BufferSafariMonDisplayName(details->displayName, safariMon->nickname, details->picSpecies, safariMon->shinyFlag, isCustomMon);
+
+    if(isCustomMon)
+        details->otId = customMonId;
+
+    for(i = 0; i < details->costCount; ++i)
+    {
+        details->costs[i].itemId = cost.itemIds[i];
+        details->costs[i].requiredCount = cost.counts[i];
+        details->costs[i].ownedCount = CountTotalItemQuantityInBag(cost.itemIds[i]);
+        details->costs[i].type = GetTypeForPokeblockItem(cost.itemIds[i]);
+        details->costs[i].isShinyCost = cost.itemIds[i] == ITEM_POKEBLOCK_SHINY;
+    }
+
+    return TRUE;
+}
+
 static void RemoveSafariPurchaseCost(struct SafariMonPurchaseCost const* cost)
 {
     u8 i;
@@ -2290,7 +2424,7 @@ static void RemoveSafariPurchaseCost(struct SafariMonPurchaseCost const* cost)
 static bool8 CreateMonFromSafariMon(struct RogueSafariMon* safariMon, struct Pokemon* mon)
 {
     u8 text[POKEMON_NAME_LENGTH + 1];
-    u16 eggSpecies = Rogue_GetEggSpecies(safariMon->species);
+    u16 eggSpecies = GetSafariMonEggSpecies(safariMon->species);
 
     ZeroMonData(mon);
     CreateMon(mon, eggSpecies, STARTER_MON_LEVEL, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
@@ -2446,7 +2580,7 @@ void Rogue_TryPurchaseSafariMon()
             GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT_SHINY);
 
         GetMonData(&mon, MON_DATA_NICKNAME, nickname);
-        BufferSafariMonDisplayName(gStringVar1, nickname, species, IsMonShiny(&mon));
+        BufferSafariMonDisplayName(gStringVar1, nickname, species, IsMonShiny(&mon), isCustomMon);
     }
 
     RemoveSafariPurchaseCost(&cost);
@@ -2557,6 +2691,7 @@ void Rogue_EnqueueSafariBattle()
 
 void Rogue_BufferSafariMonInfo()
 {
+    u32 customMonId;
     u8 safariIndex = gSpecialVar_0x8008;
 
     if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS || gRogueSaveBlock->safariMons[safariIndex].species == SPECIES_NONE)
@@ -2569,7 +2704,8 @@ void Rogue_BufferSafariMonInfo()
         gStringVar1,
         gRogueSaveBlock->safariMons[safariIndex].nickname,
         gRogueSaveBlock->safariMons[safariIndex].species,
-        gRogueSaveBlock->safariMons[safariIndex].shinyFlag);
+        gRogueSaveBlock->safariMons[safariIndex].shinyFlag,
+        TryGetSafariMonCustomMonId(&gRogueSaveBlock->safariMons[safariIndex], &customMonId));
 }
 
 // Multiplayer scripts
