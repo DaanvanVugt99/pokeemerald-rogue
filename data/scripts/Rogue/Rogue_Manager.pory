@@ -19,6 +19,7 @@ const SAFARI_PURCHASE_INVALID = 4
 
 const SAFARI_SELECTED_BUY = 10
 const SAFARI_SELECTED_DISMISS = 11
+const SAFARI_SELECTED_BACK = 12
 
 // Re-used scripts
 //
@@ -84,39 +85,8 @@ script Rogue_Common_WaitForRogueAssistant
 script RogueSafari_PurchaseSelectedMon
 {
     copyvar(VAR_SAFARI_INDEX, VAR_SAFARI_SELECTED_INDEX)
-    special(Rogue_BufferSafariMonPurchaseCostText)
-    special(ShowFieldMessageStringVar4)
-    waitmessage
-    waitbuttonpress
-
-    setvar(VAR_RESULT, MULTI_B_PRESSED)
-
-    if(var(VAR_SAFARI_COST_COUNT) != 0)
-    {
-        begindynamicmultichoice
-
-        if(var(VAR_SAFARI_PURCHASE_CONTEXT) == SAFARI_PURCHASE_CONTEXT_CAVE)
-        {
-            appenddynamicmultichoice("Make Offering", SAFARI_SELECTED_BUY)
-        }
-        else
-        {
-            appenddynamicmultichoice("Make Offer", SAFARI_SELECTED_BUY)
-        }
-
-        appenddynamicmultichoice("Dismiss {PKMN}", SAFARI_SELECTED_DISMISS)
-        appenddynamicmultichoice("Cancel", MULTI_B_PRESSED)
-        setvar(VAR_SAFARI_INDEX, TRUE)
-        enddynamicmultichoice(1, 0, 3, TRUE)
-    }
-    else
-    {
-        begindynamicmultichoice
-        appenddynamicmultichoice("Dismiss {PKMN}", SAFARI_SELECTED_DISMISS)
-        appenddynamicmultichoice("Cancel", MULTI_B_PRESSED)
-        setvar(VAR_SAFARI_INDEX, TRUE)
-        enddynamicmultichoice(1, 0, 2, TRUE)
-    }
+    callnative(ScriptMenu_ShowSafariOfferDetails)
+    waitstate
 
     if(var(VAR_RESULT) == SAFARI_SELECTED_BUY)
     {
@@ -181,6 +151,8 @@ script RogueSafari_PurchaseSelectedMon
                 special(ReloadWarpSilent)
             }
         }
+
+        setvar(VAR_RESULT, SAFARI_SELECTED_BACK)
     }
 
     return

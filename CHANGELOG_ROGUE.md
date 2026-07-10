@@ -56,6 +56,8 @@ Format follows Keep a Changelog loosely:
   instead of relying only on icons.
 - Added Berry Field helper options to harvest all ripe berries and bulk plant
   whole empty patches with 5, 10, or 20 selected berries.
+- Added a richer Pokémon Safari offer preview with a Pokémon portrait and exact
+  Pokéblock owned/required costs before buying or dismissing an offer.
 
 ### Changed
 
@@ -102,6 +104,8 @@ Format follows Keep a Changelog loosely:
 - Replaced Market Berry Blender minigames with direct Pokéblock crafting that
   uses the Mart-style quantity UI, dynamic recipe lists, and matching berries
   as item currency.
+- Made Pokéblock recipe selection open the crafting item list directly instead
+  of first showing a redundant Craft/Quit menu.
 - Removed the Berry Blender hub upgrade path and made Pokéblock crafting
   available through the Market mixer without unlocking duplicate NPCs.
 - Added bundled Pokéblock quest rewards, usually in 5-count chunks, including

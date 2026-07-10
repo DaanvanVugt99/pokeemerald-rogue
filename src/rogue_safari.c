@@ -1,6 +1,7 @@
 #include "global.h"
 #include "constants/items.h"
 #include "constants/layouts.h"
+#include "constants/pokemon.h"
 #include "constants/rogue.h"
 #include "constants/species.h"
 
@@ -525,24 +526,41 @@ static void DebugSelectSafariSpecies(u16* speciesBuffer, u8 count, bool8 legenda
 static void DebugPushSafariMon(u16 species, u8 indexInRange, bool8 legendary)
 {
     struct Pokemon mon;
+    u16 eggSpecies = Rogue_GetEggSpecies(species);
     bool8 shiny = (indexInRange % 9) == 2;
     bool8 unique = (indexInRange % 6) == 3;
 
     if(unique)
     {
         u8 rarity;
-        u16 customSpecies = Rogue_GetEggSpecies(species);
+        u16 customSpecies = eggSpecies;
 
         if(legendary)
             rarity = UNIQUE_RARITY_LEGENDARY;
         else
             rarity = (indexInRange % 18 == 3) ? UNIQUE_RARITY_EPIC : ((indexInRange % 12 == 9) ? UNIQUE_RARITY_RARE : UNIQUE_RARITY_COMMON);
 
-        RogueGift_CreateMon(RogueGift_CreateDynamicMonId(rarity, customSpecies), &mon, species, STARTER_MON_LEVEL, USE_RANDOM_IVS);
+        {
+            u8 attempts;
+            u32 customMonId = 0;
+            bool8 forceUniqueTyping = (indexInRange % 12) == 3;
+
+            for(attempts = 0; attempts < 16; ++attempts)
+            {
+                customMonId = RogueGift_CreateDynamicMonIdRaw(rarity, customSpecies);
+
+                if(!forceUniqueTyping
+                    || RogueGift_GetCustomMonType(customMonId, 0) != TYPE_NONE
+                    || RogueGift_GetCustomMonType(customMonId, 1) != TYPE_NONE)
+                    break;
+            }
+
+            RogueGift_CreateMon(customMonId, &mon, eggSpecies, STARTER_MON_LEVEL, USE_RANDOM_IVS);
+        }
     }
     else
     {
-        CreateMon(&mon, species, STARTER_MON_LEVEL, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+        CreateMon(&mon, eggSpecies, STARTER_MON_LEVEL, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     }
 
     SetMonData(&mon, MON_DATA_IS_SHINY, &shiny);
