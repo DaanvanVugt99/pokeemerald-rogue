@@ -69,6 +69,9 @@ Format follows Keep a Changelog loosely:
   190,000.
 - Reworked the Snover and Abomasnow line's White Canopy unique ability to set
   Snow and Grassy Terrain together on switch-in.
+- Reworked the Hoothoot and Noctowl line around Psychic/Flying Noctowl,
+  Eclipse-accurate Hypnosis, and Eclipse Dark immunity, and removed Techno
+  Blast from the Porygon line's level-up learnsets.
 - Matched the GEEF boot splash hold duration to the upstream boot credit screen.
 - Retinted the title main menu, start menu, option and difficulty menu
   backdrops/window frames, dialogue prompt border, option menu label text, and
