@@ -151,6 +151,8 @@ script RogueSafari_PurchaseSelectedMon
                 special(ReloadWarpSilent)
             }
         }
+
+        setvar(VAR_RESULT, SAFARI_SELECTED_BACK)
     }
 
     return

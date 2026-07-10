@@ -134,6 +134,47 @@ u8 AddIconSprite(u16 tilesTag, u16 paletteTag, const u32* image, const u32* pale
     }
 }
 
+u8 AddRemappedItemIconSprite(u16 tilesTag, u16 paletteTag, u16 itemId, const u8 *paletteMap)
+{
+    if (!AllocItemIconTemporaryBuffers())
+    {
+        return MAX_SPRITES;
+    }
+    else
+    {
+        u16 i;
+        u8 spriteId;
+        struct SpriteSheet spriteSheet;
+        struct SpriteTemplate *spriteTemplate;
+
+        LZDecompressWram(GetItemIconPicOrPalette(itemId, 0), gItemIconDecompressionBuffer);
+        CopyItemIconPicTo4x4Buffer(gItemIconDecompressionBuffer, gItemIcon4x4Buffer);
+
+        for (i = 0; i < 0x200; ++i)
+        {
+            u8 low = paletteMap[gItemIcon4x4Buffer[i] & 0xF];
+            u8 high = paletteMap[gItemIcon4x4Buffer[i] >> 4] << 4;
+            gItemIcon4x4Buffer[i] = low | high;
+        }
+
+        spriteSheet.data = gItemIcon4x4Buffer;
+        spriteSheet.size = 0x200;
+        spriteSheet.tag = tilesTag;
+        LoadSpriteSheet(&spriteSheet);
+
+        spriteTemplate = Alloc(sizeof(*spriteTemplate));
+        CpuCopy16(&gItemIconSpriteTemplate, spriteTemplate, sizeof(*spriteTemplate));
+        spriteTemplate->tileTag = tilesTag;
+        spriteTemplate->paletteTag = paletteTag;
+        spriteId = CreateSprite(spriteTemplate, 0, 0, 0);
+
+        FreeItemIconTemporaryBuffers();
+        Free(spriteTemplate);
+
+        return spriteId;
+    }
+}
+
 u8 BlitItemIconToWindow(u16 itemId, u8 windowId, u16 x, u16 y, void * paletteDest) 
 {
     if (!AllocItemIconTemporaryBuffers())

@@ -270,6 +270,7 @@ static u16 GetVariantSpeciesCount(u8 variant);
 static u8 GetVariantGenLimit(u8 variant);
 static bool8 CheckVariantContainsSpecies(u8 variant, u16 species);
 static bool8 TryGetSafariIndexForDexIndex(u8 variant, u16 dexIndex, u16* safariIndex);
+static bool8 TryGetDexIndexForSafariIndex(u8 variant, u16 safariIndex, u16* dexIndex);
 
 // Title screen
 static void TitleScreen_HandleInput(u8);
@@ -282,6 +283,7 @@ static void Overview_RefillBg();
 static void Overview_CreateSprites();
 static void Overview_DestroySprites();
 static void Overview_SelectSpeciesToDiplay();
+static void Overview_SetCursorFromDexIndex(u16 dexIndex);
 static void Overview_FillEntryBg(u8 entryX, u8 entryY, bool8 includeHeader);
 static void Overview_FillEntryBg_Selected(u8 entryX, u8 entryY, bool8 includeHeader);
 static u8 Overview_GetLastValidActiveIndex();
@@ -368,6 +370,7 @@ struct PokedexViewRequest
         {
             bool8 requireSeen;
             bool8 requireCaught;
+            u16 preferredSafariIndex;
         } selectMon;
     } perView;
 };
@@ -549,6 +552,7 @@ void Rogue_SelectPokemonInSafari()
         Rogue_SelectPokemonInPokedexFromDexVariant(POKEDEX_DYNAMIC_VARIANT_NORMAL_SAFARI, FALSE, FALSE);
 
     sPokedexViewReq.view = DEX_VIEW_SELECT_SAFARI_MON;
+    sPokedexViewReq.perView.selectMon.preferredSafariIndex = VarGet(VAR_TEMP_A);
 }
 
 static bool8 IsCurrentlySelectingMon()
@@ -709,20 +713,23 @@ static void InitPageResources(u8 fromPage, u8 toPage)
             LoadMonIconPalettes();
             //BlendPalettes(PALETTES_ALL, 16, RGB_BLACK); // Ensure the mon icon palettes are faded
 
-            desiredIdx = RoguePokedex_GetSpeciesCurrentNum(sPokedexMenu->viewBaseSpecies);
-
-            // Try and put the location on the mon we were just viewing
-            if(desiredIdx != 0) // invalid num
+            if(
+                Overview_IsSafariSelectView() &&
+                TryGetDexIndexForSafariIndex(
+                    RoguePokedex_GetDexVariant(),
+                    sPokedexViewReq.perView.selectMon.preferredSafariIndex,
+                    &desiredIdx)
+            )
             {
-                --desiredIdx;
-                sPokedexMenu->pageScrollAmount = 0;
+                Overview_SetCursorFromDexIndex(desiredIdx);
+            }
+            else
+            {
+                desiredIdx = RoguePokedex_GetSpeciesCurrentNum(sPokedexMenu->viewBaseSpecies);
 
-                if(desiredIdx > OVERVIEW_ENTRY_COUNT)
-                {
-                    sPokedexMenu->pageScrollAmount = min(1 + (desiredIdx - OVERVIEW_ENTRY_COUNT) / COLUMN_ENTRY_COUNT, Overview_GetMaxScrollAmount());
-                }
-
-                sPokedexMenu->selectedIdx = desiredIdx - (sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT);
+                // Try and put the location on the mon we were just viewing
+                if(desiredIdx != 0) // invalid num
+                    Overview_SetCursorFromDexIndex(desiredIdx - 1);
             }
 
             Overview_SelectSpeciesToDiplay();
@@ -3562,6 +3569,16 @@ static void Overview_SelectSpeciesToDiplay()
     }
 }
 
+static void Overview_SetCursorFromDexIndex(u16 dexIndex)
+{
+    sPokedexMenu->pageScrollAmount = 0;
+
+    if(dexIndex >= OVERVIEW_ENTRY_COUNT)
+        sPokedexMenu->pageScrollAmount = min(1 + (dexIndex - OVERVIEW_ENTRY_COUNT) / COLUMN_ENTRY_COUNT, Overview_GetMaxScrollAmount());
+
+    sPokedexMenu->selectedIdx = dexIndex - (sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT);
+}
+
 static u8 Overview_GetLastValidActiveIndex()
 {
     u8 i, j;
@@ -4948,6 +4965,42 @@ static bool8 TryGetSafariIndexForDexIndex(u8 variant, u16 dexIndex, u16* safariI
                 *safariIndex = i;
                 return TRUE;
             }
+        }
+    }
+
+    return FALSE;
+}
+
+static bool8 TryGetDexIndexForSafariIndex(u8 variant, u16 safariIndex, u16* dexIndex)
+{
+    u16 i;
+    u16 start;
+    u16 total;
+    u16 count = 0;
+
+    if(variant != POKEDEX_DYNAMIC_VARIANT_NORMAL_SAFARI && variant != POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI)
+        return FALSE;
+
+    if(safariIndex >= ROGUE_SAFARI_TOTAL_MONS || gRogueSaveBlock->safariMons[safariIndex].species == SPECIES_NONE)
+        return FALSE;
+
+    start = (variant == POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI) ? ROGUE_SAFARI_LEGENDS_START_INDEX : 0;
+    total = (variant == POKEDEX_DYNAMIC_VARIANT_LEGEND_SAFARI) ? ROGUE_SAFARI_TOTAL_MONS : ROGUE_SAFARI_LEGENDS_START_INDEX;
+
+    if(safariIndex < start || safariIndex >= total)
+        return FALSE;
+
+    for(i = start; i < total; ++i)
+    {
+        if(gRogueSaveBlock->safariMons[i].species != SPECIES_NONE)
+        {
+            if(i == safariIndex)
+            {
+                *dexIndex = count;
+                return TRUE;
+            }
+
+            ++count;
         }
     }
 
