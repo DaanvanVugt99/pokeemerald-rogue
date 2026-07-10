@@ -10103,20 +10103,29 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
         if (HasBattlerAbility(battler, ABILITY_WHITE_CANOPY) && !uniqueDone)
         {
+            bool32 snowStarted = TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE);
+            bool32 grassyTerrainStarted = TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer);
+
             uniqueDone = TRUE;
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
 
-            if (B_SNOW_WARNING >= GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+            if (snowStarted && grassyTerrainStarted)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
+                BattleScriptPushCursorAndCallback(BattleScript_WhiteCanopyActivates);
+                return 1;
+            }
+            else if (snowStarted)
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
                 BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesSnow);
                 return 1;
             }
-            else if (B_SNOW_WARNING < GEN_9 && TryChangeBattleWeather(battler, ENUM_WEATHER_HAIL, TRUE))
+            else if (grassyTerrainStarted)
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
-                BattleScriptPushCursorAndCallback(BattleScript_SnowWarningActivatesHail);
+                BattleScriptPushCursorAndCallback(BattleScript_GrassySurgeActivates);
                 return 1;
             }
             else if (gBattleWeather & B_WEATHER_PRIMAL_ANY && WEATHER_HAS_EFFECT)
@@ -15100,25 +15109,6 @@ if (triggeringAbility != ABILITY_NONE)
             gCalledMove = MOVE_SAND_TOMB;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_WHITE_CANOPY)
-         && moveType == TYPE_GRASS
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && IsFinalMultiHitStrike()
-         && IsBattlerWeatherAffected(battler, B_WEATHER_HAIL | B_WEATHER_SNOW)
-         && CanUseExtraMove(battler, gBattlerTarget))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_WHITE_CANOPY);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gCalledMove = MOVE_ICY_WIND;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
