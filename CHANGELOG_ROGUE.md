@@ -61,6 +61,12 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made challenge quest money rewards more generous, increasing total challenge
+  quest money from 182,000 to 552,000 by adding a 10,000 money tier for planned
+  full-run restrictions and reserving 20,000 for capstone challenges.
+- Increased Main quest money rewards for later progression, rare discoveries,
+  and full-run variant goals, raising total main quest money from 96,000 to
+  190,000.
 - Reworked the Snover and Abomasnow line's White Canopy unique ability to set
   Snow and Grassy Terrain together on switch-in.
 - Matched the GEEF boot splash hold duration to the upstream boot credit screen.
