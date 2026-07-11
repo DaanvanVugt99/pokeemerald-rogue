@@ -19,57 +19,6 @@
         "default_group":
         [
             {
-                "name": "Solo Contract",
-                "description": "Start a Trial Terminal Solo Contract and win without adding Pokémon.",
-                "triggers":
-                [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "TrialComplete",
-                        "params": [ "ROGUE_TRIAL_SOLO_CONTRACT" ],
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "rewards":
-                [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" }
-                ]
-            },
-            {
-                "name": "Hoenn Circuit",
-                "description": "Start a Trial Terminal Hoenn Circuit and win with the locked Hoenn Pokédex.",
-                "triggers":
-                [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "TrialComplete",
-                        "params": [ "ROGUE_TRIAL_HOENN_CIRCUIT" ],
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "rewards":
-                [
-                    { "money": "QUEST_REWARD_MEDIUM_MONEY" }
-                ]
-            },
-            {
-                "name": "Cursed Circuit",
-                "description": "Start a Trial Terminal Cursed Circuit and win with its forced curses active.",
-                "triggers":
-                [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "TrialComplete",
-                        "params": [ "ROGUE_TRIAL_CURSED_CIRCUIT" ],
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "rewards":
-                [
-                    { "money": "QUEST_REWARD_LARGE_MONEY" }
-                ]
-            },
-            {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Mega Evolution",
                 "description": "Win a full Run with the Mega Ring.",
@@ -230,40 +179,17 @@
                 ]
             },
             {
-                "name": "Chaos Novice",
-                "description": "Win a full Run with: Random Starter trade & always doing a Full Party trade with Mr. Randoman whenever possible.",
+                "name": "Randoman Roulette",
+                "display_group": "trial_challenges",
+                "description": "Complete the Randoman Roulette Trial through the Trial Attendant.",
                 "triggers":
                 [
                     {
-                        "on": [ "EXIT_ENCOUNTER" ],
-                        "condition": "InAdventureEncounterType",
-                        "params": [ "ADVPATH_ROOM_RESTSTOP" ],
-                        "fail": "BREAK"
-                    },
-                    {
-                        "on": [ "EXIT_ENCOUNTER" ],
-                        "condition": "RandomanWasActive",
-                        "fail": "BREAK"
-                    },
-                    {
-                        "on": [ "EXIT_ENCOUNTER" ],
-                        "condition": "RandomanWasUsed",
-                        "fail": "FAIL"
-                    },
-                    {
-                        "on": [ "EXIT_ENCOUNTER" ],
-                        "condition": "LastRandomanWasFullParty",
-                        "fail": "FAIL"
-                    },
-                    {
                         "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
+                        "condition": "TrialComplete",
+                        "params": [ "ROGUE_TRIAL_RANDOMAN_ROULETTE" ],
                         "pass": "SUCCESS"
                     }
-                ],
-                "requirements":
-                [
-                    { "flag": "FLAG_ROGUE_HAS_RANDOM_STARTER", "state": true }
                 ],
                 "rewards":
                 [
@@ -278,19 +204,11 @@
             },
             {
                 "name": "Chaos Master",
-                "description": "Win a full Run with: Wahey Curse & Wahey+ Curse.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Chaos Master Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "requirements":
-                [
-                    { "item": "ITEM_RANDOMAN_ROUTE_SPAWN_CURSE", "count": 1 },
-                    { "item": "ITEM_RANDOMAN_ALWAYS_SPAWN_CURSE", "count": 1 }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_CHAOS_MASTER" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -304,19 +222,11 @@
             },
             {
                 "name": "Roguelocke",
-                "description": "Win a full Run with: Random Starter trade & 10x Wild Curses.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Roguelocke Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "requirements":
-                [
-                    { "flag": "FLAG_ROGUE_HAS_RANDOM_STARTER", "state": true },
-                    { "item": "ITEM_WILD_ENCOUNTER_CURSE", "count": 10 }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_ROGUELOCKE" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -330,19 +240,11 @@
             },
             {
                 "name": "Can't Pick!?",
-                "description": "Win a full Run, only ever entering Trainer battles with only Starters in your party e.g. Charmander, Totodile, Treecko, Pikachu, Eevee etc.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Can't Pick!? Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "TRAINER_BATTLE_START" ],
-                        "condition": "PartyContainsOnlyStarters",
-                        "fail": "FAIL"
-                    },
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_CANT_PICK" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -366,6 +268,7 @@
             },
             {
                 "name": "Diversity",
+                "display_group": "trial_challenges",
                 "description": "Win a full Run, only ever entering Trainer battles with only Unique Types in your party e.g. Can't have a Bulbasaur and a Grimer at the same time.",
                 "triggers":
                 [
@@ -392,19 +295,11 @@
             },
             {
                 "name": "Apotheosis",
-                "description": "Win a full Run, only ever entering Trainer battles with only Legendary Pokémon in your party.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Apotheosis Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "TRAINER_BATTLE_START" ],
-                        "condition": "PartyContainsOnlyLegendaries",
-                        "fail": "FAIL"
-                    },
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_APOTHEOSIS" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -418,6 +313,7 @@
             },
             {
                 "name": "Aesthetics",
+                "display_group": "trial_challenges",
                 "description": "Win a full Run, only ever entering Trainer battles with only Shiny Pokémon in your party.",
                 "triggers":
                 [
@@ -472,18 +368,11 @@
             },
             {
                 "name": "Cursed Body",
-                "description": "Win a full Run with: Snowball Curse.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Cursed Body Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "requirements":
-                [
-                    { "item": "ITEM_SNOWBALL_CURSE", "count": 1 }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_CURSED_BODY" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -505,21 +394,11 @@
 
             {
                 "name": "Limited Capture",
-                "description": "Win a full Run with: Catching exactly 5 {PKMN} by the time you enter the Hall of Fame.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Limited Capture Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "ANY_MON_CAUGHT" ],
-                        "condition": "VarGetGreaterThan",
-                        "params": [ "VAR_ROGUE_TOTAL_RUN_CATCHES", "5" ],
-                        "pass": "FAIL"
-                    },
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "VarGetEqual",
-                        "params": [ "VAR_ROGUE_TOTAL_RUN_CATCHES", "5" ],
-                        "pass": "SUCCESS"
-                    }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_LIMITED_CAPTURE" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -541,30 +420,16 @@
 
             {
                 "name": "BST Crown",
-                "description": "Win a full Run with: Baby Curse and only using a {PKMN} with 350 or lower Base Stat Total (viewable in the Pokédex) in Trainer Battles.",
+                "display_group": "trial_challenges",
+                "description": "Complete the BST Crown Trial through the Trial Attendant with only 400-or-lower BST Pokémon in Trainer battles.",
                 "triggers":
                 [
                     {
-                        "on": [ "TRAINER_BATTLE_START" ],
-                        "condition": "PartyMaxBSTLessThan",
-                        "fail": "FAIL",
-                        "params": [ "351" ]
-                    },
-                    {
-                        "on": [ "TRAINER_BATTLE_END_TURN" ],
-                        "condition": "PartyMaxBSTLessThan",
-                        "fail": "FAIL",
-                        "params": [ "351" ]
-                    },
-                    {
                         "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
+                        "condition": "TrialComplete",
+                        "params": [ "ROGUE_TRIAL_LOW_BST" ],
                         "pass": "SUCCESS"
                     }
-                ],
-                "requirements":
-                [
-                    { "item": "ITEM_WILD_EGG_SPECIES_CURSE", "count": 1 }
                 ],
                 "rewards":
                 [
@@ -577,19 +442,58 @@
                 ]
             },
             {
-                "name": "Pro-Building",
-                "description": "Win a full Run with: Auto Move Curse.",
+                "name": "Little Cup",
+                "display_group": "trial_challenges",
+                "description": "Complete the Little Cup Trial through the Trial Attendant.",
                 "triggers":
                 [
                     {
                         "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
+                        "condition": "TrialComplete",
+                        "params": [ "ROGUE_TRIAL_LITTLE_CUP" ],
                         "pass": "SUCCESS"
                     }
                 ],
-                "requirements":
+                "rewards":
                 [
-                    { "item": "ITEM_AUTO_MOVE_CURSE", "count": 1 }
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
+                    {
+                        "species": "SPECIES_TYROGUE",
+                        "shiny": true,
+                        "difficulty": "HARD"
+                    }
+                ]
+            },
+            {
+                "name": "Equalized",
+                "display_group": "trial_challenges",
+                "description": "Complete the Equalized Trial through the Trial Attendant.",
+                "triggers":
+                [
+                    {
+                        "on": [ "ENTER_HALL_OF_FAME" ],
+                        "condition": "TrialComplete",
+                        "params": [ "ROGUE_TRIAL_EQUALIZED" ],
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
+                    {
+                        "species": "SPECIES_DITTO",
+                        "shiny": true,
+                        "difficulty": "HARD"
+                    }
+                ]
+            },
+            {
+                "name": "Pro-Building",
+                "display_group": "trial_challenges",
+                "description": "Complete the Pro-Building Trial through the Trial Attendant.",
+                "triggers":
+                [
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_PRO_BUILDING" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -604,26 +508,11 @@
 
             {
                 "name": "Insane Mode",
-                "description": "Win a full Run with: Fresh Start enabled, Mixed battle format, Random Starter trade, Unaware Curse & never using Legendary {PKMN}.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Insane Mode Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "TRAINER_BATTLE_START" ],
-                        "condition": "PartyContainsLegendary",
-                        "pass": "FAIL"
-                    },
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "requirements":
-                [
-                    { "flag": "FLAG_ROGUE_HAS_RANDOM_STARTER", "state": true },
-                    { "config_range": "CONFIG_RANGE_BATTLE_FORMAT", "value": "BATTLE_FORMAT_MIXED" },
-                    { "config_toggle": "CONFIG_TOGGLE_BAG_WIPE", "state": true },
-                    { "item": "ITEM_UNAWARE_CURSE", "count": 1 }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_INSANE_MODE" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -637,18 +526,11 @@
             },
             {
                 "name": "Iron Mono",
-                "description": "Win a full Run with: 5x Capacity Curses.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Iron Mono Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "requirements":
-                [
-                    { "item": "ITEM_PARTY_CURSE", "count": 5 }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_IRON_MONO" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [
@@ -663,21 +545,11 @@
             },
             {
                 "name": "Iron Kaizo",
-                "description": "Win a full Run with: Fresh Start enabled, Random Starter, 5x Capacity Curses & 99x Discount Curses.",
+                "display_group": "trial_challenges",
+                "description": "Complete the Iron Kaizo Trial through the Trial Attendant.",
                 "triggers":
                 [
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
-                ],
-                "requirements":
-                [
-                    { "flag": "FLAG_ROGUE_HAS_RANDOM_STARTER", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_BAG_WIPE", "state": true },
-                    { "item": "ITEM_PARTY_CURSE", "count": 5 },
-                    { "item": "ITEM_SHOP_PRICE_CURSE", "count": 99 }
+                    { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_IRON_KAIZO" ], "pass": "SUCCESS" }
                 ],
                 "rewards":
                 [

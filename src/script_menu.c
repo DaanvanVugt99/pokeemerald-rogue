@@ -36,6 +36,7 @@
 #include "rogue_hub.h"
 #include "rogue_pokedex.h"
 #include "rogue_script.h"
+#include "rogue_trials.h"
 
 #include "data/script_menu.h"
 
@@ -54,6 +55,7 @@ static void CreateLilycoveSSTidalMultichoice(void);
 static bool8 IsPicboxClosed(void);
 static void CreateStartMenuForPokenavTutorial(void);
 static void InitMultichoiceNoWrap(bool8 ignoreBPress, u8 unusedCount, u8 windowId, u8 multichoiceId);
+static void Task_ShowTrialOverviewInput(u8 taskId);
 static void Task_SafariOfferDetailsInput(u8 taskId);
 
 bool8 ScriptMenu_Multichoice(u8 left, u8 top, u8 multichoiceId, bool8 ignoreBPress)
@@ -863,6 +865,7 @@ static const struct ListMenuTemplate sMultichoiceListTemplate =
 
 static EWRAM_DATA struct ListMenuItem* sDynamicScrollingMultichoiceList = NULL;
 static EWRAM_DATA u16 sDynamicScrollingMultichoiceCount = 0;
+static EWRAM_DATA u16 sDynamicScrollingMultichoiceDefault = 0;
 #ifdef ROGUE_DEBUG
 static EWRAM_DATA u16 sDynamicScrollingMultichoiceCapacity = 0;
 #endif
@@ -872,7 +875,7 @@ static EWRAM_DATA u16 sDynamicScrollingMultichoiceCapacity = 0;
 // 0x8006 = window y
 // 0x8007 = showed at once
 // 0x8008 = Allow B press
-static void ScriptMenu_ScrollingMultichoiceInternal(const struct ListMenuItem *list, u16 listCount, bool8 hasSetSize)
+static void ScriptMenu_ScrollingMultichoiceInternal(const struct ListMenuItem *list, u16 listCount, bool8 hasSetSize, u16 defaultIndex)
 {
     int i, windowId, taskId, width = 0;
     int left = gSpecialVar_0x8005;
@@ -900,7 +903,7 @@ static void ScriptMenu_ScrollingMultichoiceInternal(const struct ListMenuItem *l
     gMultiuseListMenuTemplate.maxShowed = maxShowed;
 
     taskId = CreateTask(Task_ScrollingMultichoiceInput, 0);
-    gTasks[taskId].data[0] = ListMenuInit(&gMultiuseListMenuTemplate, 0, 0);
+    gTasks[taskId].data[0] = ListMenuInit(&gMultiuseListMenuTemplate, 0, defaultIndex);
     gTasks[taskId].data[1] = gSpecialVar_0x8008;
     gTasks[taskId].data[2] = windowId;
 }
@@ -908,7 +911,7 @@ static void ScriptMenu_ScrollingMultichoiceInternal(const struct ListMenuItem *l
 void ScriptMenu_ScrollingMultichoice(void)
 {
     int setId = gSpecialVar_0x8004;
-    ScriptMenu_ScrollingMultichoiceInternal(sScrollingMultichoiceLists[setId].list, sScrollingMultichoiceLists[setId].count, TRUE);
+    ScriptMenu_ScrollingMultichoiceInternal(sScrollingMultichoiceLists[setId].list, sScrollingMultichoiceLists[setId].count, TRUE, 0);
 }
 
 void ScriptMenu_ScrollingMultichoiceDynamicBegin(u16 capacity)
@@ -916,6 +919,7 @@ void ScriptMenu_ScrollingMultichoiceDynamicBegin(u16 capacity)
     AGB_ASSERT(sDynamicScrollingMultichoiceList == NULL);
     sDynamicScrollingMultichoiceList = Alloc(sizeof(struct ListMenuItem) * capacity);
     sDynamicScrollingMultichoiceCount = 0;
+    sDynamicScrollingMultichoiceDefault = 0;
 #ifdef ROGUE_DEBUG
     sDynamicScrollingMultichoiceCapacity = capacity;
 #endif
@@ -933,10 +937,17 @@ void ScriptMenu_ScrollingMultichoiceDynamicAppendOption(u8 const* str, u16 value
     sDynamicScrollingMultichoiceCount++;
 }
 
+void ScriptMenu_ScrollingMultichoiceDynamicSetDefault(u16 index)
+{
+    AGB_ASSERT(sDynamicScrollingMultichoiceList != NULL);
+    sDynamicScrollingMultichoiceDefault = index;
+}
+
 void ScriptMenu_ScrollingMultichoiceDynamicEnd(void)
 {
     AGB_ASSERT(sDynamicScrollingMultichoiceList != NULL);
-    ScriptMenu_ScrollingMultichoiceInternal(sDynamicScrollingMultichoiceList, sDynamicScrollingMultichoiceCount, FALSE);
+    AGB_ASSERT(sDynamicScrollingMultichoiceDefault < sDynamicScrollingMultichoiceCount);
+    ScriptMenu_ScrollingMultichoiceInternal(sDynamicScrollingMultichoiceList, sDynamicScrollingMultichoiceCount, FALSE, sDynamicScrollingMultichoiceDefault);
 }
 
 static void Task_ScrollingMultichoiceInput(u8 taskId)
@@ -1398,6 +1409,175 @@ void ScriptMenu_HideRogueAssistantNotice()
     RemoveWindow(gTasks[taskId].data[0]);
     DestroyTask(taskId);
 }
+
+static const u8 sText_TrialOverviewDifficulty[] = _("{COLOR BLUE}Difficulty:");
+static const u8 sText_TrialOverviewPokedex[] = _("{COLOR BLUE}Pokédex:");
+static const u8 sText_TrialOverviewRules[] = _("{COLOR BLUE}Rules ");
+static const u8 sText_TrialOverviewPageSeparator[] = _("/");
+static const u8 sText_TrialOverviewPageControls[] = _("  L/R");
+
+#define TRIAL_OVERVIEW_RULES_PER_PAGE 3
+#define TRIAL_OVERVIEW_MAX_RULE_LINES 16
+#define TRIAL_OVERVIEW_RULE_LINE_LENGTH 128
+#define TRIAL_OVERVIEW_RULE_WIDTH 192
+#define tTrialOverviewWindowId data[0]
+#define tTrialOverviewDelay    data[1]
+#define tTrialOverviewPage     data[2]
+
+static EWRAM_DATA u8 sTrialOverviewRuleLines[TRIAL_OVERVIEW_MAX_RULE_LINES][TRIAL_OVERVIEW_RULE_LINE_LENGTH];
+
+static u8 BufferTrialOverviewRuleLines(void)
+{
+    u8 ruleIndex;
+    u8 lineCount = 0;
+    u8 ruleCount = RogueTrial_GetRuleCount(gSpecialVar_0x8004);
+
+    for (ruleIndex = 0; ruleIndex < ruleCount && lineCount < TRIAL_OVERVIEW_MAX_RULE_LINES; ++ruleIndex)
+    {
+        const u8 *src = RogueTrial_GetRuleText(gSpecialVar_0x8004, ruleIndex);
+        u8 lineLength = 0;
+
+        sTrialOverviewRuleLines[lineCount][0] = EOS;
+
+        while (*src != EOS && lineCount < TRIAL_OVERVIEW_MAX_RULE_LINES)
+        {
+            u8 wordLength = 0;
+            u8 candidate[TRIAL_OVERVIEW_RULE_LINE_LENGTH];
+
+            while (src[wordLength] != EOS && src[wordLength] != CHAR_SPACE)
+                ++wordLength;
+
+            if (lineLength != 0)
+            {
+                memcpy(candidate, sTrialOverviewRuleLines[lineCount], lineLength);
+                candidate[lineLength] = CHAR_SPACE;
+                memcpy(&candidate[lineLength + 1], src, wordLength);
+                candidate[lineLength + wordLength + 1] = EOS;
+            }
+            else
+            {
+                memcpy(candidate, src, wordLength);
+                candidate[wordLength] = EOS;
+            }
+
+            if (lineLength != 0 && GetStringWidth(FONT_SMALL_NARROW, candidate, 0) > TRIAL_OVERVIEW_RULE_WIDTH)
+            {
+                ++lineCount;
+                lineLength = 0;
+                if (lineCount >= TRIAL_OVERVIEW_MAX_RULE_LINES)
+                    break;
+                continue;
+            }
+
+            StringCopy(sTrialOverviewRuleLines[lineCount], candidate);
+            lineLength = StringLength(candidate);
+            src += wordLength;
+            if (*src == CHAR_SPACE)
+                ++src;
+        }
+
+        if (lineCount < TRIAL_OVERVIEW_MAX_RULE_LINES && lineLength != 0)
+            ++lineCount;
+    }
+
+    return lineCount;
+}
+
+static void PrintTrialOverview(u8 taskId)
+{
+    u8 i;
+    u8 pageText[32];
+    u8 *dest;
+    u8 windowId = gTasks[taskId].tTrialOverviewWindowId;
+    u8 lineCount = BufferTrialOverviewRuleLines();
+    u8 pageCount = max(1, (lineCount + TRIAL_OVERVIEW_RULES_PER_PAGE - 1) / TRIAL_OVERVIEW_RULES_PER_PAGE);
+    u8 firstLine = gTasks[taskId].tTrialOverviewPage * TRIAL_OVERVIEW_RULES_PER_PAGE;
+
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+
+    AddTextPrinterParameterized(windowId, FONT_NORMAL, gStringVar1, 4, 0, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_TrialOverviewDifficulty, 4, 18, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, gStringVar4, 72, 18, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_TrialOverviewPokedex, 4, 32, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, gStringVar3, 72, 32, TEXT_SKIP_DRAW, NULL);
+
+    dest = StringCopy(pageText, sText_TrialOverviewRules);
+    dest = ConvertIntToDecimalStringN(dest, gTasks[taskId].tTrialOverviewPage + 1, STR_CONV_MODE_LEFT_ALIGN, 1);
+    dest = StringAppend(dest, sText_TrialOverviewPageSeparator);
+    dest = ConvertIntToDecimalStringN(dest, pageCount, STR_CONV_MODE_LEFT_ALIGN, 1);
+    if (pageCount > 1)
+        StringAppend(dest, sText_TrialOverviewPageControls);
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, pageText, 4, 48, TEXT_SKIP_DRAW, NULL);
+
+    for (i = 0; i < TRIAL_OVERVIEW_RULES_PER_PAGE && firstLine + i < lineCount; ++i)
+    {
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sTrialOverviewRuleLines[firstLine + i], 8, 64 + i * 14, TEXT_SKIP_DRAW, NULL);
+    }
+
+    CopyWindowToVram(windowId, COPYWIN_FULL);
+}
+
+static void CloseTrialOverview(u8 taskId, bool8 proceed)
+{
+    gSpecialVar_Result = proceed;
+    PlaySE(SE_SELECT);
+    ClearToTransparentAndRemoveWindow(gTasks[taskId].tTrialOverviewWindowId);
+    DestroyTask(taskId);
+    ScriptContext_Enable();
+}
+
+static void Task_ShowTrialOverviewInput(u8 taskId)
+{
+    u8 lineCount;
+    u8 pageCount;
+
+    if (gTasks[taskId].tTrialOverviewDelay < 5)
+    {
+        ++gTasks[taskId].tTrialOverviewDelay;
+        return;
+    }
+
+    lineCount = BufferTrialOverviewRuleLines();
+    pageCount = max(1, (lineCount + TRIAL_OVERVIEW_RULES_PER_PAGE - 1) / TRIAL_OVERVIEW_RULES_PER_PAGE);
+
+    if (pageCount > 1 && JOY_NEW(L_BUTTON | R_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        if (JOY_NEW(R_BUTTON))
+            gTasks[taskId].tTrialOverviewPage = (gTasks[taskId].tTrialOverviewPage + 1) % pageCount;
+        else if (gTasks[taskId].tTrialOverviewPage == 0)
+            gTasks[taskId].tTrialOverviewPage = pageCount - 1;
+        else
+            --gTasks[taskId].tTrialOverviewPage;
+        PrintTrialOverview(taskId);
+    }
+    else if (JOY_NEW(A_BUTTON))
+        CloseTrialOverview(taskId, TRUE);
+    else if (JOY_NEW(B_BUTTON))
+        CloseTrialOverview(taskId, FALSE);
+}
+
+void ScriptMenu_ShowTrialOverview(void)
+{
+    u8 taskId;
+    u8 windowId = CreateWindowFromRect(1, 2, 26, 14);
+
+    SetDarkStandardWindowBorderStyle(windowId, FALSE);
+
+    taskId = CreateTask(Task_ShowTrialOverviewInput, 0);
+    gTasks[taskId].tTrialOverviewWindowId = windowId;
+    gTasks[taskId].tTrialOverviewDelay = 0;
+    gTasks[taskId].tTrialOverviewPage = 0;
+    PrintTrialOverview(taskId);
+}
+
+#undef tTrialOverviewWindowId
+#undef tTrialOverviewDelay
+#undef tTrialOverviewPage
+#undef TRIAL_OVERVIEW_RULE_WIDTH
+#undef TRIAL_OVERVIEW_RULE_LINE_LENGTH
+#undef TRIAL_OVERVIEW_MAX_RULE_LINES
+#undef TRIAL_OVERVIEW_RULES_PER_PAGE
 
 #define SAFARI_OFFER_RESULT_BUY 10
 #define SAFARI_OFFER_RESULT_DISMISS 11

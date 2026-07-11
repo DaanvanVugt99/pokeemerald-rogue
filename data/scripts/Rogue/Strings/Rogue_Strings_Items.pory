@@ -493,6 +493,11 @@ text gHubUpgradeDesc_AdventureEntrance_AdventureReplay
     format("Adventures can be saved and replayed again.")
 }
 
+text gHubUpgradeDesc_AdventureEntrance_TrialAttendant
+{
+    format("A Trial Attendant can organize curated runs from the Town Exit.")
+}
+
 text gHubUpgradeDesc_BerryField_Brewing
 {
     format("Brew basic Potions from berries.")

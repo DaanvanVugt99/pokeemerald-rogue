@@ -2,7 +2,7 @@
     "condition": "",
     "defaults":
     {
-        "display_group": "type_challenges",
+        "display_group": "trial_challenges",
         "flags": 
         [
             "CHALLENGE_DEFAULT",
@@ -11,14 +11,9 @@
         "triggers":
         [
             {
-                "on": [ "TRAINER_BATTLE_START" ],
-                "condition": "PartyOnlyContainsType",
-                "fail": "FAIL",
-                "template_params": [ "MONO_TYPE" ]
-            },
-            {
                 "on": [ "ENTER_HALL_OF_FAME" ],
-                "condition": "Always",
+                "condition": "TrialComplete",
+                "template_params": [ "TRIAL_ID" ],
                 "pass": "SUCCESS"
             }
         ]
@@ -30,6 +25,7 @@
             
             {
                 "name": "Type Master",
+                "display_group": "type_challenges",
                 "description": "Complete any of the 'Type Master' challenges.\\ne.g. Normal Master, Water Master etc.",
                 "flags": 
                 [
@@ -75,10 +71,10 @@
             },
             {
                 "name": "Normal Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Normal type Pokémon in your party.",
+                "description": "Complete the Normal Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_NORMAL"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_NORMAL"
                 },
                 "rewards":
                 [
@@ -92,10 +88,10 @@
             },
             {
                 "name": "Fighting Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Fighting type Pokémon in your party.",
+                "description": "Complete the Fighting Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_FIGHTING"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_FIGHTING"
                 },
                 "rewards":
                 [
@@ -109,10 +105,10 @@
             },
             {
                 "name": "Flying Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Flying type Pokémon in your party.",
+                "description": "Complete the Flying Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_FLYING"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_FLYING"
                 },
                 "rewards":
                 [
@@ -126,10 +122,10 @@
             },
             {
                 "name": "Poison Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Poison type Pokémon in your party.",
+                "description": "Complete the Poison Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_POISON"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_POISON"
                 },
                 "rewards":
                 [
@@ -143,10 +139,10 @@
             },
             {
                 "name": "Ground Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Ground type Pokémon in your party.",
+                "description": "Complete the Ground Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_GROUND"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_GROUND"
                 },
                 "rewards":
                 [
@@ -160,10 +156,10 @@
             },
             {
                 "name": "Rock Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Rock type Pokémon in your party.",
+                "description": "Complete the Rock Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_ROCK"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_ROCK"
                 },
                 "rewards":
                 [
@@ -177,10 +173,10 @@
             },
             {
                 "name": "Bug Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Bug type Pokémon in your party.",
+                "description": "Complete the Bug Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_BUG"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_BUG"
                 },
                 "rewards":
                 [
@@ -194,10 +190,10 @@
             },
             {
                 "name": "Ghost Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Ghost type Pokémon in your party.",
+                "description": "Complete the Ghost Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_GHOST"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_GHOST"
                 },
                 "rewards":
                 [
@@ -211,10 +207,10 @@
             },
             {
                 "name": "Steel Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Steel type Pokémon in your party.",
+                "description": "Complete the Steel Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_STEEL"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_STEEL"
                 },
                 "rewards":
                 [
@@ -228,10 +224,10 @@
             },
             {
                 "name": "Fire Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Fire type Pokémon in your party.",
+                "description": "Complete the Fire Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_FIRE"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_FIRE"
                 },
                 "rewards":
                 [
@@ -245,10 +241,10 @@
             },
             {
                 "name": "Water Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Water type Pokémon in your party.",
+                "description": "Complete the Water Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_WATER"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_WATER"
                 },
                 "rewards":
                 [
@@ -262,10 +258,10 @@
             },
             {
                 "name": "Grass Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Grass type Pokémon in your party.",
+                "description": "Complete the Grass Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_GRASS"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_GRASS"
                 },
                 "rewards":
                 [
@@ -279,10 +275,10 @@
             },
             {
                 "name": "Electric Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Electric type Pokémon in your party.",
+                "description": "Complete the Electric Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_ELECTRIC"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_ELECTRIC"
                 },
                 "rewards":
                 [
@@ -296,10 +292,10 @@
             },
             {
                 "name": "Psychic Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Psychic type Pokémon in your party.",
+                "description": "Complete the Psychic Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_PSYCHIC"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_PSYCHIC"
                 },
                 "rewards":
                 [
@@ -313,10 +309,10 @@
             },
             {
                 "name": "Ice Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Ice type Pokémon in your party.",
+                "description": "Complete the Ice Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_ICE"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_ICE"
                 },
                 "rewards":
                 [
@@ -330,10 +326,10 @@
             },
             {
                 "name": "Dragon Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Dragon type Pokémon in your party.",
+                "description": "Complete the Dragon Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_DRAGON"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_DRAGON"
                 },
                 "rewards":
                 [
@@ -347,10 +343,10 @@
             },
             {
                 "name": "Dark Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Dark type Pokémon in your party.",
+                "description": "Complete the Dark Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_DARK"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_DARK"
                 },
                 "rewards":
                 [
@@ -365,10 +361,10 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Fairy Master",
-                "description": "Win a full Run, only ever entering Trainer battles with Fairy type Pokémon in your party.",
+                "description": "Complete the Fairy Type Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "MONO_TYPE": "TYPE_FAIRY"
+                    "TRIAL_ID": "ROGUE_TRIAL_TYPE_FAIRY"
                 },
                 "rewards":
                 [

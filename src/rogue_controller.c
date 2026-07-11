@@ -554,7 +554,7 @@ bool8 Rogue_CanAddCaughtMonToParty(struct Pokemon *mon)
 {
     if(Rogue_IsRunActive())
     {
-        if(!RogueTrial_CanAcceptCaughtMon())
+        if(!RogueTrial_CanAcceptMon(mon))
             return FALSE;
 
         if(CalculatePlayerPartyCount() >= Rogue_GetMaxPartySize())
@@ -578,7 +578,7 @@ bool8 Rogue_CanReleasePartyMonForCaughtMon(struct Pokemon *mon, u8 slot)
     if(!Rogue_IsRunActive())
         return TRUE;
 
-    if(!RogueTrial_CanAcceptCaughtMon())
+    if(!RogueTrial_CanAcceptMon(mon))
         return FALSE;
 
     if(slot >= PARTY_SIZE || GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES) == SPECIES_NONE)
@@ -1154,6 +1154,12 @@ void Rogue_ModifyExpGained(struct Pokemon *mon, s32* expGain)
 {
     u16 species = GetMonData(mon, MON_DATA_SPECIES);
 
+    if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !IsCurrentExpTrainerBattle() && RogueTrial_IsTrainerBattleExpDisabled())
+    {
+        *expGain = 0;
+        return;
+    }
+
     if(!Rogue_EnableExpGain())
     {
         *expGain = 0;
@@ -1262,7 +1268,7 @@ void Rogue_ModifyEVGain(int* multiplier)
 
 void Rogue_ModifyCatchRate(u16 species, u16* catchRate, u16* ballMultiplier)
 {
-    if(GetSafariZoneFlag() || Rogue_UseSafariBattle() || RogueDebug_GetConfigToggle(DEBUG_TOGGLE_INSTANT_CAPTURE))
+    if(GetSafariZoneFlag() || Rogue_UseSafariBattle() || RogueDebug_GetConfigToggle(DEBUG_TOGGLE_INSTANT_CAPTURE) || RogueTrial_IsCatchGuaranteed())
     {
         *ballMultiplier = 12345; // Masterball equiv
     }
@@ -1503,6 +1509,7 @@ void Rogue_OnAcceptCaughtMon(struct Pokemon *mon)
     {
         u16 species = GetMonData(mon, MON_DATA_SPECIES);
 
+        RogueTrial_OnCaughtMon();
         VarSet(VAR_ROGUE_TOTAL_RUN_CATCHES, VarGet(VAR_ROGUE_TOTAL_RUN_CATCHES) + 1);
 
         // Quest notifies
@@ -3167,6 +3174,13 @@ u16 Rogue_MiniMenuHeight(void)
         return Debug_MiniMenuHeight();
 #endif
 
+    if (RogueTrial_IsActive())
+    {
+        ++height;
+        if (RogueTrial_IsActiveTrial(ROGUE_TRIAL_LIMITED_CAPTURE))
+            ++height;
+    }
+
     if(GetSafariZoneFlag())
     {
         height = 3;
@@ -3184,6 +3198,8 @@ u16 Rogue_MiniMenuHeight(void)
 
 extern const u8 gText_StatusRoute[];
 extern const u8 gText_StatusBadges[];
+extern const u8 gText_StatusTrial[];
+extern const u8 gText_StatusCaptures[];
 extern const u8 gText_StatusScore[];
 extern const u8 gText_StatusTimer[];
 extern const u8 gText_StatusClock[];
@@ -3239,6 +3255,22 @@ u8* Rogue_GetMiniMenuContent(void)
         ConvertIntToDecimalStringN(gStringVar1, Rogue_GetCurrentDifficulty(), STR_CONV_MODE_RIGHT_ALIGN, 4);
         StringExpandPlaceholders(gStringVar3, gText_StatusBadges);
         strPointer = StringAppend(strPointer, gStringVar3);
+
+        if (RogueTrial_IsActive())
+        {
+            const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+
+            StringCopy(gStringVar1, trial->name);
+            StringExpandPlaceholders(gStringVar3, gText_StatusTrial);
+            strPointer = StringAppend(strPointer, gStringVar3);
+
+            if (RogueTrial_IsActiveTrial(ROGUE_TRIAL_LIMITED_CAPTURE))
+            {
+                ConvertIntToDecimalStringN(gStringVar1, VarGet(VAR_ROGUE_TOTAL_RUN_CATCHES), STR_CONV_MODE_LEFT_ALIGN, 1);
+                StringExpandPlaceholders(gStringVar3, gText_StatusCaptures);
+                strPointer = StringAppend(strPointer, gStringVar3);
+            }
+        }
     }
 
     // Score
@@ -3396,12 +3428,83 @@ static const u8 sStarterTypeTriangles[] =
     TYPE_STEEL, TYPE_FIRE, TYPE_ROCK
 };
 
+static void BuildTrialStarterMonQuery(bool8 limitToCurrentDex)
+{
+    RogueMonQuery_Begin();
+
+    RogueMonQuery_IsSpeciesActive();
+    if (limitToCurrentDex)
+        RogueMonQuery_IsBaseSpeciesInCurrentDex(QUERY_FUNC_INCLUDE);
+    if (RogueTrial_PendingRequiresLegendarySpecies())
+    {
+        RogueTrial_FilterPendingMonQuery();
+        return;
+    }
+    else
+    {
+        RogueMonQuery_IsLegendary(QUERY_FUNC_EXCLUDE);
+    }
+
+    RogueMonQuery_TransformIntoEggSpecies();
+    RogueMonQuery_TransformIntoEvos(2, FALSE, FALSE); // to force mons to fit gen settings
+    RogueMonQuery_AnyActiveEvos(QUERY_FUNC_INCLUDE);
+
+    RogueTrial_FilterPendingMonQuery();
+}
+
+static bool8 TrySelectTrialStarterMons(struct StarterSelectionData *starters, bool8 isSeeded, bool8 limitToCurrentDex)
+{
+    u8 i;
+
+    BuildTrialStarterMonQuery(limitToCurrentDex);
+
+    RogueWeightQuery_Begin();
+    RogueWeightQuery_FillWeights(1);
+
+    if (!RogueWeightQuery_HasAnyWeights())
+    {
+        RogueWeightQuery_End();
+        RogueMonQuery_End();
+        return FALSE;
+    }
+
+    for (i = 0; i < ARRAY_COUNT(starters->species); ++i)
+    {
+        if (!RogueWeightQuery_HasAnyWeights())
+            RogueWeightQuery_FillWeights(1);
+
+        starters->species[i] = RogueWeightQuery_SelectRandomFromWeightsWithUpdate(isSeeded ? RogueRandom() : Random(), 0);
+        starters->shinyState[i] = Rogue_RollShinyState(SHINY_ROLL_DYNAMIC);
+    }
+
+    starters->count = ARRAY_COUNT(starters->species);
+
+    RogueWeightQuery_End();
+    RogueMonQuery_End();
+    return TRUE;
+}
+
+static struct StarterSelectionData SelectTrialStarterMons(bool8 isSeeded)
+{
+    struct StarterSelectionData starters;
+
+    memset(&starters, 0, sizeof(starters));
+
+    if (!TrySelectTrialStarterMons(&starters, isSeeded, TRUE))
+        TrySelectTrialStarterMons(&starters, isSeeded, FALSE);
+
+    return starters;
+}
+
 static struct StarterSelectionData SelectStarterMons(bool8 isSeeded)
 {
     struct StarterSelectionData starters;
     u8 i;
     bool8 isValidTriangle = FALSE;
     u16 typeTriangleOffset = (isSeeded ? RogueRandom() : Random());
+
+    if (RogueTrial_PendingNeedsStarterFilter())
+        return SelectTrialStarterMons(isSeeded);
 
     while(!isValidTriangle)
     {
@@ -3423,6 +3526,7 @@ static struct StarterSelectionData SelectStarterMons(bool8 isSeeded)
             RogueMonQuery_TransformIntoEggSpecies();
             RogueMonQuery_TransformIntoEvos(2, FALSE, FALSE); // to force mons to fit gen settings
             RogueMonQuery_AnyActiveEvos(QUERY_FUNC_INCLUDE);
+            RogueTrial_FilterPendingMonQuery();
 
             RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, typeFlags);
 
@@ -4838,6 +4942,16 @@ static void BeginRogueRunPhase_Reset(void)
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     FlagClear(FLAG_ROGUE_IS_VICTORY_LAP);
     FlagClear(FLAG_ROGUE_MYSTERIOUS_SIGN_KNOWN);
+
+    SetLastHealLocationWarp(HEAL_LOCATION_ROGUE_HUB);
+    if (RogueTrial_IsActive())
+    {
+        gSaveBlock1Ptr->lastHealLocation.mapGroup = MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE);
+        gSaveBlock1Ptr->lastHealLocation.mapNum = MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE);
+        gSaveBlock1Ptr->lastHealLocation.warpId = WARP_ID_NONE;
+        gSaveBlock1Ptr->lastHealLocation.x = 10;
+        gSaveBlock1Ptr->lastHealLocation.y = 7;
+    }
 
     VarSet(VAR_ROGUE_COURIER_ITEM, ITEM_NONE);
     VarSet(VAR_ROGUE_COURIER_COUNT, 0);
@@ -7195,6 +7309,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
             VarSet(VAR_ROGUE_CURRENT_LEVEL_CAP, Rogue_CalculateBossMonLvl());
 
             RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
+            RogueTrial_OnEnterEncounter();
         }
     }
 
@@ -7876,6 +7991,8 @@ void Rogue_Battle_StartTrainerBattle(void)
 {
     gRogueLocal.hasBattleInputStarted = FALSE;
 
+    RogueTrial_OnTrainerBattleStart();
+
     // Remove soft level cap
     if(Rogue_IsExpTrainer(gTrainerBattleOpponent_A))
         gRogueRun.currentLevelOffset = 0;
@@ -7957,6 +8074,8 @@ void Rogue_Battle_TrainerTeamReady(void)
         CalculatePlayerPartyCount();
         CalculateEnemyPartyCount();
     }
+
+    RogueTrial_OnTrainerTeamReady();
 
     // Can restore the seed now
     gRngRogueValue = gRogueLocal.rngSeedToRestore;
@@ -8221,6 +8340,8 @@ static u16 ChooseRunRewardPokeblock(void)
 
 void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 {
+    RogueTrial_OnTrainerBattleEnd();
+
     if(Rogue_IsFinalQuestFinalBoss())
     {
         TempRestorePlayerTeam();
@@ -10050,6 +10171,9 @@ void Rogue_ModifyGiveMon(struct Pokemon* mon)
         }
     }
 
+    if(Rogue_IsRunActive() && !RogueTrial_TransformMonIfIllegal(mon))
+        RogueTrial_Invalidate();
+
     // Clear popup data on catch
     mon->rogueExtraData.lastPopupLevel = GetMonData(mon, MON_DATA_LEVEL) - 1;
     mon->rogueExtraData.hasPendingEvo = FALSE;
@@ -10113,6 +10237,9 @@ void Rogue_SwapMonInDaycare(struct Pokemon* partyMon, u8 daycareSlot)
 
         // Always recalc for safety
         CalculateMonStats(partyMon);
+
+        if(!RogueTrial_TransformMonIfIllegal(partyMon))
+            RogueTrial_Invalidate();
     }
 
     CompactPartySlots();

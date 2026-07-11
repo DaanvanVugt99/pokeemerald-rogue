@@ -27,6 +27,13 @@ script Rogue_HubTransition_OnLoad
 script Rogue_HubTransition_RandomMan
 {
     lock
+    special(RogueTrial_BufferRandomanDisabled)
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("Randoman trades are unavailable during this Trial."), MSGBOX_DEFAULT)
+        release
+        return
+    }
     applymovement(VAR_LAST_TALKED, Rogue_RestStop_RandomMan_Spin)
     waitmovement(0)
     faceplayer

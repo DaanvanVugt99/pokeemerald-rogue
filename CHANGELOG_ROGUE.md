@@ -52,9 +52,9 @@ Format follows Keep a Changelog loosely:
   encounter before lab rarity and typing unlocks.
 - Expanded the dynamic Unique Pokémon regular and unique ability roll pools with
   additional broadly useful and expressive options.
-- Added a Trial Terminal to the Adventure Entrance with Solo Contract, Hoenn
-  Circuit, and Cursed Circuit challenge runs that temporarily apply
-  trial-specific rules.
+- Added the Trial Attendant as an early Adventure Entrance hub upgrade, with V1
+  trial contracts for Type Trials, Little Cup, BST Crown, Randoman Roulette,
+  Equalized, Region Style runs, Z-A Royale, and Orre Style.
 - Added a Quest Log reward-details view so quest rewards can be read as text
   instead of relying only on icons.
 - Added Berry Field helper options to harvest all ripe berries and bulk plant
@@ -70,6 +70,54 @@ Format follows Keep a Changelog loosely:
 - Increased Main quest money rewards for later progression, rare discoveries,
   and full-run variant goals, raising total main quest money from 96,000 to
   190,000.
+- Split obvious run-contract challenges into a dedicated trial challenge display
+  group while keeping the existing Challenge quest category.
+- Converted Type Master, Regional Style, Z-A Royale, Orre Style, BST Crown,
+  and Randoman Roulette rewards to complete through enforced Trial Attendant
+  runs instead of self-policed challenge rules.
+- Converted Roguelocke, Can't Pick!?, Cursed Body, Pro-Building, Insane Mode,
+  Iron Mono, and Iron Kaizo into enforced Trial Attendant runs with granular
+  party, starter, battle-format, bag, Legendary, and Curse rules.
+- Converted Chaos Master into a pre-Trainer-battle party-reroll Trial,
+  Apotheosis into a Legendary-only Trial with Legendary starter choices, and
+  Limited Capture into a Fresh Start Trial built around exactly five guaranteed
+  captures.
+- Added a Trial Attendant Pokédex selection step so flexible trials can choose
+  their dex, while Region Style and Z-A Royale restrict choices to matching
+  variants.
+- Grouped Type Trials and Regional Styles into chevron-marked Trial Attendant
+  submenus so related trial families no longer crowd the top-level list.
+- Blocked Poké Ball throws against Pokémon that are illegal for the active
+  trial, reusing the existing no-catch battle item flow instead of waiting for
+  the post-catch release flow.
+- Added Trial Attendant start validation for party, Day Care, and chosen partner
+  Pokémon so illegal trial teams are caught before entering the run.
+- Made Trial Attendant starter choices respect pending type, Little Cup, and
+  low-BST legality so the three offered partner Pokémon are valid for the
+  selected trial.
+- Grouped Trial Attendant Pokédex choices by Pokédex region, with National
+  generation options and other multi-variant dexes moved into submenus.
+- Made Trial Attendant difficulty selection start on Average by default.
+- Kept Trial Attendant runs from using the normal nurse's entrance movement.
+- Blocked Trainer battles when the current Trial party is illegal, with the
+  offending Pokémon shown, and prevented evolutions into Trial-illegal species.
+- Kept the battle Poké Ball shortcut visible but grayed out when catching is
+  temporarily blocked, while still hiding it when the Bag has no Poké Balls.
+- Added the active Trial name to the start-menu run summary for saved and
+  resumed Trial runs.
+- Reordered Trial startup validation to catch illegal party or Day Care Pokémon
+  before saving or opening the optional starter selection.
+- Made the Trial Attendant upgrade become purchasable only after Challenges are
+  introduced in the Challenge Area.
+- Made the Trial Attendant appear at the Adventure Entrance only after their
+  hub upgrade has been built.
+- Placed the Trial Attendant beside the normal Adventure nurse, replacing the
+  fence behind them once the upgrade is built.
+- Replaced the Trial startup text sequence with a single overview panel showing
+  the selected Trial, difficulty, Pokédex, and paginated exhaustive rules before
+  the native Yes/No confirmation prompt.
+- Made Z-A Royale enforce Double Battles alongside its Z-A Pokédex, Rainbow
+  Trainer order, and all-region Trainer pool.
 - Reworked the Snover and Abomasnow line's White Canopy unique ability to set
   Snow and Grassy Terrain together on switch-in.
 - Reworked the Hoothoot and Noctowl line around Psychic/Flying Noctowl,
@@ -202,7 +250,23 @@ Format follows Keep a Changelog loosely:
 - Fixed Rotom form appliance abilities being assigned as normal abilities
   instead of hidden abilities.
 
+### Removed
+
+- Removed the placeholder Solo Contract, Hoenn Circuit, and Cursed Circuit trial
+  definitions and quest entries while the real Trial Attendant set is being
+  designed.
+
 ### Fixed
+
+- Restored the gate-opening walk sequence when starting a Trial through the
+  Trial Attendant.
+- Made completed or retired Trial runs return the player in front of the Trial
+  Attendant instead of the normal Adventure nurse.
+- Fixed Little Cup treating non-evolving species such as Bruxish and Klawf as
+  legal, and made its opponent teams follow the same Little Cup format before
+  level-5 battle scaling is applied.
+- Disabled ordinary Trainer-battle Exp. Points during Little Cup Trials so
+  Pokémon remain at level 5, while leaving PokéAssistant EXP battles unaffected.
 
 - Optimized route special item weighting to avoid long pauses when entering
   route, hideout, boss, or miniboss nodes.

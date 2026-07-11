@@ -24,6 +24,8 @@ const u8 gText_RogueVersionSuffix[] = _(""); // no subtitle for 2.0
 //
 const u8 gText_StatusRoute[] = _("Route: {STR_VAR_1}\n");
 const u8 gText_StatusBadges[] = _("Badges: {STR_VAR_1}\n");
+const u8 gText_StatusTrial[] = _("Trial: {STR_VAR_1}\n");
+const u8 gText_StatusCaptures[] = _("Captures: {STR_VAR_1}/5\n");
 const u8 gText_StatusScore[] = _("Score: {STR_VAR_1}\n");
 const u8 gText_StatusTimer[] = _("Timer: {STR_VAR_1}:{STR_VAR_2}\n");
 const u8 gText_StatusClock[] = _("{STR_VAR_1}:{STR_VAR_2}\n");

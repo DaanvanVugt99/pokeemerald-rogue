@@ -2998,6 +2998,9 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
 {
     s32 i;
 
+    if (!RogueTrial_CanReceiveGift())
+        return MON_CANT_GIVE;
+
     if(!isTraded)
     {
         SetMonData(mon, MON_DATA_OT_NAME, gSaveBlock2Ptr->playerName);
@@ -3006,7 +3009,7 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
     }
 
     Rogue_ModifyGiveMon(mon);
-    RogueTrial_OnMonGiven();
+    RogueTrial_OnMonGiven(mon);
 
     if (Rogue_IsRunActive()
      && (Rogue_PartyHasDuplicateSpecies(mon, PARTY_SIZE, PARTY_SIZE)
@@ -5876,6 +5879,7 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem, s
     u16 targetSpecies = 0;
     u16 species = GetMonData(mon, MON_DATA_SPECIES, 0);
     u16 heldItem = GetMonData(mon, MON_DATA_HELD_ITEM, 0);
+    u16 originalHeldItem = heldItem;
     u32 personality = GetMonData(mon, MON_DATA_PERSONALITY, 0);
     u8 level;
     u16 friendship;
@@ -6286,6 +6290,15 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem, s
             }
         }
         break;
+    }
+
+    if (targetSpecies != SPECIES_NONE
+        && !RogueTrial_IsSpeciesLegal(targetSpecies, GetMonData(mon, MON_DATA_OT_ID)))
+    {
+        if (heldItem != originalHeldItem)
+            SetMonData(mon, MON_DATA_HELD_ITEM, &originalHeldItem);
+
+        return SPECIES_NONE;
     }
 
     return targetSpecies;

@@ -85,6 +85,7 @@ static bool8 QuestCondition_IsConfigRangeEqualToAny(u16 questId, struct RogueQue
 static bool8 QuestCondition_SpeciesMasteryComplete(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_CurrentEvilTeamIs(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_TrialComplete(u16 questId, struct RogueQuestTrigger const* trigger);
+static bool8 QuestCondition_TrialCompleteAndPartyContainsAllSpecies(u16 questId, struct RogueQuestTrigger const* trigger);
 
 static bool8 IsQuestSurpressed(u16 questId);
 static bool8 CanSurpressedQuestActivate(u16 questId);
@@ -1173,6 +1174,27 @@ static bool8 QuestCondition_TrialComplete(u16 questId UNUSED, struct RogueQuestT
 {
     ASSERT_PARAM_COUNT(1);
     return RogueTrial_IsCompleteForQuest(trigger->params[0]);
+}
+
+static bool8 QuestCondition_TrialCompleteAndPartyContainsAllSpecies(u16 questId UNUSED, struct RogueQuestTrigger const* trigger)
+{
+    u16 i;
+    u16 species;
+
+    AGB_ASSERT(trigger->paramCount > 1);
+
+    if (!RogueTrial_IsCompleteForQuest(trigger->params[0]))
+        return FALSE;
+
+    for (i = 1; i < trigger->paramCount; ++i)
+    {
+        species = trigger->params[i];
+
+        if (!PartyContainsBaseSpecies(gPlayerParty, gPlayerPartyCount, species))
+            return FALSE;
+    }
+
+    return TRUE;
 }
 
 static bool8 UNUSED QuestCondition_HasCompletedQuestAND(u16 triggerQuestId, struct RogueQuestTrigger const* trigger)
