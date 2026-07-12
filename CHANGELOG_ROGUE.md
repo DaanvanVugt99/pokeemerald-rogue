@@ -280,6 +280,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed the Quest Log index failing to redraw scrolled options after adding the
+  Achievements category, restoring access to Adventure Stats and Back.
+- Added up and down indicators to the Quest Log index when category options are
+  hidden beyond the visible list.
 - Returned the player and gate NPC to their normal positions when final party
   validation cancels a run after the gate-opening walk.
 - Prevented forced-starter Trials from rejecting the Hub party on capacity rules

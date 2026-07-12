@@ -444,6 +444,8 @@ static u8 const sText_Inactive[] = _("Inactive");
 static u8 const sText_Todo[] = _("To-do");
 static u8 const sText_Complete[] = _("Complete");
 static u8 const sText_Back[] = _("Back");
+static u8 const sText_ScrollUp[] = _("{UP_ARROW}");
+static u8 const sText_ScrollDown[] = _("{DOWN_ARROW}");
 static u8 const sText_Progress[] = _("Progress");
 static u8 const sText_QuestPageButtonsTop[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{A_BUTTON} Pin  {SELECT_BUTTON} Sort");
 static u8 const sText_QuestPageButtonsRewards[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{START_BUTTON} Rewards");
@@ -968,6 +970,7 @@ static void DrawGenericScrollList(struct MenuOption const* options, u16 count)
 {
     u16 j, index;
     u8 const color[3] = {0, 2, 3};
+    u8 const arrowX = sQuestWinTemplates[WIN_RIGHT_PAGE].width * 8 - 8;
 
     FillWindowPixelBuffer(WIN_RIGHT_PAGE, PIXEL_FILL(0));
 
@@ -989,8 +992,14 @@ static void DrawGenericScrollList(struct MenuOption const* options, u16 count)
             AddTextPrinterParameterized4(WIN_RIGHT_PAGE, FONT_NARROW, 0, 4 + 16 * j, 0, 0, color, TEXT_SKIP_DRAW, gText_SelectorArrow);
         }
 
-        AddTextPrinterParameterized4(WIN_RIGHT_PAGE, FONT_NARROW, 8, 4 + 16 * j, 0, 0, color, TEXT_SKIP_DRAW, options[j].text);
+        AddTextPrinterParameterized4(WIN_RIGHT_PAGE, FONT_NARROW, 8, 4 + 16 * j, 0, 0, color, TEXT_SKIP_DRAW, options[index].text);
     }
+
+    if(sQuestMenuData->scrollListHead != 0)
+        AddTextPrinterParameterized4(WIN_RIGHT_PAGE, FONT_NORMAL, arrowX, 0, 0, 0, color, TEXT_SKIP_DRAW, sText_ScrollUp);
+
+    if(sQuestMenuData->scrollListHead + SCROLL_ITEMS_IN_VIEW < count)
+        AddTextPrinterParameterized4(WIN_RIGHT_PAGE, FONT_NORMAL, arrowX, 132, 0, 0, color, TEXT_SKIP_DRAW, sText_ScrollDown);
 
     PutWindowTilemap(WIN_RIGHT_PAGE);
     CopyWindowToVram(WIN_RIGHT_PAGE, COPYWIN_FULL);
