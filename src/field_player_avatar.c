@@ -71,6 +71,7 @@ static bool8 ForcedMovement_MatJump(void);
 static bool8 ForcedMovement_MatSpin(void);
 static bool8 ForcedMovement_MuddySlope(void);
 
+static bool8 ForcedMovement_AffectedByIce(u8);
 bool8 ForcedMovement_AffectedByMuddySlope(u8);
 
 static void MovePlayerNotOnBike(u8, u16, u16);
@@ -157,7 +158,7 @@ static u8 TrySpinPlayerForWarp(struct ObjectEvent *, s16 *);
 static bool8 (*const sForcedMovementTestFuncs[NUM_FORCED_MOVEMENTS])(u8) =
 {
     MetatileBehavior_IsTrickHouseSlipperyFloor,
-    MetatileBehavior_IsIce_2,
+    ForcedMovement_AffectedByIce,
     MetatileBehavior_IsWalkSouth,
     MetatileBehavior_IsWalkNorth,
     MetatileBehavior_IsWalkWest,
@@ -540,6 +541,11 @@ static bool8 ForcedMovement_MatSpin(void)
 {
     DoPlayerMatSpin();
     return TRUE;
+}
+
+static bool8 ForcedMovement_AffectedByIce(u8 metatileBehavior)
+{
+    return !Rogue_IsRideMonFlying() && MetatileBehavior_IsIce_2(metatileBehavior);
 }
 
 bool8 ForcedMovement_AffectedByMuddySlope(u8 metatileBehavior)

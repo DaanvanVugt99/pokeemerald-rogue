@@ -276,6 +276,7 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented flying Ride Pokémon from sliding on ice tiles.
 - Corrected the battle-sprite positioning of newly added Z-A Mega Evolutions,
   including visible gaps beneath Mega Staraptor and other backsprites.
 - Made individual Trials appear only after their corresponding Trial quest
