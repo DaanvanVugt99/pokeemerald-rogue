@@ -53,6 +53,7 @@
 #include "rogue_ridemon.h"
 #include "rogue_questmenu.h"
 #include "rogue_settings.h"
+#include "rogue_trials.h"
 #include "rogue_worldmap.h"
 
 static void SetUpItemUseCallback(u8);
@@ -1341,16 +1342,23 @@ void ItemUseOutOfBattle_EvolutionStone(u8 taskId)
 
 static u32 GetBallThrowableState(void)
 {
+    u8 catchingBattler = GetCatchingBattler();
+    u32 catchingPartyIndex = gBattlerPartyIndexes[catchingBattler];
+
     if (IsBattlerAlive(GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT))
      && IsBattlerAlive(GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT)))
         return BALL_THROW_UNABLE_TWO_MONS;
     else if (IsPlayerPartyAndPokemonStorageFull() == TRUE)
         return BALL_THROW_UNABLE_NO_ROOM;
-    else if (B_SEMI_INVULNERABLE_CATCH >= GEN_4 && (gStatuses3[GetCatchingBattler()] & STATUS3_SEMI_INVULNERABLE))
+    else if (B_SEMI_INVULNERABLE_CATCH >= GEN_4 && (gStatuses3[catchingBattler] & STATUS3_SEMI_INVULNERABLE))
         return BALL_THROW_UNABLE_SEMI_INVULNERABLE;
     else if (FlagGet(B_FLAG_NO_CATCHING))
         return BALL_THROW_UNABLE_DISABLED_FLAG;
     else if(IsCurseActive(EFFECT_SNAG_TRAINER_MON) && !FlagGet(FLAG_ROGUE_IN_SNAG_BATTLE))
+        return BALL_THROW_UNABLE_DISABLED_FLAG;
+    else if(!RogueTrial_CanThrowBall())
+        return BALL_THROW_UNABLE_DISABLED_FLAG;
+    else if(!RogueTrial_CanAcceptMon(&gEnemyParty[catchingPartyIndex]))
         return BALL_THROW_UNABLE_DISABLED_FLAG;
 
     return BALL_THROW_ABLE;

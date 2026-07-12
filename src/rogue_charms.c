@@ -10,6 +10,7 @@
 #include "rogue_controller.h"
 #include "rogue_charms.h"
 #include "rogue_popup.h"
+#include "rogue_trials.h"
 
 struct CharmCurseCounts
 {
@@ -282,18 +283,24 @@ bool8 AnyCursesActive()
 
 u16 GetCharmValue(u8 effectType)
 {
+    u16 count;
+
     if(!Rogue_IsRunActive())
         return 0;
 
-    return CalcValueInternal(effectType, gCharmItemCounts[effectType].charmItems, FALSE);
+    count = gCharmItemCounts[effectType].charmItems + RogueTrial_GetCharmItemCount(effectType);
+    return CalcValueInternal(effectType, count, FALSE);
 }
 
 u16 GetCurseValue(u8 effectType)
 {
+    u16 count;
+
     if(!Rogue_IsRunActive())
         return 0;
 
-    return CalcValueInternal(effectType, gCharmItemCounts[effectType].curseItems, TRUE);
+    count = gCharmItemCounts[effectType].curseItems + RogueTrial_GetCurseItemCount(effectType);
+    return CalcValueInternal(effectType, count, TRUE);
 }
 
 void Rogue_RemoveCharmsFromBag(void)

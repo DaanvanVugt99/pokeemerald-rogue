@@ -25,9 +25,11 @@ void ScriptMenu_DisplayPCStartupPrompt(void);
 
 void ScriptMenu_ScrollingMultichoiceDynamicBegin(u16 capacity);
 void ScriptMenu_ScrollingMultichoiceDynamicAppendOption(u8 const* str, u16 value);
+void ScriptMenu_ScrollingMultichoiceDynamicSetDefault(u16 index);
 void ScriptMenu_ScrollingMultichoiceDynamicEnd(void);
 void ScriptMenu_DisplayTextInWindow(const u8* str, u8 x, u8 y, u8 width, u8 height);
 void ScriptMenu_ShowDynamicUniqueMonPic(void);
 void ScriptMenu_ShowSafariOfferDetails(void);
+void ScriptMenu_ShowTrialOverview(void);
 
 #endif //GUARD_SCRIPT_MENU_H

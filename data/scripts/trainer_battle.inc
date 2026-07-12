@@ -44,6 +44,8 @@ EventScript_NoDoubleTrainerBattle::
 	gotopostbattlescript
 
 EventScript_DoNoIntroTrainerBattle::
+	special RogueTrial_CanStartTrainerBattle
+	goto_if_eq VAR_RESULT, FALSE, EventScript_TrialPartyIllegal
 	applymovement VAR_LAST_TALKED, Movement_RevealTrainer
 	waitmovement 0
 	special PlayTrainerEncounterMusic
@@ -102,6 +104,8 @@ Movement_RevealTrainer:
 	step_end
 
 EventScript_ShowTrainerIntroMsg::
+	special RogueTrial_CanStartTrainerBattle
+	goto_if_eq VAR_RESULT, FALSE, EventScript_TrialPartyIllegal
 	special ShowTrainerIntroSpeech
 	waitmessage
 	waitbuttonpress
@@ -122,6 +126,14 @@ EventScript_EndTrainerBattle::
 	gotobeatenscript
 	releaseall
 	end
+
+EventScript_TrialPartyIllegal::
+	msgbox Text_TrialPartyIllegal, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Text_TrialPartyIllegal::
+	.string "{STR_VAR_1} is not legal for\n{STR_VAR_2}.\pAdjust your party before battling.$"
 
 Std_MsgboxAutoclose::
 	message NULL

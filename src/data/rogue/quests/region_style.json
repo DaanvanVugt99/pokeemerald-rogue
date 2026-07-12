@@ -2,7 +2,7 @@
     "condition": "",
     "defaults":
     {
-        "display_group": "region_challenges",
+        "display_group": "trial_challenges",
         "flags": 
         [
             "CHALLENGE_DEFAULT",
@@ -11,25 +11,9 @@
         "triggers":
         [
             {
-                "on": [ "RUN_START" ],
-                "condition": "IsStandardRunActive",
-                "fail": "FAIL"
-            },
-            {
-                "on": [ "RUN_START" ],
-                "condition": "IsPokedexRegion",
-                "fail": "FAIL",
-                "template_params": [ "POKEDEX_REGION" ]
-            },
-            {
-                "on": [ "RUN_START" ],
-                "condition": "AreOnlyTheseTrainersActive",
-                "fail": "FAIL",
-                "template_params": [ "TRAINER_TOGGLE" ]
-            },
-            {
                 "on": [ "ENTER_HALL_OF_FAME" ],
-                "condition": "Always",
+                "condition": "TrialComplete",
+                "template_params": [ "TRIAL_ID" ],
                 "pass": "SUCCESS"
             }
         ]
@@ -40,6 +24,7 @@
         [
             {
                 "name": "Regional Style",
+                "display_group": "region_challenges",
                 "description": "Complete any of the 'Region Style' challenges.\\ne.g. Kanto Style, Johto Style, Orre Style etc.",
                 "flags": 
                 [
@@ -63,6 +48,7 @@
                                 "QUEST_ID_ALOLA_STYLE",
                                 "QUEST_ID_GALAR_STYLE",
                                 "QUEST_ID_PALDEA_STYLE",
+                                "QUEST_ID_Z_A_ROYALE",
                             "#endif",
                             "QUEST_ID_ORRE_STYLE"
                         ],
@@ -87,11 +73,10 @@
             },
             {
                 "name": "Kanto Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Kanto variant and only Kanto Trainers enabled.",
+                "description": "Complete the Kanto Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_KANTO",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_KANTO"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_KANTO"
                 },
                 "rewards":
                 [
@@ -109,11 +94,10 @@
             },
             {
                 "name": "Johto Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Johto variant and only Johto Trainers enabled.",
+                "description": "Complete the Johto Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_JOHTO",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_JOHTO"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_JOHTO"
                 },
                 "rewards":
                 [
@@ -131,11 +115,10 @@
             },
             {
                 "name": "Hoenn Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Hoenn variant and only Hoenn Trainers enabled.",
+                "description": "Complete the Hoenn Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_HOENN",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_HOENN"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_HOENN"
                 },
                 "rewards":
                 [
@@ -154,11 +137,10 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Sinnoh Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Sinnoh variant and only Sinnoh Trainers enabled.",
+                "description": "Complete the Sinnoh Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_SINNOH",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_SINNOH"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_SINNOH"
                 },
                 "rewards":
                 [
@@ -177,11 +159,10 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Unova Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Unova variant and only Unova Trainers enabled.",
+                "description": "Complete the Unova Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_UNOVA",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_UNOVA"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_UNOVA"
                 },
                 "rewards":
                 [
@@ -200,11 +181,10 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Kalos Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Kalos variant and only Kalos Trainers enabled.",
+                "description": "Complete the Kalos Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_KALOS",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_KALOS"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_KALOS"
                 },
                 "rewards":
                 [
@@ -223,11 +203,10 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Alola Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Alola variant and only Alola Trainers enabled.",
+                "description": "Complete the Alola Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_ALOLA",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_ALOLA"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_ALOLA"
                 },
                 "rewards":
                 [
@@ -246,11 +225,10 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Galar Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Galar variant and only Galar Trainers enabled.",
+                "description": "Complete the Galar Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_GALAR",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_GALAR"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_GALAR"
                 },
                 "rewards":
                 [
@@ -269,11 +247,10 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Paldea Style",
-                "description": "Win a full Standard Run, with the Pokédex set to any Paldea variant and only Paldea Trainers enabled.",
+                "description": "Complete the Paldea Style Trial through the Trial Attendant.",
                 "template_params":
                 {
-                    "POKEDEX_REGION": "POKEDEX_REGION_PALDEA",
-                    "TRAINER_TOGGLE": "CONFIG_TOGGLE_TRAINER_PALDEA"
+                    "TRIAL_ID": "ROGUE_TRIAL_REGION_PALDEA"
                 },
                 "rewards":
                 [
@@ -292,44 +269,14 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Z-A Royale",
-                "description": "Enable all Trainers and Rainbow Mode in the Config Lab, then win a full Run with the Mega Ring equipped and the Pokédex set to any Legends Z-A variant.",
-                "flags":
-                [
-                    "CHALLENGE_DEFAULT",
-                    "ACTIVE_IN_RUN"
-                ],
-                "triggers":
-                [
-                    {
-                        "on": [ "RUN_START" ],
-                        "condition": "IsPokedexVariant",
-                        "fail": "FAIL",
-                        "params": [ "POKEDEX_VARIANT_LEGENDS_ZA", "POKEDEX_VARIANT_LEGENDS_ZAFULLDLC" ]
-                    },
-                    {
-                        "on": [ "RUN_START" ],
-                        "condition": "IsConfigRangeEqualToAny",
-                        "params": [ "CONFIG_RANGE_TRAINER_ORDER", "TRAINER_ORDER_RAINBOW" ],
-                        "fail": "FAIL"
-                    },
-                    {
-                        "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "Always",
-                        "pass": "SUCCESS"
-                    }
-                ],
+                "description": "Complete the Z-A Royale Trial through the Trial Attendant with the Mega Ring available.",
+                "template_params":
+                {
+                    "TRIAL_ID": "ROGUE_TRIAL_Z_A_ROYALE"
+                },
                 "requirements":
                 [
-                    { "item": "ITEM_MEGA_RING", "count": 1 },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_KANTO", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_JOHTO", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_HOENN", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_SINNOH", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_UNOVA", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_KALOS", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_ALOLA", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_GALAR", "state": true },
-                    { "config_toggle": "CONFIG_TOGGLE_TRAINER_PALDEA", "state": true }
+                    { "item": "ITEM_MEGA_RING", "count": 1 }
                 ],
                 "rewards":
                 [
@@ -353,21 +300,16 @@
             },
             {
                 "name": "Orre Style",
-                "description": "Win a full Run with: Snag Curse, Doubles battle format & having Umbreon and Espeon in your party when you enter the Hall of Fame.",
+                "description": "Complete the Orre Style Trial through the Trial Attendant with Umbreon and Espeon in your party.",
                 "triggers":
                 [
                     {
                         "on": [ "ENTER_HALL_OF_FAME" ],
-                        "condition": "PartyContainsAllSpecies",
-                        "params": [ "SPECIES_UMBREON", "SPECIES_ESPEON" ],
+                        "condition": "TrialCompleteAndPartyContainsAllSpecies",
+                        "params": [ "ROGUE_TRIAL_ORRE_STYLE", "SPECIES_UMBREON", "SPECIES_ESPEON" ],
                         "pass": "SUCCESS",
                         "fail": "FAIL"
                     }
-                ],
-                "requirements":
-                [
-                    { "config_range": "CONFIG_RANGE_BATTLE_FORMAT", "value": "BATTLE_FORMAT_DOUBLES" },
-                    { "item": "ITEM_SNAG_CURSE", "count": 1 }
                 ],
                 "rewards":
                 [

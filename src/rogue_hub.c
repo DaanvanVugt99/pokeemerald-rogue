@@ -421,6 +421,10 @@ bool8 RogueHub_HasUpgradeRequirements(u16 upgradeId)
     u8 i;
     u8 check;
 
+    if(upgradeId == HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT
+        && !FlagGet(FLAG_SYS_CHALLENGES_UNLOCKED))
+        return FALSE;
+
     if(!RogueHub_HasAreaBuilt(gRogueHubUpgrades[upgradeId].targetArea))
         return FALSE;
 
@@ -1200,6 +1204,9 @@ static void RogueHub_UpdateLabsAreaMetatiles()
 
 static void RogueHub_UpdateAdventureEntranceAreaMetatiles()
 {
+    if(RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT))
+        MetatileSet_Tile(10, 6, METATILE_General_Grass | MAPGRID_COLLISION_MASK);
+
     // Remove connectionss
     if(RogueHub_GetAreaAtConnection(HUB_AREA_ADVENTURE_ENTRANCE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {

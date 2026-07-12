@@ -65,6 +65,7 @@
 #include "rogue_timeofday.h"
 #include "rogue_trainers.h"
 #include "rogue_quest.h"
+#include "rogue_trials.h"
 
 #if P_FRIENDSHIP_EVO_THRESHOLD >= GEN_9
 #define FRIENDSHIP_EVO_THRESHOLD 160
@@ -1524,9 +1525,9 @@ static u16 CalculateBoxMonChecksum(struct BoxPokemon *boxMon)
     return checksum;
 }
 
-#define CALC_STAT(base, iv, ev, statIndex, field)               \
+#define CALC_STAT(iv, ev, statIndex, field)                     \
 {                                                               \
-    u8 baseStat = gSpeciesInfo[species].base;                   \
+    u16 baseStat = effectiveBaseStats[statIndex];               \
     s32 n = (((2 * baseStat + iv + ev / 4) * level) / 100) + 5; \
     n = ModifyStatByNature(nature, n, statIndex);               \
     if (B_FRIENDSHIP_BOOST == TRUE)                             \
@@ -1551,12 +1552,14 @@ void CalculateMonStats(struct Pokemon *mon)
     s32 spDefenseIV = GetMonData(mon, MON_DATA_SPDEF_IV, NULL);
     s32 spDefenseEV = GetMonData(mon, MON_DATA_SPDEF_EV, NULL);
     u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+    u16 effectiveBaseStats[NUM_STATS];
     u8 friendship = GetMonData(mon, MON_DATA_FRIENDSHIP, NULL);
     s32 level = GetLevelFromMonExp(mon);
     s32 newMaxHP;
 
     u8 nature = GetNature(mon);
 
+    RogueTrial_GetEffectiveSpeciesBaseStats(species, effectiveBaseStats, ARRAY_COUNT(effectiveBaseStats));
     SetMonData(mon, MON_DATA_LEVEL, &level);
 
     if (species == SPECIES_SHEDINJA)
@@ -1565,7 +1568,7 @@ void CalculateMonStats(struct Pokemon *mon)
     }
     else
     {
-        s32 n = 2 * gSpeciesInfo[species].baseHP + hpIV;
+        s32 n = 2 * effectiveBaseStats[STAT_HP] + hpIV;
         newMaxHP = (((n + hpEV / 4) * level) / 100) + level + 10;
     }
 
@@ -1575,11 +1578,11 @@ void CalculateMonStats(struct Pokemon *mon)
 
     SetMonData(mon, MON_DATA_MAX_HP, &newMaxHP);
 
-    CALC_STAT(baseAttack, attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
-    CALC_STAT(baseDefense, defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
-    CALC_STAT(baseSpeed, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
-    CALC_STAT(baseSpAttack, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
-    CALC_STAT(baseSpDefense, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+    CALC_STAT(attackIV, attackEV, STAT_ATK, MON_DATA_ATK)
+    CALC_STAT(defenseIV, defenseEV, STAT_DEF, MON_DATA_DEF)
+    CALC_STAT(speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
+    CALC_STAT(spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
+    CALC_STAT(spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
 
     if (species == SPECIES_SHEDINJA)
     {
@@ -2997,6 +3000,9 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
 {
     s32 i;
 
+    if (!RogueTrial_CanReceiveGift())
+        return MON_CANT_GIVE;
+
     if(!isTraded)
     {
         SetMonData(mon, MON_DATA_OT_NAME, gSaveBlock2Ptr->playerName);
@@ -3005,6 +3011,7 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
     }
 
     Rogue_ModifyGiveMon(mon);
+    RogueTrial_OnMonGiven(mon);
 
     if (Rogue_IsRunActive()
      && (Rogue_PartyHasDuplicateSpecies(mon, PARTY_SIZE, PARTY_SIZE)
@@ -5874,6 +5881,7 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem, s
     u16 targetSpecies = 0;
     u16 species = GetMonData(mon, MON_DATA_SPECIES, 0);
     u16 heldItem = GetMonData(mon, MON_DATA_HELD_ITEM, 0);
+    u16 originalHeldItem = heldItem;
     u32 personality = GetMonData(mon, MON_DATA_PERSONALITY, 0);
     u8 level;
     u16 friendship;
@@ -6284,6 +6292,15 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem, s
             }
         }
         break;
+    }
+
+    if (targetSpecies != SPECIES_NONE
+        && !RogueTrial_IsSpeciesLegal(targetSpecies, GetMonData(mon, MON_DATA_OT_ID)))
+    {
+        if (heldItem != originalHeldItem)
+            SetMonData(mon, MON_DATA_HELD_ITEM, &originalHeldItem);
+
+        return SPECIES_NONE;
     }
 
     return targetSpecies;

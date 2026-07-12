@@ -639,6 +639,14 @@ script Rogue_EventScript_UseDayCarePhoneItem
 {
     lock
 
+    special(RogueTrial_BufferDayCareDisabled)
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("The Day Care is unavailable during this Trial."), MSGBOX_DEFAULT)
+        release
+        return
+    }
+
     if(!flag(FLAG_ROGUE_RUN_ACTIVE))
     {
         // Can call unlimited times in hub

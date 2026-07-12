@@ -1,31 +1,54 @@
 #include "global.h"
+#include "battle.h"
+#include "constants/battle.h"
 #include "constants/flags.h"
 #include "constants/rogue.h"
+#include "constants/rogue_pokedex.h"
 #include "constants/species.h"
+#include "constants/vars.h"
 #include "event_data.h"
 #include "pokemon.h"
 #include "rogue.h"
+#include "rogue_charms.h"
 #include "rogue_controller.h"
+#include "rogue_pokedex.h"
 #include "rogue_settings.h"
+#include "rogue_trials.h"
 #include "test/test.h"
 
 static void ResetCaughtMonTestState(void)
 {
+    u8 i;
+
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    memset(gEnemyParty, 0, sizeof(gEnemyParty));
+    for (i = 0; i < DAYCARE_SLOT_COUNT; ++i)
+        ZeroBoxMonData(Rogue_GetDaycareBoxMon(i));
     gPlayerPartyCount = 0;
+    gEnemyPartyCount = 0;
+    VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
+    RogueTrial_ClearPendingSelection();
 }
 
 static void ClearCaughtMonTestState(void)
 {
+    u8 i;
+
     Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, FALSE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    memset(gEnemyParty, 0, sizeof(gEnemyParty));
+    for (i = 0; i < DAYCARE_SLOT_COUNT; ++i)
+        ZeroBoxMonData(Rogue_GetDaycareBoxMon(i));
     gPlayerPartyCount = 0;
+    gEnemyPartyCount = 0;
+    VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE);
+    RogueTrial_ClearPendingSelection();
 }
 
 static void SetPartyMon(u8 slot, u16 species)
@@ -34,12 +57,70 @@ static void SetPartyMon(u8 slot, u16 species)
     CalculatePlayerPartyCount();
 }
 
+static void SetEnemyMon(u8 slot, u16 species)
+{
+    CreateMon(&gEnemyParty[slot], species, 50, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    CalculateEnemyPartyCount();
+}
+
+static void SetDaycareMon(u8 slot, u16 species)
+{
+    struct Pokemon mon;
+
+    CreateMon(&mon, species, 50, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    CopyMon(Rogue_GetDaycareBoxMon(slot), &mon.box, sizeof(struct BoxPokemon));
+}
+
 static struct Pokemon CreateCaughtMon(u16 species)
 {
     struct Pokemon mon;
 
     CreateMon(&mon, species, 50, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     return mon;
+}
+
+static void ActivateCaughtMonTestTrial(u8 trialId)
+{
+    gRogueRun.trialState.trialId = trialId;
+    gRogueRun.trialState.invalidated = FALSE;
+    gRogueRun.trialState.initialPartyCountSet = TRUE;
+}
+
+static void SetPendingTrialSelection(u8 trialId, u8 pokedexVariant)
+{
+    gSpecialVar_0x8004 = trialId;
+    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8006 = pokedexVariant;
+    RogueTrial_SetPendingSelectionFromScript();
+    EXPECT(gSpecialVar_Result);
+}
+
+static u16 GetGeneratedStarter(u8 slot)
+{
+    switch (slot)
+    {
+    case 0:
+        return VarGet(VAR_ROGUE_STARTER0);
+    case 1:
+        return VarGet(VAR_ROGUE_STARTER1);
+    case 2:
+        return VarGet(VAR_ROGUE_STARTER2);
+    }
+
+    return SPECIES_NONE;
+}
+
+static void ExpectGeneratedStartersAllowedByPendingTrial(void)
+{
+    u8 i;
+
+    for (i = 0; i < 3; ++i)
+    {
+        u16 species = GetGeneratedStarter(i);
+
+        EXPECT(species != SPECIES_NONE);
+        EXPECT(RogueTrial_PendingAllowsSpecies(species));
+    }
 }
 
 TEST("Species Clause duplicate catches with party room require releasing the matching evo chain")
@@ -88,6 +169,554 @@ TEST("Full party catches without a Species Clause conflict can release any party
     EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
     EXPECT(Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 0));
     EXPECT(Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 3));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Type Trial catches must match the selected type")
+{
+    struct Pokemon caughtMon;
+
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_TYPE_WATER);
+
+    caughtMon = CreateCaughtMon(SPECIES_MAGIKARP);
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    caughtMon = CreateCaughtMon(SPECIES_ZIGZAGOON);
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Little Cup Trial catches must be first-stage Pokemon that can evolve")
+{
+    struct Pokemon caughtMon;
+
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LITTLE_CUP);
+
+    caughtMon = CreateCaughtMon(SPECIES_MAGIKARP);
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    caughtMon = CreateCaughtMon(SPECIES_GYARADOS);
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    caughtMon = CreateCaughtMon(SPECIES_BRUXISH);
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("BST Crown Trial rejects catches above 400 BST")
+{
+    struct Pokemon caughtMon;
+
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LOW_BST);
+
+    caughtMon = CreateCaughtMon(SPECIES_ZIGZAGOON);
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    caughtMon = CreateCaughtMon(SPECIES_ABSOL);
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Trial legality invalidates trainer battles with illegal party members")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_TYPE_WATER);
+
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    RogueTrial_OnTrainerBattleStart();
+    EXPECT(!RogueTrial_IsInvalidated());
+
+    SetPartyMon(1, SPECIES_ZIGZAGOON);
+    RogueTrial_OnTrainerBattleStart();
+    EXPECT(RogueTrial_IsInvalidated());
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Trial legality blocks trainer battles with illegal party members")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LITTLE_CUP);
+
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    RogueTrial_CanStartTrainerBattle();
+    EXPECT(gSpecialVar_Result == TRUE);
+
+    SetPartyMon(1, SPECIES_GYARADOS);
+    RogueTrial_CanStartTrainerBattle();
+    EXPECT(gSpecialVar_Result == FALSE);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Little Cup and BST Crown block illegal evolutions")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LITTLE_CUP);
+    EXPECT(!RogueTrial_IsSpeciesLegal(SPECIES_GYARADOS, 0));
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LOW_BST);
+    EXPECT(!RogueTrial_IsSpeciesLegal(SPECIES_LINOONE, 0));
+    EXPECT(RogueTrial_IsSpeciesLegal(SPECIES_METAPOD, 0));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Trial generated Pokemon are transformed when they are illegal")
+{
+    struct Pokemon generatedMon;
+
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_TYPE_WATER);
+    generatedMon = CreateCaughtMon(SPECIES_ZIGZAGOON);
+
+    EXPECT(!RogueTrial_CanAcceptMon(&generatedMon));
+    EXPECT(RogueTrial_TransformMonIfIllegal(&generatedMon));
+    EXPECT(RogueTrial_CanAcceptMon(&generatedMon));
+    EXPECT(!RogueTrial_IsInvalidated());
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Regional Style Trial treats selected Pokedex as species legality")
+{
+    struct Pokemon caughtMon;
+
+    ResetCaughtMonTestState();
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_REGION_HOENN);
+
+    caughtMon = CreateCaughtMon(SPECIES_TREECKO);
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    caughtMon = CreateCaughtMon(SPECIES_BULBASAUR);
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending Type Trial blocks illegal party Pokemon before start")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_ROGUE_MODERN);
+
+    SetPartyMon(0, SPECIES_ZIGZAGOON);
+    RogueTrial_CanUsePendingParty();
+    EXPECT(!gSpecialVar_Result);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(!gSpecialVar_Result);
+
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    CalculatePlayerPartyCount();
+
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    RogueTrial_CanUsePendingParty();
+    EXPECT(gSpecialVar_Result);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(gSpecialVar_Result);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending trial checks Day Care Pokemon before start")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_ROGUE_MODERN);
+    SetPartyMon(0, SPECIES_MAGIKARP);
+
+    SetDaycareMon(0, SPECIES_ZIGZAGOON);
+    RogueTrial_CanUsePendingDayCare();
+    EXPECT(!gSpecialVar_Result);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(!gSpecialVar_Result);
+
+    ZeroBoxMonData(Rogue_GetDaycareBoxMon(0));
+    SetDaycareMon(0, SPECIES_MAGIKARP);
+    RogueTrial_CanUsePendingDayCare();
+    EXPECT(gSpecialVar_Result);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(gSpecialVar_Result);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending regional trial blocks party Pokemon outside selected Pokedex")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_REGION_HOENN, POKEDEX_VARIANT_HOENN_RSE);
+
+    SetPartyMon(0, SPECIES_BULBASAUR);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(!gSpecialVar_Result);
+
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    CalculatePlayerPartyCount();
+
+    SetPartyMon(0, SPECIES_TREECKO);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(gSpecialVar_Result);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending trial validates chosen partner instead of replaced party")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_ROGUE_MODERN);
+    SetPartyMon(0, SPECIES_ZIGZAGOON);
+
+    VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_MAGIKARP);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(gSpecialVar_Result);
+
+    VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_ZIGZAGOON);
+    RogueTrial_CanStartPendingSelection();
+    EXPECT(!gSpecialVar_Result);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending Type Trial randomizes only legal starter choices")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_ROGUE_MODERN);
+
+    Rogue_RandomiseStarters();
+    ExpectGeneratedStartersAllowedByPendingTrial();
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending Little Cup Trial randomizes only legal starter choices")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_LITTLE_CUP, POKEDEX_VARIANT_ROGUE_MODERN);
+
+    Rogue_RandomiseStarters();
+    ExpectGeneratedStartersAllowedByPendingTrial();
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending Low-BST Trial randomizes only legal starter choices")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_LOW_BST, POKEDEX_VARIANT_ROGUE_MODERN);
+
+    Rogue_RandomiseStarters();
+    ExpectGeneratedStartersAllowedByPendingTrial();
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending regional trial randomizes starters from the selected Pokedex")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_REGION_HOENN, POKEDEX_VARIANT_HOENN_RSE);
+
+    Rogue_RandomiseStarters();
+    ExpectGeneratedStartersAllowedByPendingTrial();
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Region Style Trial applies selected regional dex and trainer pool")
+{
+    ResetCaughtMonTestState();
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_MODERN);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, FALSE);
+
+    gSpecialVar_0x8004 = ROGUE_TRIAL_REGION_HOENN;
+    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_HOENN_RSE;
+    RogueTrial_SetPendingSelectionFromScript();
+    RogueTrial_ApplyPendingSelection();
+
+    EXPECT_EQ(gRogueRun.trialState.trialId, ROGUE_TRIAL_REGION_HOENN);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_HOENN_RSE);
+    EXPECT(!Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE));
+    EXPECT(!Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO));
+    EXPECT(!Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN));
+
+    ClearCaughtMonTestState();
+}
+
+#ifdef ROGUE_EXPANSION
+TEST("Z-A Royale Trial applies Z-A dex, Rainbow order, Doubles, and regional trainer pools")
+{
+    ResetCaughtMonTestState();
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_MODERN);
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER_ORDER, TRAINER_ORDER_DEFAULT);
+    Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, BATTLE_FORMAT_SINGLES);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, FALSE);
+
+    gSpecialVar_0x8004 = ROGUE_TRIAL_Z_A_ROYALE;
+    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_LEGENDS_ZA;
+    RogueTrial_SetPendingSelectionFromScript();
+    RogueTrial_ApplyPendingSelection();
+
+    EXPECT_EQ(gRogueRun.trialState.trialId, ROGUE_TRIAL_Z_A_ROYALE);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_LEGENDS_ZA);
+    EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER_ORDER), TRAINER_ORDER_RAINBOW);
+    EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT), BATTLE_FORMAT_DOUBLES);
+    EXPECT(!Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA));
+
+    ClearCaughtMonTestState();
+}
+#endif
+
+TEST("Orre Style Trial applies Doubles and Snag Curse")
+{
+    ResetCaughtMonTestState();
+    Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, BATTLE_FORMAT_SINGLES);
+
+    gSpecialVar_0x8004 = ROGUE_TRIAL_ORRE_STYLE;
+    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_ROGUE_CLASSICPLUS;
+    RogueTrial_SetPendingSelectionFromScript();
+    RogueTrial_ApplyPendingSelection();
+
+    EXPECT_EQ(gRogueRun.trialState.trialId, ROGUE_TRIAL_ORRE_STYLE);
+    EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT), BATTLE_FORMAT_DOUBLES);
+    EXPECT_EQ(RogueTrial_GetCurseItemCount(EFFECT_SNAG_TRAINER_MON), 1);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Converted curse Trials apply their exact granular Curse rules")
+{
+    ResetCaughtMonTestState();
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_ROGUELOCKE);
+    EXPECT_EQ(RogueTrial_GetCurseItemCount(EFFECT_WILD_ENCOUNTER_COUNT), 10);
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_CURSED_BODY);
+    EXPECT_EQ(RogueTrial_GetCurseItemCount(EFFECT_SNOWBALL_CURSES), 1);
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_PRO_BUILDING);
+    EXPECT_EQ(RogueTrial_GetCurseItemCount(EFFECT_AUTO_MOVE_SELECT), 1);
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_IRON_KAIZO);
+    EXPECT_EQ(RogueTrial_GetCurseItemCount(EFFECT_PARTY_SIZE), 5);
+    EXPECT_EQ(RogueTrial_GetCurseItemCount(EFFECT_SHOP_PRICE), 99);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Converted legality Trials enforce starter and Legendary rules")
+{
+    struct Pokemon caughtMon;
+
+    ResetCaughtMonTestState();
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_CANT_PICK);
+    EXPECT(RogueTrial_IsSpeciesLegal(SPECIES_CHARIZARD, 0));
+    EXPECT(!RogueTrial_IsSpeciesLegal(SPECIES_RATTATA, 0));
+    caughtMon = CreateCaughtMon(SPECIES_RATTATA);
+    EXPECT(!RogueTrial_CanAcceptMon(&caughtMon));
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_INSANE_MODE);
+    EXPECT(RogueTrial_IsSpeciesLegal(SPECIES_RATTATA, 0));
+    EXPECT(!RogueTrial_IsSpeciesLegal(SPECIES_MEWTWO, 0));
+    caughtMon = CreateCaughtMon(SPECIES_MEWTWO);
+    EXPECT(!RogueTrial_CanAcceptMon(&caughtMon));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Pending Iron Mono limits the starting party to one Pokemon")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_IRON_MONO, POKEDEX_VARIANT_ROGUE_CLASSICPLUS);
+
+    gSpecialVar_Result = PARTY_SIZE;
+    RogueTrial_ApplyPendingPartyCapacity();
+    EXPECT_EQ(gSpecialVar_Result, 1);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Apotheosis offers and accepts only Legendary Pokemon")
+{
+    u8 i;
+
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_APOTHEOSIS, POKEDEX_VARIANT_ROGUE_CLASSICPLUS);
+    Rogue_RandomiseStarters();
+
+    for (i = 0; i < 3; ++i)
+        EXPECT(RoguePokedex_IsSpeciesLegendary(GetGeneratedStarter(i)));
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_APOTHEOSIS);
+    EXPECT(RogueTrial_IsSpeciesLegal(SPECIES_MEWTWO, 0));
+    EXPECT(!RogueTrial_IsSpeciesLegal(SPECIES_RATTATA, 0));
+    EXPECT(RogueTrial_IsCatchGuaranteed());
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Limited Capture enforces its five-catch budget and bypass restrictions")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LIMITED_CAPTURE);
+
+    EXPECT(RogueTrial_IsCatchGuaranteed());
+    EXPECT(RogueTrial_IsDayCareDisabled());
+    EXPECT(RogueTrial_IsRandomanDisabled());
+    EXPECT(!RogueTrial_CanReceiveGift());
+
+    VarSet(VAR_ROGUE_TOTAL_RUN_CATCHES, 4);
+    EXPECT(RogueTrial_CanThrowBall());
+    EXPECT(!RogueTrial_IsCompleteForQuest(ROGUE_TRIAL_LIMITED_CAPTURE));
+
+    VarSet(VAR_ROGUE_TOTAL_RUN_CATCHES, 5);
+    EXPECT(!RogueTrial_CanThrowBall());
+    EXPECT(RogueTrial_IsCompleteForQuest(ROGUE_TRIAL_LIMITED_CAPTURE));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Chaos Master rerolls the full party before Trainer battles")
+{
+    u16 originalSpecies;
+
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_CHAOS_MASTER);
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    originalSpecies = GetMonData(&gPlayerParty[0], MON_DATA_SPECIES);
+
+    RogueTrial_OnTrainerBattleStart();
+
+    EXPECT_EQ(CalculatePlayerPartyCount(), 1);
+    EXPECT(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES) != SPECIES_NONE);
+    EXPECT(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES) != originalSpecies);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Little Cup Trial temporarily forces battle Pokemon to level 5")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LITTLE_CUP);
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    SetEnemyMon(0, SPECIES_ZIGZAGOON);
+
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_LEVEL), 50);
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_LEVEL), 50);
+
+    RogueTrial_OnTrainerTeamReady();
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_LEVEL), 5);
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_LEVEL), 5);
+
+    RogueTrial_OnTrainerBattleEnd();
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_LEVEL), 50);
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_LEVEL), 50);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Little Cup Trial disables Trainer battle experience")
+{
+    s32 expGain = 100;
+
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LITTLE_CUP);
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER;
+
+    Rogue_ModifyExpGained(&gPlayerParty[0], &expGain);
+    EXPECT_EQ(expGain, 0);
+
+    gBattleTypeFlags = 0;
+    ClearCaughtMonTestState();
+}
+
+TEST("Little Cup Trial replaces illegal opponent species")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LITTLE_CUP);
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    SetEnemyMon(0, SPECIES_KLAWF);
+
+    EXPECT(!RogueTrial_IsSpeciesLegal(SPECIES_KLAWF, 0));
+    RogueTrial_OnTrainerTeamReady();
+    EXPECT(RogueTrial_IsSpeciesLegal(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), 0));
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_LEVEL), 5);
+
+    RogueTrial_OnTrainerBattleEnd();
+    ClearCaughtMonTestState();
+}
+
+TEST("Handicap Trials do not apply player species legality to opponents")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_TYPE_WATER);
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    SetEnemyMon(0, SPECIES_ZIGZAGOON);
+
+    RogueTrial_OnTrainerTeamReady();
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), SPECIES_ZIGZAGOON);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Equalized Trial applies 500 BST throughout the active run")
+{
+    u16 canonicalAttack;
+    u16 normalizedAttack;
+
+    ResetCaughtMonTestState();
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    SetPartyMon(0, SPECIES_MAGIKARP);
+    canonicalAttack = GetMonData(&gPlayerParty[0], MON_DATA_ATK);
+    EXPECT_NE(RoguePokedex_GetSpeciesBST(SPECIES_MAGIKARP), 500);
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_EQUALIZED);
+    CalculateMonStats(&gPlayerParty[0]);
+    normalizedAttack = GetMonData(&gPlayerParty[0], MON_DATA_ATK);
+    EXPECT_EQ(RoguePokedex_GetSpeciesBST(SPECIES_MAGIKARP), 500);
+    EXPECT_GT(normalizedAttack, canonicalAttack);
+
+    SetEnemyMon(0, SPECIES_MAGIKARP);
+    RogueTrial_OnTrainerTeamReady();
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), SPECIES_MAGIKARP);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_ATK), normalizedAttack);
+
+    RogueTrial_OnTrainerBattleEnd();
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    CalculateMonStats(&gPlayerParty[0]);
+    EXPECT_EQ(RoguePokedex_GetSpeciesBST(SPECIES_MAGIKARP), 200);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_ATK), canonicalAttack);
 
     ClearCaughtMonTestState();
 }

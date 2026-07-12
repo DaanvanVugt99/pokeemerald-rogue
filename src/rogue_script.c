@@ -51,6 +51,7 @@
 #include "rogue_quest.h"
 #include "rogue_questmenu.h"
 #include "rogue_settings.h"
+#include "rogue_trials.h"
 
 void DoSpecialTrainerBattle(void);
 
@@ -184,6 +185,8 @@ void Rogue_RandomisePartyMon(void)
     
     if(IsCurseActive(EFFECT_WILD_EGG_SPECIES))
         RogueMonQuery_TransformIntoEggSpecies();
+
+    RogueTrial_FilterMonQuery();
 
     RogueWeightQuery_Begin();
     {

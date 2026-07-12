@@ -27,6 +27,7 @@ extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity3[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonTyping[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_RandomStarter[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_AdventureReplay[];
+extern const u8 gHubUpgradeDesc_AdventureEntrance_TrialAttendant[];
 extern const u8 gHubUpgradeDesc_BerryField_Brewing[];
 extern const u8 gHubUpgradeDesc_BerryField_ExtraField[];
 extern const u8 gHubUpgradeDesc_BerryField_HigherYeild[];
@@ -393,6 +394,14 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .targetArea = HUB_AREA_ADVENTURE_ENTRANCE,
         .buildCost = 3,
         .descText = gHubUpgradeDesc_AdventureEntrance_AdventureReplay,
+        .requiredUpgrades = { HUB_UPGRADE_NONE }
+    },
+    [HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT] =
+    {
+        .upgradeName = _("Trial Attendant"),
+        .targetArea = HUB_AREA_ADVENTURE_ENTRANCE,
+        .buildCost = 3,
+        .descText = gHubUpgradeDesc_AdventureEntrance_TrialAttendant,
         .requiredUpgrades = { HUB_UPGRADE_NONE }
     },
 

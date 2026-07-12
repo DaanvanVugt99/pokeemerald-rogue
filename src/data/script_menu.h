@@ -1,4 +1,4 @@
-#define MULTICHOICE_LIST_CAPACITY 12
+#define MULTICHOICE_LIST_CAPACITY 16
 
 typedef void (*MultichoiceList_Callback)(struct MenuAction* outList, u8* outCount, u8 listCapcity);
 

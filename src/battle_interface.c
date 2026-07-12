@@ -4060,6 +4060,7 @@ static const struct SpritePalette sSpritePalette_LastUsedBallWindow =
 #define sTimer  data[1]
 #define sMoving data[2]
 #define sBounce data[3] // 0 = Bounce down; 1 = Bounce up
+#define sDisabled data[4]
 
 #define sState     data[0]
 #define sSameBall  data[1]
@@ -4111,13 +4112,17 @@ bool32 CanThrowLastUsedBall(void)
 
 void TryAddLastUsedBallItemSprites(void)
 {
+    bool32 disabled;
+
     if (B_LAST_USED_BALL == FALSE)
         return;
 
-    TrySelectLastUsedBallToDisplay();
-
-    if (!CanThrowLastUsedBall())
+    if (!TrySelectLastUsedBallToDisplay())
         return;
+    if (gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_FRONTIER))
+        return;
+
+    disabled = !CanThrowBall();
 
     // ball
     if (gBattleStruct->ballSpriteIds[0] == MAX_SPRITES)
@@ -4126,6 +4131,7 @@ void TryAddLastUsedBallItemSprites(void)
         gSprites[gBattleStruct->ballSpriteIds[0]].x = LAST_USED_BALL_X_0;
         gSprites[gBattleStruct->ballSpriteIds[0]].y = LAST_USED_BALL_Y;
         gSprites[gBattleStruct->ballSpriteIds[0]].sHide = FALSE;   // restore
+        gSprites[gBattleStruct->ballSpriteIds[0]].sDisabled = disabled;
         gLastUsedBallMenuPresent = TRUE;
         gSprites[gBattleStruct->ballSpriteIds[0]].callback = SpriteCB_LastUsedBall;
     }
@@ -4142,6 +4148,18 @@ void TryAddLastUsedBallItemSprites(void)
                                                        LAST_USED_WIN_Y, 5);
         gSprites[gBattleStruct->ballSpriteIds[1]].sHide = FALSE;   // restore
         gLastUsedBallMenuPresent = TRUE;
+    }
+
+    if (disabled)
+    {
+        u16 paletteOffset = OBJ_PLTT_ID(gSprites[gBattleStruct->ballSpriteIds[0]].oam.paletteNum);
+
+        TintPalette_GrayScale2(&gPlttBufferUnfaded[paletteOffset], PLTT_SIZE_4BPP);
+        TintPalette_GrayScale2(&gPlttBufferFaded[paletteOffset], PLTT_SIZE_4BPP);
+
+        paletteOffset = OBJ_PLTT_ID(gSprites[gBattleStruct->ballSpriteIds[1]].oam.paletteNum);
+        TintPalette_GrayScale2(&gPlttBufferUnfaded[paletteOffset], PLTT_SIZE_4BPP);
+        TintPalette_GrayScale2(&gPlttBufferFaded[paletteOffset], PLTT_SIZE_4BPP);
     }
     if (B_LAST_USED_BALL_CYCLE == TRUE)
         ArrowsChangeColorLastBallCycle(0); //Default the arrows to be invisible
@@ -4236,6 +4254,8 @@ void TryHideLastUsedBall(void)
 
 void TryRestoreLastUsedBall(void)
 {
+    bool32 disabled;
+    bool32 disabledChanged = FALSE;
     u16 oldBallToDisplay;
 
     if (B_LAST_USED_BALL == FALSE)
@@ -4248,8 +4268,16 @@ void TryRestoreLastUsedBall(void)
         return;
     }
 
-    if (gBattleStruct->ballSpriteIds[0] != MAX_SPRITES && oldBallToDisplay != gBallToDisplay)
-        DestroyLastUsedBallGfx(&gSprites[gBattleStruct->ballSpriteIds[0]]);
+    disabled = !CanThrowBall();
+    if (gBattleStruct->ballSpriteIds[0] != MAX_SPRITES)
+    {
+        disabledChanged = gSprites[gBattleStruct->ballSpriteIds[0]].sDisabled != disabled;
+        if (oldBallToDisplay != gBallToDisplay || disabledChanged)
+            DestroyLastUsedBallGfx(&gSprites[gBattleStruct->ballSpriteIds[0]]);
+    }
+
+    if (disabledChanged && gBattleStruct->ballSpriteIds[1] != MAX_SPRITES)
+        DestroyLastUsedBallWinGfx(&gSprites[gBattleStruct->ballSpriteIds[1]]);
 
     if (gBattleStruct->ballSpriteIds[0] != MAX_SPRITES)
         TryHideOrRestoreLastUsedBall(1);

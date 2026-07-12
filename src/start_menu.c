@@ -58,6 +58,7 @@
 #include "rogue_pokedex.h"
 #include "rogue_questmenu.h"
 #include "rogue_settings.h"
+#include "rogue_trials.h"
 
 // Menu actions
 enum
@@ -569,6 +570,8 @@ static void ShowRogueRunWindow(void)
     struct WindowTemplate windowTemplate;
     memcpy(&windowTemplate, &sRogueRunWindowTemplate, sizeof(windowTemplate));
     windowTemplate.height = Rogue_MiniMenuHeight();
+    if (RogueTrial_IsActive())
+        windowTemplate.width = 16;
 
     sRogueRunWindowId = AddWindow(&windowTemplate);
     PutWindowTilemap(sRogueRunWindowId);

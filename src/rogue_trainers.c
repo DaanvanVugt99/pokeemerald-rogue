@@ -23,6 +23,7 @@
 #include "rogue_query_script.h"
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
+#include "rogue_trials.h"
 
 #define TRAINER_SHINY_PERC 25
 
@@ -2124,7 +2125,7 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
 {
     u8 monCount;
 
-    if(Rogue_IsRivalTrainer(trainerNum))
+    if(Rogue_IsRivalTrainer(trainerNum) && !RogueTrial_EnforcesOpponentSpeciesLegality())
         monCount = CreateRivalPartyInternal(trainerNum, party, monCapacity);
     else
         monCount = CreateTrainerPartyInternal(trainerNum, party, 0, monCapacity, firstTrainer, 0);
@@ -2222,7 +2223,7 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     scratch.fallbackCount = 0;
     scratch.forceLegends = FALSE;
     scratch.forcePrimaryType = FALSE;
-    scratch.evoLevel = level;
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(level);
     scratch.targetPartyCount = monCount;
     scratch.allowItemEvos = FALSE;
     scratch.allowStrongLegends = FALSE;
@@ -2230,6 +2231,9 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     scratch.preferStrongSpecies = FALSE;
     
     ConfigurePartyScratchSettings(trainerNum, &scratch);
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(scratch.evoLevel);
+    if (scratch.evoLevel < level)
+        scratch.allowItemEvos = FALSE;
     EnsureSubsetIsValid(&scratch);
 
     // Generate team
@@ -2315,6 +2319,33 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     }
 
     return monCount;
+}
+
+u16 Rogue_SelectTrainerReplacementSpecies(u16 trainerNum, struct Pokemon *party, u8 slot, u8 partyCount)
+{
+    u16 species;
+    u8 level = GetTrainerLevel(trainerNum);
+    struct TrainerPartyScratch scratch;
+
+    memset(&scratch, 0, sizeof(scratch));
+    scratch.trainerNum = trainerNum;
+    scratch.party = party;
+    scratch.partyCapacity = partyCount;
+    scratch.partyCount = slot;
+    scratch.shouldRegenerateQuery = TRUE;
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(level);
+    scratch.targetPartyCount = partyCount;
+
+    ConfigurePartyScratchSettings(trainerNum, &scratch);
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(scratch.evoLevel);
+    if (scratch.evoLevel < level)
+        scratch.allowItemEvos = FALSE;
+    EnsureSubsetIsValid(&scratch);
+
+    RogueMonQuery_Begin();
+    species = SampleNextSpecies(&scratch);
+    RogueMonQuery_End();
+    return species;
 }
 
 static u8 SelectEvoChainMon_CalculateWeight(u16 index, u16 species, void* data)
@@ -2668,6 +2699,19 @@ static bool8 FilterOutSameSpecies(u16 elem, void* usrData)
     return !PartyContainsSameSpecies(scratch, elem);
 }
 
+static bool8 TrainerQueryHasUnusedSpecies(struct TrainerPartyScratch* scratch)
+{
+    u16 species;
+
+    for(species = 1; species < NUM_SPECIES; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species) && FilterOutSimilarSpecies(species, scratch))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static void SetupQueryScriptVars(struct QueryScriptContext* context, struct TrainerPartyScratch* scratch)
 {
     u8 maxBoxLegends = 255;
@@ -2930,6 +2974,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
     u16 species;
     struct RogueTrainer const* trainer = &gRogueTrainers[scratch->trainerNum];
     bool8 allowSpeciesDuplicates = FALSE;
+    bool8 preserveResolvedPool;
     bool8 forcePrimaryType = ShouldForcePrimaryTrainerType(scratch);
     u32 forcedPrimaryTypeFlags = forcePrimaryType ? MON_TYPE_VAL_TO_FLAGS(trainer->typeAssignment) : 0;
 
@@ -2998,6 +3043,13 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             RogueMonQuery_EvosContainType(QUERY_FUNC_INCLUDE, fallbackTypeFlags);
         }
 
+        // Restricted formats should preserve strong evolution lines before
+        // resolving them to the legal battle stage (e.g. Aggron into Aron).
+        if(RogueTrial_EnforcesOpponentSpeciesLegality() && scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
+        {
+            RogueMonQuery_ContainsPresetFlags(QUERY_FUNC_INCLUDE, MON_FLAG_SINGLES_STRONG);
+        }
+
         // Transform and evolve mons to valid evos (Don't do this for custom scripts for now, as our only use case is glitch mode)
         if(!customScript)
         {
@@ -3010,7 +3062,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             RogueMonQuery_IsParadox(QUERY_FUNC_EXCLUDE);
         }
 
-        if(scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
+        if(!RogueTrial_EnforcesOpponentSpeciesLegality() && scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
         {
             RogueMonQuery_ContainsPresetFlags(QUERY_FUNC_INCLUDE, MON_FLAG_SINGLES_STRONG);
         }
@@ -3083,17 +3135,28 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             SetupQueryScriptVars(&scriptContext, scratch);
             RogueQueryScript_Execute(&scriptContext);
         }
+
+        // Trial formats such as Little Cup constrain both teams. Apply their
+        // legality after the trainer's configured pool and settings are resolved.
+        RogueTrial_FilterOpponentMonQuery();
     }
 
+    // Restricted formats can exhaust a trainer's resolved pool quickly. Prefer
+    // repeats from that pool over abandoning it for unrelated fallback types.
+    preserveResolvedPool = RogueTrial_EnforcesOpponentSpeciesLegality() && !TrainerQueryHasUnusedSpecies(scratch);
+
     // Allow duplicates if we've gone far into fallbacks
-    if(scratch->fallbackCount < 10 && !allowSpeciesDuplicates)
+    if(!preserveResolvedPool)
     {
-        // Remove any mons already in the party
-        RogueMonQuery_CustomFilter(FilterOutSimilarSpecies, scratch);
-    }
-    else
-    {
-        RogueMonQuery_CustomFilter(FilterOutSameSpecies, scratch);
+        if(scratch->fallbackCount < 10 && !allowSpeciesDuplicates)
+        {
+            // Remove any mons already in the party
+            RogueMonQuery_CustomFilter(FilterOutSimilarSpecies, scratch);
+        }
+        else
+        {
+            RogueMonQuery_CustomFilter(FilterOutSameSpecies, scratch);
+        }
     }
 
     species = SPECIES_NONE;
