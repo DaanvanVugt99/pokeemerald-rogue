@@ -2699,6 +2699,19 @@ static bool8 FilterOutSameSpecies(u16 elem, void* usrData)
     return !PartyContainsSameSpecies(scratch, elem);
 }
 
+static bool8 TrainerQueryHasUnusedSpecies(struct TrainerPartyScratch* scratch)
+{
+    u16 species;
+
+    for(species = 1; species < NUM_SPECIES; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species) && FilterOutSimilarSpecies(species, scratch))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static void SetupQueryScriptVars(struct QueryScriptContext* context, struct TrainerPartyScratch* scratch)
 {
     u8 maxBoxLegends = 255;
@@ -2961,6 +2974,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
     u16 species;
     struct RogueTrainer const* trainer = &gRogueTrainers[scratch->trainerNum];
     bool8 allowSpeciesDuplicates = FALSE;
+    bool8 preserveResolvedPool;
     bool8 forcePrimaryType = ShouldForcePrimaryTrainerType(scratch);
     u32 forcedPrimaryTypeFlags = forcePrimaryType ? MON_TYPE_VAL_TO_FLAGS(trainer->typeAssignment) : 0;
 
@@ -3120,15 +3134,22 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
         RogueTrial_FilterOpponentMonQuery();
     }
 
+    // Restricted formats can exhaust a trainer's resolved pool quickly. Prefer
+    // repeats from that pool over abandoning it for unrelated fallback types.
+    preserveResolvedPool = RogueTrial_EnforcesOpponentSpeciesLegality() && !TrainerQueryHasUnusedSpecies(scratch);
+
     // Allow duplicates if we've gone far into fallbacks
-    if(scratch->fallbackCount < 10 && !allowSpeciesDuplicates)
+    if(!preserveResolvedPool)
     {
-        // Remove any mons already in the party
-        RogueMonQuery_CustomFilter(FilterOutSimilarSpecies, scratch);
-    }
-    else
-    {
-        RogueMonQuery_CustomFilter(FilterOutSameSpecies, scratch);
+        if(scratch->fallbackCount < 10 && !allowSpeciesDuplicates)
+        {
+            // Remove any mons already in the party
+            RogueMonQuery_CustomFilter(FilterOutSimilarSpecies, scratch);
+        }
+        else
+        {
+            RogueMonQuery_CustomFilter(FilterOutSameSpecies, scratch);
+        }
     }
 
     species = SPECIES_NONE;
