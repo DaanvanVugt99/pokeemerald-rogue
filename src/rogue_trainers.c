@@ -3043,6 +3043,13 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             RogueMonQuery_EvosContainType(QUERY_FUNC_INCLUDE, fallbackTypeFlags);
         }
 
+        // Restricted formats should preserve strong evolution lines before
+        // resolving them to the legal battle stage (e.g. Aggron into Aron).
+        if(RogueTrial_EnforcesOpponentSpeciesLegality() && scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
+        {
+            RogueMonQuery_ContainsPresetFlags(QUERY_FUNC_INCLUDE, MON_FLAG_SINGLES_STRONG);
+        }
+
         // Transform and evolve mons to valid evos (Don't do this for custom scripts for now, as our only use case is glitch mode)
         if(!customScript)
         {
@@ -3055,7 +3062,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             RogueMonQuery_IsParadox(QUERY_FUNC_EXCLUDE);
         }
 
-        if(scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
+        if(!RogueTrial_EnforcesOpponentSpeciesLegality() && scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
         {
             RogueMonQuery_ContainsPresetFlags(QUERY_FUNC_INCLUDE, MON_FLAG_SINGLES_STRONG);
         }

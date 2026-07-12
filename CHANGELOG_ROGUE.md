@@ -271,6 +271,9 @@ Format follows Keep a Changelog loosely:
   level-5 battle scaling is applied.
 - Disabled ordinary Trainer-battle Exp. Points during Little Cup Trials so
   Pokémon remain at level 5, while leaving PokéAssistant EXP battles unaffected.
+- Preserved strong trainer evolution lines when adapting opponent teams to
+  restricted formats, allowing choices such as Aggron to resolve into legal
+  Little Cup forms such as Aron instead of falling into unrelated type pools.
 
 - Optimized route special item weighting to avoid long pauses when entering
   route, hideout, boss, or miniboss nodes.
