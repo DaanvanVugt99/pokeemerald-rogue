@@ -78,7 +78,7 @@ void Rogue_PushPopup_WeatherActive(u16 weather);
 
 void Rogue_PushPopup_AdventureReplay();
 void Rogue_PushPopup_MainQuestsDisabled();
-void Rogue_PushPopup_ChallengeQuestsDisabled();
+void Rogue_PushPopup_TrialQuestsDisabled();
 
 void Rogue_PushPopup_CustomPopup(struct CustomPopup const* popup);
 

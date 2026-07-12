@@ -2,7 +2,7 @@
     "includes":
     [
         "default_quests.json",
-        "default_challenges.json",
+        "default_trials.json",
         "default_masteries.json"
     ],
     "quest_groups":

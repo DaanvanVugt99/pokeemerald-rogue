@@ -111,10 +111,10 @@ enum
     PAGE_BOOK_MAIN_INACTIVE,
     PAGE_BOOK_MAIN_COMPLETE,
 
-    PAGE_BOOK_CHALLENGE_TODO,
-    PAGE_BOOK_CHALLENGE_ACTIVE,
-    PAGE_BOOK_CHALLENGE_INACTIVE,
-    PAGE_BOOK_CHALLENGE_COMPLETE,
+    PAGE_BOOK_TRIAL_TODO,
+    PAGE_BOOK_TRIAL_ACTIVE,
+    PAGE_BOOK_TRIAL_INACTIVE,
+    PAGE_BOOK_TRIAL_COMPLETE,
 
     PAGE_BOOK_MON_MASTERY_LANDING,
     PAGE_BOOK_MON_MASTERY_TRACKER,
@@ -241,28 +241,28 @@ static const struct PageData sPageData[PAGE_COUNT] =
         .drawCallback = Draw_QuestPage,
     },
 
-    [PAGE_BOOK_CHALLENGE_TODO] = 
+    [PAGE_BOOK_TRIAL_TODO] = 
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,
         .inputCallback = HandleInput_QuestPage,
         .drawCallback = Draw_QuestPage,
     },
-    [PAGE_BOOK_CHALLENGE_ACTIVE] = 
+    [PAGE_BOOK_TRIAL_ACTIVE] = 
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,
         .inputCallback = HandleInput_QuestPage,
         .drawCallback = Draw_QuestPage,
     },
-    [PAGE_BOOK_CHALLENGE_INACTIVE] = 
+    [PAGE_BOOK_TRIAL_INACTIVE] = 
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,
         .inputCallback = HandleInput_QuestPage,
         .drawCallback = Draw_QuestPage,
     },
-    [PAGE_BOOK_CHALLENGE_COMPLETE] = 
+    [PAGE_BOOK_TRIAL_COMPLETE] = 
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,
@@ -385,10 +385,10 @@ static u8 const sText_QuestsComplete[] = _("Main·{FONT_SMALL_NARROW}{COLOR GREE
 static u8 const sText_QuestsActive[] = _("Main·{FONT_SMALL_NARROW}{COLOR BLUE}Active");
 static u8 const sText_QuestsInactive[] = _("Main·{FONT_SMALL_NARROW}{COLOR RED}Inactive");
 
-static u8 const sText_ChallengesTodo[] = _("Challenge·{FONT_SMALL_NARROW}{COLOR BLUE}To-Do");
-static u8 const sText_ChallengesComplete[] = _("Challenge·{FONT_SMALL_NARROW}{COLOR GREEN}Done");
-static u8 const sText_ChallengesActive[] = _("Challenge·{FONT_SMALL_NARROW}{COLOR BLUE}Active");
-static u8 const sText_ChallengesInactive[] = _("Challenge·{FONT_SMALL_NARROW}{COLOR RED}Inactiv");
+static u8 const sText_TrialsTodo[] = _("Trial·{FONT_SMALL_NARROW}{COLOR BLUE}To-Do");
+static u8 const sText_TrialsComplete[] = _("Trial·{FONT_SMALL_NARROW}{COLOR GREEN}Done");
+static u8 const sText_TrialsActive[] = _("Trial·{FONT_SMALL_NARROW}{COLOR BLUE}Active");
+static u8 const sText_TrialsInactive[] = _("Trial·{FONT_SMALL_NARROW}{COLOR RED}Inactiv");
 
 static u8 const sText_MonMastery[] = _("{PKMN} Mastery");
 static u8 const sText_MonMasteryTracker[] = _("{PKMN} Tracker");
@@ -446,11 +446,11 @@ static u8 const sText_Index_ActiveCount[] = _("{COLOR BLUE}{STR_VAR_1} / {STR_VA
 static u8 const sText_Index_NoneActiveCount[] = _("{COLOR RED}{STR_VAR_1} / {STR_VAR_2}");
 
 static u8 const sText_Index_Main[] = _("Main");
-static u8 const sText_Index_Challenge[] = _("Challenge");
+static u8 const sText_Index_Trial[] = _("Trials");
 static u8 const sText_Index_Mastery[] = _("Mastery");
 static u8 const sText_Index_Total[] = _("Total");
 static u8 const sText_Index_ActiveQuests[] = _("Active Quests");
-static u8 const sText_Index_ChallengeDifficulty[] = _("Challenges");
+static u8 const sText_Index_TrialDifficulty[] = _("Trials");
 static u8 const sText_Index_Easy[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Easy");
 static u8 const sText_Index_Average[] = _("{COLOR GREEN}{SHADOW LIGHT_GRAY}Average");
 static u8 const sText_Index_Hard[] = _("{COLOR RED}{SHADOW LIGHT_GRAY}Hard");
@@ -735,10 +735,10 @@ static bool8 IsQuestListPage(void)
     case PAGE_BOOK_MAIN_ACTIVE:
     case PAGE_BOOK_MAIN_INACTIVE:
     case PAGE_BOOK_MAIN_COMPLETE:
-    case PAGE_BOOK_CHALLENGE_TODO:
-    case PAGE_BOOK_CHALLENGE_ACTIVE:
-    case PAGE_BOOK_CHALLENGE_INACTIVE:
-    case PAGE_BOOK_CHALLENGE_COMPLETE:
+    case PAGE_BOOK_TRIAL_TODO:
+    case PAGE_BOOK_TRIAL_ACTIVE:
+    case PAGE_BOOK_TRIAL_INACTIVE:
+    case PAGE_BOOK_TRIAL_COMPLETE:
     case PAGE_BOOK_MON_MASTERY_TODO:
     case PAGE_BOOK_MON_MASTERY_ACTIVE:
     case PAGE_BOOK_MON_MASTERY_INACTIVE:
@@ -991,7 +991,7 @@ static void DrawQuestScrollList()
 
             if(RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
             {
-                if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_CHALLENGE))
+                if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
                 {
                     switch (RogueQuest_GetHighestCompleteDifficulty(questId))
                     {
@@ -1086,14 +1086,14 @@ static struct MenuOption const sMenuOptionsHub[] =
     },
 
     {
-        .text = sText_ChallengesTodo,
+        .text = sText_TrialsTodo,
         .callback = SetupPage,
-        .param = PAGE_BOOK_CHALLENGE_TODO,
+        .param = PAGE_BOOK_TRIAL_TODO,
     },
     {
-        .text = sText_ChallengesComplete,
+        .text = sText_TrialsComplete,
         .callback = SetupPage,
-        .param = PAGE_BOOK_CHALLENGE_COMPLETE,
+        .param = PAGE_BOOK_TRIAL_COMPLETE,
     },
 
     {
@@ -1135,14 +1135,14 @@ static struct MenuOption const sMenuOptionsAdventure[] =
     },
 
     {
-        .text = sText_ChallengesActive,
+        .text = sText_TrialsActive,
         .callback = SetupPage,
-        .param = PAGE_BOOK_CHALLENGE_ACTIVE,
+        .param = PAGE_BOOK_TRIAL_ACTIVE,
     },
     {
-        .text = sText_ChallengesInactive,
+        .text = sText_TrialsInactive,
         .callback = SetupPage,
-        .param = PAGE_BOOK_CHALLENGE_INACTIVE,
+        .param = PAGE_BOOK_TRIAL_INACTIVE,
     },
 
     {
@@ -1179,11 +1179,11 @@ static bool8 IsIndexPageVisible(u8 page)
 {
     switch (page)
     {
-    case PAGE_BOOK_CHALLENGE_TODO:
-    case PAGE_BOOK_CHALLENGE_ACTIVE:
-    case PAGE_BOOK_CHALLENGE_INACTIVE:
-    case PAGE_BOOK_CHALLENGE_COMPLETE:
-        return RogueQuest_HasUnlockedChallenges();
+    case PAGE_BOOK_TRIAL_TODO:
+    case PAGE_BOOK_TRIAL_ACTIVE:
+    case PAGE_BOOK_TRIAL_INACTIVE:
+    case PAGE_BOOK_TRIAL_COMPLETE:
+        return RogueQuest_HasUnlockedTrials();
  
     case PAGE_BOOK_MON_MASTERY_LANDING:
     case PAGE_BOOK_MON_MASTERY_TRACKER:
@@ -1206,22 +1206,22 @@ static void OverrideIndexPageOption(struct MenuOption* option)
     switch (option->param)
     {
     case PAGE_BOOK_MAIN_TODO:
-        if(!RogueQuest_HasUnlockedChallenges() && !RogueQuest_HasUnlockedMonMasteries())
+        if(!RogueQuest_HasUnlockedTrials() && !RogueQuest_HasUnlockedMonMasteries())
             option->text = sText_EarlyGameTodo;
         break;
 
     case PAGE_BOOK_MAIN_ACTIVE:
-        if(!RogueQuest_HasUnlockedChallenges() && !RogueQuest_HasUnlockedMonMasteries())
+        if(!RogueQuest_HasUnlockedTrials() && !RogueQuest_HasUnlockedMonMasteries())
             option->text = sText_EarlyGameActive;
         break;
 
     case PAGE_BOOK_MAIN_INACTIVE:
-        if(!RogueQuest_HasUnlockedChallenges() && !RogueQuest_HasUnlockedMonMasteries())
+        if(!RogueQuest_HasUnlockedTrials() && !RogueQuest_HasUnlockedMonMasteries())
             option->text = sText_EarlyGameInactive;
         break;
 
     case PAGE_BOOK_MAIN_COMPLETE:
-        if(!RogueQuest_HasUnlockedChallenges() && !RogueQuest_HasUnlockedMonMasteries())
+        if(!RogueQuest_HasUnlockedTrials() && !RogueQuest_HasUnlockedMonMasteries())
             option->text = sText_EarlyGameComplete;
         break;
     }
@@ -1306,7 +1306,7 @@ static void Draw_IndexPage()
 {
     u8 x, y;
     u8 str[32];
-    u8 const* textMainQuest = (RogueQuest_HasUnlockedChallenges() || RogueQuest_HasUnlockedMonMasteries()) ? sText_Index_Main : sText_Index_Total;
+    u8 const* textMainQuest = (RogueQuest_HasUnlockedTrials() || RogueQuest_HasUnlockedMonMasteries()) ? sText_Index_Main : sText_Index_Total;
     u8 const color[3] = {0, 2, 3};
 
     // Draw current quest info
@@ -1325,11 +1325,11 @@ static void Draw_IndexPage()
         ++y;
     }
 
-    // Challenges
-    if(RogueQuest_HasUnlockedChallenges())
+    // Trials
+    if(RogueQuest_HasUnlockedTrials())
     {
-        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Challenge);
-        BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercFor(QUEST_CONST_IS_CHALLENGE), 100);
+        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Trial);
+        BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercFor(QUEST_CONST_IS_TRIAL), 100);
 
         x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
         AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
@@ -1348,7 +1348,7 @@ static void Draw_IndexPage()
     }
 
     // Total
-    if(RogueQuest_HasUnlockedChallenges() || RogueQuest_HasUnlockedMonMasteries())
+    if(RogueQuest_HasUnlockedTrials() || RogueQuest_HasUnlockedMonMasteries())
     {
         ++y;
         AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Total);
@@ -1380,11 +1380,11 @@ static void Draw_IndexPage()
             ++y;
         }
         
-        // Challenges
-        if(RogueQuest_HasUnlockedChallenges())
+        // Trials
+        if(RogueQuest_HasUnlockedTrials())
         {
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Challenge);
-            RogueQuest_GetQuestCountsFor(QUEST_CONST_IS_CHALLENGE, &active, &inactive);
+            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Trial);
+            RogueQuest_GetQuestCountsFor(QUEST_CONST_IS_TRIAL, &active, &inactive);
             BufferActiveCountFor(str, active, inactive);
 
             x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
@@ -1409,12 +1409,12 @@ static void Draw_IndexPage()
         if(RogueQuest_HasUnlockedMonMasteries())
         {
             ++y;
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_ChallengeDifficulty);
+            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_TrialDifficulty);
             ++y;
 
             // Easy
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Easy);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_CHALLENGE, DIFFICULTY_LEVEL_EASY), 100);
+            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_EASY), 100);
 
             x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
@@ -1422,7 +1422,7 @@ static void Draw_IndexPage()
 
             // Average
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Average);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_CHALLENGE, DIFFICULTY_LEVEL_AVERAGE), 100);
+            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_AVERAGE), 100);
 
             x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
@@ -1430,7 +1430,7 @@ static void Draw_IndexPage()
 
             // Hard
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Hard);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_CHALLENGE, DIFFICULTY_LEVEL_HARD), 100);
+            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_HARD), 100);
 
             x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
@@ -1438,7 +1438,7 @@ static void Draw_IndexPage()
 
             // Brutal
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Brutal);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_CHALLENGE, DIFFICULTY_LEVEL_BRUTAL), 100);
+            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_BRUTAL), 100);
 
             x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
@@ -1492,23 +1492,23 @@ static void Setup_QuestPage()
         break;
 
 
-    case PAGE_BOOK_CHALLENGE_TODO:
-        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_CHALLENGE;
+    case PAGE_BOOK_TRIAL_TODO:
+        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_TRIAL;
         sQuestMenuData->questListStateExcludeFlags = QUEST_STATE_HAS_COMPLETE;
         break;
 
-    case PAGE_BOOK_CHALLENGE_ACTIVE:
-        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_CHALLENGE;
+    case PAGE_BOOK_TRIAL_ACTIVE:
+        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_TRIAL;
         sQuestMenuData->questListStateIncludeFlags = QUEST_STATE_ACTIVE;
         break;
 
-    case PAGE_BOOK_CHALLENGE_INACTIVE:
-        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_CHALLENGE;
+    case PAGE_BOOK_TRIAL_INACTIVE:
+        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_TRIAL;
         sQuestMenuData->questListStateExcludeFlags = QUEST_STATE_ACTIVE;
         break;
 
-    case PAGE_BOOK_CHALLENGE_COMPLETE:
-        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_CHALLENGE;
+    case PAGE_BOOK_TRIAL_COMPLETE:
+        sQuestMenuData->questListConstIncludeFlags = QUEST_CONST_IS_TRIAL;
         sQuestMenuData->questListStateIncludeFlags = QUEST_STATE_HAS_COMPLETE;
         break;
 
@@ -1907,7 +1907,7 @@ static void Draw_QuestPage()
 
             else if(RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
             {
-                if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_CHALLENGE))
+                if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
                 {
                     switch (RogueQuest_GetHighestCompleteDifficulty(questId))
                     {

@@ -18,27 +18,27 @@
             "sort_alphabetically": false
         },
         {
-            "id": "starter_challenges",
+            "id": "starter_trials",
             "sort_alphabetically": false
         },
         {
-            "id": "default_challenges",
+            "id": "default_trials",
             "sort_alphabetically": false
         },
         {
-            "id": "trial_challenges",
+            "id": "trial_quests",
             "sort_alphabetically": false
         },
         {
-            "id": "evil_team_challenges",
+            "id": "evil_team_quests",
             "sort_alphabetically": false
         },
         {
-            "id": "region_challenges",
+            "id": "region_trials",
             "sort_alphabetically": false
         },
         {
-            "id": "type_challenges",
+            "id": "type_trials",
             "sort_alphabetically": true
         },
         {

@@ -7,7 +7,7 @@
 #define HUB_AREA_ADVENTURE_ENTRANCE     (HUB_AREA_FIRST + 1)
 #define HUB_AREA_LABS                   (HUB_AREA_FIRST + 2)
 #define HUB_AREA_SAFARI_ZONE            (HUB_AREA_FIRST + 3)
-#define HUB_AREA_CHALLENGE_FRONTIER     (HUB_AREA_FIRST + 4)
+#define HUB_AREA_TRIAL_FRONTIER     (HUB_AREA_FIRST + 4)
 #define HUB_AREA_BERRY_FIELD            (HUB_AREA_FIRST + 5)
 #define HUB_AREA_HOME                   (HUB_AREA_FIRST + 6)
 #define HUB_AREA_MARTS                  (HUB_AREA_FIRST + 7)

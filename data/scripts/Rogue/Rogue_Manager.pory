@@ -441,7 +441,15 @@ script Rogue_InteractWithQuestBoardInternal
     }
     else
     {
-        special(Rogue_ShowNewQuests)
+        special(Rogue_HasAnyNewQuests)
+        if(var(VAR_RESULT) == 1)
+        {
+            special(Rogue_ShowNewQuests)
+        }
+        else
+        {
+            special(Rogue_ShowQuestLog)
+        }
         waitstate
     }
 }

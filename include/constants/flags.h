@@ -696,7 +696,7 @@
 #define FLAG_ROGUE_PRE_RELEASE_COMPAT_WARNING   0x283
 #define FLAG_ROGUE_REWARD_ITEM_MART_DISABLED    0x284
 #define FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED       0x285
-#define FLAG_ROGUE_RUN_CHALLENGE_QUESTS_DISABLED  0x286
+#define FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED  0x286
 #define FLAG_UNUSED_0x287  0x287 // Unused Flag
 #define FLAG_UNUSED_0x288  0x288 // Unused Flag
 #define FLAG_UNUSED_0x289  0x289 // Unused Flag
@@ -1413,7 +1413,7 @@
 #define FLAG_SYS_SAFARI_MODE                        (SYSTEM_FLAGS + 0x2C)
 #define FLAG_SYS_CRUISE_MODE                        (SYSTEM_FLAGS + 0x2D)
 
-#define FLAG_SYS_CHALLENGES_UNLOCKED                (SYSTEM_FLAGS + 0x2E)
+#define FLAG_SYS_TRIALS_UNLOCKED                (SYSTEM_FLAGS + 0x2E)
 #define FLAG_SYS_MASTERIES_UNLOCKED                 (SYSTEM_FLAGS + 0x2F)
 
 #define FLAG_SYS_TV_HOME                            (SYSTEM_FLAGS + 0x30)

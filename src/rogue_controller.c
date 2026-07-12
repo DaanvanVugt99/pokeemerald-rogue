@@ -4998,10 +4998,10 @@ static void BeginRogueRunPhase_Reset(void)
     else
         FlagClear(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);
 
-    if (Rogue_GetModeRules()->disableChallengeQuests || AnyCharmsActive())
-        FlagSet(FLAG_ROGUE_RUN_CHALLENGE_QUESTS_DISABLED);
+    if (Rogue_GetModeRules()->disableTrialQuests || AnyCharmsActive())
+        FlagSet(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED);
     else
-        FlagClear(FLAG_ROGUE_RUN_CHALLENGE_QUESTS_DISABLED);
+        FlagClear(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED);
 
     Rogue_SetCurrentDifficulty(GetStartDifficulty());
     gRogueRun.currentLevelOffset = Rogue_GetModeRules()->initialLevelOffset;
@@ -5145,8 +5145,8 @@ static void BeginRogueRunPhase_Finalize(void)
     if(Rogue_ShouldDisableMainQuests())
         Rogue_PushPopup_MainQuestsDisabled();
 
-    if(Rogue_ShouldDisableChallengeQuests())
-        Rogue_PushPopup_ChallengeQuestsDisabled();
+    if(Rogue_ShouldDisableTrialQuests())
+        Rogue_PushPopup_TrialQuestsDisabled();
 
     gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].isValid = TRUE;
     gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].baseSeed = gRogueRun.baseSeed;
@@ -5590,6 +5590,8 @@ static void ChooseTeamEncountersForNewAdventure()
     // Don't place any of these encounters
     if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
         return;
+
+    RogueQuest_UnlockCurrentEvilTeamQuest();
 
     // Setup maps (There's only 1 per each currently)
     for(i = 0; i < gRogueTeamEncounterInfo.mapCount; ++i)
@@ -8433,6 +8435,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
                     FlagSet(FLAG_IS_CHAMPION);
                     FlagSet(FLAG_ROGUE_RUN_COMPLETED);
+                    RogueQuest_UnlockAllEvilTeamQuests();
 
                     if(!Rogue_ShouldDisableMainQuests())
                         RogueQuest_SetMonMasteryFlagFromParty();

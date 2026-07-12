@@ -7,10 +7,10 @@
     ],
     "defaults":
     {
-        "display_group": "default_challenges",
+        "display_group": "default_trials",
         "flags": 
         [
-            "CHALLENGE_DEFAULT",
+            "TRIAL_DEFAULT",
             "ACTIVE_IN_RUN"
         ]
     },
@@ -21,6 +21,8 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Mega Evolution",
+                "display_group": "postgame_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Mega Ring.",
                 "triggers":
                 [
@@ -39,14 +41,15 @@
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_LUCARIO",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Z-Moves",
+                "display_group": "postgame_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Z-Power Ring.",
                 "triggers":
                 [
@@ -65,14 +68,15 @@
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_MIMIKYU",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Dynamax",
+                "display_group": "postgame_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Dynamax Band.",
                 "triggers":
                 [
@@ -91,14 +95,15 @@
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_ELDEGOSS",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Terastallization",
+                "display_group": "postgame_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Tera Orb.",
                 "triggers":
                 [
@@ -117,14 +122,15 @@
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
                     {
                         "species": "SPECIES_CYCLIZAR",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Gimmick Overflow",
+                "display_group": "postgame_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with: Healing Flask, Mega Ring, Z-Power Ring, Dynamax Band & Tera Orb.",
                 "triggers":
                 [
@@ -147,13 +153,14 @@
                     { "money": "QUEST_REWARD_LARGEST_MONEY" },
                     {
                         "species": "SPECIES_CHARIZARD",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "name": "True Tactics",
+                "display_group": "achievement_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run, without any Pokémon ever fainting.",
                 "triggers":
                 [
@@ -173,14 +180,13 @@
                     { "money": "QUEST_REWARD_LARGEST_MONEY" },
                     {
                         "species": "SPECIES_SHEDINJA",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "name": "Randoman Roulette",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Randoman Roulette Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -204,7 +210,7 @@
             },
             {
                 "name": "Chaos Master",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Chaos Master Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -222,7 +228,7 @@
             },
             {
                 "name": "Roguelocke",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Roguelocke Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -240,7 +246,7 @@
             },
             {
                 "name": "Can't Pick!?",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Can't Pick!? Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -268,7 +274,8 @@
             },
             {
                 "name": "Diversity",
-                "display_group": "trial_challenges",
+                "display_group": "achievement_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run, only ever entering Trainer battles with only Unique Types in your party e.g. Can't have a Bulbasaur and a Grimer at the same time.",
                 "triggers":
                 [
@@ -288,14 +295,13 @@
                     { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_KECLEON",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "name": "Apotheosis",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Apotheosis Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -313,7 +319,8 @@
             },
             {
                 "name": "Aesthetics",
-                "display_group": "trial_challenges",
+                "display_group": "achievement_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run, only ever entering Trainer battles with only Shiny Pokémon in your party.",
                 "triggers":
                 [
@@ -333,13 +340,14 @@
                     { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_GYARADOS",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "name": "I am Speed",
+                "display_group": "achievement_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run in under 2:30hrs (in game time)",
                 "triggers":
                 [
@@ -361,14 +369,13 @@
                     { "money": "QUEST_REWARD_HUGE_MONEY" },
                     {
                         "species": "SPECIES_NINJASK",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "name": "Cursed Body",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Cursed Body Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -394,7 +401,7 @@
 
             {
                 "name": "Limited Capture",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Limited Capture Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -420,7 +427,7 @@
 
             {
                 "name": "BST Crown",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the BST Crown Trial through the Trial Attendant with only 400-or-lower BST Pokémon in Trainer battles.",
                 "triggers":
                 [
@@ -443,7 +450,7 @@
             },
             {
                 "name": "Little Cup",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Little Cup Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -466,7 +473,7 @@
             },
             {
                 "name": "Equalized",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Equalized Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -489,7 +496,7 @@
             },
             {
                 "name": "Pro-Building",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Pro-Building Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -508,7 +515,7 @@
 
             {
                 "name": "Insane Mode",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Insane Mode Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -526,7 +533,7 @@
             },
             {
                 "name": "Iron Mono",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Iron Mono Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -545,7 +552,7 @@
             },
             {
                 "name": "Iron Kaizo",
-                "display_group": "trial_challenges",
+                "display_group": "trial_quests",
                 "description": "Complete the Iron Kaizo Trial through the Trial Attendant.",
                 "triggers":
                 [
@@ -572,7 +579,8 @@
             {
                 "name": "Rocket Triumph",
                 "description": "Defeat the Leader of Team Rocket.",
-                "display_group": "evil_team_challenges",
+                "display_group": "evil_team_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -603,15 +611,15 @@
                     },
                     {
                         "species": "SPECIES_ZUBAT",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "name": "Aqua Triumph",
                 "description": "Defeat the Leader of Team Aqua.",
-                "display_group": "evil_team_challenges",
+                "display_group": "evil_team_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -642,15 +650,15 @@
                     },
                     {
                         "species": "SPECIES_CARVANHA",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
             {
                 "name": "Magma Triumph",
                 "description": "Defeat the Leader of Team Magma.",
-                "display_group": "evil_team_challenges",
+                "display_group": "evil_team_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -681,8 +689,7 @@
                     },
                     {
                         "species": "SPECIES_NUMEL",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
@@ -690,7 +697,8 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Galactic Triumph",
                 "description": "Defeat the Leader of Team Galactic.",
-                "display_group": "evil_team_challenges",
+                "display_group": "evil_team_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -721,8 +729,7 @@
                     },
                     {
                         "species": "SPECIES_STUNKY",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
@@ -730,7 +737,8 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Plasma Triumph",
                 "description": "Defeat the Leader of Team Plasma.",
-                "display_group": "evil_team_challenges",
+                "display_group": "evil_team_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -742,7 +750,7 @@
                     {
                         "on": [ "MAP_SPECIFIC_EVENT" ],
                         "condition": "CurrentEvilTeamIs",
-                        "params": [ "TEAM_NUM_PLASMA" ],
+                        "params": [ "TEAM_NUM_PLASMA", "TEAM_NUM_NEOPLASMA" ],
                         "pass": "SUCCESS"
                     }
                 ],
@@ -761,8 +769,7 @@
                     },
                     {
                         "species": "SPECIES_MUNNA",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             },
@@ -770,7 +777,8 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Flare Triumph",
                 "description": "Defeat the Leader of Team Flare.",
-                "display_group": "evil_team_challenges",
+                "display_group": "evil_team_quests",
+                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -801,8 +809,7 @@
                     },
                     {
                         "species": "SPECIES_LITLEO",
-                        "shiny": true,
-                        "difficulty": "HARD"
+                        "shiny": true
                     }
                 ]
             }

@@ -632,6 +632,36 @@ TEST("Last Trial selection restores its exact setup")
     ClearCaughtMonTestState();
 }
 
+TEST("The selected evil team unlocks only its Triumph quest")
+{
+    ResetCaughtMonTestState();
+
+    RogueQuest_SetStateFlag(QUEST_ID_ROCKET_TRIUMPH, QUEST_STATE_UNLOCKED, FALSE);
+    RogueQuest_SetStateFlag(QUEST_ID_AQUA_TRIUMPH, QUEST_STATE_UNLOCKED, FALSE);
+    RogueQuest_SetStateFlag(QUEST_ID_MAGMA_TRIUMPH, QUEST_STATE_UNLOCKED, FALSE);
+
+    gRogueRun.teamEncounterNum = TEAM_NUM_JOHTO_ROCKET;
+    RogueQuest_UnlockCurrentEvilTeamQuest();
+
+    EXPECT(RogueQuest_IsQuestUnlocked(QUEST_ID_ROCKET_TRIUMPH));
+    EXPECT(!RogueQuest_IsQuestUnlocked(QUEST_ID_AQUA_TRIUMPH));
+    EXPECT(!RogueQuest_IsQuestUnlocked(QUEST_ID_MAGMA_TRIUMPH));
+
+    RogueQuest_UnlockAllEvilTeamQuests();
+    EXPECT(RogueQuest_IsQuestUnlocked(QUEST_ID_ROCKET_TRIUMPH));
+    EXPECT(RogueQuest_IsQuestUnlocked(QUEST_ID_AQUA_TRIUMPH));
+    EXPECT(RogueQuest_IsQuestUnlocked(QUEST_ID_MAGMA_TRIUMPH));
+
+#ifdef ROGUE_EXPANSION
+    RogueQuest_SetStateFlag(QUEST_ID_PLASMA_TRIUMPH, QUEST_STATE_UNLOCKED, FALSE);
+    gRogueRun.teamEncounterNum = TEAM_NUM_NEOPLASMA;
+    RogueQuest_UnlockCurrentEvilTeamQuest();
+    EXPECT(RogueQuest_IsQuestUnlocked(QUEST_ID_PLASMA_TRIUMPH));
+#endif
+
+    ClearCaughtMonTestState();
+}
+
 TEST("Pending Iron Mono limits the starting party to one Pokemon")
 {
     ResetCaughtMonTestState();

@@ -1892,14 +1892,14 @@
       "blockdata_filepath": "data/layouts/Rogue_Special_Gen9_Mon/map.bin"
     },
     {
-      "id": "LAYOUT_ROGUE_AREA_CHALLENGE_FRONTIER",
-      "name": "Rogue_Area_ChallengeFrontier_Layout",
+      "id": "LAYOUT_ROGUE_AREA_TRIAL_FRONTIER",
+      "name": "Rogue_Area_TrialFrontier_Layout",
       "width": 40,
       "height": 26,
       "primary_tileset": "gTileset_GeneralHub",
       "secondary_tileset": "gTileset_Lilycove",
-      "border_filepath": "data/layouts/Rogue_Area_ChallengeFrontier/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Area_ChallengeFrontier/map.bin"
+      "border_filepath": "data/layouts/Rogue_Area_TrialFrontier/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_Area_TrialFrontier/map.bin"
     },
     {
       "id": "LAYOUT_ROGUE_AREA_DAY_CARE",
@@ -1932,14 +1932,14 @@
       "blockdata_filepath": "data/layouts/Rogue_Encounter_Sign/map.bin"
     },
     {
-      "id": "LAYOUT_ROGUE_INTERIOR_CHALLENGE_FRONTIER",
-      "name": "Rogue_Interior_ChallengeFrontier_Layout",
+      "id": "LAYOUT_ROGUE_INTERIOR_TRIAL_FRONTIER",
+      "name": "Rogue_Interior_TrialFrontier_Layout",
       "width": 43,
       "height": 29,
       "primary_tileset": "gTileset_Building",
       "secondary_tileset": "gTileset_BattleDome",
-      "border_filepath": "data/layouts/Rogue_Interior_ChallengeFrontier/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Interior_ChallengeFrontier/map.bin"
+      "border_filepath": "data/layouts/Rogue_Interior_TrialFrontier/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_Interior_TrialFrontier/map.bin"
     },
     {
       "id": "LAYOUT_ROGUE_ENCOUNTER_BATTLE_SIM",

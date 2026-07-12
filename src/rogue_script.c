@@ -692,6 +692,11 @@ void Rogue_ShowNewQuests()
     Rogue_OpenQuestMenu(CB2_ReturnToFieldContinueScript, FALSE);
 }
 
+void Rogue_ShowQuestLog()
+{
+    Rogue_OpenQuestMenu(CB2_ReturnToFieldContinueScript, TRUE);
+}
+
 void Rogue_ShowNewMonMasteries()
 {
     Rogue_OpenMonMasteryMenu(CB2_ReturnToFieldContinueScript);
@@ -746,9 +751,9 @@ void Rogue_HasPendingQuestRewards()
     }
 }
 
-void Rogue_UnlockChallengeQuests()
+void Rogue_UnlockTrialQuests()
 {
-    FlagSet(FLAG_SYS_CHALLENGES_UNLOCKED);
+    FlagSet(FLAG_SYS_TRIALS_UNLOCKED);
 }
 
 void Rogue_UnlockMasteryQuests()

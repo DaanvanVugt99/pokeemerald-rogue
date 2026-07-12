@@ -2,10 +2,10 @@
     "condition": "",
     "defaults":
     {
-        "display_group": "trial_challenges",
+        "display_group": "trial_quests",
         "flags": 
         [
-            "CHALLENGE_DEFAULT",
+            "TRIAL_DEFAULT",
             "ACTIVE_IN_RUN"
         ],
         "triggers":
@@ -24,8 +24,8 @@
         [
             {
                 "name": "Regional Style",
-                "display_group": "region_challenges",
-                "description": "Complete any of the 'Region Style' challenges.\\ne.g. Kanto Style, Johto Style, Orre Style etc.",
+                "display_group": "region_trials",
+                "description": "Complete any of the Region Style Trials.\\ne.g. Kanto Style, Johto Style, Orre Style etc.",
                 "flags": 
                 [
                     "MAIN_QUEST_DEFAULT",

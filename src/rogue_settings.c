@@ -51,7 +51,7 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
     [ROGUE_GAME_MODE_OFFICIAL] = 
     {
         .trainerOrder = TRAINER_ORDER_OFFICIAL,
-        .disableChallengeQuests = TRUE,
+        .disableTrialQuests = TRUE,
     },
     [ROGUE_GAME_MODE_GAUNTLET] = 
     {
@@ -60,7 +60,7 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
         .levelOffsetInterval = 0,
         .enterPartySize = PARTY_SIZE,
         .trainerOrder = TRAINER_ORDER_DEFAULT,
-        .disableChallengeQuests = TRUE,
+        .disableTrialQuests = TRUE,
         .disablePerBadgeLvlCaps = TRUE,
         .forceEndGameTrainers = TRUE,
         .forceEndGameRouteItems = TRUE,
@@ -77,7 +77,7 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
         .levelOffsetInterval = 0,
         .enterPartySize = PARTY_SIZE,
         .trainerOrder = TRAINER_ORDER_RAINBOW,
-        .disableChallengeQuests = TRUE,
+        .disableTrialQuests = TRUE,
         .disablePerBadgeLvlCaps = TRUE,
         .forceEndGameTrainers = TRUE,
         .forceEndGameRouteItems = TRUE,
@@ -342,7 +342,7 @@ struct GameModeRules const* Rogue_GetModeRules()
     sGeneratedModeRules.trainerOrder = trainerOrder;
 
     if(sGeneratedModeRules.trainerOrder == TRAINER_ORDER_OFFICIAL)
-        sGeneratedModeRules.disableChallengeQuests = TRUE;
+        sGeneratedModeRules.disableTrialQuests = TRUE;
 
     return &sGeneratedModeRules;
 }
@@ -363,16 +363,16 @@ bool8 Rogue_ShouldDisableMainQuests()
     return FALSE;
 }
 
-bool8 Rogue_ShouldDisableChallengeQuests()
+bool8 Rogue_ShouldDisableTrialQuests()
 {
     struct AdventureReplay const* replay = &gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED];
 
-    if(RogueQuest_HasUnlockedChallenges())
+    if(RogueQuest_HasUnlockedTrials())
     {
-        if(Rogue_IsRunActive() && FlagGet(FLAG_ROGUE_RUN_CHALLENGE_QUESTS_DISABLED))
+        if(Rogue_IsRunActive() && FlagGet(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED))
             return TRUE;
 
-        if(!Rogue_IsRunActive() && Rogue_GetModeRules()->disableChallengeQuests)
+        if(!Rogue_IsRunActive() && Rogue_GetModeRules()->disableTrialQuests)
             return TRUE;
 
         if(Rogue_IsRunActive() && FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) && replay->isValid)

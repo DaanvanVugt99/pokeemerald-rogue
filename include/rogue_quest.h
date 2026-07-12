@@ -188,6 +188,8 @@ void RogueQuest_BeginRewardSequence();
 void RogueQuest_EndRewardSequence();
 
 void RogueQuest_ActivateQuestsFor(u32 flags);
+void RogueQuest_UnlockCurrentEvilTeamQuest(void);
+void RogueQuest_UnlockAllEvilTeamQuests(void);
 bool8 RogueQuest_IsQuestActive(u16 questId);
 
 void RogueQuest_CheckQuestRequirements();
@@ -202,7 +204,7 @@ void RogueQuest_OnNewGame();
 void RogueQuest_OnLoadGame();
 void RogueQuest_OnTrigger(u32 trigger);
 
-bool8 RogueQuest_HasUnlockedChallenges();
+bool8 RogueQuest_HasUnlockedTrials();
 bool8 RogueQuest_HasUnlockedMonMasteries();
 
 bool8 RogueQuest_GetMonMasteryFlag(u16 species);

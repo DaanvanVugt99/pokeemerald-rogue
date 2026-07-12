@@ -307,7 +307,7 @@
                     {
                         "on": [ "MAP_SPECIFIC_EVENT" ],
                         "condition": "CurrentlyInMap",
-                        "params": [ "MAP_ROGUE_INTERIOR_CHALLENGE_FRONTIER" ],
+                        "params": [ "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER" ],
                         "pass": "SUCCESS"
                     }
                 ],
@@ -324,7 +324,13 @@
                     { "#if": "defined(ROGUE_EXPANSION)", "quest": "Z-Moves" },
                     { "#if": "defined(ROGUE_EXPANSION)", "quest": "Dynamax" },
                     { "#if": "defined(ROGUE_EXPANSION)", "quest": "Terastallization" },
-                    { "#if": "defined(ROGUE_EXPANSION)", "quest": "Gimmick Overflow" }
+                    { "#if": "defined(ROGUE_EXPANSION)", "quest": "Gimmick Overflow" },
+                    { "quest": "Rocket Triumph" },
+                    { "quest": "Aqua Triumph" },
+                    { "quest": "Magma Triumph" },
+                    { "#if": "defined(ROGUE_EXPANSION)", "quest": "Galactic Triumph" },
+                    { "#if": "defined(ROGUE_EXPANSION)", "quest": "Plasma Triumph" },
+                    { "#if": "defined(ROGUE_EXPANSION)", "quest": "Flare Triumph" }
 
                 ]
             },

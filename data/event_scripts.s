@@ -860,7 +860,7 @@ EventScript_VsSeekerChargingDone::
 
 	.include "data/maps/Rogue_Special_Gen9_Mon/scripts.inc"
 
-	.include "data/maps/Rogue_Area_ChallengeFrontier/scripts.inc"
+	.include "data/maps/Rogue_Area_TrialFrontier/scripts.inc"
 
 	.include "data/maps/Rogue_Area_DayCare/scripts.inc"
 
@@ -868,7 +868,7 @@ EventScript_VsSeekerChargingDone::
 
 	.include "data/maps/Rogue_Encounter_Sign/scripts.inc"
 
-	.include "data/maps/Rogue_Interior_ChallengeFrontier/scripts.inc"
+	.include "data/maps/Rogue_Interior_TrialFrontier/scripts.inc"
 
 	.include "data/maps/Rogue_Encounter_BattleSim/scripts.inc"
 

@@ -14,16 +14,16 @@ const NPC_OBJ_DYNAMAX       = 15
 const NPC_OBJ_HEALTH_FLASK  = 16
 const NPC_OBJ_TERA_ORB      = 17
 
-mapscripts Rogue_Interior_ChallengeFrontier_MapScripts
+mapscripts Rogue_Interior_TrialFrontier_MapScripts
 {
-    MAP_SCRIPT_ON_LOAD: Rogue_Interior_ChallengeFrontier_OnMapLoad
+    MAP_SCRIPT_ON_LOAD: Rogue_Interior_TrialFrontier_OnMapLoad
     MAP_SCRIPT_ON_FRAME_TABLE 
     [
-        VAR_MAP_LOAD_STATE, 0: Rogue_Interior_ChallengeFrontier_LoadState0
+        VAR_MAP_LOAD_STATE, 0: Rogue_Interior_TrialFrontier_LoadState0
     ]
 }
 
-script Rogue_Interior_ChallengeFrontier_OnMapLoad
+script Rogue_Interior_TrialFrontier_OnMapLoad
 {
     specialvar(VAR_RESULT, RogueHub_GetStatueLevel)
 
@@ -40,13 +40,13 @@ script Rogue_Interior_ChallengeFrontier_OnMapLoad
     }
 }
 
-script Rogue_Interior_ChallengeFrontier_LoadState0
+script Rogue_Interior_TrialFrontier_LoadState0
 {
     addvar(VAR_MAP_LOAD_STATE, 1)
-    call(Rogue_Interior_ChallengeFrontier_UpdateItemVisibility)
+    call(Rogue_Interior_TrialFrontier_UpdateItemVisibility)
 }
 
-script Rogue_Interior_ChallengeFrontier_UpdateItemVisibility
+script Rogue_Interior_TrialFrontier_UpdateItemVisibility
 {
     poryswitch(ROGUE_VERSION)
     {
@@ -108,7 +108,7 @@ script Rogue_Interior_ChallengeFrontier_UpdateItemVisibility
     }
 }
 
-script Rogue_Interior_ChallengeFrontier_MegaStone
+script Rogue_Interior_TrialFrontier_MegaStone
 {
     lock
 
@@ -140,7 +140,7 @@ script Rogue_Interior_ChallengeFrontier_MegaStone
                 {
                     case 0: // Yes
                         giveitem(ITEM_MEGA_RING)
-                        call(Rogue_Interior_ChallengeFrontier_GiveGimickItemTutorial)
+                        call(Rogue_Interior_TrialFrontier_GiveGimickItemTutorial)
 
                     case 1: // No
                         setvar(VAR_RESULT, NO)
@@ -152,14 +152,14 @@ script Rogue_Interior_ChallengeFrontier_MegaStone
                         setvar(VAR_RESULT, NO)
                 }
             }
-            call(Rogue_Interior_ChallengeFrontier_UpdateItemVisibility)
+            call(Rogue_Interior_TrialFrontier_UpdateItemVisibility)
         }
     }
 
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_ZCrystal
+script Rogue_Interior_TrialFrontier_ZCrystal
 {
     lock
 
@@ -191,7 +191,7 @@ script Rogue_Interior_ChallengeFrontier_ZCrystal
                 {
                     case 0: // Yes
                         giveitem(ITEM_Z_POWER_RING)
-                        call(Rogue_Interior_ChallengeFrontier_GiveGimickItemTutorial)
+                        call(Rogue_Interior_TrialFrontier_GiveGimickItemTutorial)
 
                     case 1: // No
                         setvar(VAR_RESULT, NO)
@@ -203,14 +203,14 @@ script Rogue_Interior_ChallengeFrontier_ZCrystal
                         setvar(VAR_RESULT, NO)
                 }
             }
-            call(Rogue_Interior_ChallengeFrontier_UpdateItemVisibility)
+            call(Rogue_Interior_TrialFrontier_UpdateItemVisibility)
         }
     }
 
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_TryWarnAboutDynamaxAndTera
+script Rogue_Interior_TrialFrontier_TryWarnAboutDynamaxAndTera
 {
     poryswitch(ROGUE_VERSION)
     {
@@ -233,7 +233,7 @@ script Rogue_Interior_ChallengeFrontier_TryWarnAboutDynamaxAndTera
     }
 }
 
-script Rogue_Interior_ChallengeFrontier_Dynamax
+script Rogue_Interior_TrialFrontier_Dynamax
 {
     lock
 
@@ -265,8 +265,8 @@ script Rogue_Interior_ChallengeFrontier_Dynamax
                 {
                     case 0: // Yes
                         giveitem(ITEM_DYNAMAX_BAND)
-                        call(Rogue_Interior_ChallengeFrontier_GiveGimickItemTutorial)
-                        call(Rogue_Interior_ChallengeFrontier_TryWarnAboutDynamaxAndTera)
+                        call(Rogue_Interior_TrialFrontier_GiveGimickItemTutorial)
+                        call(Rogue_Interior_TrialFrontier_TryWarnAboutDynamaxAndTera)
 
                     case 1: // No
                         setvar(VAR_RESULT, NO)
@@ -278,14 +278,14 @@ script Rogue_Interior_ChallengeFrontier_Dynamax
                         setvar(VAR_RESULT, NO)
                 }
             }
-            call(Rogue_Interior_ChallengeFrontier_UpdateItemVisibility)
+            call(Rogue_Interior_TrialFrontier_UpdateItemVisibility)
         }
     }
 
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_Tera
+script Rogue_Interior_TrialFrontier_Tera
 {
     lock
 
@@ -317,8 +317,8 @@ script Rogue_Interior_ChallengeFrontier_Tera
                 {
                     case 0: // Yes
                         giveitem(ITEM_TERA_ORB)
-                        call(Rogue_Interior_ChallengeFrontier_GiveGimickItemTutorial)
-                        call(Rogue_Interior_ChallengeFrontier_TryWarnAboutDynamaxAndTera)
+                        call(Rogue_Interior_TrialFrontier_GiveGimickItemTutorial)
+                        call(Rogue_Interior_TrialFrontier_TryWarnAboutDynamaxAndTera)
 
                     case 1: // No
                         setvar(VAR_RESULT, NO)
@@ -330,14 +330,14 @@ script Rogue_Interior_ChallengeFrontier_Tera
                         setvar(VAR_RESULT, NO)
                 }
             }
-            call(Rogue_Interior_ChallengeFrontier_UpdateItemVisibility)
+            call(Rogue_Interior_TrialFrontier_UpdateItemVisibility)
         }
     }
 
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_HealingFlask
+script Rogue_Interior_TrialFrontier_HealingFlask
 {
     lock
 
@@ -361,7 +361,7 @@ script Rogue_Interior_ChallengeFrontier_HealingFlask
         {
             case 0: // Yes
                 giveitem(ITEM_HEALING_FLASK)
-                call(Rogue_Interior_ChallengeFrontier_GiveGimickItemTutorial)
+                call(Rogue_Interior_TrialFrontier_GiveGimickItemTutorial)
 
             case 1: // No
                 setvar(VAR_RESULT, NO)
@@ -373,12 +373,12 @@ script Rogue_Interior_ChallengeFrontier_HealingFlask
                 setvar(VAR_RESULT, NO)
         }
     }
-    call(Rogue_Interior_ChallengeFrontier_UpdateItemVisibility)
+    call(Rogue_Interior_TrialFrontier_UpdateItemVisibility)
 
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_GiveGimickItemTutorial
+script Rogue_Interior_TrialFrontier_GiveGimickItemTutorial
 {
     if(!flag(FLAG_ROGUE_GIMICK_TUTORIAL))
     {
@@ -387,7 +387,7 @@ script Rogue_Interior_ChallengeFrontier_GiveGimickItemTutorial
     }
 }
 
-script Rogue_Interior_ChallengeFrontier_TalkScott
+script Rogue_Interior_TrialFrontier_TalkScott
 {
     lock
     faceplayer
@@ -401,16 +401,10 @@ script Rogue_Interior_ChallengeFrontier_TalkScott
         msgbox(format("Well, if it isn't {PLAYER}!\pHope your Questing is going well!"))
     }
 
-    //msgbox(format("todo - unlock challenges"))
-//
-    //special(Rogue_UnlockChallengeQuests)
-    //special(Rogue_ShowNewQuests)
-    //waitstate
-
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_ScottIntroLeft
+script Rogue_Interior_TrialFrontier_ScottIntroLeft
 {
     lock
 
@@ -423,11 +417,11 @@ script Rogue_Interior_ChallengeFrontier_ScottIntroLeft
     applymovement(OBJ_EVENT_ID_PLAYER, PostGameTutorial_Player0_Left)
     waitmovement(0)
 
-    call(Rogue_Interior_ChallengeFrontier_ScottIntroCommon)
+    call(Rogue_Interior_TrialFrontier_ScottIntroCommon)
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_ScottIntroRight
+script Rogue_Interior_TrialFrontier_ScottIntroRight
 {
     lock
 
@@ -440,11 +434,11 @@ script Rogue_Interior_ChallengeFrontier_ScottIntroRight
     applymovement(OBJ_EVENT_ID_PLAYER, PostGameTutorial_Player0_Right)
     waitmovement(0)
 
-    call(Rogue_Interior_ChallengeFrontier_ScottIntroCommon)
+    call(Rogue_Interior_TrialFrontier_ScottIntroCommon)
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_ScottIntroCentre
+script Rogue_Interior_TrialFrontier_ScottIntroCentre
 {
     lock
 
@@ -457,11 +451,11 @@ script Rogue_Interior_ChallengeFrontier_ScottIntroCentre
     applymovement(OBJ_EVENT_ID_PLAYER, PostGameTutorial_Player0_Centre)
     waitmovement(0)
 
-    call(Rogue_Interior_ChallengeFrontier_ScottIntroCommon)
+    call(Rogue_Interior_TrialFrontier_ScottIntroCommon)
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_ScottIntroCommon
+script Rogue_Interior_TrialFrontier_ScottIntroCommon
 {
     addvar(VAR_ROGUE_POST_GAME_TUTORIAL, 1)
 
@@ -476,7 +470,7 @@ script Rogue_Interior_ChallengeFrontier_ScottIntroCommon
         msgbox(format("You still look a little fresh, but I see the potential!\pI bet you could even enter the Hall of Fame, if you put your mind to it!"))
     }
 
-    msgbox(format("You see, this Building is an area for those who want to push themselves to complete some of the toughest Challenges imaginable!\pIn fact…\nWhy don't you have a look around?\pI'm sure you'll find plenty of the things around here interesting!"))
+    msgbox(format("You see, this Building is an area for those who want to push themselves with some of the toughest Trials imaginable!\pIn fact…\nWhy don't you have a look around?\pI'm sure you'll find plenty of the things around here interesting!"))
     
     quest_trigger(QUEST_TRIGGER_MAP_SPECIFIC_EVENT)
 }
@@ -506,11 +500,11 @@ movement PostGameTutorial_Player0_Right
 }
 
 
-script Rogue_Interior_ChallengeFrontier_ScottBlockExit
+script Rogue_Interior_TrialFrontier_ScottBlockExit
 {
     lock
 
-    if(flag(FLAG_SYS_MASTERIES_UNLOCKED) && flag(FLAG_SYS_CHALLENGES_UNLOCKED) && flag(FLAG_ROGUE_FOUND_GIMIC_ROOM))
+    if(flag(FLAG_SYS_MASTERIES_UNLOCKED) && flag(FLAG_SYS_TRIALS_UNLOCKED) && flag(FLAG_ROGUE_FOUND_GIMIC_ROOM))
     {
         addvar(VAR_ROGUE_POST_GAME_TUTORIAL, 1)
     }
@@ -527,7 +521,7 @@ script Rogue_Interior_ChallengeFrontier_ScottBlockExit
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_VisitedGimicRoom
+script Rogue_Interior_TrialFrontier_VisitedGimicRoom
 {
     lock
     setflag(FLAG_ROGUE_FOUND_GIMIC_ROOM)
@@ -539,7 +533,7 @@ movement PostGameTutorial_Player1
     walk_up
 }
 
-script Rogue_Interior_ChallengeFrontier_TalkMasteries
+script Rogue_Interior_TrialFrontier_TalkMasteries
 {
     lock
     faceplayer
@@ -592,24 +586,24 @@ script Rogue_Interior_ChallengeFrontier_TalkMasteries
     release
 }
 
-script Rogue_Interior_ChallengeFrontier_TalkChallenges
+script Rogue_Interior_TrialFrontier_TalkTrials
 {
     lock
     faceplayer
 
-    if(!flag(FLAG_SYS_CHALLENGES_UNLOCKED))
+    if(!flag(FLAG_SYS_TRIALS_UNLOCKED))
     {
-        msgbox(format("What's that?\pThat little Quest Book you have there?\pSo you're trying to complete Quests, huh?\pWell, have I got just the thing for you!\pChallenges!\pChallenges are a special type of Quest that can be way more in depth!\pHere, take a look."))
+        msgbox(format("What's that?\pThat little Quest Book you have there?\pSo you're trying to complete Quests, huh?\pWell, have I got just the thing for you!\pTrials!\pTrials are curated Adventures with special rules that are enforced from start to finish.\pHere, take a look."))
         
-        special(Rogue_UnlockChallengeQuests)
+        special(Rogue_UnlockTrialQuests)
         special(Rogue_ShowNewQuests)
         waitstate
         
-        msgbox(format("Challenges are different from regular Quests, as they track which Difficulty you last completed them on.\pThere's even some exclusive Rewards for completing them on higher difficulties too!\pIf you want to retry a Challenge on a harder difficulty, just head on over to the Config Lab and keep an eye on the Reward Difficulty.\pSounds exciting, right?\pShow me what you can do, {PLAYER}!"))
+        msgbox(format("Trial Quests track the highest Difficulty you have completed them on.\pSome even offer exclusive Rewards for higher difficulties!\pYou can now build a Trial Attendant upgrade near the Adventure entrance.\pSpeak with the attendant to choose a Trial, Difficulty, and Pokédex.\pShow me what you can do, {PLAYER}!"))
     }
     else
     {
-        msgbox(format("Hi there, {PLAYER}.\pHow have your Challenges been going?\nWell I hope!"))
+        msgbox(format("Hi there, {PLAYER}.\pHow have your Trials been going?\nWell I hope!\pThe Trial Attendant near the Adventure entrance can help you start another one."))
     }
 
     release

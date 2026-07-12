@@ -4,7 +4,7 @@
 #include "rogue_hub_strings.h"
 
 extern const u8 gHubAreaDesc_Todo[];
-extern const u8 gHubAreaDesc_ChallengeFrontier[];
+extern const u8 gHubAreaDesc_TrialFrontier[];
 extern const u8 gHubAreaDesc_BerryField[];
 extern const u8 gHubAreaDesc_Home[];
 extern const u8 gHubAreaDesc_Marts[];
@@ -219,11 +219,11 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
 #endif
         .iconPalette = gItemIconPalette_DevonGoodsBrown,
     },
-    [HUB_AREA_CHALLENGE_FRONTIER] = 
+    [HUB_AREA_TRIAL_FRONTIER] = 
     {
-        SET_AREA_PRIMARY_MAP(ROGUE_AREA_CHALLENGE_FRONTIER),
-        .areaName = _("Challenge Area"),
-        .descText = gHubAreaDesc_ChallengeFrontier,
+        SET_AREA_PRIMARY_MAP(ROGUE_AREA_TRIAL_FRONTIER),
+        .areaName = _("Trial Area"),
+        .descText = gHubAreaDesc_TrialFrontier,
         .buildCost = 0,
         .requiredUpgrades = { HUB_UPGRADE_NONE },
         .connectionWarps = 

@@ -1,7 +1,7 @@
 {
-  "id": "MAP_ROGUE_INTERIOR_CHALLENGE_FRONTIER",
-  "name": "Rogue_Interior_ChallengeFrontier",
-  "layout": "LAYOUT_ROGUE_INTERIOR_CHALLENGE_FRONTIER",
+  "id": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
+  "name": "Rogue_Interior_TrialFrontier",
+  "layout": "LAYOUT_ROGUE_INTERIOR_TRIAL_FRONTIER",
   "music": "MUS_HG_B_HALL",
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
@@ -24,7 +24,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_TalkScott",
+      "script": "Rogue_Interior_TrialFrontier_TalkScott",
       "flag": "0"
     },
     {
@@ -50,7 +50,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_TalkMasteries",
+      "script": "Rogue_Interior_TrialFrontier_TalkMasteries",
       "flag": "0"
     },
     {
@@ -180,7 +180,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_MegaStone",
+      "script": "Rogue_Interior_TrialFrontier_MegaStone",
       "flag": "FLAG_TEMP_1"
     },
     {
@@ -193,7 +193,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_ZCrystal",
+      "script": "Rogue_Interior_TrialFrontier_ZCrystal",
       "flag": "FLAG_TEMP_2"
     },
     {
@@ -206,7 +206,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_Dynamax",
+      "script": "Rogue_Interior_TrialFrontier_Dynamax",
       "flag": "FLAG_TEMP_3"
     },
     {
@@ -219,7 +219,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_HealingFlask",
+      "script": "Rogue_Interior_TrialFrontier_HealingFlask",
       "flag": "FLAG_TEMP_4"
     },
     {
@@ -232,7 +232,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_Tera",
+      "script": "Rogue_Interior_TrialFrontier_Tera",
       "flag": "FLAG_TEMP_5"
     },
     {
@@ -245,7 +245,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_TalkChallenges",
+      "script": "Rogue_Interior_TrialFrontier_TalkTrials",
       "flag": "0"
     }
   ],
@@ -254,21 +254,21 @@
       "x": 19,
       "y": 11,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_CHALLENGE_FRONTIER",
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "8"
     },
     {
       "x": 19,
       "y": 2,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_INTERIOR_CHALLENGE_FRONTIER",
+      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
       "dest_warp_id": "2"
     },
     {
       "x": 5,
       "y": 28,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_INTERIOR_CHALLENGE_FRONTIER",
+      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
       "dest_warp_id": "1"
     }
   ],
@@ -280,7 +280,7 @@
       "elevation": 0,
       "var": "VAR_ROGUE_POST_GAME_TUTORIAL",
       "var_value": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_ScottIntroCentre"
+      "script": "Rogue_Interior_TrialFrontier_ScottIntroCentre"
     },
     {
       "type": "trigger",
@@ -289,7 +289,7 @@
       "elevation": 0,
       "var": "VAR_ROGUE_POST_GAME_TUTORIAL",
       "var_value": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_ScottIntroLeft"
+      "script": "Rogue_Interior_TrialFrontier_ScottIntroLeft"
     },
     {
       "type": "trigger",
@@ -298,7 +298,7 @@
       "elevation": 0,
       "var": "VAR_ROGUE_POST_GAME_TUTORIAL",
       "var_value": "0",
-      "script": "Rogue_Interior_ChallengeFrontier_ScottIntroRight"
+      "script": "Rogue_Interior_TrialFrontier_ScottIntroRight"
     },
     {
       "type": "trigger",
@@ -307,7 +307,7 @@
       "elevation": 0,
       "var": "VAR_ROGUE_POST_GAME_TUTORIAL",
       "var_value": "1",
-      "script": "Rogue_Interior_ChallengeFrontier_ScottBlockExit"
+      "script": "Rogue_Interior_TrialFrontier_ScottBlockExit"
     },
     {
       "type": "trigger",
@@ -316,7 +316,7 @@
       "elevation": 0,
       "var": "VAR_ROGUE_POST_GAME_TUTORIAL",
       "var_value": "1",
-      "script": "Rogue_Interior_ChallengeFrontier_VisitedGimicRoom"
+      "script": "Rogue_Interior_TrialFrontier_VisitedGimicRoom"
     },
     {
       "type": "trigger",
@@ -325,7 +325,7 @@
       "elevation": 0,
       "var": "VAR_ROGUE_POST_GAME_TUTORIAL",
       "var_value": "1",
-      "script": "Rogue_Interior_ChallengeFrontier_VisitedGimicRoom"
+      "script": "Rogue_Interior_TrialFrontier_VisitedGimicRoom"
     },
     {
       "type": "trigger",
@@ -334,7 +334,7 @@
       "elevation": 0,
       "var": "VAR_ROGUE_POST_GAME_TUTORIAL",
       "var_value": "1",
-      "script": "Rogue_Interior_ChallengeFrontier_VisitedGimicRoom"
+      "script": "Rogue_Interior_TrialFrontier_VisitedGimicRoom"
     }
   ],
   "bg_events": [
@@ -344,7 +344,7 @@
       "y": 21,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Rogue_Interior_ChallengeFrontier_MegaStone"
+      "script": "Rogue_Interior_TrialFrontier_MegaStone"
     },
     {
       "type": "sign",
@@ -352,7 +352,7 @@
       "y": 22,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Rogue_Interior_ChallengeFrontier_ZCrystal"
+      "script": "Rogue_Interior_TrialFrontier_ZCrystal"
     },
     {
       "type": "sign",
@@ -360,7 +360,7 @@
       "y": 21,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Rogue_Interior_ChallengeFrontier_Dynamax"
+      "script": "Rogue_Interior_TrialFrontier_Dynamax"
     },
     {
       "type": "sign",
@@ -368,7 +368,7 @@
       "y": 21,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Rogue_Interior_ChallengeFrontier_HealingFlask"
+      "script": "Rogue_Interior_TrialFrontier_HealingFlask"
     },
     {
       "type": "sign",
@@ -376,7 +376,7 @@
       "y": 22,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Rogue_Interior_ChallengeFrontier_Tera"
+      "script": "Rogue_Interior_TrialFrontier_Tera"
     }
   ]
 }

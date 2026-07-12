@@ -358,7 +358,7 @@ static const u8 sText_Popup_AdventureReplay[] = _("Adventure Replay");
 static const u8 sText_Popup_AdventureReplaySubtitle[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN}Active");
 
 static const u8 sText_Popup_QuestsDisabled[] = _("{COLOR LIGHT_RED}{SHADOW RED}Quests Inactive");
-static const u8 sText_Popup_ChallengesDisabled[] = _("{COLOR LIGHT_RED}{SHADOW RED}Challenge Inactiv");
+static const u8 sText_Popup_TrialsDisabled[] = _("{COLOR LIGHT_RED}{SHADOW RED}Trials Inactive");
 static const u8 sText_Popup_QuestsDisabledSubtitle[] = _("{COLOR LIGHT_BLUE}{SHADOW BLUE}Current Mode");
 
 static const u8 sText_Popup_WeatherActive[] = _("{COLOR LIGHT_BLUE}{SHADOW BLUE}Weather Active");
@@ -2010,7 +2010,7 @@ void Rogue_PushPopup_MainQuestsDisabled()
     popup->subtitleText = sText_Popup_QuestsDisabledSubtitle;
 }
 
-void Rogue_PushPopup_ChallengeQuestsDisabled()
+void Rogue_PushPopup_TrialQuestsDisabled()
 {
     struct PopupRequest* popup = CreateNewPopup();
 
@@ -2018,7 +2018,7 @@ void Rogue_PushPopup_ChallengeQuestsDisabled()
     popup->iconId = ITEM_C_GEAR;
     popup->soundEffect = SE_UNLOCK;
     
-    popup->titleText = sText_Popup_ChallengesDisabled;
+    popup->titleText = sText_Popup_TrialsDisabled;
     popup->subtitleText = sText_Popup_QuestsDisabledSubtitle;
 }
 

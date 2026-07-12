@@ -2,10 +2,10 @@
     "condition": "",
     "defaults":
     {
-        "display_group": "trial_challenges",
+        "display_group": "trial_quests",
         "flags": 
         [
-            "CHALLENGE_DEFAULT",
+            "TRIAL_DEFAULT",
             "ACTIVE_IN_RUN"
         ],
         "triggers":
@@ -25,8 +25,8 @@
             
             {
                 "name": "Type Master",
-                "display_group": "type_challenges",
-                "description": "Complete any of the 'Type Master' challenges.\\ne.g. Normal Master, Water Master etc.",
+                "display_group": "type_trials",
+                "description": "Complete any of the Type Trials.\\ne.g. Normal Trial, Water Trial etc.",
                 "flags": 
                 [
                     "MAIN_QUEST_DEFAULT",

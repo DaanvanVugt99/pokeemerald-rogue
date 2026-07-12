@@ -16,7 +16,7 @@ struct GameModeRules
     u8 trainerBattleWinningsPerc;
     u8 trainerOrder : 2;
     u8 disableMainQuests : 1;
-    u8 disableChallengeQuests : 1;
+    u8 disableTrialQuests : 1;
     u8 disablePerBadgeLvlCaps : 1;
     u8 forceEndGameTrainers : 1;
     u8 forceEndGameRouteItems : 1;
@@ -36,7 +36,7 @@ bool8 Rogue_CanEditConfig();
 
 struct GameModeRules const* Rogue_GetModeRules();
 bool8 Rogue_ShouldDisableMainQuests();
-bool8 Rogue_ShouldDisableChallengeQuests();
+bool8 Rogue_ShouldDisableTrialQuests();
 
 void RogueDebug_SetConfigToggle(u16 elem, bool8 state);
 bool8 RogueDebug_GetConfigToggle(u16 elem);

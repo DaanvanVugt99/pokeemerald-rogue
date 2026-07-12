@@ -214,14 +214,14 @@ static bool8 CanActivateQuest(u16 questId)
     if(RogueQuest_GetStateFlag(questId, QUEST_STATE_PENDING_REWARDS))
         return FALSE;
 
-    // Masteries still work in the background, but challenges don't
+    // Masteries still work in the background, but Trials don't
     if(IsQuestSurpressed(questId) && !CanSurpressedQuestActivate(questId))
         return FALSE;
 
-    // Challenges can be run again at a higher difficulty
-    if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_CHALLENGE))
+    // Trials can be run again at a higher difficulty
+    if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
     {
-        if(Rogue_ShouldDisableChallengeQuests())
+        if(Rogue_ShouldDisableTrialQuests())
             return FALSE;
 
         if(RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
@@ -250,9 +250,9 @@ static bool8 CanActivateQuest(u16 questId)
 // i.e. you can technically complete masteries without having them unlocked
 static bool8 IsQuestSurpressed(u16 questId)
 {
-    if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_CHALLENGE))
+    if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
     {
-        if(!RogueQuest_HasUnlockedChallenges())
+        if(!RogueQuest_HasUnlockedTrials())
             return TRUE;
     }
 
@@ -664,6 +664,53 @@ void RogueQuest_ActivateQuestsFor(u32 flags)
     }
 }
 
+void RogueQuest_UnlockCurrentEvilTeamQuest(void)
+{
+    u16 questId;
+
+    switch (gRogueRun.teamEncounterNum)
+    {
+    case TEAM_NUM_KANTO_ROCKET:
+    case TEAM_NUM_JOHTO_ROCKET:
+        questId = QUEST_ID_ROCKET_TRIUMPH;
+        break;
+    case TEAM_NUM_AQUA:
+        questId = QUEST_ID_AQUA_TRIUMPH;
+        break;
+    case TEAM_NUM_MAGMA:
+        questId = QUEST_ID_MAGMA_TRIUMPH;
+        break;
+#ifdef ROGUE_EXPANSION
+    case TEAM_NUM_GALACTIC:
+        questId = QUEST_ID_GALACTIC_TRIUMPH;
+        break;
+    case TEAM_NUM_PLASMA:
+    case TEAM_NUM_NEOPLASMA:
+        questId = QUEST_ID_PLASMA_TRIUMPH;
+        break;
+    case TEAM_NUM_FLARE:
+        questId = QUEST_ID_FLARE_TRIUMPH;
+        break;
+#endif
+    default:
+        return;
+    }
+
+    RogueQuest_TryUnlockQuest(questId);
+}
+
+void RogueQuest_UnlockAllEvilTeamQuests(void)
+{
+    RogueQuest_TryUnlockQuest(QUEST_ID_ROCKET_TRIUMPH);
+    RogueQuest_TryUnlockQuest(QUEST_ID_AQUA_TRIUMPH);
+    RogueQuest_TryUnlockQuest(QUEST_ID_MAGMA_TRIUMPH);
+#ifdef ROGUE_EXPANSION
+    RogueQuest_TryUnlockQuest(QUEST_ID_GALACTIC_TRIUMPH);
+    RogueQuest_TryUnlockQuest(QUEST_ID_PLASMA_TRIUMPH);
+    RogueQuest_TryUnlockQuest(QUEST_ID_FLARE_TRIUMPH);
+#endif
+}
+
 static bool8 CheckRequirementCondition(u32 value, u32 conditionValue, u32 condition)
 {
     switch (condition)
@@ -836,8 +883,8 @@ u16 RogueQuest_GetDisplayCompletePerc()
     u32 constFlags = QUEST_CONST_IS_MAIN_QUEST;
     u16 maxValue = 100;
 
-    if(RogueQuest_HasUnlockedChallenges())
-        constFlags |= QUEST_CONST_IS_CHALLENGE;
+    if(RogueQuest_HasUnlockedTrials())
+        constFlags |= QUEST_CONST_IS_TRIAL;
     else
         maxValue = 99;
 
@@ -853,7 +900,7 @@ u16 RogueQuest_GetDisplayCompletePerc()
     //if(questCompletion == 100)
     //{
     //    // Reach 100% total
-    //    return questCompletion + RogueQuest_GetQuestCompletePercFor(QUEST_CONST_IS_CHALLENGE) + RogueQuest_GetQuestCompletePercFor(QUEST_CONST_IS_MON_MASTERY);
+    //    return questCompletion + RogueQuest_GetQuestCompletePercFor(QUEST_CONST_IS_TRIAL) + RogueQuest_GetQuestCompletePercFor(QUEST_CONST_IS_MON_MASTERY);
     //}
 //
     //return questCompletion;
@@ -1002,9 +1049,9 @@ void RogueQuest_OnTrigger(u32 triggerFlag)
     }
 }
 
-bool8 RogueQuest_HasUnlockedChallenges()
+bool8 RogueQuest_HasUnlockedTrials()
 {
-    return FlagGet(FLAG_SYS_CHALLENGES_UNLOCKED);
+    return FlagGet(FLAG_SYS_TRIALS_UNLOCKED);
 }
 
 bool8 RogueQuest_HasUnlockedMonMasteries()

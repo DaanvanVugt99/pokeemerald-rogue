@@ -208,9 +208,10 @@ gSpecials::
 	def_special Rogue_QuestCollectNextReward
 	def_special Rogue_HasAnyNewQuests
 	def_special Rogue_HasPendingQuestRewards
-	def_special Rogue_UnlockChallengeQuests
+	def_special Rogue_UnlockTrialQuests
 	def_special Rogue_UnlockMasteryQuests
 	def_special Rogue_ShowNewQuests
+	def_special Rogue_ShowQuestLog
 	def_special Rogue_ShowNewMonMasteries
 	def_special Rogue_DetermineItemPickupCount
 	def_special Rogue_CheckBerryTreat

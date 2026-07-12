@@ -76,19 +76,23 @@ Format follows Keep a Changelog loosely:
 - Added an early Trial Attendant shortcut that previews and repeats the exact
   setup from the most recently started Trial.
 
-- Made the Quest Board open the quest menu when there are no pending quest
-  rewards to collect.
-- Made challenge quest money rewards more generous, increasing total challenge
-  quest money from 182,000 to 552,000 by adding a 10,000 money tier for planned
-  full-run restrictions and reserving 20,000 for capstone challenges.
+- Made the Quest Board prioritize pending rewards, then newly unlocked quests,
+  and otherwise open the normal Quest Log.
+- Made Trial quest money rewards more generous by adding a 10,000 money tier
+  for full-run restrictions and reserving 20,000 for capstone Trials.
 - Increased Main quest money rewards for later progression, rare discoveries,
   and full-run variant goals, raising total main quest money from 96,000 to
   190,000.
-- Split obvious run-contract challenges into a dedicated trial challenge display
-  group while keeping the existing Challenge quest category.
+- Reworked the former run-contract quest category into Trials for enforced,
+  repeatable run contracts.
+- Moved one-time battle-gimmick, flawless-run, speedrun, team-building, Shiny,
+  and evil-team achievements into Main Quests, with their former Hard-only
+  Shiny rewards granted on first completion.
+- Made each run unlock the Main Quest for its selected evil team before quests
+  activate, while postgame progression reveals every remaining team quest.
 - Converted Type Master, Regional Style, Z-A Royale, Orre Style, BST Crown,
   and Randoman Roulette rewards to complete through enforced Trial Attendant
-  runs instead of self-policed challenge rules.
+  runs instead of self-policed rules.
 - Converted Roguelocke, Can't Pick!?, Cursed Body, Pro-Building, Insane Mode,
   Iron Mono, and Iron Kaizo into enforced Trial Attendant runs with granular
   party, starter, battle-format, bag, Legendary, and Curse rules.
@@ -121,8 +125,8 @@ Format follows Keep a Changelog loosely:
   resumed Trial runs.
 - Reordered Trial startup validation to catch illegal party or Day Care Pokémon
   before saving or opening the optional starter selection.
-- Made the Trial Attendant upgrade become purchasable only after Challenges are
-  introduced in the Challenge Area.
+- Made the Trial Attendant upgrade become purchasable only after Trials are
+  introduced in the Trial Area.
 - Made the Trial Attendant appear at the Adventure Entrance only after their
   hub upgrade has been built.
 - Placed the Trial Attendant beside the normal Adventure nurse, replacing the
@@ -274,7 +278,7 @@ Format follows Keep a Changelog loosely:
 
 - Corrected the battle-sprite positioning of newly added Z-A Mega Evolutions,
   including visible gaps beneath Mega Staraptor and other backsprites.
-- Made individual Trials appear only after their corresponding Challenge quest
+- Made individual Trials appear only after their corresponding Trial quest
   has unlocked, preserving chained unlocks such as Chaos Master and Iron Kaizo.
 - Made Equalized apply a proportional 500-point base-stat spread throughout the
   run, including wild battles, party stats, and the active Pokédex display.

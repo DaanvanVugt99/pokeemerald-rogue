@@ -99,22 +99,22 @@ void RogueDebug_MainInit(void)
         DebugPrint("[Quest Verify]");
         DebugPrint("    [Counts]");
         DebugPrintf("        [Main] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_MAIN_QUEST, TRUE));
-        DebugPrintf("        [Challenge] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_CHALLENGE, TRUE));
+        DebugPrintf("        [Trial] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_TRIAL, TRUE));
         DebugPrintf("        [Mastery] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_MON_MASTERY, TRUE));
 
         DebugPrint("    [Rewards]");
         DebugPrintf("        [Main] Money:%d", CountMoneyQuestRewards(QUEST_CONST_IS_MAIN_QUEST));
         DebugPrintf("        [Main] BuildingSupplies:%d", CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_MAIN_QUEST));
 
-        DebugPrintf("        [Challenge] Money:%d", CountMoneyQuestRewards(QUEST_CONST_IS_CHALLENGE));
-        DebugPrintf("        [Challenge] BuildingSupplies:%d", CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_CHALLENGE));
+        DebugPrintf("        [Trial] Money:%d", CountMoneyQuestRewards(QUEST_CONST_IS_TRIAL));
+        DebugPrintf("        [Trial] BuildingSupplies:%d", CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_TRIAL));
 
         DebugPrintf("        [Mastery] Money:%d", CountMoneyQuestRewards(QUEST_CONST_IS_MON_MASTERY));
         DebugPrintf("        [Mastery] BuildingSupplies:%d", CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_MON_MASTERY));
 
 
         // None of these should give building supplies
-        AGB_ASSERT(CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_CHALLENGE) == 0);
+        AGB_ASSERT(CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_TRIAL) == 0);
         AGB_ASSERT(CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_MON_MASTERY) == 0);
 
         DebugPrint("[Hub Verify]");

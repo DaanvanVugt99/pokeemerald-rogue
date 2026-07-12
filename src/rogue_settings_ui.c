@@ -223,7 +223,7 @@ static u8 const sMenuNameDesc_TrainerOrderRainbow[] = _(
 static u8 const sMenuNameDesc_TrainerOrderOfficial[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
     "Trainers appear in the order they appear\n"
-    "in official games. (Disables Challenges)"
+    "in official games. (Disables Trials)"
 );
 static u8 const* const sMenuNameDesc_TrainerOrder[] =
 {
@@ -402,13 +402,13 @@ static u8 const sMenuNameDesc_GameMode_Official[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
     "Mighty Trainers appear in the order they\n"
     "appear in their official games.\n"
-    "(Disables Challenges)"
+    "(Disables Trials)"
 );
 static u8 const sMenuNameDesc_GameMode_Gauntlet[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
     "Prepare your team and then fight Mighty\n"
     "Trainers back to back without a chance\n"
-    "to catch any {PKMN}. (Disables Challenges)"
+    "to catch any {PKMN}. (Disables Trials)"
 );
 static u8 const sMenuNameDesc_GameMode_RainbowGauntlet[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"

@@ -46,7 +46,7 @@
     "Rogue_Area_RideTraining",
     "Rogue_Area_Marts",
     "Rogue_Area_TownSquare",
-    "Rogue_Area_ChallengeFrontier",
+    "Rogue_Area_TrialFrontier",
     "Rogue_Area_DayCare",
     "Rogue_Area_Market"
   ],
@@ -60,7 +60,7 @@
     "Rogue_Interior_Restaurant",
     "Rogue_Interior_Cafe",
     "Rogue_Interior_School",
-    "Rogue_Interior_ChallengeFrontier",
+    "Rogue_Interior_TrialFrontier",
     "Rogue_Interior_BillsLab"
   ],
   "gMapGroup_RogueHubTemplates": [

@@ -5,7 +5,7 @@ text gItemDesc_EvolutionItem
 
 text gItemDesc_QuestLog
 {
-    format("A diary log for tracking Quests and Challenges.")
+    format("A diary log for tracking Quests and Trials.")
 }
 
 text gItemDesc_HealingFlask
@@ -383,9 +383,9 @@ text gHubAreaDesc_Todo
     format("todo - area desc")
 }
 
-text gHubAreaDesc_ChallengeFrontier
+text gHubAreaDesc_TrialFrontier
 {
-    format("Access various new Quests and Items…")
+    format("Access Trials, Masteries, and special Items…")
 }
 
 text gHubAreaDesc_BerryField

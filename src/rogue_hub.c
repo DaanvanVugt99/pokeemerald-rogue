@@ -294,7 +294,7 @@ static void RogueHub_UpdateRideTrainingAreaMetatiles();
 static void RogueHub_UpdateMartsAreaMetatiles();
 static void RogueHub_UpdateTownSquareAreaMetatiles();
 static void RogueHub_UpdateMarketAreaMetatiles();
-static void RogueHub_UpdateChallengeFrontierAreaMetatiles();
+static void RogueHub_UpdateTrialFrontierAreaMetatiles();
 static void RogueHub_UpdateDayCareAreaMetatiles();
 
 static void BuildAtRandomConnectionFrom(u8 fromArea, u8 buildArea);
@@ -422,7 +422,7 @@ bool8 RogueHub_HasUpgradeRequirements(u16 upgradeId)
     u8 check;
 
     if(upgradeId == HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT
-        && !FlagGet(FLAG_SYS_CHALLENGES_UNLOCKED))
+        && !FlagGet(FLAG_SYS_TRIALS_UNLOCKED))
         return FALSE;
 
     if(!RogueHub_HasAreaBuilt(gRogueHubUpgrades[upgradeId].targetArea))
@@ -506,7 +506,7 @@ bool8 RogueHub_HasAreaBuildRequirements(u8 area)
     u8 check;
 
     // Cannot build until post game
-    if(area == HUB_AREA_CHALLENGE_FRONTIER)
+    if(area == HUB_AREA_TRIAL_FRONTIER)
     {
         if(!FlagGet(FLAG_ROGUE_MET_POKABBIE))
             return FALSE;
@@ -1103,8 +1103,8 @@ void RogueHub_ApplyMapMetatiles()
         RogueHub_UpdateMarketAreaMetatiles();
         break;
 
-    case LAYOUT_ROGUE_AREA_CHALLENGE_FRONTIER:
-        RogueHub_UpdateChallengeFrontierAreaMetatiles();
+    case LAYOUT_ROGUE_AREA_TRIAL_FRONTIER:
+        RogueHub_UpdateTrialFrontierAreaMetatiles();
         break;
 
     case LAYOUT_ROGUE_AREA_DAY_CARE:
@@ -1821,10 +1821,10 @@ static void RogueHub_UpdateMarketAreaMetatiles()
     }
 }
 
-static void RogueHub_UpdateChallengeFrontierAreaMetatiles()
+static void RogueHub_UpdateTrialFrontierAreaMetatiles()
 {
     // Remove connectionss
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_EAST) == HUB_AREA_NONE && RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
+    if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_EAST) == HUB_AREA_NONE && RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
     {
         MetatileFill_TreesOverlapping(30, 7, 37, 19, TREE_TYPE_DENSE);
 
@@ -1835,7 +1835,7 @@ static void RogueHub_UpdateChallengeFrontierAreaMetatiles()
     }
     else
     {
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
+        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
         {
             MetatileFill_TreesOverlapping(32, 0, 35, 12, TREE_TYPE_DENSE);
             MetatileFill_TreeStumps(32, 13, 35, TREE_TYPE_DENSE);
@@ -1843,7 +1843,7 @@ static void RogueHub_UpdateChallengeFrontierAreaMetatiles()
             MetatileFill_CommonPathRemoval(32, 14, 35, 14);
         }
 
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
+        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
         {
             MetatileFill_TreesOverlapping(38, 13, 39, 18, TREE_TYPE_DENSE);
 
@@ -1851,7 +1851,7 @@ static void RogueHub_UpdateChallengeFrontierAreaMetatiles()
         }
     }
 
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE && RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
+    if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE && RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
         MetatileFill_TreesOverlapping(2, 13, 9, 25, TREE_TYPE_DENSE);
 
@@ -1862,7 +1862,7 @@ static void RogueHub_UpdateChallengeFrontierAreaMetatiles()
     }
     else
     {
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
+        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
         {
             MetatileFill_TreeCaps(4, 19, 7);
             MetatileFill_TreesOverlapping(4, 20, 7, 25, TREE_TYPE_DENSE);
@@ -1870,7 +1870,7 @@ static void RogueHub_UpdateChallengeFrontierAreaMetatiles()
             MetatileFill_CommonPathRemoval(4, 18, 7, 18);
         }
 
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_CHALLENGE_FRONTIER, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
+        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
         {
             MetatileFill_TreesOverlapping(0, 13, 1, 18, TREE_TYPE_DENSE);
 

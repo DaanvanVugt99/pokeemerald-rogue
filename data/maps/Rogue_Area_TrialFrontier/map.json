@@ -1,7 +1,7 @@
 {
-  "id": "MAP_ROGUE_AREA_CHALLENGE_FRONTIER",
-  "name": "Rogue_Area_ChallengeFrontier",
-  "layout": "LAYOUT_ROGUE_AREA_CHALLENGE_FRONTIER",
+  "id": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
+  "name": "Rogue_Area_TrialFrontier",
+  "layout": "LAYOUT_ROGUE_AREA_TRIAL_FRONTIER",
   "music": "MUS_LITTLEROOT",
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
@@ -110,14 +110,14 @@
       "x": 19,
       "y": 8,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_INTERIOR_CHALLENGE_FRONTIER",
+      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
       "x": 20,
       "y": 8,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_INTERIOR_CHALLENGE_FRONTIER",
+      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
