@@ -258,6 +258,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made individual Trials appear only after their corresponding Challenge quest
+  has unlocked, preserving chained unlocks such as Chaos Master and Iron Kaizo.
+- Made Equalized apply a proportional 500-point base-stat spread throughout the
+  run, including wild battles, party stats, and the active Pokédex display.
 - Restored the gate-opening walk sequence when starting a Trial through the
   Trial Attendant.
 - Made completed or retired Trial runs return the player in front of the Trial

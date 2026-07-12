@@ -276,9 +276,11 @@ static void HandleInputChooseAction(u32 battler)
         gPlayerDpadHoldFrames = 0;
 
 #if B_LAST_USED_BALL == TRUE && B_LAST_USED_BALL_CYCLE == TRUE
-    if (!gLastUsedBallMenuPresent)
+    if (!gLastUsedBallMenuPresent || !CanThrowLastUsedBall())
     {
         sAckBallUseBtn = FALSE;
+        sBallSwapped = FALSE;
+        ArrowsChangeColorLastBallCycle(FALSE);
     }
     else if (JOY_NEW(B_LAST_USED_BALL_BUTTON))
     {

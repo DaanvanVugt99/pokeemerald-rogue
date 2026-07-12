@@ -21,6 +21,7 @@
 #include "rogue_multiplayer.h"
 #include "rogue_pokedex.h"
 #include "rogue_query.h"
+#include "rogue_quest.h"
 #include "rogue_script.h"
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
@@ -125,7 +126,7 @@ static const u8 sText_TypeTrialDesc[] = _("Only matching-type {PKMN}\nmay enter 
 static const u8 sText_LittleCupDesc[] = _("Only first-stage evolving\n{PKMN}. Battles are Lv. 5.");
 static const u8 sText_LowBstDesc[] = _("Only {PKMN} with 400 BST\nor lower may battle.");
 static const u8 sText_RandomanRouletteDesc[] = _("Your full party is rerolled\non every adventure map.");
-static const u8 sText_EqualizedDesc[] = _("All battle {PKMN} are scaled\ntoward 500 BST.");
+static const u8 sText_EqualizedDesc[] = _("All {PKMN} use proportional\n500 BST stat spreads.");
 static const u8 sText_RegionTrialDesc[] = _("Uses that region's Pokédex\nand Trainer pool.");
 static const u8 sText_ZARoyaleDesc[] = _("Z-A Pokédex with Rainbow\nregional Trainers.");
 static const u8 sText_OrreStyleDesc[] = _("Doubles with Snag Curse.\nFinish with Umbreon+Espeon.");
@@ -149,7 +150,7 @@ static const u8 sRule_LowBstLegality[] = _("Only {PKMN} with 400 BST or lower ar
 static const u8 sRule_LowBstEvolution[] = _("Evolution is blocked above 400 BST.");
 static const u8 sRule_RandomanReroll[] = _("The full party rerolls on every adventure map.");
 static const u8 sRule_RandomanDex[] = _("Rerolled {PKMN} use the selected Pokédex.");
-static const u8 sRule_EqualizedBst[] = _("All battle {PKMN} are scaled to 500 BST.");
+static const u8 sRule_EqualizedBst[] = _("All {PKMN} use a 500 BST stat spread.");
 static const u8 sRule_EqualizedStats[] = _("Stats retain their original proportions.");
 static const u8 sRule_EqualizedIdentity[] = _("Species, types, moves, and Abilities stay the same.");
 static const u8 sRule_RegionalDex[] = _("Only selected Pokédex species are legal.");
@@ -693,8 +694,72 @@ static bool8 IsGroupedTrialId(u8 trialId)
     return IsTypeTrialId(trialId) || IsRegionalStyleTrialId(trialId);
 }
 
+static u16 GetTrialQuestId(u8 trialId)
+{
+    static const u16 sTypeQuestIds[] =
+    {
+        QUEST_ID_NORMAL_MASTER,
+        QUEST_ID_FIGHTING_MASTER,
+        QUEST_ID_FLYING_MASTER,
+        QUEST_ID_POISON_MASTER,
+        QUEST_ID_GROUND_MASTER,
+        QUEST_ID_ROCK_MASTER,
+        QUEST_ID_BUG_MASTER,
+        QUEST_ID_GHOST_MASTER,
+        QUEST_ID_STEEL_MASTER,
+        QUEST_ID_FIRE_MASTER,
+        QUEST_ID_WATER_MASTER,
+        QUEST_ID_GRASS_MASTER,
+        QUEST_ID_ELECTRIC_MASTER,
+        QUEST_ID_PSYCHIC_MASTER,
+        QUEST_ID_ICE_MASTER,
+        QUEST_ID_DRAGON_MASTER,
+        QUEST_ID_DARK_MASTER,
+#ifdef ROGUE_EXPANSION
+        QUEST_ID_FAIRY_MASTER,
+#endif
+    };
+
+    if (IsTypeTrialId(trialId))
+        return sTypeQuestIds[trialId - ROGUE_TRIAL_TYPE_NORMAL];
+
+    switch (trialId)
+    {
+    case ROGUE_TRIAL_LITTLE_CUP: return QUEST_ID_LITTLE_CUP;
+    case ROGUE_TRIAL_LOW_BST: return QUEST_ID_BST_CROWN;
+    case ROGUE_TRIAL_RANDOMAN_ROULETTE: return QUEST_ID_RANDOMAN_ROULETTE;
+    case ROGUE_TRIAL_EQUALIZED: return QUEST_ID_EQUALIZED;
+    case ROGUE_TRIAL_REGION_KANTO: return QUEST_ID_KANTO_STYLE;
+    case ROGUE_TRIAL_REGION_JOHTO: return QUEST_ID_JOHTO_STYLE;
+    case ROGUE_TRIAL_REGION_HOENN: return QUEST_ID_HOENN_STYLE;
+#ifdef ROGUE_EXPANSION
+    case ROGUE_TRIAL_REGION_SINNOH: return QUEST_ID_SINNOH_STYLE;
+    case ROGUE_TRIAL_REGION_UNOVA: return QUEST_ID_UNOVA_STYLE;
+    case ROGUE_TRIAL_REGION_KALOS: return QUEST_ID_KALOS_STYLE;
+    case ROGUE_TRIAL_REGION_ALOLA: return QUEST_ID_ALOLA_STYLE;
+    case ROGUE_TRIAL_REGION_GALAR: return QUEST_ID_GALAR_STYLE;
+    case ROGUE_TRIAL_REGION_PALDEA: return QUEST_ID_PALDEA_STYLE;
+    case ROGUE_TRIAL_Z_A_ROYALE: return QUEST_ID_Z_A_ROYALE;
+#endif
+    case ROGUE_TRIAL_ORRE_STYLE: return QUEST_ID_ORRE_STYLE;
+    case ROGUE_TRIAL_ROGUELOCKE: return QUEST_ID_ROGUELOCKE;
+    case ROGUE_TRIAL_CANT_PICK: return QUEST_ID_CANT_PICKEMARKQMARK;
+    case ROGUE_TRIAL_CURSED_BODY: return QUEST_ID_CURSED_BODY;
+    case ROGUE_TRIAL_PRO_BUILDING: return QUEST_ID_PRO_BUILDING;
+    case ROGUE_TRIAL_INSANE_MODE: return QUEST_ID_INSANE_MODE;
+    case ROGUE_TRIAL_IRON_MONO: return QUEST_ID_IRON_MONO;
+    case ROGUE_TRIAL_IRON_KAIZO: return QUEST_ID_IRON_KAIZO;
+    case ROGUE_TRIAL_CHAOS_MASTER: return QUEST_ID_CHAOS_MASTER;
+    case ROGUE_TRIAL_APOTHEOSIS: return QUEST_ID_APOTHEOSIS;
+    case ROGUE_TRIAL_LIMITED_CAPTURE: return QUEST_ID_LIMITED_CAPTURE;
+    default: return QUEST_ID_COUNT;
+    }
+}
+
 static bool8 IsTrialAvailableForMenu(u8 trialId)
 {
+    u16 questId;
+
     if (!IsValidTrialId(trialId) || sTrialDefinitions[trialId].name == NULL)
         return FALSE;
 
@@ -703,7 +768,8 @@ static bool8 IsTrialAvailableForMenu(u8 trialId)
         return FALSE;
 #endif
 
-    return TRUE;
+    questId = GetTrialQuestId(trialId);
+    return questId < QUEST_ID_COUNT && RogueQuest_IsQuestUnlocked(questId);
 }
 
 static bool8 IsTrialInMenuGroup(u8 trialId, u16 groupId)
@@ -1532,6 +1598,37 @@ void RogueTrial_FilterMonQuery(void)
         RogueMonQuery_CustomFilter(QueryFilter_CurrentTrialSpecies, NULL);
 }
 
+void RogueTrial_FilterOpponentMonQuery(void)
+{
+    if (RogueTrial_EnforcesOpponentSpeciesLegality())
+        RogueTrial_FilterMonQuery();
+}
+
+bool8 RogueTrial_EnforcesOpponentSpeciesLegality(void)
+{
+    const struct RogueTrialDefinition *trial;
+
+    if (!RogueTrial_IsActive() || !CurrentTrialRequiresSpeciesLegality())
+        return FALSE;
+
+    trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+    return trial != NULL && trial->enforceOpponentSpeciesLegality;
+}
+
+u8 RogueTrial_ModifyOpponentEvoLevel(u8 level)
+{
+    const struct RogueTrialDefinition *trial;
+
+    if (!RogueTrial_EnforcesOpponentSpeciesLegality())
+        return level;
+
+    trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+    if (trial->battleLevel != 0)
+        return min(level, trial->battleLevel);
+
+    return level;
+}
+
 static bool8 ActivePartyIsLegal(void)
 {
     u8 i;
@@ -1669,64 +1766,76 @@ static void SetMonBattleLevel(struct Pokemon *mon, u8 level)
     CalculateMonStats(mon);
 }
 
-static u16 ScaleStatToBst(u16 stat, u16 currentBst, u16 targetBst)
+void RogueTrial_GetEffectiveSpeciesBaseStats(u16 species, u16 *stats, u8 statCount)
 {
-    if (currentBst == 0)
-        return stat;
-
-    return max(1, (stat * targetBst + currentBst / 2) / currentBst);
-}
-
-static void NormalizeMonBattleBst(struct Pokemon *mon, u16 targetBst)
-{
-    u16 species = GetMonData(mon, MON_DATA_SPECIES);
+    u8 i;
     u16 currentBst;
-    u16 oldMaxHP;
-    u16 oldHP;
-    u16 value;
-
-    if (species == SPECIES_NONE || species == SPECIES_EGG)
-        return;
-
-    currentBst = RoguePokedex_GetSpeciesBST(species);
-    if (currentBst == 0)
-        return;
-
-    oldMaxHP = GetMonData(mon, MON_DATA_MAX_HP);
-    oldHP = GetMonData(mon, MON_DATA_HP);
-
-    value = ScaleStatToBst(oldMaxHP, currentBst, targetBst);
-    SetMonData(mon, MON_DATA_MAX_HP, &value);
-
-    value = ScaleStatToBst(GetMonData(mon, MON_DATA_ATK), currentBst, targetBst);
-    SetMonData(mon, MON_DATA_ATK, &value);
-
-    value = ScaleStatToBst(GetMonData(mon, MON_DATA_DEF), currentBst, targetBst);
-    SetMonData(mon, MON_DATA_DEF, &value);
-
-    value = ScaleStatToBst(GetMonData(mon, MON_DATA_SPEED), currentBst, targetBst);
-    SetMonData(mon, MON_DATA_SPEED, &value);
-
-    value = ScaleStatToBst(GetMonData(mon, MON_DATA_SPATK), currentBst, targetBst);
-    SetMonData(mon, MON_DATA_SPATK, &value);
-
-    value = ScaleStatToBst(GetMonData(mon, MON_DATA_SPDEF), currentBst, targetBst);
-    SetMonData(mon, MON_DATA_SPDEF, &value);
-
-    if (oldHP == 0)
+    u16 normalizedBst = 0;
+    u16 targetBst = 0;
+    u16 baseStats[NUM_STATS] =
     {
-        value = 0;
-    }
-    else
-    {
-        if (oldMaxHP == 0)
-            oldMaxHP = 1;
+        gRogueSpeciesInfo[species].baseHP,
+        gRogueSpeciesInfo[species].baseAttack,
+        gRogueSpeciesInfo[species].baseDefense,
+        gRogueSpeciesInfo[species].baseSpeed,
+        gRogueSpeciesInfo[species].baseSpAttack,
+        gRogueSpeciesInfo[species].baseSpDefense,
+    };
 
-        value = (oldHP * GetMonData(mon, MON_DATA_MAX_HP) + oldMaxHP - 1) / oldMaxHP;
-        value = min(max(value, 1), GetMonData(mon, MON_DATA_MAX_HP));
+    AGB_ASSERT(statCount >= NUM_STATS);
+
+    currentBst = 0;
+    for (i = 0; i < NUM_STATS; ++i)
+        currentBst += baseStats[i];
+
+    if (RogueTrial_IsActive())
+    {
+        const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+
+        if (trial != NULL)
+            targetBst = trial->normalizedBst;
     }
 
-    SetMonData(mon, MON_DATA_HP, &value);
+    if (targetBst == 0 || currentBst == 0)
+    {
+        memcpy(stats, baseStats, sizeof(baseStats));
+        return;
+    }
+
+    for (i = 0; i < NUM_STATS; ++i)
+    {
+        stats[i] = max(1, (baseStats[i] * targetBst + currentBst / 2) / currentBst);
+        normalizedBst += stats[i];
+    }
+
+    while (normalizedBst != targetBst)
+    {
+        u8 bestStat = 0;
+
+        for (i = 1; i < NUM_STATS; ++i)
+        {
+            if (normalizedBst < targetBst)
+            {
+                if (baseStats[i] > baseStats[bestStat])
+                    bestStat = i;
+            }
+            else if (stats[i] > 1 && (stats[bestStat] <= 1 || baseStats[i] > baseStats[bestStat]))
+            {
+                bestStat = i;
+            }
+        }
+
+        if (normalizedBst < targetBst)
+        {
+            ++stats[bestStat];
+            ++normalizedBst;
+        }
+        else
+        {
+            --stats[bestStat];
+            --normalizedBst;
+        }
+    }
 }
 
 static void ApplyBattleRulesToParty(struct Pokemon *party, struct RogueTrialBattleMonBackup *backups, u8 count, const struct RogueTrialDefinition *trial)
@@ -1740,14 +1849,13 @@ static void ApplyBattleRulesToParty(struct Pokemon *party, struct RogueTrialBatt
         if (trial->battleLevel != 0)
             SetMonBattleLevel(&party[i], trial->battleLevel);
 
-        if (trial->normalizedBst != 0)
-            NormalizeMonBattleBst(&party[i], trial->normalizedBst);
     }
 }
 
 void RogueTrial_OnTrainerTeamReady(void)
 {
     const struct RogueTrialDefinition *trial;
+    u8 partyCount;
     u8 i;
 
     if (!RogueTrial_IsActive() || Rogue_IsExpTrainer(gTrainerBattleOpponent_A))
@@ -1759,15 +1867,35 @@ void RogueTrial_OnTrainerTeamReady(void)
 
     if (trial->enforceOpponentSpeciesLegality && CurrentTrialRequiresSpeciesLegality())
     {
+        partyCount = CalculateEnemyPartyCount();
         for (i = 0; i < PARTY_SIZE; ++i)
         {
-            if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) != SPECIES_NONE)
-                RogueTrial_TransformMonIfIllegal(&gEnemyParty[i]);
+            if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+                && !RogueTrial_CanAcceptMon(&gEnemyParty[i]))
+            {
+                u16 species = Rogue_SelectTrainerReplacementSpecies(gTrainerBattleOpponent_A, gEnemyParty, i, partyCount);
+
+                if (species != SPECIES_NONE)
+                {
+                    u32 level = GetMonData(&gEnemyParty[i], MON_DATA_LEVEL);
+                    u32 heldItem = GetMonData(&gEnemyParty[i], MON_DATA_HELD_ITEM);
+                    u32 pokeball = GetMonData(&gEnemyParty[i], MON_DATA_POKEBALL);
+
+                    ZeroMonData(&gEnemyParty[i]);
+                    CreateMon(&gEnemyParty[i], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+                    SetMonData(&gEnemyParty[i], MON_DATA_HELD_ITEM, &heldItem);
+                    SetMonData(&gEnemyParty[i], MON_DATA_POKEBALL, &pokeball);
+                }
+                else
+                {
+                    RogueTrial_TransformMonIfIllegal(&gEnemyParty[i]);
+                }
+            }
         }
         CalculateEnemyPartyCount();
     }
 
-    if (trial->battleLevel == 0 && trial->normalizedBst == 0)
+    if (trial->battleLevel == 0)
         return;
 
     memset(sPlayerBattleBackups, 0, sizeof(sPlayerBattleBackups));

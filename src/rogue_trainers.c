@@ -23,6 +23,7 @@
 #include "rogue_query_script.h"
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
+#include "rogue_trials.h"
 
 #define TRAINER_SHINY_PERC 25
 
@@ -2124,7 +2125,7 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
 {
     u8 monCount;
 
-    if(Rogue_IsRivalTrainer(trainerNum))
+    if(Rogue_IsRivalTrainer(trainerNum) && !RogueTrial_EnforcesOpponentSpeciesLegality())
         monCount = CreateRivalPartyInternal(trainerNum, party, monCapacity);
     else
         monCount = CreateTrainerPartyInternal(trainerNum, party, 0, monCapacity, firstTrainer, 0);
@@ -2222,7 +2223,7 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     scratch.fallbackCount = 0;
     scratch.forceLegends = FALSE;
     scratch.forcePrimaryType = FALSE;
-    scratch.evoLevel = level;
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(level);
     scratch.targetPartyCount = monCount;
     scratch.allowItemEvos = FALSE;
     scratch.allowStrongLegends = FALSE;
@@ -2230,6 +2231,9 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     scratch.preferStrongSpecies = FALSE;
     
     ConfigurePartyScratchSettings(trainerNum, &scratch);
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(scratch.evoLevel);
+    if (scratch.evoLevel < level)
+        scratch.allowItemEvos = FALSE;
     EnsureSubsetIsValid(&scratch);
 
     // Generate team
@@ -2315,6 +2319,33 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     }
 
     return monCount;
+}
+
+u16 Rogue_SelectTrainerReplacementSpecies(u16 trainerNum, struct Pokemon *party, u8 slot, u8 partyCount)
+{
+    u16 species;
+    u8 level = GetTrainerLevel(trainerNum);
+    struct TrainerPartyScratch scratch;
+
+    memset(&scratch, 0, sizeof(scratch));
+    scratch.trainerNum = trainerNum;
+    scratch.party = party;
+    scratch.partyCapacity = partyCount;
+    scratch.partyCount = slot;
+    scratch.shouldRegenerateQuery = TRUE;
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(level);
+    scratch.targetPartyCount = partyCount;
+
+    ConfigurePartyScratchSettings(trainerNum, &scratch);
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(scratch.evoLevel);
+    if (scratch.evoLevel < level)
+        scratch.allowItemEvos = FALSE;
+    EnsureSubsetIsValid(&scratch);
+
+    RogueMonQuery_Begin();
+    species = SampleNextSpecies(&scratch);
+    RogueMonQuery_End();
+    return species;
 }
 
 static u8 SelectEvoChainMon_CalculateWeight(u16 index, u16 species, void* data)
@@ -3083,6 +3114,10 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             SetupQueryScriptVars(&scriptContext, scratch);
             RogueQueryScript_Execute(&scriptContext);
         }
+
+        // Trial formats such as Little Cup constrain both teams. Apply their
+        // legality after the trainer's configured pool and settings are resolved.
+        RogueTrial_FilterOpponentMonQuery();
     }
 
     // Allow duplicates if we've gone far into fallbacks

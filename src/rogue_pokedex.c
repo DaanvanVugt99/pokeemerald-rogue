@@ -46,6 +46,7 @@
 #include "rogue_quest.h"
 #include "rogue_safari.h"
 #include "rogue_script.h"
+#include "rogue_trials.h"
 
 #ifdef ROGUE_EXPANSION
 #define DEX_GEN_LIMIT 9
@@ -4827,24 +4828,25 @@ u8 RoguePokedex_GetSpeciesType(u16 species, u8 typeIndex)
 
 u16 RoguePokedex_GetSpeciesBST(u16 species)
 {
-    u16 statTotal =
-        gRogueSpeciesInfo[species].baseHP +
-        gRogueSpeciesInfo[species].baseAttack +
-        gRogueSpeciesInfo[species].baseDefense +
-        gRogueSpeciesInfo[species].baseSpAttack +
-        gRogueSpeciesInfo[species].baseSpDefense +
-        gRogueSpeciesInfo[species].baseSpeed;
+    u8 i;
+    u16 stats[NUM_STATS];
+    u16 statTotal = 0;
+
+    RogueTrial_GetEffectiveSpeciesBaseStats(species, stats, ARRAY_COUNT(stats));
+    for (i = 0; i < NUM_STATS; ++i)
+        statTotal += stats[i];
+
     return statTotal;
 }
 
 static void GatherSpeciesStatsArray(u16 species, u8* stats)
 {
-    stats[STAT_HP] = gRogueSpeciesInfo[species].baseHP;
-    stats[STAT_ATK] = gRogueSpeciesInfo[species].baseAttack;
-    stats[STAT_DEF] = gRogueSpeciesInfo[species].baseDefense;
-    stats[STAT_SPATK] = gRogueSpeciesInfo[species].baseSpAttack;
-    stats[STAT_SPDEF] = gRogueSpeciesInfo[species].baseSpDefense;
-    stats[STAT_SPEED] = gRogueSpeciesInfo[species].baseSpeed;
+    u8 i;
+    u16 effectiveStats[NUM_STATS];
+
+    RogueTrial_GetEffectiveSpeciesBaseStats(species, effectiveStats, ARRAY_COUNT(effectiveStats));
+    for (i = 0; i < NUM_STATS; ++i)
+        stats[i] = effectiveStats[i];
 }
 
 static u8 SelectBestWorstStat(u16 species, bool8 selectLargest)

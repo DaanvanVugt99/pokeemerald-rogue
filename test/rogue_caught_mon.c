@@ -690,25 +690,33 @@ TEST("Handicap Trials do not apply player species legality to opponents")
     ClearCaughtMonTestState();
 }
 
-TEST("Equalized Trial scales stats without changing species")
+TEST("Equalized Trial applies 500 BST throughout the active run")
 {
-    u16 oldAttack;
-    u16 battleAttack;
+    u16 canonicalAttack;
+    u16 normalizedAttack;
 
     ResetCaughtMonTestState();
-    ActivateCaughtMonTestTrial(ROGUE_TRIAL_EQUALIZED);
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
     SetPartyMon(0, SPECIES_MAGIKARP);
-    oldAttack = GetMonData(&gPlayerParty[0], MON_DATA_ATK);
+    canonicalAttack = GetMonData(&gPlayerParty[0], MON_DATA_ATK);
+    EXPECT_NE(RoguePokedex_GetSpeciesBST(SPECIES_MAGIKARP), 500);
 
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_EQUALIZED);
+    CalculateMonStats(&gPlayerParty[0]);
+    normalizedAttack = GetMonData(&gPlayerParty[0], MON_DATA_ATK);
+    EXPECT_EQ(RoguePokedex_GetSpeciesBST(SPECIES_MAGIKARP), 500);
+    EXPECT_GT(normalizedAttack, canonicalAttack);
+
+    SetEnemyMon(0, SPECIES_MAGIKARP);
     RogueTrial_OnTrainerTeamReady();
-    battleAttack = GetMonData(&gPlayerParty[0], MON_DATA_ATK);
-
     EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), SPECIES_MAGIKARP);
-    EXPECT_GT(battleAttack, oldAttack);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_ATK), normalizedAttack);
 
     RogueTrial_OnTrainerBattleEnd();
-    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), SPECIES_MAGIKARP);
-    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_ATK), oldAttack);
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    CalculateMonStats(&gPlayerParty[0]);
+    EXPECT_EQ(RoguePokedex_GetSpeciesBST(SPECIES_MAGIKARP), 200);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_ATK), canonicalAttack);
 
     ClearCaughtMonTestState();
 }

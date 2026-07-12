@@ -55,6 +55,7 @@
 #include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_quest.h"
+#include "rogue_trials.h"
 
 enum {
     PSS_PAGE_UNIQUE_ABILITY,
@@ -4217,9 +4218,12 @@ static void BufferLeftColumnStats(void)
 {
     if(sMonSummaryScreen->currTabIndex == 3)
     {
-        ConvertIntToDecimalStringN(gStringVar1, gSpeciesInfo[sMonSummaryScreen->summary.species].baseHP, STR_CONV_MODE_LEFT_ALIGN, 3);
-        ConvertIntToDecimalStringN(gStringVar2, gSpeciesInfo[sMonSummaryScreen->summary.species].baseAttack, STR_CONV_MODE_LEFT_ALIGN, 3);
-        ConvertIntToDecimalStringN(gStringVar3, gSpeciesInfo[sMonSummaryScreen->summary.species].baseDefense, STR_CONV_MODE_LEFT_ALIGN, 3);
+        u16 baseStats[NUM_STATS];
+
+        RogueTrial_GetEffectiveSpeciesBaseStats(sMonSummaryScreen->summary.species, baseStats, ARRAY_COUNT(baseStats));
+        ConvertIntToDecimalStringN(gStringVar1, baseStats[STAT_HP], STR_CONV_MODE_LEFT_ALIGN, 3);
+        ConvertIntToDecimalStringN(gStringVar2, baseStats[STAT_ATK], STR_CONV_MODE_LEFT_ALIGN, 3);
+        ConvertIntToDecimalStringN(gStringVar3, baseStats[STAT_DEF], STR_CONV_MODE_LEFT_ALIGN, 3);
     }
     else if(sMonSummaryScreen->currTabIndex != 0)
     {
@@ -4318,9 +4322,12 @@ static void BufferRightColumnStats(void)
         }
         else
         {
-            ConvertIntToDecimalStringN(gStringVar1, gSpeciesInfo[sMonSummaryScreen->summary.species].baseSpAttack, STR_CONV_MODE_RIGHT_ALIGN, 3);
-            ConvertIntToDecimalStringN(gStringVar2, gSpeciesInfo[sMonSummaryScreen->summary.species].baseSpDefense, STR_CONV_MODE_RIGHT_ALIGN, 3);
-            ConvertIntToDecimalStringN(gStringVar3, gSpeciesInfo[sMonSummaryScreen->summary.species].baseSpeed, STR_CONV_MODE_RIGHT_ALIGN, 3);
+            u16 baseStats[NUM_STATS];
+
+            RogueTrial_GetEffectiveSpeciesBaseStats(sMonSummaryScreen->summary.species, baseStats, ARRAY_COUNT(baseStats));
+            ConvertIntToDecimalStringN(gStringVar1, baseStats[STAT_SPATK], STR_CONV_MODE_RIGHT_ALIGN, 3);
+            ConvertIntToDecimalStringN(gStringVar2, baseStats[STAT_SPDEF], STR_CONV_MODE_RIGHT_ALIGN, 3);
+            ConvertIntToDecimalStringN(gStringVar3, baseStats[STAT_SPEED], STR_CONV_MODE_RIGHT_ALIGN, 3);
         }
     }
     else
