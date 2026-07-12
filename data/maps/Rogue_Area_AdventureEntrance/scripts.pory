@@ -7,6 +7,7 @@ const FLAG_HIDE_TRIAL_ATTENDANT = FLAG_TEMP_5
 const VAR_FRAME_STATE = VAR_TEMP_0
 const VAR_TRIAL_MENU_CHOICE = VAR_TEMP_1
 const VAR_INTRO_SCRIPT_STATE = VAR_TEMP_2
+const VAR_ALLOW_STARTER_CHOICE = VAR_TEMP_3
 
 // Reused vars
 const VAR_SHAKE_VERTICAL_PAN = VAR_0x8004
@@ -560,14 +561,25 @@ script Rogue_StartAdventureInternal
     special(RogueTrial_ApplyPendingPartyCapacity)
     copyvar(VAR_0x8004, VAR_RESULT)
     setvar(VAR_TRIAL_MENU_CHOICE, NO)
+    setvar(VAR_ALLOW_STARTER_CHOICE, NO)
+
+    if(!flag(FLAG_HIDE_STARTER_BAG))
+    {
+        setvar(VAR_ALLOW_STARTER_CHOICE, YES)
+    }
+
+    special(RogueTrial_HasPendingSelection)
+    if(var(VAR_RESULT) == YES)
+    {
+        setvar(VAR_ALLOW_STARTER_CHOICE, YES)
+    }
 
     getpartysize
 
     if(var(VAR_RESULT) > VAR_0x8004)
     {
         buffernumberstring(STR_VAR_1, VAR_0x8004)
-        special(RogueTrial_HasPendingSelection)
-        if(var(VAR_RESULT) == YES && !flag(FLAG_HIDE_STARTER_BAG))
+        if(var(VAR_ALLOW_STARTER_CHOICE) == YES)
         {
             msgbox(format("Looks like you have too many Pokémon.\pYou may only take in {STR_VAR_1} Pokémon into this type of Adventure.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
@@ -598,7 +610,7 @@ script Rogue_StartAdventureInternal
         special(RogueTrial_CanUsePendingParty)
         if(var(VAR_RESULT) == NO)
         {
-            if(flag(FLAG_HIDE_STARTER_BAG))
+            if(var(VAR_ALLOW_STARTER_CHOICE) == NO)
             {
                 msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pAdjust your party before starting."), MSGBOX_DEFAULT)
                 return
@@ -647,7 +659,7 @@ script Rogue_StartAdventureInternal
             applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter1)
             waitmovement(0)
         }
-        elif(!flag(FLAG_HIDE_STARTER_BAG))
+        elif(var(VAR_ALLOW_STARTER_CHOICE) == YES)
         {
             special(RogueTrial_HasPendingSelection)
             if(var(VAR_RESULT) == YES)

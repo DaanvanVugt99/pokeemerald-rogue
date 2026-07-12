@@ -284,6 +284,8 @@ Format follows Keep a Changelog loosely:
   before replacing it with the required starter.
 - Allowed capacity-restricted Trials to recover an oversized Hub party through
   the starter bag instead of forcing the player to leave the startup flow.
+- Made the optional starter choice available to every Trial without requiring
+  the separate Starter Bag hub upgrade.
 - Prevented flying Ride Pokémon from sliding on ice tiles.
 - Corrected the battle-sprite positioning of newly added Z-A Mega Evolutions,
   including visible gaps beneath Mega Staraptor and other backsprites.
