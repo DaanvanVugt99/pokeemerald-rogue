@@ -103,7 +103,7 @@ static u8 const sMenuName_GameMode_Rainbow[] = _("Rainbow");
 static u8 const sMenuName_GameMode_Official[] = _("Official");
 static u8 const sMenuName_GameMode_Gauntlet[] = _("Gauntlet");
 static u8 const sMenuName_GameMode_RainbowGauntlet[] = _("Rainbow Gauntlet");
-static u8 const sMenuName_GameMode_FastPath[] = _("Fast Path");
+static u8 const sMenuName_GameMode_SlowPath[] = _("Slow Path");
 
 static u8 const sMenuName_Affection[] = _("Affection FX");
 static u8 const sMenuName_ReleaseMons[] = _("Release Fainted {PKMN}");
@@ -390,7 +390,8 @@ static u8 const sMenuNameDesc_Paldea[] = _(
 
 static u8 const sMenuNameDesc_GameMode_Standard[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
-    "Typical Adventure with no custom rules."
+    "Explore branching routes, regroup at rest\n"
+    "stops, and defeat every Mighty Trainer."
 );
 static u8 const sMenuNameDesc_GameMode_Rainbow[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
@@ -415,10 +416,10 @@ static u8 const sMenuNameDesc_GameMode_RainbowGauntlet[] = _(
     "Combined effects of both Rainbow and\n"
     "Gauntlet modes."
 );
-static u8 const sMenuNameDesc_GameMode_FastPath[] = _(
+static u8 const sMenuNameDesc_GameMode_SlowPath[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
-    "Faster Adventure with stricter item and\n"
-    "money management between longer rests."
+    "A longer Adventure with a rest stop\n"
+    "before every Mighty Trainer."
 );
 
 
@@ -576,7 +577,7 @@ enum
     MENUITEM_MENU_SLIDER_GAME_MODE_OFFICIAL,
     MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET,
     MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW_GAUNTLET,
-    MENUITEM_MENU_SLIDER_GAME_MODE_FAST_PATH,
+    MENUITEM_MENU_SLIDER_GAME_MODE_SLOW_PATH,
 
 #ifdef ROGUE_DEBUG
     MENUITEM_MENU_DEBUG_SUBMENU,
@@ -982,10 +983,10 @@ static const struct MenuEntry sOptionMenuItems[] =
         .processInput = GameMode_ProcessInput,
         .drawChoices = GameMode_DrawChoices
     },
-    [MENUITEM_MENU_SLIDER_GAME_MODE_FAST_PATH] =
+    [MENUITEM_MENU_SLIDER_GAME_MODE_SLOW_PATH] =
     {
-        .itemName = sMenuName_GameMode_FastPath,
-        .SINGLE_DESC(sMenuNameDesc_GameMode_FastPath),
+        .itemName = sMenuName_GameMode_SlowPath,
+        .SINGLE_DESC(sMenuNameDesc_GameMode_SlowPath),
         .processInput = GameMode_ProcessInput,
         .drawChoices = GameMode_DrawChoices
     },
@@ -1193,7 +1194,7 @@ static const struct MenuEntries sOptionMenuEntries[SUBMENUITEM_COUNT] =
         {
             MENUITEM_MENU_SLIDER_GAME_MODE_STANDARD,
             MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET,
-            MENUITEM_MENU_SLIDER_GAME_MODE_FAST_PATH,
+            MENUITEM_MENU_SLIDER_GAME_MODE_SLOW_PATH,
             MENUITEM_CANCEL
         }
     },
@@ -1474,12 +1475,6 @@ static bool8 ShowMenuSparkles(u8 menuOption)
     u8 prev = GetPrevMenuUnlockLevel();
     u8 curr = GetActiveMenuUnlockLevel();
     u8 unlockLevel = GetMenuItemUnlockLevel(menuOption);
-
-    if(FlagGet(FLAG_ROGUE_SETTINGS_MENU_DISPLAY_HIGHLIGHT))
-    {
-        if(menuOption == MENUITEM_MENU_SLIDER_GAME_MODE_FAST_PATH)
-            return TRUE;
-    }
 
     if(prev != curr && unlockLevel > prev)
         return TRUE;
@@ -2445,8 +2440,8 @@ static u8 GetMenuItemValue(u8 menuItem)
     case MENUITEM_MENU_SLIDER_GAME_MODE_GAUNTLET:
         return Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM) == ROGUE_GAME_MODE_GAUNTLET;
 
-    case MENUITEM_MENU_SLIDER_GAME_MODE_FAST_PATH:
-        return Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM) == ROGUE_GAME_MODE_FAST_PATH;
+    case MENUITEM_MENU_SLIDER_GAME_MODE_SLOW_PATH:
+        return Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM) == ROGUE_GAME_MODE_SLOW_PATH;
 
     case MENUITEM_MENU_SLIDER_GAME_MODE_RAINBOW:
     case MENUITEM_MENU_SLIDER_GAME_MODE_OFFICIAL:
@@ -2643,9 +2638,9 @@ static void SetMenuItemValue(u8 menuItem, u8 value)
             Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
         break;
 
-    case MENUITEM_MENU_SLIDER_GAME_MODE_FAST_PATH:
+    case MENUITEM_MENU_SLIDER_GAME_MODE_SLOW_PATH:
         if(value != 0)
-            Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_FAST_PATH);
+            Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_SLOW_PATH);
         else
             Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
         break;

@@ -43,7 +43,7 @@ struct RogueDifficultyPreset
 
 static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] = 
 {
-    [ROGUE_GAME_MODE_STANDARD] = {}, // we should never have anything here, every rule/flag should default to off in standard
+    [ROGUE_GAME_MODE_STANDARD] = {},
     [ROGUE_GAME_MODE_RAINBOW] = 
     {
         .trainerOrder = TRAINER_ORDER_RAINBOW,
@@ -87,11 +87,9 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
         .forceFullShopInventory = TRUE,
         .adventureGenerator = ADV_GENERATOR_GAUNTLET,
     },
-    [ROGUE_GAME_MODE_FAST_PATH] =
+    [ROGUE_GAME_MODE_SLOW_PATH] =
     {
-        .itemDropRarityInc = 1,
-        .trainerBattleWinningsPerc = 125,
-        .adventureGenerator = ADV_GENERATOR_FAST_PATH,
+        .adventureGenerator = ADV_GENERATOR_SLOW_PATH,
     },
 };
 

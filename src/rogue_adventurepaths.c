@@ -135,7 +135,7 @@ static void GeneratePath(struct AdvPathSettings* pathSettings);
 static void GenerateFloorLayout(struct Coords8 currentCoords, struct AdvPathSettings* pathSettings);
 static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings);
 static void GenerateRoomInstance(u8 roomId, u8 roomType);
-static void EnsureFastPathRivalStartingLevelingRoom(void);
+static void EnsureStandardPathRivalStartingLevelingRoom(void);
 static u8 CountRoomConnections(u8 mask);
 
 static u8 GenerateRoomConnectionMask(struct Coords8 coords, struct AdvPathSettings* pathSettings);
@@ -619,9 +619,9 @@ static bool8 ReplaceRoomEncounter(u8 fromRoomType, u8 toRoomType)
     return FALSE;
 }
 
-static bool8 FastPathAreRoutesHidden()
+static bool8 StandardPathAreRoutesHidden()
 {
-    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH)
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD)
         return FALSE;
 
     if(GetPathGenerationDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
@@ -640,7 +640,7 @@ static bool8 IsLevelingRoomType(u16 roomType)
     return roomType == ADVPATH_ROOM_ROUTE || roomType == ADVPATH_ROOM_HONEY_TREE;
 }
 
-static bool8 IsFastPathRivalLevelingFallbackType(u16 roomType)
+static bool8 IsStandardPathRivalLevelingFallbackType(u16 roomType)
 {
     switch(roomType)
     {
@@ -657,13 +657,13 @@ static bool8 IsFastPathRivalLevelingFallbackType(u16 roomType)
     return FALSE;
 }
 
-static void EnsureFastPathRivalStartingLevelingRoom(void)
+static void EnsureStandardPathRivalStartingLevelingRoom(void)
 {
     u8 i;
     u8 fallbackRoom = (u8)-1;
     u8 backupFallbackRoom = (u8)-1;
 
-    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH)
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD)
         return;
 
     if(!gRogueRun.hasPendingRivalBattle)
@@ -680,7 +680,7 @@ static void EnsureFastPathRivalStartingLevelingRoom(void)
         if(fallbackRoom == (u8)-1 && gRogueAdvPath.rooms[i].roomType == ADVPATH_ROOM_WILD_DEN)
             fallbackRoom = i;
 
-        if(backupFallbackRoom == (u8)-1 && IsFastPathRivalLevelingFallbackType(gRogueAdvPath.rooms[i].roomType))
+        if(backupFallbackRoom == (u8)-1 && IsStandardPathRivalLevelingFallbackType(gRogueAdvPath.rooms[i].roomType))
             backupFallbackRoom = i;
     }
 
@@ -698,7 +698,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     u8 validEncounterCount = 0;
     u16 validEncounterList[ADVPATH_ROOM_COUNT];
     u16 minReplaceCount = 1;
-    bool8 fastPathHideRoutes = FastPathAreRoutesHidden();
+    bool8 standardPathHideRoutes = StandardPathAreRoutesHidden();
 
     // Place gym at very end
     GenerateRoomInstance(0, ADVPATH_ROOM_BOSS);
@@ -795,7 +795,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     if((Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) || GetPathGenerationDifficulty() == gRogueRun.shrineSpawnDifficulty)
         validEncounterList[validEncounterCount++] = ADVPATH_ROOM_SHRINE;
 
-    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH || !fastPathHideRoutes)
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD || !standardPathHideRoutes)
     {
         // Legends
         for(i = 0; i < ADVPATH_LEGEND_COUNT; ++i)
@@ -881,7 +881,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     }
 
     // Unique Den
-    if((Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_FAST_PATH || !fastPathHideRoutes) && gRogueRun.uniqueDenDifficulty == GetPathGenerationDifficulty())
+    if((Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD || !standardPathHideRoutes) && gRogueRun.uniqueDenDifficulty == GetPathGenerationDifficulty())
     {
         if(ReplaceRoomEncounter(ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_UNIQUE_DEN))
             --freeRoomCount;
@@ -905,7 +905,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
             break;
         }
 
-        if(fastPathHideRoutes)
+        if(standardPathHideRoutes)
             replacePerc = 100;
 
         replaceCount = (replaceCount * replacePerc) / 100;
@@ -926,7 +926,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     }
 
     // Wild dens
-    if(fastPathHideRoutes)
+    if(standardPathHideRoutes)
     {
         for(i = 0; i < gRogueAdvPath.roomCount; ++i)
         {
@@ -990,7 +990,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         }
     }
 
-    EnsureFastPathRivalStartingLevelingRoom();
+    EnsureStandardPathRivalStartingLevelingRoom();
 }
 
 static u8 FindRoomOfType(u16 type)
@@ -1250,14 +1250,14 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
                 pathSettings.totalLength = 2;
             break;
 
-        case ADV_GENERATOR_FAST_PATH:
+        case ADV_GENERATOR_STANDARD:
             if(GetPathGenerationDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
                 pathSettings.totalLength = 3 + 2;
             else
-                pathSettings.totalLength = (FastPathAreRoutesHidden() ? 2 : 4) + 2;
+                pathSettings.totalLength = (StandardPathAreRoutesHidden() ? 2 : 4) + 2;
             break;
 
-        default:
+        case ADV_GENERATOR_SLOW_PATH:
             pathSettings.totalLength = 3 + 2; // +2 to account for final encounter and initial split
             break;
         }
@@ -1300,9 +1300,9 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
                     generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_MID] = 40;
                     generator.connectionsSettingsPerColumn[i].branchingChance[ROOM_CONNECTION_BOT] = 40;
                 }
-                else if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH && !FastPathAreRoutesHidden())
+                else if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD && !StandardPathAreRoutesHidden())
                 {
-                    // Reduce variation to avoid splitting too wide during longer Fast Path segments.
+                    // Reduce variation to avoid splitting too wide during longer Standard segments.
                     switch (RogueRandom() % 3)
                     {
                     // Branches

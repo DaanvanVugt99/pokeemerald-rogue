@@ -1985,10 +1985,8 @@ void Rogue_ModifyBattleWinnings(u16 trainerNum, u32* money)
             break;
         }
 
-        if(Rogue_GetModeRules()->trainerBattleWinningsPerc != 0)
-        {
-            *money = ((*money) * Rogue_GetModeRules()->trainerBattleWinningsPerc) / 100;
-        }
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
+            *money = ((*money) * 125) / 100;
 
         //if(FlagGet(FLAG_ROGUE_HARD_ITEMS))
         //{
@@ -5408,9 +5406,9 @@ static void ChooseLegendarysForNewAdventure()
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : ROGUE_ELITE_START_DIFFICULTY - 1 + RogueRandomRange(3, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_BOX] = SelectLegendarySpecies(ADVPATH_LEGEND_BOX);
 
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
         {
-            // Fast Path hides routes every other path, so place special encounters on reset paths.
+            // Standard hides routes every other path, so place special encounters on reset paths.
             gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] / 2) * 2;
         }
     }
@@ -5420,7 +5418,7 @@ static void ChooseLegendarysForNewAdventure()
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : 1 + RogueRandomRange(5, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER] = SelectLegendarySpecies(ADVPATH_LEGEND_ROAMER);
 
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
         {
             gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] / 2) * 2;
         }
@@ -5431,7 +5429,7 @@ static void ChooseLegendarysForNewAdventure()
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : 4 + RogueRandomRange(4, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_MINOR] = SelectLegendarySpecies(ADVPATH_LEGEND_MINOR);
 
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
         {
             gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] / 2) * 2;
         }
@@ -5446,7 +5444,7 @@ static void ChooseLegendarysForNewAdventure()
     }
 
     {
-        u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH) ? 2 : 1;
+        u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD) ? 2 : 1;
 
         if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
             gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] += collisionStep;
@@ -5463,15 +5461,15 @@ static void ChooseUniqueDenForNewAdventure()
 {
     u8 i;
     bool8 hadCollision;
-    u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH) ? 2 : 1;
+    u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD) ? 2 : 1;
 
     gRogueRun.uniqueDenDifficulty = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
         ? 0
         : 1 + RogueRandomRange(ROGUE_ELITE_START_DIFFICULTY - 1, 0);
 
-    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
     {
-        // Fast Path hides routes every other path, so place special encounters on reset paths.
+        // Standard hides routes every other path, so place special encounters on reset paths.
         gRogueRun.uniqueDenDifficulty = (gRogueRun.uniqueDenDifficulty / 2) * 2;
     }
 
@@ -5606,7 +5604,7 @@ static void ChooseTeamEncountersForNewAdventure()
     gRogueRun.teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_PRE_LEGEND] = gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX];
 
     // Early can be anytime from badge 2 to badge 5 (provided there is no legend at that time)
-    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_FAST_PATH)
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
     {
         u8 candidates[] = {2, 4, 6};
         u8 validCandidates[ARRAY_COUNT(candidates)];
@@ -11934,16 +11932,18 @@ static u8 RouteItems_CalculateWeight(u16 index, u16 itemId, void* data)
 
 u8 GetCurrentDropRarity()
 {
+    u8 rarityBoost = Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD ? 1 : 0;
+
     switch (gRogueAdvPath.currentRoomType)
     {
     case ADVPATH_ROOM_ROUTE:
-        return Rogue_GetModeRules()->itemDropRarityInc + gRogueRouteTable.routes[gRogueRun.currentRouteIndex].dropRarity;
+        return rarityBoost + gRogueRouteTable.routes[gRogueRun.currentRouteIndex].dropRarity;
 
     case ADVPATH_ROOM_TEAM_HIDEOUT:
-        return Rogue_GetModeRules()->itemDropRarityInc + 3;
+        return rarityBoost + 3;
     }
 
-    return Rogue_GetModeRules()->itemDropRarityInc;
+    return rarityBoost;
 }
 
 static void RandomiseItemContent(u8 difficultyLevel)

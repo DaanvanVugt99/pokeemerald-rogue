@@ -16,7 +16,7 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
-- Ported upstream Fast Path game mode, replacing the old Experimental pacing
+- Ported upstream Fast Path pacing, replacing the old Experimental pacing
   experiment with shorter alternating adventure segments and stricter economy
   pressure.
 - Ported upstream C-Gear/Config Lab sparkle highlights for newly unlocked or
@@ -67,6 +67,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made Fast Path pacing the Standard Adventure format and retained the previous
+  Standard format as the optional Slow Path mode.
 - Made the selected Pokédex a run-entry legality rule for the party and Day Care,
   with illegal Pokémon marked in the party screen.
 - Made a confirmed Trial Pokédex selection immediately become the active hub
@@ -215,7 +217,7 @@ Format follows Keep a Changelog loosely:
   first successful Rest each switch-in instead of after biting moves.
 - Ported upstream battle heap optimization so battler sprite graphics allocate
   two mon frames per battler instead of four.
-- Fast Path segments with a pending rival battle now guarantee at
+- Standard Adventure segments with a pending rival battle now guarantee at
   least one starting Route or Honey Tree option for pre-rival leveling.
 - Ported upstream Gauntlet pacing so Gauntlet and Rainbow Gauntlet runs start
   incoming Pokemon at level 100.
@@ -317,7 +319,7 @@ Format follows Keep a Changelog loosely:
   is preserved when sent to the party or PC.
 - Fixed attacker-side move-end unique abilities, including Windsurge, being
   attributed to the target when move-end script state changed the attacker first.
-- Fixed the Game Modes submenu being hidden on early saves, which made Fast Path
+- Fixed the Game Modes submenu being hidden on early saves, which made Slow Path
   unavailable from the Config Lab.
 - Ported upstream item-PC deposit fix so Rogue-generated normal items such as
   Pokeblocks are not incorrectly treated as important items.
@@ -338,8 +340,8 @@ Format follows Keep a Changelog loosely:
   to default spawning.
 - Fixed Gauntlet entry accepting the full six-Pokemon Hub party through the
   active adventure entrance flow.
-- Fixed Fast Path sometimes skipping the early evil-team encounter when all
-  reset-path candidate difficulties were occupied by legends.
+- Fixed Standard Adventures sometimes skipping the early evil-team encounter
+  when all reset-path candidate difficulties were occupied by legends.
 - Fixed trainer team generation assertions when recoverable species-form fallbacks
   are selected.
 - Fixed Colony Guardian freezing when switch-in Intimidate triggered it.
