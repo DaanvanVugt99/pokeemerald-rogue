@@ -219,7 +219,7 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
 #endif
         .iconPalette = gItemIconPalette_DevonGoodsBrown,
     },
-    [HUB_AREA_TRIAL_FRONTIER] = 
+    [HUB_AREA_TRIAL_FRONTIER] =
     {
         SET_AREA_PRIMARY_MAP(ROGUE_AREA_TRIAL_FRONTIER),
         .areaName = _("Trial Area"),

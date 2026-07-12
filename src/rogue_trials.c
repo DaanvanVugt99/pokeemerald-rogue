@@ -2164,7 +2164,10 @@ void RogueTrial_ApplyPendingPartyCapacity(void)
         return;
 
     trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
-    if (trial == NULL || !trial->hasCurseEffect || trial->curseEffect != EFFECT_PARTY_SIZE)
+    if (trial == NULL
+        || trial->forceRandomStarter
+        || !trial->hasCurseEffect
+        || trial->curseEffect != EFFECT_PARTY_SIZE)
         return;
 
     trialCapacity = PARTY_SIZE - min(trial->curseCount, PARTY_SIZE - 1);

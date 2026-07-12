@@ -241,28 +241,28 @@ static const struct PageData sPageData[PAGE_COUNT] =
         .drawCallback = Draw_QuestPage,
     },
 
-    [PAGE_BOOK_TRIAL_TODO] = 
+    [PAGE_BOOK_TRIAL_TODO] =
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,
         .inputCallback = HandleInput_QuestPage,
         .drawCallback = Draw_QuestPage,
     },
-    [PAGE_BOOK_TRIAL_ACTIVE] = 
+    [PAGE_BOOK_TRIAL_ACTIVE] =
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,
         .inputCallback = HandleInput_QuestPage,
         .drawCallback = Draw_QuestPage,
     },
-    [PAGE_BOOK_TRIAL_INACTIVE] = 
+    [PAGE_BOOK_TRIAL_INACTIVE] =
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,
         .inputCallback = HandleInput_QuestPage,
         .drawCallback = Draw_QuestPage,
     },
-    [PAGE_BOOK_TRIAL_COMPLETE] = 
+    [PAGE_BOOK_TRIAL_COMPLETE] =
     {
         .tilemap = sInnerTilemap,
         .setupCallback = Setup_QuestPage,

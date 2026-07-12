@@ -278,6 +278,12 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Returned the player and gate NPC to their normal positions when final party
+  validation cancels a run after the gate-opening walk.
+- Prevented forced-starter Trials from rejecting the Hub party on capacity rules
+  before replacing it with the required starter.
+- Allowed capacity-restricted Trials to recover an oversized Hub party through
+  the starter bag instead of forcing the player to leave the startup flow.
 - Prevented flying Ride Pokémon from sliding on ice tiles.
 - Corrected the battle-sprite positioning of newly added Z-A Mega Evolutions,
   including visible gaps beneath Mega Staraptor and other backsprites.

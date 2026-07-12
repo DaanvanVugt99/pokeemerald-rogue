@@ -674,6 +674,18 @@ TEST("Pending Iron Mono limits the starting party to one Pokemon")
     ClearCaughtMonTestState();
 }
 
+TEST("Forced-starter Trials ignore incoming party capacity")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_IRON_KAIZO, POKEDEX_VARIANT_ROGUE_CLASSICPLUS);
+
+    gSpecialVar_Result = PARTY_SIZE;
+    RogueTrial_ApplyPendingPartyCapacity();
+    EXPECT_EQ(gSpecialVar_Result, PARTY_SIZE);
+
+    ClearCaughtMonTestState();
+}
+
 TEST("Apotheosis offers and accepts only Legendary Pokemon")
 {
     u8 i;

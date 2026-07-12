@@ -559,27 +559,33 @@ script Rogue_StartAdventureInternal
     special(Rogue_EnterPartnerMonCapacity)
     special(RogueTrial_ApplyPendingPartyCapacity)
     copyvar(VAR_0x8004, VAR_RESULT)
+    setvar(VAR_TRIAL_MENU_CHOICE, NO)
 
     getpartysize
 
     if(var(VAR_RESULT) > VAR_0x8004)
     {
         buffernumberstring(STR_VAR_1, VAR_0x8004)
-        msgbox(format("Looks like you have too many Pokémon.\pYou may only take in {STR_VAR_1} Pokémon into this type of Adventure.\pYou will need to deposit some into a PC, before I can let you on an Adventure."), MSGBOX_DEFAULT)
-        setvar(VAR_RESULT, NO)
-    }
-    else
-    {
-        setvar(VAR_RESULT, YES)
+        special(RogueTrial_HasPendingSelection)
+        if(var(VAR_RESULT) == YES && !flag(FLAG_HIDE_STARTER_BAG))
+        {
+            msgbox(format("Looks like you have too many Pokémon.\pYou may only take in {STR_VAR_1} Pokémon into this type of Adventure.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                setvar(VAR_TRIAL_MENU_CHOICE, YES)
+            }
+            else
+            {
+                return
+            }
+        }
+        else
+        {
+            msgbox(format("Looks like you have too many Pokémon.\pYou may only take in {STR_VAR_1} Pokémon into this type of Adventure.\pYou will need to deposit some into a PC, before I can let you on an Adventure."), MSGBOX_DEFAULT)
+            return
+        }
     }
 
-    if(var(VAR_RESULT) == NO)
-    {
-        // Invalid team size
-        return
-    }
-
-    setvar(VAR_TRIAL_MENU_CHOICE, NO)
     special(RogueTrial_CanUsePendingDayCare)
     if(var(VAR_RESULT) == NO)
     {
@@ -587,22 +593,25 @@ script Rogue_StartAdventureInternal
         return
     }
 
-    special(RogueTrial_CanUsePendingParty)
-    if(var(VAR_RESULT) == NO)
+    if(var(VAR_TRIAL_MENU_CHOICE) == NO)
     {
-        if(flag(FLAG_HIDE_STARTER_BAG))
+        special(RogueTrial_CanUsePendingParty)
+        if(var(VAR_RESULT) == NO)
         {
-            msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pAdjust your party before starting."), MSGBOX_DEFAULT)
-            return
-        }
+            if(flag(FLAG_HIDE_STARTER_BAG))
+            {
+                msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pAdjust your party before starting."), MSGBOX_DEFAULT)
+                return
+            }
 
-        msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
-        if(var(VAR_RESULT) != YES)
-        {
-            return
-        }
+            msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) != YES)
+            {
+                return
+            }
 
-        setvar(VAR_TRIAL_MENU_CHOICE, YES)
+            setvar(VAR_TRIAL_MENU_CHOICE, YES)
+        }
     }
 
     call(Common_EventScript_SaveGame)
@@ -704,6 +713,7 @@ script Rogue_StartAdventureInternal
             if(var(VAR_RESULT) == YES)
             {
                 msgbox(format("You can't start an Adventure with duplicate Pokémon species or more than one Legendary or Mythical Pokémon.\pPlease deposit or swap one of them at a PC first."), MSGBOX_DEFAULT)
+                call(Rogue_Adventure_CancelRunStartAfterGate)
                 return
             }
         }
@@ -712,6 +722,7 @@ script Rogue_StartAdventureInternal
         if(var(VAR_RESULT) == NO)
         {
             msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pAdjust your party, Day Care, or partner choice before starting."), MSGBOX_DEFAULT)
+            call(Rogue_Adventure_CancelRunStartAfterGate)
             return
         }
 
@@ -776,9 +787,33 @@ movement Rogue_Adventure_ReturnPlayerFromStarter
     face_up
 }
 
+movement Rogue_Adventure_ReturnPlayerFromGate
+{
+    walk_down * 3
+    face_up
+}
+
 script Rogue_Adventure_CancelStarterSelection
 {
     applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromStarter)
+
+    special(RogueTrial_HasPendingSelection)
+    if(var(VAR_RESULT) == YES)
+    {
+        applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_ReturnGateNpc)
+    }
+    else
+    {
+        applymovement(OBJ_EVENT_ADVENTURE_NURSE, Rogue_Adventure_ReturnGateNpc)
+    }
+
+    waitmovement(0)
+    return
+}
+
+script Rogue_Adventure_CancelRunStartAfterGate
+{
+    applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromGate)
 
     special(RogueTrial_HasPendingSelection)
     if(var(VAR_RESULT) == YES)
