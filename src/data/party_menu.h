@@ -662,6 +662,7 @@ static const u8 sPartyBoxFaintedPalIds2[] = {81, 87, 88};
 static const u8 sPartyBoxCurrSelectionPalIds2[] = {97, 103, 104};
 static const u8 sPartyBoxSelectedForActionPalIds2[] = {161, 167, 168};
 static const u8 sPartyBoxNoMonPalIds[] = {17, 27, 28};
+static const u8 sText_NotInSelectedPokedex[] = _("Not in selected Pokédex.");
 
 static const u8 *const sActionStringTable[] =
 {
@@ -696,6 +697,7 @@ static const u8 *const sActionStringTable[] =
     [PARTY_MSG_WHICH_APPLIANCE]        = gText_WhichAppliance,
     [PARTY_MSG_WHICH_DEOXYS_FORM]      = gText_WhichForm,
     [PARTY_MSG_CHOOSE_SECOND_FUSION]   = gText_NextFusionMon,
+    [PARTY_MSG_NOT_IN_SELECTED_POKEDEX] = sText_NotInSelectedPokedex,
 };
 
 static const u8 sText_NatureStatsNeutral[] = _("{FONT_SMALL_NARROW}- -");

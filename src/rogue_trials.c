@@ -22,6 +22,7 @@
 #include "rogue_pokedex.h"
 #include "rogue_query.h"
 #include "rogue_quest.h"
+#include "rogue_save.h"
 #include "rogue_script.h"
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
@@ -171,6 +172,7 @@ static const u8 sRule_FreshStart[] = _("Fresh Start removes the starting Bag.");
 static const u8 sRule_MixedBattles[] = _("Trainer battles use the Mixed format.");
 static const u8 sRule_Unaware[] = _("Unaware Curse is active.");
 static const u8 sRule_NoLegendaries[] = _("Legendary and Mythical {PKMN} are illegal.");
+static const u8 sRule_HardDifficulty[] = _("Difficulty is fixed to Hard.");
 static const u8 sRule_PartyOne[] = _("Party capacity is one {PKMN}.");
 static const u8 sRule_MaxShopPrices[] = _("99 Discount Curses maximize shop prices.");
 static const u8 sRule_BattleReroll[] = _("The full party rerolls before every Trainer battle.");
@@ -192,7 +194,7 @@ static const u8 *const sRules_Roguelocke[] = {sRule_RandomStarter, sRule_WildCur
 static const u8 *const sRules_CantPick[] = {sRule_StarterOnly};
 static const u8 *const sRules_CursedBody[] = {sRule_Snowball};
 static const u8 *const sRules_ProBuilding[] = {sRule_AutoMove};
-static const u8 *const sRules_InsaneMode[] = {sRule_FreshStart, sRule_MixedBattles, sRule_RandomStarter, sRule_Unaware, sRule_NoLegendaries};
+static const u8 *const sRules_InsaneMode[] = {sRule_HardDifficulty, sRule_FreshStart, sRule_MixedBattles, sRule_RandomStarter, sRule_Unaware, sRule_NoLegendaries};
 static const u8 *const sRules_IronMono[] = {sRule_PartyOne};
 static const u8 *const sRules_IronKaizo[] = {sRule_FreshStart, sRule_RandomStarter, sRule_PartyOne, sRule_MaxShopPrices};
 static const u8 *const sRules_ChaosMaster[] = {sRule_BattleReroll};
@@ -599,6 +601,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .requiredType = ROGUE_TRIAL_NO_TYPE,
         .forcedBattleFormat = BATTLE_FORMAT_MIXED,
         .hasForcedBattleFormat = TRUE,
+        .forcedDifficulty = DIFFICULTY_LEVEL_HARD,
+        .hasForcedDifficulty = TRUE,
         .curseEffect = EFFECT_UNAWARE_STATUS,
         .curseCount = 1,
         .hasCurseEffect = TRUE,
@@ -1104,8 +1108,16 @@ static bool8 DefinitionAllowsSpecies(const struct RogueTrialDefinition *trial, u
 bool8 RogueTrial_PendingAllowsSpecies(u16 species)
 {
     const struct RogueTrialDefinition *trial;
+    u8 dexVariant;
 
-    if (!sPendingTrial.isPending || species == SPECIES_NONE)
+    if (species == SPECIES_NONE)
+        return TRUE;
+
+    dexVariant = sPendingTrial.isPending ? sPendingTrial.pokedexVariant : RoguePokedex_GetDexVariant();
+    if (!SpeciesIsEnabledForDexVariant(species, dexVariant))
+        return FALSE;
+
+    if (!sPendingTrial.isPending)
         return TRUE;
 
     if (!IsValidTrialId(sPendingTrial.trialId) || !IsValidDifficulty(sPendingTrial.difficulty))
@@ -1360,6 +1372,11 @@ void RogueTrial_ApplyPendingSelection(void)
         gRogueRun.trialState.initialPartyCount = CalculatePlayerPartyCount();
         gRogueRun.trialState.invalidated = FALSE;
         gRogueRun.trialState.initialPartyCountSet = TRUE;
+
+        gRogueSaveBlock->lastTrialId = sPendingTrial.trialId;
+        gRogueSaveBlock->lastTrialDifficulty = sPendingTrial.difficulty;
+        gRogueSaveBlock->lastTrialPokedexVariant = sPendingTrial.pokedexVariant;
+        gRogueSaveBlock->hasLastTrialSelection = TRUE;
 
         Rogue_SetDifficultyPreset(sPendingTrial.difficulty);
         RoguePokedex_SetDexVariant(sPendingTrial.pokedexVariant);
@@ -1983,6 +2000,21 @@ void RogueTrial_AppendDifficultyOptions(void)
     ScriptMenu_ScrollingMultichoiceDynamicSetDefault(DIFFICULTY_LEVEL_AVERAGE);
 }
 
+void RogueTrial_SelectForcedDifficulty(void)
+{
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gSpecialVar_0x8004);
+
+    if (trial != NULL && trial->hasForcedDifficulty && IsValidDifficulty(trial->forcedDifficulty))
+    {
+        gSpecialVar_0x8005 = trial->forcedDifficulty;
+        gSpecialVar_Result = TRUE;
+    }
+    else
+    {
+        gSpecialVar_Result = FALSE;
+    }
+}
+
 void RogueTrial_AppendPokedexOptions(void)
 {
     u8 i;
@@ -2094,12 +2126,14 @@ void RogueTrial_SetPendingSelectionFromScript(void)
     if (trial != NULL
         && IsValidTrialId(gSpecialVar_0x8004)
         && IsValidDifficulty(gSpecialVar_0x8005)
+        && (!trial->hasForcedDifficulty || gSpecialVar_0x8005 == trial->forcedDifficulty)
         && IsPokedexVariantAllowedForSet(trial->pokedexSet, gSpecialVar_0x8006))
     {
         sPendingTrial.trialId = gSpecialVar_0x8004;
         sPendingTrial.difficulty = gSpecialVar_0x8005;
         sPendingTrial.pokedexVariant = gSpecialVar_0x8006;
         sPendingTrial.isPending = TRUE;
+        RoguePokedex_SetDexVariant(sPendingTrial.pokedexVariant);
         gSpecialVar_Result = TRUE;
     }
     else
@@ -2143,10 +2177,7 @@ void RogueTrial_CanUsePendingParty(void)
 
     gSpecialVar_Result = TRUE;
 
-    if (!sPendingTrial.isPending)
-        return;
-
-    if (RogueTrial_GetDefinition(sPendingTrial.trialId)->forceRandomStarter)
+    if (sPendingTrial.isPending && RogueTrial_GetDefinition(sPendingTrial.trialId)->forceRandomStarter)
         return;
 
     for (i = 0; i < PARTY_SIZE; ++i)
@@ -2167,11 +2198,7 @@ void RogueTrial_CanUsePendingDayCare(void)
     u8 i;
 
     gSpecialVar_Result = TRUE;
-
-    if (!sPendingTrial.isPending)
-        return;
-
-    trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
+    trial = sPendingTrial.isPending ? RogueTrial_GetDefinition(sPendingTrial.trialId) : NULL;
 
     for (i = 0; i < Rogue_GetCurrentDaycareSlotCount(); ++i)
     {
@@ -2199,9 +2226,6 @@ void RogueTrial_CanStartPendingSelection(void)
 
     gSpecialVar_Result = TRUE;
 
-    if (!sPendingTrial.isPending)
-        return;
-
     if (starterSpecies != SPECIES_NONE)
     {
         if (BufferPendingValidationFailure(sText_ChosenPartner, starterSpecies))
@@ -2228,6 +2252,29 @@ void RogueTrial_ClearPendingSelection(void)
 void RogueTrial_HasAvailableTrials(void)
 {
     gSpecialVar_Result = HasVisibleTrialOptions();
+}
+
+void RogueTrial_LoadLastSelection(void)
+{
+    const struct RogueTrialDefinition *trial;
+
+    gSpecialVar_Result = FALSE;
+    if (!gRogueSaveBlock->hasLastTrialSelection
+        || !IsValidTrialId(gRogueSaveBlock->lastTrialId)
+        || !IsValidDifficulty(gRogueSaveBlock->lastTrialDifficulty))
+        return;
+
+    trial = RogueTrial_GetDefinition(gRogueSaveBlock->lastTrialId);
+    if (trial == NULL
+        || !IsTrialAvailableForMenu(gRogueSaveBlock->lastTrialId)
+        || !IsPokedexVariantAllowedForSet(trial->pokedexSet, gRogueSaveBlock->lastTrialPokedexVariant)
+        || (trial->hasForcedDifficulty && trial->forcedDifficulty != gRogueSaveBlock->lastTrialDifficulty))
+        return;
+
+    gSpecialVar_0x8004 = gRogueSaveBlock->lastTrialId;
+    gSpecialVar_0x8005 = gRogueSaveBlock->lastTrialDifficulty;
+    gSpecialVar_0x8006 = gRogueSaveBlock->lastTrialPokedexVariant;
+    gSpecialVar_Result = TRUE;
 }
 
 void RogueTrial_CanUseAttendant(void)

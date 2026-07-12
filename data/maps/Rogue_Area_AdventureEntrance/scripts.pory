@@ -372,6 +372,25 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
         return
     }
 
+    special(RogueTrial_LoadLastSelection)
+    if(var(VAR_RESULT) == YES)
+    {
+        special(RogueTrial_BufferTrialPreview)
+        closemessage
+        callnative(ScriptMenu_ShowTrialOverview)
+        waitstate
+        if(var(VAR_RESULT) == YES)
+        {
+            msgbox(format("Repeat this Trial?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                call(Rogue_Area_AdventureEntrance_StartSelectedTrial)
+                releaseall
+                return
+            }
+        }
+    }
+
     msgbox(format("Would you like to take on a curated Trial?"), MSGBOX_YESNO)
     if(var(VAR_RESULT) != YES)
     {
@@ -411,15 +430,19 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
         }
     }
 
-    begindynamicmultichoice(8)
-    special(RogueTrial_AppendDifficultyOptions)
-    enddynamicmultichoice(1, 0, 5, TRUE)
-    if(var(VAR_RESULT) == MULTI_B_PRESSED)
+    special(RogueTrial_SelectForcedDifficulty)
+    if(var(VAR_RESULT) != YES)
     {
-        releaseall
-        return
+        begindynamicmultichoice(8)
+        special(RogueTrial_AppendDifficultyOptions)
+        enddynamicmultichoice(1, 0, 5, TRUE)
+        if(var(VAR_RESULT) == MULTI_B_PRESSED)
+        {
+            releaseall
+            return
+        }
+        copyvar(VAR_0x8005, VAR_RESULT)
     }
-    copyvar(VAR_0x8005, VAR_RESULT)
 
     special(RogueTrial_GetPokedexOptionCount)
     if(var(VAR_RESULT) == 0)
@@ -489,16 +512,22 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
     msgbox(format("Start this Trial?"), MSGBOX_YESNO)
     if(var(VAR_RESULT) == YES)
     {
-        special(RogueTrial_SetPendingSelectionFromScript)
-        if(var(VAR_RESULT) == YES)
-        {
-            call(Rogue_ResetAdventureVars)
-            call(Rogue_StartAdventureInternal)
-            special(RogueTrial_ClearPendingSelection)
-        }
+        call(Rogue_Area_AdventureEntrance_StartSelectedTrial)
     }
 
     releaseall
+}
+
+script Rogue_Area_AdventureEntrance_StartSelectedTrial
+{
+    special(RogueTrial_SetPendingSelectionFromScript)
+    if(var(VAR_RESULT) == YES)
+    {
+        call(Rogue_ResetAdventureVars)
+        call(Rogue_StartAdventureInternal)
+        special(RogueTrial_ClearPendingSelection)
+    }
+    return
 }
 
 movement Rogue_Adventure_QuestTutorial_Player1
@@ -551,33 +580,29 @@ script Rogue_StartAdventureInternal
     }
 
     setvar(VAR_TRIAL_MENU_CHOICE, NO)
-    special(RogueTrial_HasPendingSelection)
-    if(var(VAR_RESULT) == YES)
+    special(RogueTrial_CanUsePendingDayCare)
+    if(var(VAR_RESULT) == NO)
     {
-        special(RogueTrial_CanUsePendingDayCare)
-        if(var(VAR_RESULT) == NO)
+        msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pAdjust your Day Care before starting."), MSGBOX_DEFAULT)
+        return
+    }
+
+    special(RogueTrial_CanUsePendingParty)
+    if(var(VAR_RESULT) == NO)
+    {
+        if(flag(FLAG_HIDE_STARTER_BAG))
         {
-            msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal for this trial.\pAdjust your Day Care before starting."), MSGBOX_DEFAULT)
+            msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pAdjust your party before starting."), MSGBOX_DEFAULT)
             return
         }
 
-        special(RogueTrial_CanUsePendingParty)
-        if(var(VAR_RESULT) == NO)
+        msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
+        if(var(VAR_RESULT) != YES)
         {
-            if(flag(FLAG_HIDE_STARTER_BAG))
-            {
-                msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal for this trial.\pAdjust your party before starting."), MSGBOX_DEFAULT)
-                return
-            }
-
-            msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal for this trial.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
-            if(var(VAR_RESULT) != YES)
-            {
-                return
-            }
-
-            setvar(VAR_TRIAL_MENU_CHOICE, YES)
+            return
         }
+
+        setvar(VAR_TRIAL_MENU_CHOICE, YES)
     }
 
     call(Common_EventScript_SaveGame)
@@ -604,6 +629,12 @@ script Rogue_StartAdventureInternal
             waitstate
             clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
 
+            if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
+            {
+                call(Rogue_Adventure_CancelStarterSelection)
+                return
+            }
+
             applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter1)
             waitmovement(0)
         }
@@ -623,8 +654,7 @@ script Rogue_StartAdventureInternal
                 waitmovement(0)
             }
 
-            special(RogueTrial_HasPendingSelection)
-            if(var(VAR_RESULT) == YES && var(VAR_TRIAL_MENU_CHOICE) == YES)
+            if(var(VAR_TRIAL_MENU_CHOICE) == YES)
             {
                 setvar(VAR_RESULT, YES)
             }
@@ -640,6 +670,12 @@ script Rogue_StartAdventureInternal
                 setflag(FLAG_SCRIPT_HIDE_FOLLOWER) 
                 waitstate
                 clearflag(FLAG_SCRIPT_HIDE_FOLLOWER) 
+
+                if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
+                {
+                    call(Rogue_Adventure_CancelStarterSelection)
+                    return
+                }
             }
 
             applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter1)
@@ -675,7 +711,7 @@ script Rogue_StartAdventureInternal
         special(RogueTrial_CanStartPendingSelection)
         if(var(VAR_RESULT) == NO)
         {
-            msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal for this trial.\pAdjust your party, Day Care, or partner choice before starting."), MSGBOX_DEFAULT)
+            msgbox(format("{STR_VAR_2} from {STR_VAR_1} is not legal under the selected run rules.\pAdjust your party, Day Care, or partner choice before starting."), MSGBOX_DEFAULT)
             return
         }
 
@@ -725,6 +761,37 @@ movement Rogue_Adventure_WalkPlayerStarter
 movement Rogue_Adventure_WalkPlayerStarter1
 {
     walk_up
+}
+
+movement Rogue_Adventure_ReturnGateNpc
+{
+    walk_left
+    walk_down
+    face_down
+}
+
+movement Rogue_Adventure_ReturnPlayerFromStarter
+{
+    walk_down * 2
+    face_up
+}
+
+script Rogue_Adventure_CancelStarterSelection
+{
+    applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromStarter)
+
+    special(RogueTrial_HasPendingSelection)
+    if(var(VAR_RESULT) == YES)
+    {
+        applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_ReturnGateNpc)
+    }
+    else
+    {
+        applymovement(OBJ_EVENT_ADVENTURE_NURSE, Rogue_Adventure_ReturnGateNpc)
+    }
+
+    waitmovement(0)
+    return
 }
 
 script Rogue_ReturnAdventureInternal

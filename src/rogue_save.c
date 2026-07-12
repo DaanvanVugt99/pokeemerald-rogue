@@ -243,6 +243,12 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
     SerializeData(stream, &sRunRestoreBlock, sizeof(sRunRestoreBlock));
     SerializeData(stream, &gRogueRun, sizeof(gRogueRun));
 
+    // Keep this appended so older hub saves read zeroed defaults here.
+    SerializeData(stream, &saveBlock->lastTrialId, sizeof(saveBlock->lastTrialId));
+    SerializeData(stream, &saveBlock->lastTrialDifficulty, sizeof(saveBlock->lastTrialDifficulty));
+    SerializeData(stream, &saveBlock->lastTrialPokedexVariant, sizeof(saveBlock->lastTrialPokedexVariant));
+    SerializeData(stream, &saveBlock->hasLastTrialSelection, sizeof(saveBlock->hasLastTrialSelection));
+
     SerializeData(stream, &gRogueAdvPath.currentRoomParams, sizeof(gRogueAdvPath.currentRoomParams));
     SerializeData(stream, &gRogueAdvPath.currentRoomType, sizeof(gRogueAdvPath.currentRoomType));
 

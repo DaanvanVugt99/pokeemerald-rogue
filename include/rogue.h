@@ -694,6 +694,10 @@ struct RogueSaveBlock
     u16 timeOfDayMinutes;
     u16 lastKnownNumSpecies;
     u8 seasonCounter;
+    u8 lastTrialId;
+    u8 lastTrialDifficulty;
+    u8 lastTrialPokedexVariant;
+    bool8 hasLastTrialSelection;
 };
 
 struct RogueSpeciesBakedData

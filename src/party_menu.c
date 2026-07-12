@@ -193,7 +193,7 @@ enum {
 #define PARTY_PAL_SWITCHING    (1 << 4)
 #define PARTY_PAL_TO_SOFTBOIL  (1 << 5)
 #define PARTY_PAL_NO_MON       (1 << 6)
-#define PARTY_PAL_UNUSED       (1 << 7)
+#define PARTY_PAL_ILLEGAL      (1 << 7)
 
 #define MENU_DIR_DOWN     1
 #define MENU_DIR_UP      -1
@@ -343,6 +343,8 @@ static void AnimateSelectedPartyIcon(u8, u8);
 static void PartyMenuStartSpriteAnim(u8, u8);
 static u8 GetPartyBoxPaletteFlags(u8, u8);
 static bool8 PartyBoxPal_ParnterOrDisqualifiedInArena(u8);
+static bool8 IsPartyMonOutsideSelectedPokedex(u8 slot);
+static void UpdatePokedexLegalityMessage(u8 slot);
 static u8 GetPartyIdFromBattleSlot(u8);
 static void Task_ClosePartyMenuAndSetCB2(u8);
 static void UpdatePartyToFieldOrder(void);
@@ -770,6 +772,7 @@ static bool8 ShowPartyMenu(void)
     case 20:
         CreateTask(sPartyMenuInternal->task, 0);
         DisplayPartyMenuStdMessage(sPartyMenuInternal->messageId);
+        UpdatePokedexLegalityMessage(gPartyMenu.slotId);
         gMain.state++;
         break;
     case 21:
@@ -1104,6 +1107,7 @@ static void DisplayPartyPokemonData(u8 slot)
         DisplayPartyPokemonMaxHPCheck(&gPlayerParty[slot], &sPartyMenuBoxes[slot], 0);
         DisplayPartyPokemonHPBarCheck(&gPlayerParty[slot], &sPartyMenuBoxes[slot]);
     }
+
 }
 
 static void DisplayPartyPokemonDescriptionData(u8 slot, u8 stringID)
@@ -1424,6 +1428,8 @@ static u8 GetPartyBoxPaletteFlags(u8 slot, u8 animNum)
         palFlags |= PARTY_PAL_SELECTED;
     if (GetMonData(&gPlayerParty[slot], MON_DATA_HP) == 0)
         palFlags |= PARTY_PAL_FAINTED;
+    if (IsPartyMonOutsideSelectedPokedex(slot))
+        palFlags |= PARTY_PAL_ILLEGAL;
     if (PartyBoxPal_ParnterOrDisqualifiedInArena(slot) == TRUE)
         palFlags |= PARTY_PAL_MULTI_ALT;
     if (gPartyMenu.action == PARTY_ACTION_SWITCHING)
@@ -1437,6 +1443,29 @@ static u8 GetPartyBoxPaletteFlags(u8 slot, u8 animNum)
         palFlags |= PARTY_PAL_TO_SOFTBOIL;
 
     return palFlags;
+}
+
+static bool8 IsPartyMonOutsideSelectedPokedex(u8 slot)
+{
+    u16 species;
+
+    if (slot >= PARTY_SIZE || GetMonData(&gPlayerParty[slot], MON_DATA_IS_EGG))
+        return FALSE;
+
+    species = GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES);
+    return species != SPECIES_NONE && !RoguePokedex_IsSpeciesEnabled(species);
+}
+
+static void UpdatePokedexLegalityMessage(u8 slot)
+{
+    if (gMain.inBattle
+        || (gPartyMenu.action != PARTY_ACTION_CHOOSE_MON && gPartyMenu.action != PARTY_ACTION_CHOOSE_AND_CLOSE))
+        return;
+
+    if (IsPartyMonOutsideSelectedPokedex(slot))
+        DisplayPartyMenuStdMessage(PARTY_MSG_NOT_IN_SELECTED_POKEDEX);
+    else
+        DisplayPartyMenuStdMessage(sPartyMenuInternal->messageId);
 }
 
 static bool8 PartyBoxPal_ParnterOrDisqualifiedInArena(u8 slot)
@@ -1816,6 +1845,7 @@ static void UpdateCurrentPartySelection(s8 *slotPtr, s8 movementDir)
         AnimatePartySlot(newSlotId, 0);
         AnimatePartySlot(*slotPtr, 1);
         UpdateDisplayedItem(*slotPtr);
+        UpdatePokedexLegalityMessage(*slotPtr);
     }
 }
 
@@ -2635,7 +2665,7 @@ static void LoadPartyBoxPalette(struct PartyMenuBox *menuBox, u8 palFlags)
             LOAD_PARTY_BOX_PAL(sPartyBoxSelectedForActionPalIds2, sPartyBoxPalOffsets2);
         }
     }
-    else if (palFlags & PARTY_PAL_FAINTED)
+    else if (palFlags & (PARTY_PAL_FAINTED | PARTY_PAL_ILLEGAL))
     {
         if (palFlags & PARTY_PAL_SELECTED)
         {

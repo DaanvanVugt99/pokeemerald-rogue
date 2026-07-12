@@ -226,6 +226,7 @@ gSpecials::
 	def_special RogueTrial_IsSelectedTrialGroup
 	def_special RogueTrial_AppendSelectedTrialGroupOptions
 	def_special RogueTrial_AppendDifficultyOptions
+	def_special RogueTrial_SelectForcedDifficulty
 	def_special RogueTrial_AppendPokedexOptions
 	def_special RogueTrial_IsSelectedPokedexGroup
 	def_special RogueTrial_AppendSelectedPokedexGroupOptions
@@ -244,6 +245,7 @@ gSpecials::
 	def_special RogueTrial_CanStartTrainerBattle
 	def_special RogueTrial_ClearPendingSelection
 	def_special RogueTrial_HasAvailableTrials
+	def_special RogueTrial_LoadLastSelection
 	def_special RogueTrial_CanUseAttendant
 	def_special RogueTrial_RecordInitialParty
 	def_special Rogue_GiveTemporaryDarkDealCurse

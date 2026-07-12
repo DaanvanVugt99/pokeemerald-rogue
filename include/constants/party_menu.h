@@ -87,6 +87,7 @@
 #define PARTY_MSG_CHOOSE_SECOND_FUSION      28
 #define PARTY_MSG_WHICH_DEOXYS_FORM         29
 #define PARTY_MSG_SWAP_WITH_WHICH_MON       30
+#define PARTY_MSG_NOT_IN_SELECTED_POKEDEX   31
 #define PARTY_MSG_NONE                      127
 
 // IDs for DisplayPartyPokemonDescriptionText, to display a message in the party pokemon's box

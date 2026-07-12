@@ -67,6 +67,15 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made the selected Pokédex a run-entry legality rule for the party and Day Care,
+  with illegal Pokémon marked in the party screen.
+- Made a confirmed Trial Pokédex selection immediately become the active hub
+  Pokédex so party previews and run validation use the same rules.
+- Made Insane Mode force Hard difficulty instead of presenting a difficulty
+  selection.
+- Added an early Trial Attendant shortcut that previews and repeats the exact
+  setup from the most recently started Trial.
+
 - Made the Quest Board open the quest menu when there are no pending quest
   rewards to collect.
 - Made challenge quest money rewards more generous, increasing total challenge

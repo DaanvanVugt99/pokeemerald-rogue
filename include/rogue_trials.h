@@ -86,6 +86,7 @@ struct RogueTrialDefinition
     u8 battleLevel;
     u8 forcedTrainerOrder;
     u8 forcedBattleFormat;
+    u8 forcedDifficulty;
     u8 curseEffect;
     u8 extraCurseEffect;
     u8 curseCount;
@@ -109,7 +110,8 @@ struct RogueTrialDefinition
     u8 disableRandoman : 1;
     u8 enforceOpponentSpeciesLegality : 1;
     u8 disableTrainerBattleExp : 1;
-    u8 unused : 6;
+    u8 hasForcedDifficulty : 1;
+    u8 unused : 5;
 };
 
 struct RogueTrialRunState
@@ -167,6 +169,7 @@ void RogueTrial_AppendTrialOptions(void);
 void RogueTrial_IsSelectedTrialGroup(void);
 void RogueTrial_AppendSelectedTrialGroupOptions(void);
 void RogueTrial_AppendDifficultyOptions(void);
+void RogueTrial_SelectForcedDifficulty(void);
 void RogueTrial_AppendPokedexOptions(void);
 void RogueTrial_IsSelectedPokedexGroup(void);
 void RogueTrial_AppendSelectedPokedexGroupOptions(void);
@@ -182,6 +185,7 @@ void RogueTrial_CanUsePendingDayCare(void);
 void RogueTrial_CanStartPendingSelection(void);
 void RogueTrial_ClearPendingSelection(void);
 void RogueTrial_HasAvailableTrials(void);
+void RogueTrial_LoadLastSelection(void);
 void RogueTrial_CanUseAttendant(void);
 void RogueTrial_RecordInitialParty(void);
 

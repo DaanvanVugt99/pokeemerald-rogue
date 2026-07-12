@@ -12,6 +12,8 @@
 #include "rogue_charms.h"
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
+#include "rogue_quest.h"
+#include "rogue_save.h"
 #include "rogue_settings.h"
 #include "rogue_trials.h"
 #include "test/test.h"
@@ -32,6 +34,7 @@ static void ResetCaughtMonTestState(void)
     Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
     RogueTrial_ClearPendingSelection();
+    gRogueSaveBlock->hasLastTrialSelection = FALSE;
 }
 
 static void ClearCaughtMonTestState(void)
@@ -93,6 +96,7 @@ static void SetPendingTrialSelection(u8 trialId, u8 pokedexVariant)
     gSpecialVar_0x8006 = pokedexVariant;
     RogueTrial_SetPendingSelectionFromScript();
     EXPECT(gSpecialVar_Result);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), pokedexVariant);
 }
 
 static u16 GetGeneratedStarter(u8 slot)
@@ -305,7 +309,7 @@ TEST("Regional Style Trial treats selected Pokedex as species legality")
 TEST("Pending Type Trial blocks illegal party Pokemon before start")
 {
     ResetCaughtMonTestState();
-    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_ROGUE_MODERN);
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_NATIONAL_GEN9);
 
     SetPartyMon(0, SPECIES_ZIGZAGOON);
     RogueTrial_CanUsePendingParty();
@@ -328,7 +332,7 @@ TEST("Pending Type Trial blocks illegal party Pokemon before start")
 TEST("Pending trial checks Day Care Pokemon before start")
 {
     ResetCaughtMonTestState();
-    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_ROGUE_MODERN);
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_NATIONAL_GEN9);
     SetPartyMon(0, SPECIES_MAGIKARP);
 
     SetDaycareMon(0, SPECIES_ZIGZAGOON);
@@ -369,7 +373,7 @@ TEST("Pending regional trial blocks party Pokemon outside selected Pokedex")
 TEST("Pending trial validates chosen partner instead of replaced party")
 {
     ResetCaughtMonTestState();
-    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_ROGUE_MODERN);
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_WATER, POKEDEX_VARIANT_NATIONAL_GEN9);
     SetPartyMon(0, SPECIES_ZIGZAGOON);
 
     VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_MAGIKARP);
@@ -379,6 +383,33 @@ TEST("Pending trial validates chosen partner instead of replaced party")
     VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_ZIGZAGOON);
     RogueTrial_CanStartPendingSelection();
     EXPECT(!gSpecialVar_Result);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Normal runs reject party and Day Care Pokemon outside the selected Pokedex")
+{
+    ResetCaughtMonTestState();
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+
+    SetPartyMon(0, SPECIES_BULBASAUR);
+    RogueTrial_CanUsePendingParty();
+    EXPECT(!gSpecialVar_Result);
+
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    CalculatePlayerPartyCount();
+    SetPartyMon(0, SPECIES_TREECKO);
+    RogueTrial_CanUsePendingParty();
+    EXPECT(gSpecialVar_Result);
+
+    SetDaycareMon(0, SPECIES_BULBASAUR);
+    RogueTrial_CanUsePendingDayCare();
+    EXPECT(!gSpecialVar_Result);
+
+    ZeroBoxMonData(Rogue_GetDaycareBoxMon(0));
+    SetDaycareMon(0, SPECIES_TREECKO);
+    RogueTrial_CanUsePendingDayCare();
+    EXPECT(gSpecialVar_Result);
 
     ClearCaughtMonTestState();
 }
@@ -550,6 +581,53 @@ TEST("Converted legality Trials enforce starter and Legendary rules")
     EXPECT(!RogueTrial_IsSpeciesLegal(SPECIES_MEWTWO, 0));
     caughtMon = CreateCaughtMon(SPECIES_MEWTWO);
     EXPECT(!RogueTrial_CanAcceptMon(&caughtMon));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Insane Mode forces Hard difficulty")
+{
+    ResetCaughtMonTestState();
+
+    gSpecialVar_0x8004 = ROGUE_TRIAL_INSANE_MODE;
+    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_NATIONAL_GEN9;
+    RogueTrial_SelectForcedDifficulty();
+    EXPECT(gSpecialVar_Result);
+    EXPECT_EQ(gSpecialVar_0x8005, DIFFICULTY_LEVEL_HARD);
+
+    RogueTrial_SetPendingSelectionFromScript();
+    EXPECT(gSpecialVar_Result);
+
+    RogueTrial_ClearPendingSelection();
+    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    RogueTrial_SetPendingSelectionFromScript();
+    EXPECT(!gSpecialVar_Result);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Last Trial selection restores its exact setup")
+{
+    ResetCaughtMonTestState();
+    RogueQuest_TryUnlockQuest(QUEST_ID_NORMAL_MASTER);
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_NORMAL, POKEDEX_VARIANT_NATIONAL_GEN9);
+    RogueTrial_ApplyPendingSelection();
+
+    EXPECT(gRogueSaveBlock->hasLastTrialSelection);
+    EXPECT_EQ(gRogueSaveBlock->lastTrialId, ROGUE_TRIAL_TYPE_NORMAL);
+    EXPECT_EQ(gRogueSaveBlock->lastTrialDifficulty, DIFFICULTY_LEVEL_AVERAGE);
+    EXPECT_EQ(gRogueSaveBlock->lastTrialPokedexVariant, POKEDEX_VARIANT_NATIONAL_GEN9);
+
+    gSpecialVar_0x8004 = ROGUE_TRIAL_NONE;
+    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_EASY;
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_NONE;
+    RogueTrial_LoadLastSelection();
+
+    EXPECT(gSpecialVar_Result);
+    EXPECT_EQ(gSpecialVar_0x8004, ROGUE_TRIAL_TYPE_NORMAL);
+    EXPECT_EQ(gSpecialVar_0x8005, DIFFICULTY_LEVEL_AVERAGE);
+    EXPECT_EQ(gSpecialVar_0x8006, POKEDEX_VARIANT_NATIONAL_GEN9);
 
     ClearCaughtMonTestState();
 }
