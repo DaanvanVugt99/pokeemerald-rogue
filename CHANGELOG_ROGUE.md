@@ -201,6 +201,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Corrected the battle-sprite positioning of newly added Z-A Mega Evolutions,
+  including visible gaps beneath Mega Staraptor and other backsprites.
 - Optimized route special item weighting to avoid long pauses when entering
   route, hideout, boss, or miniboss nodes.
 - Fixed Shuffle Curse held item restoration deleting items when a shuffled party
