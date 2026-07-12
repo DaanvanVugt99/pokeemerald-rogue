@@ -64,6 +64,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made the Quest Board open the quest menu when there are no pending quest
+  rewards to collect.
 - Made challenge quest money rewards more generous, increasing total challenge
   quest money from 182,000 to 552,000 by adding a 10,000 money tier for planned
   full-run restrictions and reserving 20,000 for capstone challenges.
