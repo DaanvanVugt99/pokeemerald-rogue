@@ -1526,6 +1526,29 @@ u32 RoguePlayer_GetOutfitTrainerFlags()
     return GetCurrentOutfit()->relatedTrainerFlags;
 }
 
+u32 RoguePlayer_GetOutfitTeamClassFlags()
+{
+    switch(GetCurrentOutfit()->outfitUnlockId)
+    {
+    case OUTFIT_UNLOCK_TEAM_ROCKET:
+        return CLASS_FLAG_TEAM_ROCKET;
+    case OUTFIT_UNLOCK_TEAM_AQUA:
+        return CLASS_FLAG_TEAM_AQUA;
+    case OUTFIT_UNLOCK_TEAM_MAGMA:
+        return CLASS_FLAG_TEAM_MAGMA;
+    case OUTFIT_UNLOCK_TEAM_GALACTIC:
+        return CLASS_FLAG_TEAM_GALACTIC;
+    case OUTFIT_UNLOCK_TEAM_PLASMA:
+        return CLASS_FLAG_TEAM_PLASMA;
+    case OUTFIT_UNLOCK_TEAM_NEO_PLASMA:
+        return CLASS_FLAG_TEAM_NEOPLASMA;
+    case OUTFIT_UNLOCK_TEAM_FLARE:
+        return CLASS_FLAG_TEAM_FLARE;
+    default:
+        return CLASS_FLAG_NONE;
+    }
+}
+
 static bool32 CheckOutfitUnlockIsActive(u32 unlockId)
 {
     if(unlockId == OUTFIT_UNLOCK_PLACEHOLDER)

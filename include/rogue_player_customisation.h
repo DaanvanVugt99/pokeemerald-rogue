@@ -61,6 +61,7 @@ void RoguePlayer_RandomiseOutfit(bool8 includeOutfitId);
 void RoguePlayer_SetOutfitId(u16 outfit);
 u16 RoguePlayer_GetOutfitId();
 u32 RoguePlayer_GetOutfitTrainerFlags();
+u32 RoguePlayer_GetOutfitTeamClassFlags();
 
 bool8 RoguePlayer_HasUnlockedOutfitId(u16 outfit);
 void RoguePlayer_EnsureUnlockedOutfitId(u16 outfit);

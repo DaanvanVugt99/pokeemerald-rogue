@@ -20,10 +20,13 @@
 #include "constants/trainer_types.h"
 
 #include "rogue_trainers.h"
+#include "rogue_player_customisation.h"
 #include "rogue_ridemon.h"
 
 // this file's functions
 static u8 CheckTrainer(u8 objectEventId);
+static bool8 IsPlayerDisguisedFromTrainer(struct ObjectEvent *trainerObj);
+static void ShowDisguiseReaction(struct ObjectEvent *trainerObj);
 static u8 GetTrainerApproachDistance(struct ObjectEvent *trainerObj);
 static u8 CheckPathBetweenTrainerAndPlayer(struct ObjectEvent *trainerObj, u8 approachDistance, u8 direction);
 static void InitTrainerApproachTask(struct ObjectEvent *trainerObj, u8 range);
@@ -340,6 +343,12 @@ static u8 CheckTrainer(u8 objectEventId)
             if (GetTrainerFlagFromScriptPointer(scriptPtr))
                 return 0;
         }
+
+        if(IsPlayerDisguisedFromTrainer(&gObjectEvents[objectEventId]))
+        {
+            ShowDisguiseReaction(&gObjectEvents[objectEventId]);
+            return 0;
+        }
         
 
         if (scriptPtr[1] == TRAINER_BATTLE_DOUBLE
@@ -362,6 +371,30 @@ static u8 CheckTrainer(u8 objectEventId)
     }
 
     return 0;
+}
+
+static bool8 IsPlayerDisguisedFromTrainer(struct ObjectEvent *trainerObj)
+{
+    u16 trainerNum;
+    u32 outfitTeamFlags = RoguePlayer_GetOutfitTeamClassFlags();
+
+    if(outfitTeamFlags == CLASS_FLAG_NONE)
+        return FALSE;
+
+    trainerNum = Rogue_GetTrainerNumFromObjectEvent(trainerObj);
+    if(trainerNum >= gRogueTrainerCount)
+        return FALSE;
+
+    return (Rogue_GetTrainer(trainerNum)->classFlags & outfitTeamFlags) != 0;
+}
+
+static void ShowDisguiseReaction(struct ObjectEvent *trainerObj)
+{
+    if(FieldEffectActiveListContains(FLDEFF_QUESTION_MARK_ICON))
+        return;
+
+    ObjectEventGetLocalIdAndMap(trainerObj, &gFieldEffectArguments[0], &gFieldEffectArguments[1], &gFieldEffectArguments[2]);
+    FieldEffectStart(FLDEFF_QUESTION_MARK_ICON);
 }
 
 static u8 GetTrainerApproachDistance(struct ObjectEvent *trainerObj)

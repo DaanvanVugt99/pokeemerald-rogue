@@ -58,6 +58,9 @@ Format follows Keep a Changelog loosely:
   whole empty patches with 5, 10, or 20 selected berries.
 - Added a richer Pokémon Safari offer preview with a Pokémon portrait and exact
   Pokéblock owned/required costs before buying or dismissing an offer.
+- Added evil-team outfit disguises: matching team trainers react with a
+  question-mark emote instead of automatically approaching, while direct
+  interaction still starts their normal battle.
 
 ### Changed
 
