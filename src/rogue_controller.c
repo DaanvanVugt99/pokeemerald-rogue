@@ -3973,9 +3973,14 @@ static void TryAutoItemPickup(void)
                   || template->graphicsId == OBJ_EVENT_GFX_CUTTABLE_TREE
                   || template->graphicsId == OBJ_EVENT_GFX_PUSHABLE_BOULDER)
             {
-                gSelectedObjectEvent = i;
-                gSpecialVar_LastTalked = gObjectEvents[i].localId;
-                ScriptContext_SetupScript(template->script);
+                // Once Strength is active, movement handles pushing boulders.
+                // Re-running their interaction script only repeats the reminder popup.
+                if (template->graphicsId != OBJ_EVENT_GFX_PUSHABLE_BOULDER || !FlagGet(FLAG_SYS_USE_STRENGTH))
+                {
+                    gSelectedObjectEvent = i;
+                    gSpecialVar_LastTalked = gObjectEvents[i].localId;
+                    ScriptContext_SetupScript(template->script);
+                }
             }
         }
 
