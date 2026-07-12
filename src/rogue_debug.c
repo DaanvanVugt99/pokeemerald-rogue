@@ -100,6 +100,7 @@ void RogueDebug_MainInit(void)
         DebugPrint("    [Counts]");
         DebugPrintf("        [Main] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_MAIN_QUEST, TRUE));
         DebugPrintf("        [Trial] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_TRIAL, TRUE));
+        DebugPrintf("        [Achievement] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_ACHIEVEMENT, TRUE));
         DebugPrintf("        [Mastery] %d", RogueQuest_GetQuestTotalCountFor(QUEST_CONST_IS_MON_MASTERY, TRUE));
 
         DebugPrint("    [Rewards]");
@@ -108,6 +109,9 @@ void RogueDebug_MainInit(void)
 
         DebugPrintf("        [Trial] Money:%d", CountMoneyQuestRewards(QUEST_CONST_IS_TRIAL));
         DebugPrintf("        [Trial] BuildingSupplies:%d", CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_TRIAL));
+
+        DebugPrintf("        [Achievement] Money:%d", CountMoneyQuestRewards(QUEST_CONST_IS_ACHIEVEMENT));
+        DebugPrintf("        [Achievement] BuildingSupplies:%d", CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_ACHIEVEMENT));
 
         DebugPrintf("        [Mastery] Money:%d", CountMoneyQuestRewards(QUEST_CONST_IS_MON_MASTERY));
         DebugPrintf("        [Mastery] BuildingSupplies:%d", CountItemQuestRewards(ITEM_BUILDING_SUPPLIES, QUEST_CONST_IS_MON_MASTERY));

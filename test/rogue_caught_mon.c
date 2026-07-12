@@ -662,6 +662,39 @@ TEST("The selected evil team unlocks only its Triumph quest")
     ClearCaughtMonTestState();
 }
 
+TEST("Optional accomplishments are Achievements instead of Main Quests")
+{
+    static const u16 sAchievementQuests[] =
+    {
+#ifdef ROGUE_EXPANSION
+        QUEST_ID_MEGA_EVOLUTION,
+        QUEST_ID_Z_MOVES,
+        QUEST_ID_DYNAMAX,
+        QUEST_ID_TERASTALLIZATION,
+        QUEST_ID_GIMMICK_OVERFLOW,
+#endif
+        QUEST_ID_TRUE_TACTICS,
+        QUEST_ID_DIVERSITY,
+        QUEST_ID_AESTHETICS,
+        QUEST_ID_I_AM_SPEED,
+        QUEST_ID_ROCKET_TRIUMPH,
+        QUEST_ID_AQUA_TRIUMPH,
+        QUEST_ID_MAGMA_TRIUMPH,
+#ifdef ROGUE_EXPANSION
+        QUEST_ID_GALACTIC_TRIUMPH,
+        QUEST_ID_PLASMA_TRIUMPH,
+        QUEST_ID_FLARE_TRIUMPH,
+#endif
+    };
+    u16 i;
+
+    for(i = 0; i < ARRAY_COUNT(sAchievementQuests); ++i)
+    {
+        EXPECT(RogueQuest_GetConstFlag(sAchievementQuests[i], QUEST_CONST_IS_ACHIEVEMENT));
+        EXPECT(!RogueQuest_GetConstFlag(sAchievementQuests[i], QUEST_CONST_IS_MAIN_QUEST));
+    }
+}
+
 TEST("Pending Iron Mono limits the starting party to one Pokemon")
 {
     ResetCaughtMonTestState();

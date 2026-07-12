@@ -22,7 +22,7 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Mega Evolution",
                 "display_group": "postgame_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Mega Ring.",
                 "triggers":
                 [
@@ -49,7 +49,7 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Z-Moves",
                 "display_group": "postgame_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Z-Power Ring.",
                 "triggers":
                 [
@@ -76,7 +76,7 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Dynamax",
                 "display_group": "postgame_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Dynamax Band.",
                 "triggers":
                 [
@@ -103,7 +103,7 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Terastallization",
                 "display_group": "postgame_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with the Tera Orb.",
                 "triggers":
                 [
@@ -130,7 +130,7 @@
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Gimmick Overflow",
                 "display_group": "postgame_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run with: Healing Flask, Mega Ring, Z-Power Ring, Dynamax Band & Tera Orb.",
                 "triggers":
                 [
@@ -160,7 +160,7 @@
             {
                 "name": "True Tactics",
                 "display_group": "achievement_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run, without any Pokémon ever fainting.",
                 "triggers":
                 [
@@ -275,7 +275,7 @@
             {
                 "name": "Diversity",
                 "display_group": "achievement_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run, only ever entering Trainer battles with only Unique Types in your party e.g. Can't have a Bulbasaur and a Grimer at the same time.",
                 "triggers":
                 [
@@ -320,7 +320,7 @@
             {
                 "name": "Aesthetics",
                 "display_group": "achievement_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run, only ever entering Trainer battles with only Shiny Pokémon in your party.",
                 "triggers":
                 [
@@ -347,7 +347,7 @@
             {
                 "name": "I am Speed",
                 "display_group": "achievement_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "description": "Win a full Run in under 2:30hrs (in game time)",
                 "triggers":
                 [
@@ -580,7 +580,7 @@
                 "name": "Rocket Triumph",
                 "description": "Defeat the Leader of Team Rocket.",
                 "display_group": "evil_team_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -619,7 +619,7 @@
                 "name": "Aqua Triumph",
                 "description": "Defeat the Leader of Team Aqua.",
                 "display_group": "evil_team_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -658,7 +658,7 @@
                 "name": "Magma Triumph",
                 "description": "Defeat the Leader of Team Magma.",
                 "display_group": "evil_team_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -698,7 +698,7 @@
                 "name": "Galactic Triumph",
                 "description": "Defeat the Leader of Team Galactic.",
                 "display_group": "evil_team_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -738,7 +738,7 @@
                 "name": "Plasma Triumph",
                 "description": "Defeat the Leader of Team Plasma.",
                 "display_group": "evil_team_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {
@@ -778,7 +778,7 @@
                 "name": "Flare Triumph",
                 "description": "Defeat the Leader of Team Flare.",
                 "display_group": "evil_team_quests",
-                "flags": [ "MAIN_QUEST_DEFAULT", "ACTIVE_IN_RUN" ],
+                "flags": [ "ACHIEVEMENT_DEFAULT", "ACTIVE_IN_RUN" ],
                 "triggers":
                 [
                     {

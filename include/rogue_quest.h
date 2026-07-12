@@ -205,6 +205,7 @@ void RogueQuest_OnLoadGame();
 void RogueQuest_OnTrigger(u32 trigger);
 
 bool8 RogueQuest_HasUnlockedTrials();
+bool8 RogueQuest_HasUnlockedAchievements();
 bool8 RogueQuest_HasUnlockedMonMasteries();
 
 bool8 RogueQuest_GetMonMasteryFlag(u16 species);

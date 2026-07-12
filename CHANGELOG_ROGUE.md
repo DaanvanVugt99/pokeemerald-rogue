@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added an Achievements quest category for optional accomplishments that do not
+  gate One Last Quest or the Final Run.
 - Ported upstream Fast Path pacing, replacing the old Experimental pacing
   experiment with shorter alternating adventure segments and stricter economy
   pressure.

@@ -233,7 +233,7 @@ static bool8 CanActivateQuest(u16 questId)
                 return FALSE;
         }
     }
-    else // QUEST_CONST_IS_MAIN_QUEST || QUEST_CONST_IS_MON_MASTERY
+    else // Main quests, Achievements, and Masteries are completed once
     {
         if(Rogue_ShouldDisableMainQuests())
             return FALSE;
@@ -888,6 +888,11 @@ u16 RogueQuest_GetDisplayCompletePerc()
     else
         maxValue = 99;
 
+    if(RogueQuest_HasUnlockedAchievements())
+        constFlags |= QUEST_CONST_IS_ACHIEVEMENT;
+    else
+        maxValue = 99;
+
     if(RogueQuest_HasUnlockedMonMasteries())
         constFlags |= QUEST_CONST_IS_MON_MASTERY;
     else
@@ -1052,6 +1057,19 @@ void RogueQuest_OnTrigger(u32 triggerFlag)
 bool8 RogueQuest_HasUnlockedTrials()
 {
     return FlagGet(FLAG_SYS_TRIALS_UNLOCKED);
+}
+
+bool8 RogueQuest_HasUnlockedAchievements()
+{
+    u16 i;
+
+    for(i = 0; i < QUEST_ID_COUNT; ++i)
+    {
+        if(RogueQuest_GetConstFlag(i, QUEST_CONST_IS_ACHIEVEMENT) && RogueQuest_IsQuestUnlocked(i))
+            return TRUE;
+    }
+
+    return FALSE;
 }
 
 bool8 RogueQuest_HasUnlockedMonMasteries()
