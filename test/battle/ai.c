@@ -215,6 +215,19 @@ AI_SINGLE_BATTLE_TEST("AI scores phazing moves below default against known Stran
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI scores Whirlwind below default against known Unmovable")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_WHIRLWIND].effect == EFFECT_ROAR);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_HARIYAMA) { UniqueAbility(ABILITY_UNMOVABLE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_WHIRLWIND, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SCORE_LT_VAL(opponent, MOVE_WHIRLWIND, AI_SCORE_DEFAULT); }
+    }
+}
+
 AI_DOUBLE_BATTLE_TEST("AI scores partner-targeted moves higher when a unique ability absorbs them")
 {
     GIVEN {

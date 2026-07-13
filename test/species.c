@@ -4,12 +4,28 @@
 #include "constants/species.h"
 #include "constants/form_change_types.h"
 #include "pokemon.h"
+#include "rogue_baked.h"
 
-TEST("Eevee can evolve into Sylveon through Rogue's move-type evolution")
+TEST("Eevee requires Baby-Doll Eyes to evolve into Sylveon")
 {
     struct Pokemon mon;
+    struct Evolution evolution;
     u32 i;
     u16 move;
+    bool32 foundSylveonEvolution = FALSE;
+
+    for (i = 0; i < Rogue_GetMaxEvolutionCount(SPECIES_EEVEE); i++)
+    {
+        Rogue_ModifyEvolution(SPECIES_EEVEE, i, &evolution);
+        if (evolution.targetSpecies == SPECIES_SYLVEON)
+        {
+            foundSylveonEvolution = TRUE;
+            EXPECT_EQ(evolution.method, EVO_MOVE);
+            EXPECT_EQ(evolution.param, MOVE_BABY_DOLL_EYES);
+            break;
+        }
+    }
+    EXPECT(foundSylveonEvolution);
 
     CreateMon(&mon, SPECIES_EEVEE, 50, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     for (i = 0; i < MAX_MON_MOVES; i++)
@@ -17,6 +33,10 @@ TEST("Eevee can evolve into Sylveon through Rogue's move-type evolution")
         move = MOVE_TACKLE;
         SetMonData(&mon, MON_DATA_MOVE1 + i, &move);
     }
+    EXPECT_NE(GetEvolutionTargetSpecies(&mon, EVO_MODE_NORMAL, ITEM_NONE, NULL), SPECIES_SYLVEON);
+
+    move = MOVE_COVET;
+    SetMonData(&mon, MON_DATA_MOVE1, &move);
     EXPECT_NE(GetEvolutionTargetSpecies(&mon, EVO_MODE_NORMAL, ITEM_NONE, NULL), SPECIES_SYLVEON);
 
     move = MOVE_BABY_DOLL_EYES;

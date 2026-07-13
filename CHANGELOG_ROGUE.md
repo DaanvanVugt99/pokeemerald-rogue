@@ -313,6 +313,16 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made automatic Poké Ball selection break equal catch-rate ties by using the
+  ball with the lowest maximum potential, and preserve the Master Ball unless
+  it is the only ball available.
+- Fixed battle animations firing debug assertions when a transformed Pokémon
+  was queried for its sprite dimensions, including once per hit of Double Kick,
+  and retained Transform's gender-specific sprite across later sprite reloads.
+- Prevented the AI from repeatedly using Whirlwind and other phazing status
+  moves against Pokémon with Unmovable.
+- Made Eevee require Baby-Doll Eyes specifically to evolve into Sylveon, so
+  Fairy-type Covet no longer enables the evolution immediately.
 - Fixed the Quest Log index failing to redraw scrolled options after adding the
   Achievements category, restoring access to Adventure Stats and Back.
 - Added up and down indicators to the Quest Log index when category options are

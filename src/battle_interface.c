@@ -4096,12 +4096,50 @@ static bool32 TrySelectLastUsedBallToDisplay(void)
     return FALSE;
 }
 
+// When current catch scores tie, spend the ball with the weaker best-case modifier.
+static u16 GetBallCatchPotential(u16 ball)
+{
+    switch(ball)
+    {
+    case ITEM_GREAT_BALL:
+    case ITEM_SAFARI_BALL:
+    case ITEM_SPORT_BALL:
+        return 150;
+    case ITEM_ULTRA_BALL:
+        return 200;
+    case ITEM_PREMIER_BALL:
+    case ITEM_DUSK_BALL:
+        return 300;
+    case ITEM_NET_BALL:
+    case ITEM_NEST_BALL:
+    case ITEM_DIVE_BALL:
+    case ITEM_TIMER_BALL:
+    case ITEM_REPEAT_BALL:
+    case ITEM_LUXURY_BALL:
+    case ITEM_LEVEL_BALL:
+    case ITEM_MOON_BALL:
+    case ITEM_FAST_BALL:
+    case ITEM_HEAVY_BALL:
+    case ITEM_DREAM_BALL:
+        return 400;
+    case ITEM_QUICK_BALL:
+    case ITEM_LURE_BALL:
+    case ITEM_BEAST_BALL:
+        return 500;
+    case ITEM_LOVE_BALL:
+        return 800;
+    default:
+        return 100;
+    }
+}
+
 void SelectBestBallToDisplay(void)
 {
     u32 i;
     u32 bestScore = 0;
-    u16 bestBalls[LAST_BALL - FIRST_BALL + 1];
-    u16 bestBallCount = 0;
+    u16 bestPotential = UINT16_MAX;
+    u16 bestBall = ITEM_NONE;
+    bool32 hasMasterBall = FALSE;
     u32 attacker;
     u32 target;
 
@@ -4129,21 +4167,32 @@ void SelectBestBallToDisplay(void)
         && ball <= LAST_BALL
         && GetBagItemQuantity(&gBagPockets[BALLS_POCKET].itemSlots[i].quantity) > 0)
         {
-            u32 score = GetBallCatchScore(ball, attacker, target);
+            u32 score;
+            u16 potential;
 
-            if(bestBallCount == 0 || score > bestScore)
+            if(ball == ITEM_MASTER_BALL)
             {
-                bestScore = score;
-                bestBallCount = 0;
+                hasMasterBall = TRUE;
+                continue;
             }
 
-            if(score == bestScore)
-                bestBalls[bestBallCount++] = ball;
+            score = GetBallCatchScore(ball, attacker, target);
+            potential = GetBallCatchPotential(ball);
+            if(bestBall == ITEM_NONE
+            || score > bestScore
+            || (score == bestScore && potential < bestPotential))
+            {
+                bestScore = score;
+                bestPotential = potential;
+                bestBall = ball;
+            }
         }
     }
 
-    if(bestBallCount != 0)
-        gBallToDisplay = bestBalls[bestBallCount == 1 ? 0 : Random() % bestBallCount];
+    if(bestBall != ITEM_NONE)
+        gBallToDisplay = bestBall;
+    else if(hasMasterBall)
+        gBallToDisplay = ITEM_MASTER_BALL;
     else
         gBallToDisplay = ITEM_NONE;
 }

@@ -4,6 +4,7 @@
 //
 #include "constants/battle_ai.h"
 #include "constants/items.h"
+#include "constants/moves.h"
 #include "constants/pokemon.h"
 #include "constants/songs.h"
 #include "constants/species.h"
@@ -581,7 +582,15 @@ void Rogue_ModifyEvolution(u16 species, u8 evoIdx, struct Evolution* outEvo)
                 break;
 
             case(EVO_FRIENDSHIP_MOVE_TYPE):
-                outEvo->method = EVO_MOVE_TYPE;
+                if(outEvo->targetSpecies == SPECIES_SYLVEON)
+                {
+                    outEvo->method = EVO_MOVE;
+                    outEvo->param = MOVE_BABY_DOLL_EYES;
+                }
+                else
+                {
+                    outEvo->method = EVO_MOVE_TYPE;
+                }
                 break;
 
             case(EVO_SPECIFIC_MAP):

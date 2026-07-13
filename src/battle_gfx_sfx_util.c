@@ -602,6 +602,7 @@ void BattleLoadMonSpriteGfx(struct Pokemon *mon, u32 battler)
     else
     {
         species = gBattleSpritesDataPtr->battlerData[battler].transformSpecies;
+        gender = gBattleSpritesDataPtr->battlerData[battler].transformIsFemale ? MON_FEMALE : MON_MALE;
         if (B_TRANSFORM_SHINY >= GEN_4)
         {
             currentPersonality = gTransformedPersonalities[battler];
@@ -632,7 +633,7 @@ void BattleLoadMonSpriteGfx(struct Pokemon *mon, u32 battler)
     if (gBattleSpritesDataPtr->battlerData[battler].transformSpecies == SPECIES_NONE)
         lzPaletteData = GetMonFrontSpritePal(mon);
     else
-        lzPaletteData = GetMonSpritePalFromSpecies(species, GetMonGender(mon), shiny, otId);
+        lzPaletteData = GetMonSpritePalFromSpecies(species, gender, shiny, otId);
 
     if(!Rogue_ModifyPaletteDecompress(lzPaletteData, gDecompressionBuffer))
         LZDecompressWram(lzPaletteData, gDecompressionBuffer);
@@ -984,6 +985,7 @@ void HandleSpeciesGfxDataChange(u8 battlerAtk, u8 battlerDef, bool32 megaEvo, bo
         if (!IsContest())
         {
             gBattleSpritesDataPtr->battlerData[battlerAtk].transformSpecies = targetSpecies;
+            gBattleSpritesDataPtr->battlerData[battlerAtk].transformIsFemale = (gender == MON_FEMALE);
         }
     }
 
@@ -1311,6 +1313,7 @@ void FillAroundBattleWindows(void)
 void ClearTemporarySpeciesSpriteData(u8 battler, bool8 dontClearSubstitute)
 {
     gBattleSpritesDataPtr->battlerData[battler].transformSpecies = SPECIES_NONE;
+    gBattleSpritesDataPtr->battlerData[battler].transformIsFemale = FALSE;
     if (!dontClearSubstitute)
         ClearBehindSubstituteBit(battler);
 }

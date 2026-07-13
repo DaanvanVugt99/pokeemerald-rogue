@@ -1465,7 +1465,9 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case EFFECT_ROAR:
             if (CountUsablePartyMons(battlerDef) == 0)
                 ADJUST_SCORE(-10);
-            else if (AI_HasAbility(battlerDef, ABILITY_SUCTION_CUPS) || AI_HasAbility(battlerDef, ABILITY_STRANGE_GUEST))
+            else if (AI_HasAbility(battlerDef, ABILITY_SUCTION_CUPS)
+                  || AI_HasAbility(battlerDef, ABILITY_UNMOVABLE)
+                  || AI_HasAbility(battlerDef, ABILITY_STRANGE_GUEST))
                 ADJUST_SCORE(-10);
             else if (IsDynamaxed(battlerDef))
                 ADJUST_SCORE(-10);

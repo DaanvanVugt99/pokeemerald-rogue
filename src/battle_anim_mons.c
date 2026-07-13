@@ -2146,8 +2146,7 @@ s16 GetBattlerSpriteCoordAttr(u8 battlerId, u8 attr)
             {
                 species = spriteInfo[battlerId].transformSpecies;
                 personality = gTransformedPersonalities[battlerId];
-                gender = MON_MALE; // fixme
-                AGB_ASSERT(FALSE);
+                gender = spriteInfo[battlerId].transformIsFemale ? MON_FEMALE : MON_MALE;
             }
 
             species = SanitizeSpeciesId(species);
@@ -2172,8 +2171,7 @@ s16 GetBattlerSpriteCoordAttr(u8 battlerId, u8 attr)
             {
                 species = spriteInfo[battlerId].transformSpecies;
                 personality = gTransformedPersonalities[battlerId];
-                gender = MON_MALE; // fixme
-                AGB_ASSERT(FALSE);
+                gender = spriteInfo[battlerId].transformIsFemale ? MON_FEMALE : MON_MALE;
             }
 
             species = SanitizeSpeciesId(species);
