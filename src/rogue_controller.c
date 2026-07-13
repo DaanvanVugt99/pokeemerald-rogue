@@ -1266,7 +1266,7 @@ void Rogue_ModifyEVGain(int* multiplier)
     *multiplier = 0;
 }
 
-void Rogue_ModifyCatchRate(u16 species, u16* catchRate, u16* ballMultiplier)
+void Rogue_ModifyCatchRate(u16 species, u16 ball, u16* catchRate, u16* ballMultiplier)
 {
     if(GetSafariZoneFlag() || Rogue_UseSafariBattle() || RogueDebug_GetConfigToggle(DEBUG_TOGGLE_INSTANT_CAPTURE) || RogueTrial_IsCatchGuaranteed())
     {
@@ -1295,7 +1295,7 @@ void Rogue_ModifyCatchRate(u16 species, u16* catchRate, u16* ballMultiplier)
 
 #ifdef ROGUE_EXPANSION
             // Quick ball is specifically nerfed for roamers
-            if(gLastUsedItem == ITEM_QUICK_BALL)
+            if(ball == ITEM_QUICK_BALL)
                 difficulty += 2;
 #endif
         }
@@ -1422,6 +1422,11 @@ void Rogue_ApplyCustomMonIdToMon(u32 customMonId, struct Pokemon* mon)
 
 void Rogue_ModifyCaughtMon(struct Pokemon *mon)
 {
+    bool8 caughtInPremierBall = GetMonData(mon, MON_DATA_POKEBALL) == ITEM_PREMIER_BALL;
+    bool8 caughtInFriendBall = GetMonData(mon, MON_DATA_POKEBALL) == ITEM_FRIEND_BALL;
+    bool8 caughtInDreamBall = GetMonData(mon, MON_DATA_POKEBALL) == ITEM_DREAM_BALL;
+    bool8 caughtInCherishBall = GetMonData(mon, MON_DATA_POKEBALL) == ITEM_CHERISH_BALL;
+
     if(Rogue_IsRunActive())
     {
         u16 hp = GetMonData(mon, MON_DATA_HP);
@@ -1500,6 +1505,63 @@ void Rogue_ModifyCaughtMon(struct Pokemon *mon)
 
         // Make sure we log if we end up replacing a fainted mon
         CheckAndNotifyForFaintedMons();
+    }
+
+    if(caughtInFriendBall)
+    {
+        u8 friendship = MAX_FRIENDSHIP;
+
+        SetMonData(mon, MON_DATA_FRIENDSHIP, &friendship);
+    }
+
+    if(caughtInPremierBall)
+    {
+        static const u8 sNeutralNatures[] =
+        {
+            NATURE_HARDY,
+            NATURE_DOCILE,
+            NATURE_SERIOUS,
+            NATURE_BASHFUL,
+            NATURE_QUIRKY,
+        };
+
+        SetNature(mon, sNeutralNatures[Random() % ARRAY_COUNT(sNeutralNatures)]);
+    }
+
+    if(caughtInDreamBall)
+    {
+        u16 species = GetMonData(mon, MON_DATA_SPECIES);
+        u32 otId = GetMonData(mon, MON_DATA_OT_ID);
+        u32 customMonId = RogueGift_GetCustomMonIdBySpecies(species, otId);
+        u16 hiddenAbility = gSpeciesInfo[species].abilities[NUM_NORMAL_ABILITY_SLOTS];
+
+        if(customMonId != CUSTOM_MON_NONE && RogueGift_GetCustomMonAbilityCount(customMonId) != 0)
+            hiddenAbility = RogueGift_GetCustomMonAbility(customMonId, NUM_NORMAL_ABILITY_SLOTS);
+
+        if(hiddenAbility != ABILITY_NONE)
+        {
+            u8 abilityNum = NUM_NORMAL_ABILITY_SLOTS;
+
+            SetMonData(mon, MON_DATA_ABILITY_NUM, &abilityNum);
+        }
+    }
+
+    if(caughtInCherishBall)
+    {
+        u8 i;
+        u8 statIds[NUM_STATS] = {STAT_HP, STAT_ATK, STAT_DEF, STAT_SPEED, STAT_SPATK, STAT_SPDEF};
+        u16 perfectIV = MAX_PER_STAT_IVS;
+
+        // Select three distinct stats and guarantee that each has a perfect IV.
+        for(i = 0; i < 3; ++i)
+        {
+            u8 selectedIndex = i + (Random() % (NUM_STATS - i));
+            u8 selectedStat = statIds[selectedIndex];
+
+            statIds[selectedIndex] = statIds[i];
+            statIds[i] = selectedStat;
+            SetMonData(mon, MON_DATA_HP_IV + selectedStat, &perfectIV);
+        }
     }
 }
 

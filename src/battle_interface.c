@@ -4,6 +4,7 @@
 #include "pokemon.h"
 #include "battle_controllers.h"
 #include "battle_interface.h"
+#include "battle_util.h"
 #include "battle_z_move.h"
 #include "graphics.h"
 #include "sprite.h"
@@ -17,6 +18,7 @@
 #include "gpu_regs.h"
 #include "battle_message.h"
 #include "pokedex.h"
+#include "random.h"
 #include "palette.h"
 #include "item.h"
 #include "international_string_util.h"
@@ -4092,6 +4094,58 @@ static bool32 TrySelectLastUsedBallToDisplay(void)
 
     gBallToDisplay = ITEM_NONE;
     return FALSE;
+}
+
+void SelectBestBallToDisplay(void)
+{
+    u32 i;
+    u32 bestScore = 0;
+    u16 bestBalls[LAST_BALL - FIRST_BALL + 1];
+    u16 bestBallCount = 0;
+    u32 attacker;
+    u32 target;
+
+    if(B_LAST_USED_BALL == FALSE || gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_FRONTIER))
+        return;
+
+    attacker = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+    if(!IsBattlerAlive(attacker))
+        attacker = GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT);
+
+    target = GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT);
+    if(!IsBattlerAlive(target))
+        target = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT);
+
+    if(!IsBattlerAlive(attacker) || !IsBattlerAlive(target))
+        return;
+
+    CompactItemsInBagPocket(&gBagPockets[BALLS_POCKET]);
+
+    for(i = 0; i < gBagPockets[BALLS_POCKET].capacity; ++i)
+    {
+        u16 ball = gBagPockets[BALLS_POCKET].itemSlots[i].itemId;
+
+        if(ball >= FIRST_BALL
+        && ball <= LAST_BALL
+        && GetBagItemQuantity(&gBagPockets[BALLS_POCKET].itemSlots[i].quantity) > 0)
+        {
+            u32 score = GetBallCatchScore(ball, attacker, target);
+
+            if(bestBallCount == 0 || score > bestScore)
+            {
+                bestScore = score;
+                bestBallCount = 0;
+            }
+
+            if(score == bestScore)
+                bestBalls[bestBallCount++] = ball;
+        }
+    }
+
+    if(bestBallCount != 0)
+        gBallToDisplay = bestBalls[bestBallCount == 1 ? 0 : Random() % bestBallCount];
+    else
+        gBallToDisplay = ITEM_NONE;
 }
 
 bool32 CanThrowLastUsedBall(void)

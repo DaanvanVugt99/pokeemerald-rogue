@@ -82,7 +82,7 @@ bool8 Rogue_UseFastLevelUpAnim();
 void Rogue_ModifyBattleWinnings(u16 trainerNum, u32* money);
 void Rogue_ModifyExpGained(struct Pokemon *mon, s32* expGain);
 void Rogue_ModifyEVGain(int* multiplier);
-void Rogue_ModifyCatchRate(u16 species, u16* catchRate, u16* ballMultiplier);
+void Rogue_ModifyCatchRate(u16 species, u16 ball, u16* catchRate, u16* ballMultiplier);
 void Rogue_ModifyCaughtMon(struct Pokemon *mon);
 void Rogue_OnAcceptCaughtMon(struct Pokemon *mon);
 void Rogue_ModifyEggMon(struct Pokemon *mon);

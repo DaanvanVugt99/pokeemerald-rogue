@@ -4159,6 +4159,9 @@ static void HandleTurnActionSelectionState(void)
             RecordedBattle_CopyBattlerMoves(battler);
             gBattleCommunication[battler] = STATE_BEFORE_ACTION_CHOSEN;
 
+            if(position == B_POSITION_PLAYER_LEFT)
+                SelectBestBallToDisplay();
+
             // Do AI score computations here so we can use them in AI_TrySwitchOrUseItem
             if ((gBattleTypeFlags & BATTLE_TYPE_HAS_AI || IsWildMonSmart())
                     && (BattlerHasAi(battler) && !(gBattleTypeFlags & BATTLE_TYPE_PALACE)))

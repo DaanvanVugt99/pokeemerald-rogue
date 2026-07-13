@@ -69,6 +69,33 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked the Premier Ball with a 3x catch rate and a random neutral nature
+  for successfully caught Pokémon.
+- Updated the wild-battle quick-catch shortcut to begin each turn with the
+  currently owned Ball that has the highest catch rate against the target,
+  randomly selecting among Balls tied for the highest rate.
+- Reworked the Cherish Ball to guarantee at least three perfect IVs on a
+  successfully caught Pokémon while retaining its standard catch rate.
+- Reworked the Luxury Ball to scale with the player's money, granting a 2x
+  catch bonus at ¥10,000, 3x at ¥30,000, and 4x at ¥50,000.
+- Increased the Repeat Ball's catch bonus for previously caught species from
+  3.5x to 4x.
+- Reworked the Nest Ball to grant a 4x catch bonus against Grass- and
+  Flying-type Pokémon instead of scaling with the target's level.
+- Increased the Net Ball's catch bonus against Water- and Bug-type Pokémon from
+  3.5x to 4x.
+- Reworked the Dive Ball to grant a 4x catch bonus against Water- and
+  Flying-type Pokémon instead of depending on the encounter location.
+- Reworked the Dream Ball to give caught Pokémon their Hidden Ability instead
+  of receiving a catch bonus against sleeping targets.
+- Reworked the Moon Ball to grant a 4x catch bonus against Dark- and Fairy-type
+  Pokémon.
+- Made Pokémon caught in a Friend Ball start at maximum friendship.
+- Reworked the Heavy Ball to compare the target's weight with the active
+  Pokémon, granting a 2x bonus at 50 kg heavier, 3x at 150 kg, and 4x at 300 kg.
+- Reworked the Level Ball to use absolute level leads, granting a 2x bonus at
+  10 levels, 3x at 25 levels, and 4x at 50 levels above the target.
+- Expanded the Fast Ball's 4x catch bonus to roaming Pokémon.
 - Made Fast Path pacing the Standard Adventure format and retained the previous
   Standard format as the optional Slow Path mode.
 - Made the selected Pokédex a run-entry legality rule for the party and Day Care,

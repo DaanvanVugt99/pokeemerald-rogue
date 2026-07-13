@@ -139,6 +139,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle);
 void DestroyAbilityPopUp(u8 battlerId);
 void HideTriggerSprites(void);
 bool32 CanThrowLastUsedBall(void);
+void SelectBestBallToDisplay(void);
 void TryHideLastUsedBall(void);
 void TryRestoreLastUsedBall(void);
 void TryAddLastUsedBallItemSprites(void);

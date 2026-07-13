@@ -16,6 +16,7 @@
 #include "util.h"
 #include "battle_scripts.h"
 #include "random.h"
+#include "rtc.h"
 #include "text.h"
 #include "safari_zone.h"
 #include "sound.h"
@@ -35,6 +36,7 @@
 #include "berry.h"
 #include "pokedex.h"
 #include "mail.h"
+#include "money.h"
 #include "field_weather.h"
 #include "palette.h"
 #include "rogue.h"
@@ -46,6 +48,7 @@
 #include "constants/battle_string_ids.h"
 #include "constants/hold_effects.h"
 #include "constants/items.h"
+#include "constants/map_types.h"
 #include "constants/moves.h"
 #include "constants/songs.h"
 #include "constants/species.h"
@@ -61,6 +64,7 @@
 #include "rogue_quest.h"
 #include "rogue_pokedex.h"
 #include "rogue_timeofday.h"
+#include "wild_encounter.h"
 
 /*
 NOTE: The data and functions in this file up until (but not including) sSoundMovesTable
@@ -19778,6 +19782,201 @@ bool32 CanBattlerEscape(u32 battler)
         return FALSE;
     else
         return TRUE;
+}
+
+bool32 IsFastBallBoosted(u32 battler)
+{
+    if (gSpeciesInfo[gBattleMons[battler].species].baseSpeed >= 100)
+        return TRUE;
+
+    // Roamers attempt to flee on their first action unless trapped.
+    if (gBattleTypeFlags & BATTLE_TYPE_ROAMER)
+        return TRUE;
+
+    return FALSE;
+}
+
+bool32 IsMoonBallBoosted(u32 battler)
+{
+    return IS_BATTLER_OF_TYPE(battler, TYPE_DARK)
+        || IS_BATTLER_OF_TYPE(battler, TYPE_FAIRY);
+}
+
+u16 GetBallCatchMultiplier(u16 ball, u32 attacker, u32 target)
+{
+    u16 ballMultiplier = 100;
+
+    if(gSpeciesInfo[gBattleMons[target].species].isUltraBeast)
+        return ball == ITEM_BEAST_BALL ? 500 : 10;
+
+    switch(ball)
+    {
+    case ITEM_PREMIER_BALL:
+        ballMultiplier = 300;
+        break;
+    case ITEM_ULTRA_BALL:
+        ballMultiplier = 200;
+        break;
+    case ITEM_SPORT_BALL:
+        if(B_SPORT_BALL_MODIFIER <= GEN_7)
+            ballMultiplier = 150;
+        // Fallthrough
+    case ITEM_GREAT_BALL:
+    case ITEM_SAFARI_BALL:
+        ballMultiplier = 150;
+        break;
+    case ITEM_NET_BALL:
+        ballMultiplier = GetNetBallMultiplier(target);
+        break;
+    case ITEM_DIVE_BALL:
+        ballMultiplier = GetDiveBallMultiplier(target);
+        break;
+    case ITEM_NEST_BALL:
+        ballMultiplier = GetNestBallMultiplier(target);
+        break;
+    case ITEM_REPEAT_BALL:
+        ballMultiplier = GetRepeatBallMultiplier(gBattleMons[target].species);
+        break;
+    case ITEM_LUXURY_BALL:
+        ballMultiplier = GetLuxuryBallMultiplier(GetMoney(&gSaveBlock1Ptr->money));
+        break;
+    case ITEM_TIMER_BALL:
+        ballMultiplier = 100 + (gBattleResults.battleTurnCounter * (B_TIMER_BALL_MODIFIER >= GEN_5 ? 30 : 10));
+        ballMultiplier = min(ballMultiplier, 400);
+        break;
+    case ITEM_DUSK_BALL:
+        if(GetTimeOfDay() == TIME_EVENING || GetTimeOfDay() == TIME_NIGHT || gMapHeader.cave || gMapHeader.mapType == MAP_TYPE_UNDERGROUND)
+            ballMultiplier = (B_DUSK_BALL_MODIFIER >= GEN_7 ? 300 : 350);
+        break;
+    case ITEM_QUICK_BALL:
+        if(gBattleResults.battleTurnCounter == 0)
+            ballMultiplier = (B_QUICK_BALL_MODIFIER >= GEN_5 ? 500 : 400);
+        break;
+    case ITEM_LEVEL_BALL:
+        ballMultiplier = GetLevelBallMultiplier(attacker, target);
+        break;
+    case ITEM_LURE_BALL:
+        if(gIsFishingEncounter)
+            ballMultiplier = (B_LURE_BALL_MODIFIER >= GEN_7 ? 500 : 300);
+        break;
+    case ITEM_MOON_BALL:
+        if(IsMoonBallBoosted(target))
+            ballMultiplier = 400;
+        break;
+    case ITEM_LOVE_BALL:
+        if(gBattleMons[target].species == gBattleMons[attacker].species)
+        {
+            u8 targetGender = GetMonGender(&gEnemyParty[gBattlerPartyIndexes[target]]);
+            u8 attackerGender = GetMonGender(&gPlayerParty[gBattlerPartyIndexes[attacker]]);
+
+            if(targetGender != attackerGender && targetGender != MON_GENDERLESS && attackerGender != MON_GENDERLESS)
+                ballMultiplier = 800;
+        }
+        break;
+    case ITEM_FAST_BALL:
+        if(IsFastBallBoosted(target))
+            ballMultiplier = 400;
+        break;
+    case ITEM_HEAVY_BALL:
+        ballMultiplier = GetHeavyBallMultiplier(attacker, target);
+        break;
+    case ITEM_BEAST_BALL:
+        ballMultiplier = 10;
+        break;
+    }
+
+    return ballMultiplier;
+}
+
+u32 GetBallCatchScore(u16 ball, u32 attacker, u32 target)
+{
+    u16 catchRate;
+    u16 ballMultiplier;
+
+    if(ball == ITEM_MASTER_BALL)
+        return UINT32_MAX;
+
+    catchRate = gSpeciesInfo[gBattleMons[target].species].catchRate;
+    ballMultiplier = GetBallCatchMultiplier(ball, attacker, target);
+    Rogue_ModifyCatchRate(gBattleMons[target].species, ball, &catchRate, &ballMultiplier);
+
+    return catchRate * ballMultiplier;
+}
+
+u16 GetNetBallMultiplier(u32 target)
+{
+    if (IS_BATTLER_OF_TYPE(target, TYPE_WATER) || IS_BATTLER_OF_TYPE(target, TYPE_BUG))
+        return 400;
+
+    return 100;
+}
+
+u16 GetDiveBallMultiplier(u32 target)
+{
+    if (IS_BATTLER_OF_TYPE(target, TYPE_WATER) || IS_BATTLER_OF_TYPE(target, TYPE_FLYING))
+        return 400;
+
+    return 100;
+}
+
+u16 GetNestBallMultiplier(u32 target)
+{
+    if (IS_BATTLER_OF_TYPE(target, TYPE_GRASS) || IS_BATTLER_OF_TYPE(target, TYPE_FLYING))
+        return 400;
+
+    return 100;
+}
+
+u16 GetRepeatBallMultiplier(u16 species)
+{
+    if (GetSetPokedexSpeciesFlag(species, FLAG_GET_CAUGHT))
+        return 400;
+
+    return 100;
+}
+
+u16 GetLuxuryBallMultiplier(u32 money)
+{
+    if (money >= 50000)
+        return 400;
+    if (money >= 30000)
+        return 300;
+    if (money >= 10000)
+        return 200;
+
+    return 100;
+}
+
+u16 GetLevelBallMultiplier(u32 attacker, u32 target)
+{
+    u32 attackerLevel = gBattleMons[attacker].level;
+    u32 targetLevel = gBattleMons[target].level;
+
+    if (attackerLevel >= targetLevel + 50)
+        return 400;
+    if (attackerLevel >= targetLevel + 25)
+        return 300;
+    if (attackerLevel >= targetLevel + 10)
+        return 200;
+
+    return 100;
+}
+
+u16 GetHeavyBallMultiplier(u32 attacker, u32 target)
+{
+    u32 attackerWeight = GetSpeciesWeight(gBattleMons[attacker].species);
+    u32 targetWeight = GetSpeciesWeight(gBattleMons[target].species);
+
+    // Species weights are stored in hectograms, so these thresholds represent
+    // target weight advantages of 50 kg, 150 kg, and 300 kg.
+    if (targetWeight >= attackerWeight + 3000)
+        return 400;
+    if (targetWeight >= attackerWeight + 1500)
+        return 300;
+    if (targetWeight >= attackerWeight + 500)
+        return 200;
+
+    return 100;
 }
 
 void BattleScriptExecute(const u8 *BS_ptr)
