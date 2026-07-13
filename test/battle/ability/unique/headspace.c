@@ -34,21 +34,26 @@ SINGLE_BATTLE_TEST("Headspace terrain lasts for 8 turns")
     }
 }
 
-SINGLE_BATTLE_TEST("Headspace uses Trick Room on switch-in if Psychic Terrain is already active")
+SINGLE_BATTLE_TEST("Headspace uses Trick Room on switch-in if any terrain is already active")
 {
+    u32 terrainMove;
+    u32 terrainStatus;
+
+    PARAMETRIZE { terrainMove = MOVE_PSYCHIC_TERRAIN; terrainStatus = STATUS_FIELD_PSYCHIC_TERRAIN; }
+    PARAMETRIZE { terrainMove = MOVE_GRASSY_TERRAIN; terrainStatus = STATUS_FIELD_GRASSY_TERRAIN; }
+
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_PSYCHIC_TERRAIN, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_PSYCHIC_TERRAIN, MOVE_GRASSY_TERRAIN, MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_GIRAFARIG) { Ability(ABILITY_INNER_FOCUS); UniqueAbility(ABILITY_HEADSPACE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_PSYCHIC_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, terrainMove); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
     } SCENE {
-        MESSAGE("Wobbuffet used Psychic Terrain!");
         ABILITY_POPUP(opponent, ABILITY_HEADSPACE);
         MESSAGE("Foe Girafarig used Trick Room!");
     } THEN {
-        EXPECT(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN);
+        EXPECT_EQ(gFieldStatuses & STATUS_FIELD_TERRAIN_ANY, terrainStatus);
         EXPECT(gFieldStatuses & STATUS_FIELD_TRICK_ROOM);
     }
 }

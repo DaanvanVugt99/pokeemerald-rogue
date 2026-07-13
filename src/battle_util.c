@@ -9104,7 +9104,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             SetBattlerTriggeredAbility(battler, ABILITY_HEADSPACE);
 
-            if (gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN)
+            if (gFieldStatuses & STATUS_FIELD_TERRAIN_ANY)
             {
                 SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;
@@ -9573,7 +9573,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             SetBattlerTriggeredAbility(battler, ABILITY_PSIONIC_PARADOX);
 
-            if (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
+            if (gFieldStatuses & STATUS_FIELD_TERRAIN_ANY)
             {
                 SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = battler;

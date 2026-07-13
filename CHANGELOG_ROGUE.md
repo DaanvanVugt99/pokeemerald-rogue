@@ -297,6 +297,8 @@ Format follows Keep a Changelog loosely:
   a foe is forced out instead of on switch-in.
 - Reworked the Litleo line's Battlecry unique ability to use an empowered Growl
   only after an ally fainted last turn.
+- Changed Headspace and Psionic Paradox to use Trick Room when any terrain is
+  active instead of overwriting it with Psychic or Plain Terrain.
 - Added random unique abilities to Legendary dynamic Unique Pokemon, with the
   ability encoded in the existing custom mon ID.
 - Updated the 1.1 champion Mega Evolution ability assignments.
