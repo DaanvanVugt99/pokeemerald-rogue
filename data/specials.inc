@@ -69,6 +69,8 @@ gSpecials::
 	def_special PlayerHasBerries
 	def_special RogueBerryField_HarvestAll
 	def_special RogueBerryField_BulkPlantSelected
+	def_special RogueDaycareBerryField_HarvestAll
+	def_special RogueDaycareBerryField_BulkPlantSelected
 	def_special IsEnigmaBerryValid
 	def_special GetTrainerBattleMode
 	def_special ShowTrainerIntroSpeech

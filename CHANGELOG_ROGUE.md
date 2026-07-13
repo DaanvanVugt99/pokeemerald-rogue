@@ -61,6 +61,8 @@ Format follows Keep a Changelog loosely:
   instead of relying only on icons.
 - Added Berry Field helper options to harvest all ripe berries and bulk plant
   whole empty patches with 5, 10, or 20 selected berries.
+- Added matching Day Care node berry helper options to harvest all ripe berries
+  and bulk plant its three-tree patches with 3, 6, or 9 selected berries.
 - Added a richer Pokémon Safari offer preview with a Pokémon portrait and exact
   Pokéblock owned/required costs before buying or dismissing an offer.
 - Added evil-team outfit disguises: matching team trainers react with a

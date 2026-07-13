@@ -1,6 +1,21 @@
 
 const FLAG_HIDE_PHONE = FLAG_TEMP_1
 
+const VAR_BULK_BERRY_COUNT = VAR_0x8004
+const VAR_BULK_BERRY_TOTAL = VAR_0x8005
+
+const DAYCARE_BERRY_MENU_HARVEST_ALL = 0
+const DAYCARE_BERRY_MENU_PLANT_3 = 1
+const DAYCARE_BERRY_MENU_PLANT_6 = 2
+const DAYCARE_BERRY_MENU_PLANT_9 = 3
+const DAYCARE_BERRY_MENU_BUY_BERRIES = 4
+
+const BERRY_FIELD_RESULT_SUCCESS = 0
+const BERRY_FIELD_RESULT_NO_READY_BERRIES = 1
+const BERRY_FIELD_RESULT_BAG_FULL = 2
+const BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES = 3
+const BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES = 4
+
 mapscripts Rogue_Encounter_DayCare_MapScripts 
 {
     MAP_SCRIPT_ON_LOAD: Rogue_Encounter_DayCare_OnMapLoad
@@ -16,6 +31,103 @@ script Rogue_Encounter_DayCare_OnMapLoad
     else
     {
         setflag(FLAG_HIDE_PHONE)
+    }
+}
+
+script Rogue_Encounter_DayCare_TalkBerryMerchant
+{
+    lock
+    faceplayer
+
+    setvar(VAR_0x8009, TRUE)
+    while(var(VAR_0x8009) == TRUE)
+    {
+        begindynamicmultichoice
+        appenddynamicmultichoice("Harvest all", DAYCARE_BERRY_MENU_HARVEST_ALL)
+        appenddynamicmultichoice("Plant 3", DAYCARE_BERRY_MENU_PLANT_3)
+        appenddynamicmultichoice("Plant 6", DAYCARE_BERRY_MENU_PLANT_6)
+        appenddynamicmultichoice("Plant 9", DAYCARE_BERRY_MENU_PLANT_9)
+        appenddynamicmultichoice("Buy berries", DAYCARE_BERRY_MENU_BUY_BERRIES)
+        appenddynamicmultichoice("Exit", MULTI_B_PRESSED)
+
+        message(format("Welcome!\nHow can I help with the berry field?"))
+        waitmessage
+        enddynamicmultichoice(1, 0, 6, TRUE)
+
+        switch(var(VAR_RESULT))
+        {
+            case DAYCARE_BERRY_MENU_HARVEST_ALL:
+                call(Rogue_Encounter_DayCare_HarvestAll)
+
+            case DAYCARE_BERRY_MENU_PLANT_3:
+                setvar(VAR_BULK_BERRY_COUNT, 3)
+                call(Rogue_Encounter_DayCare_BulkPlant)
+
+            case DAYCARE_BERRY_MENU_PLANT_6:
+                setvar(VAR_BULK_BERRY_COUNT, 6)
+                call(Rogue_Encounter_DayCare_BulkPlant)
+
+            case DAYCARE_BERRY_MENU_PLANT_9:
+                setvar(VAR_BULK_BERRY_COUNT, 9)
+                call(Rogue_Encounter_DayCare_BulkPlant)
+
+            case DAYCARE_BERRY_MENU_BUY_BERRIES:
+                message("Which berries would you like?")
+                waitmessage
+                rogue_dynamicpokemart(ROGUE_SHOP_BERRIES)
+                lock
+
+            case MULTI_B_PRESSED:
+                setvar(VAR_0x8009, FALSE)
+        }
+    }
+
+    msgbox("Please come again!")
+    release
+}
+
+script Rogue_Encounter_DayCare_HarvestAll
+{
+    special(RogueDaycareBerryField_HarvestAll)
+
+    switch(var(VAR_RESULT))
+    {
+        case BERRY_FIELD_RESULT_SUCCESS:
+            buffernumberstring(STR_VAR_1, VAR_BULK_BERRY_TOTAL)
+            msgbox(format("Harvested {STR_VAR_1} Berries!"))
+
+        case BERRY_FIELD_RESULT_NO_READY_BERRIES:
+            msgbox(format("There aren't any ripe Berries to harvest."))
+
+        case BERRY_FIELD_RESULT_BAG_FULL:
+            msgbox(format("The BAG is too full to harvest everything."))
+    }
+}
+
+script Rogue_Encounter_DayCare_BulkPlant
+{
+    fadescreen(FADE_TO_BLACK)
+    closemessage
+    special(Bag_ChooseBerry)
+    waitstate
+
+    if(var(VAR_ITEM_ID) != 0)
+    {
+        bufferitemname(STR_VAR_1, VAR_ITEM_ID)
+        special(RogueDaycareBerryField_BulkPlantSelected)
+
+        switch(var(VAR_RESULT))
+        {
+            case BERRY_FIELD_RESULT_SUCCESS:
+                buffernumberstring(STR_VAR_1, VAR_BULK_BERRY_TOTAL)
+                msgbox(format("Planted {STR_VAR_1} Berries!"))
+
+            case BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES:
+                msgbox(format("There aren't enough empty berry patches."))
+
+            case BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES:
+                msgbox(format("You don't have enough {STR_VAR_1}."))
+        }
     }
 }
 

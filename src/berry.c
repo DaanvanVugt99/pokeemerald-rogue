@@ -30,13 +30,18 @@ static u8 GetNumStagesWateredByBerryTreeId(u8 id);
 static u8 CalcBerryYieldInternal(u16 max, u16 min, u8 water);
 static u8 CalcBerryYield(struct BerryTree *tree);
 static u16 GetStageDurationByBerryType(u8);
-static bool8 RogueBerryField_IsPatchUnlocked(u8 patch);
-static bool8 RogueBerryField_IsPatchEmpty(u8 patch);
+static bool8 RogueBerryField_IsPatchUnlocked(u8 patch, bool8 useHubUpgrades);
+static bool8 RogueBerryField_IsPatchEmpty(u8 start, u8 patchSize);
 static bool8 RogueBerryField_CanFitHarvest(const u16 *amounts);
 static void RogueBerryField_MarkTreeJustPicked(u8 treeId);
+static void RogueBerryField_HarvestAllInternal(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades);
+static void RogueBerryField_BulkPlantSelectedInternal(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades);
 
-#define ROGUE_BERRY_FIELD_PATCH_SIZE 5
-#define ROGUE_BERRY_FIELD_PATCH_COUNT 4
+#define ROGUE_HUB_BERRY_FIELD_PATCH_SIZE 5
+#define ROGUE_HUB_BERRY_FIELD_PATCH_COUNT 4
+#define ROGUE_DAYCARE_BERRY_FIELD_PATCH_SIZE 3
+#define ROGUE_DAYCARE_BERRY_FIELD_PATCH_COUNT 3
+#define ROGUE_BERRY_FIELD_MAX_PATCH_COUNT 4
 #define ROGUE_BERRY_FIELD_ITEM_COUNT (LAST_BERRY_INDEX - FIRST_BERRY_INDEX + 1)
 
 #define ROGUE_BERRY_FIELD_RESULT_SUCCESS 0
@@ -45,12 +50,19 @@ static void RogueBerryField_MarkTreeJustPicked(u8 treeId);
 #define ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES 3
 #define ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_BERRIES 4
 
-static const u8 sRogueBerryFieldPatchStarts[ROGUE_BERRY_FIELD_PATCH_COUNT] =
+static const u8 sRogueHubBerryFieldPatchStarts[ROGUE_HUB_BERRY_FIELD_PATCH_COUNT] =
 {
     BERRY_TREE_HUB_11,
     BERRY_TREE_HUB_6,
     BERRY_TREE_HUB_1,
     BERRY_TREE_HUB_16,
+};
+
+static const u8 sRogueDaycareBerryFieldPatchStarts[ROGUE_DAYCARE_BERRY_FIELD_PATCH_COUNT] =
+{
+    BERRY_TREE_DAYCARE_1,
+    BERRY_TREE_DAYCARE_4,
+    BERRY_TREE_DAYCARE_7,
 };
 
 //.rodata
@@ -1904,8 +1916,11 @@ bool8 PlayerHasBerries(void)
     return IsBagPocketNonEmpty(POCKET_BERRIES);
 }
 
-static bool8 RogueBerryField_IsPatchUnlocked(u8 patch)
+static bool8 RogueBerryField_IsPatchUnlocked(u8 patch, bool8 useHubUpgrades)
 {
+    if (!useHubUpgrades)
+        return TRUE;
+
     switch (patch)
     {
     case 0:
@@ -1921,12 +1936,11 @@ static bool8 RogueBerryField_IsPatchUnlocked(u8 patch)
     }
 }
 
-static bool8 RogueBerryField_IsPatchEmpty(u8 patch)
+static bool8 RogueBerryField_IsPatchEmpty(u8 start, u8 patchSize)
 {
     u8 i;
-    u8 start = sRogueBerryFieldPatchStarts[patch];
 
-    for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+    for (i = 0; i < patchSize; ++i)
     {
         if (GetStageByBerryTreeId(start + i) != BERRY_STAGE_NO_BERRY)
             return FALSE;
@@ -2014,22 +2028,22 @@ static void RogueBerryField_MarkTreeJustPicked(u8 treeId)
     }
 }
 
-void RogueBerryField_HarvestAll(void)
+static void RogueBerryField_HarvestAllInternal(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades)
 {
     u8 patch;
     u16 itemIdx;
     u16 totalHarvested = 0;
     u16 amounts[ROGUE_BERRY_FIELD_ITEM_COUNT] = {0};
 
-    for (patch = 0; patch < ROGUE_BERRY_FIELD_PATCH_COUNT; ++patch)
+    for (patch = 0; patch < patchCount; ++patch)
     {
         u8 i;
-        u8 start = sRogueBerryFieldPatchStarts[patch];
+        u8 start = patchStarts[patch];
 
-        if (!RogueBerryField_IsPatchUnlocked(patch))
+        if (!RogueBerryField_IsPatchUnlocked(patch, useHubUpgrades))
             continue;
 
-        for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+        for (i = 0; i < patchSize; ++i)
         {
             u8 treeId = start + i;
 
@@ -2062,15 +2076,15 @@ void RogueBerryField_HarvestAll(void)
             AddBagItem(FIRST_BERRY_INDEX + itemIdx, amounts[itemIdx]);
     }
 
-    for (patch = 0; patch < ROGUE_BERRY_FIELD_PATCH_COUNT; ++patch)
+    for (patch = 0; patch < patchCount; ++patch)
     {
         u8 i;
-        u8 start = sRogueBerryFieldPatchStarts[patch];
+        u8 start = patchStarts[patch];
 
-        if (!RogueBerryField_IsPatchUnlocked(patch))
+        if (!RogueBerryField_IsPatchUnlocked(patch, useHubUpgrades))
             continue;
 
-        for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+        for (i = 0; i < patchSize; ++i)
         {
             u8 treeId = start + i;
 
@@ -2087,12 +2101,12 @@ void RogueBerryField_HarvestAll(void)
     gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_SUCCESS;
 }
 
-void RogueBerryField_BulkPlantSelected(void)
+static void RogueBerryField_BulkPlantSelectedInternal(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades)
 {
     u8 patch;
     u8 targetPatchCount;
     u8 selectedPatchCount = 0;
-    u8 selectedPatches[ROGUE_BERRY_FIELD_PATCH_COUNT];
+    u8 selectedPatches[ROGUE_BERRY_FIELD_MAX_PATCH_COUNT];
     u16 itemId = gSpecialVar_ItemId;
     u16 requestedCount = gSpecialVar_0x8004;
 
@@ -2108,11 +2122,17 @@ void RogueBerryField_BulkPlantSelected(void)
         return;
     }
 
-    targetPatchCount = requestedCount / ROGUE_BERRY_FIELD_PATCH_SIZE;
-
-    for (patch = 0; patch < ROGUE_BERRY_FIELD_PATCH_COUNT; ++patch)
+    if (requestedCount == 0 || requestedCount % patchSize != 0)
     {
-        if (RogueBerryField_IsPatchUnlocked(patch) && RogueBerryField_IsPatchEmpty(patch))
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES;
+        return;
+    }
+
+    targetPatchCount = requestedCount / patchSize;
+
+    for (patch = 0; patch < patchCount; ++patch)
+    {
+        if (RogueBerryField_IsPatchUnlocked(patch, useHubUpgrades) && RogueBerryField_IsPatchEmpty(patchStarts[patch], patchSize))
             selectedPatches[selectedPatchCount++] = patch;
     }
 
@@ -2127,9 +2147,9 @@ void RogueBerryField_BulkPlantSelected(void)
     for (patch = 0; patch < targetPatchCount; ++patch)
     {
         u8 i;
-        u8 start = sRogueBerryFieldPatchStarts[selectedPatches[patch]];
+        u8 start = patchStarts[selectedPatches[patch]];
 
-        for (i = 0; i < ROGUE_BERRY_FIELD_PATCH_SIZE; ++i)
+        for (i = 0; i < patchSize; ++i)
         {
             PlantBerryTree(start + i, ItemIdToBerryType(itemId), BERRY_STAGE_PLANTED, TRUE);
             IncrementGameStat(GAME_STAT_PLANTED_BERRIES);
@@ -2139,6 +2159,26 @@ void RogueBerryField_BulkPlantSelected(void)
 
     gSpecialVar_0x8005 = requestedCount;
     gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_SUCCESS;
+}
+
+void RogueBerryField_HarvestAll(void)
+{
+    RogueBerryField_HarvestAllInternal(sRogueHubBerryFieldPatchStarts, ROGUE_HUB_BERRY_FIELD_PATCH_COUNT, ROGUE_HUB_BERRY_FIELD_PATCH_SIZE, TRUE);
+}
+
+void RogueBerryField_BulkPlantSelected(void)
+{
+    RogueBerryField_BulkPlantSelectedInternal(sRogueHubBerryFieldPatchStarts, ROGUE_HUB_BERRY_FIELD_PATCH_COUNT, ROGUE_HUB_BERRY_FIELD_PATCH_SIZE, TRUE);
+}
+
+void RogueDaycareBerryField_HarvestAll(void)
+{
+    RogueBerryField_HarvestAllInternal(sRogueDaycareBerryFieldPatchStarts, ROGUE_DAYCARE_BERRY_FIELD_PATCH_COUNT, ROGUE_DAYCARE_BERRY_FIELD_PATCH_SIZE, FALSE);
+}
+
+void RogueDaycareBerryField_BulkPlantSelected(void)
+{
+    RogueBerryField_BulkPlantSelectedInternal(sRogueDaycareBerryFieldPatchStarts, ROGUE_DAYCARE_BERRY_FIELD_PATCH_COUNT, ROGUE_DAYCARE_BERRY_FIELD_PATCH_SIZE, FALSE);
 }
 
 // Berry tree growth is frozen at their initial stage (usually, fully grown) until the player has seen the tree
