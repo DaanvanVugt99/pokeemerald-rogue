@@ -13964,6 +13964,12 @@ BattleScript_RoyalTreatmentActivates::
 	datahpupdate BS_TARGET
 	return
 
+BattleScript_RksRelayActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_RKSRELAYTRANSFERRED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_FairyTaleActivates::
 	call BattleScript_AbilityPopUp
 	modifybattlerstatstage BS_ATTACKER, STAT_ATK, INCREASE, 1, BattleScript_FairyTaleTrySpAtk, ANIM_ON

@@ -8302,6 +8302,20 @@ static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct B
     }
 }
 
+static bool32 BattleMonHasNativeType(const struct BattlePokemon *mon, u32 type)
+{
+    return gSpeciesInfo[mon->species].types[0] == type
+        || gSpeciesInfo[mon->species].types[1] == type;
+}
+
+static bool32 CanRksRelayWithAlly(const struct BattlePokemon *relayMon, const struct BattlePokemon *allyMon)
+{
+    if (ItemId_GetHoldEffect(relayMon->item) != HOLD_EFFECT_MEMORY)
+        return FALSE;
+
+    return BattleMonHasNativeType(allyMon, ItemId_GetSecondaryId(relayMon->item));
+}
+
 static bool32 TryApplySwitchInTransferEffects(u32 battler)
 {
     if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_INGRAIN)
@@ -8406,6 +8420,17 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
         }
     }
 
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_RKS_RELAY)
+    {
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_RKS_RELAY;
+        gBattlerAttacker = battler;
+        gBattlerTarget = battler;
+        SetBattlerTriggeredAbility(battler, ABILITY_RKS_RELAY);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_RksRelayActivates;
+        return TRUE;
+    }
+
     if (gBattleStruct->switchInTransferFlags[battler] == SWITCH_IN_TRANSFER_NONE)
         gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
     return FALSE;
@@ -8416,7 +8441,13 @@ static void Cmd_switchindataupdate(void)
     CMD_ARGS(u8 battler);
 
     struct BattlePokemon oldData;
+    bool32 outgoingHasRksRelay;
+    bool32 outgoingRksRelayActive;
+    bool32 incomingRksRelayActive;
+    bool32 preserveBatonPassState;
+    bool32 rksRelayActive;
     u32 battler, i;
+    u32 outgoingPartyIndex;
     u8 *monData;
 
     if (gBattleControllerExecFlags)
@@ -8424,6 +8455,8 @@ static void Cmd_switchindataupdate(void)
 
     battler = GetBattlerForBattleScript(cmd->battler);
     oldData = gBattleMons[battler];
+    outgoingHasRksRelay = HasBattlerAbility(battler, ABILITY_RKS_RELAY);
+    outgoingPartyIndex = gBattleStruct->switchInTransferSourcePartyIdx[battler];
     QueueSwitchInTransferEffectsFromOutgoing(battler, &oldData);
     monData = (u8 *)(&gBattleMons[battler]);
 
@@ -8442,7 +8475,21 @@ static void Cmd_switchindataupdate(void)
         gBattleMons[battler].item = ITEM_NONE;
     }
 
-    if (gBattleMoves[gCurrentMove].effect == EFFECT_BATON_PASS)
+    preserveBatonPassState = gBattleMoves[gCurrentMove].effect == EFFECT_BATON_PASS;
+    outgoingRksRelayActive = outgoingHasRksRelay && CanRksRelayWithAlly(&oldData, &gBattleMons[battler]);
+    incomingRksRelayActive = HasBattlerAbility(battler, ABILITY_RKS_RELAY) && CanRksRelayWithAlly(&gBattleMons[battler], &oldData);
+    rksRelayActive = !preserveBatonPassState
+                  && oldData.hp != 0
+                  && (outgoingRksRelayActive || incomingRksRelayActive);
+
+    if (rksRelayActive)
+    {
+        preserveBatonPassState = TRUE;
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_RKS_RELAY;
+        gBattleStruct->switchInTransferSourcePartyIdx[battler] = outgoingRksRelayActive ? outgoingPartyIndex : PARTY_SIZE;
+    }
+
+    if (preserveBatonPassState)
     {
         for (i = 0; i < NUM_BATTLE_STATS; i++)
         {
@@ -8451,7 +8498,7 @@ static void Cmd_switchindataupdate(void)
         gBattleMons[battler].status2 = oldData.status2;
     }
 
-    SwitchInClearSetData(battler);
+    SwitchInClearSetData(battler, preserveBatonPassState);
 
     if (gBattleTypeFlags & BATTLE_TYPE_PALACE
         && gBattleMons[battler].maxHP / 2 >= gBattleMons[battler].hp
@@ -8489,7 +8536,8 @@ static void Cmd_switchinanim(void)
 
     gAbsentBattlerFlags &= ~(gBitTable[battler]);
 
-    BtlController_EmitSwitchInAnim(battler, BUFFER_A, gBattlerPartyIndexes[battler], cmd->dontClearSubstitute);
+    BtlController_EmitSwitchInAnim(battler, BUFFER_A, gBattlerPartyIndexes[battler],
+                                   cmd->dontClearSubstitute || (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_RKS_RELAY));
     MarkBattlerForControllerExec(battler);
 
     gBattlescriptCurrInstr = cmd->nextInstr;

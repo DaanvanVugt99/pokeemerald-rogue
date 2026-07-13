@@ -77,6 +77,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Replaced Silvally's Overclock unique ability with RKS Relay, making switches
+  between Silvally and allies sharing its Memory type transfer Baton Pass state.
 - Reworked the Mysterious Shrine into a once-per-run battle against a boosted
   Epic Unique Ho-Oh with randomized moves, regular Ability, and possible
   rainbow typing, a dedicated transition, Ho-Oh's battle theme, and a fiery

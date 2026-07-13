@@ -670,7 +670,7 @@
 #define ABILITY_WASHED_ASHORE          722
 #define ABILITY_DOZING                 725
 #define ABILITY_WRECKAGE               731
-#define ABILITY_OVERCLOCK              724
+#define ABILITY_RKS_RELAY              724
 #define ABILITY_ELEMENTALIST           728
 #define ABILITY_WAR_CHOIR              730
 #define ABILITY_SOLAR_CORE             737

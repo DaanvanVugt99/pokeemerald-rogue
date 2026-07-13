@@ -16732,28 +16732,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_OVERCLOCK)
-         && move == MOVE_MULTI_ATTACK
-         && ItemId_GetHoldEffect(gBattleMons[battler].item) == HOLD_EFFECT_MEMORY
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && IsFinalMultiHitStrike()
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_OVERCLOCK);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = battler;
-            gCalledMove = MOVE_AUTOTOMIZE;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-            effect++;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_SPELLFIST)
          && gBattleMoves[move].punchingMove
          && DidMoveSucceedForMoveEndEffects(battler)

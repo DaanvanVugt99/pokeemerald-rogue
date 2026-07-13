@@ -3881,6 +3881,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
      || ability == ABILITY_SCORCHING_RELAY
      || ability == ABILITY_TIDAL_SWITCH
      || ability == ABILITY_ROYAL_TREATMENT
+     || ability == ABILITY_RKS_RELAY
      || ability == ABILITY_FAIRY_TALE)
     {
         sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battlerId];
