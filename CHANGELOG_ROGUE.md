@@ -69,6 +69,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Safari offers now base their Pokéblock types on the displayed base Pokémon
+  while retaining the final evolution's BST-based total cost.
 - Unique Pokémon Dens now have a 30% chance to appear a second time during a
   run, with both appearances scheduled away from other reserved encounters.
 - Reworked the Premier Ball with a 3x catch rate and a random neutral nature

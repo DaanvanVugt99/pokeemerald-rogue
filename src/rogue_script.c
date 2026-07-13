@@ -2171,9 +2171,9 @@ static void BufferSafariPurchaseCostCount(u8 costCount)
     gSpecialVar_Result = costCount;
 }
 
-static u8 GetSafariMonPurchaseType(struct RogueSafariMon const* safariMon, u8 typeIndex)
+static u8 GetSafariMonPurchaseType(struct RogueSafariMon const* safariMon, u16 purchaseSpecies, u8 typeIndex)
 {
-    u8 type = RoguePokedex_GetSpeciesType(safariMon->species, typeIndex);
+    u8 type = RoguePokedex_GetSpeciesType(purchaseSpecies, typeIndex);
 
     if(safariMon->customMonLookup != 0)
     {
@@ -2301,9 +2301,10 @@ static u16 CalculateSafariMonBasePurchaseCost(struct RogueSafariMon const* safar
 static void CalculateSafariMonPurchaseCost(struct RogueSafariMon const* safariMon, struct SafariMonPurchaseCost* cost)
 {
     u16 pricingSpecies = GetSafariMonPricingSpecies(safariMon->species);
+    u16 purchaseSpecies = GetSafariMonEggSpecies(safariMon->species);
     u16 baseCost = CalculateSafariMonBasePurchaseCost(safariMon);
-    u8 type1 = GetSafariMonPurchaseType(safariMon, 0);
-    u8 type2 = GetSafariMonPurchaseType(safariMon, 1);
+    u8 type1 = GetSafariMonPurchaseType(safariMon, purchaseSpecies, 0);
+    u8 type2 = GetSafariMonPurchaseType(safariMon, purchaseSpecies, 1);
     u16 pokeblock1 = GetPokeblockForType(type1);
     u16 pokeblock2 = GetPokeblockForType(type2);
 
@@ -2399,8 +2400,8 @@ bool8 Rogue_GetSafariMonOfferDetails(u16 safariIndex, struct RogueSafariOfferDet
     details->isShiny = safariMon->shinyFlag;
     details->canPurchase = cost.count != 0 && CheckBagHasSafariPurchaseCost(&cost);
     details->gender = GetGenderForSpecies(details->picSpecies, safariMon->genderFlag);
-    details->type1 = GetSafariMonPurchaseType(safariMon, 0);
-    details->type2 = GetSafariMonPurchaseType(safariMon, 1);
+    details->type1 = GetSafariMonPurchaseType(safariMon, details->picSpecies, 0);
+    details->type2 = GetSafariMonPurchaseType(safariMon, details->picSpecies, 1);
     details->costCount = min(cost.count, ROGUE_SAFARI_OFFER_MAX_COST_ITEMS);
 
     isCustomMon = TryGetSafariMonCustomMonId(safariMon, &customMonId);
