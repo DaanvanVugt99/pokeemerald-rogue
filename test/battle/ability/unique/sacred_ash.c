@@ -17,6 +17,7 @@ SINGLE_BATTLE_TEST("Sacred Ash revives to half HP and cures status on first fain
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_THUNDERBOLT); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_SACRED_ASH);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_SACRED_ASH, player);
         HP_BAR(player);
     } THEN {
         EXPECT_EQ(player->hp, 5);

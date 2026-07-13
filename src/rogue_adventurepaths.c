@@ -791,8 +791,10 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET && GetPathGenerationDifficulty() < ROGUE_ELITE_START_DIFFICULTY && RogueRandomChance(40, 0))
         validEncounterList[validEncounterCount++] = ADVPATH_ROOM_SIGN;
 
-    // Shrine (Gauntlet will always offer this encounter)
-    if((Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) || GetPathGenerationDifficulty() == gRogueRun.shrineSpawnDifficulty)
+    // The shrine is not part of the back-to-back battle structure of Gauntlet modes.
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_GAUNTLET
+        && !gRogueRun.hasChallengedShrine
+        && GetPathGenerationDifficulty() == gRogueRun.shrineSpawnDifficulty)
         validEncounterList[validEncounterCount++] = ADVPATH_ROOM_SHRINE;
 
     if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD || !standardPathHideRoutes)

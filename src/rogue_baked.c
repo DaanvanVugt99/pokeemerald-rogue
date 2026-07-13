@@ -28,6 +28,11 @@
 #include "party_menu.h"
 #include "string_util.h"
 
+static const u8 sRunSacredAshDesc[] = _(
+    "Revives your party\n"
+    "after a whiteout,\n"
+    "then crumbles away.");
+
 #include "rogue_automation.h"
 #include "rogue_campaign.h"
 #include "rogue_controller.h"
@@ -1584,6 +1589,10 @@ void Rogue_ModifyItem(u16 itemId, struct Item* outItem)
     {
         case ITEM_SACRED_ASH:
             outItem->pocket = POCKET_KEY_ITEMS;
+#ifndef ROGUE_BAKING
+            if(Rogue_IsRunActive())
+                outItem->description = sRunSacredAshDesc;
+#endif
             break;
 
         case ITEM_ESCAPE_ROPE:

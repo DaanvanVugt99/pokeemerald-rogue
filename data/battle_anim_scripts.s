@@ -1053,6 +1053,7 @@ gBattleAnims_General::
 	.4byte General_AcidRain                 @ B_ANIM_ACID_RAIN_CONTINUES
 	.4byte General_LeechSeedSet             @ B_ANIM_LEECH_SEED_SET
 	.4byte General_GrafittiTag              @ B_ANIM_GRAFITTI_TAG
+	.4byte General_SacredAsh                @ B_ANIM_SACRED_ASH
 
 	.align 2
 gBattleAnims_Special::
@@ -28908,6 +28909,34 @@ General_SeaOfFire::
 	call SeaOfFireTwisterTres
 	waitforvisualfinish
 	clearmonbg ANIM_DEF_PARTNER
+	blendoff
+	end
+
+General_SacredAsh::
+	loadspritegfx ANIM_TAG_SMALL_EMBER
+	loadspritegfx ANIM_TAG_SPARKLE_2
+	monbg ANIM_ATK_PARTNER
+	splitbgprio ANIM_ATTACKER
+	createsprite gSimplePaletteBlendSpriteTemplate, ANIM_ATTACKER, 2, F_PAL_ATTACKER, 1, 0, 12, RGB_BLACK
+	waitforvisualfinish
+	playsewithpan SE_M_SACRED_FIRE2, SOUND_PAN_ATTACKER
+	call SeaOfFireTwisterDos
+	delay 3
+	call SeaOfFireTwisterTres
+	waitforvisualfinish
+	createsprite gSimplePaletteBlendSpriteTemplate, ANIM_ATTACKER, 2, F_PAL_ATTACKER, 1, 12, 0, RGB_BLACK
+	waitforvisualfinish
+	createvisualtask AnimTask_BlendColorCycle, 2, F_PAL_ATTACKER, 0, 4, 0, 15, RGB(31, 24, 8)
+	playsewithpan SE_M_SOLAR_BEAM, SOUND_PAN_ATTACKER
+	call GrantingStarsEffect
+	call GrantingStarsEffect
+	waitforvisualfinish
+	createsprite gSimplePaletteBlendSpriteTemplate, ANIM_ATTACKER, 2, F_PAL_BG | F_PAL_BATTLERS, 2, 0, 12, RGB_WHITE
+	waitforvisualfinish
+	createvisualtask SoundTask_PlayNormalCry, 0
+	createsprite gSimplePaletteBlendSpriteTemplate, ANIM_ATTACKER, 2, F_PAL_BG | F_PAL_BATTLERS, 2, 12, 0, RGB_WHITE
+	waitforvisualfinish
+	clearmonbg ANIM_ATK_PARTNER
 	blendoff
 	end
 

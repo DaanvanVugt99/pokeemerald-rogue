@@ -1,23 +1,30 @@
-const FLAG_ACCEPTED_GIFT = FLAG_TEMP_1
-
 mapscripts Rogue_Encounter_Shrine_MapScripts {}
 
 
-script Rogue_Encounter_Shrine_Talk 
+script Rogue_Encounter_Shrine_Talk
 {
     lock
     faceplayer
     bufferitemname(STR_VAR_1, ITEM_SACRED_ASH)
 
-    if(flag(FLAG_ACCEPTED_GIFT))
+    specialvar(VAR_RESULT, Rogue_HasChallengedShrine)
+    if(var(VAR_RESULT) == TRUE)
     {
-        msgbox(format("I hope that {STR_VAR_1} can be helpful to you!"))
+        checkitem(ITEM_SACRED_ASH)
+        if(var(VAR_RESULT) == TRUE)
+        {
+            msgbox(format("May that {STR_VAR_1} light your way when all other hope is lost."))
+        }
+        else
+        {
+            msgbox(format("The rainbow guardian answers each challenger only once."))
+        }
     }
     else
     {
         msgbox(format("Why hello!\nWhat a treat to have visitors!"))
 
-        message(format("You're on an Adventure I see.\nIf you'd like, I have some {STR_VAR_1} you may take?"))
+        message(format("A sacred guardian watches over this shrine.\pThose who overcome its trial are entrusted with {STR_VAR_1}."))
         setvar(VAR_TEMP_0, TRUE)
 
         while(var(VAR_TEMP_0) == TRUE)
@@ -25,78 +32,61 @@ script Rogue_Encounter_Shrine_Talk
             setvar(VAR_TEMP_0, FALSE)
             waitmessage
 
-            bufferitemname(STR_VAR_1, ITEM_SACRED_ASH)
-            bufferitemname(STR_VAR_2, ITEM_PARTY_CURSE)
-
             multichoice(20, 6, MULTI_YESNOINFO, NO)
 
             switch(var(VAR_RESULT))
             {
                 case 0: // Yes
-                    call(Rogue_Encounter_Shrine_TalkAccept)
+                    call(Rogue_Encounter_Shrine_Challenge)
 
                 case 1: // No
                 case MULTI_B_PRESSED:
                     msgbox(format("I see…\nIf you change your mind, please do let me know."), MSGBOX_DEFAULT)
 
                 case 2: // Info
-                    msgbox(format("{STR_VAR_1} is a special kind of Charm which can protect you in the event your entire party faints.\pIn that event, the {STR_VAR_1} will shine, reviving all of your Pokémon and teleporting you back to a safe location so that you may have a second chance.\pThe {STR_VAR_1} is however a very strong item.\pIn fact, it is so strong that I'm afraid, in order to carry it, you must take this {STR_VAR_2} which will reduce the maximum number of Pokémon you may carry in your party by one."), MSGBOX_DEFAULT)
+                    msgbox(format("The guardian is Ho-Oh. The colours of the rainbow may grant it a different type.\pIts moves and Ability may not be what you expect."), MSGBOX_DEFAULT)
+                    msgbox(format("{STR_VAR_1} automatically revives and heals your party after a whiteout, allowing your Adventure to continue.\pIt crumbles after use. The trial may only be attempted once."), MSGBOX_DEFAULT)
                     setvar(VAR_TEMP_0, TRUE)
-                    message(format("Would you like to take the {STR_VAR_1}?"))
+                    message(format("Will you challenge the guardian?"))
             }
         }
     }
-
 
     release
 }
 
-script Rogue_Encounter_Shrine_TalkAccept
+script Rogue_Encounter_Shrine_Challenge
 {
-    specialvar(VAR_0x8000, CalculatePlayerPartyCount)
-
     checkitemspace(ITEM_SACRED_ASH)
 
     if(var(VAR_RESULT) == NO)
     {
-        msgbox(format("Oh…\nIt looks like your bag is too full…\pI can give you it, once you free up some space!"))
+        msgbox(format("Oh…\nIt looks like your bag is too full.\pMake room before you undertake the trial."))
     }
     else
     {
-        specialvar(VAR_TEMP_1, CalculatePlayerPartyCount)
-        specialvar(VAR_TEMP_2, Rogue_CalcMaxPartySize)
+        msgbox(format("Then step forward and let the rainbow judge your resolve!"))
 
-        if(var(VAR_TEMP_1) >= VAR_TEMP_2)
-        {
-            msgbox(format("You will have to release a Pokémon in order to take the required {STR_VAR_2}…"))
-            //fadescreen(FADE_TO_BLACK)
-            special(ChoosePartyMon)
-            waitstate
+        special(Rogue_PrepareShrineChallenge)
+        playmoncry(SPECIES_HO_OH, CRY_MODE_ENCOUNTER)
+        waitmoncry
 
-            if(var(VAR_0x8004) != PARTY_NOTHING_CHOSEN)
-            {
-                special(Rogue_ReleaseMonInSlot)
-            }
-        }
-        else
-        {
-            setvar(VAR_0x8004, 6)
-        }
+        special(BattleSetup_StartShrineBattle)
+        waitstate
 
-        if(var(VAR_0x8004) == PARTY_NOTHING_CHOSEN)
+        specialvar(VAR_RESULT, GetBattleOutcome)
+        if(var(VAR_RESULT) == B_OUTCOME_WON)
         {
-            msgbox(format("I see…\nIf you change your mind, please do let me know."))
-        }
-        else
-        {
+            bufferitemname(STR_VAR_1, ITEM_SACRED_ASH)
+            msgbox(format("Magnificent!\pHo-Oh has acknowledged your strength. Please accept this {STR_VAR_1}."))
+
             giveitem(ITEM_SACRED_ASH)
-            giveitem(ITEM_PARTY_CURSE)
             call(Rogue_Common_DisplayPopups)
-
             quest_trigger(QUEST_TRIGGER_MAP_SPECIFIC_EVENT)
-
-            msgbox(format("There you are!\nI hope it can be of use to you!"))
-            setflag(FLAG_ACCEPTED_GIFT)
+        }
+        else
+        {
+            msgbox(format("The guardian has withdrawn.\pIts trial cannot be called upon again during this Adventure."))
         }
     }
 }

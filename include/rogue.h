@@ -287,7 +287,8 @@ struct RogueRunData
     u16 currentDifficulty;
     u16 victoryLapTotalWins;
     u16 pendingPokeblockBundleRewardCount;
-    u8 shrineSpawnDifficulty;
+    u8 shrineSpawnDifficulty : 7;
+    bool8 hasChallengedShrine : 1;
     u8 adventureRoomId;
     u8 currentRouteIndex;
     u8 currentLevelOffset;

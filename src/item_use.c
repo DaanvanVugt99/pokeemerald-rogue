@@ -1051,8 +1051,18 @@ void ItemUseOutOfBattle_ReduceEV(u8 taskId)
 
 void ItemUseOutOfBattle_SacredAsh(u8 taskId)
 {
-    gItemUseCB = ItemUseCB_SacredAsh;
-    SetUpItemUseCallback(taskId);
+    static const u8 sText_SacredAshActivatesAutomatically[] = _(
+        "The Sacred Ash will activate\n"
+        "automatically if your party\n"
+        "faints during the Adventure.");
+
+    if(Rogue_IsRunActive())
+        DisplayCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem, sText_SacredAshActivatesAutomatically);
+    else
+    {
+        gItemUseCB = ItemUseCB_SacredAsh;
+        SetUpItemUseCallback(taskId);
+    }
 }
 
 void ItemUseOutOfBattle_PPRecovery(u8 taskId)
@@ -1352,7 +1362,7 @@ static u32 GetBallThrowableState(void)
         return BALL_THROW_UNABLE_NO_ROOM;
     else if (B_SEMI_INVULNERABLE_CATCH >= GEN_4 && (gStatuses3[catchingBattler] & STATUS3_SEMI_INVULNERABLE))
         return BALL_THROW_UNABLE_SEMI_INVULNERABLE;
-    else if (FlagGet(B_FLAG_NO_CATCHING))
+    else if (Rogue_IsShrineChallengeActive() || FlagGet(B_FLAG_NO_CATCHING))
         return BALL_THROW_UNABLE_DISABLED_FLAG;
     else if(IsCurseActive(EFFECT_SNAG_TRAINER_MON) && !FlagGet(FLAG_ROGUE_IN_SNAG_BATTLE))
         return BALL_THROW_UNABLE_DISABLED_FLAG;

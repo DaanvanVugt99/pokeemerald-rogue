@@ -3835,6 +3835,7 @@ static void TryDoEventsBeforeFirstTurn(void)
     }
 
     // Totem boosts
+    Rogue_QueueShrineBattleBoost();
     for (i = 0; i < gBattlersCount; i++)
     {
         if (gQueuedStatBoosts[i].stats != 0 && !gProtectStructs[i].eatMirrorHerb && gProtectStructs[i].activateOpportunist == 0)
@@ -6461,6 +6462,9 @@ void SetTotemBoost(void)
 
 bool32 IsWildMonSmart(void)
 {
+    if(Rogue_IsShrineChallengeActive())
+        return TRUE;
+
 #if B_SMART_WILD_AI_FLAG != 0
     return (FlagGet(B_SMART_WILD_AI_FLAG));
 #else

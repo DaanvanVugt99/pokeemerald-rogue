@@ -174,6 +174,8 @@ struct RogueLocalData
     bool8 hasBattleInputStarted : 1;
     bool8 hasPendingSnagBattle : 1;
     bool8 hasPendingRidemonTrappedCheck : 1;
+    bool8 isShrineChallengeActive : 1;
+    bool8 hasQueuedShrineBattleBoost : 1;
 };
 
 typedef u16 hot_track_dat;
@@ -5799,6 +5801,11 @@ u8 Rogue_GetCurrentTeamHideoutEncounterId(void)
 
 bool8 Rogue_IsBattleAlphaMon(u16 species)
 {
+    // The shrine guardian uses a custom-mon appearance, but Sacred Ash provides
+    // its second phase instead of the catchable Alpha encounter flow.
+    if(Rogue_IsShrineChallengeActive())
+        return FALSE;
+
     // Roamer legend fight is not an alpha fight
     if(gRogueRun.legendarySpecies[ADVPATH_LEGEND_MINOR] == species && gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] == Rogue_GetCurrentDifficulty())
         return TRUE;
@@ -5816,6 +5823,96 @@ bool8 Rogue_IsBattleAlphaMon(u16 species)
     }
 
     return FALSE;
+}
+
+bool8 Rogue_IsShrineChallengeActive(void)
+{
+    return gRogueLocal.isShrineChallengeActive;
+}
+
+bool8 Rogue_HasChallengedShrine(void)
+{
+    return gRogueRun.hasChallengedShrine;
+}
+
+void Rogue_PrepareShrineChallenge(void)
+{
+    u8 i;
+    u8 level = Rogue_CalculateBossMonLvl();
+    u16 species = SPECIES_HO_OH;
+    u16 customMoves[MAX_MON_MOVES];
+    u16 customMoveCount;
+    u16 presetCount = gRoguePokemonProfiles[species].competitiveSetCount;
+    u32 customMonId = RogueGift_CreateDynamicMonIdRaw(UNIQUE_RARITY_EPIC, species);
+    u32 temp;
+
+    gRogueRun.hasChallengedShrine = TRUE;
+    gRogueLocal.isShrineChallengeActive = TRUE;
+    gRogueLocal.hasQueuedShrineBattleBoost = FALSE;
+
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    ModifyExistingMonToCustomMon(customMonId, &gEnemyParty[0]);
+    gRogueLocal.wildBattleCustomMonId = customMonId;
+
+    // Preserve the unique payload, then use a normal competitive set to make
+    // the remaining move slots and nature coherent for Ho-Oh.
+    customMoveCount = min(RogueGift_GetCustomMonMoveCount(customMonId), MAX_MON_MOVES);
+    for(i = 0; i < customMoveCount; ++i)
+        customMoves[i] = RogueGift_GetCustomMonMove(customMonId, i);
+
+    if(presetCount != 0)
+    {
+        struct RoguePokemonCompetitiveSetRules rules = {0};
+        u16 presetIndex = Random() % presetCount;
+
+        rules.skipAbility = TRUE;
+        rules.skipHeldItem = TRUE;
+        Rogue_ApplyMonCompetitiveSet(&gEnemyParty[0], level, &gRoguePokemonProfiles[species].competitiveSets[presetIndex], &rules);
+
+        for(i = 0; i < customMoveCount; ++i)
+        {
+            temp = customMoves[i];
+            SetMonData(&gEnemyParty[0], MON_DATA_MOVE1 + i, &temp);
+            SetMonData(&gEnemyParty[0], MON_DATA_PP1 + i, &gBattleMoves[temp].pp);
+        }
+    }
+
+    // Match unique-den encounter quality, while never presenting an
+    // uncatchable shiny or Ho-Oh's normal held Sacred Ash.
+    temp = 31;
+    SetMonData(&gEnemyParty[0], MON_DATA_HP_IV + (Random() % NUM_STATS), &temp);
+    temp = 0;
+    SetMonData(&gEnemyParty[0], MON_DATA_FRIENDSHIP, &temp);
+    SetMonData(&gEnemyParty[0], MON_DATA_HELD_ITEM, &temp);
+    SetMonData(&gEnemyParty[0], MON_DATA_IS_SHINY, &temp);
+    CalculateMonStats(&gEnemyParty[0]);
+    temp = GetMonData(&gEnemyParty[0], MON_DATA_MAX_HP);
+    SetMonData(&gEnemyParty[0], MON_DATA_HP, &temp);
+
+}
+
+void Rogue_QueueShrineBattleBoost(void)
+{
+    u8 i;
+
+    if(!gRogueLocal.isShrineChallengeActive || gRogueLocal.hasQueuedShrineBattleBoost)
+        return;
+
+    gRogueLocal.hasQueuedShrineBattleBoost = TRUE;
+
+    // Queue after battle initialization so the established aura animation and
+    // messages apply the standard Alpha boosts before the first turn.
+    memset(&gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT], 0, sizeof(gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT]));
+    for(i = 0; i < NUM_STATS - 1; ++i)
+    {
+        if(i == STAT_SPEED - 1)
+            continue;
+
+        gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT].stats |= (1 << i);
+        gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT].statChanges[i] = 1;
+    }
+    gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT].stats |= 0x80;
 }
 
 bool8 Rogue_IsBattleRoamerMon(u16 species)
@@ -8746,6 +8843,13 @@ void Rogue_Battle_EndWildBattle(void)
         {
             RemoveAnyFaintedMons(FALSE);
         }
+    }
+
+    if(gRogueLocal.isShrineChallengeActive)
+    {
+        gRogueLocal.isShrineChallengeActive = FALSE;
+        gRogueLocal.hasQueuedShrineBattleBoost = FALSE;
+        gRogueLocal.wildBattleCustomMonId = 0;
     }
 }
 

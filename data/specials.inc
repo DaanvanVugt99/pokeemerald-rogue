@@ -267,6 +267,8 @@ gSpecials::
 	def_special Rogue_TryEnqueueWildBattleMon
 	def_special Rogue_GetTrainerNum
 	def_special Rogue_HasDefeatedAllRouteTrainers
+	def_special Rogue_HasChallengedShrine
+	def_special Rogue_PrepareShrineChallenge
 	def_special Rogue_PlayStaticTrainerEncounterBGM
 	def_special Rogue_PlayRivalTrainerEncounterBGM
 	def_special Rogue_PlayTeamBossTrainerEncounterBGM
@@ -563,6 +565,7 @@ gSpecials::
 	def_special ShakeCameraNoSE
 	def_special BattleSetup_StartWildBattle
 	def_special BattleSetup_StartLegendaryBattle
+	def_special BattleSetup_StartShrineBattle
 	def_special StartRegiBattle
 	def_special SetTrainerFacingDirection
 	def_special DoSealedChamberShakingEffect_Short

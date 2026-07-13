@@ -283,6 +283,7 @@ void LaunchBattleAnimation(u32 animType, u32 animId)
         case B_ANIM_SWAMP:
         case B_ANIM_TERA_CHARGE:
         case B_ANIM_TERA_ACTIVATE:
+        case B_ANIM_SACRED_ASH:
             sAnimHideHpBoxes = TRUE;
             break;
         default:

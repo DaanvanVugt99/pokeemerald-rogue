@@ -10325,6 +10325,8 @@ BattleScript_ReefProtectionActivates::
 
 BattleScript_SacredAshActivates::
 	call BattleScript_AbilityPopUp
+	playanimation BS_SCRIPTING, B_ANIM_SACRED_ASH, NULL
+	waitanimation
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
 	healthbarupdate BS_SCRIPTING
 	datahpupdate BS_SCRIPTING

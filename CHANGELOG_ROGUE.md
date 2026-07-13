@@ -71,6 +71,13 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked the Mysterious Shrine into a once-per-run battle against a boosted
+  Epic Unique Ho-Oh with randomized moves, regular Ability, and possible
+  rainbow typing, a dedicated transition, Ho-Oh's battle theme, and a fiery
+  Sacred Ash rebirth animation; victory now awards Sacred Ash without a
+  Capacity Curse, and the shrine no longer appears in Gauntlet modes.
+- Sacred Ash now activates only as an automatic whiteout rescue during
+  Adventures instead of also being manually usable from the party menu.
 - Safari offers now base their Pokéblock types on the displayed base Pokémon
   while retaining the final evolution's BST-based total cost.
 - Unique Pokémon Dens now have a 30% chance to appear a second time during a

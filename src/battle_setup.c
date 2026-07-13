@@ -652,6 +652,21 @@ void BattleSetup_StartLegendaryBattle(void)
     Rogue_Battle_StartWildBattle();
 }
 
+void BattleSetup_StartShrineBattle(void)
+{
+    LockPlayerFieldControls();
+    gMain.savedCallback = CB2_EndScriptedWildBattle;
+    gBattleTypeFlags = BATTLE_TYPE_LEGENDARY;
+
+    // Keep the shrine trial visually distinct and guarantee Ho-Oh's dedicated
+    // theme instead of relying on the generic legendary redirect chain.
+    CreateBattleStartTask(B_TRANSITION_RECTANGULAR_SPIRAL, MUS_HG_VS_HO_OH);
+    IncrementDailyWildBattles();
+    TryUpdateGymLeaderRematchFromWild();
+
+    Rogue_Battle_StartWildBattle();
+}
+
 void StartGroudonKyogreBattle(void)
 {
     LockPlayerFieldControls();
