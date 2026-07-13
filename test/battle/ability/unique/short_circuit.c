@@ -10,25 +10,29 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_SPIKES].effect == EFFECT_SPIKES);
 }
 
-SINGLE_BATTLE_TEST("Short Circuit boosts Electric-type moves by 20 percent per fainted Electric ally", s16 damage)
+SINGLE_BATTLE_TEST("Short Circuit boosts Electric-type moves by 50 percent per fainted Electric ally", s16 damage)
 {
-    u16 faintedSpecies;
-    PARAMETRIZE { faintedSpecies = SPECIES_NONE; }
-    PARAMETRIZE { faintedSpecies = SPECIES_PICHU; }
-    PARAMETRIZE { faintedSpecies = SPECIES_GASTLY; }
+    u16 faintedSpeciesA, faintedSpeciesB;
+    PARAMETRIZE { faintedSpeciesA = SPECIES_NONE;  faintedSpeciesB = SPECIES_NONE; }
+    PARAMETRIZE { faintedSpeciesA = SPECIES_PICHU; faintedSpeciesB = SPECIES_NONE; }
+    PARAMETRIZE { faintedSpeciesA = SPECIES_PICHU; faintedSpeciesB = SPECIES_PIKACHU; }
+    PARAMETRIZE { faintedSpeciesA = SPECIES_GASTLY; faintedSpeciesB = SPECIES_NONE; }
 
     GIVEN {
         PLAYER(SPECIES_ROTOM) { Speed(100); Ability(ABILITY_STATIC); Moves(MOVE_THUNDER_SHOCK); }
-        if (faintedSpecies != SPECIES_NONE)
-            PLAYER(faintedSpecies) { HP(0); Speed(1); Ability(ABILITY_STATIC); }
+        if (faintedSpeciesA != SPECIES_NONE)
+            PLAYER(faintedSpeciesA) { HP(0); Speed(1); Ability(ABILITY_STATIC); }
+        if (faintedSpeciesB != SPECIES_NONE)
+            PLAYER(faintedSpeciesB) { HP(0); Speed(1); Ability(ABILITY_STATIC); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Ability(ABILITY_SHADOW_TAG); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_THUNDER_SHOCK, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
-        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.2), results[1].damage);
-        EXPECT_EQ(results[0].damage, results[2].damage);
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(2.0), results[2].damage);
+        EXPECT_EQ(results[0].damage, results[3].damage);
     }
 }
 

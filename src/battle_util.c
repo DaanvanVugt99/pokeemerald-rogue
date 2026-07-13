@@ -8208,7 +8208,7 @@ static inline u32 CountFaintedPartyAlliesOfType(u32 battler, u32 type)
 
 static inline uq4_12_t GetShortCircuitModifier(u32 battler)
 {
-    return UQ_4_12(1.0) + (UQ_4_12(0.2) * gBattleStruct->supremeOverlordCounter[battler]);
+    return UQ_4_12(1.0) + (UQ_4_12(0.5) * gBattleStruct->supremeOverlordCounter[battler]);
 }
 
 static inline u32 GetHalfHpCutoff(u32 maxHP)

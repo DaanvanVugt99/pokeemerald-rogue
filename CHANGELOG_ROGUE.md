@@ -306,6 +306,8 @@ Format follows Keep a Changelog loosely:
   Clause and Species Clause are handled by run config toggles.
 - Fixed Rotom form appliance abilities being assigned as normal abilities
   instead of hidden abilities.
+- Increased Short Circuit's Electric-move boost from 20% to 50% per fainted
+  Electric-type ally.
 
 ### Removed
 
