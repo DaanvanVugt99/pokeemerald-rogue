@@ -69,6 +69,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Unique Pokémon Dens now have a 30% chance to appear a second time during a
+  run, with both appearances scheduled away from other reserved encounters.
 - Reworked the Premier Ball with a 3x catch rate and a random neutral nature
   for successfully caught Pokémon.
 - Updated the wild-battle quick-catch shortcut to begin each turn with the

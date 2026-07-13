@@ -264,6 +264,7 @@
 #define ADVPATH_LEGEND_MINOR            1
 #define ADVPATH_LEGEND_BOX              2
 #define ADVPATH_LEGEND_COUNT            3
+#define ADVPATH_UNIQUE_DEN_COUNT        2
 
 #define ADVPATH_TEAM_ENCOUNTER_EARLY        0
 #define ADVPATH_TEAM_ENCOUNTER_PRE_LEGEND   1

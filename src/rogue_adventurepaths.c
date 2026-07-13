@@ -881,10 +881,17 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     }
 
     // Unique Den
-    if((Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD || !standardPathHideRoutes) && gRogueRun.uniqueDenDifficulty == GetPathGenerationDifficulty())
+    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD || !standardPathHideRoutes)
     {
-        if(ReplaceRoomEncounter(ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_UNIQUE_DEN))
-            --freeRoomCount;
+        for(i = 0; i < ADVPATH_UNIQUE_DEN_COUNT; ++i)
+        {
+            if(gRogueRun.uniqueDenDifficulties[i] == GetPathGenerationDifficulty())
+            {
+                if(ReplaceRoomEncounter(ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_UNIQUE_DEN))
+                    --freeRoomCount;
+                break;
+            }
+        }
     }
 
     // Replace % of route with special encounters

@@ -5519,54 +5519,93 @@ static void ChooseLegendarysForNewAdventure()
     }
 }
 
-static void ChooseUniqueDenForNewAdventure()
+static bool8 IsUniqueDenDifficultyAvailable(u8 difficulty, u8 selectedDenCount)
 {
     u8 i;
-    bool8 hadCollision;
-    u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD) ? 2 : 1;
 
-    gRogueRun.uniqueDenDifficulty = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
-        ? 0
-        : 1 + RogueRandomRange(ROGUE_ELITE_START_DIFFICULTY - 1, 0);
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD && (difficulty % 2) != 0)
+        return FALSE;
 
-    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
+    for(i = 0; i < ADVPATH_LEGEND_COUNT; ++i)
     {
-        // Standard hides routes every other path, so place special encounters on reset paths.
-        gRogueRun.uniqueDenDifficulty = (gRogueRun.uniqueDenDifficulty / 2) * 2;
+        if(difficulty == gRogueRun.legendaryDifficulties[i])
+            return FALSE;
     }
 
-    do
+    if(difficulty == gRogueRun.shrineSpawnDifficulty)
+        return FALSE;
+
+    for(i = 0; i < ADVPATH_TEAM_ENCOUNTER_COUNT; ++i)
     {
-        hadCollision = FALSE;
+        if(difficulty == gRogueRun.teamEncounterDifficulties[i])
+            return FALSE;
+    }
 
-        for(i = 0; i < ADVPATH_LEGEND_COUNT; ++i)
-        {
-            if(gRogueRun.uniqueDenDifficulty == gRogueRun.legendaryDifficulties[i])
-            {
-                gRogueRun.uniqueDenDifficulty += collisionStep;
-                hadCollision = TRUE;
-                break;
-            }
-        }
+    for(i = 0; i < selectedDenCount; ++i)
+    {
+        if(difficulty == gRogueRun.uniqueDenDifficulties[i])
+            return FALSE;
+    }
 
-        if(gRogueRun.uniqueDenDifficulty == gRogueRun.shrineSpawnDifficulty)
-        {
-            gRogueRun.uniqueDenDifficulty += collisionStep;
-            hadCollision = TRUE;
-            continue;
-        }
+    return TRUE;
+}
 
-        for(i = 0; i < ADVPATH_TEAM_ENCOUNTER_COUNT; ++i)
-        {
-            if(gRogueRun.uniqueDenDifficulty == gRogueRun.teamEncounterDifficulties[i])
-            {
-                gRogueRun.uniqueDenDifficulty += collisionStep;
-                hadCollision = TRUE;
-                break;
-            }
-        }
-    } while(hadCollision);
+static u8 ChooseUniqueDenDifficulty(u8 minDifficulty, u8 maxDifficulty, u8 selectedDenCount)
+{
+    u8 i;
+    u8 candidateCount = 0;
+    u8 candidates[ROGUE_MAX_BOSS_COUNT];
 
+    for(i = minDifficulty; i <= maxDifficulty; ++i)
+    {
+        if(IsUniqueDenDifficultyAvailable(i, selectedDenCount))
+            candidates[candidateCount++] = i;
+    }
+
+    if(candidateCount == 0)
+        return ROGUE_MAX_BOSS_COUNT;
+
+    return candidates[RogueRandomRange(candidateCount, 0)];
+}
+
+static void ChooseUniqueDenForNewAdventure()
+{
+    memset(gRogueRun.uniqueDenDifficulties, ROGUE_MAX_BOSS_COUNT, sizeof(gRogueRun.uniqueDenDifficulties));
+
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+    {
+        // Preserve the existing gauntlet scheduling behavior.
+        gRogueRun.uniqueDenDifficulties[0] = 0;
+        return;
+    }
+
+    // Keep one guaranteed den in the early run. If every early slot is reserved,
+    // fall back to any available pre-Champion difficulty rather than colliding.
+    gRogueRun.uniqueDenDifficulties[0] = ChooseUniqueDenDifficulty(
+        Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD ? 0 : 1,
+        ROGUE_ELITE_START_DIFFICULTY - 1,
+        0
+    );
+
+    if(gRogueRun.uniqueDenDifficulties[0] == ROGUE_MAX_BOSS_COUNT)
+    {
+        gRogueRun.uniqueDenDifficulties[0] = ChooseUniqueDenDifficulty(
+            0,
+            ROGUE_CHAMP_START_DIFFICULTY - 1,
+            0
+        );
+    }
+
+    // Occasionally schedule one additional den in the mid or late run. This is
+    // decided once up front so regenerating an adventure path cannot reroll it.
+    if(RogueRandomChance(30, 0))
+    {
+        gRogueRun.uniqueDenDifficulties[1] = ChooseUniqueDenDifficulty(
+            ROGUE_GYM_MID_DIFFICULTY + 2,
+            ROGUE_CHAMP_START_DIFFICULTY - 1,
+            1
+        );
+    }
 }
 
 static u16 ChooseTeamEncounterNum()
