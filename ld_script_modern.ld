@@ -116,13 +116,6 @@ SECTIONS {
         src/libisagbprn.o(.rodata);
     } > ROM =0
 
-    multiboot_data :
-    ALIGN(4)
-    {
-        data/multiboot_ereader.o(.rodata);
-        data/multiboot_berry_glitch_fix.o(.rodata);
-    } > ROM =0
-
     gfx_data :
     ALIGN(4)
     {

@@ -24,7 +24,6 @@
 #include "load_save.h"
 #include "list_menu.h"
 #include "main.h"
-#include "mystery_gift.h"
 #include "match_call.h"
 #include "menu.h"
 #include "overworld.h"
@@ -1645,25 +1644,6 @@ void BufferLottoTicketNumber(void)
         gStringVar1[2] = CHAR_0;
         gStringVar1[3] = CHAR_0;
         ConvertIntToDecimalStringN(gStringVar1 + 4, gSpecialVar_Result, STR_CONV_MODE_LEFT_ALIGN, CountDigits(gSpecialVar_Result));
-    }
-}
-
-u16 GetMysteryGiftCardStat(void)
-{
-    switch (gSpecialVar_Result)
-    {
-    case GET_NUM_STAMPS:
-        return MysteryGift_GetCardStat(CARD_STAT_NUM_STAMPS);
-    case GET_MAX_STAMPS:
-        return MysteryGift_GetCardStat(CARD_STAT_MAX_STAMPS);
-    case GET_CARD_BATTLES_WON:
-        return MysteryGift_GetCardStat(CARD_STAT_BATTLES_WON);
-    case GET_CARD_BATTLES_LOST: // Never occurs
-        return MysteryGift_GetCardStat(CARD_STAT_BATTLES_LOST);
-    case GET_CARD_NUM_TRADES: // Never occurs
-        return MysteryGift_GetCardStat(CARD_STAT_NUM_TRADES);
-    default:
-        return 0;
     }
 }
 

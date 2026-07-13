@@ -16,7 +16,6 @@
 #include "main_menu.h"
 #include "menu.h"
 #include "list_menu.h"
-#include "mystery_event_menu.h"
 #include "naming_screen.h"
 #include "option_menu.h"
 #include "overworld.h"
@@ -37,7 +36,6 @@
 #include "text_window.h"
 #include "title_screen.h"
 #include "window.h"
-#include "mystery_gift_menu.h"
 
 #include "rogue.h"
 #include "rogue_assistant.h"
@@ -753,8 +751,6 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
         {
             case SAVE_STATUS_OK:
                 tMenuType = HAS_SAVED_GAME;
-                if (IsMysteryGiftEnabled())
-                    tMenuType++;
                 gTasks[taskId].func = Task_MainMenuCheckBattery;
                 break;
             case SAVE_STATUS_CORRUPT:
@@ -766,8 +762,6 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
                 CreateMainMenuErrorWindow(gText_SaveFileCorrupted);
                 gTasks[taskId].func = Task_WaitForSaveFileErrorWindow;
                 tMenuType = HAS_SAVED_GAME;
-                if (IsMysteryGiftEnabled() == TRUE)
-                    tMenuType++;
                 break;
             case SAVE_STATUS_EMPTY:
             default:
@@ -1198,18 +1192,6 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
             case ACTION_OPTION:
                 gMain.savedCallback = CB2_ReinitMainMenu;
                 SetMainCallback2(CB2_InitOptionMenu);
-                DestroyTask(taskId);
-                break;
-            case ACTION_MYSTERY_GIFT:
-                SetMainCallback2(CB2_InitMysteryGift);
-                DestroyTask(taskId);
-                break;
-            case ACTION_MYSTERY_EVENTS:
-                SetMainCallback2(CB2_InitMysteryEventMenu);
-                DestroyTask(taskId);
-                break;
-            case ACTION_EREADER:
-                SetMainCallback2(CB2_InitEReader);
                 DestroyTask(taskId);
                 break;
             case ACTION_INVALID:

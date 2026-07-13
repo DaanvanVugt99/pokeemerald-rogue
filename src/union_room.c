@@ -23,8 +23,6 @@
 #include "load_save.h"
 #include "menu.h"
 #include "menu_helpers.h"
-#include "mystery_gift.h"
-#include "mystery_gift_menu.h"
 #include "overworld.h"
 #include "palette.h"
 #include "party_menu.h"
@@ -216,14 +214,10 @@ static u16 ReadAsU16(const u8 *);
 static void Task_TryBecomeLinkLeader(u8);
 static void Task_TryJoinLinkGroup(u8);
 static void Task_ListenToWireless(u8);
-static void Task_SendMysteryGift(u8);
-static void Task_CardOrNewsWithFriend(u8);
-static void Task_CardOrNewsOverWireless(u8);
 static void Task_RunUnionRoom(u8);
 static void ClearIncomingPlayerList(struct RfuIncomingPlayerList *, u8);
 static void ClearRfuPlayerList(struct RfuPlayer *, u8);
 static u8 CreateTask_ListenForCompatiblePartners(struct RfuIncomingPlayerList *, u32);
-static u8 CreateTask_ListenForWonderDistributor(struct RfuIncomingPlayerList *, u32 );
 static bool8 PrintOnTextbox(u8 *, const u8 *);
 static bool8 Leader_SetStateIfMemberListChanged(struct WirelessLink_Leader *, u32, u32);
 static u8 LeaderPrunePlayerList(struct RfuPlayerList *);
@@ -244,7 +238,6 @@ static bool32 ArePlayerDataDifferent(struct RfuPlayerData *, struct RfuPlayerDat
 static u32 GetPartyPositionOfRegisteredMon(struct UnionRoomTrade *, u8);
 static void ResetUnionRoomTrade(struct UnionRoomTrade *);
 static void CreateTask_StartActivity(void);
-static bool32 HasWonderCardOrNewsByLinkGroup(struct RfuGameData *, s16);
 static u8 CreateTask_SearchForChildOrParent(struct RfuIncomingPlayerList *, struct RfuIncomingPlayerList *, u32);
 static bool32 RegisterTradeMonAndGetIsEgg(u32, struct UnionRoomTrade *);
 static void RegisterTradeMon(u32, struct UnionRoomTrade *);
@@ -1527,20 +1520,6 @@ static void Task_ExchangeCards(u8 taskId)
                 CopyTrainerCardData(&gTrainerCards[i], (struct TrainerCard *)recvBuff, gLinkPlayers[i].version);
             }
 
-            if (GetLinkPlayerCount() == 2)
-            {
-                // Note: hasAllFrontierSymbols is a re-used field.
-                // Here it is set by CreateTrainerCardInBuffer.
-                // If the player has a saved Wonder Card and it is the same Wonder Card
-                // as their partner then mystery gift stats are enabled.
-                recvBuff = gBlockRecvBuffer[GetMultiplayerId() ^ 1];
-                MysteryGift_TryEnableStatsByFlagId(((struct TrainerCard *)recvBuff)->hasAllFrontierSymbols);
-            }
-            else
-            {
-                MysteryGift_DisableStats();
-            }
-
             ResetBlockReceivedFlags();
             DestroyTask(taskId);
         }
@@ -1624,17 +1603,10 @@ static void CreateTrainerCardInBuffer(void *dest, bool32 setWonderCard)
 {
     struct TrainerCard * card = (struct TrainerCard *)dest;
     TrainerCard_GenerateCardForLinkPlayer(card);
-
-    // Below field is re-used, to be read by Task_ExchangeCards
-    if (setWonderCard)
-        card->hasAllFrontierSymbols = GetWonderCardFlagID();
-    else
-        card->hasAllFrontierSymbols = 0;
 }
 
 static void Task_StartActivity(u8 taskId)
 {
-    MysteryGift_DisableStats();
     switch (gPlayerCurrActivity)
     {
     case ACTIVITY_BATTLE_SINGLE:
@@ -1849,6 +1821,7 @@ static void CreateTask_StartActivity(void)
     gTasks[taskId].data[0] = 0;
 }
 
+#if 0 // Mystery Gift and Wonder distribution were removed from Divergence.
 // Sending Wonder Card/News
 void CreateTask_SendMysteryGift(u32 activity)
 {
@@ -2404,6 +2377,8 @@ static void Task_CardOrNewsOverWireless(u8 taskId)
         break;
     }
 }
+
+#endif
 
 void RunUnionRoom(void)
 {
@@ -3514,6 +3489,16 @@ static void Task_ListenForCompatiblePartners(u8 taskId)
     }
 }
 
+static u8 CreateTask_ListenForCompatiblePartners(struct RfuIncomingPlayerList *list, u32 linkGroup)
+{
+    u8 taskId = CreateTask(Task_ListenForCompatiblePartners, 0);
+    struct RfuIncomingPlayerList **oldList = (void *)gTasks[taskId].data;
+    oldList[0] = list;
+    gTasks[taskId].data[2] = linkGroup;
+    return taskId;
+}
+
+#if 0 // Mystery Gift and Wonder distribution were removed from Divergence.
 static bool32 HasWonderCardOrNewsByLinkGroup(struct RfuGameData *data, s16 linkGroup)
 {
     if (linkGroup == LINK_GROUP_WONDER_CARD)
@@ -3550,15 +3535,6 @@ static void Task_ListenForWonderDistributor(u8 taskId)
     }
 }
 
-static u8 CreateTask_ListenForCompatiblePartners(struct RfuIncomingPlayerList * list, u32 linkGroup)
-{
-    u8 taskId = CreateTask(Task_ListenForCompatiblePartners, 0);
-    struct RfuIncomingPlayerList **oldList = (void *) gTasks[taskId].data;
-    oldList[0] = list;
-    gTasks[taskId].data[2] = linkGroup;
-    return taskId;
-}
-
 static u8 CreateTask_ListenForWonderDistributor(struct RfuIncomingPlayerList * list, u32 linkGroup)
 {
     u8 taskId = CreateTask(Task_ListenForWonderDistributor, 0);
@@ -3567,6 +3543,7 @@ static u8 CreateTask_ListenForWonderDistributor(struct RfuIncomingPlayerList * l
     gTasks[taskId].data[2] = linkGroup;
     return taskId;
 }
+#endif
 
 static bool32 UR_PrintFieldMessage(const u8 *src)
 {

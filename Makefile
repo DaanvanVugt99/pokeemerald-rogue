@@ -293,6 +293,23 @@ endif
 ifeq ($(SCAN_DEPS),1)
 C_SRCS_IN := $(wildcard $(C_SUBDIR)/*.c $(C_SUBDIR)/*/*.c $(C_SUBDIR)/*/*/*.c)
 C_SRCS := $(foreach src,$(C_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
+C_SRCS := $(filter-out \
+	$(C_SUBDIR)/berry_fix_graphics.c \
+	$(C_SUBDIR)/berry_fix_program.c \
+	$(C_SUBDIR)/ereader_helpers.c \
+	$(C_SUBDIR)/ereader_screen.c \
+	$(C_SUBDIR)/mystery_event_menu.c \
+	$(C_SUBDIR)/mystery_event_msg.c \
+	$(C_SUBDIR)/mystery_event_script.c \
+	$(C_SUBDIR)/mystery_gift.c \
+	$(C_SUBDIR)/mystery_gift_client.c \
+	$(C_SUBDIR)/mystery_gift_link.c \
+	$(C_SUBDIR)/mystery_gift_menu.c \
+	$(C_SUBDIR)/mystery_gift_scripts.c \
+	$(C_SUBDIR)/mystery_gift_server.c \
+	$(C_SUBDIR)/mystery_gift_view.c \
+	$(C_SUBDIR)/wonder_news.c, \
+	$(C_SRCS))
 C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
 
 TEST_SRCS_IN := $(wildcard $(TEST_SUBDIR)/*.c $(TEST_SUBDIR)/*/*.c $(TEST_SUBDIR)/*/*/*.c $(TEST_SUBDIR)/*/*/*/*.c)
@@ -340,9 +357,16 @@ ASM_SRCS := $(wildcard $(ASM_SUBDIR)/*.s)
 ASM_OBJS := $(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o,$(ASM_SRCS))
 
 # get all the data/*.s files EXCEPT the ones with specific rules
-REGULAR_DATA_ASM_SRCS := $(filter-out $(DATA_ASM_SUBDIR)/maps.s $(DATA_ASM_SUBDIR)/map_events.s, $(wildcard $(DATA_ASM_SUBDIR)/*.s))
+REGULAR_DATA_ASM_SRCS := $(filter-out \
+	$(DATA_ASM_SUBDIR)/maps.s \
+	$(DATA_ASM_SUBDIR)/map_events.s \
+	$(DATA_ASM_SUBDIR)/multiboot_berry_glitch_fix.s \
+	$(DATA_ASM_SUBDIR)/multiboot_ereader.s \
+	$(DATA_ASM_SUBDIR)/mystery_event_script_cmd_table.s \
+	$(DATA_ASM_SUBDIR)/mystery_gift.s, \
+	$(wildcard $(DATA_ASM_SUBDIR)/*.s))
 
-DATA_ASM_SRCS := $(wildcard $(DATA_ASM_SUBDIR)/*.s)
+DATA_ASM_SRCS := $(REGULAR_DATA_ASM_SRCS) $(DATA_ASM_SUBDIR)/maps.s $(DATA_ASM_SUBDIR)/map_events.s
 DATA_ASM_OBJS := $(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o,$(DATA_ASM_SRCS))
 
 SONG_SRCS := $(wildcard $(SONG_SUBDIR)/*.s)

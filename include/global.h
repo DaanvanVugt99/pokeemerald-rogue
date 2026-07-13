@@ -1038,10 +1038,8 @@ struct SaveBlock1
     /*0x3150*/ struct LinkBattleRecords linkBattleRecords;
     /*0x31A8*/ u8 giftRibbons[GIFT_RIBBONS_COUNT];
     /*0x31F8*/ struct EnigmaBerry enigmaBerry;
-    /*0x322C*/ struct MysteryGiftSave mysteryGift;
-    /*0x3718*/ u32 trainerHillTimes[NUM_TRAINER_HILL_MODES];
-    /*0x3728*/ struct RamScript ramScript;
-    /*0x3B14*/ struct RecordMixingGift recordMixingGift;
+    u32 trainerHillTimes[NUM_TRAINER_HILL_MODES];
+    struct RamScript ramScript;
     /*0x988*/ u8 pokedexBitFlags1[NUM_DEX_FLAG_BYTES];
     /*0x3B24*/ u8 pokedexBitFlags2[NUM_DEX_FLAG_BYTES];
     /*0x3B58*/ LilycoveLady lilycoveLady;

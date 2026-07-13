@@ -47,7 +47,6 @@
 #include "player_pc.h"
 #include "field_specials.h"
 #include "berry_powder.h"
-#include "mystery_gift.h"
 #include "union_room_chat.h"
 #include "constants/items.h"
 
@@ -215,7 +214,6 @@ void NewGameInitData(void)
     ResetAllApprenticeData();
     ClearRankingHallRecords();
     InitMatchCallCounters();
-    ClearMysteryGift();
     WipeTrainerNameRecords();
     ResetTrainerHillResults();
     ResetContestLinkResults();

@@ -14,6 +14,12 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Removed
+
+- Removed inherited Japanese font glyphs, Mystery Gift and e-Reader support
+  (including their save data and link hooks), and the Generation III Berry
+  Program Update payload to free ROM space.
+
 ### Added
 
 - Added an Achievements quest category for optional accomplishments that do not
