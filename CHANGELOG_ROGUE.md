@@ -84,6 +84,8 @@ Format follows Keep a Changelog loosely:
   Glider to only set Tailwind the first time it is damaged each switch-in.
 - Gave Type: Null the Control Mask unique ability, which resets its stat changes
   after it completes a damaging move.
+- Reworked the original Regi trio's unique abilities into Stone Seal, Frost
+  Seal, and Iron Seal, which disable the first qualifying move each switch-in.
 
 - Restored the Pidgey line's Strong Winds unique ability to set Tailwind on
   switch-in instead of when a foe is forced out.

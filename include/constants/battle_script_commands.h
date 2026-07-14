@@ -350,13 +350,14 @@
 #define MOVEEND_CHANGED_ITEMS                     33
 #define MOVEEND_PICKPOCKET                        34
 #define MOVEEND_DANCER                            35
-#define MOVEEND_EMERGENCY_EXIT                    36
-#define MOVEEND_SYMBIOSIS                         37
-#define MOVEEND_OPPORTUNIST                       38    // Occurs after other stat change items/abilities to try and copy the boosts
-#define MOVEEND_DELIVERY_BAG                      39
-#define MOVEEND_SAME_MOVE_TURNS                   40
-#define MOVEEND_CLEAR_BITS                        41
-#define MOVEEND_COUNT                             42
+#define MOVEEND_IRON_SEAL                         36
+#define MOVEEND_EMERGENCY_EXIT                    37
+#define MOVEEND_SYMBIOSIS                         38
+#define MOVEEND_OPPORTUNIST                       39    // Occurs after other stat change items/abilities to try and copy the boosts
+#define MOVEEND_DELIVERY_BAG                      40
+#define MOVEEND_SAME_MOVE_TURNS                   41
+#define MOVEEND_CLEAR_BITS                        42
+#define MOVEEND_COUNT                             43
 
 // switch cases
 #define B_SWITCH_NORMAL     0

@@ -8084,6 +8084,57 @@ static void Cmd_moveend(void)
 
             gBattleScripting.moveendState++;
             break;
+        case MOVEEND_IRON_SEAL:
+            if (IS_MOVE_STATUS(gCurrentMove)
+             && IsBattlerAlive(gBattlerAttacker)
+             && gCurrentMove == originallyUsedMove
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && gDisableStructs[gBattlerAttacker].disabledMove == MOVE_NONE
+             && !IsAbilityOnSide(gBattlerAttacker, ABILITY_AROMA_VEIL)
+             && !IsDynamaxed(gBattlerAttacker))
+            {
+                u8 battlers[4] = {0, 1, 2, 3};
+                bool32 moveCanBeDisabled = FALSE;
+                u32 moveSlot;
+
+                for (moveSlot = 0; moveSlot < MAX_MON_MOVES; moveSlot++)
+                {
+                    if (gBattleMons[gBattlerAttacker].moves[moveSlot] == gCurrentMove
+                     && gBattleMons[gBattlerAttacker].pp[moveSlot] != 0)
+                    {
+                        moveCanBeDisabled = TRUE;
+                        break;
+                    }
+                }
+
+                SortBattlersBySpeed(battlers, FALSE);
+                for (i = 0; moveCanBeDisabled && i < gBattlersCount; i++)
+                {
+                    u8 sealBattler = battlers[i];
+
+                    if (GetBattlerSide(sealBattler) == GetBattlerSide(gBattlerAttacker)
+                     || !IsBattlerAlive(sealBattler)
+                     || !HasBattlerAbility(sealBattler, ABILITY_IRON_SEAL)
+                     || gDisableStructs[sealBattler].uniqueOncePerSwitchInUsed)
+                        continue;
+
+                    gDisableStructs[sealBattler].uniqueOncePerSwitchInUsed = TRUE;
+                    gDisableStructs[gBattlerAttacker].disabledMove = gCurrentMove;
+                    gDisableStructs[gBattlerAttacker].disableTimer = 4;
+                    PREPARE_MOVE_BUFFER(gBattleTextBuff1, gCurrentMove);
+                    SetBattlerTriggeredAbility(sealBattler, ABILITY_IRON_SEAL);
+                    gBattlerTarget = sealBattler;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_CursedBodyActivates;
+                    effect = TRUE;
+                    break;
+                }
+            }
+            gBattleScripting.moveendState++;
+            break;
         case MOVEEND_EMERGENCY_EXIT: // Special case, because moves hitting multiple opponents stop after switching out
             for (i = 0; i < gBattlersCount; i++)
             {

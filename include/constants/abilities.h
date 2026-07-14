@@ -845,9 +845,9 @@
 #define ABILITY_HEARTTHROB             510
 #define ABILITY_PREDATOR               511
 #define ABILITY_HIVE_MIND              512
-#define ABILITY_STONE_SPIKES           513
-#define ABILITY_ICY_MIRROR             514
-#define ABILITY_IRON_MAIDEN            515
+#define ABILITY_STONE_SEAL             513
+#define ABILITY_FROST_SEAL             514
+#define ABILITY_IRON_SEAL              515
 #define ABILITY_HEARTWING              516
 #define ABILITY_MINDWING               517
 #define ABILITY_ABYSS                  518

@@ -8225,6 +8225,23 @@ static u16 GetLastUsableMoveForDisable(u32 battler)
     return MOVE_NONE;
 }
 
+static u16 GetUsableMoveForDisable(u32 battler, u16 move)
+{
+    u32 slot;
+
+    if (move == MOVE_NONE)
+        return MOVE_NONE;
+
+    for (slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        if (gBattleMons[battler].moves[slot] == move
+         && gBattleMons[battler].pp[slot] != 0)
+            return move;
+    }
+
+    return MOVE_NONE;
+}
+
 static u16 GetStrongestUsableMoveForDisable(u32 battler)
 {
     u32 slot;
@@ -13751,21 +13768,29 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_STONE_SPIKES)
+        if (HasBattlerAbility(battler, ABILITY_STONE_SEAL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[moveEndAttacker].hp != 0
+         && IsBattlerAlive(moveEndAttacker)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && IS_MOVE_PHYSICAL(move))
+         && IS_MOVE_PHYSICAL(move)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanAbilityDisableBattler(moveEndAttacker))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_STONE_SPIKES);
-            gBattleMoveDamage = GetNonDynamaxMaxHP(moveEndAttacker) / 16;
-            if (gBattleMoveDamage == 0)
-                gBattleMoveDamage = 1;
-            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_RoughSkinActivates;
-            effect++;
+            u16 moveToDisable = GetUsableMoveForDisable(moveEndAttacker, move);
+
+            if (moveToDisable != MOVE_NONE)
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_STONE_SEAL);
+                gDisableStructs[moveEndAttacker].disabledMove = moveToDisable;
+                gDisableStructs[moveEndAttacker].disableTimer = GetDefaultDisableTimerFromGenConfig();
+                PREPARE_MOVE_BUFFER(gBattleTextBuff1, moveToDisable);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_CursedBodyActivates;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_RAZOR_CARAPACE)
@@ -13798,37 +13823,29 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_ICY_MIRROR)
+        if (HasBattlerAbility(battler, ABILITY_FROST_SEAL)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[moveEndAttacker].hp != 0
+         && IsBattlerAlive(moveEndAttacker)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && IS_MOVE_SPECIAL(move))
+         && IS_MOVE_SPECIAL(move)
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && CanAbilityDisableBattler(moveEndAttacker))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_ICY_MIRROR);
-            gBattleMoveDamage = GetNonDynamaxMaxHP(moveEndAttacker) / 16;
-            if (gBattleMoveDamage == 0)
-                gBattleMoveDamage = 1;
-            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_RoughSkinActivates;
-            effect++;
-        }
+            u16 moveToDisable = GetUsableMoveForDisable(moveEndAttacker, move);
 
-        if (HasBattlerAbility(battler, ABILITY_IRON_MAIDEN)
-         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
-         && gBattleMons[moveEndAttacker].hp != 0
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
-         && gBattleMoves[move].split == SPLIT_STATUS)
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_IRON_MAIDEN);
-            gBattleMoveDamage = GetNonDynamaxMaxHP(moveEndAttacker) / 16;
-            if (gBattleMoveDamage == 0)
-                gBattleMoveDamage = 1;
-            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_RoughSkinActivates;
-            effect++;
+            if (moveToDisable != MOVE_NONE)
+            {
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                SetBattlerTriggeredAbility(battler, ABILITY_FROST_SEAL);
+                gDisableStructs[moveEndAttacker].disabledMove = moveToDisable;
+                gDisableStructs[moveEndAttacker].disableTimer = GetDefaultDisableTimerFromGenConfig();
+                PREPARE_MOVE_BUFFER(gBattleTextBuff1, moveToDisable);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_CursedBodyActivates;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_DISGUISED)
@@ -14671,7 +14688,6 @@ if (triggeringAbility != ABILITY_NONE)
             gBattlescriptCurrInstr = BattleScript_CheekPouchActivates;
             effect++;
         }
-
         break;
     }
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
@@ -19025,6 +19041,7 @@ if (triggeringAbility != ABILITY_NONE)
             gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
             effect++;
         }
+
         break;
     }
     case ABILITYEFFECT_MOVE_END_OTHER: // Abilities that activate on *another* battler's moveend: Dancer, Soul-Heart, Receiver, Symbiosis
