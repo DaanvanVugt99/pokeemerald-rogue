@@ -82,6 +82,8 @@ Format follows Keep a Changelog loosely:
 - Reworked Emolga's unique ability into Static Stash, which uses Charge after
   consuming a Berry or terrain seed, and simplified the Wattrel line's Storm
   Glider to only set Tailwind the first time it is damaged each switch-in.
+- Gave Type: Null the Control Mask unique ability, which resets its stat changes
+  after it completes a damaging move.
 
 - Restored the Pidgey line's Strong Winds unique ability to set Tailwind on
   switch-in instead of when a foe is forced out.

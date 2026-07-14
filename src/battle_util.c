@@ -14717,6 +14717,21 @@ if (triggeringAbility != ABILITY_NONE)
         if (TryTriggerCounterpunchAfterPunchingMove(battler, move))
             effect++;
 
+        if (HasBattlerAbility(battler, ABILITY_CONTROL_MASK)
+         && IsBattlerAlive(battler)
+         && !IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrikeAndTarget()
+         && TryResetBattlerStatChanges(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_CONTROL_MASK);
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_ControlMaskActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BARBED_MONSOON)
          && IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)

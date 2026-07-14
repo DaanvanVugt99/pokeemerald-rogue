@@ -13979,6 +13979,12 @@ BattleScript_StabilizeActivates::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_ControlMaskActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_CONTROLMASKSTABILIZED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_SplitInstinctTargetStatLower::
 	copybyte sSAVED_BATTLER, gBattlerAttacker
 	call BattleScript_AbilityPopUp
