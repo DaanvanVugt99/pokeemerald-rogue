@@ -6205,40 +6205,6 @@ void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler)
     QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_AROMA_TRAIL, loweredBattler, sourceBattler, sourceBattler);
 }
 
-void QueueStrongWindsForForcedSwitch(u32 sourceBattler, u32 forcedBattler)
-{
-    u32 i;
-    u32 sourceSide;
-    u32 forcedSide;
-    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
-
-    if (sourceBattler >= gBattlersCount
-     || forcedBattler >= gBattlersCount)
-        return;
-
-    sourceSide = GetBattlerSide(sourceBattler);
-    forcedSide = GetBattlerSide(forcedBattler);
-
-    if (sourceSide == forcedSide
-     || gSideStatuses[sourceSide] & SIDE_STATUS_TAILWIND
-     || IsPendingUniqueAbilityEffectQueued(PENDING_UNIQUE_EFFECT_STRONG_WINDS))
-        return;
-
-    SortBattlersBySpeed(battlers, FALSE);
-    for (i = 0; i < gBattlersCount; i++)
-    {
-        u32 battler = battlers[i];
-
-        if (IsBattlerAlive(battler)
-         && GetBattlerSide(battler) == sourceSide
-         && HasBattlerAbility(battler, ABILITY_STRONG_WINDS))
-        {
-            QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_STRONG_WINDS, battler, sourceBattler, forcedBattler);
-            return;
-        }
-    }
-}
-
 void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount)
 {
     u32 i;
@@ -6294,29 +6260,6 @@ static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
     return TRUE;
 }
 
-static bool32 TryActivateStrongWinds(u32 battler, u32 source, u32 target)
-{
-    u32 side;
-
-    if (!IsBattlerAlive(battler)
-     || source >= gBattlersCount
-     || target >= gBattlersCount
-     || GetBattlerSide(source) == GetBattlerSide(target)
-     || GetBattlerSide(battler) != GetBattlerSide(source)
-     || !HasBattlerAbility(battler, ABILITY_STRONG_WINDS))
-        return FALSE;
-
-    side = GetBattlerSide(battler);
-    if (gSideStatuses[side] & SIDE_STATUS_TAILWIND)
-        return FALSE;
-
-    SetBattlerTriggeredAbility(battler, ABILITY_STRONG_WINDS);
-    gBattlerAttacker = gBattlerAbility = battler;
-    BattleScriptPushCursor();
-    gBattlescriptCurrInstr = BattleScript_StrongWindsPendingTailwind;
-    return TRUE;
-}
-
 static bool32 TryActivateMoonlight(u32 battler, u32 source, u32 target)
 {
     if (!IsBattlerAlive(battler)
@@ -6357,15 +6300,6 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateAromaTrail(battler, source, target))
-            return TRUE;
-    }
-    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_STRONG_WINDS)
-    {
-        u32 source = GetPendingUniqueAbilitySource(battler);
-        u32 target = GetPendingUniqueAbilityTarget(battler);
-
-        ClearPendingUniqueAbilityEffect(battler);
-        if (TryActivateStrongWinds(battler, source, target))
             return TRUE;
     }
     else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_MOONLIGHT)
@@ -11235,6 +11169,19 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlerAttacker = battler;
                 SET_STATCHANGER(STAT_SPATK, 1, TRUE);
                 BattleScriptPushCursorAndCallback(BattleScript_DampeningActivates);
+                effect++;
+            }
+            break;
+        case ABILITY_STRONG_WINDS:
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = battler;
+                gSideStatuses[GetBattlerSide(battler)] |= SIDE_STATUS_TAILWIND;
+                gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = gBattlerAttacker;
+                gSideTimers[GetBattlerSide(battler)].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
+                BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
                 effect++;
             }
             break;

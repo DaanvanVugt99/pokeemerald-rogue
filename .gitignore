@@ -55,3 +55,7 @@ tools/poryscript/*
 tools/ups/*
 !tools/Pokabbie/Build
 pokeemerald-*.png
+
+# Personal design tracker and Excel's temporary open-workbook artifact.
+docs/design/pokemon_romhack_tracker_styled.xlsx
+docs/design/~$pokemon_romhack_tracker_styled.xlsx

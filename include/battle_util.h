@@ -169,7 +169,6 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_WEB_TRAP,
     PENDING_UNIQUE_EFFECT_SCRAP_JOB,
     PENDING_UNIQUE_EFFECT_AROMA_TRAIL,
-    PENDING_UNIQUE_EFFECT_STRONG_WINDS,
     PENDING_UNIQUE_EFFECT_MOONLIGHT,
     PENDING_UNIQUE_EFFECT_BRUTAL_CHARGE,
 };
@@ -179,7 +178,6 @@ u32 GetPendingUniqueAbilityEffect(u32 battler);
 void ClearPendingUniqueAbilityEffect(u32 battler);
 void QueueWebTrapForSpeedDrop(u32 slowedBattler, u32 sourceBattler);
 void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler);
-void QueueStrongWindsForForcedSwitch(u32 sourceBattler, u32 forcedBattler);
 void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount);
 void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler);
 bool32 TryActivatePendingUniqueAbilityEffect(void);

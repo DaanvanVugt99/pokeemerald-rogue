@@ -11982,18 +11982,6 @@ BattleScript_StrongWindsActivated::
 	call BattleScript_TryTailwindAbilitiesLoop
 	end3
 
-BattleScript_StrongWindsPendingTailwind::
-	pause B_WAIT_TIME_SHORT
-	call BattleScript_AbilityPopUp
-	settailwind BattleScript_StrongWindsPendingTailwindEnd
-	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
-	waitanimation
-	printstring STRINGID_TAILWINDBLEW
-	waitmessage B_WAIT_TIME_LONG
-	call BattleScript_TryTailwindAbilitiesLoop
-BattleScript_StrongWindsPendingTailwindEnd:
-	return
-
 BattleScript_RevelryLightScreen::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

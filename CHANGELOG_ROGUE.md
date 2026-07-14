@@ -79,6 +79,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Restored the Pidgey line's Strong Winds unique ability to set Tailwind on
+  switch-in instead of when a foe is forced out.
 - Replaced Silvally's Overclock unique ability with RKS Relay, making switches
   between Silvally and allies sharing its Memory type transfer Baton Pass state.
 - Reworked the Mysterious Shrine into a once-per-run battle against a boosted
