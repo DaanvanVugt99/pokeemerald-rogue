@@ -79,6 +79,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked Zygarde's Edgeproof unique ability into Natural Order, which moves
+  every active Pokémon's stat stages one step toward neutral at turn end.
+
 - Reworked Emolga's unique ability into Static Stash, which uses Charge after
   consuming a Berry or terrain seed, and simplified the Wattrel line's Storm
   Glider to only set Tailwind the first time it is damaged each switch-in.

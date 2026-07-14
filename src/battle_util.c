@@ -1244,7 +1244,6 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
     [ABILITY_WONDER_SKIN] = 1,
     [ABILITY_AROMA_VEIL] = 1,
     [ABILITY_BULLETPROOF] = 1,
-    [ABILITY_EDGEPROOF] = 1,
     [ABILITY_FLOWER_VEIL] = 1,
     [ABILITY_FUR_COAT] = 1,
     [ABILITY_OVERCOAT] = 1,
@@ -3693,6 +3692,122 @@ u8 DoBattlerEndTurnEffects(void)
     }
     gHitMarker &= ~(HITMARKER_GRUDGE | HITMARKER_IGNORE_BIDE);
     return 0;
+}
+
+bool32 DoNaturalOrderEndTurnEffect(void)
+{
+    u32 abilityBattler = gBattlersCount;
+    u32 battler;
+    u32 stat;
+    u32 statCount;
+    u8 statMask;
+    bool32 statsGoDown;
+    bool32 firstActivation;
+
+    // DoBattlerEndTurnEffects leaves this at gBattlersCount. Natural Order uses
+    // the next value to remember that its popup has already been displayed.
+    if (gBattleStruct->turnEffectsBattlerId < gBattlersCount
+     || gBattleStruct->turnEffectsBattlerId > gBattlersCount + 1)
+        return FALSE;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        u32 orderedBattler = gBattlerByTurnOrder[battler];
+
+        if (IsBattlerAlive(orderedBattler)
+         && HasBattlerAbility(orderedBattler, ABILITY_NATURAL_ORDER))
+        {
+            abilityBattler = orderedBattler;
+            break;
+        }
+    }
+
+    if (abilityBattler == gBattlersCount)
+    {
+        gBattleStruct->turnEffectsBattlerId = gBattlersCount + 2;
+        return FALSE;
+    }
+
+    if (gBattleStruct->turnEffectsBattlerId == gBattlersCount)
+    {
+        gBattleScripting.savedStatChanger = 0;
+    }
+    else if (gBattleScripting.savedStatChanger != 0)
+    {
+        statsGoDown = (gBattleScripting.statChanger & STAT_BUFF_NEGATIVE) != 0;
+        for (stat = STAT_ATK; !(gBattleScripting.savedStatChanger & (1 << stat)); stat++)
+            ;
+        gBattleScripting.savedStatChanger &= ~(1 << stat);
+        gBattlerAttacker = gBattleScripting.battler;
+        PREPARE_STAT_BUFFER(gBattleTextBuff1, stat);
+        PREPARE_STRING_BUFFER(gBattleTextBuff2, statsGoDown ? STRINGID_STATFELL : STRINGID_STATROSE);
+        SET_STATCHANGER(stat, 1, statsGoDown);
+        BattleScriptExecute(statsGoDown ? BattleScript_NaturalOrderStatFell : BattleScript_NaturalOrderStatRose);
+        return TRUE;
+    }
+
+    // Process one battler and one direction per script. This lets each battler
+    // display both the normal stat-down and stat-up animations when needed.
+    while (gBattleStruct->turnEffectsTracker < gBattlersCount * 2)
+    {
+        battler = gBattlerByTurnOrder[gBattleStruct->turnEffectsTracker / 2];
+        statsGoDown = !(gBattleStruct->turnEffectsTracker & 1);
+        gBattleStruct->turnEffectsTracker++;
+        statMask = 0;
+        statCount = 0;
+
+        if (!IsBattlerAlive(battler))
+            continue;
+
+        for (stat = STAT_ATK; stat < NUM_BATTLE_STATS; stat++)
+        {
+            if ((statsGoDown && gBattleMons[battler].statStages[stat] > DEFAULT_STAT_STAGE)
+             || (!statsGoDown && gBattleMons[battler].statStages[stat] < DEFAULT_STAT_STAGE))
+            {
+                if (statsGoDown)
+                    gBattleMons[battler].statStages[stat]--;
+                else
+                    gBattleMons[battler].statStages[stat]++;
+                statMask |= 1 << stat;
+                statCount++;
+            }
+        }
+
+        if (statMask == 0)
+            continue;
+
+        firstActivation = gBattleStruct->turnEffectsBattlerId == gBattlersCount;
+        gBattleStruct->turnEffectsBattlerId = gBattlersCount + 1;
+        gBattleScripting.savedStatChanger = statMask;
+        SET_STATCHANGER(STAT_ATK, 1, statsGoDown);
+        gBattleScripting.animArg2 = 0;
+        if (statCount > 1)
+            gBattleScripting.animArg1 = statsGoDown ? STAT_ANIM_MULTIPLE_MINUS1 : STAT_ANIM_MULTIPLE_PLUS1;
+        else
+        {
+            for (stat = STAT_ATK; !(statMask & (1 << stat)); stat++)
+                ;
+            gBattleScripting.animArg1 = (statsGoDown ? STAT_ANIM_MINUS1 : STAT_ANIM_PLUS1) + stat;
+        }
+
+        if (firstActivation)
+        {
+            gBattlerAttacker = abilityBattler;
+            SetBattlerTriggeredAbility(abilityBattler, ABILITY_NATURAL_ORDER);
+            gBattleScripting.battler = battler;
+            BattleScriptExecute(BattleScript_NaturalOrderEndTurn);
+        }
+        else
+        {
+            gBattleScripting.battler = battler;
+            BattleScriptExecute(BattleScript_NaturalOrderStatChange);
+        }
+        return TRUE;
+    }
+
+    gBattleStruct->turnEffectsTracker = 0;
+    gBattleStruct->turnEffectsBattlerId = gBattlersCount + 2;
+    return FALSE;
 }
 
 bool32 HandleWishPerishSongOnTurnEnd(void)
@@ -12447,13 +12562,10 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             u16 targetAbility = GetBattlerAbility(gBattlerTarget);
 
             if ((HasBattlerAbility(battler, ABILITY_SOUNDPROOF) && gBattleMoves[move].soundMove && !(moveTarget & MOVE_TARGET_USER))
-             || (HasBattlerAbility(battler, ABILITY_BULLETPROOF) && gBattleMoves[move].ballisticMove)
-             || (HasBattlerAbility(battler, ABILITY_EDGEPROOF) && gBattleMoves[move].slicingMove))
+             || (HasBattlerAbility(battler, ABILITY_BULLETPROOF) && gBattleMoves[move].ballisticMove))
             {
                 if (gBattleMoves[move].soundMove)
                     SetBattlerTriggeredAbility(battler, ABILITY_SOUNDPROOF);
-                else if (gBattleMoves[move].slicingMove)
-                    SetBattlerTriggeredAbility(battler, ABILITY_EDGEPROOF);
                 else
                     SetBattlerTriggeredAbility(battler, ABILITY_BULLETPROOF);
                 if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
@@ -21876,6 +21988,8 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
     // Berry was successfully used on a Pokemon.
     if (effect && ItemId_GetPocket(gLastUsedItem) == POCKET_BERRIES)
     {
+        QueueStaticStashForConsumedItem(battler);
+
         if (HasBattlerAbility(battler, ABILITY_MESSY_EATER))
         {
             u32 target;

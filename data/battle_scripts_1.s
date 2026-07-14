@@ -1952,6 +1952,7 @@ BattleScript_MoveEffectBugBite::
 	consumeberry BS_ATTACKER, FALSE
 	bicword gHitMarker, HITMARKER_DISABLE_ANIMATION
 	setbyte sBERRY_OVERRIDE, 0
+	call BattleScript_StaticStashActivates
 	trysymbiosis
 	call BattleScript_ScrapJobActivates
 	restoretarget
@@ -11957,6 +11958,25 @@ BattleScript_RedlineEndTurn_End:
 BattleScript_DualityEndTurn::
 	call BattleScript_AbilityPopUp
 	printfromtable gDualityStringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_NaturalOrderEndTurn::
+	call BattleScript_AbilityPopUp
+	goto BattleScript_NaturalOrderStatChange
+
+BattleScript_NaturalOrderStatChange::
+	playanimation BS_SCRIPTING, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	end3
+
+BattleScript_NaturalOrderStatRose::
+	printstring STRINGID_ATTACKERSSTATROSE
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_NaturalOrderStatFell::
+	printstring STRINGID_ATTACKERSSTATFELL
 	waitmessage B_WAIT_TIME_LONG
 	end3
 

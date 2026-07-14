@@ -10137,9 +10137,6 @@ static void Cmd_removeitem(void)
     MarkBattlerForControllerExec(battler);
 
     ClearBattlerItemEffectHistory(battler);
-    if (ItemId_GetPocket(itemId) == POCKET_BERRIES
-     && gBattleStruct->ateBerry[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
-        QueueStaticStashForConsumedItem(battler);
 
     gluttonyStatBoost = TrySetGluttonyBerryStatBoost(battler, itemId);
     if (!TryCheekPouch(battler, itemId))

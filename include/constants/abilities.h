@@ -679,7 +679,7 @@
 #define ABILITY_BREAK_FORMATION        709
 #define ABILITY_TRAILBREAKER           710
 #define ABILITY_ROYAL_GARDEN           711
-#define ABILITY_EDGEPROOF              694
+#define ABILITY_NATURAL_ORDER          694
 #define ABILITY_DUSTSTORM              665
 #define ABILITY_BATTLECRY              666
 #define ABILITY_NINJA_TOOLS            663

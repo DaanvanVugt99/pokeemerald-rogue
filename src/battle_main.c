@@ -3967,6 +3967,8 @@ void BattleTurnPassed(void)
             return;
         if (DoBattlerEndTurnEffects())
             return;
+        if (DoNaturalOrderEndTurnEffect())
+            return;
     }
     if (HandleFaintedMonActions())
         return;
