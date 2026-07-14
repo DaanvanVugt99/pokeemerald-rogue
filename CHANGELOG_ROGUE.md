@@ -88,6 +88,9 @@ Format follows Keep a Changelog loosely:
   Capacity Curse, and the shrine no longer appears in Gauntlet modes.
 - Sacred Ash now activates only as an automatic whiteout rescue during
   Adventures instead of also being manually usable from the party menu.
+- Expanded thematically appropriate Main Quest rewards with balanced typed,
+  Shiny, and assorted Pokéblock bundles; quest-earned bundles now open
+  immediately when their rewards are collected in the hub.
 - Safari offers now base their Pokéblock types on the displayed base Pokémon
   while retaining the final evolution's BST-based total cost.
 - Unique Pokémon Dens now have a 30% chance to appear a second time during a

@@ -644,6 +644,10 @@ void RogueQuest_EndRewardSequence()
     if(sRogueQuestRewardOutput->failedRewardItem != ITEM_NONE)
         Rogue_PushPopup_CannotTakeItem(sRogueQuestRewardOutput->failedRewardItem, sRogueQuestRewardOutput->failedRewardCount);
 
+    // Bundles earned as Hub quest rewards should resolve immediately rather
+    // than waiting for the player to carry them through another Adventure.
+    Rogue_OpenHubPokeblockBundles();
+
     Free(sRogueQuestRewardOutput);
     sRogueQuestRewardOutput = NULL;
 }
