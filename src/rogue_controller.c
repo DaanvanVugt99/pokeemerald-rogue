@@ -8541,6 +8541,64 @@ static u16 ChooseRunRewardPokeblock(void)
     return sRunRewardTypedPokeblocks[Random() % ARRAY_COUNT(sRunRewardTypedPokeblocks)];
 }
 
+struct PotentialEvolutionStone
+{
+    u16 item;
+    u16 targetSpecies;
+};
+
+static const struct PotentialEvolutionStone sPotentialEvolutionStones[] =
+{
+    { ITEM_FIRE_STONE, SPECIES_FLAREON },
+    { ITEM_WATER_STONE, SPECIES_VAPOREON },
+    { ITEM_THUNDER_STONE, SPECIES_JOLTEON },
+    { ITEM_LEAF_STONE, SPECIES_LEAFEON },
+    { ITEM_ICE_STONE, SPECIES_GLACEON },
+    { ITEM_SUN_STONE, SPECIES_ESPEON },
+    { ITEM_MOON_STONE, SPECIES_UMBREON },
+};
+
+static void TryRewardPotentialEvolutionStone(u16 trainerNum)
+{
+    u16 i;
+    u16 validStoneCount = 0;
+    u16 validStones[ARRAY_COUNT(sPotentialEvolutionStones)];
+    bool8 hasPotential = FALSE;
+
+    if (gBattleOutcome != B_OUTCOME_WON
+     || Rogue_IsExpTrainer(trainerNum)
+     || Rogue_IsBattleSimTrainer(trainerNum)
+     || Rogue_IsVictoryLapActive()
+     || FlagGet(FLAG_ROGUE_RUN_COMPLETED))
+        return;
+
+    for (i = 0; i < gPlayerPartyCount; ++i)
+    {
+        if (GetMonUniqueAbility(&gPlayerParty[i]) == ABILITY_POTENTIAL)
+        {
+            hasPotential = TRUE;
+            break;
+        }
+    }
+
+    if (!hasPotential || !RandomPercentage(RNG_ROGUE_POTENTIAL, 25))
+        return;
+
+    for (i = 0; i < ARRAY_COUNT(sPotentialEvolutionStones); ++i)
+    {
+        if (RoguePokedex_IsSpeciesEnabled(sPotentialEvolutionStones[i].targetSpecies))
+            validStones[validStoneCount++] = sPotentialEvolutionStones[i].item;
+    }
+
+    if (validStoneCount != 0)
+    {
+        u16 item = validStones[RandomUniform(RNG_ROGUE_POTENTIAL_STONE, 0, validStoneCount - 1)];
+
+        if (AddBagItem(item, 1))
+            Rogue_PushPopup_AddItem(item, 1);
+    }
+}
+
 void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 {
     RogueTrial_OnTrainerBattleEnd();
@@ -8692,6 +8750,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
         if (IsPlayerDefeated(gBattleOutcome) != TRUE)
         {
+            TryRewardPotentialEvolutionStone(trainerNum);
             RemoveAnyFaintedMons(FALSE);
 
             if(isBossTrainer)

@@ -198,6 +198,8 @@ enum RandomTag
     RNG_TRACE,
     RNG_FICKLE_BEAM,
     RNG_ROGUE_DOZING,
+    RNG_ROGUE_POTENTIAL,
+    RNG_ROGUE_POTENTIAL_STONE,
 };
 
 #define RandomWeighted(tag, ...) \

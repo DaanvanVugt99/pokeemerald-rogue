@@ -4978,8 +4978,13 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         {
             if (gDisableStructs[battlerDef].tauntTimer != 0)
                 ADJUST_SCORE(1);    // target must use damaging move
-            if (GetNoOfHitsToKOBattler(battlerDef, battlerAtk, predictedMoveSlot) >= 2 && GetBattleMoveSplit(predictedMove) == SPLIT_PHYSICAL)
-                ADJUST_SCORE(3);
+            if (GetNoOfHitsToKOBattler(battlerDef, battlerAtk, predictedMoveSlot) >= 2)
+            {
+                if (GetBattleMoveSplit(predictedMove) == SPLIT_PHYSICAL)
+                    ADJUST_SCORE(3);
+                else if (GetBattleMoveSplit(predictedMove) == SPLIT_SPECIAL && HasBattlerAbility(battlerAtk, ABILITY_WHY_NOT))
+                    ADJUST_SCORE(2);
+            }
         }
         break;
     case EFFECT_MIRROR_COAT:
@@ -4987,8 +4992,13 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         {
             if (gDisableStructs[battlerDef].tauntTimer != 0)
                 ADJUST_SCORE(1);    // target must use damaging move
-            if (GetNoOfHitsToKOBattler(battlerDef, battlerAtk, predictedMoveSlot) >= 2 && GetBattleMoveSplit(predictedMove) == SPLIT_SPECIAL)
-                ADJUST_SCORE(3);
+            if (GetNoOfHitsToKOBattler(battlerDef, battlerAtk, predictedMoveSlot) >= 2)
+            {
+                if (GetBattleMoveSplit(predictedMove) == SPLIT_SPECIAL)
+                    ADJUST_SCORE(3);
+                else if (GetBattleMoveSplit(predictedMove) == SPLIT_PHYSICAL && HasBattlerAbility(battlerAtk, ABILITY_WHY_NOT))
+                    ADJUST_SCORE(2);
+            }
         }
         break;
     case EFFECT_SHORE_UP:

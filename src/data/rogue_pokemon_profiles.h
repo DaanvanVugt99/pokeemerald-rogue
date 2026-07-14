@@ -69856,6 +69856,8 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_TYROGUE[] =
 	{ .move=MOVE_FOCUS_ENERGY, .level=1 },
 	{ .move=MOVE_FAKE_OUT, .level=1 },
 	{ .move=MOVE_HELPING_HAND, .level=1 },
+	{ .move=MOVE_MACH_PUNCH, .level=4 },
+	{ .move=MOVE_LOW_KICK, .level=8 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 

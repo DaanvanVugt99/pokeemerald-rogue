@@ -166,6 +166,25 @@ AI_SINGLE_BATTLE_TEST("AI can choose Counter or Mirror Coat if the predicted mov
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI considers either Counter move viable with Why Not")
+{
+    u16 playerMove = MOVE_NONE, opponentMove = MOVE_NONE;
+
+    PARAMETRIZE { playerMove = MOVE_POWER_GEM; opponentMove = MOVE_COUNTER; }
+    PARAMETRIZE { playerMove = MOVE_BODY_SLAM; opponentMove = MOVE_MIRROR_COAT; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_COUNTER].effect == EFFECT_COUNTER);
+        ASSUME(gBattleMoves[MOVE_MIRROR_COAT].effect == EFFECT_MIRROR_COAT);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Speed(1); Moves(playerMove); }
+        OPPONENT(SPECIES_WYNAUT) { HP(200); MaxHP(200); Speed(100); Moves(opponentMove, MOVE_BODY_SLAM); }
+    } WHEN {
+        TURN { MOVE(player, playerMove); EXPECT_MOVE(opponent, MOVE_BODY_SLAM); }
+        TURN { MOVE(player, playerMove); EXPECT_MOVE(opponent, opponentMove); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI chooses moves with secondary effect that have a 100% chance to trigger")
 {
     u16 ability;

@@ -41,6 +41,8 @@ Format follows Keep a Changelog loosely:
 - Added the Hisuian Voltorb line's Rolling Start unique ability.
 - Added Hisuian Samurott's Momentum unique ability, raising a random stat after
   it lands a critical hit.
+- Added Eevee's Potential, Tyrogue's Freestyle, and Wynaut's Why Not? unique
+  abilities, including early punching and kicking moves for Tyrogue.
 - Added a new GEEF logo splash before the upstream boot credit screen.
 - Added delayed slash, sparkle, and sound effects to the GEEF boot splash.
 - Added an expanded Pokémon summary Info view for reading wrapped ability

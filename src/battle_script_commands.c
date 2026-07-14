@@ -16060,25 +16060,54 @@ static void Cmd_counterdamagecalculator(void)
     CMD_ARGS(const u8 *failInstr);
 
     u8 sideAttacker = GetBattlerSide(gBattlerAttacker);
-    u8 sideTarget = GetBattlerSide(gProtectStructs[gBattlerAttacker].physicalBattlerId);
+    u8 damageBattler = gProtectStructs[gBattlerAttacker].physicalBattlerId;
+    u8 sideTarget = GetBattlerSide(damageBattler);
+    bool8 whyNotActivated = FALSE;
 
     if (gProtectStructs[gBattlerAttacker].physicalDmg
         && sideAttacker != sideTarget
-        && gBattleMons[gProtectStructs[gBattlerAttacker].physicalBattlerId].hp)
+        && gBattleMons[damageBattler].hp)
     {
         gBattleMoveDamage = gProtectStructs[gBattlerAttacker].physicalDmg * 2;
+    }
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_WHY_NOT))
+    {
+        damageBattler = gProtectStructs[gBattlerAttacker].specialBattlerId;
+        sideTarget = GetBattlerSide(damageBattler);
 
-        if (IsAffectedByFollowMe(gBattlerAttacker, sideTarget, gCurrentMove))
-            gBattlerTarget = gSideTimers[sideTarget].followmeTarget;
+        if (gProtectStructs[gBattlerAttacker].specialDmg
+         && sideAttacker != sideTarget
+         && gBattleMons[damageBattler].hp)
+        {
+            gBattleMoveDamage = gProtectStructs[gBattlerAttacker].specialDmg * 3 / 2;
+            whyNotActivated = TRUE;
+        }
         else
-            gBattlerTarget = gProtectStructs[gBattlerAttacker].physicalBattlerId;
-
-        gBattlescriptCurrInstr = cmd->nextInstr;
+        {
+            gBattlescriptCurrInstr = cmd->failInstr;
+            return;
+        }
     }
     else
     {
         gBattlescriptCurrInstr = cmd->failInstr;
+        return;
     }
+
+    if (IsAffectedByFollowMe(gBattlerAttacker, sideTarget, gCurrentMove))
+        gBattlerTarget = gSideTimers[sideTarget].followmeTarget;
+    else
+        gBattlerTarget = damageBattler;
+
+    if (whyNotActivated)
+    {
+        SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_WHY_NOT);
+        RecordAbilityBattle(gBattlerAttacker, ABILITY_WHY_NOT);
+        BattleScriptPush(cmd->nextInstr);
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+    }
+    else
+        gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
 // A copy of Cmd with the physical -> special field changes
@@ -16087,25 +16116,54 @@ static void Cmd_mirrorcoatdamagecalculator(void)
     CMD_ARGS(const u8 *failInstr);
 
     u8 sideAttacker = GetBattlerSide(gBattlerAttacker);
-    u8 sideTarget = GetBattlerSide(gProtectStructs[gBattlerAttacker].specialBattlerId);
+    u8 damageBattler = gProtectStructs[gBattlerAttacker].specialBattlerId;
+    u8 sideTarget = GetBattlerSide(damageBattler);
+    bool8 whyNotActivated = FALSE;
 
     if (gProtectStructs[gBattlerAttacker].specialDmg
         && sideAttacker != sideTarget
-        && gBattleMons[gProtectStructs[gBattlerAttacker].specialBattlerId].hp)
+        && gBattleMons[damageBattler].hp)
     {
         gBattleMoveDamage = gProtectStructs[gBattlerAttacker].specialDmg * 2;
+    }
+    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_WHY_NOT))
+    {
+        damageBattler = gProtectStructs[gBattlerAttacker].physicalBattlerId;
+        sideTarget = GetBattlerSide(damageBattler);
 
-        if (IsAffectedByFollowMe(gBattlerAttacker, sideTarget, gCurrentMove))
-            gBattlerTarget = gSideTimers[sideTarget].followmeTarget;
+        if (gProtectStructs[gBattlerAttacker].physicalDmg
+         && sideAttacker != sideTarget
+         && gBattleMons[damageBattler].hp)
+        {
+            gBattleMoveDamage = gProtectStructs[gBattlerAttacker].physicalDmg * 3 / 2;
+            whyNotActivated = TRUE;
+        }
         else
-            gBattlerTarget = gProtectStructs[gBattlerAttacker].specialBattlerId;
-
-        gBattlescriptCurrInstr = cmd->nextInstr;
+        {
+            gBattlescriptCurrInstr = cmd->failInstr;
+            return;
+        }
     }
     else
     {
         gBattlescriptCurrInstr = cmd->failInstr;
+        return;
     }
+
+    if (IsAffectedByFollowMe(gBattlerAttacker, sideTarget, gCurrentMove))
+        gBattlerTarget = gSideTimers[sideTarget].followmeTarget;
+    else
+        gBattlerTarget = damageBattler;
+
+    if (whyNotActivated)
+    {
+        SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_WHY_NOT);
+        RecordAbilityBattle(gBattlerAttacker, ABILITY_WHY_NOT);
+        BattleScriptPush(cmd->nextInstr);
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+    }
+    else
+        gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
 static void Cmd_disablelastusedattack(void)
