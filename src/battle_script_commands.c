@@ -8426,6 +8426,8 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
         gBattlerAttacker = battler;
         gBattlerTarget = battler;
         SetBattlerTriggeredAbility(battler, ABILITY_RKS_RELAY);
+        if (HasBattlerAbility(battler, ABILITY_RKS_RELAY))
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
         BattleScriptPushCursor();
         gBattlescriptCurrInstr = BattleScript_RksRelayActivates;
         return TRUE;
@@ -8486,7 +8488,8 @@ static void Cmd_switchindataupdate(void)
     {
         preserveBatonPassState = TRUE;
         gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_RKS_RELAY;
-        gBattleStruct->switchInTransferSourcePartyIdx[battler] = outgoingRksRelayActive ? outgoingPartyIndex : PARTY_SIZE;
+        if (outgoingRksRelayActive)
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = outgoingPartyIndex;
     }
 
     if (preserveBatonPassState)

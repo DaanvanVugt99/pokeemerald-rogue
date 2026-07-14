@@ -58,6 +58,25 @@ SINGLE_BATTLE_TEST("RKS Relay works with switching moves")
     }
 }
 
+SINGLE_BATTLE_TEST("RKS Relay announces after an outgoing switch-transfer ability")
+{
+    GIVEN {
+        PLAYER(SPECIES_TANGELA) { UniqueAbility(ABILITY_LIVING_ROOTS); Moves(MOVE_SWORDS_DANCE, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_SILVALLY_GRASS) { Item(ITEM_GRASS_MEMORY); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SWORDS_DANCE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_LIVING_ROOTS);
+        ABILITY_POPUP(player, ABILITY_RKS_RELAY);
+        MESSAGE("The RKS System transferred battle effects to Silvally!");
+    } THEN {
+        EXPECT(gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_ROOTED);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+    }
+}
+
 SINGLE_BATTLE_TEST("RKS Relay passes Baton Pass volatile effects")
 {
     GIVEN {
