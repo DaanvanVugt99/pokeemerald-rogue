@@ -621,7 +621,7 @@
                 [
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
-                    { "item": "ITEM_BIG_POKEBLOCK_BUNDLE" }
+                    { "item": "ITEM_POKEBLOCK_PSYCHIC", "count": "5" }
                 ]
             },
             {
@@ -693,7 +693,7 @@
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
-                    { "item": "ITEM_BIG_POKEBLOCK_BUNDLE" }
+                    { "item": "ITEM_POKEBLOCK_FAIRY", "count": "5" }
                 ]
             },
             {
@@ -760,8 +760,8 @@
                 [
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
-                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" },
-                    { "item": "ITEM_POKEBLOCK_BUG", "count": "5" }
+                    { "item": "ITEM_POKEBLOCK_ROCK", "count": "5" },
+                    { "item": "ITEM_POKEBLOCK_GROUND", "count": "5" }
                 ]
             },
             {
@@ -780,7 +780,7 @@
                 [
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
-                    { "item": "ITEM_BIG_POKEBLOCK_BUNDLE" }
+                    { "item": "ITEM_POKEBLOCK_BUG", "count": "5" }
                 ]
             },
             {
@@ -799,7 +799,7 @@
                 [
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
-                    { "item": "ITEM_BIG_POKEBLOCK_BUNDLE" }
+                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" }
                 ]
             },
             {
