@@ -79,6 +79,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked Emolga's unique ability into Static Stash, which uses Charge after
+  consuming a Berry or terrain seed, and simplified the Wattrel line's Storm
+  Glider to only set Tailwind the first time it is damaged each switch-in.
+
 - Restored the Pidgey line's Strong Winds unique ability to set Tailwind on
   switch-in instead of when a foe is forced out.
 - Replaced Silvally's Overclock unique ability with RKS Relay, making switches

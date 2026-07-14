@@ -35,7 +35,7 @@ SINGLE_BATTLE_TEST("Storm Glider sets Tailwind the first time the Wattrel line i
     }
 }
 
-SINGLE_BATTLE_TEST("Storm Glider also uses Charge when the first hit is a wind move")
+SINGLE_BATTLE_TEST("Storm Glider does not use Charge when the first hit is a wind move")
 {
     GIVEN {
         PLAYER(SPECIES_KILOWATTREL) { Speed(50); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
@@ -48,11 +48,24 @@ SINGLE_BATTLE_TEST("Storm Glider also uses Charge when the first hit is a wind m
         ABILITY_POPUP(player, ABILITY_STORM_GLIDER);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
         MESSAGE("The tailwind blew from\nbehind your team!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CHARGE, player);
+        NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_CHARGE, player);
+    } THEN {
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND);
+        EXPECT(!(gStatuses3[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)] & STATUS3_CHARGED_UP));
+        EXPECT(gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniqueOncePerSwitchInUsed);
+    }
+}
+
+SINGLE_BATTLE_TEST("Storm Glider's Tailwind still activates Wattrel's Wind Power")
+{
+    GIVEN {
+        PLAYER(SPECIES_WATTREL) { Speed(50); Ability(ABILITY_WIND_POWER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND);
         EXPECT(gStatuses3[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)] & STATUS3_CHARGED_UP);
-        EXPECT(gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniqueOncePerSwitchInUsed);
     }
 }
 

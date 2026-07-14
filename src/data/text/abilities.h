@@ -504,11 +504,10 @@ static const u8 sScorchingRelayDescription[] = _("On switch-out, incoming ally's
 static const u8 sTidalSwitchDescription[] = _("On switch-out, incoming ally's first turn takes 0.8x damage; 0.5x in rain.");
 static const u8 sMomentumDescription[] = _("After landing a critical hit, raise a random stat by 1.");
 static const u8 sMigrationDescription[] = _("On switch-out, sets rain before exiting.");
-static const u8 sGliderDescription[] = _(
-    "1st Flying/Elec. move\n"
-    "gets +1 priority after switch.\n"
-    "In Elec. Terrain,\n"
-    "bypasses Protect.");
+static const u8 sStaticStashDescription[] = _(
+    "Consuming a Berry or\n"
+    "terrain seed also uses\n"
+    "Charge.");
 static const u8 sBioluminescenceDescription[] = _("On switch-in, this Pokemon sets Electric Terrain.");
 static const u8 sLivewireNestDescription[] = _("First Bug/Electric move each switch-in sets Infested Terrain.");
 static const u8 sFactoryLineDescription[] = _("With 2 Steel allies, on switch-in this Pokemon uses Shift Gear.");
@@ -769,7 +768,7 @@ static const u8 sDeathrattleDescription[] = _("After ally faints, first hit heal
 static const u8 sHeroLandingDescription[] = _("After ally faints, uses Aqua Jet on switch-in.");
 static const u8 sScrapJobDescription[] = _("Losing, consuming, or removing its held item scatters Spikes.");
 static const u8 sDirtyTricksDescription[] = _("On switch-in, uses Sand Attack. On fainting, uses Metronome.");
-static const u8 sStormGliderDescription[] = _("First time hit each switch-in sets Tailwind. Wind hits also use Charge.");
+static const u8 sStormGliderDescription[] = _("The first time this Pokemon is damaged each switch-in, it sets Tailwind.");
 static const u8 sGrafittiTagDescription[] = _("On switch-in, tags foes. Tagged foes leave Toxic Spikes when switching or fainting.");
 static const u8 sTripwireDescription[] = _("First switching-in foe each switch-in loses 1/8 HP and Speed.");
 static const u8 sCliffsideDescription[] = _("First time below half HP each switch-in, uses Rock Polish.");
@@ -1405,7 +1404,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TIDAL_SWITCH] = _("Tidal Switch"),
     [ABILITY_MOMENTUM] = _("Momentum"),
     [ABILITY_MIGRATION] = _("Migration"),
-    [ABILITY_GLIDER] = _("Glider"),
+    [ABILITY_STATIC_STASH] = _("Static Stash"),
     [ABILITY_BIOLUMINESCENCE] = _("Bioluminesce"),
     [ABILITY_LIVEWIRE_NEST] = _("Livewire Nest"),
     [ABILITY_FACTORY_LINE] = _("Factory Line"),
@@ -2303,7 +2302,7 @@ const u8 gAbilityNames[ABILITIES_COUNT][ABILITY_NAME_LENGTH + 1] =
     [ABILITY_TIDAL_SWITCH] = _("TidalSwch"),
     [ABILITY_MOMENTUM] = _("Momentum"),
     [ABILITY_MIGRATION] = _("Migration"),
-    [ABILITY_GLIDER] = _("Glider"),
+    [ABILITY_STATIC_STASH] = _("StaticStash"),
     [ABILITY_BIOLUMINESCENCE] = _("Biolumnscnc"),
     [ABILITY_LIVEWIRE_NEST] = _("LivewireNst"),
     [ABILITY_FACTORY_LINE] = _("FactoryLine"),
@@ -3202,7 +3201,7 @@ const u8 *const gAbilityDescriptionPointers[ABILITIES_COUNT] =
     [ABILITY_TIDAL_SWITCH] = sTidalSwitchDescription,
     [ABILITY_MOMENTUM] = sMomentumDescription,
     [ABILITY_MIGRATION] = sMigrationDescription,
-    [ABILITY_GLIDER] = sGliderDescription,
+    [ABILITY_STATIC_STASH] = sStaticStashDescription,
     [ABILITY_BIOLUMINESCENCE] = sBioluminescenceDescription,
     [ABILITY_LIVEWIRE_NEST] = sLivewireNestDescription,
     [ABILITY_FACTORY_LINE] = sFactoryLineDescription,

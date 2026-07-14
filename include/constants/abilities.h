@@ -542,7 +542,7 @@
 #define ABILITY_SCORCHING_RELAY        580
 #define ABILITY_TIDAL_SWITCH           581
 #define ABILITY_MIGRATION              539
-#define ABILITY_GLIDER                 621
+#define ABILITY_STATIC_STASH           621
 #define ABILITY_BIOLUMINESCENCE        629
 #define ABILITY_LIVEWIRE_NEST          626
 #define ABILITY_FACTORY_LINE           628

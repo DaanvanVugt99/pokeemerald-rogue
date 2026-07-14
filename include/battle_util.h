@@ -171,6 +171,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_AROMA_TRAIL,
     PENDING_UNIQUE_EFFECT_MOONLIGHT,
     PENDING_UNIQUE_EFFECT_BRUTAL_CHARGE,
+    PENDING_UNIQUE_EFFECT_STATIC_STASH,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -180,6 +181,7 @@ void QueueWebTrapForSpeedDrop(u32 slowedBattler, u32 sourceBattler);
 void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler);
 void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount);
 void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler);
+void QueueStaticStashForConsumedItem(u32 battler);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);
 bool32 IsFinalTargetOfMultiTargetMove(void);

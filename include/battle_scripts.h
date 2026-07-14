@@ -93,7 +93,7 @@ extern const u8 BattleScript_RallyHealActivates[];
 extern const u8 BattleScript_RallyCureOnlyActivates[];
 extern const u8 BattleScript_PrimalMoltingActivates[];
 extern const u8 BattleScript_StormGliderTailwind[];
-extern const u8 BattleScript_StormGliderTailwindCharge[];
+extern const u8 BattleScript_StaticStashActivates[];
 extern const u8 BattleScript_AbilityPopupReturn[];
 extern const u8 BattleScript_JungleLashActivates[];
 extern const u8 BattleScript_GrafittiTagActivates[];

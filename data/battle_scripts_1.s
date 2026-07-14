@@ -12369,17 +12369,9 @@ BattleScript_StormGliderTailwind::
 BattleScript_StormGliderTailwindEnd:
 	return
 
-BattleScript_StormGliderTailwindCharge::
-	pause B_WAIT_TIME_SHORT
-	call BattleScript_AbilityPopUp
-	settailwind BattleScript_StormGliderCharge
-	playmoveanimation BS_ATTACKER, MOVE_TAILWIND
-	waitanimation
-	printstring STRINGID_TAILWINDBLEW
-	waitmessage B_WAIT_TIME_LONG
-	call BattleScript_TryTailwindAbilitiesLoop
-BattleScript_StormGliderCharge:
-	goto BattleScript_AbilityUsesCalledMoveNoPopup
+BattleScript_StaticStashActivates::
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_PENDING_UNIQUE_ABILITY
+	return
 
 BattleScript_FossilMemoryUsesCalledMove::
 	call BattleScript_AbilityPopUp

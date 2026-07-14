@@ -3444,6 +3444,22 @@ static void TryQueueScrapJobAfterRemoveItem(u32 battler, const u8 *nextInstr)
     }
 }
 
+static void TryRunStaticStashAfterRemoveItem(u32 battler, const u8 *nextInstr)
+{
+    if (GetPendingUniqueAbilityEffect(battler) != PENDING_UNIQUE_EFFECT_STATIC_STASH)
+        return;
+
+    if (gBattlescriptCurrInstr == nextInstr)
+    {
+        BattleScriptPush(nextInstr);
+        gBattlescriptCurrInstr = BattleScript_StaticStashActivates;
+    }
+    else
+    {
+        BattleScriptPush(BattleScript_StaticStashActivates);
+    }
+}
+
 static void ClearUnburdenIfNeeded(u8 battler)
 {
     if (GetBattlerAbility(battler) == ABILITY_UNBURDEN)
@@ -10070,6 +10086,10 @@ static void Cmd_removeitem(void)
     MarkBattlerForControllerExec(battler);
 
     ClearBattlerItemEffectHistory(battler);
+    if (ItemId_GetPocket(itemId) == POCKET_BERRIES
+     && gBattleStruct->ateBerry[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+        QueueStaticStashForConsumedItem(battler);
+
     gluttonyStatBoost = TrySetGluttonyBerryStatBoost(battler, itemId);
     if (!TryCheekPouch(battler, itemId))
     {
@@ -10102,7 +10122,10 @@ static void Cmd_removeitem(void)
     }
 
     if (itemId != ITEM_NONE)
+    {
+        TryRunStaticStashAfterRemoveItem(battler, cmd->nextInstr);
         TryQueueScrapJobAfterRemoveItem(battler, cmd->nextInstr);
+    }
 }
 
 static void Cmd_atknameinbuff1(void)

@@ -6190,6 +6190,16 @@ void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler)
     }
 }
 
+void QueueStaticStashForConsumedItem(u32 battler)
+{
+    if (battler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || !HasBattlerAbility(battler, ABILITY_STATIC_STASH))
+        return;
+
+    QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_STATIC_STASH, battler, battler, battler);
+}
+
 void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler)
 {
     if (loweredBattler >= gBattlersCount
@@ -6282,6 +6292,23 @@ static bool32 TryActivateMoonlight(u32 battler, u32 source, u32 target)
     return TRUE;
 }
 
+static bool32 TryActivateStaticStash(u32 battler)
+{
+    if (!IsBattlerAlive(battler)
+     || !HasBattlerAbility(battler, ABILITY_STATIC_STASH)
+     || !CanUseSelfExtraMove(battler))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_STATIC_STASH);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+    gCalledMove = MOVE_CHARGE;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 {
     if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_WEB_TRAP)
@@ -6318,6 +6345,12 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateBrutalCharge(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_STATIC_STASH)
+    {
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateStaticStash(battler))
             return TRUE;
     }
 
@@ -14238,20 +14271,12 @@ if (triggeringAbility != ABILITY_NONE)
          && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
-            bool32 useCharge = gBattleMoves[move].windMove && CanUseSelfExtraMove(battler);
-
             SetBattlerTriggeredAbility(battler, ABILITY_STORM_GLIDER);
             gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-            if (useCharge)
-            {
-                SetAtkCancellerForCalledMove();
-                gCalledMove = MOVE_CHARGE;
-                gProtectStructs[battler].extraMoveUsed = TRUE;
-            }
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = useCharge ? BattleScript_StormGliderTailwindCharge : BattleScript_StormGliderTailwind;
+            gBattlescriptCurrInstr = BattleScript_StormGliderTailwind;
             effect++;
         }
 
@@ -16575,15 +16600,6 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
-        {
-            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_GLIDER)
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsFinalMultiHitStrike())
         {
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
         }
@@ -20274,6 +20290,7 @@ u8 TryHandleSeed(u32 battler, u32 terrainFlag, u8 statId, u16 itemId, bool32 exe
 {
     if (gFieldStatuses & terrainFlag && CompareStat(battler, statId, MAX_STAT_STAGE, CMP_LESS_THAN))
     {
+        QueueStaticStashForConsumedItem(battler);
         BufferStatChange(battler, statId, STRINGID_STATROSE);
         gLastUsedItem = itemId; // For surge abilities
         gEffectBattler = gBattleScripting.battler = battler;
@@ -22227,12 +22244,6 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
         return FALSE;
     else if (HasBattlerAbility(gBattlerAttacker, ABILITY_X_RAY_JAWS)
         && gBattleMoves[move].bitingMove
-        && !gProtectStructs[battler].maxGuarded)
-        return FALSE;
-    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_GLIDER)
-        && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
-        && (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
-        && (gBattleMoves[move].type == TYPE_FLYING || gBattleMoves[move].type == TYPE_ELECTRIC)
         && !gProtectStructs[battler].maxGuarded)
         return FALSE;
     else if (HasBattlerAbility(gBattlerAttacker, ABILITY_RIFT)

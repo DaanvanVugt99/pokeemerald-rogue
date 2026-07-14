@@ -116,6 +116,8 @@ This file documents practical repo-specific guidance for coding agents and contr
 
 - Use `CHANGELOG_ROGUE.md` for project-specific work on this fork.
 - Leave upstream `pokeemerald-expansion` changelog history in `CHANGELOG.md` and `docs/changelogs/`.
+- Divergence has not had its first public release yet, so saves from current development builds do not require backward compatibility. In particular, do not report changes to serialized save layouts as compatibility regressions solely because they invalidate pre-release development saves.
+- After the first `DIV-vX.Y.Z` release exists, treat its save format as compatibility-sensitive and reassess layout changes against released saves unless the user explicitly permits a break.
 - Treat Git tags as the release source of truth:
   - `DIV-vX.Y.Z` for new Divergence releases.
   - Existing `EX-v*` and `vanilla-v*` tags are inherited history.
