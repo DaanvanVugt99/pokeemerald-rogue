@@ -523,7 +523,7 @@ The following is an example:
 ```bash
 make TOOLCHAIN="/usr/local/arm-none-eabi"
 ```
-To compile the `modern` target with this toolchain, the subdirectories `lib`, `include`, and `arm-none-eabi` must also be present.
+To compile with this toolchain, the subdirectories `lib`, `include`, and `arm-none-eabi` must also be present.
 
 ### Building with debug info
 
@@ -531,55 +531,6 @@ To build **pokeemerald.elf** with debug symbols under a modern toolchain:
 ```bash
 make DINFO=1
 ```
-Note that this is not necessary for a non-modern (agbcc) build since those are built with debug symbols by default.
-
-### agbcc
-
-<details>
-    <summary><i>Deprecated; installing agbcc is optional since 1.7.0</i>.</summary>
-2. Install agbcc into pokeemerald-expansion. The commands to run depend on certain conditions. **You should only follow one of the listed instructions**:
-- If agbcc has **not been built before** in the folder where you chose to store pokeemerald Expansion, run the following commands to build and install it into pokeemerald-expansion:
-
-    ```bash
-    git clone https://github.com/pret/agbcc
-    cd agbcc
-    ./build.sh
-    ./install.sh ../pokeemerald-expansion
-    ```
-
-- **Otherwise**, if agbcc has been built before (e.g. if the git clone above fails), but was **last built on a different terminal** than the one currently used (only relevant to Windows, e.g. switching from msys2 to WSL1), then run the following commands to build and install it into pokeemerald-expansion:
-
-    ```bash
-    cd agbcc
-    git clean -fX
-    ./build.sh
-    ./install.sh ../pokeemerald-expansion
-    ```
-
-- **Otherwise**, if agbcc has been built before on the same terminal, run the following commands to install agbcc into pokeemerald-expansion:
-
-    ```bash
-    cd agbcc
-    ./install.sh ../pokeemerald-expansion
-    ```
-
-    <details>
-        <summary><i>Note...</i></summary>
-
-        > If building agbcc or pokeemerald results in an error, try deleting the agbcc folder and re-installing agbcc as if it has not been built before.
-    </details>
-
-3. Once agbcc is installed, change directory back to the base directory where pokeemerald-expansion and agbcc are stored:
-
-    ```bash
-    cd ..
-    ```
-    
-4. To compile with agbcc:
-
-    ```make agbcc```
-
-</details>
 
 # Useful additional tools
 

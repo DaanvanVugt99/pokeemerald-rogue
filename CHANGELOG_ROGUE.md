@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Removed
 
+- Removed the deprecated agbcc build path and its unused fixed-layout linker
+  tooling; Divergence now supports the modern devkitARM toolchain exclusively.
 - Removed inherited Japanese font glyphs, Mystery Gift and e-Reader support
   (including their save data and link hooks), and the Generation III Berry
   Program Update payload to free ROM space.
