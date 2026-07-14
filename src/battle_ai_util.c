@@ -2874,7 +2874,8 @@ bool32 IsBattlerIncapacitated(u32 battler, u32 ability)
     if (gBattleMons[battler].status1 & STATUS1_SLEEP)
         return TRUE;
 
-    if (gBattleMons[battler].status2 & STATUS2_RECHARGE
+    if ((gBattleMons[battler].status2 & STATUS2_RECHARGE
+      && !CanUseEndlessCoreStatusMove(battler))
      || (ability == ABILITY_TRUANT
       && gDisableStructs[battler].truantCounter != 0
       && !IsTruantLoafingSuppressed(battler)))

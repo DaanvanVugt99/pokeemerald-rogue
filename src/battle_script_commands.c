@@ -2141,6 +2141,17 @@ static void Cmd_attackstring(void)
     if (gBattleControllerExecFlags)
         return;
 
+    if (!gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
+     && IsPrismRefractionActive(gBattlerAttacker, gCurrentMove))
+    {
+        gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn = TRUE;
+        SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_PRISM_REFRACTION);
+        RecordAbilityBattle(gBattlerAttacker, ABILITY_PRISM_REFRACTION);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        return;
+    }
+
     if (!(gHitMarker & (HITMARKER_NO_ATTACKSTRING | HITMARKER_ATTACKSTRING_PRINTED)))
     {
         PrepareStringBattle(STRINGID_USEDMOVE, gBattlerAttacker);
@@ -2934,6 +2945,11 @@ static void Cmd_datahpupdate(void)
                         gSpecialStatuses[battler].specialBattlerId = gBattlerTarget;
                     }
                 }
+
+                if (gHpDealt > 0
+                 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+                 && battler != gBattlerAttacker)
+                    QueueLivingShadowForDamage(battler, gBattlerAttacker);
             }
             gHitMarker &= ~HITMARKER_PASSIVE_DAMAGE;
 

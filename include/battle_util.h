@@ -156,6 +156,9 @@ u32 GetBattlerCreationType(u32 battler);
 bool32 DoesPartyHaveUniqueTypes(u32 battler);
 bool32 IsBoneMove(u32 move);
 bool32 IsTruantLoafingSuppressed(u32 battler);
+bool32 IsPrismRefractionActive(u32 battler, u32 move);
+bool32 IsEndlessCoreStatusMove(u32 battler, u32 move);
+bool32 CanUseEndlessCoreStatusMove(u32 battler);
 bool32 DoesPartyContainAbility(u32 battler, u32 ability, bool32 excludeBattler);
 u32 CountPartyMonsOfType(u32 battler, u32 type, bool32 excludeBattler);
 u32 CountPartyMonsWithAnyTypes(u32 battler, u32 typeMask, bool32 excludeBattler);
@@ -173,6 +176,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_MOONLIGHT,
     PENDING_UNIQUE_EFFECT_BRUTAL_CHARGE,
     PENDING_UNIQUE_EFFECT_STATIC_STASH,
+    PENDING_UNIQUE_EFFECT_LIVING_SHADOW,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -183,6 +187,7 @@ void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler);
 void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount);
 void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler);
 void QueueStaticStashForConsumedItem(u32 battler);
+void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);
 bool32 IsFinalTargetOfMultiTargetMove(void);

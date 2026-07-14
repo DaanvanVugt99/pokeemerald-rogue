@@ -502,6 +502,13 @@ namespace PokemonDataGenerator.Pokedex
 							// Make dragon ascent a late level learn
 							ReplaceMove("MOVE_DRAGON_ASCENT", "MOVE_DRAGON_ASCENT", 90);
 						}
+
+						if (Species == "SPECIES_ETERNATUS")
+						{
+							// Restore Eternatus's signature move, which was removed from its Gen 9 learnset
+							if (!HasLevelUpMove("MOVE_ETERNABEAM"))
+								LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_ETERNABEAM", Level = 88 });
+						}
 					}
 				}
 

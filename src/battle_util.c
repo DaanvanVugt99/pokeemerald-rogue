@@ -524,7 +524,9 @@ void HandleAction_UseMove(void)
         gHitMarker |= HITMARKER_NO_PPDEDUCT;
         *(gBattleStruct->moveTarget + gBattlerAttacker) = GetMoveTarget(MOVE_STRUGGLE, NO_TARGET_OVERRIDE);
     }
-    else if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS || gBattleMons[gBattlerAttacker].status2 & STATUS2_RECHARGE)
+    else if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS
+          || (gBattleMons[gBattlerAttacker].status2 & STATUS2_RECHARGE
+           && !IsEndlessCoreStatusMove(gBattlerAttacker, gBattleMons[gBattlerAttacker].moves[gCurrMovePos])))
     {
         gCurrentMove = gChosenMove = gLockedMoves[gBattlerAttacker];
     }
@@ -2166,8 +2168,60 @@ u8 CheckMoveLimitations(u32 battler, u8 unusableMoves, u16 check)
         // Can't Use Twice flag
         else if (check & MOVE_LIMITATION_CANT_USE_TWICE && gBattleMoves[gBattleMons[battler].moves[i]].cantUseTwice && gBattleMons[battler].moves[i] == gLastResultingMoves[battler])
             unusableMoves |= gBitTable[i];
+
+        if (gBattleMons[battler].status2 & STATUS2_RECHARGE
+         && HasBattlerAbility(battler, ABILITY_ENDLESS_CORE)
+         && !IS_MOVE_STATUS(gBattleMons[battler].moves[i]))
+            unusableMoves |= gBitTable[i];
     }
     return unusableMoves;
+}
+
+bool32 IsEndlessCoreStatusMove(u32 battler, u32 move)
+{
+    return battler < gBattlersCount
+        && move != MOVE_NONE
+        && move != MOVE_UNAVAILABLE
+        && (gBattleMons[battler].status2 & STATUS2_RECHARGE)
+        && HasBattlerAbility(battler, ABILITY_ENDLESS_CORE)
+        && IS_MOVE_STATUS(move);
+}
+
+bool32 CanUseEndlessCoreStatusMove(u32 battler)
+{
+    u32 i;
+    u8 unusableMoves;
+
+    if (battler >= gBattlersCount
+     || !(gBattleMons[battler].status2 & STATUS2_RECHARGE)
+     || !HasBattlerAbility(battler, ABILITY_ENDLESS_CORE))
+        return FALSE;
+
+    unusableMoves = CheckMoveLimitations(battler, 0, MOVE_LIMITATIONS_ALL);
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        if (!(unusableMoves & gBitTable[i])
+         && IS_MOVE_STATUS(gBattleMons[battler].moves[i]))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool32 IsPrismRefractionActive(u32 battler, u32 move)
+{
+    u32 lastMove;
+
+    if (battler >= gBattlersCount
+     || move != MOVE_PHOTON_GEYSER
+     || !HasBattlerAbility(battler, ABILITY_PRISM_REFRACTION))
+        return FALSE;
+
+    lastMove = gLastMoves[battler];
+    return lastMove != MOVE_NONE
+        && lastMove != MOVE_UNAVAILABLE
+        && IS_MOVE_STATUS(lastMove)
+        && !(gBattleStruct->lastMoveFailed & gBitTable[battler]);
 }
 
 #define ALL_MOVES_MASK ((1 << MAX_MON_MOVES) - 1)
@@ -4150,10 +4204,22 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
             {
                 gBattleMons[gBattlerAttacker].status2 &= ~STATUS2_RECHARGE;
                 gDisableStructs[gBattlerAttacker].rechargeTimer = 0;
-                CancelMultiTurnMoves(gBattlerAttacker);
-                gBattlescriptCurrInstr = BattleScript_MoveUsedMustRecharge;
-                gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
-                effect = 1;
+                if (HasBattlerAbility(gBattlerAttacker, ABILITY_ENDLESS_CORE)
+                 && IS_MOVE_STATUS(gCurrentMove))
+                {
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_ENDLESS_CORE);
+                    RecordAbilityBattle(gBattlerAttacker, ABILITY_ENDLESS_CORE);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+                    effect = 2;
+                }
+                else
+                {
+                    CancelMultiTurnMoves(gBattlerAttacker);
+                    gBattlescriptCurrInstr = BattleScript_MoveUsedMustRecharge;
+                    gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
+                    effect = 1;
+                }
             }
             gBattleStruct->atkCancellerTracker++;
             break;
@@ -6315,6 +6381,25 @@ void QueueStaticStashForConsumedItem(u32 battler)
     QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_STATIC_STASH, battler, battler, battler);
 }
 
+void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler)
+{
+    if (battler >= gBattlersCount
+     || sourceBattler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || !IsBattlerAlive(sourceBattler)
+     || GetBattlerSide(battler) == GetBattlerSide(sourceBattler)
+     || !HasBattlerAbility(battler, ABILITY_LIVING_SHADOW)
+     || gDisableStructs[battler].uniqueOncePerSwitchInUsed
+     || gCurrentMove == MOVE_NONE
+     || gCurrentMove == MOVE_UNAVAILABLE
+     || IS_MOVE_STATUS(gCurrentMove)
+     || gBattleMoves[gCurrentMove].copycatBanned)
+        return;
+
+    if (QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_LIVING_SHADOW, battler, sourceBattler, sourceBattler))
+        gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+}
+
 void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler)
 {
     if (loweredBattler >= gBattlersCount
@@ -6424,6 +6509,34 @@ static bool32 TryActivateStaticStash(u32 battler)
     return TRUE;
 }
 
+static bool32 TryActivateLivingShadow(u32 battler, u32 source, u32 target)
+{
+    u32 move = gCurrentMove;
+
+    if (!IsBattlerAlive(battler)
+     || source >= gBattlersCount
+     || target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || GetBattlerSide(battler) == GetBattlerSide(target)
+     || !HasBattlerAbility(battler, ABILITY_LIVING_SHADOW)
+     || move == MOVE_NONE
+     || move == MOVE_UNAVAILABLE
+     || IS_MOVE_STATUS(move)
+     || gBattleMoves[move].copycatBanned
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_LIVING_SHADOW);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 {
     if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_WEB_TRAP)
@@ -6466,6 +6579,15 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
     {
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateStaticStash(battler))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_LIVING_SHADOW)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateLivingShadow(battler, source, target))
             return TRUE;
     }
 

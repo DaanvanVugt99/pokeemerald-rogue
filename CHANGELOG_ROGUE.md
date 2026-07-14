@@ -43,6 +43,8 @@ Format follows Keep a Changelog loosely:
   it lands a critical hit.
 - Added Eevee's Potential, Tyrogue's Freestyle, and Wynaut's Why Not? unique
   abilities, including early punching and kicking moves for Tyrogue.
+- Added Necrozma's Prism Refraction, Marshadow's Living Shadow, and Eternatus's
+  Endless Core unique abilities, and restored Eternabeam to Eternatus's learnset.
 - Added a new GEEF logo splash before the upstream boot credit screen.
 - Added delayed slash, sparkle, and sound effects to the GEEF boot splash.
 - Added an expanded Pokémon summary Info view for reading wrapped ability

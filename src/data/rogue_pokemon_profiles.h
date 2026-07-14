@@ -252717,6 +252717,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ETERNATUS[] =
 	{ .move=MOVE_ACID_RAIN, .level=76 },
 	{ .move=MOVE_HYPER_BEAM, .level=80 },
 	{ .move=MOVE_OUTRAGE, .level=88 },
+	{ .move=MOVE_ETERNABEAM, .level=88 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 

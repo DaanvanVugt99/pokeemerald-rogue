@@ -4191,7 +4191,8 @@ static void HandleTurnActionSelectionState(void)
                 else
                 {
                     if (gBattleMons[battler].status2 & STATUS2_MULTIPLETURNS
-                        || gBattleMons[battler].status2 & STATUS2_RECHARGE)
+                     || (gBattleMons[battler].status2 & STATUS2_RECHARGE
+                      && !CanUseEndlessCoreStatusMove(battler)))
                     {
                         gChosenActionByBattler[battler] = B_ACTION_USE_MOVE;
                         gBattleCommunication[battler] = STATE_WAIT_ACTION_CONFIRMED_STANDBY;
@@ -6352,6 +6353,9 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     {
         gBattleStruct->dynamicMoveType = TYPE_STELLAR | F_DYNAMIC_TYPE_SET;
     }
+
+    if (IsPrismRefractionActive(battlerAtk, move))
+        gBattleStruct->dynamicMoveType = gBattleMoves[gLastMoves[battlerAtk]].type | F_DYNAMIC_TYPE_SET;
 
     attackerAbility = GetBattlerAbility(battlerAtk);
 
