@@ -257,7 +257,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "PRIMEAPE": {
     "UpSprite": {
@@ -1115,7 +1116,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "ARIADOS": {
     "UpSprite": {
@@ -1141,7 +1143,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "CROBAT": {
     "UpSprite": {
@@ -1167,7 +1170,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "LANTURN": {
     "UpSprite": {
@@ -2418,7 +2422,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "HARIYAMA": {
     "UpSprite": {
@@ -3043,7 +3048,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "LATIOS": {
     "UpSprite": {
@@ -3069,7 +3075,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "TORTERRA": {
     "UpSprite": {
@@ -3954,7 +3961,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "CRESSELIA": {
     "UpSprite": {
@@ -5022,7 +5030,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "DRUDDIGON": {
     "UpSprite": {
@@ -6793,7 +6802,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": true,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "SOLGALEO": {
     "UpSprite": {
@@ -8331,7 +8341,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "GOLEM_ALOLAN": {
     "UpSprite": {
@@ -8721,7 +8732,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": true,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "LILLIGANT_HISUIAN": {
     "UpSprite": {
@@ -8956,7 +8968,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "ZYGARDE_COMPLETE": {
     "UpSprite": {
@@ -10074,7 +10087,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "CHIEN_PAO": {
     "UpSprite": {

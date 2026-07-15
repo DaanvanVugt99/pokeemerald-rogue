@@ -232,7 +232,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_DUGTRIO] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -1057,7 +1057,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_NOCTOWL] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -1082,7 +1082,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_ARIADOS] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -1107,7 +1107,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_CROBAT] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -2307,7 +2307,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_FLYGON] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB | RIDE_MON_FLAG_CAN_FLY,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB | RIDE_MON_FLAG_CAN_FLY | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -2907,7 +2907,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_LATIAS] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -2932,7 +2932,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_LATIOS] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_FLY | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -3782,7 +3782,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_GIRATINA] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB | RIDE_MON_FLAG_CAN_FLY,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB | RIDE_MON_FLAG_CAN_FLY | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -4807,7 +4807,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_ACCELGOR] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -6507,7 +6507,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_TAPU_FINI] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_SWIM,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_SWIM | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -7982,7 +7982,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_DUGTRIO_ALOLAN] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -8357,7 +8357,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_SAMUROTT_HISUIAN] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_SWIM,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_SWIM | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -8582,7 +8582,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_GIRATINA_ORIGIN] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB | RIDE_MON_FLAG_CAN_FLY,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_CLIMB | RIDE_MON_FLAG_CAN_FLY | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
@@ -9657,7 +9657,7 @@ static const struct RideMonInfo sRideMonInfo[NUM_SPECIES] =
     },
     [SPECIES_WO_CHIEN] =
     {
-        .flags = RIDE_MON_FLAG_CAN_RIDE,
+        .flags = RIDE_MON_FLAG_CAN_RIDE | RIDE_MON_FLAG_CAN_STEALTH,
         .spriteInfo = 
         {
             [RIDE_SPRITE_DIR_UP] =
