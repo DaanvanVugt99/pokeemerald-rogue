@@ -434,6 +434,18 @@ TEST("Pending Type Trial randomizes only legal starter choices")
     ClearCaughtMonTestState();
 }
 
+TEST("Pending Normal Type Trial handles move-based evolutions when generating starters")
+{
+    ResetCaughtMonTestState();
+    SetPendingTrialSelection(ROGUE_TRIAL_TYPE_NORMAL, POKEDEX_VARIANT_NATIONAL_GEN9);
+
+    Rogue_RandomiseStarters();
+    ExpectGeneratedStartersAllowedByPendingTrial();
+    ExpectGeneratedStartersDistinct();
+
+    ClearCaughtMonTestState();
+}
+
 TEST("Shrine guardian replaces Whirlwind with Tailwind")
 {
     bool8 sawTailwind = FALSE;

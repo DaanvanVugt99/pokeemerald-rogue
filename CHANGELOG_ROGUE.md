@@ -362,6 +362,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Trial starter generation mishandling move-based evolutions, which could
+  pause debug builds before opening the starter bag.
 - Reduced the first rival battle's loading pause by planning and caching the
   rival's roster without constructing discarded battle-ready Pokémon.
 - Prevented the shrine guardian Ho-Oh from receiving Whirlwind, which could end
