@@ -117,7 +117,7 @@ int main()
 		}
 	}
 
-	std::string const c_OutputPath = "..\\..\\..\\..\\src\\data\\rogue_bake_data.h";
+	std::string const c_OutputPath = "../../../../src/data/rogue_bake_data.h";
 
 	std::ofstream file;
 	file.open(c_OutputPath, std::ios::out);

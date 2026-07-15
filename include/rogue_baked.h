@@ -7,6 +7,7 @@
 
 struct Evolution;
 struct Item;
+struct RogueBattleMusic;
 struct Trainer;
 
 #ifdef ROGUE_EXPANSION

@@ -1,4 +1,5 @@
 #pragma once
+#include <string.h>
 #include "gba/gba.h"
 #include "constants/global.h"
 #include "constants/rogue.h"
@@ -261,5 +262,3 @@ struct RoguePokedexRegion
     const u16* variantList;
     u16 variantCount;
 };
-
-void memcpy(void* dst, void* src, size_t size);

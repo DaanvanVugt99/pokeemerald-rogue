@@ -70,7 +70,9 @@ extern const u8 gText_TrainerName_Leaf[];
 extern const u8 gText_TrainerName_Ethan[];
 extern const u8 gText_TrainerName_Lyra[];
 
+#ifndef ROGUE_BAKING
 extern const struct RogueItem gRogueItems[];
+#endif
 
 #ifdef ROGUE_BAKE_VALID
 extern const struct RogueSpeciesBakedData gRogueBake_SpeciesData[NUM_SPECIES];
