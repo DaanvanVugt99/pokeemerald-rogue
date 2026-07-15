@@ -362,6 +362,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Reduced the first rival battle's loading pause by planning and caching the
+  rival's roster without constructing discarded battle-ready Pokémon.
 - Prevented the shrine guardian Ho-Oh from receiving Whirlwind, which could end
   its solo wild battle without resolving the trial.
 - Fixed Endless Core allowing Eternatus to switch, use an item, or flee instead

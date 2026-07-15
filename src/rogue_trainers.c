@@ -45,6 +45,7 @@ struct TrainerPartyScratch
 {
     struct TrainerHeldItemScratch heldItems;
     struct Pokemon* party;
+    u16* speciesBuffer;
     u16 trainerNum;
     bool8 shouldRegenerateQuery;
     bool8 allowItemEvos;
@@ -79,6 +80,7 @@ static void EnsureSubsetIsValid(struct TrainerPartyScratch* scratch);
 static u16 SampleNextSpecies(struct TrainerPartyScratch* scratch);
 static bool8 ShouldForcePrimaryTrainerType(struct TrainerPartyScratch* scratch);
 
+static u8 PlanTrainerSpeciesInternal(u16 trainerNum, u16* speciesBuffer, u8 monCount, u8 monCapacity, u8 startIndex);
 static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 monCount, u8 monCapacity, bool8 firstTrainer, u8 startIndex);
 static u8 CreateRivalPartyInternal(u16 trainerNum, struct Pokemon* party, u8 monCapacity);
 static bool8 UseCompetitiveMoveset(struct TrainerPartyScratch* scratch, u8 monIdx, u8 totalMonCount);
@@ -1330,11 +1332,10 @@ static void SelectAndMoveStarterSpecies(u16 trainerNum, u16* speciesBuffer, u16 
     }
 }
 
-void Rogue_GenerateRivalBaseTeamIfNeeded()
+static void GenerateRivalBaseTeamIfNeeded()
 {
     if(gRogueRun.rivalSpecies[0] == SPECIES_NONE)
     {
-        u8 i;
         RAND_TYPE savedRng = gRngRogueValue;
 
         // Fake the difficulty for the generator
@@ -1346,23 +1347,12 @@ void Rogue_GenerateRivalBaseTeamIfNeeded()
 
         DebugPrint("Generating Rival Base Team");
 
-        // Create initial base team
-        //
-        {
-            CreateTrainerPartyInternal(gRogueRun.rivalTrainerNum, &gEnemyParty[0], RIVAL_BASE_PARTY_SIZE, RIVAL_BASE_PARTY_SIZE, FALSE, 0);
-
-            for(i = 0; i < RIVAL_BASE_PARTY_SIZE; ++i)
-            {
-                AGB_ASSERT(gRogueRun.rivalSpecies[i] == SPECIES_NONE);
-                gRogueRun.rivalSpecies[i] = GetMonData(&gEnemyParty[i], MON_DATA_SPECIES);
-                AGB_ASSERT(gRogueRun.rivalSpecies[i] != SPECIES_NONE);
-                DebugPrintf("    [%d] = %d", i, gRogueRun.rivalSpecies[i]);
-            }
-        }
+        // Plan the persistent roster directly. Battle-ready mons are created only
+        // when the rival is actually fought.
+        PlanTrainerSpeciesInternal(gRogueRun.rivalTrainerNum, gRogueRun.rivalSpecies, RIVAL_BASE_PARTY_SIZE, RIVAL_BASE_PARTY_SIZE, 0);
 
         // Restore difficulty
         Rogue_SetCurrentDifficulty(tempDifficulty);
-        gRngRogueValue = savedRng;
 
         // For just the base species we're going to sort based on BST so weakest mons appear first
         SortByBst(gRogueRun.rivalSpecies, RIVAL_BASE_PARTY_SIZE);
@@ -1370,16 +1360,18 @@ void Rogue_GenerateRivalBaseTeamIfNeeded()
         // Assign the starter to stick with the player throughout
         SelectAndMoveStarterSpecies(gRogueRun.rivalTrainerNum, gRogueRun.rivalSpecies, RIVAL_BASE_PARTY_SIZE);
 
-        // Zero mons to avoid conflicts if called during team generation
-        ZeroEnemyPartyMons();
+        gRngRogueValue = savedRng;
     }
 }
 
-void Rogue_GenerateRivalSwapTeamIfNeeded()
+static void GenerateRivalSwapTeamIfNeeded()
 {
     if(gRogueRun.rivalSpecies[RIVAL_BASE_PARTY_SIZE] == SPECIES_NONE)
     {
         u8 i, j;
+        u8 write;
+        u8 replacingPartySize = PARTY_SIZE - (ROGUE_RIVAL_TOTAL_MON_COUNT - RIVAL_BASE_PARTY_SIZE);
+        u16 speciesBuffer[PARTY_SIZE];
         RAND_TYPE savedRng = gRngRogueValue;
 
         // Fake the difficulty for the generator
@@ -1393,40 +1385,32 @@ void Rogue_GenerateRivalSwapTeamIfNeeded()
 
         DebugPrint("Generating Rival Swap Team");
 
-        // Handle replacement late game mons
-        //
-        // Remove the weakest species
+        // Keep the persistent starter, then plan the late-game replacements
+        // around it without creating placeholder mons.
+        memcpy(speciesBuffer, gRogueRun.rivalSpecies, sizeof(speciesBuffer));
+
+        for(i = PARTY_SIZE; i < ROGUE_RIVAL_TOTAL_MON_COUNT; ++i)
         {
-            u8 write;
-            u16 speciesBuffer[PARTY_SIZE];
-
-            memcpy(speciesBuffer, gRogueRun.rivalSpecies, sizeof(speciesBuffer));
-
-            for(i = PARTY_SIZE; i < ROGUE_RIVAL_TOTAL_MON_COUNT; ++i)
-            {
-                j = SelectRivalWeakestMon(speciesBuffer, RIVAL_BASE_PARTY_SIZE);
-                speciesBuffer[j] = SPECIES_NONE;
-            }
-
-            // Create a placeholder party (TODO remove this after refactoring the rest of the generator not to read from party struct)
-            ZeroEnemyPartyMons();
-            write = 0;
-
-            for(i = 0; i < PARTY_SIZE; ++i)
-            {
-                if(speciesBuffer[i] != SPECIES_NONE)
-                    CreateMon(&gEnemyParty[write++], speciesBuffer[i], MAX_LEVEL, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
-            }
+            j = SelectRivalWeakestMon(speciesBuffer, RIVAL_BASE_PARTY_SIZE);
+            speciesBuffer[j] = SPECIES_NONE;
         }
+
+        write = 0;
+        for(i = 0; i < PARTY_SIZE; ++i)
+        {
+            if(speciesBuffer[i] != SPECIES_NONE)
+                speciesBuffer[write++] = speciesBuffer[i];
+        }
+        for(i = write; i < PARTY_SIZE; ++i)
+            speciesBuffer[i] = SPECIES_NONE;
+
+        AGB_ASSERT(write == replacingPartySize);
 
         // Add the new mons
         {
-            u8 replacingPartySize = PARTY_SIZE - (ROGUE_RIVAL_TOTAL_MON_COUNT - RIVAL_BASE_PARTY_SIZE);
-            AGB_ASSERT(replacingPartySize == CalculateEnemyPartyCount());
-            
             // First swap mon is as if we're starting E4
             Rogue_SetCurrentDifficulty(ROGUE_ELITE_START_DIFFICULTY);
-            CreateTrainerPartyInternal(gRogueRun.rivalTrainerNum, &gEnemyParty[0], replacingPartySize + 1, PARTY_SIZE, FALSE, replacingPartySize);
+            PlanTrainerSpeciesInternal(gRogueRun.rivalTrainerNum, speciesBuffer, replacingPartySize + 1, PARTY_SIZE, replacingPartySize);
 
             for(i = replacingPartySize; i < PARTY_SIZE; ++i)
             {
@@ -1438,11 +1422,11 @@ void Rogue_GenerateRivalSwapTeamIfNeeded()
                 {
                     // Second swap mon is as if we're champ
                     Rogue_SetCurrentDifficulty(ROGUE_FINAL_CHAMP_DIFFICULTY);
-                    CreateTrainerPartyInternal(gRogueRun.rivalTrainerNum, &gEnemyParty[0], PARTY_SIZE, PARTY_SIZE, FALSE, replacingPartySize + 1);
+                    PlanTrainerSpeciesInternal(gRogueRun.rivalTrainerNum, speciesBuffer, PARTY_SIZE, PARTY_SIZE, replacingPartySize + 1);
                 }
 
                 AGB_ASSERT(gRogueRun.rivalSpecies[offset] == SPECIES_NONE);
-                gRogueRun.rivalSpecies[offset] = GetMonData(&gEnemyParty[i], MON_DATA_SPECIES);
+                gRogueRun.rivalSpecies[offset] = speciesBuffer[i];
                 AGB_ASSERT(gRogueRun.rivalSpecies[offset] != SPECIES_NONE);
                 DebugPrintf("    [%d] = %d", offset, gRogueRun.rivalSpecies[offset]);
             }
@@ -1452,12 +1436,21 @@ void Rogue_GenerateRivalSwapTeamIfNeeded()
         Rogue_SetCurrentDifficulty(tempDifficulty);
         gRngRogueValue = savedRng;
 
-        // Sort new mons by BST so we save the strongest mons to the fianl fights
+        // Sort new mons by BST so we save the strongest mons for the final fights
         SortByBst(&gRogueRun.rivalSpecies[RIVAL_BASE_PARTY_SIZE], (ROGUE_RIVAL_TOTAL_MON_COUNT - RIVAL_BASE_PARTY_SIZE));
 
-        // Zero mons to avoid conflicts if called during team generation
-        ZeroEnemyPartyMons();
     }
+}
+
+void Rogue_GenerateRivalTeamForNewAdventure()
+{
+    // Restricted trials generate a legal party at battle time instead of using
+    // the rival's persistent roster.
+    if(RogueTrial_EnforcesOpponentSpeciesLegality())
+        return;
+
+    GenerateRivalBaseTeamIfNeeded();
+    GenerateRivalSwapTeamIfNeeded();
 }
 
 static u32 GetActiveTeamFlag()
@@ -1668,6 +1661,33 @@ static void ConfigurePartyScratchSettings(u16 trainerNum, struct TrainerPartyScr
     {
         scratch->allowWeakLegends = TRUE;
     }
+}
+
+static u8 ConfigureRivalBaseTeamSettings(u16 trainerNum, struct TrainerPartyScratch* scratch, u8 monCount)
+{
+    if(!Rogue_IsRivalTrainer(trainerNum) || Rogue_GetCurrentDifficulty() != RIVAL_BASE_TEAM_DIFFICULTY)
+        return 0;
+
+    // Make sure the initial roster is not overloaded with legendaries.
+    scratch->forceLegends = FALSE;
+    scratch->allowStrongLegends = FALSE;
+    scratch->allowWeakLegends = FALSE;
+
+    // Reapply clauses which explicitly permit legendary opponents.
+    if(FlagGet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES))
+    {
+        scratch->allowStrongLegends = TRUE;
+        scratch->allowWeakLegends = TRUE;
+    }
+    else if(FlagGet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES))
+    {
+        scratch->allowWeakLegends = TRUE;
+    }
+
+    if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) == DIFFICULTY_LEVEL_BRUTAL)
+        return monCount - 2;
+
+    return PARTY_SIZE - 1;
 }
 
 static u8 CalculateMonFixedIV(u16 trainerNum)
@@ -2196,6 +2216,57 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
     return monCount;
 }
 
+static u8 PlanTrainerSpeciesInternal(u16 trainerNum, u16* speciesBuffer, u8 monCount, u8 monCapacity, u8 startIndex)
+{
+    u8 i;
+    u8 level = GetTrainerLevel(trainerNum);
+    struct TrainerPartyScratch scratch;
+    u8 indexToRestoreSettings = 0;
+    bool32 prevForceLegends;
+    bool32 prevAllowStrongLegends;
+    bool32 prevAllowWeakLegends;
+
+    memset(&scratch, 0, sizeof(scratch));
+    scratch.trainerNum = trainerNum;
+    scratch.speciesBuffer = speciesBuffer;
+    scratch.partyCapacity = monCapacity;
+    scratch.partyCount = startIndex;
+    scratch.shouldRegenerateQuery = TRUE;
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(level);
+    scratch.targetPartyCount = monCount;
+
+    ConfigurePartyScratchSettings(trainerNum, &scratch);
+    scratch.evoLevel = RogueTrial_ModifyOpponentEvoLevel(scratch.evoLevel);
+    if(scratch.evoLevel < level)
+        scratch.allowItemEvos = FALSE;
+    EnsureSubsetIsValid(&scratch);
+
+    prevForceLegends = scratch.forceLegends;
+    prevAllowStrongLegends = scratch.allowStrongLegends;
+    prevAllowWeakLegends = scratch.allowWeakLegends;
+
+    indexToRestoreSettings = ConfigureRivalBaseTeamSettings(trainerNum, &scratch, monCount);
+
+    RogueMonQuery_Begin();
+
+    for(i = startIndex; i < monCount; ++i)
+    {
+        if(indexToRestoreSettings != 0 && i == indexToRestoreSettings)
+        {
+            scratch.forceLegends = prevForceLegends;
+            scratch.allowStrongLegends = prevAllowStrongLegends;
+            scratch.allowWeakLegends = prevAllowWeakLegends;
+            scratch.shouldRegenerateQuery = TRUE;
+        }
+
+        speciesBuffer[i] = SampleNextSpecies(&scratch);
+        ++scratch.partyCount;
+    }
+
+    RogueMonQuery_End();
+    return monCount;
+}
+
 static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 monCount, u8 monCapacity, bool8 firstTrainer, u8 startIndex)
 {
     u8 i;
@@ -2213,6 +2284,7 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
     }
 
     // Fill defaults before we configure the scratch
+    memset(&scratch, 0, sizeof(scratch));
     scratch.trainerNum = trainerNum;
     scratch.party = party;
     scratch.partyCapacity = monCapacity;
@@ -2246,29 +2318,7 @@ static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 m
         bool32 prevAllowStrongLegends = scratch.allowStrongLegends;
         bool32 prevAllowWeakLegends = scratch.allowWeakLegends;
 
-        if(Rogue_IsRivalTrainer(trainerNum) && Rogue_GetCurrentDifficulty() == RIVAL_BASE_TEAM_DIFFICULTY)
-        {
-            // Make sure first few mons aren't legendaries
-            scratch.forceLegends = FALSE;
-            scratch.allowStrongLegends = FALSE;
-            scratch.allowWeakLegends = FALSE;
-
-            // Reapply legend clause
-            if(FlagGet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES))
-            {
-                scratch.allowStrongLegends = TRUE;
-                scratch.allowWeakLegends = TRUE;
-            }
-            else if(FlagGet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES))
-            {
-                scratch.allowWeakLegends = TRUE;
-            }
-
-            if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) == DIFFICULTY_LEVEL_BRUTAL)
-                indexToRestoreSettings = monCount - 2;
-            else
-                indexToRestoreSettings = PARTY_SIZE - 1; // only final slot
-        }
+        indexToRestoreSettings = ConfigureRivalBaseTeamSettings(trainerNum, &scratch, monCount);
 
         RogueMonQuery_Begin();
 
@@ -2365,12 +2415,13 @@ static u8 CreateRivalPartyInternal(u16 trainerNum, struct Pokemon* party, u8 mon
     teamFixedIV = CalculateMonFixedIV(trainerNum);
     monCount = CalculatePartyMonCount(trainerNum, monCapacity, level);
 
-    Rogue_GenerateRivalBaseTeamIfNeeded();
+    GenerateRivalBaseTeamIfNeeded();
 
     if(monCount > RIVAL_BASE_PARTY_SIZE)
-        Rogue_GenerateRivalSwapTeamIfNeeded();
+        GenerateRivalSwapTeamIfNeeded();
 
     // Fill defaults before we configure the scratch
+    memset(&scratch, 0, sizeof(scratch));
     scratch.trainerNum = trainerNum;
     scratch.party = party;
     scratch.partyCapacity = monCapacity;
@@ -2623,6 +2674,14 @@ bool8 PartyContainsBaseSpecies(struct Pokemon *party, u8 partyCount, u16 species
     return FALSE;
 }
 
+static u16 GetScratchPartySpecies(struct TrainerPartyScratch* scratch, u8 index)
+{
+    if(scratch->speciesBuffer != NULL)
+        return scratch->speciesBuffer[index];
+
+    return GetMonData(&scratch->party[index], MON_DATA_SPECIES);
+}
+
 bool8 PartyContainsSimilarSpecies(struct TrainerPartyScratch* scratch, u16 species)
 {
     u8 i;
@@ -2647,7 +2706,7 @@ bool8 PartyContainsSimilarSpecies(struct TrainerPartyScratch* scratch, u16 speci
 
     for(i = 0; i < scratch->partyCount; ++i)
     {
-        s = GetSimilarCheckSpecies(GetMonData(&scratch->party[i], MON_DATA_SPECIES));
+        s = GetSimilarCheckSpecies(GetScratchPartySpecies(scratch, i));
 
         if(s == species)
             return TRUE;
@@ -2678,7 +2737,7 @@ bool8 PartyContainsSameSpecies(struct TrainerPartyScratch* scratch, u16 species)
 
     for(i = 0; i < scratch->partyCount; ++i)
     {
-        s = GetMonData(&scratch->party[i], MON_DATA_SPECIES);
+        s = GetScratchPartySpecies(scratch, i);
 
         if(s == species)
             return TRUE;
@@ -2764,7 +2823,10 @@ static void SetupQueryScriptVars(struct QueryScriptContext* context, struct Trai
         break;
     }
 
-    RogueQueryScript_SetupVarsForParty(context, scratch->party, scratch->partyCount, ShouldTrainerOptimizeCoverage(scratch->trainerNum), maxBoxLegends, maxNonBoxLegends);
+    if(scratch->speciesBuffer != NULL)
+        RogueQueryScript_SetupVarsForSpeciesBuffer(context, scratch->speciesBuffer, scratch->partyCount, ShouldTrainerOptimizeCoverage(scratch->trainerNum), maxBoxLegends, maxNonBoxLegends);
+    else
+        RogueQueryScript_SetupVarsForParty(context, scratch->party, scratch->partyCount, ShouldTrainerOptimizeCoverage(scratch->trainerNum), maxBoxLegends, maxNonBoxLegends);
 }
 
 static u8 SelectFallbackTypeFor(u8 type, u8 counter)
@@ -2956,7 +3018,7 @@ static bool8 ShouldForcePrimaryTrainerType(struct TrainerPartyScratch* scratch)
 
     for(i = 0; i < scratch->partyCount; ++i)
     {
-        u16 species = GetMonData(&scratch->party[i], MON_DATA_SPECIES);
+        u16 species = GetScratchPartySpecies(scratch, i);
 
         if(SpeciesHasTrainerPrimaryType(species, trainer->typeAssignment))
             ++primaryTypeCount;

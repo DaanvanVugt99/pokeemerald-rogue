@@ -5192,6 +5192,7 @@ static void BeginRogueRunPhase_Trainers(void)
 {
     // Choose bosses last
     Rogue_ChooseRivalTrainerForNewAdventure();
+    Rogue_GenerateRivalTeamForNewAdventure();
     Rogue_ChooseBossTrainersForNewAdventure();
     EnableRivalEncounterIfRequired();
 

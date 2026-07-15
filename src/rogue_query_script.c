@@ -109,6 +109,37 @@ void RogueQueryScript_SetupVarsForParty(struct QueryScriptContext* context, stru
     context->allowNonBoxLegendaries = (nonBoxLegendaryCount < maxNonBoxLegends);
 }
 
+void RogueQueryScript_SetupVarsForSpeciesBuffer(struct QueryScriptContext* context, u16 const* speciesBuffer, u8 count, bool8 includeTypeCoverage, u8 maxBoxLegends, u8 maxNonBoxLegends)
+{
+    u8 i;
+    u16 species;
+    u8 boxLegendaryCount = 0;
+    u8 nonBoxLegendaryCount = 0;
+
+    context->partyTypeFlags = 0;
+
+    for(i = 0; i < count; ++i)
+    {
+        species = speciesBuffer[i];
+        if(species != SPECIES_NONE)
+        {
+            if(includeTypeCoverage)
+                Rogue_AppendSpeciesTypeFlags(species, &context->partyTypeFlags);
+
+            if(RoguePokedex_IsSpeciesLegendary(species))
+            {
+                if(RoguePokedex_IsSpeciesValidBoxLegendary(species))
+                    ++boxLegendaryCount;
+                else
+                    ++nonBoxLegendaryCount;
+            }
+        }
+    }
+
+    context->allowBoxLegendaries = (boxLegendaryCount < maxBoxLegends);
+    context->allowNonBoxLegendaries = (nonBoxLegendaryCount < maxNonBoxLegends);
+}
+
 void RogueQueryScript_Execute(struct QueryScriptContext* context)
 {
     u16 cmd;

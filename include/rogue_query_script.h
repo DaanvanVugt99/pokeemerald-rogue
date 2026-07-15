@@ -94,6 +94,7 @@ struct QueryScriptContext
 void RogueQueryScript_SetupScript(struct QueryScriptContext* context, u16 const* script);
 void RogueQueryScript_SetupVarsForSpecies(struct QueryScriptContext* context, u16 species);
 void RogueQueryScript_SetupVarsForParty(struct QueryScriptContext* context, struct Pokemon* party, u8 count, bool8 includeTypeCoverage, u8 maxBoxLegends, u8 maxNonBoxLegends);
+void RogueQueryScript_SetupVarsForSpeciesBuffer(struct QueryScriptContext* context, u16 const* speciesBuffer, u8 count, bool8 includeTypeCoverage, u8 maxBoxLegends, u8 maxNonBoxLegends);
 
 void RogueQueryScript_Execute(struct QueryScriptContext* context);
 
