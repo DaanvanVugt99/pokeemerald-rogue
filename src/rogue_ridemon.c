@@ -50,6 +50,7 @@ enum
 #define RIDE_MON_FLAG_CAN_SWIM      (1 << 1)
 #define RIDE_MON_FLAG_CAN_CLIMB     (1 << 2)
 #define RIDE_MON_FLAG_CAN_FLY       (1 << 3)
+#define RIDE_MON_FLAG_CAN_STEALTH   (1 << 4)
 
 #define RIDE_FLY_HEIGHT 12   // 16
 
@@ -394,6 +395,9 @@ static void UpdatePlayerRideState()
         //sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.desiredRideSpecies = SPECIES_NONE;
         sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.monGfx = SPECIES_NONE;
 
+        if(sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].riderSpriteId != SPRITE_NONE)
+            gSprites[sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].riderSpriteId].oam.objMode = ST_OAM_OBJ_NORMAL;
+
         if(wasActive)
         {
             // Final update to ensure this sprite is destroyed
@@ -575,6 +579,18 @@ bool8 Rogue_IsValidRideFlySpecies(u16 species)
     const struct RideMonInfo* rideInfo = GetRideMonInfoForSpecies(species);
 
      if(rideInfo != NULL && Rogue_IsValidRideSpecies(species) && (rideInfo->flags & RIDE_MON_FLAG_CAN_FLY) != 0)
+    {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 Rogue_IsValidRideStealthSpecies(u16 species)
+{
+    const struct RideMonInfo* rideInfo = GetRideMonInfoForSpecies(species);
+
+    if(rideInfo != NULL && Rogue_IsValidRideSpecies(species) && (rideInfo->flags & RIDE_MON_FLAG_CAN_STEALTH) != 0)
     {
         return TRUE;
     }
@@ -807,6 +823,21 @@ bool8 Rogue_CanRideMonFly()
         const struct RideMonInfo* rideInfo = GetCurrentRideMonInfo();
 
         if(rideInfo != NULL && (rideInfo->flags & RIDE_MON_FLAG_CAN_FLY) != 0)
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+bool8 Rogue_IsRideMonStealthActive()
+{
+    if(FlagGet(FLAG_SYS_RIDING_STEALTH) && Rogue_IsRideActive())
+    {
+        const struct RideMonInfo* rideInfo = GetCurrentRideMonInfo();
+
+        if(rideInfo != NULL && (rideInfo->flags & RIDE_MON_FLAG_CAN_STEALTH) != 0)
         {
             return TRUE;
         }
@@ -1072,6 +1103,14 @@ static void UpdateRideSpriteInternal(struct RideObjectEvent* rideObject, const s
     mountSprite = &gSprites[rideObject->monSpriteId];
     riderSprite = &gSprites[rideObject->riderSpriteId];
     bobbingAnim = ((mountSprite->animCmdIndex % 2) ? 0 : -1);
+
+    if(rideObject == &sRideMonData.rideObjects[RIDE_OBJECT_PLAYER])
+    {
+        u8 objMode = Rogue_IsRideMonStealthActive() ? ST_OAM_OBJ_BLEND : ST_OAM_OBJ_NORMAL;
+
+        mountSprite->oam.objMode = objMode;
+        riderSprite->oam.objMode = objMode;
+    }
 
     // Fix stairs directions
     switch (facingDirection)

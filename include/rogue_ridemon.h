@@ -25,12 +25,14 @@ bool8 Rogue_IsValidRideSpecies(u16 species);
 bool8 Rogue_IsValidRideClimbSpecies(u16 species);
 bool8 Rogue_IsValidRideSwimSpecies(u16 species);
 bool8 Rogue_IsValidRideFlySpecies(u16 species);
+bool8 Rogue_IsValidRideStealthSpecies(u16 species);
 
 u8 Rogue_GetRideSpeciesSpeedStars(u16 species);
 
 bool8 Rogue_CanRideMonInvJumpLedge();
 bool8 Rogue_CanRideMonSwim();
 bool8 Rogue_CanRideMonFly();
+bool8 Rogue_IsRideMonStealthActive();
 
 bool8 Rogue_HasUsableSwimOrFlyCharge();
 bool8 Rogue_ShouldRunRidemonTrappedScript();

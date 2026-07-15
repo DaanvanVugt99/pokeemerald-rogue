@@ -12291,6 +12291,15 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_RuinousRiteActivates::
+	copybyte gBattlerAttacker, sBATTLER
+	copybyte gBattlerAbility, sBATTLER
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ECLIPSESTOPPED
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ActivateWeatherAbilities
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_ThermalLiftUsesSkyAttack::
 	copybyte gBattlerAttacker, sBATTLER
 	copybyte gBattlerAbility, sBATTLER

@@ -31,6 +31,7 @@ namespace RideMonSpriteConfigurer.Helpers
 		public bool SupportsClimbing;
 		public bool SupportsSwimming;
 		public bool SupportsFlying;
+		public bool SupportsStealth;
 	}
 
 	public static class RideMonInfoHelper
@@ -115,6 +116,9 @@ namespace RideMonSpriteConfigurer.Helpers
 
 				if (rideInfo.SupportsFlying)
 					content.Append(" | RIDE_MON_FLAG_CAN_FLY");
+
+				if (rideInfo.SupportsStealth)
+					content.Append(" | RIDE_MON_FLAG_CAN_STEALTH");
 
 				content.AppendLine(",");
 

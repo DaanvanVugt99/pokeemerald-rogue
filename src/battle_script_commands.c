@@ -7622,6 +7622,55 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
+             && gCurrentMove == MOVE_RUINATION
+             && IsBattlerAlive(gBattlerAttacker)
+             && IsBattlerAlive(gBattlerTarget)
+             && TARGET_TURN_DAMAGED
+             && IsBattlerWeatherAffected(gBattlerAttacker, B_WEATHER_ECLIPSE)
+             && !gProtectStructs[gBattlerAttacker].extraMoveUsed
+             && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED)))
+            {
+                u32 ability = ABILITY_NONE;
+                u32 calledMove = MOVE_NONE;
+
+                if (HasBattlerAbility(gBattlerAttacker, ABILITY_WITHERING_SCRIPT))
+                {
+                    ability = ABILITY_WITHERING_SCRIPT;
+                    calledMove = MOVE_STRENGTH_SAP;
+                }
+                else if (HasBattlerAbility(gBattlerAttacker, ABILITY_SEVERING_RITE))
+                {
+                    ability = ABILITY_SEVERING_RITE;
+                    calledMove = MOVE_HONE_CLAWS;
+                }
+                else if (HasBattlerAbility(gBattlerAttacker, ABILITY_EARTHEN_SEAL))
+                {
+                    ability = ABILITY_EARTHEN_SEAL;
+                    calledMove = MOVE_TRICK_ROOM;
+                }
+                else if (HasBattlerAbility(gBattlerAttacker, ABILITY_CINDER_EDICT))
+                {
+                    ability = ABILITY_CINDER_EDICT;
+                    calledMove = MOVE_SUNNY_DAY;
+                }
+
+                if (ability != ABILITY_NONE)
+                {
+                    SetBattlerTriggeredAbility(gBattlerAttacker, ability);
+                    SetAtkCancellerForCalledMove();
+                    gBattlerAbility = gBattlerAttacker;
+                    gCalledMove = calledMove;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[gBattlerAttacker].extraMoveUsed = TRUE;
+                    gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
+                    RemoveAllWeather();
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_RuinousRiteActivates;
+                    effect = TRUE;
+                }
+            }
+            if (!effect
              && HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_VANITY)
              && IsBattlerAlive(gBattlerAttacker)
              && IsBattlerAlive(gBattlerTarget)

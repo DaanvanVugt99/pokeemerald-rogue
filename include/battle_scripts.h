@@ -26,6 +26,7 @@ extern const u8 BattleScript_VoltBreakActivates[];
 extern const u8 BattleScript_ThermalLiftUsesSkyAttack[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
 extern const u8 BattleScript_AbilityUsesCalledMoveNoPopup[];
+extern const u8 BattleScript_RuinousRiteActivates[];
 extern const u8 BattleScript_MaliciousMindUsesConfuseRayAndDisable[];
 extern const u8 BattleScript_MeanStreakRestoreAfterPoison[];
 extern const u8 BattleScript_LowTideUsesMudShot_PPLoss[];

@@ -646,9 +646,9 @@ bool8 FollowMon_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEve
 
 bool8 FollowMon_ProcessMonInteraction()
 {
-    if(Rogue_AreWildMonEnabled() && VarGet(VAR_REPEL_STEP_COUNT) != 0)
+    if(Rogue_AreWildMonEnabled() && (VarGet(VAR_REPEL_STEP_COUNT) != 0 || Rogue_IsRideMonStealthActive()))
     {
-        // Never auto trigger battle whilst repel is active
+        // Never auto trigger battle whilst repel or ride stealth is active
         sFollowMonData.pendingInterction = FALSE;
         return FALSE;
     }

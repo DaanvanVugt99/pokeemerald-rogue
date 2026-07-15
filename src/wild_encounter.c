@@ -25,6 +25,7 @@
 #include "constants/weather.h"
 
 #include "rogue_controller.h"
+#include "rogue_ridemon.h"
 
 extern const u8 EventScript_SprayWoreOff[];
 
@@ -583,6 +584,9 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
     u16 headerId;
 
     if (sWildEncountersDisabled == TRUE)
+        return FALSE;
+
+    if (Rogue_IsRideMonStealthActive())
         return FALSE;
 
     headerId = GetCurrentMapWildMonHeaderId();

@@ -192,6 +192,7 @@ static const u8 sText_Skills[] = _("Skills");
 static const u8 sText_SkillClimbing[] = _("Climbing");
 static const u8 sText_SkillSurf[] = _("Surfing");
 static const u8 sText_SkillFlying[] = _("Flying");
+static const u8 sText_SkillStealth[] = _("Stealth");
 static const u8 sText_SkillNone[] = _("None");
 
 static const u8 sText_Base[] = _("{COLOR RED}{SHADOW LIGHT_RED}Base");
@@ -231,6 +232,7 @@ static const u8 sText_Skills[] = _("SKILLS");
 static const u8 sText_SkillClimbing[] = _("CLIMBING");
 static const u8 sText_SkillSurf[] = _("SURFING");
 static const u8 sText_SkillFlying[] = _("FLYING");
+static const u8 sText_SkillStealth[] = _("STEALTH");
 static const u8 sText_SkillNone[] = _("NONE");
 #endif
 
@@ -2226,6 +2228,13 @@ static void DisplayMonRideStatsText()
         if(FlagGet(FLAG_SYS_RIDING_FLY) && Rogue_IsValidRideFlySpecies(sPokedexMenu->viewBaseSpecies))
         {
             AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, 1 + ySpacing * y, 0, 0, statColor, TEXT_SKIP_DRAW, sText_SkillFlying);
+            ++y;
+            ++skillCount;
+        }
+
+        if(FlagGet(FLAG_SYS_RIDING_STEALTH) && Rogue_IsValidRideStealthSpecies(sPokedexMenu->viewBaseSpecies))
+        {
+            AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, 1 + ySpacing * y, 0, 0, statColor, TEXT_SKIP_DRAW, sText_SkillStealth);
             ++y;
             ++skillCount;
         }

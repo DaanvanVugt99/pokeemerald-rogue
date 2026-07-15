@@ -47,6 +47,11 @@ Format follows Keep a Changelog loosely:
   Endless Core unique abilities, and restored Eternabeam to Eternatus's learnset.
 - Added Breach Point for the Nymble line, Salt Fortress for the Nacli line, and
   Ground Fault for the Tadbulb line.
+- Added the Eclipse-consuming Withering Script, Severing Rite, Earthen Seal,
+  and Cinder Edict unique abilities for the Treasures of Ruin, and assigned
+  Mean Streak to Okidogi.
+- Added an unlockable Stealth Poké Ride skill that lets thematically fitting
+  mounts avoid automatic wild encounters.
 - Added a new GEEF logo splash before the upstream boot credit screen.
 - Added delayed slash, sparkle, and sound effects to the GEEF boot splash.
 - Added an expanded Pokémon summary Info view for reading wrapped ability

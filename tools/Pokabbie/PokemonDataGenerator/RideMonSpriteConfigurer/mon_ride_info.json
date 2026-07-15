@@ -1583,7 +1583,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "KINGDRA": {
     "UpSprite": {
@@ -1947,7 +1948,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "SWELLOW": {
     "UpSprite": {
@@ -2207,7 +2209,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "LINOONE": {
     "UpSprite": {
@@ -2727,7 +2730,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "SEVIPER": {
     "UpSprite": {
@@ -3403,7 +3407,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "BRONZONG": {
     "UpSprite": {
@@ -4001,7 +4006,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "ARCEUS": {
     "UpSprite": {
@@ -4547,7 +4553,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "GOTHITELLE": {
     "UpSprite": {
@@ -5717,7 +5724,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": true,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "BARBARACLE": {
     "UpSprite": {
@@ -6003,7 +6011,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "XERNEAS": {
     "UpSprite": {
@@ -6133,7 +6142,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "INCINEROAR": {
     "UpSprite": {
@@ -7277,7 +7287,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "DUBWOOL": {
     "UpSprite": {
@@ -7849,7 +7860,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": true
+    "SupportsFlying": true,
+    "SupportsStealth": true
   },
   "ZACIAN": {
     "UpSprite": {
@@ -8083,7 +8095,8 @@
     },
     "SupportsClimbing": false,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "WYRDEER": {
     "UpSprite": {
@@ -8213,7 +8226,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "OVERQWIL": {
     "UpSprite": {
@@ -8759,7 +8773,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "BRAVIARY_HISUIAN": {
     "UpSprite": {
@@ -10085,7 +10100,8 @@
     },
     "SupportsClimbing": true,
     "SupportsSwimming": false,
-    "SupportsFlying": false
+    "SupportsFlying": false,
+    "SupportsStealth": true
   },
   "TING_LU": {
     "UpSprite": {

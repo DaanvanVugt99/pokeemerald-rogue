@@ -184,6 +184,7 @@ namespace RideMonSpriteConfigurer
 				canClimbCheckBox.Checked = m_CurrentRideMonInfo.SupportsClimbing;
 				canSwimCheckBox.Checked = m_CurrentRideMonInfo.SupportsSwimming;
 				canFlyCheckBox.Checked = m_CurrentRideMonInfo.SupportsFlying;
+				canStealthCheckBox.Checked = m_CurrentRideMonInfo.SupportsStealth;
 			}
 			else
 			{
@@ -194,6 +195,7 @@ namespace RideMonSpriteConfigurer
 				canClimbCheckBox.Checked = false;
 				canSwimCheckBox.Checked = false;
 				canFlyCheckBox.Checked = false;
+				canStealthCheckBox.Checked = false;
 			}
 
 			RefreshHeaders();
@@ -302,6 +304,14 @@ namespace RideMonSpriteConfigurer
 			if (m_CurrentRideMonInfo != null)
 			{
 				m_CurrentRideMonInfo.SupportsFlying = canFlyCheckBox.Checked;
+			}
+		}
+
+		private void canStealthCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			if (m_CurrentRideMonInfo != null)
+			{
+				m_CurrentRideMonInfo.SupportsStealth = canStealthCheckBox.Checked;
 			}
 		}
 

@@ -52,6 +52,7 @@ namespace RideMonSpriteConfigurer
 			this.canClimbCheckBox = new System.Windows.Forms.CheckBox();
 			this.canSwimCheckBox = new System.Windows.Forms.CheckBox();
 			this.canFlyCheckBox = new System.Windows.Forms.CheckBox();
+			this.canStealthCheckBox = new System.Windows.Forms.CheckBox();
 			this.deleteRideMonInfo = new System.Windows.Forms.Button();
 			this.filerAlreadyRideable = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.downPictureBox0)).BeginInit();
@@ -263,7 +264,18 @@ namespace RideMonSpriteConfigurer
 			this.canFlyCheckBox.Text = "can fly";
 			this.canFlyCheckBox.UseVisualStyleBackColor = true;
 			this.canFlyCheckBox.CheckedChanged += new System.EventHandler(this.canFlyCheckBox_CheckedChanged);
-			// 
+			//
+			// canStealthCheckBox
+			//
+			this.canStealthCheckBox.AutoSize = true;
+			this.canStealthCheckBox.Location = new System.Drawing.Point(816, 168);
+			this.canStealthCheckBox.Name = "canStealthCheckBox";
+			this.canStealthCheckBox.Size = new System.Drawing.Size(98, 21);
+			this.canStealthCheckBox.TabIndex = 57;
+			this.canStealthCheckBox.Text = "can stealth";
+			this.canStealthCheckBox.UseVisualStyleBackColor = true;
+			this.canStealthCheckBox.CheckedChanged += new System.EventHandler(this.canStealthCheckBox_CheckedChanged);
+			//
 			// deleteRideMonInfo
 			// 
 			this.deleteRideMonInfo.Location = new System.Drawing.Point(440, 51);
@@ -291,6 +303,7 @@ namespace RideMonSpriteConfigurer
 			this.ClientSize = new System.Drawing.Size(936, 620);
 			this.Controls.Add(this.filerAlreadyRideable);
 			this.Controls.Add(this.deleteRideMonInfo);
+			this.Controls.Add(this.canStealthCheckBox);
 			this.Controls.Add(this.canFlyCheckBox);
 			this.Controls.Add(this.canSwimCheckBox);
 			this.Controls.Add(this.canClimbCheckBox);
@@ -350,6 +363,7 @@ namespace RideMonSpriteConfigurer
 		private System.Windows.Forms.CheckBox canClimbCheckBox;
 		private System.Windows.Forms.CheckBox canSwimCheckBox;
 		private System.Windows.Forms.CheckBox canFlyCheckBox;
+		private System.Windows.Forms.CheckBox canStealthCheckBox;
 		private System.Windows.Forms.Button deleteRideMonInfo;
 		private System.Windows.Forms.CheckBox filerAlreadyRideable;
 	}
