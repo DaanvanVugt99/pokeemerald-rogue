@@ -168,6 +168,7 @@ s32 MgbaPrintf_(const char *fmt, ...);
     } while (0)
 
 struct Benchmark { s32 ticks; };
+struct LongBenchmark { u16 ticks; };
 
 static inline void BenchmarkStart(void)
 {
@@ -187,6 +188,25 @@ static inline struct Benchmark BenchmarkStop(void)
 
 #define BENCHMARK(id) \
     for (BenchmarkStart(); gTestRunnerState.inBenchmark; *(id) = BenchmarkStop())
+
+// For setup operations that exceed the 64-cycle timer's roughly quarter-second
+// range. One tick is 1024 CPU cycles (about 61 microseconds on GBA hardware).
+static inline void LongBenchmarkStart(void)
+{
+    gTestRunnerState.inBenchmark = TRUE;
+    VBlankIntrWait();
+    REG_TM3CNT = (TIMER_ENABLE | TIMER_1024CLK) << 16;
+}
+
+static inline struct LongBenchmark LongBenchmarkStop(void)
+{
+    REG_TM3CNT_H = 0;
+    gTestRunnerState.inBenchmark = FALSE;
+    return (struct LongBenchmark) { REG_TM3CNT_L };
+}
+
+#define LONG_BENCHMARK(id) \
+    for (LongBenchmarkStart(); gTestRunnerState.inBenchmark; *(id) = LongBenchmarkStop())
 
 // An approximation of how much overhead benchmarks introduce.
 #define BENCHMARK_ABS 2

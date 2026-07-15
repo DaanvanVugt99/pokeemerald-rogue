@@ -43,6 +43,7 @@ void RogueMonQuery_Begin();
 void RogueMonQuery_End();
 void RogueMonQuery_Reset(u8 func);
 void RogueMonQuery_IsSpeciesActive();
+void RogueMonQuery_InvalidateSpeciesActiveCache(void);
 void RogueMonQuery_IsBaseSpeciesInCurrentDex(u8 func);
 void RogueMonQuery_IsSeenInPokedex(u8 func);
 void RogueMonQuery_TransformIntoEggSpecies();
@@ -81,6 +82,9 @@ void RogueTrainerQuery_Reset(u8 func);
 void RogueTrainerQuery_ContainsClassFlag(u8 func, u32 trainerFlags);
 void RogueTrainerQuery_ContainsTrainerFlag(u8 func, u32 trainerFlags);
 void RogueTrainerQuery_IsOfTypeGroup(u8 func, u16 typeGroup);
+#define ROGUE_TRAINER_QUERY_SNAPSHOT_SIZE 65
+void RogueTrainerQuery_SaveSnapshot(u8 *dest);
+void RogueTrainerQuery_LoadSnapshot(const u8 *src);
 
 // Adventure Path Query
 void RoguePathsQuery_Begin();

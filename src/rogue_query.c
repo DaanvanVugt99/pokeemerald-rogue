@@ -40,6 +40,8 @@
 #define MAX_QUERY_BIT_COUNT (max(QUERY_NUM_MOVES, max(QUERY_NUM_ITEMS, max(QUERY_NUM_ADVENTURE_PATH, max(QUERY_NUM_TRAINERS, max(ITEMS_COUNT, QUERY_NUM_SPECIES))))))
 #define MAX_QUERY_BYTE_COUNT (1 + MAX_QUERY_BIT_COUNT / 8)
 
+STATIC_ASSERT(ROGUE_TRAINER_QUERY_SNAPSHOT_SIZE >= 1 + QUERY_NUM_TRAINERS / 8, TrainerQuerySnapshotIsLargeEnough);
+
 // Old API
 //
 EWRAM_DATA u16 gRogueQueryBufferSize = 0;
@@ -76,6 +78,9 @@ struct RogueQueryData
 };
 
 EWRAM_DATA static struct RogueQueryData sRogueQuery = {0};
+EWRAM_DATA static u8 sActiveSpeciesCache[MAX_QUERY_BYTE_COUNT];
+EWRAM_DATA static bool8 sActiveSpeciesCacheValid = FALSE;
+EWRAM_DATA static u16 sActiveSpeciesCacheBitCount;
 
 #define ASSERT_NO_QUERY         AGB_ASSERT(sRogueQuery.queryType == QUERY_TYPE_NONE)
 #define ASSERT_ANY_QUERY        AGB_ASSERT(sRogueQuery.queryType != QUERY_TYPE_NONE)
@@ -479,10 +484,29 @@ void RogueMonQuery_IsSpeciesActive()
     u32 species;
     ASSERT_MON_QUERY;
 
+    if(sActiveSpeciesCacheValid && FlagGet(FLAG_ROGUE_RUN_ACTIVE))
+    {
+        memcpy(sRogueQuery.bitFlags, sActiveSpeciesCache, MAX_QUERY_BYTE_COUNT);
+        sRogueQuery.bitCount = sActiveSpeciesCacheBitCount;
+        return;
+    }
+
     for(species = SPECIES_NONE + 1; species < QUERY_NUM_SPECIES; ++species)
     {
         SetQueryBitFlag(species, Query_IsSpeciesEnabled(species));
     }
+
+    if(FlagGet(FLAG_ROGUE_RUN_ACTIVE))
+    {
+        memcpy(sActiveSpeciesCache, sRogueQuery.bitFlags, MAX_QUERY_BYTE_COUNT);
+        sActiveSpeciesCacheBitCount = sRogueQuery.bitCount;
+        sActiveSpeciesCacheValid = TRUE;
+    }
+}
+
+void RogueMonQuery_InvalidateSpeciesActiveCache(void)
+{
+    sActiveSpeciesCacheValid = FALSE;
 }
 
 void RogueMonQuery_IsBaseSpeciesInCurrentDex(u8 func)
@@ -1472,6 +1496,25 @@ void RogueTrainerQuery_Reset(u8 func)
         {
             SetQueryBitFlag(trainerNum, FALSE);
         }
+    }
+}
+
+void RogueTrainerQuery_SaveSnapshot(u8 *dest)
+{
+    ASSERT_TRAINER_QUERY;
+    memcpy(dest, sRogueQuery.bitFlags, ROGUE_TRAINER_QUERY_SNAPSHOT_SIZE);
+}
+
+void RogueTrainerQuery_LoadSnapshot(const u8 *src)
+{
+    u16 i;
+    ASSERT_TRAINER_QUERY;
+    memcpy(sRogueQuery.bitFlags, src, ROGUE_TRAINER_QUERY_SNAPSHOT_SIZE);
+    sRogueQuery.bitCount = 0;
+    for(i = 0; i < gRogueTrainerCount; ++i)
+    {
+        if(GetQueryBitFlag(i))
+            ++sRogueQuery.bitCount;
     }
 }
 

@@ -4987,6 +4987,7 @@ enum
     BEGIN_RUN_PHASE_LEGENDS,
     BEGIN_RUN_PHASE_TEAM_ENCOUNTERS,
     BEGIN_RUN_PHASE_TRAINERS,
+    BEGIN_RUN_PHASE_ADVENTURE_PATH,
     BEGIN_RUN_PHASE_FINALIZE,
     BEGIN_RUN_PHASE_COUNT,
 };
@@ -5004,6 +5005,7 @@ static void BeginRogueRunPhase_Reset(void)
     RogueGift_EnsureDynamicCustomMonsAreValid();
     RogueSave_SaveHubStates();
     RogueTrial_ApplyPendingSelection();
+    RogueMonQuery_InvalidateSpeciesActiveCache();
 
 #ifdef ROGUE_EXPANSION
     // Cache the results for the run (Must do before ActiveRun flag is set)
@@ -5192,7 +5194,7 @@ static void BeginRogueRunPhase_Trainers(void)
 {
     // Choose bosses last
     Rogue_ChooseRivalTrainerForNewAdventure();
-    Rogue_GenerateRivalTeamForNewAdventure();
+    Rogue_EnsureRivalBaseTeamForNewAdventure();
     Rogue_ChooseBossTrainersForNewAdventure();
     EnableRivalEncounterIfRequired();
 
@@ -5200,6 +5202,13 @@ static void BeginRogueRunPhase_Trainers(void)
     ChooseUniqueDenForNewAdventure();
 
     RogueSafari_CompactEmptyEntries();
+}
+
+static void BeginRogueRunPhase_AdventurePath(void)
+{
+    // Build the first path while the portal loading screen is already black so
+    // map entry never inherits the remaining generation pause.
+    RogueAdv_GenerateAdventurePathsIfRequired();
 }
 
 static void BeginRogueRunPhase_Finalize(void)
@@ -5238,6 +5247,16 @@ static void BeginRogueRunPhase_Finalize(void)
 
 static void BeginRogueRunPhase(u8 phase)
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    static u32 sRunLoadStartClock;
+    static u32 sRunLoadPhaseClocks[BEGIN_RUN_PHASE_COUNT];
+    u32 phaseStartClock;
+
+    if(phase == BEGIN_RUN_PHASE_RESET)
+        sRunLoadStartClock = RogueDebug_SampleClock();
+    phaseStartClock = RogueDebug_SampleClock();
+#endif
+
     switch(phase)
     {
     case BEGIN_RUN_PHASE_RESET:
@@ -5268,10 +5287,32 @@ static void BeginRogueRunPhase(u8 phase)
         BeginRogueRunPhase_Trainers();
         break;
 
+    case BEGIN_RUN_PHASE_ADVENTURE_PATH:
+        BeginRogueRunPhase_AdventurePath();
+        break;
+
     case BEGIN_RUN_PHASE_FINALIZE:
         BeginRogueRunPhase_Finalize();
         break;
     }
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    sRunLoadPhaseClocks[phase] = RogueDebug_SampleClock() - phaseStartClock;
+    if(phase == BEGIN_RUN_PHASE_FINALIZE)
+    {
+        DebugPrintf("[Run Load] phases us: reset=%d world=%d bag=%d clauses=%d legends=%d teams=%d trainers=%d path=%d final=%d",
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_RESET]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_WORLD_STATE]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_PARTY_AND_BAG]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_SPECIAL_CLAUSES]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_LEGENDS]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_TEAM_ENCOUNTERS]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_TRAINERS]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_ADVENTURE_PATH]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_FINALIZE]));
+        DebugPrintf("[Run Load] setup total: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - sRunLoadStartClock));
+    }
+#endif
 }
 
 static void BeginRogueRun(void)
@@ -5300,6 +5341,7 @@ static void EndRogueRun(void)
         Rogue_DeactivateActiveCampaign();
 
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
     FlagClear(FLAG_ROGUE_IS_VICTORY_LAP);
 
     gRogueAdvPath.currentRoomType = ADVPATH_ROOM_NONE;
@@ -6927,7 +6969,6 @@ static void ResetSpecialEncounterStates(void)
 enum
 {
     RUN_PORTAL_STATE_WAIT_TRANSITION,
-    RUN_PORTAL_STATE_PREPARE_RUN_PHASE,
     RUN_PORTAL_STATE_RUN_PHASE,
 };
 
@@ -7022,31 +7063,29 @@ static void Task_RogueRunPortalTransition(u8 taskId)
         if(IsBattleTransitionDone())
         {
             BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
-            gTasks[taskId].tLoadingWindowId = RunPortal_CreateLoadingTextWindow();
             gTasks[taskId].tDotCount = 0;
             gTasks[taskId].tSetupPhase = 0;
-            gTasks[taskId].tRunPortalState = RUN_PORTAL_STATE_PREPARE_RUN_PHASE;
+            gTasks[taskId].tLoadingWindowId = WINDOW_NONE;
+            gTasks[taskId].tRunPortalState = RUN_PORTAL_STATE_RUN_PHASE;
         }
         break;
 
-    case RUN_PORTAL_STATE_PREPARE_RUN_PHASE:
+    case RUN_PORTAL_STATE_RUN_PHASE:
         if(gTasks[taskId].tSetupPhase >= BEGIN_RUN_PHASE_COUNT)
         {
             RunPortal_FinishTransitionTask(taskId);
         }
         else
         {
+            if(gTasks[taskId].tLoadingWindowId == WINDOW_NONE)
+                gTasks[taskId].tLoadingWindowId = RunPortal_CreateLoadingTextWindow();
+
             if(gTasks[taskId].tLoadingWindowId != WINDOW_NONE)
                 RunPortal_PrintLoadingText(gTasks[taskId].tLoadingWindowId, gTasks[taskId].tDotCount++);
 
-            gTasks[taskId].tRunPortalState = RUN_PORTAL_STATE_RUN_PHASE;
+            BeginRogueRunPhase(gTasks[taskId].tSetupPhase);
+            gTasks[taskId].tSetupPhase++;
         }
-        break;
-
-    case RUN_PORTAL_STATE_RUN_PHASE:
-        BeginRogueRunPhase(gTasks[taskId].tSetupPhase);
-        gTasks[taskId].tSetupPhase++;
-        gTasks[taskId].tRunPortalState = RUN_PORTAL_STATE_PREPARE_RUN_PHASE;
         break;
     }
 }
@@ -7058,7 +7097,10 @@ void Rogue_StartRunPortalTransition(void)
         u8 taskId = CreateTask(Task_RogueRunPortalTransition, 1);
         gTasks[taskId].tSavedFadeSpeed = gSaveBlock2Ptr->optionsFadeSpeed;
 
-        // Fast fade skips battle transitions entirely, so force this scripted portal to be visible.
+        // The transition task owns the black-screen handoff into the warp. A
+        // normal palette fade can finish before the field script warps and
+        // briefly expose the hub again, so keep this on the proven transition
+        // path even when the player's general fade option is Fast.
         gSaveBlock2Ptr->optionsFadeSpeed = OPTIONS_TEXT_SPEED_MID;
         PlaySE(SE_WARP_OUT);
         BattleTransition_StartOnField(B_TRANSITION_BLUR);

@@ -17,6 +17,7 @@
 #include "rogue.h"
 #include "rogue_adventurepaths.h"
 #include "rogue_controller.h"
+#include "rogue_debug.h"
 #include "rogue_multiplayer.h"
 #include "rogue_pokedex.h"
 #include "rogue_query.h"
@@ -940,6 +941,9 @@ static void GetGlobalFilter(u8 difficulty, struct TrainerFliter* filter)
 
 static u16 Rogue_ChooseTrainerId(struct TrainerFliter* filter, u8 difficulty, u16* historyBuffer, u16 historyBufferCapacity)
 {
+    static EWRAM_DATA u8 sGlobalTrainerPool[ROGUE_TRAINER_QUERY_SNAPSHOT_SIZE];
+    static EWRAM_DATA struct TrainerFliter sCachedGlobalFilter;
+    static EWRAM_DATA bool8 sGlobalTrainerPoolValid;
     u8 i;
     u16 trainerNum = gRogueTrainerCount;
     struct TrainerFliter globalFilter;
@@ -947,19 +951,23 @@ static u16 Rogue_ChooseTrainerId(struct TrainerFliter* filter, u8 difficulty, u1
 
     RogueTrainerQuery_Begin();
 
-    while(trainerNum == gRogueTrainerCount)
+    if(!sGlobalTrainerPoolValid || memcmp(&globalFilter, &sCachedGlobalFilter, sizeof(globalFilter)) != 0)
     {
-        // Populate query
-        //
         RogueTrainerQuery_Reset(QUERY_FUNC_INCLUDE);
-
-        // Only include trainers we want
-        // global filter
         RogueTrainerQuery_ContainsTrainerFlag(QUERY_FUNC_INCLUDE, globalFilter.trainerFlagsInclude);
         RogueTrainerQuery_ContainsTrainerFlag(QUERY_FUNC_EXCLUDE, globalFilter.trainerFlagsExclude);
-    
         RogueTrainerQuery_ContainsClassFlag(QUERY_FUNC_INCLUDE, globalFilter.classFlagsInclude);
         RogueTrainerQuery_ContainsClassFlag(QUERY_FUNC_EXCLUDE, globalFilter.classFlagsExclude);
+        RogueTrainerQuery_SaveSnapshot(sGlobalTrainerPool);
+        sCachedGlobalFilter = globalFilter;
+        sGlobalTrainerPoolValid = TRUE;
+    }
+
+    while(trainerNum == gRogueTrainerCount)
+    {
+        // Restore the globally eligible trainer pool, then apply the filters that
+        // vary per selection (boss class and type history).
+        RogueTrainerQuery_LoadSnapshot(sGlobalTrainerPool);
 
         // current filter
         RogueTrainerQuery_ContainsTrainerFlag(QUERY_FUNC_INCLUDE, filter->trainerFlagsInclude);
@@ -1101,6 +1109,9 @@ static u16 Rogue_ChooseBossTrainerId(u16 difficulty, u16* historyBuffer, u16 his
 
 void Rogue_ChooseBossTrainersForNewAdventure()
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
     u8 difficulty;
     u16 trainerNum;
     u16 historyBuffer[ROGUE_MAX_BOSS_COUNT];
@@ -1150,6 +1161,10 @@ void Rogue_ChooseBossTrainersForNewAdventure()
         gRogueRun.bossTrainerNums[difficulty] = trainerNum;
         DebugPrintf("    [%d] = %d", difficulty, trainerNum);
     }
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Boss selection: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 #define RIVAL_STARTER_INDEX 1
@@ -1442,15 +1457,35 @@ static void GenerateRivalSwapTeamIfNeeded()
     }
 }
 
-void Rogue_GenerateRivalTeamForNewAdventure()
+void Rogue_EnsureRivalBaseTeamForNewAdventure()
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
     // Restricted trials generate a legal party at battle time instead of using
     // the rival's persistent roster.
     if(RogueTrial_EnforcesOpponentSpeciesLegality())
         return;
 
     GenerateRivalBaseTeamIfNeeded();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Rival base: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
+}
+
+void Rogue_EnsureRivalLateTeamForNewAdventure()
+{
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
+    if(RogueTrial_EnforcesOpponentSpeciesLegality())
+        return;
+
+    GenerateRivalBaseTeamIfNeeded();
     GenerateRivalSwapTeamIfNeeded();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Rival late: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static u32 GetActiveTeamFlag()

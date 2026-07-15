@@ -9,6 +9,7 @@
 #include "rogue_charms.h"
 #include "rogue_gifts.h"
 #include "rogue_multiplayer.h"
+#include "rogue_query.h"
 #include "rogue_save.h"
 #include "rogue_settings.h"
 #include "rogue_quest.h"
@@ -261,6 +262,7 @@ void Rogue_SetConfigToggle(u16 elem, bool8 state)
         }
 
         gRogueDifficultyLocal.areLevelsValid = FALSE;
+        RogueMonQuery_InvalidateSpeciesActiveCache();
 
         if(IsDifficultyToggle(elem))
             config->rangeValues[CONFIG_RANGE_DIFFICULTY_PRESET] = DIFFICULTY_LEVEL_CUSTOM;
@@ -288,6 +290,7 @@ void Rogue_SetConfigRange(u16 elem, u8 value)
     {
         config->rangeValues[elem] = value;
         gRogueDifficultyLocal.areLevelsValid = FALSE;
+        RogueMonQuery_InvalidateSpeciesActiveCache();
 
         if(IsDifficultyRange(elem))
             config->rangeValues[CONFIG_RANGE_DIFFICULTY_PRESET] = DIFFICULTY_LEVEL_CUSTOM;

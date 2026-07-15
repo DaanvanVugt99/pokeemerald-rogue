@@ -17,6 +17,7 @@
 
 #include "rogue.h"
 #include "rogue_controller.h"
+#include "rogue_debug.h"
 
 #include "rogue_adventurepaths.h"
 #include "rogue_campaign.h"
@@ -1234,19 +1235,34 @@ static bool8 DoesRoomExists(s8 x, s8 y)
 
 bool8 RogueAdv_GenerateAdventurePathsIfRequired()
 {
-    if(gRogueRun.adventureRoomId != ADVPATH_INVALID_ROOM_ID && (gRogueAdvPath.roomCount != 0 && gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomType != ADVPATH_ROOM_BOSS))
+    if(gRogueAdvPath.roomCount != 0
+        && (gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID
+            || gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomType != ADVPATH_ROOM_BOSS))
     {
         // Path is still valid
+        if(gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID)
+            return gRogueAdvPath.justGenerated;
+
         gRogueAdvPath.justGenerated = FALSE;
         return FALSE;
     }
     else
     {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        u32 pathStartClock = RogueDebug_SampleClock();
+#endif
         struct AdvPathSettings pathSettings = {0};
         struct AdvPathGenerator generator = {0};
 
         // If we have a valid room ID, then we're reloading a previous save
         bool8 isNewGeneration = gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID;
+
+        // The replacement roster cannot be encountered this early. Planning it
+        // with the first post-boss path keeps run start responsive without moving
+        // the work into a battle transition. Use actual run progress here because
+        // Gauntlet applies late-game balance to its initial path.
+        if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 1)
+            Rogue_EnsureRivalLateTeamForNewAdventure();
 
         pathSettings.generator = &generator;
 
@@ -1417,6 +1433,10 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
         Rogue_ResetAdventurePathBuffers();
         GeneratePath(&pathSettings);
         DebugPrint("ADVPATH: Finished generating path.");
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Run Load] Path generation: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - pathStartClock));
+#endif
 
         gRogueAdvPath.justGenerated = isNewGeneration;
 
