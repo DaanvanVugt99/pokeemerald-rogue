@@ -24,6 +24,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Plain and Infested Seeds, which raise accuracy on Plain Terrain and
+  critical-hit ratio on Infested Terrain respectively.
 - Added an Achievements quest category for optional accomplishments that do not
   gate One Last Quest or the Final Run.
 - Ported upstream Fast Path pacing, replacing the old Experimental pacing

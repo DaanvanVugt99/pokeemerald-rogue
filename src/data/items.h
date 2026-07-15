@@ -5653,6 +5653,32 @@ const struct Item gItems[] =
         .flingPower = 10,
     },
 
+    [ITEM_PLAIN_SEED] =
+    {
+        .name = _("Plain Seed"),
+        .price = 4000,
+        .holdEffect = HOLD_EFFECT_SEEDS,
+        .holdEffectParam = HOLD_EFFECT_PARAM_PLAIN_TERRAIN,
+        .description = sPlainSeedDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .flingPower = 10,
+    },
+
+    [ITEM_INFESTED_SEED] =
+    {
+        .name = _("Infested Seed"),
+        .price = 4000,
+        .holdEffect = HOLD_EFFECT_SEEDS,
+        .holdEffectParam = HOLD_EFFECT_PARAM_INFESTED_TERRAIN,
+        .description = sInfestedSeedDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .flingPower = 10,
+    },
+
 // Type-activated Stat Modifiers
 
     [ITEM_ABSORB_BULB] =

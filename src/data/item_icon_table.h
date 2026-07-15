@@ -539,6 +539,8 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_PSYCHIC_SEED] = {gItemIcon_PsychicSeed, gItemIconPalette_PsychicSeed},
     [ITEM_MISTY_SEED] = {gItemIcon_MistySeed, gItemIconPalette_MistySeed},
     [ITEM_GRASSY_SEED] = {gItemIcon_GrassySeed, gItemIconPalette_GrassySeed},
+    [ITEM_PLAIN_SEED] = {gItemIcon_PlainSeed, gItemIconPalette_PlainSeed},
+    [ITEM_INFESTED_SEED] = {gItemIcon_InfestedSeed, gItemIconPalette_InfestedSeed},
     // Type-activated Stat Modifiers
     [ITEM_ABSORB_BULB] = {gItemIcon_AbsorbBulb, gItemIconPalette_AbsorbBulb},
     [ITEM_CELL_BATTERY] = {gItemIcon_CellBattery, gItemIconPalette_CellBattery},

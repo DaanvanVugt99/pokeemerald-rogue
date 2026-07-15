@@ -1849,6 +1849,10 @@ extern const u32 gItemIcon_MistySeed[];
 extern const u32 gItemIconPalette_MistySeed[];
 extern const u32 gItemIcon_GrassySeed[];
 extern const u32 gItemIconPalette_GrassySeed[];
+extern const u32 gItemIcon_PlainSeed[];
+extern const u32 gItemIconPalette_PlainSeed[];
+extern const u32 gItemIcon_InfestedSeed[];
+extern const u32 gItemIconPalette_InfestedSeed[];
 // Type-activated Stat Modifiers
 extern const u32 gItemIcon_AbsorbBulb[];
 extern const u32 gItemIconPalette_AbsorbBulb[];

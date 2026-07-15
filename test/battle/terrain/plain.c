@@ -4,9 +4,27 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_PLAIN_TERRAIN].effect == EFFECT_PLAIN_TERRAIN);
+    ASSUME(gItems[ITEM_PLAIN_SEED].holdEffect == HOLD_EFFECT_SEEDS);
+    ASSUME(gItems[ITEM_PLAIN_SEED].holdEffectParam == HOLD_EFFECT_PARAM_PLAIN_TERRAIN);
     ASSUME(gSpeciesInfo[SPECIES_GASTLY].types[0] == TYPE_GHOST || gSpeciesInfo[SPECIES_GASTLY].types[1] == TYPE_GHOST);
     ASSUME(gSpeciesInfo[SPECIES_GEODUDE].types[0] == TYPE_ROCK || gSpeciesInfo[SPECIES_GEODUDE].types[1] == TYPE_ROCK);
     ASSUME(gSpeciesInfo[SPECIES_REGISTEEL].types[0] == TYPE_STEEL || gSpeciesInfo[SPECIES_REGISTEEL].types[1] == TYPE_STEEL);
+}
+
+SINGLE_BATTLE_TEST("Plain Terrain activates Plain Seed and raises accuracy")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_PLAIN_SEED); Moves(MOVE_PLAIN_TERRAIN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_PLAIN_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
+        MESSAGE("Using Plain Seed, the accuracy of Wobbuffet rose!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT_EQ(player->statStages[STAT_ACC], DEFAULT_STAT_STAGE + 1);
+    }
 }
 
 SINGLE_BATTLE_TEST("Plain Terrain activates Mimicry and changes battlers to Normal type")

@@ -13365,6 +13365,12 @@ static void Cmd_various(void)
             case HOLD_EFFECT_PARAM_PSYCHIC_TERRAIN:
                 effect = TryHandleSeed(battler, STATUS_FIELD_PSYCHIC_TERRAIN, STAT_SPDEF, item, FALSE);
                 break;
+            case HOLD_EFFECT_PARAM_PLAIN_TERRAIN:
+                effect = TryHandleSeed(battler, STATUS_FIELD_PLAIN_TERRAIN, STAT_ACC, item, FALSE);
+                break;
+            case HOLD_EFFECT_PARAM_INFESTED_TERRAIN:
+                effect = TryHandleFocusEnergySeed(battler, STATUS_FIELD_INFESTED_TERRAIN, item, FALSE);
+                break;
             }
 
             if (effect)

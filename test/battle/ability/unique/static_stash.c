@@ -9,6 +9,8 @@ ASSUMPTIONS
     ASSUME(gItems[ITEM_SITRUS_BERRY].holdEffect == HOLD_EFFECT_RESTORE_PCT_HP);
     ASSUME(gItems[ITEM_ELECTRIC_SEED].holdEffect == HOLD_EFFECT_SEEDS);
     ASSUME(gItems[ITEM_ELECTRIC_SEED].holdEffectParam == HOLD_EFFECT_PARAM_ELECTRIC_TERRAIN);
+    ASSUME(gItems[ITEM_INFESTED_SEED].holdEffect == HOLD_EFFECT_SEEDS);
+    ASSUME(gItems[ITEM_INFESTED_SEED].holdEffectParam == HOLD_EFFECT_PARAM_INFESTED_TERRAIN);
 }
 
 SINGLE_BATTLE_TEST("Static Stash uses Charge after Emolga consumes a Berry with Bug Bite")
@@ -65,6 +67,27 @@ SINGLE_BATTLE_TEST("Static Stash uses Charge after Emolga consumes a terrain see
         EXPECT_EQ(player->item, ITEM_NONE);
         EXPECT(gStatuses3[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)] & STATUS3_CHARGED_UP);
         EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Static Stash uses Charge after Emolga consumes an Infested Seed")
+{
+    GIVEN {
+        PLAYER(SPECIES_EMOLGA) { Ability(ABILITY_STATIC); UniqueAbility(ABILITY_STATIC_STASH); Item(ITEM_INFESTED_SEED); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_INFESTED_TERRAIN); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_INFESTED_TERRAIN); MOVE(player, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_INFESTED_TERRAIN, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Emolga used Infested Seed to get pumped!");
+        ABILITY_POPUP(player, ABILITY_STATIC_STASH);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CHARGE, player);
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT(player->status2 & STATUS2_FOCUS_ENERGY);
+        EXPECT(gStatuses3[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)] & STATUS3_CHARGED_UP);
         EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 1);
     }
 }

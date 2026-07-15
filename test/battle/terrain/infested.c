@@ -4,10 +4,65 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_INFESTED_TERRAIN].effect == EFFECT_INFESTED_TERRAIN);
+    ASSUME(gBattleMoves[MOVE_FOCUS_ENERGY].effect == EFFECT_FOCUS_ENERGY);
+    ASSUME(gItems[ITEM_INFESTED_SEED].holdEffect == HOLD_EFFECT_SEEDS);
+    ASSUME(gItems[ITEM_INFESTED_SEED].holdEffectParam == HOLD_EFFECT_PARAM_INFESTED_TERRAIN);
     ASSUME(gBattleMoves[MOVE_BATON_PASS].effect == EFFECT_BATON_PASS);
     ASSUME(gSpeciesInfo[SPECIES_CATERPIE].types[0] == TYPE_BUG || gSpeciesInfo[SPECIES_CATERPIE].types[1] == TYPE_BUG);
     ASSUME(gSpeciesInfo[SPECIES_SCYTHER].types[0] == TYPE_BUG || gSpeciesInfo[SPECIES_SCYTHER].types[1] == TYPE_BUG);
     ASSUME(gSpeciesInfo[SPECIES_RATICATE].types[0] != TYPE_BUG && gSpeciesInfo[SPECIES_RATICATE].types[1] != TYPE_BUG);
+}
+
+SINGLE_BATTLE_TEST("Infested Terrain activates Infested Seed and raises critical-hit ratio")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_INFESTED_SEED); Moves(MOVE_INFESTED_TERRAIN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_INFESTED_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet used Infested Seed to get pumped!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT(player->status2 & STATUS2_FOCUS_ENERGY);
+    }
+}
+
+SINGLE_BATTLE_TEST("Infested Seed is not consumed if Focus Energy is already active")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_INFESTED_SEED); Moves(MOVE_FOCUS_ENERGY, MOVE_INFESTED_TERRAIN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_FOCUS_ENERGY); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_INFESTED_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            MESSAGE("Wobbuffet used Infested Seed to get pumped!");
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_INFESTED_SEED);
+        EXPECT(player->status2 & STATUS2_FOCUS_ENERGY);
+    }
+}
+
+SINGLE_BATTLE_TEST("Infested Seed activates when its holder switches into Infested Terrain")
+{
+    GIVEN {
+        PLAYER(SPECIES_CATERPIE) { Moves(MOVE_INFESTED_TERRAIN); }
+        PLAYER(SPECIES_SCYTHER) { Item(ITEM_INFESTED_SEED); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_INFESTED_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Scyther used Infested Seed to get pumped!");
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        EXPECT(player->status2 & STATUS2_FOCUS_ENERGY);
+    }
 }
 
 SINGLE_BATTLE_TEST("Infested Terrain damages switch ins based on Bug typing")

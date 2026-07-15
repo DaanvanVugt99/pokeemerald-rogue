@@ -2378,6 +2378,16 @@ static const u8 sGrassySeedDesc[] = _(
     "Grassy Terrain,\n"
     "but only one time.");
 
+static const u8 sPlainSeedDesc[] = _(
+    "Boosts accuracy on\n"
+    "Plain Terrain,\n"
+    "but only one time.");
+
+static const u8 sInfestedSeedDesc[] = _(
+    "Raises critical-hit\n"
+    "ratio on Infested\n"
+    "Terrain only once.");
+
 // Type-activated Stat Modifiers
 static const u8 sAbsorbBulbDesc[] = _(
     "Raises Sp. Atk if\n"

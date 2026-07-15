@@ -20623,6 +20623,28 @@ u8 TryHandleSeed(u32 battler, u32 terrainFlag, u8 statId, u16 itemId, bool32 exe
     return 0;
 }
 
+u8 TryHandleFocusEnergySeed(u32 battler, u32 terrainFlag, u16 itemId, bool32 execute)
+{
+    if (gFieldStatuses & terrainFlag && !(gBattleMons[battler].status2 & STATUS2_FOCUS_ENERGY_ANY))
+    {
+        QueueStaticStashForConsumedItem(battler);
+        gLastUsedItem = itemId;
+        gBattleMons[battler].status2 |= STATUS2_FOCUS_ENERGY;
+        gBattleScripting.battler = battler;
+        if (execute)
+        {
+            BattleScriptExecute(BattleScript_BerryFocusEnergyEnd2);
+        }
+        else
+        {
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_BerryFocusEnergyRet;
+        }
+        return ITEM_EFFECT_OTHER;
+    }
+    return 0;
+}
+
 static bool32 TryBoosterEnergy(u32 battler)
 {
     u32 ability = GetBattlerAbility(battler);
@@ -21446,6 +21468,12 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     break;
                 case HOLD_EFFECT_PARAM_PSYCHIC_TERRAIN:
                     effect = TryHandleSeed(battler, STATUS_FIELD_PSYCHIC_TERRAIN, STAT_SPDEF, gLastUsedItem, TRUE);
+                    break;
+                case HOLD_EFFECT_PARAM_PLAIN_TERRAIN:
+                    effect = TryHandleSeed(battler, STATUS_FIELD_PLAIN_TERRAIN, STAT_ACC, gLastUsedItem, TRUE);
+                    break;
+                case HOLD_EFFECT_PARAM_INFESTED_TERRAIN:
+                    effect = TryHandleFocusEnergySeed(battler, STATUS_FIELD_INFESTED_TERRAIN, gLastUsedItem, TRUE);
                     break;
                 }
                 break;
