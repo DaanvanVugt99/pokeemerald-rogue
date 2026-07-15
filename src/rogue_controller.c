@@ -5843,6 +5843,25 @@ bool8 Rogue_HasChallengedShrine(void)
     return gRogueRun.hasChallengedShrine;
 }
 
+static void SanitizeShrineGuardianMoves(struct Pokemon *mon)
+{
+    u8 i;
+    u32 move;
+
+    for(i = 0; i < MAX_MON_MOVES; ++i)
+    {
+        move = GetMonData(mon, MON_DATA_MOVE1 + i);
+
+        // Phazing ends a solo wild battle immediately, bypassing the shrine trial.
+        if(move == MOVE_WHIRLWIND)
+        {
+            move = MOVE_TAILWIND;
+            SetMonData(mon, MON_DATA_MOVE1 + i, &move);
+            SetMonData(mon, MON_DATA_PP1 + i, &gBattleMoves[move].pp);
+        }
+    }
+}
+
 void Rogue_PrepareShrineChallenge(void)
 {
     u8 i;
@@ -5885,6 +5904,8 @@ void Rogue_PrepareShrineChallenge(void)
             SetMonData(&gEnemyParty[0], MON_DATA_PP1 + i, &gBattleMoves[temp].pp);
         }
     }
+
+    SanitizeShrineGuardianMoves(&gEnemyParty[0]);
 
     // Match unique-den encounter quality, while never presenting an
     // uncatchable shiny or Ho-Oh's normal held Sacred Ash.

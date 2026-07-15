@@ -362,6 +362,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented the shrine guardian Ho-Oh from receiving Whirlwind, which could end
+  its solo wild battle without resolving the trial.
 - Fixed Endless Core allowing Eternatus to switch, use an item, or flee instead
   of selecting a status move during its recharge turn.
 - Made automatic Poké Ball selection break equal catch-rate ties by using the

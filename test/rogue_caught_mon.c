@@ -8,6 +8,7 @@
 #include "constants/vars.h"
 #include "event_data.h"
 #include "pokemon.h"
+#include "random.h"
 #include "rogue.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
@@ -430,6 +431,36 @@ TEST("Pending Type Trial randomizes only legal starter choices")
     ExpectGeneratedStartersAllowedByPendingTrial();
     ExpectGeneratedStartersDistinct();
 
+    ClearCaughtMonTestState();
+}
+
+TEST("Shrine guardian replaces Whirlwind with Tailwind")
+{
+    bool8 sawTailwind = FALSE;
+    u16 seed;
+    u8 moveSlot;
+
+    ResetCaughtMonTestState();
+
+    for(seed = 0; seed < 128; ++seed)
+    {
+        SeedRng(seed);
+        Rogue_PrepareShrineChallenge();
+
+        for(moveSlot = 0; moveSlot < MAX_MON_MOVES; ++moveSlot)
+        {
+            u16 move = GetMonData(&gEnemyParty[0], MON_DATA_MOVE1 + moveSlot);
+
+            EXPECT_NE(move, MOVE_WHIRLWIND);
+            if(move == MOVE_TAILWIND)
+                sawTailwind = TRUE;
+        }
+    }
+
+    EXPECT(sawTailwind);
+
+    gBattleOutcome = B_OUTCOME_WON;
+    Rogue_Battle_EndWildBattle();
     ClearCaughtMonTestState();
 }
 
