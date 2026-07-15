@@ -177,6 +177,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_BRUTAL_CHARGE,
     PENDING_UNIQUE_EFFECT_STATIC_STASH,
     PENDING_UNIQUE_EFFECT_LIVING_SHADOW,
+    PENDING_UNIQUE_EFFECT_SALT_FORTRESS,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -188,6 +189,7 @@ void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount);
 void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler);
 void QueueStaticStashForConsumedItem(u32 battler);
 void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler);
+void QueueSaltFortressForDefenseRise(u32 battler);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);
 bool32 IsFinalTargetOfMultiTargetMove(void);
@@ -242,6 +244,7 @@ u32 GetBattlerWeight(u32 battler);
 u32 CalcRolloutBasePower(u32 battlerAtk, u32 basePower, u32 rolloutTimer);
 u32 CalcFuryCutterBasePower(u32 basePower, u32 furyCutterCounter);
 s32 CalculateMoveDamage(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, bool32 isCrit, bool32 randomFactor, bool32 updateFlags);
+u32 GetTargetAdjustedMoveType(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType);
 s32 CalculateMoveDamageVars(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, uq4_12_t typeEffectivenessModifier,
                                           u32 weather, bool32 isCrit, u32 holdEffectAtk, u32 holdEffectDef, u32 abilityAtk, u32 abilityDef);
 uq4_12_t CalcTypeEffectivenessMultiplier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, u32 defAbility, bool32 recordAbilities);

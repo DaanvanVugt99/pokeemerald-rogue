@@ -3882,10 +3882,13 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
      || ability == ABILITY_TIDAL_SWITCH
      || ability == ABILITY_ROYAL_TREATMENT
      || ability == ABILITY_RKS_RELAY
+     || ability == ABILITY_BREACH_POINT
      || ability == ABILITY_FAIRY_TALE)
     {
         sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battlerId];
-        gBattleStruct->switchInTransferSourcePartyIdx[battlerId] = PARTY_SIZE;
+        if (ability == ABILITY_BREACH_POINT
+         || !(gBattleResources->flags->flags[battlerId] & RESOURCE_FLAG_BREACH_POINT_PENDING))
+            gBattleStruct->switchInTransferSourcePartyIdx[battlerId] = PARTY_SIZE;
     }
 
     PrintBattlerOnAbilityPopUp(battlerId, spriteId1, spriteId2, sourcePartyIdx);

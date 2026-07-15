@@ -10,7 +10,7 @@ ASSUMPTIONS
 SINGLE_BATTLE_TEST("Endless Core allows Eternatus to use a status move while recharging")
 {
     GIVEN {
-        PLAYER(SPECIES_ETERNATUS) { HP(500); MaxHP(500); Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_ENDLESS_CORE); Moves(MOVE_ETERNABEAM, MOVE_COSMIC_POWER); }
+        PLAYER(SPECIES_ETERNATUS) { HP(500); MaxHP(500); Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_ENDLESS_CORE); Moves(MOVE_ETERNABEAM, MOVE_DRAGON_PULSE, MOVE_COSMIC_POWER); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Speed(50); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_ETERNABEAM); MOVE(opponent, MOVE_CELEBRATE); }
@@ -26,21 +26,18 @@ SINGLE_BATTLE_TEST("Endless Core allows Eternatus to use a status move while rec
     }
 }
 
-SINGLE_BATTLE_TEST("Endless Core limits recharge-turn choices to status moves")
+SINGLE_BATTLE_TEST("Endless Core still requires recharging without a usable status move")
 {
     GIVEN {
-        PLAYER(SPECIES_ETERNATUS) { HP(500); MaxHP(500); Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_ENDLESS_CORE); Moves(MOVE_ETERNABEAM, MOVE_DRAGON_PULSE, MOVE_COSMIC_POWER); }
+        PLAYER(SPECIES_ETERNATUS) { HP(500); MaxHP(500); Speed(100); Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_ENDLESS_CORE); Moves(MOVE_ETERNABEAM, MOVE_DRAGON_PULSE); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Speed(50); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_ETERNABEAM); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SKIP_TURN(player); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ETERNABEAM, player);
+        MESSAGE("Eternatus must recharge!");
     } THEN {
-        u32 battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
-        u8 unusableMoves = CheckMoveLimitations(battler, 0, MOVE_LIMITATIONS_ALL);
-
-        EXPECT(player->status2 & STATUS2_RECHARGE);
-        EXPECT(unusableMoves & gBitTable[1]);
-        EXPECT(!(unusableMoves & gBitTable[2]));
+        EXPECT(!(player->status2 & STATUS2_RECHARGE));
     }
 }

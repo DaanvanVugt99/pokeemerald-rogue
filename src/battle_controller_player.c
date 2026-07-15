@@ -9,6 +9,7 @@
 #include "battle_message.h"
 #include "battle_setup.h"
 #include "battle_tv.h"
+#include "battle_util.h"
 #include "battle_util2.h"
 #include "battle_z_move.h"
 #include "bg.h"
@@ -855,7 +856,8 @@ static void HandleInputChooseMove(u32 battler)
             break;
         }
     }
-    else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
+    else if ((JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
+          && (gBattleStruct->zmove.viewing || !CanUseEndlessCoreStatusMove(battler)))
     {
         PlaySE(SE_SELECT);
         if (gBattleStruct->zmove.viewing)
@@ -2288,11 +2290,17 @@ static void PlayerHandleChooseAction(u32 battler)
 {
     RogueBH_CreateBattleOverlay();
 
-    PUSH_ASSISTANT_STATE2(BATTLE, CHOOSE_ACTION);
-
-    gBattlerControllerFuncs[battler] = HandleChooseActionAfterDma3;
     BattleTv_ClearExplosionFaintCause();
 
+    if (CanUseEndlessCoreStatusMove(battler))
+    {
+        BtlController_EmitTwoReturnValues(battler, BUFFER_B, B_ACTION_USE_MOVE, 0);
+        PlayerBufferExecCompleted(battler);
+        return;
+    }
+
+    PUSH_ASSISTANT_STATE2(BATTLE, CHOOSE_ACTION);
+    gBattlerControllerFuncs[battler] = HandleChooseActionAfterDma3;
     PrintPlayerBattleMenu(battler);
 }
 

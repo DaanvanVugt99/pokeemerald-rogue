@@ -1095,6 +1095,12 @@ void AI_TrySwitchOrUseItem(u32 battler)
     s32 lastId; // + 1
     u8 battlerPosition = GetBattlerPosition(battler);
 
+    if (CanUseEndlessCoreStatusMove(battler))
+    {
+        BtlController_EmitTwoReturnValues(battler, BUFFER_B, B_ACTION_USE_MOVE, 0);
+        return;
+    }
+
     if (GetBattlerSide(battler) == B_SIDE_PLAYER)
         party = gPlayerParty;
     else

@@ -45,6 +45,8 @@ Format follows Keep a Changelog loosely:
   abilities, including early punching and kicking moves for Tyrogue.
 - Added Necrozma's Prism Refraction, Marshadow's Living Shadow, and Eternatus's
   Endless Core unique abilities, and restored Eternabeam to Eternatus's learnset.
+- Added Breach Point for the Nymble line, Salt Fortress for the Nacli line, and
+  Ground Fault for the Tadbulb line.
 - Added a new GEEF logo splash before the upstream boot credit screen.
 - Added delayed slash, sparkle, and sound effects to the GEEF boot splash.
 - Added an expanded Pokémon summary Info view for reading wrapped ability
@@ -353,6 +355,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Endless Core allowing Eternatus to switch, use an item, or flee instead
+  of selecting a status move during its recharge turn.
 - Made automatic Poké Ball selection break equal catch-rate ties by using the
   ball with the lowest maximum potential, and preserve the Master Ball unless
   it is the only ball available.

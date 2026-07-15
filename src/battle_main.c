@@ -4219,6 +4219,11 @@ static void HandleTurnActionSelectionState(void)
         case STATE_WAIT_ACTION_CHOSEN: // Try to perform an action.
             if (!(gBattleControllerExecFlags & ((gBitTable[battler]) | (0xF << 28) | (gBitTable[battler] << 4) | (gBitTable[battler] << 8) | (gBitTable[battler] << 12))))
             {
+                // Endless Core only replaces the recharge turn with status-move selection.
+                // Do not allow another controller action to bypass the recharge instead.
+                if (CanUseEndlessCoreStatusMove(battler))
+                    gBattleResources->bufferB[battler][1] = B_ACTION_USE_MOVE;
+
                 RecordedBattle_SetBattlerAction(battler, gBattleResources->bufferB[battler][1]);
                 gChosenActionByBattler[battler] = gBattleResources->bufferB[battler][1];
 

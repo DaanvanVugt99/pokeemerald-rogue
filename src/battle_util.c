@@ -6400,6 +6400,21 @@ void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler)
         gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
 }
 
+void QueueSaltFortressForDefenseRise(u32 battler)
+{
+    u32 target;
+
+    if (battler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || !HasBattlerAbility(battler, ABILITY_SALT_FORTRESS)
+     || gDisableStructs[battler].uniqueOncePerSwitchInUsed
+     || !TryGetOpposingExtraMoveTarget(battler, &target))
+        return;
+
+    if (QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_SALT_FORTRESS, battler, battler, target))
+        gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+}
+
 void QueueAromaTrailForStatDrop(u32 loweredBattler, u32 sourceBattler)
 {
     if (loweredBattler >= gBattlersCount
@@ -6537,6 +6552,27 @@ static bool32 TryActivateLivingShadow(u32 battler, u32 source, u32 target)
     return TRUE;
 }
 
+static bool32 TryActivateSaltFortress(u32 battler, u32 target)
+{
+    if (!IsBattlerAlive(battler)
+     || target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || GetBattlerSide(battler) == GetBattlerSide(target)
+     || !HasBattlerAbility(battler, ABILITY_SALT_FORTRESS)
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_SALT_FORTRESS);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_BLOCK;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 {
     if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_WEB_TRAP)
@@ -6588,6 +6624,14 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateLivingShadow(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_SALT_FORTRESS)
+    {
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateSaltFortress(battler, target))
             return TRUE;
     }
 
@@ -12750,6 +12794,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 u8 statId = STAT_HP;
 u8 statAmount = 1;
 u16 triggeringAbility = ABILITY_NONE;
+
+moveType = GetTargetAdjustedMoveType(move, gBattlerAttacker, battler, moveType);
 
 if (moveType == TYPE_ELECTRIC && gBattleMoves[move].target != MOVE_TARGET_ALL_BATTLERS)
 {
@@ -25165,15 +25211,30 @@ static u32 GetWeather(void)
 
 s32 CalculateMoveDamage(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, bool32 isCrit, bool32 randomFactor, bool32 updateFlags)
 {
+    moveType = GetTargetAdjustedMoveType(move, battlerAtk, battlerDef, moveType);
     return DoMoveDamageCalc(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, randomFactor,
                             updateFlags, CalcTypeEffectivenessMultiplier(move, moveType, battlerAtk, battlerDef, GetBattlerAbility(battlerDef), updateFlags),
                             GetWeather());
+}
+
+u32 GetTargetAdjustedMoveType(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType)
+{
+    if (move != MOVE_STRUGGLE
+     && battlerAtk < gBattlersCount
+     && battlerDef < gBattlersCount
+     && moveType == TYPE_ELECTRIC
+     && HasBattlerAbility(battlerAtk, ABILITY_GROUND_FAULT)
+     && IS_BATTLER_OF_TYPE(battlerDef, TYPE_GROUND))
+        return TYPE_WATER;
+
+    return moveType;
 }
 
 // for AI so that typeEffectivenessModifier, weather, abilities and holdEffects are calculated only once
 s32 CalculateMoveDamageVars(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, uq4_12_t typeEffectivenessModifier,
                                           u32 weather, bool32 isCrit, u32 holdEffectAtk, u32 holdEffectDef, u32 abilityAtk, u32 abilityDef)
 {
+    moveType = GetTargetAdjustedMoveType(move, battlerAtk, battlerDef, moveType);
     return DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, FALSE, FALSE,
                                 typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
 }
@@ -25465,6 +25526,8 @@ uq4_12_t CalcTypeEffectivenessMultiplier(u32 move, u32 moveType, u32 battlerAtk,
 {
     uq4_12_t modifier = UQ_4_12(1.0);
 
+    moveType = GetTargetAdjustedMoveType(move, battlerAtk, battlerDef, moveType);
+
     if (move != MOVE_STRUGGLE && moveType != TYPE_MYSTERY)
     {
         modifier = CalcTypeEffectivenessMultiplierInternal(move, moveType, battlerAtk, battlerDef, recordAbilities, modifier, defAbility);
@@ -25718,6 +25781,8 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
 uq4_12_t CalcTypeEffectivenessMultiplierForUI(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, u32 defAbility, bool32 recordAbilities)
 {
     uq4_12_t modifier = UQ_4_12(1.0);
+
+    moveType = GetTargetAdjustedMoveType(move, battlerAtk, battlerDef, moveType);
 
     if (move != MOVE_STRUGGLE && moveType != TYPE_MYSTERY)
     {

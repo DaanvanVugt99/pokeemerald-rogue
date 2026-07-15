@@ -1422,9 +1422,21 @@ static void Cmd_attackcanceler(void)
 {
     CMD_ARGS();
 
-    s32 i, moveType;
+    s32 i, moveType, targetMoveType;
     u16 attackerAbility = GetBattlerAbility(gBattlerAttacker);
     GET_MOVE_TYPE(gCurrentMove, moveType);
+    targetMoveType = GetTargetAdjustedMoveType(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType);
+    if (moveType != targetMoveType)
+    {
+        moveType = targetMoveType;
+        gSpecialStatuses[gBattlerAttacker].gemBoost = FALSE;
+        if (GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_GEMS
+         && moveType == ItemId_GetSecondaryId(gBattleMons[gBattlerAttacker].item))
+        {
+            gSpecialStatuses[gBattlerAttacker].gemParam = GetBattlerHoldEffectParam(gBattlerAttacker);
+            gSpecialStatuses[gBattlerAttacker].gemBoost = TRUE;
+        }
+    }
 
     // Weight-based moves are blocked by Dynamax.
     if (IsDynamaxed(gBattlerTarget) && IsMoveBlockedByDynamax(gCurrentMove))
@@ -1774,8 +1786,16 @@ static bool32 IsLanakilaLawMove(u16 move)
 
 static bool32 AccuracyCalcHelper(u16 move)
 {
+    bool32 breachPointActive;
     u32 moveType;
+
     GET_MOVE_TYPE(move, moveType);
+    moveType = GetTargetAdjustedMoveType(move, gBattlerAttacker, gBattlerTarget, moveType);
+    breachPointActive = (gBattleResources->flags->flags[gBattlerAttacker] & RESOURCE_FLAG_BREACH_POINT)
+                     && !IS_MOVE_STATUS(move)
+                     && gBattleMoves[move].effect != EFFECT_OHKO;
+    if (breachPointActive)
+        gBattleResources->flags->flags[gBattlerAttacker] &= ~RESOURCE_FLAG_BREACH_POINT;
 
     if (((HasBattlerAbility(gBattlerAttacker, ABILITY_OPENING_VERSE)
        || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
@@ -1843,6 +1863,12 @@ static bool32 AccuracyCalcHelper(u16 move)
     || ((gStatuses3[gBattlerTarget] & STATUS3_UNDERWATER) && !gBattleMoves[move].damagesUnderwater))
     {
         gMoveResultFlags |= MOVE_RESULT_MISSED;
+        JumpIfMoveFailed(7, move);
+        return TRUE;
+    }
+
+    if (breachPointActive)
+    {
         JumpIfMoveFailed(7, move);
         return TRUE;
     }
@@ -2138,8 +2164,23 @@ static void Cmd_attackstring(void)
 {
     CMD_ARGS();
 
+    u32 moveType;
+
     if (gBattleControllerExecFlags)
         return;
+
+    GET_MOVE_TYPE(gCurrentMove, moveType);
+    if (!gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
+     && HasBattlerAbility(gBattlerAttacker, ABILITY_GROUND_FAULT)
+     && moveType != GetTargetAdjustedMoveType(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType))
+    {
+        gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn = TRUE;
+        SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_GROUND_FAULT);
+        RecordAbilityBattle(gBattlerAttacker, ABILITY_GROUND_FAULT);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        return;
+    }
 
     if (!gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
      && IsPrismRefractionActive(gBattlerAttacker, gCurrentMove))
@@ -8379,10 +8420,8 @@ static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct B
     {
         gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_TREATMENT;
     }
-    else
-    {
+    if (gBattleStruct->switchInTransferFlags[battler] == SWITCH_IN_TRANSFER_NONE)
         gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
-    }
 }
 
 static bool32 BattleMonHasNativeType(const struct BattlePokemon *mon, u32 type)
@@ -8503,6 +8542,18 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
         }
     }
 
+    if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_BREACH_POINT_PENDING)
+    {
+        gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_BREACH_POINT_PENDING;
+        gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_BREACH_POINT;
+        gBattlerAttacker = battler;
+        gBattlerTarget = battler;
+        SetBattlerTriggeredAbility(battler, ABILITY_BREACH_POINT);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        return TRUE;
+    }
+
     if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_RKS_RELAY)
     {
         gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_RKS_RELAY;
@@ -8516,7 +8567,8 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
         return TRUE;
     }
 
-    if (gBattleStruct->switchInTransferFlags[battler] == SWITCH_IN_TRANSFER_NONE)
+    if (gBattleStruct->switchInTransferFlags[battler] == SWITCH_IN_TRANSFER_NONE
+     && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_BREACH_POINT_PENDING))
         gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
     return FALSE;
 }
@@ -8526,6 +8578,7 @@ static void Cmd_switchindataupdate(void)
     CMD_ARGS(u8 battler);
 
     struct BattlePokemon oldData;
+    bool32 outgoingHasBreachPoint;
     bool32 outgoingHasRksRelay;
     bool32 outgoingRksRelayActive;
     bool32 incomingRksRelayActive;
@@ -8540,6 +8593,7 @@ static void Cmd_switchindataupdate(void)
 
     battler = GetBattlerForBattleScript(cmd->battler);
     oldData = gBattleMons[battler];
+    outgoingHasBreachPoint = HasBattlerAbility(battler, ABILITY_BREACH_POINT);
     outgoingHasRksRelay = HasBattlerAbility(battler, ABILITY_RKS_RELAY);
     outgoingPartyIndex = gBattleStruct->switchInTransferSourcePartyIdx[battler];
     QueueSwitchInTransferEffectsFromOutgoing(battler, &oldData);
@@ -8585,6 +8639,14 @@ static void Cmd_switchindataupdate(void)
     }
 
     SwitchInClearSetData(battler, preserveBatonPassState);
+
+    // Resource flags belong to the battler slot and are cleared above. Queue
+    // Breach Point only after the incoming mon's slot has been initialized.
+    if (outgoingHasBreachPoint && oldData.hp != 0)
+    {
+        gBattleStruct->switchInTransferSourcePartyIdx[battler] = outgoingPartyIndex;
+        gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_BREACH_POINT_PENDING;
+    }
 
     if (gBattleTypeFlags & BATTLE_TYPE_PALACE
         && gBattleMons[battler].maxHP / 2 >= gBattleMons[battler].hp
@@ -14996,6 +15058,11 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
      && statValue < 0
      && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_DECREASE)
         QueueBrutalChargeForDefenseDrop(battler, gBattlerAttacker);
+
+    if (statId == STAT_DEF
+     && statValue > 0
+     && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_INCREASE)
+        QueueSaltFortressForDefenseRise(battler);
 
     if (statValue < 0
      && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_DECREASE)
