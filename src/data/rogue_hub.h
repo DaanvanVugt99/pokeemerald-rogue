@@ -402,7 +402,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .targetArea = HUB_AREA_ADVENTURE_ENTRANCE,
         .buildCost = 3,
         .descText = gHubUpgradeDesc_AdventureEntrance_TrialAttendant,
-        .requiredUpgrades = { HUB_UPGRADE_NONE }
+        .requiredUpgrades = { HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, HUB_UPGRADE_NONE }
     },
 
     // HUB_AREA_BERRY_FIELD

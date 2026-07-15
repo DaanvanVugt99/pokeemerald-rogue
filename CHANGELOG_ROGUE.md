@@ -90,6 +90,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made the Starter Bag a prerequisite for constructing the Trial Attendant and
+  aligned the player's Trial starter-selection approach with the bag.
 - Reworked Zygarde's Edgeproof unique ability into Natural Order, which moves
   every active Pokémon's stat stages one step toward neutral at turn end.
 

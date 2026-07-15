@@ -642,7 +642,7 @@ script Rogue_StartAdventureInternal
         if(var(VAR_RESULT) == YES)
         {
             applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_WalkTrialAttendant)
-            applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter)
+            applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerTrialStarter)
             waitmovement(0)
 
             special(ChooseStarter)
@@ -665,7 +665,7 @@ script Rogue_StartAdventureInternal
             if(var(VAR_RESULT) == YES)
             {
                 applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_WalkTrialAttendant)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter)
+                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerTrialStarter)
                 waitmovement(0)
             }
             else
@@ -781,6 +781,12 @@ movement Rogue_Adventure_WalkPlayerStarter
     face_left
 }
 
+movement Rogue_Adventure_WalkPlayerTrialStarter
+{
+    walk_up * 2
+    walk_left
+}
+
 movement Rogue_Adventure_WalkPlayerStarter1
 {
     walk_up
@@ -799,6 +805,13 @@ movement Rogue_Adventure_ReturnPlayerFromStarter
     face_up
 }
 
+movement Rogue_Adventure_ReturnPlayerFromTrialStarter
+{
+    walk_right
+    walk_down * 2
+    face_up
+}
+
 movement Rogue_Adventure_ReturnPlayerFromGate
 {
     walk_down * 3
@@ -807,15 +820,15 @@ movement Rogue_Adventure_ReturnPlayerFromGate
 
 script Rogue_Adventure_CancelStarterSelection
 {
-    applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromStarter)
-
     special(RogueTrial_HasPendingSelection)
     if(var(VAR_RESULT) == YES)
     {
+        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromTrialStarter)
         applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_ReturnGateNpc)
     }
     else
     {
+        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromStarter)
         applymovement(OBJ_EVENT_ADVENTURE_NURSE, Rogue_Adventure_ReturnGateNpc)
     }
 
