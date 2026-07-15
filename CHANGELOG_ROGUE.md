@@ -155,6 +155,8 @@ Format follows Keep a Changelog loosely:
   selection.
 - Added an early Trial Attendant shortcut that previews and repeats the exact
   setup from the most recently started Trial.
+- Reduced Trial starter-bag loading time by filtering legal species earlier and
+  selecting starters directly from the eligible pool.
 
 - Made the Quest Board prioritize pending rewards, then newly unlocked quests,
   and otherwise open the normal Quest Log.

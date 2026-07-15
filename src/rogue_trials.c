@@ -1071,12 +1071,9 @@ static bool8 SpeciesIsEnabledForDexVariant(u16 species, u8 dexVariant)
     return enabled;
 }
 
-static bool8 DefinitionAllowsSpeciesForDex(const struct RogueTrialDefinition *trial, u16 species, u8 dexVariant)
+static bool8 DefinitionAllowsSpeciesRules(const struct RogueTrialDefinition *trial, u16 species)
 {
     if (trial == NULL || species == SPECIES_NONE || species == SPECIES_EGG)
-        return FALSE;
-
-    if (TrialUsesSelectedDexLegality(trial) && !SpeciesIsEnabledForDexVariant(species, dexVariant))
         return FALSE;
 
     if (trial->requiredType != ROGUE_TRIAL_NO_TYPE && !IsSpeciesType(species, trial->requiredType))
@@ -1098,6 +1095,17 @@ static bool8 DefinitionAllowsSpeciesForDex(const struct RogueTrialDefinition *tr
         return FALSE;
 
     return TRUE;
+}
+
+static bool8 DefinitionAllowsSpeciesForDex(const struct RogueTrialDefinition *trial, u16 species, u8 dexVariant)
+{
+    if (trial == NULL || species == SPECIES_NONE || species == SPECIES_EGG)
+        return FALSE;
+
+    if (TrialUsesSelectedDexLegality(trial) && !SpeciesIsEnabledForDexVariant(species, dexVariant))
+        return FALSE;
+
+    return DefinitionAllowsSpeciesRules(trial, species);
 }
 
 static bool8 DefinitionAllowsSpecies(const struct RogueTrialDefinition *trial, u16 species)
@@ -1130,7 +1138,7 @@ bool8 RogueTrial_PendingAllowsSpecies(u16 species)
     if (!DefinitionRequiresSpeciesLegality(trial))
         return TRUE;
 
-    return DefinitionAllowsSpeciesForDex(trial, species, sPendingTrial.pokedexVariant);
+    return DefinitionAllowsSpeciesRules(trial, species);
 }
 
 bool8 RogueTrial_PendingNeedsStarterFilter(void)
@@ -1163,14 +1171,24 @@ bool8 RogueTrial_PendingRequiresLegendarySpecies(void)
     return trial != NULL && trial->requiresLegendarySpecies;
 }
 
-static bool8 QueryFilter_PendingTrialSpecies(u16 species, void *usrData UNUSED)
+struct PendingTrialQueryFilterData
 {
-    return RogueTrial_PendingAllowsSpecies(species);
+    const struct RogueTrialDefinition *trial;
+};
+
+static bool8 QueryFilter_PendingTrialSpecies(u16 species, void *usrData)
+{
+    const struct PendingTrialQueryFilterData *filterData = usrData;
+
+    return Query_IsSpeciesEnabledForceDexChecking(species)
+        && DefinitionAllowsSpeciesRules(filterData->trial, species);
 }
 
 void RogueTrial_FilterPendingMonQuery(void)
 {
     const struct RogueTrialDefinition *trial;
+    struct PendingTrialQueryFilterData filterData;
+    u8 previousDexVariant;
 
     if (!sPendingTrial.isPending || !IsValidTrialId(sPendingTrial.trialId) || !IsValidDifficulty(sPendingTrial.difficulty))
         return;
@@ -1180,7 +1198,18 @@ void RogueTrial_FilterPendingMonQuery(void)
         return;
 
     if (DefinitionRequiresSpeciesLegality(trial))
-        RogueMonQuery_CustomFilter(QueryFilter_PendingTrialSpecies, NULL);
+    {
+        filterData.trial = trial;
+        previousDexVariant = RoguePokedex_GetDexVariant();
+
+        if (previousDexVariant != sPendingTrial.pokedexVariant)
+            RoguePokedex_SetDexVariant(sPendingTrial.pokedexVariant);
+
+        RogueMonQuery_CustomFilter(QueryFilter_PendingTrialSpecies, &filterData);
+
+        if (previousDexVariant != sPendingTrial.pokedexVariant)
+            RoguePokedex_SetDexVariant(previousDexVariant);
+    }
 }
 
 static bool8 BufferPendingValidationFailure(const u8 *sourceText, u16 species)

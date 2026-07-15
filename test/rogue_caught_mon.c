@@ -127,6 +127,13 @@ static void ExpectGeneratedStartersAllowedByPendingTrial(void)
     }
 }
 
+static void ExpectGeneratedStartersDistinct(void)
+{
+    EXPECT_NE(GetGeneratedStarter(0), GetGeneratedStarter(1));
+    EXPECT_NE(GetGeneratedStarter(0), GetGeneratedStarter(2));
+    EXPECT_NE(GetGeneratedStarter(1), GetGeneratedStarter(2));
+}
+
 TEST("Species Clause duplicate catches with party room require releasing the matching evo chain")
 {
     struct Pokemon caughtMon;
@@ -421,6 +428,7 @@ TEST("Pending Type Trial randomizes only legal starter choices")
 
     Rogue_RandomiseStarters();
     ExpectGeneratedStartersAllowedByPendingTrial();
+    ExpectGeneratedStartersDistinct();
 
     ClearCaughtMonTestState();
 }

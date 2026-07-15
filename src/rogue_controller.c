@@ -3509,39 +3509,47 @@ static void BuildTrialStarterMonQuery(bool8 limitToCurrentDex)
 
     RogueMonQuery_TransformIntoEggSpecies();
     RogueMonQuery_TransformIntoEvos(2, FALSE, FALSE); // to force mons to fit gen settings
-    RogueMonQuery_AnyActiveEvos(QUERY_FUNC_INCLUDE);
-
     RogueTrial_FilterPendingMonQuery();
+    RogueMonQuery_AnyActiveEvos(QUERY_FUNC_INCLUDE);
 }
 
 static bool8 TrySelectTrialStarterMons(struct StarterSelectionData *starters, bool8 isSeeded, bool8 limitToCurrentDex)
 {
     u8 i;
+    u8 selectedCount = 0;
+    u16 selectedPool[ARRAY_COUNT(starters->species)];
 
     BuildTrialStarterMonQuery(limitToCurrentDex);
 
-    RogueWeightQuery_Begin();
-    RogueWeightQuery_FillWeights(1);
-
-    if (!RogueWeightQuery_HasAnyWeights())
+    if (!RogueMiscQuery_AnyActiveElements())
     {
-        RogueWeightQuery_End();
         RogueMonQuery_End();
         return FALSE;
     }
 
     for (i = 0; i < ARRAY_COUNT(starters->species); ++i)
     {
-        if (!RogueWeightQuery_HasAnyWeights())
-            RogueWeightQuery_FillWeights(1);
+        u16 randValue = isSeeded ? RogueRandom() : Random();
 
-        starters->species[i] = RogueWeightQuery_SelectRandomFromWeightsWithUpdate(isSeeded ? RogueRandom() : Random(), 0);
+        if (RogueMiscQuery_AnyActiveElements())
+        {
+            starters->species[i] = RogueMiscQuery_SelectRandomElement(randValue);
+            RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, starters->species[i]);
+            selectedPool[selectedCount++] = starters->species[i];
+        }
+        else
+        {
+            // Tiny Trial pools may contain fewer than three legal species. Exhaust
+            // every option before allowing duplicates so the starter bag remains full.
+            AGB_ASSERT(selectedCount != 0);
+            starters->species[i] = selectedPool[randValue % selectedCount];
+        }
+
         starters->shinyState[i] = Rogue_RollShinyState(SHINY_ROLL_DYNAMIC);
     }
 
     starters->count = ARRAY_COUNT(starters->species);
 
-    RogueWeightQuery_End();
     RogueMonQuery_End();
     return TRUE;
 }
