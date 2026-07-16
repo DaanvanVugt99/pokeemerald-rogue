@@ -1,16 +1,60 @@
 #include "global.h"
 #include "constants/flags.h"
 #include "constants/rogue.h"
+#include "constants/rogue_pokedex.h"
 #include "constants/species.h"
 #include "event_data.h"
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
 #include "rogue_controller.h"
+#include "rogue_pokedex.h"
 #include "rogue_settings.h"
 #include "rogue_query.h"
 #include "test/test.h"
 #include "rogue_trainers.h"
+
+static const u8 sTrainerConfigToggles[] =
+{
+    CONFIG_TOGGLE_TRAINER_ROGUE,
+    CONFIG_TOGGLE_TRAINER_KANTO,
+    CONFIG_TOGGLE_TRAINER_JOHTO,
+    CONFIG_TOGGLE_TRAINER_HOENN,
+    CONFIG_TOGGLE_TRAINER_SINNOH,
+    CONFIG_TOGGLE_TRAINER_UNOVA,
+    CONFIG_TOGGLE_TRAINER_KALOS,
+    CONFIG_TOGGLE_TRAINER_ALOLA,
+    CONFIG_TOGGLE_TRAINER_GALAR,
+    CONFIG_TOGGLE_TRAINER_PALDEA,
+};
+
+static void SaveTrainerConfigToggles(bool8 *outValues)
+{
+    u8 i;
+
+    for(i = 0; i < ARRAY_COUNT(sTrainerConfigToggles); ++i)
+        outValues[i] = Rogue_GetConfigToggle(sTrainerConfigToggles[i]);
+}
+
+static void SetBenchmarkTrainerConfig(void)
+{
+    u8 i;
+
+    for(i = 0; i < ARRAY_COUNT(sTrainerConfigToggles); ++i)
+        Rogue_SetConfigToggle(sTrainerConfigToggles[i], FALSE);
+
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
+}
+
+static void RestoreTrainerConfigToggles(const bool8 *values)
+{
+    u8 i;
+
+    for(i = 0; i < ARRAY_COUNT(sTrainerConfigToggles); ++i)
+        Rogue_SetConfigToggle(sTrainerConfigToggles[i], values[i]);
+}
 
 TEST("Rogue trainer items: Black Sludge converts to Leftovers with tera")
 {
@@ -28,22 +72,19 @@ TEST("Rival roster planning caches species without constructing temporary mons")
     u8 i;
     u8 previousTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 previousDifficulty = Rogue_GetCurrentDifficulty();
-    bool8 previousKanto = Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO);
-    bool8 previousJohto = Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO);
-    bool8 previousHoenn = Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN);
+    bool8 previousTrainerToggles[ARRAY_COUNT(sTrainerConfigToggles)];
     bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     RAND_TYPE rngOriginal = gRngRogueValue;
     RAND_TYPE rngBefore;
 
     memset(&gRogueRun, 0, sizeof(gRogueRun));
+    SaveTrainerConfigToggles(previousTrainerToggles);
     ZeroEnemyPartyMons();
     CreateMon(&gEnemyParty[0], SPECIES_PIKACHU, 10, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
 
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
+    SetBenchmarkTrainerConfig();
     Rogue_SetCurrentDifficulty(3);
     gRogueRun.baseSeed = 12345;
     gRogueRun.rivalTrainerNum = 0;
@@ -70,9 +111,7 @@ TEST("Rival roster planning caches species without constructing temporary mons")
     gRngRogueValue = rngOriginal;
     Rogue_SetCurrentDifficulty(previousDifficulty);
     Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, previousTrainerDifficulty);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, previousKanto);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, previousJohto);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, previousHoenn);
+    RestoreTrainerConfigToggles(previousTrainerToggles);
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }
@@ -120,18 +159,17 @@ TEST("Run-start rival planning stays within its performance ceiling")
     struct LongBenchmark rivalBase;
     u8 previousTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 previousDifficulty = Rogue_GetCurrentDifficulty();
-    bool8 previousKanto = Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO);
-    bool8 previousJohto = Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO);
-    bool8 previousHoenn = Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN);
+    u8 previousDexVariant = RoguePokedex_GetDexVariant();
+    bool8 previousTrainerToggles[ARRAY_COUNT(sTrainerConfigToggles)];
     bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     RAND_TYPE rngOriginal = gRngRogueValue;
 
     memset(&gRogueRun, 0, sizeof(gRogueRun));
+    SaveTrainerConfigToggles(previousTrainerToggles);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
+    SetBenchmarkTrainerConfig();
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_MODERN);
     Rogue_SetCurrentDifficulty(0);
     gRogueRun.baseSeed = 12345;
     gRogueRun.rivalTrainerNum = 0;
@@ -149,10 +187,9 @@ TEST("Run-start rival planning stays within its performance ceiling")
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     gRngRogueValue = rngOriginal;
     Rogue_SetCurrentDifficulty(previousDifficulty);
+    RoguePokedex_SetDexVariant(previousDexVariant);
     Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, previousTrainerDifficulty);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, previousKanto);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, previousJohto);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, previousHoenn);
+    RestoreTrainerConfigToggles(previousTrainerToggles);
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }

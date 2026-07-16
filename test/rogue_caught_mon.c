@@ -12,6 +12,7 @@
 #include "rogue.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
+#include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
 #include "rogue_save.h"
@@ -446,9 +447,11 @@ TEST("Pending Normal Type Trial handles move-based evolutions when generating st
     ClearCaughtMonTestState();
 }
 
-TEST("Shrine guardian replaces Whirlwind with Tailwind")
+TEST("Shrine guardian builds varied valid movesets from every competitive-set slot")
 {
     bool8 sawTailwind = FALSE;
+    bool8 sawSacredFire = FALSE;
+    bool8 sawBraveBird = FALSE;
     u16 seed;
     u8 moveSlot;
 
@@ -456,20 +459,40 @@ TEST("Shrine guardian replaces Whirlwind with Tailwind")
 
     for(seed = 0; seed < 128; ++seed)
     {
+        bool8 hasDamagingMove = FALSE;
+
         SeedRng(seed);
         Rogue_PrepareShrineChallenge();
 
+        EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_MOVE1), RogueGift_GetCustomMonMove(RogueGift_GetCustomMonId(&gEnemyParty[0]), 0));
+        EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_MOVE2), RogueGift_GetCustomMonMove(RogueGift_GetCustomMonId(&gEnemyParty[0]), 1));
+
         for(moveSlot = 0; moveSlot < MAX_MON_MOVES; ++moveSlot)
         {
+            u8 priorSlot;
             u16 move = GetMonData(&gEnemyParty[0], MON_DATA_MOVE1 + moveSlot);
 
+            EXPECT_NE(move, MOVE_NONE);
             EXPECT_NE(move, MOVE_WHIRLWIND);
+            if(!IS_MOVE_STATUS(move))
+                hasDamagingMove = TRUE;
             if(move == MOVE_TAILWIND)
                 sawTailwind = TRUE;
+            if(move == MOVE_SACRED_FIRE)
+                sawSacredFire = TRUE;
+            if(move == MOVE_BRAVE_BIRD)
+                sawBraveBird = TRUE;
+
+            for(priorSlot = 0; priorSlot < moveSlot; ++priorSlot)
+                EXPECT_NE(move, GetMonData(&gEnemyParty[0], MON_DATA_MOVE1 + priorSlot));
         }
+
+        EXPECT(hasDamagingMove);
     }
 
     EXPECT(sawTailwind);
+    EXPECT(sawSacredFire);
+    EXPECT(sawBraveBird);
 
     gBattleOutcome = B_OUTCOME_WON;
     Rogue_Battle_EndWildBattle();

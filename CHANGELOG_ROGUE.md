@@ -93,6 +93,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Expanded Unique Pokémon move generation to a curated 154-move general pool
+  with shared physical and special attacks for every type, added four complementary
+  altered-type moves per type, and made the shrine guardian retain a more varied
+  pair of moves from its selected competitive set.
 - Made run starts substantially faster by caching repeated species and trainer
   eligibility work, deferring late rival planning,
   and removing unnecessary portal transition frames.

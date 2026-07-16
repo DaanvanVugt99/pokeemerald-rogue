@@ -5905,6 +5905,81 @@ static void SanitizeShrineGuardianMoves(struct Pokemon *mon)
     }
 }
 
+static bool8 ShrineGuardianMoveListContains(const u16 *moves, u8 moveCount, u16 move)
+{
+    u8 i;
+
+    for(i = 0; i < moveCount; ++i)
+    {
+        if(moves[i] == move)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static void SelectShrineGuardianMoves(const u16 *customMoves, u8 customMoveCount, const struct RoguePokemonCompetitiveSet *preset, u16 *outMoves)
+{
+    u8 i;
+    u8 candidateCount = 0;
+    u8 damagingCandidateCount = 0;
+    u8 outMoveCount = 0;
+    u8 selectedIndex;
+    u16 candidateMoves[MAX_MON_MOVES];
+    u16 damagingCandidateIndices[MAX_MON_MOVES];
+    bool8 hasDamagingMove = FALSE;
+
+    for(i = 0; i < customMoveCount; ++i)
+    {
+        if(customMoves[i] != MOVE_NONE && !ShrineGuardianMoveListContains(outMoves, outMoveCount, customMoves[i]))
+        {
+            outMoves[outMoveCount++] = customMoves[i];
+            if(!IS_MOVE_STATUS(customMoves[i]))
+                hasDamagingMove = TRUE;
+        }
+    }
+
+    for(i = 0; i < MAX_MON_MOVES; ++i)
+    {
+        u16 move = preset->moves[i];
+
+        if(move != MOVE_NONE
+            && !ShrineGuardianMoveListContains(outMoves, outMoveCount, move)
+            && !ShrineGuardianMoveListContains(candidateMoves, candidateCount, move))
+        {
+            candidateMoves[candidateCount++] = move;
+        }
+    }
+
+    // If both generated moves are utility moves, retain one damaging preset
+    // move before filling the final slot freely.
+    if(!hasDamagingMove && outMoveCount < MAX_MON_MOVES)
+    {
+        for(i = 0; i < candidateCount; ++i)
+        {
+            if(!IS_MOVE_STATUS(candidateMoves[i]))
+                damagingCandidateIndices[damagingCandidateCount++] = i;
+        }
+
+        AGB_ASSERT(damagingCandidateCount != 0);
+        if(damagingCandidateCount != 0)
+        {
+            selectedIndex = damagingCandidateIndices[Random() % damagingCandidateCount];
+            outMoves[outMoveCount++] = candidateMoves[selectedIndex];
+            candidateMoves[selectedIndex] = candidateMoves[--candidateCount];
+        }
+    }
+
+    while(outMoveCount < MAX_MON_MOVES && candidateCount != 0)
+    {
+        selectedIndex = Random() % candidateCount;
+        outMoves[outMoveCount++] = candidateMoves[selectedIndex];
+        candidateMoves[selectedIndex] = candidateMoves[--candidateCount];
+    }
+
+    AGB_ASSERT(outMoveCount == MAX_MON_MOVES);
+}
+
 void Rogue_PrepareShrineChallenge(void)
 {
     u8 i;
@@ -5935,14 +6010,17 @@ void Rogue_PrepareShrineChallenge(void)
     {
         struct RoguePokemonCompetitiveSetRules rules = {0};
         u16 presetIndex = Random() % presetCount;
+        const struct RoguePokemonCompetitiveSet *preset = &gRoguePokemonProfiles[species].competitiveSets[presetIndex];
+        u16 finalMoves[MAX_MON_MOVES] = {0};
 
         rules.skipAbility = TRUE;
         rules.skipHeldItem = TRUE;
-        Rogue_ApplyMonCompetitiveSet(&gEnemyParty[0], level, &gRoguePokemonProfiles[species].competitiveSets[presetIndex], &rules);
+        Rogue_ApplyMonCompetitiveSet(&gEnemyParty[0], level, preset, &rules);
+        SelectShrineGuardianMoves(customMoves, customMoveCount, preset, finalMoves);
 
-        for(i = 0; i < customMoveCount; ++i)
+        for(i = 0; i < MAX_MON_MOVES; ++i)
         {
-            temp = customMoves[i];
+            temp = finalMoves[i];
             SetMonData(&gEnemyParty[0], MON_DATA_MOVE1 + i, &temp);
             SetMonData(&gEnemyParty[0], MON_DATA_PP1 + i, &gBattleMoves[temp].pp);
         }

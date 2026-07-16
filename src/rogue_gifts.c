@@ -315,7 +315,7 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_JET_PUNCH,
     MOVE_STONE_AXE,
     MOVE_THUNDEROUS_KICK,
-    MOVE_SCORCHING_SANDS,
+    MOVE_BOOMBURST,
     MOVE_SURGING_STRIKES,
     MOVE_PARTING_SHOT,
     MOVE_GRASSY_GLIDE,
@@ -328,26 +328,26 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_PHANTOM_FORCE,
     MOVE_V_CREATE,
     MOVE_SECRET_SWORD,
-    MOVE_TRICK_ROOM,
+    MOVE_FOCUS_BLAST,
     MOVE_SPORE,
     MOVE_GUNK_SHOT,
-    MOVE_NASTY_PLOT,
+    MOVE_BRAVE_BIRD,
     MOVE_CLOSE_COMBAT,
-    MOVE_U_TURN,
-    MOVE_DRAGON_DANCE,
-    MOVE_CALM_MIND,
+    MOVE_HURRICANE,
+    MOVE_SLUDGE_BOMB,
+    MOVE_HEADLONG_RUSH,
     MOVE_LEAF_BLADE,
     MOVE_METEOR_MASH,
-    MOVE_KNOCK_OFF,
+    MOVE_EARTH_POWER,
     MOVE_SKILL_SWAP,
     MOVE_FAKE_OUT,
     MOVE_EXTREME_SPEED,
-    MOVE_ANCIENT_POWER,
+    MOVE_ROCK_SLIDE,
     MOVE_RAPID_SPIN,
     MOVE_MEGAHORN,
     MOVE_WISH,
     MOVE_THUNDER,
-    MOVE_SWORDS_DANCE,
+    MOVE_POWER_GEM,
     MOVE_THUNDERCLAP,
     MOVE_GIGATON_HAMMER,
     MOVE_SALT_CURE,
@@ -357,7 +357,7 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_SPIRIT_BREAK,
     MOVE_RECOVER,
     MOVE_NO_RETREAT,
-    MOVE_SUBSTITUTE,
+    MOVE_LUNGE,
     MOVE_METRONOME,
     MOVE_TOPSY_TURVY,
     MOVE_QUIVER_DANCE,
@@ -372,6 +372,97 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_FURY_CUTTER,
     MOVE_LAST_RESPECTS,
     MOVE_ACROBATICS,
+    MOVE_BUG_BUZZ,
+    MOVE_POWER_TRIP,
+    MOVE_WEATHER_BALL,
+    MOVE_BODY_PRESS,
+    MOVE_POWER_UP_PUNCH,
+    MOVE_FIRE_LASH,
+    MOVE_MYSTICAL_FIRE,
+    MOVE_FLAME_CHARGE,
+    MOVE_SHADOW_BALL,
+    MOVE_BRINE,
+    MOVE_IRON_HEAD,
+    MOVE_TRAILBLAZE,
+    MOVE_POLLEN_PUFF,
+    MOVE_NUZZLE,
+    MOVE_FLASH_CANNON,
+    MOVE_PSYSHOCK,
+    MOVE_STORED_POWER,
+    MOVE_ICY_WIND,
+    MOVE_AVALANCHE,
+    MOVE_OVERHEAT,
+    MOVE_SCALE_SHOT,
+    MOVE_SNARL,
+    MOVE_LIQUIDATION,
+    MOVE_MUDDY_WATER,
+    MOVE_ACID_SPRAY,
+    MOVE_CLEAR_SMOG,
+    MOVE_BULLDOZE,
+    MOVE_ROCK_TOMB,
+    MOVE_POUNCE,
+    MOVE_GIGA_DRAIN,
+    MOVE_SUPERCELL_SLAM,
+    MOVE_HEAVY_SLAM,
+    MOVE_ELECTROWEB,
+    MOVE_ENCORE,
+    MOVE_ZEN_HEADBUTT,
+    MOVE_DISABLE,
+    MOVE_TORMENT,
+    MOVE_TRIPLE_AXEL,
+    MOVE_TOXIC_SPIKES,
+    MOVE_DRAGON_RUSH,
+    MOVE_DRACO_METEOR,
+    MOVE_NIGHT_SLASH,
+    MOVE_GRAVITY,
+    MOVE_DARK_PULSE,
+    MOVE_PAIN_SPLIT,
+    MOVE_MOONBLAST,
+    MOVE_MAGIC_COAT,
+    MOVE_BURNING_JEALOUSY,
+    MOVE_ALLURING_VOICE,
+    MOVE_PSYCHIC_NOISE,
+    MOVE_TEMPER_FLARE,
+    MOVE_STRENGTH_SAP,
+    MOVE_YAWN,
+    MOVE_PERISH_SONG,
+    MOVE_COURT_CHANGE,
+    MOVE_METAL_BURST,
+    MOVE_INFESTATION,
+    MOVE_ZAP_CANNON,
+    MOVE_ERUPTION,
+    MOVE_SIGNAL_BEAM,
+    MOVE_HORN_LEECH,
+    MOVE_VACUUM_WAVE,
+    MOVE_MIRROR_COAT,
+    MOVE_BELLY_DRUM,
+    MOVE_SCORCHING_SANDS,
+    MOVE_TRICK_ROOM,
+    MOVE_NASTY_PLOT,
+    MOVE_U_TURN,
+    MOVE_DRAGON_DANCE,
+    MOVE_CALM_MIND,
+    MOVE_KNOCK_OFF,
+    MOVE_ANCIENT_POWER,
+    MOVE_SWORDS_DANCE,
+    MOVE_SUBSTITUTE,
+    MOVE_BODY_SLAM,
+    MOVE_FLIP_TURN,
+    MOVE_APPLE_ACID,
+    MOVE_VOLT_SWITCH,
+    MOVE_BREAKING_SWIPE,
+    MOVE_FOUL_PLAY,
+    MOVE_DRAINING_KISS,
+    MOVE_HEX,
+    MOVE_GYRO_BALL,
+    MOVE_TAUNT,
+    MOVE_LEECH_SEED,
+    MOVE_STICKY_WEB,
+    MOVE_STEALTH_ROCK,
+    MOVE_SPIKES,
+    MOVE_HAZE,
+    MOVE_DESTINY_BOND,
+    MOVE_FELL_STINGER,
 #else
     MOVE_PAY_DAY,
     MOVE_FIRE_PUNCH,
@@ -434,13 +525,21 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_PSYCHO_BOOST,
     MOVE_ROCK_BLAST,
     MOVE_ERUPTION,
-    MOVE_RECYCLE,
-    MOVE_FACADE,
+    MOVE_PERISH_SONG,
+    MOVE_PAIN_SPLIT,
 #endif
 };
 
 STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonAbilities) <= 127, SizeOfDynamicCustomMonAbilities);
-STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonMoves) <= 63, SizeOfDynamicCustomMonMoves);
+#define DYNAMIC_MOVE_POOL_CAPACITY 160
+#define DYNAMIC_MOVE_SELECTION_CAPACITY (1 << 14)
+#define DYNAMIC_MOVE_PAIR_COUNT ((DYNAMIC_MOVE_POOL_CAPACITY * (DYNAMIC_MOVE_POOL_CAPACITY - 1)) / 2)
+#define DYNAMIC_MOVE_PAIR_CODE_START (DYNAMIC_MOVE_POOL_CAPACITY + 1)
+#define DYNAMIC_TYPED_MOVE_SELECTION_STRIDE (DYNAMIC_MOVE_POOL_CAPACITY + 1)
+
+STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonMoves) <= DYNAMIC_MOVE_POOL_CAPACITY, SizeOfDynamicCustomMonMoves);
+STATIC_ASSERT(DYNAMIC_MOVE_PAIR_CODE_START + DYNAMIC_MOVE_PAIR_COUNT <= DYNAMIC_MOVE_SELECTION_CAPACITY, DynamicMoveSelectionFits14Bits);
+STATIC_ASSERT(NUMBER_OF_MON_TYPES * 4 * DYNAMIC_TYPED_MOVE_SELECTION_STRIDE <= DYNAMIC_MOVE_SELECTION_CAPACITY, TypedUniqueMoveSelectionFits14Bits);
 STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonUniqueAbilities) <= 127, SizeOfDynamicCustomMonUniqueAbilities);
 
 const u16 sTypeTintColors[NUMBER_OF_MON_TYPES] =
@@ -489,9 +588,8 @@ struct CompressedDynamicData
 
 struct CompressedDynamicData_Original
 {
-    u32 move1:7; // 127 indices
-    u32 move2:7; // 127 indices
-    u32 move3:7; // 127 indices
+    u32 moveSelection:14;
+    u32 unused:7;
     u32 format:2;
     u32 ability:7; // 127 indices
     u32 reserved:2;
@@ -502,8 +600,7 @@ struct CompressedDynamicData_MonType
     u32 type:5;
     u32 typeSlot:1;
     u32 typeMoveFlip:1;
-    u32 move1:7; // 127 indices
-    u32 move2:7; // 127 indices
+    u32 moveSelection:14;
     u32 format:2;
     u32 ability:7; // 127 indices
     u32 reserved:2;
@@ -511,8 +608,7 @@ struct CompressedDynamicData_MonType
 
 struct CompressedDynamicData_OriginalUniqueAbility
 {
-    u32 move1:7; // 127 indices
-    u32 move2:7; // 127 indices
+    u32 moveSelection:14;
     u32 uniqueAbility:7; // 127 indices
     u32 format:2;
     u32 ability:7; // 127 indices
@@ -521,10 +617,7 @@ struct CompressedDynamicData_OriginalUniqueAbility
 
 struct CompressedDynamicData_MonTypeUniqueAbility
 {
-    u32 type:5;
-    u32 typeSlot:1;
-    u32 typeMoveFlip:1;
-    u32 move1:7; // 127 indices
+    u32 typeMoveSelection:14;
     u32 uniqueAbility:7; // 127 indices
     u32 format:2;
     u32 ability:7; // 127 indices
@@ -546,49 +639,38 @@ STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(struct CompressedDy
 STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(struct CompressedDynamicData_MonTypeUniqueAbility), SizeOfCompressedDynamicData_MonTypeUniqueAbility);
 STATIC_ASSERT(sizeof(struct CompressedDynamicData) == sizeof(u32), SizeOfDynamicCustomMonData);
 
-static u16 SelectTypeBasedExtraMove(u8 type, u8 rng)
+static u16 SelectTypeBasedExtraMove(u8 type, u8 typeSlot, u8 typeMoveFlip)
 {
 #ifdef ROGUE_EXPANSION
-    switch (type)
+    static const u16 sTypeBasedExtraMoves[NUMBER_OF_MON_TYPES][4] =
     {
-    case TYPE_NORMAL:
-        return rng ? MOVE_BOOMBURST : MOVE_EXTREME_SPEED;
-    case TYPE_FIGHTING:
-        return rng ? MOVE_FOCUS_BLAST : MOVE_CLOSE_COMBAT;
-    case TYPE_FLYING:
-        return rng ? MOVE_HURRICANE : MOVE_BRAVE_BIRD;
-    case TYPE_POISON:
-        return rng ? MOVE_SLUDGE_BOMB : MOVE_GUNK_SHOT;
-    case TYPE_GROUND:
-        return rng ? MOVE_EARTHQUAKE : MOVE_EARTH_POWER;
-    case TYPE_ROCK:
-        return rng ? MOVE_ROCK_SLIDE : MOVE_ANCIENT_POWER;
-    case TYPE_BUG:
-        return rng ? MOVE_LUNGE : MOVE_BUG_BUZZ;
-    case TYPE_GHOST:
-        return rng ? MOVE_SHADOW_BALL : MOVE_SHADOW_SNEAK;
-    case TYPE_STEEL:
-        return rng ? MOVE_IRON_HEAD : MOVE_MAGNET_BOMB;
-    case TYPE_FIRE:
-        return rng ? MOVE_OVERHEAT : MOVE_SACRED_FIRE;
-    case TYPE_WATER:
-        return rng ? MOVE_LIQUIDATION : MOVE_SURF;
-    case TYPE_GRASS:
-        return rng ? MOVE_GIGA_DRAIN : MOVE_LEAF_BLADE;
-    case TYPE_ELECTRIC:
-        return rng ? MOVE_THUNDERCLAP : MOVE_THUNDER;
-    case TYPE_PSYCHIC:
-        return rng ? MOVE_PSYCHIC : MOVE_PSYSHOCK;
-    case TYPE_ICE:
-        return rng ? MOVE_ICE_BEAM : MOVE_TRIPLE_AXEL;
-    case TYPE_DRAGON:
-        return rng ? MOVE_DRACO_METEOR : MOVE_DRAGON_RUSH;
-    case TYPE_DARK:
-        return rng ? MOVE_DARK_PULSE : MOVE_NIGHT_SLASH;
-    case TYPE_FAIRY:
-        return rng ? MOVE_MOONBLAST : MOVE_PLAY_ROUGH;
-    }
+        [TYPE_NORMAL]   = { MOVE_EXTREME_SPEED,  MOVE_GLARE,        MOVE_BOOMBURST,     MOVE_BODY_SLAM },
+        [TYPE_FIGHTING] = { MOVE_CLOSE_COMBAT,   MOVE_BULK_UP,      MOVE_FOCUS_BLAST,   MOVE_DRAIN_PUNCH },
+        [TYPE_FLYING]   = { MOVE_BRAVE_BIRD,     MOVE_ROOST,        MOVE_HURRICANE,     MOVE_AIR_SLASH },
+        [TYPE_POISON]   = { MOVE_GUNK_SHOT,      MOVE_TOXIC,        MOVE_SLUDGE_BOMB,   MOVE_POISON_JAB },
+        [TYPE_GROUND]   = { MOVE_HEADLONG_RUSH,  MOVE_SPIKES,       MOVE_EARTH_POWER,   MOVE_SCORCHING_SANDS },
+        [TYPE_ROCK]     = { MOVE_ROCK_SLIDE,     MOVE_STEALTH_ROCK, MOVE_POWER_GEM,     MOVE_ANCIENT_POWER },
+        [TYPE_BUG]      = { MOVE_LUNGE,          MOVE_STICKY_WEB,   MOVE_BUG_BUZZ,      MOVE_FELL_STINGER },
+        [TYPE_GHOST]    = { MOVE_POLTERGEIST,    MOVE_DESTINY_BOND, MOVE_SHADOW_BALL,   MOVE_HEX },
+        [TYPE_STEEL]    = { MOVE_IRON_HEAD,      MOVE_SHIFT_GEAR,   MOVE_FLASH_CANNON,  MOVE_GYRO_BALL },
+        [TYPE_FIRE]     = { MOVE_FIRE_LASH,      MOVE_WILL_O_WISP,  MOVE_OVERHEAT,      MOVE_SACRED_FIRE },
+        [TYPE_WATER]    = { MOVE_LIQUIDATION,    MOVE_RAIN_DANCE,   MOVE_MUDDY_WATER,   MOVE_FLIP_TURN },
+        [TYPE_GRASS]    = { MOVE_LEAF_BLADE,     MOVE_LEECH_SEED,   MOVE_GIGA_DRAIN,    MOVE_APPLE_ACID },
+        [TYPE_ELECTRIC] = { MOVE_SUPERCELL_SLAM, MOVE_THUNDER_WAVE, MOVE_THUNDER,       MOVE_VOLT_SWITCH },
+        [TYPE_PSYCHIC]  = { MOVE_ZEN_HEADBUTT,   MOVE_TRICK_ROOM,   MOVE_PSYSHOCK,      MOVE_FUTURE_SIGHT },
+        [TYPE_ICE]      = { MOVE_TRIPLE_AXEL,    MOVE_HAZE,         MOVE_FREEZE_DRY,    MOVE_FROST_BREATH },
+        [TYPE_DRAGON]   = { MOVE_DRAGON_RUSH,    MOVE_DRAGON_DANCE, MOVE_DRACO_METEOR,  MOVE_BREAKING_SWIPE },
+        [TYPE_DARK]     = { MOVE_NIGHT_SLASH,    MOVE_TAUNT,        MOVE_DARK_PULSE,    MOVE_FOUL_PLAY },
+        [TYPE_FAIRY]    = { MOVE_PLAY_ROUGH,     MOVE_CHARM,        MOVE_MOONBLAST,     MOVE_DRAINING_KISS },
+    };
+
+    if (type < NUMBER_OF_MON_TYPES && sTypeBasedExtraMoves[type][0] != MOVE_NONE)
+        return sTypeBasedExtraMoves[type][(typeSlot << 1) | typeMoveFlip];
 #else
+    u8 rng = typeMoveFlip;
+
+    (void)typeSlot;
+
     switch (type)
     {
     case TYPE_NORMAL:
@@ -631,6 +713,127 @@ static u16 SelectTypeBasedExtraMove(u8 type, u8 rng)
     return MOVE_RETURN;
 }
 
+static u16 EncodeDynamicMoveSelection(u16 move1, u16 move2)
+{
+    u16 first;
+    u16 second;
+    u32 pairRank;
+
+    if(move1 == 0)
+    {
+        AGB_ASSERT(move2 <= ARRAY_COUNT(sDynamicCustomMonMoves));
+        return move2;
+    }
+    if(move2 == 0)
+    {
+        AGB_ASSERT(move1 <= ARRAY_COUNT(sDynamicCustomMonMoves));
+        return move1;
+    }
+
+    AGB_ASSERT(move1 <= ARRAY_COUNT(sDynamicCustomMonMoves));
+    AGB_ASSERT(move2 <= ARRAY_COUNT(sDynamicCustomMonMoves));
+    if(move1 == move2)
+    {
+        AGB_ASSERT(FALSE);
+        return move1;
+    }
+
+    first = move1 - 1;
+    second = move2 - 1;
+    if(first > second)
+    {
+        u16 temp = first;
+        first = second;
+        second = temp;
+    }
+
+    pairRank = first * (2 * DYNAMIC_MOVE_POOL_CAPACITY - first - 1) / 2;
+    pairRank += second - first - 1;
+    return DYNAMIC_MOVE_PAIR_CODE_START + pairRank;
+}
+
+static void AppendDynamicMoveByIndex(struct DynamicMonData* outData, u16 moveIndex)
+{
+    if(moveIndex != 0 && moveIndex <= ARRAY_COUNT(sDynamicCustomMonMoves))
+    {
+        AGB_ASSERT(outData->movesCount < ARRAY_COUNT(outData->moves));
+        outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[moveIndex - 1];
+    }
+    else
+    {
+        AGB_ASSERT(FALSE);
+    }
+}
+
+static void DecodeDynamicMoveSelection(u16 moveSelection, struct DynamicMonData* outData)
+{
+    u16 first;
+    u32 pairRank;
+
+    if(moveSelection == 0)
+        return;
+
+    if(moveSelection <= DYNAMIC_MOVE_POOL_CAPACITY)
+    {
+        AppendDynamicMoveByIndex(outData, moveSelection);
+        return;
+    }
+
+    if(moveSelection < DYNAMIC_MOVE_PAIR_CODE_START)
+    {
+        AGB_ASSERT(FALSE);
+        return;
+    }
+
+    pairRank = moveSelection - DYNAMIC_MOVE_PAIR_CODE_START;
+    if(pairRank >= DYNAMIC_MOVE_PAIR_COUNT)
+    {
+        AGB_ASSERT(FALSE);
+        return;
+    }
+
+    for(first = 0; first < DYNAMIC_MOVE_POOL_CAPACITY - 1; ++first)
+    {
+        u16 remainingPairs = DYNAMIC_MOVE_POOL_CAPACITY - first - 1;
+
+        if(pairRank < remainingPairs)
+        {
+            AppendDynamicMoveByIndex(outData, first + 1);
+            AppendDynamicMoveByIndex(outData, first + pairRank + 2);
+            return;
+        }
+
+        pairRank -= remainingPairs;
+    }
+
+    AGB_ASSERT(FALSE);
+}
+
+static u16 EncodeTypedUniqueMoveSelection(u8 type, u8 typeSlot, u8 typeMoveFlip, u16 moveIndex)
+{
+    u16 typeSelection = ((type * 2 + typeSlot) * 2 + typeMoveFlip);
+
+    AGB_ASSERT(type < NUMBER_OF_MON_TYPES);
+    AGB_ASSERT(typeSlot < 2);
+    AGB_ASSERT(typeMoveFlip < 2);
+    AGB_ASSERT(moveIndex <= ARRAY_COUNT(sDynamicCustomMonMoves));
+    return typeSelection * DYNAMIC_TYPED_MOVE_SELECTION_STRIDE + moveIndex;
+}
+
+static void DecodeTypedUniqueMoveSelection(u16 selection, u8* type, u8* typeSlot, u8* typeMoveFlip, u16* moveIndex)
+{
+    u16 typeSelection = selection / DYNAMIC_TYPED_MOVE_SELECTION_STRIDE;
+
+    *moveIndex = selection % DYNAMIC_TYPED_MOVE_SELECTION_STRIDE;
+    *typeMoveFlip = typeSelection % 2;
+    typeSelection /= 2;
+    *typeSlot = typeSelection % 2;
+    *type = typeSelection / 2;
+
+    AGB_ASSERT(*type < NUMBER_OF_MON_TYPES);
+    AGB_ASSERT(*moveIndex <= ARRAY_COUNT(sDynamicCustomMonMoves));
+}
+
 static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* outData)
 {
     struct CompressedDynamicData* compressedUntyped = (struct CompressedDynamicData*)&customMonId;
@@ -646,15 +849,7 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
         struct CompressedDynamicData_Original* compressedData = (struct CompressedDynamicData_Original*)compressedUntyped;
 
         outData->ability = ((compressedData->ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[compressedData->ability - 1] : ABILITY_NONE;
-
-        if(compressedData->move1 != 0 && (compressedData->move1 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move1 - 1];
-
-        if(compressedData->move2 != 0 && (compressedData->move2 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move2 - 1];
-
-        if(compressedData->move3 != 0 && (compressedData->move3 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move3 - 1];
+        DecodeDynamicMoveSelection(compressedData->moveSelection, outData);
     }
     else if(compressedUntyped->format == COMPRESSED_FORMAT_ORIGINAL_UNIQUE_ABILITY)
     {
@@ -662,12 +857,7 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
 
         outData->ability = ((compressedData->ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[compressedData->ability - 1] : ABILITY_NONE;
         outData->uniqueAbility = ((compressedData->uniqueAbility - 1) < ARRAY_COUNT(sDynamicCustomMonUniqueAbilities)) ? sDynamicCustomMonUniqueAbilities[compressedData->uniqueAbility - 1] : ABILITY_NONE;
-
-        if(compressedData->move1 != 0 && (compressedData->move1 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move1 - 1];
-
-        if(compressedData->move2 != 0 && (compressedData->move2 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move2 - 1];
+        DecodeDynamicMoveSelection(compressedData->moveSelection, outData);
     }
     else if(compressedUntyped->format == COMPRESSED_FORMAT_MON_TYPE)
     {
@@ -675,25 +865,24 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
 
         outData->ability = ((compressedData->ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[compressedData->ability - 1] : ABILITY_NONE;
         outData->types[compressedData->typeSlot] = compressedData->type;
-        outData->moves[outData->movesCount++] = SelectTypeBasedExtraMove(compressedData->type, compressedData->typeMoveFlip);
-
-        if(compressedData->move1 != 0 && (compressedData->move1 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move1 - 1];
-
-        if(compressedData->move2 != 0 && (compressedData->move2 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move2 - 1];
+        outData->moves[outData->movesCount++] = SelectTypeBasedExtraMove(compressedData->type, compressedData->typeSlot, compressedData->typeMoveFlip);
+        DecodeDynamicMoveSelection(compressedData->moveSelection, outData);
     }
     else if(compressedUntyped->format == COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY)
     {
         struct CompressedDynamicData_MonTypeUniqueAbility* compressedData = (struct CompressedDynamicData_MonTypeUniqueAbility*)compressedUntyped;
+        u8 type;
+        u8 typeSlot;
+        u8 typeMoveFlip;
+        u16 moveIndex;
 
         outData->ability = ((compressedData->ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[compressedData->ability - 1] : ABILITY_NONE;
         outData->uniqueAbility = ((compressedData->uniqueAbility - 1) < ARRAY_COUNT(sDynamicCustomMonUniqueAbilities)) ? sDynamicCustomMonUniqueAbilities[compressedData->uniqueAbility - 1] : ABILITY_NONE;
-        outData->types[compressedData->typeSlot] = compressedData->type;
-        outData->moves[outData->movesCount++] = SelectTypeBasedExtraMove(compressedData->type, compressedData->typeMoveFlip);
-
-        if(compressedData->move1 != 0 && (compressedData->move1 - 1) < ARRAY_COUNT(sDynamicCustomMonMoves))
-            outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[compressedData->move1 - 1];
+        DecodeTypedUniqueMoveSelection(compressedData->typeMoveSelection, &type, &typeSlot, &typeMoveFlip, &moveIndex);
+        outData->types[typeSlot] = type;
+        outData->moves[outData->movesCount++] = SelectTypeBasedExtraMove(type, typeSlot, typeMoveFlip);
+        if(moveIndex != 0)
+            AppendDynamicMoveByIndex(outData, moveIndex);
     }
     else
     {
@@ -935,7 +1124,7 @@ u8 RogueGift_GetCustomMonRarity(u32 id)
             if(compressedData->ability != 0)
                 return UNIQUE_RARITY_EPIC;
 
-            if(compressedData->move1 != 0 || compressedData->move2 != 0)
+            if(compressedData->moveSelection != 0)
                 return UNIQUE_RARITY_RARE;
 
             return UNIQUE_RARITY_COMMON;
@@ -1118,6 +1307,20 @@ static u32 SelectNextMoveIndex(u16 species)
     return 0;
 }
 
+static u16 SelectNextMoveSelection(u16 species, u8 moveCount)
+{
+    u16 move1 = 0;
+    u16 move2 = 0;
+
+    AGB_ASSERT(moveCount <= 2);
+    if(moveCount >= 1)
+        move1 = SelectNextMoveIndex(species);
+    if(moveCount >= 2)
+        move2 = SelectNextMoveIndex(species);
+
+    return EncodeDynamicMoveSelection(move1, move2);
+}
+
 static u32 SelectNextAbilityIndex(u16 species)
 {
     u8 i;
@@ -1224,18 +1427,16 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
         switch (rarity)
         {
         case UNIQUE_RARITY_COMMON:
-            compressedData->move1 = SelectNextMoveIndex(species);
-            compressedData->move2 = SelectNextMoveIndex(species);
+            compressedData->moveSelection = SelectNextMoveSelection(species, 2);
             break;
 
         case UNIQUE_RARITY_RARE:
-            compressedData->move1 = SelectNextMoveIndex(species);
+            compressedData->moveSelection = SelectNextMoveSelection(species, 1);
             compressedData->ability = SelectNextAbilityIndex(species);
             break;
 
         case UNIQUE_RARITY_EPIC:
-            compressedData->move1 = SelectNextMoveIndex(species);
-            compressedData->move2 = SelectNextMoveIndex(species);
+            compressedData->moveSelection = SelectNextMoveSelection(species, 2);
             compressedData->ability = SelectNextAbilityIndex(species);
             break;
 
@@ -1251,8 +1452,7 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
         switch (rarity)
         {
         case UNIQUE_RARITY_LEGENDARY:
-            compressedData->move1 = SelectNextMoveIndex(species);
-            compressedData->move2 = SelectNextMoveIndex(species);
+            compressedData->moveSelection = SelectNextMoveSelection(species, 2);
             compressedData->ability = SelectNextAbilityIndex(species);
             compressedData->uniqueAbility = SelectNextUniqueAbilityIndex(species);
             break;
@@ -1268,7 +1468,7 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
         compressedData->typeSlot = Random() % 2;
         compressedData->typeMoveFlip = Random() % 2;
         compressedData->type = SelectRandomType(species, compressedData->typeSlot);
-        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, SelectTypeBasedExtraMove(compressedData->type, compressedData->typeMoveFlip));
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, SelectTypeBasedExtraMove(compressedData->type, compressedData->typeSlot, compressedData->typeMoveFlip));
 
         switch (rarity)
         {
@@ -1276,12 +1476,11 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
             break;
 
         case UNIQUE_RARITY_RARE:
-            compressedData->move1 = SelectNextMoveIndex(species);
-            compressedData->move2 = SelectNextMoveIndex(species);
+            compressedData->moveSelection = SelectNextMoveSelection(species, 2);
             break;
 
         case UNIQUE_RARITY_EPIC:
-            compressedData->move1 = SelectNextMoveIndex(species);
+            compressedData->moveSelection = SelectNextMoveSelection(species, 1);
             compressedData->ability = SelectNextAbilityIndex(species);
             break;
 
@@ -1293,15 +1492,16 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
     else if(compressedDataUntyped.format == COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY)
     {
         struct CompressedDynamicData_MonTypeUniqueAbility* compressedData = (struct CompressedDynamicData_MonTypeUniqueAbility*)&compressedDataUntyped;
-        compressedData->typeSlot = Random() % 2;
-        compressedData->typeMoveFlip = Random() % 2;
-        compressedData->type = SelectRandomType(species, compressedData->typeSlot);
-        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, SelectTypeBasedExtraMove(compressedData->type, compressedData->typeMoveFlip));
+        u8 typeSlot = Random() % 2;
+        u8 typeMoveFlip = Random() % 2;
+        u8 type = SelectRandomType(species, typeSlot);
+
+        RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, SelectTypeBasedExtraMove(type, typeSlot, typeMoveFlip));
 
         switch (rarity)
         {
         case UNIQUE_RARITY_LEGENDARY:
-            compressedData->move1 = SelectNextMoveIndex(species);
+            compressedData->typeMoveSelection = EncodeTypedUniqueMoveSelection(type, typeSlot, typeMoveFlip, SelectNextMoveIndex(species));
             compressedData->ability = SelectNextAbilityIndex(species);
             compressedData->uniqueAbility = SelectNextUniqueAbilityIndex(species);
             break;
