@@ -14,6 +14,11 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Fixed
+
+- Fixed corrupted text and background tiles on the move-replacement summary
+  screen opened while relearning a move.
+
 ### Removed
 
 - Removed the deprecated agbcc build path and its unused fixed-layout linker

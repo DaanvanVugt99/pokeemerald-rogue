@@ -3424,7 +3424,10 @@ static void PutPageWindowTilemaps(u8 page)
     }
 
     for (i = 0; i < ARRAY_COUNT(sMonSummaryScreen->windowIds); i++)
-        PutWindowTilemap(sMonSummaryScreen->windowIds[i]);
+    {
+        if (sMonSummaryScreen->windowIds[i] != WINDOW_NONE)
+            PutWindowTilemap(sMonSummaryScreen->windowIds[i]);
+    }
 
     ScheduleBgCopyTilemapToVram(0);
 }
