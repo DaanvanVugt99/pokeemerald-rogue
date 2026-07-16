@@ -1052,6 +1052,8 @@ static u8 const sText_UniqueMonAbility[] = _("A/ {COLOR GREEN}{STR_VAR_1}");
 static u8 const sText_UniqueMonUniqueAbility[] = _("U/ {COLOR GREEN}{STR_VAR_1}");
 static u8 const sText_UniqueMonMove[] = _(" -{STR_VAR_1}");
 static u8 const sText_UniqueMonOutOfDex[] = _("{COLOR RED}Not in current Dex");
+static u8 const sText_UniqueMonType[] = _("Type/ {STR_VAR_1}");
+static u8 const sText_UniqueMonTypes[] = _("Type/ {STR_VAR_1}/{STR_VAR_2}");
 
 static void PrintUniqueMonInfoToWindow(u8 windowId)
 {
@@ -1073,6 +1075,30 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
 
     if(!RoguePokedex_IsSpeciesEnabled(species))
         AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_UniqueMonOutOfDex, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+
+    // Show the effective typing rather than making the player infer altered
+    // types from the recolored sprite.
+    {
+        u8 type1 = RogueGift_GetCustomMonType(customMonId, 0);
+        u8 type2 = RogueGift_GetCustomMonType(customMonId, 1);
+
+        if(!IS_STANDARD_TYPE(type1))
+            type1 = RoguePokedex_GetSpeciesType(species, 0);
+        if(!IS_STANDARD_TYPE(type2))
+            type2 = RoguePokedex_GetSpeciesType(species, 1);
+
+        StringCopy(gStringVar1, gTypeNames[type1]);
+        if(type1 == type2)
+        {
+            StringExpandPlaceholders(gStringVar4, sText_UniqueMonType);
+        }
+        else
+        {
+            StringCopy(gStringVar2, gTypeNames[type2]);
+            StringExpandPlaceholders(gStringVar4, sText_UniqueMonTypes);
+        }
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, gStringVar4, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+    }
 
     // Ability
     if(RogueGift_GetCustomMonAbilityCount(customMonId) != 0)
