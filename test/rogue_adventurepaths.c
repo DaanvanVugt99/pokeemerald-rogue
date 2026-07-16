@@ -23,3 +23,21 @@ TEST("A portal-pregenerated initial path is reused on map entry")
     gRogueAdvPath.justGenerated = originalJustGenerated;
     gRogueRun.adventureRoomId = originalRoomId;
 }
+
+TEST("An exhausted path is replaced after its boss")
+{
+    struct RogueAdvPath originalPath = gRogueAdvPath;
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+
+    gRogueAdvPath.roomCount = 1;
+    gRogueAdvPath.justGenerated = FALSE;
+    gRogueAdvPath.rooms[0].roomType = ADVPATH_ROOM_BOSS;
+    gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+
+    EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT(gRogueAdvPath.justGenerated);
+    EXPECT_GT(gRogueAdvPath.roomCount, 1);
+
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+}

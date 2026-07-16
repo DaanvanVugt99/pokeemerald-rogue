@@ -27162,8 +27162,18 @@ void CopyMonLevelAndBaseStatsToBattleMon(u32 battler, struct Pokemon *mon)
 void CopyMonAbilityAndTypesToBattleMon(u32 battler, struct Pokemon *mon)
 {
     gBattleMons[battler].ability = GetMonAbility(mon);
-    gBattleMons[battler].type1 = gSpeciesInfo[gBattleMons[battler].species].types[0];
-    gBattleMons[battler].type2 = gSpeciesInfo[gBattleMons[battler].species].types[1];
+
+    if (gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
+    {
+        gBattleMons[battler].type1 = gSpeciesInfo[gBattleMons[battler].species].types[0];
+        gBattleMons[battler].type2 = gSpeciesInfo[gBattleMons[battler].species].types[1];
+    }
+    else
+    {
+        gBattleMons[battler].type1 = GetTypeBySpecies(gBattleMons[battler].species, 0, gBattleMons[battler].otId);
+        gBattleMons[battler].type2 = GetTypeBySpecies(gBattleMons[battler].species, 1, gBattleMons[battler].otId);
+    }
+
     gBattleMons[battler].type3 = TYPE_MYSTERY;
 }
 

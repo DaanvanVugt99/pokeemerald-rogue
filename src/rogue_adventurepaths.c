@@ -1236,13 +1236,18 @@ static bool8 DoesRoomExists(s8 x, s8 y)
 bool8 RogueAdv_GenerateAdventurePathsIfRequired()
 {
     if(gRogueAdvPath.roomCount != 0
-        && (gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID
-            || gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomType != ADVPATH_ROOM_BOSS))
+        && gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID
+        && gRogueAdvPath.justGenerated)
+    {
+        // The run portal already generated the initial path while the screen
+        // was black. Reuse it on the first overview map load.
+        return TRUE;
+    }
+    else if(gRogueRun.adventureRoomId != ADVPATH_INVALID_ROOM_ID
+        && gRogueAdvPath.roomCount != 0
+        && gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomType != ADVPATH_ROOM_BOSS)
     {
         // Path is still valid
-        if(gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID)
-            return gRogueAdvPath.justGenerated;
-
         gRogueAdvPath.justGenerated = FALSE;
         return FALSE;
     }

@@ -88,3 +88,45 @@ SINGLE_BATTLE_TEST("Adaptive Origin counts dynamic custom typing when checking u
         EXPECT_MUL_EQ(results[1].damage, Q_4_12(1.5), results[0].damage);
     }
 }
+
+SINGLE_BATTLE_TEST("Dynamic custom typing is retained when a Pokemon switches in")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_CRABOMINABLE) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+
+        CreateDynamicTypeMon(&PLAYER_PARTY[1], SPECIES_CRABOMINABLE, TYPE_GROUND, 1);
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->type1, TYPE_FIGHTING);
+        EXPECT_EQ(player->type2, TYPE_GROUND);
+    }
+}
+
+SINGLE_BATTLE_TEST("A transformed dynamic custom Pokemon restores the target species typing after Mimicry")
+{
+    u16 turns;
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TRANSFORM].effect == EFFECT_TRANSFORM);
+        ASSUME(gBattleMoves[MOVE_PLAIN_TERRAIN].effect == EFFECT_PLAIN_TERRAIN);
+
+        PLAYER(SPECIES_DITTO) { Speed(100); }
+        OPPONENT(SPECIES_STUNFISK_GALARIAN) { Speed(50); Ability(ABILITY_MIMICRY); Moves(MOVE_PLAIN_TERRAIN, MOVE_CELEBRATE, MOVE_SPLASH); }
+
+        CreateDynamicTypeMon(&PLAYER_PARTY[0], SPECIES_DITTO, TYPE_FIRE, 0);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TRANSFORM); MOVE(opponent, MOVE_PLAIN_TERRAIN); }
+        for (turns = 0; turns < 5; ++turns)
+            TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        for (; turns < TERRAIN_DURATION_TURNS - 1; ++turns)
+            TURN { MOVE(player, MOVE_SPLASH); MOVE(opponent, MOVE_SPLASH); }
+    } THEN {
+        EXPECT(player->status2 & STATUS2_TRANSFORMED);
+        EXPECT_EQ(player->species, SPECIES_STUNFISK_GALARIAN);
+        EXPECT_EQ(player->type1, gSpeciesInfo[SPECIES_STUNFISK_GALARIAN].types[0]);
+        EXPECT_EQ(player->type2, gSpeciesInfo[SPECIES_STUNFISK_GALARIAN].types[1]);
+    }
+}

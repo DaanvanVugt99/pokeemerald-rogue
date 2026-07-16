@@ -846,11 +846,19 @@ STATIC_ASSERT(sizeof(((struct BattleStruct *)0)->palaceFlags) * 8 >= MAX_BATTLER
     gBattleMons[battlerId].type3 = TYPE_MYSTERY;    \
 }
 
-#define RESTORE_BATTLER_TYPE(battlerId)                                                     \
-{                                                                                           \
-    gBattleMons[battlerId].type1 = gSpeciesInfo[gBattleMons[battlerId].species].types[0];   \
-    gBattleMons[battlerId].type2 = gSpeciesInfo[gBattleMons[battlerId].species].types[1];   \
-    gBattleMons[battlerId].type3 = TYPE_MYSTERY;                                            \
+#define RESTORE_BATTLER_TYPE(battlerId)                                                                                  \
+{                                                                                                                        \
+    if (gBattleMons[battlerId].status2 & STATUS2_TRANSFORMED)                                                            \
+    {                                                                                                                    \
+        gBattleMons[battlerId].type1 = gSpeciesInfo[gBattleMons[battlerId].species].types[0];                           \
+        gBattleMons[battlerId].type2 = gSpeciesInfo[gBattleMons[battlerId].species].types[1];                           \
+    }                                                                                                                    \
+    else                                                                                                                 \
+    {                                                                                                                    \
+        gBattleMons[battlerId].type1 = GetTypeBySpecies(gBattleMons[battlerId].species, 0, gBattleMons[battlerId].otId); \
+        gBattleMons[battlerId].type2 = GetTypeBySpecies(gBattleMons[battlerId].species, 1, gBattleMons[battlerId].otId); \
+    }                                                                                                                    \
+    gBattleMons[battlerId].type3 = TYPE_MYSTERY;                                                                         \
 }
 
 #define IS_BATTLER_PROTECTED(battlerId)(gProtectStructs[battlerId].protected                                           \

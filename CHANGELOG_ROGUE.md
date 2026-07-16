@@ -24,6 +24,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed custom Unique Pokémon types reverting to their species' base types
+  when switching into battle, and fixed empty adventure paths appearing after
+  defeating a boss.
 - Fixed corrupted text and background tiles on the move-replacement summary
   screen opened while relearning a move.
 
