@@ -26,6 +26,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Fossil Drill activating Rapid Spin when its user had fainted or was
+  about to faint from its triggering move's recoil.
 - Fixed custom Unique Pokémon types reverting to their species' base types
   when switching into battle, and fixed empty adventure paths appearing after
   defeating a boss.

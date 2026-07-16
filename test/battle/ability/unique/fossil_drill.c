@@ -4,8 +4,28 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_ROCK_THROW].type == TYPE_ROCK);
+    ASSUME(gBattleMoves[MOVE_HEAD_SMASH].type == TYPE_ROCK);
+    ASSUME(gBattleMoves[MOVE_HEAD_SMASH].effect == EFFECT_RECOIL_50);
     ASSUME(gBattleMoves[MOVE_SURF].type == TYPE_WATER);
     ASSUME(gBattleMoves[MOVE_RAPID_SPIN].effect == EFFECT_RAPID_SPIN);
+}
+
+SINGLE_BATTLE_TEST("Fossil Drill does not use Rapid Spin if its user faints from recoil")
+{
+    GIVEN {
+        PLAYER(SPECIES_ARMALDO) { HP(1); Attack(1); Ability(ABILITY_BATTLE_ARMOR); UniqueAbility(ABILITY_FOSSIL_DRILL); Moves(MOVE_HEAD_SMASH); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Defense(999); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HEAD_SMASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_HEAD_SMASH, player);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_FOSSIL_DRILL);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_RAPID_SPIN, player);
+        }
+    } THEN {
+        EXPECT_EQ(player->hp, 0);
+    }
 }
 
 SINGLE_BATTLE_TEST("Fossil Drill triggers only on the first Rock-type move after switch-in")

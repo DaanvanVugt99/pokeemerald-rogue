@@ -17642,7 +17642,9 @@ if (triggeringAbility != ABILITY_NONE)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         && IsBattlerAlive(gBattlerTarget)
+         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_FOSSIL_DRILL);
             gBattleStruct->atkCancellerTracker = 0;
