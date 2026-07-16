@@ -14,6 +14,14 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Changed
+
+- Changed new hub area construction to use the hub map editor, allowing the
+  player to choose any valid connected location instead of only expanding from
+  their current area.
+- Unified hub upgrades, construction, and rearrangement under one workbench
+  session, with the hub refresh occurring once when the player exits.
+
 ### Fixed
 
 - Fixed corrupted text and background tiles on the move-replacement summary

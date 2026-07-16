@@ -485,21 +485,6 @@ static void IncrementCoordsByDirection(struct Coords8* coords, u8 dir)
     }
 }
 
-void RogueHub_BuildAreaInConnDir(u8 area, u8 connDir)
-{
-    u8 currentArea = RogueHub_GetAreaFromCurrentMap();
-
-    if(currentArea != HUB_AREA_NONE && !RogueHub_HasAreaBuilt(area) && connDir < HUB_AREA_CONN_COUNT)
-    {
-        struct Coords8 pos;
-        pos.x = GetActiveHubMap()->areaCoords[currentArea].x;
-        pos.y = GetActiveHubMap()->areaCoords[currentArea].y;
-        IncrementCoordsByDirection(&pos, connDir);
-
-        RogueHub_BuildArea(area, pos.x, pos.y);
-    }
-}
-
 bool8 RogueHub_HasAreaBuildRequirements(u8 area)
 {
     u8 i;
@@ -620,12 +605,6 @@ bool8 RogueHub_AreaHasFreeConnection(u8 area, u8 dir)
     }
 
     return FALSE;
-}
-
-bool8 RogueHub_CanBuildConnectionBetween(u8 fromArea, u8 toArea, u8 dir)
-{
-    u8 invDir = InvertConnDirection(dir);
-    return RogueHub_AreaHasFreeConnection(fromArea, dir) && CanAreaConnect(toArea, invDir);
 }
 
 static struct Coords8 GetAreaCoordsAfterMove(u8 area, u8 movingArea, s8 x, s8 y)
@@ -818,6 +797,35 @@ bool8 RogueHub_CanMoveArea(u8 area)
         return FALSE;
 
     return WouldHubRemainConnectedWithoutArea(area);
+}
+
+bool8 RogueHub_CanBuildAreaAtCoord(u8 area, s8 x, s8 y)
+{
+    u8 i;
+
+    if(area >= HUB_AREA_COUNT || RogueHub_HasAreaBuilt(area))
+        return FALSE;
+
+    if(!RogueHub_IsCoordInTownGrid(x, y))
+        return FALSE;
+
+    if(IsReservedCoordAfterMove(x, y, area, x, y))
+        return FALSE;
+
+    if(AnyAreaOccupiesReservedCoordAfterMove(area, x, y))
+        return FALSE;
+
+    for(i = 0; i < HUB_AREA_COUNT; ++i)
+    {
+        if(RogueHub_HasAreaBuilt(i))
+        {
+            struct Coords8 coords = RogueHub_GetAreaCoords(i);
+            if(coords.x == x && coords.y == y)
+                return FALSE;
+        }
+    }
+
+    return AreaHasAnyConnectionAfterMove(area, area, x, y);
 }
 
 bool8 RogueHub_CanMoveAreaToCoord(u8 area, s8 x, s8 y)

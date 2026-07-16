@@ -3,6 +3,7 @@
 
 void Rogue_OpenWorldMap(MainCallback callback);
 void Rogue_OpenWorldMapMoveArea(MainCallback callback);
+void Rogue_OpenWorldMapBuildArea(u8 area, MainCallback callback);
 void CB2_ShowWorldMap(void);
 
 #endif // GUARD_DIPLOMA_H

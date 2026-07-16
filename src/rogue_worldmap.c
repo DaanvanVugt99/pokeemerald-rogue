@@ -57,20 +57,23 @@ struct WorldMapData
 EWRAM_DATA static struct WorldMapData *sWorldMapData = NULL;
 EWRAM_DATA static u8 *sWorldMapTilemapPtr = NULL;
 static u8 sPendingWorldMapMode = 0;
+static u8 sPendingWorldMapArea;
 
 enum WorldMapMode
 {
     WORLD_MAP_MODE_VIEW,
     WORLD_MAP_MODE_MOVE_SELECT,
     WORLD_MAP_MODE_MOVE_PLACE,
+    WORLD_MAP_MODE_BUILD_PLACE,
 };
 
 static u8 const sText_BasicDesc[] = _("{STR_VAR_1}");
 static u8 const sText_TeleportDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} Teleport");
 static u8 const sText_MoveSelectDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} Move");
 static u8 const sText_CannotMoveDesc[] = _("{STR_VAR_1}\n{COLOR RED}{FONT_SHORT}Can't move");
-static u8 const sText_MovePlaceDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} Place {B_BUTTON}{FONT_SHORT} Back");
+static u8 const sText_MovePlaceDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} OK {B_BUTTON}{FONT_SHORT} Back");
 static u8 const sText_MoveCannotPlaceDesc[] = _("{STR_VAR_1}\n{COLOR RED}{FONT_SHORT}Can't place");
+static u8 const sText_BuildPlaceDesc[] = _("{STR_VAR_1}\n{A_BUTTON}{FONT_SHORT} OK {B_BUTTON}{FONT_SHORT} Back");
 
 static void MainCB2(void);
 static void InitData();
@@ -221,6 +224,19 @@ void Rogue_OpenWorldMapMoveArea(MainCallback callback)
     LockPlayerFieldControls();
 }
 
+void Rogue_OpenWorldMapBuildArea(u8 area, MainCallback callback)
+{
+    AGB_ASSERT(area < HUB_AREA_COUNT);
+    AGB_ASSERT(!RogueHub_HasAreaBuilt(area));
+
+    sPendingWorldMapMode = WORLD_MAP_MODE_BUILD_PLACE;
+    sPendingWorldMapArea = area;
+    VarSet(VAR_RESULT, FALSE);
+    gMain.savedCallback = callback;
+    SetMainCallback2(CB2_ShowWorldMap);
+    LockPlayerFieldControls();
+}
+
 void CB2_ShowWorldMap(void)
 {
     RogueToD_SetTempDisableTimeVisuals(TRUE);
@@ -259,8 +275,7 @@ void CB2_ShowWorldMap(void)
         ;
 
     LZDecompressWram(sWorldMapTilemaps[RogueHub_GetHubVariantNumber() % ARRAY_COUNT(sWorldMapTilemaps)], sWorldMapTilemapPtr);
-    LoadBgTiles(0, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, FREE_BLOCK_START);
-    LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(BG_PAL_ID_WINDOW_FRAMES), PLTT_SIZE_4BPP);
+    LoadDarkUserWindowBorderGfxOnBg(0, FREE_BLOCK_START, BG_PLTT_ID(BG_PAL_ID_WINDOW_FRAMES));
     CopyBgTilemapBufferToVram(1);
     DisplayTitleText();
     DisplayDescText();
@@ -308,7 +323,15 @@ static void InitData()
     sWorldMapData->mode = sPendingWorldMapMode;
     sWorldMapData->movingArea = HUB_AREA_NONE;
     sWorldMapData->areaMoved = FALSE;
+
+    if(sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE)
+    {
+        sWorldMapData->currentArea = sPendingWorldMapArea;
+        sWorldMapData->movingArea = sPendingWorldMapArea;
+    }
+
     sPendingWorldMapMode = WORLD_MAP_MODE_VIEW;
+    sPendingWorldMapArea = HUB_AREA_NONE;
 
 }
 
@@ -400,7 +423,13 @@ static void Task_WorldMapWaitForMoveKeyPress(u8 taskId)
     {
         PlaySE(SE_SELECT);
 
-        if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
+        if(sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE)
+        {
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_WorldMapFadeOut;
+            return;
+        }
+        else if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
         {
             struct Coords8 coords;
             sWorldMapData->mode = WORLD_MAP_MODE_MOVE_SELECT;
@@ -413,7 +442,7 @@ static void Task_WorldMapWaitForMoveKeyPress(u8 taskId)
         else
         {
             if(sWorldMapData->areaMoved)
-                VarSet(VAR_RESULT, 2);
+                VarSet(VAR_RESULT, TRUE);
 
             BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
             gTasks[taskId].func = Task_WorldMapFadeOut;
@@ -456,7 +485,7 @@ static void Task_WorldMapWaitForMoveKeyPress(u8 taskId)
             redraw = TRUE;
         }
     }
-    else if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
+    else if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE || sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE)
     {
         if(JOY_NEW(DPAD_LEFT))
         {
@@ -493,15 +522,34 @@ static void Task_WorldMapWaitForMoveKeyPress(u8 taskId)
 
         if(JOY_NEW(A_BUTTON))
         {
-            if(RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY))
+            bool8 canPlace;
+
+            if(sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE)
+                canPlace = RogueHub_CanBuildAreaAtCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY);
+            else
+                canPlace = RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY);
+
+            if(canPlace)
             {
                 PlaySE(SE_SELECT);
-                RogueHub_MoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY);
-                sWorldMapData->areaMoved = TRUE;
-                sWorldMapData->mode = WORLD_MAP_MODE_MOVE_SELECT;
-                sWorldMapData->currentArea = sWorldMapData->movingArea;
-                sWorldMapData->movingArea = HUB_AREA_NONE;
-                redraw = TRUE;
+
+                if(sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE)
+                {
+                    RogueHub_BuildArea(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY);
+                    VarSet(VAR_RESULT, TRUE);
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                    gTasks[taskId].func = Task_WorldMapFadeOut;
+                    return;
+                }
+                else
+                {
+                    RogueHub_MoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY);
+                    sWorldMapData->areaMoved = TRUE;
+                    sWorldMapData->mode = WORLD_MAP_MODE_MOVE_SELECT;
+                    sWorldMapData->currentArea = sWorldMapData->movingArea;
+                    sWorldMapData->movingArea = HUB_AREA_NONE;
+                    redraw = TRUE;
+                }
             }
             else
             {
@@ -655,9 +703,12 @@ static void DrawWorldMapTiles()
         }
     }
 
-    if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE)
+    if(sWorldMapData->mode == WORLD_MAP_MODE_MOVE_PLACE || sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE)
     {
-        u8 marker = RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY)
+        bool8 canPlace = sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE
+            ? RogueHub_CanBuildAreaAtCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY)
+            : RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY);
+        u8 marker = canPlace
             ? TILE_GREEN_MARKER
             : TILE_RED_MARKER;
         DrawMarkerAtWorldMapCoord(sWorldMapData->posX, sWorldMapData->posY, marker);
@@ -695,6 +746,13 @@ static void DisplayDescText(void)
     {
         if(RogueHub_CanMoveAreaToCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY))
             StringExpandPlaceholders(gStringVar4, sText_MovePlaceDesc);
+        else
+            StringExpandPlaceholders(gStringVar4, sText_MoveCannotPlaceDesc);
+    }
+    else if(sWorldMapData->mode == WORLD_MAP_MODE_BUILD_PLACE)
+    {
+        if(RogueHub_CanBuildAreaAtCoord(sWorldMapData->movingArea, sWorldMapData->posX, sWorldMapData->posY))
+            StringExpandPlaceholders(gStringVar4, sText_BuildPlaceDesc);
         else
             StringExpandPlaceholders(gStringVar4, sText_MoveCannotPlaceDesc);
     }
