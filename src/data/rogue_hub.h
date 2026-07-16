@@ -25,6 +25,7 @@ extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity0[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity1[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity3[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonTyping[];
+extern const u8 gHubUpgradeDesc_Lab_UniqueLegendaries[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_RandomStarter[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_AdventureReplay[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_TrialAttendant[];
@@ -376,6 +377,14 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .buildCost = 9,
         .descText = gHubUpgradeDesc_Lab_UniqueMonRarity3,
         .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EPIC, HUB_UPGRADE_NONE },
+    },
+    [HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES] =
+    {
+        .upgradeName = _("Unique Legends"),
+        .targetArea = HUB_AREA_LABS,
+        .buildCost = 12,
+        .descText = gHubUpgradeDesc_Lab_UniqueLegendaries,
+        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY, HUB_UPGRADE_NONE },
     },
 
     // HUB_AREA_ADVENTURE_ENTRANCE

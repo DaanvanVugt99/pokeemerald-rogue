@@ -22,6 +22,7 @@
 #include "rogue_adventurepaths.h"
 #include "rogue_campaign.h"
 #include "rogue_gifts.h"
+#include "rogue_hub.h"
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
 #include "rogue_query.h"
@@ -1017,6 +1018,35 @@ static u8 FindRoomOfType(u16 type)
     return 0;
 }
 
+static u32 GenerateUniqueLegendaryCustomMonId(u16 species)
+{
+    u32 customMonId;
+    u8 rarity;
+    RAND_TYPE rngState;
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES)
+     || !RogueRandomChance(10, OVERWORLD_FLAG))
+        return 0;
+
+    rarity = (RogueRandom() % 2) == 0 ? UNIQUE_RARITY_EPIC : UNIQUE_RARITY_LEGENDARY;
+
+    // Dynamic custom data uses the general RNG. Seed it from the path RNG so
+    // Adventure Replay reproduces the same payload without perturbing gameplay RNG.
+    rngState = gRngValue;
+    SeedRng(RogueRandom());
+    customMonId = RogueGift_CreateDynamicMonIdRaw(rarity, species);
+    gRngValue = rngState;
+
+    return customMonId;
+}
+
+#ifdef ROGUE_DEBUG
+u32 RogueAdv_Debug_GenerateUniqueLegendaryCustomMonId(u16 species)
+{
+    return GenerateUniqueLegendaryCustomMonId(species);
+}
+#endif
+
 static void GenerateRoomInstance(u8 roomId, u8 roomType)
 {
     u16 weights[ADVPATH_SUBROOM_WEIGHT_COUNT];
@@ -1094,6 +1124,7 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
                 u16 species = gRogueRun.legendarySpecies[legendId];
                 gRogueAdvPath.rooms[roomId].roomParams.roomIdx = Rogue_GetLegendaryRoomForSpecies(species);
                 gRogueAdvPath.rooms[roomId].roomParams.perType.legendary.shinyState = Rogue_RollShinyState(SHINY_ROLL_STATIC);
+                gRogueAdvPath.rooms[roomId].roomParams.perType.legendary.customMonId = GenerateUniqueLegendaryCustomMonId(species);
             }
             break;
 
@@ -2270,6 +2301,8 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
             return gRogueRestStopEncounterInfo.mapTable[room->roomParams.roomIdx].encounterId;
 
         case ADVPATH_ROOM_LEGENDARY:
+            if(room->roomParams.perType.legendary.customMonId != 0)
+                return OBJ_EVENT_GFX_GOLD_LEGENDARY_STATUE;
             return OBJ_EVENT_GFX_TRICK_HOUSE_STATUE;
 
         case ADVPATH_ROOM_TEAM_HIDEOUT:
@@ -2530,6 +2563,10 @@ void RogueAdv_GetLastInteractedRoomParams()
         case ADVPATH_ROOM_ROUTE:
             gSpecialVar_ScriptNodeParam1 = gRogueAdvPath.rooms[roomIdx].roomParams.perType.route.difficulty;
             BufferTypeAdjective(Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[roomIdx]));
+            break;
+
+        case ADVPATH_ROOM_LEGENDARY:
+            gSpecialVar_ScriptNodeParam1 = gRogueAdvPath.rooms[roomIdx].roomParams.perType.legendary.customMonId != 0;
             break;
     }
 }

@@ -44,6 +44,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added a final Unique Legendaries Lab upgrade that gives each legendary node
+  a 10% chance to contain an Epic or Legendary Unique Pokémon.
 - Added Plain and Infested Seeds, which raise accuracy on Plain Terrain and
   critical-hit ratio on Infested Terrain respectively.
 

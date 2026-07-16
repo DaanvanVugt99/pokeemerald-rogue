@@ -7,14 +7,15 @@ extern struct RogueSaveBlock *gRogueSaveBlock;
 
 // First internal development save schema. Bump this when the serialized
 // Rogue block layout changes; incompatible development saves are discarded.
-#define ROGUE_SAVE_VERSION 1
+#define ROGUE_SAVE_VERSION 2
 
 enum
 {
     SAVE_VER_ID_UNKNOWN,
     SAVE_VER_ID_DEVELOPMENT_1_0,
+    SAVE_VER_ID_DEVELOPMENT_2_0,
 
-    SAVE_VER_ID_LATEST = SAVE_VER_ID_DEVELOPMENT_1_0,
+    SAVE_VER_ID_LATEST = SAVE_VER_ID_DEVELOPMENT_2_0,
 };
 
 void RogueSave_UpdatePointers();

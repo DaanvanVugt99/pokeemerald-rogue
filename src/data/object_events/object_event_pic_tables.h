@@ -2102,6 +2102,10 @@ static const struct SpriteFrameImage sPicTable_Statue[] = {
     obj_frame_tiles(gObjectEventPic_Statue),
 };
 
+static const struct SpriteFrameImage sPicTable_GoldLegendaryStatue[] = {
+    obj_frame_tiles(gObjectEventPic_GoldLegendaryStatue),
+};
+
 static const struct SpriteFrameImage sPicTable_Dusclops[] = {
     overworld_frame(gObjectEventPic_Dusclops, 2, 4, 0),
     overworld_frame(gObjectEventPic_Dusclops, 2, 4, 1),

@@ -470,6 +470,7 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Team_Rocket_Proton
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PC;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PCStand;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BattleStatue;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_GoldLegendaryStatue;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PhoneBooth;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PokeblockMixer;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PokeblockMixerGold;
@@ -1068,6 +1069,7 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_GRASS_DEFAULT] =            &gObjectEventGraphicsInfo_GrassDefault,
     [OBJ_EVENT_GFX_GOLD_GRASS] =               &gObjectEventGraphicsInfo_GoldGrass,
     [OBJ_EVENT_GFX_UNIQUE_DEN_GRASS] =         &gObjectEventGraphicsInfo_UniqueDenGrass,
+    [OBJ_EVENT_GFX_GOLD_LEGENDARY_STATUE] =    &gObjectEventGraphicsInfo_GoldLegendaryStatue,
     [OBJ_EVENT_GFX_FLAG_ADVENTURE] =           &gObjectEventGraphicsInfo_FlagAdventure,
 
     [OBJ_EVENT_GFX_DECOR_BED] =                &gObjectEventGraphicsInfo_DecorBed,

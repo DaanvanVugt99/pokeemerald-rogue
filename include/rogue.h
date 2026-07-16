@@ -101,6 +101,7 @@ struct RogueAdvPathRoomParams
         struct
         {
             bool8 shinyState;
+            u32 customMonId;
         } legendary;
         struct 
         {

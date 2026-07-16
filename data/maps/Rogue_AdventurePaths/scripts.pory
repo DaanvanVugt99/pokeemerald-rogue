@@ -115,7 +115,14 @@ script Rogue_AdventurePaths_InteractRoom
             }
 
         case ADVPATH_ROOM_LEGENDARY:
-            msgbox(format("It's a Pokémon of Legends!\nEnter this encounter?"), MSGBOX_YESNO)
+            if(var(VAR_NODE_PARAM1) == TRUE)
+            {
+                msgbox(format("It's a Unique Pokémon of Legends!\nEnter this encounter?"), MSGBOX_YESNO)
+            }
+            else
+            {
+                msgbox(format("It's a Pokémon of Legends!\nEnter this encounter?"), MSGBOX_YESNO)
+            }
 
         case ADVPATH_ROOM_TEAM_HIDEOUT:
             msgbox(format("It's a Team Hideout!\nEnter this encounter?"), MSGBOX_YESNO)

@@ -88,7 +88,10 @@
 
 #define HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT  (HUB_UPGRADE_FIRST + 47)
 
-#define HUB_UPGRADE_COUNT                               (HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT + 1)
+// 2.2
+#define HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES              (HUB_UPGRADE_FIRST + 48)
+
+#define HUB_UPGRADE_COUNT                               (HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES + 1)
 
 // NOTE - Once the next update is out ALWAYS add the upgrades at the bottom of this list
 

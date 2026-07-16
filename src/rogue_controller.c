@@ -7496,6 +7496,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                 case ADVPATH_ROOM_LEGENDARY:
                 {
                     u16 species = gRogueLegendaryEncounterInfo.mapTable[gRogueAdvPath.currentRoomParams.roomIdx].encounterId;
+                    u32 customMonId = gRogueAdvPath.currentRoomParams.perType.legendary.customMonId;
                     ResetSpecialEncounterStates();
                     ResetTrainerBattles();
                     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, species);
@@ -7503,7 +7504,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                         0,
                         species,
                         gRogueAdvPath.currentRoomParams.perType.legendary.shinyState,
-                        0
+                        customMonId
                     );
                     break;
                 }
@@ -10481,8 +10482,8 @@ void Rogue_ModifyWildMon(struct Pokemon* mon)
             u8 i;
             u16 moveId;
 
-            // TODO - Consider interaction for roamer
-            //TryApplyCustomMon(species, mon);
+            if(gRogueAdvPath.currentRoomParams.perType.legendary.customMonId != 0)
+                ApplyCustomMonToWildBattle(gRogueAdvPath.currentRoomParams.perType.legendary.customMonId, mon);
 
             // Replace roar with hidden power to avoid pokemon roaring itself out of battle
             for (i = 0; i < MAX_MON_MOVES; i++)
