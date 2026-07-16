@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Added the level-up battle NPC to Mysterious Shrines so parties can reach the
+  current level cap before challenging the shrine guardian.
 - Changed new hub area construction to use the hub map editor, allowing the
   player to choose any valid connected location instead of only expanding from
   their current area.
