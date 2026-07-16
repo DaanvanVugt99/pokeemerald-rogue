@@ -93,6 +93,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made Morelull and Shiinotic's Sporelight use Spotlight after every successful
+  healing move instead of only once per battle.
 - Expanded Unique Pokémon move generation to a curated 154-move general pool
   with shared physical and special attacks for every type, added four complementary
   altered-type moves per type, and made the shrine guardian retain a more varied

@@ -7,7 +7,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_SPOTLIGHT].effect == EFFECT_FOLLOW_ME);
 }
 
-DOUBLE_BATTLE_TEST("Sporelight uses Spotlight after the first healing move each battle")
+DOUBLE_BATTLE_TEST("Sporelight uses Spotlight after a healing move")
 {
     GIVEN {
         PLAYER(SPECIES_SHIINOTIC) { HP(50); MaxHP(400); Ability(ABILITY_EFFECT_SPORE); UniqueAbility(ABILITY_SPORELIGHT); Moves(MOVE_RECOVER); }
@@ -20,8 +20,6 @@ DOUBLE_BATTLE_TEST("Sporelight uses Spotlight after the first healing move each 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RECOVER, playerLeft);
         ABILITY_POPUP(playerLeft, ABILITY_SPORELIGHT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SPOTLIGHT, playerLeft);
-    } THEN {
-        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
 
@@ -40,12 +38,10 @@ DOUBLE_BATTLE_TEST("Sporelight does not trigger after non-healing moves")
             ABILITY_POPUP(playerLeft, ABILITY_SPORELIGHT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_SPOTLIGHT, playerLeft);
         }
-    } THEN {
-        EXPECT(!(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]));
     }
 }
 
-DOUBLE_BATTLE_TEST("Sporelight only triggers once per battle")
+DOUBLE_BATTLE_TEST("Sporelight triggers after every healing move")
 {
     GIVEN {
         PLAYER(SPECIES_SHIINOTIC) { HP(50); MaxHP(400); Ability(ABILITY_EFFECT_SPORE); UniqueAbility(ABILITY_SPORELIGHT); Moves(MOVE_RECOVER); }
@@ -60,11 +56,7 @@ DOUBLE_BATTLE_TEST("Sporelight only triggers once per battle")
         ABILITY_POPUP(playerLeft, ABILITY_SPORELIGHT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SPOTLIGHT, playerLeft);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RECOVER, playerLeft);
-        NONE_OF {
-            ABILITY_POPUP(playerLeft, ABILITY_SPORELIGHT);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_SPOTLIGHT, playerLeft);
-        }
-    } THEN {
-        EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
+        ABILITY_POPUP(playerLeft, ABILITY_SPORELIGHT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPOTLIGHT, playerLeft);
     }
 }

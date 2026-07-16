@@ -17556,8 +17556,7 @@ if (triggeringAbility != ABILITY_NONE)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
-         && CanUseSelfExtraMove(battler)
-         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+         && CanUseSelfExtraMove(battler))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_SPORELIGHT);
             gBattleStruct->atkCancellerTracker = 0;
@@ -17565,7 +17564,6 @@ if (triggeringAbility != ABILITY_NONE)
             gCalledMove = MOVE_SPOTLIGHT;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
-            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
