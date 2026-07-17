@@ -304,8 +304,7 @@ void CB2_ShowAssitantBoxView(void)
     while (FreeTempTileDataBuffersIfPossible())
         ;
     LZDecompressWram(sAssitantBoxTilemap, sAssitantBoxTilemapPtr);
-    LoadBgTiles(0, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, FREE_BLOCK_START);
-    LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(BG_PAL_ID_WINDOW_FRAMES), PLTT_SIZE_4BPP);
+    LoadUserWindowBorderGfxOnBg(0, FREE_BLOCK_START, BG_PLTT_ID(BG_PAL_ID_WINDOW_FRAMES));
     CopyBgTilemapBufferToVram(1);
 
     DisplayAssitantLoadingText();

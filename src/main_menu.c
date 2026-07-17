@@ -2545,9 +2545,7 @@ static void MainMenu_FormatSavegameBadges(void)
 static void LoadMainMenuWindowFrameTiles(u8 bgId, u16 tileOffset)
 {
     LoadBgTiles(bgId, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, tileOffset);
-    LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
-    if (tileOffset == MAIN_MENU_BORDER_TILE)
-        LoadPalette(sMainMenuFramePal, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
+    LoadPalette(sMainMenuFramePal, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
 }
 
 static void DrawMainMenuWindowBorder(const struct WindowTemplate *template, u16 baseTileNum)

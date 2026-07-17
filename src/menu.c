@@ -460,6 +460,7 @@ static void WindowFunc_ClearDialogWindowAndFrame(u8 bg, u8 tilemapLeft, u8 tilem
 
 void SetStandardWindowBorderStyle(u8 windowId, bool8 copyToVram)
 {
+    LoadUserWindowBorderGfx(windowId, STD_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(STD_WINDOW_PALETTE_NUM));
     DrawStdFrameWithCustomTileAndPalette(windowId, copyToVram, STD_WINDOW_BASE_TILE_NUM, STD_WINDOW_PALETTE_NUM);
 }
 
@@ -1681,7 +1682,7 @@ static void CreateYesNoMenuInternal(const struct WindowTemplate *window, u16 bas
     if (useDarkBorder)
         LoadDarkUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
     else
-        LoadUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
+        LoadOriginalUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
     DrawStdFrameWithCustomTileAndPalette(sYesNoWindowId, TRUE, baseTileNum, paletteNum);
 
     printer.currentChar = gText_YesNo;

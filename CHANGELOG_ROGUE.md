@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made the dark charcoal window border palette the global default so standard
+  menus, prompts, shops, and scripted choices use it consistently.
 - Added the level-up battle NPC to Mysterious Shrines so parties can reach the
   current level cap before challenging the shrine guardian.
 - Changed new hub area construction to use the hub map editor, allowing the
