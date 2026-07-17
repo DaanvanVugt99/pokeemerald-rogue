@@ -91,7 +91,6 @@ static const u8 sStatNamesTable[NUM_STATS][13] = // a;t versopm pf gStatNamesTab
 };
 
 static u8 const sText_The[] = _(" the ");
-static u8 const sText_TheShiny[] = _(" the shiny ");
 static u8 const sText_Shiny[] = _("Shiny ");
 static u8 const sText_Unique[] = _("Unique ");
 static u8 const sText_ShinyUnique[] = _("Shiny Unique ");
@@ -2074,10 +2073,10 @@ static u8 GetTypeForPokeblockItem(u16 itemId)
     return TYPE_NONE;
 }
 
-static void BufferSafariMonDisplayName(u8* dest, u8 const* nickname, u16 species, bool8 isShiny, bool8 isUnique)
+static void BufferSafariMonDisplayName(u8* dest, u8 const* nickname, u16 nicknameSpecies, u16 displaySpecies, bool8 isShiny, bool8 isUnique)
 {
     u8 displayNickname[POKEMON_NAME_LENGTH + 1];
-    u8 const* speciesName = RoguePokedex_GetSpeciesName(species);
+    u8 const* speciesName = RoguePokedex_GetSpeciesName(displaySpecies);
 
     if(isShiny || isUnique)
     {
@@ -2093,15 +2092,15 @@ static void BufferSafariMonDisplayName(u8* dest, u8 const* nickname, u16 species
     }
 
     StringCopy_Nickname(displayNickname, nickname);
-    StringCopy(dest, displayNickname);
 
-    if(isShiny || StringCompareN(displayNickname, speciesName, POKEMON_NAME_LENGTH) != 0)
+    if(StringCompareN(displayNickname, RoguePokedex_GetSpeciesName(nicknameSpecies), POKEMON_NAME_LENGTH) == 0)
     {
-        if(isShiny)
-            StringAppend(dest, sText_TheShiny);
-        else
-            StringAppend(dest, sText_The);
-
+        StringCopy(dest, speciesName);
+    }
+    else
+    {
+        StringCopy(dest, displayNickname);
+        StringAppend(dest, sText_The);
         StringAppend(dest, speciesName);
     }
 }
@@ -2405,7 +2404,7 @@ bool8 Rogue_GetSafariMonOfferDetails(u16 safariIndex, struct RogueSafariOfferDet
     details->costCount = min(cost.count, ROGUE_SAFARI_OFFER_MAX_COST_ITEMS);
 
     isCustomMon = TryGetSafariMonCustomMonId(safariMon, &customMonId);
-    BufferSafariMonDisplayName(details->displayName, safariMon->nickname, details->picSpecies, safariMon->shinyFlag, isCustomMon);
+    BufferSafariMonDisplayName(details->displayName, safariMon->nickname, safariMon->species, details->picSpecies, safariMon->shinyFlag, isCustomMon);
 
     if(isCustomMon)
         details->otId = customMonId;
@@ -2589,7 +2588,7 @@ void Rogue_TryPurchaseSafariMon()
             GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT_SHINY);
 
         GetMonData(&mon, MON_DATA_NICKNAME, nickname);
-        BufferSafariMonDisplayName(gStringVar1, nickname, species, IsMonShiny(&mon), isCustomMon);
+        BufferSafariMonDisplayName(gStringVar1, nickname, species, species, IsMonShiny(&mon), isCustomMon);
     }
 
     RemoveSafariPurchaseCost(&cost);
@@ -2712,6 +2711,7 @@ void Rogue_BufferSafariMonInfo()
     BufferSafariMonDisplayName(
         gStringVar1,
         gRogueSaveBlock->safariMons[safariIndex].nickname,
+        gRogueSaveBlock->safariMons[safariIndex].species,
         gRogueSaveBlock->safariMons[safariIndex].species,
         gRogueSaveBlock->safariMons[safariIndex].shinyFlag,
         TryGetSafariMonCustomMonId(&gRogueSaveBlock->safariMons[safariIndex], &customMonId));
