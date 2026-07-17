@@ -28,6 +28,7 @@
 #include "pokemon_summary_screen.h"
 #include "pokemon_storage_system.h"
 #include "rogue_controller.h"
+#include "rogue_pokedex.h"
 #include "script.h"
 #include "sound.h"
 #include "string_util.h"
@@ -664,6 +665,7 @@ static void ReshowReleaseMon(void);
 static bool8 ResetReleaseMonSpritePtr(void);
 static void SetMovingMonPriority(u8);
 static void SpriteCB_HeldMon(struct Sprite *);
+static bool8 IsSpeciesOutsideSelectedPokedex(u16);
 static struct Sprite *CreateMonIconSprite(u16, u32, u8, s16, s16, u8, u8);
 static void DestroyBoxMonIcon(struct Sprite *);
 
@@ -971,6 +973,7 @@ static const union AffineAnimCmd *const sAffineAnims_ChooseBoxMenu[] =
 
 static const u8 sChooseBoxMenu_TextColors[] = {TEXT_COLOR_RED, TEXT_DYNAMIC_COLOR_6, TEXT_DYNAMIC_COLOR_5};
 static const u8 sText_OutOf30[] = _("/30");
+static const u8 sText_NotInCurrentDex[] = _("{COLOR RED}Not in current Dex");
 
 static const u16 sChooseBoxMenu_Pal[]        = INCBIN_U16("graphics/pokemon_storage/box_selection_popup.gbapal");
 static const u8 sChooseBoxMenuCenter_Gfx[]   = INCBIN_U8("graphics/pokemon_storage/box_selection_popup_center.4bpp");
@@ -2100,11 +2103,8 @@ static void InitStartingPosData(void)
 
 static void SetMonIconTransparency(void)
 {
-    if (sStorage->boxOption == OPTION_MOVE_ITEMS)
-    {
-        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT2_ALL);
-        SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(7, 11));
-    }
+    SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT2_ALL);
+    SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(7, 11));
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_BG_ALL_ON | DISPCNT_OBJ_1D_MAP);
 }
 
@@ -4196,6 +4196,10 @@ static void LoadDisplayMonGfx(u16 species, u32 pid, u8 gender)
         LoadSpecialPokePic(sStorage->tileBuffer, species, pid, gender, TRUE);
         if(!Rogue_ModifyPaletteDecompress(sStorage->displayMonPalette, sStorage->displayMonPalBuffer))
             LZ77UnCompWram(sStorage->displayMonPalette, sStorage->displayMonPalBuffer);
+
+        if(IsSpeciesOutsideSelectedPokedex(species))
+            TintPalette_GrayScale2(sStorage->displayMonPalBuffer, 16);
+
         CpuCopy32(sStorage->tileBuffer, sStorage->displayMonTilePtr, MON_PIC_SIZE);
         LoadPalette(sStorage->displayMonPalBuffer, sStorage->displayMonPalOffset, PLTT_SIZE_4BPP);
         sStorage->displayMonSprite->invisible = FALSE;
@@ -4208,21 +4212,26 @@ static void LoadDisplayMonGfx(u16 species, u32 pid, u8 gender)
 
 static void PrintDisplayMonInfo(void)
 {
+    bool8 isOutsideSelectedPokedex = IsSpeciesOutsideSelectedPokedex(sStorage->displayMonSpecies);
+
     FillWindowPixelBuffer(WIN_DISPLAY_INFO, PIXEL_FILL(1));
     if (sStorage->boxOption != OPTION_MOVE_ITEMS)
     {
         AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_NORMAL, sStorage->displayMonNameText, 6, 0, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, 15, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, 29, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sStorage->displayMonItemName, 6, 43, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, isOutsideSelectedPokedex ? 14 : 15, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, isOutsideSelectedPokedex ? 26 : 29, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sStorage->displayMonItemName, 6, isOutsideSelectedPokedex ? 37 : 43, TEXT_SKIP_DRAW, NULL);
     }
     else
     {
         AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sStorage->displayMonItemName, 6, 0, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_NORMAL, sStorage->displayMonNameText, 6, 13, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, 28, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, 42, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_NORMAL, sStorage->displayMonNameText, 6, isOutsideSelectedPokedex ? 11 : 13, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, isOutsideSelectedPokedex ? 24 : 28, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, isOutsideSelectedPokedex ? 35 : 42, TEXT_SKIP_DRAW, NULL);
     }
+
+    if (isOutsideSelectedPokedex)
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL_NARROW, sText_NotInCurrentDex, 2, 47, TEXT_SKIP_DRAW, NULL);
 
     CopyWindowToVram(WIN_DISPLAY_INFO, COPYWIN_GFX);
     if (sStorage->displayMonSpecies != SPECIES_NONE)
@@ -4962,7 +4971,12 @@ static void DestroyBoxMonIconAtPosition(u8 boxPosition)
 static void SetBoxMonIconObjMode(u8 boxPosition, u8 objMode)
 {
     if (sStorage->boxMonsSprites[boxPosition] != NULL)
+    {
+        if (objMode == ST_OAM_OBJ_NORMAL && IsSpeciesOutsideSelectedPokedex(GetCurrentBoxMonData(boxPosition, MON_DATA_SPECIES_OR_EGG)))
+            objMode = ST_OAM_OBJ_BLEND;
+
         sStorage->boxMonsSprites[boxPosition]->oam.objMode = objMode;
+    }
 }
 
 static void CreatePartyMonsSprites(bool8 visible)
@@ -5148,6 +5162,9 @@ static void SetPartyMonIconObjMode(u8 partyId, u8 objMode)
 {
     if (sStorage->partySprites[partyId] != NULL)
     {
+        if (objMode == ST_OAM_OBJ_NORMAL && IsSpeciesOutsideSelectedPokedex(GetMonData(&gPlayerParty[partyId], MON_DATA_SPECIES_OR_EGG)))
+            objMode = ST_OAM_OBJ_BLEND;
+
         sStorage->partySprites[partyId]->oam.objMode = objMode;
     }
 }
@@ -5382,9 +5399,17 @@ static void RemoveSpeciesFromIconList(u16 species)
     }
 }
 
+static bool8 IsSpeciesOutsideSelectedPokedex(u16 species)
+{
+    return species != SPECIES_NONE
+        && species != SPECIES_EGG
+        && !RoguePokedex_IsSpeciesEnabled(species);
+}
+
 static struct Sprite *CreateMonIconSprite(u16 species, u32 personality, u8 gender, s16 x, s16 y, u8 oamPriority, u8 subpriority)
 {
     u16 tileNum;
+    u16 monSpecies = species;
     u8 spriteId;
     struct SpriteTemplate template = sSpriteTemplate_MonIcon;
 
@@ -5412,6 +5437,10 @@ static struct Sprite *CreateMonIconSprite(u16 species, u32 personality, u8 gende
     gSprites[spriteId].oam.tileNum = tileNum;
     gSprites[spriteId].oam.priority = oamPriority;
     gSprites[spriteId].data[0] = species;
+
+    if(IsSpeciesOutsideSelectedPokedex(monSpecies))
+        gSprites[spriteId].oam.objMode = ST_OAM_OBJ_BLEND;
+
     return &gSprites[spriteId];
 }
 
