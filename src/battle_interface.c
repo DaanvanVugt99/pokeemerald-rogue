@@ -2084,6 +2084,8 @@ static void TypeIndicator_CreateSprites(u32 battlerId)
 
     if (WhichBattleCoords(battlerId))
         coords = &sTypeIndicatorDoublesCoords[GetBattlerPosition(battlerId)];
+    else if (IsDoubleBattle() && side == B_SIDE_OPPONENT)
+        coords = &sTypeIndicatorDoublesCoords[B_POSITION_OPPONENT_LEFT];
 
     for (slot = 0; slot < ARRAY_COUNT(gBattleStruct->healthboxTypeSpriteIds[0]); slot++)
     {

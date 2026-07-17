@@ -28,6 +28,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed the lone opponent's type badges being vertically misaligned in 2-vs-1
+  double battles.
 - Fixed evolved Safari catches being shown as nicknames when their hub offers
   display the Pokémon's base species.
 - Fixed Fossil Drill activating Rapid Spin when its user had fainted or was
