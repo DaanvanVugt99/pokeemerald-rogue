@@ -307,12 +307,12 @@ u8 Rogue_GetTrainerWeather(u16 trainerNum)
             break;
         
         case DIFFICULTY_LEVEL_AVERAGE:
-            if(Rogue_GetCurrentDifficulty() >= 4)
+            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
                 weatherType = trainer->preferredWeather;
             break;
         
         case DIFFICULTY_LEVEL_HARD:
-            if(Rogue_GetCurrentDifficulty() >= 2)
+            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
                 weatherType = trainer->preferredWeather;
             break;
         
@@ -3475,14 +3475,10 @@ static bool8 UseCompetitiveMoveset(struct TrainerPartyScratch* scratch, u8 monId
             return TRUE;
         else if(Rogue_IsKeyTrainer(scratch->trainerNum))
         {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
-                return TRUE;
+            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
+                return isFirstMon || isLastMon;
             else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                return !isFirstMon; // Only 1 mons insn't competitive
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-                return isFirstMon || isLastMon; // 2 mons are competitive
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 1)
-                return isLastMon; // Last mon is competitive
+                return isLastMon;
             else
                 return FALSE;
         }
@@ -3497,14 +3493,14 @@ static bool8 UseCompetitiveMoveset(struct TrainerPartyScratch* scratch, u8 monId
             return TRUE;
         else if(Rogue_IsKeyTrainer(scratch->trainerNum))
         {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
+            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
                 return TRUE;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 3)
-                return !isFirstMon; // Only 1 mons insn't competitive
+            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
+                return !isFirstMon;
+            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
+                return isFirstMon || isLastMon;
             else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-                return isFirstMon || isLastMon; // 2 mons are competitive
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 1)
-                return isLastMon; // Last mon is competitive
+                return isLastMon;
             else
                 return FALSE;
         }
@@ -3517,12 +3513,14 @@ static bool8 UseCompetitiveMoveset(struct TrainerPartyScratch* scratch, u8 monId
             return TRUE;
         else if(Rogue_IsKeyTrainer(scratch->trainerNum))
         {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
+            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
                 return TRUE;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 1)
-                return isFirstMon || isLastMon; // 2 mons are competitive
+            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
+                return !isFirstMon;
+            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
+                return isFirstMon || isLastMon;
             else
-                return isLastMon; // Last mon is competitive
+                return isLastMon;
         }
         else
             return FALSE;

@@ -973,7 +973,7 @@ static const union AffineAnimCmd *const sAffineAnims_ChooseBoxMenu[] =
 
 static const u8 sChooseBoxMenu_TextColors[] = {TEXT_COLOR_RED, TEXT_DYNAMIC_COLOR_6, TEXT_DYNAMIC_COLOR_5};
 static const u8 sText_OutOf30[] = _("/30");
-static const u8 sText_NotInCurrentDex[] = _("{COLOR RED}Not in current Dex");
+static const u8 sText_NotInCurrentDex[] = _("{COLOR RED}Not in Dex");
 
 static const u16 sChooseBoxMenu_Pal[]        = INCBIN_U16("graphics/pokemon_storage/box_selection_popup.gbapal");
 static const u8 sChooseBoxMenuCenter_Gfx[]   = INCBIN_U8("graphics/pokemon_storage/box_selection_popup_center.4bpp");
@@ -4231,7 +4231,7 @@ static void PrintDisplayMonInfo(void)
     }
 
     if (isOutsideSelectedPokedex)
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL_NARROW, sText_NotInCurrentDex, 2, 47, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL_NARROW, sText_NotInCurrentDex, 2, 42, TEXT_SKIP_DRAW, NULL);
 
     CopyWindowToVram(WIN_DISPLAY_INFO, COPYWIN_GFX);
     if (sStorage->displayMonSpecies != SPECIES_NONE)

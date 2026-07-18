@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Smoothed boss difficulty progression by delaying competitive movesets across
+  Easy, Average, and Hard, and by delaying boss weather until the Elite Four
+  on Average and Gym 5 on Hard.
 - Made the dark charcoal window border palette the global default so standard
   menus, prompts, shops, and scripted choices use it consistently.
 - Added the level-up battle NPC to Mysterious Shrines so parties can reach the
