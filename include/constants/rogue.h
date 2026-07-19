@@ -162,8 +162,11 @@
 #define ITEM_SHARPNESS_CHARM            (FIRST_ITEM_CHARM + 19)
 #define ITEM_STRONG_JAW_CHARM           (FIRST_ITEM_CHARM + 20)
 #define ITEM_SKILL_CHARM                (FIRST_ITEM_CHARM + 21)
+#define ITEM_REACH_CHARM                (FIRST_ITEM_CHARM + 22)
+#define ITEM_ACCURACY_CHARM             (FIRST_ITEM_CHARM + 23)
+#define ITEM_RECOVERY_CHARM             (FIRST_ITEM_CHARM + 24)
 
-#define LAST_ITEM_CHARM                 (ITEM_SKILL_CHARM)
+#define LAST_ITEM_CHARM                 (ITEM_RECOVERY_CHARM)
 
 
 #define FIRST_ITEM_CURSE                (ITEM_ROGUE_ITEM_FIRST + 80)

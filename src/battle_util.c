@@ -22640,20 +22640,22 @@ u32 GetBattlerHoldEffectParam(u32 battler)
         return ItemId_GetHoldEffectParam(gBattleMons[battler].item);
 }
 
+bool32 IsMoveInherentlyMakingContact(u32 move)
+{
+    return gBattleMoves[move].makesContact
+        || (gBattleMoves[move].effect == EFFECT_SHELL_SIDE_ARM && gBattleStruct->swapDamageCategory);
+}
+
 bool32 IsMoveMakingContact(u32 move, u32 battlerAtk)
 {
     u32 atkHoldEffect = GetBattlerHoldEffect(battlerAtk, TRUE);
 
-    if (!gBattleMoves[move].makesContact)
-    {
-        if (gBattleMoves[move].effect == EFFECT_SHELL_SIDE_ARM && gBattleStruct->swapDamageCategory)
-            return TRUE;
-        else
-            return FALSE;
-    }
+    if (!IsMoveInherentlyMakingContact(move))
+        return FALSE;
     else if ((atkHoldEffect == HOLD_EFFECT_PUNCHING_GLOVE && gBattleMoves[move].punchingMove)
            || atkHoldEffect == HOLD_EFFECT_PROTECTIVE_PADS
            || HasBattlerAbility(battlerAtk, ABILITY_LONG_REACH)
+           || (GetBattlerSide(battlerAtk) == B_SIDE_PLAYER && IsCharmActive(EFFECT_REACH_DAMAGE))
            || (HasBattlerAbility(battlerAtk, ABILITY_AFTERIMAGE)
             && gBattlerAttacker == battlerAtk
             && gBattlerTarget < gBattlersCount
@@ -22667,6 +22669,14 @@ bool32 IsMoveMakingContact(u32 move, u32 battlerAtk)
     {
         return TRUE;
     }
+}
+
+s32 ApplyRecoveryCharmHealing(u32 battler, s32 healing)
+{
+    if (GetBattlerSide(battler) == B_SIDE_PLAYER && IsCharmActive(EFFECT_RECOVERY))
+        healing = healing * 3 / 2;
+
+    return healing;
 }
 
 static bool32 IsMoveBlockedByProtectLike(u32 battler, u32 move)
@@ -23384,6 +23394,8 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         if (gBattleMoves[move].bitingMove && IsCharmActive(EFFECT_STRONG_JAW_DAMAGE))
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        if (IsMoveInherentlyMakingContact(move) && IsCharmActive(EFFECT_REACH_DAMAGE))
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.25));
     }
 
     // attacker's abilities

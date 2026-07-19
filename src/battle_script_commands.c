@@ -2142,6 +2142,14 @@ static void Cmd_accuracycheck(void)
         if (AccuracyCalcHelper(move))
             return;
 
+        if (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
+         && IsCharmActive(EFFECT_ACCURACY)
+         && gBattleMoves[move].effect != EFFECT_OHKO)
+        {
+            JumpIfMoveFailed(7, move);
+            return;
+        }
+
         accuracy = GetTotalAccuracy(
             gBattlerAttacker,
             gBattlerTarget,
@@ -13645,6 +13653,7 @@ static void Cmd_various(void)
             gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 4;
         if (gBattleMoveDamage == 0)
             gBattleMoveDamage = 1;
+        gBattleMoveDamage = ApplyRecoveryCharmHealing(gBattlerAttacker, gBattleMoveDamage);
         gBattleMoveDamage *= -1;
 
         if (gBattleMons[battler].hp == gBattleMons[battler].maxHP)
@@ -14305,6 +14314,7 @@ static void Cmd_various(void)
             struct Pokemon *party = GetSideParty(side);
 
             u16 hp = GetMonData(&party[gSelectedMonPartyId], MON_DATA_MAX_HP) / 2;
+            hp = ApplyRecoveryCharmHealing(gBattlerAttacker, hp);
             BtlController_EmitSetMonData(gBattlerAttacker, BUFFER_A, REQUEST_HP_BATTLE, gBitTable[gSelectedMonPartyId], sizeof(hp), &hp);
             MarkBattlerForControllerExec(gBattlerAttacker);
             PREPARE_SPECIES_BUFFER(gBattleTextBuff1, GetMonData(&party[gSelectedMonPartyId], MON_DATA_SPECIES));
@@ -14542,6 +14552,10 @@ static void Cmd_tryhealhalfhealth(void)
         gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 2;
     if (gBattleMoveDamage == 0)
         gBattleMoveDamage = 1;
+    if (IsHealingMove(gCurrentMove)
+     || (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ENEMY_HEAL_ALLY
+      && GetBattlerSide(gBattlerAttacker) == GetBattlerSide(gBattlerTarget)))
+        gBattleMoveDamage = ApplyRecoveryCharmHealing(gBattlerAttacker, gBattleMoveDamage);
     gBattleMoveDamage *= -1;
 
     if (gBattleMons[gBattlerTarget].hp == gBattleMons[gBattlerTarget].maxHP)
@@ -14703,6 +14717,8 @@ static void Cmd_manipulatedamage(void)
         break;
     case DMG_BIG_ROOT:
         gBattleMoveDamage = GetDrainedBigRootHp(gBattlerAttacker, gBattleMoveDamage);
+        if (IsHealingMove(gCurrentMove))
+            gBattleMoveDamage = ApplyRecoveryCharmHealing(gBattlerAttacker, gBattleMoveDamage);
         break;
     case DMG_1_2_ATTACKER_HP:
         gBattleMoveDamage = (GetNonDynamaxMaxHP(gBattlerAttacker) + 1) / 2; // Half of Max HP Rounded UP
@@ -14894,6 +14910,7 @@ static void Cmd_stockpiletohpheal(void)
 
             if (gBattleMoveDamage == 0)
                 gBattleMoveDamage = 1;
+            gBattleMoveDamage = ApplyRecoveryCharmHealing(gBattlerAttacker, gBattleMoveDamage);
             gBattleMoveDamage *= -1;
 
             gBattleScripting.animTurn = gDisableStructs[gBattlerAttacker].stockpileCounter;
@@ -17500,6 +17517,7 @@ static void Cmd_recoverbasedonsunlight(void)
 
         if (gBattleMoveDamage == 0)
             gBattleMoveDamage = 1;
+        gBattleMoveDamage = ApplyRecoveryCharmHealing(gBattlerAttacker, gBattleMoveDamage);
         gBattleMoveDamage *= -1;
 
         gBattlescriptCurrInstr = cmd->nextInstr;
@@ -17951,6 +17969,7 @@ static void Cmd_trywish(void)
             gBattleMoveDamage = max(1, GetNonDynamaxMaxHP(gBattlerAttacker) / 2);
         }
 
+        gBattleMoveDamage = ApplyRecoveryCharmHealing(gBattlerTarget, gBattleMoveDamage);
         gBattleMoveDamage *= -1;
         if (gBattleMons[gBattlerTarget].hp == gBattleMons[gBattlerTarget].maxHP)
             gBattlescriptCurrInstr = cmd->failInstr;
@@ -20700,6 +20719,7 @@ void BS_TryHealPulse(void)
         else
             gBattleMoveDamage = -(GetNonDynamaxMaxHP(gBattlerTarget) / 2);
 
+        gBattleMoveDamage = ApplyRecoveryCharmHealing(gBattlerAttacker, gBattleMoveDamage);
         if (gBattleMoveDamage == 0)
             gBattleMoveDamage = -1;
         gBattlescriptCurrInstr = cmd->nextInstr;

@@ -337,6 +337,18 @@ text gItemDesc_SkillCharm
 {
     format("Multi-hit moves always hit at least four times.")
 }
+text gItemDesc_ReachCharm
+{
+    format("Contact moves no longer make contact and deal 25% more damage.")
+}
+text gItemDesc_AccuracyCharm
+{
+    format("Friendly moves cannot miss, except one-hit knockout moves.")
+}
+text gItemDesc_RecoveryCharm
+{
+    format("Healing moves restore 50% more HP.")
+}
 
 text gItemDesc_PartyCurse
 {

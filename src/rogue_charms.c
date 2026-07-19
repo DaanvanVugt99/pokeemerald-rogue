@@ -93,6 +93,15 @@ static u16 EffectToCharmItem(u8 effectType)
         case EFFECT_SKILL_MULTI_HIT:
             return ITEM_SKILL_CHARM;
 
+        case EFFECT_REACH_DAMAGE:
+            return ITEM_REACH_CHARM;
+
+        case EFFECT_ACCURACY:
+            return ITEM_ACCURACY_CHARM;
+
+        case EFFECT_RECOVERY:
+            return ITEM_RECOVERY_CHARM;
+
         // Unused
         // EFFECT_PARTY_SIZE
         // EFFECT_EVERSTONE_EVOS
@@ -239,6 +248,9 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
         case EFFECT_SHARPNESS_DAMAGE:
         case EFFECT_STRONG_JAW_DAMAGE:
         case EFFECT_SKILL_MULTI_HIT:
+        case EFFECT_REACH_DAMAGE:
+        case EFFECT_ACCURACY:
+        case EFFECT_RECOVERY:
             return min(itemCount, 1);
     }
 
@@ -448,6 +460,9 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
         case EFFECT_SHARPNESS_DAMAGE:
         case EFFECT_STRONG_JAW_DAMAGE:
         case EFFECT_SKILL_MULTI_HIT:
+        case EFFECT_REACH_DAMAGE:
+        case EFFECT_ACCURACY:
+        case EFFECT_RECOVERY:
             if(!isCurse)
                 return IsCharmActive(effectType);
             break;

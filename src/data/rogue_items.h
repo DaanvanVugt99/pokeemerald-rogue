@@ -72,6 +72,9 @@ extern const u8 gItemDesc_IronFistCharm[];
 extern const u8 gItemDesc_SharpnessCharm[];
 extern const u8 gItemDesc_StrongJawCharm[];
 extern const u8 gItemDesc_SkillCharm[];
+extern const u8 gItemDesc_ReachCharm[];
+extern const u8 gItemDesc_AccuracyCharm[];
+extern const u8 gItemDesc_RecoveryCharm[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -1208,6 +1211,60 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .itemId = ITEM_SKILL_CHARM,
         .price = 0,
         .description = gItemDesc_SkillCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_REACH_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Reach Charm"),
+#else
+        .name = _("REACH CHARM"),
+#endif
+        .itemId = ITEM_REACH_CHARM,
+        .price = 0,
+        .description = gItemDesc_ReachCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_ACCURACY_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Accuracy Charm"),
+#else
+        .name = _("ACCURACY CHARM"),
+#endif
+        .itemId = ITEM_ACCURACY_CHARM,
+        .price = 0,
+        .description = gItemDesc_AccuracyCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_RECOVERY_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Recovery Charm"),
+#else
+        .name = _("RECOVERY CHARM"),
+#endif
+        .itemId = ITEM_RECOVERY_CHARM,
+        .price = 0,
+        .description = gItemDesc_RecoveryCharm,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,

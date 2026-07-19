@@ -58,6 +58,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Reach, Accuracy, and Recovery Charms, which strengthen contact
+  moves, prevent friendly non-OHKO moves from missing, and improve move-based
+  healing respectively.
 - Added the Sharpness, Jaw, and Skill Charms, which strengthen slicing and
   biting moves and improve variable multi-hit moves respectively.
 - Added the Tech, Tinted, and Iron Fist Charms, which strengthen low-power,
