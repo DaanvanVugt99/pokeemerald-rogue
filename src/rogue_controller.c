@@ -199,6 +199,7 @@ EWRAM_DATA struct RogueRunData gRogueRun = {};
 // Temporary data, that isn't remembered
 EWRAM_DATA struct RogueLocalData gRogueLocal = {};
 EWRAM_DATA struct RogueAdvPath gRogueAdvPath = {};
+static EWRAM_DATA bool8 sSacredAshRecoveryPending = FALSE;
 
 static void ResetHotTracking();
 static void ClearRogueLocalData(void);
@@ -3847,6 +3848,7 @@ extern const u8 Rogue_ForceNicknameMon[];
 extern const u8 Rogue_AskNicknameMon[];
 extern const u8 Rogue_Encounter_RestStop_RandomMan[];
 extern const u8 Rogue_EventScript_AttemptSnagBattle[];
+extern const u8 Rogue_EventScript_AttemptSacredAshRecovery[];
 extern const u8 Rogue_Ridemon_PlayerIsTrapped[];
 
 void Rogue_NotifySaveLoaded(void)
@@ -3903,7 +3905,12 @@ void ForceRunRidemonTrappedCheck()
 
 bool8 Rogue_OnProcessPlayerFieldInput(void)
 {
-    if(gRogueLocal.hasNicknameMonMsgPending)
+    if(sSacredAshRecoveryPending)
+    {
+        ScriptContext_SetupScript(Rogue_EventScript_AttemptSacredAshRecovery);
+        return TRUE;
+    }
+    else if(gRogueLocal.hasNicknameMonMsgPending)
     {
         gRogueLocal.hasNicknameMonMsgPending = FALSE;
         if(Rogue_ShouldSkipAssignNicknameYesNoMessage())
@@ -8115,32 +8122,36 @@ static void CheckAndNotifyForFaintedMons()
     }
 }
 
+static bool8 ShouldReleaseFaintedMonsNow(void)
+{
+    if(Rogue_IsRunActive())
+    {
+        // If we're finished, we don't want to release any mons, just check if anything has fainted or not
+        if(Rogue_GetCurrentDifficulty() >= ROGUE_MAX_BOSS_COUNT)
+            return FALSE;
+
+        // Don't release any fainted mons for final champ fight
+        if(Rogue_UseFinalQuestEffects() && Rogue_GetCurrentDifficulty() >= ROGUE_FINAL_CHAMP_DIFFICULTY)
+            return FALSE;
+
+        // Leave all mons in party
+        if(Rogue_IsVictoryLapActive())
+            return FALSE;
+    }
+
+    if(!Rogue_ShouldReleaseFaintedMons())
+        return FALSE;
+
+    return TRUE;
+}
+
 void RemoveAnyFaintedMons(bool8 keepItems)
 {
     bool8 hasValidSpecies;
     u8 read;
     u8 write = 0;
-    bool8 skipReleasing = FALSE;
 
-    if(Rogue_IsRunActive())
-    {
-        // If we're finished, we don't want to release any mons, just check if anything has fainted or not
-        if(Rogue_GetCurrentDifficulty() >= ROGUE_MAX_BOSS_COUNT)
-            skipReleasing = TRUE;
-
-        // Don't release any fainted mons for final champ fight
-        if(Rogue_UseFinalQuestEffects() && Rogue_GetCurrentDifficulty() >= ROGUE_FINAL_CHAMP_DIFFICULTY)
-            skipReleasing = TRUE;
-
-        // Leave all mons in party
-        if(Rogue_IsVictoryLapActive())
-            skipReleasing = TRUE;
-    }
-
-    if(!Rogue_ShouldReleaseFaintedMons())
-        skipReleasing = TRUE;
-
-    if(!skipReleasing)
+    if(ShouldReleaseFaintedMonsNow())
     {
         for(read = 0; read < PARTY_SIZE; ++read)
         {
@@ -8192,6 +8203,89 @@ void RemoveAnyFaintedMons(bool8 keepItems)
 
     gPlayerPartyCount = CalculatePlayerPartyCount();
 }
+
+static bool8 PlayerPartyHasFaintedMon(void)
+{
+    u8 i;
+
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        if(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+        && GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 CanOfferSacredAshRecovery(void)
+{
+    return ShouldReleaseFaintedMonsNow()
+        && CheckBagHasItem(ITEM_SACRED_ASH, 1)
+        && PlayerPartyHasFaintedMon();
+}
+
+static void DeferFaintedReleaseForSacredAsh(void)
+{
+    // Defer based on the party loss alone. Item availability is checked when
+    // the field script actually offers recovery, after battle teardown has
+    // finished and the live bag state is available.
+    if(ShouldReleaseFaintedMonsNow() && PlayerPartyHasFaintedMon())
+        sSacredAshRecoveryPending = TRUE;
+    else
+        RemoveAnyFaintedMons(FALSE);
+}
+
+u16 Rogue_BufferSacredAshRecovery(void)
+{
+    // This value is returned directly because the event command `specialvar`
+    // writes the special function's return value into its destination var.
+    return sSacredAshRecoveryPending
+        && CheckBagHasItem(ITEM_SACRED_ASH, 1)
+        && PlayerPartyHasFaintedMon();
+}
+
+bool8 Rogue_HasPendingSacredAshRecovery(void)
+{
+    return sSacredAshRecoveryPending;
+}
+
+void Rogue_AcceptSacredAshRecovery(void)
+{
+    bool8 wasPending = sSacredAshRecoveryPending;
+
+    if(wasPending
+    && PlayerPartyHasFaintedMon()
+    && RemoveBagItem(ITEM_SACRED_ASH, 1))
+    {
+        HealPlayerParty();
+    }
+
+    sSacredAshRecoveryPending = FALSE;
+    if(wasPending)
+        RemoveAnyFaintedMons(FALSE);
+}
+
+void Rogue_DeclineSacredAshRecovery(void)
+{
+    bool8 wasPending = sSacredAshRecoveryPending;
+
+    sSacredAshRecoveryPending = FALSE;
+    if(wasPending)
+        RemoveAnyFaintedMons(FALSE);
+}
+
+#ifdef ROGUE_DEBUG
+void RogueDebug_SetSacredAshRecoveryPending(bool8 pending)
+{
+    sSacredAshRecoveryPending = pending;
+}
+
+bool8 RogueDebug_CanOfferSacredAshRecovery(void)
+{
+    return CanOfferSacredAshRecovery();
+}
+#endif
 
 struct Pokemon* GetRecordedPlayerPartyPtr();
 struct Pokemon* GetRecordedEnemyPartyPtr();
@@ -8769,6 +8863,7 @@ static void TryRewardHiddenStashCoins(u16 trainerNum)
 
 void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 {
+    sSacredAshRecoveryPending = FALSE;
     RogueTrial_OnTrainerBattleEnd();
 
     if(Rogue_IsFinalQuestFinalBoss())
@@ -8920,7 +9015,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
         if (IsPlayerDefeated(gBattleOutcome) != TRUE)
         {
             TryRewardPotentialEvolutionStone(trainerNum);
-            RemoveAnyFaintedMons(FALSE);
+            DeferFaintedReleaseForSacredAsh();
 
             if(isBossTrainer)
             {
@@ -8948,7 +9043,8 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
                 for(i = 0; i < gPlayerPartyCount; ++i)
                 {
-                    if(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE)
+                    if(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+                    && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0)
                     {
                         MonGainRewardEVs(&gPlayerParty[i]);
                         CalculateMonStats(&gPlayerParty[i]);
@@ -8982,6 +9078,8 @@ void Rogue_Battle_StartWildBattle(void)
 void Rogue_Battle_EndWildBattle(void)
 {
     u16 wildSpecies = GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
+
+    sSacredAshRecoveryPending = FALSE;
 
     TryRestorePartyHeldItems(TRUE);
     CheckAndNotifyForFaintedMons();
@@ -9069,7 +9167,7 @@ void Rogue_Battle_EndWildBattle(void)
 
         if (IsPlayerDefeated(gBattleOutcome) != TRUE)
         {
-            RemoveAnyFaintedMons(FALSE);
+            DeferFaintedReleaseForSacredAsh();
         }
     }
 

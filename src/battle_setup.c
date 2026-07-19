@@ -84,6 +84,8 @@ static void DoSafariBattle(void);
 static void DoStandardWildBattle(bool32 isDouble);
 static void CB2_EndWildBattle(void);
 static void CB2_EndScriptedWildBattle(void);
+static void FieldCB_ContinueScriptSacredAsh(void);
+static void FieldCB_ReturnToFieldSacredAsh(void);
 static void TryUpdateGymLeaderRematchFromWild(void);
 static void TryUpdateGymLeaderRematchFromTrainer(void);
 static void CB2_GiveStarter(void);
@@ -730,6 +732,36 @@ static void DowngradeBadPoison(void)
     }
 }
 
+extern const u8 Rogue_EventScript_SacredAshRecoveryOnBattleReturn[];
+extern const u8 Rogue_EventScript_SacredAshRecoveryOnWildBattleReturn[];
+
+static void FieldCB_ContinueScriptSacredAsh(void)
+{
+    LockPlayerFieldControls();
+    Overworld_PlaySpecialMapMusic();
+    FieldScreen_HoldBlackForMessage();
+    ScriptContext_CallScript(Rogue_EventScript_SacredAshRecoveryOnBattleReturn);
+}
+
+static void FieldCB_ReturnToFieldSacredAsh(void)
+{
+    LockPlayerFieldControls();
+    Overworld_PlaySpecialMapMusic();
+    FieldScreen_HoldBlackForMessage();
+    ScriptContext_SetupScript(Rogue_EventScript_SacredAshRecoveryOnWildBattleReturn);
+}
+
+static void SetReturnToFieldContinueScriptCallback(void)
+{
+    if(Rogue_HasPendingSacredAshRecovery())
+    {
+        gFieldCallback = FieldCB_ContinueScriptSacredAsh;
+        SetMainCallback2(CB2_ReturnToField);
+    }
+    else
+        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
 static void CB2_EndWildBattle(void)
 {
     Rogue_Battle_EndWildBattle();
@@ -745,7 +777,10 @@ static void CB2_EndWildBattle(void)
     {
         SetMainCallback2(CB2_ReturnToField);
         DowngradeBadPoison();
-        gFieldCallback = FieldCB_ReturnToFieldNoScriptCheckMusic;
+        if(Rogue_HasPendingSacredAshRecovery())
+            gFieldCallback = FieldCB_ReturnToFieldSacredAsh;
+        else
+            gFieldCallback = FieldCB_ReturnToFieldNoScriptCheckMusic;
     }
 }
 
@@ -766,7 +801,7 @@ static void CB2_EndScriptedWildBattle(void)
     else
     {
         DowngradeBadPoison();
-        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+        SetReturnToFieldContinueScriptCallback();
     }
 }
 
@@ -1632,17 +1667,17 @@ static void CB2_EndTrainerBattle(void)
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
     {
         DowngradeBadPoison();
-        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+        SetReturnToFieldContinueScriptCallback();
     }
     else if(Rogue_IsBattleSimTrainer(gTrainerBattleOpponent_A) || Rogue_IsVictoryLapActive())
     {
         gSpecialVar_Result = !IsPlayerDefeated(gBattleOutcome);
-        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+        SetReturnToFieldContinueScriptCallback();
     }
     else if (IsPlayerDefeated(gBattleOutcome) == TRUE)
     {
         if (InBattlePyramid() || InTrainerHillChallenge()) // || (!NoAliveMonsForPlayer()))
-            SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+            SetReturnToFieldContinueScriptCallback();
         else if(Rogue_IsVictoryLapActive())
             SetMainCallback2(CB2_StartCreditsSequence);
         else
@@ -1650,7 +1685,7 @@ static void CB2_EndTrainerBattle(void)
     }
     else
     {
-        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+        SetReturnToFieldContinueScriptCallback();
         DowngradeBadPoison();
         if (!InBattlePyramid() && !InTrainerHillChallenge())
         {

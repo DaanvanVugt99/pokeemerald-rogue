@@ -862,6 +862,72 @@ script Rogue_EventScript_AttemptSnagBattle
     release
 }
 
+script Rogue_EventScript_AttemptSacredAshRecovery
+{
+    lockall
+    call(Rogue_EventScript_AttemptSacredAshRecoveryInternal)
+    releaseall
+}
+
+script Rogue_EventScript_AttemptSacredAshRecoveryInternal
+{
+    specialvar(VAR_RESULT, Rogue_BufferSacredAshRecovery)
+    if(var(VAR_RESULT) == TRUE)
+    {
+        fadescreen(FADE_TO_BLACK)
+        call(Rogue_EventScript_SacredAshRecoveryPrompt)
+        fadescreen(FADE_FROM_BLACK)
+    }
+    else
+    {
+        // Clear any deferred release if the item disappeared unexpectedly.
+        special(Rogue_DeclineSacredAshRecovery)
+    }
+}
+
+script Rogue_EventScript_SacredAshRecoveryPrompt
+{
+    bufferitemname(STR_VAR_1, ITEM_SACRED_ASH)
+    msgbox(format("Your party suffered losses in battle.\pWould you like to use the {STR_VAR_1} to restore your party?"), MSGBOX_YESNO)
+
+    if(var(VAR_RESULT) == YES)
+    {
+        playse(SE_USE_ITEM)
+        special(Rogue_AcceptSacredAshRecovery)
+        waitse
+        msgbox(format("The {STR_VAR_1} scattered in a rainbow glow!\pYour party was fully restored."), MSGBOX_DEFAULT)
+    }
+    else
+    {
+        special(Rogue_DeclineSacredAshRecovery)
+    }
+}
+
+script Rogue_EventScript_SacredAshRecoveryOnBattleReturn
+{
+    specialvar(VAR_RESULT, Rogue_BufferSacredAshRecovery)
+    if(var(VAR_RESULT) == TRUE)
+    {
+        call(Rogue_EventScript_SacredAshRecoveryPrompt)
+    }
+    else
+    {
+        // Clear any deferred release if the item disappeared unexpectedly.
+        special(Rogue_DeclineSacredAshRecovery)
+    }
+
+    closemessage
+    special(FieldScreen_FadeInFromBlackAndResumeScript)
+    waitstate
+}
+
+script Rogue_EventScript_SacredAshRecoveryOnWildBattleReturn
+{
+    lockall
+    call(Rogue_EventScript_SacredAshRecoveryOnBattleReturn)
+    releaseall
+}
+
 script Rogue_EventScript_AttemptPostGymHeal
 {
     // Don't heal if we're in the healing flask mode

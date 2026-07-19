@@ -193,6 +193,14 @@ void Rogue_SelectMiniBossRewardMons();
 void Rogue_Battle_StartTrainerBattle(void);
 void Rogue_Battle_TrainerTeamReady(void);
 void Rogue_Battle_EndTrainerBattle(u16 trainerNum);
+bool8 Rogue_HasPendingSacredAshRecovery(void);
+u16 Rogue_BufferSacredAshRecovery(void);
+void Rogue_AcceptSacredAshRecovery(void);
+void Rogue_DeclineSacredAshRecovery(void);
+#ifdef ROGUE_DEBUG
+void RogueDebug_SetSacredAshRecoveryPending(bool8 pending);
+bool8 RogueDebug_CanOfferSacredAshRecovery(void);
+#endif
 void Rogue_Battle_StartWildBattle(void);
 void Rogue_Battle_EndWildBattle(void);
 void Rogue_Safari_EndWildBattle(void);

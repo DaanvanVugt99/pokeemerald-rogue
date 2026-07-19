@@ -45,6 +45,9 @@ static bool32 WaitForWeatherFadeIn(void);
 static void Task_SpinEnterWarp(u8 taskId);
 static void Task_EnableScriptAfterMusicFade(u8 taskId);
 
+static EWRAM_DATA u16 sBlackMessageDisplayLayers = 0;
+static EWRAM_DATA bool8 sBlackMessageScreenActive = FALSE;
+
 // data[0] is used universally by tasks in this file as a state for switches
 #define tState       data[0]
 
@@ -97,6 +100,21 @@ void FadeInFromBlack(void)
     FadeScreen(FADE_FROM_BLACK, 0);
 }
 
+void FieldScreen_HoldBlackForMessage(void)
+{
+    u16 dispcnt = GetGpuReg(REG_OFFSET_DISPCNT);
+
+    sBlackMessageDisplayLayers = dispcnt & (DISPCNT_BG_ALL_ON | DISPCNT_OBJ_ON);
+    sBlackMessageScreenActive = TRUE;
+
+    // Keep BG0 available for the field message window, but do not reveal the
+    // reloaded map or its object sprites before the recovery prompt is done.
+    SetGpuReg(REG_OFFSET_DISPCNT,
+              (dispcnt & ~(DISPCNT_BG_ALL_ON | DISPCNT_OBJ_ON)) | DISPCNT_BG0_ON);
+    FillPalBufferBlack();
+    SetWeatherScreenFadeOut();
+}
+
 void WarpFadeOutScreen(void)
 {
     if(!IsFadingOut())
@@ -139,6 +157,22 @@ static void Task_WaitForFadeAndEnableScriptCtx(u8 taskID)
         DestroyTask(taskID);
         ScriptContext_Enable();
     }
+}
+
+void FieldScreen_FadeInFromBlackAndResumeScript(void)
+{
+    FadeInFromBlack();
+
+    if (sBlackMessageScreenActive)
+    {
+        u16 dispcnt = GetGpuReg(REG_OFFSET_DISPCNT);
+
+        SetGpuReg(REG_OFFSET_DISPCNT,
+                  (dispcnt & ~(DISPCNT_BG_ALL_ON | DISPCNT_OBJ_ON)) | sBlackMessageDisplayLayers);
+        sBlackMessageScreenActive = FALSE;
+    }
+
+    CreateTask(Task_WaitForFadeAndEnableScriptCtx, 10);
 }
 
 void FieldCB_ContinueScriptHandleMusic(void)

@@ -14,6 +14,7 @@ void RogueAdv_ApplyAdventureMetatiles();
 void RogueAdv_Debug_ForceRegenerateAdventurePaths();
 #ifdef ROGUE_DEBUG
 u32 RogueAdv_Debug_GenerateUniqueLegendaryCustomMonId(u16 species);
+u16 RogueAdv_Debug_GetFullRestStopWeight(u8 difficulty);
 #endif
 
 u8 RogueAdv_GetTileNum();

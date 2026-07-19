@@ -86,6 +86,14 @@ TEST("An exhausted path is replaced after its boss")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
+TEST("Full Rest Stops become more common during the Elite Four")
+{
+    EXPECT_EQ(RogueAdv_Debug_GetFullRestStopWeight(ROGUE_GYM_START_DIFFICULTY + 1), 0);
+    EXPECT_EQ(RogueAdv_Debug_GetFullRestStopWeight(ROGUE_GYM_START_DIFFICULTY + 2), 6);
+    EXPECT_EQ(RogueAdv_Debug_GetFullRestStopWeight(ROGUE_ELITE_START_DIFFICULTY - 1), 6);
+    EXPECT_EQ(RogueAdv_Debug_GetFullRestStopWeight(ROGUE_ELITE_START_DIFFICULTY), 20);
+}
+
 TEST("Unique Legendary upgrade is the final Lab upgrade")
 {
     u8 originalUpgradeFlags[ARRAY_COUNT(gRogueSaveBlock->hubMap.upgradeFlags)];

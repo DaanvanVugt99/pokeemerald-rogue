@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Sacred Ash can now be consumed immediately after any battle with party losses,
+  before post-battle dialogue or reward popups, provided the player did not
+  white out; declining preserves the Ash and releases fainted Pokémon normally.
 - Smoothed boss difficulty progression by delaying competitive movesets across
   Easy, Average, and Hard, and by delaying boss weather until the Elite Four
   on Average and Gym 5 on Hard.
@@ -31,6 +34,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed the intended increase in Full Rest Stop frequency during the Elite Four
+  being shadowed by the earlier Gym 3 condition.
 - Fixed the lone opponent's type badges being vertically misaligned in 2-vs-1
   double battles.
 - Fixed evolved Safari catches being shown as nicknames when their hub offers

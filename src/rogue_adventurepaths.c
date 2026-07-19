@@ -1047,6 +1047,22 @@ u32 RogueAdv_Debug_GenerateUniqueLegendaryCustomMonId(u16 species)
 }
 #endif
 
+static u16 GetFullRestStopWeight(u8 difficulty)
+{
+    if(difficulty >= ROGUE_ELITE_START_DIFFICULTY)
+        return 20;
+    if(difficulty >= ROGUE_GYM_START_DIFFICULTY + 2)
+        return 6;
+    return 0;
+}
+
+#ifdef ROGUE_DEBUG
+u16 RogueAdv_Debug_GetFullRestStopWeight(u8 difficulty)
+{
+    return GetFullRestStopWeight(difficulty);
+}
+#endif
+
 static void GenerateRoomInstance(u8 roomId, u8 roomType)
 {
     u16 weights[ADVPATH_SUBROOM_WEIGHT_COUNT];
@@ -1072,18 +1088,7 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
             weights[ADVPATH_SUBROOM_RESTSTOP_BATTLE] = 15;
             weights[ADVPATH_SUBROOM_RESTSTOP_SHOP] = 15;
             weights[ADVPATH_SUBROOM_RESTSTOP_DAYCARE] = 15;
-            weights[ADVPATH_SUBROOM_RESTSTOP_FULL] = 0;
-
-            if(GetPathGenerationDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-            {
-                // Only activate after 2nd badge
-                weights[ADVPATH_SUBROOM_RESTSTOP_FULL] = 6;
-            }
-            else if(GetPathGenerationDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
-            {
-                // Ever so slightly more common during E4 phase
-                weights[ADVPATH_SUBROOM_RESTSTOP_FULL] = 20;
-            }
+            weights[ADVPATH_SUBROOM_RESTSTOP_FULL] = GetFullRestStopWeight(GetPathGenerationDifficulty());
 
             // Prefer showing each rest stop type before having duplicates
             if(CountSubRoomType(ADVPATH_ROOM_RESTSTOP, ADVPATH_SUBROOM_RESTSTOP_BATTLE) != 0)

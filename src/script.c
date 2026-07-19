@@ -247,6 +247,14 @@ void ScriptContext_SetupScript(const u8 *ptr)
     sGlobalScriptContextStatus = CONTEXT_RUNNING;
 }
 
+// Calls a script before resuming the current global script. This is useful when
+// returning from an asynchronous screen while the original script is waiting.
+void ScriptContext_CallScript(const u8 *ptr)
+{
+    ScriptCall(&sGlobalScriptContext, ptr);
+    ScriptContext_Enable();
+}
+
 // Puts the script into waiting mode; usually called from a wait* script command.
 void ScriptContext_Stop(void)
 {

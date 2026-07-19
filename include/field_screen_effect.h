@@ -7,6 +7,8 @@ void WarpFadeInScreen(void);
 void WarpFadeOutScreen(void);
 void FadeInFromBlack(void);
 void FadeInFromWhite(void);
+void FieldScreen_HoldBlackForMessage(void);
+void FieldScreen_FadeInFromBlackAndResumeScript(void);
 void FieldCB_ContinueScriptUnionRoom(void);
 void FieldCB_ContinueScriptHandleMusic(void);
 void FieldCB_ContinueScript(void);
