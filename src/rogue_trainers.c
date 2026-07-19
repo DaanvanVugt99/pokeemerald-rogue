@@ -16,6 +16,7 @@
 
 #include "rogue.h"
 #include "rogue_adventurepaths.h"
+#include "rogue_charms.h"
 #include "rogue_controller.h"
 #include "rogue_debug.h"
 #include "rogue_multiplayer.h"
@@ -392,6 +393,21 @@ static u8 Rogue_CalculateTrainerLvlCap(bool8 keyBattle)
 u8 Rogue_CalculatePlayerMonLvl()
 {
     return Rogue_CalculateBossMonLvl() - gRogueRun.currentLevelOffset;
+}
+
+static u8 ApplyPlayerLevelCharm(u8 level)
+{
+    return min(level + 3 * GetCharmValue(EFFECT_LEVEL_CHARM), MAX_LEVEL);
+}
+
+u8 Rogue_CalculatePlayerLvlCap()
+{
+    return ApplyPlayerLevelCharm(Rogue_CalculatePlayerMonLvl());
+}
+
+u8 Rogue_CalculatePlayerMaxLvl()
+{
+    return ApplyPlayerLevelCharm(Rogue_CalculateBossMonLvl());
 }
 
 u8 Rogue_CalculateTrainerMonLvl()

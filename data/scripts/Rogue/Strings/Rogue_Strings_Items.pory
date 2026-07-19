@@ -381,6 +381,14 @@ text gItemDesc_ProteanCharm
 {
     format("The first move used after switching in changes the user's type to match that move.")
 }
+text gItemDesc_LevelCharm
+{
+    format("The level cap is increased by 3 levels.")
+}
+text gItemDesc_RegenCharm
+{
+    format("Friendly Pokémon restore 25% of their maximum HP when switching out.")
+}
 
 text gItemDesc_PartyCurse
 {

@@ -18473,6 +18473,8 @@ static void Cmd_switchoutabilities(void)
     CMD_ARGS(u8 battler);
 
     u32 battler = GetBattlerForBattleScript(cmd->battler);
+    u32 healAmount = 0;
+    u32 maxHP = GetNonDynamaxMaxHP(battler);
 
     // Undo dynamax here to ensure we reset the HP correctly
     UndoDynamax(battler);
@@ -18514,24 +18516,36 @@ static void Cmd_switchoutabilities(void)
         switch (GetBattlerAbility(battler))
         {
         case ABILITY_NATURAL_CURE:
-            gBattleMons[battler].status1 = 0;
-            BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE,
-                                         gBitTable[*(gBattleStruct->battlerPartyIndexes + battler)],
-                                         sizeof(gBattleMons[battler].status1),
-                                         &gBattleMons[battler].status1);
-            MarkBattlerForControllerExec(battler);
+            if (gBattleMons[battler].status1 != 0)
+            {
+                gBattleMons[battler].status1 = 0;
+                BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE,
+                                             gBitTable[*(gBattleStruct->battlerPartyIndexes + battler)],
+                                             sizeof(gBattleMons[battler].status1),
+                                             &gBattleMons[battler].status1);
+                MarkBattlerForControllerExec(battler);
+                return;
+            }
             break;
         case ABILITY_REGENERATOR:
-            gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 3;
-            gBattleMoveDamage += gBattleMons[battler].hp;
-            if (gBattleMoveDamage > gBattleMons[battler].maxHP)
-                gBattleMoveDamage = gBattleMons[battler].maxHP;
+            if (gBattleMons[battler].hp != 0)
+                healAmount += maxHP / 3;
+            break;
+        }
+
+        if (gBattleMons[battler].hp != 0
+         && GetBattlerSide(battler) == B_SIDE_PLAYER
+         && IsCharmActive(EFFECT_REGEN_CHARM))
+            healAmount += maxHP / 4;
+
+        if (healAmount != 0)
+        {
+            gBattleMoveDamage = min(gBattleMons[battler].hp + healAmount, maxHP);
             BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_HP_BATTLE,
                                          gBitTable[*(gBattleStruct->battlerPartyIndexes + battler)],
                                          sizeof(gBattleMoveDamage),
                                          &gBattleMoveDamage);
             MarkBattlerForControllerExec(battler);
-            break;
         }
 
         gBattlescriptCurrInstr = cmd->nextInstr;

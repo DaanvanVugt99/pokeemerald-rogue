@@ -83,6 +83,8 @@ extern const u8 gItemDesc_MomentumCharm[];
 extern const u8 gItemDesc_StandCharm[];
 extern const u8 gItemDesc_PrepCharm[];
 extern const u8 gItemDesc_ProteanCharm[];
+extern const u8 gItemDesc_LevelCharm[];
+extern const u8 gItemDesc_RegenCharm[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -1417,6 +1419,42 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .itemId = ITEM_PROTEAN_CHARM,
         .price = 0,
         .description = gItemDesc_ProteanCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_LEVEL_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Level Charm"),
+#else
+        .name = _("LEVEL CHARM"),
+#endif
+        .itemId = ITEM_LEVEL_CHARM,
+        .price = 0,
+        .description = gItemDesc_LevelCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_REGEN_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Regen Charm"),
+#else
+        .name = _("REGEN CHARM"),
+#endif
+        .itemId = ITEM_REGEN_CHARM,
+        .price = 0,
+        .description = gItemDesc_RegenCharm,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,

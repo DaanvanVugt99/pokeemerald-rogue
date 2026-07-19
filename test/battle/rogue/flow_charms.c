@@ -21,6 +21,14 @@ static void SetSwitchMoveCharms(u16 prepCount, u16 proteanCount)
     FinishCharmTestSetup();
 }
 
+static void SetRegenCharms(u16 regenCount, u16 recoveryCount)
+{
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_REGEN_CHARM, regenCount);
+    AddCharmForTest(ITEM_RECOVERY_CHARM, recoveryCount);
+    FinishCharmTestSetup();
+}
+
 static void ExpectFiveStatBoosts(struct BattlePokemon *mon, u32 stages)
 {
     EXPECT_EQ(mon->statStages[STAT_ATK], DEFAULT_STAT_STAGE + stages);
@@ -694,6 +702,156 @@ SINGLE_BATTLE_TEST("charms: flow - switch-move charms are player-only, unique re
         EXPECT(IsEffectDisabled(EFFECT_PROTEAN_CHARM, FALSE));
         EXPECT(!gDisableStructs[B_POSITION_OPPONENT_LEFT].preparationCharmUsed);
         EXPECT(!gDisableStructs[B_POSITION_OPPONENT_LEFT].proteanCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm restores one quarter HP on switch out")
+{
+    GIVEN {
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm stacks independently with Regenerator")
+{
+    GIVEN {
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_SLOWPOKE) { HP(40); Ability(ABILITY_REGENERATOR); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4
+                     + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 3);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm combines with Natural Cure switch updates")
+{
+    GIVEN {
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_CHANSEY) { HP(40); Status1(STATUS1_BURN); Ability(ABILITY_NATURAL_CURE); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_STATUS), 0);
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm caps healing at maximum HP")
+{
+    GIVEN {
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_WOBBUFFET) { HP(400); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP));
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Recovery Charm does not amplify Regen Charm")
+{
+    GIVEN {
+        SetRegenCharms(1, 1);
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm heals before pivoting out")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_U_TURN].effect == EFFECT_HIT_ESCAPE);
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); Speed(100); Moves(MOVE_U_TURN); }
+        PLAYER(SPECIES_WYNAUT) { Speed(50); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_U_TURN); SEND_OUT(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm heals friendly Pokemon forced out")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ROAR].effect == EFFECT_ROAR);
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_ROAR); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_ROAR); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm does not heal opposing Pokemon")
+{
+    GIVEN {
+        SetRegenCharms(2, 0);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(400); }
+        OPPONENT(SPECIES_WYNAUT);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); SWITCH(opponent, 1); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_HP), 400);
+        EXPECT_EQ(GetCharmValue(EFFECT_REGEN_CHARM), 1);
+        EXPECT(IsEffectDisabled(EFFECT_REGEN_CHARM, FALSE));
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm does not revive a fainting switch user")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_HEALING_WISH].effect == EFFECT_HEALING_WISH);
+        ASSUME(B_HEALING_WISH_SWITCH >= GEN_5);
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_GARDEVOIR) { Moves(MOVE_HEALING_WISH); }
+        PLAYER(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HEALING_WISH); SEND_OUT(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP), 0);
         ClearCharmTestState();
     }
 }

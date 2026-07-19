@@ -1171,8 +1171,8 @@ void Rogue_ModifyExpGained(struct Pokemon *mon, s32* expGain)
 
     if(Rogue_IsRunActive() && species != SPECIES_NONE)
     {
-        u8 targetLevel = Rogue_CalculatePlayerMonLvl();
-        u8 maxLevel = Rogue_CalculateBossMonLvl();
+        u8 targetLevel = Rogue_CalculatePlayerLvlCap();
+        u8 maxLevel = Rogue_CalculatePlayerMaxLvl();
         u8 currentLevel = GetMonData(mon, MON_DATA_LEVEL);
 
         if(currentLevel != MAX_LEVEL)
@@ -7667,7 +7667,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
 
             // Update VARs
             VarSet(VAR_ROGUE_CURRENT_ROOM_IDX, gRogueRun.enteredRoomCounter);
-            VarSet(VAR_ROGUE_CURRENT_LEVEL_CAP, Rogue_CalculateBossMonLvl());
+            VarSet(VAR_ROGUE_CURRENT_LEVEL_CAP, Rogue_CalculatePlayerMaxLvl());
 
             RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
             RogueTrial_OnEnterEncounter();

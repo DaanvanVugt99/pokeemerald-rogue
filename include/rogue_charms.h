@@ -41,6 +41,8 @@ enum RogueCharmEffects
     EFFECT_STAND_CHARM,
     EFFECT_PREP_CHARM,
     EFFECT_PROTEAN_CHARM,
+    EFFECT_LEVEL_CHARM,
+    EFFECT_REGEN_CHARM,
 
     // Curse only
     EFFECT_PARTY_SIZE,
