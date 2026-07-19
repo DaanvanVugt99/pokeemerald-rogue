@@ -171,8 +171,11 @@
 #define ITEM_RECOIL_CHARM               (FIRST_ITEM_CHARM + 25)
 #define ITEM_GUARD_CHARM                (FIRST_ITEM_CHARM + 26)
 #define ITEM_CONVERSION_CHARM           (FIRST_ITEM_CHARM + 27)
+#define ITEM_RETALIATE_CHARM            (FIRST_ITEM_CHARM + 28)
+#define ITEM_MOMENTUM_CHARM             (FIRST_ITEM_CHARM + 29)
+#define ITEM_STAND_CHARM                (FIRST_ITEM_CHARM + 30)
 
-#define LAST_ITEM_CHARM                 (ITEM_CONVERSION_CHARM)
+#define LAST_ITEM_CHARM                 (ITEM_STAND_CHARM)
 
 
 #define FIRST_ITEM_CURSE                (LAST_ITEM_CHARM + 1)

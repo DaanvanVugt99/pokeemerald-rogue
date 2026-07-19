@@ -3,7 +3,7 @@
 
 #include "charm_test.h"
 
-SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents damage-based recoil")
+SINGLE_BATTLE_TEST("charms: defense - Recoil Charm prevents damage-based recoil")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_DOUBLE_EDGE].effect == EFFECT_RECOIL_33);
@@ -23,7 +23,7 @@ SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents damage-based recoil"
     }
 }
 
-SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents fixed max-HP recoil")
+SINGLE_BATTLE_TEST("charms: defense - Recoil Charm prevents fixed max-HP recoil")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_STEEL_BEAM].effect == EFFECT_MAX_HP_50_RECOIL);
@@ -40,7 +40,7 @@ SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents fixed max-HP recoil"
     }
 }
 
-SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents Struggle recoil")
+SINGLE_BATTLE_TEST("charms: defense - Recoil Charm prevents Struggle recoil")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_GIGATON_HAMMER].cantUseTwice);
@@ -59,7 +59,7 @@ SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents Struggle recoil")
     }
 }
 
-SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents crash damage")
+SINGLE_BATTLE_TEST("charms: defense - Recoil Charm prevents crash damage")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_JUMP_KICK].effect == EFFECT_RECOIL_IF_MISS);
@@ -79,7 +79,7 @@ SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm prevents crash damage")
     }
 }
 
-SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm does not protect opponents")
+SINGLE_BATTLE_TEST("charms: defense - Recoil Charm does not protect opponents")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_DOUBLE_EDGE].effect == EFFECT_RECOIL_33);
@@ -97,7 +97,7 @@ SINGLE_BATTLE_TEST("Defensive charms: Recoil Charm does not protect opponents")
     }
 }
 
-SINGLE_BATTLE_TEST("Defensive charms: Guard Charm blocks forced critical hits")
+SINGLE_BATTLE_TEST("charms: defense - Guard Charm blocks forced critical hits")
 {
     GIVEN {
         SetSingleCharmForTest(ITEM_GUARD_CHARM, 1);
@@ -113,7 +113,7 @@ SINGLE_BATTLE_TEST("Defensive charms: Guard Charm blocks forced critical hits")
     }
 }
 
-SINGLE_BATTLE_TEST("Defensive charms: Guard Charm does not protect opponents")
+SINGLE_BATTLE_TEST("charms: defense - Guard Charm does not protect opponents")
 {
     GIVEN {
         SetSingleCharmForTest(ITEM_GUARD_CHARM, 1);
@@ -129,7 +129,7 @@ SINGLE_BATTLE_TEST("Defensive charms: Guard Charm does not protect opponents")
     }
 }
 
-SINGLE_BATTLE_TEST("Defensive charms: duplicate Recoil and Guard Charms clamp to one")
+SINGLE_BATTLE_TEST("charms: defense - duplicate Recoil and Guard Charms clamp to one")
 {
     GIVEN {
         BeginCharmTestRun();

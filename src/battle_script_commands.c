@@ -5038,6 +5038,8 @@ static void Cmd_tryfaintmon(void)
                     gBattleResults.playerFaintCounter++;
                 AdjustFriendshipOnBattleFaint(battler);
                 gSideTimers[B_SIDE_PLAYER].retaliateTimer = 2;
+                if (IsCharmActive(EFFECT_RETALIATE_CHARM))
+                    gSideTimers[B_SIDE_PLAYER].retaliateCharmPending = TRUE;
                 // RogueNote: kill mon
             }
             else
@@ -9443,9 +9445,57 @@ static s32 GetSwitchInInfestedTerrainDamage(u32 battler)
     return GetStealthHazardDamageByTypesAndHP(TYPE_BUG, type1, type2, maxHp);
 }
 
+bool32 TryActivateSwitchInCharms(u32 battler)
+{
+    u32 i;
+    u32 aliveCount = 0;
+
+    if (GetBattlerSide(battler) != B_SIDE_PLAYER
+     || (gAbsentBattlerFlags & gBitTable[battler])
+     || !IsBattlerAlive(battler))
+        return FALSE;
+
+    if (!gSpecialStatuses[battler].switchInRetaliateCharmDone)
+    {
+        gSpecialStatuses[battler].switchInRetaliateCharmDone = TRUE;
+        if (IsCharmActive(EFFECT_RETALIATE_CHARM) && gSideTimers[B_SIDE_PLAYER].retaliateCharmPending)
+        {
+            gSideTimers[B_SIDE_PLAYER].retaliateCharmPending = FALSE;
+            gBattlerAttacker = battler;
+            BattleScriptPushCursorAndCallback(BattleScript_RetaliateCharmActivates);
+            return TRUE;
+        }
+    }
+
+    if (!gSpecialStatuses[battler].switchInStandCharmDone)
+    {
+        gSpecialStatuses[battler].switchInStandCharmDone = TRUE;
+        if (IsCharmActive(EFFECT_STAND_CHARM))
+        {
+            for (i = 0; i < PARTY_SIZE; i++)
+            {
+                if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
+                 && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
+                 && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0)
+                    aliveCount++;
+            }
+
+            if (aliveCount == 1)
+            {
+                gBattlerAttacker = battler;
+                BattleScriptPushCursorAndCallback(BattleScript_StandCharmActivates);
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
 bool32 DoSwitchInAbilities(u32 battler)
 {
-    return (TryPrimalReversion(battler)
+    return (TryActivateSwitchInCharms(battler)
+         || TryPrimalReversion(battler)
          || AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, battler, 0, 0, 0)
          || (gBattleWeather & B_WEATHER_ANY && WEATHER_HAS_EFFECT && AbilityBattleEffects(ABILITYEFFECT_ON_WEATHER, battler, 0, 0, 0))
          || (gFieldStatuses & STATUS_FIELD_TERRAIN_ANY && AbilityBattleEffects(ABILITYEFFECT_ON_TERRAIN, battler, 0, 0, 0))
@@ -12284,6 +12334,26 @@ static void Cmd_various(void)
             if (battlerAbility == ABILITY_AS_ONE_ICE_RIDER)
                 gBattleScripting.abilityPopupOverwrite = gLastUsedAbility = ABILITY_CHILLING_NEIGH;
             gBattlescriptCurrInstr = BattleScript_RaiseStatOnFaintingTarget;
+            return;
+        }
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_MOMENTUM_CHARM:
+    {
+        VARIOUS_ARGS();
+
+        if (battler == gBattlerAttacker
+         && GetBattlerSide(battler) == B_SIDE_PLAYER
+         && GetBattlerSide(gBattlerTarget) == B_SIDE_OPPONENT
+         && IsCharmActive(EFFECT_MOMENTUM_CHARM)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+            PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_MomentumCharmActivates;
             return;
         }
         break;

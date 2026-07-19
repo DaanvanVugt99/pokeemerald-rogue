@@ -10,6 +10,7 @@
 #include "battle_message.h"
 #include "battle_pyramid.h"
 #include "battle_scripts.h"
+#include "battle_script_commands.h"
 #include "battle_setup.h"
 #include "battle_tower.h"
 #include "battle_util.h"
@@ -3294,6 +3295,8 @@ void SwitchInClearSetData(u32 battler, bool32 preserveBatonPassState)
     // Reset damage to prevent things like red card activating if the switched-in mon is holding it
     gSpecialStatuses[battler].physicalDmg = 0;
     gSpecialStatuses[battler].specialDmg = 0;
+    gSpecialStatuses[battler].switchInRetaliateCharmDone = FALSE;
+    gSpecialStatuses[battler].switchInStandCharmDone = FALSE;
 
     // Reset G-Max Chi Strike boosts.
     gBattleStruct->bonusCritStages[battler] = 0;
@@ -3901,6 +3904,8 @@ static void TryDoEventsBeforeFirstTurn(void)
     {
         gBattlerAttacker = gBattlerByTurnOrder[gBattleStruct->switchInAbilitiesCounter];
 
+        if (TryActivateSwitchInCharms(gBattlerAttacker))
+            return;
         if (TryPrimalReversion(gBattlerAttacker))
             return;
         if (AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, gBattlerAttacker, 0, 0, 0)

@@ -17,7 +17,7 @@ static void SetUtilityCharms(u16 reachCount, u16 accuracyCount, u16 recoveryCoun
     FinishCharmTestSetup();
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Reach Charm boosts inherent contact moves and disables Tough Claws", s16 damage)
+SINGLE_BATTLE_TEST("charms: utility - Reach Charm boosts inherent contact moves and disables Tough Claws", s16 damage)
 {
     u32 ability;
     bool32 hasCharm;
@@ -44,7 +44,7 @@ SINGLE_BATTLE_TEST("Utility charms: Reach Charm boosts inherent contact moves an
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Reach Charm leaves non-contact move damage unchanged", s16 damage)
+SINGLE_BATTLE_TEST("charms: utility - Reach Charm leaves non-contact move damage unchanged", s16 damage)
 {
     bool32 hasCharm;
 
@@ -66,7 +66,7 @@ SINGLE_BATTLE_TEST("Utility charms: Reach Charm leaves non-contact move damage u
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Reach Charm prevents contact retaliation")
+SINGLE_BATTLE_TEST("charms: utility - Reach Charm prevents contact retaliation")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
@@ -85,7 +85,7 @@ SINGLE_BATTLE_TEST("Utility charms: Reach Charm prevents contact retaliation")
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Reach Charm recognizes physical Shell Side Arm as inherent contact", s16 damage)
+SINGLE_BATTLE_TEST("charms: utility - Reach Charm recognizes physical Shell Side Arm as inherent contact", s16 damage)
 {
     bool32 hasCharm;
 
@@ -115,7 +115,7 @@ SINGLE_BATTLE_TEST("Utility charms: Reach Charm recognizes physical Shell Side A
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Reach and Iron Fist Charms stack on punching contact moves", s16 damage)
+SINGLE_BATTLE_TEST("charms: utility - Reach and Iron Fist Charms stack on punching contact moves", s16 damage)
 {
     bool32 hasCharms;
 
@@ -143,7 +143,7 @@ SINGLE_BATTLE_TEST("Utility charms: Reach and Iron Fist Charms stack on punching
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Reach Charm does not boost opponent contact moves", s16 damage)
+SINGLE_BATTLE_TEST("charms: utility - Reach Charm does not boost opponent contact moves", s16 damage)
 {
     bool32 hasCharm;
 
@@ -164,7 +164,7 @@ SINGLE_BATTLE_TEST("Utility charms: Reach Charm does not boost opponent contact 
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm makes damaging moves bypass accuracy rolls")
+SINGLE_BATTLE_TEST("charms: utility - Accuracy Charm makes damaging moves bypass accuracy rolls")
 {
     GIVEN {
         SetUtilityCharms(0, 1, 0);
@@ -180,7 +180,7 @@ SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm makes damaging moves bypass a
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm makes status moves bypass accuracy rolls")
+SINGLE_BATTLE_TEST("charms: utility - Accuracy Charm makes status moves bypass accuracy rolls")
 {
     GIVEN {
         SetUtilityCharms(0, 1, 0);
@@ -196,7 +196,7 @@ SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm makes status moves bypass acc
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm makes variable multi-hit moves pass their accuracy check")
+SINGLE_BATTLE_TEST("charms: utility - Accuracy Charm makes variable multi-hit moves pass their accuracy check")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_BULLET_SEED].effect == EFFECT_MULTI_HIT);
@@ -213,7 +213,7 @@ SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm makes variable multi-hit move
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm cannot hit semi-invulnerable targets")
+SINGLE_BATTLE_TEST("charms: utility - Accuracy Charm cannot hit semi-invulnerable targets")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_FLY].effect == EFFECT_SEMI_INVULNERABLE);
@@ -230,7 +230,7 @@ SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm cannot hit semi-invulnerable 
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm does not affect OHKO accuracy")
+SINGLE_BATTLE_TEST("charms: utility - Accuracy Charm does not affect OHKO accuracy")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_FISSURE].effect == EFFECT_OHKO);
@@ -247,7 +247,7 @@ SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm does not affect OHKO accuracy
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm does not affect opponent moves")
+SINGLE_BATTLE_TEST("charms: utility - Accuracy Charm does not affect opponent moves")
 {
     GIVEN {
         SetUtilityCharms(0, 1, 0);
@@ -263,7 +263,7 @@ SINGLE_BATTLE_TEST("Utility charms: Accuracy Charm does not affect opponent move
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Recovery Charm boosts direct healing", s16 healing)
+SINGLE_BATTLE_TEST("charms: utility - Recovery Charm boosts direct healing", s16 healing)
 {
     bool32 hasCharm;
 
@@ -284,7 +284,7 @@ SINGLE_BATTLE_TEST("Utility charms: Recovery Charm boosts direct healing", s16 h
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Recovery Charm stacks with Big Root on draining moves", s16 damage, s16 healing)
+SINGLE_BATTLE_TEST("charms: utility - Recovery Charm stacks with Big Root on draining moves", s16 damage, s16 healing)
 {
     bool32 hasCharm;
     u32 item;
@@ -313,7 +313,7 @@ SINGLE_BATTLE_TEST("Utility charms: Recovery Charm stacks with Big Root on drain
     }
 }
 
-DOUBLE_BATTLE_TEST("Utility charms: Recovery Charm boosts ally healing including Pollen Puff")
+DOUBLE_BATTLE_TEST("charms: utility - Recovery Charm boosts ally healing including Pollen Puff")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_POLLEN_PUFF].effect == EFFECT_HIT_ENEMY_HEAL_ALLY);
@@ -332,7 +332,7 @@ DOUBLE_BATTLE_TEST("Utility charms: Recovery Charm boosts ally healing including
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Recovery Charm does not boost Pollen Puff damage", s16 damage)
+SINGLE_BATTLE_TEST("charms: utility - Recovery Charm does not boost Pollen Puff damage", s16 damage)
 {
     bool32 hasCharm;
 
@@ -354,7 +354,7 @@ SINGLE_BATTLE_TEST("Utility charms: Recovery Charm does not boost Pollen Puff da
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Recovery Charm boosts delayed Wish healing")
+SINGLE_BATTLE_TEST("charms: utility - Recovery Charm boosts delayed Wish healing")
 {
     GIVEN {
         SetUtilityCharms(0, 0, 1);
@@ -370,7 +370,7 @@ SINGLE_BATTLE_TEST("Utility charms: Recovery Charm boosts delayed Wish healing")
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Recovery Charm revives with three quarters HP")
+SINGLE_BATTLE_TEST("charms: utility - Recovery Charm revives with three quarters HP")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_REVIVAL_BLESSING].effect == EFFECT_REVIVAL_BLESSING);
@@ -387,7 +387,7 @@ SINGLE_BATTLE_TEST("Utility charms: Recovery Charm revives with three quarters H
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Recovery Charm does not boost Aqua Ring healing")
+SINGLE_BATTLE_TEST("charms: utility - Recovery Charm does not boost Aqua Ring healing")
 {
     GIVEN {
         SetUtilityCharms(0, 0, 1);
@@ -402,7 +402,7 @@ SINGLE_BATTLE_TEST("Utility charms: Recovery Charm does not boost Aqua Ring heal
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: Recovery Charm does not boost opponent healing")
+SINGLE_BATTLE_TEST("charms: utility - Recovery Charm does not boost opponent healing")
 {
     GIVEN {
         SetUtilityCharms(0, 0, 1);
@@ -417,7 +417,7 @@ SINGLE_BATTLE_TEST("Utility charms: Recovery Charm does not boost opponent heali
     }
 }
 
-SINGLE_BATTLE_TEST("Utility charms: duplicate copies do not increase charm values")
+SINGLE_BATTLE_TEST("charms: utility - duplicate copies do not increase charm values")
 {
     u16 charmCount;
 

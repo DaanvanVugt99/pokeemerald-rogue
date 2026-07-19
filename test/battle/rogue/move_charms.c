@@ -17,7 +17,7 @@ static void SetMoveCharms(u16 sharpnessCount, u16 jawCount, u16 skillCount)
     FinishCharmTestSetup();
 }
 
-SINGLE_BATTLE_TEST("Move charms: Sharpness Charm boosts slicing moves and stacks with Sharpness", s16 damage)
+SINGLE_BATTLE_TEST("charms: moves - Sharpness Charm boosts slicing moves and stacks with Sharpness", s16 damage)
 {
     u32 ability;
     bool32 hasCharm;
@@ -44,7 +44,7 @@ SINGLE_BATTLE_TEST("Move charms: Sharpness Charm boosts slicing moves and stacks
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Sharpness Charm does not boost non-slicing moves", s16 damage)
+SINGLE_BATTLE_TEST("charms: moves - Sharpness Charm does not boost non-slicing moves", s16 damage)
 {
     bool32 hasCharm;
 
@@ -66,7 +66,7 @@ SINGLE_BATTLE_TEST("Move charms: Sharpness Charm does not boost non-slicing move
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Jaw Charm boosts biting moves and stacks with Strong Jaw", s16 damage)
+SINGLE_BATTLE_TEST("charms: moves - Jaw Charm boosts biting moves and stacks with Strong Jaw", s16 damage)
 {
     u32 ability;
     bool32 hasCharm;
@@ -93,7 +93,7 @@ SINGLE_BATTLE_TEST("Move charms: Jaw Charm boosts biting moves and stacks with S
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Jaw Charm does not boost non-biting moves", s16 damage)
+SINGLE_BATTLE_TEST("charms: moves - Jaw Charm does not boost non-biting moves", s16 damage)
 {
     bool32 hasCharm;
 
@@ -115,7 +115,7 @@ SINGLE_BATTLE_TEST("Move charms: Jaw Charm does not boost non-biting moves", s16
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Skill Charm makes variable multi-hit moves hit four times half the time")
+SINGLE_BATTLE_TEST("charms: moves - Skill Charm makes variable multi-hit moves hit four times half the time")
 {
     PASSES_RANDOMLY(50, 100, RNG_LOADED_DICE);
 
@@ -137,7 +137,7 @@ SINGLE_BATTLE_TEST("Move charms: Skill Charm makes variable multi-hit moves hit 
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Skill Charm makes variable multi-hit moves hit five times half the time")
+SINGLE_BATTLE_TEST("charms: moves - Skill Charm makes variable multi-hit moves hit five times half the time")
 {
     PASSES_RANDOMLY(50, 100, RNG_LOADED_DICE);
 
@@ -160,7 +160,7 @@ SINGLE_BATTLE_TEST("Move charms: Skill Charm makes variable multi-hit moves hit 
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Skill Link retains guaranteed five hits with Skill Charm")
+SINGLE_BATTLE_TEST("charms: moves - Skill Link retains guaranteed five hits with Skill Charm")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_BULLET_SEED].effect == EFFECT_MULTI_HIT);
@@ -181,7 +181,7 @@ SINGLE_BATTLE_TEST("Move charms: Skill Link retains guaranteed five hits with Sk
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Skill Charm and Loaded Dice retain the same four-or-five roll")
+SINGLE_BATTLE_TEST("charms: moves - Skill Charm and Loaded Dice retain the same four-or-five roll")
 {
     PASSES_RANDOMLY(50, 100, RNG_LOADED_DICE);
 
@@ -204,7 +204,7 @@ SINGLE_BATTLE_TEST("Move charms: Skill Charm and Loaded Dice retain the same fou
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: Skill Charm leaves fixed-count multi-hit moves unchanged")
+SINGLE_BATTLE_TEST("charms: moves - Skill Charm leaves fixed-count multi-hit moves unchanged")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_DOUBLE_KICK].strikeCount == 2);
@@ -222,7 +222,7 @@ SINGLE_BATTLE_TEST("Move charms: Skill Charm leaves fixed-count multi-hit moves 
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: player charms do not boost opponent slicing attacks", s16 damage)
+SINGLE_BATTLE_TEST("charms: moves - player charms do not boost opponent slicing attacks", s16 damage)
 {
     bool32 hasCharm;
 
@@ -244,7 +244,7 @@ SINGLE_BATTLE_TEST("Move charms: player charms do not boost opponent slicing att
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: player Skill Charm does not affect opponent multi-hit attacks")
+SINGLE_BATTLE_TEST("charms: moves - player Skill Charm does not affect opponent multi-hit attacks")
 {
     PASSES_RANDOMLY(35, 100, RNG_HITS);
 
@@ -265,7 +265,7 @@ SINGLE_BATTLE_TEST("Move charms: player Skill Charm does not affect opponent mul
     }
 }
 
-SINGLE_BATTLE_TEST("Move charms: duplicate copies do not increase charm values")
+SINGLE_BATTLE_TEST("charms: moves - duplicate copies do not increase charm values")
 {
     u16 charmCount;
 

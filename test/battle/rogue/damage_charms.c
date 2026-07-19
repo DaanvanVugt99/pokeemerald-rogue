@@ -17,7 +17,7 @@ static void SetDamageCharms(u16 techCount, u16 tintedCount, u16 ironFistCount)
     FinishCharmTestSetup();
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Tech Charm boosts moves with 60 base power by 1.5x", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Tech Charm boosts moves with 60 base power by 1.5x", s16 damage)
 {
     bool32 hasCharm;
 
@@ -39,7 +39,7 @@ SINGLE_BATTLE_TEST("Damage charms: Tech Charm boosts moves with 60 base power by
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Tech Charm does not boost moves above 60 base power", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Tech Charm does not boost moves above 60 base power", s16 damage)
 {
     bool32 hasCharm;
 
@@ -61,7 +61,7 @@ SINGLE_BATTLE_TEST("Damage charms: Tech Charm does not boost moves above 60 base
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Tech Charm stacks with Technician", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Tech Charm stacks with Technician", s16 damage)
 {
     u32 ability;
     bool32 hasCharm;
@@ -88,7 +88,7 @@ SINGLE_BATTLE_TEST("Damage charms: Tech Charm stacks with Technician", s16 damag
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Iron Fist Charm boosts punching moves and stacks with Iron Fist", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Iron Fist Charm boosts punching moves and stacks with Iron Fist", s16 damage)
 {
     u32 ability;
     bool32 hasCharm;
@@ -115,7 +115,7 @@ SINGLE_BATTLE_TEST("Damage charms: Iron Fist Charm boosts punching moves and sta
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Iron Fist Charm does not boost non-punching moves", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Iron Fist Charm does not boost non-punching moves", s16 damage)
 {
     bool32 hasCharm;
 
@@ -137,7 +137,7 @@ SINGLE_BATTLE_TEST("Damage charms: Iron Fist Charm does not boost non-punching m
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Tech and Iron Fist Charms stack on low-power punching moves", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Tech and Iron Fist Charms stack on low-power punching moves", s16 damage)
 {
     bool32 hasCharms;
 
@@ -160,7 +160,7 @@ SINGLE_BATTLE_TEST("Damage charms: Tech and Iron Fist Charms stack on low-power 
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Tinted Charm normalizes single and double resistances", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Tinted Charm normalizes single and double resistances", s16 damage)
 {
     u32 targetSpecies;
     bool32 hasCharm;
@@ -193,7 +193,7 @@ SINGLE_BATTLE_TEST("Damage charms: Tinted Charm normalizes single and double res
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Tinted Charm stacks with Tinted Lens and keeps the resisted message", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - Tinted Charm stacks with Tinted Lens and keeps the resisted message", s16 damage)
 {
     u32 ability;
     bool32 hasCharm;
@@ -222,7 +222,7 @@ SINGLE_BATTLE_TEST("Damage charms: Tinted Charm stacks with Tinted Lens and keep
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Tinted Charm does not affect immunities")
+SINGLE_BATTLE_TEST("charms: damage - Tinted Charm does not affect immunities")
 {
     bool32 hasCharm;
 
@@ -245,7 +245,7 @@ SINGLE_BATTLE_TEST("Damage charms: Tinted Charm does not affect immunities")
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: player charms do not boost opponent attacks", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - player charms do not boost opponent attacks", s16 damage)
 {
     bool32 hasCharm;
 
@@ -267,7 +267,7 @@ SINGLE_BATTLE_TEST("Damage charms: player charms do not boost opponent attacks",
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: duplicate copies do not increase their effect", s16 damage)
+SINGLE_BATTLE_TEST("charms: damage - duplicate copies do not increase their effect", s16 damage)
 {
     u16 charmCount;
 
@@ -291,7 +291,7 @@ SINGLE_BATTLE_TEST("Damage charms: duplicate copies do not increase their effect
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Conversion Charm changes Normal moves to the user's primary type")
+SINGLE_BATTLE_TEST("charms: damage - Conversion Charm changes Normal moves to the user's primary type")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
@@ -310,7 +310,7 @@ SINGLE_BATTLE_TEST("Damage charms: Conversion Charm changes Normal moves to the 
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Conversion Charm follows the user's current primary type")
+SINGLE_BATTLE_TEST("charms: damage - Conversion Charm follows the user's current primary type")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_SOAK].effect == EFFECT_SOAK);
@@ -331,7 +331,7 @@ SINGLE_BATTLE_TEST("Damage charms: Conversion Charm follows the user's current p
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Conversion Charm leaves non-Normal moves unchanged")
+SINGLE_BATTLE_TEST("charms: damage - Conversion Charm leaves non-Normal moves unchanged")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
@@ -349,7 +349,7 @@ SINGLE_BATTLE_TEST("Damage charms: Conversion Charm leaves non-Normal moves unch
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: Conversion Charm does not convert opponent moves")
+SINGLE_BATTLE_TEST("charms: damage - Conversion Charm does not convert opponent moves")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
@@ -366,7 +366,7 @@ SINGLE_BATTLE_TEST("Damage charms: Conversion Charm does not convert opponent mo
     }
 }
 
-SINGLE_BATTLE_TEST("Damage charms: duplicate Conversion Charms clamp to one")
+SINGLE_BATTLE_TEST("charms: damage - duplicate Conversion Charms clamp to one")
 {
     GIVEN {
         SetSingleCharmForTest(ITEM_CONVERSION_CHARM, 2);

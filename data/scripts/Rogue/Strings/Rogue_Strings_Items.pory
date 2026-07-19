@@ -361,6 +361,18 @@ text gItemDesc_ConversionCharm
 {
     format("Normal-type moves become the user's primary type.")
 }
+text gItemDesc_RetaliateCharm
+{
+    format("After an ally faints, the next friendly Pokémon sent out gains Attack and Sp. Atk.")
+}
+text gItemDesc_MomentumCharm
+{
+    format("After knocking out an opponent, the attacker gains Speed.")
+}
+text gItemDesc_StandCharm
+{
+    format("The final party member gains Attack, Defense, Sp. Atk, Sp. Def, and Speed on entry.")
+}
 
 text gItemDesc_PartyCurse
 {

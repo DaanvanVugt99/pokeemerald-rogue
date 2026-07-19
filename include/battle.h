@@ -213,6 +213,8 @@ struct SpecialStatus
     u8 instructedChosenTarget:3;
     u8 berryReduced:1;
     // End of byte
+    u8 switchInRetaliateCharmDone:1;
+    u8 switchInStandCharmDone:1;
     u8 gemParam;
     // End of byte
     u8 gemBoost:1;
@@ -263,6 +265,7 @@ struct SideTimer
     u8 followmeTarget:3;
     u8 followmePowder:1; // Rage powder, does not affect grass type pokemon.
     u8 retaliateTimer;
+    u8 retaliateCharmPending:1;
     u8 damageNonTypesTimer;
     u8 damageNonTypesType;
     u8 rainbowTimer;

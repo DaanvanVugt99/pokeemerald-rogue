@@ -1776,6 +1776,10 @@
 	various \battler, VARIOUS_TRY_ACTIVATE_MOXIE
 	.endm
 
+	.macro tryactivatemomentumcharm battler:req
+	various \battler, VARIOUS_TRY_ACTIVATE_MOMENTUM_CHARM
+	.endm
+
 	.macro tryactivatevictory battler:req
 	various \battler, VARIOUS_TRY_ACTIVATE_VICTORY
 	.endm

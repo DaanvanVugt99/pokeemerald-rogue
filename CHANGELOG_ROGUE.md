@@ -60,6 +60,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Retaliate, Momentum, and Stand Charms, which reward replacing a
+  fallen ally, knocking out opponents, and fielding the final party member.
 - Added the Recoil, Guard, and Convert Charms, which prevent friendly recoil
   and crash damage, block critical hits, and convert Normal-type moves to the
   user's primary type respectively.
