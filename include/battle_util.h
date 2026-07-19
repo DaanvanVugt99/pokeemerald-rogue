@@ -242,6 +242,7 @@ u32 GetBattlerHoldEffectParam(u32 battler);
 bool32 IsMoveInherentlyMakingContact(u32 move);
 bool32 IsMoveMakingContact(u32 move, u32 battlerAtk);
 s32 ApplyRecoveryCharmHealing(u32 battler, s32 healing);
+bool32 IsBattlerProtectedByRecoilCharm(u32 battler);
 bool32 IsBattlerGrounded(u32 battler);
 bool32 IsBattlerAlive(u32 battler);
 u32 GetMoveSlot(u16 *moves, u32 move);

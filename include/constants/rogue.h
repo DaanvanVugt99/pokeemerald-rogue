@@ -165,8 +165,11 @@
 #define ITEM_REACH_CHARM                (FIRST_ITEM_CHARM + 22)
 #define ITEM_ACCURACY_CHARM             (FIRST_ITEM_CHARM + 23)
 #define ITEM_RECOVERY_CHARM             (FIRST_ITEM_CHARM + 24)
+#define ITEM_RECOIL_CHARM               (FIRST_ITEM_CHARM + 25)
+#define ITEM_GUARD_CHARM                (FIRST_ITEM_CHARM + 26)
+#define ITEM_CONVERSION_CHARM           (FIRST_ITEM_CHARM + 27)
 
-#define LAST_ITEM_CHARM                 (ITEM_RECOVERY_CHARM)
+#define LAST_ITEM_CHARM                 (ITEM_CONVERSION_CHARM)
 
 
 #define FIRST_ITEM_CURSE                (ITEM_ROGUE_ITEM_FIRST + 80)

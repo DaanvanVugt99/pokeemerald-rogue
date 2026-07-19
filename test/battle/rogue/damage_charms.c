@@ -1,46 +1,20 @@
 #include "global.h"
 #include "test/battle.h"
 
-#include "constants/flags.h"
-#include "event_data.h"
-#include "item.h"
-#include "rogue_charms.h"
+#include "charm_test.h"
 
 static void ClearDamageCharms(void)
 {
-    const u16 items[] =
-    {
-        ITEM_TECHNICIAN_CHARM,
-        ITEM_TINTED_CHARM,
-        ITEM_IRON_FIST_CHARM,
-    };
-    u32 i;
-
-    for (i = 0; i < ARRAY_COUNT(items); i++)
-    {
-        u16 count = GetItemCountInBag(items[i]);
-
-        if (count != 0)
-            RemoveBagItem(items[i], count);
-    }
-
-    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
-    RecalcCharmCurseValues();
+    ClearCharmTestState();
 }
 
 static void SetDamageCharms(u16 techCount, u16 tintedCount, u16 ironFistCount)
 {
-    ClearDamageCharms();
-    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-
-    if (techCount != 0)
-        AddBagItem(ITEM_TECHNICIAN_CHARM, techCount);
-    if (tintedCount != 0)
-        AddBagItem(ITEM_TINTED_CHARM, tintedCount);
-    if (ironFistCount != 0)
-        AddBagItem(ITEM_IRON_FIST_CHARM, ironFistCount);
-
-    RecalcCharmCurseValues();
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_TECHNICIAN_CHARM, techCount);
+    AddCharmForTest(ITEM_TINTED_CHARM, tintedCount);
+    AddCharmForTest(ITEM_IRON_FIST_CHARM, ironFistCount);
+    FinishCharmTestSetup();
 }
 
 SINGLE_BATTLE_TEST("Damage charms: Tech Charm boosts moves with 60 base power by 1.5x", s16 damage)
@@ -314,5 +288,94 @@ SINGLE_BATTLE_TEST("Damage charms: duplicate copies do not increase their effect
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage);
         ClearDamageCharms();
+    }
+}
+
+SINGLE_BATTLE_TEST("Damage charms: Conversion Charm changes Normal moves to the user's primary type")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
+        ASSUME(gSpeciesInfo[SPECIES_CHARMANDER].types[0] == TYPE_FIRE);
+        ASSUME(gSpeciesInfo[SPECIES_TANGELA].types[0] == TYPE_GRASS);
+        SetSingleCharmForTest(ITEM_CONVERSION_CHARM, 1);
+        PLAYER(SPECIES_CHARMANDER) { Ability(ABILITY_KLUTZ); UniqueAbility(ABILITY_NONE); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_TANGELA) { Ability(ABILITY_KLUTZ); UniqueAbility(ABILITY_NONE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent);
+        MESSAGE("It's super effective!");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("Damage charms: Conversion Charm follows the user's current primary type")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SOAK].effect == EFFECT_SOAK);
+        ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
+        ASSUME(gSpeciesInfo[SPECIES_CHARMANDER].types[0] == TYPE_FIRE);
+        SetSingleCharmForTest(ITEM_CONVERSION_CHARM, 1);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE, MOVE_TACKLE); }
+        OPPONENT(SPECIES_CHARMANDER) { Ability(ABILITY_KLUTZ); UniqueAbility(ABILITY_NONE); Moves(MOVE_SOAK, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SOAK); MOVE(player, MOVE_CELEBRATE); }
+        TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SOAK, opponent);
+        HP_BAR(opponent);
+        MESSAGE("It's super effective!");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("Damage charms: Conversion Charm leaves non-Normal moves unchanged")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+        ASSUME(gSpeciesInfo[SPECIES_SQUIRTLE].types[0] == TYPE_WATER);
+        SetSingleCharmForTest(ITEM_CONVERSION_CHARM, 1);
+        PLAYER(SPECIES_CHARMANDER) { Ability(ABILITY_KLUTZ); UniqueAbility(ABILITY_NONE); Moves(MOVE_EMBER); }
+        OPPONENT(SPECIES_SQUIRTLE) { Ability(ABILITY_KLUTZ); UniqueAbility(ABILITY_NONE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER); }
+    } SCENE {
+        HP_BAR(opponent);
+        MESSAGE("It's not very effective…");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("Damage charms: Conversion Charm does not convert opponent moves")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
+        SetSingleCharmForTest(ITEM_CONVERSION_CHARM, 1);
+        PLAYER(SPECIES_GASTLY) { Ability(ABILITY_KLUTZ); UniqueAbility(ABILITY_NONE); }
+        OPPONENT(SPECIES_CHARMANDER) { Ability(ABILITY_KLUTZ); UniqueAbility(ABILITY_NONE); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        MESSAGE("It doesn't affect Gastly…");
+        NOT HP_BAR(player);
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("Damage charms: duplicate Conversion Charms clamp to one")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_CONVERSION_CHARM, 2);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetCharmValue(EFFECT_CONVERSION_TYPE), 1);
+        ClearCharmTestState();
     }
 }

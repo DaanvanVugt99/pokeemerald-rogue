@@ -58,6 +58,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Recoil, Guard, and Convert Charms, which prevent friendly recoil
+  and crash damage, block critical hits, and convert Normal-type moves to the
+  user's primary type respectively.
 - Added the Reach, Accuracy, and Recovery Charms, which strengthen contact
   moves, prevent friendly non-OHKO moves from missing, and improve move-based
   healing respectively.

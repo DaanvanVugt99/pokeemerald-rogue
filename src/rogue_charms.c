@@ -102,6 +102,15 @@ static u16 EffectToCharmItem(u8 effectType)
         case EFFECT_RECOVERY:
             return ITEM_RECOVERY_CHARM;
 
+        case EFFECT_RECOIL_PROTECTION:
+            return ITEM_RECOIL_CHARM;
+
+        case EFFECT_GUARD:
+            return ITEM_GUARD_CHARM;
+
+        case EFFECT_CONVERSION_TYPE:
+            return ITEM_CONVERSION_CHARM;
+
         // Unused
         // EFFECT_PARTY_SIZE
         // EFFECT_EVERSTONE_EVOS
@@ -251,6 +260,9 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
         case EFFECT_REACH_DAMAGE:
         case EFFECT_ACCURACY:
         case EFFECT_RECOVERY:
+        case EFFECT_RECOIL_PROTECTION:
+        case EFFECT_GUARD:
+        case EFFECT_CONVERSION_TYPE:
             return min(itemCount, 1);
     }
 
@@ -463,6 +475,9 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
         case EFFECT_REACH_DAMAGE:
         case EFFECT_ACCURACY:
         case EFFECT_RECOVERY:
+        case EFFECT_RECOIL_PROTECTION:
+        case EFFECT_GUARD:
+        case EFFECT_CONVERSION_TYPE:
             if(!isCurse)
                 return IsCharmActive(effectType);
             break;

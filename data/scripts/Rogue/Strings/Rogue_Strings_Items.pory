@@ -349,6 +349,18 @@ text gItemDesc_RecoveryCharm
 {
     format("Healing moves restore 50% more HP.")
 }
+text gItemDesc_RecoilCharm
+{
+    format("Friendly Pokémon receive no recoil or crash damage.")
+}
+text gItemDesc_GuardCharm
+{
+    format("Friendly Pokémon cannot be critically hit.")
+}
+text gItemDesc_ConversionCharm
+{
+    format("Normal-type moves become the user's primary type.")
+}
 
 text gItemDesc_PartyCurse
 {

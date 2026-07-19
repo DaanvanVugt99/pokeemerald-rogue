@@ -436,7 +436,7 @@ static bool8 IsFinalStrikeEffect(u16 move);
 static void TrySepticFumesPoisonPartyMon(u32 battlerAtk, u32 poisonedBattler);
 static void TryUpdateRoundTurnOrder(void);
 static bool32 ChangeOrderTargetAfterAttacker(void);
-static bool32 AerialAssaultIgnoresRecoil(void);
+static bool32 AttackerIgnoresRecoil(void);
 static void TryHandleFaintingTargetUniqueAbilities(void);
 void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBattler);
 static void RemoveAllWeather(void);
@@ -2314,7 +2314,8 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
 
     if (gSideStatuses[battlerDef] & SIDE_STATUS_LUCKY_CHANT || gStatuses4[battlerAtk] & STATUS4_CANT_SCORE_A_CRIT
        || abilityDef == ABILITY_BATTLE_ARMOR || abilityDef == ABILITY_SHELL_ARMOR
-       || HasBattlerAbility(battlerDef, ABILITY_CRYSTAL_ARMOR))
+       || HasBattlerAbility(battlerDef, ABILITY_CRYSTAL_ARMOR)
+       || (GetBattlerSide(battlerDef) == B_SIDE_PLAYER && IsCharmActive(EFFECT_GUARD)))
     {
         critChance = -1;
     }
@@ -3396,10 +3397,11 @@ bool32 HasBattlerActedThisTurn(u8 battler)
     return FALSE;
 }
 
-static bool32 AerialAssaultIgnoresRecoil(void)
+static bool32 AttackerIgnoresRecoil(void)
 {
-    return HasBattlerAbility(gBattlerAttacker, ABILITY_AERIAL_ASSAULT)
-        && GetBattlerTurnOrderNum(gBattlerAttacker) < GetBattlerTurnOrderNum(gBattlerTarget);
+    return IsBattlerProtectedByRecoilCharm(gBattlerAttacker)
+        || (HasBattlerAbility(gBattlerAttacker, ABILITY_AERIAL_ASSAULT)
+         && GetBattlerTurnOrderNum(gBattlerAttacker) < GetBattlerTurnOrderNum(gBattlerTarget));
 }
 
 static void CheckSetUnburden(u8 battler)
@@ -6727,7 +6729,7 @@ static void Cmd_moveend(void)
                 && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
                 && IsBattlerAlive(gBattlerAttacker)
                 && gBattleScripting.savedDmg != 0 // Some checks may be redundant alongside this one
-                && !AerialAssaultIgnoresRecoil())
+                && !AttackerIgnoresRecoil())
             {
                 switch (gBattleMoves[gCurrentMove].effect)
                 {
@@ -7169,7 +7171,7 @@ static void Cmd_moveend(void)
                 && IsBattlerAlive(gBattlerAttacker)
                 && IS_EFFECT_RECOIL(gBattleMoves[gCurrentMove].effect)
                 && gBattleScripting.savedDmg != 0
-                && !AerialAssaultIgnoresRecoil()
+                && !AttackerIgnoresRecoil()
                 && !HasBattlerAbility(gBattlerAttacker, ABILITY_ROCK_HEAD)
                 && HasBattlerAbility(gBattlerAttacker, ABILITY_WARPATH)
                 && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK)
@@ -19534,6 +19536,16 @@ static void Cmd_callnative(void)
 }
 
 // Callnative Funcs
+void BS_JumpIfRecoilCharm(void)
+{
+    NATIVE_ARGS(const u8 *jumpInstr);
+
+    if (IsBattlerProtectedByRecoilCharm(gBattlerAttacker))
+        gBattlescriptCurrInstr = cmd->jumpInstr;
+    else
+        gBattlescriptCurrInstr = cmd->nextInstr;
+}
+
 void BS_CalcMetalBurstDmg(void)
 {
     NATIVE_ARGS(const u8 *failInstr);

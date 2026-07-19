@@ -1206,6 +1206,7 @@ BattleScript_EffectMaxHp50Recoil::
 	resultmessage
 	waitmessage B_WAIT_TIME_LONG
 	seteffectwithchance
+	jumpifrecoilcharm BattleScript_SteelBeamAfterSelfDamage
 	jumpifability BS_ATTACKER, ABILITY_MAGIC_GUARD, BattleScript_SteelBeamAfterSelfDamage
 	call BattleScript_SteelBeamSelfDamage
 BattleScript_SteelBeamAfterSelfDamage::
@@ -1218,6 +1219,7 @@ BattleScript_SteelBeamMiss::
 	effectivenesssound
 	resultmessage
 	waitmessage B_WAIT_TIME_LONG
+	jumpifrecoilcharm BattleScript_MoveEnd
 	jumpifability BS_ATTACKER, ABILITY_MAGIC_GUARD, BattleScript_MoveEnd
 	bichalfword gMoveResultFlags, MOVE_RESULT_MISSED
 	call BattleScript_SteelBeamSelfDamage
@@ -4651,6 +4653,7 @@ BattleScript_EffectRecoilIfMiss::
 .endif
 	goto BattleScript_HitFromAtkString
 BattleScript_MoveMissedDoDamage::
+	jumpifrecoilcharm BattleScript_PrintMoveMissed
 	jumpifability BS_ATTACKER, ABILITY_MAGIC_GUARD, BattleScript_PrintMoveMissed
 	attackstring
 	ppreduce
@@ -9678,6 +9681,7 @@ BattleScript_MoveEffectConfusion::
 BattleScript_MoveEffectRecoilWithStatus::
 	argumentstatuseffect
 BattleScript_MoveEffectRecoil::
+	jumpifrecoilcharm BattleScript_RecoilEnd
 	jumpifmove MOVE_STRUGGLE, BattleScript_DoRecoil
 	jumpifability BS_ATTACKER, ABILITY_ROCK_HEAD, BattleScript_RecoilEnd
 BattleScript_DoRecoil::

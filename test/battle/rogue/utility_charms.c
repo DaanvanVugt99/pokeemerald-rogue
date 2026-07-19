@@ -1,47 +1,20 @@
 #include "global.h"
 #include "test/battle.h"
 
-#include "constants/flags.h"
-#include "event_data.h"
-#include "item.h"
-#include "rogue_charms.h"
+#include "charm_test.h"
 
 static void ClearUtilityCharms(void)
 {
-    const u16 items[] =
-    {
-        ITEM_IRON_FIST_CHARM,
-        ITEM_REACH_CHARM,
-        ITEM_ACCURACY_CHARM,
-        ITEM_RECOVERY_CHARM,
-    };
-    u32 i;
-
-    for (i = 0; i < ARRAY_COUNT(items); i++)
-    {
-        u16 count = GetItemCountInBag(items[i]);
-
-        if (count != 0)
-            RemoveBagItem(items[i], count);
-    }
-
-    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
-    RecalcCharmCurseValues();
+    ClearCharmTestState();
 }
 
 static void SetUtilityCharms(u16 reachCount, u16 accuracyCount, u16 recoveryCount)
 {
-    ClearUtilityCharms();
-    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-
-    if (reachCount != 0)
-        AddBagItem(ITEM_REACH_CHARM, reachCount);
-    if (accuracyCount != 0)
-        AddBagItem(ITEM_ACCURACY_CHARM, accuracyCount);
-    if (recoveryCount != 0)
-        AddBagItem(ITEM_RECOVERY_CHARM, recoveryCount);
-
-    RecalcCharmCurseValues();
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_REACH_CHARM, reachCount);
+    AddCharmForTest(ITEM_ACCURACY_CHARM, accuracyCount);
+    AddCharmForTest(ITEM_RECOVERY_CHARM, recoveryCount);
+    FinishCharmTestSetup();
 }
 
 SINGLE_BATTLE_TEST("Utility charms: Reach Charm boosts inherent contact moves and disables Tough Claws", s16 damage)

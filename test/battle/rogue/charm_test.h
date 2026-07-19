@@ -1,0 +1,49 @@
+#ifndef TEST_BATTLE_ROGUE_CHARM_TEST_H
+#define TEST_BATTLE_ROGUE_CHARM_TEST_H
+
+#include "constants/flags.h"
+#include "event_data.h"
+#include "item.h"
+#include "rogue_charms.h"
+
+static inline void ClearCharmTestState(void)
+{
+    u32 item;
+
+    for (item = FIRST_ITEM_CHARM; item <= LAST_ITEM_CHARM; item++)
+    {
+        u16 count = GetItemCountInBag(item);
+
+        if (count != 0)
+            RemoveBagItem(item, count);
+    }
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    RecalcCharmCurseValues();
+}
+
+static inline void BeginCharmTestRun(void)
+{
+    ClearCharmTestState();
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+}
+
+static inline void AddCharmForTest(u16 item, u16 count)
+{
+    if (count != 0)
+        AddBagItem(item, count);
+}
+
+static inline void FinishCharmTestSetup(void)
+{
+    RecalcCharmCurseValues();
+}
+
+static inline void SetSingleCharmForTest(u16 item, u16 count)
+{
+    BeginCharmTestRun();
+    AddCharmForTest(item, count);
+    FinishCharmTestSetup();
+}
+
+#endif

@@ -1,46 +1,20 @@
 #include "global.h"
 #include "test/battle.h"
 
-#include "constants/flags.h"
-#include "event_data.h"
-#include "item.h"
-#include "rogue_charms.h"
+#include "charm_test.h"
 
 static void ClearMoveCharms(void)
 {
-    const u16 items[] =
-    {
-        ITEM_SHARPNESS_CHARM,
-        ITEM_STRONG_JAW_CHARM,
-        ITEM_SKILL_CHARM,
-    };
-    u32 i;
-
-    for (i = 0; i < ARRAY_COUNT(items); i++)
-    {
-        u16 count = GetItemCountInBag(items[i]);
-
-        if (count != 0)
-            RemoveBagItem(items[i], count);
-    }
-
-    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
-    RecalcCharmCurseValues();
+    ClearCharmTestState();
 }
 
 static void SetMoveCharms(u16 sharpnessCount, u16 jawCount, u16 skillCount)
 {
-    ClearMoveCharms();
-    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-
-    if (sharpnessCount != 0)
-        AddBagItem(ITEM_SHARPNESS_CHARM, sharpnessCount);
-    if (jawCount != 0)
-        AddBagItem(ITEM_STRONG_JAW_CHARM, jawCount);
-    if (skillCount != 0)
-        AddBagItem(ITEM_SKILL_CHARM, skillCount);
-
-    RecalcCharmCurseValues();
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_SHARPNESS_CHARM, sharpnessCount);
+    AddCharmForTest(ITEM_STRONG_JAW_CHARM, jawCount);
+    AddCharmForTest(ITEM_SKILL_CHARM, skillCount);
+    FinishCharmTestSetup();
 }
 
 SINGLE_BATTLE_TEST("Move charms: Sharpness Charm boosts slicing moves and stacks with Sharpness", s16 damage)

@@ -6455,6 +6455,12 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     }
 
     GET_MOVE_TYPE(move, moveType);
+    if (GetBattlerSide(battlerAtk) == B_SIDE_PLAYER
+     && IsCharmActive(EFFECT_CONVERSION_TYPE)
+     && moveType == TYPE_NORMAL)
+        gBattleStruct->dynamicMoveType = GetBattlerCreationType(battlerAtk) | F_DYNAMIC_TYPE_SET;
+
+    GET_MOVE_TYPE(move, moveType);
     if (HasBattlerAbility(battlerAtk, ABILITY_ROCK_HEAD) && moveType == TYPE_NORMAL)
         gBattleStruct->dynamicMoveType = TYPE_ROCK | F_DYNAMIC_TYPE_SET;
 

@@ -1319,6 +1319,11 @@
 	.endm
 
 @ callnative macros
+	.macro jumpifrecoilcharm jumpInstr:req
+	callnative BS_JumpIfRecoilCharm
+	.4byte \jumpInstr
+	.endm
+
 	.macro metalburstdamagecalculator failInstr:req
 	callnative BS_CalcMetalBurstDmg
 	.4byte \failInstr

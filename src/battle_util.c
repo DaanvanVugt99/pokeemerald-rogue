@@ -5946,7 +5946,8 @@ static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 mov
 
     if (CanUseSelfExtraMove(battlerAttacker))
     {
-        if (move == MOVE_STRUGGLE || !HasBattlerAbility(battlerAttacker, ABILITY_ROCK_HEAD))
+        if (!IsBattlerProtectedByRecoilCharm(battlerAttacker)
+         && (move == MOVE_STRUGGLE || !HasBattlerAbility(battlerAttacker, ABILITY_ROCK_HEAD)))
         {
             switch (gBattleMoves[move].effect)
             {
@@ -22677,6 +22678,13 @@ s32 ApplyRecoveryCharmHealing(u32 battler, s32 healing)
         healing = healing * 3 / 2;
 
     return healing;
+}
+
+bool32 IsBattlerProtectedByRecoilCharm(u32 battler)
+{
+    return battler < gBattlersCount
+        && GetBattlerSide(battler) == B_SIDE_PLAYER
+        && IsCharmActive(EFFECT_RECOIL_PROTECTION);
 }
 
 static bool32 IsMoveBlockedByProtectLike(u32 battler, u32 move)
