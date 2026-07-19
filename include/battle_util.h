@@ -178,6 +178,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_STATIC_STASH,
     PENDING_UNIQUE_EFFECT_LIVING_SHADOW,
     PENDING_UNIQUE_EFFECT_SALT_FORTRESS,
+    PENDING_UNIQUE_EFFECT_LAST_POUR,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -190,9 +191,11 @@ void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler);
 void QueueStaticStashForConsumedItem(u32 battler);
 void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler);
 void QueueSaltFortressForDefenseRise(u32 battler);
+void QueueLastPourForHeal(u32 battler);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);
 bool32 IsFinalTargetOfMultiTargetMove(void);
+bool32 IsFlockStepMove(u32 move);
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg);
 void SetGrafittiTag(u32 battler);
 void ResetGrafittiTagPaletteCache(u32 battler);

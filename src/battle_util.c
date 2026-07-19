@@ -6474,6 +6474,26 @@ void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount)
     }
 }
 
+void QueueLastPourForHeal(u32 battler)
+{
+    u32 side;
+    u32 partyBit;
+
+    if (battler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || !HasBattlerAbility(battler, ABILITY_LAST_POUR)
+     || !CanUseSelfExtraMove(battler))
+        return;
+
+    side = GetBattlerSide(battler);
+    partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+    if (gBattleStruct->uniqueAbilityUsed[side] & partyBit)
+        return;
+
+    if (QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_LAST_POUR, battler, battler, battler))
+        gBattleStruct->uniqueAbilityUsed[side] |= partyBit;
+}
+
 static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
 {
     if (!IsBattlerAlive(battler)
@@ -6527,6 +6547,23 @@ static bool32 TryActivateStaticStash(u32 battler)
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
     gCalledMove = MOVE_CHARGE;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryActivateLastPour(u32 battler)
+{
+    if (!IsBattlerAlive(battler)
+     || !HasBattlerAbility(battler, ABILITY_LAST_POUR)
+     || !CanUseSelfExtraMove(battler))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_LAST_POUR);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+    gCalledMove = MOVE_TEATIME;
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     StartAbilityCalledMoveScript();
@@ -6643,8 +6680,46 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
         if (TryActivateSaltFortress(battler, target))
             return TRUE;
     }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_LAST_POUR)
+    {
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateLastPour(battler))
+            return TRUE;
+    }
 
     return FALSE;
+}
+
+bool32 IsFlockStepMove(u32 move)
+{
+    if (move == MOVE_NONE || move == MOVE_UNAVAILABLE || !IS_MOVE_STATUS(move))
+        return FALSE;
+
+    if (IsStatRaisingEffect(gBattleMoves[move].effect)
+     && (gBattleMoves[move].target & MOVE_TARGET_USER))
+        return TRUE;
+
+    switch (gBattleMoves[move].effect)
+    {
+    case EFFECT_CURSE:
+    case EFFECT_BELLY_DRUM:
+    case EFFECT_ATTACK_UP_USER_ALLY:
+    case EFFECT_AUTOTOMIZE:
+    case EFFECT_ROTOTILLER:
+    case EFFECT_FLOWER_SHIELD:
+    case EFFECT_MAGNETIC_FLUX:
+    case EFFECT_GEAR_UP:
+    case EFFECT_STUFF_CHEEKS:
+    case EFFECT_NO_RETREAT:
+    case EFFECT_CLANGOROUS_SOUL:
+    case EFFECT_EXTREME_EVOBOOST:
+    case EFFECT_TAKE_HEART:
+    case EFFECT_FILLET_AWAY:
+    case EFFECT_TIDY_UP:
+        return TRUE;
+    default:
+        return FALSE;
+    }
 }
 
 static bool32 TryActivatePendingUniqueAbilityEffectMatching(u32 effect, bool32 matchAny)
@@ -19380,6 +19455,27 @@ if (triggeringAbility != ABILITY_NONE)
         break;
     }
     case ABILITYEFFECT_MOVE_END_OTHER: // Abilities that activate on *another* battler's moveend: Dancer, Soul-Heart, Receiver, Symbiosis
+        if (HasBattlerAbility(battler, ABILITY_FLOCK_STEP)
+         && IsBattlerAlive(battler)
+         && gBattlerAttacker != battler
+         && IsFlockStepMove(gCurrentMove)
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && CanUseSelfExtraMove(battler))
+        {
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            gSpecialStatuses[battler].flockStepOriginalTarget = gBattleStruct->moveTarget[battler] | 0x4;
+            SetBattlerTriggeredAbility(battler, ABILITY_FLOCK_STEP);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gBattleStruct->moveTarget[battler] = battler;
+            gCalledMove = gCurrentMove;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            StartAbilityCalledMoveScript();
+            effect++;
+            break;
+        }
+
         switch (GetBattlerAbility(battler))
         {
         case ABILITY_DANCER:

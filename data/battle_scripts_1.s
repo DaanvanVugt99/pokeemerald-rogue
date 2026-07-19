@@ -2275,6 +2275,7 @@ BattleScript_FlowerShieldString:
 BattleScript_FlowerShieldMoveTargetEnd:
 	moveendto MOVEEND_NEXT_TARGET
 	jumpifnexttargetvalid BattleScript_FlowerShieldLoop
+	moveendfrom MOVEEND_MULTIHIT_MOVE
 	end
 
 BattleScript_EffectRototiller:
@@ -2311,6 +2312,7 @@ BattleScript_RototillerMoveTargetEnd:
 	moveendto MOVEEND_NEXT_TARGET
 	addbyte gBattlerTarget, 1
 	jumpifbytenotequal gBattlerTarget, gBattlersCount, BattleScript_RototillerLoop
+	moveendfrom MOVEEND_MULTIHIT_MOVE
 	end
 
 BattleScript_RototillerCantRaiseMultipleStats:

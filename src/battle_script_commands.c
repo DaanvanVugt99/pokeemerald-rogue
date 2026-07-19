@@ -437,7 +437,7 @@ static void TrySepticFumesPoisonPartyMon(u32 battlerAtk, u32 poisonedBattler);
 static void TryUpdateRoundTurnOrder(void);
 static bool32 ChangeOrderTargetAfterAttacker(void);
 static bool32 AerialAssaultIgnoresRecoil(void);
-static void TryActivateBountyOnFaintingTarget(void);
+static void TryHandleFaintingTargetUniqueAbilities(void);
 void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBattler);
 static void RemoveAllWeather(void);
 static void RemoveAllTerrains(void);
@@ -2923,13 +2923,16 @@ static void Cmd_datahpupdate(void)
                 if (gBattleMons[battler].hp > gBattleMons[battler].maxHP)
                     gBattleMons[battler].hp = gBattleMons[battler].maxHP;
 
-                if (gBattleMons[battler].hp > oldHp
-                 && HasBattlerAbility(battler, ABILITY_REEF_PROTECTION)
-                 && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
-                 && gSideTimers[BATTLE_OPPOSITE(GetBattlerSide(battler))].spikesAmount < 3)
+                if (gBattleMons[battler].hp > oldHp)
                 {
-                    gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
-                    triggerReefProtection = TRUE;
+                    QueueLastPourForHeal(battler);
+                    if (HasBattlerAbility(battler, ABILITY_REEF_PROTECTION)
+                     && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn
+                     && gSideTimers[BATTLE_OPPOSITE(GetBattlerSide(battler))].spikesAmount < 3)
+                    {
+                        gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+                        triggerReefProtection = TRUE;
+                    }
                 }
             }
             else
@@ -5014,7 +5017,7 @@ static void Cmd_tryfaintmon(void)
 
             gHitMarker |= HITMARKER_FAINTED(battler);
             if (battler == gBattlerTarget)
-                TryActivateBountyOnFaintingTarget();
+                TryHandleFaintingTargetUniqueAbilities();
 
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = faintScript;
@@ -6129,6 +6132,9 @@ static void Cmd_end(void)
     if (TryFinishPendingUniqueAbilityScriptAndContinueDrain(gBattlescriptCurrInstr))
         return;
 
+    if (TryStartPendingUniqueAbilityScriptOfKind(gBattlescriptCurrInstr, gBattlescriptCurrInstr, PENDING_UNIQUE_EFFECT_LAST_POUR))
+        return;
+
     if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
         BattleArena_AddSkillPoints(gBattlerAttacker);
 
@@ -6141,6 +6147,9 @@ static void Cmd_end2(void)
     CMD_ARGS();
 
     if (TryFinishPendingUniqueAbilityScriptAndContinueDrain(gBattlescriptCurrInstr))
+        return;
+
+    if (TryStartPendingUniqueAbilityScriptOfKind(gBattlescriptCurrInstr, gBattlescriptCurrInstr, PENDING_UNIQUE_EFFECT_LAST_POUR))
         return;
 
     gCurrentActionFuncId = B_ACTION_TRY_FINISH;
@@ -8070,6 +8079,35 @@ static void Cmd_moveend(void)
                 }
             }
 
+            if (!effect
+             && IsFlockStepMove(gCurrentMove)
+             && gSpecialStatuses[gBattlerAttacker].flockStepStatRaised
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !(gBattleMoves[gCurrentMove].effect == EFFECT_CURSE && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_GHOST))
+             && !(gBattleMoves[gCurrentMove].effect == EFFECT_ACUPRESSURE && gBattlerTarget != gBattlerAttacker))
+            {
+                u8 battlers[4] = {0, 1, 2, 3};
+
+                SortBattlersBySpeed(battlers, FALSE);
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    u8 battler = battlers[i];
+
+                    if (battler != gBattlerAttacker
+                     && HasBattlerAbility(battler, ABILITY_FLOCK_STEP)
+                     && IsBattlerAlive(battler)
+                     && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+                     && AbilityBattleEffects(ABILITYEFFECT_MOVE_END_OTHER, battler, 0, 0, 0))
+                    {
+                        effect = TRUE;
+                        break;
+                    }
+                }
+            }
+
             if (IS_MOVE_STATUS(gCurrentMove)
              && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE))
             {
@@ -8395,6 +8433,11 @@ static void Cmd_moveend(void)
                 *(gBattleStruct->moveTarget + gBattlerAttacker) = gSpecialStatuses[gBattlerAttacker].instructedChosenTarget & 0x3;
             if (gSpecialStatuses[gBattlerAttacker].dancerOriginalTarget)
                 *(gBattleStruct->moveTarget + gBattlerAttacker) = gSpecialStatuses[gBattlerAttacker].dancerOriginalTarget & 0x3;
+            if (gSpecialStatuses[gBattlerAttacker].flockStepOriginalTarget)
+            {
+                *(gBattleStruct->moveTarget + gBattlerAttacker) = gSpecialStatuses[gBattlerAttacker].flockStepOriginalTarget & 0x3;
+                gSpecialStatuses[gBattlerAttacker].flockStepOriginalTarget = 0;
+            }
 
             if (B_RAMPAGE_CANCELLING >= GEN_5
               && gBattleMoves[gCurrentMove].effect == EFFECT_RAMPAGE // If we're rampaging
@@ -8420,6 +8463,7 @@ static void Cmd_moveend(void)
                 gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
             gSpecialStatuses[gBattlerAttacker].damagedMons = 0;
             gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = 0;
+            gSpecialStatuses[gBattlerAttacker].flockStepStatRaised = FALSE;
             gSpecialStatuses[gBattlerTarget].berryReduced = FALSE;
             gBattleScripting.moveEffect = 0;
             if (gBattleResources->flags->flags[gBattlerAttacker] & RESOURCE_FLAG_FALLEN_SKIES)
@@ -10836,12 +10880,23 @@ static bool32 HasPursuitInterceptFaintedTarget(void)
         return FALSE;
 }
 
-static void TryActivateBountyOnFaintingTarget(void)
+static void TryHandleFaintingTargetUniqueAbilities(void)
 {
-    if (HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTY)
-     && GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
-     && (HasAttackerFaintedTarget() || HasPursuitInterceptFaintedTarget())
-     && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)))
+    bool32 hasBounty = HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTY);
+    bool32 hasHiddenStash = HasBattlerAbility(gBattlerAttacker, ABILITY_HIDDEN_STASH);
+
+    if ((!hasBounty && !hasHiddenStash)
+     || GetBattlerSide(gBattlerAttacker) != B_SIDE_PLAYER
+     || (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
+     || !(HasAttackerFaintedTarget() || HasPursuitInterceptFaintedTarget()))
+        return;
+
+    if (hasHiddenStash
+     && (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+     && gBattleResults.hiddenStashKOs < 255)
+        gBattleResults.hiddenStashKOs++;
+
+    if (hasBounty)
     {
         u16 payDay = gPaydayMoney;
         SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BOUNTY);
@@ -15198,6 +15253,8 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
         {
             gBattleCommunication[MULTISTRING_CHOOSER] = (gBattlerTarget == battler);
             gProtectStructs[battler].statRaised = TRUE;
+            if (battler == gBattlerAttacker)
+                gSpecialStatuses[battler].flockStepStatRaised = TRUE;
 
             // check mirror herb
             for (index = 0; index < gBattlersCount; index++)

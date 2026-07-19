@@ -8750,6 +8750,23 @@ static void TryRewardPotentialEvolutionStone(u16 trainerNum)
     }
 }
 
+static void TryRewardHiddenStashCoins(u16 trainerNum)
+{
+    u16 amount = gBattleResults.hiddenStashKOs;
+
+    if (gBattleOutcome != B_OUTCOME_WON
+     || amount == 0
+     || Rogue_IsExpTrainer(trainerNum)
+     || Rogue_IsBattleSimTrainer(trainerNum)
+     || Rogue_IsVictoryLapActive())
+        return;
+
+    if (AddBagItem(ITEM_GIMMIGHOUL_COIN, amount))
+        Rogue_PushPopup_AddItem(ITEM_GIMMIGHOUL_COIN, amount);
+    else
+        Rogue_PushPopup_CannotTakeItem(ITEM_GIMMIGHOUL_COIN, amount);
+}
+
 void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 {
     RogueTrial_OnTrainerBattleEnd();
@@ -8769,6 +8786,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
     FlagClear(FLAG_ROGUE_TERASTALLIZE_BATTLE);
     CheckAndNotifyForFaintedMons();
     RogueQuest_OnTrigger(QUEST_TRIGGER_TRAINER_BATTLE_END);
+    TryRewardHiddenStashCoins(trainerNum);
 
     if(Rogue_IsRunActive())
     {
