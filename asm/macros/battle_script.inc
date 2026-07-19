@@ -1330,6 +1330,12 @@
 	.4byte \jumpInstr
 	.endm
 
+	.macro jumpifcommanderactive battler:req, jumpInstr:req
+	callnative BS_JumpIfCommanderActive
+	.byte \battler
+	.4byte \jumpInstr
+	.endm
+
 	.macro jumpifholdeffect battler:req, holdEffect:req, jumpInstr:req
 	callnative BS_JumpIfHoldEffect
 	.byte \battler

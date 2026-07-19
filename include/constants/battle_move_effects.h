@@ -446,7 +446,8 @@
 #define EFFECT_CHEAP_TRICK                  440
 #define EFFECT_BRAINSTORM                   441
 #define EFFECT_SHELTER                      442
+#define EFFECT_ORDER_UP                     443
 
-#define NUM_BATTLE_MOVE_EFFECTS             443
+#define NUM_BATTLE_MOVE_EFFECTS             444
 
 #endif  // GUARD_CONSTANTS_BATTLE_MOVE_EFFECTS_H

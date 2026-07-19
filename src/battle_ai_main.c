@@ -844,6 +844,9 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         }
 
         // check off screen
+        if ((gBattleStruct->commandingDondozo & gBitTable[battlerDef]) && move != MOVE_TRANSFORM)
+            RETURN_SCORE_MINUS(20);
+
         if (IsSemiInvulnerable(battlerDef, move) && moveEffect != EFFECT_SEMI_INVULNERABLE && AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_FASTER)
             RETURN_SCORE_MINUS(20);    // if target off screen and we go first, don't use move
 
@@ -3408,6 +3411,20 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     switch (moveEffect)
     {
     case EFFECT_HIT:
+        break;
+    case EFFECT_ORDER_UP:
+        switch (GET_COMMANDER_FORM(battlerAtk))
+        {
+        case COMMANDER_FORM_CURLY:
+            IncreaseStatUpScore(battlerAtk, battlerDef, STAT_ATK, &score);
+            break;
+        case COMMANDER_FORM_DROOPY:
+            IncreaseStatUpScore(battlerAtk, battlerDef, STAT_DEF, &score);
+            break;
+        case COMMANDER_FORM_STRETCHY:
+            IncreaseStatUpScore(battlerAtk, battlerDef, STAT_SPEED, &score);
+            break;
+        }
         break;
     case EFFECT_SLEEP:
     case EFFECT_YAWN:

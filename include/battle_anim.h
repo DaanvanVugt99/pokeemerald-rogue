@@ -78,6 +78,7 @@ s16 CalculatePanIncrement(s16 sourcePan, s16 targetPan, s16 incrementPan);
 void RelocateBattleBgPal(u16 paletteNum, u16 *dest, u32 offset, bool8 largeScreen);
 void ResetBattleAnimBg(bool8);
 void LoadMoveBg(u16 bgId);
+void AnimRockTomb(struct Sprite *sprite);
 
 // battle_intro.c
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value);

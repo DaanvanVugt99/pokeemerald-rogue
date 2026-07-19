@@ -3135,10 +3135,47 @@ static void BattleStartClearSetData(void)
     gSelectedMonPartyId = PARTY_SIZE; // Revival Blessing
 }
 
+void ClearCommanderPairing(u32 battler)
+{
+    if (GET_COMMANDER_FORM(battler) != COMMANDER_FORM_NONE)
+    {
+        u32 partner = BATTLE_PARTNER(battler);
+
+        SET_COMMANDER_FORM(battler, COMMANDER_FORM_NONE);
+        if (GetBattlerAbility(partner) == ABILITY_COMMANDER)
+            gSpecialStatuses[partner].switchInAbilityDone = FALSE;
+        if (gStatuses3[partner] & STATUS3_COMMANDER)
+        {
+            gStatuses3[partner] &= ~STATUS3_COMMANDER;
+            if (IsBattlerAlive(partner))
+            {
+                BtlController_EmitSpriteInvisibility(partner, BUFFER_A, FALSE);
+                MarkBattlerForControllerExec(partner);
+            }
+        }
+    }
+}
+
+void ClearFaintedCommanderPairings(void)
+{
+    u32 battler;
+
+    if (gBattleStruct->commanderForms == 0)
+        return;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (GET_COMMANDER_FORM(battler) != COMMANDER_FORM_NONE && !IsBattlerAlive(battler))
+            ClearCommanderPairing(battler);
+    }
+}
+
 void SwitchInClearSetData(u32 battler, bool32 preserveBatonPassState)
 {
     s32 i;
     struct DisableStruct disableStructCopy = gDisableStructs[battler];
+
+    ClearCommanderPairing(battler);
 
     ClearIllusionMon(battler);
     if (!preserveBatonPassState)
@@ -3960,6 +3997,7 @@ void BattleTurnPassed(void)
 {
     s32 i;
 
+    ClearFaintedCommanderPairings();
     TurnValuesCleanUp(TRUE);
     if (gBattleOutcome == 0)
     {
@@ -4180,7 +4218,8 @@ static void HandleTurnActionSelectionState(void)
                 || gBattleStruct->absentBattlerFlags & gBitTable[GetBattlerAtPosition(BATTLE_PARTNER(position))]
                 || gBattleCommunication[GetBattlerAtPosition(BATTLE_PARTNER(position))] == STATE_WAIT_ACTION_CONFIRMED)
             {
-                if (gBattleStruct->absentBattlerFlags & gBitTable[battler])
+                if ((gBattleStruct->absentBattlerFlags & gBitTable[battler])
+                 || (gBattleStruct->commandingDondozo & gBitTable[battler]))
                 {
                     gChosenActionByBattler[battler] = B_ACTION_NOTHING_FAINTED;
                     if (!(gBattleTypeFlags & BATTLE_TYPE_MULTI))
@@ -5433,6 +5472,9 @@ static void TurnValuesCleanUp(bool8 var0)
 
         if (gDisableStructs[i].substituteHP == 0)
             gBattleMons[i].status2 &= ~STATUS2_SUBSTITUTE;
+
+        if (!(gStatuses3[i] & STATUS3_COMMANDER))
+            gBattleStruct->commandingDondozo &= ~gBitTable[i];
 
         gSpecialStatuses[i].parentalBondState = PARENTAL_BOND_OFF;
     }

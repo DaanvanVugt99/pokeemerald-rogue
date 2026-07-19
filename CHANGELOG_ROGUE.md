@@ -53,6 +53,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Implemented Tatsugiri's Commander ability and Dondozo's Order Up interaction,
+  including form-specific boosts and animations, switching restrictions, and
+  battle gimmick cancellation while Tatsugiri is swallowed.
 - Added dimmed storage icons, grayscale previews, and a warning label for
   Pokémon outside the currently selected Pokédex.
 - Added a final Unique Legendaries Lab upgrade that gives each legendary node

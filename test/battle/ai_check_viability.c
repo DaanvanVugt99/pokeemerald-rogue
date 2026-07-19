@@ -208,3 +208,58 @@ AI_SINGLE_BATTLE_TEST("AI chooses moves with secondary effect that have a 100% c
             TURN { EXPECT_MOVES(opponent, MOVE_OCTAZOOKA); }
     }
 }
+
+AI_DOUBLE_BATTLE_TEST("Commander AI avoids targeting a hidden Tatsugiri")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_DONDOZO);
+        PLAYER(SPECIES_TATSUGIRI) { Ability(ABILITY_COMMANDER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { SCORE_LT_VAL(opponentLeft, MOVE_TACKLE, AI_SCORE_DEFAULT, target: playerRight); }
+    }
+}
+
+AI_DOUBLE_BATTLE_TEST("Commander AI scores Order Up's form-specific boost")
+{
+    u32 species;
+    u32 ability;
+    bool32 expectBoost;
+
+    PARAMETRIZE { species = SPECIES_TATSUGIRI_CURLY;    ability = ABILITY_COMMANDER;   expectBoost = TRUE; }
+    PARAMETRIZE { species = SPECIES_TATSUGIRI_DROOPY;   ability = ABILITY_COMMANDER;   expectBoost = TRUE; }
+    PARAMETRIZE { species = SPECIES_TATSUGIRI_STRETCHY; ability = ABILITY_COMMANDER;   expectBoost = TRUE; }
+    PARAMETRIZE { species = SPECIES_TATSUGIRI_STRETCHY; ability = ABILITY_STORM_DRAIN; expectBoost = FALSE; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); }
+        OPPONENT(species) { Ability(ability); Speed(2); }
+        OPPONENT(SPECIES_DONDOZO) { Speed(1); Moves(MOVE_ORDER_UP, MOVE_DRAGON_CLAW); }
+    } WHEN {
+        if (expectBoost)
+            TURN { SCORE_GT(opponentRight, MOVE_ORDER_UP, MOVE_DRAGON_CLAW, target: playerLeft); }
+        else
+            TURN { SCORE_EQ(opponentRight, MOVE_ORDER_UP, MOVE_DRAGON_CLAW, target: playerLeft); }
+    }
+}
+
+AI_DOUBLE_BATTLE_TEST("Commander AI does not try to switch Dondozo")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET);
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_TATSUGIRI) { Ability(ABILITY_COMMANDER); }
+        OPPONENT(SPECIES_DONDOZO) { Moves(MOVE_SPLASH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { EXPECT_MOVE(opponentRight, MOVE_SPLASH); }
+    } SCENE {
+        ABILITY_POPUP(opponentLeft, ABILITY_COMMANDER);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPLASH, opponentRight);
+    }
+}

@@ -409,6 +409,9 @@
 #define ANIM_TAG_TERA_SHATTER               (ANIM_SPRITES_START + 395)
 #define ANIM_TAG_ECLIPSE_RAY                (ANIM_SPRITES_START + 396)
 #define ANIM_TAG_ACID_RAIN_DROPS            (ANIM_SPRITES_START + 397)
+#define ANIM_TAG_TATSUGIRI_CURLY            (ANIM_SPRITES_START + 398)
+#define ANIM_TAG_TATSUGIRI_DROOPY           (ANIM_SPRITES_START + 399)
+#define ANIM_TAG_TATSUGIRI_STRETCHY         (ANIM_SPRITES_START + 400)
 
 // battlers
 #define ANIM_ATTACKER         0
@@ -605,6 +608,12 @@
 
 // Tasks with return values often assign them to gBattleAnimArgs[7].
 #define ARG_RET_ID 7
+
+// Order Up variants for Commander
+#define ANIM_ORDER_UP_NONE           0
+#define ANIM_ORDER_UP_CURLY          1
+#define ANIM_ORDER_UP_DROOPY         2
+#define ANIM_ORDER_UP_STRETCHY       3
 
 // For createsprite macro to use internally
 #define ANIMSPRITE_IS_TARGET (1 << 7)

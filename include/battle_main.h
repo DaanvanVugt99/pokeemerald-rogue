@@ -54,6 +54,8 @@ void AnimSetCenterToCornerVecX(struct Sprite *sprite);
 void BeginBattleIntroDummy(void);
 void BeginBattleIntro(void);
 void SwitchInClearSetData(u32 battler, bool32 preserveBatonPassState);
+void ClearCommanderPairing(u32 battler);
+void ClearFaintedCommanderPairings(void);
 const u8* FaintClearSetData(u32 battler);
 void BattleTurnPassed(void);
 u8 IsRunningFromBattleImpossible(u32 battler);

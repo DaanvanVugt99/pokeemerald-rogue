@@ -3725,6 +3725,50 @@ const struct SpriteTemplate gDreepyMissileTemplate =
     .callback = AnimShadowBall
 };
 
+static const union AnimCmd sAnim_OrderUpTatsugiri[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END,
+};
+
+static const union AnimCmd *const sAnims_OrderUpTatsugiri[] =
+{
+    sAnim_OrderUpTatsugiri,
+};
+
+const struct SpriteTemplate gOrderUpTatsugiriCurlySpriteTemplate =
+{
+    .tileTag = ANIM_TAG_TATSUGIRI_CURLY,
+    .paletteTag = ANIM_TAG_TATSUGIRI_CURLY,
+    .oam = &gOamData_AffineOff_ObjNormal_32x32,
+    .anims = sAnims_OrderUpTatsugiri,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = AnimRockTomb,
+};
+
+const struct SpriteTemplate gOrderUpTatsugiriDroopySpriteTemplate =
+{
+    .tileTag = ANIM_TAG_TATSUGIRI_DROOPY,
+    .paletteTag = ANIM_TAG_TATSUGIRI_DROOPY,
+    .oam = &gOamData_AffineOff_ObjNormal_32x32,
+    .anims = sAnims_OrderUpTatsugiri,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = AnimRockTomb,
+};
+
+const struct SpriteTemplate gOrderUpTatsugiriStretchySpriteTemplate =
+{
+    .tileTag = ANIM_TAG_TATSUGIRI_STRETCHY,
+    .paletteTag = ANIM_TAG_TATSUGIRI_STRETCHY,
+    .oam = &gOamData_AffineOff_ObjNormal_32x32,
+    .anims = sAnims_OrderUpTatsugiri,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = AnimRockTomb,
+};
+
 //bolt beak
 const struct SpriteTemplate gBoltBeakBlueSparkTemplate =
 {
@@ -9165,5 +9209,11 @@ void AnimTask_SyrupBomb(u8 taskId)
 void AnimTask_StickySyrup(u8 taskId)
 {
     gBattleAnimArgs[0] = gAnimDisableStructPtr->syrupBombIsShiny;
+    DestroyAnimVisualTask(taskId);
+}
+
+void AnimTask_GetCommanderForm(u8 taskId)
+{
+    gBattleAnimArgs[ARG_RET_ID] = GET_COMMANDER_FORM(gBattleAnimAttacker);
     DestroyAnimVisualTask(taskId);
 }

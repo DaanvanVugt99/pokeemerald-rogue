@@ -771,6 +771,7 @@ struct BattleStruct
     u8 storedHealingWish:4; // Each battler as a bit.
     u8 storedLunarDance:4; // Each battler as a bit.
     u8 storedFairyTaleWish:4; // Each battler as a bit.
+    u8 commandingDondozo:4; // Each swallowed Tatsugiri as a bit.
     u8 fairyTaleWishSourcePartyIdx[MAX_BATTLERS_COUNT];
     u8 bonusCritStages[MAX_BATTLERS_COUNT]; // G-Max Chi Strike boosts crit stages of allies.
     u8 itemPartyIndex[MAX_BATTLERS_COUNT];
@@ -796,11 +797,28 @@ struct BattleStruct
     u8 uniqueAbilityUsed[NUM_BATTLE_SIDES];
     u8 stickySyrupdBy[MAX_BATTLERS_COUNT];
     u8 supremeOverlordCounter[MAX_BATTLERS_COUNT];
-	u8 boosterEnergyActivates;
+    u8 commanderForms; // Two bits per Dondozo battler.
+    u8 boosterEnergyActivates;
     u8 distortedTypeMatchups;
     u8 quickClawRandom[MAX_BATTLERS_COUNT];
     u8 quickDrawRandom[MAX_BATTLERS_COUNT];
 };
+
+#define COMMANDER_FORM_NONE      0
+#define COMMANDER_FORM_CURLY     1
+#define COMMANDER_FORM_DROOPY    2
+#define COMMANDER_FORM_STRETCHY  3
+#define COMMANDER_FORM_MASK      3
+#define COMMANDER_FORM_SHIFT(battler) (2 * (battler))
+#define GET_COMMANDER_FORM(battler) \
+    ((gBattleStruct->commanderForms >> COMMANDER_FORM_SHIFT(battler)) & COMMANDER_FORM_MASK)
+#define SET_COMMANDER_FORM(battler, form)                                                          \
+    do                                                                                             \
+    {                                                                                              \
+        gBattleStruct->commanderForms &= ~(COMMANDER_FORM_MASK << COMMANDER_FORM_SHIFT(battler));   \
+        gBattleStruct->commanderForms |= ((form) & COMMANDER_FORM_MASK)                             \
+                                         << COMMANDER_FORM_SHIFT(battler);                           \
+    } while (0)
 
 // The palaceFlags member of struct BattleStruct contains 1 flag per move to indicate which moves the AI should consider,
 // and 1 flag per battler to indicate whether the battler is awake and at <= 50% HP (which affects move choice).

@@ -11,7 +11,6 @@
 
 static void AnimTask_Rollout_Step(u8 taskId);
 static void AnimRolloutParticle(struct Sprite *);
-static void AnimRockTomb(struct Sprite *);
 static void AnimRockTomb_Step(struct Sprite *sprite);
 static void AnimRockScatter(struct Sprite *);
 static void AnimRockScatter_Step(struct Sprite *sprite);
@@ -882,7 +881,7 @@ static u8 GetRolloutCounter(void)
     return retVal;
 }
 
-static void AnimRockTomb(struct Sprite *sprite)
+void AnimRockTomb(struct Sprite *sprite)
 {
     StartSpriteAnim(sprite, gBattleAnimArgs[4]);
 

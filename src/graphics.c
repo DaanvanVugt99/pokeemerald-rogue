@@ -127,6 +127,13 @@ const u32 gBattleAnimSpritePal_DragonPulseRing[] = INCBIN_U32("graphics/battle_a
 const u32 gBattleAnimSpriteGfx_DreepyMissile[] = INCBIN_U32("graphics/battle_anims/sprites/dreepy_missile.4bpp.lz");
 const u32 gBattleAnimSpritePal_DreepyMissile[] = INCBIN_U32("graphics/battle_anims/sprites/dreepy_missile.gbapal.lz");
 
+const u32 gBattleAnimSpriteGfx_TatsugiriCurly[] = INCBIN_U32("graphics/battle_anims/sprites/tatsugiri_curly.4bpp.lz");
+const u32 gBattleAnimSpritePal_TatsugiriCurly[] = INCBIN_U32("graphics/battle_anims/sprites/tatsugiri_curly.gbapal.lz");
+const u32 gBattleAnimSpriteGfx_TatsugiriDroopy[] = INCBIN_U32("graphics/battle_anims/sprites/tatsugiri_droopy.4bpp.lz");
+const u32 gBattleAnimSpritePal_TatsugiriDroopy[] = INCBIN_U32("graphics/battle_anims/sprites/tatsugiri_droopy.gbapal.lz");
+const u32 gBattleAnimSpriteGfx_TatsugiriStretchy[] = INCBIN_U32("graphics/battle_anims/sprites/tatsugiri_stretchy.4bpp.lz");
+const u32 gBattleAnimSpritePal_TatsugiriStretchy[] = INCBIN_U32("graphics/battle_anims/sprites/tatsugiri_stretchy.gbapal.lz");
+
 const u32 gBattleAnimSpriteGfx_Drill[] = INCBIN_U32("graphics/battle_anims/sprites/drill.4bpp.lz");
 const u32 gBattleAnimSpritePal_Drill[] = INCBIN_U32("graphics/battle_anims/sprites/drill.gbapal.lz");
 

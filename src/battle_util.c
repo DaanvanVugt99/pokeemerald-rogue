@@ -308,6 +308,7 @@ static const u8 sGoNearCounterToEscapeFactor[] = {4, 4, 4, 4};
 
 static const u16 sSkillSwapBannedAbilities[] =
 {
+    ABILITY_COMMANDER,
     ABILITY_WONDER_GUARD,
     ABILITY_MULTITYPE,
     ABILITY_ILLUSION,
@@ -331,6 +332,7 @@ static const u16 sSkillSwapBannedAbilities[] =
 
 static const u16 sRolePlayBannedAbilities[] =
 {
+    ABILITY_COMMANDER,
     ABILITY_TRACE,
     ABILITY_WONDER_GUARD,
     ABILITY_FORECAST,
@@ -362,6 +364,7 @@ static const u16 sRolePlayBannedAbilities[] =
 
 static const u16 sRolePlayBannedAttackerAbilities[] =
 {
+    ABILITY_COMMANDER,
     ABILITY_MULTITYPE,
     ABILITY_ZEN_MODE,
     ABILITY_STANCE_CHANGE,
@@ -380,6 +383,7 @@ static const u16 sRolePlayBannedAttackerAbilities[] =
 
 static const u16 sWorrySeedBannedAbilities[] =
 {
+    ABILITY_COMMANDER,
     ABILITY_MULTITYPE,
     ABILITY_STANCE_CHANGE,
     ABILITY_SCHOOLING,
@@ -398,6 +402,7 @@ static const u16 sWorrySeedBannedAbilities[] =
 
 static const u16 sGastroAcidBannedAbilities[] =
 {
+    ABILITY_COMMANDER,
     ABILITY_AS_ONE_ICE_RIDER,
     ABILITY_AS_ONE_SHADOW_RIDER,
     ABILITY_BATTLE_BOND,
@@ -420,6 +425,7 @@ static const u16 sGastroAcidBannedAbilities[] =
 
 static const u16 sEntrainmentBannedAttackerAbilities[] =
 {
+    ABILITY_COMMANDER,
     ABILITY_TRACE,
     ABILITY_FORECAST,
     ABILITY_FLOWER_GIFT,
@@ -494,7 +500,9 @@ void HandleAction_UseMove(void)
     u16 moveTarget;
 
     gBattlerAttacker = gBattlerByTurnOrder[gCurrentTurnActionNumber];
-    if (gBattleStruct->absentBattlerFlags & gBitTable[gBattlerAttacker] || !IsBattlerAlive(gBattlerAttacker))
+    if (gBattleStruct->absentBattlerFlags & gBitTable[gBattlerAttacker]
+     || gBattleStruct->commandingDondozo & gBitTable[gBattlerAttacker]
+     || !IsBattlerAlive(gBattlerAttacker))
     {
         gCurrentActionFuncId = B_ACTION_FINISHED;
         return;
@@ -573,7 +581,7 @@ void HandleAction_UseMove(void)
          || (HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH)
           && gCurrentMove != MOVE_SHADOW_FORCE
           && gCurrentMove != MOVE_PHANTOM_FORCE))
-            gStatuses3[gBattlerAttacker] &= ~STATUS3_SEMI_INVULNERABLE;
+            gStatuses3[gBattlerAttacker] &= ~STATUS3_SEMI_INVULNERABLE_NO_COMMANDER;
     }
 
     // check z move used
@@ -1272,6 +1280,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
 
 static const u8 sAbilitiesNotTraced[ABILITIES_COUNT] =
 {
+    [ABILITY_COMMANDER] = 1,
     [ABILITY_AS_ONE_ICE_RIDER] = 1,
     [ABILITY_AS_ONE_SHADOW_RIDER] = 1,
     [ABILITY_BATTLE_BOND] = 1,
@@ -1574,7 +1583,7 @@ const u8* CancelMultiTurnMoves(u32 battler)
 
     // Clear battler's semi-invulnerable bits if they are not held by Sky Drop.
     if (!(gStatuses3[battler] & STATUS3_SKY_DROPPED))
-        gStatuses3[battler] &= ~(STATUS3_SEMI_INVULNERABLE);
+        gStatuses3[battler] &= ~(STATUS3_SEMI_INVULNERABLE_NO_COMMANDER);
 
     // Check to see if this Pokemon was in the middle of using Sky Drop. If so, release the target.
     if (gBattleStruct->skyDropTargets[battler] != 0xFF && !(gStatuses3[battler] & STATUS3_SKY_DROPPED))
@@ -10947,7 +10956,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 && !(gBattleMons[BATTLE_OPPOSITE(battler)].status2 & (STATUS2_TRANSFORMED | STATUS2_SUBSTITUTE))
                 && !(gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
                 && !(gBattleStruct->illusion[BATTLE_OPPOSITE(battler)].on)
-                && !(gStatuses3[BATTLE_OPPOSITE(battler)] & STATUS3_SEMI_INVULNERABLE))
+                && !(gStatuses3[BATTLE_OPPOSITE(battler)] & STATUS3_SEMI_INVULNERABLE_NO_COMMANDER))
             {
                 gBattlerAttacker = battler;
                 gBattlerTarget = BATTLE_OPPOSITE(battler);
@@ -11741,6 +11750,50 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
                 gBattleStruct->transformZeroToHero[side] |= gBitTable[gBattlerPartyIndexes[battler]];
                 BattleScriptPushCursorAndCallback(BattleScript_ZeroToHeroActivates);
+                effect++;
+            }
+            break;
+        case ABILITY_COMMANDER:
+            partner = BATTLE_PARTNER(battler);
+            mon = &GetSideParty(GetBattlerSide(battler))[gBattlerPartyIndexes[battler]];
+
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && IsDoubleBattle()
+             && IsPartnerMonFromSameTrainer(battler)
+             && IsBattlerAlive(partner)
+             && GET_COMMANDER_FORM(partner) == COMMANDER_FORM_NONE
+             && gBattleMons[partner].species == SPECIES_DONDOZO
+             && (gChosenActionByBattler[battler] != B_ACTION_SWITCH || HasBattlerActedThisTurn(battler))
+             && (gChosenActionByBattler[partner] != B_ACTION_SWITCH || HasBattlerActedThisTurn(partner))
+             && GET_BASE_SPECIES_ID(GetMonData(mon, MON_DATA_SPECIES)) == SPECIES_TATSUGIRI)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattleScripting.savedBattler = gBattlerAttacker;
+                gBattleScripting.battler = battler;
+                gBattlerAbility = battler;
+                gBattlerAttacker = partner;
+                gBattleStruct->commandingDondozo |= gBitTable[battler];
+                if (gBattleMons[battler].species == SPECIES_TATSUGIRI_DROOPY)
+                    SET_COMMANDER_FORM(partner, COMMANDER_FORM_DROOPY);
+                else if (gBattleMons[battler].species == SPECIES_TATSUGIRI_STRETCHY)
+                    SET_COMMANDER_FORM(partner, COMMANDER_FORM_STRETCHY);
+                else
+                    SET_COMMANDER_FORM(partner, COMMANDER_FORM_CURLY);
+                gStatuses3[battler] |= STATUS3_COMMANDER;
+
+                if ((gBattleMons[battler].status2 & STATUS2_CONFUSION)
+                 && !(gStatuses4[battler] & STATUS4_INFINITE_CONFUSION))
+                    gBattleMons[battler].status2 -= STATUS2_CONFUSION_TURN(1);
+
+                gBattleStruct->mega.toEvolve &= ~gBitTable[battler];
+                gBattleStruct->burst.toBurst &= ~gBitTable[battler];
+                gBattleStruct->dynamax.toDynamax &= ~gBitTable[battler];
+                gBattleStruct->tera.toTera &= ~gBitTable[battler];
+                gBattleStruct->zmove.toBeUsed[battler] = MOVE_NONE;
+
+                BtlController_EmitSpriteInvisibility(battler, BUFFER_A, TRUE);
+                MarkBattlerForControllerExec(battler);
+                BattleScriptPushCursorAndCallback(BattleScript_CommanderActivates);
                 effect++;
             }
             break;
@@ -13156,6 +13209,7 @@ if (triggeringAbility != ABILITY_NONE)
              && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
              && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
              && (CanBattlerSwitch(battler) || !(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+             && GET_COMMANDER_FORM(battler) == COMMANDER_FORM_NONE
              && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
              && CountUsablePartyMons(battler) > 0
              // Not currently held by Sky Drop
@@ -13211,6 +13265,7 @@ if (triggeringAbility != ABILITY_NONE)
                 switch (gBattleMons[gBattlerAttacker].ability)
                 {
                 case ABILITY_MUMMY:
+                case ABILITY_COMMANDER:
                 case ABILITY_BATTLE_BOND:
                 case ABILITY_COMATOSE:
                 case ABILITY_DISGUISE:
@@ -20016,7 +20071,9 @@ u32 IsAbilityPreventingEscape(u32 battler)
 
 bool32 CanBattlerEscape(u32 battler)
 {
-    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_SHED_SHELL)
+    if (GET_COMMANDER_FORM(battler) != COMMANDER_FORM_NONE)
+        return FALSE;
+    else if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_SHED_SHELL)
         return TRUE;
     else if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
         return TRUE;
@@ -21484,6 +21541,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             case HOLD_EFFECT_EJECT_PACK:
                 if (gProtectStructs[battler].statFell
                  && gProtectStructs[battler].disableEjectPack == 0
+                 && CanBattlerSwitch(battler)
                  && CountUsablePartyMons(battler) > 0
                  && !(gCurrentMove == MOVE_PARTING_SHOT && CanBattlerSwitch(gBattlerAttacker))) // Does not activate if attacker used Parting Shot and can switch out
                 {
@@ -25941,8 +25999,6 @@ bool32 IsPartnerMonFromSameTrainer(u32 battler)
     if (GetBattlerSide(battler) == B_SIDE_OPPONENT && gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
         return FALSE;
     else if (GetBattlerSide(battler) == B_SIDE_PLAYER && gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
-        return FALSE;
-    else if (gBattleTypeFlags & BATTLE_TYPE_MULTI)
         return FALSE;
     else
         return TRUE;

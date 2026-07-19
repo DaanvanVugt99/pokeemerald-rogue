@@ -1789,6 +1789,13 @@ static bool32 AccuracyCalcHelper(u16 move)
     bool32 breachPointActive;
     u32 moveType;
 
+    if (gStatuses3[gBattlerTarget] & STATUS3_COMMANDER)
+    {
+        gMoveResultFlags |= MOVE_RESULT_MISSED;
+        JumpIfMoveFailed(7, move);
+        return TRUE;
+    }
+
     GET_MOVE_TYPE(move, moveType);
     moveType = GetTargetAdjustedMoveType(move, gBattlerAttacker, gBattlerTarget, moveType);
     breachPointActive = (gBattleResources->flags->flags[gBattlerAttacker] & RESOURCE_FLAG_BREACH_POINT)
@@ -2293,7 +2300,7 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
 
     GET_MOVE_TYPE(move, moveType);
 
-    if (gSideStatuses[battlerDef] & SIDE_STATUS_LUCKY_CHANT || gStatuses3[battlerAtk] & STATUS3_CANT_SCORE_A_CRIT
+    if (gSideStatuses[battlerDef] & SIDE_STATUS_LUCKY_CHANT || gStatuses4[battlerAtk] & STATUS4_CANT_SCORE_A_CRIT
        || abilityDef == ABILITY_BATTLE_ARMOR || abilityDef == ABILITY_SHELL_ARMOR
        || HasBattlerAbility(battlerDef, ABILITY_CRYSTAL_ARMOR))
     {
@@ -3361,6 +3368,19 @@ u8 GetBattlerTurnOrderNum(u8 battler)
     return i;
 }
 
+bool32 HasBattlerActedThisTurn(u8 battler)
+{
+    u32 i;
+
+    for (i = 0; i <= gCurrentTurnActionNumber && i < gBattlersCount; i++)
+    {
+        if (gBattlerByTurnOrder[i] == battler)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 static bool32 AerialAssaultIgnoresRecoil(void)
 {
     return HasBattlerAbility(gBattlerAttacker, ABILITY_AERIAL_ASSAULT)
@@ -3750,7 +3770,10 @@ void SetMoveEffect(bool32 primary, u32 certain)
         && !primary && gBattleScripting.moveEffect <= MOVE_EFFECT_CONFUSION)
         INCREMENT_RESET_RETURN
 
-    if (TestSheerForceFlag(gBattlerAttacker, gCurrentMove) && gBattleScripting.moveEffect != MOVE_EFFECT_CHARGING)
+    if (TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
+     && !(gBattleMoves[gCurrentMove].effect == EFFECT_ORDER_UP
+       && GET_COMMANDER_FORM(gBattlerAttacker) != COMMANDER_FORM_NONE)
+     && gBattleScripting.moveEffect != MOVE_EFFECT_CHARGING)
         INCREMENT_RESET_RETURN
 
     if (gBattleMons[gEffectBattler].hp == 0 && !activateAfterFaint)
@@ -4807,6 +4830,43 @@ void SetMoveEffect(bool32 primary, u32 certain)
                 {
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
                     gBattlescriptCurrInstr = BattleScript_LowerAtkSpAtk;
+                }
+                break;
+            case MOVE_EFFECT_ORDER_UP:
+                {
+                    u32 stat = STAT_ATK;
+                    bool32 commanderAffected = TRUE;
+
+                    switch (GET_COMMANDER_FORM(gEffectBattler))
+                    {
+                    case COMMANDER_FORM_CURLY:
+                        stat = STAT_ATK;
+                        break;
+                    case COMMANDER_FORM_DROOPY:
+                        stat = STAT_DEF;
+                        break;
+                    case COMMANDER_FORM_STRETCHY:
+                        stat = STAT_SPEED;
+                        break;
+                    default:
+                        commanderAffected = FALSE;
+                        break;
+                    }
+
+                    if (!commanderAffected
+                     || NoAliveMonsForEitherParty()
+                     || ChangeStatBuffs(SET_STAT_BUFF_VALUE(1), stat,
+                                        affectsUser | STAT_CHANGE_UPDATE_MOVE_EFFECT, 0) == STAT_CHANGE_DIDNT_WORK)
+                    {
+                        gBattlescriptCurrInstr++;
+                    }
+                    else
+                    {
+                        gBattleScripting.animArg1 = MOVE_EFFECT_ATK_PLUS_1 + stat - STAT_ATK;
+                        gBattleScripting.animArg2 = 0;
+                        BattleScriptPush(gBattlescriptCurrInstr + 1);
+                        gBattlescriptCurrInstr = BattleScript_StatUp;
+                    }
                 }
                 break;
             }
@@ -6903,7 +6963,7 @@ static void Cmd_moveend(void)
             {
                 BtlController_EmitSpriteInvisibility(gBattlerAttacker, BUFFER_A, FALSE);
                 MarkBattlerForControllerExec(gBattlerAttacker);
-                gStatuses3[gBattlerAttacker] &= ~STATUS3_SEMI_INVULNERABLE;
+                gStatuses3[gBattlerAttacker] &= ~STATUS3_SEMI_INVULNERABLE_NO_COMMANDER;
                 gSpecialStatuses[gBattlerAttacker].restoredBattlerSprite = TRUE;
                 gBattleScripting.moveendState++;
                 return;
@@ -6916,7 +6976,7 @@ static void Cmd_moveend(void)
             {
                 BtlController_EmitSpriteInvisibility(gBattlerTarget, BUFFER_A, FALSE);
                 MarkBattlerForControllerExec(gBattlerTarget);
-                gStatuses3[gBattlerTarget] &= ~STATUS3_SEMI_INVULNERABLE;
+                gStatuses3[gBattlerTarget] &= ~STATUS3_SEMI_INVULNERABLE_NO_COMMANDER;
                 gBattleScripting.moveendState++;
                 return;
             }
@@ -7304,6 +7364,7 @@ static void Cmd_moveend(void)
                       && gBattlerAttacker != battler
                       && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_EJECT_BUTTON
                       && BATTLER_TURN_DAMAGED(battler)
+                      && CanBattlerSwitch(battler)
                       && CountUsablePartyMons(battler) > 0)  // Has mon to switch into
                     {
                         gBattleScripting.battler = battler;
@@ -7339,7 +7400,8 @@ static void Cmd_moveend(void)
                       && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)
                       && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_RED_CARD
                       && BATTLER_TURN_DAMAGED(battler)
-                      && CanBattlerSwitch(gBattlerAttacker))
+                      && (CanBattlerSwitch(gBattlerAttacker)
+                       || GET_COMMANDER_FORM(gBattlerAttacker) != COMMANDER_FORM_NONE))
                     {
                         gLastUsedItem = gBattleMons[battler].item;
                         gBattleStruct->savedBattlerTarget = gBattleScripting.battler = battler;  // Battler with red card
@@ -7347,8 +7409,15 @@ static void Cmd_moveend(void)
                         if (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE)
                             gBattlescriptCurrInstr = BattleScript_MoveEnd;  // Prevent user switch-in selection
                         BattleScriptPushCursor();
-                        gBattlescriptCurrInstr = BattleScript_RedCardActivates;
-                        gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
+                        if (GET_COMMANDER_FORM(gBattlerAttacker) != COMMANDER_FORM_NONE)
+                        {
+                            gBattlescriptCurrInstr = BattleScript_RedCardActivationNoSwitch;
+                        }
+                        else
+                        {
+                            gBattlescriptCurrInstr = BattleScript_RedCardActivates;
+                            gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
+                        }
                         effect = TRUE;
                         break;  // Only fastest red card activates
                     }
@@ -8374,6 +8443,9 @@ static void Cmd_moveend(void)
             gBattleStruct->swapDamageCategory = FALSE;
             gBattleStruct->enduredDamage = 0;
             gBattleStruct->distortedTypeMatchups = 0;
+
+            ClearFaintedCommanderPairings();
+
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_COUNT:
@@ -8748,6 +8820,10 @@ bool32 CanBattlerSwitch(u32 battler)
     s32 i, lastMonId, battlerIn1, battlerIn2;
     bool32 ret = FALSE;
     struct Pokemon *party;
+
+    if (GET_COMMANDER_FORM(battler) != COMMANDER_FORM_NONE
+     || gStatuses3[battler] & STATUS3_COMMANDER)
+        return FALSE;
 
     if (BATTLE_TWO_VS_ONE_OPPONENT && GetBattlerSide(battler) == B_SIDE_OPPONENT)
     {
@@ -9507,6 +9583,15 @@ static void Cmd_switchineffects(void)
                 return;
             else if (AbilityBattleEffects(ABILITYEFFECT_OPPORTUNIST, battler, 0, 0, 0))
                 return;
+
+            if (IsDoubleBattle() && gBattleMons[battler].species == SPECIES_DONDOZO)
+            {
+                u32 partner = BATTLE_PARTNER(battler);
+
+                if (GetBattlerAbility(partner) == ABILITY_COMMANDER
+                 && AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, partner, 0, 0, 0))
+                    return;
+            }
         }
 
         gDisableStructs[battler].stickyWebDone = FALSE;
@@ -12662,7 +12747,7 @@ static void Cmd_various(void)
             case ABILITY_SCHOOLING:         case ABILITY_COMATOSE:
             case ABILITY_SHIELDS_DOWN:      case ABILITY_DISGUISE:
             case ABILITY_RKS_SYSTEM:        case ABILITY_TRACE:
-            case ABILITY_ZERO_TO_HERO:
+            case ABILITY_ZERO_TO_HERO:      case ABILITY_COMMANDER:
             case ABILITY_FORECAST_PRIORITY:
                 break;
             default:
@@ -12795,7 +12880,8 @@ static void Cmd_various(void)
     {
         VARIOUS_ARGS(const u8 *failInstr);
         if (IsEntrainmentBannedAbilityAttacker(gBattleMons[gBattlerAttacker].ability)
-          || IsEntrainmentTargetOrSimpleBeamBannedAbility(gBattleMons[gBattlerTarget].ability))
+          || IsEntrainmentTargetOrSimpleBeamBannedAbility(gBattleMons[gBattlerTarget].ability)
+          || gBattleMons[gBattlerTarget].ability == ABILITY_COMMANDER)
         {
             RecordAbilityBattle(gBattlerTarget, gBattleMons[gBattlerTarget].ability);
             gBattlescriptCurrInstr = cmd->failInstr;
@@ -15292,6 +15378,12 @@ static void Cmd_forcerandomswitch(void)
 
     bool32 redCardForcedSwitch = FALSE;
 
+    if (GET_COMMANDER_FORM(gBattlerTarget) != COMMANDER_FORM_NONE)
+    {
+        gBattlescriptCurrInstr = cmd->failInstr;
+        return;
+    }
+
     // Red card checks against wild pokemon. If we have reached here, the player has a mon to switch into
     // Red card swaps attacker with target to get the animation correct, so here we check attacker which is really the target. Thanks GF...
     if (gBattleScripting.switchCase == B_SWITCH_RED_CARD
@@ -16013,7 +16105,7 @@ static void Cmd_transformdataexecution(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
     if (gBattleMons[gBattlerTarget].status2 & STATUS2_TRANSFORMED
         || gBattleStruct->illusion[gBattlerTarget].on
-        || gStatuses3[gBattlerTarget] & STATUS3_SEMI_INVULNERABLE)
+        || gStatuses3[gBattlerTarget] & STATUS3_SEMI_INVULNERABLE_NO_COMMANDER)
     {
         gMoveResultFlags |= MOVE_RESULT_FAILED;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_TRANSFORM_FAILED;
@@ -16840,7 +16932,8 @@ static void Cmd_trysetperishsong(void)
     {
         if (gStatuses3[i] & STATUS3_PERISH_SONG
             || HasBattlerAbility(i, ABILITY_SOUNDPROOF)
-            || BlocksPrankster(gCurrentMove, gBattlerAttacker, i, TRUE))
+            || BlocksPrankster(gCurrentMove, gBattlerAttacker, i, TRUE)
+            || gStatuses3[i] & STATUS3_COMMANDER)
         {
             notAffectedCount++;
         }
@@ -17461,7 +17554,7 @@ static void Cmd_clearsemiinvulnerablebit(void)
 {
     CMD_ARGS();
 
-    gStatuses3[gBattlerAttacker] &= ~STATUS3_SEMI_INVULNERABLE;
+    gStatuses3[gBattlerAttacker] &= ~STATUS3_SEMI_INVULNERABLE_NO_COMMANDER;
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
@@ -19364,6 +19457,19 @@ void BS_CalcMetalBurstDmg(void)
     {
         gBattlescriptCurrInstr = cmd->failInstr;
     }
+}
+
+void BS_JumpIfCommanderActive(void)
+{
+    NATIVE_ARGS(u8 battler, const u8 *jumpInstr);
+
+    u32 battler = GetBattlerForBattleScript(cmd->battler);
+
+    if (GET_COMMANDER_FORM(battler) != COMMANDER_FORM_NONE
+     || gStatuses3[battler] & STATUS3_COMMANDER)
+        gBattlescriptCurrInstr = cmd->jumpInstr;
+    else
+        gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
 void BS_JungleLashDamage(void)

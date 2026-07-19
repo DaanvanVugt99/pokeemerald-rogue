@@ -613,7 +613,10 @@ bool32 IsBattlerTrapped(u32 battler, bool32 checkSwitch)
 {
     u32 holdEffect = AI_DATA->holdEffects[battler];
 
-    if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
+    if (GET_COMMANDER_FORM(battler) != COMMANDER_FORM_NONE
+     || gStatuses3[battler] & STATUS3_COMMANDER)
+        return TRUE;
+    else if (B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(battler, TYPE_GHOST))
         return FALSE;
     if (checkSwitch && holdEffect == HOLD_EFFECT_SHED_SHELL)
         return FALSE;
@@ -1572,7 +1575,9 @@ bool32 IsMoveRedirectionPrevented(u32 move, u32 atkAbility)
 
 bool32 IsSemiInvulnerable(u32 battlerDef, u32 move)
 {
-    if (gStatuses3[battlerDef] & STATUS3_PHANTOM_FORCE)
+    if ((gStatuses3[battlerDef] & STATUS3_COMMANDER) && move != MOVE_TRANSFORM)
+        return TRUE;
+    else if (gStatuses3[battlerDef] & STATUS3_PHANTOM_FORCE)
         return TRUE;
     else if (!gBattleMoves[move].damagesAirborne && gStatuses3[battlerDef] & STATUS3_ON_AIR)
         return TRUE;

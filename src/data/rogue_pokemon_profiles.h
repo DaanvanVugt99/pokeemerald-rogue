@@ -294181,6 +294181,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_DONDOZO[] =
 	{ .move=MOVE_BODY_SLAM, .level=35 },
 	{ .move=MOVE_AQUA_TAIL, .level=40 },
 	{ .move=MOVE_RAIN_DANCE, .level=45 },
+	{ .move=MOVE_ORDER_UP, .level=50 },
 	{ .move=MOVE_HEAVY_SLAM, .level=55 },
 	{ .move=MOVE_DOUBLE_EDGE, .level=60 },
 	{ .move=MOVE_WAVE_CRASH, .level=65 },
