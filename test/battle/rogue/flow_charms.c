@@ -13,6 +13,14 @@ static void SetFlowCharms(u16 retaliateCount, u16 momentumCount, u16 standCount)
     FinishCharmTestSetup();
 }
 
+static void SetSwitchMoveCharms(u16 prepCount, u16 proteanCount)
+{
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_PREP_CHARM, prepCount);
+    AddCharmForTest(ITEM_PROTEAN_CHARM, proteanCount);
+    FinishCharmTestSetup();
+}
+
 static void ExpectFiveStatBoosts(struct BattlePokemon *mon, u32 stages)
 {
     EXPECT_EQ(mon->statStages[STAT_ATK], DEFAULT_STAT_STAGE + stages);
@@ -342,6 +350,350 @@ SINGLE_BATTLE_TEST("charms: flow - duplicate copies clamp to one")
         EXPECT_EQ(GetCharmValue(EFFECT_RETALIATE_CHARM), 1);
         EXPECT_EQ(GetCharmValue(EFFECT_MOMENTUM_CHARM), 1);
         EXPECT_EQ(GetCharmValue(EFFECT_STAND_CHARM), 1);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Prep Charm gives only the first status move priority")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Wynaut used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Wynaut used Celebrate!");
+    } THEN {
+        EXPECT(gDisableStructs[B_POSITION_PLAYER_LEFT].preparationCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - damaging moves do not consume Prep Charm")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Wynaut used Tackle!");
+        MESSAGE("Wynaut used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - a missed status move consumes Prep Charm")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_HYPNOSIS, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HYPNOSIS, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Wynaut used Hypnosis!");
+        MESSAGE("Wynaut's attack missed!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Wynaut used Celebrate!");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - incapacity does not consume Prep Charm")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_FAKE_OUT, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_FAKE_OUT); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Foe Wobbuffet used Fake Out!");
+        MESSAGE("Wynaut flinched!");
+        MESSAGE("Wynaut used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+    } THEN {
+        EXPECT(gDisableStructs[B_POSITION_PLAYER_LEFT].preparationCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Prep Charm stacks with Prankster")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_SABLEYE) { Speed(1); Ability(ABILITY_PRANKSTER); Moves(MOVE_SWORDS_DANCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_QUICK_ATTACK); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SWORDS_DANCE); MOVE(opponent, MOVE_QUICK_ATTACK); }
+    } SCENE {
+        MESSAGE("Sableye used Swords Dance!");
+        MESSAGE("Foe Wobbuffet used Quick Attack!");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Prep Charm does not grant Prankster's Dark immunity")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_CONFUSE_RAY); }
+        OPPONENT(SPECIES_UMBREON) { Speed(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CONFUSE_RAY); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Wynaut used Confuse Ray!");
+        MESSAGE("Foe Umbreon became confused!");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Quick Guard blocks a Prep Charm move")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_GROWL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_QUICK_GUARD); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_QUICK_GUARD); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_QUICK_GUARD, opponent);
+        NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, player);
+        MESSAGE("Foe Wobbuffet protected itself!");
+    } THEN {
+        EXPECT(gDisableStructs[B_POSITION_PLAYER_LEFT].preparationCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Psychic Terrain blocks a Prep Charm move")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_TACKLE, MOVE_GROWL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_PSYCHIC_TERRAIN, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_PSYCHIC_TERRAIN); }
+        TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Foe Wobbuffet used Psychic Terrain!");
+        MESSAGE("Wynaut used Tackle!");
+        MESSAGE("Wynaut cannot use Growl!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+    } THEN {
+        EXPECT(!gDisableStructs[B_POSITION_PLAYER_LEFT].preparationCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Taunt prevents Prep Charm consumption")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_SABLEYE) { Speed(100); Ability(ABILITY_PRANKSTER); Moves(MOVE_TAUNT); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TAUNT); }
+    } THEN {
+        EXPECT(!gDisableStructs[B_POSITION_PLAYER_LEFT].preparationCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Prep Charm resets after switching back in")
+{
+    GIVEN {
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_SHUCKLE) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Wynaut used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Wynaut used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+    } THEN {
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Protean Charm changes type once without an ability popup")
+{
+    GIVEN {
+        SetSwitchMoveCharms(0, 1);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_WATER_GUN, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF { ABILITY_POPUP(player); }
+        MESSAGE("Wobbuffet transformed into the Water type!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+    } THEN {
+        EXPECT_EQ(player->type1, TYPE_WATER);
+        EXPECT(gDisableStructs[B_POSITION_PLAYER_LEFT].proteanCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - same-type moves leave Protean Charm available")
+{
+    GIVEN {
+        SetSwitchMoveCharms(0, 1);
+        PLAYER(SPECIES_KECLEON) { Moves(MOVE_TACKLE, MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        MESSAGE("Kecleon transformed into the Water type!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
+    } THEN {
+        EXPECT_EQ(player->type1, TYPE_WATER);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Protean Charm follows called moves")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_METRONOME].type == TYPE_NORMAL);
+        SetSwitchMoveCharms(0, 1);
+        PLAYER(SPECIES_KECLEON) { Moves(MOVE_METRONOME); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_METRONOME, WITH_RNG(RNG_METRONOME, MOVE_WATER_GUN)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Kecleon used Metronome!");
+        MESSAGE("Kecleon transformed into the Water type!");
+        MESSAGE("Kecleon used Water Gun!");
+    } THEN {
+        EXPECT_EQ(player->type1, TYPE_WATER);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Protean Charm resets after switching back in")
+{
+    GIVEN {
+        SetSwitchMoveCharms(0, 1);
+        PLAYER(SPECIES_KECLEON) { Moves(MOVE_WATER_GUN, MOVE_EMBER); }
+        PLAYER(SPECIES_SHUCKLE) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_EMBER); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Kecleon transformed into the Water type!");
+        MESSAGE("Kecleon transformed into the Fire type!");
+    } THEN {
+        EXPECT_EQ(player->type1, TYPE_FIRE);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Terastallization does not consume Protean Charm")
+{
+    GIVEN {
+        SetSwitchMoveCharms(0, 1);
+        PLAYER(SPECIES_KECLEON) { TeraType(TYPE_GRASS); Moves(MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN, tera: TRUE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF { MESSAGE("Kecleon transformed into the Water type!"); }
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
+    } THEN {
+        EXPECT(!gDisableStructs[B_POSITION_PLAYER_LEFT].proteanCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Struggle does not consume Protean Charm")
+{
+    bool32 charmActivated = FALSE;
+
+    GIVEN {
+        SetSwitchMoveCharms(0, 1);
+        PLAYER(SPECIES_KECLEON);
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { }
+    } THEN {
+        player->type1 = TYPE_WATER;
+        player->type2 = TYPE_WATER;
+        player->type3 = TYPE_MYSTERY;
+        EXPECT(!ProteanTryChangeType(B_POSITION_PLAYER_LEFT, ABILITY_COLOR_CHANGE, MOVE_STRUGGLE, TYPE_NORMAL, TRUE, &charmActivated));
+        EXPECT(!charmActivated);
+        EXPECT(!gDisableStructs[B_POSITION_PLAYER_LEFT].proteanCharmUsed);
+        EXPECT_EQ(player->type1, TYPE_WATER);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Protean ability activation leaves Protean Charm available")
+{
+    GIVEN {
+        SetSwitchMoveCharms(0, 1);
+        PLAYER(SPECIES_KECLEON) { Ability(ABILITY_PROTEAN); Moves(MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_PROTEAN);
+        MESSAGE("Kecleon transformed into the Water type!");
+    } THEN {
+        EXPECT(!gDisableStructs[B_POSITION_PLAYER_LEFT].proteanCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - switch-move charms are player-only, unique rewards")
+{
+    GIVEN {
+        SetSwitchMoveCharms(2, 2);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_KECLEON) { Speed(1); Moves(MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN); }
+    } SCENE {
+        MESSAGE("Wobbuffet used Celebrate!");
+        NONE_OF { MESSAGE("Foe Kecleon transformed into the Water type!"); }
+        MESSAGE("Foe Kecleon used Water Gun!");
+    } THEN {
+        EXPECT_EQ(GetCharmValue(EFFECT_PREP_CHARM), 1);
+        EXPECT_EQ(GetCharmValue(EFFECT_PROTEAN_CHARM), 1);
+        EXPECT(IsEffectDisabled(EFFECT_PREP_CHARM, FALSE));
+        EXPECT(IsEffectDisabled(EFFECT_PROTEAN_CHARM, FALSE));
+        EXPECT(!gDisableStructs[B_POSITION_OPPONENT_LEFT].preparationCharmUsed);
+        EXPECT(!gDisableStructs[B_POSITION_OPPONENT_LEFT].proteanCharmUsed);
         ClearCharmTestState();
     }
 }

@@ -373,6 +373,14 @@ text gItemDesc_StandCharm
 {
     format("The final party member gains Attack, Defense, Sp. Atk, Sp. Def, and Speed on entry.")
 }
+text gItemDesc_PrepCharm
+{
+    format("The first status move used after switching in has +1 priority.")
+}
+text gItemDesc_ProteanCharm
+{
+    format("The first move used after switching in changes the user's type to match that move.")
+}
 
 text gItemDesc_PartyCurse
 {

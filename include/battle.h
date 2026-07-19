@@ -126,6 +126,8 @@ struct DisableStruct
     u8 terrainAbilityDone:1;
     u8 usedProteanLibero:1;
     u8 uniqueOncePerSwitchInUsed:1;
+    u8 preparationCharmUsed:1;
+    u8 proteanCharmUsed:1;
     u8 ultraAscentActive:1;
     u8 grafittiTagged:1;
     u8 grafittiTagColor:2;
@@ -171,6 +173,7 @@ struct ProtectStruct
     u16 disableEjectPack:1;
     u16 statFell:1;
     u16 pranksterElevated:1;
+    u16 preparationCharmElevated:1;
     u16 quickDraw:1;
     u16 beakBlastCharge:1;
     u16 quash:1;

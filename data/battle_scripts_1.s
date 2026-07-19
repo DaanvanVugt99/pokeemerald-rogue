@@ -11739,6 +11739,12 @@ BattleScript_ProteanActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_ProteanCharmActivates::
+	pause B_WAIT_TIME_SHORTEST
+	printstring STRINGID_PKMNCHANGEDTYPE
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_ModularActivates::
 	pause B_WAIT_TIME_SHORTEST
 	call BattleScript_AbilityPopUp

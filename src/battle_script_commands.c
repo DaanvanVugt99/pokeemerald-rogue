@@ -1348,9 +1348,14 @@ static bool32 TryAegiFormChange(void)
     return TRUE;
 }
 
-bool32 ProteanTryChangeType(u32 battler, u32 ability, u32 move, u32 moveType, bool32 setTriggerAbility)
+bool32 ProteanTryChangeType(u32 battler, u32 ability, u32 move, u32 moveType, bool32 applyActivationState, bool32 *charmActivated)
 {
     bool32 canUseAdaptiveArmory = FALSE;
+    bool32 canUseProteanAbility;
+    bool32 canUseProteanCharm;
+
+    if (charmActivated != NULL)
+        *charmActivated = FALSE;
 
     if (HasBattlerAbility(battler, ABILITY_ADAPTIVE_ARMORY))
     {
@@ -1360,19 +1365,37 @@ bool32 ProteanTryChangeType(u32 battler, u32 ability, u32 move, u32 moveType, bo
                              && GetBattlerKnownDistinctDamagingMoveTypeCount(battler) == MAX_MON_MOVES);
     }
 
-    if ((ability == ABILITY_PROTEAN || ability == ABILITY_LIBERO || canUseAdaptiveArmory)
-     && !gDisableStructs[gBattlerAttacker].usedProteanLibero
-     && (gBattleMons[battler].type1 != moveType || gBattleMons[battler].type2 != moveType
-         || (gBattleMons[battler].type3 != moveType && gBattleMons[battler].type3 != TYPE_MYSTERY))
-    && move != MOVE_STRUGGLE
-     && !IsTerastallized(battler))
+    canUseProteanAbility = (ability == ABILITY_PROTEAN || ability == ABILITY_LIBERO || canUseAdaptiveArmory)
+                        && !gDisableStructs[battler].usedProteanLibero;
+    canUseProteanCharm = GetBattlerSide(battler) == B_SIDE_PLAYER
+                      && IsCharmActive(EFFECT_PROTEAN_CHARM)
+                      && !gDisableStructs[battler].proteanCharmUsed;
+
+    if ((!canUseProteanAbility && !canUseProteanCharm)
+     || (gBattleMons[battler].type1 == moveType
+      && gBattleMons[battler].type2 == moveType
+      && (gBattleMons[battler].type3 == moveType || gBattleMons[battler].type3 == TYPE_MYSTERY))
+     || move == MOVE_STRUGGLE
+     || IsTerastallized(battler))
+        return FALSE;
+
+    SET_BATTLER_TYPE(battler, moveType);
+
+    // Abilities take precedence so the independent charm remains available.
+    if (canUseProteanAbility)
     {
-        SET_BATTLER_TYPE(battler, moveType);
-        if (canUseAdaptiveArmory && setTriggerAbility)
+        if (canUseAdaptiveArmory && applyActivationState)
             SetBattlerTriggeredAbility(battler, ABILITY_ADAPTIVE_ARMORY);
-        return TRUE;
     }
-    return FALSE;
+    else
+    {
+        if (applyActivationState)
+            gDisableStructs[battler].proteanCharmUsed = TRUE;
+        if (charmActivated != NULL)
+            *charmActivated = TRUE;
+    }
+
+    return TRUE;
 }
 
 static bool32 TryModularChangeType(u32 battler, u32 move, u32 moveType)
@@ -1556,18 +1579,23 @@ static void Cmd_attackcanceler(void)
     }
 
     // Check Protean activation.
-    if (ProteanTryChangeType(gBattlerAttacker, attackerAbility, gCurrentMove, moveType, TRUE))
     {
-        if (B_PROTEAN_LIBERO == GEN_9)
-            gDisableStructs[gBattlerAttacker].usedProteanLibero = TRUE;
-        PREPARE_TYPE_BUFFER(gBattleTextBuff1, moveType);
-        if (gBattleScripting.abilityPopupOverwrite == 0)
-            gBattlerAbility = gBattlerAttacker;
-        BattleScriptPushCursor();
-        PrepareStringBattle(STRINGID_EMPTYSTRING3, gBattlerAttacker);
-        gBattleCommunication[MSG_DISPLAY] = 1;
-        gBattlescriptCurrInstr = BattleScript_ProteanActivates;
-        return;
+        bool32 proteanCharmActivated;
+
+        if (ProteanTryChangeType(gBattlerAttacker, attackerAbility, gCurrentMove, moveType, TRUE, &proteanCharmActivated))
+        {
+            if (B_PROTEAN_LIBERO == GEN_9
+             && (attackerAbility == ABILITY_PROTEAN || attackerAbility == ABILITY_LIBERO))
+                gDisableStructs[gBattlerAttacker].usedProteanLibero = TRUE;
+            PREPARE_TYPE_BUFFER(gBattleTextBuff1, moveType);
+            if (!proteanCharmActivated && gBattleScripting.abilityPopupOverwrite == 0)
+                gBattlerAbility = gBattlerAttacker;
+            BattleScriptPushCursor();
+            PrepareStringBattle(STRINGID_EMPTYSTRING3, gBattlerAttacker);
+            gBattleCommunication[MSG_DISPLAY] = 1;
+            gBattlescriptCurrInstr = proteanCharmActivated ? BattleScript_ProteanCharmActivates : BattleScript_ProteanActivates;
+            return;
+        }
     }
 
     if (AtkCanceller_UnableToUseMove2())
@@ -1603,6 +1631,16 @@ static void Cmd_attackcanceler(void)
     }
 
     gHitMarker |= HITMARKER_OBEYS;
+
+    if (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
+     && IsCharmActive(EFFECT_PREP_CHARM)
+     && IS_MOVE_STATUS(gCurrentMove)
+     && !gDisableStructs[gBattlerAttacker].preparationCharmUsed
+     && !gBattleStruct->isAtkCancelerForCalledMove)
+    {
+        gDisableStructs[gBattlerAttacker].preparationCharmUsed = TRUE;
+    }
+
     // Check if no available target present on the field or if Sky Battles ban the move
     if ((NoTargetPresent(gBattlerAttacker, gCurrentMove)
         && (!gBattleMoves[gCurrentMove].twoTurnMove || (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)))

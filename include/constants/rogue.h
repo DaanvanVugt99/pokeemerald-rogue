@@ -174,8 +174,10 @@
 #define ITEM_RETALIATE_CHARM            (FIRST_ITEM_CHARM + 28)
 #define ITEM_MOMENTUM_CHARM             (FIRST_ITEM_CHARM + 29)
 #define ITEM_STAND_CHARM                (FIRST_ITEM_CHARM + 30)
+#define ITEM_PREP_CHARM                 (FIRST_ITEM_CHARM + 31)
+#define ITEM_PROTEAN_CHARM              (FIRST_ITEM_CHARM + 32)
 
-#define LAST_ITEM_CHARM                 (ITEM_STAND_CHARM)
+#define LAST_ITEM_CHARM                 (ITEM_PROTEAN_CHARM)
 
 
 #define FIRST_ITEM_CURSE                (LAST_ITEM_CHARM + 1)

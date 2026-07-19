@@ -60,6 +60,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Prep and Protean Charms, which grant priority to the first status
+  move after switching in and change the user's type to match its first
+  eligible move respectively.
 - Added the Retaliate, Momentum, and Stand Charms, which reward replacing a
   fallen ally, knocking out opponents, and fielding the final party member.
 - Added the Recoil, Guard, and Convert Charms, which prevent friendly recoil

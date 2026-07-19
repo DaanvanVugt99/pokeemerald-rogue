@@ -120,6 +120,12 @@ static u16 EffectToCharmItem(u8 effectType)
         case EFFECT_STAND_CHARM:
             return ITEM_STAND_CHARM;
 
+        case EFFECT_PREP_CHARM:
+            return ITEM_PREP_CHARM;
+
+        case EFFECT_PROTEAN_CHARM:
+            return ITEM_PROTEAN_CHARM;
+
         // Unused
         // EFFECT_PARTY_SIZE
         // EFFECT_EVERSTONE_EVOS
@@ -275,6 +281,8 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
         case EFFECT_RETALIATE_CHARM:
         case EFFECT_MOMENTUM_CHARM:
         case EFFECT_STAND_CHARM:
+        case EFFECT_PREP_CHARM:
+        case EFFECT_PROTEAN_CHARM:
             return min(itemCount, 1);
     }
 
@@ -493,6 +501,8 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
         case EFFECT_RETALIATE_CHARM:
         case EFFECT_MOMENTUM_CHARM:
         case EFFECT_STAND_CHARM:
+        case EFFECT_PREP_CHARM:
+        case EFFECT_PROTEAN_CHARM:
             if(!isCurse)
                 return IsCharmActive(effectType);
             break;

@@ -3384,6 +3384,7 @@ const u8* FaintClearSetData(u32 battler)
     gProtectStructs[battler].statRaised = FALSE;
     gProtectStructs[battler].statFell = FALSE;
     gProtectStructs[battler].pranksterElevated = FALSE;
+    gProtectStructs[battler].preparationCharmElevated = FALSE;
     gProtectStructs[battler].uniqueAbilityActive = FALSE;
 
     gDisableStructs[battler].isFirstTurn = 2;
@@ -5026,6 +5027,17 @@ s8 GetMovePriority(u32 battler, u16 move)
     }
     else if (ability == ABILITY_TRIAGE && IsHealingMove(move))
         priority += 3;
+
+    if (GetBattlerSide(battler) == B_SIDE_PLAYER
+     && IsCharmActive(EFFECT_PREP_CHARM)
+     && IS_MOVE_STATUS(move)
+     && (!gDisableStructs[battler].preparationCharmUsed
+      || gProtectStructs[battler].preparationCharmElevated))
+    {
+        priority++;
+        if (!gDisableStructs[battler].preparationCharmUsed)
+            gProtectStructs[battler].preparationCharmElevated = TRUE;
+    }
 
     if (HasBattlerAbility(battler, ABILITY_FORMATION_FIGHTER)
      && IS_MOVE_STATUS(move))
