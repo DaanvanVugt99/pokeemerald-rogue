@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made charms, curses, and dynamic TRs versioned dynamic items so their IDs can
+  be rearranged without stale saved items becoming unrelated rewards.
 - Sacred Ash can now be consumed immediately after any battle with party losses,
   before post-battle dialogue or reward popups, provided the player did not
   white out; declining preserves the Ash and releases fainted Pokémon normally.

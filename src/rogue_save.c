@@ -50,6 +50,7 @@ struct RogueRunRestoreBlock
 };
 
 STATIC_ASSERT(sizeof(struct RogueSaveBlock) < ROGUE_SAVE_BLOCK_CAPACITY, RogueSaveBlockSize);
+STATIC_ASSERT(LAST_ITEM_TR <= LAST_ITEM_DYNAMIC, DynamicRogueItemsExceedReservedRange);
 
 static EWRAM_DATA struct RogueRunRestoreBlock sRunRestoreBlock = {0};
 
@@ -159,6 +160,8 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
 
     // Serialize data
     //
+
+    SerializeData(stream, &saveBlock->dynamicItemLayoutVersion, sizeof(saveBlock->dynamicItemLayoutVersion));
 
     rogueVersion = ROGUE_VERSION;
     SerializeData(stream, &rogueVersion, sizeof(rogueVersion)); // todo - should flag if version doesn't match (make sure to handle blank/new saves)
@@ -308,6 +311,7 @@ void RogueSave_FormatForWriting()
     if(gRogueSaveBlock->currentBlockFormat != ROGUE_SAVE_FORMAT_WRITE)
     {
         gRogueSaveBlock->saveVersion = ROGUE_SAVE_VERSION;
+        gRogueSaveBlock->dynamicItemLayoutVersion = ROGUE_DYNAMIC_ITEM_LAYOUT_VERSION;
         gRogueSaveBlock->currentBlockFormat = ROGUE_SAVE_FORMAT_WRITE;
 
         SerializeRogueBlock(TRUE);
@@ -329,9 +333,77 @@ u16 RogueSave_GetVersionId()
     return SAVE_VER_ID_LATEST;
 }
 
+static bool8 IsDynamicRogueItem(u16 itemId)
+{
+    return itemId >= FIRST_ITEM_DYNAMIC && itemId <= LAST_ITEM_DYNAMIC;
+}
+
+static void RemoveDynamicItemsFromCurrentBag(void)
+{
+    u16 read;
+    u16 write = 0;
+
+    for(read = 0; read < BAG_ITEM_CAPACITY; ++read)
+    {
+        struct ItemSlot *item = &gSaveBlock1Ptr->bagPockets[read];
+
+        if(item->itemId != ITEM_NONE && !IsDynamicRogueItem(item->itemId))
+        {
+            if(write != read)
+                gSaveBlock1Ptr->bagPockets[write] = *item;
+            ++write;
+        }
+    }
+
+    for(; write < BAG_ITEM_CAPACITY; ++write)
+    {
+        gSaveBlock1Ptr->bagPockets[write].itemId = ITEM_NONE;
+        SetBagItemQuantity(&gSaveBlock1Ptr->bagPockets[write].quantity, 0);
+    }
+
+    UpdateBagItemsPointers();
+}
+
+static void RemoveDynamicItemsFromRestoreBag(void)
+{
+    u16 read;
+    u16 write = 0;
+
+    for(read = 0; read < ARRAY_COUNT(sRunRestoreBlock.bagItems); ++read)
+    {
+        struct ItemSlot *item = &sRunRestoreBlock.bagItems[read];
+
+        if(item->itemId != ITEM_NONE && !IsDynamicRogueItem(item->itemId))
+        {
+            if(write != read)
+                sRunRestoreBlock.bagItems[write] = *item;
+            ++write;
+        }
+    }
+
+    for(; write < ARRAY_COUNT(sRunRestoreBlock.bagItems); ++write)
+    {
+        sRunRestoreBlock.bagItems[write].itemId = ITEM_NONE;
+        sRunRestoreBlock.bagItems[write].quantity = 0;
+    }
+}
+
+static void ApplyDynamicItemLayoutUpdate(void)
+{
+    if(gRogueSaveBlock->dynamicItemLayoutVersion != ROGUE_DYNAMIC_ITEM_LAYOUT_VERSION)
+    {
+        RemoveDynamicItemsFromCurrentBag();
+        RemoveDynamicItemsFromRestoreBag();
+        gRogueSaveBlock->dynamicItemLayoutVersion = ROGUE_DYNAMIC_ITEM_LAYOUT_VERSION;
+    }
+}
+
 void RogueSave_OnSaveLoaded()
 {
     RAND_TYPE startSeed = gRngRogueValue;
+
+    UpdateBagItemsPointers();
+    ApplyDynamicItemLayoutUpdate();
 
     Rogue_NotifySaveLoaded();
 
@@ -347,8 +419,6 @@ void RogueSave_OnSaveLoaded()
             gRogueAdvPath.isOverviewActive = TRUE;
         }
     }
-
-    UpdateBagItemsPointers();
 
     // We cache these values for faster lookup
     RecalcCharmCurseValues();

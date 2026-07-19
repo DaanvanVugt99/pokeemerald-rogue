@@ -136,9 +136,12 @@
 #endif
 
 
-// TODO - Classify these as dynamic items, to be wiped every patch (Allows easily moving them around)
-// Reserved 30 charms then 30 items
-#define FIRST_ITEM_CHARM                (ITEM_ROGUE_ITEM_FIRST + 50)
+// Dynamic Rogue items may move between content revisions. They are cleared from
+// saved bags whenever ROGUE_DYNAMIC_ITEM_LAYOUT_VERSION changes.
+#define FIRST_ITEM_DYNAMIC              (ITEM_ROGUE_ITEM_FIRST + 50)
+#define LAST_ITEM_DYNAMIC               (ITEM_ROGUE_ITEM_LAST)
+
+#define FIRST_ITEM_CHARM                (FIRST_ITEM_DYNAMIC)
 
 #define ITEM_SHOP_PRICE_CHARM           (FIRST_ITEM_CHARM + 0)
 #define ITEM_FLINCH_CHARM               (FIRST_ITEM_CHARM + 1)
@@ -172,7 +175,7 @@
 #define LAST_ITEM_CHARM                 (ITEM_CONVERSION_CHARM)
 
 
-#define FIRST_ITEM_CURSE                (ITEM_ROGUE_ITEM_FIRST + 80)
+#define FIRST_ITEM_CURSE                (LAST_ITEM_CHARM + 1)
 
 #define ITEM_SHOP_PRICE_CURSE           (FIRST_ITEM_CURSE + 0)
 #define ITEM_FLINCH_CURSE               (FIRST_ITEM_CURSE + 1)

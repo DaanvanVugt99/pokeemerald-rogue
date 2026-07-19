@@ -679,6 +679,7 @@ struct UniqueMon
 struct RogueSaveBlock
 {
     u16 saveVersion;
+    u16 dynamicItemLayoutVersion;
     u8 currentBlockFormat;
 
     // Everything past this point is not safe to read until the block format
