@@ -84,6 +84,15 @@ static u16 EffectToCharmItem(u8 effectType)
         case EFFECT_IRON_FIST_DAMAGE:
             return ITEM_IRON_FIST_CHARM;
 
+        case EFFECT_SHARPNESS_DAMAGE:
+            return ITEM_SHARPNESS_CHARM;
+
+        case EFFECT_STRONG_JAW_DAMAGE:
+            return ITEM_STRONG_JAW_CHARM;
+
+        case EFFECT_SKILL_MULTI_HIT:
+            return ITEM_SKILL_CHARM;
+
         // Unused
         // EFFECT_PARTY_SIZE
         // EFFECT_EVERSTONE_EVOS
@@ -227,6 +236,9 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
         case EFFECT_TECHNICIAN_DAMAGE:
         case EFFECT_TINTED_DAMAGE:
         case EFFECT_IRON_FIST_DAMAGE:
+        case EFFECT_SHARPNESS_DAMAGE:
+        case EFFECT_STRONG_JAW_DAMAGE:
+        case EFFECT_SKILL_MULTI_HIT:
             return min(itemCount, 1);
     }
 
@@ -433,6 +445,9 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
         case EFFECT_TECHNICIAN_DAMAGE:
         case EFFECT_TINTED_DAMAGE:
         case EFFECT_IRON_FIST_DAMAGE:
+        case EFFECT_SHARPNESS_DAMAGE:
+        case EFFECT_STRONG_JAW_DAMAGE:
+        case EFFECT_SKILL_MULTI_HIT:
             if(!isCurse)
                 return IsCharmActive(effectType);
             break;

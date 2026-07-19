@@ -23380,6 +23380,10 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         if (gBattleMoves[move].punchingMove && IsCharmActive(EFFECT_IRON_FIST_DAMAGE))
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        if (gBattleMoves[move].slicingMove && IsCharmActive(EFFECT_SHARPNESS_DAMAGE))
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        if (gBattleMoves[move].bitingMove && IsCharmActive(EFFECT_STRONG_JAW_DAMAGE))
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
     }
 
     // attacker's abilities
@@ -27312,7 +27316,8 @@ bool32 CanTargetBattler(u32 battlerAtk, u32 battlerDef, u16 move)
 
 static void SetRandomMultiHitCounter()
 {
-    if (GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_LOADED_DICE)
+    if (GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_LOADED_DICE
+     || (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER && IsCharmActive(EFFECT_SKILL_MULTI_HIT)))
         gMultiHitCounter = RandomUniform(RNG_LOADED_DICE, 4, 5);
     else if (B_MULTI_HIT_CHANCE >= GEN_5)
         gMultiHitCounter = RandomWeighted(RNG_HITS, 0, 0, 7, 7, 3, 3); // 35%: 2 hits, 35%: 3 hits, 15% 4 hits, 15% 5 hits.

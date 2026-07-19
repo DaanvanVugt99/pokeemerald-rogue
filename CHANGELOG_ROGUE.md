@@ -58,6 +58,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Sharpness, Jaw, and Skill Charms, which strengthen slicing and
+  biting moves and improve variable multi-hit moves respectively.
 - Added the Tech, Tinted, and Iron Fist Charms, which strengthen low-power,
   resisted, and punching moves respectively.
 - Added Hidden Stash for the Gimmighoul line, Last Pour for the Poltchageist

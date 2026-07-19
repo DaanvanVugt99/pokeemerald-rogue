@@ -325,6 +325,18 @@ text gItemDesc_IronFistCharm
 {
     format("Punching moves deal 50% more damage.")
 }
+text gItemDesc_SharpnessCharm
+{
+    format("Slicing moves deal 50% more damage.")
+}
+text gItemDesc_StrongJawCharm
+{
+    format("Biting moves deal 50% more damage.")
+}
+text gItemDesc_SkillCharm
+{
+    format("Multi-hit moves always hit at least four times.")
+}
 
 text gItemDesc_PartyCurse
 {

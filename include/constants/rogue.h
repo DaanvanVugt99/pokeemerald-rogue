@@ -159,8 +159,11 @@
 #define ITEM_TECHNICIAN_CHARM           (FIRST_ITEM_CHARM + 16)
 #define ITEM_TINTED_CHARM               (FIRST_ITEM_CHARM + 17)
 #define ITEM_IRON_FIST_CHARM            (FIRST_ITEM_CHARM + 18)
+#define ITEM_SHARPNESS_CHARM            (FIRST_ITEM_CHARM + 19)
+#define ITEM_STRONG_JAW_CHARM           (FIRST_ITEM_CHARM + 20)
+#define ITEM_SKILL_CHARM                (FIRST_ITEM_CHARM + 21)
 
-#define LAST_ITEM_CHARM                 (ITEM_IRON_FIST_CHARM)
+#define LAST_ITEM_CHARM                 (ITEM_SKILL_CHARM)
 
 
 #define FIRST_ITEM_CURSE                (ITEM_ROGUE_ITEM_FIRST + 80)

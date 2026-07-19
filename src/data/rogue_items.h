@@ -69,6 +69,9 @@ extern const u8 gItemDesc_AllowSaveScumCharm[];
 extern const u8 gItemDesc_TechnicianCharm[];
 extern const u8 gItemDesc_TintedCharm[];
 extern const u8 gItemDesc_IronFistCharm[];
+extern const u8 gItemDesc_SharpnessCharm[];
+extern const u8 gItemDesc_StrongJawCharm[];
+extern const u8 gItemDesc_SkillCharm[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -1151,6 +1154,60 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .itemId = ITEM_IRON_FIST_CHARM,
         .price = 0,
         .description = gItemDesc_IronFistCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_SHARPNESS_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Sharpness Charm"),
+#else
+        .name = _("SHARPNESS CHARM"),
+#endif
+        .itemId = ITEM_SHARPNESS_CHARM,
+        .price = 0,
+        .description = gItemDesc_SharpnessCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_STRONG_JAW_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Jaw Charm"),
+#else
+        .name = _("JAW CHARM"),
+#endif
+        .itemId = ITEM_STRONG_JAW_CHARM,
+        .price = 0,
+        .description = gItemDesc_StrongJawCharm,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCharm,
+        .iconPalette = gItemIconPalette_RogueCharm,
+    },
+
+    [ITEM_SKILL_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Skill Charm"),
+#else
+        .name = _("SKILL CHARM"),
+#endif
+        .itemId = ITEM_SKILL_CHARM,
+        .price = 0,
+        .description = gItemDesc_SkillCharm,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
