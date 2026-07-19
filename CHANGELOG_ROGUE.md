@@ -53,6 +53,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Great Tusk's Primal Onslaught and Iron Boulder's Singularity Crash
+  unique abilities.
 - Implemented Tatsugiri's Commander ability and Dondozo's Order Up interaction,
   including form-specific boosts and animations, switching restrictions, and
   battle gimmick cancellation while Tatsugiri is swallowed.

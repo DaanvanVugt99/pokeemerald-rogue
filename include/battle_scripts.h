@@ -697,6 +697,7 @@ extern const u8 BattleScript_GeodeHeartReleased[];
 extern const u8 BattleScript_MoodSwingElated[];
 extern const u8 BattleScript_MoodSwingAnxious[];
 extern const u8 BattleScript_TerraformActivates[];
+extern const u8 BattleScript_SingularityCrashActivates[];
 extern const u8 BattleScript_ToxicDebrisActivates[];
 extern const u8 BattleScript_GrafittiTagToxicSpikes[];
 extern const u8 BattleScript_SharpQuillsActivates[];

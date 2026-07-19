@@ -22630,10 +22630,12 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
 
     // Protective Pads doesn't stop Unseen Fist from bypassing Protect effects, so IsMoveMakingContact() isn't used here.
     // This means extra logic is needed to handle Shell Side Arm.
-    if (HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_DRILL)
-        && IsMoveMakingContact(move, gBattlerAttacker)
+    if (IsMoveMakingContact(move, gBattlerAttacker)
         && IsMoveBlockedByProtectLike(battler, move)
-        && !gProtectStructs[battler].maxGuarded)
+        && !gProtectStructs[battler].maxGuarded
+        && (HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_DRILL)
+         || (HasBattlerAbility(gBattlerAttacker, ABILITY_PRIMAL_ONSLAUGHT)
+          && IsOnlyParadoxInParty(gBattlerAttacker))))
     {
         gProtectStructs[gBattlerAttacker].touchedProtectLike = TRUE;
         return FALSE;
@@ -24403,10 +24405,12 @@ static inline uq4_12_t GetTargetDamageModifier(u32 move, u32 battlerAtk, u32 bat
 
     if (GetMoveTargetCount(move, battlerAtk, battlerDef) >= 2)
         modifier = uq4_12_multiply(modifier, B_MULTIPLE_TARGETS_DMG >= GEN_4 ? UQ_4_12(0.75) : UQ_4_12(0.5));
-    if (HasBattlerAbility(battlerAtk, ABILITY_PIERCING_DRILL)
-     && IsMoveMakingContact(move, battlerAtk)
+    if (IsMoveMakingContact(move, battlerAtk)
      && IsMoveBlockedByProtectLike(battlerDef, move)
-     && !gProtectStructs[battlerDef].maxGuarded)
+     && !gProtectStructs[battlerDef].maxGuarded
+     && (HasBattlerAbility(battlerAtk, ABILITY_PIERCING_DRILL)
+      || (HasBattlerAbility(battlerAtk, ABILITY_PRIMAL_ONSLAUGHT)
+       && IsOnlyParadoxInParty(battlerAtk))))
         modifier = uq4_12_multiply(modifier, UQ_4_12(0.25));
 
     return modifier;

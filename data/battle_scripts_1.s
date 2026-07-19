@@ -11138,6 +11138,15 @@ BattleScript_TerraformActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_SingularityCrashActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_GRAVITY
+	waitanimation
+	printstring STRINGID_GRAVITYINTENSIFIED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_AttackWeakenedByStrongWinds::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_ATTACKWEAKENEDBSTRONGWINDS

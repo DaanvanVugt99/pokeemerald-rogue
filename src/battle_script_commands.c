@@ -683,6 +683,7 @@ static void Cmd_tryrecycleitem(void);
 static void Cmd_settypetoterrain(void);
 
 static bool32 TryActivateTerraform(const u8 *resumeInstr);
+static bool32 TryActivateSingularityCrash(const u8 *resumeInstr);
 static bool32 TrySetGrafittiTagToxicSpikes(u32 battler);
 static void Cmd_pursuitdoubles(void);
 static void Cmd_snatchsetbattlers(void);
@@ -2110,6 +2111,9 @@ static void Cmd_accuracycheck(void)
 
     if (move == ACC_CURR_MOVE)
         move = gCurrentMove;
+
+    if (TryActivateSingularityCrash(gBattlescriptCurrInstr))
+        return;
 
     if (move == NO_ACC_CALC_CHECK_LOCK_ON)
     {
@@ -11045,6 +11049,44 @@ static void RemoveAllTerrains(void)
     gFieldStatuses &= ~STATUS_FIELD_TERRAIN_ANY;    // remove the terrain
 }
 
+static void GroundBattlerForGravity(u32 battler)
+{
+    // Cancel all multiturn moves of airborne Pokemon except those being targeted by Sky Drop.
+    if ((gStatuses3[battler] & STATUS3_ON_AIR) && !(gStatuses3[battler] & STATUS3_SKY_DROPPED))
+        CancelMultiTurnMoves(battler);
+
+    gStatuses3[battler] &= ~(STATUS3_MAGNET_RISE | STATUS3_TELEKINESIS | STATUS3_ON_AIR | STATUS3_SKY_DROPPED);
+}
+
+static bool32 TryActivateSingularityCrash(const u8 *resumeInstr)
+{
+    u32 i, moveType;
+
+    GET_MOVE_TYPE(gCurrentMove, moveType);
+    if (!HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_CRASH)
+     || moveType != TYPE_ROCK
+     || IS_MOVE_STATUS(gCurrentMove)
+     || (gFieldStatuses & STATUS_FIELD_GRAVITY)
+     || (gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]])
+     || gBattleStruct->isAtkCancelerForCalledMove
+     || (gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+     || gProtectStructs[gBattlerAttacker].confusionSelfDmg
+     || !IsOnlyParadoxInParty(gBattlerAttacker))
+        return FALSE;
+
+    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] |= gBitTable[gBattlerPartyIndexes[gBattlerAttacker]];
+    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_SINGULARITY_CRASH);
+    gFieldStatuses |= STATUS_FIELD_GRAVITY;
+    gFieldTimers.gravityTimer = 5;
+
+    for (i = 0; i < gBattlersCount; i++)
+        GroundBattlerForGravity(i);
+
+    BattleScriptPush(resumeInstr);
+    gBattlescriptCurrInstr = BattleScript_SingularityCrashActivates;
+    return TRUE;
+}
+
 static bool32 TryActivateTerraform(const u8 *resumeInstr)
 {
     u32 moveType;
@@ -11701,11 +11743,7 @@ static void Cmd_various(void)
     case VARIOUS_GRAVITY_ON_AIRBORNE_MONS:
     {
         VARIOUS_ARGS();
-        // Cancel all multiturn moves of IN_AIR Pokemon except those being targeted by Sky Drop.
-        if (gStatuses3[battler] & STATUS3_ON_AIR && !(gStatuses3[battler] & STATUS3_SKY_DROPPED))
-            CancelMultiTurnMoves(battler);
-
-        gStatuses3[battler] &= ~(STATUS3_MAGNET_RISE | STATUS3_TELEKINESIS | STATUS3_ON_AIR | STATUS3_SKY_DROPPED);
+        GroundBattlerForGravity(battler);
         break;
     }
     case VARIOUS_SPECTRAL_THIEF:
