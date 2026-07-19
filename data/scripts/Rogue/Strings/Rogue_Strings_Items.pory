@@ -313,6 +313,18 @@ text gItemDesc_AllowSaveScumCharm
 {
     format("Allow regular Saving / Reloading during Runs.")
 }
+text gItemDesc_TechnicianCharm
+{
+    format("Moves with 60 base power or less deal 50% more damage.")
+}
+text gItemDesc_TintedCharm
+{
+    format("Not-very-effective moves deal normal damage instead.")
+}
+text gItemDesc_IronFistCharm
+{
+    format("Punching moves deal 50% more damage.")
+}
 
 text gItemDesc_PartyCurse
 {

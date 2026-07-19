@@ -75,6 +75,15 @@ static u16 EffectToCharmItem(u8 effectType)
         case EFFECT_ALLOW_SAVE_SCUM:
             return ITEM_ALLOW_SAVE_SCUM_CHARM;
 
+        case EFFECT_TECHNICIAN_DAMAGE:
+            return ITEM_TECHNICIAN_CHARM;
+
+        case EFFECT_TINTED_DAMAGE:
+            return ITEM_TINTED_CHARM;
+
+        case EFFECT_IRON_FIST_DAMAGE:
+            return ITEM_IRON_FIST_CHARM;
+
         // Unused
         // EFFECT_PARTY_SIZE
         // EFFECT_EVERSTONE_EVOS
@@ -214,6 +223,11 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
 
         case EFFECT_ENDURE_CHANCE:
             return min(itemCount * (isCurse ? 20 : 60), 90);
+
+        case EFFECT_TECHNICIAN_DAMAGE:
+        case EFFECT_TINTED_DAMAGE:
+        case EFFECT_IRON_FIST_DAMAGE:
+            return min(itemCount, 1);
     }
 
     return itemCount;
@@ -414,6 +428,14 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
         case EFFECT_SNAG_TRAINER_MON:
         case EFFECT_WILD_EGG_SPECIES:
             return TRUE;
+
+        // Disable unique charms once they are already active.
+        case EFFECT_TECHNICIAN_DAMAGE:
+        case EFFECT_TINTED_DAMAGE:
+        case EFFECT_IRON_FIST_DAMAGE:
+            if(!isCurse)
+                return IsCharmActive(effectType);
+            break;
 
         // Disable these effects, once we already have one (They don't stack)
         case EFFECT_EVERSTONE_EVOS:

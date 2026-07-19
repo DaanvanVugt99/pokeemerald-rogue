@@ -58,6 +58,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Tech, Tinted, and Iron Fist Charms, which strengthen low-power,
+  resisted, and punching moves respectively.
 - Added Hidden Stash for the Gimmighoul line, Last Pour for the Poltchageist
   line, and Flock Step for Flamigo.
 - Added Great Tusk's Primal Onslaught and Iron Boulder's Singularity Crash

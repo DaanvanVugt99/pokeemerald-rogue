@@ -23373,6 +23373,15 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     || AbilityBattleEffects(ABILITYEFFECT_FIELD_SPORT, 0, 0, ABILITYEFFECT_WATER_SPORT, 0)))
         modifier = uq4_12_multiply(modifier, UQ_4_12(B_SPORT_DMG_REDUCTION >= GEN_5 ? 0.23 : 0.5));
 
+    // Player-side damage charms stack with matching abilities and one another.
+    if (GetBattlerSide(battlerAtk) == B_SIDE_PLAYER)
+    {
+        if (basePower <= 60 && IsCharmActive(EFFECT_TECHNICIAN_DAMAGE))
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+        if (gBattleMoves[move].punchingMove && IsCharmActive(EFFECT_IRON_FIST_DAMAGE))
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
+    }
+
     // attacker's abilities
     switch (atkAbility)
     {
@@ -25343,7 +25352,13 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     {
         DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk));
     }
-    DAMAGE_APPLY_MODIFIER(typeEffectivenessModifier);
+    if (GetBattlerSide(battlerAtk) == B_SIDE_PLAYER
+     && typeEffectivenessModifier > UQ_4_12(0.0)
+     && typeEffectivenessModifier < UQ_4_12(1.0)
+     && IsCharmActive(EFFECT_TINTED_DAMAGE))
+        DAMAGE_APPLY_MODIFIER(UQ_4_12(1.0));
+    else
+        DAMAGE_APPLY_MODIFIER(typeEffectivenessModifier);
     DAMAGE_APPLY_MODIFIER(GetBurnOrFrostBiteModifier(battlerAtk, move, abilityAtk, usesOwnAttackStat, usesOwnSpAttackStat));
     DAMAGE_APPLY_MODIFIER(GetZMaxMoveAgainstProtectionModifier(battlerDef, move));
     DAMAGE_APPLY_MODIFIER(GetOtherModifiers(move, moveType, battlerAtk, battlerDef, isCrit, typeEffectivenessModifier, updateFlags, abilityAtk, abilityDef, holdEffectAtk, holdEffectDef));
