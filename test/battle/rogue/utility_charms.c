@@ -438,3 +438,17 @@ SINGLE_BATTLE_TEST("charms: utility - duplicate copies do not increase charm val
         ClearUtilityCharms();
     }
 }
+
+SINGLE_BATTLE_TEST("charms: utility - Pressure Charm consumes two additional PP")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_PRESSURE_CHARM, 1);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { MovesWithPP({MOVE_TACKLE, 35}); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } THEN {
+        EXPECT_EQ(opponent->pp[0], 32);
+        ClearCharmTestState();
+    }
+}

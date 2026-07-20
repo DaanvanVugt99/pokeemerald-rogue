@@ -143,3 +143,55 @@ TEST("charms: progression - new charms clamp, leave inactive runs unchanged, and
 
     RestoreLevelCharmTestState(previousDifficulty, previousLevelOffset, previousOverLevelEnabled, previousBattleTypeFlags);
 }
+
+TEST("charms: legacy - older charms use their rebalanced unique values")
+{
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_SHOP_PRICE_CHARM, 2);
+    AddCharmForTest(ITEM_FLINCH_CHARM, 2);
+    AddCharmForTest(ITEM_CRIT_CHARM, 2);
+    AddCharmForTest(ITEM_SHED_SKIN_CHARM, 2);
+    AddCharmForTest(ITEM_WILD_IV_CHARM, 2);
+    AddCharmForTest(ITEM_CATCHING_CHARM, 2);
+    AddCharmForTest(ITEM_GRACE_CHARM, 2);
+    AddCharmForTest(ITEM_WILD_ENCOUNTER_CHARM, 2);
+    AddCharmForTest(ITEM_MOVE_PRIORITY_CHARM, 2);
+    AddCharmForTest(ITEM_ENDURE_CHARM, 2);
+    AddCharmForTest(ITEM_TORMENT_CHARM, 2);
+    AddCharmForTest(ITEM_PRESSURE_CHARM, 2);
+    AddCharmForTest(ITEM_UNAWARE_CHARM, 2);
+    AddCharmForTest(ITEM_ADAPTABILITY_CHARM, 2);
+    FinishCharmTestSetup();
+
+    EXPECT_EQ(GetCharmValue(EFFECT_SHOP_PRICE), 50);
+    EXPECT_EQ(GetCharmValue(EFFECT_FLINCH_CHANCE), 15);
+    EXPECT_EQ(GetCharmValue(EFFECT_CRIT_CHANCE), 2);
+    EXPECT_EQ(GetCharmValue(EFFECT_SHED_SKIN_CHANCE), 50);
+    EXPECT_EQ(GetCharmValue(EFFECT_WILD_IV_RATE), 31);
+    EXPECT_EQ(GetCharmValue(EFFECT_CATCH_RATE), 200);
+    EXPECT_EQ(GetCharmValue(EFFECT_SERENE_GRACE_CHANCE), 100);
+    EXPECT_EQ(GetCharmValue(EFFECT_WILD_ENCOUNTER_COUNT), 2);
+    EXPECT_EQ(GetCharmValue(EFFECT_MOVE_PRIORITY_CHANCE), 25);
+    EXPECT_EQ(GetCharmValue(EFFECT_ENDURE_CHANCE), 100);
+    EXPECT_EQ(GetCharmValue(EFFECT_TORMENT_STATUS), 1);
+    EXPECT_EQ(GetCharmValue(EFFECT_PRESSURE_STATUS), 1);
+    EXPECT_EQ(GetCharmValue(EFFECT_UNAWARE_STATUS), 1);
+    EXPECT_EQ(GetCharmValue(EFFECT_ADAPTABILITY_RATE), 5);
+
+    EXPECT(IsEffectDisabled(EFFECT_SHOP_PRICE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_FLINCH_CHANCE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_CRIT_CHANCE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_SHED_SKIN_CHANCE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_WILD_IV_RATE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_CATCH_RATE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_SERENE_GRACE_CHANCE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_WILD_ENCOUNTER_COUNT, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_MOVE_PRIORITY_CHANCE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_ENDURE_CHANCE, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_TORMENT_STATUS, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_PRESSURE_STATUS, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_UNAWARE_STATUS, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_ADAPTABILITY_RATE, FALSE));
+
+    ClearCharmTestState();
+}
