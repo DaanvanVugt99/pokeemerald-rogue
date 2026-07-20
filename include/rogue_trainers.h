@@ -6,6 +6,7 @@
 bool8 Rogue_IsBossTrainer(u16 trainerNum);
 bool8 Rogue_IsRivalTrainer(u16 trainerNum);
 bool8 Rogue_IsTeamBossTrainer(u16 trainerNum);
+bool8 Rogue_IsMiniBossTrainer(u16 trainerNum);
 bool8 Rogue_IsKeyTrainer(u16 trainerNum);
 bool8 Rogue_IsExpTrainer(u16 trainerNum);
 bool8 Rogue_IsBattleSimTrainer(u16 trainerNum);
@@ -53,6 +54,9 @@ void Rogue_ChooseRivalTrainerForNewAdventure();
 void Rogue_EnsureRivalBaseTeamForNewAdventure();
 void Rogue_EnsureRivalLateTeamForNewAdventure();
 void Rogue_ChooseTeamBossTrainerForNewAdventure();
+void Rogue_ChooseFrontierBrainTrainersForNewAdventure();
+void Rogue_GetFrontierBrainSchedule(u16* trainerNums, u8* difficulties);
+u16 Rogue_GetScheduledFrontierBrainTrainer(u8 difficulty);
 u16 Rogue_ChooseNextBossTrainerForVictoryLap();
 void Rogue_ChooseRouteTrainers(u16* writeBuffer, u16 bufferCapacity);
 void Rogue_ChooseTeamHideoutTrainers(u16* writeBuffer, u16 bufferCapacity);

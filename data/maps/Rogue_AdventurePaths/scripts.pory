@@ -44,7 +44,18 @@ script Rogue_AdventurePaths_InteractRoom
             setvar(VAR_RESULT, YES)
 
         case ADVPATH_ROOM_MINIBOSS:
-            msgbox(format("It's a Strong Trainer!\nEnter this encounter?"), MSGBOX_YESNO)
+            buffertrainername(STR_VAR_1, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA)
+
+            if(var(VAR_ROGUE_ACTIVE_CAMPAIGN) == ROGUE_CAMPAIGN_POKEBALL_LIMIT)
+            {
+                msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\nEnter this encounter?"), MSGBOX_YESNO)
+            }
+            else
+            {
+                bufferspeciesname(STR_VAR_2, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1)
+                bufferspeciesname(STR_VAR_3, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2)
+                msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\pWin to recruit either\n{STR_VAR_2} or {STR_VAR_3}.\pEnter this encounter?"), MSGBOX_YESNO)
+            }
 
         case ADVPATH_ROOM_WILD_DEN:
             msgbox(format("It's the habitat of a Trained Pokémon!\nEnter this encounter?"), MSGBOX_YESNO)

@@ -1,5 +1,10 @@
 #include "global.h"
+#include "constants/battle.h"
 #include "constants/flags.h"
+#include "constants/items.h"
+#include "constants/moves.h"
+#include "constants/opponents.h"
+#include "constants/pokemon.h"
 #include "constants/rogue.h"
 #include "constants/rogue_pokedex.h"
 #include "constants/species.h"
@@ -7,10 +12,13 @@
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
+#include "rogue_adventurepaths.h"
+#include "rogue_baked.h"
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
 #include "rogue_settings.h"
 #include "rogue_query.h"
+#include "rogue_trials.h"
 #include "test/test.h"
 #include "rogue_trainers.h"
 
@@ -65,6 +73,371 @@ TEST("Rogue trainer items: Black Sludge converts to Leftovers with tera")
 #else
     ASSUME(FALSE);
 #endif
+}
+
+TEST("Frontier Brains schedule deterministically without duplicates in each mode window")
+{
+    u16 trainerNums[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u16 expectedTrainerNums[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 difficulties[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 expectedDifficulties[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalTrialId = gRogueRun.trialState.trialId;
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE rogueRngBefore;
+    u16 seed;
+    u8 trialId;
+    u8 i;
+    u8 j;
+
+    SeedRogueRng(9876);
+    rogueRngBefore = gRngRogueValue;
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    for(seed = 0; seed < 32; ++seed)
+    {
+        gRogueRun.baseSeed = seed;
+        Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
+
+        for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
+        {
+            EXPECT_NE(trainerNums[i], TRAINER_NONE);
+            EXPECT(gRogueTrainers[trainerNums[i]].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS);
+            EXPECT_GE(difficulties[i], 2 + 4 * i);
+            EXPECT_LE(difficulties[i], 4 + 4 * i);
+            EXPECT_EQ(Rogue_GetScheduledFrontierBrainTrainer(difficulties[i]), trainerNums[i]);
+
+            for(j = 0; j < i; ++j)
+                EXPECT_NE(trainerNums[i], trainerNums[j]);
+        }
+    }
+
+    gRogueRun.baseSeed = 54321;
+    Rogue_GetFrontierBrainSchedule(expectedTrainerNums, expectedDifficulties);
+    Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
+    EXPECT_EQ(memcmp(expectedTrainerNums, trainerNums, sizeof(expectedTrainerNums)), 0);
+    EXPECT_EQ(memcmp(expectedDifficulties, difficulties, sizeof(expectedDifficulties)), 0);
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_SLOW_PATH);
+    for(seed = 0; seed < 32; ++seed)
+    {
+        gRogueRun.baseSeed = seed;
+        Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
+
+        for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
+        {
+            EXPECT_NE(trainerNums[i], TRAINER_NONE);
+            EXPECT_GE(difficulties[i], 1 + 4 * i);
+            EXPECT_LE(difficulties[i], 4 + 4 * i);
+
+            for(j = 0; j < i; ++j)
+                EXPECT_NE(trainerNums[i], trainerNums[j]);
+        }
+    }
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_GAUNTLET);
+    gRogueRun.baseSeed = 12345;
+    Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
+    for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
+    {
+        EXPECT_EQ(trainerNums[i], TRAINER_NONE);
+        EXPECT_EQ(difficulties[i], ROGUE_MAX_BOSS_COUNT);
+    }
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    for(trialId = ROGUE_TRIAL_NONE + 1; trialId < ROGUE_TRIAL_COUNT; ++trialId)
+    {
+        gRogueRun.trialState.trialId = trialId;
+        Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
+        for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
+        {
+            EXPECT_EQ(trainerNums[i], TRAINER_NONE);
+            EXPECT_EQ(difficulties[i], ROGUE_MAX_BOSS_COUNT);
+        }
+    }
+    EXPECT_EQ(memcmp(&rogueRngBefore, &gRngRogueValue, sizeof(rogueRngBefore)), 0);
+
+    gRogueRun.baseSeed = originalBaseSeed;
+    gRogueRun.trialState.trialId = originalTrialId;
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    gRngRogueValue = originalRogueRng;
+}
+
+TEST("Frontier Brains use competitive movesets on the first Average path")
+{
+    struct Pokemon originalEnemyParty[PARTY_SIZE];
+    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalLevelOffset = gRogueRun.currentLevelOffset;
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    u8 originalTrialId = gRogueRun.trialState.trialId;
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE originalRng = gRngValue;
+    u16 trainerNum;
+    u8 partySize;
+    u8 i;
+
+    memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
+    Rogue_SetCurrentDifficulty(0);
+    gRogueRun.currentLevelOffset = 0;
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+
+    trainerNum = TRAINER_NONE;
+    for(i = 0; i < gRogueTrainerCount; ++i)
+    {
+        if((gRogueTrainers[i].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS)
+            && (gRogueTrainers[i].classFlags & CLASS_FLAG_MINIBOSS_ANABEL))
+        {
+            trainerNum = i;
+            break;
+        }
+    }
+    EXPECT_NE(trainerNum, TRAINER_NONE);
+
+    ZeroEnemyPartyMons();
+    SeedRogueRng(24680);
+    SeedRng(13579);
+    partySize = Rogue_CreateTrainerParty(trainerNum, gEnemyParty, PARTY_SIZE, TRUE);
+    EXPECT_GE(partySize, 1);
+    for(i = 0; i < partySize; ++i)
+    {
+        u8 friendship = GetMonData(&gEnemyParty[i], MON_DATA_FRIENDSHIP);
+
+        // Applying a competitive preset normalizes happiness for Return or
+        // Frustration after its level-legal moves have been selected.
+        EXPECT(friendship == 0 || friendship == MAX_FRIENDSHIP);
+    }
+
+    memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
+    CalculateEnemyPartyCount();
+    gRogueRun.trialState.trialId = originalTrialId;
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRogueRun.currentLevelOffset = originalLevelOffset;
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    gRngRogueValue = originalRogueRng;
+    gRngValue = originalRng;
+}
+
+TEST("Frontier Brain trophies preserve their competitive echo and reset transient identity")
+{
+    struct Pokemon originalEnemyParty[PARTY_SIZE];
+    struct Pokemon echo;
+    u32 originalOtId;
+    u32 value;
+    u16 moves[MAX_MON_MOVES] = {MOVE_MACH_PUNCH, MOVE_LEECH_SEED, MOVE_HEADBUTT, MOVE_STUN_SPORE};
+    u16 heldItem = ITEM_LEFTOVERS;
+    u8 originalRoomType = gRogueAdvPath.currentRoomType;
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalLevelOffset = gRogueRun.currentLevelOffset;
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    RAND_TYPE originalRng = gRngValue;
+    u8 enemyAbilityNum = 1;
+    u8 i;
+    u8 perfectIvCount = 0;
+    u8 expectedLevel;
+    u8 expectedAbility;
+    u8 expectedNature = NATURE_ADAMANT;
+    u8 expectedHiddenPowerType;
+
+    memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
+    ZeroEnemyPartyMons();
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_SetCurrentDifficulty(6);
+    gRogueRun.currentLevelOffset = 0;
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_MINIBOSS;
+
+    CreateMon(&gEnemyParty[0], SPECIES_BRELOOM, 70, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
+    SetMonData(&gEnemyParty[0], MON_DATA_ABILITY_NUM, &enemyAbilityNum);
+    SetNature(&gEnemyParty[0], expectedNature);
+    for(i = 0; i < MAX_MON_MOVES; ++i)
+        SetMonMoveSlot(&gEnemyParty[0], moves[i], i);
+    for(i = 0; i < NUM_STATS; ++i)
+    {
+        value = 21;
+        SetMonData(&gEnemyParty[0], MON_DATA_HP_IV + i, &value);
+        value = 252;
+        SetMonData(&gEnemyParty[0], MON_DATA_HP_EV + i, &value);
+    }
+    value = TRUE;
+    SetMonData(&gEnemyParty[0], MON_DATA_IS_SHINY, &value);
+    value = STATUS1_POISON;
+    SetMonData(&gEnemyParty[0], MON_DATA_STATUS, &value);
+    SetMonData(&gEnemyParty[0], MON_DATA_HELD_ITEM, &heldItem);
+    CalculateMonStats(&gEnemyParty[0]);
+
+    expectedAbility = GetMonAbility(&gEnemyParty[0]);
+    expectedHiddenPowerType = CalcMonHiddenPowerType(&gEnemyParty[0]);
+    expectedLevel = Rogue_CalculatePlayerMonLvl();
+
+    CreateMon(&echo, SPECIES_BRELOOM, 1, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    originalOtId = GetMonData(&echo, MON_DATA_OT_ID);
+    SeedRng(321);
+    Rogue_ModifyScriptMon(&echo);
+
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_SPECIES), SPECIES_BRELOOM);
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_OT_ID), originalOtId);
+    EXPECT_EQ(GetMonAbility(&echo), expectedAbility);
+    EXPECT_EQ(GetNature(&echo), expectedNature);
+    EXPECT_EQ(CalcMonHiddenPowerType(&echo), expectedHiddenPowerType);
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_LEVEL), expectedLevel);
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_MET_LEVEL), expectedLevel);
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_HELD_ITEM), ITEM_NONE);
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_IS_SHINY), FALSE);
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_STATUS), 0);
+    EXPECT_EQ(GetMonData(&echo, MON_DATA_FRIENDSHIP), gSpeciesInfo[SPECIES_BRELOOM].friendship);
+
+    for(i = 0; i < MAX_MON_MOVES; ++i)
+        EXPECT_EQ(GetMonData(&echo, MON_DATA_MOVE1 + i), moves[i]);
+
+    for(i = 0; i < NUM_STATS; ++i)
+    {
+        u8 iv = GetMonData(&echo, MON_DATA_HP_IV + i);
+
+        if(iv == 31)
+            ++perfectIvCount;
+        else
+            EXPECT(iv == 29 || iv == 30);
+        EXPECT_EQ(GetMonData(&echo, MON_DATA_HP_EV + i), 0);
+    }
+    EXPECT_EQ(perfectIvCount, 2);
+
+    memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
+    CalculateEnemyPartyCount();
+    gRogueAdvPath.currentRoomType = originalRoomType;
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRogueRun.currentLevelOffset = originalLevelOffset;
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    gRngValue = originalRng;
+}
+
+TEST("Frontier Brain generators retain canonical anchors and Legendary boundaries")
+{
+    struct Pokemon originalEnemyParty[PARTY_SIZE];
+    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    u8 originalTrialId = gRogueRun.trialState.trialId;
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE originalRng = gRngValue;
+    u16 firstNolandSpecies = SPECIES_NONE;
+    bool8 nolandVaried = FALSE;
+    u16 trainerNum;
+    u8 brainCount = 0;
+
+    memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_BRUTAL);
+    Rogue_SetCurrentDifficulty(6);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+
+    for(trainerNum = 0; trainerNum < gRogueTrainerCount; ++trainerNum)
+    {
+        const struct RogueTrainer* trainer = &gRogueTrainers[trainerNum];
+        u16 expectedAnchor = SPECIES_NONE;
+        u8 seedCount;
+        u8 seed;
+
+        if((trainer->trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS) == 0)
+            continue;
+
+        ++brainCount;
+        if(trainer->classFlags & CLASS_FLAG_MINIBOSS_ANABEL)
+            expectedAnchor = SPECIES_SNORLAX;
+        else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_TUCKER)
+            expectedAnchor = SPECIES_SWAMPERT;
+        else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_SPENSER)
+            expectedAnchor = SPECIES_SLAKING;
+        else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_GRETA)
+            expectedAnchor = SPECIES_UMBREON;
+        else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_LUCY)
+            expectedAnchor = SPECIES_SEVIPER;
+
+        seedCount = (trainer->classFlags & CLASS_FLAG_MINIBOSS_NOLAND) ? 3 : 1;
+        for(seed = 0; seed < seedCount; ++seed)
+        {
+            u8 partySize;
+            u8 legendaryCount = 0;
+            bool8 foundAnchor = expectedAnchor == SPECIES_NONE;
+            u8 i;
+            u8 j;
+
+            ZeroEnemyPartyMons();
+            SeedRogueRng(1000 + trainerNum * 17 + seed);
+            SeedRng(2000 + trainerNum * 19 + seed);
+            partySize = Rogue_CreateTrainerParty(trainerNum, gEnemyParty, PARTY_SIZE, TRUE);
+            EXPECT_GE(partySize, 3);
+
+            for(i = 0; i < partySize; ++i)
+            {
+                u16 species = GetMonData(&gEnemyParty[i], MON_DATA_SPECIES);
+
+                EXPECT_NE(species, SPECIES_NONE);
+                if(species == expectedAnchor)
+                    foundAnchor = TRUE;
+                if(RoguePokedex_IsSpeciesLegendary(species))
+                    ++legendaryCount;
+
+                if(trainer->classFlags & CLASS_FLAG_MINIBOSS_NOLAND)
+                    EXPECT(Rogue_CheckMonFlags(species, MON_FLAG_SINGLES_STRONG));
+
+                for(j = 0; j < i; ++j)
+                    EXPECT_NE(species, GetMonData(&gEnemyParty[j], MON_DATA_SPECIES));
+            }
+
+            if(trainer->classFlags & CLASS_FLAG_MINIBOSS_BRANDON)
+            {
+                EXPECT_EQ(legendaryCount, 1);
+            }
+            else
+            {
+                EXPECT_EQ(legendaryCount, 0);
+                EXPECT(foundAnchor);
+            }
+
+            if(trainer->classFlags & CLASS_FLAG_MINIBOSS_NOLAND)
+            {
+                u16 leadSpecies = GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
+
+                if(firstNolandSpecies == SPECIES_NONE)
+                    firstNolandSpecies = leadSpecies;
+                else if(firstNolandSpecies != leadSpecies)
+                    nolandVaried = TRUE;
+            }
+        }
+    }
+
+    EXPECT_EQ(brainCount, 7);
+    EXPECT(nolandVaried);
+
+    memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
+    CalculateEnemyPartyCount();
+    gRogueRun.trialState.trialId = originalTrialId;
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    gRngRogueValue = originalRogueRng;
+    gRngValue = originalRng;
 }
 
 TEST("Rival roster planning caches species without constructing temporary mons")

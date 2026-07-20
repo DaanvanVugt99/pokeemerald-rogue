@@ -15,6 +15,7 @@
         "trainers/galar.json",
         "trainers/paldea.json",
 
+        "trainers/frontier_brains.json",
         "trainers/route.json",
         "trainers/team_rocket.json",
         "trainers/team_aqua.json",

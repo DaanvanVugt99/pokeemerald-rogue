@@ -12,7 +12,12 @@
 #include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_hub.h"
+#include "rogue_pokedex.h"
+#include "rogue_query.h"
 #include "rogue_save.h"
+#include "rogue_settings.h"
+#include "rogue_trainers.h"
+#include "rogue_trials.h"
 #include "test/test.h"
 
 static void SetUniqueLegendaryUpgradeState(bool8 state)
@@ -84,6 +89,189 @@ TEST("An exhausted path is replaced after its boss")
 
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("A scheduled Frontier Brain replaces exactly one optional route deterministically")
+{
+    struct RogueAdvPath originalPath = gRogueAdvPath;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+    RAND_TYPE originalRng = gRngRogueValue;
+    u16 trainerNum;
+    u16 aceRoomSeed = 0;
+    u8 aceRoomId = ADVPATH_INVALID_ROOM_ID;
+    u8 generatedRoomCount;
+    u8 generatedPathLength;
+    u8 roomCount = 0;
+    u16 scheduledTrainers[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 scheduledDifficulties[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 i;
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    gRogueRun.baseSeed = 13579;
+    Rogue_GetFrontierBrainSchedule(scheduledTrainers, scheduledDifficulties);
+    trainerNum = scheduledTrainers[0];
+    Rogue_SetCurrentDifficulty(scheduledDifficulties[0]);
+    gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+    memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+
+    EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+    for(i = 0; i < gRogueAdvPath.roomCount; ++i)
+    {
+        if(gRogueAdvPath.rooms[i].roomType == ADVPATH_ROOM_MINIBOSS)
+        {
+            ++roomCount;
+            aceRoomId = i;
+            aceRoomSeed = gRogueAdvPath.rooms[i].rngSeed;
+            EXPECT_EQ(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.trainerNum, trainerNum);
+        }
+    }
+    EXPECT_EQ(roomCount, 1);
+    generatedRoomCount = gRogueAdvPath.roomCount;
+    generatedPathLength = gRogueAdvPath.pathLength;
+
+    memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+    gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+    EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT_EQ(gRogueAdvPath.roomCount, generatedRoomCount);
+    EXPECT_EQ(gRogueAdvPath.pathLength, generatedPathLength);
+    EXPECT_NE(aceRoomId, ADVPATH_INVALID_ROOM_ID);
+    EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomType, ADVPATH_ROOM_MINIBOSS);
+    EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].rngSeed, aceRoomSeed);
+    EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.trainerNum, trainerNum);
+
+    gRogueAdvPath = originalPath;
+    gRogueRun.baseSeed = originalBaseSeed;
+    gRogueRun.adventureRoomId = originalRoomId;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRngRogueValue = originalRng;
+}
+
+TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anchor")
+{
+    struct RogueAdvPathRoom originalRoom = gRogueAdvPath.rooms[1];
+    struct Pokemon originalEnemyParty[PARTY_SIZE];
+    u8 originalRoomCount = gRogueAdvPath.roomCount;
+    u16 originalRivalTrainer = gRogueRun.rivalTrainerNum;
+    u8 originalTrialId = gRogueRun.trialState.trialId;
+    u16 originalPreviewTrainer = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
+    u16 originalPreviewSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
+    u16 originalPreviewSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
+    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE originalRng = gRngValue;
+    RAND_TYPE originalRng2 = gRng2Value;
+    bool8 itemFlags[FLAG_ROGUE_ITEM_END - FLAG_ROGUE_ITEM_START + 1];
+    u16 itemVars[VAR_ROGUE_ITEM_END - VAR_ROGUE_ITEM_START + 1];
+    u16 trainerNums[2] = {TRAINER_NONE, TRAINER_NONE};
+    u16 trainerNum;
+    u8 i;
+    u8 itemIndex;
+
+    memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
+    if(wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_BRUTAL);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    gRogueRun.rivalTrainerNum = TRAINER_NONE;
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    Rogue_SetCurrentDifficulty(6);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+
+    for(trainerNum = 0; trainerNum < gRogueTrainerCount; ++trainerNum)
+    {
+        if((gRogueTrainers[trainerNum].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS) == 0)
+            continue;
+
+        if(gRogueTrainers[trainerNum].classFlags & CLASS_FLAG_MINIBOSS_ANABEL)
+            trainerNums[0] = trainerNum;
+        else if(gRogueTrainers[trainerNum].classFlags & CLASS_FLAG_MINIBOSS_BRANDON)
+            trainerNums[1] = trainerNum;
+    }
+    EXPECT_NE(trainerNums[0], TRAINER_NONE);
+    EXPECT_NE(trainerNums[1], TRAINER_NONE);
+
+    gRogueAdvPath.roomCount = 2;
+    memset(&gRogueAdvPath.rooms[1], 0, sizeof(gRogueAdvPath.rooms[1]));
+    gRogueAdvPath.rooms[1].roomType = ADVPATH_ROOM_MINIBOSS;
+    gRogueAdvPath.rooms[1].rngSeed = 24680;
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], SPECIES_PIKACHU, 10, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
+    CalculateEnemyPartyCount();
+
+    for(itemIndex = 0; itemIndex < ARRAY_COUNT(itemFlags); ++itemIndex)
+    {
+        itemFlags[itemIndex] = FlagGet(FLAG_ROGUE_ITEM_START + itemIndex);
+        itemVars[itemIndex] = VarGet(VAR_ROGUE_ITEM_START + itemIndex);
+    }
+
+    for(i = 0; i < ARRAY_COUNT(trainerNums); ++i)
+    {
+        RAND_TYPE rogueRngBefore;
+        RAND_TYPE rngBefore;
+        RAND_TYPE rng2Before;
+        u16 previewSpeciesA;
+        u16 previewSpeciesB;
+
+        gRogueAdvPath.rooms[1].roomParams.perType.miniboss.trainerNum = trainerNums[i];
+        SeedRogueRng(1111 + i);
+        SeedRng(2222 + i);
+        SeedRng2(3333 + i);
+        rogueRngBefore = gRngRogueValue;
+        rngBefore = gRngValue;
+        rng2Before = gRng2Value;
+
+        Rogue_BufferMiniBossPreview(1);
+        previewSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
+        previewSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
+        EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA), trainerNums[i]);
+        EXPECT_NE(previewSpeciesA, SPECIES_NONE);
+        EXPECT_NE(previewSpeciesB, SPECIES_NONE);
+        EXPECT_NE(previewSpeciesA, previewSpeciesB);
+        EXPECT_EQ(CalculateEnemyPartyCount(), 0);
+        EXPECT_EQ(memcmp(&rogueRngBefore, &gRngRogueValue, sizeof(rogueRngBefore)), 0);
+        EXPECT_EQ(memcmp(&rngBefore, &gRngValue, sizeof(rngBefore)), 0);
+        EXPECT_EQ(memcmp(&rng2Before, &gRng2Value, sizeof(rng2Before)), 0);
+        for(itemIndex = 0; itemIndex < ARRAY_COUNT(itemFlags); ++itemIndex)
+        {
+            EXPECT_EQ(FlagGet(FLAG_ROGUE_ITEM_START + itemIndex), itemFlags[itemIndex]);
+            EXPECT_EQ(VarGet(VAR_ROGUE_ITEM_START + itemIndex), itemVars[itemIndex]);
+        }
+
+        Rogue_BufferMiniBossPreview(1);
+        EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1), previewSpeciesA);
+        EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2), previewSpeciesB);
+
+        if(i == 1)
+            EXPECT(RoguePokedex_IsSpeciesLegendary(previewSpeciesA) || RoguePokedex_IsSpeciesLegendary(previewSpeciesB));
+    }
+
+    gRogueAdvPath.rooms[1] = originalRoom;
+    gRogueAdvPath.roomCount = originalRoomCount;
+    gRogueRun.rivalTrainerNum = originalRivalTrainer;
+    gRogueRun.trialState.trialId = originalTrialId;
+    memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
+    CalculateEnemyPartyCount();
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, originalPreviewTrainer);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, originalPreviewSpeciesA);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, originalPreviewSpeciesB);
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    if(wasRunActive)
+        FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    gRngRogueValue = originalRogueRng;
+    gRngValue = originalRng;
+    gRng2Value = originalRng2;
 }
 
 TEST("Full Rest Stops become more common during the Elite Four")

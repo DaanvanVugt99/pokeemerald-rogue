@@ -93,6 +93,7 @@ static void AssignAnySpecialMons(u16 trainerNum, struct Pokemon *party, u8 monCo
 static bool8 IsChoiceItem(u16 itemId);
 static bool8 IsGimmickItem(u16 itemId);
 static void ApplyBlackSludgeTeraOverride(struct TrainerHeldItemScratch* heldItems, struct RoguePokemonCompetitiveSet* preset, bool8 teraEnabled);
+static u16 TrySelectMiniBossAnchor(struct TrainerPartyScratch* scratch);
 
 u16 Rogue_GetDynamicTrainer(u16 i)
 {
@@ -124,9 +125,15 @@ bool8 Rogue_IsTeamBossTrainer(u16 trainerNum)
     return (trainer->trainerFlags & TRAINER_FLAG_CLASS_TEAM_BOSS) != 0;
 }
 
+bool8 Rogue_IsMiniBossTrainer(u16 trainerNum)
+{
+    const struct RogueTrainer* trainer = Rogue_GetTrainer(trainerNum);
+    return (trainer->trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS) != 0;
+}
+
 bool8 Rogue_IsKeyTrainer(u16 trainerNum)
 {
-    return Rogue_IsBossTrainer(trainerNum) || Rogue_IsRivalTrainer(trainerNum) || Rogue_IsTeamBossTrainer(trainerNum);
+    return Rogue_IsBossTrainer(trainerNum) || Rogue_IsRivalTrainer(trainerNum) || Rogue_IsTeamBossTrainer(trainerNum) || Rogue_IsMiniBossTrainer(trainerNum);
 }
 
 static u8 GetTrainerLevel(u16 trainerNum)
@@ -140,6 +147,10 @@ static u8 GetTrainerLevel(u16 trainerNum)
     else if(Rogue_IsRivalTrainer(trainerNum))
     {
         level = Rogue_CalculateRivalMonLvl();
+    }
+    else if(Rogue_IsMiniBossTrainer(trainerNum))
+    {
+        level = Rogue_CalculateMiniBossMonLvl();
     }
     else
     {
@@ -174,8 +185,10 @@ bool8 Rogue_IsBattleSimTrainer(u16 trainerNum)
 const struct RogueTrainer* Rogue_GetTrainer(u16 trainerNum)
 {
 #if TESTING
-    // Tests always use trainer slot 0 info
-    trainerNum = 0;
+    // Most battle tests inject trainer slot 0. Content-backed Frontier Brain
+    // tests deliberately exercise the actual Frontier Brain definitions.
+    if(trainerNum >= gRogueTrainerCount || (gRogueTrainers[trainerNum].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS) == 0)
+        trainerNum = 0;
 #endif
     AGB_ASSERT(trainerNum < gRogueTrainerCount);
     return &gRogueTrainers[trainerNum];
@@ -473,7 +486,7 @@ u8 Rogue_CalculateTrainerMonLvl()
 
 u8 Rogue_CalculateMiniBossMonLvl()
 {
-    return Rogue_CalculateTrainerLvlCap(TRUE) - 5;
+    return Rogue_CalculateTrainerLvlCap(TRUE);
 }
 
 u8 Rogue_CalculateRivalMonLvl()
@@ -1312,6 +1325,89 @@ void Rogue_ChooseTeamBossTrainerForNewAdventure()
     DebugPrintf("Picking team boss = %d", gRogueRun.teamBossTrainerNum);
 }
 
+static u32 AdvanceFrontierBrainScheduleRng(u32* state)
+{
+    *state = *state * 1664525u + 1013904223u;
+    return *state;
+}
+
+void Rogue_GetFrontierBrainSchedule(u16* trainerNums, u8* difficulties)
+{
+    static const u8 sStandardWindowStarts[ADVPATH_FRONTIER_BRAIN_COUNT] = {2, 6, 10};
+    static const u8 sSlowWindowStarts[ADVPATH_FRONTIER_BRAIN_COUNT] = {1, 5, 9};
+    u16 trainerPool[7];
+    u16 trainerCount = 0;
+    u16 trainerNum;
+    u32 state = ((u32)gRogueRun.baseSeed << 16) ^ gRogueRun.baseSeed ^ 0xACE7B41Du;
+    u8 i;
+
+    for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
+    {
+        trainerNums[i] = TRAINER_NONE;
+        difficulties[i] = ROGUE_MAX_BOSS_COUNT;
+    }
+
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET
+        || RogueTrial_IsActive())
+        return;
+
+    for(trainerNum = 0; trainerNum < gRogueTrainerCount; ++trainerNum)
+    {
+        if((gRogueTrainers[trainerNum].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS) != 0)
+        {
+            AGB_ASSERT(trainerCount < ARRAY_COUNT(trainerPool));
+            if(trainerCount < ARRAY_COUNT(trainerPool))
+                trainerPool[trainerCount++] = trainerNum;
+        }
+    }
+
+    if(trainerCount < ADVPATH_FRONTIER_BRAIN_COUNT)
+        return;
+
+    for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
+    {
+        u16 selectedIndex = AdvanceFrontierBrainScheduleRng(&state) % trainerCount;
+
+        trainerNums[i] = trainerPool[selectedIndex];
+        trainerPool[selectedIndex] = trainerPool[--trainerCount];
+
+        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
+            difficulties[i] = sStandardWindowStarts[i] + AdvanceFrontierBrainScheduleRng(&state) % 3;
+        else
+            difficulties[i] = sSlowWindowStarts[i] + AdvanceFrontierBrainScheduleRng(&state) % 4;
+    }
+
+}
+
+u16 Rogue_GetScheduledFrontierBrainTrainer(u8 difficulty)
+{
+    u16 trainerNums[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 difficulties[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 i;
+
+    Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
+
+    for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
+    {
+        if(difficulties[i] == difficulty)
+            return trainerNums[i];
+    }
+
+    return TRAINER_NONE;
+}
+
+void Rogue_ChooseFrontierBrainTrainersForNewAdventure()
+{
+    u16 trainerNums[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 difficulties[ADVPATH_FRONTIER_BRAIN_COUNT];
+    u8 i;
+
+    Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
+
+    for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT && trainerNums[i] != TRAINER_NONE; ++i)
+        DebugPrintf("Picking Frontier Brain %d = trainer %d at difficulty %d", i, trainerNums[i], difficulties[i]);
+}
+
 u16 Rogue_ChooseNextBossTrainerForVictoryLap()
 {
     //u16 historyBuffer[8];
@@ -1725,6 +1821,18 @@ static void ConfigurePartyScratchSettings(u16 trainerNum, struct TrainerPartyScr
     else if(FlagGet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES))
     {
         scratch->allowWeakLegends = TRUE;
+    }
+
+    // Frontier Brains use explicit curated pools. Brandon's one legal Legendary
+    // is inserted by TrySelectMiniBossAnchor; every remaining slot is non-Legendary.
+    if(Rogue_IsMiniBossTrainer(trainerNum))
+    {
+        scratch->forceLegends = FALSE;
+        scratch->allowStrongLegends = FALSE;
+        scratch->allowWeakLegends = FALSE;
+
+        if(gRogueTrainers[trainerNum].classFlags & CLASS_FLAG_MINIBOSS_NOLAND)
+            scratch->preferStrongSpecies = TRUE;
     }
 }
 
@@ -3102,6 +3210,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
     struct RogueTrainer const* trainer = &gRogueTrainers[scratch->trainerNum];
     bool8 allowSpeciesDuplicates = FALSE;
     bool8 preserveResolvedPool;
+    bool8 isNoland = Rogue_IsMiniBossTrainer(scratch->trainerNum) && (trainer->classFlags & CLASS_FLAG_MINIBOSS_NOLAND);
     bool8 forcePrimaryType = ShouldForcePrimaryTrainerType(scratch);
     u32 forcedPrimaryTypeFlags = forcePrimaryType ? MON_TYPE_VAL_TO_FLAGS(trainer->typeAssignment) : 0;
 
@@ -3172,7 +3281,10 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
 
         // Restricted formats should preserve strong evolution lines before
         // resolving them to the legal battle stage (e.g. Aggron into Aron).
-        if(RogueTrial_EnforcesOpponentSpeciesLegality() && scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
+        if((!Rogue_IsMiniBossTrainer(scratch->trainerNum) || isNoland)
+            && RogueTrial_EnforcesOpponentSpeciesLegality()
+            && scratch->preferStrongSpecies
+            && (CanEntirelyAvoidWeakSpecies() || isNoland))
         {
             RogueMonQuery_ContainsPresetFlags(QUERY_FUNC_INCLUDE, MON_FLAG_SINGLES_STRONG);
         }
@@ -3189,7 +3301,10 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             RogueMonQuery_IsParadox(QUERY_FUNC_EXCLUDE);
         }
 
-        if(!RogueTrial_EnforcesOpponentSpeciesLegality() && scratch->preferStrongSpecies && CanEntirelyAvoidWeakSpecies())
+        if((!Rogue_IsMiniBossTrainer(scratch->trainerNum) || isNoland)
+            && !RogueTrial_EnforcesOpponentSpeciesLegality()
+            && scratch->preferStrongSpecies
+            && (CanEntirelyAvoidWeakSpecies() || isNoland))
         {
             RogueMonQuery_ContainsPresetFlags(QUERY_FUNC_INCLUDE, MON_FLAG_SINGLES_STRONG);
         }
@@ -3270,7 +3385,8 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
 
     // Restricted formats can exhaust a trainer's resolved pool quickly. Prefer
     // repeats from that pool over abandoning it for unrelated fallback types.
-    preserveResolvedPool = RogueTrial_EnforcesOpponentSpeciesLegality() && !TrainerQueryHasUnusedSpecies(scratch);
+    preserveResolvedPool = (RogueTrial_EnforcesOpponentSpeciesLegality() || Rogue_IsMiniBossTrainer(scratch->trainerNum))
+        && !TrainerQueryHasUnusedSpecies(scratch);
 
     // Allow duplicates if we've gone far into fallbacks
     if(!preserveResolvedPool)
@@ -3345,10 +3461,104 @@ static void EnsureSubsetIsValid(struct TrainerPartyScratch* scratch)
     }
 }
 
+static bool8 IsMiniBossAnchorLegal(u16 species)
+{
+    RogueMonQuery_IsSpeciesActive();
+    RogueTrial_FilterOpponentMonQuery();
+    return RogueMiscQuery_CheckState(species);
+}
+
+static u16 TrySelectMiniBossAnchor(struct TrainerPartyScratch* scratch)
+{
+    const struct RogueTrainer* trainer;
+    const u16* anchors = NULL;
+    u8 anchorCount = 0;
+    u8 startIndex = 0;
+    u8 i;
+    static const u16 sAnabelAnchors[] =
+    {
+        SPECIES_SNORLAX, SPECIES_ALAKAZAM,
+    };
+    static const u16 sTuckerAnchors[] =
+    {
+        SPECIES_SWAMPERT, SPECIES_SALAMENCE, SPECIES_CHARIZARD, SPECIES_METAGROSS,
+    };
+    static const u16 sSpenserAnchors[] =
+    {
+        SPECIES_SLAKING, SPECIES_CROBAT, SPECIES_LAPRAS, SPECIES_ARCANINE,
+    };
+    static const u16 sGretaAnchors[] =
+    {
+        SPECIES_UMBREON, SPECIES_HERACROSS, SPECIES_SHEDINJA, SPECIES_GENGAR, SPECIES_BRELOOM,
+    };
+    static const u16 sLucyAnchors[] =
+    {
+        SPECIES_SEVIPER, SPECIES_SHUCKLE, SPECIES_MILOTIC, SPECIES_STEELIX, SPECIES_GYARADOS,
+    };
+    static const u16 sBrandonAnchors[] =
+    {
+        SPECIES_REGIROCK, SPECIES_REGICE, SPECIES_REGISTEEL,
+        SPECIES_ARTICUNO, SPECIES_ZAPDOS, SPECIES_MOLTRES,
+    };
+
+    if(scratch->partyCount != 0 || !Rogue_IsMiniBossTrainer(scratch->trainerNum))
+        return SPECIES_NONE;
+
+    trainer = &gRogueTrainers[scratch->trainerNum];
+
+    if(trainer->classFlags & CLASS_FLAG_MINIBOSS_NOLAND)
+        return SPECIES_NONE;
+    else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_ANABEL)
+    {
+        anchors = sAnabelAnchors;
+        anchorCount = ARRAY_COUNT(sAnabelAnchors);
+    }
+    else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_TUCKER)
+    {
+        anchors = sTuckerAnchors;
+        anchorCount = ARRAY_COUNT(sTuckerAnchors);
+    }
+    else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_SPENSER)
+    {
+        anchors = sSpenserAnchors;
+        anchorCount = ARRAY_COUNT(sSpenserAnchors);
+    }
+    else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_GRETA)
+    {
+        anchors = sGretaAnchors;
+        anchorCount = ARRAY_COUNT(sGretaAnchors);
+    }
+    else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_LUCY)
+    {
+        anchors = sLucyAnchors;
+        anchorCount = ARRAY_COUNT(sLucyAnchors);
+    }
+    else if(trainer->classFlags & CLASS_FLAG_MINIBOSS_BRANDON)
+    {
+        anchors = sBrandonAnchors;
+        anchorCount = ARRAY_COUNT(sBrandonAnchors);
+        startIndex = RogueRandomRange(anchorCount, 0);
+    }
+
+    for(i = 0; i < anchorCount; ++i)
+    {
+        u16 species = anchors[(startIndex + i) % anchorCount];
+
+        if(IsMiniBossAnchorLegal(species))
+            return species;
+    }
+
+    return SPECIES_NONE;
+}
+
 static u16 SampleNextSpecies(struct TrainerPartyScratch* scratch)
 {
     u16 species;
     struct RogueTrainer const* trainer = &gRogueTrainers[scratch->trainerNum];
+
+    species = TrySelectMiniBossAnchor(scratch);
+    if(species != SPECIES_NONE)
+        return species;
 
     // We don't have any subsets, so immediately start using fallback behaviour
     if(trainer->teamGenerator.subsetCount == 0)
@@ -3470,6 +3680,11 @@ static bool8 UseCompetitiveMoveset(struct TrainerPartyScratch* scratch, u8 monId
     //    // Exact mirror force competitive set and we'll override it later
     //    return TRUE;
     //}
+
+    // Frontier Brains always use their competitive identities, including the
+    // first adventure path where Average normally disables competitive sets.
+    if(Rogue_IsMiniBossTrainer(scratch->trainerNum))
+        return TRUE;
 
     if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY || difficultyModifier == ADVPATH_SUBROOM_ROUTE_TOUGH)
     {

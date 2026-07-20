@@ -1,0 +1,268 @@
+{
+    "condition": "",
+    "defaults":
+    {
+        "trainer_flags": [ "REGION_ANY", "CLASS_MINIBOSS" ],
+        "music_player": "hoenn_boss",
+        "type_assignment": "NONE"
+    },
+    "trainers":
+    {
+        "frontier_brains":
+        [
+            {
+                "name": "ANABEL",
+                "object_event": "OBJ_EVENT_GFX_ANABEL",
+                "trainer_pic": "TRAINER_PIC_SALON_MAIDEN_ANABEL",
+                "trainer_class": "TRAINER_CLASS_SALON_MAIDEN",
+                "class_flags": [ "MINIBOSS_ANABEL" ],
+                "shiny_species": "SPECIES_SNORLAX",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Your ability has brought you this far. Let me test it.",
+                        "POST_BATTLE_TAUNT": "Okay, I understand…"
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator":
+                {
+                    "subsets": [],
+                    "query_script_override":
+                    [
+                        "TRY_INCLUDE_SPECIES_LIST",
+                        "SPECIES_SNORLAX", "SPECIES_ALAKAZAM", "SPECIES_ARCANINE", "SPECIES_MANECTRIC",
+                        "SPECIES_FLYGON", "SPECIES_METAGROSS", "SPECIES_GARDEVOIR", "SPECIES_ABSOL", "SPECIES_SALAMENCE",
+                        "#ifdef ROGUE_EXPANSION",
+                            "SPECIES_MISMAGIUS", "SPECIES_WEAVILE", "SPECIES_LUCARIO", "SPECIES_ESPEON",
+                            "SPECIES_GALLADE", "SPECIES_HATTERENE",
+                        "#endif",
+                        "SPECIES_NONE"
+                    ],
+                    "weight_script":
+                    [
+                        "HAS_UNIQUE_TYPE_IN_TEAM", "INC_FAVOUR", "ELSE", "DEC_FAVOUR",
+                        "IS_LEGENDARY", "IMPOSSIBLE_FAVOUR",
+                        "IS_BANNED_SPECIES", "IMPOSSIBLE_FAVOUR"
+                    ]
+                }
+            },
+            {
+                "name": "TUCKER",
+                "object_event": "OBJ_EVENT_GFX_TUCKER",
+                "trainer_pic": "TRAINER_PIC_DOME_ACE_TUCKER",
+                "trainer_class": "TRAINER_CLASS_DOME_ACE",
+                "class_flags": [ "MINIBOSS_TUCKER" ],
+                "shiny_species": "SPECIES_SWAMPERT",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "The crowd deserves a spectacular match! Show me your tactics!",
+                        "POST_BATTLE_TAUNT": "Ahahaha! You're inspiring!"
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator":
+                {
+                    "subsets": [],
+                    "query_script_override":
+                    [
+                        "TRY_INCLUDE_SPECIES_LIST",
+                        "SPECIES_SWAMPERT", "SPECIES_CHARIZARD", "SPECIES_SALAMENCE", "SPECIES_METAGROSS",
+                        "SPECIES_ARCANINE", "SPECIES_BLAZIKEN", "SPECIES_FLYGON", "SPECIES_MILOTIC",
+                        "#ifdef ROGUE_EXPANSION",
+                            "SPECIES_GARCHOMP", "SPECIES_VOLCARONA", "SPECIES_AEGISLASH",
+                            "SPECIES_PRIMARINA", "SPECIES_DRAGAPULT",
+                        "#endif",
+                        "SPECIES_NONE"
+                    ],
+                    "weight_script":
+                    [
+                        "HAS_UNIQUE_TYPE_IN_TEAM", "INC_FAVOUR", "ELSE", "DEC_FAVOUR",
+                        "IS_LEGENDARY", "IMPOSSIBLE_FAVOUR",
+                        "IS_BANNED_SPECIES", "IMPOSSIBLE_FAVOUR"
+                    ]
+                }
+            },
+            {
+                "name": "SPENSER",
+                "object_event": "OBJ_EVENT_GFX_SPENSER",
+                "trainer_pic": "TRAINER_PIC_PALACE_MAVEN_SPENSER",
+                "trainer_class": "TRAINER_CLASS_PALACE_MAVEN",
+                "class_flags": [ "MINIBOSS_SPENSER" ],
+                "shiny_species": "SPECIES_SLAKING",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Trust your Pokémon's spirit, and let battle reveal the rest!",
+                        "POST_BATTLE_TAUNT": "Ah… Now this is something else…"
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator":
+                {
+                    "subsets": [],
+                    "query_script_override":
+                    [
+                        "TRY_INCLUDE_SPECIES_LIST",
+                        "SPECIES_SLAKING", "SPECIES_CROBAT", "SPECIES_LAPRAS", "SPECIES_ARCANINE",
+                        "SPECIES_MILOTIC", "SPECIES_SNORLAX", "SPECIES_HARIYAMA", "SPECIES_ABSOL",
+                        "#ifdef ROGUE_EXPANSION",
+                            "SPECIES_HIPPOWDON", "SPECIES_DARMANITAN", "SPECIES_GOODRA",
+                            "SPECIES_MUDSDALE", "SPECIES_COPPERAJAH",
+                        "#endif",
+                        "SPECIES_NONE"
+                    ],
+                    "weight_script":
+                    [
+                        "HAS_UNIQUE_TYPE_IN_TEAM", "INC_FAVOUR", "ELSE", "DEC_FAVOUR",
+                        "IS_LEGENDARY", "IMPOSSIBLE_FAVOUR",
+                        "IS_BANNED_SPECIES", "IMPOSSIBLE_FAVOUR"
+                    ]
+                }
+            },
+            {
+                "name": "GRETA",
+                "object_event": "OBJ_EVENT_GFX_GRETA",
+                "trainer_pic": "TRAINER_PIC_ARENA_TYCOON_GRETA",
+                "trainer_class": "TRAINER_CLASS_ARENA_TYCOON",
+                "class_flags": [ "MINIBOSS_GRETA" ],
+                "shiny_species": "SPECIES_UMBREON",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "I like Trainers with guts. Prove you've got them!",
+                        "POST_BATTLE_TAUNT": "No way! Good job!"
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator":
+                {
+                    "subsets": [],
+                    "query_script_override":
+                    [
+                        "TRY_INCLUDE_SPECIES_LIST",
+                        "SPECIES_UMBREON", "SPECIES_HERACROSS", "SPECIES_SHEDINJA", "SPECIES_GENGAR",
+                        "SPECIES_BRELOOM", "SPECIES_MEDICHAM", "SPECIES_BLAZIKEN",
+                        "#ifdef ROGUE_EXPANSION",
+                            "SPECIES_LUCARIO", "SPECIES_ZOROARK", "SPECIES_HAWLUCHA",
+                            "SPECIES_MIMIKYU", "SPECIES_FALINKS", "SPECIES_ANNIHILAPE",
+                        "#endif",
+                        "SPECIES_NONE"
+                    ],
+                    "weight_script":
+                    [
+                        "HAS_UNIQUE_TYPE_IN_TEAM", "INC_FAVOUR", "ELSE", "DEC_FAVOUR",
+                        "IS_LEGENDARY", "IMPOSSIBLE_FAVOUR",
+                        "IS_BANNED_SPECIES", "IMPOSSIBLE_FAVOUR"
+                    ]
+                }
+            },
+            {
+                "name": "NOLAND",
+                "object_event": "OBJ_EVENT_GFX_NOLAND",
+                "trainer_pic": "TRAINER_PIC_FACTORY_HEAD_NOLAND",
+                "trainer_class": "TRAINER_CLASS_FACTORY_HEAD",
+                "class_flags": [ "MINIBOSS_NOLAND" ],
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Knowledge comes from experience. Bring everything you've learned!",
+                        "POST_BATTLE_TAUNT": "Good job! You know what you're doing!"
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator":
+                {
+                    "subsets":
+                    [
+                        {
+                            "max_samples": 12
+                        }
+                    ],
+                    "weight_script":
+                    [
+                        "HAS_UNIQUE_TYPE_IN_TEAM", "INC_FAVOUR", "ELSE", "DEC_FAVOUR",
+                        "ALREADY_HAS_TYPE_IN_TEAM", "DEC_FAVOUR", "ELSE", "INC_FAVOUR",
+                        "IS_LEGENDARY", "IMPOSSIBLE_FAVOUR",
+                        "IS_BANNED_SPECIES", "IMPOSSIBLE_FAVOUR"
+                    ]
+                }
+            },
+            {
+                "name": "LUCY",
+                "object_event": "OBJ_EVENT_GFX_LUCY",
+                "trainer_pic": "TRAINER_PIC_PIKE_QUEEN_LUCY",
+                "trainer_class": "TRAINER_CLASS_PIKE_QUEEN",
+                "class_flags": [ "MINIBOSS_LUCY" ],
+                "shiny_species": "SPECIES_SEVIPER",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Luck brought you here. Let's see whether it stays with you.",
+                        "POST_BATTLE_TAUNT": "Darn!"
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator":
+                {
+                    "subsets": [],
+                    "query_script_override":
+                    [
+                        "TRY_INCLUDE_SPECIES_LIST",
+                        "SPECIES_SEVIPER", "SPECIES_SHUCKLE", "SPECIES_MILOTIC", "SPECIES_STEELIX",
+                        "SPECIES_GYARADOS", "SPECIES_ARBOK", "SPECIES_DRAGONAIR", "SPECIES_HUNTAIL", "SPECIES_GOREBYSS",
+                        "#ifdef ROGUE_EXPANSION",
+                            "SPECIES_EELEKTROSS", "SPECIES_SERPERIOR", "SPECIES_SANDACONDA", "SPECIES_ORTHWORM",
+                        "#endif",
+                        "SPECIES_NONE"
+                    ],
+                    "weight_script":
+                    [
+                        "HAS_UNIQUE_TYPE_IN_TEAM", "INC_FAVOUR", "ELSE", "DEC_FAVOUR",
+                        "IS_LEGENDARY", "IMPOSSIBLE_FAVOUR",
+                        "IS_BANNED_SPECIES", "IMPOSSIBLE_FAVOUR"
+                    ]
+                }
+            },
+            {
+                "name": "BRANDON",
+                "object_event": "OBJ_EVENT_GFX_BRANDON",
+                "trainer_pic": "TRAINER_PIC_PYRAMID_KING_BRANDON",
+                "trainer_class": "TRAINER_CLASS_PYRAMID_KING",
+                "class_flags": [ "MINIBOSS_BRANDON" ],
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Be brave! Face these ancient guardians without hesitation!",
+                        "POST_BATTLE_TAUNT": "That's it! You've done great!"
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator":
+                {
+                    "subsets": [],
+                    "query_script_override":
+                    [
+                        "TRY_INCLUDE_SPECIES_LIST",
+                        "SPECIES_REGIROCK", "SPECIES_REGICE", "SPECIES_REGISTEEL",
+                        "SPECIES_ARTICUNO", "SPECIES_ZAPDOS", "SPECIES_MOLTRES",
+                        "SPECIES_CLAYDOL", "SPECIES_SOLROCK", "SPECIES_LUNATONE",
+                        "SPECIES_DUSCLOPS", "SPECIES_NINJASK", "SPECIES_RELICANTH",
+                        "#ifdef ROGUE_EXPANSION",
+                            "SPECIES_BRONZONG", "SPECIES_SIGILYPH", "SPECIES_GOLURK",
+                            "SPECIES_RUNERIGUS", "SPECIES_GLIMMORA",
+                        "#endif",
+                        "SPECIES_NONE"
+                    ],
+                    "weight_script":
+                    [
+                        "HAS_UNIQUE_TYPE_IN_TEAM", "INC_FAVOUR", "ELSE", "DEC_FAVOUR",
+                        "IS_LEGENDARY", "IMPOSSIBLE_FAVOUR",
+                        "IS_BANNED_SPECIES", "IMPOSSIBLE_FAVOUR"
+                    ]
+                }
+            }
+        ]
+    }
+}

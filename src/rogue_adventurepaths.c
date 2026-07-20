@@ -732,6 +732,17 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         }
     }
 
+    // Frontier Brains are scheduled deterministically from the run seed. Claim
+    // their ordinary route slot before other optional encounters are placed.
+    if(Rogue_GetScheduledFrontierBrainTrainer(GetPathGenerationDifficulty()) != TRAINER_NONE)
+    {
+        bool8 placedFrontierBrain = ReplaceRoomEncounter(ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_MINIBOSS);
+
+        AGB_ASSERT(placedFrontierBrain);
+        if(placedFrontierBrain)
+            --freeRoomCount;
+    }
+
     // Randomly replace a routes with empty tiles
     {
         u8 chance;
@@ -1141,9 +1152,9 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
             break;
 
         case ADVPATH_ROOM_MINIBOSS:
-            AGB_ASSERT(FALSE);
             gRogueAdvPath.rooms[roomId].roomParams.roomIdx = 0;
-            gRogueAdvPath.rooms[roomId].roomParams.perType.miniboss.trainerNum = 0;
+            gRogueAdvPath.rooms[roomId].roomParams.perType.miniboss.trainerNum = Rogue_GetScheduledFrontierBrainTrainer(GetPathGenerationDifficulty());
+            AGB_ASSERT(gRogueAdvPath.rooms[roomId].roomParams.perType.miniboss.trainerNum != TRAINER_NONE);
             break;
 
         case ADVPATH_ROOM_WILD_DEN:
@@ -2345,7 +2356,7 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
         }
 
         case ADVPATH_ROOM_MINIBOSS:
-            return OBJ_EVENT_GFX_NOLAND;
+            return Rogue_GetTrainerObjectEventGfx(room->roomParams.perType.miniboss.trainerNum);
 
         case ADVPATH_ROOM_WILD_DEN:
             return OBJ_EVENT_GFX_GRASS_DEFAULT;
@@ -2572,6 +2583,10 @@ void RogueAdv_GetLastInteractedRoomParams()
 
         case ADVPATH_ROOM_LEGENDARY:
             gSpecialVar_ScriptNodeParam1 = gRogueAdvPath.rooms[roomIdx].roomParams.perType.legendary.customMonId != 0;
+            break;
+
+        case ADVPATH_ROOM_MINIBOSS:
+            Rogue_BufferMiniBossPreview(roomIdx);
             break;
     }
 }

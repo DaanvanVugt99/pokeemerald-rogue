@@ -165,12 +165,12 @@ movement MiniBoss_BossToFight {
 
 script Rogue_MiniBoss_IntroSpeech
 {
+    msgbox(gPlaceholder_Gym_PreBattleTaunt)
 }
 
 script Rogue_MiniBoss_KickOffBattle
 {
     buffertrainername(STR_VAR_1, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA)
 
-    msgbox(format("{STR_VAR_1}: Show me everything you got!"))
-    trainerbattle(TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, 0, format("Well colour me impressed!"))
+    trainerbattle(TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, 0, gPlaceholder_Gym_PostBattleTaunt)
 }

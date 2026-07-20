@@ -233,6 +233,7 @@ static void RandomiseFishingEncounters(void);
 static void ResetTrainerBattles(void);
 static void RandomiseEnabledTrainers(void);
 static void RandomiseEnabledItems(void);
+static void RandomiseMiniBossItemsAndRestoreSeed(void);
 static void RandomiseBerryTrees(void);
 static void RandomiseTRMoves();
 
@@ -1896,6 +1897,19 @@ const u8* Rogue_ModifyFieldMessage(const u8* str)
                 trainerNum = gRogueRun.bossTrainerNums[ROGUE_FINAL_CHAMP_DIFFICULTY];
             else
                 trainerNum = gRogueAdvPath.currentRoomParams.perType.boss.trainerNum;
+
+            if(str == gPlaceholder_Gym_PreBattleOpenning)
+                overrideStr = Rogue_GetTrainerString(trainerNum, TRAINER_STRING_PRE_BATTLE_OPENNING);
+            else if(str == gPlaceholder_Gym_PreBattleTaunt)
+                overrideStr = Rogue_GetTrainerString(trainerNum, TRAINER_STRING_PRE_BATTLE_TAUNT);
+            else if(str == gPlaceholder_Gym_PostBattleTaunt)
+                overrideStr = Rogue_GetTrainerString(trainerNum, TRAINER_STRING_POST_BATTLE_TAUNT);
+            else if(str == gPlaceholder_Gym_PostBattleCloser)
+                overrideStr = Rogue_GetTrainerString(trainerNum, TRAINER_STRING_POST_BATTLE_CLOSER);
+        }
+        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_MINIBOSS)
+        {
+            u16 trainerNum = gRogueAdvPath.currentRoomParams.perType.miniboss.trainerNum;
 
             if(str == gPlaceholder_Gym_PreBattleOpenning)
                 overrideStr = Rogue_GetTrainerString(trainerNum, TRAINER_STRING_PRE_BATTLE_OPENNING);
@@ -5203,6 +5217,7 @@ static void BeginRogueRunPhase_Trainers(void)
     Rogue_ChooseRivalTrainerForNewAdventure();
     Rogue_EnsureRivalBaseTeamForNewAdventure();
     Rogue_ChooseBossTrainersForNewAdventure();
+    Rogue_ChooseFrontierBrainTrainersForNewAdventure();
     EnableRivalEncounterIfRequired();
 
     gRogueRun.shrineSpawnDifficulty = 1 + RogueRandomRange(ROGUE_MAX_BOSS_COUNT, 0);
@@ -6080,64 +6095,172 @@ bool8 Rogue_IsBattleRoamerMon(u16 species)
     return FALSE;
 }
 
-void Rogue_SelectMiniBossRewardMons()
+static bool8 IsMiniBossRewardEligible(struct Pokemon* party, u8 index, bool8 allowLegendary)
 {
-    u16 indexA, indexB;
-    RAND_TYPE startSeed = gRngRogueValue;
-    u8 partySize = CalculateEnemyPartyCount();
+    u16 species = GetMonData(&party[index], MON_DATA_SPECIES);
 
-    if(partySize == 1)
+    if(species == SPECIES_NONE)
+        return FALSE;
+
+    return allowLegendary || !RoguePokedex_IsSpeciesLegendary(species);
+}
+
+static u8 FindMiniBossRewardIndex(struct Pokemon* party, u8 partySize, u8 startIndex, u8 excludedIndex, bool8 allowLegendary)
+{
+    u8 i;
+
+    for(i = 0; i < partySize; ++i)
     {
-        indexA = 0;
-        indexB = 0;
+        u8 index = (startIndex + i) % partySize;
+
+        if(index != excludedIndex && IsMiniBossRewardEligible(party, index, allowLegendary))
+            return index;
     }
-    else if(partySize == 2)
+
+    return excludedIndex == PARTY_SIZE ? 0 : excludedIndex;
+}
+
+static void SelectMiniBossRewardIndices(u16 trainerNum, struct Pokemon* party, u8 partySize, u16 roomSeed, u8* indexA, u8* indexB)
+{
+    const struct RogueTrainer* trainer;
+    bool8 isBrandon;
+    u8 startA;
+    u8 startB;
+
+    AGB_ASSERT(trainerNum < gRogueTrainerCount);
+    trainer = &gRogueTrainers[trainerNum];
+    isBrandon = (trainer->classFlags & CLASS_FLAG_MINIBOSS_BRANDON) != 0;
+    startA = (roomSeed * 13u + trainerNum * 7u) % partySize;
+    startB = (roomSeed * 29u + trainerNum * 11u + 1u) % partySize;
+
+    if(isBrandon)
     {
-        indexA = 0;
-        indexB = 1;
+        u8 i;
+        *indexA = PARTY_SIZE;
+
+        for(i = 0; i < partySize; ++i)
+        {
+            u8 index = (startA + i) % partySize;
+            u16 species = GetMonData(&party[index], MON_DATA_SPECIES);
+
+            if(species != SPECIES_NONE && RoguePokedex_IsSpeciesLegendary(species))
+            {
+                *indexA = index;
+                break;
+            }
+        }
+
+        if(*indexA == PARTY_SIZE)
+            *indexA = FindMiniBossRewardIndex(party, partySize, startA, PARTY_SIZE, TRUE);
+
+        *indexB = FindMiniBossRewardIndex(party, partySize, startB, *indexA, TRUE);
     }
     else
     {
-        u8 i;
-        u16 species;
-
-        // Select first index
-        indexA = RogueRandomRange(partySize, FLAG_SET_SEED_TRAINERS);
-
-        for(i = 0; i < partySize; ++i)
-        {
-            species = GetMonData(&gEnemyParty[indexA], MON_DATA_SPECIES);
-
-            // Accept first non legendary
-            if(!RoguePokedex_IsSpeciesLegendary(species))
-                break;
-
-            indexA = (indexA + 1) % partySize;
-        }
-
-        // Select 2nd index
-        indexB = RogueRandomRange(partySize, FLAG_SET_SEED_TRAINERS);
-
-        for(i = 0; i < partySize; ++i)
-        {
-            species = GetMonData(&gEnemyParty[indexB], MON_DATA_SPECIES);
-
-            // Avoid duplicate index
-            if(indexB != indexA)
-            {
-                // Accept first non legendary
-                if(!RoguePokedex_IsSpeciesLegendary(species))
-                    break;
-            }
-
-            indexB = (indexB + 1) % partySize;
-        }
+        *indexA = FindMiniBossRewardIndex(party, partySize, startA, PARTY_SIZE, FALSE);
+        *indexB = FindMiniBossRewardIndex(party, partySize, startB, *indexA, FALSE);
     }
+}
+
+void Rogue_SelectMiniBossRewardMons()
+{
+    u8 indexA;
+    u8 indexB;
+    u8 partySize = CalculateEnemyPartyCount();
+    u16 trainerNum = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
+    u16 roomSeed = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed;
+
+    AGB_ASSERT(partySize != 0);
+    SelectMiniBossRewardIndices(trainerNum, gEnemyParty, partySize, roomSeed, &indexA, &indexB);
 
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, GetMonData(&gEnemyParty[indexA], MON_DATA_SPECIES));
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, GetMonData(&gEnemyParty[indexB], MON_DATA_SPECIES));
+}
 
-    gRngRogueValue = startSeed;
+void Rogue_BufferMiniBossPreview(u8 roomIdx)
+{
+    struct RogueAdvPathRoom* room = &gRogueAdvPath.rooms[roomIdx];
+    u16 trainerNum = room->roomParams.perType.miniboss.trainerNum;
+    RAND_TYPE rogueRng = gRngRogueValue;
+    RAND_TYPE rng = gRngValue;
+    RAND_TYPE rng2 = gRng2Value;
+    RAND_TYPE localSeedToRestore = gRogueLocal.rngSeedToRestore;
+    RAND_TYPE localRngToRestore = gRogueLocal.rngToRestore;
+    RAND_TYPE localRng2ToRestore = gRogueLocal.rng2ToRestore;
+    struct RogueAdvPathRoomParams currentRoomParams = gRogueAdvPath.currentRoomParams;
+    u32 battleTypeFlags = gBattleTypeFlags;
+    u8 currentRoomType = gRogueAdvPath.currentRoomType;
+    bool8 hadDynamax = FlagGet(FLAG_ROGUE_DYNAMAX_BATTLE);
+    bool8 hadTera = FlagGet(FLAG_ROGUE_TERASTALLIZE_BATTLE);
+    bool8 hadBattleEvent = gRogueLocal.hasBattleEventOccurred;
+    bool8 itemFlags[ROGUE_ITEM_COUNT];
+    u16 itemVars[ROGUE_ITEM_COUNT];
+    RAND_TYPE miniBossSeed;
+    u8 partySize;
+    u8 indexA;
+    u8 indexB;
+    u8 i;
+
+    AGB_ASSERT(room->roomType == ADVPATH_ROOM_MINIBOSS);
+
+    ZeroEnemyPartyMons();
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_MINIBOSS;
+    gRogueAdvPath.currentRoomParams = room->roomParams;
+
+    // Preview the item availability that will be generated on room entry, as
+    // it influences competitive preset selection. Keep it entirely temporary.
+    for(i = 0; i < ROGUE_ITEM_COUNT; ++i)
+    {
+        itemFlags[i] = FlagGet(FLAG_ROGUE_ITEM_START + i);
+        itemVars[i] = VarGet(VAR_ROGUE_ITEM_START + i);
+    }
+
+    SeedRogueRng(room->rngSeed);
+    miniBossSeed = gRngRogueValue;
+    RandomiseMiniBossItemsAndRestoreSeed();
+    AGB_ASSERT(gRngRogueValue == miniBossSeed);
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER;
+    SetupTrainerBattleInternal(trainerNum);
+    partySize = Rogue_CreateTrainerParty(trainerNum, gEnemyParty, PARTY_SIZE, TRUE);
+    AGB_ASSERT(partySize >= 2);
+    SelectMiniBossRewardIndices(trainerNum, gEnemyParty, partySize, room->rngSeed, &indexA, &indexB);
+
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, trainerNum);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, GetMonData(&gEnemyParty[indexA], MON_DATA_SPECIES));
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, GetMonData(&gEnemyParty[indexB], MON_DATA_SPECIES));
+
+    ZeroEnemyPartyMons();
+    CalculateEnemyPartyCount();
+
+    for(i = 0; i < ROGUE_ITEM_COUNT; ++i)
+    {
+        if(itemFlags[i])
+            FlagSet(FLAG_ROGUE_ITEM_START + i);
+        else
+            FlagClear(FLAG_ROGUE_ITEM_START + i);
+        VarSet(VAR_ROGUE_ITEM_START + i, itemVars[i]);
+    }
+
+    if(hadDynamax)
+        FlagSet(FLAG_ROGUE_DYNAMAX_BATTLE);
+    else
+        FlagClear(FLAG_ROGUE_DYNAMAX_BATTLE);
+
+    if(hadTera)
+        FlagSet(FLAG_ROGUE_TERASTALLIZE_BATTLE);
+    else
+        FlagClear(FLAG_ROGUE_TERASTALLIZE_BATTLE);
+
+    gBattleTypeFlags = battleTypeFlags;
+    gRogueAdvPath.currentRoomType = currentRoomType;
+    gRogueAdvPath.currentRoomParams = currentRoomParams;
+    gRogueLocal.hasBattleEventOccurred = hadBattleEvent;
+    gRogueLocal.rngSeedToRestore = localSeedToRestore;
+    gRogueLocal.rngToRestore = localRngToRestore;
+    gRogueLocal.rng2ToRestore = localRng2ToRestore;
+    gRngRogueValue = rogueRng;
+    gRngValue = rng;
+    gRng2Value = rng2;
 }
 
 static u8 UNUSED RandomMonType(u16 seedFlag)
@@ -7489,14 +7612,16 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                 {
                     u16 trainerNum;
                     trainerNum = gRogueAdvPath.currentRoomParams.perType.miniboss.trainerNum;
+                    gRogueLocal.rngSeedToRestore = gRngRogueValue;
 
-                    RandomiseEnabledItems();
+                    RandomiseMiniBossItemsAndRestoreSeed();
 
                     VarSet(VAR_OBJ_GFX_ID_0, Rogue_GetTrainerObjectEventGfx(trainerNum));
                     VarSet(VAR_ROGUE_DESIRED_WEATHER, Rogue_GetTrainerWeather(trainerNum));
 
                     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, trainerNum);
                     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, Rogue_GetTrainerTypeAssignment(trainerNum));
+
                     break;
                 }
 
@@ -10632,8 +10757,10 @@ void Rogue_ModifyScriptMon(struct Pokemon* mon)
         {
             u32 temp;
             u16 species = GetMonData(mon, MON_DATA_SPECIES);
-            u16 statA = (Random() % 6);
-            u16 statB = (statA + 1 + (Random() % 5)) % 6;
+            u8 perfectIvCandidates[NUM_STATS];
+            u8 perfectIvCandidateCount = 0;
+            u8 statA;
+            u8 statB;
 
             // Apply the miniboss preset for this mon
             {
@@ -10656,7 +10783,12 @@ void Rogue_ModifyScriptMon(struct Pokemon* mon)
                     struct RoguePokemonCompetitiveSet customPreset;
 
                     memset(&rules, 0, sizeof(rules));
-                    customPreset.heldItem = GetMonData(&gEnemyParty[target], MON_DATA_HELD_ITEM);
+                    memset(&customPreset, 0, sizeof(customPreset));
+                    rules.allowMissingMoves = TRUE;
+#ifdef ROGUE_EXPANSION
+                    rules.skipTeraType = TRUE;
+#endif
+                    customPreset.heldItem = ITEM_NONE;
                     customPreset.ability = GetMonAbility(&gEnemyParty[target]);
                     customPreset.nature = GetNature(&gEnemyParty[target]);
                     customPreset.hiddenPowerType = CalcMonHiddenPowerType(&gEnemyParty[target]);
@@ -10668,14 +10800,50 @@ void Rogue_ModifyScriptMon(struct Pokemon* mon)
                 }
             }
 
-            // Bump 2 of the IVs to max
+            // Normalize IVs around the copied Hidden Power parity, then select
+            // exactly two contributing stats to perfect without changing it.
+            for(temp = 0; temp < NUM_STATS; ++temp)
+            {
+                u32 iv;
+
+                if((GetMonData(mon, MON_DATA_HP_IV + temp) & 1) != 0)
+                {
+                    perfectIvCandidates[perfectIvCandidateCount++] = temp;
+                    iv = 29;
+                }
+                else
+                {
+                    iv = 30;
+                }
+
+                SetMonData(mon, MON_DATA_HP_IV + temp, &iv);
+            }
+
+            AGB_ASSERT(perfectIvCandidateCount >= 2);
+            statB = Random() % perfectIvCandidateCount;
+            statA = perfectIvCandidates[statB];
+            perfectIvCandidates[statB] = perfectIvCandidates[--perfectIvCandidateCount];
+            statB = perfectIvCandidates[Random() % perfectIvCandidateCount];
+
             temp = 31;
             SetMonData(mon, MON_DATA_HP_IV + statA, &temp);
             SetMonData(mon, MON_DATA_HP_IV + statB, &temp);
 
-            // Clear held item
+            // The trophy is a clean, player-owned echo rather than the
+            // battle-worn opponent object.
             temp = 0;
             SetMonData(mon, MON_DATA_HELD_ITEM, &temp);
+            SetMonData(mon, MON_DATA_IS_SHINY, &temp);
+            SetMonData(mon, MON_DATA_STATUS, &temp);
+
+            temp = gSpeciesInfo[species].friendship;
+            SetMonData(mon, MON_DATA_FRIENDSHIP, &temp);
+
+            for(temp = 0; temp < NUM_STATS; ++temp)
+            {
+                u32 ev = 0;
+                SetMonData(mon, MON_DATA_HP_EV + temp, &ev);
+            }
 
             // Set to the correct level
             temp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[species].growthRate, Rogue_CalculatePlayerMonLvl());
@@ -12599,6 +12767,17 @@ static void RandomiseEnabledItems(void)
     }
 
     RandomiseItemContent(difficultyLevel);
+}
+
+static void RandomiseMiniBossItemsAndRestoreSeed(void)
+{
+    RAND_TYPE seed = gRngRogueValue;
+
+    RandomiseEnabledItems();
+
+    // Item availability affects preset scoring, while team generation must
+    // still begin from the room seed used by the path preview.
+    gRngRogueValue = seed;
 }
 
 static void RandomiseCharmItems(void)

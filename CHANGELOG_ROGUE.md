@@ -70,6 +70,10 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Restored Frontier Brain adventure-path encounters with three scheduled
+  Frontier Brain battles per run, previewed Pokémon trophies, and canon-inspired
+  competitive teams; Brandon can uniquely award one of his Legendary guardians.
+  Frontier Brains are omitted from Trial runs.
 - Added Level, Tinted, Reach, Accuracy, Retaliate, and Stand Curses to the
   temporary Dark Deal pool as opponent-side mirrors of their Charms.
 - Added the Moody and Eviolite Charms, which adjust friendly Pokémon's stats
