@@ -688,6 +688,21 @@ void Rogue_ModifyFormChange(u16 species, u8 changeIdx, struct FormChange* outFor
 #endif
 }
 
+#if !TESTING && !defined(ROGUE_BAKING)
+static u8 GetTrainerNamePoolIndex(u16 trainerNum, u8 nameCount)
+{
+    u32 seed = ((u32)gRogueRun.baseSeed << 16) | gRogueRun.enteredRoomCounter;
+
+    // Mix stable run and room state without advancing either gameplay RNG.
+    seed ^= (u32)trainerNum * 0x45D9F3B;
+    seed ^= seed >> 16;
+    seed *= 0x45D9F3B;
+    seed ^= seed >> 16;
+
+    return seed % nameCount;
+}
+#endif
+
 const u8* Rogue_GetTrainerName(u16 trainerNum)
 {
 #if TESTING
@@ -695,6 +710,10 @@ const u8* Rogue_GetTrainerName(u16 trainerNum)
     return gText_TrainerName_Leaf;
 #elif !defined(ROGUE_BAKING)
     const struct RogueTrainer* trainer = Rogue_GetTrainer(trainerNum);
+
+    if (Rogue_IsRunActive() && trainer->trainerNamePoolCount != 0)
+        return trainer->trainerNamePool[GetTrainerNamePoolIndex(trainerNum, trainer->trainerNamePoolCount)];
+
     //if((trainer->trainerFlags & TRAINER_FLAG_NAME_IS_PLAYER))
     //{
     //    return gSaveBlock2Ptr->playerName;

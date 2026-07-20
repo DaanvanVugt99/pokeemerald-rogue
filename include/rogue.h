@@ -412,6 +412,7 @@ struct RogueTeamGenerator
 struct RogueTrainer
 {
     u8 const* trainerName;
+    u8 const* const* trainerNamePool;
     u8 const* const* encounterText; // TRAINER_STRING_COUNT * N
     u32 classFlags;
     u32 trainerFlags;
@@ -426,6 +427,7 @@ struct RogueTrainer
     u8 preferredWeather;
     u8 musicPlayer;
     u8 encounterTextCount;
+    u8 trainerNamePoolCount;
     struct RogueTeamGenerator teamGenerator;
 };
 

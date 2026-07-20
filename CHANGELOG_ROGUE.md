@@ -20,11 +20,9 @@ Format follows Keep a Changelog loosely:
   Speed after transforming once per battle before adopting the target's unique
   ability.
 - Expanded generated Unique Pokemon from a 103-entry unique-ability pool to
-  555 audited battle-safe abilities and added stat-aware synergy profiles for
-  abilities that depend on particular moves, types, or move families. Flexible
-  profiles vary between physical, special, and utility moves, while exact-move
-  abilities remain fixed and naturally learned pairings retain both random moves.
-  Creation receives one of several type-matched status moves where available.
+  558 audited battle-safe abilities, including Starmobile, and added guaranteed
+  synergy moves for abilities that depend on particular moves or move families,
+  while retaining both random moves when the species already learns the pairing.
 - Repacked generated Unique Pokemon IDs for the larger ability pool and bumped
   the development save version; existing development saves require a restart.
 - Reworked Alolan Ninetales's Lanakila Law so Encore and Disable gain priority

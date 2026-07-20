@@ -110,7 +110,24 @@ static void ExportTrainerGroupData_C(TrainerDataExport_C& exporter, json const& 
 	for (auto trainer : trainers)
 	{
 		int trainerIdx = i++;
-		exporter.earlyBlock << "static const u8 sTrainerName_" << trainerGroup << "_" << trainerIdx << "[] = _(\"" << trainer["name"].get<std::string>() << "\");\n";
+		std::string trainerSuffix = trainerGroup + "_" + std::to_string(trainerIdx);
+		exporter.earlyBlock << "static const u8 sTrainerName_" << trainerSuffix << "[] = _(\"" << trainer["name"].get<std::string>() << "\");\n";
+
+		if (trainer.contains("name_variants"))
+		{
+			int nameIdx = 0;
+			for (auto name : trainer["name_variants"])
+			{
+				exporter.earlyBlock << "static const u8 sTrainerNameVariant_" << trainerSuffix << "_" << nameIdx++ << "[] = _(\"" << name.get<std::string>() << "\");\n";
+			}
+
+			exporter.earlyBlock << "static const u8* const sTrainerNamePool_" << trainerSuffix << "[] =\n{\n";
+			exporter.earlyBlock << c_TabSpacing << "sTrainerName_" << trainerSuffix << ",\n";
+			nameIdx = 0;
+			for (auto name : trainer["name_variants"])
+				exporter.earlyBlock << c_TabSpacing << "sTrainerNameVariant_" << trainerSuffix << "_" << nameIdx++ << ",\n";
+			exporter.earlyBlock << "};\n";
+		}
 
 		if (trainer.contains("encounter_text"))
 		{
@@ -301,6 +318,11 @@ static void ExportTrainerGroupData_C(TrainerDataExport_C& exporter, json const& 
 		exporter.trainerStructsBlock << c_TabSpacing << "{\n";
 
 		exporter.trainerStructsBlock << c_TabSpacing << ".trainerName = sTrainerName_" << trainerSuffix << ",\n";
+		if (trainer.contains("name_variants"))
+		{
+			exporter.trainerStructsBlock << c_TabSpacing << ".trainerNamePool = sTrainerNamePool_" << trainerSuffix << ",\n";
+			exporter.trainerStructsBlock << c_TabSpacing << ".trainerNamePoolCount = ARRAY_COUNT(sTrainerNamePool_" << trainerSuffix << "),\n";
+		}
 		exporter.trainerStructsBlock << c_TabSpacing << ".trainerClass = " << trainer["trainer_class"].get<std::string>() << ",\n";
 		exporter.trainerStructsBlock << c_TabSpacing << ".musicPlayer = BATTLE_MUSIC_" << strutil::to_upper(trainer["music_player"].get<std::string>()) << ",\n";
 		exporter.trainerStructsBlock << c_TabSpacing << ".typeAssignment = TYPE_" << strutil::to_upper(trainer["type_assignment"].get<std::string>()) << ",\n";

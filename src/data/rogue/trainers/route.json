@@ -5,14 +5,16 @@
         "type_assignment": "NONE",
         "music_player": "route_trainer",
         "trainer_flags": [ "REGION_ANY", "CLASS_ROUTE" ],
-        "class_flags": []
+        "class_flags": [],
+        "team_generator": { "subsets": [] }
     },
     "trainers":
     {
         "route_general":
         [
             {
-                "name": "MALONE",
+                "name": "GABRIELLE",
+                "name_variants": [ "LYDIA", "PAT" ],
                 "object_event": "OBJ_EVENT_GFX_GIRL_1",
                 "trainer_pic": "TRAINER_PIC_POKEMON_BREEDER_F",
                 "trainer_class": "TRAINER_CLASS_PKMN_BREEDER",
@@ -31,7 +33,8 @@
                 }
             },
             {
-                "name": "CAIRO",
+                "name": "ISAAC",
+                "name_variants": [ "MYLES" ],
                 "object_event": "OBJ_EVENT_GFX_BOY_2",
                 "trainer_pic": "TRAINER_PIC_POKEMON_BREEDER_M",
                 "trainer_class": "TRAINER_CLASS_PKMN_BREEDER",
@@ -50,7 +53,8 @@
                 }
             },
             {
-                "name": "JETT",
+                "name": "MARCEL",
+                "name_variants": [ "FELIX", "RANDALL", "PARKER" ],
                 "object_event": "OBJ_EVENT_GFX_MAN_3",
                 "trainer_pic": "TRAINER_PIC_COOLTRAINER_M",
                 "trainer_class": "TRAINER_CLASS_COOLTRAINER",
@@ -69,7 +73,8 @@
                 }
             },
             {
-                "name": "HARTLEY",
+                "name": "MARY",
+                "name_variants": [ "ALEXIA", "JODY", "WENDY" ],
                 "object_event": "OBJ_EVENT_GFX_WOMAN_5",
                 "trainer_pic": "TRAINER_PIC_COOLTRAINER_F",
                 "trainer_class": "TRAINER_CLASS_COOLTRAINER",
@@ -88,7 +93,8 @@
                 }
             },
             {
-                "name": "JO",
+                "name": "EDWARD",
+                "name_variants": [ "PRESTON", "VIRGIL", "BLAKE" ],
                 "type_assignment": "PSYCHIC",
                 "object_event": "OBJ_EVENT_GFX_PSYCHIC_M",
                 "trainer_pic": "TRAINER_PIC_PSYCHIC_M",
@@ -114,7 +120,8 @@
                 }
             },
             {
-                "name": "KOBIE",
+                "name": "RICKY",
+                "name_variants": [ "SIMON", "CHARLIE", "CHANDLER" ],
                 "object_event": "OBJ_EVENT_GFX_TUBER_M",
                 "trainer_pic": "TRAINER_PIC_TUBER_M",
                 "trainer_class": "TRAINER_CLASS_TUBER_M",
@@ -133,7 +140,8 @@
                 }
             },
             {
-                "name": "KHARI",
+                "name": "LOLA",
+                "name_variants": [ "AUSTINA", "GWEN", "JANI" ],
                 "object_event": "OBJ_EVENT_GFX_TUBER_F",
                 "trainer_pic": "TRAINER_PIC_TUBER_F",
                 "trainer_class": "TRAINER_CLASS_TUBER_F",
@@ -152,7 +160,8 @@
                 }
             },
             {
-                "name": "GIFT",
+                "name": "MOLLIE",
+                "name_variants": [ "VICKY", "SHELBY", "MAKAYLA" ],
                 "object_event": "OBJ_EVENT_GFX_EXPERT_F",
                 "trainer_pic": "TRAINER_PIC_EXPERT_F",
                 "trainer_class": "TRAINER_CLASS_EXPERT",
@@ -171,7 +180,8 @@
                 }
             },
             {
-                "name": "DUSTY",
+                "name": "FREDRICK",
+                "name_variants": [ "TIMOTHY", "AURON", "CONOR" ],
                 "object_event": "OBJ_EVENT_GFX_EXPERT_M",
                 "trainer_pic": "TRAINER_PIC_EXPERT_M",
                 "trainer_class": "TRAINER_CLASS_EXPERT",
@@ -190,7 +200,7 @@
                 }
             },
             {
-                "name": "ELY",
+                "name": "DYLAN",
                 "object_event": "OBJ_EVENT_GFX_RUNNING_TRIATHLETE_M",
                 "trainer_pic": "TRAINER_PIC_RUNNING_TRIATHLETE_M",
                 "trainer_class": "TRAINER_CLASS_TRIATHLETE",
@@ -209,7 +219,8 @@
                 }
             },
             {
-                "name": "TEEGAN",
+                "name": "MARIA",
+                "name_variants": [ "KYRA", "MELINA" ],
                 "object_event": "OBJ_EVENT_GFX_RUNNING_TRIATHLETE_F",
                 "trainer_pic": "TRAINER_PIC_RUNNING_TRIATHLETE_F",
                 "trainer_class": "TRAINER_CLASS_TRIATHLETE",
@@ -228,7 +239,8 @@
                 }
             },
             {
-                "name": "ELIYAH",
+                "name": "JERRY",
+                "name_variants": [ "TED", "PAUL" ],
                 "object_event": "OBJ_EVENT_GFX_SCHOOL_KID_M",
                 "trainer_pic": "TRAINER_PIC_SCHOOL_KID_M",
                 "trainer_class": "TRAINER_CLASS_SCHOOL_KID",
@@ -247,7 +259,8 @@
                 }
             },
             {
-                "name": "MASON",
+                "name": "KAREN",
+                "name_variants": [ "GEORGIA" ],
                 "object_event": "OBJ_EVENT_GFX_LITTLE_GIRL",
                 "trainer_pic": "TRAINER_PIC_SCHOOL_KID_F",
                 "trainer_class": "TRAINER_CLASS_SCHOOL_KID",
@@ -266,7 +279,8 @@
                 }
             },
             {
-                "name": "NOB",
+                "name": "SAWYER",
+                "name_variants": [ "ELI", "MARC", "BRICE" ],
                 "type_assignment": "GROUND",
                 "object_event": "OBJ_EVENT_GFX_HIKER",
                 "trainer_pic": "TRAINER_PIC_HIKER",
@@ -292,7 +306,8 @@
                 }
             },
             {
-                "name": "HENLEY",
+                "name": "ALBERTO",
+                "name_variants": [ "PERRY", "HUGH", "PHIL" ],
                 "type_assignment": "FLYING",
                 "object_event": "OBJ_EVENT_GFX_MAN_5",
                 "trainer_pic": "TRAINER_PIC_BIRD_KEEPER",
@@ -318,7 +333,8 @@
                 }
             },
             {
-                "name": "ZELAND",
+                "name": "ED",
+                "name_variants": [ "EDWIN", "HECTOR" ],
                 "object_event": "OBJ_EVENT_GFX_MANIAC",
                 "trainer_pic": "TRAINER_PIC_COLLECTOR",
                 "trainer_class": "TRAINER_CLASS_COLLECTOR",
@@ -337,7 +353,8 @@
                 }
             },
             {
-                "name": "AUDIE",
+                "name": "ZANDER",
+                "name_variants": [ "TAKAO", "HITOSHI", "KIYO" ],
                 "type_assignment": "FIGHTING",
                 "object_event": "OBJ_EVENT_GFX_BLACK_BELT",
                 "trainer_pic": "TRAINER_PIC_BLACK_BELT",
@@ -363,7 +380,8 @@
                 }
             },
             {
-                "name": "AMARI",
+                "name": "LEAH",
+                "name_variants": [ "PATRICIA", "KINDRA", "TAMMY" ],
                 "type_assignment": "GHOST",
                 "object_event": "OBJ_EVENT_GFX_HEX_MANIAC",
                 "trainer_pic": "TRAINER_PIC_HEX_MANIAC",
@@ -389,7 +407,8 @@
                 }
             },
             {
-                "name": "REMINGTON",
+                "name": "DUSTY",
+                "name_variants": [ "CHIP", "FOSTER", "GARRISON" ],
                 "type_assignment": "ROCK",
                 "object_event": "OBJ_EVENT_GFX_MISC_RUIN_MANIAC",
                 "trainer_pic": "TRAINER_PIC_RUIN_MANIAC",
@@ -415,7 +434,8 @@
                 }
             },
             {
-                "name": "SHINE",
+                "name": "MELISSA",
+                "name_variants": [ "SHEILA", "SHIRLEY", "JESSICA" ],
                 "object_event": "OBJ_EVENT_GFX_BEAUTY",
                 "trainer_pic": "TRAINER_PIC_BEAUTY",
                 "trainer_class": "TRAINER_CLASS_BEAUTY",
@@ -434,7 +454,8 @@
                 }
             },
             {
-                "name": "COPELAND",
+                "name": "WINSTON",
+                "name_variants": [ "GARRET", "DAWSON" ],
                 "object_event": "OBJ_EVENT_GFX_RICH_BOY",
                 "trainer_pic": "TRAINER_PIC_RICH_BOY",
                 "trainer_class": "TRAINER_CLASS_RICH_BOY",
@@ -453,7 +474,8 @@
                 }
             },
             {
-                "name": "ARLIE",
+                "name": "DAVIS",
+                "name_variants": [ "RICK", "LYLE", "JOSE" ],
                 "type_assignment": "BUG",
                 "object_event": "OBJ_EVENT_GFX_BUG_CATCHER",
                 "trainer_pic": "TRAINER_PIC_BUG_CATCHER",
@@ -479,7 +501,8 @@
                 }
             },
             {
-                "name": "QUINCY",
+                "name": "WALTER",
+                "name_variants": [ "MICAH", "THOMAS", "NATE" ],
                 "object_event": "OBJ_EVENT_GFX_GENTLEMAN",
                 "trainer_pic": "TRAINER_PIC_GENTLEMAN",
                 "trainer_class": "TRAINER_CLASS_GENTLEMAN",
@@ -498,7 +521,8 @@
                 }
             },
             {
-                "name": "KAYA",
+                "name": "ANDREW",
+                "name_variants": [ "IVAN", "CLAUDE", "ELLIOT" ],
                 "type_assignment": "WATER",
                 "object_event": "OBJ_EVENT_GFX_FISHERMAN",
                 "trainer_pic": "TRAINER_PIC_FISHERMAN",
@@ -524,7 +548,8 @@
                 }
             },
             {
-                "name": "KOBI",
+                "name": "NICOLAS",
+                "name_variants": [ "AARON" ],
                 "type_assignment": "DRAGON",
                 "object_event": "OBJ_EVENT_GFX_BOY_3",
                 "trainer_pic": "TRAINER_PIC_DRAGON_TAMER",
@@ -550,7 +575,8 @@
                 }
             },
             {
-                "name": "CUE",
+                "name": "JARED",
+                "name_variants": [ "MALIK", "ERNEST", "ALEX" ],
                 "type_assignment": "POISON",
                 "object_event": "OBJ_EVENT_GFX_BIKER",
                 "trainer_pic": "TRAINER_PIC_BIKER",
@@ -584,7 +610,8 @@
                 }
             },
             {
-                "name": "BLAIR",
+                "name": "JACOB",
+                "name_variants": [ "ANTHONY", "BENJAMIN", "JULIO" ],
                 "object_event": "OBJ_EVENT_GFX_CYCLING_TRIATHLETE_M",
                 "trainer_pic": "TRAINER_PIC_CYCLING_TRIATHLETE_M",
                 "trainer_class": "TRAINER_CLASS_TRIATHLETE",
@@ -603,7 +630,8 @@
                 }
             },
             {
-                "name": "MONROE",
+                "name": "ABIGAIL",
+                "name_variants": [ "JASMINE", "ALYSSA" ],
                 "object_event": "OBJ_EVENT_GFX_CYCLING_TRIATHLETE_F",
                 "trainer_pic": "TRAINER_PIC_CYCLING_TRIATHLETE_F",
                 "trainer_class": "TRAINER_CLASS_TRIATHLETE",
@@ -622,7 +650,8 @@
                 }
             },
             {
-                "name": "MONROE",
+                "name": "COLE",
+                "name_variants": [ "JEFF", "AXLE", "JACE" ],
                 "object_event": "OBJ_EVENT_GFX_MAN_5",
                 "trainer_pic": "TRAINER_PIC_KINDLER",
                 "trainer_class": "TRAINER_CLASS_KINDLER",
@@ -639,6 +668,350 @@
                 {
                     "subsets": []
                 }
+            },
+            {
+                "name": "DAISY",
+                "name_variants": [ "ROSE", "VIOLET", "CELINA" ],
+                "type_assignment": "GRASS",
+                "object_event": "OBJ_EVENT_GFX_MISC_AROMA_GIRL",
+                "trainer_pic": "TRAINER_PIC_AROMA_LADY",
+                "trainer_class": "TRAINER_CLASS_AROMA_LADY",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "The scent of flowers always lifts my spirits!",
+                        "POST_BATTLE_TAUNT": "That battle swept me off my feet!",
+                        "POST_BATTLE_CLOSER": "A lovely aroma can brighten any journey."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "GRASS" ] } ] }
+            },
+            {
+                "name": "JOCELYN",
+                "name_variants": [ "LAURA", "CYNDY", "CORA" ],
+                "type_assignment": "FIGHTING",
+                "object_event": "OBJ_EVENT_GFX_GIRL_3",
+                "trainer_pic": "TRAINER_PIC_BATTLE_GIRL",
+                "trainer_class": "TRAINER_CLASS_BATTLE_GIRL",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "My Pokémon and I train together every day!",
+                        "POST_BATTLE_TAUNT": "Your technique is impressive!",
+                        "POST_BATTLE_CLOSER": "A strong body needs a focused mind."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "FIGHTING" ] } ] }
+            },
+            {
+                "name": "BRENT",
+                "name_variants": [ "DONALD", "TAYLOR", "JEFFREY" ],
+                "type_assignment": "BUG",
+                "object_event": "OBJ_EVENT_GFX_MANIAC",
+                "trainer_pic": "TRAINER_PIC_BUG_MANIAC",
+                "trainer_class": "TRAINER_CLASS_BUG_MANIAC",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Let me show you my rarest specimens!",
+                        "POST_BATTLE_TAUNT": "What an unexpected result!",
+                        "POST_BATTLE_CLOSER": "There is always another Bug Pokémon to study."
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "BUG" ] } ] }
+            },
+            {
+                "name": "DREW",
+                "name_variants": [ "BEAU", "LARRY", "SHANE" ],
+                "object_event": "OBJ_EVENT_GFX_CAMPER",
+                "trainer_pic": "TRAINER_PIC_CAMPER",
+                "trainer_class": "TRAINER_CLASS_CAMPER",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "This looks like a great place for a battle!",
+                        "POST_BATTLE_TAUNT": "I should have packed a better strategy!",
+                        "POST_BATTLE_CLOSER": "The best adventures happen off the beaten path."
+                    }
+                ],
+                "preferred_mon_gender": "MALE"
+            },
+            {
+                "name": "KIRK",
+                "name_variants": [ "SHAWN", "FERNANDO", "DALTON" ],
+                "type_assignment": "ELECTRIC",
+                "object_event": "OBJ_EVENT_GFX_MAN_5",
+                "trainer_pic": "TRAINER_PIC_GUITARIST",
+                "trainer_class": "TRAINER_CLASS_GUITARIST",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Ready for a battle with real voltage?",
+                        "POST_BATTLE_TAUNT": "That struck the wrong chord!",
+                        "POST_BATTLE_CLOSER": "Every great performance needs energy."
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "ELECTRIC" ] } ] }
+            },
+            {
+                "name": "CINDY",
+                "name_variants": [ "DAPHNE", "BRIANNA", "NAOMI" ],
+                "object_event": "OBJ_EVENT_GFX_MISC_NPC_LADY",
+                "trainer_pic": "TRAINER_PIC_LADY",
+                "trainer_class": "TRAINER_CLASS_LADY",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "A refined Trainer is always prepared.",
+                        "POST_BATTLE_TAUNT": "How unexpectedly capable!",
+                        "POST_BATTLE_CLOSER": "Composure matters, even after a loss."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE"
+            },
+            {
+                "name": "TIANA",
+                "name_variants": [ "HALEY", "JANICE", "VIVI" ],
+                "object_event": "OBJ_EVENT_GFX_LASS",
+                "trainer_pic": "TRAINER_PIC_LASS",
+                "trainer_class": "TRAINER_CLASS_LASS",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Hey! Let me see what Pokémon you have!",
+                        "POST_BATTLE_TAUNT": "Yours are really strong!",
+                        "POST_BATTLE_CLOSER": "I want to meet even more Pokémon."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE"
+            },
+            {
+                "name": "YASU",
+                "name_variants": [ "TAKASHI", "LAO", "LUNG" ],
+                "type_assignment": "POISON",
+                "object_event": "OBJ_EVENT_GFX_NINJA_BOY",
+                "trainer_pic": "TRAINER_PIC_NINJA_BOY",
+                "trainer_class": "TRAINER_CLASS_NINJA_BOY",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "You never saw this challenge coming!",
+                        "POST_BATTLE_TAUNT": "My plan vanished in a puff of smoke!",
+                        "POST_BATTLE_CLOSER": "Next time, my strategy will be flawless."
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "POISON" ] } ] }
+            },
+            {
+                "name": "MADELINE",
+                "name_variants": [ "CLARISSA", "ANGELICA", "KAYLEY" ],
+                "type_assignment": "WATER",
+                "object_event": "OBJ_EVENT_GFX_WOMAN_2",
+                "trainer_pic": "TRAINER_PIC_PARASOL_LADY",
+                "trainer_class": "TRAINER_CLASS_PARASOL_LADY",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "A little rain never spoiled a good battle!",
+                        "POST_BATTLE_TAUNT": "My forecast was completely wrong!",
+                        "POST_BATTLE_CLOSER": "Sun or rain, I travel in style."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "WATER" ] } ] }
+            },
+            {
+                "name": "AUTUMN",
+                "name_variants": [ "HEIDI", "BECKY", "CAROL" ],
+                "object_event": "OBJ_EVENT_GFX_PICNICKER",
+                "trainer_pic": "TRAINER_PIC_PICNICKER",
+                "trainer_class": "TRAINER_CLASS_PICNICKER",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "A battle makes any picnic more exciting!",
+                        "POST_BATTLE_TAUNT": "I need a snack after that!",
+                        "POST_BATTLE_CLOSER": "Fresh air makes every journey better."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE"
+            },
+            {
+                "name": "VICTOR",
+                "name_variants": [ "MIGUEL", "COLTON", "KALEB" ],
+                "object_event": "OBJ_EVENT_GFX_POKEFAN_M",
+                "trainer_pic": "TRAINER_PIC_POKEFAN_M",
+                "trainer_class": "TRAINER_CLASS_POKEFAN",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "My Pokémon are simply the most adorable!",
+                        "POST_BATTLE_TAUNT": "They did their very best!",
+                        "POST_BATTLE_CLOSER": "Winning is nice, but caring matters more."
+                    }
+                ],
+                "preferred_mon_gender": "MALE"
+            },
+            {
+                "name": "STEVE",
+                "name_variants": [ "MARK", "WYATT" ],
+                "object_event": "OBJ_EVENT_GFX_MANIAC",
+                "trainer_pic": "TRAINER_PIC_POKEMANIAC",
+                "trainer_class": "TRAINER_CLASS_POKEMANIAC",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "My unusual Pokémon will amaze you!",
+                        "POST_BATTLE_TAUNT": "Now that was fascinating!",
+                        "POST_BATTLE_CLOSER": "The strangest Pokémon are often the best."
+                    }
+                ],
+                "preferred_mon_gender": "MALE"
+            },
+            {
+                "name": "JACKSON",
+                "name_variants": [ "LORENZO", "SEBASTIAN" ],
+                "object_event": "OBJ_EVENT_GFX_CAMPER",
+                "trainer_pic": "TRAINER_PIC_POKEMON_RANGER_M",
+                "trainer_class": "TRAINER_CLASS_PKMN_RANGER",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "I patrol these wild places with my Pokémon!",
+                        "POST_BATTLE_TAUNT": "You handled the terrain better than I did!",
+                        "POST_BATTLE_CLOSER": "Respect the wild, and it will teach you plenty."
+                    }
+                ],
+                "preferred_mon_gender": "MALE"
+            },
+            {
+                "name": "CATHERINE",
+                "name_variants": [ "JENNA", "SOPHIA" ],
+                "object_event": "OBJ_EVENT_GFX_PICNICKER",
+                "trainer_pic": "TRAINER_PIC_POKEMON_RANGER_F",
+                "trainer_class": "TRAINER_CLASS_PKMN_RANGER",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "A Ranger must be ready for anything!",
+                        "POST_BATTLE_TAUNT": "You adapted faster than I could!",
+                        "POST_BATTLE_CLOSER": "Every route has something new to discover."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE"
+            },
+            {
+                "name": "JACLYN",
+                "name_variants": [ "HANNAH", "SAMANTHA", "MAURA" ],
+                "type_assignment": "PSYCHIC",
+                "object_event": "OBJ_EVENT_GFX_LASS",
+                "trainer_pic": "TRAINER_PIC_PSYCHIC_F",
+                "trainer_class": "TRAINER_CLASS_PSYCHIC",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "I sensed that our paths would cross.",
+                        "POST_BATTLE_TAUNT": "That outcome escaped my vision!",
+                        "POST_BATTLE_CLOSER": "The future is never entirely certain."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "PSYCHIC" ] } ] }
+            },
+            {
+                "name": "HUEY",
+                "name_variants": [ "EDMOND", "ERNEST", "DWAYNE" ],
+                "type_assignment": "WATER",
+                "object_event": "OBJ_EVENT_GFX_SAILOR",
+                "trainer_pic": "TRAINER_PIC_SAILOR",
+                "trainer_class": "TRAINER_CLASS_SAILOR",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "A rough voyage makes a strong Trainer!",
+                        "POST_BATTLE_TAUNT": "You knocked the wind from my sails!",
+                        "POST_BATTLE_CLOSER": "The sea always calls me back."
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "WATER" ] } ] }
+            },
+            {
+                "name": "DECLAN",
+                "name_variants": [ "LUIS", "DOMINIK", "DOUGLAS" ],
+                "type_assignment": "WATER",
+                "object_event": "OBJ_EVENT_GFX_SWIMMER_M",
+                "trainer_pic": "TRAINER_PIC_SWIMMER_M",
+                "trainer_class": "TRAINER_CLASS_SWIMMER_M",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "I can battle just as well as I can swim!",
+                        "POST_BATTLE_TAUNT": "You left me treading water!",
+                        "POST_BATTLE_CLOSER": "A good swim clears the mind."
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "WATER" ] } ] }
+            },
+            {
+                "name": "BEVERLY",
+                "name_variants": [ "IMANI", "KYLA", "DENISE" ],
+                "type_assignment": "WATER",
+                "object_event": "OBJ_EVENT_GFX_SWIMMER_F",
+                "trainer_pic": "TRAINER_PIC_SWIMMER_F",
+                "trainer_class": "TRAINER_CLASS_SWIMMER_F",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "The water is perfect for a battle!",
+                        "POST_BATTLE_TAUNT": "That made quite a splash!",
+                        "POST_BATTLE_CLOSER": "Nothing beats training in open water."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "WATER" ] } ] }
+            },
+            {
+                "name": "CAMDEN",
+                "name_variants": [ "ISAIAH", "PABLO", "CHASE" ],
+                "type_assignment": "WATER",
+                "object_event": "OBJ_EVENT_GFX_SWIMMER_M",
+                "trainer_pic": "TRAINER_PIC_SWIMMING_TRIATHLETE_M",
+                "trainer_class": "TRAINER_CLASS_TRIATHLETE",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "Swimming is the toughest part of my training!",
+                        "POST_BATTLE_TAUNT": "I lost momentum there!",
+                        "POST_BATTLE_CLOSER": "Endurance is built one stroke at a time."
+                    }
+                ],
+                "preferred_mon_gender": "MALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "WATER" ] } ] }
+            },
+            {
+                "name": "ISOBEL",
+                "name_variants": [ "DONNY", "TALIA", "KATELYN" ],
+                "type_assignment": "WATER",
+                "object_event": "OBJ_EVENT_GFX_SWIMMER_F",
+                "trainer_pic": "TRAINER_PIC_SWIMMING_TRIATHLETE_F",
+                "trainer_class": "TRAINER_CLASS_TRIATHLETE",
+                "encounter_text":
+                [
+                    {
+                        "PRE_BATTLE_TAUNT": "A quick battle will sharpen my pace!",
+                        "POST_BATTLE_TAUNT": "You raced ahead of me!",
+                        "POST_BATTLE_CLOSER": "Training never stops after one setback."
+                    }
+                ],
+                "preferred_mon_gender": "FEMALE",
+                "team_generator": { "subsets": [ { "max_samples": 6, "include_types": [ "WATER" ] } ] }
             }
         ]
     }
