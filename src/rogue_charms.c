@@ -202,6 +202,24 @@ static u16 EffectToCurseItem(u8 effectType)
         case EFFECT_ADAPTABILITY_RATE:
             return ITEM_ADAPTABILITY_CURSE;
 
+        case EFFECT_TINTED_DAMAGE:
+            return ITEM_TINTED_CURSE;
+
+        case EFFECT_REACH_DAMAGE:
+            return ITEM_REACH_CURSE;
+
+        case EFFECT_ACCURACY:
+            return ITEM_ACCURACY_CURSE;
+
+        case EFFECT_RETALIATE_CHARM:
+            return ITEM_RETALIATE_CURSE;
+
+        case EFFECT_STAND_CHARM:
+            return ITEM_STAND_CURSE;
+
+        case EFFECT_LEVEL_CHARM:
+            return ITEM_LEVEL_CURSE;
+
         // Just curse effects
         case EFFECT_PARTY_SIZE:
             return ITEM_PARTY_CURSE;
@@ -614,6 +632,13 @@ static bool8 IsEffectDisabledForDarkDeal(u8 effectType)
     return FALSE;
 }
 
+bool8 Rogue_IsCurseAvailableForDarkDeal(u8 effectType)
+{
+    return EffectToCurseItem(effectType) != ITEM_NONE
+        && !IsEffectDisabled(effectType, TRUE)
+        && !IsEffectDisabledForDarkDeal(effectType);
+}
+
 u16 Rogue_NextDarkDealCurseItem(u16* historyBuffer, u16 historyBufferCount)
 {
     u8 effectType;
@@ -624,9 +649,7 @@ u16 Rogue_NextDarkDealCurseItem(u16* historyBuffer, u16 historyBufferCount)
         effectType = Random() % EFFECT_COUNT;
         itemId = EffectToCurseItem(effectType);
     }
-    while(itemId == ITEM_NONE
-       || IsEffectDisabled(effectType, TRUE)
-       || IsEffectDisabledForDarkDeal(effectType)
+    while(!Rogue_IsCurseAvailableForDarkDeal(effectType)
        || BufferContainsValue(historyBuffer, historyBufferCount, effectType));
 
     historyBuffer[historyBufferCount] = effectType;

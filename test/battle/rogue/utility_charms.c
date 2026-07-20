@@ -38,7 +38,7 @@ SINGLE_BATTLE_TEST("charms: utility - Reach Charm boosts inherent contact moves 
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.3), results[1].damage);
-        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.25), results[2].damage);
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.2), results[2].damage);
         EXPECT_EQ(results[2].damage, results[3].damage);
         ClearUtilityCharms();
     }
@@ -110,7 +110,7 @@ SINGLE_BATTLE_TEST("charms: utility - Reach Charm recognizes physical Shell Side
             }
         }
     } FINALLY {
-        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.25), results[1].damage);
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.2), results[1].damage);
         ClearUtilityCharms();
     }
 }
@@ -138,7 +138,7 @@ SINGLE_BATTLE_TEST("charms: utility - Reach and Iron Fist Charms stack on punchi
     } SCENE {
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
-        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.875), results[1].damage);
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.8), results[1].damage);
         ClearUtilityCharms();
     }
 }
@@ -160,6 +160,47 @@ SINGLE_BATTLE_TEST("charms: utility - Reach Charm does not boost opponent contac
         HP_BAR(player, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage);
+        ClearUtilityCharms();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: curses - Reach Curse boosts opponent contact moves", s16 damage)
+{
+    bool32 hasCurse;
+
+    PARAMETRIZE { hasCurse = FALSE; }
+    PARAMETRIZE { hasCurse = TRUE; }
+
+    GIVEN {
+        BeginCharmTestRun();
+        AddCharmForTest(ITEM_REACH_CURSE, hasCurse);
+        FinishCharmTestSetup();
+        PLAYER(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(120); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.2), results[1].damage);
+        ClearUtilityCharms();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: curses - Reach Curse prevents opponent contact retaliation")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_REACH_CURSE, 1);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_ROUGH_SKIN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_ROUGH_SKIN);
+            HP_BAR(opponent);
+        }
+    } THEN {
         ClearUtilityCharms();
     }
 }
@@ -258,6 +299,22 @@ SINGLE_BATTLE_TEST("charms: utility - Accuracy Charm does not affect opponent mo
     } SCENE {
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDER, opponent);
         MESSAGE("Foe Wobbuffet's attack missed!");
+    } THEN {
+        ClearUtilityCharms();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: curses - Accuracy Curse makes opponent moves bypass accuracy rolls")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_ACCURACY_CURSE, 1);
+        PLAYER(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_THUNDER); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_THUNDER, WITH_RNG(RNG_ACCURACY, FALSE)); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDER, opponent);
+        HP_BAR(player);
     } THEN {
         ClearUtilityCharms();
     }

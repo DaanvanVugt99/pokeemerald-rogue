@@ -245,6 +245,32 @@ SINGLE_BATTLE_TEST("charms: damage - Tinted Charm does not affect immunities")
     }
 }
 
+SINGLE_BATTLE_TEST("charms: curses - Tinted Curse normalizes resisted opponent attacks", s16 damage)
+{
+    u32 targetSpecies;
+    bool32 hasCurse;
+
+    PARAMETRIZE { targetSpecies = SPECIES_WOBBUFFET; hasCurse = FALSE; }
+    PARAMETRIZE { targetSpecies = SPECIES_SQUIRTLE;  hasCurse = FALSE; }
+    PARAMETRIZE { targetSpecies = SPECIES_SQUIRTLE;  hasCurse = TRUE; }
+
+    GIVEN {
+        BeginCharmTestRun();
+        AddCharmForTest(ITEM_TINTED_CURSE, hasCurse);
+        FinishCharmTestSetup();
+        PLAYER(targetSpecies) { Ability(ABILITY_KLUTZ); SpDefense(120); HP(1000); MaxHP(1000); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); SpAttack(120); Moves(MOVE_EMBER); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_EMBER); }
+    } SCENE {
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.5), results[1].damage);
+        EXPECT_EQ(results[0].damage, results[2].damage);
+        ClearDamageCharms();
+    }
+}
+
 SINGLE_BATTLE_TEST("charms: damage - player charms do not boost opponent attacks", s16 damage)
 {
     bool32 hasCharm;

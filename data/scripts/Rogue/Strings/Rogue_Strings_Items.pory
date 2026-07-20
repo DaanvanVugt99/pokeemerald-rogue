@@ -339,7 +339,7 @@ text gItemDesc_SkillCharm
 }
 text gItemDesc_ReachCharm
 {
-    format("Contact moves no longer make contact and deal 25% more damage.")
+    format("Contact moves no longer make contact and deal 20% more damage.")
 }
 text gItemDesc_AccuracyCharm
 {
@@ -396,6 +396,31 @@ text gItemDesc_MoodyCharm
 text gItemDesc_EvioliteCharm
 {
     format("Friendly Pokémon that can evolve have 1.5× Defense and Sp. Def.")
+}
+
+text gItemDesc_LevelCurse
+{
+    format("Opposing trainer Pokémon are 3 levels higher.")
+}
+text gItemDesc_TintedCurse
+{
+    format("Not-very-effective opponent moves deal normal damage instead.")
+}
+text gItemDesc_ReachCurse
+{
+    format("Opponent contact moves no longer make contact and deal 20% more damage.")
+}
+text gItemDesc_AccuracyCurse
+{
+    format("Opponent moves cannot miss, except one-hit knockout moves.")
+}
+text gItemDesc_RetaliateCurse
+{
+    format("After an opponent faints, the next opposing Pokémon gains Attack and Sp. Atk.")
+}
+text gItemDesc_StandCurse
+{
+    format("The final opposing trainer Pokémon gains Attack, Defense, Sp. Atk, Sp. Def, and Speed on entry.")
 }
 
 text gItemDesc_PartyCurse

@@ -22682,6 +22682,7 @@ bool32 IsMoveMakingContact(u32 move, u32 battlerAtk)
            || atkHoldEffect == HOLD_EFFECT_PROTECTIVE_PADS
            || HasBattlerAbility(battlerAtk, ABILITY_LONG_REACH)
            || (GetBattlerSide(battlerAtk) == B_SIDE_PLAYER && IsCharmActive(EFFECT_REACH_DAMAGE))
+           || (GetBattlerSide(battlerAtk) == B_SIDE_OPPONENT && IsCurseActive(EFFECT_REACH_DAMAGE))
            || (HasBattlerAbility(battlerAtk, ABILITY_AFTERIMAGE)
             && gBattlerAttacker == battlerAtk
             && gBattlerTarget < gBattlersCount
@@ -23428,7 +23429,11 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         if (gBattleMoves[move].bitingMove && IsCharmActive(EFFECT_STRONG_JAW_DAMAGE))
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         if (IsMoveInherentlyMakingContact(move) && IsCharmActive(EFFECT_REACH_DAMAGE))
-            modifier = uq4_12_multiply(modifier, UQ_4_12(1.25));
+            modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+    }
+    else if (IsMoveInherentlyMakingContact(move) && IsCurseActive(EFFECT_REACH_DAMAGE))
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
     // attacker's abilities
@@ -25406,10 +25411,10 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     {
         DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk));
     }
-    if (GetBattlerSide(battlerAtk) == B_SIDE_PLAYER
+    if (((GetBattlerSide(battlerAtk) == B_SIDE_PLAYER && IsCharmActive(EFFECT_TINTED_DAMAGE))
+      || (GetBattlerSide(battlerAtk) == B_SIDE_OPPONENT && IsCurseActive(EFFECT_TINTED_DAMAGE)))
      && typeEffectivenessModifier > UQ_4_12(0.0)
-     && typeEffectivenessModifier < UQ_4_12(1.0)
-     && IsCharmActive(EFFECT_TINTED_DAMAGE))
+     && typeEffectivenessModifier < UQ_4_12(1.0))
         DAMAGE_APPLY_MODIFIER(UQ_4_12(1.0));
     else
         DAMAGE_APPLY_MODIFIER(typeEffectivenessModifier);

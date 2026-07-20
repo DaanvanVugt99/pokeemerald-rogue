@@ -75,6 +75,36 @@ TEST("charms: progression - Level Charm follows the moving cap without changing 
     RestoreLevelCharmTestState(previousDifficulty, previousLevelOffset, previousOverLevelEnabled, previousBattleTypeFlags);
 }
 
+TEST("charms: curses - Level Curse raises only generated trainer levels")
+{
+    u8 previousDifficulty = Rogue_GetCurrentDifficulty();
+    u8 previousLevelOffset = gRogueRun.currentLevelOffset;
+    bool8 previousOverLevelEnabled = Rogue_GetConfigToggle(CONFIG_TOGGLE_OVER_LVL);
+    u32 previousBattleTypeFlags = gBattleTypeFlags;
+    u8 bossLevel;
+    u8 trainerLevel;
+    u8 rivalLevel;
+
+    BeginCharmTestRun();
+    Rogue_SetCurrentDifficulty(1);
+    gRogueRun.currentLevelOffset = 0;
+    FinishCharmTestSetup();
+    bossLevel = Rogue_CalculateBossMonLvl();
+    trainerLevel = Rogue_CalculateTrainerMonLvl();
+    rivalLevel = Rogue_CalculateRivalMonLvl();
+
+    AddCharmForTest(ITEM_LEVEL_CURSE, 1);
+    FinishCharmTestSetup();
+
+    EXPECT_EQ(Rogue_CalculateBossMonLvl(), bossLevel);
+    EXPECT_EQ(Rogue_CalculateTrainerMonLvl(), trainerLevel);
+    EXPECT_EQ(Rogue_CalculateRivalMonLvl(), rivalLevel);
+    EXPECT_EQ(Rogue_ApplyTrainerLevelCurse(bossLevel), bossLevel + 3);
+    EXPECT_EQ(Rogue_ApplyTrainerLevelCurse(99), MAX_LEVEL);
+
+    RestoreLevelCharmTestState(previousDifficulty, previousLevelOffset, previousOverLevelEnabled, previousBattleTypeFlags);
+}
+
 TEST("charms: progression - Level Charm permits experience above the base cap")
 {
     u8 previousDifficulty = Rogue_GetCurrentDifficulty();
@@ -219,6 +249,18 @@ TEST("charms: curses - paired combat curses match their charm values")
     AddCharmForTest(ITEM_UNAWARE_CURSE, 1);
     AddCharmForTest(ITEM_ADAPTABILITY_CHARM, 1);
     AddCharmForTest(ITEM_ADAPTABILITY_CURSE, 1);
+    AddCharmForTest(ITEM_TINTED_CHARM, 1);
+    AddCharmForTest(ITEM_TINTED_CURSE, 1);
+    AddCharmForTest(ITEM_REACH_CHARM, 1);
+    AddCharmForTest(ITEM_REACH_CURSE, 1);
+    AddCharmForTest(ITEM_ACCURACY_CHARM, 1);
+    AddCharmForTest(ITEM_ACCURACY_CURSE, 1);
+    AddCharmForTest(ITEM_RETALIATE_CHARM, 1);
+    AddCharmForTest(ITEM_RETALIATE_CURSE, 1);
+    AddCharmForTest(ITEM_STAND_CHARM, 1);
+    AddCharmForTest(ITEM_STAND_CURSE, 1);
+    AddCharmForTest(ITEM_LEVEL_CHARM, 1);
+    AddCharmForTest(ITEM_LEVEL_CURSE, 1);
     FinishCharmTestSetup();
 
     EXPECT_EQ(GetCurseValue(EFFECT_FLINCH_CHANCE), GetCharmValue(EFFECT_FLINCH_CHANCE));
@@ -231,25 +273,35 @@ TEST("charms: curses - paired combat curses match their charm values")
     EXPECT_EQ(GetCurseValue(EFFECT_PRESSURE_STATUS), GetCharmValue(EFFECT_PRESSURE_STATUS));
     EXPECT_EQ(GetCurseValue(EFFECT_UNAWARE_STATUS), GetCharmValue(EFFECT_UNAWARE_STATUS));
     EXPECT_EQ(GetCurseValue(EFFECT_ADAPTABILITY_RATE), GetCharmValue(EFFECT_ADAPTABILITY_RATE));
+    EXPECT_EQ(GetCurseValue(EFFECT_TINTED_DAMAGE), GetCharmValue(EFFECT_TINTED_DAMAGE));
+    EXPECT_EQ(GetCurseValue(EFFECT_REACH_DAMAGE), GetCharmValue(EFFECT_REACH_DAMAGE));
+    EXPECT_EQ(GetCurseValue(EFFECT_ACCURACY), GetCharmValue(EFFECT_ACCURACY));
+    EXPECT_EQ(GetCurseValue(EFFECT_RETALIATE_CHARM), GetCharmValue(EFFECT_RETALIATE_CHARM));
+    EXPECT_EQ(GetCurseValue(EFFECT_STAND_CHARM), GetCharmValue(EFFECT_STAND_CHARM));
+    EXPECT_EQ(GetCurseValue(EFFECT_LEVEL_CHARM), GetCharmValue(EFFECT_LEVEL_CHARM));
 
     ClearCharmTestState();
 }
 
-TEST("charms: curses - Dark Deals exclude persistent nonbattle curses")
+TEST("charms: curses - Dark Deals offer exactly seventeen temporary battle curses")
 {
-    u16 history[1];
-    u16 itemId;
-    u16 i;
+    u16 availableCount = 0;
+    u16 effectType;
 
-    for (i = 0; i < 256; i++)
-    {
-        itemId = Rogue_NextDarkDealCurseItem(history, 0);
+    for (effectType = 0; effectType < EFFECT_COUNT; effectType++)
+        availableCount += Rogue_IsCurseAvailableForDarkDeal(effectType);
 
-        EXPECT_NE(itemId, ITEM_SHOP_PRICE_CURSE);
-        EXPECT_NE(itemId, ITEM_WILD_IV_CURSE);
-        EXPECT_NE(itemId, ITEM_CATCHING_CURSE);
-        EXPECT_NE(itemId, ITEM_WILD_ENCOUNTER_CURSE);
-        EXPECT_NE(itemId, ITEM_EVERSTONE_CURSE);
-        EXPECT_NE(itemId, ITEM_RANDOMAN_ROUTE_SPAWN_CURSE);
-    }
+    EXPECT_EQ(availableCount, 17);
+    EXPECT(Rogue_IsCurseAvailableForDarkDeal(EFFECT_LEVEL_CHARM));
+    EXPECT(Rogue_IsCurseAvailableForDarkDeal(EFFECT_TINTED_DAMAGE));
+    EXPECT(Rogue_IsCurseAvailableForDarkDeal(EFFECT_REACH_DAMAGE));
+    EXPECT(Rogue_IsCurseAvailableForDarkDeal(EFFECT_ACCURACY));
+    EXPECT(Rogue_IsCurseAvailableForDarkDeal(EFFECT_RETALIATE_CHARM));
+    EXPECT(Rogue_IsCurseAvailableForDarkDeal(EFFECT_STAND_CHARM));
+    EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_SHOP_PRICE));
+    EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_WILD_IV_RATE));
+    EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_CATCH_RATE));
+    EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_WILD_ENCOUNTER_COUNT));
+    EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_EVERSTONE_EVOS));
+    EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_RANDOMAN_ROUTE_SPAWN));
 }

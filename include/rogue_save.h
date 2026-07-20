@@ -11,7 +11,7 @@ extern struct RogueSaveBlock *gRogueSaveBlock;
 
 // Increment whenever dynamic Rogue item IDs are rearranged. Loading a save with
 // an older layout removes dynamic items from both its current and restored bags.
-#define ROGUE_DYNAMIC_ITEM_LAYOUT_VERSION 5
+#define ROGUE_DYNAMIC_ITEM_LAYOUT_VERSION 6
 
 enum
 {

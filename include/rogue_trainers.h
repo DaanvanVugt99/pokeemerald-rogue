@@ -40,6 +40,7 @@ s32 Rogue_GetSwitchAISpeedDivisor(u16 trainerNum, u8 slot);
 u8 Rogue_CalculatePlayerMonLvl();
 u8 Rogue_CalculatePlayerLvlCap();
 u8 Rogue_CalculatePlayerMaxLvl();
+u8 Rogue_ApplyTrainerLevelCurse(u8 level);
 u8 Rogue_CalculateTrainerMonLvl();
 u8 Rogue_CalculateMiniBossMonLvl();
 u8 Rogue_CalculateRivalMonLvl();

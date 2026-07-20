@@ -212,8 +212,14 @@
 #define ITEM_ONE_HIT_CURSE              (FIRST_ITEM_CURSE + 23)
 #define ITEM_SNAG_CURSE                 (FIRST_ITEM_CURSE + 24)
 #define ITEM_WILD_EGG_SPECIES_CURSE     (FIRST_ITEM_CURSE + 25)
+#define ITEM_LEVEL_CURSE                (FIRST_ITEM_CURSE + 26)
+#define ITEM_TINTED_CURSE               (FIRST_ITEM_CURSE + 27)
+#define ITEM_REACH_CURSE                (FIRST_ITEM_CURSE + 28)
+#define ITEM_ACCURACY_CURSE             (FIRST_ITEM_CURSE + 29)
+#define ITEM_RETALIATE_CURSE            (FIRST_ITEM_CURSE + 30)
+#define ITEM_STAND_CURSE                (FIRST_ITEM_CURSE + 31)
 
-#define LAST_ITEM_CURSE                 (ITEM_WILD_EGG_SPECIES_CURSE)
+#define LAST_ITEM_CURSE                 (ITEM_STAND_CURSE)
 
 #define ITEM_TR01                       (LAST_ITEM_CURSE + 1)
 #define ITEM_TR50                       (LAST_ITEM_CURSE + 50)

@@ -87,6 +87,12 @@ extern const u8 gItemDesc_LevelCharm[];
 extern const u8 gItemDesc_RegenCharm[];
 extern const u8 gItemDesc_MoodyCharm[];
 extern const u8 gItemDesc_EvioliteCharm[];
+extern const u8 gItemDesc_LevelCurse[];
+extern const u8 gItemDesc_TintedCurse[];
+extern const u8 gItemDesc_ReachCurse[];
+extern const u8 gItemDesc_AccuracyCurse[];
+extern const u8 gItemDesc_RetaliateCurse[];
+extern const u8 gItemDesc_StandCurse[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -1961,6 +1967,114 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .itemId = ITEM_ADAPTABILITY_CURSE,
         .price = 0,
         .description = gItemDesc_AdaptabilityCurse,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCurse,
+        .iconPalette = gItemIconPalette_RogueCurse,
+    },
+
+    [ITEM_LEVEL_CURSE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Level Curse"),
+#else
+        .name = _("LEVEL CURSE"),
+#endif
+        .itemId = ITEM_LEVEL_CURSE,
+        .price = 0,
+        .description = gItemDesc_LevelCurse,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCurse,
+        .iconPalette = gItemIconPalette_RogueCurse,
+    },
+
+    [ITEM_TINTED_CURSE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Tinted Curse"),
+#else
+        .name = _("TINTED CURSE"),
+#endif
+        .itemId = ITEM_TINTED_CURSE,
+        .price = 0,
+        .description = gItemDesc_TintedCurse,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCurse,
+        .iconPalette = gItemIconPalette_RogueCurse,
+    },
+
+    [ITEM_REACH_CURSE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Reach Curse"),
+#else
+        .name = _("REACH CURSE"),
+#endif
+        .itemId = ITEM_REACH_CURSE,
+        .price = 0,
+        .description = gItemDesc_ReachCurse,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCurse,
+        .iconPalette = gItemIconPalette_RogueCurse,
+    },
+
+    [ITEM_ACCURACY_CURSE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Accuracy Curse"),
+#else
+        .name = _("ACCURACY CURSE"),
+#endif
+        .itemId = ITEM_ACCURACY_CURSE,
+        .price = 0,
+        .description = gItemDesc_AccuracyCurse,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCurse,
+        .iconPalette = gItemIconPalette_RogueCurse,
+    },
+
+    [ITEM_RETALIATE_CURSE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Retaliate Curse"),
+#else
+        .name = _("RETALIATE CURSE"),
+#endif
+        .itemId = ITEM_RETALIATE_CURSE,
+        .price = 0,
+        .description = gItemDesc_RetaliateCurse,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_RogueCurse,
+        .iconPalette = gItemIconPalette_RogueCurse,
+    },
+
+    [ITEM_STAND_CURSE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Stand Curse"),
+#else
+        .name = _("STAND CURSE"),
+#endif
+        .itemId = ITEM_STAND_CURSE,
+        .price = 0,
+        .description = gItemDesc_StandCurse,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,

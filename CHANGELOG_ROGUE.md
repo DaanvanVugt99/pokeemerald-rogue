@@ -19,8 +19,9 @@ Format follows Keep a Changelog loosely:
 - Rebalanced temporary Dark Deal Curses to match their paired Charms and
   removed economy, recruitment, evolution, and Randoman effects from the
   temporary pool.
+- Reduced Reach Charm's contact-move damage bonus from 25% to 20%.
 - Made all standard Charms unique and rebalanced older Charms: Crit grants one
-  stages, Shed Skin cures status 50% of the time, Strength guarantees perfect
+  stage, Shed Skin cures status 50% of the time, Strength guarantees perfect
   IVs, Grace doubles secondary-effect chances, Priority activates 25% of the
   time, Endure always protects from full HP, and Pressure consumes two extra PP.
 - Made charms, curses, and dynamic TRs versioned dynamic items so their IDs can
@@ -67,6 +68,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Level, Tinted, Reach, Accuracy, Retaliate, and Stand Curses to the
+  temporary Dark Deal pool as opponent-side mirrors of their Charms.
 - Added the Moody and Eviolite Charms, which adjust friendly Pokémon's stats
   each turn and bolster the defenses of Pokémon that can still evolve.
 - Added the Level and Regen Charms, which raise the player's level cap by three

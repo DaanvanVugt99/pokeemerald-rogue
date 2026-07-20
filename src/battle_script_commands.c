@@ -2180,8 +2180,8 @@ static void Cmd_accuracycheck(void)
         if (AccuracyCalcHelper(move))
             return;
 
-        if (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
-         && IsCharmActive(EFFECT_ACCURACY)
+        if (((GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER && IsCharmActive(EFFECT_ACCURACY))
+          || (GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT && IsCurseActive(EFFECT_ACCURACY)))
          && gBattleMoves[move].effect != EFFECT_OHKO)
         {
             JumpIfMoveFailed(7, move);
@@ -5086,6 +5086,8 @@ static void Cmd_tryfaintmon(void)
                     gBattleResults.opponentFaintCounter++;
                 gBattleResults.lastOpponentSpecies = GetMonData(&gEnemyParty[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES, NULL);
                 gSideTimers[B_SIDE_OPPONENT].retaliateTimer = 2;
+                if (IsCurseActive(EFFECT_RETALIATE_CHARM))
+                    gSideTimers[B_SIDE_OPPONENT].retaliateCharmPending = TRUE;
             }
             if ((gHitMarker & HITMARKER_DESTINYBOND) && gBattleMons[gBattlerAttacker].hp != 0
                  && !IsDynamaxed(gBattlerAttacker))
@@ -9487,18 +9489,21 @@ bool32 TryActivateSwitchInCharms(u32 battler)
 {
     u32 i;
     u32 aliveCount = 0;
+    u32 side = GetBattlerSide(battler);
+    struct Pokemon *party = side == B_SIDE_PLAYER ? gPlayerParty : gEnemyParty;
 
-    if (GetBattlerSide(battler) != B_SIDE_PLAYER
-     || (gAbsentBattlerFlags & gBitTable[battler])
+    if ((gAbsentBattlerFlags & gBitTable[battler])
      || !IsBattlerAlive(battler))
         return FALSE;
 
     if (!gSpecialStatuses[battler].switchInRetaliateCharmDone)
     {
         gSpecialStatuses[battler].switchInRetaliateCharmDone = TRUE;
-        if (IsCharmActive(EFFECT_RETALIATE_CHARM) && gSideTimers[B_SIDE_PLAYER].retaliateCharmPending)
+        if (((side == B_SIDE_PLAYER && IsCharmActive(EFFECT_RETALIATE_CHARM))
+          || (side == B_SIDE_OPPONENT && IsCurseActive(EFFECT_RETALIATE_CHARM)))
+         && gSideTimers[side].retaliateCharmPending)
         {
-            gSideTimers[B_SIDE_PLAYER].retaliateCharmPending = FALSE;
+            gSideTimers[side].retaliateCharmPending = FALSE;
             gBattlerAttacker = battler;
             BattleScriptPushCursorAndCallback(BattleScript_RetaliateCharmActivates);
             return TRUE;
@@ -9508,13 +9513,14 @@ bool32 TryActivateSwitchInCharms(u32 battler)
     if (!gSpecialStatuses[battler].switchInStandCharmDone)
     {
         gSpecialStatuses[battler].switchInStandCharmDone = TRUE;
-        if (IsCharmActive(EFFECT_STAND_CHARM))
+        if ((side == B_SIDE_PLAYER && IsCharmActive(EFFECT_STAND_CHARM))
+         || (side == B_SIDE_OPPONENT && (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && IsCurseActive(EFFECT_STAND_CHARM)))
         {
             for (i = 0; i < PARTY_SIZE; i++)
             {
-                if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
-                 && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
-                 && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0)
+                if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
+                 && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
+                 && GetMonData(&party[i], MON_DATA_HP) != 0)
                     aliveCount++;
             }
 

@@ -131,23 +131,32 @@ bool8 Rogue_IsKeyTrainer(u16 trainerNum)
 
 static u8 GetTrainerLevel(u16 trainerNum)
 {
+    u8 level;
+
     if(Rogue_IsBossTrainer(trainerNum))
     {
-        return Rogue_CalculateBossMonLvl();
+        level = Rogue_CalculateBossMonLvl();
     }
-
-    if(Rogue_IsRivalTrainer(trainerNum))
+    else if(Rogue_IsRivalTrainer(trainerNum))
     {
-        return Rogue_CalculateRivalMonLvl();
+        level = Rogue_CalculateRivalMonLvl();
     }
-
+    else
     {
         const struct RogueTrainer* trainer = Rogue_GetTrainer(trainerNum);
+
         if(trainer->levelOverride != 0)
-            return trainer->levelOverride;
+            level = trainer->levelOverride;
+        else
+            level = Rogue_CalculateTrainerMonLvl();
     }
 
-    return Rogue_CalculateTrainerMonLvl();
+    // Special trainers can supply temporary or service-generated Pokémon to
+    // the player, so do not let a temporary curse improve those parties.
+    if (Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL)
+        return level;
+
+    return Rogue_ApplyTrainerLevelCurse(level);
 }
 
 bool8 Rogue_IsExpTrainer(u16 trainerNum)
@@ -408,6 +417,11 @@ u8 Rogue_CalculatePlayerLvlCap()
 u8 Rogue_CalculatePlayerMaxLvl()
 {
     return ApplyPlayerLevelCharm(Rogue_CalculateBossMonLvl());
+}
+
+u8 Rogue_ApplyTrainerLevelCurse(u8 level)
+{
+    return min(level + 3 * GetCurseValue(EFFECT_LEVEL_CHARM), MAX_LEVEL);
 }
 
 u8 Rogue_CalculateTrainerMonLvl()

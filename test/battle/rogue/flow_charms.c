@@ -13,6 +13,14 @@ static void SetFlowCharms(u16 retaliateCount, u16 momentumCount, u16 standCount)
     FinishCharmTestSetup();
 }
 
+static void SetFlowCurses(u16 retaliateCount, u16 standCount)
+{
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_RETALIATE_CURSE, retaliateCount);
+    AddCharmForTest(ITEM_STAND_CURSE, standCount);
+    FinishCharmTestSetup();
+}
+
 static void SetSwitchMoveCharms(u16 prepCount, u16 proteanCount)
 {
     BeginCharmTestRun();
@@ -133,6 +141,23 @@ SINGLE_BATTLE_TEST("charms: flow - Retaliate Charm does not boost opposing repla
     } THEN {
         EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
         EXPECT_EQ(opponent->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: curses - Retaliate Curse boosts the next opposing entrant")
+{
+    GIVEN {
+        SetFlowCurses(1, 0);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 1); }
+    } THEN {
+        EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(opponent->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(opponent->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
         ClearCharmTestState();
     }
 }
@@ -263,6 +288,34 @@ SINGLE_BATTLE_TEST("charms: flow - Stand Charm boosts all five stats for a solo 
         MESSAGE("Wobbuffet's Sp. Def rose!");
     } THEN {
         ExpectFiveStatBoosts(player, 1);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: curses - Stand Curse boosts the final opposing trainer Pokémon")
+{
+    GIVEN {
+        SetFlowCurses(0, 1);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { }
+    } THEN {
+        ExpectFiveStatBoosts(opponent, 1);
+        ClearCharmTestState();
+    }
+}
+
+WILD_BATTLE_TEST("charms: curses - Stand Curse does not boost wild Pokémon")
+{
+    GIVEN {
+        SetFlowCurses(0, 1);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { }
+    } THEN {
+        ExpectFiveStatBoosts(opponent, 0);
         ClearCharmTestState();
     }
 }

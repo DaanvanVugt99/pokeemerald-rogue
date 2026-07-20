@@ -20,7 +20,7 @@ enum RogueCharmEffects
     EFFECT_UNAWARE_STATUS,
     EFFECT_ADAPTABILITY_RATE,
 
-    // Charm only
+    // Additional charm effects (some also have mirrored curses)
     EFFECT_EXTRA_LIFE,
     EFFECT_INFINITE_EXTRA_LIFE,
     EFFECT_ALLOW_SAVE_SCUM,
@@ -82,6 +82,7 @@ void Rogue_ClearTemporaryDarkDealCurse(void);
 u16 Rogue_GetMaxPartySize(void);
 
 bool8 IsEffectDisabled(u8 effectType, bool8 isCurse);
+bool8 Rogue_IsCurseAvailableForDarkDeal(u8 effectType);
 u16 Rogue_NextCharmItem(u16* historyBuffer, u16 historyBufferCount);
 u16 Rogue_NextCurseItem(u16* historyBuffer, u16 historyBufferCount);
 u16 Rogue_NextDarkDealCurseItem(u16* historyBuffer, u16 historyBufferCount);
