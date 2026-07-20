@@ -218,6 +218,7 @@ struct SpecialStatus
     // End of byte
     u8 switchInRetaliateCharmDone:1;
     u8 switchInStandCharmDone:1;
+    u8 switchOutAbilityDone:1;
     u8 gemParam;
     // End of byte
     u8 gemBoost:1;

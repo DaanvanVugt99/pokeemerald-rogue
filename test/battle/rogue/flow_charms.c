@@ -558,6 +558,24 @@ SINGLE_BATTLE_TEST("charms: flow - Prep Charm resets after switching back in")
     }
 }
 
+SINGLE_BATTLE_TEST("charms: flow - called status moves do not inherit a consumed Prep Charm bonus")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_CELEBRATE].priority == 0);
+        SetSwitchMoveCharms(1, 0);
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(gDisableStructs[B_POSITION_PLAYER_LEFT].preparationCharmUsed);
+        gProtectStructs[B_POSITION_PLAYER_LEFT].preparationCharmElevated = TRUE;
+        gBattleStruct->isAtkCancelerForCalledMove = TRUE;
+        EXPECT_EQ(GetMovePriority(B_POSITION_PLAYER_LEFT, MOVE_CELEBRATE), 0);
+        ClearCharmTestState();
+    }
+}
+
 SINGLE_BATTLE_TEST("charms: flow - Protean Charm changes type once without an ability popup")
 {
     GIVEN {
@@ -763,6 +781,28 @@ SINGLE_BATTLE_TEST("charms: flow - Regen Charm combines with Natural Cure switch
         EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_STATUS), 0);
         EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
                   40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Regen Charm combines with an early switch-out ability")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_MEAN_LOOK].effect == EFFECT_MEAN_LOOK);
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_ZARUDE) { HP(40); Ability(ABILITY_JUNGLE_LASH); Moves(MOVE_MEAN_LOOK); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_CHARMANDER) { HP(160); MaxHP(160); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_MEAN_LOOK); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_JUNGLE_LASH);
+        HP_BAR(opponent, damage: 20);
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  40 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 4);
+        EXPECT_EQ(opponent->hp, 140);
         ClearCharmTestState();
     }
 }

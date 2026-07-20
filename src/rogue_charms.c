@@ -245,38 +245,48 @@ static u16 EffectToCurseItem(u8 effectType)
 
 static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
 {
+    u16 uniqueCharmCount = isCurse ? itemCount : min(itemCount, 1);
+
     // Custom rate scaling
     switch(effectType)
     {
         case EFFECT_SHOP_PRICE:
-            return itemCount * (isCurse ? 40 : 50);
+            return (isCurse ? itemCount * 40 : uniqueCharmCount * 50);
 
         case EFFECT_FLINCH_CHANCE:
-            return min(itemCount * (isCurse ? 10 : 15), 90);
+            return isCurse ? min(itemCount * 10, 90) : uniqueCharmCount * 15;
+
+        case EFFECT_CRIT_CHANCE:
+            return isCurse ? itemCount : uniqueCharmCount * 2;
 
         case EFFECT_SHED_SKIN_CHANCE:
-            return min(itemCount * (isCurse ? 15 : 25), 90);
+            return isCurse ? min(itemCount * 15, 90) : uniqueCharmCount * 50;
 
         case EFFECT_WILD_IV_RATE:
-            return itemCount * 20;
+            return isCurse ? itemCount * 20 : uniqueCharmCount * 31;
             
         case EFFECT_CATCH_RATE:
-            return itemCount * (isCurse ? 40 : 200);
+            return isCurse ? itemCount * 40 : uniqueCharmCount * 200;
 
         case EFFECT_SERENE_GRACE_CHANCE:
-            return min(itemCount * (isCurse ? 50 : 75), 150);
+            return isCurse ? min(itemCount * 50, 150) : uniqueCharmCount * 100;
 
         case EFFECT_WILD_ENCOUNTER_COUNT:
-            return itemCount * (isCurse ? 1 : 2);
+            return isCurse ? itemCount : uniqueCharmCount * 2;
 
         case EFFECT_MOVE_PRIORITY_CHANCE:
-            return min(itemCount * (isCurse ? 10 : 15), 90);
+            return isCurse ? min(itemCount * 10, 90) : uniqueCharmCount * 25;
 
         case EFFECT_ADAPTABILITY_RATE:
-            return min(itemCount * (isCurse ? 3 : 5), 15); // 5 means 50%
+            return isCurse ? min(itemCount * 3, 15) : uniqueCharmCount * 5; // 5 means 50%
 
         case EFFECT_ENDURE_CHANCE:
-            return min(itemCount * (isCurse ? 20 : 60), 90);
+            return isCurse ? min(itemCount * 20, 90) : uniqueCharmCount * 100;
+
+        case EFFECT_TORMENT_STATUS:
+        case EFFECT_PRESSURE_STATUS:
+        case EFFECT_UNAWARE_STATUS:
+            return isCurse ? itemCount : uniqueCharmCount;
 
         case EFFECT_TECHNICIAN_DAMAGE:
         case EFFECT_TINTED_DAMAGE:
@@ -299,7 +309,7 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
         case EFFECT_REGEN_CHARM:
         case EFFECT_MOODY_CHARM:
         case EFFECT_EVIOLITE_CHARM:
-            return min(itemCount, 1);
+            return uniqueCharmCount;
     }
 
     return itemCount;
@@ -502,6 +512,20 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
             return TRUE;
 
         // Disable unique charms once they are already active.
+        case EFFECT_SHOP_PRICE:
+        case EFFECT_FLINCH_CHANCE:
+        case EFFECT_CRIT_CHANCE:
+        case EFFECT_SHED_SKIN_CHANCE:
+        case EFFECT_WILD_IV_RATE:
+        case EFFECT_CATCH_RATE:
+        case EFFECT_SERENE_GRACE_CHANCE:
+        case EFFECT_WILD_ENCOUNTER_COUNT:
+        case EFFECT_MOVE_PRIORITY_CHANCE:
+        case EFFECT_ENDURE_CHANCE:
+        case EFFECT_TORMENT_STATUS:
+        case EFFECT_PRESSURE_STATUS:
+        case EFFECT_UNAWARE_STATUS:
+        case EFFECT_ADAPTABILITY_RATE:
         case EFFECT_TECHNICIAN_DAMAGE:
         case EFFECT_TINTED_DAMAGE:
         case EFFECT_IRON_FIST_DAMAGE:
@@ -530,10 +554,6 @@ bool8 IsEffectDisabled(u8 effectType, bool8 isCurse)
         // Disable these effects, once we already have one (They don't stack)
         case EFFECT_EVERSTONE_EVOS:
         case EFFECT_ITEM_SHUFFLE:
-        case EFFECT_ENDURE_CHANCE:
-        case EFFECT_TORMENT_STATUS:
-        case EFFECT_PRESSURE_STATUS:
-        case EFFECT_UNAWARE_STATUS:
         case EFFECT_RANDOMAN_ROUTE_SPAWN:
             if(isCurse)
                 return CheckBagHasItem(EffectToCurseItem(effectType), 1);

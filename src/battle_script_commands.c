@@ -2284,7 +2284,7 @@ static void Cmd_ppreduce(void)
             ppToDeduct++;
 
         if(GetBattlerSide(gBattlerAttacker) != B_SIDE_PLAYER && IsCharmActive(EFFECT_PRESSURE_STATUS))
-            ppToDeduct++;
+            ppToDeduct += 2;
     }
     else if (moveTarget != MOVE_TARGET_OPPONENTS_FIELD)
     {
@@ -2295,7 +2295,7 @@ static void Cmd_ppreduce(void)
             ppToDeduct++;
 
         if(GetBattlerSide(gBattlerAttacker) != B_SIDE_PLAYER && IsCharmActive(EFFECT_PRESSURE_STATUS))
-            ppToDeduct++;
+            ppToDeduct += 2;
     }
 
     if (!(gHitMarker & (HITMARKER_NO_PPDEDUCT | HITMARKER_NO_ATTACKSTRING)) && gBattleMons[gBattlerAttacker].pp[gCurrMovePos])
@@ -18487,28 +18487,35 @@ static void Cmd_switchoutabilities(void)
     }
     else
     {
-        if (TrySetGrafittiTagToxicSpikes(battler))
+        if (!gSpecialStatuses[battler].switchOutAbilityDone
+         && TrySetGrafittiTagToxicSpikes(battler))
         {
-            BattleScriptPush(cmd->nextInstr);
+            gSpecialStatuses[battler].switchOutAbilityDone = TRUE;
+            BattleScriptPush(gBattlescriptCurrInstr);
             gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
             return;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_MIGRATION)
+        if (!gSpecialStatuses[battler].switchOutAbilityDone
+         && HasBattlerAbility(battler, ABILITY_MIGRATION)
          && TrySetMigrationRain(battler))
         {
+            gSpecialStatuses[battler].switchOutAbilityDone = TRUE;
             SetBattlerTriggeredAbility(battler, ABILITY_MIGRATION);
             gBattlerAttacker = gBattlerAbility = battler;
-            BattleScriptPush(cmd->nextInstr);
+            BattleScriptPush(gBattlescriptCurrInstr);
             gBattlescriptCurrInstr = BattleScript_MigrationActivates;
             return;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_JUNGLE_LASH) && HasJungleLashTarget(battler))
+        if (!gSpecialStatuses[battler].switchOutAbilityDone
+         && HasBattlerAbility(battler, ABILITY_JUNGLE_LASH)
+         && HasJungleLashTarget(battler))
         {
+            gSpecialStatuses[battler].switchOutAbilityDone = TRUE;
             SetBattlerTriggeredAbility(battler, ABILITY_JUNGLE_LASH);
             gBattlerAbility = gBattlerAttacker = battler;
-            BattleScriptPush(cmd->nextInstr);
+            BattleScriptPush(gBattlescriptCurrInstr);
             gBattlescriptCurrInstr = BattleScript_JungleLashActivates;
             return;
         }
@@ -18534,6 +18541,7 @@ static void Cmd_switchoutabilities(void)
         }
 
         if (gBattleMons[battler].hp != 0
+         && gBattleOutcome == 0
          && GetBattlerSide(battler) == B_SIDE_PLAYER
          && IsCharmActive(EFFECT_REGEN_CHARM))
             healAmount += maxHP / 4;

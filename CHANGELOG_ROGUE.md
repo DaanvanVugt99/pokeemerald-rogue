@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made all standard Charms unique and rebalanced older Charms: Crit grants two
+  stages, Shed Skin cures status 50% of the time, Strength guarantees perfect
+  IVs, Grace doubles secondary-effect chances, Priority activates 25% of the
+  time, Endure always protects from full HP, and Pressure consumes two extra PP.
 - Made charms, curses, and dynamic TRs versioned dynamic items so their IDs can
   be rearranged without stale saved items becoming unrelated rewards.
 - Sacred Ash can now be consumed immediately after any battle with party losses,

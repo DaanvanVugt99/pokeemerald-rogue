@@ -3297,6 +3297,7 @@ void SwitchInClearSetData(u32 battler, bool32 preserveBatonPassState)
     gSpecialStatuses[battler].specialDmg = 0;
     gSpecialStatuses[battler].switchInRetaliateCharmDone = FALSE;
     gSpecialStatuses[battler].switchInStandCharmDone = FALSE;
+    gSpecialStatuses[battler].switchOutAbilityDone = FALSE;
 
     // Reset G-Max Chi Strike boosts.
     gBattleStruct->bonusCritStages[battler] = 0;
@@ -5032,7 +5033,8 @@ s8 GetMovePriority(u32 battler, u16 move)
      && IsCharmActive(EFFECT_PREP_CHARM)
      && IS_MOVE_STATUS(move)
      && (!gDisableStructs[battler].preparationCharmUsed
-      || gProtectStructs[battler].preparationCharmElevated))
+      || (gProtectStructs[battler].preparationCharmElevated
+       && !gBattleStruct->isAtkCancelerForCalledMove)))
     {
         priority++;
         if (!gDisableStructs[battler].preparationCharmUsed)
