@@ -1817,12 +1817,6 @@ static bool8 JumpIfMoveAffectedByProtect(u16 move)
     return affected;
 }
 
-static bool32 IsLanakilaLawMove(u16 move)
-{
-    return move == MOVE_ENCORE
-        || move == MOVE_HYPNOSIS;
-}
-
 static bool32 AccuracyCalcHelper(u16 move)
 {
     bool32 breachPointActive;
@@ -1860,9 +1854,6 @@ static bool32 AccuracyCalcHelper(u16 move)
 	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_ORACLE_SHRINE)
 	      && IS_MOVE_STATUS(move)
 	      && IsBattlerTerrainAffected(gBattlerAttacker, STATUS_FIELD_PSYCHIC_TERRAIN))
-	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_LANAKILA_LAW)
-	      && IsLanakilaLawMove(move)
-	      && IsBattlerWeatherAffected(gBattlerAttacker, B_WEATHER_SNOW))
 	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_ROLLING_START)
 	      && (move == MOVE_ROLLOUT || move == MOVE_ICE_BALL))
 	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_INTENT)

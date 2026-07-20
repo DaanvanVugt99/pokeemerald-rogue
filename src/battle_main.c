@@ -4973,7 +4973,7 @@ static bool32 IsPivotMove(u16 move)
 static bool32 IsLanakilaLawMove(u16 move)
 {
     return move == MOVE_ENCORE
-        || move == MOVE_HYPNOSIS;
+        || move == MOVE_DISABLE;
 }
 
 static bool32 IsRailgunChargePriorityMove(u32 battler, u16 move)
