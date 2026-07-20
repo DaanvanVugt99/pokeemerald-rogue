@@ -304,6 +304,7 @@ static u16 const sDynamicCustomMonUniqueAbilities[] =
     ABILITY_ROYAL_STORM,
     ABILITY_SANDMAN,
     ABILITY_SAND_SKIMMER,
+    ABILITY_STARMOBILE,
 };
 
 static u16 const sDynamicCustomMonMoves[] = 

@@ -16,6 +16,7 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Added Starmobile to the Unique Pokemon generation ability pool.
 - Reworked Alolan Ninetales's Lanakila Law so Encore and Disable gain priority
   in Snow, removing priority and perfect accuracy from Hypnosis.
 - Rebalanced temporary Dark Deal Curses to match their paired Charms and

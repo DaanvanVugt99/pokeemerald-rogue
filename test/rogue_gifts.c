@@ -16,6 +16,7 @@
 #define TEST_DYNAMIC_MOVE_POOL_CAPACITY       160
 #define TEST_DYNAMIC_MOVE_PAIR_CODE_START     (TEST_DYNAMIC_MOVE_POOL_CAPACITY + 1)
 #define TEST_TYPED_MOVE_SELECTION_STRIDE      (TEST_DYNAMIC_MOVE_POOL_CAPACITY + 1)
+#define TEST_STARMOBILE_UNIQUE_ABILITY_INDEX  103
 
 static u32 EncodeTestMoveSelection(u32 move1, u32 move2)
 {
@@ -162,6 +163,13 @@ TEST("Dynamic original unique ability format decodes legendary payload")
     EXPECT_NE(RogueGift_GetCustomMonAbility(customMonId, 0), ABILITY_NONE);
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_IMPACT);
     EXPECT_EQ(RogueGift_GetCustomMonRarity(customMonId), UNIQUE_RARITY_LEGENDARY);
+}
+
+TEST("Dynamic unique ability pool includes Starmobile")
+{
+    u32 customMonId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, TEST_STARMOBILE_UNIQUE_ABILITY_INDEX);
+
+    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_STARMOBILE);
 }
 
 TEST("Dynamic type unique ability format decodes legendary payload")
