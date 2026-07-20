@@ -50,6 +50,19 @@ SINGLE_BATTLE_TEST("Unique abilities are suppressed by Neutralizing Gas")
     }
 }
 
+SINGLE_BATTLE_TEST("Gastro Acid suppresses unique abilities")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_GASTRO_ACID].effect == EFFECT_GASTRO_ACID);
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(ABILITY_SPEED_BOOST); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_GASTRO_ACID); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_GASTRO_ACID); MOVE(player, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+    }
+}
+
 SINGLE_BATTLE_TEST("Dynamic custom unique abilities can affect battle behavior")
 {
     u32 customMonId = DynamicSilverLiningCustomMonId();

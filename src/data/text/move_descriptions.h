@@ -1561,8 +1561,8 @@ static const u8 sPowerTrickDescription[] = _(
     "and Defense stats.");
 
 static const u8 sGastroAcidDescription[] = _(
-    "Stomach acid suppresses\n"
-    "the foe's ability.");
+    "Stomach acid suppresses both\n"
+    "of the foe's abilities.");
 
 static const u8 sLuckyChantDescription[] = _(
     "Prevents the foe from\n"
