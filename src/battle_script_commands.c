@@ -2281,7 +2281,7 @@ static void Cmd_ppreduce(void)
         }
 
         if(GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER && IsCurseActive(EFFECT_PRESSURE_STATUS))
-            ppToDeduct++;
+            ppToDeduct += 2;
 
         if(GetBattlerSide(gBattlerAttacker) != B_SIDE_PLAYER && IsCharmActive(EFFECT_PRESSURE_STATUS))
             ppToDeduct += 2;
@@ -2292,7 +2292,7 @@ static void Cmd_ppreduce(void)
              ppToDeduct++;
 
         if(GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER && IsCurseActive(EFFECT_PRESSURE_STATUS))
-            ppToDeduct++;
+            ppToDeduct += 2;
 
         if(GetBattlerSide(gBattlerAttacker) != B_SIDE_PLAYER && IsCharmActive(EFFECT_PRESSURE_STATUS))
             ppToDeduct += 2;

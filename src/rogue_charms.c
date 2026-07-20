@@ -254,13 +254,13 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
             return (isCurse ? itemCount * 40 : uniqueCharmCount * 50);
 
         case EFFECT_FLINCH_CHANCE:
-            return isCurse ? min(itemCount * 10, 90) : uniqueCharmCount * 15;
+            return isCurse ? min(itemCount * 15, 90) : uniqueCharmCount * 15;
 
         case EFFECT_CRIT_CHANCE:
-            return isCurse ? itemCount : uniqueCharmCount * 2;
+            return isCurse ? itemCount * 2 : uniqueCharmCount * 2;
 
         case EFFECT_SHED_SKIN_CHANCE:
-            return isCurse ? min(itemCount * 15, 90) : uniqueCharmCount * 50;
+            return isCurse ? min(itemCount * 50, 90) : uniqueCharmCount * 50;
 
         case EFFECT_WILD_IV_RATE:
             return isCurse ? itemCount * 20 : uniqueCharmCount * 31;
@@ -269,19 +269,19 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
             return isCurse ? itemCount * 40 : uniqueCharmCount * 200;
 
         case EFFECT_SERENE_GRACE_CHANCE:
-            return isCurse ? min(itemCount * 50, 150) : uniqueCharmCount * 100;
+            return isCurse ? min(itemCount * 100, 150) : uniqueCharmCount * 100;
 
         case EFFECT_WILD_ENCOUNTER_COUNT:
             return isCurse ? itemCount : uniqueCharmCount * 2;
 
         case EFFECT_MOVE_PRIORITY_CHANCE:
-            return isCurse ? min(itemCount * 10, 90) : uniqueCharmCount * 25;
+            return isCurse ? min(itemCount * 25, 90) : uniqueCharmCount * 25;
 
         case EFFECT_ADAPTABILITY_RATE:
-            return isCurse ? min(itemCount * 3, 15) : uniqueCharmCount * 5; // 5 means 50%
+            return isCurse ? min(itemCount * 5, 15) : uniqueCharmCount * 5; // 5 means 50%
 
         case EFFECT_ENDURE_CHANCE:
-            return isCurse ? min(itemCount * 20, 90) : uniqueCharmCount * 100;
+            return isCurse ? min(itemCount * 100, 100) : uniqueCharmCount * 100;
 
         case EFFECT_TORMENT_STATUS:
         case EFFECT_PRESSURE_STATUS:
@@ -590,6 +590,44 @@ u16 Rogue_NextCurseItem(u16* historyBuffer, u16 historyBufferCount)
         itemId = EffectToCurseItem(effectType);
     }
     while(itemId == ITEM_NONE || IsEffectDisabled(effectType, TRUE) || BufferContainsValue(historyBuffer, historyBufferCount, effectType));
+
+    historyBuffer[historyBufferCount] = effectType;
+
+    return itemId;
+}
+
+static bool8 IsEffectDisabledForDarkDeal(u8 effectType)
+{
+    switch(effectType)
+    {
+        // These effects were designed as permanent run modifiers and do not
+        // create a meaningful temporary challenge before the next boss.
+        case EFFECT_SHOP_PRICE:
+        case EFFECT_WILD_IV_RATE:
+        case EFFECT_CATCH_RATE:
+        case EFFECT_WILD_ENCOUNTER_COUNT:
+        case EFFECT_EVERSTONE_EVOS:
+        case EFFECT_RANDOMAN_ROUTE_SPAWN:
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+u16 Rogue_NextDarkDealCurseItem(u16* historyBuffer, u16 historyBufferCount)
+{
+    u8 effectType;
+    u16 itemId;
+
+    do
+    {
+        effectType = Random() % EFFECT_COUNT;
+        itemId = EffectToCurseItem(effectType);
+    }
+    while(itemId == ITEM_NONE
+       || IsEffectDisabled(effectType, TRUE)
+       || IsEffectDisabledForDarkDeal(effectType)
+       || BufferContainsValue(historyBuffer, historyBufferCount, effectType));
 
     historyBuffer[historyBufferCount] = effectType;
 

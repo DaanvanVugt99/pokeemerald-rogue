@@ -452,3 +452,17 @@ SINGLE_BATTLE_TEST("charms: utility - Pressure Charm consumes two additional PP"
         ClearCharmTestState();
     }
 }
+
+SINGLE_BATTLE_TEST("charms: curses - Pressure Curse consumes two additional PP")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_PRESSURE_CURSE, 1);
+        PLAYER(SPECIES_WOBBUFFET) { MovesWithPP({MOVE_TACKLE, 35}); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->pp[0], 32);
+        ClearCharmTestState();
+    }
+}

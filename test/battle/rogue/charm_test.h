@@ -18,6 +18,14 @@ static inline void ClearCharmTestState(void)
             RemoveBagItem(item, count);
     }
 
+    for (item = FIRST_ITEM_CURSE; item <= LAST_ITEM_CURSE; item++)
+    {
+        u16 count = GetItemCountInBag(item);
+
+        if (count != 0)
+            RemoveBagItem(item, count);
+    }
+
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     RecalcCharmCurseValues();
 }

@@ -12612,7 +12612,7 @@ static void RandomiseCharmItems(void)
     VarSet(VAR_ROGUE_ITEM2, Rogue_NextCharmItem(tempBuffer, tempBufferCount++));
 
     // Curse Items
-    VarSet(VAR_ROGUE_ITEM10, Rogue_NextCurseItem(tempBuffer, tempBufferCount++));
+    VarSet(VAR_ROGUE_ITEM10, Rogue_NextDarkDealCurseItem(tempBuffer, tempBufferCount++));
     //VarSet(VAR_ROGUE_ITEM11, Rogue_NextCurseItem(tempBuffer, 4));
     //VarSet(VAR_ROGUE_ITEM12, Rogue_NextCurseItem(tempBuffer, 5));
 }

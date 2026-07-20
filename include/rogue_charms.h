@@ -84,6 +84,7 @@ u16 Rogue_GetMaxPartySize(void);
 bool8 IsEffectDisabled(u8 effectType, bool8 isCurse);
 u16 Rogue_NextCharmItem(u16* historyBuffer, u16 historyBufferCount);
 u16 Rogue_NextCurseItem(u16* historyBuffer, u16 historyBufferCount);
+u16 Rogue_NextDarkDealCurseItem(u16* historyBuffer, u16 historyBufferCount);
 
 void Rogue_ExecuteExtraLife();
 

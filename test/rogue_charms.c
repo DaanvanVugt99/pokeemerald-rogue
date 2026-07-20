@@ -195,3 +195,61 @@ TEST("charms: legacy - older charms use their rebalanced unique values")
 
     ClearCharmTestState();
 }
+
+TEST("charms: curses - paired combat curses match their charm values")
+{
+    BeginCharmTestRun();
+    AddCharmForTest(ITEM_FLINCH_CHARM, 1);
+    AddCharmForTest(ITEM_FLINCH_CURSE, 1);
+    AddCharmForTest(ITEM_CRIT_CHARM, 1);
+    AddCharmForTest(ITEM_CRIT_CURSE, 1);
+    AddCharmForTest(ITEM_SHED_SKIN_CHARM, 1);
+    AddCharmForTest(ITEM_SHED_SKIN_CURSE, 1);
+    AddCharmForTest(ITEM_GRACE_CHARM, 1);
+    AddCharmForTest(ITEM_GRACE_CURSE, 1);
+    AddCharmForTest(ITEM_MOVE_PRIORITY_CHARM, 1);
+    AddCharmForTest(ITEM_MOVE_PRIORITY_CURSE, 1);
+    AddCharmForTest(ITEM_ENDURE_CHARM, 1);
+    AddCharmForTest(ITEM_ENDURE_CURSE, 1);
+    AddCharmForTest(ITEM_TORMENT_CHARM, 1);
+    AddCharmForTest(ITEM_TORMENT_CURSE, 1);
+    AddCharmForTest(ITEM_PRESSURE_CHARM, 1);
+    AddCharmForTest(ITEM_PRESSURE_CURSE, 1);
+    AddCharmForTest(ITEM_UNAWARE_CHARM, 1);
+    AddCharmForTest(ITEM_UNAWARE_CURSE, 1);
+    AddCharmForTest(ITEM_ADAPTABILITY_CHARM, 1);
+    AddCharmForTest(ITEM_ADAPTABILITY_CURSE, 1);
+    FinishCharmTestSetup();
+
+    EXPECT_EQ(GetCurseValue(EFFECT_FLINCH_CHANCE), GetCharmValue(EFFECT_FLINCH_CHANCE));
+    EXPECT_EQ(GetCurseValue(EFFECT_CRIT_CHANCE), GetCharmValue(EFFECT_CRIT_CHANCE));
+    EXPECT_EQ(GetCurseValue(EFFECT_SHED_SKIN_CHANCE), GetCharmValue(EFFECT_SHED_SKIN_CHANCE));
+    EXPECT_EQ(GetCurseValue(EFFECT_SERENE_GRACE_CHANCE), GetCharmValue(EFFECT_SERENE_GRACE_CHANCE));
+    EXPECT_EQ(GetCurseValue(EFFECT_MOVE_PRIORITY_CHANCE), GetCharmValue(EFFECT_MOVE_PRIORITY_CHANCE));
+    EXPECT_EQ(GetCurseValue(EFFECT_ENDURE_CHANCE), GetCharmValue(EFFECT_ENDURE_CHANCE));
+    EXPECT_EQ(GetCurseValue(EFFECT_TORMENT_STATUS), GetCharmValue(EFFECT_TORMENT_STATUS));
+    EXPECT_EQ(GetCurseValue(EFFECT_PRESSURE_STATUS), GetCharmValue(EFFECT_PRESSURE_STATUS));
+    EXPECT_EQ(GetCurseValue(EFFECT_UNAWARE_STATUS), GetCharmValue(EFFECT_UNAWARE_STATUS));
+    EXPECT_EQ(GetCurseValue(EFFECT_ADAPTABILITY_RATE), GetCharmValue(EFFECT_ADAPTABILITY_RATE));
+
+    ClearCharmTestState();
+}
+
+TEST("charms: curses - Dark Deals exclude persistent nonbattle curses")
+{
+    u16 history[1];
+    u16 itemId;
+    u16 i;
+
+    for (i = 0; i < 256; i++)
+    {
+        itemId = Rogue_NextDarkDealCurseItem(history, 0);
+
+        EXPECT_NE(itemId, ITEM_SHOP_PRICE_CURSE);
+        EXPECT_NE(itemId, ITEM_WILD_IV_CURSE);
+        EXPECT_NE(itemId, ITEM_CATCHING_CURSE);
+        EXPECT_NE(itemId, ITEM_WILD_ENCOUNTER_CURSE);
+        EXPECT_NE(itemId, ITEM_EVERSTONE_CURSE);
+        EXPECT_NE(itemId, ITEM_RANDOMAN_ROUTE_SPAWN_CURSE);
+    }
+}

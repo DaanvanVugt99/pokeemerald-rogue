@@ -194,7 +194,7 @@ text gItemDesc_FlinchCharm
 }
 text gItemDesc_FlinchCurse
 {
-    format("Opponent moves have a 10% chance to flinch.")
+    format("Opponent moves have a 15% chance to flinch.")
 }
 
 text gItemDesc_CritCharm
@@ -203,7 +203,7 @@ text gItemDesc_CritCharm
 }
 text gItemDesc_CritCurse
 {
-    format("Opponent Pokémon have an increased crit rate.")
+    format("Opponent Pokémon have +2 critical-hit stages.")
 }
 
 text gItemDesc_ShedSkinCharm
@@ -212,7 +212,7 @@ text gItemDesc_ShedSkinCharm
 }
 text gItemDesc_ShedSkinCurse
 {
-    format("Opponent Pokémon have a 15% chance to cure status.")
+    format("Opponent Pokémon have a 50% chance to cure status each turn.")
 }
 
 text gItemDesc_WildIVCharm
@@ -239,7 +239,7 @@ text gItemDesc_GraceCharm
 }
 text gItemDesc_GraceCurse
 {
-    format("Opponent moves have x1.5 to chance for effects.")
+    format("Opponent moves have 2× secondary-effect chances.")
 }
 
 text gItemDesc_WildCharm
@@ -257,7 +257,7 @@ text gItemDesc_PriorityCharm
 }
 text gItemDesc_PriorityCurse
 {
-    format("Opponent moves have 10% chance to apply Quick Claw.")
+    format("Opponent moves have a 25% chance to apply Quick Claw.")
 }
 
 text gItemDesc_EndureCharm
@@ -266,7 +266,7 @@ text gItemDesc_EndureCharm
 }
 text gItemDesc_EndureCurse
 {
-    format("Opponent Pokémon have a 20% chance to endure OHKOs.")
+    format("Opponent Pokémon at full HP always endure lethal damage.")
 }
 
 text gItemDesc_TormentCharm
@@ -284,7 +284,7 @@ text gItemDesc_PressureCharm
 }
 text gItemDesc_PressureCurse
 {
-    format("Friendly Pokémon consume more PP per move.")
+    format("Friendly Pokémon consume 2 additional PP per move.")
 }
 
 text gItemDesc_UnawareCharm
@@ -302,7 +302,7 @@ text gItemDesc_AdaptabilityCharm
 }
 text gItemDesc_AdaptabilityCurse
 {
-    format("Opponent Pokémon STAB increased by 30%.")
+    format("Opponent Pokémon STAB increased by 50%.")
 }
 
 text gItemDesc_ExtraLifeCharm

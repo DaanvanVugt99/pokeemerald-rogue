@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Rebalanced temporary Dark Deal Curses to match their paired Charms and
+  removed economy, recruitment, evolution, and Randoman effects from the
+  temporary pool.
 - Made all standard Charms unique and rebalanced older Charms: Crit grants two
   stages, Shed Skin cures status 50% of the time, Strength guarantees perfect
   IVs, Grace doubles secondary-effect chances, Priority activates 25% of the
