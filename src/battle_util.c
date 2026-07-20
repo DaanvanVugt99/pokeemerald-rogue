@@ -10844,25 +10844,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_STABILIZE) && !uniqueDone)
-        {
-            bool32 didReset = FALSE;
-
-            uniqueDone = TRUE;
-            for (i = 0; i < gBattlersCount; i++)
-                didReset |= TryResetBattlerStatChanges(i);
-
-            if (didReset)
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_STABILIZE);
-                gBattlerAttacker = battler;
-                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
-                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursorAndCallback(BattleScript_StabilizeActivates);
-                return 1;
-            }
-        }
-
         if (HasBattlerAbility(battler, ABILITY_VOLT_BREAK) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -11878,10 +11859,10 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             if (!gSpecialStatuses[battler].switchInAbilityDone
              && GetMonData(mon, MON_DATA_SPECIES) == SPECIES_PALAFIN_HERO
-             && !(gBattleStruct->transformZeroToHero[side] & gBitTable[gBattlerPartyIndexes[battler]]))
+             && !(gBattleStruct->transformationAbilityUsed[side] & gBitTable[gBattlerPartyIndexes[battler]]))
             {
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
-                gBattleStruct->transformZeroToHero[side] |= gBitTable[gBattlerPartyIndexes[battler]];
+                gBattleStruct->transformationAbilityUsed[side] |= gBitTable[gBattlerPartyIndexes[battler]];
                 BattleScriptPushCursorAndCallback(BattleScript_ZeroToHeroActivates);
                 effect++;
             }

@@ -13,7 +13,7 @@ static u32 DynamicTypeCustomMonId(u32 type, u32 typeSlot)
 {
     return OTID_FLAG_CUSTOM_MON
         | OTID_FLAG_DYNAMIC_CUSTOM_MON
-        | (1 << 21) // COMPRESSED_FORMAT_MON_TYPE
+        | (1 << 28) // COMPRESSED_FORMAT_MON_TYPE
         | (typeSlot << 5)
         | type;
 }

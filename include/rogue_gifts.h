@@ -23,6 +23,16 @@ u16 RogueGift_GetCustomMonMoveCount(u32 id);
 u16 RogueGift_GetCustomMonAbility(u32 id, u8 i);
 u16 RogueGift_GetCustomMonAbilityCount(u32 id);
 u16 RogueGift_GetCustomMonUniqueAbility(u32 id);
+bool8 RogueGift_IsDynamicUniqueAbilityEligible(u16 ability);
+u16 RogueGift_GetDynamicUniqueAbilityPoolCount(void);
+
+#ifdef ROGUE_DEBUG
+u16 RogueGift_DebugGetDynamicSynergyProfileId(u16 ability);
+u16 RogueGift_DebugGetDynamicSynergyMove(u16 ability, u8 choice);
+u8 RogueGift_DebugGetDynamicSynergyPolicy(u16 ability);
+u8 RogueGift_DebugSelectDynamicSynergyChoice(u16 species, u16 ability, u16 suppliedMove);
+u16 RogueGift_DebugSelectCreationSynergyMove(u16 species, u8 type, u16 suppliedMove);
+#endif
 
 u8 RogueGift_GetCustomMonType(u32 id, u8 i);
 

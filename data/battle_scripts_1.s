@@ -4827,7 +4827,8 @@ BattleScript_EffectTransform::
 	waitanimation
 	printfromtable gTransformUsedStringIds
 	waitmessage B_WAIT_TIME_LONG
-	goto BattleScript_MoveEnd
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_RAPID_REPLICA
+	.4byte BattleScript_MoveEnd
 
 BattleScript_EffectAttackDown2:
 	setstatchanger STAT_ATK, 2, TRUE
@@ -12181,6 +12182,9 @@ BattleScript_ImposterActivates::
 	waitanimation
 	printstring STRINGID_IMPOSTERTRANSFORM
 	waitmessage B_WAIT_TIME_LONG
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_RAPID_REPLICA
+	.4byte BattleScript_ImposterActivatesEnd
+BattleScript_ImposterActivatesEnd:
 	end3
 
 BattleScript_HurtAttacker:
@@ -14131,13 +14135,6 @@ BattleScript_TrashAlchemyActivates::
 	datahpupdate BS_ATTACKER
 BattleScript_TrashAlchemyEnd:
 	printstring STRINGID_TRASHALCHEMYFOUND
-	waitmessage B_WAIT_TIME_LONG
-	end3
-
-BattleScript_StabilizeActivates::
-	call BattleScript_AbilityPopUp
-	normalisebuffs
-	printstring STRINGID_STATCHANGESGONE
 	waitmessage B_WAIT_TIME_LONG
 	end3
 

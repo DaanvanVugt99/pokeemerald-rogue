@@ -12393,6 +12393,31 @@ static void Cmd_various(void)
         }
         break;
     }
+    case VARIOUS_TRY_ACTIVATE_RAPID_REPLICA:
+    {
+        VARIOUS_ARGS(const u8 *failInstr);
+        u8 partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+        u32 side = GetBattlerSide(battler);
+
+        if (!gDisableStructs[battler].uniqueOncePerSwitchInUsed
+         || (gBattleStruct->transformationAbilityUsed[side] & partyBit)
+         || CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_EQUAL))
+        {
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = FALSE;
+            gBattlescriptCurrInstr = cmd->failInstr;
+            return;
+        }
+
+        gDisableStructs[battler].uniqueOncePerSwitchInUsed = FALSE;
+        gBattleStruct->transformationAbilityUsed[side] |= partyBit;
+        SetBattlerTriggeredAbility(battler, ABILITY_RAPID_REPLICA);
+        gBattlerAttacker = battler;
+        SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+        PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+        BattleScriptPush(cmd->failInstr);
+        gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+        return;
+    }
     case VARIOUS_TRY_ACTIVATE_VICTORY:
     {
         VARIOUS_ARGS();
@@ -16331,9 +16356,16 @@ static void Cmd_transformdataexecution(void)
     }
     else
     {
+        u32 side = GetBattlerSide(gBattlerAttacker);
+        u8 partyBit = gBitTable[gBattlerPartyIndexes[gBattlerAttacker]];
         s32 i;
         u8 *battleMonAttacker, *battleMonTarget;
         u8 timesGotHit;
+
+        gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed =
+            HasBattlerAbility(gBattlerAttacker, ABILITY_RAPID_REPLICA)
+            && !(gBattleStruct->transformationAbilityUsed[side] & partyBit)
+            && CompareStat(gBattlerTarget, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN);
 
         gBattleMons[gBattlerAttacker].status2 |= STATUS2_TRANSFORMED;
         gDisableStructs[gBattlerAttacker].disabledMove = MOVE_NONE;

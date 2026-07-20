@@ -662,7 +662,6 @@ extern const u8 BattleScript_TidalSwitchActivates[];
 extern const u8 BattleScript_RoyalTreatmentActivates[];
 extern const u8 BattleScript_RksRelayActivates[];
 extern const u8 BattleScript_FairyTaleActivates[];
-extern const u8 BattleScript_StabilizeActivates[];
 extern const u8 BattleScript_ControlMaskActivates[];
 extern const u8 BattleScript_NaturalOrderEndTurn[];
 extern const u8 BattleScript_NaturalOrderStatChange[];

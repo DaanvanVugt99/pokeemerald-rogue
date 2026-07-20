@@ -418,7 +418,7 @@
 #define ABILITY_OPEN_FIELD             379
 #define ABILITY_DREAD                  380
 #define ABILITY_STILL_WATER            381
-#define ABILITY_STABILIZE              382
+#define ABILITY_RAPID_REPLICA          382
 #define ABILITY_BODY_OF_WATER          383
 #define ABILITY_IONIZE                 384
 #define ABILITY_SMOLDER                385

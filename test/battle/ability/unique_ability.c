@@ -14,8 +14,8 @@ static u32 DynamicSilverLiningCustomMonId(void)
 {
     return OTID_FLAG_CUSTOM_MON
         | OTID_FLAG_DYNAMIC_CUSTOM_MON
-        | (2 << 14)
-        | (TEST_FORMAT_ORIGINAL_UNIQUE_ABILITY << 21);
+        | (ABILITY_SILVER_LINING << 14)
+        | (TEST_FORMAT_ORIGINAL_UNIQUE_ABILITY << 28);
 }
 
 SINGLE_BATTLE_TEST("Unique abilities can affect battle behavior")

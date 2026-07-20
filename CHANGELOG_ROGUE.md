@@ -16,7 +16,17 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
-- Added Starmobile to the Unique Pokemon generation ability pool.
+- Replaced Ditto's Stabilize unique ability with Rapid Replica, which raises its
+  Speed after transforming once per battle before adopting the target's unique
+  ability.
+- Expanded generated Unique Pokemon from a 103-entry unique-ability pool to
+  555 audited battle-safe abilities and added stat-aware synergy profiles for
+  abilities that depend on particular moves, types, or move families. Flexible
+  profiles vary between physical, special, and utility moves, while exact-move
+  abilities remain fixed and naturally learned pairings retain both random moves.
+  Creation receives one of several type-matched status moves where available.
+- Repacked generated Unique Pokemon IDs for the larger ability pool and bumped
+  the development save version; existing development saves require a restart.
 - Reworked Alolan Ninetales's Lanakila Law so Encore and Disable gain priority
   in Snow, removing priority and perfect accuracy from Hypnosis.
 - Rebalanced temporary Dark Deal Curses to match their paired Charms and
