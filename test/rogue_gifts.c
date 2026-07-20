@@ -383,6 +383,23 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     EXPECT_EQ(pairedAbilityCount, 247);
 }
 
+TEST("Final Step generated synergy guarantees a sound move")
+{
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_FINAL_STEP, 0), MOVE_NONE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_FINAL_STEP, 1), MOVE_BOOMBURST);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_FINAL_STEP, 2), MOVE_SNARL);
+}
+
+TEST("Dynamic Unique pool only includes Gimmighoul Chest Form")
+{
+#ifdef ROGUE_EXPANSION
+    EXPECT(RogueGift_DebugIsSpeciesInDynamicUniquePool(SPECIES_GIMMIGHOUL_CHEST));
+    EXPECT(!RogueGift_DebugIsSpeciesInDynamicUniquePool(SPECIES_GIMMIGHOUL_ROAMING));
+#else
+    ASSUME(FALSE);
+#endif
+}
+
 TEST("Dynamic synergy choices decode all three profile slots and the natural sentinel")
 {
     u32 physicalId = DynamicOriginalUniqueAbilityCustomMonIdWithChoice(1, 2, 1, ABILITY_TOXIC_TANDEM, 0);

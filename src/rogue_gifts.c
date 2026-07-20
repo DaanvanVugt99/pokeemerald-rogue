@@ -914,6 +914,8 @@ static u16 GetDynamicUniqueAbilitySynergyProfileId(u16 ability)
         return DYNAMIC_SYNERGY_PROFILE_CRITICAL_HIT;
     case ABILITY_SALT_FORTRESS:
         return DYNAMIC_SYNERGY_PROFILE_DEFENSE_BOOST;
+    case ABILITY_FINAL_STEP:
+        return DYNAMIC_SYNERGY_PROFILE_SOUND;
     case ABILITY_BRAVERY:
     case ABILITY_WATER_GLIDE:
     case ABILITY_TROPICAL_CANOPY:
@@ -2420,6 +2422,39 @@ static bool8 IsDynamicUniqueMonValid(struct UniqueMon* mon)
     return !(mon->species == SPECIES_NONE || mon->customMonId == 0 || mon->countDown == 0);
 }
 
+static bool8 FilterDynamicUniqueSpecies(u16 species, void* usrData)
+{
+    (void)usrData;
+    return Query_IsSpeciesEnabled(species);
+}
+
+static void ApplyDynamicUniqueSpeciesQuery(void)
+{
+    RogueMonQuery_IsSpeciesActive();
+    RogueMonQuery_TransformIntoEggSpecies();
+    // Transformations may introduce a species which the initial active-species
+    // pass rejected, so validate the transformed pool again.
+    RogueMonQuery_CustomFilter(FilterDynamicUniqueSpecies, NULL);
+    RogueMonQuery_IsLegendary(QUERY_FUNC_EXCLUDE);
+}
+
+#ifdef ROGUE_DEBUG
+bool8 RogueGift_DebugIsSpeciesInDynamicUniquePool(u16 species)
+{
+    bool8 isIncluded;
+    u8 dexVariantToRestore = RoguePokedex_GetDexVariant();
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_DEFAULT);
+    RogueMonQuery_Begin();
+    ApplyDynamicUniqueSpeciesQuery();
+    isIncluded = RogueMiscQuery_CheckState(species);
+    RogueMonQuery_End();
+    RoguePokedex_SetDexVariant(dexVariantToRestore);
+
+    return isIncluded;
+}
+#endif
+
 u8 RogueGift_RollDynamicUniqueRarity(bool8 ignoreUnlockGates)
 {
     u8 rarity;
@@ -2488,6 +2523,7 @@ static bool8 IsSlotUnlocked(u8 slot)
 void RogueGift_EnsureDynamicCustomMonsAreValid()
 {
     u8 i, write;
+    bool8 retainExisting[DYNAMIC_UNIQUE_MON_COUNT] = {FALSE};
     u16 newSpecies[DYNAMIC_UNIQUE_MON_COUNT];
 
     // We use query below, so grab some new unique species now
@@ -2497,14 +2533,14 @@ void RogueGift_EnsureDynamicCustomMonsAreValid()
         RoguePokedex_SetDexVariant(POKEDEX_VARIANT_DEFAULT);
 
         RogueMonQuery_Begin();
-        RogueMonQuery_IsSpeciesActive();
-        RogueMonQuery_TransformIntoEggSpecies();
-        RogueMonQuery_IsLegendary(QUERY_FUNC_EXCLUDE);
+        ApplyDynamicUniqueSpeciesQuery();
         
         for(i = 0; i < DYNAMIC_UNIQUE_MON_COUNT; ++i)
         {
-            if(IsDynamicUniqueMonValid(&gRogueSaveBlock->dynamicUniquePokemon[i]))
+            if(IsDynamicUniqueMonValid(&gRogueSaveBlock->dynamicUniquePokemon[i])
+             && RogueMiscQuery_CheckState(gRogueSaveBlock->dynamicUniquePokemon[i].species))
             {
+                retainExisting[i] = TRUE;
                 RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, gRogueSaveBlock->dynamicUniquePokemon[i].species);
             }
         }
@@ -2534,7 +2570,7 @@ void RogueGift_EnsureDynamicCustomMonsAreValid()
     write = 0;
     for(i = 0; i < DYNAMIC_UNIQUE_MON_COUNT; ++i)
     {
-        if(IsDynamicUniqueMonValid(&gRogueSaveBlock->dynamicUniquePokemon[i]))
+        if(IsDynamicUniqueMonValid(&gRogueSaveBlock->dynamicUniquePokemon[i]) && retainExisting[i])
         {
             if(write != i)
             {

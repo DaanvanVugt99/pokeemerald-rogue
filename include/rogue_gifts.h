@@ -32,6 +32,7 @@ u16 RogueGift_DebugGetDynamicSynergyMove(u16 ability, u8 choice);
 u8 RogueGift_DebugGetDynamicSynergyPolicy(u16 ability);
 u8 RogueGift_DebugSelectDynamicSynergyChoice(u16 species, u16 ability, u16 suppliedMove);
 u16 RogueGift_DebugSelectCreationSynergyMove(u16 species, u8 type, u16 suppliedMove);
+bool8 RogueGift_DebugIsSpeciesInDynamicUniquePool(u16 species);
 #endif
 
 u8 RogueGift_GetCustomMonType(u32 id, u8 i);

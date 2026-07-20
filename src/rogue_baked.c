@@ -381,12 +381,6 @@ void Rogue_ModifyEvolution(u16 species, u8 evoIdx, struct Evolution* outEvo)
         outEvo->param = 20;
     }
 
-    if(species == SPECIES_GIMMIGHOUL && evoIdx == 0)
-    {
-        outEvo->method = EVO_ITEM;
-        outEvo->param = ITEM_GIMMIGHOUL_COIN;
-    }
-
 #endif
 
 #ifndef ROGUE_BAKING

@@ -22,7 +22,8 @@ Format follows Keep a Changelog loosely:
 - Expanded generated Unique Pokemon from a 103-entry unique-ability pool to
   558 audited battle-safe abilities, including Starmobile, and added guaranteed
   synergy moves for abilities that depend on particular moves or move families,
-  while retaining both random moves when the species already learns the pairing.
+  while retaining both random moves when the species already learns the pairing;
+  Final Step now guarantees a sound move instead of a contact move.
 - Repacked generated Unique Pokemon IDs for the larger ability pool and bumped
   the development save version; existing development saves require a restart.
 - Reworked Alolan Ninetales's Lanakila Law so Encore and Disable gain priority
@@ -68,6 +69,12 @@ Format follows Keep a Changelog loosely:
   defeating a boss.
 - Fixed corrupted text and background tiles on the move-replacement summary
   screen opened while relearning a move.
+- Fixed Gimmighoul Roaming Form entering the generated Unique Pokemon buffer
+  through Gholdengo's egg-species conversion.
+- Fixed Gimmighoul Roaming Form being unable to evolve with a Gimmighoul Coin,
+  and made the shared evolution data cover both forms without a Rogue override.
+- Fixed the Unique Pokemon tracker preview clipping its final detail line when
+  displaying every optional field.
 
 ### Removed
 

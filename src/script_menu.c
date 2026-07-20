@@ -675,7 +675,7 @@ void ScriptMenu_ShowDynamicUniqueMonPic(void)
     if(RogueGift_IsDynamicMonSlotEnabled(gSpecialVar_0x8004))
     {
         struct UniqueMon* uniqueMon = RogueGift_GetDynamicUniqueMon(gSpecialVar_0x8004);
-        ScriptMenu_ShowPokemonPicCustom(uniqueMon->species, uniqueMon->customMonId, 2, 2, FALSE);
+        ScriptMenu_ShowPokemonPicCustom(uniqueMon->species, uniqueMon->customMonId, 2, 1, FALSE);
     }
 }
 
@@ -1055,6 +1055,15 @@ static u8 const sText_UniqueMonOutOfDex[] = _("{COLOR RED}Not in current Dex");
 static u8 const sText_UniqueMonType[] = _("Type/ {STR_VAR_1}");
 static u8 const sText_UniqueMonTypes[] = _("Type/ {STR_VAR_1}/{STR_VAR_2}");
 
+#define UNIQUE_MON_INFO_WINDOW_HEIGHT 12
+#define UNIQUE_MON_INFO_TITLE_HEIGHT  13
+#define UNIQUE_MON_INFO_LINE_HEIGHT   13
+#define UNIQUE_MON_INFO_MAX_LINES     6
+#define UNIQUE_MON_INFO_LINE_Y(line)  (UNIQUE_MON_INFO_TITLE_HEIGHT + UNIQUE_MON_INFO_LINE_HEIGHT * (line))
+
+// Out-of-Dex warning, type, standard ability, unique ability, and two moves.
+STATIC_ASSERT(UNIQUE_MON_INFO_LINE_Y(UNIQUE_MON_INFO_MAX_LINES) <= UNIQUE_MON_INFO_WINDOW_HEIGHT * 8, UniqueMonInfoWindowFitsAllDetailLines);
+
 static void PrintUniqueMonInfoToWindow(u8 windowId)
 {
     u8 i, line;
@@ -1074,7 +1083,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
     line = 0;
 
     if(!RoguePokedex_IsSpeciesEnabled(species))
-        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_UniqueMonOutOfDex, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_UniqueMonOutOfDex, 2, UNIQUE_MON_INFO_LINE_Y(line++), TEXT_SKIP_DRAW, NULL);
 
     // Show the effective typing rather than making the player infer altered
     // types from the recolored sprite.
@@ -1097,7 +1106,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
             StringCopy(gStringVar2, gTypeNames[type2]);
             StringExpandPlaceholders(gStringVar4, sText_UniqueMonTypes);
         }
-        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, gStringVar4, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, gStringVar4, 2, UNIQUE_MON_INFO_LINE_Y(line++), TEXT_SKIP_DRAW, NULL);
     }
 
     // Ability
@@ -1107,7 +1116,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
 
         StringCopy(gStringVar1, gAbilityNames[ability]);
         StringExpandPlaceholders(gStringVar4, sText_UniqueMonAbility);
-        AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, UNIQUE_MON_INFO_LINE_Y(line++), TEXT_SKIP_DRAW, NULL);
     }
 
     // Unique Ability
@@ -1117,7 +1126,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
 
         StringCopy(gStringVar1, gAbilityNames[ability]);
         StringExpandPlaceholders(gStringVar4, sText_UniqueMonUniqueAbility);
-        AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, UNIQUE_MON_INFO_LINE_Y(line++), TEXT_SKIP_DRAW, NULL);
     }
 
     // Moves
@@ -1127,7 +1136,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
         
         StringCopy(gStringVar1, gMoveNames[moveId]);
         StringExpandPlaceholders(gStringVar4, sText_UniqueMonMove);
-        AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, 13 + 13 * (line++), TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(windowId, FONT_SMALL, gStringVar4, 2, UNIQUE_MON_INFO_LINE_Y(line++), TEXT_SKIP_DRAW, NULL);
     }
 
     CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -1136,7 +1145,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
 void ScriptMenu_DisplayUniqueMonInfo()
 {
     u8 taskId;
-    u8 windowId = CreateWindowFromRectWithBaseBlockOffset(12, 1, 14, 11, 8 * 8);
+    u8 windowId = CreateWindowFromRectWithBaseBlockOffset(12, 0, 14, UNIQUE_MON_INFO_WINDOW_HEIGHT, 8 * 8);
 
     PrintUniqueMonInfoToWindow(windowId);
 

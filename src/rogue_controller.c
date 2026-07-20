@@ -14,6 +14,7 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "constants/trainer_types.h"
+#include "constants/trainers.h"
 #include "constants/weather.h"
 #include "data.h"
 #include "decompress.h"
@@ -7883,6 +7884,15 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
                     {
                         objectEvents[write].graphicsId = OBJ_EVENT_GFX_DYNAMIC_TRAINER_FIRST + trainerIndex;
                         objectEvents[write].flagId = 0;//FLAG_ROGUE_TRAINER0 + ;
+
+                        // Preserve Ninja Boys' signature hidden encounter without requiring
+                        // route-specific object templates. Buried trainers remain stationary
+                        // until they spot the player, then reveal themselves before approaching.
+                        if(Rogue_GetTrainer(trainerNum)->trainerPic == TRAINER_PIC_NINJA_BOY)
+                        {
+                            objectEvents[write].movementType = MOVEMENT_TYPE_BURIED;
+                            objectEvents[write].trainerType = TRAINER_TYPE_BURIED;
+                        }
 
                         // Accept this trainer
                         write++;
