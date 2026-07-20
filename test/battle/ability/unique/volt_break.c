@@ -9,11 +9,17 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_TACKLE].priority == 0);
 }
 
-SINGLE_BATTLE_TEST("Volt Break suppresses the opposing ability like Gastro Acid on switch-in")
+SINGLE_BATTLE_TEST("Volt Break suppresses both opposing abilities like Gastro Acid on switch-in")
 {
+    u16 ability;
+    u16 uniqueAbility;
+
+    PARAMETRIZE { ability = ABILITY_SPEED_BOOST; uniqueAbility = ABILITY_INSOMNIA; }
+    PARAMETRIZE { ability = ABILITY_SOUNDPROOF; uniqueAbility = ABILITY_SPEED_BOOST; }
+
     GIVEN {
         PLAYER(SPECIES_VOLTORB) { Speed(50); Ability(ABILITY_SOUNDPROOF); UniqueAbility(ABILITY_VOLT_BREAK); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_NINJASK) { Speed(40); Ability(ABILITY_SPEED_BOOST); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(40); Ability(ability); UniqueAbility(uniqueAbility); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
