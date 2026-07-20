@@ -389,6 +389,14 @@ text gItemDesc_RegenCharm
 {
     format("Friendly Pokémon restore 25% of their maximum HP when switching out.")
 }
+text gItemDesc_MoodyCharm
+{
+    format("At each turn's end, a random stat rises and another random stat falls.")
+}
+text gItemDesc_EvioliteCharm
+{
+    format("Friendly Pokémon that can evolve have 1.5× Defense and Sp. Def.")
+}
 
 text gItemDesc_PartyCurse
 {

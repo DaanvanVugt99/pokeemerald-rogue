@@ -60,6 +60,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Moody and Eviolite Charms, which adjust friendly Pokémon's stats
+  each turn and bolster the defenses of Pokémon that can still evolve.
 - Added the Level and Regen Charms, which raise the player's level cap by three
   and restore friendly Pokémon's HP when switching out.
 - Added the Prep and Protean Charms, which grant priority to the first status

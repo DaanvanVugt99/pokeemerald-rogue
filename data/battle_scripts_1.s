@@ -9913,6 +9913,7 @@ sZero:
 
 BattleScript_MoodyActivates::
 	call BattleScript_AbilityPopUp
+BattleScript_MoodyCharmActivates::
 	jumpifbyteequal sSTATCHANGER, sZero, BattleScript_MoodyLower
 	statbuffchange MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN | STAT_CHANGE_NOT_PROTECT_AFFECTED, BattleScript_MoodyLower
 	jumpifbyte CMP_GREATER_THAN, cMULTISTRING_CHOOSER, B_MSG_DEFENDER_STAT_ROSE, BattleScript_MoodyLower

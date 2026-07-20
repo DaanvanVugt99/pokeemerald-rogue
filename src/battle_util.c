@@ -3041,6 +3041,7 @@ enum
     ENDTURN_INGRAIN,
     ENDTURN_AQUA_RING,
     ENDTURN_ABILITIES,
+    ENDTURN_CHARMS,
     ENDTURN_ITEMS1,
     ENDTURN_LEECH_SEED,
     ENDTURN_POISON,
@@ -3101,6 +3102,7 @@ if (ability == ABILITY_MAGIC_GUARD) \
 }
 
 bool8 ActiveAlphaMonEndure(u32 battler);
+static bool32 PrepareMoodyStatChanges(u32 battler, u32 raiseStages);
 
 static void HandleAlphaMonStatusEndure(u32 battler)
 {
@@ -3157,6 +3159,18 @@ u8 DoBattlerEndTurnEffects(void)
         case ENDTURN_ABILITIES:  // end turn abilities
             if (AbilityBattleEffects(ABILITYEFFECT_ENDTURN, battler, 0, 0, 0))
                 effect++;
+            gBattleStruct->turnEffectsTracker++;
+            break;
+        case ENDTURN_CHARMS:
+            if (GetBattlerSide(battler) == B_SIDE_PLAYER
+             && IsBattlerAlive(battler)
+             && IsCharmActive(EFFECT_MOODY_CHARM)
+             && gDisableStructs[battler].isFirstTurn != 2
+             && PrepareMoodyStatChanges(battler, 1))
+            {
+                BattleScriptExecute(BattleScript_MoodyCharmActivates);
+                effect++;
+            }
             gBattleStruct->turnEffectsTracker++;
             break;
         case ENDTURN_ITEMS1:  // item effects
@@ -8798,6 +8812,49 @@ static bool32 TryActivateTripwire(u32 battler)
     return FALSE;
 }
 
+static bool32 PrepareMoodyStatChanges(u32 battler, u32 raiseStages)
+{
+    u32 stat, raiseCount = 0, lowerCount = 0;
+    u32 statsNum = B_MOODY_ACC_EVASION >= GEN_8 ? NUM_STATS : NUM_BATTLE_STATS;
+    u8 validToRaise[NUM_BATTLE_STATS - 1];
+    u8 validToLower[NUM_BATTLE_STATS - 1];
+
+    for (stat = STAT_ATK; stat < statsNum; stat++)
+    {
+        if (CompareStat(battler, stat, MIN_STAT_STAGE, CMP_GREATER_THAN))
+            validToLower[lowerCount++] = stat;
+        if (CompareStat(battler, stat, MAX_STAT_STAGE, CMP_LESS_THAN))
+            validToRaise[raiseCount++] = stat;
+    }
+
+    if (lowerCount == 0 && raiseCount == 0)
+        return FALSE;
+
+    gBattleScripting.statChanger = gBattleScripting.savedStatChanger = 0;
+    if (raiseCount != 0)
+    {
+        u32 lowerIndex;
+
+        stat = validToRaise[RandomUniform(RNG_MOODY_RAISE, 0, raiseCount - 1)];
+        SET_STATCHANGER(stat, raiseStages, FALSE);
+        for (lowerIndex = 0; lowerIndex < lowerCount; lowerIndex++)
+        {
+            if (validToLower[lowerIndex] == stat)
+            {
+                validToLower[lowerIndex] = validToLower[--lowerCount];
+                break;
+            }
+        }
+    }
+    if (lowerCount != 0)
+    {
+        stat = validToLower[RandomUniform(RNG_MOODY_LOWER, 0, lowerCount - 1)];
+        SET_STATCHANGER2(gBattleScripting.savedStatChanger, stat, 1, TRUE);
+    }
+
+    return TRUE;
+}
+
 u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 moveArg)
 {
     u32 effect = 0;
@@ -12141,42 +12198,10 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
                 break;
             case ABILITY_MOODY:
-                if (gDisableStructs[battler].isFirstTurn != 2)
+                if (gDisableStructs[battler].isFirstTurn != 2 && PrepareMoodyStatChanges(battler, 2))
                 {
-                    u32 validToRaise = 0, validToLower = 0;
-                    u32 statsNum = B_MOODY_ACC_EVASION >= GEN_8 ? NUM_STATS : NUM_BATTLE_STATS;
-
-                    for (i = STAT_ATK; i < statsNum; i++)
-                    {
-                        if (CompareStat(battler, i, MIN_STAT_STAGE, CMP_GREATER_THAN))
-                            validToLower |= gBitTable[i];
-                        if (CompareStat(battler, i, MAX_STAT_STAGE, CMP_LESS_THAN))
-                            validToRaise |= gBitTable[i];
-                    }
-
-                    if (validToLower != 0 || validToRaise != 0) // Can lower one stat, or can raise one stat
-                    {
-                        gBattleScripting.statChanger = gBattleScripting.savedStatChanger = 0; // for raising and lowering stat respectively
-                        if (validToRaise != 0) // Find stat to raise
-                        {
-                            do
-                            {
-                                i = (Random() % statsNum) + STAT_ATK;
-                            } while (!(validToRaise & gBitTable[i]));
-                            SET_STATCHANGER(i, 2, FALSE);
-                            validToLower &= ~(gBitTable[i]); // Can't lower the same stat as raising.
-                        }
-                        if (validToLower != 0) // Find stat to lower
-                        {
-                            do
-                            {
-                                i = (Random() % statsNum) + STAT_ATK;
-                            } while (!(validToLower & gBitTable[i]));
-                            SET_STATCHANGER2(gBattleScripting.savedStatChanger, i, 1, TRUE);
-                        }
-                        BattleScriptPushCursorAndCallback(BattleScript_MoodyActivates);
-                        effect++;
-                    }
+                    BattleScriptPushCursorAndCallback(BattleScript_MoodyActivates);
+                    effect++;
                 }
                 break;
             case ABILITY_TRUANT:
@@ -24449,6 +24474,11 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     }
+
+    if (GetBattlerSide(battlerDef) == B_SIDE_PLAYER
+     && IsCharmActive(EFFECT_EVIOLITE_CHARM)
+     && CanEvolve(gBattleMons[battlerDef].species))
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
 
     // sandstorm sp.def boost for rock types
     if (B_SANDSTORM_SPDEF_BOOST >= GEN_4 && !HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL) && IS_BATTLER_OF_TYPE(battlerDef, TYPE_ROCK) && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM) && !usesDefStat)

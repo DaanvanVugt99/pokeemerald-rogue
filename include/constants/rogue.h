@@ -178,8 +178,10 @@
 #define ITEM_PROTEAN_CHARM              (FIRST_ITEM_CHARM + 32)
 #define ITEM_LEVEL_CHARM                (FIRST_ITEM_CHARM + 33)
 #define ITEM_REGEN_CHARM                (FIRST_ITEM_CHARM + 34)
+#define ITEM_MOODY_CHARM                (FIRST_ITEM_CHARM + 35)
+#define ITEM_EVIOLITE_CHARM             (FIRST_ITEM_CHARM + 36)
 
-#define LAST_ITEM_CHARM                 (ITEM_REGEN_CHARM)
+#define LAST_ITEM_CHARM                 (ITEM_EVIOLITE_CHARM)
 
 
 #define FIRST_ITEM_CURSE                (LAST_ITEM_CHARM + 1)

@@ -119,18 +119,26 @@ TEST("charms: progression - new charms clamp, leave inactive runs unchanged, and
     gRogueRun.currentLevelOffset = 0;
     AddCharmForTest(ITEM_LEVEL_CHARM, 2);
     AddCharmForTest(ITEM_REGEN_CHARM, 2);
+    AddCharmForTest(ITEM_MOODY_CHARM, 2);
+    AddCharmForTest(ITEM_EVIOLITE_CHARM, 2);
     FinishCharmTestSetup();
 
     EXPECT_EQ(GetCharmValue(EFFECT_LEVEL_CHARM), 1);
     EXPECT_EQ(GetCharmValue(EFFECT_REGEN_CHARM), 1);
+    EXPECT_EQ(GetCharmValue(EFFECT_MOODY_CHARM), 1);
+    EXPECT_EQ(GetCharmValue(EFFECT_EVIOLITE_CHARM), 1);
     EXPECT(IsEffectDisabled(EFFECT_LEVEL_CHARM, FALSE));
     EXPECT(IsEffectDisabled(EFFECT_REGEN_CHARM, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_MOODY_CHARM, FALSE));
+    EXPECT(IsEffectDisabled(EFFECT_EVIOLITE_CHARM, FALSE));
     EXPECT_EQ(Rogue_CalculatePlayerLvlCap(), MAX_LEVEL);
     EXPECT_EQ(Rogue_CalculatePlayerMaxLvl(), MAX_LEVEL);
 
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     EXPECT_EQ(GetCharmValue(EFFECT_LEVEL_CHARM), 0);
     EXPECT_EQ(GetCharmValue(EFFECT_REGEN_CHARM), 0);
+    EXPECT_EQ(GetCharmValue(EFFECT_MOODY_CHARM), 0);
+    EXPECT_EQ(GetCharmValue(EFFECT_EVIOLITE_CHARM), 0);
     EXPECT_EQ(Rogue_CalculatePlayerLvlCap(), MAX_LEVEL);
 
     RestoreLevelCharmTestState(previousDifficulty, previousLevelOffset, previousOverLevelEnabled, previousBattleTypeFlags);

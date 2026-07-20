@@ -38,6 +38,17 @@ static void ExpectFiveStatBoosts(struct BattlePokemon *mon, u32 stages)
     EXPECT_EQ(mon->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + stages);
 }
 
+static void ExpectMoodyCharmStages(struct BattlePokemon *mon, s32 raisedStages, s32 loweredStages)
+{
+    EXPECT_EQ(mon->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+    EXPECT_EQ(mon->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+    EXPECT_EQ(mon->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+    EXPECT_EQ(mon->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + loweredStages);
+    EXPECT_EQ(mon->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + raisedStages);
+    EXPECT_EQ(mon->statStages[STAT_ACC], DEFAULT_STAT_STAGE);
+    EXPECT_EQ(mon->statStages[STAT_EVASION], DEFAULT_STAT_STAGE);
+}
+
 SINGLE_BATTLE_TEST("charms: flow - Retaliate Charm boosts the next entrant after an ally faints")
 {
     GIVEN {
@@ -852,6 +863,84 @@ SINGLE_BATTLE_TEST("charms: flow - Regen Charm does not revive a fainting switch
         TURN { MOVE(player, MOVE_HEALING_WISH); SEND_OUT(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } THEN {
         EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP), 0);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Moody Charm raises and lowers different eligible stats by one stage")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_MOODY_CHARM, 1);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF { ABILITY_POPUP(player); }
+    } THEN {
+        ExpectMoodyCharmStages(player, 1, -1);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Moody Charm does not activate for opponents")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_MOODY_CHARM, 1);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(opponent->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponent->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Moody Charm waits until the turn after switching in")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_MOODY_CHARM, 1);
+        PLAYER(SPECIES_WYNAUT);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        ExpectMoodyCharmStages(player, 0, 0);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Moody Charm activates on a switched Pokemon's next full turn")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_MOODY_CHARM, 1);
+        PLAYER(SPECIES_WYNAUT);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        ExpectMoodyCharmStages(player, 1, -1);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Moody Charm stacks independently with Moody")
+{
+    GIVEN {
+        SetSingleCharmForTest(ITEM_MOODY_CHARM, 1);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_MOODY); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_MOODY);
+    } THEN {
+        ExpectMoodyCharmStages(player, 3, -2);
         ClearCharmTestState();
     }
 }
