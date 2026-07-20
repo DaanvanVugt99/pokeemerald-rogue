@@ -2300,7 +2300,9 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 ADJUST_SCORE(-10);
             break;
         case EFFECT_POWER_TRICK:
-            if (IS_TARGETING_PARTNER(battlerAtk, battlerDef))
+            if (HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL))
+                ADJUST_SCORE(-10);
+            else if (IS_TARGETING_PARTNER(battlerAtk, battlerDef))
                 ADJUST_SCORE(-10);
             else if (gBattleMons[battlerAtk].defense >= gBattleMons[battlerAtk].attack && !HasMoveWithSplit(battlerAtk, SPLIT_PHYSICAL))
                 ADJUST_SCORE(-10);

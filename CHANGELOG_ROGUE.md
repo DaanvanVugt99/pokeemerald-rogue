@@ -70,6 +70,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Ported full battle animations for all five Torque moves from
+  `pokeemerald-expansion`.
 - Restored Frontier Brain adventure-path encounters with three scheduled
   Frontier Brain battles per run, previewed Pokémon trophies, and canon-inspired
   competitive teams; Brandon can uniquely award one of his Legendary guardians.

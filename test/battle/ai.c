@@ -91,6 +91,20 @@ AI_SINGLE_BATTLE_TEST("AI does not use Rest if it has unique Insomnia")
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI does not use Power Trick with Ancient Idol")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_POWER_TRICK].effect == EFFECT_POWER_TRICK);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { HP(200); }
+        OPPONENT(SPECIES_WOBBUFFET) {
+            Attack(50); Defense(100); UniqueAbility(ABILITY_ANCIENT_IDOL); Moves(MOVE_POWER_TRICK, MOVE_TACKLE);
+        }
+    } WHEN {
+        TURN { EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI scores Confuse Ray below Tackle against revealed Own Tempo")
 {
     GIVEN {
