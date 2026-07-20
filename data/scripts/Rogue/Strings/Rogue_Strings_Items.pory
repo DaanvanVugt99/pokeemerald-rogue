@@ -199,11 +199,11 @@ text gItemDesc_FlinchCurse
 
 text gItemDesc_CritCharm
 {
-    format("Friendly Pokémon have +2 critical-hit stages.")
+    format("Friendly Pokémon have +1 critical-hit stage.")
 }
 text gItemDesc_CritCurse
 {
-    format("Opponent Pokémon have +2 critical-hit stages.")
+    format("Opponent Pokémon have +1 critical-hit stage.")
 }
 
 text gItemDesc_ShedSkinCharm

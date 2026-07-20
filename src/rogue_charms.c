@@ -257,7 +257,7 @@ static u16 CalcValueInternal(u8 effectType, u16 itemCount, bool8 isCurse)
             return isCurse ? min(itemCount * 15, 90) : uniqueCharmCount * 15;
 
         case EFFECT_CRIT_CHANCE:
-            return isCurse ? itemCount * 2 : uniqueCharmCount * 2;
+            return isCurse ? itemCount : uniqueCharmCount;
 
         case EFFECT_SHED_SKIN_CHANCE:
             return isCurse ? min(itemCount * 50, 90) : uniqueCharmCount * 50;

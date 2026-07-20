@@ -165,7 +165,7 @@ TEST("charms: legacy - older charms use their rebalanced unique values")
 
     EXPECT_EQ(GetCharmValue(EFFECT_SHOP_PRICE), 50);
     EXPECT_EQ(GetCharmValue(EFFECT_FLINCH_CHANCE), 15);
-    EXPECT_EQ(GetCharmValue(EFFECT_CRIT_CHANCE), 2);
+    EXPECT_EQ(GetCharmValue(EFFECT_CRIT_CHANCE), 1);
     EXPECT_EQ(GetCharmValue(EFFECT_SHED_SKIN_CHANCE), 50);
     EXPECT_EQ(GetCharmValue(EFFECT_WILD_IV_RATE), 31);
     EXPECT_EQ(GetCharmValue(EFFECT_CATCH_RATE), 200);
