@@ -27,6 +27,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made the Roguelocke Trial require nicknames for every acquired Pokémon while
+  preserving the player's nickname setting outside the Trial.
 - Show each battler's Tera type beside its level whenever Terastallization is
   enabled, using a grayscale icon until it Terastallizes.
 - Added unique abilities for the Galarian legendary birds: Freezing Glare now

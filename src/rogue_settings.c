@@ -13,6 +13,7 @@
 #include "rogue_save.h"
 #include "rogue_settings.h"
 #include "rogue_quest.h"
+#include "rogue_trials.h"
 
 #include "data/rogue/pokemon_nicknames.h"
 
@@ -657,6 +658,9 @@ static u16 GetCurrentNicknameMode()
 {
     if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL)
         return gSaveBlock2Ptr->optionsNicknameMode;
+
+    if(RogueTrial_IsActiveTrial(ROGUE_TRIAL_ROGUELOCKE))
+        return OPTIONS_NICKNAME_MODE_ALWAYS;
 
     if(Rogue_InWildSafari())
         return OPTIONS_NICKNAME_MODE_NEVER;

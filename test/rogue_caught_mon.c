@@ -826,6 +826,36 @@ TEST("Converted curse Trials apply their exact granular Curse rules")
     ClearCaughtMonTestState();
 }
 
+TEST("Roguelocke Trial requires nicknames without changing the saved nickname mode")
+{
+    struct Pokemon mon;
+    u8 originalNicknameMode = gSaveBlock2Ptr->optionsNicknameMode;
+    bool8 wasSnagBattle = FlagGet(FLAG_ROGUE_IN_SNAG_BATTLE);
+    bool8 wasWildSafari = FlagGet(FLAG_ROGUE_WILD_SAFARI);
+
+    ResetCaughtMonTestState();
+    FlagClear(FLAG_ROGUE_IN_SNAG_BATTLE);
+    FlagClear(FLAG_ROGUE_WILD_SAFARI);
+    CreateMon(&mon, SPECIES_PIKACHU, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gSaveBlock2Ptr->optionsNicknameMode = OPTIONS_NICKNAME_MODE_NEVER;
+
+    EXPECT(Rogue_ShouldSkipAssignNickname(&mon));
+    EXPECT(!Rogue_ShouldForceNicknameScreen());
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_ROGUELOCKE);
+    EXPECT(!Rogue_ShouldSkipAssignNickname(&mon));
+    EXPECT(Rogue_ShouldSkipAssignNicknameYesNoMessage());
+    EXPECT(Rogue_ShouldForceNicknameScreen());
+    EXPECT(gSaveBlock2Ptr->optionsNicknameMode == OPTIONS_NICKNAME_MODE_NEVER);
+
+    ClearCaughtMonTestState();
+    gSaveBlock2Ptr->optionsNicknameMode = originalNicknameMode;
+    if (wasSnagBattle)
+        FlagSet(FLAG_ROGUE_IN_SNAG_BATTLE);
+    if (wasWildSafari)
+        FlagSet(FLAG_ROGUE_WILD_SAFARI);
+}
+
 TEST("Converted legality Trials enforce starter and Legendary rules")
 {
     struct Pokemon caughtMon;
