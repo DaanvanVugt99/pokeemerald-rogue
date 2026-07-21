@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Clarified that Iron Treads' Singularity Drive clears allied entry hazards and
+  sets Gravity on switch-in.
 - Made Frontier Brain Pokémon rewards respect the configured nickname mode,
   including skipping prompts for Never and assigning names for Automatic.
 - Kept Tera type indicators visible during battle animations whenever their
