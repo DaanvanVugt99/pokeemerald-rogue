@@ -161,7 +161,11 @@ static const u8 sRule_RegionalTrainers[] = _("Uses the matching regional Trainer
 static const u8 sRule_ZADex[] = _("Only selected Z-A Pokédex species are legal.");
 static const u8 sRule_ZATrainers[] = _("Uses Trainers from every region.");
 static const u8 sRule_ZAOrder[] = _("Trainer order is Rainbow.");
-static const u8 sRule_ZAMegaRing[] = _("A Mega Ring is supplied and active.");
+static const u8 sRule_GimmickNone[] = _("Battle gimmicks are disabled.");
+static const u8 sRule_GimmickMega[] = _("Mega Ring supplied; only Mega Evolution is active.");
+static const u8 sRule_GimmickZMove[] = _("Z-Power Ring supplied; only Z-Moves are active.");
+static const u8 sRule_GimmickDynamax[] = _("Dynamax Band supplied; only Dynamax is active.");
+static const u8 sRule_GimmickTera[] = _("Tera Orb supplied; only Terastallization is active.");
 static const u8 sRule_Doubles[] = _("Trainer battles are Doubles.");
 static const u8 sRule_OrreSnag[] = _("Snag Curse is active.");
 static const u8 sRule_OrreStart[] = _("Start with Umbreon and Espeon.");
@@ -191,7 +195,7 @@ static const u8 *const sRules_LowBst[] = {sRule_LowBstLegality, sRule_LowBstEvol
 static const u8 *const sRules_Randoman[] = {sRule_RandomanReroll, sRule_RandomanDex};
 static const u8 *const sRules_Equalized[] = {sRule_EqualizedBst, sRule_EqualizedStats, sRule_EqualizedIdentity};
 static const u8 *const sRules_Regional[] = {sRule_RegionalDex, sRule_RegionalTrainers};
-static const u8 *const sRules_ZA[] = {sRule_ZADex, sRule_ZATrainers, sRule_ZAOrder, sRule_Doubles, sRule_ZAMegaRing};
+static const u8 *const sRules_ZA[] = {sRule_ZADex, sRule_ZATrainers, sRule_ZAOrder, sRule_Doubles};
 static const u8 *const sRules_Orre[] = {sRule_Doubles, sRule_OrreSnag, sRule_OrreStart, sRule_OrreFinish};
 static const u8 *const sRules_Roguelocke[] = {sRule_RandomStarter, sRule_WildCurse10};
 static const u8 *const sRules_CantPick[] = {sRule_StarterOnly};
@@ -205,6 +209,55 @@ static const u8 *const sRules_Apotheosis[] = {sRule_RandomStarter, sRule_Legenda
 static const u8 *const sRules_LimitedCapture[] = {sRule_FreshStart, sRule_RandomStarter, sRule_FiveCaptures, sRule_GuaranteedCatch, sRule_NoDayCare, sRule_NoGiftMons};
 
 static const u16 sOrreStartingParty[] = {SPECIES_UMBREON, SPECIES_ESPEON};
+
+#ifdef ROGUE_EXPANSION
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Kanto[] =
+{
+    {POKEDEX_VARIANT_KANTO_RBY, ROGUE_TRIAL_GIMMICK_NONE},
+    {POKEDEX_VARIANT_KANTO_LETSGO, ROGUE_TRIAL_GIMMICK_MEGA},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Johto[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_NONE},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Hoenn[] =
+{
+    {POKEDEX_VARIANT_HOENN_RSE, ROGUE_TRIAL_GIMMICK_NONE},
+    {POKEDEX_VARIANT_HOENN_ORAS, ROGUE_TRIAL_GIMMICK_MEGA},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Sinnoh[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_NONE},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Unova[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_NONE},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Kalos[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_MEGA},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Alola[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_Z_MOVE},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Galar[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_DYNAMAX},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Paldea[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_TERASTALLIZATION},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_ZA[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_MEGA},
+};
+static const struct RogueTrialBattleGimmickProfile sGimmicks_Orre[] =
+{
+    {POKEDEX_VARIANT_NONE, ROGUE_TRIAL_GIMMICK_NONE},
+};
+#endif
 
 static const u8 *const sDifficultyNames[DIFFICULTY_PRESET_COUNT] =
 {
@@ -442,6 +495,10 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_KANTO,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_KANTO,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+#ifdef ROGUE_EXPANSION
+        .battleGimmickProfiles = sGimmicks_Kanto,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Kanto),
+#endif
     },
     [ROGUE_TRIAL_REGION_JOHTO] =
     {
@@ -452,6 +509,10 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_JOHTO,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_JOHTO,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+#ifdef ROGUE_EXPANSION
+        .battleGimmickProfiles = sGimmicks_Johto,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Johto),
+#endif
     },
     [ROGUE_TRIAL_REGION_HOENN] =
     {
@@ -462,6 +523,10 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_HOENN,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_HOENN,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+#ifdef ROGUE_EXPANSION
+        .battleGimmickProfiles = sGimmicks_Hoenn,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Hoenn),
+#endif
     },
 #ifdef ROGUE_EXPANSION
     [ROGUE_TRIAL_REGION_SINNOH] =
@@ -473,6 +538,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_SINNOH,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_SINNOH,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+        .battleGimmickProfiles = sGimmicks_Sinnoh,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Sinnoh),
     },
     [ROGUE_TRIAL_REGION_UNOVA] =
     {
@@ -483,6 +550,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_UNOVA,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_UNOVA,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+        .battleGimmickProfiles = sGimmicks_Unova,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Unova),
     },
     [ROGUE_TRIAL_REGION_KALOS] =
     {
@@ -493,6 +562,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_KALOS,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_KALOS,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+        .battleGimmickProfiles = sGimmicks_Kalos,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Kalos),
     },
     [ROGUE_TRIAL_REGION_ALOLA] =
     {
@@ -503,6 +574,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_ALOLA,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_ALOLA,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+        .battleGimmickProfiles = sGimmicks_Alola,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Alola),
     },
     [ROGUE_TRIAL_REGION_GALAR] =
     {
@@ -513,6 +586,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_GALAR,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_GALAR,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+        .battleGimmickProfiles = sGimmicks_Galar,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Galar),
     },
     [ROGUE_TRIAL_REGION_PALDEA] =
     {
@@ -523,6 +598,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .pokedexSet = ROGUE_TRIAL_POKEDEX_SET_PALDEA,
         .forcedTrainerToggle = CONFIG_TOGGLE_TRAINER_PALDEA,
         .requiredType = ROGUE_TRIAL_NO_TYPE,
+        .battleGimmickProfiles = sGimmicks_Paldea,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Paldea),
     },
     [ROGUE_TRIAL_Z_A_ROYALE] =
     {
@@ -538,7 +615,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .forcedBattleFormat = BATTLE_FORMAT_DOUBLES,
         .hasForcedBattleFormat = TRUE,
         .enableAllRegionalTrainers = TRUE,
-        .temporaryBagItem = ITEM_MEGA_RING,
+        .battleGimmickProfiles = sGimmicks_ZA,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_ZA),
     },
 #endif
     [ROGUE_TRIAL_ORRE_STYLE] =
@@ -556,6 +634,10 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .hasCurseEffect = TRUE,
         .fixedStartingParty = sOrreStartingParty,
         .fixedStartingPartyCount = ARRAY_COUNT(sOrreStartingParty),
+#ifdef ROGUE_EXPANSION
+        .battleGimmickProfiles = sGimmicks_Orre,
+        .battleGimmickProfileCount = ARRAY_COUNT(sGimmicks_Orre),
+#endif
     },
     [ROGUE_TRIAL_ROGUELOCKE] =
     {
@@ -1280,6 +1362,74 @@ const struct RogueTrialDefinition *RogueTrial_GetDefinition(u8 trialId)
     return NULL;
 }
 
+bool8 RogueTrial_GetBattleGimmick(u8 trialId, u8 pokedexVariant, u8 *gimmick)
+{
+    u8 i;
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(trialId);
+    const struct RogueTrialBattleGimmickProfile *fallback = NULL;
+
+    if (trial == NULL || gimmick == NULL)
+        return FALSE;
+
+    for (i = 0; i < trial->battleGimmickProfileCount; ++i)
+    {
+        const struct RogueTrialBattleGimmickProfile *profile = &trial->battleGimmickProfiles[i];
+
+        if (profile->pokedexVariant == pokedexVariant)
+        {
+            *gimmick = profile->gimmick;
+            return TRUE;
+        }
+
+        if (profile->pokedexVariant == POKEDEX_VARIANT_NONE)
+            fallback = profile;
+    }
+
+    if (fallback != NULL)
+    {
+        *gimmick = fallback->gimmick;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static const u8 *GetBattleGimmickRuleText(u8 gimmick)
+{
+    switch (gimmick)
+    {
+    case ROGUE_TRIAL_GIMMICK_NONE:
+        return sRule_GimmickNone;
+    case ROGUE_TRIAL_GIMMICK_MEGA:
+        return sRule_GimmickMega;
+    case ROGUE_TRIAL_GIMMICK_Z_MOVE:
+        return sRule_GimmickZMove;
+    case ROGUE_TRIAL_GIMMICK_DYNAMAX:
+        return sRule_GimmickDynamax;
+    case ROGUE_TRIAL_GIMMICK_TERASTALLIZATION:
+        return sRule_GimmickTera;
+    default:
+        return gText_Exit;
+    }
+}
+
+static u16 GetBattleGimmickItem(u8 gimmick)
+{
+    switch (gimmick)
+    {
+    case ROGUE_TRIAL_GIMMICK_MEGA:
+        return ITEM_MEGA_RING;
+    case ROGUE_TRIAL_GIMMICK_Z_MOVE:
+        return ITEM_Z_POWER_RING;
+    case ROGUE_TRIAL_GIMMICK_DYNAMAX:
+        return ITEM_DYNAMAX_BAND;
+    case ROGUE_TRIAL_GIMMICK_TERASTALLIZATION:
+        return ITEM_TERA_ORB;
+    default:
+        return ITEM_NONE;
+    }
+}
+
 static const u8 *const *GetTrialRules(u8 trialId, u8 *ruleCount)
 {
     if (IsTypeTrialId(trialId))
@@ -1350,21 +1500,29 @@ static const u8 *const *GetTrialRules(u8 trialId, u8 *ruleCount)
     }
 }
 
-u8 RogueTrial_GetRuleCount(u8 trialId)
+u8 RogueTrial_GetRuleCount(u8 trialId, u8 pokedexVariant)
 {
     u8 ruleCount;
+    u8 gimmick;
 
     GetTrialRules(trialId, &ruleCount);
+    if (RogueTrial_GetBattleGimmick(trialId, pokedexVariant, &gimmick))
+        ++ruleCount;
+
     return ruleCount;
 }
 
-const u8 *RogueTrial_GetRuleText(u8 trialId, u8 ruleIndex)
+const u8 *RogueTrial_GetRuleText(u8 trialId, u8 pokedexVariant, u8 ruleIndex)
 {
     u8 ruleCount;
+    u8 gimmick;
     const u8 *const *rules = GetTrialRules(trialId, &ruleCount);
 
     if (rules != NULL && ruleIndex < ruleCount)
         return rules[ruleIndex];
+
+    if (ruleIndex == ruleCount && RogueTrial_GetBattleGimmick(trialId, pokedexVariant, &gimmick))
+        return GetBattleGimmickRuleText(gimmick);
 
     return gText_Exit;
 }
@@ -1440,17 +1598,36 @@ void RogueTrial_ApplyPendingSelection(void)
 
 void RogueTrial_ApplyRunBagItems(void)
 {
-    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+    u8 gimmick;
+    u16 item;
 
-    if (trial != NULL
-        && trial->temporaryBagItem != ITEM_NONE
-        && !CheckBagHasItem(trial->temporaryBagItem, 1))
+    if (!RogueTrial_GetBattleGimmick(gRogueRun.trialState.trialId, RoguePokedex_GetDexVariant(), &gimmick))
+        return;
+
+    item = GetBattleGimmickItem(gimmick);
+
+    if (item != ITEM_NONE && !CheckBagHasItem(item, 1))
     {
-        bool8 success = AddBagItem(trial->temporaryBagItem, 1);
+        bool8 success = AddBagItem(item, 1);
 
         if (!success)
             AGB_ASSERT(FALSE);
     }
+}
+
+void RogueTrial_ApplyBattleGimmickOverride(void)
+{
+#ifdef ROGUE_EXPANSION
+    u8 gimmick;
+
+    if (!RogueTrial_GetBattleGimmick(gRogueRun.trialState.trialId, RoguePokedex_GetDexVariant(), &gimmick))
+        return;
+
+    gRogueRun.megasEnabled = gimmick == ROGUE_TRIAL_GIMMICK_MEGA;
+    gRogueRun.zMovesEnabled = gimmick == ROGUE_TRIAL_GIMMICK_Z_MOVE;
+    gRogueRun.dynamaxEnabled = gimmick == ROGUE_TRIAL_GIMMICK_DYNAMAX;
+    gRogueRun.terastallizeEnabled = gimmick == ROGUE_TRIAL_GIMMICK_TERASTALLIZATION;
+#endif
 }
 
 u8 RogueTrial_GetPendingForcedPokedexVariant(void)

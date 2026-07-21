@@ -20,6 +20,7 @@
 #include "rogue_save.h"
 #include "rogue_settings.h"
 #include "rogue_trials.h"
+#include "string_util.h"
 #include "test/test.h"
 
 static void ResetCaughtMonTestState(void)
@@ -601,32 +602,174 @@ TEST("Z-A Royale Trial applies Z-A dex, Rainbow order, Doubles, and regional tra
     ClearCaughtMonTestState();
 }
 
-TEST("Z-A Royale temporarily supplies a missing Mega Ring without duplicating an owned one")
+TEST("Regional Style Trials resolve their era gimmick from the selected Pokedex")
 {
-    u16 originalCount = CountTotalItemQuantityInBag(ITEM_MEGA_RING);
+    static const struct
+    {
+        u8 trialId;
+        u8 pokedexVariant;
+        u8 gimmick;
+    } cases[] =
+    {
+        {ROGUE_TRIAL_REGION_KANTO, POKEDEX_VARIANT_KANTO_RBY, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_KANTO, POKEDEX_VARIANT_KANTO_LETSGO, ROGUE_TRIAL_GIMMICK_MEGA},
+        {ROGUE_TRIAL_REGION_JOHTO, POKEDEX_VARIANT_JOHTO_GSC, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_JOHTO, POKEDEX_VARIANT_JOHTO_HGSS, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_HOENN, POKEDEX_VARIANT_HOENN_RSE, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_HOENN, POKEDEX_VARIANT_HOENN_ORAS, ROGUE_TRIAL_GIMMICK_MEGA},
+        {ROGUE_TRIAL_REGION_SINNOH, POKEDEX_VARIANT_SINNOH_DP, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_SINNOH, POKEDEX_VARIANT_SINNOH_PL, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_UNOVA, POKEDEX_VARIANT_UNOVA_BW, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_UNOVA, POKEDEX_VARIANT_UNOVA_BW2, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_KALOS, POKEDEX_VARIANT_KALOS, ROGUE_TRIAL_GIMMICK_MEGA},
+        {ROGUE_TRIAL_REGION_ALOLA, POKEDEX_VARIANT_ALOLA_SM, ROGUE_TRIAL_GIMMICK_Z_MOVE},
+        {ROGUE_TRIAL_REGION_ALOLA, POKEDEX_VARIANT_ALOLA_USUM, ROGUE_TRIAL_GIMMICK_Z_MOVE},
+        {ROGUE_TRIAL_REGION_GALAR, POKEDEX_VARIANT_GALAR_SWSH, ROGUE_TRIAL_GIMMICK_DYNAMAX},
+        {ROGUE_TRIAL_REGION_GALAR, POKEDEX_VARIANT_GALAR_ISLEOFARMOR, ROGUE_TRIAL_GIMMICK_DYNAMAX},
+        {ROGUE_TRIAL_REGION_GALAR, POKEDEX_VARIANT_GALAR_CROWNTUNDRA, ROGUE_TRIAL_GIMMICK_DYNAMAX},
+        {ROGUE_TRIAL_REGION_GALAR, POKEDEX_VARIANT_GALAR_FULLDLC, ROGUE_TRIAL_GIMMICK_DYNAMAX},
+        {ROGUE_TRIAL_REGION_PALDEA, POKEDEX_VARIANT_PALDEA_SCVI, ROGUE_TRIAL_GIMMICK_TERASTALLIZATION},
+        {ROGUE_TRIAL_REGION_PALDEA, POKEDEX_VARIANT_PALDEA_KITAKAMI, ROGUE_TRIAL_GIMMICK_TERASTALLIZATION},
+        {ROGUE_TRIAL_REGION_PALDEA, POKEDEX_VARIANT_PALDEA_BLUEBERRY, ROGUE_TRIAL_GIMMICK_TERASTALLIZATION},
+        {ROGUE_TRIAL_REGION_PALDEA, POKEDEX_VARIANT_PALDEA_FULLDLC, ROGUE_TRIAL_GIMMICK_TERASTALLIZATION},
+        {ROGUE_TRIAL_Z_A_ROYALE, POKEDEX_VARIANT_LEGENDS_ZA, ROGUE_TRIAL_GIMMICK_MEGA},
+        {ROGUE_TRIAL_Z_A_ROYALE, POKEDEX_VARIANT_LEGENDS_ZAFULLDLC, ROGUE_TRIAL_GIMMICK_MEGA},
+        {ROGUE_TRIAL_ORRE_STYLE, POKEDEX_VARIANT_ROGUE_MODERN, ROGUE_TRIAL_GIMMICK_NONE},
+    };
+    u8 i;
+    u8 gimmick;
 
-    while (RemoveBagItem(ITEM_MEGA_RING, 1))
-        ;
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        EXPECT(RogueTrial_GetBattleGimmick(cases[i].trialId, cases[i].pokedexVariant, &gimmick));
+        EXPECT_EQ(gimmick, cases[i].gimmick);
+    }
+
+    EXPECT(!RogueTrial_GetBattleGimmick(ROGUE_TRIAL_LITTLE_CUP, POKEDEX_VARIANT_ROGUE_MODERN, &gimmick));
+}
+
+TEST("Regional Style gimmick overrides are exclusive while ordinary Trials preserve cached state")
+{
+    static const struct
+    {
+        u8 trialId;
+        u8 pokedexVariant;
+        u8 gimmick;
+    } cases[] =
+    {
+        {ROGUE_TRIAL_REGION_KANTO, POKEDEX_VARIANT_KANTO_RBY, ROGUE_TRIAL_GIMMICK_NONE},
+        {ROGUE_TRIAL_REGION_KALOS, POKEDEX_VARIANT_KALOS, ROGUE_TRIAL_GIMMICK_MEGA},
+        {ROGUE_TRIAL_REGION_ALOLA, POKEDEX_VARIANT_ALOLA_USUM, ROGUE_TRIAL_GIMMICK_Z_MOVE},
+        {ROGUE_TRIAL_REGION_GALAR, POKEDEX_VARIANT_GALAR_FULLDLC, ROGUE_TRIAL_GIMMICK_DYNAMAX},
+        {ROGUE_TRIAL_REGION_PALDEA, POKEDEX_VARIANT_PALDEA_FULLDLC, ROGUE_TRIAL_GIMMICK_TERASTALLIZATION},
+    };
+    u8 i;
+
+    ResetCaughtMonTestState();
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        ActivateCaughtMonTestTrial(cases[i].trialId);
+        RoguePokedex_SetDexVariant(cases[i].pokedexVariant);
+        gRogueRun.megasEnabled = TRUE;
+        gRogueRun.zMovesEnabled = TRUE;
+        gRogueRun.dynamaxEnabled = TRUE;
+        gRogueRun.terastallizeEnabled = TRUE;
+
+        RogueTrial_ApplyBattleGimmickOverride();
+
+        EXPECT(gRogueRun.megasEnabled == (cases[i].gimmick == ROGUE_TRIAL_GIMMICK_MEGA));
+        EXPECT(gRogueRun.zMovesEnabled == (cases[i].gimmick == ROGUE_TRIAL_GIMMICK_Z_MOVE));
+        EXPECT(gRogueRun.dynamaxEnabled == (cases[i].gimmick == ROGUE_TRIAL_GIMMICK_DYNAMAX));
+        EXPECT(gRogueRun.terastallizeEnabled == (cases[i].gimmick == ROGUE_TRIAL_GIMMICK_TERASTALLIZATION));
+    }
+
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_LITTLE_CUP);
+    gRogueRun.megasEnabled = FALSE;
+    gRogueRun.zMovesEnabled = TRUE;
+    gRogueRun.dynamaxEnabled = FALSE;
+    gRogueRun.terastallizeEnabled = TRUE;
+    RogueTrial_ApplyBattleGimmickOverride();
+    EXPECT(!gRogueRun.megasEnabled);
+    EXPECT(gRogueRun.zMovesEnabled);
+    EXPECT(!gRogueRun.dynamaxEnabled);
+    EXPECT(gRogueRun.terastallizeEnabled);
+    ClearCaughtMonTestState();
+}
+
+TEST("Regional Style gimmick items are temporary and idempotent")
+{
+    static const struct
+    {
+        u8 trialId;
+        u8 pokedexVariant;
+        u16 item;
+    } cases[] =
+    {
+        {ROGUE_TRIAL_REGION_KALOS, POKEDEX_VARIANT_KALOS, ITEM_MEGA_RING},
+        {ROGUE_TRIAL_REGION_ALOLA, POKEDEX_VARIANT_ALOLA_USUM, ITEM_Z_POWER_RING},
+        {ROGUE_TRIAL_REGION_GALAR, POKEDEX_VARIANT_GALAR_FULLDLC, ITEM_DYNAMAX_BAND},
+        {ROGUE_TRIAL_REGION_PALDEA, POKEDEX_VARIANT_PALDEA_FULLDLC, ITEM_TERA_ORB},
+    };
+    u16 originalCounts[ARRAY_COUNT(cases)];
+    u8 i;
+
+    ResetCaughtMonTestState();
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+        originalCounts[i] = CountTotalItemQuantityInBag(cases[i].item);
 
     RogueSave_SaveHubStates();
-    ActivateCaughtMonTestTrial(ROGUE_TRIAL_Z_A_ROYALE);
-    RogueTrial_ApplyRunBagItems();
-    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 1);
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        while (RemoveBagItem(cases[i].item, 1))
+            ;
+
+        ActivateCaughtMonTestTrial(cases[i].trialId);
+        RoguePokedex_SetDexVariant(cases[i].pokedexVariant);
+        RogueTrial_ApplyRunBagItems();
+        RogueTrial_ApplyRunBagItems();
+        EXPECT_EQ(CountTotalItemQuantityInBag(cases[i].item), 1);
+
+        EXPECT(RemoveBagItem(cases[i].item, 1));
+        RogueTrial_ApplyRunBagItems();
+        EXPECT_EQ(CountTotalItemQuantityInBag(cases[i].item), 1);
+    }
+
     RogueSave_LoadHubStates();
-    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 0);
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+        EXPECT_EQ(CountTotalItemQuantityInBag(cases[i].item), originalCounts[i]);
+    ClearCaughtMonTestState();
+}
 
-    EXPECT(AddBagItem(ITEM_MEGA_RING, 1));
-    RogueSave_SaveHubStates();
-    RogueTrial_ApplyRunBagItems();
-    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 1);
-    RogueSave_LoadHubStates();
-    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 1);
+TEST("Regional Style preview rules are variant-aware")
+{
+    static const u8 sExpectedDisabled[] = _("Battle gimmicks are disabled.");
+    static const u8 sExpectedMega[] = _("Mega Ring supplied; only Mega Evolution is active.");
+    const u8 *rule;
 
-    while (RemoveBagItem(ITEM_MEGA_RING, 1))
-        ;
-    if (originalCount != 0)
-        EXPECT(AddBagItem(ITEM_MEGA_RING, originalCount));
-    RogueSave_SaveHubStates();
+    EXPECT_EQ(RogueTrial_GetRuleCount(ROGUE_TRIAL_REGION_KANTO, POKEDEX_VARIANT_KANTO_RBY), 3);
+    rule = RogueTrial_GetRuleText(ROGUE_TRIAL_REGION_KANTO, POKEDEX_VARIANT_KANTO_RBY, 2);
+    EXPECT_EQ(StringCompare(rule, sExpectedDisabled), 0);
+
+    EXPECT_EQ(RogueTrial_GetRuleCount(ROGUE_TRIAL_REGION_KANTO, POKEDEX_VARIANT_KANTO_LETSGO), 3);
+    rule = RogueTrial_GetRuleText(ROGUE_TRIAL_REGION_KANTO, POKEDEX_VARIANT_KANTO_LETSGO, 2);
+    EXPECT_EQ(StringCompare(rule, sExpectedMega), 0);
+
+    rule = RogueTrial_GetRuleText(ROGUE_TRIAL_REGION_HOENN, POKEDEX_VARIANT_HOENN_RSE, 2);
+    EXPECT_EQ(StringCompare(rule, sExpectedDisabled), 0);
+    rule = RogueTrial_GetRuleText(ROGUE_TRIAL_REGION_HOENN, POKEDEX_VARIANT_HOENN_ORAS, 2);
+    EXPECT_EQ(StringCompare(rule, sExpectedMega), 0);
+
+    EXPECT_EQ(RogueTrial_GetRuleCount(ROGUE_TRIAL_Z_A_ROYALE, POKEDEX_VARIANT_LEGENDS_ZA), 5);
+    EXPECT_EQ(RogueTrial_GetRuleCount(ROGUE_TRIAL_LITTLE_CUP, POKEDEX_VARIANT_ROGUE_MODERN), 4);
+}
+
+TEST("Regional Style completion does not require activating its gimmick")
+{
+    ResetCaughtMonTestState();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_REGION_KALOS);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KALOS);
+    gRogueRun.megasEnabled = TRUE;
+    EXPECT(RogueTrial_IsCompleteForQuest(ROGUE_TRIAL_REGION_KALOS));
     ClearCaughtMonTestState();
 }
 #endif

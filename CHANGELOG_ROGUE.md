@@ -18,8 +18,8 @@ Format follows Keep a Changelog loosely:
 
 - Made Unique Legendary variants available in legendary nodes from the start,
   and moved alternative Unique Pokémon typings to the final Unique Lab upgrade.
-- Made Z-A Royale temporarily supply a Mega Ring for its run when needed,
-  without requiring or granting permanent ownership.
+- Made Regional Style Trials exclusively enable and temporarily supply their
+  era-appropriate battle gimmick, while legacy styles disable all gimmicks.
 - Made Orre Style replace the incoming party with Umbreon and Espeon while
   retaining its requirement to finish the Trial with both partners.
 - Layered staggered lightning strikes and electrical flashes through

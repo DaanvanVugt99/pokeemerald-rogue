@@ -42,6 +42,8 @@
 #include "constants/abilities.h"
 #include "constants/moves.h"
 
+#include "rogue_controller.h"
+
 #define STAT_STAGE(battler, stat) (gBattleMons[battler].statStages[stat - 1])
 
 // Function Declarations
@@ -159,6 +161,9 @@ bool32 IsViableZMove(u8 battler, u16 move)
     u32 item;
     u16 holdEffect;
     int moveSlotIndex;
+
+    if (!IsZMovesEnabled())
+        return FALSE;
 
     item = gBattleMons[battler].item;
 
@@ -729,4 +734,3 @@ u16 GetZMovePower(u16 move)
         }
     }
 }
-

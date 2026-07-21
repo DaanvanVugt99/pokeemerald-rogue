@@ -25,7 +25,7 @@
             {
                 "name": "Regional Style",
                 "display_group": "region_trials",
-                "description": "Complete any of the Region Style Trials.\\ne.g. Kanto Style, Johto Style, Orre Style etc.",
+                "description": "Complete any Regional Style Trial.\\nEach era enforces its own battle gimmick rules.",
                 "flags": 
                 [
                     "MAIN_QUEST_DEFAULT",
@@ -73,7 +73,7 @@
             },
             {
                 "name": "Kanto Style",
-                "description": "Complete the Kanto Style Trial through the Trial Attendant.",
+                "description": "Complete the Kanto Style Trial.\\nRBY disables gimmicks; Let's Go enables Mega Evolution.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_KANTO"
@@ -94,7 +94,7 @@
             },
             {
                 "name": "Johto Style",
-                "description": "Complete the Johto Style Trial through the Trial Attendant.",
+                "description": "Complete the Johto Style Trial.\\nBattle gimmicks are disabled.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_JOHTO"
@@ -115,7 +115,7 @@
             },
             {
                 "name": "Hoenn Style",
-                "description": "Complete the Hoenn Style Trial through the Trial Attendant.",
+                "description": "Complete the Hoenn Style Trial.\\nRSE disables gimmicks; ORAS enables Mega Evolution.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_HOENN"
@@ -137,7 +137,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Sinnoh Style",
-                "description": "Complete the Sinnoh Style Trial through the Trial Attendant.",
+                "description": "Complete the Sinnoh Style Trial.\\nBattle gimmicks are disabled.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_SINNOH"
@@ -159,7 +159,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Unova Style",
-                "description": "Complete the Unova Style Trial through the Trial Attendant.",
+                "description": "Complete the Unova Style Trial.\\nBattle gimmicks are disabled.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_UNOVA"
@@ -181,7 +181,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Kalos Style",
-                "description": "Complete the Kalos Style Trial through the Trial Attendant.",
+                "description": "Complete the Kalos Style Trial.\\nOnly Mega Evolution is active.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_KALOS"
@@ -203,7 +203,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Alola Style",
-                "description": "Complete the Alola Style Trial through the Trial Attendant.",
+                "description": "Complete the Alola Style Trial.\\nOnly Z-Moves are active.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_ALOLA"
@@ -225,7 +225,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Galar Style",
-                "description": "Complete the Galar Style Trial through the Trial Attendant.",
+                "description": "Complete the Galar Style Trial.\\nOnly Dynamax is active.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_GALAR"
@@ -247,7 +247,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Paldea Style",
-                "description": "Complete the Paldea Style Trial through the Trial Attendant.",
+                "description": "Complete the Paldea Style Trial.\\nOnly Terastallization is active.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_REGION_PALDEA"
@@ -269,7 +269,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Z-A Royale",
-                "description": "Complete the Z-A Royale Trial through the Trial Attendant.",
+                "description": "Complete the Z-A Royale Trial.\\nOnly Mega Evolution is active.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_Z_A_ROYALE"
@@ -286,7 +286,7 @@
             },
             {
                 "name": "Orre Style",
-                "description": "Complete the Orre Style Trial through the Trial Attendant with Umbreon and Espeon in your party.",
+                "description": "Complete the Orre Style Trial with Umbreon and Espeon.\\nBattle gimmicks are disabled.",
                 "triggers":
                 [
                     {

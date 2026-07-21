@@ -26194,6 +26194,9 @@ bool32 CanMegaEvolve(u32 battler)
     u8 partnerPosition = GetBattlerPosition(BATTLE_PARTNER(battler));
     struct MegaEvolutionData *mega = &(((struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]))->mega);
 
+    if (!IsMegaEvolutionEnabled())
+        return FALSE;
+
     // Check if Player has a Mega Ring
     if ((GetBattlerPosition(battler) == B_POSITION_PLAYER_LEFT || (!(gBattleTypeFlags & BATTLE_TYPE_MULTI) && GetBattlerPosition(battler) == B_POSITION_PLAYER_RIGHT))
      && !CheckBagHasItem(ITEM_MEGA_RING, 1))
@@ -26255,6 +26258,9 @@ bool32 CanUltraBurst(u32 battler)
     struct Pokemon *mon;
     u32 battlerPosition = GetBattlerPosition(battler);
     u8 partnerPosition = GetBattlerPosition(BATTLE_PARTNER(battler));
+
+    if (!IsZMovesEnabled())
+        return FALSE;
 
     // Check if Player has a Z Ring
     if ((GetBattlerPosition(battler) == B_POSITION_PLAYER_LEFT || (!(gBattleTypeFlags & BATTLE_TYPE_MULTI) && GetBattlerPosition(battler) == B_POSITION_PLAYER_RIGHT))

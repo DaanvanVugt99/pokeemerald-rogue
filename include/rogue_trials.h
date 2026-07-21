@@ -72,6 +72,22 @@ enum RogueTrialPokedexSet
     ROGUE_TRIAL_POKEDEX_SET_LEGENDS_ZA,
 };
 
+enum RogueTrialBattleGimmick
+{
+    ROGUE_TRIAL_GIMMICK_NONE,
+    ROGUE_TRIAL_GIMMICK_MEGA,
+    ROGUE_TRIAL_GIMMICK_Z_MOVE,
+    ROGUE_TRIAL_GIMMICK_DYNAMAX,
+    ROGUE_TRIAL_GIMMICK_TERASTALLIZATION,
+    ROGUE_TRIAL_GIMMICK_COUNT,
+};
+
+struct RogueTrialBattleGimmickProfile
+{
+    u8 pokedexVariant;
+    u8 gimmick;
+};
+
 struct RogueTrialDefinition
 {
     u8 id;
@@ -83,7 +99,8 @@ struct RogueTrialDefinition
     u8 requiredType;
     u16 maxBst;
     u16 normalizedBst;
-    u16 temporaryBagItem;
+    const struct RogueTrialBattleGimmickProfile *battleGimmickProfiles;
+    u8 battleGimmickProfileCount;
     u8 battleLevel;
     u8 forcedTrainerOrder;
     u8 forcedBattleFormat;
@@ -128,14 +145,16 @@ struct RogueTrialRunState
 };
 
 const struct RogueTrialDefinition *RogueTrial_GetDefinition(u8 trialId);
-u8 RogueTrial_GetRuleCount(u8 trialId);
-const u8 *RogueTrial_GetRuleText(u8 trialId, u8 ruleIndex);
+u8 RogueTrial_GetRuleCount(u8 trialId, u8 pokedexVariant);
+const u8 *RogueTrial_GetRuleText(u8 trialId, u8 pokedexVariant, u8 ruleIndex);
+bool8 RogueTrial_GetBattleGimmick(u8 trialId, u8 pokedexVariant, u8 *gimmick);
 bool8 RogueTrial_IsActive(void);
 bool8 RogueTrial_IsActiveTrial(u8 trialId);
 bool8 RogueTrial_IsInvalidated(void);
 void RogueTrial_Invalidate(void);
 void RogueTrial_ApplyPendingSelection(void);
 void RogueTrial_ApplyRunBagItems(void);
+void RogueTrial_ApplyBattleGimmickOverride(void);
 u8 RogueTrial_GetPendingForcedPokedexVariant(void);
 
 u16 RogueTrial_GetCharmItemCount(u8 effectType);

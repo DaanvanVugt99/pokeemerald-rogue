@@ -5063,6 +5063,7 @@ static void BeginRogueRunPhase_Reset(void)
     gRogueRun.zMovesEnabled = IsZMovesEnabled();
     gRogueRun.dynamaxEnabled = IsDynamaxEnabled();
     gRogueRun.terastallizeEnabled = IsTerastallizeEnabled();
+    RogueTrial_ApplyBattleGimmickOverride();
     // CheckBagHasItem(ITEM_DYNAMAX_BAND, 1)
 #endif
 

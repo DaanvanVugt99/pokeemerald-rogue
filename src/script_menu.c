@@ -1474,11 +1474,11 @@ static u8 BufferTrialOverviewRuleLines(void)
 {
     u8 ruleIndex;
     u8 lineCount = 0;
-    u8 ruleCount = RogueTrial_GetRuleCount(gSpecialVar_0x8004);
+    u8 ruleCount = RogueTrial_GetRuleCount(gSpecialVar_0x8004, gSpecialVar_0x8006);
 
     for (ruleIndex = 0; ruleIndex < ruleCount && lineCount < TRIAL_OVERVIEW_MAX_RULE_LINES; ++ruleIndex)
     {
-        const u8 *src = RogueTrial_GetRuleText(gSpecialVar_0x8004, ruleIndex);
+        const u8 *src = RogueTrial_GetRuleText(gSpecialVar_0x8004, gSpecialVar_0x8006, ruleIndex);
         u8 lineLength = 0;
 
         sTrialOverviewRuleLines[lineCount][0] = EOS;
