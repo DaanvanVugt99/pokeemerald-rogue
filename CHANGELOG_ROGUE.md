@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Restored unique-ability inheritance for costume and cap Pikachu, Spiky-eared
+  Pichu, alternate Unown letters, and ten previously unmapped Gigantamax forms.
 - Prevented Frontier Brains from replacing routes in the starting column of an
   adventure path, ensuring the player can level before challenging them.
 - Moved battle gimmick selectors clear of the battler type indicators.
