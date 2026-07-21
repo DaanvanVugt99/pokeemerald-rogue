@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Layered staggered lightning strikes and electrical flashes through
+  Thundercrush's rising stone animation.
 - Updated every Poké Ball item description to state its exact catch multiplier
   and conditions while retaining descriptions of secondary capture effects.
 - Added independent 1x-4x speed controls for scripted cutscene movement,
@@ -60,6 +62,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Infested Terrain damaging Flying and otherwise ungrounded Pokémon on
+  switch-in.
 - Fixed the storage out-of-Dex warning compressing and overlapping the Pokémon
   information panel.
 - Added Galarian Corsola to the Modern Pokedex alongside Cursola.

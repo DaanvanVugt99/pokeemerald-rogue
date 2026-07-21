@@ -3976,6 +3976,7 @@ Move_STONE_EDGE:
 
 Move_THUNDERCRUSH:
 	loadspritegfx ANIM_TAG_STONE_EDGE
+	loadspritegfx ANIM_TAG_LIGHTNING
 	loadspritegfx ANIM_TAG_ELECTRICITY
 	loadspritegfx ANIM_TAG_SPARK_2
 	loadspritegfx ANIM_TAG_IMPACT
@@ -3986,15 +3987,30 @@ Move_THUNDERCRUSH:
 	delay 2
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 32, 480, 20, 16, -46, 1
 	delay 2
-	loopsewithpan SE_M_THUNDERBOLT, SOUND_PAN_TARGET, 18, 3
+	createvisualtask AnimTask_InvertScreenColor, 2, 0x1 | 0x2 | 0x4
+	playsewithpan SE_M_THUNDERBOLT, SOUND_PAN_TARGET
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, -18, -32
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, -18, -16
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, -18, 16
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 33, 576, 20, 8, 42, 1
 	delay 2
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 31, 400, 25, 11, -42, 1
 	delay 2
+	createvisualtask AnimTask_InvertScreenColor, 2, 0x1 | 0x2 | 0x4
+	playsewithpan SE_M_THUNDER_WAVE, SOUND_PAN_TARGET
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 6, 18, -32
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 6, 18, -16
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 6, 18, 16
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 28, 512, 25, 16, 46, 1
 	delay 2
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 33, 464, 30, 15, 49, 1
-	delay 6
+	delay 2
+	createvisualtask AnimTask_InvertScreenColor, 2, 0x1 | 0x2 | 0x4
+	playsewithpan SE_M_THUNDERBOLT, SOUND_PAN_TARGET
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, 0, -32
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, 0, -16
+	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, 0, 16
+	delay 4
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 2, 0, 10, RGB(31, 31, 0)
 	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, 5, 0, 5, 0
 	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, -5, 10, 5, 1

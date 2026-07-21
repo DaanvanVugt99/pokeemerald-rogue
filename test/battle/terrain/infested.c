@@ -103,6 +103,32 @@ SINGLE_BATTLE_TEST("Infested Terrain damages switch ins based on Bug typing")
     }
 }
 
+SINGLE_BATTLE_TEST("Infested Terrain only damages grounded switch ins")
+{
+    u32 item = ITEM_NONE;
+    bool32 grounded;
+
+    PARAMETRIZE { grounded = FALSE; }
+    PARAMETRIZE { item = ITEM_IRON_BALL; grounded = TRUE; }
+
+    GIVEN {
+        ASSUME(gSpeciesInfo[SPECIES_ZUBAT].types[0] != TYPE_BUG && gSpeciesInfo[SPECIES_ZUBAT].types[1] != TYPE_BUG);
+        ASSUME(gSpeciesInfo[SPECIES_ZUBAT].types[0] == TYPE_FLYING || gSpeciesInfo[SPECIES_ZUBAT].types[1] == TYPE_FLYING);
+        ASSUME(gItems[ITEM_IRON_BALL].holdEffect == HOLD_EFFECT_IRON_BALL);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_CATERPIE);
+        OPPONENT(SPECIES_ZUBAT) { Item(item); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_INFESTED_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(opponent, 1); }
+    } SCENE {
+        if (grounded)
+            HP_BAR(opponent);
+        else
+            NOT HP_BAR(opponent);
+    }
+}
+
 SINGLE_BATTLE_TEST("Infested Terrain does not damage Bug-type switch ins")
 {
     GIVEN {

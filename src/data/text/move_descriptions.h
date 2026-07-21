@@ -993,8 +993,8 @@ static const u8 sEclipseDescription[] = _(
     "weakens Fairy for 8 turns.");
 
 static const u8 sInfestedTerrainDescription[] = _(
-    "Switching causes Bug-\n"
-    "type damage for 8 turns.");
+    "Grounded switch-ins take\n"
+    "Bug damage for 8 turns.");
 
 static const u8 sPlainTerrainDescription[] = _(
     "Boosts Normal moves and\n"

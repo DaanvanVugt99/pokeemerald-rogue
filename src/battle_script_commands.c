@@ -9470,6 +9470,8 @@ static s32 GetSwitchInInfestedTerrainDamage(u32 battler)
         return 0;
     if (!(gFieldStatuses & STATUS_FIELD_INFESTED_TERRAIN))
         return 0;
+    if (!IsBattlerGrounded(battler))
+        return 0;
     if (HasBattlerAbility(battler, ABILITY_MAGIC_GUARD))
         return 0;
 
