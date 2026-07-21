@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept Tera type indicators visible during battle animations whenever their
+  healthboxes remain visible.
 - Prevented battle-end fades from freeing healthbox backing data while its
   sprites were still active, including during accelerated battle updates.
 - Prevented future-only faint effects and subsequent end-of-turn effects from
@@ -23,6 +25,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Show each battler's Tera type beside its level whenever Terastallization is
+  enabled, using a grayscale icon until it Terastallizes.
 - Added unique abilities for the Galarian legendary birds: Freezing Glare now
   sets Future Sight, Galarian Zapdos matches the field's fastest raw Speed, and
   contact hits prime Galarian Moltres's next Dark move to drain half its damage.

@@ -87,6 +87,7 @@ enum
 #define TAG_DYNAMAX_TRIGGER_PAL         0xD77D
 #define TAG_TERA_INDICATOR_PAL          0xD77E
 #define TAG_TERA_TRIGGER_PAL            0xD77F
+#define TAG_TERA_INDICATOR_INACTIVE_PAL 0xD794
 
 enum
 {

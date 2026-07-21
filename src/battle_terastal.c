@@ -727,11 +727,27 @@ void TeraIndicator_LoadSpriteGfx(void)
 {
     LoadSpriteSheets(sTeraIndicatorSpriteSheets);
     LoadSpritePalette(&sSpritePalette_TeraIndicator);
+
+    if (IsTerastallizeEnabled())
+    {
+        u16 inactivePaletteData[16];
+        const struct SpritePalette inactivePalette =
+        {
+            inactivePaletteData, TAG_TERA_INDICATOR_INACTIVE_PAL
+        };
+
+        CpuCopy16(sTeraIndicatorPal, inactivePaletteData, sizeof(inactivePaletteData));
+        TintPalette_GrayScale(inactivePaletteData, ARRAY_COUNT(inactivePaletteData));
+        LoadSpritePalette(&inactivePalette);
+    }
 }
 
 bool32 TeraIndicator_ShouldBeInvisible(u32 battler)
 {
-    return !IsTerastallized(battler);
+    return !IsTerastallizeEnabled()
+        || IsBattlerMegaEvolved(battler)
+        || IsBattlerPrimalReverted(battler)
+        || IsDynamaxed(battler);
 }
 
 u8 TeraIndicator_GetSpriteId(u32 healthboxSpriteId)
@@ -757,6 +773,10 @@ void TeraIndicator_SetVisibilities(u32 healthboxId, bool32 invisible)
 void TeraIndicator_UpdateOamPriorities(u32 healthboxId, u32 oamPriority)
 {
     u8 spriteId = TeraIndicator_GetSpriteId(healthboxId);
+
+    if (Rogue_UseSafariBattle())
+        return;
+
     gSprites[spriteId].oam.priority = oamPriority;
 }
 
@@ -790,6 +810,13 @@ void TeraIndicator_CreateSprite(u32 battler, u32 healthboxSpriteId)
     spriteId = gBattleStruct->tera.indicatorSpriteId[battler] = CreateSpriteAtEnd(sTeraIndicatorSpriteTemplates[type], 0, y, 0);
     gSprites[spriteId].tBattler = battler;
     gSprites[spriteId].tPosX = x;
+    if (!IsTerastallized(battler))
+    {
+        u8 paletteNum = IndexOfSpritePaletteTag(TAG_TERA_INDICATOR_INACTIVE_PAL);
+
+        if (paletteNum != 0xFF)
+            gSprites[spriteId].oam.paletteNum = paletteNum;
+    }
     gSprites[spriteId].invisible = TRUE;
 }
 
@@ -808,10 +835,13 @@ void TeraIndicator_UpdateType(u32 battler, u32 healthboxSpriteId)
 static void SpriteCb_TeraIndicator(struct Sprite *sprite)
 {
     u32 battler = sprite->tBattler;
+    u32 healthboxSpriteId = gHealthboxSpriteIds[battler];
+    u32 healthbarSpriteId = gSprites[healthboxSpriteId].hMain_HealthBarSpriteId;
 
-    sprite->x = gSprites[gHealthboxSpriteIds[battler]].x + sprite->tPosX + sprite->tLevelXDelta;
-    sprite->x2 = gSprites[gHealthboxSpriteIds[battler]].x2;
-    sprite->y2 = gSprites[gHealthboxSpriteIds[battler]].y2;
+    sprite->x = gSprites[healthboxSpriteId].x + sprite->tPosX + sprite->tLevelXDelta;
+    sprite->x2 = gSprites[healthboxSpriteId].x2;
+    sprite->y2 = gSprites[healthboxSpriteId].y2;
+    sprite->invisible = gSprites[healthbarSpriteId].invisible || TeraIndicator_ShouldBeInvisible(battler);
 }
 
 #undef tBattler

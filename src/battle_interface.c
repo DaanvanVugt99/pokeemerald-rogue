@@ -1024,6 +1024,7 @@ void UpdateOamPriorityInAllHealthboxes(u8 priority, bool32 hideHPBoxes)
         gSprites[healthbarSpriteId].oam.priority = priority;
 
         MegaIndicator_UpdateOamPriority(healthboxLeftSpriteId, priority);
+        TeraIndicator_UpdateOamPriorities(healthboxLeftSpriteId, priority);
         TypeIndicator_UpdateOamPriority(healthboxLeftSpriteId, priority);
 
         if (B_HIDE_HEALTHBOX_IN_ANIMS == TRUE && hideHPBoxes && IsBattlerAlive(i))
@@ -1089,7 +1090,7 @@ static void UpdateLvlInHealthbox(u8 healthboxSpriteId, u8 lvl)
         MegaIndicator_UpdateLevel(healthboxSpriteId, lvl);
         MegaIndicator_SetVisibilities(healthboxSpriteId, FALSE);
     }
-    else if (IsTerastallized(battler))
+    else if (IsTerastallizeEnabled())
     {
         textPtr = StringCopy(text, gText_HealthboxNickname);
         objVram = ConvertIntToDecimalStringN(textPtr, lvl, STR_CONV_MODE_LEFT_ALIGN, 3);
