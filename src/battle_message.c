@@ -901,9 +901,11 @@ static const u8 sText_DualityShiftedToAttack[] = _("{B_SCR_ACTIVE_NAME_WITH_PREF
 static const u8 sText_GalaricaRoundsLoaded[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}\nloaded a Galarica round!");
 static const u8 sText_TrashAlchemyFound[] = _("{B_ATK_NAME_WITH_PREFIX}'s Trash Alchemy\nfound {B_LAST_ITEM}!");
 static const u8 sText_CommanderActivates[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} was swallowed by\nDondozo and became its commander!");
+static const u8 sText_EmeraldAccordRestored[] = _("{B_ATK_NAME_WITH_PREFIX} restored the\nbattlefield to neutral!");
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_EMERALDACCORDRESTORED - BATTLESTRINGS_TABLE_START] = sText_EmeraldAccordRestored,
     [STRINGID_COMMANDERACTIVATES - BATTLESTRINGS_TABLE_START] = sText_CommanderActivates,
     [STRINGID_TRASHALCHEMYFOUND - BATTLESTRINGS_TABLE_START] = sText_TrashAlchemyFound,
     [STRINGID_GALARICAROUNDSLOADED - BATTLESTRINGS_TABLE_START] = sText_GalaricaRoundsLoaded,

@@ -280,7 +280,7 @@ SINGLE_BATTLE_TEST("Forecast transforms Castform back to normal under Air Lock")
     GIVEN {
         PLAYER(SPECIES_CASTFORM_NORMAL) { Ability(ABILITY_FORECAST); }
         OPPONENT(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_RAYQUAZA);
+        OPPONENT(SPECIES_RAYQUAZA) { UniqueAbility(ABILITY_SILVER_LINING); }
     } WHEN {
         TURN { MOVE(player, MOVE_RAIN_DANCE); }
         TURN { SWITCH(opponent, 1); }

@@ -28,6 +28,7 @@
 #include "window.h"
 #include "battle_message.h"
 #include "battle_main.h"
+#include "battle_script_commands.h"
 #include "battle_ai_main.h"
 #include "battle_ai_util.h"
 #include "event_data.h"
@@ -8440,6 +8441,85 @@ static bool32 ClearSideEntryHazards(u32 side)
     return hazardsCleared;
 }
 
+#define EMERALD_ACCORD_SIDE_STATUSES (SIDE_STATUS_SCREEN_ANY       \
+                                    | SIDE_STATUS_HAZARDS_ANY      \
+                                    | SIDE_STATUS_MIST             \
+                                    | SIDE_STATUS_SAFEGUARD        \
+                                    | SIDE_STATUS_TAILWIND         \
+                                    | SIDE_STATUS_LUCKY_CHANT      \
+                                    | SIDE_STATUS_PLEDGE_ANY       \
+                                    | SIDE_STATUS_DAMAGE_NON_TYPES)
+
+static bool32 IsBattlefieldNeutralForEmeraldAccord(void)
+{
+    u32 battler;
+    u32 side;
+    u32 stat;
+
+    if (gBattleWeather != B_WEATHER_NONE || gFieldStatuses != 0)
+        return FALSE;
+
+    for (side = 0; side < NUM_BATTLE_SIDES; side++)
+    {
+        if (gSideStatuses[side] & EMERALD_ACCORD_SIDE_STATUSES)
+            return FALSE;
+    }
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (!IsBattlerAlive(battler))
+            continue;
+
+        for (stat = STAT_ATK; stat <= STAT_EVASION; stat++)
+        {
+            if (gBattleMons[battler].statStages[stat] != DEFAULT_STAT_STAGE)
+                return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+static void RestoreBattlefieldToNeutral(void)
+{
+    u32 battler;
+    u32 side;
+
+    gBattleWeather = B_WEATHER_NONE;
+    gWishFutureKnock.weatherDuration = 0;
+
+    gFieldStatuses = 0;
+    memset(&gFieldTimers, 0, sizeof(gFieldTimers));
+    TryToRevertMimicryAndFlags();
+
+    for (side = 0; side < NUM_BATTLE_SIDES; side++)
+    {
+        gSideStatuses[side] &= ~EMERALD_ACCORD_SIDE_STATUSES;
+        gSideTimers[side].reflectTimer = 0;
+        gSideTimers[side].lightscreenTimer = 0;
+        gSideTimers[side].mistTimer = 0;
+        gSideTimers[side].safeguardTimer = 0;
+        gSideTimers[side].spikesAmount = 0;
+        gSideTimers[side].toxicSpikesAmount = 0;
+        gSideTimers[side].stealthRockAmount = 0;
+        gSideTimers[side].stickyWebAmount = 0;
+        gSideTimers[side].auroraVeilTimer = 0;
+        gSideTimers[side].tailwindTimer = 0;
+        gSideTimers[side].luckyChantTimer = 0;
+        gSideTimers[side].steelsurgeAmount = 0;
+        gSideTimers[side].damageNonTypesTimer = 0;
+        gSideTimers[side].rainbowTimer = 0;
+        gSideTimers[side].seaOfFireTimer = 0;
+        gSideTimers[side].swampTimer = 0;
+    }
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (IsBattlerAlive(battler))
+            TryResetBattlerStatChanges(battler);
+    }
+}
+
 static inline u32 GetLowestBaseStatId(u32 battler)
 {
     u16 species = gBattleMons[battler].species;
@@ -11636,6 +11716,20 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = gBattlerAttacker;
                 gSideTimers[GetBattlerSide(battler)].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
                 BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
+                effect++;
+            }
+            break;
+        case ABILITY_EMERALD_ACCORD:
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+             && !IsBattlefieldNeutralForEmeraldAccord())
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+                gBattlerAttacker = gBattlerAbility = battler;
+                SetBattlerTriggeredAbility(battler, ABILITY_EMERALD_ACCORD);
+                RestoreBattlefieldToNeutral();
+                BattleScriptPushCursorAndCallback(BattleScript_EmeraldAccordActivates);
                 effect++;
             }
             break;

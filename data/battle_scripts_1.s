@@ -10103,6 +10103,20 @@ BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return
 
+BattleScript_EmeraldAccordActivates::
+	showabilitypopup BS_ATTACKER
+	pause B_WAIT_TIME_LONG
+	destroyabilitypopup
+	playmoveanimation BS_ATTACKER, MOVE_HAZE
+	waitanimation
+	playmoveanimation BS_ATTACKER, MOVE_DEFOG
+	waitanimation
+	playanimation BS_ATTACKER, B_ANIM_RESTORE_BG
+	printstring STRINGID_EMERALDACCORDRESTORED
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_ActivateWeatherAbilities
+	end3
+
 BattleScript_DeathrattleActivates::
 	call BattleScript_AbilityPopUp
 	playmoveanimation BS_ATTACKER, MOVE_CURSE

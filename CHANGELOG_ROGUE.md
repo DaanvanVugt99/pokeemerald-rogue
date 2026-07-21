@@ -36,6 +36,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Gave Rayquaza Emerald Accord, a once-per-battle switch-in ability that restores
+  weather, terrain, rooms, side conditions, and active stat changes to neutral.
 - Made the Roguelocke Trial require nicknames for every acquired Pokémon while
   preserving the player's nickname setting outside the Trial.
 - Show each battler's Tera type beside its level whenever Terastallization is
@@ -61,7 +63,7 @@ Format follows Keep a Changelog loosely:
   Speed after transforming once per battle before adopting the target's unique
   ability.
 - Expanded generated Unique Pokemon from a 103-entry unique-ability pool to
-  558 audited battle-safe abilities, including Starmobile, and added guaranteed
+  559 audited battle-safe abilities, including Starmobile, and added guaranteed
   synergy moves for abilities that depend on particular moves or move families,
   while retaining both random moves when the species already learns the pairing;
   Final Step now guarantees a sound move instead of a contact move.

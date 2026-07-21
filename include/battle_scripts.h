@@ -5,6 +5,7 @@ extern const u8 BattleScript_SupersweetSyrupActivates[];
 extern const u8 BattleScript_AbilityHpHeal[];
 extern const u8 BattleScript_MoonlightActivates[];
 extern const u8 BattleScript_StrongWindsActivated[];
+extern const u8 BattleScript_EmeraldAccordActivates[];
 extern const u8 BattleScript_RevelryLightScreen[];
 extern const u8 BattleScript_RevelryReflect[];
 extern const u8 BattleScript_VampiricActivates[];
