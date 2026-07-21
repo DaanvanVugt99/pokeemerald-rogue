@@ -12421,6 +12421,14 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_CruelPremonitionSetsFutureSight::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_FUTURE_SIGHT
+	waitanimation
+	printfromtable gFutureMoveUsedStringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_RuinousRiteActivates::
 	copybyte gBattlerAttacker, sBATTLER
 	copybyte gBattlerAbility, sBATTLER

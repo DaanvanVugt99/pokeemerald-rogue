@@ -14,8 +14,18 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Fixed
+
+- Prevented future-only faint effects and subsequent end-of-turn effects from
+  activating after either party's final Pokemon faints.
+
 ### Changed
 
+- Added unique abilities for the Galarian legendary birds: Freezing Glare now
+  sets Future Sight, Galarian Zapdos matches the field's fastest raw Speed, and
+  contact hits prime Galarian Moltres's next Dark move to drain half its damage.
+- Made Jetstream use the user's effective Speed, allowing Tailwind, held items,
+  Abilities, weather, status, and other Speed modifiers to affect its damage.
 - Made Unique Legendary variants available in legendary nodes from the start,
   and moved alternative Unique Pokémon typings to the final Unique Lab upgrade.
 - Made Regional Style Trials exclusively enable and temporarily supply their

@@ -216,7 +216,7 @@ TEST("Dynamic unique ability pool includes Starmobile")
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_STARMOBILE);
 }
 
-TEST("Dynamic unique ability eligibility audit contains 555 abilities")
+TEST("Dynamic unique ability eligibility audit contains 558 abilities")
 {
     static const u16 sExpectedExclusions[] =
     {
@@ -269,17 +269,20 @@ TEST("Dynamic unique ability eligibility audit contains 555 abilities")
     u16 eligibleCount = 0;
     u16 i;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_FLOCK_STEP; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_SPIRIT_FEAST; ++ability)
     {
         if(RogueGift_IsDynamicUniqueAbilityEligible(ability))
             ++eligibleCount;
     }
 
-    EXPECT_EQ(eligibleCount, 555);
-    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 555);
+    EXPECT_EQ(eligibleCount, 558);
+    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 558);
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STRONG_WINDS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STARMOBILE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLOCK_STEP));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_CRUEL_PREMONITION));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_DEAD_HEAT));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SPIRIT_FEAST));
 
     for(i = 0; i < ARRAY_COUNT(sExpectedExclusions); ++i)
         EXPECT(!RogueGift_IsDynamicUniqueAbilityEligible(sExpectedExclusions[i]));
@@ -287,9 +290,9 @@ TEST("Dynamic unique ability eligibility audit contains 555 abilities")
 
 TEST("Dynamic legendary payload stores direct ten bit unique ability ids")
 {
-    u32 customMonId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 3, ABILITY_FLOCK_STEP);
+    u32 customMonId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 3, ABILITY_SPIRIT_FEAST);
 
-    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_FLOCK_STEP);
+    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_SPIRIT_FEAST);
     EXPECT_NE(RogueGift_GetCustomMonAbility(customMonId, 0), ABILITY_NONE);
 }
 
@@ -351,7 +354,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     u16 ability;
     u16 pairedAbilityCount = 0;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_FLOCK_STEP; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_SPIRIT_FEAST; ++ability)
     {
         u16 profileId = RogueGift_DebugGetDynamicSynergyProfileId(ability);
         u16 moves[3];
@@ -380,7 +383,22 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 3);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 247);
+    EXPECT_EQ(pairedAbilityCount, 249);
+}
+
+TEST("Galarian bird unique abilities use the required legendary synergy profiles")
+{
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_CRUEL_PREMONITION, 0), MOVE_FREEZING_GLARE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_CRUEL_PREMONITION, 1), MOVE_NONE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_CRUEL_PREMONITION, 2), MOVE_NONE);
+
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_DEAD_HEAT, 0), MOVE_NONE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_DEAD_HEAT, 1), MOVE_NONE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_DEAD_HEAT, 2), MOVE_NONE);
+
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_SPIRIT_FEAST, 0), MOVE_NIGHT_SLASH);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_SPIRIT_FEAST, 1), MOVE_DARK_PULSE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_SPIRIT_FEAST, 2), MOVE_FOUL_PLAY);
 }
 
 TEST("Final Step generated synergy guarantees a sound move")

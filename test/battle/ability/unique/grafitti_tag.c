@@ -50,8 +50,9 @@ SINGLE_BATTLE_TEST("Grafitti Tag makes a tagged foe leave Toxic Spikes when fain
     GIVEN {
         PLAYER(SPECIES_GRAFAIAI) { Ability(ABILITY_UNBURDEN); Attack(200); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(1); Defense(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_CHARIZARD) { Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); SEND_OUT(opponent, 1); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_GRAFITTI_TAG);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponent);
@@ -63,6 +64,28 @@ SINGLE_BATTLE_TEST("Grafitti Tag makes a tagged foe leave Toxic Spikes when fain
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_TOXIC_SPIKES);
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Grafitti Tag does not leave Toxic Spikes when the final foe faints")
+{
+    GIVEN {
+        PLAYER(SPECIES_GRAFAIAI) { Ability(ABILITY_UNBURDEN); Attack(200); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); Defense(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_GRAFITTI_TAG);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        MESSAGE("Foe Wobbuffet fainted!");
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
+            MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        }
+    } THEN {
+        EXPECT(!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_TOXIC_SPIKES));
+        EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 0);
     }
 }
 

@@ -53,3 +53,24 @@ SINGLE_BATTLE_TEST("Ionize does not trigger if all battlers are Electric or Grou
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Ionize stops subsequent end-turn effects after fainting the final foe")
+{
+    GIVEN {
+        PLAYER(SPECIES_JOLTEON) { Ability(ABILITY_VOLT_ABSORB); UniqueAbility(ABILITY_IONIZE); HP(320); MaxHP(320); Status1(STATUS1_POISON); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); MaxHP(320); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_IONIZE);
+        HP_BAR(opponent, hp: 0);
+        MESSAGE("Foe Wobbuffet fainted!");
+        NONE_OF {
+            MESSAGE("Jolteon is hurt by poison!");
+            HP_BAR(player);
+        }
+    } THEN {
+        EXPECT_EQ(player->hp, 320);
+        EXPECT_EQ(opponent->hp, 0);
+    }
+}

@@ -4010,7 +4010,9 @@ void BattleTurnPassed(void)
 
     ClearFaintedCommanderPairings();
     TurnValuesCleanUp(TRUE);
-    if (gBattleOutcome == 0)
+    // A scripted end-turn effect can faint the last Pokemon before the battle
+    // outcome is updated. Stop processing subsequent effects in that case.
+    if (gBattleOutcome == 0 && !NoAliveMonsForEitherParty())
     {
         if (DoFieldEndTurnEffects())
             return;
@@ -4777,10 +4779,20 @@ static bool8 ActivateMovePriorityCharm(u8 battler)
     }
 }
 
-static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 holdEffect, bool32 ignoreLimberSpeedStages)
+static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 holdEffect, bool32 ignoreLimberSpeedStages, bool32 ignoreSpeedStages)
 {
+    u32 i;
     u32 speed = gBattleMons[battler].speed;
     u32 highestStat = GetHighestStatId(battler);
+
+    if (HasBattlerAbility(battler, ABILITY_DEAD_HEAT))
+    {
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (IsBattlerAlive(i) && speed < gBattleMons[i].speed)
+                speed = gBattleMons[i].speed;
+        }
+    }
 
     // weather abilities
     if (WEATHER_HAS_EFFECT)
@@ -4849,7 +4861,8 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
             RecordAbilityBattle(battler, ABILITY_UNKNOWN_BIOLOGY);
     }
     // stat stages
-    if (!IsAbilityOnField(ABILITY_EQUILIBRIUM)
+    if (!ignoreSpeedStages
+     && !IsAbilityOnField(ABILITY_EQUILIBRIUM)
      && !(ignoreLimberSpeedStages && HasBattlerAbility(battler, ABILITY_LIMBER)))
     {
         speed *= gStatStageRatios[gBattleMons[battler].statStages[STAT_SPEED]][0];
@@ -4895,12 +4908,12 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
 // For AI, so it doesn't 'cheat' by knowing player's ability
 u32 GetBattlerTotalSpeedStatArgs(u32 battler, u32 ability, u32 holdEffect)
 {
-    return GetBattlerTotalSpeedStatArgsInternal(battler, ability, holdEffect, FALSE);
+    return GetBattlerTotalSpeedStatArgsInternal(battler, ability, holdEffect, FALSE, FALSE);
 }
 
 static u32 GetBattlerMoveOrderSpeedStat(u32 battler, u32 ability, u32 holdEffect)
 {
-    return GetBattlerTotalSpeedStatArgsInternal(battler, ability, holdEffect, TRUE);
+    return GetBattlerTotalSpeedStatArgsInternal(battler, ability, holdEffect, TRUE, FALSE);
 }
 
 u32 GetBattlerTotalSpeedStat(u32 battler)
@@ -4908,6 +4921,13 @@ u32 GetBattlerTotalSpeedStat(u32 battler)
     u32 ability = GetBattlerAbility(battler);
     u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
     return GetBattlerTotalSpeedStatArgs(battler, ability, holdEffect);
+}
+
+u32 GetBattlerTotalSpeedStatWithoutStages(u32 battler)
+{
+    u32 ability = GetBattlerAbility(battler);
+    u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
+    return GetBattlerTotalSpeedStatArgsInternal(battler, ability, holdEffect, FALSE, TRUE);
 }
 
 s8 GetChosenMovePriority(u32 battler)

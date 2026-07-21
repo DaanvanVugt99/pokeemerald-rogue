@@ -2278,7 +2278,7 @@ static const u8 sNightfallDescription[] = _(
 
 static const u8 sJetstreamDescription[] = _(
     "A rushing strike that uses\n"
-    "the user's Speed.");
+    "the user's effective Speed.");
 
 static const u8 sThundercrushDescription[] = _(
     "A thunderous blow with a\n"

@@ -8,6 +8,7 @@ extern const u8 BattleScript_StrongWindsActivated[];
 extern const u8 BattleScript_RevelryLightScreen[];
 extern const u8 BattleScript_RevelryReflect[];
 extern const u8 BattleScript_VampiricActivates[];
+extern const u8 BattleScript_CruelPremonitionSetsFutureSight[];
 extern const u8 BattleScript_ToxicBloomActivates[];
 extern const u8 BattleScript_SepticFumesActivates[];
 extern const u8 BattleScript_EffectConfusePoisonPuppeteerRet[];

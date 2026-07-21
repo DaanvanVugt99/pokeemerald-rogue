@@ -13849,6 +13849,17 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SPIRIT_FEAST)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && BATTLER_TURN_DAMAGED(moveEndTarget)
+         && IsBattlerAlive(battler)
+         && IsMoveMakingContact(move, moveEndAttacker)
+         && IsFinalMultiHitStrike())
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SLEEP_DUST)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
@@ -19188,6 +19199,32 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SPIRIT_FEAST)
+         && gDisableStructs[battler].uniquePersistentStateActive
+         && moveType == TYPE_DARK
+         && gBattleMoves[move].split != SPLIT_STATUS
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrikeAndTarget()
+         && gBattleScripting.savedDmg > 0)
+        {
+            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
+
+            if (IsBattlerAlive(battler)
+             && !BATTLER_MAX_HP(battler)
+             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+            {
+                s32 drainedHp = gBattleScripting.savedDmg / 2;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_SPIRIT_FEAST);
+                if (drainedHp == 0)
+                    drainedHp = 1;
+                gBattleMoveDamage = -drainedHp;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BEACON)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
@@ -23967,10 +24004,10 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     {
         if (move == MOVE_JETSTREAM)
         {
-            // Jetstream scales from the user's Speed stat and stat stages only.
-            // It intentionally does not use turn-order modifiers such as Tailwind,
-            // Choice Scarf, Swift Swim, or paralysis adjustments.
-            atkStat = gBattleMons[battlerAtk].speed;
+            // Keep Speed stages separate so critical hits and Unaware can still
+            // handle them like other offensive stat changes. All other effective
+            // Speed modifiers, such as Tailwind and Choice Scarf, apply here.
+            atkStat = GetBattlerTotalSpeedStatWithoutStages(battlerAtk);
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPEED];
         }
         else

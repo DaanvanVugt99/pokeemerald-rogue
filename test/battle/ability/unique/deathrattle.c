@@ -47,15 +47,35 @@ SINGLE_BATTLE_TEST("Deathrattle curses the attacker before this Pokemon faints")
 {
     GIVEN {
         PLAYER(SPECIES_HOUNDSTONE) { HP(40); MaxHP(100); Speed(1); Ability(ABILITY_SAND_RUSH); UniqueAbility(ABILITY_DEATHRATTLE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Speed(100); Moves(MOVE_DRAGON_RAGE); }
     } WHEN {
-        TURN { MOVE(opponent, MOVE_DRAGON_RAGE); }
+        TURN { MOVE(opponent, MOVE_DRAGON_RAGE); SEND_OUT(player, 1); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
         HP_BAR(player);
         ABILITY_POPUP(player, ABILITY_DEATHRATTLE);
     } THEN {
         EXPECT(opponent->status2 & STATUS2_CURSED);
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP), 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Deathrattle does not curse after the user's final Pokemon faints")
+{
+    GIVEN {
+        PLAYER(SPECIES_HOUNDSTONE) { HP(40); MaxHP(100); Speed(1); Ability(ABILITY_SAND_RUSH); UniqueAbility(ABILITY_DEATHRATTLE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Speed(100); Moves(MOVE_DRAGON_RAGE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_DRAGON_RAGE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
+        HP_BAR(player);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_DEATHRATTLE);
+        }
+    } THEN {
+        EXPECT(!(opponent->status2 & STATUS2_CURSED));
         EXPECT_EQ(player->hp, 0);
     }
 }

@@ -67,6 +67,25 @@ SINGLE_BATTLE_TEST("Tumbleweed sets Tailwind when the user faints")
     }
 }
 
+SINGLE_BATTLE_TEST("Tumbleweed does not set Tailwind when the user's final Pokemon faints")
+{
+    GIVEN {
+        PLAYER(SPECIES_BRAMBLEGHAST) { HP(1); MaxHP(100); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_AERIAL_ACE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_AERIAL_ACE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_AERIAL_ACE, opponent);
+        HP_BAR(player, hp: 0);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_TUMBLEWEED);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
+        }
+    } THEN {
+        EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND));
+    }
+}
+
 DOUBLE_BATTLE_TEST("Tumbleweed Tailwind activates ally Wind Power when the user faints")
 {
     GIVEN {

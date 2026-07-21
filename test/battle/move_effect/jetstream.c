@@ -59,7 +59,7 @@ SINGLE_BATTLE_TEST("Jetstream is not reduced by burn", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Jetstream is not boosted by Tailwind", s16 damage)
+SINGLE_BATTLE_TEST("Jetstream is boosted by Tailwind", s16 damage)
 {
     bool32 useTailwind;
 
@@ -78,6 +78,50 @@ SINGLE_BATTLE_TEST("Jetstream is not boosted by Tailwind", s16 damage)
     } SCENE {
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
-        EXPECT_EQ(results[0].damage, results[1].damage);
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(2.0), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Jetstream uses item-based Speed modifiers", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_CHOICE_SCARF; }
+    PARAMETRIZE { item = ITEM_IRON_BALL; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Item(item); Moves(MOVE_JETSTREAM); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_JETSTREAM); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.5), results[1].damage);
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.5), results[2].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Jetstream is boosted by Swift Swim in rain", s16 damage)
+{
+    bool32 useRain;
+
+    PARAMETRIZE { useRain = FALSE; }
+    PARAMETRIZE { useRain = TRUE; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Ability(ABILITY_SWIFT_SWIM); Moves(MOVE_RAIN_DANCE, MOVE_JETSTREAM, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
+    } WHEN {
+        if (useRain)
+            TURN { MOVE(player, MOVE_RAIN_DANCE); }
+        else
+            TURN { MOVE(player, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_JETSTREAM); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(2.0), results[1].damage);
     }
 }

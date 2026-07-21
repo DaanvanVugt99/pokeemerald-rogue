@@ -8123,6 +8123,45 @@ static void Cmd_moveend(void)
             }
 
             if (!effect
+             && gCurrentMove == MOVE_FREEZING_GLARE
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_CRUEL_PREMONITION)
+             && IsBattlerAlive(gBattlerAttacker)
+             && GetBattlerSide(gBattlerTarget) != GetBattlerSide(gBattlerAttacker)
+             && TARGET_TURN_DAMAGED
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !gProtectStructs[gBattlerAttacker].extraMoveUsed
+             && !NoAliveMonsForEitherParty()
+             && gWishFutureKnock.futureSightCounter[gBattlerTarget] == 0)
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_CRUEL_PREMONITION);
+                gBattlerAbility = gBattlerAttacker;
+
+                if (IsBattlerAlive(gBattlerTarget))
+                {
+                    SetAtkCancellerForCalledMove();
+                    gCalledMove = MOVE_FUTURE_SIGHT;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[gBattlerAttacker].extraMoveUsed = TRUE;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                }
+                else
+                {
+                    gSideStatuses[GetBattlerSide(gBattlerTarget)] |= SIDE_STATUS_FUTUREATTACK;
+                    gWishFutureKnock.futureSightMove[gBattlerTarget] = MOVE_FUTURE_SIGHT;
+                    gWishFutureKnock.futureSightAttacker[gBattlerTarget] = gBattlerAttacker;
+                    gWishFutureKnock.futureSightCounter[gBattlerTarget] = 3;
+                    gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_FUTURE_SIGHT;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_CruelPremonitionSetsFutureSight;
+                }
+                effect = TRUE;
+            }
+
+            if (!effect
              && IsFlockStepMove(gCurrentMove)
              && gSpecialStatuses[gBattlerAttacker].flockStepStatRaised
              && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
@@ -12883,6 +12922,7 @@ static void Cmd_various(void)
 
         side = GetBattlerSide(battler);
         if (!HasBattlerAbility(battler, ABILITY_TUMBLEWEED)
+         || NoAliveMonsForEitherParty()
          || (gSideStatuses[side] & SIDE_STATUS_TAILWIND))
             break;
 
@@ -12898,7 +12938,8 @@ static void Cmd_various(void)
     {
         VARIOUS_ARGS();
 
-        if (TrySetGrafittiTagToxicSpikes(battler))
+        if (!NoAliveMonsForEitherParty()
+         && TrySetGrafittiTagToxicSpikes(battler))
         {
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
@@ -12913,7 +12954,8 @@ static void Cmd_various(void)
 
         VARIOUS_ARGS();
 
-        if (!HasBattlerAbility(battler, ABILITY_DEATHRATTLE))
+        if (!HasBattlerAbility(battler, ABILITY_DEATHRATTLE)
+         || NoAliveMonsForEitherParty())
             break;
 
         if (gBattlerAttacker < gBattlersCount
@@ -12967,7 +13009,8 @@ static void Cmd_various(void)
         VARIOUS_ARGS();
         gBattlerAbility = BATTLE_PARTNER(battler);
         i = GetBattlerAbility(gBattlerAbility);
-        if (IsBattlerAlive(gBattlerAbility)
+        if (!NoAliveMonsForEitherParty()
+            && IsBattlerAlive(gBattlerAbility)
             && (i == ABILITY_RECEIVER || i == ABILITY_POWER_OF_ALCHEMY)
             && GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_ABILITY_SHIELD)
         {
