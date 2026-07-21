@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented battle-end fades from freeing healthbox backing data while its
+  sprites were still active, including during accelerated battle updates.
 - Prevented future-only faint effects and subsequent end-of-turn effects from
   activating after either party's final Pokemon faints.
 

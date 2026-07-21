@@ -1781,6 +1781,7 @@ static void CB2_HandleStartMultiBattle(void)
 void BattleMainCB2(void)
 {
     bool8 catchingAnimActive = BtlController_IsBallThrowAnimActive();
+    bool8 battleVisualStateActive = TRUE;
     u8 speedScale = catchingAnimActive ? Rogue_GetCatchingSpeedScale() : Rogue_GetBattleSpeedScale(FALSE);
     gMain.nativeSpeedUpActive = FALSE;
 
@@ -1829,12 +1830,26 @@ void BattleMainCB2(void)
                 if (gMain.callback1)
                     gMain.callback1();
 
+                // Battle cleanup resets the sprites and frees their backing data.
+                // Do not run another accelerated visual tick after that boundary.
+                if (gMain.callback2 != BattleMainCB2
+                 || gBattleStruct == NULL
+                 || gBattleResources == NULL
+                 || gBattleSpritesDataPtr == NULL)
+                {
+                    battleVisualStateActive = FALSE;
+                    break;
+                }
+
                 if (catchingAnimActive && !BtlController_IsBallThrowAnimActive())
                     break;
             }
         }
 
         gMain.nativeSpeedUpActive = FALSE;
+
+        if (!battleVisualStateActive)
+            return;
 
         if(fadeResult != PALETTE_FADE_STATUS_LOADING)
         {
@@ -6032,32 +6047,16 @@ static void HandleEndTurn_FinishBattle(void)
 
 static void FreeResetData_ReturnToOvOrDoEvolutions(void)
 {
-    if (!gPaletteFade.active)
-    {
-        gIsFishingEncounter = FALSE;
-        gIsSurfingEncounter = FALSE;
-        ResetSpriteData();
-        if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK
-                                  | BATTLE_TYPE_RECORDED_LINK
-                                  | BATTLE_TYPE_FIRST_BATTLE
-                                  | BATTLE_TYPE_SAFARI
-                                  | BATTLE_TYPE_FRONTIER
-                                  | BATTLE_TYPE_EREADER_TRAINER
-                                  | BATTLE_TYPE_WALLY_TUTORIAL))
-            && (B_EVOLUTION_AFTER_WHITEOUT >= GEN_6
-                || gBattleOutcome == B_OUTCOME_WON
-                || gBattleOutcome == B_OUTCOME_CAUGHT))
-        {
-            gBattleMainFunc = TrySpecialEvolution;
-        }
-        else
-        {
-            gBattleMainFunc = ReturnFromBattleToOverworld;
-            return;
-        }
+    bool8 shouldTryEvolution;
 
-        // RogueNote: Release pokemon here
-    }
+    // Healthbox and indicator callbacks still use the battle allocations while
+    // the screen fades. Keep those allocations alive until the sprites reset.
+    if (gPaletteFade.active)
+        return;
+
+    gIsFishingEncounter = FALSE;
+    gIsSurfingEncounter = FALSE;
+    ResetSpriteData();
 
     FreeAllWindowBuffers();
     if (!(gBattleTypeFlags & BATTLE_TYPE_LINK))
@@ -6066,6 +6065,24 @@ static void FreeResetData_ReturnToOvOrDoEvolutions(void)
         FreeBattleResources();
         FreeBattleSpritesData();
     }
+
+    shouldTryEvolution = !(gBattleTypeFlags & (BATTLE_TYPE_LINK
+                                               | BATTLE_TYPE_RECORDED_LINK
+                                               | BATTLE_TYPE_FIRST_BATTLE
+                                               | BATTLE_TYPE_SAFARI
+                                               | BATTLE_TYPE_FRONTIER
+                                               | BATTLE_TYPE_EREADER_TRAINER
+                                               | BATTLE_TYPE_WALLY_TUTORIAL))
+                      && (B_EVOLUTION_AFTER_WHITEOUT >= GEN_6
+                          || gBattleOutcome == B_OUTCOME_WON
+                          || gBattleOutcome == B_OUTCOME_CAUGHT);
+
+    if (shouldTryEvolution)
+        gBattleMainFunc = TrySpecialEvolution;
+    else
+        gBattleMainFunc = ReturnFromBattleToOverworld;
+
+    // RogueNote: Release pokemon here
 }
 
 static void TrySpecialEvolution(void) // Attempts to perform non-level related battle evolutions (not the script command).
