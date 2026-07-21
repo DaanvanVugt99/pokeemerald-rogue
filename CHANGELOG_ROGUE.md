@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Removed Swimmers and swimming Triathletes from land-based route Trainer
+  encounters.
 - Prevented the level-up helper Trainer from Terastallizing.
 - Clarified that Iron Treads' Singularity Drive clears allied entry hazards and
   sets Gravity on switch-in.
