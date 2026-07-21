@@ -690,6 +690,30 @@ static bool8 IsCurrentExpTrainerBattle(void)
     return (gBattleTypeFlags & BATTLE_TYPE_TRAINER) != 0 && Rogue_IsExpTrainer(gTrainerBattleOpponent_A);
 }
 
+static u8 GetAnimSpeedScale(u8 option)
+{
+    if (JOY_HELD(L_BUTTON))
+        return 1;
+
+    AGB_ASSERT(option < OPTIONS_ANIM_SPEED_COUNT);
+    return min(option, OPTIONS_ANIM_SPEED_COUNT - 1) + 1;
+}
+
+u8 Rogue_GetCutsceneSpeedScale(void)
+{
+    return GetAnimSpeedScale(gSaveBlock2Ptr->optionsCutsceneSpeed);
+}
+
+u8 Rogue_GetEvolutionSpeedScale(void)
+{
+    return GetAnimSpeedScale(gSaveBlock2Ptr->optionsEvolutionSpeed);
+}
+
+u8 Rogue_GetCatchingSpeedScale(void)
+{
+    return GetAnimSpeedScale(gSaveBlock2Ptr->optionsCatchingSpeed);
+}
+
 u8 Rogue_GetBattleSpeedScale(bool8 forHealthbar)
 {
     u8 battleSceneOption = GetBattleSceneOption();

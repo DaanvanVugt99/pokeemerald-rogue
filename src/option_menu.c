@@ -27,6 +27,7 @@ enum
     TD_MENUSELECTION,
     TD_SUBMENU,
     TD_PREVIOUS_MENUSELECTION,
+    TD_SPEED_MENUSELECTION,
 };
 
 // Menu items
@@ -41,6 +42,10 @@ enum
     MENUITEM_BATTLESCENE_WILD_BATTLES,
     MENUITEM_BATTLESCENE_TRAINER_BATTLES,
     MENUITEM_BATTLESCENE_KEY_BATTLES,
+    MENUITEM_MENU_MORE_SPEEDS,
+    MENUITEM_CUTSCENE_SPEED,
+    MENUITEM_EVOLUTION_SPEED,
+    MENUITEM_CATCHING_SPEED,
     MENUITEM_AUTORUN_TOGGLE,
     MENUITEM_ITEM_PICKUP,
     MENUITEM_NICKNAME_MODE,
@@ -64,6 +69,7 @@ enum
     SUBMENUITEM_GAME,
     SUBMENUITEM_GRAPHICS,
     SUBMENUITEM_SPEED,
+    SUBMENUITEM_MORE_SPEEDS,
     SUBMENUITEM_AUDIO,
     SUBMENUITEM_COUNT,
 };
@@ -97,6 +103,8 @@ static u8 TextSpeed_ProcessInput(u8 menuOffset, u8 selection);
 static void TextSpeed_DrawChoices(u8 menuOffset, u8 selection);
 static u8 BattleScene_ProcessInput(u8 menuOffset, u8 selection);
 static void BattleScene_DrawChoices(u8 menuOffset, u8 selection);
+static u8 AnimSpeed_ProcessInput(u8 menuOffset, u8 selection);
+static void AnimSpeed_DrawChoices(u8 menuOffset, u8 selection);
 static u8 InvertedToggle_ProcessInput(u8 menuOffset, u8 selection);
 static void InvertedToggle_DrawChoices(u8 menuOffset, u8 selection);
 static u8 AutoRun_ProcessInput(u8 menuOffset, u8 selection);
@@ -210,6 +218,30 @@ static const struct MenuEntry sOptionMenuItems[] =
         .itemName = gText_BattleSceneKey,
         .processInput = BattleScene_ProcessInput,
         .drawChoices = BattleScene_DrawChoices
+    },
+    [MENUITEM_MENU_MORE_SPEEDS] =
+    {
+        .itemName = gText_MoreSpeeds,
+        .processInput = Empty_ProcessInput,
+        .drawChoices = Empty_DrawChoices
+    },
+    [MENUITEM_CUTSCENE_SPEED] =
+    {
+        .itemName = gText_CutsceneSpeed,
+        .processInput = AnimSpeed_ProcessInput,
+        .drawChoices = AnimSpeed_DrawChoices
+    },
+    [MENUITEM_EVOLUTION_SPEED] =
+    {
+        .itemName = gText_EvolutionSpeed,
+        .processInput = AnimSpeed_ProcessInput,
+        .drawChoices = AnimSpeed_DrawChoices
+    },
+    [MENUITEM_CATCHING_SPEED] =
+    {
+        .itemName = gText_CatchingSpeed,
+        .processInput = AnimSpeed_ProcessInput,
+        .drawChoices = AnimSpeed_DrawChoices
     },
     [MENUITEM_AUTORUN_TOGGLE] = 
     {
@@ -351,6 +383,18 @@ static const struct MenuEntries sOptionMenuEntries[SUBMENUITEM_COUNT] =
             MENUITEM_BATTLESCENE_WILD_BATTLES,
             MENUITEM_BATTLESCENE_TRAINER_BATTLES,
             MENUITEM_BATTLESCENE_KEY_BATTLES,
+            MENUITEM_MENU_MORE_SPEEDS,
+            MENUITEM_CANCEL
+        }
+    },
+    [SUBMENUITEM_MORE_SPEEDS] =
+    {
+        .titleName = gText_MoreSpeeds,
+        .menuOptions =
+        {
+            MENUITEM_CUTSCENE_SPEED,
+            MENUITEM_EVOLUTION_SPEED,
+            MENUITEM_CATCHING_SPEED,
             MENUITEM_CANCEL
         }
     },
@@ -544,9 +588,16 @@ static void Task_OptionMenuProcessInput(u8 taskId)
 
     if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && menuItem == MENUITEM_CANCEL))
     {
-        if(submenuSelection != SUBMENUITEM_NONE)
+        if (submenuSelection == SUBMENUITEM_MORE_SPEEDS)
+        {
+            submenuSelection = SUBMENUITEM_SPEED;
+            menuSelection = gTasks[taskId].data[TD_SPEED_MENUSELECTION];
+            submenuChanged = TRUE;
+        }
+        else if(submenuSelection != SUBMENUITEM_NONE)
         {
             submenuSelection = SUBMENUITEM_NONE;
+            menuSelection = gTasks[taskId].data[TD_PREVIOUS_MENUSELECTION];
             submenuChanged = TRUE;
         }
         else
@@ -554,6 +605,9 @@ static void Task_OptionMenuProcessInput(u8 taskId)
     }
     else if(JOY_NEW(A_BUTTON) && submenuSelection == SUBMENUITEM_NONE)
     {
+        gTasks[taskId].data[TD_PREVIOUS_MENUSELECTION] = menuSelection;
+        menuSelection = 0;
+
         switch (menuItem)
         {
         case MENUITEM_MENU_GAME:
@@ -576,6 +630,13 @@ static void Task_OptionMenuProcessInput(u8 taskId)
             submenuChanged = TRUE;
             break;
         }
+    }
+    else if (JOY_NEW(A_BUTTON) && submenuSelection == SUBMENUITEM_SPEED && menuItem == MENUITEM_MENU_MORE_SPEEDS)
+    {
+        gTasks[taskId].data[TD_SPEED_MENUSELECTION] = menuSelection;
+        submenuSelection = SUBMENUITEM_MORE_SPEEDS;
+        menuSelection = 0;
+        submenuChanged = TRUE;
     }
     else if (JOY_NEW(DPAD_UP | L_BUTTON))
     {
@@ -642,16 +703,6 @@ static void Task_OptionMenuProcessInput(u8 taskId)
 
     if(submenuChanged)
     {
-        if(submenuSelection == SUBMENUITEM_NONE)
-        {
-            menuSelection = gTasks[taskId].data[TD_PREVIOUS_MENUSELECTION];
-        }
-        else
-        {
-            gTasks[taskId].data[TD_PREVIOUS_MENUSELECTION] = menuSelection;
-            menuSelection = 0;
-        }
-        
         gTasks[taskId].data[TD_MENUSELECTION] = menuSelection;
         gTasks[taskId].data[TD_SUBMENU] = submenuSelection;
 
@@ -783,6 +834,41 @@ static void BattleScene_DrawChoices(u8 menuOffset, u8 selection)
         [OPTIONS_BATTLE_SCENE_3X] = sText_BattleScene_3x,
         [OPTIONS_BATTLE_SCENE_4X] = sText_BattleScene_4x,
         [OPTIONS_BATTLE_SCENE_DISABLED] = sText_BattleScene_Disabled,
+    };
+    DrawChoiceSelection(menuOffset, selection, options, ARRAY_COUNT(options));
+}
+
+static u8 AnimSpeed_ProcessInput(u8 menuOffset, u8 selection)
+{
+    if (JOY_NEW(DPAD_RIGHT))
+    {
+        if (selection < OPTIONS_ANIM_SPEED_COUNT - 1)
+            selection++;
+        else
+            selection = 0;
+
+        sArrowPressed = TRUE;
+    }
+    if (JOY_NEW(DPAD_LEFT))
+    {
+        if (selection != 0)
+            selection--;
+        else
+            selection = OPTIONS_ANIM_SPEED_COUNT - 1;
+
+        sArrowPressed = TRUE;
+    }
+    return selection;
+}
+
+static void AnimSpeed_DrawChoices(u8 menuOffset, u8 selection)
+{
+    u8 const *options[OPTIONS_ANIM_SPEED_COUNT] =
+    {
+        [OPTIONS_ANIM_SPEED_1X] = sText_BattleScene_1x,
+        [OPTIONS_ANIM_SPEED_2X] = sText_BattleScene_2x,
+        [OPTIONS_ANIM_SPEED_3X] = sText_BattleScene_3x,
+        [OPTIONS_ANIM_SPEED_4X] = sText_BattleScene_4x,
     };
     DrawChoiceSelection(menuOffset, selection, options, ARRAY_COUNT(options));
 }
@@ -1200,6 +1286,15 @@ static u8 GetMenuItemValue(u8 menuItem)
 
     case MENUITEM_BATTLESCENE_KEY_BATTLES:
         return gSaveBlock2Ptr->optionsBossBattleScene;
+
+    case MENUITEM_CUTSCENE_SPEED:
+        return gSaveBlock2Ptr->optionsCutsceneSpeed;
+
+    case MENUITEM_EVOLUTION_SPEED:
+        return gSaveBlock2Ptr->optionsEvolutionSpeed;
+
+    case MENUITEM_CATCHING_SPEED:
+        return gSaveBlock2Ptr->optionsCatchingSpeed;
         
     case MENUITEM_AUTORUN_TOGGLE:
         return gSaveBlock2Ptr->optionsAutoRunToggle;
@@ -1269,6 +1364,18 @@ static void SetMenuItemValue(u8 menuItem, u8 value)
 
     case MENUITEM_BATTLESCENE_KEY_BATTLES:
         gSaveBlock2Ptr->optionsBossBattleScene = value;
+        break;
+
+    case MENUITEM_CUTSCENE_SPEED:
+        gSaveBlock2Ptr->optionsCutsceneSpeed = value;
+        break;
+
+    case MENUITEM_EVOLUTION_SPEED:
+        gSaveBlock2Ptr->optionsEvolutionSpeed = value;
+        break;
+
+    case MENUITEM_CATCHING_SPEED:
+        gSaveBlock2Ptr->optionsCatchingSpeed = value;
         break;
 
     case MENUITEM_AUTORUN_TOGGLE:

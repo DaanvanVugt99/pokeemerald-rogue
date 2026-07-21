@@ -30,6 +30,7 @@
 
 static EWRAM_DATA u8 sLinkSendTaskId = 0;
 static EWRAM_DATA u8 sLinkReceiveTaskId = 0;
+static EWRAM_DATA bool8 sBallThrowAnimActive = FALSE;
 EWRAM_DATA struct UnusedControllerStruct gUnusedControllerStruct = {}; // Debug? Unused code that writes to it, never read
 
 void (*gBattlerControllerFuncs[MAX_BATTLERS_COUNT])(u32 battler);
@@ -64,6 +65,7 @@ void SetUpBattleVarsAndBirchZigzagoon(void)
     s32 i;
 
     gBattleMainFunc = BeginBattleIntroDummy;
+    sBallThrowAnimActive = FALSE;
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
@@ -2310,7 +2312,10 @@ void Controller_WaitForHealthBar(u32 battler)
 static void Controller_WaitForBallThrow(u32 battler)
 {
     if (!gDoingBattleAnim || !gBattleSpritesDataPtr->healthBoxesData[battler].specialAnimActive)
+    {
+        sBallThrowAnimActive = FALSE;
         BattleControllerComplete(battler);
+    }
 }
 
 static void Controller_WaitForBattleAnimation(u32 battler)
@@ -2661,12 +2666,18 @@ void BtlController_HandleFaintAnimation(u32 battler)
 
 static void HandleBallThrow(u32 battler, u32 target, u32 animId, bool32 allowCriticalCapture)
 {
+    sBallThrowAnimActive = TRUE;
     gDoingBattleAnim = TRUE;
     if (allowCriticalCapture && IsCriticalCapture())
         animId = B_ANIM_CRITICAL_CAPTURE_THROW;
     InitAndLaunchSpecialAnimation(battler, battler, target, animId);
 
     gBattlerControllerFuncs[battler] = Controller_WaitForBallThrow;
+}
+
+bool8 BtlController_IsBallThrowAnimActive(void)
+{
+    return sBallThrowAnimActive;
 }
 
 void BtlController_HandleSuccessBallThrowAnim(u32 battler, u32 target, u32 animId, bool32 allowCriticalCapture)

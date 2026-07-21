@@ -566,7 +566,10 @@ struct SaveBlock2
              u32 regionMapZoom:1; // whether the map is zoomed in
              u32 optionsFadeSpeed:3; // OPTIONS_TEXT_SPEED_[SLOW/MID/FAST]
              u32 optionsItemPickupAutomatic:1; // whether to manually pickup items or automatically
-             u32 settingsReserved:20; // unused/reserved bits
+             u32 optionsCutsceneSpeed:2; // OPTIONS_ANIM_SPEED_[...]
+             u32 optionsEvolutionSpeed:2; // OPTIONS_ANIM_SPEED_[...]
+             u32 optionsCatchingSpeed:2; // OPTIONS_ANIM_SPEED_[...]
+             u32 settingsReserved:14; // unused/reserved bits
     /*0x18*/ struct Pokedex pokedex;
              s8 playerStyles[8];
              u32 playerOutfitUnlockFlags;

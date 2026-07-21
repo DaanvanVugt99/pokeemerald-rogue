@@ -59,6 +59,8 @@ static void Task_EvolutionScene(u8 taskId);
 static void Task_TradeEvolutionScene(u8 taskId);
 static void CB2_EvolutionSceneUpdate(void);
 static void CB2_TradeEvolutionSceneUpdate(void);
+static void EvolutionSceneUpdateOnce(void);
+static bool8 IsEvolutionVisualPhaseActive(bool8 isTrade);
 static void EvoDummyFunc(void);
 static void VBlankCB_EvolutionScene(void);
 static void VBlankCB_TradeEvolutionScene(void);
@@ -532,7 +534,7 @@ void TradeEvolutionScene(struct Pokemon *mon, u16 postEvoSpecies, u8 preEvoSprit
     SetMainCallback2(CB2_TradeEvolutionSceneUpdate);
 }
 
-static void CB2_EvolutionSceneUpdate(void)
+static void EvolutionSceneUpdateOnce(void)
 {
     AnimateSprites();
     BuildOamBuffer();
@@ -543,11 +545,36 @@ static void CB2_EvolutionSceneUpdate(void)
 
 static void CB2_TradeEvolutionSceneUpdate(void)
 {
-    AnimateSprites();
-    BuildOamBuffer();
-    RunTextPrinters();
-    UpdatePaletteFade();
-    RunTasks();
+    u8 i;
+    u8 speedScale;
+
+    EvolutionSceneUpdateOnce();
+    speedScale = Rogue_GetEvolutionSpeedScale();
+
+    for (i = 1; i < speedScale; i++)
+    {
+        if (gPaletteFade.active || !IsEvolutionVisualPhaseActive(TRUE))
+            break;
+
+        EvolutionSceneUpdateOnce();
+    }
+}
+
+static void CB2_EvolutionSceneUpdate(void)
+{
+    u8 i;
+    u8 speedScale;
+
+    EvolutionSceneUpdateOnce();
+    speedScale = Rogue_GetEvolutionSpeedScale();
+
+    for (i = 1; i < speedScale; i++)
+    {
+        if (gPaletteFade.active || !IsEvolutionVisualPhaseActive(FALSE))
+            break;
+
+        EvolutionSceneUpdateOnce();
+    }
 }
 
 static void CreateShedinja(u16 preEvoSpecies, struct Pokemon *mon)
@@ -1095,6 +1122,32 @@ enum {
     T_EVOSTATE_TRY_LEARN_ANOTHER_MOVE,
     T_EVOSTATE_REPLACE_MOVE,
 };
+
+static bool8 IsEvolutionVisualPhaseActive(bool8 isTrade)
+{
+    u8 state;
+
+    if (sEvoStructPtr == NULL || !gTasks[sEvoStructPtr->evoTaskId].isActive)
+        return FALSE;
+
+    state = gTasks[sEvoStructPtr->evoTaskId].tState;
+    if (isTrade)
+    {
+        if (state >= T_EVOSTATE_START_BG_AND_SPARKLE_SPIRAL && state <= T_EVOSTATE_EVO_SOUND)
+            return TRUE;
+        if (state == T_EVOSTATE_SET_MON_EVOLVED && !IsCryFinished())
+            return TRUE;
+    }
+    else
+    {
+        if (state >= EVOSTATE_START_BG_AND_SPARKLE_SPIRAL && state <= EVOSTATE_EVO_SOUND)
+            return TRUE;
+        if (state == EVOSTATE_SET_MON_EVOLVED && !IsCryFinished())
+            return TRUE;
+    }
+
+    return FALSE;
+}
 
 // States for the switch in T_EVOSTATE_REPLACE_MOVE
 enum {

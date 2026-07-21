@@ -46,6 +46,7 @@
 #include "save.h"
 #include "save_location.h"
 #include "script.h"
+#include "script_movement.h"
 #include "script_pokemon_util.h"
 #include "secret_base.h"
 #include "sound.h"
@@ -1593,6 +1594,16 @@ static void OverworldBasic(void)
     DoScheduledBgTilemapCopiesToVram();
 }
 
+static void OverworldCutsceneMovementTick(void)
+{
+    ScriptMovement_RunActiveObjectMovements();
+    AnimateSprites();
+    CameraUpdate();
+    UpdateCameraPanning();
+    BuildOamBuffer();
+    DoScheduledBgTilemapCopiesToVram();
+}
+
 // This CB2 is used when starting
 void CB2_OverworldBasic(void)
 {
@@ -1601,10 +1612,33 @@ void CB2_OverworldBasic(void)
 
 void CB2_Overworld(void)
 {
+    u8 i;
+    u8 speedScale = 1;
     bool32 fading = (gPaletteFade.active != 0);
+
     if (fading)
         SetVBlankCallback(NULL);
+
     OverworldBasic();
+
+    if (!fading
+     && !gPaletteFade.active
+     && ScriptContext_IsEnabled()
+     && ArePlayerFieldControlsLocked()
+     && ScriptMovement_IsAnyObjectMovementActive())
+        speedScale = Rogue_GetCutsceneSpeedScale();
+
+    for (i = 1; i < speedScale; i++)
+    {
+        if (gPaletteFade.active
+         || !ScriptContext_IsEnabled()
+         || !ArePlayerFieldControlsLocked()
+         || !ScriptMovement_IsAnyObjectMovementActive())
+            break;
+
+        OverworldCutsceneMovementTick();
+    }
+
     if (fading)
         SetFieldVBlankCallback();
 }

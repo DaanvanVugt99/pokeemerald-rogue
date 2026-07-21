@@ -1780,7 +1780,8 @@ static void CB2_HandleStartMultiBattle(void)
 
 void BattleMainCB2(void)
 {
-    u8 speedScale = Rogue_GetBattleSpeedScale(FALSE);
+    bool8 catchingAnimActive = BtlController_IsBallThrowAnimActive();
+    u8 speedScale = catchingAnimActive ? Rogue_GetCatchingSpeedScale() : Rogue_GetBattleSpeedScale(FALSE);
     gMain.nativeSpeedUpActive = FALSE;
 
     // If we are processing a palette fade we need to temporarily fall back to 1x speed otherwise there is graphical corruption
@@ -1827,6 +1828,9 @@ void BattleMainCB2(void)
                 // Call it again to make sure everything is behaving as it should (this is crazy town now)
                 if (gMain.callback1)
                     gMain.callback1();
+
+                if (catchingAnimActive && !BtlController_IsBallThrowAnimActive())
+                    break;
             }
         }
 

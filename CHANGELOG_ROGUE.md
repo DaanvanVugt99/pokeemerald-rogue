@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Added independent 1x-4x speed controls for scripted cutscene movement,
+  evolution animations, and catching animations.
 - Replaced Ditto's Stabilize unique ability with Rapid Replica, which raises its
   Speed after transforming once per battle before adopting the target's unique
   ability.
@@ -56,6 +58,7 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Added Galarian Corsola to the Modern Pokedex alongside Cursola.
 - Fixed the intended increase in Full Rest Stop frequency during the Elite Four
   being shadowed by the earlier Gym 3 condition.
 - Fixed the lone opponent's type badges being vertically misaligned in 2-vs-1

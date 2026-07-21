@@ -102,6 +102,9 @@ static void SetDefaultOptions(void)
     gSaveBlock2Ptr->optionsWildBattleScene = OPTIONS_BATTLE_SCENE_2X;
     gSaveBlock2Ptr->optionsTrainerBattleScene = OPTIONS_BATTLE_SCENE_1X;
     gSaveBlock2Ptr->optionsBossBattleScene = OPTIONS_BATTLE_SCENE_1X;
+    gSaveBlock2Ptr->optionsCutsceneSpeed = OPTIONS_ANIM_SPEED_1X;
+    gSaveBlock2Ptr->optionsEvolutionSpeed = OPTIONS_ANIM_SPEED_1X;
+    gSaveBlock2Ptr->optionsCatchingSpeed = OPTIONS_ANIM_SPEED_1X;
     gSaveBlock2Ptr->optionsAutoRunToggle = FALSE;
     gSaveBlock2Ptr->optionsAutoRunActive = FALSE;
     gSaveBlock2Ptr->optionsNicknameMode = OPTIONS_NICKNAME_MODE_ASK;
