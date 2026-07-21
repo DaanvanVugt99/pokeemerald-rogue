@@ -8589,7 +8589,7 @@ static void SetupTrainerBattleInternal(u16 trainerNum)
         FlagClear(FLAG_ROGUE_DYNAMAX_BATTLE);
 
     // enable tera for this fight
-    if(IsTerastallizeEnabled() && AllowBattleGimics(trainerNum, FALSE))
+    if(IsTerastallizeEnabled() && !Rogue_IsExpTrainer(trainerNum) && AllowBattleGimics(trainerNum, FALSE))
         FlagSet(FLAG_ROGUE_TERASTALLIZE_BATTLE);
     else
         FlagClear(FLAG_ROGUE_TERASTALLIZE_BATTLE);

@@ -16,6 +16,7 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented the level-up helper Trainer from Terastallizing.
 - Clarified that Iron Treads' Singularity Drive clears allied entry hazards and
   sets Gravity on switch-in.
 - Made Frontier Brain Pokémon rewards respect the configured nickname mode,
