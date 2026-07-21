@@ -554,6 +554,7 @@ static u8 ReplaceRoomEncounters_CalculateWeight(u16 weightIndex, u16 roomId, voi
     case ADVPATH_ROOM_GAMESHOW:
     case ADVPATH_ROOM_BATTLE_SIM:
     case ADVPATH_ROOM_BATTLE_TOWER:
+    case ADVPATH_ROOM_MINIBOSS:
         // Don't want to place in first column
         if(existingRoom->coords.x + 1 == gRogueAdvPath.pathLength)
             weight -= 40;

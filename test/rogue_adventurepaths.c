@@ -118,6 +118,7 @@ TEST("A scheduled Frontier Brain replaces exactly one optional route determinist
             aceRoomId = i;
             aceRoomSeed = gRogueAdvPath.rooms[i].rngSeed;
             EXPECT_EQ(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.trainerNum, trainerNum);
+            EXPECT_NE(gRogueAdvPath.rooms[i].coords.x + 1, gRogueAdvPath.pathLength);
         }
     }
     EXPECT_EQ(roomCount, 1);
