@@ -60,6 +60,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed the storage out-of-Dex warning compressing and overlapping the Pokémon
+  information panel.
 - Added Galarian Corsola to the Modern Pokedex alongside Cursola.
 - Fixed the intended increase in Full Rest Stop frequency during the Elite Four
   being shadowed by the earlier Gym 3 condition.
