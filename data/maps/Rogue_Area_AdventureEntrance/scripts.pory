@@ -638,26 +638,36 @@ script Rogue_StartAdventureInternal
 
         setvar(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE)
 
-        special(RogueTrial_PendingRequiresRandomStarter)
+        special(RogueTrial_PendingReplacesStartingParty)
         if(var(VAR_RESULT) == YES)
         {
             applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_WalkTrialAttendant)
-            applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerTrialStarter)
-            waitmovement(0)
 
-            special(ChooseStarter)
-            setflag(FLAG_SCRIPT_HIDE_FOLLOWER)
-            waitstate
-            clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
-
-            if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
+            special(RogueTrial_PendingHasFixedStartingParty)
+            if(var(VAR_RESULT) == YES)
             {
-                call(Rogue_Adventure_CancelStarterSelection)
-                return
+                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayer)
+                waitmovement(0)
             }
+            else
+            {
+                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerTrialStarter)
+                waitmovement(0)
 
-            applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter1)
-            waitmovement(0)
+                special(ChooseStarter)
+                setflag(FLAG_SCRIPT_HIDE_FOLLOWER)
+                waitstate
+                clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
+
+                if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
+                {
+                    call(Rogue_Adventure_CancelStarterSelection)
+                    return
+                }
+
+                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter1)
+                waitmovement(0)
+            }
         }
         elif(var(VAR_ALLOW_STARTER_CHOICE) == YES)
         {
@@ -688,9 +698,9 @@ script Rogue_StartAdventureInternal
             if(var(VAR_RESULT) == YES)
             {
                 special(ChooseStarter)
-                setflag(FLAG_SCRIPT_HIDE_FOLLOWER) 
+                setflag(FLAG_SCRIPT_HIDE_FOLLOWER)
                 waitstate
-                clearflag(FLAG_SCRIPT_HIDE_FOLLOWER) 
+                clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
 
                 if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
                 {
@@ -719,7 +729,8 @@ script Rogue_StartAdventureInternal
             }
         }
 
-        if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
+        special(RogueTrial_PendingHasFixedStartingParty)
+        if(var(VAR_RESULT) == NO && var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
         {
             special(Rogue_CheckPartyHasDuplicateStartSpecies)
             if(var(VAR_RESULT) == YES)

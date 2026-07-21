@@ -83,6 +83,7 @@ struct RogueTrialDefinition
     u8 requiredType;
     u16 maxBst;
     u16 normalizedBst;
+    u16 temporaryBagItem;
     u8 battleLevel;
     u8 forcedTrainerOrder;
     u8 forcedBattleFormat;
@@ -92,6 +93,8 @@ struct RogueTrialDefinition
     u8 curseCount;
     u8 extraCurseCount;
     u8 captureLimit;
+    const u16 *fixedStartingParty;
+    u8 fixedStartingPartyCount;
     u8 requiresLittleCup : 1;
     u8 randomizePartyOnEnter : 1;
     u8 enableAllRegionalTrainers : 1;
@@ -132,6 +135,7 @@ bool8 RogueTrial_IsActiveTrial(u8 trialId);
 bool8 RogueTrial_IsInvalidated(void);
 void RogueTrial_Invalidate(void);
 void RogueTrial_ApplyPendingSelection(void);
+void RogueTrial_ApplyRunBagItems(void);
 u8 RogueTrial_GetPendingForcedPokedexVariant(void);
 
 u16 RogueTrial_GetCharmItemCount(u8 effectType);
@@ -178,7 +182,8 @@ void RogueTrial_SelectDefaultPokedexOption(void);
 void RogueTrial_BufferTrialPreview(void);
 void RogueTrial_SetPendingSelectionFromScript(void);
 void RogueTrial_HasPendingSelection(void);
-void RogueTrial_PendingRequiresRandomStarter(void);
+void RogueTrial_PendingHasFixedStartingParty(void);
+void RogueTrial_PendingReplacesStartingParty(void);
 void RogueTrial_ApplyPendingPartyCapacity(void);
 void RogueTrial_CanUsePendingParty(void);
 void RogueTrial_CanUsePendingDayCare(void);
@@ -188,5 +193,6 @@ void RogueTrial_HasAvailableTrials(void);
 void RogueTrial_LoadLastSelection(void);
 void RogueTrial_CanUseAttendant(void);
 void RogueTrial_RecordInitialParty(void);
+bool8 RogueTrial_ApplyFixedStartingParty(u8 level);
 
 #endif // ROGUE_TRIALS_H

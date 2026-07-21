@@ -1035,8 +1035,7 @@ static u32 GenerateUniqueLegendaryCustomMonId(u16 species)
     u8 rarity;
     RAND_TYPE rngState;
 
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES)
-     || !RogueRandomChance(10, OVERWORLD_FLAG))
+    if(!RogueRandomChance(10, OVERWORLD_FLAG))
         return 0;
 
     rarity = (RogueRandom() % 2) == 0 ? UNIQUE_RARITY_EPIC : UNIQUE_RARITY_LEGENDARY;

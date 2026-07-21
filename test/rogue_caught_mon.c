@@ -2,11 +2,13 @@
 #include "battle.h"
 #include "constants/battle.h"
 #include "constants/flags.h"
+#include "constants/items.h"
 #include "constants/rogue.h"
 #include "constants/rogue_pokedex.h"
 #include "constants/species.h"
 #include "constants/vars.h"
 #include "event_data.h"
+#include "item.h"
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
@@ -598,22 +600,65 @@ TEST("Z-A Royale Trial applies Z-A dex, Rainbow order, Doubles, and regional tra
 
     ClearCaughtMonTestState();
 }
+
+TEST("Z-A Royale temporarily supplies a missing Mega Ring without duplicating an owned one")
+{
+    u16 originalCount = CountTotalItemQuantityInBag(ITEM_MEGA_RING);
+
+    while (RemoveBagItem(ITEM_MEGA_RING, 1))
+        ;
+
+    RogueSave_SaveHubStates();
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_Z_A_ROYALE);
+    RogueTrial_ApplyRunBagItems();
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 1);
+    RogueSave_LoadHubStates();
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 0);
+
+    EXPECT(AddBagItem(ITEM_MEGA_RING, 1));
+    RogueSave_SaveHubStates();
+    RogueTrial_ApplyRunBagItems();
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 1);
+    RogueSave_LoadHubStates();
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_MEGA_RING), 1);
+
+    while (RemoveBagItem(ITEM_MEGA_RING, 1))
+        ;
+    if (originalCount != 0)
+        EXPECT(AddBagItem(ITEM_MEGA_RING, originalCount));
+    RogueSave_SaveHubStates();
+    ClearCaughtMonTestState();
+}
 #endif
 
-TEST("Orre Style Trial applies Doubles and Snag Curse")
+TEST("Orre Style Trial supplies its partner duo with Doubles and Snag Curse")
 {
     ResetCaughtMonTestState();
     Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, BATTLE_FORMAT_SINGLES);
+    SetPartyMon(0, SPECIES_PIKACHU);
 
     gSpecialVar_0x8004 = ROGUE_TRIAL_ORRE_STYLE;
     gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
     gSpecialVar_0x8006 = POKEDEX_VARIANT_ROGUE_CLASSICPLUS;
     RogueTrial_SetPendingSelectionFromScript();
+
+    RogueTrial_PendingHasFixedStartingParty();
+    EXPECT(gSpecialVar_Result);
+
+    RogueTrial_CanUsePendingParty();
+    EXPECT(gSpecialVar_Result);
+
     RogueTrial_ApplyPendingSelection();
 
     EXPECT_EQ(gRogueRun.trialState.trialId, ROGUE_TRIAL_ORRE_STYLE);
     EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT), BATTLE_FORMAT_DOUBLES);
     EXPECT_EQ(RogueTrial_GetCurseItemCount(EFFECT_SNAG_TRAINER_MON), 1);
+    EXPECT(RogueTrial_ApplyFixedStartingParty(STARTER_MON_LEVEL));
+    EXPECT_EQ(gPlayerPartyCount, 2);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), SPECIES_UMBREON);
+    EXPECT_EQ(GetMonData(&gPlayerParty[1], MON_DATA_SPECIES), SPECIES_ESPEON);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_LEVEL), STARTER_MON_LEVEL);
+    EXPECT_EQ(GetMonData(&gPlayerParty[1], MON_DATA_LEVEL), STARTER_MON_LEVEL);
 
     ClearCaughtMonTestState();
 }

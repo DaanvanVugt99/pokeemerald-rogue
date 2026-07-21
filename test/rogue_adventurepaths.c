@@ -20,14 +20,6 @@
 #include "rogue_trials.h"
 #include "test/test.h"
 
-static void SetUniqueLegendaryUpgradeState(bool8 state)
-{
-    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_RARE, state);
-    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EPIC, state);
-    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY, state);
-    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES, state);
-}
-
 static void ExpectGeneratedAbilityIsRerolled(u16 species, u32 customMonId)
 {
     u8 i;
@@ -298,7 +290,7 @@ TEST("Full Rest Stops become more common during the Elite Four")
     EXPECT_EQ(RogueAdv_Debug_GetFullRestStopWeight(ROGUE_ELITE_START_DIFFICULTY), 20);
 }
 
-TEST("Unique Legendary upgrade is the final Lab upgrade")
+TEST("Unique Typings is the final Lab upgrade")
 {
     u8 originalUpgradeFlags[ARRAY_COUNT(gRogueSaveBlock->hubMap.upgradeFlags)];
     u8 originalAreaBuiltFlags[ARRAY_COUNT(gRogueSaveBlock->hubMap.areaBuiltFlags)];
@@ -308,25 +300,26 @@ TEST("Unique Legendary upgrade is the final Lab upgrade")
     gRogueSaveBlock->hubMap.areaBuiltFlags[HUB_AREA_LABS / 8] |= 1 << (HUB_AREA_LABS % 8);
 
     EXPECT_EQ(ARRAY_COUNT(gRogueSaveBlock->hubMap.upgradeFlags), 7);
-    EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES].targetArea, HUB_AREA_LABS);
-    EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES].buildCost, 12);
-    EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES].requiredUpgrades[0], HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY);
+    EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_TYPINGS].targetArea, HUB_AREA_LABS);
+    EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_TYPINGS].buildCost, 12);
+    EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_TYPINGS].requiredUpgrades[0], HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY);
 
-    SetUniqueLegendaryUpgradeState(FALSE);
-    EXPECT(!RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES));
-    EXPECT(!RogueHub_HasUpgradeRequirements(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES));
+    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY, FALSE);
+    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS, FALSE);
+    EXPECT(!RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS));
+    EXPECT(!RogueHub_HasUpgradeRequirements(HUB_UPGRADE_LAB_UNIQUE_TYPINGS));
 
     RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY, TRUE);
-    EXPECT(RogueHub_HasUpgradeRequirements(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES));
+    EXPECT(RogueHub_HasUpgradeRequirements(HUB_UPGRADE_LAB_UNIQUE_TYPINGS));
 
-    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES, TRUE);
-    EXPECT(RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES));
+    RogueHub_SetUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS, TRUE);
+    EXPECT(RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS));
 
     memcpy(gRogueSaveBlock->hubMap.upgradeFlags, originalUpgradeFlags, sizeof(originalUpgradeFlags));
     memcpy(gRogueSaveBlock->hubMap.areaBuiltFlags, originalAreaBuiltFlags, sizeof(originalAreaBuiltFlags));
 }
 
-TEST("Unique Legendary generation is gated, deterministic, and supports both rarities")
+TEST("Unique Legendary generation is available by default, deterministic, and supports both rarities")
 {
     u16 seed;
     u16 successSeed = 0;
@@ -343,15 +336,8 @@ TEST("Unique Legendary generation is gated, deterministic, and supports both rar
     u8 originalUpgradeFlags[ARRAY_COUNT(gRogueSaveBlock->hubMap.upgradeFlags)];
 
     memcpy(originalUpgradeFlags, gRogueSaveBlock->hubMap.upgradeFlags, sizeof(originalUpgradeFlags));
-    SetUniqueLegendaryUpgradeState(FALSE);
+    memset(gRogueSaveBlock->hubMap.upgradeFlags, 0, sizeof(gRogueSaveBlock->hubMap.upgradeFlags));
 
-    for(seed = 0; seed < 128; ++seed)
-    {
-        SeedRogueRng(seed);
-        EXPECT_EQ(RogueAdv_Debug_GenerateUniqueLegendaryCustomMonId(SPECIES_HO_OH), 0);
-    }
-
-    SetUniqueLegendaryUpgradeState(TRUE);
     for(seed = 0; seed < 1024 && (epicId == 0 || legendaryId == 0 || !foundFailure); ++seed)
     {
         SeedRogueRng(seed);
@@ -440,10 +426,7 @@ TEST("Unique Legendary battles and catches preserve their generated payload")
     bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     struct RogueAdvPath originalPath = gRogueAdvPath;
     RAND_TYPE originalRng = gRngValue;
-    u8 originalUpgradeFlags[ARRAY_COUNT(gRogueSaveBlock->hubMap.upgradeFlags)];
 
-    memcpy(originalUpgradeFlags, gRogueSaveBlock->hubMap.upgradeFlags, sizeof(originalUpgradeFlags));
-    SetUniqueLegendaryUpgradeState(TRUE);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     gRogueAdvPath.currentRoomType = ADVPATH_ROOM_LEGENDARY;
 
@@ -472,7 +455,6 @@ TEST("Unique Legendary battles and catches preserve their generated payload")
     }
 
     gRogueAdvPath = originalPath;
-    memcpy(gRogueSaveBlock->hubMap.upgradeFlags, originalUpgradeFlags, sizeof(originalUpgradeFlags));
     gRngValue = originalRng;
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);

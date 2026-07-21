@@ -4760,13 +4760,15 @@ static void BeginRogueRun_ModifyParty(void)
 {
     u16 starterSpecies = VarGet(VAR_STARTER_SWAP_SPECIES);
     u32 startLevel = STARTER_MON_LEVEL;
+    bool8 hasFixedStartingParty;
 
     if(Rogue_GetModeRules()->initialLevelOverride != 0)
         startLevel = Rogue_GetModeRules()->initialLevelOverride;
 
     FlagClear(FLAG_ROGUE_HAS_RANDOM_STARTER);
+    hasFixedStartingParty = RogueTrial_ApplyFixedStartingParty(startLevel);
 
-    if(starterSpecies != SPECIES_NONE)
+    if(!hasFixedStartingParty && starterSpecies != SPECIES_NONE)
     {
         FlagSet(FLAG_ROGUE_HAS_RANDOM_STARTER);
         ClearPlayerTeam();
@@ -4803,7 +4805,7 @@ static void BeginRogueRun_ModifyParty(void)
                 exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL)].growthRate, startLevel);
                 SetMonData(&gPlayerParty[i], MON_DATA_EXP, &exp);
 
-                if(starterSpecies != SPECIES_NONE)
+                if(hasFixedStartingParty || starterSpecies != SPECIES_NONE)
                 {
                     // This mon was just added so it can appear in the safari
                 }
@@ -5049,8 +5051,10 @@ static void BeginRogueRunPhase_Reset(void)
     ResetHotTracking();
 
     RogueGift_EnsureDynamicCustomMonsAreValid();
+    // Save before applying temporary Trial items so the exact hub inventory is restored after the run.
     RogueSave_SaveHubStates();
     RogueTrial_ApplyPendingSelection();
+    RogueTrial_ApplyRunBagItems();
     RogueMonQuery_InvalidateSpeciesActiveCache();
 
 #ifdef ROGUE_EXPANSION
@@ -5185,6 +5189,7 @@ static void BeginRogueRunPhase_PartyAndBag(void)
 {
     BeginRogueRun_ModifyParty();
     SetupRogueRunBag();
+    RogueTrial_ApplyRunBagItems();
 
     FlagClear(FLAG_ROGUE_FREE_HEAL_USED);
     FlagClear(FLAG_ROGUE_RUN_COMPLETED);

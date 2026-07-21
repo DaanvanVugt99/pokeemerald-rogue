@@ -238,7 +238,8 @@ gSpecials::
 	def_special RogueTrial_BufferTrialPreview
 	def_special RogueTrial_SetPendingSelectionFromScript
 	def_special RogueTrial_HasPendingSelection
-	def_special RogueTrial_PendingRequiresRandomStarter
+	def_special RogueTrial_PendingHasFixedStartingParty
+	def_special RogueTrial_PendingReplacesStartingParty
 	def_special RogueTrial_ApplyPendingPartyCapacity
 	def_special RogueTrial_BufferDayCareDisabled
 	def_special RogueTrial_BufferRandomanDisabled

@@ -1,5 +1,6 @@
 #include "global.h"
 #include "constants/flags.h"
+#include "constants/items.h"
 #include "constants/pokemon.h"
 #include "constants/rogue.h"
 #include "constants/rogue_pokedex.h"
@@ -8,6 +9,7 @@
 
 #include "event_data.h"
 #include "battle_setup.h"
+#include "item.h"
 #include "pokemon.h"
 #include "random.h"
 #include "script_menu.h"
@@ -130,7 +132,7 @@ static const u8 sText_RandomanRouletteDesc[] = _("Your full party is rerolled\no
 static const u8 sText_EqualizedDesc[] = _("All {PKMN} use proportional\n500 BST stat spreads.");
 static const u8 sText_RegionTrialDesc[] = _("Uses that region's Pokédex\nand Trainer pool.");
 static const u8 sText_ZARoyaleDesc[] = _("Z-A Pokédex with Rainbow\nregional Trainers.");
-static const u8 sText_OrreStyleDesc[] = _("Doubles with Snag Curse.\nFinish with Umbreon+Espeon.");
+static const u8 sText_OrreStyleDesc[] = _("Doubles with Snag Curse.\nStart with Umbreon+Espeon.");
 static const u8 sText_RoguelockeDesc[] = _("Random starter with 10\nWild Encounter Curses.");
 static const u8 sText_CantPickDesc[] = _("Only starter-family {PKMN}\nare legal.");
 static const u8 sText_CursedBodyDesc[] = _("Snowball Curse is active.");
@@ -159,9 +161,10 @@ static const u8 sRule_RegionalTrainers[] = _("Uses the matching regional Trainer
 static const u8 sRule_ZADex[] = _("Only selected Z-A Pokédex species are legal.");
 static const u8 sRule_ZATrainers[] = _("Uses Trainers from every region.");
 static const u8 sRule_ZAOrder[] = _("Trainer order is Rainbow.");
-static const u8 sRule_ZAMegaRing[] = _("Quest completion requires the Mega Ring.");
+static const u8 sRule_ZAMegaRing[] = _("A Mega Ring is supplied and active.");
 static const u8 sRule_Doubles[] = _("Trainer battles are Doubles.");
 static const u8 sRule_OrreSnag[] = _("Snag Curse is active.");
+static const u8 sRule_OrreStart[] = _("Start with Umbreon and Espeon.");
 static const u8 sRule_OrreFinish[] = _("Finish with Umbreon and Espeon.");
 static const u8 sRule_RandomStarter[] = _("A random starter replaces the current party.");
 static const u8 sRule_WildCurse10[] = _("10 Wild Encounter Curses are active.");
@@ -189,7 +192,7 @@ static const u8 *const sRules_Randoman[] = {sRule_RandomanReroll, sRule_Randoman
 static const u8 *const sRules_Equalized[] = {sRule_EqualizedBst, sRule_EqualizedStats, sRule_EqualizedIdentity};
 static const u8 *const sRules_Regional[] = {sRule_RegionalDex, sRule_RegionalTrainers};
 static const u8 *const sRules_ZA[] = {sRule_ZADex, sRule_ZATrainers, sRule_ZAOrder, sRule_Doubles, sRule_ZAMegaRing};
-static const u8 *const sRules_Orre[] = {sRule_Doubles, sRule_OrreSnag, sRule_OrreFinish};
+static const u8 *const sRules_Orre[] = {sRule_Doubles, sRule_OrreSnag, sRule_OrreStart, sRule_OrreFinish};
 static const u8 *const sRules_Roguelocke[] = {sRule_RandomStarter, sRule_WildCurse10};
 static const u8 *const sRules_CantPick[] = {sRule_StarterOnly};
 static const u8 *const sRules_CursedBody[] = {sRule_Snowball};
@@ -200,6 +203,8 @@ static const u8 *const sRules_IronKaizo[] = {sRule_FreshStart, sRule_RandomStart
 static const u8 *const sRules_ChaosMaster[] = {sRule_BattleReroll};
 static const u8 *const sRules_Apotheosis[] = {sRule_RandomStarter, sRule_LegendaryOnly, sRule_GuaranteedCatch};
 static const u8 *const sRules_LimitedCapture[] = {sRule_FreshStart, sRule_RandomStarter, sRule_FiveCaptures, sRule_GuaranteedCatch, sRule_NoDayCare, sRule_NoGiftMons};
+
+static const u16 sOrreStartingParty[] = {SPECIES_UMBREON, SPECIES_ESPEON};
 
 static const u8 *const sDifficultyNames[DIFFICULTY_PRESET_COUNT] =
 {
@@ -533,6 +538,7 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .forcedBattleFormat = BATTLE_FORMAT_DOUBLES,
         .hasForcedBattleFormat = TRUE,
         .enableAllRegionalTrainers = TRUE,
+        .temporaryBagItem = ITEM_MEGA_RING,
     },
 #endif
     [ROGUE_TRIAL_ORRE_STYLE] =
@@ -548,6 +554,8 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .curseEffect = EFFECT_SNAG_TRAINER_MON,
         .curseCount = 1,
         .hasCurseEffect = TRUE,
+        .fixedStartingParty = sOrreStartingParty,
+        .fixedStartingPartyCount = ARRAY_COUNT(sOrreStartingParty),
     },
     [ROGUE_TRIAL_ROGUELOCKE] =
     {
@@ -1430,6 +1438,21 @@ void RogueTrial_ApplyPendingSelection(void)
     RogueTrial_ClearPendingSelection();
 }
 
+void RogueTrial_ApplyRunBagItems(void)
+{
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+
+    if (trial != NULL
+        && trial->temporaryBagItem != ITEM_NONE
+        && !CheckBagHasItem(trial->temporaryBagItem, 1))
+    {
+        bool8 success = AddBagItem(trial->temporaryBagItem, 1);
+
+        if (!success)
+            AGB_ASSERT(FALSE);
+    }
+}
+
 u8 RogueTrial_GetPendingForcedPokedexVariant(void)
 {
     const struct RogueTrialDefinition *trial;
@@ -2177,11 +2200,20 @@ void RogueTrial_HasPendingSelection(void)
     gSpecialVar_Result = sPendingTrial.isPending;
 }
 
-void RogueTrial_PendingRequiresRandomStarter(void)
+void RogueTrial_PendingHasFixedStartingParty(void)
 {
     const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
 
-    gSpecialVar_Result = sPendingTrial.isPending && trial != NULL && trial->forceRandomStarter;
+    gSpecialVar_Result = sPendingTrial.isPending && trial != NULL && trial->fixedStartingPartyCount != 0;
+}
+
+void RogueTrial_PendingReplacesStartingParty(void)
+{
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
+
+    gSpecialVar_Result = sPendingTrial.isPending
+        && trial != NULL
+        && (trial->forceRandomStarter || trial->fixedStartingPartyCount != 0);
 }
 
 void RogueTrial_ApplyPendingPartyCapacity(void)
@@ -2195,6 +2227,7 @@ void RogueTrial_ApplyPendingPartyCapacity(void)
     trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
     if (trial == NULL
         || trial->forceRandomStarter
+        || trial->fixedStartingPartyCount != 0
         || !trial->hasCurseEffect
         || trial->curseEffect != EFFECT_PARTY_SIZE)
         return;
@@ -2209,8 +2242,13 @@ void RogueTrial_CanUsePendingParty(void)
 
     gSpecialVar_Result = TRUE;
 
-    if (sPendingTrial.isPending && RogueTrial_GetDefinition(sPendingTrial.trialId)->forceRandomStarter)
-        return;
+    if (sPendingTrial.isPending)
+    {
+        const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
+
+        if (trial->forceRandomStarter || trial->fixedStartingPartyCount != 0)
+            return;
+    }
 
     for (i = 0; i < PARTY_SIZE; ++i)
     {
@@ -2254,23 +2292,27 @@ void RogueTrial_CanUsePendingDayCare(void)
 
 void RogueTrial_CanStartPendingSelection(void)
 {
+    const struct RogueTrialDefinition *trial = sPendingTrial.isPending ? RogueTrial_GetDefinition(sPendingTrial.trialId) : NULL;
     u16 starterSpecies = VarGet(VAR_STARTER_SWAP_SPECIES);
 
     gSpecialVar_Result = TRUE;
 
-    if (starterSpecies != SPECIES_NONE)
+    if (trial == NULL || trial->fixedStartingPartyCount == 0)
     {
-        if (BufferPendingValidationFailure(sText_ChosenPartner, starterSpecies))
+        if (starterSpecies != SPECIES_NONE)
         {
-            gSpecialVar_Result = FALSE;
-            return;
+            if (BufferPendingValidationFailure(sText_ChosenPartner, starterSpecies))
+            {
+                gSpecialVar_Result = FALSE;
+                return;
+            }
         }
-    }
-    else
-    {
-        RogueTrial_CanUsePendingParty();
-        if (!gSpecialVar_Result)
-            return;
+        else
+        {
+            RogueTrial_CanUsePendingParty();
+            if (!gSpecialVar_Result)
+                return;
+        }
     }
 
     RogueTrial_CanUsePendingDayCare();
@@ -2324,4 +2366,26 @@ void RogueTrial_RecordInitialParty(void)
         gRogueRun.trialState.initialPartyCount = CalculatePlayerPartyCount();
         gRogueRun.trialState.initialPartyCountSet = TRUE;
     }
+}
+
+bool8 RogueTrial_ApplyFixedStartingParty(u8 level)
+{
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+    u8 i;
+
+    if (trial == NULL || trial->fixedStartingPartyCount == 0)
+        return FALSE;
+
+    AGB_ASSERT(trial->fixedStartingPartyCount <= PARTY_SIZE);
+    AGB_ASSERT(trial->fixedStartingParty != NULL);
+    ZeroPlayerPartyMons();
+
+    for (i = 0; i < trial->fixedStartingPartyCount; ++i)
+    {
+        AGB_ASSERT(trial->fixedStartingParty[i] != SPECIES_NONE);
+        CreateMon(&gPlayerParty[i], trial->fixedStartingParty[i], level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    }
+
+    CalculatePlayerPartyCount();
+    return TRUE;
 }

@@ -25,7 +25,6 @@ extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity0[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity1[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity3[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonTyping[];
-extern const u8 gHubUpgradeDesc_Lab_UniqueLegendaries[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_RandomStarter[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_AdventureReplay[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_TrialAttendant[];
@@ -326,9 +325,9 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .upgradeName = _("Unique{PKMN} Types"),
         .targetArea = HUB_AREA_LABS,
 #ifdef ROGUE_EXPANSION
-        .buildCost = 0,
-        .requiredUpgrades = { HUB_UPGRADE_NONE },
-        .isHidden = TRUE
+        .buildCost = 12,
+        .descText = gHubUpgradeDesc_Lab_UniqueMonTyping,
+        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY, HUB_UPGRADE_NONE },
 #else
         // Expansion-only: vanilla type lookup does not consume dynamic custom mon typings.
         .buildCost = 0,
@@ -378,13 +377,13 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .descText = gHubUpgradeDesc_Lab_UniqueMonRarity3,
         .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EPIC, HUB_UPGRADE_NONE },
     },
-    [HUB_UPGRADE_LAB_UNIQUE_LEGENDARIES] =
+    [HUB_UPGRADE_UNUSED_48] =
     {
-        .upgradeName = _("Unique Legends"),
+        .upgradeName = _("Reserved"),
         .targetArea = HUB_AREA_LABS,
-        .buildCost = 12,
-        .descText = gHubUpgradeDesc_Lab_UniqueLegendaries,
-        .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY, HUB_UPGRADE_NONE },
+        .buildCost = 0,
+        .requiredUpgrades = { HUB_UPGRADE_NONE },
+        .isHidden = TRUE,
     },
 
     // HUB_AREA_ADVENTURE_ENTRANCE

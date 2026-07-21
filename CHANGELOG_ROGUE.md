@@ -16,6 +16,12 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made Unique Legendary variants available in legendary nodes from the start,
+  and moved alternative Unique Pokémon typings to the final Unique Lab upgrade.
+- Made Z-A Royale temporarily supply a Mega Ring for its run when needed,
+  without requiring or granting permanent ownership.
+- Made Orre Style replace the incoming party with Umbreon and Espeon while
+  retaining its requirement to finish the Trial with both partners.
 - Layered staggered lightning strikes and electrical flashes through
   Thundercrush's rising stone animation.
 - Updated every Poké Ball item description to state its exact catch multiplier
@@ -137,8 +143,6 @@ Format follows Keep a Changelog loosely:
   battle gimmick cancellation while Tatsugiri is swallowed.
 - Added dimmed storage icons, grayscale previews, and a warning label for
   Pokémon outside the currently selected Pokédex.
-- Added a final Unique Legendaries Lab upgrade that gives each legendary node
-  a 10% chance to contain an Epic or Legendary Unique Pokémon.
 - Added Plain and Infested Seeds, which raise accuracy on Plain Terrain and
   critical-hit ratio on Infested Terrain respectively.
 

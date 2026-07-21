@@ -269,28 +269,14 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Z-A Royale",
-                "description": "Complete the Z-A Royale Trial through the Trial Attendant with the Mega Ring available.",
+                "description": "Complete the Z-A Royale Trial through the Trial Attendant.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_Z_A_ROYALE"
                 },
-                "requirements":
-                [
-                    { "item": "ITEM_MEGA_RING", "count": 1 }
-                ],
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_LARGEST_MONEY" },
-                    {
-                        "hub_upgrade": "HUB_UPGRADE_LAB_UNIQUE_TYPINGS",
-                        "custom_popup":
-                        {
-                            "item_icon": "ITEM_TOWN_MAP",
-                            "title": "Unique{PKMN}",
-                            "subtitle": "{COLOR LIGHT_BLUE}{SHADOW BLUE}Typings Unlocked",
-                            "fanfare": "MUS_RG_OBTAIN_KEY_ITEM"
-                        }
-                    },
                     {
                         "species": "SPECIES_RIOLU",
                         "shiny": true,
