@@ -222,6 +222,7 @@ gSpecials::
 	def_special Rogue_BufferLabMonName
 	def_special Rogue_GiveLabMon
 	def_special Rogue_ChooseMiniBossRewardMons
+	def_special Rogue_ApplyPartyMonNicknameSettings
 	def_special Rogue_ClearCharmsAndCurses
 	def_special Rogue_ClearCharms
 	def_special Rogue_ClearCurses

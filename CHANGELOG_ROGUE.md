@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made Frontier Brain Pokémon rewards respect the configured nickname mode,
+  including skipping prompts for Never and assigning names for Automatic.
 - Kept Tera type indicators visible during battle animations whenever their
   healthboxes remain visible.
 - Prevented battle-end fades from freeing healthbox backing data while its

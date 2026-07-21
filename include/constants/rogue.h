@@ -281,6 +281,11 @@
 #define MINIBOSS_REWARD_MODE_SNAG       3
 #define MINIBOSS_REWARD_MODE_NO_LEGAL   4
 
+// Result values from Rogue_ApplyPartyMonNicknameSettings.
+#define NICKNAME_ACTION_SKIP            0
+#define NICKNAME_ACTION_ASK             1
+#define NICKNAME_ACTION_FORCE           2
+
 #define ADVPATH_ROOM_COUNT              18
 
 

@@ -37,6 +37,7 @@ bool8 Rogue_GetSafariMonOfferDetails(u16 safariIndex, struct RogueSafariOfferDet
 void Rogue_RandomisePartyMon(void);
 void Rogue_AlterMonIVs(void);
 void Rogue_ApplyStatusToMon(void);
+u16 Rogue_ApplyPartyMonNicknameSettings(void);
 
 u16 Rogue_GetMonEvoCount(void);
 void Rogue_GetMonEvoParams(void);

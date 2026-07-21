@@ -140,11 +140,23 @@ script Rogue_BattleDefeated_GiveSelectedMon
     waitmessage
     waitfanfare
 
-    msgbox(format("Would you like to give {STR_VAR_1} a nickname?"), MSGBOX_YESNO)
-    if(var(VAR_RESULT) == YES)
+    call(Common_EventScript_GetGiftMonPartySlot)
+    specialvar(VAR_RESULT, Rogue_ApplyPartyMonNicknameSettings)
+
+    if(var(VAR_RESULT) == NICKNAME_ACTION_FORCE)
     {
-        call(Common_EventScript_GetGiftMonPartySlot)
         call(Common_EventScript_NameReceivedPartyMon)
+    }
+    else
+    {
+        if(var(VAR_RESULT) == NICKNAME_ACTION_ASK)
+        {
+            msgbox(format("Would you like to give {STR_VAR_1} a nickname?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                call(Common_EventScript_NameReceivedPartyMon)
+            }
+        }
     }
 }
 

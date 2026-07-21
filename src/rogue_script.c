@@ -930,6 +930,20 @@ void Rogue_ChooseMiniBossRewardMons(void)
     Rogue_SelectMiniBossRewardMons();
 }
 
+u16 Rogue_ApplyPartyMonNicknameSettings(void)
+{
+    u16 monIdx = gSpecialVar_0x8004;
+
+    if (monIdx >= gPlayerPartyCount
+     || Rogue_ShouldSkipAssignNickname(&gPlayerParty[monIdx]))
+        return NICKNAME_ACTION_SKIP;
+
+    if (Rogue_ShouldForceNicknameScreen())
+        return NICKNAME_ACTION_FORCE;
+
+    return NICKNAME_ACTION_ASK;
+}
+
 void Rogue_ClearCharmsAndCurses(void)
 {
     Rogue_RemoveCharmsFromBag();
