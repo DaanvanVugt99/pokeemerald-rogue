@@ -3992,6 +3992,9 @@ Move_THUNDERCRUSH:
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, -18, -32
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, -18, -16
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, -18, 16
+	delay 1
+	createvisualtask AnimTask_InvertScreenColor, 2, 0x1 | 0x2 | 0x4
+	delay 1
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 33, 576, 20, 8, 42, 1
 	delay 2
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 31, 400, 25, 11, -42, 1
@@ -4001,6 +4004,9 @@ Move_THUNDERCRUSH:
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 6, 18, -32
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 6, 18, -16
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 6, 18, 16
+	delay 1
+	createvisualtask AnimTask_InvertScreenColor, 2, 0x1 | 0x2 | 0x4
+	delay 1
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 28, 512, 25, 16, 46, 1
 	delay 2
 	createsprite gStoneEdgeSpriteTemplate, 130, 7, 0, 33, 464, 30, 15, 49, 1
@@ -4010,7 +4016,9 @@ Move_THUNDERCRUSH:
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, 0, -32
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, 0, -16
 	createsprite gLightningSpriteTemplate, ANIM_TARGET, 2, 0, 16
-	delay 4
+	delay 1
+	createvisualtask AnimTask_InvertScreenColor, 2, 0x1 | 0x2 | 0x4
+	delay 3
 	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, 2, 0, 10, RGB(31, 31, 0)
 	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, 5, 0, 5, 0
 	createsprite gElectricitySpriteTemplate, ANIM_TARGET, 2, -5, 10, 5, 1

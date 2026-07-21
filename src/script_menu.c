@@ -1,4 +1,5 @@
 #include "global.h"
+#include "bg.h"
 #include "main.h"
 #include "battle_main.h"
 #include "data.h"
@@ -1458,6 +1459,14 @@ static const u8 sText_TrialOverviewPageControls[] = _("  L/R");
 #define tTrialOverviewWindowId data[0]
 #define tTrialOverviewDelay    data[1]
 #define tTrialOverviewPage     data[2]
+#define tTrialOverviewState    data[3]
+
+enum
+{
+    TRIAL_OVERVIEW_STATE_WAIT_FOR_BG,
+    TRIAL_OVERVIEW_STATE_WAIT_FOR_GFX,
+    TRIAL_OVERVIEW_STATE_INPUT,
+};
 
 static EWRAM_DATA u8 sTrialOverviewRuleLines[TRIAL_OVERVIEW_MAX_RULE_LINES][TRIAL_OVERVIEW_RULE_LINE_LENGTH];
 
@@ -1549,7 +1558,7 @@ static void PrintTrialOverview(u8 taskId)
         AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sTrialOverviewRuleLines[firstLine + i], 8, 64 + i * 14, TEXT_SKIP_DRAW, NULL);
     }
 
-    CopyWindowToVram(windowId, COPYWIN_FULL);
+    CopyWindowToVram(windowId, COPYWIN_GFX);
 }
 
 static void CloseTrialOverview(u8 taskId, bool8 proceed)
@@ -1565,6 +1574,29 @@ static void Task_ShowTrialOverviewInput(u8 taskId)
 {
     u8 lineCount;
     u8 pageCount;
+
+    switch (gTasks[taskId].tTrialOverviewState)
+    {
+    case TRIAL_OVERVIEW_STATE_WAIT_FOR_BG:
+        // The preceding closemessage may still be copying this background's
+        // tilemap. Wait before modifying it so the border cannot be revealed
+        // before the window graphics are ready.
+        if (IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        gTasks[taskId].tTrialOverviewWindowId = CreateWindowFromRect(1, 2, 26, 14);
+        SetDarkStandardWindowBorderStyle(gTasks[taskId].tTrialOverviewWindowId, FALSE);
+        PrintTrialOverview(taskId);
+        gTasks[taskId].tTrialOverviewState = TRIAL_OVERVIEW_STATE_WAIT_FOR_GFX;
+        return;
+    case TRIAL_OVERVIEW_STATE_WAIT_FOR_GFX:
+        if (IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        CopyWindowToVram(gTasks[taskId].tTrialOverviewWindowId, COPYWIN_MAP);
+        gTasks[taskId].tTrialOverviewState = TRIAL_OVERVIEW_STATE_INPUT;
+        return;
+    }
 
     if (gTasks[taskId].tTrialOverviewDelay < 5)
     {
@@ -1594,21 +1626,18 @@ static void Task_ShowTrialOverviewInput(u8 taskId)
 
 void ScriptMenu_ShowTrialOverview(void)
 {
-    u8 taskId;
-    u8 windowId = CreateWindowFromRect(1, 2, 26, 14);
+    u8 taskId = CreateTask(Task_ShowTrialOverviewInput, 0);
 
-    SetDarkStandardWindowBorderStyle(windowId, FALSE);
-
-    taskId = CreateTask(Task_ShowTrialOverviewInput, 0);
-    gTasks[taskId].tTrialOverviewWindowId = windowId;
+    gTasks[taskId].tTrialOverviewWindowId = WINDOW_NONE;
     gTasks[taskId].tTrialOverviewDelay = 0;
     gTasks[taskId].tTrialOverviewPage = 0;
-    PrintTrialOverview(taskId);
+    gTasks[taskId].tTrialOverviewState = TRIAL_OVERVIEW_STATE_WAIT_FOR_BG;
 }
 
 #undef tTrialOverviewWindowId
 #undef tTrialOverviewDelay
 #undef tTrialOverviewPage
+#undef tTrialOverviewState
 #undef TRIAL_OVERVIEW_RULE_WIDTH
 #undef TRIAL_OVERVIEW_RULE_LINE_LENGTH
 #undef TRIAL_OVERVIEW_MAX_RULE_LINES

@@ -62,6 +62,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed the Trial preview briefly drawing its border around an unloaded gap
+  before the complete overview appeared.
 - Fixed Infested Terrain damaging Flying and otherwise ungrounded Pokémon on
   switch-in.
 - Fixed the storage out-of-Dex warning compressing and overlapping the Pokémon
