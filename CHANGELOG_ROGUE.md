@@ -17,6 +17,7 @@ Format follows Keep a Changelog loosely:
 ### Fixed
 
 - Moved battle gimmick selectors clear of the battler type indicators.
+- Prevented Honey Tree habitats from generating Pokémon forbidden by the active Trial.
 - Removed Swimmers and swimming Triathletes from land-based route Trainer
   encounters.
 - Prevented the level-up helper Trainer from Terastallizing.

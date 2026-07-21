@@ -7106,6 +7106,11 @@ u16 Rogue_SelectHoneyTreeEncounterRoom(void)
         if(IsCurseActive(EFFECT_WILD_EGG_SPECIES))
             RogueMonQuery_TransformIntoEggSpecies();
 
+        // Evolution can turn a species from the active regional Dex into one
+        // that the current Trial does not allow (for example, Basculin into
+        // Basculegion during a Paldea Trial). Filter the final encounter form.
+        RogueTrial_FilterMonQuery();
+
         species = SelectWildSpeciesFromFormFamilies(Random(), Random(), WildFormFlatWeight, NULL, FALSE);
 
         if(species == SPECIES_NONE)
