@@ -6123,11 +6123,15 @@ bool8 Rogue_IsBattleRoamerMon(u16 species)
 static bool8 IsMiniBossRewardEligible(struct Pokemon* party, u8 index, bool8 allowLegendary)
 {
     u16 species = GetMonData(&party[index], MON_DATA_SPECIES);
+    u32 otId = GetMonData(&party[index], MON_DATA_OT_ID);
 
     if(species == SPECIES_NONE)
         return FALSE;
 
-    return allowLegendary || !RoguePokedex_IsSpeciesLegendary(species);
+    if(!allowLegendary && RoguePokedex_IsSpeciesLegendary(species))
+        return FALSE;
+
+    return RogueTrial_IsSpeciesLegal(species, otId);
 }
 
 static u8 FindMiniBossRewardIndex(struct Pokemon* party, u8 partySize, u8 startIndex, u8 excludedIndex, bool8 allowLegendary)
@@ -6142,15 +6146,34 @@ static u8 FindMiniBossRewardIndex(struct Pokemon* party, u8 partySize, u8 startI
             return index;
     }
 
-    return excludedIndex == PARTY_SIZE ? 0 : excludedIndex;
+    return PARTY_SIZE;
 }
 
-static void SelectMiniBossRewardIndices(u16 trainerNum, struct Pokemon* party, u8 partySize, u16 roomSeed, u8* indexA, u8* indexB)
+static u8 GetMiniBossRewardOverrideMode(void)
+{
+    if(VarGet(VAR_ROGUE_ACTIVE_CAMPAIGN) == ROGUE_CAMPAIGN_POKEBALL_LIMIT
+        || RogueTrial_IsActiveTrial(ROGUE_TRIAL_LIMITED_CAPTURE))
+        return MINIBOSS_REWARD_MODE_NONE;
+
+    if(RogueTrial_IsActiveTrial(ROGUE_TRIAL_ORRE_STYLE))
+        return MINIBOSS_REWARD_MODE_SNAG;
+
+    return 0xFF;
+}
+
+static u8 SelectMiniBossRewardIndices(u16 trainerNum, struct Pokemon* party, u8 partySize, u16 roomSeed, u8* indexA, u8* indexB)
 {
     const struct RogueTrainer* trainer;
     bool8 isBrandon;
+    u8 overrideMode = GetMiniBossRewardOverrideMode();
     u8 startA;
     u8 startB;
+
+    *indexA = PARTY_SIZE;
+    *indexB = PARTY_SIZE;
+
+    if(overrideMode != 0xFF)
+        return overrideMode;
 
     AGB_ASSERT(trainerNum < gRogueTrainerCount);
     trainer = &gRogueTrainers[trainerNum];
@@ -6168,7 +6191,9 @@ static void SelectMiniBossRewardIndices(u16 trainerNum, struct Pokemon* party, u
             u8 index = (startA + i) % partySize;
             u16 species = GetMonData(&party[index], MON_DATA_SPECIES);
 
-            if(species != SPECIES_NONE && RoguePokedex_IsSpeciesLegendary(species))
+            if(species != SPECIES_NONE
+                && RoguePokedex_IsSpeciesLegendary(species)
+                && IsMiniBossRewardEligible(party, index, TRUE))
             {
                 *indexA = index;
                 break;
@@ -6185,21 +6210,36 @@ static void SelectMiniBossRewardIndices(u16 trainerNum, struct Pokemon* party, u
         *indexA = FindMiniBossRewardIndex(party, partySize, startA, PARTY_SIZE, FALSE);
         *indexB = FindMiniBossRewardIndex(party, partySize, startB, *indexA, FALSE);
     }
+
+    if(*indexA == PARTY_SIZE)
+        return MINIBOSS_REWARD_MODE_NO_LEGAL;
+    if(*indexB == PARTY_SIZE)
+        return MINIBOSS_REWARD_MODE_SINGLE;
+    return MINIBOSS_REWARD_MODE_DOUBLE;
+}
+
+static u8 BufferMiniBossRewardSelection(u16 trainerNum, struct Pokemon* party, u8 partySize, u16 roomSeed)
+{
+    u8 indexA;
+    u8 indexB;
+    u8 rewardMode = SelectMiniBossRewardIndices(trainerNum, party, partySize, roomSeed, &indexA, &indexB);
+
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1,
+        indexA == PARTY_SIZE ? SPECIES_NONE : GetMonData(&party[indexA], MON_DATA_SPECIES));
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2,
+        indexB == PARTY_SIZE ? SPECIES_NONE : GetMonData(&party[indexB], MON_DATA_SPECIES));
+
+    return rewardMode;
 }
 
 void Rogue_SelectMiniBossRewardMons()
 {
-    u8 indexA;
-    u8 indexB;
     u8 partySize = CalculateEnemyPartyCount();
     u16 trainerNum = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
     u16 roomSeed = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed;
 
     AGB_ASSERT(partySize != 0);
-    SelectMiniBossRewardIndices(trainerNum, gEnemyParty, partySize, roomSeed, &indexA, &indexB);
-
-    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, GetMonData(&gEnemyParty[indexA], MON_DATA_SPECIES));
-    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, GetMonData(&gEnemyParty[indexB], MON_DATA_SPECIES));
+    gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, roomSeed);
 }
 
 void Rogue_BufferMiniBossPreview(u8 roomIdx)
@@ -6222,8 +6262,6 @@ void Rogue_BufferMiniBossPreview(u8 roomIdx)
     u16 itemVars[ROGUE_ITEM_COUNT];
     RAND_TYPE miniBossSeed;
     u8 partySize;
-    u8 indexA;
-    u8 indexB;
     u8 i;
 
     AGB_ASSERT(room->roomType == ADVPATH_ROOM_MINIBOSS);
@@ -6248,11 +6286,9 @@ void Rogue_BufferMiniBossPreview(u8 roomIdx)
     SetupTrainerBattleInternal(trainerNum);
     partySize = Rogue_CreateTrainerParty(trainerNum, gEnemyParty, PARTY_SIZE, TRUE);
     AGB_ASSERT(partySize >= 2);
-    SelectMiniBossRewardIndices(trainerNum, gEnemyParty, partySize, room->rngSeed, &indexA, &indexB);
 
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, trainerNum);
-    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, GetMonData(&gEnemyParty[indexA], MON_DATA_SPECIES));
-    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, GetMonData(&gEnemyParty[indexB], MON_DATA_SPECIES));
+    gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, room->rngSeed);
 
     ZeroEnemyPartyMons();
     CalculateEnemyPartyCount();

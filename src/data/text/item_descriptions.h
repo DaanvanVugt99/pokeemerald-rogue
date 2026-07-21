@@ -3,19 +3,19 @@ static const u8 sDummyDesc[] = _(
 
 // Poké Balls
 static const u8 sPokeBallDesc[] = _(
-    "A tool used for\n"
-    "catching wild\n"
-    "Pokémon.");
+    "A basic Ball for\n"
+    "catching Pokémon.\n"
+    "Catch rate: 1x.");
 
 static const u8 sGreatBallDesc[] = _(
-    "A good Ball with a\n"
-    "higher catch rate\n"
-    "than a Poké Ball.");
+    "A good Ball for\n"
+    "catching Pokémon.\n"
+    "Catch rate: 1.5x.");
 
 static const u8 sUltraBallDesc[] = _(
-    "A better Ball with\n"
-    "a higher catch rate\n"
-    "than a Great Ball.");
+    "A better Ball for\n"
+    "catching Pokémon.\n"
+    "Catch rate: 2x.");
 
 static const u8 sMasterBallDesc[] = _(
     "The best Ball that\n"
@@ -23,117 +23,118 @@ static const u8 sMasterBallDesc[] = _(
     "without fail.");
 
 static const u8 sPremierBallDesc[] = _(
-    "3x effective. Caught\n"
+    "3x catch rate. Caught\n"
     "Pokémon always have\n"
     "a neutral nature.");
 
 static const u8 sHealBallDesc[] = _(
-    "A remedial Ball\n"
-    "that restores\n"
-    "caught Pokémon.");
+    "1x catch rate. Fully\n"
+    "heals caught\n"
+    "Pokémon.");
 
 static const u8 sNetBallDesc[] = _(
-    "4x effective on\n"
-    "Water- or Bug-type\n"
-    "Pokémon.");
+    "4x catch rate on\n"
+    "Water/Bug types;\n"
+    "otherwise 1x.");
 
 static const u8 sNestBallDesc[] = _(
-    "4x effective on\n"
-    "Grass- or Flying-\n"
-    "type Pokémon.");
+    "4x catch rate on\n"
+    "Grass/Flying types;\n"
+    "otherwise 1x.");
 
 static const u8 sDiveBallDesc[] = _(
-    "4x effective on\n"
-    "Water- or Flying-\n"
-    "type Pokémon.");
+    "4x catch rate on\n"
+    "Water/Flying types;\n"
+    "otherwise 1x.");
 
 static const u8 sDuskBallDesc[] = _(
-    "Works well if\n"
-    "used in a\n"
-    "dark place.");
+    "3x in caves,\n"
+    "underground, dusk or\n"
+    "night; otherwise 1x.");
 
 static const u8 sTimerBallDesc[] = _(
-    "A Ball that gains\n"
-    "power in battles\n"
-    "taking many turns.");
+    "Starts at 1x; gains\n"
+    "0.3x each turn up to\n"
+    "a 4x catch rate.");
 
 static const u8 sQuickBallDesc[] = _(
-    "Works well if\n"
-    "used on the\n"
-    "first turn.");
+    "5x catch rate on\n"
+    "the first turn;\n"
+    "otherwise 1x.");
 
 static const u8 sRepeatBallDesc[] = _(
-    "4x effective on\n"
-    "Pokémon species\n"
-    "caught before.");
+    "4x if its species\n"
+    "was caught before;\n"
+    "otherwise 1x.");
 
 static const u8 sLuxuryBallDesc[] = _(
-    "Up to 4x better\n"
-    "the more money\n"
-    "you have.");
+    "Money catch bonus:\n"
+    "2x/10K, 3x/30K,\n"
+    "4x/50K; else 1x.");
 
 static const u8 sLevelBallDesc[] = _(
-    "Works better the\n"
-    "further above its\n"
-    "level you are.");
+    "Level lead bonus:\n"
+    "2x/+10, 3x/+25,\n"
+    "4x/+50; else 1x.");
 
 static const u8 sLureBallDesc[] = _(
-    "A Ball that works\n"
-    "well on fished\n"
-    "up Pokémon.");
+    "5x catch rate on\n"
+    "fishing encounters;\n"
+    "otherwise 1x.");
 
 static const u8 sMoonBallDesc[] = _(
-    "4x effective on\n"
-    "Dark- or Fairy-type\n"
-    "Pokémon.");
+    "4x catch rate on\n"
+    "Dark/Fairy types;\n"
+    "otherwise 1x.");
 
 static const u8 sFriendBallDesc[] = _(
-    "A Ball that gives\n"
-    "a caught Pokémon\n"
+    "1x catch rate.\n"
+    "Caught Pokémon get\n"
     "max friendship.");
 
 static const u8 sLoveBallDesc[] = _(
-    "Works well on\n"
-    "Pokémon of the\n"
-    "opposite gender.");
+    "8x for same species\n"
+    "of opposite gender;\n"
+    "otherwise 1x.");
 
 static const u8 sFastBallDesc[] = _(
-    "Works well on fast\n"
-    "or roaming wild\n"
-    "Pokémon.");
+    "4x at base Speed\n"
+    "100+ or for roamers;\n"
+    "otherwise 1x.");
 
 static const u8 sHeavyBallDesc[] = _(
-    "Works better when\n"
-    "its target outweighs\n"
-    "your Pokémon.");
+    "Target weight lead:\n"
+    "2x/50kg, 3x/150kg,\n"
+    "4x/300kg; else 1x.");
 
 static const u8 sDreamBallDesc[] = _(
-    "Makes a caught\n"
-    "Pokémon use its\n"
+    "1x catch rate.\n"
+    "Pokémon use their\n"
     "Hidden Ability.");
 
 static const u8 sSafariBallDesc[] = _(
-    "A special Ball that\n"
-    "is used only in the\n"
-    "Safari Zone.");
+    "1.5x catch rate;\n"
+    "guaranteed in Safari-\n"
+    "style encounters.");
 
 static const u8 sSportBallDesc[] = _(
-    "A special Ball used\n"
-    "in the Bug-Catching\n"
-    "Contest.");
+    "1.5x catch rate. Used\n"
+    "for Bug-Catching\n"
+    "Contests.");
 
 static const u8 sParkBallDesc[] = _(
-    "A special Ball for\n"
-    "the Pal Park.");
+    "1x catch rate. Made\n"
+    "for Pal Park.");
 
 static const u8 sBeastBallDesc[] = _(
-    "A Ball designed to\n"
-    "catch Ultra Beasts.");
+    "5x on Ultra Beasts;\n"
+    "0.1x on all other\n"
+    "Pokémon.");
 
 static const u8 sCherishBallDesc[] = _(
-    "Caught Pokémon have\n"
-    "at least three\n"
-    "perfect IVs.");
+    "1x catch rate.\n"
+    "Caught Pokémon get\n"
+    "3+ perfect IVs.");
 
 // Medicine
 static const u8 sPotionDesc[] = _(

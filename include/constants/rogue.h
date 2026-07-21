@@ -274,6 +274,13 @@
 #define ADVPATH_ROOM_BATTLE_TOWER       16
 #define ADVPATH_ROOM_UNIQUE_DEN         17
 
+// Frontier Brain post-battle recruitment modes.
+#define MINIBOSS_REWARD_MODE_NONE       0
+#define MINIBOSS_REWARD_MODE_SINGLE     1
+#define MINIBOSS_REWARD_MODE_DOUBLE     2
+#define MINIBOSS_REWARD_MODE_SNAG       3
+#define MINIBOSS_REWARD_MODE_NO_LEGAL   4
+
 #define ADVPATH_ROOM_COUNT              18
 
 

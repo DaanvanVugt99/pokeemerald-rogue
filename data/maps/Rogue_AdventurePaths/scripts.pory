@@ -46,15 +46,25 @@ script Rogue_AdventurePaths_InteractRoom
         case ADVPATH_ROOM_MINIBOSS:
             buffertrainername(STR_VAR_1, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA)
 
-            if(var(VAR_ROGUE_ACTIVE_CAMPAIGN) == ROGUE_CAMPAIGN_POKEBALL_LIMIT)
+            switch(var(VAR_RESULT))
             {
-                msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\nEnter this encounter?"), MSGBOX_YESNO)
-            }
-            else
-            {
-                bufferspeciesname(STR_VAR_2, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1)
-                bufferspeciesname(STR_VAR_3, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2)
-                msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\pWin to recruit either\n{STR_VAR_2} or {STR_VAR_3}.\pEnter this encounter?"), MSGBOX_YESNO)
+                case MINIBOSS_REWARD_MODE_SINGLE:
+                    bufferspeciesname(STR_VAR_2, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1)
+                    msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\pWin to recruit\n{STR_VAR_2}.\pEnter this encounter?"), MSGBOX_YESNO)
+
+                case MINIBOSS_REWARD_MODE_DOUBLE:
+                    bufferspeciesname(STR_VAR_2, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1)
+                    bufferspeciesname(STR_VAR_3, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2)
+                    msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\pWin to recruit either\n{STR_VAR_2} or {STR_VAR_3}.\pEnter this encounter?"), MSGBOX_YESNO)
+
+                case MINIBOSS_REWARD_MODE_SNAG:
+                    msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\pWin for a chance to Snag\none of their Pokémon.\pEnter this encounter?"), MSGBOX_YESNO)
+
+                case MINIBOSS_REWARD_MODE_NO_LEGAL:
+                    msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\pNone of their Pokémon fit\nthis Trial's rules.\pEnter this encounter?"), MSGBOX_YESNO)
+
+                default:
+                    msgbox(format("It's {STR_VAR_1}, a Frontier Brain!\pWin to claim an item reward.\pEnter this encounter?"), MSGBOX_YESNO)
             }
 
         case ADVPATH_ROOM_WILD_DEN:

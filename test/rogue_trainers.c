@@ -64,6 +64,16 @@ static void RestoreTrainerConfigToggles(const bool8 *values)
         Rogue_SetConfigToggle(sTrainerConfigToggles[i], values[i]);
 }
 
+static void SetMiniBossRewardTestParty(const u16 *species, u8 count)
+{
+    u8 i;
+
+    ZeroEnemyPartyMons();
+    for(i = 0; i < count; ++i)
+        CreateMon(&gEnemyParty[i], species[i], 50, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
+    CalculateEnemyPartyCount();
+}
+
 TEST("Rogue trainer items: Black Sludge converts to Leftovers with tera")
 {
 #if defined(ROGUE_EXPANSION)
@@ -154,8 +164,16 @@ TEST("Frontier Brains schedule deterministically without duplicates in each mode
         Rogue_GetFrontierBrainSchedule(trainerNums, difficulties);
         for(i = 0; i < ADVPATH_FRONTIER_BRAIN_COUNT; ++i)
         {
-            EXPECT_EQ(trainerNums[i], TRAINER_NONE);
-            EXPECT_EQ(difficulties[i], ROGUE_MAX_BOSS_COUNT);
+            if(trialId == ROGUE_TRIAL_LITTLE_CUP)
+            {
+                EXPECT_EQ(trainerNums[i], TRAINER_NONE);
+                EXPECT_EQ(difficulties[i], ROGUE_MAX_BOSS_COUNT);
+            }
+            else
+            {
+                EXPECT_NE(trainerNums[i], TRAINER_NONE);
+                EXPECT_NE(difficulties[i], ROGUE_MAX_BOSS_COUNT);
+            }
         }
     }
     EXPECT_EQ(memcmp(&rogueRngBefore, &gRngRogueValue, sizeof(rogueRngBefore)), 0);
@@ -166,6 +184,71 @@ TEST("Frontier Brains schedule deterministically without duplicates in each mode
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
     gRngRogueValue = originalRogueRng;
+}
+
+TEST("Frontier Brain rewards only offer Trial-legal team members")
+{
+    static const u16 sTwoLegal[] = {SPECIES_PIKACHU, SPECIES_MAGIKARP, SPECIES_SQUIRTLE};
+    static const u16 sOneLegal[] = {SPECIES_PIKACHU, SPECIES_MAGIKARP};
+    static const u16 sNoneLegal[] = {SPECIES_PIKACHU, SPECIES_RATTATA};
+    struct RogueAdvPathRoom originalRoom = gRogueAdvPath.rooms[0];
+    struct Pokemon originalEnemyParty[PARTY_SIZE];
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+    u8 originalTrialId = gRogueRun.trialState.trialId;
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    u16 originalTrainer = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
+    u16 originalSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
+    u16 originalSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
+    u16 originalResult = gSpecialVar_Result;
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u16 trainerNum;
+
+    memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
+    for(trainerNum = 0; trainerNum < gRogueTrainerCount; ++trainerNum)
+    {
+        if(gRogueTrainers[trainerNum].classFlags & CLASS_FLAG_MINIBOSS_ANABEL)
+        {
+            VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, trainerNum);
+            break;
+        }
+    }
+    EXPECT_LT(trainerNum, gRogueTrainerCount);
+
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    gRogueRun.adventureRoomId = 0;
+    gRogueAdvPath.rooms[0].rngSeed = 24680;
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_TYPE_WATER;
+
+    SetMiniBossRewardTestParty(sTwoLegal, ARRAY_COUNT(sTwoLegal));
+    Rogue_SelectMiniBossRewardMons();
+    EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_DOUBLE);
+    EXPECT(RogueTrial_IsSpeciesLegal(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1), 0));
+    EXPECT(RogueTrial_IsSpeciesLegal(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2), 0));
+
+    SetMiniBossRewardTestParty(sOneLegal, ARRAY_COUNT(sOneLegal));
+    Rogue_SelectMiniBossRewardMons();
+    EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_SINGLE);
+    EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1), SPECIES_MAGIKARP);
+
+    SetMiniBossRewardTestParty(sNoneLegal, ARRAY_COUNT(sNoneLegal));
+    Rogue_SelectMiniBossRewardMons();
+    EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_NO_LEGAL);
+
+    gRogueAdvPath.rooms[0] = originalRoom;
+    gRogueRun.adventureRoomId = originalRoomId;
+    gRogueRun.trialState.trialId = originalTrialId;
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, originalTrainer);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, originalSpeciesA);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, originalSpeciesB);
+    gSpecialVar_Result = originalResult;
+    memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
+    CalculateEnemyPartyCount();
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }
 
 TEST("Frontier Brains use competitive movesets on the first Average path")
@@ -438,6 +521,69 @@ TEST("Frontier Brain generators retain canonical anchors and Legendary boundarie
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     gRngRogueValue = originalRogueRng;
     gRngValue = originalRng;
+}
+
+TEST("Frontier Brain curated pools fall back to the active Trial Pokedex when exhausted")
+{
+#ifdef ROGUE_EXPANSION
+    u16 plannedSpecies[PARTY_SIZE];
+    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalLevelOffset = gRogueRun.currentLevelOffset;
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    u8 originalTrialId = gRogueRun.trialState.trialId;
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE originalRng = gRngValue;
+    u16 gretaTrainer = TRAINER_NONE;
+    bool8 foundGenericSpecies = FALSE;
+    u16 trainerNum;
+    u8 i;
+
+    for(trainerNum = 0; trainerNum < gRogueTrainerCount; ++trainerNum)
+    {
+        if(gRogueTrainers[trainerNum].classFlags & CLASS_FLAG_MINIBOSS_GRETA)
+        {
+            gretaTrainer = trainerNum;
+            break;
+        }
+    }
+    EXPECT_NE(gretaTrainer, TRAINER_NONE);
+
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_BRUTAL);
+    Rogue_SetCurrentDifficulty(6);
+    gRogueRun.currentLevelOffset = 0;
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_REGION_JOHTO;
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_JOHTO_GSC);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    SeedRogueRng(24680);
+    SeedRng(13579);
+
+    EXPECT_EQ(RogueTest_PlanTrainerSpecies(gretaTrainer, plannedSpecies, PARTY_SIZE), PARTY_SIZE);
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        EXPECT(RogueTrial_IsSpeciesLegal(plannedSpecies[i], 0));
+        if(plannedSpecies[i] != SPECIES_UMBREON
+            && plannedSpecies[i] != SPECIES_HERACROSS
+            && plannedSpecies[i] != SPECIES_GENGAR)
+            foundGenericSpecies = TRUE;
+    }
+    EXPECT(foundGenericSpecies);
+
+    gRogueRun.trialState.trialId = originalTrialId;
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRogueRun.currentLevelOffset = originalLevelOffset;
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    gRngRogueValue = originalRogueRng;
+    gRngValue = originalRng;
+#else
+    ASSUME(FALSE);
+#endif
 }
 
 TEST("Rival roster planning caches species without constructing temporary mons")

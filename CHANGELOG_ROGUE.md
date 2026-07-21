@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Updated every Poké Ball item description to state its exact catch multiplier
+  and conditions while retaining descriptions of secondary capture effects.
 - Added independent 1x-4x speed controls for scripted cutscene movement,
   evolution animations, and catching animations.
 - Replaced Ditto's Stabilize unique ability with Rapid Replica, which raises its
@@ -94,7 +96,9 @@ Format follows Keep a Changelog loosely:
 - Restored Frontier Brain adventure-path encounters with three scheduled
   Frontier Brain battles per run, previewed Pokémon trophies, and canon-inspired
   competitive teams; Brandon can uniquely award one of his Legendary guardians.
-  Frontier Brains are omitted from Trial runs.
+  Brains now appear in Trial runs except Little Cup, only offer Trial-legal
+  trophies, skip trophies during Limited Capture, and use Snagging instead during
+  Orre Style.
 - Added Level, Tinted, Reach, Accuracy, Retaliate, and Stand Curses to the
   temporary Dark Deal pool as opponent-side mirrors of their Charms.
 - Added the Moody and Eviolite Charms, which adjust friendly Pokémon's stats

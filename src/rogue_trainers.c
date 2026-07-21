@@ -56,6 +56,7 @@ struct TrainerPartyScratch
     bool8 forceLegends;
     bool8 preferStrongSpecies;
     bool8 forcePrimaryType;
+    bool8 useGenericMiniBossFallback;
     u8 evoLevel;
     u8 partyCapacity;
     u8 targetPartyCount;
@@ -1348,7 +1349,7 @@ void Rogue_GetFrontierBrainSchedule(u16* trainerNums, u8* difficulties)
     }
 
     if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET
-        || RogueTrial_IsActive())
+        || RogueTrial_IsActiveTrial(ROGUE_TRIAL_LITTLE_CUP))
         return;
 
     for(trainerNum = 0; trainerNum < gRogueTrainerCount; ++trainerNum)
@@ -2440,6 +2441,13 @@ static u8 PlanTrainerSpeciesInternal(u16 trainerNum, u16* speciesBuffer, u8 monC
     return monCount;
 }
 
+#if TESTING
+u8 RogueTest_PlanTrainerSpecies(u16 trainerNum, u16 *speciesBuffer, u8 monCount)
+{
+    return PlanTrainerSpeciesInternal(trainerNum, speciesBuffer, monCount, monCount, 0);
+}
+#endif
+
 static u8 CreateTrainerPartyInternal(u16 trainerNum, struct Pokemon* party, u8 monCount, u8 monCapacity, bool8 firstTrainer, u8 startIndex)
 {
     u8 i;
@@ -2934,8 +2942,13 @@ static bool8 FilterOutSameSpecies(u16 elem, void* usrData)
 static bool8 TrainerQueryHasUnusedSpecies(struct TrainerPartyScratch* scratch)
 {
     u16 species;
+#ifdef ROGUE_EXPANSION
+    u16 speciesCount = PLACEHOLDER_START + 1;
+#else
+    u16 speciesCount = NUM_SPECIES;
+#endif
 
-    for(species = 1; species < NUM_SPECIES; ++species)
+    for(species = 1; species < speciesCount; ++species)
     {
         if(RogueMiscQuery_CheckState(species) && FilterOutSimilarSpecies(species, scratch))
             return TRUE;
@@ -3211,6 +3224,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
     bool8 allowSpeciesDuplicates = FALSE;
     bool8 preserveResolvedPool;
     bool8 isNoland = Rogue_IsMiniBossTrainer(scratch->trainerNum) && (trainer->classFlags & CLASS_FLAG_MINIBOSS_NOLAND);
+    bool8 isFixedMiniBoss = Rogue_IsMiniBossTrainer(scratch->trainerNum) && !isNoland;
     bool8 forcePrimaryType = ShouldForcePrimaryTrainerType(scratch);
     u32 forcedPrimaryTypeFlags = forcePrimaryType ? MON_TYPE_VAL_TO_FLAGS(trainer->typeAssignment) : 0;
 
@@ -3240,7 +3254,8 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
         }
 
         // Execute initialisation
-        if(trainer->teamGenerator.queryScriptOverride != NULL)
+        if(trainer->teamGenerator.queryScriptOverride != NULL
+            && !scratch->useGenericMiniBossFallback)
         {
             struct QueryScriptContext scriptContext;
 
@@ -3273,7 +3288,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
         {
             RogueMonQuery_EvosContainType(QUERY_FUNC_INCLUDE, currentSubset->includedTypeMask);
         }
-        else
+        else if(!isFixedMiniBoss)
         {
             fallbackTypeFlags = CalculateFallbackTypeFlags(scratch);
             RogueMonQuery_EvosContainType(QUERY_FUNC_INCLUDE, fallbackTypeFlags);
@@ -3351,7 +3366,7 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
                 }
             }
         }
-        else
+        else if(!isFixedMiniBoss)
         {
             RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, fallbackTypeFlags);
         }
@@ -3387,6 +3402,12 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
     // repeats from that pool over abandoning it for unrelated fallback types.
     preserveResolvedPool = (RogueTrial_EnforcesOpponentSpeciesLegality() || Rogue_IsMiniBossTrainer(scratch->trainerNum))
         && !TrainerQueryHasUnusedSpecies(scratch);
+
+    // A fixed Brain pool should transition to the active-dex fallback once
+    // all of its distinct families have been used. Repeating the exhausted
+    // pool here would prevent SampleNextSpecies from seeing the empty query.
+    if(isFixedMiniBoss && !scratch->useGenericMiniBossFallback)
+        preserveResolvedPool = FALSE;
 
     // Allow duplicates if we've gone far into fallbacks
     if(!preserveResolvedPool)
@@ -3610,6 +3631,18 @@ static u16 SampleNextSpecies(struct TrainerPartyScratch* scratch)
 
         if(species == SPECIES_NONE)
         {
+            if(Rogue_IsMiniBossTrainer(scratch->trainerNum)
+                && trainer->teamGenerator.queryScriptOverride != NULL
+                && !scratch->useGenericMiniBossFallback)
+            {
+                // Narrow Pokedexes can exhaust a Brain's curated pool. Keep
+                // the generated team valid by falling back to the active dex.
+                scratch->useGenericMiniBossFallback = TRUE;
+                scratch->fallbackCount = 0;
+                scratch->shouldRegenerateQuery = TRUE;
+                continue;
+            }
+
             // Just put it to some really high number if we failed, as we need to move to the next subset
             scratch->subsetSampleCount = 128;
         }

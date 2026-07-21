@@ -160,6 +160,7 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
     u16 originalPreviewTrainer = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
     u16 originalPreviewSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
     u16 originalPreviewSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
+    u16 originalPreviewMode = gSpecialVar_Result;
     u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalDexVariant = RoguePokedex_GetDexVariant();
@@ -235,6 +236,7 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
         EXPECT_NE(previewSpeciesA, SPECIES_NONE);
         EXPECT_NE(previewSpeciesB, SPECIES_NONE);
         EXPECT_NE(previewSpeciesA, previewSpeciesB);
+        EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_DOUBLE);
         EXPECT_EQ(CalculateEnemyPartyCount(), 0);
         EXPECT_EQ(memcmp(&rogueRngBefore, &gRngRogueValue, sizeof(rogueRngBefore)), 0);
         EXPECT_EQ(memcmp(&rngBefore, &gRngValue, sizeof(rngBefore)), 0);
@@ -253,6 +255,19 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
             EXPECT(RoguePokedex_IsSpeciesLegendary(previewSpeciesA) || RoguePokedex_IsSpeciesLegendary(previewSpeciesB));
     }
 
+    gRogueAdvPath.rooms[1].roomParams.perType.miniboss.trainerNum = trainerNums[0];
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_LIMITED_CAPTURE;
+    Rogue_BufferMiniBossPreview(1);
+    EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_NONE);
+    EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1), SPECIES_NONE);
+    EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2), SPECIES_NONE);
+
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_ORRE_STYLE;
+    Rogue_BufferMiniBossPreview(1);
+    EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_SNAG);
+    EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1), SPECIES_NONE);
+    EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2), SPECIES_NONE);
+
     gRogueAdvPath.rooms[1] = originalRoom;
     gRogueAdvPath.roomCount = originalRoomCount;
     gRogueRun.rivalTrainerNum = originalRivalTrainer;
@@ -262,6 +277,7 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, originalPreviewTrainer);
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, originalPreviewSpeciesA);
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, originalPreviewSpeciesB);
+    gSpecialVar_Result = originalPreviewMode;
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
     Rogue_SetCurrentDifficulty(originalDifficulty);
