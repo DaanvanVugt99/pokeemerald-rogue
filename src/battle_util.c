@@ -14349,7 +14349,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SNAREWIRE)
+        if (HasBattlerAbility(battler, ABILITY_CROSSED_WIRES)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[moveEndAttacker].hp != 0
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -14357,7 +14357,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsMoveMakingContact(move, moveEndAttacker)
          && CanBeConfused(moveEndAttacker))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_SNAREWIRE);
+            SetBattlerTriggeredAbility(battler, ABILITY_CROSSED_WIRES);
             gBattleScripting.moveEffect = MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CONFUSION;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
@@ -14503,18 +14503,18 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_DISGUISED)
+        if (HasBattlerAbility(battler, ABILITY_FAUXLIAGE)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsBattlerAlive(battler)
          && !IS_BATTLER_OF_TYPE(battler, TYPE_ROCK))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_DISGUISED);
+            SetBattlerTriggeredAbility(battler, ABILITY_FAUXLIAGE);
             SET_BATTLER_TYPE(battler, TYPE_ROCK);
             PREPARE_TYPE_BUFFER(gBattleTextBuff1, TYPE_ROCK);
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_DisguisedActivates;
+            gBattlescriptCurrInstr = BattleScript_FauxliageActivates;
             effect++;
         }
 
@@ -14718,7 +14718,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_BREAK_FORMATION)
+        if (HasBattlerAbility(battler, ABILITY_SCHOOLS_OUT)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && HadMoreThanHalfHpNowHasLess(battler)
@@ -14731,7 +14731,7 @@ if (triggeringAbility != ABILITY_NONE)
              && gBattleMons[battler].level >= 20
              && TryBattleFormChange(battler, FORM_CHANGE_BATTLE_HP_PERCENT))
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_BREAK_FORMATION);
+                SetBattlerTriggeredAbility(battler, ABILITY_SCHOOLS_OUT);
                 gBattleStruct->atkCancellerTracker = 0;
                 gBattlerAttacker = battler;
                 gBattlerTarget = moveEndAttacker;
@@ -14745,7 +14745,7 @@ if (triggeringAbility != ABILITY_NONE)
             }
             else
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_BREAK_FORMATION);
+                SetBattlerTriggeredAbility(battler, ABILITY_SCHOOLS_OUT);
                 gBattleStruct->atkCancellerTracker = 0;
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = moveEndAttacker;
@@ -18774,7 +18774,7 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_ROYAL_DECREE)
+        if (HasBattlerAbility(battler, ABILITY_ROYAL_REBUKE)
          && IsBattlerAlive(battler)
          && IsBattlerAlive(gBattlerTarget)
          && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
@@ -18788,7 +18788,7 @@ if (triggeringAbility != ABILITY_NONE)
             if (CompareStat(gBattlerTarget, highestStat, MIN_STAT_STAGE, CMP_GREATER_THAN)
              || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR)
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_DECREE);
+                SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_REBUKE);
                 switch (highestStat)
                 {
                 case STAT_ATK:

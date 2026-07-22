@@ -380,7 +380,7 @@
 #define ABILITY_AFTERSHOCK             348
 #define ABILITY_HOT_PURSUIT            346
 #define ABILITY_GIFTED_MIND            343
-#define ABILITY_ROYAL_DECREE           419
+#define ABILITY_ROYAL_REBUKE           419
 #define ABILITY_SIGHTING_SYSTEM        349
 #define ABILITY_DUELIST                350
 #define ABILITY_SPLIT_INSTINCT         351
@@ -451,7 +451,7 @@
 #define ABILITY_DIVINE_FAVOR           405
 #define ABILITY_OMNISENSE              406
 #define ABILITY_BEACON                 407
-#define ABILITY_DISGUISED              410
+#define ABILITY_FAUXLIAGE              410
 #define ABILITY_POLLEN_PUFF            412
 #define ABILITY_HANDYWORK              413
 #define ABILITY_SOLARBOOST             414
@@ -602,7 +602,7 @@
 #define ABILITY_COLONY_GUARDIAN        643
 #define ABILITY_MODULAR                658
 #define ABILITY_SPOREFIELD             623
-#define ABILITY_SNAREWIRE              829
+#define ABILITY_CROSSED_WIRES          829
 #define ABILITY_ROCKET_FIST            637
 #define ABILITY_APOCALYPSE             644
 #define ABILITY_BRAMBLE_GUARD          661
@@ -676,7 +676,7 @@
 #define ABILITY_SOLAR_CORE             737
 #define ABILITY_CENTER_STAGE           707
 #define ABILITY_INSTINCT               708
-#define ABILITY_BREAK_FORMATION        709
+#define ABILITY_SCHOOLS_OUT            709
 #define ABILITY_TRAILBREAKER           710
 #define ABILITY_ROYAL_GARDEN           711
 #define ABILITY_NATURAL_ORDER          694

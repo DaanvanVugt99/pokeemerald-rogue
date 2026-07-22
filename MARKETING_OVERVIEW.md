@@ -46,7 +46,7 @@ Examples visible in the commit history include:
 - Avalanche Hide, Singularity Reactor, and Singularity Overload
 - Storm Glider, Primal Current, and Singularity Drive
 - Photokeratitis, Swallowed, and Chef's Pick
-- Tripwire and Snarewire
+- Tripwire and Crossed Wires
 - Duality, Dirty Tricks, Tumbleweed, Drop Off, Starmobile, and Carving Rush
 - Barbed Monsoon and Spring Command
 - Crown of Fangs, Gridlock, and Regal Aegis

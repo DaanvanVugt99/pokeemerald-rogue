@@ -7,13 +7,13 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_U_TURN].power > 20);
 }
 
-SINGLE_BATTLE_TEST("Break Formation uses 20 BP U-turn when first dropping below half HP")
+SINGLE_BATTLE_TEST("School's Out uses 20 BP U-turn when first dropping below half HP")
 {
     GIVEN {
         PLAYER(SPECIES_WISHIWASHI)
         {
             Ability(ABILITY_SCHOOLING);
-            UniqueAbility(ABILITY_BREAK_FORMATION);
+            UniqueAbility(ABILITY_SCHOOLS_OUT);
             HP(GetMonData(&PLAYER_PARTY[0], MON_DATA_MAX_HP) / 2 + 20);
             Moves(MOVE_CELEBRATE);
         }
@@ -24,7 +24,7 @@ SINGLE_BATTLE_TEST("Break Formation uses 20 BP U-turn when first dropping below 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
         HP_BAR(player);
-        ABILITY_POPUP(player, ABILITY_BREAK_FORMATION);
+        ABILITY_POPUP(player, ABILITY_SCHOOLS_OUT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
         HP_BAR(opponent);
     } THEN {
@@ -32,14 +32,14 @@ SINGLE_BATTLE_TEST("Break Formation uses 20 BP U-turn when first dropping below 
     }
 }
 
-SINGLE_BATTLE_TEST("Break Formation can switch out after Schooling changes Wishiwashi's form")
+SINGLE_BATTLE_TEST("School's Out can switch out after Schooling changes Wishiwashi's form")
 {
     GIVEN {
         PLAYER(SPECIES_WISHIWASHI)
         {
             Level(20);
             Ability(ABILITY_SCHOOLING);
-            UniqueAbility(ABILITY_BREAK_FORMATION);
+            UniqueAbility(ABILITY_SCHOOLS_OUT);
             HP(GetMonData(&PLAYER_PARTY[0], MON_DATA_MAX_HP) / 2 + 20);
             Moves(MOVE_CELEBRATE);
         }
@@ -52,7 +52,7 @@ SINGLE_BATTLE_TEST("Break Formation can switch out after Schooling changes Wishi
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
         HP_BAR(player);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_FORM_CHANGE, player);
-        ABILITY_POPUP(player, ABILITY_BREAK_FORMATION);
+        ABILITY_POPUP(player, ABILITY_SCHOOLS_OUT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
         HP_BAR(opponent);
         MESSAGE("Go! Wynaut!");
@@ -61,13 +61,13 @@ SINGLE_BATTLE_TEST("Break Formation can switch out after Schooling changes Wishi
     }
 }
 
-SINGLE_BATTLE_TEST("Break Formation does not trigger if already below half HP")
+SINGLE_BATTLE_TEST("School's Out does not trigger if already below half HP")
 {
     GIVEN {
         PLAYER(SPECIES_WISHIWASHI)
         {
             Ability(ABILITY_SCHOOLING);
-            UniqueAbility(ABILITY_BREAK_FORMATION);
+            UniqueAbility(ABILITY_SCHOOLS_OUT);
             HP(GetMonData(&PLAYER_PARTY[0], MON_DATA_MAX_HP) / 2 - 1);
             Moves(MOVE_CELEBRATE);
         }
@@ -79,7 +79,7 @@ SINGLE_BATTLE_TEST("Break Formation does not trigger if already below half HP")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
         HP_BAR(player);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_BREAK_FORMATION);
+            ABILITY_POPUP(player, ABILITY_SCHOOLS_OUT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
             MESSAGE("Go! Wynaut!");
         }

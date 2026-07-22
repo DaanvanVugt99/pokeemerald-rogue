@@ -9,15 +9,15 @@ ASSUMPTIONS
     ASSUME(gSpeciesInfo[SPECIES_SUDOWOODO].types[1] == TYPE_GRASS);
 }
 
-SINGLE_BATTLE_TEST("Unique Disguised changes the user to Rock-type and raises Attack and Defense after being hit")
+SINGLE_BATTLE_TEST("Fauxliage changes the user to Rock-type and raises Attack and Defense after being hit")
 {
     GIVEN {
-        PLAYER(SPECIES_SUDOWOODO) { Ability(ABILITY_STURDY); UniqueAbility(ABILITY_DISGUISED); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_SUDOWOODO) { Ability(ABILITY_STURDY); UniqueAbility(ABILITY_FAUXLIAGE); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_DISGUISED);
+        ABILITY_POPUP(player, ABILITY_FAUXLIAGE);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
     } THEN {
@@ -29,10 +29,10 @@ SINGLE_BATTLE_TEST("Unique Disguised changes the user to Rock-type and raises At
     }
 }
 
-SINGLE_BATTLE_TEST("Unique Disguised triggers only once against a multi-hit move")
+SINGLE_BATTLE_TEST("Fauxliage triggers only once against a multi-hit move")
 {
     GIVEN {
-        PLAYER(SPECIES_SUDOWOODO) { Ability(ABILITY_STURDY); UniqueAbility(ABILITY_DISGUISED); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_SUDOWOODO) { Ability(ABILITY_STURDY); UniqueAbility(ABILITY_FAUXLIAGE); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_HITMONLEE) { Ability(ABILITY_SKILL_LINK); Moves(MOVE_DOUBLE_KICK); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_DOUBLE_KICK); }

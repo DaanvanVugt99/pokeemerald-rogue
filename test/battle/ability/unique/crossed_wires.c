@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_WATER_GUN].effect != EFFECT_CONFUSE_HIT);
 }
 
-SINGLE_BATTLE_TEST("Snarewire confuses attackers on contact but not on non-contact")
+SINGLE_BATTLE_TEST("Crossed Wires confuses attackers on contact but not on non-contact")
 {
     u16 move;
     bool8 shouldConfuse;
@@ -18,7 +18,7 @@ SINGLE_BATTLE_TEST("Snarewire confuses attackers on contact but not on non-conta
     PARAMETRIZE { move = MOVE_WATER_GUN; shouldConfuse = FALSE; }
 
     GIVEN {
-        PLAYER(SPECIES_STUNFISK) { Ability(ABILITY_STATIC); UniqueAbility(ABILITY_SNAREWIRE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_STUNFISK) { Ability(ABILITY_STATIC); UniqueAbility(ABILITY_CROSSED_WIRES); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(move, MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, move); }
