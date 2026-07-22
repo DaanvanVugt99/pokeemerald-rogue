@@ -440,7 +440,7 @@
 #define ABILITY_DRAGON_MAJESTY         390
 #define ABILITY_ONE_MIND               391
 #define ABILITY_ADAPTIVE_ORIGIN        396
-#define ABILITY_VERDANT_HAVEN          397
+#define ABILITY_FLOWER_FIELD           397
 #define ABILITY_BLINDING_SMOKE         398
 #define ABILITY_DEATH_ROLL             399
 #define ABILITY_SCAMPER                400

@@ -5533,6 +5533,29 @@ static bool32 CanWorldPrismSetField(u32 battler, const struct WorldPrismFieldEff
     return !(gBattleWeather & (sWeatherFlagsInfo[effect->field][0] | sWeatherFlagsInfo[effect->field][1]));
 }
 
+static const u8 *TryStartFlowerFieldTerrain(u32 battler)
+{
+    u32 i, count = 0;
+    u8 candidates[ARRAY_COUNT(sWorldPrismFieldEffects)];
+    const struct WorldPrismFieldEffect *effect;
+
+    for (i = 0; i < ARRAY_COUNT(sWorldPrismFieldEffects); i++)
+    {
+        if (!sWorldPrismFieldEffects[i].isWeather
+         && CanWorldPrismSetField(battler, &sWorldPrismFieldEffects[i]))
+            candidates[count++] = i;
+    }
+
+    if (count == 0)
+        return NULL;
+
+    effect = &sWorldPrismFieldEffects[candidates[RandomUniform(RNG_ROGUE_FLOWER_FIELD, 0, count - 1)]];
+    if (TryChangeBattleTerrain(battler, effect->field, &gFieldTimers.terrainTimer))
+        return effect->script;
+
+    return NULL;
+}
+
 static const u8 *TryStartWorldPrismFieldEffect(u32 battler)
 {
     u32 i, count = 0;
@@ -19094,7 +19117,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_VERDANT_HAVEN)
+        if (HasBattlerAbility(battler, ABILITY_FLOWER_FIELD)
          && IS_MOVE_STATUS(move)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -19103,16 +19126,15 @@ if (triggeringAbility != ABILITY_NONE)
          && !gDisableStructs[battler].isFirstTurn
          && !gProtectStructs[battler].extraMoveUsed)
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_VERDANT_HAVEN);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = battler;
-            gCalledMove = MOVE_AROMATHERAPY;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-            effect++;
+            const u8 *flowerFieldScript = TryStartFlowerFieldTerrain(battler);
+
+            if (flowerFieldScript != NULL)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_FLOWER_FIELD);
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                BattleScriptPushCursorAndCallback(flowerFieldScript);
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_BLINDING_SMOKE)
@@ -19184,7 +19206,7 @@ if (triggeringAbility != ABILITY_NONE)
                 gBattleStruct->atkCancellerTracker = 0;
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = gBattleStruct->moveTarget[battler];
-                gCalledMove = MOVE_SCREECH;
+                gCalledMove = MOVE_SCARY_FACE;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 BattleScriptPushCursor();

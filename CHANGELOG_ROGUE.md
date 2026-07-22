@@ -38,6 +38,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked the Chikorita line's Evergreen into Flower Field, which makes status
+  moves set a different random terrain after its first turn out.
+- Reworked the Totodile line's Death Roll to add Scary Face instead of Screech
+  to biting moves after its first turn out.
 - Reworked the Cyndaquil line's Heat Surge into Blinding Smoke, which adds
   Smokescreen to Fire moves after its first turn out, and gave Hisuian
   Typhlosion Guiding Flames, which does the same with Ghost moves and

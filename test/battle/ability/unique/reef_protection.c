@@ -32,7 +32,7 @@ SINGLE_BATTLE_TEST("Reef Protection only sets Spikes once even if the user heals
 DOUBLE_BATTLE_TEST("Reef Protection does not stop the healer's move-end ability from triggering")
 {
     GIVEN {
-        PLAYER(SPECIES_MEGANIUM)    { Status1(STATUS1_BURN); Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_VERDANT_HAVEN); Moves(MOVE_CELEBRATE, MOVE_HEAL_PULSE); }
+        PLAYER(SPECIES_MEGANIUM)    { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_FLOWER_FIELD); Moves(MOVE_CELEBRATE, MOVE_HEAL_PULSE); }
         PLAYER(SPECIES_CORSOLA)     { HP(50); MaxHP(100); Ability(ABILITY_HUSTLE); UniqueAbility(ABILITY_REEF_PROTECTION); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
@@ -51,6 +51,6 @@ DOUBLE_BATTLE_TEST("Reef Protection does not stop the healer's move-end ability 
         }
     } THEN {
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].spikesAmount, 1);
-        EXPECT_EQ(playerLeft->status1, STATUS1_NONE);
+        EXPECT(gFieldStatuses & STATUS_FIELD_TERRAIN_ANY);
     }
 }
