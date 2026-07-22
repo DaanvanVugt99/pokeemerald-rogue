@@ -3298,6 +3298,10 @@ u8 DoBattlerEndTurnEffects(void)
                 {
                     RecordAbilityBattle(battler, ABILITY_TOXIC_BOOST);
                 }
+                else if (HasBattlerAbility(battler, ABILITY_ADRENALINE))
+                {
+                    RecordAbilityBattle(battler, ABILITY_ADRENALINE);
+                }
                 else
                 {
                     gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
@@ -3340,6 +3344,10 @@ u8 DoBattlerEndTurnEffects(void)
                 else if (ability == ABILITY_TOXIC_BOOST)
                 {
                     RecordAbilityBattle(battler, ABILITY_TOXIC_BOOST);
+                }
+                else if (HasBattlerAbility(battler, ABILITY_ADRENALINE))
+                {
+                    RecordAbilityBattle(battler, ABILITY_ADRENALINE);
                 }
                 else
                 {

@@ -44,10 +44,15 @@ SINGLE_BATTLE_TEST("Adrenaline does not heal when not poisoned")
     }
 }
 
-SINGLE_BATTLE_TEST("Adrenaline does not heal on non-punching moves")
+SINGLE_BATTLE_TEST("Adrenaline blocks poison damage without curing poison")
 {
+    u32 status;
+
+    PARAMETRIZE { status = STATUS1_POISON; }
+    PARAMETRIZE { status = STATUS1_TOXIC_POISON; }
+
     GIVEN {
-        PLAYER(SPECIES_BRELOOM) { HP(100); MaxHP(200); Status1(STATUS1_POISON); Ability(ABILITY_EFFECT_SPORE); UniqueAbility(ABILITY_ADRENALINE); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_BRELOOM) { HP(100); MaxHP(200); Status1(status); Ability(ABILITY_EFFECT_SPORE); UniqueAbility(ABILITY_ADRENALINE); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
@@ -57,6 +62,24 @@ SINGLE_BATTLE_TEST("Adrenaline does not heal on non-punching moves")
             MESSAGE("Foe Wobbuffet had its energy drained!");
         }
     } THEN {
-        EXPECT_EQ(player->hp, 75);
+        EXPECT_EQ(player->hp, 100);
+        EXPECT(player->status1 & status);
+    }
+}
+
+SINGLE_BATTLE_TEST("Poison Heal still heals a poisoned Pokemon with Adrenaline")
+{
+    GIVEN {
+        PLAYER(SPECIES_BRELOOM) { HP(100); MaxHP(200); Status1(STATUS1_POISON); Ability(ABILITY_POISON_HEAL); UniqueAbility(ABILITY_ADRENALINE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_POISON_HEAL);
+        MESSAGE("The poisoning healed Breloom a little bit!");
+        HP_BAR(player, damage: -25);
+    } THEN {
+        EXPECT_EQ(player->hp, 125);
+        EXPECT(player->status1 & STATUS1_POISON);
     }
 }
