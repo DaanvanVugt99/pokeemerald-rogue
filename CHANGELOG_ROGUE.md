@@ -44,6 +44,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Frontier Brains now use the full badge level cap and cache their reward
+  previews during path generation, avoiding a delay when inspecting their nodes.
 - Adrenaline now prevents poison status damage while retaining its poisoned
   punching-move healing effect and compatibility with Poison Heal.
 - Sand Stream and Snow Warning now make their holders immune to Sandstorm and

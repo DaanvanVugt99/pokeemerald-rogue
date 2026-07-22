@@ -1484,6 +1484,19 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
         DebugPrintf("ADVPATH: Generating path for seed %d.", gRngRogueValue);
         Rogue_ResetAdventurePathBuffers();
         GeneratePath(&pathSettings);
+
+        // Frontier Brain teams are deterministic from the room seed and use the
+        // full badge level cap, so cache their reward preview while the path is
+        // generated instead of stalling when the player inspects the node.
+        {
+            u8 i;
+
+            for(i = 0; i < gRogueAdvPath.roomCount; ++i)
+            {
+                if(gRogueAdvPath.rooms[i].roomType == ADVPATH_ROOM_MINIBOSS)
+                    Rogue_CacheMiniBossPreview(i);
+            }
+        }
         DebugPrint("ADVPATH: Finished generating path.");
 
 #ifdef DEBUG_FEATURE_FRAME_TIMERS

@@ -83,7 +83,7 @@ TEST("An exhausted path is replaced after its boss")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
-TEST("A scheduled Frontier Brain replaces exactly one optional route deterministically")
+TEST("Frontier Brain paths cache deterministic previews")
 {
     struct RogueAdvPath originalPath = gRogueAdvPath;
     u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
@@ -93,6 +93,9 @@ TEST("A scheduled Frontier Brain replaces exactly one optional route determinist
     RAND_TYPE originalRng = gRngRogueValue;
     u16 trainerNum;
     u16 aceRoomSeed = 0;
+    u16 rewardSpeciesA = SPECIES_NONE;
+    u16 rewardSpeciesB = SPECIES_NONE;
+    u8 rewardMode = MINIBOSS_REWARD_MODE_NONE;
     u8 aceRoomId = ADVPATH_INVALID_ROOM_ID;
     u8 generatedRoomCount;
     u8 generatedPathLength;
@@ -119,6 +122,10 @@ TEST("A scheduled Frontier Brain replaces exactly one optional route determinist
             aceRoomSeed = gRogueAdvPath.rooms[i].rngSeed;
             EXPECT_EQ(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.trainerNum, trainerNum);
             EXPECT_NE(gRogueAdvPath.rooms[i].coords.x + 1, gRogueAdvPath.pathLength);
+            EXPECT(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.hasRewardPreview);
+            rewardSpeciesA = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardSpeciesA;
+            rewardSpeciesB = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardSpeciesB;
+            rewardMode = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardMode;
         }
     }
     EXPECT_EQ(roomCount, 1);
@@ -134,6 +141,10 @@ TEST("A scheduled Frontier Brain replaces exactly one optional route determinist
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomType, ADVPATH_ROOM_MINIBOSS);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].rngSeed, aceRoomSeed);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.trainerNum, trainerNum);
+    EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+    EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesA, rewardSpeciesA);
+    EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesB, rewardSpeciesB);
+    EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardMode, rewardMode);
 
     gRogueAdvPath = originalPath;
     gRogueRun.baseSeed = originalBaseSeed;
@@ -215,6 +226,7 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
         u16 previewSpeciesB;
 
         gRogueAdvPath.rooms[1].roomParams.perType.miniboss.trainerNum = trainerNums[i];
+        gRogueAdvPath.rooms[1].roomParams.perType.miniboss.hasRewardPreview = FALSE;
         SeedRogueRng(1111 + i);
         SeedRng(2222 + i);
         SeedRng2(3333 + i);
@@ -222,6 +234,8 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
         rngBefore = gRngValue;
         rng2Before = gRng2Value;
 
+        Rogue_CacheMiniBossPreview(1);
+        EXPECT(gRogueAdvPath.rooms[1].roomParams.perType.miniboss.hasRewardPreview);
         Rogue_BufferMiniBossPreview(1);
         previewSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
         previewSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
@@ -230,7 +244,11 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
         EXPECT_NE(previewSpeciesB, SPECIES_NONE);
         EXPECT_NE(previewSpeciesA, previewSpeciesB);
         EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_DOUBLE);
-        EXPECT_EQ(CalculateEnemyPartyCount(), 0);
+        EXPECT_EQ(gRogueAdvPath.rooms[1].roomParams.perType.miniboss.rewardSpeciesA, previewSpeciesA);
+        EXPECT_EQ(gRogueAdvPath.rooms[1].roomParams.perType.miniboss.rewardSpeciesB, previewSpeciesB);
+        EXPECT_EQ(gRogueAdvPath.rooms[1].roomParams.perType.miniboss.rewardMode, gSpecialVar_Result);
+        EXPECT_EQ(CalculateEnemyPartyCount(), 1);
+        EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), SPECIES_PIKACHU);
         EXPECT_EQ(memcmp(&rogueRngBefore, &gRngRogueValue, sizeof(rogueRngBefore)), 0);
         EXPECT_EQ(memcmp(&rngBefore, &gRngValue, sizeof(rngBefore)), 0);
         EXPECT_EQ(memcmp(&rng2Before, &gRng2Value, sizeof(rng2Before)), 0);
@@ -250,12 +268,14 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
 
     gRogueAdvPath.rooms[1].roomParams.perType.miniboss.trainerNum = trainerNums[0];
     gRogueRun.trialState.trialId = ROGUE_TRIAL_LIMITED_CAPTURE;
+    gRogueAdvPath.rooms[1].roomParams.perType.miniboss.hasRewardPreview = FALSE;
     Rogue_BufferMiniBossPreview(1);
     EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_NONE);
     EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1), SPECIES_NONE);
     EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2), SPECIES_NONE);
 
     gRogueRun.trialState.trialId = ROGUE_TRIAL_ORRE_STYLE;
+    gRogueAdvPath.rooms[1].roomParams.perType.miniboss.hasRewardPreview = FALSE;
     Rogue_BufferMiniBossPreview(1);
     EXPECT_EQ(gSpecialVar_Result, MINIBOSS_REWARD_MODE_SNAG);
     EXPECT_EQ(VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1), SPECIES_NONE);

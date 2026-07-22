@@ -315,6 +315,21 @@ TEST("Frontier Brains use competitive movesets on the first Average path")
     gRngValue = originalRng;
 }
 
+TEST("Frontier Brains use the full badge level cap")
+{
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalLevelOffset = gRogueRun.currentLevelOffset;
+
+    Rogue_SetCurrentDifficulty(4);
+    gRogueRun.currentLevelOffset = 10;
+
+    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculateBossMonLvl());
+    EXPECT_NE(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculatePlayerMonLvl());
+
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRogueRun.currentLevelOffset = originalLevelOffset;
+}
+
 TEST("Frontier Brain trophies preserve their competitive echo and reset transient identity")
 {
     struct Pokemon originalEnemyParty[PARTY_SIZE];

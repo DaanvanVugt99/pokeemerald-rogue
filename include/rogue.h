@@ -110,6 +110,10 @@ struct RogueAdvPathRoomParams
         struct 
         {
             u16 trainerNum;
+            u16 rewardSpeciesA;
+            u16 rewardSpeciesB;
+            u8 rewardMode;
+            bool8 hasRewardPreview;
         } miniboss;
     } perType;
 };

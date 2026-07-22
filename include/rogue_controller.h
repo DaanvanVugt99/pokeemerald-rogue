@@ -192,6 +192,7 @@ u16 RogueDebug_GetWildApprovedFamilyForm(u16 species, u16 randValue);
 u16 RogueDebug_SelectWildSpeciesFromCurrentQuery(u16 familyRand, u16 formRand, bool8 excludeSelectedFamily);
 
 void Rogue_SelectMiniBossRewardMons();
+void Rogue_CacheMiniBossPreview(u8 roomIdx);
 void Rogue_BufferMiniBossPreview(u8 roomIdx);
 
 void Rogue_Battle_StartTrainerBattle(void);

@@ -487,7 +487,7 @@ u8 Rogue_CalculateTrainerMonLvl()
 
 u8 Rogue_CalculateMiniBossMonLvl()
 {
-    return Rogue_CalculateTrainerLvlCap(TRUE);
+    return Rogue_CalculateBossMonLvl();
 }
 
 u8 Rogue_CalculateRivalMonLvl()

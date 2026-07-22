@@ -6248,9 +6248,10 @@ void Rogue_SelectMiniBossRewardMons()
     gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, roomSeed);
 }
 
-void Rogue_BufferMiniBossPreview(u8 roomIdx)
+static void GenerateMiniBossPreview(u8 roomIdx)
 {
     struct RogueAdvPathRoom* room = &gRogueAdvPath.rooms[roomIdx];
+    struct Pokemon* enemyParty = Alloc(sizeof(gEnemyParty));
     u16 trainerNum = room->roomParams.perType.miniboss.trainerNum;
     RAND_TYPE rogueRng = gRngRogueValue;
     RAND_TYPE rng = gRngValue;
@@ -6271,7 +6272,9 @@ void Rogue_BufferMiniBossPreview(u8 roomIdx)
     u8 i;
 
     AGB_ASSERT(room->roomType == ADVPATH_ROOM_MINIBOSS);
+    AGB_ASSERT(enemyParty != NULL);
 
+    memcpy(enemyParty, gEnemyParty, sizeof(gEnemyParty));
     ZeroEnemyPartyMons();
     gRogueAdvPath.currentRoomType = ADVPATH_ROOM_MINIBOSS;
     gRogueAdvPath.currentRoomParams = room->roomParams;
@@ -6296,7 +6299,8 @@ void Rogue_BufferMiniBossPreview(u8 roomIdx)
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, trainerNum);
     gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, room->rngSeed);
 
-    ZeroEnemyPartyMons();
+    memcpy(gEnemyParty, enemyParty, sizeof(gEnemyParty));
+    Free(enemyParty);
     CalculateEnemyPartyCount();
 
     for(i = 0; i < ROGUE_ITEM_COUNT; ++i)
@@ -6328,6 +6332,43 @@ void Rogue_BufferMiniBossPreview(u8 roomIdx)
     gRngRogueValue = rogueRng;
     gRngValue = rng;
     gRng2Value = rng2;
+}
+
+void Rogue_CacheMiniBossPreview(u8 roomIdx)
+{
+    struct RogueAdvPathRoom* room = &gRogueAdvPath.rooms[roomIdx];
+    u16 previousTrainerNum = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
+    u16 previousSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
+    u16 previousSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
+    u16 previousResult = gSpecialVar_Result;
+
+    GenerateMiniBossPreview(roomIdx);
+
+    room->roomParams.perType.miniboss.rewardSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
+    room->roomParams.perType.miniboss.rewardSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
+    room->roomParams.perType.miniboss.rewardMode = gSpecialVar_Result;
+    room->roomParams.perType.miniboss.hasRewardPreview = TRUE;
+
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, previousTrainerNum);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, previousSpeciesA);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, previousSpeciesB);
+    gSpecialVar_Result = previousResult;
+}
+
+void Rogue_BufferMiniBossPreview(u8 roomIdx)
+{
+    struct RogueAdvPathRoom* room = &gRogueAdvPath.rooms[roomIdx];
+
+    AGB_ASSERT(room->roomType == ADVPATH_ROOM_MINIBOSS);
+
+    // Keep a fallback for debug-created rooms and older in-memory path state.
+    if(!room->roomParams.perType.miniboss.hasRewardPreview)
+        Rogue_CacheMiniBossPreview(roomIdx);
+
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, room->roomParams.perType.miniboss.trainerNum);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, room->roomParams.perType.miniboss.rewardSpeciesA);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, room->roomParams.perType.miniboss.rewardSpeciesB);
+    gSpecialVar_Result = room->roomParams.perType.miniboss.rewardMode;
 }
 
 static u8 UNUSED RandomMonType(u16 seedFlag)
