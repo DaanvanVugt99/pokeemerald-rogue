@@ -1448,6 +1448,7 @@ static void Cmd_attackcanceler(void)
 
     s32 i, moveType, targetMoveType;
     u16 attackerAbility = GetBattlerAbility(gBattlerAttacker);
+    gBattleStruct->royalAdvanceActivated &= ~gBitTable[gBattlerAttacker];
     GET_MOVE_TYPE(gCurrentMove, moveType);
     targetMoveType = GetTargetAdjustedMoveType(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType);
     if (moveType != targetMoveType)
@@ -2217,6 +2218,22 @@ static void Cmd_attackstring(void)
     if (gBattleControllerExecFlags)
         return;
 
+    if ((gBattleStruct->switchInTransferFlags[gBattlerAttacker] & SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE_MASK)
+     && !(gBattleStruct->royalAdvanceActivated & gBitTable[gBattlerAttacker])
+     && !IS_MOVE_STATUS(gCurrentMove)
+     && !gBattleStruct->isAtkCancelerForCalledMove)
+    {
+        gBattleStruct->royalAdvanceActivated |= gBitTable[gBattlerAttacker];
+        if (gBattleStruct->switchInTransferFlags[gBattlerAttacker] & SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE)
+            gBattleStruct->switchInTransferFlags[gBattlerAttacker] &= ~SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE;
+        else
+            gBattleStruct->switchInTransferFlags[gBattlerAttacker] &= ~SWITCH_IN_TRANSFER_ROYAL_ADVANCE_GIMMICK;
+        SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_ROYAL_ADVANCE);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        return;
+    }
+
     GET_MOVE_TYPE(gCurrentMove, moveType);
     if (!gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
      && HasBattlerAbility(gBattlerAttacker, ABILITY_GROUND_FAULT)
@@ -2856,6 +2873,37 @@ static void Cmd_healthbarupdate(void)
     if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) || (gHitMarker & HITMARKER_PASSIVE_DAMAGE))
     {
         u32 battler = GetBattlerForBattleScript(cmd->battler);
+        u32 battlerBit = gBitTable[battler];
+
+        if ((gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE_MASK)
+         && !(gBattleStruct->royalGuardActivated & battlerBit)
+         && gBattleMoveDamage > 0
+         && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+         && !IS_MOVE_STATUS(gCurrentMove)
+         && !DoesDisguiseBlockMove(battler, gCurrentMove))
+        {
+            gBattleStruct->royalGuardActivated |= battlerBit;
+            if (!(gBattleStruct->royalGuardDamageCalculated & battlerBit))
+            {
+                gBattleMoveDamage /= 2;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+            }
+            gBattleStruct->royalGuardDamageCalculated &= ~battlerBit;
+            if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE)
+                gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE;
+            else
+                gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_ROYAL_GUARD_GIMMICK;
+            SetBattlerTriggeredAbility(battler, ABILITY_ROYAL_GUARD);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            return;
+        }
+
+        gBattleStruct->royalGuardActivated &= ~battlerBit;
+
+        if (DoesDisguiseBlockMove(battler, gCurrentMove))
+            gBattleStruct->royalGuardDamageCalculated &= ~battlerBit;
 
         if (DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove) && gDisableStructs[battler].substituteHP && !(gHitMarker & HITMARKER_IGNORE_SUBSTITUTE))
         {
@@ -8626,6 +8674,8 @@ static void Cmd_returnatktoball(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
+static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct BattlePokemon *outgoingMon);
+
 static void Cmd_getswitchedmondata(void)
 {
     CMD_ARGS(u8 battler);
@@ -8635,6 +8685,7 @@ static void Cmd_getswitchedmondata(void)
         return;
 
     gBattleStruct->switchInTransferSourcePartyIdx[battler] = gBattlerPartyIndexes[battler];
+    QueueSwitchInTransferEffectsFromOutgoing(battler, &gBattleMons[battler]);
     gBattlerPartyIndexes[battler] = gBattleStruct->monToSwitchIntoId[battler];
 
     BtlController_EmitGetMonData(battler, BUFFER_A, REQUEST_ALL_BATTLE, gBitTable[gBattlerPartyIndexes[battler]]);
@@ -8645,12 +8696,31 @@ static void Cmd_getswitchedmondata(void)
 
 static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct BattlePokemon *outgoingMon)
 {
+    u32 side = GetBattlerSide(battler);
+    u32 sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battler];
+
     gBattleStruct->switchInTransferFlags[battler] = SWITCH_IN_TRANSFER_NONE;
 
-    // Fainted mons did not switch out, so they cannot transfer switch-out effects.
+    if (sourcePartyIdx < PARTY_SIZE
+     && !(gBattleStruct->uniqueAbilityUsed[side] & gBitTable[sourcePartyIdx]))
+    {
+        if (HasBattlerAbility(battler, ABILITY_ROYAL_ADVANCE))
+        {
+            gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_ADVANCE;
+            gBattleStruct->uniqueAbilityUsed[side] |= gBitTable[sourcePartyIdx];
+        }
+        else if (HasBattlerAbility(battler, ABILITY_ROYAL_GUARD))
+        {
+            gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_GUARD;
+            gBattleStruct->uniqueAbilityUsed[side] |= gBitTable[sourcePartyIdx];
+        }
+    }
+
+    // Other transfer effects require the user to switch out rather than faint.
     if (outgoingMon->hp == 0)
     {
-        gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
+        if (gBattleStruct->switchInTransferFlags[battler] == SWITCH_IN_TRANSFER_NONE)
+            gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
         return;
     }
 
@@ -8696,6 +8766,25 @@ static bool32 CanRksRelayWithAlly(const struct BattlePokemon *relayMon, const st
 
 static bool32 TryApplySwitchInTransferEffects(u32 battler)
 {
+    u32 opposingSide = GetBattlerSide(battler) ^ BIT_SIDE;
+
+    if (gBattleStruct->battleGimmickUsed[opposingSide])
+        TryGrantRoyalGimmickEffect(battler);
+
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROYAL_ADVANCE)
+    {
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_ROYAL_ADVANCE;
+        if (IsBattlerAlive(battler))
+            gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE;
+    }
+
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROYAL_GUARD)
+    {
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_ROYAL_GUARD;
+        if (IsBattlerAlive(battler))
+            gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE;
+    }
+
     if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_INGRAIN)
     {
         u8 sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battler];
@@ -8852,7 +8941,6 @@ static void Cmd_switchindataupdate(void)
     outgoingHasBreachPoint = HasBattlerAbility(battler, ABILITY_BREACH_POINT);
     outgoingHasRksRelay = HasBattlerAbility(battler, ABILITY_RKS_RELAY);
     outgoingPartyIndex = gBattleStruct->switchInTransferSourcePartyIdx[battler];
-    QueueSwitchInTransferEffectsFromOutgoing(battler, &oldData);
     monData = (u8 *)(&gBattleMons[battler]);
 
     for (i = 0; i < sizeof(struct BattlePokemon); i++)
@@ -11582,6 +11670,8 @@ static void HandleScriptMegaPrimalBurst(u32 caseId, u32 battler, u32 type)
             gBattleStruct->mega.alreadyEvolved[position] = TRUE;
         if (type == HANDLE_TYPE_ULTRA_BURST)
             gBattleStruct->burst.alreadyBursted[position] = TRUE;
+        if (caseId == 1)
+            MarkBattleGimmickUsed(battler);
     }
 }
 

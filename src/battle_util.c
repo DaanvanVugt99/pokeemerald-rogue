@@ -189,6 +189,41 @@ static void SetMeloettaVerseState(u32 battler, u32 state)
         gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
 }
 
+void TryGrantRoyalGimmickEffect(u32 battler)
+{
+    u32 side = GetBattlerSide(battler);
+    u32 partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+
+    if (!IsBattlerAlive(battler)
+     || (gBattleStruct->royalGimmickUsed[side] & partyBit))
+        return;
+
+    if (HasBattlerAbility(battler, ABILITY_ROYAL_ADVANCE))
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_ADVANCE_GIMMICK;
+    else if (HasBattlerAbility(battler, ABILITY_ROYAL_GUARD))
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_ROYAL_GUARD_GIMMICK;
+    else
+        return;
+
+    if (!(gBattleStruct->switchInTransferFlags[battler] & (SWITCH_IN_TRANSFER_ROYAL_ADVANCE | SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE
+                                                        | SWITCH_IN_TRANSFER_ROYAL_GUARD | SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE)))
+        gBattleStruct->switchInTransferSourcePartyIdx[battler] = gBattlerPartyIndexes[battler];
+    gBattleStruct->royalGimmickUsed[side] |= partyBit;
+}
+
+void MarkBattleGimmickUsed(u32 battler)
+{
+    u32 i;
+    u32 gimmickSide = GetBattlerSide(battler);
+
+    gBattleStruct->battleGimmickUsed[gimmickSide] = TRUE;
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != gimmickSide)
+            TryGrantRoyalGimmickEffect(i);
+    }
+}
+
 static u16 GetGemItemForType(u32 type)
 {
     switch (type)
@@ -23794,11 +23829,11 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
     }
 
-    if ((gBattleStruct->switchInTransferFlags[battlerAtk] & SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE)
+    if ((gBattleStruct->switchInTransferFlags[battlerAtk] & SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE)
      && gDisableStructs[battlerAtk].isFirstTurn
      && !IS_MOVE_STATUS(move))
     {
-        modifier = uq4_12_multiply(modifier, IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SUN) ? UQ_4_12(1.5) : UQ_4_12(1.2));
+        modifier = uq4_12_multiply(modifier, IsBattlerWeatherAffected(battlerAtk, B_WEATHER_RAIN) ? UQ_4_12(1.5) : UQ_4_12(1.2));
     }
 
     if (gBattleMoves[move].soundMove
@@ -25099,12 +25134,6 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         return uq4_12_divide(UQ_4_12(1.0), typeEffectivenessModifier);
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_DUELISTS_LAW)
-     && typeEffectivenessModifier > UQ_4_12(0.0)
-     && typeEffectivenessModifier < UQ_4_12(1.0)
-     && DoesPartyShareTypeWithBattler(battlerAtk))
-        return UQ_4_12(2.0);
-
     if (HasBattlerAbility(battlerAtk, ABILITY_DEADLY_SHOT)
      && typeEffectivenessModifier >= UQ_4_12(2.0))
     {
@@ -25199,16 +25228,16 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         return UQ_4_12(0.5);
     }
 
-    if ((gBattleStruct->switchInTransferFlags[battlerDef] & SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE)
+    if ((gBattleStruct->switchInTransferFlags[battlerDef] & SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE)
      && gDisableStructs[battlerDef].isFirstTurn)
     {
         if (updateFlags)
         {
-            gBattleStruct->switchInTransferFlags[battlerDef] &= ~SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE;
+            gBattleStruct->switchInTransferFlags[battlerDef] &= ~SWITCH_IN_TRANSFER_SCORCHING_RELAY_ACTIVE;
             if (gBattleStruct->switchInTransferFlags[battlerDef] == SWITCH_IN_TRANSFER_NONE)
                 gBattleStruct->switchInTransferSourcePartyIdx[battlerDef] = PARTY_SIZE;
         }
-        return IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN) ? UQ_4_12(0.5) : UQ_4_12(0.8);
+        return IsBattlerWeatherAffected(battlerDef, B_WEATHER_SUN) ? UQ_4_12(0.5) : UQ_4_12(0.8);
     }
 
     if (HasBattlerAbility(battlerDef, ABILITY_AQUATIC_ARMOR)
@@ -25561,6 +25590,14 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     DAMAGE_APPLY_MODIFIER(GetCriticalModifier(isCrit));
     DAMAGE_APPLY_MODIFIER(GetGlaiveRushModifier(battlerDef));
 
+    if ((gBattleStruct->switchInTransferFlags[battlerDef] & SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE_MASK)
+     && !IS_MOVE_STATUS(move))
+    {
+        DAMAGE_APPLY_MODIFIER(UQ_4_12(0.5));
+        if (updateFlags)
+            gBattleStruct->royalGuardDamageCalculated |= gBitTable[battlerDef];
+    }
+
     if (randomFactor)
     {
         dmg *= 100 - RandomUniform(RNG_DAMAGE_MODIFIER, 0, 15);
@@ -25589,17 +25626,6 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
      && HasBattlerAbility(battlerAtk, ABILITY_INNER_FOCUS)
      && (gProtectStructs[battlerAtk].physicalDmg || gProtectStructs[battlerAtk].specialDmg))
         DAMAGE_APPLY_MODIFIER(UQ_4_12(0.5));
-
-    if (HasBattlerAbility(battlerDef, ABILITY_SHIELD_WALL)
-     && DoesPartyShareTypeWithBattler(battlerDef))
-    {
-        s32 damageCap = gBattleMons[battlerDef].maxHP / 2;
-
-        if (damageCap == 0)
-            damageCap = 1;
-        if (dmg > damageCap)
-            dmg = damageCap;
-    }
 
     if (dmg == 0)
         dmg = 1;

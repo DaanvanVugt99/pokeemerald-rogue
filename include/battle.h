@@ -653,7 +653,7 @@ struct BattleStruct
     u8 moneyMultiplierMove:1;
     u8 savedTurnActionNumber;
     u8 switchInAbilitiesCounter;
-    u8 switchInTransferFlags[MAX_BATTLERS_COUNT];
+    u16 switchInTransferFlags[MAX_BATTLERS_COUNT];
     u8 switchInTransferSourcePartyIdx[MAX_BATTLERS_COUNT];
     u8 faintedActionsState;
     u8 faintedActionsBattlerId;
@@ -804,6 +804,11 @@ struct BattleStruct
     u8 intrepidSwordBoost[NUM_BATTLE_SIDES];
     u8 dauntlessShieldBoost[NUM_BATTLE_SIDES];
     u8 uniqueAbilityUsed[NUM_BATTLE_SIDES];
+    bool8 battleGimmickUsed[NUM_BATTLE_SIDES];
+    u8 royalGimmickUsed[NUM_BATTLE_SIDES];
+    u8 royalAdvanceActivated;
+    u8 royalGuardActivated;
+    u8 royalGuardDamageCalculated;
     u8 stickySyrupdBy[MAX_BATTLERS_COUNT];
     u8 supremeOverlordCounter[MAX_BATTLERS_COUNT];
     u8 commanderForms; // Two bits per Dondozo battler.
@@ -1067,6 +1072,14 @@ struct QueuedStatBoost
 #define SWITCH_IN_TRANSFER_TIDAL_SWITCH_ACTIVE     (1 << 5)
 #define SWITCH_IN_TRANSFER_ROYAL_TREATMENT         (1 << 6)
 #define SWITCH_IN_TRANSFER_RKS_RELAY                (1 << 7)
+#define SWITCH_IN_TRANSFER_ROYAL_ADVANCE            (1 << 8)
+#define SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE     (1 << 9)
+#define SWITCH_IN_TRANSFER_ROYAL_GUARD              (1 << 10)
+#define SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE       (1 << 11)
+#define SWITCH_IN_TRANSFER_ROYAL_ADVANCE_GIMMICK    (1 << 12)
+#define SWITCH_IN_TRANSFER_ROYAL_GUARD_GIMMICK      (1 << 13)
+#define SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE_MASK (SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE | SWITCH_IN_TRANSFER_ROYAL_ADVANCE_GIMMICK)
+#define SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE_MASK (SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE | SWITCH_IN_TRANSFER_ROYAL_GUARD_GIMMICK)
 
 // All battle variables are declared in battle_main.c
 extern u16 gBattle_BG0_X;

@@ -38,6 +38,12 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked both Zacian forms with Royal Advance and both Zamazenta forms with
+  Royal Guard, passing a one-use priority or damage-halving effect to their
+  replacement and gaining a separate use when the foe activates a battle gimmick.
+- Swapped the relay roles of Emboar and Samurott: Scorch Relay now guards the
+  incoming ally, strengthened by sun, while Tidal Switch boosts its damage,
+  strengthened by rain.
 - Gave every Minior Meteor colour Blast Shield, which blocks damaging moves
   with at least 120 listed BP, and every Core colour Flak Shield, which blocks
   damaging moves with at most 40 listed BP.

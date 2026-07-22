@@ -5,6 +5,7 @@
 #include "battle_interface.h"
 #include "battle_scripts.h"
 #include "battle_script_commands.h"
+#include "battle_util.h"
 #include "data.h"
 #include "event_data.h"
 #include "graphics.h"
@@ -213,6 +214,7 @@ void PrepareBattlerForDynamax(u16 battlerId)
     gBattleStruct->dynamax.alreadyDynamaxed[side] = TRUE;
     gBattleStruct->dynamax.dynamaxed[battlerId] = TRUE;
     gBattleStruct->dynamax.dynamaxTurns[battlerId] = DYNAMAX_TURNS_COUNT;
+    MarkBattleGimmickUsed(battlerId);
 
     // Substitute is removed upon Dynamaxing.
     gBattleMons[battlerId].status2 &= ~STATUS2_SUBSTITUTE;

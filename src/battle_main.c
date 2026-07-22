@@ -5044,6 +5044,10 @@ s8 GetMovePriority(u32 battler, u16 move)
     if (gBattleStruct->dynamax.usingMaxMove[battler] && gBattleMoves[move].split == SPLIT_STATUS)
         return gBattleMoves[MOVE_MAX_GUARD].priority;
 
+    if ((gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE_MASK)
+     && !IS_MOVE_STATUS(move))
+        priority++;
+
     if (ability == ABILITY_GALE_WINGS
         && (B_GALE_WINGS < GEN_7 || BATTLER_MAX_HP(battler))
         && gBattleMoves[move].type == TYPE_FLYING)

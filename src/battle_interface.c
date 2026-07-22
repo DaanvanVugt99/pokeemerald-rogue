@@ -3886,7 +3886,9 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
      || ability == ABILITY_ROYAL_TREATMENT
      || ability == ABILITY_RKS_RELAY
      || ability == ABILITY_BREACH_POINT
-     || ability == ABILITY_FAIRY_TALE)
+     || ability == ABILITY_FAIRY_TALE
+     || ability == ABILITY_ROYAL_ADVANCE
+     || ability == ABILITY_ROYAL_GUARD)
     {
         sourcePartyIdx = gBattleStruct->switchInTransferSourcePartyIdx[battlerId];
         if (ability == ABILITY_BREACH_POINT

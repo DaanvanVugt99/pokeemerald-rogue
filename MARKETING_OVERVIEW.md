@@ -51,7 +51,7 @@ Examples visible in the commit history include:
 - Barbed Monsoon and Spring Command
 - Crown of Fangs, Gridlock, and Regal Aegis
 - Shadowmere and Frozen Bastion
-- Duelist's Law and Shield Wall
+- Royal Advance and Royal Guard
 - Fossil Memory
 - Raid Leader, Formation, and Snowstorm
 - Space Rift, Dark Dimension, and Temporal Lock changes

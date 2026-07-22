@@ -14125,13 +14125,13 @@ BattleScript_RootNetworkActivates::
 
 BattleScript_ScorchingRelayActivates::
 	call BattleScript_AbilityPopUp
-	printstring STRINGID_SCORCHINGRELAYCHARGED
+	printstring STRINGID_SCORCHINGRELAYGUARDED
 	waitmessage B_WAIT_TIME_LONG
 	return
 
 BattleScript_TidalSwitchActivates::
 	call BattleScript_AbilityPopUp
-	printstring STRINGID_TIDALSWITCHGUARDED
+	printstring STRINGID_TIDALSWITCHCHARGED
 	waitmessage B_WAIT_TIME_LONG
 	return
 

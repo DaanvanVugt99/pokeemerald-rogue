@@ -4,6 +4,7 @@
 #include "battle_controllers.h"
 #include "battle_interface.h"
 #include "battle_terastal.h"
+#include "battle_util.h"
 #include "event_data.h"
 #include "item.h"
 #include "palette.h"
@@ -26,6 +27,7 @@ void PrepareBattlerForTera(u32 battler)
     // Update TeraData fields.
     gBattleStruct->tera.isTerastallized[side] |= gBitTable[index];
     gBattleStruct->tera.alreadyTerastallized[battler] = TRUE;
+    MarkBattleGimmickUsed(battler);
 
     // Remove Tera Orb charge.    
     if (B_FLAG_TERA_ORB_CHARGED != 0

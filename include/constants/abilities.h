@@ -781,8 +781,8 @@
 #define ABILITY_GRIDLOCK               801
 #define ABILITY_CROWN_OF_FANGS         800
 #define ABILITY_FROZEN_BASTION         799
-#define ABILITY_DUELISTS_LAW           796
-#define ABILITY_SHIELD_WALL            797
+#define ABILITY_ROYAL_ADVANCE          796
+#define ABILITY_ROYAL_GUARD            797
 #define ABILITY_SHADOWMERE             798
 #define ABILITY_SPRING_COMMAND         814
 #define ABILITY_REGAL_AEGIS            802

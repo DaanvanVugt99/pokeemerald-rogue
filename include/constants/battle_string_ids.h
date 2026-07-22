@@ -729,8 +729,8 @@
 #define STRINGID_PSYCHICPARRYREADY                    727
 #define STRINGID_PSYCHICPARRIED                       728
 #define STRINGID_ROOTNETWORKRESTORED                  729
-#define STRINGID_SCORCHINGRELAYCHARGED                730
-#define STRINGID_TIDALSWITCHGUARDED                   731
+#define STRINGID_SCORCHINGRELAYGUARDED                730
+#define STRINGID_TIDALSWITCHCHARGED                   731
 #define STRINGID_GEODEHEARTCHARGED                    732
 #define STRINGID_GEODEHEARTRELEASED                   733
 #define STRINGID_MOODSWINGELATED                      734
