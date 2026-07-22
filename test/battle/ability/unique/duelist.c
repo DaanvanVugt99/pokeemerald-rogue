@@ -39,7 +39,7 @@ SINGLE_BATTLE_TEST("Duelist heals 1/8 max HP after using a slicing move at or be
     s16 healed;
 
     GIVEN {
-        PLAYER(SPECIES_FARFETCHD_GALARIAN) { HP(40); MaxHP(160); Ability(ABILITY_STEADFAST); UniqueAbility(ABILITY_DUELIST); Moves(MOVE_LEAF_BLADE); }
+        PLAYER(SPECIES_FARFETCHD) { HP(40); MaxHP(160); Ability(ABILITY_KEEN_EYE); UniqueAbility(ABILITY_DUELIST); Moves(MOVE_LEAF_BLADE); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(player, MOVE_LEAF_BLADE); }

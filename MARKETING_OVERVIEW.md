@@ -52,6 +52,7 @@ Examples visible in the commit history include:
 - Crown of Fangs and Gridlock
 - Bountiful, Frozen, Dread, Tundra, and Astral Reign
 - Royal Advance and Royal Guard
+- Duelist and Sword and Board
 - Fossil Memory
 - Raid Leader, Formation, and Snowstorm
 - Space Rift, Dark Dimension, and Temporal Lock changes

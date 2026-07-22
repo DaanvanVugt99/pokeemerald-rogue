@@ -38,6 +38,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Replaced Duelist on Galarian Farfetch'd and Sirfetch'd with Sword and Board,
+  which raises Attack by one after successfully using a protection move.
 - Renamed Mothim's unique ability to Swarm Surge and made it set Infested
   Terrain unconditionally on switch-in; renamed Unovan Stunfisk's
   contact-confusion ability to Crossed Wires, while Galarian Stunfisk now uses

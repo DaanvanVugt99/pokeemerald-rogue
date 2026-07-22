@@ -18515,6 +18515,24 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_SWORD_AND_BOARD)
+         && IsBattlerAlive(battler)
+         && gBattleMoves[move].protectionMove
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !(gMoveResultFlags & (MOVE_RESULT_FAILED | MOVE_RESULT_MISSED))
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SWORD_AND_BOARD);
+            gBattlerAttacker = battler;
+            SET_STATCHANGER(STAT_ATK, 1, FALSE);
+            PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_TIDECALL)
          && move == MOVE_PROTECT
          && DidMoveSucceedForMoveEndEffects(battler)
