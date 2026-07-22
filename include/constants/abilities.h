@@ -441,7 +441,7 @@
 #define ABILITY_ONE_MIND               391
 #define ABILITY_ADAPTIVE_ORIGIN        396
 #define ABILITY_VERDANT_HAVEN          397
-#define ABILITY_ERUPTION               398
+#define ABILITY_BLINDING_SMOKE         398
 #define ABILITY_DEATH_ROLL             399
 #define ABILITY_SCAMPER                400
 #define ABILITY_NOCTURNAL              401
@@ -950,12 +950,13 @@
 #define ABILITY_BLAST_SHIELD           916
 #define ABILITY_FLAK_SHIELD            917
 #define ABILITY_BOG_BODY               918
+#define ABILITY_GUIDING_FLAMES         919
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
 #define BLAST_SHIELD_MIN_POWER      120
 #define FLAK_SHIELD_MAX_POWER       40
 
-#define ABILITIES_COUNT_ROGUE       919
+#define ABILITIES_COUNT_ROGUE       920
 
 #define ABILITIES_COUNT ABILITIES_COUNT_ROGUE
 

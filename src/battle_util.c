@@ -19115,7 +19115,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_ERUPTION)
+        if (HasBattlerAbility(battler, ABILITY_BLINDING_SMOKE)
          && moveType == TYPE_FIRE
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -19128,14 +19128,39 @@ if (triggeringAbility != ABILITY_NONE)
              && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
              && IsBattlerAlive(gBattleStruct->moveTarget[battler]))
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_ERUPTION);
+                SetBattlerTriggeredAbility(battler, ABILITY_BLINDING_SMOKE);
                 gBattleStruct->atkCancellerTracker = 0;
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = gBattleStruct->moveTarget[battler];
-                gCalledMove = MOVE_FLAME_CHARGE;
+                gCalledMove = MOVE_SMOKESCREEN;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
-                VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_GUIDING_FLAMES)
+         && moveType == TYPE_GHOST
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].isFirstTurn
+         && !gProtectStructs[battler].extraMoveUsed)
+        {
+            if (gBattleStruct->moveTarget[battler] < gBattlersCount
+             && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
+             && IsBattlerAlive(gBattleStruct->moveTarget[battler]))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_GUIDING_FLAMES);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = gBattleStruct->moveTarget[battler];
+                gCalledMove = MOVE_WILL_O_WISP;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
                 effect++;

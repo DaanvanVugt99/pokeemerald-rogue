@@ -38,6 +38,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked the Cyndaquil line's Heat Surge into Blinding Smoke, which adds
+  Smokescreen to Fire moves after its first turn out, and gave Hisuian
+  Typhlosion Guiding Flames, which does the same with Ghost moves and
+  Will-O-Wisp.
 - Organized project documentation by current, inherited, legacy, and
   third-party purpose, and kept the personal Pokemon design tracker out of
   version control.
