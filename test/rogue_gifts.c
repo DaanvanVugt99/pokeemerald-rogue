@@ -216,7 +216,7 @@ TEST("Dynamic unique ability pool includes Starmobile")
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_STARMOBILE);
 }
 
-TEST("Dynamic unique ability eligibility audit contains 559 abilities")
+TEST("Dynamic unique ability eligibility audit contains 563 abilities")
 {
     static const u16 sExpectedExclusions[] =
     {
@@ -269,14 +269,14 @@ TEST("Dynamic unique ability eligibility audit contains 559 abilities")
     u16 eligibleCount = 0;
     u16 i;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_EMERALD_ACCORD; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_BOG_BODY; ++ability)
     {
         if(RogueGift_IsDynamicUniqueAbilityEligible(ability))
             ++eligibleCount;
     }
 
-    EXPECT_EQ(eligibleCount, 559);
-    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 559);
+    EXPECT_EQ(eligibleCount, 563);
+    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 563);
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STRONG_WINDS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STARMOBILE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLOCK_STEP));
@@ -284,6 +284,10 @@ TEST("Dynamic unique ability eligibility audit contains 559 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_DEAD_HEAT));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SPIRIT_FEAST));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_EMERALD_ACCORD));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SAND_COMMAND));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_BLAST_SHIELD));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLAK_SHIELD));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_BOG_BODY));
 
     for(i = 0; i < ARRAY_COUNT(sExpectedExclusions); ++i)
         EXPECT(!RogueGift_IsDynamicUniqueAbilityEligible(sExpectedExclusions[i]));
@@ -291,9 +295,9 @@ TEST("Dynamic unique ability eligibility audit contains 559 abilities")
 
 TEST("Dynamic legendary payload stores direct ten bit unique ability ids")
 {
-    u32 customMonId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 3, ABILITY_EMERALD_ACCORD);
+    u32 customMonId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 3, ABILITY_BOG_BODY);
 
-    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_EMERALD_ACCORD);
+    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_BOG_BODY);
     EXPECT_NE(RogueGift_GetCustomMonAbility(customMonId, 0), ABILITY_NONE);
 }
 
@@ -355,7 +359,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     u16 ability;
     u16 pairedAbilityCount = 0;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_EMERALD_ACCORD; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_BOG_BODY; ++ability)
     {
         u16 profileId = RogueGift_DebugGetDynamicSynergyProfileId(ability);
         u16 moves[3];
@@ -671,6 +675,9 @@ TEST("Generated legendary unique ability never duplicates the species native uni
     {
         { SPECIES_SHUCKLE,  ABILITY_SILVER_LINING },
         { SPECIES_RAYQUAZA, ABILITY_EMERALD_ACCORD },
+        { SPECIES_LANDORUS, ABILITY_SAND_COMMAND },
+        { SPECIES_MINIOR,   ABILITY_BLAST_SHIELD },
+        { SPECIES_CLODSIRE, ABILITY_BOG_BODY },
     };
     u8 i;
     u16 seed;

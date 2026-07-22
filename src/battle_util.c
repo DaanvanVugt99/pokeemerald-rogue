@@ -1277,6 +1277,8 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
     [ABILITY_PURIFYING_SALT] = 1,
     [ABILITY_WELL_BAKED_BODY] = 1,
     [ABILITY_THERMAL_EXCHANGE] = 1,
+    [ABILITY_BLAST_SHIELD] = 1,
+    [ABILITY_FLAK_SHIELD] = 1,
 };
 
 static const u8 sAbilitiesNotTraced[ABILITIES_COUNT] =
@@ -1846,12 +1848,15 @@ static bool32 IsGravityPreventingMove(u32 move)
     return gBattleMoves[move].gravityBanned;
 }
 
+bool32 IsBattlerHealBlocked(u32 battler)
+{
+    return (gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+        || IsAbilityOnOpposingSide(battler, ABILITY_BOG_BODY);
+}
+
 bool32 IsHealBlockPreventingMove(u32 battler, u32 move)
 {
-    if (!(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
-        return FALSE;
-
-    return gBattleMoves[move].healBlockBanned;
+    return IsBattlerHealBlocked(battler) && gBattleMoves[move].healBlockBanned;
 }
 
 static bool32 IsBelchPreventingMove(u32 battler, u32 move)
@@ -3136,7 +3141,7 @@ u8 DoBattlerEndTurnEffects(void)
         case ENDTURN_INGRAIN:  // ingrain
             if ((gStatuses3[battler] & STATUS3_ROOTED)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+             && !IsBattlerHealBlocked(battler)
              && gBattleMons[battler].hp != 0)
             {
                 gBattleMoveDamage = GetDrainedBigRootHp(battler, GetNonDynamaxMaxHP(battler) / 16);
@@ -3148,7 +3153,7 @@ u8 DoBattlerEndTurnEffects(void)
         case ENDTURN_AQUA_RING:  // aqua ring
             if ((gStatuses3[battler] & STATUS3_AQUA_RING)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+             && !IsBattlerHealBlocked(battler)
              && gBattleMons[battler].hp != 0)
             {
                 gBattleMoveDamage = GetDrainedBigRootHp(battler, GetNonDynamaxMaxHP(battler) / 16);
@@ -3217,7 +3222,7 @@ u8 DoBattlerEndTurnEffects(void)
                 if (ability == ABILITY_POISON_HEAL
                  || HasBattlerAbility(battler, ABILITY_UNKNOWN_BIOLOGY))
                 {
-                    if (!BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                    if (!BATTLER_MAX_HP(battler) && !IsBattlerHealBlocked(battler))
                     {
                         gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
                         if (gBattleMoveDamage == 0)
@@ -3260,7 +3265,7 @@ u8 DoBattlerEndTurnEffects(void)
                 if (ability == ABILITY_POISON_HEAL
                  || HasBattlerAbility(battler, ABILITY_UNKNOWN_BIOLOGY))
                 {
-                    if (!BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                    if (!BATTLER_MAX_HP(battler) && !IsBattlerHealBlocked(battler))
                     {
                         gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
                         if (gBattleMoveDamage == 0)
@@ -3306,7 +3311,7 @@ u8 DoBattlerEndTurnEffects(void)
                 if (HasBattlerAbility(battler, ABILITY_FLAMEHEART)
                  || HasBattlerAbility(battler, ABILITY_UNKNOWN_BIOLOGY))
                 {
-                    if (!BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                    if (!BATTLER_MAX_HP(battler) && !IsBattlerHealBlocked(battler))
                     {
                         gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
                         if (gBattleMoveDamage == 0)
@@ -4271,7 +4276,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
             gBattleStruct->atkCancellerTracker++;
             break;
         case CANCELLER_HEAL_BLOCKED:
-            if (gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE && gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK && IsHealBlockPreventingMove(gBattlerAttacker, gCurrentMove))
+            if (gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE && IsHealBlockPreventingMove(gBattlerAttacker, gCurrentMove))
             {
                 gProtectStructs[gBattlerAttacker].usedHealBlockedMove = TRUE;
                 gBattleScripting.battler = gBattlerAttacker;
@@ -6472,7 +6477,7 @@ void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount)
 
         if (!IsBattlerAlive(battler)
          || !HasBattlerAbility(battler, ABILITY_MOONLIGHT)
-         || gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+         || IsBattlerHealBlocked(battler))
             continue;
 
         if (battler == healedBattler)
@@ -6537,7 +6542,7 @@ static bool32 TryActivateMoonlight(u32 battler, u32 source, u32 target)
      || target >= gBattlersCount
      || !HasBattlerAbility(battler, ABILITY_MOONLIGHT)
      || BATTLER_MAX_HP(battler)
-     || (gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+     || IsBattlerHealBlocked(battler))
         return FALSE;
 
     SetBattlerTriggeredAbility(battler, ABILITY_MOONLIGHT);
@@ -10542,7 +10547,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
         if (HasBattlerAbility(battler, ABILITY_FRESHLY_BAKED) && !uniqueDone)
         {
-            bool32 canHeal = !BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK);
+            bool32 canHeal = !BATTLER_MAX_HP(battler) && !IsBattlerHealBlocked(battler);
             bool32 canSetMist = !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_MIST);
 
             if (canHeal || canSetMist)
@@ -11706,6 +11711,16 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_BOG_BODY:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = gBattlerAbility = battler;
+                SetBattlerTriggeredAbility(battler, ABILITY_BOG_BODY);
+                BattleScriptPushCursorAndCallback(BattleScript_BogBodyActivates);
+                effect++;
+            }
+            break;
         case ABILITY_STRONG_WINDS:
             if (!gSpecialStatuses[battler].switchInAbilityDone
              && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
@@ -11845,7 +11860,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         case ABILITY_SHELTER:
             if (!gSpecialStatuses[battler].switchInAbilityDone
              && (CompareStat(battler, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN)
-              || (!BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))))
+              || (!BATTLER_MAX_HP(battler) && !IsBattlerHealBlocked(battler))))
             {
                 gBattlerAttacker = battler;
                 gSpecialStatuses[battler].switchInAbilityDone = TRUE;
@@ -12164,7 +12179,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             if (HasBattlerAbility(battler, ABILITY_TROPICAL_CANOPY)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 u32 healDivisor = IsBattlerWeatherAffected(battler, B_WEATHER_SUN) ? 8 : 16;
 
@@ -12187,7 +12202,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             if (HasBattlerAbility(battler, ABILITY_RUMINATE)
              && gBattleMons[battler].hp * 2 < gBattleMons[battler].maxHP
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
                 if (gBattleMoveDamage == 0)
@@ -12209,7 +12224,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (HasBattlerAbility(battler, ABILITY_CARRION_HOUR)
              && IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_CARRION_HOUR);
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
@@ -12240,7 +12255,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             case ABILITY_RAIN_DISH:
                 if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN)
                  && !BATTLER_MAX_HP(battler)
-                 && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                 && !IsBattlerHealBlocked(battler))
                 {
                     BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                     gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
@@ -12427,7 +12442,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 {
                     if (!IsBattlerAlive(i)
                      || BATTLER_MAX_HP(i)
-                     || (gStatuses3[i] & STATUS3_HEAL_BLOCK))
+                     || IsBattlerHealBlocked(i))
                         continue;
 
                     healedAny = TRUE;
@@ -12474,7 +12489,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                         gBattleStruct->usedHeldItems[gBattlerPartyIndexes[battler]][GetBattlerSide(battler)] = oldItem;
 
                         if (!BATTLER_MAX_HP(battler)
-                         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                         && !IsBattlerHealBlocked(battler))
                         {
                             gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
                             if (gBattleMoveDamage == 0)
@@ -12544,7 +12559,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
                 else if (splitInstinctRoll == 1
                       && !BATTLER_MAX_HP(battler)
-                      && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                      && !IsBattlerHealBlocked(battler))
                 {
                     s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
 
@@ -12664,7 +12679,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (HasBattlerAbility(battler, ABILITY_STILL_WATER)
              && !BATTLER_MAX_HP(battler)
              && BattlerTookNoDamageThisTurn(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
 
@@ -12680,7 +12695,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (HasBattlerAbility(battler, ABILITY_CELL_DIVISION)
              && !BATTLER_MAX_HP(battler)
              && (gProtectStructs[battler].physicalDmg != 0 || gProtectStructs[battler].specialDmg != 0)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 s32 healAmount = (gProtectStructs[battler].physicalDmg + gProtectStructs[battler].specialDmg) / 4;
 
@@ -12790,7 +12805,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
                 if (HasBattlerAbility(battler, ABILITY_DRIFT_SONG)
                  && !BATTLER_MAX_HP(battler)
-                 && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                 && !IsBattlerHealBlocked(battler))
                 {
                     s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
 
@@ -12806,7 +12821,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             if (HasBattlerAbility(battler, ABILITY_TRAGIC_BEAUTY)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 s32 healAmount = GetNonDynamaxMaxHP(battler) / 8;
 
@@ -12824,7 +12839,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                                            gBitTable[TYPE_WATER] | gBitTable[TYPE_GROUND] | gBitTable[TYPE_ROCK],
                                            TRUE) >= 3
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 s32 healAmount = GetNonDynamaxMaxHP(battler) / 16;
 
@@ -12840,7 +12855,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (HasBattlerAbility(battler, ABILITY_NEGATIVE_CHARGE)
              && DoesPartyContainAbility(battler, ABILITY_PLUS, TRUE)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 s32 healAmount = GetNonDynamaxMaxHP(battler) / 16;
 
@@ -12856,7 +12871,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if (HasBattlerAbility(battler, ABILITY_FLASH_FREEZE)
              && (gBattleWeather & B_WEATHER_SNOW)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+             && !IsBattlerHealBlocked(battler)
              && !(gStatuses3[battler] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)))
             {
                 s32 healAmount = GetNonDynamaxMaxHP(battler) / 16;
@@ -12873,7 +12888,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             if ((gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
              && IsBattlerTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 u32 pasturizedBattler = IsAbilityOnSide(battler, ABILITY_PASTURIZED);
 
@@ -12955,8 +12970,26 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         {
             u16 moveTarget = GetBattlerMoveTargetType(battler, move);
             u16 targetAbility = GetBattlerAbility(gBattlerTarget);
+            u16 movePower = gBattleMoves[move].power;
+            u16 shieldAbility = ABILITY_NONE;
 
-            if ((HasBattlerAbility(battler, ABILITY_SOUNDPROOF) && gBattleMoves[move].soundMove && !(moveTarget & MOVE_TARGET_USER))
+            if (movePower != 0)
+            {
+                if (movePower >= BLAST_SHIELD_MIN_POWER && HasBattlerAbility(battler, ABILITY_BLAST_SHIELD))
+                    shieldAbility = ABILITY_BLAST_SHIELD;
+                else if (movePower <= FLAK_SHIELD_MAX_POWER && HasBattlerAbility(battler, ABILITY_FLAK_SHIELD))
+                    shieldAbility = ABILITY_FLAK_SHIELD;
+            }
+
+            if (shieldAbility != ABILITY_NONE)
+            {
+                SetBattlerTriggeredAbility(battler, shieldAbility);
+                if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
+                    gHitMarker |= HITMARKER_NO_PPDEDUCT;
+                gBattlescriptCurrInstr = BattleScript_SoundproofProtected;
+                effect = 1;
+            }
+            else if ((HasBattlerAbility(battler, ABILITY_SOUNDPROOF) && gBattleMoves[move].soundMove && !(moveTarget & MOVE_TARGET_USER))
              || (HasBattlerAbility(battler, ABILITY_BULLETPROOF) && gBattleMoves[move].ballisticMove))
             {
                 if (gBattleMoves[move].soundMove)
@@ -13112,7 +13145,7 @@ else if (moveType == TYPE_FIRE && HasBattlerAbility(battler, ABILITY_FLASH_FREEZ
 }
 else if (moveType == TYPE_FIRE && HasBattlerAbility(battler, ABILITY_MELTDOWN))
 {
-    bool32 canHeal = !BATTLER_MAX_HP(battler) && !(B_HEAL_BLOCKING >= GEN_5 && gStatuses3[battler] & STATUS3_HEAL_BLOCK);
+    bool32 canHeal = !BATTLER_MAX_HP(battler) && !(B_HEAL_BLOCKING >= GEN_5 && IsBattlerHealBlocked(battler));
 
     triggeringAbility = ABILITY_MELTDOWN;
     SET_BATTLER_TYPE(battler, TYPE_WATER);
@@ -13194,7 +13227,7 @@ if (triggeringAbility != ABILITY_NONE)
 
             if (effect == 1) // Drain Hp ability.
             {
-                if (BATTLER_MAX_HP(battler) || (B_HEAL_BLOCKING >= GEN_5 && gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                if (BATTLER_MAX_HP(battler) || (B_HEAL_BLOCKING >= GEN_5 && IsBattlerHealBlocked(battler)))
                 {
                     if ((gProtectStructs[gBattlerAttacker].notFirstStrike))
                         gBattlescriptCurrInstr = BattleScript_MonMadeMoveUseless;
@@ -14238,7 +14271,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsMoveMakingContact(move, moveEndAttacker)
-         && !(gStatuses3[moveEndAttacker] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(moveEndAttacker))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_NUMBING_SPINES);
             gBattlerTarget = moveEndAttacker;
@@ -14704,7 +14737,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsBattlerAlive(battler)
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
         {
-            bool32 canHeal = !BATTLER_MAX_HP(battler) && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK);
+            bool32 canHeal = !BATTLER_MAX_HP(battler) && !IsBattlerHealBlocked(battler);
             bool32 canCureStatus = gBattleMons[battler].status1 != STATUS1_NONE;
 
             if (canHeal || canCureStatus)
@@ -15198,7 +15231,7 @@ if (triggeringAbility != ABILITY_NONE)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsBattlerAlive(battler)
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_SILVER_LINING);
             gBattlerAbility = battler;
@@ -18137,7 +18170,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsBattlerAlive(battler)
          && IsFinalMultiHitStrike())
         {
-            bool32 canHeal = !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+            bool32 canHeal = !IsBattlerHealBlocked(battler)
                           && gBattleMons[battler].hp < gBattleMons[battler].maxHP;
             bool32 canRaiseSpeed = (gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
                                 && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN);
@@ -18366,7 +18399,7 @@ if (triggeringAbility != ABILITY_NONE)
             bool32 hazardsCleared = ClearSideEntryHazards(GetBattlerSide(battler));
             bool32 healed = FALSE;
 
-            if (!(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+            if (!IsBattlerHealBlocked(battler)
              && gBattleMons[battler].hp < gBattleMons[battler].maxHP)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
@@ -18535,7 +18568,7 @@ if (triggeringAbility != ABILITY_NONE)
          && TARGET_TURN_DAMAGED
          && IsFinalMultiHitStrike()
          && gBattleMoves[move].bitingMove
-         && !(gStatuses3[gBattlerTarget] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(gBattlerTarget))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_RIPJAW);
             gStatuses3[gBattlerTarget] |= STATUS3_HEAL_BLOCK;
@@ -19143,7 +19176,7 @@ if (triggeringAbility != ABILITY_NONE)
          && gBattleMoves[move].punchingMove
          && (gBattleMons[battler].status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON))
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
 
@@ -19164,7 +19197,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsMoveMakingContact(move, battler)
          && GetBattlerTurnOrderNum(battler) < GetBattlerTurnOrderNum(gBattlerTarget)
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 3;
 
@@ -19185,7 +19218,7 @@ if (triggeringAbility != ABILITY_NONE)
          && moveType == TYPE_FLYING
          && (gBattleMons[battler].hp * 2) < gBattleMons[battler].maxHP
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
 
@@ -19205,7 +19238,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsFinalMultiHitStrike()
          && gBattleMoves[move].soundMove
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg;
 
@@ -19231,7 +19264,7 @@ if (triggeringAbility != ABILITY_NONE)
          && gBattleMoves[move].split != SPLIT_STATUS
          && (gBattleMons[gBattlerTarget].status2 & STATUS2_FORESIGHT)
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
 
@@ -19252,7 +19285,7 @@ if (triggeringAbility != ABILITY_NONE)
          && IsFinalMultiHitStrike()
          && gBattleMoves[move].slicingMove
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
 
@@ -19278,7 +19311,7 @@ if (triggeringAbility != ABILITY_NONE)
                 gDisableStructs[battler].uniquePersistentStateActive = FALSE;
 
                 if (!BATTLER_MAX_HP(battler)
-                 && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+                 && !IsBattlerHealBlocked(battler))
                 {
                 s32 drainedHp = gSpecialStatuses[gBattlerTarget].shellBellDmg / 4;
 
@@ -19305,7 +19338,7 @@ if (triggeringAbility != ABILITY_NONE)
 
             if (IsBattlerAlive(battler)
              && !BATTLER_MAX_HP(battler)
-             && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(battler))
             {
                 s32 drainedHp = gBattleScripting.savedDmg / 2;
 
@@ -19507,7 +19540,7 @@ if (triggeringAbility != ABILITY_NONE)
          && DidMoveSucceedForMoveEndEffects(battler)
          && IsFinalMultiHitStrike()
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 healAmount = max(1, GetNonDynamaxMaxHP(battler) / 4);
 
@@ -19536,7 +19569,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 healAmount = gBattleMons[battler].maxHP / 4;
 
@@ -19558,7 +19591,7 @@ if (triggeringAbility != ABILITY_NONE)
          && gBattleMoves[move].slicingMove
          && gBattleMons[battler].hp <= (gBattleMons[battler].maxHP / 2)
          && !BATTLER_MAX_HP(battler)
-         && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         && !IsBattlerHealBlocked(battler))
         {
             s32 healAmount = gBattleMons[battler].maxHP / 8;
 
@@ -20705,7 +20738,7 @@ bool32 HasEnoughHpToEatBerry(u32 battler, u32 hpFraction, u32 itemId)
 static u8 HealConfuseBerry(u32 battler, u32 itemId, u32 flavorId, bool32 end2)
 {
     if (HasEnoughHpToEatBerry(battler, (B_CONFUSE_BERRIES_HEAL >= GEN_7 ? 4 : 2), itemId)
-     && (B_HEAL_BLOCKING < GEN_5 || !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)))
+     && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler)))
     {
         PREPARE_FLAVOR_BUFFER(gBattleTextBuff1, flavorId);
 
@@ -20846,7 +20879,7 @@ static u8 TrySetEnigmaBerry(u32 battler)
      && !DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove)
      && ((TARGET_TURN_DAMAGED && gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE) || gBattleScripting.overrideBerryRequirements)
      && !(gBattleScripting.overrideBerryRequirements && gBattleMons[battler].hp == gBattleMons[battler].maxHP)
-     && (B_HEAL_BLOCKING < GEN_5 || !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)))
+     && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler)))
     {
         gBattleScripting.battler = battler;
         gBattleMoveDamage = (gBattleMons[battler].maxHP * 25 / 100) * -1;
@@ -21012,7 +21045,7 @@ static u32 ItemRestorePp(u32 battler, u32 itemId, bool32 execute)
 static u8 ItemHealHp(u32 battler, u32 itemId, bool32 end2, bool32 percentHeal)
 {
     if (!(gBattleScripting.overrideBerryRequirements && gBattleMons[battler].hp == gBattleMons[battler].maxHP)
-        && (B_HEAL_BLOCKING < GEN_5 || !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler))
         && HasEnoughHpToEatBerry(battler, 2, itemId))
     {
         if (percentHeal)
@@ -21057,7 +21090,7 @@ static u8 RottenBerryEffect(u32 battler, u32 itemId, bool32 end2)
      || IS_BATTLER_OF_TYPE(battler, TYPE_POISON)
      || IS_BATTLER_OF_TYPE(battler, TYPE_BUG))
     {
-        if (B_HEAL_BLOCKING < GEN_5 || !(gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+        if (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler))
         {
             gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 3;
             if (gBattleMoveDamage == 0)
@@ -21884,7 +21917,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             case HOLD_EFFECT_LEFTOVERS:
             LEFTOVERS:
                 if (gBattleMons[battler].hp < gBattleMons[battler].maxHP && !moveTurn
-                  && (B_HEAL_BLOCKING < GEN_5 || !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)))
+                  && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler)))
                 {
                     gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
                     if (gBattleMoveDamage == 0)
@@ -22205,7 +22238,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 && gBattlerAttacker != gBattlerTarget
                 && gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP
                 && gBattleMons[gBattlerAttacker].hp != 0
-                && (B_HEAL_BLOCKING < GEN_5 || !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)))
+                && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler)))
             {
                 gLastUsedItem = atkItem;
                 gPotentialItemEffectBattler = gBattlerAttacker;
@@ -27479,7 +27512,7 @@ bool32 CanTargetBattler(u32 battlerAtk, u32 battlerDef, u16 move)
 {
     if (gBattleMoves[move].effect == EFFECT_HIT_ENEMY_HEAL_ALLY
       && GetBattlerSide(battlerAtk) == GetBattlerSide(battlerDef)
-      && gStatuses3[battlerAtk] & STATUS3_HEAL_BLOCK)
+      && IsBattlerHealBlocked(battlerAtk))
         return FALSE;   // Pokémon affected by Heal Block cannot target allies with Pollen Puff
     if ((IsDynamaxed(battlerAtk) || gBattleStruct->dynamax.playerSelect)
       && GetBattlerSide(battlerAtk) == GetBattlerSide(battlerDef))

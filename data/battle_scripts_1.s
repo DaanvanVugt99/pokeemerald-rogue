@@ -10103,6 +10103,10 @@ BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return
 
+BattleScript_BogBodyActivates::
+	call BattleScript_AbilityPopUp
+	end3
+
 BattleScript_EmeraldAccordActivates::
 	showabilitypopup BS_ATTACKER
 	pause B_WAIT_TIME_LONG
@@ -12650,6 +12654,15 @@ BattleScript_StormCommandActivates::
 	waitmessage B_WAIT_TIME_LONG
 	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
 	call BattleScript_ActivateTerrainEffects
+	return
+
+BattleScript_SandCommandActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNSXWHIPPEDUPSANDSTORM
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_SANDSTORM_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
 	return
 
 BattleScript_RoyalGardenActivates::

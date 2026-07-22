@@ -38,6 +38,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Gave every Minior Meteor colour Blast Shield, which blocks damaging moves
+  with at least 120 listed BP, and every Core colour Flak Shield, which blocks
+  damaging moves with at most 40 listed BP.
+- Gave both Landorus forms Sand Command, which starts Sandstorm after Landorus
+  knocks out a foe while backed by another Flying ally and Ground ally.
 - Gave Rayquaza Emerald Accord, a once-per-battle switch-in ability that restores
   weather, terrain, rooms, side conditions, and active stat changes to neutral.
 - Made the Roguelocke Trial require nicknames for every acquired Pokémon while
@@ -65,10 +70,12 @@ Format follows Keep a Changelog loosely:
   Speed after transforming once per battle before adopting the target's unique
   ability.
 - Expanded generated Unique Pokemon from a 103-entry unique-ability pool to
-  559 audited battle-safe abilities, including Starmobile, and added guaranteed
+  563 audited battle-safe abilities, including Starmobile, and added guaranteed
   synergy moves for abilities that depend on particular moves or move families,
   while retaining both random moves when the species already learns the pairing;
   Final Step now guarantees a sound move instead of a contact move.
+- Gave Paldean Wooper and Clodsire Bog Body, which prevents opposing Pokemon
+  from restoring HP while either is active.
 - Repacked generated Unique Pokemon IDs for the larger ability pool and bumped
   the development save version; existing development saves require a restart.
 - Reworked Alolan Ninetales's Lanakila Law so Encore and Disable gain priority

@@ -877,6 +877,11 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
               && AI_IsOpposingSingularityAirspaceActive(battlerAtk))
                 RETURN_SCORE_MINUS(10);
 
+            if (gBattleMoves[move].power != 0
+             && ((gBattleMoves[move].power >= BLAST_SHIELD_MIN_POWER && AI_HasAbility(battlerDef, ABILITY_BLAST_SHIELD))
+              || (gBattleMoves[move].power <= FLAK_SHIELD_MAX_POWER && AI_HasAbility(battlerDef, ABILITY_FLAK_SHIELD))))
+                RETURN_SCORE_MINUS(20);
+
             switch (aiData->abilities[battlerDef])
             {
             case ABILITY_MAGIC_GUARD:
@@ -1050,7 +1055,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
     if (gDisableStructs[battlerAtk].throatChopTimer && gBattleMoves[move].soundMove)
         return 0; // Can't even select move at all
     // heal block check
-    if (gStatuses3[battlerAtk] & STATUS3_HEAL_BLOCK && IsHealBlockPreventingMove(battlerAtk, move))
+    if (IsHealBlockPreventingMove(battlerAtk, move))
         return 0; // Can't even select heal blocked move
 
     // primal weather check
@@ -2569,7 +2574,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case EFFECT_HIT_ENEMY_HEAL_ALLY:    // pollen puff
             if (IS_TARGETING_PARTNER(battlerAtk, battlerDef))
             {
-                if (gStatuses3[battlerDef] & STATUS3_HEAL_BLOCK)
+                if (IsBattlerHealBlocked(battlerDef))
                     return 0;
                 if (AtMaxHp(battlerDef))
                     ADJUST_SCORE(-10);
@@ -5345,7 +5350,7 @@ static s32 AI_HPAware(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         if ((effect == EFFECT_HEAL_PULSE || effect == EFFECT_HIT_ENEMY_HEAL_ALLY)
          || AI_BattlerHasMoveAbsorbingAbility(BATTLE_PARTNER(battlerAtk), moveType))
         {
-            if (gStatuses3[battlerDef] & STATUS3_HEAL_BLOCK)
+            if (IsBattlerHealBlocked(battlerDef))
                 return 0;
 
             if (CanTargetFaintAi(FOE(battlerAtk), BATTLE_PARTNER(battlerAtk))

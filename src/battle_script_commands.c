@@ -5256,16 +5256,21 @@ static void Cmd_jumpifstatus3condition(void)
     CMD_ARGS(u8 battler, u32 flags, bool8 jumpIfTrue, const u8 *jumpInstr);
 
     u32 battler = GetBattlerForBattleScript(cmd->battler);
+    u32 statuses = gStatuses3[battler] & cmd->flags;
+
+    if ((cmd->flags & STATUS3_HEAL_BLOCK) && IsBattlerHealBlocked(battler))
+        statuses |= STATUS3_HEAL_BLOCK;
+
     if (cmd->jumpIfTrue)
     {
-        if ((gStatuses3[battler] & cmd->flags) != 0)
+        if (statuses != 0)
             gBattlescriptCurrInstr = cmd->nextInstr;
         else
             gBattlescriptCurrInstr = cmd->jumpInstr;
     }
     else
     {
-        if ((gStatuses3[battler] & cmd->flags) != 0)
+        if (statuses != 0)
             gBattlescriptCurrInstr = cmd->jumpInstr;
         else
             gBattlescriptCurrInstr = cmd->nextInstr;
@@ -7207,7 +7212,7 @@ static void Cmd_moveend(void)
                 && !AttackerIgnoresRecoil()
                 && !HasBattlerAbility(gBattlerAttacker, ABILITY_ROCK_HEAD)
                 && HasBattlerAbility(gBattlerAttacker, ABILITY_WARPATH)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK)
+                && !IsBattlerHealBlocked(gBattlerAttacker)
                 && gBattleMons[gBattlerAttacker].hp < gBattleMons[gBattlerAttacker].maxHP)
             {
                 SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_WARPATH);
@@ -7225,7 +7230,7 @@ static void Cmd_moveend(void)
                 && !IS_MOVE_STATUS(gCurrentMove)
                 && TARGET_TURN_DAMAGED
                 && gBattleScripting.savedDmg != 0
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK)
+                && !IsBattlerHealBlocked(gBattlerAttacker)
                 && gBattleMons[gBattlerAttacker].hp < gBattleMons[gBattlerAttacker].maxHP)
             {
                 SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_DEATHRATTLE);
@@ -7244,7 +7249,7 @@ static void Cmd_moveend(void)
                 && TARGET_TURN_DAMAGED
                 && gBattleScripting.savedDmg != 0
                 && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK)
+                && !IsBattlerHealBlocked(gBattlerAttacker)
                 && gBattleMons[gBattlerAttacker].hp < gBattleMons[gBattlerAttacker].maxHP)
             {
                 SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_OLIVE_GROVE);
@@ -8311,7 +8316,7 @@ static void Cmd_moveend(void)
              && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
              && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]))
             {
-                bool32 canHeal = !BATTLER_MAX_HP(gBattlerAttacker) && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK);
+                bool32 canHeal = !BATTLER_MAX_HP(gBattlerAttacker) && !IsBattlerHealBlocked(gBattlerAttacker);
                 bool32 canCureStatus = gBattleMons[gBattlerAttacker].status1 != STATUS1_NONE;
 
                 if (canHeal || canCureStatus)
@@ -8346,7 +8351,7 @@ static void Cmd_moveend(void)
              && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
              && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
              && !BATTLER_MAX_HP(gBattlerAttacker)
-             && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK))
+             && !IsBattlerHealBlocked(gBattlerAttacker))
             {
                 SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_MOONGLASS);
                 gBattleMoveDamage = -(GetNonDynamaxMaxHP(gBattlerAttacker) / 8);
@@ -8597,7 +8602,7 @@ static void Cmd_sethealblock(void)
 {
     CMD_ARGS(const u8 *failInstr);
 
-    if (gStatuses3[gBattlerTarget] & STATUS3_HEAL_BLOCK)
+    if (IsBattlerHealBlocked(gBattlerTarget))
     {
         gBattlescriptCurrInstr = cmd->failInstr;
     }
@@ -10416,7 +10421,7 @@ static bool32 TryCheekPouch(u32 battler, u32 itemId)
 
     if (ItemId_GetPocket(itemId) == POCKET_BERRIES
         && (hasCheekPouch || hasWinterStash)
-        && !(gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+        && !IsBattlerHealBlocked(battler)
         && gBattleStruct->ateBerry[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]
         && !BATTLER_MAX_HP(battler))
     {
@@ -11858,7 +11863,8 @@ static void Cmd_various(void)
     case VARIOUS_CHECK_IF_GRASSY_TERRAIN_HEALS:
     {
         VARIOUS_ARGS(const u8 *failInstr);
-        if ((gStatuses3[battler] & (STATUS3_SEMI_INVULNERABLE | STATUS3_HEAL_BLOCK))
+        if ((gStatuses3[battler] & STATUS3_SEMI_INVULNERABLE)
+            || IsBattlerHealBlocked(battler)
             || BATTLER_MAX_HP(battler)
             || !gBattleMons[battler].hp
             || !(IsBattlerGrounded(battler)))
@@ -11881,7 +11887,7 @@ static void Cmd_various(void)
         VARIOUS_ARGS(const u8 *failInstr);
         if (!IsBattlerAlive(battler)
          || BATTLER_MAX_HP(battler)
-         || (gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         || IsBattlerHealBlocked(battler))
         {
             gBattlescriptCurrInstr = cmd->failInstr;
         }
@@ -11901,7 +11907,7 @@ static void Cmd_various(void)
         VARIOUS_ARGS(const u8 *failInstr);
         if (!IsBattlerAlive(battler)
          || BATTLER_MAX_HP(battler)
-         || (gStatuses3[battler] & STATUS3_HEAL_BLOCK))
+         || IsBattlerHealBlocked(battler))
         {
             gBattlescriptCurrInstr = cmd->failInstr;
         }
@@ -12688,6 +12694,21 @@ static void Cmd_various(void)
             gBattlerAttacker = gBattlerAbility = battler;
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_StormCommandActivates;
+            return;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SAND_COMMAND)
+         && battler == gBattlerAttacker
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && CountPartyMonsOfType(battler, TYPE_FLYING, TRUE) > 0
+         && CountPartyMonsOfType(battler, TYPE_GROUND, TRUE) > 0
+         && TryChangeBattleWeather(battler, ENUM_WEATHER_SANDSTORM, TRUE))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SAND_COMMAND);
+            gBattlerAttacker = gBattlerAbility = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_SandCommandActivates;
             return;
         }
 
@@ -16208,7 +16229,7 @@ static void Cmd_weatherdamage(void)
             if (ability == ABILITY_ICE_BODY
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !BATTLER_MAX_HP(gBattlerAttacker)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK))
+                && !IsBattlerHealBlocked(gBattlerAttacker))
             {
                 gBattlerAbility = gBattlerAttacker;
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
@@ -16234,7 +16255,7 @@ static void Cmd_weatherdamage(void)
             if (ability == ABILITY_ICE_BODY
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !BATTLER_MAX_HP(gBattlerAttacker)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK))
+                && !IsBattlerHealBlocked(gBattlerAttacker))
             {
                 gBattlerAbility = gBattlerAttacker;
                 gBattleMoveDamage = gBattleMons[gBattlerAttacker].maxHP / 16;
@@ -16255,7 +16276,7 @@ static void Cmd_weatherdamage(void)
             else if (IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON)
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !BATTLER_MAX_HP(gBattlerAttacker)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_HEAL_BLOCK))
+                && !IsBattlerHealBlocked(gBattlerAttacker))
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
                 if (gBattleMoveDamage == 0)

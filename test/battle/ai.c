@@ -91,6 +91,17 @@ AI_SINGLE_BATTLE_TEST("AI does not use Rest if it has unique Insomnia")
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI does not choose healing moves against Bog Body")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_CLODSIRE) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(40); MaxHP(120); Moves(MOVE_RECOVER, MOVE_TACKLE); }
+    } WHEN {
+        TURN { EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI does not use Power Trick with Ancient Idol")
 {
     GIVEN {
@@ -213,6 +224,28 @@ AI_SINGLE_BATTLE_TEST("AI scores priority and switching moves below safe moves a
         OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(blockedMove, MOVE_TACKLE); }
     } WHEN {
         TURN { SCORE_GT(opponent, MOVE_TACKLE, blockedMove); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI avoids moves blocked by Blast Shield and Flak Shield")
+{
+    u16 shieldAbility;
+    u16 blockedMove;
+    u16 safeMove;
+
+    PARAMETRIZE { shieldAbility = ABILITY_BLAST_SHIELD; blockedMove = MOVE_CLOSE_COMBAT; safeMove = MOVE_PSYCHIC; }
+    PARAMETRIZE { shieldAbility = ABILITY_FLAK_SHIELD; blockedMove = MOVE_TACKLE; safeMove = MOVE_SWIFT; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_CLOSE_COMBAT].power == BLAST_SHIELD_MIN_POWER);
+        ASSUME(gBattleMoves[MOVE_PSYCHIC].power < BLAST_SHIELD_MIN_POWER);
+        ASSUME(gBattleMoves[MOVE_TACKLE].power == FLAK_SHIELD_MAX_POWER);
+        ASSUME(gBattleMoves[MOVE_SWIFT].power > FLAK_SHIELD_MAX_POWER);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { UniqueAbility(shieldAbility); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(blockedMove, safeMove); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, safeMove, blockedMove); }
     }
 }
 
