@@ -37,7 +37,7 @@ SINGLE_BATTLE_TEST("Dry Skin increases damage taken from Fire-type moves by 25%"
     GIVEN {
         ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
         ASSUME(gBattleMoves[MOVE_EMBER].power == 40);
-        ASSUME(gSpeciesInfo[SPECIES_PARASECT].types[0] == TYPE_BUG);
+        ASSUME(gSpeciesInfo[SPECIES_PARASECT].types[0] == TYPE_GHOST);
         ASSUME(gSpeciesInfo[SPECIES_PARASECT].types[1] == TYPE_GRASS);
         ASSUME(gSpeciesInfo[SPECIES_WOBBUFFET].types[0] == TYPE_PSYCHIC);
         ASSUME(gSpeciesInfo[SPECIES_WOBBUFFET].types[1] == TYPE_PSYCHIC);
@@ -51,9 +51,9 @@ SINGLE_BATTLE_TEST("Dry Skin increases damage taken from Fire-type moves by 25%"
     } FINALLY {
         // Due to numerics related to rounding on each applied multiplier,
         // the ability effect doesn't manifest as a 25% damage increase, but as a ~31% damage increase in this case.
-        // Values obtained from https://calc.pokemonshowdown.com (Neutral nature and 0 IVs on both sides)
-        EXPECT_EQ(results[0].damage, 52);
-        EXPECT_EQ(results[1].damage, 68);
+        // Parasect's Ghost/Grass typing halves the original Bug/Grass fixture's Fire damage.
+        EXPECT_EQ(results[0].damage, 26);
+        EXPECT_EQ(results[1].damage, 34);
     }
 }
 

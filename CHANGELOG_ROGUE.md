@@ -40,6 +40,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Updated the typings of Goodra, Golduck, Electivire, Midnight Form Lycanroc,
+  Florges, Dodrio, Parasect, and Mega Absol to better match their designs.
 - Reworked generated Unique Pokémon movesets so exotic moves are unavailable
   across the full evolution family, changed typings independently select from
   four typed options, and Legendary move-dependent abilities always receive a

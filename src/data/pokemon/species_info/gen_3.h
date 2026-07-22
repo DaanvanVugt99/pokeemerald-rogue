@@ -6461,7 +6461,6 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
 
 #if P_FAMILY_ABSOL
 #define ABSOL_MISC_INFO                                     \
-        .types = { TYPE_DARK, TYPE_DARK },                  \
         .catchRate = 30,                                    \
         .evYield_Attack = 2,                                \
         .genderRatio = PERCENT_FEMALE(50),                  \
@@ -6487,6 +6486,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
     [SPECIES_ABSOL] =
     {
         ABSOL_MISC_INFO,
+        .types = { TYPE_DARK, TYPE_DARK },
         .baseHP        = 65,
         .baseAttack    = 130,
         .baseDefense   = 60,
@@ -6518,6 +6518,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
     [SPECIES_ABSOL_MEGA] =
     {
         ABSOL_MISC_INFO,
+        .types = { TYPE_DARK, TYPE_FAIRY },
         .baseHP        = 65,
         .baseAttack    = 150,
         .baseDefense   = 60,

@@ -1251,7 +1251,6 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
     },
 
 #define LYCANROC_MISC_INFO                                  \
-        .types = { TYPE_ROCK, TYPE_ROCK },                  \
         .catchRate = 90,                                    \
         .expYield = 170,                                    \
         .evYield_Attack = 2,                                \
@@ -1274,6 +1273,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
     [SPECIES_LYCANROC_MIDDAY] =
     {
         LYCANROC_MISC_INFO,
+        .types = { TYPE_ROCK, TYPE_ROCK },
         .baseHP        = 75,
         .baseAttack    = 115,
         .baseDefense   = 65,
@@ -1304,6 +1304,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
     [SPECIES_LYCANROC_MIDNIGHT] =
     {
         LYCANROC_MISC_INFO,
+        .types = { TYPE_ROCK, TYPE_DARK },
         .baseHP        = 85,
         .baseAttack    = 115,
         .baseDefense   = 75,
@@ -1334,6 +1335,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
     [SPECIES_LYCANROC_DUSK] =
     {
         LYCANROC_MISC_INFO,
+        .types = { TYPE_ROCK, TYPE_ROCK },
         .baseHP        = 75,
         .baseAttack    = 117,
         .baseDefense   = 65,
