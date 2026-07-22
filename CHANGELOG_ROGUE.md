@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Shortened Charm and Dark Deal Curse descriptions to fit their item-detail
+  panel without clipping.
+- Made ability-called priority moves respect Psychic Terrain, Quick Guard, and
+  abilities that protect against opposing priority moves.
 - Made Toxisphere block secondary stat reductions during Acid Rain, consistent
   with its description and its handling of other additional move effects.
 - Restored unique-ability inheritance for costume and cap Pikachu, Spiky-eared
@@ -40,6 +44,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Sand Stream and Snow Warning now make their holders immune to Sandstorm and
+  Hail damage, respectively.
 - Updated the typings of Goodra, Golduck, Electivire, Midnight Form Lycanroc,
   Florges, Dodrio, Parasect, and Mega Absol to better match their designs.
 - Reworked generated Unique Pokémon movesets so exotic moves are unavailable

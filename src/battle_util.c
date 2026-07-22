@@ -4670,6 +4670,19 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
 static bool32 IsSwitchingMove(u32 move);
 static u32 GetSingularityAirspaceBattler(u32 battler);
 
+static s8 GetExecutingMovePriority(u32 battler)
+{
+    // Ability-called moves do not occupy the battler's chosen move slot.
+    // Priority protection must inspect the move that is actually executing.
+    if (gBattleStruct->isAtkCancelerForCalledMove)
+    {
+        gProtectStructs[battler].pranksterElevated = FALSE;
+        return GetMovePriority(battler, gCurrentMove);
+    }
+
+    return GetChosenMovePriority(battler);
+}
+
 // After Protean Activation.
 u8 AtkCanceller_UnableToUseMove2(void)
 {
@@ -4683,7 +4696,7 @@ u8 AtkCanceller_UnableToUseMove2(void)
             gBattleStruct->atkCancellerTracker++;
         case CANCELLER_PSYCHIC_TERRAIN:
             if (IsBattlerTerrainAffected(gBattlerTarget, STATUS_FIELD_PSYCHIC_TERRAIN)
-                && GetChosenMovePriority(gBattlerAttacker) > 0
+                && GetExecutingMovePriority(gBattlerAttacker) > 0
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_ALL_BATTLERS
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_OPPONENTS_FIELD
                 && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gBattlerTarget))
@@ -4698,7 +4711,7 @@ u8 AtkCanceller_UnableToUseMove2(void)
         case CANCELLER_GRIDLOCK:
             if (HasBattlerAbility(gBattlerTarget, ABILITY_GRIDLOCK)
                 && IsBattlerTerrainAffected(gBattlerTarget, STATUS_FIELD_ELECTRIC_TERRAIN)
-                && GetChosenMovePriority(gBattlerAttacker) > 0
+                && GetExecutingMovePriority(gBattlerAttacker) > 0
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_ALL_BATTLERS
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_OPPONENTS_FIELD
                 && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gBattlerTarget))
@@ -4718,7 +4731,7 @@ u8 AtkCanceller_UnableToUseMove2(void)
                 u32 airspaceBattler = GetSingularityAirspaceBattler(gBattlerAttacker);
 
                 if (airspaceBattler != MAX_BATTLERS_COUNT
-                 && (GetChosenMovePriority(gBattlerAttacker) > 0 || IsSwitchingMove(gCurrentMove)))
+                 && (GetExecutingMovePriority(gBattlerAttacker) > 0 || IsSwitchingMove(gCurrentMove)))
                 {
                     CancelMultiTurnMoves(gBattlerAttacker);
                     SetBattlerTriggeredAbility(airspaceBattler, ABILITY_SINGULARITY_AIRSPACE);
@@ -4732,7 +4745,7 @@ u8 AtkCanceller_UnableToUseMove2(void)
             gBattleStruct->atkCancellerTracker++;
             break;
         case CANCELLER_AUTHORITY:
-            if (GetChosenMovePriority(gBattlerAttacker) > 0
+            if (GetExecutingMovePriority(gBattlerAttacker) > 0
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_ALL_BATTLERS
                 && gBattleMoves[gCurrentMove].target != MOVE_TARGET_OPPONENTS_FIELD
                 && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gBattlerTarget))
@@ -13110,7 +13123,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                    || HasBattlerAbility(battler, ABILITY_QUEENLY_MAJESTY)
                    || HasBattlerAbility(battler, ABILITY_ARMOR_TAIL)
                    || (HasBattlerAbility(battler, ABILITY_ROYAL_STORM) && (gBattleWeather & B_WEATHER_RAIN)))
-                  && GetChosenMovePriority(gBattlerAttacker) > 0
+                  && GetExecutingMovePriority(gBattlerAttacker) > 0
                   && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
             {
                 if (HasBattlerAbility(battler, ABILITY_DAZZLING))
@@ -13126,7 +13139,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlescriptCurrInstr = BattleScript_DazzlingProtected;
                 effect = 1;
             }
-            else if (GetChosenMovePriority(gBattlerAttacker) > 0
+            else if (GetExecutingMovePriority(gBattlerAttacker) > 0
                      && BlocksPrankster(move, gBattlerAttacker, gBattlerTarget, TRUE)
                      && !(IS_MOVE_STATUS(move) && (targetAbility == ABILITY_MAGIC_BOUNCE
                                                 || HasBattlerAbility(gBattlerTarget, ABILITY_OMNISENSE)
@@ -23019,7 +23032,7 @@ static bool32 IsMoveBlockedByProtectLike(u32 battler, u32 move)
     else if (gProtectStructs[battler].maxGuarded)
         return TRUE;
     else if (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_QUICK_GUARD
-             && GetChosenMovePriority(gBattlerAttacker) > 0)
+             && GetExecutingMovePriority(gBattlerAttacker) > 0)
         return TRUE;
     else if (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_CRAFTY_SHIELD
       && IS_MOVE_STATUS(move))

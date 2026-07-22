@@ -64,3 +64,16 @@ SINGLE_BATTLE_TEST("Sandstorm damage does not hurt Ground, Rock, and Steel-type 
         }
     }
 }
+
+SINGLE_BATTLE_TEST("Sand Stream makes its holder immune to sandstorm damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SAND_STREAM); }
+    } WHEN {
+        TURN {}
+    } SCENE {
+        MESSAGE("Wobbuffet is buffeted by the sandstorm!");
+        NOT MESSAGE("Foe Wobbuffet is buffeted by the sandstorm!");
+    }
+}

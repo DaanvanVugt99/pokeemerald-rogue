@@ -29,3 +29,16 @@ SINGLE_BATTLE_TEST("Hail damage does not affect Ice-type Pokémon")
         NOT MESSAGE("Foe Glalie is pelted by HAIL!");
     }
 }
+
+SINGLE_BATTLE_TEST("Snow Warning makes its holder immune to hail damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SNOW_WARNING); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HAIL); }
+    } SCENE {
+        MESSAGE("Wobbuffet is pelted by HAIL!");
+        NOT MESSAGE("Foe Wobbuffet is pelted by HAIL!");
+    }
+}

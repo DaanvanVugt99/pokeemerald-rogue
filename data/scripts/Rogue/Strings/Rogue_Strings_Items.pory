@@ -208,11 +208,11 @@ text gItemDesc_CritCurse
 
 text gItemDesc_ShedSkinCharm
 {
-    format("Friendly Pokémon have a 50% chance to cure status each turn.")
+    format("Each turn, friendly Pokémon have a 50% status cure chance.")
 }
 text gItemDesc_ShedSkinCurse
 {
-    format("Opponent Pokémon have a 50% chance to cure status each turn.")
+    format("Each turn, opposing Pokémon have a 50% status cure chance.")
 }
 
 text gItemDesc_WildIVCharm
@@ -235,11 +235,11 @@ text gItemDesc_CatchingCurse
 
 text gItemDesc_GraceCharm
 {
-    format("Friendly moves have 2× secondary-effect chances.")
+    format("Friendly moves' added effects are twice as likely.")
 }
 text gItemDesc_GraceCurse
 {
-    format("Opponent moves have 2× secondary-effect chances.")
+    format("Opponent moves' added effects are twice as likely.")
 }
 
 text gItemDesc_WildCharm
@@ -262,11 +262,11 @@ text gItemDesc_PriorityCurse
 
 text gItemDesc_EndureCharm
 {
-    format("Friendly Pokémon at full HP always endure lethal damage.")
+    format("Friendly Pokémon at full HP endure lethal damage.")
 }
 text gItemDesc_EndureCurse
 {
-    format("Opponent Pokémon at full HP always endure lethal damage.")
+    format("Opponent Pokémon at full HP endure lethal damage.")
 }
 
 text gItemDesc_TormentCharm
@@ -280,11 +280,11 @@ text gItemDesc_TormentCurse
 
 text gItemDesc_PressureCharm
 {
-    format("Opponent Pokémon consume 2 additional PP per move.")
+    format("Opponent Pokémon spend 2 extra PP per move.")
 }
 text gItemDesc_PressureCurse
 {
-    format("Friendly Pokémon consume 2 additional PP per move.")
+    format("Friendly Pokémon spend 2 extra PP per move.")
 }
 
 text gItemDesc_UnawareCharm
@@ -339,11 +339,11 @@ text gItemDesc_SkillCharm
 }
 text gItemDesc_ReachCharm
 {
-    format("Contact moves no longer make contact and deal 20% more damage.")
+    format("Contact moves lose contact and deal 20% more damage.")
 }
 text gItemDesc_AccuracyCharm
 {
-    format("Friendly moves cannot miss, except one-hit knockout moves.")
+    format("Friendly non-OHKO moves cannot miss.")
 }
 text gItemDesc_RecoveryCharm
 {
@@ -363,23 +363,23 @@ text gItemDesc_ConversionCharm
 }
 text gItemDesc_RetaliateCharm
 {
-    format("After an ally faints, the next friendly Pokémon sent out gains Attack and Sp. Atk.")
+    format("A fainted ally's replacement gains Attack and Sp. Atk.")
 }
 text gItemDesc_MomentumCharm
 {
-    format("After knocking out an opponent, the attacker gains Speed.")
+    format("Knocking out a foe raises the attacker's Speed.")
 }
 text gItemDesc_StandCharm
 {
-    format("The final party member gains Attack, Defense, Sp. Atk, Sp. Def, and Speed on entry.")
+    format("On entry, the final party member gains +1 to all stats.")
 }
 text gItemDesc_PrepCharm
 {
-    format("The first status move used after switching in has +1 priority.")
+    format("The first status move after entry gains +1 priority.")
 }
 text gItemDesc_ProteanCharm
 {
-    format("The first move used after switching in changes the user's type to match that move.")
+    format("First move after entry changes its user to its type.")
 }
 text gItemDesc_LevelCharm
 {
@@ -387,15 +387,15 @@ text gItemDesc_LevelCharm
 }
 text gItemDesc_RegenCharm
 {
-    format("Friendly Pokémon restore 25% of their maximum HP when switching out.")
+    format("Friendly Pokémon restore 25% HP when switching out.")
 }
 text gItemDesc_MoodyCharm
 {
-    format("At each turn's end, a random stat rises and another random stat falls.")
+    format("Each turn, one random stat rises and another falls.")
 }
 text gItemDesc_EvioliteCharm
 {
-    format("Friendly Pokémon that can evolve have 1.5× Defense and Sp. Def.")
+    format("Unevolved allies have 1.5× Defense and Sp. Def.")
 }
 
 text gItemDesc_LevelCurse
@@ -404,23 +404,23 @@ text gItemDesc_LevelCurse
 }
 text gItemDesc_TintedCurse
 {
-    format("Not-very-effective opponent moves deal normal damage instead.")
+    format("Not-very-effective opponent moves deal normal damage.")
 }
 text gItemDesc_ReachCurse
 {
-    format("Opponent contact moves no longer make contact and deal 20% more damage.")
+    format("Foe contact moves gain 20% damage and lose contact.")
 }
 text gItemDesc_AccuracyCurse
 {
-    format("Opponent moves cannot miss, except one-hit knockout moves.")
+    format("Opponent non-OHKO moves cannot miss.")
 }
 text gItemDesc_RetaliateCurse
 {
-    format("After an opponent faints, the next opposing Pokémon gains Attack and Sp. Atk.")
+    format("A fainted foe's replacement gains Attack and Sp. Atk.")
 }
 text gItemDesc_StandCurse
 {
-    format("The final opposing trainer Pokémon gains Attack, Defense, Sp. Atk, Sp. Def, and Speed on entry.")
+    format("On entry, the last foe gains +1 to all stats.")
 }
 
 text gItemDesc_PartyCurse

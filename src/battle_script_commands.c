@@ -16473,6 +16473,7 @@ static void Cmd_weatherdamage(void)
                 && ability != ABILITY_SAND_VEIL
                 && ability != ABILITY_SAND_FORCE
                 && ability != ABILITY_SAND_RUSH
+                && !HasBattlerAbility(gBattlerAttacker, ABILITY_SAND_STREAM)
                 && ability != ABILITY_OVERCOAT
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
@@ -16498,6 +16499,7 @@ static void Cmd_weatherdamage(void)
             }
             else if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_ICE)
                 && ability != ABILITY_SNOW_CLOAK
+                && !HasBattlerAbility(gBattlerAttacker, ABILITY_SNOW_WARNING)
                 && ability != ABILITY_OVERCOAT
                 && ability != ABILITY_ICE_BODY
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
