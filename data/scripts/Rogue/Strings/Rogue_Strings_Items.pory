@@ -379,7 +379,7 @@ text gItemDesc_PrepCharm
 }
 text gItemDesc_ProteanCharm
 {
-    format("First move after entry changes its user to its type.")
+    format("After entry, first move changes user's type to match.")
 }
 text gItemDesc_LevelCharm
 {
@@ -387,15 +387,15 @@ text gItemDesc_LevelCharm
 }
 text gItemDesc_RegenCharm
 {
-    format("Friendly Pokémon restore 25% HP when switching out.")
+    format("Friendly Pokémon restore 25% max HP when switching out.")
 }
 text gItemDesc_MoodyCharm
 {
-    format("Each turn, one random stat rises and another falls.")
+    format("At each turn's end, one stat rises and another falls.")
 }
 text gItemDesc_EvioliteCharm
 {
-    format("Unevolved allies have 1.5× Defense and Sp. Def.")
+    format("Allies able to evolve have 1.5× Defense and Sp. Def.")
 }
 
 text gItemDesc_LevelCurse
@@ -408,7 +408,7 @@ text gItemDesc_TintedCurse
 }
 text gItemDesc_ReachCurse
 {
-    format("Foe contact moves gain 20% damage and lose contact.")
+    format("Foe contact moves deal 20% more but lose contact.")
 }
 text gItemDesc_AccuracyCurse
 {
@@ -420,7 +420,7 @@ text gItemDesc_RetaliateCurse
 }
 text gItemDesc_StandCurse
 {
-    format("On entry, the last foe gains +1 to all stats.")
+    format("On entry, the final foe gains +1 to all stats.")
 }
 
 text gItemDesc_PartyCurse
