@@ -14,7 +14,7 @@ static u32 DynamicSilverLiningCustomMonId(void)
 {
     return OTID_FLAG_CUSTOM_MON
         | OTID_FLAG_DYNAMIC_CUSTOM_MON
-        | (ABILITY_SILVER_LINING << 14)
+        | (ABILITY_SILVER_LINING << 15)
         | (TEST_FORMAT_ORIGINAL_UNIQUE_ABILITY << 28);
 }
 

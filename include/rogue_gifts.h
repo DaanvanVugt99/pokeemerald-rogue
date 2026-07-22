@@ -6,11 +6,11 @@
 
 enum
 {
-    UNIQUE_RARITY_COMMON,       // 2 moves, or type + 1 type move
-    UNIQUE_RARITY_RARE,         // 1 move & ability, or type + type move + 2 moves
-    UNIQUE_RARITY_EPIC,         // 2 moves & ability, or type + type move + 1 move & ability
+    UNIQUE_RARITY_COMMON,       // 2 exotic moves, or a new type + 1 typed move
+    UNIQUE_RARITY_RARE,         // 1 exotic move + standard ability, or new type + typed move + 2 exotic moves
+    UNIQUE_RARITY_EPIC,         // 2 exotic moves + standard ability, or new type + typed move + 1 exotic move + standard ability
     UNIQUE_RARITY_EXOTIC,       // bespoke made mons for Quest rewards
-    UNIQUE_RARITY_LEGENDARY,    // Epic payload plus unique ability
+    UNIQUE_RARITY_LEGENDARY,    // 2 total custom moves + standard and unique abilities
 };
 
 u32 RogueGift_GetCustomMonId(struct Pokemon* mon);
@@ -31,8 +31,20 @@ u16 RogueGift_DebugGetDynamicSynergyProfileId(u16 ability);
 u16 RogueGift_DebugGetDynamicSynergyMove(u16 ability, u8 choice);
 u8 RogueGift_DebugGetDynamicSynergyPolicy(u16 ability);
 u8 RogueGift_DebugSelectDynamicSynergyChoice(u16 species, u16 ability, u16 suppliedMove);
+u16 RogueGift_DebugSelectDynamicSynergyMove(u16 species, u16 ability, u16 move1, u16 move2);
 u16 RogueGift_DebugSelectCreationSynergyMove(u16 species, u8 type, u16 suppliedMove);
+bool8 RogueGift_DebugDoesMoveMatchDynamicSynergy(u16 ability, u16 move);
+bool8 RogueGift_DebugDoesMoveMatchCreationSynergy(u8 type, u16 move);
+u16 RogueGift_DebugGetDynamicMovePoolCount(void);
+u16 RogueGift_DebugGetDynamicExoticMoveCount(void);
+u16 RogueGift_DebugGetDynamicMoveByIndex(u16 index);
+bool8 RogueGift_DebugIsMoveInDynamicPool(u16 move);
+bool8 RogueGift_DebugIsMoveNativeToEvolutionFamily(u16 species, u16 move);
+bool8 RogueGift_DebugIsStandardAbilityNativeToEvolutionFamily(u16 species, u16 ability);
+bool8 RogueGift_DebugIsUniqueAbilityNativeToEvolutionFamily(u16 species, u16 ability);
+u16 RogueGift_DebugGetEvolutionFamilyExoticMoveCount(u16 species);
 bool8 RogueGift_DebugIsSpeciesInDynamicUniquePool(u16 species);
+bool8 RogueGift_DebugAllDynamicSpeciesHaveExoticMoves(u8 requiredCount);
 #endif
 
 u8 RogueGift_GetCustomMonType(u32 id, u8 i);

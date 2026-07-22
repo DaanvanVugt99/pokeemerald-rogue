@@ -40,6 +40,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked generated Unique Pokémon movesets so exotic moves are unavailable
+  across the full evolution family, changed typings independently select from
+  four typed options, and Legendary move-dependent abilities always receive a
+  semantically compatible custom move while preserving already-valid rolls.
 - Replaced Toxisphere on Galarian Weezing with Smog Refinery, which blocks
   secondary effects from damaging moves and retaliates with Strange Steam.
 - Replaced Night Hunter on Hisuian Decidueye with Wandering Hunter, which uses
