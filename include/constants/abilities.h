@@ -780,12 +780,12 @@
 #define ABILITY_EJECT                  791
 #define ABILITY_GRIDLOCK               801
 #define ABILITY_CROWN_OF_FANGS         800
-#define ABILITY_FROZEN_BASTION         799
+#define ABILITY_FROZEN_REIGN           799
 #define ABILITY_ROYAL_ADVANCE          796
 #define ABILITY_ROYAL_GUARD            797
-#define ABILITY_SHADOWMERE             798
+#define ABILITY_DREAD_REIGN            798
 #define ABILITY_SPRING_COMMAND         814
-#define ABILITY_REGAL_AEGIS            802
+#define ABILITY_BOUNTIFUL_REIGN        802
 #define ABILITY_FALSE_APPLAUSE         815
 #define ABILITY_DIRGE                  816
 #define ABILITY_SHOWSTOPPER            817
@@ -952,12 +952,14 @@
 #define ABILITY_BOG_BODY               918
 #define ABILITY_GUIDING_FLAMES         919
 #define ABILITY_FALSE_GROUND           920
+#define ABILITY_TUNDRA_REIGN           921
+#define ABILITY_ASTRAL_REIGN           922
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
 #define BLAST_SHIELD_MIN_POWER      120
 #define FLAK_SHIELD_MAX_POWER       40
 
-#define ABILITIES_COUNT_ROGUE       921
+#define ABILITIES_COUNT_ROGUE       923
 
 #define ABILITIES_COUNT ABILITIES_COUNT_ROGUE
 

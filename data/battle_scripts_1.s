@@ -6309,6 +6309,7 @@ BattleScript_PresentHealTarget::
 
 BattleScript_AlreadyAtFullHp::
 	pause B_WAIT_TIME_SHORT
+	orhalfword gMoveResultFlags, MOVE_RESULT_FAILED
 	printstring STRINGID_PKMNHPFULL
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
@@ -11211,6 +11212,19 @@ BattleScript_WhiteCanopyActivates::
 	printstring STRINGID_SNOWWARNINGSNOW
 	waitstate
 	playanimation BS_BATTLER_0, B_ANIM_SNOW_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	printstring STRINGID_TERRAINBECOMESGRASSY
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	end3
+
+BattleScript_AstralReignActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_ECLIPSESTARTED
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_ECLIPSE_CONTINUES
 	call BattleScript_ActivateWeatherAbilities
 	printstring STRINGID_TERRAINBECOMESGRASSY
 	waitmessage B_WAIT_TIME_LONG

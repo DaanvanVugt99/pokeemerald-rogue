@@ -316,6 +316,7 @@
 #define WEATHER_DURATION_EXTENDED     12
 #define TERRAIN_DURATION_TURNS        8
 #define TERRAIN_DURATION_EXTENDED     12
+#define REIGN_FIELD_DURATION_TURNS     3
 
 // Battle Weather as enum
 #define ENUM_WEATHER_NONE                 0

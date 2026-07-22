@@ -49,8 +49,8 @@ Examples visible in the commit history include:
 - Tripwire and Crossed Wires
 - Duality, Dirty Tricks, Tumbleweed, Drop Off, Starmobile, and Carving Rush
 - Barbed Monsoon and Spring Command
-- Crown of Fangs, Gridlock, and Regal Aegis
-- Shadowmere and Frozen Bastion
+- Crown of Fangs and Gridlock
+- Bountiful, Frozen, Dread, Tundra, and Astral Reign
 - Royal Advance and Royal Guard
 - Fossil Memory
 - Raid Leader, Formation, and Snowstorm

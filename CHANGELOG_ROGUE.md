@@ -45,6 +45,9 @@ Format follows Keep a Changelog loosely:
 - Renamed Slowking's Royal Decree to Royal Rebuke, Sudowoodo's Disguised to
   Fauxliage, and Wishiwashi's Break Formation to School's Out for clearer,
   more distinct ability names.
+- Reworked Calyrex, Glastrier, Spectrier, and both Rider forms into a cohesive
+  Reign ability package whose first successful status move each battle creates
+  their individual or combined three-turn weather and terrain effects.
 - Reworked the Chikorita line's Evergreen into Flower Field, which makes status
   moves set a different random terrain after its first turn out.
 - Reworked the Totodile line's Death Roll to add Scary Face instead of Screech

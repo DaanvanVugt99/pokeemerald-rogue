@@ -506,6 +506,7 @@ extern const u8 BattleScript_MistySurgeActivates[];
 extern const u8 BattleScript_ElectricSurgeActivates[];
 extern const u8 BattleScript_InfestedSurgeActivates[];
 extern const u8 BattleScript_WhiteCanopyActivates[];
+extern const u8 BattleScript_AstralReignActivates[];
 extern const u8 BattleScript_CallAlliesActivates[];
 extern const u8 BattleScript_PlainSurgeActivates[];
 extern const u8 BattleScript_BrainSurfActivates[];

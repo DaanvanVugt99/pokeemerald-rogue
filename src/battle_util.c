@@ -18239,7 +18239,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if ((HasBattlerAbility(battler, ABILITY_SCREEN_TEST) || HasBattlerAbility(battler, ABILITY_REGAL_AEGIS))
+        if (HasBattlerAbility(battler, ABILITY_SCREEN_TEST)
          && IS_MOVE_STATUS(move)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -18247,13 +18247,10 @@ if (triggeringAbility != ABILITY_NONE)
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseSelfExtraMove(battler))
         {
-            u32 ability = HasBattlerAbility(battler, ABILITY_REGAL_AEGIS) ? ABILITY_REGAL_AEGIS : ABILITY_SCREEN_TEST;
-            u32 rng = ability == ABILITY_REGAL_AEGIS ? RNG_ROGUE_REGAL_AEGIS : RNG_ROGUE_SCREEN_TEST;
-
-            SetBattlerTriggeredAbility(battler, ability);
+            SetBattlerTriggeredAbility(battler, ABILITY_SCREEN_TEST);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
-            gCalledMove = RandomWeighted(rng, 1, 1) == 0 ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
+            gCalledMove = RandomWeighted(RNG_ROGUE_SCREEN_TEST, 1, 1) == 0 ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
@@ -25426,15 +25423,6 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         return UQ_4_12(0.5);
     }
 
-    if (HasBattlerAbility(battlerDef, ABILITY_FROZEN_BASTION)
-     && typeEffectivenessModifier >= UQ_4_12(2.0)
-     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
-    {
-        if (updateFlags)
-            RecordAbilityBattle(battlerDef, ABILITY_FROZEN_BASTION);
-        return UQ_4_12(0.65);
-    }
-
     if (HasBattlerAbility(battlerDef, ABILITY_HYDRATION)
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
         return UQ_4_12(0.8);
@@ -25923,20 +25911,6 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
             RecordAbilityBattle(battlerDef, ABILITY_NOCTURNAL);
         }
     }
-    else if (moveType == TYPE_GHOST
-     && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)
-     && DoesPartyShareTypeWithBattler(battlerDef))
-    {
-        modifier = UQ_4_12(0.0);
-        if (recordAbilities)
-        {
-            SetBattlerTriggeredAbility(battlerDef, ABILITY_SHADOWMERE);
-            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
-            gLastLandedMoves[battlerDef] = 0;
-            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
-            RecordAbilityBattle(battlerDef, ABILITY_SHADOWMERE);
-        }
-    }
     else if (moveType == TYPE_DARK
      && HasBattlerAbility(battlerDef, ABILITY_MOONVEIL)
      && !gDisableStructs[battlerDef].uniqueOncePerSwitchInUsed)
@@ -26192,20 +26166,6 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
             gLastLandedMoves[battlerDef] = 0;
             gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
             RecordAbilityBattle(battlerDef, ABILITY_NOCTURNAL);
-        }
-    }
-    else if (moveType == TYPE_GHOST
-     && HasBattlerAbility(battlerDef, ABILITY_SHADOWMERE)
-     && DoesPartyShareTypeWithBattler(battlerDef))
-    {
-        modifier = UQ_4_12(0.0);
-        if (recordAbilities)
-        {
-            gLastUsedAbility = ABILITY_SHADOWMERE;
-            gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
-            gLastLandedMoves[battlerDef] = 0;
-            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
-            RecordAbilityBattle(battlerDef, ABILITY_SHADOWMERE);
         }
     }
     else if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)

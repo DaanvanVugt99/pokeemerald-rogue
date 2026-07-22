@@ -6646,6 +6646,49 @@ static const u8 *TryCreationSetField(u32 battler, u32 moveType)
     return NULL;
 }
 
+static const u8 *TryReignSetFields(u32 battler, u32 ability)
+{
+    bool32 weatherStarted = FALSE;
+    bool32 grassyTerrainStarted = FALSE;
+
+    switch (ability)
+    {
+    case ABILITY_BOUNTIFUL_REIGN:
+        grassyTerrainStarted = TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer);
+        break;
+    case ABILITY_FROZEN_REIGN:
+        weatherStarted = TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE);
+        break;
+    case ABILITY_DREAD_REIGN:
+        weatherStarted = TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE);
+        break;
+    case ABILITY_TUNDRA_REIGN:
+        weatherStarted = TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE);
+        grassyTerrainStarted = TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer);
+        break;
+    case ABILITY_ASTRAL_REIGN:
+        weatherStarted = TryChangeBattleWeather(battler, ENUM_WEATHER_ECLIPSE, TRUE);
+        grassyTerrainStarted = TryChangeBattleTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, &gFieldTimers.terrainTimer);
+        break;
+    }
+
+    if (weatherStarted)
+        gWishFutureKnock.weatherDuration = REIGN_FIELD_DURATION_TURNS;
+    if (grassyTerrainStarted)
+        gFieldTimers.terrainTimer = REIGN_FIELD_DURATION_TURNS;
+
+    if (weatherStarted && grassyTerrainStarted)
+        return ability == ABILITY_TUNDRA_REIGN ? BattleScript_WhiteCanopyActivates : BattleScript_AstralReignActivates;
+    if (weatherStarted)
+        return ability == ABILITY_FROZEN_REIGN || ability == ABILITY_TUNDRA_REIGN
+             ? BattleScript_SnowWarningActivatesSnow
+             : BattleScript_OmenActivates;
+    if (grassyTerrainStarted)
+        return BattleScript_GrassySurgeActivates;
+
+    return NULL;
+}
+
 static void Cmd_moveend(void)
 {
     CMD_ARGS(u8 endMode, u8 endState);
@@ -8408,6 +8451,44 @@ static void Cmd_moveend(void)
                 gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
                 BattleScriptPushCursorAndCallback(BattleScript_RainDishActivates);
                 effect = TRUE;
+            }
+
+            if (!effect
+             && IsBattlerAlive(gBattlerAttacker)
+             && IS_MOVE_STATUS(gCurrentMove)
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]))
+            {
+                u32 reignAbility = ABILITY_NONE;
+                const u8 *reignScript;
+
+                if (HasBattlerAbility(gBattlerAttacker, ABILITY_BOUNTIFUL_REIGN))
+                    reignAbility = ABILITY_BOUNTIFUL_REIGN;
+                else if (HasBattlerAbility(gBattlerAttacker, ABILITY_FROZEN_REIGN))
+                    reignAbility = ABILITY_FROZEN_REIGN;
+                else if (HasBattlerAbility(gBattlerAttacker, ABILITY_DREAD_REIGN))
+                    reignAbility = ABILITY_DREAD_REIGN;
+                else if (HasBattlerAbility(gBattlerAttacker, ABILITY_TUNDRA_REIGN))
+                    reignAbility = ABILITY_TUNDRA_REIGN;
+                else if (HasBattlerAbility(gBattlerAttacker, ABILITY_ASTRAL_REIGN))
+                    reignAbility = ABILITY_ASTRAL_REIGN;
+
+                if (reignAbility != ABILITY_NONE)
+                    reignScript = TryReignSetFields(gBattlerAttacker, reignAbility);
+                else
+                    reignScript = NULL;
+
+                if (reignScript != NULL)
+                {
+                    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] |= gBitTable[gBattlerPartyIndexes[gBattlerAttacker]];
+                    SetBattlerTriggeredAbility(gBattlerAttacker, reignAbility);
+                    gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
+                    BattleScriptPushCursorAndCallback(reignScript);
+                    effect = TRUE;
+                }
             }
 
             if (!effect
