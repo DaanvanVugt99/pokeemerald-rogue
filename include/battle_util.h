@@ -277,6 +277,7 @@ u8 GetBattleMoveSplit(u32 moveId);
 bool32 CanFling(u32 battler);
 bool32 IsBoosterEnergyActive(u32 battler);
 bool32 IsTelekinesisBannedSpecies(u16 species);
+u32 GetMovePowerForShieldAbilities(u32 battlerAtk, u32 move);
 bool32 IsBattlerHealBlocked(u32 battler);
 bool32 IsHealBlockPreventingMove(u32 battler, u32 move);
 bool32 HasEnoughHpToEatBerry(u32 battler, u32 hpFraction, u32 itemId);

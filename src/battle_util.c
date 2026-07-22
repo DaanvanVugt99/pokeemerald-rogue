@@ -1848,6 +1848,25 @@ static bool32 IsGravityPreventingMove(u32 move)
     return gBattleMoves[move].gravityBanned;
 }
 
+u32 GetMovePowerForShieldAbilities(u32 battlerAtk, u32 move)
+{
+    if (gBattleStruct->zmove.active)
+        return GetZMovePower(gBattleStruct->zmove.baseMoves[battlerAtk]);
+
+    if (IsMaxMove(move))
+    {
+        u32 baseMove = gBattleMons[battlerAtk].moves[gBattleStruct->chosenMovePositions[battlerAtk]];
+        return GetMaxMovePower(baseMove);
+    }
+
+    // A listed power of 1 is the engine sentinel for variable/fixed-power moves,
+    // not an actual 1 BP move. Those moves have no fixed listed BP threshold.
+    if (gBattleMoves[move].power == 1)
+        return 0;
+
+    return gBattleMoves[move].power;
+}
+
 bool32 IsBattlerHealBlocked(u32 battler)
 {
     return (gStatuses3[battler] & STATUS3_HEAL_BLOCK)
@@ -12970,7 +12989,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         {
             u16 moveTarget = GetBattlerMoveTargetType(battler, move);
             u16 targetAbility = GetBattlerAbility(gBattlerTarget);
-            u16 movePower = gBattleMoves[move].power;
+            u16 movePower = GetMovePowerForShieldAbilities(gBattlerAttacker, move);
             u16 shieldAbility = ABILITY_NONE;
 
             if (movePower != 0)
@@ -22238,7 +22257,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 && gBattlerAttacker != gBattlerTarget
                 && gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP
                 && gBattleMons[gBattlerAttacker].hp != 0
-                && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler)))
+                && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(gBattlerAttacker)))
             {
                 gLastUsedItem = atkItem;
                 gPotentialItemEffectBattler = gBattlerAttacker;

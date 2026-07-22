@@ -877,10 +877,14 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
               && AI_IsOpposingSingularityAirspaceActive(battlerAtk))
                 RETURN_SCORE_MINUS(10);
 
-            if (gBattleMoves[move].power != 0
-             && ((gBattleMoves[move].power >= BLAST_SHIELD_MIN_POWER && AI_HasAbility(battlerDef, ABILITY_BLAST_SHIELD))
-              || (gBattleMoves[move].power <= FLAK_SHIELD_MAX_POWER && AI_HasAbility(battlerDef, ABILITY_FLAK_SHIELD))))
-                RETURN_SCORE_MINUS(20);
+            {
+                u32 movePower = GetMovePowerForShieldAbilities(battlerAtk, move);
+
+                if (movePower != 0
+                 && ((movePower >= BLAST_SHIELD_MIN_POWER && AI_HasAbility(battlerDef, ABILITY_BLAST_SHIELD))
+                  || (movePower <= FLAK_SHIELD_MAX_POWER && AI_HasAbility(battlerDef, ABILITY_FLAK_SHIELD))))
+                    RETURN_SCORE_MINUS(20);
+            }
 
             switch (aiData->abilities[battlerDef])
             {

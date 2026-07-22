@@ -48,6 +48,24 @@ SINGLE_BATTLE_TEST("Bog Body prevents opposing passive item recovery")
     }
 }
 
+SINGLE_BATTLE_TEST("Bog Body prevents opposing Shell Bell recovery")
+{
+    GIVEN {
+        PLAYER(SPECIES_CLODSIRE) { HP(1000); MaxHP(1000); Ability(ABILITY_WATER_ABSORB); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(50); MaxHP(100); Attack(300); Item(ITEM_SHELL_BELL); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_BOG_BODY);
+        NONE_OF {
+            HP_BAR(opponent);
+            MESSAGE("Foe Wobbuffet's Shell Bell restored its HP a little!");
+        }
+    } THEN {
+        EXPECT_EQ(opponent->hp, 50);
+    }
+}
+
 SINGLE_BATTLE_TEST("Bog Body stops blocking healing when its holder switches out")
 {
     GIVEN {

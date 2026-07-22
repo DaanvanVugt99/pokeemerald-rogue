@@ -111,6 +111,52 @@ SINGLE_BATTLE_TEST("Flak Shield only blocks damaging moves at or below 40 listed
     }
 }
 
+SINGLE_BATTLE_TEST("Minior shields resolve Max Move power instead of the power sentinel")
+{
+    u16 species;
+    u16 move;
+    u16 ability;
+    bool32 blocked;
+
+    PARAMETRIZE { species = SPECIES_MINIOR_METEOR_RED; move = MOVE_BOOMBURST; ability = ABILITY_BLAST_SHIELD; blocked = TRUE; }
+    PARAMETRIZE { species = SPECIES_MINIOR_CORE_RED; move = MOVE_TACKLE; ability = ABILITY_FLAK_SHIELD; blocked = FALSE; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_MAX_STRIKE].power == 1);
+        ASSUME(GetMaxMovePower(MOVE_BOOMBURST) >= BLAST_SHIELD_MIN_POWER);
+        ASSUME(GetMaxMovePower(MOVE_TACKLE) > FLAK_SHIELD_MAX_POWER);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(move); }
+        OPPONENT(species) { HP(1000); MaxHP(1000); Moves(MOVE_SPLASH); }
+    } WHEN {
+        TURN { MOVE(player, move, dynamax: TRUE); MOVE(opponent, MOVE_SPLASH); }
+    } SCENE {
+        if (blocked)
+            ABILITY_POPUP(opponent, ability);
+        else
+            NOT ABILITY_POPUP(opponent, ability);
+    } THEN {
+        if (blocked)
+            EXPECT_EQ(opponent->hp, 1000);
+        else
+            EXPECT_LT(opponent->hp, 1000);
+    }
+}
+
+SINGLE_BATTLE_TEST("Flak Shield does not treat variable move power as 1 BP")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_LOW_KICK].power == 1);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_LOW_KICK); }
+        OPPONENT(SPECIES_MINIOR_CORE_RED) { HP(1000); MaxHP(1000); Moves(MOVE_SPLASH); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_LOW_KICK); MOVE(opponent, MOVE_SPLASH); }
+    } SCENE {
+        NOT ABILITY_POPUP(opponent, ABILITY_FLAK_SHIELD);
+    } THEN {
+        EXPECT_LT(opponent->hp, 1000);
+    }
+}
+
 SINGLE_BATTLE_TEST("Mold Breaker bypasses Blast Shield and Flak Shield")
 {
     u16 species;
