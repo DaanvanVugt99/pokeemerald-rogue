@@ -31,7 +31,7 @@ SINGLE_BATTLE_TEST("Plain Terrain activates Mimicry and changes battlers to Norm
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_STUNFISK_GALARIAN) { Ability(ABILITY_MIMICRY); }
+        OPPONENT(SPECIES_STUNFISK_GALARIAN) { Ability(ABILITY_MIMICRY); UniqueAbility(ABILITY_IMPACT); }
     } WHEN {
         TURN { MOVE(player, MOVE_PLAIN_TERRAIN); }
     } SCENE {

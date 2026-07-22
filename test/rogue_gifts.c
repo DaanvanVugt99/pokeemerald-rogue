@@ -216,7 +216,7 @@ TEST("Dynamic unique ability pool includes Starmobile")
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_STARMOBILE);
 }
 
-TEST("Dynamic unique ability eligibility audit contains 563 abilities")
+TEST("Dynamic unique ability eligibility audit contains 565 abilities")
 {
     static const u16 sExpectedExclusions[] =
     {
@@ -269,14 +269,14 @@ TEST("Dynamic unique ability eligibility audit contains 563 abilities")
     u16 eligibleCount = 0;
     u16 i;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_BOG_BODY; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_FALSE_GROUND; ++ability)
     {
         if(RogueGift_IsDynamicUniqueAbilityEligible(ability))
             ++eligibleCount;
     }
 
-    EXPECT_EQ(eligibleCount, 563);
-    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 563);
+    EXPECT_EQ(eligibleCount, 565);
+    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 565);
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STRONG_WINDS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STARMOBILE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLOCK_STEP));
@@ -288,6 +288,8 @@ TEST("Dynamic unique ability eligibility audit contains 563 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_BLAST_SHIELD));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLAK_SHIELD));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_BOG_BODY));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_GUIDING_FLAMES));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FALSE_GROUND));
 
     for(i = 0; i < ARRAY_COUNT(sExpectedExclusions); ++i)
         EXPECT(!RogueGift_IsDynamicUniqueAbilityEligible(sExpectedExclusions[i]));
@@ -359,7 +361,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     u16 ability;
     u16 pairedAbilityCount = 0;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_BOG_BODY; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_FALSE_GROUND; ++ability)
     {
         u16 profileId = RogueGift_DebugGetDynamicSynergyProfileId(ability);
         u16 moves[3];
@@ -388,7 +390,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 3);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 249);
+    EXPECT_EQ(pairedAbilityCount, 253);
 }
 
 TEST("Galarian bird unique abilities use the required legendary synergy profiles")
