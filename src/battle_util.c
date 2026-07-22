@@ -5533,7 +5533,7 @@ static bool32 CanWorldPrismSetField(u32 battler, const struct WorldPrismFieldEff
     return !(gBattleWeather & (sWeatherFlagsInfo[effect->field][0] | sWeatherFlagsInfo[effect->field][1]));
 }
 
-static const u8 *TryStartFlowerFieldTerrain(u32 battler)
+static const u8 *TryStartRandomTerrain(u32 battler, u32 rng)
 {
     u32 i, count = 0;
     u8 candidates[ARRAY_COUNT(sWorldPrismFieldEffects)];
@@ -5549,11 +5549,24 @@ static const u8 *TryStartFlowerFieldTerrain(u32 battler)
     if (count == 0)
         return NULL;
 
-    effect = &sWorldPrismFieldEffects[candidates[RandomUniform(RNG_ROGUE_FLOWER_FIELD, 0, count - 1)]];
+    effect = &sWorldPrismFieldEffects[candidates[RandomUniform(rng, 0, count - 1)]];
     if (TryChangeBattleTerrain(battler, effect->field, &gFieldTimers.terrainTimer))
         return effect->script;
 
     return NULL;
+}
+
+static const u8 *TryStartFlowerFieldTerrain(u32 battler)
+{
+    return TryStartRandomTerrain(battler, RNG_ROGUE_FLOWER_FIELD);
+}
+
+static const u8 *TryStartFalseGroundTerrain(u32 battler)
+{
+    if (gFieldStatuses & STATUS_FIELD_TERRAIN_ANY)
+        return NULL;
+
+    return TryStartRandomTerrain(battler, RNG_ROGUE_FALSE_GROUND);
 }
 
 static const u8 *TryStartWorldPrismFieldEffect(u32 battler)
@@ -11682,14 +11695,24 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
-        case ABILITY_PESTILENT_DRIFT:
-            if (IsAnyOpposingBattlerStatused(battler)
-             && TryChangeBattleTerrain(battler, STATUS_FIELD_INFESTED_TERRAIN, &gFieldTimers.terrainTimer))
+        case ABILITY_SWARM_SURGE:
+            if (TryChangeBattleTerrain(battler, STATUS_FIELD_INFESTED_TERRAIN, &gFieldTimers.terrainTimer))
             {
                 BattleScriptPushCursorAndCallback(BattleScript_InfestedSurgeActivates);
                 effect++;
             }
             break;
+        case ABILITY_FALSE_GROUND:
+        {
+            const u8 *terrainScript = TryStartFalseGroundTerrain(battler);
+
+            if (terrainScript != NULL)
+            {
+                BattleScriptPushCursorAndCallback(terrainScript);
+                effect++;
+            }
+            break;
+        }
         case ABILITY_ULTRA_FALLOUT:
             if (IsOnlyUltraBeastInParty(battler) && IsAnyOpposingBattlerStatused(battler))
             {

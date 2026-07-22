@@ -453,7 +453,7 @@ STATIC_ASSERT(NUMBER_OF_MON_TYPES * 4 * DYNAMIC_TYPED_MOVE_SELECTION_STRIDE <= D
 STATIC_ASSERT(ABILITIES_COUNT <= 1024, DynamicUniqueAbilityFits10Bits);
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
-#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_GUIDING_FLAMES
+#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_FALSE_GROUND
 
 // These are the only custom abilities which are not safe and useful on an
 // arbitrary generated Pokemon. Keep this list explicit so new abilities do
@@ -509,7 +509,7 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
 #define DYNAMIC_UNIQUE_ABILITY_COUNT \
     (DYNAMIC_UNIQUE_ABILITY_MAX - DYNAMIC_UNIQUE_ABILITY_MIN + 1 - ARRAY_COUNT(sExcludedDynamicUniqueAbilities))
 
-STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 564, DynamicUniqueAbilityPoolAuditCount);
+STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 565, DynamicUniqueAbilityPoolAuditCount);
 
 bool8 RogueGift_IsDynamicUniqueAbilityEligible(u16 ability)
 {
@@ -571,6 +571,7 @@ static const u16 sDynamicUniqueAbilitySynergyMoves[ABILITIES_COUNT] =
     [ABILITY_FLOWER_FIELD] = MOVE_TAUNT,
     [ABILITY_BLINDING_SMOKE] = MOVE_MYSTICAL_FIRE,
     [ABILITY_GUIDING_FLAMES] = MOVE_SHADOW_BALL,
+    [ABILITY_FALSE_GROUND] = MOVE_TERRAIN_PULSE,
     [ABILITY_DEATH_ROLL] = MOVE_CRUNCH,
     [ABILITY_NOCTURNAL] = MOVE_HYPNOSIS,
     [ABILITY_FORMATION_FIGHTER] = MOVE_TAUNT,

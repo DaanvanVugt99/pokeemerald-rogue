@@ -38,6 +38,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Renamed Mothim's unique ability to Swarm Surge and made it set Infested
+  Terrain unconditionally on switch-in; renamed Unovan Stunfisk's
+  contact-confusion ability to Snarewire, while Galarian Stunfisk now uses
+  False Ground to set a random terrain on switch-in when none is active.
 - Reworked the Chikorita line's Evergreen into Flower Field, which makes status
   moves set a different random terrain after its first turn out.
 - Reworked the Totodile line's Death Roll to add Scary Face instead of Screech

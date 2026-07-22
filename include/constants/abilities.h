@@ -697,7 +697,7 @@
 #define ABILITY_SCRAMBLE               486
 #define ABILITY_STUMBLE                487
 #define ABILITY_ENVIRONMENTAL          538
-#define ABILITY_PESTILENT_DRIFT        620
+#define ABILITY_SWARM_SURGE            620
 #define ABILITY_ULTRA_FALLOUT          740
 #define ABILITY_ULTRA_SWOLE            741
 #define ABILITY_ULTRA_STRUT            742
@@ -951,12 +951,13 @@
 #define ABILITY_FLAK_SHIELD            917
 #define ABILITY_BOG_BODY               918
 #define ABILITY_GUIDING_FLAMES         919
+#define ABILITY_FALSE_GROUND           920
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
 #define BLAST_SHIELD_MIN_POWER      120
 #define FLAK_SHIELD_MAX_POWER       40
 
-#define ABILITIES_COUNT_ROGUE       920
+#define ABILITIES_COUNT_ROGUE       921
 
 #define ABILITIES_COUNT ABILITIES_COUNT_ROGUE
 
