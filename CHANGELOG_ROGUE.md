@@ -38,6 +38,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Organized project documentation by current, inherited, legacy, and
+  third-party purpose, and kept the personal Pokemon design tracker out of
+  version control.
 - Reworked both Zacian forms with Royal Advance and both Zamazenta forms with
   Royal Guard, passing a one-use priority or damage-halving effect to their
   replacement and gaining a separate use when the foe activates a battle gimmick.

@@ -1,4 +1,10 @@
-### Setting up WSL1 (Legacy Portion)
+# Legacy WSL1 Setup
+
+> This inherited setup path is retained for older repositories that require the
+> original WSL1 flow. For current Divergence development, begin with the main
+> [installation guide](../INSTALL.md).
+
+## Setting up WSL1
 
 1. Certain packages are required to build pokeemerald. Install these packages by running the following command:
 
@@ -38,4 +44,4 @@
     source /etc/profile.d/devkit-env.sh
     ```
 
-Proceed to [Choosing where to store pokeemerald (WSL1) of the current INSTALL.md](/INSTALL.md#choosing-where-to-store-pokeemerald-WSL1).
+Proceed to [Choosing where to store pokeemerald Expansion (WSL1) in the current installation guide](../INSTALL.md#choosing-where-to-store-pokeemerald-expansion-wsl1).

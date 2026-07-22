@@ -9,6 +9,10 @@ Divergence.
 design notebook for Pokemon identity work, especially unique abilities and
 per-Pokemon notes.
 
+The workbook is a personal planning aid and is intentionally excluded from
+version control. A fresh clone will not contain it; contributors may create
+their own local copy if useful.
+
 Use it as the planning source for:
 
 - Unique ability ideas, status, complexity, and effect notes.
