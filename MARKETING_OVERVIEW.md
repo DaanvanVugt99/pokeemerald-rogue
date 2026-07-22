@@ -53,6 +53,8 @@ Examples visible in the commit history include:
 - Bountiful, Frozen, Dread, Tundra, and Astral Reign
 - Royal Advance and Royal Guard
 - Duelist and Sword and Board
+- Night Hunter and Wandering Hunter
+- Toxisphere and Smog Refinery
 - Fossil Memory
 - Raid Leader, Formation, and Snowstorm
 - Space Rift, Dark Dimension, and Temporal Lock changes

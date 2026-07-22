@@ -107,6 +107,7 @@
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 BattleScript_WarpathHeal[];
 extern const u8 BattleScript_AbilityHpHeal[];
+extern const u8 BattleScript_SmogRefineryRestoreAfterStrangeSteam[];
 
 static u16 GetRandomMoveFromPool(u8 pool);
 
@@ -3770,6 +3771,36 @@ void StealTargetItem(u8 battlerStealer, u8 battlerItem)
     return;                                     \
 }
 
+static bool32 TryUseSmogRefineryStrangeSteam(u32 battler, u32 target, const u8 *returnInstr)
+{
+    if (!IsBattlerAlive(battler)
+     || !IsBattlerAlive(target)
+     || GetBattlerSide(battler) == GetBattlerSide(target)
+     || NoAliveMonsForEitherParty()
+     || gProtectStructs[battler].confusionSelfDmg
+     || gProtectStructs[battler].extraMoveUsed
+     || (gBattleMons[battler].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+     || ((gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE
+       || gBattleMoves[gCurrentMove].effect == EFFECT_PARTING_SHOT)
+      && CanBattlerSwitch(target)))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_SMOG_REFINERY);
+    SetAtkCancellerForCalledMove();
+    gBattleStruct->savedFaintBattlerAttacker = gBattlerAttacker;
+    gBattleStruct->savedFaintBattlerTarget = gBattlerTarget;
+    gBattleScripting.battler = battler;
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_STRANGE_STEAM;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    BattleScriptPush(returnInstr);
+    BattleScriptPush(BattleScript_SmogRefineryRestoreAfterStrangeSteam);
+    gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+    return TRUE;
+}
+
 void SetMoveEffect(bool32 primary, u32 certain)
 {
     s32 i, affectsUser = 0;
@@ -3823,6 +3854,19 @@ void SetMoveEffect(bool32 primary, u32 certain)
 
      // Just in case this flag is still set
     gBattleScripting.moveEffect &= ~MOVE_EFFECT_CERTAIN;
+
+    if (HasBattlerAbility(gEffectBattler, ABILITY_SMOG_REFINERY)
+     && !IS_MOVE_STATUS(gCurrentMove)
+     && !(gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
+     && !primary
+     && affectsUser != MOVE_EFFECT_AFFECTS_USER
+     && (gBattleScripting.moveEffect <= MOVE_EFFECT_TRI_ATTACK || gBattleScripting.moveEffect >= MOVE_EFFECT_SMACK_DOWN)) // Stat lowering effects are handled in ChangeStatBuffs.
+    {
+        RecordAbilityBattle(gEffectBattler, ABILITY_SMOG_REFINERY);
+        if (TryUseSmogRefineryStrangeSteam(gEffectBattler, gBattleScripting.battler, gBattlescriptCurrInstr + 1))
+            RESET_RETURN
+        INCREMENT_RESET_RETURN
+    }
 
     if (HasBattlerAbility(gEffectBattler, ABILITY_TOXISPHERE)
      && WEATHER_HAS_EFFECT
@@ -12640,6 +12684,28 @@ static void Cmd_various(void)
     {
         VARIOUS_ARGS();
 
+        if (HasBattlerAbility(battler, ABILITY_WANDERING_HUNTER)
+         && battler == gBattlerAttacker
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && IsBattlerAlive(battler)
+         && CanBattlerSwitch(battler)
+         && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        {
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            SetBattlerTriggeredAbility(battler, ABILITY_WANDERING_HUNTER);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            gCalledMove = MOVE_BATON_PASS;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            return;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_INSECTIVORE)
          && battler == gBattlerAttacker
          && HasAttackerFaintedTarget()
@@ -15531,6 +15597,28 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
                 gBattlescriptCurrInstr = BattleScript_MirrorArmorReflect;
                 RecordAbilityBattle(battler, gBattleMons[battler].ability);
             }
+            return STAT_CHANGE_DIDNT_WORK;
+        }
+        else if (HasBattlerAbility(battler, ABILITY_SMOG_REFINERY)
+              && !certain
+              && !affectsUser
+              && !IS_MOVE_STATUS(gCurrentMove)
+              && (flags == 0 || flags == STAT_CHANGE_UPDATE_MOVE_EFFECT))
+        {
+            RecordAbilityBattle(battler, ABILITY_SMOG_REFINERY);
+            TryUseSmogRefineryStrangeSteam(battler, gBattlerAttacker, BS_ptr);
+            return STAT_CHANGE_DIDNT_WORK;
+        }
+        else if (HasBattlerAbility(battler, ABILITY_TOXISPHERE)
+              && WEATHER_HAS_EFFECT
+              && (gBattleWeather & B_WEATHER_ACID_RAIN)
+              && !(gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
+              && !certain
+              && !affectsUser
+              && !IS_MOVE_STATUS(gCurrentMove)
+              && (flags == 0 || flags == STAT_CHANGE_UPDATE_MOVE_EFFECT))
+        {
+            RecordAbilityBattle(battler, ABILITY_TOXISPHERE);
             return STAT_CHANGE_DIDNT_WORK;
         }
         else if (battlerAbility == ABILITY_SHIELD_DUST && flags == 0)

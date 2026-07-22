@@ -5,6 +5,7 @@ ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_DYNAMIC_PUNCH].effect == EFFECT_CONFUSE_HIT);
     ASSUME(gBattleMoves[MOVE_DYNAMIC_PUNCH].secondaryEffectChance == 100);
+    ASSUME(gBattleMoves[MOVE_ACID_SPRAY].effect == EFFECT_SPECIAL_DEFENSE_DOWN_HIT_2);
 }
 
 SINGLE_BATTLE_TEST("Toxisphere sets Acid Rain on switch-in")
@@ -54,6 +55,18 @@ SINGLE_BATTLE_TEST("Toxisphere blocks secondary effects from damaging moves duri
     } THEN {
         EXPECT(player->hp < player->maxHP);
         EXPECT((player->status2 & STATUS2_CONFUSION) == 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Toxisphere blocks secondary stat drops from damaging moves during Acid Rain")
+{
+    GIVEN {
+        PLAYER(SPECIES_WEEZING) { Speed(50); Ability(ABILITY_LEVITATE); UniqueAbility(ABILITY_TOXISPHERE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_ACID_SPRAY); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_ACID_SPRAY); MOVE(player, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
     }
 }
 

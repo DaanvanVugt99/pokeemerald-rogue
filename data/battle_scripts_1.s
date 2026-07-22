@@ -12453,6 +12453,10 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_SmogRefineryRestoreAfterStrangeSteam::
+	various BS_SCRIPTING, VARIOUS_RESTORE_ATTACKER_AND_TARGET
+	return
+
 BattleScript_CruelPremonitionSetsFutureSight::
 	call BattleScript_AbilityPopUp
 	playmoveanimation BS_ATTACKER, MOVE_FUTURE_SIGHT

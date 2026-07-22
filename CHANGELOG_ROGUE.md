@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made Toxisphere block secondary stat reductions during Acid Rain, consistent
+  with its description and its handling of other additional move effects.
 - Restored unique-ability inheritance for costume and cap Pikachu, Spiky-eared
   Pichu, alternate Unown letters, and ten previously unmapped Gigantamax forms.
 - Prevented Frontier Brains from replacing routes in the starting column of an
@@ -38,6 +40,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Replaced Toxisphere on Galarian Weezing with Smog Refinery, which blocks
+  secondary effects from damaging moves and retaliates with Strange Steam.
+- Replaced Night Hunter on Hisuian Decidueye with Wandering Hunter, which uses
+  Baton Pass after its first knockout each battle.
 - Replaced Duelist on Galarian Farfetch'd and Sirfetch'd with Sword and Board,
   which raises Attack by one after successfully using a protection move.
 - Renamed Mothim's unique ability to Swarm Surge and made it set Infested
