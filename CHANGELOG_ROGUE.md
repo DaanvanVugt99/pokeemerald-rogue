@@ -58,6 +58,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Replaced Summary Trainer Memo encounter details with compact, spoiler-free
+  evolution method guidance tailored to the current Pokémon and run.
 - Standardized unique Ability descriptions to distinguish damage dealt from
   damage taken, made vague modifiers explicit, and added layout validation
   for their Summary and Pokédex panels.

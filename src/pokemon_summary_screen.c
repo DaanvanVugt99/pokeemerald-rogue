@@ -297,12 +297,11 @@ static void PrintMonAbilityDescription(void);
 static void BufferWrappedSummaryAbilityDescription(u8 *, const u8 *, u32, u8);
 static const u8 *GetAbilitySummaryExpandedDescription(u16 ability);
 static void BufferMonTrainerMemo(void);
+static void BufferMonEvolutionMemo(void);
 static void PrintMonTrainerMemo(void);
 static void BufferNatureString(void);
-static void GetMetLevelString(u8 *);
 static bool8 DoesMonOTMatchOwner(void);
 static bool8 DidMonComeFromGBAGames(void);
-static bool8 IsInGamePartnerMon(void);
 static void PrintEggOTName(void);
 static void PrintEggOTID(void);
 static void PrintEggState(void);
@@ -824,6 +823,45 @@ static const u8 sText_UniqueAbilityPageTitle[] = _("Unique");
 static const u8 sText_UniqueHeader[] = _("UNIQUE");
 static const u8 sText_NoUniqueAbility[] = _("No unique ability.");
 static const u8 sMovesPPLayout[] = _("{PP}{DYNAMIC 0}/{DYNAMIC 1}");
+static const u8 sText_MemoNextLine[] = _(",\n");
+static const u8 sText_MemoNoFurtherEvolution[] = _("Does not evolve further.");
+static const u8 sText_MemoCannotCurrentlyEvolve[] = _("Cannot currently evolve.");
+static const u8 sText_MemoEvolvesAtLevel[] = _("Evolves at {LV}{STR_VAR_1}.");
+static const u8 sText_MemoEvolvesAtLevelByStats[] = _("Evolves at {LV}{STR_VAR_1}\nbased on its stats.");
+static const u8 sText_MemoEvolvesAtLevelByTime[] = _("Evolves at {LV}{STR_VAR_1}\ndepending on the time.");
+static const u8 sText_MemoEvolvesAtLevelByNature[] = _("Evolves at {LV}{STR_VAR_1}\nbased on its nature.");
+static const u8 sText_MemoEvolvesUsingItem[] = _("Evolves using\n{STR_VAR_1}.");
+static const u8 sText_MemoEvolvesKnowingMove[] = _("Evolves knowing\n{STR_VAR_1}.");
+static const u8 sText_MemoEvolvesKnowingMoveType[] = _("Evolves knowing a\n{STR_VAR_1}-type move.");
+static const u8 sText_MemoEvolvesWithFriendship[] = _("Evolves with high\nfriendship.");
+static const u8 sText_MemoEvolvesWithBeauty[] = _("Evolves with high\nBeauty.");
+static const u8 sText_MemoEvolvesWhenTraded[] = _("Evolves when traded.");
+static const u8 sText_MemoTwoItems[] = _("Use {STR_VAR_1} or\n{STR_VAR_2} to evolve.");
+static const u8 sText_MemoLevelOrItem[] = _("Reach {LV}{STR_VAR_1} or use\n{STR_VAR_2} to evolve.");
+static const u8 sText_MemoTwoLevels[] = _("Evolves at {LV}{STR_VAR_1} or {LV}{STR_VAR_2}.");
+static const u8 sText_MemoManyMethods[] = _("Many evolution methods.\nSee Pokédex for details.");
+static const u8 sText_MemoSeePokedex[] = _("See Pokédex evolutions.");
+
+enum SummaryEvolutionKind
+{
+    SUMMARY_EVO_LEVEL,
+    SUMMARY_EVO_LEVEL_STATS,
+    SUMMARY_EVO_LEVEL_TIME,
+    SUMMARY_EVO_LEVEL_NATURE,
+    SUMMARY_EVO_ITEM,
+    SUMMARY_EVO_MOVE,
+    SUMMARY_EVO_MOVE_TYPE,
+    SUMMARY_EVO_FRIENDSHIP,
+    SUMMARY_EVO_BEAUTY,
+    SUMMARY_EVO_TRADE,
+    SUMMARY_EVO_OTHER,
+};
+
+struct SummaryEvolutionRoute
+{
+    u16 kind;
+    u16 param;
+};
 
 #define TAG_MOVE_SELECTOR 30000
 #define TAG_MON_STATUS 30001
@@ -3918,53 +3956,258 @@ static void PrintUniqueAbilityDescription(void)
 
 static void BufferMonTrainerMemo(void)
 {
-    struct PokeSummary *sum = &sMonSummaryScreen->summary;
-    const u8 *text;
-
     DynamicPlaceholderTextUtil_Reset();
     DynamicPlaceholderTextUtil_SetPlaceholderPtr(0, sMemoNatureTextColor);
     DynamicPlaceholderTextUtil_SetPlaceholderPtr(1, sMemoMiscTextColor);
     BufferNatureString();
+    DynamicPlaceholderTextUtil_ExpandPlaceholders(gStringVar4, gText_XNature);
+    StringAppend(gStringVar4, sText_MemoNextLine);
+    BufferMonEvolutionMemo();
+}
 
-    if (InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE || IsInGamePartnerMon() == TRUE)
+static bool8 IsEvolutionApplicableToSummaryMon(const struct Evolution *evo)
+{
+    u8 gender = GetGenderForSpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.genderFlag);
+
+    switch (evo->method)
     {
-        DynamicPlaceholderTextUtil_ExpandPlaceholders(gStringVar4, gText_XNature);
+    case EVO_LEVEL_MALE:
+    case EVO_ITEM_MALE:
+        return gender == MON_MALE;
+    case EVO_LEVEL_FEMALE:
+    case EVO_ITEM_FEMALE:
+        return gender == MON_FEMALE;
+    default:
+        return TRUE;
+    }
+}
+
+static struct SummaryEvolutionRoute GetSummaryEvolutionRoute(const struct Evolution *evo)
+{
+    struct SummaryEvolutionRoute route = { SUMMARY_EVO_OTHER, evo->method };
+
+    switch (evo->method)
+    {
+    case EVO_LEVEL:
+    case EVO_LEVEL_MALE:
+    case EVO_LEVEL_FEMALE:
+    case EVO_LEVEL_SILCOON:
+    case EVO_LEVEL_CASCOON:
+    case EVO_LEVEL_NINJASK:
+    case EVO_LEVEL_SHEDINJA:
+#ifdef ROGUE_EXPANSION
+    case EVO_LEVEL_TWO_SEGMENT:
+    case EVO_LEVEL_THREE_SEGMENT:
+    case EVO_LEVEL_FAMILY_OF_THREE:
+    case EVO_LEVEL_FAMILY_OF_FOUR:
+#endif
+        route.kind = SUMMARY_EVO_LEVEL;
+        route.param = evo->param;
+        break;
+    case EVO_LEVEL_ATK_GT_DEF:
+    case EVO_LEVEL_ATK_EQ_DEF:
+    case EVO_LEVEL_ATK_LT_DEF:
+        route.kind = SUMMARY_EVO_LEVEL_STATS;
+        route.param = evo->param;
+        break;
+    case EVO_LEVEL_DAY:
+    case EVO_LEVEL_NIGHT:
+#ifdef ROGUE_EXPANSION
+    case EVO_LEVEL_DUSK:
+#endif
+        route.kind = SUMMARY_EVO_LEVEL_TIME;
+        route.param = evo->param;
+        break;
+#ifdef ROGUE_EXPANSION
+    case EVO_LEVEL_NATURE_AMPED:
+    case EVO_LEVEL_NATURE_LOW_KEY:
+        route.kind = SUMMARY_EVO_LEVEL_NATURE;
+        route.param = evo->param;
+        break;
+    case EVO_LEVEL_30_NATURE:
+        route.kind = SUMMARY_EVO_LEVEL_NATURE;
+        route.param = 30;
+        break;
+#endif
+    case EVO_ITEM:
+    case EVO_ITEM_MALE:
+    case EVO_ITEM_FEMALE:
+        route.kind = SUMMARY_EVO_ITEM;
+        route.param = evo->param;
+        break;
+    case EVO_MOVE:
+        route.kind = SUMMARY_EVO_MOVE;
+        route.param = evo->param;
+        break;
+#ifdef ROGUE_EXPANSION
+    case EVO_MOVE_TYPE:
+        route.kind = SUMMARY_EVO_MOVE_TYPE;
+        route.param = evo->param;
+        break;
+#endif
+    case EVO_FRIENDSHIP:
+    case EVO_FRIENDSHIP_DAY:
+    case EVO_FRIENDSHIP_NIGHT:
+        route.kind = SUMMARY_EVO_FRIENDSHIP;
+        route.param = 0;
+        break;
+    case EVO_BEAUTY:
+        route.kind = SUMMARY_EVO_BEAUTY;
+        route.param = 0;
+        break;
+    case EVO_TRADE:
+    case EVO_TRADE_ITEM:
+        route.kind = SUMMARY_EVO_TRADE;
+        route.param = 0;
+        break;
+    }
+
+    return route;
+}
+
+static bool8 AreSummaryEvolutionRoutesEqual(const struct SummaryEvolutionRoute *left, const struct SummaryEvolutionRoute *right)
+{
+    return left->kind == right->kind && left->param == right->param;
+}
+
+static void BufferSingleSummaryEvolution(const struct SummaryEvolutionRoute *route)
+{
+    const u8 *text;
+
+    switch (route->kind)
+    {
+    case SUMMARY_EVO_LEVEL:
+        ConvertUIntToDecimalStringN(gStringVar1, route->param, STR_CONV_MODE_LEFT_ALIGN, 3);
+        text = sText_MemoEvolvesAtLevel;
+        break;
+    case SUMMARY_EVO_LEVEL_STATS:
+        ConvertUIntToDecimalStringN(gStringVar1, route->param, STR_CONV_MODE_LEFT_ALIGN, 3);
+        text = sText_MemoEvolvesAtLevelByStats;
+        break;
+    case SUMMARY_EVO_LEVEL_TIME:
+        ConvertUIntToDecimalStringN(gStringVar1, route->param, STR_CONV_MODE_LEFT_ALIGN, 3);
+        text = sText_MemoEvolvesAtLevelByTime;
+        break;
+    case SUMMARY_EVO_LEVEL_NATURE:
+        ConvertUIntToDecimalStringN(gStringVar1, route->param, STR_CONV_MODE_LEFT_ALIGN, 3);
+        text = sText_MemoEvolvesAtLevelByNature;
+        break;
+    case SUMMARY_EVO_ITEM:
+        StringCopy(gStringVar1, Rogue_GetItemName(route->param));
+        text = sText_MemoEvolvesUsingItem;
+        break;
+    case SUMMARY_EVO_MOVE:
+        StringCopy(gStringVar1, gMoveNames[route->param]);
+        text = sText_MemoEvolvesKnowingMove;
+        break;
+    case SUMMARY_EVO_MOVE_TYPE:
+        StringCopy(gStringVar1, gTypeNames[route->param]);
+        text = sText_MemoEvolvesKnowingMoveType;
+        break;
+    case SUMMARY_EVO_FRIENDSHIP:
+        text = sText_MemoEvolvesWithFriendship;
+        break;
+    case SUMMARY_EVO_BEAUTY:
+        text = sText_MemoEvolvesWithBeauty;
+        break;
+    case SUMMARY_EVO_TRADE:
+        text = sText_MemoEvolvesWhenTraded;
+        break;
+    default:
+        text = sText_MemoSeePokedex;
+        break;
+    }
+
+    StringExpandPlaceholders(gStringVar3, text);
+    StringAppend(gStringVar4, gStringVar3);
+}
+
+static bool8 BufferTwoSummaryEvolutions(const struct SummaryEvolutionRoute *first, const struct SummaryEvolutionRoute *second)
+{
+    const struct SummaryEvolutionRoute *levelRoute;
+    const struct SummaryEvolutionRoute *itemRoute;
+    const u8 *text;
+
+    if (first->kind == SUMMARY_EVO_ITEM && second->kind == SUMMARY_EVO_ITEM)
+    {
+        StringCopy(gStringVar1, Rogue_GetItemName(first->param));
+        StringCopy(gStringVar2, Rogue_GetItemName(second->param));
+        text = sText_MemoTwoItems;
+    }
+    else if ((first->kind == SUMMARY_EVO_LEVEL && second->kind == SUMMARY_EVO_ITEM)
+          || (first->kind == SUMMARY_EVO_ITEM && second->kind == SUMMARY_EVO_LEVEL))
+    {
+        levelRoute = first->kind == SUMMARY_EVO_LEVEL ? first : second;
+        itemRoute = first->kind == SUMMARY_EVO_ITEM ? first : second;
+        ConvertUIntToDecimalStringN(gStringVar1, levelRoute->param, STR_CONV_MODE_LEFT_ALIGN, 3);
+        StringCopy(gStringVar2, Rogue_GetItemName(itemRoute->param));
+        text = sText_MemoLevelOrItem;
+    }
+    else if (first->kind == SUMMARY_EVO_LEVEL && second->kind == SUMMARY_EVO_LEVEL)
+    {
+        ConvertUIntToDecimalStringN(gStringVar1, first->param, STR_CONV_MODE_LEFT_ALIGN, 3);
+        ConvertUIntToDecimalStringN(gStringVar2, second->param, STR_CONV_MODE_LEFT_ALIGN, 3);
+        text = sText_MemoTwoLevels;
     }
     else
     {
-        u8 *metLevelString = Alloc(32);
-        u8 *metLocationString = Alloc(32);
-        GetMetLevelString(metLevelString);
+        return FALSE;
+    }
 
-        if (sum->metLocation < MAPSEC_NONE)
+    StringExpandPlaceholders(gStringVar3, text);
+    StringAppend(gStringVar4, gStringVar3);
+    return TRUE;
+}
+
+static void BufferMonEvolutionMemo(void)
+{
+    struct SummaryEvolutionRoute routes[3];
+    struct Evolution evo;
+    u8 evoCount = Rogue_GetMaxEvolutionCount(sMonSummaryScreen->summary.species);
+    u8 routeCount = 0;
+    u8 i;
+    u8 j;
+
+    for (i = 0; i < evoCount; ++i)
+    {
+        struct SummaryEvolutionRoute route;
+
+        Rogue_ModifyEvolution(sMonSummaryScreen->summary.species, i, &evo);
+        Rogue_ModifyEvolution_ApplyCurses(sMonSummaryScreen->summary.species, i, &evo);
+
+        if (evo.targetSpecies == SPECIES_NONE || !IsEvolutionApplicableToSummaryMon(&evo))
+            continue;
+
+        route = GetSummaryEvolutionRoute(&evo);
+        for (j = 0; j < min(routeCount, ARRAY_COUNT(routes)); ++j)
         {
-            GetMapNameHandleAquaHideout(metLocationString, sum->metLocation);
-            DynamicPlaceholderTextUtil_SetPlaceholderPtr(4, metLocationString);
+            if (AreSummaryEvolutionRoutesEqual(&routes[j], &route))
+                break;
         }
 
-        if (DoesMonOTMatchOwner() == TRUE)
-        {
-            if (sum->metLevel == 0)
-                text = (sum->metLocation >= MAPSEC_NONE) ? gText_XNatureHatchedSomewhereAt : gText_XNatureHatchedAtYZ;
-            else
-                text = (sum->metLocation >= MAPSEC_NONE) ? gText_XNatureMetSomewhereAt : gText_XNatureMetAtYZ;
-        }
-        else if (sum->metLocation == METLOC_FATEFUL_ENCOUNTER)
-        {
-            text = gText_XNatureFatefulEncounter;
-        }
-        else if (sum->metLocation != METLOC_IN_GAME_TRADE && DidMonComeFromGBAGames())
-        {
-            text = (sum->metLocation >= MAPSEC_NONE) ? gText_XNatureObtainedInTrade : gText_XNatureProbablyMetAt;
-        }
-        else
-        {
-            text = gText_XNatureObtainedInTrade;
-        }
+        if (j != min(routeCount, ARRAY_COUNT(routes)))
+            continue;
 
-        DynamicPlaceholderTextUtil_ExpandPlaceholders(gStringVar4, text);
-        Free(metLevelString);
-        Free(metLocationString);
+        if (routeCount < ARRAY_COUNT(routes))
+            routes[routeCount] = route;
+        ++routeCount;
+    }
+
+    if (routeCount == 0)
+    {
+        StringAppend(gStringVar4, evoCount == 0 ? sText_MemoNoFurtherEvolution : sText_MemoCannotCurrentlyEvolve);
+    }
+    else if (routeCount == 1)
+    {
+        BufferSingleSummaryEvolution(&routes[0]);
+    }
+    else if (routeCount == 2 && BufferTwoSummaryEvolutions(&routes[0], &routes[1]))
+    {
+        // The supported pair was written directly to the memo.
+    }
+    else
+    {
+        StringAppend(gStringVar4, sText_MemoManyMethods);
     }
 }
 
@@ -3978,15 +4221,6 @@ static void BufferNatureString(void)
     struct PokemonSummaryScreenData *sumStruct = sMonSummaryScreen;
     DynamicPlaceholderTextUtil_SetPlaceholderPtr(2, gNatureNamePointers[sumStruct->summary.nature]);
     DynamicPlaceholderTextUtil_SetPlaceholderPtr(5, gText_EmptyString5);
-}
-
-static void GetMetLevelString(u8 *output)
-{
-    u8 level = sMonSummaryScreen->summary.metLevel;
-    if (level == 0)
-        level = EGG_HATCH_LEVEL;
-    ConvertIntToDecimalStringN(output, level, STR_CONV_MODE_LEFT_ALIGN, 3);
-    DynamicPlaceholderTextUtil_SetPlaceholderPtr(3, output);
 }
 
 static bool8 DoesMonOTMatchOwner(void)
@@ -4025,16 +4259,6 @@ bool8 DidMonComeFromRSE(void)
     struct PokeSummary *sum = &sMonSummaryScreen->summary;
     if (sum->metGame > 0 && sum->metGame <= VERSION_EMERALD)
         return TRUE;
-    return FALSE;
-}
-
-static bool8 IsInGamePartnerMon(void)
-{
-    if ((gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && gMain.inBattle)
-    {
-        if (sMonSummaryScreen->curMonIndex == 1 || sMonSummaryScreen->curMonIndex == 4 || sMonSummaryScreen->curMonIndex == 5)
-            return TRUE;
-    }
     return FALSE;
 }
 
