@@ -89,6 +89,7 @@ static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
 static bool32 TryActivateTripwire(u32 battler);
+static bool32 TryActivateHornLock(u32 battler, u32 target);
 static void SetRandomMultiHitCounter();
 static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
@@ -9021,6 +9022,48 @@ static bool32 TryForecastFrillChangeSecondaryType(u32 battler)
     return TRUE;
 }
 
+static bool32 TryActivateHornLock(u32 battler, u32 target)
+{
+    u32 battlerPrimaryType;
+    u32 battlerSecondaryType;
+    u32 targetPrimaryType;
+    u32 targetSecondaryType;
+    u32 newBattlerSecondaryType;
+    u32 newTargetSecondaryType;
+
+    if (!IsBattlerAlive(battler)
+     || IsTerastallized(battler)
+     || IsTerastallized(target))
+        return FALSE;
+
+    battlerPrimaryType = gBattleMons[battler].type1;
+    battlerSecondaryType = gBattleMons[battler].type2;
+    targetPrimaryType = gBattleMons[target].type1;
+    targetSecondaryType = gBattleMons[target].type2;
+
+    if (battlerSecondaryType == battlerPrimaryType)
+        battlerSecondaryType = TYPE_MYSTERY;
+    if (targetSecondaryType == targetPrimaryType)
+        targetSecondaryType = TYPE_MYSTERY;
+
+    newBattlerSecondaryType = targetSecondaryType;
+    if (newBattlerSecondaryType == TYPE_MYSTERY || newBattlerSecondaryType == battlerPrimaryType)
+        newBattlerSecondaryType = battlerPrimaryType;
+
+    newTargetSecondaryType = battlerSecondaryType;
+    if (newTargetSecondaryType == TYPE_MYSTERY || newTargetSecondaryType == targetPrimaryType)
+        newTargetSecondaryType = targetPrimaryType;
+
+    if (gBattleMons[battler].type2 == newBattlerSecondaryType
+     && gBattleMons[target].type2 == newTargetSecondaryType)
+        return FALSE;
+
+    gBattleMons[battler].type2 = newBattlerSecondaryType;
+    gBattleMons[target].type2 = newTargetSecondaryType;
+    SetBattlerTriggeredAbility(battler, ABILITY_HORN_LOCK);
+    return TRUE;
+}
+
 static bool32 TryActivateTripwire(u32 battler)
 {
     u32 i;
@@ -15450,6 +15493,23 @@ if (triggeringAbility != ABILITY_NONE)
 
         if (TryTriggerCounterpunchAfterPunchingMove(battler, move))
             effect++;
+
+        if (HasBattlerAbility(battler, ABILITY_HORN_LOCK)
+         && move == MOVE_RAGING_BULL
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && TARGET_TURN_DAMAGED
+         && gHpDealt > 0
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && !DoesSubstituteBlockMove(gBattlerAttacker, gBattlerTarget, gCurrentMove)
+         && IsFinalMultiHitStrikeAndTarget()
+         && TryActivateHornLock(battler, gBattlerTarget))
+        {
+            gBattlerAbility = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_HornLockActivates;
+            effect++;
+        }
 
         if (HasBattlerAbility(battler, ABILITY_CONTROL_MASK)
          && IsBattlerAlive(battler)

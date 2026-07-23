@@ -761,8 +761,9 @@
 #define STRINGID_CONTROLMASKSTABILIZED                759
 #define STRINGID_COMMANDERACTIVATES                   760
 #define STRINGID_EMERALDACCORDRESTORED                761
+#define STRINGID_HORNLOCKSWAPPEDTYPES                 762
 
-#define BATTLESTRINGS_COUNT                           762
+#define BATTLESTRINGS_COUNT                           763
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

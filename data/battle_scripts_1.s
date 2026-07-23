@@ -12491,6 +12491,12 @@ BattleScript_CruelPremonitionSetsFutureSight::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_HornLockActivates::
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_HORNLOCKSWAPPEDTYPES
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_RuinousRiteActivates::
 	copybyte gBattlerAttacker, sBATTLER
 	copybyte gBattlerAbility, sBATTLER
