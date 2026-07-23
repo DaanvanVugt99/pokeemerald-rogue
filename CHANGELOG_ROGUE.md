@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Warmed missing Frontier Brain reward previews whenever an existing adventure
+  path is reused, preventing full team generation during node interaction.
+- Made Auto Pickup collect item objects placed across counters and on tables,
+  matching normal interaction targeting in hideouts.
 - Prevented Oricorio's Center Stage from calling the singles-incompatible
   Follow Me outside double battles while retaining its Flying-move follow-up.
 - Converted Unique Legendary roamers into stationary Alpha encounters so they

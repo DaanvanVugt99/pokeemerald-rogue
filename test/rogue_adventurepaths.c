@@ -146,6 +146,20 @@ TEST("Frontier Brain paths cache deterministic previews")
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesB, rewardSpeciesB);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardMode, rewardMode);
 
+    // Reused paths must repair a missing preview before the overview becomes
+    // interactive instead of generating the full team when the node is used.
+    gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview = FALSE;
+    gRogueAdvPath.justGenerated = TRUE;
+    gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+    EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+
+    gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview = FALSE;
+    gRogueAdvPath.justGenerated = FALSE;
+    gRogueRun.adventureRoomId = aceRoomId;
+    EXPECT(!RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+
     gRogueAdvPath = originalPath;
     gRogueRun.baseSeed = originalBaseSeed;
     gRogueRun.adventureRoomId = originalRoomId;

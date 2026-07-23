@@ -38,6 +38,7 @@
 #include "malloc.h"
 #include "main.h"
 #include "menu.h"
+#include "metatile_behavior.h"
 #include "money.h"
 #include "m4a.h"
 #include "overworld.h"
@@ -4114,7 +4115,7 @@ static void ClearRogueLocalData(void)
 
 static void TryAutoItemPickup(void)
 {
-    u8 i, elevation;
+    u8 i, elevation, direction;
     s16 x, y;
     struct ObjectEventTemplate *template;
 
@@ -4123,6 +4124,16 @@ static void TryAutoItemPickup(void)
 
     GetXYCoordsOneStepInFrontOfPlayer(&x, &y);
     elevation = PlayerGetElevation();
+    direction = GetPlayerFacingDirection();
+
+    // Normal interactions look one tile beyond counters so objects placed on
+    // tables and shop counters can be reached from the other side. Auto Pickup
+    // must resolve the same target instead of stopping on the counter itself.
+    if (MetatileBehavior_IsCounter(MapGridGetMetatileBehaviorAt(x, y)))
+    {
+        x += gDirectionToVectors[direction].x;
+        y += gDirectionToVectors[direction].y;
+    }
 
     if ((gRogueLocal.autoPickupLastX == x && gRogueLocal.autoPickupLastY == y) || Rogue_IsRideMonFlying())
         return;
