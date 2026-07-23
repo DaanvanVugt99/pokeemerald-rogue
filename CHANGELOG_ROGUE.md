@@ -75,6 +75,8 @@ Format follows Keep a Changelog loosely:
 - Replaced Quiet Mind on the Galarian Darumaka line with Snowball Fight:
   flinging a Snowball turns Fling into a 60 BP Ice move, switches the user
   out, and returns the Snowball.
+- Replaced Warpath on Hisuian Braviary with Premonition, which sets Tailwind
+  whenever its Speed rises.
 - Replaced Night Hunter on Hisuian Decidueye with Wandering Hunter, which uses
   Baton Pass after its first knockout each battle.
 - Replaced Duelist on Galarian Farfetch'd and Sirfetch'd with Sword and Board,

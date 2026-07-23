@@ -6626,6 +6626,22 @@ void QueueLastPourForHeal(u32 battler)
         gBattleStruct->uniqueAbilityUsed[side] |= partyBit;
 }
 
+void QueuePremonitionForSpeedRise(u32 battler)
+{
+    u32 side;
+
+    if (battler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || !HasBattlerAbility(battler, ABILITY_PREMONITION))
+        return;
+
+    side = GetBattlerSide(battler);
+    if (gSideStatuses[side] & SIDE_STATUS_TAILWIND)
+        return;
+
+    QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_PREMONITION, battler, battler, battler);
+}
+
 static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
 {
     if (!IsBattlerAlive(battler)
@@ -6699,6 +6715,25 @@ static bool32 TryActivateLastPour(u32 battler)
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
+static bool32 TryActivatePremonition(u32 battler)
+{
+    u32 side;
+
+    if (!IsBattlerAlive(battler)
+     || !HasBattlerAbility(battler, ABILITY_PREMONITION))
+        return FALSE;
+
+    side = GetBattlerSide(battler);
+    if (gSideStatuses[side] & SIDE_STATUS_TAILWIND)
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_PREMONITION);
+    gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = BattleScript_StormGliderTailwind;
     return TRUE;
 }
 
@@ -6816,6 +6851,12 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
     {
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateLastPour(battler))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_PREMONITION)
+    {
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivatePremonition(battler))
             return TRUE;
     }
 
