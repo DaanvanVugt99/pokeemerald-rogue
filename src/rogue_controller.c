@@ -1410,6 +1410,7 @@ static void ModifyExistingMonToCustomMon(u32 customMonId, struct Pokemon* mon)
 {
     u32 species = GetMonData(mon, MON_DATA_SPECIES);
     u32 level = GetMonData(mon, MON_DATA_LEVEL);
+    u32 abilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM);
     u32 hpIV = GetMonData(mon, MON_DATA_HP_IV);
     u32 atkIV = GetMonData(mon, MON_DATA_ATK_IV);
     u32 defIV = GetMonData(mon, MON_DATA_DEF_IV);
@@ -1422,6 +1423,7 @@ static void ModifyExistingMonToCustomMon(u32 customMonId, struct Pokemon* mon)
     u32 metLevel = GetMonData(mon, MON_DATA_MET_LEVEL);
     u8 text[POKEMON_NAME_LENGTH + 1];
     bool8 hasCustomNickname = FALSE;
+    bool8 preserveNativeAbility = RogueGift_GetCustomMonAbilityCount(customMonId) == 0;
 
     GetMonData(mon, MON_DATA_NICKNAME, text);
 
@@ -1440,6 +1442,11 @@ static void ModifyExistingMonToCustomMon(u32 customMonId, struct Pokemon* mon)
     SetMonData(mon, MON_DATA_GENDER_FLAG, &isGenderFlag);
     SetMonData(mon, MON_DATA_MET_LOCATION, &metLocation);
     SetMonData(mon, MON_DATA_MET_LEVEL, &metLevel);
+
+    // Reapplying custom data must not reroll a native ability selected when the
+    // Pokemon was first created. Explicit custom abilities remain authoritative.
+    if(preserveNativeAbility)
+        SetMonData(mon, MON_DATA_ABILITY_NUM, &abilityNum);
 
     if(hasCustomNickname)
         SetMonData(mon, MON_DATA_NICKNAME, text);

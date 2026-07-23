@@ -16,6 +16,13 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made holders of unique abilities that create Acid Rain, Sandstorm, or Hail
+  immune to that weather's damage without granting Acid Rain healing to
+  non-Poison Pokémon.
+- Preserved unique Pokémon's native ability choices when they are caught,
+  reconstructed in the Safari, or purchased from Safari offers.
+- Prevented Neutralizing Gas switch-in popups from inheriting another
+  ability's name.
 - Kept opposing Tera types hidden until activation and reduced player-side
   inactive indicators' contrast so grayscale types such as Dark are visibly
   disabled.
@@ -66,6 +73,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Clarified that Living Fossil, Cliffside, and Steadfast require a foe's hit to
+  carry their user from at least half HP to below half HP.
+- Neutralizing Gas now suppresses its holder's separate unique ability while
+  remaining active itself.
 - Bulk berry planting now reports insufficient field space immediately after
   choosing an amount, before asking which Berry to plant.
 - Rebalanced fixed Trainer IVs around clearer difficulty identities: ordinary

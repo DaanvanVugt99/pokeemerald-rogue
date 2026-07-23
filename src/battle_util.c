@@ -20447,8 +20447,10 @@ static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability)
 
     if (IsNeutralizingGasOnField() && !IsNeutralizingGasBannedAbility(ability))
     {
-        // Neutralizing Gas suppresses other battlers, but not the holder itself.
-        if (!(gBattleMons[battler].ability == ABILITY_NEUTRALIZING_GAS
+        // The active Neutralizing Gas must not suppress itself, but any separate
+        // unique ability belonging to its holder is suppressed normally.
+        if (!(ability == ABILITY_NEUTRALIZING_GAS
+           && gBattleMons[battler].ability == ABILITY_NEUTRALIZING_GAS
            && !(gStatuses3[battler] & STATUS3_GASTRO_ACID)))
             return TRUE;
     }

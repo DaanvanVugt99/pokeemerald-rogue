@@ -7,7 +7,9 @@
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
+#include "rogue_controller.h"
 #include "rogue_gifts.h"
+#include "rogue_safari.h"
 #include "test/test.h"
 
 #define TEST_FORMAT_MON_TYPE                    1
@@ -163,6 +165,52 @@ TEST("Dynamic custom unique ability lookup falls back when the encoded id has no
 
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_NONE);
     EXPECT_EQ(GetUniqueAbilityBySpeciesAndOtId(SPECIES_SHUCKLE, customMonId), ABILITY_SILVER_LINING);
+}
+
+TEST("Safari reconstruction preserves a unique Pokemon's native ability slot")
+{
+    static const u16 sExpectedAbilities[] =
+    {
+        ABILITY_LEVITATE,
+        ABILITY_NEUTRALIZING_GAS,
+    };
+    u32 customMonId = DynamicTypeCustomMonId(TYPE_FIRE, 0, 0, 0, 0, 0);
+    u8 abilityNum;
+
+    for(abilityNum = 0; abilityNum < ARRAY_COUNT(sExpectedAbilities); ++abilityNum)
+    {
+        struct Pokemon original;
+        struct Pokemon restored;
+        struct RogueSafariMon safariMon = {0};
+        u16 eggSpecies = SPECIES_KOFFING;
+
+        CreateMon(&original, SPECIES_WEEZING, 50, USE_RANDOM_IVS, FALSE, 0, OT_ID_CUSTOM_MON, customMonId);
+        SetMonData(&original, MON_DATA_ABILITY_NUM, &abilityNum);
+        RogueSafari_CopyToSafariMon(&original.box, &safariMon);
+
+        ZeroMonData(&restored);
+        CreateMon(&restored, SPECIES_KOFFING, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+        RogueSafari_CopyFromSafariMon(&safariMon, &restored.box);
+        SetMonData(&restored, MON_DATA_SPECIES, &eggSpecies);
+        Rogue_ApplyCustomMonIdToMon(customMonId, &restored);
+
+        EXPECT_EQ(GetMonData(&restored, MON_DATA_ABILITY_NUM), abilityNum);
+        EXPECT_EQ(GetMonAbility(&restored), sExpectedAbilities[abilityNum]);
+    }
+}
+
+TEST("Reapplying custom data keeps an explicit standard ability authoritative")
+{
+    u32 customMonId = DynamicOriginalCustomMonId(1, 2, 1);
+    struct Pokemon mon;
+    u8 abilityNum = 1;
+
+    CreateMon(&mon, SPECIES_WEEZING, 50, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    SetMonData(&mon, MON_DATA_ABILITY_NUM, &abilityNum);
+    Rogue_ApplyCustomMonIdToMon(customMonId, &mon);
+
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_ABILITY_NUM), 0);
+    EXPECT_EQ(GetMonAbility(&mon), RogueGift_GetCustomMonAbility(customMonId, 0));
 }
 
 TEST("Dynamic original format decodes epic payload without unique ability")

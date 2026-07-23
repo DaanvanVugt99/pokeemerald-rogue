@@ -51,6 +51,40 @@ SINGLE_BATTLE_TEST("Living Fossil does not trigger if the user was already below
     }
 }
 
+SINGLE_BATTLE_TEST("Living Fossil does not trigger from confusion damage or a later hit while below half HP")
+{
+    s16 confusionDamage;
+
+    PASSES_RANDOMLY(1, 3, RNG_CONFUSION);
+
+    GIVEN {
+        PLAYER(SPECIES_RELICANTH) {
+            Ability(ABILITY_SWIFT_SWIM);
+            UniqueAbility(ABILITY_LIVING_FOSSIL);
+            HP(60);
+            MaxHP(100);
+            Attack(150);
+            Defense(255);
+            Speed(100);
+            Moves(MOVE_CELEBRATE);
+        }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(1); Speed(1); Moves(MOVE_CONFUSE_RAY, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CONFUSE_RAY); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        MESSAGE("It hurt itself in its confusion!");
+        HP_BAR(player, captureDamage: &confusionDamage);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        HP_BAR(player);
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_LIVING_FOSSIL);
+        }
+    } THEN {
+        EXPECT_GT(confusionDamage, 10);
+    }
+}
+
 SINGLE_BATTLE_TEST("Living Fossil's Ancient Power can grant the all-stats boost")
 {
     PASSES_RANDOMLY(1, 10, RNG_SECONDARY_EFFECT);

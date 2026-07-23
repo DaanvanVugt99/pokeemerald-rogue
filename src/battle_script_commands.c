@@ -9825,7 +9825,7 @@ static void Cmd_switchineffects(void)
     {
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SWITCHIN_NEUTRALIZING_GAS;
         gSpecialStatuses[battler].announceNeutralizingGas = TRUE;
-        gBattlerAbility = battler;
+        SetBattlerTriggeredAbility(battler, ABILITY_NEUTRALIZING_GAS);
         BattleScriptPushCursor();
         gBattlescriptCurrInstr = BattleScript_SwitchInAbilityMsgRet;
     }
@@ -16462,6 +16462,32 @@ static void Cmd_setsandstorm(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
+static bool32 IsWeatherDamageBlockedByUniqueAbility(u32 battler, u32 weather)
+{
+    switch (GetBattlerUniqueAbility(battler))
+    {
+    case ABILITY_CREATION:
+    case ABILITY_METEOROLOGY:
+        return weather & (B_WEATHER_ACID_RAIN | B_WEATHER_SANDSTORM | B_WEATHER_HAIL);
+    case ABILITY_TOXIC_DELUGE:
+    case ABILITY_TOXISPHERE:
+    case ABILITY_TOXIC_MONSOON:
+    case ABILITY_ULTRA_FALLOUT:
+        return weather & B_WEATHER_ACID_RAIN;
+    case ABILITY_DOMINION:
+    case ABILITY_GEODE_HEART:
+    case ABILITY_SAND_COMMAND:
+    case ABILITY_TYRANT_STORM:
+        return weather & B_WEATHER_SANDSTORM;
+    case ABILITY_COLD_SNAP:
+    case ABILITY_FROSTBITE_RITUAL:
+    case ABILITY_ICE_FLOE:
+        return weather & B_WEATHER_HAIL;
+    }
+
+    return FALSE;
+}
+
 static void Cmd_weatherdamage(void)
 {
     CMD_ARGS();
@@ -16489,6 +16515,7 @@ static void Cmd_weatherdamage(void)
                 && ability != ABILITY_OVERCOAT
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
+                && !IsWeatherDamageBlockedByUniqueAbility(gBattlerAttacker, B_WEATHER_SANDSTORM)
                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
@@ -16516,6 +16543,7 @@ static void Cmd_weatherdamage(void)
                 && ability != ABILITY_ICE_BODY
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
+                && !IsWeatherDamageBlockedByUniqueAbility(gBattlerAttacker, B_WEATHER_HAIL)
                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
@@ -16562,6 +16590,7 @@ static void Cmd_weatherdamage(void)
                 && ability != ABILITY_OVERCOAT
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
+                && !IsWeatherDamageBlockedByUniqueAbility(gBattlerAttacker, B_WEATHER_ACID_RAIN)
                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;

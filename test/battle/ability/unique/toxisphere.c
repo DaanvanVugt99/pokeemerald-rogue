@@ -20,15 +20,18 @@ SINGLE_BATTLE_TEST("Toxisphere sets Acid Rain on switch-in")
     }
 }
 
-SINGLE_BATTLE_TEST("Toxisphere sets Acid Rain on switch-in even with Neutralizing Gas")
+SINGLE_BATTLE_TEST("Neutralizing Gas suppresses its holder's Toxisphere")
 {
     GIVEN {
         PLAYER(SPECIES_WEEZING) { Ability(ABILITY_NEUTRALIZING_GAS); UniqueAbility(ABILITY_TOXISPHERE); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_NEUTRALIZING_GAS);
+        NOT ABILITY_POPUP(player, ABILITY_TOXISPHERE);
     } THEN {
-        EXPECT(gBattleWeather & B_WEATHER_ACID_RAIN);
+        EXPECT(!(gBattleWeather & B_WEATHER_ACID_RAIN));
     }
 }
 

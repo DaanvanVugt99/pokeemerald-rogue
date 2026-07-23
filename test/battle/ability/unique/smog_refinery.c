@@ -47,6 +47,24 @@ SINGLE_BATTLE_TEST("Smog Refinery blocks a secondary stat drop and retaliates wi
     }
 }
 
+SINGLE_BATTLE_TEST("Neutralizing Gas suppresses its holder's Smog Refinery")
+{
+    GIVEN {
+        PLAYER(SPECIES_WEEZING_GALARIAN) { HP(500); Ability(ABILITY_NEUTRALIZING_GAS); UniqueAbility(ABILITY_SMOG_REFINERY); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); Speed(100); Moves(MOVE_ACID_SPRAY); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_ACID_SPRAY); MOVE(player, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_SMOG_REFINERY);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_STRANGE_STEAM, player);
+        }
+    } THEN {
+        EXPECT_LT(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponent->hp, opponent->maxHP);
+    }
+}
+
 SINGLE_BATTLE_TEST("Smog Refinery does not block primary effects from status moves")
 {
     GIVEN {
