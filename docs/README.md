@@ -29,6 +29,8 @@ material retained from the projects it builds upon.
 
 ## Third-Party Notices
 
+- [Random Pokemon nickname data](third_party/pokemon-nicknames.md) records the
+  sources, pinned snapshots, licenses, and selection rules for the curated
+  nickname pool.
 - [Pokemon Showdown attribution](third_party/pokemon-showdown.md) records the
   source and license for adapted canonical ability descriptions.
-
