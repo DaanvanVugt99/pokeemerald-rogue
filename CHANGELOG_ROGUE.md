@@ -73,6 +73,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Differentiated the hidden-entry abilities: Kecleon's Stealth now activates on
+  every switch-in, Lumineon's primed Dive switches it out after attacking, and
+  Dudunsparce's Dig raises Speed after hitting.
 - Clarified that Living Fossil, Cliffside, and Steadfast require a foe's hit to
   carry their user from at least half HP to below half HP.
 - Neutralizing Gas now suppresses its holder's separate unique ability while

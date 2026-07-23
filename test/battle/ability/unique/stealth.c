@@ -8,16 +8,20 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_PHANTOM_FORCE].effect == EFFECT_SEMI_INVULNERABLE);
 }
 
-SINGLE_BATTLE_TEST("Stealth hides Kecleon on first switch-in, ignoring moves and hazards")
+SINGLE_BATTLE_TEST("Stealth hides Kecleon on every switch-in, ignoring moves and hazards")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         PLAYER(SPECIES_KECLEON) { Ability(ABILITY_COLOR_CHANGE); UniqueAbility(ABILITY_STEALTH); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_STEALTH_ROCK, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_STEALTH_ROCK, MOVE_TACKLE, MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_STEALTH_ROCK); }
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_TACKLE); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_TACKLE); }
     } SCENE {
+        ABILITY_POPUP(player, ABILITY_STEALTH);
+        MESSAGE("Foe Wobbuffet's attack missed!");
         ABILITY_POPUP(player, ABILITY_STEALTH);
         MESSAGE("Foe Wobbuffet's attack missed!");
     } THEN {

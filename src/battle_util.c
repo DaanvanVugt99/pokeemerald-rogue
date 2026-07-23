@@ -613,6 +613,8 @@ void HandleAction_UseMove(void)
      && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
     {
         gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
+        if (HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE) && gCurrentMove == MOVE_DIVE)
+            gProtectStructs[gBattlerAttacker].uniqueAbilityActive = TRUE;
         if ((HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW) && gCurrentMove != MOVE_DIG)
          || (HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE) && gCurrentMove != MOVE_DIVE)
          || (HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH)
@@ -9789,12 +9791,9 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             return 1;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_STEALTH)
-         && !uniqueDone
-         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
+        if (HasBattlerAbility(battler, ABILITY_STEALTH) && !uniqueDone)
         {
             uniqueDone = TRUE;
-            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
             gBattlerAttacker = battler;
             gCurrentMove = MOVE_PHANTOM_FORCE;

@@ -39,19 +39,38 @@ SINGLE_BATTLE_TEST("Submerge ends after using a normal move")
     }
 }
 
-SINGLE_BATTLE_TEST("Submerge makes Dive skip its charging turn")
+SINGLE_BATTLE_TEST("Submerge makes its primed Dive strike at once and switch the user out")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        PLAYER(SPECIES_WOBBUFFET) { Speed(100); UniqueAbility(ABILITY_SUBMERGE); Moves(MOVE_DIVE); }
+        PLAYER(SPECIES_LUMINEON) { Speed(100); Ability(ABILITY_STORM_DRAIN); UniqueAbility(ABILITY_SUBMERGE); Moves(MOVE_DIVE); }
+        PLAYER(SPECIES_MAGIKARP) { Speed(1); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE, MOVE_TACKLE); }
     } WHEN {
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
-        TURN { MOVE(player, MOVE_DIVE); MOVE(opponent, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_DIVE); MOVE(opponent, MOVE_TACKLE); SEND_OUT(player, 2); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DIVE, player);
+        ABILITY_POPUP(player, ABILITY_SUBMERGE);
     } THEN {
-        EXPECT_LT(player->hp, player->maxHP);
+        EXPECT_EQ(player->species, SPECIES_MAGIKARP);
         EXPECT_LT(opponent->hp, opponent->maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Submerge does not switch out when its primed Dive fails")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_LUMINEON) { Speed(100); Ability(ABILITY_STORM_DRAIN); UniqueAbility(ABILITY_SUBMERGE); Moves(MOVE_DIVE); }
+        PLAYER(SPECIES_MAGIKARP) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE, MOVE_PROTECT); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_DIVE); MOVE(opponent, MOVE_PROTECT); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, opponent);
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_LUMINEON);
     }
 }

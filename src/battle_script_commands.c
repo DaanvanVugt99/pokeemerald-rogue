@@ -8047,10 +8047,13 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
-             && HasBattlerAbility(gBattlerAttacker, ABILITY_UNDERTOW)
+             && ((HasBattlerAbility(gBattlerAttacker, ABILITY_UNDERTOW)
+               && moveType == TYPE_WATER
+               && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE)
+              || (HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE)
+               && gProtectStructs[gBattlerAttacker].uniqueAbilityActive
+               && gCurrentMove == MOVE_DIVE))
              && IsBattlerAlive(gBattlerAttacker)
-             && moveType == TYPE_WATER
-             && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE
              && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
              && CountUsablePartyMons(gBattlerAttacker) > 0
              && gProtectStructs[gBattlerAttacker].targetAffected
@@ -8060,12 +8063,30 @@ static void Cmd_moveend(void)
              && gBattleOutcome == 0
              && !NoAliveMonsForEitherParty())
             {
-                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_UNDERTOW);
+                SetBattlerTriggeredAbility(gBattlerAttacker,
+                    HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE) ? ABILITY_SUBMERGE : ABILITY_UNDERTOW);
                 gBattlerAbility = gBattlerAttacker;
                 gBattleScripting.battler = gBattlerAttacker;
                 gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_UndertowActivates;
+                effect = TRUE;
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW)
+             && IsBattlerAlive(gBattlerAttacker)
+             && gCurrentMove == MOVE_DIG
+             && TARGET_TURN_DAMAGED
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED | MOVE_RESULT_FAILED | MOVE_RESULT_DOESNT_AFFECT_FOE))
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && CompareStat(gBattlerAttacker, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_BURROW);
+                SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AttackerAbilityStatRaise;
                 effect = TRUE;
             }
             if (!effect
