@@ -8681,6 +8681,12 @@ static void Cmd_moveend(void)
             else
                 gBattleScripting.moveendState++;
             break;
+        case MOVEEND_COUNTERSPELL:
+            if (TryUseCounterspellCalledMoveOnStatusMove())
+                effect = TRUE;
+            else
+                gBattleScripting.moveendState++;
+            break;
         case MOVEEND_SAME_MOVE_TURNS:
             if (gCurrentMove != gLastResultingMoves[gBattlerAttacker] || gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
                 gBattleStruct->sameMoveTurns[gBattlerAttacker] = 0;

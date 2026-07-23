@@ -80,6 +80,8 @@ Format follows Keep a Changelog loosely:
 - Replaced Open Field on all three Paldean Tauros breeds with Horn Lock:
   successful Raging Bull hits exchange secondary types with the target.
   Removed their now-unrelated Plain Terrain level-up move.
+- Replaced Gifted Mind on Galarian Slowking with Counterspell, which answers
+  successful opposing status moves with a 20 BP Eerie Spell.
 - Replaced Night Hunter on Hisuian Decidueye with Wandering Hunter, which uses
   Baton Pass after its first knockout each battle.
 - Replaced Duelist on Galarian Farfetch'd and Sirfetch'd with Sword and Board,

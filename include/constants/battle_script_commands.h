@@ -357,9 +357,10 @@
 #define MOVEEND_SYMBIOSIS                         38
 #define MOVEEND_OPPORTUNIST                       39    // Occurs after other stat change items/abilities to try and copy the boosts
 #define MOVEEND_DELIVERY_BAG                      40
-#define MOVEEND_SAME_MOVE_TURNS                   41
-#define MOVEEND_CLEAR_BITS                        42
-#define MOVEEND_COUNT                             43
+#define MOVEEND_COUNTERSPELL                      41
+#define MOVEEND_SAME_MOVE_TURNS                   42
+#define MOVEEND_CLEAR_BITS                        43
+#define MOVEEND_COUNT                             44
 
 // switch cases
 #define B_SWITCH_NORMAL     0

@@ -535,7 +535,7 @@ STATIC_ASSERT(DYNAMIC_MOVE_PAIR_CODE_START + DYNAMIC_MOVE_PAIR_COUNT <= DYNAMIC_
 STATIC_ASSERT(ABILITIES_COUNT <= 1024, DynamicUniqueAbilityFits10Bits);
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
-#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_HORN_LOCK
+#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_COUNTERSPELL
 
 // These are the only custom abilities which are not safe and useful on an
 // arbitrary generated Pokemon. Keep this list explicit so new abilities do
@@ -591,7 +591,7 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
 #define DYNAMIC_UNIQUE_ABILITY_COUNT \
     (DYNAMIC_UNIQUE_ABILITY_MAX - DYNAMIC_UNIQUE_ABILITY_MIN + 1 - ARRAY_COUNT(sExcludedDynamicUniqueAbilities))
 
-STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 573, DynamicUniqueAbilityPoolAuditCount);
+STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 574, DynamicUniqueAbilityPoolAuditCount);
 
 bool8 RogueGift_IsDynamicUniqueAbilityEligible(u16 ability)
 {

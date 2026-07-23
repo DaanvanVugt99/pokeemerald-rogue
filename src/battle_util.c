@@ -6981,6 +6981,43 @@ bool32 TryUseDeliveryBagCalledMoveOnStatusMove(void)
     return TryUseDeliveryBagCalledMove(battler);
 }
 
+bool32 TryUseCounterspellCalledMoveOnStatusMove(void)
+{
+    u32 statusUser = gBattlerAttacker;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+    u32 i;
+
+    if (!IS_MOVE_STATUS(gCurrentMove)
+     || !DidMoveSucceedForMoveEndEffects(statusUser)
+     || (gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+     || gProtectStructs[statusUser].confusionSelfDmg)
+        return FALSE;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+
+        if (GetBattlerSide(battler) == GetBattlerSide(statusUser)
+         || !HasBattlerAbility(battler, ABILITY_COUNTERSPELL)
+         || !CanUseExtraMove(battler, statusUser))
+            continue;
+
+        SetBattlerTriggeredAbility(battler, ABILITY_COUNTERSPELL);
+        SetAtkCancellerForCalledMove();
+        gBattlerAttacker = gBattlerAbility = battler;
+        gBattlerTarget = statusUser;
+        gCalledMove = MOVE_EERIE_SPELL;
+        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+        gProtectStructs[battler].extraMoveUsed = TRUE;
+        VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+        StartAbilityCalledMoveScript();
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 static const u16 sWishmakerMoves[] =
 {
     MOVE_LIFE_DEW,
