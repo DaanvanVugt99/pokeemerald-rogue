@@ -66,6 +66,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Bulk berry planting now reports insufficient field space immediately after
+  choosing an amount, before asking which Berry to plant.
 - Rebalanced fixed Trainer IVs around clearer difficulty identities: ordinary
   Trainers now always have zero IVs, Average key Trainers gain only 5/10/15
   IVs across the Elite Four and Champion battles, and Hard and Brutal key

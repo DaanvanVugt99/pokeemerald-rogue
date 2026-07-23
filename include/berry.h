@@ -28,8 +28,10 @@ void ObjectEventInteractionPickBerryTree(void);
 void ObjectEventInteractionRemoveBerryTree(void);
 bool8 PlayerHasBerries(void);
 void RogueBerryField_HarvestAll(void);
+void RogueBerryField_CheckBulkPlantSpace(void);
 void RogueBerryField_BulkPlantSelected(void);
 void RogueDaycareBerryField_HarvestAll(void);
+void RogueDaycareBerryField_CheckBulkPlantSpace(void);
 void RogueDaycareBerryField_BulkPlantSelected(void);
 void SetBerryTreesSeen(void);
 

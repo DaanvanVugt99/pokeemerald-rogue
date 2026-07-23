@@ -32,6 +32,7 @@ static u8 CalcBerryYield(struct BerryTree *tree);
 static u16 GetStageDurationByBerryType(u8);
 static bool8 RogueBerryField_IsPatchUnlocked(u8 patch, bool8 useHubUpgrades);
 static bool8 RogueBerryField_IsPatchEmpty(u8 start, u8 patchSize);
+static bool8 RogueBerryField_HasBulkPlantSpace(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades, u16 requestedCount);
 static bool8 RogueBerryField_CanFitHarvest(const u16 *amounts);
 static void RogueBerryField_MarkTreeJustPicked(u8 treeId);
 static void RogueBerryField_HarvestAllInternal(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades);
@@ -2101,6 +2102,36 @@ static void RogueBerryField_HarvestAllInternal(const u8 *patchStarts, u8 patchCo
     gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_SUCCESS;
 }
 
+static bool8 RogueBerryField_HasBulkPlantSpace(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades, u16 requestedCount)
+{
+    u8 patch;
+    u8 emptyPatchCount = 0;
+    u8 targetPatchCount;
+
+    if (requestedCount == 0 || requestedCount % patchSize != 0)
+        return FALSE;
+
+    targetPatchCount = requestedCount / patchSize;
+    for (patch = 0; patch < patchCount; ++patch)
+    {
+        if (RogueBerryField_IsPatchUnlocked(patch, useHubUpgrades) && RogueBerryField_IsPatchEmpty(patchStarts[patch], patchSize))
+        {
+            if (++emptyPatchCount >= targetPatchCount)
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static void RogueBerryField_CheckBulkPlantSpaceInternal(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades)
+{
+    if (RogueBerryField_HasBulkPlantSpace(patchStarts, patchCount, patchSize, useHubUpgrades, gSpecialVar_0x8004))
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_SUCCESS;
+    else
+        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES;
+}
+
 static void RogueBerryField_BulkPlantSelectedInternal(const u8 *patchStarts, u8 patchCount, u8 patchSize, bool8 useHubUpgrades)
 {
     u8 patch;
@@ -2122,13 +2153,11 @@ static void RogueBerryField_BulkPlantSelectedInternal(const u8 *patchStarts, u8 
         return;
     }
 
-    if (requestedCount == 0 || requestedCount % patchSize != 0)
+    if (!RogueBerryField_HasBulkPlantSpace(patchStarts, patchCount, patchSize, useHubUpgrades, requestedCount))
     {
         gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES;
         return;
     }
-
-    targetPatchCount = requestedCount / patchSize;
 
     for (patch = 0; patch < patchCount; ++patch)
     {
@@ -2136,12 +2165,7 @@ static void RogueBerryField_BulkPlantSelectedInternal(const u8 *patchStarts, u8 
             selectedPatches[selectedPatchCount++] = patch;
     }
 
-    if (selectedPatchCount < targetPatchCount)
-    {
-        gSpecialVar_Result = ROGUE_BERRY_FIELD_RESULT_NOT_ENOUGH_EMPTY_PATCHES;
-        return;
-    }
-
+    targetPatchCount = requestedCount / patchSize;
     RemoveBagItem(itemId, requestedCount);
 
     for (patch = 0; patch < targetPatchCount; ++patch)
@@ -2166,6 +2190,11 @@ void RogueBerryField_HarvestAll(void)
     RogueBerryField_HarvestAllInternal(sRogueHubBerryFieldPatchStarts, ROGUE_HUB_BERRY_FIELD_PATCH_COUNT, ROGUE_HUB_BERRY_FIELD_PATCH_SIZE, TRUE);
 }
 
+void RogueBerryField_CheckBulkPlantSpace(void)
+{
+    RogueBerryField_CheckBulkPlantSpaceInternal(sRogueHubBerryFieldPatchStarts, ROGUE_HUB_BERRY_FIELD_PATCH_COUNT, ROGUE_HUB_BERRY_FIELD_PATCH_SIZE, TRUE);
+}
+
 void RogueBerryField_BulkPlantSelected(void)
 {
     RogueBerryField_BulkPlantSelectedInternal(sRogueHubBerryFieldPatchStarts, ROGUE_HUB_BERRY_FIELD_PATCH_COUNT, ROGUE_HUB_BERRY_FIELD_PATCH_SIZE, TRUE);
@@ -2174,6 +2203,11 @@ void RogueBerryField_BulkPlantSelected(void)
 void RogueDaycareBerryField_HarvestAll(void)
 {
     RogueBerryField_HarvestAllInternal(sRogueDaycareBerryFieldPatchStarts, ROGUE_DAYCARE_BERRY_FIELD_PATCH_COUNT, ROGUE_DAYCARE_BERRY_FIELD_PATCH_SIZE, FALSE);
+}
+
+void RogueDaycareBerryField_CheckBulkPlantSpace(void)
+{
+    RogueBerryField_CheckBulkPlantSpaceInternal(sRogueDaycareBerryFieldPatchStarts, ROGUE_DAYCARE_BERRY_FIELD_PATCH_COUNT, ROGUE_DAYCARE_BERRY_FIELD_PATCH_SIZE, FALSE);
 }
 
 void RogueDaycareBerryField_BulkPlantSelected(void)
