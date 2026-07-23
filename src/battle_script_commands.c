@@ -1843,8 +1843,6 @@ static bool32 AccuracyCalcHelper(u16 move)
        || HasBattlerAbility(gBattlerAttacker, ABILITY_FINAL_STEP))
       && gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn
       && gBattleMoves[move].soundMove)
-	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_HAUTE_COUTURE)
-	      && moveType == TYPE_NORMAL)
 	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_NEST_BOSS)
 	      && IS_BATTLER_OF_TYPE(gBattlerAttacker, moveType))
 	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_BONE_KEEPER)
@@ -2391,7 +2389,10 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
                     + (gBattleMoves[gCurrentMove].highCritRatio)
                     + (abilityAtk == ABILITY_HYPER_CUTTER && IsMoveMakingContact(move, battlerAtk))
                     + (move == MOVE_ATTACK_ORDER && HIVE_COMMAND_ACTIVE(battlerAtk))
-                    + (HasBattlerAbility(battlerAtk, ABILITY_HAUTE_COUTURE) && moveType == TYPE_NORMAL)
+                    + (gBattleStruct->ateBoost[battlerAtk]
+                    && HasBattlerAbility(battlerAtk, ABILITY_HAUTE_COUTURE)
+                    && gBattleMoves[move].type == TYPE_NORMAL
+                    && moveType == gBattleMons[battlerAtk].type2)
                     + (holdEffectAtk == HOLD_EFFECT_SCOPE_LENS)
                     + 2 * (holdEffectAtk == HOLD_EFFECT_LUCKY_PUNCH && gBattleMons[battlerAtk].species == SPECIES_CHANSEY)
                     + 2 * BENEFITS_FROM_LEEK(battlerAtk, holdEffectAtk)
@@ -8716,7 +8717,7 @@ static void Cmd_moveend(void)
             gProtectStructs[gBattlerAttacker].targetAffected = FALSE;
             gBattleStruct->successfulForceSwitchMove[gBattlerAttacker] = MOVE_NONE;
             gProtectStructs[gBattlerAttacker].shellTrap = FALSE;
-            gBattleStruct->ateBoost[gBattlerAttacker] = 0;
+            gBattleStruct->ateBoost[gBattlerAttacker] = FALSE;
             gStatuses3[gBattlerAttacker] &= ~STATUS3_ME_FIRST;
             gSpecialStatuses[gBattlerAttacker].gemBoost = FALSE;
             if ((HasBattlerAbility(gBattlerAttacker, ABILITY_IRON_RESOLVE)

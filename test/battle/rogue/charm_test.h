@@ -5,6 +5,8 @@
 #include "event_data.h"
 #include "item.h"
 #include "rogue_charms.h"
+#include "rogue_controller.h"
+#include "rogue_pokedex.h"
 
 static inline void ClearCharmTestState(void)
 {
@@ -33,6 +35,8 @@ static inline void ClearCharmTestState(void)
 static inline void BeginCharmTestRun(void)
 {
     ClearCharmTestState();
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
 }
 

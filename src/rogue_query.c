@@ -1171,6 +1171,9 @@ static bool8 Query_IsSpeciesEnabledInternal(u16 species, bool32 forceDexCheck)
             // Gen6
             if(species == SPECIES_MEOWSTIC_FEMALE)
                 return Query_IsSpeciesEnabledInDexInternal(species, forceDexCheck);
+
+            if(species >= SPECIES_FURFROU_HEART_TRIM && species <= SPECIES_FURFROU_PHARAOH_TRIM)
+                return Query_IsSpeciesEnabledInDexInternal(species, forceDexCheck);
     
             // Gen7
             if(species >= SPECIES_ORICORIO_POM_POM && species <= SPECIES_LYCANROC_DUSK)

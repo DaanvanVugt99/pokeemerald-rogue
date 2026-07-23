@@ -23777,6 +23777,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
     uq4_12_t holdEffectModifier;
     uq4_12_t modifier = UQ_4_12(1.0);
     u32 atkSide = GetBattlerSide(battlerAtk);
+    bool32 applyAteBoost = gBattleStruct->ateBoost[battlerAtk];
 
     // move effect
     switch (gBattleMoves[move].effect)
@@ -23884,6 +23885,17 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
+    // Haute Couture uses the existing -ate boost, but its second-type
+    // conversion takes precedence over any standard -ate ability.
+    if (applyAteBoost
+     && HasBattlerAbility(battlerAtk, ABILITY_HAUTE_COUTURE)
+     && gBattleMoves[move].type == TYPE_NORMAL
+     && moveType == gBattleMons[battlerAtk].type2)
+    {
+        modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
+        applyAteBoost = FALSE;
+    }
+
     // attacker's abilities
     switch (atkAbility)
     {
@@ -23949,27 +23961,27 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
            modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_PIXILATE:
-        if (moveType == TYPE_FAIRY && gBattleStruct->ateBoost[battlerAtk])
+        if (moveType == TYPE_FAIRY && applyAteBoost)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
         break;
     case ABILITY_GALVANIZE:
-        if (moveType == TYPE_ELECTRIC && gBattleStruct->ateBoost[battlerAtk])
+        if (moveType == TYPE_ELECTRIC && applyAteBoost)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
         break;
     case ABILITY_REFRIGERATE:
-        if (moveType == TYPE_ICE && gBattleStruct->ateBoost[battlerAtk])
+        if (moveType == TYPE_ICE && applyAteBoost)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
         break;
     case ABILITY_AERILATE:
-        if (moveType == TYPE_FLYING && gBattleStruct->ateBoost[battlerAtk])
+        if (moveType == TYPE_FLYING && applyAteBoost)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
         break;
     case ABILITY_DRAGONIZE:
-        if (moveType == TYPE_DRAGON && gBattleStruct->ateBoost[battlerAtk])
+        if (moveType == TYPE_DRAGON && applyAteBoost)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
         break;
     case ABILITY_NORMALIZE:
-        if (moveType == TYPE_NORMAL && gBattleStruct->ateBoost[battlerAtk])
+        if (moveType == TYPE_NORMAL && applyAteBoost)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
         break;
     case ABILITY_PUNK_ROCK:

@@ -6226,6 +6226,7 @@ static bool32 MoveCanReceiveNormalTypeAbilityOverride(u32 move)
 u8 GetMonMoveType(u32 move, struct Pokemon *mon)
 {
     u32 species = GetMonData(mon, MON_DATA_SPECIES);
+    u32 otId = GetMonData(mon, MON_DATA_OT_ID);
     u32 ability = GetMonAbility(mon);
     u32 item;
     u32 holdEffect;
@@ -6310,7 +6311,8 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
 
     if (gBattleMoves[move].type == TYPE_NORMAL
      && MoveCanReceiveNormalTypeAbilityOverride(move)
-     && ((ability == ABILITY_PIXILATE && (ateType = TYPE_FAIRY))
+     && ((MonHasMoveTypeAbility(mon, ABILITY_HAUTE_COUTURE) && (ateType = GetTypeBySpecies(species, 1, otId), TRUE))
+      || (ability == ABILITY_PIXILATE && (ateType = TYPE_FAIRY))
       || (ability == ABILITY_REFRIGERATE && (ateType = TYPE_ICE))
       || (ability == ABILITY_AERILATE && (ateType = TYPE_FLYING))
       || (ability == ABILITY_GALVANIZE && (ateType = TYPE_ELECTRIC))
@@ -6475,26 +6477,21 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
         gBattleStruct->dynamicMoveType = gBattleMoves[gLastMoves[battlerAtk]].type | F_DYNAMIC_TYPE_SET;
 
     attackerAbility = GetBattlerAbility(battlerAtk);
-
     if (gBattleMoves[move].type == TYPE_NORMAL
-             && gBattleMoves[move].effect != EFFECT_HIDDEN_POWER
-             && gBattleMoves[move].effect != EFFECT_WEATHER_BALL
-             && gBattleMoves[move].effect != EFFECT_CHANGE_TYPE_ON_ITEM
-             && gBattleMoves[move].effect != EFFECT_NATURAL_GIFT
+             && MoveCanReceiveNormalTypeAbilityOverride(move)
              && !(gBattleMoves[move].effect == EFFECT_TERA_BLAST && IsTerastallized(battlerAtk))
              && !(gBattleMoves[move].effect == EFFECT_TERA_STARSTORM && gBattleMons[battlerAtk].species == SPECIES_TERAPAGOS_STELLAR)
-             && ((attackerAbility == ABILITY_PIXILATE && (ateType = TYPE_FAIRY))
-                 || (attackerAbility == ABILITY_REFRIGERATE && (ateType = TYPE_ICE))
-                 || (attackerAbility == ABILITY_AERILATE && (ateType = TYPE_FLYING))
-                 || ((attackerAbility == ABILITY_GALVANIZE) && (ateType = TYPE_ELECTRIC))
-                 || (attackerAbility == ABILITY_DRAGONIZE && (ateType = TYPE_DRAGON))
-                 || (HasBattlerAbility(battlerAtk, ABILITY_IMMOLATE) && (ateType = TYPE_FIRE))
-                )
-             )
+             && ((HasBattlerAbility(battlerAtk, ABILITY_HAUTE_COUTURE) && (ateType = gBattleMons[battlerAtk].type2, TRUE))
+              || (attackerAbility == ABILITY_PIXILATE && (ateType = TYPE_FAIRY))
+              || (attackerAbility == ABILITY_REFRIGERATE && (ateType = TYPE_ICE))
+              || (attackerAbility == ABILITY_AERILATE && (ateType = TYPE_FLYING))
+              || (attackerAbility == ABILITY_GALVANIZE && (ateType = TYPE_ELECTRIC))
+              || (attackerAbility == ABILITY_DRAGONIZE && (ateType = TYPE_DRAGON))
+              || (HasBattlerAbility(battlerAtk, ABILITY_IMMOLATE) && (ateType = TYPE_FIRE))))
     {
         gBattleStruct->dynamicMoveType = ateType | F_DYNAMIC_TYPE_SET;
         if (!IsDynamaxed(battlerAtk) && !HasBattlerAbility(battlerAtk, ABILITY_IMMOLATE))
-            gBattleStruct->ateBoost[battlerAtk] = 1;
+            gBattleStruct->ateBoost[battlerAtk] = TRUE;
     }
     else if (gBattleMoves[move].type != TYPE_NORMAL
              && gBattleMoves[move].effect != EFFECT_HIDDEN_POWER
@@ -6503,7 +6500,7 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     {
         gBattleStruct->dynamicMoveType = TYPE_NORMAL | F_DYNAMIC_TYPE_SET;
         if (!IsDynamaxed(battlerAtk))
-            gBattleStruct->ateBoost[battlerAtk] = 1;
+            gBattleStruct->ateBoost[battlerAtk] = TRUE;
     }
     else if (gBattleMoves[move].soundMove && attackerAbility == ABILITY_LIQUID_VOICE)
     {
@@ -6538,7 +6535,7 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     if (HasBattlerAbility(battlerAtk, ABILITY_MANTIS_MIMICRY) && moveType == TYPE_BUG)
     {
         gBattleStruct->dynamicMoveType = TYPE_GRASS | F_DYNAMIC_TYPE_SET;
-        gBattleStruct->ateBoost[battlerAtk] = 1;
+        gBattleStruct->ateBoost[battlerAtk] = TRUE;
     }
 
     GET_MOVE_TYPE(move, moveType);

@@ -1,9 +1,11 @@
 #include "global.h"
 #include "test/test.h"
 #include "constants/species.h"
+#include "event_data.h"
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
 #include "rogue_query.h"
+#include "pokemon.h"
 
 #if defined(ROGUE_EXPANSION)
 static bool8 IsMiniorMeteorForm(u16 species)
@@ -66,6 +68,38 @@ TEST("Wild encounter approved random forms only spawn Gimmighoul Chest Form")
 
     for(i = 0; i < 8; ++i)
         EXPECT_EQ(RogueDebug_GetWildApprovedFamilyForm(SPECIES_GIMMIGHOUL_ROAMING, i), SPECIES_GIMMIGHOUL_CHEST);
+#else
+    ASSUME(FALSE);
+#endif
+}
+
+TEST("Furfrou trims have distinct secondary types")
+{
+#if defined(ROGUE_EXPANSION)
+    static const struct
+    {
+        u16 species;
+        u8 type;
+    } sFurfrouTrimTypes[] =
+    {
+        { SPECIES_FURFROU_NATURAL,        TYPE_NORMAL },
+        { SPECIES_FURFROU_HEART_TRIM,     TYPE_FAIRY },
+        { SPECIES_FURFROU_STAR_TRIM,      TYPE_ELECTRIC },
+        { SPECIES_FURFROU_DIAMOND_TRIM,   TYPE_ROCK },
+        { SPECIES_FURFROU_DEBUTANTE_TRIM, TYPE_GRASS },
+        { SPECIES_FURFROU_MATRON_TRIM,    TYPE_PSYCHIC },
+        { SPECIES_FURFROU_DANDY_TRIM,     TYPE_DARK },
+        { SPECIES_FURFROU_LA_REINE_TRIM,  TYPE_ICE },
+        { SPECIES_FURFROU_KABUKI_TRIM,    TYPE_FIRE },
+        { SPECIES_FURFROU_PHARAOH_TRIM,   TYPE_GROUND },
+    };
+    u16 i;
+
+    for(i = 0; i < ARRAY_COUNT(sFurfrouTrimTypes); ++i)
+    {
+        EXPECT_EQ(GetTypeBySpecies(sFurfrouTrimTypes[i].species, 0, 0), TYPE_NORMAL);
+        EXPECT_EQ(GetTypeBySpecies(sFurfrouTrimTypes[i].species, 1, 0), sFurfrouTrimTypes[i].type);
+    }
 #else
     ASSUME(FALSE);
 #endif
@@ -140,6 +174,49 @@ TEST("Wild encounter family selection does not leak inactive Rotom forms")
     EXPECT_EQ(RogueDebug_SelectWildSpeciesFromCurrentQuery(0, 99, FALSE), SPECIES_ROTOM_HEAT);
 
     RogueMonQuery_End();
+#else
+    ASSUME(FALSE);
+#endif
+}
+
+TEST("Wild encounter family selection does not leak inactive Furfrou trims")
+{
+#if defined(ROGUE_EXPANSION)
+    RogueMonQuery_Begin();
+
+    RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, SPECIES_FURFROU_DEBUTANTE_TRIM);
+
+    EXPECT_EQ(RogueDebug_SelectWildSpeciesFromCurrentQuery(0, 99, FALSE), SPECIES_FURFROU_DEBUTANTE_TRIM);
+
+    RogueMonQuery_End();
+#else
+    ASSUME(FALSE);
+#endif
+}
+
+TEST("Active run queries include Furfrou trims for their distinct types")
+{
+#if defined(ROGUE_EXPANSION)
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+
+    RogueMonQuery_Begin();
+    RogueMonQuery_IsSpeciesActive();
+    RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, MON_TYPE_VAL_TO_FLAGS(TYPE_GRASS));
+
+    EXPECT(RogueMiscQuery_CheckState(SPECIES_FURFROU_DEBUTANTE_TRIM));
+    EXPECT(!RogueMiscQuery_CheckState(SPECIES_FURFROU_STAR_TRIM));
+
+    RogueMonQuery_End();
+
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
 #else
     ASSUME(FALSE);
 #endif

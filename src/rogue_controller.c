@@ -7010,7 +7010,14 @@ static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, Weigh
 
     AGB_ASSERT(selectedFamilyKey != SPECIES_NONE);
 
-    species = SelectWildSpeciesFromApprovedForms(selectedFamilyKey, formRand);
+    // Furfrou trims have distinct typings, so typed queries must select from
+    // the eligible trims instead of leaking an unrelated approved form.
+#ifdef ROGUE_EXPANSION
+    if(selectedFamilyKey == WILD_FORM_FAMILY_FURFROU)
+        species = SelectWildSpeciesFromEligibleFamily(selectedFamilyKey, formRand, weightFunc, data);
+    else
+#endif
+        species = SelectWildSpeciesFromApprovedForms(selectedFamilyKey, formRand);
 
     if(species == SPECIES_NONE)
         species = SelectWildSpeciesFromEligibleFamily(selectedFamilyKey, formRand, weightFunc, data);

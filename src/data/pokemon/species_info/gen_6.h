@@ -1656,7 +1656,6 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         .baseSpeed     = 102,                               \
         .baseSpAttack  = 65,                                \
         .baseSpDefense = 90,                                \
-        .types = { TYPE_NORMAL, TYPE_NORMAL },              \
         .catchRate = 160,                                   \
         .expYield = 165,                                    \
         .evYield_Speed = 1,                                 \
@@ -1688,6 +1687,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_NATURAL] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_NORMAL },
         FRONT_PIC(FurfrouNatural, 48, 64),
         .frontPicYOffset = 3,
         BACK_PIC(FurfrouNatural, 56, 64),
@@ -1698,6 +1698,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_HEART_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_FAIRY },
         FRONT_PIC(FurfrouHeartTrim, 56, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouHeartTrim, 56, 64),
@@ -1708,6 +1709,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_STAR_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_ELECTRIC },
         FRONT_PIC(FurfrouStarTrim, 56, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouStarTrim, 64, 64),
@@ -1718,6 +1720,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_DIAMOND_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_ROCK },
         FRONT_PIC(FurfrouDiamondTrim, 48, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouDiamondTrim, 56, 64),
@@ -1728,6 +1731,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_DEBUTANTE_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_GRASS },
         .noFlip = TRUE,
         FRONT_PIC(FurfrouDebutanteTrim, 48, 64),
         .frontPicYOffset = 2,
@@ -1739,6 +1743,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_MATRON_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_PSYCHIC },
         FRONT_PIC(FurfrouMatronTrim, 48, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouMatronTrim, 56, 64),
@@ -1749,6 +1754,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_DANDY_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_DARK },
         FRONT_PIC(FurfrouDandyTrim, 48, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouDandyTrim, 56, 64),
@@ -1759,6 +1765,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_LA_REINE_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_ICE },
         FRONT_PIC(FurfrouLaReineTrim, 48, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouLaReineTrim, 56, 64),
@@ -1769,6 +1776,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_KABUKI_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_FIRE },
         FRONT_PIC(FurfrouKabukiTrim, 56, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouKabukiTrim, 56, 64),
@@ -1779,6 +1787,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_FURFROU_PHARAOH_TRIM] =
     {
         FURFROU_MISC_INFO,
+        .types = { TYPE_NORMAL, TYPE_GROUND },
         FRONT_PIC(FurfrouPharaohTrim, 48, 64),
         .frontPicYOffset = 2,
         BACK_PIC(FurfrouPharaohTrim, 56, 64),
