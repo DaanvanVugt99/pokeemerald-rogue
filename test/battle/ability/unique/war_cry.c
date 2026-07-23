@@ -6,7 +6,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_BULK_UP].effect == EFFECT_BULK_UP);
 }
 
-SINGLE_BATTLE_TEST("Primal Roar uses Bulk Up after Koraidon knocks out a target if the party shares a type")
+SINGLE_BATTLE_TEST("War Cry uses Bulk Up after Koraidon knocks out a target if the party shares a type")
 {
     bool32 partySharesType;
 
@@ -29,13 +29,13 @@ SINGLE_BATTLE_TEST("Primal Roar uses Bulk Up after Koraidon knocks out a target 
         HP_BAR(opponent);
         if (partySharesType)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_ROAR);
+            ABILITY_POPUP(player, ABILITY_WAR_CRY);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_BULK_UP, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_ROAR);
+                ABILITY_POPUP(player, ABILITY_WAR_CRY);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_BULK_UP, player);
             }
         }
@@ -53,7 +53,7 @@ SINGLE_BATTLE_TEST("Primal Roar uses Bulk Up after Koraidon knocks out a target 
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Roar does not trigger if Koraidon does not knock out the target")
+SINGLE_BATTLE_TEST("War Cry does not trigger if Koraidon does not knock out the target")
 {
     GIVEN {
         PLAYER(SPECIES_KORAIDON) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_TACKLE); }
@@ -66,7 +66,7 @@ SINGLE_BATTLE_TEST("Primal Roar does not trigger if Koraidon does not knock out 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_ROAR);
+            ABILITY_POPUP(player, ABILITY_WAR_CRY);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_BULK_UP, player);
         }
     } THEN {

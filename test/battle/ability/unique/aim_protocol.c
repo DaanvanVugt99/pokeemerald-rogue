@@ -8,7 +8,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_PROTECT].effect == EFFECT_PROTECT);
 }
 
-SINGLE_BATTLE_TEST("Singularity Targeting makes Iron Bundle's moves never miss if it is the only Paradox")
+SINGLE_BATTLE_TEST("Aim Protocol makes Iron Bundle's moves never miss if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -46,7 +46,7 @@ SINGLE_BATTLE_TEST("Singularity Targeting makes Iron Bundle's moves never miss i
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Targeting does not bypass Protect")
+SINGLE_BATTLE_TEST("Aim Protocol does not bypass Protect")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BUNDLE) { Speed(50); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_HYDRO_PUMP); }

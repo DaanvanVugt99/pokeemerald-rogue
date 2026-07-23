@@ -8,7 +8,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_ELECTRIC_TERRAIN].effect == EFFECT_ELECTRIC_TERRAIN);
 }
 
-SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Sandstorm starts if Sandy Shocks is the only Paradox")
+SINGLE_BATTLE_TEST("Flux Instinct uses Magnet Rise when Sandstorm starts if Sandy Shocks is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -28,13 +28,13 @@ SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Sandstorm starts if San
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SANDSTORM, opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_CURRENT);
+            ABILITY_POPUP(player, ABILITY_FLUX_INSTINCT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGNET_RISE, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_CURRENT);
+                ABILITY_POPUP(player, ABILITY_FLUX_INSTINCT);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGNET_RISE, player);
             }
         }
@@ -47,7 +47,7 @@ SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Sandstorm starts if San
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Electric Terrain starts if Sandy Shocks is the only Paradox")
+SINGLE_BATTLE_TEST("Flux Instinct uses Magnet Rise when Electric Terrain starts if Sandy Shocks is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -67,13 +67,13 @@ SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Electric Terrain starts
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ELECTRIC_TERRAIN, opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_CURRENT);
+            ABILITY_POPUP(player, ABILITY_FLUX_INSTINCT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGNET_RISE, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_CURRENT);
+                ABILITY_POPUP(player, ABILITY_FLUX_INSTINCT);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGNET_RISE, player);
             }
         }
@@ -86,7 +86,7 @@ SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Electric Terrain starts
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Sandy Shocks switches into active Sandstorm or Electric Terrain")
+SINGLE_BATTLE_TEST("Flux Instinct uses Magnet Rise when Sandy Shocks switches into active Sandstorm or Electric Terrain")
 {
     u16 setupMove;
 
@@ -103,7 +103,7 @@ SINGLE_BATTLE_TEST("Primal Current uses Magnet Rise when Sandy Shocks switches i
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, setupMove, opponent);
-        ABILITY_POPUP(player, ABILITY_PRIMAL_CURRENT);
+        ABILITY_POPUP(player, ABILITY_FLUX_INSTINCT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGNET_RISE, player);
     } THEN {
         EXPECT(gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_MAGNET_RISE);

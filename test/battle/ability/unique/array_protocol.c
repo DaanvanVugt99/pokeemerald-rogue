@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(IS_MOVE_STATUS(MOVE_CELEBRATE));
 }
 
-DOUBLE_BATTLE_TEST("Singularity Array makes Iron Crown's first damaging move hit both opposing Pokemon")
+DOUBLE_BATTLE_TEST("Array Protocol makes Iron Crown's first damaging move hit both opposing Pokemon")
 {
     bool32 hasOtherParadox;
 
@@ -49,7 +49,7 @@ DOUBLE_BATTLE_TEST("Singularity Array makes Iron Crown's first damaging move hit
     }
 }
 
-DOUBLE_BATTLE_TEST("Singularity Array ignores status moves before Iron Crown's first damaging move")
+DOUBLE_BATTLE_TEST("Array Protocol ignores status moves before Iron Crown's first damaging move")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_CROWN) { Level(100); SpAttack(300); Speed(100); Ability(ABILITY_QUARK_DRIVE); Moves(MOVE_CELEBRATE, MOVE_TACHYON_CUTTER); }

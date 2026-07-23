@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(gItems[ITEM_LIFE_ORB].holdEffect == HOLD_EFFECT_LIFE_ORB);
 }
 
-SINGLE_BATTLE_TEST("Primal Echo only repeats a damaging sound move when Scream Tail is the only Paradox")
+SINGLE_BATTLE_TEST("Echo Instinct only repeats a damaging sound move when Scream Tail is the only Paradox")
 {
     bool32 hasOtherParadox;
     s16 echoHit;
@@ -31,14 +31,14 @@ SINGLE_BATTLE_TEST("Primal Echo only repeats a damaging sound move when Scream T
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_ECHO);
+            ABILITY_POPUP(player, ABILITY_ECHO_INSTINCT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, player);
             HP_BAR(opponent, captureDamage: &echoHit);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_ECHO);
+                ABILITY_POPUP(player, ABILITY_ECHO_INSTINCT);
             }
         }
     } THEN {
@@ -55,7 +55,7 @@ SINGLE_BATTLE_TEST("Primal Echo only repeats a damaging sound move when Scream T
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Echo only triggers once per battle and not from the echoed sound move")
+SINGLE_BATTLE_TEST("Echo Instinct only triggers once per battle and not from the echoed sound move")
 {
     GIVEN {
         PLAYER(SPECIES_SCREAM_TAIL) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_HYPER_VOICE); }
@@ -67,20 +67,20 @@ SINGLE_BATTLE_TEST("Primal Echo only triggers once per battle and not from the e
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_PRIMAL_ECHO);
+        ABILITY_POPUP(player, ABILITY_ECHO_INSTINCT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, player);
         HP_BAR(opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_ECHO);
+            ABILITY_POPUP(player, ABILITY_ECHO_INSTINCT);
         }
     } THEN {
         EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Echo does not trigger after non-sound moves")
+SINGLE_BATTLE_TEST("Echo Instinct does not trigger after non-sound moves")
 {
     GIVEN {
         PLAYER(SPECIES_SCREAM_TAIL) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_TACKLE); }
@@ -92,14 +92,14 @@ SINGLE_BATTLE_TEST("Primal Echo does not trigger after non-sound moves")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_ECHO);
+            ABILITY_POPUP(player, ABILITY_ECHO_INSTINCT);
         }
     } THEN {
         EXPECT_EQ(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0], 0);
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Echo does not trigger if pending Life Orb damage would faint the user")
+SINGLE_BATTLE_TEST("Echo Instinct does not trigger if pending Life Orb damage would faint the user")
 {
     GIVEN {
         PLAYER(SPECIES_SCREAM_TAIL) { MaxHP(100); HP(1); Speed(100); Ability(ABILITY_BATTLE_ARMOR); Item(ITEM_LIFE_ORB); Moves(MOVE_HYPER_VOICE); }
@@ -109,7 +109,7 @@ SINGLE_BATTLE_TEST("Primal Echo does not trigger if pending Life Orb damage woul
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPER_VOICE, player);
         HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_PRIMAL_ECHO);
+        NOT ABILITY_POPUP(player, ABILITY_ECHO_INSTINCT);
         HP_BAR(player);
     } THEN {
         EXPECT_EQ(player->hp, 0);

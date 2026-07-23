@@ -11,7 +11,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_THUNDERCLAP].type == TYPE_ELECTRIC);
 }
 
-SINGLE_BATTLE_TEST("Primal Crest uses Burning Bulwark after Gouging Fire's first Fire move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Guard Instinct uses Burning Bulwark after Gouging Fire's first Fire move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -32,14 +32,14 @@ SINGLE_BATTLE_TEST("Primal Crest uses Burning Bulwark after Gouging Fire's first
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_CREST);
+            ABILITY_POPUP(player, ABILITY_GUARD_INSTINCT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_BURNING_BULWARK, player);
             NOT HP_BAR(player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_CREST);
+                ABILITY_POPUP(player, ABILITY_GUARD_INSTINCT);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_BURNING_BULWARK, player);
             }
         }
@@ -57,7 +57,7 @@ SINGLE_BATTLE_TEST("Primal Crest uses Burning Bulwark after Gouging Fire's first
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Thunder uses Thunderclap after Raging Bolt's first Dragon move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Storm Instinct uses Thunderclap after Raging Bolt's first Dragon move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
     s16 thunderclapDamage;
@@ -79,14 +79,14 @@ SINGLE_BATTLE_TEST("Primal Thunder uses Thunderclap after Raging Bolt's first Dr
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_THUNDER);
+            ABILITY_POPUP(player, ABILITY_STORM_INSTINCT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDERCLAP, player);
             HP_BAR(opponent, captureDamage: &thunderclapDamage);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_THUNDER);
+                ABILITY_POPUP(player, ABILITY_STORM_INSTINCT);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDERCLAP, player);
             }
         }

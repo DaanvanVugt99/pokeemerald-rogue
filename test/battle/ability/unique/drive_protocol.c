@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_STICKY_WEB].effect == EFFECT_STICKY_WEB);
 }
 
-SINGLE_BATTLE_TEST("Singularity Drive clears hazards and sets Gravity on switch-in if Iron Treads is the only Paradox")
+SINGLE_BATTLE_TEST("Drive Protocol clears hazards and sets Gravity on switch-in if Iron Treads is the only Paradox")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
@@ -22,7 +22,7 @@ SINGLE_BATTLE_TEST("Singularity Drive clears hazards and sets Gravity on switch-
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_STICKY_WEB); }
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_DRIVE);
+        ABILITY_POPUP(player, ABILITY_DRIVE_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
     } THEN {
         EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_SPIKES));
@@ -35,7 +35,7 @@ SINGLE_BATTLE_TEST("Singularity Drive clears hazards and sets Gravity on switch-
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Drive sets Gravity on switch-in even when there are no hazards")
+SINGLE_BATTLE_TEST("Drive Protocol sets Gravity on switch-in even when there are no hazards")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
@@ -45,7 +45,7 @@ SINGLE_BATTLE_TEST("Singularity Drive sets Gravity on switch-in even when there 
     } WHEN {
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_DRIVE);
+        ABILITY_POPUP(player, ABILITY_DRIVE_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
     } THEN {
         EXPECT(gFieldStatuses & STATUS_FIELD_GRAVITY);
@@ -53,7 +53,7 @@ SINGLE_BATTLE_TEST("Singularity Drive sets Gravity on switch-in even when there 
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Drive does not activate if Iron Treads has another Paradox ally")
+SINGLE_BATTLE_TEST("Drive Protocol does not activate if Iron Treads has another Paradox ally")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
@@ -65,7 +65,7 @@ SINGLE_BATTLE_TEST("Singularity Drive does not activate if Iron Treads has anoth
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_DRIVE);
+            ABILITY_POPUP(player, ABILITY_DRIVE_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
         }
     } THEN {

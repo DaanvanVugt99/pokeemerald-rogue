@@ -208,7 +208,7 @@ AI_SINGLE_BATTLE_TEST("AI scores priority moves below safe moves against known G
     }
 }
 
-AI_SINGLE_BATTLE_TEST("AI scores priority and switching moves below safe moves against known Singularity Airspace")
+AI_SINGLE_BATTLE_TEST("AI scores priority and switching moves below safe moves against known Lock Protocol")
 {
     u16 blockedMove;
 

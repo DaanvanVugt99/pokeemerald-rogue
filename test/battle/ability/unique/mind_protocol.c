@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(!gBattleMoves[MOVE_TACKLE].slicingMove);
 }
 
-SINGLE_BATTLE_TEST("Singularity Prism sets Psychic Terrain after Iron Leaves's first slicing move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Mind Protocol sets Psychic Terrain after Iron Leaves's first slicing move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -29,9 +29,9 @@ SINGLE_BATTLE_TEST("Singularity Prism sets Psychic Terrain after Iron Leaves's f
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         HP_BAR(opponent);
         if (!hasOtherParadox)
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_PRISM);
+            ABILITY_POPUP(player, ABILITY_MIND_PROTOCOL);
         else
-            NOT ABILITY_POPUP(player, ABILITY_SINGULARITY_PRISM);
+            NOT ABILITY_POPUP(player, ABILITY_MIND_PROTOCOL);
     } THEN {
         if (hasOtherParadox)
         {
@@ -46,7 +46,7 @@ SINGLE_BATTLE_TEST("Singularity Prism sets Psychic Terrain after Iron Leaves's f
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Prism only triggers once per battle")
+SINGLE_BATTLE_TEST("Mind Protocol only triggers once per battle")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_LEAVES) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_LEAF_BLADE, MOVE_PLAIN_TERRAIN); }
@@ -59,18 +59,18 @@ SINGLE_BATTLE_TEST("Singularity Prism only triggers once per battle")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_PRISM);
+        ABILITY_POPUP(player, ABILITY_MIND_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_PLAIN_TERRAIN, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_SINGULARITY_PRISM);
+        NOT ABILITY_POPUP(player, ABILITY_MIND_PROTOCOL);
     } THEN {
         EXPECT(gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN);
         EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Prism does not trigger after non-slicing moves")
+SINGLE_BATTLE_TEST("Mind Protocol does not trigger after non-slicing moves")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_LEAVES) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_TACKLE); }
@@ -81,14 +81,14 @@ SINGLE_BATTLE_TEST("Singularity Prism does not trigger after non-slicing moves")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_SINGULARITY_PRISM);
+        NOT ABILITY_POPUP(player, ABILITY_MIND_PROTOCOL);
     } THEN {
         EXPECT(!(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN));
         EXPECT(!(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]));
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Prism does not trigger if pending Rocky Helmet damage would faint the user")
+SINGLE_BATTLE_TEST("Mind Protocol does not trigger if pending Rocky Helmet damage would faint the user")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_LEAVES) { HP(1); MaxHP(100); Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_LEAF_BLADE); }
@@ -97,7 +97,7 @@ SINGLE_BATTLE_TEST("Singularity Prism does not trigger if pending Rocky Helmet d
         TURN { MOVE(player, MOVE_LEAF_BLADE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
-        NOT ABILITY_POPUP(player, ABILITY_SINGULARITY_PRISM);
+        NOT ABILITY_POPUP(player, ABILITY_MIND_PROTOCOL);
     } THEN {
         EXPECT_EQ(player->hp, 0);
         EXPECT(!(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN));

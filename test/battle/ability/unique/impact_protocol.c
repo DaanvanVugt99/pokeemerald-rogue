@@ -8,7 +8,7 @@ ASSUMPTIONS
     ASSUME(IS_MOVE_STATUS(MOVE_CELEBRATE));
 }
 
-SINGLE_BATTLE_TEST("Singularity Impact makes Iron Hands's first damaging move hit twice if it is the only Paradox", s16 hit1, s16 hit2)
+SINGLE_BATTLE_TEST("Impact Protocol makes Iron Hands's first damaging move hit twice if it is the only Paradox", s16 hit1, s16 hit2)
 {
     bool32 hasOtherParadox;
 
@@ -43,7 +43,7 @@ SINGLE_BATTLE_TEST("Singularity Impact makes Iron Hands's first damaging move hi
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Impact only affects the first damaging move each switch-in")
+SINGLE_BATTLE_TEST("Impact Protocol only affects the first damaging move each switch-in")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_HANDS) { Level(100); Attack(300); Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE, MOVE_TACKLE); }

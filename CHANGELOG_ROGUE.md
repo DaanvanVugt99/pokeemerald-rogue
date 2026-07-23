@@ -31,7 +31,7 @@ Format follows Keep a Changelog loosely:
 - Removed Swimmers and swimming Triathletes from land-based route Trainer
   encounters.
 - Prevented the level-up helper Trainer from Terastallizing.
-- Clarified that Iron Treads' Singularity Drive clears allied entry hazards and
+- Clarified that Iron Treads' Drive Protocol clears allied entry hazards and
   sets Gravity on switch-in.
 - Made Frontier Brain Pokémon rewards respect the configured nickname mode,
   including skipping prompts for Never and assigning names for Automatic.
@@ -44,6 +44,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Renamed ancient Paradox solo abilities as Instincts and future Paradox solo
+  abilities as Protocols, and renamed Tyrantrum's and Koraidon's unrelated
+  Primal abilities to Tyrant Storm and War Cry.
 - Frontier Brains now use the full badge level cap and cache their reward
   previews during path generation, avoiding a delay when inspecting their nodes.
 - Adrenaline now prevents poison status damage while retaining its poisoned
@@ -227,7 +230,7 @@ Format follows Keep a Changelog loosely:
   resisted, and punching moves respectively.
 - Added Hidden Stash for the Gimmighoul line, Last Pour for the Poltchageist
   line, and Flock Step for Flamigo.
-- Added Great Tusk's Primal Onslaught and Iron Boulder's Singularity Crash
+- Added Great Tusk's Siege Instinct and Iron Boulder's Crash Protocol
   unique abilities.
 - Implemented Tatsugiri's Commander ability and Dondozo's Order Up interaction,
   including form-specific boosts and animations, switching restrictions, and
@@ -244,8 +247,8 @@ Format follows Keep a Changelog loosely:
   pressure.
 - Ported upstream C-Gear/Config Lab sparkle highlights for newly unlocked or
   newly added settings.
-- Added Iron Crown's Singularity Array unique ability.
-- Added Gouging Fire's Primal Crest and Raging Bolt's Primal Thunder unique
+- Added Iron Crown's Array Protocol unique ability.
+- Added Gouging Fire's Guard Instinct and Raging Bolt's Storm Instinct unique
   abilities.
 - Added Terapagos's World Prism unique ability.
 - Added Pecharunt's Puppet Master unique ability.

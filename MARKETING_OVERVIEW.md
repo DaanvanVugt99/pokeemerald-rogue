@@ -42,9 +42,9 @@ Examples visible in the commit history include:
 
 - Meltdown and Fallen Skies
 - Cliffside
-- Tidal Dawn, Singularity Prism, and Strange Guest
-- Avalanche Hide, Singularity Reactor, and Singularity Overload
-- Storm Glider, Primal Current, and Singularity Drive
+- Tidal Dawn, Mind Protocol, and Strange Guest
+- Avalanche Hide, Heat Protocol, and Surge Protocol
+- Storm Glider, Flux Instinct, and Drive Protocol
 - Photokeratitis, Swallowed, and Chef's Pick
 - Tripwire and Crossed Wires
 - Duality, Dirty Tricks, Tumbleweed, Drop Off, Starmobile, and Carving Rush

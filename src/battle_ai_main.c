@@ -57,7 +57,7 @@ static s32 AI_Safari(u32 battlerAtk, u32 battlerDef, u32 move, s32 score);
 static s32 AI_FirstBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score);
 static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score);
 static bool32 AI_IsSwitchingMove(u32 move);
-static bool32 AI_IsOpposingSingularityAirspaceActive(u32 battler);
+static bool32 AI_IsOpposingLockProtocolActive(u32 battler);
 
 static s32 (*const sBattleAiFuncTable[])(u32, u32, u32, s32) =
 {
@@ -874,7 +874,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 RETURN_SCORE_MINUS(10);
 
             if ((atkPriority > 0 || AI_IsSwitchingMove(move))
-              && AI_IsOpposingSingularityAirspaceActive(battlerAtk))
+              && AI_IsOpposingLockProtocolActive(battlerAtk))
                 RETURN_SCORE_MINUS(10);
 
             {
@@ -5325,7 +5325,7 @@ static bool32 AI_IsSwitchingMove(u32 move)
     return FALSE;
 }
 
-static bool32 AI_IsOpposingSingularityAirspaceActive(u32 battler)
+static bool32 AI_IsOpposingLockProtocolActive(u32 battler)
 {
     u32 i;
 
@@ -5333,7 +5333,7 @@ static bool32 AI_IsOpposingSingularityAirspaceActive(u32 battler)
     {
         if (GetBattlerSide(i) != GetBattlerSide(battler)
          && IsBattlerAlive(i)
-         && AI_HasAbility(i, ABILITY_SINGULARITY_AIRSPACE)
+         && AI_HasAbility(i, ABILITY_LOCK_PROTOCOL)
          && IsOnlyParadoxInParty(i))
             return TRUE;
     }

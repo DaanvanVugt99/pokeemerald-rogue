@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_FIRE_SPIN].effect == EFFECT_TRAP);
 }
 
-SINGLE_BATTLE_TEST("Singularity Reactor uses Fire Spin after Iron Moth's first Fire move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Heat Protocol uses Fire Spin after Iron Moth's first Fire move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -30,14 +30,14 @@ SINGLE_BATTLE_TEST("Singularity Reactor uses Fire Spin after Iron Moth's first F
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_REACTOR);
+            ABILITY_POPUP(player, ABILITY_HEAT_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_SPIN, player);
             HP_BAR(opponent);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_SINGULARITY_REACTOR);
+                ABILITY_POPUP(player, ABILITY_HEAT_PROTOCOL);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_SPIN, player);
             }
         }
@@ -56,7 +56,7 @@ SINGLE_BATTLE_TEST("Singularity Reactor uses Fire Spin after Iron Moth's first F
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Reactor only triggers once per switch-in")
+SINGLE_BATTLE_TEST("Heat Protocol only triggers once per switch-in")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_MOTH) { Speed(100); Ability(ABILITY_NO_GUARD); Moves(MOVE_EMBER); }
@@ -68,13 +68,13 @@ SINGLE_BATTLE_TEST("Singularity Reactor only triggers once per switch-in")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_REACTOR);
+        ABILITY_POPUP(player, ABILITY_HEAT_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_SPIN, player);
         HP_BAR(opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_REACTOR);
+            ABILITY_POPUP(player, ABILITY_HEAT_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_SPIN, player);
         }
     } THEN {
@@ -82,7 +82,7 @@ SINGLE_BATTLE_TEST("Singularity Reactor only triggers once per switch-in")
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Reactor does not trigger after non-Fire moves")
+SINGLE_BATTLE_TEST("Heat Protocol does not trigger after non-Fire moves")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_MOTH) { Speed(100); Ability(ABILITY_NO_GUARD); Moves(MOVE_TACKLE); }
@@ -94,7 +94,7 @@ SINGLE_BATTLE_TEST("Singularity Reactor does not trigger after non-Fire moves")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_REACTOR);
+            ABILITY_POPUP(player, ABILITY_HEAT_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_FIRE_SPIN, player);
         }
     } THEN {
@@ -103,7 +103,7 @@ SINGLE_BATTLE_TEST("Singularity Reactor does not trigger after non-Fire moves")
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Reactor does not trigger if pending Life Orb damage would faint the user")
+SINGLE_BATTLE_TEST("Heat Protocol does not trigger if pending Life Orb damage would faint the user")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_MOTH) { HP(1); MaxHP(100); Speed(100); Ability(ABILITY_NO_GUARD); Item(ITEM_LIFE_ORB); Moves(MOVE_EMBER); }
@@ -113,7 +113,7 @@ SINGLE_BATTLE_TEST("Singularity Reactor does not trigger if pending Life Orb dam
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
         HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_SINGULARITY_REACTOR);
+        NOT ABILITY_POPUP(player, ABILITY_HEAT_PROTOCOL);
         HP_BAR(player);
     } THEN {
         EXPECT_EQ(player->hp, 0);

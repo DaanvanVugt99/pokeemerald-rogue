@@ -129,7 +129,7 @@ static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target);
 static bool32 TryUseOctolockCalledMove(u32 battler, u32 target);
 static bool32 TryUseTeaServiceCalledMove(u32 battler);
 static bool32 TryUseFossilMemoryCalledMove(u32 battler, u32 target);
-static bool32 TryUsePrimalSignatureCalledMove(u32 battler, u32 target, u32 ability, u32 calledMove);
+static bool32 TryUseParadoxSignatureCalledMove(u32 battler, u32 target, u32 ability, u32 calledMove);
 static bool32 TryUseShardstormCalledMove(u32 battler, u32 target);
 static bool32 TryUseFalseApplauseCalledMove(u32 battler, u32 target);
 static bool32 TryUseCapsaicinCrazeCalledMove(u32 battler, u32 target);
@@ -1299,7 +1299,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
     [ABILITY_FLUFFY] = 1,
     [ABILITY_QUEENLY_MAJESTY] = 1,
     [ABILITY_GRIDLOCK] = 1,
-    [ABILITY_SINGULARITY_AIRSPACE] = 1,
+    [ABILITY_LOCK_PROTOCOL] = 1,
     [ABILITY_WATER_BUBBLE] = 1,
     [ABILITY_MIRROR_ARMOR] = 1,
     [ABILITY_PUNK_ROCK] = 1,
@@ -4676,7 +4676,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
 }
 
 static bool32 IsSwitchingMove(u32 move);
-static u32 GetSingularityAirspaceBattler(u32 battler);
+static u32 GetLockProtocolBattler(u32 battler);
 
 static s8 GetExecutingMovePriority(u32 battler)
 {
@@ -4734,15 +4734,15 @@ u8 AtkCanceller_UnableToUseMove2(void)
             }
             gBattleStruct->atkCancellerTracker++;
             break;
-        case CANCELLER_SINGULARITY_AIRSPACE:
+        case CANCELLER_LOCK_PROTOCOL:
             {
-                u32 airspaceBattler = GetSingularityAirspaceBattler(gBattlerAttacker);
+                u32 lockProtocolBattler = GetLockProtocolBattler(gBattlerAttacker);
 
-                if (airspaceBattler != MAX_BATTLERS_COUNT
+                if (lockProtocolBattler != MAX_BATTLERS_COUNT
                  && (GetExecutingMovePriority(gBattlerAttacker) > 0 || IsSwitchingMove(gCurrentMove)))
                 {
                     CancelMultiTurnMoves(gBattlerAttacker);
-                    SetBattlerTriggeredAbility(airspaceBattler, ABILITY_SINGULARITY_AIRSPACE);
+                    SetBattlerTriggeredAbility(lockProtocolBattler, ABILITY_LOCK_PROTOCOL);
                     if (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)
                         gHitMarker |= HITMARKER_NO_PPDEDUCT;
                     gBattlescriptCurrInstr = BattleScript_DazzlingProtected;
@@ -5108,7 +5108,7 @@ static bool32 IsSwitchingMove(u32 move)
     return FALSE;
 }
 
-static u32 GetSingularityAirspaceBattler(u32 battler)
+static u32 GetLockProtocolBattler(u32 battler)
 {
     u32 i;
 
@@ -5116,7 +5116,7 @@ static u32 GetSingularityAirspaceBattler(u32 battler)
     {
         if (GetBattlerSide(i) != GetBattlerSide(battler)
          && IsBattlerAlive(i)
-         && HasBattlerAbility(i, ABILITY_SINGULARITY_AIRSPACE)
+         && HasBattlerAbility(i, ABILITY_LOCK_PROTOCOL)
          && IsOnlyParadoxInParty(i))
             return i;
     }
@@ -5944,15 +5944,15 @@ static bool32 CanUseSwallowedRestExtraMove(u32 battlerAttacker)
         && !(gBattleMons[battlerAttacker].status1 & STATUS1_FREEZE);
 }
 
-static bool32 TryUsePrimalCurrentCalledMove(u32 battler)
+static bool32 TryUseFluxInstinctCalledMove(u32 battler)
 {
-    if (!HasBattlerAbility(battler, ABILITY_PRIMAL_CURRENT)
+    if (!HasBattlerAbility(battler, ABILITY_FLUX_INSTINCT)
      || !IsOnlyParadoxInParty(battler)
      || (gStatuses3[battler] & STATUS3_MAGNET_RISE)
      || !CanUseSelfExtraMove(battler))
         return FALSE;
 
-    SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_CURRENT);
+    SetBattlerTriggeredAbility(battler, ABILITY_FLUX_INSTINCT);
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
     gCalledMove = MOVE_MAGNET_RISE;
@@ -5962,7 +5962,7 @@ static bool32 TryUsePrimalCurrentCalledMove(u32 battler)
     return TRUE;
 }
 
-static bool32 TryUseSingularityReactorCalledMove(u32 battler, u32 target)
+static bool32 TryUseHeatProtocolCalledMove(u32 battler, u32 target)
 {
     if (target >= gBattlersCount
      || !IsBattlerAlive(target)
@@ -5971,7 +5971,7 @@ static bool32 TryUseSingularityReactorCalledMove(u32 battler, u32 target)
      || !CanUseExtraMove(battler, target))
         return FALSE;
 
-    SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_REACTOR);
+    SetBattlerTriggeredAbility(battler, ABILITY_HEAT_PROTOCOL);
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
@@ -5983,7 +5983,7 @@ static bool32 TryUseSingularityReactorCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
-static bool32 TryUsePrimalSignatureCalledMove(u32 battler, u32 target, u32 ability, u32 calledMove)
+static bool32 TryUseParadoxSignatureCalledMove(u32 battler, u32 target, u32 ability, u32 calledMove)
 {
     if (calledMove == MOVE_BURNING_BULWARK)
     {
@@ -6011,7 +6011,7 @@ static bool32 TryUsePrimalSignatureCalledMove(u32 battler, u32 target, u32 abili
     return TRUE;
 }
 
-static bool32 TryUseSingularityOverloadCalledMove(u32 battler, u32 move)
+static bool32 TryUseSurgeProtocolCalledMove(u32 battler, u32 move)
 {
     u32 target;
 
@@ -6033,7 +6033,7 @@ static bool32 TryUseSingularityOverloadCalledMove(u32 battler, u32 move)
         gDisableStructs[battler].uniquePersistentStateActive = TRUE;
     }
 
-    SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_OVERLOAD);
+    SetBattlerTriggeredAbility(battler, ABILITY_SURGE_PROTOCOL);
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
@@ -8261,7 +8261,7 @@ static bool32 TryUseShardstormCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
-static bool32 TryUsePrimalEchoCalledMove(u32 battler, u32 target, u32 move)
+static bool32 TryUseEchoInstinctCalledMove(u32 battler, u32 target, u32 move)
 {
     if (target >= gBattlersCount
      || !IsBattlerAlive(target)
@@ -8275,7 +8275,7 @@ static bool32 TryUsePrimalEchoCalledMove(u32 battler, u32 target, u32 move)
     if (!CanUseExtraMove(battler, target))
         return FALSE;
 
-    SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_ECHO);
+    SetBattlerTriggeredAbility(battler, ABILITY_ECHO_INSTINCT);
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
@@ -10604,7 +10604,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_DRIVE)
+        if (HasBattlerAbility(battler, ABILITY_DRIVE_PROTOCOL)
          && !uniqueDone
          && IsOnlyParadoxInParty(battler))
         {
@@ -10617,7 +10617,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 uniqueDone = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_DRIVE);
+                SetBattlerTriggeredAbility(battler, ABILITY_DRIVE_PROTOCOL);
                 SetAtkCancellerForCalledMove();
                 gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
                 gCalledMove = MOVE_GRAVITY;
@@ -10635,12 +10635,12 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gDisableStructs[battler].uniquePersistentStateActive = hazardsCleared && canSetGravity;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_DRIVE);
+                SetBattlerTriggeredAbility(battler, ABILITY_DRIVE_PROTOCOL);
 
                 if (hazardsCleared)
                 {
                     gBattlerAttacker = gBattlerAbility = battler;
-                    BattleScriptPushCursorAndCallback(BattleScript_SingularityDriveClearsHazards);
+                    BattleScriptPushCursorAndCallback(BattleScript_DriveProtocolClearsHazards);
                 }
                 else
                 {
@@ -14930,7 +14930,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_MOLTING)
+        if (HasBattlerAbility(battler, ABILITY_MOLT_INSTINCT)
          && IsOnlyParadoxInParty(battler)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && battler == moveEndTarget
@@ -14942,7 +14942,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[battler].extraMoveUsed
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_MOLTING);
+            SetBattlerTriggeredAbility(battler, ABILITY_MOLT_INSTINCT);
             SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
             gCalledMove = MOVE_HARDEN;
@@ -14950,7 +14950,7 @@ if (triggeringAbility != ABILITY_NONE)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_PrimalMoltingActivates;
+            gBattlescriptCurrInstr = BattleScript_MoltInstinctActivates;
             effect++;
         }
 
@@ -16281,7 +16281,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_REACTOR)
+        if (HasBattlerAbility(battler, ABILITY_HEAT_PROTOCOL)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && moveType == TYPE_FIRE
@@ -16294,12 +16294,12 @@ if (triggeringAbility != ABILITY_NONE)
          && !gBattleStruct->isAtkCancelerForCalledMove
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && TryUseSingularityReactorCalledMove(battler, gBattlerTarget))
+         && TryUseHeatProtocolCalledMove(battler, gBattlerTarget))
         {
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_CREST)
+        if (HasBattlerAbility(battler, ABILITY_GUARD_INSTINCT)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && moveType == TYPE_FIRE
@@ -16312,12 +16312,12 @@ if (triggeringAbility != ABILITY_NONE)
          && !gBattleStruct->isAtkCancelerForCalledMove
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && TryUsePrimalSignatureCalledMove(battler, battler, ABILITY_PRIMAL_CREST, MOVE_BURNING_BULWARK))
+         && TryUseParadoxSignatureCalledMove(battler, battler, ABILITY_GUARD_INSTINCT, MOVE_BURNING_BULWARK))
         {
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_THUNDER)
+        if (HasBattlerAbility(battler, ABILITY_STORM_INSTINCT)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && moveType == TYPE_DRAGON
@@ -16330,12 +16330,12 @@ if (triggeringAbility != ABILITY_NONE)
          && !gBattleStruct->isAtkCancelerForCalledMove
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && TryUsePrimalSignatureCalledMove(battler, gBattlerTarget, ABILITY_PRIMAL_THUNDER, MOVE_THUNDERCLAP))
+         && TryUseParadoxSignatureCalledMove(battler, gBattlerTarget, ABILITY_STORM_INSTINCT, MOVE_THUNDERCLAP))
         {
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_OVERLOAD)
+        if (HasBattlerAbility(battler, ABILITY_SURGE_PROTOCOL)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && moveType == TYPE_ELECTRIC
@@ -16348,12 +16348,12 @@ if (triggeringAbility != ABILITY_NONE)
          && !gBattleStruct->isAtkCancelerForCalledMove
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && TryUseSingularityOverloadCalledMove(battler, MOVE_CHARGE))
+         && TryUseSurgeProtocolCalledMove(battler, MOVE_CHARGE))
         {
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_OVERLOAD)
+        if (HasBattlerAbility(battler, ABILITY_SURGE_PROTOCOL)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && moveType == TYPE_ROCK
@@ -16366,12 +16366,12 @@ if (triggeringAbility != ABILITY_NONE)
          && !gBattleStruct->isAtkCancelerForCalledMove
          && !gDisableStructs[battler].uniquePersistentStateActive
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && TryUseSingularityOverloadCalledMove(battler, MOVE_STEALTH_ROCK))
+         && TryUseSurgeProtocolCalledMove(battler, MOVE_STEALTH_ROCK))
         {
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_EDGE)
+        if (HasBattlerAbility(battler, ABILITY_EDGE_PROTOCOL)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && gBattleMoves[move].slicingMove
@@ -16385,7 +16385,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_EDGE);
+            SetBattlerTriggeredAbility(battler, ABILITY_EDGE_PROTOCOL);
             SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
             gCalledMove = MOVE_DETECT;
@@ -16396,7 +16396,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SINGULARITY_PRISM)
+        if (HasBattlerAbility(battler, ABILITY_MIND_PROTOCOL)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && gBattleMoves[move].slicingMove
@@ -16411,7 +16411,7 @@ if (triggeringAbility != ABILITY_NONE)
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
          && TryChangeBattleTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, &gFieldTimers.terrainTimer))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_SINGULARITY_PRISM);
+            SetBattlerTriggeredAbility(battler, ABILITY_MIND_PROTOCOL);
             gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
             BattleScriptPushCursorAndCallback(BattleScript_PsychicSurgeActivates);
             effect++;
@@ -16500,7 +16500,7 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_ECHO)
+        if (HasBattlerAbility(battler, ABILITY_ECHO_INSTINCT)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && gBattleMoves[move].soundMove
@@ -16514,12 +16514,12 @@ if (triggeringAbility != ABILITY_NONE)
          && IsFinalMultiHitStrike()
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
          && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && TryUsePrimalEchoCalledMove(battler, gBattlerTarget, move))
+         && TryUseEchoInstinctCalledMove(battler, gBattlerTarget, move))
         {
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_WRAITH)
+        if (HasBattlerAbility(battler, ABILITY_HEX_INSTINCT)
          && IsOnlyParadoxInParty(battler)
          && IsBattlerAlive(battler)
          && IsBattlerAlive(gBattlerTarget)
@@ -16539,7 +16539,7 @@ if (triggeringAbility != ABILITY_NONE)
             if (moveToDisable != MOVE_NONE)
             {
                 gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-                ApplyAbilityDisableMove(battler, gBattlerTarget, ABILITY_PRIMAL_WRAITH, moveToDisable, GetDefaultDisableTimerFromGenConfig());
+                ApplyAbilityDisableMove(battler, gBattlerTarget, ABILITY_HEX_INSTINCT, moveToDisable, GetDefaultDisableTimerFromGenConfig());
                 effect++;
             }
         }
@@ -19138,7 +19138,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_TIRANNY)
+        if (HasBattlerAbility(battler, ABILITY_HUNT_INSTINCT)
          && IsOnlyParadoxInParty(battler)
          && gDisableStructs[battler].uniquePersistentStateActive
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -19151,7 +19151,7 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniquePersistentStateActive = FALSE;
             if (!(gBattleMons[gBattlerTarget].status2 & STATUS2_ESCAPE_PREVENTION))
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_TIRANNY);
+                SetBattlerTriggeredAbility(battler, ABILITY_HUNT_INSTINCT);
                 gBattleMons[gBattlerTarget].status2 |= STATUS2_ESCAPE_PREVENTION;
                 gDisableStructs[gBattlerTarget].battlerPreventingEscape = battler;
                 BattleScriptPushCursor();
@@ -20100,7 +20100,7 @@ if (triggeringAbility != ABILITY_NONE)
 
         if ((gBattleWeather & B_WEATHER_SANDSTORM)
          && WEATHER_HAS_EFFECT
-         && TryUsePrimalCurrentCalledMove(battler))
+         && TryUseFluxInstinctCalledMove(battler))
         {
             effect++;
             break;
@@ -20156,7 +20156,7 @@ if (triggeringAbility != ABILITY_NONE)
         gLastUsedAbility = GetBattlerAbility(battler);
 
         if ((gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN)
-         && TryUsePrimalCurrentCalledMove(battler))
+         && TryUseFluxInstinctCalledMove(battler))
         {
             effect++;
             break;
@@ -23079,7 +23079,7 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
         && IsMoveBlockedByProtectLike(battler, move)
         && !gProtectStructs[battler].maxGuarded
         && (HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_DRILL)
-         || (HasBattlerAbility(gBattlerAttacker, ABILITY_PRIMAL_ONSLAUGHT)
+         || (HasBattlerAbility(gBattlerAttacker, ABILITY_SIEGE_INSTINCT)
           && IsOnlyParadoxInParty(gBattlerAttacker))))
     {
         gProtectStructs[gBattlerAttacker].touchedProtectLike = TRUE;
@@ -23957,7 +23957,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
 
     if (gBattleMoves[move].bitingMove
      && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_SANDSTORM)
-     && HasBattlerAbility(battlerAtk, ABILITY_PRIMAL_STORM))
+     && HasBattlerAbility(battlerAtk, ABILITY_TYRANT_STORM))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
@@ -24878,7 +24878,7 @@ static inline uq4_12_t GetTargetDamageModifier(u32 move, u32 battlerAtk, u32 bat
      && IsMoveBlockedByProtectLike(battlerDef, move)
      && !gProtectStructs[battlerDef].maxGuarded
      && (HasBattlerAbility(battlerAtk, ABILITY_PIERCING_DRILL)
-      || (HasBattlerAbility(battlerAtk, ABILITY_PRIMAL_ONSLAUGHT)
+      || (HasBattlerAbility(battlerAtk, ABILITY_SIEGE_INSTINCT)
        && IsOnlyParadoxInParty(battlerAtk))))
         modifier = uq4_12_multiply(modifier, UQ_4_12(0.25));
 
@@ -24903,7 +24903,7 @@ static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
         return UQ_4_12(0.4);
     if (HasBattlerAbility(battlerAtk, ABILITY_BRUTAL))
         return UQ_4_12(0.25);
-    if (HasBattlerAbility(battlerAtk, ABILITY_SINGULARITY_IMPACT)
+    if (HasBattlerAbility(battlerAtk, ABILITY_IMPACT_PROTOCOL)
      && IsOnlyParadoxInParty(battlerAtk))
         return UQ_4_12(0.2);
     if (HasBattlerAbility(battlerAtk, ABILITY_CENTER_STAGE)
@@ -27423,7 +27423,7 @@ bool32 IsBattlerAffectedByHazards(u32 battler, bool32 toxicSpikes)
      || HasBattlerAbility(battler, ABILITY_TIDAL_FLOOD)
      || HasBattlerAbility(battler, ABILITY_PICKUP)
      || HasBattlerAbility(battler, ABILITY_TUMBLEWEED)
-     || (HasBattlerAbility(battler, ABILITY_SINGULARITY_DRIVE)
+     || (HasBattlerAbility(battler, ABILITY_DRIVE_PROTOCOL)
       && IsOnlyParadoxInParty(battler))
      || HasBattlerAbility(battler, ABILITY_HOLLOW_NEST)
      || (HasBattlerAbility(battler, ABILITY_SKITTERSTEP)
@@ -27608,7 +27608,7 @@ u32 GetBattlerMoveTargetType(u32 battler, u32 move)
     else if (gBattleMoves[move].effect == EFFECT_TERA_STARSTORM
         && gBattleMons[battler].species == SPECIES_TERAPAGOS_STELLAR)
         return MOVE_TARGET_BOTH;
-    else if (HasBattlerAbility(battler, ABILITY_SINGULARITY_ARRAY)
+    else if (HasBattlerAbility(battler, ABILITY_ARRAY_PROTOCOL)
         && IsOnlyParadoxInParty(battler)
         && (!gDisableStructs[battler].uniqueOncePerSwitchInUsed
          || gDisableStructs[battler].uniquePersistentStateActive)

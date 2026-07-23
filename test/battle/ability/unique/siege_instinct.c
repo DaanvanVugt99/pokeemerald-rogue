@@ -8,7 +8,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_PROTECT].effect == EFFECT_PROTECT);
 }
 
-SINGLE_BATTLE_TEST("Primal Onslaught contact moves hit through Protect for quarter damage", s16 damage)
+SINGLE_BATTLE_TEST("Siege Instinct contact moves hit through Protect for quarter damage", s16 damage)
 {
     bool32 protected;
 
@@ -28,7 +28,7 @@ SINGLE_BATTLE_TEST("Primal Onslaught contact moves hit through Protect for quart
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Onslaught remains inactive with another Paradox ally")
+SINGLE_BATTLE_TEST("Siege Instinct remains inactive with another Paradox ally")
 {
     GIVEN {
         PLAYER(SPECIES_GREAT_TUSK) { Speed(50); Ability(ABILITY_PROTOSYNTHESIS); Moves(MOVE_TACKLE); }
@@ -41,7 +41,7 @@ SINGLE_BATTLE_TEST("Primal Onslaught remains inactive with another Paradox ally"
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Onslaught does not pierce protection with non-contact moves")
+SINGLE_BATTLE_TEST("Siege Instinct does not pierce protection with non-contact moves")
 {
     GIVEN {
         PLAYER(SPECIES_GREAT_TUSK) { Speed(50); Ability(ABILITY_PROTOSYNTHESIS); Moves(MOVE_EARTHQUAKE); }
@@ -54,7 +54,7 @@ SINGLE_BATTLE_TEST("Primal Onslaught does not pierce protection with non-contact
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Onslaught retains protective contact effects")
+SINGLE_BATTLE_TEST("Siege Instinct retains protective contact effects")
 {
     GIVEN {
         PLAYER(SPECIES_GREAT_TUSK) { HP(80); MaxHP(80); Speed(50); Ability(ABILITY_PROTOSYNTHESIS); Moves(MOVE_TACKLE); }

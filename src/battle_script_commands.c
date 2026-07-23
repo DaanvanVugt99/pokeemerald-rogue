@@ -684,7 +684,7 @@ static void Cmd_tryrecycleitem(void);
 static void Cmd_settypetoterrain(void);
 
 static bool32 TryActivateTerraform(const u8 *resumeInstr);
-static bool32 TryActivateSingularityCrash(const u8 *resumeInstr);
+static bool32 TryActivateCrashProtocol(const u8 *resumeInstr);
 static bool32 TrySetGrafittiTagToxicSpikes(u32 battler);
 static void Cmd_pursuitdoubles(void);
 static void Cmd_snatchsetbattlers(void);
@@ -1520,7 +1520,7 @@ static void Cmd_attackcanceler(void)
         gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = TRUE;
     }
 
-    if (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_ARRAY)
+    if (HasBattlerAbility(gBattlerAttacker, ABILITY_ARRAY_PROTOCOL)
      && IsOnlyParadoxInParty(gBattlerAttacker)
      && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
      && !gBattleStruct->isAtkCancelerForCalledMove
@@ -1547,7 +1547,7 @@ static void Cmd_attackcanceler(void)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_ABYSSAL_MAW) && gBattleMoves[gCurrentMove].bitingMove)
      || HasBattlerAbility(gBattlerAttacker, ABILITY_BRUTAL)
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_IMPACT)
+     || (HasBattlerAbility(gBattlerAttacker, ABILITY_IMPACT_PROTOCOL)
       && IsOnlyParadoxInParty(gBattlerAttacker)
       && !gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed
       && !gBattleStruct->isAtkCancelerForCalledMove)
@@ -1559,7 +1559,7 @@ static void Cmd_attackcanceler(void)
     && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
     && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE)
     {
-        if (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_IMPACT))
+        if (HasBattlerAbility(gBattlerAttacker, ABILITY_IMPACT_PROTOCOL))
             gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed = TRUE;
         gSpecialStatuses[gBattlerAttacker].parentalBondState = PARENTAL_BOND_1ST_HIT;
         gMultiHitCounter = 2;
@@ -1849,7 +1849,7 @@ static bool32 AccuracyCalcHelper(u16 move)
 	      && IS_BATTLER_OF_TYPE(gBattlerAttacker, moveType))
 	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_BONE_KEEPER)
 	      && IsBoneMove(move))
-	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_TARGETING)
+	     || (HasBattlerAbility(gBattlerAttacker, ABILITY_AIM_PROTOCOL)
 	      && IsOnlyParadoxInParty(gBattlerAttacker))
      || (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
      || (B_TOXIC_NEVER_MISS >= GEN_6 && gBattleMoves[move].effect == EFFECT_TOXIC && IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_POISON))
@@ -2143,7 +2143,7 @@ static void Cmd_accuracycheck(void)
     if (move == ACC_CURR_MOVE)
         move = gCurrentMove;
 
-    if (TryActivateSingularityCrash(gBattlescriptCurrInstr))
+    if (TryActivateCrashProtocol(gBattlescriptCurrInstr))
         return;
 
     if (move == NO_ACC_CALC_CHECK_LOCK_ON)
@@ -4214,7 +4214,7 @@ void SetMoveEffect(bool32 primary, u32 certain)
             bool32 septicFumesActivated = FALSE;
             bool32 ultraVeninActivated = FALSE;
             bool32 feverDreamActivated = FALSE;
-            bool32 primalParasiteActivated = FALSE;
+            bool32 sporeInstinctActivated = FALSE;
             bool32 poisonPuppeteerActivated = FALSE;
 
             if ((gBattleScripting.moveEffect == MOVE_EFFECT_POISON || gBattleScripting.moveEffect == MOVE_EFFECT_TOXIC)
@@ -4285,22 +4285,22 @@ void SetMoveEffect(bool32 primary, u32 certain)
              && gEffectBattler < gBattlersCount
              && GetBattlerSide(gBattleScripting.battler) != GetBattlerSide(gEffectBattler)
              && IsBattlerAlive(gBattleScripting.battler)
-             && HasBattlerAbility(gBattleScripting.battler, ABILITY_PRIMAL_PARASITE)
+             && HasBattlerAbility(gBattleScripting.battler, ABILITY_SPORE_INSTINCT)
              && IsOnlyParadoxInParty(gBattleScripting.battler)
              && !(gStatuses3[gEffectBattler] & STATUS3_LEECHSEED)
              && !IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_GRASS))
             {
-                primalParasiteActivated = TRUE;
+                sporeInstinctActivated = TRUE;
                 gBattlerAttacker = gBattlerAbility = gBattleScripting.battler;
                 gBattlerTarget = gEffectBattler;
-                SetBattlerTriggeredAbility(gBattleScripting.battler, ABILITY_PRIMAL_PARASITE);
-                RecordAbilityBattle(gBattleScripting.battler, ABILITY_PRIMAL_PARASITE);
+                SetBattlerTriggeredAbility(gBattleScripting.battler, ABILITY_SPORE_INSTINCT);
+                RecordAbilityBattle(gBattleScripting.battler, ABILITY_SPORE_INSTINCT);
             }
 
             BattleScriptPush(gBattlescriptCurrInstr + 1);
             if (poisonPuppeteerActivated)
                 BattleScriptPush(BattleScript_EffectConfusePoisonPuppeteerRet);
-            if (primalParasiteActivated)
+            if (sporeInstinctActivated)
                 BattleScriptPush(BattleScript_FungalInfectionActivates);
             if (feverDreamActivated)
                 BattleScriptPush(BattleScript_AbilityUsesCalledMove);
@@ -7472,7 +7472,7 @@ static void Cmd_moveend(void)
                 gHitMarker |= HITMARKER_NO_ATTACKSTRING;
                 gHitMarker &= ~HITMARKER_NO_PPDEDUCT;
             }
-            if (HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_ARRAY))
+            if (HasBattlerAbility(gBattlerAttacker, ABILITY_ARRAY_PROTOCOL))
                 gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
             RecordLastUsedMoveBy(gBattlerAttacker, gCurrentMove);
             gBattleScripting.moveendState++;
@@ -11467,12 +11467,12 @@ static void GroundBattlerForGravity(u32 battler)
     gStatuses3[battler] &= ~(STATUS3_MAGNET_RISE | STATUS3_TELEKINESIS | STATUS3_ON_AIR | STATUS3_SKY_DROPPED);
 }
 
-static bool32 TryActivateSingularityCrash(const u8 *resumeInstr)
+static bool32 TryActivateCrashProtocol(const u8 *resumeInstr)
 {
     u32 i, moveType;
 
     GET_MOVE_TYPE(gCurrentMove, moveType);
-    if (!HasBattlerAbility(gBattlerAttacker, ABILITY_SINGULARITY_CRASH)
+    if (!HasBattlerAbility(gBattlerAttacker, ABILITY_CRASH_PROTOCOL)
      || moveType != TYPE_ROCK
      || IS_MOVE_STATUS(gCurrentMove)
      || (gFieldStatuses & STATUS_FIELD_GRAVITY)
@@ -11484,7 +11484,7 @@ static bool32 TryActivateSingularityCrash(const u8 *resumeInstr)
         return FALSE;
 
     gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerAttacker)] |= gBitTable[gBattlerPartyIndexes[gBattlerAttacker]];
-    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_SINGULARITY_CRASH);
+    SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_CRASH_PROTOCOL);
     gFieldStatuses |= STATUS_FIELD_GRAVITY;
     gFieldTimers.gravityTimer = 5;
 
@@ -11492,7 +11492,7 @@ static bool32 TryActivateSingularityCrash(const u8 *resumeInstr)
         GroundBattlerForGravity(i);
 
     BattleScriptPush(resumeInstr);
-    gBattlescriptCurrInstr = BattleScript_SingularityCrashActivates;
+    gBattlescriptCurrInstr = BattleScript_CrashProtocolActivates;
     return TRUE;
 }
 
@@ -12843,7 +12843,7 @@ static void Cmd_various(void)
             return;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_ROAR)
+        if (HasBattlerAbility(battler, ABILITY_WAR_CRY)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()
          && DoesPartyShareTypeWithBattler(battler)
@@ -12853,7 +12853,7 @@ static void Cmd_various(void)
          && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
          && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_ROAR);
+            SetBattlerTriggeredAbility(battler, ABILITY_WAR_CRY);
             SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
@@ -12887,7 +12887,7 @@ static void Cmd_various(void)
             return;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_PRIMAL_STORM)
+        if (HasBattlerAbility(battler, ABILITY_TYRANT_STORM)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()
          && IsBattlerAlive(battler)
@@ -12896,7 +12896,7 @@ static void Cmd_various(void)
          && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
          && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_PRIMAL_STORM);
+            SetBattlerTriggeredAbility(battler, ABILITY_TYRANT_STORM);
             SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
@@ -17808,7 +17808,7 @@ static void Cmd_jumpifnopursuitswitchdmg(void)
         gCurrentMove = MOVE_DEFOG;
         doSwitchIntercept = TRUE;
     }
-    else if (HasBattlerAbility(gBattlerTarget, ABILITY_PRIMAL_TIRANNY)
+    else if (HasBattlerAbility(gBattlerTarget, ABILITY_HUNT_INSTINCT)
           && IsOnlyParadoxInParty(gBattlerTarget)
           && gBattleMons[gBattlerAttacker].hp
           && gBattleMons[gBattlerTarget].hp)

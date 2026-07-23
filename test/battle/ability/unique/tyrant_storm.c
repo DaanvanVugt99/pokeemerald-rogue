@@ -8,37 +8,37 @@ ASSUMPTIONS
     ASSUME(!gBattleMoves[MOVE_TACKLE].bitingMove);
 }
 
-SINGLE_BATTLE_TEST("Primal Storm uses Sandstorm after knocking out a target")
+SINGLE_BATTLE_TEST("Tyrant Storm uses Sandstorm after knocking out a target")
 {
     GIVEN {
-        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_PRIMAL_STORM); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_TYRANT_STORM); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_CATERPIE) { HP(1); MaxHP(400); Moves(MOVE_SPLASH); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SPLASH); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_SPLASH); SEND_OUT(opponent, 1); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_PRIMAL_STORM);
+        ABILITY_POPUP(player, ABILITY_TYRANT_STORM);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SANDSTORM, player);
     } THEN {
         EXPECT(gBattleWeather & B_WEATHER_SANDSTORM);
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Storm does not use Sandstorm without a knockout")
+SINGLE_BATTLE_TEST("Tyrant Storm does not use Sandstorm without a knockout")
 {
     GIVEN {
-        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_PRIMAL_STORM); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_TYRANT_STORM); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(400); MaxHP(400); Moves(MOVE_SPLASH); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_SPLASH); }
     } SCENE {
-        NOT ABILITY_POPUP(player, ABILITY_PRIMAL_STORM);
+        NOT ABILITY_POPUP(player, ABILITY_TYRANT_STORM);
     } THEN {
         EXPECT(!(gBattleWeather & B_WEATHER_SANDSTORM));
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Storm boosts biting move damage in Sandstorm", s16 damage)
+SINGLE_BATTLE_TEST("Tyrant Storm boosts biting move damage in Sandstorm", s16 damage)
 {
     bool32 sandstorm;
 
@@ -46,7 +46,7 @@ SINGLE_BATTLE_TEST("Primal Storm boosts biting move damage in Sandstorm", s16 da
     PARAMETRIZE { sandstorm = TRUE; }
 
     GIVEN {
-        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_PRIMAL_STORM); Moves(MOVE_BITE); }
+        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_TYRANT_STORM); Moves(MOVE_BITE); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(400); MaxHP(400); Defense(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_SANDSTORM, MOVE_SPLASH); }
     } WHEN {
         if (sandstorm)
@@ -60,7 +60,7 @@ SINGLE_BATTLE_TEST("Primal Storm boosts biting move damage in Sandstorm", s16 da
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Storm does not boost non-biting move damage in Sandstorm", s16 damage)
+SINGLE_BATTLE_TEST("Tyrant Storm does not boost non-biting move damage in Sandstorm", s16 damage)
 {
     bool32 sandstorm;
 
@@ -68,7 +68,7 @@ SINGLE_BATTLE_TEST("Primal Storm does not boost non-biting move damage in Sandst
     PARAMETRIZE { sandstorm = TRUE; }
 
     GIVEN {
-        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_PRIMAL_STORM); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_TYRANTRUM) { Ability(ABILITY_STENCH); UniqueAbility(ABILITY_TYRANT_STORM); Moves(MOVE_TACKLE); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(400); MaxHP(400); Defense(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_SANDSTORM, MOVE_SPLASH); }
     } WHEN {
         if (sandstorm)

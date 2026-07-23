@@ -10046,12 +10046,12 @@ BattleScript_RallyCureStatus:
 	waitmessage B_WAIT_TIME_LONG
 	return
 
-BattleScript_PrimalMoltingActivates::
+BattleScript_MoltInstinctActivates::
 	call BattleScript_AbilityPopUp
-	jumpifstatus BS_ATTACKER, STATUS1_ANY, BattleScript_PrimalMoltingCureStatus
+	jumpifstatus BS_ATTACKER, STATUS1_ANY, BattleScript_MoltInstinctCureStatus
 	goto BattleScript_AbilityUsesCalledMoveNoPopup
 
-BattleScript_PrimalMoltingCureStatus:
+BattleScript_MoltInstinctCureStatus:
 	curestatus BS_ATTACKER
 	updatestatusicon BS_ATTACKER
 	printstring STRINGID_PKMNSTATUSNORMAL
@@ -11166,7 +11166,7 @@ BattleScript_TerraformActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
-BattleScript_SingularityCrashActivates::
+BattleScript_CrashProtocolActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
 	playmoveanimation BS_ATTACKER, MOVE_GRAVITY
@@ -12540,10 +12540,10 @@ BattleScript_TumbleweedClearsHazards::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
-BattleScript_SingularityDriveClearsHazards::
+BattleScript_DriveProtocolClearsHazards::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
-	printstring STRINGID_SINGULARITYDRIVECLEAREDHAZARDS
+	printstring STRINGID_DRIVEPROTOCOLCLEAREDHAZARDS
 	waitmessage B_WAIT_TIME_LONG
 	end3
 

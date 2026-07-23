@@ -10,7 +10,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_DETECT].effect == EFFECT_PROTECT);
 }
 
-SINGLE_BATTLE_TEST("Singularity Edge uses Detect after Iron Valiant's first slicing move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Edge Protocol uses Detect after Iron Valiant's first slicing move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -31,13 +31,13 @@ SINGLE_BATTLE_TEST("Singularity Edge uses Detect after Iron Valiant's first slic
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_EDGE);
+            ABILITY_POPUP(player, ABILITY_EDGE_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_DETECT, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_SINGULARITY_EDGE);
+                ABILITY_POPUP(player, ABILITY_EDGE_PROTOCOL);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_DETECT, player);
             }
         }
@@ -53,7 +53,7 @@ SINGLE_BATTLE_TEST("Singularity Edge uses Detect after Iron Valiant's first slic
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Edge only triggers once per battle")
+SINGLE_BATTLE_TEST("Edge Protocol only triggers once per battle")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_VALIANT) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_LEAF_BLADE); }
@@ -65,12 +65,12 @@ SINGLE_BATTLE_TEST("Singularity Edge only triggers once per battle")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_EDGE);
+        ABILITY_POPUP(player, ABILITY_EDGE_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DETECT, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_EDGE);
+            ABILITY_POPUP(player, ABILITY_EDGE_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_DETECT, player);
         }
     } THEN {
@@ -78,7 +78,7 @@ SINGLE_BATTLE_TEST("Singularity Edge only triggers once per battle")
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Edge does not trigger after non-slicing moves")
+SINGLE_BATTLE_TEST("Edge Protocol does not trigger after non-slicing moves")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_VALIANT) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_TACKLE); }
@@ -90,7 +90,7 @@ SINGLE_BATTLE_TEST("Singularity Edge does not trigger after non-slicing moves")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_EDGE);
+            ABILITY_POPUP(player, ABILITY_EDGE_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_DETECT, player);
         }
     } THEN {
@@ -98,7 +98,7 @@ SINGLE_BATTLE_TEST("Singularity Edge does not trigger after non-slicing moves")
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Edge does not trigger if pending Rocky Helmet damage would faint the user")
+SINGLE_BATTLE_TEST("Edge Protocol does not trigger if pending Rocky Helmet damage would faint the user")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_VALIANT) { HP(1); MaxHP(100); Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_LEAF_BLADE); }
@@ -108,7 +108,7 @@ SINGLE_BATTLE_TEST("Singularity Edge does not trigger if pending Rocky Helmet da
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_EDGE);
+            ABILITY_POPUP(player, ABILITY_EDGE_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_DETECT, player);
         }
     } THEN {

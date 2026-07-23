@@ -1486,7 +1486,7 @@ u32 AI_GetBattlerMoveTargetType(u32 battlerId, u32 move)
 {
     if (gBattleMoves[move].effect == EFFECT_EXPANDING_FORCE && AI_IsTerrainAffected(battlerId, STATUS_FIELD_PSYCHIC_TERRAIN))
         return MOVE_TARGET_BOTH;
-    else if (HasBattlerAbility(battlerId, ABILITY_SINGULARITY_ARRAY)
+    else if (HasBattlerAbility(battlerId, ABILITY_ARRAY_PROTOCOL)
         && IsOnlyParadoxInParty(battlerId)
         && (!gDisableStructs[battlerId].uniqueOncePerSwitchInUsed
          || gDisableStructs[battlerId].uniquePersistentStateActive)

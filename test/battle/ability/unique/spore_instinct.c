@@ -7,7 +7,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_LEECH_SEED].effect == EFFECT_LEECH_SEED);
 }
 
-SINGLE_BATTLE_TEST("Primal Parasite seeds targets after Brute Bonnet inflicts status if it is the only Paradox")
+SINGLE_BATTLE_TEST("Spore Instinct seeds targets after Brute Bonnet inflicts status if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -27,13 +27,13 @@ SINGLE_BATTLE_TEST("Primal Parasite seeds targets after Brute Bonnet inflicts st
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SPORE, player);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_PARASITE);
+            ABILITY_POPUP(player, ABILITY_SPORE_INSTINCT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_LEECH_SEED, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_PARASITE);
+                ABILITY_POPUP(player, ABILITY_SPORE_INSTINCT);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_LEECH_SEED, player);
             }
         }
@@ -46,7 +46,7 @@ SINGLE_BATTLE_TEST("Primal Parasite seeds targets after Brute Bonnet inflicts st
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Parasite does not trigger when the status fails")
+SINGLE_BATTLE_TEST("Spore Instinct does not trigger when the status fails")
 {
     GIVEN {
         PLAYER(SPECIES_BRUTE_BONNET) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_SPORE); }
@@ -56,7 +56,7 @@ SINGLE_BATTLE_TEST("Primal Parasite does not trigger when the status fails")
         TURN { MOVE(player, MOVE_SPORE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_PARASITE);
+            ABILITY_POPUP(player, ABILITY_SPORE_INSTINCT);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_LEECH_SEED, player);
         }
     } THEN {

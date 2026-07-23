@@ -12,7 +12,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_FLY].effect == EFFECT_SEMI_INVULNERABLE);
 }
 
-SINGLE_BATTLE_TEST("Singularity Crash sets Gravity before Iron Boulder's first Rock attack")
+SINGLE_BATTLE_TEST("Crash Protocol sets Gravity before Iron Boulder's first Rock attack")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BOULDER) { Attack(100); Speed(100); Ability(ABILITY_QUARK_DRIVE); Moves(MOVE_STONE_EDGE); }
@@ -21,7 +21,7 @@ SINGLE_BATTLE_TEST("Singularity Crash sets Gravity before Iron Boulder's first R
     } WHEN {
         TURN { MOVE(player, MOVE_STONE_EDGE, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_CRASH);
+        ABILITY_POPUP(player, ABILITY_CRASH_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
         MESSAGE("Gravity intensified!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STONE_EDGE, player);
@@ -34,7 +34,7 @@ SINGLE_BATTLE_TEST("Singularity Crash sets Gravity before Iron Boulder's first R
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Crash remains inactive with another Paradox ally")
+SINGLE_BATTLE_TEST("Crash Protocol remains inactive with another Paradox ally")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BOULDER) { Speed(100); Ability(ABILITY_QUARK_DRIVE); Moves(MOVE_STONE_EDGE); }
@@ -44,7 +44,7 @@ SINGLE_BATTLE_TEST("Singularity Crash remains inactive with another Paradox ally
         TURN { MOVE(player, MOVE_STONE_EDGE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_CRASH);
+            ABILITY_POPUP(player, ABILITY_CRASH_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
         }
     } THEN {
@@ -53,7 +53,7 @@ SINGLE_BATTLE_TEST("Singularity Crash remains inactive with another Paradox ally
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Crash waits for a damaging Rock-type move")
+SINGLE_BATTLE_TEST("Crash Protocol waits for a damaging Rock-type move")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BOULDER) { Speed(100); Ability(ABILITY_QUARK_DRIVE); Moves(MOVE_PSYCHO_CUT, MOVE_STONE_EDGE); }
@@ -64,7 +64,7 @@ SINGLE_BATTLE_TEST("Singularity Crash waits for a damaging Rock-type move")
         TURN { MOVE(player, MOVE_STONE_EDGE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYCHO_CUT, player);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_CRASH);
+        ABILITY_POPUP(player, ABILITY_CRASH_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
     } THEN {
         EXPECT(gFieldStatuses & STATUS_FIELD_GRAVITY);
@@ -72,7 +72,7 @@ SINGLE_BATTLE_TEST("Singularity Crash waits for a damaging Rock-type move")
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Crash does not consume its activation while Gravity is already active")
+SINGLE_BATTLE_TEST("Crash Protocol does not consume its activation while Gravity is already active")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BOULDER) { Speed(50); Ability(ABILITY_QUARK_DRIVE); Moves(MOVE_STONE_EDGE); }
@@ -83,7 +83,7 @@ SINGLE_BATTLE_TEST("Singularity Crash does not consume its activation while Grav
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_CRASH);
+            ABILITY_POPUP(player, ABILITY_CRASH_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
         }
     } THEN {
@@ -92,7 +92,7 @@ SINGLE_BATTLE_TEST("Singularity Crash does not consume its activation while Grav
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Crash grounds airborne targets before the Rock attack")
+SINGLE_BATTLE_TEST("Crash Protocol grounds airborne targets before the Rock attack")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BOULDER) { Attack(100); Speed(50); Ability(ABILITY_QUARK_DRIVE); Moves(MOVE_STONE_EDGE); }
@@ -102,7 +102,7 @@ SINGLE_BATTLE_TEST("Singularity Crash grounds airborne targets before the Rock a
         TURN { MOVE(opponent, MOVE_FLY); MOVE(player, MOVE_STONE_EDGE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_FLY, opponent);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_CRASH);
+        ABILITY_POPUP(player, ABILITY_CRASH_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STONE_EDGE, player);
         HP_BAR(opponent);
@@ -112,7 +112,7 @@ SINGLE_BATTLE_TEST("Singularity Crash grounds airborne targets before the Rock a
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Crash is not consumed when Iron Boulder cannot act")
+SINGLE_BATTLE_TEST("Crash Protocol is not consumed when Iron Boulder cannot act")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BOULDER) { Speed(100); Ability(ABILITY_QUARK_DRIVE); Status1(STATUS1_SLEEP_TURN(2)); Moves(MOVE_STONE_EDGE); }
@@ -122,7 +122,7 @@ SINGLE_BATTLE_TEST("Singularity Crash is not consumed when Iron Boulder cannot a
         TURN { MOVE(player, MOVE_STONE_EDGE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_CRASH);
+            ABILITY_POPUP(player, ABILITY_CRASH_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
         }
     } THEN {
@@ -131,7 +131,7 @@ SINGLE_BATTLE_TEST("Singularity Crash is not consumed when Iron Boulder cannot a
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Crash sets Gravity before a Rock attack is blocked by Protect")
+SINGLE_BATTLE_TEST("Crash Protocol sets Gravity before a Rock attack is blocked by Protect")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_BOULDER) { Speed(50); Ability(ABILITY_QUARK_DRIVE); Moves(MOVE_STONE_EDGE); }
@@ -141,7 +141,7 @@ SINGLE_BATTLE_TEST("Singularity Crash sets Gravity before a Rock attack is block
         TURN { MOVE(opponent, MOVE_PROTECT); MOVE(player, MOVE_STONE_EDGE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, opponent);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_CRASH);
+        ABILITY_POPUP(player, ABILITY_CRASH_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GRAVITY, player);
         MESSAGE("Foe Wobbuffet protected itself!");
     } THEN {

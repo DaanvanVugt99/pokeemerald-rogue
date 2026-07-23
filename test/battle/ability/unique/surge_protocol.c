@@ -11,7 +11,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_STEALTH_ROCK].effect == EFFECT_STEALTH_ROCK);
 }
 
-SINGLE_BATTLE_TEST("Singularity Overload uses Charge after Iron Thorns's first Electric move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Surge Protocol uses Charge after Iron Thorns's first Electric move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -32,13 +32,13 @@ SINGLE_BATTLE_TEST("Singularity Overload uses Charge after Iron Thorns's first E
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_OVERLOAD);
+            ABILITY_POPUP(player, ABILITY_SURGE_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_CHARGE, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_SINGULARITY_OVERLOAD);
+                ABILITY_POPUP(player, ABILITY_SURGE_PROTOCOL);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_CHARGE, player);
             }
         }
@@ -56,7 +56,7 @@ SINGLE_BATTLE_TEST("Singularity Overload uses Charge after Iron Thorns's first E
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Overload sets Stealth Rock after Iron Thorns's first Rock move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Surge Protocol sets Stealth Rock after Iron Thorns's first Rock move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -77,13 +77,13 @@ SINGLE_BATTLE_TEST("Singularity Overload sets Stealth Rock after Iron Thorns's f
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_OVERLOAD);
+            ABILITY_POPUP(player, ABILITY_SURGE_PROTOCOL);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_STEALTH_ROCK, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_SINGULARITY_OVERLOAD);
+                ABILITY_POPUP(player, ABILITY_SURGE_PROTOCOL);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_STEALTH_ROCK, player);
             }
         }
@@ -101,7 +101,7 @@ SINGLE_BATTLE_TEST("Singularity Overload sets Stealth Rock after Iron Thorns's f
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Overload Electric and Rock triggers are independent")
+SINGLE_BATTLE_TEST("Surge Protocol Electric and Rock triggers are independent")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_THORNS) { Speed(100); Ability(ABILITY_NO_GUARD); Moves(MOVE_THUNDER_SHOCK, MOVE_ROCK_THROW); }
@@ -113,11 +113,11 @@ SINGLE_BATTLE_TEST("Singularity Overload Electric and Rock triggers are independ
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDER_SHOCK, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_OVERLOAD);
+        ABILITY_POPUP(player, ABILITY_SURGE_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CHARGE, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ROCK_THROW, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_SINGULARITY_OVERLOAD);
+        ABILITY_POPUP(player, ABILITY_SURGE_PROTOCOL);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STEALTH_ROCK, player);
     } THEN {
         EXPECT(gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniqueOncePerSwitchInUsed);

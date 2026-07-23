@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_TACKLE].effect == EFFECT_HIT);
 }
 
-SINGLE_BATTLE_TEST("Singularity Airspace blocks opposing priority moves if Iron Jugulis is the only Paradox")
+SINGLE_BATTLE_TEST("Lock Protocol blocks opposing priority moves if Iron Jugulis is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -28,7 +28,7 @@ SINGLE_BATTLE_TEST("Singularity Airspace blocks opposing priority moves if Iron 
     } SCENE {
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_AIRSPACE);
+            ABILITY_POPUP(player, ABILITY_LOCK_PROTOCOL);
             NOT { HP_BAR(player); }
         }
         else
@@ -44,7 +44,7 @@ SINGLE_BATTLE_TEST("Singularity Airspace blocks opposing priority moves if Iron 
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Airspace blocks opposing switching moves if Iron Jugulis is the only Paradox")
+SINGLE_BATTLE_TEST("Lock Protocol blocks opposing switching moves if Iron Jugulis is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -67,7 +67,7 @@ SINGLE_BATTLE_TEST("Singularity Airspace blocks opposing switching moves if Iron
     } SCENE {
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_SINGULARITY_AIRSPACE);
+            ABILITY_POPUP(player, ABILITY_LOCK_PROTOCOL);
             NONE_OF {
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, opponent);
                 HP_BAR(player);
@@ -94,7 +94,7 @@ SINGLE_BATTLE_TEST("Singularity Airspace blocks opposing switching moves if Iron
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Airspace does not block ordinary opposing moves")
+SINGLE_BATTLE_TEST("Lock Protocol does not block ordinary opposing moves")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_JUGULIS) { HP(200); MaxHP(200); Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
@@ -105,13 +105,13 @@ SINGLE_BATTLE_TEST("Singularity Airspace does not block ordinary opposing moves"
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
         HP_BAR(player);
-        NOT { ABILITY_POPUP(player, ABILITY_SINGULARITY_AIRSPACE); }
+        NOT { ABILITY_POPUP(player, ABILITY_LOCK_PROTOCOL); }
     } THEN {
         EXPECT_LT(player->hp, player->maxHP);
     }
 }
 
-SINGLE_BATTLE_TEST("Singularity Airspace is ignored by Mold Breaker")
+SINGLE_BATTLE_TEST("Lock Protocol is ignored by Mold Breaker")
 {
     GIVEN {
         PLAYER(SPECIES_IRON_JUGULIS) { HP(200); MaxHP(200); Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_CELEBRATE); }
@@ -123,7 +123,7 @@ SINGLE_BATTLE_TEST("Singularity Airspace is ignored by Mold Breaker")
         ABILITY_POPUP(opponent, ABILITY_MOLD_BREAKER);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_QUICK_ATTACK, opponent);
         HP_BAR(player);
-        NOT { ABILITY_POPUP(player, ABILITY_SINGULARITY_AIRSPACE); }
+        NOT { ABILITY_POPUP(player, ABILITY_LOCK_PROTOCOL); }
     } THEN {
         EXPECT_LT(player->hp, player->maxHP);
     }

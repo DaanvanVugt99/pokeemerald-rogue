@@ -9,7 +9,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_EMBER].type != TYPE_GHOST);
 }
 
-SINGLE_BATTLE_TEST("Primal Wraith disables the target's last used move after Flutter Mane's first Ghost move if it is the only Paradox")
+SINGLE_BATTLE_TEST("Hex Instinct disables the target's last used move after Flutter Mane's first Ghost move if it is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -31,13 +31,13 @@ SINGLE_BATTLE_TEST("Primal Wraith disables the target's last used move after Flu
         HP_BAR(opponent);
         if (!hasOtherParadox)
         {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_WRAITH);
+            ABILITY_POPUP(player, ABILITY_HEX_INSTINCT);
             MESSAGE("Foe Wobbuffet's Water Gun was disabled!");
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_PRIMAL_WRAITH);
+                ABILITY_POPUP(player, ABILITY_HEX_INSTINCT);
                 MESSAGE("Foe Wobbuffet's Water Gun was disabled!");
             }
         }
@@ -56,7 +56,7 @@ SINGLE_BATTLE_TEST("Primal Wraith disables the target's last used move after Flu
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Wraith only triggers once per switch-in")
+SINGLE_BATTLE_TEST("Hex Instinct only triggers once per switch-in")
 {
     GIVEN {
         PLAYER(SPECIES_FLUTTER_MANE) { HP(500); MaxHP(500); Speed(50); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_SHADOW_BALL); }
@@ -66,10 +66,10 @@ SINGLE_BATTLE_TEST("Primal Wraith only triggers once per switch-in")
         TURN { MOVE(opponent, MOVE_WATER_GUN); MOVE(player, MOVE_SHADOW_BALL); }
         TURN { MOVE(opponent, MOVE_EMBER); MOVE(player, MOVE_SHADOW_BALL); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_PRIMAL_WRAITH);
+        ABILITY_POPUP(player, ABILITY_HEX_INSTINCT);
         MESSAGE("Foe Wobbuffet's Water Gun was disabled!");
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_WRAITH);
+            ABILITY_POPUP(player, ABILITY_HEX_INSTINCT);
             MESSAGE("Foe Wobbuffet's Ember was disabled!");
         }
     } THEN {
@@ -78,7 +78,7 @@ SINGLE_BATTLE_TEST("Primal Wraith only triggers once per switch-in")
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Wraith does not trigger after non-Ghost moves")
+SINGLE_BATTLE_TEST("Hex Instinct does not trigger after non-Ghost moves")
 {
     GIVEN {
         PLAYER(SPECIES_FLUTTER_MANE) { HP(500); MaxHP(500); Speed(50); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_TACKLE); }
@@ -88,7 +88,7 @@ SINGLE_BATTLE_TEST("Primal Wraith does not trigger after non-Ghost moves")
         TURN { MOVE(opponent, MOVE_WATER_GUN); MOVE(player, MOVE_TACKLE); }
     } SCENE {
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_PRIMAL_WRAITH);
+            ABILITY_POPUP(player, ABILITY_HEX_INSTINCT);
         }
     } THEN {
         EXPECT_EQ(gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].disabledMove, MOVE_NONE);

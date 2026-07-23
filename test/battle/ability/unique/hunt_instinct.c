@@ -7,7 +7,7 @@ ASSUMPTIONS
     ASSUME(!gBattleMoves[MOVE_TACKLE].bitingMove);
 }
 
-SINGLE_BATTLE_TEST("Primal Tiranny traps with the next biting move after a foe switches out if Roaring Moon is the only Paradox")
+SINGLE_BATTLE_TEST("Hunt Instinct traps with the next biting move after a foe switches out if Roaring Moon is the only Paradox")
 {
     bool32 hasOtherParadox;
 
@@ -28,9 +28,9 @@ SINGLE_BATTLE_TEST("Primal Tiranny traps with the next biting move after a foe s
         ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, player);
         HP_BAR(opponent);
         if (!hasOtherParadox)
-            ABILITY_POPUP(player, ABILITY_PRIMAL_TIRANNY);
+            ABILITY_POPUP(player, ABILITY_HUNT_INSTINCT);
         else
-            NOT ABILITY_POPUP(player, ABILITY_PRIMAL_TIRANNY);
+            NOT ABILITY_POPUP(player, ABILITY_HUNT_INSTINCT);
     } THEN {
         if (hasOtherParadox)
         {
@@ -47,7 +47,7 @@ SINGLE_BATTLE_TEST("Primal Tiranny traps with the next biting move after a foe s
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Tiranny keeps its primed state through non-biting moves")
+SINGLE_BATTLE_TEST("Hunt Instinct keeps its primed state through non-biting moves")
 {
     GIVEN {
         PLAYER(SPECIES_ROARING_MOON) { Speed(100); Ability(ABILITY_PROTOSYNTHESIS); Moves(MOVE_TACKLE, MOVE_BITE); }
@@ -60,17 +60,17 @@ SINGLE_BATTLE_TEST("Primal Tiranny keeps its primed state through non-biting mov
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_PRIMAL_TIRANNY);
+        NOT ABILITY_POPUP(player, ABILITY_HUNT_INSTINCT);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, player);
         HP_BAR(opponent);
-        ABILITY_POPUP(player, ABILITY_PRIMAL_TIRANNY);
+        ABILITY_POPUP(player, ABILITY_HUNT_INSTINCT);
     } THEN {
         EXPECT(opponent->status2 & STATUS2_ESCAPE_PREVENTION);
         EXPECT(!gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniquePersistentStateActive);
     }
 }
 
-SINGLE_BATTLE_TEST("Primal Tiranny does not trap if no foe switched out")
+SINGLE_BATTLE_TEST("Hunt Instinct does not trap if no foe switched out")
 {
     GIVEN {
         PLAYER(SPECIES_ROARING_MOON) { Speed(100); Ability(ABILITY_PROTOSYNTHESIS); Moves(MOVE_BITE); }
@@ -81,7 +81,7 @@ SINGLE_BATTLE_TEST("Primal Tiranny does not trap if no foe switched out")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, player);
         HP_BAR(opponent);
-        NOT ABILITY_POPUP(player, ABILITY_PRIMAL_TIRANNY);
+        NOT ABILITY_POPUP(player, ABILITY_HUNT_INSTINCT);
     } THEN {
         EXPECT_EQ(opponent->status2 & STATUS2_ESCAPE_PREVENTION, 0);
         EXPECT(!gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniquePersistentStateActive);
