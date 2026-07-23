@@ -74,6 +74,60 @@ static void SetMiniBossRewardTestParty(const u16 *species, u8 count)
     CalculateEnemyPartyCount();
 }
 
+TEST("Trainer IV curves reserve fixed IV advantages for key battles")
+{
+    static const u8 sExpectedKeyTrainerIvs[4][ROGUE_MAX_BOSS_COUNT] =
+    {
+        [DIFFICULTY_LEVEL_EASY] =
+        {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 10,
+        },
+        [DIFFICULTY_LEVEL_AVERAGE] =
+        {
+            0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 15,
+        },
+        [DIFFICULTY_LEVEL_HARD] =
+        {
+            5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 25, 25, 31, 31,
+        },
+        [DIFFICULTY_LEVEL_BRUTAL] =
+        {
+            15, 15, 20, 20, 25, 25, 31, 31, 31, 31, 31, 31, 31, 31,
+        },
+    };
+    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
+    u8 originalRunDifficulty = Rogue_GetCurrentDifficulty();
+    u16 keyTrainer = TRAINER_NONE;
+    u8 trainerDifficulty;
+    u8 runDifficulty;
+    u16 i;
+
+    for(i = 1; i < gRogueTrainerCount; ++i)
+    {
+        if(gRogueTrainers[i].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS)
+        {
+            keyTrainer = i;
+            break;
+        }
+    }
+    EXPECT_NE(keyTrainer, TRAINER_NONE);
+    EXPECT(!Rogue_IsKeyTrainer(TRAINER_NONE));
+
+    for(trainerDifficulty = DIFFICULTY_LEVEL_EASY; trainerDifficulty <= DIFFICULTY_LEVEL_BRUTAL; ++trainerDifficulty)
+    {
+        Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, trainerDifficulty);
+        for(runDifficulty = 0; runDifficulty < ROGUE_MAX_BOSS_COUNT; ++runDifficulty)
+        {
+            Rogue_SetCurrentDifficulty(runDifficulty);
+            EXPECT_EQ(RogueTest_CalculateMonFixedIV(keyTrainer), sExpectedKeyTrainerIvs[trainerDifficulty][runDifficulty]);
+            EXPECT_EQ(RogueTest_CalculateMonFixedIV(TRAINER_NONE), 0);
+        }
+    }
+
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
+    Rogue_SetCurrentDifficulty(originalRunDifficulty);
+}
+
 TEST("Rogue trainer items: Black Sludge converts to Leftovers with tera")
 {
 #if defined(ROGUE_EXPANSION)

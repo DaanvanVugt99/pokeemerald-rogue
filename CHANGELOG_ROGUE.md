@@ -66,6 +66,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Rebalanced fixed Trainer IVs around clearer difficulty identities: ordinary
+  Trainers now always have zero IVs, Average key Trainers gain only 5/10/15
+  IVs across the Elite Four and Champion battles, and Hard and Brutal key
+  Trainers follow smoother late-game optimization curves.
 - Moved Mysterious Shrine encounters to Gym 5 or later and made victories heal
   the party like rival battles, while retaining Healing Flask restrictions.
 - Made Spiral Gaze users reliably prioritize their first-turn perfect-accuracy

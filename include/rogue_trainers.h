@@ -68,6 +68,7 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
 u16 Rogue_SelectTrainerReplacementSpecies(u16 trainerNum, struct Pokemon *party, u8 slot, u8 partyCount);
 
 #if TESTING
+u8 RogueTest_CalculateMonFixedIV(u16 trainerNum);
 u8 RogueTest_PlanTrainerSpecies(u16 trainerNum, u16 *speciesBuffer, u8 monCount);
 #endif
 
