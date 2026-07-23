@@ -6120,10 +6120,17 @@ void Rogue_QueueShrineBattleBoost(void)
 
 bool8 Rogue_IsBattleRoamerMon(u16 species)
 {
-    if(gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER] == species)
-        return TRUE;
+    if(gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER] != species)
+        return FALSE;
 
-    return FALSE;
+    // A Legendary node that rolled a custom Pokémon is converted into an
+    // Alpha encounter.
+    if(Rogue_IsRunActive()
+        && gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY
+        && gRogueAdvPath.currentRoomParams.perType.legendary.customMonId != 0)
+        return FALSE;
+
+    return TRUE;
 }
 
 static bool8 IsMiniBossRewardEligible(struct Pokemon* party, u8 index, bool8 allowLegendary)

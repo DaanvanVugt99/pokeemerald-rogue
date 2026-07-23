@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Converted Unique Legendary roamers into stationary Alpha encounters so they
+  cannot flee during their initially uncatchable phase.
 - Kept attacker-side unique ability popups attached to their actual battler,
   including Serene Voice on opposing Pokémon.
 - Corrected spelling errors across dialogue, UI copy, move descriptions,

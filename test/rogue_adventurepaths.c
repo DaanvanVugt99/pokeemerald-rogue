@@ -440,6 +440,28 @@ TEST("Unique Legendary rooms use a gold statue")
     gRogueAdvPath = originalPath;
 }
 
+TEST("Unique Legendary rooms convert roamers into stationary encounters")
+{
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u16 originalRoamerSpecies = gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER];
+    struct RogueAdvPath originalPath = gRogueAdvPath;
+
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER] = SPECIES_HO_OH;
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_LEGENDARY;
+    gRogueAdvPath.currentRoomParams.perType.legendary.customMonId = 0;
+
+    EXPECT(Rogue_IsBattleRoamerMon(SPECIES_HO_OH));
+
+    gRogueAdvPath.currentRoomParams.perType.legendary.customMonId = 1;
+    EXPECT(!Rogue_IsBattleRoamerMon(SPECIES_HO_OH));
+
+    gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER] = originalRoamerSpecies;
+    gRogueAdvPath = originalPath;
+    if(!wasRunActive)
+        FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+}
+
 TEST("Unique Legendary battles and catches preserve their generated payload")
 {
     u8 i;
