@@ -1090,7 +1090,7 @@ static void UpdateLvlInHealthbox(u8 healthboxSpriteId, u8 lvl)
         MegaIndicator_UpdateLevel(healthboxSpriteId, lvl);
         MegaIndicator_SetVisibilities(healthboxSpriteId, FALSE);
     }
-    else if (IsTerastallizeEnabled())
+    else if (!TeraIndicator_ShouldBeInvisible(battler))
     {
         textPtr = StringCopy(text, gText_HealthboxNickname);
         objVram = ConvertIntToDecimalStringN(textPtr, lvl, STR_CONV_MODE_LEFT_ALIGN, 3);
@@ -1107,6 +1107,7 @@ static void UpdateLvlInHealthbox(u8 healthboxSpriteId, u8 lvl)
         objVram = ConvertIntToDecimalStringN(textPtr + 2, lvl, STR_CONV_MODE_LEFT_ALIGN, 3);
         xPos = 5 * (3 - (objVram - (textPtr + 2)));
         MegaIndicator_SetVisibilities(healthboxSpriteId, TRUE);
+        TeraIndicator_SetVisibilities(healthboxSpriteId, TRUE);
     }
 
     windowTileData = AddTextPrinterAndCreateWindowOnHealthbox(text, xPos, 3, BATTLE_INTERFACE_FILLED_BG, &windowId);

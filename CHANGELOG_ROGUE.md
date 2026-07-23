@@ -16,6 +16,12 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept opposing Tera types hidden until activation and reduced player-side
+  inactive indicators' contrast so grayscale types such as Dark are visibly
+  disabled.
+- Separated and compacted the Safari offer preview panels, added navigation
+  arrows, and staged their initial rendering to prevent incomplete frames and
+  border flashes.
 - Made Fault Finder set Stealth Rock when its triggering Steel move knocks out
   an active target that still has a replacement.
 - Warmed missing Frontier Brain reward previews whenever an existing adventure

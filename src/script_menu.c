@@ -1654,16 +1654,15 @@ void ScriptMenu_ShowTrialOverview(void)
 #define SAFARI_OFFER_ITEM_ICON_BLACK_INDEX 1
 #define SAFARI_OFFER_ITEM_ICON_SLOT_BASE(i) (2 + (i) * 4)
 #define SAFARI_OFFER_PIC_WINDOW_TILES (8 * 8)
-#define SAFARI_OFFER_DETAILS_WINDOW_TILES (17 * 11)
+#define SAFARI_OFFER_DETAILS_WINDOW_TILES (16 * 10)
 #define SAFARI_OFFER_ACTIONS_WINDOW_TILES (26 * 3)
-#define SAFARI_OFFER_DETAILS_SCREEN_X 88
+#define SAFARI_OFFER_DETAILS_SCREEN_X 96
 #define SAFARI_OFFER_DETAILS_SCREEN_Y 16
-#define SAFARI_OFFER_DETAILS_WIDTH 136
-#define SAFARI_OFFER_DEX_WARNING_Y 17
-#define SAFARI_OFFER_COST_LABEL_Y 30
-#define SAFARI_OFFER_COST_ICON_Y 42
-#define SAFARI_OFFER_COST_COUNT_Y 66
-#define SAFARI_OFFER_ACTIONS_LEFT_SHIFT 8
+#define SAFARI_OFFER_DETAILS_WIDTH 128
+#define SAFARI_OFFER_DEX_WARNING_Y 15
+#define SAFARI_OFFER_COST_LABEL_Y 28
+#define SAFARI_OFFER_COST_ICON_Y 39
+#define SAFARI_OFFER_COST_COUNT_Y 62
 
 #define tSafariOfferPicWindow    data[0]
 #define tSafariOfferDetailsWindow data[1]
@@ -1673,6 +1672,14 @@ void ScriptMenu_ShowTrialOverview(void)
 #define tSafariOfferCanBuy       data[7]
 #define tSafariOfferCanDismiss   data[8]
 #define tSafariOfferSafariIndex  data[9]
+#define tSafariOfferState        data[10]
+
+enum
+{
+    SAFARI_OFFER_STATE_WAIT_FOR_BG,
+    SAFARI_OFFER_STATE_WAIT_FOR_GFX,
+    SAFARI_OFFER_STATE_INPUT,
+};
 
 static const u8 sSafariOfferTextColor[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
 static const u8 sSafariOfferRedColor[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_GRAY};
@@ -1682,9 +1689,12 @@ static const u8 sText_SafariOfferCannotBuy[] = _("{COLOR RED}{A_BUTTON} Invite")
 static const u8 sText_SafariOfferDismiss[] = _("{START_BUTTON} Dismiss");
 static const u8 sText_SafariOfferBack[] = _("{B_BUTTON} Back");
 static const u8 sText_SafariOfferShinyCost[] = _("Shiny");
+static const u8 sText_SafariOfferPrevious[] = _("{LEFT_ARROW}");
+static const u8 sText_SafariOfferNext[] = _("{RIGHT_ARROW}");
 
 static bool8 TryCycleSafariOfferDetails(u8 taskId, bool8 forward);
 static bool8 RefreshSafariOfferDetails(u8 taskId, u16 safariIndex);
+static void InitSafariOfferWindows(u8 taskId);
 
 static void DestroySafariOfferMonSprite(u8 taskId)
 {
@@ -1712,6 +1722,20 @@ static void DestroySafariOfferItemIcons(u8 taskId)
     FreeSpritePaletteByTag(SAFARI_OFFER_ITEM_ICON_PAL_TAG);
 }
 
+static void SetSafariOfferSpritesInvisible(u8 taskId, bool8 invisible)
+{
+    u8 i;
+
+    if (gTasks[taskId].tSafariOfferMonSpriteId != SPRITE_NONE)
+        gSprites[gTasks[taskId].tSafariOfferMonSpriteId].invisible = invisible;
+
+    for (i = 0; i < SAFARI_OFFER_MAX_ITEM_ICONS; ++i)
+    {
+        if (gTasks[taskId].tSafariOfferItemSpriteId(i) != SPRITE_NONE)
+            gSprites[gTasks[taskId].tSafariOfferItemSpriteId(i)].invisible = invisible;
+    }
+}
+
 static void CleanupSafariOfferDetails(u8 taskId)
 {
     DestroySafariOfferMonSprite(taskId);
@@ -1727,6 +1751,25 @@ static void CleanupSafariOfferDetails(u8 taskId)
 
 static void Task_SafariOfferDetailsInput(u8 taskId)
 {
+    switch (gTasks[taskId].tSafariOfferState)
+    {
+    case SAFARI_OFFER_STATE_WAIT_FOR_BG:
+        if (IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        InitSafariOfferWindows(taskId);
+        gTasks[taskId].tSafariOfferState = SAFARI_OFFER_STATE_WAIT_FOR_GFX;
+        return;
+    case SAFARI_OFFER_STATE_WAIT_FOR_GFX:
+        if (IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        CopyBgTilemapBufferToVram(0);
+        SetSafariOfferSpritesInvisible(taskId, FALSE);
+        gTasks[taskId].tSafariOfferState = SAFARI_OFFER_STATE_INPUT;
+        return;
+    }
+
     if (JOY_REPEAT(DPAD_LEFT))
     {
         if (TryCycleSafariOfferDetails(taskId, FALSE))
@@ -1795,9 +1838,9 @@ static u8 GetSafariOfferCostIconCenterX(u8 costCount, u8 index)
 {
     static const u8 sCostColumnCenters[ROGUE_SAFARI_OFFER_MAX_COST_ITEMS][ROGUE_SAFARI_OFFER_MAX_COST_ITEMS] =
     {
-        { 68, 0, 0 },
-        { 48, 88, 0 },
-        { 34, 68, 102 },
+        { 64, 0, 0 },
+        { 44, 84, 0 },
+        { 30, 64, 98 },
     };
 
     if (costCount == 0)
@@ -1865,16 +1908,17 @@ static const u8 *GetSafariOfferCostLabel(struct RogueSafariOfferCostItem const *
 static void PrintSafariOfferActions(u8 windowId, bool8 hasOffer, bool8 canPurchase, bool8 canDismiss)
 {
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-    SetDarkStandardWindowBorderStyle(windowId, FALSE);
+    PrintSafariOfferActionText(windowId, sText_SafariOfferPrevious, 10);
 
     if (hasOffer)
-        PrintSafariOfferActionText(windowId, canPurchase ? sText_SafariOfferCanBuy : sText_SafariOfferCannotBuy, 38 - SAFARI_OFFER_ACTIONS_LEFT_SHIFT);
+        PrintSafariOfferActionText(windowId, canPurchase ? sText_SafariOfferCanBuy : sText_SafariOfferCannotBuy, 44);
 
     if (canDismiss)
-        PrintSafariOfferActionText(windowId, sText_SafariOfferDismiss, 116 - SAFARI_OFFER_ACTIONS_LEFT_SHIFT);
+        PrintSafariOfferActionText(windowId, sText_SafariOfferDismiss, 104);
 
-    PrintSafariOfferActionText(windowId, sText_SafariOfferBack, 184 - SAFARI_OFFER_ACTIONS_LEFT_SHIFT);
-    CopyWindowToVram(windowId, COPYWIN_FULL);
+    PrintSafariOfferActionText(windowId, sText_SafariOfferBack, 164);
+    PrintSafariOfferActionText(windowId, sText_SafariOfferNext, 198);
+    CopyWindowToVram(windowId, COPYWIN_GFX);
 }
 
 static void PrintSafariOfferDetails(u8 windowId, struct RogueSafariOfferDetails const *details)
@@ -1882,8 +1926,7 @@ static void PrintSafariOfferDetails(u8 windowId, struct RogueSafariOfferDetails 
     u8 i;
 
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-    SetDarkStandardWindowBorderStyle(windowId, FALSE);
-    AddTextPrinterParameterized4(windowId, FONT_SMALL_NARROW, 2, 4, 0, 0, sSafariOfferTextColor, TEXT_SKIP_DRAW, details->displayName);
+    AddTextPrinterParameterized4(windowId, FONT_SMALL_NARROW, 2, 2, 0, 0, sSafariOfferTextColor, TEXT_SKIP_DRAW, details->displayName);
 
     if (!RoguePokedex_IsSpeciesEnabled(details->species))
         AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_NotInCurrentDex, 2, SAFARI_OFFER_DEX_WARNING_Y, TEXT_SKIP_DRAW, NULL);
@@ -1911,7 +1954,7 @@ static void PrintSafariOfferDetails(u8 windowId, struct RogueSafariOfferDetails 
         }
     }
 
-    CopyWindowToVram(windowId, COPYWIN_FULL);
+    CopyWindowToVram(windowId, COPYWIN_GFX);
 }
 
 static void InitSafariOfferItemIconPaletteMap(u8 *paletteMap, u8 index, bool8 isShinyCost)
@@ -2013,11 +2056,13 @@ static void DrawSafariOfferItemIcons(u8 taskId, struct RogueSafariOfferDetails c
     }
 }
 
-static void DrawSafariOfferPicWindow(u8 windowId)
+static void DrawSafariOfferWindowFrames(u8 picWindowId, u8 detailsWindowId, u8 actionsWindowId)
 {
-    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-    SetDarkStandardWindowBorderStyle(windowId, FALSE);
-    CopyWindowToVram(windowId, COPYWIN_FULL);
+    SetDarkStandardWindowBorderStyle(picWindowId, FALSE);
+    SetDarkStandardWindowBorderStyle(detailsWindowId, FALSE);
+    SetDarkStandardWindowBorderStyle(actionsWindowId, FALSE);
+
+    CopyWindowToVram(picWindowId, COPYWIN_GFX);
 }
 
 static u8 CreateSafariOfferMonSprite(struct RogueSafariOfferDetails const *details)
@@ -2063,7 +2108,6 @@ static bool8 RefreshSafariOfferDetails(u8 taskId, u16 safariIndex)
     DestroySafariOfferMonSprite(taskId);
     DestroySafariOfferItemIcons(taskId);
 
-    DrawSafariOfferPicWindow(gTasks[taskId].tSafariOfferPicWindow);
     PrintSafariOfferDetails(gTasks[taskId].tSafariOfferDetailsWindow, &details);
     PrintSafariOfferActions(gTasks[taskId].tSafariOfferActionsWindow, details.costCount != 0, details.canPurchase, TRUE);
 
@@ -2107,13 +2151,25 @@ static bool8 TryCycleSafariOfferDetails(u8 taskId, bool8 forward)
     return FALSE;
 }
 
+static void InitSafariOfferWindows(u8 taskId)
+{
+    u8 picWindowId = CreateWindowFromRectWithBaseBlockOffset(1, 1, 8, 8, 0);
+    u8 detailsWindowId = CreateWindowFromRectWithBaseBlockOffset(11, 1, 16, 10, SAFARI_OFFER_PIC_WINDOW_TILES);
+    u8 actionsWindowId = CreateWindowFromRectWithBaseBlockOffset(1, 13, 26, 3, SAFARI_OFFER_PIC_WINDOW_TILES + SAFARI_OFFER_DETAILS_WINDOW_TILES);
+
+    gTasks[taskId].tSafariOfferPicWindow = picWindowId;
+    gTasks[taskId].tSafariOfferDetailsWindow = detailsWindowId;
+    gTasks[taskId].tSafariOfferActionsWindow = actionsWindowId;
+
+    DrawSafariOfferWindowFrames(picWindowId, detailsWindowId, actionsWindowId);
+    RefreshSafariOfferDetails(taskId, gTasks[taskId].tSafariOfferSafariIndex);
+    SetSafariOfferSpritesInvisible(taskId, TRUE);
+}
+
 void ScriptMenu_ShowSafariOfferDetails(void)
 {
     u8 i;
     u8 taskId;
-    u8 picWindowId;
-    u8 detailsWindowId;
-    u8 actionsWindowId;
     struct RogueSafariOfferDetails details;
 
     gSpecialVar_Result = MULTI_B_PRESSED;
@@ -2124,21 +2180,17 @@ void ScriptMenu_ShowSafariOfferDetails(void)
         return;
     }
 
-    picWindowId = CreateWindowFromRectWithBaseBlockOffset(1, 1, 8, 8, 0);
-    detailsWindowId = CreateWindowFromRectWithBaseBlockOffset(10, 1, 17, 11, SAFARI_OFFER_PIC_WINDOW_TILES);
-    actionsWindowId = CreateWindowFromRectWithBaseBlockOffset(1, 13, 26, 3, SAFARI_OFFER_PIC_WINDOW_TILES + SAFARI_OFFER_DETAILS_WINDOW_TILES);
-
     taskId = CreateTask(Task_SafariOfferDetailsInput, 0);
-    gTasks[taskId].tSafariOfferPicWindow = picWindowId;
-    gTasks[taskId].tSafariOfferDetailsWindow = detailsWindowId;
-    gTasks[taskId].tSafariOfferActionsWindow = actionsWindowId;
+    gTasks[taskId].tSafariOfferPicWindow = WINDOW_NONE;
+    gTasks[taskId].tSafariOfferDetailsWindow = WINDOW_NONE;
+    gTasks[taskId].tSafariOfferActionsWindow = WINDOW_NONE;
     gTasks[taskId].tSafariOfferMonSpriteId = SPRITE_NONE;
     for (i = 0; i < SAFARI_OFFER_MAX_ITEM_ICONS; ++i)
         gTasks[taskId].tSafariOfferItemSpriteId(i) = SPRITE_NONE;
     gTasks[taskId].tSafariOfferSafariIndex = gSpecialVar_0x8008;
     gTasks[taskId].tSafariOfferCanBuy = FALSE;
     gTasks[taskId].tSafariOfferCanDismiss = TRUE;
-    RefreshSafariOfferDetails(taskId, gSpecialVar_0x8008);
+    gTasks[taskId].tSafariOfferState = SAFARI_OFFER_STATE_WAIT_FOR_BG;
 }
 
 #undef tSafariOfferPicWindow
@@ -2149,6 +2201,7 @@ void ScriptMenu_ShowSafariOfferDetails(void)
 #undef tSafariOfferCanBuy
 #undef tSafariOfferCanDismiss
 #undef tSafariOfferSafariIndex
+#undef tSafariOfferState
 #undef SAFARI_OFFER_ITEM_ICON_TILE_TAG_BASE
 #undef SAFARI_OFFER_ITEM_ICON_PAL_TAG
 #undef SAFARI_OFFER_ITEM_ICON_BLACK_INDEX
@@ -2163,7 +2216,6 @@ void ScriptMenu_ShowSafariOfferDetails(void)
 #undef SAFARI_OFFER_COST_LABEL_Y
 #undef SAFARI_OFFER_COST_ICON_Y
 #undef SAFARI_OFFER_COST_COUNT_Y
-#undef SAFARI_OFFER_ACTIONS_LEFT_SHIFT
 #undef SAFARI_OFFER_RESULT_BUY
 #undef SAFARI_OFFER_RESULT_DISMISS
 #undef SAFARI_OFFER_RESULT_BACK

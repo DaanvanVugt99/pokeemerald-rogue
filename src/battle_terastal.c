@@ -725,6 +725,19 @@ static const struct SpriteTemplate * const sTeraIndicatorSpriteTemplates[NUMBER_
 // data fields for healthbar
 #define hBar_HealthBoxSpriteId      data[5]
 
+static void TintTeraIndicatorInactivePalette(u16 *palette, u32 count)
+{
+    u32 i;
+
+    TintPalette_GrayScale(palette, count);
+    for (i = 1; i < count; ++i)
+    {
+        u32 gray = (GET_R(palette[i]) + 16) / 2;
+
+        palette[i] = RGB(gray, gray, gray);
+    }
+}
+
 void TeraIndicator_LoadSpriteGfx(void)
 {
     LoadSpriteSheets(sTeraIndicatorSpriteSheets);
@@ -739,7 +752,7 @@ void TeraIndicator_LoadSpriteGfx(void)
         };
 
         CpuCopy16(sTeraIndicatorPal, inactivePaletteData, sizeof(inactivePaletteData));
-        TintPalette_GrayScale(inactivePaletteData, ARRAY_COUNT(inactivePaletteData));
+        TintTeraIndicatorInactivePalette(inactivePaletteData, ARRAY_COUNT(inactivePaletteData));
         LoadSpritePalette(&inactivePalette);
     }
 }
@@ -747,6 +760,7 @@ void TeraIndicator_LoadSpriteGfx(void)
 bool32 TeraIndicator_ShouldBeInvisible(u32 battler)
 {
     return !IsTerastallizeEnabled()
+        || (GetBattlerSide(battler) == B_SIDE_OPPONENT && !IsTerastallized(battler))
         || IsBattlerMegaEvolved(battler)
         || IsBattlerPrimalReverted(battler)
         || IsDynamaxed(battler);
