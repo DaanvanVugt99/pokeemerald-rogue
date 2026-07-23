@@ -18514,17 +18514,27 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
          && IsFinalMultiHitStrike()
-         && CanUseSelfExtraMove(battler))
+         && (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE) || CanUseSelfExtraMove(battler)))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_CENTER_STAGE);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
-            gCalledMove = MOVE_FOLLOW_ME;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniquePersistentStateActive = TRUE;
             BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+
+            if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+            {
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+                gCalledMove = MOVE_FOLLOW_ME;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            }
+            else
+            {
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+            }
+
             effect++;
         }
 

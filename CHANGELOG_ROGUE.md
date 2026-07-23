@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented Oricorio's Center Stage from calling the singles-incompatible
+  Follow Me outside double battles while retaining its Flying-move follow-up.
 - Converted Unique Legendary roamers into stationary Alpha encounters so they
   cannot flee during their initially uncatchable phase.
 - Kept attacker-side unique ability popups attached to their actual battler,

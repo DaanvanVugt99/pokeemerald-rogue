@@ -56,6 +56,26 @@ DOUBLE_BATTLE_TEST("Center Stage does not prime Flying moves after non-dance sta
     }
 }
 
+SINGLE_BATTLE_TEST("Center Stage skips Follow Me in singles but still primes the next Flying move")
+{
+    GIVEN {
+        PLAYER(SPECIES_ORICORIO_BAILE) { Ability(ABILITY_DANCER); UniqueAbility(ABILITY_CENTER_STAGE); Moves(MOVE_QUIVER_DANCE, MOVE_AERIAL_ACE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_QUIVER_DANCE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_AERIAL_ACE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_QUIVER_DANCE, player);
+        ABILITY_POPUP(player, ABILITY_CENTER_STAGE);
+        NOT MESSAGE("But it failed!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_AERIAL_ACE, player);
+        HP_BAR(opponent);
+        HP_BAR(opponent);
+    } THEN {
+        EXPECT(!gDisableStructs[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)].uniquePersistentStateActive);
+    }
+}
+
 DOUBLE_BATTLE_TEST("Center Stage second Flying hit uses 25 percent damage", s16 hit1, s16 hit2)
 {
     u16 uniqueAbility;
