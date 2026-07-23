@@ -76,9 +76,9 @@ Format follows Keep a Changelog loosely:
   the party like rival battles, while retaining Healing Flask restrictions.
 - Made Spiral Gaze users reliably prioritize their first-turn perfect-accuracy
   Hypnosis when the target can be put to sleep.
-- Expanded every selected Pokédex through its complete evolution families,
-  including relatives introduced in later generations, while limiting regional
-  forms and their exclusive branches to appropriate Pokédex variants.
+- Kept each Pokédex's canonical visible roster and numbering while allowing
+  appropriate pre-evolutions, later evolutions, and regional family members
+  throughout encounters, catching, evolution, storage, and run eligibility.
 - Replaced Summary Trainer Memo encounter details with compact, spoiler-free
   evolution method guidance tailored to the current Pokémon and run.
 - Standardized unique Ability descriptions to distinguish damage dealt from

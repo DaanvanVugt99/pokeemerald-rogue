@@ -36,8 +36,8 @@
 #define INCBIN_U32(...) { 0 }
 
 #ifdef ROGUE_EXPANSION
-#define COMPOUND_STRING(str) ""
-#define POKEDEX_DESC_STRING(str) ""
+#define COMPOUND_STRING(str) ((const u8 *)"")
+#define POKEDEX_DESC_STRING(str) ((const u8 *)"")
 #define FORM_SPECIES_END (0xffff)
 
 #define DIV_ROUND_UP(val, roundBy)(((val) / (roundBy)) + (((val) % (roundBy)) ? 1 : 0))

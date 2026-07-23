@@ -24,6 +24,7 @@ u16 SelectIndexFromWeights(u16* weights, u16 count, u16 rngValue);
 
 // Semi-baked methods
 bool8 Rogue_CheckPokedexVariantFlag(u8 dexVariant, u16 species, bool8* result);
+bool8 Rogue_CheckPokedexVariantEligibilityFlag(u8 dexVariant, u16 species, bool8* result);
 
 void Rogue_ModifyEvolution(u16 species, u8 evoIdx, struct Evolution* outEvo);
 void Rogue_ModifyEvolution_ApplyCurses(u16 species, u8 evoIdx, struct Evolution* outEvo);

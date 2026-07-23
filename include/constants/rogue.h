@@ -789,7 +789,7 @@
 // Misc.
 //
 // Number of bytes needed to cover all species
-#define SPECIES_FLAGS_BYTE_COUNT (1 + NUM_SPECIES / 8)
+#define SPECIES_FLAGS_BYTE_COUNT (1 + (NUM_SPECIES) / 8)
 
 #ifdef ROGUE_EXPANSION
 #define SPECIES_FINAL_EVO_STAGE_COUNT   606

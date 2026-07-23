@@ -270,14 +270,9 @@ static void GatherSpeciesStatsArray(u16 species, u8* stats);
 
 static u16 GetVariantSpeciesAt(u8 variant, u16 index);
 static u16 GetVariantSpeciesCount(u8 variant);
-static u16 GetVariantSeedSpeciesAt(u8 variant, u16 index);
-static u16 GetVariantSeedSpeciesCount(u8 variant);
 static u8 GetVariantGenLimit(u8 variant);
 static bool8 CheckVariantContainsSpecies(u8 variant, u16 species);
 static bool8 IsSpeciesEnabledForVariant(u16 species, u8 variant);
-#ifdef ROGUE_EXPANSION
-static bool8 IsRegionalFormSpecies(u16 species);
-#endif
 static bool8 TryGetSafariIndexForDexIndex(u8 variant, u16 dexIndex, u16* safariIndex);
 static bool8 TryGetDexIndexForSafariIndex(u8 variant, u16 safariIndex, u16* dexIndex);
 
@@ -389,10 +384,6 @@ struct PokedexViewRequest
 EWRAM_DATA static u8 *sTilemapBufferPtr = NULL;
 EWRAM_DATA static struct PokedexMenu* sPokedexMenu = NULL;
 EWRAM_DATA static struct PokedexViewRequest sPokedexViewReq = {0};
-
-#define FAMILY_ROOT_FLAG_BYTES ((NUM_SPECIES + 7) / 8)
-EWRAM_DATA static u8 sVariantFamilyRootFlags[FAMILY_ROOT_FLAG_BYTES] = {0};
-EWRAM_DATA static u8 sVariantFamilyRootFlagsVariant = POKEDEX_VARIANT_NONE;
 
 static void VBlankCB(void)
 {
@@ -638,7 +629,7 @@ static void CB2_Rogue_ShowPokedex(void)
 
     InitOverviewBg();
     ResetTempTileDataBuffers();
-    
+
     //DecompressAndCopyTileDataToVram(1, &sOverviewTiles, 0, 0, 0);
     //while (FreeTempTileDataBuffersIfPossible())
     //    ;
@@ -1190,7 +1181,11 @@ static bool8 IsAltFormVisible(u16 baseForm, u16 altForm)
     if(gSpeciesInfo[altForm].isTeraForm && !IsTerastallizeEnabled())
         return FALSE;
 
-    if(IsRegionalFormSpecies(altForm)
+    if((gSpeciesInfo[altForm].isAlolanForm
+        || gSpeciesInfo[altForm].isGalarianForm
+        || gSpeciesInfo[altForm].isHisuianForm
+        || gSpeciesInfo[altForm].isPaldeanForm
+        || altForm == SPECIES_BASCULIN_WHITE_STRIPED)
         && !RoguePokedex_IsSpeciesEnabled(altForm))
         return FALSE;
 
@@ -4377,153 +4372,24 @@ bool8 RoguePokedex_IsVariantEditEnabled()
     return RoguePokedex_IsVariantEditUnlocked() && Rogue_CanEditConfig();
 }
 
-#ifdef ROGUE_EXPANSION
-enum
-{
-    REGIONAL_FORM_NONE   = 0,
-    REGIONAL_FORM_ALOLAN = 1 << 0,
-    REGIONAL_FORM_GALARIAN = 1 << 1,
-    REGIONAL_FORM_HISUIAN = 1 << 2,
-    REGIONAL_FORM_PALDEAN = 1 << 3,
-    REGIONAL_FORM_ALL = REGIONAL_FORM_ALOLAN
-        | REGIONAL_FORM_GALARIAN
-        | REGIONAL_FORM_HISUIAN
-        | REGIONAL_FORM_PALDEAN,
-};
-
-static u8 GetVariantRegionalFormFlags(u8 variant)
-{
-    switch(variant)
-    {
-    case POKEDEX_VARIANT_ROGUE_MODERN:
-    case POKEDEX_VARIANT_ROGUE_CLASSICPLUS:
-    case POKEDEX_VARIANT_NATIONAL_GEN9:
-        return REGIONAL_FORM_ALL;
-
-    case POKEDEX_VARIANT_KANTO_LETSGO:
-    case POKEDEX_VARIANT_ALOLA_SM:
-    case POKEDEX_VARIANT_ALOLA_USUM:
-    case POKEDEX_VARIANT_NATIONAL_GEN7:
-        return REGIONAL_FORM_ALOLAN;
-
-    case POKEDEX_VARIANT_GALAR_SWSH:
-    case POKEDEX_VARIANT_GALAR_ISLEOFARMOR:
-    case POKEDEX_VARIANT_GALAR_CROWNTUNDRA:
-    case POKEDEX_VARIANT_GALAR_FULLDLC:
-        return REGIONAL_FORM_GALARIAN;
-
-    case POKEDEX_VARIANT_PALDEA_SCVI:
-    case POKEDEX_VARIANT_PALDEA_KITAKAMI:
-        return REGIONAL_FORM_PALDEAN;
-
-    case POKEDEX_VARIANT_PALDEA_BLUEBERRY:
-    case POKEDEX_VARIANT_PALDEA_FULLDLC:
-        return REGIONAL_FORM_ALOLAN | REGIONAL_FORM_PALDEAN;
-
-    case POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS:
-        return REGIONAL_FORM_HISUIAN;
-
-    case POKEDEX_VARIANT_NATIONAL_GEN8:
-        return REGIONAL_FORM_ALOLAN | REGIONAL_FORM_GALARIAN | REGIONAL_FORM_HISUIAN;
-    }
-
-    if(variant > POKEDEX_VARIANT_END)
-        return REGIONAL_FORM_ALL;
-
-    return REGIONAL_FORM_NONE;
-}
-
-static u8 GetSpeciesRegionalFormFlag(u16 species)
-{
-    // White-Striped Basculin is a Hisui-specific form, but expansion does not
-    // tag it with isHisuianForm.
-    if(species == SPECIES_BASCULIN_WHITE_STRIPED)
-        return REGIONAL_FORM_HISUIAN;
-
-    if(gSpeciesInfo[species].isAlolanForm)
-        return REGIONAL_FORM_ALOLAN;
-    if(gSpeciesInfo[species].isGalarianForm)
-        return REGIONAL_FORM_GALARIAN;
-    if(gSpeciesInfo[species].isHisuianForm)
-        return REGIONAL_FORM_HISUIAN;
-    if(gSpeciesInfo[species].isPaldeanForm)
-        return REGIONAL_FORM_PALDEAN;
-
-    return REGIONAL_FORM_NONE;
-}
-
-static bool8 IsRegionalFormSpecies(u16 species)
-{
-    return GetSpeciesRegionalFormFlag(species) != REGIONAL_FORM_NONE;
-}
-
-static bool8 IsRegionalFamilyApprovedForVariant(u16 species, u16 eggSpecies, u8 variant)
-{
-    u8 requiredFlags = GetSpeciesRegionalFormFlag(species) | GetSpeciesRegionalFormFlag(eggSpecies);
-
-    // The combined Paldea Pokédex contains families from all three component
-    // Pokédexes. Only Blueberry's families should gain their Alolan branches.
-    if(variant == POKEDEX_VARIANT_PALDEA_FULLDLC
-        && (requiredFlags & REGIONAL_FORM_ALOLAN)
-        && !CheckVariantContainsSpecies(
-            POKEDEX_VARIANT_PALDEA_BLUEBERRY,
-            GET_BASE_SPECIES_ID(eggSpecies)))
-        return FALSE;
-
-    return (requiredFlags & ~GetVariantRegionalFormFlags(variant)) == 0;
-}
-#endif
-
-static void CacheVariantFamilyRoots(u8 variant)
-{
-    u16 i;
-    u16 rootSpecies;
-    u16 seedCount;
-
-    if(sVariantFamilyRootFlagsVariant == variant)
-        return;
-
-    memset(sVariantFamilyRootFlags, 0, sizeof(sVariantFamilyRootFlags));
-    seedCount = GetVariantSeedSpeciesCount(variant);
-
-    for(i = 0; i < seedCount; ++i)
-    {
-        rootSpecies = Rogue_GetEggSpecies(GetVariantSeedSpeciesAt(variant, i));
-#ifdef ROGUE_EXPANSION
-        rootSpecies = GET_BASE_SPECIES_ID(rootSpecies);
-#endif
-        sVariantFamilyRootFlags[rootSpecies / 8] |= 1 << (rootSpecies % 8);
-    }
-
-    sVariantFamilyRootFlagsVariant = variant;
-}
-
 static bool8 IsSpeciesEnabledForVariant(u16 species, u8 variant)
 {
-    u16 eggSpecies;
+    bool8 result;
 
     if(species == SPECIES_NONE || species >= NUM_SPECIES)
         return FALSE;
 
-    if(CheckVariantContainsSpecies(variant, species))
-        return TRUE;
-
-    eggSpecies = Rogue_GetEggSpecies(species);
-#ifdef ROGUE_EXPANSION
-    if(!IsRegionalFamilyApprovedForVariant(species, eggSpecies, variant))
-        return FALSE;
-
-    eggSpecies = GET_BASE_SPECIES_ID(eggSpecies);
-#endif
-
-    if(variant <= POKEDEX_VARIANT_END)
-    {
-        CacheVariantFamilyRoots(variant);
-        return (sVariantFamilyRootFlags[eggSpecies / 8] & (1 << (eggSpecies % 8))) != 0;
-    }
+    if(variant <= POKEDEX_VARIANT_END
+        && Rogue_CheckPokedexVariantEligibilityFlag(variant, species, &result))
+        return result;
 
     // Dynamic Pokédex views retain their exact, transient membership.
-    return CheckVariantContainsSpecies(variant, eggSpecies);
+#ifdef ROGUE_EXPANSION
+    species = GET_BASE_SPECIES_ID(species);
+#endif
+
+    return CheckVariantContainsSpecies(variant, species)
+        || CheckVariantContainsSpecies(variant, Rogue_GetEggSpecies(species));
 }
 
 bool8 RoguePokedex_IsSpeciesEnabled(u16 species)
@@ -4533,7 +4399,17 @@ bool8 RoguePokedex_IsSpeciesEnabled(u16 species)
 
 bool8 RoguePokedex_IsBaseSpeciesEnabled(u16 species)
 {
-    return IsSpeciesEnabledForVariant(species, RoguePokedex_GetDexVariant());
+    if(species == SPECIES_NONE)
+        return FALSE;
+
+    {
+        u8 variant = RoguePokedex_GetDexVariant();
+
+        // The species or the base species is allowed to use this
+        return CheckVariantContainsSpecies(variant, species);
+    }
+
+    return TRUE;
 }
 
 u16 RoguePokedex_GetSpeciesCurrentNum(u16 species)
@@ -5090,7 +4966,7 @@ void RoguePokedex_GetSpeciesStatArray(u16 species, u8* stats, u8 bufferSize)
 extern const u16 gRogueBake_EggSpecies[];
 extern const u16 gRogueBake_FinalEvoSpecies[];
 
-static u16 GetVariantSeedSpeciesAt(u8 variant, u16 index)
+static u16 GetVariantSpeciesAt(u8 variant, u16 index)
 {
     if(variant <= POKEDEX_VARIANT_END)
         return gPokedexVariants[variant].speciesList[index];
@@ -5199,7 +5075,7 @@ static bool8 TryGetDexIndexForSafariIndex(u8 variant, u16 safariIndex, u16* dexI
     return FALSE;
 }
 
-static u16 GetVariantSeedSpeciesCount(u8 variant)
+static u16 GetVariantSpeciesCount(u8 variant)
 {
     if(variant <= POKEDEX_VARIANT_END)
         return gPokedexVariants[variant].speciesCount;
@@ -5242,65 +5118,6 @@ static u16 GetVariantSeedSpeciesCount(u8 variant)
     }
 }
 
-static bool8 IsResolvedVariantExtension(u8 variant, u16 species)
-{
-    if(variant > POKEDEX_VARIANT_END
-        || species == SPECIES_NONE
-        || species >= NUM_SPECIES
-        || gRogueSpeciesInfo[species].baseHP == 0
-        || CheckVariantContainsSpecies(variant, species))
-        return FALSE;
-
-#ifdef ROGUE_EXPANSION
-    // Alternate forms share their base species's Pokédex slot. Regional form
-    // availability is still enforced by IsSpeciesEnabledForVariant.
-    if(GET_BASE_SPECIES_ID(species) != species)
-        return FALSE;
-#endif
-
-    return IsSpeciesEnabledForVariant(species, variant);
-}
-
-static u16 GetVariantSpeciesAt(u8 variant, u16 index)
-{
-    u16 seedCount = GetVariantSeedSpeciesCount(variant);
-    u16 species;
-
-    if(index < seedCount || variant > POKEDEX_VARIANT_END)
-        return GetVariantSeedSpeciesAt(variant, index);
-
-    index -= seedCount;
-    for(species = SPECIES_NONE + 1; species < NUM_SPECIES; ++species)
-    {
-        if(IsResolvedVariantExtension(variant, species))
-        {
-            if(index == 0)
-                return species;
-
-            --index;
-        }
-    }
-
-    return SPECIES_NONE;
-}
-
-static u16 GetVariantSpeciesCount(u8 variant)
-{
-    u16 count = GetVariantSeedSpeciesCount(variant);
-    u16 species;
-
-    if(variant > POKEDEX_VARIANT_END)
-        return count;
-
-    for(species = SPECIES_NONE + 1; species < NUM_SPECIES; ++species)
-    {
-        if(IsResolvedVariantExtension(variant, species))
-            ++count;
-    }
-
-    return count;
-}
-
 static u8 GetVariantGenLimit(u8 variant)
 {
     if(variant <= POKEDEX_VARIANT_END)
@@ -5323,11 +5140,11 @@ static bool8 CheckVariantContainsSpecies(u8 variant, u16 species)
     else
     {
         u16 i;
-        u16 dexCount = GetVariantSeedSpeciesCount(variant);
+        u16 dexCount = GetVariantSpeciesCount(variant);
 
         for(i = 0; i < dexCount; ++i)
         {
-            if(GetVariantSeedSpeciesAt(variant, i) == species)
+            if(GetVariantSpeciesAt(variant, i) == species)
                 return TRUE;
         }
     }

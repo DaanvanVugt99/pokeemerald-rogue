@@ -77,6 +77,7 @@ extern const struct RogueItem gRogueItems[];
 #ifdef ROGUE_BAKE_VALID
 extern const struct RogueSpeciesBakedData gRogueBake_SpeciesData[NUM_SPECIES];
 extern const u8 gRogueBake_PokedexVariantBitFlags[POKEDEX_VARIANT_COUNT][SPECIES_FLAGS_BYTE_COUNT];
+extern const u8 gRogueBake_PokedexVariantEligibilityBitFlags[POKEDEX_VARIANT_COUNT][SPECIES_FLAGS_BYTE_COUNT];
 extern const u16 gRogueBake_EvoItems[];
 extern const u16 gRogueBake_EvoItems_Count;
 extern const u16 gRogueBake_FormItems[];
@@ -164,6 +165,26 @@ bool8 Rogue_CheckPokedexVariantFlag(u8 dexVariant, u16 species, bool8* result)
 
         *result = (gRogueBake_PokedexVariantBitFlags[dexVariant][idx] & bitMask) != 0;
 
+        return TRUE;
+    }
+    else
+    {
+        AGB_ASSERT(FALSE);
+    }
+#endif
+    return FALSE;
+}
+
+bool8 Rogue_CheckPokedexVariantEligibilityFlag(u8 dexVariant, u16 species, bool8* result)
+{
+#ifdef ROGUE_BAKE_VALID
+    if(dexVariant < POKEDEX_VARIANT_COUNT && species < NUM_SPECIES)
+    {
+        u16 idx = species / 8;
+        u16 bit = species % 8;
+        u8 bitMask = 1 << bit;
+
+        *result = (gRogueBake_PokedexVariantEligibilityBitFlags[dexVariant][idx] & bitMask) != 0;
         return TRUE;
     }
     else
