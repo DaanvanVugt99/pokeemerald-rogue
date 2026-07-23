@@ -115,7 +115,7 @@
                         "PRE_BATTLE_OPENNING": "{STR_VAR_1}: My research is going to make me the authority on BUG-type Pokémon!",
                         "PRE_BATTLE_TAUNT": "Let me demonstrate what I've learned!",
                         "POST_BATTLE_TAUNT": "Whoa, amazing!",
-                        "POST_BATTLE_CLOSER": "You're an expert on Pokémon!\\pI hope you're next battles are just as fun!"
+                        "POST_BATTLE_CLOSER": "You're an expert on Pokémon!\\pI hope your next battles are just as fun!"
                     }
                 ],
                 "preferred_mon_gender": "MALE",

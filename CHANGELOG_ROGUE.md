@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Corrected typos in Bugsy's post-battle dialogue and the Pokéblock
+  scattering prompt.
 - Shortened Charm and Dark Deal Curse descriptions to fit their item-detail
   panel without clipping.
 - Made ability-called priority moves respect Psychic Terrain, Quick Guard, and
