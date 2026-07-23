@@ -23369,7 +23369,11 @@ static inline u32 CalcMoveBasePower(u32 move, u32 battlerAtk, u32 battlerDef, u3
             basePower = 150;
         break;
     case EFFECT_FLING:
-        basePower = GetFlingPowerFromItemId(gBattleMons[battlerAtk].item);
+        if (gBattleMons[battlerAtk].item == ITEM_SNOWBALL
+         && HasBattlerAbility(battlerAtk, ABILITY_SNOWBALL_FIGHT))
+            basePower = 60;
+        else
+            basePower = GetFlingPowerFromItemId(gBattleMons[battlerAtk].item);
         break;
     case EFFECT_ERUPTION:
         basePower = gBattleMons[battlerAtk].hp * basePower / gBattleMons[battlerAtk].maxHP;

@@ -72,6 +72,9 @@ Format follows Keep a Changelog loosely:
   semantically compatible custom move while preserving already-valid rolls.
 - Replaced Toxisphere on Galarian Weezing with Smog Refinery, which blocks
   secondary effects from damaging moves and retaliates with Strange Steam.
+- Replaced Quiet Mind on the Galarian Darumaka line with Snowball Fight:
+  flinging a Snowball turns Fling into a 60 BP Ice move, switches the user
+  out, and returns the Snowball.
 - Replaced Night Hunter on Hisuian Decidueye with Wandering Hunter, which uses
   Baton Pass after its first knockout each battle.
 - Replaced Duelist on Galarian Farfetch'd and Sirfetch'd with Sword and Board,

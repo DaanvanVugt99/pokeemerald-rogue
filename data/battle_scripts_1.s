@@ -1408,6 +1408,32 @@ BattleScript_EffectFlingConsumeBerry:
 	restorebattleritem BS_TARGET
 BattleScript_FlingEnd:
 	tryfaintmon BS_TARGET
+	jumpifability BS_ATTACKER, ABILITY_SNOWBALL_FIGHT, BattleScript_SnowballFightTrySwitch
+	trysymbiosis
+	call BattleScript_ScrapJobActivates
+	goto BattleScript_MoveEnd
+
+BattleScript_SnowballFightTrySwitch:
+	jumpiflastuseditemholdeffect BS_ATTACKER, HOLD_EFFECT_SNOWBALL, BattleScript_SnowballFightSwitchChecks
+	goto BattleScript_FlingEndNormal
+BattleScript_SnowballFightSwitchChecks:
+	jumpifmovehadnoeffect BattleScript_MoveEnd
+	jumpifability BS_TARGET, ABILITY_GUARD_DOG, BattleScript_MoveEnd
+	moveendto MOVEEND_ATTACKER_VISIBLE
+	moveendfrom MOVEEND_TARGET_VISIBLE
+	jumpifbattleend BattleScript_HitEscapeEnd
+	jumpifbyte CMP_NOT_EQUAL, gBattleOutcome, 0, BattleScript_HitEscapeEnd
+	jumpifemergencyexited BS_TARGET, BattleScript_HitEscapeEnd
+	jumpifbattletype BATTLE_TYPE_ARENA, BattleScript_HitEscapeEnd
+	jumpifcantswitch SWITCH_IGNORE_ESCAPE_PREVENTION | BS_ATTACKER, BattleScript_HitEscapeEnd
+	copybyte gBattlerAbility, gBattlerAttacker
+	sethword sABILITY_OVERWRITE, ABILITY_SNOWBALL_FIGHT
+	call BattleScript_AbilityPopUp
+	tryrecycleitem BattleScript_SnowballFightSwitch
+BattleScript_SnowballFightSwitch:
+	goto BattleScript_MoveSwitch
+
+BattleScript_FlingEndNormal:
 	trysymbiosis
 	call BattleScript_ScrapJobActivates
 	goto BattleScript_MoveEnd

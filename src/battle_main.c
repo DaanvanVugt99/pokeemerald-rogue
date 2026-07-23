@@ -6392,6 +6392,12 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
                 gBattleStruct->dynamicMoveType = TYPE_NORMAL | F_DYNAMIC_TYPE_SET;
         }
     }
+    else if (move == MOVE_FLING
+          && gBattleMons[battlerAtk].item == ITEM_SNOWBALL
+          && HasBattlerAbility(battlerAtk, ABILITY_SNOWBALL_FIGHT))
+    {
+        gBattleStruct->dynamicMoveType = TYPE_ICE | F_DYNAMIC_TYPE_SET;
+    }
     else if (gBattleMoves[move].effect == EFFECT_HIDDEN_POWER)
     {
         u8 typeBits  = ((gBattleMons[battlerAtk].hpIV & 1) << 0)

@@ -203,7 +203,7 @@ TEST("Dynamic unique ability pool includes Starmobile")
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_STARMOBILE);
 }
 
-TEST("Dynamic unique ability eligibility audit contains 570 abilities")
+TEST("Dynamic unique ability eligibility audit contains 571 abilities")
 {
     static const u16 sExpectedExclusions[] =
     {
@@ -256,14 +256,14 @@ TEST("Dynamic unique ability eligibility audit contains 570 abilities")
     u16 eligibleCount = 0;
     u16 i;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_SMOG_REFINERY; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_SNOWBALL_FIGHT; ++ability)
     {
         if(RogueGift_IsDynamicUniqueAbilityEligible(ability))
             ++eligibleCount;
     }
 
-    EXPECT_EQ(eligibleCount, 570);
-    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 570);
+    EXPECT_EQ(eligibleCount, 571);
+    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 571);
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STRONG_WINDS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STARMOBILE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLOCK_STEP));
@@ -282,6 +282,7 @@ TEST("Dynamic unique ability eligibility audit contains 570 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SWORD_AND_BOARD));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_WANDERING_HUNTER));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SMOG_REFINERY));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SNOWBALL_FIGHT));
 
     for(i = 0; i < ARRAY_COUNT(sExpectedExclusions); ++i)
         EXPECT(!RogueGift_IsDynamicUniqueAbilityEligible(sExpectedExclusions[i]));
@@ -313,7 +314,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     u16 ability;
     u16 pairedAbilityCount = 0;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_SMOG_REFINERY; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_SNOWBALL_FIGHT; ++ability)
     {
         u16 profileId = RogueGift_DebugGetDynamicSynergyProfileId(ability);
         u16 moves[3];
@@ -344,7 +345,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 3);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 250);
+    EXPECT_EQ(pairedAbilityCount, 251);
 }
 
 TEST("Newest dynamic unique abilities use their required synergy profiles")
@@ -355,6 +356,13 @@ TEST("Newest dynamic unique abilities use their required synergy profiles")
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_WANDERING_HUNTER), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_FALSE_GROUND), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_SMOG_REFINERY), 0);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_SNOWBALL_FIGHT, 0), MOVE_FLING);
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SNOWBALL_FIGHT, MOVE_FLING));
+    EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SNOWBALL_FIGHT, MOVE_U_TURN));
+    EXPECT_EQ(RogueGift_DebugSelectDynamicSynergyMove(
+        SPECIES_DITTO, ABILITY_SNOWBALL_FIGHT, MOVE_TACKLE, MOVE_CELEBRATE), MOVE_FLING);
+    EXPECT_EQ(RogueGift_DebugSelectDynamicSynergyMove(
+        SPECIES_DITTO, ABILITY_SNOWBALL_FIGHT, MOVE_FLING, MOVE_CELEBRATE), MOVE_NONE);
 }
 
 TEST("Direct move synergy uses battle semantics instead of learnability")
