@@ -3436,7 +3436,10 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         break;
     case EFFECT_SLEEP:
     case EFFECT_YAWN:
-        if (AI_RandLessThan(128))
+        if ((move == MOVE_HYPNOSIS
+          && AI_HasAbility(battlerAtk, ABILITY_SPIRAL_GAZE)
+          && gDisableStructs[battlerAtk].isFirstTurn)
+         || AI_RandLessThan(128))
             IncreaseSleepScore(battlerAtk, battlerDef, move, &score);
         break;
     case EFFECT_ABSORB:

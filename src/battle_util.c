@@ -18243,23 +18243,19 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
          && !gDisableStructs[battler].uniquePersistentStateActive
-         && !(gSideStatuses[GetBattlerSide(BATTLE_OPPOSITE(battler))] & SIDE_STATUS_STEALTH_ROCK))
+         && !(gSideStatuses[GetBattlerSide(BATTLE_OPPOSITE(battler))] & SIDE_STATUS_STEALTH_ROCK)
+         && CanUseSelfExtraMove(battler))
         {
-            u32 target;
-
-            if (TryGetOpposingExtraMoveTarget(battler, &target))
-            {
-                SetBattlerTriggeredAbility(battler, ABILITY_FAULT_FINDER);
-                SetAtkCancellerForCalledMove();
-                gBattlerAttacker = gBattlerAbility = battler;
-                gBattlerTarget = target;
-                gCalledMove = MOVE_STEALTH_ROCK;
-                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-                gProtectStructs[battler].extraMoveUsed = TRUE;
-                gDisableStructs[battler].uniquePersistentStateActive = TRUE;
-                StartAbilityCalledMoveScript();
-                effect++;
-            }
+            SetBattlerTriggeredAbility(battler, ABILITY_FAULT_FINDER);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = BATTLE_OPPOSITE(battler);
+            gCalledMove = MOVE_STEALTH_ROCK;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
+            StartAbilityCalledMoveScript();
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_EMPTY_HAND)

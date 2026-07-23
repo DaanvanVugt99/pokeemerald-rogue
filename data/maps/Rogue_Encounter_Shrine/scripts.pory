@@ -83,6 +83,7 @@ script Rogue_Encounter_Shrine_Challenge
             giveitem(ITEM_SACRED_ASH)
             call(Rogue_Common_DisplayPopups)
             quest_trigger(QUEST_TRIGGER_MAP_SPECIFIC_EVENT)
+            call(Rogue_EventScript_AttemptPostRivalHeal)
         }
         else
         {

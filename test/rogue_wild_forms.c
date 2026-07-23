@@ -231,3 +231,88 @@ TEST("Wild encounter Vivillon forms redirect to Vivillon in the Pokedex")
     ASSUME(FALSE);
 #endif
 }
+
+TEST("Selected Pokedexes include complete evolution families")
+{
+#if defined(ROGUE_EXPANSION)
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_LETSGO);
+
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_MIME_JR));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_CROBAT));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_ANNIHILAPE));
+    EXPECT_NE(RoguePokedex_GetSpeciesCurrentNum(SPECIES_MIME_JR), 0);
+    EXPECT_NE(RoguePokedex_GetSpeciesCurrentNum(SPECIES_CROBAT), 0);
+    EXPECT_NE(RoguePokedex_GetSpeciesCurrentNum(SPECIES_ANNIHILAPE), 0);
+    EXPECT_GT(RoguePokedex_GetCurrentDexLimit(), 153);
+
+    RoguePokedex_SetDexVariant(originalDexVariant);
+#else
+    ASSUME(FALSE);
+#endif
+}
+
+TEST("Selected Pokedexes only include approved regional families")
+{
+#if defined(ROGUE_EXPANSION)
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_LETSGO);
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_RAICHU_ALOLAN));
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_MR_MIME_GALARIAN));
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_PERRSERKER));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_GALAR_SWSH);
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_MR_MIME_GALARIAN));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_PERRSERKER));
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_RAICHU_ALOLAN));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_RBY);
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_RAICHU_ALOLAN));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_PALDEA_SCVI);
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_EXEGGUTOR_ALOLAN));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_PALDEA_BLUEBERRY);
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_EXEGGUTOR_ALOLAN));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_PALDEA_FULLDLC);
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_EXEGGUTOR_ALOLAN));
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_RAICHU_ALOLAN));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_UNOVA_BW);
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_BASCULIN_WHITE_STRIPED));
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_BASCULEGION_MALE));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS);
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_BASCULIN_WHITE_STRIPED));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_BASCULEGION_MALE));
+
+    RoguePokedex_SetDexVariant(originalDexVariant);
+#else
+    ASSUME(FALSE);
+#endif
+}
+
+TEST("Encounter egg transforms stay inside the selected Pokedex")
+{
+#if defined(ROGUE_EXPANSION)
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_LETSGO);
+
+    RogueMonQuery_Begin();
+    RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, SPECIES_MR_MIME);
+    RogueMonQuery_TransformIntoEggSpecies();
+
+    EXPECT(RogueMiscQuery_CheckState(SPECIES_MIME_JR));
+    EXPECT(!RogueMiscQuery_CheckState(SPECIES_MR_MIME));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_MIME_JR));
+
+    RogueMonQuery_End();
+    RoguePokedex_SetDexVariant(originalDexVariant);
+#else
+    ASSUME(FALSE);
+#endif
+}

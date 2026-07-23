@@ -42,6 +42,38 @@ SINGLE_BATTLE_TEST("Fault Finder sets Stealth Rock after the first Steel move ea
     }
 }
 
+SINGLE_BATTLE_TEST("Fault Finder sets Stealth Rock if the Steel move knocks out the active target")
+{
+    GIVEN {
+        PLAYER(SPECIES_DUGTRIO_ALOLAN) { Speed(100); Ability(ABILITY_TANGLING_HAIR); Moves(MOVE_IRON_HEAD); }
+        OPPONENT(SPECIES_CATERPIE) { HP(1); MaxHP(1); Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_IRON_HEAD); SEND_OUT(opponent, 1); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_FAULT_FINDER);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_STEALTH_ROCK, player);
+    } THEN {
+        EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_STEALTH_ROCK);
+    }
+}
+
+SINGLE_BATTLE_TEST("Fault Finder uses Magnet Rise if the Ground move knocks out the active target")
+{
+    GIVEN {
+        PLAYER(SPECIES_DUGTRIO_ALOLAN) { Speed(100); Ability(ABILITY_TANGLING_HAIR); Moves(MOVE_EARTHQUAKE); }
+        OPPONENT(SPECIES_CATERPIE) { HP(1); MaxHP(1); Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_EARTHQUAKE); SEND_OUT(opponent, 1); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_FAULT_FINDER);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_MAGNET_RISE, player);
+    } THEN {
+        EXPECT(gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_MAGNET_RISE);
+    }
+}
+
 SINGLE_BATTLE_TEST("Fault Finder Ground and Steel triggers are independent")
 {
     GIVEN {

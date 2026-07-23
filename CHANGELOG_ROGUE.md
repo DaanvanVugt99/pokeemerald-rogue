@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made Fault Finder set Stealth Rock when its triggering Steel move knocks out
+  an active target that still has a replacement.
 - Warmed missing Frontier Brain reward previews whenever an existing adventure
   path is reused, preventing full team generation during node interaction.
 - Made Auto Pickup collect item objects placed across counters and on tables,
@@ -58,6 +60,13 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Moved Mysterious Shrine encounters to Gym 5 or later and made victories heal
+  the party like rival battles, while retaining Healing Flask restrictions.
+- Made Spiral Gaze users reliably prioritize their first-turn perfect-accuracy
+  Hypnosis when the target can be put to sleep.
+- Expanded every selected Pokédex through its complete evolution families,
+  including relatives introduced in later generations, while limiting regional
+  forms and their exclusive branches to appropriate Pokédex variants.
 - Replaced Summary Trainer Memo encounter details with compact, spoiler-free
   evolution method guidance tailored to the current Pokémon and run.
 - Standardized unique Ability descriptions to distinguish damage dealt from

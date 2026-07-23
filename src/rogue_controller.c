@@ -5262,7 +5262,8 @@ static void BeginRogueRunPhase_Trainers(void)
     Rogue_ChooseFrontierBrainTrainersForNewAdventure();
     EnableRivalEncounterIfRequired();
 
-    gRogueRun.shrineSpawnDifficulty = 1 + RogueRandomRange(ROGUE_MAX_BOSS_COUNT, 0);
+    gRogueRun.shrineSpawnDifficulty = ROGUE_GYM_MID_DIFFICULTY
+        + RogueRandomRange(ROGUE_MAX_BOSS_COUNT - ROGUE_GYM_MID_DIFFICULTY, 0);
     ChooseUniqueDenForNewAdventure();
 
     RogueSafari_CompactEmptyEntries();

@@ -51,3 +51,18 @@ SINGLE_BATTLE_TEST("Spiral Gaze does not boost Hypnosis after first turn")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPNOSIS, player);
     }
 }
+
+AI_SINGLE_BATTLE_TEST("Spiral Gaze AI prefers Hypnosis on its first turn")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_POLIWAG) {
+            Ability(ABILITY_WATER_ABSORB);
+            UniqueAbility(ABILITY_SPIRAL_GAZE);
+            Moves(MOVE_HYPNOSIS, MOVE_CELEBRATE);
+        }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_HYPNOSIS, MOVE_CELEBRATE); }
+    }
+}

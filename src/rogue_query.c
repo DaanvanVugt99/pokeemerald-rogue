@@ -570,7 +570,8 @@ void RogueMonQuery_TransformIntoEggSpecies()
         if(GetQueryBitFlag(species))
         {
             eggSpecies = Query_GetEggSpecies(species);
-            if(eggSpecies != species)
+            if(eggSpecies != species
+                && (!Rogue_IsRunActive() || Query_IsSpeciesEnabledForceDexChecking(eggSpecies)))
             {
                 SetQueryBitFlag(eggSpecies, TRUE);
                 SetQueryBitFlag(species, FALSE);
@@ -606,7 +607,9 @@ static void Query_ApplyEvolutions(u16 species, u8 level, bool8 items, bool8 remo
     {
         Rogue_ModifyEvolution(species, i, &evo);
 
-        if(evo.method == 0 || evo.targetSpecies == SPECIES_NONE)
+        if(evo.method == 0
+            || evo.targetSpecies == SPECIES_NONE
+            || (Rogue_IsRunActive() && !Query_IsSpeciesEnabledForceDexChecking(evo.targetSpecies)))
             continue;
 
         switch(evo.method)
@@ -1019,98 +1022,7 @@ void RogueMonQuery_CustomFilter(QueryFilterCallback filterFunc, void* usrData)
 
 static u16 Query_GetEggSpecies(u16 inSpecies)
 {
-    // Edge case handling for specific pre evos added in later gens
-    u32 genLimit = RoguePokedex_GetDexGenLimit();
-    u32 species = Rogue_GetEggSpecies(inSpecies);
-
-    if(genLimit == 1)
-    {
-        // Check egg species
-        switch (species)
-        {
-        case SPECIES_PICHU:
-            species = SPECIES_PIKACHU;
-            break;
-        
-        case SPECIES_CLEFFA:
-            species = SPECIES_CLEFAIRY;
-            break;
-        
-        case SPECIES_IGGLYBUFF:
-            species = SPECIES_JIGGLYPUFF;
-            break;
-
-        case SPECIES_TYROGUE:
-            species = inSpecies;
-            break;
-
-        case SPECIES_SMOOCHUM:
-            species = SPECIES_JYNX;
-            break;
-
-        case SPECIES_ELEKID:
-            species = SPECIES_ELECTABUZZ;
-            break;
-
-        case SPECIES_MAGBY:
-            species = SPECIES_MAGMAR;
-            break;
-        }
-    }
-
-    if(genLimit < 3)
-    {
-        // Check egg species
-        switch (species)
-        {
-        case SPECIES_AZURILL:
-            species = SPECIES_MARILL;
-            break;
-
-        case SPECIES_WYNAUT:
-            species = SPECIES_WOBBUFFET;
-            break;
-        }
-    }
-
-#ifdef ROGUE_EXPANSION
-    if(genLimit < 4)
-    {
-        // Check egg species
-        switch (species)
-        {
-        case SPECIES_HAPPINY:
-            species = SPECIES_CHANSEY;
-            break;
-
-        case SPECIES_MIME_JR:
-            species = SPECIES_MR_MIME;
-            break;
-
-        case SPECIES_MUNCHLAX:
-            species = SPECIES_SNORLAX;
-            break;
-
-        case SPECIES_BONSLY:
-            species = SPECIES_SUDOWOODO;
-            break;
-
-        case SPECIES_MANTYKE:
-            species = SPECIES_MANTINE;
-            break;
-
-        case SPECIES_BUDEW:
-            species = SPECIES_ROSELIA;
-            break;
-
-        case SPECIES_CHINGLING:
-            species = SPECIES_CHIMECHO;
-            break;
-        }
-    }
-#endif
-
-    return species;
+    return Rogue_GetEggSpecies(inSpecies);
 }
 
 static bool8 Query_IsSpeciesEnabledInDexInternal(u16 species, bool32 forceDexCheck)
