@@ -3628,7 +3628,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
             "Its coat of thin, stiff hair that covers\n"
             "its entire body is said to have evolved\n"
             "for protection. Its large eyes never fail\n"
-            "to spot even miniscule prey."),
+            "to spot even minuscule prey."),
         .pokemonScale = 360,
         .pokemonOffset = 0,
         .trainerScale = 256,

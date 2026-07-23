@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept attacker-side unique ability popups attached to their actual battler,
+  including Serene Voice on opposing Pokémon.
+- Corrected spelling errors across dialogue, UI copy, move descriptions,
+  Pokédex entries, and the Graffiti Tag ability name.
 - Corrected typos in Bugsy's post-battle dialogue and the Pokéblock
   scattering prompt.
 - Shortened Charm and Dark Deal Curse descriptions to fit their item-detail

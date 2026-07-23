@@ -15369,6 +15369,7 @@ if (triggeringAbility != ABILITY_NONE)
     case ABILITYEFFECT_MOVE_END_ATTACKER: // Same as above, but for attacker
     {
         u32 moveEndTarget = gBattleStruct->moveTarget[battler];
+        u32 scrambleBattler;
 
         if (moveEndTarget < gBattlersCount)
             gBattlerTarget = moveEndTarget;
@@ -19764,7 +19765,8 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if ((battler = IsAbilityOnField(ABILITY_SCRAMBLE))
+        scrambleBattler = IsAbilityOnField(ABILITY_SCRAMBLE);
+        if (scrambleBattler
          && (gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
@@ -19774,8 +19776,7 @@ if (triggeringAbility != ABILITY_NONE)
          && CanBeConfused(gBattlerTarget)
          && RandomWeighted(RNG_SECONDARY_EFFECT, 70, 30))
         {
-            battler--;
-            SetBattlerTriggeredAbility(battler, ABILITY_SCRAMBLE);
+            SetBattlerTriggeredAbility(scrambleBattler - 1, ABILITY_SCRAMBLE);
             gBattleScripting.moveEffect = MOVE_EFFECT_CONFUSION;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;

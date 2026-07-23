@@ -54,7 +54,7 @@ script Rogue_HubTransition_RandomMan
             }
             else
             {
-                msgbox(format("Okidoke!\nOne surpise Pokémon coming up!"), MSGBOX_DEFAULT)
+                msgbox(format("Okidoke!\nOne surprise Pokémon coming up!"), MSGBOX_DEFAULT)
             }
         }
 

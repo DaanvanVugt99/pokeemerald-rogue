@@ -2425,7 +2425,7 @@ static const u8 sBabyDollEyesDescription[] = _(
     "before it can move.");
 
 static const u8 sNuzzleDescription[] = _(
-    "Rubs its cheecks against\n"
+    "Rubs its cheeks against\n"
     "the foe, paralyzing it.");
 
 static const u8 sInfestationDescription[] = _(
@@ -3171,7 +3171,7 @@ static const u8 sTripleDiveDescription[] = _(
 
 static const u8 sMortalSpinDescription[] = _(
     "Erases trap moves and Leech\n"
-    "Seed. Poisons adjecent foes.");
+    "Seed. Poisons adjacent foes.");
 
 static const u8 sDoodleDescription[] = _(
     "Changes user's and ally's\n"

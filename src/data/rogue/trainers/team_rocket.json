@@ -228,7 +228,7 @@
                 [
                     {
                         "PRE_BATTLE_TAUNT": "This is a really comfortable outfit, you know!",
-                        "POST_BATTLE_TAUNT": "Wait?\\nWere we suppose to be battling?",
+                        "POST_BATTLE_TAUNT": "Wait?\\nWere we supposed to be battling?",
                         "POST_BATTLE_CLOSER": "I'm far to comfortable to battle at full strength."
                     }
                 ],
@@ -314,7 +314,7 @@
                     {
                         "PRE_BATTLE_TAUNT": "Another kid breaking in?",
                         "POST_BATTLE_TAUNT": "Why are there so many today?!",
-                        "POST_BATTLE_CLOSER": "Another kid came through here not to long ago.\\pI thought this was suppose to be a Secret Hideout…"
+                        "POST_BATTLE_CLOSER": "Another kid came through here not too long ago.\\pI thought this was supposed to be a Secret Hideout…"
                     }
                 ],
                 "preferred_mon_gender": "FEMALE"

@@ -10,7 +10,7 @@ text gItemDesc_QuestLog
 
 text gItemDesc_HealingFlask
 {
-    format("Rechargable flask capable of healing all {PKMN} in the party.")
+    format("Rechargeable flask capable of healing all {PKMN} in the party.")
 }
 
 text gItemDesc_RidingWhistle

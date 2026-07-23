@@ -400,7 +400,7 @@ Naranjilla
 Narenj
 Nashi Pear
 Natal Plum
-Naval Orange
+Navel Orange
 Nectacot
 Nectarine
 Neem
@@ -627,7 +627,7 @@ Ugli Fruit
 Ugni
 Ugni Blanc Grape
 Ugni Molinae
-Ukranian Heart Tomato
+Ukrainian Heart Tomato
 Ula
 Umari
 Umbrafruit
@@ -1323,11 +1323,11 @@ A
 
 asparagus
 apples
-avacado
+avocado
 alfalfa
 acorn squash
 almond
-arugala
+arugula
 artichoke
 applesauce
 antelope
@@ -1337,7 +1337,7 @@ Apple juice
 Avocado roll
 B
 
-Bruscetta
+Bruschetta
 bacon
 black beans
 bagels

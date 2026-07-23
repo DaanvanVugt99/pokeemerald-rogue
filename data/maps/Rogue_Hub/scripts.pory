@@ -325,7 +325,7 @@ script RogueHub_SpeakScott
     }
     else
     {
-        msgbox(format("SCOTT: Uh oh!\pI'm not suppose to be standing here...\pYou probably loaded this SAVE from an old game version.\pTry entering a house and checking if I'm still here."), MSGBOX_DEFAULT)
+        msgbox(format("SCOTT: Uh oh!\pI'm not supposed to be standing here...\pYou probably loaded this SAVE from an old game version.\pTry entering a house and checking if I'm still here."), MSGBOX_DEFAULT)
     }
 
     release

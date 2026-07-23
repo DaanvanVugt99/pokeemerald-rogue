@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_TACKLE].split != SPLIT_STATUS);
+    ASSUME(gBattleMoves[MOVE_HYPER_VOICE].soundMove);
 }
 
 SINGLE_BATTLE_TEST("Scramble sets Psychic Terrain on switch-in")
@@ -56,5 +57,17 @@ DOUBLE_BATTLE_TEST("Scramble affects other battlers' damaging moves while its us
         ABILITY_POPUP(playerLeft, ABILITY_SCRAMBLE);
     } THEN {
         EXPECT_NE(opponentLeft->status2 & STATUS2_CONFUSION, 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Scramble field lookup preserves opposing move-end ability popup ownership")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(100); MaxHP(400); Speed(100); UniqueAbility(ABILITY_SERENE_VOICE); Moves(MOVE_HYPER_VOICE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_HYPER_VOICE); MOVE(player, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(opponent, ABILITY_SERENE_VOICE);
     }
 }

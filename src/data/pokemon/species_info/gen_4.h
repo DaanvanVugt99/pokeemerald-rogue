@@ -3624,7 +3624,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         ROTOM_APPLIANCE_INFO(Fan),
         .description = POKEDEX_DESC_STRING(
             "The first appliance developed that Rotom\n"
-            "coud inspirit was the electric fan. It uses\n"
+            "could inspirit was the electric fan. It uses\n"
             "its power over wind in its pranks, happily\n"
             "blowing any important documents it finds."),
         FRONT_PIC(RotomFan, 64, 56),

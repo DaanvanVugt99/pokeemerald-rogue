@@ -447,7 +447,7 @@ static const u8 sText_DifficultyOverworldMonsDescOff[] = _(
 );
 static const u8 sText_DifficultyOverworldMonsDescOn[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
-    "Wild {PKMN} can be encounted and interacted\n"
+    "Wild {PKMN} can be encountered and interacted\n"
     "with in the overworld."
 );
 static u8 const* const sText_DifficultyOverworldMonsDesc[] = 

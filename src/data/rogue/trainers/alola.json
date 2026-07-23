@@ -89,7 +89,7 @@
                     },
                     {
                         "PRE_BATTLE_OPENNING": "… … …\\pI've been waiting for you.",
-                        "PRE_BATTLE_TAUNT": "{STR_VAR_1}: To thank you.\\pYou've openned my eyes.\\pI appreciate it.\\lMaybe more than you know.\\pAnd the only thing I can offer you in thanks is a great battle.\\pSo I'm going to show my full power…\\pMy real full power this time!",
+                        "PRE_BATTLE_TAUNT": "{STR_VAR_1}: To thank you.\\pYou've opened my eyes.\\pI appreciate it.\\lMaybe more than you know.\\pAnd the only thing I can offer you in thanks is a great battle.\\pSo I'm going to show my full power…\\pMy real full power this time!",
                         "POST_BATTLE_TAUNT": "Hmph.\\lThere's nothing more to say.",
                         "POST_BATTLE_CLOSER": "…"
                     }

@@ -268,7 +268,7 @@
                 [
                     {
                         "PRE_BATTLE_TAUNT": "I lost my last battle so I'm gonna get payback on you!",
-                        "POST_BATTLE_TAUNT": "Oh no!\\nYou were suppose to lose!",
+                        "POST_BATTLE_TAUNT": "Oh no!\\nYou were supposed to lose!",
                         "POST_BATTLE_CLOSER": "Why do I keep losing?"
                     }
                 ],
