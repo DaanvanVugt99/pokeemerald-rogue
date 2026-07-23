@@ -50,6 +50,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Standardized unique Ability descriptions to distinguish damage dealt from
+  damage taken, made vague modifiers explicit, and added layout validation
+  for their Summary and Pokédex panels.
 - Replaced the random nickname data with a curated, equally weighted pool of
   2,500 common words, human names, and themed proper names.
 - Renamed ancient Paradox solo abilities as Instincts and future Paradox solo
