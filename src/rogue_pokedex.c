@@ -272,6 +272,7 @@ static u16 GetVariantSpeciesAt(u8 variant, u16 index);
 static u16 GetVariantSpeciesCount(u8 variant);
 static u8 GetVariantGenLimit(u8 variant);
 static bool8 CheckVariantContainsSpecies(u8 variant, u16 species);
+static bool8 IsSpeciesEnabledForVariant(u16 species, u8 variant);
 static bool8 TryGetSafariIndexForDexIndex(u8 variant, u16 dexIndex, u16* safariIndex);
 static bool8 TryGetDexIndexForSafariIndex(u8 variant, u16 safariIndex, u16* dexIndex);
 
@@ -292,6 +293,8 @@ static void Overview_FillEntryBg_Selected(u8 entryX, u8 entryY, bool8 includeHea
 static u8 Overview_GetLastValidActiveIndex();
 static u8 Overview_GetMaxScrollAmount();
 static bool8 Overview_IsSafariSelectView(void);
+static bool8 Overview_IsSafariEntryInSelectedDex(u8 entryX, u8 entryY);
+static void Overview_ApplySafariIconPalette(u8 spriteId, u16 iconSpecies, u8 entryX, u8 entryY);
 
 // MonInfo
 static void MonInfo_CreateSprites(bool8 includeType);
@@ -420,6 +423,7 @@ static const u32 sPageTiles[] = INCBIN_U32("graphics/rogue_pokedex/page_tiles.4b
 
 #define SAFARI_MARKER_TILE_BASE 0x60
 #define SAFARI_MARKER_PAL_NUM 2
+#define SAFARI_OUT_OF_DEX_ICON_PAL_TAG_BASE 0xF600
 
 enum
 {
@@ -2817,6 +2821,49 @@ static bool8 Overview_IsSafariEntryCaught(s8 entryX, s8 entryY, s8 deltaX, s8 de
     return GetSpeciesDisplayDexFlag(species, FLAG_GET_CAUGHT);
 }
 
+static bool8 Overview_IsSafariEntryInSelectedDex(u8 entryX, u8 entryY)
+{
+    u16 safariIndex;
+
+    if(!Overview_TryGetSafariIndexForEntry(entryX, entryY, 0, 0, &safariIndex))
+        return TRUE;
+
+    return IsSpeciesEnabledForVariant(
+        gRogueSaveBlock->safariMons[safariIndex].species,
+        sPokedexViewReq.dexVariantToRestore);
+}
+
+static void Overview_ApplySafariIconPalette(u8 spriteId, u16 iconSpecies, u8 entryX, u8 entryY)
+{
+    u8 iconPalIndex;
+    u8 spritePalIndex;
+    u16 paletteTag;
+    u16 grayscalePalette[16];
+    struct SpritePalette spritePalette;
+
+    if(!Overview_IsSafariSelectView()
+        || Overview_IsSafariEntryInSelectedDex(entryX, entryY)
+        || spriteId == MAX_SPRITES)
+        return;
+
+    iconPalIndex = GetValidMonIconPalIndex(iconSpecies);
+    paletteTag = SAFARI_OUT_OF_DEX_ICON_PAL_TAG_BASE + iconPalIndex;
+    spritePalIndex = IndexOfSpritePaletteTag(paletteTag);
+
+    if(spritePalIndex == 0xFF)
+    {
+        CpuCopy16(GetValidMonIconPalettePtr(iconSpecies), grayscalePalette, sizeof(grayscalePalette));
+        TintPalette_GrayScale2(grayscalePalette, ARRAY_COUNT(grayscalePalette));
+
+        spritePalette.data = grayscalePalette;
+        spritePalette.tag = paletteTag;
+        spritePalIndex = LoadSpritePalette(&spritePalette);
+    }
+
+    if(spritePalIndex != 0xFF)
+        gSprites[spriteId].oam.paletteNum = spritePalIndex;
+}
+
 static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
 {
     u8 idx;
@@ -3520,6 +3567,7 @@ static void Overview_CreateSprites()
                     // Always display in select mon view
                     // Non animated
                     sPokedexMenu->pageSprites[i] = CreateMonIcon(sPokedexMenu->overviewPageSpecies[i], SpriteCallbackDummy, 28 + 32 * x, 18 + 40 * y, 0, 0, MON_MALE);
+                    Overview_ApplySafariIconPalette(sPokedexMenu->pageSprites[i], species, x, y);
                 }
                 else
                 {
@@ -4316,12 +4364,13 @@ bool8 RoguePokedex_IsVariantEditEnabled()
     return RoguePokedex_IsVariantEditUnlocked() && Rogue_CanEditConfig();
 }
 
-u8 SpeciesToGen(u16 species);
-
-bool8 RoguePokedex_IsSpeciesEnabled(u16 species)
+static bool8 IsSpeciesEnabledForVariant(u16 species, u8 variant)
 {
-    u8 genLimit = RoguePokedex_GetDexGenLimit();
+    u8 genLimit = GetVariantGenLimit(variant);
     u8 speciesGen = SpeciesToGen(species);
+
+    if(genLimit == 0 || genLimit > DEX_GEN_LIMIT)
+        genLimit = DEX_GEN_LIMIT;
 
     if(species == SPECIES_NONE || speciesGen > genLimit)
         return FALSE;
@@ -4330,14 +4379,14 @@ bool8 RoguePokedex_IsSpeciesEnabled(u16 species)
     species = GET_BASE_SPECIES_ID(species);
 #endif
 
-    {
-        u8 variant = RoguePokedex_GetDexVariant();
+    // The species or the base species is allowed to use this
+    return CheckVariantContainsSpecies(variant, species)
+        || CheckVariantContainsSpecies(variant, Rogue_GetEggSpecies(species));
+}
 
-        // The species or the base species is allowed to use this
-        return CheckVariantContainsSpecies(variant, species) || CheckVariantContainsSpecies(variant, Rogue_GetEggSpecies(species));
-    }
-
-    return TRUE;
+bool8 RoguePokedex_IsSpeciesEnabled(u16 species)
+{
+    return IsSpeciesEnabledForVariant(species, RoguePokedex_GetDexVariant());
 }
 
 bool8 RoguePokedex_IsBaseSpeciesEnabled(u16 species)

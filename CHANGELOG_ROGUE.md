@@ -184,6 +184,8 @@ Format follows Keep a Changelog loosely:
   on Average and Gym 5 on Hard.
 - Made the dark charcoal window border palette the global default so standard
   menus, prompts, shops, and scripted choices use it consistently.
+- Grayscaled Safari matrix portraits for Pokémon outside the currently selected
+  Pokédex and labeled their inspection previews.
 - Added the level-up battle NPC to Mysterious Shrines so parties can reach the
   current level cap before challenging the shrine guardian.
 - Changed new hub area construction to use the hub map editor, allowing the

@@ -1052,7 +1052,7 @@ static u8 const sText_UniqueMonTitleRare[] = _("{STR_VAR_1} {FONT_SMALL_NARROW}{
 static u8 const sText_UniqueMonAbility[] = _("A/ {COLOR GREEN}{STR_VAR_1}");
 static u8 const sText_UniqueMonUniqueAbility[] = _("U/ {COLOR GREEN}{STR_VAR_1}");
 static u8 const sText_UniqueMonMove[] = _(" -{STR_VAR_1}");
-static u8 const sText_UniqueMonOutOfDex[] = _("{COLOR RED}Not in current Dex");
+static u8 const sText_NotInCurrentDex[] = _("{COLOR RED}Not in current Dex");
 static u8 const sText_UniqueMonType[] = _("Type/ {STR_VAR_1}");
 static u8 const sText_UniqueMonTypes[] = _("Type/ {STR_VAR_1}/{STR_VAR_2}");
 
@@ -1084,7 +1084,7 @@ static void PrintUniqueMonInfoToWindow(u8 windowId)
     line = 0;
 
     if(!RoguePokedex_IsSpeciesEnabled(species))
-        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_UniqueMonOutOfDex, 2, UNIQUE_MON_INFO_LINE_Y(line++), TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_NotInCurrentDex, 2, UNIQUE_MON_INFO_LINE_Y(line++), TEXT_SKIP_DRAW, NULL);
 
     // Show the effective typing rather than making the player infer altered
     // types from the recolored sprite.
@@ -1659,6 +1659,7 @@ void ScriptMenu_ShowTrialOverview(void)
 #define SAFARI_OFFER_DETAILS_SCREEN_X 88
 #define SAFARI_OFFER_DETAILS_SCREEN_Y 16
 #define SAFARI_OFFER_DETAILS_WIDTH 136
+#define SAFARI_OFFER_DEX_WARNING_Y 17
 #define SAFARI_OFFER_COST_LABEL_Y 30
 #define SAFARI_OFFER_COST_ICON_Y 42
 #define SAFARI_OFFER_COST_COUNT_Y 66
@@ -1883,6 +1884,9 @@ static void PrintSafariOfferDetails(u8 windowId, struct RogueSafariOfferDetails 
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     SetDarkStandardWindowBorderStyle(windowId, FALSE);
     AddTextPrinterParameterized4(windowId, FONT_SMALL_NARROW, 2, 4, 0, 0, sSafariOfferTextColor, TEXT_SKIP_DRAW, details->displayName);
+
+    if (!RoguePokedex_IsSpeciesEnabled(details->species))
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_NotInCurrentDex, 2, SAFARI_OFFER_DEX_WARNING_Y, TEXT_SKIP_DRAW, NULL);
 
     if (details->costCount == 0)
     {
@@ -2155,6 +2159,7 @@ void ScriptMenu_ShowSafariOfferDetails(void)
 #undef SAFARI_OFFER_DETAILS_SCREEN_X
 #undef SAFARI_OFFER_DETAILS_SCREEN_Y
 #undef SAFARI_OFFER_DETAILS_WIDTH
+#undef SAFARI_OFFER_DEX_WARNING_Y
 #undef SAFARI_OFFER_COST_LABEL_Y
 #undef SAFARI_OFFER_COST_ICON_Y
 #undef SAFARI_OFFER_COST_COUNT_Y
