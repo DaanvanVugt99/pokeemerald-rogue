@@ -1952,6 +1952,9 @@ static void TypeIndicator_GetResolvedTypes(u32 battlerId, u8 *types)
 {
     u32 teraType;
 
+    if (GetIllusionMonTypes(battlerId, types))
+        return;
+
     types[0] = gBattleMons[battlerId].type1;
     types[1] = gBattleMons[battlerId].type2;
     types[2] = gBattleMons[battlerId].type3;

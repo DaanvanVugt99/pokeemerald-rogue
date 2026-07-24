@@ -1895,8 +1895,6 @@ static u16 GetDisplayAbility(u16 ability)
     return ability;
 }
 
-uq4_12_t CalcTypeEffectivenessMultiplierForUI(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, u32 defAbility, bool32 recordAbilities);
-
 static u8 GetDisplayEffectiveness(u16 move, u16 displayType, u32 battler, u32 opposingBattler, u16 ability)
 {
 #ifdef ROGUE_EXPANSION

@@ -30,6 +30,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Hid an active Illusion user's real typing behind its disguise in the battle
+  type indicator and move-selection effectiveness preview.
 - Hardened living-battler checks against invalid target IDs before accessing
   battler data.
 - Prevented Reef Protection from targeting a nonexistent opposing battler when

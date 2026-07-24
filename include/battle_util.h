@@ -262,6 +262,7 @@ u32 GetTargetAdjustedMoveType(u32 move, u32 battlerAtk, u32 battlerDef, u32 move
 s32 CalculateMoveDamageVars(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, uq4_12_t typeEffectivenessModifier,
                                           u32 weather, bool32 isCrit, u32 holdEffectAtk, u32 holdEffectDef, u32 abilityAtk, u32 abilityDef);
 uq4_12_t CalcTypeEffectivenessMultiplier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, u32 defAbility, bool32 recordAbilities);
+uq4_12_t CalcTypeEffectivenessMultiplierForUI(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, u32 defAbility, bool32 recordAbilities);
 uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 otIdDef, u16 abilityDef);
 uq4_12_t GetTypeModifier(u32 atkType, u32 defType);
 s32 GetStealthHazardDamage(u8 hazardType, u32 battler);
@@ -278,6 +279,7 @@ bool32 CanBattlerGetOrLoseItem(u32 battler, u16 itemId);
 bool32 CanTransferBoosterEnergy(u32 battlerFrom, u32 battlerTo, u16 itemId);
 u32 GetIllusionMonSpecies(u32 battler);
 struct Pokemon *GetIllusionMonPtr(u32 battler);
+bool32 GetIllusionMonTypes(u32 battler, u8 *types);
 void ClearIllusionMon(u32 battler);
 bool32 SetIllusionMon(struct Pokemon *mon, u32 battler);
 bool32 ShouldGetStatBadgeBoost(u16 flagId, u32 battler);

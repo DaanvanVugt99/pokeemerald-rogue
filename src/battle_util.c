@@ -26427,13 +26427,13 @@ static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battler
 
 static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, bool32 recordAbilities, uq4_12_t modifier, u32 defAbility)
 {
-    u32 illusionSpecies;
+    u8 illusionTypes[3];
 
-    if ((illusionSpecies = GetIllusionMonSpecies(battlerDef)))
+    if (GetIllusionMonTypes(battlerDef, illusionTypes))
     {
-        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, gSpeciesInfo[illusionSpecies].types[0], battlerAtk, recordAbilities);
-        if (gSpeciesInfo[illusionSpecies].types[1] != gSpeciesInfo[illusionSpecies].types[0])
-            MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, gSpeciesInfo[illusionSpecies].types[1], battlerAtk, recordAbilities);
+        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, illusionTypes[0], battlerAtk, recordAbilities);
+        if (illusionTypes[1] != illusionTypes[0])
+            MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, illusionTypes[1], battlerAtk, recordAbilities);
 
         return modifier;
     }
@@ -27196,6 +27196,17 @@ u32 GetIllusionMonSpecies(u32 battler)
     return SPECIES_NONE;
 }
 
+bool32 GetIllusionMonTypes(u32 battler, u8 *types)
+{
+    if (GetIllusionMonPtr(battler) == NULL)
+        return FALSE;
+
+    types[0] = gBattleStruct->illusion[battler].types[0];
+    types[1] = gBattleStruct->illusion[battler].types[1];
+    types[2] = TYPE_MYSTERY;
+    return TRUE;
+}
+
 bool32 SetIllusionMon(struct Pokemon *mon, u32 battler)
 {
     struct Pokemon *party, *partnerMon;
@@ -27229,9 +27240,14 @@ bool32 SetIllusionMon(struct Pokemon *mon, u32 battler)
             && &party[id] != mon
             && &party[id] != partnerMon)
         {
+            u32 species = GetMonData(&party[id], MON_DATA_SPECIES);
+            u32 otId = GetMonData(&party[id], MON_DATA_OT_ID);
+
             gBattleStruct->illusion[battler].on = 1;
             gBattleStruct->illusion[battler].broken = 0;
             gBattleStruct->illusion[battler].partyId = id;
+            gBattleStruct->illusion[battler].types[0] = GetTypeBySpecies(species, 0, otId);
+            gBattleStruct->illusion[battler].types[1] = GetTypeBySpecies(species, 1, otId);
             gBattleStruct->illusion[battler].mon = &party[id];
             return TRUE;
         }
