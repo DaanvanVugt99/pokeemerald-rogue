@@ -536,7 +536,7 @@ STATIC_ASSERT(DYNAMIC_MOVE_PAIR_CODE_START + DYNAMIC_MOVE_PAIR_COUNT <= DYNAMIC_
 STATIC_ASSERT(ABILITIES_COUNT <= 1024, DynamicUniqueAbilityFits10Bits);
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
-#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_FEVER_PITCH
+#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_VANISHING_ACT
 
 // These are the only custom abilities which are not safe and useful on an
 // arbitrary generated Pokemon. Keep this list explicit so new abilities do
@@ -547,7 +547,7 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
     ABILITY_PASSIVE_INCOME,
     ABILITY_DEBUG,
     ABILITY_BOUNTY,
-    ABILITY_GRAND_REVEAL,
+    ABILITY_BITTER_RUSE,
     ABILITY_ULTRA_FALLOUT,
     ABILITY_ULTRA_SWOLE,
     ABILITY_ULTRA_STRUT,
@@ -587,6 +587,7 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
     ABILITY_SIEGE_INSTINCT,
     ABILITY_CRASH_PROTOCOL,
     ABILITY_HIDDEN_STASH,
+    ABILITY_VANISHING_ACT,
 };
 
 #define DYNAMIC_UNIQUE_ABILITY_COUNT \

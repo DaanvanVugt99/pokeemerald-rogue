@@ -2366,8 +2366,6 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
     }
     else if (gStatuses3[battlerAtk] & STATUS3_LASER_FOCUS
              || gBattleMoves[move].effect == EFFECT_ALWAYS_CRIT
-             || (HasBattlerAbility(battlerAtk, ABILITY_GRAND_REVEAL)
-                 && gProtectStructs[battlerAtk].uniqueAbilityTriggeredThisTurn)
              || (HasBattlerAbility(battlerAtk, ABILITY_SOUL_BRAND)
                  && gDisableStructs[battlerAtk].uniquePersistentStateActive
                  && gBattleMoves[move].slicingMove)
@@ -6954,6 +6952,7 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_ABILITIES: // Such as abilities activating on contact(Poison Spore, Rough Skin, etc.).
+            QueueBitterRuseForTypeImmunity();
             if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END, gBattlerTarget, 0, 0, 0))
                 effect = TRUE;
             gBattleScripting.moveendState++;
@@ -8059,7 +8058,11 @@ static void Cmd_moveend(void)
                && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE)
               || (HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE)
                && gProtectStructs[gBattlerAttacker].uniqueAbilityActive
-               && gCurrentMove == MOVE_DIVE))
+               && gCurrentMove == MOVE_DIVE)
+              || (HasBattlerAbility(gBattlerAttacker, ABILITY_VANISHING_ACT)
+               && GetIllusionMonPtr(gBattlerAttacker) != NULL
+               && !IS_MOVE_STATUS(gCurrentMove)
+               && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE))
              && IsBattlerAlive(gBattlerAttacker)
              && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
              && CountUsablePartyMons(gBattlerAttacker) > 0
@@ -8071,7 +8074,9 @@ static void Cmd_moveend(void)
              && !NoAliveMonsForEitherParty())
             {
                 SetBattlerTriggeredAbility(gBattlerAttacker,
-                    HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE) ? ABILITY_SUBMERGE : ABILITY_UNDERTOW);
+                    HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE) ? ABILITY_SUBMERGE
+                  : HasBattlerAbility(gBattlerAttacker, ABILITY_VANISHING_ACT) ? ABILITY_VANISHING_ACT
+                  : ABILITY_UNDERTOW);
                 gBattlerAbility = gBattlerAttacker;
                 gBattleScripting.battler = gBattlerAttacker;
                 gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
@@ -12098,8 +12103,6 @@ static void Cmd_various(void)
         VARIOUS_ARGS();
         if (GetIllusionMonPtr(battler) != NULL)
         {
-            if (HasBattlerAbility(battler, ABILITY_GRAND_REVEAL))
-                gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
             gBattlescriptCurrInstr = cmd->nextInstr;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_IllusionOff;

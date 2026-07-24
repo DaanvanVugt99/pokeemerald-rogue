@@ -584,7 +584,7 @@
 #define ABILITY_BRUTAL                 631
 #define ABILITY_TUFTED_AWAY            601
 #define ABILITY_WEB_TAILOR             599
-#define ABILITY_GRAND_REVEAL           616
+#define ABILITY_BITTER_RUSE            616
 #define ABILITY_ACID_CONVERSION        600
 #define ABILITY_DEATH_CURRENT          811
 #define ABILITY_HEALING_CURRENT        625
@@ -962,12 +962,13 @@
 #define ABILITY_HORN_LOCK               928
 #define ABILITY_COUNTERSPELL            929
 #define ABILITY_FEVER_PITCH              930
+#define ABILITY_VANISHING_ACT            931
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
 #define BLAST_SHIELD_MIN_POWER      120
 #define FLAK_SHIELD_MAX_POWER       40
 
-#define ABILITIES_COUNT_ROGUE       931
+#define ABILITIES_COUNT_ROGUE       932
 
 #define ABILITIES_COUNT ABILITIES_COUNT_ROGUE
 

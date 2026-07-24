@@ -604,9 +604,6 @@ void HandleAction_UseMove(void)
         gCurrentMove = gChosenMove = gBattleMons[gBattlerAttacker].moves[gCurrMovePos];
     }
 
-    if (!HasBattlerAbility(gBattlerAttacker, ABILITY_GRAND_REVEAL))
-        gProtectStructs[gBattlerAttacker].uniqueAbilityTriggeredThisTurn = FALSE;
-
     if ((HasBattlerAbility(gBattlerAttacker, ABILITY_BURROW)
       || HasBattlerAbility(gBattlerAttacker, ABILITY_STEALTH)
       || HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE))
@@ -6659,6 +6656,40 @@ void QueuePremonitionForSpeedRise(u32 battler)
     QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_PREMONITION, battler, battler, battler);
 }
 
+void QueueBitterRuseForTypeImmunity(void)
+{
+    u32 moveUser = gBattlerAttacker;
+    u32 disguisedBattler = gBattlerTarget;
+    u32 moveType;
+
+    if (moveUser >= gBattlersCount
+     || disguisedBattler >= gBattlersCount
+     || GetBattlerSide(moveUser) == GetBattlerSide(disguisedBattler)
+     || !HasBattlerAbility(disguisedBattler, ABILITY_BITTER_RUSE)
+     || GetIllusionMonPtr(disguisedBattler) == NULL
+     || !(gMoveResultFlags & MOVE_RESULT_DOESNT_AFFECT_FOE)
+     || (gMoveResultFlags & (MOVE_RESULT_MISSED | MOVE_RESULT_FAILED))
+     || (gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+     || gProtectStructs[moveUser].confusionSelfDmg)
+        return;
+
+    GET_MOVE_TYPE(gCurrentMove, moveType);
+    if (CalcTypeEffectivenessMultiplier(
+            gCurrentMove,
+            moveType,
+            moveUser,
+            disguisedBattler,
+            ABILITY_NONE,
+            FALSE) != UQ_4_12(0.0))
+        return;
+
+    QueuePendingUniqueAbilityEffect(
+        PENDING_UNIQUE_EFFECT_BITTER_RUSE,
+        disguisedBattler,
+        moveUser,
+        moveUser);
+}
+
 static bool32 TryActivateAromaTrail(u32 battler, u32 source, u32 target)
 {
     if (!IsBattlerAlive(battler)
@@ -6751,6 +6782,30 @@ static bool32 TryActivatePremonition(u32 battler)
     gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
     BattleScriptPushCursor();
     gBattlescriptCurrInstr = BattleScript_StormGliderTailwind;
+    return TRUE;
+}
+
+static bool32 TryActivateBitterRuse(u32 battler, u32 source, u32 target)
+{
+    if (!IsBattlerAlive(battler)
+     || source >= gBattlersCount
+     || target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || GetBattlerSide(battler) == GetBattlerSide(source)
+     || !HasBattlerAbility(battler, ABILITY_BITTER_RUSE)
+     || GetIllusionMonPtr(battler) == NULL
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_BITTER_RUSE);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_BITTER_MALICE;
+    gMoveResultFlags = 0;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScriptAt(BattleScript_BitterRuseUsesCalledMove);
     return TRUE;
 }
 
@@ -6874,6 +6929,15 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
     {
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivatePremonition(battler))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_BITTER_RUSE)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateBitterRuse(battler, source, target))
             return TRUE;
     }
 
@@ -14029,8 +14093,6 @@ if (triggeringAbility != ABILITY_NONE)
         case ABILITY_ILLUSION:
             if (gBattleStruct->illusion[gBattlerTarget].on && !gBattleStruct->illusion[gBattlerTarget].broken && TARGET_TURN_DAMAGED)
             {
-                if (HasBattlerAbility(gBattlerTarget, ABILITY_GRAND_REVEAL))
-                    gProtectStructs[gBattlerTarget].uniqueAbilityTriggeredThisTurn = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_IllusionOff;
                 effect++;

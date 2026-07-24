@@ -184,6 +184,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_SALT_FORTRESS,
     PENDING_UNIQUE_EFFECT_LAST_POUR,
     PENDING_UNIQUE_EFFECT_PREMONITION,
+    PENDING_UNIQUE_EFFECT_BITTER_RUSE,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -198,6 +199,7 @@ void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler);
 void QueueSaltFortressForDefenseRise(u32 battler);
 void QueueLastPourForHeal(u32 battler);
 void QueuePremonitionForSpeedRise(u32 battler);
+void QueueBitterRuseForTypeImmunity(void);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);
 bool32 IsFinalTargetOfMultiTargetMove(void);

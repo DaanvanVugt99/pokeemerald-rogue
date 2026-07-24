@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Gave the Unovan Zorua line Vanishing Act, switching it out after it lands a
+  damaging move while still disguised by Illusion.
+- Gave the Hisuian Zorua line Bitter Ruse, revealing itself and retaliating
+  with Bitter Malice when Illusion successfully baits a type immunity.
 - Gave Vigoroth Fever Pitch, priming a switch after its next successful
   damaging move whenever it uses a status move.
 - Removed King’s Domain from randomly generated Unique Pokémon because its

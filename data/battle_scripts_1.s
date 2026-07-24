@@ -12509,6 +12509,22 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_BitterRuseUsesCalledMove::
+	copybyte gBattlerAttacker, sBATTLER
+	copybyte gBattlerAbility, sBATTLER
+	call BattleScript_AbilityPopUp
+	spriteignore0hp TRUE
+	playanimation BS_ATTACKER, B_ANIM_ILLUSION_OFF
+	waitanimation
+	updatenick BS_ATTACKER
+	waitstate
+	spriteignore0hp FALSE
+	swapattackerwithtarget
+	printstring STRINGID_ILLUSIONWOREOFF
+	waitmessage B_WAIT_TIME_LONG
+	swapattackerwithtarget
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_SmogRefineryRestoreAfterStrangeSteam::
 	various BS_SCRIPTING, VARIOUS_RESTORE_ATTACKER_AND_TARGET
 	return
