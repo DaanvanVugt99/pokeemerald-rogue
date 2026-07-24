@@ -821,6 +821,7 @@ static const u8 sStatsRightColumnLayout[] = _("{DYNAMIC 0}\n{DYNAMIC 1}\n{DYNAMI
 static const u8 sText_PkmnBase[] = _("BS");
 static const u8 sText_UniqueAbilityPageTitle[] = _("Unique");
 static const u8 sText_UniqueHeader[] = _("UNIQUE");
+static const u8 sText_AnomalousHeader[] = _("ANOMALOUS");
 static const u8 sText_NoUniqueAbility[] = _("No unique ability.");
 static const u8 sMovesPPLayout[] = _("{PP}{DYNAMIC 0}/{DYNAMIC 1}");
 static const u8 sText_MemoNextLine[] = _(",\n");
@@ -3750,11 +3751,12 @@ static const u8 *GetAbilitySummaryExpandedDescription(u16 ability)
 static void PrintUniqueAbilityName(void)
 {
     u16 ability = GetSummaryUniqueAbility();
+    const u8 *header = RogueGift_IsAnomalousUniqueAbility(ability) ? sText_AnomalousHeader : sText_UniqueHeader;
     u8 windowId = AddWindowFromTemplateList(sPageUniqueAbilityTemplate, PSS_DATA_WINDOW_INFO_ABILITY);
     int x;
 
-    x = GetStringCenterAlignXOffset(FONT_NORMAL, sText_UniqueHeader, 18 * 8);
-    PrintTextOnWindow(windowId, sText_UniqueHeader, x, 1, 0, 1);
+    x = GetStringCenterAlignXOffset(FONT_NORMAL, header, 18 * 8);
+    PrintTextOnWindow(windowId, header, x, 1, 0, 1);
 
     if (ability != ABILITY_NONE)
     {

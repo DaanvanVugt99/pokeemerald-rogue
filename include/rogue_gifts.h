@@ -24,6 +24,7 @@ u16 RogueGift_GetCustomMonAbility(u32 id, u8 i);
 u16 RogueGift_GetCustomMonAbilityCount(u32 id);
 u16 RogueGift_GetCustomMonUniqueAbility(u32 id);
 bool8 RogueGift_IsDynamicUniqueAbilityEligible(u16 ability);
+bool8 RogueGift_IsAnomalousUniqueAbility(u16 ability);
 u16 RogueGift_GetDynamicUniqueAbilityPoolCount(void);
 
 #ifdef ROGUE_DEBUG

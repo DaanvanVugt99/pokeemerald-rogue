@@ -14,6 +14,11 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Added
+
+- Added Chaos Theory, the first generated-only Anomalous Ability. When every
+  party Pokémon has distinct typing, it uses Metronome after every move.
+
 ### Changed
 
 - Gave Hisuian Lilligant Counterstep, retaliating with Low Sweep whenever an

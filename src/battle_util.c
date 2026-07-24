@@ -17399,6 +17399,43 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CHAOS_THEORY)
+         && DoesPartyHaveUniqueTypes(battler)
+         && IsBattlerAlive(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && IsFinalMultiHitStrike())
+        {
+            u32 target = gBattlerTarget;
+
+            if (!IsBattlerAlive(target) || GetBattlerSide(target) == GetBattlerSide(battler))
+            {
+                target = gBattlersCount;
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler) && IsBattlerAlive(i))
+                    {
+                        target = i;
+                        break;
+                    }
+                }
+            }
+
+            if (target < gBattlersCount
+             && CanUseExtraMove(battler, target))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_CHAOS_THEORY);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_METRONOME;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_FEVER_DREAM)
          && IsBattlerAlive(battler)
          && gDisableStructs[battler].uniquePersistentStateActive

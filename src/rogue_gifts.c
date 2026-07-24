@@ -536,7 +536,15 @@ STATIC_ASSERT(DYNAMIC_MOVE_PAIR_CODE_START + DYNAMIC_MOVE_PAIR_COUNT <= DYNAMIC_
 STATIC_ASSERT(ABILITIES_COUNT <= 1024, DynamicUniqueAbilityFits10Bits);
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
-#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_COUNTERSTEP
+#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_CHAOS_THEORY
+
+// These generated-only abilities have no native species mapping. They remain
+// part of the ordinary Legendary unique ability roll, but are identified
+// explicitly so their anomalous origin can be presented to the player.
+static const u16 sAnomalousUniqueAbilities[] =
+{
+    ABILITY_CHAOS_THEORY,
+};
 
 // These are the only custom abilities which are not safe and useful on an
 // arbitrary generated Pokemon. Keep this list explicit so new abilities do
@@ -593,7 +601,20 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
 #define DYNAMIC_UNIQUE_ABILITY_COUNT \
     (DYNAMIC_UNIQUE_ABILITY_MAX - DYNAMIC_UNIQUE_ABILITY_MIN + 1 - ARRAY_COUNT(sExcludedDynamicUniqueAbilities))
 
-STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 577, DynamicUniqueAbilityPoolAuditCount);
+STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 578, DynamicUniqueAbilityPoolAuditCount);
+
+bool8 RogueGift_IsAnomalousUniqueAbility(u16 ability)
+{
+    u16 i;
+
+    for(i = 0; i < ARRAY_COUNT(sAnomalousUniqueAbilities); ++i)
+    {
+        if(sAnomalousUniqueAbilities[i] == ability)
+            return TRUE;
+    }
+
+    return FALSE;
+}
 
 bool8 RogueGift_IsDynamicUniqueAbilityEligible(u16 ability)
 {
