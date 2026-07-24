@@ -10402,12 +10402,14 @@ BattleScript_InfernalRageActivates::
 
 BattleScript_ReefProtectionActivates::
 	savetarget
-	trysetspikes BattleScript_MoveEnd
+	settargetopposingside BS_ATTACKER
+	trysetspikes BattleScript_ReefProtectionRet
 	call BattleScript_AbilityPopUp
-	playmoveanimation BS_TARGET, MOVE_SPIKES
+	playmoveanimation BS_ATTACKER, MOVE_SPIKES
 	waitanimation
 	printstring STRINGID_SPIKESSCATTERED
 	waitmessage B_WAIT_TIME_SHORT
+BattleScript_ReefProtectionRet:
 	restoretarget
 	copybyte gBattlerAttacker, sSAVED_BATTLER
 	return

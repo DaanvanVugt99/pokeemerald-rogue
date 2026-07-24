@@ -29,6 +29,22 @@ SINGLE_BATTLE_TEST("Reef Protection only sets Spikes once even if the user heals
     }
 }
 
+SINGLE_BATTLE_TEST("Reef Protection can trigger while no opposing battler is active")
+{
+    GIVEN {
+        PLAYER(SPECIES_CORSOLA) { HP(50); MaxHP(100); SpAttack(500); Ability(ABILITY_HUSTLE); UniqueAbility(ABILITY_REEF_PROTECTION); Moves(MOVE_ABSORB); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); MaxHP(1); SpDefense(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_ABSORB); SEND_OUT(opponent, 1); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_REEF_PROTECTION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPIKES, player);
+    } THEN {
+        EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].spikesAmount, 1);
+    }
+}
+
 DOUBLE_BATTLE_TEST("Reef Protection does not stop the healer's move-end ability from triggering")
 {
     GIVEN {

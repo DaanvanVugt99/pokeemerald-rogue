@@ -3104,15 +3104,6 @@ static void Cmd_datahpupdate(void)
             {
                 SetBattlerTriggeredAbility(battler, ABILITY_REEF_PROTECTION);
                 gBattleScripting.savedBattler = gBattlerAttacker;
-                gBattlerTarget = BATTLE_OPPOSITE(battler);
-                if (!IsBattlerAlive(gBattlerTarget) || GetBattlerSide(gBattlerTarget) == GetBattlerSide(battler))
-                {
-                    for (gBattlerTarget = 0; gBattlerTarget < gBattlersCount; gBattlerTarget++)
-                    {
-                        if (GetBattlerSide(gBattlerTarget) != GetBattlerSide(battler) && IsBattlerAlive(gBattlerTarget))
-                            break;
-                    }
-                }
                 gBattlerAttacker = gBattlerAbility = battler;
                 BattleScriptPush(cmd->nextInstr);
                 gBattlescriptCurrInstr = BattleScript_ReefProtectionActivates;

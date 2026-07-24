@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Hardened living-battler checks against invalid target IDs before accessing
+  battler data.
+- Prevented Reef Protection from targeting a nonexistent opposing battler when
+  healing activates it between opposing Pokémon, including from Leftovers.
 - Restored the original Legendary Statue's full shading and foot detail in
   its golden recolor instead of collapsing seven source shades into three.
 - Made holders of unique abilities that create Acid Rain, Sandstorm, or Hail
