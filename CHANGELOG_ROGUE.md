@@ -30,6 +30,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Recalculated party counts when loading recorded battles, preventing Illusion
+  from treating a non-final party member as the last Pokémon in the party.
 - Hid an active Illusion user's real typing behind its disguise in the battle
   type indicator and move-selection effectiveness preview.
 - Hardened living-battler checks against invalid target IDs before accessing

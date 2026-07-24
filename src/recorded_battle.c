@@ -508,6 +508,9 @@ void SetPartiesFromRecordedSave(struct RecordedBattleSave *src)
         gPlayerParty[i] = src->playerParty[i];
         gEnemyParty[i] = src->opponentParty[i];
     }
+
+    CalculatePlayerPartyCount();
+    CalculateEnemyPartyCount();
 }
 
 void SetVariablesForRecordedBattle(struct RecordedBattleSave *src)
