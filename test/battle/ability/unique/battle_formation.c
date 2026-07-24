@@ -8,10 +8,10 @@ ASSUMPTIONS
     ASSUME(!IS_MOVE_STATUS(MOVE_TACKLE));
 }
 
-SINGLE_BATTLE_TEST("Formation Fighter gives +1 priority to status moves when the user has exactly one status move")
+SINGLE_BATTLE_TEST("Battle Formation gives +1 priority to status moves when the user has exactly one status move")
 {
     GIVEN {
-        PLAYER(SPECIES_LEDIAN)      { Speed(50); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_FORMATION_FIGHTER); Moves(MOVE_TACKLE, MOVE_GROWL); }
+        PLAYER(SPECIES_LEDIAN)      { Speed(50); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_BATTLE_FORMATION); Moves(MOVE_TACKLE, MOVE_GROWL); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_CELEBRATE); }
@@ -21,10 +21,10 @@ SINGLE_BATTLE_TEST("Formation Fighter gives +1 priority to status moves when the
     }
 }
 
-SINGLE_BATTLE_TEST("Formation Fighter does not give +1 priority when the user has more than one status move")
+SINGLE_BATTLE_TEST("Battle Formation does not give +1 priority when the user has more than one status move")
 {
     GIVEN {
-        PLAYER(SPECIES_LEDIAN)      { Speed(50); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_FORMATION_FIGHTER); Moves(MOVE_TACKLE, MOVE_GROWL, MOVE_TAIL_WHIP); }
+        PLAYER(SPECIES_LEDIAN)      { Speed(50); Ability(ABILITY_SWARM); UniqueAbility(ABILITY_BATTLE_FORMATION); Moves(MOVE_TACKLE, MOVE_GROWL, MOVE_TAIL_WHIP); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_CELEBRATE); }
@@ -34,11 +34,11 @@ SINGLE_BATTLE_TEST("Formation Fighter does not give +1 priority when the user ha
     }
 }
 
-SINGLE_BATTLE_TEST("Formation Fighter reduces incoming damage by 20% when the user has exactly one status move", s16 damage)
+SINGLE_BATTLE_TEST("Battle Formation reduces incoming damage by 20% when the user has exactly one status move", s16 damage)
 {
     u16 ability;
 
-    PARAMETRIZE { ability = ABILITY_FORMATION_FIGHTER; }
+    PARAMETRIZE { ability = ABILITY_BATTLE_FORMATION; }
     PARAMETRIZE { ability = ABILITY_PRESSURE; }
 
     GIVEN {
@@ -53,11 +53,11 @@ SINGLE_BATTLE_TEST("Formation Fighter reduces incoming damage by 20% when the us
     }
 }
 
-SINGLE_BATTLE_TEST("Formation Fighter does not reduce damage when the user has more than one status move", s16 damage)
+SINGLE_BATTLE_TEST("Battle Formation does not reduce damage when the user has more than one status move", s16 damage)
 {
     u16 ability;
 
-    PARAMETRIZE { ability = ABILITY_FORMATION_FIGHTER; }
+    PARAMETRIZE { ability = ABILITY_BATTLE_FORMATION; }
     PARAMETRIZE { ability = ABILITY_PRESSURE; }
 
     GIVEN {

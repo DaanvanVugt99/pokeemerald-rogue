@@ -9,7 +9,7 @@ extern const u8 BattleScript_EmeraldAccordActivates[];
 extern const u8 BattleScript_RevelryLightScreen[];
 extern const u8 BattleScript_RevelryReflect[];
 extern const u8 BattleScript_VampiricActivates[];
-extern const u8 BattleScript_CruelPremonitionSetsFutureSight[];
+extern const u8 BattleScript_ColdPremonitionSetsFutureSight[];
 extern const u8 BattleScript_HornLockActivates[];
 extern const u8 BattleScript_ToxicBloomActivates[];
 extern const u8 BattleScript_SepticFumesActivates[];

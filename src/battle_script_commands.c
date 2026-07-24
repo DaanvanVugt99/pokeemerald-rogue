@@ -8286,7 +8286,7 @@ static void Cmd_moveend(void)
 
             if (!effect
              && gCurrentMove == MOVE_FREEZING_GLARE
-             && HasBattlerAbility(gBattlerAttacker, ABILITY_CRUEL_PREMONITION)
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_COLD_PREMONITION)
              && IsBattlerAlive(gBattlerAttacker)
              && GetBattlerSide(gBattlerTarget) != GetBattlerSide(gBattlerAttacker)
              && TARGET_TURN_DAMAGED
@@ -8298,7 +8298,7 @@ static void Cmd_moveend(void)
              && !NoAliveMonsForEitherParty()
              && gWishFutureKnock.futureSightCounter[gBattlerTarget] == 0)
             {
-                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_CRUEL_PREMONITION);
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_COLD_PREMONITION);
                 gBattlerAbility = gBattlerAttacker;
 
                 if (IsBattlerAlive(gBattlerTarget))
@@ -8318,7 +8318,7 @@ static void Cmd_moveend(void)
                     gWishFutureKnock.futureSightCounter[gBattlerTarget] = 3;
                     gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_FUTURE_SIGHT;
                     BattleScriptPushCursor();
-                    gBattlescriptCurrInstr = BattleScript_CruelPremonitionSetsFutureSight;
+                    gBattlescriptCurrInstr = BattleScript_ColdPremonitionSetsFutureSight;
                 }
                 effect = TRUE;
             }
@@ -16376,17 +16376,17 @@ static void Cmd_tryKO(void)
     }
     else
     {
-        bool32 isPiercingJudgmentHornDrill =
-            HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_JUDGMENT)
+        bool32 isPiercingVerdictHornDrill =
+            HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_VERDICT)
             && gCurrentMove == MOVE_HORN_DRILL;
 
-        if (isPiercingJudgmentHornDrill)
+        if (isPiercingVerdictHornDrill)
         {
             if (gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level
              && ((u32)gBattleMons[gBattlerTarget].hp * 2) <= gBattleMons[gBattlerTarget].maxHP)
             {
                 lands = TRUE;
-                RecordAbilityBattle(gBattlerAttacker, ABILITY_PIERCING_JUDGMENT);
+                RecordAbilityBattle(gBattlerAttacker, ABILITY_PIERCING_VERDICT);
             }
         }
         else if ((((gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS)

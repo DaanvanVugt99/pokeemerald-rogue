@@ -402,9 +402,9 @@
 #define ABILITY_SHATTER                366
 #define ABILITY_INTENSIVE_CARE         367
 #define ABILITY_LIVING_ROOTS           368
-#define ABILITY_MATERNAL_INSTINCT      369
+#define ABILITY_MOTHERS_GUARD          369
 #define ABILITY_MARKSMAN               370
-#define ABILITY_PIERCING_JUDGMENT      371
+#define ABILITY_PIERCING_VERDICT       371
 #define ABILITY_BATTLE_FURY            640
 #define ABILITY_STARLOCK               372
 #define ABILITY_IMPROV                 373
@@ -445,7 +445,7 @@
 #define ABILITY_DEATH_ROLL             399
 #define ABILITY_SCAMPER                400
 #define ABILITY_NOCTURNAL              401
-#define ABILITY_FORMATION_FIGHTER      402
+#define ABILITY_BATTLE_FORMATION       402
 #define ABILITY_WEB_TRAP               403
 #define ABILITY_ABYSSAL_LIGHT          404
 #define ABILITY_DIVINE_FAVOR           405
@@ -942,7 +942,7 @@
 #define ABILITY_HIDDEN_STASH           908
 #define ABILITY_LAST_POUR              909
 #define ABILITY_FLOCK_STEP             910
-#define ABILITY_CRUEL_PREMONITION      911
+#define ABILITY_COLD_PREMONITION       911
 #define ABILITY_DEAD_HEAT              912
 #define ABILITY_SPIRIT_FEAST           913
 #define ABILITY_EMERALD_ACCORD         914

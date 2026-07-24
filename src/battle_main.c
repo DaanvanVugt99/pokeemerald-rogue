@@ -5084,7 +5084,7 @@ s8 GetMovePriority(u32 battler, u16 move)
             gProtectStructs[battler].preparationCharmElevated = TRUE;
     }
 
-    if (HasBattlerAbility(battler, ABILITY_FORMATION_FIGHTER)
+    if (HasBattlerAbility(battler, ABILITY_BATTLE_FORMATION)
      && IS_MOVE_STATUS(move))
     {
         u32 statusMoveCount;

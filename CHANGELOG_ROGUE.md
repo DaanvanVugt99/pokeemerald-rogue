@@ -74,6 +74,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Renamed four unique abilities to fit the full 16-character ability-name
+  limit: Cold Premonition, Battle Formation, Mother's Guard, and Piercing
+  Verdict.
 - Added distinct battle animations to Bubble Net, Numbing Spines, Barnacle
   Wall, Breach Point, Galarica Rounds, Intent, Ground Fault, and
   Prism Refraction so their otherwise hidden effects are visually readable.

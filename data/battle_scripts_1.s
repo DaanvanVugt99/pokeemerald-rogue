@@ -12511,7 +12511,7 @@ BattleScript_SmogRefineryRestoreAfterStrangeSteam::
 	various BS_SCRIPTING, VARIOUS_RESTORE_ATTACKER_AND_TARGET
 	return
 
-BattleScript_CruelPremonitionSetsFutureSight::
+BattleScript_ColdPremonitionSetsFutureSight::
 	call BattleScript_AbilityPopUp
 	playmoveanimation BS_ATTACKER, MOVE_FUTURE_SIGHT
 	waitanimation

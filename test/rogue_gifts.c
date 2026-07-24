@@ -315,7 +315,7 @@ TEST("Dynamic unique ability eligibility audit contains 574 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STRONG_WINDS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STARMOBILE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLOCK_STEP));
-    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_CRUEL_PREMONITION));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_COLD_PREMONITION));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_DEAD_HEAT));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SPIRIT_FEAST));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_EMERALD_ACCORD));
@@ -477,9 +477,9 @@ TEST("Qualifying custom moves preserve the rest of the rolled payload")
 
 TEST("Galarian bird unique abilities use the required legendary synergy profiles")
 {
-    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_CRUEL_PREMONITION, 0), MOVE_FREEZING_GLARE);
-    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_CRUEL_PREMONITION, 1), MOVE_NONE);
-    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_CRUEL_PREMONITION, 2), MOVE_NONE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_COLD_PREMONITION, 0), MOVE_FREEZING_GLARE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_COLD_PREMONITION, 1), MOVE_NONE);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_COLD_PREMONITION, 2), MOVE_NONE);
 
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_DEAD_HEAT, 0), MOVE_NONE);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_DEAD_HEAT, 1), MOVE_NONE);

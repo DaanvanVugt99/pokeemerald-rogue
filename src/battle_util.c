@@ -14813,7 +14813,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_MATERNAL_INSTINCT)
+        if (HasBattlerAbility(battler, ABILITY_MOTHERS_GUARD)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && IsBattlerAlive(battler)
@@ -14824,7 +14824,7 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
          && CanUseSelfExtraMove(battler))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_MATERNAL_INSTINCT);
+            SetBattlerTriggeredAbility(battler, ABILITY_MOTHERS_GUARD);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
@@ -25450,7 +25450,7 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         return UQ_4_12(0.75);
     }
 
-    if (HasBattlerAbility(battlerDef, ABILITY_FORMATION_FIGHTER))
+    if (HasBattlerAbility(battlerDef, ABILITY_BATTLE_FORMATION))
     {
         u32 statusMoveCount;
         GetBattlerKnownMoveCategoryCounts(battlerDef, NULL, &statusMoveCount);
