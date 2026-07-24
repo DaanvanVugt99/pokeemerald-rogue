@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Gave Stonjourner Menhir, preventing a single hit from dealing more than half
+  its maximum HP while it remains above half health.
 - Gave the Unovan Zorua line Vanishing Act, switching it out after it lands a
   damaging move while still disguised by Illusion.
 - Gave the Hisuian Zorua line Bitter Ruse, revealing itself and retaliating

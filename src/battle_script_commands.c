@@ -2613,6 +2613,13 @@ static void Cmd_adjustdamage(void)
         // Form change will be done after attack animation in Cmd_resultmessage.
         goto END;
     }
+    if (HasBattlerAbility(gBattlerTarget, ABILITY_MENHIR)
+        && gBattleMons[gBattlerTarget].hp * 2 > gBattleMons[gBattlerTarget].maxHP
+        && gBattleMoveDamage > gBattleMons[gBattlerTarget].maxHP / 2)
+    {
+        gBattleMoveDamage = max(1, gBattleMons[gBattlerTarget].maxHP / 2);
+        RecordAbilityBattle(gBattlerTarget, ABILITY_MENHIR);
+    }
     if (gBattleMons[gBattlerTarget].hp > gBattleMoveDamage)
         goto END;
 
@@ -16468,6 +16475,12 @@ static void Cmd_tryKO(void)
                 gMoveResultFlags |= MOVE_RESULT_STURDIED;
                 SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_DIVINE_FAVOR);
                 gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerTarget)] |= gBitTable[gBattlerPartyIndexes[gBattlerTarget]];
+            }
+            else if (HasBattlerAbility(gBattlerTarget, ABILITY_MENHIR)
+                  && gBattleMons[gBattlerTarget].hp * 2 > gBattleMons[gBattlerTarget].maxHP)
+            {
+                gBattleMoveDamage = max(1, gBattleMons[gBattlerTarget].maxHP / 2);
+                RecordAbilityBattle(gBattlerTarget, ABILITY_MENHIR);
             }
             else
             {
