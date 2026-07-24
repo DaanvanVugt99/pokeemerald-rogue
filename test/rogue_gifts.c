@@ -251,7 +251,7 @@ TEST("Dynamic unique ability pool includes Starmobile")
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(customMonId), ABILITY_STARMOBILE);
 }
 
-TEST("Dynamic unique ability eligibility audit contains 574 abilities")
+TEST("Dynamic unique ability eligibility audit contains 575 abilities")
 {
     static const u16 sExpectedExclusions[] =
     {
@@ -291,7 +291,7 @@ TEST("Dynamic unique ability eligibility audit contains 574 abilities")
         ABILITY_GUARD_INSTINCT,
         ABILITY_STORM_INSTINCT,
         ABILITY_COUNTERPUNCH,
-        ABILITY_RAPID_REPLICA,
+        ABILITY_KINGS_DOMAIN,
         ABILITY_COLOSSAL,
         ABILITY_TRASH_ALCHEMY,
         ABILITY_POTENTIAL,
@@ -304,14 +304,14 @@ TEST("Dynamic unique ability eligibility audit contains 574 abilities")
     u16 eligibleCount = 0;
     u16 i;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_COUNTERSPELL; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_FEVER_PITCH; ++ability)
     {
         if(RogueGift_IsDynamicUniqueAbilityEligible(ability))
             ++eligibleCount;
     }
 
-    EXPECT_EQ(eligibleCount, 574);
-    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 574);
+    EXPECT_EQ(eligibleCount, 575);
+    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 575);
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STRONG_WINDS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STARMOBILE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLOCK_STEP));
@@ -334,6 +334,8 @@ TEST("Dynamic unique ability eligibility audit contains 574 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_PREMONITION));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_HORN_LOCK));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_COUNTERSPELL));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FEVER_PITCH));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_RAPID_REPLICA));
 
     for(i = 0; i < ARRAY_COUNT(sExpectedExclusions); ++i)
         EXPECT(!RogueGift_IsDynamicUniqueAbilityEligible(sExpectedExclusions[i]));
@@ -365,7 +367,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     u16 ability;
     u16 pairedAbilityCount = 0;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_COUNTERSPELL; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_FEVER_PITCH; ++ability)
     {
         u16 profileId = RogueGift_DebugGetDynamicSynergyProfileId(ability);
         u16 moves[3];
@@ -396,7 +398,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 3);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 252);
+    EXPECT_EQ(pairedAbilityCount, 253);
 }
 
 TEST("Newest dynamic unique abilities use their required synergy profiles")
@@ -409,6 +411,10 @@ TEST("Newest dynamic unique abilities use their required synergy profiles")
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_SMOG_REFINERY), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_PREMONITION), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_COUNTERSPELL), 0);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_FEVER_PITCH), 0);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_RAPID_REPLICA, 0), MOVE_TRANSFORM);
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_RAPID_REPLICA, MOVE_TRANSFORM));
+    EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_RAPID_REPLICA, MOVE_COPYCAT));
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_HORN_LOCK, 0), MOVE_RAGING_BULL);
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_HORN_LOCK, MOVE_RAGING_BULL));
     EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_HORN_LOCK, MOVE_CLOSE_COMBAT));

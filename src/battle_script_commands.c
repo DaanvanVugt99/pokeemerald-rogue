@@ -8038,6 +8038,22 @@ static void Cmd_moveend(void)
                 effect = TRUE;
             }
             if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_FEVER_PITCH)
+             && IsBattlerAlive(gBattlerAttacker)
+             && IS_MOVE_STATUS(gCurrentMove)
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
+             && !(gBattleStruct->lastMoveFailed & gBitTable[gBattlerAttacker])
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && !gDisableStructs[gBattlerAttacker].uniquePersistentStateActive)
+            {
+                gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = TRUE;
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_FEVER_PITCH);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+                effect = TRUE;
+            }
+            if (!effect
              && ((HasBattlerAbility(gBattlerAttacker, ABILITY_UNDERTOW)
                && moveType == TYPE_WATER
                && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE)
@@ -8058,6 +8074,29 @@ static void Cmd_moveend(void)
                     HasBattlerAbility(gBattlerAttacker, ABILITY_SUBMERGE) ? ABILITY_SUBMERGE : ABILITY_UNDERTOW);
                 gBattlerAbility = gBattlerAttacker;
                 gBattleScripting.battler = gBattlerAttacker;
+                gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_UndertowActivates;
+                effect = TRUE;
+            }
+            if (!effect
+             && HasBattlerAbility(gBattlerAttacker, ABILITY_FEVER_PITCH)
+             && gDisableStructs[gBattlerAttacker].uniquePersistentStateActive
+             && IsBattlerAlive(gBattlerAttacker)
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE
+             && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
+             && CountUsablePartyMons(gBattlerAttacker) > 0
+             && gProtectStructs[gBattlerAttacker].targetAffected
+             && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && gBattleOutcome == 0
+             && !NoAliveMonsForEitherParty())
+            {
+                gDisableStructs[gBattlerAttacker].uniquePersistentStateActive = FALSE;
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_FEVER_PITCH);
                 gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_UndertowActivates;

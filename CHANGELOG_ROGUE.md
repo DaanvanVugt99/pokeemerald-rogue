@@ -14,6 +14,16 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Changed
+
+- Gave Vigoroth Fever Pitch, priming a switch after its next successful
+  damaging move whenever it uses a status move.
+- Removed King’s Domain from randomly generated Unique Pokémon because its
+  effect requires Truant; Colossal and the other standard-ability-dependent
+  effects remain species-bound as well.
+- Allowed generated Unique Pokémon to receive Rapid Replica, guaranteeing
+  Transform so the ability can always activate.
+
 ### Fixed
 
 - Hardened living-battler checks against invalid target IDs before accessing
