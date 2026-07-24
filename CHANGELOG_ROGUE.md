@@ -76,6 +76,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made Duality announce whether body, mind, or balance currently leads on
+  entry and after each turn, and clarified when its offensive roles swap.
 - Renamed four unique abilities to fit the full 16-character ability-name
   limit: Cold Premonition, Battle Formation, Mother's Guard, and Piercing
   Verdict.

@@ -84,7 +84,7 @@ enum
 static bool32 TryRemoveScreens(u32 battler);
 static bool32 TryRemoveTargetSideScreens(u32 target);
 extern const u8 BattleScript_RedlineEndTurn[];
-extern const u8 BattleScript_DualityEndTurn[];
+extern const u8 BattleScript_DualityAnnouncesMode[];
 static bool32 IsUnnerveAbilityOnOpposingSide(u32 battler);
 static bool32 TrySetupIronStampHazards(u32 battler, u32 target);
 static u32 GetFlingPowerFromItemId(u32 itemId);
@@ -6067,6 +6067,20 @@ static u32 GetStagedOffensiveStat(u32 battler, u32 statId)
     return stat * gStatStageRatios[stage][0] / gStatStageRatios[stage][1];
 }
 
+static u32 GetDualityModeMessage(u32 battler)
+{
+    u32 attackStatId = gDisableStructs[battler].uniquePersistentStateActive ? STAT_SPATK : STAT_ATK;
+    u32 spAttackStatId = gDisableStructs[battler].uniquePersistentStateActive ? STAT_ATK : STAT_SPATK;
+    u32 effectiveAttack = GetStagedOffensiveStat(battler, attackStatId);
+    u32 effectiveSpAttack = GetStagedOffensiveStat(battler, spAttackStatId);
+
+    if (effectiveAttack > effectiveSpAttack)
+        return B_MSG_DUALITY_BODY;
+    if (effectiveSpAttack > effectiveAttack)
+        return B_MSG_DUALITY_MIND;
+    return B_MSG_DUALITY_BALANCED;
+}
+
 static bool32 ShouldTallTaleUseSpAttackForDragonHammer(u32 battlerAtk, u32 move)
 {
     return move == MOVE_DRAGON_HAMMER
@@ -9193,10 +9207,13 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         bool32 primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
         bool32 uniqueDone = gSpecialStatuses[battler].switchInUniqueAbilityDone;
 
-        if (HasBattlerAbility(battler, ABILITY_CARVING_RUSH))
+        if (HasBattlerAbility(battler, ABILITY_CARVING_RUSH)
+         || HasBattlerAbility(battler, ABILITY_DUALITY))
             gDisableStructs[battler].uniquePersistentStateActive = FALSE;
 
-        if (uniqueAbility != ABILITY_NONE && uniqueAbility != primaryAbility)
+        if (uniqueAbility != ABILITY_NONE
+         && uniqueAbility != primaryAbility
+         && uniqueAbility != ABILITY_DUALITY)
         {
             gSpecialStatuses[battler].switchInAbilityDone = uniqueDone;
             effect = AbilityBattleEffects(caseID, battler, ability, uniqueAbility, moveArg);
@@ -9212,6 +9229,19 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             effect = AbilityBattleEffects(caseID, battler, ability, primaryAbility, moveArg);
             primaryDone = gSpecialStatuses[battler].switchInAbilityDone;
+            if (effect != 0)
+                return effect;
+        }
+
+        // Duality reports the effective offensive stats, so resolve any
+        // standard switch-in stat changes before announcing its initial mode.
+        if (uniqueAbility == ABILITY_DUALITY && uniqueAbility != primaryAbility)
+        {
+            gSpecialStatuses[battler].switchInAbilityDone = uniqueDone;
+            effect = AbilityBattleEffects(caseID, battler, ability, uniqueAbility, moveArg);
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = gSpecialStatuses[battler].switchInAbilityDone;
+            uniqueDone = gSpecialStatuses[battler].switchInUniqueAbilityDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
             if (effect != 0)
                 return effect;
         }
@@ -11381,6 +11411,15 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         gBattleScripting.battler = battler;
         switch (gLastUsedAbility)
         {
+        case ABILITY_DUALITY:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattleCommunication[MULTISTRING_CHOOSER] = GetDualityModeMessage(battler);
+                BattleScriptPushCursorAndCallback(BattleScript_DualityAnnouncesMode);
+                effect++;
+            }
+            break;
         case ABILITY_IMPOSTER:
             if (IsBattlerAlive(BATTLE_OPPOSITE(battler))
                 && !(gBattleMons[BATTLE_OPPOSITE(battler)].status2 & (STATUS2_TRANSFORMED | STATUS2_SUBSTITUTE))
@@ -12374,10 +12413,8 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             {
                 gDisableStructs[battler].uniquePersistentStateActive ^= TRUE;
                 SetBattlerTriggeredAbility(battler, ABILITY_DUALITY);
-                gBattleCommunication[MULTISTRING_CHOOSER] = gDisableStructs[battler].uniquePersistentStateActive
-                    ? B_MSG_DUALITY_SPATK
-                    : B_MSG_DUALITY_ATTACK;
-                BattleScriptPushCursorAndCallback(BattleScript_DualityEndTurn);
+                gBattleCommunication[MULTISTRING_CHOOSER] = GetDualityModeMessage(battler);
+                BattleScriptPushCursorAndCallback(BattleScript_DualityAnnouncesMode);
                 effect++;
                 break;
             }

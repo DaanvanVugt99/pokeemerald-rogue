@@ -12168,7 +12168,7 @@ BattleScript_RedlineEndTurn::
 BattleScript_RedlineEndTurn_End:
 	end3
 
-BattleScript_DualityEndTurn::
+BattleScript_DualityAnnouncesMode::
 	call BattleScript_AbilityPopUp
 	printfromtable gDualityStringIds
 	waitmessage B_WAIT_TIME_LONG

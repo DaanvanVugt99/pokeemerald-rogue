@@ -896,8 +896,9 @@ static const u8 sText_LowTideMadeYUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Low 
 static const u8 sText_RumbleRollClearedHazards[] = _("{B_ATK_NAME_WITH_PREFIX}'s Rumble Roll\ncleared away the hazards!");
 static const u8 sText_MeltdownRestoredHp[] = _("{B_DEF_NAME_WITH_PREFIX} restored HP\nusing its Meltdown!");
 static const u8 sText_MeltdownMadeMoveUseless[] = _("{B_DEF_NAME_WITH_PREFIX}'s Meltdown\nmade {B_CURRENT_MOVE} useless!");
-static const u8 sText_DualityShiftedToSpAtk[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s Duality\nshifted to Sp. Atk!");
-static const u8 sText_DualityShiftedToAttack[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s Duality\nshifted to Attack!");
+static const u8 sText_DualityMindTookLead[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s mind\ntook the lead!");
+static const u8 sText_DualityBodyTookLead[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s body\ntook the lead!");
+static const u8 sText_DualityFoundBalance[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} found balance\nbetween body and mind!");
 static const u8 sText_GalaricaRoundsLoaded[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}\nloaded a Galarica round!");
 static const u8 sText_TrashAlchemyFound[] = _("{B_ATK_NAME_WITH_PREFIX}'s Trash Alchemy\nfound {B_LAST_ITEM}!");
 static const u8 sText_CommanderActivates[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} was swallowed by\nDondozo and became its commander!");
@@ -906,13 +907,14 @@ static const u8 sText_HornLockSwappedTypes[] = _("{B_ATK_NAME_WITH_PREFIX} swapp
 
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
+    [STRINGID_DUALITYFOUNDBALANCE - BATTLESTRINGS_TABLE_START] = sText_DualityFoundBalance,
     [STRINGID_HORNLOCKSWAPPEDTYPES - BATTLESTRINGS_TABLE_START] = sText_HornLockSwappedTypes,
     [STRINGID_EMERALDACCORDRESTORED - BATTLESTRINGS_TABLE_START] = sText_EmeraldAccordRestored,
     [STRINGID_COMMANDERACTIVATES - BATTLESTRINGS_TABLE_START] = sText_CommanderActivates,
     [STRINGID_TRASHALCHEMYFOUND - BATTLESTRINGS_TABLE_START] = sText_TrashAlchemyFound,
     [STRINGID_GALARICAROUNDSLOADED - BATTLESTRINGS_TABLE_START] = sText_GalaricaRoundsLoaded,
-    [STRINGID_DUALITYSHIFTEDTOATTACK - BATTLESTRINGS_TABLE_START] = sText_DualityShiftedToAttack,
-    [STRINGID_DUALITYSHIFTEDTOSPATK - BATTLESTRINGS_TABLE_START] = sText_DualityShiftedToSpAtk,
+    [STRINGID_DUALITYBODYTOOKLEAD - BATTLESTRINGS_TABLE_START] = sText_DualityBodyTookLead,
+    [STRINGID_DUALITYMINDTOOKLEAD - BATTLESTRINGS_TABLE_START] = sText_DualityMindTookLead,
     [STRINGID_MELTDOWNMADEMOVEUSELESS - BATTLESTRINGS_TABLE_START] = sText_MeltdownMadeMoveUseless,
     [STRINGID_MELTDOWNRESTOREDHP - BATTLESTRINGS_TABLE_START] = sText_MeltdownRestoredHp,
     [STRINGID_RUMBLEROLLCLEAREDHAZARDS - BATTLESTRINGS_TABLE_START] = sText_RumbleRollClearedHazards,
@@ -2193,8 +2195,9 @@ const u16 gDamageNonTypesDmgStringIds[] =
 
 const u16 gDualityStringIds[] =
 {
-    [B_MSG_DUALITY_SPATK] = STRINGID_DUALITYSHIFTEDTOSPATK,
-    [B_MSG_DUALITY_ATTACK] = STRINGID_DUALITYSHIFTEDTOATTACK,
+    [B_MSG_DUALITY_BODY] = STRINGID_DUALITYBODYTOOKLEAD,
+    [B_MSG_DUALITY_MIND] = STRINGID_DUALITYMINDTOOKLEAD,
+    [B_MSG_DUALITY_BALANCED] = STRINGID_DUALITYFOUNDBALANCE,
 };
 
 const u8 gText_PkmnIsEvolving[] = _("What?\n{STR_VAR_1} is evolving!");

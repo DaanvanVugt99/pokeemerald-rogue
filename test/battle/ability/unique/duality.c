@@ -7,7 +7,7 @@ ASSUMPTIONS
     ASSUME(IS_MOVE_SPECIAL(MOVE_WATER_GUN));
 }
 
-SINGLE_BATTLE_TEST("Duality announces its current offensive mode at end of turn")
+SINGLE_BATTLE_TEST("Duality announces its current offensive focus on entry and after every turn")
 {
     GIVEN {
         PLAYER(SPECIES_ESPATHRA) { Speed(100); Moves(MOVE_CELEBRATE); }
@@ -17,9 +17,65 @@ SINGLE_BATTLE_TEST("Duality announces its current offensive mode at end of turn"
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_DUALITY);
-        MESSAGE("Espathra's Duality\nshifted to Sp. Atk!");
+        MESSAGE("Espathra's mind\ntook the lead!");
         ABILITY_POPUP(player, ABILITY_DUALITY);
-        MESSAGE("Espathra's Duality\nshifted to Attack!");
+        MESSAGE("Espathra's body\ntook the lead!");
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Espathra's mind\ntook the lead!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Duality announces when Attack and Sp. Atk are balanced")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(100); SpAttack(100); UniqueAbility(ABILITY_DUALITY); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Wobbuffet found balance\nbetween body and mind!");
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Wobbuffet found balance\nbetween body and mind!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Duality accounts for stat stages when announcing its offensive focus")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(100); SpAttack(100); UniqueAbility(ABILITY_DUALITY); Moves(MOVE_SWORDS_DANCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SWORDS_DANCE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Wobbuffet found balance\nbetween body and mind!");
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Wobbuffet's mind\ntook the lead!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Duality announces its initial focus after Download")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) {
+            Ability(ABILITY_DOWNLOAD);
+            UniqueAbility(ABILITY_DUALITY);
+            Attack(100);
+            SpAttack(120);
+            Moves(MOVE_CELEBRATE);
+        }
+        OPPONENT(SPECIES_WOBBUFFET) {
+            Defense(50);
+            SpDefense(100);
+            Moves(MOVE_CELEBRATE);
+        }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DOWNLOAD);
+        ABILITY_POPUP(player, ABILITY_DUALITY);
+        MESSAGE("Wobbuffet's body\ntook the lead!");
     }
 }
 
