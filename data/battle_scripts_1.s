@@ -11222,6 +11222,47 @@ BattleScript_TerraformActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_WorldEngineSunActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playanimation BS_BATTLER_0, B_ANIM_SUN_CONTINUES
+	goto BattleScript_WorldEngineActivateField
+
+BattleScript_WorldEngineRainActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playanimation BS_BATTLER_0, B_ANIM_RAIN_CONTINUES
+	goto BattleScript_WorldEngineActivateField
+
+BattleScript_WorldEngineSnowActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playanimation BS_BATTLER_0, B_ANIM_SNOW_CONTINUES
+	goto BattleScript_WorldEngineActivateField
+
+BattleScript_WorldEngineSandstormActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playanimation BS_BATTLER_0, B_ANIM_SANDSTORM_CONTINUES
+	goto BattleScript_WorldEngineActivateField
+
+BattleScript_WorldEngineAcidRainActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playanimation BS_BATTLER_0, B_ANIM_ACID_RAIN_CONTINUES
+	goto BattleScript_WorldEngineActivateField
+
+BattleScript_WorldEngineEclipseActivates::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playanimation BS_BATTLER_0, B_ANIM_ECLIPSE_CONTINUES
+
+BattleScript_WorldEngineActivateField:
+	call BattleScript_ActivateWeatherAbilities
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	end3
+
 BattleScript_CrashProtocolActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

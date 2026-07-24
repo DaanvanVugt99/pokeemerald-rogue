@@ -74,6 +74,8 @@ match the ROM; this is also why sSoundMovesTable's declaration is in the middle 
 functions instead of at the top of the file with the other declarations.
 */
 
+static bool32 TryAdvanceWorldEngineAtEndTurn(void);
+
 enum
 {
     UNIQUE_VERSE_NONE,
@@ -2398,6 +2400,7 @@ enum
     ENDTURN_PSYCHIC_TERRAIN,
     ENDTURN_INFESTED_TERRAIN,
     ENDTURN_PLAIN_TERRAIN,
+    ENDTURN_WORLD_ENGINE,
     ENDTURN_ION_DELUGE,
     ENDTURN_FAIRY_LOCK,
     ENDTURN_RETALIATE,
@@ -2924,6 +2927,10 @@ u8 DoFieldEndTurnEffects(void)
             break;
         case ENDTURN_PLAIN_TERRAIN:
             effect = EndTurnTerrain(STATUS_FIELD_PLAIN_TERRAIN, B_MSG_TERRAIN_END_PLAIN);
+            gBattleStruct->turnCountersTracker++;
+            break;
+        case ENDTURN_WORLD_ENGINE:
+            effect = TryAdvanceWorldEngineAtEndTurn();
             gBattleStruct->turnCountersTracker++;
             break;
         case ENDTURN_WATER_SPORT:
@@ -5501,6 +5508,88 @@ bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer)
 
         gBattleScripting.battler = battler;
         return TRUE;
+    }
+
+    return FALSE;
+}
+
+enum
+{
+    WORLD_ENGINE_SUN_GRASSY,
+    WORLD_ENGINE_RAIN_ELECTRIC,
+    WORLD_ENGINE_SNOW_MISTY,
+    WORLD_ENGINE_SANDSTORM_PSYCHIC,
+    WORLD_ENGINE_ACID_RAIN_INFESTED,
+    WORLD_ENGINE_ECLIPSE_PLAIN,
+    WORLD_ENGINE_PHASE_COUNT,
+};
+
+struct WorldEnginePhase
+{
+    u8 weather;
+    u16 terrain;
+    const u8 *script;
+};
+
+static const struct WorldEnginePhase sWorldEnginePhases[WORLD_ENGINE_PHASE_COUNT] =
+{
+    [WORLD_ENGINE_SUN_GRASSY]          = {ENUM_WEATHER_SUN,       STATUS_FIELD_GRASSY_TERRAIN,   BattleScript_WorldEngineSunActivates},
+    [WORLD_ENGINE_RAIN_ELECTRIC]       = {ENUM_WEATHER_RAIN,      STATUS_FIELD_ELECTRIC_TERRAIN, BattleScript_WorldEngineRainActivates},
+    [WORLD_ENGINE_SNOW_MISTY]          = {ENUM_WEATHER_SNOW,      STATUS_FIELD_MISTY_TERRAIN,    BattleScript_WorldEngineSnowActivates},
+    [WORLD_ENGINE_SANDSTORM_PSYCHIC]   = {ENUM_WEATHER_SANDSTORM, STATUS_FIELD_PSYCHIC_TERRAIN,  BattleScript_WorldEngineSandstormActivates},
+    [WORLD_ENGINE_ACID_RAIN_INFESTED]  = {ENUM_WEATHER_ACID_RAIN, STATUS_FIELD_INFESTED_TERRAIN, BattleScript_WorldEngineAcidRainActivates},
+    [WORLD_ENGINE_ECLIPSE_PLAIN]       = {ENUM_WEATHER_ECLIPSE,   STATUS_FIELD_PLAIN_TERRAIN,    BattleScript_WorldEngineEclipseActivates},
+};
+
+static bool32 IsOtherWorldEngineActive(u32 battler)
+{
+    u32 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (i != battler
+         && IsBattlerAlive(i)
+         && HasBattlerAbility(i, ABILITY_WORLD_ENGINE))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static void ApplyWorldEnginePhase(u32 battler)
+{
+    const struct WorldEnginePhase *phase = &sWorldEnginePhases[gBattleStruct->worldEnginePhase];
+
+    // World Engine deliberately supersedes every existing field effect,
+    // including permanent and primal weather.
+    gBattleWeather = B_WEATHER_NONE;
+    TryChangeBattleWeather(battler, phase->weather, TRUE);
+
+    gFieldStatuses &= ~(STATUS_FIELD_TERRAIN_ANY | STATUS_FIELD_TERRAIN_PERMANENT);
+    TryChangeBattleTerrain(battler, phase->terrain, &gFieldTimers.terrainTimer);
+
+    gBattleScripting.battler = battler;
+    gBattlerAttacker = battler;
+    SetBattlerTriggeredAbility(battler, ABILITY_WORLD_ENGINE);
+}
+
+static bool32 TryAdvanceWorldEngineAtEndTurn(void)
+{
+    u32 battler;
+
+    if (!gBattleStruct->worldEngineInitialized)
+        return FALSE;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (IsBattlerAlive(battler)
+         && HasBattlerAbility(battler, ABILITY_WORLD_ENGINE))
+        {
+            gBattleStruct->worldEnginePhase = (gBattleStruct->worldEnginePhase + 1) % WORLD_ENGINE_PHASE_COUNT;
+            ApplyWorldEnginePhase(battler);
+            BattleScriptExecute(sWorldEnginePhases[gBattleStruct->worldEnginePhase].script);
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -9372,6 +9461,31 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
         if (TryActivateTripwire(battler))
             return 1;
+
+        if (HasBattlerAbility(battler, ABILITY_WORLD_ENGINE) && !uniqueDone)
+        {
+            uniqueDone = TRUE;
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+
+            if (!gBattleStruct->worldEngineInitialized)
+            {
+                gBattleStruct->worldEngineInitialized = TRUE;
+                gBattleStruct->worldEnginePhase = RandomUniform(RNG_ROGUE_WORLD_ENGINE, 0, WORLD_ENGINE_PHASE_COUNT - 1);
+            }
+            else if (!IsOtherWorldEngineActive(battler))
+            {
+                gBattleStruct->worldEnginePhase = (gBattleStruct->worldEnginePhase + 1) % WORLD_ENGINE_PHASE_COUNT;
+            }
+            else
+            {
+                return 0;
+            }
+
+            ApplyWorldEnginePhase(battler);
+            BattleScriptPushCursorAndCallback(sWorldEnginePhases[gBattleStruct->worldEnginePhase].script);
+            return 1;
+        }
 
         if (HasBattlerAbility(battler, ABILITY_CLAIRVOYANT) && !uniqueDone)
         {

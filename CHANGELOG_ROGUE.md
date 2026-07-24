@@ -20,6 +20,9 @@ Format follows Keep a Changelog loosely:
   party Pokémon has distinct typing, it uses Metronome after every move.
 - Added Ship of Theseus as a generated-only Anomalous Ability, passing its
   moves and both Abilities through every replacement that enters battle.
+- Added World Engine as a generated-only Anomalous Ability. It starts at a
+  random point in a six-phase weather-and-terrain cycle, advances each active
+  turn and upon returning to battle, and pauses while its holder is absent.
 
 ### Changed
 

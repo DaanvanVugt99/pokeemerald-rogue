@@ -203,6 +203,7 @@ enum RandomTag
     RNG_ROGUE_DOZING,
     RNG_ROGUE_POTENTIAL,
     RNG_ROGUE_POTENTIAL_STONE,
+    RNG_ROGUE_WORLD_ENGINE,
 };
 
 #define RandomWeighted(tag, ...) \

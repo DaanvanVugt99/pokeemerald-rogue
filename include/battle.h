@@ -633,6 +633,8 @@ struct BattleStruct
     u8 turnEffectsBattlerId;
     u8 rogueAlphaMonActive : 1;
     u8 rogueAlphaMonWeakened : 1;
+    u8 worldEngineInitialized : 1;
+    u8 worldEnginePhase : 3;
     u8 turnCountersTracker;
     u16 wrappedMove[MAX_BATTLERS_COUNT];
     u16 moveTarget[MAX_BATTLERS_COUNT];

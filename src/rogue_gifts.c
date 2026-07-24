@@ -536,7 +536,7 @@ STATIC_ASSERT(DYNAMIC_MOVE_PAIR_CODE_START + DYNAMIC_MOVE_PAIR_COUNT <= DYNAMIC_
 STATIC_ASSERT(ABILITIES_COUNT <= 1024, DynamicUniqueAbilityFits10Bits);
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
-#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_SHIP_OF_THESEUS
+#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_WORLD_ENGINE
 
 // These generated-only abilities have no native species mapping. They remain
 // part of the ordinary Legendary unique ability roll, but are identified
@@ -545,6 +545,7 @@ static const u16 sAnomalousUniqueAbilities[] =
 {
     ABILITY_CHAOS_THEORY,
     ABILITY_SHIP_OF_THESEUS,
+    ABILITY_WORLD_ENGINE,
 };
 
 // These are the only custom abilities which are not safe and useful on an
@@ -602,7 +603,7 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
 #define DYNAMIC_UNIQUE_ABILITY_COUNT \
     (DYNAMIC_UNIQUE_ABILITY_MAX - DYNAMIC_UNIQUE_ABILITY_MIN + 1 - ARRAY_COUNT(sExcludedDynamicUniqueAbilities))
 
-STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 579, DynamicUniqueAbilityPoolAuditCount);
+STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 580, DynamicUniqueAbilityPoolAuditCount);
 
 bool8 RogueGift_IsAnomalousUniqueAbility(u16 ability)
 {

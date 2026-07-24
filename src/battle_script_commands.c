@@ -16589,6 +16589,7 @@ static bool32 IsWeatherDamageBlockedByUniqueAbility(u32 battler, u32 weather)
     {
     case ABILITY_CREATION:
     case ABILITY_METEOROLOGY:
+    case ABILITY_WORLD_ENGINE:
         return weather & (B_WEATHER_ACID_RAIN | B_WEATHER_SANDSTORM | B_WEATHER_HAIL);
     case ABILITY_TOXIC_DELUGE:
     case ABILITY_TOXISPHERE:
