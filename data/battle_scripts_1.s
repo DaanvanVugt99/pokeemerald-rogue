@@ -14292,6 +14292,14 @@ BattleScript_ShipOfTheseusActivates::
 	call BattleScript_AbilityPopUp
 	return
 
+BattleScript_ChromaticFluxActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_CONVERSION
+	waitanimation
+	printstring STRINGID_PKMNCHANGEDTYPE
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_FairyTaleActivates::
 	call BattleScript_AbilityPopUp
 	modifybattlerstatstage BS_ATTACKER, STAT_ATK, INCREASE, 1, BattleScript_FairyTaleTrySpAtk, ANIM_ON

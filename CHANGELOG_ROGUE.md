@@ -23,6 +23,8 @@ Format follows Keep a Changelog loosely:
 - Added World Engine as a generated-only Anomalous Ability. It starts at a
   random point in a six-phase weather-and-terrain cycle, advances each active
   turn and upon returning to battle, and pauses while its holder is absent.
+- Added Chromatic Flux as a generated-only Anomalous Ability. Each turn it
+  makes its holder and every move on the field a random type.
 
 ### Changed
 

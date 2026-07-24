@@ -6361,6 +6361,9 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
     if (gMain.inBattle && (gFieldStatuses & STATUS_FIELD_ION_DELUGE) && moveType == TYPE_NORMAL)
         moveType = TYPE_ELECTRIC;
 
+    if (gMain.inBattle && IS_STANDARD_TYPE(GetChromaticFluxType()))
+        return GetChromaticFluxType();
+
     return moveType;
 }
 
@@ -6370,7 +6373,11 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     u16 holdEffect = GetBattlerHoldEffect(battlerAtk, TRUE);
 
     if (move == MOVE_STRUGGLE)
+    {
+        if (IS_STANDARD_TYPE(GetChromaticFluxType()))
+            gBattleStruct->dynamicMoveType = GetChromaticFluxType() | F_DYNAMIC_TYPE_SET;
         return;
+    }
 
     gBattleStruct->dynamicMoveType = 0;
     gBattleStruct->ateBoost[battlerAtk] = 0;
@@ -6554,6 +6561,9 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
     if ((gFieldStatuses & STATUS_FIELD_ION_DELUGE && moveType == TYPE_NORMAL)
         || gStatuses4[battlerAtk] & STATUS4_ELECTRIFIED)
         gBattleStruct->dynamicMoveType = TYPE_ELECTRIC | F_DYNAMIC_TYPE_SET;
+
+    if (IS_STANDARD_TYPE(GetChromaticFluxType()))
+        gBattleStruct->dynamicMoveType = GetChromaticFluxType() | F_DYNAMIC_TYPE_SET;
 
     // Check if a gem should activate.
     GET_MOVE_TYPE(move, moveType);

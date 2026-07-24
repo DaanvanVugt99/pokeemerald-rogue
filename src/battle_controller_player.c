@@ -1827,6 +1827,9 @@ static u8 GetMoveDisplayTyping(u32 battler, u16 move)
     if (move == MOVE_NONE || move == MOVE_UNAVAILABLE)
         return TYPE_MYSTERY;
 
+    if (IS_STANDARD_TYPE(GetChromaticFluxType()))
+        return GetChromaticFluxType();
+
 #ifdef ROGUE_EXPANSION
     if (move == MOVE_TERA_BLAST)
     {

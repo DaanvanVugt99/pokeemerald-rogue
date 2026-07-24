@@ -11649,6 +11649,18 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         gBattleScripting.battler = battler;
         switch (gLastUsedAbility)
         {
+        case ABILITY_CHROMATIC_FLUX:
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && TryActivateChromaticFlux(battler))
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = battler;
+                gBattlerTarget = battler;
+                SetBattlerTriggeredAbility(battler, ABILITY_CHROMATIC_FLUX);
+                BattleScriptPushCursorAndCallback(BattleScript_ChromaticFluxActivates);
+                effect++;
+            }
+            break;
         case ABILITY_DUALITY:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -12653,6 +12665,13 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 SetBattlerTriggeredAbility(battler, ABILITY_DUALITY);
                 gBattleCommunication[MULTISTRING_CHOOSER] = GetDualityModeMessage(battler);
                 BattleScriptPushCursorAndCallback(BattleScript_DualityAnnouncesMode);
+                effect++;
+                break;
+            }
+
+            if (TryRerollChromaticFlux(battler))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_ChromaticFluxActivates);
                 effect++;
                 break;
             }
@@ -20881,6 +20900,120 @@ u32 GetBattlerUniqueAbility(u32 battler)
     return ability;
 }
 
+static void SetBattlerChromaticFluxType(u32 battler, u32 type)
+{
+    gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_CHROMATIC_TYPE_MASK;
+    gBattleResources->flags->flags[battler] |= (type + 1) << RESOURCE_FLAG_CHROMATIC_TYPE_SHIFT;
+    SET_BATTLER_TYPE(battler, type);
+}
+
+u32 GetBattlerChromaticFluxType(u32 battler)
+{
+    u32 encodedType = (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_CHROMATIC_TYPE_MASK)
+                    >> RESOURCE_FLAG_CHROMATIC_TYPE_SHIFT;
+
+    return encodedType == 0 ? TYPE_NONE : encodedType - 1;
+}
+
+u32 GetChromaticFluxType(void)
+{
+    u32 battler;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        u32 type = GetBattlerChromaticFluxType(battler);
+
+        if (IsBattlerAlive(battler)
+         && IS_STANDARD_TYPE(type)
+         && HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
+            return type;
+    }
+
+    return TYPE_NONE;
+}
+
+static u32 RollChromaticFluxType(void)
+{
+    static const u8 sChromaticFluxTypes[] =
+    {
+        TYPE_NORMAL,
+        TYPE_FIGHTING,
+        TYPE_FLYING,
+        TYPE_POISON,
+        TYPE_GROUND,
+        TYPE_ROCK,
+        TYPE_BUG,
+        TYPE_GHOST,
+        TYPE_STEEL,
+        TYPE_WATER,
+        TYPE_GRASS,
+        TYPE_ELECTRIC,
+        TYPE_PSYCHIC,
+        TYPE_ICE,
+        TYPE_DRAGON,
+        TYPE_DARK,
+        TYPE_FAIRY,
+        TYPE_FIRE,
+    };
+
+    return RandomElement(RNG_ROGUE_CHROMATIC_FLUX, sChromaticFluxTypes);
+}
+
+static void ApplyChromaticFluxType(u32 type)
+{
+    u32 battler;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (IsBattlerAlive(battler)
+         && HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
+            SetBattlerChromaticFluxType(battler, type);
+    }
+}
+
+bool32 TryActivateChromaticFlux(u32 battler)
+{
+    u32 type;
+
+    if (!IsBattlerAlive(battler)
+     || !HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
+        return FALSE;
+
+    type = GetChromaticFluxType();
+    if (!IS_STANDARD_TYPE(type))
+        type = RollChromaticFluxType();
+
+    ApplyChromaticFluxType(type);
+    PREPARE_TYPE_BUFFER(gBattleTextBuff1, type);
+    return TRUE;
+}
+
+bool32 TryRerollChromaticFlux(u32 battler)
+{
+    u32 source;
+
+    if (!IsBattlerAlive(battler)
+     || !HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
+        return FALSE;
+
+    for (source = 0; source < gBattlersCount; source++)
+    {
+        if (IsBattlerAlive(source)
+         && HasBattlerAbilityIgnoreMoldBreaker(source, ABILITY_CHROMATIC_FLUX))
+            break;
+    }
+
+    if (source != battler)
+        return FALSE;
+
+    ApplyChromaticFluxType(RollChromaticFluxType());
+    PREPARE_TYPE_BUFFER(gBattleTextBuff1, GetBattlerChromaticFluxType(battler));
+    gBattlerAttacker = battler;
+    gBattlerTarget = battler;
+    SetBattlerTriggeredAbility(battler, ABILITY_CHROMATIC_FLUX);
+    return TRUE;
+}
+
 void SetBattlerTriggeredAbility(u32 battler, u32 ability)
 {
     gBattlerAbility = battler;
@@ -28200,6 +28333,7 @@ void CopyMonAbilityAndTypesToBattleMon(u32 battler, struct Pokemon *mon)
 void RecalcBattlerStats(u32 battler, struct Pokemon *mon)
 {
     bool32 shipOfTheseusActive = gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS;
+    u32 chromaticFluxType = GetBattlerChromaticFluxType(battler);
     u32 shipOfTheseusPrimaryAbility = gBattleMons[battler].ability;
 
     CalculateMonStats(mon);
@@ -28213,6 +28347,9 @@ void RecalcBattlerStats(u32 battler, struct Pokemon *mon)
         gBattleMons[battler].ability = shipOfTheseusPrimaryAbility;
         gBattleStruct->overwrittenAbilities[battler] = shipOfTheseusPrimaryAbility;
     }
+
+    if (IS_STANDARD_TYPE(chromaticFluxType))
+        SET_BATTLER_TYPE(battler, chromaticFluxType);
 }
 
 void RemoveConfusionStatus(u32 battler)
@@ -28463,11 +28600,16 @@ bool8 IsMonBannedFromSkyBattles(u16 species)
 
 u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera)
 {
+    u32 chromaticType = GetBattlerChromaticFluxType(battler);
     u32 teraType = GetBattlerTeraType(battler);
     u16 types[3] = {0};
     types[0] = gBattleMons[battler].type1;
     types[1] = gBattleMons[battler].type2;
     types[2] = gBattleMons[battler].type3;
+
+    if (IS_STANDARD_TYPE(chromaticType)
+     && HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
+        return typeIndex == 2 ? TYPE_MYSTERY : chromaticType;
 
     // Handle Terastallization
     if (IsTerastallized(battler) && teraType != TYPE_STELLAR && !ignoreTera)
