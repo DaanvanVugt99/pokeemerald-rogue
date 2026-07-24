@@ -14247,6 +14247,10 @@ BattleScript_RksRelayActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_ShipOfTheseusActivates::
+	call BattleScript_AbilityPopUp
+	return
+
 BattleScript_FairyTaleActivates::
 	call BattleScript_AbilityPopUp
 	modifybattlerstatstage BS_ATTACKER, STAT_ATK, INCREASE, 1, BattleScript_FairyTaleTrySpAtk, ANIM_ON

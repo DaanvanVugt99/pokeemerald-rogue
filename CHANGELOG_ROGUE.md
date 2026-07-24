@@ -18,6 +18,8 @@ Format follows Keep a Changelog loosely:
 
 - Added Chaos Theory, the first generated-only Anomalous Ability. When every
   party Pokémon has distinct typing, it uses Metronome after every move.
+- Added Ship of Theseus as a generated-only Anomalous Ability, passing its
+  moves and both Abilities through every replacement that enters battle.
 
 ### Changed
 

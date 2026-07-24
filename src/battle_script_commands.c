@@ -5188,8 +5188,11 @@ static void Cmd_tryfaintmon(void)
                 gBattleMons[gBattlerAttacker].pp[moveIndex] = 0;
                 BattleScriptPush(gBattlescriptCurrInstr);
                 gBattlescriptCurrInstr = BattleScript_GrudgeTakesPp;
-                BtlController_EmitSetMonData(gBattlerAttacker, BUFFER_A, moveIndex + REQUEST_PPMOVE1_BATTLE, 0, sizeof(gBattleMons[gBattlerAttacker].pp[moveIndex]), &gBattleMons[gBattlerAttacker].pp[moveIndex]);
-                MarkBattlerForControllerExec(gBattlerAttacker);
+                if (MOVE_IS_PERMANENT(gBattlerAttacker, moveIndex))
+                {
+                    BtlController_EmitSetMonData(gBattlerAttacker, BUFFER_A, moveIndex + REQUEST_PPMOVE1_BATTLE, 0, sizeof(gBattleMons[gBattlerAttacker].pp[moveIndex]), &gBattleMons[gBattlerAttacker].pp[moveIndex]);
+                    MarkBattlerForControllerExec(gBattlerAttacker);
+                }
 
                 PREPARE_MOVE_BUFFER(gBattleTextBuff1, gBattleMons[gBattlerAttacker].moves[moveIndex])
             }
@@ -8896,6 +8899,14 @@ static void QueueSwitchInTransferEffectsFromOutgoing(u32 battler, const struct B
 
     gBattleStruct->switchInTransferFlags[battler] = SWITCH_IN_TRANSFER_NONE;
 
+    if (HasBattlerAbility(battler, ABILITY_SHIP_OF_THESEUS))
+    {
+        gBattleStruct->switchInTransferFlags[battler] |= SWITCH_IN_TRANSFER_SHIP_OF_THESEUS;
+        if (sourcePartyIdx < PARTY_SIZE
+         && GetBattlerIntrinsicUniqueAbility(battler) == ABILITY_SHIP_OF_THESEUS)
+            gBattleStruct->uniqueAbilityUsed[side] |= gBitTable[sourcePartyIdx];
+    }
+
     if (sourcePartyIdx < PARTY_SIZE
      && !(gBattleStruct->uniqueAbilityUsed[side] & gBitTable[sourcePartyIdx]))
     {
@@ -9107,6 +9118,17 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
         return TRUE;
     }
 
+    if (gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_SHIP_OF_THESEUS)
+    {
+        gBattleStruct->switchInTransferFlags[battler] &= ~SWITCH_IN_TRANSFER_SHIP_OF_THESEUS;
+        gBattlerAttacker = battler;
+        gBattlerTarget = battler;
+        SetBattlerTriggeredAbility(battler, ABILITY_SHIP_OF_THESEUS);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_ShipOfTheseusActivates;
+        return TRUE;
+    }
+
     if (gBattleStruct->switchInTransferFlags[battler] == SWITCH_IN_TRANSFER_NONE
      && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_BREACH_POINT_PENDING))
         gBattleStruct->switchInTransferSourcePartyIdx[battler] = PARTY_SIZE;
@@ -9124,6 +9146,7 @@ static void Cmd_switchindataupdate(void)
     bool32 incomingRksRelayActive;
     bool32 preserveBatonPassState;
     bool32 rksRelayActive;
+    bool32 shipOfTheseusActive;
     u32 battler, i;
     u32 outgoingPartyIndex;
     u8 *monData;
@@ -9133,8 +9156,11 @@ static void Cmd_switchindataupdate(void)
 
     battler = GetBattlerForBattleScript(cmd->battler);
     oldData = gBattleMons[battler];
+    if (gBattleStruct->overwrittenAbilities[battler] != ABILITY_NONE)
+        oldData.ability = gBattleStruct->overwrittenAbilities[battler];
     outgoingHasBreachPoint = HasBattlerAbility(battler, ABILITY_BREACH_POINT);
     outgoingHasRksRelay = HasBattlerAbility(battler, ABILITY_RKS_RELAY);
+    shipOfTheseusActive = gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_SHIP_OF_THESEUS;
     outgoingPartyIndex = gBattleStruct->switchInTransferSourcePartyIdx[battler];
     monData = (u8 *)(&gBattleMons[battler]);
 
@@ -9178,6 +9204,29 @@ static void Cmd_switchindataupdate(void)
     }
 
     SwitchInClearSetData(battler, preserveBatonPassState);
+
+    if (shipOfTheseusActive)
+    {
+        memcpy(gBattleMons[battler].moves, oldData.moves, sizeof(gBattleMons[battler].moves));
+        memcpy(gBattleMons[battler].pp, oldData.pp, sizeof(gBattleMons[battler].pp));
+        gBattleMons[battler].ppBonuses = oldData.ppBonuses;
+        gBattleMons[battler].ability = oldData.ability;
+        gBattleStruct->overwrittenAbilities[battler] = oldData.ability;
+        gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_SHIP_OF_THESEUS;
+        RecordAllMoves(battler);
+        RecordAbilityBattle(battler, oldData.ability);
+        RecordAbilityBattle(battler, ABILITY_SHIP_OF_THESEUS);
+    }
+    else if (GetBattlerIntrinsicUniqueAbility(battler) == ABILITY_SHIP_OF_THESEUS
+          && (gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)]
+              & gBitTable[gBattlerPartyIndexes[battler]]))
+    {
+        // In doubles, the original owner can re-enter through the partner
+        // lane while the anomaly continues elsewhere. It has relinquished
+        // both abilities and must not create a second copy of the chain.
+        gBattleMons[battler].ability = ABILITY_NONE;
+        gBattleStruct->overwrittenAbilities[battler] = ABILITY_NONE;
+    }
 
     // Resource flags belong to the battler slot and are cleared above. Queue
     // Breach Point only after the incoming mon's slot has been initialized.
@@ -12675,8 +12724,11 @@ static void Cmd_various(void)
             data[i] = gBattleMons[battler].pp[i];
         }
         data[i] = gBattleMons[battler].ppBonuses;
-        BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_PP_DATA_BATTLE, 0, 5, data);
-        MarkBattlerForControllerExec(battler);
+        if (!(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS))
+        {
+            BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_PP_DATA_BATTLE, 0, 5, data);
+            MarkBattlerForControllerExec(battler);
+        }
         break;
     }
     case VARIOUS_TRY_ACTIVATE_MOXIE:    // and chilling neigh + as one ice rider
@@ -14103,8 +14155,7 @@ static void Cmd_various(void)
                 ConvertIntToDecimalStringN(gBattleTextBuff2, ppToDeduct, STR_CONV_MODE_LEFT_ALIGN, 1);
                 PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, ppToDeduct)
                 gBattleMons[battler].pp[i] -= ppToDeduct;
-                if (!(gDisableStructs[battler].mimickedMoves & gBitTable[i])
-                    && !(gBattleMons[battler].status2 & STATUS2_TRANSFORMED))
+                if (MOVE_IS_PERMANENT(battler, i))
                 {
                     BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_PPMOVE1_BATTLE + i, 0, sizeof(gBattleMons[battler].pp[i]), &gBattleMons[battler].pp[i]);
                     MarkBattlerForControllerExec(battler);
@@ -17297,8 +17348,13 @@ static void Cmd_copymovepermanently(void)
             }
             movePpData.ppBonuses = gBattleMons[gBattlerAttacker].ppBonuses;
 
-            BtlController_EmitSetMonData(gBattlerAttacker, BUFFER_A, REQUEST_MOVES_PP_BATTLE, 0, sizeof(movePpData), &movePpData);
-            MarkBattlerForControllerExec(gBattlerAttacker);
+            // Ship of Theseus passes a battle-only moveset. Sketch may alter that
+            // inherited moveset, but must not overwrite the replacement's party data.
+            if (!(gBattleResources->flags->flags[gBattlerAttacker] & RESOURCE_FLAG_SHIP_OF_THESEUS))
+            {
+                BtlController_EmitSetMonData(gBattlerAttacker, BUFFER_A, REQUEST_MOVES_PP_BATTLE, 0, sizeof(movePpData), &movePpData);
+                MarkBattlerForControllerExec(gBattlerAttacker);
+            }
 
             PREPARE_MOVE_BUFFER(gBattleTextBuff1, gLastPrintedMoves[gBattlerTarget])
 
@@ -17443,9 +17499,7 @@ static void Cmd_tryspiteppreduce(void)
 
             gBattleMons[gBattlerTarget].pp[i] -= ppToDeduct;
 
-            // if (MOVE_IS_PERMANENT(gBattlerTarget, i)), but backwards
-            if (!(gDisableStructs[gBattlerTarget].mimickedMoves & gBitTable[i])
-                && !(gBattleMons[gBattlerTarget].status2 & STATUS2_TRANSFORMED))
+            if (MOVE_IS_PERMANENT(gBattlerTarget, i))
             {
                 BtlController_EmitSetMonData(gBattlerTarget, BUFFER_A, REQUEST_PPMOVE1_BATTLE + i, 0, sizeof(gBattleMons[gBattlerTarget].pp[i]), &gBattleMons[gBattlerTarget].pp[i]);
                 MarkBattlerForControllerExec(gBattlerTarget);

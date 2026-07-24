@@ -216,6 +216,7 @@ bool32 IsMoldBreakerTypeAbility(u32 ability);
 u32 GetBattlerAbility(u32 battler);
 u32 GetBattlerPrimaryAbility(u32 battler);
 u32 GetBattlerUniqueAbility(u32 battler);
+u32 GetBattlerIntrinsicUniqueAbility(u32 battler);
 void SetBattlerTriggeredAbility(u32 battler, u32 ability);
 u32 GetBattlerPrimaryAbilityIgnoreMoldBreaker(u32 battler);
 u32 GetBattlerUniqueAbilityIgnoreMoldBreaker(u32 battler);

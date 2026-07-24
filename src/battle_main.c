@@ -3347,6 +3347,10 @@ const u8* FaintClearSetData(u32 battler)
 {
     s32 i;
     const u8 *result = NULL;
+    bool32 shipOfTheseusActive = HasBattlerAbility(battler, ABILITY_SHIP_OF_THESEUS);
+    u32 shipOfTheseusPrimaryAbility = gBattleStruct->overwrittenAbilities[battler] != ABILITY_NONE
+                                   ? gBattleStruct->overwrittenAbilities[battler]
+                                   : gBattleMons[battler].ability;
 
     for (i = 0; i < NUM_BATTLE_STATS; i++)
         gBattleMons[battler].statStages[i] = DEFAULT_STAT_STAGE;
@@ -3443,7 +3447,7 @@ const u8* FaintClearSetData(u32 battler)
         gBattleStruct->lastTakenMoveFrom[i][battler] = 0;
     }
 
-    gBattleResources->flags->flags[battler] = 0;
+    gBattleResources->flags->flags[battler] = shipOfTheseusActive ? RESOURCE_FLAG_SHIP_OF_THESEUS : 0;
 
     gBattleMons[battler].type1 = GetTypeBySpecies(gBattleMons[battler].species, 0, gBattleMons[battler].otId);
     gBattleMons[battler].type2 = GetTypeBySpecies(gBattleMons[battler].species, 1, gBattleMons[battler].otId);
@@ -3452,7 +3456,9 @@ const u8* FaintClearSetData(u32 battler)
     Ai_UpdateFaintData(battler);
     TryBattleFormChange(battler, FORM_CHANGE_FAINT);
 
-    gBattleStruct->overwrittenAbilities[battler] = ABILITY_NONE;
+    gBattleStruct->overwrittenAbilities[battler] = shipOfTheseusActive
+                                                 ? shipOfTheseusPrimaryAbility
+                                                 : ABILITY_NONE;
 
     // If the fainted mon was involved in a Sky Drop
     if (gBattleStruct->skyDropTargets[battler] != 0xFF)

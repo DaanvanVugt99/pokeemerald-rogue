@@ -22,6 +22,7 @@
 // Used to exclude moves learned temporarily by Transform or Mimic
 #define MOVE_IS_PERMANENT(battler, moveSlot)                        \
    (!(gBattleMons[battler].status2 & STATUS2_TRANSFORMED)           \
+ && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS) \
  && !(gDisableStructs[battler].mimickedMoves & gBitTable[moveSlot]))
 
 // Battle Actions
@@ -68,6 +69,7 @@ struct ResourceFlags
 #define RESOURCE_FLAG_FALLEN_SKIES      0x400
 #define RESOURCE_FLAG_BREACH_POINT         0x800
 #define RESOURCE_FLAG_BREACH_POINT_PENDING 0x1000
+#define RESOURCE_FLAG_SHIP_OF_THESEUS      0x2000
 
 struct DisableStruct
 {
@@ -1078,6 +1080,7 @@ struct QueuedStatBoost
 #define SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE       (1 << 11)
 #define SWITCH_IN_TRANSFER_ROYAL_ADVANCE_GIMMICK    (1 << 12)
 #define SWITCH_IN_TRANSFER_ROYAL_GUARD_GIMMICK      (1 << 13)
+#define SWITCH_IN_TRANSFER_SHIP_OF_THESEUS           (1 << 14)
 #define SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE_MASK (SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE | SWITCH_IN_TRANSFER_ROYAL_ADVANCE_GIMMICK)
 #define SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE_MASK (SWITCH_IN_TRANSFER_ROYAL_GUARD_ACTIVE | SWITCH_IN_TRANSFER_ROYAL_GUARD_GIMMICK)
 

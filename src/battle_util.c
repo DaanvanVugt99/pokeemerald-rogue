@@ -20614,7 +20614,7 @@ bool32 IsMoldBreakerTypeAbility(u32 ability)
     return (ability == ABILITY_MOLD_BREAKER || ability == ABILITY_TERAVOLT || ability == ABILITY_TURBOBLAZE);
 }
 
-static u32 GetBattlerUniqueAbilityRaw(u32 battler)
+u32 GetBattlerIntrinsicUniqueAbility(u32 battler)
 {
 #if TESTING
     if (gTestRunnerEnabled)
@@ -20630,6 +20630,25 @@ static u32 GetBattlerUniqueAbilityRaw(u32 battler)
 #endif
 
     return GetUniqueAbilityBySpeciesAndOtId(gBattleMons[battler].species, gBattleMons[battler].otId);
+}
+
+static u32 GetBattlerUniqueAbilityRaw(u32 battler)
+{
+    u32 ability;
+
+    if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS)
+        return ABILITY_SHIP_OF_THESEUS;
+
+    ability = GetBattlerIntrinsicUniqueAbility(battler);
+
+    // The original party member relinquishes the anomaly after its first
+    // handoff. A replacement carrying the resource flag takes precedence.
+    if (ability == ABILITY_SHIP_OF_THESEUS
+     && (gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)]
+         & gBitTable[gBattlerPartyIndexes[battler]]))
+        return ABILITY_NONE;
+
+    return ability;
 }
 
 static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability)
@@ -20706,6 +20725,12 @@ static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability)
 
 u32 GetBattlerPrimaryAbilityIgnoreMoldBreaker(u32 battler)
 {
+    if (GetBattlerIntrinsicUniqueAbility(battler) == ABILITY_SHIP_OF_THESEUS
+     && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS)
+     && (gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)]
+         & gBitTable[gBattlerPartyIndexes[battler]]))
+        return ABILITY_NONE;
+
     if (IsBattlerAbilitySuppressedCommon(battler, gBattleMons[battler].ability))
         return ABILITY_NONE;
 
@@ -21501,13 +21526,14 @@ static u32 ItemRestorePp(u32 battler, u32 itemId, bool32 execute)
 {
     struct Pokemon *party = GetBattlerParty(battler);
     struct Pokemon *mon = &party[gBattlerPartyIndexes[battler]];
+    bool32 shipOfTheseusActive = gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS;
     u32 i, changedPP = 0;
 
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
-        u32 move = GetMonData(mon, MON_DATA_MOVE1 + i);
-        u32 currentPP = GetMonData(mon, MON_DATA_PP1 + i);
-        u32 ppBonuses = GetMonData(mon, MON_DATA_PP_BONUSES);
+        u32 move = shipOfTheseusActive ? gBattleMons[battler].moves[i] : GetMonData(mon, MON_DATA_MOVE1 + i);
+        u32 currentPP = shipOfTheseusActive ? gBattleMons[battler].pp[i] : GetMonData(mon, MON_DATA_PP1 + i);
+        u32 ppBonuses = shipOfTheseusActive ? gBattleMons[battler].ppBonuses : GetMonData(mon, MON_DATA_PP_BONUSES);
         u32 maxPP = CalculatePPWithBonus(move, ppBonuses, i);
         if (move && (currentPP == 0 || (gBattleScripting.overrideBerryRequirements && currentPP != maxPP)))
         {
@@ -21534,10 +21560,17 @@ static u32 ItemRestorePp(u32 battler, u32 itemId, bool32 execute)
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_BerryPPHealRet;
             }
-            BtlController_EmitSetMonData(battler, BUFFER_A, i + REQUEST_PPMOVE1_BATTLE, 0, 1, &changedPP);
-            MarkBattlerForControllerExec(battler);
-            if (MOVE_IS_PERMANENT(battler, i))
+            if (shipOfTheseusActive)
+            {
                 gBattleMons[battler].pp[i] = changedPP;
+            }
+            else
+            {
+                BtlController_EmitSetMonData(battler, BUFFER_A, i + REQUEST_PPMOVE1_BATTLE, 0, 1, &changedPP);
+                MarkBattlerForControllerExec(battler);
+                if (MOVE_IS_PERMANENT(battler, i))
+                    gBattleMons[battler].pp[i] = changedPP;
+            }
             return ITEM_PP_CHANGE;
         }
     }
@@ -28052,11 +28085,20 @@ void CopyMonAbilityAndTypesToBattleMon(u32 battler, struct Pokemon *mon)
 
 void RecalcBattlerStats(u32 battler, struct Pokemon *mon)
 {
+    bool32 shipOfTheseusActive = gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS;
+    u32 shipOfTheseusPrimaryAbility = gBattleMons[battler].ability;
+
     CalculateMonStats(mon);
     if (IsDynamaxed(battler) && gChosenActionByBattler[battler] != B_ACTION_SWITCH)
         ApplyDynamaxHPMultiplier(battler, mon);
     CopyMonLevelAndBaseStatsToBattleMon(battler, mon);
     CopyMonAbilityAndTypesToBattleMon(battler, mon);
+
+    if (shipOfTheseusActive)
+    {
+        gBattleMons[battler].ability = shipOfTheseusPrimaryAbility;
+        gBattleStruct->overwrittenAbilities[battler] = shipOfTheseusPrimaryAbility;
+    }
 }
 
 void RemoveConfusionStatus(u32 battler)
