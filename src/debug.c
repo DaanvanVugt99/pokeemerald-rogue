@@ -74,6 +74,7 @@
 #include "rogue_popup.h"
 #include "rogue_query.h"
 #include "rogue_safari.h"
+#include "rogue_trainers.h"
 
 #ifndef ROGUE_EXPANSION
 #define MON_DATA_SPECIES_OR_EGG MON_DATA_SPECIES2
@@ -120,6 +121,8 @@ enum RogueUtilMenu
     DEBUG_ROGUE_UTIL_MENU_SET_WEATHER,
     DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT,
     DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM,
+    DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE,
+    DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE,
     DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER,
     DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI,
 };
@@ -379,6 +382,8 @@ static void DebugAction_RogueUtil_GiveCommonItems(u8 taskId);
 static void DebugAction_RogueUtil_SetWeather(u8 taskId);
 static void DebugAction_RogueUtil_ChangeOutfit(u8 taskId);
 static void DebugAction_RogueUtil_RandomTradeTeam(u8 taskId);
+static void DebugAction_RogueUtil_GiveLegendaryUnique(u8 taskId);
+static void DebugAction_RogueUtil_GiveAnomalousUnique(u8 taskId);
 static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId);
 static void DebugAction_RogueUtil_FillSafari(u8 taskId);
 
@@ -529,6 +534,8 @@ static const u8 sDebugText_RogueUtil_GiveCommonItems[] =     _("Give Common Item
 static const u8 sDebugText_RogueUtil_SetWeather[] =          _("Set Weather");
 static const u8 sDebugText_RogueUtil_ChangeOutfit[] =        _("Change Outfit");
 static const u8 sDebugText_RogueUtil_TradeTeam[] =           _("Trade Team");
+static const u8 sDebugText_RogueUtil_GiveLegendaryUnique[] = _("Give Legendary Unique");
+static const u8 sDebugText_RogueUtil_GiveAnomalousUnique[] = _("Give Anomalous Unique");
 static const u8 sDebugText_RogueUtil_RerollUniqueTracker[] = _("Reroll Unique Tracker");
 static const u8 sDebugText_RogueUtil_FillSafari[] =          _("Fill Safari Buffer");
 // Party/Boxes Menu
@@ -712,6 +719,8 @@ static const struct ListMenuItem sDebugMenu_Items_RogueUtilities[] =
     [DEBUG_ROGUE_UTIL_MENU_SET_WEATHER]         = {sDebugText_RogueUtil_SetWeather,      DEBUG_ROGUE_UTIL_MENU_SET_WEATHER},
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]       = {sDebugText_RogueUtil_ChangeOutfit,    DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT},
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]         = {sDebugText_RogueUtil_TradeTeam,       DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM},
+    [DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE] = {sDebugText_RogueUtil_GiveLegendaryUnique, DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE},
+    [DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE] = {sDebugText_RogueUtil_GiveAnomalousUnique, DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE},
     [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = {sDebugText_RogueUtil_RerollUniqueTracker, DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER},
     [DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI]         = {sDebugText_RogueUtil_FillSafari,      DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI},
 };
@@ -876,6 +885,8 @@ static void (*const sDebugMenu_Actions_RogueUtilities[])(u8) =
     [DEBUG_ROGUE_UTIL_MENU_SET_WEATHER]       = DebugAction_RogueUtil_SetWeather,
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]     = DebugAction_RogueUtil_ChangeOutfit,
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]       = DebugAction_RogueUtil_RandomTradeTeam,
+    [DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE] = DebugAction_RogueUtil_GiveLegendaryUnique,
+    [DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE] = DebugAction_RogueUtil_GiveAnomalousUnique,
     [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = DebugAction_RogueUtil_RerollUniqueTracker,
     [DEBUG_ROGUE_UTIL_MENU_FILL_SAFARI]       = DebugAction_RogueUtil_FillSafari,
 };
@@ -2346,6 +2357,46 @@ static void DebugAction_RogueUtil_RandomTradeTeam(u8 taskId)
     Debug_DestroyMenu_Full(taskId);
     LockPlayerFieldControls();
     ScriptContext_SetupScript(Rogue_Debug_RandomTradeTeam);
+}
+
+static void DebugAction_RogueUtil_GiveUnique(u8 taskId, bool8 anomalous)
+{
+    struct Pokemon mon;
+    u16 species = RogueGift_DebugSelectRandomDynamicSpecies();
+    u8 level = Rogue_IsRunActive() ? Rogue_CalculatePlayerLvlCap() : 50;
+    u32 customMonId = anomalous
+        ? RogueGift_DebugCreateAnomalousMonId(species)
+        : RogueGift_CreateDynamicMonIdRaw(UNIQUE_RARITY_LEGENDARY, species);
+    u8 result;
+
+    RogueGift_CreateMon(customMonId, &mon, species, level, USE_RANDOM_IVS);
+    result = GiveMonToPlayer(&mon);
+
+    if(result != MON_CANT_GIVE)
+    {
+        GetSetPokedexSpeciesFlag(species, FLAG_SET_SEEN);
+        GetSetPokedexSpeciesFlag(species, FLAG_SET_CAUGHT);
+        FlagSet(FLAG_SYS_POKEMON_GET);
+        Rogue_PushPopup_AddPokemon(species, TRUE, IsMonShiny(&mon));
+        PlaySE(MUS_LEVEL_UP);
+    }
+    else
+    {
+        PlaySE(SE_FAILURE);
+    }
+
+    Debug_DestroyMenu_Full(taskId);
+    ScriptContext_Enable();
+}
+
+static void DebugAction_RogueUtil_GiveLegendaryUnique(u8 taskId)
+{
+    DebugAction_RogueUtil_GiveUnique(taskId, FALSE);
+}
+
+static void DebugAction_RogueUtil_GiveAnomalousUnique(u8 taskId)
+{
+    DebugAction_RogueUtil_GiveUnique(taskId, TRUE);
 }
 
 static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId)

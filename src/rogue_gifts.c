@@ -2480,12 +2480,15 @@ static u32 SelectRandomType(u16 species)
     return type;
 }
 
-static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGate)
+static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGate, u16 forcedUniqueAbility)
 {
     u16 i;
     u32 temp;
     struct DynamicEvolutionFamily family = GetDynamicEvolutionFamily(species);
     struct CompressedDynamicData compressedDataUntyped = {0};
+
+    AGB_ASSERT(forcedUniqueAbility == ABILITY_NONE || RogueGift_IsDynamicUniqueAbilityEligible(forcedUniqueAbility));
+    AGB_ASSERT(forcedUniqueAbility == ABILITY_NONE || rarity == UNIQUE_RARITY_LEGENDARY);
 
     switch (Random() % 2)
     {
@@ -2564,7 +2567,9 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
                 };
                 struct SelectedDynamicSynergy synergy;
 
-                compressedData->uniqueAbility = SelectNextUniqueAbility(&family, creationType);
+                compressedData->uniqueAbility = forcedUniqueAbility != ABILITY_NONE
+                    ? forcedUniqueAbility
+                    : SelectNextUniqueAbility(&family, creationType);
                 if(compressedData->uniqueAbility == ABILITY_CREATION)
                     synergy = SelectCreationSynergy(species, creationType, moves, ARRAY_COUNT(moves));
                 else
@@ -2647,7 +2652,9 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
                 compressedData->moveIndex = SelectNextMoveIndex(species);
                 moves[0] = typeMove;
                 moves[1] = sDynamicCustomMonMoves[compressedData->moveIndex - 1];
-                compressedData->uniqueAbility = SelectNextUniqueAbility(&family, creationType);
+                compressedData->uniqueAbility = forcedUniqueAbility != ABILITY_NONE
+                    ? forcedUniqueAbility
+                    : SelectNextUniqueAbility(&family, creationType);
                 if(compressedData->uniqueAbility == ABILITY_CREATION)
                     synergy = SelectCreationSynergy(species, creationType, moves, ARRAY_COUNT(moves));
                 else
@@ -2698,12 +2705,12 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
 
 u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
 {
-    return CreateDynamicMonId(rarity, species, FALSE);
+    return CreateDynamicMonId(rarity, species, FALSE, ABILITY_NONE);
 }
 
 u32 RogueGift_CreateDynamicMonIdRaw(u8 rarity, u16 species)
 {
-    return CreateDynamicMonId(rarity, species, TRUE);
+    return CreateDynamicMonId(rarity, species, TRUE, ABILITY_NONE);
 }
 
 static bool8 IsDynamicUniqueMonValid(struct UniqueMon* mon)
@@ -2769,6 +2776,28 @@ bool8 RogueGift_DebugAllDynamicSpeciesHaveExoticMoves(u8 requiredCount)
     RoguePokedex_SetDexVariant(dexVariantToRestore);
 
     return result;
+}
+
+u16 RogueGift_DebugSelectRandomDynamicSpecies(void)
+{
+    u16 species;
+    u8 dexVariantToRestore = RoguePokedex_GetDexVariant();
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_DEFAULT);
+    RogueMonQuery_Begin();
+    ApplyDynamicUniqueSpeciesQuery();
+    species = RogueMiscQuery_SelectRandomElement(Random());
+    RogueMonQuery_End();
+    RoguePokedex_SetDexVariant(dexVariantToRestore);
+
+    return species;
+}
+
+u32 RogueGift_DebugCreateAnomalousMonId(u16 species)
+{
+    u16 ability = sAnomalousUniqueAbilities[Random() % ARRAY_COUNT(sAnomalousUniqueAbilities)];
+
+    return CreateDynamicMonId(UNIQUE_RARITY_LEGENDARY, species, TRUE, ability);
 }
 #endif
 

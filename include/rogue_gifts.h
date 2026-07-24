@@ -46,6 +46,8 @@ bool8 RogueGift_DebugIsUniqueAbilityNativeToEvolutionFamily(u16 species, u16 abi
 u16 RogueGift_DebugGetEvolutionFamilyExoticMoveCount(u16 species);
 bool8 RogueGift_DebugIsSpeciesInDynamicUniquePool(u16 species);
 bool8 RogueGift_DebugAllDynamicSpeciesHaveExoticMoves(u8 requiredCount);
+u16 RogueGift_DebugSelectRandomDynamicSpecies(void);
+u32 RogueGift_DebugCreateAnomalousMonId(u16 species);
 #endif
 
 u8 RogueGift_GetCustomMonType(u32 id, u8 i);

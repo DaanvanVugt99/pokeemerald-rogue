@@ -265,6 +265,16 @@ TEST("Dynamic unique ability pool serializes generated-only anomalous abilities"
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(engineId), ABILITY_WORLD_ENGINE);
 }
 
+TEST("Debug anomalous generator creates a Legendary with an anomalous ability")
+{
+    u32 customMonId = RogueGift_DebugCreateAnomalousMonId(SPECIES_BULBASAUR);
+
+    EXPECT_EQ(RogueGift_GetCustomMonRarity(customMonId), UNIQUE_RARITY_LEGENDARY);
+    EXPECT(RogueGift_IsAnomalousUniqueAbility(RogueGift_GetCustomMonUniqueAbility(customMonId)));
+    EXPECT_EQ(RogueGift_GetCustomMonMoveCount(customMonId), 2);
+    EXPECT_NE(RogueGift_GetCustomMonAbility(customMonId, 0), ABILITY_NONE);
+}
+
 TEST("Dynamic unique ability eligibility audit contains 580 abilities")
 {
     static const u16 sExpectedExclusions[] =
