@@ -2242,7 +2242,7 @@ static void Cmd_attackstring(void)
         SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_GROUND_FAULT);
         RecordAbilityBattle(gBattlerAttacker, ABILITY_GROUND_FAULT);
         BattleScriptPushCursor();
-        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        gBattlescriptCurrInstr = BattleScript_GroundFaultActivates;
         return;
     }
 
@@ -2253,7 +2253,7 @@ static void Cmd_attackstring(void)
         SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_PRISM_REFRACTION);
         RecordAbilityBattle(gBattlerAttacker, ABILITY_PRISM_REFRACTION);
         BattleScriptPushCursor();
-        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        gBattlescriptCurrInstr = BattleScript_PrismRefractionActivates;
         return;
     }
 
@@ -9045,10 +9045,10 @@ static bool32 TryApplySwitchInTransferEffects(u32 battler)
         gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_BREACH_POINT_PENDING;
         gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_BREACH_POINT;
         gBattlerAttacker = battler;
-        gBattlerTarget = battler;
+        gBattlerTarget = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
         SetBattlerTriggeredAbility(battler, ABILITY_BREACH_POINT);
         BattleScriptPushCursor();
-        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+        gBattlescriptCurrInstr = BattleScript_BreachPointActivates;
         return TRUE;
     }
 

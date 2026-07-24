@@ -18,6 +18,7 @@ SINGLE_BATTLE_TEST("Prism Refraction gives Photon Geyser the type of the immedia
         TURN { MOVE(player, MOVE_PHOTON_GEYSER); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_PRISM_REFRACTION);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CONVERSION, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_PHOTON_GEYSER, player);
         HP_BAR(opponent);
     } THEN {

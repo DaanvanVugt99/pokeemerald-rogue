@@ -9880,6 +9880,12 @@ BattleScript_DeathrattlePrimed::
 	call BattleScript_AbilityPopUp
 	end3
 
+BattleScript_BreachPointActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_LOCK_ON
+	waitanimation
+	return
+
 BattleScript_BattleFuryActivates::
 	call BattleScript_AbilityPopUp
 	call BattleScript_BattleFuryAttackBoost
@@ -10106,6 +10112,8 @@ BattleScript_DynamoEnd:
 
 BattleScript_NumbingSpinesActivates::
 	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ABILITY_BATTLER, MOVE_HEAL_BLOCK
+	waitanimation
 	printstring STRINGID_PKMNPREVENTEDFROMHEALING
 	waitmessage B_WAIT_TIME_LONG
 	return
@@ -10113,6 +10121,8 @@ BattleScript_NumbingSpinesActivates::
 BattleScript_BubbleNetActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_SPIDER_WEB
+	waitanimation
 	printstring STRINGID_THUNDERCAGETRAPPED
 	waitmessage B_WAIT_TIME_LONG
 	return
@@ -10231,6 +10241,8 @@ BattleScript_RestorePendingUniqueAbilityContext::
 
 BattleScript_IntentFocused::
 	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_LOCK_ON
+	waitanimation
 	printstring STRINGID_INTENTFOCUSED
 	waitmessage B_WAIT_TIME_LONG
 	return
@@ -10243,8 +10255,22 @@ BattleScript_FamilyFeudReadied::
 
 BattleScript_GalaricaRoundsLoaded::
 	call BattleScript_AbilityPopUp
+	playanimation BS_ABILITY_BATTLER, B_ANIM_GALARICA_ROUNDS_LOAD, sB_ANIM_ARG1
+	waitanimation
 	printstring STRINGID_GALARICAROUNDSLOADED
 	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_GroundFaultActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_SOAK
+	waitanimation
+	return
+
+BattleScript_PrismRefractionActivates::
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ATTACKER, MOVE_CONVERSION
+	waitanimation
 	return
 
 BattleScript_CarvingRushReadied::
@@ -10281,6 +10307,8 @@ BattleScript_JungleLashEnd::
 
 BattleScript_BarnacleWallActivates::
 	call BattleScript_AbilityPopUp
+	playmoveanimation BS_ABILITY_BATTLER, MOVE_SALT_CURE
+	waitanimation
 	printstring STRINGID_TARGETISBEINGSALTCURED
 	waitmessage B_WAIT_TIME_LONG
 	return

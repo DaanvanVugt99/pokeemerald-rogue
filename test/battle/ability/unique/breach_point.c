@@ -22,6 +22,7 @@ SINGLE_BATTLE_TEST("Breach Point makes the incoming ally's first damaging move u
         TURN { MOVE(player, MOVE_HYDRO_PUMP, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_BREACH_POINT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LOCK_ON, player, target: opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYDRO_PUMP, player);
         HP_BAR(opponent);
         MESSAGE("Wobbuffet's attack missed!");
@@ -40,6 +41,7 @@ SINGLE_BATTLE_TEST("Breach Point transfers after U-turn")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
         ABILITY_POPUP(player, ABILITY_BREACH_POINT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LOCK_ON, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYDRO_PUMP, player);
         HP_BAR(opponent);
     }
@@ -56,6 +58,8 @@ SINGLE_BATTLE_TEST("Breach Point is not consumed by status moves")
         TURN { MOVE(player, MOVE_HYPNOSIS, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_HYDRO_PUMP, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
+        ABILITY_POPUP(player, ABILITY_BREACH_POINT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LOCK_ON, player);
         MESSAGE("Wobbuffet's attack missed!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYDRO_PUMP, player);
         HP_BAR(opponent);
@@ -73,6 +77,8 @@ SINGLE_BATTLE_TEST("Breach Point is consumed by an inherently accurate damaging 
         TURN { MOVE(player, MOVE_SWIFT); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_HYDRO_PUMP, WITH_RNG(RNG_ACCURACY, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
+        ABILITY_POPUP(player, ABILITY_BREACH_POINT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LOCK_ON, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SWIFT, player);
         HP_BAR(opponent);
         MESSAGE("Wobbuffet's attack missed!");

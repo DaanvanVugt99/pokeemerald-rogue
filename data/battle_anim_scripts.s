@@ -1054,6 +1054,7 @@ gBattleAnims_General::
 	.4byte General_LeechSeedSet             @ B_ANIM_LEECH_SEED_SET
 	.4byte General_GrafittiTag              @ B_ANIM_GRAFITTI_TAG
 	.4byte General_SacredAsh                @ B_ANIM_SACRED_ASH
+	.4byte General_GalaricaRoundsLoad       @ B_ANIM_GALARICA_ROUNDS_LOAD
 
 	.align 2
 gBattleAnims_Special::
@@ -17919,7 +17920,25 @@ Move_SPIN_OUT::
 Move_POPULATION_BOMB::
 Move_GLAIVE_RUSH::
 Move_REVIVAL_BLESSING::
+	goto Move_COUNT
 Move_SALT_CURE::
+	loadspritegfx ANIM_TAG_ICE_CRYSTALS
+	createvisualtask AnimTask_BlendParticle, 5, ANIM_TAG_ICE_CRYSTALS, 0, 13, 13, RGB_WHITE
+	waitforvisualfinish
+	createsprite gIceCrystalHitLargeSpriteTemplate, ANIM_TARGET, 2, -10, -10, 0
+	playsewithpan SE_M_ROCK_THROW, SOUND_PAN_TARGET
+	delay 4
+	createsprite gIceCrystalHitSmallSpriteTemplate, ANIM_TARGET, 2, 10, 20, 0
+	delay 4
+	createsprite gIceCrystalHitLargeSpriteTemplate, ANIM_TARGET, 2, -5, 10, 0
+	playsewithpan SE_M_ROCK_THROW, SOUND_PAN_TARGET
+	delay 4
+	createsprite gIceCrystalHitSmallSpriteTemplate, ANIM_TARGET, 2, 17, -12, 0
+	delay 4
+	createsprite gIceCrystalHitSmallSpriteTemplate, ANIM_TARGET, 2, -15, 15, 0
+	playsewithpan SE_M_ROCK_THROW, SOUND_PAN_TARGET
+	waitforvisualfinish
+	end
 Move_TRIPLE_DIVE::
 Move_MORTAL_SPIN::
 Move_DOODLE::
@@ -29205,6 +29224,17 @@ General_AffectionHangedOn_3Hearts:
 
 General_SaltCureDamage::
 	goto Status_Freeze
+
+General_GalaricaRoundsLoad::
+	loadspritegfx ANIM_TAG_TOXIC_BUBBLE
+	playsewithpan SE_M_CHARGE, SOUND_PAN_TARGET
+	createsprite gToxicBubbleSpriteTemplate, ANIM_TARGET, 2, -18, 12, 1, 1
+	delay 8
+	createsprite gToxicBubbleSpriteTemplate, ANIM_TARGET, 2, 18, 8, 1, 1
+	delay 8
+	createsprite gToxicBubbleSpriteTemplate, ANIM_TARGET, 2, 0, -8, 1, 1
+	waitforvisualfinish
+	end
 
 General_Rainbow::
 	call RainDrops

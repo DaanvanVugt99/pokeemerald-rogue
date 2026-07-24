@@ -19,6 +19,7 @@ SINGLE_BATTLE_TEST("Intent makes the next move hit after a resisted hit")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
         HP_BAR(opponent);
         ABILITY_POPUP(player, ABILITY_INTENT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LOCK_ON, player);
         MESSAGE("Urshifu focused\nits intent!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GUNK_SHOT, player);
         HP_BAR(opponent);

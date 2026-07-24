@@ -583,6 +583,7 @@
 #define B_ANIM_LEECH_SEED_SET           53
 #define B_ANIM_GRAFITTI_TAG             54
 #define B_ANIM_SACRED_ASH               55
+#define B_ANIM_GALARICA_ROUNDS_LOAD     56
 
 // special animations table (gBattleAnims_Special)
 #define B_ANIM_LVL_UP                   0

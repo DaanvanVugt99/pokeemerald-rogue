@@ -229,8 +229,10 @@ static void SpriteCb_AbilityPopUp(struct Sprite *);
 static void Task_FreeAbilityPopUpGfx(u8);
 static bool8 IsAbilityPopUpSpriteValid(u8 spriteId);
 static bool8 HasFreeTaskSlot(void);
+static bool8 HasOtherAbilityPopUpCleanupTask(u8 taskId, u8 battlerId, bool8 matchBattler);
+static bool8 DoesAbilityPopUpTaskOwnCurrentPopUp(u8 taskId);
 static void ClearAbilityPopUpSpriteIds(u8 battlerId);
-static void FreeFailedAbilityPopUpLoad(u8 battlerId, u8 spriteId1, u8 spriteId2, bool8 loadedPalette, bool8 loadedTiles);
+static void FreeFailedAbilityPopUpLoad(u8 battlerId, u8 spriteId1, u8 spriteId2, bool8 loadedPalette, bool8 loadedTiles, bool8 hadActivePopUp);
 
 static void SpriteCB_LastUsedBall(struct Sprite *);
 static void SpriteCB_LastUsedBallWin(struct Sprite *);
@@ -3449,6 +3451,7 @@ static void SafariTextIntoHealthboxObject(void *dest, u8 *windowTileData, u32 wi
 #define tIsMain         data[5]
 
 // for task
+#define tPopupBattlerId data[2]
 #define tSpriteId1      data[6]
 #define tSpriteId2      data[7]
 
@@ -3756,6 +3759,31 @@ static bool8 HasFreeTaskSlot(void)
     return FALSE;
 }
 
+static bool8 HasOtherAbilityPopUpCleanupTask(u8 taskId, u8 battlerId, bool8 matchBattler)
+{
+    u8 i;
+
+    for (i = 0; i < NUM_TASKS; i++)
+    {
+        if (i != taskId
+         && gTasks[i].isActive
+         && gTasks[i].func == Task_FreeAbilityPopUpGfx
+         && (!matchBattler || gTasks[i].tPopupBattlerId == battlerId))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 DoesAbilityPopUpTaskOwnCurrentPopUp(u8 taskId)
+{
+    u8 battlerId = gTasks[taskId].tPopupBattlerId;
+
+    return (gBattleStruct->activeAbilityPopUps & gBitTable[battlerId])
+        && gBattleStruct->abilityPopUpSpriteIds[battlerId][0] == gTasks[taskId].tSpriteId1
+        && gBattleStruct->abilityPopUpSpriteIds[battlerId][1] == gTasks[taskId].tSpriteId2;
+}
+
 static void ClearAbilityPopUpSpriteIds(u8 battlerId)
 {
     gBattleStruct->activeAbilityPopUps &= ~(gBitTable[battlerId]);
@@ -3763,7 +3791,7 @@ static void ClearAbilityPopUpSpriteIds(u8 battlerId)
     gBattleStruct->abilityPopUpSpriteIds[battlerId][1] = MAX_SPRITES;
 }
 
-static void FreeFailedAbilityPopUpLoad(u8 battlerId, u8 spriteId1, u8 spriteId2, bool8 loadedPalette, bool8 loadedTiles)
+static void FreeFailedAbilityPopUpLoad(u8 battlerId, u8 spriteId1, u8 spriteId2, bool8 loadedPalette, bool8 loadedTiles, bool8 hadActivePopUp)
 {
     if (IsAbilityPopUpSpriteValid(spriteId1))
         DestroySprite(&gSprites[spriteId1]);
@@ -3774,7 +3802,8 @@ static void FreeFailedAbilityPopUpLoad(u8 battlerId, u8 spriteId1, u8 spriteId2,
         FreeSpriteTilesByTag(ABILITY_POP_UP_TILE_TAG(battlerId));
     if (loadedPalette)
         FreeSpritePaletteByTag(ABILITY_POP_UP_TAG);
-    ClearAbilityPopUpSpriteIds(battlerId);
+    if (!hadActivePopUp)
+        ClearAbilityPopUpSpriteIds(battlerId);
 }
 
 void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
@@ -3782,6 +3811,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     const s16 (*coords)[2];
     u8 spriteId1, spriteId2, battlerPosition, taskId;
     u8 sourcePartyIdx = PARTY_SIZE;
+    bool8 hadActivePopUp = (gBattleStruct->activeAbilityPopUps & gBitTable[battlerId]) != 0;
     bool8 loadedPalette = FALSE;
     bool8 loadedTiles = FALSE;
     struct SpriteTemplate spriteTemplate = sSpriteTemplate_AbilityPopUp;
@@ -3808,7 +3838,8 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     {
         if (LoadSpritePalette(&sSpritePalette_AbilityPopUp) == 0xFF)
         {
-            ClearAbilityPopUpSpriteIds(battlerId);
+            if (!hadActivePopUp)
+                ClearAbilityPopUpSpriteIds(battlerId);
             return;
         }
         loadedPalette = TRUE;
@@ -3820,7 +3851,8 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
         {
             if (loadedPalette)
                 FreeSpritePaletteByTag(ABILITY_POP_UP_TAG);
-            ClearAbilityPopUpSpriteIds(battlerId);
+            if (!hadActivePopUp)
+                ClearAbilityPopUpSpriteIds(battlerId);
             return;
         }
         loadedTiles = TRUE;
@@ -3854,7 +3886,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
 
     if (!IsAbilityPopUpSpriteValid(spriteId1) || !IsAbilityPopUpSpriteValid(spriteId2) || !HasFreeTaskSlot())
     {
-        FreeFailedAbilityPopUpLoad(battlerId, spriteId1, spriteId2, loadedPalette, loadedTiles);
+        FreeFailedAbilityPopUpLoad(battlerId, spriteId1, spriteId2, loadedPalette, loadedTiles, hadActivePopUp);
         return;
     }
 
@@ -3871,7 +3903,7 @@ void CreateAbilityPopUp(u8 battlerId, u32 ability, bool32 isDoubleBattle)
     taskId = CreateTask(Task_FreeAbilityPopUpGfx, 5);
     gTasks[taskId].tSpriteId1 = spriteId1;
     gTasks[taskId].tSpriteId2 = spriteId2;
-    gTasks[taskId].data[2] = battlerId;
+    gTasks[taskId].tPopupBattlerId = battlerId;
 
     gSprites[spriteId1].tIsMain = TRUE;
     gSprites[spriteId1].tBattlerId = battlerId;
@@ -3946,7 +3978,6 @@ static void SpriteCb_AbilityPopUp(struct Sprite *sprite)
                 ||(sprite->tRightToLeft && (sprite->x -= 4) <= sprite->tOriginalX - ABILITY_POP_UP_POS_X_SLIDE)
                )
             {
-                gBattleStruct->activeAbilityPopUps &= ~(gBitTable[sprite->tBattlerId]);
                 DestroySprite(sprite);
             }
         }
@@ -3976,13 +4007,17 @@ void DestroyAbilityPopUp(u8 battlerId)
 
 static void Task_FreeAbilityPopUpGfx(u8 taskId)
 {
+    u8 battlerId = gTasks[taskId].tPopupBattlerId;
     bool8 sprite1Gone = !IsAbilityPopUpSpriteValid(gTasks[taskId].tSpriteId1);
     bool8 sprite2Gone = !IsAbilityPopUpSpriteValid(gTasks[taskId].tSpriteId2);
 
     if (sprite1Gone && sprite2Gone)
     {
-        FreeSpriteTilesByTag(ABILITY_POP_UP_TILE_TAG(gTasks[taskId].data[2]));
-        if (!gBattleStruct->activeAbilityPopUps)
+        if (DoesAbilityPopUpTaskOwnCurrentPopUp(taskId))
+            ClearAbilityPopUpSpriteIds(battlerId);
+        if (!HasOtherAbilityPopUpCleanupTask(taskId, battlerId, TRUE))
+            FreeSpriteTilesByTag(ABILITY_POP_UP_TILE_TAG(battlerId));
+        if (!HasOtherAbilityPopUpCleanupTask(taskId, battlerId, FALSE))
             FreeSpritePaletteByTag(ABILITY_POP_UP_TAG);
         DestroyTask(taskId);
     }

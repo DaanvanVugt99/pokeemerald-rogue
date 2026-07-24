@@ -17,6 +17,7 @@ SINGLE_BATTLE_TEST("Bubble Net traps contact attackers once per battle")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
         ABILITY_POPUP(player, ABILITY_BUBBLE_NET);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPIDER_WEB, player);
     } THEN {
         EXPECT(opponent->status2 & STATUS2_ESCAPE_PREVENTION);
         EXPECT_EQ(gDisableStructs[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)].battlerPreventingEscape,
@@ -60,6 +61,7 @@ DOUBLE_BATTLE_TEST("Bubble Net only traps the first contact attacker per battle"
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponentLeft);
         ABILITY_POPUP(playerLeft, ABILITY_BUBBLE_NET);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPIDER_WEB, playerLeft);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponentRight);
         NONE_OF {
             ABILITY_POPUP(playerLeft, ABILITY_BUBBLE_NET);

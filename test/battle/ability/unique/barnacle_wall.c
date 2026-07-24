@@ -20,6 +20,16 @@ SINGLE_BATTLE_TEST("Barnacle Wall salt cures attackers after contact but not non
         OPPONENT(SPECIES_WOBBUFFET) { Moves(move); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, move); }
+    } SCENE {
+        if (shouldSaltCure) {
+            ABILITY_POPUP(player, ABILITY_BARNACLE_WALL);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SALT_CURE, opponent);
+        } else {
+            NONE_OF {
+                ABILITY_POPUP(player, ABILITY_BARNACLE_WALL);
+                ANIMATION(ANIM_TYPE_MOVE, MOVE_SALT_CURE, opponent);
+            }
+        }
     } THEN {
         EXPECT_EQ(!!(gStatuses4[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)] & STATUS4_SALT_CURE), shouldSaltCure);
     }

@@ -15,6 +15,7 @@ SINGLE_BATTLE_TEST("Ground Fault turns Electric moves into Water against Ground 
         TURN { MOVE(player, MOVE_THUNDERBOLT); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_GROUND_FAULT);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SOAK, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDERBOLT, player);
         HP_BAR(opponent);
     } THEN {

@@ -21,8 +21,9 @@ Format follows Keep a Changelog loosely:
   non-Poison Pokémon.
 - Preserved unique Pokémon's native ability choices when they are caught,
   reconstructed in the Safari, or purchased from Safari offers.
-- Prevented Neutralizing Gas switch-in popups from inheriting another
-  ability's name.
+- Prevented Neutralizing Gas and Truant popups from inheriting another
+  ability's name, and kept consecutive same-slot popups from freeing each
+  other's graphics.
 - Kept opposing Tera types hidden until activation and reduced player-side
   inactive indicators' contrast so grayscale types such as Dark are visibly
   disabled.
@@ -73,6 +74,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Added distinct battle animations to Bubble Net, Numbing Spines, Barnacle
+  Wall, Breach Point, Galarica Rounds, Intent, Ground Fault, and
+  Prism Refraction so their otherwise hidden effects are visually readable.
 - Differentiated the hidden-entry abilities: Kecleon's Stealth now activates on
   every switch-in, Lumineon's primed Dive switches it out after attacking, and
   Dudunsparce's Dig raises Speed after hitting.

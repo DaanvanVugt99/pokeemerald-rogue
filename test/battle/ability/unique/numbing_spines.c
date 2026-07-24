@@ -18,6 +18,7 @@ SINGLE_BATTLE_TEST("Numbing Spines applies Heal Block to contact attackers")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
         ABILITY_POPUP(player, ABILITY_NUMBING_SPINES);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_HEAL_BLOCK, opponent);
         MESSAGE("Foe Wobbuffet was prevented\nfrom healing!");
     } THEN {
         EXPECT(gStatuses3[B_POSITION_OPPONENT_LEFT] & STATUS3_HEAL_BLOCK);

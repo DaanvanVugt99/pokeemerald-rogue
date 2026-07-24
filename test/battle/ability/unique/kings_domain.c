@@ -25,6 +25,7 @@ SINGLE_BATTLE_TEST("King's Domain does not prevent loafing if the party does not
         TURN { MOVE(player, MOVE_SONIC_BOOM); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_SONIC_BOOM); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
+        ABILITY_POPUP(player, ABILITY_TRUANT);
         MESSAGE("Slaking is loafing around!");
     } THEN {
         EXPECT_EQ(opponent->hp, 80);
