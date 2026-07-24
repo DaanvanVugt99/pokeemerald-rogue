@@ -27198,11 +27198,17 @@ u32 GetIllusionMonSpecies(u32 battler)
 
 bool32 GetIllusionMonTypes(u32 battler, u8 *types)
 {
-    if (GetIllusionMonPtr(battler) == NULL)
+    struct Pokemon *illusionMon = GetIllusionMonPtr(battler);
+    u32 species;
+    u32 otId;
+
+    if (illusionMon == NULL)
         return FALSE;
 
-    types[0] = gBattleStruct->illusion[battler].types[0];
-    types[1] = gBattleStruct->illusion[battler].types[1];
+    species = GetMonData(illusionMon, MON_DATA_SPECIES);
+    otId = GetMonData(illusionMon, MON_DATA_OT_ID);
+    types[0] = GetTypeBySpecies(species, 0, otId);
+    types[1] = GetTypeBySpecies(species, 1, otId);
     types[2] = TYPE_MYSTERY;
     return TRUE;
 }
@@ -27240,14 +27246,9 @@ bool32 SetIllusionMon(struct Pokemon *mon, u32 battler)
             && &party[id] != mon
             && &party[id] != partnerMon)
         {
-            u32 species = GetMonData(&party[id], MON_DATA_SPECIES);
-            u32 otId = GetMonData(&party[id], MON_DATA_OT_ID);
-
             gBattleStruct->illusion[battler].on = 1;
             gBattleStruct->illusion[battler].broken = 0;
             gBattleStruct->illusion[battler].partyId = id;
-            gBattleStruct->illusion[battler].types[0] = GetTypeBySpecies(species, 0, otId);
-            gBattleStruct->illusion[battler].types[1] = GetTypeBySpecies(species, 1, otId);
             gBattleStruct->illusion[battler].mon = &party[id];
             return TRUE;
         }
