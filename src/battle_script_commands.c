@@ -15835,7 +15835,10 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
     if (statId == STAT_SPEED
      && statValue > 0
      && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_INCREASE)
+    {
         QueuePremonitionForSpeedRise(battler);
+        QueueCounterstepForSpeedRise(battler);
+    }
 
     if (statId == STAT_DEF
      && statValue < 0

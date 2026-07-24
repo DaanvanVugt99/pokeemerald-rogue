@@ -6656,6 +6656,35 @@ void QueuePremonitionForSpeedRise(u32 battler)
     QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_PREMONITION, battler, battler, battler);
 }
 
+void QueueCounterstepForSpeedRise(u32 battler)
+{
+    u32 i;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+
+    if (battler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || gBattleStruct->isAtkCancelerForCalledMove)
+        return;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 counterstepBattler = battlers[i];
+
+        if (IsBattlerAlive(counterstepBattler)
+         && GetBattlerSide(counterstepBattler) != GetBattlerSide(battler)
+         && HasBattlerAbility(counterstepBattler, ABILITY_COUNTERSTEP)
+         && CanUseExtraMove(counterstepBattler, battler))
+        {
+            QueuePendingUniqueAbilityEffect(
+                PENDING_UNIQUE_EFFECT_COUNTERSTEP,
+                counterstepBattler,
+                battler,
+                battler);
+        }
+    }
+}
+
 void QueueBitterRuseForTypeImmunity(void)
 {
     u32 moveUser = gBattlerAttacker;
@@ -6809,6 +6838,28 @@ static bool32 TryActivateBitterRuse(u32 battler, u32 source, u32 target)
     return TRUE;
 }
 
+static bool32 TryActivateCounterstep(u32 battler, u32 source, u32 target)
+{
+    if (!IsBattlerAlive(battler)
+     || source >= gBattlersCount
+     || target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || GetBattlerSide(battler) == GetBattlerSide(source)
+     || !HasBattlerAbility(battler, ABILITY_COUNTERSTEP)
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_COUNTERSTEP);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_LOW_SWEEP;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static bool32 TryActivateLivingShadow(u32 battler, u32 source, u32 target)
 {
     u32 move = gCurrentMove;
@@ -6938,6 +6989,15 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateBitterRuse(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_COUNTERSTEP)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateCounterstep(battler, source, target))
             return TRUE;
     }
 

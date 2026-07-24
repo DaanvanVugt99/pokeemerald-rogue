@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Gave Hisuian Lilligant Counterstep, retaliating with Low Sweep whenever an
+  opposing Pokémon's Speed rises.
 - Gave Stonjourner Menhir, preventing a single hit from dealing more than half
   its maximum HP while it remains above half health.
 - Gave the Unovan Zorua line Vanishing Act, switching it out after it lands a
