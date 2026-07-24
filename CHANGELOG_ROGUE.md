@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Restored the original Legendary Statue's full shading and foot detail in
+  its golden recolor instead of collapsing seven source shades into three.
 - Made holders of unique abilities that create Acid Rain, Sandstorm, or Hail
   immune to that weather's damage without granting Acid Rain healing to
   non-Poison Pokémon.
