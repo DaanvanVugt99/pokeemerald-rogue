@@ -121,6 +121,7 @@ enum RogueUtilMenu
     DEBUG_ROGUE_UTIL_MENU_SET_WEATHER,
     DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT,
     DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM,
+    DEBUG_ROGUE_UTIL_MENU_GIVE_RANDOM_UNIQUE,
     DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE,
     DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE,
     DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER,
@@ -382,6 +383,7 @@ static void DebugAction_RogueUtil_GiveCommonItems(u8 taskId);
 static void DebugAction_RogueUtil_SetWeather(u8 taskId);
 static void DebugAction_RogueUtil_ChangeOutfit(u8 taskId);
 static void DebugAction_RogueUtil_RandomTradeTeam(u8 taskId);
+static void DebugAction_RogueUtil_GiveRandomUnique(u8 taskId);
 static void DebugAction_RogueUtil_GiveLegendaryUnique(u8 taskId);
 static void DebugAction_RogueUtil_GiveAnomalousUnique(u8 taskId);
 static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId);
@@ -534,6 +536,7 @@ static const u8 sDebugText_RogueUtil_GiveCommonItems[] =     _("Give Common Item
 static const u8 sDebugText_RogueUtil_SetWeather[] =          _("Set Weather");
 static const u8 sDebugText_RogueUtil_ChangeOutfit[] =        _("Change Outfit");
 static const u8 sDebugText_RogueUtil_TradeTeam[] =           _("Trade Team");
+static const u8 sDebugText_RogueUtil_GiveRandomUnique[] =    _("Give Random Unique");
 static const u8 sDebugText_RogueUtil_GiveLegendaryUnique[] = _("Give Legendary Unique");
 static const u8 sDebugText_RogueUtil_GiveAnomalousUnique[] = _("Give Anomalous Unique");
 static const u8 sDebugText_RogueUtil_RerollUniqueTracker[] = _("Reroll Unique Tracker");
@@ -719,6 +722,7 @@ static const struct ListMenuItem sDebugMenu_Items_RogueUtilities[] =
     [DEBUG_ROGUE_UTIL_MENU_SET_WEATHER]         = {sDebugText_RogueUtil_SetWeather,      DEBUG_ROGUE_UTIL_MENU_SET_WEATHER},
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]       = {sDebugText_RogueUtil_ChangeOutfit,    DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT},
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]         = {sDebugText_RogueUtil_TradeTeam,       DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM},
+    [DEBUG_ROGUE_UTIL_MENU_GIVE_RANDOM_UNIQUE] = {sDebugText_RogueUtil_GiveRandomUnique, DEBUG_ROGUE_UTIL_MENU_GIVE_RANDOM_UNIQUE},
     [DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE] = {sDebugText_RogueUtil_GiveLegendaryUnique, DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE},
     [DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE] = {sDebugText_RogueUtil_GiveAnomalousUnique, DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE},
     [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = {sDebugText_RogueUtil_RerollUniqueTracker, DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER},
@@ -885,6 +889,7 @@ static void (*const sDebugMenu_Actions_RogueUtilities[])(u8) =
     [DEBUG_ROGUE_UTIL_MENU_SET_WEATHER]       = DebugAction_RogueUtil_SetWeather,
     [DEBUG_ROGUE_UTIL_MENU_CHANGE_OUTFIT]     = DebugAction_RogueUtil_ChangeOutfit,
     [DEBUG_ROGUE_UTIL_MENU_RANDOM_TEAM]       = DebugAction_RogueUtil_RandomTradeTeam,
+    [DEBUG_ROGUE_UTIL_MENU_GIVE_RANDOM_UNIQUE] = DebugAction_RogueUtil_GiveRandomUnique,
     [DEBUG_ROGUE_UTIL_MENU_GIVE_LEGENDARY_UNIQUE] = DebugAction_RogueUtil_GiveLegendaryUnique,
     [DEBUG_ROGUE_UTIL_MENU_GIVE_ANOMALOUS_UNIQUE] = DebugAction_RogueUtil_GiveAnomalousUnique,
     [DEBUG_ROGUE_UTIL_MENU_REROLL_UNIQUE_TRACKER] = DebugAction_RogueUtil_RerollUniqueTracker,
@@ -2359,18 +2364,20 @@ static void DebugAction_RogueUtil_RandomTradeTeam(u8 taskId)
     ScriptContext_SetupScript(Rogue_Debug_RandomTradeTeam);
 }
 
-static void DebugAction_RogueUtil_GiveUnique(u8 taskId, bool8 anomalous)
+static void DebugAction_RogueUtil_GiveUnique(u8 taskId, u8 rarity, bool8 anomalous)
 {
     struct Pokemon mon;
     u16 species = RogueGift_DebugSelectRandomDynamicSpecies();
     u8 level = Rogue_IsRunActive() ? Rogue_CalculatePlayerLvlCap() : 50;
     u32 customMonId = anomalous
         ? RogueGift_DebugCreateAnomalousMonId(species)
-        : RogueGift_CreateDynamicMonIdRaw(UNIQUE_RARITY_LEGENDARY, species);
+        : RogueGift_CreateDynamicMonIdRaw(rarity, species);
     u8 result;
 
     RogueGift_CreateMon(customMonId, &mon, species, level, USE_RANDOM_IVS);
-    result = GiveMonToPlayer(&mon);
+    // Dynamic Unique data is encoded in the custom OT ID, so preserve it in
+    // the same way as every other custom Pokemon gift.
+    result = GiveTradedMonToPlayer(&mon);
 
     if(result != MON_CANT_GIVE)
     {
@@ -2389,14 +2396,19 @@ static void DebugAction_RogueUtil_GiveUnique(u8 taskId, bool8 anomalous)
     ScriptContext_Enable();
 }
 
+static void DebugAction_RogueUtil_GiveRandomUnique(u8 taskId)
+{
+    DebugAction_RogueUtil_GiveUnique(taskId, RogueGift_RollDynamicUniqueRarity(TRUE), FALSE);
+}
+
 static void DebugAction_RogueUtil_GiveLegendaryUnique(u8 taskId)
 {
-    DebugAction_RogueUtil_GiveUnique(taskId, FALSE);
+    DebugAction_RogueUtil_GiveUnique(taskId, UNIQUE_RARITY_LEGENDARY, FALSE);
 }
 
 static void DebugAction_RogueUtil_GiveAnomalousUnique(u8 taskId)
 {
-    DebugAction_RogueUtil_GiveUnique(taskId, TRUE);
+    DebugAction_RogueUtil_GiveUnique(taskId, UNIQUE_RARITY_LEGENDARY, TRUE);
 }
 
 static void DebugAction_RogueUtil_RerollUniqueTracker(u8 taskId)

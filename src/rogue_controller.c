@@ -1411,6 +1411,7 @@ static void ModifyExistingMonToCustomMon(u32 customMonId, struct Pokemon* mon)
     u32 species = GetMonData(mon, MON_DATA_SPECIES);
     u32 level = GetMonData(mon, MON_DATA_LEVEL);
     u32 abilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM);
+    u8 nature = GetNature(mon);
     u32 hpIV = GetMonData(mon, MON_DATA_HP_IV);
     u32 atkIV = GetMonData(mon, MON_DATA_ATK_IV);
     u32 defIV = GetMonData(mon, MON_DATA_DEF_IV);
@@ -1438,6 +1439,7 @@ static void ModifyExistingMonToCustomMon(u32 customMonId, struct Pokemon* mon)
     SetMonData(mon, MON_DATA_SPEED_IV, &speedIV);
     SetMonData(mon, MON_DATA_SPATK_IV, &spAtkIV);
     SetMonData(mon, MON_DATA_SPDEF_IV, &spDefIV);
+    SetNature(mon, nature);
     SetMonData(mon, MON_DATA_IS_SHINY, &isShiny);
     SetMonData(mon, MON_DATA_GENDER_FLAG, &isGenderFlag);
     SetMonData(mon, MON_DATA_MET_LOCATION, &metLocation);

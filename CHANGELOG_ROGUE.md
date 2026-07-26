@@ -28,6 +28,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Expanded generated Unique Pokémon's regular Ability pool to every compatible
+  standard Ability. Mechanically identical names now share one weighted roll
+  before choosing a flavor, and species/form-bound, severe-drawback,
+  suppressive, and game-breaking effects remain excluded.
 - Gave Hisuian Lilligant Counterstep, retaliating with Low Sweep whenever an
   opposing Pokémon's Speed rises.
 - Gave Stonjourner Menhir, preventing a single hit from dealing more than half
@@ -46,6 +50,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Preserved Unique Pokémon's nature and recalculated stats after applying or
+  reapplying their custom data.
+- Made Unique Den payload generation deterministic under Adventure Replay
+  without consuming the general gameplay RNG.
 - Recalculated party counts when loading recorded battles, preventing Illusion
   from treating a non-final party member as the last Pokémon in the party.
 - Hid an active Illusion user's real typing behind its disguise in the battle

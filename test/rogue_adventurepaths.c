@@ -431,6 +431,32 @@ TEST("Unique Legendary generation is available by default, deterministic, and su
     gRngRogueValue = originalRogueRng;
 }
 
+TEST("Unique Den generation is replay deterministic and preserves general RNG")
+{
+    u32 customMonId;
+    u32 replayId;
+    RAND_TYPE originalRng = gRngValue;
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE rngBefore;
+
+    SeedRng(12345);
+    rngBefore = gRngValue;
+    SeedRogueRng(6789);
+    customMonId = RogueAdv_Debug_GenerateUniqueDenCustomMonId(SPECIES_HO_OH);
+
+    EXPECT_NE(customMonId, 0);
+    EXPECT_EQ(memcmp(&gRngValue, &rngBefore, sizeof(rngBefore)), 0);
+
+    SeedRng(54321);
+    SeedRogueRng(6789);
+    replayId = RogueAdv_Debug_GenerateUniqueDenCustomMonId(SPECIES_HO_OH);
+
+    EXPECT_EQ(replayId, customMonId);
+
+    gRngValue = originalRng;
+    gRngRogueValue = originalRogueRng;
+}
+
 TEST("Unique Legendary rooms use a gold statue")
 {
     struct RogueAdvPath originalPath = gRogueAdvPath;

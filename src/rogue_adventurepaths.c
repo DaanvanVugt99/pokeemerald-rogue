@@ -1063,10 +1063,33 @@ static u32 GenerateUniqueLegendaryCustomMonId(u16 species)
     return customMonId;
 }
 
+static u32 GenerateUniqueDenCustomMonId(u16 species)
+{
+    u32 customMonId;
+    RAND_TYPE rngState = gRngValue;
+
+    // Dynamic custom data uses the general RNG. Seed the complete payload roll,
+    // including rarity, from the path RNG so Adventure Replay reproduces it
+    // without perturbing gameplay RNG.
+    SeedRng(RogueRandom());
+    customMonId = RogueGift_CreateDynamicMonIdRaw(
+        RogueGift_RollDynamicUniqueRarity(TRUE),
+        species
+    );
+    gRngValue = rngState;
+
+    return customMonId;
+}
+
 #ifdef ROGUE_DEBUG
 u32 RogueAdv_Debug_GenerateUniqueLegendaryCustomMonId(u16 species)
 {
     return GenerateUniqueLegendaryCustomMonId(species);
+}
+
+u32 RogueAdv_Debug_GenerateUniqueDenCustomMonId(u16 species)
+{
+    return GenerateUniqueDenCustomMonId(species);
 }
 #endif
 
@@ -1181,10 +1204,7 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
             gRogueAdvPath.rooms[roomId].roomParams.roomIdx = 0;
             gRogueAdvPath.rooms[roomId].roomParams.perType.uniqueDen.species = species;
             gRogueAdvPath.rooms[roomId].roomParams.perType.uniqueDen.shinyState = Rogue_RollShinyState(SHINY_ROLL_STATIC);
-            gRogueAdvPath.rooms[roomId].roomParams.perType.uniqueDen.customMonId = RogueGift_CreateDynamicMonIdRaw(
-                RogueGift_RollDynamicUniqueRarity(TRUE),
-                species
-            );
+            gRogueAdvPath.rooms[roomId].roomParams.perType.uniqueDen.customMonId = GenerateUniqueDenCustomMonId(species);
             break;
         }
 

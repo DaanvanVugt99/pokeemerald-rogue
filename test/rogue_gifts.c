@@ -48,7 +48,7 @@ static u32 DynamicOriginalCustomMonId(u32 move1, u32 move2, u32 ability)
     return OTID_FLAG_CUSTOM_MON
         | OTID_FLAG_DYNAMIC_CUSTOM_MON
         | EncodeTestMoveSelection(move1, move2)
-        | (ability << 21);
+        | (ability << 15);
 }
 
 static u32 DynamicTypeCustomMonId(u32 type, u32 typeSlot, u32 typeMoveChoice, u32 move1, u32 move2, u32 ability)
@@ -78,7 +78,7 @@ static u32 DynamicTypeCustomMonId(u32 type, u32 typeSlot, u32 typeMoveChoice, u3
         | (typeSlot << 5)
         | (typeMoveChoice << 6)
         | (payload << 8)
-        | (rarity << 23)
+        | (rarity << 26)
         | (TEST_FORMAT_MON_TYPE << 28);
 }
 
@@ -213,6 +213,168 @@ TEST("Reapplying custom data keeps an explicit standard ability authoritative")
     EXPECT_EQ(GetMonAbility(&mon), RogueGift_GetCustomMonAbility(customMonId, 0));
 }
 
+TEST("Reapplying custom data preserves nature, IVs, and calculated stats")
+{
+    u32 customMonId = DynamicOriginalCustomMonId(1, 2, 1);
+    struct Pokemon mon;
+    u16 maxHp;
+    u16 attack;
+    u16 defense;
+    u16 speed;
+    u16 spAttack;
+    u16 spDefense;
+
+    CreateMon(&mon, SPECIES_WEEZING, 50, 31, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    SetNature(&mon, NATURE_ADAMANT);
+    maxHp = GetMonData(&mon, MON_DATA_MAX_HP);
+    attack = GetMonData(&mon, MON_DATA_ATK);
+    defense = GetMonData(&mon, MON_DATA_DEF);
+    speed = GetMonData(&mon, MON_DATA_SPEED);
+    spAttack = GetMonData(&mon, MON_DATA_SPATK);
+    spDefense = GetMonData(&mon, MON_DATA_SPDEF);
+
+    Rogue_ApplyCustomMonIdToMon(customMonId, &mon);
+
+    EXPECT_EQ(GetNature(&mon), NATURE_ADAMANT);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_HP_IV), 31);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_ATK_IV), 31);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_DEF_IV), 31);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_SPEED_IV), 31);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_SPATK_IV), 31);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_SPDEF_IV), 31);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_MAX_HP), maxHp);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_ATK), attack);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_DEF), defense);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_SPEED), speed);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_SPATK), spAttack);
+    EXPECT_EQ(GetMonData(&mon, MON_DATA_SPDEF), spDefense);
+}
+
+#ifdef ROGUE_EXPANSION
+TEST("Dynamic standard ability pool includes every audited regular ability once by mechanic")
+{
+    static const u16 sExpectedExclusions[] =
+    {
+        ABILITY_FORECAST,
+        ABILITY_MULTITYPE,
+        ABILITY_FLOWER_GIFT,
+        ABILITY_ZEN_MODE,
+        ABILITY_STANCE_CHANGE,
+        ABILITY_SHIELDS_DOWN,
+        ABILITY_SCHOOLING,
+        ABILITY_DISGUISE,
+        ABILITY_BATTLE_BOND,
+        ABILITY_POWER_CONSTRUCT,
+        ABILITY_RKS_SYSTEM,
+        ABILITY_GULP_MISSILE,
+        ABILITY_ICE_FACE,
+        ABILITY_HUNGER_SWITCH,
+        ABILITY_ZERO_TO_HERO,
+        ABILITY_COMMANDER,
+        ABILITY_TERA_SHIFT,
+        ABILITY_TERA_SHELL,
+        ABILITY_TERAFORM_ZERO,
+        ABILITY_FORECAST_PRIORITY,
+        ABILITY_EMBODY_ASPECT_TEAL,
+        ABILITY_EMBODY_ASPECT_HEARTHFLAME,
+        ABILITY_EMBODY_ASPECT_WELLSPRING,
+        ABILITY_EMBODY_ASPECT_CORNERSTONE,
+        ABILITY_TRUANT,
+        ABILITY_SLOW_START,
+        ABILITY_DEFEATIST,
+        ABILITY_STALL,
+        ABILITY_NEUTRALIZING_GAS,
+        ABILITY_WONDER_GUARD,
+    };
+    u16 eligibleCount = 0;
+    u16 ability;
+    u16 i;
+
+    for(ability = 1; ability <= ABILITY_FORECAST_PRIORITY; ++ability)
+    {
+        bool8 expected = TRUE;
+
+        for(i = 0; i < ARRAY_COUNT(sExpectedExclusions); ++i)
+        {
+            if(sExpectedExclusions[i] == ability)
+                expected = FALSE;
+        }
+
+        EXPECT_EQ(RogueGift_DebugIsStandardAbilityEligible(ability), expected);
+        if(expected)
+            ++eligibleCount;
+    }
+
+    EXPECT_EQ(eligibleCount, 281);
+    EXPECT_EQ(RogueGift_DebugGetStandardAbilityGroupCount(), 267);
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_SHADOW_TAG));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_ARENA_TRAP));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_IMPOSTER));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_MOODY));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_PARENTAL_BOND));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_EMERGENCY_EXIT));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_WIMP_OUT));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_AS_ONE_ICE_RIDER));
+    EXPECT(RogueGift_DebugIsStandardAbilityEligible(ABILITY_AS_ONE_SHADOW_RIDER));
+}
+
+TEST("Duplicate standard ability names share one weighted flavor group")
+{
+    static const u16 sGroups[][3] =
+    {
+        { ABILITY_HUGE_POWER,       ABILITY_PURE_POWER },
+        { ABILITY_CLOUD_NINE,       ABILITY_AIR_LOCK },
+        { ABILITY_MOLD_BREAKER,     ABILITY_TERAVOLT,          ABILITY_TURBOBLAZE },
+        { ABILITY_DAZZLING,         ABILITY_QUEENLY_MAJESTY,   ABILITY_ARMOR_TAIL },
+        { ABILITY_STALWART,         ABILITY_PROPELLER_TAIL },
+        { ABILITY_GOOEY,            ABILITY_TANGLING_HAIR },
+        { ABILITY_ROUGH_SKIN,       ABILITY_IRON_BARBS },
+        { ABILITY_RECEIVER,         ABILITY_POWER_OF_ALCHEMY },
+        { ABILITY_PROTEAN,          ABILITY_LIBERO },
+        { ABILITY_CLEAR_BODY,       ABILITY_WHITE_SMOKE },
+        { ABILITY_MOXIE,            ABILITY_CHILLING_NEIGH },
+        { ABILITY_EMERGENCY_EXIT,   ABILITY_WIMP_OUT },
+    };
+    u8 group;
+
+    for(group = 0; group < ARRAY_COUNT(sGroups); ++group)
+    {
+        u8 flavorCount = sGroups[group][2] == ABILITY_NONE ? 2 : 3;
+        u8 flavor;
+
+        EXPECT_EQ(RogueGift_DebugGetStandardAbilityFlavorCount(sGroups[group][0]), flavorCount);
+        for(flavor = 0; flavor < flavorCount; ++flavor)
+        {
+            EXPECT_EQ(RogueGift_DebugGetStandardAbilityGroupRepresentative(sGroups[group][flavor]), sGroups[group][0]);
+            EXPECT_EQ(RogueGift_DebugGetStandardAbilityFlavor(sGroups[group][0], flavor), sGroups[group][flavor]);
+        }
+    }
+}
+
+TEST("Native standard ability checks reject an entire flavor group")
+{
+    EXPECT(RogueGift_DebugIsStandardAbilityNativeToEvolutionFamily(SPECIES_MEDITITE, ABILITY_HUGE_POWER));
+    EXPECT(RogueGift_DebugIsStandardAbilityNativeToEvolutionFamily(SPECIES_MEDITITE, ABILITY_PURE_POWER));
+    EXPECT(RogueGift_DebugIsStandardAbilityNativeToEvolutionFamily(SPECIES_WIMPOD, ABILITY_EMERGENCY_EXIT));
+    EXPECT(RogueGift_DebugIsStandardAbilityNativeToEvolutionFamily(SPECIES_WIMPOD, ABILITY_WIMP_OUT));
+}
+
+TEST("Nine bit standard ability IDs round trip in both non Legendary formats")
+{
+    u32 originalId = DynamicOriginalCustomMonId(1, 2, ABILITY_POISON_PUPPETEER);
+    u32 typedId = DynamicTypeCustomMonId(TYPE_FIRE, 0, 0, 1, 0, ABILITY_POISON_PUPPETEER);
+    u32 flavorId = DynamicOriginalCustomMonId(1, 2, ABILITY_WIMP_OUT);
+    u32 excludedId = DynamicOriginalCustomMonId(1, 2, ABILITY_FORECAST_PRIORITY);
+
+    EXPECT_EQ(RogueGift_GetCustomMonAbility(originalId, 0), ABILITY_POISON_PUPPETEER);
+    EXPECT_EQ(RogueGift_GetCustomMonAbility(typedId, 0), ABILITY_POISON_PUPPETEER);
+    EXPECT_EQ(RogueGift_GetCustomMonAbility(flavorId, 0), ABILITY_WIMP_OUT);
+    EXPECT_EQ(RogueGift_GetCustomMonAbility(excludedId, 0), ABILITY_NONE);
+    EXPECT_EQ(RogueGift_GetCustomMonMoveCount(originalId), 2);
+    EXPECT_EQ(RogueGift_GetCustomMonMoveCount(typedId), 2);
+}
+#endif
+
 TEST("Dynamic original format decodes epic payload without unique ability")
 {
     u32 customMonId = DynamicOriginalCustomMonId(1, 2, 1);
@@ -276,6 +438,21 @@ TEST("Debug anomalous generator creates a Legendary with an anomalous ability")
     EXPECT(RogueGift_IsAnomalousUniqueAbility(RogueGift_GetCustomMonUniqueAbility(customMonId)));
     EXPECT_EQ(RogueGift_GetCustomMonMoveCount(customMonId), 2);
     EXPECT_NE(RogueGift_GetCustomMonAbility(customMonId, 0), ABILITY_NONE);
+}
+
+TEST("Dynamic Unique custom gift transfer preserves its encrypted payload")
+{
+    struct Pokemon mon;
+    u32 customMonId = RogueGift_DebugCreateAnomalousMonId(SPECIES_BULBASAUR);
+
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    gPlayerPartyCount = 0;
+    RogueGift_CreateMon(customMonId, &mon, SPECIES_BULBASAUR, 50, USE_RANDOM_IVS);
+
+    EXPECT_EQ(GiveTradedMonToPlayer(&mon), MON_GIVEN_TO_PARTY);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SANITY_IS_BAD_EGG), FALSE);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), SPECIES_BULBASAUR);
+    EXPECT_EQ(RogueGift_GetCustomMonId(&gPlayerParty[0]), customMonId);
 }
 
 TEST("Dynamic unique ability eligibility audit contains 581 abilities")

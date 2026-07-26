@@ -48,157 +48,72 @@ static u8 const sRarityToCustomTrainerIndex[] =
     [UNIQUE_RARITY_LEGENDARY]   = CUSTOM_TRAINER_LEGEND,
 };
 
-static u16 const sDynamicCustomMonAbilities[] = 
-{
 #ifdef ROGUE_EXPANSION
-    ABILITY_GOOD_AS_GOLD,
-    ABILITY_WATER_ABSORB,
-    ABILITY_VOLT_ABSORB,
-    ABILITY_FLASH_FIRE,
-    ABILITY_SPEED_BOOST,
-    ABILITY_ADAPTABILITY,
-    ABILITY_INTIMIDATE,
-    ABILITY_DRIZZLE,
-    ABILITY_DROUGHT,
-    ABILITY_SNOW_WARNING,
-    ABILITY_SAND_STREAM,
-    ABILITY_QUICK_DRAW,
-    ABILITY_NEUTRALIZING_GAS,
-    ABILITY_ELECTRIC_SURGE,
-    ABILITY_PSYCHIC_SURGE,
-    ABILITY_MISTY_SURGE,
-    ABILITY_GRASSY_SURGE,
-    ABILITY_PROTEAN,
-    ABILITY_MAGIC_BOUNCE,
-    ABILITY_MOXIE,
-    ABILITY_ILLUSION,
-    ABILITY_REGENERATOR,
-    ABILITY_SUPER_LUCK,
-    ABILITY_CONTRARY,
-    ABILITY_NO_GUARD,
-    ABILITY_SKILL_LINK,
-    ABILITY_SHELL_ARMOR,
-    ABILITY_GUTS,
-    ABILITY_THICK_FAT,
-    ABILITY_HUGE_POWER,
-    ABILITY_SERENE_GRACE,
-    ABILITY_BATTLE_ARMOR,
-    ABILITY_WEAK_ARMOR,
-    ABILITY_TOXIC_DEBRIS,
-    ABILITY_UNSEEN_FIST,
-    ABILITY_GORILLA_TACTICS,
-    ABILITY_TOUGH_CLAWS,
-    ABILITY_FULL_METAL_BODY,
-    ABILITY_TECHNICIAN,
-    ABILITY_EMERGENCY_EXIT,
-    ABILITY_PRANKSTER,
-    ABILITY_POWER_OF_ALCHEMY,
-    ABILITY_OPPORTUNIST,
-    ABILITY_LEVITATE,
-    ABILITY_MULTISCALE,
-    ABILITY_COSTAR,
-    ABILITY_POISON_HEAL,
-    ABILITY_NEUROFORCE,
-    ABILITY_MOODY,
-    ABILITY_HOSPITALITY,
-    ABILITY_COMATOSE,
-    ABILITY_BERSERK,
-    ABILITY_SIMPLE,
-    ABILITY_UNAWARE,
-    ABILITY_HARVEST,
-    ABILITY_MOLD_BREAKER,
-    ABILITY_SHEER_FORCE,
-    ABILITY_OVERCOAT,
-    ABILITY_IRON_BARBS,
-    ABILITY_DEFIANT,
-    ABILITY_STALL,
-    ABILITY_SNIPER,
-    ABILITY_MULTITYPE,
-    ABILITY_SHARPNESS,
-    ABILITY_PURIFYING_SALT,
-    ABILITY_EARTH_EATER,
-    ABILITY_WIND_RIDER,
-    ABILITY_WELL_BAKED_BODY,
-    ABILITY_THERMAL_EXCHANGE,
-    ABILITY_ROCKY_PAYLOAD,
-    ABILITY_DRAGONS_MAW,
-    ABILITY_TRANSISTOR,
-    ABILITY_PUNK_ROCK,
-    ABILITY_MEGA_LAUNCHER,
-    ABILITY_STEELWORKER,
-    ABILITY_ARMOR_TAIL,
-    ABILITY_QUEENLY_MAJESTY,
-    ABILITY_GUARD_DOG,
-    ABILITY_MAGIC_GUARD,
-    ABILITY_TINTED_LENS,
-    ABILITY_STRONG_JAW,
-    ABILITY_IRON_FIST,
-    ABILITY_RECKLESS,
-    ABILITY_ANALYTIC,
-    ABILITY_DOWNLOAD,
-    ABILITY_SCRAPPY,
-    ABILITY_FUR_COAT,
-    ABILITY_ICE_SCALES,
-    ABILITY_MIRROR_ARMOR,
-    ABILITY_STORM_DRAIN,
-    ABILITY_LIGHTNING_ROD,
-    ABILITY_SAP_SIPPER,
-    ABILITY_PIXILATE,
-    ABILITY_AERILATE,
-    ABILITY_REFRIGERATE,
-    ABILITY_GALVANIZE,
-    ABILITY_LIQUID_VOICE,
-    ABILITY_DAUNTLESS_SHIELD,
-    ABILITY_INTREPID_SWORD,
-    ABILITY_CHILLING_NEIGH,
-    ABILITY_GRIM_NEIGH,
-    ABILITY_SUPREME_OVERLORD
+#define DYNAMIC_STANDARD_ABILITY_MAX ABILITY_FORECAST_PRIORITY
+#define DYNAMIC_STANDARD_ABILITY_GROUP_COUNT 267
 #else
-    ABILITY_DRIZZLE,
-    ABILITY_SPEED_BOOST,
-    ABILITY_BATTLE_ARMOR,
-    ABILITY_LIMBER,
-    ABILITY_SAND_VEIL,
-    ABILITY_STATIC,
-    ABILITY_VOLT_ABSORB,
-    ABILITY_WATER_ABSORB,
-    ABILITY_CLOUD_NINE,
-    ABILITY_COMPOUND_EYES,
-    ABILITY_COLOR_CHANGE,
-    ABILITY_FLASH_FIRE,
-    ABILITY_SHIELD_DUST,
-    ABILITY_SUCTION_CUPS,
-    ABILITY_INTIMIDATE,
-    ABILITY_SHADOW_TAG,
-    ABILITY_ROUGH_SKIN,
-    ABILITY_LEVITATE,
-    ABILITY_EFFECT_SPORE,
-    ABILITY_CLEAR_BODY,
-    ABILITY_SERENE_GRACE,
-    ABILITY_SWIFT_SWIM,
-    ABILITY_CHLOROPHYLL,
-    ABILITY_HUGE_POWER,
-    ABILITY_INNER_FOCUS,
-    ABILITY_SOUNDPROOF,
-    ABILITY_RAIN_DISH,
-    ABILITY_SAND_STREAM,
-    ABILITY_PRESSURE,
-    ABILITY_THICK_FAT,
-    ABILITY_FLAME_BODY,
-    ABILITY_RUN_AWAY,
-    ABILITY_PICKUP,
-    ABILITY_HUSTLE,
-    ABILITY_CUTE_CHARM,
-    ABILITY_SHED_SKIN,
-    ABILITY_GUTS,
-    ABILITY_MARVEL_SCALE,
-    ABILITY_ROCK_HEAD,
-    ABILITY_DROUGHT,
-    ABILITY_WHITE_SMOKE,
-    ABILITY_PURE_POWER,
-    ABILITY_SHELL_ARMOR,
-    ABILITY_AIR_LOCK,
+#define DYNAMIC_STANDARD_ABILITY_MAX ABILITY_AIR_LOCK
+#define DYNAMIC_STANDARD_ABILITY_GROUP_COUNT 70
 #endif
+
+struct DynamicStandardAbilityFlavorGroup
+{
+    u16 abilities[3];
+};
+
+// These Abilities are mechanically identical, so each row receives one share
+// of the generation pool before a concrete display flavor is chosen.
+static const struct DynamicStandardAbilityFlavorGroup sDynamicStandardAbilityFlavorGroups[] =
+{
+    { { ABILITY_HUGE_POWER,       ABILITY_PURE_POWER } },
+    { { ABILITY_CLOUD_NINE,       ABILITY_AIR_LOCK } },
+    { { ABILITY_MOLD_BREAKER,     ABILITY_TERAVOLT,          ABILITY_TURBOBLAZE } },
+    { { ABILITY_DAZZLING,         ABILITY_QUEENLY_MAJESTY,   ABILITY_ARMOR_TAIL } },
+    { { ABILITY_STALWART,         ABILITY_PROPELLER_TAIL } },
+    { { ABILITY_GOOEY,            ABILITY_TANGLING_HAIR } },
+    { { ABILITY_ROUGH_SKIN,       ABILITY_IRON_BARBS } },
+    { { ABILITY_RECEIVER,         ABILITY_POWER_OF_ALCHEMY } },
+    { { ABILITY_PROTEAN,          ABILITY_LIBERO } },
+    { { ABILITY_CLEAR_BODY,       ABILITY_WHITE_SMOKE } },
+    { { ABILITY_MOXIE,            ABILITY_CHILLING_NEIGH } },
+    { { ABILITY_EMERGENCY_EXIT,   ABILITY_WIMP_OUT } },
+};
+
+// Exclude effects which require a specific species/form, are severe drawbacks,
+// suppress the generated Unique Ability, or are too disruptive for a silent
+// random roll. Flavor aliases above remain eligible concrete results.
+static const u16 sDynamicStandardAbilityExclusions[] =
+{
+    ABILITY_FORECAST,
+    ABILITY_MULTITYPE,
+    ABILITY_FLOWER_GIFT,
+    ABILITY_ZEN_MODE,
+    ABILITY_STANCE_CHANGE,
+    ABILITY_SHIELDS_DOWN,
+    ABILITY_SCHOOLING,
+    ABILITY_DISGUISE,
+    ABILITY_BATTLE_BOND,
+    ABILITY_POWER_CONSTRUCT,
+    ABILITY_RKS_SYSTEM,
+    ABILITY_GULP_MISSILE,
+    ABILITY_ICE_FACE,
+    ABILITY_HUNGER_SWITCH,
+    ABILITY_ZERO_TO_HERO,
+    ABILITY_COMMANDER,
+    ABILITY_TERA_SHIFT,
+    ABILITY_TERA_SHELL,
+    ABILITY_TERAFORM_ZERO,
+    ABILITY_FORECAST_PRIORITY,
+    ABILITY_EMBODY_ASPECT_TEAL,
+    ABILITY_EMBODY_ASPECT_HEARTHFLAME,
+    ABILITY_EMBODY_ASPECT_WELLSPRING,
+    ABILITY_EMBODY_ASPECT_CORNERSTONE,
+    ABILITY_TRUANT,
+    ABILITY_SLOW_START,
+    ABILITY_DEFEATIST,
+    ABILITY_STALL,
+    ABILITY_NEUTRALIZING_GAS,
+    ABILITY_WONDER_GUARD,
 };
 
 static u16 const sDynamicCustomMonMoves[] = 
@@ -512,12 +427,8 @@ static u16 const sDynamicCustomMonMoves[] =
 #endif
 };
 
-STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonAbilities) <= 127, SizeOfDynamicCustomMonAbilities);
-#ifdef ROGUE_EXPANSION
-STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonAbilities) == 102, DynamicStandardAbilityPoolAuditCount);
-#endif
-STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonAbilities) >= 4, LegendaryAbilitySeedHasFourCandidates);
-STATIC_ASSERT(NUM_ABILITY_SLOTS < 4, LegendaryAbilitySeedCanAvoidNativeSlots);
+STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_MAX < (1 << 9), DynamicStandardAbilityFits9Bits);
+STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_GROUP_COUNT >= 4, LegendaryAbilitySeedHasFourCandidates);
 #ifdef ROGUE_EXPANSION
 #define DYNAMIC_EXOTIC_MOVE_COUNT 165
 #else
@@ -537,6 +448,139 @@ STATIC_ASSERT(ABILITIES_COUNT <= 1024, DynamicUniqueAbilityFits10Bits);
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
 #define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_CHROMATIC_FLUX
+
+static bool8 IsDynamicStandardAbilityExcluded(u16 ability)
+{
+    u16 i;
+
+    for(i = 0; i < ARRAY_COUNT(sDynamicStandardAbilityExclusions); ++i)
+    {
+        if(sDynamicStandardAbilityExclusions[i] == ability)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static const struct DynamicStandardAbilityFlavorGroup* GetDynamicStandardAbilityFlavorGroup(u16 ability)
+{
+    u16 i;
+    u8 j;
+
+    for(i = 0; i < ARRAY_COUNT(sDynamicStandardAbilityFlavorGroups); ++i)
+    {
+        for(j = 0; j < ARRAY_COUNT(sDynamicStandardAbilityFlavorGroups[i].abilities); ++j)
+        {
+            if(sDynamicStandardAbilityFlavorGroups[i].abilities[j] == ability)
+                return &sDynamicStandardAbilityFlavorGroups[i];
+        }
+    }
+
+    return NULL;
+}
+
+static u16 GetDynamicStandardAbilityGroupRepresentative(u16 ability)
+{
+    const struct DynamicStandardAbilityFlavorGroup* group = GetDynamicStandardAbilityFlavorGroup(ability);
+
+    return group != NULL ? group->abilities[0] : ability;
+}
+
+static bool8 IsDynamicStandardAbilityEligible(u16 ability)
+{
+    return ability != ABILITY_NONE
+        && ability <= DYNAMIC_STANDARD_ABILITY_MAX
+        && !IsDynamicStandardAbilityExcluded(ability);
+}
+
+static bool8 IsDynamicStandardAbilityGroupRepresentative(u16 ability)
+{
+    return GetDynamicStandardAbilityGroupRepresentative(ability) == ability;
+}
+
+static u8 GetDynamicStandardAbilityFlavorCount(u16 ability)
+{
+    const struct DynamicStandardAbilityFlavorGroup* group = GetDynamicStandardAbilityFlavorGroup(ability);
+    u8 count = 0;
+
+    if(group == NULL)
+        return 1;
+
+    while(count < ARRAY_COUNT(group->abilities) && group->abilities[count] != ABILITY_NONE)
+        ++count;
+
+    return count;
+}
+
+static u16 GetDynamicStandardAbilityFlavor(u16 ability, u32 flavorRoll)
+{
+    const struct DynamicStandardAbilityFlavorGroup* group = GetDynamicStandardAbilityFlavorGroup(ability);
+
+    if(group == NULL)
+        return ability;
+
+    return group->abilities[flavorRoll % GetDynamicStandardAbilityFlavorCount(ability)];
+}
+
+static u16 GetDynamicStandardAbilityGroupByIndex(u16 groupIndex)
+{
+    u16 ability = groupIndex + 1;
+    u16 previousAbility;
+
+    // Convert the dense group index into a concrete Ability ID by accounting
+    // only for omitted IDs. This avoids scanning the full pool whenever a
+    // compact Legendary seed is decoded.
+    do
+    {
+        u16 omissionCount = 0;
+        u16 i;
+        u8 j;
+
+        previousAbility = ability;
+        for(i = 0; i < ARRAY_COUNT(sDynamicStandardAbilityExclusions); ++i)
+        {
+            if(sDynamicStandardAbilityExclusions[i] <= ability
+             && sDynamicStandardAbilityExclusions[i] <= DYNAMIC_STANDARD_ABILITY_MAX)
+                ++omissionCount;
+        }
+
+        for(i = 0; i < ARRAY_COUNT(sDynamicStandardAbilityFlavorGroups); ++i)
+        {
+            for(j = 1; j < ARRAY_COUNT(sDynamicStandardAbilityFlavorGroups[i].abilities); ++j)
+            {
+                u16 flavor = sDynamicStandardAbilityFlavorGroups[i].abilities[j];
+
+                if(flavor != ABILITY_NONE
+                 && flavor <= ability
+                 && flavor <= DYNAMIC_STANDARD_ABILITY_MAX)
+                    ++omissionCount;
+            }
+        }
+
+        ability = groupIndex + 1 + omissionCount;
+    }
+    while(ability != previousAbility);
+
+    AGB_ASSERT(groupIndex < DYNAMIC_STANDARD_ABILITY_GROUP_COUNT);
+    AGB_ASSERT(IsDynamicStandardAbilityEligible(ability));
+    AGB_ASSERT(IsDynamicStandardAbilityGroupRepresentative(ability));
+    return ability;
+}
+
+static u16 CountDynamicStandardAbilityGroups(void)
+{
+    u16 count = 0;
+    u16 ability;
+
+    for(ability = 1; ability <= DYNAMIC_STANDARD_ABILITY_MAX; ++ability)
+    {
+        if(IsDynamicStandardAbilityEligible(ability)
+         && IsDynamicStandardAbilityGroupRepresentative(ability))
+            ++count;
+    }
+
+    return count;
+}
 
 // These generated-only abilities have no native species mapping. They remain
 // part of the ordinary Legendary unique ability roll, but are identified
@@ -1345,8 +1389,8 @@ struct CompressedDynamicData
 struct CompressedDynamicData_Original
 {
     u32 moveSelection:15;
-    u32 unused:6;
-    u32 ability:7; // 127 indices
+    u32 ability:9; // Concrete regular Ability ID.
+    u32 unused:4;
     u32 format:2;
     u32 reserved:2;
 };
@@ -1356,11 +1400,10 @@ struct CompressedDynamicData_MonType
     u32 type:5;
     u32 typeSlot:1;
     u32 typeMoveChoice:2;
-    // Rare stores a 15-bit move pair. Epic stores an 8-bit move index and a
-    // 7-bit ability index. Common leaves the payload empty.
-    u32 payload:15;
+    // Rare stores a 15-bit move pair. Epic st ores an 8-bit move index and a
+    // 9-bit concrete Ability ID. Common leaves the payload empty.
+    u32 payload:18;
     u32 rarity:2;
-    u32 unused:3;
     u32 format:2;
     u32 reserved:2;
 };
@@ -1551,9 +1594,11 @@ static void DecodeDynamicMoveSelection(u16 moveSelection, struct DynamicMonData*
 static u16 DecodeLegendaryStandardAbility(u16 moveSelection, u16 uniqueAbility, u8 format, u8 abilitySeed)
 {
     u32 baseIndex = moveSelection * 33u + uniqueAbility * 17u + format * 7u;
-    u32 abilityIndex = (baseIndex + abilitySeed) % ARRAY_COUNT(sDynamicCustomMonAbilities);
+    u32 abilityRoll = baseIndex + abilitySeed;
+    u32 flavorRoll = abilityRoll ^ (abilityRoll >> 7) ^ (abilityRoll >> 13);
+    u16 ability = GetDynamicStandardAbilityGroupByIndex(abilityRoll % DYNAMIC_STANDARD_ABILITY_GROUP_COUNT);
 
-    return sDynamicCustomMonAbilities[abilityIndex];
+    return GetDynamicStandardAbilityFlavor(ability, flavorRoll);
 }
 
 static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* outData)
@@ -1570,7 +1615,7 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
     {
         struct CompressedDynamicData_Original* compressedData = (struct CompressedDynamicData_Original*)compressedUntyped;
 
-        outData->ability = ((compressedData->ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[compressedData->ability - 1] : ABILITY_NONE;
+        outData->ability = IsDynamicStandardAbilityEligible(compressedData->ability) ? compressedData->ability : ABILITY_NONE;
         DecodeDynamicMoveSelection(compressedData->moveSelection, outData);
     }
     else if(compressedUntyped->format == COMPRESSED_FORMAT_ORIGINAL_UNIQUE_ABILITY)
@@ -1586,7 +1631,7 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
         struct CompressedDynamicData_MonType* compressedData = (struct CompressedDynamicData_MonType*)compressedUntyped;
 
         u16 moveSelection = 0;
-        u8 ability = 0;
+        u16 ability = ABILITY_NONE;
 
         if(compressedData->rarity == UNIQUE_RARITY_RARE)
             moveSelection = compressedData->payload;
@@ -1596,7 +1641,7 @@ static void UncompressDynamicMonData(u32 customMonId, struct DynamicMonData* out
             ability = compressedData->payload >> 8;
         }
 
-        outData->ability = ((ability - 1) < ARRAY_COUNT(sDynamicCustomMonAbilities)) ? sDynamicCustomMonAbilities[ability - 1] : ABILITY_NONE;
+        outData->ability = IsDynamicStandardAbilityEligible(ability) ? ability : ABILITY_NONE;
         outData->types[compressedData->typeSlot] = compressedData->type;
         outData->moves[outData->movesCount++] = SelectTypeBasedExtraMove(compressedData->type, compressedData->typeMoveChoice);
         DecodeDynamicMoveSelection(moveSelection, outData);
@@ -2176,12 +2221,16 @@ static bool8 IsNativeStandardAbility(const struct DynamicEvolutionFamily* family
 {
     u8 s;
     u8 i;
+    u16 abilityGroup = GetDynamicStandardAbilityGroupRepresentative(ability);
 
     for(s = 0; s < family->count; ++s)
     {
         for(i = 0; i < NUM_ABILITY_SLOTS; ++i)
         {
-            if(GetAbilityBySpecies(family->species[s], i, 0) == ability)
+            u16 nativeAbility = GetAbilityBySpecies(family->species[s], i, 0);
+
+            if(nativeAbility != ABILITY_NONE
+             && GetDynamicStandardAbilityGroupRepresentative(nativeAbility) == abilityGroup)
                 return TRUE;
         }
     }
@@ -2215,6 +2264,31 @@ bool8 RogueGift_DebugIsStandardAbilityNativeToEvolutionFamily(u16 species, u16 a
     return IsNativeStandardAbility(&family, ability);
 }
 
+bool8 RogueGift_DebugIsStandardAbilityEligible(u16 ability)
+{
+    return IsDynamicStandardAbilityEligible(ability);
+}
+
+u16 RogueGift_DebugGetStandardAbilityGroupCount(void)
+{
+    return CountDynamicStandardAbilityGroups();
+}
+
+u16 RogueGift_DebugGetStandardAbilityGroupRepresentative(u16 ability)
+{
+    return GetDynamicStandardAbilityGroupRepresentative(ability);
+}
+
+u8 RogueGift_DebugGetStandardAbilityFlavorCount(u16 ability)
+{
+    return GetDynamicStandardAbilityFlavorCount(ability);
+}
+
+u16 RogueGift_DebugGetStandardAbilityFlavor(u16 ability, u8 flavor)
+{
+    return GetDynamicStandardAbilityFlavor(ability, flavor);
+}
+
 bool8 RogueGift_DebugIsUniqueAbilityNativeToEvolutionFamily(u16 species, u16 ability)
 {
     struct DynamicEvolutionFamily family = GetDynamicEvolutionFamily(species);
@@ -2237,18 +2311,23 @@ u16 RogueGift_DebugGetEvolutionFamilyExoticMoveCount(u16 species)
 }
 #endif
 
-static u32 SelectNextAbilityIndex(const struct DynamicEvolutionFamily* family)
+static u16 SelectNextStandardAbility(const struct DynamicEvolutionFamily* family)
 {
-    // Give the mon a new ability for it
+#ifdef ROGUE_DEBUG
+    AGB_ASSERT(CountDynamicStandardAbilityGroups() == DYNAMIC_STANDARD_ABILITY_GROUP_COUNT);
+#endif
+
     while(TRUE)
     {
-        u32 idx = (Random() % ARRAY_COUNT(sDynamicCustomMonAbilities));
+        u16 ability = 1 + Random() % DYNAMIC_STANDARD_ABILITY_MAX;
 
-        if(!IsNativeStandardAbility(family, sDynamicCustomMonAbilities[idx]))
-            return 1 + idx;
+        if(IsDynamicStandardAbilityEligible(ability)
+         && IsDynamicStandardAbilityGroupRepresentative(ability)
+         && !IsNativeStandardAbility(family, ability))
+            return GetDynamicStandardAbilityFlavor(ability, Random());
     }
 
-    return 0;
+    return ABILITY_NONE;
 }
 
 static u16 SelectNextUniqueAbility(const struct DynamicEvolutionFamily* family, u8 creationType)
@@ -2532,12 +2611,12 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
 
         case UNIQUE_RARITY_RARE:
             compressedData->moveSelection = SelectNextMoveSelection(species, 1);
-            compressedData->ability = SelectNextAbilityIndex(&family);
+            compressedData->ability = SelectNextStandardAbility(&family);
             break;
 
         case UNIQUE_RARITY_EPIC:
             compressedData->moveSelection = SelectNextMoveSelection(species, 2);
-            compressedData->ability = SelectNextAbilityIndex(&family);
+            compressedData->ability = SelectNextStandardAbility(&family);
             break;
 
         default:
@@ -2614,7 +2693,7 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
 
         case UNIQUE_RARITY_EPIC:
             compressedData->payload = SelectNextMoveIndex(species);
-            compressedData->payload |= SelectNextAbilityIndex(&family) << 8;
+            compressedData->payload |= SelectNextStandardAbility(&family) << 8;
             break;
 
         default:
