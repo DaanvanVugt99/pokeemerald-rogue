@@ -876,15 +876,68 @@ TEST("Dynamic exotic move pool includes expanded curated moves")
     u16 firstCustomMoveIndex = RogueGift_DebugGetDynamicExoticMoveCount() - ARRAY_COUNT(sExpectedMoves) + 1;
     u8 i;
 
-    EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 183);
+    EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 207);
 
     for(i = 0; i < ARRAY_COUNT(sExpectedMoves); ++i)
         EXPECT_EQ(RogueGift_DebugGetDynamicMoveByIndex(firstCustomMoveIndex + i), sExpectedMoves[i]);
 }
 
-TEST("Dynamic general move index 183 decodes the expanded pool boundary")
+TEST("Standalone synergy moves are eligible as exotics")
 {
-    u32 customMonId = DynamicOriginalCustomMonId(183, 0, 0);
+    static const u16 sPromotedMoves[] =
+    {
+        MOVE_AIR_SLASH,
+        MOVE_AQUA_STEP,
+        MOVE_ATTACK_ORDER,
+        MOVE_BITTER_BLADE,
+        MOVE_BONEMERANG,
+        MOVE_BONE_RUSH,
+        MOVE_DRAGON_TAIL,
+        MOVE_DRAIN_PUNCH,
+        MOVE_FLARE_BLITZ,
+        MOVE_FROST_BREATH,
+        MOVE_JAW_LOCK,
+        MOVE_PSYCHIC_FANGS,
+        MOVE_SHADOW_BONE,
+        MOVE_WATER_SHURIKEN,
+        MOVE_DRAGON_HAMMER,
+        MOVE_FREEZING_GLARE,
+        MOVE_PHOTON_GEYSER,
+        MOVE_SHELL_SIDE_ARM,
+        MOVE_SPACIAL_REND,
+        MOVE_TECHNO_BLAST,
+        MOVE_TERA_STARSTORM,
+        MOVE_UPROAR,
+        MOVE_FUTURE_SIGHT,
+        MOVE_POISON_JAB,
+        MOVE_SACRED_FIRE,
+        MOVE_SHIFT_GEAR,
+        MOVE_BLAZE_KICK,
+        MOVE_RAGING_BULL,
+    };
+    static const u16 sSynergyOnlyMoves[] =
+    {
+        MOVE_CHARGE,
+        MOVE_MAGNET_RISE,
+        MOVE_SWEET_KISS,
+    };
+    u8 i;
+
+    for(i = 0; i < ARRAY_COUNT(sPromotedMoves); ++i)
+        EXPECT(RogueGift_DebugIsMoveExotic(sPromotedMoves[i]));
+
+    for(i = 0; i < ARRAY_COUNT(sSynergyOnlyMoves); ++i)
+    {
+        EXPECT(RogueGift_DebugIsMoveInDynamicPool(sSynergyOnlyMoves[i]));
+        EXPECT(!RogueGift_DebugIsMoveExotic(sSynergyOnlyMoves[i]));
+    }
+
+    EXPECT(!RogueGift_DebugIsMoveInDynamicPool(MOVE_MIRROR_COAT));
+}
+
+TEST("Dynamic general move index 207 decodes the expanded pool boundary")
+{
+    u32 customMonId = DynamicOriginalCustomMonId(207, 0, 0);
 
     EXPECT_EQ(RogueGift_GetCustomMonMoveCount(customMonId), 1);
     EXPECT_EQ(RogueGift_GetCustomMonMove(customMonId, 0), MOVE_BRAINSTORM);
@@ -899,7 +952,7 @@ TEST("Expanded dynamic move selections decode high pairs in every payload format
     u32 typedUniqueId = DynamicTypeUniqueAbilityCustomMonId(TYPE_FIRE, 1, 1, upper, 1, ABILITY_STARMOBILE);
 
     EXPECT_LE(upper, 255);
-    EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 183);
+    EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 207);
 
     EXPECT_EQ(RogueGift_GetCustomMonMoveCount(originalId), 2);
     EXPECT_EQ(RogueGift_GetCustomMonMove(originalId, 0), RogueGift_DebugGetDynamicMoveByIndex(upper - 1));

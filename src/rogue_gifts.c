@@ -244,7 +244,6 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_SIGNAL_BEAM,
     MOVE_HORN_LEECH,
     MOVE_VACUUM_WAVE,
-    MOVE_MIRROR_COAT,
     MOVE_BELLY_DRUM,
     MOVE_SCORCHING_SANDS,
     MOVE_TRICK_ROOM,
@@ -275,15 +274,40 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_FELL_STINGER,
     MOVE_WILL_O_WISP,
     MOVE_AQUA_RING,
-    MOVE_CHARGE,
     MOVE_CHARM,
     MOVE_TOXIC,
     MOVE_ROCK_POLISH,
     MOVE_CURSE,
     MOVE_CONFUSE_RAY,
     MOVE_THUNDER_WAVE,
-    MOVE_MAGNET_RISE,
-    MOVE_SWEET_KISS,
+    MOVE_AIR_SLASH,
+    MOVE_AQUA_STEP,
+    MOVE_ATTACK_ORDER,
+    MOVE_BITTER_BLADE,
+    MOVE_BONEMERANG,
+    MOVE_BONE_RUSH,
+    MOVE_DRAGON_TAIL,
+    MOVE_DRAIN_PUNCH,
+    MOVE_FLARE_BLITZ,
+    MOVE_FROST_BREATH,
+    MOVE_JAW_LOCK,
+    MOVE_PSYCHIC_FANGS,
+    MOVE_SHADOW_BONE,
+    MOVE_WATER_SHURIKEN,
+    MOVE_DRAGON_HAMMER,
+    MOVE_FREEZING_GLARE,
+    MOVE_PHOTON_GEYSER,
+    MOVE_SHELL_SIDE_ARM,
+    MOVE_SPACIAL_REND,
+    MOVE_TECHNO_BLAST,
+    MOVE_TERA_STARSTORM,
+    MOVE_UPROAR,
+    MOVE_FUTURE_SIGHT,
+    MOVE_POISON_JAB,
+    MOVE_SACRED_FIRE,
+    MOVE_SHIFT_GEAR,
+    MOVE_BLAZE_KICK,
+    MOVE_RAGING_BULL,
     MOVE_OBLIVION_WING,
     MOVE_DUAL_WINGBEAT,
     MOVE_ICE_SPINNER,
@@ -307,20 +331,10 @@ static u16 const sDynamicCustomMonMoves[] =
     // These are deliberately outside the exotic prefix: they may be naturally
     // learnable and are only injected when a legendary ability needs them.
     MOVE_ACID_ARMOR,
-    MOVE_AIR_SLASH,
-    MOVE_AQUA_STEP,
     MOVE_AROMATIC_MIST,
-    MOVE_ATTACK_ORDER,
     MOVE_BITE,
-    MOVE_BITTER_BLADE,
-    MOVE_BONEMERANG,
-    MOVE_BONE_RUSH,
     MOVE_DEFEND_ORDER,
-    MOVE_DRAGON_TAIL,
-    MOVE_DRAIN_PUNCH,
     MOVE_DYNAMIC_PUNCH,
-    MOVE_FLARE_BLITZ,
-    MOVE_FROST_BREATH,
     MOVE_GIGA_IMPACT,
     MOVE_HEAL_ORDER,
     MOVE_HEAL_PULSE,
@@ -329,55 +343,40 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_ICE_BALL,
     MOVE_INFERNO,
     MOVE_IRON_DEFENSE,
-    MOVE_JAW_LOCK,
     MOVE_METEOR_ASSAULT,
     MOVE_MIND_BLOWN,
     MOVE_PROTECT,
-    MOVE_PSYCHIC_FANGS,
     MOVE_ROAR,
-    MOVE_SHADOW_BONE,
     MOVE_SING,
     MOVE_SLEEP_POWDER,
     MOVE_SPIKY_SHIELD,
     MOVE_STUN_SPORE,
-    MOVE_WATER_SHURIKEN,
     MOVE_WHIRLWIND,
     MOVE_DIG,
     MOVE_DIVE,
-    MOVE_DRAGON_HAMMER,
     MOVE_FILLET_AWAY,
     MOVE_FLOWER_SHIELD,
     MOVE_FOCUS_ENERGY,
-    MOVE_FREEZING_GLARE,
     MOVE_GLARE,
     MOVE_HEALING_WISH,
     MOVE_HYPNOSIS,
     MOVE_OCTOLOCK,
-    MOVE_PHOTON_GEYSER,
     MOVE_REST,
     MOVE_REVIVAL_BLESSING,
     MOVE_ROAR_OF_TIME,
     MOVE_SHADOW_FORCE,
-    MOVE_SHELL_SIDE_ARM,
-    MOVE_SPACIAL_REND,
     MOVE_STOCKPILE,
     MOVE_TEATIME,
-    MOVE_TECHNO_BLAST,
-    MOVE_TERA_STARSTORM,
     MOVE_BULK_UP,
     MOVE_CRUNCH,
     MOVE_THUNDER_PUNCH,
-    MOVE_UPROAR,
-    MOVE_FUTURE_SIGHT,
-    MOVE_POISON_JAB,
     MOVE_RAIN_DANCE,
     MOVE_ROOST,
-    MOVE_SACRED_FIRE,
-    MOVE_SHIFT_GEAR,
-    MOVE_BLAZE_KICK,
     MOVE_FLING,
-    MOVE_RAGING_BULL,
     MOVE_TRANSFORM,
+    MOVE_CHARGE,
+    MOVE_MAGNET_RISE,
+    MOVE_SWEET_KISS,
 #else
     MOVE_PAY_DAY,
     MOVE_FIRE_PUNCH,
@@ -448,7 +447,7 @@ static u16 const sDynamicCustomMonMoves[] =
 STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_MAX < (1 << 9), DynamicStandardAbilityFits9Bits);
 STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_GROUP_COUNT >= 4, LegendaryAbilitySeedHasFourCandidates);
 #ifdef ROGUE_EXPANSION
-#define DYNAMIC_EXOTIC_MOVE_COUNT 183
+#define DYNAMIC_EXOTIC_MOVE_COUNT 207
 #else
 #define DYNAMIC_EXOTIC_MOVE_COUNT ARRAY_COUNT(sDynamicCustomMonMoves)
 #endif
@@ -2556,6 +2555,19 @@ bool8 RogueGift_DebugIsMoveInDynamicPool(u16 move)
     u16 i;
 
     for(i = 0; i < ARRAY_COUNT(sDynamicCustomMonMoves); ++i)
+    {
+        if(sDynamicCustomMonMoves[i] == move)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 RogueGift_DebugIsMoveExotic(u16 move)
+{
+    u16 i;
+
+    for(i = 0; i < DYNAMIC_EXOTIC_MOVE_COUNT; ++i)
     {
         if(sDynamicCustomMonMoves[i] == move)
             return TRUE;
