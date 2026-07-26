@@ -28,6 +28,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Expanded generated Unique Pokémon's exotic move pool with all eleven
+  non-field Divergence moves and seven additional curated moves, retaining its
+  attack-focused distribution while broadening type and effect variety.
 - Expanded generated Unique Pokémon's regular Ability pool to every compatible
   standard Ability. Mechanically identical names now share one weighted roll
   before choosing a flavor, and species/form-bound, severe-drawback,

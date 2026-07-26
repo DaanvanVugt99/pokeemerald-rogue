@@ -850,12 +850,44 @@ TEST("Generated altered typings can roll every move choice in either slot")
     EXPECT_EQ(seenCount, 8);
 }
 
-TEST("Dynamic general move index 165 decodes the expanded pool boundary")
+TEST("Dynamic exotic move pool includes expanded curated moves")
 {
-    u32 customMonId = DynamicOriginalCustomMonId(165, 0, 0);
+    static const u16 sExpectedMoves[] =
+    {
+        MOVE_OBLIVION_WING,
+        MOVE_DUAL_WINGBEAT,
+        MOVE_ICE_SPINNER,
+        MOVE_CLANGING_SCALES,
+        MOVE_THOUSAND_ARROWS,
+        MOVE_DIRE_CLAW,
+        MOVE_TIDY_UP,
+        MOVE_SHIMMER,
+        MOVE_COLD_SNAP,
+        MOVE_NIGHTFALL,
+        MOVE_JETSTREAM,
+        MOVE_THUNDERCRUSH,
+        MOVE_FOUL_MIXTURE,
+        MOVE_STAGE_FRIGHT,
+        MOVE_WILD_GROWTH,
+        MOVE_STATIC_BURST,
+        MOVE_CHEAP_TRICK,
+        MOVE_BRAINSTORM,
+    };
+    u16 firstCustomMoveIndex = RogueGift_DebugGetDynamicExoticMoveCount() - ARRAY_COUNT(sExpectedMoves) + 1;
+    u8 i;
+
+    EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 183);
+
+    for(i = 0; i < ARRAY_COUNT(sExpectedMoves); ++i)
+        EXPECT_EQ(RogueGift_DebugGetDynamicMoveByIndex(firstCustomMoveIndex + i), sExpectedMoves[i]);
+}
+
+TEST("Dynamic general move index 183 decodes the expanded pool boundary")
+{
+    u32 customMonId = DynamicOriginalCustomMonId(183, 0, 0);
 
     EXPECT_EQ(RogueGift_GetCustomMonMoveCount(customMonId), 1);
-    EXPECT_EQ(RogueGift_GetCustomMonMove(customMonId, 0), MOVE_SWEET_KISS);
+    EXPECT_EQ(RogueGift_GetCustomMonMove(customMonId, 0), MOVE_BRAINSTORM);
 }
 
 TEST("Expanded dynamic move selections decode high pairs in every payload format")
@@ -867,7 +899,7 @@ TEST("Expanded dynamic move selections decode high pairs in every payload format
     u32 typedUniqueId = DynamicTypeUniqueAbilityCustomMonId(TYPE_FIRE, 1, 1, upper, 1, ABILITY_STARMOBILE);
 
     EXPECT_LE(upper, 255);
-    EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 165);
+    EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 183);
 
     EXPECT_EQ(RogueGift_GetCustomMonMoveCount(originalId), 2);
     EXPECT_EQ(RogueGift_GetCustomMonMove(originalId, 0), RogueGift_DebugGetDynamicMoveByIndex(upper - 1));

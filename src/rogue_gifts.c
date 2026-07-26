@@ -284,6 +284,24 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_THUNDER_WAVE,
     MOVE_MAGNET_RISE,
     MOVE_SWEET_KISS,
+    MOVE_OBLIVION_WING,
+    MOVE_DUAL_WINGBEAT,
+    MOVE_ICE_SPINNER,
+    MOVE_CLANGING_SCALES,
+    MOVE_THOUSAND_ARROWS,
+    MOVE_DIRE_CLAW,
+    MOVE_TIDY_UP,
+    MOVE_SHIMMER,
+    MOVE_COLD_SNAP,
+    MOVE_NIGHTFALL,
+    MOVE_JETSTREAM,
+    MOVE_THUNDERCRUSH,
+    MOVE_FOUL_MIXTURE,
+    MOVE_STAGE_FRIGHT,
+    MOVE_WILD_GROWTH,
+    MOVE_STATIC_BURST,
+    MOVE_CHEAP_TRICK,
+    MOVE_BRAINSTORM,
 
     // Serialization-only candidates for direct unique-ability interactions.
     // These are deliberately outside the exotic prefix: they may be naturally
@@ -430,7 +448,7 @@ static u16 const sDynamicCustomMonMoves[] =
 STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_MAX < (1 << 9), DynamicStandardAbilityFits9Bits);
 STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_GROUP_COUNT >= 4, LegendaryAbilitySeedHasFourCandidates);
 #ifdef ROGUE_EXPANSION
-#define DYNAMIC_EXOTIC_MOVE_COUNT 165
+#define DYNAMIC_EXOTIC_MOVE_COUNT 183
 #else
 #define DYNAMIC_EXOTIC_MOVE_COUNT ARRAY_COUNT(sDynamicCustomMonMoves)
 #endif
