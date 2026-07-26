@@ -30,7 +30,6 @@ u16 RogueGift_GetDynamicUniqueAbilityPoolCount(void);
 #ifdef ROGUE_DEBUG
 u16 RogueGift_DebugGetDynamicSynergyProfileId(u16 ability);
 u16 RogueGift_DebugGetDynamicSynergyMove(u16 ability, u8 choice);
-u8 RogueGift_DebugGetDynamicSynergyPolicy(u16 ability);
 u8 RogueGift_DebugSelectDynamicSynergyChoice(u16 species, u16 ability, u16 suppliedMove);
 u16 RogueGift_DebugSelectDynamicSynergyMove(u16 species, u16 ability, u16 move1, u16 move2);
 u16 RogueGift_DebugSelectCreationSynergyMove(u16 species, u8 type, u16 suppliedMove);

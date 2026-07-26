@@ -116,7 +116,9 @@ static const u16 sDynamicStandardAbilityExclusions[] =
     ABILITY_WONDER_GUARD,
 };
 
-static u16 const sDynamicCustomMonMoves[] = 
+// These arrays form one serialized move-index table: exotics first, followed by
+// synergy-only moves. Preserve entry order after the first public release.
+static const u16 sDynamicExoticMoves[] =
 {
 #ifdef ROGUE_EXPANSION
     MOVE_HYDRO_STEAM,
@@ -326,57 +328,6 @@ static u16 const sDynamicCustomMonMoves[] =
     MOVE_STATIC_BURST,
     MOVE_CHEAP_TRICK,
     MOVE_BRAINSTORM,
-
-    // Serialization-only candidates for direct unique-ability interactions.
-    // These are deliberately outside the exotic prefix: they may be naturally
-    // learnable and are only injected when a legendary ability needs them.
-    MOVE_ACID_ARMOR,
-    MOVE_AROMATIC_MIST,
-    MOVE_BITE,
-    MOVE_DEFEND_ORDER,
-    MOVE_DYNAMIC_PUNCH,
-    MOVE_GIGA_IMPACT,
-    MOVE_HEAL_ORDER,
-    MOVE_HEAL_PULSE,
-    MOVE_HELPING_HAND,
-    MOVE_HYPER_BEAM,
-    MOVE_ICE_BALL,
-    MOVE_INFERNO,
-    MOVE_IRON_DEFENSE,
-    MOVE_METEOR_ASSAULT,
-    MOVE_MIND_BLOWN,
-    MOVE_PROTECT,
-    MOVE_ROAR,
-    MOVE_SING,
-    MOVE_SLEEP_POWDER,
-    MOVE_SPIKY_SHIELD,
-    MOVE_STUN_SPORE,
-    MOVE_WHIRLWIND,
-    MOVE_DIG,
-    MOVE_DIVE,
-    MOVE_FILLET_AWAY,
-    MOVE_FLOWER_SHIELD,
-    MOVE_FOCUS_ENERGY,
-    MOVE_GLARE,
-    MOVE_HEALING_WISH,
-    MOVE_HYPNOSIS,
-    MOVE_OCTOLOCK,
-    MOVE_REST,
-    MOVE_REVIVAL_BLESSING,
-    MOVE_ROAR_OF_TIME,
-    MOVE_SHADOW_FORCE,
-    MOVE_STOCKPILE,
-    MOVE_TEATIME,
-    MOVE_BULK_UP,
-    MOVE_CRUNCH,
-    MOVE_THUNDER_PUNCH,
-    MOVE_RAIN_DANCE,
-    MOVE_ROOST,
-    MOVE_FLING,
-    MOVE_TRANSFORM,
-    MOVE_CHARGE,
-    MOVE_MAGNET_RISE,
-    MOVE_SWEET_KISS,
 #else
     MOVE_PAY_DAY,
     MOVE_FIRE_PUNCH,
@@ -444,24 +395,99 @@ static u16 const sDynamicCustomMonMoves[] =
 #endif
 };
 
+#ifdef ROGUE_EXPANSION
+// Direct unique-ability candidates which are encodable but never enter the
+// equal-weight exotic roll. They may be naturally learnable or too conditional
+// to be satisfying standalone rewards.
+static const u16 sDynamicSynergyOnlyMoves[] =
+{
+    MOVE_ACID_ARMOR,
+    MOVE_AROMATIC_MIST,
+    MOVE_BITE,
+    MOVE_DEFEND_ORDER,
+    MOVE_DYNAMIC_PUNCH,
+    MOVE_GIGA_IMPACT,
+    MOVE_HEAL_ORDER,
+    MOVE_HEAL_PULSE,
+    MOVE_HELPING_HAND,
+    MOVE_HYPER_BEAM,
+    MOVE_ICE_BALL,
+    MOVE_INFERNO,
+    MOVE_IRON_DEFENSE,
+    MOVE_METEOR_ASSAULT,
+    MOVE_MIND_BLOWN,
+    MOVE_PROTECT,
+    MOVE_ROAR,
+    MOVE_SING,
+    MOVE_SLEEP_POWDER,
+    MOVE_SPIKY_SHIELD,
+    MOVE_STUN_SPORE,
+    MOVE_WHIRLWIND,
+    MOVE_DIG,
+    MOVE_DIVE,
+    MOVE_FILLET_AWAY,
+    MOVE_FLOWER_SHIELD,
+    MOVE_FOCUS_ENERGY,
+    MOVE_GLARE,
+    MOVE_HEALING_WISH,
+    MOVE_HYPNOSIS,
+    MOVE_OCTOLOCK,
+    MOVE_REST,
+    MOVE_REVIVAL_BLESSING,
+    MOVE_ROAR_OF_TIME,
+    MOVE_SHADOW_FORCE,
+    MOVE_STOCKPILE,
+    MOVE_TEATIME,
+    MOVE_BULK_UP,
+    MOVE_CRUNCH,
+    MOVE_THUNDER_PUNCH,
+    MOVE_RAIN_DANCE,
+    MOVE_ROOST,
+    MOVE_FLING,
+    MOVE_TRANSFORM,
+    MOVE_CHARGE,
+    MOVE_MAGNET_RISE,
+    MOVE_SWEET_KISS,
+};
+#endif
+
 STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_MAX < (1 << 9), DynamicStandardAbilityFits9Bits);
 STATIC_ASSERT(DYNAMIC_STANDARD_ABILITY_GROUP_COUNT >= 4, LegendaryAbilitySeedHasFourCandidates);
+#define DYNAMIC_EXOTIC_MOVE_COUNT ARRAY_COUNT(sDynamicExoticMoves)
 #ifdef ROGUE_EXPANSION
-#define DYNAMIC_EXOTIC_MOVE_COUNT 207
+#define DYNAMIC_SYNERGY_ONLY_MOVE_COUNT ARRAY_COUNT(sDynamicSynergyOnlyMoves)
 #else
-#define DYNAMIC_EXOTIC_MOVE_COUNT ARRAY_COUNT(sDynamicCustomMonMoves)
+#define DYNAMIC_SYNERGY_ONLY_MOVE_COUNT 0
 #endif
+#define DYNAMIC_MOVE_POOL_COUNT (DYNAMIC_EXOTIC_MOVE_COUNT + DYNAMIC_SYNERGY_ONLY_MOVE_COUNT)
 #define DYNAMIC_MOVE_POOL_CAPACITY 255
 #define DYNAMIC_MOVE_SELECTION_CAPACITY (1 << 15)
 #define DYNAMIC_MOVE_PAIR_COUNT ((DYNAMIC_MOVE_POOL_CAPACITY * (DYNAMIC_MOVE_POOL_CAPACITY - 1)) / 2)
 #define DYNAMIC_MOVE_PAIR_CODE_START (DYNAMIC_MOVE_POOL_CAPACITY + 1)
 
-STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonMoves) <= DYNAMIC_MOVE_POOL_CAPACITY, SizeOfDynamicCustomMonMoves);
-#ifdef ROGUE_EXPANSION
-STATIC_ASSERT(ARRAY_COUNT(sDynamicCustomMonMoves) >= DYNAMIC_EXOTIC_MOVE_COUNT, DynamicMovePoolContainsExoticPrefix);
-#endif
+STATIC_ASSERT(DYNAMIC_MOVE_POOL_COUNT <= DYNAMIC_MOVE_POOL_CAPACITY, SizeOfDynamicCustomMonMoves);
 STATIC_ASSERT(DYNAMIC_MOVE_PAIR_CODE_START + DYNAMIC_MOVE_PAIR_COUNT <= DYNAMIC_MOVE_SELECTION_CAPACITY, DynamicMoveSelectionFits15Bits);
 STATIC_ASSERT(ABILITIES_COUNT <= 1024, DynamicUniqueAbilityFits10Bits);
+
+static u16 GetDynamicMoveByIndex(u16 moveIndex)
+{
+    u16 index;
+
+    if(moveIndex == 0)
+        return MOVE_NONE;
+
+    index = moveIndex - 1;
+    if(index < DYNAMIC_EXOTIC_MOVE_COUNT)
+        return sDynamicExoticMoves[index];
+
+#ifdef ROGUE_EXPANSION
+    index -= DYNAMIC_EXOTIC_MOVE_COUNT;
+    if(index < DYNAMIC_SYNERGY_ONLY_MOVE_COUNT)
+        return sDynamicSynergyOnlyMoves[index];
+#endif
+
+    return MOVE_NONE;
+}
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
 #define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_CHROMATIC_FLUX
@@ -701,12 +727,6 @@ u16 RogueGift_GetDynamicUniqueAbilityPoolCount(void)
     return DYNAMIC_UNIQUE_ABILITY_COUNT;
 }
 
-enum DynamicSynergyPolicy
-{
-    DYNAMIC_SYNERGY_POLICY_UNIFORM,
-    DYNAMIC_SYNERGY_POLICY_OFFENSE,
-};
-
 enum DynamicSynergyProfileId
 {
     DYNAMIC_SYNERGY_PROFILE_NONE,
@@ -760,7 +780,6 @@ STATIC_ASSERT(DYNAMIC_SYNERGY_PROFILE_TYPE_DAMAGE_BASE + NUMBER_OF_MON_TYPES < D
 struct DynamicSynergyProfile
 {
     u16 moves[3];
-    u8 policy;
 };
 
 #ifdef ROGUE_EXPANSION
@@ -1064,7 +1083,7 @@ static u16 GetDynamicUniqueAbilitySynergyProfileId(u16 ability)
 
 static struct DynamicSynergyProfile GetDynamicSynergyProfile(u16 profileId)
 {
-    struct DynamicSynergyProfile profile = { .policy = DYNAMIC_SYNERGY_POLICY_UNIFORM };
+    struct DynamicSynergyProfile profile = {0};
 
 #ifdef ROGUE_EXPANSION
     if(profileId >= DYNAMIC_SYNERGY_PROFILE_TYPE_ANY_BASE
@@ -1074,7 +1093,6 @@ static struct DynamicSynergyProfile GetDynamicSynergyProfile(u16 profileId)
         profile.moves[0] = sDynamicTypeSynergyMoves[type][0];
         profile.moves[1] = sDynamicTypeSynergyMoves[type][2];
         profile.moves[2] = sDynamicTypeSynergyMoves[type][1];
-        profile.policy = DYNAMIC_SYNERGY_POLICY_OFFENSE;
         return profile;
     }
     if(profileId >= DYNAMIC_SYNERGY_PROFILE_TYPE_DAMAGE_BASE
@@ -1084,7 +1102,6 @@ static struct DynamicSynergyProfile GetDynamicSynergyProfile(u16 profileId)
         profile.moves[0] = sDynamicTypeSynergyMoves[type][0];
         profile.moves[1] = sDynamicTypeSynergyMoves[type][2];
         profile.moves[2] = sDynamicTypeSynergyMoves[type][3];
-        profile.policy = DYNAMIC_SYNERGY_POLICY_OFFENSE;
         return profile;
     }
     if(profileId >= DYNAMIC_SYNERGY_PROFILE_EXACT_BASE)
@@ -1096,109 +1113,109 @@ static struct DynamicSynergyProfile GetDynamicSynergyProfile(u16 profileId)
     switch(profileId)
     {
     case DYNAMIC_SYNERGY_PROFILE_PUNCH:
-        profile = (struct DynamicSynergyProfile){{ MOVE_JET_PUNCH, MOVE_NONE, MOVE_DRAIN_PUNCH }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_JET_PUNCH, MOVE_NONE, MOVE_DRAIN_PUNCH }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_KICK:
-        profile = (struct DynamicSynergyProfile){{ MOVE_BLAZE_KICK, MOVE_NONE, MOVE_TRIPLE_AXEL }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_BLAZE_KICK, MOVE_NONE, MOVE_TRIPLE_AXEL }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_SLICE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_LEAF_BLADE, MOVE_AIR_SLASH, MOVE_BITTER_BLADE }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_LEAF_BLADE, MOVE_AIR_SLASH, MOVE_BITTER_BLADE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_BITE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_CRUNCH, MOVE_PSYCHIC_FANGS, MOVE_JAW_LOCK }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_CRUNCH, MOVE_PSYCHIC_FANGS, MOVE_JAW_LOCK }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_SOUND:
-        profile = (struct DynamicSynergyProfile){{ MOVE_NONE, MOVE_BOOMBURST, MOVE_SNARL }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_NONE, MOVE_BOOMBURST, MOVE_SNARL }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_DANCE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_AQUA_STEP, MOVE_REVELATION_DANCE, MOVE_QUIVER_DANCE }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_AQUA_STEP, MOVE_REVELATION_DANCE, MOVE_QUIVER_DANCE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_HEALING:
-        profile = (struct DynamicSynergyProfile){{ MOVE_HORN_LEECH, MOVE_DRAINING_KISS, MOVE_RECOVER }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_HORN_LEECH, MOVE_DRAINING_KISS, MOVE_RECOVER }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_PIVOT:
-        profile = (struct DynamicSynergyProfile){{ MOVE_U_TURN, MOVE_VOLT_SWITCH, MOVE_PARTING_SHOT }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_U_TURN, MOVE_VOLT_SWITCH, MOVE_PARTING_SHOT }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_RECOIL:
-        profile = (struct DynamicSynergyProfile){{ MOVE_BRAVE_BIRD, MOVE_MIND_BLOWN, MOVE_FLARE_BLITZ }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_BRAVE_BIRD, MOVE_MIND_BLOWN, MOVE_FLARE_BLITZ }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_MULTI_HIT:
-        profile = (struct DynamicSynergyProfile){{ MOVE_SURGING_STRIKES, MOVE_WATER_SHURIKEN, MOVE_SCALE_SHOT }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_SURGING_STRIKES, MOVE_WATER_SHURIKEN, MOVE_SCALE_SHOT }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_POWDER:
-        profile = (struct DynamicSynergyProfile){{ MOVE_SPORE, MOVE_SLEEP_POWDER, MOVE_STUN_SPORE }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_SPORE, MOVE_SLEEP_POWDER, MOVE_STUN_SPORE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_PROTECTION:
-        profile = (struct DynamicSynergyProfile){{ MOVE_PROTECT, MOVE_SPIKY_SHIELD, MOVE_BANEFUL_BUNKER }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_PROTECT, MOVE_SPIKY_SHIELD, MOVE_BANEFUL_BUNKER }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_PULSE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_NONE, MOVE_DARK_PULSE, MOVE_HEAL_PULSE }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_NONE, MOVE_DARK_PULSE, MOVE_HEAL_PULSE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_BONE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_SHADOW_BONE, MOVE_BONE_RUSH, MOVE_BONEMERANG }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_SHADOW_BONE, MOVE_BONE_RUSH, MOVE_BONEMERANG }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_KISS:
-        profile = (struct DynamicSynergyProfile){{ MOVE_NONE, MOVE_DRAINING_KISS, MOVE_SWEET_KISS }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_NONE, MOVE_DRAINING_KISS, MOVE_SWEET_KISS }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_STATUS:
-        profile = (struct DynamicSynergyProfile){{ MOVE_TAUNT, MOVE_ENCORE, MOVE_DISABLE }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_TAUNT, MOVE_ENCORE, MOVE_DISABLE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_RECHARGE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_GIGA_IMPACT, MOVE_HYPER_BEAM, MOVE_METEOR_ASSAULT }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_GIGA_IMPACT, MOVE_HYPER_BEAM, MOVE_METEOR_ASSAULT }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_CONTACT:
-        profile = (struct DynamicSynergyProfile){{ MOVE_BODY_SLAM, MOVE_DRAINING_KISS, MOVE_FAKE_OUT }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_BODY_SLAM, MOVE_DRAINING_KISS, MOVE_FAKE_OUT }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_DYNAMO_FISTS:
-        profile = (struct DynamicSynergyProfile){{ MOVE_THUNDER_PUNCH, MOVE_THUNDER, MOVE_CHARGE }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_THUNDER_PUNCH, MOVE_THUNDER, MOVE_CHARGE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_FAULT_FINDER:
-        profile = (struct DynamicSynergyProfile){{ MOVE_HEADLONG_RUSH, MOVE_EARTH_POWER, MOVE_FLASH_CANNON }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_HEADLONG_RUSH, MOVE_EARTH_POWER, MOVE_FLASH_CANNON }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_ROLLING_START:
-        profile = (struct DynamicSynergyProfile){{ MOVE_ROLLOUT, MOVE_ICE_BALL, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_ROLLOUT, MOVE_ICE_BALL, MOVE_NONE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_RECOVER_STRENGTH_SAP:
-        profile = (struct DynamicSynergyProfile){{ MOVE_RECOVER, MOVE_STRENGTH_SAP, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_RECOVER, MOVE_STRENGTH_SAP, MOVE_NONE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_ENCORE_DISABLE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_ENCORE, MOVE_DISABLE, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_ENCORE, MOVE_DISABLE, MOVE_NONE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_BEGUILE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_ENCORE, MOVE_DISABLE, MOVE_TORMENT }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_ENCORE, MOVE_DISABLE, MOVE_TORMENT }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_LOW_ACCURACY:
-        profile = (struct DynamicSynergyProfile){{ MOVE_DYNAMIC_PUNCH, MOVE_ZAP_CANNON, MOVE_INFERNO }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_DYNAMIC_PUNCH, MOVE_ZAP_CANNON, MOVE_INFERNO }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_ALLY_TARGET:
-        profile = (struct DynamicSynergyProfile){{ MOVE_HELPING_HAND, MOVE_HEAL_PULSE, MOVE_AROMATIC_MIST }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_HELPING_HAND, MOVE_HEAL_PULSE, MOVE_AROMATIC_MIST }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_BITE_OR_CRUNCH:
-        profile = (struct DynamicSynergyProfile){{ MOVE_BITE, MOVE_CRUNCH, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_BITE, MOVE_CRUNCH, MOVE_NONE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_ORDER:
-        profile = (struct DynamicSynergyProfile){{ MOVE_ATTACK_ORDER, MOVE_DEFEND_ORDER, MOVE_HEAL_ORDER }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_ATTACK_ORDER, MOVE_DEFEND_ORDER, MOVE_HEAL_ORDER }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_FORCED_SWITCH:
-        profile = (struct DynamicSynergyProfile){{ MOVE_DRAGON_TAIL, MOVE_ROAR, MOVE_WHIRLWIND }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_DRAGON_TAIL, MOVE_ROAR, MOVE_WHIRLWIND }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_PSYCHIC_STATUS:
-        profile = (struct DynamicSynergyProfile){{ MOVE_CALM_MIND, MOVE_TRICK_ROOM, MOVE_GRAVITY }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_CALM_MIND, MOVE_TRICK_ROOM, MOVE_GRAVITY }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_GHOST_STATUS:
-        profile = (struct DynamicSynergyProfile){{ MOVE_DESTINY_BOND, MOVE_CURSE, MOVE_CONFUSE_RAY }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_DESTINY_BOND, MOVE_CURSE, MOVE_CONFUSE_RAY }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_ATTACK_BOOST:
-        profile = (struct DynamicSynergyProfile){{ MOVE_SWORDS_DANCE, MOVE_BULK_UP, MOVE_DRAGON_DANCE }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_SWORDS_DANCE, MOVE_BULK_UP, MOVE_DRAGON_DANCE }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_WEAK_MOVE:
-        profile = (struct DynamicSynergyProfile){{ MOVE_NUZZLE, MOVE_ACID_SPRAY, MOVE_FAKE_OUT }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_NUZZLE, MOVE_ACID_SPRAY, MOVE_FAKE_OUT }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_CRITICAL_HIT:
-        profile = (struct DynamicSynergyProfile){{ MOVE_LEAF_BLADE, MOVE_FROST_BREATH, MOVE_NIGHT_SLASH }, DYNAMIC_SYNERGY_POLICY_OFFENSE};
+        profile = (struct DynamicSynergyProfile){{ MOVE_LEAF_BLADE, MOVE_FROST_BREATH, MOVE_NIGHT_SLASH }};
         break;
     case DYNAMIC_SYNERGY_PROFILE_DEFENSE_BOOST:
-        profile = (struct DynamicSynergyProfile){{ MOVE_IRON_DEFENSE, MOVE_ACID_ARMOR, MOVE_BULK_UP }, DYNAMIC_SYNERGY_POLICY_UNIFORM};
+        profile = (struct DynamicSynergyProfile){{ MOVE_IRON_DEFENSE, MOVE_ACID_ARMOR, MOVE_BULK_UP }};
         break;
     }
 #endif
@@ -1309,29 +1326,29 @@ static u16 GetDynamicUniqueAbilitySynergyMove(u16 ability, u8 choice)
 
 static struct DynamicSynergyProfile GetCreationSynergyProfile(u8 type)
 {
-    struct DynamicSynergyProfile profile = { .policy = DYNAMIC_SYNERGY_POLICY_UNIFORM };
+    struct DynamicSynergyProfile profile = {0};
 
 #ifdef ROGUE_EXPANSION
     switch(type)
     {
-    case TYPE_NORMAL:   profile = (struct DynamicSynergyProfile){{ MOVE_SUBSTITUTE, MOVE_RECOVER, MOVE_SWORDS_DANCE }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
+    case TYPE_NORMAL:   profile = (struct DynamicSynergyProfile){{ MOVE_SUBSTITUTE, MOVE_RECOVER, MOVE_SWORDS_DANCE }}; break;
     case TYPE_FIGHTING: profile.moves[0] = MOVE_BULK_UP; break;
     case TYPE_FLYING:   profile.moves[0] = MOVE_ROOST; break;
     case TYPE_FIRE:     profile.moves[0] = MOVE_WILL_O_WISP; break;
     case TYPE_WATER:    profile.moves[0] = MOVE_AQUA_RING; break;
-    case TYPE_POISON:   profile = (struct DynamicSynergyProfile){{ MOVE_TOXIC_SPIKES, MOVE_TOXIC, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
+    case TYPE_POISON:   profile = (struct DynamicSynergyProfile){{ MOVE_TOXIC_SPIKES, MOVE_TOXIC, MOVE_NONE }}; break;
     case TYPE_GROUND:   profile.moves[0] = MOVE_SPIKES; break;
-    case TYPE_ROCK:     profile = (struct DynamicSynergyProfile){{ MOVE_STEALTH_ROCK, MOVE_ROCK_POLISH, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
-    case TYPE_BUG:      profile = (struct DynamicSynergyProfile){{ MOVE_STICKY_WEB, MOVE_QUIVER_DANCE, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
-    case TYPE_GHOST:    profile = (struct DynamicSynergyProfile){{ MOVE_DESTINY_BOND, MOVE_CURSE, MOVE_CONFUSE_RAY }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
-    case TYPE_STEEL:    profile = (struct DynamicSynergyProfile){{ MOVE_SHIFT_GEAR, MOVE_IRON_DEFENSE, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
-    case TYPE_GRASS:    profile = (struct DynamicSynergyProfile){{ MOVE_LEECH_SEED, MOVE_SPORE, MOVE_STRENGTH_SAP }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
-    case TYPE_ELECTRIC: profile = (struct DynamicSynergyProfile){{ MOVE_CHARGE, MOVE_THUNDER_WAVE, MOVE_MAGNET_RISE }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
-    case TYPE_PSYCHIC:  profile = (struct DynamicSynergyProfile){{ MOVE_TRICK_ROOM, MOVE_CALM_MIND, MOVE_GRAVITY }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
+    case TYPE_ROCK:     profile = (struct DynamicSynergyProfile){{ MOVE_STEALTH_ROCK, MOVE_ROCK_POLISH, MOVE_NONE }}; break;
+    case TYPE_BUG:      profile = (struct DynamicSynergyProfile){{ MOVE_STICKY_WEB, MOVE_QUIVER_DANCE, MOVE_NONE }}; break;
+    case TYPE_GHOST:    profile = (struct DynamicSynergyProfile){{ MOVE_DESTINY_BOND, MOVE_CURSE, MOVE_CONFUSE_RAY }}; break;
+    case TYPE_STEEL:    profile = (struct DynamicSynergyProfile){{ MOVE_SHIFT_GEAR, MOVE_IRON_DEFENSE, MOVE_NONE }}; break;
+    case TYPE_GRASS:    profile = (struct DynamicSynergyProfile){{ MOVE_LEECH_SEED, MOVE_SPORE, MOVE_STRENGTH_SAP }}; break;
+    case TYPE_ELECTRIC: profile = (struct DynamicSynergyProfile){{ MOVE_CHARGE, MOVE_THUNDER_WAVE, MOVE_MAGNET_RISE }}; break;
+    case TYPE_PSYCHIC:  profile = (struct DynamicSynergyProfile){{ MOVE_TRICK_ROOM, MOVE_CALM_MIND, MOVE_GRAVITY }}; break;
     case TYPE_ICE:      profile.moves[0] = MOVE_HAZE; break;
     case TYPE_DRAGON:   profile.moves[0] = MOVE_DRAGON_DANCE; break;
-    case TYPE_DARK:     profile = (struct DynamicSynergyProfile){{ MOVE_TAUNT, MOVE_NASTY_PLOT, MOVE_TORMENT }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
-    case TYPE_FAIRY:    profile = (struct DynamicSynergyProfile){{ MOVE_CHARM, MOVE_SWEET_KISS, MOVE_NONE }, DYNAMIC_SYNERGY_POLICY_UNIFORM}; break;
+    case TYPE_DARK:     profile = (struct DynamicSynergyProfile){{ MOVE_TAUNT, MOVE_NASTY_PLOT, MOVE_TORMENT }}; break;
+    case TYPE_FAIRY:    profile = (struct DynamicSynergyProfile){{ MOVE_CHARM, MOVE_SWEET_KISS, MOVE_NONE }}; break;
     }
 #endif
 
@@ -1354,10 +1371,6 @@ u16 RogueGift_DebugGetDynamicSynergyMove(u16 ability, u8 choice)
     return GetDynamicUniqueAbilitySynergyMove(ability, choice);
 }
 
-u8 RogueGift_DebugGetDynamicSynergyPolicy(u16 ability)
-{
-    return GetDynamicUniqueAbilitySynergyProfile(ability).policy;
-}
 #endif
 
 const u16 sTypeTintColors[NUMBER_OF_MON_TYPES] =
@@ -1520,17 +1533,17 @@ static u16 EncodeDynamicMoveSelection(u16 move1, u16 move2)
 
     if(move1 == 0)
     {
-        AGB_ASSERT(move2 <= ARRAY_COUNT(sDynamicCustomMonMoves));
+        AGB_ASSERT(move2 <= DYNAMIC_MOVE_POOL_COUNT);
         return move2;
     }
     if(move2 == 0)
     {
-        AGB_ASSERT(move1 <= ARRAY_COUNT(sDynamicCustomMonMoves));
+        AGB_ASSERT(move1 <= DYNAMIC_MOVE_POOL_COUNT);
         return move1;
     }
 
-    AGB_ASSERT(move1 <= ARRAY_COUNT(sDynamicCustomMonMoves));
-    AGB_ASSERT(move2 <= ARRAY_COUNT(sDynamicCustomMonMoves));
+    AGB_ASSERT(move1 <= DYNAMIC_MOVE_POOL_COUNT);
+    AGB_ASSERT(move2 <= DYNAMIC_MOVE_POOL_COUNT);
     if(move1 == move2)
     {
         AGB_ASSERT(FALSE);
@@ -1553,10 +1566,10 @@ static u16 EncodeDynamicMoveSelection(u16 move1, u16 move2)
 
 static void AppendDynamicMoveByIndex(struct DynamicMonData* outData, u16 moveIndex)
 {
-    if(moveIndex != 0 && moveIndex <= ARRAY_COUNT(sDynamicCustomMonMoves))
+    if(moveIndex != 0 && moveIndex <= DYNAMIC_MOVE_POOL_COUNT)
     {
         AGB_ASSERT(outData->movesCount < ARRAY_COUNT(outData->moves));
-        outData->moves[outData->movesCount++] = sDynamicCustomMonMoves[moveIndex - 1];
+        outData->moves[outData->movesCount++] = GetDynamicMoveByIndex(moveIndex);
     }
     else
     {
@@ -2103,10 +2116,10 @@ static u32 SelectNextMoveIndex(u16 species)
         u16 moveId = RogueMiscQuery_SelectRandomElement(Random());
         RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, moveId);
 
-        for (i = 0; i < ARRAY_COUNT(sDynamicCustomMonMoves); i++)
+        for (i = 1; i <= DYNAMIC_MOVE_POOL_COUNT; ++i)
         {
-            if(sDynamicCustomMonMoves[i] == moveId)
-                return 1 + i;
+            if(GetDynamicMoveByIndex(i) == moveId)
+                return i;
         }
 
         // Should never get here
@@ -2122,10 +2135,10 @@ static u16 GetDynamicMoveIndex(u16 move)
 {
     u16 i;
 
-    for(i = 0; i < ARRAY_COUNT(sDynamicCustomMonMoves); ++i)
+    for(i = 1; i <= DYNAMIC_MOVE_POOL_COUNT; ++i)
     {
-        if(sDynamicCustomMonMoves[i] == move)
-            return i + 1;
+        if(GetDynamicMoveByIndex(i) == move)
+            return i;
     }
 
     AGB_ASSERT(FALSE);
@@ -2320,7 +2333,7 @@ u16 RogueGift_DebugGetEvolutionFamilyExoticMoveCount(u16 species)
 
     for(i = 0; i < DYNAMIC_EXOTIC_MOVE_COUNT; ++i)
     {
-        if(!IsMoveNativeToDynamicFamily(&family, sDynamicCustomMonMoves[i]))
+        if(!IsMoveNativeToDynamicFamily(&family, sDynamicExoticMoves[i]))
             ++count;
     }
 
@@ -2411,6 +2424,8 @@ static struct SelectedDynamicSynergy SelectDynamicSynergyFromProfile(u16 species
             return selection;
     }
 
+    // Softly prefer the species' stronger offensive category without ever
+    // excluding a valid physical, special, or status candidate.
     for(i = 0; i < ARRAY_COUNT(profile.moves); ++i)
     {
         u16 move = profile.moves[i];
@@ -2535,7 +2550,7 @@ bool8 RogueGift_DebugDoesMoveMatchCreationSynergy(u8 type, u16 move)
 
 u16 RogueGift_DebugGetDynamicMovePoolCount(void)
 {
-    return ARRAY_COUNT(sDynamicCustomMonMoves);
+    return DYNAMIC_MOVE_POOL_COUNT;
 }
 
 u16 RogueGift_DebugGetDynamicExoticMoveCount(void)
@@ -2545,18 +2560,16 @@ u16 RogueGift_DebugGetDynamicExoticMoveCount(void)
 
 u16 RogueGift_DebugGetDynamicMoveByIndex(u16 index)
 {
-    return index != 0 && index <= ARRAY_COUNT(sDynamicCustomMonMoves)
-        ? sDynamicCustomMonMoves[index - 1]
-        : MOVE_NONE;
+    return GetDynamicMoveByIndex(index);
 }
 
 bool8 RogueGift_DebugIsMoveInDynamicPool(u16 move)
 {
     u16 i;
 
-    for(i = 0; i < ARRAY_COUNT(sDynamicCustomMonMoves); ++i)
+    for(i = 1; i <= DYNAMIC_MOVE_POOL_COUNT; ++i)
     {
-        if(sDynamicCustomMonMoves[i] == move)
+        if(GetDynamicMoveByIndex(i) == move)
             return TRUE;
     }
 
@@ -2569,7 +2582,7 @@ bool8 RogueGift_DebugIsMoveExotic(u16 move)
 
     for(i = 0; i < DYNAMIC_EXOTIC_MOVE_COUNT; ++i)
     {
-        if(sDynamicCustomMonMoves[i] == move)
+        if(sDynamicExoticMoves[i] == move)
             return TRUE;
     }
 
@@ -2626,7 +2639,7 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
     RogueCustomQuery_Begin();
 
     for (i = 0; i < DYNAMIC_EXOTIC_MOVE_COUNT; i++)
-        RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, sDynamicCustomMonMoves[i]);
+        RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, sDynamicExoticMoves[i]);
     ExcludeDynamicFamilyMovesFromQuery(&family);
 
     if(compressedDataUntyped.format == COMPRESSED_FORMAT_ORIGINAL)
@@ -2672,8 +2685,8 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
                 u8 abilitySeed;
                 u16 moves[2] =
                 {
-                    sDynamicCustomMonMoves[moveIndices[0] - 1],
-                    sDynamicCustomMonMoves[moveIndices[1] - 1],
+                    GetDynamicMoveByIndex(moveIndices[0]),
+                    GetDynamicMoveByIndex(moveIndices[1]),
                 };
                 struct SelectedDynamicSynergy synergy;
 
@@ -2761,7 +2774,7 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
 
                 compressedData->moveIndex = SelectNextMoveIndex(species);
                 moves[0] = typeMove;
-                moves[1] = sDynamicCustomMonMoves[compressedData->moveIndex - 1];
+                moves[1] = GetDynamicMoveByIndex(compressedData->moveIndex);
                 compressedData->uniqueAbility = forcedUniqueAbility != ABILITY_NONE
                     ? forcedUniqueAbility
                     : SelectNextUniqueAbility(&family, creationType);
