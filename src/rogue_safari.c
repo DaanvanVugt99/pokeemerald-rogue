@@ -527,8 +527,9 @@ static void DebugPushSafariMon(u16 species, u8 indexInRange, bool8 legendary)
 {
     struct Pokemon mon;
     u16 eggSpecies = Rogue_GetEggSpecies(species);
-    bool8 shiny = (indexInRange % 9) == 2;
     bool8 unique = (indexInRange % 6) == 3;
+    bool8 shiny = (indexInRange % 9) == 2
+        || (unique && (indexInRange % 12) == 3);
 
     if(unique)
     {
