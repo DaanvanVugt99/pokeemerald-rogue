@@ -40,6 +40,21 @@ SINGLE_BATTLE_TEST("Drift Song heals 1/8 max HP at end of turn after the user us
     }
 }
 
+SINGLE_BATTLE_TEST("Drift Song heals 1/4 max HP in Misty Terrain")
+{
+    GIVEN {
+        PLAYER(SPECIES_PHIONE) { Speed(50); Ability(ABILITY_HYDRATION); UniqueAbility(ABILITY_DRIFT_SONG); HP(200); MaxHP(400); Moves(MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_MISTY_TERRAIN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_MISTY_TERRAIN); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DRIFT_SONG);
+        MESSAGE("Phione's Drift Song restored its HP a little!");
+    } THEN {
+        EXPECT_EQ(player->hp, 300);
+    }
+}
+
 SINGLE_BATTLE_TEST("Drift Song heals 1/8 max HP at end of turn after the user uses a dynamically Water-type move")
 {
     GIVEN {

@@ -35,6 +35,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Expanded Misty Terrain synergy: Heartwing now preserves allied Dragon
+  damage, Flower Ritual activates with two Fairy allies or Misty Terrain,
+  Drift Song heals one quarter in Misty Terrain, and Moonglass heals one
+  sixth.
 - Replaced redundant weather-setting Abilities on Politoed, Pelipper,
   Tyranitar, the Snover line, Vanilluxe, the Amaura line, Torkoal, and
   Gigalith with Abilities that complement their weather-setting Unique

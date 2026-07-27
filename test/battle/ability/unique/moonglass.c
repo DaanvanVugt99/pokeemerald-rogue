@@ -13,6 +13,18 @@ SINGLE_BATTLE_TEST("Moonglass heals 1/8 max HP after using a successful status m
     }
 }
 
+SINGLE_BATTLE_TEST("Moonglass heals 1/6 max HP after using a successful status move in Misty Terrain")
+{
+    GIVEN {
+        PLAYER(SPECIES_CARBINK) { HP(90); MaxHP(180); Speed(50); Ability(ABILITY_CLEAR_BODY); UniqueAbility(ABILITY_MOONGLASS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_MISTY_TERRAIN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_MISTY_TERRAIN); }
+    } THEN {
+        EXPECT_EQ(player->hp, 120);
+    }
+}
+
 SINGLE_BATTLE_TEST("Moonglass does not heal after a damaging move")
 {
     GIVEN {

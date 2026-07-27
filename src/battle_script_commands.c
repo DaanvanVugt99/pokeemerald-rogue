@@ -8556,7 +8556,8 @@ static void Cmd_moveend(void)
              && !IsBattlerHealBlocked(gBattlerAttacker))
             {
                 SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_MOONGLASS);
-                gBattleMoveDamage = -(GetNonDynamaxMaxHP(gBattlerAttacker) / 8);
+                gBattleMoveDamage = -(GetNonDynamaxMaxHP(gBattlerAttacker)
+                    / (IsBattlerTerrainAffected(gBattlerAttacker, STATUS_FIELD_MISTY_TERRAIN) ? 6 : 8));
                 if (gBattleMoveDamage == 0)
                     gBattleMoveDamage = -1;
                 gBattlerAbility = gBattleScripting.battler = gBattlerAttacker;
