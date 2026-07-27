@@ -12,12 +12,14 @@
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
+#include "rogue_adventurepaths.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
 #include "rogue_save.h"
+#include "rogue_safari.h"
 #include "rogue_script.h"
 #include "rogue_settings.h"
 #include "rogue_trials.h"
@@ -227,6 +229,32 @@ TEST("Legendary Clause still rejects multiple Legendary Pokemon at run entry")
     Rogue_CheckPartyHasDuplicateStartSpecies();
     EXPECT(!gSpecialVar_Result);
 
+    ClearCaughtMonTestState();
+}
+
+TEST("Defeating a Legendary den Pokemon adds it to the Safari")
+{
+    u8 i;
+    bool8 foundLegendary = FALSE;
+
+    ResetCaughtMonTestState();
+    RogueSafari_ResetAllLegendEntries();
+    SetEnemyMon(0, SPECIES_MEWTWO);
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_LEGENDARY;
+    gBattleOutcome = B_OUTCOME_WON;
+
+    Rogue_Battle_EndWildBattle();
+
+    for(i = ROGUE_SAFARI_LEGENDS_START_INDEX; i < ROGUE_SAFARI_TOTAL_MONS; ++i)
+    {
+        if(gRogueSaveBlock->safariMons[i].species == SPECIES_MEWTWO)
+            foundLegendary = TRUE;
+    }
+
+    EXPECT(foundLegendary);
+
+    RogueSafari_ResetAllLegendEntries();
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_NONE;
     ClearCaughtMonTestState();
 }
 

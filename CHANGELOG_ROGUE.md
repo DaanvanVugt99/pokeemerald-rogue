@@ -35,6 +35,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Defeated Legendary-den Pokémon are now preserved in the hub Safari, allowing
+  uncatchable trial encounters to remain obtainable after the run.
 - Tera Shards are now reusable, limited to one copy of each type, stop appearing
   as route drops once owned, show as sold out in shops, and cost ₽8,000.
 - Regional Style Trials now temporarily remove every disabled battle-gimmick

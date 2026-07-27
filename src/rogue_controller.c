@@ -8843,6 +8843,13 @@ static bool32 DidPlayerCatch(u32 battleOutcome)
     }
 }
 
+static bool32 DidDefeatLegendaryDenMon(u32 battleOutcome, u16 species)
+{
+    return battleOutcome == B_OUTCOME_WON
+        && gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY
+        && RoguePokedex_IsSpeciesLegendary(species);
+}
+
 static bool32 DidCompleteWildChain(u32 battleOutcome)
 {
     switch (battleOutcome)
@@ -9378,6 +9385,19 @@ void Rogue_Battle_EndWildBattle(void)
 
             if(Rogue_IsBattleRoamerMon(wildSpecies))
                 IncrementGameStat(GAME_STAT_ROAMERS_CAUGHT);
+        }
+
+        if(DidDefeatLegendaryDenMon(gBattleOutcome, wildSpecies))
+        {
+            u32 customMonId = RogueGift_GetCustomMonId(&gEnemyParty[0]);
+
+            RogueSafari_PushMon(&gEnemyParty[0]);
+
+            if(customMonId != CUSTOM_MON_NONE)
+            {
+                RogueGift_RemoveDynamicCustomMon(customMonId);
+                gRogueLocal.wildBattleCustomMonId = 0;
+            }
         }
 
         if(gRogueRun.currentLevelOffset && !DidPlayerRun(gBattleOutcome))
