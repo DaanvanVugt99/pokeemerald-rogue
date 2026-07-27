@@ -6302,7 +6302,6 @@ void Task_TeraShard(u8 taskId)
     case 3:
         PlaySE(SE_USE_ITEM);
         SetMonData(mon, MON_DATA_TERA_TYPE, &teraType);
-        RemoveBagItem(gSpecialVar_ItemId, 1);
         //UpdateMonDisplayInfoAfterTeraShard(tMonId);
         tState++;
         break;

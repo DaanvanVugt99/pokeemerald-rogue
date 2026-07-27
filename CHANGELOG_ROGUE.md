@@ -33,6 +33,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Tera Shards are now reusable, limited to one copy of each type, stop appearing
+  as route drops once owned, show as sold out in shops, and cost ₽8,000.
 - Kept chained Ability popups visible long enough to read before another
   Ability from the same Pokémon replaces them.
 - Expanded generated Unique Pokémon's exotic move pool with all eleven

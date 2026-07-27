@@ -1743,6 +1743,21 @@ u16 Rogue_ModifyItemPickupAmount(u16 itemId, u16 amount)
     return amount;
 }
 
+bool8 Rogue_IsReusableItem(u16 itemId)
+{
+    if((itemId >= ITEM_TM01 && itemId <= ITEM_HM08)
+     || (itemId >= ITEM_TR01 && itemId <= ITEM_TR50))
+        return TRUE;
+
+#ifdef ROGUE_EXPANSION
+    if((itemId >= ITEM_BUG_TERA_SHARD && itemId <= ITEM_WATER_TERA_SHARD)
+     || itemId == ITEM_STELLAR_TERA_SHARD)
+        return TRUE;
+#endif
+
+    return FALSE;
+}
+
 #define PERCENT_FEMALE(percent) min(254, ((percent * 255) / 100))
 
 u8 Rogue_ModifyGenderRatio(u8 genderRatio)
@@ -12501,6 +12516,9 @@ static bool8 IsRouteSpecialDropItemAllowed(u16 itemId)
     if(itemId == ITEM_NONE || itemId == ITEM_LIST_END)
         return FALSE;
 
+    if(Rogue_IsReusableItem(itemId) && CheckBagHasItem(itemId, 1))
+        return FALSE;
+
     switch (ItemId_GetPocket(itemId))
     {
     case POCKET_KEY_ITEMS:
@@ -12775,7 +12793,7 @@ static u8 RouteItems_CalculateWeight(u16 index, u16 itemId, void* data)
     bool8 isPartyBoostItem = isPartySpecialItem || RouteItemContextIsPartyBoostItem(context, itemId);
 
     if(RouteItemContextWasSelected(context, itemId))
-        return isSpecialItem ? 0 : 1;
+        return (isSpecialItem || Rogue_IsReusableItem(itemId)) ? 0 : 1;
 
     if(isSpecialItem)
         return 0;
@@ -12804,6 +12822,7 @@ u8 GetCurrentDropRarity()
 
 static void RandomiseItemContent(u8 difficultyLevel)
 {
+    u16 itemId;
     u8 difficultyModifier = Rogue_GetEncounterDifficultyModifier();
     u8 dropRarity = GetCurrentDropRarity();
     struct RouteItemWeightContext routeItemContext;
@@ -12833,6 +12852,12 @@ static void RandomiseItemContent(u8 difficultyLevel)
         RogueItemQuery_IsStoredInPocket(QUERY_FUNC_EXCLUDE, POCKET_KEY_ITEMS);
         RogueItemQuery_IsStoredInPocket(QUERY_FUNC_EXCLUDE, POCKET_BERRIES);
         RogueItemQuery_IsStoredInPocket(QUERY_FUNC_EXCLUDE, POCKET_POKEBLOCK);
+
+        for(itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
+        {
+            if(Rogue_IsReusableItem(itemId) && CheckBagHasItem(itemId, 1))
+                RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, itemId);
+        }
 
         RogueMiscQuery_EditElement(QUERY_FUNC_EXCLUDE, ITEM_PREMIER_BALL);
         RogueMiscQuery_EditRange(QUERY_FUNC_EXCLUDE, ITEM_X_ATTACK, ITEM_GUARD_SPEC);

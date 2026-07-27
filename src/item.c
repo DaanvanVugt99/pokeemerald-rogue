@@ -409,6 +409,9 @@ bool8 CheckBagHasSpace(u16 itemId, u16 count)
     if (itemPocket == POCKET_NONE)
         return FALSE;
 
+    if(Rogue_IsReusableItem(itemId) && CheckBagHasItem(itemId, 1))
+        return FALSE;
+
     if(ItemPocketUsesReservedSlots(itemPocket))
     {
         freeSlots = GetBagReservedFreeSlots();
@@ -725,6 +728,14 @@ bool8 AddBagItem(u16 itemId, u16 count)
 
     if (itemPocket == POCKET_NONE)
         return FALSE;
+
+    if(Rogue_IsReusableItem(itemId))
+    {
+        if(CheckBagHasItem(itemId, 1))
+            return FALSE;
+
+        count = 1;
+    }
 
     if(ItemPocketUsesReservedSlots(itemPocket))
     {

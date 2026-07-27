@@ -212,7 +212,7 @@ static void CopyShopItemName(u16 item, u8* name);
 static const u8* GetShopItemDescription(u16 item);
 static bool8 BuyShopItem(u16 item, u16 count);
 static u32 GetShopItemPrice(u16 item);
-static bool8 IsZeroPriceMarkedAsFree();
+static bool8 IsZeroPriceMarkedAsFree(u16 item);
 
 static u32 GetShopCurrencyAmount();
 static void RemoveShopCurrencyAmount(u32 amount);
@@ -1005,7 +1005,7 @@ static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y)
 
         if(price == 0)
         {
-            if(IsZeroPriceMarkedAsFree())
+            if(IsZeroPriceMarkedAsFree(itemId))
             {
                 x = GetStringRightAlignXOffset(FONT_NARROW, gText_PokedollarFree, 0x78);
                 AddTextPrinterParameterized4(windowId, FONT_NARROW, x, y, 0, 0, sShopBuyMenuTextColors[1], TEXT_SKIP_DRAW, gText_PokedollarFree);
@@ -1455,7 +1455,7 @@ static void Task_BuyMenu(u8 taskId)
             sSelectedCustomShopItem = itemId;
             sShopData->totalCost = GetShopItemPrice(itemId);
 
-            if(sShopData->totalCost == 0 && !IsZeroPriceMarkedAsFree())
+            if(sShopData->totalCost == 0 && !IsZeroPriceMarkedAsFree(itemId))
             {
                 BuyMenuDisplayMessage(taskId, gText_AlreadyOwnThis, BuyMenuReturnToItemList);
             }
@@ -1555,8 +1555,8 @@ static void Task_BuyHowManyDialogueInit(u8 taskId)
     {
         maxQuantity = min(maxQuantity, Rogue_GetBagPocketAmountPerItem(ItemId_GetPocket(tItemId) - 1));
 
-        // Can only buy 1 of infinite items
-        if((tItemId >= ITEM_TM01 && tItemId <= ITEM_HM08) || (tItemId >= ITEM_TR01 && tItemId <= ITEM_TR50))
+        // Can only buy 1 of reusable items.
+        if(Rogue_IsReusableItem(tItemId))
             maxQuantity = 1;
     }
 
@@ -2347,12 +2347,9 @@ static u32 GetShopItemPrice(u16 item)
     {
         u32 price = Mart_GetItemPrice(item) >> IsPokeNewsActive(POKENEWS_SLATEPORT);
 
-        if(ShowTMView())
-        {
-            // Override TMs/HMs/TRs price if we have them
-            if(((item >= ITEM_TM01 && item <= ITEM_HM08) || (item >= ITEM_TR01 && item <= ITEM_TR50)) && CheckBagHasItem(item, 1))
-                price = 0;
-        }
+        // Reusable items are sold out once owned.
+        if(Rogue_IsReusableItem(item) && CheckBagHasItem(item, 1))
+            price = 0;
 
         return price;
     }
@@ -2372,13 +2369,14 @@ static u32 GetShopItemPrice(u16 item)
     return 0;
 }
 
-static bool8 IsZeroPriceMarkedAsFree()
+static bool8 IsZeroPriceMarkedAsFree(u16 item)
 {
     if (sMartInfo.martType == MART_TYPE_NORMAL || sMartInfo.martType == MART_TYPE_PURCHASE_ONLY || sMartInfo.martType == MART_TYPE_SINGLE_PURCHASE)
     {
-        if(ShowTMView())
+        if(ShowTMView()
+         || (Rogue_IsReusableItem(item) && CheckBagHasItem(item, 1)))
         {
-            // Theses aren't free just mark as already bought
+            // These aren't free, just mark them as already bought.
             return FALSE;
         }
     }
