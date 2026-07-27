@@ -405,6 +405,9 @@ namespace PokemonDataGenerator.Pokedex
 			{
 				switch (Species)
 				{
+					case "SPECIES_GENGAR":
+						ReplaceCompetitiveAbility("ABILITY_CURSED_BODY", "ABILITY_LEVITATE");
+						break;
 					case "SPECIES_POLITOED":
 						ReplaceCompetitiveAbility("ABILITY_DRIZZLE", "ABILITY_LIQUID_VOICE");
 						break;
@@ -414,8 +417,27 @@ namespace PokemonDataGenerator.Pokedex
 					case "SPECIES_TYRANITAR":
 						ReplaceCompetitiveAbility("ABILITY_SAND_STREAM", "ABILITY_BATTLE_ARMOR");
 						break;
+					case "SPECIES_SNOVER":
 					case "SPECIES_ABOMASNOW":
 						ReplaceCompetitiveAbility("ABILITY_SNOW_WARNING", "ABILITY_GRASS_PELT");
+						break;
+					case "SPECIES_ROTOM":
+						ReplaceCompetitiveAbility("ABILITY_LEVITATE", "ABILITY_CURSED_BODY");
+						break;
+					case "SPECIES_ROTOM_HEAT":
+						ReplaceCompetitiveAbility("ABILITY_LEVITATE", "ABILITY_FLASH_FIRE");
+						break;
+					case "SPECIES_ROTOM_WASH":
+						ReplaceCompetitiveAbility("ABILITY_LEVITATE", "ABILITY_WATER_ABSORB");
+						break;
+					case "SPECIES_ROTOM_FROST":
+						ReplaceCompetitiveAbility("ABILITY_LEVITATE", "ABILITY_SNOW_WARNING");
+						break;
+					case "SPECIES_ROTOM_FAN":
+						ReplaceCompetitiveAbility("ABILITY_LEVITATE", "ABILITY_WIND_POWER");
+						break;
+					case "SPECIES_ROTOM_MOW":
+						ReplaceCompetitiveAbility("ABILITY_LEVITATE", "ABILITY_GRASSY_SURGE");
 						break;
 					case "SPECIES_VANILLUXE":
 						ReplaceCompetitiveAbility("ABILITY_SNOW_WARNING", "ABILITY_SLUSH_RUSH");
@@ -430,6 +452,14 @@ namespace PokemonDataGenerator.Pokedex
 						break;
 					case "SPECIES_GIGALITH":
 						ReplaceCompetitiveAbility("ABILITY_SAND_STREAM", "ABILITY_STAMINA");
+						break;
+					case "SPECIES_PINCURCHIN":
+						ReplaceCompetitiveAbility("ABILITY_ELECTRIC_SURGE", "ABILITY_INNARDS_OUT");
+						break;
+					case "SPECIES_INDEEDEE":
+					case "SPECIES_INDEEDEE_MALE":
+					case "SPECIES_INDEEDEE_FEMALE":
+						ReplaceCompetitiveAbility("ABILITY_PSYCHIC_SURGE", "ABILITY_TELEPATHY");
 						break;
 				}
 			}

@@ -87,6 +87,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Updated competitive profiles for Divergence-specific Ability replacements
+  and added validation against each Pokémon's current form-family Abilities.
 - Prevented headless test crashes from hanging indefinitely by bounding emulator
   worker progress, failing fast on illegal opcodes, and moving a large Adventure
   path test snapshot off the GBA stack.
