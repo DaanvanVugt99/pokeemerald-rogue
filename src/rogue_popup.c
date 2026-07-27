@@ -1776,29 +1776,13 @@ void Rogue_PushPopup_FlightChargeUsed(u32 remainingCharges, u32 totalCharges)
     struct PopupRequest* popup = CreateNewPopup();
 
     popup->templateId = POPUP_COMMON_FIND_ITEM;
-    popup->iconId = ITEM_BASIC_RIDING_WHISTLE;
+    popup->iconId = ITEM_GOLD_RIDING_WHISTLE;
     popup->displayDuration = 30;
     
     popup->titleText = sText_Popup_ChargeRemaining;
     popup->subtitleText = sText_Popup_FlightChargeSubtitle;
 
     popup->expandTextData[0] = remainingCharges;
-    popup->expandTextType[0] = TEXT_EXPAND_UNSIGNED_NUMBER;
-    popup->expandTextData[1] = totalCharges;
-    popup->expandTextType[1] = TEXT_EXPAND_UNSIGNED_NUMBER;
-}
-
-void Rogue_PushPopup_FlightChargeRefilled(u32 totalCharges)
-{
-    struct PopupRequest* popup = CreateNewPopup();
-
-    popup->templateId = POPUP_COMMON_FIND_ITEM;
-    popup->iconId = ITEM_BASIC_RIDING_WHISTLE;
-    
-    popup->titleText = sText_Popup_ChargeRemaining;
-    popup->subtitleText = sText_Popup_FlightChargeSubtitle;
-
-    popup->expandTextData[0] = totalCharges;
     popup->expandTextType[0] = TEXT_EXPAND_UNSIGNED_NUMBER;
     popup->expandTextData[1] = totalCharges;
     popup->expandTextType[1] = TEXT_EXPAND_UNSIGNED_NUMBER;

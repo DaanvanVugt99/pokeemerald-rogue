@@ -1,10 +1,19 @@
 #include "global.h"
 #include "constants/flags.h"
+#include "constants/items.h"
 #include "constants/rogue.h"
 #include "constants/species.h"
 #include "event_data.h"
+#include "item.h"
+#include "pokemon.h"
+#include "rogue_controller.h"
+#include "rogue_popup.h"
 #include "rogue_ridemon.h"
+#include "rogue_script.h"
 #include "test/test.h"
+
+static struct Pokemon sRideTestPartyBackup[PARTY_SIZE];
+static struct BoxPokemon sRideTestDaycareBackup;
 
 static void SetRideStealthTestState(u16 rideSpecies, bool8 isRiding, bool8 isUnlocked)
 {
@@ -54,4 +63,93 @@ TEST("Ride Stealth handles shiny graphics and inherited ride forms")
     FlagClear(FLAG_SYS_RIDING_STEALTH);
     gPlayerAvatar.flags &= ~PLAYER_AVATAR_FLAG_RIDING;
     Rogue_RideMonInit();
+}
+
+TEST("Gold Whistle replaces Basic Whistle in its exact registered slot")
+{
+    u16 registeredItemsBackup[MAX_REGISTERED_ITEMS];
+    bool8 hadBasicWhistle = CheckBagHasItem(ITEM_BASIC_RIDING_WHISTLE, 1);
+    bool8 hadGoldWhistle = CheckBagHasItem(ITEM_GOLD_RIDING_WHISTLE, 1);
+
+    memcpy(registeredItemsBackup, gSaveBlock1Ptr->registeredItems, sizeof(registeredItemsBackup));
+    RemoveBagItem(ITEM_BASIC_RIDING_WHISTLE, 1);
+    RemoveBagItem(ITEM_GOLD_RIDING_WHISTLE, 1);
+    EXPECT(AddBagItem(ITEM_BASIC_RIDING_WHISTLE, 1));
+    EXPECT(AddBagItem(ITEM_GOLD_RIDING_WHISTLE, 1));
+
+    gSaveBlock1Ptr->registeredItems[0] = ITEM_HEALING_FLASK;
+    gSaveBlock1Ptr->registeredItems[1] = ITEM_GOLD_RIDING_WHISTLE;
+    gSaveBlock1Ptr->registeredItems[2] = ITEM_BASIC_RIDING_WHISTLE;
+    gSaveBlock1Ptr->registeredItems[3] = ITEM_QUEST_LOG;
+
+    Rogue_NormalizeRidingWhistles();
+
+    EXPECT(!CheckBagHasItem(ITEM_BASIC_RIDING_WHISTLE, 1));
+    EXPECT(CheckBagHasItem(ITEM_GOLD_RIDING_WHISTLE, 1));
+    EXPECT_EQ(gSaveBlock1Ptr->registeredItems[0], ITEM_HEALING_FLASK);
+    EXPECT_EQ(gSaveBlock1Ptr->registeredItems[1], ITEM_NONE);
+    EXPECT_EQ(gSaveBlock1Ptr->registeredItems[2], ITEM_GOLD_RIDING_WHISTLE);
+    EXPECT_EQ(gSaveBlock1Ptr->registeredItems[3], ITEM_QUEST_LOG);
+
+    RemoveBagItem(ITEM_GOLD_RIDING_WHISTLE, 1);
+    if(hadBasicWhistle)
+        AddBagItem(ITEM_BASIC_RIDING_WHISTLE, 1);
+    if(hadGoldWhistle)
+        AddBagItem(ITEM_GOLD_RIDING_WHISTLE, 1);
+    memcpy(gSaveBlock1Ptr->registeredItems, registeredItemsBackup, sizeof(registeredItemsBackup));
+}
+
+TEST("Gold Whistle combines party Day Care and park mounts")
+{
+    struct Pokemon daycareMon;
+    u8 daycareSlotCount = Rogue_GetCurrentDaycareSlotCount();
+    u8 partyCountBackup = gPlayerPartyCount;
+    u16 registeredRideBackup = VarGet(VAR_ROGUE_REGISTERED_RIDE_MON);
+
+    memcpy(sRideTestPartyBackup, gPlayerParty, sizeof(sRideTestPartyBackup));
+    sRideTestDaycareBackup = *Rogue_GetDaycareBoxMon(0);
+
+    ZeroPlayerPartyMons();
+    CreateMon(&gPlayerParty[0], SPECIES_STANTLER, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gPlayerPartyCount = 1;
+    CreateMon(&daycareMon, SPECIES_LAPRAS, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    *Rogue_GetDaycareBoxMon(0) = daycareMon.box;
+    VarSet(VAR_ROGUE_REGISTERED_RIDE_MON, SPECIES_ZOROARK);
+
+    EXPECT_EQ(RogueDebug_GetRideOptionCount(RIDE_WHISTLE_GOLD), 1 + daycareSlotCount + 1);
+    EXPECT_EQ(RogueDebug_GetRideOptionGfx(RIDE_WHISTLE_GOLD, 0), SPECIES_STANTLER);
+    EXPECT_EQ(RogueDebug_GetRideOptionGfx(RIDE_WHISTLE_GOLD, 1), SPECIES_LAPRAS);
+    EXPECT_EQ(RogueDebug_GetRideOptionGfx(RIDE_WHISTLE_GOLD, 1 + daycareSlotCount), SPECIES_ZOROARK);
+
+    memcpy(gPlayerParty, sRideTestPartyBackup, sizeof(sRideTestPartyBackup));
+    gPlayerPartyCount = partyCountBackup;
+    *Rogue_GetDaycareBoxMon(0) = sRideTestDaycareBackup;
+    VarSet(VAR_ROGUE_REGISTERED_RIDE_MON, registeredRideBackup);
+}
+
+TEST("Flight grants three takeoffs per Adventure room")
+{
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u16 chargesBackup = VarGet(VAR_ROGUE_REMAINING_FLIGHT_CHARGES);
+
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_ClearPopupQueue();
+    Rogue_ResetFlightCharges();
+
+    EXPECT_EQ(Rogue_GetMaxFlightCharges(), 3);
+    EXPECT_EQ(Rogue_GetRemainingFlightCharges(), 3);
+    Rogue_DecreaseFlightCharges();
+    EXPECT_EQ(Rogue_GetRemainingFlightCharges(), 2);
+    Rogue_DecreaseFlightCharges();
+    Rogue_DecreaseFlightCharges();
+    Rogue_DecreaseFlightCharges();
+    EXPECT_EQ(Rogue_GetRemainingFlightCharges(), 0);
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    EXPECT_EQ(Rogue_GetRemainingFlightCharges(), 999);
+
+    VarSet(VAR_ROGUE_REMAINING_FLIGHT_CHARGES, chargesBackup);
+    Rogue_ClearPopupQueue();
+    if(wasRunActive)
+        FlagSet(FLAG_ROGUE_RUN_ACTIVE);
 }

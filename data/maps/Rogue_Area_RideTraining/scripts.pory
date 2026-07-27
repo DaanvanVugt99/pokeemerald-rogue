@@ -19,18 +19,22 @@ script Rogue_Area_RideTraining_OnTransition
     setvar(VAR_FOLLOW_MON_2, SPECIES_MR_MIME)
     setvar(VAR_FOLLOW_MON_3, SPECIES_CHIMECHO)
 
-    checkitem(ITEM_BASIC_RIDING_WHISTLE)
+    checkitem(ITEM_GOLD_RIDING_WHISTLE)
 
     if(var(VAR_RESULT) == TRUE)
     {
+        special(Rogue_NormalizeRidingWhistles)
         setflag(FLAG_HIDE_STANTLER)
     }
-
-    checkitem(ITEM_GOLD_RIDING_WHISTLE)
-
-    if(var(VAR_RESULT) == FALSE)
+    else
     {
         setflag(FLAG_HIDE_DITTO)
+
+        checkitem(ITEM_BASIC_RIDING_WHISTLE)
+        if(var(VAR_RESULT) == TRUE)
+        {
+            setflag(FLAG_HIDE_STANTLER)
+        }
     }
 }
 
@@ -199,13 +203,18 @@ script Rogue_Area_RideTraining_SpeakClown
 
 script Rogue_Area_RideTraining_OfferNextUpgrade
 {
-    checkitem(ITEM_BASIC_RIDING_WHISTLE)
+    checkitem(ITEM_GOLD_RIDING_WHISTLE)
 
     if(var(VAR_RESULT) == FALSE)
     {
-        // 5000
-        call(Rogue_Area_RideTraining_GiveBasicWhistle)
-        return
+        checkitem(ITEM_BASIC_RIDING_WHISTLE)
+
+        if(var(VAR_RESULT) == FALSE)
+        {
+            // 5000
+            call(Rogue_Area_RideTraining_GiveBasicWhistle)
+            return
+        }
     }
 
     if (!flag(FLAG_SYS_RIDING_LEDGE_JUMP))
@@ -230,20 +239,6 @@ script Rogue_Area_RideTraining_OfferNextUpgrade
         return
     }
 
-    if(!flag(FLAG_SYS_RIDING_ACCESS_DAYCARE))
-    {
-        // 25000
-        call(Rogue_Area_RideTraining_CallDaycare)
-        return
-    }
-
-    if (!flag(FLAG_SYS_RIDING_FLY))
-    {
-        // 30000
-        call(Rogue_Area_RideTraining_TeachFly)
-        return
-    }
-
     if (!flag(FLAG_SYS_RIDING_STEALTH))
     {
         // 40000
@@ -251,24 +246,10 @@ script Rogue_Area_RideTraining_OfferNextUpgrade
         return
     }
 
-    if (!flag(FLAG_SYS_RIDING_FLY_2_CHARGES))
+    if (!flag(FLAG_SYS_RIDING_FLY))
     {
         // 50000
-        call(Rogue_Area_RideTraining_FlyCharge2)
-        return
-    }
-
-    if (!flag(FLAG_SYS_RIDING_FLY_3_CHARGES))
-    {
-        // 100000
-        call(Rogue_Area_RideTraining_FlyCharge3)
-        return
-    }
-
-    if (!flag(FLAG_SYS_RIDING_FLY_INFINITE_CHARGES))
-    {
-        // 500000
-        call(Rogue_Area_RideTraining_FlyChargeInfinite)
+        call(Rogue_Area_RideTraining_TeachFly)
         return
     }
 
@@ -316,7 +297,7 @@ script Rogue_Area_RideTraining_GiveBasicWhistle
             hidemoneybox
             giveitem(ITEM_BASIC_RIDING_WHISTLE)
 
-            msgbox(format("You'll only be able to ride certain species of Pokémon from your party.\pYou should now be able to check your Pokédex to find out which Pokémon can be riden."))
+            msgbox(format("You'll only be able to ride certain species of Pokémon from your party.\pYou should now be able to check your Pokédex to find out which Pokémon can be ridden."))
             msgbox(format("You know what… here why don't you take Stantler along with you!\pIt's been itching to go on Adventures and you can even ride it too!"))
 
             givemon(SPECIES_STANTLER, 5)
@@ -328,7 +309,7 @@ script Rogue_Area_RideTraining_GiveBasicWhistle
             playfanfare(MUS_EVOLVED)
             waitfanfare
 
-            msgbox(format("All you need to do is use that whistle, whilst you have a ridable Pokémon in your party.\pIf have multiple Pokémon you can ride, you can quickly cycle between them by using {R_BUTTON}."))
+            msgbox(format("All you need to do is use that whistle whilst you have a ridable Pokémon in your party.\pIf you have multiple Pokémon you can ride, you can quickly cycle between them by using {R_BUTTON}."))
         }
         else
         {
@@ -410,7 +391,7 @@ script Rogue_Area_RideTraining_TeachSurf
             playfanfare(MUS_EVOLVED)
             waitfanfare
 
-            msgbox(format("When riding your Pokémon, some of them will be able to now swim in water.\pYou should now be able to see which Pokémon are able to use this skill in your Pokédex."))
+            msgbox(format("When riding your Pokémon, some of them will now be able to swim in water.\pYou should now be able to see which Pokémon are able to use this skill in your Pokédex."))
 
             setflag(FLAG_SYS_RIDING_SURF)
         }
@@ -430,14 +411,14 @@ script Rogue_Area_RideTraining_TeachFly
 {
     showmoneybox(0, 0)
 
-    msgbox(format("I could teach you how to fly for ¥30000?"), MSGBOX_YESNO)
+    msgbox(format("I could teach you how to fly for ¥50000?"), MSGBOX_YESNO)
 
     if(var(VAR_RESULT) == YES)
     {
-        checkconstantmoney(30000)
+        checkconstantmoney(50000)
         if(var(VAR_RESULT) == YES)
         {
-            removeconstantmoney(30000)
+            removeconstantmoney(50000)
             updatemoneybox
 
             playse(SE_SHOP)
@@ -452,7 +433,7 @@ script Rogue_Area_RideTraining_TeachFly
             playfanfare(MUS_EVOLVED)
             waitfanfare
 
-            msgbox(format("When riding your Pokémon, some of them will be able to now fly by pressing {B_BUTTON}.\pWhilst you are up in the air, you won't be able to interact with items and you won't be seen by trainers either.\pYou will have to be careful however, as your Pokémon will only have enough energy to fly once before exhausting itself.\pEvery time you heal at a Nurse, your Pokémon will be able to fly again.\pYou will be able to fly for an Unlimited number of times in {POKEMON_HUB}, thankfully.\pYou should also now be able to see which Pokémon are able to use this skill in your Pokédex."))
+            msgbox(format("When riding certain Pokémon, press {B_BUTTON} to take flight.\pYou can take off three times in each Adventure area. Your charges refresh when you enter the next area.\pWhilst airborne, you can't interact with items and trainers won't see you.\pFlight is unlimited in {POKEMON_HUB}. Your Pokédex now shows which Pokémon can fly."))
 
             setflag(FLAG_SYS_RIDING_FLY)
         }
@@ -510,126 +491,6 @@ script Rogue_Area_RideTraining_TeachStealth
     }
 }
 
-script Rogue_Area_RideTraining_FlyCharge2
-{
-    showmoneybox(0, 0)
-
-    msgbox(format("I could teach you how to fly 2 times before exhausting your {PKMN} for ¥50000?"), MSGBOX_YESNO)
-
-    if(var(VAR_RESULT) == YES)
-    {
-        checkconstantmoney(50000)
-        if(var(VAR_RESULT) == YES)
-        {
-            removeconstantmoney(50000)
-            updatemoneybox
-
-            playse(SE_SHOP)
-            waitse
-
-            msgbox(format("Thank you very much, {PLAYER}!"))
-            msgbox(format("Here, let me teach you!"))
-
-            hidemoneybox
-            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}{PLAYER} gained an extra flight charge!"))
-            waitmessage
-            playfanfare(MUS_EVOLVED)
-            waitfanfare
-
-            setflag(FLAG_SYS_RIDING_FLY_2_CHARGES)
-        }
-        else
-        {
-            msgbox(format("Oh… it doesn't look like you have enough money at the moment."))
-            hidemoneybox
-        }
-    }
-    else
-    {
-        hidemoneybox
-    }
-}
-
-script Rogue_Area_RideTraining_FlyCharge3
-{
-    showmoneybox(0, 0)
-
-    msgbox(format("I could teach you how to fly 3 times before exhausting your {PKMN} for ¥100000?"), MSGBOX_YESNO)
-
-    if(var(VAR_RESULT) == YES)
-    {
-        checkconstantmoney(100000)
-        if(var(VAR_RESULT) == YES)
-        {
-            removeconstantmoney(100000)
-            updatemoneybox
-
-            playse(SE_SHOP)
-            waitse
-
-            msgbox(format("Thank you very much, {PLAYER}!"))
-            msgbox(format("Here, let me teach you!"))
-
-            hidemoneybox
-            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}{PLAYER} gained an extra flight charge!"))
-            waitmessage
-            playfanfare(MUS_EVOLVED)
-            waitfanfare
-
-            setflag(FLAG_SYS_RIDING_FLY_3_CHARGES)
-        }
-        else
-        {
-            msgbox(format("Oh… it doesn't look like you have enough money at the moment."))
-            hidemoneybox
-        }
-    }
-    else
-    {
-        hidemoneybox
-    }
-}
-
-script Rogue_Area_RideTraining_FlyChargeInfinite
-{
-    showmoneybox(0, 0)
-
-    msgbox(format("I could teach you how to fly and unlimited number of times before exhausting your {PKMN} for ¥500000?"), MSGBOX_YESNO)
-
-    if(var(VAR_RESULT) == YES)
-    {
-        checkconstantmoney(500000)
-        if(var(VAR_RESULT) == YES)
-        {
-            removeconstantmoney(500000)
-            updatemoneybox
-
-            playse(SE_SHOP)
-            waitse
-
-            msgbox(format("Thank you very much, {PLAYER}!"))
-            msgbox(format("Here, let me teach you!"))
-
-            hidemoneybox
-            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}{PLAYER} gained an unlimited flight charges!"))
-            waitmessage
-            playfanfare(MUS_EVOLVED)
-            waitfanfare
-
-            setflag(FLAG_SYS_RIDING_FLY_INFINITE_CHARGES)
-        }
-        else
-        {
-            msgbox(format("Oh… it doesn't look like you have enough money at the moment."))
-            hidemoneybox
-        }
-    }
-    else
-    {
-        hidemoneybox
-    }
-}
-
 script Rogue_Area_RideTraining_GiveGoldWhistle
 {
     showmoneybox(0, 0)
@@ -651,9 +512,11 @@ script Rogue_Area_RideTraining_GiveGoldWhistle
             msgbox(format("Here you go!"))
 
             hidemoneybox
+            removeitem(ITEM_BASIC_RIDING_WHISTLE)
             giveitem(ITEM_GOLD_RIDING_WHISTLE)
+            special(Rogue_NormalizeRidingWhistles)
 
-            msgbox(format("Rather than riding on Pokémon in your party, that Gold Whistle is linked my friend.\pCome on out!"))
+            msgbox(format("The Gold Whistle replaces your old whistle and keeps its registered button.\pIt can cycle through ridable Pokémon in your party or Day Care, plus one special Pokémon registered here.\pCome on out!"))
 
             poryswitch(ROGUE_VERSION)
             {
@@ -664,7 +527,7 @@ script Rogue_Area_RideTraining_GiveGoldWhistle
                     playmoncry(SPECIES_DITTO, CRY_MODE_NORMAL)
                     waitmoncry
 
-                    msgbox(format("You can speak with Ditto whenever you want and get it to transform into one of your Pokémon.\pFrom then on, even if you don't have that Pokémon in your party, you will be able to summon it using the Gold Whistle."))
+                    msgbox(format("You can speak with Ditto whenever you want and get it to transform into one of your Pokémon.\pThat Pokémon is then added to the mounts available through the Gold Whistle. Press {R_BUTTON} whilst riding to cycle between them."))
 
                     message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}{PLAYER} learnt how to summon Ditto!"))
                     waitmessage
@@ -678,7 +541,7 @@ script Rogue_Area_RideTraining_GiveGoldWhistle
                     playmoncry(SPECIES_ZORUA_HISUIAN, CRY_MODE_NORMAL)
                     waitmoncry
 
-                    msgbox(format("You can speak with Zorua whenever you want and get it to transform into one of your Pokémon.\pFrom then on, even if you don't have that Pokémon in your party, you will be able to summon it using the Gold Whistle."))
+                    msgbox(format("You can speak with Zorua whenever you want and get it to transform into one of your Pokémon.\pThat Pokémon is then added to the mounts available through the Gold Whistle. Press {R_BUTTON} whilst riding to cycle between them."))
 
                     message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}{PLAYER} learnt how to summon Zorua!"))
                     waitmessage
@@ -686,48 +549,6 @@ script Rogue_Area_RideTraining_GiveGoldWhistle
                     waitfanfare
                 }
             }
-        }
-        else
-        {
-            msgbox(format("Oh… it doesn't look like you have enough money at the moment."))
-            hidemoneybox
-        }
-    }
-    else
-    {
-        hidemoneybox
-    }
-}
-
-script Rogue_Area_RideTraining_CallDaycare
-{
-    showmoneybox(0, 0)
-
-    msgbox(format("I could teach you how to call Pokémon from the Day Care for ¥25000?"), MSGBOX_YESNO)
-
-    if(var(VAR_RESULT) == YES)
-    {
-        checkconstantmoney(25000)
-        if(var(VAR_RESULT) == YES)
-        {
-            removeconstantmoney(25000)
-            updatemoneybox
-
-            playse(SE_SHOP)
-            waitse
-
-            msgbox(format("Thank you very much, {PLAYER}!"))
-            msgbox(format("Here, let me teach you!"))
-
-            hidemoneybox
-            message(format("{COLOR GREEN}{SHADOW LIGHT_GREEN}{PLAYER} learnt how summon Day Care Pokémon!"))
-            waitmessage
-            playfanfare(MUS_EVOLVED)
-            waitfanfare
-
-            msgbox(format("When using your Gold Whistle, you can now summon any Pokémon you have stored in the Day Care by pressing the {R_BUTTON}."))
-
-            setflag(FLAG_SYS_RIDING_ACCESS_DAYCARE)
         }
         else
         {

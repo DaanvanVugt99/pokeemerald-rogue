@@ -5094,7 +5094,6 @@ static void BeginRogueRunPhase_Reset(void)
     FlagClear(FLAG_ROGUE_COURIER_READY);
 
     gRogueRun.victoryLapTotalWins = 0;
-    Rogue_RefillFlightCharges(FALSE);
     Rogue_RefillDayCareCharges(FALSE);
 
     Rogue_PreActivateDesiredCampaign();
@@ -7646,6 +7645,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
         {
             ++gRogueRun.enteredRoomCounter;
 
+            Rogue_ResetFlightCharges();
             FlagSet(FLAG_ROGUE_TERA_ORB_CHARGED);
 
             // Grow berries based on progress in runs (This will grow in run berries and hub berries)

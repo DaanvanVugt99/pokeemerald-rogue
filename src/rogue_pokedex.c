@@ -3865,7 +3865,8 @@ static bool8 IsMonPageUnlocked(u8 page)
     switch (page)
     {
     case PAGE_MON_RIDE_STATS:
-        return CheckBagHasItem(ITEM_BASIC_RIDING_WHISTLE, 1);
+        return CheckBagHasItem(ITEM_BASIC_RIDING_WHISTLE, 1)
+            || CheckBagHasItem(ITEM_GOLD_RIDING_WHISTLE, 1);
 
     case PAGE_MON_FORMS:
 #ifdef ROGUE_EXPANSION

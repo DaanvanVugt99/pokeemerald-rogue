@@ -1349,6 +1349,38 @@ void Rogue_RegisterRideMon()
     VarSet(VAR_ROGUE_REGISTERED_RIDE_MON, gfxId);
 }
 
+void Rogue_NormalizeRidingWhistles()
+{
+    u8 i;
+    u8 basicRegistrationSlot = MAX_REGISTERED_ITEMS;
+
+    if(!CheckBagHasItem(ITEM_GOLD_RIDING_WHISTLE, 1))
+        return;
+
+    for(i = 0; i < MAX_REGISTERED_ITEMS; ++i)
+    {
+        if(gSaveBlock1Ptr->registeredItems[i] == ITEM_BASIC_RIDING_WHISTLE)
+        {
+            basicRegistrationSlot = i;
+            break;
+        }
+    }
+
+    if(basicRegistrationSlot != MAX_REGISTERED_ITEMS)
+    {
+        for(i = 0; i < MAX_REGISTERED_ITEMS; ++i)
+        {
+            if(i == basicRegistrationSlot)
+                gSaveBlock1Ptr->registeredItems[i] = ITEM_GOLD_RIDING_WHISTLE;
+            else if(gSaveBlock1Ptr->registeredItems[i] == ITEM_BASIC_RIDING_WHISTLE
+                 || gSaveBlock1Ptr->registeredItems[i] == ITEM_GOLD_RIDING_WHISTLE)
+                gSaveBlock1Ptr->registeredItems[i] = ITEM_NONE;
+        }
+    }
+
+    RemoveBagItem(ITEM_BASIC_RIDING_WHISTLE, 1);
+}
+
 void Rogue_RunRewardLvls()
 {
     gSpecialVar_Result = Rogue_PostRunRewardLvls();
@@ -1970,7 +2002,6 @@ void Rogue_OnHealWithNurse()
         Rogue_PushPopup_FlaskRefilled();
     }
 
-    Rogue_RefillFlightCharges(TRUE);
     Rogue_RefillDayCareCharges(TRUE);
 }
 

@@ -20,7 +20,7 @@ text gItemDesc_RidingWhistle
 
 text gItemDesc_GoldRidingWhistle
 {
-    format("A whistle used to ride registered {PKMN}.")
+    format("Calls ridable party, Day Care, and registered {PKMN}.")
 }
 
 text gItemDesc_CGear

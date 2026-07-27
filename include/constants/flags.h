@@ -1402,11 +1402,8 @@
 #define FLAG_SYS_RIDING_LEDGE_JUMP                  (SYSTEM_FLAGS + 0x22)
 #define FLAG_SYS_RIDING_SURF                        (SYSTEM_FLAGS + 0x23)
 #define FLAG_SYS_RIDING_FLY                         (SYSTEM_FLAGS + 0x24)
-#define FLAG_SYS_RIDING_FLY_2_CHARGES               (SYSTEM_FLAGS + 0x25)
-#define FLAG_SYS_RIDING_FLY_3_CHARGES               (SYSTEM_FLAGS + 0x26)
-#define FLAG_SYS_RIDING_FLY_INFINITE_CHARGES        (SYSTEM_FLAGS + 0x27)
+// SYSTEM_FLAGS + 0x25 through +0x28 are reserved for retired riding upgrades.
 
-#define FLAG_SYS_RIDING_ACCESS_DAYCARE              (SYSTEM_FLAGS + 0x28)
 #define FLAG_SYS_USE_STRENGTH                       (SYSTEM_FLAGS + 0x29)
 #define FLAG_SYS_USE_FLASH                          (SYSTEM_FLAGS + 0x2A)
 #define FLAG_SYS_CYCLING_ROAD                       (SYSTEM_FLAGS + 0x2B)

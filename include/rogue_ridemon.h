@@ -40,7 +40,7 @@ bool8 Rogue_ShouldRunRidemonTrappedScript();
 u32 Rogue_GetRemainingFlightCharges();
 u32 Rogue_GetMaxFlightCharges();
 void Rogue_DecreaseFlightCharges();
-void Rogue_RefillFlightCharges(bool8 createPopup);
+void Rogue_ResetFlightCharges();
 
 bool8 Rogue_IsRideActive();
 bool8 Rogue_IsRideMonSwimming();
@@ -49,5 +49,10 @@ bool8 Rogue_RideMonIsCollisionExempt(struct ObjectEvent* obstacle, struct Object
 
 void MovePlayerOnRideMon(u8 direction, u16 newKeys, u16 heldKeys);
 s16 RideMonGetPlayerSpeed();
+
+#if TESTING
+u8 RogueDebug_GetRideOptionCount(u8 whistleType);
+u16 RogueDebug_GetRideOptionGfx(u8 whistleType, u8 slot);
+#endif
 
 #endif

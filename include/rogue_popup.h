@@ -58,7 +58,6 @@ void Rogue_PushPopup_TriggerExtraLife(bool8 itemConsumed);
 void Rogue_PushPopup_FlaskRefilled();
 
 void Rogue_PushPopup_FlightChargeUsed(u32 remainingCharges, u32 totalCharges);
-void Rogue_PushPopup_FlightChargeRefilled(u32 totalCharges);
 void Rogue_PushPopup_DaycareChargeUsed(u32 remainingCharges, u32 totalCharges);
 void Rogue_PushPopup_DaycareChargeRefilled(u32 totalCharges);
 

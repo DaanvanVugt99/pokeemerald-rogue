@@ -35,6 +35,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked Ride Training into a seven-step progression. The Gold Whistle now
+  replaces the basic whistle and cycles through party, Day Care, and
+  park-registered mounts, while Flight provides three takeoffs that refresh at
+  the start of every Adventure node.
 - Defeated Legendary-den Pokémon are now preserved in the hub Safari, allowing
   uncatchable trial encounters to remain obtainable after the run.
 - Tera Shards are now reusable, limited to one copy of each type, stop appearing

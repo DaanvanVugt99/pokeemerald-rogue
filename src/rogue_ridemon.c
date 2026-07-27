@@ -2,6 +2,7 @@
 #include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
 #include "constants/layouts.h"
+#include "constants/rogue.h"
 #include "constants/songs.h"
 
 #include "bike.h"
@@ -11,6 +12,7 @@
 #include "field_effect_helpers.h"
 #include "field_player_avatar.h"
 #include "follow_me.h"
+#include "item.h"
 #include "metatile_behavior.h"
 #include "sound.h"
 
@@ -53,6 +55,7 @@ enum
 #define RIDE_MON_FLAG_CAN_STEALTH   (1 << 4)
 
 #define RIDE_FLY_HEIGHT 12   // 16
+#define RIDE_FLIGHT_CHARGES_PER_ROOM 3
 
 #define RIDE_OBJECT_PLAYER              0   // Reserved for the player
 #define RIDE_OBJECT_COUNT               (1 + NET_PLAYER_CAPACITY)
@@ -155,18 +158,17 @@ static bool8 IsValidMonToRideNow(struct Pokemon* mon)
 
 static u8 GetRideOptionCountFor(u8 whistleType)
 {
-    u8 count;
-
     if(whistleType == RIDE_WHISTLE_GOLD)
     {
-        count = 1 + (FlagGet(FLAG_SYS_RIDING_ACCESS_DAYCARE) ? Rogue_GetCurrentDaycareSlotCount() : 0);
-    }
-    else // RIDE_WHISTLE_BASIC
-    {
-        count = gPlayerPartyCount;
+        u8 count = gPlayerPartyCount + Rogue_GetCurrentDaycareSlotCount();
+
+        if(VarGet(VAR_ROGUE_REGISTERED_RIDE_MON) != SPECIES_NONE)
+            ++count;
+
+        return count;
     }
 
-    return count;
+    return gPlayerPartyCount;
 }
 
 static u8 GetRideOptionCount()
@@ -178,15 +180,26 @@ static u16 GetRideOptionGfxFor(u8 whistleType, u8 slot)
 {
     if(whistleType == RIDE_WHISTLE_GOLD)
     {
-        if(slot == 0)
+        u8 daycareSlotCount;
+
+        if(slot < gPlayerPartyCount)
         {
-            return VarGet(VAR_ROGUE_REGISTERED_RIDE_MON);
+            if(IsValidMonToRideNow(&gPlayerParty[slot]))
+                return FollowMon_GetMonGraphics(&gPlayerParty[slot]);
+
+            return SPECIES_NONE;
         }
-        else
+
+        slot -= gPlayerPartyCount;
+        daycareSlotCount = Rogue_GetCurrentDaycareSlotCount();
+
+        if(slot < daycareSlotCount)
         {
-            struct BoxPokemon* mon = Rogue_GetDaycareBoxMon(slot - 1);
+            struct BoxPokemon* mon = Rogue_GetDaycareBoxMon(slot);
             return FollowMon_GetBoxMonGraphics(mon);
         }
+
+        return VarGet(VAR_ROGUE_REGISTERED_RIDE_MON);
     }
     else // RIDE_WHISTLE_BASIC
     {
@@ -198,6 +211,18 @@ static u16 GetRideOptionGfxFor(u8 whistleType, u8 slot)
 
     return SPECIES_NONE;
 }
+
+#if TESTING
+u8 RogueDebug_GetRideOptionCount(u8 whistleType)
+{
+    return GetRideOptionCountFor(whistleType);
+}
+
+u16 RogueDebug_GetRideOptionGfx(u8 whistleType, u8 slot)
+{
+    return GetRideOptionGfxFor(whistleType, slot);
+}
+#endif
 
 static u16 GetRideOptionGfx(u8 slot)
 {
@@ -348,21 +373,18 @@ bool8 Rogue_HandleRideMonInput()
     if(Rogue_IsRideActive())
     {
         // Cycle through mons when pressing R.
-        if(sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.whistleType == RIDE_WHISTLE_BASIC || (FlagGet(FLAG_SYS_RIDING_ACCESS_DAYCARE) && sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.whistleType == RIDE_WHISTLE_GOLD))
+        if(IsSafeToSwapRideMons())
         {
-            if(IsSafeToSwapRideMons())
+            if(JOY_NEW(R_BUTTON))
             {
-                if(JOY_NEW(R_BUTTON))
+                if(CanCycleRideMons())
                 {
-                    if(CanCycleRideMons())
-                    {
-                        CalculateRideSpecies(1);
-                        PlayRideMonCry();
-                    }
-                    else
-                    {
-                        PlaySE(SE_FAILURE);
-                    }
+                    CalculateRideSpecies(1);
+                    PlayRideMonCry();
+                }
+                else
+                {
+                    PlaySE(SE_FAILURE);
                 }
             }
         }
@@ -862,36 +884,28 @@ static bool8 IsUsableSwimOrFlySpecies(u16 species)
 
 bool8 Rogue_HasUsableSwimOrFlyCharge()
 {
-    // Check Party first
-    u32 count = GetRideOptionCountFor(RIDE_WHISTLE_BASIC);
+    u8 whistleType;
+    u32 count;
     u32 i;
+
+    if(CheckBagHasItem(ITEM_GOLD_RIDING_WHISTLE, 1))
+        whistleType = RIDE_WHISTLE_GOLD;
+    else if(CheckBagHasItem(ITEM_BASIC_RIDING_WHISTLE, 1))
+        whistleType = RIDE_WHISTLE_BASIC;
+    else
+        return FALSE;
+
+    count = GetRideOptionCountFor(whistleType);
 
     for(i = 0; i < count; ++i)
     {
-        u16 species = GetRideOptionGfxFor(RIDE_WHISTLE_BASIC, i);
+        u16 species = GetRideOptionGfxFor(whistleType, i);
 
         if(species >= FOLLOWMON_SHINY_OFFSET)
             species -= FOLLOWMON_SHINY_OFFSET;
 
         if(species != SPECIES_NONE && IsUsableSwimOrFlySpecies(species))
             return TRUE;
-    }
-
-    // TODO - Only run if we have this in our bag?
-    // (We should always have this in our bag anyway and we can't fill any of the slots until we get it anyway)
-    {
-        count = GetRideOptionCountFor(RIDE_WHISTLE_GOLD);
-
-        for(i = 0; i < count; ++i)
-        {
-            u16 species = GetRideOptionGfxFor(RIDE_WHISTLE_GOLD, i);
-
-            if(species >= FOLLOWMON_SHINY_OFFSET)
-                species -= FOLLOWMON_SHINY_OFFSET;
-
-            if(species != SPECIES_NONE && IsUsableSwimOrFlySpecies(species))
-                return TRUE;
-        }
     }
 
     return FALSE;
@@ -984,19 +998,12 @@ u32 Rogue_GetRemainingFlightCharges()
 
 u32 Rogue_GetMaxFlightCharges()
 {
-    if(FlagGet(FLAG_SYS_RIDING_FLY_INFINITE_CHARGES))
-        return 999;
-    else if(FlagGet(FLAG_SYS_RIDING_FLY_3_CHARGES))
-        return 3;
-    else if(FlagGet(FLAG_SYS_RIDING_FLY_2_CHARGES))
-        return 2;
-    else
-        return 1;
+    return RIDE_FLIGHT_CHARGES_PER_ROOM;
 }
 
 void Rogue_DecreaseFlightCharges()
 {
-    if(Rogue_IsRunActive() && !FlagGet(FLAG_SYS_RIDING_FLY_INFINITE_CHARGES))
+    if(Rogue_IsRunActive())
     {
         u16 charges = VarGet(VAR_ROGUE_REMAINING_FLIGHT_CHARGES);
         if(charges != 0)
@@ -1008,15 +1015,9 @@ void Rogue_DecreaseFlightCharges()
     }
 }
 
-void Rogue_RefillFlightCharges(bool8 createPopup)
+void Rogue_ResetFlightCharges()
 {
-    if(Rogue_GetRemainingFlightCharges() != Rogue_GetMaxFlightCharges())
-    {
-        VarSet(VAR_ROGUE_REMAINING_FLIGHT_CHARGES, Rogue_GetMaxFlightCharges());
-
-        if(createPopup)
-            Rogue_PushPopup_FlightChargeRefilled(Rogue_GetMaxFlightCharges());
-    }
+    VarSet(VAR_ROGUE_REMAINING_FLIGHT_CHARGES, RIDE_FLIGHT_CHARGES_PER_ROOM);
 }
 
 bool8 Rogue_IsRideActive()
