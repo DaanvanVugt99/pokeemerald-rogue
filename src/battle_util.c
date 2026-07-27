@@ -11669,18 +11669,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
-        case ABILITY_CHROMATIC_FLUX:
-            if (!gSpecialStatuses[battler].switchInAbilityDone
-             && TryActivateChromaticFlux(battler))
-            {
-                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
-                gBattlerAttacker = battler;
-                gBattlerTarget = battler;
-                SetBattlerTriggeredAbility(battler, ABILITY_CHROMATIC_FLUX);
-                BattleScriptPushCursorAndCallback(BattleScript_ChromaticFluxActivates);
-                effect++;
-            }
-            break;
         case ABILITY_DUALITY:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -12692,13 +12680,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 SetBattlerTriggeredAbility(battler, ABILITY_DUALITY);
                 gBattleCommunication[MULTISTRING_CHOOSER] = GetDualityModeMessage(battler);
                 BattleScriptPushCursorAndCallback(BattleScript_DualityAnnouncesMode);
-                effect++;
-                break;
-            }
-
-            if (TryRerollChromaticFlux(battler))
-            {
-                BattleScriptPushCursorAndCallback(BattleScript_ChromaticFluxActivates);
                 effect++;
                 break;
             }
@@ -20942,23 +20923,6 @@ u32 GetBattlerChromaticFluxType(u32 battler)
     return encodedType == 0 ? TYPE_NONE : encodedType - 1;
 }
 
-u32 GetChromaticFluxType(void)
-{
-    u32 battler;
-
-    for (battler = 0; battler < gBattlersCount; battler++)
-    {
-        u32 type = GetBattlerChromaticFluxType(battler);
-
-        if (IsBattlerAlive(battler)
-         && IS_STANDARD_TYPE(type)
-         && HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
-            return type;
-    }
-
-    return TYPE_NONE;
-}
-
 static u32 RollChromaticFluxType(void)
 {
     static const u8 sChromaticFluxTypes[] =
@@ -20998,24 +20962,7 @@ static void ApplyChromaticFluxType(u32 type)
     }
 }
 
-bool32 TryActivateChromaticFlux(u32 battler)
-{
-    u32 type;
-
-    if (!IsBattlerAlive(battler)
-     || !HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
-        return FALSE;
-
-    type = GetChromaticFluxType();
-    if (!IS_STANDARD_TYPE(type))
-        type = RollChromaticFluxType();
-
-    ApplyChromaticFluxType(type);
-    PREPARE_TYPE_BUFFER(gBattleTextBuff1, type);
-    return TRUE;
-}
-
-bool32 TryRerollChromaticFlux(u32 battler)
+bool32 TryActivateChromaticFluxAtTurnStart(u32 battler)
 {
     u32 source;
 

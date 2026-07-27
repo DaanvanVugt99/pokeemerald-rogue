@@ -3014,8 +3014,7 @@ static u8 GiveMonToPlayerInternal(struct Pokemon *mon, bool8 isTraded)
     RogueTrial_OnMonGiven(mon);
 
     if (Rogue_IsRunActive()
-     && (Rogue_PartyHasDuplicateSpecies(mon, PARTY_SIZE, PARTY_SIZE)
-      || Rogue_PartyHasExtraLegendaryOrMythical(mon, PARTY_SIZE, PARTY_SIZE)))
+     && Rogue_PartyHasDuplicateSpecies(mon, PARTY_SIZE, PARTY_SIZE))
         return CopyMonToPC(mon);
 
     for (i = 0; i < PARTY_SIZE; i++)

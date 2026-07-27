@@ -131,6 +131,8 @@ static void TrySpecialEvolution(void);
 static u32 Crc32B (const u8 *data, u32 size);
 static u32 GeneratePartyHash(const struct Trainer *trainer, u32 i);
 
+static EWRAM_DATA bool8 sChromaticFluxTurnStartPending = FALSE;
+
 EWRAM_DATA u16 gBattle_BG0_X = 0;
 EWRAM_DATA u16 gBattle_BG0_Y = 0;
 EWRAM_DATA u16 gBattle_BG1_X = 0;
@@ -3964,6 +3966,7 @@ static void TryDoEventsBeforeFirstTurn(void)
     SpecialStatusesClear();
     *(&gBattleStruct->absentBattlerFlags) = gAbsentBattlerFlags;
     BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
+    sChromaticFluxTurnStartPending = TRUE;
     gBattleMainFunc = HandleTurnActionSelectionState;
     ResetSentPokesToOpponentValue();
 
@@ -4089,6 +4092,7 @@ void BattleTurnPassed(void)
     *(&gBattleStruct->absentBattlerFlags) = gAbsentBattlerFlags;
     BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
     SetAiLogicDataForTurn(AI_DATA); // get assumed abilities, hold effects, etc of all battlers
+    sChromaticFluxTurnStartPending = TRUE;
     gBattleMainFunc = HandleTurnActionSelectionState;
 
     if (gBattleTypeFlags & BATTLE_TYPE_PALACE)
@@ -4223,6 +4227,19 @@ static void HandleTurnActionSelectionState(void)
     s32 i, battler;
 
     Rogue_UpdatePopups(FALSE, TRUE);
+
+    if (sChromaticFluxTurnStartPending)
+    {
+        sChromaticFluxTurnStartPending = FALSE;
+        for (battler = 0; battler < gBattlersCount; battler++)
+        {
+            if (TryActivateChromaticFluxAtTurnStart(battler))
+            {
+                BattleScriptExecute(BattleScript_ChromaticFluxActivates);
+                return;
+            }
+        }
+    }
 
     gBattleCommunication[ACTIONS_CONFIRMED_COUNT] = 0;
     for (battler = 0; battler < gBattlersCount; battler++)
@@ -6361,9 +6378,6 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
     if (gMain.inBattle && (gFieldStatuses & STATUS_FIELD_ION_DELUGE) && moveType == TYPE_NORMAL)
         moveType = TYPE_ELECTRIC;
 
-    if (gMain.inBattle && IS_STANDARD_TYPE(GetChromaticFluxType()))
-        return GetChromaticFluxType();
-
     return moveType;
 }
 
@@ -6374,8 +6388,11 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
 
     if (move == MOVE_STRUGGLE)
     {
-        if (IS_STANDARD_TYPE(GetChromaticFluxType()))
-            gBattleStruct->dynamicMoveType = GetChromaticFluxType() | F_DYNAMIC_TYPE_SET;
+        u32 chromaticType = GetBattlerChromaticFluxType(battlerAtk);
+
+        if (IS_STANDARD_TYPE(chromaticType)
+         && HasBattlerAbilityIgnoreMoldBreaker(battlerAtk, ABILITY_CHROMATIC_FLUX))
+            gBattleStruct->dynamicMoveType = chromaticType | F_DYNAMIC_TYPE_SET;
         return;
     }
 
@@ -6562,8 +6579,9 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
         || gStatuses4[battlerAtk] & STATUS4_ELECTRIFIED)
         gBattleStruct->dynamicMoveType = TYPE_ELECTRIC | F_DYNAMIC_TYPE_SET;
 
-    if (IS_STANDARD_TYPE(GetChromaticFluxType()))
-        gBattleStruct->dynamicMoveType = GetChromaticFluxType() | F_DYNAMIC_TYPE_SET;
+    if (IS_STANDARD_TYPE(GetBattlerChromaticFluxType(battlerAtk))
+     && HasBattlerAbilityIgnoreMoldBreaker(battlerAtk, ABILITY_CHROMATIC_FLUX))
+        gBattleStruct->dynamicMoveType = GetBattlerChromaticFluxType(battlerAtk) | F_DYNAMIC_TYPE_SET;
 
     // Check if a gem should activate.
     GET_MOVE_TYPE(move, moveType);

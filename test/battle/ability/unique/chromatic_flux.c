@@ -1,32 +1,32 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Chromatic Flux changes its holder and every move to the rolled type")
+SINGLE_BATTLE_TEST("Chromatic Flux changes only its holder's moves to the rolled type")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
         PLAYER(SPECIES_HOUNDOOM) {
             Ability(ABILITY_FLASH_FIRE);
             UniqueAbility(ABILITY_CHROMATIC_FLUX);
-            Moves(MOVE_CELEBRATE);
+            Moves(MOVE_WATER_GUN);
         }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_WATER_GUN, MOVE_CELEBRATE); }
     } WHEN {
         TURN {
-            SWITCH_WITH_RNG(player, 1, WITH_RNG(RNG_ROGUE_CHROMATIC_FLUX, TYPE_FIRE));
+            SWITCH(player, 1);
             MOVE(opponent, MOVE_CELEBRATE);
         }
         TURN {
-            MOVE(player, MOVE_CELEBRATE);
+            MOVE(player, MOVE_WATER_GUN);
             MOVE(opponent, MOVE_WATER_GUN);
         }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_CHROMATIC_FLUX);
         MESSAGE("Houndoom transformed into the Fire type!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
-        ABILITY_POPUP(player, ABILITY_CHROMATIC_FLUX);
-        MESSAGE("Houndoom transformed into the Fire type!");
-        ABILITY_POPUP(player, ABILITY_FLASH_FIRE);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, opponent);
+        NOT ABILITY_POPUP(player, ABILITY_FLASH_FIRE);
+        HP_BAR(player);
     }
 }
 
@@ -52,7 +52,7 @@ SINGLE_BATTLE_TEST("Chromatic Flux gives every attacking move STAB", s16 damage)
         }
     } WHEN {
         TURN {
-            SWITCH_WITH_RNG(player, 1, WITH_RNG(RNG_ROGUE_CHROMATIC_FLUX, TYPE_FIRE));
+            SWITCH(player, 1);
             MOVE(opponent, MOVE_CELEBRATE);
         }
         TURN {
@@ -66,10 +66,32 @@ SINGLE_BATTLE_TEST("Chromatic Flux gives every attacking move STAB", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Chromatic Flux rerolls between turns")
+SINGLE_BATTLE_TEST("Chromatic Flux keeps its natural type when switching in mid-turn")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_HOUNDOOM) {
+            UniqueAbility(ABILITY_CHROMATIC_FLUX);
+            Moves(MOVE_CELEBRATE);
+        }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_PSYCHIC); }
+    } WHEN {
+        TURN {
+            SWITCH(player, 1);
+            MOVE(opponent, MOVE_PSYCHIC);
+        }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_CHROMATIC_FLUX);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_PSYCHIC, opponent);
+        }
+        MESSAGE("It doesn't affect Houndoom…");
+    }
+}
+
+SINGLE_BATTLE_TEST("Chromatic Flux activates once at the start of every turn")
+{
+    GIVEN {
         PLAYER(SPECIES_MEW) {
             UniqueAbility(ABILITY_CHROMATIC_FLUX);
             Moves(MOVE_CELEBRATE);
@@ -77,12 +99,16 @@ SINGLE_BATTLE_TEST("Chromatic Flux rerolls between turns")
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN {
-            SWITCH_WITH_RNG(player, 1, WITH_RNG(RNG_ROGUE_CHROMATIC_FLUX, TYPE_FAIRY));
+            MOVE(player, MOVE_CELEBRATE);
+            MOVE(opponent, MOVE_CELEBRATE);
+        }
+        TURN {
+            MOVE(player, MOVE_CELEBRATE);
             MOVE(opponent, MOVE_CELEBRATE);
         }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_CHROMATIC_FLUX);
-        MESSAGE("Mew transformed into the Fairy type!");
+        MESSAGE("Mew transformed into the Fire type!");
         ABILITY_POPUP(player, ABILITY_CHROMATIC_FLUX);
         MESSAGE("Mew transformed into the Fire type!");
     } THEN {

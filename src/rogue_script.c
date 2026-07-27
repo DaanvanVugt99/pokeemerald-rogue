@@ -386,12 +386,19 @@ void Rogue_CheckPartyHasDuplicateStartSpecies(void)
         if(species == SPECIES_NONE || species == SPECIES_EGG)
             continue;
 
-        for(j = i + 1; j < gPlayerPartyCount; ++j)
+        if(Rogue_GetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE))
         {
-            if(GetMonData(&gPlayerParty[j], MON_DATA_SPECIES) == species)
+            for(j = i + 1; j < gPlayerPartyCount; ++j)
             {
-                gSpecialVar_Result = TRUE;
-                return;
+                u16 otherSpecies = GetMonData(&gPlayerParty[j], MON_DATA_SPECIES);
+
+                if(otherSpecies != SPECIES_NONE
+                 && otherSpecies != SPECIES_EGG
+                 && Rogue_SpeciesShareEvolutionLine(species, otherSpecies))
+                {
+                    gSpecialVar_Result = TRUE;
+                    return;
+                }
             }
         }
 

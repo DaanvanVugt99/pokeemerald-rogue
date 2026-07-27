@@ -273,13 +273,13 @@ static u8 const* const sMenuNameDesc_BagClause[] =
 
 const u8 sMenuNameDesc_SpeciesClauseOff[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
-    "Duplicate species and evolutions can\n"
-    "be used in your party."
+    "Evolution-line duplicates can be used\n"
+    "in your party."
 );
 const u8 sMenuNameDesc_SpeciesClauseOn[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
-    "No duplicate species or evolutions can\n"
-    "be used in your party."
+    "Direct evolutions count as duplicates.\n"
+    "Separate branches are allowed."
 );
 static u8 const* const sMenuNameDesc_SpeciesClause[] =
 {
@@ -306,12 +306,12 @@ static u8 const* const sMenuNameDesc_HeldItemClause[] =
 const u8 sMenuNameDesc_LegendaryClauseOff[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
     "Multiple Legendary or Mythical {PKMN}\n"
-    "can be used in your party."
+    "can enter an Adventure."
 );
 const u8 sMenuNameDesc_LegendaryClauseOn[] = _(
     "{COLOR GREEN}{SHADOW LIGHT_GREEN}"
     "Only one Legendary or Mythical {PKMN}\n"
-    "can be used in your party."
+    "can enter an Adventure."
 );
 static u8 const* const sMenuNameDesc_LegendaryClause[] =
 {

@@ -18,6 +18,7 @@
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
 #include "rogue_save.h"
+#include "rogue_script.h"
 #include "rogue_settings.h"
 #include "rogue_trials.h"
 #include "string_util.h"
@@ -36,8 +37,10 @@ static void ResetCaughtMonTestState(void)
     gEnemyPartyCount = 0;
     VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_GEN9);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE, TRUE);
     RogueTrial_ClearPendingSelection();
     gRogueSaveBlock->hasLastTrialSelection = FALSE;
 }
@@ -48,6 +51,7 @@ static void ClearCaughtMonTestState(void)
 
     Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, FALSE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE, FALSE);
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     memset(gPlayerParty, 0, sizeof(gPlayerParty));
     memset(gEnemyParty, 0, sizeof(gEnemyParty));
@@ -151,6 +155,77 @@ TEST("Species Clause duplicate catches with party room require releasing the mat
     EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
     EXPECT(Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 0));
     EXPECT(!Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 1));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Species Clause allows sibling evolution branches but still blocks direct lineages")
+{
+    struct Pokemon caughtMon;
+
+    ResetCaughtMonTestState();
+    SetPartyMon(0, SPECIES_FLAREON);
+    caughtMon = CreateCaughtMon(SPECIES_VAPOREON);
+
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    SetPartyMon(1, SPECIES_EEVEE);
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
+    EXPECT(Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 1));
+    EXPECT(!Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 0));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Species Clause uses direct evolution lineages when entering a run")
+{
+    ResetCaughtMonTestState();
+    SetPartyMon(0, SPECIES_EEVEE);
+    SetPartyMon(1, SPECIES_VAPOREON);
+
+    Rogue_CheckPartyHasDuplicateStartSpecies();
+    EXPECT(gSpecialVar_Result);
+
+    SetPartyMon(0, SPECIES_VAPOREON);
+    SetPartyMon(1, SPECIES_FLAREON);
+    Rogue_CheckPartyHasDuplicateStartSpecies();
+    EXPECT(!gSpecialVar_Result);
+
+    SetPartyMon(0, SPECIES_EEVEE);
+    SetPartyMon(1, SPECIES_EEVEE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, FALSE);
+    Rogue_CheckPartyHasDuplicateStartSpecies();
+    EXPECT(!gSpecialVar_Result);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Legendary Clause permits additional Legendary Pokemon acquired during a run")
+{
+    struct Pokemon caughtMon;
+
+    ResetCaughtMonTestState();
+    SetPartyMon(0, SPECIES_MEWTWO);
+    caughtMon = CreateCaughtMon(SPECIES_LUGIA);
+
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE));
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Legendary Clause still rejects multiple Legendary Pokemon at run entry")
+{
+    ResetCaughtMonTestState();
+    SetPartyMon(0, SPECIES_MEWTWO);
+    SetPartyMon(1, SPECIES_LUGIA);
+
+    Rogue_CheckPartyHasDuplicateStartSpecies();
+    EXPECT(gSpecialVar_Result);
+
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE, FALSE);
+    Rogue_CheckPartyHasDuplicateStartSpecies();
+    EXPECT(!gSpecialVar_Result);
 
     ClearCaughtMonTestState();
 }

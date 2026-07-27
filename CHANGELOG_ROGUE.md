@@ -23,8 +23,8 @@ Format follows Keep a Changelog loosely:
 - Added World Engine as a generated-only Anomalous Ability. It starts at a
   random point in a six-phase weather-and-terrain cycle, advances each active
   turn and upon returning to battle, and pauses while its holder is absent.
-- Added Chromatic Flux as a generated-only Anomalous Ability. Each turn it
-  makes its holder and every move on the field a random type.
+- Added Chromatic Flux as a generated-only Anomalous Ability. At the start of
+  each turn, it makes its holder and all of its moves a random type.
 - Added Mirror World as a generated-only Anomalous Ability, reversing all type
   matchups while its holder is active.
 - Added Living Library as a generated-only Anomalous Ability. It draws a
@@ -37,6 +37,12 @@ Format follows Keep a Changelog loosely:
   as route drops once owned, show as sold out in shops, and cost ₽8,000.
 - Regional Style Trials now temporarily remove every disabled battle-gimmick
   activator from the bag and supply only the one permitted by that trial.
+- Legendary Clause now limits only the party entering an Adventure; additional
+  Legendary and Mythical Pokémon may join the party during the run.
+- Species Clause now permits separate branches of the same evolution family,
+  such as Vaporeon and Flareon, while still blocking direct evolution lines.
+- Rejected release choices now remain readable until the player acknowledges
+  the explanation.
 - Kept chained Ability popups visible long enough to read before another
   Ability from the same Pokémon replaces them.
 - Expanded generated Unique Pokémon's exotic move pool with all eleven

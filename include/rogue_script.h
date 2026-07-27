@@ -31,6 +31,7 @@ struct RogueSafariOfferDetails
 };
 
 bool8 Rogue_CheckPartyHasRoomForMon(void);
+void Rogue_CheckPartyHasDuplicateStartSpecies(void);
 bool8 Rogue_CanPurchaseSafariMon(u16 safariIndex);
 bool8 Rogue_GetSafariMonOfferDetails(u16 safariIndex, struct RogueSafariOfferDetails *details);
 

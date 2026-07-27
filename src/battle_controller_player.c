@@ -1115,7 +1115,7 @@ static void HandleMoveSwitching(u32 battler)
             }
 
             if (!(gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
-             && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_LIVING_LIBRARY))
+             && !(gBattleResources->flags->flags[battler] & (RESOURCE_FLAG_SHIP_OF_THESEUS | RESOURCE_FLAG_LIVING_LIBRARY)))
             {
                 for (i = 0; i < MAX_MON_MOVES; i++)
                 {
@@ -1828,8 +1828,9 @@ static u8 GetMoveDisplayTyping(u32 battler, u16 move)
     if (move == MOVE_NONE || move == MOVE_UNAVAILABLE)
         return TYPE_MYSTERY;
 
-    if (IS_STANDARD_TYPE(GetChromaticFluxType()))
-        return GetChromaticFluxType();
+    if (IS_STANDARD_TYPE(GetBattlerChromaticFluxType(battler))
+     && HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_CHROMATIC_FLUX))
+        return GetBattlerChromaticFluxType(battler);
 
 #ifdef ROGUE_EXPANSION
     if (move == MOVE_TERA_BLAST)

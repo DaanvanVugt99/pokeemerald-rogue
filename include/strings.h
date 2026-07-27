@@ -3251,7 +3251,6 @@ extern const u8 gText_SelectSecondPkmn[];
 extern const u8 gText_SelectThirdPkmn[];
 extern const u8 gText_TheseThreePkmnOkay[];
 extern const u8 gText_CantSelectSamePkmn[];
-extern const u8 gText_OnlyOneLegendaryMythical[];
 extern const u8 gText_Summary[];
 extern const u8 gText_Rechoose[];
 extern const u8 gText_Deselect[];

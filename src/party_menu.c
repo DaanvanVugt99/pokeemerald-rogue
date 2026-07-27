@@ -371,6 +371,7 @@ static void Task_CancelChooseMonYesNo(u8);
 static void PartyMenuDisplayYesNoMenu(void);
 static void Task_HandleCancelChooseMonYesNoInput(u8);
 static void Task_ReturnToChooseMonAfterText(u8);
+static void Task_WaitForReleaseDeniedInput(u8);
 static void UpdateCurrentPartySelection(s8 *, s8);
 static void UpdatePartySelectionSingleLayout(s8 *, s8);
 static void UpdatePartySelectionDoubleLayout(s8 *, s8);
@@ -4010,7 +4011,7 @@ static void CursorCb_Release(u8 taskId)
         PlaySE(SE_FAILURE);
         PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
         PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
-        gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
+        gTasks[taskId].func = Task_WaitForReleaseDeniedInput;
         return;
     }
 
@@ -4021,6 +4022,15 @@ static void CursorCb_Release(u8 taskId)
     ReleasePartyPokemon(GetCursorSelectionMonId(), FALSE);
 
     gTasks[taskId].func = Task_ClosePartyMenu;
+}
+
+static void Task_WaitForReleaseDeniedInput(u8 taskId)
+{
+    if (IsPartyMenuTextPrinterActive() != TRUE && JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        Task_ReturnToChooseMonAfterText(taskId);
+    }
 }
 
 static bool8 CanReleaseSelectedMonForCaughtMon(u8 slot)
@@ -4035,12 +4045,6 @@ static bool8 CanReleaseSelectedMonForCaughtMon(u8 slot)
     if(!Rogue_CaughtMonFitsSpeciesClauseAfterRelease(caughtMon, slot))
     {
         DisplayPartyMenuMessage(gText_CantSelectSamePkmn, TRUE);
-        return FALSE;
-    }
-
-    if(!Rogue_CaughtMonFitsLegendaryClauseAfterRelease(caughtMon, slot))
-    {
-        DisplayPartyMenuMessage(gText_OnlyOneLegendaryMythical, TRUE);
         return FALSE;
     }
 
