@@ -35,6 +35,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Removed the Mysterious Shrine guardian's opening stat boosts and allowed the
+  shrine to appear from the second path of an Adventure onward.
 - Made Huntail Water/Dragon and Gorebyss Water/Fairy.
 - Expanded Misty Terrain synergy: Heartwing now preserves allied Dragon
   damage, Flower Ritual activates with two Fairy allies or Misty Terrain,
@@ -72,6 +74,8 @@ Format follows Keep a Changelog loosely:
   suppressive, and game-breaking effects remain excluded.
 - Gave Hisuian Lilligant Counterstep, retaliating with Low Sweep whenever an
   opposing Pokémon's Speed rises.
+- Gave Hisuian Avalugg Glacial Fortress, making special attacks calculate
+  damage using its Defense instead of its Special Defense.
 - Gave Stonjourner Menhir, preventing a single hit from dealing more than half
   its maximum HP while it remains above half health.
 - Gave the Unovan Zorua line Vanishing Act, switching it out after it lands a
@@ -223,7 +227,8 @@ Format follows Keep a Changelog loosely:
 - Replaced Warpath on Hisuian Braviary with Premonition, which sets Tailwind
   whenever its Speed rises.
 - Replaced Open Field on all three Paldean Tauros breeds with Horn Lock:
-  successful Raging Bull hits exchange secondary types with the target.
+  successful Raging Bull hits exchange secondary types with the target, and
+  Raging Bull now matches its user's second type regardless of species.
   Removed their now-unrelated Plain Terrain level-up move.
 - Replaced Gifted Mind on Galarian Slowking with Counterspell, which answers
   successful opposing status moves with a 20 BP Eerie Spell.
@@ -477,6 +482,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked Gorebyss's Shell Game, Audino's Saving Grace, the Morelull
+  line's Sporelight, and Cresselia's Lunar Edict into distinct Misty Terrain
+  payoffs: Shell Smash can transfer its defensive drops, a grounded ally can be
+  saved from fainting once per battle, healing moves gain priority, and Lunar
+  Dance can consume the terrain instead of Cresselia, respectively.
 - Made Morelull and Shiinotic's Sporelight use Spotlight after every successful
   healing move instead of only once per battle.
 - Expanded Unique Pokémon move generation to a curated 154-move general pool

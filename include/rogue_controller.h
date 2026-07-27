@@ -182,7 +182,6 @@ bool8 Rogue_IsBattleRoamerMon(u16 species);
 bool8 Rogue_IsShrineChallengeActive(void);
 bool8 Rogue_HasChallengedShrine(void);
 void Rogue_PrepareShrineChallenge(void);
-void Rogue_QueueShrineBattleBoost(void);
 u16 Rogue_SelectWildDenEncounterRoom(void);
 u16 Rogue_SelectUniqueDenEncounterRoom(void);
 u16 Rogue_SelectHoneyTreeEncounterRoom(void);

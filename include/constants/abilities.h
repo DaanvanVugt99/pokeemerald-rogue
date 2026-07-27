@@ -537,7 +537,7 @@
 #define ABILITY_KOMBO                  554
 #define ABILITY_BLOOM_BURST            577
 #define ABILITY_PSYCHIC_PARRY          578
-#define ABILITY_RESTORATIVE_AURA       594
+#define ABILITY_SAVING_GRACE           594
 #define ABILITY_ROOT_NETWORK           579
 #define ABILITY_SCORCHING_RELAY        580
 #define ABILITY_TIDAL_SWITCH           581
@@ -840,7 +840,7 @@
 #define ABILITY_BLUBBER                523
 #define ABILITY_CRYSTAL_ARMOR          524
 #define ABILITY_ABYSSAL_MAW            525
-#define ABILITY_CHANGE_OF_HEART        526
+#define ABILITY_SHELL_GAME             526
 #define ABILITY_LIVING_FOSSIL          509
 #define ABILITY_HEARTTHROB             510
 #define ABILITY_PREDATOR               511
@@ -971,12 +971,13 @@
 #define ABILITY_CHROMATIC_FLUX            937
 #define ABILITY_MIRROR_WORLD              938
 #define ABILITY_LIVING_LIBRARY            939
+#define ABILITY_GLACIAL_FORTRESS           940
 #define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
 
 #define BLAST_SHIELD_MIN_POWER      120
 #define FLAK_SHIELD_MAX_POWER       40
 
-#define ABILITIES_COUNT_ROGUE       940
+#define ABILITIES_COUNT_ROGUE       941
 
 #define ABILITIES_COUNT ABILITIES_COUNT_ROGUE
 

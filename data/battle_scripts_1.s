@@ -2733,12 +2733,15 @@ BattleScript_EffectShellSmash:
 	attackcanceler
 	attackstring
 	ppreduce
+	jumpifterrainaffected BS_ATTACKER, STATUS_FIELD_MISTY_TERRAIN, BattleScript_ShellSmashTryShellGameChecks
+BattleScript_ShellSmashStandardChecks:
 	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_ATK, MAX_STAT_STAGE, BattleScript_ShellSmashTryDef
 	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_SPATK, MAX_STAT_STAGE, BattleScript_ShellSmashTryDef
 	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_SPEED, MAX_STAT_STAGE, BattleScript_ShellSmashTryDef
 	jumpifstat BS_ATTACKER, CMP_GREATER_THAN, STAT_DEF, MIN_STAT_STAGE, BattleScript_ShellSmashTryDef
 	jumpifstat BS_ATTACKER, CMP_EQUAL, STAT_SPDEF, MIN_STAT_STAGE, BattleScript_ButItFailed
 BattleScript_ShellSmashTryDef::
+BattleScript_ShellSmashStandardDrops:
 	attackanimation
 	waitanimation
 	setbyte sSTAT_ANIM_PLAYED, FALSE
@@ -2754,6 +2757,47 @@ BattleScript_ShellSmashTrySpDef:
 	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_ShellSmashTryAttack
 	printfromtable gStatUpStringIds
 	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_ShellSmashTryAttack
+BattleScript_ShellSmashTryShellGameChecks:
+	jumpifability BS_ATTACKER, ABILITY_SHELL_GAME, BattleScript_ShellSmashShellGameChecks
+	goto BattleScript_ShellSmashStandardChecks
+BattleScript_ShellSmashShellGameChecks:
+	savetarget
+	settargetopposingside BS_ATTACKER
+	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_ATK, MAX_STAT_STAGE, BattleScript_ShellSmashShellGameChecksPassed
+	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_SPATK, MAX_STAT_STAGE, BattleScript_ShellSmashShellGameChecksPassed
+	jumpifstat BS_ATTACKER, CMP_LESS_THAN, STAT_SPEED, MAX_STAT_STAGE, BattleScript_ShellSmashShellGameChecksPassed
+	jumpifstat BS_TARGET, CMP_GREATER_THAN, STAT_DEF, MIN_STAT_STAGE, BattleScript_ShellSmashShellGameChecksPassed
+	jumpifstat BS_TARGET, CMP_GREATER_THAN, STAT_SPDEF, MIN_STAT_STAGE, BattleScript_ShellSmashShellGameChecksPassed
+	restoretarget
+	goto BattleScript_ButItFailed
+BattleScript_ShellSmashShellGameChecksPassed:
+	restoretarget
+BattleScript_ShellSmashShellGame:
+	attackanimation
+	waitanimation
+	call BattleScript_AbilityPopUp
+	various BS_ATTACKER, VARIOUS_REMOVE_TERRAIN
+	playanimation BS_ATTACKER, B_ANIM_RESTORE_BG
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	savetarget
+	settargetopposingside BS_ATTACKER
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	playstatchangeanimation BS_TARGET, BIT_DEF | BIT_SPDEF, STAT_CHANGE_NEGATIVE | STAT_CHANGE_CANT_PREVENT
+	setstatchanger STAT_DEF, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR | STAT_CHANGE_NOT_PROTECT_AFFECTED | MOVE_EFFECT_CERTAIN, BattleScript_ShellSmashShellGameTrySpDef
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_ShellSmashShellGameTrySpDef
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ShellSmashShellGameTrySpDef:
+	setstatchanger STAT_SPDEF, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR | STAT_CHANGE_NOT_PROTECT_AFFECTED | MOVE_EFFECT_CERTAIN, BattleScript_ShellSmashShellGameFinish
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_ShellSmashShellGameFinish
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ShellSmashShellGameFinish:
+	restoretarget
 BattleScript_ShellSmashTryAttack:
 	setbyte sSTAT_ANIM_PLAYED, FALSE
 	playstatchangeanimation BS_ATTACKER, BIT_SPATK | BIT_ATK | BIT_SPEED, STAT_CHANGE_BY_TWO
@@ -3193,6 +3237,8 @@ BattleScript_EffectHealingWish:
 	ppreduce
 	attackanimation
 	waitanimation
+	jumpifmove MOVE_LUNAR_DANCE, BattleScript_LunarDanceTryLunarEdict
+BattleScript_EffectHealingWishSacrifice:
 	instanthpdrop BS_ATTACKER
 	setatkhptozero
 	tryfaintmon BS_ATTACKER
@@ -3216,6 +3262,19 @@ BattleScript_EffectHealingWish:
 BattleScript_EffectHealingWishEnd:
 	moveendall
 	end
+
+BattleScript_LunarDanceTryLunarEdict:
+	jumpifability BS_ATTACKER, ABILITY_LUNAR_EDICT, BattleScript_LunarDanceTryConsumeMistyTerrain
+	goto BattleScript_EffectHealingWishSacrifice
+BattleScript_LunarDanceTryConsumeMistyTerrain:
+	jumpifword CMP_NO_COMMON_BITS, gFieldStatuses, STATUS_FIELD_MISTY_TERRAIN, BattleScript_EffectHealingWishSacrifice
+	call BattleScript_AbilityPopUp
+	various BS_ATTACKER, VARIOUS_REMOVE_TERRAIN
+	playanimation BS_ATTACKER, B_ANIM_RESTORE_BG
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	storehealingwish BS_ATTACKER
+	goto BattleScript_MoveSwitch
 
 BattleScript_HealingWishActivates::
 	setbyte cMULTISTRING_CHOOSER, 0
@@ -4234,7 +4293,7 @@ BattleScript_EffectWildGrowth:
 	attackcanceler
 	attackstring
 	ppreduce
-	various BS_ATTACKER, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
+	various BS_ATTACKER, VARIOUS_TRY_WILD_GROWTH_HEAL
 	.4byte BattleScript_AlreadyAtFullHp
 	attackanimation
 	waitanimation
@@ -10511,33 +10570,21 @@ BattleScript_HealerActivates::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
-BattleScript_RestorativeAuraHeals::
+BattleScript_SavingGraceSaves::
 	call BattleScript_AbilityPopUp
-	various BS_PLAYER1, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
-	.4byte BattleScript_RestorativeAuraTryPlayer2
-	playanimation BS_PLAYER1, B_ANIM_HELD_ITEM_EFFECT
-	healthbarupdate BS_PLAYER1
-	datahpupdate BS_PLAYER1
-BattleScript_RestorativeAuraTryPlayer2:
-	various BS_PLAYER2, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
-	.4byte BattleScript_RestorativeAuraTryOpponent1
-	playanimation BS_PLAYER2, B_ANIM_HELD_ITEM_EFFECT
-	healthbarupdate BS_PLAYER2
-	datahpupdate BS_PLAYER2
-BattleScript_RestorativeAuraTryOpponent1:
-	various BS_OPPONENT1, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
-	.4byte BattleScript_RestorativeAuraTryOpponent2
-	playanimation BS_OPPONENT1, B_ANIM_HELD_ITEM_EFFECT
-	healthbarupdate BS_OPPONENT1
-	datahpupdate BS_OPPONENT1
-BattleScript_RestorativeAuraTryOpponent2:
-	various BS_OPPONENT2, VARIOUS_TRY_RESTORATIVE_AURA_HEAL
-	.4byte BattleScript_RestorativeAuraEnd
-	playanimation BS_OPPONENT2, B_ANIM_HELD_ITEM_EFFECT
-	healthbarupdate BS_OPPONENT2
-	datahpupdate BS_OPPONENT2
-BattleScript_RestorativeAuraEnd:
-	end3
+	playanimation BS_EFFECT_BATTLER, B_ANIM_RESTORE_BG
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	savetarget
+	copybyte gBattlerTarget, gEffectBattler
+	playanimation BS_EFFECT_BATTLER, B_ANIM_HELD_ITEM_EFFECT
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
+	healthbarupdate BS_EFFECT_BATTLER
+	datahpupdate BS_EFFECT_BATTLER
+	printstring STRINGID_PKMNENDUREDHIT
+	waitmessage B_WAIT_TIME_LONG
+	restoretarget
+	return
 
 BattleScript_SandstreamActivates::
 	pause B_WAIT_TIME_SHORT

@@ -1316,6 +1316,7 @@ static const u8 sAbilitiesAffectedByMoldBreaker[ABILITIES_COUNT] =
     [ABILITY_THERMAL_EXCHANGE] = 1,
     [ABILITY_BLAST_SHIELD] = 1,
     [ABILITY_FLAK_SHIELD] = 1,
+    [ABILITY_GLACIAL_FORTRESS] = 1,
 };
 
 static const u8 sAbilitiesNotTraced[ABILITIES_COUNT] =
@@ -9749,35 +9750,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_CHANGE_OF_HEART)
-         && !uniqueDone
-         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
-        {
-            u32 opposingBattler = BATTLE_OPPOSITE(battler);
-            u32 i;
-
-            uniqueDone = TRUE;
-
-            for (i = 0; i < 2; i++, opposingBattler ^= BIT_FLANK)
-            {
-                if (!CanUseExtraMove(battler, opposingBattler))
-                    continue;
-
-                gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
-                SetBattlerTriggeredAbility(battler, ABILITY_CHANGE_OF_HEART);
-                SetAtkCancellerForCalledMove();
-                gBattlerAttacker = gBattlerAbility = battler;
-                gBattlerTarget = opposingBattler;
-                gCalledMove = MOVE_HEART_SWAP;
-                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-                gProtectStructs[battler].extraMoveUsed = TRUE;
-                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
-                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                StartAbilityCalledMoveScript();
-                return 1;
-            }
-        }
-
         if (HasBattlerAbility(battler, ABILITY_SILKEN_THREAD) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -10254,24 +10226,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
             gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_LUNAR_EDICT)
-         && !uniqueDone
-         && !(gStatuses3[battler] & STATUS3_IMPRISONED_OTHERS))
-        {
-            uniqueDone = TRUE;
-            SetBattlerTriggeredAbility(battler, ABILITY_LUNAR_EDICT);
-            SetAtkCancellerForCalledMove();
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = battler;
-            gCalledMove = MOVE_IMPRISON;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
-            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-            StartAbilityCalledMoveScript();
-            return 1;
         }
 
         if (HasBattlerAbility(battler, ABILITY_BLOOMING_CASCADE)
@@ -12974,30 +12928,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                         effect++;
                         break;
                     }
-                }
-            }
-
-            if (HasBattlerAbility(battler, ABILITY_RESTORATIVE_AURA))
-            {
-                bool32 healedAny = FALSE;
-
-                for (i = 0; i < gBattlersCount; i++)
-                {
-                    if (!IsBattlerAlive(i)
-                     || BATTLER_MAX_HP(i)
-                     || IsBattlerHealBlocked(i))
-                        continue;
-
-                    healedAny = TRUE;
-                    break;
-                }
-
-                if (healedAny)
-                {
-                    SetBattlerTriggeredAbility(battler, ABILITY_RESTORATIVE_AURA);
-                    BattleScriptPushCursorAndCallback(BattleScript_RestorativeAuraHeals);
-                    effect++;
-                    break;
                 }
             }
 
@@ -25648,6 +25578,13 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         usesDefStat = defStat <= spDefStat;
         if (updateFlags)
             RecordAbilityBattle(battlerAtk, ABILITY_CROWN_OF_FANGS);
+    }
+    else if (HasBattlerAbility(battlerDef, ABILITY_GLACIAL_FORTRESS)
+          && IS_MOVE_SPECIAL(move))
+    {
+        usesDefStat = TRUE;
+        if (updateFlags)
+            RecordAbilityBattle(battlerDef, ABILITY_GLACIAL_FORTRESS);
     }
     else if (gBattleMoves[move].effect == EFFECT_PSYSHOCK || IS_MOVE_PHYSICAL(move)) // uses defense stat instead of sp.def
     {

@@ -5098,7 +5098,7 @@ static void Cmd_clearstatusfromeffect(void)
 static void Cmd_tryfaintmon(void)
 {
     CMD_ARGS(u8 battler, bool8 isSpikes, const u8 *instr);
-    u32 battler, destinyBondBattler;
+    u32 battler, destinyBondBattler, i;
     const u8 *faintScript;
 
     battler = GetBattlerForBattleScript(cmd->battler);
@@ -5141,6 +5141,29 @@ static void Cmd_tryfaintmon(void)
                 BattleScriptPush(cmd->nextInstr);
                 gBattlescriptCurrInstr = BattleScript_SacredAshActivates;
                 return;
+            }
+
+            if (IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
+            {
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (GetBattlerSide(i) != GetBattlerSide(battler)
+                     || (gAbsentBattlerFlags & gBitTable[i])
+                     || (i != battler && !IsBattlerAlive(i))
+                     || !HasBattlerAbility(i, ABILITY_SAVING_GRACE)
+                     || (gBattleStruct->uniqueAbilityUsed[GetBattlerSide(i)] & gBitTable[gBattlerPartyIndexes[i]]))
+                        continue;
+
+                    RecordAbilityBattle(i, ABILITY_SAVING_GRACE);
+                    SetBattlerTriggeredAbility(i, ABILITY_SAVING_GRACE);
+                    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(i)] |= gBitTable[gBattlerPartyIndexes[i]];
+                    gEffectBattler = battler;
+                    gBattleMoveDamage = -1;
+                    RemoveAllTerrains();
+                    BattleScriptPush(cmd->nextInstr);
+                    gBattlescriptCurrInstr = BattleScript_SavingGraceSaves;
+                    return;
+                }
             }
 
             gHitMarker |= HITMARKER_FAINTED(battler);
@@ -12215,7 +12238,7 @@ static void Cmd_various(void)
         }
         return;
     }
-    case VARIOUS_TRY_RESTORATIVE_AURA_HEAL:
+    case VARIOUS_TRY_WILD_GROWTH_HEAL:
     {
         VARIOUS_ARGS(const u8 *failInstr);
         if (!IsBattlerAlive(battler)

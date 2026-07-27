@@ -3904,7 +3904,6 @@ static void TryDoEventsBeforeFirstTurn(void)
     }
 
     // Totem boosts
-    Rogue_QueueShrineBattleBoost();
     for (i = 0; i < gBattlersCount; i++)
     {
         if (gQueuedStatBoosts[i].stats != 0 && !gProtectStructs[i].eatMirrorHerb && gProtectStructs[i].activateOpportunist == 0)
@@ -5094,6 +5093,11 @@ s8 GetMovePriority(u32 battler, u16 move)
     }
     else if (ability == ABILITY_TRIAGE && IsHealingMove(move))
         priority += 3;
+
+    if (HasBattlerAbility(battler, ABILITY_SPORELIGHT)
+     && IsHealingMove(move)
+     && IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
+        priority++;
 
     if (GetBattlerSide(battler) == B_SIDE_PLAYER
      && IsCharmActive(EFFECT_PREP_CHARM)
@@ -6304,10 +6308,7 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
             moveType = gSpeciesInfo[species].types[1];
         break;
     case EFFECT_RAGING_BULL:
-        if (species == SPECIES_TAUROS_PALDEAN_COMBAT_BREED
-         || species == SPECIES_TAUROS_PALDEAN_BLAZE_BREED
-         || species == SPECIES_TAUROS_PALDEAN_AQUA_BREED)
-            moveType = gSpeciesInfo[species].types[1];
+        moveType = gSpeciesInfo[species].types[1];
         break;
     case EFFECT_NATURAL_GIFT:
         if (ItemId_GetPocket(item) == POCKET_BERRIES)
@@ -6462,12 +6463,9 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
         else if (gBattleMons[battlerAtk].type3 != TYPE_MYSTERY)
             gBattleStruct->dynamicMoveType = gBattleMons[battlerAtk].type3 | F_DYNAMIC_TYPE_SET;
     }
-    else if (gBattleMoves[move].effect == EFFECT_RAGING_BULL
-            && (gBattleMons[battlerAtk].species == SPECIES_TAUROS_PALDEAN_COMBAT_BREED
-             || gBattleMons[battlerAtk].species == SPECIES_TAUROS_PALDEAN_BLAZE_BREED
-             || gBattleMons[battlerAtk].species == SPECIES_TAUROS_PALDEAN_AQUA_BREED))
+    else if (gBattleMoves[move].effect == EFFECT_RAGING_BULL)
     {
-            gBattleStruct->dynamicMoveType = gBattleMons[battlerAtk].type2 | F_DYNAMIC_TYPE_SET;
+        gBattleStruct->dynamicMoveType = gBattleMons[battlerAtk].type2 | F_DYNAMIC_TYPE_SET;
     }
     else if (gBattleMoves[move].effect == EFFECT_NATURAL_GIFT)
     {

@@ -555,12 +555,13 @@ TEST("Dynamic unique ability eligibility audit contains 583 abilities")
         ABILITY_CRASH_PROTOCOL,
         ABILITY_HIDDEN_STASH,
         ABILITY_VANISHING_ACT,
+        ABILITY_GLACIAL_FORTRESS,
     };
     u16 ability;
     u16 eligibleCount = 0;
     u16 i;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_LIVING_LIBRARY; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_GLACIAL_FORTRESS; ++ability)
     {
         if(RogueGift_IsDynamicUniqueAbilityEligible(ability))
             ++eligibleCount;
@@ -600,6 +601,7 @@ TEST("Dynamic unique ability eligibility audit contains 583 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_CHROMATIC_FLUX));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_MIRROR_WORLD));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_LIVING_LIBRARY));
+    EXPECT(!RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_GLACIAL_FORTRESS));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_CHAOS_THEORY));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_SHIP_OF_THESEUS));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_WORLD_ENGINE));

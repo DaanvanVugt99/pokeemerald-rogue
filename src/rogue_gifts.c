@@ -490,7 +490,7 @@ static u16 GetDynamicMoveByIndex(u16 moveIndex)
 }
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
-#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_LIVING_LIBRARY
+#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_GLACIAL_FORTRESS
 
 static bool8 IsDynamicStandardAbilityExcluded(u16 ability)
 {
@@ -688,6 +688,7 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
     ABILITY_CRASH_PROTOCOL,
     ABILITY_HIDDEN_STASH,
     ABILITY_VANISHING_ACT,
+    ABILITY_GLACIAL_FORTRESS,
 };
 
 #define DYNAMIC_UNIQUE_ABILITY_COUNT \

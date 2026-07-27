@@ -137,7 +137,7 @@ DOUBLE_BATTLE_TEST("Brick Break can remove Light Screen, Reflect and Aurora Veil
     }
 }
 
-SINGLE_BATTLE_TEST("Move Raging Bull changes it's type depending on the Tauros Form")
+SINGLE_BATTLE_TEST("Raging Bull matches each Paldean Tauros breed's second type")
 {
     u16 speciesPlayer;
     u16 speciesOpponent;
@@ -155,5 +155,19 @@ SINGLE_BATTLE_TEST("Move Raging Bull changes it's type depending on the Tauros F
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RAGING_BULL, player);
         HP_BAR(opponent);
         MESSAGE("It's not very effective…");
+    }
+}
+
+SINGLE_BATTLE_TEST("Raging Bull matches a non-Tauros user's second type")
+{
+    GIVEN {
+        PLAYER(SPECIES_CHARIZARD);
+        OPPONENT(SPECIES_TANGELA);
+    } WHEN {
+        TURN { MOVE(player, MOVE_RAGING_BULL); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RAGING_BULL, player);
+        HP_BAR(opponent);
+        MESSAGE("It's super effective!");
     }
 }

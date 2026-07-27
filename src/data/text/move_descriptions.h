@@ -3199,7 +3199,7 @@ static const u8 sAquaStepDescription[] = _(
 
 static const u8 sRagingBullDescription[] = _(
     "Tackle that breaks barriers.\n"
-    "User's form determines type.");
+    "Matches the user's second type.");
 
 static const u8 sMakeItRainDescription[] = _(
     "Lowers the user's Sp. Atk.\n"

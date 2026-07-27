@@ -177,7 +177,6 @@ struct RogueLocalData
     bool8 hasPendingSnagBattle : 1;
     bool8 hasPendingRidemonTrappedCheck : 1;
     bool8 isShrineChallengeActive : 1;
-    bool8 hasQueuedShrineBattleBoost : 1;
 };
 
 typedef u16 hot_track_dat;
@@ -5258,8 +5257,7 @@ static void BeginRogueRunPhase_Trainers(void)
     Rogue_ChooseFrontierBrainTrainersForNewAdventure();
     EnableRivalEncounterIfRequired();
 
-    gRogueRun.shrineSpawnDifficulty = ROGUE_GYM_MID_DIFFICULTY
-        + RogueRandomRange(ROGUE_MAX_BOSS_COUNT - ROGUE_GYM_MID_DIFFICULTY, 0);
+    gRogueRun.shrineSpawnDifficulty = 1 + RogueRandomRange(ROGUE_MAX_BOSS_COUNT - 1, 0);
     ChooseUniqueDenForNewAdventure();
 
     RogueSafari_CompactEmptyEntries();
@@ -6054,7 +6052,6 @@ void Rogue_PrepareShrineChallenge(void)
 
     gRogueRun.hasChallengedShrine = TRUE;
     gRogueLocal.isShrineChallengeActive = TRUE;
-    gRogueLocal.hasQueuedShrineBattleBoost = FALSE;
 
     ZeroEnemyPartyMons();
     CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
@@ -6101,29 +6098,6 @@ void Rogue_PrepareShrineChallenge(void)
     temp = GetMonData(&gEnemyParty[0], MON_DATA_MAX_HP);
     SetMonData(&gEnemyParty[0], MON_DATA_HP, &temp);
 
-}
-
-void Rogue_QueueShrineBattleBoost(void)
-{
-    u8 i;
-
-    if(!gRogueLocal.isShrineChallengeActive || gRogueLocal.hasQueuedShrineBattleBoost)
-        return;
-
-    gRogueLocal.hasQueuedShrineBattleBoost = TRUE;
-
-    // Queue after battle initialization so the established aura animation and
-    // messages apply the standard Alpha boosts before the first turn.
-    memset(&gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT], 0, sizeof(gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT]));
-    for(i = 0; i < NUM_STATS - 1; ++i)
-    {
-        if(i == STAT_SPEED - 1)
-            continue;
-
-        gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT].stats |= (1 << i);
-        gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT].statChanges[i] = 1;
-    }
-    gQueuedStatBoosts[B_POSITION_OPPONENT_LEFT].stats |= 0x80;
 }
 
 bool8 Rogue_IsBattleRoamerMon(u16 species)
@@ -9463,7 +9437,6 @@ void Rogue_Battle_EndWildBattle(void)
     if(gRogueLocal.isShrineChallengeActive)
     {
         gRogueLocal.isShrineChallengeActive = FALSE;
-        gRogueLocal.hasQueuedShrineBattleBoost = FALSE;
         gRogueLocal.wildBattleCustomMonId = 0;
     }
 }
