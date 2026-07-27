@@ -20,6 +20,7 @@
 #include <regex.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +31,7 @@
 #endif
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -37,6 +39,7 @@
 #define MAX_PROCESSES               32 // See also test/test.h
 #define MAX_SUMMARY_TESTS_TO_LIST   50
 #define MAX_TEST_LIST_BUFFER_LENGTH 256
+#define DEFAULT_RUNNER_TIMEOUT_SECONDS 120
 
 #define ARRAY_COUNT(arr) (sizeof((arr)) / sizeof((arr)[0]))
 
@@ -59,13 +62,27 @@ struct Runner
     int assumptionFails;
     int fails;
     int results;
+    time_t last_progress_at;
+    bool harness_failed;
     char failedTestNames[MAX_SUMMARY_TESTS_TO_LIST][MAX_TEST_LIST_BUFFER_LENGTH];
     char knownFailingPassedTestNames[MAX_SUMMARY_TESTS_TO_LIST][MAX_TEST_LIST_BUFFER_LENGTH];
 };
 
 static unsigned nrunners = 0;
 static unsigned runners_digits = 0;
+static unsigned runner_timeout_seconds = DEFAULT_RUNNER_TIMEOUT_SECONDS;
 static struct Runner *runners = NULL;
+
+static void fail_runner(int i, struct Runner *runner, const char *reason)
+{
+    if (runner->harness_failed)
+        return;
+
+    runner->harness_failed = true;
+    fprintf(stderr, "[%0*d] Harness failure while running \"%s\": %s\n", runners_digits, i, runner->test_name, reason);
+    if (runner->pid > 0 && kill(runner->pid, SIGKILL) == -1)
+        perror("kill test runner failed");
+}
 
 static void handle_read(int i, struct Runner *runner)
 {
@@ -73,6 +90,7 @@ static void handle_read(int i, struct Runner *runner)
     char *eol;
     size_t consumed = 0;
     size_t remaining = runner->input_buffer_size;
+    bool show_output;
     while ((eol = memchr(sol, '\n', remaining)))
     {
         eol++;
@@ -82,6 +100,9 @@ static void handle_read(int i, struct Runner *runner)
          && !strncmp(sol, "GBA: ", strlen("GBA: ")))
         {
             soc = sol + strlen("GBA: ");
+            if ((size_t)(eol - soc) >= strlen("Illegal opcode:")
+             && !strncmp(soc, "Illegal opcode:", strlen("Illegal opcode:")))
+                fail_runner(i, runner, "mGBA reported an illegal opcode");
             goto buffer_output;
         }
         else if (runner->input_buffer_size >= strlen("GBA Debug: ")
@@ -101,6 +122,7 @@ static void handle_read(int i, struct Runner *runner)
                     }
                     strncpy(runner->test_name, soc, eol - soc - 1);
                     runner->test_name[eol - soc - 1] = '\0';
+                    runner->last_progress_at = time(NULL);
                     break;
 
                 case 'P':
@@ -125,11 +147,14 @@ static void handle_read(int i, struct Runner *runner)
                         strcpy(runner->failedTestNames[runner->fails], runner->test_name);
                     runner->fails++;
 add_to_results:
+                    show_output = soc[1] != 'P';
                     runner->results++;
+                    runner->last_progress_at = time(NULL);
                     soc += 2;
                     fprintf(stdout, "[%0*d] %s: ", runners_digits, i, runner->test_name);
                     fwrite(soc, 1, eol - soc, stdout);
-                    fwrite(runner->output_buffer, 1, runner->output_buffer_size, stdout);
+                    if (show_output)
+                        fwrite(runner->output_buffer, 1, runner->output_buffer_size, stdout);
                     strcpy(runner->test_name, "WAITING...");
                     runner->output_buffer_size = 0;
                     break;
@@ -185,10 +210,13 @@ buffer_output:
     }
 }
 
-static void unlink_roms(void)
+static void cleanup_runners(void)
 {
     for (int i = 0; i < nrunners; i++)
     {
+        if (runners[i].pid > 0)
+            kill(runners[i].pid, SIGKILL);
+
         if (runners[i].rom_path[0])
         {
             if (unlink(runners[i].rom_path) == -1)
@@ -290,6 +318,20 @@ int main(int argc, char *argv[])
     }
     if (nrunners > MAX_PROCESSES)
         nrunners = MAX_PROCESSES;
+
+    const char *timeout_env = getenv("MGBA_HYDRA_TIMEOUT_SECONDS");
+    if (timeout_env && timeout_env[0])
+    {
+        char *end;
+        unsigned long timeout = strtoul(timeout_env, &end, 10);
+        if (*end != '\0' || timeout > UINT_MAX)
+        {
+            fprintf(stderr, "Invalid MGBA_HYDRA_TIMEOUT_SECONDS value: %s\n", timeout_env);
+            exit(2);
+        }
+        runner_timeout_seconds = timeout;
+    }
+
     runners_digits = ceil(log10(nrunners));
     runners = calloc(nrunners, sizeof(*runners));
     if (!runners)
@@ -303,12 +345,13 @@ int main(int argc, char *argv[])
         runners[i].input_buffer = malloc(runners[i].input_buffer_capacity);
         runners[i].output_buffer_capacity = 4096;
         runners[i].output_buffer = malloc(runners[i].output_buffer_capacity);
+        runners[i].last_progress_at = time(NULL);
         strcpy(runners[i].test_name, "WAITING...");
         if (tty)
             fprintf(stdout, "[%0*d] %s\n", runners_digits, i, runners[i].test_name);
     }
     fflush(stdout);
-    atexit(unlink_roms);
+    atexit(cleanup_runners);
     signal(SIGINT, exit2);
     signal(SIGTERM, exit2);
 
@@ -479,7 +522,8 @@ int main(int argc, char *argv[])
                 fprintf(stdout, "\e[%dF\e[J", scrollback);
         }
 
-        if (poll(pollfds, nrunners, -1) == -1)
+        int poll_timeout_ms = runner_timeout_seconds == 0 ? -1 : 1000;
+        if (poll(pollfds, nrunners, poll_timeout_ms) == -1)
         {
             perror("poll failed");
             exit(2);
@@ -507,6 +551,22 @@ int main(int argc, char *argv[])
                 }
                 runners[i].outfd = pollfds[i].fd = -pollfds[i].fd;
                 openfds--;
+            }
+        }
+
+        if (runner_timeout_seconds != 0)
+        {
+            time_t now = time(NULL);
+            for (int i = 0; i < nrunners; i++)
+            {
+                if (runners[i].outfd >= 0
+                 && !runners[i].harness_failed
+                 && difftime(now, runners[i].last_progress_at) >= runner_timeout_seconds)
+                {
+                    char reason[128];
+                    snprintf(reason, sizeof(reason), "no test progress for %u seconds", runner_timeout_seconds);
+                    fail_runner(i, &runners[i], reason);
+                }
             }
         }
 
@@ -543,10 +603,21 @@ int main(int argc, char *argv[])
             perror("waitpid runners[i] failed");
             exit(2);
         }
-        if (runners[i].output_buffer_size > 0)
-            fwrite(runners[i].output_buffer, 1, runners[i].output_buffer_size, stdout);
+        runners[i].pid = 0;
+        if (runners[i].harness_failed)
+            exit_code = 2;
+        else if (WIFSIGNALED(wstatus))
+        {
+            fprintf(stderr, "[%0*d] Test runner terminated by signal %d while running \"%s\"\n", runners_digits, i, WTERMSIG(wstatus), runners[i].test_name);
+            exit_code = 2;
+        }
         if (WIFEXITED(wstatus) && WEXITSTATUS(wstatus) > exit_code)
             exit_code = WEXITSTATUS(wstatus);
+        if (runners[i].output_buffer_size > 0
+         && (runners[i].harness_failed
+          || WIFSIGNALED(wstatus)
+          || (WIFEXITED(wstatus) && WEXITSTATUS(wstatus) != 0)))
+            fwrite(runners[i].output_buffer, 1, runners[i].output_buffer_size, stdout);
         passes += runners[i].passes;
         knownFails += runners[i].knownFails;
         for (int j = 0; j < runners[i].knownFailsPassing; j++)

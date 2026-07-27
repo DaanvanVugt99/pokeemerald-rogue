@@ -5,6 +5,7 @@
 #include "constants/rogue.h"
 #include "constants/species.h"
 #include "event_data.h"
+#include "malloc.h"
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
@@ -67,9 +68,14 @@ TEST("A portal-pregenerated initial path is reused on map entry")
 
 TEST("An exhausted path is replaced after its boss")
 {
-    struct RogueAdvPath originalPath = gRogueAdvPath;
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
     u8 originalRoomId = gRogueRun.adventureRoomId;
 
+    EXPECT_NE(originalPath, NULL);
+    if(originalPath == NULL)
+        return;
+
+    *originalPath = gRogueAdvPath;
     gRogueAdvPath.roomCount = 1;
     gRogueAdvPath.justGenerated = FALSE;
     gRogueAdvPath.rooms[0].roomType = ADVPATH_ROOM_BOSS;
@@ -79,8 +85,9 @@ TEST("An exhausted path is replaced after its boss")
     EXPECT(gRogueAdvPath.justGenerated);
     EXPECT_GT(gRogueAdvPath.roomCount, 1);
 
-    gRogueAdvPath = originalPath;
+    gRogueAdvPath = *originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
+    Free(originalPath);
 }
 
 TEST("Frontier Brain paths cache deterministic previews")

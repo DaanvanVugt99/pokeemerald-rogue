@@ -79,6 +79,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented headless test crashes from hanging indefinitely by bounding emulator
+  worker progress, failing fast on illegal opcodes, and moving a large Adventure
+  path test snapshot off the GBA stack.
 - Preserved Unique Pokémon's nature and recalculated stats after applying or
   reapplying their custom data.
 - Made Unique Den payload generation deterministic under Adventure Replay

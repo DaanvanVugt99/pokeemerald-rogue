@@ -135,15 +135,16 @@ print_split_suite_summary() {
     local total_todo=0
     local total_assumption_failed=0
     local total_tests=0
+    local total_duration=0
     local failed_suites=0
     local i
 
     echo
     echo "Split-suite summary:"
-    printf "  %-10s %8s %8s %8s %8s %8s %8s %8s\n" "Suite" "Failed" "KF Pass" "Passed" "Known" "TODO" "Assume" "Total"
+    printf "  %-10s %8s %8s %8s %8s %8s %8s %8s %8s\n" "Suite" "Failed" "KF Pass" "Passed" "Known" "TODO" "Assume" "Total" "Time(s)"
 
     for i in "${!suite_names[@]}"; do
-        printf "  %-10s %8s %8s %8s %8s %8s %8s %8s\n" \
+        printf "  %-10s %8s %8s %8s %8s %8s %8s %8s %8s\n" \
             "${suite_names[$i]}" \
             "${suite_failed[$i]}" \
             "${suite_known_failing_passed[$i]}" \
@@ -151,7 +152,8 @@ print_split_suite_summary() {
             "${suite_known_failing[$i]}" \
             "${suite_todo[$i]}" \
             "${suite_assumption_failed[$i]}" \
-            "${suite_total[$i]}"
+            "${suite_total[$i]}" \
+            "${suite_durations[$i]}"
 
         total_failed=$((total_failed + suite_failed[$i]))
         total_known_failing_passed=$((total_known_failing_passed + suite_known_failing_passed[$i]))
@@ -160,13 +162,14 @@ print_split_suite_summary() {
         total_todo=$((total_todo + suite_todo[$i]))
         total_assumption_failed=$((total_assumption_failed + suite_assumption_failed[$i]))
         total_tests=$((total_tests + suite_total[$i]))
+        total_duration=$((total_duration + suite_durations[$i]))
 
         if [ "${suite_exit_codes[$i]}" -ne 0 ]; then
             failed_suites=$((failed_suites + 1))
         fi
     done
 
-    printf "  %-10s %8s %8s %8s %8s %8s %8s %8s\n" \
+    printf "  %-10s %8s %8s %8s %8s %8s %8s %8s %8s\n" \
         "TOTAL" \
         "$total_failed" \
         "$total_known_failing_passed" \
@@ -174,7 +177,8 @@ print_split_suite_summary() {
         "$total_known_failing" \
         "$total_todo" \
         "$total_assumption_failed" \
-        "$total_tests"
+        "$total_tests" \
+        "$total_duration"
 
     if [ "$failed_suites" -gt 0 ]; then
         echo
@@ -218,12 +222,15 @@ if [ "$check_all_suites" -eq 1 ]; then
     suite_todo=()
     suite_assumption_failed=()
     suite_total=()
+    suite_durations=()
 
     for suite in "${all_suites[@]}"; do
         suite_log="$suite_logs_dir/$suite.log"
         echo "Running headless tests.. [make -j$num_cores check RELEASE=0 TEST_SUITE=\"$suite\" TESTS=\"$test_to_run_prefix\"]"
+        suite_started_at=$SECONDS
         run_make check "$suite" 2>&1 | tee "$suite_log"
         suite_exit_code=$?
+        suite_duration=$((SECONDS - suite_started_at))
         if [ $suite_exit_code -ne 0 ] && { [ $exit_code -eq 0 ] || [ $suite_exit_code -gt $exit_code ]; }; then
             exit_code=$suite_exit_code
         fi
@@ -237,6 +244,7 @@ if [ "$check_all_suites" -eq 1 ]; then
         suite_todo+=("$(parse_summary_count "Tests TO_DO" "$suite_log")")
         suite_assumption_failed+=("$(parse_summary_count "ASSUMPTIONS_FAILED" "$suite_log")")
         suite_total+=("$(parse_summary_count "Tests TOTAL" "$suite_log")")
+        suite_durations+=("$suite_duration")
     done
 
     print_split_suite_summary
