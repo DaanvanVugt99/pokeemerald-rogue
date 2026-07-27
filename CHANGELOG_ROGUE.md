@@ -35,6 +35,7 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made Huntail Water/Dragon and Gorebyss Water/Fairy.
 - Expanded Misty Terrain synergy: Heartwing now preserves allied Dragon
   damage, Flower Ritual activates with two Fairy allies or Misty Terrain,
   Drift Song heals one quarter in Misty Terrain, and Moonglass heals one
