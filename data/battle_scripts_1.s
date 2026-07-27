@@ -642,8 +642,8 @@ BattleScript_EffectDoodle_CopyAbility:
 	copybyte gBattlerTarget, gBattleCommunication + 7
 	trycopyability BS_ATTACKER, BattleScript_ButItFailed
 .if B_ABILITY_POP_UP == TRUE
-	setbyte sFIXED_ABILITY_POPUP, TRUE
 	showabilitypopup BS_ATTACKER
+	setbyte sFIXED_ABILITY_POPUP, TRUE
 	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_LONG
 	sethword sABILITY_OVERWRITE, 0
 	updateabilitypopup BS_ATTACKER
@@ -6722,8 +6722,8 @@ BattleScript_EffectRolePlay::
 	attackanimation
 	waitanimation
 .if B_ABILITY_POP_UP == TRUE
-	setbyte sFIXED_ABILITY_POPUP, TRUE
 	showabilitypopup BS_ATTACKER
+	setbyte sFIXED_ABILITY_POPUP, TRUE
 	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_LONG
 	sethword sABILITY_OVERWRITE, 0
 	updateabilitypopup BS_ATTACKER
@@ -11936,9 +11936,9 @@ BattleScript_MummyActivates::
 
 BattleScript_WanderingSpiritActivates::
 .if B_ABILITY_POP_UP == TRUE
-	setbyte sFIXED_ABILITY_POPUP, TRUE
 	sethword sABILITY_OVERWRITE, ABILITY_WANDERING_SPIRIT
 	showabilitypopup BS_TARGET
+	setbyte sFIXED_ABILITY_POPUP, TRUE
 	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_LONG
 	sethword sABILITY_OVERWRITE, 0
 	updateabilitypopup BS_TARGET
@@ -11946,9 +11946,9 @@ BattleScript_WanderingSpiritActivates::
 	destroyabilitypopup
 	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_SHORT
 	copybyte gBattlerAbility, gBattlerAttacker
-	setbyte sFIXED_ABILITY_POPUP, TRUE
 	copyhword sABILITY_OVERWRITE, gLastUsedAbility
 	showabilitypopup BS_ATTACKER
+	setbyte sFIXED_ABILITY_POPUP, TRUE
 	pause B_WAIT_TIME_ABSOLUTE | B_WAIT_TIME_LONG
 	sethword sABILITY_OVERWRITE, 0
 	updateabilitypopup BS_ATTACKER

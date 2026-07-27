@@ -28,6 +28,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Kept chained Ability popups visible long enough to read before another
+  Ability from the same Pokémon replaces them.
 - Expanded generated Unique Pokémon's exotic move pool with all eleven
   non-field Divergence moves, seven additional curated moves, and 28 broadly
   useful ability-synergy moves while keeping conditional support moves out of

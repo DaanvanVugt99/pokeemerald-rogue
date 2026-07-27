@@ -13799,6 +13799,8 @@ static void Cmd_various(void)
     case VARIOUS_ABILITY_POPUP:
     {
         VARIOUS_ARGS();
+        if (!CanReplaceAbilityPopUp(battler))
+            return;
         CreateAbilityPopUp(battler, gBattleMons[battler].ability, (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) != 0);
         break;
     }

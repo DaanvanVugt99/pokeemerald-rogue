@@ -3956,7 +3956,23 @@ void UpdateAbilityPopup(u8 battlerId)
     RestoreOverwrittenPixels((void*)(OBJ_VRAM0) + (gSprites[spriteId1].oam.tileNum * 32));
 }
 
-#define FRAMES_TO_WAIT 48
+#define ABILITY_POP_UP_FRAMES_TO_WAIT 48
+#define ABILITY_POP_UP_MIN_VISIBLE_FRAMES 32
+
+bool32 CanReplaceAbilityPopUp(u8 battlerId)
+{
+    u8 spriteId;
+
+    if (!(gBattleStruct->activeAbilityPopUps & gBitTable[battlerId]))
+        return TRUE;
+
+    spriteId = gBattleStruct->abilityPopUpSpriteIds[battlerId][0];
+    if (!IsAbilityPopUpSpriteValid(spriteId))
+        return TRUE;
+
+    return gSprites[spriteId].tHide
+        && gSprites[spriteId].tFrames <= ABILITY_POP_UP_FRAMES_TO_WAIT - ABILITY_POP_UP_MIN_VISIBLE_FRAMES;
+}
 
 static void SpriteCb_AbilityPopUp(struct Sprite *sprite)
 {
@@ -3970,7 +3986,7 @@ static void SpriteCb_AbilityPopUp(struct Sprite *sprite)
         {
             sprite->x = sprite->tOriginalX;
             sprite->tHide = TRUE;
-            sprite->tFrames = FRAMES_TO_WAIT;
+            sprite->tFrames = ABILITY_POP_UP_FRAMES_TO_WAIT;
         }
     }
     else // Hide
