@@ -392,6 +392,48 @@ namespace PokemonDataGenerator.Pokedex
 				}
 			}
 
+			private void ReplaceCompetitiveAbility(string fromAbility, string toAbility)
+			{
+				foreach (var set in CompetitiveSets)
+				{
+					if (set.Ability == fromAbility)
+						set.Ability = toAbility;
+				}
+			}
+
+			private void ApplyDivergenceAbilityReplacements()
+			{
+				switch (Species)
+				{
+					case "SPECIES_POLITOED":
+						ReplaceCompetitiveAbility("ABILITY_DRIZZLE", "ABILITY_LIQUID_VOICE");
+						break;
+					case "SPECIES_PELIPPER":
+						ReplaceCompetitiveAbility("ABILITY_DRIZZLE", "ABILITY_WIND_RIDER");
+						break;
+					case "SPECIES_TYRANITAR":
+						ReplaceCompetitiveAbility("ABILITY_SAND_STREAM", "ABILITY_BATTLE_ARMOR");
+						break;
+					case "SPECIES_ABOMASNOW":
+						ReplaceCompetitiveAbility("ABILITY_SNOW_WARNING", "ABILITY_GRASS_PELT");
+						break;
+					case "SPECIES_VANILLUXE":
+						ReplaceCompetitiveAbility("ABILITY_SNOW_WARNING", "ABILITY_SLUSH_RUSH");
+						break;
+					case "SPECIES_AMAURA":
+					case "SPECIES_AURORUS":
+						ReplaceCompetitiveAbility("ABILITY_SNOW_WARNING", "ABILITY_SOLID_ROCK");
+						break;
+					case "SPECIES_TORKOAL":
+						ReplaceCompetitiveAbility("ABILITY_WHITE_SMOKE", "ABILITY_FLAME_BODY");
+						ReplaceCompetitiveAbility("ABILITY_DROUGHT", "ABILITY_STEAM_ENGINE");
+						break;
+					case "SPECIES_GIGALITH":
+						ReplaceCompetitiveAbility("ABILITY_SAND_STREAM", "ABILITY_STAMINA");
+						break;
+				}
+			}
+
 			private bool AttemptReplaceMove(PokemonCompetitiveSet target, string move, params string[] orderedReplacements)
 			{
 				foreach(string testMove in orderedReplacements)
@@ -509,6 +551,8 @@ namespace PokemonDataGenerator.Pokedex
 							if (!HasLevelUpMove("MOVE_ETERNABEAM"))
 								LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_ETERNABEAM", Level = 88 });
 						}
+
+						ApplyDivergenceAbilityReplacements();
 					}
 				}
 

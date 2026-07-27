@@ -35,6 +35,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Replaced redundant weather-setting Abilities on Politoed, Pelipper,
+  Tyranitar, the Snover line, Vanilluxe, the Amaura line, Torkoal, and
+  Gigalith with Abilities that complement their weather-setting Unique
+  Abilities.
 - Reworked Ride Training into a seven-step progression. The Gold Whistle now
   replaces the basic whistle and cycles through party, Day Care, and
   park-registered mounts, while Flight provides three takeoffs that refresh at
