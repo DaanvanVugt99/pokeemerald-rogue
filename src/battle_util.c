@@ -11649,6 +11649,15 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         gBattleScripting.battler = battler;
         switch (gLastUsedAbility)
         {
+        case ABILITY_LIVING_LIBRARY:
+            if (!gSpecialStatuses[battler].switchInAbilityDone
+             && TryDealLivingLibraryHand(battler))
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                BattleScriptPushCursorAndCallback(BattleScript_LivingLibraryActivates);
+                effect++;
+            }
+            break;
         case ABILITY_MIRROR_WORLD:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -12669,6 +12678,13 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             u32 primaryAbility = GetBattlerAbility(battler);
 
             gBattlerAttacker = battler;
+
+            if (TryDealLivingLibraryHand(battler))
+            {
+                BattleScriptPushCursorAndCallback(BattleScript_LivingLibraryActivates);
+                effect++;
+                break;
+            }
 
             if (HasBattlerAbility(battler, ABILITY_DUALITY))
             {
@@ -21022,6 +21038,169 @@ bool32 TryRerollChromaticFlux(u32 battler)
     gBattlerAttacker = battler;
     gBattlerTarget = battler;
     SetBattlerTriggeredAbility(battler, ABILITY_CHROMATIC_FLUX);
+    return TRUE;
+}
+
+static bool32 IsLivingLibraryMoveLegal(u16 move)
+{
+    return move != MOVE_NONE
+        && move != MOVE_UNAVAILABLE
+        && move != MOVE_STRUGGLE
+        && move != MOVE_SKETCH;
+}
+
+static bool32 LivingLibraryHandContains(const u16 hand[MAX_MON_MOVES], u16 move)
+{
+    u32 i;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        if (hand[i] == move)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static void AddLivingLibraryForcedMove(u16 hand[MAX_MON_MOVES], u32 *handCount, u16 move)
+{
+    if (*handCount < MAX_MON_MOVES
+     && IsLivingLibraryMoveLegal(move)
+     && !LivingLibraryHandContains(hand, move))
+        hand[(*handCount)++] = move;
+}
+
+static void RestoreLivingLibraryMoves(u32 battler)
+{
+    struct Pokemon *mon = &GetBattlerParty(battler)[gBattlerPartyIndexes[battler]];
+    u32 i;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        gBattleMons[battler].moves[i] = GetMonData(mon, MON_DATA_MOVE1 + i);
+        gBattleMons[battler].pp[i] = GetMonData(mon, MON_DATA_PP1 + i);
+    }
+    gBattleMons[battler].ppBonuses = GetMonData(mon, MON_DATA_PP_BONUSES);
+    gDisableStructs[battler].mimickedMoves = 0;
+    gBattleResources->flags->flags[battler] &= ~RESOURCE_FLAG_LIVING_LIBRARY;
+
+    if (gDisableStructs[battler].encoreTimer)
+    {
+        for (i = 0; i < MAX_MON_MOVES; i++)
+        {
+            if (gBattleMons[battler].moves[i] == gDisableStructs[battler].encoredMove)
+            {
+                gDisableStructs[battler].encoredMovePos = i;
+                break;
+            }
+        }
+        if (i == MAX_MON_MOVES)
+        {
+            gDisableStructs[battler].encoredMove = MOVE_NONE;
+            gDisableStructs[battler].encoreTimer = 0;
+        }
+    }
+
+    if (gBattleStruct->choicedMove[battler] != MOVE_NONE)
+    {
+        for (i = 0; i < MAX_MON_MOVES; i++)
+        {
+            if (gBattleMons[battler].moves[i] == gBattleStruct->choicedMove[battler])
+                break;
+        }
+        if (i == MAX_MON_MOVES)
+            gBattleStruct->choicedMove[battler] = MOVE_NONE;
+    }
+}
+
+bool32 TryDealLivingLibraryHand(u32 battler)
+{
+    u16 moveEntries[PARTY_SIZE * MAX_MON_MOVES];
+    u16 hand[MAX_MON_MOVES] = {MOVE_NONE};
+    struct Pokemon *party;
+    u32 firstMonId, lastMonId;
+    u32 moveEntryCount = 0;
+    u32 handCount = 0;
+    u32 i, j;
+
+    if (!IsBattlerAlive(battler))
+        return FALSE;
+
+    if (!HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_LIVING_LIBRARY))
+    {
+        if (gBattleResources->flags->flags[battler] & RESOURCE_FLAG_LIVING_LIBRARY)
+            RestoreLivingLibraryMoves(battler);
+        return FALSE;
+    }
+
+    // Preserve effects which require a particular move to remain selectable.
+    AddLivingLibraryForcedMove(hand, &handCount, gLockedMoves[battler]);
+    if (gDisableStructs[battler].encoreTimer)
+        AddLivingLibraryForcedMove(hand, &handCount, gDisableStructs[battler].encoredMove);
+    AddLivingLibraryForcedMove(hand, &handCount, gBattleStruct->choicedMove[battler]);
+
+    GetBattlerPartyRange(battler, &party, &firstMonId, &lastMonId);
+    for (i = firstMonId; i < lastMonId; i++)
+    {
+        u16 species = GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG);
+
+        if (species == SPECIES_NONE || species == SPECIES_EGG)
+            continue;
+
+        for (j = 0; j < MAX_MON_MOVES; j++)
+        {
+            u16 move = GetMonData(&party[i], MON_DATA_MOVE1 + j);
+
+            if (IsLivingLibraryMoveLegal(move))
+                moveEntries[moveEntryCount++] = move;
+        }
+    }
+
+    while (handCount < MAX_MON_MOVES)
+    {
+        u32 candidateCount = 0;
+        u32 selectedCandidate;
+
+        // Each occurrence is one ticket, so duplicate party moves increase
+        // selection weight. Once drawn, every duplicate is excluded from the
+        // rest of this hand.
+        for (i = 0; i < moveEntryCount; i++)
+        {
+            if (!LivingLibraryHandContains(hand, moveEntries[i]))
+                candidateCount++;
+        }
+
+        if (candidateCount == 0)
+            break;
+
+        selectedCandidate = RandomUniform(RNG_ROGUE_LIVING_LIBRARY, 0, candidateCount - 1);
+        for (i = 0; i < moveEntryCount; i++)
+        {
+            if (LivingLibraryHandContains(hand, moveEntries[i]))
+                continue;
+            if (selectedCandidate-- == 0)
+            {
+                hand[handCount++] = moveEntries[i];
+                break;
+            }
+        }
+    }
+
+    gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_LIVING_LIBRARY;
+    gBattleMons[battler].ppBonuses = 0;
+    gDisableStructs[battler].mimickedMoves = 0;
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        gBattleMons[battler].moves[i] = hand[i];
+        gBattleMons[battler].pp[i] = hand[i] == MOVE_NONE ? 0 : gBattleMoves[hand[i]].pp;
+        if (gDisableStructs[battler].encoreTimer
+         && hand[i] == gDisableStructs[battler].encoredMove)
+            gDisableStructs[battler].encoredMovePos = i;
+    }
+
+    gBattlerAttacker = battler;
+    gBattlerTarget = battler;
+    SetBattlerTriggeredAbility(battler, ABILITY_LIVING_LIBRARY);
     return TRUE;
 }
 

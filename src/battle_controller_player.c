@@ -1114,7 +1114,8 @@ static void HandleMoveSwitching(u32 battler)
                 gBattleMons[battler].pp[i] = moveInfo->currentPp[i];
             }
 
-            if (!(gBattleMons[battler].status2 & STATUS2_TRANSFORMED))
+            if (!(gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
+             && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_LIVING_LIBRARY))
             {
                 for (i = 0; i < MAX_MON_MOVES; i++)
                 {

@@ -27,6 +27,9 @@ Format follows Keep a Changelog loosely:
   makes its holder and every move on the field a random type.
 - Added Mirror World as a generated-only Anomalous Ability, reversing all type
   matchups while its holder is active.
+- Added Living Library as a generated-only Anomalous Ability. It draws a
+  weighted, duplicate-free hand of four moves from its party on entry and after
+  each turn.
 
 ### Changed
 

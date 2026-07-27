@@ -23,6 +23,7 @@
 #define MOVE_IS_PERMANENT(battler, moveSlot)                        \
    (!(gBattleMons[battler].status2 & STATUS2_TRANSFORMED)           \
  && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SHIP_OF_THESEUS) \
+ && !(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_LIVING_LIBRARY) \
  && !(gDisableStructs[battler].mimickedMoves & gBitTable[moveSlot]))
 
 // Battle Actions
@@ -72,6 +73,7 @@ struct ResourceFlags
 #define RESOURCE_FLAG_SHIP_OF_THESEUS      0x2000
 #define RESOURCE_FLAG_CHROMATIC_TYPE_SHIFT 14
 #define RESOURCE_FLAG_CHROMATIC_TYPE_MASK  (0x1F << RESOURCE_FLAG_CHROMATIC_TYPE_SHIFT)
+#define RESOURCE_FLAG_LIVING_LIBRARY       (1 << 19)
 
 struct DisableStruct
 {

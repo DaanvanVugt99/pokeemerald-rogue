@@ -674,6 +674,7 @@ extern const u8 BattleScript_RksRelayActivates[];
 extern const u8 BattleScript_ShipOfTheseusActivates[];
 extern const u8 BattleScript_ChromaticFluxActivates[];
 extern const u8 BattleScript_MirrorWorldActivates[];
+extern const u8 BattleScript_LivingLibraryActivates[];
 extern const u8 BattleScript_FairyTaleActivates[];
 extern const u8 BattleScript_ControlMaskActivates[];
 extern const u8 BattleScript_NaturalOrderEndTurn[];
