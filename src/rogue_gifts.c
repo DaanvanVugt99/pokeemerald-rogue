@@ -490,7 +490,7 @@ static u16 GetDynamicMoveByIndex(u16 moveIndex)
 }
 
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
-#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_CHROMATIC_FLUX
+#define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_MIRROR_WORLD
 
 static bool8 IsDynamicStandardAbilityExcluded(u16 ability)
 {
@@ -634,6 +634,7 @@ static const u16 sAnomalousUniqueAbilities[] =
     ABILITY_SHIP_OF_THESEUS,
     ABILITY_WORLD_ENGINE,
     ABILITY_CHROMATIC_FLUX,
+    ABILITY_MIRROR_WORLD,
 };
 
 // These are the only custom abilities which are not safe and useful on an
@@ -691,7 +692,7 @@ static const u16 sExcludedDynamicUniqueAbilities[] =
 #define DYNAMIC_UNIQUE_ABILITY_COUNT \
     (DYNAMIC_UNIQUE_ABILITY_MAX - DYNAMIC_UNIQUE_ABILITY_MIN + 1 - ARRAY_COUNT(sExcludedDynamicUniqueAbilities))
 
-STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 581, DynamicUniqueAbilityPoolAuditCount);
+STATIC_ASSERT(DYNAMIC_UNIQUE_ABILITY_COUNT == 582, DynamicUniqueAbilityPoolAuditCount);
 
 bool8 RogueGift_IsAnomalousUniqueAbility(u16 ability)
 {

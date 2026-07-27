@@ -419,15 +419,18 @@ TEST("Dynamic unique ability pool serializes generated-only anomalous abilities"
     u32 shipId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ABILITY_SHIP_OF_THESEUS);
     u32 engineId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ABILITY_WORLD_ENGINE);
     u32 fluxId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ABILITY_CHROMATIC_FLUX);
+    u32 mirrorId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ABILITY_MIRROR_WORLD);
 
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_CHAOS_THEORY));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_SHIP_OF_THESEUS));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_WORLD_ENGINE));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_CHROMATIC_FLUX));
+    EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_MIRROR_WORLD));
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(chaosId), ABILITY_CHAOS_THEORY);
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(shipId), ABILITY_SHIP_OF_THESEUS);
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(engineId), ABILITY_WORLD_ENGINE);
     EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(fluxId), ABILITY_CHROMATIC_FLUX);
+    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(mirrorId), ABILITY_MIRROR_WORLD);
 }
 
 TEST("Debug anomalous generator creates a Legendary with an anomalous ability")
@@ -455,7 +458,7 @@ TEST("Dynamic Unique custom gift transfer preserves its encrypted payload")
     EXPECT_EQ(RogueGift_GetCustomMonId(&gPlayerParty[0]), customMonId);
 }
 
-TEST("Dynamic unique ability eligibility audit contains 581 abilities")
+TEST("Dynamic unique ability eligibility audit contains 582 abilities")
 {
     static const u16 sExpectedExclusions[] =
     {
@@ -509,14 +512,14 @@ TEST("Dynamic unique ability eligibility audit contains 581 abilities")
     u16 eligibleCount = 0;
     u16 i;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_CHROMATIC_FLUX; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_MIRROR_WORLD; ++ability)
     {
         if(RogueGift_IsDynamicUniqueAbilityEligible(ability))
             ++eligibleCount;
     }
 
-    EXPECT_EQ(eligibleCount, 581);
-    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 581);
+    EXPECT_EQ(eligibleCount, 582);
+    EXPECT_EQ(RogueGift_GetDynamicUniqueAbilityPoolCount(), 582);
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STRONG_WINDS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_STARMOBILE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FLOCK_STEP));
@@ -547,10 +550,12 @@ TEST("Dynamic unique ability eligibility audit contains 581 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SHIP_OF_THESEUS));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_WORLD_ENGINE));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_CHROMATIC_FLUX));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_MIRROR_WORLD));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_CHAOS_THEORY));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_SHIP_OF_THESEUS));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_WORLD_ENGINE));
     EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_CHROMATIC_FLUX));
+    EXPECT(RogueGift_IsAnomalousUniqueAbility(ABILITY_MIRROR_WORLD));
     EXPECT(!RogueGift_IsAnomalousUniqueAbility(ABILITY_ADAPTIVE_ORIGIN));
 
     for(i = 0; i < ARRAY_COUNT(sExpectedExclusions); ++i)
@@ -583,7 +588,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     u16 ability;
     u16 pairedAbilityCount = 0;
 
-    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_CHROMATIC_FLUX; ++ability)
+    for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_MIRROR_WORLD; ++ability)
     {
         u16 profileId = RogueGift_DebugGetDynamicSynergyProfileId(ability);
         u16 moves[3];
@@ -634,6 +639,7 @@ TEST("Newest dynamic unique abilities use their required synergy profiles")
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_SHIP_OF_THESEUS), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_WORLD_ENGINE), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_CHROMATIC_FLUX), 0);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_MIRROR_WORLD), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_RAPID_REPLICA, 0), MOVE_TRANSFORM);
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_RAPID_REPLICA, MOVE_TRANSFORM));
     EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_RAPID_REPLICA, MOVE_COPYCAT));

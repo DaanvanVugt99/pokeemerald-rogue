@@ -25,6 +25,8 @@ Format follows Keep a Changelog loosely:
   turn and upon returning to battle, and pauses while its holder is absent.
 - Added Chromatic Flux as a generated-only Anomalous Ability. Each turn it
   makes its holder and every move on the field a random type.
+- Added Mirror World as a generated-only Anomalous Ability, reversing all type
+  matchups while its holder is active.
 
 ### Changed
 

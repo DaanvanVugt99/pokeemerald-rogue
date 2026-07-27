@@ -11649,6 +11649,17 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
         gBattleScripting.battler = battler;
         switch (gLastUsedAbility)
         {
+        case ABILITY_MIRROR_WORLD:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+                gBattlerAttacker = battler;
+                gBattlerTarget = battler;
+                SetBattlerTriggeredAbility(battler, ABILITY_MIRROR_WORLD);
+                BattleScriptPushCursorAndCallback(BattleScript_MirrorWorldActivates);
+                effect++;
+            }
+            break;
         case ABILITY_CHROMATIC_FLUX:
             if (!gSpecialStatuses[battler].switchInAbilityDone
              && TryActivateChromaticFlux(battler))
@@ -23724,6 +23735,26 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
     return IsMoveBlockedByProtectLike(battler, move);
 }
 
+bool32 IsInverseBattleActive(void)
+{
+    u32 battler;
+
+    if (B_FLAG_INVERSE_BATTLE != 0 && FlagGet(B_FLAG_INVERSE_BATTLE))
+        return TRUE;
+
+    if (!gMain.inBattle)
+        return FALSE;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (IsBattlerAlive(battler)
+         && HasBattlerAbilityIgnoreMoldBreaker(battler, ABILITY_MIRROR_WORLD))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 // Only called directly when calculating damage type effectiveness
 static bool32 IsBattlerGrounded2(u32 battler, bool32 considerInverse)
 {
@@ -23750,7 +23781,7 @@ static bool32 IsBattlerGrounded2(u32 battler, bool32 considerInverse)
     if (HasBattlerAbility(battler, ABILITY_BRANCH_SWING)
      && (gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN))
         return FALSE;
-    if (IS_BATTLER_OF_TYPE(battler, TYPE_FLYING) && (!considerInverse || !FlagGet(B_FLAG_INVERSE_BATTLE)))
+    if (IS_BATTLER_OF_TYPE(battler, TYPE_FLYING) && (!considerInverse || !IsInverseBattleActive()))
         return FALSE;
     return TRUE;
 }
@@ -27007,7 +27038,7 @@ static uq4_12_t GetInverseTypeMultiplier(uq4_12_t multiplier)
 
 uq4_12_t GetTypeModifier(u32 atkType, u32 defType)
 {
-    if (B_FLAG_INVERSE_BATTLE != 0 && FlagGet(B_FLAG_INVERSE_BATTLE))
+    if (IsInverseBattleActive())
         return GetInverseTypeMultiplier(sTypeEffectivenessTable[atkType][defType]);
     return sTypeEffectivenessTable[atkType][defType];
 }

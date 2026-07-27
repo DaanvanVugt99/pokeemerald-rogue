@@ -14300,6 +14300,10 @@ BattleScript_ChromaticFluxActivates::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_MirrorWorldActivates::
+	call BattleScript_AbilityPopUp
+	end3
+
 BattleScript_FairyTaleActivates::
 	call BattleScript_AbilityPopUp
 	modifybattlerstatstage BS_ATTACKER, STAT_ATK, INCREASE, 1, BattleScript_FairyTaleTrySpAtk, ANIM_ON

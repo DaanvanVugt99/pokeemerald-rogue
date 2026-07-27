@@ -221,6 +221,7 @@ u32 GetChromaticFluxType(void);
 u32 GetBattlerChromaticFluxType(u32 battler);
 bool32 TryActivateChromaticFlux(u32 battler);
 bool32 TryRerollChromaticFlux(u32 battler);
+bool32 IsInverseBattleActive(void);
 void SetBattlerTriggeredAbility(u32 battler, u32 ability);
 u32 GetBattlerPrimaryAbilityIgnoreMoldBreaker(u32 battler);
 u32 GetBattlerUniqueAbilityIgnoreMoldBreaker(u32 battler);
