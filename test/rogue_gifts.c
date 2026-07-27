@@ -2,11 +2,13 @@
 #include "constants/abilities.h"
 #include "constants/moves.h"
 #include "constants/rogue.h"
+#include "constants/rgb.h"
 #include "constants/species.h"
 #include "constants/pokemon.h"
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
+#include "rogue_colour_utils.h"
 #include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_safari.h"
@@ -17,6 +19,49 @@
 #define TEST_FORMAT_MON_TYPE_UNIQUE_ABILITY    3
 #define TEST_DYNAMIC_MOVE_POOL_CAPACITY       255
 #define TEST_DYNAMIC_MOVE_PAIR_CODE_START     (TEST_DYNAMIC_MOVE_POOL_CAPACITY + 1)
+
+TEST("Unique Pokemon palette classification safely handles neutral palettes")
+{
+    u8 i;
+    u16 palette[16] = {0};
+    u16 layers[16];
+
+    Rogue_GenerateLayerPaletteByHue(palette, palette, layers);
+
+    for (i = 0; i < ARRAY_COUNT(layers); ++i)
+        EXPECT_EQ(layers[i], RGB_BLACK);
+}
+
+TEST("Unique Pokemon palette classification treats a single hue as the primary layer")
+{
+    u16 palette[16] = {0};
+    u16 layers[16];
+
+    palette[1] = HSVToRGB((struct HSV){ .h = 20, .s = 255, .v = 255 });
+    palette[2] = palette[1];
+
+    Rogue_GenerateLayerPaletteByHue(palette, palette, layers);
+
+    EXPECT_EQ(layers[0], RGB_BLACK);
+    EXPECT_EQ(layers[1], RGB_RED);
+    EXPECT_EQ(layers[2], RGB_RED);
+}
+
+TEST("Unique Pokemon palette classification measures hue across the color wheel boundary")
+{
+    u16 palette[16] = {0};
+    u16 layers[16];
+
+    palette[1] = HSVToRGB((struct HSV){ .h = 250, .s = 255, .v = 255 });
+    palette[2] = HSVToRGB((struct HSV){ .h = 5, .s = 255, .v = 255 });
+    palette[3] = HSVToRGB((struct HSV){ .h = 128, .s = 255, .v = 255 });
+
+    Rogue_GenerateLayerPaletteByHue(palette, palette, layers);
+
+    EXPECT_EQ(layers[1], RGB_RED);
+    EXPECT_EQ(layers[2], RGB_RED);
+    EXPECT_EQ(layers[3], RGB_GREEN);
+}
 
 static u32 EncodeTestMoveSelection(u32 move1, u32 move2)
 {

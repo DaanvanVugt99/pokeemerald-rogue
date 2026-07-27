@@ -110,13 +110,13 @@ static bool8 IsColourExemptFromHueTint(u8 slot, struct HSV hsv)
 
 static u8 GetHueDistance(u8 a, u8 b)
 {
-    return a < b ? b - a : a - b;
+    u16 distance = a < b ? b - a : a - b;
+    return min(distance, 256 - distance);
 }
 
-static u8 GetAverageTintHue(u16 const *inputPal)
+static u8 GetTintHues(u16 const *inputPal, u8 *hues)
 {
     u8 i;
-    u32 total = 0;
     u32 count = 0;
 
     for (i = 0; i < 16; ++i)
@@ -125,123 +125,74 @@ static u8 GetAverageTintHue(u16 const *inputPal)
         struct HSV hsv = RGBtoHSV(rgb);
 
         if (!IsColourExemptFromHueTint(i, hsv))
-        {
-            total += hsv.h;
-            ++count;
-        }
+            hues[count++] = hsv.h;
     }
 
-    return SAFE_DIV(total, count);
+    return count;
 }
 
-static bool8 InsertionSortPlaceBefore(u8 elemA, u8 elemB, u8 targetHue)
-{
-    u8 distA = GetHueDistance(elemA, targetHue);
-    u8 distB = GetHueDistance(elemB, targetHue);
-    return distA < distB;
-}
-
-static void InsertionSort(u8 elem, u8 *buffer, u8 currBufferCount, u8 targetHue)
-{
-    if (currBufferCount == 0)
-    {
-        buffer[currBufferCount] = elem;
-    }
-    else if (currBufferCount == 1)
-    {
-        if (InsertionSortPlaceBefore(elem, buffer[0], targetHue))
-        {
-            buffer[currBufferCount] = buffer[0];
-            buffer[0] = elem;
-        }
-        else
-        {
-            buffer[currBufferCount] = elem;
-        }
-    }
-    else
-    {
-        u16 index = 0;
-        u16 minIndex = 0;
-        u16 maxIndex = currBufferCount - 1;
-
-        while (minIndex != maxIndex)
-        {
-            AGB_ASSERT(minIndex < maxIndex);
-
-            index = (maxIndex + minIndex) / 2;
-
-            if (InsertionSortPlaceBefore(elem, buffer[index], targetHue))
-            {
-                if (maxIndex == index)
-                    --maxIndex;
-                else
-                    maxIndex = index;
-            }
-            else
-            {
-                if (minIndex == index)
-                    ++minIndex;
-                else
-                    minIndex = index;
-            }
-        }
-
-        AGB_ASSERT(minIndex == maxIndex);
-
-        if (minIndex == currBufferCount - 1)
-        {
-            if (InsertionSortPlaceBefore(elem, buffer[currBufferCount - 1], targetHue))
-            {
-                buffer[currBufferCount] = buffer[currBufferCount - 1];
-                buffer[currBufferCount - 1] = elem;
-            }
-            else
-            {
-                buffer[currBufferCount] = elem;
-            }
-        }
-        else
-        {
-            for (index = currBufferCount; TRUE; --index)
-            {
-                buffer[index] = buffer[index - 1];
-
-                if (index == minIndex + 1)
-                    break;
-            }
-
-            buffer[minIndex] = elem;
-        }
-    }
-}
-
-static void CalculateNearFarHues(u16 const *inputPal, u8 avgHue, u8 *nearHue, u8 *farHue)
+static u8 GetCentralTintHue(u8 const *hues, u8 count)
 {
     u8 i;
-    u8 sortedHues[16];
-    u8 count = 0;
+    u8 j;
+    u8 centralHue = hues[0];
+    u32 bestDistance = (u32)-1;
 
-    for (i = 0; i < 16; ++i)
+    for (i = 0; i < count; ++i)
     {
-        u16 rgb = inputPal[i];
-        struct HSV hsv = RGBtoHSV(rgb);
+        u32 totalDistance = 0;
 
-        if (!IsColourExemptFromHueTint(i, hsv))
-            InsertionSort(hsv.h, sortedHues, count++, avgHue);
+        for (j = 0; j < count; ++j)
+            totalDistance += GetHueDistance(hues[i], hues[j]);
+
+        if (totalDistance < bestDistance)
+        {
+            bestDistance = totalDistance;
+            centralHue = hues[i];
+        }
     }
 
-    *nearHue = sortedHues[0];
-    *farHue = sortedHues[count - 1];
+    return centralHue;
+}
+
+static bool8 CalculateNearFarHues(u16 const *inputPal, u8 *nearHue, u8 *farHue)
+{
+    u8 i;
+    u8 hues[16];
+    u8 count = GetTintHues(inputPal, hues);
+    u8 farDistance = 0;
+
+    if (count == 0)
+        return FALSE;
+
+    *nearHue = GetCentralTintHue(hues, count);
+    *farHue = *nearHue;
+
+    for (i = 0; i < count; ++i)
+    {
+        u8 distance = GetHueDistance(hues[i], *nearHue);
+
+        if (distance > farDistance)
+        {
+            farDistance = distance;
+            *farHue = hues[i];
+        }
+    }
+
+    return TRUE;
 }
 
 void Rogue_GenerateLayerPaletteByHue(u16 const *inputPal, u16 const *layerRefPal, u16 *outputLayers)
 {
     u8 i;
     u8 nearestHue, furthestHue;
-    u8 avgHue = GetAverageTintHue(layerRefPal);
 
-    CalculateNearFarHues(layerRefPal, avgHue, &nearestHue, &furthestHue);
+    if (!CalculateNearFarHues(layerRefPal, &nearestHue, &furthestHue))
+    {
+        for (i = 0; i < 16; ++i)
+            outputLayers[i] = RGB_BLACK;
+        return;
+    }
 
     for (i = 0; i < 16; ++i)
     {
@@ -256,7 +207,7 @@ void Rogue_GenerateLayerPaletteByHue(u16 const *inputPal, u16 const *layerRefPal
         {
             u8 nearDist = GetHueDistance(hsv.h, nearestHue);
             u8 farDist = GetHueDistance(hsv.h, furthestHue);
-            bool8 isPrimaryPal = nearDist < farDist;
+            bool8 isPrimaryPal = nearDist <= farDist;
 
             outputLayers[i] = isPrimaryPal ? RGB_RED : RGB_GREEN;
         }

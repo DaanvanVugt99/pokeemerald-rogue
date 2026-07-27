@@ -25,6 +25,8 @@ Format follows Keep a Changelog loosely:
   turn and upon returning to battle, and pauses while its holder is absent.
 - Added Chromatic Flux as a generated-only Anomalous Ability. At the start of
   each turn, it makes its holder and all of its moves a random type.
+- Improved changed-type Unique Pokémon palette tinting, especially for follower
+  sprites with neutral, single-hue, or color-wheel-wrapping palettes.
 - Added Mirror World as a generated-only Anomalous Ability, reversing all type
   matchups while its holder is active.
 - Added Living Library as a generated-only Anomalous Ability. It draws a

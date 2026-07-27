@@ -424,13 +424,11 @@ u16 const* FollowMon_GetGraphicsForPalSlot(u16 palSlot)
 
     if(customMonId != 0)
     {
-        u16 *frontSpritePal = (u16*)&gPaletteDecompressionBuffer[0];
-        u16 *outputPal = (u16*)&gPaletteDecompressionBuffer[32];
-        u32 const *compressedFrontSpritePal = GetMonSpritePalFromSpecies(species, MON_MALE, isShiny, 0);
+        u16 *outputPal = (u16*)&gPaletteDecompressionBuffer[0];
 
-        LZ77UnCompWram(compressedFrontSpritePal, frontSpritePal);
-
-        if(RogueGift_TryApplyPaletteModify(customMonId, isShiny, objectEventPal, frontSpritePal, outputPal))
+        // Classify the overworld palette directly. Its color layout does not
+        // necessarily match the corresponding battle sprite palette.
+        if(RogueGift_TryApplyPaletteModify(customMonId, isShiny, objectEventPal, NULL, outputPal))
             return outputPal;
     }
 
