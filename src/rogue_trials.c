@@ -1599,15 +1599,29 @@ void RogueTrial_ApplyPendingSelection(void)
 
 void RogueTrial_ApplyRunBagItems(void)
 {
+    static const u16 sBattleGimmickItems[] =
+    {
+        ITEM_MEGA_RING,
+        ITEM_Z_POWER_RING,
+        ITEM_DYNAMAX_BAND,
+        ITEM_TERA_ORB,
+    };
     u8 gimmick;
+    u8 i;
     u16 item;
 
     if (!RogueTrial_GetBattleGimmick(gRogueRun.trialState.trialId, RoguePokedex_GetDexVariant(), &gimmick))
         return;
 
+    for (i = 0; i < ARRAY_COUNT(sBattleGimmickItems); ++i)
+    {
+        while (RemoveBagItem(sBattleGimmickItems[i], 1))
+            ;
+    }
+
     item = GetBattleGimmickItem(gimmick);
 
-    if (item != ITEM_NONE && !CheckBagHasItem(item, 1))
+    if (item != ITEM_NONE)
     {
         bool8 success = AddBagItem(item, 1);
 

@@ -35,6 +35,8 @@ Format follows Keep a Changelog loosely:
 
 - Tera Shards are now reusable, limited to one copy of each type, stop appearing
   as route drops once owned, show as sold out in shops, and cost ₽8,000.
+- Regional Style Trials now temporarily remove every disabled battle-gimmick
+  activator from the bag and supply only the one permitted by that trial.
 - Kept chained Ability popups visible long enough to read before another
   Ability from the same Pokémon replaces them.
 - Expanded generated Unique Pokémon's exotic move pool with all eleven

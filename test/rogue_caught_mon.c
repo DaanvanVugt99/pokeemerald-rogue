@@ -696,7 +696,7 @@ TEST("Regional Style gimmick overrides are exclusive while ordinary Trials prese
     ClearCaughtMonTestState();
 }
 
-TEST("Regional Style gimmick items are temporary and idempotent")
+TEST("Regional Style supplies only its active gimmick item and restores the hub bag")
 {
     static const struct
     {
@@ -720,19 +720,35 @@ TEST("Regional Style gimmick items are temporary and idempotent")
     RogueSave_SaveHubStates();
     for (i = 0; i < ARRAY_COUNT(cases); ++i)
     {
-        while (RemoveBagItem(cases[i].item, 1))
-            ;
+        u8 j;
+
+        for (j = 0; j < ARRAY_COUNT(cases); ++j)
+        {
+            while (RemoveBagItem(cases[j].item, 1))
+                ;
+            EXPECT(AddBagItem(cases[j].item, 1));
+        }
 
         ActivateCaughtMonTestTrial(cases[i].trialId);
         RoguePokedex_SetDexVariant(cases[i].pokedexVariant);
         RogueTrial_ApplyRunBagItems();
         RogueTrial_ApplyRunBagItems();
-        EXPECT_EQ(CountTotalItemQuantityInBag(cases[i].item), 1);
 
-        EXPECT(RemoveBagItem(cases[i].item, 1));
-        RogueTrial_ApplyRunBagItems();
-        EXPECT_EQ(CountTotalItemQuantityInBag(cases[i].item), 1);
+        for (j = 0; j < ARRAY_COUNT(cases); ++j)
+            EXPECT_EQ(CountTotalItemQuantityInBag(cases[j].item), j == i ? 1 : 0);
     }
+
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        while (RemoveBagItem(cases[i].item, 1))
+            ;
+        EXPECT(AddBagItem(cases[i].item, 1));
+    }
+    ActivateCaughtMonTestTrial(ROGUE_TRIAL_REGION_KANTO);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_RBY);
+    RogueTrial_ApplyRunBagItems();
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+        EXPECT_EQ(CountTotalItemQuantityInBag(cases[i].item), 0);
 
     RogueSave_LoadHubStates();
     for (i = 0; i < ARRAY_COUNT(cases); ++i)
