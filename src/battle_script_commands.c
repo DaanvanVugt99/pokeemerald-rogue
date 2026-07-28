@@ -2952,6 +2952,7 @@ static void Cmd_datahpupdate(void)
     if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) || (gHitMarker & HITMARKER_PASSIVE_DAMAGE))
     {
         battler = GetBattlerForBattleScript(cmd->battler);
+        gBattleStruct->savingGraceEligibleBattlers &= ~gBitTable[battler];
         if (DoesSubstituteBlockMove(gBattlerAttacker, battler, gCurrentMove) && gDisableStructs[battler].substituteHP && !(gHitMarker & HITMARKER_IGNORE_SUBSTITUTE))
         {
             if (gDisableStructs[battler].substituteHP >= gBattleMoveDamage)
@@ -3098,6 +3099,13 @@ static void Cmd_datahpupdate(void)
                  && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
                  && battler != gBattlerAttacker)
                     QueueLivingShadowForDamage(battler, gBattlerAttacker);
+
+                if (gBattleMons[battler].hp == 0
+                 && gBattleMoveDamage > 0
+                 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+                 && battler == gBattlerTarget
+                 && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(battler))
+                    gBattleStruct->savingGraceEligibleBattlers |= gBitTable[battler];
             }
             gHitMarker &= ~HITMARKER_PASSIVE_DAMAGE;
 
@@ -5125,10 +5133,12 @@ static void Cmd_clearstatusfromeffect(void)
 static void Cmd_tryfaintmon(void)
 {
     CMD_ARGS(u8 battler, bool8 isSpikes, const u8 *instr);
-    u32 battler, destinyBondBattler, i;
+    u32 battler, battlerBit, destinyBondBattler, i;
+    bool32 savingGraceEligible;
     const u8 *faintScript;
 
     battler = GetBattlerForBattleScript(cmd->battler);
+    battlerBit = gBitTable[battler];
     if (cmd->isSpikes != 0)
     {
         if (gHitMarker & HITMARKER_FAINTED(battler))
@@ -5143,6 +5153,9 @@ static void Cmd_tryfaintmon(void)
     }
     else
     {
+        savingGraceEligible = gBattleStruct->savingGraceEligibleBattlers & battlerBit;
+        gBattleStruct->savingGraceEligibleBattlers &= ~battlerBit;
+
         if (cmd->battler == BS_ATTACKER)
         {
             destinyBondBattler = gBattlerTarget;
@@ -5170,7 +5183,8 @@ static void Cmd_tryfaintmon(void)
                 return;
             }
 
-            if (IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
+            if (savingGraceEligible
+             && IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN))
             {
                 for (i = 0; i < gBattlersCount; i++)
                 {

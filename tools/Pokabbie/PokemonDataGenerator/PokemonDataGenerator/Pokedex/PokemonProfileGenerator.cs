@@ -492,6 +492,68 @@ namespace PokemonDataGenerator.Pokedex
 				},
 			};
 
+			private static readonly Dictionary<string, LevelUpMove[]> s_DivergenceLevelUpMoveLearnsets = new Dictionary<string, LevelUpMove[]>
+			{
+				{ "SPECIES_GRIMMSNARL", new[] { new LevelUpMove { Move = "MOVE_BADDY_BAD", Level = 48 } } },
+				{ "SPECIES_JELLICENT", new[] { new LevelUpMove { Move = "MOVE_BOUNCY_BUBBLE", Level = 48 } } },
+				{ "SPECIES_VIKAVOLT", new[] { new LevelUpMove { Move = "MOVE_BUZZY_BUZZ", Level = 48 } } },
+				{ "SPECIES_DRIFLOON", new[] { new LevelUpMove { Move = "MOVE_FLOATY_FALL", Level = 40 } } },
+				{ "SPECIES_DRIFBLIM", new[] { new LevelUpMove { Move = "MOVE_FLOATY_FALL", Level = 40 } } },
+				{ "SPECIES_CRYOGONAL", new[] { new LevelUpMove { Move = "MOVE_FREEZY_FROST", Level = 48 } } },
+				{ "SPECIES_GARDEVOIR", new[] { new LevelUpMove { Move = "MOVE_GLITZY_GLOW", Level = 48 } } },
+				{ "SPECIES_PICHU", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_RAICHU", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_RAICHU_ALOLAN", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_COSPLAY", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_ROCK_STAR", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_BELLE", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_POP_STAR", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_PH_D", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_LIBRE", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_ORIGINAL_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_HOENN_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_SINNOH_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_UNOVA_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_KALOS_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_ALOLA_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_PARTNER_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_PIKACHU_WORLD_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
+				{ "SPECIES_SUNFLORA", new[] { new LevelUpMove { Move = "MOVE_SAPPY_SEED", Level = 48 } } },
+				{ "SPECIES_SIZZLIPEDE", new[] { new LevelUpMove { Move = "MOVE_SIZZLY_SLIDE", Level = 40 } } },
+				{ "SPECIES_CENTISKORCH", new[] { new LevelUpMove { Move = "MOVE_SIZZLY_SLIDE", Level = 40 } } },
+				{ "SPECIES_PONYTA_GALARIAN", new[] { new LevelUpMove { Move = "MOVE_SPARKLY_SWIRL", Level = 48 } } },
+				{ "SPECIES_RAPIDASH_GALARIAN", new[] { new LevelUpMove { Move = "MOVE_SPARKLY_SWIRL", Level = 48 } } },
+				{ "SPECIES_CHINCHOU", new[] { new LevelUpMove { Move = "MOVE_SPLISHY_SPLASH", Level = 44 } } },
+				{ "SPECIES_LANTURN", new[] { new LevelUpMove { Move = "MOVE_SPLISHY_SPLASH", Level = 44 } } },
+				{ "SPECIES_EEVEE", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_VAPOREON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_JOLTEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_FLAREON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_ESPEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_UMBREON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_LEAFEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_GLACEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_SYLVEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
+				{ "SPECIES_BLITZLE", new[] { new LevelUpMove { Move = "MOVE_ZIPPY_ZAP", Level = 44 } } },
+				{ "SPECIES_ZEBSTRIKA", new[] { new LevelUpMove { Move = "MOVE_ZIPPY_ZAP", Level = 44 } } },
+			};
+
+			private static readonly Dictionary<string, HashSet<string>> s_DivergenceTutorMoveLearnsets = new Dictionary<string, HashSet<string>>
+			{
+				{ "MOVE_BADDY_BAD", new HashSet<string> { "SPECIES_ABSOL" } },
+				{ "MOVE_BOUNCY_BUBBLE", new HashSet<string> { "SPECIES_POPPLIO", "SPECIES_BRIONNE", "SPECIES_PRIMARINA" } },
+				{ "MOVE_BUZZY_BUZZ", new HashSet<string> { "SPECIES_MAREEP", "SPECIES_FLAAFFY", "SPECIES_AMPHAROS" } },
+				{ "MOVE_FLOATY_FALL", new HashSet<string> { "SPECIES_HOPPIP", "SPECIES_SKIPLOOM", "SPECIES_JUMPLUFF" } },
+				{ "MOVE_FREEZY_FROST", new HashSet<string> { "SPECIES_SNORUNT", "SPECIES_FROSLASS" } },
+				{ "MOVE_GLITZY_GLOW", new HashSet<string> { "SPECIES_STARYU", "SPECIES_STARMIE" } },
+				{ "MOVE_SAPPY_SEED", new HashSet<string> { "SPECIES_PHANTUMP", "SPECIES_TREVENANT" } },
+				{ "MOVE_SIZZLY_SLIDE", new HashSet<string> { "SPECIES_SALANDIT", "SPECIES_SALAZZLE" } },
+				{ "MOVE_SPARKLY_SWIRL", new HashSet<string> { "SPECIES_COMFEY" } },
+				{ "MOVE_SPLISHY_SPLASH", new HashSet<string> { "SPECIES_TADBULB", "SPECIES_BELLIBOLT" } },
+				{ "MOVE_ZIPPY_ZAP", new HashSet<string> { "SPECIES_VOLTORB", "SPECIES_ELECTRODE" } },
+			};
+
 			public string Species;
 			public List<LevelUpMove> LevelUpMoves;
 			public List<string> TutorMoves;
@@ -692,6 +754,21 @@ namespace PokemonDataGenerator.Pokedex
 			private void RestoreImplementedMoveData()
 			{
 				foreach (var moveLearnset in s_RestoredMoveLearnsets)
+				{
+					if (moveLearnset.Value.Contains(Species) && !CanLearnMove(moveLearnset.Key))
+						TutorMoves.Add(moveLearnset.Key);
+				}
+
+				if (s_DivergenceLevelUpMoveLearnsets.TryGetValue(Species, out LevelUpMove[] levelUpMoves))
+				{
+					foreach (var move in levelUpMoves)
+					{
+						if (!HasLevelUpMove(move.Move))
+							LevelUpMoves.Add(new LevelUpMove { Move = move.Move, Level = move.Level });
+					}
+				}
+
+				foreach (var moveLearnset in s_DivergenceTutorMoveLearnsets)
 				{
 					if (moveLearnset.Value.Contains(Species) && !CanLearnMove(moveLearnset.Key))
 						TutorMoves.Add(moveLearnset.Key);

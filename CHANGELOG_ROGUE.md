@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Distributed the thirteen Partner Pikachu and Partner Eevee moves across
+  thematically matched late level-up and tutor learnsets, while keeping Pika
+  Papow and Veevee Volley exclusive to their mascot families. Their powerful
+  combined effects now carry premium minimum tutor prices.
 - Implemented Alluring Voice, Psychic Noise, Spicy Extract, and Upper Hand,
   including their conditional effects, AI handling, and Scarlet/Violet learnsets.
 - Restored Barrage, Bone Club, Egg Bomb, Ion Deluge, Magnitude, Needle Arm,
@@ -45,6 +49,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Consolidated Furfrou wild generation through Natural Form so its trim
+  typings no longer overrepresent the family, and added rare cosplay and cap
+  Pikachu rolls while preserving ordinary, evolvable Pikachu two thirds of
+  the time.
 - Removed the Mysterious Shrine guardian's opening stat boosts and allowed the
   shrine to appear from the second path of an Adventure onward.
 - Made Huntail Water/Dragon and Gorebyss Water/Fairy.

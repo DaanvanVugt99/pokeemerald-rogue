@@ -32,10 +32,48 @@ TEST("Wild encounter form families collapse only explicit curated forms")
     EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_SQUAWKABILLY_GREEN_PLUMAGE), RogueDebug_GetWildFormFamilyKey(SPECIES_SQUAWKABILLY_BLUE_PLUMAGE));
     EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_ROTOM_HEAT), RogueDebug_GetWildFormFamilyKey(SPECIES_ROTOM_WASH));
     EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_UNOWN), RogueDebug_GetWildFormFamilyKey(SPECIES_UNOWN_QMARK));
+    EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_FURFROU_NATURAL), RogueDebug_GetWildFormFamilyKey(SPECIES_FURFROU_PHARAOH_TRIM));
+    EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU), RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU_PARTNER_CAP));
+    EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU), RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU_ORIGINAL_CAP));
+    EXPECT_NE(RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU), RogueDebug_GetWildFormFamilyKey(SPECIES_PICHU));
+    EXPECT_NE(RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU), RogueDebug_GetWildFormFamilyKey(SPECIES_RAICHU));
+    EXPECT_NE(RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU), RogueDebug_GetWildFormFamilyKey(SPECIES_PIKACHU_GIGANTAMAX));
 
     EXPECT_NE(RogueDebug_GetWildFormFamilyKey(SPECIES_TAUROS), RogueDebug_GetWildFormFamilyKey(SPECIES_TAUROS_PALDEAN_COMBAT_BREED));
     EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_TAUROS_PALDEAN_COMBAT_BREED), RogueDebug_GetWildFormFamilyKey(SPECIES_TAUROS_PALDEAN_BLAZE_BREED));
     EXPECT_EQ(RogueDebug_GetWildFormFamilyKey(SPECIES_TAUROS_PALDEAN_COMBAT_BREED), RogueDebug_GetWildFormFamilyKey(SPECIES_TAUROS_PALDEAN_AQUA_BREED));
+#else
+    ASSUME(FALSE);
+#endif
+}
+
+TEST("Wild encounter Pikachu family preserves ordinary Pikachu two thirds of the time")
+{
+#if defined(ROGUE_EXPANSION)
+    static const u16 sExpectedSpecialForms[] =
+    {
+        SPECIES_PIKACHU_COSPLAY,
+        SPECIES_PIKACHU_ROCK_STAR,
+        SPECIES_PIKACHU_BELLE,
+        SPECIES_PIKACHU_POP_STAR,
+        SPECIES_PIKACHU_PH_D,
+        SPECIES_PIKACHU_LIBRE,
+        SPECIES_PIKACHU_HOENN_CAP,
+        SPECIES_PIKACHU_SINNOH_CAP,
+        SPECIES_PIKACHU_UNOVA_CAP,
+        SPECIES_PIKACHU_KALOS_CAP,
+        SPECIES_PIKACHU_ALOLA_CAP,
+        SPECIES_PIKACHU_PARTNER_CAP,
+        SPECIES_PIKACHU_WORLD_CAP,
+    };
+    u16 i;
+
+    for(i = 0; i < ARRAY_COUNT(sExpectedSpecialForms); ++i)
+    {
+        EXPECT_EQ(RogueDebug_GetWildApprovedFamilyForm(SPECIES_PIKACHU, i * 3), sExpectedSpecialForms[i]);
+        EXPECT_EQ(RogueDebug_GetWildApprovedFamilyForm(SPECIES_PIKACHU, i * 3 + 1), SPECIES_PIKACHU);
+        EXPECT_EQ(RogueDebug_GetWildApprovedFamilyForm(SPECIES_PIKACHU, i * 3 + 2), SPECIES_PIKACHU);
+    }
 #else
     ASSUME(FALSE);
 #endif
@@ -179,12 +217,16 @@ TEST("Wild encounter family selection does not leak inactive Rotom forms")
 #endif
 }
 
-TEST("Wild encounter family selection does not leak inactive Furfrou trims")
+TEST("Wild encounter Furfrou family is eligible only through Natural Form")
 {
 #if defined(ROGUE_EXPANSION)
     RogueMonQuery_Begin();
 
     RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, SPECIES_FURFROU_DEBUTANTE_TRIM);
+
+    EXPECT_EQ(RogueDebug_SelectWildSpeciesFromCurrentQuery(0, 99, FALSE), SPECIES_NONE);
+
+    RogueMiscQuery_EditElement(QUERY_FUNC_INCLUDE, SPECIES_FURFROU_NATURAL);
 
     EXPECT_EQ(RogueDebug_SelectWildSpeciesFromCurrentQuery(0, 99, FALSE), SPECIES_FURFROU_DEBUTANTE_TRIM);
 

@@ -6380,6 +6380,7 @@ static u8 UNUSED RandomMonType(u16 seedFlag)
 enum
 {
     WILD_FORM_FAMILY_UNOWN = NUM_SPECIES + 1,
+    WILD_FORM_FAMILY_PIKACHU,
     WILD_FORM_FAMILY_ROTOM,
     WILD_FORM_FAMILY_SQUAWKABILLY,
     WILD_FORM_FAMILY_VIVILLON,
@@ -6489,6 +6490,25 @@ static const u16 sWildFurfrouForms[] = {
     SPECIES_FURFROU_PHARAOH_TRIM,
 };
 
+// Original Cap Pikachu remains exclusive to the Can't Pick!? quest reward.
+// Gigantamax Pikachu and the unimplemented Let's Go Partner Pikachu are battle
+// and placeholder forms respectively, so neither belongs in wild generation.
+static const u16 sWildPikachuSpecialForms[] = {
+    SPECIES_PIKACHU_COSPLAY,
+    SPECIES_PIKACHU_ROCK_STAR,
+    SPECIES_PIKACHU_BELLE,
+    SPECIES_PIKACHU_POP_STAR,
+    SPECIES_PIKACHU_PH_D,
+    SPECIES_PIKACHU_LIBRE,
+    SPECIES_PIKACHU_HOENN_CAP,
+    SPECIES_PIKACHU_SINNOH_CAP,
+    SPECIES_PIKACHU_UNOVA_CAP,
+    SPECIES_PIKACHU_KALOS_CAP,
+    SPECIES_PIKACHU_ALOLA_CAP,
+    SPECIES_PIKACHU_PARTNER_CAP,
+    SPECIES_PIKACHU_WORLD_CAP,
+};
+
 static const u16 sWildMiniorForms[] = {
     SPECIES_MINIOR_METEOR_RED,
     SPECIES_MINIOR_METEOR_ORANGE,
@@ -6587,6 +6607,23 @@ static u16 GetWildFormFamilyKey(u16 species)
 
     switch(species)
     {
+    case SPECIES_PIKACHU:
+    case SPECIES_PIKACHU_COSPLAY:
+    case SPECIES_PIKACHU_ROCK_STAR:
+    case SPECIES_PIKACHU_BELLE:
+    case SPECIES_PIKACHU_POP_STAR:
+    case SPECIES_PIKACHU_PH_D:
+    case SPECIES_PIKACHU_LIBRE:
+    case SPECIES_PIKACHU_ORIGINAL_CAP:
+    case SPECIES_PIKACHU_HOENN_CAP:
+    case SPECIES_PIKACHU_SINNOH_CAP:
+    case SPECIES_PIKACHU_UNOVA_CAP:
+    case SPECIES_PIKACHU_KALOS_CAP:
+    case SPECIES_PIKACHU_ALOLA_CAP:
+    case SPECIES_PIKACHU_PARTNER_CAP:
+    case SPECIES_PIKACHU_WORLD_CAP:
+        return WILD_FORM_FAMILY_PIKACHU;
+
     case SPECIES_ROTOM:
     case SPECIES_ROTOM_HEAT:
     case SPECIES_ROTOM_WASH:
@@ -6849,6 +6886,9 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *
 {
     u16 species;
     u16 weightIndex = 0;
+#ifdef ROGUE_EXPANSION
+    bool8 furfrouAnchorEligible = FALSE;
+#endif
 
     *familyCount = 0;
     *totalWeight = 0;
@@ -6861,11 +6901,26 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *
 
             ++weightIndex;
 
+#ifdef ROGUE_EXPANSION
+            if(species == SPECIES_FURFROU_NATURAL)
+                furfrouAnchorEligible = weight != 0;
+#endif
+
             if(weight != 0)
             {
                 u16 i;
                 u16 familyKey = GetWildFormFamilyKey(species);
                 bool8 addNewWeight = FALSE;
+
+#ifdef ROGUE_EXPANSION
+                // Every Furfrou trim has Normal as its primary type. Requiring
+                // Natural Form to survive the query makes the family occupy one
+                // Normal-family slot instead of qualifying through nine extra
+                // secondary types. A trim is chosen after family selection.
+                if(familyKey == WILD_FORM_FAMILY_FURFROU
+                    && !furfrouAnchorEligible)
+                    continue;
+#endif
 
                 for(i = 0; i < *familyCount; ++i)
                 {
@@ -6903,6 +6958,18 @@ static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue)
 {
     const u16 *speciesList;
     u16 speciesCount;
+
+#ifdef ROGUE_EXPANSION
+    if(familyKey == WILD_FORM_FAMILY_PIKACHU)
+    {
+        // Preserve ordinary Pikachu, and therefore access to Raichu, on two
+        // thirds of family rolls. The remaining third exposes a special form.
+        if(randValue % 3 != 0)
+            return SPECIES_PIKACHU;
+
+        return sWildPikachuSpecialForms[(randValue / 3) % ARRAY_COUNT(sWildPikachuSpecialForms)];
+    }
+#endif
 
     if(GetWildApprovedFormList(familyKey, &speciesList, &speciesCount) && speciesCount != 0)
         return speciesList[randValue % speciesCount];

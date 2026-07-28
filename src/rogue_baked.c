@@ -1698,6 +1698,7 @@ u32 Rogue_CalculateMovePrice(u16 move, u16 itemId)
 {
     // Move cost takes into account high level stats and then modifies based on usage
     u32 cost = 0;
+    u32 minimumRunCost = 0;
     u32 usageCount = gRoguePokemonMoveUsages[move];
     u8 accuracy = gBattleMoves[move].accuracy;
     u8 pp = gBattleMoves[move].pp;
@@ -1725,6 +1726,41 @@ u32 Rogue_CalculateMovePrice(u16 move, u16 itemId)
 
     case MOVE_SPLASH:
         power = 1;
+        break;
+    }
+
+    // These moves bundle premium effects that are not represented by their
+    // base power, accuracy, PP, or current competitive-set usage.
+    switch (move)
+    {
+    case MOVE_BADDY_BAD:
+    case MOVE_BUZZY_BUZZ:
+    case MOVE_GLITZY_GLOW:
+        minimumRunCost = 2500;
+        break;
+    case MOVE_BOUNCY_BUBBLE:
+    case MOVE_SIZZLY_SLIDE:
+        minimumRunCost = 2250;
+        break;
+    case MOVE_FLOATY_FALL:
+        minimumRunCost = 2000;
+        break;
+    case MOVE_FREEZY_FROST:
+    case MOVE_SPLISHY_SPLASH:
+        minimumRunCost = 2750;
+        break;
+    case MOVE_PIKA_PAPOW:
+    case MOVE_VEEVEE_VOLLEY:
+        minimumRunCost = 2750;
+        break;
+    case MOVE_SAPPY_SEED:
+        minimumRunCost = 3250;
+        break;
+    case MOVE_SPARKLY_SWIRL:
+        minimumRunCost = 3500;
+        break;
+    case MOVE_ZIPPY_ZAP:
+        minimumRunCost = 4000;
         break;
     }
 
@@ -1779,6 +1815,9 @@ u32 Rogue_CalculateMovePrice(u16 move, u16 itemId)
         cost += 1000;
     else if(usageCount >= 100)
         cost += 500;
+
+    if(cost < minimumRunCost)
+        cost = minimumRunCost;
 
     cost /= 2;
 
