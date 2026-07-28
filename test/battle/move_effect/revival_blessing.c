@@ -28,6 +28,9 @@ SINGLE_BATTLE_TEST("Revival Blessing revives a chosen fainted party member for t
     } SCENE {
         MESSAGE("Wobbuffet used " REVIVAL_BLESSING "!");
         MESSAGE("Wynaut was revived and is ready to fight again!");
+    } THEN {
+        EXPECT(gBattleStruct->revivalBlessingUsed & gBitTable[B_SIDE_PLAYER]);
+        EXPECT(!(gBattleStruct->revivalBlessingUsed & gBitTable[B_SIDE_OPPONENT]));
     }
 }
 
@@ -43,6 +46,9 @@ SINGLE_BATTLE_TEST("Revival Blessing revives a fainted party member for an oppon
     } SCENE {
         MESSAGE("Foe Raichu used " REVIVAL_BLESSING "!");
         MESSAGE("Pichu was revived and is ready to fight again!");
+    } THEN {
+        EXPECT(gBattleStruct->revivalBlessingUsed & gBitTable[B_SIDE_OPPONENT]);
+        EXPECT(!(gBattleStruct->revivalBlessingUsed & gBitTable[B_SIDE_PLAYER]));
     }
 }
 
@@ -56,6 +62,34 @@ SINGLE_BATTLE_TEST("Revival Blessing fails if no party members are fainted")
     } SCENE {
         MESSAGE("Wobbuffet used " REVIVAL_BLESSING "!");
         MESSAGE("But it failed!");
+    } THEN {
+        EXPECT(!gBattleStruct->revivalBlessingUsed);
+    }
+}
+
+SINGLE_BATTLE_TEST("Revival Blessing can only succeed once per team each battle")
+{
+    GIVEN {
+        PLAYER(SPECIES_PAWMOT) { Moves(MOVE_REVIVAL_BLESSING); }
+        PLAYER(SPECIES_RABSCA) { Moves(MOVE_REVIVAL_BLESSING); }
+        PLAYER(SPECIES_WOBBUFFET) { HP(0); }
+        PLAYER(SPECIES_WYNAUT) { HP(0); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_REVIVAL_BLESSING); SEND_OUT(player, 2); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_REVIVAL_BLESSING); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Pawmot used " REVIVAL_BLESSING "!");
+        MESSAGE("Wobbuffet was revived and is ready to fight again!");
+        MESSAGE("Rabsca used " REVIVAL_BLESSING "!");
+        MESSAGE("But it failed!");
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_FUNERAL_RITE);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_TRICK_ROOM, player);
+        }
+    } THEN {
+        EXPECT(gBattleStruct->revivalBlessingUsed & gBitTable[B_SIDE_PLAYER]);
     }
 }
 

@@ -80,6 +80,8 @@ extern const u8 BattleScript_DynamoHealActivates[];
 extern const u8 BattleScript_DynamoSpeedActivates[];
 extern const u8 BattleScript_DynamoHealSpeedActivates[];
 extern const u8 BattleScript_NumbingSpinesActivates[];
+extern const u8 BattleScript_EffectPsychicNoise[];
+extern const u8 BattleScript_PsychicNoiseAromaVeil[];
 extern const u8 BattleScript_BubbleNetActivates[];
 extern const u8 BattleScript_BearHugActivates[];
 extern const u8 BattleScript_TargetFormChangeUnspeakable[];

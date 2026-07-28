@@ -470,6 +470,8 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectBrainstorm              @ EFFECT_BRAINSTORM
 	.4byte BattleScript_EffectShelter                 @ EFFECT_SHELTER
 	.4byte BattleScript_EffectOrderUp                 @ EFFECT_ORDER_UP
+	.4byte BattleScript_EffectSpicyExtract            @ EFFECT_SPICY_EXTRACT
+	.4byte BattleScript_EffectPsychicNoiseHit         @ EFFECT_PSYCHIC_NOISE
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -574,7 +576,64 @@ BattleScript_EffectTidyUpDoMoveAnimation::
 BattleScript_EffectUpperHand::
 	attackcanceler
 	tryupperhand BattleScript_FailedFromAtkString
+	setmoveeffect MOVE_EFFECT_FLINCH
 	goto BattleScript_HitFromAccCheck
+
+BattleScript_EffectPsychicNoise::
+	savetarget
+	copybyte gBattlerTarget, gEffectBattler
+	printstring STRINGID_PKMNPREVENTEDFROMHEALING
+	waitmessage B_WAIT_TIME_LONG
+	restoretarget
+	return
+
+BattleScript_PsychicNoiseAromaVeil::
+	savetarget
+	copybyte gBattlerTarget, gEffectBattler
+	call BattleScript_AromaVeilProtectsRet
+	restoretarget
+	return
+
+BattleScript_EffectPsychicNoiseHit::
+	argumenttomoveeffect
+	goto BattleScript_EffectHit
+
+BattleScript_EffectSpicyExtract::
+	attackcanceler
+	jumpifsubstituteblocks BattleScript_ButItFailed
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	jumpifstat BS_TARGET, CMP_LESS_THAN, STAT_ATK, MAX_STAT_STAGE, BattleScript_SpicyExtractCheckShouldSkipAttackAnim
+	jumpifstat BS_TARGET, CMP_GREATER_THAN, STAT_DEF, MIN_STAT_STAGE, BattleScript_SpicyExtractCheckShouldSkipAttackAnim
+	goto BattleScript_ButItFailed
+BattleScript_SpicyExtractCheckShouldSkipAttackAnim:
+	jumpifbyte CMP_NOT_EQUAL, gBattleCommunication, 0, BattleScript_SpicyExtractRaiseAttack
+	attackstring
+	ppreduce
+	bicword gHitMarker, HITMARKER_NO_ATTACKSTRING | HITMARKER_NO_PPDEDUCT
+	goto BattleScript_SpicyExtractSkipAttackAnim
+BattleScript_SpicyExtractRaiseAttack:
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+BattleScript_SpicyExtractSkipAttackAnim:
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	playstatchangeanimation BS_TARGET, BIT_ATK, STAT_CHANGE_BY_TWO
+	setstatchanger STAT_ATK, 2, FALSE
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_SpicyExtractLowerDefense
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_SpicyExtractLowerDefense
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SpicyExtractLowerDefense:
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	playstatchangeanimation BS_TARGET, BIT_DEF, STAT_CHANGE_NEGATIVE | STAT_CHANGE_BY_TWO
+	setstatchanger STAT_DEF, 2, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_SpicyExtractEnd
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_SpicyExtractEnd
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_SpicyExtractEnd:
+	goto BattleScript_MoveEnd
 
 BattleScript_EffectShedTail::
 	attackcanceler

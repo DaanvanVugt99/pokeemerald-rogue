@@ -24,7 +24,10 @@ SINGLE_BATTLE_TEST("Sheer Force boosts power, but removes secondary effects of m
         PLAYER(SPECIES_TAUROS) { Ability(ability); Status1(move == MOVE_SNORE ? STATUS1_SLEEP : STATUS1_NONE); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
-        TURN { MOVE(player, move); }
+        if (move == MOVE_UPPER_HAND)
+            TURN { MOVE(player, move); MOVE(opponent, MOVE_QUICK_ATTACK); }
+        else
+            TURN { MOVE(player, move); }
         if (gBattleMoves[move].effect == EFFECT_TWO_TURNS_ATTACK || gBattleMoves[move].effect == EFFECT_SEMI_INVULNERABLE) {
                 TURN { SKIP_TURN(player); }
                 TURN { ; }

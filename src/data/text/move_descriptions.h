@@ -3158,8 +3158,8 @@ static const u8 sGlaiveRushDescription[] = _(
     "miss and do double damage.");
 
 static const u8 sRevivalBlessingDescription[] = _(
-    "Revives a fainted party {PKMN}\n"
-    "and restores half of its HP.");
+    "Once per battle, revives a\n"
+    "fainted party {PKMN} at half HP.");
 
 static const u8 sSaltCureDescription[] = _(
     "Hurts foe every turn. Double\n"

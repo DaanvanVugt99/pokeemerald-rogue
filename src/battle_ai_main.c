@@ -1526,6 +1526,16 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             if (!AI_CanConfuse(battlerAtk, battlerDef, aiData->abilities[battlerDef], BATTLE_PARTNER(battlerAtk), move, aiData->partnerMove))
                 ADJUST_SCORE(-10);
             break;
+        case EFFECT_SPICY_EXTRACT:
+            if (!IS_TARGETING_PARTNER(battlerAtk, battlerDef)
+             && (HasMoveWithSplit(battlerDef, SPLIT_PHYSICAL)
+              || aiData->abilities[battlerDef] == ABILITY_CLEAR_BODY
+              || aiData->abilities[battlerDef] == ABILITY_WHITE_SMOKE
+              || aiData->abilities[battlerDef] == ABILITY_FULL_METAL_BODY
+              || aiData->abilities[battlerDef] == ABILITY_GOOD_AS_GOLD
+              || aiData->holdEffects[battlerDef] == HOLD_EFFECT_CLEAR_AMULET))
+                ADJUST_SCORE(-10);
+            break;
         case EFFECT_PARALYZE:
             if (!AI_CanParalyze(battlerAtk, battlerDef, aiData->abilities[battlerDef], move, aiData->partnerMove))
                 ADJUST_SCORE(-10);
@@ -2752,7 +2762,8 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 ADJUST_SCORE(-10);
             break;*/
         case EFFECT_REVIVAL_BLESSING:
-            if (GetFirstFaintedPartyIndex(battlerAtk) == PARTY_SIZE)
+            if (gBattleStruct->revivalBlessingUsed & gBitTable[GetBattlerSide(battlerAtk)]
+             || GetFirstFaintedPartyIndex(battlerAtk) == PARTY_SIZE)
                 ADJUST_SCORE(-10);
             else if (CanAIFaintTarget(battlerAtk, battlerDef, 0))
                 ADJUST_SCORE(-10);
@@ -2781,7 +2792,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 ADJUST_SCORE(-10);
             break;
         case EFFECT_UPPER_HAND:
-            if (predictedMove == MOVE_NONE || IS_MOVE_STATUS(predictedMove) || AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_SLOWER || GetMovePriority(battlerDef, move) < 1 || GetMovePriority(battlerDef, move) > 3) // Opponent going first or not using priority move
+            if (predictedMove == MOVE_NONE || IS_MOVE_STATUS(predictedMove) || AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_SLOWER || GetMovePriority(battlerDef, predictedMove) < 1 || GetMovePriority(battlerDef, predictedMove) > 3) // Opponent going first or not using priority move
                 ADJUST_SCORE(-10);
             break;
         case EFFECT_PLACEHOLDER:
@@ -3099,6 +3110,19 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                   || atkPartnerHoldEffect == HOLD_EFFECT_CURE_STATUS))
                 {
                     RETURN_SCORE_PLUS(1);
+                }
+                break;
+            case EFFECT_SPICY_EXTRACT:
+                if (BattlerStatCanRise(battlerAtkPartner, atkPartnerAbility, STAT_ATK)
+                 && HasMoveWithSplit(battlerAtkPartner, SPLIT_PHYSICAL)
+                 && atkPartnerAbility != ABILITY_CONTRARY
+                 && atkPartnerAbility != ABILITY_GOOD_AS_GOLD
+                 && (atkPartnerAbility == ABILITY_CLEAR_BODY
+                  || atkPartnerAbility == ABILITY_WHITE_SMOKE
+                  || atkPartnerAbility == ABILITY_FULL_METAL_BODY
+                  || atkPartnerHoldEffect == HOLD_EFFECT_CLEAR_AMULET))
+                {
+                    RETURN_SCORE_PLUS(2);
                 }
                 break;
             case EFFECT_BEAT_UP:
@@ -5057,7 +5081,8 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
         }
         break;
     case EFFECT_REVIVAL_BLESSING:
-        if (GetFirstFaintedPartyIndex(battlerAtk) != PARTY_SIZE)
+        if (!(gBattleStruct->revivalBlessingUsed & gBitTable[GetBattlerSide(battlerAtk)])
+         && GetFirstFaintedPartyIndex(battlerAtk) != PARTY_SIZE)
             ADJUST_SCORE(2);
         break;
     //case EFFECT_EXTREME_EVOBOOST: // TODO

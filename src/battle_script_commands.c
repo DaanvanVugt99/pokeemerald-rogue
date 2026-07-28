@@ -4369,7 +4369,11 @@ void SetMoveEffect(bool32 primary, u32 certain)
             switch (gBattleScripting.moveEffect)
             {
             case MOVE_EFFECT_CONFUSION:
-                if (!CanBeConfused(gEffectBattler))
+                if (gCurrentMove == MOVE_ALLURING_VOICE && !gProtectStructs[gEffectBattler].statRaised)
+                {
+                    gBattlescriptCurrInstr++;
+                }
+                else if (!CanBeConfused(gEffectBattler))
                 {
                     gBattlescriptCurrInstr++;
                 }
@@ -4956,6 +4960,29 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     gBattleStruct->stickySyrupdBy[gEffectBattler] = gBattlerAttacker;
                     BattleScriptPush(gBattlescriptCurrInstr + 1);
                     gBattlescriptCurrInstr = BattleScript_SyrupBombActivates;
+                }
+                break;
+            case MOVE_EFFECT_PSYCHIC_NOISE:
+                {
+                    u32 battlerAbility = IsAbilityOnSide(gEffectBattler, ABILITY_AROMA_VEIL);
+
+                    if (battlerAbility)
+                    {
+                        gBattlerAbility = battlerAbility - 1;
+                        BattleScriptPush(gBattlescriptCurrInstr + 1);
+                        gBattlescriptCurrInstr = BattleScript_PsychicNoiseAromaVeil;
+                    }
+                    else if (!IsBattlerHealBlocked(gEffectBattler))
+                    {
+                        gStatuses3[gEffectBattler] |= STATUS3_HEAL_BLOCK;
+                        gDisableStructs[gEffectBattler].healBlockTimer = 2;
+                        BattleScriptPush(gBattlescriptCurrInstr + 1);
+                        gBattlescriptCurrInstr = BattleScript_EffectPsychicNoise;
+                    }
+                    else
+                    {
+                        gBattlescriptCurrInstr++;
+                    }
                 }
                 break;
             case MOVE_EFFECT_TERA_BLAST:
@@ -14881,8 +14908,9 @@ static void Cmd_various(void)
         u32 side = GetBattlerSide(gBattlerAttacker);
         u8 index = GetFirstFaintedPartyIndex(gBattlerAttacker);
 
-        // Move fails if there are no battlers to revive.
-        if (index == PARTY_SIZE)
+        // Each side can successfully use Revival Blessing only once per battle.
+        if (gBattleStruct->revivalBlessingUsed & gBitTable[side]
+         || index == PARTY_SIZE)
         {
             gBattlescriptCurrInstr = cmd->failInstr;
             return;
@@ -14895,6 +14923,7 @@ static void Cmd_various(void)
 
             u16 hp = GetMonData(&party[gSelectedMonPartyId], MON_DATA_MAX_HP) / 2;
             hp = ApplyRecoveryCharmHealing(gBattlerAttacker, hp);
+            gBattleStruct->revivalBlessingUsed |= gBitTable[side];
             BtlController_EmitSetMonData(gBattlerAttacker, BUFFER_A, REQUEST_HP_BATTLE, gBitTable[gSelectedMonPartyId], sizeof(hp), &hp);
             MarkBattlerForControllerExec(gBattlerAttacker);
             PREPARE_SPECIES_BUFFER(gBattleTextBuff1, GetMonData(&party[gSelectedMonPartyId], MON_DATA_SPECIES));

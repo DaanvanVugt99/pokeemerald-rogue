@@ -16,6 +16,11 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Implemented Alluring Voice, Psychic Noise, Spicy Extract, and Upper Hand,
+  including their conditional effects, AI handling, and Scarlet/Violet learnsets.
+- Restored Order Up and Revival Blessing to generated learnsets. Revival
+  Blessing is limited to one successful use per team each battle; obsolete
+  Leppa Berry profiles built around recycling it were removed.
 - Added Chaos Theory, the first generated-only Anomalous Ability. When every
   party Pokémon has distinct typing, it uses Metronome after every move.
 - Added Ship of Theseus as a generated-only Anomalous Ability, passing its

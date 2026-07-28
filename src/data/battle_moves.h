@@ -13760,7 +13760,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_SPICY_EXTRACT] =
     {
-        .effect = EFFECT_PLACEHOLDER, // EFFECT_SPICY_EXTRACT
+        .effect = EFFECT_SPICY_EXTRACT,
         .power = 0,
         .type = TYPE_GRASS,
         .accuracy = 0,
@@ -14950,18 +14950,19 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_ALLURING_VOICE] =
     {
-        .effect = EFFECT_PLACEHOLDER, //EFFECT_ALLURING_VOICE
+        .effect = EFFECT_CONFUSE_HIT,
         .power = 80,
         .type = TYPE_FAIRY,
         .accuracy = 100,
         .pp = 10,
-        .secondaryEffectChance = 0,
+        .secondaryEffectChance = 100,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
         .split = SPLIT_SPECIAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .soundMove = TRUE,
         .ignoresSubstitute = TRUE,
+        .sheerForceBoost = TRUE,
     },
 
     [MOVE_TEMPER_FLARE] =
@@ -14996,33 +14997,36 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
 
     [MOVE_PSYCHIC_NOISE] =
     {
-        .effect = EFFECT_PLACEHOLDER, //EFFECT_PSYCHIC_NOISE
+        .effect = EFFECT_PSYCHIC_NOISE,
         .power = 75,
         .type = TYPE_PSYCHIC,
         .accuracy = 100,
         .pp = 10,
-        .secondaryEffectChance = 0,
+        .secondaryEffectChance = 100,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
         .split = SPLIT_SPECIAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .soundMove = TRUE,
         .ignoresSubstitute = TRUE,
+        .argument = MOVE_EFFECT_PSYCHIC_NOISE,
+        .sheerForceBoost = TRUE,
     },
 
     [MOVE_UPPER_HAND] =
     {
-        .effect = EFFECT_UPPER_HAND, // EFFECT_PLACEHOLDER RogueNote: doesn't really seem to work?
+        .effect = EFFECT_UPPER_HAND,
         .power = 65,
         .type = TYPE_FIGHTING,
         .accuracy = 100,
         .pp = 15,
-        .secondaryEffectChance = 0,
+        .secondaryEffectChance = 100,
         .target = MOVE_TARGET_SELECTED,
-        .priority = 4,
+        .priority = 3,
         .split = SPLIT_PHYSICAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,
+        .sheerForceBoost = TRUE,
     },
 
     [MOVE_MALIGNANT_CHAIN] =

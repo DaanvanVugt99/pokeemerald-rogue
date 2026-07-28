@@ -317,6 +317,84 @@ namespace PokemonDataGenerator.Pokedex
 
 		private class PokemonProfile
 		{
+			// Profiles are cached after banned moves are removed. Keep old caches usable when an
+			// implemented move is unbanned by restoring its Scarlet/Violet compatibility here.
+			private static readonly Dictionary<string, HashSet<string>> s_RestoredMoveLearnsets = new Dictionary<string, HashSet<string>>
+			{
+				{
+					"MOVE_ALLURING_VOICE",
+					new HashSet<string>
+					{
+						"SPECIES_PIKACHU", "SPECIES_RAICHU", "SPECIES_CLEFAIRY", "SPECIES_CLEFABLE",
+						"SPECIES_JIGGLYPUFF", "SPECIES_WIGGLYTUFF", "SPECIES_DEWGONG", "SPECIES_LAPRAS",
+						"SPECIES_EEVEE", "SPECIES_VAPOREON", "SPECIES_JOLTEON", "SPECIES_FLAREON",
+						"SPECIES_MEW", "SPECIES_CLEFFA", "SPECIES_IGGLYBUFF", "SPECIES_MARILL",
+						"SPECIES_AZUMARILL", "SPECIES_ESPEON", "SPECIES_UMBREON", "SPECIES_BLISSEY",
+						"SPECIES_RALTS", "SPECIES_KIRLIA", "SPECIES_GARDEVOIR", "SPECIES_AZURILL",
+						"SPECIES_PLUSLE", "SPECIES_MINUN", "SPECIES_FLYGON", "SPECIES_ALTARIA",
+						"SPECIES_MILOTIC", "SPECIES_LATIAS", "SPECIES_PACHIRISU", "SPECIES_FINNEON",
+						"SPECIES_LUMINEON", "SPECIES_LEAFEON", "SPECIES_GLACEON", "SPECIES_GALLADE",
+						"SPECIES_PHIONE", "SPECIES_MANAPHY", "SPECIES_LILLIGANT", "SPECIES_MINCCINO",
+						"SPECIES_CINCCINO", "SPECIES_SWANNA", "SPECIES_ALOMOMOLA", "SPECIES_MELOETTA",
+						"SPECIES_FLABEBE", "SPECIES_FLOETTE", "SPECIES_FLORGES", "SPECIES_MEOWSTIC",
+						"SPECIES_SYLVEON", "SPECIES_PRIMARINA", "SPECIES_ORICORIO", "SPECIES_RIBOMBEE",
+						"SPECIES_COMFEY", "SPECIES_ALCREMIE", "SPECIES_ENAMORUS", "SPECIES_SKELEDIRGE",
+						"SPECIES_FIDOUGH", "SPECIES_DACHSBUN", "SPECIES_ARBOLIVA", "SPECIES_FEZANDIPITI",
+						"SPECIES_MEOWSTIC_FEMALE", "SPECIES_RAICHU_ALOLAN", "SPECIES_ORICORIO_POM_POM",
+						"SPECIES_ORICORIO_PAU", "SPECIES_ORICORIO_SENSU", "SPECIES_ENAMORUS_THERIAN",
+					}
+				},
+				{
+					"MOVE_PSYCHIC_NOISE",
+					new HashSet<string>
+					{
+						"SPECIES_JIGGLYPUFF", "SPECIES_WIGGLYTUFF", "SPECIES_VENONAT", "SPECIES_VENOMOTH",
+						"SPECIES_PSYDUCK", "SPECIES_GOLDUCK", "SPECIES_SLOWBRO", "SPECIES_GENGAR",
+						"SPECIES_DROWZEE", "SPECIES_HYPNO", "SPECIES_EXEGGCUTE", "SPECIES_EXEGGUTOR",
+						"SPECIES_LAPRAS", "SPECIES_MEWTWO", "SPECIES_MEW", "SPECIES_NOCTOWL",
+						"SPECIES_YANMA", "SPECIES_ESPEON", "SPECIES_MURKROW", "SPECIES_SLOWKING",
+						"SPECIES_MISDREAVUS", "SPECIES_GIRAFARIG", "SPECIES_LUGIA", "SPECIES_GARDEVOIR",
+						"SPECIES_GRUMPIG", "SPECIES_FLYGON", "SPECIES_CHIMECHO", "SPECIES_METANG",
+						"SPECIES_METAGROSS", "SPECIES_LATIOS", "SPECIES_JIRACHI", "SPECIES_DEOXYS",
+						"SPECIES_VESPIQUEN", "SPECIES_MISMAGIUS", "SPECIES_HONCHKROW", "SPECIES_CHINGLING",
+						"SPECIES_BRONZONG", "SPECIES_YANMEGA", "SPECIES_UXIE", "SPECIES_MESPRIT",
+						"SPECIES_GOTHITA", "SPECIES_GOTHORITA", "SPECIES_GOTHITELLE", "SPECIES_REUNICLUS",
+						"SPECIES_DELPHOX", "SPECIES_FLORGES", "SPECIES_ESPURR", "SPECIES_MEOWSTIC",
+						"SPECIES_MALAMAR", "SPECIES_TREVENANT", "SPECIES_NOIVERN", "SPECIES_HOOPA",
+						"SPECIES_PRIMARINA", "SPECIES_RIBOMBEE", "SPECIES_ORANGURU", "SPECIES_BRUXISH",
+						"SPECIES_TOXTRICITY", "SPECIES_HATTERENE", "SPECIES_INDEEDEE", "SPECIES_WYRDEER",
+						"SPECIES_RABSCA", "SPECIES_FARIGIRAF", "SPECIES_SCREAM_TAIL", "SPECIES_MUNKIDORI",
+						"SPECIES_IRON_CROWN", "SPECIES_DEOXYS_ATTACK", "SPECIES_DEOXYS_DEFENSE",
+						"SPECIES_DEOXYS_SPEED", "SPECIES_MEOWSTIC_FEMALE", "SPECIES_HOOPA_UNBOUND",
+						"SPECIES_RAICHU_ALOLAN", "SPECIES_EXEGGUTOR_ALOLAN", "SPECIES_ARTICUNO_GALARIAN",
+						"SPECIES_SLOWKING_GALARIAN", "SPECIES_TOXTRICITY_LOW_KEY", "SPECIES_INDEEDEE_FEMALE",
+						"SPECIES_BRAVIARY_HISUIAN",
+					}
+				},
+				{
+					"MOVE_UPPER_HAND",
+					new HashSet<string>
+					{
+						"SPECIES_PIKACHU", "SPECIES_RAICHU", "SPECIES_POLIWRATH", "SPECIES_HITMONLEE",
+						"SPECIES_HITMONCHAN", "SPECIES_MEW", "SPECIES_AIPOM", "SPECIES_HERACROSS",
+						"SPECIES_SNEASEL", "SPECIES_TYROGUE", "SPECIES_HITMONTOP", "SPECIES_TREECKO",
+						"SPECIES_GROVYLE", "SPECIES_SCEPTILE", "SPECIES_BLAZIKEN", "SPECIES_SHIFTRY",
+						"SPECIES_MAKUHITA", "SPECIES_HARIYAMA", "SPECIES_MEDITITE", "SPECIES_MEDICHAM",
+						"SPECIES_ZANGOOSE", "SPECIES_MONFERNO", "SPECIES_INFERNAPE", "SPECIES_AMBIPOM",
+						"SPECIES_RIOLU", "SPECIES_LUCARIO", "SPECIES_CROAGUNK", "SPECIES_TOXICROAK",
+						"SPECIES_WEAVILE", "SPECIES_GALLADE", "SPECIES_SAMUROTT", "SPECIES_CONKELDURR",
+						"SPECIES_SCRAGGY", "SPECIES_SCRAFTY", "SPECIES_MIENFOO", "SPECIES_MIENSHAO",
+						"SPECIES_COBALION", "SPECIES_TERRAKION", "SPECIES_VIRIZION", "SPECIES_KELDEO",
+						"SPECIES_GRENINJA", "SPECIES_TALONFLAME", "SPECIES_HAWLUCHA", "SPECIES_DECIDUEYE",
+						"SPECIES_CRABRAWLER", "SPECIES_CRABOMINABLE", "SPECIES_PASSIMIAN", "SPECIES_HAKAMO_O",
+						"SPECIES_KOMMO_O", "SPECIES_FALINKS", "SPECIES_SNEASLER", "SPECIES_QUAQUAVAL",
+						"SPECIES_SPIDOPS", "SPECIES_PAWMO", "SPECIES_PAWMOT", "SPECIES_FLAMIGO",
+						"SPECIES_OKIDOGI", "SPECIES_RAICHU_ALOLAN", "SPECIES_LYCANROC_MIDNIGHT",
+						"SPECIES_SAMUROTT_HISUIAN", "SPECIES_LILLIGANT_HISUIAN", "SPECIES_DECIDUEYE_HISUIAN",
+					}
+				},
+			};
+
 			public string Species;
 			public List<LevelUpMove> LevelUpMoves;
 			public List<string> TutorMoves;
@@ -514,6 +592,30 @@ namespace PokemonDataGenerator.Pokedex
 				}
 			}
 
+			private void RestoreImplementedMoveData()
+			{
+				foreach (var moveLearnset in s_RestoredMoveLearnsets)
+				{
+					if (moveLearnset.Value.Contains(Species) && !CanLearnMove(moveLearnset.Key))
+						TutorMoves.Add(moveLearnset.Key);
+				}
+
+				if (Species == "SPECIES_SCOVILLAIN" && !HasLevelUpMove("MOVE_SPICY_EXTRACT"))
+					LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_SPICY_EXTRACT", Level = 0 });
+
+				if ((Species == "SPECIES_PAWMOT" || Species == "SPECIES_RABSCA")
+					&& !HasLevelUpMove("MOVE_REVIVAL_BLESSING"))
+					LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_REVIVAL_BLESSING", Level = 0 });
+
+				if (Species == "SPECIES_PAWMOT" || Species == "SPECIES_RABSCA")
+					// These sets were built to recycle Revival Blessing's PP, which is
+					// incompatible with Divergence's once-per-team battle limit.
+					CompetitiveSets.RemoveAll(set => set.Item == "ITEM_LEPPA_BERRY");
+
+				if (Species == "SPECIES_DONDOZO" && !HasLevelUpMove("MOVE_ORDER_UP"))
+					LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_ORDER_UP", Level = 50 });
+			}
+
 			private bool AttemptReplaceMove(PokemonCompetitiveSet target, string move, params string[] orderedReplacements)
 			{
 				foreach(string testMove in orderedReplacements)
@@ -531,6 +633,9 @@ namespace PokemonDataGenerator.Pokedex
 
 			public void FormatDataForGame()
 			{
+				if (!GameDataHelpers.IsVanillaVersion)
+					RestoreImplementedMoveData();
+
 				// Now we've added the sets, add any moves that we can't currently learn as tutor moves
 				foreach (var set in CompetitiveSets)
 				{
@@ -868,22 +973,7 @@ namespace PokemonDataGenerator.Pokedex
 
 		private static bool IsBannedMove(string moveName)
 		{
-			switch(moveName)
-			{
-				// Intentionally banned moves
-				case "MOVE_REVIVAL_BLESSING":
-					return true;
-
-				// Moves that aren't currently implemented fully
-				//case "MOVE_TERA_BLAST": <- is replaced by hidden power
-				case "MOVE_ORDER_UP":
-				case "MOVE_SPICY_EXTRACT":
-				case "MOVE_ALLURING_VOICE":
-				case "MOVE_PSYCHIC_NOISE":
-				case "MOVE_UPPER_HAND":
-					return true;
-			}
-
+			// No moves are currently banned. Tera Blast is replaced by Hidden Power elsewhere.
 			return false;
 		}
 

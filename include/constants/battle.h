@@ -414,8 +414,9 @@
 #define MOVE_EFFECT_FLORAL_HEALING      79
 #define MOVE_EFFECT_TERA_BLAST          80
 #define MOVE_EFFECT_ORDER_UP            81
+#define MOVE_EFFECT_PSYCHIC_NOISE       82
 
-#define NUM_MOVE_EFFECTS                82
+#define NUM_MOVE_EFFECTS                83
 
 #define MOVE_EFFECT_AFFECTS_USER        0x4000
 #define MOVE_EFFECT_CERTAIN             0x8000
