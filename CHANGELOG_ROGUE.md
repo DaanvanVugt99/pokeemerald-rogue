@@ -38,6 +38,7 @@ Format follows Keep a Changelog loosely:
 - Removed the Mysterious Shrine guardian's opening stat boosts and allowed the
   shrine to appear from the second path of an Adventure onward.
 - Made Huntail Water/Dragon and Gorebyss Water/Fairy.
+- Replaced Early Bird with Natural Cure on the Smoliv line.
 - Expanded Misty Terrain synergy: Heartwing now preserves allied Dragon
   damage, Flower Ritual activates with two Fairy allies or Misty Terrain,
   Drift Song heals one quarter in Misty Terrain, and Moonglass heals one
@@ -92,6 +93,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made generated Liquid Voice Politoed sets use Hyper Voice and limited
+  Telepathy to Indeedee's doubles-oriented competitive sets.
 - Updated competitive profiles for Divergence-specific Ability replacements
   and added validation against each Pokémon's current form-family Abilities.
 - Prevented headless test crashes from hanging indefinitely by bounding emulator

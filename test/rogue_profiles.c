@@ -1,5 +1,6 @@
 #include "global.h"
 #include "constants/abilities.h"
+#include "constants/moves.h"
 #include "pokemon.h"
 #include "rogue.h"
 #include "test/test.h"
@@ -87,4 +88,31 @@ TEST("Competitive profile abilities belong to their species form family")
     }
 
     EXPECT_EQ(mismatchCount, 0);
+}
+
+TEST("Liquid Voice Politoed competitive sets contain Hyper Voice")
+{
+    const struct RoguePokemonProfile *profile = &gRoguePokemonProfiles[SPECIES_POLITOED];
+    u32 setIndex;
+
+    for (setIndex = 0; setIndex < profile->competitiveSetCount; ++setIndex)
+    {
+        const struct RoguePokemonCompetitiveSet *set = &profile->competitiveSets[setIndex];
+        bool32 hasHyperVoice = FALSE;
+        u32 moveIndex;
+
+        if (set->ability != ABILITY_LIQUID_VOICE)
+            continue;
+
+        for (moveIndex = 0; moveIndex < MAX_MON_MOVES; ++moveIndex)
+        {
+            if (set->moves[moveIndex] == MOVE_HYPER_VOICE)
+            {
+                hasHyperVoice = TRUE;
+                break;
+            }
+        }
+
+        EXPECT(hasHyperVoice);
+    }
 }

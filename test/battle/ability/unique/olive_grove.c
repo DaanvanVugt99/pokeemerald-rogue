@@ -11,7 +11,7 @@ ASSUMPTIONS
 SINGLE_BATTLE_TEST("Olive Grove sets Grassy Terrain when hit by an attack")
 {
     GIVEN {
-        PLAYER(SPECIES_SMOLIV) { Ability(ABILITY_EARLY_BIRD); UniqueAbility(ABILITY_OLIVE_GROVE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_SMOLIV) { Ability(ABILITY_NATURAL_CURE); UniqueAbility(ABILITY_OLIVE_GROVE); Moves(MOVE_CELEBRATE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
     } WHEN {
         TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
@@ -32,7 +32,7 @@ SINGLE_BATTLE_TEST("Olive Grove heals one quarter of Grass-type damage dealt in 
     PARAMETRIZE { uniqueAbility = ABILITY_OLIVE_GROVE; }
 
     GIVEN {
-        PLAYER(SPECIES_SMOLIV) { HP(100); MaxHP(300); Ability(ABILITY_EARLY_BIRD); UniqueAbility(uniqueAbility); SpAttack(200); Moves(MOVE_GRASSY_TERRAIN, MOVE_ENERGY_BALL); }
+        PLAYER(SPECIES_SMOLIV) { HP(100); MaxHP(300); Ability(ABILITY_NATURAL_CURE); UniqueAbility(uniqueAbility); SpAttack(200); Moves(MOVE_GRASSY_TERRAIN, MOVE_ENERGY_BALL); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); SpDefense(100); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_GRASSY_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }
@@ -60,7 +60,7 @@ SINGLE_BATTLE_TEST("Olive Grove does not heal non-Grass moves in Grassy Terrain"
     PARAMETRIZE { uniqueAbility = ABILITY_OLIVE_GROVE; }
 
     GIVEN {
-        PLAYER(SPECIES_SMOLIV) { HP(100); MaxHP(200); Ability(ABILITY_EARLY_BIRD); UniqueAbility(uniqueAbility); Moves(MOVE_GRASSY_TERRAIN, MOVE_SWIFT); }
+        PLAYER(SPECIES_SMOLIV) { HP(100); MaxHP(200); Ability(ABILITY_NATURAL_CURE); UniqueAbility(uniqueAbility); Moves(MOVE_GRASSY_TERRAIN, MOVE_SWIFT); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_GRASSY_TERRAIN); MOVE(opponent, MOVE_CELEBRATE); }

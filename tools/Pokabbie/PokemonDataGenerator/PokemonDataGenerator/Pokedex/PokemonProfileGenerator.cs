@@ -401,6 +401,51 @@ namespace PokemonDataGenerator.Pokedex
 				}
 			}
 
+			private void UpdatePolitoedCompetitiveSets()
+			{
+				foreach (var set in CompetitiveSets)
+				{
+					if (set.Ability != "ABILITY_DRIZZLE" && set.Ability != "ABILITY_LIQUID_VOICE")
+						continue;
+
+					set.Ability = "ABILITY_LIQUID_VOICE";
+
+					if (set.Moves.Contains("MOVE_HYPER_VOICE"))
+						continue;
+
+					string moveToReplace = new[]
+					{
+						"MOVE_SURF",
+						"MOVE_HYDRO_PUMP",
+						"MOVE_MUDDY_WATER",
+						"MOVE_WATER_PULSE",
+					}.FirstOrDefault(move => set.Moves.Contains(move));
+
+					if (moveToReplace == null)
+						throw new InvalidDataException("Politoed's Liquid Voice set has no Water-type move to replace with Hyper Voice");
+
+					set.Moves[set.Moves.IndexOf(moveToReplace)] = "MOVE_HYPER_VOICE";
+				}
+			}
+
+			private static bool IsDoublesCompetitiveTier(string tier)
+			{
+				return tier.Contains("DOUBLES") || tier.Contains("VGC");
+			}
+
+			private void UpdateIndeedeeCompetitiveAbilities()
+			{
+				foreach (var set in CompetitiveSets)
+				{
+					if (set.Ability != "ABILITY_PSYCHIC_SURGE" && set.Ability != "ABILITY_TELEPATHY")
+						continue;
+
+					set.Ability = set.SourceTiers.Any() && set.SourceTiers.All(IsDoublesCompetitiveTier)
+						? "ABILITY_TELEPATHY"
+						: "ABILITY_SYNCHRONIZE";
+				}
+			}
+
 			private void ApplyDivergenceAbilityReplacements()
 			{
 				switch (Species)
@@ -409,7 +454,7 @@ namespace PokemonDataGenerator.Pokedex
 						ReplaceCompetitiveAbility("ABILITY_CURSED_BODY", "ABILITY_LEVITATE");
 						break;
 					case "SPECIES_POLITOED":
-						ReplaceCompetitiveAbility("ABILITY_DRIZZLE", "ABILITY_LIQUID_VOICE");
+						UpdatePolitoedCompetitiveSets();
 						break;
 					case "SPECIES_PELIPPER":
 						ReplaceCompetitiveAbility("ABILITY_DRIZZLE", "ABILITY_WIND_RIDER");
@@ -459,7 +504,12 @@ namespace PokemonDataGenerator.Pokedex
 					case "SPECIES_INDEEDEE":
 					case "SPECIES_INDEEDEE_MALE":
 					case "SPECIES_INDEEDEE_FEMALE":
-						ReplaceCompetitiveAbility("ABILITY_PSYCHIC_SURGE", "ABILITY_TELEPATHY");
+						UpdateIndeedeeCompetitiveAbilities();
+						break;
+					case "SPECIES_SMOLIV":
+					case "SPECIES_DOLLIV":
+					case "SPECIES_ARBOLIVA":
+						ReplaceCompetitiveAbility("ABILITY_SEED_SOWER", "ABILITY_NATURAL_CURE");
 						break;
 				}
 			}

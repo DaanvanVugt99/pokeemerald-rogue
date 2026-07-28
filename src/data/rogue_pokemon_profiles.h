@@ -53902,7 +53902,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_CALM,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_HYPNOSIS,
 			MOVE_ENCORE,
 			MOVE_REST,
@@ -53962,7 +53962,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ICY_WIND,
 			MOVE_HELPING_HAND,
 			MOVE_PROTECT,
@@ -53977,7 +53977,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_CALM,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ICE_BEAM,
 			MOVE_PROTECT,
 			MOVE_HYPNOSIS,
@@ -53993,7 +53993,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.moves=
 		{
 			MOVE_PERISH_SONG,
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ICE_BEAM,
 			MOVE_PROTECT,
 		},
@@ -54007,7 +54007,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_CALM,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ICY_WIND,
 			MOVE_HELPING_HAND,
 			MOVE_PROTECT,
@@ -54024,7 +54024,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		{
 			MOVE_HYDRO_PUMP,
 			MOVE_ICE_BEAM,
-			MOVE_SURF,
+			MOVE_HYPER_VOICE,
 			MOVE_HIDDEN_POWER,
 		},
 	},
@@ -54037,7 +54037,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ICE_BEAM,
 			MOVE_HYPNOSIS,
 			MOVE_ENCORE,
@@ -54067,7 +54067,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_CALM,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_HELPING_HAND,
 			MOVE_ENCORE,
 			MOVE_PROTECT,
@@ -54085,7 +54085,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 			MOVE_PROTECT,
 			MOVE_HYDRO_PUMP,
 			MOVE_HELPING_HAND,
-			MOVE_SURF,
+			MOVE_HYPER_VOICE,
 		},
 	},
 	{
@@ -54100,7 +54100,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 			MOVE_PERISH_SONG,
 			MOVE_PROTECT,
 			MOVE_ENCORE,
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 		},
 	},
 	{
@@ -54112,7 +54112,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_TIMID,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_PROTECT,
 			MOVE_HELPING_HAND,
 			MOVE_HAZE,
@@ -54127,7 +54127,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_CALM,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ICE_BEAM,
 			MOVE_ENCORE,
 			MOVE_PROTECT,
@@ -54142,7 +54142,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_TIMID,
 		.moves=
 		{
-			MOVE_SURF,
+			MOVE_HYPER_VOICE,
 			MOVE_HYDRO_PUMP,
 			MOVE_ICE_BEAM,
 			MOVE_ENCORE,
@@ -54157,7 +54157,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_TIMID,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_PROTECT,
 			MOVE_ICE_BEAM,
 			MOVE_ENCORE,
@@ -54173,7 +54173,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.moves=
 		{
 			MOVE_PROTECT,
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_HELPING_HAND,
 			MOVE_PERISH_SONG,
 		},
@@ -54187,7 +54187,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ENCORE,
 			MOVE_ICE_BEAM,
 			MOVE_REST,
@@ -54202,7 +54202,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ICE_BEAM,
 			MOVE_ENCORE,
 			MOVE_HYPNOSIS,
@@ -54217,7 +54217,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_ENCORE,
 			MOVE_HYPNOSIS,
 			MOVE_ICE_BEAM,
@@ -54232,7 +54232,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_HYPNOSIS,
 			MOVE_ENCORE,
 			MOVE_ICE_BEAM,
@@ -54247,7 +54247,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_HELPING_HAND,
 			MOVE_ICY_WIND,
 			MOVE_PROTECT,
@@ -54264,7 +54264,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		{
 			MOVE_EARTH_POWER,
 			MOVE_HYDRO_PUMP,
-			MOVE_SURF,
+			MOVE_HYPER_VOICE,
 			MOVE_ICY_WIND,
 		},
 	},
@@ -54278,7 +54278,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.moves=
 		{
 			MOVE_PROTECT,
-			MOVE_HYDRO_PUMP,
+			MOVE_HYPER_VOICE,
 			MOVE_HELPING_HAND,
 			MOVE_PERISH_SONG,
 		},
@@ -54292,7 +54292,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_POLITOED
 		.nature=NATURE_BOLD,
 		.moves=
 		{
-			MOVE_SURF,
+			MOVE_HYPER_VOICE,
 			MOVE_ENCORE,
 			MOVE_ICE_BEAM,
 			MOVE_REST,
@@ -249773,7 +249773,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8UU | MON_FLAGS_GEN9NATIONALDEXMONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249788,7 +249788,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8RU),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249803,7 +249803,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8RU),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249818,7 +249818,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8RU),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249848,7 +249848,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8MONOTYPE),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_MODEST,
@@ -249863,7 +249863,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8MONOTYPE),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249878,7 +249878,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8MONOTYPE),
 		.heldItem=ITEM_CHOICE_SPECS,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249893,7 +249893,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN8NATIONALDEXMONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249908,7 +249908,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9OU),
 		.heldItem=ITEM_TERRAIN_EXTENDER,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_FAIRY,
 		.nature=NATURE_TIMID,
@@ -249923,7 +249923,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9UU),
 		.heldItem=ITEM_TERRAIN_EXTENDER,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_STEEL,
 		.nature=NATURE_TIMID,
@@ -249938,7 +249938,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9MONOTYPE | MON_FLAGS_GEN9MONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -249953,7 +249953,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9MONOTYPE),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
@@ -282905,7 +282905,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_INDEEDEE
 	{
 		.flags= (0 | MON_FLAGS_GEN9PU),
 		.heldItem=ITEM_CHOICE_SCARF,
-		.ability=ABILITY_TELEPATHY,
+		.ability=ABILITY_SYNCHRONIZE,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_TIMID,
