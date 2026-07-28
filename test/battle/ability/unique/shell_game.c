@@ -58,7 +58,7 @@ SINGLE_BATTLE_TEST("Shell Game does not alter Shell Smash outside Misty Terrain"
     }
 }
 
-SINGLE_BATTLE_TEST("Shell Game transfers Shell Smash's drops through stat-loss prevention")
+SINGLE_BATTLE_TEST("Clear Body blocks Shell Game's transferred defensive drops")
 {
     GIVEN {
         PLAYER(SPECIES_GOREBYSS) {
@@ -72,10 +72,15 @@ SINGLE_BATTLE_TEST("Shell Game transfers Shell Smash's drops through stat-loss p
         TURN { MOVE(opponent, MOVE_MISTY_TERRAIN); MOVE(player, MOVE_SHELL_SMASH); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_SHELL_GAME);
-        NOT ABILITY_POPUP(opponent, ABILITY_CLEAR_BODY);
+        ABILITY_POPUP(opponent, ABILITY_CLEAR_BODY);
     } THEN {
-        EXPECT_EQ(opponent->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
-        EXPECT_EQ(opponent->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE - 1);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponent->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponent->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
     }
 }
 
