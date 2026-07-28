@@ -18,6 +18,11 @@ Format follows Keep a Changelog loosely:
 
 - Implemented Alluring Voice, Psychic Noise, Spicy Extract, and Upper Hand,
   including their conditional effects, AI handling, and Scarlet/Violet learnsets.
+- Restored Barrage, Bone Club, Egg Bomb, Ion Deluge, Magnitude, Needle Arm,
+  Powder, Spider Web, Spike Cannon, and Trump Card to their former canonical
+  learners, and restored the Legends: Arceus Power Shift tutor roster. Bone Club,
+  Egg Bomb, Needle Arm, Spike Cannon, Spider Web, and Trump Card were rebalanced
+  to make their restored availability meaningful.
 - Restored Order Up and Revival Blessing to generated learnsets. Revival
   Blessing is limited to one successful use per team each battle; obsolete
   Leppa Berry profiles built around recycling it were removed.

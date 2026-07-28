@@ -5707,6 +5707,16 @@ BattleScript_EffectMeanLook::
 	seteffectprimary
 	printstring STRINGID_TARGETCANTESCAPENOW
 	waitmessage B_WAIT_TIME_LONG
+	jumpifmove MOVE_SPIDER_WEB, BattleScript_SpiderWebLowerSpeed
+	goto BattleScript_MoveEnd
+BattleScript_SpiderWebLowerSpeed:
+	setbyte sSTAT_ANIM_PLAYED, FALSE
+	playstatchangeanimation BS_TARGET, BIT_SPEED, STAT_CHANGE_NEGATIVE
+	setstatchanger STAT_SPEED, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_MoveEnd
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_MoveEnd
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
 
 BattleScript_EffectNightmare::

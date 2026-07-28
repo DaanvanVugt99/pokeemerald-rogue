@@ -317,10 +317,107 @@ namespace PokemonDataGenerator.Pokedex
 
 		private class PokemonProfile
 		{
-			// Profiles are cached after banned moves are removed. Keep old caches usable when an
-			// implemented move is unbanned by restoring its Scarlet/Violet compatibility here.
+			// Profiles are cached after move filtering. Keep old caches usable and restore
+			// deliberately selected compatibility for moves omitted from modern learnsets.
 			private static readonly Dictionary<string, HashSet<string>> s_RestoredMoveLearnsets = new Dictionary<string, HashSet<string>>
 			{
+				{
+					"MOVE_BARRAGE",
+					new HashSet<string>
+					{
+						"SPECIES_EXEGGCUTE", "SPECIES_EXEGGUTOR", "SPECIES_EXEGGUTOR_ALOLAN",
+					}
+				},
+				{
+					"MOVE_BONE_CLUB",
+					new HashSet<string>
+					{
+						"SPECIES_CUBONE", "SPECIES_MAROWAK", "SPECIES_MAROWAK_ALOLAN",
+					}
+				},
+				{
+					"MOVE_EGG_BOMB",
+					new HashSet<string>
+					{
+						"SPECIES_EXEGGCUTE", "SPECIES_EXEGGUTOR", "SPECIES_CHANSEY", "SPECIES_MEW",
+						"SPECIES_BLISSEY", "SPECIES_EXEGGUTOR_ALOLAN",
+					}
+				},
+				{
+					"MOVE_ION_DELUGE",
+					new HashSet<string>
+					{
+						"SPECIES_CHINCHOU", "SPECIES_LANTURN", "SPECIES_AMPHAROS", "SPECIES_PACHIRISU",
+						"SPECIES_ELECTIVIRE", "SPECIES_ZEBSTRIKA", "SPECIES_EMOLGA", "SPECIES_EELEKTROSS",
+						"SPECIES_XURKITREE",
+					}
+				},
+				{
+					"MOVE_MAGNITUDE",
+					new HashSet<string>
+					{
+						"SPECIES_SANDSHREW", "SPECIES_SANDSLASH", "SPECIES_DIGLETT", "SPECIES_DUGTRIO",
+						"SPECIES_GEODUDE", "SPECIES_GRAVELER", "SPECIES_GOLEM", "SPECIES_LICKITUNG",
+						"SPECIES_RHYHORN", "SPECIES_DONPHAN", "SPECIES_NOSEPASS", "SPECIES_NUMEL",
+						"SPECIES_CAMERUPT", "SPECIES_BARBOACH", "SPECIES_WHISCASH", "SPECIES_RELICANTH",
+						"SPECIES_TEPIG", "SPECIES_ROGGENROLA", "SPECIES_GOLETT", "SPECIES_GOLURK",
+						"SPECIES_MUDBRAY", "SPECIES_DIGLETT_ALOLAN", "SPECIES_DUGTRIO_ALOLAN",
+					}
+				},
+				{
+					"MOVE_NEEDLE_ARM",
+					new HashSet<string>
+					{
+						"SPECIES_CACNEA", "SPECIES_CACTURNE", "SPECIES_MARACTUS", "SPECIES_QUILLADIN",
+						"SPECIES_CHESNAUGHT",
+					}
+				},
+				{
+					"MOVE_POWDER",
+					new HashSet<string>
+					{
+						"SPECIES_VIVILLON", "SPECIES_CUTIEFLY",
+					}
+				},
+				{
+					"MOVE_POWER_SHIFT",
+					new HashSet<string>
+					{
+						"SPECIES_GENGAR", "SPECIES_ONIX", "SPECIES_MR_MIME", "SPECIES_FLAREON",
+						"SPECIES_UMBREON", "SPECIES_STEELIX", "SPECIES_MANTINE", "SPECIES_BLISSEY",
+						"SPECIES_NOSEPASS", "SPECIES_DUSCLOPS", "SPECIES_RAMPARDOS", "SPECIES_BASTIODON",
+						"SPECIES_VESPIQUEN", "SPECIES_DRIFBLIM", "SPECIES_CHATOT", "SPECIES_GLISCOR",
+						"SPECIES_PORYGON_Z", "SPECIES_PROBOPASS", "SPECIES_DUSKNOIR", "SPECIES_UXIE",
+						"SPECIES_AZELF", "SPECIES_REGIGIGAS", "SPECIES_CRESSELIA", "SPECIES_BRAVIARY_HISUIAN",
+						"SPECIES_THUNDURUS", "SPECIES_THUNDURUS_THERIAN", "SPECIES_AVALUGG_HISUIAN",
+						"SPECIES_SNEASLER", "SPECIES_ENAMORUS", "SPECIES_ENAMORUS_THERIAN",
+					}
+				},
+				{
+					"MOVE_SPIDER_WEB",
+					new HashSet<string>
+					{
+						"SPECIES_SPINARAK", "SPECIES_ARIADOS", "SPECIES_JOLTIK", "SPECIES_GALVANTULA",
+						"SPECIES_DEWPIDER", "SPECIES_ARAQUANID",
+					}
+				},
+				{
+					"MOVE_SPIKE_CANNON",
+					new HashSet<string>
+					{
+						"SPECIES_CLOYSTER", "SPECIES_OMANYTE", "SPECIES_OMASTAR", "SPECIES_CORSOLA",
+						"SPECIES_MAREANIE", "SPECIES_TOXAPEX",
+					}
+				},
+				{
+					"MOVE_TRUMP_CARD",
+					new HashSet<string>
+					{
+						"SPECIES_FARFETCHD", "SPECIES_KANGASKHAN", "SPECIES_EEVEE", "SPECIES_SLOWKING",
+						"SPECIES_DUNSPARCE", "SPECIES_MINUN", "SPECIES_CORPHISH", "SPECIES_SHELLOS",
+						"SPECIES_OSHAWOTT", "SPECIES_MAGEARNA",
+					}
+				},
 				{
 					"MOVE_ALLURING_VOICE",
 					new HashSet<string>

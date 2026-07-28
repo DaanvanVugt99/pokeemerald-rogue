@@ -10,7 +10,7 @@ mode="check" # build | check | ui
 test_to_run_prefix="${TESTS:-}"
 test_suite="${TEST_SUITE:-}"
 check_all_suites=0
-all_suites=(core ai ability moves items forms rogue)
+all_suites=(core ai ability ability_unique moves items forms rogue)
 
 if [ $# -eq 0 ]; then
     check_all_suites=1
@@ -22,7 +22,7 @@ usage() {
     echo "            Recommended full validation: run all split test suites sequentially (default)"
     echo "  --check   Build and run headless tests via 'make check'"
     echo "            Recommended focused validation: --check --suite ability --filter \"Some Test\""
-    echo "  --suite   Compile only one test suite: core, ai, ability, moves, items, forms, rogue"
+    echo "  --suite   Compile only one test suite: core, ai, ability, ability_unique, moves, items, forms, rogue"
     echo "  --filter  Set TESTS prefix filter and compile only matching test files"
     echo "  --build   Legacy: build the monolithic all-in-one pokeemerald-test.elf only"
     echo "            This target may fail near the 32 MiB test ROM linker limit; use --check-all-suites for full validation."

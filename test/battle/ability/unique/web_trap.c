@@ -15,6 +15,24 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
 }
 
+SINGLE_BATTLE_TEST("Web Trap follows Spider Web's Speed drop with another web move")
+{
+    GIVEN {
+        PLAYER(SPECIES_ARIADOS) { Ability(ABILITY_SWARM); UniqueAbility(ABILITY_WEB_TRAP); Moves(MOVE_SPIDER_WEB); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SPIDER_WEB, WITH_RNG(RNG_ROGUE_WEB_TRAP, MOVE_STICKY_WEB)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPIDER_WEB, player);
+        ABILITY_POPUP(player, ABILITY_WEB_TRAP);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, player);
+    } THEN {
+        EXPECT(opponent->status2 & STATUS2_ESCAPE_PREVENTION);
+        EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE - 1);
+        EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_STICKY_WEB);
+    }
+}
+
 SINGLE_BATTLE_TEST("Web Trap uses a random web move after lowering a target's Speed")
 {
     GIVEN {

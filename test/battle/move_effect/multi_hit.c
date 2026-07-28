@@ -6,7 +6,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_BULLET_SEED].effect == EFFECT_MULTI_HIT);
 }
 
-SINGLE_BATTLE_TEST("Spike Cannon is a Steel-type 20 BP multi-hit move")
+SINGLE_BATTLE_TEST("Spike Cannon is a Steel-type 25 BP multi-hit move")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
@@ -17,7 +17,7 @@ SINGLE_BATTLE_TEST("Spike Cannon is a Steel-type 20 BP multi-hit move")
         EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].effect, EFFECT_MULTI_HIT);
         EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].type, TYPE_STEEL);
         EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].split, SPLIT_PHYSICAL);
-        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].power, 20);
+        EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].power, 25);
         EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].accuracy, 100);
         EXPECT_EQ(gBattleMoves[MOVE_SPIKE_CANNON].pp, 15);
     }

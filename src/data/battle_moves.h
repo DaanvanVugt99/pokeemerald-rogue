@@ -2149,14 +2149,14 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_EGG_BOMB] =
     {
         .effect = EFFECT_HIT,
-        .power = 100,
+        .power = 120,
         .type = TYPE_NORMAL,
-        .accuracy = 75,
+        .accuracy = 85,
         .pp = 10,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
-        .split = SPLIT_PHYSICAL,
+        .split = SPLIT_SPECIAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .ballisticMove = TRUE,
     },
@@ -2222,7 +2222,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .type = TYPE_GROUND,
         .accuracy = 85,
         .pp = 20,
-        .secondaryEffectChance = 10,
+        .secondaryEffectChance = 30,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
         .split = SPLIT_PHYSICAL,
@@ -2330,7 +2330,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_SPIKE_CANNON] =
     {
         .effect = EFFECT_MULTI_HIT,
-        .power = 20,
+        .power = 25,
         .type = TYPE_STEEL,
         .accuracy = 100,
         .pp = 15,
@@ -5434,7 +5434,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_NEEDLE_ARM] =
     {
         .effect = EFFECT_FLINCH_HIT,
-        .power = 60,
+        .power = 75,
         .type = TYPE_GRASS,
         .accuracy = 100,
         .pp = 15,

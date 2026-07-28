@@ -505,8 +505,8 @@ static const u8 sSelfDestructDescription[] = _(
     "makes the user faint.");
 
 static const u8 sEggBombDescription[] = _(
-    "An egg is forcibly hurled at\n"
-    "the foe.");
+    "Hurls an explosive egg with\n"
+    "great force. It may miss.");
 
 static const u8 sLickDescription[] = _(
     "Licks with a long tongue to\n"
@@ -697,8 +697,8 @@ static const u8 sThiefDescription[] = _(
     "steal the foe's held item.");
 
 static const u8 sSpiderWebDescription[] = _(
-    "Ensnares the foe to stop it\n"
-    "from fleeing or switching.");
+    "Traps the foe in a web and\n"
+    "lowers its Speed.");
 
 static const u8 sMindReaderDescription[] = _(
     "Senses the foe's action to\n"
