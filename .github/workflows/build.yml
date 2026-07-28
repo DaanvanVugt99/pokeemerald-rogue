@@ -42,6 +42,9 @@ jobs:
         run: |
           ./init_deps.sh
 
+      - name: Check Species Change Report
+        run: make check-species-report
+
       - name: Build Debug
         env:
           COMPARE: 0

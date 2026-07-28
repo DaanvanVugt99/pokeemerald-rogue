@@ -494,6 +494,18 @@ namespace PokemonDataGenerator.Pokedex
 
 			private static readonly Dictionary<string, LevelUpMove[]> s_DivergenceLevelUpMoveLearnsets = new Dictionary<string, LevelUpMove[]>
 			{
+				{
+					"SPECIES_UNOWN",
+					new[]
+					{
+						new LevelUpMove { Move = "MOVE_SECRET_POWER", Level = 12 },
+						new LevelUpMove { Move = "MOVE_ANCIENT_POWER", Level = 20 },
+						new LevelUpMove { Move = "MOVE_COSMIC_POWER", Level = 28 },
+						new LevelUpMove { Move = "MOVE_POWER_GEM", Level = 36 },
+						new LevelUpMove { Move = "MOVE_STORED_POWER", Level = 40 },
+						new LevelUpMove { Move = "MOVE_EARTH_POWER", Level = 48 },
+					}
+				},
 				{ "SPECIES_GRIMMSNARL", new[] { new LevelUpMove { Move = "MOVE_BADDY_BAD", Level = 48 } } },
 				{ "SPECIES_JELLICENT", new[] { new LevelUpMove { Move = "MOVE_BOUNCY_BUBBLE", Level = 48 } } },
 				{ "SPECIES_VIKAVOLT", new[] { new LevelUpMove { Move = "MOVE_BUZZY_BUZZ", Level = 48 } } },
@@ -683,10 +695,60 @@ namespace PokemonDataGenerator.Pokedex
 				}
 			}
 
+			private void UpdateUnownCompetitiveSets()
+			{
+				List<string> sourceTiers = CompetitiveSets
+					.SelectMany(set => set.SourceTiers)
+					.Distinct()
+					.ToList();
+
+				if (!sourceTiers.Any())
+				{
+					sourceTiers.Add("GEN6PU");
+					sourceTiers.Add("GEN7PU");
+				}
+
+				CompetitiveSets.Clear();
+				CompetitiveSets.Add(new PokemonCompetitiveSet
+				{
+					Ability = "ABILITY_LEVITATE",
+					Item = "ITEM_CHOICE_SPECS",
+					Nature = "NATURE_MODEST",
+					HiddenPower = "TYPE_FIGHTING",
+					TeraType = "TYPE_PSYCHIC",
+					Moves = new List<string>
+					{
+						"MOVE_HIDDEN_POWER",
+						"MOVE_EARTH_POWER",
+						"MOVE_POWER_GEM",
+						"MOVE_TERA_BLAST",
+					},
+					SourceTiers = new List<string>(sourceTiers),
+				});
+				CompetitiveSets.Add(new PokemonCompetitiveSet
+				{
+					Ability = "ABILITY_LEVITATE",
+					Item = "ITEM_LEFTOVERS",
+					Nature = "NATURE_TIMID",
+					TeraType = "TYPE_PSYCHIC",
+					Moves = new List<string>
+					{
+						"MOVE_COSMIC_POWER",
+						"MOVE_STORED_POWER",
+						"MOVE_EARTH_POWER",
+						"MOVE_POWER_GEM",
+					},
+					SourceTiers = new List<string>(sourceTiers),
+				});
+			}
+
 			private void ApplyDivergenceAbilityReplacements()
 			{
 				switch (Species)
 				{
+					case "SPECIES_UNOWN":
+						UpdateUnownCompetitiveSets();
+						break;
 					case "SPECIES_GENGAR":
 						ReplaceCompetitiveAbility("ABILITY_CURSED_BODY", "ABILITY_LEVITATE");
 						break;

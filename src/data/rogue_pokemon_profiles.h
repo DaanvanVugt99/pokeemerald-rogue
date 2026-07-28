@@ -57807,6 +57807,12 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_MISDREAV
 static struct LevelUpMove const sLevelUpMoves_SPECIES_UNOWN[] =
 {
 	{ .move=MOVE_HIDDEN_POWER, .level=1 },
+	{ .move=MOVE_SECRET_POWER, .level=12 },
+	{ .move=MOVE_ANCIENT_POWER, .level=20 },
+	{ .move=MOVE_COSMIC_POWER, .level=28 },
+	{ .move=MOVE_POWER_GEM, .level=36 },
+	{ .move=MOVE_STORED_POWER, .level=40 },
+	{ .move=MOVE_EARTH_POWER, .level=48 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -57823,12 +57829,30 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_UNOWN[] 
 		.flags= (0 | MON_FLAGS_GEN6PU | MON_FLAGS_GEN7PU),
 		.heldItem=ITEM_CHOICE_SPECS,
 		.ability=ABILITY_LEVITATE,
-		.hiddenPowerType=TYPE_PSYCHIC,
-		.teraType=TYPE_NONE,
+		.hiddenPowerType=TYPE_FIGHTING,
+		.teraType=TYPE_PSYCHIC,
 		.nature=NATURE_MODEST,
 		.moves=
 		{
 			MOVE_HIDDEN_POWER,
+			MOVE_EARTH_POWER,
+			MOVE_POWER_GEM,
+			MOVE_TERA_BLAST,
+		},
+	},
+	{
+		.flags= (0 | MON_FLAGS_GEN6PU | MON_FLAGS_GEN7PU),
+		.heldItem=ITEM_LEFTOVERS,
+		.ability=ABILITY_LEVITATE,
+		.hiddenPowerType=TYPE_NONE,
+		.teraType=TYPE_PSYCHIC,
+		.nature=NATURE_TIMID,
+		.moves=
+		{
+			MOVE_COSMIC_POWER,
+			MOVE_STORED_POWER,
+			MOVE_EARTH_POWER,
+			MOVE_POWER_GEM,
 		},
 	},
 };

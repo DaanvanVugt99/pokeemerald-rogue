@@ -8,6 +8,9 @@ material retained from the projects it builds upon.
 - [Design notes](design/README.md) describe local planning resources used while
   developing Divergence. These notes support development, but code and tests
   remain the source of truth for implemented behavior.
+- [Species changes](generated/species_changes.md) is generated from the
+  configured game data and tracks base-stat, typing, and normal Ability
+  differences from the pinned canonical upstream baseline.
 - Project-wide setup, release, and change documentation lives at the repository
   root in [README.md](../README.md), [INSTALL.md](../INSTALL.md),
   [VERSIONING.md](../VERSIONING.md), and

@@ -56,6 +56,25 @@ static bool32 IsFirstCompetitiveProfileOwner(u16 species)
     return TRUE;
 }
 
+static bool32 ProfileCanLearnMove(const struct RoguePokemonProfile *profile, u16 move)
+{
+    u32 moveIndex;
+
+    for (moveIndex = 0; profile->levelUpMoves[moveIndex].move != MOVE_NONE; ++moveIndex)
+    {
+        if (profile->levelUpMoves[moveIndex].move == move)
+            return TRUE;
+    }
+
+    for (moveIndex = 0; profile->tutorMoves[moveIndex] != MOVE_NONE; ++moveIndex)
+    {
+        if (profile->tutorMoves[moveIndex] == move)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 TEST("Competitive profile abilities belong to their species form family")
 {
     u32 species;
@@ -115,4 +134,55 @@ TEST("Liquid Voice Politoed competitive sets contain Hyper Voice")
 
         EXPECT(hasHyperVoice);
     }
+}
+
+TEST("Unown forms share their expanded Power profile")
+{
+    static const u16 sExpectedMoves[] =
+    {
+        MOVE_HIDDEN_POWER,
+        MOVE_SECRET_POWER,
+        MOVE_ANCIENT_POWER,
+        MOVE_COSMIC_POWER,
+        MOVE_POWER_GEM,
+        MOVE_STORED_POWER,
+        MOVE_EARTH_POWER,
+    };
+    const struct RoguePokemonProfile *profile = &gRoguePokemonProfiles[SPECIES_UNOWN];
+    const u16 *formSpeciesIdTable = gSpeciesInfo[SPECIES_UNOWN].formSpeciesIdTable;
+    u32 formIndex;
+    u32 moveIndex;
+    u32 setIndex;
+
+    EXPECT_EQ(gSpeciesInfo[SPECIES_UNOWN].baseSpeed, 72);
+
+    for (formIndex = 0; formSpeciesIdTable[formIndex] != FORM_SPECIES_END; ++formIndex)
+    {
+        u16 formSpecies = formSpeciesIdTable[formIndex];
+        const struct RoguePokemonProfile *formProfile = &gRoguePokemonProfiles[formSpecies];
+
+        EXPECT_EQ(gSpeciesInfo[formSpecies].baseSpeed, 72);
+        EXPECT(formProfile->levelUpMoves == profile->levelUpMoves);
+        EXPECT(formProfile->tutorMoves == profile->tutorMoves);
+        EXPECT(formProfile->competitiveSets == profile->competitiveSets);
+    }
+
+    for (moveIndex = 0; moveIndex < ARRAY_COUNT(sExpectedMoves); ++moveIndex)
+        EXPECT(ProfileCanLearnMove(profile, sExpectedMoves[moveIndex]));
+
+    EXPECT_EQ(profile->competitiveSetCount, 2);
+    for (setIndex = 0; setIndex < profile->competitiveSetCount; ++setIndex)
+    {
+        for (moveIndex = 0; moveIndex < MAX_MON_MOVES; ++moveIndex)
+        {
+            EXPECT_NE(profile->competitiveSets[setIndex].moves[moveIndex], MOVE_NONE);
+            EXPECT(ProfileCanLearnMove(profile, profile->competitiveSets[setIndex].moves[moveIndex]));
+        }
+    }
+}
+
+TEST("Mega Starmie keeps its Huge Power adjusted Attack")
+{
+    EXPECT_EQ(gSpeciesInfo[SPECIES_STARMIE_MEGA].baseAttack, 100);
+    EXPECT_EQ(gSpeciesInfo[SPECIES_STARMIE_MEGA].abilities[0], ABILITY_HUGE_POWER);
 }

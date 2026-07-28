@@ -113,7 +113,9 @@
     [SPECIES_STARMIE_MEGA] =
     {
         .baseHP        = 60,
-        .baseAttack    = 140,
+        // Legends: Z-A raises this to 140 because that game has no Abilities.
+        // Retain the original value here because this form has Huge Power.
+        .baseAttack    = 100,
         .baseDefense   = 105,
         .baseSpeed     = 120,
         .baseSpAttack  = 130,

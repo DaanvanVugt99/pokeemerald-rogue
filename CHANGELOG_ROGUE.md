@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added a generated species-change report tracking base stats, typing, and
+  normal Abilities against a pinned canonical upstream snapshot, with
+  regeneration and CI freshness checks.
 - Distributed the thirteen Partner Pikachu and Partner Eevee moves across
   thematically matched late level-up and tutor learnsets, while keeping Pika
   Papow and Veevee Volley exclusive to their mascot families. Their powerful
@@ -49,6 +52,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Restored Mega Starmie's base Attack to 100 because its 140 Attack in
+  Legends: Z-A compensates for that game's lack of its Huge Power Ability.
+- Raised Unown's Speed to 72 and expanded its shared learnset with six
+  thematically linked Power moves, backed by coherent offensive and Cosmic
+  Power competitive profiles.
 - Consolidated Furfrou wild generation through Natural Form so its trim
   typings no longer overrepresent the family, and added rare cosplay and cap
   Pikachu rolls while preserving ordinary, evolvable Pikachu two thirds of
