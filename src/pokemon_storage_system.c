@@ -5360,7 +5360,7 @@ static bool8 IsSpeciesOutsideSelectedPokedex(u16 species)
 {
     return species != SPECIES_NONE
         && species != SPECIES_EGG
-        && !RoguePokedex_IsSpeciesEnabled(species);
+        && !RoguePokedex_IsSpeciesEnabledForDisplay(species);
 }
 
 static struct Sprite *CreateMonIconSprite(u16 species, u32 personality, u8 gender, s16 x, s16 y, u8 oamPriority, u8 subpriority)

@@ -12,6 +12,7 @@
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
 #include "rogue_settings.h"
+#include "string_util.h"
 #include "test/test.h"
 
 static const u8 sTrainerConfigToggles[] =
@@ -80,6 +81,33 @@ TEST("Sacred Ash can restore the full party after battle losses")
     EXPECT_EQ(gPlayerPartyCount, 2);
 
     EXPECT(!Rogue_BufferSacredAshRecovery());
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
+    ClearRecoveryTestState();
+}
+
+TEST("Sacred Ash recovery identifies every lost Pokemon by nickname")
+{
+    static const u8 sFirstNickname[] = _("Petal");
+    static const u8 sSecondNickname[] = _("Ember");
+    static const u8 sExpectedLosses[] = _("Petal, Ember");
+    static const u8 sExpectedCount[] = _("2");
+    bool8 releaseFaintedMons = Rogue_GetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS);
+    u32 hp = 0;
+
+    ClearRecoveryTestState();
+    CreateRecoveryTestParty();
+    SetMonData(&gPlayerParty[0], MON_DATA_NICKNAME, sFirstNickname);
+    SetMonData(&gPlayerParty[1], MON_DATA_NICKNAME, sSecondNickname);
+    SetMonData(&gPlayerParty[1], MON_DATA_HP, &hp);
+    AddBagItem(ITEM_SACRED_ASH, 1);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, TRUE);
+    RogueDebug_SetSacredAshRecoveryPending(TRUE);
+
+    EXPECT(Rogue_BufferSacredAshRecovery());
+    EXPECT_EQ(StringCompare(gStringVar2, sExpectedLosses), 0);
+    EXPECT_EQ(StringCompare(gStringVar3, sExpectedCount), 0);
+
+    Rogue_DeclineSacredAshRecovery();
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
     ClearRecoveryTestState();
 }

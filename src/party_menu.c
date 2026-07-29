@@ -1454,7 +1454,7 @@ static bool8 IsPartyMonOutsideSelectedPokedex(u8 slot)
         return FALSE;
 
     species = GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES);
-    return species != SPECIES_NONE && !RoguePokedex_IsSpeciesEnabled(species);
+    return species != SPECIES_NONE && !RoguePokedex_IsSpeciesEnabledForDisplay(species);
 }
 
 static void UpdatePokedexLegalityMessage(u8 slot)

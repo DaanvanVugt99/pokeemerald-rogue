@@ -888,7 +888,7 @@ script Rogue_EventScript_AttemptSacredAshRecoveryInternal
 script Rogue_EventScript_SacredAshRecoveryPrompt
 {
     bufferitemname(STR_VAR_1, ITEM_SACRED_ASH)
-    msgbox(format("Your party suffered losses in battle.\pWould you like to use the {STR_VAR_1} to restore your party?"), MSGBOX_YESNO)
+    msgbox(format("Lost Pokémon ({STR_VAR_3}):\n{STR_VAR_2}\pUse the {STR_VAR_1} to restore them?"), MSGBOX_YESNO)
 
     if(var(VAR_RESULT) == YES)
     {

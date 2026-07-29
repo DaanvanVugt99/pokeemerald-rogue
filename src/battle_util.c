@@ -116,6 +116,7 @@ static bool32 TryUseSpaceRiftCalledMove(u32 battler);
 bool32 TryUseDarkDimensionCalledMove(u32 battler);
 static bool32 TryUseShellWorkCalledMove(u32 battler);
 static bool32 TryUseTrashHeapCalledMove(u32 battler, u32 target);
+static bool32 TryUseStarmobileCalledMove(u32 battler, u32 target);
 static bool32 TryUseCausticBloomCalledMove(u32 battler, u32 target);
 static bool32 TryUseOddSignalCalledMove(u32 battler);
 static bool32 TryUseIceFloeCalledMove(u32 battler, u32 target);
@@ -171,6 +172,28 @@ extern const u8 *const gBattlescriptsForSafariActions[];
 
 u8 gIonizeDmgByBattler[MAX_BATTLERS_COUNT];
 u8 gHeartbreakDmgByBattler[MAX_BATTLERS_COUNT];
+
+static u16 RandomFollowUpMoveExcept(enum RandomTag tag, const u16 *moves, u32 moveCount, u16 excludedMove)
+{
+    u16 eligibleMoves[moveCount];
+    u32 eligibleCount = 0;
+    u32 i;
+
+    for (i = 0; i < moveCount; i++)
+    {
+        if (moves[i] != excludedMove)
+            eligibleMoves[eligibleCount++] = moves[i];
+    }
+
+    if (eligibleCount == 0)
+        return *(const u16 *)RandomElementArray(tag, moves, sizeof(moves[0]), moveCount);
+
+    return *(const u16 *)RandomElementArray(tag, eligibleMoves, sizeof(eligibleMoves[0]), eligibleCount);
+}
+
+#define RandomFollowUpMove(tag, moves, battler) \
+    RandomFollowUpMoveExcept(tag, moves, ARRAY_COUNT(moves), \
+                             gProtectStructs[battler].extraMoveUsed ? MOVE_NONE : gCurrentMove)
 
 static u32 GetMeloettaVerseState(u32 battler)
 {
@@ -6275,7 +6298,7 @@ static bool32 TryUseDreamSequenceCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_DREAM_SEQUENCE, sDreamSequenceMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_DREAM_SEQUENCE, sDreamSequenceMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -6323,7 +6346,7 @@ static bool32 TryUseDistortionCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_DISTORTION, sDistortionMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_DISTORTION, sDistortionMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount
@@ -6368,7 +6391,7 @@ static bool32 TryUseVicejawCalledMove(u32 battler, u32 target)
      || !CanUseExtraMove(battler, target))
         return FALSE;
 
-    move = RandomElement(RNG_ROGUE_VICEJAW, sVicejawMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_VICEJAW, sVicejawMoves, battler);
 
     SetBattlerTriggeredAbility(battler, ABILITY_VICEJAW);
     SetAtkCancellerForCalledMove();
@@ -6402,7 +6425,7 @@ static bool32 TryUseAcidRefluxCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_ACID_REFLUX, sAcidRefluxMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_ACID_REFLUX, sAcidRefluxMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -6452,7 +6475,7 @@ static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target)
      || !CanUseExtraMove(battler, target))
         return FALSE;
 
-    move = RandomElement(RNG_ROGUE_WEB_TRAP, sWebTrapMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_WEB_TRAP, sWebTrapMoves, battler);
 
     SetBattlerTriggeredAbility(battler, ABILITY_WEB_TRAP);
     SetAtkCancellerForCalledMove();
@@ -7090,6 +7113,17 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
         if (TryActivateCounterstep(battler, source, target))
             return TRUE;
     }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_STARMOBILE)
+    {
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (IsBattlerAlive(battler)
+         && HasBattlerAbility(battler, ABILITY_STARMOBILE)
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && TryUseStarmobileCalledMove(battler, target))
+            return TRUE;
+    }
 
     return FALSE;
 }
@@ -7173,7 +7207,7 @@ static bool32 TryUseDeliveryBagCalledMove(u32 battler)
      || (gBattleMons[battler].status1 & (STATUS1_SLEEP | STATUS1_FREEZE)))
         return FALSE;
 
-    move = RandomElement(RNG_ROGUE_DELIVERY_BAG, sDeliveryBagMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_DELIVERY_BAG, sDeliveryBagMoves, battler);
 
     if (move == MOVE_RECYCLE || move == MOVE_HAPPY_HOUR)
     {
@@ -7268,7 +7302,7 @@ static bool32 TryUseWishmakerCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_WISHMAKER, sWishmakerMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_WISHMAKER, sWishmakerMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7316,7 +7350,7 @@ static bool32 TryUseBloomBurstCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_BLOOM_BURST, sBloomBurstMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_BLOOM_BURST, sBloomBurstMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7367,7 +7401,7 @@ static bool32 TryUseDebugCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_DEBUG, sDebugMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_DEBUG, sDebugMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7414,7 +7448,7 @@ static bool32 TryUseTimeRiftCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_TIME_RIFT, sTimeRiftMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_TIME_RIFT, sTimeRiftMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7464,7 +7498,7 @@ static bool32 TryUseSpaceRiftCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_SPACE_RIFT, sSpaceRiftMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_SPACE_RIFT, sSpaceRiftMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7512,7 +7546,7 @@ bool32 TryUseDarkDimensionCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_DARK_DIMENSION, sDarkDimensionMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_DARK_DIMENSION, sDarkDimensionMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7556,7 +7590,7 @@ static bool32 TryUseShellWorkCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_SHELL_WORK, sShellWorkMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_SHELL_WORK, sShellWorkMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7603,7 +7637,7 @@ static bool32 TryUseTrashHeapCalledMove(u32 battler, u32 target)
 {
     u16 move;
 
-    move = RandomElement(RNG_ROGUE_TRASH_HEAP, sTrashHeapMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_TRASH_HEAP, sTrashHeapMoves, battler);
     if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
     {
         target = battler;
@@ -7679,7 +7713,7 @@ static bool32 TryUseStarmobileCalledMove(u32 battler, u32 target)
     if (!CanUseExtraMove(battler, target))
         return FALSE;
 
-    move = RandomElement(RNG_ROGUE_STARMOBILE, sStarmobileMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_STARMOBILE, sStarmobileMoves, battler);
     SetBattlerTriggeredAbility(battler, ABILITY_STARMOBILE);
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = battler;
@@ -7712,7 +7746,7 @@ static bool32 TryUseGalaricaRoundsCalledMove(u32 battler, u32 target)
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
-    gCalledMove = RandomElement(RNG_ROGUE_GALARICA_ROUNDS, sGalaricaRoundMoves);
+    gCalledMove = RandomFollowUpMove(RNG_ROGUE_GALARICA_ROUNDS, sGalaricaRoundMoves, battler);
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
@@ -7720,27 +7754,21 @@ static bool32 TryUseGalaricaRoundsCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
+static const u16 sOddSignalMoves[] =
+{
+    MOVE_TRICK_ROOM,
+    MOVE_WONDER_ROOM,
+    MOVE_MAGIC_ROOM,
+};
+
 static bool32 TryUseOddSignalCalledMove(u32 battler)
 {
     u16 move;
 
-    switch (RandomUniform(RNG_ROGUE_ODD_SIGNAL, 0, 2))
-    {
-    default:
-    case 0:
-        move = MOVE_TRICK_ROOM;
-        break;
-    case 1:
-        move = MOVE_WONDER_ROOM;
-        break;
-    case 2:
-        move = MOVE_MAGIC_ROOM;
-        break;
-    }
-
     if (!CanUseSelfExtraMove(battler))
         return FALSE;
 
+    move = RandomFollowUpMove(RNG_ROGUE_ODD_SIGNAL, sOddSignalMoves, battler);
     SetBattlerTriggeredAbility(battler, ABILITY_ODD_SIGNAL);
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
@@ -7764,7 +7792,7 @@ static bool32 TryUseIceFloeCalledMove(u32 battler, u32 target)
 {
     u16 move;
 
-    move = RandomElement(RNG_ROGUE_ICE_FLOE, sIceFloeMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_ICE_FLOE, sIceFloeMoves, battler);
     if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
     {
         target = battler;
@@ -7813,7 +7841,7 @@ static bool32 TryUseBrambleGuardCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_BRAMBLE_GUARD, sBrambleGuardMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_BRAMBLE_GUARD, sBrambleGuardMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7863,7 +7891,7 @@ static bool32 TryUseSpellbookCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_SPELLBOOK, sSpellbookMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_SPELLBOOK, sSpellbookMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7914,7 +7942,7 @@ static bool32 TryUseNinjaToolsCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_NINJA_TOOLS, sNinjaToolsMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_NINJA_TOOLS, sNinjaToolsMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -7961,7 +7989,7 @@ static bool32 TryUseWorkCrewCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_WORK_CREW, sWorkCrewMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_WORK_CREW, sWorkCrewMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -8006,7 +8034,7 @@ static bool32 TryUseBasaltShellCalledMove(u32 battler, u32 target)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_BASALT_SHELL, sBasaltShellMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_BASALT_SHELL, sBasaltShellMoves, battler);
 
     if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
     {
@@ -8046,7 +8074,7 @@ static bool32 TryUseBalloonBurstCalledMove(u32 battler, u32 target)
 {
     u16 move;
 
-    move = RandomElement(RNG_ROGUE_BALLOON_BURST, sBalloonBurstMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_BALLOON_BURST, sBalloonBurstMoves, battler);
     if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
     {
         target = battler;
@@ -8094,7 +8122,7 @@ static bool32 TryUseKeyringCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_KEYRING, sKeyringMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_KEYRING, sKeyringMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount || !IsBattlerAlive(target))
@@ -8151,7 +8179,7 @@ static bool32 TryUseWreckageCalledMove(u32 battler, u32 target)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_WRECKAGE, sWreckageMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_WRECKAGE, sWreckageMoves, battler);
 
     if (target >= gBattlersCount
      || !IsBattlerAlive(target)
@@ -8228,7 +8256,7 @@ static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_BAG_OF_TRICKS, sBagOfTricksMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_BAG_OF_TRICKS, sBagOfTricksMoves, battler);
 
     if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
     {
@@ -8277,7 +8305,7 @@ static bool32 TryUseOctolockCalledMove(u32 battler, u32 target)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_OCTOLOCK, sOctolockMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_OCTOLOCK, sOctolockMoves, battler);
 
     if (GetBattlerMoveTargetType(battler, move) == MOVE_TARGET_USER)
     {
@@ -8326,7 +8354,7 @@ static bool32 TryUseTeaServiceCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_TEA_SERVICE, sTeaServiceMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_TEA_SERVICE, sTeaServiceMoves, battler);
 
     if (GetBattlerMoveTargetType(battler, move) & MOVE_TARGET_USER)
     {
@@ -8376,7 +8404,7 @@ static bool32 TryUseFormationCalledMove(u32 battler)
     u16 move;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_FORMATION, sFormationMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_FORMATION, sFormationMoves, battler);
 
     if (GetBattlerMoveTargetType(battler, move) & MOVE_TARGET_USER)
     {
@@ -8648,7 +8676,7 @@ static bool32 TryUseCapsaicinCrazeCalledMove(u32 battler, u32 target)
     SetAtkCancellerForCalledMove();
     gBattlerAttacker = gBattlerAbility = battler;
     gBattlerTarget = target;
-    gCalledMove = RandomElement(RNG_ROGUE_CAPSAICIN_CRAZE, sCapsaicinCrazeMoves);
+    gCalledMove = RandomFollowUpMove(RNG_ROGUE_CAPSAICIN_CRAZE, sCapsaicinCrazeMoves, battler);
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
@@ -8731,7 +8759,7 @@ static bool32 TryUseVarietyActCalledMove(u32 battler)
         return FALSE;
 
     gBattlerAttacker = battler;
-    move = RandomElement(RNG_ROGUE_VARIETY_ACT, sVarietyActMoves);
+    move = RandomFollowUpMove(RNG_ROGUE_VARIETY_ACT, sVarietyActMoves, battler);
     target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
 
     if (target >= gBattlersCount
@@ -14640,10 +14668,11 @@ if (triggeringAbility != ABILITY_NONE)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
          && HadMoreThanHalfHpNowHasLess(battler)
          && IsFinalMultiHitStrike()
-         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
-         && TryUseStarmobileCalledMove(battler, moveEndAttacker))
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
         {
-            effect++;
+            // Resolve after delayed effects belonging to the triggering move,
+            // such as Knock Off, have finished with their original battlers.
+            QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_STARMOBILE, battler, moveEndAttacker, moveEndAttacker);
         }
 
         if (HasBattlerAbility(battler, ABILITY_ICE_FLOE)
@@ -18673,7 +18702,12 @@ if (triggeringAbility != ABILITY_NONE)
             SetBattlerTriggeredAbility(battler, ABILITY_SCREEN_TEST);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
-            gCalledMove = RandomWeighted(RNG_ROGUE_SCREEN_TEST, 1, 1) == 0 ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
+            if (move == MOVE_REFLECT)
+                gCalledMove = MOVE_LIGHT_SCREEN;
+            else if (move == MOVE_LIGHT_SCREEN)
+                gCalledMove = MOVE_REFLECT;
+            else
+                gCalledMove = RandomWeighted(RNG_ROGUE_SCREEN_TEST, 1, 1) == 0 ? MOVE_REFLECT : MOVE_LIGHT_SCREEN;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;

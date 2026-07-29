@@ -4405,6 +4405,11 @@ bool8 RoguePokedex_IsSpeciesEnabled(u16 species)
     return IsSpeciesEnabledForVariant(species, RoguePokedex_GetDexVariant());
 }
 
+bool8 RoguePokedex_IsSpeciesEnabledForDisplay(u16 species)
+{
+    return RoguePokedex_IsSpeciesEnabled(RoguePokedex_RedirectSpeciesGetSetFlag(species));
+}
+
 bool8 RoguePokedex_IsBaseSpeciesEnabled(u16 species)
 {
     if(species == SPECIES_NONE)

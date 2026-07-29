@@ -136,7 +136,7 @@ script Rogue_BattleDefeated_GiveSelectedMon
     bufferspeciesname(STR_VAR_1, VAR_TEMP_0)
 
     playfanfare(MUS_OBTAIN_ITEM)
-    message(format("{PLAYER} obtained a {STR_VAR_1}."))
+    message(format("{PLAYER} received {STR_VAR_1}\nfrom the Frontier Brain!"))
     waitmessage
     waitfanfare
 

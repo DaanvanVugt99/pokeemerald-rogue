@@ -100,3 +100,31 @@ SINGLE_BATTLE_TEST("Keyring chooses from every key trick")
         EXPECT_EQ(gCalledMove, expectedMoves[gBattleTestRunnerState->runTrial]);
     }
 }
+
+SINGLE_BATTLE_TEST("Keyring does not repeat the status move that triggered it")
+{
+    static const u16 expectedMoves[] =
+    {
+        MOVE_DISABLE,
+        MOVE_TORMENT,
+        MOVE_ENCORE,
+        MOVE_MAGIC_ROOM,
+        MOVE_REFLECT,
+        MOVE_METAL_SOUND,
+        MOVE_LOCK_ON,
+        MOVE_SPIKES,
+    };
+
+    PASSES_RANDOMLY(ARRAY_COUNT(expectedMoves), ARRAY_COUNT(expectedMoves), RNG_ROGUE_KEYRING);
+
+    GIVEN {
+        PLAYER(SPECIES_KLEFKI) { Speed(1); Ability(ABILITY_MAGIC_GUARD); UniqueAbility(ABILITY_KEYRING); Moves(MOVE_LIGHT_SCREEN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_LIGHT_SCREEN); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_KEYRING);
+    } THEN {
+        EXPECT_EQ(gCalledMove, expectedMoves[gBattleTestRunnerState->runTrial]);
+    }
+}

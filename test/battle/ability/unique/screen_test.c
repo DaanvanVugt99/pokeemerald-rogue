@@ -46,6 +46,29 @@ SINGLE_BATTLE_TEST("Screen Test uses Light Screen after the first status move wh
     }
 }
 
+SINGLE_BATTLE_TEST("Screen Test always chooses the other screen when triggered by Reflect or Light Screen")
+{
+    u16 triggerMove;
+    u16 calledMove;
+
+    PARAMETRIZE { triggerMove = MOVE_REFLECT; calledMove = MOVE_LIGHT_SCREEN; }
+    PARAMETRIZE { triggerMove = MOVE_LIGHT_SCREEN; calledMove = MOVE_REFLECT; }
+
+    GIVEN {
+        PLAYER(SPECIES_ESPURR) { Ability(ABILITY_KEEN_EYE); Moves(triggerMove); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, triggerMove); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, triggerMove, player);
+        ABILITY_POPUP(player, ABILITY_SCREEN_TEST);
+        ANIMATION(ANIM_TYPE_MOVE, calledMove, player);
+    } THEN {
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_REFLECT);
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_LIGHTSCREEN);
+    }
+}
+
 SINGLE_BATTLE_TEST("Screen Test only triggers once per switch-in")
 {
     GIVEN {

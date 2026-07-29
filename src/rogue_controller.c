@@ -8546,13 +8546,51 @@ static void DeferFaintedReleaseForSacredAsh(void)
         RemoveAnyFaintedMons(FALSE);
 }
 
+static u8 BufferSacredAshLosses(void)
+{
+    u8 nickname[POKEMON_NAME_LENGTH + 1];
+    u8 lossCount = 0;
+    u8 i;
+
+    gStringVar2[0] = EOS;
+
+    for(i = 0; i < PARTY_SIZE; ++i)
+    {
+        if(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE
+        || GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0)
+            continue;
+
+        if(lossCount != 0)
+        {
+            // Keep two nicknames on each line. Further lines scroll so every
+            // loss remains visible in the standard two-line field message box.
+            if((lossCount % 2) == 0)
+                StringAppend(gStringVar2, gText_LineBreak);
+            else
+                StringAppend(gStringVar2, gText_CommaSpace);
+        }
+
+        GetMonData(&gPlayerParty[i], MON_DATA_NICKNAME, nickname);
+        StringAppend(gStringVar2, nickname);
+        lossCount++;
+    }
+
+    ConvertIntToDecimalStringN(gStringVar3, lossCount, STR_CONV_MODE_LEFT_ALIGN, 1);
+    return lossCount;
+}
+
 u16 Rogue_BufferSacredAshRecovery(void)
 {
-    // This value is returned directly because the event command `specialvar`
-    // writes the special function's return value into its destination var.
-    return sSacredAshRecoveryPending
+    bool8 canRecover = sSacredAshRecoveryPending
         && CheckBagHasItem(ITEM_SACRED_ASH, 1)
         && PlayerPartyHasFaintedMon();
+
+    // This value is returned directly because the event command `specialvar`
+    // writes the special function's return value into its destination var.
+    if(canRecover)
+        BufferSacredAshLosses();
+
+    return canRecover;
 }
 
 bool8 Rogue_HasPendingSacredAshRecovery(void)

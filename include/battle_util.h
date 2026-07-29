@@ -186,6 +186,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_PREMONITION,
     PENDING_UNIQUE_EFFECT_BITTER_RUSE,
     PENDING_UNIQUE_EFFECT_COUNTERSTEP,
+    PENDING_UNIQUE_EFFECT_STARMOBILE,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);

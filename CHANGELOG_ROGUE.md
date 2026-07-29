@@ -55,6 +55,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworded Frontier Brain Pokémon rewards as gifts from the Frontier Brain
+  instead of using generic item copy.
 - Focused older Pokémon stat buffs around their Divergence roles: Arbok and
   Parasect gained 20 HP, Wigglytuff gained 20 Defense and 15 Sp. Def, Dewgong
   gained 20 Defense, and Hypno's Sp. Atk rose from 73 to 95.
@@ -154,6 +156,16 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented Starmobile's retaliatory Torque move from redirecting a triggering
+  Knock Off's delayed item removal onto the original attacker.
+- Listed the number and nicknames of lost party members in the Sacred Ash
+  recovery prompt so the revival choice can be made with full context.
+- Prevented random Unique Ability follow-up moves from repeating the move that
+  triggered them when another pool option is available; Screen Test now always
+  pairs Reflect with Light Screen and vice versa.
+- Made party and storage Pokédex legality indicators resolve temporary and
+  consolidated forms through their shared Pokédex entry, including Wobbuffet's
+  Punching form.
 - Made generated Liquid Voice Politoed sets use Hyper Voice and limited
   Telepathy to Indeedee's doubles-oriented competitive sets.
 - Updated competitive profiles for Divergence-specific Ability replacements
