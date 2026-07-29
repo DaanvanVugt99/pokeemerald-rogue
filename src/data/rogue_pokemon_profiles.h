@@ -49295,17 +49295,17 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_LEDIAN[]
 {
 	{
 		.flags= (0 | MON_FLAGS_GEN6PU),
-		.heldItem=ITEM_LIGHT_CLAY,
+		.heldItem=ITEM_HEAVY_DUTY_BOOTS,
 		.ability=ABILITY_EARLY_BIRD,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_JOLLY,
 		.moves=
 		{
-			MOVE_REFLECT,
-			MOVE_LIGHT_SCREEN,
-			MOVE_ENCORE,
+			MOVE_ROOST,
 			MOVE_U_TURN,
+			MOVE_DRAIN_PUNCH,
+			MOVE_KNOCK_OFF,
 		},
 	},
 	{
@@ -49317,10 +49317,10 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_LEDIAN[]
 		.nature=NATURE_JOLLY,
 		.moves=
 		{
+			MOVE_ROOST,
 			MOVE_POWER_UP_PUNCH,
 			MOVE_DRAIN_PUNCH,
 			MOVE_ICE_PUNCH,
-			MOVE_THUNDER_PUNCH,
 		},
 	},
 };
@@ -55139,17 +55139,17 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_SUNFLORA
 	},
 	{
 		.flags= (0 | MON_FLAGS_GEN9ZU),
-		.heldItem=ITEM_ASSAULT_VEST,
-		.ability=ABILITY_EARLY_BIRD,
+		.heldItem=ITEM_LIFE_ORB,
+		.ability=ABILITY_CHLOROPHYLL,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
-		.nature=NATURE_MODEST,
+		.nature=NATURE_TIMID,
 		.moves=
 		{
+			MOVE_SOLAR_BEAM,
 			MOVE_EARTH_POWER,
-			MOVE_DAZZLING_GLEAM,
+			MOVE_WEATHER_BALL,
 			MOVE_SLUDGE_BOMB,
-			MOVE_GIGA_DRAIN,
 		},
 	},
 };

@@ -581,7 +581,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
     [SPECIES_WATCHOG] =
     {
         .baseHP        = 60,
-        .baseAttack    = 85,
+        .baseAttack    = 95,
         .baseDefense   = 69,
         .baseSpeed     = 77,
         .baseSpAttack  = 60,
@@ -3474,7 +3474,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
 #if P_FAMILY_MARACTUS
     [SPECIES_MARACTUS] =
     {
-        .baseHP        = 75,
+        .baseHP        = 90,
         .baseAttack    = 86,
         .baseDefense   = 67,
         .baseSpeed     = 60,
@@ -5283,7 +5283,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         .baseAttack    = 75,
         .baseDefense   = 60,
         .baseSpeed     = 103,
-        .baseSpAttack  = 75,
+        .baseSpAttack  = 85,
         .baseSpDefense = 60,
         .types = { TYPE_ELECTRIC, TYPE_FLYING },
         .catchRate = 200,
@@ -6228,7 +6228,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
 
     [SPECIES_BEHEEYEM] =
     {
-        .baseHP        = 75,
+        .baseHP        = 85,
         .baseAttack    = 75,
         .baseDefense   = 75,
         .baseSpeed     = 40,
@@ -7611,7 +7611,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         .baseHP        = 85,
         .baseAttack    = 97,
         .baseDefense   = 66,
-        .baseSpeed     = 65,
+        .baseSpeed     = 80,
         .baseSpAttack  = 105,
         .baseSpDefense = 66,
         .types = { TYPE_FIRE, TYPE_FIRE },

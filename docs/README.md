@@ -10,7 +10,9 @@ material retained from the projects it builds upon.
   remain the source of truth for implemented behavior.
 - [Species changes](generated/species_changes.md) is generated from the
   configured game data and tracks base-stat, typing, and normal Ability
-  differences from the pinned canonical upstream baseline.
+  differences from the pinned canonical upstream baseline. The same generator
+  supplies the compact stat-buff flags incorporated into the species bake and
+  used for `+` markers in the Pokédex.
 - Project-wide setup, release, and change documentation lives at the repository
   root in [README.md](../README.md), [INSTALL.md](../INSTALL.md),
   [VERSIONING.md](../VERSIONING.md), and

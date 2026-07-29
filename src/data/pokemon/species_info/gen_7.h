@@ -676,7 +676,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
 
     [SPECIES_GUMSHOOS] =
     {
-        .baseHP        = 88,
+        .baseHP        = 100,
         .baseAttack    = 110,
         .baseDefense   = 60,
         .baseSpeed     = 45,
@@ -1896,7 +1896,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
 
     [SPECIES_SHIINOTIC] =
     {
-        .baseHP        = 60,
+        .baseHP        = 75,
         .baseAttack    = 45,
         .baseDefense   = 80,
         .baseSpeed     = 30,
@@ -2903,7 +2903,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
     {
         .baseHP        = 65,
         .baseAttack    = 115,
-        .baseDefense   = 65,
+        .baseDefense   = 80,
         .baseSpeed     = 65,
         .baseSpAttack  = 75,
         .baseSpDefense = 95,
@@ -2950,7 +2950,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
 #if P_FAMILY_TURTONATOR
     [SPECIES_TURTONATOR] =
     {
-        .baseHP        = 60,
+        .baseHP        = 70,
         .baseAttack    = 78,
         .baseDefense   = 135,
         .baseSpeed     = 36,
@@ -3000,7 +3000,7 @@ const struct SpeciesInfo gSpeciesInfoGen7[] =
 #if P_FAMILY_TOGEDEMARU
     [SPECIES_TOGEDEMARU] =
     {
-        .baseHP        = 65,
+        .baseHP        = 75,
         .baseAttack    = 98,
         .baseDefense   = 63,
         .baseSpeed     = 96,

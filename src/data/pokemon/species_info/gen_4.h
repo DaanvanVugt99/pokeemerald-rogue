@@ -768,7 +768,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         .baseAttack    = 85,
         .baseDefense   = 51,
         .baseSpeed     = 65,
-        .baseSpAttack  = 55,
+        .baseSpAttack  = 85,
         .baseSpDefense = 51,
         .types = { TYPE_BUG, TYPE_BUG },
         .catchRate = 45,
@@ -1284,7 +1284,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     [SPECIES_WORMADAM_PLANT_CLOAK] =
     {
         WORMADAM_MISC_INFO,
-        .baseHP        = 60,
+        .baseHP        = 80,
         .baseAttack    = 59,
         .baseDefense   = 85,
         .baseSpeed     = 36,
@@ -1308,7 +1308,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     [SPECIES_WORMADAM_SANDY_CLOAK] =
     {
         WORMADAM_MISC_INFO,
-        .baseHP        = 60,
+        .baseHP        = 80,
         .baseAttack    = 79,
         .baseDefense   = 105,
         .baseSpeed     = 36,
@@ -1332,7 +1332,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     [SPECIES_WORMADAM_TRASH_CLOAK] =
     {
         WORMADAM_MISC_INFO,
-        .baseHP        = 60,
+        .baseHP        = 80,
         .baseAttack    = 69,
         .baseDefense   = 95,
         .baseSpeed     = 36,
@@ -1359,7 +1359,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
         .baseHP        = 70,
         .baseAttack    = 94,
         .baseDefense   = 50,
-        .baseSpeed     = 66,
+        .baseSpeed     = 86,
         .baseSpAttack  = 94,
         .baseSpDefense = 50,
         .types = { TYPE_BUG, TYPE_FLYING },
@@ -3189,7 +3189,7 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
 #if P_FAMILY_CARNIVINE
     [SPECIES_CARNIVINE] =
     {
-        .baseHP        = 74,
+        .baseHP        = 94,
         .baseAttack    = 100,
         .baseDefense   = 72,
         .baseSpeed     = 46,
@@ -3290,10 +3290,10 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     [SPECIES_LUMINEON] =
     {
         .baseHP        = 69,
-        .baseAttack    = 69,
+        .baseAttack    = 89,
         .baseDefense   = 76,
         .baseSpeed     = 91,
-        .baseSpAttack  = 69,
+        .baseSpAttack  = 89,
         .baseSpDefense = 86,
         .types = { TYPE_WATER, TYPE_WATER },
         .catchRate = 75,

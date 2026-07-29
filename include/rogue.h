@@ -716,7 +716,8 @@ struct RogueSpeciesBakedData
     u32 unused1 : 3;
 
     u32 evolutionCount : 8;
-    u32 unused2 : 24;
+    u32 statBuffFlags : 6;
+    u32 unused2 : 18;
 };
 
 struct RogueFollowMonGraphicsInfo

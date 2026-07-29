@@ -1045,7 +1045,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .baseAttack    = 58,
         .baseDefense   = 58,
         .baseSpeed     = 90,
-        .baseSpAttack  = 87,
+        .baseSpAttack  = 100,
         .baseSpDefense = 92,
         .types = { TYPE_DARK, TYPE_DARK },
         .catchRate = 127,
@@ -1138,7 +1138,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
 
     [SPECIES_ELDEGOSS] =
     {
-        .baseHP        = 60,
+        .baseHP        = 75,
         .baseAttack    = 50,
         .baseDefense   = 90,
         .baseSpeed     = 60,
@@ -1235,7 +1235,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
 
     [SPECIES_DUBWOOL] =
     {
-        .baseHP        = 72,
+        .baseHP        = 80,
         .baseAttack    = 80,
         .baseDefense   = 100,
         .baseSpeed     = 88,
@@ -2685,7 +2685,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .baseDefense   = 90,
         .baseSpeed     = 42,
         .baseSpAttack  = 70,
-        .baseSpDefense = 80,
+        .baseSpDefense = 90,
         .types = { TYPE_FIGHTING, TYPE_FIGHTING },
         .catchRate = 45,
         .expYield = 168,
@@ -3618,7 +3618,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .baseDefense   = 135,
         .baseSpeed     = 70,
         .baseSpAttack  = 20,
-        .baseSpDefense = 20,
+        .baseSpDefense = 45,
         .types = { TYPE_ROCK, TYPE_ROCK },
         .catchRate = 60,
         .expYield = 165,

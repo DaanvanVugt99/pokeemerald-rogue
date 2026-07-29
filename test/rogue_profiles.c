@@ -186,3 +186,18 @@ TEST("Mega Starmie keeps its Huge Power adjusted Attack")
     EXPECT_EQ(gSpeciesInfo[SPECIES_STARMIE_MEGA].baseAttack, 100);
     EXPECT_EQ(gSpeciesInfo[SPECIES_STARMIE_MEGA].abilities[0], ABILITY_HUGE_POWER);
 }
+
+TEST("Mightyena has the Speed to capitalize on Full Moon")
+{
+    EXPECT_EQ(gSpeciesInfo[SPECIES_MIGHTYENA].baseSpeed, 100);
+}
+
+TEST("Focused stat buffs support underperforming Pokemon's unique roles")
+{
+    EXPECT_EQ(gSpeciesInfo[SPECIES_ARBOK].baseHP, 80);
+    EXPECT_EQ(gSpeciesInfo[SPECIES_WIGGLYTUFF].baseDefense, 65);
+    EXPECT_EQ(gSpeciesInfo[SPECIES_WIGGLYTUFF].baseSpDefense, 65);
+    EXPECT_EQ(gSpeciesInfo[SPECIES_PARASECT].baseHP, 80);
+    EXPECT_EQ(gSpeciesInfo[SPECIES_DEWGONG].baseDefense, 100);
+    EXPECT_EQ(gSpeciesInfo[SPECIES_HYPNO].baseSpAttack, 95);
+}

@@ -1848,11 +1848,9 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     },
 
 #define MEOWSTIC_MISC_INFO                                  \
-        .baseHP        = 74,                                \
         .baseAttack    = 48,                                \
         .baseDefense   = 76,                                \
         .baseSpeed     = 104,                               \
-        .baseSpAttack  = 83,                                \
         .baseSpDefense = 81,                                \
         .types = { TYPE_PSYCHIC, TYPE_PSYCHIC },            \
         .catchRate = 75,                                    \
@@ -1882,6 +1880,8 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_MEOWSTIC_MALE] =
     {
         MEOWSTIC_MISC_INFO,
+        .baseHP        = 86,
+        .baseSpAttack  = 83,
         .genderRatio = MON_MALE,
         .abilities = { ABILITY_KEEN_EYE, ABILITY_INFILTRATOR, ABILITY_PRANKSTER },
         .bodyColor = BODY_COLOR_BLUE,
@@ -1902,6 +1902,8 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     [SPECIES_MEOWSTIC_FEMALE] =
     {
         MEOWSTIC_MISC_INFO,
+        .baseHP        = 74,
+        .baseSpAttack  = 95,
         .genderRatio = MON_FEMALE,
         .abilities = { ABILITY_KEEN_EYE, ABILITY_INFILTRATOR, ABILITY_COMPETITIVE },
         .bodyColor = BODY_COLOR_WHITE,
@@ -2159,7 +2161,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
     {
         .baseHP        = 101,
         .baseAttack    = 72,
-        .baseDefense   = 72,
+        .baseDefense   = 85,
         .baseSpeed     = 29,
         .baseSpAttack  = 99,
         .baseSpDefense = 89,
@@ -3054,7 +3056,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         .baseAttack    = 58,
         .baseDefense   = 57,
         .baseSpeed     = 101,
-        .baseSpAttack  = 81,
+        .baseSpAttack  = 95,
         .baseSpDefense = 67,
         .types = { TYPE_ELECTRIC, TYPE_FAIRY },
         .catchRate = 180,
@@ -3484,7 +3486,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
 
     [SPECIES_TREVENANT] =
     {
-        .baseHP        = 85,
+        .baseHP        = 95,
         .baseAttack    = 110,
         .baseDefense   = 76,
         .baseSpeed     = 56,
@@ -3886,7 +3888,7 @@ const struct SpeciesInfo gSpeciesInfoGen6[] =
         .baseDefense   = 184,
         .baseSpeed     = 28,
         .baseSpAttack  = 44,
-        .baseSpDefense = 46,
+        .baseSpDefense = 55,
         .types = { TYPE_ICE, TYPE_ICE },
         .abilities = { ABILITY_OWN_TEMPO, ABILITY_ICE_BODY, ABILITY_STURDY },
         .height = 20,

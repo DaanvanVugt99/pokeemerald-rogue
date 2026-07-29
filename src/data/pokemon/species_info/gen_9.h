@@ -515,7 +515,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
     {
         OINKOLOGNE_MISC_INFO,
         .baseHP        = 110,
-        .baseAttack    = 100,
+        .baseAttack    = 110,
         .baseDefense   = 75,
         .baseSpeed     = 65,
         .baseSpAttack  = 59,
@@ -545,7 +545,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         OINKOLOGNE_MISC_INFO,
         .baseHP        = 115,
         .baseAttack    = 90,
-        .baseDefense   = 70,
+        .baseDefense   = 80,
         .baseSpeed     = 65,
         .baseSpAttack  = 59,
         .baseSpDefense = 90,
@@ -622,7 +622,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
 
     [SPECIES_SPIDOPS] =
     {
-        .baseHP        = 60,
+        .baseHP        = 75,
         .baseAttack    = 79,
         .baseDefense   = 92,
         .baseSpeed     = 35,
@@ -1270,7 +1270,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
 
 #if P_FAMILY_SQUAWKABILLY
 #define SQUAWKABILLY_MISC_INFO                                  \
-        .baseHP        = 82,                                    \
+        .baseHP        = 90,                                    \
         .baseAttack    = 96,                                    \
         .baseDefense   = 51,                                    \
         .baseSpeed     = 92,                                    \
@@ -2244,7 +2244,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
         .baseDefense   = 115,
         .baseSpeed     = 75,
         .baseSpAttack  = 35,
-        .baseSpDefense = 55,
+        .baseSpDefense = 70,
         .types = { TYPE_ROCK, TYPE_ROCK },
         .catchRate = 120,
         .expYield = 158,
@@ -2774,7 +2774,7 @@ const struct SpeciesInfo gSpeciesInfoGen9[] =
     [SPECIES_WUGTRIO] =
     {
         .baseHP        = 35,
-        .baseAttack    = 100,
+        .baseAttack    = 115,
         .baseDefense   = 50,
         .baseSpeed     = 120,
         .baseSpAttack  = 50,

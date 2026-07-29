@@ -743,7 +743,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
     [SPECIES_LEDIAN] =
     {
         .baseHP        = 55,
-        .baseAttack    = 35,
+        .baseAttack    = 75,
         .baseDefense   = 50,
         .baseSpeed     = 85,
         .baseSpAttack  = 55,
@@ -842,7 +842,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
 
     [SPECIES_ARIADOS] =
     {
-        .baseHP        = 70,
+        .baseHP        = 90,
         .baseAttack    = 90,
         .baseDefense   = 70,
         .baseSpeed     = 40,
@@ -2049,7 +2049,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
         .baseHP        = 75,
         .baseAttack    = 75,
         .baseDefense   = 55,
-        .baseSpeed     = 30,
+        .baseSpeed     = 60,
         .baseSpAttack  = 105,
         .baseSpDefense = 85,
         .types = { TYPE_GRASS, TYPE_GRASS },
@@ -4261,7 +4261,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
 
     [SPECIES_MAGCARGO] =
     {
-        .baseHP        = P_UPDATED_STATS >= GEN_7 ? 60 : 50,
+        .baseHP        = P_UPDATED_STATS >= GEN_7 ? 80 : 50,
         .baseAttack    = 50,
         .baseDefense   = 120,
         .baseSpeed     = 30,
@@ -4705,8 +4705,8 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
         .baseHP        = 45,
         .baseAttack    = 55,
         .baseDefense   = 45,
-        .baseSpeed     = 75,
-        .baseSpAttack  = 65,
+        .baseSpeed     = 105,
+        .baseSpAttack  = 85,
         .baseSpDefense = 45,
         .types = { TYPE_ICE, TYPE_FLYING },
         .catchRate = 45,

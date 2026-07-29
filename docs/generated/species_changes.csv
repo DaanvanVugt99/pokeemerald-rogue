@@ -3,16 +3,31 @@ SPECIES_ABOMASNOW,Abomasnow,90,92,75,92,85,60,90,92,75,92,85,60,Grass / Ice,Gras
 SPECIES_ABOMASNOW_MEGA,Abomasnow,90,132,105,132,105,30,90,132,105,132,105,30,Grass / Ice,Grass / Ice,Snow Warning / Snow Warning / Snow Warning,Grass Pelt / Grass Pelt / Grass Pelt,false,false,true
 SPECIES_ABSOL_MEGA,Absol,65,150,60,115,60,115,65,150,60,115,60,115,Dark,Dark / Fairy,Magic Bounce / Magic Bounce / Magic Bounce,Magic Bounce / Magic Bounce / Magic Bounce,false,true,false
 SPECIES_AMAURA,Amaura,77,59,50,67,63,46,77,59,50,67,63,46,Rock / Ice,Rock / Ice,Refrigerate / — / Snow Warning,Refrigerate / — / Solid Rock,false,false,true
+SPECIES_ARBOK,Arbok,60,95,69,65,79,80,80,95,69,65,79,80,Poison,Poison,Intimidate / Shed Skin / Unnerve,Intimidate / Shed Skin / Unnerve,true,false,false
 SPECIES_ARBOLIVA,Arboliva,78,69,90,125,109,39,78,69,90,125,109,39,Grass / Normal,Grass / Normal,Seed Sower / — / Harvest,Natural Cure / — / Harvest,false,false,true
+SPECIES_ARIADOS,Ariados,70,90,70,60,70,40,90,90,70,60,70,40,Bug / Poison,Bug / Poison,Swarm / Insomnia / Sniper,Swarm / Insomnia / Sniper,true,false,false
+SPECIES_AROMATISSE,Aromatisse,101,72,72,99,89,29,101,72,85,99,89,29,Fairy,Fairy,Healer / — / Aroma Veil,Healer / — / Aroma Veil,true,false,false
 SPECIES_AURORUS,Aurorus,123,77,72,99,92,58,123,77,72,99,92,58,Rock / Ice,Rock / Ice,Refrigerate / — / Snow Warning,Refrigerate / — / Solid Rock,false,false,true
+SPECIES_AVALUGG,Avalugg,95,117,184,44,46,28,95,117,184,44,55,28,Ice,Ice,Own Tempo / Ice Body / Sturdy,Own Tempo / Ice Body / Sturdy,true,false,false
+SPECIES_BEAUTIFLY,Beautifly,60,70,50,100,50,65,60,70,50,100,50,85,Bug / Flying,Bug / Flying,Swarm / — / Rivalry,Swarm / — / Rivalry,true,false,false
+SPECIES_BEHEEYEM,Beheeyem,75,75,75,125,95,40,85,75,75,125,95,40,Psychic,Psychic,Telepathy / Synchronize / Analytic,Telepathy / Synchronize / Analytic,true,false,false
 SPECIES_BONSLY,Bonsly,50,80,95,10,45,10,50,80,95,10,45,10,Rock,Grass,Sturdy / Rock Head / Rattled,Sturdy / Rock Head / Rattled,false,true,false
+SPECIES_CARNIVINE,Carnivine,74,100,72,90,72,46,94,100,72,90,72,46,Grass,Grass,Levitate / — / —,Levitate / — / —,true,false,false
 SPECIES_CHESNAUGHT_MEGA,Chesnaught,88,137,172,74,115,44,88,137,172,74,115,44,Grass / Fighting,Grass / Fighting,Bulletproof / Bulletproof / Bulletproof,Bulletproof / — / Bulletproof,false,false,true
 SPECIES_CHIMECHO_MEGA,Chimecho,75,50,110,135,120,65,75,50,110,135,120,65,Psychic / Steel,Psychic / Steel,Levitate / Levitate / Levitate,Levitate / — / —,false,false,true
+SPECIES_DEDENNE,Dedenne,67,58,57,81,67,101,67,58,57,95,67,101,Electric / Fairy,Electric / Fairy,Cheek Pouch / Pickup / Plus,Cheek Pouch / Pickup / Plus,true,false,false
+SPECIES_DELCATTY,Delcatty,70,65,65,55,55,90,70,85,65,75,55,90,Normal,Normal,Cute Charm / Normalize / Wonder Skin,Cute Charm / Normalize / Wonder Skin,true,false,false
+SPECIES_DELIBIRD,Delibird,45,55,45,65,45,75,45,55,45,85,45,105,Ice / Flying,Ice / Flying,Vital Spirit / Hustle / Insomnia,Vital Spirit / Hustle / Insomnia,true,false,false
 SPECIES_DELPHOX_MEGA,Delphox,75,69,72,159,125,134,75,69,72,159,125,134,Fire / Psychic,Fire / Psychic,Levitate / Levitate / Levitate,Levitate / — / Levitate,false,false,true
+SPECIES_DEWGONG,Dewgong,90,70,80,70,95,70,90,70,100,70,95,70,Water / Ice,Water / Ice,Thick Fat / Hydration / Ice Body,Thick Fat / Hydration / Ice Body,true,false,false
 SPECIES_DODRIO,Dodrio,60,110,70,60,60,110,60,110,70,60,60,110,Normal / Flying,Ground / Flying,Run Away / Early Bird / Tangled Feet,Run Away / Early Bird / Tangled Feet,false,true,false
 SPECIES_DOLLIV,Dolliv,52,53,60,78,78,33,52,53,60,78,78,33,Grass / Normal,Grass / Normal,Early Bird / — / Harvest,Natural Cure / — / Harvest,false,false,true
 SPECIES_DRAGONITE_MEGA,Dragonite,91,124,115,145,125,100,91,124,115,145,125,100,Dragon / Flying,Dragon / Flying,Multiscale / Multiscale / Multiscale,Multiscale / — / Multiscale,false,false,true
+SPECIES_DUBWOOL,Dubwool,72,80,100,60,90,88,80,80,100,60,90,88,Normal,Normal,Fluffy / Steadfast / Bulletproof,Fluffy / Steadfast / Bulletproof,true,false,false
+SPECIES_DUSTOX,Dustox,60,50,70,50,90,65,80,50,70,50,90,65,Bug / Poison,Bug / Poison,Shield Dust / — / Compound Eyes,Shield Dust / — / Compound Eyes,true,false,false
+SPECIES_ELDEGOSS,Eldegoss,60,50,90,80,120,60,75,50,90,80,120,60,Grass,Grass,Cotton Down / Regenerator / Effect Spore,Cotton Down / Regenerator / Effect Spore,true,false,false
 SPECIES_ELECTIVIRE,Electivire,75,123,67,95,85,95,75,123,67,95,85,95,Electric,Electric / Fighting,Motor Drive / — / Vital Spirit,Motor Drive / — / Vital Spirit,false,true,false
+SPECIES_EMOLGA,Emolga,55,75,60,75,60,103,55,75,60,85,60,103,Electric / Flying,Electric / Flying,Static / — / Motor Drive,Static / — / Motor Drive,true,false,false
 SPECIES_FERALIGATR_MEGA,Feraligatr,85,160,125,89,93,78,85,160,125,89,93,78,Water / Dragon,Water / Dragon,Dragonize / Dragonize / Dragonize,Dragonize / — / Dragonize,false,false,true
 SPECIES_FLORGES_BLUE_FLOWER,Florges,78,65,68,112,154,75,78,65,68,112,154,75,Fairy,Fairy / Grass,Flower Veil / — / Symbiosis,Flower Veil / — / Symbiosis,false,true,false
 SPECIES_FLORGES_ORANGE_FLOWER,Florges,78,65,68,112,154,75,78,65,68,112,154,75,Fairy,Fairy / Grass,Flower Veil / — / Symbiosis,Flower Veil / — / Symbiosis,false,true,false
@@ -35,16 +50,36 @@ SPECIES_GLIMMORA_MEGA,Glimmora,83,90,105,150,96,101,83,90,105,150,96,101,Rock / 
 SPECIES_GOLDUCK,Golduck,80,82,78,95,80,85,80,82,78,95,80,85,Water,Water / Psychic,Damp / Cloud Nine / Swift Swim,Damp / Cloud Nine / Swift Swim,false,true,false
 SPECIES_GOODRA,Goodra,90,100,70,110,150,80,90,100,70,110,150,80,Dragon,Dragon / Poison,Sap Sipper / Hydration / Gooey,Sap Sipper / Hydration / Gooey,false,true,false
 SPECIES_GOREBYSS,Gorebyss,55,84,105,114,75,52,55,84,105,114,75,52,Water,Water / Fairy,Swift Swim / — / Hydration,Swift Swim / — / Hydration,false,true,false
+SPECIES_GRAPPLOCT,Grapploct,80,118,90,70,80,42,80,118,90,70,90,42,Fighting,Fighting,Limber / — / Technician,Limber / — / Technician,true,false,false
 SPECIES_GRENINJA_MEGA,Greninja,72,125,77,133,81,142,72,125,77,133,81,142,Water / Dark,Water / Dark,Protean / Protean / Protean,Protean / — / Protean,false,false,true
+SPECIES_GUMSHOOS,Gumshoos,88,110,60,55,60,45,100,110,60,55,60,45,Normal,Normal,Stakeout / Strong Jaw / Adaptability,Stakeout / Strong Jaw / Adaptability,true,false,false
+SPECIES_HEATMOR,Heatmor,85,97,66,105,66,65,85,97,66,105,66,80,Fire,Fire,Gluttony / Flash Fire / White Smoke,Gluttony / Flash Fire / White Smoke,true,false,false
 SPECIES_HUNTAIL,Huntail,55,104,105,94,75,52,55,104,105,94,75,52,Water,Water / Dragon,Swift Swim / — / Water Veil,Swift Swim / — / Water Veil,false,true,false
+SPECIES_HYPNO,Hypno,85,73,70,73,115,67,85,73,70,95,115,67,Psychic,Psychic,Insomnia / Forewarn / Inner Focus,Insomnia / Forewarn / Inner Focus,true,false,false
 SPECIES_ILLUMISE,Illumise,65,47,75,73,85,85,65,47,75,73,85,85,Bug,Bug / Fairy,Oblivious / Tinted Lens / Prankster,Oblivious / Tinted Lens / Prankster,false,true,false
 SPECIES_INDEEDEE_FEMALE,Indeedee,70,55,65,95,105,85,70,55,65,95,105,85,Psychic / Normal,Psychic / Normal,Own Tempo / Synchronize / Psychic Surge,Own Tempo / Synchronize / Telepathy,false,false,true
 SPECIES_INDEEDEE_MALE,Indeedee,60,65,55,105,95,95,60,65,55,105,95,95,Psychic / Normal,Psychic / Normal,Inner Focus / Synchronize / Psychic Surge,Inner Focus / Synchronize / Telepathy,false,false,true
+SPECIES_KLAWF,Klawf,70,100,115,35,55,75,70,100,115,35,70,75,Rock,Rock,Anger Shell / Shell Armor / Regenerator,Anger Shell / Shell Armor / Regenerator,true,false,false
+SPECIES_KOMALA,Komala,65,115,65,75,95,65,65,115,80,75,95,65,Normal,Normal,Comatose / — / —,Comatose / — / —,true,false,false
+SPECIES_KRICKETUNE,Kricketune,77,85,51,55,51,65,77,85,51,85,51,65,Bug,Bug,Swarm / — / Technician,Swarm / — / Technician,true,false,false
+SPECIES_LEDIAN,Ledian,55,35,50,55,110,85,55,75,50,55,110,85,Bug / Flying,Bug / Flying,Swarm / Early Bird / Iron Fist,Swarm / Early Bird / Iron Fist,true,false,false
+SPECIES_LUMINEON,Lumineon,69,69,76,69,86,91,69,89,76,89,86,91,Water,Water,Swift Swim / Storm Drain / Water Veil,Swift Swim / Storm Drain / Water Veil,true,false,false
+SPECIES_LUVDISC,Luvdisc,43,30,55,40,65,97,43,30,55,80,65,120,Water,Water,Swift Swim / — / Hydration,Swift Swim / — / Hydration,true,false,false
 SPECIES_LYCANROC_MIDNIGHT,Lycanroc,85,115,75,55,75,82,85,115,75,55,75,82,Rock,Rock / Dark,Keen Eye / Vital Spirit / No Guard,Keen Eye / Vital Spirit / No Guard,false,true,false
+SPECIES_MAGCARGO,Magcargo,60,50,120,90,80,30,80,50,120,90,80,30,Fire / Rock,Fire / Rock,Magma Armor / Flame Body / Weak Armor,Magma Armor / Flame Body / Weak Armor,true,false,false
+SPECIES_MARACTUS,Maractus,75,86,67,106,67,60,90,86,67,106,67,60,Grass,Grass,Water Absorb / Chlorophyll / Storm Drain,Water Absorb / Chlorophyll / Storm Drain,true,false,false
 SPECIES_MASQUERAIN,Masquerain,70,60,62,100,82,80,70,60,62,100,82,80,Bug / Flying,Bug / Water,Intimidate / — / Unnerve,Intimidate / — / Unnerve,false,true,false
 SPECIES_MEGANIUM_MEGA,Meganium,80,92,115,143,115,80,80,92,115,143,115,80,Grass / Fairy,Grass / Fairy,Mega Sol / Mega Sol / Mega Sol,Mega Sol / — / Mega Sol,false,false,true
+SPECIES_MEOWSTIC_FEMALE,Meowstic,74,48,76,83,81,104,74,48,76,95,81,104,Psychic,Psychic,Keen Eye / Infiltrator / Competitive,Keen Eye / Infiltrator / Competitive,true,false,false
+SPECIES_MEOWSTIC_F_MEGA,Meowstic,74,48,76,143,101,124,74,48,76,155,101,124,Psychic,Psychic,Trace / Trace / Trace,Trace / Trace / Trace,true,false,false
+SPECIES_MEOWSTIC_MALE,Meowstic,74,48,76,83,81,104,86,48,76,83,81,104,Psychic,Psychic,Keen Eye / Infiltrator / Prankster,Keen Eye / Infiltrator / Prankster,true,false,false
+SPECIES_MEOWSTIC_M_MEGA,Meowstic,74,48,76,143,101,124,86,48,76,143,101,124,Psychic,Psychic,Trace / Trace / Trace,Trace / Trace / Trace,true,false,false
+SPECIES_MIGHTYENA,Mightyena,70,90,70,60,60,70,70,90,70,60,60,100,Dark,Dark,Intimidate / Quick Feet / Moxie,Intimidate / Quick Feet / Moxie,true,false,false
+SPECIES_MOTHIM,Mothim,70,94,50,94,50,66,70,94,50,94,50,86,Bug / Flying,Bug / Flying,Swarm / — / Tinted Lens,Swarm / — / Tinted Lens,true,false,false
 SPECIES_NOCTOWL,Noctowl,100,50,50,86,96,70,100,50,50,86,96,70,Normal / Flying,Psychic / Flying,Insomnia / Keen Eye / Tinted Lens,Insomnia / Gale Wings / Tinted Lens,false,true,true
-SPECIES_PARASECT,Parasect,60,95,80,60,80,30,60,95,80,60,80,30,Bug / Grass,Ghost / Grass,Effect Spore / Dry Skin / Damp,Effect Spore / Dry Skin / Damp,false,true,false
+SPECIES_OINKOLOGNE_FEMALE,Oinkologne,115,90,70,59,90,65,115,90,80,59,90,65,Normal,Normal,Aroma Veil / Gluttony / Thick Fat,Aroma Veil / Gluttony / Thick Fat,true,false,false
+SPECIES_OINKOLOGNE_MALE,Oinkologne,110,100,75,59,80,65,110,110,75,59,80,65,Normal,Normal,Lingering Aroma / Gluttony / Thick Fat,Lingering Aroma / Gluttony / Thick Fat,true,false,false
+SPECIES_PARASECT,Parasect,60,95,80,60,80,30,80,95,80,60,80,30,Bug / Grass,Ghost / Grass,Effect Spore / Dry Skin / Damp,Effect Spore / Dry Skin / Damp,true,true,false
 SPECIES_PELIPPER,Pelipper,60,50,100,95,70,65,60,50,100,95,70,65,Water / Flying,Water / Flying,Keen Eye / Drizzle / Rain Dish,Keen Eye / Wind Rider / Rain Dish,false,false,true
 SPECIES_PINCURCHIN,Pincurchin,48,101,95,91,85,15,48,101,95,91,85,15,Electric,Electric,Lightning Rod / — / Electric Surge,Lightning Rod / — / Innards Out,false,false,true
 SPECIES_POLITOED,Politoed,90,75,75,90,100,70,90,75,75,90,100,70,Water,Water,Water Absorb / Damp / Drizzle,Water Absorb / Damp / Liquid Voice,false,false,true
@@ -54,10 +89,23 @@ SPECIES_ROTOM_FROST,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / I
 SPECIES_ROTOM_HEAT,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / Fire,Electric / Fire,Levitate / — / —,Static / — / Flash Fire,false,false,true
 SPECIES_ROTOM_MOW,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / Grass,Electric / Grass,Levitate / — / —,Static / — / Grassy Surge,false,false,true
 SPECIES_ROTOM_WASH,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / Water,Electric / Water,Levitate / — / —,Static / — / Water Absorb,false,false,true
+SPECIES_SHIINOTIC,Shiinotic,60,45,80,90,100,30,75,45,80,90,100,30,Grass / Fairy,Grass / Fairy,Illuminate / Effect Spore / Rain Dish,Illuminate / Effect Spore / Rain Dish,true,false,false
 SPECIES_SMOLIV,Smoliv,41,35,45,58,51,30,41,35,45,58,51,30,Grass / Normal,Grass / Normal,Early Bird / — / Harvest,Natural Cure / — / Harvest,false,false,true
 SPECIES_SNOVER,Snover,60,62,50,62,60,40,60,62,50,62,60,40,Grass / Ice,Grass / Ice,Snow Warning / — / Soundproof,Grass Pelt / — / Soundproof,false,false,true
+SPECIES_SPIDOPS,Spidops,60,79,92,52,86,35,75,79,92,52,86,35,Bug,Bug,Insomnia / — / Stakeout,Insomnia / — / Stakeout,true,false,false
+SPECIES_SQUAWKABILLY_BLUE_PLUMAGE,Sqawkabily,82,96,51,45,51,92,90,96,51,45,51,92,Normal / Flying,Normal / Flying,Intimidate / Hustle / Guts,Intimidate / Hustle / Guts,true,false,false
+SPECIES_SQUAWKABILLY_GREEN_PLUMAGE,Sqawkabily,82,96,51,45,51,92,90,96,51,45,51,92,Normal / Flying,Normal / Flying,Intimidate / Hustle / Guts,Intimidate / Hustle / Guts,true,false,false
+SPECIES_SQUAWKABILLY_WHITE_PLUMAGE,Sqawkabily,82,96,51,45,51,92,90,96,51,45,51,92,Normal / Flying,Normal / Flying,Intimidate / Hustle / Sheer Force,Intimidate / Hustle / Sheer Force,true,false,false
+SPECIES_SQUAWKABILLY_YELLOW_PLUMAGE,Sqawkabily,82,96,51,45,51,92,90,96,51,45,51,92,Normal / Flying,Normal / Flying,Intimidate / Hustle / Sheer Force,Intimidate / Hustle / Sheer Force,true,false,false
+SPECIES_STONJOURNER,Stonjourne,100,125,135,20,20,70,100,125,135,20,45,70,Rock,Rock,Power Spot / — / —,Power Spot / — / —,true,false,false
 SPECIES_SUDOWOODO,Sudowoodo,70,100,115,30,65,30,70,100,115,30,65,30,Rock,Grass,Sturdy / Rock Head / Rattled,Sturdy / Rock Head / Rattled,false,true,false
+SPECIES_SUNFLORA,Sunflora,75,75,55,105,85,30,75,75,55,105,85,60,Grass,Grass,Chlorophyll / Solar Power / Early Bird,Chlorophyll / Solar Power / Early Bird,true,false,false
+SPECIES_THIEVUL,Thievul,70,58,58,87,92,90,70,58,58,100,92,90,Dark,Dark,Run Away / Unburden / Stakeout,Run Away / Unburden / Stakeout,true,false,false
+SPECIES_TOGEDEMARU,Togedemaru,65,98,63,40,73,96,75,98,63,40,73,96,Electric / Steel,Electric / Steel,Iron Barbs / Lightning Rod / Sturdy,Iron Barbs / Lightning Rod / Sturdy,true,false,false
 SPECIES_TORKOAL,Torkoal,70,85,140,85,70,20,70,85,140,85,70,20,Fire,Fire,White Smoke / Drought / Shell Armor,Flame Body / Steam Engine / Shell Armor,false,false,true
+SPECIES_TREVENANT,Trevenant,85,110,76,65,82,56,95,110,76,65,82,56,Ghost / Grass,Ghost / Grass,Natural Cure / Frisk / Harvest,Natural Cure / Frisk / Harvest,true,false,false
+SPECIES_TROPIUS,Tropius,99,68,83,72,87,51,99,68,83,92,87,51,Grass / Flying,Grass / Flying,Chlorophyll / Solar Power / Harvest,Chlorophyll / Solar Power / Harvest,true,false,false
+SPECIES_TURTONATOR,Turtonator,60,78,135,91,85,36,70,78,135,91,85,36,Fire / Dragon,Fire / Dragon,Shell Armor / — / —,Shell Armor / — / —,true,false,false
 SPECIES_TYRANITAR,Tyranitar,100,134,110,95,100,61,100,134,110,95,100,61,Rock / Dark,Rock / Dark,Sand Stream / — / Unnerve,Battle Armor / — / Unnerve,false,false,true
 SPECIES_TYRANITAR_MEGA,Tyranitar,100,164,150,95,120,71,100,164,150,95,120,71,Rock / Dark,Rock / Dark,Sand Stream / Sand Stream / Sand Stream,Battle Armor / Battle Armor / Battle Armor,false,false,true
 SPECIES_UNOWN,Unown,48,72,48,72,48,48,48,72,48,72,48,72,Psychic,Psychic,Levitate / — / —,Levitate / — / —,true,false,false
@@ -91,4 +139,10 @@ SPECIES_UNOWN_Z,Unown,48,72,48,72,48,48,48,72,48,72,48,72,Psychic,Psychic,Levita
 SPECIES_VANILLUXE,Vanilluxe,71,95,85,110,95,79,71,95,85,110,95,79,Ice,Ice,Ice Body / Snow Warning / Weak Armor,Ice Body / Slush Rush / Weak Armor,false,false,true
 SPECIES_VICTREEBEL_MEGA,Victreebel,80,125,85,135,95,70,80,125,85,135,95,70,Grass / Poison,Grass / Poison,Innards Out / Innards Out / Innards Out,Innards Out / — / Innards Out,false,false,true
 SPECIES_VOLBEAT,Volbeat,65,73,75,47,85,85,65,73,75,47,85,85,Bug,Bug / Electric,Illuminate / Swarm / Prankster,Illuminate / Swarm / Prankster,false,true,false
+SPECIES_WATCHOG,Watchog,60,85,69,60,69,77,60,95,69,60,69,77,Normal,Normal,Illuminate / Keen Eye / Analytic,Illuminate / Keen Eye / Analytic,true,false,false
+SPECIES_WIGGLYTUFF,Wigglytuff,140,70,45,85,50,45,140,70,65,85,65,45,Normal / Fairy,Normal / Fairy,Cute Charm / Competitive / Frisk,Cute Charm / Competitive / Frisk,true,false,false
 SPECIES_WOBBUFFET_PUNCHING,Wobbuffet,190,115,10,1,10,79,190,115,10,1,10,79,Psychic / Fighting,Psychic / Fighting,Stance Change / — / —,Shadow Tag / — / Telepathy,false,false,true
+SPECIES_WORMADAM_PLANT_CLOAK,Wormadam,60,59,85,79,105,36,80,59,85,79,105,36,Bug / Grass,Bug / Grass,Anticipation / — / Overcoat,Anticipation / — / Overcoat,true,false,false
+SPECIES_WORMADAM_SANDY_CLOAK,Wormadam,60,79,105,59,85,36,80,79,105,59,85,36,Bug / Ground,Bug / Ground,Anticipation / — / Overcoat,Anticipation / — / Overcoat,true,false,false
+SPECIES_WORMADAM_TRASH_CLOAK,Wormadam,60,69,95,69,95,36,80,69,95,69,95,36,Bug / Steel,Bug / Steel,Anticipation / — / Overcoat,Anticipation / — / Overcoat,true,false,false
+SPECIES_WUGTRIO,Wugtrio,35,100,50,50,70,120,35,115,50,50,70,120,Water,Water,Gooey / Rattled / Sand Veil,Gooey / Rattled / Sand Veil,true,false,false

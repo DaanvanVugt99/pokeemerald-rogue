@@ -742,12 +742,64 @@ namespace PokemonDataGenerator.Pokedex
 				});
 			}
 
+			private void UpdateLedianCompetitiveSets()
+			{
+				if (CompetitiveSets.Count < 2)
+					throw new InvalidDataException("Ledian is missing the competitive sets required for its Divergence profiles");
+
+				PokemonCompetitiveSet utilitySet = CompetitiveSets[0];
+				utilitySet.Item = "ITEM_HEAVY_DUTY_BOOTS";
+				utilitySet.Nature = "NATURE_JOLLY";
+				utilitySet.Moves = new List<string>
+				{
+					"MOVE_ROOST",
+					"MOVE_U_TURN",
+					"MOVE_DRAIN_PUNCH",
+					"MOVE_KNOCK_OFF",
+				};
+
+				PokemonCompetitiveSet ironFistSet = CompetitiveSets[1];
+				ironFistSet.Moves = new List<string>
+				{
+					"MOVE_ROOST",
+					"MOVE_POWER_UP_PUNCH",
+					"MOVE_DRAIN_PUNCH",
+					"MOVE_ICE_PUNCH",
+				};
+			}
+
+			private void UpdateSunfloraCompetitiveSets()
+			{
+				PokemonCompetitiveSet chlorophyllSet = CompetitiveSets
+					.FirstOrDefault(set => set.Ability == "ABILITY_EARLY_BIRD");
+
+				if (chlorophyllSet == null)
+					throw new InvalidDataException("Sunflora is missing its Early Bird competitive set");
+
+				chlorophyllSet.Ability = "ABILITY_CHLOROPHYLL";
+				chlorophyllSet.Item = "ITEM_LIFE_ORB";
+				chlorophyllSet.Nature = "NATURE_TIMID";
+				chlorophyllSet.Moves = new List<string>
+				{
+					"MOVE_SOLAR_BEAM",
+					"MOVE_EARTH_POWER",
+					"MOVE_WEATHER_BALL",
+					"MOVE_SLUDGE_BOMB",
+				};
+			}
+
 			private void ApplyDivergenceAbilityReplacements()
 			{
 				switch (Species)
 				{
 					case "SPECIES_UNOWN":
 						UpdateUnownCompetitiveSets();
+						break;
+					case "SPECIES_LEDIAN":
+						UpdateLedianCompetitiveSets();
+						break;
+					case "SPECIES_SUNFLORA":
+						UpdateSunfloraCompetitiveSets();
 						break;
 					case "SPECIES_GENGAR":
 						ReplaceCompetitiveAbility("ABILITY_CURSED_BODY", "ABILITY_LEVITATE");

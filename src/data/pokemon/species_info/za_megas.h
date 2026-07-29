@@ -1799,7 +1799,7 @@
 #if P_MEGA_EVOLUTIONS
     [SPECIES_MEOWSTIC_M_MEGA] =
     {
-        .baseHP        = 74,
+        .baseHP        = 86,
         .baseAttack    = 48,
         .baseDefense   = 76,
         .baseSpeed     = 124,
@@ -1850,7 +1850,7 @@
         .baseAttack    = 48,
         .baseDefense   = 76,
         .baseSpeed     = 124,
-        .baseSpAttack  = 143,
+        .baseSpAttack  = 155,
         .baseSpDefense = 101,
         .types = { TYPE_PSYCHIC, TYPE_PSYCHIC },
         .catchRate = 75,

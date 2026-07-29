@@ -1412,6 +1412,13 @@ extern const u8 gAbilityNames[][ABILITY_NAME_LENGTH + 1];
 #define GET_STAT_COLOUR(stat) GET_STAT_COLOUR_RANGE(stats[stat], bestStatValue, worstStatValue)
 #define GET_STAT_COLOUR_RANGE(value, bestValue, worstColor) (value >= bestValue ? bestStatColor : (value <= worstColor ? worstStatColor : statColor))
 
+static void BufferPokedexStatValue(u16 species, u16 value, u8 stat)
+{
+    ConvertUIntToDecimalStringN(gStringVar4, value, STR_CONV_MODE_RIGHT_ALIGN, 3);
+    if (Rogue_IsSpeciesStatBuffed(species, stat))
+        StringAppend(gStringVar4, gText_Plus);
+}
+
 static void DisplayMonStatsText(void)
 {
     u8 i;
@@ -1479,35 +1486,35 @@ static void DisplayMonStatsText(void)
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_HP);
 
-        ConvertUIntToDecimalStringN(gStringVar4, stats[STAT_HP], STR_CONV_MODE_RIGHT_ALIGN, 3);
+        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_HP], STAT_HP);
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_HP), TEXT_SKIP_DRAW, gStringVar4);
 
         // Attack
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Attack);
         
-        ConvertUIntToDecimalStringN(gStringVar4, stats[STAT_ATK], STR_CONV_MODE_RIGHT_ALIGN, 3);
+        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_ATK], STAT_ATK);
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_ATK), TEXT_SKIP_DRAW, gStringVar4);
 
         // Def
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Defence);
         
-        ConvertUIntToDecimalStringN(gStringVar4, stats[STAT_DEF], STR_CONV_MODE_RIGHT_ALIGN, 3);
+        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_DEF], STAT_DEF);
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_DEF), TEXT_SKIP_DRAW, gStringVar4);
 
         // SpAttack
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_SpAttack);
         
-        ConvertUIntToDecimalStringN(gStringVar4, stats[STAT_SPATK], STR_CONV_MODE_RIGHT_ALIGN, 3);
+        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_SPATK], STAT_SPATK);
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_SPATK), TEXT_SKIP_DRAW, gStringVar4);
 
         // SpDef
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_SpDefence);
         
-        ConvertUIntToDecimalStringN(gStringVar4, stats[STAT_SPDEF], STR_CONV_MODE_RIGHT_ALIGN, 3);
+        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_SPDEF], STAT_SPDEF);
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_SPDEF), TEXT_SKIP_DRAW, gStringVar4);
 
         // Speed
@@ -1515,7 +1522,7 @@ static void DisplayMonStatsText(void)
         // Move 1 pixel higher
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 0 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Speed);
 
-        ConvertUIntToDecimalStringN(gStringVar4, stats[STAT_SPEED], STR_CONV_MODE_RIGHT_ALIGN, 3);
+        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_SPEED], STAT_SPEED);
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_SPEED), TEXT_SKIP_DRAW, gStringVar4);
     }
 

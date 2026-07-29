@@ -1624,7 +1624,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
 
     [SPECIES_ARBOK] =
     {
-        .baseHP        = 60,
+        .baseHP        = 80,
         .baseAttack    = P_UPDATED_STATS >= GEN_7 ? 95 : 85,
         .baseDefense   = 69,
         .baseSpeed     = 80,
@@ -3091,10 +3091,10 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
     {
         .baseHP        = 140,
         .baseAttack    = 70,
-        .baseDefense   = 45,
+        .baseDefense   = 65,
         .baseSpeed     = 45,
         .baseSpAttack  = P_UPDATED_STATS >= GEN_6 ? 85 : 75,
-        .baseSpDefense = 50,
+        .baseSpDefense = 65,
         .types = JIGGLYPUFF_FAMILY_TYPES,
         .catchRate = 50,
         .expYield = 196,
@@ -3548,7 +3548,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
 
     [SPECIES_PARASECT] =
     {
-        .baseHP        = 60,
+        .baseHP        = 80,
         .baseAttack    = 95,
         .baseDefense   = 80,
         .baseSpeed     = 30,
@@ -6612,7 +6612,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
     {
         .baseHP        = 90,
         .baseAttack    = 70,
-        .baseDefense   = 80,
+        .baseDefense   = 100,
         .baseSpeed     = 70,
         .baseSpAttack  = 70,
         .baseSpDefense = 95,
@@ -7362,7 +7362,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
         .baseAttack    = 73,
         .baseDefense   = 70,
         .baseSpeed     = 67,
-        .baseSpAttack  = 73,
+        .baseSpAttack  = 95,
         .baseSpDefense = 115,
         .types = { TYPE_PSYCHIC, TYPE_PSYCHIC },
         .catchRate = 75,

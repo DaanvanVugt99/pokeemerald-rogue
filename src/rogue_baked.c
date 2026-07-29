@@ -2167,6 +2167,18 @@ u32 Rogue_GetSpeciesEvolutionChainTypeFlags(u16 species)
 #endif
 }
 
+bool8 Rogue_IsSpeciesStatBuffed(u16 species, u8 stat)
+{
+#ifdef ROGUE_BAKE_VALID
+    if (species >= NUM_SPECIES || stat >= NUM_STATS)
+        return FALSE;
+
+    return (gRogueBake_SpeciesData[species].statBuffFlags & (1u << stat)) != 0;
+#else
+    return FALSE;
+#endif
+}
+
 u32 Rogue_GetTypeFlagsFromArray(const u8* types, u8 count)
 {
     u8 i;

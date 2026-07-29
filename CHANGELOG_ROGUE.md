@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added a `+` marker after Pokédex stat values that exceed the pinned canonical
+  baseline, stored in otherwise-unused per-species bake bits and generated
+  automatically alongside the species-change report.
 - Added a generated species-change report tracking base stats, typing, and
   normal Abilities against a pinned canonical upstream snapshot, with
   regeneration and CI freshness checks.
@@ -52,6 +55,38 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Focused older Pokémon stat buffs around their Divergence roles: Arbok and
+  Parasect gained 20 HP, Wigglytuff gained 20 Defense and 15 Sp. Def, Dewgong
+  gained 20 Defense, and Hypno's Sp. Atk rose from 73 to 95.
+- Continued focused stat buffs for underperforming Johto Pokémon: Ledian gained
+  40 Attack, Ariados and Magcargo gained 20 HP, Sunflora gained 30 Speed, and
+  Delibird gained 30 Speed and 20 Sp. Atk.
+- Continued focused stat buffs for underperforming Hoenn Pokémon: Beautifly
+  gained 20 Speed, Dustox gained 20 HP, Delcatty gained 20 Attack and Sp. Atk,
+  Tropius gained 20 Sp. Atk, and Luvdisc gained 40 Sp. Atk and 23 Speed.
+- Continued focused stat buffs for underperforming Sinnoh Pokémon: Kricketune
+  gained 30 Sp. Atk, every Wormadam cloak and Carnivine gained 20 HP, Mothim
+  gained 20 Speed, and Lumineon gained 20 Attack and Sp. Atk.
+- Continued focused stat buffs for underperforming Unova Pokémon: Watchog's
+  Attack rose to 95, Maractus's HP to 90, Emolga's Sp. Atk to 85, Beheeyem's
+  HP to 85, and Heatmor's Speed to 80.
+- Continued focused stat buffs for underperforming Kalos Pokémon: male and
+  female Meowstic now share a 478 BST through 86 HP and 95 Sp. Atk
+  respectively, with the same form-specific increases carried into both Mega
+  forms; Aromatisse's Defense rose to 85, Dedenne's Sp. Atk to 95, Trevenant's
+  HP to 95, and Avalugg's Sp. Def to 55.
+- Continued focused stat buffs for underperforming Alola Pokémon: Gumshoos's HP
+  rose to 100, Shiinotic's to 75, Komala's Defense to 80, Turtonator's HP to
+  70, and Togedemaru's HP to 75.
+- Continued focused stat buffs for underperforming Galar Pokémon: Thievul's
+  Sp. Atk rose to 100, Eldegoss's HP to 75, Dubwool's HP to 80, Grapploct's
+  Sp. Def to 90, and Stonjourner's Sp. Def to 45.
+- Completed the focused regional stat pass with Paldea: Spidops's HP rose to
+  75, male Oinkologne's Attack to 110, female Oinkologne's Defense to 80, all
+  Squawkabilly plumages' HP to 90, Wugtrio's Attack to 115, and Klawf's
+  Sp. Def to 70.
+- Raised Mightyena's base Speed from 70 to 100, giving its frail physical
+  offense and Full Moon hunting role a meaningful Speed tier.
 - Restored Mega Starmie's base Attack to 100 because its 140 Attack in
   Legends: Z-A compensates for that game's lack of its Huge Power Ability.
 - Raised Unown's Speed to 72 and expanded its shared learnset with six
