@@ -33,45 +33,47 @@ script Rogue_Hub_ProfLab_SpeakProf
     }
     else
     {
-        if(var(VAR_ROGUE_INTRO_STATE) <= 3)
-        {
-            msgbox(format("BIRCH: Go ahead!\nPick a PARTNER Pokémon!"), MSGBOX_DEFAULT)
-        }
-        else
-        {
-            message(format("BIRCH: What can I help you with?"))
-            waitmessage
-            begindynamicmultichoice(4)
-            special(RoguePokedex_AppendProfessorOptions)
-            enddynamicmultichoice(1, 0, 5, TRUE)
+        message(format("BIRCH: What can I help you with?"))
+        waitmessage
+        begindynamicmultichoice(4)
+        special(RoguePokedex_AppendProfessorOptions)
+        enddynamicmultichoice(1, 0, 4, TRUE)
 
-            switch(var(VAR_RESULT))
-            {
-                case 0:
-                    msgbox(format("BIRCH: Which game's Pokédex would you like to use?"), MSGBOX_DEFAULT)
-                    call(Rogue_Common_SelectCuratedPokedex)
+        switch(var(VAR_RESULT))
+        {
+            case 0:
+                msgbox(format("BIRCH: Which game's Pokédex would you like to use?"), MSGBOX_DEFAULT)
+                call(Rogue_Common_SelectCuratedPokedex)
+
+                if(var(VAR_RESULT) == YES)
+                {
+                    special(RoguePokedex_BufferCuratedSelection)
+                    msgbox(format("BIRCH: Change your active Pokédex to {STR_VAR_1}?"), MSGBOX_YESNO)
 
                     if(var(VAR_RESULT) == YES)
                     {
-                        special(RoguePokedex_BufferCuratedSelection)
-                        msgbox(format("BIRCH: Change your active Pokédex to {STR_VAR_1}?"), MSGBOX_YESNO)
+                        special(RoguePokedex_ApplyCuratedSelection)
 
-                        if(var(VAR_RESULT) == YES)
+                        if(var(VAR_ROGUE_INTRO_STATE) <= 3)
                         {
-                            special(RoguePokedex_ApplyCuratedSelection)
+                            special(Rogue_RandomiseStarters)
+                            msgbox(format("BIRCH: All set!\pI've refreshed your PARTNER choices to follow the {STR_VAR_1} Pokédex."), MSGBOX_DEFAULT)
+                        }
+                        else
+                        {
                             msgbox(format("BIRCH: All set!\pYour encounters and available partners will now follow the {STR_VAR_1} Pokédex."), MSGBOX_DEFAULT)
                         }
                     }
+                }
 
-                case 1:
-                    call(Rogue_Hub_ProfLab_ProfShowEvos)
+            case 1:
+                call(Rogue_Hub_ProfLab_ProfShowEvos)
 
-                case 2:
-                    call(Rogue_Hub_ProfLab_ProfExplain)
+            case 2:
+                call(Rogue_Hub_ProfLab_ProfExplain)
 
-                default:
-                    msgbox(format("BIRCH: No problem!\nCome back whenever you need me."), MSGBOX_DEFAULT)
-            }
+            default:
+                msgbox(format("BIRCH: No problem!\nCome back whenever you need me."), MSGBOX_DEFAULT)
         }
     }
 
@@ -499,10 +501,12 @@ script Rogue_Hub_ProfLab_PostStarterSelect
     giveitem(ITEM_POKE_BALL, 5)
     giveitem(ITEM_POTION, 1)
 
-    if(var(VAR_ROGUE_INITIAL_GIMMICK_ITEM) != ITEM_NONE)
+    special(RoguePokedex_GrantInitialGimmickItem)
+
+    if(var(VAR_RESULT) != ITEM_NONE)
     {
         msgbox(format("BIRCH: And since you chose that Pokédex, this should suit your favorite battling style."), MSGBOX_DEFAULT)
-        giveitem(VAR_ROGUE_INITIAL_GIMMICK_ITEM, 1)
+        call(Rogue_Common_DisplayPopups)
     }
 
     setflag(FLAG_SYS_POKEDEX_GET)

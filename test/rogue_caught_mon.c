@@ -651,6 +651,85 @@ TEST("Favorite-game setup stores every National gimmick choice")
     }
 }
 
+TEST("Favorite-game setup derives regional gimmicks from the selected Pokedex")
+{
+    static const struct
+    {
+        u8 variant;
+        u16 item;
+    } cases[] =
+    {
+        {POKEDEX_VARIANT_KANTO_LETSGO, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_HOENN_ORAS, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_KALOS, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_LEGENDS_ZA, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_LEGENDS_ZAFULLDLC, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_ALOLA_USUM, ITEM_Z_POWER_RING},
+        {POKEDEX_VARIANT_GALAR_FULLDLC, ITEM_DYNAMAX_BAND},
+        {POKEDEX_VARIANT_PALDEA_FULLDLC, ITEM_TERA_ORB},
+    };
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        gSpecialVar_0x8006 = cases[i].variant;
+        gSpecialVar_0x8005 = ITEM_NONE;
+        RoguePokedex_StoreInitialSelection();
+
+        EXPECT(gSpecialVar_Result);
+        EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), cases[i].variant);
+        EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), cases[i].item);
+    }
+}
+
+TEST("Professor grants each stored gimmick item")
+{
+    static const u16 items[] =
+    {
+        ITEM_MEGA_RING,
+        ITEM_Z_POWER_RING,
+        ITEM_DYNAMAX_BAND,
+        ITEM_TERA_ORB,
+    };
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(items); ++i)
+    {
+        ClearBag();
+        VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, items[i]);
+        RoguePokedex_GrantInitialGimmickItem();
+
+        EXPECT_EQ(gSpecialVar_Result, items[i]);
+        EXPECT(CheckBagHasItem(items[i], 1));
+
+        RoguePokedex_GrantInitialGimmickItem();
+        EXPECT_EQ(gSpecialVar_Result, ITEM_NONE);
+    }
+
+    ClearBag();
+}
+
+TEST("Initial Galar selection stores and grants a Dynamax Band")
+{
+    ClearBag();
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_GALAR_FULLDLC;
+    gSpecialVar_0x8005 = ITEM_NONE;
+
+    RoguePokedex_StoreInitialSelection();
+
+    EXPECT(gSpecialVar_Result);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_GALAR_FULLDLC);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), POKEDEX_VARIANT_GALAR_FULLDLC);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), ITEM_DYNAMAX_BAND);
+
+    RoguePokedex_GrantInitialGimmickItem();
+
+    EXPECT_EQ(gSpecialVar_Result, ITEM_DYNAMAX_BAND);
+    EXPECT(CheckBagHasItem(ITEM_DYNAMAX_BAND, 1));
+
+    ClearBag();
+}
+
 TEST("Normal and fallback starters stay inside the selected favorite-game Pokedex")
 {
     u8 i;
@@ -670,10 +749,31 @@ TEST("Normal and fallback starters stay inside the selected favorite-game Pokede
     ClearCaughtMonTestState();
 }
 
-TEST("Professor Pokedex changes do not alter the one-time gimmick choice")
+TEST("Pre-partner Professor Pokedex changes update the pending gimmick reward")
 {
     ResetCaughtMonTestState();
     VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, ITEM_Z_POWER_RING);
+    VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_CATCH_MON);
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_GALAR_FULLDLC;
+
+    RoguePokedex_ApplyCuratedSelection();
+
+    EXPECT(gSpecialVar_Result);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_GALAR_FULLDLC);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), POKEDEX_VARIANT_GALAR_FULLDLC);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), ITEM_DYNAMAX_BAND);
+    EXPECT(!Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO));
+    EXPECT(Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR));
+    EXPECT(!Rogue_GetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Post-partner Professor Pokedex changes do not alter the issued gimmick")
+{
+    ResetCaughtMonTestState();
+    VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, ITEM_Z_POWER_RING);
+    VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_REPORT_TO_PROF);
     gSpecialVar_0x8006 = POKEDEX_VARIANT_GALAR_FULLDLC;
 
     RoguePokedex_ApplyCuratedSelection();
@@ -683,6 +783,58 @@ TEST("Professor Pokedex changes do not alter the one-time gimmick choice")
     EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), ITEM_Z_POWER_RING);
 
     ClearCaughtMonTestState();
+}
+
+TEST("Favorite-game Pokedex selection sets its matching trainer pool")
+{
+    static const struct
+    {
+        u8 variant;
+        u16 enabledToggle;
+    } regionalCases[] =
+    {
+        {POKEDEX_VARIANT_KANTO_RBY, CONFIG_TOGGLE_TRAINER_KANTO},
+        {POKEDEX_VARIANT_JOHTO_HGSS, CONFIG_TOGGLE_TRAINER_JOHTO},
+        {POKEDEX_VARIANT_HOENN_ORAS, CONFIG_TOGGLE_TRAINER_HOENN},
+        {POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS, CONFIG_TOGGLE_TRAINER_SINNOH},
+        {POKEDEX_VARIANT_UNOVA_BW2, CONFIG_TOGGLE_TRAINER_UNOVA},
+        {POKEDEX_VARIANT_LEGENDS_ZAFULLDLC, CONFIG_TOGGLE_TRAINER_KALOS},
+        {POKEDEX_VARIANT_ALOLA_USUM, CONFIG_TOGGLE_TRAINER_ALOLA},
+        {POKEDEX_VARIANT_GALAR_FULLDLC, CONFIG_TOGGLE_TRAINER_GALAR},
+        {POKEDEX_VARIANT_PALDEA_FULLDLC, CONFIG_TOGGLE_TRAINER_PALDEA},
+    };
+    static const u16 trainerToggles[] =
+    {
+        CONFIG_TOGGLE_TRAINER_KANTO,
+        CONFIG_TOGGLE_TRAINER_JOHTO,
+        CONFIG_TOGGLE_TRAINER_HOENN,
+        CONFIG_TOGGLE_TRAINER_SINNOH,
+        CONFIG_TOGGLE_TRAINER_UNOVA,
+        CONFIG_TOGGLE_TRAINER_KALOS,
+        CONFIG_TOGGLE_TRAINER_ALOLA,
+        CONFIG_TOGGLE_TRAINER_GALAR,
+        CONFIG_TOGGLE_TRAINER_PALDEA,
+    };
+    u8 i;
+    u8 j;
+
+    for (i = 0; i < ARRAY_COUNT(regionalCases); ++i)
+    {
+        RoguePokedex_ApplyTrainerPoolForVariant(regionalCases[i].variant);
+
+        for (j = 0; j < ARRAY_COUNT(trainerToggles); ++j)
+            EXPECT_EQ(Rogue_GetConfigToggle(trainerToggles[j]), trainerToggles[j] == regionalCases[i].enabledToggle);
+    }
+
+    for (i = POKEDEX_VARIANT_NATIONAL_GEN1; i <= POKEDEX_VARIANT_NATIONAL_GEN9; ++i)
+    {
+        u8 genLimit = i - POKEDEX_VARIANT_NATIONAL_GEN1 + 1;
+
+        RoguePokedex_ApplyTrainerPoolForVariant(i);
+
+        for (j = 0; j < ARRAY_COUNT(trainerToggles); ++j)
+            EXPECT_EQ(Rogue_GetConfigToggle(trainerToggles[j]), j < genLimit);
+    }
 }
 
 TEST("Postgame direct Pokedex editing remains unrestricted")

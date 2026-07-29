@@ -1,8 +1,8 @@
-const FLAG_HIDE_ELM = FLAG_TEMP_1
+const FLAG_HIDE_BIRCH = FLAG_TEMP_1
 
 const VAR_RETURN_STATE = VAR_TEMP_0
 
-const OBJ_EVENT_ELM = 2
+const OBJ_EVENT_BIRCH = 2
 
 mapscripts Rogue_Area_Labs_MapScripts 
 {
@@ -17,17 +17,17 @@ script Rogue_Area_Labs_OnMapLoad
 {
     if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_SPAWN)
     {
-        clearflag(FLAG_HIDE_ELM)
+        clearflag(FLAG_HIDE_BIRCH)
     }
     elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEAVE_LAB)
     {
-        clearflag(FLAG_HIDE_ELM)
-        setobjectxyperm(OBJ_EVENT_ELM, 7, 9)
-        setobjectmovementtype(OBJ_EVENT_ELM, MOVEMENT_TYPE_FACE_UP)
+        clearflag(FLAG_HIDE_BIRCH)
+        setobjectxyperm(OBJ_EVENT_BIRCH, 7, 9)
+        setobjectmovementtype(OBJ_EVENT_BIRCH, MOVEMENT_TYPE_FACE_UP)
     }
     else
     {
-        setflag(FLAG_HIDE_ELM)
+        setflag(FLAG_HIDE_BIRCH)
     }
 }
 
@@ -48,23 +48,23 @@ script Rogue_Area_Labs_StartGame
 {
     lock
 
-    applymovement(OBJ_EVENT_ELM, ElmStartGame0)
+    applymovement(OBJ_EVENT_BIRCH, BirchStartGame0)
     applymovement(OBJ_EVENT_ID_PLAYER, PlayerStartGame0)
     waitmovement(0)
 
-    msgbox(format("ELM: There you are!\nBack up on your feet now!\pYou seem fine, but perhaps it would be a good idea for you to have a wander around {POKEMON_HUB} to refresh your memory.\pOnce you're ready, come and find me in my lab."))
+    msgbox(format("BIRCH: There you are!\nBack up on your feet now!\pYou seem fine, but perhaps it would be a good idea for you to have a wander around {POKEMON_HUB} to refresh your memory.\pOnce you're ready, come and find me in my lab."))
     closemessage
 
-    applymovement(OBJ_EVENT_ELM, ElmStartGame1)
+    applymovement(OBJ_EVENT_BIRCH, BirchStartGame1)
     waitmovement(0)
 
     opendoor(7, 6)
     waitdooranim
 
-    applymovement(OBJ_EVENT_ELM, ElmStartGame2)
+    applymovement(OBJ_EVENT_BIRCH, BirchStartGame2)
     waitmovement(0)
-    hideobjectat(OBJ_EVENT_ELM, MAP_ROGUE_AREA_LABS)
-    setflag(FLAG_HIDE_ELM)
+    hideobjectat(OBJ_EVENT_BIRCH, MAP_ROGUE_AREA_LABS)
+    setflag(FLAG_HIDE_BIRCH)
 
     closedoor(7, 6)
     waitdooranim
@@ -73,7 +73,7 @@ script Rogue_Area_Labs_StartGame
     release
 }
 
-movement ElmStartGame0 
+movement BirchStartGame0
 {
     walk_in_place_right
 }
@@ -83,13 +83,13 @@ movement PlayerStartGame0
     face_left
 }
 
-movement ElmStartGame1
+movement BirchStartGame1
 {
     walk_left
     walk_up * 2
 }
 
-movement ElmStartGame2
+movement BirchStartGame2
 {
     walk_up
 }
@@ -98,8 +98,8 @@ script Rogue_Area_Labs_TutorialGuide
 {
     lock
 
-    turnobject(OBJ_EVENT_ELM, DIR_NORTH)
-    msgbox(format("ELM: {PLAYER}!\pQuickly, we must make haste!"))
+    turnobject(OBJ_EVENT_BIRCH, DIR_NORTH)
+    msgbox(format("BIRCH: {PLAYER}!\pQuickly, we must make haste!"))
 
     closemessage
     setvar(VAR_0x8004, HUB_AREA_ADVENTURE_ENTRANCE)
@@ -108,58 +108,58 @@ script Rogue_Area_Labs_TutorialGuide
     switch(var(VAR_RESULT))
     {
         case HUB_AREA_CONN_NORTH:
-            applymovement(OBJ_EVENT_ELM, ElmTutorialGuideNorth)
+            applymovement(OBJ_EVENT_BIRCH, BirchTutorialGuideNorth)
             break
 
         case HUB_AREA_CONN_EAST:
-            applymovement(OBJ_EVENT_ELM, ElmTutorialGuideEast)
+            applymovement(OBJ_EVENT_BIRCH, BirchTutorialGuideEast)
             break
 
         case HUB_AREA_CONN_SOUTH:
-            applymovement(OBJ_EVENT_ELM, ElmTutorialGuideSouth)
+            applymovement(OBJ_EVENT_BIRCH, BirchTutorialGuideSouth)
             break
 
         case HUB_AREA_CONN_WEST:
-            applymovement(OBJ_EVENT_ELM, ElmTutorialGuideWest)
+            applymovement(OBJ_EVENT_BIRCH, BirchTutorialGuideWest)
             break
     }
 
     waitmovement(0)
-    setobjectxy(OBJ_EVENT_ELM, 0, 0)
-    setobjectxyperm(OBJ_EVENT_ELM, 0, 0)
-    hideobjectat(OBJ_EVENT_ELM, MAP_ROGUE_AREA_LABS)
-    setflag(FLAG_HIDE_ELM)
+    setobjectxy(OBJ_EVENT_BIRCH, 0, 0)
+    setobjectxyperm(OBJ_EVENT_BIRCH, 0, 0)
+    hideobjectat(OBJ_EVENT_BIRCH, MAP_ROGUE_AREA_LABS)
+    setflag(FLAG_HIDE_BIRCH)
 
     addvar(VAR_ROGUE_INTRO_STATE, 1)
 
     release
 }
 
-movement ElmTutorialGuideNorth
+movement BirchTutorialGuideNorth
 {
     walk_fast_right * 6
     walk_fast_up * 9
 }
 
-movement ElmTutorialGuideEast
+movement BirchTutorialGuideEast
 {
     walk_fast_right * 9
 }
 
-movement ElmTutorialGuideSouth
+movement BirchTutorialGuideSouth
 {
     walk_fast_right * 6
     walk_fast_down * 4
 }
 
-movement ElmTutorialGuideWest
+movement BirchTutorialGuideWest
 {
     walk_fast_left * 7
 }
 
 script Rogue_Area_Labs_LabSign
 {
-    msgbox(format("Professor Elm's Lab"), MSGBOX_SIGN)
+    msgbox(format("Professor Birch's Lab"), MSGBOX_SIGN)
 }
 
 script Rogue_Area_Labs_ConfigSign

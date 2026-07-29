@@ -34,7 +34,9 @@ void RoguePokedex_AppendProfessorOptions(void);
 void RoguePokedex_BufferCuratedSelection(void);
 void RoguePokedex_GetSelectedNativeGimmick(void);
 void RoguePokedex_StoreInitialSelection(void);
+void RoguePokedex_GrantInitialGimmickItem(void);
 void RoguePokedex_ApplyCuratedSelection(void);
+void RoguePokedex_ApplyTrainerPoolForVariant(u8 variant);
 
 bool8 RoguePokedex_IsSpeciesEnabled(u16 species);
 bool8 RoguePokedex_IsSpeciesEnabledForDisplay(u16 species);

@@ -182,6 +182,14 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Preserved favorite-game Pokédex selections across the nested gimmick menu,
+  offered the gimmick choice for every National dex, and allowed Birch to
+  change the Pokédex before partner selection while refreshing the candidates.
+- Made favorite-game Pokédex selections configure the matching trainer pool:
+  regional dexes use their region, while National dexes cumulatively enable
+  trainer regions through their selected generation.
+- Restored Professor Birch as the main professor throughout the intro,
+  catching tutorial, and hub.
 - Prevented Starmobile's retaliatory Torque move from redirecting a triggering
   Knock Off's delayed item removal onto the original attacker.
 - Listed the number and nicknames of lost party members in the Sacred Ash

@@ -43,6 +43,7 @@
 #include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
+#include "rogue_popup.h"
 #include "rogue_ridemon.h"
 #include "rogue_settings.h"
 #include "rogue_query.h"
@@ -5463,6 +5464,95 @@ void RoguePokedex_GetSelectedNativeGimmick(void)
     gSpecialVar_Result = RoguePokedex_GetNativeGimmickItem(gSpecialVar_0x8006);
 }
 
+static void ClearTrainerPool(void)
+{
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, FALSE);
+#ifdef ROGUE_EXPANSION
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR, FALSE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, FALSE);
+#endif
+}
+
+void RoguePokedex_ApplyTrainerPoolForVariant(u8 variant)
+{
+    ClearTrainerPool();
+
+#ifdef ROGUE_EXPANSION
+    if (variant >= POKEDEX_VARIANT_NATIONAL_GEN1
+        && variant <= POKEDEX_VARIANT_NATIONAL_GEN9)
+    {
+        u8 genLimit = GetVariantGenLimit(variant);
+
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, genLimit >= 1);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, genLimit >= 2);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, genLimit >= 3);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH, genLimit >= 4);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA, genLimit >= 5);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS, genLimit >= 6);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA, genLimit >= 7);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR, genLimit >= 8);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, genLimit >= 9);
+        return;
+    }
+
+    switch (variant)
+    {
+    case POKEDEX_VARIANT_KANTO_RBY:
+    case POKEDEX_VARIANT_KANTO_LETSGO:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
+        break;
+    case POKEDEX_VARIANT_JOHTO_GSC:
+    case POKEDEX_VARIANT_JOHTO_HGSS:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
+        break;
+    case POKEDEX_VARIANT_HOENN_RSE:
+    case POKEDEX_VARIANT_HOENN_ORAS:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
+        break;
+    case POKEDEX_VARIANT_SINNOH_DP:
+    case POKEDEX_VARIANT_SINNOH_PL:
+    case POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH, TRUE);
+        break;
+    case POKEDEX_VARIANT_UNOVA_BW:
+    case POKEDEX_VARIANT_UNOVA_BW2:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA, TRUE);
+        break;
+    case POKEDEX_VARIANT_KALOS:
+    case POKEDEX_VARIANT_LEGENDS_ZA:
+    case POKEDEX_VARIANT_LEGENDS_ZAFULLDLC:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS, TRUE);
+        break;
+    case POKEDEX_VARIANT_ALOLA_SM:
+    case POKEDEX_VARIANT_ALOLA_USUM:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA, TRUE);
+        break;
+    case POKEDEX_VARIANT_GALAR_SWSH:
+    case POKEDEX_VARIANT_GALAR_FULLDLC:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR, TRUE);
+        break;
+    case POKEDEX_VARIANT_PALDEA_SCVI:
+    case POKEDEX_VARIANT_PALDEA_FULLDLC:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, TRUE);
+        break;
+    default:
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
+        break;
+    }
+#else
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
+#endif
+}
+
 static bool8 IsValidInitialGimmickItem(u16 item)
 {
     return item == ITEM_NONE
@@ -5474,11 +5564,19 @@ static bool8 IsValidInitialGimmickItem(u16 item)
 
 void RoguePokedex_StoreInitialSelection(void)
 {
+    u16 gimmickItem = gSpecialVar_0x8005;
+    u16 nativeGimmickItem = RoguePokedex_GetNativeGimmickItem(gSpecialVar_0x8006);
+
+    if (nativeGimmickItem != ITEM_NONE)
+        gimmickItem = nativeGimmickItem;
+
     if (RoguePokedex_IsCuratedVariant(gSpecialVar_0x8006)
-        && IsValidInitialGimmickItem(gSpecialVar_0x8005))
+        && IsValidInitialGimmickItem(gimmickItem))
     {
         VarSet(VAR_ROGUE_INITIAL_DEX_SELECTION, gSpecialVar_0x8006);
-        VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, gSpecialVar_0x8005);
+        VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, gimmickItem);
+        RoguePokedex_SetDexVariant(gSpecialVar_0x8006);
+        RoguePokedex_ApplyTrainerPoolForVariant(gSpecialVar_0x8006);
         gSpecialVar_Result = TRUE;
     }
     else
@@ -5487,11 +5585,47 @@ void RoguePokedex_StoreInitialSelection(void)
     }
 }
 
+void RoguePokedex_GrantInitialGimmickItem(void)
+{
+    u16 item = VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM);
+
+    gSpecialVar_Result = ITEM_NONE;
+
+    if (item == ITEM_NONE || !IsValidInitialGimmickItem(item))
+        return;
+
+    if (CheckBagHasItem(item, 1))
+        return;
+
+    gSpecialVar_Result = item;
+
+    if (AddBagItem(item, 1))
+        Rogue_PushPopup_AddItem(item, 1);
+    else
+        Rogue_PushPopup_CannotTakeItem(item, 1);
+}
+
 void RoguePokedex_ApplyCuratedSelection(void)
 {
     if (RoguePokedex_IsCuratedVariant(gSpecialVar_0x8006))
     {
-        RoguePokedex_SetDexVariant(gSpecialVar_0x8006);
+        u8 variant = gSpecialVar_0x8006;
+
+        if (VarGet(VAR_ROGUE_INTRO_STATE) <= ROGUE_INTRO_STATE_CATCH_MON)
+        {
+            u16 nativeGimmickItem = RoguePokedex_GetNativeGimmickItem(variant);
+
+            VarSet(VAR_ROGUE_INITIAL_DEX_SELECTION, variant);
+
+            // National dexes keep the explicitly chosen intro gimmick.
+            if (nativeGimmickItem != ITEM_NONE
+                || variant < POKEDEX_VARIANT_NATIONAL_GEN1
+                || variant > POKEDEX_VARIANT_NATIONAL_GEN9)
+                VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, nativeGimmickItem);
+        }
+
+        RoguePokedex_SetDexVariant(variant);
+        RoguePokedex_ApplyTrainerPoolForVariant(variant);
         gSpecialVar_Result = TRUE;
     }
     else

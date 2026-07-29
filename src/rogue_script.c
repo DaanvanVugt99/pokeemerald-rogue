@@ -1582,7 +1582,10 @@ void Rogue_AssignDefaultRegion()
 
 #ifdef ROGUE_EXPANSION
     if (RoguePokedex_IsCuratedVariant(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION)))
+    {
         RoguePokedex_SetDexVariant(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION));
+        RoguePokedex_ApplyTrainerPoolForVariant(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION));
+    }
     else
         RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
 #else

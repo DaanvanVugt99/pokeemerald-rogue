@@ -228,11 +228,12 @@ script Rogue_PreIntro
 
                 if(var(VAR_RESULT) == YES)
                 {
+                    copyvar(VAR_0x800B, VAR_0x8006)
                     special(RoguePokedex_GetSelectedNativeGimmick)
                     copyvar(VAR_0x8005, VAR_RESULT)
                     setvar(VAR_0x8004, YES)
 
-                    if(var(VAR_0x8006) == POKEDEX_VARIANT_NATIONAL_GEN9)
+                    if(var(VAR_0x800B) >= POKEDEX_VARIANT_NATIONAL_GEN1 && var(VAR_0x800B) <= POKEDEX_VARIANT_NATIONAL_GEN9)
                     {
                         message(format("{COLOR BLUE}And what is your favorite battle gimmick?"))
                         waitmessage
@@ -249,6 +250,8 @@ script Rogue_PreIntro
                             copyvar(VAR_0x8005, VAR_RESULT)
                         }
                     }
+
+                    copyvar(VAR_0x8006, VAR_0x800B)
                 }
 
                 if(var(VAR_0x8004) == YES)
@@ -315,7 +318,7 @@ script Rogue_Intro_MapScripts_LoadFrame_0
 
     // Pokemon walking anims
     //
-    msgbox(format("I am Professor Elm."))
+    msgbox(format("I am Professor Birch."))
 
     call(Rogue_Intro_PlayAnim_FlyingMons)
     call(Rogue_Intro_PlayAnim_FightMons)
@@ -323,7 +326,7 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     call(Rogue_Intro_PlayAnim_ParentChildMon)
 
     msgbox(format(
-        "ELM: Pokémon inhabit every inch of this world… Be it land, sky or sea!\p"
+        "BIRCH: Pokémon inhabit every inch of this world… Be it land, sky or sea!\p"
         "Pokémon are the friends of many and, for some, they even train and fight alongside their Pokémon in an attempt to become a Pokémon Champion!\p"
         "I myself study Pokémon to try and understand what makes each and every species unique!\p"
 
