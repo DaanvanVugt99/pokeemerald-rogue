@@ -6039,6 +6039,8 @@ static void SelectShrineGuardianMoves(const u16 *customMoves, u8 customMoveCount
     AGB_ASSERT(outMoveCount == MAX_MON_MOVES);
 }
 
+#define SHRINE_GUARDIAN_TYPING_CHANCE 67
+
 void Rogue_PrepareShrineChallenge(void)
 {
     u8 i;
@@ -6047,7 +6049,7 @@ void Rogue_PrepareShrineChallenge(void)
     u16 customMoves[MAX_MON_MOVES];
     u16 customMoveCount;
     u16 presetCount = gRoguePokemonProfiles[species].competitiveSetCount;
-    u32 customMonId = RogueGift_CreateDynamicMonIdRaw(UNIQUE_RARITY_EPIC, species);
+    u32 customMonId = RogueGift_CreateDynamicMonIdRawWithTypingChance(UNIQUE_RARITY_EPIC, species, SHRINE_GUARDIAN_TYPING_CHANCE);
     u32 temp;
 
     gRogueRun.hasChallengedShrine = TRUE;

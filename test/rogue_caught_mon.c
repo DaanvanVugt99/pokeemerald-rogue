@@ -558,6 +558,8 @@ TEST("Shrine guardian builds varied valid movesets from every competitive-set sl
     bool8 sawTailwind = FALSE;
     bool8 sawSacredFire = FALSE;
     bool8 sawBraveBird = FALSE;
+    u16 typedGuardianCount = 0;
+    u16 originalTypingCount = 0;
     u16 seed;
     u8 moveSlot;
 
@@ -569,6 +571,12 @@ TEST("Shrine guardian builds varied valid movesets from every competitive-set sl
 
         SeedRng(seed);
         Rogue_PrepareShrineChallenge();
+
+        if(RogueGift_GetCustomMonType(RogueGift_GetCustomMonId(&gEnemyParty[0]), 0) != TYPE_NONE
+        || RogueGift_GetCustomMonType(RogueGift_GetCustomMonId(&gEnemyParty[0]), 1) != TYPE_NONE)
+            typedGuardianCount++;
+        else
+            originalTypingCount++;
 
         EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_MOVE1), RogueGift_GetCustomMonMove(RogueGift_GetCustomMonId(&gEnemyParty[0]), 0));
         EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_MOVE2), RogueGift_GetCustomMonMove(RogueGift_GetCustomMonId(&gEnemyParty[0]), 1));
@@ -599,6 +607,8 @@ TEST("Shrine guardian builds varied valid movesets from every competitive-set sl
     EXPECT(sawTailwind);
     EXPECT(sawSacredFire);
     EXPECT(sawBraveBird);
+    EXPECT_GT(typedGuardianCount, originalTypingCount);
+    EXPECT_NE(originalTypingCount, 0);
 
     gBattleOutcome = B_OUTCOME_WON;
     Rogue_Battle_EndWildBattle();

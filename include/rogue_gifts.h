@@ -66,6 +66,7 @@ u8 const* RogueGift_GetRarityName(u8 rarity);
 void RogueGift_CreateMon(u32 customMonId, struct Pokemon* mon, u16 species, u8 level, u8 fixedIV);
 u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species);
 u32 RogueGift_CreateDynamicMonIdRaw(u8 rarity, u16 species);
+u32 RogueGift_CreateDynamicMonIdRawWithTypingChance(u8 rarity, u16 species, u8 typingChance);
 u8 RogueGift_RollDynamicUniqueRarity(bool8 ignoreUnlockGates);
 
 void RogueGift_EnsureDynamicCustomMonsAreValid();

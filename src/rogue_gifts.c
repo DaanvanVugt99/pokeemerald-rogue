@@ -2606,7 +2606,9 @@ static u32 SelectRandomType(u16 species)
     return type;
 }
 
-static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGate, u16 forcedUniqueAbility)
+#define DEFAULT_DYNAMIC_MON_TYPING_CHANCE 50
+
+static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGate, u16 forcedUniqueAbility, u8 typingChance)
 {
     u16 i;
     u32 temp;
@@ -2615,17 +2617,12 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
 
     AGB_ASSERT(forcedUniqueAbility == ABILITY_NONE || RogueGift_IsDynamicUniqueAbilityEligible(forcedUniqueAbility));
     AGB_ASSERT(forcedUniqueAbility == ABILITY_NONE || rarity == UNIQUE_RARITY_LEGENDARY);
+    AGB_ASSERT(typingChance <= 100);
 
-    switch (Random() % 2)
-    {
-    case 0:
-        compressedDataUntyped.format = COMPRESSED_FORMAT_ORIGINAL;
-        break;
-
-    case 1:
+    if((Random() % 100) < typingChance)
         compressedDataUntyped.format = COMPRESSED_FORMAT_MON_TYPE;
-        break;
-    }
+    else
+        compressedDataUntyped.format = COMPRESSED_FORMAT_ORIGINAL;
 
     if(compressedDataUntyped.format == COMPRESSED_FORMAT_MON_TYPE && !ignoreTypingUnlockGate && !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_TYPINGS))
         compressedDataUntyped.format = COMPRESSED_FORMAT_ORIGINAL;
@@ -2831,12 +2828,17 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
 
 u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species)
 {
-    return CreateDynamicMonId(rarity, species, FALSE, ABILITY_NONE);
+    return CreateDynamicMonId(rarity, species, FALSE, ABILITY_NONE, DEFAULT_DYNAMIC_MON_TYPING_CHANCE);
 }
 
 u32 RogueGift_CreateDynamicMonIdRaw(u8 rarity, u16 species)
 {
-    return CreateDynamicMonId(rarity, species, TRUE, ABILITY_NONE);
+    return RogueGift_CreateDynamicMonIdRawWithTypingChance(rarity, species, DEFAULT_DYNAMIC_MON_TYPING_CHANCE);
+}
+
+u32 RogueGift_CreateDynamicMonIdRawWithTypingChance(u8 rarity, u16 species, u8 typingChance)
+{
+    return CreateDynamicMonId(rarity, species, TRUE, ABILITY_NONE, typingChance);
 }
 
 static bool8 IsDynamicUniqueMonValid(struct UniqueMon* mon)
@@ -2923,7 +2925,7 @@ u32 RogueGift_DebugCreateAnomalousMonId(u16 species)
 {
     u16 ability = sAnomalousUniqueAbilities[Random() % ARRAY_COUNT(sAnomalousUniqueAbilities)];
 
-    return CreateDynamicMonId(UNIQUE_RARITY_LEGENDARY, species, TRUE, ability);
+    return CreateDynamicMonId(UNIQUE_RARITY_LEGENDARY, species, TRUE, ability, DEFAULT_DYNAMIC_MON_TYPING_CHANCE);
 }
 #endif
 

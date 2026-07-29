@@ -55,6 +55,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Increased the Sacred Trial Ho-Oh's chance of receiving a unique typing from
+  50% to 67%.
 - Reworded Frontier Brain Pokémon rewards as gifts from the Frontier Brain
   instead of using generic item copy.
 - Focused older Pokémon stat buffs around their Divergence roles: Arbok and
