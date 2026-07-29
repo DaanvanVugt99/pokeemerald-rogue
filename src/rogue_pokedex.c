@@ -1417,9 +1417,29 @@ extern const u8 gAbilityNames[][ABILITY_NAME_LENGTH + 1];
 
 static void BufferPokedexStatValue(u16 species, u16 value, u8 stat)
 {
-    ConvertUIntToDecimalStringN(gStringVar4, value, STR_CONV_MODE_RIGHT_ALIGN, 3);
     if (Rogue_IsSpeciesStatBuffed(species, stat))
-        StringAppend(gStringVar4, gText_Plus);
+    {
+        u8 *dst = StringCopy(gStringVar4, gText_Plus);
+
+        ConvertUIntToDecimalStringN(dst, value, STR_CONV_MODE_LEFT_ALIGN, 3);
+    }
+    else
+    {
+        ConvertUIntToDecimalStringN(gStringVar4, value, STR_CONV_MODE_RIGHT_ALIGN, 3);
+    }
+}
+
+static bool8 IsAnySpeciesStatBuffed(u16 species)
+{
+    u8 stat;
+
+    for (stat = 0; stat < NUM_STATS; ++stat)
+    {
+        if (Rogue_IsSpeciesStatBuffed(species, stat))
+            return TRUE;
+    }
+
+    return FALSE;
 }
 
 static void DisplayMonStatsText(void)
@@ -1482,7 +1502,16 @@ static void DisplayMonStatsText(void)
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Total);
 
-        ConvertUIntToDecimalStringN(gStringVar4, bst, STR_CONV_MODE_RIGHT_ALIGN, 3);
+        if (IsAnySpeciesStatBuffed(sPokedexMenu->viewBaseSpecies))
+        {
+            u8 *dst = StringCopy(gStringVar4, gText_Plus);
+
+            ConvertUIntToDecimalStringN(dst, bst, STR_CONV_MODE_LEFT_ALIGN, 3);
+        }
+        else
+        {
+            ConvertUIntToDecimalStringN(gStringVar4, bst, STR_CONV_MODE_RIGHT_ALIGN, 3);
+        }
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR_RANGE(bst, 600, 299), TEXT_SKIP_DRAW, gStringVar4);
 
         // HP
