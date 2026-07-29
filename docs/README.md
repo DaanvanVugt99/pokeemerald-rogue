@@ -5,6 +5,9 @@ material retained from the projects it builds upon.
 
 ## Current Divergence Documentation
 
+- [Friend release checklist](FRIEND_RELEASE_CHECKLIST.md) defines the
+  ship/no-ship gate, manual smoke test, friend-test package, and feedback exit
+  criteria for a small private preview.
 - [Design notes](design/README.md) describe local planning resources used while
   developing Divergence. These notes support development, but code and tests
   remain the source of truth for implemented behavior.

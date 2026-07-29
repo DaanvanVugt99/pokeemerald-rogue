@@ -602,7 +602,9 @@ EventScript_VsSeekerChargingDone::
 	.include "data/scripts/Rogue/Rogue_FollowMon.inc"
 	.include "data/scripts/Rogue/Rogue_Hub.inc"
 	.include "data/scripts/Rogue/Rogue_Manager.inc"
+#ifdef ROGUE_FEATURE_MULTIPLAYER
 	.include "data/scripts/Rogue/Rogue_Multiplayer.inc"
+#endif
 
 	.include "data/scripts/Rogue/Strings/Rogue_Strings_Common.inc"
 	.include "data/scripts/Rogue/Strings/Rogue_Strings_Items.inc"

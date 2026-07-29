@@ -23,6 +23,8 @@
 #include "rogue_save.h"
 #include "rogue_timeofday.h"
 
+#ifdef ROGUE_FEATURE_MULTIPLAYER
+
 #define NET_STATE_NONE              0
 #define NET_STATE_ACTIVE            (1 << 0)
 #define NET_STATE_HOST              (1 << 1)
@@ -1494,3 +1496,163 @@ void RogueMP_NotifyAcceptTalkRequest()
 
     MpLog("RequestTalkToPlayer accepted");
 }
+
+#else
+
+EWRAM_DATA struct RogueNetMultiplayer* gRogueMultiplayer = NULL;
+
+static const u8 sMultiplayerUnavailableText[] = _("");
+static const u8 sMultiplayerUnavailableTrainerId[] = {0, 0, 0, 0};
+
+void RogueMP_Init(void)
+{
+    gRogueMultiplayer = NULL;
+}
+
+bool8 RogueMP_IsActive(void)
+{
+    return FALSE;
+}
+
+bool8 RogueMP_IsActiveOrConnecting(void)
+{
+    return FALSE;
+}
+
+bool8 RogueMP_IsConnecting(void)
+{
+    return FALSE;
+}
+
+bool8 RogueMP_IsHost(void)
+{
+    return FALSE;
+}
+
+bool8 RogueMP_IsClient(void)
+{
+    return FALSE;
+}
+
+u8 RogueMP_GetLocalPlayerId(void)
+{
+    return 0;
+}
+
+u8 RogueMP_GetRemotePlayerId(void)
+{
+    return 1;
+}
+
+bool8 RogueMP_IsRemotePlayerActive(void)
+{
+    return FALSE;
+}
+
+u8 RogueMP_GetPlayerOutfitId(u8 playerId)
+{
+    return 0;
+}
+
+u16 RogueMP_GetPlayerOutfitStyle(u8 playerId, u8 outfitStyle)
+{
+    return 0;
+}
+
+const u8* RogueMP_GetPlayerName(u8 playerId)
+{
+    return sMultiplayerUnavailableText;
+}
+
+const u8* RogueMP_GetPlayerHubName(u8 playerId)
+{
+    return sMultiplayerUnavailableText;
+}
+
+const u8* RogueMP_GetPlayerTrainerId(u8 playerId)
+{
+    return sMultiplayerUnavailableTrainerId;
+}
+
+u8 RogueMP_WaitPlayerStatusSync(bool8 canCancel)
+{
+    return TASK_NONE;
+}
+
+u8 RogueMP_WaitUpdatedPlayerStatus(bool8 canCancel)
+{
+    return TASK_NONE;
+}
+
+void RogueMP_PushLocalPlayerStatus(u8 status)
+{
+}
+
+bool8 RogueMP_TryExecuteScripts(void)
+{
+    return FALSE;
+}
+
+void RogueMP_OpenHost(void)
+{
+}
+
+void RogueMP_OpenClient(void)
+{
+}
+
+void RogueMP_Close(void)
+{
+    gRogueMultiplayer = NULL;
+}
+
+void RogueMP_MainCB(void)
+{
+}
+
+void RogueMP_OverworldCB(void)
+{
+}
+
+void RogueMP_RemoveObjectEvents(void)
+{
+}
+
+u8 RogueMP_WaitForConnection(void)
+{
+    return TASK_NONE;
+}
+
+u8 RogueMP_WaitForOutgoingCommand(bool8 canCancel)
+{
+    return TASK_NONE;
+}
+
+u8 RogueMP_WaitForIncomingCommand(bool8 canCancel)
+{
+    return TASK_NONE;
+}
+
+bool8 RogueMP_IsWaitingForCommandToFinish(void)
+{
+    return FALSE;
+}
+
+void RogueMP_Cmd_RequestPartyMon(u8 fromSlot, u8 toSlot)
+{
+}
+
+void RogueMP_Cmd_RequestTalkToPlayer(void)
+{
+}
+
+bool8 RogueMP_HasTalkRequestPending(void)
+{
+    return FALSE;
+}
+
+void RogueMP_NotifyAcceptTalkRequest(void)
+{
+}
+
+#endif

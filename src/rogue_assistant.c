@@ -141,6 +141,7 @@ const struct RogueAssistantHeader gRogueAssistantHeader =
     .rogueAssistantCompatVersion = ROGUE_ASSISTANT_COMPAT_VERSION,
 
     // MP Data
+#ifdef ROGUE_FEATURE_MULTIPLAYER
     .multiplayerPtr = &gRogueMultiplayer,
     .netMultiplayerSize = sizeof(struct RogueNetMultiplayer),
 
@@ -158,6 +159,9 @@ const struct RogueAssistantHeader gRogueAssistantHeader =
     .netRequestStateOffset = offsetof(struct RogueNetMultiplayer, netRequestState),
     .netCurrentStateOffset = offsetof(struct RogueNetMultiplayer, netCurrentState),
     .netPlayerCount = NET_PLAYER_CAPACITY,
+#else
+    .multiplayerPtr = NULL,
+#endif
 
     .saveBlock1Ptr = &gSaveBlock1Ptr,
     .saveBlock2Ptr = &gSaveBlock2Ptr,

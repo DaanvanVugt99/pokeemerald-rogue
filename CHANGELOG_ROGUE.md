@@ -16,7 +16,7 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
-- Added a `+` marker after Pokédex stat values that exceed the pinned canonical
+- Added a `+` marker before Pokédex stat values that exceed the pinned canonical
   baseline, stored in otherwise-unused per-species bake bits and generated
   automatically alongside the species-change report.
 - Added a generated species-change report tracking base stats, typing, and
@@ -55,6 +55,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Disabled the legacy multiplayer implementation while its replacement is in
+  development, and replaced its hub interaction with a work-in-progress notice.
 - Renamed the legacy Modern and Classic Plus Pokédex variants to Rogue Modern
   and Rogue Classic to distinguish them from Divergence's main dex selection.
 - Replaced the opening Modern/Classic prompt with a favorite-game Pokédex
