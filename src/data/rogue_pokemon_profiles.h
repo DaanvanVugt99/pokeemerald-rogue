@@ -23899,7 +23899,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 		.moves=
 		{
 			MOVE_BRAVE_BIRD,
-			MOVE_RETURN,
+			MOVE_DRILL_RUN,
 			MOVE_KNOCK_OFF,
 			MOVE_QUICK_ATTACK,
 		},
@@ -23914,7 +23914,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 		.moves=
 		{
 			MOVE_BRAVE_BIRD,
-			MOVE_RETURN,
+			MOVE_DRILL_RUN,
 			MOVE_KNOCK_OFF,
 			MOVE_PURSUIT,
 		},
@@ -23930,7 +23930,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 		{
 			MOVE_BRAVE_BIRD,
 			MOVE_KNOCK_OFF,
-			MOVE_RETURN,
+			MOVE_DRILL_RUN,
 			MOVE_QUICK_ATTACK,
 		},
 	},
@@ -23945,7 +23945,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 		{
 			MOVE_BRAVE_BIRD,
 			MOVE_JUMP_KICK,
-			MOVE_RETURN,
+			MOVE_DRILL_RUN,
 			MOVE_KNOCK_OFF,
 		},
 	},
@@ -23961,7 +23961,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 			MOVE_SWORDS_DANCE,
 			MOVE_BRAVE_BIRD,
 			MOVE_JUMP_KICK,
-			MOVE_RETURN,
+			MOVE_DRILL_RUN,
 		},
 	},
 	{
@@ -23974,7 +23974,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 		.moves=
 		{
 			MOVE_BRAVE_BIRD,
-			MOVE_RETURN,
+			MOVE_DRILL_RUN,
 			MOVE_JUMP_KICK,
 			MOVE_KNOCK_OFF,
 		},
@@ -23988,7 +23988,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 		{
 			MOVE_SWORDS_DANCE,
 			MOVE_DRILL_PECK,
-			MOVE_QUICK_ATTACK,
+			MOVE_DRILL_RUN,
 			MOVE_JUMP_KICK,
 		},
 	},
@@ -24002,7 +24002,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 			MOVE_JUMP_KICK,
 			MOVE_SWORDS_DANCE,
 			MOVE_DRILL_PECK,
-			MOVE_THRASH,
+			MOVE_DRILL_RUN,
 		},
 	},
 	{
@@ -24017,7 +24017,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 			MOVE_SWORDS_DANCE,
 			MOVE_BRAVE_BIRD,
 			MOVE_KNOCK_OFF,
-			MOVE_LOW_KICK,
+			MOVE_DRILL_RUN,
 		},
 	},
 	{
@@ -24030,7 +24030,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DODRIO[]
 		.moves=
 		{
 			MOVE_BRAVE_BIRD,
-			MOVE_DOUBLE_EDGE,
+			MOVE_DRILL_RUN,
 			MOVE_KNOCK_OFF,
 			MOVE_LOW_KICK,
 		},
@@ -49078,7 +49078,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_NOCTOWL[
 		.moves=
 		{
 			MOVE_HURRICANE,
-			MOVE_HYPER_VOICE,
+			MOVE_PSYCHIC,
 			MOVE_ROOST,
 			MOVE_DEFOG,
 		},
@@ -49109,7 +49109,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_NOCTOWL[
 		{
 			MOVE_ROOST,
 			MOVE_HURRICANE,
-			MOVE_DEFOG,
+			MOVE_PSYCHIC,
 			MOVE_NASTY_PLOT,
 		},
 	},

@@ -73,16 +73,23 @@ Format follows Keep a Changelog loosely:
   instead of using generic item copy.
 - Focused older Pokémon stat buffs around their Divergence roles: Arbok and
   Parasect gained 20 HP, Wigglytuff gained 20 Defense and 15 Sp. Def, Dewgong
-  gained 20 Defense, and Hypno's Sp. Atk rose from 73 to 95.
+  gained 20 Defense, Hypno's Sp. Atk rose from 73 to 95, and both Marowak forms
+  gained 10 HP and Attack.
 - Continued focused stat buffs for underperforming Johto Pokémon: Ledian gained
-  40 Attack, Ariados and Magcargo gained 20 HP, Sunflora gained 30 Speed, and
-  Delibird gained 30 Speed and 20 Sp. Atk.
+  10 HP, 50 Attack, and 5 Speed; Ariados and Magcargo gained 20 HP; Sunflora
+  gained 20 Speed; and Delibird gained 25 Attack, 30 Speed, and 20 Sp. Atk.
 - Continued focused stat buffs for underperforming Hoenn Pokémon: Beautifly
   gained 20 Speed, Dustox gained 20 HP, Delcatty gained 20 Attack and Sp. Atk,
-  Tropius gained 20 Sp. Atk, and Luvdisc gained 40 Sp. Atk and 23 Speed.
+  Tropius gained 20 Sp. Atk, and Luvdisc gained 10 HP, 45 Sp. Atk, and 25
+  Speed. Castform traded 10 Attack for 10 HP, 20 Sp. Atk, and 10 Speed across
+  every weather form; Cacturne received focused defensive and Speed increases;
+  Kecleon gained 10 HP and Defense; Grumpig gained 10 HP, Defense, and Sp. Atk;
+  and Banette and Chimecho received matching improvements across their base and
+  Mega forms.
 - Continued focused stat buffs for underperforming Sinnoh Pokémon: Kricketune
-  gained 30 Sp. Atk, every Wormadam cloak and Carnivine gained 20 HP, Mothim
-  gained 20 Speed, and Lumineon gained 20 Attack and Sp. Atk.
+  gained 10 Attack, Defense, Sp. Atk, and Sp. Def; every Wormadam cloak and
+  Carnivine gained 20 HP; Mothim gained 20 Speed; and Lumineon gained 20 Attack
+  and Sp. Atk.
 - Continued focused stat buffs for underperforming Unova Pokémon: Watchog's
   Attack rose to 95, Maractus's HP to 90, Emolga's Sp. Atk to 85, Beheeyem's
   HP to 85, and Heatmor's Speed to 80.
@@ -96,11 +103,16 @@ Format follows Keep a Changelog loosely:
   70, and Togedemaru's HP to 75.
 - Continued focused stat buffs for underperforming Galar Pokémon: Thievul's
   Sp. Atk rose to 100, Eldegoss's HP to 75, Dubwool's HP to 80, Grapploct's
-  Sp. Def to 90, and Stonjourner's Sp. Def to 45.
+  Sp. Def to 90, and Stonjourner's Sp. Def to 45. Orbeetle gained 15 Sp. Atk,
+  Boltund gained 10 Attack, Frosmoth gained 15 Speed, and Falinks gained 10 HP,
+  Attack, Defense, and Sp. Def with the same increases carried into its Mega
+  form.
 - Completed the focused regional stat pass with Paldea: Spidops's HP rose to
   75, male Oinkologne's Attack to 110, female Oinkologne's Defense to 80, all
   Squawkabilly plumages' HP to 90, Wugtrio's Attack to 115, and Klawf's
   Sp. Def to 70.
+- Updated Dodrio and Noctowl's generated competitive sets to use their new
+  Ground and Psychic STAB options.
 - Raised Mightyena's base Speed from 70 to 100, giving its frail physical
   offense and Full Moon hunting role a meaningful Speed tier.
 - Restored Mega Starmie's base Attack to 100 because its 140 Attack in

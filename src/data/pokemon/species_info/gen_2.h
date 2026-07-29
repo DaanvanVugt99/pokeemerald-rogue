@@ -742,10 +742,10 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
 
     [SPECIES_LEDIAN] =
     {
-        .baseHP        = 55,
-        .baseAttack    = 75,
+        .baseHP        = 65,
+        .baseAttack    = 85,
         .baseDefense   = 50,
-        .baseSpeed     = 85,
+        .baseSpeed     = 90,
         .baseSpAttack  = 55,
         .baseSpDefense = 110,
         .types = { TYPE_BUG, TYPE_FLYING },
@@ -2049,7 +2049,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
         .baseHP        = 75,
         .baseAttack    = 75,
         .baseDefense   = 55,
-        .baseSpeed     = 60,
+        .baseSpeed     = 50,
         .baseSpAttack  = 105,
         .baseSpDefense = 85,
         .types = { TYPE_GRASS, TYPE_GRASS },
@@ -4703,7 +4703,7 @@ const struct SpeciesInfo gSpeciesInfoGen2[] =
     [SPECIES_DELIBIRD] =
     {
         .baseHP        = 45,
-        .baseAttack    = 55,
+        .baseAttack    = 80,
         .baseDefense   = 45,
         .baseSpeed     = 105,
         .baseSpAttack  = 85,

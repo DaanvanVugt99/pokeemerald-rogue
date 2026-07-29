@@ -788,6 +788,41 @@ namespace PokemonDataGenerator.Pokedex
 				};
 			}
 
+			private void UpdateDodrioCompetitiveSets()
+			{
+				foreach (var set in CompetitiveSets)
+				{
+					if (set.Moves.Contains("MOVE_DRILL_RUN"))
+						continue;
+
+					string moveToReplace = new[]
+					{
+						"MOVE_RETURN",
+						"MOVE_DOUBLE_EDGE",
+						"MOVE_THRASH",
+						"MOVE_LOW_KICK",
+						"MOVE_QUICK_ATTACK",
+						"MOVE_JUMP_KICK",
+					}.FirstOrDefault(move => set.Moves.Contains(move));
+
+					if (moveToReplace == null)
+						throw new InvalidDataException("Dodrio competitive set has no move to replace with Ground STAB");
+
+					set.Moves[set.Moves.IndexOf(moveToReplace)] = "MOVE_DRILL_RUN";
+				}
+			}
+
+			private void UpdateNoctowlCompetitiveSets()
+			{
+				foreach (var set in CompetitiveSets)
+				{
+					if (set.Item == "ITEM_CHOICE_SPECS" && set.Moves.Contains("MOVE_HYPER_VOICE"))
+						set.Moves[set.Moves.IndexOf("MOVE_HYPER_VOICE")] = "MOVE_PSYCHIC";
+					else if (set.Moves.Contains("MOVE_NASTY_PLOT") && set.Moves.Contains("MOVE_DEFOG"))
+						set.Moves[set.Moves.IndexOf("MOVE_DEFOG")] = "MOVE_PSYCHIC";
+				}
+			}
+
 			private void ApplyDivergenceAbilityReplacements()
 			{
 				switch (Species)
@@ -800,6 +835,12 @@ namespace PokemonDataGenerator.Pokedex
 						break;
 					case "SPECIES_SUNFLORA":
 						UpdateSunfloraCompetitiveSets();
+						break;
+					case "SPECIES_DODRIO":
+						UpdateDodrioCompetitiveSets();
+						break;
+					case "SPECIES_NOCTOWL":
+						UpdateNoctowlCompetitiveSets();
 						break;
 					case "SPECIES_GENGAR":
 						ReplaceCompetitiveAbility("ABILITY_CURSED_BODY", "ABILITY_LEVITATE");

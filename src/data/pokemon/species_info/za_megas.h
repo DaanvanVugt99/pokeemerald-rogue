@@ -1207,12 +1207,12 @@
 #if P_MEGA_EVOLUTIONS
     [SPECIES_FALINKS_MEGA] =
     {
-        .baseHP        = 65,
-        .baseAttack    = 135,
-        .baseDefense   = 135,
+        .baseHP        = 75,
+        .baseAttack    = 145,
+        .baseDefense   = 145,
         .baseSpeed     = 100,
         .baseSpAttack  = 70,
-        .baseSpDefense = 65,
+        .baseSpDefense = 75,
         .types = { TYPE_FIGHTING, TYPE_FIGHTING },
         .catchRate = 45,
         .expYield = 165,
@@ -1499,12 +1499,12 @@
 #if P_MEGA_EVOLUTIONS
     [SPECIES_CHIMECHO_MEGA] =
     {
-        .baseHP        = 75,
+        .baseHP        = 85,
         .baseAttack    = 50,
-        .baseDefense   = 110,
-        .baseSpeed     = 65,
-        .baseSpAttack  = 135,
-        .baseSpDefense = 120,
+        .baseDefense   = 115,
+        .baseSpeed     = 75,
+        .baseSpAttack  = 140,
+        .baseSpDefense = 125,
         .types = { TYPE_PSYCHIC, TYPE_STEEL },
         .catchRate = 45,
     #if GEN_LATEST >= GEN_7

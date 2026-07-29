@@ -14,18 +14,38 @@ static u8 GetDivergenceStatBuffFlags(u16 species)
         return (1u << STAT_DEF);
     case SPECIES_AVALUGG:
         return (1u << STAT_SPDEF);
+    case SPECIES_BANETTE:
+        return (1u << STAT_HP) | (1u << STAT_ATK) | (1u << STAT_DEF) | (1u << STAT_SPDEF) | (1u << STAT_SPEED);
+    case SPECIES_BANETTE_MEGA:
+        return (1u << STAT_HP) | (1u << STAT_ATK) | (1u << STAT_DEF) | (1u << STAT_SPDEF) | (1u << STAT_SPEED);
     case SPECIES_BEAUTIFLY:
         return (1u << STAT_SPEED);
     case SPECIES_BEHEEYEM:
         return (1u << STAT_HP);
+    case SPECIES_BOLTUND:
+        return (1u << STAT_ATK);
+    case SPECIES_CACTURNE:
+        return (1u << STAT_DEF) | (1u << STAT_SPDEF) | (1u << STAT_SPEED);
     case SPECIES_CARNIVINE:
         return (1u << STAT_HP);
+    case SPECIES_CASTFORM_NORMAL:
+        return (1u << STAT_HP) | (1u << STAT_SPATK) | (1u << STAT_SPEED);
+    case SPECIES_CASTFORM_RAINY:
+        return (1u << STAT_HP) | (1u << STAT_SPATK) | (1u << STAT_SPEED);
+    case SPECIES_CASTFORM_SNOWY:
+        return (1u << STAT_HP) | (1u << STAT_SPATK) | (1u << STAT_SPEED);
+    case SPECIES_CASTFORM_SUNNY:
+        return (1u << STAT_HP) | (1u << STAT_SPATK) | (1u << STAT_SPEED);
+    case SPECIES_CHIMECHO:
+        return (1u << STAT_HP) | (1u << STAT_DEF) | (1u << STAT_SPATK) | (1u << STAT_SPDEF) | (1u << STAT_SPEED);
+    case SPECIES_CHIMECHO_MEGA:
+        return (1u << STAT_HP) | (1u << STAT_DEF) | (1u << STAT_SPATK) | (1u << STAT_SPDEF) | (1u << STAT_SPEED);
     case SPECIES_DEDENNE:
         return (1u << STAT_SPATK);
     case SPECIES_DELCATTY:
         return (1u << STAT_ATK) | (1u << STAT_SPATK);
     case SPECIES_DELIBIRD:
-        return (1u << STAT_SPATK) | (1u << STAT_SPEED);
+        return (1u << STAT_ATK) | (1u << STAT_SPATK) | (1u << STAT_SPEED);
     case SPECIES_DEWGONG:
         return (1u << STAT_DEF);
     case SPECIES_DUBWOOL:
@@ -36,30 +56,42 @@ static u8 GetDivergenceStatBuffFlags(u16 species)
         return (1u << STAT_HP);
     case SPECIES_EMOLGA:
         return (1u << STAT_SPATK);
+    case SPECIES_FALINKS:
+        return (1u << STAT_HP) | (1u << STAT_ATK) | (1u << STAT_DEF) | (1u << STAT_SPDEF);
+    case SPECIES_FROSMOTH:
+        return (1u << STAT_SPEED);
     case SPECIES_GRAPPLOCT:
         return (1u << STAT_SPDEF);
+    case SPECIES_GRUMPIG:
+        return (1u << STAT_HP) | (1u << STAT_DEF) | (1u << STAT_SPATK);
     case SPECIES_GUMSHOOS:
         return (1u << STAT_HP);
     case SPECIES_HEATMOR:
         return (1u << STAT_SPEED);
     case SPECIES_HYPNO:
         return (1u << STAT_SPATK);
+    case SPECIES_KECLEON:
+        return (1u << STAT_HP) | (1u << STAT_DEF);
     case SPECIES_KLAWF:
         return (1u << STAT_SPDEF);
     case SPECIES_KOMALA:
         return (1u << STAT_DEF);
     case SPECIES_KRICKETUNE:
-        return (1u << STAT_SPATK);
+        return (1u << STAT_ATK) | (1u << STAT_DEF) | (1u << STAT_SPATK) | (1u << STAT_SPDEF);
     case SPECIES_LEDIAN:
-        return (1u << STAT_ATK);
+        return (1u << STAT_HP) | (1u << STAT_ATK) | (1u << STAT_SPEED);
     case SPECIES_LUMINEON:
         return (1u << STAT_ATK) | (1u << STAT_SPATK);
     case SPECIES_LUVDISC:
-        return (1u << STAT_SPATK) | (1u << STAT_SPEED);
+        return (1u << STAT_HP) | (1u << STAT_SPATK) | (1u << STAT_SPEED);
     case SPECIES_MAGCARGO:
         return (1u << STAT_HP);
     case SPECIES_MARACTUS:
         return (1u << STAT_HP);
+    case SPECIES_MAROWAK:
+        return (1u << STAT_HP) | (1u << STAT_ATK);
+    case SPECIES_MAROWAK_ALOLAN:
+        return (1u << STAT_HP) | (1u << STAT_ATK);
     case SPECIES_MEOWSTIC_FEMALE:
         return (1u << STAT_SPATK);
     case SPECIES_MEOWSTIC_F_MEGA:
@@ -76,6 +108,10 @@ static u8 GetDivergenceStatBuffFlags(u16 species)
         return (1u << STAT_DEF);
     case SPECIES_OINKOLOGNE_MALE:
         return (1u << STAT_ATK);
+    case SPECIES_ORBEETLE:
+        return (1u << STAT_SPATK);
+    case SPECIES_ORBEETLE_GIGANTAMAX:
+        return (1u << STAT_SPATK);
     case SPECIES_PARASECT:
         return (1u << STAT_HP);
     case SPECIES_SHIINOTIC:

@@ -4461,11 +4461,11 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
 
     [SPECIES_GRUMPIG] =
     {
-        .baseHP        = 80,
+        .baseHP        = 90,
         .baseAttack    = 45,
-        .baseDefense   = 65,
+        .baseDefense   = 75,
         .baseSpeed     = 80,
-        .baseSpAttack  = 90,
+        .baseSpAttack  = 100,
         .baseSpDefense = 110,
         .types = { TYPE_PSYCHIC, TYPE_PSYCHIC },
         .catchRate = 60,
@@ -4773,10 +4773,10 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
     {
         .baseHP        = 70,
         .baseAttack    = 115,
-        .baseDefense   = 60,
-        .baseSpeed     = 55,
+        .baseDefense   = 70,
+        .baseSpeed     = 65,
         .baseSpAttack  = 115,
-        .baseSpDefense = 60,
+        .baseSpDefense = 70,
         .types = { TYPE_GRASS, TYPE_DARK },
         .catchRate = 60,
         .expYield = 166,
@@ -5764,11 +5764,11 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
 
 #if P_FAMILY_CASTFORM
 #define CASTFORM_MISC_INFO                                      \
-        .baseHP        = 70,                                    \
-        .baseAttack    = 70,                                    \
+        .baseHP        = 80,                                    \
+        .baseAttack    = 60,                                    \
         .baseDefense   = 70,                                    \
-        .baseSpeed     = 70,                                    \
-        .baseSpAttack  = 70,                                    \
+        .baseSpeed     = 80,                                    \
+        .baseSpAttack  = 90,                                    \
         .baseSpDefense = 70,                                    \
         .catchRate = 45,                                        \
         .expYield = 147,                                        \
@@ -5954,9 +5954,9 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
 #if P_FAMILY_KECLEON
     [SPECIES_KECLEON] =
     {
-        .baseHP        = 60,
+        .baseHP        = 70,
         .baseAttack    = 90,
-        .baseDefense   = 70,
+        .baseDefense   = 80,
         .baseSpeed     = 40,
         .baseSpAttack  = 60,
         .baseSpDefense = 120,
@@ -6074,12 +6074,12 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
     [SPECIES_BANETTE] =
     {
         BANETTE_MISC_INFO,
-        .baseHP        = 64,
-        .baseAttack    = 115,
-        .baseDefense   = 65,
-        .baseSpeed     = 65,
+        .baseHP        = 74,
+        .baseAttack    = 125,
+        .baseDefense   = 75,
+        .baseSpeed     = 75,
         .baseSpAttack  = 83,
-        .baseSpDefense = 63,
+        .baseSpDefense = 73,
         .expYield = 159,
         .abilities = { ABILITY_INSOMNIA, ABILITY_FRISK, ABILITY_CURSED_BODY },
         .cryId = CRY_BANETTE,
@@ -6109,12 +6109,12 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
     [SPECIES_BANETTE_MEGA] =
     {
         BANETTE_MISC_INFO,
-        .baseHP        = 64,
-        .baseAttack    = 165,
-        .baseDefense   = 75,
-        .baseSpeed     = 75,
+        .baseHP        = 74,
+        .baseAttack    = 175,
+        .baseDefense   = 85,
+        .baseSpeed     = 85,
         .baseSpAttack  = 93,
-        .baseSpDefense = 83,
+        .baseSpDefense = 93,
         .expYield = 194,
         .abilities = { ABILITY_PRANKSTER, ABILITY_PRANKSTER, ABILITY_PRANKSTER },
         .cryId = CRY_BANETTE_MEGA,
@@ -6402,18 +6402,12 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
 
     [SPECIES_CHIMECHO] =
     {
+        .baseHP        = 85,
         .baseAttack    = 50,
-        .baseSpeed     = 65,
-        .baseSpAttack  = 95,
-        #if P_UPDATED_STATS >= GEN_7
-            .baseHP        = 75,
-            .baseDefense   = 80,
-            .baseSpDefense = 90,
-        #else
-            .baseHP        = 65,
-            .baseDefense   = 70,
-            .baseSpDefense = 80,
-        #endif
+        .baseDefense   = 85,
+        .baseSpeed     = 75,
+        .baseSpAttack  = 100,
+        .baseSpDefense = 95,
         .types = { TYPE_PSYCHIC, TYPE_PSYCHIC },
         .catchRate = 45,
         .expYield = 159,
@@ -7097,11 +7091,11 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
 #if P_FAMILY_LUVDISC
     [SPECIES_LUVDISC] =
     {
-        .baseHP        = 43,
+        .baseHP        = 53,
         .baseAttack    = 30,
         .baseDefense   = 55,
-        .baseSpeed     = 120,
-        .baseSpAttack  = 80,
+        .baseSpeed     = 122,
+        .baseSpAttack  = 85,
         .baseSpDefense = 65,
         .types = { TYPE_WATER, TYPE_WATER },
         .catchRate = 225,

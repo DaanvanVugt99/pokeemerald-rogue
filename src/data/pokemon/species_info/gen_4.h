@@ -765,11 +765,11 @@ const struct SpeciesInfo gSpeciesInfoGen4[] =
     [SPECIES_KRICKETUNE] =
     {
         .baseHP        = 77,
-        .baseAttack    = 85,
-        .baseDefense   = 51,
+        .baseAttack    = 95,
+        .baseDefense   = 61,
         .baseSpeed     = 65,
-        .baseSpAttack  = 85,
-        .baseSpDefense = 51,
+        .baseSpAttack  = 65,
+        .baseSpDefense = 61,
         .types = { TYPE_BUG, TYPE_BUG },
         .catchRate = 45,
         .expYield = 134,

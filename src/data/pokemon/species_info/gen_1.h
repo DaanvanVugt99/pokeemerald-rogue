@@ -7887,8 +7887,8 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
     },
 
 #define MAROWAK_MISC_INFO                                       \
-        .baseHP        = 60,                                    \
-        .baseAttack    = 80,                                    \
+        .baseHP        = 70,                                    \
+        .baseAttack    = 90,                                    \
         .baseDefense   = 110,                                   \
         .baseSpeed     = 45,                                    \
         .baseSpAttack  = 50,                                    \
