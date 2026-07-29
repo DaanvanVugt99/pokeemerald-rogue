@@ -464,40 +464,11 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
     else
     {
         msgbox(format("Choose a Pokédex for this trial."), MSGBOX_DEFAULT)
-        setvar(VAR_TRIAL_MENU_CHOICE, MULTI_B_PRESSED)
-        while(var(VAR_TRIAL_MENU_CHOICE) == MULTI_B_PRESSED)
+        call(Rogue_Common_SelectTrialPokedex)
+        if(var(VAR_RESULT) == NO)
         {
-            begindynamicmultichoice(24)
-            special(RogueTrial_AppendPokedexOptions)
-            enddynamicmultichoice(1, 0, 5, TRUE)
-            if(var(VAR_RESULT) == MULTI_B_PRESSED)
-            {
-                releaseall
-                return
-            }
-            copyvar(VAR_0x8007, VAR_RESULT)
-            copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
-
-            special(RogueTrial_IsSelectedPokedexGroup)
-            if(var(VAR_RESULT) == YES)
-            {
-                begindynamicmultichoice(16)
-                special(RogueTrial_AppendSelectedPokedexGroupOptions)
-                enddynamicmultichoice(1, 0, 5, TRUE)
-                if(var(VAR_RESULT) == MULTI_B_PRESSED)
-                {
-                    setvar(VAR_TRIAL_MENU_CHOICE, MULTI_B_PRESSED)
-                }
-                else
-                {
-                    copyvar(VAR_0x8006, VAR_RESULT)
-                    copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
-                }
-            }
-            else
-            {
-                copyvar(VAR_0x8006, VAR_RESULT)
-            }
+            releaseall
+            return
         }
     }
 

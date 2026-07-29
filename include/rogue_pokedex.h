@@ -23,6 +23,18 @@ u16 RoguePokedex_GetCurrentDexLimit();
 
 bool8 RoguePokedex_IsVariantEditUnlocked();
 bool8 RoguePokedex_IsVariantEditEnabled();
+bool8 RoguePokedex_IsCuratedVariant(u8 variant);
+u16 RoguePokedex_GetNativeGimmickItem(u8 variant);
+
+void RoguePokedex_AppendCuratedOptions(void);
+void RoguePokedex_IsSelectedCuratedGroup(void);
+void RoguePokedex_AppendSelectedCuratedGroupOptions(void);
+void RoguePokedex_AppendGimmickOptions(void);
+void RoguePokedex_AppendProfessorOptions(void);
+void RoguePokedex_BufferCuratedSelection(void);
+void RoguePokedex_GetSelectedNativeGimmick(void);
+void RoguePokedex_StoreInitialSelection(void);
+void RoguePokedex_ApplyCuratedSelection(void);
 
 bool8 RoguePokedex_IsSpeciesEnabled(u16 species);
 bool8 RoguePokedex_IsSpeciesEnabledForDisplay(u16 species);

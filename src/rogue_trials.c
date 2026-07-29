@@ -285,6 +285,22 @@ static const u8 *const sPokedexRegionMenuNames[POKEDEX_REGION_COUNT] =
     [POKEDEX_REGION_LEGENDS] = sText_PokedexLegends,
 };
 
+static const u8 sTrialPokedexMenuRegionOrder[] =
+{
+    POKEDEX_REGION_ROGUE,
+    POKEDEX_REGION_KANTO,
+    POKEDEX_REGION_JOHTO,
+    POKEDEX_REGION_HOENN,
+    POKEDEX_REGION_SINNOH,
+    POKEDEX_REGION_UNOVA,
+    POKEDEX_REGION_KALOS,
+    POKEDEX_REGION_ALOLA,
+    POKEDEX_REGION_GALAR,
+    POKEDEX_REGION_PALDEA,
+    POKEDEX_REGION_NATIONAL,
+    POKEDEX_REGION_EXTRAS,
+};
+
 #define ROGUE_TRIAL_MENU_GROUP_TYPE 125
 #define ROGUE_TRIAL_MENU_GROUP_REGIONAL 126
 #define ROGUE_TRIAL_POKEDEX_MENU_GROUP_BASE 128
@@ -975,17 +991,44 @@ static u8 GetPokedexRegionFromMenuGroupId(u16 menuId)
     return menuId - ROGUE_TRIAL_POKEDEX_MENU_GROUP_BASE;
 }
 
+static u8 GetPokedexMenuRegionForVariant(u8 variant)
+{
+    u8 region;
+    u8 i;
+
+    if (!IsValidPokedexVariant(variant))
+        return POKEDEX_REGION_NONE;
+
+    if (variant == POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS)
+        return POKEDEX_REGION_SINNOH;
+
+    if (variant == POKEDEX_VARIANT_LEGENDS_ZA || variant == POKEDEX_VARIANT_LEGENDS_ZAFULLDLC)
+        return POKEDEX_REGION_KALOS;
+
+    for (region = 0; region < POKEDEX_REGION_COUNT; ++region)
+    {
+        for (i = 0; i < gPokedexRegions[region].variantCount; ++i)
+        {
+            if (gPokedexRegions[region].variantList[i] == variant)
+                return region;
+        }
+    }
+
+    return POKEDEX_REGION_NONE;
+}
+
 static u8 GetAllowedPokedexVariantCountForRegion(const struct RogueTrialDefinition *trial, u8 region)
 {
-    u8 i;
+    u8 variant;
     u8 count = 0;
 
     if (trial == NULL || !IsValidPokedexRegion(region))
         return 0;
 
-    for (i = 0; i < gPokedexRegions[region].variantCount; ++i)
+    for (variant = 0; variant < POKEDEX_VARIANT_COUNT; ++variant)
     {
-        if (IsPokedexVariantAllowedForSet(trial->pokedexSet, gPokedexRegions[region].variantList[i]))
+        if (GetPokedexMenuRegionForVariant(variant) == region
+            && IsPokedexVariantAllowedForSet(trial->pokedexSet, variant))
             ++count;
     }
 
@@ -994,16 +1037,15 @@ static u8 GetAllowedPokedexVariantCountForRegion(const struct RogueTrialDefiniti
 
 static u8 GetFirstAllowedPokedexVariantForRegion(const struct RogueTrialDefinition *trial, u8 region)
 {
-    u8 i;
+    u8 variant;
 
     if (trial == NULL || !IsValidPokedexRegion(region))
         return POKEDEX_VARIANT_NONE;
 
-    for (i = 0; i < gPokedexRegions[region].variantCount; ++i)
+    for (variant = 0; variant < POKEDEX_VARIANT_COUNT; ++variant)
     {
-        u8 variant = gPokedexRegions[region].variantList[i];
-
-        if (IsPokedexVariantAllowedForSet(trial->pokedexSet, variant))
+        if (GetPokedexMenuRegionForVariant(variant) == region
+            && IsPokedexVariantAllowedForSet(trial->pokedexSet, variant))
             return variant;
     }
 
@@ -2266,15 +2308,16 @@ void RogueTrial_AppendPokedexOptions(void)
 
     if (trial != NULL && IsValidTrialId(gSpecialVar_0x8004))
     {
-        for (i = 0; i < POKEDEX_REGION_COUNT; ++i)
+        for (i = 0; i < ARRAY_COUNT(sTrialPokedexMenuRegionOrder); ++i)
         {
-            u8 variantCount = GetAllowedPokedexVariantCountForRegion(trial, i);
+            u8 region = sTrialPokedexMenuRegionOrder[i];
+            u8 variantCount = GetAllowedPokedexVariantCountForRegion(trial, region);
 
             if (variantCount > 1)
-                ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sPokedexRegionMenuNames[i], GetPokedexRegionMenuGroupId(i));
+                ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sPokedexRegionMenuNames[region], GetPokedexRegionMenuGroupId(region));
             else if (variantCount == 1)
             {
-                u8 variant = GetFirstAllowedPokedexVariantForRegion(trial, i);
+                u8 variant = GetFirstAllowedPokedexVariantForRegion(trial, region);
 
                 if (IsValidPokedexVariant(variant))
                     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(gPokedexVariants[variant].displayName, variant);
@@ -2292,17 +2335,16 @@ void RogueTrial_IsSelectedPokedexGroup(void)
 
 void RogueTrial_AppendSelectedPokedexGroupOptions(void)
 {
-    u8 i;
+    u8 variant;
     u8 region = GetPokedexRegionFromMenuGroupId(gSpecialVar_0x8007);
     const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gSpecialVar_0x8004);
 
     if (trial != NULL && IsValidTrialId(gSpecialVar_0x8004) && IsValidPokedexRegion(region))
     {
-        for (i = 0; i < gPokedexRegions[region].variantCount; ++i)
+        for (variant = 0; variant < POKEDEX_VARIANT_COUNT; ++variant)
         {
-            u8 variant = gPokedexRegions[region].variantList[i];
-
-            if (IsPokedexVariantAllowedForSet(trial->pokedexSet, variant))
+            if (GetPokedexMenuRegionForVariant(variant) == region
+                && IsPokedexVariantAllowedForSet(trial->pokedexSet, variant))
                 ScriptMenu_ScrollingMultichoiceDynamicAppendOption(gPokedexVariants[variant].displayName, variant);
         }
     }

@@ -27,11 +27,14 @@
 #include "party_menu.h"
 #include "pokedex.h"
 #include "pokemon_icon.h"
+#include "script_menu.h"
 
 #include "constants/abilities.h"
 #include "constants/items.h"
 #include "constants/rgb.h"
+#include "constants/script_menu.h"
 #include "constants/songs.h"
+#include "constants/vars.h"
 #ifdef ROGUE_EXPANSION
 #include "constants/form_change_types.h"
 #endif
@@ -5163,4 +5166,307 @@ static bool8 CheckVariantContainsSpecies(u8 variant, u16 species)
     }
 
     return FALSE;
+}
+
+#define CURATED_POKEDEX_MENU_GROUP_BASE 128
+
+static const u8 sText_CuratedBack[] = _("Back");
+static const u8 sText_NoGimmick[] = _("None");
+static const u8 sText_ChangePokedex[] = _("Change Pokédex");
+static const u8 sText_EvolutionHelp[] = _("Evolution Help");
+static const u8 sText_ExplainAdventures[] = _("Explain Adventures");
+static const u8 sText_Cancel[] = _("Cancel");
+
+#ifdef ROGUE_EXPANSION
+struct CuratedPokedexGroup
+{
+    const u8 *displayName;
+    const u8 *variantList;
+    u8 variantCount;
+};
+
+static const u8 sText_Kanto[] = _("Kanto");
+static const u8 sText_Johto[] = _("Johto");
+static const u8 sText_Hoenn[] = _("Hoenn");
+static const u8 sText_Sinnoh[] = _("Sinnoh");
+static const u8 sText_Unova[] = _("Unova");
+static const u8 sText_Kalos[] = _("Kalos");
+static const u8 sText_Alola[] = _("Alola");
+static const u8 sText_Galar[] = _("Galar");
+static const u8 sText_Paldea[] = _("Paldea");
+static const u8 sText_National[] = _("National");
+
+static const u8 sCuratedPokedexKanto[] =
+{
+    POKEDEX_VARIANT_KANTO_RBY,
+    POKEDEX_VARIANT_KANTO_LETSGO,
+};
+
+static const u8 sCuratedPokedexJohto[] =
+{
+    POKEDEX_VARIANT_JOHTO_GSC,
+    POKEDEX_VARIANT_JOHTO_HGSS,
+};
+
+static const u8 sCuratedPokedexHoenn[] =
+{
+    POKEDEX_VARIANT_HOENN_RSE,
+    POKEDEX_VARIANT_HOENN_ORAS,
+};
+
+static const u8 sCuratedPokedexSinnoh[] =
+{
+    POKEDEX_VARIANT_SINNOH_DP,
+    POKEDEX_VARIANT_SINNOH_PL,
+    POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS,
+};
+
+static const u8 sCuratedPokedexUnova[] =
+{
+    POKEDEX_VARIANT_UNOVA_BW,
+    POKEDEX_VARIANT_UNOVA_BW2,
+};
+
+static const u8 sCuratedPokedexKalos[] =
+{
+    POKEDEX_VARIANT_KALOS,
+    POKEDEX_VARIANT_LEGENDS_ZA,
+    POKEDEX_VARIANT_LEGENDS_ZAFULLDLC,
+};
+
+static const u8 sCuratedPokedexAlola[] =
+{
+    POKEDEX_VARIANT_ALOLA_SM,
+    POKEDEX_VARIANT_ALOLA_USUM,
+};
+
+static const u8 sCuratedPokedexGalar[] =
+{
+    POKEDEX_VARIANT_GALAR_SWSH,
+    POKEDEX_VARIANT_GALAR_FULLDLC,
+};
+
+static const u8 sCuratedPokedexPaldea[] =
+{
+    POKEDEX_VARIANT_PALDEA_SCVI,
+    POKEDEX_VARIANT_PALDEA_FULLDLC,
+};
+
+static const u8 sCuratedPokedexNational[] =
+{
+    POKEDEX_VARIANT_NATIONAL_GEN1,
+    POKEDEX_VARIANT_NATIONAL_GEN2,
+    POKEDEX_VARIANT_NATIONAL_GEN3,
+    POKEDEX_VARIANT_NATIONAL_GEN4,
+    POKEDEX_VARIANT_NATIONAL_GEN5,
+    POKEDEX_VARIANT_NATIONAL_GEN6,
+    POKEDEX_VARIANT_NATIONAL_GEN7,
+    POKEDEX_VARIANT_NATIONAL_GEN8,
+    POKEDEX_VARIANT_NATIONAL_GEN9,
+};
+
+static const struct CuratedPokedexGroup sCuratedPokedexGroups[] =
+{
+    {sText_Kanto, sCuratedPokedexKanto, ARRAY_COUNT(sCuratedPokedexKanto)},
+    {sText_Johto, sCuratedPokedexJohto, ARRAY_COUNT(sCuratedPokedexJohto)},
+    {sText_Hoenn, sCuratedPokedexHoenn, ARRAY_COUNT(sCuratedPokedexHoenn)},
+    {sText_Sinnoh, sCuratedPokedexSinnoh, ARRAY_COUNT(sCuratedPokedexSinnoh)},
+    {sText_Unova, sCuratedPokedexUnova, ARRAY_COUNT(sCuratedPokedexUnova)},
+    {sText_Kalos, sCuratedPokedexKalos, ARRAY_COUNT(sCuratedPokedexKalos)},
+    {sText_Alola, sCuratedPokedexAlola, ARRAY_COUNT(sCuratedPokedexAlola)},
+    {sText_Galar, sCuratedPokedexGalar, ARRAY_COUNT(sCuratedPokedexGalar)},
+    {sText_Paldea, sCuratedPokedexPaldea, ARRAY_COUNT(sCuratedPokedexPaldea)},
+    {sText_National, sCuratedPokedexNational, ARRAY_COUNT(sCuratedPokedexNational)},
+};
+#endif
+
+bool8 RoguePokedex_IsCuratedVariant(u8 variant)
+{
+#ifdef ROGUE_EXPANSION
+    switch (variant)
+    {
+    case POKEDEX_VARIANT_KANTO_RBY:
+    case POKEDEX_VARIANT_KANTO_LETSGO:
+    case POKEDEX_VARIANT_JOHTO_GSC:
+    case POKEDEX_VARIANT_JOHTO_HGSS:
+    case POKEDEX_VARIANT_HOENN_RSE:
+    case POKEDEX_VARIANT_HOENN_ORAS:
+    case POKEDEX_VARIANT_SINNOH_DP:
+    case POKEDEX_VARIANT_SINNOH_PL:
+    case POKEDEX_VARIANT_UNOVA_BW:
+    case POKEDEX_VARIANT_UNOVA_BW2:
+    case POKEDEX_VARIANT_KALOS:
+    case POKEDEX_VARIANT_ALOLA_SM:
+    case POKEDEX_VARIANT_ALOLA_USUM:
+    case POKEDEX_VARIANT_GALAR_SWSH:
+    case POKEDEX_VARIANT_GALAR_FULLDLC:
+    case POKEDEX_VARIANT_PALDEA_SCVI:
+    case POKEDEX_VARIANT_PALDEA_FULLDLC:
+    case POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS:
+    case POKEDEX_VARIANT_NATIONAL_GEN1:
+    case POKEDEX_VARIANT_NATIONAL_GEN2:
+    case POKEDEX_VARIANT_NATIONAL_GEN3:
+    case POKEDEX_VARIANT_NATIONAL_GEN4:
+    case POKEDEX_VARIANT_NATIONAL_GEN5:
+    case POKEDEX_VARIANT_NATIONAL_GEN6:
+    case POKEDEX_VARIANT_NATIONAL_GEN7:
+    case POKEDEX_VARIANT_NATIONAL_GEN8:
+    case POKEDEX_VARIANT_NATIONAL_GEN9:
+    case POKEDEX_VARIANT_LEGENDS_ZA:
+    case POKEDEX_VARIANT_LEGENDS_ZAFULLDLC:
+        return TRUE;
+    }
+
+    return FALSE;
+#else
+    return variant == POKEDEX_VARIANT_DEFAULT;
+#endif
+}
+
+u16 RoguePokedex_GetNativeGimmickItem(u8 variant)
+{
+#ifdef ROGUE_EXPANSION
+    switch (variant)
+    {
+    case POKEDEX_VARIANT_KANTO_LETSGO:
+    case POKEDEX_VARIANT_HOENN_ORAS:
+    case POKEDEX_VARIANT_KALOS:
+    case POKEDEX_VARIANT_LEGENDS_ZA:
+    case POKEDEX_VARIANT_LEGENDS_ZAFULLDLC:
+        return ITEM_MEGA_RING;
+    case POKEDEX_VARIANT_ALOLA_SM:
+    case POKEDEX_VARIANT_ALOLA_USUM:
+        return ITEM_Z_POWER_RING;
+    case POKEDEX_VARIANT_GALAR_SWSH:
+    case POKEDEX_VARIANT_GALAR_FULLDLC:
+        return ITEM_DYNAMAX_BAND;
+    case POKEDEX_VARIANT_PALDEA_SCVI:
+    case POKEDEX_VARIANT_PALDEA_FULLDLC:
+        return ITEM_TERA_ORB;
+    }
+#endif
+
+    return ITEM_NONE;
+}
+
+static bool8 IsCuratedGroupId(u16 value)
+{
+#ifdef ROGUE_EXPANSION
+    return value >= CURATED_POKEDEX_MENU_GROUP_BASE
+        && value < CURATED_POKEDEX_MENU_GROUP_BASE + ARRAY_COUNT(sCuratedPokedexGroups);
+#else
+    return FALSE;
+#endif
+}
+
+void RoguePokedex_AppendCuratedOptions(void)
+{
+#ifdef ROGUE_EXPANSION
+    u8 group;
+
+    for (group = 0; group < ARRAY_COUNT(sCuratedPokedexGroups); ++group)
+    {
+        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(
+            sCuratedPokedexGroups[group].displayName,
+            CURATED_POKEDEX_MENU_GROUP_BASE + group);
+    }
+#else
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(
+        gPokedexVariants[POKEDEX_VARIANT_DEFAULT].displayName,
+        POKEDEX_VARIANT_DEFAULT);
+#endif
+
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_CuratedBack, MULTI_B_PRESSED);
+}
+
+void RoguePokedex_IsSelectedCuratedGroup(void)
+{
+    gSpecialVar_Result = IsCuratedGroupId(gSpecialVar_0x8007);
+}
+
+void RoguePokedex_AppendSelectedCuratedGroupOptions(void)
+{
+#ifdef ROGUE_EXPANSION
+    if (IsCuratedGroupId(gSpecialVar_0x8007))
+    {
+        u8 i;
+        u8 group = gSpecialVar_0x8007 - CURATED_POKEDEX_MENU_GROUP_BASE;
+
+        for (i = 0; i < sCuratedPokedexGroups[group].variantCount; ++i)
+        {
+            u8 variant = sCuratedPokedexGroups[group].variantList[i];
+            ScriptMenu_ScrollingMultichoiceDynamicAppendOption(gPokedexVariants[variant].displayName, variant);
+        }
+    }
+#endif
+
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_CuratedBack, MULTI_B_PRESSED);
+}
+
+void RoguePokedex_AppendGimmickOptions(void)
+{
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(ItemId_GetName(ITEM_MEGA_RING), ITEM_MEGA_RING);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(ItemId_GetName(ITEM_Z_POWER_RING), ITEM_Z_POWER_RING);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(ItemId_GetName(ITEM_DYNAMAX_BAND), ITEM_DYNAMAX_BAND);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(ItemId_GetName(ITEM_TERA_ORB), ITEM_TERA_ORB);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_NoGimmick, ITEM_NONE);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_CuratedBack, MULTI_B_PRESSED);
+}
+
+void RoguePokedex_AppendProfessorOptions(void)
+{
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_ChangePokedex, 0);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_EvolutionHelp, 1);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_ExplainAdventures, 2);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Cancel, MULTI_B_PRESSED);
+}
+
+void RoguePokedex_BufferCuratedSelection(void)
+{
+    if (RoguePokedex_IsCuratedVariant(gSpecialVar_0x8006))
+        StringCopy(gStringVar1, gPokedexVariants[gSpecialVar_0x8006].displayName);
+    else
+        StringCopy(gStringVar1, gText_ThreeMarks);
+}
+
+void RoguePokedex_GetSelectedNativeGimmick(void)
+{
+    gSpecialVar_Result = RoguePokedex_GetNativeGimmickItem(gSpecialVar_0x8006);
+}
+
+static bool8 IsValidInitialGimmickItem(u16 item)
+{
+    return item == ITEM_NONE
+        || item == ITEM_MEGA_RING
+        || item == ITEM_Z_POWER_RING
+        || item == ITEM_DYNAMAX_BAND
+        || item == ITEM_TERA_ORB;
+}
+
+void RoguePokedex_StoreInitialSelection(void)
+{
+    if (RoguePokedex_IsCuratedVariant(gSpecialVar_0x8006)
+        && IsValidInitialGimmickItem(gSpecialVar_0x8005))
+    {
+        VarSet(VAR_ROGUE_INITIAL_DEX_SELECTION, gSpecialVar_0x8006);
+        VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, gSpecialVar_0x8005);
+        gSpecialVar_Result = TRUE;
+    }
+    else
+    {
+        gSpecialVar_Result = FALSE;
+    }
+}
+
+void RoguePokedex_ApplyCuratedSelection(void)
+{
+    if (RoguePokedex_IsCuratedVariant(gSpecialVar_0x8006))
+    {
+        RoguePokedex_SetDexVariant(gSpecialVar_0x8006);
+        gSpecialVar_Result = TRUE;
+    }
+    else
+    {
+        gSpecialVar_Result = FALSE;
+    }
 }

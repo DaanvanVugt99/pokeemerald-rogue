@@ -21,8 +21,92 @@ const SAFARI_SELECTED_BUY = 10
 const SAFARI_SELECTED_DISMISS = 11
 const SAFARI_SELECTED_BACK = 12
 
+const POKEDEX_SELECTION_CURATED = 0
+const POKEDEX_SELECTION_TRIAL = 1
+
 // Re-used scripts
 //
+
+script Rogue_Common_SelectCuratedPokedex
+{
+    setvar(VAR_0x8009, POKEDEX_SELECTION_CURATED)
+    call(Rogue_Common_SelectPokedex)
+    return
+}
+
+script Rogue_Common_SelectTrialPokedex
+{
+    setvar(VAR_0x8009, POKEDEX_SELECTION_TRIAL)
+    call(Rogue_Common_SelectPokedex)
+    return
+}
+
+script Rogue_Common_SelectPokedex
+{
+    setvar(VAR_0x800A, MULTI_B_PRESSED)
+
+    while(var(VAR_0x800A) == MULTI_B_PRESSED)
+    {
+        begindynamicmultichoice(24)
+        if(var(VAR_0x8009) == POKEDEX_SELECTION_TRIAL)
+        {
+            special(RogueTrial_AppendPokedexOptions)
+        }
+        else
+        {
+            special(RoguePokedex_AppendCuratedOptions)
+        }
+        enddynamicmultichoice(1, 0, 5, TRUE)
+
+        if(var(VAR_RESULT) == MULTI_B_PRESSED)
+        {
+            setvar(VAR_RESULT, NO)
+            return
+        }
+
+        copyvar(VAR_0x8007, VAR_RESULT)
+        if(var(VAR_0x8009) == POKEDEX_SELECTION_TRIAL)
+        {
+            special(RogueTrial_IsSelectedPokedexGroup)
+        }
+        else
+        {
+            special(RoguePokedex_IsSelectedCuratedGroup)
+        }
+
+        if(var(VAR_RESULT) == YES)
+        {
+            begindynamicmultichoice(16)
+            if(var(VAR_0x8009) == POKEDEX_SELECTION_TRIAL)
+            {
+                special(RogueTrial_AppendSelectedPokedexGroupOptions)
+            }
+            else
+            {
+                special(RoguePokedex_AppendSelectedCuratedGroupOptions)
+            }
+            enddynamicmultichoice(1, 0, 5, TRUE)
+
+            if(var(VAR_RESULT) == MULTI_B_PRESSED)
+            {
+                setvar(VAR_0x800A, MULTI_B_PRESSED)
+            }
+            else
+            {
+                copyvar(VAR_0x8006, VAR_RESULT)
+                setvar(VAR_0x800A, YES)
+            }
+        }
+        else
+        {
+            copyvar(VAR_0x8006, VAR_0x8007)
+            setvar(VAR_0x800A, YES)
+        }
+    }
+
+    setvar(VAR_RESULT, YES)
+    return
+}
 
 script Rogue_GiveItem_Internal
 {

@@ -3,7 +3,7 @@ const VAR_PICKING_STARTER = VAR_TEMP_F
 
 const NPC_BIRCH = 1
 
-mapscripts Rogue_Hub_ProfLab_MapScripts 
+mapscripts Rogue_Hub_ProfLab_MapScripts
 {
     MAP_SCRIPT_ON_TRANSITION: Rogue_Hub_ProfLab_OnTransition
 }
@@ -39,17 +39,40 @@ script Rogue_Hub_ProfLab_SpeakProf
         }
         else
         {
-            call(Rogue_Hub_ProfLab_ProfExplain)
-            if(var(VAR_RESULT) == NO)
+            message(format("BIRCH: What can I help you with?"))
+            waitmessage
+            begindynamicmultichoice(4)
+            special(RoguePokedex_AppendProfessorOptions)
+            enddynamicmultichoice(1, 0, 5, TRUE)
+
+            switch(var(VAR_RESULT))
             {
-                call(Rogue_Hub_ProfLab_ProfShowEvos)
+                case 0:
+                    msgbox(format("BIRCH: Which game's Pokédex would you like to use?"), MSGBOX_DEFAULT)
+                    call(Rogue_Common_SelectCuratedPokedex)
+
+                    if(var(VAR_RESULT) == YES)
+                    {
+                        special(RoguePokedex_BufferCuratedSelection)
+                        msgbox(format("BIRCH: Change your active Pokédex to {STR_VAR_1}?"), MSGBOX_YESNO)
+
+                        if(var(VAR_RESULT) == YES)
+                        {
+                            special(RoguePokedex_ApplyCuratedSelection)
+                            msgbox(format("BIRCH: All set!\pYour encounters and available partners will now follow the {STR_VAR_1} Pokédex."), MSGBOX_DEFAULT)
+                        }
+                    }
+
+                case 1:
+                    call(Rogue_Hub_ProfLab_ProfShowEvos)
+
+                case 2:
+                    call(Rogue_Hub_ProfLab_ProfExplain)
+
+                default:
+                    msgbox(format("BIRCH: No problem!\nCome back whenever you need me."), MSGBOX_DEFAULT)
             }
         }
-    }
-
-    if(var(VAR_RESULT) == NO)
-    {
-        msgbox(format("BIRCH: OK then!\nIf you ever need an explanation, you know where to find me."), MSGBOX_DEFAULT)
     }
 
     releaseall
@@ -162,12 +185,12 @@ script Rogue_Hub_ProfLab_ProfCycleEvos
             case EVO_ITEM_HOLD_NIGHT:
                 bufferitemname(STR_VAR_3, VAR_0x8007)
                 msgbox(format("{STR_VAR_2}. raise by a lvl whilst holding {STR_VAR_3} during the night."))
-    
+
 
             case EVO_MOVE:
                 buffermovename(STR_VAR_3, VAR_0x8007)
                 msgbox(format("{STR_VAR_2}. raise by a lvl whilst knowing {STR_VAR_3}."))
-    
+
             case EVO_MOVE_TYPE:
                 msgbox(format("{STR_VAR_2}. raise by a lvl whilst knowing a FAIRY move.")) // Hard coded, as this is only instance
 
@@ -215,7 +238,7 @@ script Rogue_Hub_ProfLab_ProfCycleEvos
             case EVO_SCRIPT_TRIGGER_DMG:
                 buffernumberstring(STR_VAR_3, VAR_0x8007)
                 msgbox(format("{STR_VAR_2}. when hp less than {STR_VAR_3} interact with ???."))
-    
+
             case EVO_DARK_SCROLL:
             case EVO_WATER_SCROLL:
                 msgbox(format("{STR_VAR_2}. interact with ???."))
@@ -236,7 +259,7 @@ script Rogue_Hub_ProfLab_ProfShowEvos
         msgbox(format("Who would you like information on?"))
         special(ChoosePartyMon)
         waitstate
-        
+
         if(var(VAR_0x8004) == PARTY_NOTHING_CHOSEN)
         {
             msgbox(format("BIRCH: OK then!\nIf you ever need any help, you know where to find me."), MSGBOX_DEFAULT)
@@ -283,7 +306,7 @@ script Rogue_Hub_ProfLab_TriggerPC
     releaseall
 }
 
-movement Rogue_Hub_ProfLab_WalkBackwards 
+movement Rogue_Hub_ProfLab_WalkBackwards
 {
     walk_down
 }
@@ -298,8 +321,10 @@ script Rogue_Hub_ProfLab_IntroCommon
 
 script Rogue_Hub_ProfLab_IntroRunAwayCommon
 {
-    bufferspeciesname(STR_VAR_1, SPECIES_SUNKERN)
-    givemon(SPECIES_SUNKERN, 7, ITEM_ORAN_BERRY)
+    special(Rogue_GenerateFallbackStarter)
+    copyvar(VAR_0x8001, VAR_RESULT)
+    bufferspeciesname(STR_VAR_1, VAR_0x8001)
+    givemon(VAR_0x8001, 7, ITEM_ORAN_BERRY)
 
     playfanfare(MUS_OBTAIN_ITEM)
     message(format("{PLAYER} obtained a {STR_VAR_1}."))
@@ -311,7 +336,7 @@ script Rogue_Hub_ProfLab_IntroRunAwayCommon
     {
         call(Common_EventScript_NameReceivedPartyMon)
     }
-    
+
     setvar(VAR_STARTER_MON, 4)
 
     call(Rogue_Hub_ProfLab_PostStarterSelect)
@@ -449,7 +474,7 @@ script Rogue_Hub_ProfLab_PokeballCommon
                 call(Common_EventScript_GetGiftMonPartySlot)
                 call(Common_EventScript_NameReceivedPartyMon)
             }
-            
+
             turnobject(OBJ_EVENT_ID_PLAYER, DIR_WEST)
             call(Rogue_Hub_ProfLab_PostStarterSelect)
 
@@ -470,15 +495,21 @@ script Rogue_Hub_ProfLab_PokeballCommon
 script Rogue_Hub_ProfLab_PostStarterSelect
 {
     msgbox(format("BIRCH: I also threw some items and a POKéDEX in there too!"), MSGBOX_DEFAULT)
-    
+
     giveitem(ITEM_POKE_BALL, 5)
     giveitem(ITEM_POTION, 1)
-    
+
+    if(var(VAR_ROGUE_INITIAL_GIMMICK_ITEM) != ITEM_NONE)
+    {
+        msgbox(format("BIRCH: And since you chose that Pokédex, this should suit your favorite battling style."), MSGBOX_DEFAULT)
+        giveitem(VAR_ROGUE_INITIAL_GIMMICK_ITEM, 1)
+    }
+
     setflag(FLAG_SYS_POKEDEX_GET)
     setflag(FLAG_SYS_POKEMON_GET)
     setvar(VAR_ROGUE_INTRO_STATE, 4)
 
-    msgbox(format("You're now ready to go on adventures!"), MSGBOX_DEFAULT)
+    msgbox(format("BIRCH: You're now ready to go on adventures!\pIf you want to use a different Pokédex, come talk to me and I'll adjust it."), MSGBOX_DEFAULT)
 
     call(Rogue_Hub_ProfLab_ProfExplain)
 

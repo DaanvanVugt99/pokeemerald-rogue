@@ -3696,6 +3696,17 @@ void Rogue_RandomiseStarters()
     VarSet(VAR_ROGUE_STARTER2, starters.species[2]);
 }
 
+u16 Rogue_SelectFallbackStarterSpecies(void)
+{
+    struct StarterSelectionData starters = SelectStarterMons(FALSE);
+    return starters.species[0];
+}
+
+void Rogue_GenerateFallbackStarter(void)
+{
+    gSpecialVar_Result = Rogue_SelectFallbackStarterSpecies();
+}
+
 static void UNUSED ClearPokemonHeldItems(void)
 {
     struct BoxPokemon* boxMon;

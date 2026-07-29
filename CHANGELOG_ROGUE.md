@@ -55,6 +55,16 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Renamed the legacy Modern and Classic Plus Pokédex variants to Rogue Modern
+  and Rogue Classic to distinguish them from Divergence's main dex selection.
+- Replaced the opening Modern/Classic prompt with a favorite-game Pokédex
+  selection that determines the first partner pool and an optional native
+  battle-gimmick gift. The selection groups games by region, placing Legends
+  Arceus with Sinnoh and Legends Z-A with Kalos, while cumulative generation
+  limits live under a separate National submenu. Birch can change between the
+  same curated dexes later, while unrestricted direct Pokédex editing remains
+  a postgame upgrade. Trial Pokédex choices use the same regional grouping
+  while retaining trial-only Rogue and Conquest options.
 - Increased the Sacred Trial Ho-Oh's chance of receiving a unique typing from
   50% to 67%.
 - Reworded Frontier Brain Pokémon rewards as gifts from the Frontier Brain

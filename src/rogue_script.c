@@ -1581,16 +1581,10 @@ void Rogue_AssignDefaultRegion()
     }
 
 #ifdef ROGUE_EXPANSION
-    switch (VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION))
-    {
-    case 0:
-        RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_MODERN);
-        break;
-    
-    default:
-        RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_CLASSICPLUS);
-        break;
-    }
+    if (RoguePokedex_IsCuratedVariant(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION)))
+        RoguePokedex_SetDexVariant(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION));
+    else
+        RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
 #else
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_DEFAULT);
 #endif

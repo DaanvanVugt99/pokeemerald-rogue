@@ -127,6 +127,8 @@ bool8 IsTerastallizeEnabled(void);
 bool8 IsHealingFlaskEnabled(void);
 
 void Rogue_RandomiseStarters();
+u16 Rogue_SelectFallbackStarterSpecies(void);
+void Rogue_GenerateFallbackStarter(void);
 void Rogue_ResetConfigHubSettings(void);
 void Rogue_OnNewGame(void);
 void Rogue_GameClear(void);

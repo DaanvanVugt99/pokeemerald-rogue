@@ -194,6 +194,7 @@ gSpecials::
 	def_special Rogue_ReleaseMonInSlot
 	def_special Rogue_CalcMaxPartySize
 	def_special Rogue_CheckPartyHasDuplicateStartSpecies
+	def_special Rogue_GenerateFallbackStarter
 	def_special Rogue_GetMonEvoCount
 	def_special Rogue_GetMonEvoParams
 	def_special RogueDebug_FillGenPC
@@ -248,6 +249,15 @@ gSpecials::
 	def_special RogueTrial_BufferRandomanDisabled
 	def_special RogueTrial_CanUsePendingParty
 	def_special RogueTrial_CanUsePendingDayCare
+	def_special RoguePokedex_AppendCuratedOptions
+	def_special RoguePokedex_IsSelectedCuratedGroup
+	def_special RoguePokedex_AppendSelectedCuratedGroupOptions
+	def_special RoguePokedex_AppendGimmickOptions
+	def_special RoguePokedex_AppendProfessorOptions
+	def_special RoguePokedex_BufferCuratedSelection
+	def_special RoguePokedex_GetSelectedNativeGimmick
+	def_special RoguePokedex_StoreInitialSelection
+	def_special RoguePokedex_ApplyCuratedSelection
 	def_special RogueTrial_CanStartPendingSelection
 	def_special RogueTrial_CanStartTrainerBattle
 	def_special RogueTrial_ClearPendingSelection

@@ -94,7 +94,7 @@
 #define VAR_UNUSED_0x404A                    0x404A
 #define VAR_UNUSED_0x404B                    0x404B
 #define VAR_UNUSED_0x404C                    0x404C
-#define VAR_UNUSED_0x404D                    0x404D
+#define VAR_ROGUE_INITIAL_GIMMICK_ITEM       0x404D
 #define VAR_UNUSED_0x404E                    0x404E 
 #define VAR_UNUSED_0x404F                    0x404F
 #define VAR_UNUSED_0x4050                    0x4050

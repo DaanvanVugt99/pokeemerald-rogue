@@ -37,22 +37,22 @@ namespace PokemonDataGenerator.Pokedex
 				fullDexes.Add(GatherDexData("johto_GSC", "Gold/Silver/Crystal", 2, "original-johto"));
 				fullDexes.Add(GatherDexData("hoenn_RSE", "Ruby/Sapphire/Emerald", 3, "hoenn"));
 
-				fullDexes.Add(GatherDexData("national_gen1", "Gen. 1", 1, "national"));
-				fullDexes.Add(GatherDexData("national_gen2", "Gen. 2", 2, "national"));
-				fullDexes.Add(GatherDexData("national_gen3", "Gen. 3", 3, "national"));
+				fullDexes.Add(GatherDexData("national_gen1", "Gen I National", 1, "national"));
+				fullDexes.Add(GatherDexData("national_gen2", "Gen II National", 2, "national"));
+				fullDexes.Add(GatherDexData("national_gen3", "Gen III National", 3, "national"));
 			}
 			else
 			{
 				// Purposely order so the most recent regional dex is first
-				fullDexes.Add(GatherResourceDexData("rogue_modern", "Modern", 9, "Rogue Dex.csv"));
+				fullDexes.Add(GatherResourceDexData("rogue_modern", "Rogue Modern", 9, "Rogue Dex.csv"));
 
 				// Hacky, gather based on 3 but allow up to 9 in reality
-				var dexData = GatherDexData("rogue_classicplus", "Classic Plus", 3, "national");
+				var dexData = GatherDexData("rogue_classicplus", "Rogue Classic", 3, "national");
 				dexData.GenLimit = 9;
 				fullDexes.Add(dexData);
 
 				fullDexes.Add(GatherDexData("kanto_RBY", "Red/Blue/Yellow", 1, "kanto"));
-				fullDexes.Add(GatherDexData("kanto_letsgo", "Let'sGo", 7, "letsgo-kanto"));
+				fullDexes.Add(GatherDexData("kanto_letsgo", "Let's Go", 7, "letsgo-kanto"));
 
 				fullDexes.Add(GatherDexData("johto_GSC", "Gold/Silver/Crystal", 2, "original-johto"));
 				fullDexes.Add(GatherDexData("johto_HGSS", "HeartGold/SoulSilver", 4, "updated-johto"));
@@ -82,20 +82,20 @@ namespace PokemonDataGenerator.Pokedex
 				fullDexes.Add(GatherDexData("paldea_fulldlc", "Scarlet/Violet + DLC", 9, "paldea", "kitakami", "blueberry"));
 
 				fullDexes.Add(GatherDexData("extras_conquest", "Conquest", 5, "conquest-gallery"));
-				fullDexes.Add(GatherDexData("extras_legendsarceus", "LegendsArceus", 8, "hisui"));
+				fullDexes.Add(GatherDexData("extras_legendsarceus", "Legends Arceus", 8, "hisui"));
 
-				fullDexes.Add(GatherDexData("national_gen1", "Gen. 1", 1, "national"));
-				fullDexes.Add(GatherDexData("national_gen2", "Gen. 2", 2, "national"));
-				fullDexes.Add(GatherDexData("national_gen3", "Gen. 3", 3, "national"));
-				fullDexes.Add(GatherDexData("national_gen4", "Gen. 4", 4, "national"));
-				fullDexes.Add(GatherDexData("national_gen5", "Gen. 5", 5, "national"));
-				fullDexes.Add(GatherDexData("national_gen6", "Gen. 6", 6, "national"));
-				fullDexes.Add(GatherDexData("national_gen7", "Gen. 7", 7, "national"));
-				fullDexes.Add(GatherDexData("national_gen8", "Gen. 8", 8, "national"));
-				fullDexes.Add(GatherDexData("national_gen9", "Gen. 9", 9, "national"));
+				fullDexes.Add(GatherDexData("national_gen1", "Gen I National", 1, "national"));
+				fullDexes.Add(GatherDexData("national_gen2", "Gen II National", 2, "national"));
+				fullDexes.Add(GatherDexData("national_gen3", "Gen III National", 3, "national"));
+				fullDexes.Add(GatherDexData("national_gen4", "Gen IV National", 4, "national"));
+				fullDexes.Add(GatherDexData("national_gen5", "Gen V National", 5, "national"));
+				fullDexes.Add(GatherDexData("national_gen6", "Gen VI National", 6, "national"));
+				fullDexes.Add(GatherDexData("national_gen7", "Gen VII National", 7, "national"));
+				fullDexes.Add(GatherDexData("national_gen8", "Gen VIII National", 8, "national"));
+				fullDexes.Add(GatherDexData("national_gen9", "Gen IX National", 9, "national"));
 
-				fullDexes.Add(GatherDexData("legends_za", "Z-A", 9, "lumiose-city"));
-				fullDexes.Add(GatherDexData("legends_zafulldlc", "Z-A + DLC", 9, "lumiose-city", "hyperspace"));
+				fullDexes.Add(GatherDexData("legends_za", "Legends Z-A", 9, "lumiose-city"));
+				fullDexes.Add(GatherDexData("legends_zafulldlc", "Legends Z-A + DLC", 9, "lumiose-city", "hyperspace"));
 			}
 
 			Dictionary<string, List<PokedexData>> regionVariants = new Dictionary<string, List<PokedexData>>();
@@ -741,6 +741,8 @@ namespace PokemonDataGenerator.Pokedex
 			{
 				string displayName = region.Key;
 				displayName = char.ToUpper(displayName[0]).ToString() + string.Join("", displayName.Skip(1));
+				if (region.Key.Equals("legends", StringComparison.OrdinalIgnoreCase))
+					displayName = "Legends Z-A";
 
 				content.AppendLine($"");
 				content.AppendLine($"const u8 sRogueDexRegionName_{FormatKeyword(region.Key)}[] = _(\"{displayName}\");");

@@ -529,6 +529,177 @@ TEST("Normal runs reject party and Day Care Pokemon outside the selected Pokedex
     ClearCaughtMonTestState();
 }
 
+TEST("Favorite-game setup exposes only the curated Pokedex variants")
+{
+    static const u8 allowedVariants[] =
+    {
+        POKEDEX_VARIANT_KANTO_RBY,
+        POKEDEX_VARIANT_KANTO_LETSGO,
+        POKEDEX_VARIANT_JOHTO_GSC,
+        POKEDEX_VARIANT_JOHTO_HGSS,
+        POKEDEX_VARIANT_HOENN_RSE,
+        POKEDEX_VARIANT_HOENN_ORAS,
+        POKEDEX_VARIANT_SINNOH_DP,
+        POKEDEX_VARIANT_SINNOH_PL,
+        POKEDEX_VARIANT_UNOVA_BW,
+        POKEDEX_VARIANT_UNOVA_BW2,
+        POKEDEX_VARIANT_KALOS,
+        POKEDEX_VARIANT_ALOLA_SM,
+        POKEDEX_VARIANT_ALOLA_USUM,
+        POKEDEX_VARIANT_GALAR_SWSH,
+        POKEDEX_VARIANT_GALAR_FULLDLC,
+        POKEDEX_VARIANT_PALDEA_SCVI,
+        POKEDEX_VARIANT_PALDEA_FULLDLC,
+        POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS,
+        POKEDEX_VARIANT_NATIONAL_GEN1,
+        POKEDEX_VARIANT_NATIONAL_GEN2,
+        POKEDEX_VARIANT_NATIONAL_GEN3,
+        POKEDEX_VARIANT_NATIONAL_GEN4,
+        POKEDEX_VARIANT_NATIONAL_GEN5,
+        POKEDEX_VARIANT_NATIONAL_GEN6,
+        POKEDEX_VARIANT_NATIONAL_GEN7,
+        POKEDEX_VARIANT_NATIONAL_GEN8,
+        POKEDEX_VARIANT_NATIONAL_GEN9,
+        POKEDEX_VARIANT_LEGENDS_ZA,
+        POKEDEX_VARIANT_LEGENDS_ZAFULLDLC,
+    };
+    u8 variant;
+
+    for (variant = 0; variant < POKEDEX_VARIANT_COUNT; ++variant)
+    {
+        bool8 expected = FALSE;
+        u8 i;
+
+        for (i = 0; i < ARRAY_COUNT(allowedVariants); ++i)
+        {
+            if (allowedVariants[i] == variant)
+            {
+                expected = TRUE;
+                break;
+            }
+        }
+
+        EXPECT_EQ(RoguePokedex_IsCuratedVariant(variant), expected);
+    }
+}
+
+TEST("Favorite-game setup maps each curated Pokedex to its native gimmick")
+{
+    static const struct
+    {
+        u8 variant;
+        u16 item;
+    } cases[] =
+    {
+        {POKEDEX_VARIANT_KANTO_RBY, ITEM_NONE},
+        {POKEDEX_VARIANT_KANTO_LETSGO, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_JOHTO_GSC, ITEM_NONE},
+        {POKEDEX_VARIANT_JOHTO_HGSS, ITEM_NONE},
+        {POKEDEX_VARIANT_HOENN_RSE, ITEM_NONE},
+        {POKEDEX_VARIANT_HOENN_ORAS, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_SINNOH_DP, ITEM_NONE},
+        {POKEDEX_VARIANT_SINNOH_PL, ITEM_NONE},
+        {POKEDEX_VARIANT_UNOVA_BW, ITEM_NONE},
+        {POKEDEX_VARIANT_UNOVA_BW2, ITEM_NONE},
+        {POKEDEX_VARIANT_KALOS, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_ALOLA_SM, ITEM_Z_POWER_RING},
+        {POKEDEX_VARIANT_ALOLA_USUM, ITEM_Z_POWER_RING},
+        {POKEDEX_VARIANT_GALAR_SWSH, ITEM_DYNAMAX_BAND},
+        {POKEDEX_VARIANT_GALAR_FULLDLC, ITEM_DYNAMAX_BAND},
+        {POKEDEX_VARIANT_PALDEA_SCVI, ITEM_TERA_ORB},
+        {POKEDEX_VARIANT_PALDEA_FULLDLC, ITEM_TERA_ORB},
+        {POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN1, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN2, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN3, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN4, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN5, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN6, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN7, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN8, ITEM_NONE},
+        {POKEDEX_VARIANT_NATIONAL_GEN9, ITEM_NONE},
+        {POKEDEX_VARIANT_LEGENDS_ZA, ITEM_MEGA_RING},
+        {POKEDEX_VARIANT_LEGENDS_ZAFULLDLC, ITEM_MEGA_RING},
+    };
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(cases); ++i)
+        EXPECT_EQ(RoguePokedex_GetNativeGimmickItem(cases[i].variant), cases[i].item);
+}
+
+TEST("Favorite-game setup stores every National gimmick choice")
+{
+    static const u16 items[] =
+    {
+        ITEM_NONE,
+        ITEM_MEGA_RING,
+        ITEM_Z_POWER_RING,
+        ITEM_DYNAMAX_BAND,
+        ITEM_TERA_ORB,
+    };
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(items); ++i)
+    {
+        gSpecialVar_0x8006 = POKEDEX_VARIANT_NATIONAL_GEN9;
+        gSpecialVar_0x8005 = items[i];
+        RoguePokedex_StoreInitialSelection();
+
+        EXPECT(gSpecialVar_Result);
+        EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), POKEDEX_VARIANT_NATIONAL_GEN9);
+        EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), items[i]);
+    }
+}
+
+TEST("Normal and fallback starters stay inside the selected favorite-game Pokedex")
+{
+    u8 i;
+    u16 fallback;
+
+    ResetCaughtMonTestState();
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+
+    Rogue_RandomiseStarters();
+    for (i = 0; i < 3; ++i)
+        EXPECT(RoguePokedex_IsBaseSpeciesEnabled(GetGeneratedStarter(i)));
+
+    fallback = Rogue_SelectFallbackStarterSpecies();
+    EXPECT_NE(fallback, SPECIES_NONE);
+    EXPECT(RoguePokedex_IsBaseSpeciesEnabled(fallback));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Professor Pokedex changes do not alter the one-time gimmick choice")
+{
+    ResetCaughtMonTestState();
+    VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, ITEM_Z_POWER_RING);
+    gSpecialVar_0x8006 = POKEDEX_VARIANT_GALAR_FULLDLC;
+
+    RoguePokedex_ApplyCuratedSelection();
+
+    EXPECT(gSpecialVar_Result);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_GALAR_FULLDLC);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), ITEM_Z_POWER_RING);
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Postgame direct Pokedex editing remains unrestricted")
+{
+    FlagSet(FLAG_ROGUE_MET_POKABBIE);
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+
+    EXPECT(RoguePokedex_IsVariantEditUnlocked());
+    EXPECT(RoguePokedex_IsVariantEditEnabled());
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_GALAR_ISLEOFARMOR);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_GALAR_ISLEOFARMOR);
+    EXPECT(!RoguePokedex_IsCuratedVariant(RoguePokedex_GetDexVariant()));
+
+    FlagClear(FLAG_ROGUE_MET_POKABBIE);
+}
+
 TEST("Pending Type Trial randomizes only legal starter choices")
 {
     ResetCaughtMonTestState();
