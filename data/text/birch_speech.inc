@@ -1,5 +1,5 @@
 gText_Birch_Welcome::
-	.string "Hello!\p"
+	.string "Hi! Sorry to keep you waiting!\p"
 	.string "$"
 
 gText_Birch_Pokemon::
@@ -8,15 +8,16 @@ gText_Birch_Pokemon::
 	.string "$"
 
 gText_Birch_MainSpeech::
-	.string "In this game, every time you embark \n"
-	.string "on an Adventure...\p"
-	.string "the world and the POKéMON you\n"
-	.string "encounter will be different!\p"
+	.string "Each time you set out, the routes\n"
+	.string "and wild POKéMON may be entirely\n"
+	.string "different.\p"
+	.string "For a field researcher, it's a\n"
+	.string "dream come true!\p"
 	.string "$"
 
 gText_Birch_AndYouAre::
-	.string "Now...\n"
-	.string "Time to tell me about yourself$"
+	.string "But that's enough about my research!\p"
+	.string "Tell me about yourself.$"
 	.string "$"
 
 gText_Birch_BoyOrGirl::
@@ -43,6 +44,6 @@ gText_Birch_YourePlayer::
 	.string "$"
 
 gText_Birch_AreYouReady::
-	.string "I'll be waiting for you in my LAB!\p"
-	.string "Come and find me once you arrive.\p"
+	.string "Well, I'll be expecting you.\p"
+	.string "Come see me at my POKéMON LAB!\p"
 	.string "$"

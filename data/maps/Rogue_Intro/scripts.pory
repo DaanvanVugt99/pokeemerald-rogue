@@ -297,7 +297,7 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     // Fade in screen
     //
     delay(60)
-    msgbox(format("… … …\p… … …!\pHey… … …!\pCan you hear me?"), MSGBOX_AUTOCLOSE)
+    msgbox(format("… … …\p… … …!\pHey… … …!\pCan you hear me?\nOh! There you are!"), MSGBOX_AUTOCLOSE)
 
     setobjectxy(OBJ_LOCAL_ID_PROF, COORD_CENTRE_X, COORD_CENTRE_Y)
     
@@ -307,8 +307,8 @@ script Rogue_Intro_MapScripts_LoadFrame_0
 
     msgbox(format
     (
-        "Oh thank goodness!\pYou took quite the fall it seems.\pCan you tell me what you remember?\p… … …\p"
-        "Hmm…\nIt looks like you may have a mild case of amnesia.\pLet me see if I can jog your memory a bit."
+        "Oh, thank goodness!\pYou took quite a tumble out there.\pWhat do you remember?\p… … …\p"
+        "Hmm…\nA little amnesia, perhaps.\pLet's see if we can't jog that memory of yours."
     ), MSGBOX_AUTOCLOSE)
 
     playbgm(MUS_RG_NEW_GAME_EXIT, FALSE)
@@ -318,7 +318,7 @@ script Rogue_Intro_MapScripts_LoadFrame_0
 
     // Pokemon walking anims
     //
-    msgbox(format("I am Professor Birch."))
+    msgbox(format("I'm Birch—the Pokémon Professor!"))
 
     call(Rogue_Intro_PlayAnim_FlyingMons)
     call(Rogue_Intro_PlayAnim_FightMons)
@@ -326,15 +326,16 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     call(Rogue_Intro_PlayAnim_ParentChildMon)
 
     msgbox(format(
-        "BIRCH: Pokémon inhabit every inch of this world… Be it land, sky or sea!\p"
-        "Pokémon are the friends of many and, for some, they even train and fight alongside their Pokémon in an attempt to become a Pokémon Champion!\p"
-        "I myself study Pokémon to try and understand what makes each and every species unique!\p"
+        "Pokémon can be found just about everywhere—on land, in the sky, and beneath the waves!\p"
+        "People live alongside them as friends, partners, and sometimes rivals in battle.\p"
+        "I study how Pokémon live in the wild, and how each species adapts to its surroundings.\p"
 
-        "The world has changed quite a lot recently…\p"
-        "Routes within the world seem to be connecting up at random. Making exploring even more difficult.\p"
-        "Though there is one thing for sure, trainers are still out there and itching for battles!\p"
+        "Lately, though, those surroundings have become very strange.\p"
+        "Routes are joining up in ways they never did before, and Pokémon are appearing far from their usual habitats!\p"
+        "For a field researcher, it's fascinating!\nA little dangerous, too.\p"
+        "And the Trainers out there are as eager to battle as ever!\p"
 
-        "Now…\nLet me put your memory to the test…"
+        "Now then…\nLet's see what you remember."
     ))
 
     waitmovement(OBJ_LOCAL_ID_FOLLOWMON_PARENT)
@@ -354,9 +355,9 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     }
 
     msgbox(format(
-        "Phew…\pYou had me worried for a second then {PLAYER}!\p"
-        "It looks like your memory is working fine to me!\p"
-        "Come on now, let's try and get you standing up."
+        "Whew!\pYou had me worried for a moment, {PLAYER}!\p"
+        "Looks like your memory is coming back just fine.\p"
+        "Come on—let's get you on your feet."
     ))
 
     special(Rogue_AssignDefaultRegion)
@@ -376,22 +377,22 @@ script Rogue_Intro_MapScripts_LoadFrame_0
 
 script Rogue_Intro_CustomisePlayer
 {
-    msgbox(format("Do you remember what you look like?"))
+    msgbox(format("First things first—do you remember what you look like?"))
     fadescreen(FADE_TO_BLACK)
     special(Special_ViewPlayerCustomisationMenu)
     waitstate
 
-    msgbox(format("And what is your name?"))
+    msgbox(format("Good, good!\nAnd your name?"))
     fadescreen(FADE_TO_BLACK)
     special(ChangePlayerNickname)
     waitstate
 
-    msgbox(format("And finally…\pWe set out in a small group to build up a new village.\pWhat is the name of the village?"))
+    msgbox(format("One more thing.\pWe came here with a small group to establish a new village.\pDo you remember what we called it?"))
     fadescreen(FADE_TO_BLACK)
     special(ChangePokemonHubName)
     waitstate
 
-    msgbox(format("So you're {PLAYER} living in {POKEMON_HUB}?"), MSGBOX_YESNO)
+    msgbox(format("So, you're {PLAYER}, from {POKEMON_HUB}.\nIs that right?"), MSGBOX_YESNO)
 }
 
 script Rogue_Intro_PlayAnim_ParentChildMon

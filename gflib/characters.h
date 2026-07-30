@@ -25,6 +25,7 @@
 #define CHAR_ESZETT            0x15
 #define CHAR_a_GRAVE           0x16
 #define CHAR_a_ACUTE           0x17
+#define CHAR_EM_DASH           0x18
 //#define CHAR_a_CIRCUMFLEX    0x18 // Is 0x68 instead
 #define CHAR_c_CEDILLA         0x19
 #define CHAR_e_GRAVE           0x1A

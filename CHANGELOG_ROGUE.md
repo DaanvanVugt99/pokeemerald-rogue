@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added an em dash glyph to every Latin game font and taught the text toolchain
+  to encode and measure it.
 - Added a `+` marker before Pokédex stat values that exceed the pinned canonical
   baseline, stored in otherwise-unused per-species bake bits and generated
   automatically alongside the species-change report.
@@ -55,6 +57,12 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked Professor Birch's dialogue throughout the introduction, hub services,
+  and alternate partner flow to emphasize his enthusiastic field research,
+  observations of wild Pokémon, and curiosity about Adventures.
+- Assigned Professor Elm to the Encounter Lab, where he studies Pokémon released
+  or fainted during Adventures, with dialogue and music reflecting his
+  evolution-focused, easily flustered character.
 - Disabled the legacy multiplayer implementation while its replacement is in
   development, and replaced its hub interaction with a work-in-progress notice.
 - Renamed the legacy Modern and Classic Plus Pokédex variants to Rogue Modern

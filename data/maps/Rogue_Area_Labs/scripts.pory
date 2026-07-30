@@ -52,7 +52,7 @@ script Rogue_Area_Labs_StartGame
     applymovement(OBJ_EVENT_ID_PLAYER, PlayerStartGame0)
     waitmovement(0)
 
-    msgbox(format("BIRCH: There you are!\nBack up on your feet now!\pYou seem fine, but perhaps it would be a good idea for you to have a wander around {POKEMON_HUB} to refresh your memory.\pOnce you're ready, come and find me in my lab."))
+    msgbox(format("BIRCH: There you are!\nBack on your feet already—excellent!\pYou look all right, but take a walk around {POKEMON_HUB} and see if anything feels familiar.\pWhen you're ready, come find me at the lab."))
     closemessage
 
     applymovement(OBJ_EVENT_BIRCH, BirchStartGame1)
@@ -99,7 +99,7 @@ script Rogue_Area_Labs_TutorialGuide
     lock
 
     turnobject(OBJ_EVENT_BIRCH, DIR_NORTH)
-    msgbox(format("BIRCH: {PLAYER}!\pQuickly, we must make haste!"))
+    msgbox(format("BIRCH: {PLAYER}!\nThere you are!\pCome on—something's happening up ahead!"))
 
     closemessage
     setvar(VAR_0x8004, HUB_AREA_ADVENTURE_ENTRANCE)
