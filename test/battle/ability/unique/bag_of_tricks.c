@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
+    ASSUME(gBattleMoves[MOVE_NASTY_PLOT].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_TACKLE].type != TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_THIEF].effect == EFFECT_THIEF);
     ASSUME(gBattleMoves[MOVE_COVET].effect == EFFECT_THIEF);
@@ -31,6 +32,23 @@ SINGLE_BATTLE_TEST("Bag of Tricks uses a random trick move after the first Dark-
         ANIMATION(ANIM_TYPE_MOVE, MOVE_NASTY_PLOT, player);
     } THEN {
         EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 2);
+    }
+}
+
+SINGLE_BATTLE_TEST("Bag of Tricks uses an opposing target after a Dark-type self-targeting move")
+{
+    GIVEN {
+        PLAYER(SPECIES_THIEVUL) { Speed(100); Ability(ABILITY_RUN_AWAY); UniqueAbility(ABILITY_BAG_OF_TRICKS); Moves(MOVE_NASTY_PLOT); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_NASTY_PLOT, WITH_RNG(RNG_ROGUE_BAG_OF_TRICKS, MOVE_FAKE_TEARS)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_NASTY_PLOT, player);
+        ABILITY_POPUP(player, ABILITY_BAG_OF_TRICKS);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FAKE_TEARS, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(opponent->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE - 2);
     }
 }
 

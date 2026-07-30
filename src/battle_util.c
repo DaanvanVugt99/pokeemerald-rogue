@@ -8269,6 +8269,16 @@ static bool32 TryUseBagOfTricksCalledMove(u32 battler, u32 target)
         if (target >= gBattlersCount
          || !IsBattlerAlive(target)
          || target == battler
+         || GetBattlerSide(target) == GetBattlerSide(battler))
+        {
+            target = BATTLE_OPPOSITE(battler);
+            if (!IsBattlerAlive(target) && gBattlersCount > 2)
+                target ^= BIT_FLANK;
+        }
+
+        if (target >= gBattlersCount
+         || !IsBattlerAlive(target)
+         || target == battler
          || GetBattlerSide(target) == GetBattlerSide(battler)
          || !CanUseExtraMove(battler, target))
             return FALSE;

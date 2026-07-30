@@ -201,6 +201,7 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made Bag of Tricks activate after self-targeting Dark-type status moves.
 - Preserved favorite-game Pokédex selections across the nested gimmick menu,
   offered the gimmick choice for every National dex, and allowed Birch to
   change the Pokédex before partner selection while refreshing the candidates.
