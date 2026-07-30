@@ -5,6 +5,8 @@ ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
     ASSUME(gBattleMoves[MOVE_ABSORB].priority == 0);
+    ASSUME(gBattleMoves[MOVE_WEATHER_BALL].effect == EFFECT_WEATHER_BALL);
+    ASSUME(gBattleMoves[MOVE_WEATHER_BALL].type == TYPE_NORMAL);
 }
 
 SINGLE_BATTLE_TEST("Solarboost sets sun on switch-in")
@@ -31,6 +33,20 @@ SINGLE_BATTLE_TEST("Solarboost gives +1 priority to Fire-type moves on the first
     } SCENE {
         ABILITY_POPUP(player, ABILITY_SOLARBOOST);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ABSORB, opponent);
+    }
+}
+
+SINGLE_BATTLE_TEST("Solarboost gives +1 priority to Weather Ball after setting sun")
+{
+    GIVEN {
+        PLAYER(SPECIES_SUNFLORA) { Speed(50); Ability(ABILITY_EARLY_BIRD); UniqueAbility(ABILITY_SOLARBOOST); Moves(MOVE_WEATHER_BALL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Moves(MOVE_ABSORB); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WEATHER_BALL); MOVE(opponent, MOVE_ABSORB); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_SOLARBOOST);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WEATHER_BALL, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_ABSORB, opponent);
     }
 }

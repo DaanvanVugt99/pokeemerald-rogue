@@ -5048,6 +5048,19 @@ static bool32 IsRailgunChargePriorityMove(u32 battler, u16 move)
         && !IS_MOVE_STATUS(move);
 }
 
+static bool32 IsSolarboostPriorityMove(u32 battler, u16 move)
+{
+    u32 moveType = gBattleMoves[move].type;
+
+    if (gBattleMoves[move].effect == EFFECT_WEATHER_BALL
+     && WEATHER_HAS_EFFECT
+     && (gBattleWeather & B_WEATHER_SUN)
+     && GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_UTILITY_UMBRELLA)
+        moveType = TYPE_FIRE;
+
+    return moveType == TYPE_FIRE;
+}
+
 s8 GetMovePriority(u32 battler, u16 move)
 {
     s8 priority;
@@ -5213,7 +5226,7 @@ s8 GetMovePriority(u32 battler, u16 move)
 
     if (HasBattlerAbility(battler, ABILITY_SOLARBOOST)
      && gDisableStructs[battler].isFirstTurn
-     && gBattleMoves[move].type == TYPE_FIRE)
+     && IsSolarboostPriorityMove(battler, move))
     {
         priority++;
     }

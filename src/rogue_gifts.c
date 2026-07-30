@@ -1313,6 +1313,23 @@ static bool8 DoesMoveMatchDynamicSynergyProfile(u16 profileId, u16 move)
 
 static bool8 DoesMoveMatchDynamicUniqueAbility(u16 ability, u16 move)
 {
+    if(move == MOVE_NONE || move >= MOVES_COUNT)
+        return FALSE;
+
+    // Some Unique Abilities accept a broader set of native moves than the
+    // curated candidates used when generating a dynamic legendary.
+    if(ability == ABILITY_SOLARBOOST && move == MOVE_WEATHER_BALL)
+        return TRUE;
+    if(ability == ABILITY_STEALTH && move == MOVE_PHANTOM_FORCE)
+        return TRUE;
+    if(ability == ABILITY_FAULT_FINDER
+     && (gBattleMoves[move].type == TYPE_GROUND || gBattleMoves[move].type == TYPE_STEEL))
+        return TRUE;
+    if(ability == ABILITY_HOT_SHELLS && gBattleMoves[move].ballisticMove)
+        return TRUE;
+    if(ability == ABILITY_HECKLER && gBattleMoves[move].makesContact)
+        return TRUE;
+
     return DoesMoveMatchDynamicSynergyProfile(GetDynamicUniqueAbilitySynergyProfileId(ability), move);
 }
 

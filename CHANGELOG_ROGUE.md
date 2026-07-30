@@ -57,6 +57,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Fixed Solarboost recognizing Weather Ball as Fire after setting sun, and
+  expanded generated move synergy matching for move-driven Unique Abilities.
 - Refreshed Huntail, Gorebyss, Parasect, Electivire, Florges, and Volbeat
   competitive profiles around their Divergence typings and Unique Abilities,
   adding the thematically matched Dragon Tail, Alluring Voice, Misty Terrain,

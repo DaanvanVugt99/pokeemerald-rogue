@@ -742,6 +742,13 @@ TEST("Direct move synergy uses battle semantics instead of learnability")
     EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_SING));
     EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_FOCUS_BLAST));
 
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SOLARBOOST, MOVE_WEATHER_BALL));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_STEALTH, MOVE_PHANTOM_FORCE));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_FAULT_FINDER, MOVE_EARTHQUAKE));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_FAULT_FINDER, MOVE_IRON_HEAD));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_HOT_SHELLS, MOVE_AURA_SPHERE));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_HECKLER, MOVE_BODY_SLAM));
+
     SeedRng(0);
     EXPECT_LT(RogueGift_DebugSelectDynamicSynergyChoice(SPECIES_DITTO, ABILITY_SWORD_AND_BOARD, MOVE_NONE), 3);
 }
