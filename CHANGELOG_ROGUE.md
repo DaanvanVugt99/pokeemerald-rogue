@@ -61,6 +61,7 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Set Frontier Brain teams to five levels below the current badge level cap.
 - Fixed Solarboost recognizing Weather Ball as Fire after setting sun, and
   expanded generated move synergy matching for move-driven Unique Abilities.
 - Refreshed Huntail, Gorebyss, Parasect, Electivire, Florges, and Volbeat

@@ -369,15 +369,17 @@ TEST("Frontier Brains use competitive movesets on the first Average path")
     gRngValue = originalRng;
 }
 
-TEST("Frontier Brains use the full badge level cap")
+TEST("Frontier Brains stay five levels below the badge level cap")
 {
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalLevelOffset = gRogueRun.currentLevelOffset;
 
-    Rogue_SetCurrentDifficulty(4);
+    Rogue_SetCurrentDifficulty(6);
     gRogueRun.currentLevelOffset = 10;
 
-    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculateBossMonLvl());
+    EXPECT_EQ(Rogue_CalculateBossMonLvl(), 75);
+    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), 70);
+    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculateBossMonLvl() - 5);
     EXPECT_NE(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculatePlayerMonLvl());
 
     Rogue_SetCurrentDifficulty(originalDifficulty);

@@ -1519,9 +1519,10 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
         Rogue_ResetAdventurePathBuffers();
         GeneratePath(&pathSettings);
 
-        // Frontier Brain teams are deterministic from the room seed and use the
-        // full badge level cap, so cache their reward preview while the path is
-        // generated instead of stalling when the player inspects the node.
+        // Frontier Brain teams are deterministic from the room seed and stay
+        // five levels below the badge level cap, so cache their reward preview
+        // while the path is generated instead of stalling when the player
+        // inspects the node.
         CacheMissingMiniBossPreviews();
         DebugPrint("ADVPATH: Finished generating path.");
 
