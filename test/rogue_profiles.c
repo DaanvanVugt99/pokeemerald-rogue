@@ -109,6 +109,53 @@ TEST("Competitive profile abilities belong to their species form family")
     EXPECT_EQ(mismatchCount, 0);
 }
 
+TEST("Refreshed Divergence competitive profiles use legal moves")
+{
+    static const u16 sRefreshedSpecies[] =
+    {
+        SPECIES_PARASECT,
+        SPECIES_VOLBEAT,
+        SPECIES_HUNTAIL,
+        SPECIES_GOREBYSS,
+        SPECIES_ELECTIVIRE,
+        SPECIES_FLORGES,
+    };
+    u32 speciesIndex;
+    u32 setIndex;
+    u32 mismatchCount = 0;
+
+    for (speciesIndex = 0; speciesIndex < ARRAY_COUNT(sRefreshedSpecies); ++speciesIndex)
+    {
+        u16 species = sRefreshedSpecies[speciesIndex];
+        const struct RoguePokemonProfile *profile = &gRoguePokemonProfiles[species];
+
+        for (setIndex = 0; setIndex < profile->competitiveSetCount; ++setIndex)
+        {
+            const struct RoguePokemonCompetitiveSet *set = &profile->competitiveSets[setIndex];
+            u32 moveIndex;
+
+            for (moveIndex = 0; moveIndex < MAX_MON_MOVES; ++moveIndex)
+            {
+                u16 move = set->moves[moveIndex];
+
+                if (move == MOVE_NONE || ProfileCanLearnMove(profile, move))
+                    continue;
+
+                MgbaPrintf_(
+                    "Invalid competitive profile move: species=%d (%S), set=%d, move=%d",
+                    species,
+                    gSpeciesInfo[species].speciesName,
+                    setIndex,
+                    move
+                );
+                ++mismatchCount;
+            }
+        }
+    }
+
+    EXPECT_EQ(mismatchCount, 0);
+}
+
 TEST("Liquid Voice Politoed competitive sets contain Hyper Voice")
 {
     const struct RoguePokemonProfile *profile = &gRoguePokemonProfiles[SPECIES_POLITOED];

@@ -57,6 +57,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Refreshed Huntail, Gorebyss, Parasect, Electivire, Florges, and Volbeat
+  competitive profiles around their Divergence typings and Unique Abilities,
+  adding the thematically matched Dragon Tail, Alluring Voice, Misty Terrain,
+  Mega Punch, Shadow Claw, and Poltergeist learnset options they require.
 - Reworked Professor Birch's dialogue throughout the introduction, hub services,
   and alternate partner flow to emphasize his enthusiastic field research,
   observations of wild Pokémon, and curiosity about Adventures.

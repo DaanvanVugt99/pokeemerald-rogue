@@ -506,6 +506,8 @@ namespace PokemonDataGenerator.Pokedex
 						new LevelUpMove { Move = "MOVE_EARTH_POWER", Level = 48 },
 					}
 				},
+				{ "SPECIES_HUNTAIL", new[] { new LevelUpMove { Move = "MOVE_DRAGON_TAIL", Level = 42 } } },
+				{ "SPECIES_PARASECT", new[] { new LevelUpMove { Move = "MOVE_SHADOW_CLAW", Level = 0 } } },
 				{ "SPECIES_GRIMMSNARL", new[] { new LevelUpMove { Move = "MOVE_BADDY_BAD", Level = 48 } } },
 				{ "SPECIES_JELLICENT", new[] { new LevelUpMove { Move = "MOVE_BOUNCY_BUBBLE", Level = 48 } } },
 				{ "SPECIES_VIKAVOLT", new[] { new LevelUpMove { Move = "MOVE_BUZZY_BUZZ", Level = 48 } } },
@@ -553,12 +555,16 @@ namespace PokemonDataGenerator.Pokedex
 
 			private static readonly Dictionary<string, HashSet<string>> s_DivergenceTutorMoveLearnsets = new Dictionary<string, HashSet<string>>
 			{
+				{ "MOVE_ALLURING_VOICE", new HashSet<string> { "SPECIES_GOREBYSS" } },
 				{ "MOVE_BADDY_BAD", new HashSet<string> { "SPECIES_ABSOL" } },
 				{ "MOVE_BOUNCY_BUBBLE", new HashSet<string> { "SPECIES_POPPLIO", "SPECIES_BRIONNE", "SPECIES_PRIMARINA" } },
 				{ "MOVE_BUZZY_BUZZ", new HashSet<string> { "SPECIES_MAREEP", "SPECIES_FLAAFFY", "SPECIES_AMPHAROS" } },
 				{ "MOVE_FLOATY_FALL", new HashSet<string> { "SPECIES_HOPPIP", "SPECIES_SKIPLOOM", "SPECIES_JUMPLUFF" } },
 				{ "MOVE_FREEZY_FROST", new HashSet<string> { "SPECIES_SNORUNT", "SPECIES_FROSLASS" } },
 				{ "MOVE_GLITZY_GLOW", new HashSet<string> { "SPECIES_STARYU", "SPECIES_STARMIE" } },
+				{ "MOVE_MEGA_PUNCH", new HashSet<string> { "SPECIES_ELECTIVIRE" } },
+				{ "MOVE_MISTY_TERRAIN", new HashSet<string> { "SPECIES_GOREBYSS" } },
+				{ "MOVE_POLTERGEIST", new HashSet<string> { "SPECIES_PARASECT" } },
 				{ "MOVE_SAPPY_SEED", new HashSet<string> { "SPECIES_PHANTUMP", "SPECIES_TREVENANT" } },
 				{ "MOVE_SIZZLY_SLIDE", new HashSet<string> { "SPECIES_SALANDIT", "SPECIES_SALAZZLE" } },
 				{ "MOVE_SPARKLY_SWIRL", new HashSet<string> { "SPECIES_COMFEY" } },
@@ -768,6 +774,185 @@ namespace PokemonDataGenerator.Pokedex
 				};
 			}
 
+			private void UpdateHuntailCompetitiveSets()
+			{
+				if (CompetitiveSets.Count < 6)
+					throw new InvalidDataException("Huntail is missing the competitive sets required for its Divergence profiles");
+
+				CompetitiveSets[0].Nature = "NATURE_ADAMANT";
+				CompetitiveSets[0].Moves = new List<string>
+				{
+					"MOVE_SHELL_SMASH",
+					"MOVE_WATERFALL",
+					"MOVE_CRUNCH",
+					"MOVE_ICE_FANG",
+				};
+
+				CompetitiveSets[1].Item = "ITEM_LEFTOVERS";
+				CompetitiveSets[1].Nature = "NATURE_ADAMANT";
+				CompetitiveSets[1].Moves = new List<string>
+				{
+					"MOVE_COIL",
+					"MOVE_AQUA_TAIL",
+					"MOVE_CRUNCH",
+					"MOVE_DRAGON_TAIL",
+				};
+
+				CompetitiveSets[2].Moves = new List<string>
+				{
+					"MOVE_SHELL_SMASH",
+					"MOVE_WATERFALL",
+					"MOVE_CRUNCH",
+					"MOVE_SUCKER_PUNCH",
+				};
+
+				CompetitiveSets[3].Item = "ITEM_CHOICE_BAND";
+				CompetitiveSets[3].Nature = "NATURE_ADAMANT";
+				CompetitiveSets[3].HiddenPower = null;
+				CompetitiveSets[3].Moves = new List<string>
+				{
+					"MOVE_AQUA_TAIL",
+					"MOVE_CRUNCH",
+					"MOVE_ICE_FANG",
+					"MOVE_DRAGON_TAIL",
+				};
+
+				CompetitiveSets[4].Nature = "NATURE_ADAMANT";
+				CompetitiveSets[4].Moves = new List<string>
+				{
+					"MOVE_SHELL_SMASH",
+					"MOVE_WATERFALL",
+					"MOVE_CRUNCH",
+					"MOVE_ICE_FANG",
+				};
+
+				CompetitiveSets[5].Nature = "NATURE_ADAMANT";
+				CompetitiveSets[5].Moves = new List<string>
+				{
+					"MOVE_SHELL_SMASH",
+					"MOVE_WATERFALL",
+					"MOVE_CRUNCH",
+					"MOVE_ICE_FANG",
+				};
+			}
+
+			private void UpdateGorebyssCompetitiveSets()
+			{
+				if (CompetitiveSets.Count < 4)
+					throw new InvalidDataException("Gorebyss is missing the competitive sets required for its Divergence profiles");
+
+				CompetitiveSets[0].HiddenPower = null;
+				CompetitiveSets[0].Moves = new List<string>
+				{
+					"MOVE_SHELL_SMASH",
+					"MOVE_HYDRO_PUMP",
+					"MOVE_ALLURING_VOICE",
+					"MOVE_ICE_BEAM",
+				};
+
+				CompetitiveSets[1].Moves = new List<string>
+				{
+					"MOVE_MISTY_TERRAIN",
+					"MOVE_SHELL_SMASH",
+					"MOVE_HYDRO_PUMP",
+					"MOVE_ALLURING_VOICE",
+				};
+
+				CompetitiveSets[2].Moves = new List<string>
+				{
+					"MOVE_SHELL_SMASH",
+					"MOVE_SURF",
+					"MOVE_DRAINING_KISS",
+					"MOVE_PSYCHIC",
+				};
+
+				CompetitiveSets[3].HiddenPower = null;
+				CompetitiveSets[3].Moves = new List<string>
+				{
+					"MOVE_MISTY_TERRAIN",
+					"MOVE_SHELL_SMASH",
+					"MOVE_HYDRO_PUMP",
+					"MOVE_ALLURING_VOICE",
+				};
+			}
+
+			private void UpdateParasectCompetitiveSets()
+			{
+				if (CompetitiveSets.Count < 2)
+					throw new InvalidDataException("Parasect is missing the competitive sets required for its Divergence profiles");
+
+				CompetitiveSets[0].Moves = new List<string>
+				{
+					"MOVE_SPORE",
+					"MOVE_SYNTHESIS",
+					"MOVE_SEED_BOMB",
+					"MOVE_POLTERGEIST",
+				};
+
+				CompetitiveSets[1].Moves = new List<string>
+				{
+					"MOVE_SWORDS_DANCE",
+					"MOVE_SHADOW_CLAW",
+					"MOVE_SEED_BOMB",
+					"MOVE_SYNTHESIS",
+				};
+			}
+
+			private void UpdateVolbeatCompetitiveSets()
+			{
+				if (CompetitiveSets.Count < 5)
+					throw new InvalidDataException("Volbeat is missing the competitive sets required for its Divergence profiles");
+
+				CompetitiveSets[1].Item = "ITEM_LIFE_ORB";
+				CompetitiveSets[1].Ability = "ABILITY_SWARM";
+				CompetitiveSets[1].Nature = "NATURE_TIMID";
+				CompetitiveSets[1].Moves = new List<string>
+				{
+					"MOVE_TAIL_GLOW",
+					"MOVE_THUNDER",
+					"MOVE_BUG_BUZZ",
+					"MOVE_ROOST",
+				};
+
+				CompetitiveSets[4].Item = "ITEM_HEAVY_DUTY_BOOTS";
+			}
+
+			private void UpdateFlorgesCompetitiveSets()
+			{
+				if (CompetitiveSets.Count < 11)
+					throw new InvalidDataException("Florges is missing the competitive sets required for its Divergence profiles");
+
+				CompetitiveSets[1].Moves = new List<string>
+				{
+					"MOVE_CALM_MIND",
+					"MOVE_MOONBLAST",
+					"MOVE_GIGA_DRAIN",
+					"MOVE_SYNTHESIS",
+				};
+
+				CompetitiveSets[10].Moves = new List<string>
+				{
+					"MOVE_CALM_MIND",
+					"MOVE_MOONBLAST",
+					"MOVE_ENERGY_BALL",
+					"MOVE_SYNTHESIS",
+				};
+			}
+
+			private void UpdateElectivireCompetitiveSets()
+			{
+				if (CompetitiveSets.Count < 3)
+					throw new InvalidDataException("Electivire is missing the competitive sets required for its Divergence profiles");
+
+				CompetitiveSets[2].Moves = new List<string>
+				{
+					"MOVE_ELECTRIC_TERRAIN",
+					"MOVE_PLASMA_FISTS",
+					"MOVE_MEGA_PUNCH",
+					"MOVE_ICE_PUNCH",
+				};
+			}
+
 			private void UpdateSunfloraCompetitiveSets()
 			{
 				PokemonCompetitiveSet chlorophyllSet = CompetitiveSets
@@ -832,6 +1017,24 @@ namespace PokemonDataGenerator.Pokedex
 						break;
 					case "SPECIES_LEDIAN":
 						UpdateLedianCompetitiveSets();
+						break;
+					case "SPECIES_PARASECT":
+						UpdateParasectCompetitiveSets();
+						break;
+					case "SPECIES_VOLBEAT":
+						UpdateVolbeatCompetitiveSets();
+						break;
+					case "SPECIES_HUNTAIL":
+						UpdateHuntailCompetitiveSets();
+						break;
+					case "SPECIES_GOREBYSS":
+						UpdateGorebyssCompetitiveSets();
+						break;
+					case "SPECIES_ELECTIVIRE":
+						UpdateElectivireCompetitiveSets();
+						break;
+					case "SPECIES_FLORGES":
+						UpdateFlorgesCompetitiveSets();
 						break;
 					case "SPECIES_SUNFLORA":
 						UpdateSunfloraCompetitiveSets();
