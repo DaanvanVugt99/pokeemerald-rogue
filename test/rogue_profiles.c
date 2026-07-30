@@ -1,6 +1,7 @@
 #include "global.h"
 #include "constants/abilities.h"
 #include "constants/moves.h"
+#include "constants/rogue.h"
 #include "pokemon.h"
 #include "rogue.h"
 #include "test/test.h"
@@ -226,6 +227,122 @@ TEST("Unown forms share their expanded Power profile")
             EXPECT(ProfileCanLearnMove(profile, profile->competitiveSets[setIndex].moves[moveIndex]));
         }
     }
+}
+
+TEST("Divergence competitive roles emit runtime preset flags")
+{
+    const struct RoguePokemonProfile *profile = &gRoguePokemonProfiles[SPECIES_UNOWN];
+    bool32 foundStrongWildSet = FALSE;
+    u32 setIndex;
+
+    for (setIndex = 0; setIndex < profile->competitiveSetCount; ++setIndex)
+    {
+        const struct RoguePokemonCompetitiveSet *set = &profile->competitiveSets[setIndex];
+        u32 moveIndex;
+
+        for (moveIndex = 0; moveIndex < MAX_MON_MOVES; ++moveIndex)
+        {
+            if (set->moves[moveIndex] == MOVE_STORED_POWER)
+            {
+                EXPECT(set->flags & MON_FLAG_STRONG_WILD);
+                foundStrongWildSet = TRUE;
+                break;
+            }
+        }
+    }
+
+    EXPECT(foundStrongWildSet);
+}
+
+TEST("Legends Z-A Mega forms retain their resolved base profiles")
+{
+    static const struct
+    {
+        u16 form;
+        u16 profileOwner;
+    } sExpectedProfileOwners[] =
+    {
+        { SPECIES_ABSOL_MEGA_Z, SPECIES_ABSOL },
+        { SPECIES_BARBARACLE_MEGA, SPECIES_BARBARACLE },
+        { SPECIES_BAXCALIBUR_MEGA, SPECIES_BAXCALIBUR },
+        { SPECIES_CHANDELURE_MEGA, SPECIES_CHANDELURE },
+        { SPECIES_CHESNAUGHT_MEGA, SPECIES_CHESNAUGHT },
+        { SPECIES_CHIMECHO_MEGA, SPECIES_CHIMECHO },
+        { SPECIES_CLEFABLE_MEGA, SPECIES_CLEFABLE },
+        { SPECIES_CRABOMINABLE_MEGA, SPECIES_CRABOMINABLE },
+        { SPECIES_DARKRAI_MEGA, SPECIES_DARKRAI },
+        { SPECIES_DELPHOX_MEGA, SPECIES_DELPHOX },
+        { SPECIES_DRAGALGE_MEGA, SPECIES_DRAGALGE },
+        { SPECIES_DRAGONITE_MEGA, SPECIES_DRAGONITE },
+        { SPECIES_DRAMPA_MEGA, SPECIES_DRAMPA },
+        { SPECIES_EELEKTROSS_MEGA, SPECIES_EELEKTROSS },
+        { SPECIES_EMBOAR_MEGA, SPECIES_EMBOAR },
+        { SPECIES_EXCADRILL_MEGA, SPECIES_EXCADRILL },
+        { SPECIES_FALINKS_MEGA, SPECIES_FALINKS },
+        { SPECIES_FERALIGATR_MEGA, SPECIES_FERALIGATR },
+        { SPECIES_FLOETTE_MEGA, SPECIES_FLOETTE_ETERNAL_FLOWER },
+        { SPECIES_FROSLASS_MEGA, SPECIES_FROSLASS },
+        { SPECIES_GARCHOMP_MEGA_Z, SPECIES_GARCHOMP },
+        { SPECIES_GLIMMORA_MEGA, SPECIES_GLIMMORA },
+        { SPECIES_GOLISOPOD_MEGA, SPECIES_GOLISOPOD },
+        { SPECIES_GOLURK_MEGA, SPECIES_GOLURK },
+        { SPECIES_GRENINJA_MEGA, SPECIES_GRENINJA },
+        { SPECIES_HAWLUCHA_MEGA, SPECIES_HAWLUCHA },
+        { SPECIES_HEATRAN_MEGA, SPECIES_HEATRAN },
+        { SPECIES_LUCARIO_MEGA_Z, SPECIES_LUCARIO },
+        { SPECIES_MAGEARNA_MEGA, SPECIES_MAGEARNA },
+        { SPECIES_MAGEARNA_ORIGINAL_MEGA, SPECIES_MAGEARNA },
+        { SPECIES_MALAMAR_MEGA, SPECIES_MALAMAR },
+        { SPECIES_MEGANIUM_MEGA, SPECIES_MEGANIUM },
+        { SPECIES_MEOWSTIC_F_MEGA, SPECIES_MEOWSTIC_FEMALE },
+        { SPECIES_MEOWSTIC_M_MEGA, SPECIES_MEOWSTIC },
+        { SPECIES_PYROAR_MEGA, SPECIES_PYROAR },
+        { SPECIES_RAICHU_MEGA_X, SPECIES_RAICHU },
+        { SPECIES_RAICHU_MEGA_Y, SPECIES_RAICHU },
+        { SPECIES_SCOLIPEDE_MEGA, SPECIES_SCOLIPEDE },
+        { SPECIES_SCOVILLAIN_MEGA, SPECIES_SCOVILLAIN },
+        { SPECIES_SCRAFTY_MEGA, SPECIES_SCRAFTY },
+        { SPECIES_SKARMORY_MEGA, SPECIES_SKARMORY },
+        { SPECIES_STARAPTOR_MEGA, SPECIES_STARAPTOR },
+        { SPECIES_STARMIE_MEGA, SPECIES_STARMIE },
+        { SPECIES_TATSUGIRI_CURLY_MEGA, SPECIES_TATSUGIRI },
+        { SPECIES_TATSUGIRI_DROOPY_MEGA, SPECIES_TATSUGIRI_DROOPY },
+        { SPECIES_TATSUGIRI_STRETCHY_MEGA, SPECIES_TATSUGIRI_STRETCHY },
+        { SPECIES_VICTREEBEL_MEGA, SPECIES_VICTREEBEL },
+        { SPECIES_ZERAORA_MEGA, SPECIES_ZERAORA },
+        { SPECIES_ZYGARDE_MEGA, SPECIES_ZYGARDE },
+    };
+    u32 i;
+
+    for (i = 0; i < ARRAY_COUNT(sExpectedProfileOwners); ++i)
+    {
+        const struct RoguePokemonProfile *form = &gRoguePokemonProfiles[sExpectedProfileOwners[i].form];
+        const struct RoguePokemonProfile *owner = &gRoguePokemonProfiles[sExpectedProfileOwners[i].profileOwner];
+
+        EXPECT(form->levelUpMoves == owner->levelUpMoves);
+        EXPECT(form->tutorMoves == owner->tutorMoves);
+        EXPECT(form->competitiveSets == owner->competitiveSets);
+    }
+}
+
+TEST("Profiles retained from the pre-pipeline baseline keep a competitive set")
+{
+    static const u16 sExpectedProfiles[] =
+    {
+        SPECIES_TATSUGIRI_DROOPY,
+        SPECIES_TATSUGIRI_STRETCHY,
+        SPECIES_VULPIX_ALOLAN,
+        SPECIES_VOLTORB_HISUIAN,
+        SPECIES_GROTLE,
+        SPECIES_MELTAN,
+        SPECIES_DRIZZILE,
+        SPECIES_WYRDEER,
+        SPECIES_FLITTLE,
+    };
+    u32 i;
+
+    for (i = 0; i < ARRAY_COUNT(sExpectedProfiles); ++i)
+        EXPECT_GT(gRoguePokemonProfiles[sExpectedProfiles[i]].competitiveSetCount, 0);
 }
 
 TEST("Mega Starmie keeps its Huge Power adjusted Attack")

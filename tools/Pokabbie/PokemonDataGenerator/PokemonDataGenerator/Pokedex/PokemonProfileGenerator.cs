@@ -15,6 +15,16 @@ namespace PokemonDataGenerator.Pokedex
 {
 	public static class PokemonProfileGenerator
 	{
+		private const int ProfileCacheSchemaVersion = 2;
+		private static readonly Dictionary<string, int> s_TransformationMatchCounts = new Dictionary<string, int>();
+
+		private static void RecordTransformationMatch(string id, int count = 1)
+		{
+			if (!s_TransformationMatchCounts.ContainsKey(id))
+				s_TransformationMatchCounts[id] = 0;
+			s_TransformationMatchCounts[id] += count;
+		}
+
 		private static readonly JsonSerializerSettings c_JsonSettings = new JsonSerializerSettings
 		{
 			Formatting = Formatting.Indented,
@@ -205,7 +215,7 @@ namespace PokemonDataGenerator.Pokedex
 		}
 
 
-		private class SourceMoveInfo
+		internal class SourceMoveInfo
 		{
 			public enum LearnMethod
 			{
@@ -230,7 +240,7 @@ namespace PokemonDataGenerator.Pokedex
 			}
 		}
 
-		private class SourcePokemonProfile
+		internal class SourcePokemonProfile
 		{
 			public string Species;
 			public List<SourceMoveInfo> Moves;
@@ -304,7 +314,7 @@ namespace PokemonDataGenerator.Pokedex
 			}
 		}
 
-		private class LevelUpMove
+		internal class LevelUpMove
 		{
 			public string Move;
 			public int Level;
@@ -315,269 +325,63 @@ namespace PokemonDataGenerator.Pokedex
 			}
 		}
 
-		private class PokemonProfile
+		private class LearnsetRule
 		{
-			// Profiles are cached after move filtering. Keep old caches usable and restore
-			// deliberately selected compatibility for moves omitted from modern learnsets.
-			private static readonly Dictionary<string, HashSet<string>> s_RestoredMoveLearnsets = new Dictionary<string, HashSet<string>>
-			{
-				{
-					"MOVE_BARRAGE",
-					new HashSet<string>
-					{
-						"SPECIES_EXEGGCUTE", "SPECIES_EXEGGUTOR", "SPECIES_EXEGGUTOR_ALOLAN",
-					}
-				},
-				{
-					"MOVE_BONE_CLUB",
-					new HashSet<string>
-					{
-						"SPECIES_CUBONE", "SPECIES_MAROWAK", "SPECIES_MAROWAK_ALOLAN",
-					}
-				},
-				{
-					"MOVE_EGG_BOMB",
-					new HashSet<string>
-					{
-						"SPECIES_EXEGGCUTE", "SPECIES_EXEGGUTOR", "SPECIES_CHANSEY", "SPECIES_MEW",
-						"SPECIES_BLISSEY", "SPECIES_EXEGGUTOR_ALOLAN",
-					}
-				},
-				{
-					"MOVE_ION_DELUGE",
-					new HashSet<string>
-					{
-						"SPECIES_CHINCHOU", "SPECIES_LANTURN", "SPECIES_AMPHAROS", "SPECIES_PACHIRISU",
-						"SPECIES_ELECTIVIRE", "SPECIES_ZEBSTRIKA", "SPECIES_EMOLGA", "SPECIES_EELEKTROSS",
-						"SPECIES_XURKITREE",
-					}
-				},
-				{
-					"MOVE_MAGNITUDE",
-					new HashSet<string>
-					{
-						"SPECIES_SANDSHREW", "SPECIES_SANDSLASH", "SPECIES_DIGLETT", "SPECIES_DUGTRIO",
-						"SPECIES_GEODUDE", "SPECIES_GRAVELER", "SPECIES_GOLEM", "SPECIES_LICKITUNG",
-						"SPECIES_RHYHORN", "SPECIES_DONPHAN", "SPECIES_NOSEPASS", "SPECIES_NUMEL",
-						"SPECIES_CAMERUPT", "SPECIES_BARBOACH", "SPECIES_WHISCASH", "SPECIES_RELICANTH",
-						"SPECIES_TEPIG", "SPECIES_ROGGENROLA", "SPECIES_GOLETT", "SPECIES_GOLURK",
-						"SPECIES_MUDBRAY", "SPECIES_DIGLETT_ALOLAN", "SPECIES_DUGTRIO_ALOLAN",
-					}
-				},
-				{
-					"MOVE_NEEDLE_ARM",
-					new HashSet<string>
-					{
-						"SPECIES_CACNEA", "SPECIES_CACTURNE", "SPECIES_MARACTUS", "SPECIES_QUILLADIN",
-						"SPECIES_CHESNAUGHT",
-					}
-				},
-				{
-					"MOVE_POWDER",
-					new HashSet<string>
-					{
-						"SPECIES_VIVILLON", "SPECIES_CUTIEFLY",
-					}
-				},
-				{
-					"MOVE_POWER_SHIFT",
-					new HashSet<string>
-					{
-						"SPECIES_GENGAR", "SPECIES_ONIX", "SPECIES_MR_MIME", "SPECIES_FLAREON",
-						"SPECIES_UMBREON", "SPECIES_STEELIX", "SPECIES_MANTINE", "SPECIES_BLISSEY",
-						"SPECIES_NOSEPASS", "SPECIES_DUSCLOPS", "SPECIES_RAMPARDOS", "SPECIES_BASTIODON",
-						"SPECIES_VESPIQUEN", "SPECIES_DRIFBLIM", "SPECIES_CHATOT", "SPECIES_GLISCOR",
-						"SPECIES_PORYGON_Z", "SPECIES_PROBOPASS", "SPECIES_DUSKNOIR", "SPECIES_UXIE",
-						"SPECIES_AZELF", "SPECIES_REGIGIGAS", "SPECIES_CRESSELIA", "SPECIES_BRAVIARY_HISUIAN",
-						"SPECIES_THUNDURUS", "SPECIES_THUNDURUS_THERIAN", "SPECIES_AVALUGG_HISUIAN",
-						"SPECIES_SNEASLER", "SPECIES_ENAMORUS", "SPECIES_ENAMORUS_THERIAN",
-					}
-				},
-				{
-					"MOVE_SPIDER_WEB",
-					new HashSet<string>
-					{
-						"SPECIES_SPINARAK", "SPECIES_ARIADOS", "SPECIES_JOLTIK", "SPECIES_GALVANTULA",
-						"SPECIES_DEWPIDER", "SPECIES_ARAQUANID",
-					}
-				},
-				{
-					"MOVE_SPIKE_CANNON",
-					new HashSet<string>
-					{
-						"SPECIES_CLOYSTER", "SPECIES_OMANYTE", "SPECIES_OMASTAR", "SPECIES_CORSOLA",
-						"SPECIES_MAREANIE", "SPECIES_TOXAPEX",
-					}
-				},
-				{
-					"MOVE_TRUMP_CARD",
-					new HashSet<string>
-					{
-						"SPECIES_FARFETCHD", "SPECIES_KANGASKHAN", "SPECIES_EEVEE", "SPECIES_SLOWKING",
-						"SPECIES_DUNSPARCE", "SPECIES_MINUN", "SPECIES_CORPHISH", "SPECIES_SHELLOS",
-						"SPECIES_OSHAWOTT", "SPECIES_MAGEARNA",
-					}
-				},
-				{
-					"MOVE_ALLURING_VOICE",
-					new HashSet<string>
-					{
-						"SPECIES_PIKACHU", "SPECIES_RAICHU", "SPECIES_CLEFAIRY", "SPECIES_CLEFABLE",
-						"SPECIES_JIGGLYPUFF", "SPECIES_WIGGLYTUFF", "SPECIES_DEWGONG", "SPECIES_LAPRAS",
-						"SPECIES_EEVEE", "SPECIES_VAPOREON", "SPECIES_JOLTEON", "SPECIES_FLAREON",
-						"SPECIES_MEW", "SPECIES_CLEFFA", "SPECIES_IGGLYBUFF", "SPECIES_MARILL",
-						"SPECIES_AZUMARILL", "SPECIES_ESPEON", "SPECIES_UMBREON", "SPECIES_BLISSEY",
-						"SPECIES_RALTS", "SPECIES_KIRLIA", "SPECIES_GARDEVOIR", "SPECIES_AZURILL",
-						"SPECIES_PLUSLE", "SPECIES_MINUN", "SPECIES_FLYGON", "SPECIES_ALTARIA",
-						"SPECIES_MILOTIC", "SPECIES_LATIAS", "SPECIES_PACHIRISU", "SPECIES_FINNEON",
-						"SPECIES_LUMINEON", "SPECIES_LEAFEON", "SPECIES_GLACEON", "SPECIES_GALLADE",
-						"SPECIES_PHIONE", "SPECIES_MANAPHY", "SPECIES_LILLIGANT", "SPECIES_MINCCINO",
-						"SPECIES_CINCCINO", "SPECIES_SWANNA", "SPECIES_ALOMOMOLA", "SPECIES_MELOETTA",
-						"SPECIES_FLABEBE", "SPECIES_FLOETTE", "SPECIES_FLORGES", "SPECIES_MEOWSTIC",
-						"SPECIES_SYLVEON", "SPECIES_PRIMARINA", "SPECIES_ORICORIO", "SPECIES_RIBOMBEE",
-						"SPECIES_COMFEY", "SPECIES_ALCREMIE", "SPECIES_ENAMORUS", "SPECIES_SKELEDIRGE",
-						"SPECIES_FIDOUGH", "SPECIES_DACHSBUN", "SPECIES_ARBOLIVA", "SPECIES_FEZANDIPITI",
-						"SPECIES_MEOWSTIC_FEMALE", "SPECIES_RAICHU_ALOLAN", "SPECIES_ORICORIO_POM_POM",
-						"SPECIES_ORICORIO_PAU", "SPECIES_ORICORIO_SENSU", "SPECIES_ENAMORUS_THERIAN",
-					}
-				},
-				{
-					"MOVE_PSYCHIC_NOISE",
-					new HashSet<string>
-					{
-						"SPECIES_JIGGLYPUFF", "SPECIES_WIGGLYTUFF", "SPECIES_VENONAT", "SPECIES_VENOMOTH",
-						"SPECIES_PSYDUCK", "SPECIES_GOLDUCK", "SPECIES_SLOWBRO", "SPECIES_GENGAR",
-						"SPECIES_DROWZEE", "SPECIES_HYPNO", "SPECIES_EXEGGCUTE", "SPECIES_EXEGGUTOR",
-						"SPECIES_LAPRAS", "SPECIES_MEWTWO", "SPECIES_MEW", "SPECIES_NOCTOWL",
-						"SPECIES_YANMA", "SPECIES_ESPEON", "SPECIES_MURKROW", "SPECIES_SLOWKING",
-						"SPECIES_MISDREAVUS", "SPECIES_GIRAFARIG", "SPECIES_LUGIA", "SPECIES_GARDEVOIR",
-						"SPECIES_GRUMPIG", "SPECIES_FLYGON", "SPECIES_CHIMECHO", "SPECIES_METANG",
-						"SPECIES_METAGROSS", "SPECIES_LATIOS", "SPECIES_JIRACHI", "SPECIES_DEOXYS",
-						"SPECIES_VESPIQUEN", "SPECIES_MISMAGIUS", "SPECIES_HONCHKROW", "SPECIES_CHINGLING",
-						"SPECIES_BRONZONG", "SPECIES_YANMEGA", "SPECIES_UXIE", "SPECIES_MESPRIT",
-						"SPECIES_GOTHITA", "SPECIES_GOTHORITA", "SPECIES_GOTHITELLE", "SPECIES_REUNICLUS",
-						"SPECIES_DELPHOX", "SPECIES_FLORGES", "SPECIES_ESPURR", "SPECIES_MEOWSTIC",
-						"SPECIES_MALAMAR", "SPECIES_TREVENANT", "SPECIES_NOIVERN", "SPECIES_HOOPA",
-						"SPECIES_PRIMARINA", "SPECIES_RIBOMBEE", "SPECIES_ORANGURU", "SPECIES_BRUXISH",
-						"SPECIES_TOXTRICITY", "SPECIES_HATTERENE", "SPECIES_INDEEDEE", "SPECIES_WYRDEER",
-						"SPECIES_RABSCA", "SPECIES_FARIGIRAF", "SPECIES_SCREAM_TAIL", "SPECIES_MUNKIDORI",
-						"SPECIES_IRON_CROWN", "SPECIES_DEOXYS_ATTACK", "SPECIES_DEOXYS_DEFENSE",
-						"SPECIES_DEOXYS_SPEED", "SPECIES_MEOWSTIC_FEMALE", "SPECIES_HOOPA_UNBOUND",
-						"SPECIES_RAICHU_ALOLAN", "SPECIES_EXEGGUTOR_ALOLAN", "SPECIES_ARTICUNO_GALARIAN",
-						"SPECIES_SLOWKING_GALARIAN", "SPECIES_TOXTRICITY_LOW_KEY", "SPECIES_INDEEDEE_FEMALE",
-						"SPECIES_BRAVIARY_HISUIAN",
-					}
-				},
-				{
-					"MOVE_UPPER_HAND",
-					new HashSet<string>
-					{
-						"SPECIES_PIKACHU", "SPECIES_RAICHU", "SPECIES_POLIWRATH", "SPECIES_HITMONLEE",
-						"SPECIES_HITMONCHAN", "SPECIES_MEW", "SPECIES_AIPOM", "SPECIES_HERACROSS",
-						"SPECIES_SNEASEL", "SPECIES_TYROGUE", "SPECIES_HITMONTOP", "SPECIES_TREECKO",
-						"SPECIES_GROVYLE", "SPECIES_SCEPTILE", "SPECIES_BLAZIKEN", "SPECIES_SHIFTRY",
-						"SPECIES_MAKUHITA", "SPECIES_HARIYAMA", "SPECIES_MEDITITE", "SPECIES_MEDICHAM",
-						"SPECIES_ZANGOOSE", "SPECIES_MONFERNO", "SPECIES_INFERNAPE", "SPECIES_AMBIPOM",
-						"SPECIES_RIOLU", "SPECIES_LUCARIO", "SPECIES_CROAGUNK", "SPECIES_TOXICROAK",
-						"SPECIES_WEAVILE", "SPECIES_GALLADE", "SPECIES_SAMUROTT", "SPECIES_CONKELDURR",
-						"SPECIES_SCRAGGY", "SPECIES_SCRAFTY", "SPECIES_MIENFOO", "SPECIES_MIENSHAO",
-						"SPECIES_COBALION", "SPECIES_TERRAKION", "SPECIES_VIRIZION", "SPECIES_KELDEO",
-						"SPECIES_GRENINJA", "SPECIES_TALONFLAME", "SPECIES_HAWLUCHA", "SPECIES_DECIDUEYE",
-						"SPECIES_CRABRAWLER", "SPECIES_CRABOMINABLE", "SPECIES_PASSIMIAN", "SPECIES_HAKAMO_O",
-						"SPECIES_KOMMO_O", "SPECIES_FALINKS", "SPECIES_SNEASLER", "SPECIES_QUAQUAVAL",
-						"SPECIES_SPIDOPS", "SPECIES_PAWMO", "SPECIES_PAWMOT", "SPECIES_FLAMIGO",
-						"SPECIES_OKIDOGI", "SPECIES_RAICHU_ALOLAN", "SPECIES_LYCANROC_MIDNIGHT",
-						"SPECIES_SAMUROTT_HISUIAN", "SPECIES_LILLIGANT_HISUIAN", "SPECIES_DECIDUEYE_HISUIAN",
-					}
-				},
-			};
+			public string Id { get; set; }
+			public string Species { get; set; }
+			public string Move { get; set; }
+			public int Level { get; set; }
+		}
 
-			private static readonly Dictionary<string, LevelUpMove[]> s_DivergenceLevelUpMoveLearnsets = new Dictionary<string, LevelUpMove[]>
+		private class LearnsetRuleFile
+		{
+			public int SchemaVersion { get; set; }
+			public List<LearnsetRule> CompatibilityTutor { get; set; } = new List<LearnsetRule>();
+			public List<LearnsetRule> LevelUp { get; set; } = new List<LearnsetRule>();
+			public List<LearnsetRule> Tutor { get; set; } = new List<LearnsetRule>();
+		}
+
+		internal class PokemonProfile
+		{
+			private static LearnsetRuleFile s_LearnsetRules;
+
+			private static LearnsetRuleFile LearnsetRules
 			{
+				get
 				{
-					"SPECIES_UNOWN",
-					new[]
+					if (s_LearnsetRules == null)
 					{
-						new LevelUpMove { Move = "MOVE_SECRET_POWER", Level = 12 },
-						new LevelUpMove { Move = "MOVE_ANCIENT_POWER", Level = 20 },
-						new LevelUpMove { Move = "MOVE_COSMIC_POWER", Level = 28 },
-						new LevelUpMove { Move = "MOVE_POWER_GEM", Level = 36 },
-						new LevelUpMove { Move = "MOVE_STORED_POWER", Level = 40 },
-						new LevelUpMove { Move = "MOVE_EARTH_POWER", Level = 48 },
+						string path = Path.Combine(
+							GameDataHelpers.RootDirectory,
+							"tools", "Pokabbie", "PokemonDataGenerator", "PokemonDataGenerator",
+							"Resources", "PokemonProfiles", "Pipeline", "divergence_learnsets.json");
+						s_LearnsetRules = JsonConvert.DeserializeObject<LearnsetRuleFile>(File.ReadAllText(path));
+						if (s_LearnsetRules.SchemaVersion != 1)
+							throw new InvalidDataException($"Unsupported Divergence learnset-rule schema {s_LearnsetRules.SchemaVersion}");
+						List<LearnsetRule> allRules = s_LearnsetRules.CompatibilityTutor
+							.Concat(s_LearnsetRules.LevelUp)
+							.Concat(s_LearnsetRules.Tutor)
+							.ToList();
+						if (allRules.GroupBy(rule => rule.Id).Any(group => group.Count() != 1))
+							throw new InvalidDataException("Divergence learnset-rule IDs must be unique.");
+						foreach (LearnsetRule rule in allRules)
+						{
+							if (!GameDataHelpers.SpeciesDefines.ContainsKey(rule.Species)
+								|| !GameDataHelpers.MoveDefines.ContainsKey(rule.Move))
+								throw new InvalidDataException($"Invalid Divergence learnset rule {rule.Id}.");
+						}
 					}
-				},
-				{ "SPECIES_HUNTAIL", new[] { new LevelUpMove { Move = "MOVE_DRAGON_TAIL", Level = 42 } } },
-				{ "SPECIES_PARASECT", new[] { new LevelUpMove { Move = "MOVE_SHADOW_CLAW", Level = 0 } } },
-				{ "SPECIES_GRIMMSNARL", new[] { new LevelUpMove { Move = "MOVE_BADDY_BAD", Level = 48 } } },
-				{ "SPECIES_JELLICENT", new[] { new LevelUpMove { Move = "MOVE_BOUNCY_BUBBLE", Level = 48 } } },
-				{ "SPECIES_VIKAVOLT", new[] { new LevelUpMove { Move = "MOVE_BUZZY_BUZZ", Level = 48 } } },
-				{ "SPECIES_DRIFLOON", new[] { new LevelUpMove { Move = "MOVE_FLOATY_FALL", Level = 40 } } },
-				{ "SPECIES_DRIFBLIM", new[] { new LevelUpMove { Move = "MOVE_FLOATY_FALL", Level = 40 } } },
-				{ "SPECIES_CRYOGONAL", new[] { new LevelUpMove { Move = "MOVE_FREEZY_FROST", Level = 48 } } },
-				{ "SPECIES_GARDEVOIR", new[] { new LevelUpMove { Move = "MOVE_GLITZY_GLOW", Level = 48 } } },
-				{ "SPECIES_PICHU", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_RAICHU", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_RAICHU_ALOLAN", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_COSPLAY", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_ROCK_STAR", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_BELLE", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_POP_STAR", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_PH_D", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_LIBRE", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_ORIGINAL_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_HOENN_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_SINNOH_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_UNOVA_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_KALOS_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_ALOLA_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_PARTNER_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_PIKACHU_WORLD_CAP", new[] { new LevelUpMove { Move = "MOVE_PIKA_PAPOW", Level = 50 } } },
-				{ "SPECIES_SUNFLORA", new[] { new LevelUpMove { Move = "MOVE_SAPPY_SEED", Level = 48 } } },
-				{ "SPECIES_SIZZLIPEDE", new[] { new LevelUpMove { Move = "MOVE_SIZZLY_SLIDE", Level = 40 } } },
-				{ "SPECIES_CENTISKORCH", new[] { new LevelUpMove { Move = "MOVE_SIZZLY_SLIDE", Level = 40 } } },
-				{ "SPECIES_PONYTA_GALARIAN", new[] { new LevelUpMove { Move = "MOVE_SPARKLY_SWIRL", Level = 48 } } },
-				{ "SPECIES_RAPIDASH_GALARIAN", new[] { new LevelUpMove { Move = "MOVE_SPARKLY_SWIRL", Level = 48 } } },
-				{ "SPECIES_CHINCHOU", new[] { new LevelUpMove { Move = "MOVE_SPLISHY_SPLASH", Level = 44 } } },
-				{ "SPECIES_LANTURN", new[] { new LevelUpMove { Move = "MOVE_SPLISHY_SPLASH", Level = 44 } } },
-				{ "SPECIES_EEVEE", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_VAPOREON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_JOLTEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_FLAREON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_ESPEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_UMBREON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_LEAFEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_GLACEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_SYLVEON", new[] { new LevelUpMove { Move = "MOVE_VEEVEE_VOLLEY", Level = 50 } } },
-				{ "SPECIES_BLITZLE", new[] { new LevelUpMove { Move = "MOVE_ZIPPY_ZAP", Level = 44 } } },
-				{ "SPECIES_ZEBSTRIKA", new[] { new LevelUpMove { Move = "MOVE_ZIPPY_ZAP", Level = 44 } } },
-			};
+					return s_LearnsetRules;
+				}
+			}
 
-			private static readonly Dictionary<string, HashSet<string>> s_DivergenceTutorMoveLearnsets = new Dictionary<string, HashSet<string>>
-			{
-				{ "MOVE_ALLURING_VOICE", new HashSet<string> { "SPECIES_GOREBYSS" } },
-				{ "MOVE_BADDY_BAD", new HashSet<string> { "SPECIES_ABSOL" } },
-				{ "MOVE_BOUNCY_BUBBLE", new HashSet<string> { "SPECIES_POPPLIO", "SPECIES_BRIONNE", "SPECIES_PRIMARINA" } },
-				{ "MOVE_BUZZY_BUZZ", new HashSet<string> { "SPECIES_MAREEP", "SPECIES_FLAAFFY", "SPECIES_AMPHAROS" } },
-				{ "MOVE_FLOATY_FALL", new HashSet<string> { "SPECIES_HOPPIP", "SPECIES_SKIPLOOM", "SPECIES_JUMPLUFF" } },
-				{ "MOVE_FREEZY_FROST", new HashSet<string> { "SPECIES_SNORUNT", "SPECIES_FROSLASS" } },
-				{ "MOVE_GLITZY_GLOW", new HashSet<string> { "SPECIES_STARYU", "SPECIES_STARMIE" } },
-				{ "MOVE_MEGA_PUNCH", new HashSet<string> { "SPECIES_ELECTIVIRE" } },
-				{ "MOVE_MISTY_TERRAIN", new HashSet<string> { "SPECIES_GOREBYSS" } },
-				{ "MOVE_POLTERGEIST", new HashSet<string> { "SPECIES_PARASECT" } },
-				{ "MOVE_SAPPY_SEED", new HashSet<string> { "SPECIES_PHANTUMP", "SPECIES_TREVENANT" } },
-				{ "MOVE_SIZZLY_SLIDE", new HashSet<string> { "SPECIES_SALANDIT", "SPECIES_SALAZZLE" } },
-				{ "MOVE_SPARKLY_SWIRL", new HashSet<string> { "SPECIES_COMFEY" } },
-				{ "MOVE_SPLISHY_SPLASH", new HashSet<string> { "SPECIES_TADBULB", "SPECIES_BELLIBOLT" } },
-				{ "MOVE_ZIPPY_ZAP", new HashSet<string> { "SPECIES_VOLTORB", "SPECIES_ELECTRODE" } },
-			};
-
+			// Divergence learnset additions and legacy compatibility are tracked in divergence_learnsets.json.
 			public string Species;
 			public List<LevelUpMove> LevelUpMoves;
 			public List<string> TutorMoves;
 			public List<PokemonCompetitiveSet> CompetitiveSets;
 
-			public static PokemonProfile FromSource(SourcePokemonProfile sourceProfile)
+			internal static PokemonProfile FromSource(SourcePokemonProfile sourceProfile)
 			{
 				PokemonProfile profile = new PokemonProfile();
 				profile.Species = sourceProfile.Species;
@@ -649,11 +453,37 @@ namespace PokemonDataGenerator.Pokedex
 
 			private void ReplaceCompetitiveAbility(string fromAbility, string toAbility)
 			{
+				int matchCount = 0;
 				foreach (var set in CompetitiveSets)
 				{
 					if (set.Ability == fromAbility)
+					{
 						set.Ability = toAbility;
+						++matchCount;
+					}
 				}
+				RecordTransformationMatch(
+					$"{Species.ToLowerInvariant()}-ability-{fromAbility.ToLowerInvariant()}-to-{toAbility.ToLowerInvariant()}",
+					matchCount);
+			}
+
+			private PokemonCompetitiveSet SelectCompetitiveSet(
+				string transformationId,
+				Func<PokemonCompetitiveSet, bool> predicate)
+			{
+				List<PokemonCompetitiveSet> matches = CompetitiveSets.Where(predicate).ToList();
+				if (matches.Count != 1)
+				{
+					throw new InvalidDataException(
+						$"{transformationId} expected exactly one competitive set for {Species}, found {matches.Count}");
+				}
+				RecordTransformationMatch(transformationId);
+				return matches[0];
+			}
+
+			private static bool HasSourceId(PokemonCompetitiveSet set, string sourceId)
+			{
+				return set.SourceIds.Contains(sourceId);
 			}
 
 			private void UpdatePolitoedCompetitiveSets()
@@ -674,6 +504,7 @@ namespace PokemonDataGenerator.Pokedex
 						"MOVE_HYDRO_PUMP",
 						"MOVE_MUDDY_WATER",
 						"MOVE_WATER_PULSE",
+						"MOVE_WHIRLPOOL",
 					}.FirstOrDefault(move => set.Moves.Contains(move));
 
 					if (moveToReplace == null)
@@ -717,6 +548,9 @@ namespace PokemonDataGenerator.Pokedex
 				CompetitiveSets.Clear();
 				CompetitiveSets.Add(new PokemonCompetitiveSet
 				{
+					StableId = "unown-divergence-choice-specs",
+					Provenance = "divergence-redesign",
+					RogueRole = "standard",
 					Ability = "ABILITY_LEVITATE",
 					Item = "ITEM_CHOICE_SPECS",
 					Nature = "NATURE_MODEST",
@@ -733,6 +567,9 @@ namespace PokemonDataGenerator.Pokedex
 				});
 				CompetitiveSets.Add(new PokemonCompetitiveSet
 				{
+					StableId = "unown-divergence-cosmic-power",
+					Provenance = "divergence-redesign",
+					RogueRole = "strong-wild",
 					Ability = "ABILITY_LEVITATE",
 					Item = "ITEM_LEFTOVERS",
 					Nature = "NATURE_TIMID",
@@ -746,14 +583,14 @@ namespace PokemonDataGenerator.Pokedex
 					},
 					SourceTiers = new List<string>(sourceTiers),
 				});
+				RecordTransformationMatch("unown-full-profile-redesign");
 			}
 
 			private void UpdateLedianCompetitiveSets()
 			{
-				if (CompetitiveSets.Count < 2)
-					throw new InvalidDataException("Ledian is missing the competitive sets required for its Divergence profiles");
-
-				PokemonCompetitiveSet utilitySet = CompetitiveSets[0];
+				PokemonCompetitiveSet utilitySet = SelectCompetitiveSet(
+					"ledian-battle-formation-utility",
+					set => HasSourceId(set, "gen6|gen6pu|Ledian|Dual Screens"));
 				utilitySet.Item = "ITEM_HEAVY_DUTY_BOOTS";
 				utilitySet.Nature = "NATURE_JOLLY";
 				utilitySet.Moves = new List<string>
@@ -764,7 +601,9 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_KNOCK_OFF",
 				};
 
-				PokemonCompetitiveSet ironFistSet = CompetitiveSets[1];
+				PokemonCompetitiveSet ironFistSet = SelectCompetitiveSet(
+					"ledian-battle-formation-iron-fist",
+					set => HasSourceId(set, "gen7|gen7pu|Ledian|Falcon PUNCH (All-out Attacker)"));
 				ironFistSet.Moves = new List<string>
 				{
 					"MOVE_ROOST",
@@ -776,11 +615,11 @@ namespace PokemonDataGenerator.Pokedex
 
 			private void UpdateHuntailCompetitiveSets()
 			{
-				if (CompetitiveSets.Count < 6)
-					throw new InvalidDataException("Huntail is missing the competitive sets required for its Divergence profiles");
-
-				CompetitiveSets[0].Nature = "NATURE_ADAMANT";
-				CompetitiveSets[0].Moves = new List<string>
+				PokemonCompetitiveSet mixedShellSmash = SelectCompetitiveSet(
+					"huntail-abyssal-maw-mixed-shell-smash",
+					set => HasSourceId(set, "gen6|gen6pu|Huntail|Shell Smash"));
+				mixedShellSmash.Nature = "NATURE_ADAMANT";
+				mixedShellSmash.Moves = new List<string>
 				{
 					"MOVE_SHELL_SMASH",
 					"MOVE_WATERFALL",
@@ -788,9 +627,12 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_ICE_FANG",
 				};
 
-				CompetitiveSets[1].Item = "ITEM_LEFTOVERS";
-				CompetitiveSets[1].Nature = "NATURE_ADAMANT";
-				CompetitiveSets[1].Moves = new List<string>
+				PokemonCompetitiveSet physicalShellSmash = SelectCompetitiveSet(
+					"huntail-abyssal-maw-coil",
+					set => HasSourceId(set, "gen6|gen6pu|Huntail|Showdown Usage"));
+				physicalShellSmash.Item = "ITEM_LEFTOVERS";
+				physicalShellSmash.Nature = "NATURE_ADAMANT";
+				physicalShellSmash.Moves = new List<string>
 				{
 					"MOVE_COIL",
 					"MOVE_AQUA_TAIL",
@@ -798,27 +640,11 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_DRAGON_TAIL",
 				};
 
-				CompetitiveSets[2].Moves = new List<string>
-				{
-					"MOVE_SHELL_SMASH",
-					"MOVE_WATERFALL",
-					"MOVE_CRUNCH",
-					"MOVE_SUCKER_PUNCH",
-				};
-
-				CompetitiveSets[3].Item = "ITEM_CHOICE_BAND";
-				CompetitiveSets[3].Nature = "NATURE_ADAMANT";
-				CompetitiveSets[3].HiddenPower = null;
-				CompetitiveSets[3].Moves = new List<string>
-				{
-					"MOVE_AQUA_TAIL",
-					"MOVE_CRUNCH",
-					"MOVE_ICE_FANG",
-					"MOVE_DRAGON_TAIL",
-				};
-
-				CompetitiveSets[4].Nature = "NATURE_ADAMANT";
-				CompetitiveSets[4].Moves = new List<string>
+				PokemonCompetitiveSet gen7WaterVeil = SelectCompetitiveSet(
+					"huntail-abyssal-maw-gen7-water-veil",
+					set => HasSourceId(set, "gen7|gen7zu|Huntail|Mixed Shell Smash"));
+				gen7WaterVeil.Nature = "NATURE_ADAMANT";
+				gen7WaterVeil.Moves = new List<string>
 				{
 					"MOVE_SHELL_SMASH",
 					"MOVE_WATERFALL",
@@ -826,8 +652,11 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_ICE_FANG",
 				};
 
-				CompetitiveSets[5].Nature = "NATURE_ADAMANT";
-				CompetitiveSets[5].Moves = new List<string>
+				PokemonCompetitiveSet gen7SwiftSwim = SelectCompetitiveSet(
+					"huntail-abyssal-maw-gen7-swift-swim",
+					set => HasSourceId(set, "gen7|gen7zu|Huntail|Showdown Usage"));
+				gen7SwiftSwim.Nature = "NATURE_ADAMANT";
+				gen7SwiftSwim.Moves = new List<string>
 				{
 					"MOVE_SHELL_SMASH",
 					"MOVE_WATERFALL",
@@ -838,11 +667,11 @@ namespace PokemonDataGenerator.Pokedex
 
 			private void UpdateGorebyssCompetitiveSets()
 			{
-				if (CompetitiveSets.Count < 4)
-					throw new InvalidDataException("Gorebyss is missing the competitive sets required for its Divergence profiles");
-
-				CompetitiveSets[0].HiddenPower = null;
-				CompetitiveSets[0].Moves = new List<string>
+				PokemonCompetitiveSet gen6NuSet = SelectCompetitiveSet(
+					"gorebyss-shell-game-gen6nu",
+					set => HasSourceId(set, "gen6|gen6nu|Gorebyss|Shell Smash"));
+				gen6NuSet.HiddenPower = null;
+				gen6NuSet.Moves = new List<string>
 				{
 					"MOVE_SHELL_SMASH",
 					"MOVE_HYDRO_PUMP",
@@ -850,7 +679,10 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_ICE_BEAM",
 				};
 
-				CompetitiveSets[1].Moves = new List<string>
+				PokemonCompetitiveSet gen6PuSet = SelectCompetitiveSet(
+					"gorebyss-shell-game-gen6pu-terrain",
+					set => HasSourceId(set, "gen6|gen6pu|Gorebyss|Shell Smash"));
+				gen6PuSet.Moves = new List<string>
 				{
 					"MOVE_MISTY_TERRAIN",
 					"MOVE_SHELL_SMASH",
@@ -858,7 +690,10 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_ALLURING_VOICE",
 				};
 
-				CompetitiveSets[2].Moves = new List<string>
+				PokemonCompetitiveSet alternateGen6PuSet = SelectCompetitiveSet(
+					"gorebyss-shell-game-gen6pu-draining-kiss",
+					set => HasSourceId(set, "gen6|gen6pu|Gorebyss|Showdown Usage"));
+				alternateGen6PuSet.Moves = new List<string>
 				{
 					"MOVE_SHELL_SMASH",
 					"MOVE_SURF",
@@ -866,8 +701,11 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_PSYCHIC",
 				};
 
-				CompetitiveSets[3].HiddenPower = null;
-				CompetitiveSets[3].Moves = new List<string>
+				PokemonCompetitiveSet gen7PuSet = SelectCompetitiveSet(
+					"gorebyss-shell-game-gen7pu-terrain",
+					set => HasSourceId(set, "gen7|gen7pu|Gorebyss|Shell Smash"));
+				gen7PuSet.HiddenPower = null;
+				gen7PuSet.Moves = new List<string>
 				{
 					"MOVE_MISTY_TERRAIN",
 					"MOVE_SHELL_SMASH",
@@ -878,10 +716,10 @@ namespace PokemonDataGenerator.Pokedex
 
 			private void UpdateParasectCompetitiveSets()
 			{
-				if (CompetitiveSets.Count < 2)
-					throw new InvalidDataException("Parasect is missing the competitive sets required for its Divergence profiles");
-
-				CompetitiveSets[0].Moves = new List<string>
+				PokemonCompetitiveSet defensiveSet = SelectCompetitiveSet(
+					"parasect-fungal-infection-poltergeist",
+					set => HasSourceId(set, "gen6|gen6pu|Parasect|Spore"));
+				defensiveSet.Moves = new List<string>
 				{
 					"MOVE_SPORE",
 					"MOVE_SYNTHESIS",
@@ -889,7 +727,10 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_POLTERGEIST",
 				};
 
-				CompetitiveSets[1].Moves = new List<string>
+				PokemonCompetitiveSet physicalSet = SelectCompetitiveSet(
+					"parasect-fungal-infection-shadow-claw",
+					set => HasSourceId(set, "gen7|gen7pu|Parasect|Specially Defensive"));
+				physicalSet.Moves = new List<string>
 				{
 					"MOVE_SWORDS_DANCE",
 					"MOVE_SHADOW_CLAW",
@@ -900,13 +741,13 @@ namespace PokemonDataGenerator.Pokedex
 
 			private void UpdateVolbeatCompetitiveSets()
 			{
-				if (CompetitiveSets.Count < 5)
-					throw new InvalidDataException("Volbeat is missing the competitive sets required for its Divergence profiles");
-
-				CompetitiveSets[1].Item = "ITEM_LIFE_ORB";
-				CompetitiveSets[1].Ability = "ABILITY_SWARM";
-				CompetitiveSets[1].Nature = "NATURE_TIMID";
-				CompetitiveSets[1].Moves = new List<string>
+				PokemonCompetitiveSet tailGlowSet = SelectCompetitiveSet(
+					"volbeat-electric-tail-glow",
+					set => HasSourceId(set, "gen6|gen6pu|Volbeat|Showdown Usage"));
+				tailGlowSet.Item = "ITEM_LIFE_ORB";
+				tailGlowSet.Ability = "ABILITY_SWARM";
+				tailGlowSet.Nature = "NATURE_TIMID";
+				tailGlowSet.Moves = new List<string>
 				{
 					"MOVE_TAIL_GLOW",
 					"MOVE_THUNDER",
@@ -914,15 +755,18 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_ROOST",
 				};
 
-				CompetitiveSets[4].Item = "ITEM_HEAVY_DUTY_BOOTS";
+				PokemonCompetitiveSet defogSet = SelectCompetitiveSet(
+					"volbeat-remove-dead-damp-rock",
+					set => HasSourceId(set, "gen7|gen7pu|Volbeat|Showdown Usage"));
+				defogSet.Item = "ITEM_HEAVY_DUTY_BOOTS";
 			}
 
 			private void UpdateFlorgesCompetitiveSets()
 			{
-				if (CompetitiveSets.Count < 11)
-					throw new InvalidDataException("Florges is missing the competitive sets required for its Divergence profiles");
-
-				CompetitiveSets[1].Moves = new List<string>
+				PokemonCompetitiveSet gen6CalmMindSet = SelectCompetitiveSet(
+					"florges-flower-rite-gen6-grass-stab",
+					set => HasSourceId(set, "gen6|gen6uu|Florges|Defensive Calm Mind"));
+				gen6CalmMindSet.Moves = new List<string>
 				{
 					"MOVE_CALM_MIND",
 					"MOVE_MOONBLAST",
@@ -930,7 +774,10 @@ namespace PokemonDataGenerator.Pokedex
 					"MOVE_SYNTHESIS",
 				};
 
-				CompetitiveSets[10].Moves = new List<string>
+				PokemonCompetitiveSet gen9CalmMindSet = SelectCompetitiveSet(
+					"florges-flower-rite-gen9-grass-stab",
+					set => HasSourceId(set, "gen9|gen9pu|Florges|Calm Mind"));
+				gen9CalmMindSet.Moves = new List<string>
 				{
 					"MOVE_CALM_MIND",
 					"MOVE_MOONBLAST",
@@ -941,10 +788,10 @@ namespace PokemonDataGenerator.Pokedex
 
 			private void UpdateElectivireCompetitiveSets()
 			{
-				if (CompetitiveSets.Count < 3)
-					throw new InvalidDataException("Electivire is missing the competitive sets required for its Divergence profiles");
-
-				CompetitiveSets[2].Moves = new List<string>
+				PokemonCompetitiveSet dynamoFistsSet = SelectCompetitiveSet(
+					"electivire-dynamo-fists",
+					set => HasSourceId(set, "gen6|gen6nu|Electivire|Showdown Usage"));
+				dynamoFistsSet.Moves = new List<string>
 				{
 					"MOVE_ELECTRIC_TERRAIN",
 					"MOVE_PLASMA_FISTS",
@@ -1111,41 +958,32 @@ namespace PokemonDataGenerator.Pokedex
 
 			private void RestoreImplementedMoveData()
 			{
-				foreach (var moveLearnset in s_RestoredMoveLearnsets)
+				foreach (LearnsetRule rule in LearnsetRules.CompatibilityTutor.Where(rule => rule.Species == Species))
 				{
-					if (moveLearnset.Value.Contains(Species) && !CanLearnMove(moveLearnset.Key))
-						TutorMoves.Add(moveLearnset.Key);
+					if (!CanLearnMove(rule.Move))
+						TutorMoves.Add(rule.Move);
 				}
 
-				if (s_DivergenceLevelUpMoveLearnsets.TryGetValue(Species, out LevelUpMove[] levelUpMoves))
+				foreach (LearnsetRule rule in LearnsetRules.LevelUp.Where(rule => rule.Species == Species))
 				{
-					foreach (var move in levelUpMoves)
-					{
-						if (!HasLevelUpMove(move.Move))
-							LevelUpMoves.Add(new LevelUpMove { Move = move.Move, Level = move.Level });
-					}
+					LevelUpMove existingMove = LevelUpMoves.FirstOrDefault(move => move.Move == rule.Move);
+					if (existingMove == null)
+						LevelUpMoves.Add(new LevelUpMove { Move = rule.Move, Level = rule.Level });
+					else
+						existingMove.Level = rule.Level;
 				}
 
-				foreach (var moveLearnset in s_DivergenceTutorMoveLearnsets)
+				foreach (LearnsetRule rule in LearnsetRules.Tutor.Where(rule => rule.Species == Species))
 				{
-					if (moveLearnset.Value.Contains(Species) && !CanLearnMove(moveLearnset.Key))
-						TutorMoves.Add(moveLearnset.Key);
+					if (!TutorMoves.Contains(rule.Move))
+						TutorMoves.Add(rule.Move);
 				}
-
-				if (Species == "SPECIES_SCOVILLAIN" && !HasLevelUpMove("MOVE_SPICY_EXTRACT"))
-					LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_SPICY_EXTRACT", Level = 0 });
-
-				if ((Species == "SPECIES_PAWMOT" || Species == "SPECIES_RABSCA")
-					&& !HasLevelUpMove("MOVE_REVIVAL_BLESSING"))
-					LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_REVIVAL_BLESSING", Level = 0 });
 
 				if (Species == "SPECIES_PAWMOT" || Species == "SPECIES_RABSCA")
 					// These sets were built to recycle Revival Blessing's PP, which is
 					// incompatible with Divergence's once-per-team battle limit.
 					CompetitiveSets.RemoveAll(set => set.Item == "ITEM_LEPPA_BERRY");
 
-				if (Species == "SPECIES_DONDOZO" && !HasLevelUpMove("MOVE_ORDER_UP"))
-					LevelUpMoves.Add(new LevelUpMove { Move = "MOVE_ORDER_UP", Level = 50 });
 			}
 
 			private bool AttemptReplaceMove(PokemonCompetitiveSet target, string move, params string[] orderedReplacements)
@@ -1320,7 +1158,7 @@ namespace PokemonDataGenerator.Pokedex
 
 		}
 
-		private class PokemonCompetitiveSet
+		internal class PokemonCompetitiveSet
 		{
 			public List<string> Moves = new List<string>();
 			public string Ability;
@@ -1329,6 +1167,10 @@ namespace PokemonDataGenerator.Pokedex
 			public string HiddenPower;
 			public string TeraType;
 			public List<string> SourceTiers = new List<string>();
+			public List<string> SourceIds = new List<string>();
+			public string StableId;
+			public string Provenance;
+			public string RogueRole;
 
 			public bool IsCompatibleWith(PokemonCompetitiveSet other)
 			{
@@ -1359,6 +1201,9 @@ namespace PokemonDataGenerator.Pokedex
 			{
 				PokemonCompetitiveSet output = new PokemonCompetitiveSet();
 				output.SourceTiers.Add(sourceTier);
+				if (json.ContainsKey("_profileSourceId"))
+					output.SourceIds.Add(json["_profileSourceId"].Value<string>());
+				output.Provenance = "showdown";
 
 				string ability = json["ability"].Value<string>();
 				if (ability != "No Ability")
@@ -1509,11 +1354,47 @@ namespace PokemonDataGenerator.Pokedex
 			return false;
 		}
 
+		internal class ProfileBundle
+		{
+			public List<PokemonProfile> Profiles = new List<PokemonProfile>();
+			public Dictionary<string, string> RedirectedSpecies = new Dictionary<string, string>();
+			public Dictionary<string, string> ZaMegaResolutions = new Dictionary<string, string>();
+			public Dictionary<string, int> TransformationMatches = new Dictionary<string, int>();
+			public Dictionary<string, SpeciesSourceMetadata> SpeciesMetadata = new Dictionary<string, SpeciesSourceMetadata>();
+		}
+
+		internal class SpeciesSourceMetadata
+		{
+			public string ProjectSpecies;
+			public string PokeApiSpecies;
+			public string PokeApiForm;
+			public string ShowdownId;
+			public string UpstreamBaseSpecies;
+			public bool HasDedicatedCompetitiveSets;
+			public string ProfileSource;
+		}
+
 		public static void GatherProfiles()
 		{
+			ProfileBundle bundle = GatherSourceProfileBundle(false);
+			PrepareProfilesForGame(bundle);
+			ExportProfileBundle(bundle, Path.Combine(GameDataHelpers.RootDirectory, "src\\data\\rogue_pokemon_profiles.h"));
+		}
+
+		internal static ProfileBundle GatherSourceProfileBundle(bool bypassHttpCache)
+		{
+			ContentCache.BypassHttpCache = bypassHttpCache;
 			List<PokemonProfile> profiles = new List<PokemonProfile>();
 			Dictionary<string, string> redirectedSpecies = new Dictionary<string, string>();
+			Dictionary<string, string> zaMegaResolutions = new Dictionary<string, string>();
+			Dictionary<string, SpeciesSourceMetadata> speciesMetadata = new Dictionary<string, SpeciesSourceMetadata>();
 			int exceptionHitCount = 0;
+
+			if (bypassHttpCache)
+			{
+				PokeAPI.PrefetchPokemonProfiles(
+					GameDataHelpers.SpeciesDefines.Keys.Where(GameDataHelpers.IsUniqueSpeciesDefine));
+			}
 
 			Stack<string> speciesToProcess = new Stack<string>();
 			foreach (var kvp in GameDataHelpers.SpeciesDefines.Reverse())
@@ -1529,6 +1410,18 @@ namespace PokemonDataGenerator.Pokedex
 				{
 					if (!GameDataHelpers.IsUniqueSpeciesDefine(speciesName))
 						continue;
+
+					PokeAPI.RedirectSpeciesLookupName(speciesName, out string apiSpeciesName, out string apiFormName);
+					SpeciesSourceMetadata metadata = new SpeciesSourceMetadata
+					{
+						ProjectSpecies = speciesName,
+						PokeApiSpecies = apiSpeciesName,
+						PokeApiForm = apiFormName,
+						ShowdownId = PokeAPI.NormalizeIdentifier(speciesName.Replace("SPECIES_", "")),
+						HasDedicatedCompetitiveSets = !GameDataHelpers.IsVanillaVersion
+							&& PokeAPI.HasShowdownCompetitiveSets(speciesName),
+					};
+					speciesMetadata[speciesName] = metadata;
 
 					if (GameDataHelpers.IsVanillaVersion && speciesName.StartsWith("SPECIES_UNOWN_"))
 					{
@@ -1552,8 +1445,33 @@ namespace PokemonDataGenerator.Pokedex
 					{
 						if (!GameDataHelpers.IsVanillaVersion)
 						{
+							if (PokeAPI.TryGetShowdownGen9MegaBaseSpecies(speciesName, out string upstreamMegaBase))
+							{
+								switch (speciesName)
+								{
+									case "SPECIES_FLOETTE_MEGA":
+										upstreamMegaBase = "SPECIES_FLOETTE_ETERNAL_FLOWER";
+										break;
+									case "SPECIES_MEOWSTIC_F_MEGA":
+										upstreamMegaBase = "SPECIES_MEOWSTIC_FEMALE";
+										break;
+									case "SPECIES_TATSUGIRI_DROOPY_MEGA":
+										upstreamMegaBase = "SPECIES_TATSUGIRI_DROOPY";
+										break;
+									case "SPECIES_TATSUGIRI_STRETCHY_MEGA":
+										upstreamMegaBase = "SPECIES_TATSUGIRI_STRETCHY";
+										break;
+								}
+								zaMegaResolutions[speciesName] = upstreamMegaBase;
+								metadata.UpstreamBaseSpecies = upstreamMegaBase;
+								if (!metadata.HasDedicatedCompetitiveSets)
+									redirectSpecies = upstreamMegaBase;
+							}
+
 							// Only redirect species which are functionally identical for rogue spawning
-							if (speciesName.EndsWith("_MEGA"))
+							if (redirectSpecies == null
+								&& !zaMegaResolutions.ContainsKey(speciesName)
+								&& speciesName.EndsWith("_MEGA"))
 							{
 								redirectSpecies = speciesName.Substring(0, speciesName.Length - "_MEGA".Length);
 
@@ -1564,7 +1482,8 @@ namespace PokemonDataGenerator.Pokedex
 										break;
 								}
 							}
-							else if (speciesName.EndsWith("_MEGA_X") || speciesName.EndsWith("_MEGA_Y"))
+							else if (!zaMegaResolutions.ContainsKey(speciesName)
+								&& (speciesName.EndsWith("_MEGA_X") || speciesName.EndsWith("_MEGA_Y")))
 							{
 								redirectSpecies = speciesName.Substring(0, speciesName.Length - "_MEGA_X".Length);
 							}
@@ -1617,7 +1536,9 @@ namespace PokemonDataGenerator.Pokedex
 							{
 								redirectSpecies = "SPECIES_FLABEBE";
 							}
-							else if (speciesName.StartsWith("SPECIES_FLOETTE_"))
+							else if (speciesName.StartsWith("SPECIES_FLOETTE_")
+								&& speciesName != "SPECIES_FLOETTE_ETERNAL_FLOWER"
+								&& speciesName != "SPECIES_FLOETTE_MEGA")
 							{
 								redirectSpecies = "SPECIES_FLOETTE";
 							}
@@ -1767,6 +1688,11 @@ namespace PokemonDataGenerator.Pokedex
 
 					if (redirectSpecies != null)
 					{
+						if (metadata.UpstreamBaseSpecies == null)
+							metadata.UpstreamBaseSpecies = redirectSpecies;
+						metadata.ProfileSource = zaMegaResolutions.ContainsKey(speciesName)
+							? "showdown-form-redirect"
+							: "legacy-redirect";
 						if (!GameDataHelpers.SpeciesDefines.ContainsKey(redirectSpecies))
 							throw new InvalidDataException();
 
@@ -1774,7 +1700,12 @@ namespace PokemonDataGenerator.Pokedex
 						continue;
 					}
 
-					PokemonProfile profile = GatherProfileFor(speciesName);
+					string manualProfilePath = ContentCache.GetWriteableCachePath(
+						$"res://PokemonProfiles//{(GameDataHelpers.IsVanillaVersion ? "Vanilla" : "EX")}/{speciesName}.json");
+					metadata.ProfileSource = File.Exists(manualProfilePath)
+						? "manual-resource"
+						: "pokeapi-showdown";
+					PokemonProfile profile = GatherProfileFor(speciesName, bypassHttpCache);
 					profiles.Add(profile);
 				}
 				catch (AggregateException e)
@@ -1789,6 +1720,7 @@ namespace PokemonDataGenerator.Pokedex
 						Console.WriteLine($"\tSleeping (assuming just rapid access error)");
 						Thread.Sleep(5000);
 					}
+					else
 					{
 						// Gone over threshold
 						throw e;
@@ -1796,13 +1728,21 @@ namespace PokemonDataGenerator.Pokedex
 				}
 			}
 
-			ExportProfiles(profiles, redirectedSpecies, Path.Combine(GameDataHelpers.RootDirectory, "src\\data\\rogue_pokemon_profiles.h"));
+			ContentCache.BypassHttpCache = false;
+			return new ProfileBundle
+			{
+				Profiles = profiles,
+				RedirectedSpecies = redirectedSpecies,
+				ZaMegaResolutions = zaMegaResolutions,
+				SpeciesMetadata = speciesMetadata,
+			};
 		}
 
-		private static PokemonProfile GatherProfileFor(string speciesName)
+		private static PokemonProfile GatherProfileFor(string speciesName, bool bypassCache)
 		{
 			string manualPath = ContentCache.GetWriteableCachePath($"res://PokemonProfiles//{(GameDataHelpers.IsVanillaVersion ? "Vanilla" : "EX")}/{speciesName}.json");
-			string cachePath = ContentCache.GetWriteableCachePath($"pokemon_profiles/{(GameDataHelpers.IsVanillaVersion ? "Vanilla" : "EX")}/{speciesName}.json");
+			string cachePath = ContentCache.GetWriteableCachePath(
+				$"pokemon_profiles/v{ProfileCacheSchemaVersion}/{(GameDataHelpers.IsVanillaVersion ? "Vanilla" : "EX")}/{speciesName}.json");
 			PokemonProfile outputProfile;
 
 			if (File.Exists(manualPath))
@@ -1812,7 +1752,7 @@ namespace PokemonDataGenerator.Pokedex
 				string jsonProfile = File.ReadAllText(manualPath);
 				outputProfile = JsonConvert.DeserializeObject<PokemonProfile>(jsonProfile, c_JsonSettings);
 			}
-			else if (File.Exists(cachePath))
+			else if (!bypassCache && File.Exists(cachePath))
 			{
 				Console.WriteLine($"Found '{speciesName}' profile in cache");
 
@@ -1900,6 +1840,7 @@ namespace PokemonDataGenerator.Pokedex
 							if (existingSet.IsCompatibleWith(compSet))
 							{
 								existingSet.SourceTiers.Add(tierName);
+								existingSet.SourceIds.AddRange(compSet.SourceIds);
 								hasMerged = true;
 								break;
 							}
@@ -1913,19 +1854,53 @@ namespace PokemonDataGenerator.Pokedex
 				sourceProfile.CollapseMovesets();
 
 				outputProfile = PokemonProfile.FromSource(sourceProfile);
-				outputProfile.FormatDataForGame(); // collapse initially so we can easily inspect the cache file
 
-				string cacheDir = Path.GetDirectoryName(cachePath);
-				Directory.CreateDirectory(cacheDir);
+				if (!bypassCache)
+				{
+					string cacheDir = Path.GetDirectoryName(cachePath);
+					Directory.CreateDirectory(cacheDir);
 
-				string profileJson = JsonConvert.SerializeObject(outputProfile, c_JsonSettings);
-				File.WriteAllText(cachePath, profileJson);
+					string profileJson = JsonConvert.SerializeObject(outputProfile, c_JsonSettings);
+					File.WriteAllText(cachePath, profileJson);
+				}
 			}
 
-			outputProfile.FormatDataForGame();
-			outputProfile.ValidateContents();
-
 			return outputProfile;
+		}
+
+		internal static void PrepareProfilesForGame(ProfileBundle bundle)
+		{
+			s_TransformationMatchCounts.Clear();
+			foreach (PokemonProfile profile in bundle.Profiles)
+			{
+				profile.FormatDataForGame();
+				profile.ValidateContents();
+			}
+			bundle.TransformationMatches = new Dictionary<string, int>(s_TransformationMatchCounts);
+		}
+
+		internal static void ExportProfileBundle(ProfileBundle bundle, string filePath)
+		{
+			ExportProfiles(bundle.Profiles, bundle.RedirectedSpecies, filePath);
+		}
+
+		private static string GetRogueRoleFlag(PokemonCompetitiveSet set)
+		{
+			switch (set.RogueRole)
+			{
+				case null:
+				case "standard":
+					return null;
+				case "singles-strong":
+					return "MON_FLAG_SINGLES_STRONG";
+				case "doubles-strong":
+					return "MON_FLAG_DOUBLES_STRONG";
+				case "strong-wild":
+					return "MON_FLAG_STRONG_WILD";
+				default:
+					throw new InvalidDataException(
+						$"{set.StableId ?? "competitive set"} has unsupported Rogue role {set.RogueRole}.");
+			}
 		}
 
 		private static void ExportProfiles(List<PokemonProfile> profiles, Dictionary<string, string> redirectedSpecies, string filePath)
@@ -2024,21 +1999,21 @@ namespace PokemonDataGenerator.Pokedex
 				}
 			}
 
-			upperBlock.AppendLine("u16 const gRoguePokemonMoveUsages[MOVES_COUNT] = \n{");
+			upperBlock.AppendLine("u16 const gRoguePokemonMoveUsages[MOVES_COUNT] =\n{");
 
 			foreach (var kvp in moveCount)
 				upperBlock.AppendLine($"\t[{kvp.Key}] = {kvp.Value},");
 
 			upperBlock.AppendLine("};\n");
 
-			upperBlock.AppendLine("u16 const gRoguePokemonSpecialMoveUsages[MOVES_COUNT] = \n{");
+			upperBlock.AppendLine("u16 const gRoguePokemonSpecialMoveUsages[MOVES_COUNT] =\n{");
 
 			foreach (var kvp in specialMoveCount)
 				upperBlock.AppendLine($"\t[{kvp.Key}] = {kvp.Value},");
 
 			upperBlock.AppendLine("};\n");
 
-			upperBlock.AppendLine("u16 const gRoguePokemonHeldItemUsages[ITEMS_COUNT] = \n{");
+			upperBlock.AppendLine("u16 const gRoguePokemonHeldItemUsages[ITEMS_COUNT] =\n{");
 
 			foreach (var kvp in heldItemCount)
 				upperBlock.AppendLine($"\t[{kvp.Key}] = {kvp.Value},");
@@ -2047,17 +2022,21 @@ namespace PokemonDataGenerator.Pokedex
 
 			// Pokemon Profiles
 			//
-			lowerBlock.AppendLine("struct RoguePokemonProfile const gRoguePokemonProfiles[NUM_SPECIES] = \n{");
+			lowerBlock.AppendLine("struct RoguePokemonProfile const gRoguePokemonProfiles[NUM_SPECIES] =\n{");
 
 			foreach(var profile in profiles)
 			{
 				// Mon flags
 				HashSet<string> sourceTiers = new HashSet<string>();
+				HashSet<string> rogueRoleFlags = new HashSet<string>();
 
 				foreach (var compSet in profile.CompetitiveSets)
 				{
 					foreach (var tier in compSet.SourceTiers)
 						sourceTiers.Add(GameDataHelpers.FormatKeyword(tier));
+					string roleFlag = GetRogueRoleFlag(compSet);
+					if (roleFlag != null)
+						rogueRoleFlags.Add(roleFlag);
 				}
 
 				upperBlock.AppendLine($"#ifdef APPEND_MON_FLAGS_{profile.Species}");
@@ -2065,6 +2044,8 @@ namespace PokemonDataGenerator.Pokedex
 				upperBlock.Append($"#define MON_FLAGS_{profile.Species} (APPEND_MON_FLAGS_{profile.Species}"); // allow easily appending flags
 				foreach (var tier in sourceTiers)
 					upperBlock.Append($" | MON_FLAGS_{tier}");
+				foreach (var roleFlag in rogueRoleFlags.OrderBy(flag => flag))
+					upperBlock.Append($" | {roleFlag}");
 				upperBlock.AppendLine(")");
 
 				upperBlock.AppendLine("#else");
@@ -2072,13 +2053,15 @@ namespace PokemonDataGenerator.Pokedex
 				upperBlock.Append($"#define MON_FLAGS_{profile.Species} (0");
 				foreach (var tier in sourceTiers)
 					upperBlock.Append($" | MON_FLAGS_{tier}");
+				foreach (var roleFlag in rogueRoleFlags.OrderBy(flag => flag))
+					upperBlock.Append($" | {roleFlag}");
 				upperBlock.AppendLine(")");
 
 				upperBlock.AppendLine("#endif");
 				upperBlock.AppendLine("");
 
 				// Level moves
-				upperBlock.AppendLine($"static struct LevelUpMove const sLevelUpMoves_{profile.Species}[] = \n{{");
+				upperBlock.AppendLine($"static struct LevelUpMove const sLevelUpMoves_{profile.Species}[] =\n{{");
 				foreach(var move in profile.LevelUpMoves)
 				{
 					upperBlock.AppendLine($"\t{{ .move={move.Move}, .level={move.Level} }},");
@@ -2088,7 +2071,7 @@ namespace PokemonDataGenerator.Pokedex
 				upperBlock.AppendLine();
 
 				// Tutor moves
-				upperBlock.AppendLine($"static u16 const sTutorMoves_{profile.Species}[] = \n{{");
+				upperBlock.AppendLine($"static u16 const sTutorMoves_{profile.Species}[] =\n{{");
 				foreach (var move in profile.TutorMoves)
 				{
 					upperBlock.AppendLine($"\t{move},");
@@ -2098,7 +2081,7 @@ namespace PokemonDataGenerator.Pokedex
 				upperBlock.AppendLine();
 
 				// Comp sets
-				upperBlock.AppendLine($"static struct RoguePokemonCompetitiveSet const sCompetitiveSets_{profile.Species}[] = \n{{");
+				upperBlock.AppendLine($"static struct RoguePokemonCompetitiveSet const sCompetitiveSets_{profile.Species}[] =\n{{");
 				foreach(var compSet in profile.CompetitiveSets)
 				{
 					upperBlock.AppendLine($"\t{{");
@@ -2106,6 +2089,9 @@ namespace PokemonDataGenerator.Pokedex
 					upperBlock.Append($"\t\t.flags= (0");
 					foreach (var tier in compSet.SourceTiers)
 						upperBlock.Append($" | MON_FLAGS_{tier}");
+					string roleFlag = GetRogueRoleFlag(compSet);
+					if (roleFlag != null)
+						upperBlock.Append($" | {roleFlag}");
 					upperBlock.AppendLine("),");
 
 					if (compSet.Item != null)
@@ -2141,7 +2127,7 @@ namespace PokemonDataGenerator.Pokedex
 
 
 				// Add to species lookup below
-				lowerBlock.AppendLine($"\t[{profile.Species}] = \n\t{{");
+				lowerBlock.AppendLine($"\t[{profile.Species}] =\n\t{{");
 				lowerBlock.AppendLine($"\t\t.levelUpMoves = sLevelUpMoves_{profile.Species},");
 				lowerBlock.AppendLine($"\t\t.tutorMoves = sTutorMoves_{profile.Species},");
 				lowerBlock.AppendLine($"\t\t.competitiveSets = sCompetitiveSets_{profile.Species},");
@@ -2153,7 +2139,7 @@ namespace PokemonDataGenerator.Pokedex
 			// Attach redirected species info too
 			foreach(var kvp in redirectedSpecies)
 			{
-				lowerBlock.AppendLine($"\t[{kvp.Key}] = \n\t{{");
+				lowerBlock.AppendLine($"\t[{kvp.Key}] =\n\t{{");
 				lowerBlock.AppendLine($"\t\t.levelUpMoves = sLevelUpMoves_{kvp.Value},");
 				lowerBlock.AppendLine($"\t\t.tutorMoves = sTutorMoves_{kvp.Value},");
 				lowerBlock.AppendLine($"\t\t.competitiveSets = sCompetitiveSets_{kvp.Value},");

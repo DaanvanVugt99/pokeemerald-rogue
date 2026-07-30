@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added a deterministic Pokémon-profile refresh pipeline with a small source
+  lock, an ignored local PokeAPI/Showdown cache, explicit Divergence learnset
+  and competitive-set rules, Z-A Mega form validation, drift reports, and
+  offline generate/verify commands.
 - Added an em dash glyph to every Latin game font and taught the text toolchain
   to encode and measure it.
 - Added a `+` marker before Pokédex stat values that exceed the pinned canonical

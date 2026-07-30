@@ -1,0 +1,213 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "stableId": "floette-eternal-offensive-mega",
+      "species": "SPECIES_FLOETTE_ETERNAL_FLOWER",
+      "rogueRole": "standard",
+      "ability": "ABILITY_SYMBIOSIS",
+      "item": "ITEM_FLOETTITE",
+      "nature": "NATURE_TIMID",
+      "moves": [
+        "MOVE_DAZZLING_GLEAM",
+        "MOVE_LIGHT_OF_RUIN",
+        "MOVE_MOONBLAST",
+        "MOVE_PROTECT"
+      ],
+      "sourceTiers": [
+        "CHAMPIONS_SINGLES_S1",
+        "CHAMPIONS_DOUBLES_S1"
+      ]
+    },
+    {
+      "stableId": "floette-eternal-calm-mind-mega",
+      "species": "SPECIES_FLOETTE_ETERNAL_FLOWER",
+      "rogueRole": "standard",
+      "ability": "ABILITY_SYMBIOSIS",
+      "item": "ITEM_FLOETTITE",
+      "nature": "NATURE_TIMID",
+      "moves": [
+        "MOVE_CALM_MIND",
+        "MOVE_DAZZLING_GLEAM",
+        "MOVE_MOONBLAST",
+        "MOVE_PROTECT"
+      ],
+      "sourceTiers": [
+        "CHAMPIONS_SINGLES_S1",
+        "CHAMPIONS_DOUBLES_S1"
+      ]
+    },
+    {
+      "stableId": "floette-eternal-draining-kiss-mega",
+      "species": "SPECIES_FLOETTE_ETERNAL_FLOWER",
+      "rogueRole": "standard",
+      "ability": "ABILITY_SYMBIOSIS",
+      "item": "ITEM_FLOETTITE",
+      "nature": "NATURE_TIMID",
+      "moves": [
+        "MOVE_CALM_MIND",
+        "MOVE_DRAINING_KISS",
+        "MOVE_MOONBLAST",
+        "MOVE_PROTECT"
+      ],
+      "sourceTiers": [
+        "CHAMPIONS_SINGLES_S1",
+        "CHAMPIONS_DOUBLES_S1"
+      ]
+    },
+    {
+      "stableId": "tatsugiri-droopy-baseline-spinner",
+      "species": "SPECIES_TATSUGIRI_DROOPY",
+      "rogueRole": "standard",
+      "ability": "ABILITY_STORM_DRAIN",
+      "item": "ITEM_HEAVY_DUTY_BOOTS",
+      "nature": "NATURE_TIMID",
+      "moves": [
+        "MOVE_RAPID_SPIN",
+        "MOVE_DRACO_METEOR",
+        "MOVE_SURF",
+        "MOVE_NASTY_PLOT"
+      ],
+      "sourceTiers": [
+        "GEN9RU"
+      ]
+    },
+    {
+      "stableId": "tatsugiri-stretchy-baseline-spinner",
+      "species": "SPECIES_TATSUGIRI_STRETCHY",
+      "rogueRole": "standard",
+      "ability": "ABILITY_STORM_DRAIN",
+      "item": "ITEM_HEAVY_DUTY_BOOTS",
+      "nature": "NATURE_TIMID",
+      "moves": [
+        "MOVE_RAPID_SPIN",
+        "MOVE_DRACO_METEOR",
+        "MOVE_SURF",
+        "MOVE_NASTY_PLOT"
+      ],
+      "sourceTiers": [
+        "GEN9RU"
+      ]
+    },
+    {
+      "stableId": "vulpix-alolan-baseline-veil",
+      "species": "SPECIES_VULPIX_ALOLAN",
+      "rogueRole": "standard",
+      "ability": "ABILITY_SNOW_WARNING",
+      "item": "ITEM_LIGHT_CLAY",
+      "nature": "NATURE_TIMID",
+      "moves": [
+        "MOVE_AURORA_VEIL",
+        "MOVE_BLIZZARD",
+        "MOVE_FREEZE_DRY",
+        "MOVE_MOONBLAST"
+      ],
+      "sourceTiers": [
+        "GEN7LC"
+      ]
+    },
+    {
+      "stableId": "voltorb-hisuian-baseline-attacker",
+      "species": "SPECIES_VOLTORB_HISUIAN",
+      "rogueRole": "standard",
+      "ability": "ABILITY_STATIC",
+      "item": "ITEM_EVIOLITE",
+      "nature": "NATURE_TIMID",
+      "teraType": "TYPE_FIRE",
+      "moves": [
+        "MOVE_VOLT_SWITCH",
+        "MOVE_GIGA_DRAIN",
+        "MOVE_THUNDERBOLT",
+        "MOVE_TERA_BLAST"
+      ],
+      "sourceTiers": [
+        "GEN9LC"
+      ]
+    },
+    {
+      "stableId": "grotle-baseline-defensive",
+      "species": "SPECIES_GROTLE",
+      "rogueRole": "standard",
+      "ability": "ABILITY_OVERGROW",
+      "item": "ITEM_EVIOLITE",
+      "nature": "NATURE_CAREFUL",
+      "moves": [
+        "MOVE_STEALTH_ROCK",
+        "MOVE_BULLET_SEED",
+        "MOVE_SYNTHESIS",
+        "MOVE_IRON_HEAD"
+      ],
+      "sourceTiers": [
+        "GEN6ZU"
+      ]
+    },
+    {
+      "stableId": "meltan-baseline-defensive",
+      "species": "SPECIES_MELTAN",
+      "rogueRole": "standard",
+      "ability": "ABILITY_MAGNET_PULL",
+      "item": "ITEM_LEFTOVERS",
+      "nature": "NATURE_BOLD",
+      "moves": [
+        "MOVE_ACID_ARMOR",
+        "MOVE_REST",
+        "MOVE_FLASH_CANNON",
+        "MOVE_THUNDERBOLT"
+      ],
+      "sourceTiers": [
+        "GEN8ZU"
+      ]
+    },
+    {
+      "stableId": "drizzile-baseline-specs",
+      "species": "SPECIES_DRIZZILE",
+      "rogueRole": "standard",
+      "ability": "ABILITY_TORRENT",
+      "item": "ITEM_CHOICE_SPECS",
+      "nature": "NATURE_TIMID",
+      "moves": [
+        "MOVE_U_TURN",
+        "MOVE_HYDRO_PUMP",
+        "MOVE_SURF",
+        "MOVE_TERA_BLAST"
+      ],
+      "sourceTiers": [
+        "GEN9ZU"
+      ]
+    },
+    {
+      "stableId": "wyrdeer-baseline-calm-mind",
+      "species": "SPECIES_WYRDEER",
+      "rogueRole": "standard",
+      "ability": "ABILITY_INTIMIDATE",
+      "item": "ITEM_LEFTOVERS",
+      "nature": "NATURE_MODEST",
+      "moves": [
+        "MOVE_TERA_BLAST",
+        "MOVE_CALM_MIND",
+        "MOVE_STORED_POWER",
+        "MOVE_AGILITY"
+      ],
+      "sourceTiers": [
+        "GEN9PU"
+      ]
+    },
+    {
+      "stableId": "flittle-baseline-speed-boost",
+      "species": "SPECIES_FLITTLE",
+      "rogueRole": "standard",
+      "ability": "ABILITY_SPEED_BOOST",
+      "item": "ITEM_EVIOLITE",
+      "nature": "NATURE_MODEST",
+      "moves": [
+        "MOVE_STORED_POWER",
+        "MOVE_TERA_BLAST",
+        "MOVE_PROTECT",
+        "MOVE_CALM_MIND"
+      ],
+      "sourceTiers": [
+        "GEN9ZU"
+      ]
+    }
+  ]
+}

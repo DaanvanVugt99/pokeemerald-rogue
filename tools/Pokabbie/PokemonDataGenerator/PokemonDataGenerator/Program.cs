@@ -17,6 +17,13 @@ namespace PokemonDataGenerator
 
 		static void Main(string[] args)
 		{
+			if (args.Length >= 2 && args[0] == "profiles")
+			{
+				bool acceptRemovals = args.Skip(2).Contains("--accept-removals");
+				PokemonProfilePipeline.Run(args[1], acceptRemovals);
+				return;
+			}
+
 			Console.WriteLine("1 - Vanilla");
 			Console.WriteLine("2 - EX");
 			bool isVanillaVersion = ReadOption(1, 2) == 1;

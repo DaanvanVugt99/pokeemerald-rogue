@@ -9,7 +9,9 @@ namespace PokemonDataGenerator.Utils
 {
 	public static class GameDataHelpers
 	{
-		private static string s_RootDirectory = Path.GetFullPath(@"..\\..\\..\\..\\..\\..\\");
+		private static string s_RootDirectory =
+			Environment.GetEnvironmentVariable("POKEEMERALD_ROGUE_ROOT")
+			?? Path.GetFullPath(@"..\\..\\..\\..\\..\\..\\");
 
 		private static Dictionary<string, string> s_SpeciesDefines = null;
 		private static Dictionary<string, string> s_ItemDefines = null;

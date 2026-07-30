@@ -11,11 +11,14 @@ namespace PokemonDataGenerator.Utils
 	{
 		private static readonly string s_PokeApiAddress = "https://pokeapi.co/api/v2/";
 		private static readonly string s_ShowdownApiAddress = "https://play.pokemonshowdown.com/data/sets/";
+		private static readonly string s_ShowdownPokedexAddress = "https://play.pokemonshowdown.com/data/pokedex.json";
 		private static Dictionary<string, string> s_PokeApiBaseAddresses = null;
 
 		private static Dictionary<string, string> s_CachedPokedexURIs = null;
 		private static Dictionary<string, string> s_CachedPokemonURIs = null;
 		private static Dictionary<string, string> s_CachedPokemonSpeciesURIs = null;
+		private static readonly Dictionary<string, JObject> s_CachedShowdownSets = new Dictionary<string, JObject>();
+		private static JObject s_CachedShowdownPokedex;
 
 		static PokeAPI()
 		{
@@ -160,6 +163,50 @@ namespace PokemonDataGenerator.Utils
 			throw new InvalidOperationException("API species error");
 		}
 
+		public static void PrefetchPokemonProfiles(IEnumerable<string> speciesNames)
+		{
+			Dictionary<string, string> speciesUris = GetPokemonSpeciesURIs();
+			List<Tuple<string, string, string>> lookups = new List<Tuple<string, string, string>>();
+			foreach (string speciesName in speciesNames.Distinct())
+			{
+				string overridePath = $"res://ManualPokeAPI/{(GameDataHelpers.IsVanillaVersion ? "Vanilla" : "EX")}/{speciesName}.json";
+				if (ContentCache.ExistsInCache(overridePath))
+					continue;
+				RedirectSpeciesLookupName(speciesName, out string apiSpecies, out string variantName);
+				if (speciesUris.ContainsKey(apiSpecies))
+					lookups.Add(Tuple.Create(apiSpecies, variantName, speciesUris[apiSpecies]));
+			}
+
+			ContentCache.PrefetchHttpContent(lookups.Select(lookup => lookup.Item3));
+			List<string> formUris = new List<string>();
+			foreach (var lookup in lookups)
+			{
+				JObject speciesEntry = ContentCache.GetJsonContent(lookup.Item3);
+				foreach (var variant in speciesEntry["varieties"])
+				{
+					if (variant["pokemon"]["name"].Value<string>() == lookup.Item2)
+					{
+						formUris.Add(variant["pokemon"]["url"].Value<string>());
+						break;
+					}
+				}
+			}
+			ContentCache.PrefetchHttpContent(formUris);
+		}
+
+		public static bool HasPokemonForm(string speciesName)
+		{
+			string overridePath = $"res://ManualPokeAPI/{(GameDataHelpers.IsVanillaVersion ? "Vanilla" : "EX")}/{speciesName}.json";
+			if (ContentCache.ExistsInCache(overridePath))
+				return true;
+			Dictionary<string, string> speciesUris = GetPokemonSpeciesURIs();
+			RedirectSpeciesLookupName(speciesName, out string apiSpecies, out string variantName);
+			if (!speciesUris.TryGetValue(apiSpecies, out string speciesUri))
+				return false;
+			JObject speciesEntry = ContentCache.GetJsonContent(speciesUri);
+			return speciesEntry["varieties"].Any(variant => variant["pokemon"]["name"].Value<string>() == variantName);
+		}
+
 		private static string SpeciesNameToApiName(string speciesName)
 		{
 			if (speciesName.StartsWith("SPECIES_"))
@@ -173,7 +220,67 @@ namespace PokemonDataGenerator.Utils
 			return "SPECIES_" + GameDataHelpers.FormatKeyword(apiName);
 		}
 
-		private static void RedirectSpeciesLookupName(string speciesName, out string apiSpecies, out string variantName)
+		private static string NormalizeSpeciesIdentifier(string name)
+		{
+			if (name.StartsWith("SPECIES_", StringComparison.CurrentCultureIgnoreCase))
+				name = name.Substring("SPECIES_".Length);
+			return new string(name.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant).ToArray());
+		}
+
+		public static string NormalizeIdentifier(string name)
+		{
+			return NormalizeSpeciesIdentifier(name);
+		}
+
+		private static JObject GetShowdownSetDocument(string generation)
+		{
+			if (!s_CachedShowdownSets.TryGetValue(generation, out JObject document))
+			{
+				document = ContentCache.GetJsonContent(s_ShowdownApiAddress + generation + ".json");
+				s_CachedShowdownSets[generation] = document;
+			}
+			return document;
+		}
+
+		public static bool TryGetShowdownGen9MegaBaseSpecies(string speciesName, out string baseSpecies)
+		{
+			if (s_CachedShowdownPokedex == null)
+				s_CachedShowdownPokedex = ContentCache.GetJsonContent(s_ShowdownPokedexAddress);
+
+			string normalizedSpecies = NormalizeSpeciesIdentifier(speciesName);
+			foreach (var entry in s_CachedShowdownPokedex)
+			{
+				if (NormalizeSpeciesIdentifier(entry.Key) != normalizedSpecies)
+					continue;
+
+				JObject data = entry.Value.Value<JObject>();
+				string forme = data["forme"]?.Value<string>();
+				string rawBaseSpecies = data["baseSpecies"]?.Value<string>();
+				string nonstandard = data["isNonstandard"]?.Value<string>();
+				if (nonstandard != "Future"
+					|| string.IsNullOrEmpty(forme)
+					|| !forme.Contains("Mega")
+					|| string.IsNullOrEmpty(rawBaseSpecies))
+					break;
+
+				baseSpecies = ApiNameToSpeciesName(rawBaseSpecies);
+				return true;
+			}
+
+			baseSpecies = null;
+			return false;
+		}
+
+		public static bool HasShowdownCompetitiveSets(string speciesName)
+		{
+			if (s_CompetitiveSetsBySpecies == null
+				|| s_CompetitiveSetIndexIsVanilla != GameDataHelpers.IsVanillaVersion)
+				BuildCompetitiveSetIndex();
+			return s_CompetitiveSetsBySpecies.TryGetValue(speciesName, out JObject sets)
+				&& sets.Properties().Any(property => property.Value is JArray tierSets && tierSets.Any());
+		}
+
+		public static void RedirectSpeciesLookupName(string speciesName, out string apiSpecies, out string variantName)
 		{
 			if (GameDataHelpers.IsVanillaVersion)
 			{
@@ -183,7 +290,18 @@ namespace PokemonDataGenerator.Utils
 
 			apiSpecies = speciesName;
 			variantName = SpeciesNameToApiName(speciesName);
-			
+
+			if (!GameDataHelpers.IsVanillaVersion
+				&& TryGetShowdownGen9MegaBaseSpecies(speciesName, out string gen9MegaBaseSpecies))
+			{
+				apiSpecies = gen9MegaBaseSpecies;
+				if (speciesName == "SPECIES_MEOWSTIC_M_MEGA")
+					variantName = "meowstic-male-mega";
+				else if (speciesName == "SPECIES_MEOWSTIC_F_MEGA")
+					variantName = "meowstic-female-mega";
+				return;
+			}
+
 			if(speciesName.StartsWith("SPECIES_DEOXYS"))
 			{
 				apiSpecies = "SPECIES_DEOXYS";
@@ -339,6 +457,11 @@ namespace PokemonDataGenerator.Utils
 						variantName = "indeedee-female";
 						break;
 
+					case "SPECIES_FLOETTE_ETERNAL_FLOWER":
+						apiSpecies = "SPECIES_FLOETTE";
+						variantName = "floette-eternal";
+						break;
+
 					case "SPECIES_ZACIAN_CROWNED_SWORD":
 						apiSpecies = "SPECIES_ZACIAN";
 						variantName = "zacian-crowned";
@@ -374,7 +497,7 @@ namespace PokemonDataGenerator.Utils
 
 					case "SPECIES_MAUSHOLD_FAMILY_OF_FOUR":
 						apiSpecies = "SPECIES_MAUSHOLD";
-						variantName = "maushold";
+						variantName = "maushold-family-of-four";
 						break;
 
 					case "SPECIES_TATSUGIRI_DROOPY":
@@ -479,36 +602,34 @@ namespace PokemonDataGenerator.Utils
 			}
 		}
 
+		private static Dictionary<string, JObject> s_CompetitiveSetsBySpecies;
+		private static bool s_CompetitiveSetIndexIsVanilla;
+
 		public static JObject GetPokemonSpeciesCompetitiveSets(string speciesName)
 		{
-			List<string> lookupGens = new List<string>();
+			if (s_CompetitiveSetsBySpecies == null || s_CompetitiveSetIndexIsVanilla != GameDataHelpers.IsVanillaVersion)
+				BuildCompetitiveSetIndex();
+			return s_CompetitiveSetsBySpecies.TryGetValue(speciesName, out JObject sets)
+				? sets
+				: new JObject();
+		}
 
-			if(GameDataHelpers.IsVanillaVersion)
+		private static void BuildCompetitiveSetIndex()
+		{
+			s_CompetitiveSetIndexIsVanilla = GameDataHelpers.IsVanillaVersion;
+			s_CompetitiveSetsBySpecies = new Dictionary<string, JObject>();
+			string[] lookupGens = GameDataHelpers.IsVanillaVersion
+				? new[] { "gen3" }
+				: new[] { "gen6", "gen7", "gen8", "gen9" };
+
+			foreach (string lookupGen in lookupGens)
 			{
-				lookupGens.Add("gen3");
-			}
-			else
-			{
-				lookupGens.Add("gen6");
-				lookupGens.Add("gen7");
-				lookupGens.Add("gen8");
-				lookupGens.Add("gen9");
-			}
-
-			JObject output = new JObject();
-
-			foreach(var lookupGen in lookupGens)
-			{
-				var compSets = ContentCache.GetJsonContent(s_ShowdownApiAddress + lookupGen + ".json");
-
-				foreach (var compTierKvp in compSets)
+				foreach (var compTierKvp in GetShowdownSetDocument(lookupGen))
 				{
-					if (compTierKvp.Key.EndsWith("hackmons", StringComparison.CurrentCultureIgnoreCase) ||
-						compTierKvp.Key.EndsWith("cap", StringComparison.CurrentCultureIgnoreCase) ||
-						compTierKvp.Key.EndsWith("anyability", StringComparison.CurrentCultureIgnoreCase))
+					if (compTierKvp.Key.EndsWith("hackmons", StringComparison.CurrentCultureIgnoreCase)
+						|| compTierKvp.Key.EndsWith("cap", StringComparison.CurrentCultureIgnoreCase)
+						|| compTierKvp.Key.EndsWith("anyability", StringComparison.CurrentCultureIgnoreCase))
 						continue;
-
-					JArray tierOutput = new JArray();
 
 					foreach (var upperGroupingKvp in compTierKvp.Value.Value<JObject>())
 					{
@@ -516,29 +637,34 @@ namespace PokemonDataGenerator.Utils
 						{
 							if (IsSpeciesIgnored(speciesSetGroupKvp.Key))
 								continue;
-
-							// Verify that the mons we're examining are correctly handled or have an equivilant species in game
 							VerifyCompetitiveSpecies(speciesSetGroupKvp.Key);
-
-							string currentSpeciesName = CompetitiveApiNameToSpeciesName(speciesSetGroupKvp.Key);
-
-							if (currentSpeciesName != speciesName)
-								continue;
+							string projectSpecies = CompetitiveApiNameToSpeciesName(speciesSetGroupKvp.Key);
+							if (!s_CompetitiveSetsBySpecies.TryGetValue(projectSpecies, out JObject speciesSets))
+							{
+								speciesSets = new JObject();
+								s_CompetitiveSetsBySpecies[projectSpecies] = speciesSets;
+							}
+							if (!(speciesSets[compTierKvp.Key] is JArray tierOutput))
+							{
+								tierOutput = new JArray();
+								speciesSets[compTierKvp.Key] = tierOutput;
+							}
 
 							foreach (var currentSetKvp in speciesSetGroupKvp.Value.Value<JObject>())
 							{
-								var currentSet = currentSetKvp.Value.Value<JObject>();
-
+								var currentSet = (JObject)currentSetKvp.Value.DeepClone();
+								currentSet["_profileSourceId"] = string.Join(
+									"|",
+									lookupGen,
+									compTierKvp.Key,
+									speciesSetGroupKvp.Key,
+									currentSetKvp.Key);
 								tierOutput.Add(currentSet);
 							}
 						}
 					}
-
-					output[compTierKvp.Key] = tierOutput;
 				}
 			}
-
-			return output;
 		}
 
 		private static void VerifyCompetitiveSpecies(string apiName)
@@ -567,11 +693,23 @@ namespace PokemonDataGenerator.Utils
 			}
 
 			if (!GameDataHelpers.SpeciesDefines.ContainsKey(speciesName))
-				throw new NotImplementedException();
+				throw new NotImplementedException($"Showdown species '{apiName}' maps to unsupported project species '{speciesName}'.");
 		}
 
 		private static string CompetitiveApiNameToSpeciesName(string apiName)
 		{
+			if (apiName.EndsWith("-Gmax", StringComparison.CurrentCultureIgnoreCase))
+				apiName = apiName.Substring(0, apiName.Length - "-Gmax".Length) + "-Gigantamax";
+			if (apiName == "Urshifu-Gigantamax")
+				apiName = "Urshifu-Single-Strike-Style-Gigantamax";
+
+			if (!GameDataHelpers.IsVanillaVersion)
+			{
+				string directSpeciesName = "SPECIES_" + GameDataHelpers.FormatKeyword(apiName);
+				if (GameDataHelpers.SpeciesDefines.ContainsKey(directSpeciesName))
+					return ResolveCompetitiveProfileOwner(directSpeciesName);
+			}
+
 			if (apiName.EndsWith("-mega", StringComparison.CurrentCultureIgnoreCase))
 			{
 				apiName = apiName.Substring(0, apiName.Length - "-mega".Length);
@@ -681,7 +819,61 @@ namespace PokemonDataGenerator.Utils
 			}
 
 
-			return "SPECIES_" + GameDataHelpers.FormatKeyword(apiName);
+			return ResolveCompetitiveProfileOwner("SPECIES_" + GameDataHelpers.FormatKeyword(apiName));
+		}
+
+		private static string ResolveCompetitiveProfileOwner(string speciesName)
+		{
+			if (GameDataHelpers.IsVanillaVersion)
+				return speciesName;
+
+			// Z-A Mega forms are upstream-owned forms. Keep their sets attached to
+			// the form so a future dedicated set promotes it to an independent
+			// profile instead of folding it into the base species.
+			if (TryGetShowdownGen9MegaBaseSpecies(speciesName, out string ignoredBaseSpecies))
+				return speciesName;
+
+			if (speciesName.EndsWith("_MEGA_X") || speciesName.EndsWith("_MEGA_Y"))
+				return speciesName.Substring(0, speciesName.Length - "_MEGA_X".Length);
+			if (speciesName.EndsWith("_MEGA"))
+				return speciesName.Substring(0, speciesName.Length - "_MEGA".Length);
+			if (speciesName.EndsWith("_PRIMAL"))
+				return speciesName.Substring(0, speciesName.Length - "_PRIMAL".Length);
+			if (speciesName.EndsWith("_GIGANTAMAX"))
+			{
+				switch (speciesName)
+				{
+					case "SPECIES_TOXTRICITY_AMPED_GIGANTAMAX":
+						return "SPECIES_TOXTRICITY";
+					case "SPECIES_URSHIFU_SINGLE_STRIKE_STYLE_GIGANTAMAX":
+						return "SPECIES_URSHIFU";
+					default:
+						return speciesName.Substring(0, speciesName.Length - "_GIGANTAMAX".Length);
+				}
+			}
+
+			if (speciesName.StartsWith("SPECIES_ARCEUS_"))
+				return "SPECIES_ARCEUS";
+			if (speciesName.StartsWith("SPECIES_SILVALLY_"))
+				return "SPECIES_SILVALLY";
+			if (speciesName.StartsWith("SPECIES_PUMPKABOO_"))
+				return "SPECIES_PUMPKABOO";
+			if (speciesName.StartsWith("SPECIES_GOURGEIST_"))
+				return "SPECIES_GOURGEIST";
+
+			switch (speciesName)
+			{
+				case "SPECIES_DARMANITAN_ZEN_MODE":
+					return "SPECIES_DARMANITAN";
+				case "SPECIES_DARMANITAN_ZEN_MODE_GALARIAN":
+					return "SPECIES_DARMANITAN_GALARIAN";
+				case "SPECIES_MELOETTA_PIROUETTE":
+					return "SPECIES_MELOETTA";
+				case "SPECIES_ZARUDE_DADA":
+					return "SPECIES_ZARUDE";
+				default:
+					return speciesName;
+			}
 		}
 
 		private static bool IsSpeciesIgnored(string apiName)
