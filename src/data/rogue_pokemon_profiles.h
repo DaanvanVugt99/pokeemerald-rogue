@@ -132754,8 +132754,6 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_SNOVER[] =
 	{ .move=MOVE_WOOD_HAMMER, .level=41 },
 	{ .move=MOVE_BLIZZARD, .level=45 },
 	{ .move=MOVE_SHEER_COLD, .level=50 },
-	{ .move=MOVE_ICE_HAMMER, .level=52 },
-	{ .move=MOVE_MOUNTAIN_GALE, .level=62 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -132980,10 +132978,8 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_ABOMASNOW[] =
 	{ .move=MOVE_INGRAIN, .level=35 },
 	{ .move=MOVE_WOOD_HAMMER, .level=43 },
 	{ .move=MOVE_BLIZZARD, .level=49 },
-	{ .move=MOVE_ICE_HAMMER, .level=52 },
 	{ .move=MOVE_COLD_SNAP, .level=53 },
 	{ .move=MOVE_SHEER_COLD, .level=56 },
-	{ .move=MOVE_MOUNTAIN_GALE, .level=62 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 

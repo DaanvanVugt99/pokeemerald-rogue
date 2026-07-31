@@ -63,6 +63,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Removed Ice Hammer and Mountain Gale from the Snover line now that Grassy
+  Terrain, Grassy Glide, White Canopy, and Mega Evolution already give
+  Abomasnow a strong Divergence identity.
 - Set Frontier Brain teams to five levels below the current badge level cap.
 - Fixed Solarboost recognizing Weather Ball as Fire after setting sun, and
   expanded generated move synergy matching for move-driven Unique Abilities.

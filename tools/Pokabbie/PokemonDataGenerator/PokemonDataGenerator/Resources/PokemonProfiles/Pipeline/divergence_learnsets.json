@@ -1880,18 +1880,6 @@
       "level": 53
     },
     {
-      "id": "retained-level-abomasnow-ice_hammer",
-      "species": "SPECIES_ABOMASNOW",
-      "move": "MOVE_ICE_HAMMER",
-      "level": 52
-    },
-    {
-      "id": "retained-level-abomasnow-mountain_gale",
-      "species": "SPECIES_ABOMASNOW",
-      "move": "MOVE_MOUNTAIN_GALE",
-      "level": 62
-    },
-    {
       "id": "retained-level-absol-eclipse",
       "species": "SPECIES_ABSOL",
       "move": "MOVE_ECLIPSE",
@@ -4224,18 +4212,6 @@
       "species": "SPECIES_SNORUNT",
       "move": "MOVE_FREEZING_GLARE",
       "level": 50
-    },
-    {
-      "id": "retained-level-snover-ice_hammer",
-      "species": "SPECIES_SNOVER",
-      "move": "MOVE_ICE_HAMMER",
-      "level": 52
-    },
-    {
-      "id": "retained-level-snover-mountain_gale",
-      "species": "SPECIES_SNOVER",
-      "move": "MOVE_MOUNTAIN_GALE",
-      "level": 62
     },
     {
       "id": "retained-level-snubbull-jaw_lock",
