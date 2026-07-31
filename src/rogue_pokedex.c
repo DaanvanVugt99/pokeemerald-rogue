@@ -1416,17 +1416,26 @@ extern const u8 gAbilityNames[][ABILITY_NAME_LENGTH + 1];
 #define GET_STAT_COLOUR(stat) GET_STAT_COLOUR_RANGE(stats[stat], bestStatValue, worstStatValue)
 #define GET_STAT_COLOUR_RANGE(value, bestValue, worstColor) (value >= bestValue ? bestStatColor : (value <= worstColor ? worstStatColor : statColor))
 
-static void BufferPokedexStatValue(u16 species, u16 value, u8 stat)
+static void BufferPokedexStatValue(u16 value)
 {
-    if (Rogue_IsSpeciesStatBuffed(species, stat))
-    {
-        u8 *dst = StringCopy(gStringVar4, gText_Plus);
+    ConvertUIntToDecimalStringN(gStringVar4, value, STR_CONV_MODE_RIGHT_ALIGN, 3);
+}
 
-        ConvertUIntToDecimalStringN(dst, value, STR_CONV_MODE_LEFT_ALIGN, 3);
-    }
-    else
+static void DrawPokedexStatValue(u16 value, u8 x, u8 y, const u8 *color, bool8 hasBuffMarker)
+{
+    BufferPokedexStatValue(value);
+    AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, x, y, 0, 0, color, TEXT_SKIP_DRAW, gStringVar4);
+
+    if (hasBuffMarker)
     {
-        ConvertUIntToDecimalStringN(gStringVar4, value, STR_CONV_MODE_RIGHT_ALIGN, 3);
+        u8 digits[4];
+        u8 numberStart;
+        u8 plusWidth;
+
+        ConvertUIntToDecimalStringN(digits, value, STR_CONV_MODE_LEFT_ALIGN, 3);
+        numberStart = x + GetStringWidth(FONT_NARROW, gStringVar4, 0) - GetStringWidth(FONT_NARROW, digits, 0);
+        plusWidth = GetStringWidth(FONT_NARROW, gText_Plus, 0);
+        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, numberStart - plusWidth, y, 0, 0, color, TEXT_SKIP_DRAW, gText_Plus);
     }
 }
 
@@ -1503,60 +1512,44 @@ static void DisplayMonStatsText(void)
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Total);
 
-        if (IsAnySpeciesStatBuffed(sPokedexMenu->viewBaseSpecies))
-        {
-            u8 *dst = StringCopy(gStringVar4, gText_Plus);
-
-            ConvertUIntToDecimalStringN(dst, bst, STR_CONV_MODE_LEFT_ALIGN, 3);
-        }
-        else
-        {
-            ConvertUIntToDecimalStringN(gStringVar4, bst, STR_CONV_MODE_RIGHT_ALIGN, 3);
-        }
-        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR_RANGE(bst, 600, 299), TEXT_SKIP_DRAW, gStringVar4);
+        DrawPokedexStatValue(bst, 115, 1 + ySpacing * i, GET_STAT_COLOUR_RANGE(bst, 600, 299), IsAnySpeciesStatBuffed(sPokedexMenu->viewBaseSpecies));
 
         // HP
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_HP);
 
-        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_HP], STAT_HP);
-        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_HP), TEXT_SKIP_DRAW, gStringVar4);
+        DrawPokedexStatValue(stats[STAT_HP], 115, 1 + ySpacing * i, GET_STAT_COLOUR(STAT_HP), Rogue_IsSpeciesStatBuffed(sPokedexMenu->viewBaseSpecies, STAT_HP));
 
         // Attack
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Attack);
         
-        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_ATK], STAT_ATK);
-        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_ATK), TEXT_SKIP_DRAW, gStringVar4);
+        DrawPokedexStatValue(stats[STAT_ATK], 115, 1 + ySpacing * i, GET_STAT_COLOUR(STAT_ATK), Rogue_IsSpeciesStatBuffed(sPokedexMenu->viewBaseSpecies, STAT_ATK));
 
         // Def
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Defence);
         
-        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_DEF], STAT_DEF);
-        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_DEF), TEXT_SKIP_DRAW, gStringVar4);
+        DrawPokedexStatValue(stats[STAT_DEF], 115, 1 + ySpacing * i, GET_STAT_COLOUR(STAT_DEF), Rogue_IsSpeciesStatBuffed(sPokedexMenu->viewBaseSpecies, STAT_DEF));
 
         // SpAttack
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_SpAttack);
         
-        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_SPATK], STAT_SPATK);
-        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_SPATK), TEXT_SKIP_DRAW, gStringVar4);
+        DrawPokedexStatValue(stats[STAT_SPATK], 115, 1 + ySpacing * i, GET_STAT_COLOUR(STAT_SPATK), Rogue_IsSpeciesStatBuffed(sPokedexMenu->viewBaseSpecies, STAT_SPATK));
 
         // SpDef
         ++i;
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 1 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_SpDefence);
         
-        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_SPDEF], STAT_SPDEF);
-        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_SPDEF), TEXT_SKIP_DRAW, gStringVar4);
+        DrawPokedexStatValue(stats[STAT_SPDEF], 115, 1 + ySpacing * i, GET_STAT_COLOUR(STAT_SPDEF), Rogue_IsSpeciesStatBuffed(sPokedexMenu->viewBaseSpecies, STAT_SPDEF));
 
         // Speed
         ++i;
         // Move 1 pixel higher
         AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NORMAL, 72, 0 + ySpacing * i, 0, 0, headerColor, TEXT_SKIP_DRAW, sText_Speed);
 
-        BufferPokedexStatValue(sPokedexMenu->viewBaseSpecies, stats[STAT_SPEED], STAT_SPEED);
-        AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 115, 1 + ySpacing * i, 0, 0, GET_STAT_COLOUR(STAT_SPEED), TEXT_SKIP_DRAW, gStringVar4);
+        DrawPokedexStatValue(stats[STAT_SPEED], 115, 1 + ySpacing * i, GET_STAT_COLOUR(STAT_SPEED), Rogue_IsSpeciesStatBuffed(sPokedexMenu->viewBaseSpecies, STAT_SPEED));
     }
 
     PutWindowTilemap(WIN_MON_PAGE_CONTENT);
