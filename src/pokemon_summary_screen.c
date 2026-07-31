@@ -2379,14 +2379,17 @@ static void PssScrollLeft(u8 taskId) // Scroll left
 
         if(sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE && !sMonSummaryScreen->doneMoveLearnHack)
         {
-            // Make sure the page graphics are setup correctly
+            // Select-move summaries start on the moves page with the skills page
+            // staged on BG1. Keep BG1 bound to that destination so later tilemap
+            // copies cannot replace the visible skills page with a different page.
             sMonSummaryScreen->doneMoveLearnHack = TRUE;
             
             SetBgAttribute(2, BG_ATTR_PRIORITY, 1);
             SetBgAttribute(1, BG_ATTR_PRIORITY, 2);
             ScheduleBgCopyTilemapToVram(2);
             
-            SetBgTilemapBuffer(1, sMonSummaryScreen->bgTilemapBuffers[sMonSummaryScreen->currPageIndex - 1][0]);
+            SetBgTilemapBuffer(1, sMonSummaryScreen->bgTilemapBuffers[sMonSummaryScreen->currPageIndex][0]);
+            ScheduleBgCopyTilemapToVram(1);
             ShowBg(1);
             ShowBg(2);
 

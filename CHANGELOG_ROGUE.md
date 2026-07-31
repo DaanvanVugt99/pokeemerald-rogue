@@ -216,6 +216,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented intermittent tilemap corruption when paging left from move
+  relearning or replacement into the Pokémon stats summary.
 - Applied changed-type Unique Pokémon palette tinting to party, Day Care, and
   registered ride Pokémon while mounted.
 - Moved automatic Poké Ball preselection out of the action-selection frame so
