@@ -456,6 +456,7 @@ static void EnsureCachedParterMonGfxValid()
         if(Rogue_IsRideActive())
         {
             sFollowMonData.cachedPartnerMonGfx = Rogue_GetRideMonSpeciesGfx(0);
+            sFollowMonData.cachedUniqueMonId = Rogue_GetRideMonCustomMonId(0);
         }
         else
         {

@@ -201,6 +201,7 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
     // Dynamic Unique Mons
     SerializeArray(stream, saveBlock->dynamicUniquePokemon, sizeof(saveBlock->dynamicUniquePokemon[0]), ARRAY_COUNT(saveBlock->dynamicUniquePokemon));
     SerializeArray(stream, saveBlock->safariMonCustomIds, sizeof(saveBlock->safariMonCustomIds[0]), ARRAY_COUNT(saveBlock->safariMonCustomIds));
+    SerializeData(stream, &saveBlock->registeredRideMonCustomId, sizeof(saveBlock->registeredRideMonCustomId));
 
     // Mon Mastery
     SerializeArray(stream, saveBlock->monMasteryFlags, sizeof(saveBlock->monMasteryFlags[0]), ARRAY_COUNT(saveBlock->monMasteryFlags));

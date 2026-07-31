@@ -1346,7 +1346,10 @@ void Rogue_SetupFollowParterMonObjectEvent()
 void Rogue_RegisterRideMon()
 {
     u16 gfxId = FollowMon_GetMonGraphics(&gPlayerParty[0]);
+    u32 customMonId = RogueGift_GetCustomMonId(&gPlayerParty[0]);
+
     VarSet(VAR_ROGUE_REGISTERED_RIDE_MON, gfxId);
+    gRogueSaveBlock->registeredRideMonCustomId = customMonId;
 }
 
 void Rogue_NormalizeRidingWhistles()

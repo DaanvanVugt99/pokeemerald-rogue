@@ -216,6 +216,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Applied changed-type Unique Pokémon palette tinting to party, Day Care, and
+  registered ride Pokémon while mounted.
 - Moved automatic Poké Ball preselection out of the action-selection frame so
   catchable battle menus no longer scan catch scores while the shortcut preview
   slides in.

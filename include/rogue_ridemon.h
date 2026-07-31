@@ -20,6 +20,7 @@ void Rogue_OnRideMonWarp();
 
 u8 Rogue_GetRideMonSprite(struct ObjectEvent* objectEvent);
 u16 Rogue_GetRideMonSpeciesGfx(u8 rideObject);
+u32 Rogue_GetRideMonCustomMonId(u8 rideObject);
 
 bool8 Rogue_IsValidRideSpecies(u16 species);
 bool8 Rogue_IsValidRideClimbSpecies(u16 species);
@@ -53,6 +54,7 @@ s16 RideMonGetPlayerSpeed();
 #if TESTING
 u8 RogueDebug_GetRideOptionCount(u8 whistleType);
 u16 RogueDebug_GetRideOptionGfx(u8 whistleType, u8 slot);
+u32 RogueDebug_GetRideOptionCustomMonId(u8 whistleType, u8 slot);
 #endif
 
 #endif

@@ -20,6 +20,7 @@
 #include "rogue_controller.h"
 #include "rogue_debug.h"
 #include "rogue_followmon.h"
+#include "rogue_gifts.h"
 #include "rogue_multiplayer.h"
 #include "rogue_popup.h"
 #include "rogue_ridemon.h"
@@ -91,6 +92,7 @@ struct RideObjectEvent
 struct RideMonData
 {
     struct RideObjectEvent rideObjects[RIDE_OBJECT_COUNT];
+    u32 playerRideCustomMonId;
     u8 rideFrameCounter;
     u8 recentRideIndex;
 };
@@ -117,6 +119,7 @@ void Rogue_RideMonInit()
 
     sRideMonData.rideFrameCounter = 0;
     sRideMonData.recentRideIndex = 0;
+    sRideMonData.playerRideCustomMonId = CUSTOM_MON_NONE;
     
     for(i = 0; i < RIDE_OBJECT_COUNT; ++i)
         ResetRideObject(&sRideMonData.rideObjects[i]);
@@ -212,6 +215,43 @@ static u16 GetRideOptionGfxFor(u8 whistleType, u8 slot)
     return SPECIES_NONE;
 }
 
+static u32 GetRideOptionCustomMonIdFor(u8 whistleType, u8 slot)
+{
+    if(whistleType == RIDE_WHISTLE_GOLD)
+    {
+        u8 daycareSlotCount;
+
+        if(slot < gPlayerPartyCount)
+        {
+            if(IsValidMonToRideNow(&gPlayerParty[slot]))
+                return RogueGift_GetCustomMonId(&gPlayerParty[slot]);
+
+            return CUSTOM_MON_NONE;
+        }
+
+        slot -= gPlayerPartyCount;
+        daycareSlotCount = Rogue_GetCurrentDaycareSlotCount();
+
+        if(slot < daycareSlotCount)
+        {
+            struct BoxPokemon* mon = Rogue_GetDaycareBoxMon(slot);
+            return RogueGift_GetCustomBoxMonId(mon);
+        }
+
+        if(VarGet(VAR_ROGUE_REGISTERED_RIDE_MON) != SPECIES_NONE)
+            return gRogueSaveBlock->registeredRideMonCustomId;
+
+        return CUSTOM_MON_NONE;
+    }
+    else // RIDE_WHISTLE_BASIC
+    {
+        if(IsValidMonToRideNow(&gPlayerParty[slot]))
+            return RogueGift_GetCustomMonId(&gPlayerParty[slot]);
+    }
+
+    return CUSTOM_MON_NONE;
+}
+
 #if TESTING
 u8 RogueDebug_GetRideOptionCount(u8 whistleType)
 {
@@ -222,11 +262,21 @@ u16 RogueDebug_GetRideOptionGfx(u8 whistleType, u8 slot)
 {
     return GetRideOptionGfxFor(whistleType, slot);
 }
+
+u32 RogueDebug_GetRideOptionCustomMonId(u8 whistleType, u8 slot)
+{
+    return GetRideOptionCustomMonIdFor(whistleType, slot);
+}
 #endif
 
 static u16 GetRideOptionGfx(u8 slot)
 {
     return GetRideOptionGfxFor(sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.whistleType, slot);
+}
+
+static u32 GetRideOptionCustomMonId(u8 slot)
+{
+    return GetRideOptionCustomMonIdFor(sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.whistleType, slot);
 }
 
 static bool8 CalculateRideSpecies(s8 dir)
@@ -239,6 +289,7 @@ static bool8 CalculateRideSpecies(s8 dir)
     // Loop through mons from last riden
     sRideMonData.recentRideIndex = min(sRideMonData.recentRideIndex, rideOptionCount - 1);
     sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.desiredRideSpecies = SPECIES_NONE;
+    sRideMonData.playerRideCustomMonId = CUSTOM_MON_NONE;
 
     for(counter = 0; counter < rideOptionCount; ++counter)
     {
@@ -259,6 +310,7 @@ static bool8 CalculateRideSpecies(s8 dir)
         {
             sRideMonData.recentRideIndex = monIdx;
             sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.desiredRideSpecies = rideOptionGfx;
+            sRideMonData.playerRideCustomMonId = GetRideOptionCustomMonId(monIdx);
             return TRUE;
         }
     }
@@ -274,6 +326,7 @@ static bool8 CalculateInitialRideSpecies()
     u8 rideOptionCount = GetRideOptionCount();
 
     sRideMonData.recentRideIndex = min(sRideMonData.recentRideIndex, rideOptionCount - 1);
+    sRideMonData.playerRideCustomMonId = CUSTOM_MON_NONE;
 
     // Try to ride the same species we were previously riding
     for(counter = 0; counter < rideOptionCount; ++counter)
@@ -285,6 +338,7 @@ static bool8 CalculateInitialRideSpecies()
         {
             sRideMonData.recentRideIndex = monIdx;
             sRideMonData.rideObjects[RIDE_OBJECT_PLAYER].state.desiredRideSpecies = rideOptionGfx;
+            sRideMonData.playerRideCustomMonId = GetRideOptionCustomMonId(monIdx);
             return TRUE;
         }
     }
@@ -520,6 +574,16 @@ u16 Rogue_GetRideMonSpeciesGfx(u8 rideObject)
 {
     AGB_ASSERT(rideObject < RIDE_OBJECT_COUNT);
     return sRideMonData.rideObjects[rideObject].state.monGfx;
+}
+
+u32 Rogue_GetRideMonCustomMonId(u8 rideObject)
+{
+    AGB_ASSERT(rideObject < RIDE_OBJECT_COUNT);
+
+    if(rideObject == RIDE_OBJECT_PLAYER)
+        return sRideMonData.playerRideCustomMonId;
+
+    return CUSTOM_MON_NONE;
 }
 
 static u8 CalculateMovementModeForInternal(u16 species);
