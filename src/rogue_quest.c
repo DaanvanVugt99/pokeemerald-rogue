@@ -49,6 +49,7 @@ static bool8 QuestCondition_HasCompletedQuestAND(u16 questId, struct RogueQuestT
 static bool8 QuestCondition_HasCompletedQuestOR(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_PartyContainsType(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_PartyOnlyContainsType(u16 questId, struct RogueQuestTrigger const* trigger);
+static bool8 QuestCondition_PartyIsFull(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_PartyContainsLegendary(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_PartyContainsOnlyLegendaries(u16 questId, struct RogueQuestTrigger const* trigger);
 static bool8 QuestCondition_PartyContainsOnlyShinys(u16 questId, struct RogueQuestTrigger const* trigger);
@@ -1334,6 +1335,12 @@ static bool8 QuestCondition_PartyOnlyContainsType(u16 questId, struct RogueQuest
     }
 
     return TRUE;
+}
+
+static bool8 QuestCondition_PartyIsFull(u16 questId, struct RogueQuestTrigger const* trigger)
+{
+    ASSERT_PARAM_COUNT(0);
+    return gPlayerPartyCount == PARTY_SIZE;
 }
 
 static bool8 QuestCondition_PartyContainsLegendary(u16 questId, struct RogueQuestTrigger const* trigger)

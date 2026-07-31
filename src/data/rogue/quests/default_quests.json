@@ -1094,6 +1094,44 @@
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_ELECTRIC", "count": "5" }
                 ]
+            },
+
+            {
+                "name": "Full House",
+                "description": "Enter an Adventure with a full party of six Pokémon.",
+                "triggers":
+                [
+                    {
+                        "on": [ "RUN_START" ],
+                        "condition": "PartyIsFull",
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_WATER", "count": "5" }
+                ]
+            },
+
+            {
+                "name": "A Unique Legend",
+                "description": "During an Adventure, catch a Unique Legendary Pokémon.",
+                "triggers":
+                [
+                    {
+                        "on": [ "MON_UNIQUE_LEGEND_CAUGHT" ],
+                        "condition": "Always",
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_MEDIUM_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_DRAGON", "count": "5" }
+                ]
             }
         ]
     }

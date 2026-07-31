@@ -1580,17 +1580,25 @@ void Rogue_OnAcceptCaughtMon(struct Pokemon *mon)
 {
     if(Rogue_IsRunActive())
     {
+        bool8 isLegendary;
+        bool8 isUnique;
         u16 species = GetMonData(mon, MON_DATA_SPECIES);
 
         RogueTrial_OnCaughtMon();
         VarSet(VAR_ROGUE_TOTAL_RUN_CATCHES, VarGet(VAR_ROGUE_TOTAL_RUN_CATCHES) + 1);
 
+        isLegendary = RoguePokedex_IsSpeciesLegendary(species);
+        isUnique = RogueGift_GetCustomMonId(mon) != CUSTOM_MON_NONE;
+
         // Quest notifies
-        if(RoguePokedex_IsSpeciesLegendary(species))
+        if(isLegendary)
             RogueQuest_OnTrigger(QUEST_TRIGGER_MON_LEGEND_CAUGHT);
 
-        if(RogueGift_GetCustomMonId(mon) != CUSTOM_MON_NONE)
+        if(isUnique)
             RogueQuest_OnTrigger(QUEST_TRIGGER_MON_UNIQUE_CAUGHT);
+
+        if(isLegendary && isUnique)
+            RogueQuest_OnTrigger(QUEST_TRIGGER_MON_UNIQUE_LEGEND_CAUGHT);
 
         if(IsMonShiny(mon))
             RogueQuest_OnTrigger(QUEST_TRIGGER_MON_SHINY_CAUGHT);

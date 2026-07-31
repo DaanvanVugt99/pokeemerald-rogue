@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Main Quests for entering an Adventure with a full party and catching a
+  Unique Legendary Pokémon.
 - Added a deterministic Pokémon-profile refresh pipeline with a small source
   lock, an ignored local PokeAPI/Showdown cache, explicit Divergence learnset
   and competitive-set rules, Z-A Mega form validation, drift reports, and
