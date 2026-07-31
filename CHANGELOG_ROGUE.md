@@ -66,6 +66,9 @@ Format follows Keep a Changelog loosely:
 
 - Made Sky Uppercut super effective against Flying-type Pokémon and limited its
   tutor distribution to the Blaziken line, Hitmonchan, and Medicham.
+- Reworked Sceptile's Unique Ability into Canopy Stalker: with three qualifying
+  Grass, Dragon, or Dark allies, its first slicing move after switch-in now
+  forces the target out instead of gaining priority.
 - Limited automatic Poké Ball selection to the first turn of each battle so
   manually cycled ball choices persist across later turns.
 - Made Gholdengo revert to Gimmighoul Chest Form instead of Roaming Form when

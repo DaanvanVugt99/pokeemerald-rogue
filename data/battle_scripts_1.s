@@ -10257,6 +10257,39 @@ BattleScript_BearHugActivates::
 	seteffectsecondary
 	return
 
+BattleScript_CanopyStalkerActivates::
+	waitstate
+	call BattleScript_AbilityPopUp
+	jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_CanopyStalkerAbilityPrevents
+	jumpifability BS_TARGET, ABILITY_UNMOVABLE, BattleScript_CanopyStalkerAbilityPrevents
+	jumpifability BS_TARGET, ABILITY_STRANGE_GUEST, BattleScript_CanopyStalkerAbilityPrevents
+	jumpifability BS_TARGET, ABILITY_ROOTED_SHRINE, BattleScript_CanopyStalkerTryRootedShrine
+	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_CanopyStalkerRooted
+	jumpiftargetdynamaxed BattleScript_CanopyStalkerDynamaxed
+	setbyte sSWITCH_CASE, B_SWITCH_NORMAL
+	forcerandomswitch BattleScript_CanopyStalkerEnd
+BattleScript_CanopyStalkerTryRootedShrine:
+	jumpifterrainaffected BS_TARGET, STATUS_FIELD_GRASSY_TERRAIN, BattleScript_CanopyStalkerAbilityPrevents
+	jumpifstatus3 BS_TARGET, STATUS3_ROOTED, BattleScript_CanopyStalkerRooted
+	jumpiftargetdynamaxed BattleScript_CanopyStalkerDynamaxed
+	setbyte sSWITCH_CASE, B_SWITCH_NORMAL
+	forcerandomswitch BattleScript_CanopyStalkerEnd
+BattleScript_CanopyStalkerEnd:
+	return
+BattleScript_CanopyStalkerAbilityPrevents:
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_PKMNANCHORSITSELFWITH
+	waitmessage B_WAIT_TIME_LONG
+	return
+BattleScript_CanopyStalkerRooted:
+	printstring STRINGID_PKMNANCHOREDITSELF
+	waitmessage B_WAIT_TIME_LONG
+	return
+BattleScript_CanopyStalkerDynamaxed:
+	printstring STRINGID_MOVEBLOCKEDBYDYNAMAX
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_AbilityPopupReturn::
 	call BattleScript_AbilityPopUp
 	return

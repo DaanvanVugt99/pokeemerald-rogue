@@ -5200,16 +5200,6 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
-    if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
-     && gBattleMoves[move].slicingMove
-     && CountPartyMonsWithAnyTypes(battler,
-                                   gBitTable[TYPE_GRASS] | gBitTable[TYPE_DRAGON] | gBitTable[TYPE_DARK],
-                                   TRUE) >= 3
-     && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
-    {
-        priority++;
-    }
-
     if (HasBattlerAbility(battler, ABILITY_VENDETTA)
      && gBattleMoves[move].slicingMove
      && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)

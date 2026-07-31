@@ -17731,20 +17731,6 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
-         && gBattleMoves[move].slicingMove
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsFinalMultiHitStrike()
-         && CountPartyMonsWithAnyTypes(battler,
-                                       gBitTable[TYPE_GRASS] | gBitTable[TYPE_DRAGON] | gBitTable[TYPE_DARK],
-                                       TRUE) >= 3
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
-        {
-            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_VENDETTA)
          && gBattleMoves[move].slicingMove
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -18913,6 +18899,27 @@ if (triggeringAbility != ABILITY_NONE)
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_BearHugActivates;
+            effect++;
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
+         && gBattleMoves[move].slicingMove
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && gBattleMons[gBattlerTarget].hp != 0
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && CanBattlerSwitch(gBattlerTarget)
+         && CountPartyMonsWithAnyTypes(battler,
+                                       gBitTable[TYPE_GRASS] | gBitTable[TYPE_DRAGON] | gBitTable[TYPE_DARK],
+                                       TRUE) >= 3
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_SUNSTALKER);
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_CanopyStalkerActivates;
             effect++;
         }
 

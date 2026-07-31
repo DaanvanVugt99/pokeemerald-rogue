@@ -84,6 +84,7 @@ extern const u8 BattleScript_EffectPsychicNoise[];
 extern const u8 BattleScript_PsychicNoiseAromaVeil[];
 extern const u8 BattleScript_BubbleNetActivates[];
 extern const u8 BattleScript_BearHugActivates[];
+extern const u8 BattleScript_CanopyStalkerActivates[];
 extern const u8 BattleScript_TargetFormChangeUnspeakable[];
 extern const u8 BattleScript_ColdSnapActivates[];
 extern const u8 BattleScript_RottenBerryToxicRet[];
