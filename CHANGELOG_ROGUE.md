@@ -65,6 +65,8 @@ Format follows Keep a Changelog loosely:
 
 - Made Sky Uppercut super effective against Flying-type Pokémon and limited its
   tutor distribution to the Blaziken line, Hitmonchan, and Medicham.
+- Limited automatic Poké Ball selection to the first turn of each battle so
+  manually cycled ball choices persist across later turns.
 - Removed Ice Hammer and Mountain Gale from the Snover line now that Grassy
   Terrain, Grassy Glide, White Canopy, and Mega Evolution already give
   Abomasnow a strong Divergence identity.

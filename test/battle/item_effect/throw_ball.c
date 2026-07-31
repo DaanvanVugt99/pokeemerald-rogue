@@ -45,6 +45,25 @@ WILD_BATTLE_TEST("Automatic ball selection prioritizes the highest active catch 
     }
 }
 
+WILD_BATTLE_TEST("Automatic ball selection only updates the displayed ball on the first turn")
+{
+    GIVEN {
+        ClearBallPocket();
+        AddBagItem(ITEM_POKE_BALL, 1);
+        AddBagItem(ITEM_NET_BALL, 1);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_SQUIRTLE);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(gBallToDisplay, ITEM_NET_BALL);
+
+        gBallToDisplay = ITEM_POKE_BALL;
+        TrySelectBestBallToDisplayForTurnStart();
+        EXPECT_EQ(gBallToDisplay, ITEM_POKE_BALL);
+    }
+}
+
 WILD_BATTLE_TEST("Automatic ball selection does not select the Master Ball when another ball is available")
 {
     GIVEN {

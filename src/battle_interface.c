@@ -4261,6 +4261,12 @@ void SelectBestBallToDisplay(void)
         gBallToDisplay = ITEM_NONE;
 }
 
+void TrySelectBestBallToDisplayForTurnStart(void)
+{
+    if (gBattleResults.battleTurnCounter == 0)
+        SelectBestBallToDisplay();
+}
+
 bool32 CanThrowLastUsedBall(void)
 {
     if (B_LAST_USED_BALL == FALSE)

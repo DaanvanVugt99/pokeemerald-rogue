@@ -4251,7 +4251,7 @@ static void HandleTurnActionSelectionState(void)
             gBattleCommunication[battler] = STATE_BEFORE_ACTION_CHOSEN;
 
             if(position == B_POSITION_PLAYER_LEFT)
-                SelectBestBallToDisplay();
+                TrySelectBestBallToDisplayForTurnStart();
 
             // Do AI score computations here so we can use them in AI_TrySwitchOrUseItem
             if ((gBattleTypeFlags & BATTLE_TYPE_HAS_AI || IsWildMonSmart())
