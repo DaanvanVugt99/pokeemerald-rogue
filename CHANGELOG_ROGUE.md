@@ -67,6 +67,8 @@ Format follows Keep a Changelog loosely:
   tutor distribution to the Blaziken line, Hitmonchan, and Medicham.
 - Limited automatic Poké Ball selection to the first turn of each battle so
   manually cycled ball choices persist across later turns.
+- Made Gholdengo revert to Gimmighoul Chest Form instead of Roaming Form when
+  systems such as the Safari Matrix display or spawn its base species.
 - Removed Ice Hammer and Mountain Gale from the Snover line now that Grassy
   Terrain, Grassy Glide, White Canopy, and Mega Evolution already give
   Abomasnow a strong Divergence identity.

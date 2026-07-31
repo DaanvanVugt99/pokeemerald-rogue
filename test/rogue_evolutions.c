@@ -32,3 +32,12 @@ TEST("Both Gimmighoul forms evolve with a Gimmighoul Coin")
     ASSUME(FALSE);
 #endif
 }
+
+TEST("Gholdengo reverts to Gimmighoul Chest Form as its egg species")
+{
+#ifdef ROGUE_EXPANSION
+    EXPECT_EQ(Rogue_GetEggSpecies(SPECIES_GHOLDENGO), SPECIES_GIMMIGHOUL_CHEST);
+#else
+    ASSUME(FALSE);
+#endif
+}

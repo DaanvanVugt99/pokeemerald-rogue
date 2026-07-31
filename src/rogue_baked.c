@@ -2015,6 +2015,11 @@ u32 Rogue_ModifyExperienceTables(u8 growthRate, u8 level)
 // Taken straight from daycare
 u16 Rogue_GetEggSpecies(u16 species)
 {
+#ifdef ROGUE_EXPANSION
+    if (species == SPECIES_GHOLDENGO)
+        return SPECIES_GIMMIGHOUL_CHEST;
+#endif
+
 #ifdef ROGUE_BAKE_VALID
     return gRogueBake_SpeciesData[species].eggSpecies;
 
