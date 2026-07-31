@@ -216,6 +216,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Moved automatic Poké Ball preselection out of the action-selection frame so
+  catchable battle menus no longer scan catch scores while the shortcut preview
+  slides in.
 - Restored the expanded ability-description option while choosing a move to
   forget.
 - Made Bag of Tricks activate after self-targeting Dark-type status moves.
