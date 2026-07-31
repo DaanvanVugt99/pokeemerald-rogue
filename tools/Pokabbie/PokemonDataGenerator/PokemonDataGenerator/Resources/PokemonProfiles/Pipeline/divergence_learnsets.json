@@ -4702,6 +4702,21 @@
   ],
   "tutor": [
     {
+      "id": "tutor-blaziken-sky_uppercut",
+      "move": "MOVE_SKY_UPPERCUT",
+      "species": "SPECIES_BLAZIKEN"
+    },
+    {
+      "id": "tutor-hitmonchan-sky_uppercut",
+      "move": "MOVE_SKY_UPPERCUT",
+      "species": "SPECIES_HITMONCHAN"
+    },
+    {
+      "id": "tutor-medicham-sky_uppercut",
+      "move": "MOVE_SKY_UPPERCUT",
+      "species": "SPECIES_MEDICHAM"
+    },
+    {
       "id": "retained-tutor-abomasnow-cold_snap",
       "move": "MOVE_COLD_SNAP",
       "species": "SPECIES_ABOMASNOW"

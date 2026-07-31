@@ -26602,6 +26602,8 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
         mod = UQ_4_12(1.0);
     if (gBattleMoves[move].effect == EFFECT_FREEZE_DRY && defType == TYPE_WATER)
         mod = UQ_4_12(2.0);
+    if (gBattleMoves[move].effect == EFFECT_SKY_UPPERCUT && defType == TYPE_FLYING)
+        mod = UQ_4_12(2.0);
     if (move == MOVE_SHIMMER && defType == TYPE_FAIRY)
         mod = UQ_4_12(2.0);
     if (move == MOVE_DRAGON_BREATH && defType == TYPE_DRAGON)

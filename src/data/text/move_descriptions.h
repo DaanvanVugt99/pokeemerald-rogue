@@ -1349,8 +1349,8 @@ static const u8 sExtrasensoryDescription[] = _(
     "power. May cause flinching.");
 
 static const u8 sSkyUppercutDescription[] = _(
-    "An uppercut thrown as if\n"
-    "leaping into the sky.");
+    "Super effective on Flying-\n"
+    "types. Hits airborne foes.");
 
 static const u8 sSandTombDescription[] = _(
     "Traps and hurts the foe in\n"

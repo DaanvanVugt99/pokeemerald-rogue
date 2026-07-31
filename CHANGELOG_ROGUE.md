@@ -63,6 +63,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made Sky Uppercut super effective against Flying-type Pokémon and limited its
+  tutor distribution to the Blaziken line, Hitmonchan, and Medicham.
 - Removed Ice Hammer and Mountain Gale from the Snover line now that Grassy
   Terrain, Grassy Glide, White Canopy, and Mega Evolution already give
   Abomasnow a strong Divergence identity.

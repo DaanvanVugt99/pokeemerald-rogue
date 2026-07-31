@@ -110,6 +110,17 @@ TEST("Competitive profile abilities belong to their species form family")
     EXPECT_EQ(mismatchCount, 0);
 }
 
+TEST("Sky Uppercut has narrow punching specialist distribution")
+{
+    EXPECT(!ProfileCanLearnMove(&gRoguePokemonProfiles[SPECIES_TORCHIC], MOVE_SKY_UPPERCUT));
+    EXPECT(ProfileCanLearnMove(&gRoguePokemonProfiles[SPECIES_COMBUSKEN], MOVE_SKY_UPPERCUT));
+    EXPECT(ProfileCanLearnMove(&gRoguePokemonProfiles[SPECIES_BLAZIKEN], MOVE_SKY_UPPERCUT));
+    EXPECT(ProfileCanLearnMove(&gRoguePokemonProfiles[SPECIES_BLAZIKEN_MEGA], MOVE_SKY_UPPERCUT));
+    EXPECT(ProfileCanLearnMove(&gRoguePokemonProfiles[SPECIES_HITMONCHAN], MOVE_SKY_UPPERCUT));
+    EXPECT(ProfileCanLearnMove(&gRoguePokemonProfiles[SPECIES_MEDICHAM], MOVE_SKY_UPPERCUT));
+    EXPECT(ProfileCanLearnMove(&gRoguePokemonProfiles[SPECIES_MEDICHAM_MEGA], MOVE_SKY_UPPERCUT));
+}
+
 TEST("Refreshed Divergence competitive profiles use legal moves")
 {
     static const u16 sRefreshedSpecies[] =
