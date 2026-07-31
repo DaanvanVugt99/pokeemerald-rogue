@@ -224,7 +224,7 @@ MAKEFLAGS += --no-print-directory
 # Secondary expansion is required for dependency variables in object rules.
 .SECONDEXPANSION:
 
-.PHONY: all rom clean compare tidy tools check-tools mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall modern tidymodern check species-report check-species-report FORCE
+.PHONY: all rom clean compare tidy tools check-tools mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall modern tidymodern check species-report check-species-report rogue-bake-data check-rogue-bake-data FORCE
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
@@ -401,9 +401,17 @@ tidycheck:
 
 species-report:
 	$(PYTHON) scripts/generate_species_change_report.py
+	scripts/generate_rogue_bake_data.sh
 
 check-species-report:
 	$(PYTHON) scripts/generate_species_change_report.py --check
+	scripts/generate_rogue_bake_data.sh --check
+
+rogue-bake-data:
+	scripts/generate_rogue_bake_data.sh
+
+check-rogue-bake-data:
+	scripts/generate_rogue_bake_data.sh --check
 
 $(C_BUILDDIR)/berry_crush.o: override CFLAGS += -Wno-address-of-packed-member
 

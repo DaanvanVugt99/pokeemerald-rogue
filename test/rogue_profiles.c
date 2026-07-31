@@ -4,6 +4,7 @@
 #include "constants/rogue.h"
 #include "pokemon.h"
 #include "rogue.h"
+#include "rogue_baked.h"
 #include "test/test.h"
 
 static bool32 SpeciesHasCompetitiveAbility(u16 species, u16 ability)
@@ -375,4 +376,14 @@ TEST("Focused stat buffs support underperforming Pokemon's unique roles")
     EXPECT_EQ(gSpeciesInfo[SPECIES_PARASECT].baseHP, 80);
     EXPECT_EQ(gSpeciesInfo[SPECIES_DEWGONG].baseDefense, 100);
     EXPECT_EQ(gSpeciesInfo[SPECIES_HYPNO].baseSpAttack, 95);
+}
+
+TEST("Falinks stat buff markers are baked for Pokedex display")
+{
+    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_HP));
+    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_ATK));
+    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_DEF));
+    EXPECT(!Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_SPATK));
+    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_SPDEF));
+    EXPECT(!Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_SPEED));
 }
