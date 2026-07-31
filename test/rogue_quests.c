@@ -7,6 +7,7 @@
 #include "event_data.h"
 #include "pokemon.h"
 #include "rogue.h"
+#include "rogue_adventurepaths.h"
 #include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_quest.h"
@@ -117,6 +118,12 @@ TEST("A Unique Legend requires the caught Pokemon to be both Unique and Legendar
 
 TEST("New Main Quest rewards follow their progression tiers and Pokeblock distribution")
 {
+    EXPECT(RogueQuest_GetConstFlag(QUEST_ID_FRONTIER_BRAIN, QUEST_CONST_IS_MAIN_QUEST));
+    EXPECT_EQ(RogueQuest_GetRewardCount(QUEST_ID_FRONTIER_BRAIN), 3);
+    EXPECT(QuestHasMoneyReward(QUEST_ID_FRONTIER_BRAIN, QUEST_REWARD_MEDIUM_MONEY));
+    EXPECT(QuestHasItemReward(QUEST_ID_FRONTIER_BRAIN, ITEM_BUILDING_SUPPLIES, QUEST_REWARD_SMALL_BUILD_AMOUNT));
+    EXPECT(QuestHasItemReward(QUEST_ID_FRONTIER_BRAIN, ITEM_POKEBLOCK_FIGHTING, 5));
+
     EXPECT(RogueQuest_GetConstFlag(QUEST_ID_FULL_HOUSE, QUEST_CONST_IS_MAIN_QUEST));
     EXPECT_EQ(RogueQuest_GetRewardCount(QUEST_ID_FULL_HOUSE), 3);
     EXPECT(QuestHasMoneyReward(QUEST_ID_FULL_HOUSE, QUEST_REWARD_MEDIUM_MONEY));
@@ -128,4 +135,23 @@ TEST("New Main Quest rewards follow their progression tiers and Pokeblock distri
     EXPECT(QuestHasMoneyReward(QUEST_ID_A_UNIQUE_LEGEND, QUEST_REWARD_HUGE_MONEY));
     EXPECT(QuestHasItemReward(QUEST_ID_A_UNIQUE_LEGEND, ITEM_BUILDING_SUPPLIES, QUEST_REWARD_MEDIUM_BUILD_AMOUNT));
     EXPECT(QuestHasItemReward(QUEST_ID_A_UNIQUE_LEGEND, ITEM_POKEBLOCK_DRAGON, 5));
+}
+
+TEST("Frontier Brain completes only from a defeated Frontier Brain room")
+{
+    ResetQuestTestState();
+
+    EXPECT(RogueQuest_IsQuestUnlocked(QUEST_ID_FRONTIER_BRAIN));
+    EXPECT(RogueQuest_IsQuestActive(QUEST_ID_FRONTIER_BRAIN));
+
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_ROUTE;
+    RogueQuest_OnTrigger(QUEST_TRIGGER_MAP_SPECIFIC_EVENT);
+    EXPECT(!RogueQuest_GetStateFlag(QUEST_ID_FRONTIER_BRAIN, QUEST_STATE_HAS_COMPLETE));
+
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_MINIBOSS;
+    RogueQuest_OnTrigger(QUEST_TRIGGER_MAP_SPECIFIC_EVENT);
+    EXPECT(RogueQuest_GetStateFlag(QUEST_ID_FRONTIER_BRAIN, QUEST_STATE_HAS_COMPLETE));
+    EXPECT(RogueQuest_HasPendingRewards(QUEST_ID_FRONTIER_BRAIN));
+
+    ClearQuestTestState();
 }

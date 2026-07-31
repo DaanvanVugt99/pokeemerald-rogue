@@ -163,6 +163,7 @@ script Rogue_BattleDefeated_GiveSelectedMon
 script Rogue_BattleDefeated_MiniBoss
 {
     call(Rogue_ClearWeather)
+    quest_trigger(QUEST_TRIGGER_MAP_SPECIFIC_EVENT)
 
     copyvar(VAR_ITEM_ID_VAL, VAR_ROGUE_ITEM0)
     call(Rogue_GiveItem_Internal)

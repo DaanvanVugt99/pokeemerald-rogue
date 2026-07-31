@@ -599,6 +599,25 @@
                     { "decor": "DECOR_ID_PC_WANDERING_PKMN" }
                 ]
             },
+            {
+                "name": "Frontier Brain",
+                "description": "Defeat any Frontier Brain during an Adventure.",
+                "triggers":
+                [
+                    {
+                        "on": [ "MAP_SPECIFIC_EVENT" ],
+                        "condition": "CurrentlyInRoomType",
+                        "params": [ "ADVPATH_ROOM_MINIBOSS" ],
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_MEDIUM_MONEY" },
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_FIGHTING", "count": "5" }
+                ]
+            },
 
             {
                 "name": "Mr. Randoman",
