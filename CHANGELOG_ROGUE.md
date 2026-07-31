@@ -203,6 +203,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Restored the expanded ability-description option while choosing a move to
+  forget.
 - Made Bag of Tricks activate after self-targeting Dark-type status moves.
 - Preserved favorite-game Pokédex selections across the nested gimmick menu,
   offered the gimmick choice for every National dex, and allowed Birch to

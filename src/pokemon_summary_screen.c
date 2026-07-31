@@ -2201,7 +2201,6 @@ static bool8 IsValidToViewInMulti(struct Pokemon *mon)
 static bool8 CanExpandInfoAbility(void)
 {
     return sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO
-        && sMonSummaryScreen->mode != SUMMARY_MODE_SELECT_MOVE
         && !sMonSummaryScreen->summary.isEgg;
 }
 
@@ -2827,10 +2826,14 @@ static void Task_HandleReplaceMoveInput(u8 taskId)
             }
             else if (JOY_NEW(DPAD_LEFT) || GetLRKeysPressed() == MENU_L_PRESSED)
             {
+                if (sMonSummaryScreen->infoAbilityExpanded)
+                    SetInfoAbilityExpanded(FALSE);
                 ChangePage(taskId, -1);
             }
             else if (JOY_NEW(DPAD_RIGHT) || GetLRKeysPressed() == MENU_R_PRESSED)
             {
+                if (sMonSummaryScreen->infoAbilityExpanded)
+                    SetInfoAbilityExpanded(FALSE);
                 ChangePage(taskId, 1);
             }
             else if (JOY_NEW(A_BUTTON))
@@ -2854,6 +2857,11 @@ static void Task_HandleReplaceMoveInput(u8 taskId)
                 else if(sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS)
                 {
                     ChangeTab(taskId, 1);
+                }
+                else if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO && CanExpandInfoAbility())
+                {
+                    PlaySE(SE_SELECT);
+                    ToggleInfoAbilityExpanded();
                 }
             }
             else if (JOY_NEW(B_BUTTON))
@@ -3425,15 +3433,12 @@ static void PutPageWindowTilemaps(u8 page)
     {
     case PSS_PAGE_INFO:
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TITLE);
-        if (sMonSummaryScreen->mode != SUMMARY_MODE_SELECT_MOVE)
-        {
-            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
-            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
-            if (CanExpandInfoAbility())
-                PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
-            else
-                PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
-        }
+        ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+        ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
+        if (CanExpandInfoAbility())
+            PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
+        else if (sMonSummaryScreen->mode != SUMMARY_MODE_SELECT_MOVE)
+            PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
         if (InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE)
             PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL);
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TYPE);
@@ -3478,11 +3483,8 @@ static void ClearPageWindowTilemaps(u8 page)
     switch (page)
     {
     case PSS_PAGE_INFO:
-        if (sMonSummaryScreen->mode != SUMMARY_MODE_SELECT_MOVE)
-        {
-            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
-            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
-        }
+        ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+        ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
         if (InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE)
             ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL);
         ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TYPE);
