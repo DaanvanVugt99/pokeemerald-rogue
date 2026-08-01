@@ -8,6 +8,23 @@ const VAR_FRAME_STATE = VAR_TEMP_0
 const VAR_TRIAL_MENU_CHOICE = VAR_TEMP_1
 const VAR_INTRO_SCRIPT_STATE = VAR_TEMP_2
 const VAR_ALLOW_STARTER_CHOICE = VAR_TEMP_3
+const VAR_RUN_REVIEW_STAGE = VAR_TEMP_4
+
+const RUN_REVIEW_ACTION_BACK = 0
+const RUN_REVIEW_ACTION_START = 1
+const RUN_REVIEW_ACTION_EDIT = 2
+
+const RUN_START_EDIT_SETTINGS = 0
+const RUN_START_EDIT_POKEDEX = 1
+const RUN_START_EDIT_TRIAL = 2
+const RUN_START_EDIT_DIFFICULTY = 3
+const RUN_START_EDIT_TRIAL_POKEDEX = 4
+
+const TRIAL_SETUP_STAGE_TRIAL = 0
+const TRIAL_SETUP_STAGE_DIFFICULTY = 1
+const TRIAL_SETUP_STAGE_POKEDEX = 2
+const TRIAL_SETUP_STAGE_REVIEW = 3
+const TRIAL_SETUP_STAGE_EXIT = 4
 
 // Reused vars
 const VAR_SHAKE_VERTICAL_PAN = VAR_0x8004
@@ -288,7 +305,6 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
         if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_GO_ON_ADVENTURE)
         {
             msgbox(format("Now you seem all ready to go!"))
-            msgbox(format("Would you like to set off on an Adventure?"), MSGBOX_YESNO)
         }
         else
         {
@@ -304,44 +320,63 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
                     call(Rogue_Area_DayCare_GiveDayCarePhone)
                 }
             }
-
-            special(Rogue_HasPendingQuestRewards)
-            if(var(VAR_RESULT) == YES)
-            {
-                msgbox(format("Hi {PLAYER}!\pOh.\pIt looks like you still have some Quest Rewards to collect.\pDo you still want to continue and set off on an Adventure?"), MSGBOX_YESNO)
-            }
-            else
-            {
-                msgbox(format("Hi {PLAYER}!\pWould you like to set off on an Adventure?"), MSGBOX_YESNO)
-            }
         }
 
-        if(var(VAR_RESULT) == YES)
-        {
-            call(Rogue_ResetAdventureVars)
-            call(Rogue_StartAdventureInternal)
-        }
-        else
-        {
-            special(Rogue_HasPendingQuestRewards)
-            if(var(VAR_RESULT) == YES)
-            {
-                msgbox(format("No worries!"), MSGBOX_DEFAULT)
-                turnobject(OBJ_EVENT_ADVENTURE_NURSE, DIR_WEST)
-
-                msgbox(format("You can collect any Quest rewards from the Quest Board over there."), MSGBOX_DEFAULT)
-                turnobject(OBJ_EVENT_ADVENTURE_NURSE, DIR_SOUTH)
-
-                msgbox(format("Come and talk to me, once you're ready."), MSGBOX_DEFAULT)
-            }
-            else
-            {
-                msgbox(format("No worries!\pCome and talk to me, once you're ready."), MSGBOX_DEFAULT)
-            }
-        }
+        call(Rogue_Area_AdventureEntrance_StandardRunReview)
     }
 
     releaseall
+}
+
+script Rogue_Area_AdventureEntrance_StandardRunReview
+{
+    call(Rogue_ResetAdventureVars)
+    callnative(RogueRunStart_PrepareStandard)
+    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+
+    while(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
+    {
+        closemessage
+        callnative(ScriptMenu_ShowRunReview)
+        waitstate
+
+        if(var(VAR_RESULT) == RUN_REVIEW_ACTION_BACK)
+        {
+            callnative(RogueRunStart_Clear)
+            return
+        }
+        elif(var(VAR_RESULT) == RUN_REVIEW_ACTION_EDIT)
+        {
+            begindynamicmultichoice(32)
+            callnative(RogueRunStart_AppendStandardEditOptions)
+            enddynamicmultichoice(1, 0, 3, TRUE)
+            copyvar(VAR_RUN_REVIEW_STAGE, VAR_RESULT)
+            callnative(RogueRunStart_Clear)
+
+            if(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_SETTINGS)
+            {
+                special(Special_ViewDifficultyConfigMenu)
+                waitstate
+            }
+            elif(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_POKEDEX)
+            {
+                special(Special_ViewRoguePokedex)
+                waitstate
+            }
+
+            callnative(RogueRunStart_PrepareStandard)
+        }
+        else
+        {
+            callnative(RogueRunStart_Commit)
+            if(var(VAR_RESULT) == YES)
+            {
+                call(Rogue_StartAdventureInternal)
+                callnative(RogueRunStart_Clear)
+                return
+            }
+        }
+    }
 }
 
 script Rogue_Area_AdventureEntrance_TrialAttendant
@@ -376,130 +411,170 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
     special(RogueTrial_LoadLastSelection)
     if(var(VAR_RESULT) == YES)
     {
-        special(RogueTrial_BufferTrialPreview)
-        closemessage
-        callnative(ScriptMenu_ShowTrialOverview)
-        waitstate
-        if(var(VAR_RESULT) == YES)
-        {
-            msgbox(format("Repeat this Trial?"), MSGBOX_YESNO)
-            if(var(VAR_RESULT) == YES)
-            {
-                call(Rogue_Area_AdventureEntrance_StartSelectedTrial)
-                releaseall
-                return
-            }
-        }
-    }
-
-    msgbox(format("Would you like to take on a curated Trial?"), MSGBOX_YESNO)
-    if(var(VAR_RESULT) != YES)
-    {
-        releaseall
-        return
-    }
-
-    setvar(VAR_TRIAL_MENU_CHOICE, MULTI_B_PRESSED)
-    while(var(VAR_TRIAL_MENU_CHOICE) == MULTI_B_PRESSED)
-    {
-        begindynamicmultichoice(48)
-        special(RogueTrial_AppendTrialOptions)
-        enddynamicmultichoice(1, 0, 4, TRUE)
-        if(var(VAR_RESULT) == MULTI_B_PRESSED)
-        {
-            releaseall
-            return
-        }
-        copyvar(VAR_0x8004, VAR_RESULT)
-        copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
-
-        special(RogueTrial_IsSelectedTrialGroup)
-        if(var(VAR_RESULT) == YES)
-        {
-            begindynamicmultichoice(24)
-            special(RogueTrial_AppendSelectedTrialGroupOptions)
-            enddynamicmultichoice(1, 0, 5, TRUE)
-            if(var(VAR_RESULT) == MULTI_B_PRESSED)
-            {
-                setvar(VAR_TRIAL_MENU_CHOICE, MULTI_B_PRESSED)
-            }
-            else
-            {
-                copyvar(VAR_0x8004, VAR_RESULT)
-                copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
-            }
-        }
-    }
-
-    special(RogueTrial_SelectForcedDifficulty)
-    if(var(VAR_RESULT) != YES)
-    {
-        begindynamicmultichoice(8)
-        special(RogueTrial_AppendDifficultyOptions)
-        enddynamicmultichoice(1, 0, 5, TRUE)
-        if(var(VAR_RESULT) == MULTI_B_PRESSED)
-        {
-            releaseall
-            return
-        }
-        copyvar(VAR_0x8005, VAR_RESULT)
-    }
-
-    special(RogueTrial_GetPokedexOptionCount)
-    if(var(VAR_RESULT) == 0)
-    {
-        msgbox(format("No valid Pokédex options are configured for that trial."), MSGBOX_DEFAULT)
-        releaseall
-        return
-    }
-    elif(var(VAR_RESULT) == 1)
-    {
-        special(RogueTrial_SelectDefaultPokedexOption)
-        if(var(VAR_RESULT) != YES)
-        {
-            releaseall
-            return
-        }
+        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
     }
     else
     {
-        msgbox(format("Choose a Pokédex for this trial."), MSGBOX_DEFAULT)
-        call(Rogue_Common_SelectTrialPokedex)
-        if(var(VAR_RESULT) == NO)
+        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
+    }
+
+    while(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
+    {
+        if(var(VAR_RUN_REVIEW_STAGE) == TRIAL_SETUP_STAGE_TRIAL)
         {
-            releaseall
-            return
+            setvar(VAR_TRIAL_MENU_CHOICE, MULTI_B_PRESSED)
+            while(var(VAR_TRIAL_MENU_CHOICE) == MULTI_B_PRESSED)
+            {
+                begindynamicmultichoice(48)
+                special(RogueTrial_AppendTrialOptions)
+                enddynamicmultichoice(1, 0, 4, TRUE)
+                if(var(VAR_RESULT) == MULTI_B_PRESSED)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
+                    break
+                }
+                copyvar(VAR_0x8004, VAR_RESULT)
+                copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
+
+                special(RogueTrial_IsSelectedTrialGroup)
+                if(var(VAR_RESULT) == YES)
+                {
+                    begindynamicmultichoice(24)
+                    special(RogueTrial_AppendSelectedTrialGroupOptions)
+                    enddynamicmultichoice(1, 0, 5, TRUE)
+                    if(var(VAR_RESULT) == MULTI_B_PRESSED)
+                    {
+                        setvar(VAR_TRIAL_MENU_CHOICE, MULTI_B_PRESSED)
+                    }
+                    else
+                    {
+                        copyvar(VAR_0x8004, VAR_RESULT)
+                        copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
+                    }
+                }
+            }
+
+            if(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
+            {
+                special(RogueTrial_SelectForcedDifficulty)
+                if(var(VAR_RESULT) == YES)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_POKEDEX)
+                }
+                else
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_DIFFICULTY)
+                }
+            }
+        }
+        elif(var(VAR_RUN_REVIEW_STAGE) == TRIAL_SETUP_STAGE_DIFFICULTY)
+        {
+            begindynamicmultichoice(8)
+            special(RogueTrial_AppendDifficultyOptions)
+            enddynamicmultichoice(1, 0, 5, TRUE)
+            if(var(VAR_RESULT) == MULTI_B_PRESSED)
+            {
+                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
+            }
+            else
+            {
+                copyvar(VAR_0x8005, VAR_RESULT)
+                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_POKEDEX)
+            }
+        }
+        elif(var(VAR_RUN_REVIEW_STAGE) == TRIAL_SETUP_STAGE_POKEDEX)
+        {
+            special(RogueTrial_GetPokedexOptionCount)
+            if(var(VAR_RESULT) == 0)
+            {
+                msgbox(format("No valid Pokédex options are configured for that Trial."), MSGBOX_DEFAULT)
+                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
+            }
+            elif(var(VAR_RESULT) == 1)
+            {
+                special(RogueTrial_SelectDefaultPokedexOption)
+                if(var(VAR_RESULT) == YES)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+                }
+                else
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
+                }
+            }
+            else
+            {
+                call(Rogue_Common_SelectTrialPokedex)
+                if(var(VAR_RESULT) == YES)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+                }
+                else
+                {
+                    special(RogueTrial_SelectForcedDifficulty)
+                    if(var(VAR_RESULT) == YES)
+                    {
+                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
+                    }
+                    else
+                    {
+                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_DIFFICULTY)
+                    }
+                }
+            }
+        }
+        else
+        {
+            callnative(RogueRunStart_PrepareTrial)
+            closemessage
+            callnative(ScriptMenu_ShowRunReview)
+            waitstate
+
+            if(var(VAR_RESULT) == RUN_REVIEW_ACTION_BACK)
+            {
+                callnative(RogueRunStart_Clear)
+                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
+            }
+            elif(var(VAR_RESULT) == RUN_REVIEW_ACTION_EDIT)
+            {
+                begindynamicmultichoice(32)
+                callnative(RogueRunStart_AppendTrialEditOptions)
+                enddynamicmultichoice(1, 0, 4, TRUE)
+                copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
+                callnative(RogueRunStart_Clear)
+
+                if(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_TRIAL)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
+                }
+                elif(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_DIFFICULTY)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_DIFFICULTY)
+                }
+                elif(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_TRIAL_POKEDEX)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_POKEDEX)
+                }
+                else
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+                }
+            }
+            else
+            {
+                callnative(RogueRunStart_Commit)
+                if(var(VAR_RESULT) == YES)
+                {
+                    call(Rogue_ResetAdventureVars)
+                    call(Rogue_StartAdventureInternal)
+                    callnative(RogueRunStart_Clear)
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
+                }
+            }
         }
     }
 
-    special(RogueTrial_BufferTrialPreview)
-    closemessage
-    callnative(ScriptMenu_ShowTrialOverview)
-    waitstate
-    if(var(VAR_RESULT) == NO)
-    {
-        releaseall
-        return
-    }
-    msgbox(format("Start this Trial?"), MSGBOX_YESNO)
-    if(var(VAR_RESULT) == YES)
-    {
-        call(Rogue_Area_AdventureEntrance_StartSelectedTrial)
-    }
-
     releaseall
-}
-
-script Rogue_Area_AdventureEntrance_StartSelectedTrial
-{
-    special(RogueTrial_SetPendingSelectionFromScript)
-    if(var(VAR_RESULT) == YES)
-    {
-        call(Rogue_ResetAdventureVars)
-        call(Rogue_StartAdventureInternal)
-        special(RogueTrial_ClearPendingSelection)
-    }
-    return
 }
 
 movement Rogue_Adventure_QuestTutorial_Player1
@@ -534,6 +609,12 @@ script Rogue_StartAdventureInternal
     setvar(VAR_TRIAL_MENU_CHOICE, NO)
     setvar(VAR_ALLOW_STARTER_CHOICE, NO)
 
+    callnative(RogueRunStart_RequiresRandomPartner)
+    if(var(VAR_RESULT) == YES)
+    {
+        setvar(VAR_TRIAL_MENU_CHOICE, YES)
+    }
+
     if(!flag(FLAG_HIDE_STARTER_BAG))
     {
         setvar(VAR_ALLOW_STARTER_CHOICE, YES)
@@ -552,14 +633,17 @@ script Rogue_StartAdventureInternal
         buffernumberstring(STR_VAR_1, VAR_0x8004)
         if(var(VAR_ALLOW_STARTER_CHOICE) == YES)
         {
-            msgbox(format("Looks like you have too many Pokémon.\pYou may only take in {STR_VAR_1} Pokémon into this type of Adventure.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
-            if(var(VAR_RESULT) == YES)
+            if(var(VAR_TRIAL_MENU_CHOICE) != YES)
             {
-                setvar(VAR_TRIAL_MENU_CHOICE, YES)
-            }
-            else
-            {
-                return
+                msgbox(format("Looks like you have too many Pokémon.\pYou may only take in {STR_VAR_1} Pokémon into this type of Adventure.\pUse a random Partner Pokémon instead?"), MSGBOX_YESNO)
+                if(var(VAR_RESULT) == YES)
+                {
+                    setvar(VAR_TRIAL_MENU_CHOICE, YES)
+                }
+                else
+                {
+                    return
+                }
             }
         }
         else
@@ -597,7 +681,7 @@ script Rogue_StartAdventureInternal
         }
     }
 
-    call(Common_EventScript_SaveGame)
+    call(Common_EventScript_ForceSaveGame)
     if(var(VAR_RESULT) == YES)
     {
         if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_GO_ON_ADVENTURE)

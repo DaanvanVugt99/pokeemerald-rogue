@@ -30,6 +30,6 @@ void ScriptMenu_ScrollingMultichoiceDynamicEnd(void);
 void ScriptMenu_DisplayTextInWindow(const u8* str, u8 x, u8 y, u8 width, u8 height);
 void ScriptMenu_ShowDynamicUniqueMonPic(void);
 void ScriptMenu_ShowSafariOfferDetails(void);
-void ScriptMenu_ShowTrialOverview(void);
+void ScriptMenu_ShowRunReview(void);
 
 #endif //GUARD_SCRIPT_MENU_H

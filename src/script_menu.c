@@ -29,14 +29,19 @@
 #include "constants/field_specials.h"
 #include "constants/items.h"
 #include "constants/rgb.h"
+#include "constants/rogue.h"
+#include "constants/rogue_hub.h"
 #include "constants/script_menu.h"
 #include "constants/songs.h"
 
 #include "rogue_controller.h"
+#include "rogue_charms.h"
 #include "rogue_gifts.h"
 #include "rogue_hub.h"
 #include "rogue_pokedex.h"
+#include "rogue_run_start.h"
 #include "rogue_script.h"
+#include "rogue_settings.h"
 #include "rogue_trials.h"
 
 #include "data/script_menu.h"
@@ -56,7 +61,7 @@ static void CreateLilycoveSSTidalMultichoice(void);
 static bool8 IsPicboxClosed(void);
 static void CreateStartMenuForPokenavTutorial(void);
 static void InitMultichoiceNoWrap(bool8 ignoreBPress, u8 unusedCount, u8 windowId, u8 multichoiceId);
-static void Task_ShowTrialOverviewInput(u8 taskId);
+static void Task_ShowRunReviewInput(u8 taskId);
 static void Task_SafariOfferDetailsInput(u8 taskId);
 
 bool8 ScriptMenu_Multichoice(u8 left, u8 top, u8 multichoiceId, bool8 ignoreBPress)
@@ -1446,202 +1451,783 @@ void ScriptMenu_HideRogueAssistantNotice()
     DestroyTask(taskId);
 }
 
-static const u8 sText_TrialOverviewDifficulty[] = _("{COLOR BLUE}Difficulty:");
-static const u8 sText_TrialOverviewPokedex[] = _("{COLOR BLUE}Pokédex:");
-static const u8 sText_TrialOverviewRules[] = _("{COLOR BLUE}Rules ");
-static const u8 sText_TrialOverviewPageSeparator[] = _("/");
-static const u8 sText_TrialOverviewPageControls[] = _("  L/R");
+static const u8 sText_RunReviewPageSeparator[] = _("/");
+static const u8 sText_RunReviewPageControls[] = _("  L/R");
+static const u8 sText_RunReviewOverview[] = _("{COLOR BLUE}Overview");
+static const u8 sText_RunReviewCustomRules[] = _("{COLOR BLUE}Custom Rules");
+static const u8 sText_RunReviewTrialRules[] = _("{COLOR BLUE}Trial Rules");
+static const u8 sText_RunReviewStart[] = _("Start");
+static const u8 sText_RunReviewEdit[] = _("Edit");
+static const u8 sText_RunReviewBack[] = _("Back");
+static const u8 sText_RunReviewSelectedStart[] = _("{COLOR BLUE}▶ Start");
+static const u8 sText_RunReviewSelectedEdit[] = _("{COLOR BLUE}▶ Edit");
+static const u8 sText_RunReviewSelectedBack[] = _("{COLOR BLUE}▶ Back");
+static const u8 sText_RunReviewDisabledStart[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}Start");
+static const u8 sText_RunReviewSpace[] = _(" ");
+static const u8 sText_RunReviewValueColor[] = _("{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}");
+static const u8 sText_RunReviewBlueColor[] = _("{COLOR BLUE}{SHADOW LIGHT_BLUE}");
+static const u8 sText_RunReviewSummarySeparator[] = _(" · ");
+static const u8 sText_RunReviewLevelCapLabel[] = _("{COLOR BLUE}Level cap:");
+static const u8 sText_RunReviewEvLabel[] = _("{COLOR BLUE}EV gain:");
+static const u8 sText_RunReviewStartingBagLabel[] = _("{COLOR BLUE}Starting Bag:");
+static const u8 sText_RunReviewTrainerStrengthLabel[] = _("{COLOR BLUE}Trainer strength:");
+static const u8 sText_RunReviewBattleStyleLabel[] = _("{COLOR BLUE}Battle style:");
+static const u8 sText_RunReviewFaintedLabel[] = _("{COLOR BLUE}Fainted Pokémon:");
+static const u8 sText_RunReviewBattleBagLabel[] = _("{COLOR BLUE}Battle Bag:");
+static const u8 sText_RunReviewSpeciesClauseLabel[] = _("{COLOR BLUE}Species Clause:");
+static const u8 sText_RunReviewHeldItemClauseLabel[] = _("{COLOR BLUE}Held Item Clause:");
+static const u8 sText_RunReviewLegendaryClauseLabel[] = _("{COLOR BLUE}Legendary Clause:");
+static const u8 sText_RunReviewAffectionLabel[] = _("{COLOR BLUE}Affection:");
+static const u8 sText_RunReviewTrainerTeamsLabel[] = _("{COLOR BLUE}Trainer teams:");
+static const u8 sText_RunReviewRewardOpen[] = _(" (");
+static const u8 sText_RunReviewRewardClose[] = _(" rewards)");
+static const u8 sText_RunReviewPokedexSuffix[] = _(" Pokédex");
+static const u8 sText_RunReviewCustom[] = _("Custom");
+static const u8 sText_RunReviewPartyPrefix[] = _("Party: ");
+static const u8 sText_RunReviewFixedTeam[] = _("Fixed Trial team");
+static const u8 sText_RunReviewPartnerRequired[] = _("Random Partner required");
+static const u8 sText_RunReviewMaxPrefix[] = _("max ");
+static const u8 sText_RunReviewPokemonSuffix[] = _(" Pokémon");
+static const u8 sText_RunReviewBlockedParty[] = _("{COLOR RED}{SHADOW LIGHT_RED}! Adjust your party before starting");
+static const u8 sText_RunReviewBlockedDayCare[] = _("{COLOR RED}{SHADOW LIGHT_RED}! Adjust the Day Care before starting");
+static const u8 sText_RunReviewWaitingHost[] = _("{COLOR BLUE}{SHADOW LIGHT_BLUE}! Waiting for the host");
+static const u8 sText_RunReviewReplayQuests[] = _("{COLOR BLUE}{SHADOW LIGHT_BLUE}! Quests are disabled during Replay");
+static const u8 sText_RunReviewQuestsDisabled[] = _("{COLOR BLUE}{SHADOW LIGHT_BLUE}! Quest eligibility is limited");
+static const u8 sText_RunReviewPendingRewards[] = _("{COLOR BLUE}{SHADOW LIGHT_BLUE}! Quest rewards are waiting");
+static const u8 sText_RunReviewReasonEmpty[] = _("No Pokémon are available to enter");
+static const u8 sText_RunReviewReasonCapacity[] = _("Your party exceeds the entry limit");
+static const u8 sText_RunReviewReasonPartyIllegal[] = _("Your party contains an ineligible Pokémon");
+static const u8 sText_RunReviewReasonDayCare[] = _("The Day Care contains an ineligible Pokémon");
+static const u8 sText_RunReviewReasonSpeciesClause[] = _("Species Clause conflicts with your party");
+static const u8 sText_RunReviewReasonLegendaryClause[] = _("Legendary Clause conflicts with your party");
+static const u8 sText_RunReviewReasonTrialPartner[] = _("This Trial replaces your current party");
 
-#define TRIAL_OVERVIEW_RULES_PER_PAGE 3
-#define TRIAL_OVERVIEW_MAX_RULE_LINES 16
-#define TRIAL_OVERVIEW_RULE_LINE_LENGTH 128
-#define TRIAL_OVERVIEW_RULE_WIDTH 192
-#define tTrialOverviewWindowId data[0]
-#define tTrialOverviewDelay    data[1]
-#define tTrialOverviewPage     data[2]
-#define tTrialOverviewState    data[3]
+#define RUN_REVIEW_LINES_PER_PAGE 6
+#define RUN_REVIEW_MAX_PAGES 12
+#define RUN_REVIEW_MAX_LINES 48
+#define RUN_REVIEW_LINE_LENGTH 64
+#define RUN_REVIEW_TEXT_LENGTH 128
+#define RUN_REVIEW_LINE_WIDTH 192
+#define tRunReviewWindowId data[0]
+#define tRunReviewDelay    data[1]
+#define tRunReviewPage     data[2]
+#define tRunReviewState    data[3]
+#define tRunReviewAction   data[4]
+#define tRunReviewStatus   data[5]
+#define tRunReviewRevision data[6]
 
 enum
 {
-    TRIAL_OVERVIEW_STATE_WAIT_FOR_BG,
-    TRIAL_OVERVIEW_STATE_WAIT_FOR_GFX,
-    TRIAL_OVERVIEW_STATE_INPUT,
+    RUN_REVIEW_STATE_WAIT_FOR_BG,
+    RUN_REVIEW_STATE_WAIT_FOR_GFX,
+    RUN_REVIEW_STATE_INPUT,
 };
 
-static EWRAM_DATA u8 sTrialOverviewRuleLines[TRIAL_OVERVIEW_MAX_RULE_LINES][TRIAL_OVERVIEW_RULE_LINE_LENGTH];
+static EWRAM_DATA u8 sRunReviewLines[RUN_REVIEW_MAX_LINES][RUN_REVIEW_LINE_LENGTH];
+static EWRAM_DATA u8 sRunReviewLineCount;
+static EWRAM_DATA u8 sRunReviewPageCount;
+static EWRAM_DATA u8 sRunReviewPageStarts[RUN_REVIEW_MAX_PAGES];
+static EWRAM_DATA u8 sRunReviewPageLineCounts[RUN_REVIEW_MAX_PAGES];
+static EWRAM_DATA const u8 *sRunReviewPageTitles[RUN_REVIEW_MAX_PAGES];
+static EWRAM_DATA const u8 *sRunReviewCurrentPageTitle;
 
-static u8 BufferTrialOverviewRuleLines(void)
+static const u8 *GetRunReviewDifficultyName(u8 difficulty)
 {
-    u8 ruleIndex;
-    u8 lineCount = 0;
-    u8 ruleCount = RogueTrial_GetRuleCount(gSpecialVar_0x8004, gSpecialVar_0x8006);
+    static const u8 sText_Easy[] = _("Easy");
+    static const u8 sText_Average[] = _("Average");
+    static const u8 sText_Hard[] = _("Hard");
+    static const u8 sText_Brutal[] = _("Brutal");
+    static const u8 sText_Custom[] = _("Custom");
 
-    for (ruleIndex = 0; ruleIndex < ruleCount && lineCount < TRIAL_OVERVIEW_MAX_RULE_LINES; ++ruleIndex)
+    switch (difficulty)
     {
-        const u8 *src = RogueTrial_GetRuleText(gSpecialVar_0x8004, gSpecialVar_0x8006, ruleIndex);
-        u8 lineLength = 0;
-
-        sTrialOverviewRuleLines[lineCount][0] = EOS;
-
-        while (*src != EOS && lineCount < TRIAL_OVERVIEW_MAX_RULE_LINES)
-        {
-            u8 wordLength = 0;
-            u8 candidate[TRIAL_OVERVIEW_RULE_LINE_LENGTH];
-
-            while (src[wordLength] != EOS && src[wordLength] != CHAR_SPACE)
-                ++wordLength;
-
-            if (lineLength != 0)
-            {
-                memcpy(candidate, sTrialOverviewRuleLines[lineCount], lineLength);
-                candidate[lineLength] = CHAR_SPACE;
-                memcpy(&candidate[lineLength + 1], src, wordLength);
-                candidate[lineLength + wordLength + 1] = EOS;
-            }
-            else
-            {
-                memcpy(candidate, src, wordLength);
-                candidate[wordLength] = EOS;
-            }
-
-            if (lineLength != 0 && GetStringWidth(FONT_SMALL_NARROW, candidate, 0) > TRIAL_OVERVIEW_RULE_WIDTH)
-            {
-                ++lineCount;
-                lineLength = 0;
-                if (lineCount >= TRIAL_OVERVIEW_MAX_RULE_LINES)
-                    break;
-                continue;
-            }
-
-            StringCopy(sTrialOverviewRuleLines[lineCount], candidate);
-            lineLength = StringLength(candidate);
-            src += wordLength;
-            if (*src == CHAR_SPACE)
-                ++src;
-        }
-
-        if (lineCount < TRIAL_OVERVIEW_MAX_RULE_LINES && lineLength != 0)
-            ++lineCount;
+    case DIFFICULTY_LEVEL_EASY: return sText_Easy;
+    case DIFFICULTY_LEVEL_AVERAGE: return sText_Average;
+    case DIFFICULTY_LEVEL_HARD: return sText_Hard;
+    case DIFFICULTY_LEVEL_BRUTAL: return sText_Brutal;
+    default: return sText_Custom;
     }
-
-    return lineCount;
 }
 
-static void PrintTrialOverview(u8 taskId)
+static const u8 *GetRunReviewBattleFormatName(u8 format)
 {
-    u8 i;
+    static const u8 sText_Singles[] = _("Singles");
+    static const u8 sText_Doubles[] = _("Doubles");
+    static const u8 sText_Mixed[] = _("Mixed");
+
+    switch (format)
+    {
+    case BATTLE_FORMAT_DOUBLES: return sText_Doubles;
+    case BATTLE_FORMAT_MIXED: return sText_Mixed;
+    default: return sText_Singles;
+    }
+}
+
+static const u8 *GetRunReviewReasonText(u8 reason)
+{
+    switch (reason)
+    {
+    case RUN_START_REASON_PARTY_EMPTY: return sText_RunReviewReasonEmpty;
+    case RUN_START_REASON_PARTY_CAPACITY: return sText_RunReviewReasonCapacity;
+    case RUN_START_REASON_PARTY_ILLEGAL: return sText_RunReviewReasonPartyIllegal;
+    case RUN_START_REASON_DAY_CARE_ILLEGAL: return sText_RunReviewReasonDayCare;
+    case RUN_START_REASON_SPECIES_CLAUSE: return sText_RunReviewReasonSpeciesClause;
+    case RUN_START_REASON_LEGENDARY_CLAUSE: return sText_RunReviewReasonLegendaryClause;
+    case RUN_START_REASON_TRIAL_REPLACES_PARTY: return sText_RunReviewReasonTrialPartner;
+    default: return NULL;
+    }
+}
+
+static bool8 BufferRunReviewEligibilityReason(const struct RogueRunStartContext *context, u8 *text)
+{
+    static const u8 sText_NotInPokedex[] = _(" isn't in this Pokédex");
+    static const u8 sText_NotType[] = _(" isn't a ");
+    static const u8 sText_TypeSuffix[] = _("-type");
+    static const u8 sText_Exceeds[] = _(" exceeds the ");
+    static const u8 sText_BstLimit[] = _(" BST limit");
+    static const u8 sText_NotLittleCup[] = _(" isn't eligible for Little Cup");
+    static const u8 sText_NotStarter[] = _(" isn't from a starter family");
+    static const u8 sText_IsLegendary[] = _(" is Legendary or Mythical");
+    static const u8 sText_NotLegendary[] = _(" isn't Legendary or Mythical");
+    static const u8 sText_DayCareDisabled[] = _("This Trial doesn't allow Day Care Pokémon");
+    static const u8 sText_InvalidSetup[] = _("The selected run rules are incomplete");
+    u8 *dest;
+
+    if (context->eligibilityReason == ROGUE_TRIAL_ELIGIBILITY_OK)
+        return FALSE;
+
+    if (context->eligibilityReason == ROGUE_TRIAL_ELIGIBILITY_DAY_CARE_DISABLED)
+    {
+        StringCopy(text, sText_DayCareDisabled);
+        return TRUE;
+    }
+    if (context->eligibilityReason == ROGUE_TRIAL_ELIGIBILITY_INVALID_SETUP)
+    {
+        StringCopy(text, sText_InvalidSetup);
+        return TRUE;
+    }
+    if (context->ineligibleSpecies == SPECIES_NONE)
+        return FALSE;
+
+    dest = StringCopy(text, sText_RunReviewBlueColor);
+    dest = StringAppend(dest, RoguePokedex_GetSpeciesName(context->ineligibleSpecies));
+    dest = StringAppend(dest, sText_RunReviewValueColor);
+
+    switch (context->eligibilityReason)
+    {
+    case ROGUE_TRIAL_ELIGIBILITY_POKEDEX:
+        StringAppend(dest, sText_NotInPokedex);
+        break;
+    case ROGUE_TRIAL_ELIGIBILITY_TYPE:
+        dest = StringAppend(dest, sText_NotType);
+        if (context->eligibilityParam < NUMBER_OF_MON_TYPES)
+            dest = StringAppend(dest, gTypeNames[context->eligibilityParam]);
+        StringAppend(dest, sText_TypeSuffix);
+        break;
+    case ROGUE_TRIAL_ELIGIBILITY_BST:
+        dest = StringAppend(dest, sText_Exceeds);
+        dest = ConvertIntToDecimalStringN(dest, context->eligibilityParam, STR_CONV_MODE_LEFT_ALIGN, 3);
+        StringAppend(dest, sText_BstLimit);
+        break;
+    case ROGUE_TRIAL_ELIGIBILITY_LITTLE_CUP:
+        StringAppend(dest, sText_NotLittleCup);
+        break;
+    case ROGUE_TRIAL_ELIGIBILITY_STARTER_FAMILY:
+        StringAppend(dest, sText_NotStarter);
+        break;
+    case ROGUE_TRIAL_ELIGIBILITY_LEGENDARY_FORBIDDEN:
+        StringAppend(dest, sText_IsLegendary);
+        break;
+    case ROGUE_TRIAL_ELIGIBILITY_LEGENDARY_REQUIRED:
+        StringAppend(dest, sText_NotLegendary);
+        break;
+    default:
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static void BeginRunReviewPage(const u8 *title)
+{
+    if (sRunReviewPageCount >= RUN_REVIEW_MAX_PAGES)
+        return;
+
+    sRunReviewCurrentPageTitle = title;
+    sRunReviewPageTitles[sRunReviewPageCount] = title;
+    sRunReviewPageStarts[sRunReviewPageCount] = sRunReviewLineCount;
+    sRunReviewPageLineCounts[sRunReviewPageCount] = 0;
+    ++sRunReviewPageCount;
+}
+
+static void AddRunReviewLine(const u8 *text)
+{
+    if (sRunReviewPageCount == 0
+     || sRunReviewLineCount >= RUN_REVIEW_MAX_LINES)
+        return;
+
+    if (sRunReviewPageLineCounts[sRunReviewPageCount - 1] >= RUN_REVIEW_LINES_PER_PAGE)
+        BeginRunReviewPage(sRunReviewCurrentPageTitle);
+    if (sRunReviewPageCount == 0
+     || sRunReviewPageLineCounts[sRunReviewPageCount - 1] >= RUN_REVIEW_LINES_PER_PAGE)
+        return;
+
+    StringCopy(sRunReviewLines[sRunReviewLineCount], text);
+    ++sRunReviewLineCount;
+    ++sRunReviewPageLineCounts[sRunReviewPageCount - 1];
+}
+
+static void AddRunReviewSettingLine(const u8 *label, const u8 *value)
+{
+    u8 text[RUN_REVIEW_LINE_LENGTH];
+    u8 *dest = StringCopy(text, label);
+
+    dest = StringAppend(dest, sText_RunReviewSpace);
+    dest = StringAppend(dest, sText_RunReviewValueColor);
+    StringAppend(dest, value);
+    AddRunReviewLine(text);
+}
+
+static void AddWrappedRunReviewText(const u8 *src)
+{
+    u8 line[RUN_REVIEW_LINE_LENGTH];
+    u8 candidate[RUN_REVIEW_LINE_LENGTH];
+    u8 lineLength = 0;
+
+    line[0] = EOS;
+    while (*src != EOS && sRunReviewLineCount < RUN_REVIEW_MAX_LINES)
+    {
+        u8 wordLength = 0;
+
+        while (src[wordLength] != EOS && src[wordLength] != CHAR_SPACE)
+            ++wordLength;
+
+        if (lineLength != 0)
+        {
+            memcpy(candidate, line, lineLength);
+            candidate[lineLength] = CHAR_SPACE;
+            memcpy(&candidate[lineLength + 1], src, wordLength);
+            candidate[lineLength + wordLength + 1] = EOS;
+        }
+        else
+        {
+            memcpy(candidate, src, wordLength);
+            candidate[wordLength] = EOS;
+        }
+
+        if (lineLength != 0 && GetStringWidth(FONT_SMALL_NARROW, candidate, 0) > RUN_REVIEW_LINE_WIDTH)
+        {
+            AddRunReviewLine(line);
+            lineLength = 0;
+            continue;
+        }
+
+        StringCopy(line, candidate);
+        lineLength = StringLength(candidate);
+        src += wordLength;
+        if (*src == CHAR_SPACE)
+            ++src;
+    }
+
+    if (lineLength != 0)
+        AddRunReviewLine(line);
+}
+
+static bool8 GetRunReviewConfigToggle(const struct RogueDifficultyConfig *config, u16 toggle)
+{
+    return (config->toggleBits[toggle / 8] & (1 << (toggle % 8))) != 0;
+}
+
+static void AddRunReviewToggleDifference(const struct RogueDifficultyConfig *config,
+                                         const struct RogueDifficultyConfig *baseline,
+                                         u16 toggle, const u8 *label,
+                                         const u8 *enabled, const u8 *disabled)
+{
+    bool8 value = GetRunReviewConfigToggle(config, toggle);
+
+    if (value != GetRunReviewConfigToggle(baseline, toggle))
+        AddRunReviewSettingLine(label, value ? enabled : disabled);
+}
+
+static u8 BufferRunReviewPages(void)
+{
+    static const u8 sText_On[] = _("On");
+    static const u8 sText_Off[] = _("Off");
+    static const u8 sText_Allowed[] = _("Allowed");
+    static const u8 sText_Enforced[] = _("Enforced");
+    static const u8 sText_Release[] = _("Release");
+    static const u8 sText_Retain[] = _("Retain");
+    static const u8 sText_BallsOnly[] = _("Balls only");
+    static const u8 sText_AllItems[] = _("All items");
+    static const u8 sText_Fresh[] = _("Fresh Start");
+    static const u8 sText_HubBag[] = _("Hub Bag");
+    static const u8 sText_Switch[] = _("Switch");
+    static const u8 sText_Set[] = _("Set");
+    static const u8 sText_Specialists[] = _("Specialists");
+    static const u8 sText_Diverse[] = _("Diverse");
+    const struct RogueRunStartContext *context = RogueRunStart_GetContext();
+
+    sRunReviewLineCount = 0;
+    sRunReviewPageCount = 0;
+    sRunReviewCurrentPageTitle = NULL;
+    if (context == NULL)
+        return 0;
+
+    if (context->source == RUN_START_SOURCE_TRIAL)
+    {
+        u8 ruleIndex;
+        u8 ruleCount = RogueTrial_GetRuleCount(context->trialId, context->pokedexVariant);
+
+        if (ruleCount != 0)
+        {
+            BeginRunReviewPage(sText_RunReviewTrialRules);
+            for (ruleIndex = 0; ruleIndex < ruleCount; ++ruleIndex)
+                AddWrappedRunReviewText(RogueTrial_GetRuleText(context->trialId, context->pokedexVariant, ruleIndex));
+        }
+    }
+    else if (Rogue_GetDifficultyPreset() == DIFFICULTY_LEVEL_CUSTOM)
+    {
+        struct RogueDifficultyConfig baseline = context->effectiveConfig;
+        u8 rewardLevel = Rogue_GetDifficultyRewardLevel();
+        u8 firstLine = sRunReviewLineCount;
+
+        Rogue_ApplyDifficultyPresetToConfig(&baseline, rewardLevel);
+        BeginRunReviewPage(sText_RunReviewCustomRules);
+
+        if (context->effectiveConfig.rangeValues[CONFIG_RANGE_TRAINER]
+         != baseline.rangeValues[CONFIG_RANGE_TRAINER])
+            AddRunReviewSettingLine(sText_RunReviewTrainerStrengthLabel,
+                                    GetRunReviewDifficultyName(context->effectiveConfig.rangeValues[CONFIG_RANGE_TRAINER]));
+
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_OVER_LVL,
+                                     sText_RunReviewLevelCapLabel, sText_Allowed, sText_Enforced);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_EV_GAIN,
+                                     sText_RunReviewEvLabel, sText_On, sText_Off);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_BAG_WIPE,
+                                     sText_RunReviewStartingBagLabel, sText_Fresh, sText_HubBag);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_SWITCH_MODE,
+                                     sText_RunReviewBattleStyleLabel, sText_Switch, sText_Set);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_RELEASE_MONS,
+                                     sText_RunReviewFaintedLabel, sText_Release, sText_Retain);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_BAG_CLAUSE,
+                                     sText_RunReviewBattleBagLabel, sText_BallsOnly, sText_AllItems);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_SPECIES_CLAUSE,
+                                     sText_RunReviewSpeciesClauseLabel, sText_On, sText_Off);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_HELD_ITEM_CLAUSE,
+                                     sText_RunReviewHeldItemClauseLabel, sText_On, sText_Off);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_LEGENDARY_CLAUSE,
+                                     sText_RunReviewLegendaryClauseLabel, sText_On, sText_Off);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_AFFECTION,
+                                     sText_RunReviewAffectionLabel, sText_On, sText_Off);
+        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_DIVERSE_TRAINERS,
+                                     sText_RunReviewTrainerTeamsLabel, sText_Diverse, sText_Specialists);
+
+        // A config can retain the Custom marker after being changed back to
+        // its reward preset. Do not create an empty details page in that case.
+        if (sRunReviewLineCount == firstLine)
+        {
+            sRunReviewPageCount = 0;
+            sRunReviewCurrentPageTitle = NULL;
+        }
+    }
+
+    return sRunReviewPageCount;
+}
+
+static const u8 *GetRunReviewTitle(const struct RogueRunStartContext *context)
+{
+    static const u8 sText_AdventureReplay[] = _("Adventure Replay");
+    static const u8 sText_MultiplayerAdventure[] = _("Multiplayer Adventure");
+    static const u8 sText_StandardAdventure[] = _("Standard Adventure");
+    static const u8 sText_GauntletAdventure[] = _("Gauntlet Adventure");
+    static const u8 sText_SlowAdventure[] = _("Slow Path Adventure");
+    const struct RogueTrialDefinition *trial;
+
+    if (context->source == RUN_START_SOURCE_TRIAL)
+    {
+        trial = RogueTrial_GetDefinition(context->trialId);
+        return trial != NULL ? trial->name : sText_StandardAdventure;
+    }
+    if (context->source == RUN_START_SOURCE_REPLAY)
+        return sText_AdventureReplay;
+    if (context->source == RUN_START_SOURCE_MULTIPLAYER_HOST
+     || context->source == RUN_START_SOURCE_MULTIPLAYER_CLIENT)
+        return sText_MultiplayerAdventure;
+
+    switch (Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM))
+    {
+    case ROGUE_GAME_MODE_GAUNTLET:
+    case ROGUE_GAME_MODE_RAINBOW_GAUNTLET:
+        return sText_GauntletAdventure;
+    case ROGUE_GAME_MODE_SLOW_PATH:
+        return sText_SlowAdventure;
+    default:
+        return sText_StandardAdventure;
+    }
+}
+
+static void PrintRunReviewAction(u8 windowId, u8 x, u8 action, bool8 selected, bool8 enabled)
+{
+    const u8 *text;
+
+    if (action == RUN_REVIEW_ACTION_START && !enabled)
+        text = sText_RunReviewDisabledStart;
+    else if (selected)
+    {
+        switch (action)
+        {
+        case RUN_REVIEW_ACTION_START: text = sText_RunReviewSelectedStart; break;
+        case RUN_REVIEW_ACTION_EDIT: text = sText_RunReviewSelectedEdit; break;
+        default: text = sText_RunReviewSelectedBack; break;
+        }
+    }
+    else
+    {
+        switch (action)
+        {
+        case RUN_REVIEW_ACTION_START: text = sText_RunReviewStart; break;
+        case RUN_REVIEW_ACTION_EDIT: text = sText_RunReviewEdit; break;
+        default: text = sText_RunReviewBack; break;
+        }
+    }
+
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, text, x, 116, TEXT_SKIP_DRAW, NULL);
+}
+
+static void PrintRunReviewPageMarker(u8 windowId, u8 page, u8 pageCount)
+{
     u8 pageText[32];
     u8 *dest;
-    u8 windowId = gTasks[taskId].tTrialOverviewWindowId;
-    u8 lineCount = BufferTrialOverviewRuleLines();
-    u8 pageCount = max(1, (lineCount + TRIAL_OVERVIEW_RULES_PER_PAGE - 1) / TRIAL_OVERVIEW_RULES_PER_PAGE);
-    u8 firstLine = gTasks[taskId].tTrialOverviewPage * TRIAL_OVERVIEW_RULES_PER_PAGE;
+    u16 width;
+
+    if (pageCount <= 1)
+        return;
+
+    dest = ConvertIntToDecimalStringN(pageText, page + 1, STR_CONV_MODE_LEFT_ALIGN, 2);
+    dest = StringAppend(dest, sText_RunReviewPageSeparator);
+    dest = ConvertIntToDecimalStringN(dest, pageCount, STR_CONV_MODE_LEFT_ALIGN, 2);
+    StringAppend(dest, sText_RunReviewPageControls);
+
+    width = GetStringWidth(FONT_SMALL_NARROW, pageText, 0);
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, pageText, 204 - width, 19, TEXT_SKIP_DRAW, NULL);
+}
+
+static void PrintRunReviewSummaryLine(u8 windowId, const u8 *text, u8 y)
+{
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, text, 8, y, TEXT_SKIP_DRAW, NULL);
+}
+
+static u8 GetRunReviewPageCount(void)
+{
+    return 1 + BufferRunReviewPages();
+}
+
+static void PrintRunReview(u8 taskId)
+{
+    const struct RogueRunStartContext *context = RogueRunStart_GetContext();
+    u8 text[RUN_REVIEW_TEXT_LENGTH];
+    u8 *dest;
+    u8 i;
+    u8 detailPageCount;
+    u8 pageCount;
+    u8 firstLine;
+    u8 detailPage;
+    u8 windowId = gTasks[taskId].tRunReviewWindowId;
+
+    if (context == NULL)
+        return;
+
+    detailPageCount = BufferRunReviewPages();
+    pageCount = 1 + detailPageCount;
+    if (gTasks[taskId].tRunReviewPage >= pageCount)
+        gTasks[taskId].tRunReviewPage = 0;
 
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    AddTextPrinterParameterized(windowId, FONT_NORMAL, GetRunReviewTitle(context), 4, 0, TEXT_SKIP_DRAW, NULL);
+    PrintRunReviewPageMarker(windowId, gTasks[taskId].tRunReviewPage, pageCount);
 
-    AddTextPrinterParameterized(windowId, FONT_NORMAL, gStringVar1, 4, 0, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_TrialOverviewDifficulty, 4, 18, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, gStringVar4, 72, 18, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_TrialOverviewPokedex, 4, 32, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, gStringVar3, 72, 32, TEXT_SKIP_DRAW, NULL);
-
-    dest = StringCopy(pageText, sText_TrialOverviewRules);
-    dest = ConvertIntToDecimalStringN(dest, gTasks[taskId].tTrialOverviewPage + 1, STR_CONV_MODE_LEFT_ALIGN, 1);
-    dest = StringAppend(dest, sText_TrialOverviewPageSeparator);
-    dest = ConvertIntToDecimalStringN(dest, pageCount, STR_CONV_MODE_LEFT_ALIGN, 1);
-    if (pageCount > 1)
-        StringAppend(dest, sText_TrialOverviewPageControls);
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, pageText, 4, 48, TEXT_SKIP_DRAW, NULL);
-
-    for (i = 0; i < TRIAL_OVERVIEW_RULES_PER_PAGE && firstLine + i < lineCount; ++i)
+    if (gTasks[taskId].tRunReviewPage == 0)
     {
-        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sTrialOverviewRuleLines[firstLine + i], 8, 64 + i * 14, TEXT_SKIP_DRAW, NULL);
+        u8 preset = context->source == RUN_START_SOURCE_TRIAL
+            ? context->trialDifficulty
+            : Rogue_GetDifficultyPreset();
+        u8 reasonBuffer[RUN_REVIEW_TEXT_LENGTH];
+        const u8 *reasonText = GetRunReviewReasonText(context->readinessReason);
+        u8 noticeY = 73;
+        u8 partyCount = CalculatePlayerPartyCount();
+
+        if ((context->readinessReason == RUN_START_REASON_PARTY_ILLEGAL
+          || context->readinessReason == RUN_START_REASON_DAY_CARE_ILLEGAL)
+         && BufferRunReviewEligibilityReason(context, reasonBuffer))
+            reasonText = reasonBuffer;
+
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_RunReviewOverview, 4, 19, TEXT_SKIP_DRAW, NULL);
+
+        dest = StringCopy(text, sText_RunReviewBlueColor);
+        dest = StringAppend(dest, GetRunReviewDifficultyName(preset));
+        if (preset == DIFFICULTY_LEVEL_CUSTOM)
+        {
+            dest = StringAppend(dest, sText_RunReviewRewardOpen);
+            dest = StringAppend(dest, GetRunReviewDifficultyName(Rogue_GetDifficultyRewardLevel()));
+            dest = StringAppend(dest, sText_RunReviewRewardClose);
+        }
+        dest = StringAppend(dest, sText_RunReviewValueColor);
+        dest = StringAppend(dest, sText_RunReviewSummarySeparator);
+        StringAppend(dest, GetRunReviewBattleFormatName(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT)));
+        PrintRunReviewSummaryLine(windowId, text, 34);
+
+        dest = StringCopy(text, sText_RunReviewBlueColor);
+        if (context->pokedexVariant < POKEDEX_VARIANT_COUNT)
+            dest = StringAppend(dest, gPokedexVariants[context->pokedexVariant].displayName);
+        else
+            dest = StringAppend(dest, sText_RunReviewCustom);
+        dest = StringAppend(dest, sText_RunReviewValueColor);
+        StringAppend(dest, sText_RunReviewPokedexSuffix);
+        PrintRunReviewSummaryLine(windowId, text, 47);
+
+        dest = StringCopy(text, sText_RunReviewBlueColor);
+        if (context->teamPolicy == RUN_START_TEAM_FIXED_TRIAL)
+        {
+            dest = StringAppend(dest, sText_RunReviewFixedTeam);
+            dest = StringAppend(dest, sText_RunReviewValueColor);
+            dest = StringAppend(dest, sText_RunReviewSummarySeparator);
+            dest = ConvertIntToDecimalStringN(dest, context->partyCapacity, STR_CONV_MODE_LEFT_ALIGN, 1);
+            StringAppend(dest, sText_RunReviewPokemonSuffix);
+        }
+        else if (context->requiresRandomPartner)
+        {
+            dest = StringAppend(dest, sText_RunReviewPartnerRequired);
+            dest = StringAppend(dest, sText_RunReviewValueColor);
+            dest = StringAppend(dest, sText_RunReviewSummarySeparator);
+            dest = StringAppend(dest, sText_RunReviewMaxPrefix);
+            ConvertIntToDecimalStringN(dest, context->partyCapacity, STR_CONV_MODE_LEFT_ALIGN, 1);
+        }
+        else
+        {
+            dest = StringAppend(dest, sText_RunReviewPartyPrefix);
+            dest = StringAppend(dest, sText_RunReviewValueColor);
+            dest = ConvertIntToDecimalStringN(dest, partyCount, STR_CONV_MODE_LEFT_ALIGN, 1);
+            dest = StringAppend(dest, sText_RunReviewPageSeparator);
+            ConvertIntToDecimalStringN(dest, context->partyCapacity, STR_CONV_MODE_LEFT_ALIGN, 1);
+        }
+        PrintRunReviewSummaryLine(windowId, text, 60);
+
+        if (context->readiness == RUN_START_BLOCKED_PARTY)
+        {
+            PrintRunReviewSummaryLine(windowId, sText_RunReviewBlockedParty, noticeY);
+            noticeY += 13;
+        }
+        else if (context->readiness == RUN_START_BLOCKED_DAY_CARE)
+        {
+            PrintRunReviewSummaryLine(windowId, sText_RunReviewBlockedDayCare, noticeY);
+            noticeY += 13;
+        }
+        else if (context->readiness == RUN_START_WAITING_FOR_HOST)
+        {
+            PrintRunReviewSummaryLine(windowId, sText_RunReviewWaitingHost, noticeY);
+            noticeY += 13;
+        }
+
+        if (noticeY <= 99 && reasonText != NULL)
+        {
+            PrintRunReviewSummaryLine(windowId, reasonText, noticeY);
+            noticeY += 13;
+        }
+
+        if (noticeY <= 99 && context->source == RUN_START_SOURCE_REPLAY)
+        {
+            PrintRunReviewSummaryLine(windowId, sText_RunReviewReplayQuests, noticeY);
+            noticeY += 13;
+        }
+        else if (noticeY <= 99 && (context->mainQuestsDisabled || context->trialQuestsDisabled))
+        {
+            PrintRunReviewSummaryLine(windowId, sText_RunReviewQuestsDisabled, noticeY);
+            noticeY += 13;
+        }
+
+        if (noticeY <= 99 && context->hasPendingQuestRewards)
+            PrintRunReviewSummaryLine(windowId, sText_RunReviewPendingRewards, noticeY);
     }
+    else
+    {
+        detailPage = gTasks[taskId].tRunReviewPage - 1;
+        firstLine = sRunReviewPageStarts[detailPage];
+        AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sRunReviewPageTitles[detailPage], 4, 19, TEXT_SKIP_DRAW, NULL);
+        for (i = 0; i < sRunReviewPageLineCounts[detailPage]; ++i)
+            AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sRunReviewLines[firstLine + i], 8, 34 + i * 13, TEXT_SKIP_DRAW, NULL);
+    }
+
+    PrintRunReviewAction(windowId, 14, RUN_REVIEW_ACTION_START,
+                         gTasks[taskId].tRunReviewAction == RUN_REVIEW_ACTION_START,
+                         RogueRunStart_CanStart());
+    if (context->canEdit)
+        PrintRunReviewAction(windowId, 78, RUN_REVIEW_ACTION_EDIT,
+                             gTasks[taskId].tRunReviewAction == RUN_REVIEW_ACTION_EDIT, TRUE);
+    PrintRunReviewAction(windowId, context->canEdit ? 154 : 144, RUN_REVIEW_ACTION_BACK,
+                         gTasks[taskId].tRunReviewAction == RUN_REVIEW_ACTION_BACK, TRUE);
 
     CopyWindowToVram(windowId, COPYWIN_GFX);
 }
 
-static void CloseTrialOverview(u8 taskId, bool8 proceed)
+static void CloseRunReview(u8 taskId, u8 action)
 {
-    gSpecialVar_Result = proceed;
+    gSpecialVar_Result = action;
     PlaySE(SE_SELECT);
-    ClearToTransparentAndRemoveWindow(gTasks[taskId].tTrialOverviewWindowId);
+    ClearToTransparentAndRemoveWindow(gTasks[taskId].tRunReviewWindowId);
     DestroyTask(taskId);
     ScriptContext_Enable();
 }
 
-static void Task_ShowTrialOverviewInput(u8 taskId)
+static u8 MoveRunReviewAction(u8 current, bool8 right)
 {
-    u8 lineCount;
+    const struct RogueRunStartContext *context = RogueRunStart_GetContext();
+    u8 candidate = current;
+    u8 i;
+
+    for (i = 0; i < 3; ++i)
+    {
+        if (right)
+        {
+            switch (candidate)
+            {
+            case RUN_REVIEW_ACTION_START: candidate = RUN_REVIEW_ACTION_EDIT; break;
+            case RUN_REVIEW_ACTION_EDIT: candidate = RUN_REVIEW_ACTION_BACK; break;
+            default: candidate = RUN_REVIEW_ACTION_START; break;
+            }
+        }
+        else
+        {
+            switch (candidate)
+            {
+            case RUN_REVIEW_ACTION_START: candidate = RUN_REVIEW_ACTION_BACK; break;
+            case RUN_REVIEW_ACTION_BACK: candidate = RUN_REVIEW_ACTION_EDIT; break;
+            default: candidate = RUN_REVIEW_ACTION_START; break;
+            }
+        }
+
+        if (candidate == RUN_REVIEW_ACTION_EDIT && !context->canEdit)
+            continue;
+        if (candidate == RUN_REVIEW_ACTION_START && !RogueRunStart_CanStart())
+            continue;
+        return candidate;
+    }
+
+    return RUN_REVIEW_ACTION_BACK;
+}
+
+static void Task_ShowRunReviewInput(u8 taskId)
+{
+    const struct RogueRunStartContext *context;
     u8 pageCount;
 
-    switch (gTasks[taskId].tTrialOverviewState)
+    switch (gTasks[taskId].tRunReviewState)
     {
-    case TRIAL_OVERVIEW_STATE_WAIT_FOR_BG:
+    case RUN_REVIEW_STATE_WAIT_FOR_BG:
         // The preceding closemessage may still be copying this background's
         // tilemap. Wait before modifying it so the border cannot be revealed
         // before the window graphics are ready.
         if (IsDma3ManagerBusyWithBgCopy())
             return;
 
-        gTasks[taskId].tTrialOverviewWindowId = CreateWindowFromRect(1, 2, 26, 14);
-        SetDarkStandardWindowBorderStyle(gTasks[taskId].tTrialOverviewWindowId, FALSE);
-        PrintTrialOverview(taskId);
-        gTasks[taskId].tTrialOverviewState = TRIAL_OVERVIEW_STATE_WAIT_FOR_GFX;
+        // The standard frame occupies one extra tile on every side. A 26x16
+        // content window at (1, 1) therefore leaves an even one-tile field
+        // margin around the complete 28x18 framed card.
+        gTasks[taskId].tRunReviewWindowId = CreateWindowFromRect(1, 1, 26, 16);
+        SetDarkStandardWindowBorderStyle(gTasks[taskId].tRunReviewWindowId, FALSE);
+        PrintRunReview(taskId);
+        gTasks[taskId].tRunReviewState = RUN_REVIEW_STATE_WAIT_FOR_GFX;
         return;
-    case TRIAL_OVERVIEW_STATE_WAIT_FOR_GFX:
+    case RUN_REVIEW_STATE_WAIT_FOR_GFX:
         if (IsDma3ManagerBusyWithBgCopy())
             return;
 
-        CopyWindowToVram(gTasks[taskId].tTrialOverviewWindowId, COPYWIN_MAP);
-        gTasks[taskId].tTrialOverviewState = TRIAL_OVERVIEW_STATE_INPUT;
+        CopyWindowToVram(gTasks[taskId].tRunReviewWindowId, COPYWIN_MAP);
+        gTasks[taskId].tRunReviewState = RUN_REVIEW_STATE_INPUT;
         return;
     }
 
-    if (gTasks[taskId].tTrialOverviewDelay < 5)
+    if (gTasks[taskId].tRunReviewDelay < 5)
     {
-        ++gTasks[taskId].tTrialOverviewDelay;
+        ++gTasks[taskId].tRunReviewDelay;
         return;
     }
 
-    lineCount = BufferTrialOverviewRuleLines();
-    pageCount = max(1, (lineCount + TRIAL_OVERVIEW_RULES_PER_PAGE - 1) / TRIAL_OVERVIEW_RULES_PER_PAGE);
+    context = RogueRunStart_GetContext();
+    if (context == NULL)
+    {
+        CloseRunReview(taskId, RUN_REVIEW_ACTION_BACK);
+        return;
+    }
 
+    RogueRunStart_Refresh();
+    if (gTasks[taskId].tRunReviewStatus != context->readiness
+     || gTasks[taskId].tRunReviewRevision != context->configRevision)
+    {
+        gTasks[taskId].tRunReviewStatus = context->readiness;
+        gTasks[taskId].tRunReviewRevision = context->configRevision;
+        if (gTasks[taskId].tRunReviewAction == RUN_REVIEW_ACTION_START && !RogueRunStart_CanStart())
+            gTasks[taskId].tRunReviewAction = context->canEdit ? RUN_REVIEW_ACTION_EDIT : RUN_REVIEW_ACTION_BACK;
+        PrintRunReview(taskId);
+    }
+
+    pageCount = GetRunReviewPageCount();
     if (pageCount > 1 && JOY_NEW(L_BUTTON | R_BUTTON))
     {
         PlaySE(SE_SELECT);
         if (JOY_NEW(R_BUTTON))
-            gTasks[taskId].tTrialOverviewPage = (gTasks[taskId].tTrialOverviewPage + 1) % pageCount;
-        else if (gTasks[taskId].tTrialOverviewPage == 0)
-            gTasks[taskId].tTrialOverviewPage = pageCount - 1;
+            gTasks[taskId].tRunReviewPage = (gTasks[taskId].tRunReviewPage + 1) % pageCount;
+        else if (gTasks[taskId].tRunReviewPage == 0)
+            gTasks[taskId].tRunReviewPage = pageCount - 1;
         else
-            --gTasks[taskId].tTrialOverviewPage;
-        PrintTrialOverview(taskId);
+            --gTasks[taskId].tRunReviewPage;
+        PrintRunReview(taskId);
+    }
+    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    {
+        PlaySE(SE_SELECT);
+        gTasks[taskId].tRunReviewAction = MoveRunReviewAction(
+            gTasks[taskId].tRunReviewAction,
+            JOY_NEW(DPAD_RIGHT));
+        PrintRunReview(taskId);
     }
     else if (JOY_NEW(A_BUTTON))
-        CloseTrialOverview(taskId, TRUE);
+        CloseRunReview(taskId, gTasks[taskId].tRunReviewAction);
     else if (JOY_NEW(B_BUTTON))
-        CloseTrialOverview(taskId, FALSE);
+        CloseRunReview(taskId, RUN_REVIEW_ACTION_BACK);
 }
 
-void ScriptMenu_ShowTrialOverview(void)
+void ScriptMenu_ShowRunReview(void)
 {
-    u8 taskId = CreateTask(Task_ShowTrialOverviewInput, 0);
+    const struct RogueRunStartContext *context = RogueRunStart_GetContext();
+    u8 taskId = CreateTask(Task_ShowRunReviewInput, 0);
 
-    gTasks[taskId].tTrialOverviewWindowId = WINDOW_NONE;
-    gTasks[taskId].tTrialOverviewDelay = 0;
-    gTasks[taskId].tTrialOverviewPage = 0;
-    gTasks[taskId].tTrialOverviewState = TRIAL_OVERVIEW_STATE_WAIT_FOR_BG;
+    gTasks[taskId].tRunReviewWindowId = WINDOW_NONE;
+    gTasks[taskId].tRunReviewDelay = 0;
+    gTasks[taskId].tRunReviewPage = 0;
+    gTasks[taskId].tRunReviewState = RUN_REVIEW_STATE_WAIT_FOR_BG;
+    gTasks[taskId].tRunReviewStatus = context != NULL ? context->readiness : RUN_START_BLOCKED_PARTY;
+    gTasks[taskId].tRunReviewRevision = context != NULL ? context->configRevision : 0;
+    if (RogueRunStart_CanStart())
+        gTasks[taskId].tRunReviewAction = RUN_REVIEW_ACTION_START;
+    else if (context != NULL && context->canEdit)
+        gTasks[taskId].tRunReviewAction = RUN_REVIEW_ACTION_EDIT;
+    else
+        gTasks[taskId].tRunReviewAction = RUN_REVIEW_ACTION_BACK;
 }
 
-#undef tTrialOverviewWindowId
-#undef tTrialOverviewDelay
-#undef tTrialOverviewPage
-#undef tTrialOverviewState
-#undef TRIAL_OVERVIEW_RULE_WIDTH
-#undef TRIAL_OVERVIEW_RULE_LINE_LENGTH
-#undef TRIAL_OVERVIEW_MAX_RULE_LINES
-#undef TRIAL_OVERVIEW_RULES_PER_PAGE
+#undef tRunReviewWindowId
+#undef tRunReviewDelay
+#undef tRunReviewPage
+#undef tRunReviewState
+#undef tRunReviewAction
+#undef tRunReviewStatus
+#undef tRunReviewRevision
+#undef RUN_REVIEW_LINE_WIDTH
+#undef RUN_REVIEW_TEXT_LENGTH
+#undef RUN_REVIEW_LINE_LENGTH
+#undef RUN_REVIEW_MAX_LINES
+#undef RUN_REVIEW_MAX_PAGES
+#undef RUN_REVIEW_LINES_PER_PAGE
 
 #define SAFARI_OFFER_RESULT_BUY 10
 #define SAFARI_OFFER_RESULT_DISMISS 11

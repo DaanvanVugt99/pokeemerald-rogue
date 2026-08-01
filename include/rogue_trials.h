@@ -4,6 +4,7 @@
 #include "global.h"
 
 struct Pokemon;
+struct RogueDifficultyConfig;
 
 enum RogueTrialId
 {
@@ -52,6 +53,20 @@ enum RogueTrialId
     ROGUE_TRIAL_APOTHEOSIS,
     ROGUE_TRIAL_LIMITED_CAPTURE,
     ROGUE_TRIAL_COUNT,
+};
+
+enum RogueTrialEligibilityReason
+{
+    ROGUE_TRIAL_ELIGIBILITY_OK,
+    ROGUE_TRIAL_ELIGIBILITY_POKEDEX,
+    ROGUE_TRIAL_ELIGIBILITY_TYPE,
+    ROGUE_TRIAL_ELIGIBILITY_BST,
+    ROGUE_TRIAL_ELIGIBILITY_LITTLE_CUP,
+    ROGUE_TRIAL_ELIGIBILITY_STARTER_FAMILY,
+    ROGUE_TRIAL_ELIGIBILITY_LEGENDARY_FORBIDDEN,
+    ROGUE_TRIAL_ELIGIBILITY_LEGENDARY_REQUIRED,
+    ROGUE_TRIAL_ELIGIBILITY_DAY_CARE_DISABLED,
+    ROGUE_TRIAL_ELIGIBILITY_INVALID_SETUP,
 };
 
 #define ROGUE_TRIAL_NO_TYPE 0xFF
@@ -153,6 +168,7 @@ bool8 RogueTrial_IsActiveTrial(u8 trialId);
 bool8 RogueTrial_IsInvalidated(void);
 void RogueTrial_Invalidate(void);
 void RogueTrial_ApplyPendingSelection(void);
+bool8 RogueTrial_BuildSelectionConfig(u8 trialId, u8 difficulty, u8 pokedexVariant, struct RogueDifficultyConfig *config);
 void RogueTrial_ApplyRunBagItems(void);
 void RogueTrial_ApplyBattleGimmickOverride(void);
 u8 RogueTrial_GetPendingForcedPokedexVariant(void);
@@ -179,6 +195,7 @@ void RogueTrial_FilterOpponentMonQuery(void);
 bool8 RogueTrial_EnforcesOpponentSpeciesLegality(void);
 u8 RogueTrial_ModifyOpponentEvoLevel(u8 level);
 bool8 RogueTrial_PendingAllowsSpecies(u16 species);
+u8 RogueTrial_GetPendingSpeciesEligibilityReason(u16 species, bool8 isDayCare, u16 *param);
 bool8 RogueTrial_PendingNeedsStarterFilter(void);
 bool8 RogueTrial_PendingRequiresLegendarySpecies(void);
 void RogueTrial_FilterPendingMonQuery(void);
@@ -200,10 +217,14 @@ void RogueTrial_GetPokedexOptionCount(void);
 void RogueTrial_SelectDefaultPokedexOption(void);
 void RogueTrial_BufferTrialPreview(void);
 void RogueTrial_SetPendingSelectionFromScript(void);
+void RogueTrial_SetPreviewSelectionFromScript(void);
 void RogueTrial_HasPendingSelection(void);
 void RogueTrial_PendingHasFixedStartingParty(void);
 void RogueTrial_PendingReplacesStartingParty(void);
 void RogueTrial_ApplyPendingPartyCapacity(void);
+u8 RogueTrial_GetPendingPartyCapacity(u8 capacity);
+bool8 RogueTrial_PendingHasFixedStartingPartyValue(void);
+bool8 RogueTrial_PendingReplacesStartingPartyValue(void);
 void RogueTrial_CanUsePendingParty(void);
 void RogueTrial_CanUsePendingDayCare(void);
 void RogueTrial_CanStartPendingSelection(void);

@@ -1246,32 +1246,76 @@ static bool8 DefinitionAllowsSpecies(const struct RogueTrialDefinition *trial, u
     return DefinitionAllowsSpeciesForDex(trial, species, RoguePokedex_GetDexVariant());
 }
 
-bool8 RogueTrial_PendingAllowsSpecies(u16 species)
+u8 RogueTrial_GetPendingSpeciesEligibilityReason(u16 species, bool8 isDayCare, u16 *param)
 {
     const struct RogueTrialDefinition *trial;
     u8 dexVariant;
 
+    if (param != NULL)
+        *param = 0;
+
     if (species == SPECIES_NONE)
-        return TRUE;
+        return ROGUE_TRIAL_ELIGIBILITY_OK;
+
+    trial = NULL;
+    if (sPendingTrial.isPending && IsValidTrialId(sPendingTrial.trialId))
+        trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
+    if (isDayCare && trial != NULL && trial->disableDayCare)
+        return ROGUE_TRIAL_ELIGIBILITY_DAY_CARE_DISABLED;
 
     dexVariant = sPendingTrial.isPending ? sPendingTrial.pokedexVariant : RoguePokedex_GetDexVariant();
     if (!SpeciesIsEnabledForDexVariant(species, dexVariant))
-        return FALSE;
+    {
+        if (param != NULL)
+            *param = dexVariant;
+        return ROGUE_TRIAL_ELIGIBILITY_POKEDEX;
+    }
 
     if (!sPendingTrial.isPending)
-        return TRUE;
+        return ROGUE_TRIAL_ELIGIBILITY_OK;
 
     if (!IsValidTrialId(sPendingTrial.trialId) || !IsValidDifficulty(sPendingTrial.difficulty))
-        return FALSE;
+        return ROGUE_TRIAL_ELIGIBILITY_INVALID_SETUP;
 
-    trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
     if (trial == NULL || !IsPokedexVariantAllowedForSet(trial->pokedexSet, sPendingTrial.pokedexVariant))
-        return FALSE;
+        return ROGUE_TRIAL_ELIGIBILITY_INVALID_SETUP;
 
     if (!DefinitionRequiresSpeciesLegality(trial))
-        return TRUE;
+        return ROGUE_TRIAL_ELIGIBILITY_OK;
 
-    return DefinitionAllowsSpeciesRules(trial, species);
+    if (trial->requiredType != ROGUE_TRIAL_NO_TYPE && !IsSpeciesType(species, trial->requiredType))
+    {
+        if (param != NULL)
+            *param = trial->requiredType;
+        return ROGUE_TRIAL_ELIGIBILITY_TYPE;
+    }
+
+    if (trial->maxBst != 0 && RoguePokedex_GetSpeciesBST(species) > trial->maxBst)
+    {
+        if (param != NULL)
+            *param = trial->maxBst;
+        return ROGUE_TRIAL_ELIGIBILITY_BST;
+    }
+
+    if (trial->requiresLittleCup && !SpeciesIsLittleCupLegal(species))
+        return ROGUE_TRIAL_ELIGIBILITY_LITTLE_CUP;
+
+    if (trial->requiresStarterSpecies && !SpeciesIsStarterFamily(species))
+        return ROGUE_TRIAL_ELIGIBILITY_STARTER_FAMILY;
+
+    if (trial->forbidsLegendarySpecies && RoguePokedex_IsSpeciesLegendary(species))
+        return ROGUE_TRIAL_ELIGIBILITY_LEGENDARY_FORBIDDEN;
+
+    if (trial->requiresLegendarySpecies && !RoguePokedex_IsSpeciesLegendary(species))
+        return ROGUE_TRIAL_ELIGIBILITY_LEGENDARY_REQUIRED;
+
+    return ROGUE_TRIAL_ELIGIBILITY_OK;
+}
+
+bool8 RogueTrial_PendingAllowsSpecies(u16 species)
+{
+    return RogueTrial_GetPendingSpeciesEligibilityReason(species, FALSE, NULL)
+        == ROGUE_TRIAL_ELIGIBILITY_OK;
 }
 
 bool8 RogueTrial_PendingNeedsStarterFilter(void)
@@ -1362,38 +1406,38 @@ static bool8 CurrentTrialRequiresSpeciesLegality(void)
     return DefinitionRequiresSpeciesLegality(trial);
 }
 
-static void SetOnlyTrainerToggle(u8 trainerToggle)
+static void SetOnlyTrainerToggleFor(struct RogueDifficultyConfig *config, u8 trainerToggle)
 {
     if (trainerToggle == ROGUE_TRIAL_NO_TRAINER_TOGGLE)
         return;
 
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, trainerToggle == CONFIG_TOGGLE_TRAINER_KANTO);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, trainerToggle == CONFIG_TOGGLE_TRAINER_JOHTO);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, trainerToggle == CONFIG_TOGGLE_TRAINER_HOENN);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_ROGUE, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_KANTO, trainerToggle == CONFIG_TOGGLE_TRAINER_KANTO);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_JOHTO, trainerToggle == CONFIG_TOGGLE_TRAINER_JOHTO);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_HOENN, trainerToggle == CONFIG_TOGGLE_TRAINER_HOENN);
 #ifdef ROGUE_EXPANSION
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH, trainerToggle == CONFIG_TOGGLE_TRAINER_SINNOH);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA, trainerToggle == CONFIG_TOGGLE_TRAINER_UNOVA);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS, trainerToggle == CONFIG_TOGGLE_TRAINER_KALOS);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA, trainerToggle == CONFIG_TOGGLE_TRAINER_ALOLA);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR, trainerToggle == CONFIG_TOGGLE_TRAINER_GALAR);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, trainerToggle == CONFIG_TOGGLE_TRAINER_PALDEA);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_SINNOH, trainerToggle == CONFIG_TOGGLE_TRAINER_SINNOH);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_UNOVA, trainerToggle == CONFIG_TOGGLE_TRAINER_UNOVA);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_KALOS, trainerToggle == CONFIG_TOGGLE_TRAINER_KALOS);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_ALOLA, trainerToggle == CONFIG_TOGGLE_TRAINER_ALOLA);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_GALAR, trainerToggle == CONFIG_TOGGLE_TRAINER_GALAR);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_PALDEA, trainerToggle == CONFIG_TOGGLE_TRAINER_PALDEA);
 #endif
 }
 
-static void SetAllRegionalTrainerToggles(void)
+static void SetAllRegionalTrainerTogglesFor(struct RogueDifficultyConfig *config)
 {
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_ROGUE, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
 #ifdef ROGUE_EXPANSION
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_SINNOH, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_UNOVA, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_KALOS, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_ALOLA, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_GALAR, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_PALDEA, TRUE);
 #endif
 }
 
@@ -1616,27 +1660,46 @@ void RogueTrial_ApplyPendingSelection(void)
         gRogueSaveBlock->lastTrialPokedexVariant = sPendingTrial.pokedexVariant;
         gRogueSaveBlock->hasLastTrialSelection = TRUE;
 
-        Rogue_SetDifficultyPreset(sPendingTrial.difficulty);
-        RoguePokedex_SetDexVariant(sPendingTrial.pokedexVariant);
+        {
+            struct RogueDifficultyConfig config;
 
-        SetOnlyTrainerToggle(trial->forcedTrainerToggle);
-
-        if (trial->enableAllRegionalTrainers)
-            SetAllRegionalTrainerToggles();
-
-        if (trial->hasForcedTrainerOrder)
-            Rogue_SetConfigRange(CONFIG_RANGE_TRAINER_ORDER, trial->forcedTrainerOrder);
-
-        if (trial->hasForcedBattleFormat)
-            Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, trial->forcedBattleFormat);
-
-        if (trial->forceFreshStart)
-            Rogue_SetConfigToggle(CONFIG_TOGGLE_BAG_WIPE, TRUE);
+            Rogue_CopyReadableDifficultyConfig(&config);
+            if (RogueTrial_BuildSelectionConfig(sPendingTrial.trialId, sPendingTrial.difficulty, sPendingTrial.pokedexVariant, &config))
+                Rogue_ApplyDifficultyConfig(&config);
+        }
 
         FlagClear(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE);
     }
 
     RogueTrial_ClearPendingSelection();
+}
+
+bool8 RogueTrial_BuildSelectionConfig(u8 trialId, u8 difficulty, u8 pokedexVariant, struct RogueDifficultyConfig *config)
+{
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(trialId);
+
+    if (trial == NULL
+        || config == NULL
+        || !IsValidTrialId(trialId)
+        || !IsValidDifficulty(difficulty)
+        || (trial->hasForcedDifficulty && trial->forcedDifficulty != difficulty)
+        || !IsPokedexVariantAllowedForSet(trial->pokedexSet, pokedexVariant))
+        return FALSE;
+
+    Rogue_ApplyDifficultyPresetToConfig(config, difficulty);
+    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_POKEDEX_VARIANT, pokedexVariant);
+    SetOnlyTrainerToggleFor(config, trial->forcedTrainerToggle);
+
+    if (trial->enableAllRegionalTrainers)
+        SetAllRegionalTrainerTogglesFor(config);
+    if (trial->hasForcedTrainerOrder)
+        Rogue_SetConfigRangeFor(config, CONFIG_RANGE_TRAINER_ORDER, trial->forcedTrainerOrder);
+    if (trial->hasForcedBattleFormat)
+        Rogue_SetConfigRangeFor(config, CONFIG_RANGE_BATTLE_FORMAT, trial->forcedBattleFormat);
+    if (trial->forceFreshStart)
+        Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_BAG_WIPE, TRUE);
+
+    return TRUE;
 }
 
 void RogueTrial_ApplyRunBagItems(void)
@@ -2283,7 +2346,8 @@ void RogueTrial_AppendDifficultyOptions(void)
         ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sDifficultyNames[i], i);
 
     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Back, MULTI_B_PRESSED);
-    ScriptMenu_ScrollingMultichoiceDynamicSetDefault(DIFFICULTY_LEVEL_AVERAGE);
+    ScriptMenu_ScrollingMultichoiceDynamicSetDefault(
+        IsValidDifficulty(gSpecialVar_0x8005) ? gSpecialVar_0x8005 : DIFFICULTY_LEVEL_AVERAGE);
 }
 
 void RogueTrial_SelectForcedDifficulty(void)
@@ -2429,6 +2493,29 @@ void RogueTrial_SetPendingSelectionFromScript(void)
     }
 }
 
+void RogueTrial_SetPreviewSelectionFromScript(void)
+{
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gSpecialVar_0x8004);
+
+    if (trial != NULL
+        && IsValidTrialId(gSpecialVar_0x8004)
+        && IsValidDifficulty(gSpecialVar_0x8005)
+        && (!trial->hasForcedDifficulty || gSpecialVar_0x8005 == trial->forcedDifficulty)
+        && IsPokedexVariantAllowedForSet(trial->pokedexSet, gSpecialVar_0x8006))
+    {
+        sPendingTrial.trialId = gSpecialVar_0x8004;
+        sPendingTrial.difficulty = gSpecialVar_0x8005;
+        sPendingTrial.pokedexVariant = gSpecialVar_0x8006;
+        sPendingTrial.isPending = TRUE;
+        gSpecialVar_Result = TRUE;
+    }
+    else
+    {
+        RogueTrial_ClearPendingSelection();
+        gSpecialVar_Result = FALSE;
+    }
+}
+
 void RogueTrial_HasPendingSelection(void)
 {
     gSpecialVar_Result = sPendingTrial.isPending;
@@ -2436,27 +2523,42 @@ void RogueTrial_HasPendingSelection(void)
 
 void RogueTrial_PendingHasFixedStartingParty(void)
 {
+    gSpecialVar_Result = RogueTrial_PendingHasFixedStartingPartyValue();
+}
+
+bool8 RogueTrial_PendingHasFixedStartingPartyValue(void)
+{
     const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
 
-    gSpecialVar_Result = sPendingTrial.isPending && trial != NULL && trial->fixedStartingPartyCount != 0;
+    return sPendingTrial.isPending && trial != NULL && trial->fixedStartingPartyCount != 0;
 }
 
 void RogueTrial_PendingReplacesStartingParty(void)
 {
+    gSpecialVar_Result = RogueTrial_PendingReplacesStartingPartyValue();
+}
+
+bool8 RogueTrial_PendingReplacesStartingPartyValue(void)
+{
     const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
 
-    gSpecialVar_Result = sPendingTrial.isPending
+    return sPendingTrial.isPending
         && trial != NULL
         && (trial->forceRandomStarter || trial->fixedStartingPartyCount != 0);
 }
 
 void RogueTrial_ApplyPendingPartyCapacity(void)
 {
+    gSpecialVar_Result = RogueTrial_GetPendingPartyCapacity(gSpecialVar_Result);
+}
+
+u8 RogueTrial_GetPendingPartyCapacity(u8 capacity)
+{
     const struct RogueTrialDefinition *trial;
     u8 trialCapacity;
 
     if (!sPendingTrial.isPending)
-        return;
+        return capacity;
 
     trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
     if (trial == NULL
@@ -2464,10 +2566,10 @@ void RogueTrial_ApplyPendingPartyCapacity(void)
         || trial->fixedStartingPartyCount != 0
         || !trial->hasCurseEffect
         || trial->curseEffect != EFFECT_PARTY_SIZE)
-        return;
+        return capacity;
 
     trialCapacity = PARTY_SIZE - min(trial->curseCount, PARTY_SIZE - 1);
-    gSpecialVar_Result = min(gSpecialVar_Result, trialCapacity);
+    return min(capacity, trialCapacity);
 }
 
 void RogueTrial_CanUsePendingParty(void)

@@ -26,9 +26,18 @@ struct GameModeRules
 
 void Rogue_SetConfigToggle(u16 elem, bool8 state);
 bool8 Rogue_GetConfigToggle(u16 elem);
+void Rogue_SetConfigToggleFor(struct RogueDifficultyConfig *config, u16 elem, bool8 state);
 
 void Rogue_SetConfigRange(u16 elem, u8 value);
 u8 Rogue_GetConfigRange(u16 elem);
+void Rogue_SetConfigRangeFor(struct RogueDifficultyConfig *config, u16 elem, u8 value);
+
+void Rogue_CopyReadableDifficultyConfig(struct RogueDifficultyConfig *dest);
+void Rogue_ApplyDifficultyPresetToConfig(struct RogueDifficultyConfig *config, u8 preset);
+void Rogue_ApplyDifficultyConfig(const struct RogueDifficultyConfig *config);
+void Rogue_SetRunStartConfigOverride(const struct RogueDifficultyConfig *config);
+void Rogue_ClearRunStartConfigOverride(void);
+bool8 Rogue_HasRunStartConfigOverride(void);
 
 bool8 Rogue_CanEditConfig();
 

@@ -64,6 +64,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
+  an interactive Run Review that previews effective rules and readiness,
+  supports in-place setup edits, and replaces the old confirmation prompts.
 - Made Sky Uppercut super effective against Flying-type Pokémon and limited its
   tutor distribution to the Blaziken line, Hitmonchan, and Medicham.
 - Reworked Sceptile's Unique Ability into Canopy Stalker: with three qualifying

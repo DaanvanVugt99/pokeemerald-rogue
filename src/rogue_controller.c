@@ -80,6 +80,7 @@
 #include "rogue_pokedex.h"
 #include "rogue_popup.h"
 #include "rogue_query.h"
+#include "rogue_run_start.h"
 #include "rogue_trials.h"
 #include "rogue_quest.h"
 #include "rogue_ridemon.h"
@@ -5140,6 +5141,10 @@ static void BeginRogueRunPhase_Reset(void)
             FlagClear(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE);
         }
     }
+
+    // From this point on, the committed run configuration is authoritative.
+    // Drop the temporary review override before deriving run rules from it.
+    RogueRunStart_Clear();
 
     if (Rogue_GetModeRules()->disableMainQuests || AnyCharmsActive())
         FlagSet(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);

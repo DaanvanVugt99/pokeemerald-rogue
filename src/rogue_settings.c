@@ -96,6 +96,8 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
 };
 
 EWRAM_DATA struct RogueDifficultyLocal gRogueDifficultyLocal;
+static EWRAM_DATA struct RogueDifficultyConfig sRunStartConfigOverride;
+static EWRAM_DATA bool8 sRunStartConfigOverrideActive;
 
 #ifdef ROGUE_DEBUG
 EWRAM_DATA struct RogueDebugConfig gRogueDebug = {0};
@@ -198,6 +200,9 @@ static struct RogueDifficultyConfig* GetWritableDifficultyConfig()
 
 static struct RogueDifficultyConfig const* GetReadableDifficultyConfig()
 {
+    if(sRunStartConfigOverrideActive)
+        return &sRunStartConfigOverride;
+
     if(RogueMP_IsActive() && RogueMP_IsClient())
     {
         AGB_ASSERT(gRogueMultiplayer != NULL);
@@ -205,6 +210,34 @@ static struct RogueDifficultyConfig const* GetReadableDifficultyConfig()
     }
 
     return &gRogueSaveBlock->difficultyConfig;
+}
+
+void Rogue_CopyReadableDifficultyConfig(struct RogueDifficultyConfig *dest)
+{
+    memcpy(dest, GetReadableDifficultyConfig(), sizeof(*dest));
+}
+
+void Rogue_SetRunStartConfigOverride(const struct RogueDifficultyConfig *config)
+{
+    memcpy(&sRunStartConfigOverride, config, sizeof(sRunStartConfigOverride));
+    sRunStartConfigOverrideActive = TRUE;
+    gRogueDifficultyLocal.areLevelsValid = FALSE;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+}
+
+void Rogue_ClearRunStartConfigOverride(void)
+{
+    if(sRunStartConfigOverrideActive)
+    {
+        sRunStartConfigOverrideActive = FALSE;
+        gRogueDifficultyLocal.areLevelsValid = FALSE;
+        RogueMonQuery_InvalidateSpeciesActiveCache();
+    }
+}
+
+bool8 Rogue_HasRunStartConfigOverride(void)
+{
+    return sRunStartConfigOverrideActive;
 }
 
 static bool8 IsDifficultyToggle(u16 elem)
@@ -243,10 +276,18 @@ static bool8 IsDifficultyRange(u16 elem)
 
 void Rogue_SetConfigToggle(u16 elem, bool8 state)
 {
+    struct RogueDifficultyConfig* config = GetWritableDifficultyConfig();
+
+    Rogue_SetConfigToggleFor(config, elem, state);
+    gRogueDifficultyLocal.areLevelsValid = FALSE;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+}
+
+void Rogue_SetConfigToggleFor(struct RogueDifficultyConfig *config, u16 elem, bool8 state)
+{
     u16 idx = elem / 8;
     u16 bit = elem % 8;
     u8 bitMask = 1 << bit;
-    struct RogueDifficultyConfig* config = GetWritableDifficultyConfig();
 
     AGB_ASSERT(elem < CONFIG_TOGGLE_COUNT);
     AGB_ASSERT(idx < ARRAY_COUNT(config->toggleBits));
@@ -261,9 +302,6 @@ void Rogue_SetConfigToggle(u16 elem, bool8 state)
         {
             config->toggleBits[idx] &= ~bitMask;
         }
-
-        gRogueDifficultyLocal.areLevelsValid = FALSE;
-        RogueMonQuery_InvalidateSpeciesActiveCache();
 
         if(IsDifficultyToggle(elem))
             config->rangeValues[CONFIG_RANGE_DIFFICULTY_PRESET] = DIFFICULTY_LEVEL_CUSTOM;
@@ -285,14 +323,19 @@ bool8 Rogue_GetConfigToggle(u16 elem)
 void Rogue_SetConfigRange(u16 elem, u8 value)
 {
     struct RogueDifficultyConfig* config = GetWritableDifficultyConfig();
+
+    Rogue_SetConfigRangeFor(config, elem, value);
+    gRogueDifficultyLocal.areLevelsValid = FALSE;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+}
+
+void Rogue_SetConfigRangeFor(struct RogueDifficultyConfig *config, u16 elem, u8 value)
+{
     AGB_ASSERT(elem < CONFIG_RANGE_COUNT);
 
     if(elem < CONFIG_RANGE_COUNT)
     {
         config->rangeValues[elem] = value;
-        gRogueDifficultyLocal.areLevelsValid = FALSE;
-        RogueMonQuery_InvalidateSpeciesActiveCache();
-
         if(IsDifficultyRange(elem))
             config->rangeValues[CONFIG_RANGE_DIFFICULTY_PRESET] = DIFFICULTY_LEVEL_CUSTOM;
     }
@@ -497,11 +540,33 @@ static void Rogue_ResetToDefaults(bool8 difficultySettingsOnly)
 
 static void Rogue_SetDifficultyPresetInternal(u8 preset)
 {
+    struct RogueDifficultyConfig config;
+
+    Rogue_CopyReadableDifficultyConfig(&config);
+    Rogue_ApplyDifficultyPresetToConfig(&config, preset);
+    Rogue_ApplyDifficultyConfig(&config);
+}
+
+void Rogue_ApplyDifficultyPresetToConfig(struct RogueDifficultyConfig *config, u8 preset)
+{
     u8 i, j;
     const struct RogueDifficultyPresetToggle* toggle;
     const struct RogueDifficultyPresetRange* range;
 
-    Rogue_ResetToDefaults(TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_OVER_LVL, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_EV_GAIN, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_BAG_WIPE, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_SWITCH_MODE, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_AFFECTION, TRUE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_RELEASE_MONS, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_BAG_CLAUSE, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_SPECIES_CLAUSE, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_LEGENDARY_CLAUSE, FALSE);
+    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_DIVERSE_TRAINERS, FALSE);
+    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_EASY);
+    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_ITEM, DIFFICULTY_LEVEL_EASY);
+    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_LEGENDARY, DIFFICULTY_LEVEL_EASY);
 
     for(i = 0; i < DIFFICULTY_PRESET_COUNT; ++i)
     {
@@ -512,7 +577,7 @@ static void Rogue_SetDifficultyPresetInternal(u8 preset)
             if(toggle->id == CONFIG_TOGGLE_COUNT)
                 break;
 
-            Rogue_SetConfigToggle(toggle->id, toggle->value);
+            Rogue_SetConfigToggleFor(config, toggle->id, toggle->value);
         }
 
         for(j = 0; j < ARRAY_COUNT(gRogueDifficultyPresets[i].ranges); ++j)
@@ -522,7 +587,7 @@ static void Rogue_SetDifficultyPresetInternal(u8 preset)
             if(range->id == CONFIG_RANGE_COUNT)
                 break;
 
-            Rogue_SetConfigRange(range->id, range->value);
+            Rogue_SetConfigRangeFor(config, range->id, range->value);
         }
 
         // Have applied preset up until this point
@@ -530,8 +595,14 @@ static void Rogue_SetDifficultyPresetInternal(u8 preset)
             break;
     }
 
-    gRogueDifficultyLocal.rewardLevel = preset;
-    gRogueDifficultyLocal.areLevelsValid = TRUE;
+    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_DIFFICULTY_PRESET, preset);
+}
+
+void Rogue_ApplyDifficultyConfig(const struct RogueDifficultyConfig *config)
+{
+    memcpy(GetWritableDifficultyConfig(), config, sizeof(*config));
+    gRogueDifficultyLocal.areLevelsValid = FALSE;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
 }
 
 static u8 Rogue_CalcRewardDifficultyPreset()
