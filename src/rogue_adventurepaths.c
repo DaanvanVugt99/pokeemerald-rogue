@@ -1123,7 +1123,7 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
     // Erase any previously set params
     gRogueAdvPath.rooms[roomId].roomType = ADVPATH_ROOM_NONE; // set room type below so counting methods don't break
     memset(&gRogueAdvPath.rooms[roomId].roomParams, 0, sizeof(gRogueAdvPath.rooms[roomId].roomParams));
-    memset(&gRogueAdvPath.rooms[roomId].routeScene, 0, sizeof(gRogueAdvPath.rooms[roomId].routeScene));
+    memset(&gRogueAdvPath.rooms[roomId].routeScenePlan, 0, sizeof(gRogueAdvPath.rooms[roomId].routeScenePlan));
 
     switch(roomType)
     {

@@ -21,9 +21,6 @@ const SAFARI_SELECTED_BUY = 10
 const SAFARI_SELECTED_DISMISS = 11
 const SAFARI_SELECTED_BACK = 12
 
-const ROGUE_ROUTE_EVENT_ANCHOR_SENDER = 0
-const ROGUE_ROUTE_EVENT_ANCHOR_RECIPIENT = 1
-
 const ROGUE_ROUTE_EVENT_STATE_NOT_STARTED = 0
 const ROGUE_ROUTE_EVENT_STATE_ACTIVE = 1
 const ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING = 2
@@ -35,6 +32,7 @@ const ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM = 2
 const ROGUE_ROUTE_EVENT_RESULT_NO_SPACE = 3
 const ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL = 4
 const ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON = 5
+const VAR_ROUTE_EVENT_STATE = VAR_0x8008
 
 const ROGUE_FOSSIL_RESTORATION_STABLE = 0
 const ROGUE_FOSSIL_RESTORATION_ADAPTIVE = 1
@@ -79,7 +77,7 @@ script Rogue_RouteEvent_HexedShrine
     bufferitemname(STR_VAR_2, VAR_0x8005)
     buffernumberstring(STR_VAR_1, VAR_0x8007)
 
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
         msgbox(format("Our bargain holds. The {STR_VAR_2} will fade when the next Boss falls."))
     }
@@ -146,7 +144,7 @@ script Rogue_RouteEvent_AnomalousFossilOffer
     bufferspeciesname(STR_VAR_1, VAR_0x8004)
     bufferitemname(STR_VAR_2, VAR_0x8005)
 
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
         msgbox(format("This {STR_VAR_2} contains a {STR_VAR_1}, but its genetic material is unusually intact.\pA colleague farther ahead could restore it as a Rare Unique Pokémon. Will you take it?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
@@ -189,7 +187,7 @@ script Rogue_RouteEvent_AnomalousFossilRestoration
     faceplayer
 
     special(RogueRouteEvents_GetInteractionData)
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
         bufferspeciesname(STR_VAR_1, VAR_0x8004)
         msgbox(format("That {STR_VAR_1} is a remarkable restoration. Take good care of it."))
@@ -260,7 +258,7 @@ script Rogue_RouteEvent_StolenTradeCaseOffer
     faceplayer
 
     special(RogueRouteEvents_GetInteractionData)
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
         msgbox(format("A gang of thieves robbed my caravan! They took my locked Trade Case.\pIf you recover it, I'll give you a Large Bundle and ¥5,000. Will you help?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
@@ -296,13 +294,13 @@ script Rogue_RouteEvent_StolenTradeCaseCamp
     special(RogueRouteEvents_GetInteractionData)
     bufferitemname(STR_VAR_2, VAR_0x8005)
 
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
         msgbox(format("You got the case. Now get out of here!"))
     }
     else
     {
-        if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING)
+        if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING)
         {
             msgbox(format("You beat me already! Take the {STR_VAR_2} and get lost."))
             special(RogueRouteEvents_FinishStolenTradeCaseBattle)
@@ -357,7 +355,7 @@ script Rogue_RouteEvent_StolenTradeCasePayoff
     special(RogueRouteEvents_GetInteractionData)
     bufferitemname(STR_VAR_1, VAR_0x8004)
 
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
         msgbox(format("Thanks again! My caravan can finally get moving."))
     }

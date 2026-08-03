@@ -302,11 +302,18 @@ bool8 RogueAdventureQuests_IsItemProtected(u16 itemId)
     return FALSE;
 }
 
-static bool8 BuildQuestSceneRequest(u8 questId, struct RogueRouteSceneRequest *request)
+bool8 RogueAdventureQuests_BuildSceneRequest(u8 questId, struct RogueRouteSceneRequest *request)
 {
-    const struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[questId];
-    const struct RogueAdventureQuestDefinition *definition = GetDefinition(quest->definitionId);
-    const struct RogueAdventureQuestNodeDefinition *node = GetNode(quest);
+    const struct RogueAdventureQuest *quest;
+    const struct RogueAdventureQuestDefinition *definition;
+    const struct RogueAdventureQuestNodeDefinition *node;
+
+    if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+        return FALSE;
+
+    quest = &gRogueRun.adventureQuests[questId];
+    definition = GetDefinition(quest->definitionId);
+    node = GetNode(quest);
 
     if(definition == NULL || node == NULL || definition->buildSceneRequest == NULL)
         return FALSE;
@@ -317,12 +324,16 @@ static bool8 BuildQuestSceneRequest(u8 questId, struct RogueRouteSceneRequest *r
     return definition->buildSceneRequest(quest, request);
 }
 
-bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSceneRequest *request, u16 *priority)
+u8 RogueAdventureQuests_CollectSceneRequests(u8 roomId, struct RogueRouteSceneRequest *requests, u8 capacity)
 {
+    u8 count = 0;
     u8 i;
 
+    if(capacity == 0)
+        return 0;
+
     // Same-room reloads restore the already-bound graph node.
-    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY && count < capacity; ++i)
     {
         struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[i];
         const struct RogueAdventureQuestNodeDefinition *node = GetNode(quest);
@@ -332,13 +343,19 @@ bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSc
             && quest->routesUntilScene == 0
             && quest->sceneRoomId == roomId)
         {
-            *priority = 1000 + ROGUE_ADVENTURE_QUEST_CAPACITY - i;
-            return BuildQuestSceneRequest(i, request);
+            if(RogueAdventureQuests_BuildSceneRequest(i, &requests[count]))
+                ++count;
         }
     }
 
-    // One graph node owns the route scene. Slot order is stable and a skipped
-    // node receives a cooldown so later quests still get an opportunity.
+    // A bound node means this is a same-route reload. Rebuild exactly the
+    // existing set without advancing cooldowns or binding newly-ready quests.
+    if(count != 0)
+        return count;
+
+    // Fill the remaining route capacity with ready graph nodes. Nodes which do
+    // not fit remain ready for the next route; selected nodes receive a
+    // cooldown only if the player leaves their bound route unfinished.
     for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
     {
         struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[i];
@@ -352,15 +369,24 @@ bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSc
         if(quest->routesUntilScene != 0)
             --quest->routesUntilScene;
 
-        if(quest->routesUntilScene == 0)
+        if(quest->routesUntilScene == 0 && count < capacity)
         {
             quest->sceneRoomId = roomId;
-            *priority = 1000 + ROGUE_ADVENTURE_QUEST_CAPACITY - i;
-            return BuildQuestSceneRequest(i, request);
+            if(RogueAdventureQuests_BuildSceneRequest(i, &requests[count]))
+                ++count;
         }
     }
 
-    return FALSE;
+    return count;
+}
+
+bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSceneRequest *request, u16 *priority)
+{
+    if(RogueAdventureQuests_CollectSceneRequests(roomId, request, 1) == 0)
+        return FALSE;
+
+    *priority = 1000 + ROGUE_ADVENTURE_QUEST_CAPACITY - request->ownerQuestId;
+    return TRUE;
 }
 
 void RogueAdventureQuests_LeaveRoute(u8 roomId)

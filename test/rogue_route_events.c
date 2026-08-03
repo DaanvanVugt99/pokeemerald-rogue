@@ -83,11 +83,43 @@ static void SetupCurrentEvent(struct RogueAdvPath *originalPath, u8 *originalRoo
     gRogueRun.adventureRoomId = 0;
 }
 
+static bool8 GetPlacementByRecipe(u8 recipeId, struct RogueRouteSceneRequest *request)
+{
+    u8 i;
+
+    for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
+    {
+        if(RogueRouteScenes_GetPlacementRequest(i, request)
+            && request->recipeId == recipeId)
+            return TRUE;
+    }
+
+    memset(request, 0, sizeof(*request));
+    return FALSE;
+}
+
+static bool8 GetFirstPlacement(struct RogueRouteSceneRequest *request)
+{
+    return RogueRouteScenes_GetPlacementRequest(0, request);
+}
+
+static void SelectPlacement(const struct RogueRouteSceneRequest *request)
+{
+    gSelectedObjectEvent = 0;
+    gObjectEvents[0].trainerRange_berryTreeId = request->sceneSlot | (request->lotRole << 2);
+}
+
+static void SetDebugPlacement(u8 recipeId, u8 lotId, u8 ownerQuestId)
+{
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[gRogueRun.adventureRoomId]);
+    RogueRouteScenes_DebugSetPlacement(0, recipeId, lotId, 0, 0, ownerQuestId);
+}
+
 TEST("Route event fallback registry is deterministic weighted and RNG neutral")
 {
     struct RogueAdvPath originalPath;
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
-    struct RogueRouteSceneRequest firstRequest;
+    struct RogueRouteScenePlan firstPlan;
     RAND_TYPE originalRogueRng = gRngRogueValue;
     RAND_TYPE originalStandardRng = gRngValue;
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
@@ -129,46 +161,55 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
         EXPECT_EQ(memcmp(&gRngValue, &standardRngBefore, sizeof(standardRngBefore)), 0);
         EXPECT_EQ(memcmp(&gRngRogueValue, &rogueRngBefore, sizeof(rogueRngBefore)), 0);
 
-        firstRequest = gRogueAdvPath.rooms[0].routeScene;
+        firstPlan = gRogueAdvPath.rooms[0].routeScenePlan;
         SeedRng(0xEF01);
         SeedRogueRng(0xDCBA);
         RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
         RogueRouteScenes_OnEnterRoute();
-        EXPECT_EQ(memcmp(&firstRequest, &gRogueAdvPath.rooms[0].routeScene, sizeof(firstRequest)), 0);
+        EXPECT_EQ(memcmp(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan, sizeof(firstPlan)), 0);
+        EXPECT_GE(RogueRouteScenes_GetPlacementCount(), 1);
+        EXPECT_LE(RogueRouteScenes_GetPlacementCount(), ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
 
-        if(firstRequest.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER)
+        for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
         {
-            ++merchantCount;
-            EXPECT_EQ((u8)firstRequest.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
-            EXPECT_EQ(firstRequest.requestedItem, ITEM_TRADE_CASE);
-            EXPECT((gRogueTrainers[firstRequest.trainerNum].classFlags & GetActiveTeamClassFlag(gRogueRun.teamEncounterNum)) != 0);
-        }
-        else if(firstRequest.recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE)
-        {
-            EXPECT_EQ((u8)firstRequest.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
-            EXPECT_EQ(firstRequest.primaryGraphicsId, OBJ_EVENT_GFX_DEVIL_MAN);
-            ++shrineCount;
-            for(i = 0; i < curseCount; ++i)
+            struct RogueRouteSceneRequest request;
+
+            EXPECT(RogueRouteScenes_GetPlacementRequest(i, &request));
+            if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER)
             {
-                if(firstRequest.requestedItem == Rogue_SelectDarkDealCurseItem(i))
-                    seenCurse[i] = TRUE;
+                ++merchantCount;
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
+                EXPECT_EQ(request.requestedItem, ITEM_TRADE_CASE);
+                EXPECT((gRogueTrainers[request.trainerNum].classFlags & GetActiveTeamClassFlag(gRogueRun.teamEncounterNum)) != 0);
+            }
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE)
+            {
+                u8 curseIdx;
+
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+                EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_DEVIL_MAN);
+                ++shrineCount;
+                for(curseIdx = 0; curseIdx < curseCount; ++curseIdx)
+                {
+                    if(request.requestedItem == Rogue_SelectDarkDealCurseItem(curseIdx))
+                        seenCurse[curseIdx] = TRUE;
+                }
+            }
+            else
+            {
+                EXPECT_EQ(request.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
+                EXPECT_EQ(RogueAdventureQuests_GetFossilSpecies(request.requestedItem), request.rewardItem);
+                ++fossilCount;
             }
         }
-        else
-        {
-            EXPECT_EQ(firstRequest.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
-            EXPECT_EQ((u8)firstRequest.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
-            EXPECT_EQ(RogueAdventureQuests_GetFossilSpecies(firstRequest.requestedItem), firstRequest.rewardItem);
-            ++fossilCount;
-        }
     }
-    EXPECT_GE(merchantCount, 250);
-    EXPECT_LE(merchantCount, 420);
-    EXPECT_GE(shrineCount, 250);
-    EXPECT_LE(shrineCount, 420);
-    EXPECT_GE(fossilCount, 250);
-    EXPECT_LE(fossilCount, 420);
-    EXPECT_EQ(merchantCount + shrineCount + fossilCount, 1000);
+    EXPECT_GE(merchantCount, 500);
+    EXPECT_LE(merchantCount, 800);
+    EXPECT_GE(shrineCount, 500);
+    EXPECT_LE(shrineCount, 800);
+    EXPECT_GE(fossilCount, 500);
+    EXPECT_LE(fossilCount, 800);
     for(i = 0; i < curseCount; ++i)
         EXPECT(seenCurse[i]);
 
@@ -184,7 +225,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     gRngValue = originalStandardRng;
 }
 
-TEST("Route events reserve two clear anchors on every classified active route")
+TEST("Route events provide clear typed lots on every classified active route")
 {
     u8 routeIdx;
 
@@ -194,64 +235,96 @@ TEST("Route events reserve two clear anchors on every classified active route")
         const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(route->map.group, route->map.num);
         const struct MapLayout *mapLayout = mapHeader->mapLayout;
         const struct MapEvents *events = mapHeader->events;
-        const struct ObjectEventTemplate *markers[ROGUE_ROUTE_EVENT_ANCHOR_COUNT] = {0};
-        u8 markerCount = 0;
+        const struct ObjectEventTemplate *lots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {0};
+        u8 lotCount = 0;
+        u8 baseObjectCount = 0;
         u8 objectIdx;
 
         EXPECT_LT(route->environment, ROGUE_ROUTE_ENVIRONMENT_COUNT);
-        EXPECT_LE(events->objectEventCount + 2, OBJECT_EVENT_TEMPLATES_COUNT);
+        EXPECT_LE(events->objectEventCount, OBJECT_EVENT_TEMPLATES_COUNT);
 
         for(objectIdx = 0; objectIdx < events->objectEventCount; ++objectIdx)
         {
             const struct ObjectEventTemplate *object = &events->objectEvents[objectIdx];
 
-            if(RogueRouteScenes_IsAnchorTemplate(object))
+            if(RogueRouteScenes_IsLotTemplate(object))
             {
-                u16 role = object->trainerRange_berryTreeId;
-                EXPECT_LT(role, ROGUE_ROUTE_EVENT_ANCHOR_COUNT);
-                EXPECT_EQ(markers[role], NULL);
-                markers[role] = object;
-                ++markerCount;
+                u16 lotId = object->trainerRange_berryTreeId;
+                EXPECT_LT(lotId, ROGUE_ROUTE_SCENE_MAX_LOTS);
+                EXPECT_EQ(lots[lotId], NULL);
+                lots[lotId] = object;
+                ++lotCount;
             }
+            else
+                ++baseObjectCount;
         }
 
-        EXPECT_EQ(markerCount, ROGUE_ROUTE_EVENT_ANCHOR_COUNT);
-        EXPECT_NE(markers[0]->localId, markers[1]->localId);
+        EXPECT_GE(lotCount, 5);
+        EXPECT_LE(lotCount, 10);
+        EXPECT_LE(baseObjectCount + ROGUE_ROUTE_SCENE_MAX_PLACEMENTS * 4, OBJECT_EVENT_TEMPLATES_COUNT);
 
-        for(objectIdx = 0; objectIdx < ROGUE_ROUTE_EVENT_ANCHOR_COUNT; ++objectIdx)
+        for(objectIdx = 0; objectIdx < ROGUE_ROUTE_SCENE_MAX_LOTS; ++objectIdx)
         {
-            const struct ObjectEventTemplate *marker = markers[objectIdx];
+            const struct ObjectEventTemplate *lot = lots[objectIdx];
+            s16 firstOffset;
+            s16 lastOffset;
+            u8 size;
             s16 x;
             s16 y;
             u8 otherIdx;
             u8 warpIdx;
 
-            EXPECT_GT(marker->x, 0);
-            EXPECT_GT(marker->y, 0);
-            EXPECT_LT(marker->x, mapLayout->width - 1);
-            EXPECT_LT(marker->y, mapLayout->height - 1);
+            if(lot == NULL)
+                continue;
 
-            for(y = marker->y - 1; y <= marker->y + 1; ++y)
+            size = lot->movementRangeX + 2;
+            firstOffset = -(size / 2);
+            lastOffset = firstOffset + size - 1;
+            EXPECT_GE(lot->x + firstOffset, 0);
+            EXPECT_GE(lot->y + firstOffset, 0);
+            EXPECT_LT(lot->x + lastOffset, mapLayout->width);
+            EXPECT_LT(lot->y + lastOffset, mapLayout->height);
+
+            for(y = lot->y + firstOffset; y <= lot->y + lastOffset; ++y)
             {
-                for(x = marker->x - 1; x <= marker->x + 1; ++x)
+                for(x = lot->x + firstOffset; x <= lot->x + lastOffset; ++x)
                 {
                     u16 block = mapLayout->map[y * mapLayout->width + x];
                     EXPECT_EQ(block & MAPGRID_COLLISION_MASK, 0);
-                    EXPECT_EQ((block & MAPGRID_ELEVATION_MASK) >> MAPGRID_ELEVATION_SHIFT, marker->elevation);
+                    EXPECT_EQ((block & MAPGRID_ELEVATION_MASK) >> MAPGRID_ELEVATION_SHIFT, lot->elevation);
                 }
             }
+
+            // Recipes keep the tile directly south of their centre open so
+            // the player can interact with the main object from below.
+            y = lot->y + 1;
+            EXPECT_LT(y, mapLayout->height);
+            EXPECT_EQ(mapLayout->map[y * mapLayout->width + lot->x] & MAPGRID_COLLISION_MASK, 0);
 
             for(otherIdx = 0; otherIdx < events->objectEventCount; ++otherIdx)
             {
                 const struct ObjectEventTemplate *other = &events->objectEvents[otherIdx];
-                if(other != marker)
-                    EXPECT(abs(other->x - marker->x) > 1 || abs(other->y - marker->y) > 1);
+                if(other != lot && !RogueRouteScenes_IsLotTemplate(other))
+                    EXPECT(other->x < lot->x + firstOffset || other->x > lot->x + lastOffset
+                        || other->y < lot->y + firstOffset || other->y > lot->y + lastOffset);
+                else if(other != lot)
+                {
+                    u8 otherSize = other->movementRangeX + 2;
+                    s16 otherFirst = -(otherSize / 2);
+                    s16 otherLast = otherFirst + otherSize - 1;
+
+                    EXPECT(lot->x + lastOffset < other->x + otherFirst
+                        || other->x + otherLast < lot->x + firstOffset
+                        || lot->y + lastOffset < other->y + otherFirst
+                        || other->y + otherLast < lot->y + firstOffset);
+                }
             }
 
             for(warpIdx = 0; warpIdx < events->warpCount; ++warpIdx)
             {
                 const struct WarpEvent *warp = &events->warps[warpIdx];
-                EXPECT(abs(warp->x - marker->x) > 1 || abs(warp->y - marker->y) > 1);
+                EXPECT(warp->x < lot->x + firstOffset || warp->x > lot->x + lastOffset
+                    || warp->y < lot->y + firstOffset || warp->y > lot->y + lastOffset);
             }
         }
     }
@@ -259,18 +332,26 @@ TEST("Route events reserve two clear anchors on every classified active route")
 
 TEST("Route scene recipes compose bounded unique route objects")
 {
+    static const u8 sRecipes[] =
+    {
+        ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE,
+        ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER,
+    };
     struct RogueAdvPath originalPath;
     u8 originalRoomId;
-    u8 recipeId;
+    u8 recipeIdx;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
 
-    for(recipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER; recipeId < ROGUE_ROUTE_SCENE_RECIPE_COUNT; ++recipeId)
+    for(recipeIdx = 0; recipeIdx < ARRAY_COUNT(sRecipes); ++recipeIdx)
     {
+        u8 recipeId = sRecipes[recipeIdx];
+        struct RogueRouteSceneRequest request;
         const struct ObjectEventTemplate baseObjects[] =
         {
-            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
         };
         struct ObjectEventTemplate objects[8] =
         {
@@ -299,23 +380,15 @@ TEST("Route scene recipes compose bounded unique route objects")
         u8 npcCount = 0;
         u8 propCount = 0;
 
-        memset(&gRogueAdvPath.rooms[0].routeScene, 0, sizeof(gRogueAdvPath.rooms[0].routeScene));
-        gRogueAdvPath.rooms[0].routeScene.recipeId = recipeId;
-        gRogueAdvPath.rooms[0].routeScene.environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN;
-        gRogueAdvPath.rooms[0].routeScene.anchor = ROGUE_ROUTE_EVENT_ANCHOR_RECIPIENT;
-        gRogueAdvPath.rooms[0].routeScene.primaryGraphicsId = recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
-            ? OBJ_EVENT_GFX_ROCKET_M
-            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? OBJ_EVENT_GFX_DEVIL_MAN
-            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? OBJ_EVENT_GFX_SCIENTIST_1
-            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? OBJ_EVENT_GFX_SCIENTIST_2
-            : OBJ_EVENT_GFX_MART_EMPLOYEE;
+        SetDebugPlacement(recipeId, 1, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+        EXPECT(GetFirstPlacement(&request));
 
         RogueRouteScenes_ModifyObjectEvents(objects, &count, ARRAY_COUNT(objects));
         EXPECT_EQ(count, expectedCount);
 
         for(i = 0; i < count; ++i)
         {
-            EXPECT(!RogueRouteScenes_IsAnchorTemplate(&objects[i]));
+            EXPECT(!RogueRouteScenes_IsLotTemplate(&objects[i]));
             for(j = i + 1; j < count; ++j)
                 EXPECT_NE(objects[i].localId, objects[j].localId);
 
@@ -325,7 +398,7 @@ TEST("Route scene recipes compose bounded unique route objects")
                 EXPECT_EQ(objects[i].localId, 42);
                 EXPECT_EQ(objects[i].x, 56);
                 EXPECT_EQ(objects[i].y, 78);
-                EXPECT_EQ(objects[i].graphicsId, gRogueAdvPath.rooms[0].routeScene.primaryGraphicsId);
+                EXPECT_EQ(objects[i].graphicsId, request.primaryGraphicsId);
             }
             else if(objects[i].script == expectedPropScript)
             {
@@ -378,7 +451,7 @@ TEST("Route scene recipes compose bounded unique route objects")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
-TEST("Stolen Trade Case camp metatiles stay bounded compatible and idempotent")
+TEST("Route scene metatiles stay bounded compatible and idempotent")
 {
     struct RogueAdvPath originalPath;
     struct BackupMapLayout originalBackup = gBackupMapLayout;
@@ -393,8 +466,7 @@ TEST("Stolen Trade Case camp metatiles stay bounded compatible and idempotent")
     u16 y;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
-    gRogueAdvPath.rooms[0].routeScene.recipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP;
-    gRogueAdvPath.rooms[0].routeScene.anchor = 0;
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
     gMapHeader = *mapHeader;
     gBackupMapLayout.map = sBackupMapData;
     gBackupMapLayout.width = mapHeader->mapLayout->width + MAP_OFFSET_W;
@@ -405,7 +477,7 @@ TEST("Stolen Trade Case camp metatiles stay bounded compatible and idempotent")
 
     for(i = 0; i < mapHeader->events->objectEventCount; ++i)
     {
-        if(RogueRouteScenes_IsAnchorTemplate(&mapHeader->events->objectEvents[i])
+        if(RogueRouteScenes_IsLotTemplate(&mapHeader->events->objectEvents[i])
             && mapHeader->events->objectEvents[i].trainerRange_berryTreeId == 0)
             anchor = &mapHeader->events->objectEvents[i];
     }
@@ -416,12 +488,12 @@ TEST("Stolen Trade Case camp metatiles stay bounded compatible and idempotent")
     RogueRouteScenes_ApplyMetatiles();
     EXPECT_EQ(MapGridGetMetatileIdAt(x - 1, y), METATILE_General_Grass_Stone);
     EXPECT_EQ(MapGridGetMetatileIdAt(x + 1, y), METATILE_General_Grass_Stone);
-    EXPECT_EQ(MapGridGetMetatileIdAt(x, y + 1), METATILE_General_Grass_Stone);
+    EXPECT_EQ(MapGridGetMetatileIdAt(x, y - 1), METATILE_General_Grass_Stone);
     EXPECT_EQ(MapGridGetMetatileIdAt(x, y), METATILE_General_Grass);
-    EXPECT_EQ(MapGridGetElevationAt(x, y + 1), 3);
+    EXPECT_EQ(MapGridGetElevationAt(x, y - 1), 3);
 
     RogueRouteScenes_ApplyMetatiles();
-    EXPECT_EQ(MapGridGetMetatileIdAt(x, y + 1), METATILE_General_Grass_Stone);
+    EXPECT_EQ(MapGridGetMetatileIdAt(x, y - 1), METATILE_General_Grass_Stone);
 
     MapGridSetMetatileIdAt(x + 1, y, METATILE_General_TallGrass);
     RogueRouteScenes_ApplyMetatiles();
@@ -429,7 +501,7 @@ TEST("Stolen Trade Case camp metatiles stay bounded compatible and idempotent")
 
     for(i = 0; i < cellCount; ++i)
         sBackupMapData[i] = METATILE_General_Grass | (3 << MAPGRID_ELEVATION_SHIFT);
-    gRogueAdvPath.rooms[0].routeScene.recipeId = ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE;
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
     RogueRouteScenes_ApplyMetatiles();
     EXPECT_EQ(MapGridGetMetatileIdAt(x - 1, y), METATILE_General_Grass_Stone);
     EXPECT_EQ(MapGridGetMetatileIdAt(x + 1, y), METATILE_General_Grass_Stone);
@@ -471,15 +543,15 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
         gRogueAdvPath.rooms[0].rngSeed = seed;
         RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
         RogueRouteScenes_OnEnterRoute();
-        if(gRogueAdvPath.rooms[0].routeScene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE)
+        if(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &shrine))
             break;
     }
-    shrine = gRogueAdvPath.rooms[0].routeScene;
+    SelectPlacement(&shrine);
 
     EXPECT_EQ(shrine.recipeId, ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
     EXPECT_EQ((u8)shrine.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
     EXPECT_EQ(shrine.rewardAmount, 8000);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    EXPECT_EQ(RogueRouteScenes_GetState(shrine.sceneSlot), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
 
     RogueRouteEvents_GetInteractionData();
@@ -497,7 +569,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_NO_SPACE);
     EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 1000);
     EXPECT_EQ(gRogueRun.temporaryDarkDealCurseItem, ITEM_NONE);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    EXPECT_EQ(RogueRouteScenes_GetState(shrine.sceneSlot), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
 
     ClearBag();
     SetMoney(&gSaveBlock1Ptr->money, MAX_MONEY - shrine.rewardAmount + 1);
@@ -512,15 +584,19 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 1000 + shrine.rewardAmount);
     EXPECT(CheckBagHasItem(shrine.requestedItem, 1));
     EXPECT_EQ(gRogueRun.temporaryDarkDealCurseItem, shrine.requestedItem);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT_EQ(RogueRouteScenes_GetState(shrine.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
 
     // A same-route quickload reconstructs the accepted shrine even though its
     // active Curse would normally make new shrines ineligible.
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(memcmp(&shrine, &gRogueAdvPath.rooms[0].routeScene, sizeof(shrine)), 0);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    {
+        struct RogueRouteSceneRequest restoredShrine;
+        EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &restoredShrine));
+        EXPECT_EQ(memcmp(&shrine, &restoredShrine, sizeof(shrine)), 0);
+    }
+    EXPECT_EQ(RogueRouteScenes_GetState(shrine.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
     Rogue_SetCurrentDifficulty(ROGUE_CHAMP_START_DIFFICULTY);
     RogueRouteScenes_OnExitRoute();
@@ -530,15 +606,15 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     gRogueAdvPath.rooms[1].rngSeed = 701;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[1].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_NONE);
+    EXPECT(!GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &shrine));
 
     Rogue_ClearTemporaryDarkDealCurse();
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     Rogue_SetCurrentDifficulty(13);
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[1].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
-    EXPECT_EQ(gRogueAdvPath.rooms[1].routeScene.rewardAmount, ROGUE_HEXED_SHRINE_REWARD_MAX);
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &shrine));
+    EXPECT_EQ(shrine.rewardAmount, ROGUE_HEXED_SHRINE_REWARD_MAX);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
@@ -589,7 +665,8 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     gRogueAdvPath.rooms[0].rngSeed = 300;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
-    offer = gRogueAdvPath.rooms[0].routeScene;
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, &offer));
+    SelectPlacement(&offer);
 
     EXPECT_EQ(offer.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
     EXPECT_EQ((u8)offer.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
@@ -607,7 +684,11 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
 
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(memcmp(&offer, &gRogueAdvPath.rooms[0].routeScene, sizeof(offer)), 0);
+    {
+        struct RogueRouteSceneRequest restoredOffer;
+        EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, &restoredOffer));
+        EXPECT_EQ(memcmp(&offer, &restoredOffer, sizeof(offer)), 0);
+    }
 
     RogueRouteScenes_OnExitRoute();
     gRogueAdvPath.roomCount = 2;
@@ -616,7 +697,8 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     gRogueAdvPath.rooms[1].rngSeed = 301;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
-    restoration = gRogueAdvPath.rooms[1].routeScene;
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION, &restoration));
+    SelectPlacement(&restoration);
     EXPECT_EQ(restoration.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION);
     EXPECT_EQ((u8)restoration.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE);
     EXPECT_EQ(restoration.ownerQuestId, questId);
@@ -634,7 +716,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT_EQ(memcmp(&gRngValue, &rngBefore, sizeof(rngBefore)), 0);
     EXPECT(!CheckBagHasItem(restoration.requestedItem, 1));
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT_EQ(RogueRouteScenes_GetState(restoration.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), restoration.rewardItem);
     EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_LEVEL), 1);
     customMonId = RogueGift_GetCustomMonId(&gPlayerParty[0]);
@@ -656,13 +738,9 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     EXPECT(AddBagItem(params.payload[0], 1));
     questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL, &params);
     EXPECT_NE(questId, ROGUE_ADVENTURE_QUEST_INVALID_ID);
-    memset(&gRogueAdvPath.rooms[1].routeScene, 0, sizeof(gRogueAdvPath.rooms[1].routeScene));
-    gRogueAdvPath.rooms[1].routeScene.recipeId = ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION;
-    gRogueAdvPath.rooms[1].routeScene.source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE;
-    gRogueAdvPath.rooms[1].routeScene.ownerQuestId = questId;
-    gRogueAdvPath.rooms[1].routeScene.requestedItem = params.payload[0];
-    gRogueAdvPath.rooms[1].routeScene.rewardItem = RogueAdventureQuests_GetFossilSpecies(params.payload[0]);
-    gRogueAdvPath.rooms[1].routeScene.rewardAmount = params.payload[1];
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION, 0, questId);
+    EXPECT(GetFirstPlacement(&restoration));
+    SelectPlacement(&restoration);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     SeedRng(0x1357);
     rngBefore = gRngValue;
@@ -677,13 +755,13 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     EXPECT(IS_STANDARD_TYPE(customType0) || IS_STANDARD_TYPE(customType1));
     if(IS_STANDARD_TYPE(customType0))
     {
-        EXPECT_NE(customType0, RoguePokedex_GetSpeciesType(gRogueAdvPath.rooms[1].routeScene.rewardItem, 0));
-        EXPECT_NE(customType0, RoguePokedex_GetSpeciesType(gRogueAdvPath.rooms[1].routeScene.rewardItem, 1));
+        EXPECT_NE(customType0, RoguePokedex_GetSpeciesType(restoration.rewardItem, 0));
+        EXPECT_NE(customType0, RoguePokedex_GetSpeciesType(restoration.rewardItem, 1));
     }
     if(IS_STANDARD_TYPE(customType1))
     {
-        EXPECT_NE(customType1, RoguePokedex_GetSpeciesType(gRogueAdvPath.rooms[1].routeScene.rewardItem, 0));
-        EXPECT_NE(customType1, RoguePokedex_GetSpeciesType(gRogueAdvPath.rooms[1].routeScene.rewardItem, 1));
+        EXPECT_NE(customType1, RoguePokedex_GetSpeciesType(restoration.rewardItem, 0));
+        EXPECT_NE(customType1, RoguePokedex_GetSpeciesType(restoration.rewardItem, 1));
     }
 
     RogueAdventureQuests_Clear();
@@ -706,6 +784,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     struct RogueAdvPath originalPath;
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     struct RogueRouteSceneRequest offer;
+    struct RogueRouteSceneRequest scene;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
     u16 originalDifficulty = Rogue_GetCurrentDifficulty();
@@ -741,15 +820,15 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
         gRogueAdvPath.rooms[0].rngSeed = seed;
         RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
         RogueRouteScenes_OnEnterRoute();
-        if(gRogueAdvPath.rooms[0].routeScene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER)
+        if(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, &offer))
             break;
     }
-    offer = gRogueAdvPath.rooms[0].routeScene;
+    SelectPlacement(&offer);
 
     EXPECT_EQ(offer.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER);
     RogueRouteEvents_TryAcceptStolenTradeCaseQuest();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    EXPECT_EQ(RogueRouteScenes_GetState(offer.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
     questId = RogueAdventureQuests_GetQuestIdAt(0);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[1], offer.trainerNum);
@@ -759,8 +838,8 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     // Quicksaving on the source route retains the accepted merchant scene.
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[0].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, &offer));
+    EXPECT_EQ(RogueRouteScenes_GetState(offer.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
 
     RogueRouteScenes_OnExitRoute();
     gRogueAdvPath.roomCount = 3;
@@ -769,11 +848,12 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     gRogueAdvPath.rooms[1].rngSeed = 101;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[1].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
-    EXPECT_EQ((u8)gRogueAdvPath.rooms[1].routeScene.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE);
-    EXPECT_EQ(gRogueAdvPath.rooms[1].routeScene.ownerQuestId, questId);
-    EXPECT_EQ(gRogueAdvPath.rooms[1].routeScene.trainerNum, offer.trainerNum);
-    EXPECT_EQ(gRogueAdvPath.rooms[1].routeScene.primaryGraphicsId, Rogue_GetTrainerObjectEventGfx(offer.trainerNum));
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP, &scene));
+    EXPECT_EQ((u8)scene.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE);
+    EXPECT_EQ(scene.ownerQuestId, questId);
+    EXPECT_EQ(scene.trainerNum, offer.trainerNum);
+    EXPECT_EQ(scene.primaryGraphicsId, Rogue_GetTrainerObjectEventGfx(offer.trainerNum));
+    SelectPlacement(&scene);
 
     for(i = 0; i < ROGUE_MAX_ACTIVE_TRAINER_COUNT; ++i)
     {
@@ -796,7 +876,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT(!CheckBagHasSpace(ITEM_TRADE_CASE, 1));
     RogueRouteEvents_FinishStolenTradeCaseBattle();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_NO_SPACE);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+    EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 0);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->progress, 1);
 
@@ -809,7 +889,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     gRogueAdvPath.rooms[2].rngSeed = 102;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[2]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[2].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_NONE);
+    EXPECT(!GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP, &scene));
     RogueRouteScenes_OnExitRoute();
 
     gRogueRun.adventureRoomId = 3;
@@ -817,22 +897,23 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     gRogueAdvPath.rooms[3].rngSeed = 103;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[3]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[3].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP, &scene));
+    EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+    SelectPlacement(&scene);
 
     ClearBag();
     RogueRouteEvents_FinishStolenTradeCaseBattle();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 0);
     EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
-    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
+    EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
     // A same-route quickload restores the completed camp rather than binding
     // the next quest node to this room.
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[3]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[3].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP, &scene));
+    EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
     RogueRouteScenes_OnExitRoute();
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
@@ -841,10 +922,11 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     gRogueAdvPath.rooms[4].rngSeed = 104;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[4]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF);
-    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.requestedItem, ITEM_TRADE_CASE);
-    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.rewardItem, ITEM_BIG_POKEBLOCK_BUNDLE);
-    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.primaryGraphicsId, OBJ_EVENT_GFX_MART_EMPLOYEE);
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF, &scene));
+    EXPECT_EQ(scene.requestedItem, ITEM_TRADE_CASE);
+    EXPECT_EQ(scene.rewardItem, ITEM_BIG_POKEBLOCK_BUNDLE);
+    EXPECT_EQ(scene.primaryGraphicsId, OBJ_EVENT_GFX_MART_EMPLOYEE);
+    SelectPlacement(&scene);
     EXPECT(RemoveBagItem(ITEM_TRADE_CASE, 1));
     RogueRouteEvents_TryClaimStolenTradeCaseReward();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM);
@@ -867,14 +949,14 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
     EXPECT(FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED));
-    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN));
+    EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
     // The completed payoff also survives a same-route quickload so its
     // acknowledgement remains available until the player leaves.
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[4]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF, &scene));
+    EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
     RogueRouteScenes_OnExitRoute();
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
@@ -883,7 +965,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     gRogueAdvPath.rooms[5].rngSeed = 105;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[5]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[5].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_NONE);
+    EXPECT(!GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF, &scene));
 
     RogueAdventureQuests_Clear();
     EXPECT(!FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED));
@@ -950,5 +1032,64 @@ TEST("Adventure quest registry reschedules skipped Stolen Trade Case nodes fairl
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 20);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("Route director composes three pending quest consumers and preserves them on reload")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueAdventureQuestCreateParams params = {0};
+    struct RogueRouteScenePlan firstPlan;
+    bool8 seenLots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {FALSE};
+    bool8 seenSlots[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS] = {FALSE};
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u8 i;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].rngSeed = 0x5151;
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+
+    for(i = 0; i < 4; ++i)
+    {
+        params.payload[1] = i + 1;
+        EXPECT_EQ(RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params), i);
+        gRogueRun.adventureQuests[i].routesUntilScene = 0;
+        gRogueRun.adventureQuests[i].sceneRoomId = ROGUE_ADVENTURE_QUEST_INVALID_ROOM;
+    }
+
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(RogueRouteScenes_GetPlacementCount(), 3);
+    for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
+    {
+        struct RogueRouteSceneRequest request;
+
+        EXPECT(RogueRouteScenes_GetPlacementRequest(i, &request));
+        EXPECT_EQ(request.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
+        EXPECT_EQ(request.ownerQuestId, i);
+        EXPECT_LT(request.lotId, ROGUE_ROUTE_SCENE_MAX_LOTS);
+        EXPECT_LT(request.sceneSlot, ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
+        EXPECT(!seenLots[request.lotId]);
+        EXPECT(!seenSlots[request.sceneSlot]);
+        seenLots[request.lotId] = TRUE;
+        seenSlots[request.sceneSlot] = TRUE;
+    }
+    EXPECT_EQ(gRogueRun.adventureQuests[3].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
+
+    firstPlan = gRogueAdvPath.rooms[0].routeScenePlan;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(memcmp(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan, sizeof(firstPlan)), 0);
+    EXPECT_EQ(gRogueRun.adventureQuests[3].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
 }

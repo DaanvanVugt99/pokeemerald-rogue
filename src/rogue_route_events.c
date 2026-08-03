@@ -50,13 +50,138 @@ extern const u8 Rogue_RouteEvent_FossilProp[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
-static const struct RogueRouteSceneRequest *GetCurrentSceneRequest(void)
+#define ROUTE_SCENE_RECIPE_SHIFT 0
+#define ROUTE_SCENE_RECIPE_MASK  0x3F
+#define ROUTE_SCENE_LOT_SHIFT    6
+#define ROUTE_SCENE_LOT_MASK     0x0F
+#define ROUTE_SCENE_ROLE_SHIFT   10
+#define ROUTE_SCENE_ROLE_MASK    0x03
+#define ROUTE_SCENE_SLOT_SHIFT   12
+#define ROUTE_SCENE_SLOT_MASK    0x03
+#define ROUTE_SCENE_OWNER_SHIFT  14
+#define ROUTE_SCENE_OWNER_MASK   0x3F
+
+#define ROUTE_SCENE_OBJECT_SLOT_MASK 0x03
+#define ROUTE_SCENE_OBJECT_ROLE_SHIFT 2
+#define ROUTE_SCENE_OBJECT_ROLE_MASK 0x03
+#define ROUTE_SCENE_OBJECT_PROP_SHIFT 4
+#define ROUTE_SCENE_OBJECT_PROP_MASK 0x0F
+
+struct RogueRouteLot
+{
+    const struct ObjectEventTemplate *objectEvent;
+    u8 id;
+    u8 size;
+};
+
+static struct RogueRouteScenePlan *GetCurrentScenePlan(void)
 {
     if(gRogueRun.adventureRoomId >= gRogueAdvPath.roomCount)
         return NULL;
 
-    return &gRogueAdvPath.rooms[gRogueRun.adventureRoomId].routeScene;
+    return &gRogueAdvPath.rooms[gRogueRun.adventureRoomId].routeScenePlan;
 }
+
+static u8 GetPlacementRecipe(const struct RogueRouteScenePlacement *placement)
+{
+    return (placement->packed >> ROUTE_SCENE_RECIPE_SHIFT) & ROUTE_SCENE_RECIPE_MASK;
+}
+
+static u8 GetPlacementLot(const struct RogueRouteScenePlacement *placement)
+{
+    return (placement->packed >> ROUTE_SCENE_LOT_SHIFT) & ROUTE_SCENE_LOT_MASK;
+}
+
+static u8 GetPlacementRole(const struct RogueRouteScenePlacement *placement)
+{
+    return (placement->packed >> ROUTE_SCENE_ROLE_SHIFT) & ROUTE_SCENE_ROLE_MASK;
+}
+
+static u8 GetPlacementSceneSlot(const struct RogueRouteScenePlacement *placement)
+{
+    return (placement->packed >> ROUTE_SCENE_SLOT_SHIFT) & ROUTE_SCENE_SLOT_MASK;
+}
+
+static u8 GetPlacementOwner(const struct RogueRouteScenePlacement *placement)
+{
+    return (placement->packed >> ROUTE_SCENE_OWNER_SHIFT) & ROUTE_SCENE_OWNER_MASK;
+}
+
+static struct RogueRouteScenePlacement PackPlacement(u8 recipeId, u8 lotId, u8 lotRole, u8 sceneSlot, u8 ownerQuestId)
+{
+    struct RogueRouteScenePlacement placement =
+    {
+        .packed = ((u32)recipeId << ROUTE_SCENE_RECIPE_SHIFT)
+            | ((u32)lotId << ROUTE_SCENE_LOT_SHIFT)
+            | ((u32)lotRole << ROUTE_SCENE_ROLE_SHIFT)
+            | ((u32)sceneSlot << ROUTE_SCENE_SLOT_SHIFT)
+            | ((u32)(ownerQuestId & ROUTE_SCENE_OWNER_MASK) << ROUTE_SCENE_OWNER_SHIFT),
+    };
+
+    return placement;
+}
+
+static u16 PackSceneObjectData(u8 sceneSlot, u8 lotRole, u8 propId)
+{
+    return (sceneSlot & ROUTE_SCENE_OBJECT_SLOT_MASK)
+        | ((lotRole & ROUTE_SCENE_OBJECT_ROLE_MASK) << ROUTE_SCENE_OBJECT_ROLE_SHIFT)
+        | ((propId & ROUTE_SCENE_OBJECT_PROP_MASK) << ROUTE_SCENE_OBJECT_PROP_SHIFT);
+}
+
+static u8 GetSceneObjectSlot(u16 objectData)
+{
+    return objectData & ROUTE_SCENE_OBJECT_SLOT_MASK;
+}
+
+static u8 GetSceneObjectRole(u16 objectData)
+{
+    return (objectData >> ROUTE_SCENE_OBJECT_ROLE_SHIFT) & ROUTE_SCENE_OBJECT_ROLE_MASK;
+}
+
+static u8 GetSceneObjectProp(u16 objectData)
+{
+    return (objectData >> ROUTE_SCENE_OBJECT_PROP_SHIFT) & ROUTE_SCENE_OBJECT_PROP_MASK;
+}
+
+u8 RogueRouteScenes_GetState(u8 sceneSlot)
+{
+    if(sceneSlot >= ROGUE_ROUTE_SCENE_MAX_PLACEMENTS)
+        return ROGUE_ROUTE_EVENT_STATE_NOT_STARTED;
+
+    return (VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) >> (sceneSlot * 2)) & 3;
+}
+
+void RogueRouteScenes_SetState(u8 sceneSlot, u8 state)
+{
+    u16 shift;
+    u16 value;
+
+    if(sceneSlot >= ROGUE_ROUTE_SCENE_MAX_PLACEMENTS)
+        return;
+
+    shift = sceneSlot * 2;
+    value = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    value &= ~(3 << shift);
+    value |= (state & 3) << shift;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, value);
+}
+
+#ifdef ROGUE_DEBUG
+void RogueRouteScenes_DebugSetPlacement(u8 placementIndex, u8 recipeId, u8 lotId, u8 lotRole, u8 sceneSlot, u8 ownerQuestId)
+{
+    struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
+
+    if(plan == NULL || placementIndex >= ARRAY_COUNT(plan->placements))
+        return;
+
+    plan->placements[placementIndex] = PackPlacement(
+        recipeId,
+        lotId,
+        lotRole,
+        sceneSlot,
+        ownerQuestId);
+}
+#endif
 
 static u32 GetActiveTeamClassFlag(void)
 {
@@ -120,52 +245,27 @@ static u16 SelectEvilTeamTrainer(void)
 
 void RogueRouteScenes_GenerateRoom(struct RogueAdvPathRoom *room)
 {
-    u8 routeIdx = room->roomParams.roomIdx;
-
-    memset(&room->routeScene, 0, sizeof(room->routeScene));
-    room->routeScene.ownerQuestId = ROGUE_ADVENTURE_QUEST_INVALID_ID;
-    if(routeIdx >= gRogueRouteTable.routeCount)
-        return;
-
-    room->routeScene.environment = gRogueRouteTable.routes[routeIdx].environment;
+    memset(&room->routeScenePlan, 0, sizeof(room->routeScenePlan));
 }
 
-static void SyncPropVisibility(void)
+static void HideSceneProp(u8 sceneSlot, u8 propId)
 {
     u8 i;
 
+    // The flag is shared by every prop that is already known to be hidden.
+    // Visible conditional props keep flag 0, so one route-local flag can hide
+    // any number of independently completed scenes after a quickload.
+    FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     for(i = 0; i < gSaveBlock1Ptr->objectEventTemplatesCount; ++i)
     {
         const struct ObjectEventTemplate *objectEvent = &gSaveBlock1Ptr->objectEventTemplates[i];
 
-        if(objectEvent->flagId != FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN
-            && objectEvent->flagId != FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN)
-            continue;
-
-        if(FlagGet(objectEvent->flagId))
+        if(objectEvent->script == Rogue_RouteEvent_Prop
+            && GetSceneObjectSlot(objectEvent->trainerRange_berryTreeId) == sceneSlot
+            && GetSceneObjectProp(objectEvent->trainerRange_berryTreeId) == propId)
             RemoveObjectEventByLocalIdAndMap(objectEvent->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
-        else
-            TrySpawnObjectEvent(objectEvent->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
     }
 }
-
-struct RogueRouteSceneCandidate
-{
-    struct RogueRouteSceneRequest request;
-    u16 priority;
-};
-
-typedef bool8 (*RogueRouteSceneProducer)(u8 roomId, struct RogueRouteSceneCandidate *candidate);
-
-static bool8 TryCollectQuestNodeCandidate(u8 roomId, struct RogueRouteSceneCandidate *candidate)
-{
-    return RogueAdventureQuests_TryCollectSceneRequest(roomId, &candidate->request, &candidate->priority);
-}
-
-static const RogueRouteSceneProducer sRouteSceneProducers[] =
-{
-    TryCollectQuestNodeCandidate,
-};
 
 static bool8 CanShowStolenTradeCaseOffer(u8 roomId)
 {
@@ -193,7 +293,7 @@ static bool8 CanShowHexedShrine(u8 roomId)
     // Rebuild the accepted scene on a same-route quickload. Once the route is
     // left, the active temporary Curse suppresses future shrine offers.
     return gRogueRun.routeSceneRoomId == roomId
-        && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED;
+        && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != 0;
 }
 
 static const u16 sAnomalousFossilItems[] =
@@ -297,153 +397,514 @@ static void BuildAnomalousFossilOffer(struct RogueRouteSceneRequest *request)
 
 struct RogueRouteFallbackDefinition
 {
+    u8 recipeId;
     u8 weight;
     bool8 (*isEligible)(u8 roomId);
+};
+
+struct RogueRouteRecipeDefinition
+{
     void (*build)(struct RogueRouteSceneRequest *request);
+    u8 source;
+    u8 lotCount;
+    u8 lotSizes[ROGUE_ROUTE_SCENE_MAX_ROLES];
+    u8 objectCounts[ROGUE_ROUTE_SCENE_MAX_ROLES];
+};
+
+static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
+{
+    [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER] =
+    {
+        .build = BuildStolenTradeCaseOffer,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {3},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP] =
+    {
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {4},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF] =
+    {
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {3},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE] =
+    {
+        .build = BuildHexedShrine,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {4},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER] =
+    {
+        .build = BuildAnomalousFossilOffer,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {4},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION] =
+    {
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {4},
+    },
 };
 
 static const struct RogueRouteFallbackDefinition sRouteFallbacks[] =
 {
-    {50, CanShowStolenTradeCaseOffer, BuildStolenTradeCaseOffer},
-    {50, CanShowHexedShrine, BuildHexedShrine},
-    {50, CanShowAnomalousFossilOffer, BuildAnomalousFossilOffer},
+    {ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, 50, CanShowStolenTradeCaseOffer},
+    {ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, 50, CanShowHexedShrine},
+    {ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, 50, CanShowAnomalousFossilOffer},
 };
 
-static void SelectFallbackScene(u8 roomId, struct RogueRouteSceneRequest *selected)
+static const struct RogueRouteRecipeDefinition *GetRecipeDefinition(u8 recipeId)
 {
-    RAND_TYPE originalRng = gRngRogueValue;
-    u8 environment = selected->environment;
-    u16 totalWeight = 0;
-    u16 roll;
+    if(recipeId == ROGUE_ROUTE_SCENE_RECIPE_NONE
+        || recipeId >= ROGUE_ROUTE_SCENE_RECIPE_COUNT
+        || sRouteRecipes[recipeId].lotCount == 0)
+        return NULL;
+
+    return &sRouteRecipes[recipeId];
+}
+
+bool8 RogueRouteScenes_IsLotTemplate(const struct ObjectEventTemplate *objectEvent)
+{
+    return objectEvent->script == Rogue_RouteEvent_Interact
+        && objectEvent->trainerType == TRAINER_TYPE_NONE
+        && objectEvent->trainerRange_berryTreeId < ROGUE_ROUTE_SCENE_MAX_LOTS
+        && objectEvent->movementRangeX < ROGUE_ROUTE_SCENE_LOT_SIZE_COUNT;
+}
+
+static const struct MapHeader *GetRouteMapHeader(u8 roomId)
+{
+    u8 routeIdx;
+
+    if(roomId >= gRogueAdvPath.roomCount)
+        return NULL;
+
+    routeIdx = gRogueAdvPath.rooms[roomId].roomParams.roomIdx;
+    if(routeIdx >= gRogueRouteTable.routeCount)
+        return NULL;
+
+    return Overworld_GetMapHeaderByGroupAndId(
+        gRogueRouteTable.routes[routeIdx].map.group,
+        gRogueRouteTable.routes[routeIdx].map.num);
+}
+
+static u8 CollectRouteLots(u8 roomId, struct RogueRouteLot *lots, u8 capacity, u8 *baseObjectCount)
+{
+    const struct MapHeader *mapHeader = GetRouteMapHeader(roomId);
+    bool8 seenIds[ROGUE_ROUTE_SCENE_MAX_LOTS] = {FALSE};
+    u8 count = 0;
     u8 i;
 
-    for(i = 0; i < ARRAY_COUNT(sRouteFallbacks); ++i)
+    *baseObjectCount = 0;
+    if(mapHeader == NULL || mapHeader->events == NULL)
+        return 0;
+
+    for(i = 0; i < mapHeader->events->objectEventCount; ++i)
     {
-        if(sRouteFallbacks[i].isEligible(roomId))
-            totalWeight += sRouteFallbacks[i].weight;
+        const struct ObjectEventTemplate *objectEvent = &mapHeader->events->objectEvents[i];
+
+        if(RogueRouteScenes_IsLotTemplate(objectEvent))
+        {
+            u8 lotId = objectEvent->trainerRange_berryTreeId;
+
+            if(lotId < ARRAY_COUNT(seenIds) && count < capacity && !seenIds[lotId])
+            {
+                lots[count].objectEvent = objectEvent;
+                lots[count].id = lotId;
+                lots[count].size = objectEvent->movementRangeX;
+                seenIds[lotId] = TRUE;
+                ++count;
+            }
+        }
+        else
+        {
+            ++*baseObjectCount;
+        }
     }
 
-    memset(selected, 0, sizeof(*selected));
-    selected->environment = environment;
-    selected->ownerQuestId = ROGUE_ADVENTURE_QUEST_INVALID_ID;
-    if(totalWeight == 0)
+    return count;
+}
+
+static bool8 AddRecipeToPlan(
+    struct RogueRouteScenePlan *plan,
+    u8 *placementCount,
+    u8 maxPlacements,
+    u8 sceneSlot,
+    u8 recipeId,
+    u8 ownerQuestId,
+    const struct RogueRouteLot *lots,
+    u8 lotCount,
+    u16 *usedLots,
+    u8 *usedObjects,
+    u8 objectBudget)
+{
+    const struct RogueRouteRecipeDefinition *definition = GetRecipeDefinition(recipeId);
+    u16 pendingUsedLots = *usedLots;
+    u8 selectedLots[ROGUE_ROUTE_SCENE_MAX_ROLES];
+    u8 pendingObjects = *usedObjects;
+    u8 role;
+
+    if(definition == NULL
+        || definition->lotCount > ROGUE_ROUTE_SCENE_MAX_ROLES
+        || *placementCount + definition->lotCount > maxPlacements)
+        return FALSE;
+
+    for(role = 0; role < definition->lotCount; ++role)
+    {
+        u8 eligibleCount = 0;
+        u8 selected;
+        u8 i;
+
+        for(i = 0; i < lotCount; ++i)
+        {
+            if((pendingUsedLots & (1 << lots[i].id)) == 0
+                && lots[i].size >= definition->lotSizes[role])
+                ++eligibleCount;
+        }
+
+        if(eligibleCount == 0)
+            return FALSE;
+
+        selected = RogueRandom() % eligibleCount;
+        for(i = 0; i < lotCount; ++i)
+        {
+            if((pendingUsedLots & (1 << lots[i].id)) == 0
+                && lots[i].size >= definition->lotSizes[role]
+                && selected-- == 0)
+            {
+                selectedLots[role] = lots[i].id;
+                pendingUsedLots |= 1 << lots[i].id;
+                break;
+            }
+        }
+
+        pendingObjects += definition->objectCounts[role];
+        if(pendingObjects > objectBudget)
+            return FALSE;
+    }
+
+    for(role = 0; role < definition->lotCount; ++role)
+    {
+        plan->placements[*placementCount] = PackPlacement(
+            recipeId,
+            selectedLots[role],
+            role,
+            sceneSlot,
+            ownerQuestId);
+        ++*placementCount;
+    }
+
+    *usedLots = pendingUsedLots;
+    *usedObjects = pendingObjects;
+    return TRUE;
+}
+
+static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
+{
+    struct RogueRouteSceneRequest questRequests[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS] = {0};
+    struct RogueRouteLot lots[ROGUE_ROUTE_SCENE_MAX_LOTS];
+    bool8 usedFallbacks[ARRAY_COUNT(sRouteFallbacks)] = {FALSE};
+    RAND_TYPE originalRng = gRngRogueValue;
+    u16 usedLots = 0;
+    u8 baseObjectCount;
+    u8 objectBudget;
+    u8 usedObjects = 0;
+    u8 placementCount = 0;
+    u8 sceneSlot = 0;
+    u8 targetPlacements;
+    u8 questCount;
+    u8 lotCount;
+    u8 i;
+
+    memset(plan, 0, sizeof(*plan));
+    lotCount = CollectRouteLots(roomId, lots, ARRAY_COUNT(lots), &baseObjectCount);
+    if(lotCount == 0 || baseObjectCount >= OBJECT_EVENT_TEMPLATES_COUNT)
         return;
 
+    objectBudget = OBJECT_EVENT_TEMPLATES_COUNT - baseObjectCount;
     SeedRogueRng(gRogueAdvPath.rooms[roomId].rngSeed ^ 0xA7E1);
-    selected->anchor = RogueRandom() % ROGUE_ROUTE_EVENT_ANCHOR_COUNT;
-    roll = RogueRandom() % totalWeight;
+    targetPlacements = 1 + RogueRandom() % ROGUE_ROUTE_SCENE_MAX_PLACEMENTS;
 
-    for(i = 0; i < ARRAY_COUNT(sRouteFallbacks); ++i)
+    questCount = RogueAdventureQuests_CollectSceneRequests(
+        roomId,
+        questRequests,
+        ARRAY_COUNT(questRequests));
+    targetPlacements = max(targetPlacements, questCount);
+
+    for(i = 0; i < questCount && placementCount < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS; ++i)
     {
-        if(!sRouteFallbacks[i].isEligible(roomId))
-            continue;
+        if(AddRecipeToPlan(
+            plan,
+            &placementCount,
+            ROGUE_ROUTE_SCENE_MAX_PLACEMENTS,
+            sceneSlot,
+            questRequests[i].recipeId,
+            questRequests[i].ownerQuestId,
+            lots,
+            lotCount,
+            &usedLots,
+            &usedObjects,
+            objectBudget))
+            ++sceneSlot;
+    }
 
-        if(roll < sRouteFallbacks[i].weight)
+    while(placementCount < targetPlacements && sceneSlot < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS)
+    {
+        u16 totalWeight = 0;
+        u16 roll;
+        u8 selectedFallback = ARRAY_COUNT(sRouteFallbacks);
+
+        for(i = 0; i < ARRAY_COUNT(sRouteFallbacks); ++i)
         {
-            sRouteFallbacks[i].build(selected);
-            break;
+            if(!usedFallbacks[i] && sRouteFallbacks[i].isEligible(roomId))
+                totalWeight += sRouteFallbacks[i].weight;
         }
-        roll -= sRouteFallbacks[i].weight;
+
+        if(totalWeight == 0)
+            break;
+
+        roll = RogueRandom() % totalWeight;
+        for(i = 0; i < ARRAY_COUNT(sRouteFallbacks); ++i)
+        {
+            if(usedFallbacks[i] || !sRouteFallbacks[i].isEligible(roomId))
+                continue;
+
+            if(roll < sRouteFallbacks[i].weight)
+            {
+                selectedFallback = i;
+                break;
+            }
+            roll -= sRouteFallbacks[i].weight;
+        }
+
+        if(selectedFallback >= ARRAY_COUNT(sRouteFallbacks))
+            break;
+
+        usedFallbacks[selectedFallback] = TRUE;
+        if(AddRecipeToPlan(
+            plan,
+            &placementCount,
+            targetPlacements,
+            sceneSlot,
+            sRouteFallbacks[selectedFallback].recipeId,
+            ROGUE_ADVENTURE_QUEST_INVALID_ID,
+            lots,
+            lotCount,
+            &usedLots,
+            &usedObjects,
+            objectBudget))
+            ++sceneSlot;
     }
 
     gRngRogueValue = originalRng;
 }
 
-static void SelectRouteScene(u8 roomId, struct RogueRouteSceneRequest *selected)
+u8 RogueRouteScenes_GetPlacementCount(void)
 {
-    struct RogueRouteSceneCandidate selectedCandidate = {0};
-    struct RogueRouteSceneRequest baseRequest = *selected;
-    u8 i;
+    const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
+    u8 count = 0;
 
-    SelectFallbackScene(roomId, &selectedCandidate.request);
-    selectedCandidate.request.environment = baseRequest.environment;
+    if(plan == NULL)
+        return 0;
 
-    // Content producers submit transient candidates here. Quest nodes outrank
-    // the seeded fallback today; reactive producers can join without changing
-    // the composer or quest graph implementation.
-    for(i = 0; i < ARRAY_COUNT(sRouteSceneProducers); ++i)
+    while(count < ARRAY_COUNT(plan->placements)
+        && GetPlacementRecipe(&plan->placements[count]) != ROGUE_ROUTE_SCENE_RECIPE_NONE)
+        ++count;
+
+    return count;
+}
+
+bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request)
+{
+    const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
+    const struct RogueRouteScenePlacement *placement;
+    const struct RogueRouteRecipeDefinition *definition;
+    RAND_TYPE originalRng;
+    u8 recipeId;
+    u8 routeIdx;
+
+    if(plan == NULL || placementIndex >= ARRAY_COUNT(plan->placements))
+        return FALSE;
+
+    placement = &plan->placements[placementIndex];
+    recipeId = GetPlacementRecipe(placement);
+    definition = GetRecipeDefinition(recipeId);
+    routeIdx = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomParams.roomIdx;
+    if(definition == NULL || routeIdx >= gRogueRouteTable.routeCount)
+        return FALSE;
+
+    memset(request, 0, sizeof(*request));
+    request->recipeId = recipeId;
+    request->environment = gRogueRouteTable.routes[routeIdx].environment;
+    request->lotId = GetPlacementLot(placement);
+    request->lotRole = GetPlacementRole(placement);
+    request->sceneSlot = GetPlacementSceneSlot(placement);
+    request->source = definition->source;
+    request->ownerQuestId = definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        ? GetPlacementOwner(placement)
+        : ROGUE_ADVENTURE_QUEST_INVALID_ID;
+
+    originalRng = gRngRogueValue;
+    SeedRogueRng(gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed
+        ^ 0x5EED
+        ^ (recipeId * 257)
+        ^ (request->sceneSlot * 4051));
+
+    if(definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
     {
-        struct RogueRouteSceneCandidate candidate =
-        {
-            .request = baseRequest,
-        };
+        struct RogueRouteSceneRequest content = {0};
 
-        if(sRouteSceneProducers[i](roomId, &candidate) && candidate.priority > selectedCandidate.priority)
-            selectedCandidate = candidate;
+        if(!RogueAdventureQuests_BuildSceneRequest(request->ownerQuestId, &content))
+        {
+            gRngRogueValue = originalRng;
+            return FALSE;
+        }
+
+        request->rewardItem = content.rewardItem;
+        request->requestedItem = content.requestedItem;
+        request->trainerNum = content.trainerNum;
+        request->primaryGraphicsId = content.primaryGraphicsId;
+        request->secondaryGraphicsId = content.secondaryGraphicsId;
+        request->rewardAmount = content.rewardAmount;
+    }
+    else if(definition->build != NULL)
+    {
+        definition->build(request);
     }
 
-    *selected = selectedCandidate.request;
+    request->recipeId = recipeId;
+    request->source = definition->source;
+    gRngRogueValue = originalRng;
+    return TRUE;
+}
+
+static bool8 GetSceneRequestBySlotAndRole(u8 sceneSlot, u8 lotRole, struct RogueRouteSceneRequest *request)
+{
+    u8 i;
+
+    for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
+    {
+        if(RogueRouteScenes_GetPlacementRequest(i, request)
+            && request->sceneSlot == sceneSlot
+            && request->lotRole == lotRole)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 GetCurrentInteractionRequest(struct RogueRouteSceneRequest *request)
+{
+    u16 objectData;
+
+    if(gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
+        return FALSE;
+
+    objectData = gObjectEvents[gSelectedObjectEvent].trainerRange_berryTreeId;
+    return GetSceneRequestBySlotAndRole(
+        GetSceneObjectSlot(objectData),
+        GetSceneObjectRole(objectData),
+        request);
 }
 
 void RogueRouteScenes_OnEnterRoute(void)
 {
-    struct RogueRouteSceneRequest *scene;
-    const struct RogueAdventureQuest *quest;
+    struct RogueRouteScenePlan *plan;
+    u8 i;
 
     if(gRogueRun.routeSceneRoomId != gRogueRun.adventureRoomId)
     {
-        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
         FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
         FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
         gRogueRun.routeSceneRoomId = gRogueRun.adventureRoomId;
     }
 
-    if(gRogueRun.adventureRoomId >= gRogueAdvPath.roomCount)
+    plan = GetCurrentScenePlan();
+    if(plan == NULL)
         return;
 
-    scene = &gRogueAdvPath.rooms[gRogueRun.adventureRoomId].routeScene;
-    SelectRouteScene(gRogueRun.adventureRoomId, scene);
+    BuildRouteScenePlan(gRogueRun.adventureRoomId, plan);
 
-    // A won camp remains on its current node until the route is left. Restore
-    // its collection-only interaction if it was rescheduled after a full Bag.
-    if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
-        && scene->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+    // Won camps retain their collection-only state across same-route reloads.
+    for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {
-        quest = RogueAdventureQuests_Get(scene->ownerQuestId);
-        if(quest != NULL
-            && quest->progress != 0
-            && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-            VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        struct RogueRouteSceneRequest scene;
+
+        if(RogueRouteScenes_GetPlacementRequest(i, &scene)
+            && scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
+            && scene.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+        {
+            const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(scene.ownerQuestId);
+
+            if(quest != NULL
+                && quest->progress != 0
+                && RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+                RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        }
     }
 }
 
 void RogueRouteScenes_PrepareRouteTrainers(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
-    u8 i;
+    u8 placementIdx;
 
-    if(scene == NULL || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)
-        return;
-
-    for(i = 0; i < ROGUE_MAX_ACTIVE_TRAINER_COUNT; ++i)
+    for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
-        if(Rogue_GetDynamicTrainer(i) == scene->trainerNum)
-            Rogue_SetDynamicTrainer(i, TRAINER_NONE);
+        struct RogueRouteSceneRequest scene;
+        u8 trainerIdx;
+
+        if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
+            || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)
+            continue;
+
+        for(trainerIdx = 0; trainerIdx < ROGUE_MAX_ACTIVE_TRAINER_COUNT; ++trainerIdx)
+        {
+            if(Rogue_GetDynamicTrainer(trainerIdx) == scene.trainerNum)
+                Rogue_SetDynamicTrainer(trainerIdx, TRAINER_NONE);
+        }
     }
 }
 
 void RogueRouteScenes_OnExitRoute(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    bool8 advancedQuests[ROGUE_ADVENTURE_QUEST_CAPACITY] = {FALSE};
+    u8 i;
 
     RogueAdventureQuests_EmitSignal(ROGUE_ADVENTURE_QUEST_SIGNAL_ROUTE_COMPLETED, 1);
-    if(scene != NULL
-        && scene->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
-        && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-        RogueAdventureQuests_Advance(scene->ownerQuestId);
-    else
-        RogueAdventureQuests_LeaveRoute(gRogueRun.adventureRoomId);
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
+    {
+        struct RogueRouteSceneRequest scene;
+
+        if(RogueRouteScenes_GetPlacementRequest(i, &scene)
+            && scene.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+            && scene.ownerQuestId < ROGUE_ADVENTURE_QUEST_CAPACITY
+            && !advancedQuests[scene.ownerQuestId]
+            && RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        {
+            advancedQuests[scene.ownerQuestId] = TRUE;
+            RogueAdventureQuests_Advance(scene.ownerQuestId);
+        }
+    }
+
+    RogueAdventureQuests_LeaveRoute(gRogueRun.adventureRoomId);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
-}
-
-bool8 RogueRouteScenes_IsAnchorTemplate(const struct ObjectEventTemplate *objectEvent)
-{
-    return objectEvent->script == Rogue_RouteEvent_Interact
-        && objectEvent->trainerType == TRAINER_TYPE_NONE
-        && objectEvent->trainerRange_berryTreeId < ROGUE_ROUTE_EVENT_ANCHOR_COUNT;
 }
 
 static u8 FindFreeLocalId(const struct ObjectEventTemplate *objectEvents, u8 objectEventCount)
@@ -475,7 +936,7 @@ static void AppendSceneObject(
     s8 yOffset,
     u16 graphicsId,
     const u8 *script,
-    u16 role,
+    u16 objectData,
     u16 flagId)
 {
     struct ObjectEventTemplate *objectEvent = &objectEvents[(*objectEventCount)++];
@@ -488,7 +949,7 @@ static void AppendSceneObject(
     objectEvent->elevation = anchor->elevation;
     objectEvent->movementType = MOVEMENT_TYPE_FACE_DOWN;
     objectEvent->trainerType = TRAINER_TYPE_NONE;
-    objectEvent->trainerRange_berryTreeId = role;
+    objectEvent->trainerRange_berryTreeId = objectData;
     objectEvent->script = script;
     objectEvent->flagId = flagId;
 }
@@ -523,6 +984,7 @@ static bool8 RestoreSceneObject(
     s8 yOffset,
     u16 graphicsId,
     const u8 *script,
+    u16 objectData,
     u16 flagId)
 {
     u8 i;
@@ -545,6 +1007,7 @@ static bool8 RestoreSceneObject(
             objectEvent->elevation = anchor->elevation;
             objectEvent->movementType = MOVEMENT_TYPE_FACE_DOWN;
             objectEvent->trainerType = TRAINER_TYPE_NONE;
+            objectEvent->trainerRange_berryTreeId = objectData;
             objectEvent->script = script;
             objectEvent->flagId = flagId;
             return TRUE;
@@ -562,6 +1025,7 @@ static void RestoreSceneProp(
     s8 yOffset,
     u16 graphicsId,
     const u8 *script,
+    u16 objectData,
     u16 flagId)
 {
     u8 i;
@@ -574,7 +1038,7 @@ static void RestoreSceneProp(
             && objectEvent->x == anchor->x + xOffset
             && objectEvent->y == anchor->y + yOffset)
         {
-            RestoreSceneObject(objectEvents, objectEventCount, anchor, objectEvent->localId, xOffset, yOffset, graphicsId, script, flagId);
+            RestoreSceneObject(objectEvents, objectEventCount, anchor, objectEvent->localId, xOffset, yOffset, graphicsId, script, objectData, flagId);
             return;
         }
     }
@@ -586,163 +1050,196 @@ void RogueRouteScenes_RestoreObjectEvents(
     const struct ObjectEventTemplate *baseObjectEvents,
     u8 baseObjectEventCount)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
-    const struct ObjectEventTemplate *anchor = NULL;
-    const u8 *npcScript;
-    u8 i;
+    u8 placementIdx;
 
-    if(scene == NULL || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_NONE)
-        return;
-
-    npcScript = GetSceneNpcScript(scene->recipeId);
-    if(npcScript == NULL)
-        return;
-
-    for(i = 0; i < baseObjectEventCount; ++i)
+    for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
-        if(RogueRouteScenes_IsAnchorTemplate(&baseObjectEvents[i])
-            && baseObjectEvents[i].trainerRange_berryTreeId == scene->anchor)
+        struct RogueRouteSceneRequest scene;
+        const struct ObjectEventTemplate *lot = NULL;
+        const u8 *npcScript;
+        u16 mainData;
+        u8 i;
+
+        if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
+            continue;
+
+        npcScript = GetSceneNpcScript(scene.recipeId);
+        if(npcScript == NULL)
+            continue;
+
+        for(i = 0; i < baseObjectEventCount; ++i)
         {
-            anchor = &baseObjectEvents[i];
+            if(RogueRouteScenes_IsLotTemplate(&baseObjectEvents[i])
+                && baseObjectEvents[i].trainerRange_berryTreeId == scene.lotId)
+            {
+                lot = &baseObjectEvents[i];
+                break;
+            }
+        }
+
+        mainData = PackSceneObjectData(scene.sceneSlot, scene.lotRole, 0);
+        if(lot == NULL
+            || !RestoreSceneObject(objectEvents, objectEventCount, lot, lot->localId, 0, 0, scene.primaryGraphicsId, npcScript, mainData, 0))
+            continue;
+
+#define RESTORE_PROP_FLAG(propId, x, y, gfx, script, flag) \
+        RestoreSceneProp(objectEvents, objectEventCount, lot, x, y, gfx, script, PackSceneObjectData(scene.sceneSlot, scene.lotRole, propId), flag)
+#define RESTORE_PROP(propId, x, y, gfx, script) \
+        RESTORE_PROP_FLAG(propId, x, y, gfx, script, 0)
+
+        switch(scene.recipeId)
+        {
+        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
+            RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
+            if(RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+            {
+                FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+                RESTORE_PROP_FLAG(1, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+            }
+            else
+                RESTORE_PROP(1, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
+            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
+            if(RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+            {
+                FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+                RESTORE_PROP_FLAG(1, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+            }
+            else
+                RESTORE_PROP(1, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
+            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_HexedShrineProp);
+            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
+            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
+            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
+            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
+            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
+            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp);
+            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp);
+            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
             break;
         }
-    }
 
-    if(anchor == NULL
-        || !RestoreSceneObject(objectEvents, objectEventCount, anchor, anchor->localId, 0, 0, scene->primaryGraphicsId, npcScript, 0))
-        return;
-
-    switch(scene->recipeId)
-    {
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop, 0);
-        break;
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, 0);
-        break;
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop, 0);
-        break;
-    case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_HexedShrineProp, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp, 0);
-        break;
-    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0);
-        break;
-    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp, 0);
-        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0);
-        break;
+#undef RESTORE_PROP
+#undef RESTORE_PROP_FLAG
     }
 }
 
 void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvents, u8 *objectEventCount, u8 objectEventCapacity)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
-    struct ObjectEventTemplate anchors[ROGUE_ROUTE_EVENT_ANCHOR_COUNT];
-    bool8 foundAnchor[ROGUE_ROUTE_EVENT_ANCHOR_COUNT] = {FALSE};
-    u8 requiredCount;
+    struct ObjectEventTemplate lots[ROGUE_ROUTE_SCENE_MAX_LOTS];
+    bool8 foundLots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {FALSE};
     u8 originalCount = *objectEventCount;
     u8 write = 0;
+    u8 requiredCount = 0;
+    u8 placementIdx;
     u8 i;
-    u8 localId;
-
-    if(scene == NULL || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_NONE)
-        return;
 
     for(i = 0; i < originalCount; ++i)
     {
-        if(RogueRouteScenes_IsAnchorTemplate(&objectEvents[i]))
+        if(RogueRouteScenes_IsLotTemplate(&objectEvents[i]))
         {
-            u8 anchor = objectEvents[i].trainerRange_berryTreeId;
-            anchors[anchor] = objectEvents[i];
-            foundAnchor[anchor] = TRUE;
+            u8 lotId = objectEvents[i].trainerRange_berryTreeId;
+            lots[lotId] = objectEvents[i];
+            foundLots[lotId] = TRUE;
         }
-    }
-
-    if(!foundAnchor[ROGUE_ROUTE_EVENT_ANCHOR_SENDER] || !foundAnchor[ROGUE_ROUTE_EVENT_ANCHOR_RECIPIENT])
-        return;
-
-    requiredCount = scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
-        || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
-        || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
-        || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? 4 : 3;
-    if(originalCount - ROGUE_ROUTE_EVENT_ANCHOR_COUNT + requiredCount > objectEventCapacity)
-        return;
-
-    for(i = 0; i < originalCount; ++i)
-    {
-        if(!RogueRouteScenes_IsAnchorTemplate(&objectEvents[i]))
+        else
+        {
             objectEvents[write++] = objectEvents[i];
+        }
     }
     *objectEventCount = write;
 
-    switch(scene->recipeId)
+    for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_StolenTradeCaseOffer, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop, 0, 0);
-        break;
+        struct RogueRouteSceneRequest scene;
+        const struct RogueRouteRecipeDefinition *definition;
 
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_StolenTradeCaseCamp, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, 0, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, 0, 0);
-        break;
+        if(RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
+        {
+            definition = GetRecipeDefinition(scene.recipeId);
+            if(definition != NULL)
+                requiredCount += definition->objectCounts[scene.lotRole];
+        }
+    }
 
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_StolenTradeCasePayoff, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, 0, FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop, 0, 0);
-        break;
+    if(*objectEventCount + requiredCount > objectEventCapacity)
+        return;
 
-    case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_HexedShrine, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_HexedShrineProp, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp, 0, 0);
-        break;
+    for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
+    {
+        struct RogueRouteSceneRequest scene;
+        const struct ObjectEventTemplate *lot;
+        const u8 *npcScript;
+        u16 mainData;
+        u8 localId;
 
-    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_AnomalousFossilOffer, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0, 0);
-        break;
+        if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
+            || scene.lotId >= ARRAY_COUNT(lots)
+            || !foundLots[scene.lotId])
+            continue;
 
-    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_AnomalousFossilRestoration, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp, 0, 0);
-        localId = FindFreeLocalId(objectEvents, *objectEventCount);
-        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0, 0);
-        break;
+        lot = &lots[scene.lotId];
+        npcScript = GetSceneNpcScript(scene.recipeId);
+        if(npcScript == NULL)
+            continue;
+
+        mainData = PackSceneObjectData(scene.sceneSlot, scene.lotRole, 0);
+        AppendSceneObject(objectEvents, objectEventCount, lot, lot->localId, 0, 0, scene.primaryGraphicsId, npcScript, mainData, 0);
+
+#define APPEND_PROP(propId, x, y, gfx, script) \
+        do \
+        { \
+            localId = FindFreeLocalId(objectEvents, *objectEventCount); \
+            AppendSceneObject(objectEvents, objectEventCount, lot, localId, x, y, gfx, script, PackSceneObjectData(scene.sceneSlot, scene.lotRole, propId), 0); \
+        } while(0)
+
+        switch(scene.recipeId)
+        {
+        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
+            APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
+            if(RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+                APPEND_PROP(1, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
+            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
+            if(RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+                APPEND_PROP(1, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
+            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
+            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_HexedShrineProp);
+            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
+            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
+            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
+            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
+            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
+            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp);
+            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp);
+            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
+            break;
+        }
+
+#undef APPEND_PROP
     }
 }
 
@@ -764,160 +1261,170 @@ static void ApplyAccentMetatile(const struct ObjectEventTemplate *anchor, s8 xOf
 
 void RogueRouteScenes_ApplyMetatiles(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
-    const struct ObjectEventTemplate *anchors[ROGUE_ROUTE_EVENT_ANCHOR_COUNT] = {NULL};
+    const struct ObjectEventTemplate *lots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {NULL};
     u8 i;
 
-    if(scene == NULL || gRogueAdvPath.currentRoomType != ADVPATH_ROOM_ROUTE)
+    if(gRogueAdvPath.currentRoomType != ADVPATH_ROOM_ROUTE)
         return;
 
     for(i = 0; i < gMapHeader.events->objectEventCount; ++i)
     {
         const struct ObjectEventTemplate *objectEvent = &gMapHeader.events->objectEvents[i];
 
-        if(RogueRouteScenes_IsAnchorTemplate(objectEvent))
-            anchors[objectEvent->trainerRange_berryTreeId] = objectEvent;
+        if(RogueRouteScenes_IsLotTemplate(objectEvent))
+            lots[objectEvent->trainerRange_berryTreeId] = objectEvent;
     }
 
-    if(anchors[ROGUE_ROUTE_EVENT_ANCHOR_SENDER] == NULL || anchors[ROGUE_ROUTE_EVENT_ANCHOR_RECIPIENT] == NULL)
-        return;
-
-    if(scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_NONE)
+    for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {
-        ApplyAccentMetatile(anchors[scene->anchor], -1, 0);
-        ApplyAccentMetatile(anchors[scene->anchor], 1, 0);
-        if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)
-            ApplyAccentMetatile(anchors[scene->anchor], 0, 1);
-        else if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE)
-            ApplyAccentMetatile(anchors[scene->anchor], 0, -1);
-        else if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
-            || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION)
-            ApplyAccentMetatile(anchors[scene->anchor], 0, -1);
+        struct RogueRouteSceneRequest scene;
+        const struct ObjectEventTemplate *lot;
+
+        if(!RogueRouteScenes_GetPlacementRequest(i, &scene)
+            || scene.lotId >= ARRAY_COUNT(lots)
+            || (lot = lots[scene.lotId]) == NULL)
+            continue;
+
+        ApplyAccentMetatile(lot, -1, 0);
+        ApplyAccentMetatile(lot, 1, 0);
+        if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)
+            ApplyAccentMetatile(lot, 0, 1);
+        else if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
+            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
+            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION)
+            ApplyAccentMetatile(lot, 0, -1);
     }
 }
 
 void RogueRouteEvents_GetInteractionData(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
 
-    gSpecialVar_Result = ROGUE_ROUTE_EVENT_ANCHOR_SENDER;
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_STATE_NOT_STARTED;
     gSpecialVar_0x8004 = ITEM_NONE;
     gSpecialVar_0x8005 = ITEM_NONE;
     gSpecialVar_0x8006 = TRAINER_NONE;
     gSpecialVar_0x8007 = 0;
+    gSpecialVar_0x8008 = ROGUE_ROUTE_EVENT_STATE_NOT_STARTED;
 
-    if(scene == NULL)
+    if(!GetCurrentInteractionRequest(&scene))
         return;
 
-    if(gSelectedObjectEvent < OBJECT_EVENTS_COUNT)
-        gSpecialVar_Result = gObjectEvents[gSelectedObjectEvent].trainerRange_berryTreeId;
-    gSpecialVar_0x8004 = scene->rewardItem;
-    gSpecialVar_0x8005 = scene->requestedItem;
-    gSpecialVar_0x8006 = scene->trainerNum;
-    gSpecialVar_0x8007 = scene->rewardAmount;
+    gSpecialVar_Result = RogueRouteScenes_GetState(scene.sceneSlot);
+    gSpecialVar_0x8004 = scene.rewardItem;
+    gSpecialVar_0x8005 = scene.requestedItem;
+    gSpecialVar_0x8006 = scene.trainerNum;
+    gSpecialVar_0x8007 = scene.rewardAmount;
+    gSpecialVar_0x8008 = gSpecialVar_Result;
 }
 
 void RogueRouteEvents_TryAcceptStolenTradeCaseQuest(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
     struct RogueAdventureQuestCreateParams params = {0};
     u8 questId;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
         || FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED)
         || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE)
-        || VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
         return;
 
-    params.payload[1] = scene->trainerNum;
+    params.payload[1] = scene.trainerNum;
     questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params);
     if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
         return;
 
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
 void RogueRouteEvents_BeginStolenTradeCaseBattle(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
-    u16 state = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    struct RogueRouteSceneRequest scene;
+    u16 state;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+    if(!GetCurrentInteractionRequest(&scene))
+        return;
+    state = RogueRouteScenes_GetState(scene.sceneSlot);
+    if(scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
         || (state != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED && state != ROGUE_ROUTE_EVENT_STATE_ACTIVE))
         return;
 
-    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, scene->trainerNum);
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, scene.trainerNum);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
 void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
     bool8 alreadyHasCase;
-    u16 state = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 state;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+    if(!GetCurrentInteractionRequest(&scene))
+        return;
+    state = RogueRouteScenes_GetState(scene.sceneSlot);
+    if(scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
         || (state != ROGUE_ROUTE_EVENT_STATE_ACTIVE && state != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING))
         return;
 
     if(state == ROGUE_ROUTE_EVENT_STATE_ACTIVE
-        && !RogueAdventureQuests_SetProgress(scene->ownerQuestId, 1))
+        && !RogueAdventureQuests_SetProgress(scene.ownerQuestId, 1))
         return;
 
-    alreadyHasCase = CheckBagHasItem(scene->requestedItem, 1);
+    alreadyHasCase = CheckBagHasItem(scene.requestedItem, 1);
     if(!alreadyHasCase
-        && (!CheckBagHasSpace(scene->requestedItem, 1) || !AddBagItem(scene->requestedItem, 1)))
+        && (!CheckBagHasSpace(scene.requestedItem, 1) || !AddBagItem(scene.requestedItem, 1)))
     {
-        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
 
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
-    FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-    SyncPropVisibility();
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    HideSceneProp(scene.sceneSlot, 1);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
 void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
+    u16 state;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
-        || (VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
-            && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING))
+    if(!GetCurrentInteractionRequest(&scene))
+        return;
+    state = RogueRouteScenes_GetState(scene.sceneSlot);
+    if(scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        || (state != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+            && state != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING))
         return;
 
-    if(!CheckBagHasItem(scene->requestedItem, 1))
+    if(!CheckBagHasItem(scene.requestedItem, 1))
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
         return;
     }
 
-    if(!RemoveBagItem(scene->requestedItem, 1))
+    if(!RemoveBagItem(scene.requestedItem, 1))
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
         return;
     }
 
-    if(!AddBagItem(scene->rewardItem, 1))
+    if(!AddBagItem(scene.rewardItem, 1))
     {
-        AddBagItem(scene->requestedItem, 1);
-        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        AddBagItem(scene.requestedItem, 1);
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
@@ -925,81 +1432,80 @@ void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
     AddMoney(&gSaveBlock1Ptr->money, ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY);
 
     FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
-    FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
-    SyncPropVisibility();
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    HideSceneProp(scene.sceneSlot, 1);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
 void RogueRouteEvents_TryAcceptHexedShrine(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
     u32 money;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF
-        || VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
         || gRogueRun.temporaryDarkDealCurseItem != ITEM_NONE)
         return;
 
-    if(!CheckBagHasSpace(scene->requestedItem, 1))
+    if(!CheckBagHasSpace(scene.requestedItem, 1))
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
 
     money = GetMoney(&gSaveBlock1Ptr->money);
-    if(scene->rewardAmount > MAX_MONEY || money > MAX_MONEY - scene->rewardAmount)
+    if(scene.rewardAmount > MAX_MONEY || money > MAX_MONEY - scene.rewardAmount)
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL;
         return;
     }
 
-    if(!Rogue_TryAddTemporaryDarkDealCurse(scene->requestedItem))
+    if(!Rogue_TryAddTemporaryDarkDealCurse(scene.requestedItem))
         return;
 
-    AddMoney(&gSaveBlock1Ptr->money, scene->rewardAmount);
-    Rogue_PushPopup_AddMoney(scene->rewardAmount);
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    AddMoney(&gSaveBlock1Ptr->money, scene.rewardAmount);
+    Rogue_PushPopup_AddMoney(scene.rewardAmount);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
 void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
     struct RogueAdventureQuestCreateParams params = {0};
     u8 questId;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
-        || VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
         || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL)
-        || RogueAdventureQuests_GetFossilSpecies(scene->requestedItem) != scene->rewardItem)
+        || RogueAdventureQuests_GetFossilSpecies(scene.requestedItem) != scene.rewardItem)
         return;
 
-    if(!CheckBagHasSpace(scene->requestedItem, 1))
+    if(!CheckBagHasSpace(scene.requestedItem, 1))
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
 
-    if(!AddBagItem(scene->requestedItem, 1))
+    if(!AddBagItem(scene.requestedItem, 1))
         return;
 
-    params.payload[0] = scene->requestedItem;
-    params.payload[1] = scene->rewardAmount;
+    params.payload[0] = scene.requestedItem;
+    params.payload[1] = scene.rewardAmount;
     questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL, &params);
     if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
     {
-        RemoveBagItem(scene->requestedItem, 1);
+        RemoveBagItem(scene.requestedItem, 1);
         return;
     }
 
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
@@ -1038,30 +1544,30 @@ static void BufferFossilCustomTyping(u8 *dest, u16 species, u32 customMonId)
 
 void RogueRouteEvents_BufferFossilRestorationData(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
 
     gStringVar1[0] = EOS;
     gStringVar2[0] = EOS;
     gStringVar3[0] = EOS;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
         return;
 
     BufferFossilCustomTyping(
         gStringVar1,
-        scene->rewardItem,
-        GenerateFossilCustomMonId(scene, ROGUE_FOSSIL_RESTORATION_STABLE));
+        scene.rewardItem,
+        GenerateFossilCustomMonId(&scene, ROGUE_FOSSIL_RESTORATION_STABLE));
     BufferFossilCustomTyping(
         gStringVar2,
-        scene->rewardItem,
-        GenerateFossilCustomMonId(scene, ROGUE_FOSSIL_RESTORATION_ADAPTIVE));
-    StringCopy(gStringVar3, RoguePokedex_GetSpeciesName(scene->rewardItem));
+        scene.rewardItem,
+        GenerateFossilCustomMonId(&scene, ROGUE_FOSSIL_RESTORATION_ADAPTIVE));
+    StringCopy(gStringVar3, RoguePokedex_GetSpeciesName(scene.rewardItem));
 }
 
 void RogueRouteEvents_TryRestoreAnomalousFossil(void)
 {
-    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueRouteSceneRequest scene;
     struct Pokemon mon;
     RAND_TYPE originalRng;
     u32 customMonId;
@@ -1069,29 +1575,29 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
     u8 restoration = gSpecialVar_0x8004;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
-    if(scene == NULL
-        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
-        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
-        || VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
         || restoration > ROGUE_FOSSIL_RESTORATION_ADAPTIVE)
         return;
 
-    if(!CheckBagHasItem(scene->requestedItem, 1))
+    if(!CheckBagHasItem(scene.requestedItem, 1))
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
         return;
     }
 
     originalRng = gRngValue;
-    SeedRng(scene->rewardAmount ^ (restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0x51A7 : 0xB4E3));
+    SeedRng(scene.rewardAmount ^ (restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0x51A7 : 0xB4E3));
     customMonId = RogueGift_CreateDynamicMonIdRawWithTypingChance(
         UNIQUE_RARITY_RARE,
-        scene->rewardItem,
+        scene.rewardItem,
         restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0 : 100);
-    RogueGift_CreateMon(customMonId, &mon, scene->rewardItem, 1, USE_RANDOM_IVS);
+    RogueGift_CreateMon(customMonId, &mon, scene.rewardItem, 1, USE_RANDOM_IVS);
     gRngValue = originalRng;
 
-    if(!RemoveBagItem(scene->requestedItem, 1))
+    if(!RemoveBagItem(scene.requestedItem, 1))
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
         return;
@@ -1100,13 +1606,13 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
     giveResult = GiveTradedMonToPlayer(&mon);
     if(giveResult == MON_CANT_GIVE)
     {
-        AddBagItem(scene->requestedItem, 1);
+        AddBagItem(scene.requestedItem, 1);
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
         return;
     }
 
-    GetSetPokedexSpeciesFlag(scene->rewardItem, FLAG_SET_CAUGHT);
-    Rogue_PushPopup_AddPokemon(scene->rewardItem, TRUE, FALSE);
-    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    GetSetPokedexSpeciesFlag(scene.rewardItem, FLAG_SET_CAUGHT);
+    Rogue_PushPopup_AddPokemon(scene.rewardItem, TRUE, FALSE);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }

@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "constants/rogue_adventure_quests.h"
+#include "constants/rogue_route_scenes.h"
 #include "rogue_trials.h"
 
 // Extra data for pokemon in party
@@ -119,8 +120,8 @@ struct RogueAdvPathRoomParams
     } perType;
 };
 
-// A selected scene request. Content producers fill this payload; the route
-// scene composer only concerns itself with the selected recipe and anchor.
+// A transient expanded scene request. Adventure-path rooms retain only the
+// packed placement below; content is rebuilt deterministically when needed.
 struct RogueRouteSceneRequest
 {
     u16 rewardItem;
@@ -130,11 +131,22 @@ struct RogueRouteSceneRequest
     u16 secondaryGraphicsId;
     u16 rewardAmount;
     u8 recipeId;
-    u8 environment : 3;
-    u8 anchor : 1;
-    u8 variant : 1;
-    u8 source : 2;
+    u8 environment;
+    u8 lotId;
+    u8 lotRole;
+    u8 sceneSlot;
+    u8 source;
     u8 ownerQuestId;
+};
+
+struct RogueRouteScenePlacement
+{
+    u32 packed;
+};
+
+struct RogueRouteScenePlan
+{
+    struct RogueRouteScenePlacement placements[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS];
 };
 
 struct RogueAdventureQuest
@@ -148,7 +160,7 @@ struct RogueAdventureQuest
     u8 sceneRoomId;
 };
 
-STATIC_ASSERT(sizeof(struct RogueRouteSceneRequest) <= 16, SizeOfRogueRouteSceneRequest);
+STATIC_ASSERT(sizeof(struct RogueRouteScenePlan) == 12, SizeOfRogueRouteScenePlan);
 STATIC_ASSERT(sizeof(struct RogueAdventureQuest) == 12, SizeOfRogueAdventureQuest);
 
 struct RogueAdvPathNode
@@ -163,7 +175,7 @@ struct RogueAdvPathRoom
 {
     struct Coords8 coords;
     struct RogueAdvPathRoomParams roomParams;
-    struct RogueRouteSceneRequest routeScene;
+    struct RogueRouteScenePlan routeScenePlan;
     u16 rngSeed;
     u8 roomType;
     u8 connectionMask;

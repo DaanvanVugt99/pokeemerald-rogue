@@ -4,6 +4,7 @@
 #include "global.h"
 
 struct RogueAdvPathRoom;
+struct RogueRouteSceneRequest;
 
 // Route lifecycle and scene composition are content-agnostic. Individual
 // interactions remain in rogue_route_events.h.
@@ -18,6 +19,14 @@ void RogueRouteScenes_RestoreObjectEvents(
     const struct ObjectEventTemplate *baseObjectEvents,
     u8 baseObjectEventCount);
 void RogueRouteScenes_ApplyMetatiles(void);
-bool8 RogueRouteScenes_IsAnchorTemplate(const struct ObjectEventTemplate *objectEvent);
+bool8 RogueRouteScenes_IsLotTemplate(const struct ObjectEventTemplate *objectEvent);
+u8 RogueRouteScenes_GetPlacementCount(void);
+bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request);
+u8 RogueRouteScenes_GetState(u8 sceneSlot);
+void RogueRouteScenes_SetState(u8 sceneSlot, u8 state);
+
+#ifdef ROGUE_DEBUG
+void RogueRouteScenes_DebugSetPlacement(u8 placementIndex, u8 recipeId, u8 lotId, u8 lotRole, u8 sceneSlot, u8 ownerQuestId);
+#endif
 
 #endif // GUARD_ROGUE_ROUTE_SCENES_H
