@@ -77,12 +77,15 @@ u16 GetCurseValue(u8 effectType);
 void Rogue_RemoveCharmsFromBag(void);
 void Rogue_RemoveCursesFromBag(void);
 void Rogue_AddTemporaryDarkDealCurse(u16 itemId);
+bool8 Rogue_TryAddTemporaryDarkDealCurse(u16 itemId);
 void Rogue_ClearTemporaryDarkDealCurse(void);
 
 u16 Rogue_GetMaxPartySize(void);
 
 bool8 IsEffectDisabled(u8 effectType, bool8 isCurse);
 bool8 Rogue_IsCurseAvailableForDarkDeal(u8 effectType);
+u8 Rogue_GetDarkDealCurseCount(void);
+u16 Rogue_SelectDarkDealCurseItem(u16 roll);
 u16 Rogue_NextCharmItem(u16* historyBuffer, u16 historyBufferCount);
 u16 Rogue_NextCurseItem(u16* historyBuffer, u16 historyBufferCount);
 u16 Rogue_NextDarkDealCurseItem(u16* historyBuffer, u16 historyBufferCount);

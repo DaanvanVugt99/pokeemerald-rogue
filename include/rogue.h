@@ -128,6 +128,7 @@ struct RogueRouteSceneRequest
     u16 trainerNum;
     u16 primaryGraphicsId;
     u16 secondaryGraphicsId;
+    u16 rewardAmount;
     u8 recipeId;
     u8 environment : 3;
     u8 anchor : 1;

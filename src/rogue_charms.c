@@ -457,12 +457,36 @@ void Rogue_RemoveCursesFromBag(void)
 
 void Rogue_AddTemporaryDarkDealCurse(u16 itemId)
 {
-    if(itemId != ITEM_NONE && AddBagItem(itemId, 1))
+    if(gRogueRun.temporaryDarkDealCurseItem != ITEM_NONE)
+        Rogue_ClearTemporaryDarkDealCurse();
+
+    Rogue_TryAddTemporaryDarkDealCurse(itemId);
+}
+
+bool8 Rogue_TryAddTemporaryDarkDealCurse(u16 itemId)
+{
+    u8 effectType;
+    bool8 isEligible = FALSE;
+
+    if(gRogueRun.temporaryDarkDealCurseItem != ITEM_NONE || itemId == ITEM_NONE)
+        return FALSE;
+
+    for(effectType = 0; effectType < EFFECT_COUNT; ++effectType)
     {
-        gRogueRun.temporaryDarkDealCurseItem = itemId;
-        Rogue_PushPopup_AddItem(itemId, 1);
-        RecalcCharmCurseValues();
+        if(Rogue_IsCurseAvailableForDarkDeal(effectType) && EffectToCurseItem(effectType) == itemId)
+        {
+            isEligible = TRUE;
+            break;
+        }
     }
+
+    if(!isEligible || !AddBagItem(itemId, 1))
+        return FALSE;
+
+    gRogueRun.temporaryDarkDealCurseItem = itemId;
+    Rogue_PushPopup_AddItem(itemId, 1);
+    RecalcCharmCurseValues();
+    return TRUE;
 }
 
 void Rogue_ClearTemporaryDarkDealCurse(void)
@@ -637,6 +661,38 @@ bool8 Rogue_IsCurseAvailableForDarkDeal(u8 effectType)
     return EffectToCurseItem(effectType) != ITEM_NONE
         && !IsEffectDisabled(effectType, TRUE)
         && !IsEffectDisabledForDarkDeal(effectType);
+}
+
+u8 Rogue_GetDarkDealCurseCount(void)
+{
+    u8 effectType;
+    u8 count = 0;
+
+    for(effectType = 0; effectType < EFFECT_COUNT; ++effectType)
+    {
+        if(Rogue_IsCurseAvailableForDarkDeal(effectType))
+            ++count;
+    }
+
+    return count;
+}
+
+u16 Rogue_SelectDarkDealCurseItem(u16 roll)
+{
+    u8 effectType;
+    u8 count = Rogue_GetDarkDealCurseCount();
+
+    if(count == 0)
+        return ITEM_NONE;
+
+    roll %= count;
+    for(effectType = 0; effectType < EFFECT_COUNT; ++effectType)
+    {
+        if(Rogue_IsCurseAvailableForDarkDeal(effectType) && roll-- == 0)
+            return EffectToCurseItem(effectType);
+    }
+
+    return ITEM_NONE;
 }
 
 u16 Rogue_NextDarkDealCurseItem(u16* historyBuffer, u16 historyBufferCount)

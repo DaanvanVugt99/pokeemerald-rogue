@@ -24,7 +24,10 @@ Format follows Keep a Changelog loosely:
   returning the recovered Trade Case at a final merchant checkpoint awards a
   Large Pokéblock Bundle and ¥5,000. Scene placement, quest state, key-item
   cargo, battles, and pending rewards remain deterministic across quicksaves
-  without changing save data.
+  without changing save data. The same route director now selects from a
+  weighted pool of valid content, including a one-off Hexed Shrine where the
+  Dark Deal Devil offers immediate money in exchange for a temporary Curse
+  that lasts until the next Boss falls.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.

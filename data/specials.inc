@@ -193,6 +193,7 @@ gSpecials::
     def_special RogueRouteEvents_BeginStolenTradeCaseBattle
     def_special RogueRouteEvents_FinishStolenTradeCaseBattle
     def_special RogueRouteEvents_TryClaimStolenTradeCaseReward
+    def_special RogueRouteEvents_TryAcceptHexedShrine
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon

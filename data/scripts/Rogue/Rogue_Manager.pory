@@ -33,6 +33,7 @@ const ROGUE_ROUTE_EVENT_RESULT_FAILED = 0
 const ROGUE_ROUTE_EVENT_RESULT_SUCCESS = 1
 const ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM = 2
 const ROGUE_ROUTE_EVENT_RESULT_NO_SPACE = 3
+const ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL = 4
 
 const POKEDEX_SELECTION_CURATED = 0
 const POKEDEX_SELECTION_TRIAL = 1
@@ -51,6 +52,73 @@ script Rogue_RouteEvent_Prop
     faceplayer
 
     msgbox(format("Travel supplies are packed inside."))
+
+    release
+}
+
+script Rogue_RouteEvent_HexedShrineProp
+{
+    lock
+    faceplayer
+
+    msgbox(format("An uneasy chill hangs over the shrine."))
+
+    release
+}
+
+script Rogue_RouteEvent_HexedShrine
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    bufferitemname(STR_VAR_2, VAR_0x8005)
+    buffernumberstring(STR_VAR_1, VAR_0x8007)
+
+    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("Our bargain holds. The {STR_VAR_2} will fade when the next Boss falls."))
+    }
+    else
+    {
+        msgbox(format("Accept the {STR_VAR_2}, and I will give you ¥{STR_VAR_1}.\pThe Curse lasts until the next Boss falls."))
+        copyvar(VAR_0x8004, VAR_0x8005)
+        callnative(ScriptMenu_ShowItemDescription)
+        msgbox(format("Seal the bargain?"), MSGBOX_YESNO)
+        callnative(ScriptMenu_HideItemDescription)
+
+        if(var(VAR_RESULT) == YES)
+        {
+            special(RogueRouteEvents_TryAcceptHexedShrine)
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+            {
+                call(Rogue_Common_DisplayPopups)
+                msgbox(format("It is done. The bargain lasts until the next Boss falls."))
+            }
+            else
+            {
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+                {
+                    msgbox(format("Your Bag has no room for this Curse."))
+                }
+                else
+                {
+                    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL)
+                    {
+                        msgbox(format("You cannot carry the full payment. Return when you can."))
+                    }
+                    else
+                    {
+                        msgbox(format("The bargain cannot be sealed."))
+                    }
+                }
+            }
+        }
+        else
+        {
+            msgbox(format("Then keep your peace—for now."))
+        }
+    }
 
     release
 }
