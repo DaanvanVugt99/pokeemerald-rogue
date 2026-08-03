@@ -253,21 +253,6 @@ static u16 GetApricornBall(u16 apricorn)
     return ITEM_NONE;
 }
 
-static u8 FindAdventureQuestId(u8 definitionId)
-{
-    u8 i;
-
-    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
-    {
-        const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(i);
-
-        if(quest != NULL && quest->definitionId == definitionId)
-            return i;
-    }
-
-    return ROGUE_ADVENTURE_QUEST_INVALID_ID;
-}
-
 static bool8 SelectStolenTradeCaseOfferPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
 {
     (void)request;
@@ -411,7 +396,7 @@ static void ExpandApricornGrovePayload(struct RogueRouteSceneRequest *request, u
     if(request->recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
         && request->lotRole == 1)
     {
-        u8 questId = FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+        u8 questId = RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
         const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
 
         request->primaryGraphicsId = OBJ_EVENT_GFX_OLD_MAN;
@@ -432,26 +417,8 @@ static void ExpandApricornGrovePayload(struct RogueRouteSceneRequest *request, u
     request->trainerNum = sApricornItems[(payload >> (APRICORN_PAYLOAD_CHOICE_BITS * 2)) & APRICORN_PAYLOAD_CHOICE_MASK];
 }
 
-enum
-{
-    ROUTE_FALLBACK_FAMILY_STOLEN_TRADE_CASE,
-    ROUTE_FALLBACK_FAMILY_HEXED_SHRINE,
-    ROUTE_FALLBACK_FAMILY_ANOMALOUS_FOSSIL,
-    ROUTE_FALLBACK_FAMILY_FORBIDDEN_STONE,
-    ROUTE_FALLBACK_FAMILY_APRICORN_CRAFTING,
-};
-
 #include "data/rogue_route_scene_recipes.h"
-
-static const struct RogueRouteFallbackDefinition sRouteFallbacks[] =
-{
-    {ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, 50, ROUTE_FALLBACK_FAMILY_STOLEN_TRADE_CASE, CanShowStolenTradeCaseOffer},
-    {ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, 50, ROUTE_FALLBACK_FAMILY_HEXED_SHRINE, CanShowHexedShrine},
-    {ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, 50, ROUTE_FALLBACK_FAMILY_ANOMALOUS_FOSSIL, CanShowAnomalousFossilOffer},
-    {ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER, 50, ROUTE_FALLBACK_FAMILY_FORBIDDEN_STONE, CanShowForbiddenStoneOffer},
-    {ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE, 25, ROUTE_FALLBACK_FAMILY_APRICORN_CRAFTING, CanShowApricornGrove},
-    {ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN, 25, ROUTE_FALLBACK_FAMILY_APRICORN_CRAFTING, CanShowApricornGrove},
-};
+#include "data/rogue_route_event_definitions.h"
 
 const struct RogueRouteRecipeDefinition *RogueRouteEvents_GetRecipeDefinition(u8 recipeId)
 {
@@ -478,33 +445,35 @@ u8 RogueRouteEvents_GetFallbackCount(void)
 
 void RogueRouteEvents_OnEnterScene(const struct RogueRouteSceneRequest *scene)
 {
+    const struct RogueRouteRecipeDefinition *definition;
     const struct RogueAdventureQuest *quest;
 
     if(scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
         return;
 
+    definition = RogueRouteEvents_GetRecipeDefinition(scene->recipeId);
     quest = RogueAdventureQuests_Get(scene->ownerQuestId);
-    if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
-        && quest != NULL
+    if(definition == NULL
+        || quest == NULL
+        || quest->definitionId != definition->linkedQuestDefinitionId)
+        return;
+
+    if(definition->resumeBehavior == ROUTE_SCENE_RESUME_REWARD_PENDING_IF_PROGRESS
         && quest->progress != 0
         && RogueRouteScenes_GetState(scene->sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
         RogueRouteScenes_SetState(scene->sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-    else if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS
-        && quest != NULL
-        && (quest->progress & ((1 << ROGUE_FORBIDDEN_STONE_SOUL_COUNT) - 1)) == (1 << ROGUE_FORBIDDEN_STONE_SOUL_COUNT) - 1)
+    else if(definition->resumeBehavior == ROUTE_SCENE_RESUME_COMPLETED_IF_TARGET_MET
+        && RogueAdventureQuests_IsProgressTargetMet(scene->ownerQuestId))
         RogueRouteScenes_SetState(scene->sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
-    else if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF
-        && quest != NULL
-        && quest->progress != 0
-        && RogueRouteScenes_GetState(scene->sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-        RogueRouteScenes_SetState(scene->sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
 }
 
 void RogueRouteEvents_PrepareSceneTrainers(const struct RogueRouteSceneRequest *scene)
 {
+    const struct RogueRouteRecipeDefinition *definition = RogueRouteEvents_GetRecipeDefinition(scene->recipeId);
     u8 trainerIdx;
 
-    if(scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)
+    if(definition == NULL
+        || (definition->flags & ROUTE_SCENE_RECIPE_FLAG_EXCLUDE_DYNAMIC_TRAINER) == 0)
         return;
 
     for(trainerIdx = 0; trainerIdx < ROGUE_MAX_ACTIVE_TRAINER_COUNT; ++trainerIdx)
@@ -516,10 +485,13 @@ void RogueRouteEvents_PrepareSceneTrainers(const struct RogueRouteSceneRequest *
 
 u8 RogueRouteEvents_OnExitScene(const struct RogueRouteSceneRequest *scene)
 {
-    if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
-        && scene->lotRole == 1
+    const struct RogueRouteRecipeDefinition *definition = RogueRouteEvents_GetRecipeDefinition(scene->recipeId);
+
+    if(definition != NULL
+        && (definition->flags & ROUTE_SCENE_RECIPE_FLAG_COMPLETE_LINKED_QUEST_ON_EXIT) != 0
+        && scene->lotRole == definition->completionLotRole
         && RogueRouteScenes_GetState(scene->sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-        return FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+        return RogueAdventureQuests_FindByDefinition(definition->linkedQuestDefinitionId);
 
     return ROGUE_ADVENTURE_QUEST_INVALID_ID;
 }
@@ -1061,7 +1033,7 @@ void RogueRouteEvents_BufferApricornTreeData(void)
         return;
 
     {
-        u8 questId = FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+        u8 questId = RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
         const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
 
         if(quest != NULL)
@@ -1148,7 +1120,7 @@ void RogueRouteEvents_TryCraftApricornBalls(void)
 
     questId = scene.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
         ? scene.ownerQuestId
-        : FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+        : RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
     quest = RogueAdventureQuests_Get(questId);
     if(quest == NULL
         || quest->definitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING

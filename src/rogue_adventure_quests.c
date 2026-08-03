@@ -19,6 +19,8 @@
 
 struct RogueAdventureQuestNodeDefinition
 {
+    const u8 *activeDescription;
+    const u8 *readyDescription;
     u8 sceneRecipeId;
     u8 nextNodeId;
     u8 progressSignal;
@@ -32,9 +34,20 @@ struct RogueAdventureQuestDefinition
     const u8 *title;
     const struct RogueAdventureQuestNodeDefinition *nodes;
     bool8 (*buildSceneRequest)(const struct RogueAdventureQuest *quest, struct RogueRouteSceneRequest *request);
-    u16 cleanupItem;
+    void (*prepareDescription)(const struct RogueAdventureQuest *quest);
+    u16 fixedQuestItem;
     u8 nodeCount;
     u8 initialNodeId;
+    u8 cleanupItemSource;
+    u8 protectedItemSource;
+};
+
+enum
+{
+    QUEST_ITEM_SOURCE_NONE,
+    QUEST_ITEM_SOURCE_FIXED,
+    QUEST_ITEM_SOURCE_PAYLOAD_0,
+    QUEST_ITEM_SOURCE_PAYLOAD_1,
 };
 
 static const u8 sText_StolenTradeCaseTitle[] = _("Stolen Trade Case");
@@ -55,6 +68,27 @@ static const u8 sText_FindBallMaker[] = _("Find a traveling Ball Maker to craft 
 static const u8 sText_BallMakerReady[] = _("A traveling Ball Maker is on this route.\nReward: 5 {STR_VAR_2}");
 static const u8 sText_UnknownQuestTitle[] = _("Adventure Quest");
 static const u8 sText_UnknownQuestDescription[] = _("Complete this quest before the adventure ends.");
+
+static void PrepareAnomalousFossilDescription(const struct RogueAdventureQuest *quest)
+{
+    CopyItemName(quest->payload[0], gStringVar1);
+    StringCopy(gStringVar2, RoguePokedex_GetSpeciesName(RogueAdventureQuests_GetFossilSpecies(quest->payload[0])));
+}
+
+static void PrepareForbiddenStoneDescription(const struct RogueAdventureQuest *quest)
+{
+    u8 recovered = ((quest->progress & (1 << 0)) != 0)
+        + ((quest->progress & (1 << 1)) != 0)
+        + ((quest->progress & (1 << 2)) != 0);
+
+    ConvertIntToDecimalStringN(gStringVar1, recovered, STR_CONV_MODE_LEFT_ALIGN, 1);
+}
+
+static void PrepareApricornCraftingDescription(const struct RogueAdventureQuest *quest)
+{
+    CopyItemName(quest->payload[0], gStringVar1);
+    CopyItemName(quest->payload[1], gStringVar2);
+}
 
 u16 RogueAdventureQuests_GetFossilSpecies(u16 fossilItem)
 {
@@ -149,115 +183,14 @@ static bool8 BuildApricornCraftingScene(const struct RogueAdventureQuest *quest,
     return TRUE;
 }
 
-static const struct RogueAdventureQuestNodeDefinition sStolenTradeCaseNodes[] =
-{
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP,
-        .nextNodeId = 1,
-        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
-        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
-        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
-        .routeDelay = 1,
-    },
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF,
-        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
-        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
-        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
-        .routeDelay = 1,
-    },
-};
-
-static const struct RogueAdventureQuestNodeDefinition sAnomalousFossilNodes[] =
-{
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION,
-        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
-        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
-        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
-        .routeDelay = 1,
-    },
-};
-
-static const struct RogueAdventureQuestNodeDefinition sForbiddenStoneNodes[] =
-{
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS,
-        .nextNodeId = 1,
-        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
-        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
-        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE | ROGUE_ADVENTURE_QUEST_NODE_FLAG_PROGRESS_SET_BITS,
-        .routeDelay = 1,
-    },
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF,
-        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
-        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
-        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
-        .routeDelay = 1,
-    },
-};
-
-static const struct RogueAdventureQuestNodeDefinition sApricornCraftingNodes[] =
-{
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN,
-        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
-        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
-        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
-        .routeDelay = 1,
-    },
-};
-
-static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT] =
-{
-    [ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE] =
-    {
-        .title = sText_StolenTradeCaseTitle,
-        .nodes = sStolenTradeCaseNodes,
-        .buildSceneRequest = BuildStolenTradeCaseScene,
-        .cleanupItem = ITEM_TRADE_CASE,
-        .nodeCount = ARRAY_COUNT(sStolenTradeCaseNodes),
-        .initialNodeId = 0,
-    },
-    [ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL] =
-    {
-        .title = sText_AnomalousFossilTitle,
-        .nodes = sAnomalousFossilNodes,
-        .buildSceneRequest = BuildAnomalousFossilScene,
-        .cleanupItem = ITEM_NONE,
-        .nodeCount = ARRAY_COUNT(sAnomalousFossilNodes),
-        .initialNodeId = 0,
-    },
-    [ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE] =
-    {
-        .title = sText_ForbiddenStoneTitle,
-        .nodes = sForbiddenStoneNodes,
-        .buildSceneRequest = BuildForbiddenStoneScene,
-        .cleanupItem = ITEM_ODD_KEYSTONE,
-        .nodeCount = ARRAY_COUNT(sForbiddenStoneNodes),
-        .initialNodeId = 0,
-    },
-    [ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING] =
-    {
-        .title = sText_ApricornCraftingTitle,
-        .nodes = sApricornCraftingNodes,
-        .buildSceneRequest = BuildApricornCraftingScene,
-        .cleanupItem = ITEM_NONE,
-        .nodeCount = ARRAY_COUNT(sApricornCraftingNodes),
-        .initialNodeId = 0,
-    },
-};
+#include "data/rogue_adventure_quest_definitions.h"
 
 static const struct RogueAdventureQuestDefinition *GetDefinition(u8 definitionId)
 {
     if(definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_NONE
         || definitionId >= ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT
-        || sQuestDefinitions[definitionId].nodes == NULL)
+        || sQuestDefinitions[definitionId].nodes == NULL
+        || sQuestDefinitions[definitionId].nodeCount > ROGUE_ADVENTURE_QUEST_MAX_NODE_COUNT)
         return NULL;
 
     return &sQuestDefinitions[definitionId];
@@ -267,10 +200,30 @@ static const struct RogueAdventureQuestNodeDefinition *GetNode(const struct Rogu
 {
     const struct RogueAdventureQuestDefinition *definition = GetDefinition(quest->definitionId);
 
-    if(definition == NULL || quest->nodeId >= definition->nodeCount)
+    if(definition == NULL
+        || quest->nodeId >= definition->nodeCount
+        || definition->nodes[quest->nodeId].routeDelay > ROGUE_ADVENTURE_QUEST_MAX_ROUTE_DELAY)
         return NULL;
 
     return &definition->nodes[quest->nodeId];
+}
+
+static u16 ResolveQuestItem(
+    const struct RogueAdventureQuestDefinition *definition,
+    const struct RogueAdventureQuest *quest,
+    u8 source)
+{
+    switch(source)
+    {
+    case QUEST_ITEM_SOURCE_FIXED:
+        return definition->fixedQuestItem;
+    case QUEST_ITEM_SOURCE_PAYLOAD_0:
+        return quest->payload[0];
+    case QUEST_ITEM_SOURCE_PAYLOAD_1:
+        return quest->payload[1];
+    default:
+        return ITEM_NONE;
+    }
 }
 
 static void EnterNode(struct RogueAdventureQuest *quest, u8 nodeId)
@@ -279,7 +232,8 @@ static void EnterNode(struct RogueAdventureQuest *quest, u8 nodeId)
 
     if(nodeId == ROGUE_ADVENTURE_QUEST_NODE_COMPLETE
         || definition == NULL
-        || nodeId >= definition->nodeCount)
+        || nodeId >= definition->nodeCount
+        || definition->nodes[nodeId].routeDelay > ROGUE_ADVENTURE_QUEST_MAX_ROUTE_DELAY)
     {
         memset(quest, 0, sizeof(*quest));
         return;
@@ -294,13 +248,14 @@ static void EnterNode(struct RogueAdventureQuest *quest, u8 nodeId)
 static void CleanupQuest(const struct RogueAdventureQuest *quest)
 {
     const struct RogueAdventureQuestDefinition *definition = GetDefinition(quest->definitionId);
+    u16 item;
 
-    if(definition != NULL && definition->cleanupItem != ITEM_NONE)
-        RemoveBagItem(definition->cleanupItem, 1);
-    else if(quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL)
-        RemoveBagItem(quest->payload[0], 1);
-    else if(quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING)
-        RemoveBagItem(quest->payload[0], 1);
+    if(definition == NULL)
+        return;
+
+    item = ResolveQuestItem(definition, quest, definition->cleanupItemSource);
+    if(item != ITEM_NONE)
+        RemoveBagItem(item, 1);
 }
 
 void RogueAdventureQuests_Clear(void)
@@ -358,6 +313,22 @@ bool8 RogueAdventureQuests_HasDefinition(u8 definitionId)
     return FALSE;
 }
 
+u8 RogueAdventureQuests_FindByDefinition(u8 definitionId)
+{
+    u8 i;
+
+    if(GetDefinition(definitionId) == NULL)
+        return ROGUE_ADVENTURE_QUEST_INVALID_ID;
+
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        if(gRogueRun.adventureQuests[i].definitionId == definitionId)
+            return i;
+    }
+
+    return ROGUE_ADVENTURE_QUEST_INVALID_ID;
+}
+
 bool8 RogueAdventureQuests_IsDefinitionSourceRoom(u8 definitionId, u8 roomId)
 {
     u8 i;
@@ -382,13 +353,12 @@ bool8 RogueAdventureQuests_IsItemProtected(u16 itemId)
     for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
     {
         const struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[i];
+        const struct RogueAdventureQuestDefinition *definition = GetDefinition(quest->definitionId);
 
-        if((quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL
-                && quest->payload[0] == itemId)
-            || (quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE
-                && itemId == ITEM_ODD_KEYSTONE)
-            || (quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING
-                && quest->payload[0] == itemId))
+        if(itemId != ITEM_NONE
+            && definition != NULL
+            && definition->protectedItemSource != QUEST_ITEM_SOURCE_NONE
+            && ResolveQuestItem(definition, quest, definition->protectedItemSource) == itemId)
             return TRUE;
     }
 
@@ -521,6 +491,18 @@ static bool8 IsProgressTargetMet(const struct RogueAdventureQuest *quest, const 
     return quest->progress >= quest->target;
 }
 
+bool8 RogueAdventureQuests_IsProgressTargetMet(u8 questId)
+{
+    const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+    const struct RogueAdventureQuestNodeDefinition *node;
+
+    if(quest == NULL)
+        return FALSE;
+
+    node = GetNode(quest);
+    return node != NULL && IsProgressTargetMet(quest, node);
+}
+
 bool8 RogueAdventureQuests_EmitSignalForQuest(u8 questId, u8 signal, u16 value)
 {
     struct RogueAdventureQuest *quest;
@@ -649,6 +631,9 @@ const u8 *RogueAdventureQuests_GetTitle(u8 questId)
 void RogueAdventureQuests_BufferDescription(u8 questId, u8 *dest)
 {
     const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+    const struct RogueAdventureQuestDefinition *definition;
+    const struct RogueAdventureQuestNodeDefinition *node;
+    const u8 *description;
 
     if(quest == NULL)
     {
@@ -656,41 +641,21 @@ void RogueAdventureQuests_BufferDescription(u8 questId, u8 *dest)
         return;
     }
 
-    switch(quest->definitionId)
+    definition = GetDefinition(quest->definitionId);
+    node = GetNode(quest);
+    if(definition == NULL || node == NULL)
     {
-    case ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE:
-        if(quest->nodeId == 0)
-            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_CampReady : sText_FindCamp);
-        else
-            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_MerchantReady : sText_ReturnCase);
-        break;
-    case ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL:
-        CopyItemName(quest->payload[0], gStringVar1);
-        StringCopy(gStringVar2, RoguePokedex_GetSpeciesName(RogueAdventureQuests_GetFossilSpecies(quest->payload[0])));
-        StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_FossilResearcherReady : sText_FindFossilResearcher);
-        break;
-    case ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE:
-        if(quest->nodeId == 0)
-        {
-            u8 recovered = ((quest->progress & (1 << 0)) != 0)
-                + ((quest->progress & (1 << 1)) != 0)
-                + ((quest->progress & (1 << 2)) != 0);
-
-            ConvertIntToDecimalStringN(gStringVar1, recovered, STR_CONV_MODE_LEFT_ALIGN, 1);
-            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_EscapedSoulsReady : sText_FindEscapedSouls);
-        }
-        else
-        {
-            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_SealingGroundReady : sText_FindSealingGround);
-        }
-        break;
-    case ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING:
-        CopyItemName(quest->payload[0], gStringVar1);
-        CopyItemName(quest->payload[1], gStringVar2);
-        StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_BallMakerReady : sText_FindBallMaker);
-        break;
-    default:
         StringCopy(dest, sText_UnknownQuestDescription);
-        break;
+        return;
     }
+
+    if(definition->prepareDescription != NULL)
+        definition->prepareDescription(quest);
+
+    description = RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY
+        ? node->readyDescription
+        : node->activeDescription;
+    if(description == NULL)
+        description = sText_UnknownQuestDescription;
+    StringExpandPlaceholders(dest, description);
 }

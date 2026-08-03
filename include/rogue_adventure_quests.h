@@ -15,8 +15,10 @@ struct RogueAdventureQuestCreateParams
 void RogueAdventureQuests_Clear(void);
 u8 RogueAdventureQuests_Create(u8 definitionId, const struct RogueAdventureQuestCreateParams *params);
 bool8 RogueAdventureQuests_HasDefinition(u8 definitionId);
+u8 RogueAdventureQuests_FindByDefinition(u8 definitionId);
 bool8 RogueAdventureQuests_IsDefinitionSourceRoom(u8 definitionId, u8 roomId);
 bool8 RogueAdventureQuests_IsItemProtected(u16 itemId);
+bool8 RogueAdventureQuests_IsProgressTargetMet(u8 questId);
 u16 RogueAdventureQuests_GetFossilSpecies(u16 fossilItem);
 bool8 RogueAdventureQuests_BuildSceneRequest(u8 questId, struct RogueRouteSceneRequest *request);
 u8 RogueAdventureQuests_CollectSceneRequests(u8 roomId, struct RogueRouteSceneRequest *requests, u8 capacity);

@@ -100,7 +100,11 @@ Format follows Keep a Changelog loosely:
   so composition and quickload restoration never rerun content selection.
   Adventure Quest nodes now also declare reusable progress and completion
   signals, including additive and unique-objective progress, instead of
-  advancing through event-specific state mutations.
+  advancing through event-specific state mutations. Their run-time records
+  are packed from 12 to 8 bytes while retaining 64 simultaneous quests,
+  recovering 256 bytes of EWRAM. The initial five route-event families now
+  live in declarative event, scene-recipe, and quest-node tables, including
+  their copy, item policies, restoration behavior, and route-exit hooks.
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.

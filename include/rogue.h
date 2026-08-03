@@ -152,16 +152,18 @@ struct RogueRouteScenePlan
 struct RogueAdventureQuest
 {
     u16 payload[2];
-    u8 definitionId;
-    u8 nodeId;
+    u8 definitionId : 4;
+    u8 nodeId : 4;
     u8 progress;
     u8 target;
-    u8 routesUntilScene;
-    u8 sceneRoomId;
+    u8 routesUntilScene : 2;
+    u8 sceneRoomId : 6;
 };
 
 STATIC_ASSERT(sizeof(struct RogueRouteScenePlan) == 12, SizeOfRogueRouteScenePlan);
-STATIC_ASSERT(sizeof(struct RogueAdventureQuest) == 12, SizeOfRogueAdventureQuest);
+STATIC_ASSERT(sizeof(struct RogueAdventureQuest) == 8, SizeOfRogueAdventureQuest);
+STATIC_ASSERT(ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT <= 16, AdventureQuestDefinitionFitsPackedId);
+STATIC_ASSERT(ADVPATH_ROOM_COUNT < ROGUE_ADVENTURE_QUEST_INVALID_ROOM, AdventureRoomFitsPackedQuestRoom);
 
 struct RogueAdvPathNode
 {
@@ -357,6 +359,8 @@ struct RogueRunData
     bool8 hasPendingRivalBattle : 1;
     bool8 rivalHasShiny : 1;
 };
+
+STATIC_ASSERT(sizeof(((struct RogueRunData *)0)->adventureQuests) == 512, SizeOfAdventureQuestRuntime);
 
 struct RogueHubArea
 {

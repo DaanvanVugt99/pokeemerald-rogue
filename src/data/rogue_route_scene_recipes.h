@@ -176,18 +176,24 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sStolenTradeCaseOfferLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sStolenTradeCaseOfferLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP] =
     {
         .lots = sStolenTradeCaseCampLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
         .lotCount = ARRAY_COUNT(sStolenTradeCaseCampLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE,
+        .resumeBehavior = ROUTE_SCENE_RESUME_REWARD_PENDING_IF_PROGRESS,
+        .flags = ROUTE_SCENE_RECIPE_FLAG_EXCLUDE_DYNAMIC_TRAINER,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF] =
     {
         .lots = sStolenTradeCasePayoffLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
         .lotCount = ARRAY_COUNT(sStolenTradeCasePayoffLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE,
+        .resumeBehavior = ROUTE_SCENE_RESUME_REWARD_PENDING_IF_PROGRESS,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE] =
     {
@@ -204,12 +210,14 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sAnomalousFossilOfferLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sAnomalousFossilOfferLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION] =
     {
         .lots = sAnomalousFossilRestorationLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
         .lotCount = ARRAY_COUNT(sAnomalousFossilRestorationLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER] =
     {
@@ -218,18 +226,23 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sForbiddenStoneOfferLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sForbiddenStoneOfferLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS] =
     {
         .lots = sForbiddenStoneSoulLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
         .lotCount = ARRAY_COUNT(sForbiddenStoneSoulLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+        .resumeBehavior = ROUTE_SCENE_RESUME_COMPLETED_IF_TARGET_MET,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF] =
     {
         .lots = sForbiddenStonePayoffLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
         .lotCount = ARRAY_COUNT(sForbiddenStonePayoffLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+        .resumeBehavior = ROUTE_SCENE_RESUME_REWARD_PENDING_IF_PROGRESS,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE] =
     {
@@ -238,6 +251,7 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sApricornGroveLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sApricornGroveLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN] =
     {
@@ -246,12 +260,16 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sApricornGroveAndArtisanLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sApricornGroveAndArtisanLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
+        .flags = ROUTE_SCENE_RECIPE_FLAG_COMPLETE_LINKED_QUEST_ON_EXIT,
+        .completionLotRole = 1,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN] =
     {
         .lots = sApricornArtisanLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
         .lotCount = ARRAY_COUNT(sApricornArtisanLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
     },
 };
 

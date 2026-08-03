@@ -1140,7 +1140,7 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     EXPECT(CheckBagHasItem(ITEM_ODD_KEYSTONE, 1));
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
     questId = RogueAdventureQuests_GetQuestIdAt(0);
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->target, ROGUE_FORBIDDEN_STONE_SOUL_COUNT);
     EXPECT(RogueAdventureQuests_IsItemProtected(ITEM_ODD_KEYSTONE));
 
@@ -1210,7 +1210,7 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     // All three placements share one graph node, so route exit advances it
     // exactly once to the final encounter.
     RogueRouteScenes_OnExitRoute();
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->nodeId, 1);
     gRogueAdvPath.roomCount = 2;
     gRogueRun.adventureRoomId = 1;
     gRogueAdvPath.rooms[1].roomParams.roomIdx = 1;
@@ -1364,7 +1364,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     EXPECT(RogueAdventureQuests_IsItemProtected(apricorn));
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
     questId = RogueAdventureQuests_GetQuestIdAt(0);
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[0], apricorn);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[1], ball);
 
@@ -1415,7 +1415,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     RogueRouteEvents_TryChooseApricorn();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     questId = RogueAdventureQuests_GetQuestIdAt(0);
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->routesUntilScene, 1);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->routesUntilScene, 1);
     RogueRouteScenes_OnExitRoute();
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
 
@@ -1542,7 +1542,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     RogueRouteEvents_FinishStolenTradeCaseBattle();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_NO_SPACE);
     EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 0);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->nodeId, 0);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->progress, 1);
 
     // Leaving while collection is pending reschedules the camp without
@@ -1569,7 +1569,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     ClearBag();
     RogueRouteEvents_FinishStolenTradeCaseBattle();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 0);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->nodeId, 0);
     EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
     EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
@@ -1581,7 +1581,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
     RogueRouteScenes_OnExitRoute();
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->nodeId, 1);
     gRogueRun.adventureRoomId = 4;
     gRogueAdvPath.rooms[4].roomParams.roomIdx = 4;
     gRogueAdvPath.rooms[4].rngSeed = 104;
@@ -1622,7 +1622,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT(CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
     EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 12345 + ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY);
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->nodeId, 1);
     EXPECT(FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED));
     EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
@@ -1754,13 +1754,13 @@ TEST("Route director composes three pending quest consumers and preserves them o
         seenLots[request.lotId] = TRUE;
         seenSlots[request.sceneSlot] = TRUE;
     }
-    EXPECT_EQ(gRogueRun.adventureQuests[3].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[3].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
 
     firstPlan = gRogueAdvPath.rooms[0].routeScenePlan;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
     EXPECT_EQ(memcmp(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan, sizeof(firstPlan)), 0);
-    EXPECT_EQ(gRogueRun.adventureQuests[3].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[3].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
@@ -1794,8 +1794,8 @@ TEST("Adventure quest node signals update progress and complete only their targe
     EXPECT_EQ(RogueAdventureQuests_Get(otherQuestId)->progress, 0);
 
     RogueAdventureQuests_EmitSignal(ROGUE_ADVENTURE_QUEST_SIGNAL_TRAINER_DEFEATED, 1);
-    EXPECT_EQ(RogueAdventureQuests_Get(stolenQuestId)->nodeId, 0);
-    EXPECT_EQ(RogueAdventureQuests_Get(otherQuestId)->nodeId, 0);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(stolenQuestId)->nodeId, 0);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(otherQuestId)->nodeId, 0);
 
     EXPECT(RogueAdventureQuests_EmitSignalForQuest(
         stolenQuestId,
@@ -1803,9 +1803,9 @@ TEST("Adventure quest node signals update progress and complete only their targe
         1));
     quest = RogueAdventureQuests_Get(stolenQuestId);
     EXPECT(quest != NULL);
-    EXPECT_EQ(quest->nodeId, 1);
+    EXPECT_EQ((u8)quest->nodeId, 1);
     EXPECT_EQ(quest->progress, 0);
-    EXPECT_EQ(RogueAdventureQuests_Get(otherQuestId)->nodeId, 0);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(otherQuestId)->nodeId, 0);
 
     EXPECT(RogueAdventureQuests_EmitSignalForQuest(
         stolenQuestId,
@@ -1832,7 +1832,7 @@ TEST("Adventure quest node signals update progress and complete only their targe
         1 << 0));
     quest = RogueAdventureQuests_Get(forbiddenQuestId);
     EXPECT_EQ(quest->progress, (1 << 0) | (1 << 2));
-    EXPECT_EQ(quest->nodeId, 0);
+    EXPECT_EQ((u8)quest->nodeId, 0);
 
     EXPECT(RogueAdventureQuests_EmitSignalForQuest(
         forbiddenQuestId,
@@ -1840,15 +1840,118 @@ TEST("Adventure quest node signals update progress and complete only their targe
         1 << 1));
     quest = RogueAdventureQuests_Get(forbiddenQuestId);
     EXPECT_EQ(quest->progress, (1 << ROGUE_FORBIDDEN_STONE_SOUL_COUNT) - 1);
-    EXPECT_EQ(quest->nodeId, 0);
+    EXPECT_EQ((u8)quest->nodeId, 0);
 
     EXPECT(RogueAdventureQuests_EmitSignalForQuest(
         forbiddenQuestId,
         ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
         1));
     quest = RogueAdventureQuests_Get(forbiddenQuestId);
-    EXPECT_EQ(quest->nodeId, 1);
+    EXPECT_EQ((u8)quest->nodeId, 1);
     EXPECT_EQ(quest->progress, 0);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+}
+
+TEST("Adventure quest runtime packs 64 independent quest records into 512 bytes")
+{
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueAdventureQuestCreateParams params = {0};
+    u8 i;
+
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    EXPECT_EQ((u32)sizeof(gRogueRun.adventureQuests), 512);
+
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        params.payload[0] = i;
+        params.payload[1] = 0xA000 | i;
+        EXPECT_EQ(
+            RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params),
+            i);
+        gRogueRun.adventureQuests[i].routesUntilScene = i % (ROGUE_ADVENTURE_QUEST_MAX_ROUTE_DELAY + 1);
+        gRogueRun.adventureQuests[i].sceneRoomId = i % ADVPATH_ROOM_COUNT;
+    }
+
+    EXPECT_EQ(
+        RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params),
+        ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(i);
+
+        EXPECT(quest != NULL);
+        EXPECT_EQ(quest->payload[0], i);
+        EXPECT_EQ(quest->payload[1], 0xA000 | i);
+        EXPECT_EQ((u8)quest->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE);
+        EXPECT_EQ((u8)quest->nodeId, 0);
+        EXPECT_EQ((u8)quest->routesUntilScene, i % (ROGUE_ADVENTURE_QUEST_MAX_ROUTE_DELAY + 1));
+        EXPECT_EQ((u8)quest->sceneRoomId, i % ADVPATH_ROOM_COUNT);
+    }
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+}
+
+TEST("All existing route events are registered through declarative tables")
+{
+    static const u8 sExpectedQuestDefinitions[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
+    {
+        [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER] = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE,
+        [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP] = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE,
+        [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF] = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE,
+        [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER] = ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL,
+        [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION] = ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL,
+        [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER] = ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+        [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS] = ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+        [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF] = ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+        [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE] = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
+        [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN] = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
+        [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN] = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
+    };
+    static const u8 sExpectedFallbackRecipes[] =
+    {
+        ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE,
+        ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
+        ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN,
+    };
+    u8 i;
+
+    for(i = 1; i < ROGUE_ROUTE_SCENE_RECIPE_COUNT; ++i)
+    {
+        const struct RogueRouteRecipeDefinition *recipe = RogueRouteEvents_GetRecipeDefinition(i);
+
+        EXPECT(recipe != NULL);
+        EXPECT(recipe->lots != NULL);
+        EXPECT(recipe->lotCount != 0);
+        EXPECT_EQ(recipe->linkedQuestDefinitionId, sExpectedQuestDefinitions[i]);
+    }
+
+    EXPECT_EQ(RogueRouteEvents_GetFallbackCount(), ARRAY_COUNT(sExpectedFallbackRecipes));
+    for(i = 0; i < ARRAY_COUNT(sExpectedFallbackRecipes); ++i)
+    {
+        const struct RogueRouteFallbackDefinition *fallback = RogueRouteEvents_GetFallbackDefinition(i);
+
+        EXPECT(fallback != NULL);
+        EXPECT_EQ(fallback->recipeId, sExpectedFallbackRecipes[i]);
+        EXPECT(fallback->isEligible != NULL);
+        EXPECT_EQ(fallback->weight, i < 4 ? 50 : 25);
+    }
+    EXPECT_EQ(
+        RogueRouteEvents_GetFallbackDefinition(4)->familyId,
+        RogueRouteEvents_GetFallbackDefinition(5)->familyId);
+
+    EXPECT((RogueRouteEvents_GetRecipeDefinition(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)->flags
+        & ROUTE_SCENE_RECIPE_FLAG_EXCLUDE_DYNAMIC_TRAINER) != 0);
+    EXPECT_EQ(
+        RogueRouteEvents_GetRecipeDefinition(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF)->resumeBehavior,
+        ROUTE_SCENE_RESUME_REWARD_PENDING_IF_PROGRESS);
+    EXPECT_EQ(
+        RogueRouteEvents_GetRecipeDefinition(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS)->resumeBehavior,
+        ROUTE_SCENE_RESUME_COMPLETED_IF_TARGET_MET);
+    EXPECT((RogueRouteEvents_GetRecipeDefinition(ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN)->flags
+        & ROUTE_SCENE_RECIPE_FLAG_COMPLETE_LINKED_QUEST_ON_EXIT) != 0);
 }
