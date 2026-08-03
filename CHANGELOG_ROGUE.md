@@ -91,7 +91,9 @@ Format follows Keep a Changelog loosely:
 
 - Made route-scene presentation declarative: each recipe now defines its lots,
   objects, scripts, state visibility, and metatile accents in one ROM data
-  table shared by initial composition and quicksave restoration.
+  table shared by initial composition and quicksave restoration. The generic
+  route-scene planner and compositor are now separated from event-specific
+  eligibility, payload generation, lifecycle hooks, and interactions.
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.

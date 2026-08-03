@@ -18,6 +18,7 @@ u32 Random32(void);
 u32 RandomAlt32(void);
 u32 RogueRandom32(void);
 u32 RandomCustom32(u32* seed);
+u32 RandomPCG32(struct PCG32 *rng);
 
 
 //Returns a 16-bit pseudorandom number

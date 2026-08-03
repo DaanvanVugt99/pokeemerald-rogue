@@ -28,6 +28,7 @@
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_route_events.h"
+#include "rogue_route_scene_internal.h"
 #include "rogue_route_scenes.h"
 #include "rogue_trainers.h"
 #include "test/test.h"
