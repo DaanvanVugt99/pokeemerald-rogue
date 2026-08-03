@@ -89,6 +89,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Made route-scene presentation declarative: each recipe now defines its lots,
+  objects, scripts, state visibility, and metatile accents in one ROM data
+  table shared by initial composition and quicksave restoration.
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.

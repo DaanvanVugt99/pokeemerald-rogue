@@ -554,108 +554,58 @@ struct RogueRouteFallbackDefinition
     bool8 (*isEligible)(u8 roomId);
 };
 
+enum
+{
+    ROUTE_SCENE_OBJECT_FLAG_NONE,
+    // The object's lot role maps to one bit in the owning quest's progress.
+    // This supports independently collected objects in a shared scene slot.
+    ROUTE_SCENE_OBJECT_FLAG_HIDE_IF_QUEST_ROLE_COMPLETE = (1 << 0),
+};
+
+#define ROUTE_SCENE_GFX_PRIMARY 0xFFFF
+#define ROUTE_SCENE_GFX_SECONDARY 0xFFFE
+#define ROUTE_SCENE_STATE_MASK(state) (1 << (state))
+#define ROUTE_SCENE_STATE_MASK_ALL 0x0F
+#define ROUTE_SCENE_STATE_MASK_UNTIL_COMPLETED \
+    (ROUTE_SCENE_STATE_MASK(ROGUE_ROUTE_EVENT_STATE_NOT_STARTED) \
+        | ROUTE_SCENE_STATE_MASK(ROGUE_ROUTE_EVENT_STATE_ACTIVE) \
+        | ROUTE_SCENE_STATE_MASK(ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING))
+
+struct RogueRouteSceneObjectDefinition
+{
+    const u8 *script;
+    u16 graphicsId;
+    s8 xOffset;
+    s8 yOffset;
+    u8 propId;
+    u8 visibleStateMask;
+    u8 flags;
+};
+
+struct RogueRouteSceneAccentDefinition
+{
+    s8 xOffset;
+    s8 yOffset;
+};
+
+struct RogueRouteSceneLotDefinition
+{
+    const struct RogueRouteSceneObjectDefinition *objects;
+    const struct RogueRouteSceneAccentDefinition *accents;
+    u8 objectCount;
+    u8 accentCount;
+    u8 minimumSize;
+};
+
 struct RogueRouteRecipeDefinition
 {
     void (*build)(struct RogueRouteSceneRequest *request);
+    const struct RogueRouteSceneLotDefinition *lots;
     u8 source;
     u8 lotCount;
-    u8 lotSizes[ROGUE_ROUTE_SCENE_MAX_ROLES];
-    u8 objectCounts[ROGUE_ROUTE_SCENE_MAX_ROLES];
 };
 
-static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
-{
-    [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER] =
-    {
-        .build = BuildStolenTradeCaseOffer,
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {3},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP] =
-    {
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {4},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF] =
-    {
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {3},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE] =
-    {
-        .build = BuildHexedShrine,
-        .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {4},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER] =
-    {
-        .build = BuildAnomalousFossilOffer,
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {4},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION] =
-    {
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {4},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER] =
-    {
-        .build = BuildForbiddenStoneOffer,
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {4},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS] =
-    {
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
-        .lotCount = ROGUE_FORBIDDEN_STONE_SOUL_COUNT,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_SMALL, ROGUE_ROUTE_SCENE_LOT_SMALL, ROGUE_ROUTE_SCENE_LOT_SMALL},
-        .objectCounts = {1, 1, 1},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF] =
-    {
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_LARGE},
-        .objectCounts = {4},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE] =
-    {
-        .build = BuildApricornGrove,
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {3},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN] =
-    {
-        .build = BuildApricornGrove,
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
-        .lotCount = 2,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM, ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {3, 3},
-    },
-    [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN] =
-    {
-        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
-        .lotCount = 1,
-        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
-        .objectCounts = {3},
-    },
-};
+#include "data/rogue_route_scene_recipes.h"
 
 static const struct RogueRouteFallbackDefinition sRouteFallbacks[] =
 {
@@ -764,6 +714,7 @@ static bool8 AddRecipeToPlan(
 
     for(role = 0; role < definition->lotCount; ++role)
     {
+        const struct RogueRouteSceneLotDefinition *lotDefinition = &definition->lots[role];
         u8 eligibleCount = 0;
         u8 selected;
         u8 i;
@@ -771,7 +722,7 @@ static bool8 AddRecipeToPlan(
         for(i = 0; i < lotCount; ++i)
         {
             if((pendingUsedLots & (1 << lots[i].id)) == 0
-                && lots[i].size >= definition->lotSizes[role])
+                && lots[i].size >= lotDefinition->minimumSize)
                 ++eligibleCount;
         }
 
@@ -782,7 +733,7 @@ static bool8 AddRecipeToPlan(
         for(i = 0; i < lotCount; ++i)
         {
             if((pendingUsedLots & (1 << lots[i].id)) == 0
-                && lots[i].size >= definition->lotSizes[role]
+                && lots[i].size >= lotDefinition->minimumSize
                 && selected-- == 0)
             {
                 selectedLots[role] = lots[i].id;
@@ -791,7 +742,7 @@ static bool8 AddRecipeToPlan(
             }
         }
 
-        pendingObjects += definition->objectCounts[role];
+        pendingObjects += lotDefinition->objectCount;
         if(pendingObjects > objectBudget)
             return FALSE;
     }
@@ -1185,49 +1136,45 @@ static void AppendSceneObject(
     objectEvent->flagId = flagId;
 }
 
-static const u8 *GetSceneNpcScript(const struct RogueRouteSceneRequest *scene)
+static const struct RogueRouteSceneLotDefinition *GetSceneLotDefinition(const struct RogueRouteSceneRequest *scene)
 {
-    switch(scene->recipeId)
-    {
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
-        return Rogue_RouteEvent_StolenTradeCaseOffer;
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
-        return Rogue_RouteEvent_StolenTradeCaseCamp;
-    case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
-        return Rogue_RouteEvent_StolenTradeCasePayoff;
-    case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
-        return Rogue_RouteEvent_HexedShrine;
-    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
-        return Rogue_RouteEvent_AnomalousFossilOffer;
-    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
-        return Rogue_RouteEvent_AnomalousFossilRestoration;
-    case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER:
-        return Rogue_RouteEvent_ForbiddenStoneOffer;
-    case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS:
-        return Rogue_RouteEvent_ForbiddenStoneSoul;
-    case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
-        return Rogue_RouteEvent_ForbiddenStonePayoff;
-    case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
-        return Rogue_RouteEvent_ApricornTree;
-    case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN:
-        return scene->lotRole == 0 ? Rogue_RouteEvent_ApricornTree : Rogue_RouteEvent_ApricornArtisan;
-    case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN:
-        return Rogue_RouteEvent_ApricornArtisan;
-    default:
+    const struct RogueRouteRecipeDefinition *recipe = GetRecipeDefinition(scene->recipeId);
+
+    if(recipe == NULL || scene->lotRole >= recipe->lotCount)
         return NULL;
-    }
+
+    return &recipe->lots[scene->lotRole];
 }
 
-static bool8 IsForbiddenStoneSoulCollected(const struct RogueRouteSceneRequest *scene)
+static u16 ResolveSceneObjectGraphics(
+    const struct RogueRouteSceneRequest *scene,
+    const struct RogueRouteSceneObjectDefinition *object)
+{
+    if(object->graphicsId == ROUTE_SCENE_GFX_PRIMARY)
+        return scene->primaryGraphicsId;
+    if(object->graphicsId == ROUTE_SCENE_GFX_SECONDARY)
+        return scene->secondaryGraphicsId;
+    return object->graphicsId;
+}
+
+static bool8 IsSceneObjectVisible(
+    const struct RogueRouteSceneRequest *scene,
+    const struct RogueRouteSceneObjectDefinition *object)
 {
     const struct RogueAdventureQuest *quest;
+    u8 state = RogueRouteScenes_GetState(scene->sceneSlot);
 
-    if(scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS
-        || scene->lotRole >= ROGUE_FORBIDDEN_STONE_SOUL_COUNT)
+    if((object->visibleStateMask & ROUTE_SCENE_STATE_MASK(state)) == 0)
         return FALSE;
 
-    quest = RogueAdventureQuests_Get(scene->ownerQuestId);
-    return quest != NULL && (quest->progress & (1 << scene->lotRole)) != 0;
+    if((object->flags & ROUTE_SCENE_OBJECT_FLAG_HIDE_IF_QUEST_ROLE_COMPLETE) != 0)
+    {
+        quest = RogueAdventureQuests_Get(scene->ownerQuestId);
+        if(quest != NULL && (quest->progress & (1 << scene->lotRole)) != 0)
+            return FALSE;
+    }
+
+    return TRUE;
 }
 
 static bool8 RestoreSceneObject(
@@ -1310,17 +1257,15 @@ void RogueRouteScenes_RestoreObjectEvents(
     for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
         struct RogueRouteSceneRequest scene;
+        const struct RogueRouteSceneLotDefinition *lotDefinition;
         const struct ObjectEventTemplate *lot = NULL;
-        const u8 *npcScript;
-        u16 mainData;
-        u16 mainFlag = 0;
         u8 i;
 
         if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
             continue;
 
-        npcScript = GetSceneNpcScript(&scene);
-        if(npcScript == NULL)
+        lotDefinition = GetSceneLotDefinition(&scene);
+        if(lotDefinition == NULL)
             continue;
 
         for(i = 0; i < baseObjectEventCount; ++i)
@@ -1333,93 +1278,49 @@ void RogueRouteScenes_RestoreObjectEvents(
             }
         }
 
-        mainData = PackSceneObjectData(scene.sceneSlot, scene.lotRole, 0);
-        if(IsForbiddenStoneSoulCollected(&scene))
-        {
-            FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-            mainFlag = FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN;
-        }
-        if(lot == NULL
-            || !RestoreSceneObject(objectEvents, objectEventCount, lot, lot->localId, 0, 0, scene.primaryGraphicsId, npcScript, mainData, mainFlag))
+        if(lot == NULL)
             continue;
 
-#define RESTORE_PROP_FLAG(propId, x, y, gfx, script, flag) \
-        RestoreSceneProp(objectEvents, objectEventCount, lot, x, y, gfx, script, PackSceneObjectData(scene.sceneSlot, scene.lotRole, propId), flag)
-#define RESTORE_PROP(propId, x, y, gfx, script) \
-        RESTORE_PROP_FLAG(propId, x, y, gfx, script, 0)
-
-        switch(scene.recipeId)
+        for(i = 0; i < lotDefinition->objectCount; ++i)
         {
-        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
-            RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
-            if(RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-            {
-                FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-                RESTORE_PROP_FLAG(1, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-            }
-            else
-                RESTORE_PROP(1, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
-            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
-            if(RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-            {
-                FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-                RESTORE_PROP_FLAG(1, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-            }
-            else
-                RESTORE_PROP(1, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
-            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_HexedShrineProp);
-            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
-            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
-            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
-            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
-            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
-            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp);
-            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp);
-            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER:
-        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
-            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_ForbiddenStoneProp);
-            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
-            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
-            RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-            RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN:
-            if(scene.lotRole == 0)
-            {
-                RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-                RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-            }
-            else
-            {
-                RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
-                RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
-            }
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN:
-            RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
-            RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
-            break;
-        }
+            const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
+            u16 graphicsId = ResolveSceneObjectGraphics(&scene, object);
+            u16 flagId = 0;
 
-#undef RESTORE_PROP
-#undef RESTORE_PROP_FLAG
+            if(!IsSceneObjectVisible(&scene, object))
+            {
+                FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+                flagId = FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN;
+            }
+
+            if(object->propId == 0)
+            {
+                RestoreSceneObject(
+                    objectEvents,
+                    objectEventCount,
+                    lot,
+                    lot->localId,
+                    object->xOffset,
+                    object->yOffset,
+                    graphicsId,
+                    object->script,
+                    PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
+                    flagId);
+            }
+            else
+            {
+                RestoreSceneProp(
+                    objectEvents,
+                    objectEventCount,
+                    lot,
+                    object->xOffset,
+                    object->yOffset,
+                    graphicsId,
+                    object->script,
+                    PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
+                    flagId);
+            }
+        }
     }
 }
 
@@ -1451,14 +1352,20 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
     for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
         struct RogueRouteSceneRequest scene;
-        const struct RogueRouteRecipeDefinition *definition;
+        const struct RogueRouteSceneLotDefinition *lotDefinition;
+        u8 objectIdx;
 
-        if(RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
-            && !IsForbiddenStoneSoulCollected(&scene))
+        if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
+            continue;
+
+        lotDefinition = GetSceneLotDefinition(&scene);
+        if(lotDefinition == NULL)
+            continue;
+
+        for(objectIdx = 0; objectIdx < lotDefinition->objectCount; ++objectIdx)
         {
-            definition = GetRecipeDefinition(scene.recipeId);
-            if(definition != NULL)
-                requiredCount += definition->objectCounts[scene.lotRole];
+            if(IsSceneObjectVisible(&scene, &lotDefinition->objects[objectIdx]))
+                ++requiredCount;
         }
     }
 
@@ -1468,93 +1375,43 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
     for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
         struct RogueRouteSceneRequest scene;
+        const struct RogueRouteSceneLotDefinition *lotDefinition;
         const struct ObjectEventTemplate *lot;
-        const u8 *npcScript;
-        u16 mainData;
-        u8 localId;
+        u8 objectIdx;
 
         if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
             || scene.lotId >= ARRAY_COUNT(lots)
-            || !foundLots[scene.lotId]
-            || IsForbiddenStoneSoulCollected(&scene))
+            || !foundLots[scene.lotId])
             continue;
 
         lot = &lots[scene.lotId];
-        npcScript = GetSceneNpcScript(&scene);
-        if(npcScript == NULL)
+        lotDefinition = GetSceneLotDefinition(&scene);
+        if(lotDefinition == NULL)
             continue;
 
-        mainData = PackSceneObjectData(scene.sceneSlot, scene.lotRole, 0);
-        AppendSceneObject(objectEvents, objectEventCount, lot, lot->localId, 0, 0, scene.primaryGraphicsId, npcScript, mainData, 0);
-
-#define APPEND_PROP(propId, x, y, gfx, script) \
-        do \
-        { \
-            localId = FindFreeLocalId(objectEvents, *objectEventCount); \
-            AppendSceneObject(objectEvents, objectEventCount, lot, localId, x, y, gfx, script, PackSceneObjectData(scene.sceneSlot, scene.lotRole, propId), 0); \
-        } while(0)
-
-        switch(scene.recipeId)
+        for(objectIdx = 0; objectIdx < lotDefinition->objectCount; ++objectIdx)
         {
-        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
-            APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
-            if(RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-                APPEND_PROP(1, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
-            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
-            if(RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-                APPEND_PROP(1, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop);
-            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
-            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_HexedShrineProp);
-            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
-            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
-            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
-            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
-            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
-            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp);
-            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp);
-            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER:
-        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
-            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_ForbiddenStoneProp);
-            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
-            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
-            APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-            APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN:
-            if(scene.lotRole == 0)
-            {
-                APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-                APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
-            }
-            else
-            {
-                APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
-                APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
-            }
-            break;
-        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN:
-            APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
-            APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
-            break;
-        }
+            const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[objectIdx];
+            u8 localId;
 
-#undef APPEND_PROP
+            if(!IsSceneObjectVisible(&scene, object))
+                continue;
+
+            localId = object->propId == 0
+                ? lot->localId
+                : FindFreeLocalId(objectEvents, *objectEventCount);
+            AppendSceneObject(
+                objectEvents,
+                objectEventCount,
+                lot,
+                localId,
+                object->xOffset,
+                object->yOffset,
+                ResolveSceneObjectGraphics(&scene, object),
+                object->script,
+                PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
+                0);
+        }
     }
 }
 
@@ -1593,23 +1450,26 @@ void RogueRouteScenes_ApplyMetatiles(void)
     for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {
         struct RogueRouteSceneRequest scene;
+        const struct RogueRouteSceneLotDefinition *lotDefinition;
         const struct ObjectEventTemplate *lot;
+        u8 accentIdx;
 
         if(!RogueRouteScenes_GetPlacementRequest(i, &scene)
             || scene.lotId >= ARRAY_COUNT(lots)
             || (lot = lots[scene.lotId]) == NULL)
             continue;
 
-        ApplyAccentMetatile(lot, -1, 0);
-        ApplyAccentMetatile(lot, 1, 0);
-        if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)
-            ApplyAccentMetatile(lot, 0, 1);
-        else if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
-            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
-            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
-            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER
-            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF)
-            ApplyAccentMetatile(lot, 0, -1);
+        lotDefinition = GetSceneLotDefinition(&scene);
+        if(lotDefinition == NULL)
+            continue;
+
+        for(accentIdx = 0; accentIdx < lotDefinition->accentCount; ++accentIdx)
+        {
+            ApplyAccentMetatile(
+                lot,
+                lotDefinition->accents[accentIdx].xOffset,
+                lotDefinition->accents[accentIdx].yOffset);
+        }
     }
 }
 

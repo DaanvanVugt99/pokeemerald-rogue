@@ -526,6 +526,84 @@ TEST("Route scene recipes compose bounded unique route objects")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
+TEST("Declarative route scene visibility drives insertion and restoration")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    const struct ObjectEventTemplate baseObjects[] =
+    {
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+    };
+    struct ObjectEventTemplate objects[8] =
+    {
+        {.localId = 1, .graphicsId = OBJ_EVENT_GFX_BOY_1, .x = 2, .y = 2},
+        baseObjects[0],
+        baseObjects[1],
+    };
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u8 originalRoomId;
+    bool8 originalHidden = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    u8 count = 3;
+    u8 i;
+    bool8 foundConditionalProp;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    gRogueRun.adventureQuests[0].definitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE;
+    gRogueRun.adventureQuests[0].nodeId = 0;
+    gRogueRun.adventureQuests[0].payload[1] = 1;
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP, 1, 0);
+
+    RogueRouteScenes_SetState(0, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    RogueRouteScenes_ModifyObjectEvents(objects, &count, ARRAY_COUNT(objects));
+    EXPECT_EQ(count, 5);
+    foundConditionalProp = FALSE;
+    for(i = 0; i < count; ++i)
+    {
+        if(objects[i].x == 56 && objects[i].y == 79)
+        {
+            foundConditionalProp = TRUE;
+            EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_MOVING_BOX);
+            EXPECT_EQ(objects[i].flagId, 0);
+        }
+    }
+    EXPECT(foundConditionalProp);
+
+    // Restoration consumes the same visibility definition and hides the
+    // conditional object without changing the saved template's identity.
+    RogueRouteScenes_SetState(0, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteScenes_RestoreObjectEvents(objects, count, baseObjects, ARRAY_COUNT(baseObjects));
+    foundConditionalProp = FALSE;
+    for(i = 0; i < count; ++i)
+    {
+        if(objects[i].x == 56 && objects[i].y == 79)
+        {
+            foundConditionalProp = TRUE;
+            EXPECT_EQ(objects[i].flagId, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+        }
+    }
+    EXPECT(foundConditionalProp);
+    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
+
+    // A fresh composition in the completed state omits that same object.
+    objects[0] = (struct ObjectEventTemplate){.localId = 1, .graphicsId = OBJ_EVENT_GFX_BOY_1, .x = 2, .y = 2};
+    objects[1] = baseObjects[0];
+    objects[2] = baseObjects[1];
+    count = 3;
+    RogueRouteScenes_ModifyObjectEvents(objects, &count, ARRAY_COUNT(objects));
+    EXPECT_EQ(count, 4);
+    for(i = 0; i < count; ++i)
+        EXPECT(objects[i].x != 56 || objects[i].y != 79);
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalHidden);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+}
+
 TEST("Route scene metatiles stay bounded compatible and idempotent")
 {
     struct RogueAdvPath originalPath;
