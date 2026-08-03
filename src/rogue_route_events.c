@@ -62,6 +62,7 @@ extern const u8 Rogue_RouteEvent_ApricornArtisan[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
 extern const u8 Rogue_RouteEvent_UnboundTutor[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
+extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -210,6 +211,12 @@ static bool8 CanShowUnboundTutor(u8 roomId)
 {
     (void)roomId;
     return gPlayerPartyCount != 0;
+}
+
+static bool8 CanShowTravelingMerchant(u8 roomId)
+{
+    (void)roomId;
+    return TRUE;
 }
 
 static const u16 sApricornItems[] =
@@ -495,6 +502,33 @@ static void ExpandUnboundTutorPayload(struct RogueRouteSceneRequest *request, u3
     request->requestedItem = moves[0];
     request->rewardItem = moves[1];
     request->trainerNum = moves[2];
+}
+
+static const u8 sTravelingMerchantShopCategories[] =
+{
+    ROGUE_SHOP_GENERAL,
+    ROGUE_SHOP_BALLS,
+    ROGUE_SHOP_TMS,
+    ROGUE_SHOP_BATTLE_ENHANCERS,
+    ROGUE_SHOP_HELD_ITEMS,
+#ifdef ROGUE_EXPANSION
+    ROGUE_SHOP_RARE_HELD_ITEMS,
+#endif
+};
+
+static bool8 SelectTravelingMerchantPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    (void)request;
+    *payload = sTravelingMerchantShopCategories[
+        RogueRouteSceneRng_Next(rng) % ARRAY_COUNT(sTravelingMerchantShopCategories)];
+    return TRUE;
+}
+
+static void ExpandTravelingMerchantPayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    request->primaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
+    request->rewardAmount = ROGUE_SHOP_FLAG_TRAVELING_MERCHANT | payload;
 }
 
 #include "data/rogue_route_scene_recipes.h"
@@ -1344,4 +1378,18 @@ void RogueRouteEvents_FinishUnboundTutor(void)
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_FinishTravelingMerchant(void)
+{
+    struct RogueRouteSceneRequest scene;
+    bool8 boughtAnything = gSpecialVar_Result == TRUE;
+
+    if(!boughtAnything
+        || !RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT)
+        return;
+
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
 }

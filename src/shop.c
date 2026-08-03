@@ -953,10 +953,12 @@ static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, s
 
 static bool8 ShowTMView(void)
 {
-    if (sMartInfo.dynamicMartCategory == ROGUE_SHOP_TMS)
+    u16 category = ROGUE_SHOP_GET_CATEGORY(sMartInfo.dynamicMartCategory);
+
+    if (category == ROGUE_SHOP_TMS)
         return TRUE;
 
-    if (sMartInfo.dynamicMartCategory == ROGUE_SHOP_COURIER && sMartInfo.listItemData != NULL)
+    if (category == ROGUE_SHOP_COURIER && sMartInfo.listItemData != NULL)
     {
         const u16 *listPtr = (const u16 *)sMartInfo.listItemData;
         return ItemIdToBattleMoveId(listPtr[0]) != MOVE_NONE;
@@ -2052,11 +2054,12 @@ static u16 QueryShopItemListCallback(u16 index)
         u8 sortMode = ITEM_SORT_MODE_TYPE;
         bool8 flipSort = FALSE;
         bool8 showInventoryChanges = FALSE;
+        u16 category = ROGUE_SHOP_GET_CATEGORY(sMartInfo.dynamicMartCategory);
 
         currDifficulty = Rogue_GetCurrentDifficulty();
         prevDifficulty = currDifficulty;
 
-        switch (sMartInfo.dynamicMartCategory)
+        switch (category)
         {
         case ROGUE_SHOP_TMS:
         case ROGUE_SHOP_BATTLE_ENHANCERS:
@@ -2082,9 +2085,9 @@ static u16 QueryShopItemListCallback(u16 index)
             break;
         }
 
-        if(Rogue_IsRunActive())
+        if(Rogue_IsRunActive() && !ROGUE_SHOP_IS_TRAVELING_MERCHANT(sMartInfo.dynamicMartCategory))
         {
-            prevDifficulty = gRogueRun.lastShopVisitDifficulty[sMartInfo.dynamicMartCategory];
+            prevDifficulty = gRogueRun.lastShopVisitDifficulty[category];
 
             if(prevDifficulty >= ROGUE_MAX_BOSS_COUNT)
             {
@@ -2092,7 +2095,7 @@ static u16 QueryShopItemListCallback(u16 index)
                 showInventoryChanges = FALSE;
             }
 
-            gRogueRun.lastShopVisitDifficulty[sMartInfo.dynamicMartCategory] = currDifficulty;
+            gRogueRun.lastShopVisitDifficulty[category] = currDifficulty;
         }
 
         if(showInventoryChanges && prevDifficulty != currDifficulty)
@@ -2351,7 +2354,7 @@ static u32 GetShopItemPrice(u16 item)
         if(Rogue_IsReusableItem(item) && CheckBagHasItem(item, 1))
             price = 0;
 
-        return price;
+        return Shop_ApplyDynamicPriceModifier(sMartInfo.dynamicMartCategory, price);
     }
     else if (sMartInfo.martType == MART_TYPE_HUB_AREAS)
     {
@@ -2367,6 +2370,14 @@ static u32 GetShopItemPrice(u16 item)
     }
 
     return 0;
+}
+
+u32 Shop_ApplyDynamicPriceModifier(u16 category, u32 price)
+{
+    if(price != 0 && ROGUE_SHOP_IS_TRAVELING_MERCHANT(category))
+        return max(1, price / 2);
+
+    return price;
 }
 
 static bool8 IsZeroPriceMarkedAsFree(u16 item)

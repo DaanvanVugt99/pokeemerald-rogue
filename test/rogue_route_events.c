@@ -36,6 +36,7 @@
 #include "rogue_route_scene_internal.h"
 #include "rogue_route_scenes.h"
 #include "rogue_trainers.h"
+#include "shop.h"
 #include "test/test.h"
 
 extern const u8 Rogue_RouteEvent_Interact[];
@@ -57,6 +58,7 @@ extern const u8 Rogue_RouteEvent_ApricornArtisan[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
 extern const u8 Rogue_RouteEvent_UnboundTutor[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
+extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 
 static u32 GetActiveTeamClassFlag(u16 teamNum)
 {
@@ -247,6 +249,7 @@ TEST("Selected standalone route scene payloads remain immutable")
         ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
+        ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
     };
     struct RogueAdvPath originalPath;
     struct RogueRouteSceneRequest selected;
@@ -324,6 +327,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     u16 forbiddenStoneCount = 0;
     u16 apricornCount = 0;
     u16 tutorCount = 0;
+    u16 travelingMerchantCount = 0;
     u8 originalPartyCount = gPlayerPartyCount;
     u8 curseCount = Rogue_GetDarkDealCurseCount();
     u16 seed;
@@ -419,6 +423,17 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                 EXPECT_NE(request.rewardItem, request.trainerNum);
                 ++tutorCount;
             }
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT)
+            {
+                u16 category = ROGUE_SHOP_GET_CATEGORY(request.rewardAmount);
+
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+                EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_MART_EMPLOYEE);
+                EXPECT(ROGUE_SHOP_IS_TRAVELING_MERCHANT(request.rewardAmount));
+                EXPECT_GE(category, ROGUE_SHOP_GENERAL);
+                EXPECT_LE(category, ROGUE_SHOP_RARE_HELD_ITEMS);
+                ++travelingMerchantCount;
+            }
             else
             {
                 EXPECT(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE
@@ -445,18 +460,20 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
             }
         }
     }
-    EXPECT_GE(merchantCount, 300);
+    EXPECT_GE(merchantCount, 200);
     EXPECT_LE(merchantCount, 700);
-    EXPECT_GE(shrineCount, 300);
+    EXPECT_GE(shrineCount, 200);
     EXPECT_LE(shrineCount, 700);
-    EXPECT_GE(fossilCount, 300);
+    EXPECT_GE(fossilCount, 200);
     EXPECT_LE(fossilCount, 700);
-    EXPECT_GE(forbiddenStoneCount, 300);
+    EXPECT_GE(forbiddenStoneCount, 200);
     EXPECT_LE(forbiddenStoneCount, 700);
-    EXPECT_GE(apricornCount, 300);
+    EXPECT_GE(apricornCount, 200);
     EXPECT_LE(apricornCount, 700);
-    EXPECT_GE(tutorCount, 250);
+    EXPECT_GE(tutorCount, 200);
     EXPECT_LE(tutorCount, 700);
+    EXPECT_GE(travelingMerchantCount, 200);
+    EXPECT_LE(travelingMerchantCount, 700);
     for(i = 0; i < curseCount; ++i)
         EXPECT(seenCurse[i]);
 
@@ -610,6 +627,7 @@ TEST("Route scene recipes compose bounded unique route objects")
         ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE,
         ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
+        ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
     };
     struct RogueAdvPath originalPath;
     struct Pokemon originalParty[PARTY_SIZE];
@@ -644,6 +662,7 @@ TEST("Route scene recipes compose bounded unique route objects")
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? Rogue_RouteEvent_HexedShrine
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? Rogue_RouteEvent_AnomalousFossilOffer
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutor
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT ? Rogue_RouteEvent_TravelingMerchant
             : Rogue_RouteEvent_AnomalousFossilRestoration;
         const u8 *expectedPropScript = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
             ? Rogue_RouteEvent_HexedShrineProp
@@ -1231,6 +1250,88 @@ TEST("Unbound Tutor offers three universal moves and completes after one lesson"
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     memcpy(gPlayerParty, originalParty, sizeof(originalParty));
     gPlayerPartyCount = originalPartyCount;
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("Traveling Merchant offers one seeded half-price shop with normal selling")
+{
+    static const u8 sExpectedCategories[] =
+    {
+        ROGUE_SHOP_GENERAL,
+        ROGUE_SHOP_BALLS,
+        ROGUE_SHOP_TMS,
+        ROGUE_SHOP_BATTLE_ENHANCERS,
+        ROGUE_SHOP_HELD_ITEMS,
+        ROGUE_SHOP_RARE_HELD_ITEMS,
+    };
+    struct RogueAdvPath originalPath;
+    struct RogueRouteSceneRequest merchant;
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE originalStandardRng = gRngValue;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    bool8 seenCategories[ARRAY_COUNT(sExpectedCategories)] = {FALSE};
+    u8 originalRoomId;
+    u16 seed;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+
+    for(seed = 0; seed < 256; ++seed)
+    {
+        u16 category;
+        u8 i;
+
+        gRogueAdvPath.rooms[0].rngSeed = seed;
+        SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+        EXPECT(GetFirstPlacement(&merchant));
+        EXPECT_EQ((u8)merchant.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+        EXPECT_EQ(merchant.primaryGraphicsId, OBJ_EVENT_GFX_MART_EMPLOYEE);
+        EXPECT(ROGUE_SHOP_IS_TRAVELING_MERCHANT(merchant.rewardAmount));
+        category = ROGUE_SHOP_GET_CATEGORY(merchant.rewardAmount);
+
+        for(i = 0; i < ARRAY_COUNT(sExpectedCategories); ++i)
+        {
+            if(category == sExpectedCategories[i])
+            {
+                seenCategories[i] = TRUE;
+                break;
+            }
+        }
+        EXPECT_LT(i, ARRAY_COUNT(sExpectedCategories));
+    }
+    for(seed = 0; seed < ARRAY_COUNT(seenCategories); ++seed)
+        EXPECT(seenCategories[seed]);
+
+    EXPECT_EQ(Shop_ApplyDynamicPriceModifier(ROGUE_SHOP_GENERAL, 1000), 1000);
+    EXPECT_EQ(
+        Shop_ApplyDynamicPriceModifier(ROGUE_SHOP_FLAG_TRAVELING_MERCHANT | ROGUE_SHOP_GENERAL, 1000),
+        500);
+    EXPECT_EQ(
+        Shop_ApplyDynamicPriceModifier(ROGUE_SHOP_FLAG_TRAVELING_MERCHANT | ROGUE_SHOP_GENERAL, 5),
+        2);
+    EXPECT_EQ(
+        Shop_ApplyDynamicPriceModifier(ROGUE_SHOP_FLAG_TRAVELING_MERCHANT | ROGUE_SHOP_GENERAL, 0),
+        0);
+
+    SelectPlacement(&merchant);
+    gSpecialVar_Result = FALSE;
+    RogueRouteEvents_FinishTravelingMerchant();
+    EXPECT_EQ(RogueRouteScenes_GetState(merchant.sceneSlot), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    EXPECT(!RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_TRAVELING_MERCHANT));
+
+    gSpecialVar_Result = TRUE;
+    RogueRouteEvents_FinishTravelingMerchant();
+    EXPECT_EQ(RogueRouteScenes_GetState(merchant.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_TRAVELING_MERCHANT));
+    EXPECT_EQ(memcmp(&gRngRogueValue, &originalRogueRng, sizeof(originalRogueRng)), 0);
+    EXPECT_EQ(memcmp(&gRngValue, &originalStandardRng, sizeof(originalStandardRng)), 0);
+
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
 }
@@ -2243,6 +2344,7 @@ TEST("All existing route events are registered through declarative tables")
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN,
         ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
+        ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
     };
     u8 i;
 

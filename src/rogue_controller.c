@@ -11443,7 +11443,15 @@ static void ApplyMartSeed(u16 itemCategory)
     if(!Rogue_IsRunActive())
         return;
 
-    switch (itemCategory)
+    if(ROGUE_SHOP_IS_TRAVELING_MERCHANT(itemCategory))
+    {
+        SeedRogueRng(
+            gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed
+            ^ (ROGUE_SHOP_GET_CATEGORY(itemCategory) * 0x45D9));
+        return;
+    }
+
+    switch (ROGUE_SHOP_GET_CATEGORY(itemCategory))
     {
     case ROGUE_SHOP_GENERAL:
         SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_GENERAL]);
@@ -11530,6 +11538,7 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
     gRogueLocal.rngSeedToRestore = gRngRogueValue;
     ApplyMartSeed(itemCategory);
     randomSeed = RogueRandom();
+    itemCategory = ROGUE_SHOP_GET_CATEGORY(itemCategory);
 
     if(itemCategory == ROGUE_SHOP_COURIER)
     {

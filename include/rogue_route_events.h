@@ -21,5 +21,6 @@ void RogueRouteEvents_TryChooseApricorn(void);
 void RogueRouteEvents_TryCraftApricornBalls(void);
 void RogueRouteEvents_PrepareUnboundTutor(void);
 void RogueRouteEvents_FinishUnboundTutor(void);
+void RogueRouteEvents_FinishTravelingMerchant(void);
 
 #endif // GUARD_ROGUE_ROUTE_EVENTS_H

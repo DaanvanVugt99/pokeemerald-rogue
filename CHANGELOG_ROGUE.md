@@ -39,7 +39,9 @@ Format follows Keep a Changelog loosely:
   or follow the unfinished Adventure Quest onto a later branch. The one-off
   Unbound Tutor offers one free lesson chosen from three seeded,
   progression-scaled moves, and ignores normal species compatibility to enable
-  unusual builds. Active routes
+  unusual builds. A once-per-Adventure Traveling Merchant now brings one
+  seeded shop category to a route, supports normal buying and selling, and
+  sells its entire inventory at half price. Active routes
   expose eight small, medium, and large scene lots; the director independently
   fills one to three lots so quest consumers and unrelated route events can
   coexist. The per-room scene plan is packed into less memory than the former
@@ -98,6 +100,9 @@ Format follows Keep a Changelog loosely:
   decorative Rock Smash boulders, kept each lot locally traversable with its
   focal objects accessible, and replaced Spiritomb soul markers with distinct
   non-interactive shrine stones.
+- Rewrote route-event and Adventure Quest copy with distinct voices for the
+  merchant, thief, researchers, Channeler, Ball Maker, Move Tutor, and Dark
+  Deal Devil, while retaining concise mechanical guidance and rewards.
 - Made route-scene presentation declarative: each recipe now defines its lots,
   objects, scripts, state visibility, and metatile accents in one ROM data
   table shared by initial composition and quicksave restoration. The generic

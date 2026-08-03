@@ -12,5 +12,6 @@ void CreateCustomPokemartMenu(const u16 * buffer, u16 currency);
 void CreateSingleItemCustomPokemartMenu(u16 item, u16 currency, u16 price);
 void CreateCustomRecipePokemartMenu(const u16 * buffer);
 void CB2_ExitSellMenu(void);
+u32 Shop_ApplyDynamicPriceModifier(u16 category, u32 price);
 
 #endif // GUARD_SHOP_H

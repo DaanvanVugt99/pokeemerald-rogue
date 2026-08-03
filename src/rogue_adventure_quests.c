@@ -51,21 +51,21 @@ enum
 };
 
 static const u8 sText_StolenTradeCaseTitle[] = _("Stolen Trade Case");
-static const u8 sText_FindCamp[] = _("Find the thieves' camp and recover the Trade Case.\nReward: Large Bundle + ¥5,000");
-static const u8 sText_CampReady[] = _("The thieves' camp is on this route.\nReward: Large Bundle + ¥5,000");
-static const u8 sText_ReturnCase[] = _("Return the Trade Case to the caravan merchant.\nReward: Large Bundle + ¥5,000");
-static const u8 sText_MerchantReady[] = _("The caravan merchant is on this route.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_FindCamp[] = _("Track down the thieves and recover the Trade Case.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_CampReady[] = _("The thieves are camped somewhere along this route.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_ReturnCase[] = _("Take the recovered Trade Case back to the merchant.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_MerchantReady[] = _("The caravan merchant is waiting along this route.\nReward: Large Bundle + ¥5,000");
 static const u8 sText_AnomalousFossilTitle[] = _("Anomalous Fossil");
-static const u8 sText_FindFossilResearcher[] = _("Find a fossil researcher who can restore {STR_VAR_1}.\nReward: Rare Unique {STR_VAR_2}");
-static const u8 sText_FossilResearcherReady[] = _("A fossil researcher is on this route.\nReward: Rare Unique {STR_VAR_2}");
+static const u8 sText_FindFossilResearcher[] = _("Find the researcher who can revive {STR_VAR_1}.\nReward: Rare Unique {STR_VAR_2}");
+static const u8 sText_FossilResearcherReady[] = _("The fossil researcher is waiting along this route.\nReward: Rare Unique {STR_VAR_2}");
 static const u8 sText_ForbiddenStoneTitle[] = _("The Forbidden Stone");
-static const u8 sText_FindEscapedSouls[] = _("Find the three souls that escaped from the Odd Keystone.\nRecovered: {STR_VAR_1}/3");
-static const u8 sText_EscapedSoulsReady[] = _("The escaped souls are haunting this route.\nRecovered: {STR_VAR_1}/3");
-static const u8 sText_FindSealingGround[] = _("Bring the restored Odd Keystone to the Channeler.\nReward: Ability Patch + ¥10,000");
-static const u8 sText_SealingGroundReady[] = _("The Channeler is waiting on this route.\nReward: Ability Patch + ¥10,000");
+static const u8 sText_FindEscapedSouls[] = _("Draw the three missing souls back into the Odd Keystone.\nRecovered: {STR_VAR_1}/3");
+static const u8 sText_EscapedSoulsReady[] = _("The Odd Keystone is stirring on this route.\nRecovered: {STR_VAR_1}/3");
+static const u8 sText_FindSealingGround[] = _("Return the restored Odd Keystone to the Channeler.\nReward: Ability Patch + ¥10,000");
+static const u8 sText_SealingGroundReady[] = _("The Channeler is waiting somewhere along this route.\nReward: Ability Patch + ¥10,000");
 static const u8 sText_ApricornCraftingTitle[] = _("Apricorn Crafting");
-static const u8 sText_FindBallMaker[] = _("Find a traveling Ball Maker to craft the {STR_VAR_1}.\nReward: 5 {STR_VAR_2}");
-static const u8 sText_BallMakerReady[] = _("A traveling Ball Maker is on this route.\nReward: 5 {STR_VAR_2}");
+static const u8 sText_FindBallMaker[] = _("Bring the {STR_VAR_1} to a traveling Ball Maker.\nReward: 5 {STR_VAR_2}");
+static const u8 sText_BallMakerReady[] = _("A traveling Ball Maker has set up along this route.\nReward: 5 {STR_VAR_2}");
 static const u8 sText_UnknownQuestTitle[] = _("Adventure Quest");
 static const u8 sText_UnknownQuestDescription[] = _("Complete this quest before the adventure ends.");
 

@@ -78,6 +78,13 @@
 #define ROGUE_SHOP_COURIER              14
 #define ROGUE_SHOP_COUNT                15
 
+// Dynamic shop contexts may tag an ordinary category with route-local rules.
+// The underlying category remains one of the values above.
+#define ROGUE_SHOP_FLAG_TRAVELING_MERCHANT  (1 << 15)
+#define ROGUE_SHOP_CATEGORY_MASK            0x00FF
+#define ROGUE_SHOP_IS_TRAVELING_MERCHANT(category) (((category) & ROGUE_SHOP_FLAG_TRAVELING_MERCHANT) != 0)
+#define ROGUE_SHOP_GET_CATEGORY(category) ((category) & ROGUE_SHOP_CATEGORY_MASK)
+
 #define ITEM_LINK_CABLE                 (ITEM_ROGUE_ITEM_FIRST + 0)
 #define ITEM_QUEST_LOG                  (ITEM_ROGUE_ITEM_FIRST + 1)
 #define ITEM_HEALING_FLASK              (ITEM_ROGUE_ITEM_FIRST + 2)
