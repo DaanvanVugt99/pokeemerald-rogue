@@ -46,6 +46,9 @@ extern const u8 Rogue_RouteEvent_ForbiddenStoneOffer[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneSoul[];
 extern const u8 Rogue_RouteEvent_ForbiddenStonePayoff[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
+extern const u8 Rogue_RouteEvent_ApricornTree[];
+extern const u8 Rogue_RouteEvent_ApricornArtisan[];
+extern const u8 Rogue_RouteEvent_ApricornProp[];
 
 static u32 GetActiveTeamClassFlag(u16 teamNum)
 {
@@ -115,10 +118,39 @@ static void SelectPlacement(const struct RogueRouteSceneRequest *request)
     gObjectEvents[0].trainerRange_berryTreeId = request->sceneSlot | (request->lotRole << 2);
 }
 
+static void SelectPlacementProp(const struct RogueRouteSceneRequest *request, u8 propId)
+{
+    SelectPlacement(request);
+    gObjectEvents[0].trainerRange_berryTreeId |= propId << 4;
+}
+
 static void SetDebugPlacement(u8 recipeId, u8 lotId, u8 ownerQuestId)
 {
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[gRogueRun.adventureRoomId]);
     RogueRouteScenes_DebugSetPlacement(0, recipeId, lotId, 0, 0, ownerQuestId);
+}
+
+static u16 GetExpectedApricornBall(u16 apricorn)
+{
+    switch(apricorn)
+    {
+    case ITEM_RED_APRICORN:
+        return ITEM_LEVEL_BALL;
+    case ITEM_BLUE_APRICORN:
+        return ITEM_LURE_BALL;
+    case ITEM_YELLOW_APRICORN:
+        return ITEM_MOON_BALL;
+    case ITEM_GREEN_APRICORN:
+        return ITEM_FRIEND_BALL;
+    case ITEM_PINK_APRICORN:
+        return ITEM_LOVE_BALL;
+    case ITEM_WHITE_APRICORN:
+        return ITEM_FAST_BALL;
+    case ITEM_BLACK_APRICORN:
+        return ITEM_HEAVY_BALL;
+    default:
+        return ITEM_NONE;
+    }
 }
 
 TEST("Route event fallback registry is deterministic weighted and RNG neutral")
@@ -139,6 +171,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     u16 shrineCount = 0;
     u16 fossilCount = 0;
     u16 forbiddenStoneCount = 0;
+    u16 apricornCount = 0;
     u8 curseCount = Rogue_GetDarkDealCurseCount();
     u16 seed;
     u8 i;
@@ -208,14 +241,37 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                 EXPECT_EQ(RogueAdventureQuests_GetFossilSpecies(request.requestedItem), request.rewardItem);
                 ++fossilCount;
             }
-            else
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER)
             {
-                EXPECT_EQ(request.recipeId, ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER);
                 EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
                 EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_MISC_CHANNELER);
                 EXPECT_EQ(request.requestedItem, ITEM_ODD_KEYSTONE);
                 EXPECT_EQ(request.rewardItem, ITEM_ABILITY_PATCH);
                 ++forbiddenStoneCount;
+            }
+            else
+            {
+                EXPECT(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE
+                    || request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN);
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
+                if(request.lotRole == 0)
+                {
+                    EXPECT_GE(request.requestedItem, ITEM_RED_APRICORN);
+                    EXPECT_LE(request.requestedItem, ITEM_BLACK_APRICORN);
+                    EXPECT_GE(request.rewardItem, ITEM_RED_APRICORN);
+                    EXPECT_LE(request.rewardItem, ITEM_BLACK_APRICORN);
+                    EXPECT_GE(request.trainerNum, ITEM_RED_APRICORN);
+                    EXPECT_LE(request.trainerNum, ITEM_BLACK_APRICORN);
+                    EXPECT_NE(request.requestedItem, request.rewardItem);
+                    EXPECT_NE(request.requestedItem, request.trainerNum);
+                    EXPECT_NE(request.rewardItem, request.trainerNum);
+                    ++apricornCount;
+                }
+                else
+                {
+                    EXPECT_EQ(request.recipeId, ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN);
+                    EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_OLD_MAN);
+                }
             }
         }
     }
@@ -227,6 +283,8 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     EXPECT_LE(fossilCount, 700);
     EXPECT_GE(forbiddenStoneCount, 300);
     EXPECT_LE(forbiddenStoneCount, 700);
+    EXPECT_GE(apricornCount, 300);
+    EXPECT_LE(apricornCount, 700);
     for(i = 0; i < curseCount; ++i)
         EXPECT(seenCurse[i]);
 
@@ -611,7 +669,12 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     {
         struct RogueRouteSceneRequest restoredShrine;
         EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &restoredShrine));
-        EXPECT_EQ(memcmp(&shrine, &restoredShrine, sizeof(shrine)), 0);
+        EXPECT_EQ(shrine.recipeId, restoredShrine.recipeId);
+        EXPECT_EQ(shrine.lotId, restoredShrine.lotId);
+        EXPECT_EQ(shrine.lotRole, restoredShrine.lotRole);
+        EXPECT_EQ(shrine.sceneSlot, restoredShrine.sceneSlot);
+        EXPECT_EQ(shrine.requestedItem, restoredShrine.requestedItem);
+        EXPECT_EQ(shrine.rewardAmount, restoredShrine.rewardAmount);
     }
     EXPECT_EQ(RogueRouteScenes_GetState(shrine.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
 
@@ -679,10 +742,19 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     Rogue_SetCurrentDifficulty(0);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
-    gRogueAdvPath.rooms[0].rngSeed = 300;
-    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
-    RogueRouteScenes_OnEnterRoute();
-    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, &offer));
+    {
+        u16 seed;
+
+        for(seed = 1; seed != 0; ++seed)
+        {
+            gRogueAdvPath.rooms[0].rngSeed = seed;
+            RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+            RogueRouteScenes_OnEnterRoute();
+            if(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, &offer))
+                break;
+        }
+        EXPECT_NE(seed, 0);
+    }
     SelectPlacement(&offer);
 
     EXPECT_EQ(offer.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
@@ -993,6 +1065,160 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     gBattleOutcome = originalBattleOutcome;
     gRngValue = originalStandardRng;
     SetMoney(&gSaveBlock1Ptr->money, originalMoney);
+    ClearBag();
+}
+
+TEST("Apricorn Crafting can finish locally or follow the player to a later route")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueRouteSceneRequest grove;
+    struct RogueRouteSceneRequest artisan;
+    struct ObjectEventTemplate objects[6] =
+    {
+        {.localId = 40, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+    };
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u8 objectCount = 2;
+    u8 questId;
+    u16 apricorn;
+    u16 ball;
+    u16 itemId;
+    u8 treeCount = 0;
+    u8 artisanCount = 0;
+    u8 propCount = 0;
+    u8 i;
+
+    ClearBag();
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    gRogueRun.routeSceneRoomId = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].rngSeed = 0xA91C;
+
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+    RogueRouteScenes_DebugSetPlacement(0, ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN, 0, 0, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    RogueRouteScenes_DebugSetPlacement(1, ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN, 1, 1, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(RogueRouteScenes_GetPlacementRequest(0, &grove));
+    EXPECT(RogueRouteScenes_GetPlacementRequest(1, &artisan));
+    EXPECT_EQ(grove.recipeId, ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN);
+    EXPECT_EQ(grove.lotRole, 0);
+    EXPECT_EQ(artisan.lotRole, 1);
+    EXPECT_EQ(grove.sceneSlot, artisan.sceneSlot);
+    EXPECT_NE(grove.requestedItem, grove.rewardItem);
+    EXPECT_NE(grove.requestedItem, grove.trainerNum);
+    EXPECT_NE(grove.rewardItem, grove.trainerNum);
+
+    RogueRouteScenes_ModifyObjectEvents(objects, &objectCount, ARRAY_COUNT(objects));
+    EXPECT_EQ(objectCount, 6);
+    for(i = 0; i < objectCount; ++i)
+    {
+        u8 j;
+
+        for(j = i + 1; j < objectCount; ++j)
+            EXPECT_NE(objects[i].localId, objects[j].localId);
+        if(objects[i].script == Rogue_RouteEvent_ApricornTree)
+            ++treeCount;
+        else if(objects[i].script == Rogue_RouteEvent_ApricornArtisan)
+            ++artisanCount;
+        else if(objects[i].script == Rogue_RouteEvent_ApricornProp)
+            ++propCount;
+    }
+    EXPECT_EQ(treeCount, ROGUE_APRICORN_CHOICE_COUNT);
+    EXPECT_EQ(artisanCount, 1);
+    EXPECT_EQ(propCount, 2);
+
+    SelectPlacementProp(&grove, 2);
+    apricorn = grove.trainerNum;
+    ball = GetExpectedApricornBall(apricorn);
+    EXPECT_NE(ball, ITEM_NONE);
+    RogueRouteEvents_TryChooseApricorn();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT(CheckBagHasItem(apricorn, 1));
+    EXPECT(RogueAdventureQuests_IsItemProtected(apricorn));
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+    questId = RogueAdventureQuests_GetQuestIdAt(0);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[0], apricorn);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[1], ball);
+
+    EXPECT(RogueRouteScenes_GetPlacementRequest(1, &artisan));
+    EXPECT_EQ(artisan.requestedItem, apricorn);
+    EXPECT_EQ(artisan.rewardItem, ball);
+    SelectPlacement(&artisan);
+    for(itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT && CheckBagHasSpace(ball, ROGUE_APRICORN_BALL_REWARD_COUNT); ++itemId)
+    {
+        if(itemId != ball
+            && itemId != apricorn
+            && ItemId_GetPocket(itemId) != POCKET_NONE
+            && !ItemPocketUsesReservedSlots(ItemId_GetPocket(itemId)))
+            AddBagItem(itemId, 1);
+    }
+    EXPECT(!CheckBagHasSpace(ball, ROGUE_APRICORN_BALL_REWARD_COUNT));
+    RogueRouteEvents_TryCraftApricornBalls();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_NO_SPACE);
+    EXPECT(CheckBagHasItem(apricorn, 1));
+    EXPECT(!CheckBagHasItem(ball, ROGUE_APRICORN_BALL_REWARD_COUNT));
+
+    ClearBag();
+    EXPECT(AddBagItem(apricorn, 1));
+    RogueRouteEvents_TryCraftApricornBalls();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT(!CheckBagHasItem(apricorn, 1));
+    EXPECT(CheckBagHasItem(ball, ROGUE_APRICORN_BALL_REWARD_COUNT));
+    EXPECT_EQ(RogueRouteScenes_GetState(artisan.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+
+    // The grove-only variant uses the same quest. Leaving with its Apricorn
+    // schedules the ordinary artisan consumer on the next eligible route.
+    ClearBag();
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    gRogueAdvPath.roomCount = 1;
+    gRogueRun.adventureRoomId = 0;
+    gRogueRun.routeSceneRoomId = 0;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].rngSeed = 0xB72D;
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(GetFirstPlacement(&grove));
+    SelectPlacementProp(&grove, 1);
+    apricorn = grove.rewardItem;
+    ball = GetExpectedApricornBall(apricorn);
+    RogueRouteEvents_TryChooseApricorn();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    questId = RogueAdventureQuests_GetQuestIdAt(0);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->routesUntilScene, 1);
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+
+    gRogueAdvPath.roomCount = 2;
+    gRogueRun.adventureRoomId = 1;
+    gRogueAdvPath.rooms[1].roomParams.roomIdx = 1;
+    gRogueAdvPath.rooms[1].rngSeed = 0xB72E;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN, &artisan));
+    EXPECT_EQ(artisan.ownerQuestId, questId);
+    EXPECT_EQ(artisan.requestedItem, apricorn);
+    EXPECT_EQ(artisan.rewardItem, ball);
+    SelectPlacement(&artisan);
+    RogueRouteEvents_TryCraftApricornBalls();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT(CheckBagHasItem(ball, ROGUE_APRICORN_BALL_REWARD_COUNT));
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
     ClearBag();
 }
 

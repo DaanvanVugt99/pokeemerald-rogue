@@ -201,6 +201,9 @@ gSpecials::
     def_special RogueRouteEvents_CollectForbiddenStoneSoul
     def_special RogueRouteEvents_PrepareForbiddenStoneBattle
     def_special RogueRouteEvents_FinishForbiddenStoneBattle
+    def_special RogueRouteEvents_BufferApricornTreeData
+    def_special RogueRouteEvents_TryChooseApricorn
+    def_special RogueRouteEvents_TryCraftApricornBalls
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon

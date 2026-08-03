@@ -431,6 +431,116 @@ script Rogue_RouteEvent_ForbiddenStoneGiveReward
     return
 }
 
+script Rogue_RouteEvent_ApricornTree
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    special(RogueRouteEvents_BufferApricornTreeData)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("The grove has been carefully harvested."))
+    }
+    else
+    {
+        if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_ACTIVE)
+        {
+            msgbox(format("You already chose the {STR_VAR_1}. A Ball Maker can turn it into five {STR_VAR_2}."))
+        }
+        else
+        {
+            msgbox(format("A ripe {STR_VAR_1} is growing here. A Ball Maker could turn it into five {STR_VAR_2}.\pPick this Apricorn?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                special(RogueRouteEvents_TryChooseApricorn)
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+                {
+                    playfanfare(MUS_OBTAIN_ITEM)
+                    waitfanfare
+                    msgbox(format("You picked the {STR_VAR_1}. Find a traveling Ball Maker."))
+                }
+                else
+                {
+                    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+                    {
+                        msgbox(format("Your Items pocket is full. Make some room first."))
+                    }
+                    else
+                    {
+                        msgbox(format("The Apricorn should stay on the tree for now."))
+                    }
+                }
+            }
+            else
+            {
+                msgbox(format("You leave the {STR_VAR_1} on the tree."))
+            }
+        }
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_ApricornProp
+{
+    lock
+    faceplayer
+    msgbox(format("Ball-making tools and carefully shaped shells fill the workshop."))
+    release
+}
+
+script Rogue_RouteEvent_ApricornArtisan
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    if(var(VAR_0x8005) == ITEM_NONE)
+    {
+        msgbox(format("I make special Poké Balls from Apricorns. There may be a grove nearby."))
+    }
+    else
+    {
+        bufferitemname(STR_VAR_1, VAR_0x8005)
+        bufferitemname(STR_VAR_2, VAR_0x8004)
+        if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        {
+            msgbox(format("Those five {STR_VAR_2} should serve you well."))
+        }
+        else
+        {
+            msgbox(format("That's a fine {STR_VAR_1}. I can shape it into five {STR_VAR_2}.\pShall I get to work?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                special(RogueRouteEvents_TryCraftApricornBalls)
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+                {
+                    call(Rogue_Common_DisplayPopups)
+                    msgbox(format("All done! Those five {STR_VAR_2} are yours."))
+                }
+                else
+                {
+                    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+                    {
+                        msgbox(format("Your Poké Balls pocket cannot hold all five. Make some room first."))
+                    }
+                    else
+                    {
+                        msgbox(format("You no longer have the {STR_VAR_1}. Bring it back and I can finish the work."))
+                    }
+                }
+            }
+            else
+            {
+                msgbox(format("No hurry. The {STR_VAR_1} will keep."))
+            }
+        }
+    }
+
+    release
+}
+
 script Rogue_RouteEvent_StolenTradeCaseOffer
 {
     lock

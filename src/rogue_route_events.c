@@ -51,6 +51,9 @@ extern const u8 Rogue_RouteEvent_ForbiddenStoneOffer[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneSoul[];
 extern const u8 Rogue_RouteEvent_ForbiddenStonePayoff[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
+extern const u8 Rogue_RouteEvent_ApricornTree[];
+extern const u8 Rogue_RouteEvent_ApricornArtisan[];
+extern const u8 Rogue_RouteEvent_ApricornProp[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -359,6 +362,68 @@ static bool8 CanShowForbiddenStoneOffer(u8 roomId)
     return RoguePokedex_IsSpeciesEnabled(SPECIES_SPIRITOMB);
 }
 
+static bool8 CanShowApricornGrove(u8 roomId)
+{
+    if(RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING))
+    {
+        return RogueAdventureQuests_IsDefinitionSourceRoom(
+            ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
+            roomId);
+    }
+
+    return TRUE;
+}
+
+static const u16 sApricornItems[] =
+{
+    ITEM_RED_APRICORN,
+    ITEM_BLUE_APRICORN,
+    ITEM_YELLOW_APRICORN,
+    ITEM_GREEN_APRICORN,
+    ITEM_PINK_APRICORN,
+    ITEM_WHITE_APRICORN,
+    ITEM_BLACK_APRICORN,
+};
+
+static const u16 sApricornBalls[] =
+{
+    ITEM_LEVEL_BALL,
+    ITEM_LURE_BALL,
+    ITEM_MOON_BALL,
+    ITEM_FRIEND_BALL,
+    ITEM_LOVE_BALL,
+    ITEM_FAST_BALL,
+    ITEM_HEAVY_BALL,
+};
+
+static u16 GetApricornBall(u16 apricorn)
+{
+    u8 i;
+
+    for(i = 0; i < ARRAY_COUNT(sApricornItems); ++i)
+    {
+        if(sApricornItems[i] == apricorn)
+            return sApricornBalls[i];
+    }
+
+    return ITEM_NONE;
+}
+
+static u8 FindAdventureQuestId(u8 definitionId)
+{
+    u8 i;
+
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(i);
+
+        if(quest != NULL && quest->definitionId == definitionId)
+            return i;
+    }
+
+    return ROGUE_ADVENTURE_QUEST_INVALID_ID;
+}
+
 static void BuildStolenTradeCaseOffer(struct RogueRouteSceneRequest *request)
 {
     request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER;
@@ -376,7 +441,15 @@ static void BuildHexedShrine(struct RogueRouteSceneRequest *request)
     request->source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF;
     request->primaryGraphicsId = OBJ_EVENT_GFX_DEVIL_MAN;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_DEVIL_MAN;
-    request->requestedItem = Rogue_SelectDarkDealCurseItem(RogueRandom());
+    if(gRogueRun.temporaryDarkDealCurseItem != ITEM_NONE
+        && (VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_HEXED_SHRINE_ACCEPTED) != 0)
+    {
+        request->requestedItem = gRogueRun.temporaryDarkDealCurseItem;
+    }
+    else
+    {
+        request->requestedItem = Rogue_SelectDarkDealCurseItem(RogueRandom());
+    }
     request->rewardAmount = min(
         ROGUE_HEXED_SHRINE_REWARD_MAX,
         ROGUE_HEXED_SHRINE_REWARD_BASE + ROGUE_HEXED_SHRINE_REWARD_PER_DIFFICULTY * Rogue_GetCurrentDifficulty());
@@ -423,10 +496,61 @@ static void BuildForbiddenStoneOffer(struct RogueRouteSceneRequest *request)
     request->rewardAmount = RogueRandom();
 }
 
+static void BuildApricornGrove(struct RogueRouteSceneRequest *request)
+{
+    u8 choices[ARRAY_COUNT(sApricornItems)];
+    u8 i;
+
+    if(request->recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
+        && request->lotRole == 1)
+    {
+        u8 questId = FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+        const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+
+        request->primaryGraphicsId = OBJ_EVENT_GFX_OLD_MAN;
+        request->secondaryGraphicsId = OBJ_EVENT_GFX_OLD_MAN;
+        request->rewardAmount = ROGUE_APRICORN_BALL_REWARD_COUNT;
+        if(quest != NULL)
+        {
+            request->requestedItem = quest->payload[0];
+            request->rewardItem = quest->payload[1];
+        }
+        return;
+    }
+
+    for(i = 0; i < ARRAY_COUNT(choices); ++i)
+        choices[i] = i;
+    for(i = 0; i < ROGUE_APRICORN_CHOICE_COUNT; ++i)
+    {
+        u8 selected = i + RogueRandom() % (ARRAY_COUNT(choices) - i);
+        u8 temp = choices[i];
+
+        choices[i] = choices[selected];
+        choices[selected] = temp;
+    }
+
+    request->primaryGraphicsId = OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_OLD_MAN;
+    request->requestedItem = sApricornItems[choices[0]];
+    request->rewardItem = sApricornItems[choices[1]];
+    request->trainerNum = sApricornItems[choices[2]];
+}
+
+enum
+{
+    ROUTE_FALLBACK_FAMILY_STOLEN_TRADE_CASE,
+    ROUTE_FALLBACK_FAMILY_HEXED_SHRINE,
+    ROUTE_FALLBACK_FAMILY_ANOMALOUS_FOSSIL,
+    ROUTE_FALLBACK_FAMILY_FORBIDDEN_STONE,
+    ROUTE_FALLBACK_FAMILY_APRICORN_CRAFTING,
+    ROUTE_FALLBACK_FAMILY_COUNT,
+};
+
 struct RogueRouteFallbackDefinition
 {
     u8 recipeId;
     u8 weight;
+    u8 familyId;
     bool8 (*isEligible)(u8 roomId);
 };
 
@@ -508,14 +632,39 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lotSizes = {ROGUE_ROUTE_SCENE_LOT_LARGE},
         .objectCounts = {4},
     },
+    [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE] =
+    {
+        .build = BuildApricornGrove,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {3},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN] =
+    {
+        .build = BuildApricornGrove,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
+        .lotCount = 2,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM, ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {3, 3},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN] =
+    {
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {3},
+    },
 };
 
 static const struct RogueRouteFallbackDefinition sRouteFallbacks[] =
 {
-    {ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, 50, CanShowStolenTradeCaseOffer},
-    {ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, 50, CanShowHexedShrine},
-    {ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, 50, CanShowAnomalousFossilOffer},
-    {ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER, 50, CanShowForbiddenStoneOffer},
+    {ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, 50, ROUTE_FALLBACK_FAMILY_STOLEN_TRADE_CASE, CanShowStolenTradeCaseOffer},
+    {ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, 50, ROUTE_FALLBACK_FAMILY_HEXED_SHRINE, CanShowHexedShrine},
+    {ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, 50, ROUTE_FALLBACK_FAMILY_ANOMALOUS_FOSSIL, CanShowAnomalousFossilOffer},
+    {ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER, 50, ROUTE_FALLBACK_FAMILY_FORBIDDEN_STONE, CanShowForbiddenStoneOffer},
+    {ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE, 25, ROUTE_FALLBACK_FAMILY_APRICORN_CRAFTING, CanShowApricornGrove},
+    {ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN, 25, ROUTE_FALLBACK_FAMILY_APRICORN_CRAFTING, CanShowApricornGrove},
 };
 
 static const struct RogueRouteRecipeDefinition *GetRecipeDefinition(u8 recipeId)
@@ -668,6 +817,7 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
     struct RogueRouteSceneRequest questRequests[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS] = {0};
     struct RogueRouteLot lots[ROGUE_ROUTE_SCENE_MAX_LOTS];
     bool8 usedFallbacks[ARRAY_COUNT(sRouteFallbacks)] = {FALSE};
+    bool8 usedFallbackFamilies[ROUTE_FALLBACK_FAMILY_COUNT] = {FALSE};
     RAND_TYPE originalRng = gRngRogueValue;
     u16 usedLots = 0;
     u8 baseObjectCount;
@@ -720,7 +870,9 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
 
         for(i = 0; i < ARRAY_COUNT(sRouteFallbacks); ++i)
         {
-            if(!usedFallbacks[i] && sRouteFallbacks[i].isEligible(roomId))
+            if(!usedFallbacks[i]
+                && !usedFallbackFamilies[sRouteFallbacks[i].familyId]
+                && sRouteFallbacks[i].isEligible(roomId))
                 totalWeight += sRouteFallbacks[i].weight;
         }
 
@@ -730,7 +882,9 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
         roll = RogueRandom() % totalWeight;
         for(i = 0; i < ARRAY_COUNT(sRouteFallbacks); ++i)
         {
-            if(usedFallbacks[i] || !sRouteFallbacks[i].isEligible(roomId))
+            if(usedFallbacks[i]
+                || usedFallbackFamilies[sRouteFallbacks[i].familyId]
+                || !sRouteFallbacks[i].isEligible(roomId))
                 continue;
 
             if(roll < sRouteFallbacks[i].weight)
@@ -748,7 +902,7 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
         if(AddRecipeToPlan(
             plan,
             &placementCount,
-            targetPlacements,
+            ROGUE_ROUTE_SCENE_MAX_PLACEMENTS,
             sceneSlot,
             sRouteFallbacks[selectedFallback].recipeId,
             ROGUE_ADVENTURE_QUEST_INVALID_ID,
@@ -757,7 +911,10 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             &usedLots,
             &usedObjects,
             objectBudget))
+        {
+            usedFallbackFamilies[sRouteFallbacks[selectedFallback].familyId] = TRUE;
             ++sceneSlot;
+        }
     }
 
     gRngRogueValue = originalRng;
@@ -949,14 +1106,28 @@ void RogueRouteScenes_OnExitRoute(void)
     {
         struct RogueRouteSceneRequest scene;
 
-        if(RogueRouteScenes_GetPlacementRequest(i, &scene)
-            && scene.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        if(!RogueRouteScenes_GetPlacementRequest(i, &scene))
+            continue;
+
+        if(scene.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
             && scene.ownerQuestId < ROGUE_ADVENTURE_QUEST_CAPACITY
             && !advancedQuests[scene.ownerQuestId]
             && RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
         {
             advancedQuests[scene.ownerQuestId] = TRUE;
             RogueAdventureQuests_Advance(scene.ownerQuestId);
+        }
+        else if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
+            && scene.lotRole == 1
+            && RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        {
+            u8 questId = FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+
+            if(questId < ROGUE_ADVENTURE_QUEST_CAPACITY && !advancedQuests[questId])
+            {
+                advancedQuests[questId] = TRUE;
+                RogueAdventureQuests_Advance(questId);
+            }
         }
     }
 
@@ -1014,9 +1185,9 @@ static void AppendSceneObject(
     objectEvent->flagId = flagId;
 }
 
-static const u8 *GetSceneNpcScript(u8 recipeId)
+static const u8 *GetSceneNpcScript(const struct RogueRouteSceneRequest *scene)
 {
-    switch(recipeId)
+    switch(scene->recipeId)
     {
     case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
         return Rogue_RouteEvent_StolenTradeCaseOffer;
@@ -1036,6 +1207,12 @@ static const u8 *GetSceneNpcScript(u8 recipeId)
         return Rogue_RouteEvent_ForbiddenStoneSoul;
     case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
         return Rogue_RouteEvent_ForbiddenStonePayoff;
+    case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
+        return Rogue_RouteEvent_ApricornTree;
+    case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN:
+        return scene->lotRole == 0 ? Rogue_RouteEvent_ApricornTree : Rogue_RouteEvent_ApricornArtisan;
+    case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN:
+        return Rogue_RouteEvent_ApricornArtisan;
     default:
         return NULL;
     }
@@ -1142,7 +1319,7 @@ void RogueRouteScenes_RestoreObjectEvents(
         if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
             continue;
 
-        npcScript = GetSceneNpcScript(scene.recipeId);
+        npcScript = GetSceneNpcScript(&scene);
         if(npcScript == NULL)
             continue;
 
@@ -1219,6 +1396,26 @@ void RogueRouteScenes_RestoreObjectEvents(
             RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
             RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
             break;
+        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
+            RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+            RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN:
+            if(scene.lotRole == 0)
+            {
+                RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+                RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+            }
+            else
+            {
+                RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
+                RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
+            }
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN:
+            RESTORE_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
+            RESTORE_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
+            break;
         }
 
 #undef RESTORE_PROP
@@ -1283,7 +1480,7 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
             continue;
 
         lot = &lots[scene.lotId];
-        npcScript = GetSceneNpcScript(scene.recipeId);
+        npcScript = GetSceneNpcScript(&scene);
         if(npcScript == NULL)
             continue;
 
@@ -1334,6 +1531,26 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
             APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_ForbiddenStoneProp);
             APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
             APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
+            APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+            APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN:
+            if(scene.lotRole == 0)
+            {
+                APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+                APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree);
+            }
+            else
+            {
+                APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
+                APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
+            }
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN:
+            APPEND_PROP(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp);
+            APPEND_PROP(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp);
             break;
         }
 
@@ -1916,6 +2133,156 @@ void RogueRouteEvents_FinishForbiddenStoneBattle(void)
     AddMoney(&gSaveBlock1Ptr->money, ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
     Rogue_PushPopup_AddItem(ITEM_ABILITY_PATCH, 1);
     Rogue_PushPopup_AddMoney(ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+static u16 GetApricornChoice(const struct RogueRouteSceneRequest *scene, u8 choice)
+{
+    switch(choice)
+    {
+    case 0:
+        return scene->requestedItem;
+    case 1:
+        return scene->rewardItem;
+    case 2:
+        return scene->trainerNum;
+    default:
+        return ITEM_NONE;
+    }
+}
+
+void RogueRouteEvents_BufferApricornTreeData(void)
+{
+    struct RogueRouteSceneRequest scene;
+    u16 apricorn = ITEM_NONE;
+    u16 ball = ITEM_NONE;
+
+    gStringVar1[0] = EOS;
+    gStringVar2[0] = EOS;
+    if(!GetCurrentInteractionRequest(&scene)
+        || (scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE
+            && scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN)
+        || scene.lotRole != 0)
+        return;
+
+    {
+        u8 questId = FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+        const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+
+        if(quest != NULL)
+        {
+            apricorn = quest->payload[0];
+            ball = quest->payload[1];
+        }
+        else if(gSelectedObjectEvent < OBJECT_EVENTS_COUNT)
+        {
+            u8 choice = GetSceneObjectProp(gObjectEvents[gSelectedObjectEvent].trainerRange_berryTreeId);
+
+            apricorn = GetApricornChoice(&scene, choice);
+            ball = GetApricornBall(apricorn);
+        }
+    }
+
+    if(apricorn != ITEM_NONE)
+        CopyItemName(apricorn, gStringVar1);
+    if(ball != ITEM_NONE)
+        CopyItemName(ball, gStringVar2);
+}
+
+void RogueRouteEvents_TryChooseApricorn(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct RogueAdventureQuestCreateParams params = {0};
+    u16 apricorn;
+    u16 ball;
+    u8 choice;
+    u8 questId;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!GetCurrentInteractionRequest(&scene)
+        || (scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE
+            && scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN)
+        || scene.lotRole != 0
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+        || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING)
+        || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
+        return;
+
+    choice = GetSceneObjectProp(gObjectEvents[gSelectedObjectEvent].trainerRange_berryTreeId);
+    apricorn = GetApricornChoice(&scene, choice);
+    ball = GetApricornBall(apricorn);
+    if(apricorn == ITEM_NONE || ball == ITEM_NONE)
+        return;
+
+    if(!CheckBagHasSpace(apricorn, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+    if(!AddBagItem(apricorn, 1))
+        return;
+
+    params.payload[0] = apricorn;
+    params.payload[1] = ball;
+    questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING, &params);
+    if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
+    {
+        RemoveBagItem(apricorn, 1);
+        return;
+    }
+
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_TryCraftApricornBalls(void)
+{
+    struct RogueRouteSceneRequest scene;
+    const struct RogueAdventureQuest *quest;
+    u8 questId;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!GetCurrentInteractionRequest(&scene)
+        || (scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN
+            && (scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN || scene.lotRole != 1))
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        return;
+
+    questId = scene.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        ? scene.ownerQuestId
+        : FindAdventureQuestId(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
+    quest = RogueAdventureQuests_Get(questId);
+    if(quest == NULL
+        || quest->definitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING
+        || GetApricornBall(quest->payload[0]) != quest->payload[1])
+        return;
+
+    if(!CheckBagHasItem(quest->payload[0], 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+    if(!CheckBagHasSpace(quest->payload[1], ROGUE_APRICORN_BALL_REWARD_COUNT))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+
+    if(!RemoveBagItem(quest->payload[0], 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+    if(!AddBagItem(quest->payload[1], ROGUE_APRICORN_BALL_REWARD_COUNT))
+    {
+        AddBagItem(quest->payload[0], 1);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+
+    Rogue_PushPopup_AddItem(quest->payload[1], ROGUE_APRICORN_BALL_REWARD_COUNT);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }

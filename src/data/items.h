@@ -2283,7 +2283,7 @@ const struct Item gItems[] =
 
     [ITEM_YELLOW_APRICORN] =
     {
-        .name = _("YellwApricorn"),
+        .name = _("Yellow Apricorn"),
         .price = 200,
         .description = sYellowApricornDesc,
         .pocket = POCKET_ITEMS,
@@ -2293,7 +2293,7 @@ const struct Item gItems[] =
 
     [ITEM_GREEN_APRICORN] =
     {
-        .name = _("GreenApricorn"),
+        .name = _("Green Apricorn"),
         .price = 200,
         .description = sGreenApricornDesc,
         .pocket = POCKET_ITEMS,
@@ -2313,7 +2313,7 @@ const struct Item gItems[] =
 
     [ITEM_WHITE_APRICORN] =
     {
-        .name = _("WhiteApricorn"),
+        .name = _("White Apricorn"),
         .price = 200,
         .description = sWhiteApricornDesc,
         .pocket = POCKET_ITEMS,
@@ -2323,7 +2323,7 @@ const struct Item gItems[] =
 
     [ITEM_BLACK_APRICORN] =
     {
-        .name = _("BlackApricorn"),
+        .name = _("Black Apricorn"),
         .price = 200,
         .description = sBlackApricornDesc,
         .pocket = POCKET_ITEMS,

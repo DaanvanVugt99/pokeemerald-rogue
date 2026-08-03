@@ -33,11 +33,14 @@ Format follows Keep a Changelog loosely:
   its original typing or accepting a seeded adaptive typing. The Forbidden
   Stone quest now gives the player an Odd Keystone, binds three escaped souls
   at separate locations on a later route, and ends with an uncatchable
-  Spiritomb battle for an Ability Patch and ¥10,000. Active routes expose eight
-  small, medium, and large scene lots; the director independently fills one to
-  three lots so quest consumers and unrelated route events can coexist. The
-  per-room scene plan is packed into less memory than the former single-scene
-  descriptor.
+  Spiritomb battle for an Ability Patch and ¥10,000. Apricorn Crafting now
+  presents three seeded Apricorns and lets the player choose one to exchange
+  for five matching Apricorn Balls. Its Ball Maker may share the current route
+  or follow the unfinished Adventure Quest onto a later branch. Active routes
+  expose eight small, medium, and large scene lots; the director independently
+  fills one to three lots so quest consumers and unrelated route events can
+  coexist. The per-room scene plan is packed into less memory than the former
+  single-scene descriptor.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.

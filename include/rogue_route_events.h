@@ -16,5 +16,8 @@ void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void);
 void RogueRouteEvents_CollectForbiddenStoneSoul(void);
 void RogueRouteEvents_PrepareForbiddenStoneBattle(void);
 void RogueRouteEvents_FinishForbiddenStoneBattle(void);
+void RogueRouteEvents_BufferApricornTreeData(void);
+void RogueRouteEvents_TryChooseApricorn(void);
+void RogueRouteEvents_TryCraftApricornBalls(void);
 
 #endif // GUARD_ROGUE_ROUTE_EVENTS_H
