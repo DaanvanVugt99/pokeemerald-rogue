@@ -58,7 +58,7 @@ void RogueRouteSceneRng_Seed(struct RogueRouteSceneRng *rng, u32 seed)
     rng->state.high = seed;
     rng->state.low = seed;
 #else
-    rng->state = seed;
+    rng->state = (u16)seed;
 #endif
 }
 
@@ -463,7 +463,6 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             }
         }
     }
-
 }
 
 u8 RogueRouteScenes_GetPlacementCount(void)

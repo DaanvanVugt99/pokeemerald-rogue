@@ -93,7 +93,8 @@ Format follows Keep a Changelog loosely:
   objects, scripts, state visibility, and metatile accents in one ROM data
   table shared by initial composition and quicksave restoration. The generic
   route-scene planner and compositor are now separated from event-specific
-  eligibility, payload generation, lifecycle hooks, and interactions.
+  eligibility, payload generation, lifecycle hooks, and interactions, and use
+  an explicit local deterministic RNG without replacing either global stream.
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.

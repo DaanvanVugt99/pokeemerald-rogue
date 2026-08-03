@@ -154,6 +154,31 @@ static u16 GetExpectedApricornBall(u16 apricorn)
     }
 }
 
+TEST("Route scene local RNG matches Rogue RNG without mutating it")
+{
+    static const u16 sSeeds[] = {0, 1, 0x5EED, 0xA7E1, 0xFFFF};
+    struct RogueRouteSceneRng localRng;
+    RAND_TYPE originalRng = gRngRogueValue;
+    u16 expected[8];
+    u8 seedIdx;
+    u8 drawIdx;
+
+    for(seedIdx = 0; seedIdx < ARRAY_COUNT(sSeeds); ++seedIdx)
+    {
+        SeedRogueRng(sSeeds[seedIdx]);
+        for(drawIdx = 0; drawIdx < ARRAY_COUNT(expected); ++drawIdx)
+            expected[drawIdx] = RogueRandom();
+
+        gRngRogueValue = originalRng;
+        RogueRouteSceneRng_Seed(&localRng, sSeeds[seedIdx]);
+        for(drawIdx = 0; drawIdx < ARRAY_COUNT(expected); ++drawIdx)
+            EXPECT_EQ(RogueRouteSceneRng_Next(&localRng), expected[drawIdx]);
+        EXPECT_EQ(memcmp(&gRngRogueValue, &originalRng, sizeof(originalRng)), 0);
+    }
+
+    gRngRogueValue = originalRng;
+}
+
 TEST("Route event fallback registry is deterministic weighted and RNG neutral")
 {
     struct RogueAdvPath originalPath;
