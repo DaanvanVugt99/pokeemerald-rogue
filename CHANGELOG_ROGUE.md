@@ -16,14 +16,15 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
-- Added a proof-of-concept seeded route-scene system that composes themed NPCs,
-  props, and terrain accents into reserved route anchors for Parcel deliveries,
-  supply trades, and optional Trainer challenges. Generated Adventure Quests
-  now appear in their own run-only quest-book category; Parcel deliveries can
-  begin on one route and dynamically insert their recipient into a later one.
-  Scene sources now submit generic requests through a route director and
-  composer, while compact ROM-defined quest graphs advance through scene nodes
-  or passive run signals such as Trainer victories and completed routes.
+- Added a proof-of-concept seeded route-scene system with a route director,
+  reusable scene composer, compact ROM-defined quest graphs, and a dedicated
+  run-only Adventure Quest category. Its first complete quest chain is the
+  Stolen Trade Case: a fixed travelling merchant creates the quest, the run's
+  selected evil team builds a dynamically generated camp on a later route, and
+  returning the recovered Trade Case at a final merchant checkpoint awards a
+  Large Pokéblock Bundle and ¥5,000. Scene placement, quest state, key-item
+  cargo, battles, and pending rewards remain deterministic across quicksaves
+  without changing save data.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.

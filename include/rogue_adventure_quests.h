@@ -14,6 +14,8 @@ struct RogueAdventureQuestCreateParams
 
 void RogueAdventureQuests_Clear(void);
 u8 RogueAdventureQuests_Create(u8 definitionId, const struct RogueAdventureQuestCreateParams *params);
+bool8 RogueAdventureQuests_HasDefinition(u8 definitionId);
+bool8 RogueAdventureQuests_IsDefinitionSourceRoom(u8 definitionId, u8 roomId);
 bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSceneRequest *request, u16 *priority);
 void RogueAdventureQuests_LeaveRoute(u8 roomId);
 bool8 RogueAdventureQuests_Advance(u8 questId);

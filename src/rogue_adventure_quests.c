@@ -1,15 +1,19 @@
 #include "global.h"
 
+#include "constants/event_objects.h"
+#include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/rogue_adventure_quests.h"
 #include "constants/rogue_route_scenes.h"
 
+#include "event_data.h"
 #include "item.h"
 #include "string_util.h"
 
 #include "rogue.h"
 #include "rogue_adventure_quests.h"
 #include "rogue_controller.h"
+#include "rogue_trainers.h"
 
 struct RogueAdventureQuestNodeDefinition
 {
@@ -30,25 +34,45 @@ struct RogueAdventureQuestDefinition
     u8 initialNodeId;
 };
 
-static const u8 sText_ParcelDeliveryTitle[] = _("Parcel Delivery");
-static const u8 sText_ParcelDeliveryActive[] = _("Carry the Parcel. Its recipient will appear during a future route.");
-static const u8 sText_ParcelDeliveryReady[] = _("The recipient is waiting on this route.\nReward: {STR_VAR_1}");
-static const u8 sText_TrainerHuntTitle[] = _("Trainer Hunt");
-static const u8 sText_TrainerHuntDescription[] = _("Defeat Trainers during this adventure.\nProgress: {STR_VAR_1}/{STR_VAR_2}");
+static const u8 sText_StolenTradeCaseTitle[] = _("Stolen Trade Case");
+static const u8 sText_FindCamp[] = _("Find the thieves' camp and recover the Trade Case.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_CampReady[] = _("The thieves' camp is on this route.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_ReturnCase[] = _("Return the Trade Case to the caravan merchant.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_MerchantReady[] = _("The caravan merchant is on this route.\nReward: Large Bundle + ¥5,000");
 static const u8 sText_UnknownQuestTitle[] = _("Adventure Quest");
 static const u8 sText_UnknownQuestDescription[] = _("Complete this quest before the adventure ends.");
 
-static bool8 BuildParcelDeliveryScene(const struct RogueAdventureQuest *quest, struct RogueRouteSceneRequest *request)
+static bool8 BuildStolenTradeCaseScene(const struct RogueAdventureQuest *quest, struct RogueRouteSceneRequest *request)
 {
-    request->rewardItem = quest->payload[0];
-    request->primaryGraphicsId = quest->payload[1];
+    request->requestedItem = ITEM_TRADE_CASE;
+    request->rewardItem = ITEM_BIG_POKEBLOCK_BUNDLE;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
+
+    if(quest->nodeId == 0)
+    {
+        request->trainerNum = quest->payload[1];
+        request->primaryGraphicsId = Rogue_GetTrainerObjectEventGfx(request->trainerNum);
+    }
+    else
+    {
+        request->trainerNum = TRAINER_NONE;
+        request->primaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
+    }
+
     return TRUE;
 }
 
-static const struct RogueAdventureQuestNodeDefinition sParcelDeliveryNodes[] =
+static const struct RogueAdventureQuestNodeDefinition sStolenTradeCaseNodes[] =
 {
     {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_DELIVERY_PAYOFF,
+        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP,
+        .nextNodeId = 1,
+        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
+        .routeDelay = 1,
+    },
+    {
+        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF,
         .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
         .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
         .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
@@ -56,39 +80,15 @@ static const struct RogueAdventureQuestNodeDefinition sParcelDeliveryNodes[] =
     },
 };
 
-// Trainer Hunt is deliberately definition-only for now. It proves that
-// passive objectives and scene-backed nodes share the same graph model before
-// a quest giver or payoff scene is added.
-static const struct RogueAdventureQuestNodeDefinition sTrainerHuntNodes[] =
-{
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_NONE,
-        .nextNodeId = 1,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_TRAINER_DEFEATED,
-    },
-    {
-        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_NONE,
-        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
-    },
-};
-
 static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT] =
 {
-    [ROGUE_ADVENTURE_QUEST_DEFINITION_PARCEL_DELIVERY] =
+    [ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE] =
     {
-        .title = sText_ParcelDeliveryTitle,
-        .nodes = sParcelDeliveryNodes,
-        .buildSceneRequest = BuildParcelDeliveryScene,
-        .cleanupItem = ITEM_PARCEL,
-        .nodeCount = ARRAY_COUNT(sParcelDeliveryNodes),
-        .initialNodeId = 0,
-    },
-    [ROGUE_ADVENTURE_QUEST_DEFINITION_TRAINER_HUNT] =
-    {
-        .title = sText_TrainerHuntTitle,
-        .nodes = sTrainerHuntNodes,
-        .nodeCount = ARRAY_COUNT(sTrainerHuntNodes),
+        .title = sText_StolenTradeCaseTitle,
+        .nodes = sStolenTradeCaseNodes,
+        .buildSceneRequest = BuildStolenTradeCaseScene,
+        .cleanupItem = ITEM_TRADE_CASE,
+        .nodeCount = ARRAY_COUNT(sStolenTradeCaseNodes),
         .initialNodeId = 0,
     },
 };
@@ -144,6 +144,7 @@ void RogueAdventureQuests_Clear(void)
     }
 
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
 }
 
 u8 RogueAdventureQuests_Create(u8 definitionId, const struct RogueAdventureQuestCreateParams *params)
@@ -175,6 +176,36 @@ u8 RogueAdventureQuests_Create(u8 definitionId, const struct RogueAdventureQuest
     }
 
     return ROGUE_ADVENTURE_QUEST_INVALID_ID;
+}
+
+bool8 RogueAdventureQuests_HasDefinition(u8 definitionId)
+{
+    u8 i;
+
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        if(gRogueRun.adventureQuests[i].definitionId == definitionId)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 RogueAdventureQuests_IsDefinitionSourceRoom(u8 definitionId, u8 roomId)
+{
+    u8 i;
+
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        const struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[i];
+
+        if(quest->definitionId == definitionId
+            && quest->routesUntilScene != 0
+            && quest->sceneRoomId == roomId)
+            return TRUE;
+    }
+
+    return FALSE;
 }
 
 static bool8 BuildQuestSceneRequest(u8 questId, struct RogueRouteSceneRequest *request)
@@ -376,21 +407,11 @@ void RogueAdventureQuests_BufferDescription(u8 questId, u8 *dest)
 
     switch(quest->definitionId)
     {
-    case ROGUE_ADVENTURE_QUEST_DEFINITION_PARCEL_DELIVERY:
-        if(RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY)
-        {
-            StringCopy(gStringVar1, ItemId_GetName(quest->payload[0]));
-            StringExpandPlaceholders(dest, sText_ParcelDeliveryReady);
-        }
+    case ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE:
+        if(quest->nodeId == 0)
+            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_CampReady : sText_FindCamp);
         else
-            StringCopy(dest, sText_ParcelDeliveryActive);
-        break;
-    case ROGUE_ADVENTURE_QUEST_DEFINITION_TRAINER_HUNT:
-        ConvertUIntToDecimalStringN(gStringVar1,
-            RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? quest->target : quest->progress,
-            STR_CONV_MODE_LEFT_ALIGN, 3);
-        ConvertUIntToDecimalStringN(gStringVar2, quest->target, STR_CONV_MODE_LEFT_ALIGN, 3);
-        StringExpandPlaceholders(dest, sText_TrainerHuntDescription);
+            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_MerchantReady : sText_ReturnCase);
         break;
     default:
         StringCopy(dest, sText_UnknownQuestDescription);

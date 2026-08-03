@@ -189,12 +189,10 @@ gSpecials::
 	def_special Rogue_StartRunPortalTransition
 	def_special Rogue_SeedRandomGenerators
 	def_special RogueRouteEvents_GetInteractionData
-	def_special RogueRouteEvents_TryAcceptDelivery
-	def_special RogueRouteEvents_TryCompleteDelivery
-	def_special RogueRouteEvents_TryCompleteSupplyRequest
-	def_special RogueRouteEvents_BeginTrainerChallenge
-	def_special RogueRouteEvents_FinishTrainerChallenge
-	def_special RogueRouteEvents_TryClaimTrainerReward
+    def_special RogueRouteEvents_TryAcceptStolenTradeCaseQuest
+    def_special RogueRouteEvents_BeginStolenTradeCaseBattle
+    def_special RogueRouteEvents_FinishStolenTradeCaseBattle
+    def_special RogueRouteEvents_TryClaimStolenTradeCaseReward
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon

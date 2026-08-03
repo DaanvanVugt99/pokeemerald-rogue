@@ -5103,6 +5103,7 @@ static void BeginRogueRunPhase_Reset(void)
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     FlagClear(FLAG_ROGUE_IS_VICTORY_LAP);
     FlagClear(FLAG_ROGUE_MYSTERIOUS_SIGN_KNOWN);
+    FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
 
     SetLastHealLocationWarp(HEAL_LOCATION_ROGUE_HUB);
     if (RogueTrial_IsActive())
@@ -8219,6 +8220,17 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
 
             if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
                 RogueRouteScenes_ModifyObjectEvents(objectEvents, objectEventCount, objectEventCapacity);
+        }
+        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE && loadingFromSave)
+        {
+            // Authored-script restoration uses local IDs, so generated scene
+            // objects must be rebound after it has run. The main NPC reuses an
+            // anchor ID and props may reuse IDs removed by route generation.
+            RogueRouteScenes_RestoreObjectEvents(
+                objectEvents,
+                *objectEventCount,
+                mapHeader->events->objectEvents,
+                mapHeader->events->objectEventCount);
         }
 
         // We need to reapply this as pending when loading from a save, as we would've already consumed it here

@@ -47,6 +47,7 @@
 #define QUEST_REWARD_ICON_BACKDROP_WIDTH 11
 #define QUEST_REWARD_ICON_BACKDROP_HEIGHT 3
 #define QUEST_PAGE_FILL_TILE 0x004E
+#define ADVENTURE_QUEST_TEXT_WIDTH 86
 
 enum {
     TAG_REWARD_ICON_POKEMON_SHINY = 100,
@@ -96,6 +97,7 @@ static void HandleInput_PlayerStatsPage(u8 taskId);
 static void Draw_FrontPage();
 static void Draw_IndexPage();
 static void Draw_AdventureQuestPage();
+static void BufferWrappedAdventureQuestText(u8 *dest, const u8 *src);
 static void Draw_QuestPage();
 static void RefreshQuestPageBackdrop(bool8 showRewardDetails);
 static void Draw_QuestPageRewardDetails(u16 questId, u8 const* color);
@@ -522,8 +524,9 @@ static u8 const sText_Index_PendingRewards[] = _("{COLOR GREEN}Rewards ready to\
 static u8 const sText_AdventureQuestHeader[] = _("Adventure Quests");
 static u8 const sText_AdventureQuestActive[] = _("{COLOR BLUE}In Progress");
 static u8 const sText_AdventureQuestReady[] = _("{COLOR GREEN}Ready on this route");
-static u8 const sText_AdventureQuestEmpty[] = _("No Adventure Quests yet.\nGenerated route events can add them.");
-static u8 const sText_AdventureQuestRunOnly[] = _("Unfinished quests are cleared when this adventure ends.");
+static u8 const sText_AdventureQuestEmpty[] = _("No Adventure Quests yet.\nYou may find someone who needs help.");
+static u8 const sText_AdventureQuestRunOnly[] = _("Adventure Quests must be finished during this adventure.");
+static u8 const sText_Space[] = _(" ");
 
 
 EWRAM_DATA static struct QuestMenuData* sQuestMenuData = NULL;
@@ -1617,6 +1620,64 @@ static void HandleInput_AdventureQuestPage(u8 taskId)
         SetupPage(PAGE_BOOK_INDEX);
 }
 
+static void AppendAdventureQuestTextLine(u8 *dest, const u8 *line)
+{
+    if(dest[0] != EOS)
+    {
+        u16 length = StringLength(dest);
+        dest[length++] = CHAR_NEWLINE;
+        dest[length] = EOS;
+    }
+
+    StringAppend(dest, line);
+}
+
+static void BufferWrappedAdventureQuestText(u8 *dest, const u8 *src)
+{
+    u16 lineLength;
+    u16 wordLength;
+
+    dest[0] = EOS;
+    gStringVar1[0] = EOS;
+
+    while(*src != EOS)
+    {
+        while(*src == CHAR_SPACE)
+            ++src;
+
+        if(*src == CHAR_NEWLINE)
+        {
+            AppendAdventureQuestTextLine(dest, gStringVar1);
+            gStringVar1[0] = EOS;
+            ++src;
+            continue;
+        }
+
+        if(*src == EOS)
+            break;
+
+        wordLength = 0;
+        while(*src != EOS && *src != CHAR_SPACE && *src != CHAR_NEWLINE)
+            gStringVar2[wordLength++] = *src++;
+        gStringVar2[wordLength] = EOS;
+
+        lineLength = StringLength(gStringVar1);
+        if(lineLength != 0)
+            StringAppend(gStringVar1, sText_Space);
+        StringAppend(gStringVar1, gStringVar2);
+
+        if(lineLength != 0 && GetStringWidth(FONT_SMALL_NARROW, gStringVar1, 0) > ADVENTURE_QUEST_TEXT_WIDTH)
+        {
+            gStringVar1[lineLength] = EOS;
+            AppendAdventureQuestTextLine(dest, gStringVar1);
+            StringCopy(gStringVar1, gStringVar2);
+        }
+    }
+
+    if(gStringVar1[0] != EOS)
+        AppendAdventureQuestTextLine(dest, gStringVar1);
+}
+
 static void Draw_AdventureQuestPage()
 {
     const u8 color[3] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
@@ -1655,13 +1716,18 @@ static void Draw_AdventureQuestPage()
         AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_NARROW, 0, 24, 0, 0, color, TEXT_SKIP_DRAW, RogueAdventureQuests_GetTitle(selectedQuestId));
         statusText = RogueAdventureQuests_GetState(selectedQuestId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_AdventureQuestReady : sText_AdventureQuestActive;
         AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 42, 0, 0, color, TEXT_SKIP_DRAW, statusText);
-        RogueAdventureQuests_BufferDescription(selectedQuestId, gStringVar4);
+        RogueAdventureQuests_BufferDescription(selectedQuestId, gStringVar3);
+        BufferWrappedAdventureQuestText(gStringVar4, gStringVar3);
         AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 62, 0, 0, color, TEXT_SKIP_DRAW, gStringVar4);
     }
     else if(questCount == 0)
-        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 32, 0, 0, color, TEXT_SKIP_DRAW, sText_AdventureQuestEmpty);
+    {
+        BufferWrappedAdventureQuestText(gStringVar4, sText_AdventureQuestEmpty);
+        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 32, 0, 0, color, TEXT_SKIP_DRAW, gStringVar4);
+    }
 
-    AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 120, 0, 0, color, TEXT_SKIP_DRAW, sText_AdventureQuestRunOnly);
+    BufferWrappedAdventureQuestText(gStringVar4, sText_AdventureQuestRunOnly);
+    AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 120, 0, 0, color, TEXT_SKIP_DRAW, gStringVar4);
     PutWindowTilemap(WIN_LEFT_PAGE);
     CopyWindowToVram(WIN_LEFT_PAGE, COPYWIN_FULL);
 }

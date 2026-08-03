@@ -50,51 +50,107 @@ script Rogue_RouteEvent_Prop
     lock
     faceplayer
 
-    msgbox(format("These supplies belong to the nearby traveler."))
+    msgbox(format("Travel supplies are packed inside."))
 
     release
 }
 
-script Rogue_RouteEvent_Delivery
+script Rogue_RouteEvent_StolenTradeCaseOffer
 {
     lock
     faceplayer
 
+    special(RogueRouteEvents_GetInteractionData)
     if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
-        msgbox(format("Excuse me! I need this Parcel delivered, but I cannot leave my post.\pWould you take it?"), MSGBOX_YESNO)
+        msgbox(format("A gang of thieves robbed my caravan! They took my locked Trade Case.\pIf you recover it, I'll give you a Large Bundle and ¥5,000. Will you help?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
         {
-            special(RogueRouteEvents_TryAcceptDelivery)
+            special(RogueRouteEvents_TryAcceptStolenTradeCaseQuest)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
-                playfanfare(MUS_OBTAIN_ITEM)
-                waitfanfare
-                msgbox(format("Thank you! Keep an eye out for the recipient during a future route."))
+                msgbox(format("Thank you! Look for their camp somewhere ahead.\pI'll wait for you farther along the road."))
             }
             else
             {
-                msgbox(format("It looks like there isn't room in your Bag right now."))
+                msgbox(format("Perhaps this is too much to ask right now."))
             }
         }
         else
         {
-            msgbox(format("No problem. Let me know if you change your mind."))
+            msgbox(format("I understand. Let me know if you change your mind."))
         }
-    }
-    elif(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_ACTIVE)
-    {
-        msgbox(format("Thank you. The recipient should cross your path before long."))
     }
     else
     {
-        msgbox(format("Thanks again for taking care of that delivery!"))
+        msgbox(format("The thieves must have made camp somewhere ahead. I'll wait for you farther along the road."))
     }
 
     release
 }
 
-script Rogue_RouteEvent_DeliveryPayoff
+script Rogue_RouteEvent_StolenTradeCaseCamp
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    bufferitemname(STR_VAR_2, VAR_0x8005)
+
+    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("You got the case. Now get out of here!"))
+    }
+    else
+    {
+        if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING)
+        {
+            msgbox(format("You beat me already! Take the {STR_VAR_2} and get lost."))
+            special(RogueRouteEvents_FinishStolenTradeCaseBattle)
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+            {
+                playfanfare(MUS_OBTAIN_ITEM)
+                waitfanfare
+                msgbox(format("You recovered the merchant's {STR_VAR_2}."))
+            }
+            else
+            {
+                msgbox(format("Your Key Items pocket is full. Make some room first."))
+            }
+        }
+        else
+        {
+            msgbox(format("That case is ours now!\pIf you want it back, you'll have to take it!"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                special(RogueRouteEvents_BeginStolenTradeCaseBattle)
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+                {
+                    trainerbattle(TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, 0, gPlaceholder_Trainer_PostBattleTaunt)
+                    special(RogueRouteEvents_FinishStolenTradeCaseBattle)
+                    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+                    {
+                        playfanfare(MUS_OBTAIN_ITEM)
+                        waitfanfare
+                        msgbox(format("You recovered the merchant's {STR_VAR_2}."))
+                    }
+                    else
+                    {
+                        msgbox(format("You won, but your Key Items pocket is full. Make room for the {STR_VAR_2}."))
+                    }
+                }
+            }
+            else
+            {
+                msgbox(format("Then stay away from our haul!"))
+            }
+        }
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_StolenTradeCasePayoff
 {
     lock
     faceplayer
@@ -104,122 +160,28 @@ script Rogue_RouteEvent_DeliveryPayoff
 
     if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
-        msgbox(format("Thanks again for delivering the Parcel!"))
+        msgbox(format("Thanks again! My caravan can finally get moving."))
     }
     else
     {
-        msgbox(format("That Parcel is for me! I can give you a {STR_VAR_1} for bringing it."))
-        special(RogueRouteEvents_TryCompleteDelivery)
+        msgbox(format("You found it! Just as promised, here's a {STR_VAR_1} and ¥5,000."))
+        special(RogueRouteEvents_TryClaimStolenTradeCaseReward)
         if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         {
             playfanfare(MUS_OBTAIN_ITEM)
             waitfanfare
-            msgbox(format("Perfect! Thank you for making the delivery."))
+            msgbox(format("That bundle holds five Pokéblocks. You've earned every one."))
         }
         else
         {
-            msgbox(format("You'll need the Parcel and room in your Bag for the reward."))
-        }
-    }
-
-    release
-}
-
-script Rogue_RouteEvent_SupplyRequest
-{
-    lock
-    faceplayer
-
-    special(RogueRouteEvents_GetInteractionData)
-    bufferitemname(STR_VAR_1, VAR_0x8005)
-    bufferitemname(STR_VAR_2, VAR_0x8004)
-
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-    {
-        msgbox(format("That {STR_VAR_1} was exactly what I needed. Thanks again!"))
-    }
-    else
-    {
-        msgbox(format("I'm running short on supplies. Could you spare one {STR_VAR_1}?pI can trade you a {STR_VAR_2} for it."), MSGBOX_YESNO)
-        if(var(VAR_RESULT) == YES)
-        {
-            special(RogueRouteEvents_TryCompleteSupplyRequest)
-            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM)
             {
-                playfanfare(MUS_OBTAIN_ITEM)
-                waitfanfare
-                msgbox(format("Perfect! This should keep me going. Enjoy the {STR_VAR_2}!"))
-            }
-            elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM)
-            {
-                msgbox(format("It doesn't look like you have a {STR_VAR_1} right now."))
+                msgbox(format("Come back once you have my Trade Case."))
             }
             else
             {
-                msgbox(format("You'll need room in your Bag for the {STR_VAR_2} first."))
+                msgbox(format("Make room in your Key Items pocket, then come back for the {STR_VAR_1}."))
             }
-        }
-        else
-        {
-            msgbox(format("No worries. I'll be here if you change your mind."))
-        }
-    }
-
-    release
-}
-
-script Rogue_RouteEvent_TrainerChallenge
-{
-    lock
-    faceplayer
-
-    special(RogueRouteEvents_GetInteractionData)
-    buffertrainername(STR_VAR_1, VAR_0x8006)
-    bufferitemname(STR_VAR_2, VAR_0x8004)
-
-    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
-    {
-        msgbox(format("That was a fine battle. Good luck farther along the route!"))
-    }
-    elif(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING)
-    {
-        special(RogueRouteEvents_TryClaimTrainerReward)
-        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
-        {
-            playfanfare(MUS_OBTAIN_ITEM)
-            waitfanfare
-            msgbox(format("Here's the {STR_VAR_2} I promised. You earned it!"))
-        }
-        else
-        {
-            msgbox(format("Make room for the {STR_VAR_2}, then come back for your prize."))
-        }
-    }
-    else
-    {
-        msgbox(format("I'm {STR_VAR_1}. This clearing looks perfect for a quick challenge!pWin, and the {STR_VAR_2} is yours. Battle?"), MSGBOX_YESNO)
-        if(var(VAR_RESULT) == YES)
-        {
-            special(RogueRouteEvents_BeginTrainerChallenge)
-            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
-            {
-                trainerbattle(TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, 0, gPlaceholder_Trainer_PostBattleTaunt)
-                special(RogueRouteEvents_FinishTrainerChallenge)
-                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
-                {
-                    playfanfare(MUS_OBTAIN_ITEM)
-                    waitfanfare
-                    msgbox(format("Excellent battle! Take this {STR_VAR_2}."))
-                }
-                else
-                {
-                    msgbox(format("Your Bag is full. Come back after making room for the {STR_VAR_2}."))
-                }
-            }
-        }
-        else
-        {
-            msgbox(format("Another time, then. The challenge stays open while you're on this route."))
         }
     }
 

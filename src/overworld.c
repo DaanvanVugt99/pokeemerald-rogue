@@ -550,14 +550,15 @@ void LoadSaveblockObjEventScripts(void)
     const struct ObjectEventTemplate *mapHeaderObjTemplates = gMapHeader.events->objectEvents;
     struct ObjectEventTemplate *savObjTemplates = gSaveBlock1Ptr->objectEventTemplates;
     u8 objectCount = gSaveBlock1Ptr->objectEventTemplatesCount;
+    u8 mapHeaderObjectCount = gMapHeader.events->objectEventCount;
     s32 i, j, k;
 
-    for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
+    for (i = 0; i < objectCount; i++)
     {
-        for(j = 0; j < OBJECT_EVENT_TEMPLATES_COUNT; j++)
+        for(j = 0; j < mapHeaderObjectCount; j++)
         {
             // Should be faster to just use the same index 95% of the time
-            k = (j + i) % OBJECT_EVENT_TEMPLATES_COUNT;
+            k = (j + i) % mapHeaderObjectCount;
 
             if(savObjTemplates[i].localId == mapHeaderObjTemplates[k].localId)
             {

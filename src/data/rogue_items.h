@@ -10,6 +10,7 @@ extern const u8 gItemDesc_DaycarePhone[];
 extern const u8 gItemDesc_BuildingSupplies[];
 extern const u8 gItemDesc_PokeblockBundle[];
 extern const u8 gItemDesc_BigPokeblockBundle[];
+extern const u8 gItemDesc_TradeCase[];
 extern const u8 gItemDesc_SmallCoinCase[];
 extern const u8 gItemDesc_LargeCoinCase[];
 extern const u8 gItemDesc_GoldenSeed[];
@@ -283,6 +284,24 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .itemId = ITEM_BIG_POKEBLOCK_BUNDLE,
         .price = 0,
         .description = gItemDesc_BigPokeblockBundle,
+        .pocket = POCKET_KEY_ITEMS,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_Parcel,
+        .iconPalette = gItemIconPalette_Parcel,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_TRADE_CASE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Trade Case"),
+#else
+        .name = _("TRADE CASE"),
+#endif
+        .itemId = ITEM_TRADE_CASE,
+        .price = 0,
+        .description = gItemDesc_TradeCase,
         .pocket = POCKET_KEY_ITEMS,
         .registrability = FALSE,
         .iconImage = gItemIcon_Parcel,
