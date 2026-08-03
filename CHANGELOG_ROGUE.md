@@ -27,7 +27,10 @@ Format follows Keep a Changelog loosely:
   without changing save data. The same route director now selects from a
   weighted pool of valid content, including a one-off Hexed Shrine where the
   Dark Deal Devil offers immediate money in exchange for a temporary Curse
-  that lasts until the next Boss falls.
+  that lasts until the next Boss falls, and an Anomalous Fossil quest that
+  carries a discovered fossil to a later restoration lab. The restored
+  Pokémon is always a level-1 Rare Unique, with a choice between preserving
+  its original typing or accepting a seeded adaptive typing.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.

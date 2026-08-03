@@ -9,5 +9,8 @@ void RogueRouteEvents_BeginStolenTradeCaseBattle(void);
 void RogueRouteEvents_FinishStolenTradeCaseBattle(void);
 void RogueRouteEvents_TryClaimStolenTradeCaseReward(void);
 void RogueRouteEvents_TryAcceptHexedShrine(void);
+void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void);
+void RogueRouteEvents_BufferFossilRestorationData(void);
+void RogueRouteEvents_TryRestoreAnomalousFossil(void);
 
 #endif // GUARD_ROGUE_ROUTE_EVENTS_H

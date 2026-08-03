@@ -34,6 +34,10 @@ const ROGUE_ROUTE_EVENT_RESULT_SUCCESS = 1
 const ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM = 2
 const ROGUE_ROUTE_EVENT_RESULT_NO_SPACE = 3
 const ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL = 4
+const ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON = 5
+
+const ROGUE_FOSSIL_RESTORATION_STABLE = 0
+const ROGUE_FOSSIL_RESTORATION_ADAPTIVE = 1
 
 const POKEDEX_SELECTION_CURATED = 0
 const POKEDEX_SELECTION_TRIAL = 1
@@ -117,6 +121,133 @@ script Rogue_RouteEvent_HexedShrine
         else
         {
             msgbox(format("Then keep your peace—for now."))
+        }
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_FossilProp
+{
+    lock
+    faceplayer
+
+    msgbox(format("Specialized tools surround the ancient fossil."))
+
+    release
+}
+
+script Rogue_RouteEvent_AnomalousFossilOffer
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    bufferspeciesname(STR_VAR_1, VAR_0x8004)
+    bufferitemname(STR_VAR_2, VAR_0x8005)
+
+    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+    {
+        msgbox(format("This {STR_VAR_2} contains a {STR_VAR_1}, but its genetic material is unusually intact.\pA colleague farther ahead could restore it as a Rare Unique Pokémon. Will you take it?"), MSGBOX_YESNO)
+        if(var(VAR_RESULT) == YES)
+        {
+            special(RogueRouteEvents_TryAcceptAnomalousFossilQuest)
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+            {
+                playfanfare(MUS_OBTAIN_ITEM)
+                waitfanfare
+                msgbox(format("You received the anomalous {STR_VAR_2}.\pFind the fossil researcher farther along the road."))
+            }
+            else
+            {
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+                {
+                    msgbox(format("Your Items pocket is full. Make some room first."))
+                }
+                else
+                {
+                    msgbox(format("The fossil cannot be moved safely right now."))
+                }
+            }
+        }
+        else
+        {
+            msgbox(format("I'll keep the fossil stable if you reconsider."))
+        }
+    }
+    else
+    {
+        msgbox(format("My colleague can restore the {STR_VAR_2} somewhere farther ahead."))
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_AnomalousFossilRestoration
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        bufferspeciesname(STR_VAR_1, VAR_0x8004)
+        msgbox(format("That {STR_VAR_1} is a remarkable restoration. Take good care of it."))
+    }
+    else
+    {
+        special(RogueRouteEvents_BufferFossilRestorationData)
+        msgbox(format("I can restore this {STR_VAR_3} in two ways.\pStable restoration preserves its {STR_VAR_1} typing. Adaptive restoration reconstructs it as {STR_VAR_2}.\pEither result will be a Rare Unique Pokémon."))
+
+        begindynamicmultichoice(16)
+        appenddynamicmultichoice("Stable", ROGUE_FOSSIL_RESTORATION_STABLE)
+        appenddynamicmultichoice("Adaptive", ROGUE_FOSSIL_RESTORATION_ADAPTIVE)
+        appenddynamicmultichoice("Not yet", MULTI_B_PRESSED)
+        enddynamicmultichoice(1, 0, 3, TRUE)
+
+        if(var(VAR_RESULT) != MULTI_B_PRESSED)
+        {
+            copyvar(VAR_0x8004, VAR_RESULT)
+            if(var(VAR_0x8004) == ROGUE_FOSSIL_RESTORATION_STABLE)
+            {
+                msgbox(format("Use the stable restoration?"), MSGBOX_YESNO)
+            }
+            else
+            {
+                msgbox(format("Use the adaptive restoration?"), MSGBOX_YESNO)
+            }
+
+            if(var(VAR_RESULT) == YES)
+            {
+                special(RogueRouteEvents_TryRestoreAnomalousFossil)
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+                {
+                    call(Rogue_Common_DisplayPopups)
+                    msgbox(format("Restoration complete! The Rare Unique Pokémon was revived at Lv. 1."))
+                }
+                else
+                {
+                    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM)
+                    {
+                        msgbox(format("The fossil is missing. Bring it back and I can finish the restoration."))
+                    }
+                    else
+                    {
+                        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON)
+                        {
+                            msgbox(format("There is no room in your party or PC. The fossil is unharmed."))
+                        }
+                        else
+                        {
+                            msgbox(format("The restoration cannot be completed right now."))
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            msgbox(format("The fossil will remain stable until you decide."))
         }
     }
 

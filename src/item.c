@@ -22,6 +22,7 @@
 #include "party_menu.h"
 
 #include "rogue.h"
+#include "rogue_adventure_quests.h"
 #include "rogue_controller.h"
 #include "rogue_charms.h"
 #include "rogue_baked.h"
@@ -1412,6 +1413,10 @@ const u8 *ItemId_GetDescription(u16 itemId)
 u8 ItemId_GetImportance(u16 itemId)
 {
     struct Item item;
+
+    if(RogueAdventureQuests_IsItemProtected(itemId))
+        return TRUE;
+
     Rogue_ModifyItem(itemId, &item);
     return item.importance;
 }

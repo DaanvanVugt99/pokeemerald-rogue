@@ -194,6 +194,9 @@ gSpecials::
     def_special RogueRouteEvents_FinishStolenTradeCaseBattle
     def_special RogueRouteEvents_TryClaimStolenTradeCaseReward
     def_special RogueRouteEvents_TryAcceptHexedShrine
+    def_special RogueRouteEvents_TryAcceptAnomalousFossilQuest
+    def_special RogueRouteEvents_BufferFossilRestorationData
+    def_special RogueRouteEvents_TryRestoreAnomalousFossil
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon

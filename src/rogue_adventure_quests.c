@@ -13,6 +13,7 @@
 #include "rogue.h"
 #include "rogue_adventure_quests.h"
 #include "rogue_controller.h"
+#include "rogue_pokedex.h"
 #include "rogue_trainers.h"
 
 struct RogueAdventureQuestNodeDefinition
@@ -39,8 +40,44 @@ static const u8 sText_FindCamp[] = _("Find the thieves' camp and recover the Tra
 static const u8 sText_CampReady[] = _("The thieves' camp is on this route.\nReward: Large Bundle + ¥5,000");
 static const u8 sText_ReturnCase[] = _("Return the Trade Case to the caravan merchant.\nReward: Large Bundle + ¥5,000");
 static const u8 sText_MerchantReady[] = _("The caravan merchant is on this route.\nReward: Large Bundle + ¥5,000");
+static const u8 sText_AnomalousFossilTitle[] = _("Anomalous Fossil");
+static const u8 sText_FindFossilResearcher[] = _("Find a fossil researcher who can restore {STR_VAR_1}.\nReward: Rare Unique {STR_VAR_2}");
+static const u8 sText_FossilResearcherReady[] = _("A fossil researcher is on this route.\nReward: Rare Unique {STR_VAR_2}");
 static const u8 sText_UnknownQuestTitle[] = _("Adventure Quest");
 static const u8 sText_UnknownQuestDescription[] = _("Complete this quest before the adventure ends.");
+
+u16 RogueAdventureQuests_GetFossilSpecies(u16 fossilItem)
+{
+    switch(fossilItem)
+    {
+    case ITEM_HELIX_FOSSIL:
+        return SPECIES_OMANYTE;
+    case ITEM_DOME_FOSSIL:
+        return SPECIES_KABUTO;
+    case ITEM_OLD_AMBER:
+        return SPECIES_AERODACTYL;
+    case ITEM_ROOT_FOSSIL:
+        return SPECIES_LILEEP;
+    case ITEM_CLAW_FOSSIL:
+        return SPECIES_ANORITH;
+#ifdef ROGUE_EXPANSION
+    case ITEM_ARMOR_FOSSIL:
+        return SPECIES_SHIELDON;
+    case ITEM_SKULL_FOSSIL:
+        return SPECIES_CRANIDOS;
+    case ITEM_COVER_FOSSIL:
+        return SPECIES_TIRTOUGA;
+    case ITEM_PLUME_FOSSIL:
+        return SPECIES_ARCHEN;
+    case ITEM_JAW_FOSSIL:
+        return SPECIES_TYRUNT;
+    case ITEM_SAIL_FOSSIL:
+        return SPECIES_AMAURA;
+#endif
+    default:
+        return SPECIES_NONE;
+    }
+}
 
 static bool8 BuildStolenTradeCaseScene(const struct RogueAdventureQuest *quest, struct RogueRouteSceneRequest *request)
 {
@@ -62,6 +99,22 @@ static bool8 BuildStolenTradeCaseScene(const struct RogueAdventureQuest *quest, 
     return TRUE;
 }
 
+static bool8 BuildAnomalousFossilScene(const struct RogueAdventureQuest *quest, struct RogueRouteSceneRequest *request)
+{
+    u16 species = RogueAdventureQuests_GetFossilSpecies(quest->payload[0]);
+
+    if(species == SPECIES_NONE)
+        return FALSE;
+
+    request->requestedItem = quest->payload[0];
+    request->rewardItem = species;
+    request->rewardAmount = quest->payload[1];
+    request->primaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_2;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_2;
+    request->trainerNum = TRAINER_NONE;
+    return TRUE;
+}
+
 static const struct RogueAdventureQuestNodeDefinition sStolenTradeCaseNodes[] =
 {
     {
@@ -80,6 +133,17 @@ static const struct RogueAdventureQuestNodeDefinition sStolenTradeCaseNodes[] =
     },
 };
 
+static const struct RogueAdventureQuestNodeDefinition sAnomalousFossilNodes[] =
+{
+    {
+        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION,
+        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
+        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
+        .routeDelay = 1,
+    },
+};
+
 static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT] =
 {
     [ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE] =
@@ -89,6 +153,15 @@ static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENT
         .buildSceneRequest = BuildStolenTradeCaseScene,
         .cleanupItem = ITEM_TRADE_CASE,
         .nodeCount = ARRAY_COUNT(sStolenTradeCaseNodes),
+        .initialNodeId = 0,
+    },
+    [ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL] =
+    {
+        .title = sText_AnomalousFossilTitle,
+        .nodes = sAnomalousFossilNodes,
+        .buildSceneRequest = BuildAnomalousFossilScene,
+        .cleanupItem = ITEM_NONE,
+        .nodeCount = ARRAY_COUNT(sAnomalousFossilNodes),
         .initialNodeId = 0,
     },
 };
@@ -131,17 +204,22 @@ static void EnterNode(struct RogueAdventureQuest *quest, u8 nodeId)
     quest->sceneRoomId = ROGUE_ADVENTURE_QUEST_INVALID_ROOM;
 }
 
+static void CleanupQuest(const struct RogueAdventureQuest *quest)
+{
+    const struct RogueAdventureQuestDefinition *definition = GetDefinition(quest->definitionId);
+
+    if(definition != NULL && definition->cleanupItem != ITEM_NONE)
+        RemoveBagItem(definition->cleanupItem, 1);
+    else if(quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL)
+        RemoveBagItem(quest->payload[0], 1);
+}
+
 void RogueAdventureQuests_Clear(void)
 {
     u8 i;
 
     for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
-    {
-        const struct RogueAdventureQuestDefinition *definition = GetDefinition(gRogueRun.adventureQuests[i].definitionId);
-
-        if(definition != NULL && definition->cleanupItem != ITEM_NONE)
-            RemoveBagItem(definition->cleanupItem, 1);
-    }
+        CleanupQuest(&gRogueRun.adventureQuests[i]);
 
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
@@ -202,6 +280,22 @@ bool8 RogueAdventureQuests_IsDefinitionSourceRoom(u8 definitionId, u8 roomId)
         if(quest->definitionId == definitionId
             && quest->routesUntilScene != 0
             && quest->sceneRoomId == roomId)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 RogueAdventureQuests_IsItemProtected(u16 itemId)
+{
+    u8 i;
+
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        const struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[i];
+
+        if(quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL
+            && quest->payload[0] == itemId)
             return TRUE;
     }
 
@@ -427,6 +521,11 @@ void RogueAdventureQuests_BufferDescription(u8 questId, u8 *dest)
             StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_CampReady : sText_FindCamp);
         else
             StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_MerchantReady : sText_ReturnCase);
+        break;
+    case ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL:
+        CopyItemName(quest->payload[0], gStringVar1);
+        StringCopy(gStringVar2, RoguePokedex_GetSpeciesName(RogueAdventureQuests_GetFossilSpecies(quest->payload[0])));
+        StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_FossilResearcherReady : sText_FindFossilResearcher);
         break;
     default:
         StringCopy(dest, sText_UnknownQuestDescription);

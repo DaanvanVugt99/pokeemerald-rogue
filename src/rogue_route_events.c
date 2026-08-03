@@ -5,6 +5,7 @@
 #include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
+#include "constants/pokemon.h"
 #include "constants/rogue_route_events.h"
 #include "constants/rogue_route_scenes.h"
 #include "constants/trainer_types.h"
@@ -12,17 +13,25 @@
 
 #include "event_data.h"
 #include "event_object_movement.h"
+#include "battle_main.h"
+#include "characters.h"
 #include "fieldmap.h"
 #include "item.h"
 #include "money.h"
 #include "overworld.h"
+#include "pokemon.h"
+#include "pokedex.h"
 #include "random.h"
+#include "strings.h"
+#include "string_util.h"
 
 #include "rogue.h"
 #include "rogue_adventure_quests.h"
 #include "rogue_adventurepaths.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
+#include "rogue_gifts.h"
+#include "rogue_pokedex.h"
 #include "rogue_popup.h"
 #include "rogue_route_events.h"
 #include "rogue_route_scenes.h"
@@ -35,6 +44,9 @@ extern const u8 Rogue_RouteEvent_StolenTradeCasePayoff[];
 extern const u8 Rogue_RouteEvent_Prop[];
 extern const u8 Rogue_RouteEvent_HexedShrine[];
 extern const u8 Rogue_RouteEvent_HexedShrineProp[];
+extern const u8 Rogue_RouteEvent_AnomalousFossilOffer[];
+extern const u8 Rogue_RouteEvent_AnomalousFossilRestoration[];
+extern const u8 Rogue_RouteEvent_FossilProp[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -184,6 +196,52 @@ static bool8 CanShowHexedShrine(u8 roomId)
         && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED;
 }
 
+static const u16 sAnomalousFossilItems[] =
+{
+    ITEM_HELIX_FOSSIL,
+    ITEM_DOME_FOSSIL,
+    ITEM_OLD_AMBER,
+    ITEM_ROOT_FOSSIL,
+    ITEM_CLAW_FOSSIL,
+#ifdef ROGUE_EXPANSION
+    ITEM_ARMOR_FOSSIL,
+    ITEM_SKULL_FOSSIL,
+    ITEM_COVER_FOSSIL,
+    ITEM_PLUME_FOSSIL,
+    ITEM_JAW_FOSSIL,
+    ITEM_SAIL_FOSSIL,
+#endif
+};
+
+static u16 CountEligibleAnomalousFossils(void)
+{
+    u16 count = 0;
+    u16 i;
+
+    for(i = 0; i < ARRAY_COUNT(sAnomalousFossilItems); ++i)
+    {
+        u16 species = RogueAdventureQuests_GetFossilSpecies(sAnomalousFossilItems[i]);
+
+        if(species != SPECIES_NONE && RoguePokedex_IsSpeciesEnabled(species))
+            ++count;
+    }
+
+    return count;
+}
+
+static bool8 CanShowAnomalousFossilOffer(u8 roomId)
+{
+    if(RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL))
+    {
+        return RogueAdventureQuests_IsDefinitionSourceRoom(
+            ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL,
+            roomId);
+    }
+
+    return Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY
+        && CountEligibleAnomalousFossils() != 0;
+}
+
 static void BuildStolenTradeCaseOffer(struct RogueRouteSceneRequest *request)
 {
     request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER;
@@ -207,6 +265,36 @@ static void BuildHexedShrine(struct RogueRouteSceneRequest *request)
         ROGUE_HEXED_SHRINE_REWARD_BASE + ROGUE_HEXED_SHRINE_REWARD_PER_DIFFICULTY * Rogue_GetCurrentDifficulty());
 }
 
+static void BuildAnomalousFossilOffer(struct RogueRouteSceneRequest *request)
+{
+    u16 eligibleCount = CountEligibleAnomalousFossils();
+    u16 selected = eligibleCount == 0 ? 0 : RogueRandom() % eligibleCount;
+    u16 i;
+
+    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER;
+    request->source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR;
+    request->primaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_1;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_2;
+    request->rewardAmount = RogueRandom();
+
+    for(i = 0; i < ARRAY_COUNT(sAnomalousFossilItems); ++i)
+    {
+        u16 item = sAnomalousFossilItems[i];
+        u16 species = RogueAdventureQuests_GetFossilSpecies(item);
+
+        if(species != SPECIES_NONE
+            && RoguePokedex_IsSpeciesEnabled(species)
+            && selected-- == 0)
+        {
+            request->requestedItem = item;
+            request->rewardItem = species;
+            return;
+        }
+    }
+
+    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_NONE;
+}
+
 struct RogueRouteFallbackDefinition
 {
     u8 weight;
@@ -218,6 +306,7 @@ static const struct RogueRouteFallbackDefinition sRouteFallbacks[] =
 {
     {50, CanShowStolenTradeCaseOffer, BuildStolenTradeCaseOffer},
     {50, CanShowHexedShrine, BuildHexedShrine},
+    {50, CanShowAnomalousFossilOffer, BuildAnomalousFossilOffer},
 };
 
 static void SelectFallbackScene(u8 roomId, struct RogueRouteSceneRequest *selected)
@@ -416,6 +505,10 @@ static const u8 *GetSceneNpcScript(u8 recipeId)
         return Rogue_RouteEvent_StolenTradeCasePayoff;
     case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
         return Rogue_RouteEvent_HexedShrine;
+    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
+        return Rogue_RouteEvent_AnomalousFossilOffer;
+    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
+        return Rogue_RouteEvent_AnomalousFossilRestoration;
     default:
         return NULL;
     }
@@ -539,6 +632,16 @@ void RogueRouteScenes_RestoreObjectEvents(
         RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp, 0);
         RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp, 0);
         break;
+    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
+        RestoreSceneProp(objectEvents, objectEventCount, anchor, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0);
+        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0);
+        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0);
+        break;
+    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
+        RestoreSceneProp(objectEvents, objectEventCount, anchor, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp, 0);
+        RestoreSceneProp(objectEvents, objectEventCount, anchor, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp, 0);
+        RestoreSceneProp(objectEvents, objectEventCount, anchor, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0);
+        break;
     }
 }
 
@@ -570,7 +673,9 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
         return;
 
     requiredCount = scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
-        || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? 4 : 3;
+        || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
+        || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
+        || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? 4 : 3;
     if(originalCount - ROGUE_ROUTE_EVENT_ANCHOR_COUNT + requiredCount > objectEventCapacity)
         return;
 
@@ -618,6 +723,26 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
         localId = FindFreeLocalId(objectEvents, *objectEventCount);
         AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp, 0, 0);
         break;
+
+    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_AnomalousFossilOffer, 0, 0);
+        localId = FindFreeLocalId(objectEvents, *objectEventCount);
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0, 0);
+        localId = FindFreeLocalId(objectEvents, *objectEventCount);
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0, 0);
+        localId = FindFreeLocalId(objectEvents, *objectEventCount);
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp, 0, 0);
+        break;
+
+    case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], anchors[scene->anchor].localId, 0, 0, scene->primaryGraphicsId, Rogue_RouteEvent_AnomalousFossilRestoration, 0, 0);
+        localId = FindFreeLocalId(objectEvents, *objectEventCount);
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp, 0, 0);
+        localId = FindFreeLocalId(objectEvents, *objectEventCount);
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp, 0, 0);
+        localId = FindFreeLocalId(objectEvents, *objectEventCount);
+        AppendSceneObject(objectEvents, objectEventCount, &anchors[scene->anchor], localId, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp, 0, 0);
+        break;
     }
 }
 
@@ -664,6 +789,9 @@ void RogueRouteScenes_ApplyMetatiles(void)
         if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP)
             ApplyAccentMetatile(anchors[scene->anchor], 0, 1);
         else if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE)
+            ApplyAccentMetatile(anchors[scene->anchor], 0, -1);
+        else if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
+            || scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION)
             ApplyAccentMetatile(anchors[scene->anchor], 0, -1);
     }
 }
@@ -834,6 +962,151 @@ void RogueRouteEvents_TryAcceptHexedShrine(void)
 
     AddMoney(&gSaveBlock1Ptr->money, scene->rewardAmount);
     Rogue_PushPopup_AddMoney(scene->rewardAmount);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void)
+{
+    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct RogueAdventureQuestCreateParams params = {0};
+    u8 questId;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(scene == NULL
+        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
+        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        || VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+        || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL)
+        || RogueAdventureQuests_GetFossilSpecies(scene->requestedItem) != scene->rewardItem)
+        return;
+
+    if(!CheckBagHasSpace(scene->requestedItem, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+
+    if(!AddBagItem(scene->requestedItem, 1))
+        return;
+
+    params.payload[0] = scene->requestedItem;
+    params.payload[1] = scene->rewardAmount;
+    questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL, &params);
+    if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
+    {
+        RemoveBagItem(scene->requestedItem, 1);
+        return;
+    }
+
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+static u32 GenerateFossilCustomMonId(const struct RogueRouteSceneRequest *scene, u8 restoration)
+{
+    RAND_TYPE originalRng = gRngValue;
+    u32 customMonId;
+
+    SeedRng(scene->rewardAmount ^ (restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0x51A7 : 0xB4E3));
+    customMonId = RogueGift_CreateDynamicMonIdRawWithTypingChance(
+        UNIQUE_RARITY_RARE,
+        scene->rewardItem,
+        restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0 : 100);
+    gRngValue = originalRng;
+    return customMonId;
+}
+
+static void BufferFossilCustomTyping(u8 *dest, u16 species, u32 customMonId)
+{
+    static const u8 sText_TypeSeparator[] = _("/");
+    u8 type1 = RogueGift_GetCustomMonType(customMonId, 0);
+    u8 type2 = RogueGift_GetCustomMonType(customMonId, 1);
+
+    if(!IS_STANDARD_TYPE(type1))
+        type1 = RoguePokedex_GetSpeciesType(species, 0);
+    if(!IS_STANDARD_TYPE(type2))
+        type2 = RoguePokedex_GetSpeciesType(species, 1);
+
+    StringCopy(dest, gTypeNames[type1]);
+    if(type2 != type1)
+    {
+        StringAppend(dest, sText_TypeSeparator);
+        StringAppend(dest, gTypeNames[type2]);
+    }
+}
+
+void RogueRouteEvents_BufferFossilRestorationData(void)
+{
+    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+
+    gStringVar1[0] = EOS;
+    gStringVar2[0] = EOS;
+    gStringVar3[0] = EOS;
+    if(scene == NULL
+        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
+        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+        return;
+
+    BufferFossilCustomTyping(
+        gStringVar1,
+        scene->rewardItem,
+        GenerateFossilCustomMonId(scene, ROGUE_FOSSIL_RESTORATION_STABLE));
+    BufferFossilCustomTyping(
+        gStringVar2,
+        scene->rewardItem,
+        GenerateFossilCustomMonId(scene, ROGUE_FOSSIL_RESTORATION_ADAPTIVE));
+    StringCopy(gStringVar3, RoguePokedex_GetSpeciesName(scene->rewardItem));
+}
+
+void RogueRouteEvents_TryRestoreAnomalousFossil(void)
+{
+    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+    struct Pokemon mon;
+    RAND_TYPE originalRng;
+    u32 customMonId;
+    u8 giveResult;
+    u8 restoration = gSpecialVar_0x8004;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(scene == NULL
+        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
+        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        || VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
+        || restoration > ROGUE_FOSSIL_RESTORATION_ADAPTIVE)
+        return;
+
+    if(!CheckBagHasItem(scene->requestedItem, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+
+    originalRng = gRngValue;
+    SeedRng(scene->rewardAmount ^ (restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0x51A7 : 0xB4E3));
+    customMonId = RogueGift_CreateDynamicMonIdRawWithTypingChance(
+        UNIQUE_RARITY_RARE,
+        scene->rewardItem,
+        restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0 : 100);
+    RogueGift_CreateMon(customMonId, &mon, scene->rewardItem, 1, USE_RANDOM_IVS);
+    gRngValue = originalRng;
+
+    if(!RemoveBagItem(scene->requestedItem, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+
+    giveResult = GiveTradedMonToPlayer(&mon);
+    if(giveResult == MON_CANT_GIVE)
+    {
+        AddBagItem(scene->requestedItem, 1);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+        return;
+    }
+
+    GetSetPokedexSpeciesFlag(scene->rewardItem, FLAG_SET_CAUGHT);
+    Rogue_PushPopup_AddPokemon(scene->rewardItem, TRUE, FALSE);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
