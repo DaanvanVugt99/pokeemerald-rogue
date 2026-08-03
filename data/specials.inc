@@ -197,6 +197,10 @@ gSpecials::
     def_special RogueRouteEvents_TryAcceptAnomalousFossilQuest
     def_special RogueRouteEvents_BufferFossilRestorationData
     def_special RogueRouteEvents_TryRestoreAnomalousFossil
+    def_special RogueRouteEvents_TryAcceptForbiddenStoneQuest
+    def_special RogueRouteEvents_CollectForbiddenStoneSoul
+    def_special RogueRouteEvents_PrepareForbiddenStoneBattle
+    def_special RogueRouteEvents_FinishForbiddenStoneBattle
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon

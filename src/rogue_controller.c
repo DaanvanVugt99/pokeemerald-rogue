@@ -5974,6 +5974,13 @@ bool8 Rogue_IsShrineChallengeActive(void)
     return gRogueLocal.isShrineChallengeActive;
 }
 
+void Rogue_ActivateUncatchableWildBattle(void)
+{
+    // Route-event bosses share the shrine guardian's transient battle rules:
+    // smart wild AI, no capture, and no Alpha encounter treatment.
+    gRogueLocal.isShrineChallengeActive = TRUE;
+}
+
 bool8 Rogue_HasChallengedShrine(void)
 {
     return gRogueRun.hasChallengedShrine;

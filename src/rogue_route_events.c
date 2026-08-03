@@ -47,6 +47,10 @@ extern const u8 Rogue_RouteEvent_HexedShrineProp[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilOffer[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilRestoration[];
 extern const u8 Rogue_RouteEvent_FossilProp[];
+extern const u8 Rogue_RouteEvent_ForbiddenStoneOffer[];
+extern const u8 Rogue_RouteEvent_ForbiddenStoneSoul[];
+extern const u8 Rogue_RouteEvent_ForbiddenStonePayoff[];
+extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -64,6 +68,7 @@ extern const struct Tileset gTileset_GeneralHub;
 #define ROUTE_SCENE_OBJECT_SLOT_MASK 0x03
 #define ROUTE_SCENE_OBJECT_ROLE_SHIFT 2
 #define ROUTE_SCENE_OBJECT_ROLE_MASK 0x03
+#define ROUTE_SCENE_HEXED_SHRINE_ACCEPTED (1 << 15)
 #define ROUTE_SCENE_OBJECT_PROP_SHIFT 4
 #define ROUTE_SCENE_OBJECT_PROP_MASK 0x0F
 
@@ -293,7 +298,7 @@ static bool8 CanShowHexedShrine(u8 roomId)
     // Rebuild the accepted scene on a same-route quickload. Once the route is
     // left, the active temporary Curse suppresses future shrine offers.
     return gRogueRun.routeSceneRoomId == roomId
-        && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != 0;
+        && (VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_HEXED_SHRINE_ACCEPTED) != 0;
 }
 
 static const u16 sAnomalousFossilItems[] =
@@ -340,6 +345,18 @@ static bool8 CanShowAnomalousFossilOffer(u8 roomId)
 
     return Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY
         && CountEligibleAnomalousFossils() != 0;
+}
+
+static bool8 CanShowForbiddenStoneOffer(u8 roomId)
+{
+    if(RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE))
+    {
+        return RogueAdventureQuests_IsDefinitionSourceRoom(
+            ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+            roomId);
+    }
+
+    return RoguePokedex_IsSpeciesEnabled(SPECIES_SPIRITOMB);
 }
 
 static void BuildStolenTradeCaseOffer(struct RogueRouteSceneRequest *request)
@@ -393,6 +410,17 @@ static void BuildAnomalousFossilOffer(struct RogueRouteSceneRequest *request)
     }
 
     request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_NONE;
+}
+
+static void BuildForbiddenStoneOffer(struct RogueRouteSceneRequest *request)
+{
+    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER;
+    request->source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR;
+    request->primaryGraphicsId = OBJ_EVENT_GFX_MISC_CHANNELER;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_MISC_CHANNELER;
+    request->requestedItem = ITEM_ODD_KEYSTONE;
+    request->rewardItem = ITEM_ABILITY_PATCH;
+    request->rewardAmount = RogueRandom();
 }
 
 struct RogueRouteFallbackDefinition
@@ -458,6 +486,28 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
         .objectCounts = {4},
     },
+    [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER] =
+    {
+        .build = BuildForbiddenStoneOffer,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_MEDIUM},
+        .objectCounts = {4},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS] =
+    {
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
+        .lotCount = ROGUE_FORBIDDEN_STONE_SOUL_COUNT,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_SMALL, ROGUE_ROUTE_SCENE_LOT_SMALL, ROGUE_ROUTE_SCENE_LOT_SMALL},
+        .objectCounts = {1, 1, 1},
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF] =
+    {
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
+        .lotCount = 1,
+        .lotSizes = {ROGUE_ROUTE_SCENE_LOT_LARGE},
+        .objectCounts = {4},
+    },
 };
 
 static const struct RogueRouteFallbackDefinition sRouteFallbacks[] =
@@ -465,6 +515,7 @@ static const struct RogueRouteFallbackDefinition sRouteFallbacks[] =
     {ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, 50, CanShowStolenTradeCaseOffer},
     {ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, 50, CanShowHexedShrine},
     {ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, 50, CanShowAnomalousFossilOffer},
+    {ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER, 50, CanShowForbiddenStoneOffer},
 };
 
 static const struct RogueRouteRecipeDefinition *GetRecipeDefinition(u8 recipeId)
@@ -845,12 +896,21 @@ void RogueRouteScenes_OnEnterRoute(void)
         struct RogueRouteSceneRequest scene;
 
         if(RogueRouteScenes_GetPlacementRequest(i, &scene)
-            && scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
             && scene.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
         {
             const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(scene.ownerQuestId);
 
-            if(quest != NULL
+            if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
+                && quest != NULL
+                && quest->progress != 0
+                && RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+                RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+            else if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS
+                && quest != NULL
+                && (quest->progress & ((1 << ROGUE_FORBIDDEN_STONE_SOUL_COUNT) - 1)) == (1 << ROGUE_FORBIDDEN_STONE_SOUL_COUNT) - 1)
+                RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+            else if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF
+                && quest != NULL
                 && quest->progress != 0
                 && RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
                 RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
@@ -970,9 +1030,27 @@ static const u8 *GetSceneNpcScript(u8 recipeId)
         return Rogue_RouteEvent_AnomalousFossilOffer;
     case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
         return Rogue_RouteEvent_AnomalousFossilRestoration;
+    case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER:
+        return Rogue_RouteEvent_ForbiddenStoneOffer;
+    case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS:
+        return Rogue_RouteEvent_ForbiddenStoneSoul;
+    case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
+        return Rogue_RouteEvent_ForbiddenStonePayoff;
     default:
         return NULL;
     }
+}
+
+static bool8 IsForbiddenStoneSoulCollected(const struct RogueRouteSceneRequest *scene)
+{
+    const struct RogueAdventureQuest *quest;
+
+    if(scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS
+        || scene->lotRole >= ROGUE_FORBIDDEN_STONE_SOUL_COUNT)
+        return FALSE;
+
+    quest = RogueAdventureQuests_Get(scene->ownerQuestId);
+    return quest != NULL && (quest->progress & (1 << scene->lotRole)) != 0;
 }
 
 static bool8 RestoreSceneObject(
@@ -1058,6 +1136,7 @@ void RogueRouteScenes_RestoreObjectEvents(
         const struct ObjectEventTemplate *lot = NULL;
         const u8 *npcScript;
         u16 mainData;
+        u16 mainFlag = 0;
         u8 i;
 
         if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
@@ -1078,8 +1157,13 @@ void RogueRouteScenes_RestoreObjectEvents(
         }
 
         mainData = PackSceneObjectData(scene.sceneSlot, scene.lotRole, 0);
+        if(IsForbiddenStoneSoulCollected(&scene))
+        {
+            FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+            mainFlag = FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN;
+        }
         if(lot == NULL
-            || !RestoreSceneObject(objectEvents, objectEventCount, lot, lot->localId, 0, 0, scene.primaryGraphicsId, npcScript, mainData, 0))
+            || !RestoreSceneObject(objectEvents, objectEventCount, lot, lot->localId, 0, 0, scene.primaryGraphicsId, npcScript, mainData, mainFlag))
             continue;
 
 #define RESTORE_PROP_FLAG(propId, x, y, gfx, script, flag) \
@@ -1129,6 +1213,12 @@ void RogueRouteScenes_RestoreObjectEvents(
             RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp);
             RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
             break;
+        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER:
+        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
+            RESTORE_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_ForbiddenStoneProp);
+            RESTORE_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
+            RESTORE_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
+            break;
         }
 
 #undef RESTORE_PROP
@@ -1166,7 +1256,8 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
         struct RogueRouteSceneRequest scene;
         const struct RogueRouteRecipeDefinition *definition;
 
-        if(RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
+        if(RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
+            && !IsForbiddenStoneSoulCollected(&scene))
         {
             definition = GetRecipeDefinition(scene.recipeId);
             if(definition != NULL)
@@ -1187,7 +1278,8 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
 
         if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
             || scene.lotId >= ARRAY_COUNT(lots)
-            || !foundLots[scene.lotId])
+            || !foundLots[scene.lotId]
+            || IsForbiddenStoneSoulCollected(&scene))
             continue;
 
         lot = &lots[scene.lotId];
@@ -1236,6 +1328,12 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
             APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp);
             APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp);
             APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp);
+            break;
+        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER:
+        case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
+            APPEND_PROP(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_ForbiddenStoneProp);
+            APPEND_PROP(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
+            APPEND_PROP(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp);
             break;
         }
 
@@ -1291,7 +1389,9 @@ void RogueRouteScenes_ApplyMetatiles(void)
             ApplyAccentMetatile(lot, 0, 1);
         else if(scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
             || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
-            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION)
+            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
+            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER
+            || scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF)
             ApplyAccentMetatile(lot, 0, -1);
     }
 }
@@ -1306,6 +1406,7 @@ void RogueRouteEvents_GetInteractionData(void)
     gSpecialVar_0x8006 = TRAINER_NONE;
     gSpecialVar_0x8007 = 0;
     gSpecialVar_0x8008 = ROGUE_ROUTE_EVENT_STATE_NOT_STARTED;
+    gSpecialVar_0x8009 = 0;
 
     if(!GetCurrentInteractionRequest(&scene))
         return;
@@ -1316,6 +1417,7 @@ void RogueRouteEvents_GetInteractionData(void)
     gSpecialVar_0x8006 = scene.trainerNum;
     gSpecialVar_0x8007 = scene.rewardAmount;
     gSpecialVar_0x8008 = gSpecialVar_Result;
+    gSpecialVar_0x8009 = scene.lotRole;
 }
 
 void RogueRouteEvents_TryAcceptStolenTradeCaseQuest(void)
@@ -1469,6 +1571,9 @@ void RogueRouteEvents_TryAcceptHexedShrine(void)
     AddMoney(&gSaveBlock1Ptr->money, scene.rewardAmount);
     Rogue_PushPopup_AddMoney(scene.rewardAmount);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    VarSet(
+        VAR_ROGUE_ROUTE_EVENT_STATE,
+        VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) | ROUTE_SCENE_HEXED_SHRINE_ACCEPTED);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
@@ -1613,6 +1718,204 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
 
     GetSetPokedexSpeciesFlag(scene.rewardItem, FLAG_SET_CAUGHT);
     Rogue_PushPopup_AddPokemon(scene.rewardItem, TRUE, FALSE);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+static u8 CountForbiddenStoneSouls(u8 progress)
+{
+    u8 count = 0;
+    u8 i;
+
+    for(i = 0; i < ROGUE_FORBIDDEN_STONE_SOUL_COUNT; ++i)
+    {
+        if((progress & (1 << i)) != 0)
+            ++count;
+    }
+
+    return count;
+}
+
+void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct RogueAdventureQuestCreateParams params = {0};
+    u8 questId;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+        || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE))
+        return;
+
+    if(!CheckBagHasSpace(ITEM_ODD_KEYSTONE, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+
+    if(!AddBagItem(ITEM_ODD_KEYSTONE, 1))
+        return;
+
+    params.payload[0] = scene.rewardAmount;
+    params.target = ROGUE_FORBIDDEN_STONE_SOUL_COUNT;
+    questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE, &params);
+    if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
+    {
+        RemoveBagItem(ITEM_ODD_KEYSTONE, 1);
+        return;
+    }
+
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_CollectForbiddenStoneSoul(void)
+{
+    struct RogueRouteSceneRequest scene;
+    const struct RogueAdventureQuest *quest;
+    u8 progress;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    gSpecialVar_0x8007 = 0;
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        || scene.lotRole >= ROGUE_FORBIDDEN_STONE_SOUL_COUNT
+        || !CheckBagHasItem(ITEM_ODD_KEYSTONE, 1))
+        return;
+
+    quest = RogueAdventureQuests_Get(scene.ownerQuestId);
+    if(quest == NULL
+        || quest->definitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE
+        || quest->nodeId != 0)
+        return;
+
+    progress = quest->progress | (1 << scene.lotRole);
+    if(!RogueAdventureQuests_SetProgress(scene.ownerQuestId, progress))
+        return;
+
+    gSpecialVar_0x8007 = CountForbiddenStoneSouls(progress);
+    if(gSpecialVar_0x8007 == ROGUE_FORBIDDEN_STONE_SOUL_COUNT)
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    else
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_PrepareForbiddenStoneBattle(void)
+{
+    struct RogueRouteSceneRequest scene;
+    const struct RogueAdventureQuest *quest;
+    struct RoguePokemonCompetitiveSetRules rules = {0};
+    RAND_TYPE originalRng;
+    u16 presetCount;
+    u32 temp;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
+        || !CheckBagHasItem(ITEM_ODD_KEYSTONE, 1))
+        return;
+
+    quest = RogueAdventureQuests_Get(scene.ownerQuestId);
+    if(quest == NULL
+        || quest->definitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE
+        || quest->nodeId != 1
+        || quest->progress != 0)
+        return;
+
+    originalRng = gRngValue;
+    SeedRng(scene.trainerNum ^ 0x108);
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], SPECIES_SPIRITOMB, Rogue_CalculateBossMonLvl(), USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    presetCount = gRoguePokemonProfiles[SPECIES_SPIRITOMB].competitiveSetCount;
+    if(presetCount != 0)
+    {
+        const struct RoguePokemonCompetitiveSet *preset = &gRoguePokemonProfiles[SPECIES_SPIRITOMB].competitiveSets[Random() % presetCount];
+
+        Rogue_ApplyMonCompetitiveSet(&gEnemyParty[0], Rogue_CalculateBossMonLvl(), preset, &rules);
+    }
+    temp = FALSE;
+    SetMonData(&gEnemyParty[0], MON_DATA_IS_SHINY, &temp);
+    CalculateMonStats(&gEnemyParty[0]);
+    temp = GetMonData(&gEnemyParty[0], MON_DATA_MAX_HP);
+    SetMonData(&gEnemyParty[0], MON_DATA_HP, &temp);
+    gRngValue = originalRng;
+
+    Rogue_ActivateUncatchableWildBattle();
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_FinishForbiddenStoneBattle(void)
+{
+    struct RogueRouteSceneRequest scene;
+    const struct RogueAdventureQuest *quest;
+    u32 money;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        return;
+
+    quest = RogueAdventureQuests_Get(scene.ownerQuestId);
+    if(quest == NULL
+        || quest->definitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE
+        || quest->nodeId != 1)
+        return;
+
+    // Calling this after the battle records the win before attempting the
+    // atomic payoff. A full Bag or wallet therefore never repeats the boss.
+    if(quest->progress == 0 && !RogueAdventureQuests_SetProgress(scene.ownerQuestId, 1))
+        return;
+
+    if(!CheckBagHasItem(ITEM_ODD_KEYSTONE, 1))
+    {
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+
+    money = GetMoney(&gSaveBlock1Ptr->money);
+    if(money > MAX_MONEY - ROGUE_FORBIDDEN_STONE_REWARD_MONEY)
+    {
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL;
+        return;
+    }
+
+    if(!CheckBagHasSpace(ITEM_ABILITY_PATCH, 1))
+    {
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+
+    if(!RemoveBagItem(ITEM_ODD_KEYSTONE, 1))
+    {
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+
+    if(!AddBagItem(ITEM_ABILITY_PATCH, 1))
+    {
+        AddBagItem(ITEM_ODD_KEYSTONE, 1);
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+
+    AddMoney(&gSaveBlock1Ptr->money, ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
+    Rogue_PushPopup_AddItem(ITEM_ABILITY_PATCH, 1);
+    Rogue_PushPopup_AddMoney(ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }

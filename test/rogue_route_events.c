@@ -1,5 +1,7 @@
 #include "global.h"
 
+#include "battle.h"
+#include "constants/battle.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/flags.h"
@@ -40,6 +42,10 @@ extern const u8 Rogue_RouteEvent_HexedShrineProp[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilOffer[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilRestoration[];
 extern const u8 Rogue_RouteEvent_FossilProp[];
+extern const u8 Rogue_RouteEvent_ForbiddenStoneOffer[];
+extern const u8 Rogue_RouteEvent_ForbiddenStoneSoul[];
+extern const u8 Rogue_RouteEvent_ForbiddenStonePayoff[];
+extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
 
 static u32 GetActiveTeamClassFlag(u16 teamNum)
 {
@@ -132,6 +138,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     u16 merchantCount = 0;
     u16 shrineCount = 0;
     u16 fossilCount = 0;
+    u16 forbiddenStoneCount = 0;
     u8 curseCount = Rogue_GetDarkDealCurseCount();
     u16 seed;
     u8 i;
@@ -195,21 +202,31 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                         seenCurse[curseIdx] = TRUE;
                 }
             }
-            else
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER)
             {
-                EXPECT_EQ(request.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
                 EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
                 EXPECT_EQ(RogueAdventureQuests_GetFossilSpecies(request.requestedItem), request.rewardItem);
                 ++fossilCount;
             }
+            else
+            {
+                EXPECT_EQ(request.recipeId, ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER);
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
+                EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_MISC_CHANNELER);
+                EXPECT_EQ(request.requestedItem, ITEM_ODD_KEYSTONE);
+                EXPECT_EQ(request.rewardItem, ITEM_ABILITY_PATCH);
+                ++forbiddenStoneCount;
+            }
         }
     }
-    EXPECT_GE(merchantCount, 500);
-    EXPECT_LE(merchantCount, 800);
-    EXPECT_GE(shrineCount, 500);
-    EXPECT_LE(shrineCount, 800);
-    EXPECT_GE(fossilCount, 500);
-    EXPECT_LE(fossilCount, 800);
+    EXPECT_GE(merchantCount, 300);
+    EXPECT_LE(merchantCount, 700);
+    EXPECT_GE(shrineCount, 300);
+    EXPECT_LE(shrineCount, 700);
+    EXPECT_GE(fossilCount, 300);
+    EXPECT_LE(fossilCount, 700);
+    EXPECT_GE(forbiddenStoneCount, 300);
+    EXPECT_LE(forbiddenStoneCount, 700);
     for(i = 0; i < curseCount; ++i)
         EXPECT(seenCurse[i]);
 
@@ -687,6 +704,12 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     {
         struct RogueRouteSceneRequest restoredOffer;
         EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, &restoredOffer));
+        EXPECT_EQ(offer.sceneSlot, restoredOffer.sceneSlot);
+        EXPECT_EQ(offer.lotId, restoredOffer.lotId);
+        EXPECT_EQ(offer.lotRole, restoredOffer.lotRole);
+        EXPECT_EQ(offer.requestedItem, restoredOffer.requestedItem);
+        EXPECT_EQ(offer.rewardItem, restoredOffer.rewardItem);
+        EXPECT_EQ(offer.rewardAmount, restoredOffer.rewardAmount);
         EXPECT_EQ(memcmp(&offer, &restoredOffer, sizeof(offer)), 0);
     }
 
@@ -779,6 +802,200 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     ClearBag();
 }
 
+TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct Pokemon originalEnemyParty[PARTY_SIZE];
+    struct RogueRouteSceneRequest offer;
+    struct RogueRouteSceneRequest souls[ROGUE_FORBIDDEN_STONE_SOUL_COUNT];
+    struct RogueRouteSceneRequest payoff;
+    RAND_TYPE originalStandardRng = gRngValue;
+    RAND_TYPE rngBefore;
+    u32 originalMoney = GetMoney(&gSaveBlock1Ptr->money);
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u8 originalLevelOffset = gRogueRun.currentLevelOffset;
+    u8 originalBattleOutcome = gBattleOutcome;
+    u8 questId;
+    u16 itemId;
+    u8 i;
+
+    memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
+    ClearBag();
+    SetMoney(&gSaveBlock1Ptr->money, 5000);
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    gRogueRun.routeSceneRoomId = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].rngSeed = 0x108;
+
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(GetFirstPlacement(&offer));
+    SelectPlacement(&offer);
+    EXPECT_EQ(offer.requestedItem, ITEM_ODD_KEYSTONE);
+    EXPECT_EQ(offer.rewardItem, ITEM_ABILITY_PATCH);
+    EXPECT_EQ(offer.primaryGraphicsId, OBJ_EVENT_GFX_MISC_CHANNELER);
+    EXPECT_EQ(ItemId_GetPocket(ITEM_ODD_KEYSTONE), POCKET_KEY_ITEMS);
+    EXPECT_EQ(ItemId_GetPrice(ITEM_ODD_KEYSTONE), 0);
+
+    RogueRouteEvents_TryAcceptForbiddenStoneQuest();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT(CheckBagHasItem(ITEM_ODD_KEYSTONE, 1));
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+    questId = RogueAdventureQuests_GetQuestIdAt(0);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->target, ROGUE_FORBIDDEN_STONE_SOUL_COUNT);
+    EXPECT(RogueAdventureQuests_IsItemProtected(ITEM_ODD_KEYSTONE));
+
+    // Bind the first graph node as it would be on the next generated route.
+    gRogueRun.adventureQuests[questId].routesUntilScene = 0;
+    gRogueRun.adventureQuests[questId].sceneRoomId = 0;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(RogueRouteScenes_GetPlacementCount(), ROGUE_FORBIDDEN_STONE_SOUL_COUNT);
+    memset(souls, 0, sizeof(souls));
+    for(i = 0; i < ROGUE_FORBIDDEN_STONE_SOUL_COUNT; ++i)
+    {
+        struct RogueRouteSceneRequest request;
+
+        EXPECT(RogueRouteScenes_GetPlacementRequest(i, &request));
+        EXPECT_EQ(request.recipeId, ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS);
+        EXPECT_EQ(request.ownerQuestId, questId);
+        EXPECT_LT(request.lotRole, ROGUE_FORBIDDEN_STONE_SOUL_COUNT);
+        souls[request.lotRole] = request;
+    }
+    EXPECT_NE(souls[0].lotId, souls[1].lotId);
+    EXPECT_NE(souls[0].lotId, souls[2].lotId);
+    EXPECT_NE(souls[1].lotId, souls[2].lotId);
+    EXPECT_EQ(souls[0].sceneSlot, souls[1].sceneSlot);
+    EXPECT_EQ(souls[0].sceneSlot, souls[2].sceneSlot);
+
+    SelectPlacement(&souls[0]);
+    RogueRouteEvents_CollectForbiddenStoneSoul();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(gSpecialVar_0x8007, 1);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->progress, 1);
+    EXPECT_EQ(RogueRouteScenes_GetState(souls[0].sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+
+    // Same-route reconstruction keeps the bitmask and omits the soul which
+    // was already sealed, while retaining the other two scene objects.
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+    RogueRouteScenes_OnEnterRoute();
+    {
+        struct ObjectEventTemplate objects[3] =
+        {
+            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[0].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[1].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[2].lotId, .script = Rogue_RouteEvent_Interact},
+        };
+        u8 objectCount = ARRAY_COUNT(objects);
+
+        RogueRouteScenes_ModifyObjectEvents(objects, &objectCount, ARRAY_COUNT(objects));
+        EXPECT_EQ(objectCount, 2);
+        for(i = 0; i < objectCount; ++i)
+        {
+            EXPECT_EQ(objects[i].script, Rogue_RouteEvent_ForbiddenStoneSoul);
+            EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_ROUTE_GHOST);
+            EXPECT_NE(objects[i].localId, 41);
+        }
+    }
+
+    for(i = 1; i < ROGUE_FORBIDDEN_STONE_SOUL_COUNT; ++i)
+    {
+        SelectPlacement(&souls[i]);
+        RogueRouteEvents_CollectForbiddenStoneSoul();
+        EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+        EXPECT_EQ(gSpecialVar_0x8007, i + 1);
+    }
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->progress, 7);
+    EXPECT_EQ(RogueRouteScenes_GetState(souls[0].sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+
+    // All three placements share one graph node, so route exit advances it
+    // exactly once to the final encounter.
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
+    gRogueAdvPath.roomCount = 2;
+    gRogueRun.adventureRoomId = 1;
+    gRogueAdvPath.rooms[1].roomParams.roomIdx = 1;
+    gRogueAdvPath.rooms[1].rngSeed = 0x109;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF, &payoff));
+    EXPECT_EQ(payoff.ownerQuestId, questId);
+    EXPECT_EQ(payoff.requestedItem, ITEM_ODD_KEYSTONE);
+    EXPECT_EQ(payoff.rewardItem, ITEM_ABILITY_PATCH);
+    EXPECT_EQ(payoff.rewardAmount, ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
+    SelectPlacement(&payoff);
+
+    SeedRng(0x4242);
+    rngBefore = gRngValue;
+    RogueRouteEvents_PrepareForbiddenStoneBattle();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(memcmp(&gRngValue, &rngBefore, sizeof(rngBefore)), 0);
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), SPECIES_SPIRITOMB);
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_LEVEL), Rogue_CalculateBossMonLvl());
+    EXPECT_EQ(RogueGift_GetCustomMonId(&gEnemyParty[0]), 0);
+    EXPECT(Rogue_IsShrineChallengeActive());
+    gBattleOutcome = B_OUTCOME_WON;
+    Rogue_Battle_EndWildBattle();
+    EXPECT(!Rogue_IsShrineChallengeActive());
+
+    // The win is retained when the wallet rejects the atomic payoff, and the
+    // boss is not repeated when the player returns with room for both rewards.
+    SetMoney(&gSaveBlock1Ptr->money, MAX_MONEY);
+    RogueRouteEvents_FinishForbiddenStoneBattle();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->progress, 1);
+    EXPECT_EQ(RogueRouteScenes_GetState(payoff.sceneSlot), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+    EXPECT(CheckBagHasItem(ITEM_ODD_KEYSTONE, 1));
+    EXPECT(!CheckBagHasItem(ITEM_ABILITY_PATCH, 1));
+
+    SetMoney(&gSaveBlock1Ptr->money, 5000);
+    for(itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT && CheckBagHasSpace(ITEM_ABILITY_PATCH, 1); ++itemId)
+    {
+        if(ItemId_GetPocket(itemId) == ItemId_GetPocket(ITEM_ABILITY_PATCH) && itemId != ITEM_ABILITY_PATCH)
+            AddBagItem(itemId, 1);
+    }
+    EXPECT(!CheckBagHasSpace(ITEM_ABILITY_PATCH, 1));
+    RogueRouteEvents_FinishForbiddenStoneBattle();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_NO_SPACE);
+    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 5000);
+    EXPECT(CheckBagHasItem(ITEM_ODD_KEYSTONE, 1));
+    EXPECT(!CheckBagHasItem(ITEM_ABILITY_PATCH, 1));
+
+    ClearBag();
+    EXPECT(AddBagItem(ITEM_ODD_KEYSTONE, 1));
+    SetMoney(&gSaveBlock1Ptr->money, 5000);
+    RogueRouteEvents_FinishForbiddenStoneBattle();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 5000 + ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
+    EXPECT(!CheckBagHasItem(ITEM_ODD_KEYSTONE, 1));
+    EXPECT(CheckBagHasItem(ITEM_ABILITY_PATCH, 1));
+    EXPECT_EQ(RogueRouteScenes_GetState(payoff.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF, &payoff));
+    EXPECT_EQ(RogueRouteScenes_GetState(payoff.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    gRogueRun.currentLevelOffset = originalLevelOffset;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+    gBattleOutcome = originalBattleOutcome;
+    gRngValue = originalStandardRng;
+    SetMoney(&gSaveBlock1Ptr->money, originalMoney);
+    ClearBag();
+}
+
 TEST("Stolen Trade Case completes its three route-node handoffs")
 {
     struct RogueAdvPath originalPath;
@@ -833,7 +1050,6 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     questId = RogueAdventureQuests_GetQuestIdAt(0);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[1], offer.trainerNum);
     EXPECT(!CheckBagHasItem(ITEM_TRADE_CASE, 1));
-    Rogue_SetCurrentDifficulty(ROGUE_CHAMP_START_DIFFICULTY);
 
     // Quicksaving on the source route retains the accepted merchant scene.
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
@@ -841,6 +1057,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, &offer));
     EXPECT_EQ(RogueRouteScenes_GetState(offer.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
 
+    Rogue_SetCurrentDifficulty(ROGUE_CHAMP_START_DIFFICULTY);
     RogueRouteScenes_OnExitRoute();
     gRogueAdvPath.roomCount = 3;
     gRogueRun.adventureRoomId = 1;

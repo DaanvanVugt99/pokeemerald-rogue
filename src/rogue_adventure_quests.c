@@ -4,6 +4,7 @@
 #include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/rogue_adventure_quests.h"
+#include "constants/rogue_route_events.h"
 #include "constants/rogue_route_scenes.h"
 
 #include "event_data.h"
@@ -43,6 +44,11 @@ static const u8 sText_MerchantReady[] = _("The caravan merchant is on this route
 static const u8 sText_AnomalousFossilTitle[] = _("Anomalous Fossil");
 static const u8 sText_FindFossilResearcher[] = _("Find a fossil researcher who can restore {STR_VAR_1}.\nReward: Rare Unique {STR_VAR_2}");
 static const u8 sText_FossilResearcherReady[] = _("A fossil researcher is on this route.\nReward: Rare Unique {STR_VAR_2}");
+static const u8 sText_ForbiddenStoneTitle[] = _("The Forbidden Stone");
+static const u8 sText_FindEscapedSouls[] = _("Find the three souls that escaped from the Odd Keystone.\nRecovered: {STR_VAR_1}/3");
+static const u8 sText_EscapedSoulsReady[] = _("The escaped souls are haunting this route.\nRecovered: {STR_VAR_1}/3");
+static const u8 sText_FindSealingGround[] = _("Bring the restored Odd Keystone to the Channeler.\nReward: Ability Patch + ¥10,000");
+static const u8 sText_SealingGroundReady[] = _("The Channeler is waiting on this route.\nReward: Ability Patch + ¥10,000");
 static const u8 sText_UnknownQuestTitle[] = _("Adventure Quest");
 static const u8 sText_UnknownQuestDescription[] = _("Complete this quest before the adventure ends.");
 
@@ -115,6 +121,19 @@ static bool8 BuildAnomalousFossilScene(const struct RogueAdventureQuest *quest, 
     return TRUE;
 }
 
+static bool8 BuildForbiddenStoneScene(const struct RogueAdventureQuest *quest, struct RogueRouteSceneRequest *request)
+{
+    request->requestedItem = ITEM_ODD_KEYSTONE;
+    request->rewardItem = ITEM_ABILITY_PATCH;
+    request->rewardAmount = ROGUE_FORBIDDEN_STONE_REWARD_MONEY;
+    request->trainerNum = quest->payload[0];
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_MISC_CHANNELER;
+    request->primaryGraphicsId = quest->nodeId == 0
+        ? OBJ_EVENT_GFX_ROUTE_GHOST
+        : OBJ_EVENT_GFX_MISC_CHANNELER;
+    return TRUE;
+}
+
 static const struct RogueAdventureQuestNodeDefinition sStolenTradeCaseNodes[] =
 {
     {
@@ -144,6 +163,24 @@ static const struct RogueAdventureQuestNodeDefinition sAnomalousFossilNodes[] =
     },
 };
 
+static const struct RogueAdventureQuestNodeDefinition sForbiddenStoneNodes[] =
+{
+    {
+        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS,
+        .nextNodeId = 1,
+        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
+        .routeDelay = 1,
+    },
+    {
+        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF,
+        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
+        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
+        .routeDelay = 1,
+    },
+};
+
 static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT] =
 {
     [ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE] =
@@ -162,6 +199,15 @@ static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENT
         .buildSceneRequest = BuildAnomalousFossilScene,
         .cleanupItem = ITEM_NONE,
         .nodeCount = ARRAY_COUNT(sAnomalousFossilNodes),
+        .initialNodeId = 0,
+    },
+    [ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE] =
+    {
+        .title = sText_ForbiddenStoneTitle,
+        .nodes = sForbiddenStoneNodes,
+        .buildSceneRequest = BuildForbiddenStoneScene,
+        .cleanupItem = ITEM_ODD_KEYSTONE,
+        .nodeCount = ARRAY_COUNT(sForbiddenStoneNodes),
         .initialNodeId = 0,
     },
 };
@@ -294,8 +340,10 @@ bool8 RogueAdventureQuests_IsItemProtected(u16 itemId)
     {
         const struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[i];
 
-        if(quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL
-            && quest->payload[0] == itemId)
+        if((quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL
+                && quest->payload[0] == itemId)
+            || (quest->definitionId == ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE
+                && itemId == ITEM_ODD_KEYSTONE))
             return TRUE;
     }
 
@@ -552,6 +600,21 @@ void RogueAdventureQuests_BufferDescription(u8 questId, u8 *dest)
         CopyItemName(quest->payload[0], gStringVar1);
         StringCopy(gStringVar2, RoguePokedex_GetSpeciesName(RogueAdventureQuests_GetFossilSpecies(quest->payload[0])));
         StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_FossilResearcherReady : sText_FindFossilResearcher);
+        break;
+    case ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE:
+        if(quest->nodeId == 0)
+        {
+            u8 recovered = ((quest->progress & (1 << 0)) != 0)
+                + ((quest->progress & (1 << 1)) != 0)
+                + ((quest->progress & (1 << 2)) != 0);
+
+            ConvertIntToDecimalStringN(gStringVar1, recovered, STR_CONV_MODE_LEFT_ALIGN, 1);
+            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_EscapedSoulsReady : sText_FindEscapedSouls);
+        }
+        else
+        {
+            StringExpandPlaceholders(dest, RogueAdventureQuests_GetState(questId) == ROGUE_ADVENTURE_QUEST_STATE_READY ? sText_SealingGroundReady : sText_FindSealingGround);
+        }
         break;
     default:
         StringCopy(dest, sText_UnknownQuestDescription);

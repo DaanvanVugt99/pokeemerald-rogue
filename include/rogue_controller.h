@@ -182,6 +182,7 @@ u8 Rogue_GetCurrentTeamHideoutEncounterId(void);
 bool8 Rogue_IsBattleAlphaMon(u16 species);
 bool8 Rogue_IsBattleRoamerMon(u16 species);
 bool8 Rogue_IsShrineChallengeActive(void);
+void Rogue_ActivateUncatchableWildBattle(void);
 bool8 Rogue_HasChallengedShrine(void);
 void Rogue_PrepareShrineChallenge(void);
 u16 Rogue_SelectWildDenEncounterRoom(void);

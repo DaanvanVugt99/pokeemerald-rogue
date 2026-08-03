@@ -252,6 +252,185 @@ script Rogue_RouteEvent_AnomalousFossilRestoration
     release
 }
 
+script Rogue_RouteEvent_ForbiddenStoneProp
+{
+    lock
+    faceplayer
+    msgbox(format("The old stones are marked with a faded binding spell."))
+    release
+}
+
+script Rogue_RouteEvent_ForbiddenStoneOffer
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+    {
+        msgbox(format("This Odd Keystone once bound all 108 souls of a Spiritomb. Three have escaped.\pWill you carry the stone and return them?"), MSGBOX_YESNO)
+        if(var(VAR_RESULT) == YES)
+        {
+            special(RogueRouteEvents_TryAcceptForbiddenStoneQuest)
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+            {
+                playfanfare(MUS_OBTAIN_ITEM)
+                waitfanfare
+                msgbox(format("You received the Odd Keystone.\pThe escaped souls will be drawn to it somewhere ahead."))
+            }
+            else
+            {
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+                {
+                    msgbox(format("Your Key Items pocket is full. Make some room first."))
+                }
+                else
+                {
+                    msgbox(format("The stone should remain here for now."))
+                }
+            }
+        }
+        else
+        {
+            msgbox(format("Then I will keep watch over it."))
+        }
+    }
+    else
+    {
+        msgbox(format("Three souls are still loose. The Odd Keystone will draw them out farther ahead."))
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_ForbiddenStoneSoul
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    if(var(VAR_0x8009) == 0)
+    {
+        msgbox(format("The wandering soul recoils from the Odd Keystone..."))
+    }
+    else
+    {
+        if(var(VAR_0x8009) == 1)
+        {
+            msgbox(format("A spiteful soul circles the Odd Keystone..."))
+        }
+        else
+        {
+            msgbox(format("A mournful soul reaches toward the Odd Keystone..."))
+        }
+    }
+
+    special(RogueRouteEvents_CollectForbiddenStoneSoul)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        buffernumberstring(STR_VAR_1, VAR_0x8007)
+        if(var(VAR_0x8007) == 3)
+        {
+            msgbox(format("The soul vanished into the stone.\pAll 108 souls are together once more."))
+        }
+        else
+        {
+            msgbox(format("The soul vanished into the stone.\pSouls recovered: {STR_VAR_1}/3"))
+        }
+        removeobject(VAR_LAST_TALKED)
+    }
+    else
+    {
+        msgbox(format("The soul slips away. The Odd Keystone may be missing."))
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_ForbiddenStonePayoff
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    bufferitemname(STR_VAR_1, ITEM_ABILITY_PATCH)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("The 108 souls are bound once more. Thank you."))
+    }
+    else
+    {
+        if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING)
+        {
+            call(Rogue_RouteEvent_ForbiddenStoneGiveReward)
+        }
+        else
+        {
+            msgbox(format("The Odd Keystone is whole, but Spiritomb is stirring inside it.\pHelp me complete the binding ritual?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                special(RogueRouteEvents_PrepareForbiddenStoneBattle)
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+                {
+                    playmoncry(SPECIES_SPIRITOMB, CRY_MODE_ENCOUNTER)
+                    waitmoncry
+                    special(BattleSetup_StartLegendaryBattle)
+                    waitstate
+                    specialvar(VAR_RESULT, GetBattleOutcome)
+                    if(var(VAR_RESULT) == B_OUTCOME_WON)
+                    {
+                        msgbox(format("Spiritomb retreats into the Odd Keystone. The binding holds!"))
+                        call(Rogue_RouteEvent_ForbiddenStoneGiveReward)
+                    }
+                    else
+                    {
+                        msgbox(format("The ritual failed, but the Odd Keystone remains intact."))
+                    }
+                }
+                else
+                {
+                    msgbox(format("The ritual cannot begin without the Odd Keystone."))
+                }
+            }
+            else
+            {
+                msgbox(format("The seal will hold until you are ready."))
+            }
+        }
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_ForbiddenStoneGiveReward
+{
+    special(RogueRouteEvents_FinishForbiddenStoneBattle)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        call(Rogue_Common_DisplayPopups)
+        msgbox(format("Please accept this {STR_VAR_1} and ¥10,000 for your help."))
+    }
+    else
+    {
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+        {
+            msgbox(format("Make room in your Items pocket for the {STR_VAR_1}. Your reward will wait."))
+        }
+        else
+        {
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL)
+            {
+                msgbox(format("You cannot carry the full ¥10,000. Your reward will wait."))
+            }
+            else
+            {
+                msgbox(format("Bring back the Odd Keystone and I can finish the ritual."))
+            }
+        }
+    }
+    return
+}
+
 script Rogue_RouteEvent_StolenTradeCaseOffer
 {
     lock

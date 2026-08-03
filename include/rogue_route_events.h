@@ -12,5 +12,9 @@ void RogueRouteEvents_TryAcceptHexedShrine(void);
 void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void);
 void RogueRouteEvents_BufferFossilRestorationData(void);
 void RogueRouteEvents_TryRestoreAnomalousFossil(void);
+void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void);
+void RogueRouteEvents_CollectForbiddenStoneSoul(void);
+void RogueRouteEvents_PrepareForbiddenStoneBattle(void);
+void RogueRouteEvents_FinishForbiddenStoneBattle(void);
 
 #endif // GUARD_ROGUE_ROUTE_EVENTS_H
