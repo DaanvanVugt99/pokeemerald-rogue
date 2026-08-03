@@ -2,6 +2,7 @@
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/maps.h"
+#include "constants/rogue_route_scenes.h"
 #include "constants/weather.h"
 
 #ifdef ROGUE_DEBUG
@@ -19,33 +20,39 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     //
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_FIELD0),
         .wildTypeTable = { TYPE_GRASS, TYPE_NORMAL, TYPE_FLYING }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_FIELD1),
         .wildTypeTable = { TYPE_ELECTRIC, TYPE_STEEL, TYPE_ICE }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
         .dropRarity = 1,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FOREST,
         .map = ROUTE_MAP(ROGUE_ROUTE_FOREST0),
         .wildTypeTable = { TYPE_BUG, TYPE_GHOST, TYPE_POISON }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
         .dropRarity = 2,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_CAVE,
         .map = ROUTE_MAP(ROGUE_ROUTE_CAVE0),
         .wildTypeTable = { TYPE_ROCK, TYPE_ICE, TYPE_DRAGON }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_MOUNTAIN0),
         .wildTypeTable = { TYPE_GROUND, TYPE_FIRE, TYPE_FIGHTING }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_MOUNTAIN1),
 #ifdef ROGUE_EXPANSION
         .wildTypeTable = { TYPE_FAIRY, TYPE_DARK, TYPE_PSYCHIC }
@@ -55,31 +62,37 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_MOUNTAIN2),
         .wildTypeTable = { TYPE_GROUND, TYPE_GHOST, TYPE_FIRE }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_MOUNTAIN3),
         .wildTypeTable = { TYPE_ROCK, TYPE_DRAGON, TYPE_POISON }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_WATERFRONT,
         .map = ROUTE_MAP(ROGUE_ROUTE_WATER_FRONT0),
         .wildTypeTable = { TYPE_WATER, TYPE_FLYING, TYPE_GRASS }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_WATERFRONT,
         .map = ROUTE_MAP(ROGUE_ROUTE_WATER_FRONT1),
         .wildTypeTable = { TYPE_NORMAL, TYPE_FIGHTING, TYPE_DARK }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_URBAN,
         .map = ROUTE_MAP(ROGUE_ROUTE_URBAN0),
         .wildTypeTable = { TYPE_STEEL, TYPE_ELECTRIC, TYPE_PSYCHIC }
     },
     {
         .mapFlags = ROUTE_FLAG_HOENN,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_URBAN,
         .map = ROUTE_MAP(ROGUE_ROUTE_URBAN1),
 #ifdef ROGUE_EXPANSION
         .wildTypeTable = { TYPE_FAIRY, TYPE_ICE, TYPE_BUG }
@@ -92,16 +105,19 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     //
     {
         .mapFlags = ROUTE_FLAG_KANTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_KANTO_FIELD0),
         .wildTypeTable = { TYPE_NORMAL, TYPE_FLYING, TYPE_GRASS }
     },
     {
         .mapFlags = ROUTE_FLAG_KANTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_KANTO_MOUNTAIN0),
         .wildTypeTable = { TYPE_FIGHTING, TYPE_ROCK, TYPE_ELECTRIC }
     },
     {
         .mapFlags = ROUTE_FLAG_KANTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_URBAN,
         .map = ROUTE_MAP(ROGUE_ROUTE_KANTO_URBAN0),
 #ifdef ROGUE_EXPANSION
         .wildTypeTable = { TYPE_WATER, TYPE_FAIRY, TYPE_STEEL }
@@ -112,17 +128,20 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     {
         .mapFlags = ROUTE_FLAG_KANTO,
         .dropRarity = 1,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FOREST,
         .map = ROUTE_MAP(ROGUE_ROUTE_KANTO_FOREST0),
         .wildTypeTable = { TYPE_BUG, TYPE_POISON, TYPE_DARK }
     },
     {
         .mapFlags = ROUTE_FLAG_KANTO,
         .dropRarity = 2,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_CAVE,
         .map = ROUTE_MAP(ROGUE_ROUTE_KANTO_CAVE0),
         .wildTypeTable = { TYPE_GROUND, TYPE_FIRE, TYPE_DRAGON }
     },
     {
         .mapFlags = ROUTE_FLAG_KANTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_URBAN,
         .map = ROUTE_MAP(ROGUE_ROUTE_KANTO_URBAN1),
         .wildTypeTable = { TYPE_GHOST, TYPE_ICE, TYPE_PSYCHIC }
     },
@@ -131,16 +150,19 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     //
     {
         .mapFlags = ROUTE_FLAG_JOHTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_JOHTO_FIELD0),
         .wildTypeTable = { TYPE_ELECTRIC, TYPE_GRASS, TYPE_DARK }
     },
     {
         .mapFlags = ROUTE_FLAG_JOHTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_JOHTO_FIELD1),
         .wildTypeTable = { TYPE_BUG, TYPE_NORMAL, TYPE_POISON }
     },
     {
         .mapFlags = ROUTE_FLAG_JOHTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_CAVE,
         .map = ROUTE_MAP(ROGUE_ROUTE_JOHTO_CAVE0),
         .dropRarity = 2,
 #ifdef ROGUE_EXPANSION
@@ -151,16 +173,19 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     },
     {
         .mapFlags = ROUTE_FLAG_JOHTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_WATERFRONT,
         .map = ROUTE_MAP(ROGUE_ROUTE_JOHTO_WATER_FRONT0),
         .wildTypeTable = { TYPE_WATER, TYPE_DRAGON, TYPE_GHOST }
     },
     {
         .mapFlags = ROUTE_FLAG_JOHTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_URBAN,
         .map = ROUTE_MAP(ROGUE_ROUTE_JOHTO_URBAN0),
         .wildTypeTable = { TYPE_STEEL, TYPE_PSYCHIC, TYPE_FLYING }
     },
     {
         .mapFlags = ROUTE_FLAG_JOHTO,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_JOHTO_MOUNTAIN0),
         .wildTypeTable = { TYPE_FIRE, TYPE_ROCK, TYPE_FIGHTING }
     },
@@ -169,36 +194,43 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     //
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_205),
         .wildTypeTable = { TYPE_FLYING, TYPE_WATER, TYPE_ROCK }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FOREST,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_ETERNA_FOREST),
         .wildTypeTable = { TYPE_GRASS, TYPE_BUG, TYPE_GHOST }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_207),
         .wildTypeTable = { TYPE_ROCK, TYPE_FIRE, TYPE_DRAGON }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_215),
         .wildTypeTable = { TYPE_POISON, TYPE_NORMAL, TYPE_ICE }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_WATERFRONT,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_212),
         .wildTypeTable = { TYPE_WATER, TYPE_POISON, TYPE_GROUND }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_217),
         .wildTypeTable = { TYPE_ICE, TYPE_FIGHTING, TYPE_DARK }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_210),
 #ifdef ROGUE_EXPANSION
         .wildTypeTable = { TYPE_DRAGON, TYPE_PSYCHIC, TYPE_FAIRY }
@@ -208,16 +240,19 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_201),
         .wildTypeTable = { TYPE_NORMAL, TYPE_BUG, TYPE_FLYING }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_214),
         .wildTypeTable = { TYPE_DARK, TYPE_FIGHTING, TYPE_GRASS }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_FIELD,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_209),
 #ifdef ROGUE_EXPANSION
         .wildTypeTable = { TYPE_FAIRY, TYPE_GHOST, TYPE_ELECTRIC }
@@ -227,12 +262,14 @@ static const struct RogueRouteEncounter sRogueRouteTable[] = {
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_CAVE,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_MT_CORONET),
         .dropRarity = 2,
         .wildTypeTable = { TYPE_PSYCHIC, TYPE_GROUND, TYPE_STEEL }
     },
     {
         .mapFlags = ROUTE_FLAG_SINNOH,
+        .environment = ROGUE_ROUTE_ENVIRONMENT_CAVE,
         .map = ROUTE_MAP(ROGUE_ROUTE_SINNOH_IRON_ISLAND),
         .dropRarity = 2,
         .wildTypeTable = { TYPE_STEEL, TYPE_ELECTRIC, TYPE_FIRE }

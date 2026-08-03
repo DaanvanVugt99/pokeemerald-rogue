@@ -28,6 +28,7 @@
 #include "rogue_query.h"
 #include "rogue_quest.h"
 #include "rogue_route_events.h"
+#include "rogue_route_scenes.h"
 
 
 #define ROOM_TO_WORLD_X 3
@@ -1122,7 +1123,7 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
     // Erase any previously set params
     gRogueAdvPath.rooms[roomId].roomType = ADVPATH_ROOM_NONE; // set room type below so counting methods don't break
     memset(&gRogueAdvPath.rooms[roomId].roomParams, 0, sizeof(gRogueAdvPath.rooms[roomId].roomParams));
-    memset(&gRogueAdvPath.rooms[roomId].routeEvent, 0, sizeof(gRogueAdvPath.rooms[roomId].routeEvent));
+    memset(&gRogueAdvPath.rooms[roomId].routeScene, 0, sizeof(gRogueAdvPath.rooms[roomId].routeScene));
 
     switch(roomType)
     {
@@ -1235,7 +1236,7 @@ static void GenerateRoomInstance(u8 roomId, u8 roomType)
             }
 
             gRogueAdvPath.rooms[roomId].roomParams.perType.route.difficulty = SelectIndexFromWeights(weights, ARRAY_COUNT(weights), RogueRandom());
-            RogueRouteEvents_GenerateRoom(&gRogueAdvPath.rooms[roomId]);
+            RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[roomId]);
             break;
         }
 
@@ -2218,7 +2219,7 @@ u8 RogueAdv_OverrideNextWarp(struct WarpData *warp)
 
         // Trigger before we wipe the room type
         if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
-            RogueRouteEvents_OnExitRoute();
+            RogueRouteScenes_OnExitRoute();
 
         RogueQuest_OnTrigger(QUEST_TRIGGER_EXIT_ENCOUNTER);
 

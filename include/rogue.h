@@ -2,6 +2,7 @@
 #define GUARD_ROGUE_H
 
 #include "global.h"
+#include "constants/rogue_adventure_quests.h"
 #include "rogue_trials.h"
 
 // Extra data for pokemon in party
@@ -118,13 +119,36 @@ struct RogueAdvPathRoomParams
     } perType;
 };
 
-struct RogueRouteEventRoomData
+// A selected scene request. Content producers fill this payload; the route
+// scene composer only concerns itself with the selected recipe and anchor.
+struct RogueRouteSceneRequest
 {
     u16 rewardItem;
-    u16 senderGraphicsId;
-    u16 recipientGraphicsId;
-    u8 eventType;
+    u16 requestedItem;
+    u16 trainerNum;
+    u16 primaryGraphicsId;
+    u16 secondaryGraphicsId;
+    u8 recipeId;
+    u8 environment : 3;
+    u8 anchor : 1;
+    u8 variant : 1;
+    u8 source : 2;
+    u8 ownerQuestId;
 };
+
+struct RogueAdventureQuest
+{
+    u16 payload[2];
+    u8 definitionId;
+    u8 nodeId;
+    u8 progress;
+    u8 target;
+    u8 routesUntilScene;
+    u8 sceneRoomId;
+};
+
+STATIC_ASSERT(sizeof(struct RogueRouteSceneRequest) <= 16, SizeOfRogueRouteSceneRequest);
+STATIC_ASSERT(sizeof(struct RogueAdventureQuest) == 12, SizeOfRogueAdventureQuest);
 
 struct RogueAdvPathNode
 {
@@ -138,7 +162,7 @@ struct RogueAdvPathRoom
 {
     struct Coords8 coords;
     struct RogueAdvPathRoomParams roomParams;
-    struct RogueRouteEventRoomData routeEvent;
+    struct RogueRouteSceneRequest routeScene;
     u16 rngSeed;
     u8 roomType;
     u8 connectionMask;
@@ -278,6 +302,7 @@ struct RogueRunData
     u16 dynamicTRMoves[NUM_TECHNICAL_RECORDS];
     u16 partyHeldItems[PARTY_SIZE];
     u16 dynamicTrainerNums[ROGUE_MAX_ACTIVE_TRAINER_COUNT];
+    struct RogueAdventureQuest adventureQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     u8 legendaryDifficulties[ADVPATH_LEGEND_COUNT];
     u8 teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_COUNT];
     u8 rivalEncounterDifficulties[ROGUE_RIVAL_MAX_ROUTE_ENCOUNTERS];
@@ -305,6 +330,7 @@ struct RogueRunData
     bool8 hasChallengedShrine : 1;
     u8 adventureRoomId;
     u8 currentRouteIndex;
+    u8 routeSceneRoomId;
     u8 currentLevelOffset;
     u8 partySnapshotCount;
 #ifdef ROGUE_EXPANSION
@@ -358,6 +384,7 @@ struct RogueRouteMap
 struct RogueRouteEncounter
 {
     u8 dropRarity;
+    u8 environment;
     u16 mapFlags;
     struct RogueRouteMap map;
     const u8 wildTypeTable[3];

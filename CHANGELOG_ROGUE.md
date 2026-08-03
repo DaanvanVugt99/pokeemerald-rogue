@@ -16,8 +16,14 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
-- Added a proof-of-concept seeded route-event system with two reserved NPC
-  anchors per active route and a route-local Parcel delivery encounter.
+- Added a proof-of-concept seeded route-scene system that composes themed NPCs,
+  props, and terrain accents into reserved route anchors for Parcel deliveries,
+  supply trades, and optional Trainer challenges. Generated Adventure Quests
+  now appear in their own run-only quest-book category; Parcel deliveries can
+  begin on one route and dynamically insert their recipient into a later one.
+  Scene sources now submit generic requests through a route director and
+  composer, while compact ROM-defined quest graphs advance through scene nodes
+  or passive run signals such as Trainer victories and completed routes.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.

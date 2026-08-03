@@ -64,6 +64,7 @@
 #include "trainer_card.h"
 
 #include "rogue.h"
+#include "rogue_adventure_quests.h"
 #include "rogue_assistant.h"
 #include "rogue_automation.h"
 #include "rogue_adventurepaths.h"
@@ -82,6 +83,7 @@
 #include "rogue_query.h"
 #include "rogue_run_start.h"
 #include "rogue_route_events.h"
+#include "rogue_route_scenes.h"
 #include "rogue_trials.h"
 #include "rogue_quest.h"
 #include "rogue_ridemon.h"
@@ -4420,6 +4422,8 @@ void Rogue_OnLoadMap(void)
     {
         if(RogueAdv_IsViewingPath())
             RogueAdv_ApplyAdventureMetatiles();
+        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+            RogueRouteScenes_ApplyMetatiles();
     }
     else if(!Rogue_IsRunActive())
     {
@@ -5074,6 +5078,7 @@ static void BeginRogueRunPhase_Reset(void)
 
     ClearRogueLocalData();
     memset(&gRogueRun, 0, sizeof(gRogueRun));
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
     ClearHoneyTreePokeblock();
     ResetHotTracking();
@@ -5420,6 +5425,9 @@ static u16 GetRequiredBadgesForEggToHatch(u16 species)
 static void EndRogueRun(void)
 {
     HandleForfeitingInCatchingContest();
+
+    // Generated quests and their temporary cargo never survive the run boundary.
+    RogueAdventureQuests_Clear();
 
     if(Rogue_IsCampaignActive())
         Rogue_DeactivateActiveCampaign();
@@ -7738,12 +7746,13 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     u8 weatherChance = 5 + 20 * gRogueAdvPath.currentRoomParams.perType.route.difficulty;
 
                     gRogueRun.currentRouteIndex = gRogueAdvPath.currentRoomParams.roomIdx;
-                    RogueRouteEvents_OnEnterRoute();
+                    RogueRouteScenes_OnEnterRoute();
 
                     RandomiseWildEncounters();
                     ResetTrainerBattles();
                     RandomiseBerryTrees();
                     RandomiseEnabledTrainers();
+                    RogueRouteScenes_PrepareRouteTrainers();
                     RandomiseEnabledItems();
                     TryOptionalRandomanSpawn();
 
@@ -8209,7 +8218,7 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
             *objectEventCount = write;
 
             if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
-                RogueRouteEvents_ModifyObjectEvents(objectEvents, *objectEventCount);
+                RogueRouteScenes_ModifyObjectEvents(objectEvents, objectEventCount, objectEventCapacity);
         }
 
         // We need to reapply this as pending when loading from a save, as we would've already consumed it here
@@ -9267,6 +9276,8 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
     FlagClear(FLAG_ROGUE_TERASTALLIZE_BATTLE);
     CheckAndNotifyForFaintedMons();
     RogueQuest_OnTrigger(QUEST_TRIGGER_TRAINER_BATTLE_END);
+    if(Rogue_IsRunActive() && gBattleOutcome == B_OUTCOME_WON)
+        RogueAdventureQuests_EmitSignal(ROGUE_ADVENTURE_QUEST_SIGNAL_TRAINER_DEFEATED, 1);
     TryRewardHiddenStashCoins(trainerNum);
 
     if(Rogue_IsRunActive())
