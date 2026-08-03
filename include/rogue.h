@@ -118,6 +118,14 @@ struct RogueAdvPathRoomParams
     } perType;
 };
 
+struct RogueRouteEventRoomData
+{
+    u16 rewardItem;
+    u16 senderGraphicsId;
+    u16 recipientGraphicsId;
+    u8 eventType;
+};
+
 struct RogueAdvPathNode
 {
     u8 roomType;
@@ -130,6 +138,7 @@ struct RogueAdvPathRoom
 {
     struct Coords8 coords;
     struct RogueAdvPathRoomParams roomParams;
+    struct RogueRouteEventRoomData routeEvent;
     u16 rngSeed;
     u8 roomType;
     u8 connectionMask;

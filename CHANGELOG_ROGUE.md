@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added a proof-of-concept seeded route-event system with two reserved NPC
+  anchors per active route and a route-local Parcel delivery encounter.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.

@@ -21,11 +21,90 @@ const SAFARI_SELECTED_BUY = 10
 const SAFARI_SELECTED_DISMISS = 11
 const SAFARI_SELECTED_BACK = 12
 
+const ROGUE_ROUTE_EVENT_ANCHOR_SENDER = 0
+const ROGUE_ROUTE_EVENT_ANCHOR_RECIPIENT = 1
+
+const ROGUE_ROUTE_EVENT_STATE_NOT_STARTED = 0
+const ROGUE_ROUTE_EVENT_STATE_CARRYING = 1
+const ROGUE_ROUTE_EVENT_STATE_COMPLETED = 2
+
 const POKEDEX_SELECTION_CURATED = 0
 const POKEDEX_SELECTION_TRIAL = 1
 
 // Re-used scripts
 //
+
+script Rogue_RouteEvent_Interact
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    copyvar(VAR_0x8005, VAR_RESULT)
+
+    if(var(VAR_0x8005) == ROGUE_ROUTE_EVENT_ANCHOR_SENDER)
+    {
+        if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+        {
+            msgbox(format("Excuse me! My friend is waiting farther along this route.\pWould you deliver this Parcel for me?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                special(RogueRouteEvents_TryAcceptDelivery)
+                if(var(VAR_RESULT) == YES)
+                {
+                    playfanfare(MUS_OBTAIN_ITEM)
+                    waitfanfare
+                    msgbox(format("Thank you! Please give it to my friend before you leave this route."))
+                }
+                else
+                {
+                    msgbox(format("It looks like there isn't room in your Bag right now."))
+                }
+            }
+            else
+            {
+                msgbox(format("No problem. Let me know if you change your mind."))
+            }
+        }
+        elif(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_CARRYING)
+        {
+            msgbox(format("My friend is waiting farther along this route. Thank you for carrying the Parcel!"))
+        }
+        else
+        {
+            msgbox(format("My friend received the Parcel. Thank you for helping us!"))
+        }
+    }
+    else
+    {
+        if(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+        {
+            msgbox(format("I'm waiting for a delivery from my friend near the start of this route."))
+        }
+        elif(var(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_CARRYING)
+        {
+            bufferitemname(STR_VAR_1, VAR_0x8004)
+            msgbox(format("Oh, is that the Parcel for me? I can give you a {STR_VAR_1} for your trouble."))
+            special(RogueRouteEvents_TryCompleteDelivery)
+            if(var(VAR_RESULT) == YES)
+            {
+                playfanfare(MUS_OBTAIN_ITEM)
+                waitfanfare
+                msgbox(format("Perfect! Thank you for making the delivery."))
+            }
+            else
+            {
+                msgbox(format("You'll need to make room in your Bag for the reward first."))
+            }
+        }
+        else
+        {
+            msgbox(format("Thanks again for delivering the Parcel!"))
+        }
+    }
+
+    release
+}
 
 script Rogue_Common_SelectCuratedPokedex
 {

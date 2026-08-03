@@ -81,6 +81,7 @@
 #include "rogue_popup.h"
 #include "rogue_query.h"
 #include "rogue_run_start.h"
+#include "rogue_route_events.h"
 #include "rogue_trials.h"
 #include "rogue_quest.h"
 #include "rogue_ridemon.h"
@@ -7737,6 +7738,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     u8 weatherChance = 5 + 20 * gRogueAdvPath.currentRoomParams.perType.route.difficulty;
 
                     gRogueRun.currentRouteIndex = gRogueAdvPath.currentRoomParams.roomIdx;
+                    RogueRouteEvents_OnEnterRoute();
 
                     RandomiseWildEncounters();
                     ResetTrainerBattles();
@@ -8205,6 +8207,9 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
             }
 
             *objectEventCount = write;
+
+            if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+                RogueRouteEvents_ModifyObjectEvents(objectEvents, *objectEventCount);
         }
 
         // We need to reapply this as pending when loading from a save, as we would've already consumed it here

@@ -188,6 +188,9 @@ gSpecials::
 	def_special ChoosePartyMon
 	def_special Rogue_StartRunPortalTransition
 	def_special Rogue_SeedRandomGenerators
+	def_special RogueRouteEvents_GetInteractionData
+	def_special RogueRouteEvents_TryAcceptDelivery
+	def_special RogueRouteEvents_TryCompleteDelivery
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon
