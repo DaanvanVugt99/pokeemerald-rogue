@@ -8,6 +8,7 @@
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
 #include "constants/pokemon.h"
+#include "constants/rogue_adventure_quests.h"
 #include "constants/rogue_route_events.h"
 #include "constants/rogue_route_scenes.h"
 #include "constants/trainer_types.h"
@@ -1766,4 +1767,88 @@ TEST("Route director composes three pending quest consumers and preserves them o
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("Adventure quest node signals update progress and complete only their targeted node")
+{
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueAdventureQuestCreateParams params = {0};
+    const struct RogueAdventureQuest *quest;
+    u8 stolenQuestId;
+    u8 otherQuestId;
+    u8 forbiddenQuestId;
+
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+
+    stolenQuestId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params);
+    otherQuestId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params);
+    EXPECT_NE(stolenQuestId, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT_NE(otherQuestId, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        stolenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        1));
+    EXPECT_EQ(RogueAdventureQuests_Get(stolenQuestId)->progress, 1);
+    EXPECT_EQ(RogueAdventureQuests_Get(otherQuestId)->progress, 0);
+
+    RogueAdventureQuests_EmitSignal(ROGUE_ADVENTURE_QUEST_SIGNAL_TRAINER_DEFEATED, 1);
+    EXPECT_EQ(RogueAdventureQuests_Get(stolenQuestId)->nodeId, 0);
+    EXPECT_EQ(RogueAdventureQuests_Get(otherQuestId)->nodeId, 0);
+
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        stolenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+        1));
+    quest = RogueAdventureQuests_Get(stolenQuestId);
+    EXPECT(quest != NULL);
+    EXPECT_EQ(quest->nodeId, 1);
+    EXPECT_EQ(quest->progress, 0);
+    EXPECT_EQ(RogueAdventureQuests_Get(otherQuestId)->nodeId, 0);
+
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        stolenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+        1));
+    EXPECT(RogueAdventureQuests_Get(stolenQuestId) == NULL);
+
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    params.target = ROGUE_FORBIDDEN_STONE_SOUL_COUNT;
+    forbiddenQuestId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE, &params);
+    EXPECT_NE(forbiddenQuestId, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        forbiddenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        1 << 0));
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        forbiddenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        1 << 2));
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        forbiddenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        1 << 0));
+    quest = RogueAdventureQuests_Get(forbiddenQuestId);
+    EXPECT_EQ(quest->progress, (1 << 0) | (1 << 2));
+    EXPECT_EQ(quest->nodeId, 0);
+
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        forbiddenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        1 << 1));
+    quest = RogueAdventureQuests_Get(forbiddenQuestId);
+    EXPECT_EQ(quest->progress, (1 << ROGUE_FORBIDDEN_STONE_SOUL_COUNT) - 1);
+    EXPECT_EQ(quest->nodeId, 0);
+
+    EXPECT(RogueAdventureQuests_EmitSignalForQuest(
+        forbiddenQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+        1));
+    quest = RogueAdventureQuests_Get(forbiddenQuestId);
+    EXPECT_EQ(quest->nodeId, 1);
+    EXPECT_EQ(quest->progress, 0);
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
 }

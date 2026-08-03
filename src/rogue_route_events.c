@@ -608,7 +608,10 @@ void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
         return;
 
     if(state == ROGUE_ROUTE_EVENT_STATE_ACTIVE
-        && !RogueAdventureQuests_SetProgress(scene.ownerQuestId, 1))
+        && !RogueAdventureQuests_EmitSignalForQuest(
+            scene.ownerQuestId,
+            ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+            1))
         return;
 
     alreadyHasCase = CheckBagHasItem(scene.requestedItem, 1);
@@ -915,10 +918,16 @@ void RogueRouteEvents_CollectForbiddenStoneSoul(void)
         || quest->nodeId != 0)
         return;
 
-    progress = quest->progress | (1 << scene.lotRole);
-    if(!RogueAdventureQuests_SetProgress(scene.ownerQuestId, progress))
+    if(!RogueAdventureQuests_EmitSignalForQuest(
+        scene.ownerQuestId,
+        ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        1 << scene.lotRole))
         return;
 
+    quest = RogueAdventureQuests_Get(scene.ownerQuestId);
+    if(quest == NULL)
+        return;
+    progress = quest->progress;
     gSpecialVar_0x8007 = CountForbiddenStoneSouls(progress);
     if(gSpecialVar_0x8007 == ROGUE_FORBIDDEN_STONE_SOUL_COUNT)
         RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
@@ -995,7 +1004,11 @@ void RogueRouteEvents_FinishForbiddenStoneBattle(void)
 
     // Calling this after the battle records the win before attempting the
     // atomic payoff. A full Bag or wallet therefore never repeats the boss.
-    if(quest->progress == 0 && !RogueAdventureQuests_SetProgress(scene.ownerQuestId, 1))
+    if(quest->progress == 0
+        && !RogueAdventureQuests_EmitSignalForQuest(
+            scene.ownerQuestId,
+            ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+            1))
         return;
 
     transaction.costs[0].itemId = ITEM_ODD_KEYSTONE;

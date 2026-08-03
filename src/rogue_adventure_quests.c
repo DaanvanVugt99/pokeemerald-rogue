@@ -21,7 +21,8 @@ struct RogueAdventureQuestNodeDefinition
 {
     u8 sceneRecipeId;
     u8 nextNodeId;
-    u8 listenSignal;
+    u8 progressSignal;
+    u8 completionSignal;
     u8 flags;
     u8 routeDelay;
 };
@@ -153,14 +154,16 @@ static const struct RogueAdventureQuestNodeDefinition sStolenTradeCaseNodes[] =
     {
         .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP,
         .nextNodeId = 1,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
         .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
         .routeDelay = 1,
     },
     {
         .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF,
         .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
         .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
         .routeDelay = 1,
     },
@@ -171,7 +174,8 @@ static const struct RogueAdventureQuestNodeDefinition sAnomalousFossilNodes[] =
     {
         .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION,
         .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
         .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
         .routeDelay = 1,
     },
@@ -182,14 +186,16 @@ static const struct RogueAdventureQuestNodeDefinition sForbiddenStoneNodes[] =
     {
         .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS,
         .nextNodeId = 1,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
-        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE | ROGUE_ADVENTURE_QUEST_NODE_FLAG_PROGRESS_SET_BITS,
         .routeDelay = 1,
     },
     {
         .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF,
         .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
         .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
         .routeDelay = 1,
     },
@@ -200,7 +206,8 @@ static const struct RogueAdventureQuestNodeDefinition sApricornCraftingNodes[] =
     {
         .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN,
         .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
-        .listenSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
         .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE,
         .routeDelay = 1,
     },
@@ -493,12 +500,36 @@ void RogueAdventureQuests_LeaveRoute(u8 roomId)
     }
 }
 
-bool8 RogueAdventureQuests_Advance(u8 questId)
+static u8 CountProgressBits(u8 progress)
+{
+    u8 count = 0;
+
+    while(progress != 0)
+    {
+        count += progress & 1;
+        progress >>= 1;
+    }
+
+    return count;
+}
+
+static bool8 IsProgressTargetMet(const struct RogueAdventureQuest *quest, const struct RogueAdventureQuestNodeDefinition *node)
+{
+    if((node->flags & ROGUE_ADVENTURE_QUEST_NODE_FLAG_PROGRESS_SET_BITS) != 0)
+        return CountProgressBits(quest->progress) >= quest->target;
+
+    return quest->progress >= quest->target;
+}
+
+bool8 RogueAdventureQuests_EmitSignalForQuest(u8 questId, u8 signal, u16 value)
 {
     struct RogueAdventureQuest *quest;
     const struct RogueAdventureQuestNodeDefinition *node;
+    bool8 handled = FALSE;
 
-    if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+    if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY
+        || signal == ROGUE_ADVENTURE_QUEST_SIGNAL_NONE
+        || signal >= ROGUE_ADVENTURE_QUEST_SIGNAL_COUNT)
         return FALSE;
 
     quest = &gRogueRun.adventureQuests[questId];
@@ -506,44 +537,41 @@ bool8 RogueAdventureQuests_Advance(u8 questId)
     if(node == NULL)
         return FALSE;
 
-    EnterNode(quest, node->nextNodeId);
-    return TRUE;
-}
+    if(node->progressSignal == signal)
+    {
+        handled = TRUE;
+        if((node->flags & ROGUE_ADVENTURE_QUEST_NODE_FLAG_PROGRESS_SET_BITS) != 0)
+            quest->progress |= (u8)value;
+        else
+            quest->progress = min((u16)quest->target, quest->progress + value);
 
-bool8 RogueAdventureQuests_SetProgress(u8 questId, u8 progress)
-{
-    struct RogueAdventureQuest *quest;
+        if((node->flags & ROGUE_ADVENTURE_QUEST_NODE_FLAG_ADVANCE_ON_PROGRESS) != 0
+            && IsProgressTargetMet(quest, node))
+        {
+            EnterNode(quest, node->nextNodeId);
+            return TRUE;
+        }
+    }
 
-    if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
-        return FALSE;
+    if(node->completionSignal == signal)
+    {
+        EnterNode(quest, node->nextNodeId);
+        return TRUE;
+    }
 
-    quest = &gRogueRun.adventureQuests[questId];
-    if(GetNode(quest) == NULL)
-        return FALSE;
-
-    quest->progress = progress;
-    return TRUE;
+    return handled;
 }
 
 void RogueAdventureQuests_EmitSignal(u8 signal, u16 value)
 {
     u8 i;
 
-    if(signal == ROGUE_ADVENTURE_QUEST_SIGNAL_NONE || value == 0)
+    if(signal == ROGUE_ADVENTURE_QUEST_SIGNAL_NONE
+        || signal >= ROGUE_ADVENTURE_QUEST_SIGNAL_COUNT)
         return;
 
     for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
-    {
-        struct RogueAdventureQuest *quest = &gRogueRun.adventureQuests[i];
-        const struct RogueAdventureQuestNodeDefinition *node = GetNode(quest);
-
-        if(node != NULL && node->listenSignal == signal)
-        {
-            quest->progress = min(quest->target, quest->progress + value);
-            if(quest->progress >= quest->target)
-                EnterNode(quest, node->nextNodeId);
-        }
-    }
+        RogueAdventureQuests_EmitSignalForQuest(i, signal, value);
 }
 
 u8 RogueAdventureQuests_GetCount(void)
@@ -597,7 +625,9 @@ u8 RogueAdventureQuests_GetState(u8 questId)
         return ROGUE_ADVENTURE_QUEST_STATE_READY;
 
     node = GetNode(quest);
-    if(node != NULL && node->listenSignal == ROGUE_ADVENTURE_QUEST_SIGNAL_NONE
+    if(node != NULL
+        && node->progressSignal == ROGUE_ADVENTURE_QUEST_SIGNAL_NONE
+        && node->completionSignal == ROGUE_ADVENTURE_QUEST_SIGNAL_NONE
         && (node->flags & ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE) == 0)
         return ROGUE_ADVENTURE_QUEST_STATE_READY;
 

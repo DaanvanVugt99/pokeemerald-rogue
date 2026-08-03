@@ -692,7 +692,10 @@ void RogueRouteScenes_OnExitRoute(void)
             && RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
         {
             advancedQuests[scene.ownerQuestId] = TRUE;
-            RogueAdventureQuests_Advance(scene.ownerQuestId);
+            RogueAdventureQuests_EmitSignalForQuest(
+                scene.ownerQuestId,
+                ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+                1);
         }
         else
         {
@@ -701,7 +704,10 @@ void RogueRouteScenes_OnExitRoute(void)
             if(questId < ROGUE_ADVENTURE_QUEST_CAPACITY && !advancedQuests[questId])
             {
                 advancedQuests[questId] = TRUE;
-                RogueAdventureQuests_Advance(questId);
+                RogueAdventureQuests_EmitSignalForQuest(
+                    questId,
+                    ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+                    1);
             }
         }
     }

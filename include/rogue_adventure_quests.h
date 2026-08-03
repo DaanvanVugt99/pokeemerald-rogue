@@ -22,9 +22,8 @@ bool8 RogueAdventureQuests_BuildSceneRequest(u8 questId, struct RogueRouteSceneR
 u8 RogueAdventureQuests_CollectSceneRequests(u8 roomId, struct RogueRouteSceneRequest *requests, u8 capacity);
 bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSceneRequest *request, u16 *priority);
 void RogueAdventureQuests_LeaveRoute(u8 roomId);
-bool8 RogueAdventureQuests_Advance(u8 questId);
-bool8 RogueAdventureQuests_SetProgress(u8 questId, u8 progress);
 void RogueAdventureQuests_EmitSignal(u8 signal, u16 value);
+bool8 RogueAdventureQuests_EmitSignalForQuest(u8 questId, u8 signal, u16 value);
 
 u8 RogueAdventureQuests_GetCount(void);
 u8 RogueAdventureQuests_GetQuestIdAt(u8 displayIndex);

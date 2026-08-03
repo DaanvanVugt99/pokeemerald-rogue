@@ -98,6 +98,9 @@ Format follows Keep a Changelog loosely:
   an explicit local deterministic RNG without replacing either global stream.
   Selected standalone payloads are retained in the existing 12-byte room plan,
   so composition and quickload restoration never rerun content selection.
+  Adventure Quest nodes now also declare reusable progress and completion
+  signals, including additive and unique-objective progress, instead of
+  advancing through event-specific state mutations.
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.
