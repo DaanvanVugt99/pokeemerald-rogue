@@ -58,6 +58,64 @@ script Rogue_RouteEvent_Prop
     release
 }
 
+script Rogue_RouteEvent_UnboundTutorProp
+{
+    lock
+    faceplayer
+
+    msgbox(format("The equipment has been worn smooth by years of unusual training."))
+
+    release
+}
+
+script Rogue_RouteEvent_UnboundTutor
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("A technique belongs to whoever can master it. Make this one your own."))
+    }
+    else
+    {
+        special(RogueRouteEvents_PrepareUnboundTutor)
+        if(var(VAR_RESULT) != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        {
+            msgbox(format("I have no suitable lesson for you today."))
+            release
+            end
+        }
+
+        msgbox(format("A technique doesn't belong to a species. It belongs to whoever can master it.\pI can teach one Pokémon {STR_VAR_1}, {STR_VAR_2}, or {STR_VAR_3}.\pYou may choose only one lesson. Use left and right to inspect your party."))
+        msgbox(format("Begin the lesson?"), MSGBOX_YESNO)
+        if(var(VAR_RESULT) == YES)
+        {
+            setvar(VAR_0x8004, 0)
+            setvar(VAR_0x8006, FALSE)
+            special(TeachMoveFromContext)
+            waitstate
+
+            special(RogueRouteEvents_FinishUnboundTutor)
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+            {
+                msgbox(format("Excellent. No one will expect that technique from your Pokémon."))
+            }
+            else
+            {
+                msgbox(format("Another time, then. The lesson remains open while I am here."))
+            }
+        }
+        else
+        {
+            msgbox(format("Consider the possibilities. I will remain here for now."))
+        }
+    }
+
+    release
+}
+
 script Rogue_RouteEvent_HexedShrineProp
 {
     lock

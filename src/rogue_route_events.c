@@ -5,6 +5,7 @@
 #include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
+#include "constants/moves.h"
 #include "constants/pokemon.h"
 #include "constants/rogue_route_events.h"
 #include "constants/rogue_route_scenes.h"
@@ -18,7 +19,9 @@
 #include "fieldmap.h"
 #include "item.h"
 #include "money.h"
+#include "move_relearner.h"
 #include "overworld.h"
+#include "party_menu.h"
 #include "pokemon.h"
 #include "pokedex.h"
 #include "random.h"
@@ -56,6 +59,8 @@ extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
 extern const u8 Rogue_RouteEvent_ApricornTree[];
 extern const u8 Rogue_RouteEvent_ApricornArtisan[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
+extern const u8 Rogue_RouteEvent_UnboundTutor[];
+extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -218,6 +223,12 @@ static bool8 CanShowApricornGrove(u8 roomId)
     return TRUE;
 }
 
+static bool8 CanShowUnboundTutor(u8 roomId)
+{
+    (void)roomId;
+    return gPlayerPartyCount != 0;
+}
+
 static const u16 sApricornItems[] =
 {
     ITEM_RED_APRICORN,
@@ -239,6 +250,8 @@ static const u16 sApricornBalls[] =
     ITEM_FAST_BALL,
     ITEM_HEAVY_BALL,
 };
+
+#include "data/rogue_unbound_tutor_moves.h"
 
 static u16 GetApricornBall(u16 apricorn)
 {
@@ -415,6 +428,90 @@ static void ExpandApricornGrovePayload(struct RogueRouteSceneRequest *request, u
     request->requestedItem = sApricornItems[payload & APRICORN_PAYLOAD_CHOICE_MASK];
     request->rewardItem = sApricornItems[(payload >> APRICORN_PAYLOAD_CHOICE_BITS) & APRICORN_PAYLOAD_CHOICE_MASK];
     request->trainerNum = sApricornItems[(payload >> (APRICORN_PAYLOAD_CHOICE_BITS * 2)) & APRICORN_PAYLOAD_CHOICE_MASK];
+}
+
+#define UNBOUND_TUTOR_PAYLOAD_SEED_MASK 0xFFFF
+#define UNBOUND_TUTOR_PAYLOAD_TIER_SHIFT 16
+#define UNBOUND_TUTOR_PAYLOAD_TIER_MASK 0x3
+
+static void GenerateUnboundTutorMoves(u32 payload, u16 moves[UNBOUND_TUTOR_ROLE_COUNT])
+{
+    struct RogueRouteSceneRng rng;
+    u8 tier = (payload >> UNBOUND_TUTOR_PAYLOAD_TIER_SHIFT) & UNBOUND_TUTOR_PAYLOAD_TIER_MASK;
+    u8 role;
+
+    if(tier >= UNBOUND_TUTOR_TIER_COUNT)
+    {
+        memset(moves, 0, sizeof(u16) * UNBOUND_TUTOR_ROLE_COUNT);
+        return;
+    }
+
+    RogueRouteSceneRng_Seed(&rng, (payload & UNBOUND_TUTOR_PAYLOAD_SEED_MASK) ^ 0xA17E);
+    for(role = 0; role < UNBOUND_TUTOR_ROLE_COUNT; ++role)
+    {
+        const struct RogueUnboundTutorMovePool *pool = &sUnboundTutorMovePools[tier][role];
+
+        moves[role] = pool->moves[RogueRouteSceneRng_Next(&rng) % pool->count];
+    }
+}
+
+static bool8 IsUnboundTutorOfferUseful(const u16 moves[UNBOUND_TUTOR_ROLE_COUNT])
+{
+    u8 moveIdx;
+
+    for(moveIdx = 0; moveIdx < UNBOUND_TUTOR_ROLE_COUNT; ++moveIdx)
+    {
+        bool8 hasRecipient = FALSE;
+        u8 partyIdx;
+
+        for(partyIdx = 0; partyIdx < gPlayerPartyCount; ++partyIdx)
+        {
+            struct Pokemon *mon = &gPlayerParty[partyIdx];
+
+            if(!GetMonData(mon, MON_DATA_IS_EGG) && !MonKnowsMove(mon, moves[moveIdx]))
+            {
+                hasRecipient = TRUE;
+                break;
+            }
+        }
+
+        if(!hasRecipient)
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+static bool8 SelectUnboundTutorPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    u8 tier = min(Rogue_GetCurrentDifficulty() / 4, UNBOUND_TUTOR_TIER_LATE);
+    u8 attempt;
+
+    (void)request;
+    for(attempt = 0; attempt < 16; ++attempt)
+    {
+        u16 moves[UNBOUND_TUTOR_ROLE_COUNT];
+
+        *payload = RogueRouteSceneRng_Next(rng)
+            | ((u32)tier << UNBOUND_TUTOR_PAYLOAD_TIER_SHIFT);
+        GenerateUnboundTutorMoves(*payload, moves);
+        if(IsUnboundTutorOfferUseful(moves))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static void ExpandUnboundTutorPayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    u16 moves[UNBOUND_TUTOR_ROLE_COUNT];
+
+    GenerateUnboundTutorMoves(payload, moves);
+    request->primaryGraphicsId = OBJ_EVENT_GFX_MISC_NPC_TUTOR;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_MISC_NPC_TUTOR;
+    request->requestedItem = moves[0];
+    request->rewardItem = moves[1];
+    request->trainerNum = moves[2];
 }
 
 #include "data/rogue_route_scene_recipes.h"
@@ -1138,6 +1235,42 @@ void RogueRouteEvents_TryCraftApricornBalls(void)
         return;
 
     Rogue_PushPopup_AddItem(quest->payload[1], ROGUE_APRICORN_BALL_REWARD_COUNT);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_PrepareUnboundTutor(void)
+{
+    struct RogueRouteSceneRequest scene;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        return;
+
+    gSpecialVar_0x8007 = scene.requestedItem;
+    gSpecialVar_0x8008 = scene.rewardItem;
+    gSpecialVar_0x8009 = scene.trainerNum;
+    StringCopy(gStringVar1, gMoveNames[gSpecialVar_0x8007]);
+    StringCopy(gStringVar2, gMoveNames[gSpecialVar_0x8008]);
+    StringCopy(gStringVar3, gMoveNames[gSpecialVar_0x8009]);
+    TeachMoveSetContextUnbound();
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_FinishUnboundTutor(void)
+{
+    struct RogueRouteSceneRequest scene;
+    bool8 taughtMove = gSpecialVar_0x8006 == TRUE;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!taughtMove
+        || !RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        return;
+
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }

@@ -19,5 +19,7 @@ void RogueRouteEvents_FinishForbiddenStoneBattle(void);
 void RogueRouteEvents_BufferApricornTreeData(void);
 void RogueRouteEvents_TryChooseApricorn(void);
 void RogueRouteEvents_TryCraftApricornBalls(void);
+void RogueRouteEvents_PrepareUnboundTutor(void);
+void RogueRouteEvents_FinishUnboundTutor(void);
 
 #endif // GUARD_ROGUE_ROUTE_EVENTS_H

@@ -4,6 +4,7 @@
 void TeachMoveSetContextRelearnMove(void);
 void TeachMoveSetContextEggMove(void);
 void TeachMoveSetContextTutorMove(void);
+void TeachMoveSetContextUnbound(void);
 void TeachMoveFromContext(void);
 void TeachMoveRelearnerMove(void);
 

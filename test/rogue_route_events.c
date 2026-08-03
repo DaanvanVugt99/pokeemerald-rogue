@@ -7,6 +7,7 @@
 #include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
+#include "constants/moves.h"
 #include "constants/pokemon.h"
 #include "constants/rogue_adventure_quests.h"
 #include "constants/rogue_route_events.h"
@@ -18,6 +19,7 @@
 #include "fieldmap.h"
 #include "item.h"
 #include "money.h"
+#include "move_relearner.h"
 #include "overworld.h"
 #include "pokemon.h"
 #include "random.h"
@@ -52,6 +54,8 @@ extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
 extern const u8 Rogue_RouteEvent_ApricornTree[];
 extern const u8 Rogue_RouteEvent_ApricornArtisan[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
+extern const u8 Rogue_RouteEvent_UnboundTutor[];
+extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 
 static u32 GetActiveTeamClassFlag(u16 teamNum)
 {
@@ -301,6 +305,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
 {
     struct RogueAdvPath originalPath;
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct Pokemon originalParty[PARTY_SIZE];
     struct RogueRouteScenePlan firstPlan;
     RAND_TYPE originalRogueRng = gRngRogueValue;
     RAND_TYPE originalStandardRng = gRngValue;
@@ -316,6 +321,8 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     u16 fossilCount = 0;
     u16 forbiddenStoneCount = 0;
     u16 apricornCount = 0;
+    u16 tutorCount = 0;
+    u8 originalPartyCount = gPlayerPartyCount;
     u8 curseCount = Rogue_GetDarkDealCurseCount();
     u16 seed;
     u8 i;
@@ -323,6 +330,10 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     RAND_TYPE standardRngBefore;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalParty, gPlayerParty, sizeof(originalParty));
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    CreateMon(&gPlayerParty[0], SPECIES_MAGIKARP, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gPlayerPartyCount = 1;
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
@@ -393,6 +404,18 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                 EXPECT_EQ(request.rewardItem, ITEM_ABILITY_PATCH);
                 ++forbiddenStoneCount;
             }
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR)
+            {
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+                EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_MISC_NPC_TUTOR);
+                EXPECT_NE(request.requestedItem, MOVE_NONE);
+                EXPECT_NE(request.rewardItem, MOVE_NONE);
+                EXPECT_NE(request.trainerNum, MOVE_NONE);
+                EXPECT_NE(request.requestedItem, request.rewardItem);
+                EXPECT_NE(request.requestedItem, request.trainerNum);
+                EXPECT_NE(request.rewardItem, request.trainerNum);
+                ++tutorCount;
+            }
             else
             {
                 EXPECT(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE
@@ -429,6 +452,8 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     EXPECT_LE(forbiddenStoneCount, 700);
     EXPECT_GE(apricornCount, 300);
     EXPECT_LE(apricornCount, 700);
+    EXPECT_GE(tutorCount, 250);
+    EXPECT_LE(tutorCount, 700);
     for(i = 0; i < curseCount; ++i)
         EXPECT(seenCurse[i]);
 
@@ -442,6 +467,8 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     gRogueRun.adventureRoomId = originalRoomId;
     gRngRogueValue = originalRogueRng;
     gRngValue = originalStandardRng;
+    memcpy(gPlayerParty, originalParty, sizeof(originalParty));
+    gPlayerPartyCount = originalPartyCount;
 }
 
 TEST("Route events provide clear typed lots on every classified active route")
@@ -556,12 +583,19 @@ TEST("Route scene recipes compose bounded unique route objects")
         ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE,
         ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
     };
     struct RogueAdvPath originalPath;
+    struct Pokemon originalParty[PARTY_SIZE];
+    u8 originalPartyCount = gPlayerPartyCount;
     u8 originalRoomId;
     u8 recipeIdx;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalParty, gPlayerParty, sizeof(originalParty));
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    CreateMon(&gPlayerParty[0], SPECIES_MAGIKARP, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gPlayerPartyCount = 1;
 
     for(recipeIdx = 0; recipeIdx < ARRAY_COUNT(sRecipes); ++recipeIdx)
     {
@@ -583,9 +617,11 @@ TEST("Route scene recipes compose bounded unique route objects")
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF ? Rogue_RouteEvent_StolenTradeCasePayoff
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? Rogue_RouteEvent_HexedShrine
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? Rogue_RouteEvent_AnomalousFossilOffer
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutor
             : Rogue_RouteEvent_AnomalousFossilRestoration;
         const u8 *expectedPropScript = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
             ? Rogue_RouteEvent_HexedShrineProp
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutorProp
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
                 || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? Rogue_RouteEvent_FossilProp
             : Rogue_RouteEvent_Prop;
@@ -593,6 +629,7 @@ TEST("Route scene recipes compose bounded unique route objects")
         u8 expectedCount = recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
+            || recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? 5 : 4;
         u8 i;
         u8 j;
@@ -629,6 +666,7 @@ TEST("Route scene recipes compose bounded unique route objects")
             }
 
             if(recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
+                || recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
                 || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
                 || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION)
                 EXPECT(objects[i].x != 56 || objects[i].y != 79);
@@ -637,6 +675,7 @@ TEST("Route scene recipes compose bounded unique route objects")
         EXPECT_EQ(npcCount, 1);
         EXPECT_EQ(propCount, recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
+            || recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? 3 : 2);
 
@@ -662,12 +701,15 @@ TEST("Route scene recipes compose bounded unique route objects")
         EXPECT_EQ(npcCount, 1);
         EXPECT_EQ(propCount, recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
+            || recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
             || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? 3 : 2);
     }
 
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
+    memcpy(gPlayerParty, originalParty, sizeof(originalParty));
+    gPlayerPartyCount = originalPartyCount;
 }
 
 TEST("Declarative route scene visibility drives insertion and restoration")
@@ -928,6 +970,80 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     gRogueRun.adventureRoomId = originalRoomId;
     SetMoney(&gSaveBlock1Ptr->money, originalMoney);
     ClearBag();
+}
+
+TEST("Unbound Tutor offers three universal moves and completes after one lesson")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct Pokemon originalParty[PARTY_SIZE];
+    struct RogueRouteSceneRequest tutor;
+    u16 offeredMoves[3];
+    u16 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u32 originalMoney = GetMoney(&gSaveBlock1Ptr->money);
+    u8 originalPartyCount = gPlayerPartyCount;
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u8 moveIdx;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memcpy(originalParty, gPlayerParty, sizeof(originalParty));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    CreateMon(&gPlayerParty[0], SPECIES_MAGIKARP, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    for(moveIdx = 0; moveIdx < MAX_MON_MOVES; ++moveIdx)
+        SetMonMoveSlot(&gPlayerParty[0], MOVE_NONE, moveIdx);
+    gPlayerPartyCount = 1;
+    Rogue_SetCurrentDifficulty(5);
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(GetFirstPlacement(&tutor));
+    SelectPlacement(&tutor);
+
+    offeredMoves[0] = tutor.requestedItem;
+    offeredMoves[1] = tutor.rewardItem;
+    offeredMoves[2] = tutor.trainerNum;
+    EXPECT_EQ((u8)tutor.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+    EXPECT_NE(offeredMoves[0], MOVE_NONE);
+    EXPECT_NE(offeredMoves[0], offeredMoves[1]);
+    EXPECT_NE(offeredMoves[0], offeredMoves[2]);
+    EXPECT_NE(offeredMoves[1], offeredMoves[2]);
+
+    RogueRouteEvents_PrepareUnboundTutor();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(gSpecialVar_0x8007, offeredMoves[0]);
+    EXPECT_EQ(gSpecialVar_0x8008, offeredMoves[1]);
+    EXPECT_EQ(gSpecialVar_0x8009, offeredMoves[2]);
+    // The special context deliberately ignores species compatibility.
+    EXPECT_EQ(GetNumberOfRelearnableMovesForContext(&gPlayerParty[0]), 3);
+
+    gSpecialVar_0x8006 = FALSE;
+    RogueRouteEvents_FinishUnboundTutor();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_FAILED);
+    EXPECT_EQ(RogueRouteScenes_GetState(tutor.sceneSlot), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+
+    EXPECT_NE(GiveMoveToMon(&gPlayerParty[0], offeredMoves[0]), MON_HAS_MAX_MOVES);
+    gSpecialVar_0x8006 = TRUE;
+    RogueRouteEvents_FinishUnboundTutor();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(RogueRouteScenes_GetState(tutor.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), originalMoney);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+
+    RogueRouteEvents_PrepareUnboundTutor();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_FAILED);
+
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    memcpy(gPlayerParty, originalParty, sizeof(originalParty));
+    gPlayerPartyCount = originalPartyCount;
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
 }
 
 TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Pokemon")
@@ -1917,6 +2033,7 @@ TEST("All existing route events are registered through declarative tables")
         ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN,
+        ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
     };
     u8 i;
 
@@ -1938,7 +2055,7 @@ TEST("All existing route events are registered through declarative tables")
         EXPECT(fallback != NULL);
         EXPECT_EQ(fallback->recipeId, sExpectedFallbackRecipes[i]);
         EXPECT(fallback->isEligible != NULL);
-        EXPECT_EQ(fallback->weight, i < 4 ? 50 : 25);
+        EXPECT_EQ(fallback->weight, i == 4 || i == 5 ? 25 : 50);
     }
     EXPECT_EQ(
         RogueRouteEvents_GetFallbackDefinition(4)->familyId,

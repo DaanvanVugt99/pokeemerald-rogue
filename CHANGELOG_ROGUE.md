@@ -36,7 +36,10 @@ Format follows Keep a Changelog loosely:
   Spiritomb battle for an Ability Patch and ¥10,000. Apricorn Crafting now
   presents three seeded Apricorns and lets the player choose one to exchange
   for five matching Apricorn Balls. Its Ball Maker may share the current route
-  or follow the unfinished Adventure Quest onto a later branch. Active routes
+  or follow the unfinished Adventure Quest onto a later branch. The one-off
+  Unbound Tutor offers one free lesson chosen from three seeded,
+  progression-scaled moves, and ignores normal species compatibility to enable
+  unusual builds. Active routes
   expose eight small, medium, and large scene lots; the director independently
   fills one to three lots so quest consumers and unrelated route events can
   coexist. The per-room scene plan is packed into less memory than the former

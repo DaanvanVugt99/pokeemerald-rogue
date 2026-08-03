@@ -115,6 +115,14 @@ static const struct RogueRouteSceneObjectDefinition sApricornArtisanObjects[] =
     SCENE_OBJECT(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp),
 };
 
+static const struct RogueRouteSceneObjectDefinition sUnboundTutorObjects[] =
+{
+    SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_UnboundTutor),
+    SCENE_OBJECT(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_UnboundTutorProp),
+    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_UnboundTutorProp),
+    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_UnboundTutorProp),
+};
+
 static const struct RogueRouteSceneLotDefinition sStolenTradeCaseOfferLots[] =
 {
     SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCaseOfferObjects, sAccentsLeftRight),
@@ -165,6 +173,10 @@ static const struct RogueRouteSceneLotDefinition sApricornGroveAndArtisanLots[] 
 static const struct RogueRouteSceneLotDefinition sApricornArtisanLots[] =
 {
     SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornArtisanObjects, sAccentsLeftRight),
+};
+static const struct RogueRouteSceneLotDefinition sUnboundTutorLots[] =
+{
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sUnboundTutorObjects, sAccentsLeftRightUp),
 };
 
 static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
@@ -270,6 +282,14 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE,
         .lotCount = ARRAY_COUNT(sApricornArtisanLots),
         .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR] =
+    {
+        .selectPayload = SelectUnboundTutorPayload,
+        .expandPayload = ExpandUnboundTutorPayload,
+        .lots = sUnboundTutorLots,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
+        .lotCount = ARRAY_COUNT(sUnboundTutorLots),
     },
 };
 
