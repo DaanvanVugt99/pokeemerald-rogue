@@ -30,6 +30,7 @@
 #include "rogue_adventurepaths.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
+#include "rogue_event_transactions.h"
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_popup.h"
@@ -267,83 +268,146 @@ static u8 FindAdventureQuestId(u8 definitionId)
     return ROGUE_ADVENTURE_QUEST_INVALID_ID;
 }
 
-static void BuildStolenTradeCaseOffer(struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng)
+static bool8 SelectStolenTradeCaseOfferPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
 {
-    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER;
-    request->source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR;
+    (void)request;
+    *payload = SelectEvilTeamTrainer(rng);
+    return *payload != TRAINER_NONE;
+}
+
+static void ExpandStolenTradeCaseOfferPayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
     request->primaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
     request->requestedItem = ITEM_TRADE_CASE;
     request->rewardItem = ITEM_BIG_POKEBLOCK_BUNDLE;
-    request->trainerNum = SelectEvilTeamTrainer(rng);
+    request->trainerNum = payload;
 }
 
-static void BuildHexedShrine(struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng)
+#define HEXED_SHRINE_PAYLOAD_ITEM_MASK 0xFFF
+#define HEXED_SHRINE_PAYLOAD_REWARD_SHIFT 12
+
+static bool8 SelectHexedShrinePayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
 {
-    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE;
-    request->source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF;
-    request->primaryGraphicsId = OBJ_EVENT_GFX_DEVIL_MAN;
-    request->secondaryGraphicsId = OBJ_EVENT_GFX_DEVIL_MAN;
+    u16 curseItem;
+    u16 rewardAmount;
+
+    (void)request;
     if(gRogueRun.temporaryDarkDealCurseItem != ITEM_NONE
         && (VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_HEXED_SHRINE_ACCEPTED) != 0)
-    {
-        request->requestedItem = gRogueRun.temporaryDarkDealCurseItem;
-    }
+        curseItem = gRogueRun.temporaryDarkDealCurseItem;
     else
-    {
-        request->requestedItem = Rogue_SelectDarkDealCurseItem(RogueRouteSceneRng_Next(rng));
-    }
-    request->rewardAmount = min(
+        curseItem = Rogue_SelectDarkDealCurseItem(RogueRouteSceneRng_Next(rng));
+
+    rewardAmount = min(
         ROGUE_HEXED_SHRINE_REWARD_MAX,
         ROGUE_HEXED_SHRINE_REWARD_BASE + ROGUE_HEXED_SHRINE_REWARD_PER_DIFFICULTY * Rogue_GetCurrentDifficulty());
+    if(curseItem == ITEM_NONE
+        || curseItem > HEXED_SHRINE_PAYLOAD_ITEM_MASK
+        || rewardAmount % 1000 != 0)
+        return FALSE;
+
+    *payload = curseItem | ((u32)(rewardAmount / 1000) << HEXED_SHRINE_PAYLOAD_REWARD_SHIFT);
+    return TRUE;
 }
 
-static void BuildAnomalousFossilOffer(struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng)
+static void ExpandHexedShrinePayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    request->primaryGraphicsId = OBJ_EVENT_GFX_DEVIL_MAN;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_DEVIL_MAN;
+    request->requestedItem = payload & HEXED_SHRINE_PAYLOAD_ITEM_MASK;
+    request->rewardAmount = (payload >> HEXED_SHRINE_PAYLOAD_REWARD_SHIFT) * 1000;
+}
+
+#define FOSSIL_PAYLOAD_INDEX_MASK 0xF
+#define FOSSIL_PAYLOAD_SEED_SHIFT 4
+
+static bool8 SelectAnomalousFossilOfferPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
 {
     u16 eligibleCount = CountEligibleAnomalousFossils();
     u16 selected = eligibleCount == 0 ? 0 : RogueRouteSceneRng_Next(rng) % eligibleCount;
+    u16 rewardSeed = RogueRouteSceneRng_Next(rng);
     u16 i;
 
-    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER;
-    request->source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR;
-    request->primaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_1;
-    request->secondaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_2;
-    request->rewardAmount = RogueRouteSceneRng_Next(rng);
+    (void)request;
+    if(eligibleCount == 0)
+        return FALSE;
 
     for(i = 0; i < ARRAY_COUNT(sAnomalousFossilItems); ++i)
     {
-        u16 item = sAnomalousFossilItems[i];
-        u16 species = RogueAdventureQuests_GetFossilSpecies(item);
+        u16 species = RogueAdventureQuests_GetFossilSpecies(sAnomalousFossilItems[i]);
 
         if(species != SPECIES_NONE
             && RoguePokedex_IsSpeciesEnabled(species)
             && selected-- == 0)
         {
-            request->requestedItem = item;
-            request->rewardItem = species;
-            return;
+            AGB_ASSERT(i <= FOSSIL_PAYLOAD_INDEX_MASK);
+            *payload = i | ((u32)rewardSeed << FOSSIL_PAYLOAD_SEED_SHIFT);
+            return i <= FOSSIL_PAYLOAD_INDEX_MASK;
         }
     }
 
-    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_NONE;
+    return FALSE;
 }
 
-static void BuildForbiddenStoneOffer(struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng)
+static void ExpandAnomalousFossilOfferPayload(struct RogueRouteSceneRequest *request, u32 payload)
 {
-    request->recipeId = ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER;
-    request->source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR;
+    u8 fossilIndex = payload & FOSSIL_PAYLOAD_INDEX_MASK;
+
+    if(fossilIndex >= ARRAY_COUNT(sAnomalousFossilItems))
+        return;
+
+    request->primaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_1;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_SCIENTIST_2;
+    request->requestedItem = sAnomalousFossilItems[fossilIndex];
+    request->rewardItem = RogueAdventureQuests_GetFossilSpecies(request->requestedItem);
+    request->rewardAmount = payload >> FOSSIL_PAYLOAD_SEED_SHIFT;
+}
+
+static bool8 SelectForbiddenStoneOfferPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    (void)request;
+    *payload = RogueRouteSceneRng_Next(rng);
+    return TRUE;
+}
+
+static void ExpandForbiddenStoneOfferPayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
     request->primaryGraphicsId = OBJ_EVENT_GFX_MISC_CHANNELER;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_MISC_CHANNELER;
     request->requestedItem = ITEM_ODD_KEYSTONE;
     request->rewardItem = ITEM_ABILITY_PATCH;
-    request->rewardAmount = RogueRouteSceneRng_Next(rng);
+    request->rewardAmount = payload;
 }
 
-static void BuildApricornGrove(struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng)
+#define APRICORN_PAYLOAD_CHOICE_BITS 3
+#define APRICORN_PAYLOAD_CHOICE_MASK 0x7
+
+static bool8 SelectApricornGrovePayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
 {
     u8 choices[ARRAY_COUNT(sApricornItems)];
     u8 i;
 
+    (void)request;
+    for(i = 0; i < ARRAY_COUNT(choices); ++i)
+        choices[i] = i;
+    for(i = 0; i < ROGUE_APRICORN_CHOICE_COUNT; ++i)
+    {
+        u8 selected = i + RogueRouteSceneRng_Next(rng) % (ARRAY_COUNT(choices) - i);
+        u8 temp = choices[i];
+
+        choices[i] = choices[selected];
+        choices[selected] = temp;
+    }
+
+    *payload = choices[0]
+        | ((u32)choices[1] << APRICORN_PAYLOAD_CHOICE_BITS)
+        | ((u32)choices[2] << (APRICORN_PAYLOAD_CHOICE_BITS * 2));
+    return TRUE;
+}
+
+static void ExpandApricornGrovePayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
     if(request->recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
         && request->lotRole == 1)
     {
@@ -361,22 +425,11 @@ static void BuildApricornGrove(struct RogueRouteSceneRequest *request, struct Ro
         return;
     }
 
-    for(i = 0; i < ARRAY_COUNT(choices); ++i)
-        choices[i] = i;
-    for(i = 0; i < ROGUE_APRICORN_CHOICE_COUNT; ++i)
-    {
-        u8 selected = i + RogueRouteSceneRng_Next(rng) % (ARRAY_COUNT(choices) - i);
-        u8 temp = choices[i];
-
-        choices[i] = choices[selected];
-        choices[selected] = temp;
-    }
-
     request->primaryGraphicsId = OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_OLD_MAN;
-    request->requestedItem = sApricornItems[choices[0]];
-    request->rewardItem = sApricornItems[choices[1]];
-    request->trainerNum = sApricornItems[choices[2]];
+    request->requestedItem = sApricornItems[payload & APRICORN_PAYLOAD_CHOICE_MASK];
+    request->rewardItem = sApricornItems[(payload >> APRICORN_PAYLOAD_CHOICE_BITS) & APRICORN_PAYLOAD_CHOICE_MASK];
+    request->trainerNum = sApricornItems[(payload >> (APRICORN_PAYLOAD_CHOICE_BITS * 2)) & APRICORN_PAYLOAD_CHOICE_MASK];
 }
 
 enum
@@ -541,6 +594,7 @@ void RogueRouteEvents_BeginStolenTradeCaseBattle(void)
 void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
 {
     struct RogueRouteSceneRequest scene;
+    struct RogueEventTransaction transaction = {0};
     bool8 alreadyHasCase;
     u16 state;
 
@@ -558,12 +612,17 @@ void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
         return;
 
     alreadyHasCase = CheckBagHasItem(scene.requestedItem, 1);
-    if(!alreadyHasCase
-        && (!CheckBagHasSpace(scene.requestedItem, 1) || !AddBagItem(scene.requestedItem, 1)))
+    transaction.rewards[0].itemId = scene.requestedItem;
+    transaction.rewards[0].count = 1;
+    transaction.rewardCount = 1;
+    if(!alreadyHasCase)
     {
-        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
+        gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+        if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        {
+            RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+            return;
+        }
     }
 
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
@@ -574,6 +633,7 @@ void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
 void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
 {
     struct RogueRouteSceneRequest scene;
+    struct RogueEventTransaction transaction = {0};
     u16 state;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
@@ -586,27 +646,20 @@ void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
             && state != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING))
         return;
 
-    if(!CheckBagHasItem(scene.requestedItem, 1))
+    transaction.costs[0].itemId = scene.requestedItem;
+    transaction.costs[0].count = 1;
+    transaction.rewards[0].itemId = scene.rewardItem;
+    transaction.rewards[0].count = 1;
+    transaction.moneyReward = ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY;
+    transaction.costCount = 1;
+    transaction.rewardCount = 1;
+    transaction.flags = ROGUE_EVENT_TRANSACTION_FLAG_ALLOW_COST_SLOTS_FOR_REWARDS;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
-        return;
-    }
-
-    if(!RemoveBagItem(scene.requestedItem, 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
-        return;
-    }
-
-    if(!AddBagItem(scene.rewardItem, 1))
-    {
-        AddBagItem(scene.requestedItem, 1);
         RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
-
-    AddMoney(&gSaveBlock1Ptr->money, ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY);
 
     FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
@@ -617,33 +670,31 @@ void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
 void RogueRouteEvents_TryAcceptHexedShrine(void)
 {
     struct RogueRouteSceneRequest scene;
-    u32 money;
+    struct RogueEventTransaction transaction = {0};
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
     if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
         || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
         || scene.source != ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF
         || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
-        || gRogueRun.temporaryDarkDealCurseItem != ITEM_NONE)
+        || !Rogue_CanActivateTemporaryDarkDealCurse(scene.requestedItem))
         return;
 
-    if(!CheckBagHasSpace(scene.requestedItem, 1))
+    transaction.rewards[0].itemId = scene.requestedItem;
+    transaction.rewards[0].count = 1;
+    transaction.moneyReward = scene.rewardAmount;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        return;
+
+    if(!Rogue_TryActivateTemporaryDarkDealCurse(scene.requestedItem))
     {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        RogueEventTransaction_Rollback(&transaction);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
         return;
     }
 
-    money = GetMoney(&gSaveBlock1Ptr->money);
-    if(scene.rewardAmount > MAX_MONEY || money > MAX_MONEY - scene.rewardAmount)
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL;
-        return;
-    }
-
-    if(!Rogue_TryAddTemporaryDarkDealCurse(scene.requestedItem))
-        return;
-
-    AddMoney(&gSaveBlock1Ptr->money, scene.rewardAmount);
     Rogue_PushPopup_AddMoney(scene.rewardAmount);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     VarSet(
@@ -656,6 +707,7 @@ void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void)
 {
     struct RogueRouteSceneRequest scene;
     struct RogueAdventureQuestCreateParams params = {0};
+    struct RogueEventTransaction transaction = {0};
     u8 questId;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
@@ -667,13 +719,11 @@ void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void)
         || RogueAdventureQuests_GetFossilSpecies(scene.requestedItem) != scene.rewardItem)
         return;
 
-    if(!CheckBagHasSpace(scene.requestedItem, 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
-
-    if(!AddBagItem(scene.requestedItem, 1))
+    transaction.rewards[0].itemId = scene.requestedItem;
+    transaction.rewards[0].count = 1;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         return;
 
     params.payload[0] = scene.requestedItem;
@@ -681,7 +731,8 @@ void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void)
     questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL, &params);
     if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
     {
-        RemoveBagItem(scene.requestedItem, 1);
+        RogueEventTransaction_Rollback(&transaction);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
         return;
     }
 
@@ -748,6 +799,7 @@ void RogueRouteEvents_BufferFossilRestorationData(void)
 void RogueRouteEvents_TryRestoreAnomalousFossil(void)
 {
     struct RogueRouteSceneRequest scene;
+    struct RogueEventTransaction transaction = {0};
     struct Pokemon mon;
     RAND_TYPE originalRng;
     u32 customMonId;
@@ -762,12 +814,6 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
         || restoration > ROGUE_FOSSIL_RESTORATION_ADAPTIVE)
         return;
 
-    if(!CheckBagHasItem(scene.requestedItem, 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
-        return;
-    }
-
     originalRng = gRngValue;
     SeedRng(scene.rewardAmount ^ (restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0x51A7 : 0xB4E3));
     customMonId = RogueGift_CreateDynamicMonIdRawWithTypingChance(
@@ -777,16 +823,17 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
     RogueGift_CreateMon(customMonId, &mon, scene.rewardItem, 1, USE_RANDOM_IVS);
     gRngValue = originalRng;
 
-    if(!RemoveBagItem(scene.requestedItem, 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+    transaction.costs[0].itemId = scene.requestedItem;
+    transaction.costs[0].count = 1;
+    transaction.costCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         return;
-    }
 
     giveResult = GiveTradedMonToPlayer(&mon);
     if(giveResult == MON_CANT_GIVE)
     {
-        AddBagItem(scene.requestedItem, 1);
+        RogueEventTransaction_Rollback(&transaction);
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
         return;
     }
@@ -815,6 +862,7 @@ void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void)
 {
     struct RogueRouteSceneRequest scene;
     struct RogueAdventureQuestCreateParams params = {0};
+    struct RogueEventTransaction transaction = {0};
     u8 questId;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
@@ -825,13 +873,11 @@ void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void)
         || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE))
         return;
 
-    if(!CheckBagHasSpace(ITEM_ODD_KEYSTONE, 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
-
-    if(!AddBagItem(ITEM_ODD_KEYSTONE, 1))
+    transaction.rewards[0].itemId = ITEM_ODD_KEYSTONE;
+    transaction.rewards[0].count = 1;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         return;
 
     params.payload[0] = scene.rewardAmount;
@@ -839,7 +885,8 @@ void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void)
     questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE, &params);
     if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
     {
-        RemoveBagItem(ITEM_ODD_KEYSTONE, 1);
+        RogueEventTransaction_Rollback(&transaction);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
         return;
     }
 
@@ -931,7 +978,7 @@ void RogueRouteEvents_FinishForbiddenStoneBattle(void)
 {
     struct RogueRouteSceneRequest scene;
     const struct RogueAdventureQuest *quest;
-    u32 money;
+    struct RogueEventTransaction transaction = {0};
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
     if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
@@ -951,44 +998,20 @@ void RogueRouteEvents_FinishForbiddenStoneBattle(void)
     if(quest->progress == 0 && !RogueAdventureQuests_SetProgress(scene.ownerQuestId, 1))
         return;
 
-    if(!CheckBagHasItem(ITEM_ODD_KEYSTONE, 1))
+    transaction.costs[0].itemId = ITEM_ODD_KEYSTONE;
+    transaction.costs[0].count = 1;
+    transaction.rewards[0].itemId = ITEM_ABILITY_PATCH;
+    transaction.rewards[0].count = 1;
+    transaction.moneyReward = ROGUE_FORBIDDEN_STONE_REWARD_MONEY;
+    transaction.costCount = 1;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
         return;
     }
 
-    money = GetMoney(&gSaveBlock1Ptr->money);
-    if(money > MAX_MONEY - ROGUE_FORBIDDEN_STONE_REWARD_MONEY)
-    {
-        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL;
-        return;
-    }
-
-    if(!CheckBagHasSpace(ITEM_ABILITY_PATCH, 1))
-    {
-        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
-
-    if(!RemoveBagItem(ITEM_ODD_KEYSTONE, 1))
-    {
-        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
-        return;
-    }
-
-    if(!AddBagItem(ITEM_ABILITY_PATCH, 1))
-    {
-        AddBagItem(ITEM_ODD_KEYSTONE, 1);
-        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
-
-    AddMoney(&gSaveBlock1Ptr->money, ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
     Rogue_PushPopup_AddItem(ITEM_ABILITY_PATCH, 1);
     Rogue_PushPopup_AddMoney(ROGUE_FORBIDDEN_STONE_REWARD_MONEY);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
@@ -1052,6 +1075,7 @@ void RogueRouteEvents_TryChooseApricorn(void)
 {
     struct RogueRouteSceneRequest scene;
     struct RogueAdventureQuestCreateParams params = {0};
+    struct RogueEventTransaction transaction = {0};
     u16 apricorn;
     u16 ball;
     u8 choice;
@@ -1074,12 +1098,11 @@ void RogueRouteEvents_TryChooseApricorn(void)
     if(apricorn == ITEM_NONE || ball == ITEM_NONE)
         return;
 
-    if(!CheckBagHasSpace(apricorn, 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
-    if(!AddBagItem(apricorn, 1))
+    transaction.rewards[0].itemId = apricorn;
+    transaction.rewards[0].count = 1;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         return;
 
     params.payload[0] = apricorn;
@@ -1087,7 +1110,8 @@ void RogueRouteEvents_TryChooseApricorn(void)
     questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING, &params);
     if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
     {
-        RemoveBagItem(apricorn, 1);
+        RogueEventTransaction_Rollback(&transaction);
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
         return;
     }
 
@@ -1099,6 +1123,7 @@ void RogueRouteEvents_TryCraftApricornBalls(void)
 {
     struct RogueRouteSceneRequest scene;
     const struct RogueAdventureQuest *quest;
+    struct RogueEventTransaction transaction = {0};
     u8 questId;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
@@ -1117,28 +1142,15 @@ void RogueRouteEvents_TryCraftApricornBalls(void)
         || GetApricornBall(quest->payload[0]) != quest->payload[1])
         return;
 
-    if(!CheckBagHasItem(quest->payload[0], 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+    transaction.costs[0].itemId = quest->payload[0];
+    transaction.costs[0].count = 1;
+    transaction.rewards[0].itemId = quest->payload[1];
+    transaction.rewards[0].count = ROGUE_APRICORN_BALL_REWARD_COUNT;
+    transaction.costCount = 1;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         return;
-    }
-    if(!CheckBagHasSpace(quest->payload[1], ROGUE_APRICORN_BALL_REWARD_COUNT))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
-
-    if(!RemoveBagItem(quest->payload[0], 1))
-    {
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
-        return;
-    }
-    if(!AddBagItem(quest->payload[1], ROGUE_APRICORN_BALL_REWARD_COUNT))
-    {
-        AddBagItem(quest->payload[0], 1);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
 
     Rogue_PushPopup_AddItem(quest->payload[1], ROGUE_APRICORN_BALL_REWARD_COUNT);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);

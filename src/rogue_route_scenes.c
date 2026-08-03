@@ -33,10 +33,10 @@ extern const struct Tileset gTileset_GeneralHub;
 #define ROUTE_SCENE_LOT_MASK     0x0F
 #define ROUTE_SCENE_ROLE_SHIFT   10
 #define ROUTE_SCENE_ROLE_MASK    0x03
-#define ROUTE_SCENE_SLOT_SHIFT   12
-#define ROUTE_SCENE_SLOT_MASK    0x03
-#define ROUTE_SCENE_OWNER_SHIFT  14
+#define ROUTE_SCENE_OWNER_SHIFT  12
 #define ROUTE_SCENE_OWNER_MASK   0x3F
+#define ROUTE_SCENE_PAYLOAD_SHIFT 12
+#define ROUTE_SCENE_PAYLOAD_MASK  0xFFFFF
 
 #define ROUTE_SCENE_OBJECT_SLOT_MASK 0x03
 #define ROUTE_SCENE_OBJECT_ROLE_SHIFT 2
@@ -95,9 +95,18 @@ static u8 GetPlacementRole(const struct RogueRouteScenePlacement *placement)
     return (placement->packed >> ROUTE_SCENE_ROLE_SHIFT) & ROUTE_SCENE_ROLE_MASK;
 }
 
-static u8 GetPlacementSceneSlot(const struct RogueRouteScenePlacement *placement)
+static u8 GetPlacementSceneSlot(const struct RogueRouteScenePlan *plan, u8 placementIndex)
 {
-    return (placement->packed >> ROUTE_SCENE_SLOT_SHIFT) & ROUTE_SCENE_SLOT_MASK;
+    u8 sceneSlot = 0;
+    u8 i;
+
+    for(i = 1; i <= placementIndex; ++i)
+    {
+        if(GetPlacementRole(&plan->placements[i]) == 0)
+            ++sceneSlot;
+    }
+
+    return sceneSlot;
 }
 
 static u8 GetPlacementOwner(const struct RogueRouteScenePlacement *placement)
@@ -105,19 +114,28 @@ static u8 GetPlacementOwner(const struct RogueRouteScenePlacement *placement)
     return (placement->packed >> ROUTE_SCENE_OWNER_SHIFT) & ROUTE_SCENE_OWNER_MASK;
 }
 
-static struct RogueRouteScenePlacement PackPlacement(u8 recipeId, u8 lotId, u8 lotRole, u8 sceneSlot, u8 ownerQuestId)
+static u32 GetPlacementPayload(const struct RogueRouteScenePlacement *placement)
 {
+    return (placement->packed >> ROUTE_SCENE_PAYLOAD_SHIFT) & ROUTE_SCENE_PAYLOAD_MASK;
+}
+
+static struct RogueRouteScenePlacement PackPlacement(u8 recipeId, u8 lotId, u8 lotRole, u8 ownerQuestId, u32 payload)
+{
+    u32 ownerOrPayload = ownerQuestId == ROGUE_ADVENTURE_QUEST_INVALID_ID
+        ? payload & ROUTE_SCENE_PAYLOAD_MASK
+        : ownerQuestId & ROUTE_SCENE_OWNER_MASK;
     struct RogueRouteScenePlacement placement =
     {
         .packed = ((u32)recipeId << ROUTE_SCENE_RECIPE_SHIFT)
             | ((u32)lotId << ROUTE_SCENE_LOT_SHIFT)
             | ((u32)lotRole << ROUTE_SCENE_ROLE_SHIFT)
-            | ((u32)sceneSlot << ROUTE_SCENE_SLOT_SHIFT)
-            | ((u32)(ownerQuestId & ROUTE_SCENE_OWNER_MASK) << ROUTE_SCENE_OWNER_SHIFT),
+            | (ownerOrPayload << ROUTE_SCENE_OWNER_SHIFT),
     };
 
     return placement;
 }
+
+static bool8 SelectRecipePayload(u8 roomId, u8 recipeId, u8 sceneSlot, u32 *payload);
 
 static u16 PackSceneObjectData(u8 sceneSlot, u8 lotRole, u8 propId)
 {
@@ -168,16 +186,22 @@ void RogueRouteScenes_SetState(u8 sceneSlot, u8 state)
 void RogueRouteScenes_DebugSetPlacement(u8 placementIndex, u8 recipeId, u8 lotId, u8 lotRole, u8 sceneSlot, u8 ownerQuestId)
 {
     struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
+    const struct RogueRouteRecipeDefinition *definition = RogueRouteEvents_GetRecipeDefinition(recipeId);
+    u32 payload = 0;
 
-    if(plan == NULL || placementIndex >= ARRAY_COUNT(plan->placements))
+    if(plan == NULL || definition == NULL || placementIndex >= ARRAY_COUNT(plan->placements))
+        return;
+
+    if(definition->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        && !SelectRecipePayload(gRogueRun.adventureRoomId, recipeId, sceneSlot, &payload))
         return;
 
     plan->placements[placementIndex] = PackPlacement(
         recipeId,
         lotId,
         lotRole,
-        sceneSlot,
-        ownerQuestId);
+        ownerQuestId,
+        payload);
 }
 #endif
 
@@ -272,9 +296,9 @@ static bool8 AddRecipeToPlan(
     struct RogueRouteScenePlan *plan,
     u8 *placementCount,
     u8 maxPlacements,
-    u8 sceneSlot,
     u8 recipeId,
     u8 ownerQuestId,
+    u32 payload,
     const struct RogueRouteLot *lots,
     u8 lotCount,
     u16 *usedLots,
@@ -334,14 +358,49 @@ static bool8 AddRecipeToPlan(
             recipeId,
             selectedLots[role],
             role,
-            sceneSlot,
-            ownerQuestId);
+            ownerQuestId,
+            payload);
         ++*placementCount;
     }
 
     *usedLots = pendingUsedLots;
     *usedObjects = pendingObjects;
     return TRUE;
+}
+
+static bool8 SelectRecipePayload(u8 roomId, u8 recipeId, u8 sceneSlot, u32 *payload)
+{
+    const struct RogueRouteRecipeDefinition *definition = RogueRouteEvents_GetRecipeDefinition(recipeId);
+    struct RogueRouteSceneRequest request = {0};
+    struct RogueRouteSceneRng rng;
+    u8 routeIdx;
+
+    if(definition == NULL || roomId >= gRogueAdvPath.roomCount)
+        return FALSE;
+
+    routeIdx = gRogueAdvPath.rooms[roomId].roomParams.roomIdx;
+    if(routeIdx >= gRogueRouteTable.routeCount)
+        return FALSE;
+
+    *payload = 0;
+    if(definition->selectPayload == NULL)
+        return TRUE;
+
+    request.recipeId = recipeId;
+    request.environment = gRogueRouteTable.routes[routeIdx].environment;
+    request.sceneSlot = sceneSlot;
+    request.source = definition->source;
+    request.ownerQuestId = ROGUE_ADVENTURE_QUEST_INVALID_ID;
+    RogueRouteSceneRng_Seed(&rng, gRogueAdvPath.rooms[roomId].rngSeed
+        ^ 0x5EED
+        ^ (recipeId * 257)
+        ^ (sceneSlot * 4051));
+
+    if(!definition->selectPayload(&request, &rng, payload))
+        return FALSE;
+
+    AGB_ASSERT(*payload <= ROUTE_SCENE_PAYLOAD_MASK);
+    return *payload <= ROUTE_SCENE_PAYLOAD_MASK;
 }
 
 static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
@@ -384,9 +443,9 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             plan,
             &placementCount,
             ROGUE_ROUTE_SCENE_MAX_PLACEMENTS,
-            sceneSlot,
             questRequests[i].recipeId,
             questRequests[i].ownerQuestId,
+            0,
             lots,
             lotCount,
             &usedLots,
@@ -440,17 +499,20 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
 
         {
             const struct RogueRouteFallbackDefinition *fallback = RogueRouteEvents_GetFallbackDefinition(selectedFallback);
+            u32 payload = 0;
 
             if(fallback != NULL)
                 usedFallbackRecipes[fallback->recipeId] = TRUE;
 
-            if(fallback != NULL && AddRecipeToPlan(
+            if(fallback != NULL
+                && SelectRecipePayload(roomId, fallback->recipeId, sceneSlot, &payload)
+                && AddRecipeToPlan(
                     plan,
                     &placementCount,
                     ROGUE_ROUTE_SCENE_MAX_PLACEMENTS,
-                    sceneSlot,
                     fallback->recipeId,
                     ROGUE_ADVENTURE_QUEST_INVALID_ID,
+                    payload,
                     lots,
                     lotCount,
                     &usedLots,
@@ -485,7 +547,6 @@ bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteS
     const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
     const struct RogueRouteScenePlacement *placement;
     const struct RogueRouteRecipeDefinition *definition;
-    struct RogueRouteSceneRng rng;
     u8 recipeId;
     u8 routeIdx;
 
@@ -504,16 +565,11 @@ bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteS
     request->environment = gRogueRouteTable.routes[routeIdx].environment;
     request->lotId = GetPlacementLot(placement);
     request->lotRole = GetPlacementRole(placement);
-    request->sceneSlot = GetPlacementSceneSlot(placement);
+    request->sceneSlot = GetPlacementSceneSlot(plan, placementIndex);
     request->source = definition->source;
     request->ownerQuestId = definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
         ? GetPlacementOwner(placement)
         : ROGUE_ADVENTURE_QUEST_INVALID_ID;
-
-    RogueRouteSceneRng_Seed(&rng, gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed
-        ^ 0x5EED
-        ^ (recipeId * 257)
-        ^ (request->sceneSlot * 4051));
 
     if(definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
     {
@@ -529,9 +585,9 @@ bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteS
         request->secondaryGraphicsId = content.secondaryGraphicsId;
         request->rewardAmount = content.rewardAmount;
     }
-    else if(definition->build != NULL)
+    else if(definition->expandPayload != NULL)
     {
-        definition->build(request, &rng);
+        definition->expandPayload(request, GetPlacementPayload(placement));
     }
 
     request->recipeId = recipeId;
@@ -593,7 +649,8 @@ void RogueRouteScenes_OnEnterRoute(void)
     if(plan == NULL)
         return;
 
-    BuildRouteScenePlan(gRogueRun.adventureRoomId, plan);
+    if(RogueRouteScenes_GetPlacementCount() == 0)
+        BuildRouteScenePlan(gRogueRun.adventureRoomId, plan);
 
     for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {

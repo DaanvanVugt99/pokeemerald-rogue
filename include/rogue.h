@@ -120,8 +120,8 @@ struct RogueAdvPathRoomParams
     } perType;
 };
 
-// A transient expanded scene request. Adventure-path rooms retain only the
-// packed placement below; content is rebuilt deterministically when needed.
+// A transient expanded scene request. Adventure-path rooms retain the selected
+// standalone payload or quest owner directly in the packed placement below.
 struct RogueRouteSceneRequest
 {
     u16 rewardItem;

@@ -25,6 +25,7 @@
 #include "rogue_adventurepaths.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
+#include "rogue_event_transactions.h"
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_route_events.h"
@@ -81,6 +82,58 @@ static void RestoreFlag(u16 flagId, bool8 value)
         FlagSet(flagId);
     else
         FlagClear(flagId);
+}
+
+TEST("Event transactions exchange and roll back items and money atomically")
+{
+    struct RogueEventTransaction transaction = {0};
+    u32 originalMoney = GetMoney(&gSaveBlock1Ptr->money);
+    u16 itemId;
+
+    ClearBag();
+    SetMoney(&gSaveBlock1Ptr->money, 12000);
+    EXPECT(AddBagItem(ITEM_TRADE_CASE, 1));
+    for(itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT && CheckBagHasSpace(ITEM_BIG_POKEBLOCK_BUNDLE, 1); ++itemId)
+    {
+        if(ItemId_GetPocket(itemId) == POCKET_KEY_ITEMS
+            && itemId != ITEM_TRADE_CASE
+            && itemId != ITEM_BIG_POKEBLOCK_BUNDLE)
+            AddBagItem(itemId, 1);
+    }
+    EXPECT(!CheckBagHasSpace(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
+
+    transaction.costs[0].itemId = ITEM_TRADE_CASE;
+    transaction.costs[0].count = 1;
+    transaction.rewards[0].itemId = ITEM_BIG_POKEBLOCK_BUNDLE;
+    transaction.rewards[0].count = 1;
+    transaction.moneyReward = 5000;
+    transaction.costCount = 1;
+    transaction.rewardCount = 1;
+    transaction.flags = ROGUE_EVENT_TRANSACTION_FLAG_ALLOW_COST_SLOTS_FOR_REWARDS;
+
+    // Consuming the cost frees the slot required by the reward.
+    EXPECT_EQ(RogueEventTransaction_Execute(&transaction), ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT(!CheckBagHasItem(ITEM_TRADE_CASE, 1));
+    EXPECT(CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
+    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 17000);
+
+    RogueEventTransaction_Rollback(&transaction);
+    EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
+    EXPECT(!CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
+    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 12000);
+
+    SetMoney(&gSaveBlock1Ptr->money, MAX_MONEY - transaction.moneyReward + 1);
+    EXPECT_EQ(RogueEventTransaction_Execute(&transaction), ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL);
+    EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
+    EXPECT(!CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
+    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), MAX_MONEY - transaction.moneyReward + 1);
+
+    RemoveBagItem(ITEM_TRADE_CASE, 1);
+    EXPECT_EQ(RogueEventTransaction_Execute(&transaction), ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM);
+    EXPECT(!CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
+
+    ClearBag();
+    SetMoney(&gSaveBlock1Ptr->money, originalMoney);
 }
 
 static void SetupCurrentEvent(struct RogueAdvPath *originalPath, u8 *originalRoomId)
@@ -177,6 +230,70 @@ TEST("Route scene local RNG matches Rogue RNG without mutating it")
     }
 
     gRngRogueValue = originalRng;
+}
+
+TEST("Selected standalone route scene payloads remain immutable")
+{
+    static const u8 sRecipes[] =
+    {
+        ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE,
+        ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER,
+        ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
+    };
+    struct RogueAdvPath originalPath;
+    struct RogueRouteSceneRequest selected;
+    struct RogueRouteSceneRequest restored;
+    struct RogueRouteScenePlan selectedPlan;
+    u16 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u16 originalTeamNum = gRogueRun.teamEncounterNum;
+    u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    u8 i;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
+    gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+    Rogue_SetCurrentDifficulty(2);
+    FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+
+    for(i = 0; i < ARRAY_COUNT(sRecipes); ++i)
+    {
+        gRogueAdvPath.rooms[0].rngSeed = 0x6100 + i;
+        SetDebugPlacement(sRecipes[i], 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+        EXPECT(RogueRouteScenes_GetPlacementRequest(0, &selected));
+        selectedPlan = gRogueAdvPath.rooms[0].routeScenePlan;
+
+        gRogueRun.teamEncounterNum = TEAM_NUM_AQUA;
+        gRogueRun.temporaryDarkDealCurseItem = Rogue_SelectDarkDealCurseItem(1);
+        Rogue_SetCurrentDifficulty(10);
+        FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+        RogueRouteScenes_OnEnterRoute();
+
+        EXPECT_EQ(memcmp(&gRogueAdvPath.rooms[0].routeScenePlan, &selectedPlan, sizeof(selectedPlan)), 0);
+        EXPECT(RogueRouteScenes_GetPlacementRequest(0, &restored));
+        EXPECT_EQ(memcmp(&restored, &selected, sizeof(selected)), 0);
+
+        gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
+        gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+        Rogue_SetCurrentDifficulty(2);
+        FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    }
+
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRogueRun.teamEncounterNum = originalTeamNum;
+    gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
 }
 
 TEST("Route event fallback registry is deterministic weighted and RNG neutral")
@@ -1480,6 +1597,16 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 12345);
     EXPECT(!CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
     EXPECT(AddBagItem(ITEM_TRADE_CASE, 1));
+
+    SetMoney(&gSaveBlock1Ptr->money, MAX_MONEY - ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY + 1);
+    RogueRouteEvents_TryClaimStolenTradeCaseReward();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL);
+    EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
+    EXPECT(!CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
+    EXPECT_EQ(
+        GetMoney(&gSaveBlock1Ptr->money),
+        MAX_MONEY - ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY + 1);
+    SetMoney(&gSaveBlock1Ptr->money, 12345);
 
     for(itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT && CheckBagHasSpace(ITEM_BIG_POKEBLOCK_BUNDLE, 1); ++itemId)
     {

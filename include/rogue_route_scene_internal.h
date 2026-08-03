@@ -60,7 +60,8 @@ struct RogueRouteSceneLotDefinition
 
 struct RogueRouteRecipeDefinition
 {
-    void (*build)(struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng);
+    bool8 (*selectPayload)(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload);
+    void (*expandPayload)(struct RogueRouteSceneRequest *request, u32 payload);
     const struct RogueRouteSceneLotDefinition *lots;
     u8 source;
     u8 lotCount;

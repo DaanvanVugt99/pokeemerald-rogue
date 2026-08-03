@@ -171,7 +171,8 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
 {
     [ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER] =
     {
-        .build = BuildStolenTradeCaseOffer,
+        .selectPayload = SelectStolenTradeCaseOfferPayload,
+        .expandPayload = ExpandStolenTradeCaseOfferPayload,
         .lots = sStolenTradeCaseOfferLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sStolenTradeCaseOfferLots),
@@ -190,14 +191,16 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
     },
     [ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE] =
     {
-        .build = BuildHexedShrine,
+        .selectPayload = SelectHexedShrinePayload,
+        .expandPayload = ExpandHexedShrinePayload,
         .lots = sHexedShrineLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
         .lotCount = ARRAY_COUNT(sHexedShrineLots),
     },
     [ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER] =
     {
-        .build = BuildAnomalousFossilOffer,
+        .selectPayload = SelectAnomalousFossilOfferPayload,
+        .expandPayload = ExpandAnomalousFossilOfferPayload,
         .lots = sAnomalousFossilOfferLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sAnomalousFossilOfferLots),
@@ -210,7 +213,8 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
     },
     [ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER] =
     {
-        .build = BuildForbiddenStoneOffer,
+        .selectPayload = SelectForbiddenStoneOfferPayload,
+        .expandPayload = ExpandForbiddenStoneOfferPayload,
         .lots = sForbiddenStoneOfferLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sForbiddenStoneOfferLots),
@@ -229,14 +233,16 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
     },
     [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE] =
     {
-        .build = BuildApricornGrove,
+        .selectPayload = SelectApricornGrovePayload,
+        .expandPayload = ExpandApricornGrovePayload,
         .lots = sApricornGroveLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sApricornGroveLots),
     },
     [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN] =
     {
-        .build = BuildApricornGrove,
+        .selectPayload = SelectApricornGrovePayload,
+        .expandPayload = ExpandApricornGrovePayload,
         .lots = sApricornGroveAndArtisanLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
         .lotCount = ARRAY_COUNT(sApricornGroveAndArtisanLots),

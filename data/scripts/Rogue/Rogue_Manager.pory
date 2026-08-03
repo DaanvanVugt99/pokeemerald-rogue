@@ -666,7 +666,14 @@ script Rogue_RouteEvent_StolenTradeCasePayoff
             }
             else
             {
-                msgbox(format("Make room in your Key Items pocket, then come back for the {STR_VAR_1}."))
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL)
+                {
+                    msgbox(format("You cannot carry the full ¥5,000. Your reward will wait."))
+                }
+                else
+                {
+                    msgbox(format("Make room in your Key Items pocket, then come back for the {STR_VAR_1}."))
+                }
             }
         }
     }

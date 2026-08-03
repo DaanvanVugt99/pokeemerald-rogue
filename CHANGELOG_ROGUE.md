@@ -40,7 +40,8 @@ Format follows Keep a Changelog loosely:
   expose eight small, medium, and large scene lots; the director independently
   fills one to three lots so quest consumers and unrelated route events can
   coexist. The per-room scene plan is packed into less memory than the former
-  single-scene descriptor.
+  single-scene descriptor. Route-event item and money exchanges now use a
+  shared stack-local atomic transaction layer with reusable rollback support.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.
@@ -95,6 +96,8 @@ Format follows Keep a Changelog loosely:
   route-scene planner and compositor are now separated from event-specific
   eligibility, payload generation, lifecycle hooks, and interactions, and use
   an explicit local deterministic RNG without replacing either global stream.
+  Selected standalone payloads are retained in the existing 12-byte room plan,
+  so composition and quickload restoration never rerun content selection.
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.
