@@ -468,6 +468,7 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             if(fallback != NULL
                 && !usedFallbackRecipes[fallback->recipeId]
                 && !usedFallbackFamilies[fallback->familyId]
+                && !RogueRouteEvents_HasEncounteredFamily(fallback->familyId)
                 && fallback->isEligible(roomId))
                 totalWeight += fallback->weight;
         }
@@ -483,6 +484,7 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             if(fallback == NULL
                 || usedFallbackRecipes[fallback->recipeId]
                 || usedFallbackFamilies[fallback->familyId]
+                || RogueRouteEvents_HasEncounteredFamily(fallback->familyId)
                 || !fallback->isEligible(roomId))
                 continue;
 
@@ -558,6 +560,14 @@ bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteS
     definition = RogueRouteEvents_GetRecipeDefinition(recipeId);
     routeIdx = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomParams.roomIdx;
     if(definition == NULL || routeIdx >= gRogueRouteTable.routeCount)
+        return FALSE;
+    if(definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        && definition->linkedQuestDefinitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_NONE
+        && RogueAdventureQuests_HasDefinition(definition->linkedQuestDefinitionId)
+        // The combined Apricorn recipe deliberately uses its second lot as
+        // the same-route consumer after the grove creates the quest.
+        && !(recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
+            && GetPlacementRole(placement) == 1))
         return FALSE;
 
     memset(request, 0, sizeof(*request));
@@ -682,6 +692,10 @@ void RogueRouteScenes_OnExitRoute(void)
     for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {
         struct RogueRouteSceneRequest scene;
+        const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
+
+        if(plan != NULL)
+            RogueRouteEvents_MarkRecipeFamilyEncountered(GetPlacementRecipe(&plan->placements[i]));
 
         if(!RogueRouteScenes_GetPlacementRequest(i, &scene))
             continue;
@@ -691,11 +705,15 @@ void RogueRouteScenes_OnExitRoute(void)
             && !advancedQuests[scene.ownerQuestId]
             && RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
         {
+            u8 questId = scene.ownerQuestId;
+
             advancedQuests[scene.ownerQuestId] = TRUE;
             RogueAdventureQuests_EmitSignalForQuest(
-                scene.ownerQuestId,
+                questId,
                 ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
                 1);
+            if(RogueAdventureQuests_Get(questId) == NULL)
+                RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
         }
         else
         {
@@ -708,6 +726,8 @@ void RogueRouteScenes_OnExitRoute(void)
                     questId,
                     ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
                     1);
+                if(RogueAdventureQuests_Get(questId) == NULL)
+                    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
             }
         }
     }

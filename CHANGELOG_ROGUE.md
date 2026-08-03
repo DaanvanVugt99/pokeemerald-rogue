@@ -263,6 +263,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Limited each generated route-event family to one appearance per Adventure,
+  removed accepted quest generators during restoration, corrected Adventure
+  Quest book text bounds, and made fossil restoration safely offer a confirmed
+  party replacement without consuming the fossil when cancelled.
 - Prevented intermittent tilemap corruption when paging left from move
   relearning or replacement into the Pokémon stats summary.
 - Applied changed-type Unique Pokémon palette tinting to party, Day Care, and

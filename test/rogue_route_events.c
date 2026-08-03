@@ -8,6 +8,7 @@
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
 #include "constants/moves.h"
+#include "constants/party_menu.h"
 #include "constants/pokemon.h"
 #include "constants/rogue_adventure_quests.h"
 #include "constants/rogue_route_events.h"
@@ -312,6 +313,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
@@ -344,6 +346,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
 
     for(seed = 1; seed <= 1000; ++seed)
     {
+        VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
         gRogueAdvPath.rooms[0].rngSeed = seed;
         gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
@@ -462,6 +465,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
@@ -469,6 +473,34 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     gRngValue = originalStandardRng;
     memcpy(gPlayerParty, originalParty, sizeof(originalParty));
     gPlayerPartyCount = originalPartyCount;
+}
+
+TEST("Route event family history packs encountered and completed state without touching RNG")
+{
+    struct RogueRouteSceneRequest scene =
+    {
+        .recipeId = ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION,
+    };
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE originalStandardRng = gRngValue;
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    EXPECT(!RogueRouteEvents_HasEncounteredFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
+    EXPECT(!RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
+
+    RogueRouteEvents_MarkFamilyEncountered(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL);
+    EXPECT(RogueRouteEvents_HasEncounteredFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
+    EXPECT(!RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
+    EXPECT(!RogueRouteEvents_HasEncounteredFamily(ROGUE_ROUTE_FAMILY_STOLEN_TRADE_CASE));
+
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+    EXPECT(RogueRouteEvents_HasEncounteredFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
+    EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
+    EXPECT_EQ(memcmp(&gRngRogueValue, &originalRogueRng, sizeof(originalRogueRng)), 0);
+    EXPECT_EQ(memcmp(&gRngValue, &originalStandardRng, sizeof(originalStandardRng)), 0);
+
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
 }
 
 TEST("Route events provide clear typed lots on every classified active route")
@@ -862,6 +894,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     u16 originalDifficulty = Rogue_GetCurrentDifficulty();
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
@@ -875,6 +908,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
     Rogue_SetCurrentDifficulty(3);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
     for(seed = 1; seed != 0; ++seed)
@@ -957,6 +991,13 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     Rogue_SetCurrentDifficulty(13);
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
+    EXPECT(!GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &shrine));
+
+    // A new Adventure clears encounter history and permits the family again.
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
+    RogueRouteScenes_OnEnterRoute();
     EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &shrine));
     EXPECT_EQ(shrine.rewardAmount, ROGUE_HEXED_SHRINE_REWARD_MAX);
 
@@ -965,6 +1006,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
     Rogue_SetCurrentDifficulty(originalDifficulty);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
@@ -1059,6 +1101,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     u16 originalDifficulty = Rogue_GetCurrentDifficulty();
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
     u8 originalPartyCount = gPlayerPartyCount;
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
@@ -1085,6 +1128,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
 
         for(seed = 1; seed != 0; ++seed)
         {
+            VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
             gRogueAdvPath.rooms[0].rngSeed = seed;
             RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
             RogueRouteScenes_OnEnterRoute();
@@ -1111,16 +1155,11 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
 
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
+    // The packed plan remains stable, but an accepted generator is filtered
+    // from object restoration while its quest is active.
     {
-        struct RogueRouteSceneRequest restoredOffer;
-        EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, &restoredOffer));
-        EXPECT_EQ(offer.sceneSlot, restoredOffer.sceneSlot);
-        EXPECT_EQ(offer.lotId, restoredOffer.lotId);
-        EXPECT_EQ(offer.lotRole, restoredOffer.lotRole);
-        EXPECT_EQ(offer.requestedItem, restoredOffer.requestedItem);
-        EXPECT_EQ(offer.rewardItem, restoredOffer.rewardItem);
-        EXPECT_EQ(offer.rewardAmount, restoredOffer.rewardAmount);
-        EXPECT_EQ(memcmp(&offer, &restoredOffer, sizeof(offer)), 0);
+        struct RogueRouteSceneRequest staleOffer;
+        EXPECT(!GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, &staleOffer));
     }
 
     RogueRouteScenes_OnExitRoute();
@@ -1144,15 +1183,31 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     RogueRouteEvents_BufferFossilRestorationData();
     EXPECT_EQ(memcmp(&gRngValue, &rngBefore, sizeof(rngBefore)), 0);
 
+    // A full party requires an explicit replacement. Cancelling at this point
+    // leaves both the fossil and quest untouched.
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    for(customType0 = 0; customType0 < PARTY_SIZE; ++customType0)
+        CreateMon(&gPlayerParty[customType0], SPECIES_MAGIKARP, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, customType0 + 1);
+    gPlayerPartyCount = PARTY_SIZE;
+    rngBefore = gRngValue;
     gSpecialVar_0x8004 = ROGUE_FOSSIL_RESTORATION_STABLE;
+    gSpecialVar_0x8006 = PARTY_NOTHING_CHOSEN;
+    RogueRouteEvents_TryRestoreAnomalousFossil();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL);
+    EXPECT(CheckBagHasItem(restoration.requestedItem, 1));
+    EXPECT_EQ(RogueRouteScenes_GetState(restoration.sceneSlot), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+
+    gSpecialVar_0x8006 = 2;
     RogueRouteEvents_TryRestoreAnomalousFossil();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT_EQ(memcmp(&gRngValue, &rngBefore, sizeof(rngBefore)), 0);
     EXPECT(!CheckBagHasItem(restoration.requestedItem, 1));
     EXPECT_EQ(RogueRouteScenes_GetState(restoration.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
-    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), restoration.rewardItem);
-    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_LEVEL), 1);
-    customMonId = RogueGift_GetCustomMonId(&gPlayerParty[0]);
+    EXPECT_EQ(gPlayerPartyCount, PARTY_SIZE);
+    EXPECT_EQ(GetMonData(&gPlayerParty[2], MON_DATA_SPECIES), restoration.rewardItem);
+    EXPECT_EQ(GetMonData(&gPlayerParty[2], MON_DATA_LEVEL), 1);
+    customMonId = RogueGift_GetCustomMonId(&gPlayerParty[2]);
     EXPECT_NE(customMonId, 0);
     EXPECT_EQ(RogueGift_GetCustomMonRarity(customMonId), UNIQUE_RARITY_RARE);
     EXPECT_EQ(RogueGift_GetCustomMonType(customMonId, 0), TYPE_NONE);
@@ -1205,6 +1260,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
     Rogue_SetCurrentDifficulty(originalDifficulty);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
@@ -1570,6 +1626,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
     u16 originalDifficulty = Rogue_GetCurrentDifficulty();
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
     u32 originalMoney = GetMoney(&gSaveBlock1Ptr->money);
     u16 originalTrainers[ROGUE_MAX_ACTIVE_TRAINER_COUNT];
     u8 originalRoomId;
@@ -1588,6 +1645,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
     // This test covers the quest chain specifically; an active temporary
     // Curse makes the shrine ineligible and deterministically exercises the
@@ -1615,11 +1673,14 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[1], offer.trainerNum);
     EXPECT(!CheckBagHasItem(ITEM_TRADE_CASE, 1));
 
-    // Quicksaving on the source route retains the accepted merchant scene.
+    // Quicksaving on the source route must not restore a generator whose
+    // quest is already active.
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, &offer));
-    EXPECT_EQ(RogueRouteScenes_GetState(offer.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    {
+        struct RogueRouteSceneRequest staleOffer;
+        EXPECT(!GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, &staleOffer));
+    }
 
     Rogue_SetCurrentDifficulty(ROGUE_CHAMP_START_DIFFICULTY);
     RogueRouteScenes_OnExitRoute();
@@ -1779,6 +1840,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
     Rogue_SetCurrentDifficulty(originalDifficulty);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalPropA);
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN, originalPropB);

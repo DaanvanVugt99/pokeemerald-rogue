@@ -52,4 +52,20 @@ enum
 #define ROGUE_ROUTE_SCENE_MAX_PLACEMENTS 3
 #define ROGUE_ROUTE_SCENE_MAX_ROLES 4
 
+// A single save-backed variable tracks which fallback families have appeared
+// and which have been completed during the current Adventure. Keep the family
+// count at or below eight so both masks fit in one u16.
+enum
+{
+    ROGUE_ROUTE_FAMILY_STOLEN_TRADE_CASE,
+    ROGUE_ROUTE_FAMILY_HEXED_SHRINE,
+    ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL,
+    ROGUE_ROUTE_FAMILY_FORBIDDEN_STONE,
+    ROGUE_ROUTE_FAMILY_APRICORN_CRAFTING,
+    ROGUE_ROUTE_FAMILY_UNBOUND_TUTOR,
+    ROGUE_ROUTE_FAMILY_COUNT,
+};
+
+#define ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT 8
+
 #endif // GUARD_CONSTANTS_ROGUE_ROUTE_SCENES_H

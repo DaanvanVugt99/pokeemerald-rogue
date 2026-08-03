@@ -99,6 +99,11 @@ struct RogueRouteFallbackDefinition
 const struct RogueRouteRecipeDefinition *RogueRouteEvents_GetRecipeDefinition(u8 recipeId);
 const struct RogueRouteFallbackDefinition *RogueRouteEvents_GetFallbackDefinition(u8 fallbackId);
 u8 RogueRouteEvents_GetFallbackCount(void);
+bool8 RogueRouteEvents_HasEncounteredFamily(u8 familyId);
+bool8 RogueRouteEvents_HasCompletedFamily(u8 familyId);
+void RogueRouteEvents_MarkFamilyEncountered(u8 familyId);
+void RogueRouteEvents_MarkRecipeFamilyEncountered(u8 recipeId);
+void RogueRouteEvents_MarkSceneFamilyCompleted(const struct RogueRouteSceneRequest *scene);
 
 void RogueRouteEvents_OnEnterScene(const struct RogueRouteSceneRequest *scene);
 void RogueRouteEvents_PrepareSceneTrainers(const struct RogueRouteSceneRequest *scene);

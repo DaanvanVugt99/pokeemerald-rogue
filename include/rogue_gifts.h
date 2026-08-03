@@ -64,6 +64,10 @@ u8 RogueGift_GetCustomMonRarity(u32 id);
 u8 const* RogueGift_GetRarityName(u8 rarity);
 
 void RogueGift_CreateMon(u32 customMonId, struct Pokemon* mon, u16 species, u8 level, u8 fixedIV);
+// Gives a generated gift directly to the active party. If replacementSlot is
+// a party slot, that Pokémon is released only after every gift constraint has
+// been validated. This deliberately never sends the gift to the PC.
+bool8 RogueGift_TryGiveMonToParty(struct Pokemon *mon, u8 replacementSlot);
 u32 RogueGift_CreateDynamicMonId(u8 rarity, u16 species);
 u32 RogueGift_CreateDynamicMonIdRaw(u8 rarity, u16 species);
 u32 RogueGift_CreateDynamicMonIdRawWithTypingChance(u8 rarity, u16 species, u8 typingChance);

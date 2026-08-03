@@ -6,6 +6,7 @@
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
 #include "constants/moves.h"
+#include "constants/party_menu.h"
 #include "constants/pokemon.h"
 #include "constants/rogue_route_events.h"
 #include "constants/rogue_route_scenes.h"
@@ -126,17 +127,12 @@ static u16 SelectEvilTeamTrainer(struct RogueRouteSceneRng *rng)
 
 static bool8 CanShowStolenTradeCaseOffer(u8 roomId)
 {
+    (void)roomId;
     if(FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED))
         return FALSE;
 
-    if(!RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE))
-        return Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY;
-
-    // Preserve an accepted offer across a quickload until its source route is
-    // actually left. Later quest nodes still outrank this source scene.
-    return RogueAdventureQuests_IsDefinitionSourceRoom(
-        ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE,
-        roomId);
+    return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE)
+        && Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY;
 }
 
 static bool8 CanShowHexedShrine(u8 roomId)
@@ -188,39 +184,26 @@ static u16 CountEligibleAnomalousFossils(void)
 
 static bool8 CanShowAnomalousFossilOffer(u8 roomId)
 {
-    if(RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL))
-    {
-        return RogueAdventureQuests_IsDefinitionSourceRoom(
-            ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL,
-            roomId);
-    }
+    (void)roomId;
 
-    return Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY
+    return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_ANOMALOUS_FOSSIL)
+        && Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY
         && CountEligibleAnomalousFossils() != 0;
 }
 
 static bool8 CanShowForbiddenStoneOffer(u8 roomId)
 {
-    if(RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE))
-    {
-        return RogueAdventureQuests_IsDefinitionSourceRoom(
-            ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
-            roomId);
-    }
+    (void)roomId;
 
-    return RoguePokedex_IsSpeciesEnabled(SPECIES_SPIRITOMB);
+    return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE)
+        && RoguePokedex_IsSpeciesEnabled(SPECIES_SPIRITOMB);
 }
 
 static bool8 CanShowApricornGrove(u8 roomId)
 {
-    if(RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING))
-    {
-        return RogueAdventureQuests_IsDefinitionSourceRoom(
-            ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
-            roomId);
-    }
+    (void)roomId;
 
-    return TRUE;
+    return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING);
 }
 
 static bool8 CanShowUnboundTutor(u8 roomId)
@@ -540,6 +523,82 @@ u8 RogueRouteEvents_GetFallbackCount(void)
     return ARRAY_COUNT(sRouteFallbacks);
 }
 
+static u16 GetFamilyHistoryBit(u8 familyId, u8 shift)
+{
+    if(familyId >= ROGUE_ROUTE_FAMILY_COUNT)
+        return 0;
+
+    return 1 << (familyId + shift);
+}
+
+bool8 RogueRouteEvents_HasEncounteredFamily(u8 familyId)
+{
+    return (VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY) & GetFamilyHistoryBit(familyId, 0)) != 0;
+}
+
+bool8 RogueRouteEvents_HasCompletedFamily(u8 familyId)
+{
+    return (VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY)
+        & GetFamilyHistoryBit(familyId, ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT)) != 0;
+}
+
+static u8 GetSceneFamily(const struct RogueRouteSceneRequest *scene);
+
+void RogueRouteEvents_MarkFamilyEncountered(u8 familyId)
+{
+    VarSet(
+        VAR_ROGUE_ROUTE_EVENT_HISTORY,
+        VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY) | GetFamilyHistoryBit(familyId, 0));
+}
+
+void RogueRouteEvents_MarkRecipeFamilyEncountered(u8 recipeId)
+{
+    struct RogueRouteSceneRequest scene = {.recipeId = recipeId};
+    u8 familyId = GetSceneFamily(&scene);
+
+    if(familyId < ROGUE_ROUTE_FAMILY_COUNT)
+        RogueRouteEvents_MarkFamilyEncountered(familyId);
+}
+
+static u8 GetSceneFamily(const struct RogueRouteSceneRequest *scene)
+{
+    const struct RogueRouteRecipeDefinition *sceneDefinition;
+    u8 i;
+
+    if(scene == NULL)
+        return ROGUE_ROUTE_FAMILY_COUNT;
+
+    sceneDefinition = RogueRouteEvents_GetRecipeDefinition(scene->recipeId);
+    for(i = 0; i < ARRAY_COUNT(sRouteFallbacks); ++i)
+    {
+        const struct RogueRouteFallbackDefinition *fallback = &sRouteFallbacks[i];
+        const struct RogueRouteRecipeDefinition *fallbackDefinition =
+            RogueRouteEvents_GetRecipeDefinition(fallback->recipeId);
+
+        if(fallback->recipeId == scene->recipeId
+            || (sceneDefinition != NULL
+                && fallbackDefinition != NULL
+                && sceneDefinition->linkedQuestDefinitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_NONE
+                && sceneDefinition->linkedQuestDefinitionId == fallbackDefinition->linkedQuestDefinitionId))
+            return fallback->familyId;
+    }
+
+    return ROGUE_ROUTE_FAMILY_COUNT;
+}
+
+void RogueRouteEvents_MarkSceneFamilyCompleted(const struct RogueRouteSceneRequest *scene)
+{
+    u8 familyId = GetSceneFamily(scene);
+    u16 history;
+
+    if(familyId >= ROGUE_ROUTE_FAMILY_COUNT)
+        return;
+
+    history = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    history |= GetFamilyHistoryBit(familyId, ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, history);
+}
+
 void RogueRouteEvents_OnEnterScene(const struct RogueRouteSceneRequest *scene)
 {
     const struct RogueRouteRecipeDefinition *definition;
@@ -769,6 +828,7 @@ void RogueRouteEvents_TryAcceptHexedShrine(void)
 
     Rogue_PushPopup_AddMoney(scene.rewardAmount);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
     VarSet(
         VAR_ROGUE_ROUTE_EVENT_STATE,
         VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) | ROUTE_SCENE_HEXED_SHRINE_ACCEPTED);
@@ -874,9 +934,10 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
     struct RogueEventTransaction transaction = {0};
     struct Pokemon mon;
     RAND_TYPE originalRng;
+    bool8 gaveMon;
     u32 customMonId;
-    u8 giveResult;
     u8 restoration = gSpecialVar_0x8004;
+    u8 replacementSlot = gSpecialVar_0x8006;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
     if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
@@ -885,6 +946,13 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
         || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
         || restoration > ROGUE_FOSSIL_RESTORATION_ADAPTIVE)
         return;
+
+    if(CalculatePlayerPartyCount() >= Rogue_GetMaxPartySize()
+        && replacementSlot == PARTY_NOTHING_CHOSEN)
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL;
+        return;
+    }
 
     originalRng = gRngValue;
     SeedRng(scene.rewardAmount ^ (restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0x51A7 : 0xB4E3));
@@ -902,8 +970,9 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
     if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         return;
 
-    giveResult = GiveTradedMonToPlayer(&mon);
-    if(giveResult == MON_CANT_GIVE)
+    gaveMon = RogueGift_TryGiveMonToParty(&mon, replacementSlot);
+    gRngValue = originalRng;
+    if(!gaveMon)
     {
         RogueEventTransaction_Rollback(&transaction);
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
@@ -913,6 +982,7 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
     GetSetPokedexSpeciesFlag(scene.rewardItem, FLAG_SET_CAUGHT);
     Rogue_PushPopup_AddPokemon(scene.rewardItem, TRUE, FALSE);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
@@ -1272,5 +1342,6 @@ void RogueRouteEvents_FinishUnboundTutor(void)
         return;
 
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
