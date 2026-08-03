@@ -525,7 +525,7 @@ static u8 const sText_AdventureQuestHeader[] = _("Adventure Quests");
 static u8 const sText_AdventureQuestActive[] = _("{COLOR BLUE}In Progress");
 static u8 const sText_AdventureQuestReady[] = _("{COLOR GREEN}Ready on this route");
 static u8 const sText_AdventureQuestEmpty[] = _("No Adventure Quests yet.\nYou may find someone who needs help.");
-static u8 const sText_AdventureQuestRunOnly[] = _("Adventure Quests must be finished during this adventure.");
+static u8 const sText_AdventureQuestRunOnly[] = _("Finish these quests before this adventure ends.");
 static u8 const sText_Space[] = _(" ");
 
 

@@ -434,24 +434,53 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_NO_SPACE);
     EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 0);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->progress, 1);
 
-    ClearBag();
-    RogueRouteEvents_FinishStolenTradeCaseBattle();
-    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
-    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
-    EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
-    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
-
+    // Leaving while collection is pending reschedules the camp without
+    // forgetting that its battle has already been won.
     RogueRouteScenes_OnExitRoute();
+    gRogueAdvPath.roomCount = 6;
     gRogueRun.adventureRoomId = 2;
     gRogueAdvPath.rooms[2].roomParams.roomIdx = 2;
     gRogueAdvPath.rooms[2].rngSeed = 102;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[2]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[2].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF);
-    EXPECT_EQ(gRogueAdvPath.rooms[2].routeScene.requestedItem, ITEM_TRADE_CASE);
-    EXPECT_EQ(gRogueAdvPath.rooms[2].routeScene.rewardItem, ITEM_BIG_POKEBLOCK_BUNDLE);
-    EXPECT_EQ(gRogueAdvPath.rooms[2].routeScene.primaryGraphicsId, OBJ_EVENT_GFX_MART_EMPLOYEE);
+    EXPECT_EQ(gRogueAdvPath.rooms[2].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_NONE);
+    RogueRouteScenes_OnExitRoute();
+
+    gRogueRun.adventureRoomId = 3;
+    gRogueAdvPath.rooms[3].roomParams.roomIdx = 3;
+    gRogueAdvPath.rooms[3].rngSeed = 103;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[3]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(gRogueAdvPath.rooms[3].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
+    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+
+    ClearBag();
+    RogueRouteEvents_FinishStolenTradeCaseBattle();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 0);
+    EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
+    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
+
+    // A same-route quickload restores the completed camp rather than binding
+    // the next quest node to this room.
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[3]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(gRogueAdvPath.rooms[3].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
+    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
+    gRogueRun.adventureRoomId = 4;
+    gRogueAdvPath.rooms[4].roomParams.roomIdx = 4;
+    gRogueAdvPath.rooms[4].rngSeed = 104;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[4]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF);
+    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.requestedItem, ITEM_TRADE_CASE);
+    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.rewardItem, ITEM_BIG_POKEBLOCK_BUNDLE);
+    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.primaryGraphicsId, OBJ_EVENT_GFX_MART_EMPLOYEE);
     EXPECT(RemoveBagItem(ITEM_TRADE_CASE, 1));
     RogueRouteEvents_TryClaimStolenTradeCaseReward();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM);
@@ -467,31 +496,30 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     }
     EXPECT(!CheckBagHasSpace(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
     RogueRouteEvents_TryClaimStolenTradeCaseReward();
-    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_NO_SPACE);
-    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
-    EXPECT_NE(RogueAdventureQuests_Get(questId), NULL);
-    EXPECT(CheckBagHasItem(ITEM_TRADE_CASE, 1));
-    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 12345);
-
-    ClearBag();
-    EXPECT(AddBagItem(ITEM_TRADE_CASE, 1));
-    RogueRouteEvents_TryClaimStolenTradeCaseReward();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT(!CheckBagHasItem(ITEM_TRADE_CASE, 1));
     EXPECT(CheckBagHasItem(ITEM_BIG_POKEBLOCK_BUNDLE, 1));
     EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 12345 + ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY);
-    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->nodeId, 1);
     EXPECT(FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED));
     EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN));
 
-    gRogueAdvPath.roomCount = 4;
-    RogueRouteScenes_OnExitRoute();
-    gRogueRun.adventureRoomId = 3;
-    gRogueAdvPath.rooms[3].roomParams.roomIdx = 3;
-    gRogueAdvPath.rooms[3].rngSeed = 103;
-    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[3]);
+    // The completed payoff also survives a same-route quickload so its
+    // acknowledgement remains available until the player leaves.
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[4]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(gRogueAdvPath.rooms[3].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_NONE);
+    EXPECT_EQ(gRogueAdvPath.rooms[4].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF);
+    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_STATE), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+    gRogueRun.adventureRoomId = 5;
+    gRogueAdvPath.rooms[5].roomParams.roomIdx = 5;
+    gRogueAdvPath.rooms[5].rngSeed = 105;
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[5]);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(gRogueAdvPath.rooms[5].routeScene.recipeId, ROGUE_ROUTE_SCENE_RECIPE_NONE);
 
     RogueAdventureQuests_Clear();
     EXPECT(!FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED));
@@ -499,6 +527,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     {
         struct RogueAdventureQuestCreateParams params = {0};
 
+        ClearBag();
         EXPECT_NE(RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params), ROGUE_ADVENTURE_QUEST_INVALID_ID);
         EXPECT(AddBagItem(ITEM_TRADE_CASE, 1));
         RogueAdventureQuests_Clear();

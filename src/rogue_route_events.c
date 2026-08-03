@@ -216,6 +216,7 @@ static void SelectRouteScene(u8 roomId, struct RogueRouteSceneRequest *selected)
 void RogueRouteScenes_OnEnterRoute(void)
 {
     struct RogueRouteSceneRequest *scene;
+    const struct RogueAdventureQuest *quest;
 
     if(gRogueRun.routeSceneRoomId != gRogueRun.adventureRoomId)
     {
@@ -230,6 +231,18 @@ void RogueRouteScenes_OnEnterRoute(void)
 
     scene = &gRogueAdvPath.rooms[gRogueRun.adventureRoomId].routeScene;
     SelectRouteScene(gRogueRun.adventureRoomId, scene);
+
+    // A won camp remains on its current node until the route is left. Restore
+    // its collection-only interaction if it was rescheduled after a full Bag.
+    if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP
+        && scene->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+    {
+        quest = RogueAdventureQuests_Get(scene->ownerQuestId);
+        if(quest != NULL
+            && quest->progress != 0
+            && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+            VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+    }
 }
 
 void RogueRouteScenes_PrepareRouteTrainers(void)
@@ -249,8 +262,15 @@ void RogueRouteScenes_PrepareRouteTrainers(void)
 
 void RogueRouteScenes_OnExitRoute(void)
 {
+    const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
+
     RogueAdventureQuests_EmitSignal(ROGUE_ADVENTURE_QUEST_SIGNAL_ROUTE_COMPLETED, 1);
-    RogueAdventureQuests_LeaveRoute(gRogueRun.adventureRoomId);
+    if(scene != NULL
+        && scene->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE
+        && VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        RogueAdventureQuests_Advance(scene->ownerQuestId);
+    else
+        RogueAdventureQuests_LeaveRoute(gRogueRun.adventureRoomId);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
@@ -627,19 +647,16 @@ void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
         || (state != ROGUE_ROUTE_EVENT_STATE_ACTIVE && state != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING))
         return;
 
+    if(state == ROGUE_ROUTE_EVENT_STATE_ACTIVE
+        && !RogueAdventureQuests_SetProgress(scene->ownerQuestId, 1))
+        return;
+
     alreadyHasCase = CheckBagHasItem(scene->requestedItem, 1);
     if(!alreadyHasCase
         && (!CheckBagHasSpace(scene->requestedItem, 1) || !AddBagItem(scene->requestedItem, 1)))
     {
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
-        return;
-    }
-
-    if(!RogueAdventureQuests_Advance(scene->ownerQuestId))
-    {
-        if(!alreadyHasCase)
-            RemoveBagItem(scene->requestedItem, 1);
         return;
     }
 
@@ -652,7 +669,6 @@ void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
 void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
 {
     const struct RogueRouteSceneRequest *scene = GetCurrentSceneRequest();
-    u32 previousMoney;
 
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
     if(scene == NULL
@@ -668,29 +684,21 @@ void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
         return;
     }
 
-    if(!CheckBagHasSpace(scene->rewardItem, 1) || !AddBagItem(scene->rewardItem, 1))
+    if(!RemoveBagItem(scene->requestedItem, 1))
     {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+
+    if(!AddBagItem(scene->rewardItem, 1))
+    {
+        AddBagItem(scene->requestedItem, 1);
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
 
-    if(!RemoveBagItem(scene->requestedItem, 1))
-    {
-        RemoveBagItem(scene->rewardItem, 1);
-        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
-        return;
-    }
-
-    previousMoney = GetMoney(&gSaveBlock1Ptr->money);
     AddMoney(&gSaveBlock1Ptr->money, ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY);
-    if(!RogueAdventureQuests_Advance(scene->ownerQuestId))
-    {
-        SetMoney(&gSaveBlock1Ptr->money, previousMoney);
-        AddBagItem(scene->requestedItem, 1);
-        RemoveBagItem(scene->rewardItem, 1);
-        return;
-    }
 
     FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);

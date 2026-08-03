@@ -304,6 +304,21 @@ bool8 RogueAdventureQuests_Advance(u8 questId)
     return TRUE;
 }
 
+bool8 RogueAdventureQuests_SetProgress(u8 questId, u8 progress)
+{
+    struct RogueAdventureQuest *quest;
+
+    if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+        return FALSE;
+
+    quest = &gRogueRun.adventureQuests[questId];
+    if(GetNode(quest) == NULL)
+        return FALSE;
+
+    quest->progress = progress;
+    return TRUE;
+}
+
 void RogueAdventureQuests_EmitSignal(u8 signal, u16 value)
 {
     u8 i;
