@@ -13,170 +13,161 @@
     {objectScript, gfx, x, y, prop, ROUTE_SCENE_STATE_MASK_ALL, ROUTE_SCENE_OBJECT_FLAG_HIDE_IF_QUEST_ROLE_COMPLETE}
 #define SCENE_LOT(size, objectDefs, accentDefs) \
     {objectDefs, accentDefs, ARRAY_COUNT(objectDefs), ARRAY_COUNT(accentDefs), size}
+#define SCENE_LOT_NO_ACCENTS(size, objectDefs) \
+    {objectDefs, NULL, ARRAY_COUNT(objectDefs), 0, size}
 
-static const struct RogueRouteSceneAccentDefinition sAccentsLeftRight[] =
+static const struct RogueRouteSceneAccentDefinition sAccentsLeftColumn[] =
 {
-    {-1, 0},
-    {1, 0},
+    {-1, -1},
+    {-1, 1},
 };
 
-static const struct RogueRouteSceneAccentDefinition sAccentsLeftRightUp[] =
+static const struct RogueRouteSceneAccentDefinition sAccentUpperLeft[] =
 {
-    {-1, 0},
-    {1, 0},
-    {0, -1},
+    {-1, -1},
 };
 
-static const struct RogueRouteSceneAccentDefinition sAccentsLeftRightDown[] =
+static const struct RogueRouteSceneAccentDefinition sAccentUpperRight[] =
 {
-    {-1, 0},
-    {1, 0},
-    {0, 1},
+    {1, -1},
+};
+
+static const struct RogueRouteSceneAccentDefinition sAccentLowerLeft[] =
+{
+    {-1, 1},
+};
+
+static const struct RogueRouteSceneAccentDefinition sAccentLowerRight[] =
+{
+    {1, 1},
 };
 
 static const struct RogueRouteSceneObjectDefinition sStolenTradeCaseOfferObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_StolenTradeCaseOffer),
-    SCENE_OBJECT(1, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop),
-    SCENE_OBJECT(2, 1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop),
+    SCENE_OBJECT(1, -1, 1, ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES, Rogue_RouteEvent_Prop),
 };
 
 static const struct RogueRouteSceneObjectDefinition sStolenTradeCaseCampObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_StolenTradeCaseCamp),
-    SCENE_OBJECT_UNTIL_COMPLETED(1, 0, 1, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop),
-    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop),
+    SCENE_OBJECT_UNTIL_COMPLETED(1, 1, -1, ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES, Rogue_RouteEvent_Prop),
 };
 
 static const struct RogueRouteSceneObjectDefinition sStolenTradeCasePayoffObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_StolenTradeCasePayoff),
-    SCENE_OBJECT_UNTIL_COMPLETED(1, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_Prop),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_Prop),
+    SCENE_OBJECT_UNTIL_COMPLETED(1, 1, 1, ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES, Rogue_RouteEvent_Prop),
 };
 
 static const struct RogueRouteSceneObjectDefinition sHexedShrineObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_HexedShrine),
-    SCENE_OBJECT(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_HexedShrineProp),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp),
-    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_HexedShrineProp),
+    SCENE_OBJECT(1, -1, -1, ROUTE_SCENE_GFX_SEMANTIC_SHRINE_STONE, Rogue_RouteEvent_HexedShrineProp),
 };
 
 static const struct RogueRouteSceneObjectDefinition sAnomalousFossilOfferObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_AnomalousFossilOffer),
-    SCENE_OBJECT(1, 0, -1, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp),
-    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_FossilProp),
+    SCENE_OBJECT(1, 1, 1, ROUTE_SCENE_GFX_SEMANTIC_RELIC, Rogue_RouteEvent_FossilProp),
 };
 
 static const struct RogueRouteSceneObjectDefinition sAnomalousFossilRestorationObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_AnomalousFossilRestoration),
-    SCENE_OBJECT(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_FossilProp),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_FossilProp),
-    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_FOSSIL, Rogue_RouteEvent_FossilProp),
+    SCENE_OBJECT(1, -1, 1, ROUTE_SCENE_GFX_SEMANTIC_WORKBENCH, Rogue_RouteEvent_FossilProp),
 };
 
 static const struct RogueRouteSceneObjectDefinition sForbiddenStoneOfferObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_ForbiddenStoneOffer),
-    SCENE_OBJECT(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_ForbiddenStoneProp),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp),
-    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp),
+    SCENE_OBJECT(1, -1, -1, ROUTE_SCENE_GFX_SEMANTIC_SHRINE_STONE, Rogue_RouteEvent_ForbiddenStoneProp),
 };
 
 static const struct RogueRouteSceneObjectDefinition sForbiddenStoneSoulObjects[] =
 {
-    SCENE_OBJECT_UNTIL_ROLE_COMPLETE(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_ForbiddenStoneSoul),
+    SCENE_OBJECT_UNTIL_ROLE_COMPLETE(0, 0, 0, ROUTE_SCENE_GFX_SEMANTIC_SHRINE_STONE, Rogue_RouteEvent_ForbiddenStoneSoul),
 };
 
 static const struct RogueRouteSceneObjectDefinition sForbiddenStonePayoffObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_ForbiddenStonePayoff),
-    SCENE_OBJECT(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_ForbiddenStoneProp),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp),
-    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_ForbiddenStoneProp),
+    SCENE_OBJECT(1, 1, 1, ROUTE_SCENE_GFX_SEMANTIC_SHRINE_STONE, Rogue_RouteEvent_ForbiddenStoneProp),
 };
 
 static const struct RogueRouteSceneObjectDefinition sApricornGroveObjects[] =
 {
-    SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_ApricornTree),
-    SCENE_OBJECT(1, -1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree),
-    SCENE_OBJECT(2, 1, 0, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree),
+    SCENE_OBJECT(0, -1, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_ApricornTree),
+    SCENE_OBJECT(1, -1, -1, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree),
+    SCENE_OBJECT(2, -1, 1, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree),
 };
 
 static const struct RogueRouteSceneObjectDefinition sApricornArtisanObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_ApricornArtisan),
-    SCENE_OBJECT(1, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_ApricornProp),
-    SCENE_OBJECT(2, 1, 0, OBJ_EVENT_GFX_MOVING_BOX, Rogue_RouteEvent_ApricornProp),
+    SCENE_OBJECT(1, 1, -1, ROUTE_SCENE_GFX_SEMANTIC_WORKBENCH, Rogue_RouteEvent_ApricornProp),
 };
 
 static const struct RogueRouteSceneObjectDefinition sUnboundTutorObjects[] =
 {
     SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_UnboundTutor),
-    SCENE_OBJECT(1, 0, -1, OBJ_EVENT_GFX_BATTLE_STATUE, Rogue_RouteEvent_UnboundTutorProp),
-    SCENE_OBJECT(2, -1, 0, OBJ_EVENT_GFX_BIRCHS_BAG, Rogue_RouteEvent_UnboundTutorProp),
-    SCENE_OBJECT(3, 1, 0, OBJ_EVENT_GFX_BREAKABLE_ROCK, Rogue_RouteEvent_UnboundTutorProp),
+    SCENE_OBJECT(1, -1, 1, ROUTE_SCENE_GFX_SEMANTIC_CAMP, Rogue_RouteEvent_UnboundTutorProp),
 };
 
 static const struct RogueRouteSceneLotDefinition sStolenTradeCaseOfferLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCaseOfferObjects, sAccentsLeftRight),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCaseOfferObjects, sAccentLowerLeft),
 };
 static const struct RogueRouteSceneLotDefinition sStolenTradeCaseCampLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCaseCampObjects, sAccentsLeftRightDown),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCaseCampObjects, sAccentUpperRight),
 };
 static const struct RogueRouteSceneLotDefinition sStolenTradeCasePayoffLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCasePayoffObjects, sAccentsLeftRight),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCasePayoffObjects, sAccentLowerRight),
 };
 static const struct RogueRouteSceneLotDefinition sHexedShrineLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sHexedShrineObjects, sAccentsLeftRightUp),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sHexedShrineObjects, sAccentUpperLeft),
 };
 static const struct RogueRouteSceneLotDefinition sAnomalousFossilOfferLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sAnomalousFossilOfferObjects, sAccentsLeftRightUp),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sAnomalousFossilOfferObjects, sAccentLowerRight),
 };
 static const struct RogueRouteSceneLotDefinition sAnomalousFossilRestorationLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sAnomalousFossilRestorationObjects, sAccentsLeftRightUp),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sAnomalousFossilRestorationObjects, sAccentLowerLeft),
 };
 static const struct RogueRouteSceneLotDefinition sForbiddenStoneOfferLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sForbiddenStoneOfferObjects, sAccentsLeftRightUp),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sForbiddenStoneOfferObjects, sAccentUpperLeft),
 };
 static const struct RogueRouteSceneLotDefinition sForbiddenStoneSoulLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_SMALL, sForbiddenStoneSoulObjects, sAccentsLeftRight),
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_SMALL, sForbiddenStoneSoulObjects, sAccentsLeftRight),
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_SMALL, sForbiddenStoneSoulObjects, sAccentsLeftRight),
+    SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_SMALL, sForbiddenStoneSoulObjects),
+    SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_SMALL, sForbiddenStoneSoulObjects),
+    SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_SMALL, sForbiddenStoneSoulObjects),
 };
 static const struct RogueRouteSceneLotDefinition sForbiddenStonePayoffLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_LARGE, sForbiddenStonePayoffObjects, sAccentsLeftRightUp),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_LARGE, sForbiddenStonePayoffObjects, sAccentLowerRight),
 };
 static const struct RogueRouteSceneLotDefinition sApricornGroveLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornGroveObjects, sAccentsLeftRight),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornGroveObjects, sAccentsLeftColumn),
 };
 static const struct RogueRouteSceneLotDefinition sApricornGroveAndArtisanLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornGroveObjects, sAccentsLeftRight),
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornArtisanObjects, sAccentsLeftRight),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornGroveObjects, sAccentsLeftColumn),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornArtisanObjects, sAccentUpperRight),
 };
 static const struct RogueRouteSceneLotDefinition sApricornArtisanLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornArtisanObjects, sAccentsLeftRight),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sApricornArtisanObjects, sAccentUpperRight),
 };
 static const struct RogueRouteSceneLotDefinition sUnboundTutorLots[] =
 {
-    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sUnboundTutorObjects, sAccentsLeftRightUp),
+    SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sUnboundTutorObjects, sAccentLowerLeft),
 };
 
 static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
@@ -294,6 +285,7 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
 };
 
 #undef SCENE_LOT
+#undef SCENE_LOT_NO_ACCENTS
 #undef SCENE_OBJECT_UNTIL_ROLE_COMPLETE
 #undef SCENE_OBJECT_UNTIL_COMPLETED
 #undef SCENE_OBJECT

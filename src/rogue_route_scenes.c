@@ -292,6 +292,79 @@ static u8 CollectRouteLots(u8 roomId, struct RogueRouteLot *lots, u8 capacity, u
     return count;
 }
 
+static bool8 IsLotLayoutTraversable(const struct RogueRouteSceneLotDefinition *lotDefinition)
+{
+    u16 occupied = 0;
+    u16 open;
+    u16 visited = 0;
+    u16 frontier;
+    u8 i;
+
+    // Dynamic objects may use the whole authored 3x3 clearing. Keep every
+    // remaining tile connected and every object reachable from a cardinally
+    // adjacent tile, so a recipe cannot create a wall or an inaccessible NPC.
+    for(i = 0; i < lotDefinition->objectCount; ++i)
+    {
+        const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
+        u16 bit;
+
+        if(abs(object->xOffset) > 1 || abs(object->yOffset) > 1)
+            return FALSE;
+
+        bit = 1 << ((object->yOffset + 1) * 3 + object->xOffset + 1);
+        if(occupied & bit)
+            return FALSE;
+        occupied |= bit;
+    }
+
+    open = (~occupied) & 0x1FF;
+    for(i = 0; i < lotDefinition->objectCount; ++i)
+    {
+        const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
+        u8 x = object->xOffset + 1;
+        u8 y = object->yOffset + 1;
+        u16 neighbours = 0;
+
+        if(x > 0)
+            neighbours |= 1 << (y * 3 + x - 1);
+        if(x < 2)
+            neighbours |= 1 << (y * 3 + x + 1);
+        if(y > 0)
+            neighbours |= 1 << ((y - 1) * 3 + x);
+        if(y < 2)
+            neighbours |= 1 << ((y + 1) * 3 + x);
+        if((neighbours & open) == 0)
+            return FALSE;
+    }
+
+    frontier = open & -open;
+    while(frontier != 0)
+    {
+        u16 next = 0;
+
+        visited |= frontier;
+        for(i = 0; i < 9; ++i)
+        {
+            u8 x = i % 3;
+            u8 y = i / 3;
+
+            if((frontier & (1 << i)) == 0)
+                continue;
+            if(x > 0)
+                next |= 1 << (i - 1);
+            if(x < 2)
+                next |= 1 << (i + 1);
+            if(y > 0)
+                next |= 1 << (i - 3);
+            if(y < 2)
+                next |= 1 << (i + 3);
+        }
+        frontier = next & open & ~visited;
+    }
+
+    return visited == open;
+}
+
 static bool8 AddRecipeToPlan(
     struct RogueRouteScenePlan *plan,
     u8 *placementCount,
@@ -323,6 +396,9 @@ static bool8 AddRecipeToPlan(
         u8 eligibleCount = 0;
         u8 selected;
         u8 i;
+
+        if(!IsLotLayoutTraversable(lotDefinition))
+            return FALSE;
 
         for(i = 0; i < lotCount; ++i)
         {
@@ -800,10 +876,67 @@ static u16 ResolveSceneObjectGraphics(
     const struct RogueRouteSceneRequest *scene,
     const struct RogueRouteSceneObjectDefinition *object)
 {
+    static const u16 sSemanticGraphics[ROUTE_SCENE_SEMANTIC_PROP_COUNT][ROGUE_ROUTE_ENVIRONMENT_COUNT] =
+    {
+        [ROUTE_SCENE_SEMANTIC_PROP_SUPPLIES] =
+        {
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_MOVING_BOX,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_MOVING_BOX,
+        },
+        [ROUTE_SCENE_SEMANTIC_PROP_WORKBENCH] =
+        {
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_WORK_TABLE,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_WORK_TABLE,
+        },
+        [ROUTE_SCENE_SEMANTIC_PROP_SHRINE_STONE] =
+        {
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+        },
+        [ROUTE_SCENE_SEMANTIC_PROP_CAMP] =
+        {
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_MOVING_BOX,
+            OBJ_EVENT_GFX_MOVING_BOX,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_MOVING_BOX,
+        },
+        [ROUTE_SCENE_SEMANTIC_PROP_RELIC] =
+        {
+            OBJ_EVENT_GFX_FOSSIL,
+            OBJ_EVENT_GFX_FOSSIL,
+            OBJ_EVENT_GFX_FOSSIL,
+            OBJ_EVENT_GFX_FOSSIL,
+            OBJ_EVENT_GFX_FOSSIL,
+            OBJ_EVENT_GFX_FOSSIL,
+        },
+    };
+    u8 semanticId;
+
     if(object->graphicsId == ROUTE_SCENE_GFX_PRIMARY)
         return scene->primaryGraphicsId;
     if(object->graphicsId == ROUTE_SCENE_GFX_SECONDARY)
         return scene->secondaryGraphicsId;
+    if(object->graphicsId <= ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES
+        && object->graphicsId >= ROUTE_SCENE_GFX_SEMANTIC_RELIC
+        && scene->environment < ROGUE_ROUTE_ENVIRONMENT_COUNT)
+    {
+        semanticId = ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES - object->graphicsId;
+        return sSemanticGraphics[semanticId][scene->environment];
+    }
     return object->graphicsId;
 }
 

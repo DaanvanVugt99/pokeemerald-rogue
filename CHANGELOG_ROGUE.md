@@ -93,6 +93,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reworked generated route scenes around sparse, asymmetric compositions and
+  environment-aware semantic props. Removed generic battle-statue pillars and
+  decorative Rock Smash boulders, kept each lot locally traversable with its
+  focal objects accessible, and replaced Spiritomb soul markers with distinct
+  non-interactive shrine stones.
 - Made route-scene presentation declarative: each recipe now defines its lots,
   objects, scripts, state visibility, and metatile accents in one ROM data
   table shared by initial composition and quicksave restoration. The generic
