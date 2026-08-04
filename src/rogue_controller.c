@@ -5118,6 +5118,7 @@ static void BeginRogueRunPhase_Reset(void)
     VarSet(VAR_ROGUE_COURIER_ITEM, ITEM_NONE);
     VarSet(VAR_ROGUE_COURIER_COUNT, 0);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
     FlagClear(FLAG_ROGUE_COURIER_READY);
 
     gRogueRun.victoryLapTotalWins = 0;
@@ -5431,6 +5432,7 @@ static void EndRogueRun(void)
     // Generated quests and their temporary cargo never survive the run boundary.
     RogueAdventureQuests_Clear();
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
 
     if(Rogue_IsCampaignActive())
         Rogue_DeactivateActiveCampaign();

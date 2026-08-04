@@ -28,9 +28,9 @@ Format follows Keep a Changelog loosely:
   weighted pool of valid content, including a one-off Hexed Shrine where the
   Dark Deal Devil offers immediate money in exchange for a temporary Curse
   that lasts until the next Boss falls, and an Anomalous Fossil quest that
-  carries a discovered fossil to a later restoration lab. The restored
-  Pokémon is always a level-1 Rare Unique, with a choice between preserving
-  its original typing or accepting a seeded adaptive typing. The Forbidden
+  carries a discovered Key Item fossil safely to a later restoration lab. The
+  restored Pokémon is always a level-1 Rare Unique, with a choice between
+  preserving its original typing or accepting a seeded adaptive typing. The Forbidden
   Stone quest now gives the player an Odd Keystone, binds three escaped souls
   at separate locations on a later route, and ends with an uncatchable
   Spiritomb battle for an Ability Patch and ¥10,000. Apricorn Crafting now
@@ -45,7 +45,11 @@ Format follows Keep a Changelog loosely:
   Exchange requests a species from the current route in return for a visible,
   similarly powered Pokémon with a coherent trained set and three perfect
   IVs; players can preview the offer, choose the exact partner to trade, and
-  recover its held item safely. Active routes
+  recover its held item safely. A once-per-Adventure Buried Cache event now
+  occupies three lots on one route: an archaeologist lends a route-local Field
+  Shovel and a two-trait clue, while two environment-themed landmarks conceal
+  either the cache or a recoverable wild ambush. Ancient, Trainer, relic, and
+  rare Charm caches provide distinct seeded reward classes. Active routes
   expose eight small, medium, and large scene lots; the director independently
   fills one to three lots so quest consumers and unrelated route events can
   coexist. The per-room scene plan is packed into less memory than the former

@@ -946,26 +946,54 @@ static u16 ResolveSceneObjectGraphics(
             OBJ_EVENT_GFX_FOSSIL,
             OBJ_EVENT_GFX_FOSSIL,
         },
+        [ROUTE_SCENE_SEMANTIC_PROP_LANDMARK_0] =
+        {
+            OBJ_EVENT_GFX_CUTTABLE_TREE,
+            OBJ_EVENT_GFX_CUTTABLE_TREE,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_CUTTABLE_TREE,
+            OBJ_EVENT_GFX_MOVING_BOX,
+        },
+        [ROUTE_SCENE_SEMANTIC_PROP_LANDMARK_1] =
+        {
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_PUSHABLE_BOULDER,
+            OBJ_EVENT_GFX_PUSHABLE_BOULDER,
+            OBJ_EVENT_GFX_MOVING_BOX,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+        },
+        [ROUTE_SCENE_SEMANTIC_PROP_LANDMARK_2] =
+        {
+            OBJ_EVENT_GFX_MOVING_BOX,
+            OBJ_EVENT_GFX_PUSHABLE_BOULDER,
+            OBJ_EVENT_GFX_MOVING_BOX,
+            OBJ_EVENT_GFX_BIRCHS_BAG,
+            OBJ_EVENT_GFX_ROUTE_ROCK,
+            OBJ_EVENT_GFX_SMALL_SIGN,
+        },
     };
+    u16 graphicsId = object->graphicsId;
     u8 semanticId;
 
-    if(object->graphicsId == ROUTE_SCENE_GFX_PRIMARY)
-        return scene->primaryGraphicsId;
-    if(object->graphicsId == ROUTE_SCENE_GFX_SECONDARY)
-        return scene->secondaryGraphicsId;
-    if(object->graphicsId == ROUTE_SCENE_GFX_OFFERED_MON)
+    if(graphicsId == ROUTE_SCENE_GFX_PRIMARY)
+        graphicsId = scene->primaryGraphicsId;
+    else if(graphicsId == ROUTE_SCENE_GFX_SECONDARY)
+        graphicsId = scene->secondaryGraphicsId;
+    else if(graphicsId == ROUTE_SCENE_GFX_OFFERED_MON)
     {
         FollowMon_SetGraphics(1, scene->rewardItem, FALSE, 0);
         return OBJ_EVENT_GFX_FOLLOW_MON_1;
     }
-    if(object->graphicsId <= ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES
-        && object->graphicsId >= ROUTE_SCENE_GFX_SEMANTIC_RELIC
+    if(graphicsId <= ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES
+        && graphicsId >= ROUTE_SCENE_GFX_SEMANTIC_LANDMARK_2
         && scene->environment < ROGUE_ROUTE_ENVIRONMENT_COUNT)
     {
-        semanticId = ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES - object->graphicsId;
+        semanticId = ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES - graphicsId;
         return sSemanticGraphics[semanticId][scene->environment];
     }
-    return object->graphicsId;
+    return graphicsId;
 }
 
 static bool8 IsSceneObjectVisible(

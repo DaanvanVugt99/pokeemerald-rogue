@@ -210,6 +210,9 @@ gSpecials::
     def_special RogueRouteEvents_ShowBreedersExchangePreview
     def_special RogueRouteEvents_ValidateBreedersExchangeSelection
     def_special RogueRouteEvents_TryCompleteBreedersExchange
+    def_special RogueRouteEvents_BufferBuriedCacheData
+    def_special RogueRouteEvents_TryAcceptBuriedCache
+    def_special RogueRouteEvents_TryDigBuriedCache
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon

@@ -19,6 +19,7 @@ enum
     ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
     ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
     ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
+    ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,
     ROGUE_ROUTE_SCENE_RECIPE_COUNT,
 };
 
@@ -54,9 +55,9 @@ enum
 #define ROGUE_ROUTE_SCENE_MAX_PLACEMENTS 3
 #define ROGUE_ROUTE_SCENE_MAX_ROLES 4
 
-// A single save-backed variable tracks which fallback families have appeared
-// and which have been completed during the current Adventure. Keep the family
-// count at or below eight so both masks fit in one u16.
+// Save-backed variables track which fallback families have appeared and which
+// have been completed during the current Adventure. Each variable owns eight
+// encountered bits and eight completed bits.
 enum
 {
     ROGUE_ROUTE_FAMILY_STOLEN_TRADE_CASE,
@@ -67,9 +68,11 @@ enum
     ROGUE_ROUTE_FAMILY_UNBOUND_TUTOR,
     ROGUE_ROUTE_FAMILY_TRAVELING_MERCHANT,
     ROGUE_ROUTE_FAMILY_BREEDERS_EXCHANGE,
+    ROGUE_ROUTE_FAMILY_BURIED_CACHE,
     ROGUE_ROUTE_FAMILY_COUNT,
 };
 
+#define ROGUE_ROUTE_FAMILY_HISTORY_PER_VAR 8
 #define ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT 8
 
 #endif // GUARD_CONSTANTS_ROGUE_ROUTE_SCENES_H

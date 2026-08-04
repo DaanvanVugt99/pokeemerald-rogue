@@ -35,7 +35,10 @@ const ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON = 5
 const ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL = 6
 const ROGUE_ROUTE_EVENT_RESULT_WRONG_MON = 7
 const ROGUE_ROUTE_EVENT_RESULT_PROTECTED_MON = 8
+const ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE = 9
+const ROGUE_ROUTE_EVENT_RESULT_ALREADY_DUG = 10
 const VAR_ROUTE_EVENT_STATE = VAR_0x8008
+const VAR_BURIED_CACHE_SITE_DUG = VAR_0x8003
 
 const ROGUE_FOSSIL_RESTORATION_STABLE = 0
 const ROGUE_FOSSIL_RESTORATION_ADAPTIVE = 1
@@ -57,6 +60,142 @@ script Rogue_RouteEvent_Prop
     faceplayer
 
     msgbox(format("Someone packed these supplies for a long road."))
+
+    release
+}
+
+script Rogue_RouteEvent_BuriedCacheSupplies
+{
+    lock
+    faceplayer
+    msgbox(format("A field journal, brushes, and measuring cord are arranged with practiced care."))
+    release
+}
+
+script Rogue_RouteEvent_BuriedCacheArchaeologist
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    special(RogueRouteEvents_BufferBuriedCacheData)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("A remarkable find! The road keeps its history well hidden."))
+    }
+    else
+    {
+        if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+        {
+            msgbox(format("My survey points to a buried cache somewhere along this route.\pThere are two promising landmarks, but only one matches the old notes: {STR_VAR_2}\pWould you test the site for me?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES)
+            {
+                special(RogueRouteEvents_TryAcceptBuriedCache)
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+                {
+                    call(Rogue_Common_DisplayPopups)
+                    msgbox(format("Take this Field Shovel. Inspect both landmarks carefully—the wrong ground may not stay quiet."))
+                }
+                else
+                {
+                    msgbox(format("You need room among your Key Items for the Field Shovel. Nothing has changed yet."))
+                }
+            }
+            else
+            {
+                msgbox(format("No harm done. The sites and my shovel will remain here while you decide."))
+            }
+        }
+        else
+        {
+            msgbox(format("The old notes are precise: {STR_VAR_2}\pInspect both landmarks before you commit the shovel."))
+        }
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_BuriedCacheSite
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    special(RogueRouteEvents_BufferBuriedCacheData)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("{STR_VAR_1}\pThe excavation is finished."))
+        release
+        end
+    }
+    if(var(VAR_BURIED_CACHE_SITE_DUG) == TRUE && var(VAR_ROUTE_EVENT_STATE) != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING)
+    {
+        msgbox(format("{STR_VAR_1}\pThis site has already been excavated."))
+        release
+        end
+    }
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+    {
+        msgbox(format("{STR_VAR_1}\pThe ground looks deliberately disturbed, but digging without the right tool would ruin the site."))
+        release
+        end
+    }
+
+    msgbox(format("{STR_VAR_1}\pThe clue says: {STR_VAR_2}\pDig here?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == NO)
+    {
+        msgbox(format("You leave the ground untouched."))
+        release
+        end
+    }
+
+    special(RogueRouteEvents_TryDigBuriedCache)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        call(Rogue_Common_DisplayPopups)
+        msgbox(format("The shovel strikes a sealed {STR_VAR_3}. Its contents survived the years intact!"))
+    }
+    else
+    {
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE)
+        {
+            msgbox(format("The soil gives way—but there is no cache. Something was nesting beneath it!"))
+            playmoncry(VAR_0x8006, CRY_MODE_ENCOUNTER)
+            waitmoncry
+            special(BattleSetup_StartLegendaryBattle)
+            waitstate
+            specialvar(VAR_RESULT, GetBattleOutcome)
+            if(var(VAR_RESULT) == B_OUTCOME_WON)
+            {
+                msgbox(format("The disturbed Pokémon retreats. The Field Shovel is unharmed; the other landmark is still worth checking."))
+            }
+        }
+        else
+        {
+            if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+            {
+                msgbox(format("You uncover the cache, but your Bag cannot hold everything inside. The cache remains safely sealed."))
+            }
+            else
+            {
+                if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL)
+                {
+                    msgbox(format("You uncover the cache, but cannot carry every coin. The cache remains safely sealed."))
+                }
+                else
+                {
+                    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_ALREADY_DUG)
+                    {
+                        msgbox(format("This ground has already been searched."))
+                    }
+                    else
+                    {
+                        msgbox(format("Without the borrowed Field Shovel, the cache cannot be recovered safely."))
+                    }
+                }
+            }
+        }
+    }
 
     release
 }

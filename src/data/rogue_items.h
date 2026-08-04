@@ -11,6 +11,7 @@ extern const u8 gItemDesc_BuildingSupplies[];
 extern const u8 gItemDesc_PokeblockBundle[];
 extern const u8 gItemDesc_BigPokeblockBundle[];
 extern const u8 gItemDesc_TradeCase[];
+extern const u8 gItemDesc_FieldShovel[];
 extern const u8 gItemDesc_SmallCoinCase[];
 extern const u8 gItemDesc_LargeCoinCase[];
 extern const u8 gItemDesc_GoldenSeed[];
@@ -306,6 +307,24 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .registrability = FALSE,
         .iconImage = gItemIcon_Parcel,
         .iconPalette = gItemIconPalette_Parcel,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_FIELD_SHOVEL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Field Shovel"),
+#else
+        .name = _("FIELD SHOVEL"),
+#endif
+        .itemId = ITEM_FIELD_SHOVEL,
+        .price = 0,
+        .description = gItemDesc_FieldShovel,
+        .pocket = POCKET_KEY_ITEMS,
+        .registrability = FALSE,
+        .iconImage = gItemIcon_GoodRod,
+        .iconPalette = gItemIconPalette_GoodRod,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },

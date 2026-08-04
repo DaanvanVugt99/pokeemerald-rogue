@@ -38,6 +38,8 @@
 #include "rogue_route_scenes.h"
 #include "rogue_trainers.h"
 #include "shop.h"
+#include "strings.h"
+#include "string_util.h"
 #include "test/test.h"
 
 extern const u8 Rogue_RouteEvent_Interact[];
@@ -62,6 +64,9 @@ extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 extern const u8 Rogue_RouteEvent_BreedersExchange[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
+extern const u8 Rogue_RouteEvent_BuriedCacheArchaeologist[];
+extern const u8 Rogue_RouteEvent_BuriedCacheSupplies[];
+extern const u8 Rogue_RouteEvent_BuriedCacheSite[];
 
 static u32 GetActiveTeamClassFlag(u16 teamNum)
 {
@@ -254,6 +259,7 @@ TEST("Selected standalone route scene payloads remain immutable")
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
         ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
+        ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,
     };
     struct RogueAdvPath originalPath;
     struct RogueRouteSceneRequest selected;
@@ -328,6 +334,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
@@ -356,6 +363,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     for(seed = 1; seed <= 96; ++seed)
     {
         VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+        VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
         gRogueAdvPath.rooms[0].rngSeed = seed;
         gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
@@ -445,6 +453,19 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
                 EXPECT(offeredBst + 80 >= requestedBst);
                 EXPECT(requestedBst + 80 >= offeredBst);
             }
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE)
+            {
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+                if(request.lotRole == 0)
+                    EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_MISC_RUIN_MANIAC);
+                else
+                {
+                    EXPECT_GE(request.primaryGraphicsId, ROUTE_SCENE_GFX_SEMANTIC_LANDMARK_2);
+                    EXPECT_LE(request.primaryGraphicsId, ROUTE_SCENE_GFX_SEMANTIC_LANDMARK_0);
+                }
+                EXPECT_NE(request.rewardItem, ITEM_NONE);
+                EXPECT_NE(request.trainerNum, SPECIES_NONE);
+            }
             else
             {
                 EXPECT(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE
@@ -477,6 +498,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
     RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
     gRogueAdvPath = originalPath;
@@ -496,8 +518,10 @@ TEST("Route event family history packs encountered and completed state without t
     RAND_TYPE originalRogueRng = gRngRogueValue;
     RAND_TYPE originalStandardRng = gRngValue;
     u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
 
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
     EXPECT(!RogueRouteEvents_HasEncounteredFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
     EXPECT(!RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL));
 
@@ -512,7 +536,161 @@ TEST("Route event family history packs encountered and completed state without t
     EXPECT_EQ(memcmp(&gRngRogueValue, &originalRogueRng, sizeof(originalRogueRng)), 0);
     EXPECT_EQ(memcmp(&gRngValue, &originalStandardRng, sizeof(originalStandardRng)), 0);
 
+    scene.recipeId = ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE;
+    RogueRouteEvents_MarkFamilyEncountered(ROGUE_ROUTE_FAMILY_BURIED_CACHE);
+    EXPECT(RogueRouteEvents_HasEncounteredFamily(ROGUE_ROUTE_FAMILY_BURIED_CACHE));
+    EXPECT(!RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_BURIED_CACHE));
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+    EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_BURIED_CACHE));
+    EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY),
+        (1 << ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL)
+            | (1 << (ROGUE_ROUTE_FAMILY_ANOMALOUS_FOSSIL + ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT)));
+
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
+}
+
+TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueRouteSceneRequest archaeologist;
+    struct RogueRouteSceneRequest siteA;
+    struct RogueRouteSceneRequest siteB;
+    u8 observationA[256];
+    u8 observationB[256];
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
+    u32 originalMoney = GetMoney(&gSaveBlock1Ptr->money);
+    bool8 originalFlagA = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    bool8 originalFlagB = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    u8 originalRoomId;
+    u16 seed;
+    u16 rewardItem;
+    u16 secondaryRewardItem;
+    u8 cacheType;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    ClearBag();
+    SetMoney(&gSaveBlock1Ptr->money, 0);
+    for(seed = 1; seed < 256; ++seed)
+    {
+        gRogueAdvPath.rooms[0].rngSeed = seed;
+        RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+        RogueRouteScenes_DebugSetPlacement(0, ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE, 0, 0, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+        RogueRouteScenes_DebugSetPlacement(1, ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE, 1, 1, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+        RogueRouteScenes_DebugSetPlacement(2, ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE, 2, 2, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+        EXPECT_EQ(RogueRouteScenes_GetPlacementCount(), 3);
+        EXPECT(RogueRouteScenes_GetPlacementRequest(0, &archaeologist));
+        EXPECT(RogueRouteScenes_GetPlacementRequest(1, &siteA));
+        EXPECT(RogueRouteScenes_GetPlacementRequest(2, &siteB));
+        EXPECT_EQ(archaeologist.sceneSlot, siteA.sceneSlot);
+        EXPECT_EQ(archaeologist.sceneSlot, siteB.sceneSlot);
+        EXPECT_EQ(archaeologist.lotRole, 0);
+        EXPECT_EQ(siteA.lotRole, 1);
+        EXPECT_EQ(siteB.lotRole, 2);
+
+        {
+            struct ObjectEventTemplate objects[8] =
+            {
+                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+                {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 2, .script = Rogue_RouteEvent_Interact},
+            };
+            u8 count = 3;
+            u8 archaeologistCount = 0;
+            u8 suppliesCount = 0;
+            u8 siteCount = 0;
+            u8 i;
+            u8 j;
+
+            RogueRouteScenes_ModifyObjectEvents(objects, &count, ARRAY_COUNT(objects));
+            EXPECT_EQ(count, 4);
+            for(i = 0; i < count; ++i)
+            {
+                EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_BATTLE_STATUE);
+                EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_BREAKABLE_ROCK);
+                archaeologistCount += objects[i].script == Rogue_RouteEvent_BuriedCacheArchaeologist;
+                suppliesCount += objects[i].script == Rogue_RouteEvent_BuriedCacheSupplies;
+                siteCount += objects[i].script == Rogue_RouteEvent_BuriedCacheSite;
+                for(j = i + 1; j < count; ++j)
+                    EXPECT_NE(objects[i].localId, objects[j].localId);
+            }
+            EXPECT_EQ(archaeologistCount, 1);
+            EXPECT_EQ(suppliesCount, 1);
+            EXPECT_EQ(siteCount, 2);
+        }
+
+        SelectPlacement(&siteA);
+        RogueRouteEvents_BufferBuriedCacheData();
+        StringCopy(observationA, gStringVar1);
+        SelectPlacement(&siteB);
+        RogueRouteEvents_BufferBuriedCacheData();
+        StringCopy(observationB, gStringVar1);
+        EXPECT_NE(StringCompare(observationA, observationB), 0);
+
+        SelectPlacement(&archaeologist);
+        RogueRouteEvents_BufferBuriedCacheData();
+        rewardItem = gSpecialVar_0x8004;
+        secondaryRewardItem = gSpecialVar_0x8005;
+        cacheType = gSpecialVar_0x8007;
+        RogueRouteEvents_TryAcceptBuriedCache();
+        EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+        EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
+        EXPECT_EQ(RogueRouteScenes_GetState(0), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+
+        SelectPlacement(&siteA);
+        RogueRouteEvents_TryDigBuriedCache();
+        if(gSpecialVar_Result == ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE)
+            break;
+
+        ClearBag();
+        FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+        FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
+        VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
+    }
+
+    EXPECT_LT(seed, 256);
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), siteA.trainerNum);
+    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
+    EXPECT(!FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN));
+    EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
+    EXPECT_EQ(RogueRouteScenes_GetState(0), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+
+    SelectPlacement(&siteA);
+    RogueRouteEvents_TryDigBuriedCache();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_ALREADY_DUG);
+
+    SelectPlacement(&siteB);
+    RogueRouteEvents_TryDigBuriedCache();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT(!CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
+    EXPECT(CheckBagHasItem(rewardItem, 1));
+    if(secondaryRewardItem != ITEM_NONE)
+        EXPECT(CheckBagHasItem(secondaryRewardItem, 1));
+    if(cacheType == ROGUE_BURIED_CACHE_ANCIENT)
+        EXPECT_GE(GetMoney(&gSaveBlock1Ptr->money), ROGUE_BURIED_CACHE_MONEY_BASE);
+    EXPECT_EQ(RogueRouteScenes_GetState(0), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_BURIED_CACHE));
+
+    // An unfinished borrowed tool never survives the route boundary.
+    ClearBag();
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
+    SelectPlacement(&archaeologist);
+    RogueRouteEvents_TryAcceptBuriedCache();
+    EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
+    RogueRouteEvents_OnExitScene(&archaeologist);
+    EXPECT(!CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
+
+    ClearBag();
+    SetMoney(&gSaveBlock1Ptr->money, originalMoney);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
+    RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalFlagA);
+    RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN, originalFlagB);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
 }
 
 TEST("Route events provide clear typed lots on every classified active route")
@@ -1530,6 +1708,22 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
 
 TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Pokemon")
 {
+    static const u16 sQuestFossils[] =
+    {
+        ITEM_HELIX_FOSSIL,
+        ITEM_DOME_FOSSIL,
+        ITEM_OLD_AMBER,
+        ITEM_ROOT_FOSSIL,
+        ITEM_CLAW_FOSSIL,
+#ifdef ROGUE_EXPANSION
+        ITEM_ARMOR_FOSSIL,
+        ITEM_SKULL_FOSSIL,
+        ITEM_COVER_FOSSIL,
+        ITEM_PLUME_FOSSIL,
+        ITEM_JAW_FOSSIL,
+        ITEM_SAIL_FOSSIL,
+#endif
+    };
     struct RogueAdvPath originalPath;
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     struct Pokemon originalParty[PARTY_SIZE];
@@ -1550,6 +1744,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     u32 customMonId;
     u8 customType0;
     u8 customType1;
+    u8 i;
 
     memcpy(originalParty, gPlayerParty, sizeof(originalParty));
     memset(gPlayerParty, 0, sizeof(gPlayerParty));
@@ -1563,6 +1758,12 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     Rogue_SetCurrentDifficulty(0);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    for(i = 0; i < ARRAY_COUNT(sQuestFossils); ++i)
+    {
+        EXPECT_EQ(ItemId_GetPocket(sQuestFossils[i]), POCKET_KEY_ITEMS);
+        EXPECT_EQ(ItemId_GetPrice(sQuestFossils[i]), 0);
+        EXPECT(ItemId_GetImportance(sQuestFossils[i]));
+    }
     {
         u16 seed;
 
@@ -1582,7 +1783,9 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     EXPECT_EQ(offer.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
     EXPECT_EQ((u8)offer.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
     EXPECT_EQ(RogueAdventureQuests_GetFossilSpecies(offer.requestedItem), offer.rewardItem);
-    EXPECT(!ItemId_GetImportance(offer.requestedItem));
+    EXPECT_EQ(ItemId_GetPocket(offer.requestedItem), POCKET_KEY_ITEMS);
+    EXPECT_EQ(ItemId_GetPrice(offer.requestedItem), 0);
+    EXPECT(ItemId_GetImportance(offer.requestedItem));
 
     RogueRouteEvents_TryAcceptAnomalousFossilQuest();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
@@ -2538,6 +2741,7 @@ TEST("All existing route events are registered through declarative tables")
         ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
         ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
+        ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,
     };
     u8 i;
 

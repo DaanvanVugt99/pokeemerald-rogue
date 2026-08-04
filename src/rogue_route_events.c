@@ -76,6 +76,9 @@ extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 extern const u8 Rogue_RouteEvent_BreedersExchange[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
+extern const u8 Rogue_RouteEvent_BuriedCacheArchaeologist[];
+extern const u8 Rogue_RouteEvent_BuriedCacheSupplies[];
+extern const u8 Rogue_RouteEvent_BuriedCacheSite[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -310,6 +313,12 @@ static bool8 CanShowBreedersExchange(u8 roomId)
     // Keeping eligibility cheap avoids scanning the full species table once
     // per fallback candidate during a single route-planning pass.
     return encounterCount != 0;
+}
+
+static bool8 CanShowBuriedCache(u8 roomId)
+{
+    (void)roomId;
+    return !CheckBagHasItem(ITEM_FIELD_SHOVEL, 1);
 }
 
 static const u16 sApricornItems[] =
@@ -666,6 +675,325 @@ static void ExpandBreedersExchangePayload(struct RogueRouteSceneRequest *request
         request->trainerNum = seed % gRoguePokemonProfiles[offeredSpecies].competitiveSetCount;
 }
 
+enum
+{
+    BURIED_CACHE_TRAIT_LANDMARK,
+    BURIED_CACHE_TRAIT_MARKING,
+    BURIED_CACHE_TRAIT_GROUND,
+    BURIED_CACHE_TRAIT_COUNT,
+};
+
+struct BuriedCacheSiteData
+{
+    u8 landmark;
+    u8 marking;
+    u8 ground;
+};
+
+struct BuriedCacheData
+{
+    struct BuriedCacheSiteData sites[2];
+    u16 rewardItem;
+    u16 secondaryRewardItem;
+    u16 ambushSpecies;
+    u16 moneyReward;
+    u8 correctSite;
+    u8 clueTraitA;
+    u8 clueTraitB;
+    u8 cacheType;
+};
+
+static const u16 sBuriedCacheEvolutionItems[] =
+{
+    ITEM_FIRE_STONE,
+    ITEM_WATER_STONE,
+    ITEM_THUNDER_STONE,
+    ITEM_LEAF_STONE,
+    ITEM_ICE_STONE,
+    ITEM_SUN_STONE,
+    ITEM_MOON_STONE,
+    ITEM_SHINY_STONE,
+    ITEM_DUSK_STONE,
+    ITEM_DAWN_STONE,
+};
+
+static const u16 sBuriedCacheTmMoves[] =
+{
+    MOVE_PSYCHIC,
+    MOVE_EARTHQUAKE,
+    MOVE_ICE_BEAM,
+    MOVE_THUNDERBOLT,
+    MOVE_FLAMETHROWER,
+    MOVE_SHADOW_BALL,
+    MOVE_SLUDGE_BOMB,
+    MOVE_BRICK_BREAK,
+    MOVE_AERIAL_ACE,
+};
+
+static const u16 sBuriedCacheAmbushSpecies[ROGUE_ROUTE_ENVIRONMENT_COUNT][3] =
+{
+    [ROGUE_ROUTE_ENVIRONMENT_FIELD] = {SPECIES_SANDSHREW, SPECIES_TRAPINCH, SPECIES_BALTOY},
+    [ROGUE_ROUTE_ENVIRONMENT_FOREST] = {SPECIES_NINCADA, SPECIES_PARAS, SPECIES_SHROOMISH},
+    [ROGUE_ROUTE_ENVIRONMENT_CAVE] = {SPECIES_GEODUDE, SPECIES_ONIX, SPECIES_DUNSPARCE},
+    [ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN] = {SPECIES_GEODUDE, SPECIES_NOSEPASS, SPECIES_ARON},
+    [ROGUE_ROUTE_ENVIRONMENT_WATERFRONT] = {SPECIES_KRABBY, SPECIES_CORPHISH, SPECIES_CLAMPERL},
+    [ROGUE_ROUTE_ENVIRONMENT_URBAN] = {SPECIES_VOLTORB, SPECIES_GRIMER, SPECIES_KOFFING},
+};
+
+static u16 SelectEnabledItemFromList(
+    const u16 *items,
+    u16 itemCount,
+    struct RogueRouteSceneRng *rng)
+{
+    u16 eligibleCount = 0;
+    u16 selected;
+    u16 i;
+
+    for(i = 0; i < itemCount; ++i)
+    {
+        if(Rogue_IsItemEnabled(items[i]))
+            ++eligibleCount;
+    }
+    if(eligibleCount == 0)
+        return ITEM_NONE;
+
+    selected = RogueRouteSceneRng_Next(rng) % eligibleCount;
+    for(i = 0; i < itemCount; ++i)
+    {
+        if(Rogue_IsItemEnabled(items[i]) && selected-- == 0)
+            return items[i];
+    }
+
+    return ITEM_NONE;
+}
+
+static u16 SelectBuriedCacheTm(struct RogueRouteSceneRng *rng)
+{
+    u16 items[ARRAY_COUNT(sBuriedCacheTmMoves)];
+    u8 count = 0;
+    u8 i;
+
+    for(i = 0; i < ARRAY_COUNT(sBuriedCacheTmMoves); ++i)
+    {
+        u16 item = BattleMoveIdToItemId(sBuriedCacheTmMoves[i]);
+
+        if(item != ITEM_NONE && Rogue_IsItemEnabled(item))
+            items[count++] = item;
+    }
+
+    return count == 0 ? ITEM_NONE : items[RogueRouteSceneRng_Next(rng) % count];
+}
+
+static u16 SelectBuriedCacheRelic(struct RogueRouteSceneRng *rng)
+{
+#ifdef ROGUE_EXPANSION
+    u16 eligibleCount = 0;
+    u16 selected;
+    u16 item;
+
+    for(item = ITEM_VENUSAURITE; item < ITEMS_COUNT; ++item)
+    {
+        bool8 isMegaStone = IS_MEGA_STONE_ITEM(item) && IsMegaEvolutionEnabled();
+        bool8 isZCrystal = item >= ITEM_NORMALIUM_Z
+            && item <= ITEM_ULTRANECROZIUM_Z
+            && IsZMovesEnabled();
+
+        if((isMegaStone || isZCrystal) && Rogue_IsItemEnabled(item))
+            ++eligibleCount;
+    }
+    if(eligibleCount == 0)
+        return ITEM_NONE;
+
+    selected = RogueRouteSceneRng_Next(rng) % eligibleCount;
+    for(item = ITEM_VENUSAURITE; item < ITEMS_COUNT; ++item)
+    {
+        bool8 isMegaStone = IS_MEGA_STONE_ITEM(item) && IsMegaEvolutionEnabled();
+        bool8 isZCrystal = item >= ITEM_NORMALIUM_Z
+            && item <= ITEM_ULTRANECROZIUM_Z
+            && IsZMovesEnabled();
+
+        if((isMegaStone || isZCrystal)
+            && Rogue_IsItemEnabled(item)
+            && selected-- == 0)
+            return item;
+    }
+#else
+    (void)rng;
+#endif
+
+    return ITEM_NONE;
+}
+
+static u16 SelectBuriedCacheCharm(struct RogueRouteSceneRng *rng)
+{
+    u16 eligibleCount = 0;
+    u16 selected;
+    u16 item;
+
+    for(item = FIRST_ITEM_CHARM; item <= LAST_ITEM_CHARM; ++item)
+    {
+        if(Rogue_IsItemEnabled(item))
+            ++eligibleCount;
+    }
+    if(eligibleCount == 0)
+        return ITEM_NONE;
+
+    selected = RogueRouteSceneRng_Next(rng) % eligibleCount;
+    for(item = FIRST_ITEM_CHARM; item <= LAST_ITEM_CHARM; ++item)
+    {
+        if(Rogue_IsItemEnabled(item) && selected-- == 0)
+            return item;
+    }
+
+    return ITEM_NONE;
+}
+
+static u16 SelectBuriedCacheAmbush(u8 environment, struct RogueRouteSceneRng *rng)
+{
+    u16 eligible[3];
+    u8 count = 0;
+    u8 i;
+
+    if(environment >= ROGUE_ROUTE_ENVIRONMENT_COUNT)
+        environment = ROGUE_ROUTE_ENVIRONMENT_FIELD;
+    for(i = 0; i < ARRAY_COUNT(eligible); ++i)
+    {
+        u16 species = sBuriedCacheAmbushSpecies[environment][i];
+
+        if(RoguePokedex_IsSpeciesEnabled(species))
+            eligible[count++] = species;
+    }
+
+    return count == 0 ? SPECIES_NONE : eligible[RogueRouteSceneRng_Next(rng) % count];
+}
+
+static void GenerateBuriedCacheData(u16 seed, u8 environment, struct BuriedCacheData *data)
+{
+    struct RogueRouteSceneRng rng;
+    struct BuriedCacheSiteData *correct;
+    struct BuriedCacheSiteData *decoy;
+    u8 sharedTrait;
+    u8 rewardRoll;
+
+    memset(data, 0, sizeof(*data));
+    RogueRouteSceneRng_Seed(&rng, seed ^ 0xD16A);
+    data->correctSite = RogueRouteSceneRng_Next(&rng) % 2;
+    correct = &data->sites[data->correctSite];
+    decoy = &data->sites[data->correctSite ^ 1];
+
+    correct->landmark = RogueRouteSceneRng_Next(&rng) % 3;
+    correct->marking = RogueRouteSceneRng_Next(&rng) % 4;
+    correct->ground = RogueRouteSceneRng_Next(&rng) % 3;
+    decoy->landmark = (correct->landmark + 1 + RogueRouteSceneRng_Next(&rng) % 2) % 3;
+    decoy->marking = (correct->marking + 1 + RogueRouteSceneRng_Next(&rng) % 3) % 4;
+    decoy->ground = (correct->ground + 1 + RogueRouteSceneRng_Next(&rng) % 2) % 3;
+
+    data->clueTraitA = RogueRouteSceneRng_Next(&rng) % BURIED_CACHE_TRAIT_COUNT;
+    data->clueTraitB = (data->clueTraitA + 1 + RogueRouteSceneRng_Next(&rng) % 2)
+        % BURIED_CACHE_TRAIT_COUNT;
+    if(data->clueTraitA > data->clueTraitB)
+    {
+        u8 temp = data->clueTraitA;
+        data->clueTraitA = data->clueTraitB;
+        data->clueTraitB = temp;
+    }
+    sharedTrait = RogueRouteSceneRng_Next(&rng) % 2 == 0
+        ? data->clueTraitA
+        : data->clueTraitB;
+    if(sharedTrait == BURIED_CACHE_TRAIT_LANDMARK)
+        decoy->landmark = correct->landmark;
+    else if(sharedTrait == BURIED_CACHE_TRAIT_MARKING)
+        decoy->marking = correct->marking;
+    else
+        decoy->ground = correct->ground;
+
+    rewardRoll = RogueRouteSceneRng_Next(&rng) % 100;
+    data->cacheType = rewardRoll < 35 ? ROGUE_BURIED_CACHE_ANCIENT
+        : rewardRoll < 65 ? ROGUE_BURIED_CACHE_TRAINER
+        : rewardRoll < 90 ? ROGUE_BURIED_CACHE_RELIC
+        : ROGUE_BURIED_CACHE_JACKPOT;
+    switch(data->cacheType)
+    {
+    case ROGUE_BURIED_CACHE_TRAINER:
+        data->rewardItem = SelectBuriedCacheTm(&rng);
+        data->secondaryRewardItem = ITEM_PP_MAX;
+        if(data->rewardItem != ITEM_NONE)
+            break;
+        data->cacheType = ROGUE_BURIED_CACHE_ANCIENT;
+        // fall through
+    case ROGUE_BURIED_CACHE_ANCIENT:
+        data->rewardItem = SelectEnabledItemFromList(
+            sBuriedCacheEvolutionItems,
+            ARRAY_COUNT(sBuriedCacheEvolutionItems),
+            &rng);
+        data->moneyReward = min(
+            ROGUE_BURIED_CACHE_MONEY_MAX,
+            ROGUE_BURIED_CACHE_MONEY_BASE
+                + ROGUE_BURIED_CACHE_MONEY_PER_DIFFICULTY * Rogue_GetCurrentDifficulty());
+        break;
+    case ROGUE_BURIED_CACHE_RELIC:
+        data->rewardItem = SelectBuriedCacheRelic(&rng);
+        if(data->rewardItem != ITEM_NONE)
+            break;
+        data->cacheType = ROGUE_BURIED_CACHE_ANCIENT;
+        data->rewardItem = SelectEnabledItemFromList(
+            sBuriedCacheEvolutionItems,
+            ARRAY_COUNT(sBuriedCacheEvolutionItems),
+            &rng);
+        data->moneyReward = min(
+            ROGUE_BURIED_CACHE_MONEY_MAX,
+            ROGUE_BURIED_CACHE_MONEY_BASE
+                + ROGUE_BURIED_CACHE_MONEY_PER_DIFFICULTY * Rogue_GetCurrentDifficulty());
+        break;
+    case ROGUE_BURIED_CACHE_JACKPOT:
+        data->rewardItem = SelectBuriedCacheCharm(&rng);
+        if(data->rewardItem == ITEM_NONE)
+        {
+            data->cacheType = ROGUE_BURIED_CACHE_ANCIENT;
+            data->rewardItem = SelectEnabledItemFromList(
+                sBuriedCacheEvolutionItems,
+                ARRAY_COUNT(sBuriedCacheEvolutionItems),
+                &rng);
+            data->moneyReward = min(
+                ROGUE_BURIED_CACHE_MONEY_MAX,
+                ROGUE_BURIED_CACHE_MONEY_BASE
+                    + ROGUE_BURIED_CACHE_MONEY_PER_DIFFICULTY * Rogue_GetCurrentDifficulty());
+        }
+        break;
+    }
+
+    data->ambushSpecies = SelectBuriedCacheAmbush(environment, &rng);
+}
+
+static bool8 SelectBuriedCachePayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    struct BuriedCacheData data;
+    u16 seed = RogueRouteSceneRng_Next(rng);
+
+    GenerateBuriedCacheData(seed, request->environment, &data);
+    if(data.rewardItem == ITEM_NONE || data.ambushSpecies == SPECIES_NONE)
+        return FALSE;
+
+    *payload = seed;
+    return TRUE;
+}
+
+static void ExpandBuriedCachePayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    struct BuriedCacheData data;
+
+    GenerateBuriedCacheData(payload, request->environment, &data);
+    request->primaryGraphicsId = request->lotRole == 0
+        ? OBJ_EVENT_GFX_MISC_RUIN_MANIAC
+        : ROUTE_SCENE_GFX_SEMANTIC(data.sites[request->lotRole - 1].landmark
+            + ROUTE_SCENE_SEMANTIC_PROP_LANDMARK_0);
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_MISC_RUIN_MANIAC;
+    request->requestedItem = data.secondaryRewardItem;
+    request->rewardItem = data.rewardItem;
+    request->trainerNum = data.ambushSpecies;
+    request->rewardAmount = payload;
+}
+
 #include "data/rogue_route_scene_recipes.h"
 #include "data/rogue_route_event_definitions.h"
 
@@ -692,32 +1020,46 @@ u8 RogueRouteEvents_GetFallbackCount(void)
     return ARRAY_COUNT(sRouteFallbacks);
 }
 
-static u16 GetFamilyHistoryBit(u8 familyId, u8 shift)
+static bool8 GetFamilyHistoryLocation(u8 familyId, bool8 completed, u16 *varId, u16 *bit)
 {
     if(familyId >= ROGUE_ROUTE_FAMILY_COUNT)
-        return 0;
+        return FALSE;
 
-    return 1 << (familyId + shift);
+    *varId = familyId < ROGUE_ROUTE_FAMILY_HISTORY_PER_VAR
+        ? VAR_ROGUE_ROUTE_EVENT_HISTORY
+        : VAR_ROGUE_ROUTE_EVENT_HISTORY_2;
+    familyId %= ROGUE_ROUTE_FAMILY_HISTORY_PER_VAR;
+    *bit = 1 << (familyId + (completed ? ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT : 0));
+    return TRUE;
 }
 
 bool8 RogueRouteEvents_HasEncounteredFamily(u8 familyId)
 {
-    return (VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY) & GetFamilyHistoryBit(familyId, 0)) != 0;
+    u16 varId;
+    u16 bit;
+
+    return GetFamilyHistoryLocation(familyId, FALSE, &varId, &bit)
+        && (VarGet(varId) & bit) != 0;
 }
 
 bool8 RogueRouteEvents_HasCompletedFamily(u8 familyId)
 {
-    return (VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY)
-        & GetFamilyHistoryBit(familyId, ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT)) != 0;
+    u16 varId;
+    u16 bit;
+
+    return GetFamilyHistoryLocation(familyId, TRUE, &varId, &bit)
+        && (VarGet(varId) & bit) != 0;
 }
 
 static u8 GetSceneFamily(const struct RogueRouteSceneRequest *scene);
 
 void RogueRouteEvents_MarkFamilyEncountered(u8 familyId)
 {
-    VarSet(
-        VAR_ROGUE_ROUTE_EVENT_HISTORY,
-        VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY) | GetFamilyHistoryBit(familyId, 0));
+    u16 varId;
+    u16 bit;
+
+    if(GetFamilyHistoryLocation(familyId, FALSE, &varId, &bit))
+        VarSet(varId, VarGet(varId) | bit);
 }
 
 void RogueRouteEvents_MarkRecipeFamilyEncountered(u8 recipeId)
@@ -758,14 +1100,13 @@ static u8 GetSceneFamily(const struct RogueRouteSceneRequest *scene)
 void RogueRouteEvents_MarkSceneFamilyCompleted(const struct RogueRouteSceneRequest *scene)
 {
     u8 familyId = GetSceneFamily(scene);
-    u16 history;
+    u16 varId;
+    u16 bit;
 
-    if(familyId >= ROGUE_ROUTE_FAMILY_COUNT)
+    if(!GetFamilyHistoryLocation(familyId, TRUE, &varId, &bit))
         return;
 
-    history = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
-    history |= GetFamilyHistoryBit(familyId, ROGUE_ROUTE_FAMILY_HISTORY_COMPLETED_SHIFT);
-    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, history);
+    VarSet(varId, VarGet(varId) | bit);
 }
 
 void RogueRouteEvents_OnEnterScene(const struct RogueRouteSceneRequest *scene)
@@ -811,6 +1152,9 @@ void RogueRouteEvents_PrepareSceneTrainers(const struct RogueRouteSceneRequest *
 u8 RogueRouteEvents_OnExitScene(const struct RogueRouteSceneRequest *scene)
 {
     const struct RogueRouteRecipeDefinition *definition = RogueRouteEvents_GetRecipeDefinition(scene->recipeId);
+
+    if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE && scene->lotRole == 0)
+        RemoveBagItem(ITEM_FIELD_SHOVEL, 1);
 
     if(definition != NULL
         && (definition->flags & ROUTE_SCENE_RECIPE_FLAG_COMPLETE_LINKED_QUEST_ON_EXIT) != 0
@@ -1734,6 +2078,288 @@ void RogueRouteEvents_TryCompleteBreedersExchange(void)
     Rogue_PushPopup_AddPokemon(scene.rewardItem, FALSE, FALSE);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteScenes_HideProp(scene.sceneSlot, 1);
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+static const u8 sText_BuriedCacheFieldLandmark0[] = _("old stump");
+static const u8 sText_BuriedCacheFieldLandmark1[] = _("boulder");
+static const u8 sText_BuriedCacheFieldLandmark2[] = _("abandoned crate");
+static const u8 sText_BuriedCacheForestLandmark0[] = _("old stump");
+static const u8 sText_BuriedCacheForestLandmark1[] = _("mossy stone");
+static const u8 sText_BuriedCacheForestLandmark2[] = _("fallen log");
+static const u8 sText_BuriedCacheCaveLandmark0[] = _("cracked boulder");
+static const u8 sText_BuriedCacheCaveLandmark1[] = _("rubble pile");
+static const u8 sText_BuriedCacheCaveLandmark2[] = _("abandoned crate");
+static const u8 sText_BuriedCacheMountainLandmark0[] = _("cairn");
+static const u8 sText_BuriedCacheMountainLandmark1[] = _("split rock");
+static const u8 sText_BuriedCacheMountainLandmark2[] = _("weathered supplies");
+static const u8 sText_BuriedCacheWaterLandmark0[] = _("driftwood");
+static const u8 sText_BuriedCacheWaterLandmark1[] = _("washed-up crate");
+static const u8 sText_BuriedCacheWaterLandmark2[] = _("smooth stone");
+static const u8 sText_BuriedCacheUrbanLandmark0[] = _("shipping crate");
+static const u8 sText_BuriedCacheUrbanLandmark1[] = _("barrel");
+static const u8 sText_BuriedCacheUrbanLandmark2[] = _("cracked paving");
+
+static const u8 *const sBuriedCacheLandmarkNames[ROGUE_ROUTE_ENVIRONMENT_COUNT][3] =
+{
+    {sText_BuriedCacheFieldLandmark0, sText_BuriedCacheFieldLandmark1, sText_BuriedCacheFieldLandmark2},
+    {sText_BuriedCacheForestLandmark0, sText_BuriedCacheForestLandmark1, sText_BuriedCacheForestLandmark2},
+    {sText_BuriedCacheCaveLandmark0, sText_BuriedCacheCaveLandmark1, sText_BuriedCacheCaveLandmark2},
+    {sText_BuriedCacheMountainLandmark0, sText_BuriedCacheMountainLandmark1, sText_BuriedCacheMountainLandmark2},
+    {sText_BuriedCacheWaterLandmark0, sText_BuriedCacheWaterLandmark1, sText_BuriedCacheWaterLandmark2},
+    {sText_BuriedCacheUrbanLandmark0, sText_BuriedCacheUrbanLandmark1, sText_BuriedCacheUrbanLandmark2},
+};
+
+static const u8 sText_BuriedCacheMarking0[] = _("a crescent mark");
+static const u8 sText_BuriedCacheMarking1[] = _("a spiral mark");
+static const u8 sText_BuriedCacheMarking2[] = _("crossed lines");
+static const u8 sText_BuriedCacheMarking3[] = _("three scratches");
+static const u8 *const sBuriedCacheMarkingNames[] =
+{
+    sText_BuriedCacheMarking0,
+    sText_BuriedCacheMarking1,
+    sText_BuriedCacheMarking2,
+    sText_BuriedCacheMarking3,
+};
+
+static const u8 sText_BuriedCacheFieldGround0[] = _("pale soil");
+static const u8 sText_BuriedCacheFieldGround1[] = _("red clay");
+static const u8 sText_BuriedCacheFieldGround2[] = _("short grass");
+static const u8 sText_BuriedCacheForestGround0[] = _("dark earth");
+static const u8 sText_BuriedCacheForestGround1[] = _("thick moss");
+static const u8 sText_BuriedCacheForestGround2[] = _("tangled roots");
+static const u8 sText_BuriedCacheCaveGround0[] = _("pale dust");
+static const u8 sText_BuriedCacheCaveGround1[] = _("loose gravel");
+static const u8 sText_BuriedCacheCaveGround2[] = _("damp grit");
+static const u8 sText_BuriedCacheMountainGround0[] = _("red dust");
+static const u8 sText_BuriedCacheMountainGround1[] = _("loose scree");
+static const u8 sText_BuriedCacheMountainGround2[] = _("packed earth");
+static const u8 sText_BuriedCacheWaterGround0[] = _("damp sand");
+static const u8 sText_BuriedCacheWaterGround1[] = _("smooth pebbles");
+static const u8 sText_BuriedCacheWaterGround2[] = _("salt-stained soil");
+static const u8 sText_BuriedCacheUrbanGround0[] = _("cracked paving");
+static const u8 sText_BuriedCacheUrbanGround1[] = _("soot-dark earth");
+static const u8 sText_BuriedCacheUrbanGround2[] = _("struggling weeds");
+
+static const u8 *const sBuriedCacheGroundNames[ROGUE_ROUTE_ENVIRONMENT_COUNT][3] =
+{
+    {sText_BuriedCacheFieldGround0, sText_BuriedCacheFieldGround1, sText_BuriedCacheFieldGround2},
+    {sText_BuriedCacheForestGround0, sText_BuriedCacheForestGround1, sText_BuriedCacheForestGround2},
+    {sText_BuriedCacheCaveGround0, sText_BuriedCacheCaveGround1, sText_BuriedCacheCaveGround2},
+    {sText_BuriedCacheMountainGround0, sText_BuriedCacheMountainGround1, sText_BuriedCacheMountainGround2},
+    {sText_BuriedCacheWaterGround0, sText_BuriedCacheWaterGround1, sText_BuriedCacheWaterGround2},
+    {sText_BuriedCacheUrbanGround0, sText_BuriedCacheUrbanGround1, sText_BuriedCacheUrbanGround2},
+};
+
+static const u8 sText_BuriedCacheTypeAncient[] = _("ancient cache");
+static const u8 sText_BuriedCacheTypeTrainer[] = _("Trainer's cache");
+static const u8 sText_BuriedCacheTypeRelic[] = _("collector's relic");
+static const u8 sText_BuriedCacheTypeJackpot[] = _("exceptional treasure");
+static const u8 sText_BuriedCacheFindThe[] = _("Find the ");
+static const u8 sText_BuriedCacheBearing[] = _(" bearing ");
+static const u8 sText_BuriedCacheBeside[] = _(" beside ");
+static const u8 sText_BuriedCacheLookFor[] = _("Look for ");
+static const u8 sText_BuriedCacheObservationStart[] = _("A ");
+static const u8 sText_BuriedCacheObservationMark[] = _(" bears ");
+static const u8 sText_BuriedCacheObservationGround[] = _(". Around it lies ");
+static const u8 sText_BuriedCachePeriod[] = _(".");
+static const u8 *const sBuriedCacheTypeNames[] =
+{
+    sText_BuriedCacheTypeAncient,
+    sText_BuriedCacheTypeTrainer,
+    sText_BuriedCacheTypeRelic,
+    sText_BuriedCacheTypeJackpot,
+};
+
+static bool8 IsBuriedCacheSiteDug(u8 lotRole)
+{
+    if(lotRole == 1)
+        return FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    if(lotRole == 2)
+        return FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    return FALSE;
+}
+
+static void MarkBuriedCacheSiteDug(u8 lotRole)
+{
+    if(lotRole == 1)
+        FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    else if(lotRole == 2)
+        FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+}
+
+void RogueRouteEvents_BufferBuriedCacheData(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct BuriedCacheData data;
+    const struct BuriedCacheSiteData *site;
+    u8 environment;
+
+    gStringVar1[0] = EOS;
+    gStringVar2[0] = EOS;
+    gStringVar3[0] = EOS;
+    gSpecialVar_0x8003 = FALSE;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE)
+        return;
+
+    environment = scene.environment < ROGUE_ROUTE_ENVIRONMENT_COUNT
+        ? scene.environment
+        : ROGUE_ROUTE_ENVIRONMENT_FIELD;
+    GenerateBuriedCacheData(scene.rewardAmount, environment, &data);
+    gSpecialVar_0x8004 = data.rewardItem;
+    gSpecialVar_0x8005 = data.secondaryRewardItem;
+    gSpecialVar_0x8006 = data.ambushSpecies;
+    gSpecialVar_0x8007 = data.cacheType;
+    StringCopy(gStringVar3, sBuriedCacheTypeNames[data.cacheType]);
+    {
+        const struct BuriedCacheSiteData *correct = &data.sites[data.correctSite];
+
+        if(data.clueTraitA == BURIED_CACHE_TRAIT_LANDMARK
+            && data.clueTraitB == BURIED_CACHE_TRAIT_MARKING)
+        {
+            StringCopy(gStringVar2, sText_BuriedCacheFindThe);
+            StringAppend(gStringVar2, sBuriedCacheLandmarkNames[environment][correct->landmark]);
+            StringAppend(gStringVar2, sText_BuriedCacheBearing);
+            StringAppend(gStringVar2, sBuriedCacheMarkingNames[correct->marking]);
+            StringAppend(gStringVar2, sText_BuriedCachePeriod);
+        }
+        else if(data.clueTraitA == BURIED_CACHE_TRAIT_LANDMARK)
+        {
+            StringCopy(gStringVar2, sText_BuriedCacheFindThe);
+            StringAppend(gStringVar2, sBuriedCacheLandmarkNames[environment][correct->landmark]);
+            StringAppend(gStringVar2, sText_BuriedCacheBeside);
+            StringAppend(gStringVar2, sBuriedCacheGroundNames[environment][correct->ground]);
+            StringAppend(gStringVar2, sText_BuriedCachePeriod);
+        }
+        else
+        {
+            StringCopy(gStringVar2, sText_BuriedCacheLookFor);
+            StringAppend(gStringVar2, sBuriedCacheMarkingNames[correct->marking]);
+            StringAppend(gStringVar2, sText_BuriedCacheBeside);
+            StringAppend(gStringVar2, sBuriedCacheGroundNames[environment][correct->ground]);
+            StringAppend(gStringVar2, sText_BuriedCachePeriod);
+        }
+    }
+
+    if(scene.lotRole == 0)
+        return;
+
+    site = &data.sites[scene.lotRole - 1];
+    StringCopy(gStringVar1, sText_BuriedCacheObservationStart);
+    StringAppend(gStringVar1, sBuriedCacheLandmarkNames[environment][site->landmark]);
+    StringAppend(gStringVar1, sText_BuriedCacheObservationMark);
+    StringAppend(gStringVar1, sBuriedCacheMarkingNames[site->marking]);
+    StringAppend(gStringVar1, sText_BuriedCacheObservationGround);
+    StringAppend(gStringVar1, sBuriedCacheGroundNames[environment][site->ground]);
+    StringAppend(gStringVar1, sText_BuriedCachePeriod);
+    gSpecialVar_0x8003 = IsBuriedCacheSiteDug(scene.lotRole);
+}
+
+void RogueRouteEvents_TryAcceptBuriedCache(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct RogueEventTransaction transaction = {0};
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE
+        || scene.lotRole != 0
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+        return;
+
+    transaction.rewards[0].itemId = ITEM_FIELD_SHOVEL;
+    transaction.rewards[0].count = 1;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        return;
+
+    Rogue_PushPopup_AddItem(ITEM_FIELD_SHOVEL, 1);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+}
+
+static void PrepareBuriedCacheAmbush(const struct RogueRouteSceneRequest *scene, u16 species)
+{
+    RAND_TYPE originalRng = gRngValue;
+    u8 level = min(MAX_LEVEL, Rogue_CalculatePlayerMonLvl() + 2);
+
+    SeedRng(scene->rewardAmount ^ species ^ 0xA8B5);
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gRngValue = originalRng;
+    Rogue_ActivateUncatchableWildBattle();
+}
+
+void RogueRouteEvents_TryDigBuriedCache(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct BuriedCacheData data;
+    struct RogueEventTransaction transaction = {0};
+    u8 state;
+    u8 siteIndex;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE
+        || scene.lotRole < 1
+        || scene.lotRole > 2)
+        return;
+
+    state = RogueRouteScenes_GetState(scene.sceneSlot);
+    if((state != ROGUE_ROUTE_EVENT_STATE_ACTIVE
+            && state != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING)
+        || !CheckBagHasItem(ITEM_FIELD_SHOVEL, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+
+    GenerateBuriedCacheData(scene.rewardAmount, scene.environment, &data);
+    siteIndex = scene.lotRole - 1;
+    if(siteIndex != data.correctSite)
+    {
+        if(IsBuriedCacheSiteDug(scene.lotRole))
+        {
+            gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_ALREADY_DUG;
+            return;
+        }
+
+        MarkBuriedCacheSiteDug(scene.lotRole);
+        PrepareBuriedCacheAmbush(&scene, data.ambushSpecies);
+        gSpecialVar_0x8006 = data.ambushSpecies;
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE;
+        return;
+    }
+
+    MarkBuriedCacheSiteDug(scene.lotRole);
+    transaction.costs[0].itemId = ITEM_FIELD_SHOVEL;
+    transaction.costs[0].count = 1;
+    transaction.rewards[0].itemId = data.rewardItem;
+    transaction.rewards[0].count = 1;
+    transaction.costCount = 1;
+    transaction.rewardCount = 1;
+    if(data.secondaryRewardItem != ITEM_NONE)
+    {
+        transaction.rewards[1].itemId = data.secondaryRewardItem;
+        transaction.rewards[1].count = 1;
+        transaction.rewardCount = 2;
+    }
+    transaction.moneyReward = data.moneyReward;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+        return;
+    }
+
+    Rogue_PushPopup_AddItem(data.rewardItem, 1);
+    if(data.secondaryRewardItem != ITEM_NONE)
+        Rogue_PushPopup_AddItem(data.secondaryRewardItem, 1);
+    if(data.moneyReward != 0)
+        Rogue_PushPopup_AddMoney(data.moneyReward);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }

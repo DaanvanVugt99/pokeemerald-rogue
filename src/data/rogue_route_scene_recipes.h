@@ -126,6 +126,17 @@ static const struct RogueRouteSceneObjectDefinition sBreedersExchangeObjects[] =
     SCENE_OBJECT_UNTIL_COMPLETED(1, 1, -1, ROUTE_SCENE_GFX_OFFERED_MON, Rogue_RouteEvent_BreedersExchangePokemon),
 };
 
+static const struct RogueRouteSceneObjectDefinition sBuriedCacheArchaeologistObjects[] =
+{
+    SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_BuriedCacheArchaeologist),
+    SCENE_OBJECT(1, 1, -1, ROUTE_SCENE_GFX_SEMANTIC_WORKBENCH, Rogue_RouteEvent_BuriedCacheSupplies),
+};
+
+static const struct RogueRouteSceneObjectDefinition sBuriedCacheSiteObjects[] =
+{
+    SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_BuriedCacheSite),
+};
+
 static const struct RogueRouteSceneLotDefinition sStolenTradeCaseOfferLots[] =
 {
     SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCaseOfferObjects, sAccentLowerLeft),
@@ -188,6 +199,12 @@ static const struct RogueRouteSceneLotDefinition sTravelingMerchantLots[] =
 static const struct RogueRouteSceneLotDefinition sBreedersExchangeLots[] =
 {
     SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sBreedersExchangeObjects),
+};
+static const struct RogueRouteSceneLotDefinition sBuriedCacheLots[] =
+{
+    SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sBuriedCacheArchaeologistObjects),
+    SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_SMALL, sBuriedCacheSiteObjects),
+    SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_SMALL, sBuriedCacheSiteObjects),
 };
 
 static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
@@ -317,6 +334,14 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sBreedersExchangeLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
         .lotCount = ARRAY_COUNT(sBreedersExchangeLots),
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE] =
+    {
+        .selectPayload = SelectBuriedCachePayload,
+        .expandPayload = ExpandBuriedCachePayload,
+        .lots = sBuriedCacheLots,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
+        .lotCount = ARRAY_COUNT(sBuriedCacheLots),
     },
 };
 
