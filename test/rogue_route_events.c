@@ -7,6 +7,7 @@
 #include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
+#include "constants/metatile_behaviors.h"
 #include "constants/moves.h"
 #include "constants/party_menu.h"
 #include "constants/pokemon.h"
@@ -19,6 +20,7 @@
 #include "event_data.h"
 #include "fieldmap.h"
 #include "item.h"
+#include "metatile_behavior.h"
 #include "money.h"
 #include "move_relearner.h"
 #include "overworld.h"
@@ -98,6 +100,35 @@ static void RestoreFlag(u16 flagId, bool8 value)
         FlagSet(flagId);
     else
         FlagClear(flagId);
+}
+
+static u8 GetRouteTestMetatileBehavior(const struct MapLayout *mapLayout, u16 block)
+{
+    u16 metatileId = block & MAPGRID_METATILE_ID_MASK;
+    const u16 *attributes;
+
+    if(metatileId < NUM_METATILES_IN_PRIMARY)
+    {
+        attributes = mapLayout->primaryTileset->metatileAttributes;
+        return attributes[metatileId] & METATILE_ATTR_BEHAVIOR_MASK;
+    }
+
+    attributes = Rogue_ModifyOverworldTileset(mapLayout->secondaryTileset)->metatileAttributes;
+    return attributes[metatileId - NUM_METATILES_IN_PRIMARY] & METATILE_ATTR_BEHAVIOR_MASK;
+}
+
+static bool8 IsTerrainForbiddenForNormalRouteLot(u8 behavior)
+{
+    return MetatileBehavior_IsSurfableWaterOrUnderwater(behavior)
+        || MetatileBehavior_IsForcedMovementTile(behavior)
+        || MetatileBehavior_IsIce(behavior)
+        || MetatileBehavior_IsWaterfall(behavior)
+        || behavior == MB_WATER_DOOR
+        || behavior == MB_WATER_SOUTH_ARROW_WARP
+        || MetatileBehavior_IsNorthwardCurrent(behavior)
+        || MetatileBehavior_IsSouthwardCurrent(behavior)
+        || MetatileBehavior_IsWestwardCurrent(behavior)
+        || MetatileBehavior_IsEastwardCurrent(behavior);
 }
 
 TEST("Event transactions exchange and roll back items and money atomically")
@@ -705,6 +736,7 @@ TEST("Route events provide clear typed lots on every classified active route")
         const struct MapEvents *events = mapHeader->events;
         const struct ObjectEventTemplate *lots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {0};
         u8 lotCount = 0;
+        u8 standardLotCount = 0;
         u8 baseObjectCount = 0;
         u8 objectIdx;
 
@@ -722,6 +754,9 @@ TEST("Route events provide clear typed lots on every classified active route")
                 EXPECT_EQ(lots[lotId], NULL);
                 lots[lotId] = object;
                 ++lotCount;
+                if(object->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_LAND
+                    || object->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_CAVE)
+                    ++standardLotCount;
             }
             else
                 ++baseObjectCount;
@@ -729,6 +764,7 @@ TEST("Route events provide clear typed lots on every classified active route")
 
         EXPECT_GE(lotCount, 5);
         EXPECT_LE(lotCount, 10);
+        EXPECT_GE(standardLotCount, ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
         EXPECT_LE(baseObjectCount + ROGUE_ROUTE_SCENE_MAX_PLACEMENTS * 4, OBJECT_EVENT_TEMPLATES_COUNT);
 
         for(objectIdx = 0; objectIdx < ROGUE_ROUTE_SCENE_MAX_LOTS; ++objectIdx)
@@ -758,8 +794,13 @@ TEST("Route events provide clear typed lots on every classified active route")
                 for(x = lot->x + firstOffset; x <= lot->x + lastOffset; ++x)
                 {
                     u16 block = mapLayout->map[y * mapLayout->width + x];
+                    u8 behavior = GetRouteTestMetatileBehavior(mapLayout, block);
+
                     EXPECT_EQ(block & MAPGRID_COLLISION_MASK, 0);
                     EXPECT_EQ((block & MAPGRID_ELEVATION_MASK) >> MAPGRID_ELEVATION_SHIFT, lot->elevation);
+                    if(lot->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_LAND
+                        || lot->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_CAVE)
+                        EXPECT(!IsTerrainForbiddenForNormalRouteLot(behavior));
                 }
             }
 
@@ -1020,6 +1061,8 @@ TEST("Route scene layouts stay sparse accessible and locally traversable")
             u8 objectIdx;
 
             EXPECT_LE(lot->objectCount, 3);
+            EXPECT_NE(lot->terrainMask, 0);
+            EXPECT_EQ(lot->terrainMask & ~ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL, 0);
             for(objectIdx = 0; objectIdx < lot->objectCount; ++objectIdx)
             {
                 const struct RogueRouteSceneObjectDefinition *object = &lot->objects[objectIdx];

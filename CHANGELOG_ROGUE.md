@@ -55,6 +55,10 @@ Format follows Keep a Changelog loosely:
   coexist. The per-room scene plan is packed into less memory than the former
   single-scene descriptor. Route-event item and money exchanges now use a
   shared stack-local atomic transaction layer with reusable rollback support.
+- Added terrain tags to route-scene lots and recipe placement rules so ordinary
+  land scenes no longer spawn on water, current, water-door, ice, or other
+  special-movement terrain; special terrain lots are now available for future
+  water or ice-specific route events.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.

@@ -94,6 +94,7 @@ struct RogueRouteSceneLotDefinition
     u8 objectCount;
     u8 accentCount;
     u8 minimumSize;
+    u8 terrainMask;
 };
 
 struct RogueRouteRecipeDefinition

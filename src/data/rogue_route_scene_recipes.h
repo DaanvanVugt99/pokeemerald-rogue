@@ -11,10 +11,14 @@
     {objectScript, gfx, x, y, prop, ROUTE_SCENE_STATE_MASK_UNTIL_COMPLETED, ROUTE_SCENE_OBJECT_FLAG_NONE}
 #define SCENE_OBJECT_UNTIL_ROLE_COMPLETE(prop, x, y, gfx, objectScript) \
     {objectScript, gfx, x, y, prop, ROUTE_SCENE_STATE_MASK_ALL, ROUTE_SCENE_OBJECT_FLAG_HIDE_IF_QUEST_ROLE_COMPLETE}
+#define SCENE_LOT_ON(size, terrainMask, objectDefs, accentDefs) \
+    {objectDefs, accentDefs, ARRAY_COUNT(objectDefs), ARRAY_COUNT(accentDefs), size, terrainMask}
 #define SCENE_LOT(size, objectDefs, accentDefs) \
-    {objectDefs, accentDefs, ARRAY_COUNT(objectDefs), ARRAY_COUNT(accentDefs), size}
+    SCENE_LOT_ON(size, ROGUE_ROUTE_SCENE_TERRAIN_MASK_STANDARD, objectDefs, accentDefs)
+#define SCENE_LOT_NO_ACCENTS_ON(size, terrainMask, objectDefs) \
+    {objectDefs, NULL, ARRAY_COUNT(objectDefs), 0, size, terrainMask}
 #define SCENE_LOT_NO_ACCENTS(size, objectDefs) \
-    {objectDefs, NULL, ARRAY_COUNT(objectDefs), 0, size}
+    SCENE_LOT_NO_ACCENTS_ON(size, ROGUE_ROUTE_SCENE_TERRAIN_MASK_STANDARD, objectDefs)
 
 static const struct RogueRouteSceneAccentDefinition sAccentsLeftColumn[] =
 {

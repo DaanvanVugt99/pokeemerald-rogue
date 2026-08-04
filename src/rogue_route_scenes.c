@@ -51,6 +51,7 @@ struct RogueRouteLot
     const struct ObjectEventTemplate *objectEvent;
     u8 id;
     u8 size;
+    u8 terrain;
 };
 
 void RogueRouteSceneRng_Seed(struct RogueRouteSceneRng *rng, u32 seed)
@@ -259,7 +260,8 @@ bool8 RogueRouteScenes_IsLotTemplate(const struct ObjectEventTemplate *objectEve
     return objectEvent->script == Rogue_RouteEvent_Interact
         && objectEvent->trainerType == TRAINER_TYPE_NONE
         && objectEvent->trainerRange_berryTreeId < ROGUE_ROUTE_SCENE_MAX_LOTS
-        && objectEvent->movementRangeX < ROGUE_ROUTE_SCENE_LOT_SIZE_COUNT;
+        && objectEvent->movementRangeX < ROGUE_ROUTE_SCENE_LOT_SIZE_COUNT
+        && objectEvent->movementRangeY < ROGUE_ROUTE_SCENE_TERRAIN_COUNT;
 }
 
 static const struct MapHeader *GetRouteMapHeader(u8 roomId)
@@ -302,6 +304,7 @@ static u8 CollectRouteLots(u8 roomId, struct RogueRouteLot *lots, u8 capacity, u
                 lots[count].objectEvent = objectEvent;
                 lots[count].id = lotId;
                 lots[count].size = objectEvent->movementRangeX;
+                lots[count].terrain = objectEvent->movementRangeY;
                 seenIds[lotId] = TRUE;
                 ++count;
             }
@@ -426,7 +429,8 @@ static bool8 AddRecipeToPlan(
         for(i = 0; i < lotCount; ++i)
         {
             if((pendingUsedLots & (1 << lots[i].id)) == 0
-                && lots[i].size >= lotDefinition->minimumSize)
+                && lots[i].size >= lotDefinition->minimumSize
+                && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(lots[i].terrain)) != 0)
                 ++eligibleCount;
         }
 
@@ -438,6 +442,7 @@ static bool8 AddRecipeToPlan(
         {
             if((pendingUsedLots & (1 << lots[i].id)) == 0
                 && lots[i].size >= lotDefinition->minimumSize
+                && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(lots[i].terrain)) != 0
                 && selected-- == 0)
             {
                 selectedLots[role] = lots[i].id;
