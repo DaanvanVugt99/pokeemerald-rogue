@@ -522,7 +522,7 @@ static void ExpandApricornGrovePayload(struct RogueRouteSceneRequest *request, u
         return;
     }
 
-    request->primaryGraphicsId = OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES;
+    request->primaryGraphicsId = OBJ_EVENT_GFX_ROUTE_PROP_APRICORN_TREE;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_OLD_MAN;
     request->requestedItem = sApricornItems[payload & APRICORN_PAYLOAD_CHOICE_MASK];
     request->rewardItem = sApricornItems[(payload >> APRICORN_PAYLOAD_CHOICE_BITS) & APRICORN_PAYLOAD_CHOICE_MASK];

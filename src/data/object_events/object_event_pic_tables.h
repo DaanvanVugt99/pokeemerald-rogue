@@ -2850,7 +2850,7 @@ static const struct SpriteFrameImage sPicTable_ZefaNormal[] = {
     overworld_frame(gObjectEventPic_ZefaNormal, 2, 4, 6),
     overworld_frame(gObjectEventPic_ZefaNormal, 2, 4, 7),
     overworld_frame(gObjectEventPic_ZefaNormal, 2, 4, 8),
-    
+
     overworld_frame(gObjectEventPic_ZefaRunning, 2, 4, 0),
     overworld_frame(gObjectEventPic_ZefaRunning, 2, 4, 1),
     overworld_frame(gObjectEventPic_ZefaRunning, 2, 4, 2),
@@ -4461,7 +4461,7 @@ static const struct SpriteFrameImage sPicTable_Pokabbie[] = {
     overworld_frame(gObjectEventPic_Pokabbie, 2, 4, 7),
     overworld_frame(gObjectEventPic_Pokabbie, 2, 4, 8),
 };
-static const struct SpriteFrameImage sPicTable_PokabbieRiding[] = {    
+static const struct SpriteFrameImage sPicTable_PokabbieRiding[] = {
     overworld_frame(gObjectEventPic_PokabbieRiding, 2, 4, 0),
     overworld_frame(gObjectEventPic_PokabbieRiding, 2, 4, 1),
     overworld_frame(gObjectEventPic_PokabbieRiding, 2, 4, 2),
@@ -4484,7 +4484,7 @@ static const struct SpriteFrameImage sPicTable_Misc_Aroma_Girl[] = {
     overworld_frame(gObjectEventPic_Misc_Aroma_Girl, 2, 4, 7),
     overworld_frame(gObjectEventPic_Misc_Aroma_Girl, 2, 4, 8),
 };
-static const struct SpriteFrameImage sPicTable_Misc_Aroma_GirlRiding[] = {    
+static const struct SpriteFrameImage sPicTable_Misc_Aroma_GirlRiding[] = {
     overworld_frame(gObjectEventPic_Misc_Aroma_GirlRiding, 2, 4, 0),
     overworld_frame(gObjectEventPic_Misc_Aroma_GirlRiding, 2, 4, 1),
     overworld_frame(gObjectEventPic_Misc_Aroma_GirlRiding, 2, 4, 2),
@@ -5493,6 +5493,7 @@ static const struct SpriteFrameImage sPicTable_RoutePropSplitRock[] = {obj_frame
 static const struct SpriteFrameImage sPicTable_RoutePropDriftwood[] = {obj_frame_tiles(gObjectEventPic_RoutePropDriftwood)};
 static const struct SpriteFrameImage sPicTable_RoutePropDigMound[] = {obj_frame_tiles(gObjectEventPic_RoutePropDigMound)};
 static const struct SpriteFrameImage sPicTable_RoutePropRoundStone[] = {obj_frame_tiles(gObjectEventPic_RoutePropRoundStone)};
+static const struct SpriteFrameImage sPicTable_RoutePropApricornTree[] = {overworld_frame(gObjectEventPic_PechaBerryTree, 2, 4, 4)};
 
 static const struct SpriteFrameImage sPicTable_Route_Bug[] = {
     overworld_frame(gObjectEventPic_Route_Bug, 2, 2, 0),

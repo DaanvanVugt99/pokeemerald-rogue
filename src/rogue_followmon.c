@@ -25,6 +25,7 @@
 #include "rogue_adventurepaths.h"
 #include "rogue_baked.h"
 #include "rogue_controller.h"
+#include "rogue_debug.h"
 #include "rogue_followmon.h"
 #include "rogue_gifts.h"
 #include "rogue_ridemon.h"
@@ -37,6 +38,8 @@
 // Care with increasing FOLLOWMON_MAX_SPAWN_SLOTS as it can cause lag
 
 #define INVALID_SPAWN_SLOT 0xFF
+
+#define FOLLOWMON_BLOCKED_SPAWN_DELAY 30
 
 struct FollowMonData
 {
@@ -287,7 +290,7 @@ void SetupFollowParterMonObjectEvent()
         if(!FollowMon_IsPartnerMonActive())
         {
             u16 localId = OBJ_EVENT_ID_FOLLOWER;
-            //u8 objectEventId = 
+            //u8 objectEventId =
             SpawnSpecialObjectEventParameterized(
                 OBJ_EVENT_GFX_FOLLOW_MON_PARTNER,
                 MOVEMENT_TYPE_FACE_DOWN,
@@ -606,7 +609,7 @@ static bool8 AreElevationsCompatible(u8 a, u8 b)
 bool8 FollowMon_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEvent* collider)
 {
     struct ObjectEvent* player = &gObjectEvents[gPlayerAvatar.objectEventId];
-    
+
     // Disable collision exemption for tutorial
     //if(Rogue_InWildSafari() && VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_CATCH_MON)
     //    return FALSE;
@@ -658,9 +661,9 @@ bool8 FollowMon_ProcessMonInteraction()
         u8 i;
         struct ObjectEvent *curObject;
         struct ObjectEvent* player = &gObjectEvents[gPlayerAvatar.objectEventId];
-    
+
         sFollowMonData.pendingInterction = FALSE;
-        
+
         for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
         {
             curObject = &gObjectEvents[i];
@@ -793,7 +796,7 @@ static bool8 IsSpawnSlotValid(u16 slot)
     {
         return TRUE;
     }
-    
+
     // 2 : normal pal index 3 (Shared for the multiplayer player palette)
     // 3 : normal pal index 4 (Shared for the multiplayer follower palette) <- OBJ_EVENT_GFX_MP_FOLLOW_MON
     if(slot == 2 || slot == 3)
@@ -856,6 +859,13 @@ static u16 NextSpawnMonSlot()
     species = SPECIES_NONE;
     slot = FOLLOWMON_MAX_SPAWN_SLOTS;
 
+    // Check that we don't have too many sprites on screen before spawning
+    // (lag reduction)
+    // Checked up front so a blocked spawn doesn't remove an existing mon on its
+    // way to bailing out.
+    if(sFollowMonData.activeCount != 0 && CountActiveObjectEvents() >= FOLLOWMON_IDEAL_OBJECT_EVENT_COUNT)
+        return INVALID_SPAWN_SLOT;
+
     // Attempt to find a free slot first
     // (Don't do this in catching contest as we want mons to disappear fairly fast)
     if(!Rogue_IsCatchingContestActive())
@@ -888,13 +898,6 @@ static u16 NextSpawnMonSlot()
 
     // Remove any existing id by this slot
     RemoveObjectEventByLocalIdAndMap(OBJ_EVENT_ID_FOLLOW_MON_FIRST + slot, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
-    
-    // Check that we don't have too many sprites on screen before spawning
-    // (lag reduction)
-    if(sFollowMonData.activeCount != 0 && CountActiveObjectEvents() >= FOLLOWMON_IDEAL_OBJECT_EVENT_COUNT)
-    {
-        return INVALID_SPAWN_SLOT;
-    }
 
     if(Rogue_InWildSafari())
     {
@@ -1005,7 +1008,7 @@ static bool8 TrySelectTile(s16* outX, s16* outY)
             break;
         }
 
-        
+
         PlayerGetDestCoords(&playerX, &playerY);
         x += playerX;
         y += playerY;
@@ -1093,6 +1096,7 @@ void FollowMon_OverworldCB()
 
 
         // Speed up spawning
+        START_TIMER(ROGUE_FOLLOWMON_SLOT_SCAN);
         if(!Rogue_IsCatchingContestActive())
         {
             if(sFollowMonData.activeCount <= 1)
@@ -1106,16 +1110,31 @@ void FollowMon_OverworldCB()
                 sFollowMonData.spawnCountdown = min(sFollowMonData.spawnCountdown, 60);
             }
         }
+        STOP_TIMER(ROGUE_FOLLOWMON_SLOT_SCAN);
 
         if(sFollowMonData.spawnCountdown == 0)
         {
             s16 x, y;
 
-            if(IsSafeToSpawnObjectEvents() && TrySelectTile(&x, &y))
+            START_TIMER(ROGUE_FOLLOWMON_SPAWN_ATTEMPT);
+            if(!IsSafeToSpawnObjectEvents())
+            {
+                // Cheap to re-check, so keep polling for the player to settle
+                // onto a tile rather than delaying the spawn.
+            }
+            else if(!TrySelectTile(&x, &y))
+            {
+                sFollowMonData.spawnCountdown = FOLLOWMON_BLOCKED_SPAWN_DELAY;
+            }
+            else
             {
                 u16 spawnSlot = NextSpawnMonSlot();
 
-                if(spawnSlot != INVALID_SPAWN_SLOT)
+                if(spawnSlot == INVALID_SPAWN_SLOT)
+                {
+                    sFollowMonData.spawnCountdown = FOLLOWMON_BLOCKED_SPAWN_DELAY;
+                }
+                else
                 {
                     u8 localId = OBJ_EVENT_ID_FOLLOW_MON_FIRST + spawnSlot;
                     u8 objectEventId = SpawnSpecialObjectEventParameterized(
@@ -1134,7 +1153,7 @@ void FollowMon_OverworldCB()
                     // (It just looks weird)
                     if(IsSpawningWaterMons())
                     {
-                        gObjectEvents[objectEventId].hideReflection = TRUE; 
+                        gObjectEvents[objectEventId].hideReflection = TRUE;
                     }
 
                     // Slower replacement spawning
@@ -1147,6 +1166,7 @@ void FollowMon_OverworldCB()
                     sFollowMonData.spawnCountdown = 120;
                 }
             }
+            STOP_TIMER(ROGUE_FOLLOWMON_SPAWN_ATTEMPT);
         }
         else
         {
@@ -1187,7 +1207,7 @@ void FollowMon_OverworldCB()
                             sFollowMonData.pendingSpawnAnim &= ~bitFlag;
                         }
                     }
-                    else 
+                    else
                     {
                         // Only play anim if they are wild spawning mons
                         if(Rogue_AreWildMonEnabled())

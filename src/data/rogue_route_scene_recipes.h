@@ -103,8 +103,8 @@ static const struct RogueRouteSceneObjectDefinition sForbiddenStonePayoffObjects
 static const struct RogueRouteSceneObjectDefinition sApricornGroveObjects[] =
 {
     SCENE_OBJECT(0, -1, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_ApricornTree),
-    SCENE_OBJECT(1, -1, -1, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree),
-    SCENE_OBJECT(2, -1, 1, OBJ_EVENT_GFX_BERRY_TREE_LATE_STAGES, Rogue_RouteEvent_ApricornTree),
+    SCENE_OBJECT(1, -1, -1, OBJ_EVENT_GFX_ROUTE_PROP_APRICORN_TREE, Rogue_RouteEvent_ApricornTree),
+    SCENE_OBJECT(2, -1, 1, OBJ_EVENT_GFX_ROUTE_PROP_APRICORN_TREE, Rogue_RouteEvent_ApricornTree),
 };
 
 static const struct RogueRouteSceneObjectDefinition sApricornArtisanObjects[] =

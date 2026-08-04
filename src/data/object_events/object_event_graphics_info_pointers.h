@@ -524,6 +524,7 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSplitRock
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropDriftwood;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropDigMound;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropRoundStone;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropApricornTree;
 
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanAlt;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MayAlt;
@@ -1093,6 +1094,7 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_ROUTE_PROP_DRIFTWOOD] =      &gObjectEventGraphicsInfo_RoutePropDriftwood,
     [OBJ_EVENT_GFX_ROUTE_PROP_DIG_MOUND] =      &gObjectEventGraphicsInfo_RoutePropDigMound,
     [OBJ_EVENT_GFX_ROUTE_PROP_ROUND_STONE] =    &gObjectEventGraphicsInfo_RoutePropRoundStone,
+    [OBJ_EVENT_GFX_ROUTE_PROP_APRICORN_TREE] =  &gObjectEventGraphicsInfo_RoutePropApricornTree,
     [OBJ_EVENT_GFX_FLAG_ADVENTURE] =           &gObjectEventGraphicsInfo_FlagAdventure,
 
     [OBJ_EVENT_GFX_DECOR_BED] =                &gObjectEventGraphicsInfo_DecorBed,
