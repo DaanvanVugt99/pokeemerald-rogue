@@ -22,5 +22,9 @@ void RogueRouteEvents_TryCraftApricornBalls(void);
 void RogueRouteEvents_PrepareUnboundTutor(void);
 void RogueRouteEvents_FinishUnboundTutor(void);
 void RogueRouteEvents_FinishTravelingMerchant(void);
+void RogueRouteEvents_ShowBreedersExchangePreview(void);
+void RogueRouteEvents_ValidateBreedersExchangeSelection(void);
+void RogueRouteEvents_TryCompleteBreedersExchange(void);
+bool8 RogueRouteEvents_CreateBreedersExchangeMon(struct Pokemon *mon);
 
 #endif // GUARD_ROGUE_ROUTE_EVENTS_H

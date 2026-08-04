@@ -120,6 +120,12 @@ static const struct RogueRouteSceneObjectDefinition sTravelingMerchantObjects[] 
     SCENE_OBJECT(1, 1, -1, ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES, Rogue_RouteEvent_Prop),
 };
 
+static const struct RogueRouteSceneObjectDefinition sBreedersExchangeObjects[] =
+{
+    SCENE_OBJECT(0, 0, 0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_BreedersExchange),
+    SCENE_OBJECT_UNTIL_COMPLETED(1, 1, -1, ROUTE_SCENE_GFX_OFFERED_MON, Rogue_RouteEvent_BreedersExchangePokemon),
+};
+
 static const struct RogueRouteSceneLotDefinition sStolenTradeCaseOfferLots[] =
 {
     SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sStolenTradeCaseOfferObjects, sAccentLowerLeft),
@@ -178,6 +184,10 @@ static const struct RogueRouteSceneLotDefinition sUnboundTutorLots[] =
 static const struct RogueRouteSceneLotDefinition sTravelingMerchantLots[] =
 {
     SCENE_LOT(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sTravelingMerchantObjects, sAccentUpperRight),
+};
+static const struct RogueRouteSceneLotDefinition sBreedersExchangeLots[] =
+{
+    SCENE_LOT_NO_ACCENTS(ROGUE_ROUTE_SCENE_LOT_MEDIUM, sBreedersExchangeObjects),
 };
 
 static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
@@ -299,6 +309,14 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sTravelingMerchantLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
         .lotCount = ARRAY_COUNT(sTravelingMerchantLots),
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE] =
+    {
+        .selectPayload = SelectBreedersExchangePayload,
+        .expandPayload = ExpandBreedersExchangePayload,
+        .lots = sBreedersExchangeLots,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
+        .lotCount = ARRAY_COUNT(sBreedersExchangeLots),
     },
 };
 

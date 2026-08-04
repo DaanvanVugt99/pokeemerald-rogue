@@ -3,11 +3,13 @@
 #include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
 #include "constants/flags.h"
+#include "constants/field_weather.h"
 #include "constants/items.h"
 #include "constants/metatile_labels.h"
 #include "constants/moves.h"
 #include "constants/party_menu.h"
 #include "constants/pokemon.h"
+#include "constants/rogue.h"
 #include "constants/rogue_route_events.h"
 #include "constants/rogue_route_scenes.h"
 #include "constants/trainer_types.h"
@@ -18,23 +20,31 @@
 #include "battle_main.h"
 #include "characters.h"
 #include "fieldmap.h"
+#include "field_screen_effect.h"
+#include "field_weather.h"
 #include "item.h"
+#include "mail.h"
 #include "money.h"
 #include "move_relearner.h"
 #include "overworld.h"
+#include "palette.h"
 #include "party_menu.h"
 #include "pokemon.h"
+#include "pokemon_summary_screen.h"
 #include "pokedex.h"
 #include "random.h"
 #include "strings.h"
 #include "string_util.h"
+#include "task.h"
 
 #include "rogue.h"
 #include "rogue_adventure_quests.h"
 #include "rogue_adventurepaths.h"
+#include "rogue_baked.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
 #include "rogue_event_transactions.h"
+#include "rogue_followmon.h"
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_popup.h"
@@ -42,6 +52,7 @@
 #include "rogue_route_scene_internal.h"
 #include "rogue_route_scenes.h"
 #include "rogue_trainers.h"
+#include "rogue_trials.h"
 
 extern const u8 Rogue_RouteEvent_Interact[];
 extern const u8 Rogue_RouteEvent_StolenTradeCaseOffer[];
@@ -63,6 +74,8 @@ extern const u8 Rogue_RouteEvent_ApricornProp[];
 extern const u8 Rogue_RouteEvent_UnboundTutor[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
+extern const u8 Rogue_RouteEvent_BreedersExchange[];
+extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -217,6 +230,86 @@ static bool8 CanShowTravelingMerchant(u8 roomId)
 {
     (void)roomId;
     return TRUE;
+}
+
+#define BREEDERS_EXCHANGE_BST_TOLERANCE 80
+#define BREEDERS_EXCHANGE_PAYLOAD_SPECIES_MASK 0x7FF
+#define BREEDERS_EXCHANGE_PAYLOAD_SEED_SHIFT 11
+#define BREEDERS_EXCHANGE_PAYLOAD_SEED_MASK 0x1FF
+#define BREEDERS_EXCHANGE_OT_ID 0x00BEEFED
+
+static const u8 sBreedersExchangeOtName[] = _("BREEDER");
+
+static bool8 IsBreedersExchangeOfferCandidate(
+    u16 species,
+    u16 requestedSpecies,
+    u16 requestedBst,
+    u8 requestedEvolutionCount)
+{
+    u16 bst;
+
+    if(species == SPECIES_NONE
+        || species >= NUM_SPECIES
+        || species == requestedSpecies
+        || Rogue_GetEggSpecies(species) == Rogue_GetEggSpecies(requestedSpecies)
+        || !RoguePokedex_IsSpeciesEnabled(species)
+        || RoguePokedex_IsSpeciesLegendary(species)
+        || !RogueTrial_IsSpeciesLegal(species, BREEDERS_EXCHANGE_OT_ID)
+        || gRoguePokemonProfiles[species].competitiveSetCount == 0
+        || Rogue_GetActiveEvolutionCount(species) != requestedEvolutionCount)
+        return FALSE;
+
+#ifdef ROGUE_EXPANSION
+    // Alternate and battle-only forms should not be handed out as ordinary
+    // Breeder stock. Their base form remains eligible in its own right.
+    if(GET_BASE_SPECIES_ID(species) != species)
+        return FALSE;
+#endif
+
+    bst = RoguePokedex_GetSpeciesBST(species);
+    return bst + BREEDERS_EXCHANGE_BST_TOLERANCE >= requestedBst
+        && requestedBst + BREEDERS_EXCHANGE_BST_TOLERANCE >= bst;
+}
+
+static u16 SelectBreedersExchangeOffer(u16 requestedSpecies, u16 seed)
+{
+    struct RogueRouteSceneRng rng;
+    u16 requestedBst = RoguePokedex_GetSpeciesBST(requestedSpecies);
+    u8 requestedEvolutionCount = Rogue_GetActiveEvolutionCount(requestedSpecies);
+    u16 speciesSpan = NUM_SPECIES - 1;
+    u16 startIndex;
+    u16 offset;
+    u16 species;
+
+    RogueRouteSceneRng_Seed(&rng, seed ^ requestedSpecies ^ 0xBEE5);
+    startIndex = RogueRouteSceneRng_Next(&rng) % speciesSpan;
+    for(offset = 0; offset < speciesSpan; ++offset)
+    {
+        species = SPECIES_NONE + 1 + ((startIndex + offset) % speciesSpan);
+        if(IsBreedersExchangeOfferCandidate(
+            species,
+            requestedSpecies,
+            requestedBst,
+            requestedEvolutionCount))
+            return species;
+    }
+
+    return SPECIES_NONE;
+}
+
+static bool8 CanShowBreedersExchange(u8 roomId)
+{
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+    u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
+
+    (void)roomId;
+    if(RogueTrial_IsActive() && trial != NULL && trial->disableGifts)
+        return FALSE;
+
+    // Payload selection performs the more expensive comparable-offer search.
+    // Keeping eligibility cheap avoids scanning the full species table once
+    // per fallback candidate during a single route-planning pass.
+    return encounterCount != 0;
 }
 
 static const u16 sApricornItems[] =
@@ -529,6 +622,48 @@ static void ExpandTravelingMerchantPayload(struct RogueRouteSceneRequest *reques
     request->primaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
     request->rewardAmount = ROGUE_SHOP_FLAG_TRAVELING_MERCHANT | payload;
+}
+
+static bool8 SelectBreedersExchangePayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
+    u16 seed = RogueRouteSceneRng_Next(rng) & BREEDERS_EXCHANGE_PAYLOAD_SEED_MASK;
+    u8 startIndex;
+    u8 offset;
+
+    (void)request;
+    if(encounterCount == 0)
+        return FALSE;
+
+    startIndex = RogueRouteSceneRng_Next(rng) % encounterCount;
+    for(offset = 0; offset < encounterCount; ++offset)
+    {
+        u16 requestedSpecies = Rogue_GetCurrentWildEncounterSpecies((startIndex + offset) % encounterCount);
+
+        if(requestedSpecies <= BREEDERS_EXCHANGE_PAYLOAD_SPECIES_MASK
+            && SelectBreedersExchangeOffer(requestedSpecies, seed) != SPECIES_NONE)
+        {
+            *payload = requestedSpecies | ((u32)seed << BREEDERS_EXCHANGE_PAYLOAD_SEED_SHIFT);
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static void ExpandBreedersExchangePayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    u16 requestedSpecies = payload & BREEDERS_EXCHANGE_PAYLOAD_SPECIES_MASK;
+    u16 seed = (payload >> BREEDERS_EXCHANGE_PAYLOAD_SEED_SHIFT) & BREEDERS_EXCHANGE_PAYLOAD_SEED_MASK;
+    u16 offeredSpecies = SelectBreedersExchangeOffer(requestedSpecies, seed);
+
+    request->primaryGraphicsId = OBJ_EVENT_GFX_GIRL_1;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_FOLLOW_MON_1;
+    request->requestedItem = requestedSpecies;
+    request->rewardItem = offeredSpecies;
+    request->rewardAmount = seed;
+    if(offeredSpecies != SPECIES_NONE)
+        request->trainerNum = seed % gRoguePokemonProfiles[offeredSpecies].competitiveSetCount;
 }
 
 #include "data/rogue_route_scene_recipes.h"
@@ -1392,4 +1527,213 @@ void RogueRouteEvents_FinishTravelingMerchant(void)
 
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+}
+
+static bool8 CreateBreedersExchangeMonForScene(const struct RogueRouteSceneRequest *scene, struct Pokemon *mon)
+{
+    struct RoguePokemonCompetitiveSetRules rules =
+    {
+        .skipHeldItem = TRUE,
+        .allowMissingMoves = TRUE,
+    };
+    struct RogueRouteSceneRng rng;
+    bool8 perfectStats[NUM_STATS] = {FALSE};
+    u32 personality;
+    u16 pokeball = ITEM_FRIEND_BALL;
+    u8 remainingStats = NUM_STATS;
+    u8 perfectCount;
+    u8 stat;
+
+    if(scene == NULL
+        || mon == NULL
+        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE
+        || scene->rewardItem == SPECIES_NONE
+        || scene->rewardItem >= NUM_SPECIES
+        || scene->trainerNum >= gRoguePokemonProfiles[scene->rewardItem].competitiveSetCount)
+        return FALSE;
+
+    RogueRouteSceneRng_Seed(&rng, scene->rewardAmount ^ scene->rewardItem ^ 0x71AD);
+    personality = RogueRouteSceneRng_Next(&rng);
+    personality |= (u32)RogueRouteSceneRng_Next(&rng) << 16;
+    CreateMon(
+        mon,
+        scene->rewardItem,
+        Rogue_CalculatePlayerMonLvl(),
+        0,
+        TRUE,
+        personality,
+        OT_ID_PRESET,
+        BREEDERS_EXCHANGE_OT_ID);
+    SetMonData(mon, MON_DATA_OT_NAME, sBreedersExchangeOtName);
+    SetMonData(mon, MON_DATA_POKEBALL, &pokeball);
+    Rogue_ApplyMonCompetitiveSet(
+        mon,
+        Rogue_CalculatePlayerMonLvl(),
+        &gRoguePokemonProfiles[scene->rewardItem].competitiveSets[scene->trainerNum],
+        &rules);
+
+    // Give the remaining stats ordinary seeded IVs, then choose exactly three
+    // different stats to perfect. This keeps the value legible without making
+    // every exchange Pokémon generically flawless.
+    for(stat = 0; stat < NUM_STATS; ++stat)
+    {
+        u8 iv = RogueRouteSceneRng_Next(&rng) % 31;
+        SetMonData(mon, MON_DATA_HP_IV + stat, &iv);
+    }
+    for(perfectCount = 0; perfectCount < 3; ++perfectCount)
+    {
+        u8 selected = RogueRouteSceneRng_Next(&rng) % remainingStats;
+
+        for(stat = 0; stat < NUM_STATS; ++stat)
+        {
+            if(!perfectStats[stat] && selected-- == 0)
+            {
+                u8 iv = 31;
+
+                perfectStats[stat] = TRUE;
+                --remainingStats;
+                SetMonData(mon, MON_DATA_HP_IV + stat, &iv);
+                break;
+            }
+        }
+    }
+
+    mon->rogueExtraData.lastPopupLevel = GetMonData(mon, MON_DATA_LEVEL) - 1;
+    mon->rogueExtraData.hasPendingEvo = FALSE;
+    CalculateMonStats(mon);
+    return TRUE;
+}
+
+bool8 RogueRouteEvents_CreateBreedersExchangeMon(struct Pokemon *mon)
+{
+    struct RogueRouteSceneRequest scene;
+
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene))
+        return FALSE;
+
+    return CreateBreedersExchangeMonForScene(&scene, mon);
+}
+
+static void Task_ShowBreedersExchangePreview(u8 taskId)
+{
+    if(gPaletteFade.active)
+        return;
+
+    CleanupOverworldWindowsAndTilemaps();
+    ShowPokemonSummaryScreen(
+        SUMMARY_MODE_NORMAL,
+        gEnemyParty,
+        0,
+        0,
+        CB2_ReturnToFieldContinueScriptPlayMapMusic);
+    DestroyTask(taskId);
+}
+
+void RogueRouteEvents_ShowBreedersExchangePreview(void)
+{
+    ZeroEnemyPartyMons();
+    if(!RogueRouteEvents_CreateBreedersExchangeMon(&gEnemyParty[0]))
+        return;
+
+    FadeScreen(FADE_TO_BLACK, 0);
+    CreateTask(Task_ShowBreedersExchangePreview, 10);
+}
+
+static u8 ValidateBreedersExchangeSelection(
+    const struct RogueRouteSceneRequest *scene,
+    u8 partySlot,
+    struct Pokemon *offeredMon)
+{
+    struct Pokemon generatedMon;
+    u16 heldItem;
+
+    if(scene == NULL
+        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE
+        || RogueRouteScenes_GetState(scene->sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
+        || partySlot >= gPlayerPartyCount)
+        return ROGUE_ROUTE_EVENT_RESULT_FAILED;
+
+    if(GetMonData(&gPlayerParty[partySlot], MON_DATA_IS_EGG)
+        || GetMonData(&gPlayerParty[partySlot], MON_DATA_SPECIES) != scene->requestedItem)
+        return ROGUE_ROUTE_EVENT_RESULT_WRONG_MON;
+
+    heldItem = GetMonData(&gPlayerParty[partySlot], MON_DATA_HELD_ITEM);
+    if(RogueGift_GetCustomMonId(&gPlayerParty[partySlot]) != CUSTOM_MON_NONE
+        || RogueAdventureQuests_IsItemProtected(heldItem))
+        return ROGUE_ROUTE_EVENT_RESULT_PROTECTED_MON;
+
+    if(heldItem != ITEM_NONE && !CheckBagHasSpace(heldItem, 1))
+        return ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+
+    if(!CreateBreedersExchangeMonForScene(scene, &generatedMon)
+        || !Rogue_CanReleasePartyMonForCaughtMon(&generatedMon, partySlot))
+        return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+
+    FollowMon_SetGraphics(1, scene->rewardItem, FALSE, BREEDERS_EXCHANGE_OT_ID);
+    if(offeredMon != NULL)
+        CopyMon(offeredMon, &generatedMon, sizeof(generatedMon));
+    return ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_ValidateBreedersExchangeSelection(void)
+{
+    struct RogueRouteSceneRequest scene;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene))
+        return;
+
+    gSpecialVar_Result = ValidateBreedersExchangeSelection(&scene, gSpecialVar_0x8006, NULL);
+}
+
+void RogueRouteEvents_TryCompleteBreedersExchange(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct Pokemon offeredMon;
+    struct Pokemon *tradedMon;
+    u16 heldItem;
+    u8 partySlot = gSpecialVar_0x8006;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene))
+        return;
+
+    gSpecialVar_Result = ValidateBreedersExchangeSelection(&scene, partySlot, &offeredMon);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        return;
+    if(!RogueTrial_CanReceiveGift())
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+        return;
+    }
+
+    tradedMon = &gPlayerParty[partySlot];
+    heldItem = GetMonData(tradedMon, MON_DATA_HELD_ITEM);
+    if(heldItem != ITEM_NONE)
+    {
+        if(!AddBagItem(heldItem, 1))
+        {
+            gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+            return;
+        }
+
+        Rogue_PushPopup_AddItem(heldItem, 1);
+        if(ItemIsMail(heldItem))
+            TakeMailFromMon(tradedMon);
+        else
+        {
+            u16 noItem = ITEM_NONE;
+            SetMonData(tradedMon, MON_DATA_HELD_ITEM, &noItem);
+        }
+    }
+
+    RemoveMonAtSlot(partySlot, FALSE, FALSE);
+    CopyMon(&gPlayerParty[partySlot], &offeredMon, sizeof(offeredMon));
+    CalculatePlayerPartyCount();
+    RogueTrial_OnMonGiven(&gPlayerParty[partySlot]);
+    Rogue_PushPopup_AddPokemon(scene.rewardItem, FALSE, FALSE);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteScenes_HideProp(scene.sceneSlot, 1);
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }

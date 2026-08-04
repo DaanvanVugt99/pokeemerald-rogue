@@ -33,6 +33,8 @@ const ROGUE_ROUTE_EVENT_RESULT_NO_SPACE = 3
 const ROGUE_ROUTE_EVENT_RESULT_MONEY_FULL = 4
 const ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON = 5
 const ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL = 6
+const ROGUE_ROUTE_EVENT_RESULT_WRONG_MON = 7
+const ROGUE_ROUTE_EVENT_RESULT_PROTECTED_MON = 8
 const VAR_ROUTE_EVENT_STATE = VAR_0x8008
 
 const ROGUE_FOSSIL_RESTORATION_STABLE = 0
@@ -130,6 +132,112 @@ script Rogue_RouteEvent_TravelingMerchant
     special(RogueRouteEvents_FinishTravelingMerchant)
 
     msgbox(format("Much obliged. I'll be here until you move on."))
+    release
+}
+
+script Rogue_RouteEvent_BreedersExchangePokemon
+{
+    lock
+    faceplayer
+    special(RogueRouteEvents_ShowBreedersExchangePreview)
+    waitstate
+    release
+}
+
+script Rogue_RouteEvent_BreedersExchange
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    bufferspeciesname(STR_VAR_1, VAR_0x8004)
+    bufferspeciesname(STR_VAR_2, VAR_0x8005)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("I think {STR_VAR_1} has found the right road at last. Take good care of each other."))
+        release
+        end
+    }
+
+    copyvar(VAR_0x8007, VAR_0x8004)
+    copyvar(VAR_0x8009, VAR_0x8005)
+    msgbox(format("This {STR_VAR_1} has grown restless on the road.\pI think it needs a Trainer who battles a little differently.\pIf you caught a {STR_VAR_2} around here, I could make you a trade."))
+    msgbox(format("Would you like a closer look at {STR_VAR_1}?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == YES)
+    {
+        special(RogueRouteEvents_ShowBreedersExchangePreview)
+        waitstate
+    }
+
+    bufferspeciesname(STR_VAR_1, VAR_0x8007)
+    bufferspeciesname(STR_VAR_2, VAR_0x8009)
+    msgbox(format("Trade a {STR_VAR_2} for this {STR_VAR_1}?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == NO)
+    {
+        msgbox(format("No pressure. A new partner is worth thinking over."))
+        release
+        end
+    }
+
+    special(ChoosePartyMon)
+    waitstate
+    if(var(VAR_0x8004) == PARTY_NOTHING_CHOSEN)
+    {
+        msgbox(format("Changed your mind? That's all right. Nothing has changed hands."))
+        release
+        end
+    }
+
+    copyvar(VAR_0x8006, VAR_0x8004)
+    special(RogueRouteEvents_ValidateBreedersExchangeSelection)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_MON)
+    {
+        bufferspeciesname(STR_VAR_1, VAR_0x8009)
+        msgbox(format("I'm only looking for a {STR_VAR_1} from this route."))
+        release
+        end
+    }
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_PROTECTED_MON)
+    {
+        msgbox(format("That Pokémon seems tied to something important. Better keep it with you."))
+        release
+        end
+    }
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+    {
+        msgbox(format("Your Pokémon is carrying something, but your Bag has no room for it. Make a little space first."))
+        release
+        end
+    }
+    if(var(VAR_RESULT) != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        msgbox(format("Hmm... Something about that trade doesn't feel right. Let's leave it be."))
+        release
+        end
+    }
+
+    bufferpartymonnick(STR_VAR_1, VAR_0x8006)
+    bufferspeciesname(STR_VAR_2, VAR_0x8007)
+    msgbox(format("Trade {STR_VAR_1} for {STR_VAR_2}? This can't be undone."), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == NO)
+    {
+        msgbox(format("All right. Both Pokémon stay right where they are."))
+        release
+        end
+    }
+
+    special(RogueRouteEvents_TryCompleteBreedersExchange)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        call(Rogue_Common_DisplayPopups)
+        bufferspeciesname(STR_VAR_1, VAR_0x8007)
+        msgbox(format("There we are. {STR_VAR_1} looks ready for the road—don't keep it waiting!"))
+    }
+    else
+    {
+        msgbox(format("Hold on. The trade didn't go through, so nothing changed hands."))
+    }
+
     release
 }
 

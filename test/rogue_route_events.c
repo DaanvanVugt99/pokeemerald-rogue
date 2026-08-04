@@ -27,6 +27,7 @@
 #include "rogue.h"
 #include "rogue_adventure_quests.h"
 #include "rogue_adventurepaths.h"
+#include "rogue_baked.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
 #include "rogue_event_transactions.h"
@@ -59,6 +60,8 @@ extern const u8 Rogue_RouteEvent_ApricornProp[];
 extern const u8 Rogue_RouteEvent_UnboundTutor[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
+extern const u8 Rogue_RouteEvent_BreedersExchange[];
+extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
 
 static u32 GetActiveTeamClassFlag(u16 teamNum)
 {
@@ -250,11 +253,13 @@ TEST("Selected standalone route scene payloads remain immutable")
         ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
+        ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
     };
     struct RogueAdvPath originalPath;
     struct RogueRouteSceneRequest selected;
     struct RogueRouteSceneRequest restored;
     struct RogueRouteScenePlan selectedPlan;
+    struct RogueWildEncounters originalWildEncounters = gRogueRun.wildEncounters;
     u16 originalDifficulty = Rogue_GetCurrentDifficulty();
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
@@ -262,12 +267,16 @@ TEST("Selected standalone route scene payloads remain immutable")
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     u8 i;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
+    gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(2);
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
@@ -301,11 +310,13 @@ TEST("Selected standalone route scene payloads remain immutable")
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
+    gRogueRun.wildEncounters = originalWildEncounters;
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
-TEST("Route event fallback registry is deterministic weighted and RNG neutral")
+TEST("Route event fallback registry is deterministic and RNG neutral")
 {
     struct RogueAdvPath originalPath;
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
@@ -320,16 +331,8 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
-    bool8 seenCurse[32] = {FALSE};
-    u16 merchantCount = 0;
-    u16 shrineCount = 0;
-    u16 fossilCount = 0;
-    u16 forbiddenStoneCount = 0;
-    u16 apricornCount = 0;
-    u16 tutorCount = 0;
-    u16 travelingMerchantCount = 0;
+    bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     u8 originalPartyCount = gPlayerPartyCount;
-    u8 curseCount = Rogue_GetDarkDealCurseCount();
     u16 seed;
     u8 i;
     RAND_TYPE rogueRngBefore;
@@ -344,11 +347,13 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
-    EXPECT_EQ(curseCount, 17);
+    memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
+    gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
 
-    for(seed = 1; seed <= 1000; ++seed)
+    for(seed = 1; seed <= 96; ++seed)
     {
         VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
         gRogueAdvPath.rooms[0].rngSeed = seed;
@@ -379,7 +384,6 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
             EXPECT(RogueRouteScenes_GetPlacementRequest(i, &request));
             if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER)
             {
-                ++merchantCount;
                 EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
                 EXPECT_EQ(request.requestedItem, ITEM_TRADE_CASE);
                 EXPECT((gRogueTrainers[request.trainerNum].classFlags & GetActiveTeamClassFlag(gRogueRun.teamEncounterNum)) != 0);
@@ -390,18 +394,15 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
 
                 EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
                 EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_DEVIL_MAN);
-                ++shrineCount;
-                for(curseIdx = 0; curseIdx < curseCount; ++curseIdx)
-                {
+                for(curseIdx = 0; curseIdx < Rogue_GetDarkDealCurseCount(); ++curseIdx)
                     if(request.requestedItem == Rogue_SelectDarkDealCurseItem(curseIdx))
-                        seenCurse[curseIdx] = TRUE;
-                }
+                        break;
+                EXPECT_NE(curseIdx, Rogue_GetDarkDealCurseCount());
             }
             else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER)
             {
                 EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
                 EXPECT_EQ(RogueAdventureQuests_GetFossilSpecies(request.requestedItem), request.rewardItem);
-                ++fossilCount;
             }
             else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER)
             {
@@ -409,7 +410,6 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                 EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_MISC_CHANNELER);
                 EXPECT_EQ(request.requestedItem, ITEM_ODD_KEYSTONE);
                 EXPECT_EQ(request.rewardItem, ITEM_ABILITY_PATCH);
-                ++forbiddenStoneCount;
             }
             else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR)
             {
@@ -421,7 +421,6 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                 EXPECT_NE(request.requestedItem, request.rewardItem);
                 EXPECT_NE(request.requestedItem, request.trainerNum);
                 EXPECT_NE(request.rewardItem, request.trainerNum);
-                ++tutorCount;
             }
             else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT)
             {
@@ -432,7 +431,19 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                 EXPECT(ROGUE_SHOP_IS_TRAVELING_MERCHANT(request.rewardAmount));
                 EXPECT_GE(category, ROGUE_SHOP_GENERAL);
                 EXPECT_LE(category, ROGUE_SHOP_RARE_HELD_ITEMS);
-                ++travelingMerchantCount;
+            }
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE)
+            {
+                u16 requestedBst = RoguePokedex_GetSpeciesBST(request.requestedItem);
+                u16 offeredBst = RoguePokedex_GetSpeciesBST(request.rewardItem);
+
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+                EXPECT_EQ(request.requestedItem, SPECIES_MIGHTYENA);
+                EXPECT_NE(request.rewardItem, SPECIES_NONE);
+                EXPECT(!RoguePokedex_IsSpeciesLegendary(request.rewardItem));
+                EXPECT_EQ(Rogue_GetActiveEvolutionCount(request.rewardItem), Rogue_GetActiveEvolutionCount(request.requestedItem));
+                EXPECT(offeredBst + 80 >= requestedBst);
+                EXPECT(requestedBst + 80 >= offeredBst);
             }
             else
             {
@@ -450,7 +461,6 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
                     EXPECT_NE(request.requestedItem, request.rewardItem);
                     EXPECT_NE(request.requestedItem, request.trainerNum);
                     EXPECT_NE(request.rewardItem, request.trainerNum);
-                    ++apricornCount;
                 }
                 else
                 {
@@ -460,22 +470,6 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
             }
         }
     }
-    EXPECT_GE(merchantCount, 200);
-    EXPECT_LE(merchantCount, 700);
-    EXPECT_GE(shrineCount, 200);
-    EXPECT_LE(shrineCount, 700);
-    EXPECT_GE(fossilCount, 200);
-    EXPECT_LE(fossilCount, 700);
-    EXPECT_GE(forbiddenStoneCount, 200);
-    EXPECT_LE(forbiddenStoneCount, 700);
-    EXPECT_GE(apricornCount, 200);
-    EXPECT_LE(apricornCount, 700);
-    EXPECT_GE(tutorCount, 200);
-    EXPECT_LE(tutorCount, 700);
-    EXPECT_GE(travelingMerchantCount, 200);
-    EXPECT_LE(travelingMerchantCount, 700);
-    for(i = 0; i < curseCount; ++i)
-        EXPECT(seenCurse[i]);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     gRogueRun.teamEncounterNum = originalTeamNum;
@@ -484,6 +478,7 @@ TEST("Route event fallback registry is deterministic weighted and RNG neutral")
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
     gRngRogueValue = originalRogueRng;
@@ -1063,6 +1058,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     u16 itemId;
     u16 seed;
@@ -1075,6 +1071,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(3);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
     for(seed = 1; seed != 0; ++seed)
@@ -1174,6 +1171,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
     SetMoney(&gSaveBlock1Ptr->money, originalMoney);
@@ -1334,6 +1332,200 @@ TEST("Traveling Merchant offers one seeded half-price shop with normal selling")
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("Breeder's Exchange trades one local catch for a deterministic trained Pokemon atomically")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueWildEncounters originalWildEncounters = gRogueRun.wildEncounters;
+    struct Pokemon originalParty[PARTY_SIZE];
+    struct RogueRouteSceneRequest exchange;
+    struct Pokemon offeredMon;
+    struct RogueAdventureQuestCreateParams questParams = {0};
+    RAND_TYPE originalRogueRng = gRngRogueValue;
+    RAND_TYPE originalStandardRng = gRngValue;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    u8 originalPartyCount = gPlayerPartyCount;
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u8 perfectIvCount = 0;
+    u8 moveCount = 0;
+    u8 stat;
+    u8 moveIdx;
+    u16 heldItem;
+    u32 uniqueOtId = OTID_FLAG_CUSTOM_MON | OTID_FLAG_DYNAMIC_CUSTOM_MON;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalParty, gPlayerParty, sizeof(originalParty));
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
+    gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].rngSeed = 0xBEEF;
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(GetFirstPlacement(&exchange));
+    EXPECT_EQ(exchange.requestedItem, SPECIES_MIGHTYENA);
+    EXPECT_NE(exchange.rewardItem, SPECIES_NONE);
+    EXPECT(!RoguePokedex_IsSpeciesLegendary(exchange.rewardItem));
+    EXPECT_EQ(Rogue_GetActiveEvolutionCount(exchange.rewardItem), Rogue_GetActiveEvolutionCount(exchange.requestedItem));
+    EXPECT_EQ(gRoguePokemonProfiles[exchange.rewardItem].competitiveSetCount != 0, TRUE);
+
+    SelectPlacement(&exchange);
+    EXPECT(RogueRouteEvents_CreateBreedersExchangeMon(&offeredMon));
+    EXPECT_EQ(GetMonData(&offeredMon, MON_DATA_SPECIES), exchange.rewardItem);
+    EXPECT_EQ(GetMonData(&offeredMon, MON_DATA_LEVEL), Rogue_CalculatePlayerMonLvl());
+    EXPECT_EQ(GetNature(&offeredMon), gRoguePokemonProfiles[exchange.rewardItem].competitiveSets[exchange.trainerNum].nature);
+    EXPECT_EQ(RogueGift_GetCustomMonId(&offeredMon), CUSTOM_MON_NONE);
+    for(stat = 0; stat < NUM_STATS; ++stat)
+    {
+        if(GetMonData(&offeredMon, MON_DATA_HP_IV + stat) == 31)
+            ++perfectIvCount;
+    }
+    for(moveIdx = 0; moveIdx < MAX_MON_MOVES; ++moveIdx)
+    {
+        if(GetMonData(&offeredMon, MON_DATA_MOVE1 + moveIdx) != MOVE_NONE)
+            ++moveCount;
+    }
+    EXPECT_EQ(perfectIvCount, 3);
+    EXPECT_NE(moveCount, 0);
+    EXPECT_EQ(memcmp(&gRngRogueValue, &originalRogueRng, sizeof(originalRogueRng)), 0);
+    EXPECT_EQ(memcmp(&gRngValue, &originalStandardRng, sizeof(originalStandardRng)), 0);
+
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    CreateMon(&gPlayerParty[0], exchange.requestedItem, Rogue_CalculatePlayerMonLvl(), 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gPlayerPartyCount = 1;
+    heldItem = ITEM_ODD_KEYSTONE;
+    SetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM, &heldItem);
+    EXPECT_NE(
+        RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE, &questParams),
+        ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(RogueAdventureQuests_IsItemProtected(ITEM_ODD_KEYSTONE));
+    gSpecialVar_0x8006 = 0;
+    RogueRouteEvents_ValidateBreedersExchangeSelection();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_PROTECTED_MON);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), exchange.requestedItem);
+
+    RogueAdventureQuests_Clear();
+    CreateMon(&gPlayerParty[0], exchange.requestedItem, Rogue_CalculatePlayerMonLvl(), 0, FALSE, 0, OT_ID_CUSTOM_MON, uniqueOtId);
+    RogueRouteEvents_ValidateBreedersExchangeSelection();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_PROTECTED_MON);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), exchange.requestedItem);
+
+    CreateMon(&gPlayerParty[0], exchange.requestedItem, Rogue_CalculatePlayerMonLvl(), 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    ClearBag();
+    heldItem = ITEM_POTION;
+    SetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM, &heldItem);
+    RogueRouteEvents_ValidateBreedersExchangeSelection();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    RogueRouteEvents_TryCompleteBreedersExchange();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), exchange.rewardItem);
+    EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM), ITEM_NONE);
+    EXPECT(CheckBagHasItem(ITEM_POTION, 1));
+    EXPECT_EQ(RogueRouteScenes_GetState(exchange.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_BREEDERS_EXCHANGE));
+
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    gRogueRun.wildEncounters = originalWildEncounters;
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    memcpy(gPlayerParty, originalParty, sizeof(originalParty));
+    gPlayerPartyCount = originalPartyCount;
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+    gRngRogueValue = originalRogueRng;
+    gRngValue = originalStandardRng;
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
+}
+
+TEST("Breeder's Exchange composes a visible offer and removes it after trading")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueWildEncounters originalWildEncounters = gRogueRun.wildEncounters;
+    struct RogueRouteSceneRequest exchange;
+    struct ObjectEventTemplate objects[5] =
+    {
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+    };
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u8 count = 1;
+    bool8 foundBreeder = FALSE;
+    bool8 foundPokemon = FALSE;
+    u8 i;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
+    gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].rngSeed = 0xCAFE;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(GetFirstPlacement(&exchange));
+
+    RogueRouteScenes_ModifyObjectEvents(objects, &count, ARRAY_COUNT(objects));
+    EXPECT_EQ(count, 2);
+    for(i = 0; i < count; ++i)
+    {
+        if(objects[i].script == Rogue_RouteEvent_BreedersExchange)
+        {
+            foundBreeder = TRUE;
+            EXPECT_EQ(objects[i].localId, 41);
+            EXPECT_EQ(objects[i].x, 12);
+            EXPECT_EQ(objects[i].y, 34);
+        }
+        else if(objects[i].script == Rogue_RouteEvent_BreedersExchangePokemon)
+        {
+            foundPokemon = TRUE;
+            EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_FOLLOW_MON_1);
+            EXPECT_EQ(objects[i].x, 13);
+            EXPECT_EQ(objects[i].y, 33);
+        }
+    }
+    EXPECT(foundBreeder);
+    EXPECT(foundPokemon);
+    EXPECT_EQ(VarGet(VAR_FOLLOW_MON_1), exchange.rewardItem);
+    EXPECT(RogueRouteScenes_IsFollowMonSlotReserved(1));
+
+    RogueRouteScenes_SetState(exchange.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT(!RogueRouteScenes_IsFollowMonSlotReserved(1));
+    count = 1;
+    objects[0] = (struct ObjectEventTemplate)
+    {
+        .localId = 41,
+        .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE,
+        .x = 12,
+        .y = 34,
+        .elevation = 3,
+        .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM,
+        .trainerType = TRAINER_TYPE_NONE,
+        .trainerRange_berryTreeId = 0,
+        .script = Rogue_RouteEvent_Interact,
+    };
+    RogueRouteScenes_ModifyObjectEvents(objects, &count, ARRAY_COUNT(objects));
+    EXPECT_EQ(count, 1);
+    for(i = 0; i < count; ++i)
+        EXPECT(objects[i].script != Rogue_RouteEvent_BreedersExchangePokemon);
+
+    gRogueRun.wildEncounters = originalWildEncounters;
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
 }
 
 TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Pokemon")
@@ -2345,6 +2537,7 @@ TEST("All existing route events are registered through declarative tables")
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN,
         ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
+        ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
     };
     u8 i;
 

@@ -24,6 +24,7 @@ u8 RogueRouteScenes_GetPlacementCount(void);
 bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request);
 u8 RogueRouteScenes_GetState(u8 sceneSlot);
 void RogueRouteScenes_SetState(u8 sceneSlot, u8 state);
+bool8 RogueRouteScenes_IsFollowMonSlotReserved(u8 slot);
 
 #ifdef ROGUE_DEBUG
 void RogueRouteScenes_DebugSetPlacement(u8 placementIndex, u8 recipeId, u8 lotId, u8 lotRole, u8 sceneSlot, u8 ownerQuestId);

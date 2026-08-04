@@ -32,6 +32,7 @@
 #include "rogue_popup.h"
 #include "rogue_safari.h"
 #include "rogue_settings.h"
+#include "rogue_route_scenes.h"
 
 // Care with increasing FOLLOWMON_MAX_SPAWN_SLOTS as it can cause lag
 
@@ -766,6 +767,9 @@ static u8 CountActiveObjectEvents()
 
 static bool8 IsSpawnSlotValid(u16 slot)
 {
+    if(RogueRouteScenes_IsFollowMonSlotReserved(slot))
+        return FALSE;
+
     // 0 : normal pal index 1
     if(slot == 0)
     {

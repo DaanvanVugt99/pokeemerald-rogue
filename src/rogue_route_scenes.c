@@ -19,11 +19,13 @@
 #include "rogue_adventure_quests.h"
 #include "rogue_adventurepaths.h"
 #include "rogue_controller.h"
+#include "rogue_followmon.h"
 #include "rogue_route_scene_internal.h"
 #include "rogue_route_scenes.h"
 
 extern const u8 Rogue_RouteEvent_Interact[];
 extern const u8 Rogue_RouteEvent_Prop[];
+extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -223,11 +225,32 @@ void RogueRouteScenes_HideProp(u8 sceneSlot, u8 propId)
     {
         const struct ObjectEventTemplate *objectEvent = &gSaveBlock1Ptr->objectEventTemplates[i];
 
-        if(objectEvent->script == Rogue_RouteEvent_Prop
+        if((objectEvent->script == Rogue_RouteEvent_Prop
+                || objectEvent->script == Rogue_RouteEvent_BreedersExchangePokemon)
             && GetSceneObjectSlot(objectEvent->trainerRange_berryTreeId) == sceneSlot
             && GetSceneObjectProp(objectEvent->trainerRange_berryTreeId) == propId)
             RemoveObjectEventByLocalIdAndMap(objectEvent->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
     }
+}
+
+bool8 RogueRouteScenes_IsFollowMonSlotReserved(u8 slot)
+{
+    u8 placementIdx;
+
+    if(slot != 1)
+        return FALSE;
+
+    for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
+    {
+        struct RogueRouteSceneRequest scene;
+
+        if(RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
+            && scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE
+            && RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+            return TRUE;
+    }
+
+    return FALSE;
 }
 
 
@@ -930,6 +953,11 @@ static u16 ResolveSceneObjectGraphics(
         return scene->primaryGraphicsId;
     if(object->graphicsId == ROUTE_SCENE_GFX_SECONDARY)
         return scene->secondaryGraphicsId;
+    if(object->graphicsId == ROUTE_SCENE_GFX_OFFERED_MON)
+    {
+        FollowMon_SetGraphics(1, scene->rewardItem, FALSE, 0);
+        return OBJ_EVENT_GFX_FOLLOW_MON_1;
+    }
     if(object->graphicsId <= ROUTE_SCENE_GFX_SEMANTIC_SUPPLIES
         && object->graphicsId >= ROUTE_SCENE_GFX_SEMANTIC_RELIC
         && scene->environment < ROGUE_ROUTE_ENVIRONMENT_COUNT)

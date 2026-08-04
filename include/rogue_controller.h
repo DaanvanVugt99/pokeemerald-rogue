@@ -230,6 +230,8 @@ void Rogue_ApplyMonCompetitiveSet(struct Pokemon* mon, u8 level, struct RoguePok
 void Rogue_ModifyWildMonHeldItem(u16* itemId);
 void Rogue_CreateWildMon(u8 area, u16* species, u8* level, bool8* forceShiny);
 u16 Rogue_SelectRandomWildMon(void);
+u8 Rogue_GetCurrentWildEncounterCount(void);
+u16 Rogue_GetCurrentWildEncounterSpecies(u8 index);
 bool8 Rogue_PreferTraditionalWildMons(void);
 bool8 Rogue_AreWildMonEnabled(void);
 bool8 Rogue_CanScatterPokeblock(u16 itemId);

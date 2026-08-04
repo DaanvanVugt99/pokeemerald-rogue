@@ -7756,9 +7756,8 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     u8 weatherChance = 5 + 20 * gRogueAdvPath.currentRoomParams.perType.route.difficulty;
 
                     gRogueRun.currentRouteIndex = gRogueAdvPath.currentRoomParams.roomIdx;
-                    RogueRouteScenes_OnEnterRoute();
-
                     RandomiseWildEncounters();
+                    RogueRouteScenes_OnEnterRoute();
                     ResetTrainerBattles();
                     RandomiseBerryTrees();
                     RandomiseEnabledTrainers();
@@ -10490,6 +10489,19 @@ static u16 GetWildGrassEncounter(u8 index)
     }
 
     return SPECIES_NONE;
+}
+
+u8 Rogue_GetCurrentWildEncounterCount(void)
+{
+    return GetCurrentWildEncounterCount();
+}
+
+u16 Rogue_GetCurrentWildEncounterSpecies(u8 index)
+{
+    if(index >= GetCurrentWildEncounterCount())
+        return SPECIES_NONE;
+
+    return GetWildGrassEncounter(index);
 }
 
 static u16 GetWildWaterEncounter(u8 index)

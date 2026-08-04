@@ -41,7 +41,11 @@ Format follows Keep a Changelog loosely:
   progression-scaled moves, and ignores normal species compatibility to enable
   unusual builds. A once-per-Adventure Traveling Merchant now brings one
   seeded shop category to a route, supports normal buying and selling, and
-  sells its entire inventory at half price. Active routes
+  sells its entire inventory at half price. The once-per-Adventure Breeder's
+  Exchange requests a species from the current route in return for a visible,
+  similarly powered Pokémon with a coherent trained set and three perfect
+  IVs; players can preview the offer, choose the exact partner to trade, and
+  recover its held item safely. Active routes
   expose eight small, medium, and large scene lots; the director independently
   fills one to three lots so quest consumers and unrelated route events can
   coexist. The per-room scene plan is packed into less memory than the former
