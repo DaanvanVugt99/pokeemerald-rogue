@@ -5482,6 +5482,18 @@ static const struct SpriteFrameImage sPicTable_DecorCauldren[] = {
     obj_frame_tiles(gObjectEventPic_DecorCauldren),
 };
 
+static const struct SpriteFrameImage sPicTable_RoutePropSpiritStone[] = {obj_frame_tiles(gObjectEventPic_RoutePropSpiritStone)};
+static const struct SpriteFrameImage sPicTable_RoutePropOccultAltar[] = {obj_frame_tiles(gObjectEventPic_RoutePropOccultAltar)};
+static const struct SpriteFrameImage sPicTable_RoutePropSupplyCrate[] = {obj_frame_tiles(gObjectEventPic_RoutePropSupplyCrate)};
+static const struct SpriteFrameImage sPicTable_RoutePropStorageBarrel[] = {obj_frame_tiles(gObjectEventPic_RoutePropStorageBarrel)};
+static const struct SpriteFrameImage sPicTable_RoutePropStump[] = {obj_frame_tiles(gObjectEventPic_RoutePropStump)};
+static const struct SpriteFrameImage sPicTable_RoutePropMossyStone[] = {obj_frame_tiles(gObjectEventPic_RoutePropMossyStone)};
+static const struct SpriteFrameImage sPicTable_RoutePropStonePile[] = {obj_frame_tiles(gObjectEventPic_RoutePropStonePile)};
+static const struct SpriteFrameImage sPicTable_RoutePropSplitRock[] = {obj_frame_tiles(gObjectEventPic_RoutePropSplitRock)};
+static const struct SpriteFrameImage sPicTable_RoutePropDriftwood[] = {obj_frame_tiles(gObjectEventPic_RoutePropDriftwood)};
+static const struct SpriteFrameImage sPicTable_RoutePropDigMound[] = {obj_frame_tiles(gObjectEventPic_RoutePropDigMound)};
+static const struct SpriteFrameImage sPicTable_RoutePropRoundStone[] = {obj_frame_tiles(gObjectEventPic_RoutePropRoundStone)};
+
 static const struct SpriteFrameImage sPicTable_Route_Bug[] = {
     overworld_frame(gObjectEventPic_Route_Bug, 2, 2, 0),
     overworld_frame(gObjectEventPic_Route_Bug, 2, 2, 1),

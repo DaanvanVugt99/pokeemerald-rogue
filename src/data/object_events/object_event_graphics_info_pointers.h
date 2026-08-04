@@ -513,6 +513,18 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RotomWash;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorWardrobe;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorCauldren;
 
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSpiritStone;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropOccultAltar;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSupplyCrate;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropStorageBarrel;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropStump;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropMossyStone;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropStonePile;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSplitRock;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropDriftwood;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropDigMound;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropRoundStone;
+
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanAlt;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MayAlt;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RedAlt;
@@ -1070,6 +1082,17 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_GOLD_GRASS] =               &gObjectEventGraphicsInfo_GoldGrass,
     [OBJ_EVENT_GFX_UNIQUE_DEN_GRASS] =         &gObjectEventGraphicsInfo_UniqueDenGrass,
     [OBJ_EVENT_GFX_GOLD_LEGENDARY_STATUE] =    &gObjectEventGraphicsInfo_GoldLegendaryStatue,
+    [OBJ_EVENT_GFX_ROUTE_PROP_SPIRIT_STONE] =   &gObjectEventGraphicsInfo_RoutePropSpiritStone,
+    [OBJ_EVENT_GFX_ROUTE_PROP_OCCULT_ALTAR] =   &gObjectEventGraphicsInfo_RoutePropOccultAltar,
+    [OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE] =   &gObjectEventGraphicsInfo_RoutePropSupplyCrate,
+    [OBJ_EVENT_GFX_ROUTE_PROP_STORAGE_BARREL] = &gObjectEventGraphicsInfo_RoutePropStorageBarrel,
+    [OBJ_EVENT_GFX_ROUTE_PROP_STUMP] =          &gObjectEventGraphicsInfo_RoutePropStump,
+    [OBJ_EVENT_GFX_ROUTE_PROP_MOSSY_STONE] =    &gObjectEventGraphicsInfo_RoutePropMossyStone,
+    [OBJ_EVENT_GFX_ROUTE_PROP_STONE_PILE] =     &gObjectEventGraphicsInfo_RoutePropStonePile,
+    [OBJ_EVENT_GFX_ROUTE_PROP_SPLIT_ROCK] =     &gObjectEventGraphicsInfo_RoutePropSplitRock,
+    [OBJ_EVENT_GFX_ROUTE_PROP_DRIFTWOOD] =      &gObjectEventGraphicsInfo_RoutePropDriftwood,
+    [OBJ_EVENT_GFX_ROUTE_PROP_DIG_MOUND] =      &gObjectEventGraphicsInfo_RoutePropDigMound,
+    [OBJ_EVENT_GFX_ROUTE_PROP_ROUND_STONE] =    &gObjectEventGraphicsInfo_RoutePropRoundStone,
     [OBJ_EVENT_GFX_FLAG_ADVENTURE] =           &gObjectEventGraphicsInfo_FlagAdventure,
 
     [OBJ_EVENT_GFX_DECOR_BED] =                &gObjectEventGraphicsInfo_DecorBed,

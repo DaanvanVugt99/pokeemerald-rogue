@@ -57,7 +57,6 @@ script Rogue_RouteEvent_Interact
 script Rogue_RouteEvent_Prop
 {
     lock
-    faceplayer
 
     msgbox(format("Someone packed these supplies for a long road."))
 
@@ -67,7 +66,6 @@ script Rogue_RouteEvent_Prop
 script Rogue_RouteEvent_BuriedCacheSupplies
 {
     lock
-    faceplayer
     msgbox(format("A field journal, brushes, and measuring cord are arranged with practiced care."))
     release
 }
@@ -118,7 +116,6 @@ script Rogue_RouteEvent_BuriedCacheArchaeologist
 script Rogue_RouteEvent_BuriedCacheSite
 {
     lock
-    faceplayer
 
     special(RogueRouteEvents_GetInteractionData)
     special(RogueRouteEvents_BufferBuriedCacheData)
@@ -203,7 +200,6 @@ script Rogue_RouteEvent_BuriedCacheSite
 script Rogue_RouteEvent_UnboundTutorProp
 {
     lock
-    faceplayer
 
     msgbox(format("Every tool here is worn smooth. They've seen years of practice."))
 
@@ -271,6 +267,51 @@ script Rogue_RouteEvent_TravelingMerchant
     special(RogueRouteEvents_FinishTravelingMerchant)
 
     msgbox(format("Much obliged. I'll be here until you move on."))
+    release
+}
+
+script Rogue_RouteEvent_TideSalvage
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    bufferitemname(STR_VAR_1, VAR_0x8004)
+
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("That was the only thing I saw drifting by. The tide's quiet now."))
+        release
+        end
+    }
+
+    msgbox(format("Hey! See that bundle caught in the current?\pHelp me haul it in, and whatever's useful is yours. I can make out {STR_VAR_1} in there."))
+    msgbox(format("Give me a hand?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == NO)
+    {
+        msgbox(format("No worries. I'll keep an eye on it a little longer."))
+        release
+        end
+    }
+
+    special(RogueRouteEvents_TryClaimTideSalvage)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        call(Rogue_Common_DisplayPopups)
+        msgbox(format("Nice pull! Good thing we got to it before the current did."))
+    }
+    else
+    {
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+        {
+            msgbox(format("Your Bag's too full to keep it safe. Make some room and we'll try again."))
+        }
+        else
+        {
+            msgbox(format("The current's fighting us. Let's try again in a moment."))
+        }
+    }
+
     release
 }
 
@@ -383,7 +424,6 @@ script Rogue_RouteEvent_BreedersExchange
 script Rogue_RouteEvent_HexedShrineProp
 {
     lock
-    faceplayer
 
     msgbox(format("The air around the stone bites with unnatural cold."))
 
@@ -447,12 +487,20 @@ script Rogue_RouteEvent_HexedShrine
     release
 }
 
-script Rogue_RouteEvent_FossilProp
+script Rogue_RouteEvent_AnomalousFossilProp
 {
     lock
-    faceplayer
 
-    msgbox(format("The tools are spotless, laid out with almost nervous care."))
+    msgbox(format("The unusual fossil rests inside a padded case, protected from every jolt."))
+
+    release
+}
+
+script Rogue_RouteEvent_FossilWorkbench
+{
+    lock
+
+    msgbox(format("The restoration equipment is spotless, arranged with almost nervous care."))
 
     release
 }
@@ -623,14 +671,6 @@ script Rogue_RouteEvent_AnomalousFossilTryRestore
     return
 }
 
-script Rogue_RouteEvent_ForbiddenStoneProp
-{
-    lock
-    faceplayer
-    msgbox(format("Faded symbols wind across the stone like an old, broken chain."))
-    release
-}
-
 script Rogue_RouteEvent_ForbiddenStoneOffer
 {
     lock
@@ -677,7 +717,6 @@ script Rogue_RouteEvent_ForbiddenStoneOffer
 script Rogue_RouteEvent_ForbiddenStoneSoul
 {
     lock
-    faceplayer
 
     special(RogueRouteEvents_GetInteractionData)
     if(var(VAR_0x8009) == 0)
@@ -805,7 +844,6 @@ script Rogue_RouteEvent_ForbiddenStoneGiveReward
 script Rogue_RouteEvent_ApricornTree
 {
     lock
-    faceplayer
 
     special(RogueRouteEvents_GetInteractionData)
     special(RogueRouteEvents_BufferApricornTreeData)
@@ -856,7 +894,6 @@ script Rogue_RouteEvent_ApricornTree
 script Rogue_RouteEvent_ApricornProp
 {
     lock
-    faceplayer
     msgbox(format("Shaped shells and well-loved tools cover the workbench."))
     release
 }

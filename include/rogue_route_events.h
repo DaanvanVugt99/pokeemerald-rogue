@@ -29,5 +29,6 @@ bool8 RogueRouteEvents_CreateBreedersExchangeMon(struct Pokemon *mon);
 void RogueRouteEvents_BufferBuriedCacheData(void);
 void RogueRouteEvents_TryAcceptBuriedCache(void);
 void RogueRouteEvents_TryDigBuriedCache(void);
+void RogueRouteEvents_TryClaimTideSalvage(void);
 
 #endif // GUARD_ROGUE_ROUTE_EVENTS_H

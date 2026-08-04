@@ -53,11 +53,11 @@ extern const u8 Rogue_RouteEvent_HexedShrine[];
 extern const u8 Rogue_RouteEvent_HexedShrineProp[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilOffer[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilRestoration[];
-extern const u8 Rogue_RouteEvent_FossilProp[];
+extern const u8 Rogue_RouteEvent_AnomalousFossilProp[];
+extern const u8 Rogue_RouteEvent_FossilWorkbench[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneOffer[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneSoul[];
 extern const u8 Rogue_RouteEvent_ForbiddenStonePayoff[];
-extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
 extern const u8 Rogue_RouteEvent_ApricornTree[];
 extern const u8 Rogue_RouteEvent_ApricornArtisan[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
@@ -69,6 +69,7 @@ extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
 extern const u8 Rogue_RouteEvent_BuriedCacheArchaeologist[];
 extern const u8 Rogue_RouteEvent_BuriedCacheSupplies[];
 extern const u8 Rogue_RouteEvent_BuriedCacheSite[];
+extern const u8 Rogue_RouteEvent_TideSalvage[];
 
 static u32 GetActiveTeamClassFlag(u16 teamNum)
 {
@@ -291,6 +292,7 @@ TEST("Selected standalone route scene payloads remain immutable")
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
         ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
         ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,
+        ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE,
     };
     struct RogueAdvPath originalPath;
     struct RogueRouteSceneRequest selected;
@@ -406,10 +408,16 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
         RogueRouteScenes_OnEnterRoute();
         EXPECT_EQ(memcmp(&gRngValue, &standardRngBefore, sizeof(standardRngBefore)), 0);
         EXPECT_EQ(memcmp(&gRngRogueValue, &rogueRngBefore, sizeof(rogueRngBefore)), 0);
+        EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY), 0);
+        EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2), 0);
 
         firstPlan = gRogueAdvPath.rooms[0].routeScenePlan;
         SeedRng(0xEF01);
         SeedRogueRng(0xDCBA);
+        VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+        VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
+        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+        gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
         RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
         RogueRouteScenes_OnEnterRoute();
         EXPECT_EQ(memcmp(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan, sizeof(firstPlan)), 0);
@@ -496,6 +504,13 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
                 }
                 EXPECT_NE(request.rewardItem, ITEM_NONE);
                 EXPECT_NE(request.trainerNum, SPECIES_NONE);
+            }
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE)
+            {
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+                EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_SWIMMER_M);
+                EXPECT_NE(request.rewardItem, ITEM_NONE);
+                EXPECT_NE(request.rewardAmount, 0);
             }
             else
             {
@@ -881,8 +896,8 @@ TEST("Route scene recipes compose bounded unique route objects")
         const u8 *expectedPropScript = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
             ? Rogue_RouteEvent_HexedShrineProp
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutorProp
-            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER
-                || recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? Rogue_RouteEvent_FossilProp
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? Rogue_RouteEvent_AnomalousFossilProp
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? Rogue_RouteEvent_FossilWorkbench
             : Rogue_RouteEvent_Prop;
         u8 count = 3;
         u8 expectedCount = 3;
@@ -920,6 +935,11 @@ TEST("Route scene recipes compose bounded unique route objects")
                 EXPECT_LE(objects[i].y, 79);
                 EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_BATTLE_STATUE);
                 EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_BREAKABLE_ROCK);
+                EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_CUTTABLE_TREE);
+                EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_PUSHABLE_BOULDER);
+                EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_MOVING_BOX);
+                EXPECT(objects[i].graphicsId < OBJ_EVENT_GFX_ROUTE_BUG
+                    || objects[i].graphicsId > OBJ_EVENT_GFX_ROUTE_WATER);
             }
 
         }
@@ -960,21 +980,21 @@ TEST("Semantic route props adapt supplies and camps to every environment")
 {
     static const u16 sExpectedSupplies[ROGUE_ROUTE_ENVIRONMENT_COUNT] =
     {
-        OBJ_EVENT_GFX_BIRCHS_BAG,
-        OBJ_EVENT_GFX_BIRCHS_BAG,
-        OBJ_EVENT_GFX_MOVING_BOX,
-        OBJ_EVENT_GFX_BIRCHS_BAG,
-        OBJ_EVENT_GFX_BIRCHS_BAG,
-        OBJ_EVENT_GFX_MOVING_BOX,
+        OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE,
+        OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE,
+        OBJ_EVENT_GFX_ROUTE_PROP_STORAGE_BARREL,
+        OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE,
+        OBJ_EVENT_GFX_ROUTE_PROP_STORAGE_BARREL,
+        OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE,
     };
     static const u16 sExpectedCamps[ROGUE_ROUTE_ENVIRONMENT_COUNT] =
     {
-        OBJ_EVENT_GFX_BIRCHS_BAG,
-        OBJ_EVENT_GFX_BIRCHS_BAG,
-        OBJ_EVENT_GFX_MOVING_BOX,
-        OBJ_EVENT_GFX_MOVING_BOX,
-        OBJ_EVENT_GFX_BIRCHS_BAG,
-        OBJ_EVENT_GFX_MOVING_BOX,
+        OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE,
+        OBJ_EVENT_GFX_ROUTE_PROP_STUMP,
+        OBJ_EVENT_GFX_ROUTE_PROP_STORAGE_BARREL,
+        OBJ_EVENT_GFX_ROUTE_PROP_STONE_PILE,
+        OBJ_EVENT_GFX_ROUTE_PROP_DRIFTWOOD,
+        OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE,
     };
     struct RogueAdvPath originalPath;
     struct Pokemon originalParty[PARTY_SIZE];
@@ -1063,6 +1083,7 @@ TEST("Route scene layouts stay sparse accessible and locally traversable")
             EXPECT_LE(lot->objectCount, 3);
             EXPECT_NE(lot->terrainMask, 0);
             EXPECT_EQ(lot->terrainMask & ~ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL, 0);
+            EXPECT_EQ(lot->requiredOpenMask & ~0x1FF, 0);
             for(objectIdx = 0; objectIdx < lot->objectCount; ++objectIdx)
             {
                 const struct RogueRouteSceneObjectDefinition *object = &lot->objects[objectIdx];
@@ -1078,6 +1099,7 @@ TEST("Route scene layouts stay sparse accessible and locally traversable")
             }
 
             open = (~occupied) & 0x1FF;
+            EXPECT_EQ(occupied & lot->requiredOpenMask, 0);
             for(objectIdx = 0; objectIdx < lot->objectCount; ++objectIdx)
             {
                 const struct RogueRouteSceneObjectDefinition *object = &lot->objects[objectIdx];
@@ -1165,7 +1187,7 @@ TEST("Declarative route scene visibility drives insertion and restoration")
         if(objects[i].x == 57 && objects[i].y == 77)
         {
             foundConditionalProp = TRUE;
-            EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_BIRCHS_BAG);
+            EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE);
             EXPECT_EQ(objects[i].flagId, 0);
         }
     }
@@ -1277,6 +1299,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
@@ -1292,6 +1315,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(3);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
@@ -1379,9 +1403,16 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
 
     // A new Adventure clears encounter history and permits the family again.
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
-    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
-    RogueRouteScenes_OnEnterRoute();
+    for(seed = 1; seed != 0; ++seed)
+    {
+        gRogueAdvPath.rooms[1].rngSeed = seed;
+        RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
+        RogueRouteScenes_OnEnterRoute();
+        if(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &shrine))
+            break;
+    }
     EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, &shrine));
     EXPECT_EQ(shrine.rewardAmount, ROGUE_HEXED_SHRINE_REWARD_MAX);
 
@@ -1391,6 +1422,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     Rogue_SetCurrentDifficulty(originalDifficulty);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
     RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
     gRogueAdvPath = originalPath;
@@ -1956,6 +1988,9 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
 
 TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
 {
+    const struct RogueRouteRecipeDefinition *offerRecipe = RogueRouteEvents_GetRecipeDefinition(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER);
+    const struct RogueRouteRecipeDefinition *soulRecipe = RogueRouteEvents_GetRecipeDefinition(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS);
+    const struct RogueRouteRecipeDefinition *payoffRecipe = RogueRouteEvents_GetRecipeDefinition(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF);
     struct RogueAdvPath originalPath;
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     struct Pokemon originalEnemyParty[PARTY_SIZE];
@@ -1973,6 +2008,18 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     u8 questId;
     u16 itemId;
     u8 i;
+
+    // Spirit Stone objects identify the three collectible souls only. The
+    // quest giver and final battle must not reuse an indistinguishable prop.
+    EXPECT_EQ(offerRecipe->lots[0].objectCount, 1);
+    EXPECT_EQ(payoffRecipe->lots[0].objectCount, 1);
+    EXPECT_EQ(soulRecipe->lotCount, ROGUE_FORBIDDEN_STONE_SOUL_COUNT);
+    for(i = 0; i < soulRecipe->lotCount; ++i)
+    {
+        EXPECT_EQ(soulRecipe->lots[i].objectCount, 1);
+        EXPECT_EQ(soulRecipe->lots[i].objects[0].graphicsId, ROUTE_SCENE_GFX_SEMANTIC_SPIRIT_STONE);
+        EXPECT_EQ(soulRecipe->lots[i].objects[0].script, Rogue_RouteEvent_ForbiddenStoneSoul);
+    }
 
     memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
     ClearBag();
@@ -2050,7 +2097,7 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
         for(i = 0; i < objectCount; ++i)
         {
             EXPECT_EQ(objects[i].script, Rogue_RouteEvent_ForbiddenStoneSoul);
-            EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_ROUTE_ROCK);
+            EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_ROUTE_PROP_SPIRIT_STONE);
             EXPECT_NE(objects[i].localId, 41);
         }
     }
@@ -2757,6 +2804,42 @@ TEST("Adventure quest runtime packs 64 independent quest records into 512 bytes"
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
 }
 
+TEST("Tide Salvage claims one seeded water reward atomically")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueRouteSceneRequest scene;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
+    u8 originalRoomId;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    ClearBag();
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
+    gRogueAdvPath.rooms[0].rngSeed = 0xA717;
+
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE, &scene));
+    EXPECT_EQ(scene.source, ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF);
+    EXPECT_EQ(scene.primaryGraphicsId, OBJ_EVENT_GFX_SWIMMER_M);
+    EXPECT_NE(scene.rewardItem, ITEM_NONE);
+    EXPECT_NE(scene.rewardAmount, 0);
+    EXPECT(!CheckBagHasItem(scene.rewardItem, scene.rewardAmount));
+
+    SelectPlacement(&scene);
+    RogueRouteEvents_TryClaimTideSalvage();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT(CheckBagHasItem(scene.rewardItem, scene.rewardAmount));
+    EXPECT_EQ(RogueRouteScenes_GetState(scene.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_TIDE_SALVAGE));
+
+    ClearBag();
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+}
+
 TEST("All existing route events are registered through declarative tables")
 {
     static const u8 sExpectedQuestDefinitions[ROGUE_ROUTE_SCENE_RECIPE_COUNT] =
@@ -2785,6 +2868,7 @@ TEST("All existing route events are registered through declarative tables")
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
         ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
         ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,
+        ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE,
     };
     u8 i;
 

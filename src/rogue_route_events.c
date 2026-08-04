@@ -63,11 +63,11 @@ extern const u8 Rogue_RouteEvent_HexedShrine[];
 extern const u8 Rogue_RouteEvent_HexedShrineProp[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilOffer[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilRestoration[];
-extern const u8 Rogue_RouteEvent_FossilProp[];
+extern const u8 Rogue_RouteEvent_AnomalousFossilProp[];
+extern const u8 Rogue_RouteEvent_FossilWorkbench[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneOffer[];
 extern const u8 Rogue_RouteEvent_ForbiddenStoneSoul[];
 extern const u8 Rogue_RouteEvent_ForbiddenStonePayoff[];
-extern const u8 Rogue_RouteEvent_ForbiddenStoneProp[];
 extern const u8 Rogue_RouteEvent_ApricornTree[];
 extern const u8 Rogue_RouteEvent_ApricornArtisan[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
@@ -79,6 +79,7 @@ extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
 extern const u8 Rogue_RouteEvent_BuriedCacheArchaeologist[];
 extern const u8 Rogue_RouteEvent_BuriedCacheSupplies[];
 extern const u8 Rogue_RouteEvent_BuriedCacheSite[];
+extern const u8 Rogue_RouteEvent_TideSalvage[];
 extern const struct Tileset gTileset_General;
 extern const struct Tileset gTileset_GeneralHub;
 
@@ -319,6 +320,12 @@ static bool8 CanShowBuriedCache(u8 roomId)
 {
     (void)roomId;
     return !CheckBagHasItem(ITEM_FIELD_SHOVEL, 1);
+}
+
+static bool8 CanShowTideSalvage(u8 roomId)
+{
+    (void)roomId;
+    return TRUE;
 }
 
 static const u16 sApricornItems[] =
@@ -631,6 +638,52 @@ static void ExpandTravelingMerchantPayload(struct RogueRouteSceneRequest *reques
     request->primaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE;
     request->rewardAmount = ROGUE_SHOP_FLAG_TRAVELING_MERCHANT | payload;
+}
+
+struct TideSalvageReward
+{
+    u16 itemId;
+    u8 count;
+};
+
+static const struct TideSalvageReward sTideSalvageRewards[] =
+{
+    {ITEM_PEARL, 2},
+    {ITEM_BIG_PEARL, 1},
+    {ITEM_STARDUST, 2},
+    {ITEM_HEART_SCALE, 2},
+    {ITEM_DIVE_BALL, 5},
+};
+
+static bool8 SelectTideSalvagePayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    u8 eligible[ARRAY_COUNT(sTideSalvageRewards)];
+    u8 count = 0;
+    u8 i;
+
+    (void)request;
+    for(i = 0; i < ARRAY_COUNT(sTideSalvageRewards); ++i)
+    {
+        if(Rogue_IsItemEnabled(sTideSalvageRewards[i].itemId))
+            eligible[count++] = i;
+    }
+
+    if(count == 0)
+        return FALSE;
+
+    *payload = eligible[RogueRouteSceneRng_Next(rng) % count];
+    return TRUE;
+}
+
+static void ExpandTideSalvagePayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    if(payload >= ARRAY_COUNT(sTideSalvageRewards))
+        return;
+
+    request->primaryGraphicsId = OBJ_EVENT_GFX_SWIMMER_M;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_SWIMMER_M;
+    request->rewardItem = sTideSalvageRewards[payload].itemId;
+    request->rewardAmount = sTideSalvageRewards[payload].count;
 }
 
 static bool8 SelectBreedersExchangePayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
@@ -1873,6 +1926,32 @@ void RogueRouteEvents_FinishTravelingMerchant(void)
     RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
 }
 
+void RogueRouteEvents_TryClaimTideSalvage(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct RogueEventTransaction transaction = {0};
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+        || scene.rewardItem == ITEM_NONE
+        || scene.rewardAmount == 0)
+        return;
+
+    transaction.rewards[0].itemId = scene.rewardItem;
+    transaction.rewards[0].count = scene.rewardAmount;
+    transaction.rewardCount = 1;
+    gSpecialVar_Result = RogueEventTransaction_Execute(&transaction);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        return;
+
+    Rogue_PushPopup_AddItem(scene.rewardItem, scene.rewardAmount);
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+}
+
 static bool8 CreateBreedersExchangeMonForScene(const struct RogueRouteSceneRequest *scene, struct Pokemon *mon)
 {
     struct RoguePokemonCompetitiveSetRules rules =
@@ -2091,7 +2170,7 @@ static const u8 sText_BuriedCacheForestLandmark2[] = _("fallen log");
 static const u8 sText_BuriedCacheCaveLandmark0[] = _("cracked boulder");
 static const u8 sText_BuriedCacheCaveLandmark1[] = _("rubble pile");
 static const u8 sText_BuriedCacheCaveLandmark2[] = _("abandoned crate");
-static const u8 sText_BuriedCacheMountainLandmark0[] = _("cairn");
+static const u8 sText_BuriedCacheMountainLandmark0[] = _("stone pile");
 static const u8 sText_BuriedCacheMountainLandmark1[] = _("split rock");
 static const u8 sText_BuriedCacheMountainLandmark2[] = _("weathered supplies");
 static const u8 sText_BuriedCacheWaterLandmark0[] = _("driftwood");
@@ -2099,7 +2178,7 @@ static const u8 sText_BuriedCacheWaterLandmark1[] = _("washed-up crate");
 static const u8 sText_BuriedCacheWaterLandmark2[] = _("smooth stone");
 static const u8 sText_BuriedCacheUrbanLandmark0[] = _("shipping crate");
 static const u8 sText_BuriedCacheUrbanLandmark1[] = _("barrel");
-static const u8 sText_BuriedCacheUrbanLandmark2[] = _("cracked paving");
+static const u8 sText_BuriedCacheUrbanLandmark2[] = _("street marker");
 
 static const u8 *const sBuriedCacheLandmarkNames[ROGUE_ROUTE_ENVIRONMENT_COUNT][3] =
 {

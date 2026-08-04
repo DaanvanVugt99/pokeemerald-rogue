@@ -932,6 +932,18 @@ const u32 gObjectEventPic_DecorRotomWash[] = INCBIN_U32("graphics/object_events/
 const u32 gObjectEventPic_DecorWardrobe[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_wardrobe.4bpp");
 const u32 gObjectEventPic_DecorCauldren[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_cauldren.4bpp");
 
+const u32 gObjectEventPic_RoutePropSpiritStone[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/spirit_stone.4bpp");
+const u32 gObjectEventPic_RoutePropOccultAltar[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/occult_altar.4bpp");
+const u32 gObjectEventPic_RoutePropSupplyCrate[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/supply_crate.4bpp");
+const u32 gObjectEventPic_RoutePropStorageBarrel[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/storage_barrel.4bpp");
+const u32 gObjectEventPic_RoutePropStump[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/stump.4bpp");
+const u32 gObjectEventPic_RoutePropMossyStone[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/mossy_stone.4bpp");
+const u32 gObjectEventPic_RoutePropStonePile[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/stone_pile.4bpp");
+const u32 gObjectEventPic_RoutePropSplitRock[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/split_rock.4bpp");
+const u32 gObjectEventPic_RoutePropDriftwood[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/driftwood.4bpp");
+const u32 gObjectEventPic_RoutePropDigMound[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/dig_mound.4bpp");
+const u32 gObjectEventPic_RoutePropRoundStone[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/round_stone.4bpp");
+
 const u32 gObjectEventPic_Route_Bug[] = INCBIN_U32("graphics/object_events/pics/rogue/route/bug.4bpp");
 const u32 gObjectEventPic_Route_Dark[] = INCBIN_U32("graphics/object_events/pics/rogue/route/dark.4bpp");
 const u32 gObjectEventPic_Route_Dragon[] = INCBIN_U32("graphics/object_events/pics/rogue/route/dragon.4bpp");

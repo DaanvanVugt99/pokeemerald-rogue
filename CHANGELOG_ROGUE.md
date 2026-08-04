@@ -59,6 +59,8 @@ Format follows Keep a Changelog loosely:
   land scenes no longer spawn on water, current, water-door, ice, or other
   special-movement terrain; special terrain lots are now available for future
   water or ice-specific route events.
+- Added Tide Salvage, the first water-terrain route event, where an in-water
+  NPC offers one seeded salvage reward from a drifting bundle.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.
@@ -110,8 +112,13 @@ Format follows Keep a Changelog loosely:
 - Reworked generated route scenes around sparse, asymmetric compositions and
   environment-aware semantic props. Removed generic battle-statue pillars and
   decorative Rock Smash boulders, kept each lot locally traversable with its
-  focal objects accessible, and replaced Spiritomb soul markers with distinct
-  non-interactive shrine stones.
+  focal objects accessible, and replaced Spiritomb soul markers with a
+  dedicated cracked Spirit Stone. A compact route-prop art set now gives
+  merchants, camps, supplies, dig sites, shrines, and natural landmarks
+  environment-appropriate fixtures without reusing Cut trees, Strength
+  boulders, route-type markers, or cardboard moving boxes. Natural landmarks,
+  supplies, crates, and stumps now use credited public Gen III artwork
+  normalized to Emerald's existing object palettes.
 - Rewrote route-event and Adventure Quest copy with distinct voices for the
   merchant, thief, researchers, Channeler, Ball Maker, Move Tutor, and Dark
   Deal Devil, while retaining concise mechanical guidance and rewards.
@@ -288,7 +295,10 @@ Format follows Keep a Changelog loosely:
 - Limited each generated route-event family to one appearance per Adventure,
   removed accepted quest generators during restoration, corrected Adventure
   Quest book text bounds, and made fossil restoration safely offer a confirmed
-  party replacement without consuming the fossil when cancelled.
+  party replacement without consuming the fossil when cancelled. Spirit Stone
+  markers now appear only for the three collectible souls, static scene props
+  no longer attempt invalid facing animations, and fossil props use
+  context-specific inspection text.
 - Prevented intermittent tilemap corruption when paging left from move
   relearning or replacement into the Pokémon stats summary.
 - Applied changed-type Unique Pokémon palette tinting to party, Day Care, and
