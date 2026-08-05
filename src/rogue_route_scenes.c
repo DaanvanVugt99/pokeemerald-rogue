@@ -3,7 +3,6 @@
 #include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
 #include "constants/flags.h"
-#include "constants/metatile_labels.h"
 #include "constants/rogue_route_events.h"
 #include "constants/rogue_route_scenes.h"
 #include "constants/trainer_types.h"
@@ -11,7 +10,6 @@
 
 #include "event_data.h"
 #include "event_object_movement.h"
-#include "fieldmap.h"
 #include "overworld.h"
 #include "random.h"
 
@@ -26,8 +24,6 @@
 extern const u8 Rogue_RouteEvent_Interact[];
 extern const u8 Rogue_RouteEvent_Prop[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
-extern const struct Tileset gTileset_General;
-extern const struct Tileset gTileset_GeneralHub;
 
 #define ROUTE_SCENE_RECIPE_SHIFT 0
 #define ROUTE_SCENE_RECIPE_MASK  0x3F
@@ -46,11 +42,11 @@ extern const struct Tileset gTileset_GeneralHub;
 #define ROUTE_SCENE_OBJECT_PROP_SHIFT 4
 #define ROUTE_SCENE_OBJECT_PROP_MASK 0x0F
 
-struct RogueRouteLot
+struct RogueRouteSpot
 {
     const struct ObjectEventTemplate *objectEvent;
     u8 id;
-    u8 size;
+    u8 type;
     u8 terrain;
 };
 
@@ -259,8 +255,8 @@ bool8 RogueRouteScenes_IsLotTemplate(const struct ObjectEventTemplate *objectEve
 {
     return objectEvent->script == Rogue_RouteEvent_Interact
         && objectEvent->trainerType == TRAINER_TYPE_NONE
-        && objectEvent->trainerRange_berryTreeId < ROGUE_ROUTE_SCENE_MAX_LOTS
-        && objectEvent->movementRangeX < ROGUE_ROUTE_SCENE_LOT_SIZE_COUNT
+        && objectEvent->trainerRange_berryTreeId < ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS
+        && objectEvent->movementRangeX < ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT
         && objectEvent->movementRangeY < ROGUE_ROUTE_SCENE_TERRAIN_COUNT;
 }
 
@@ -280,10 +276,9 @@ static const struct MapHeader *GetRouteMapHeader(u8 roomId)
         gRogueRouteTable.routes[routeIdx].map.num);
 }
 
-static u8 CollectRouteLots(u8 roomId, struct RogueRouteLot *lots, u8 capacity, u8 *baseObjectCount)
+static u8 CollectRouteSpots(u8 roomId, struct RogueRouteSpot *spots, u8 capacity, u8 *baseObjectCount)
 {
     const struct MapHeader *mapHeader = GetRouteMapHeader(roomId);
-    bool8 seenIds[ROGUE_ROUTE_SCENE_MAX_LOTS] = {FALSE};
     u8 count = 0;
     u8 i;
 
@@ -297,15 +292,12 @@ static u8 CollectRouteLots(u8 roomId, struct RogueRouteLot *lots, u8 capacity, u
 
         if(RogueRouteScenes_IsLotTemplate(objectEvent))
         {
-            u8 lotId = objectEvent->trainerRange_berryTreeId;
-
-            if(lotId < ARRAY_COUNT(seenIds) && count < capacity && !seenIds[lotId])
+            if(count < capacity)
             {
-                lots[count].objectEvent = objectEvent;
-                lots[count].id = lotId;
-                lots[count].size = objectEvent->movementRangeX;
-                lots[count].terrain = objectEvent->movementRangeY;
-                seenIds[lotId] = TRUE;
+                spots[count].objectEvent = objectEvent;
+                spots[count].id = objectEvent->trainerRange_berryTreeId;
+                spots[count].type = objectEvent->movementRangeX;
+                spots[count].terrain = objectEvent->movementRangeY;
                 ++count;
             }
         }
@@ -318,81 +310,61 @@ static u8 CollectRouteLots(u8 roomId, struct RogueRouteLot *lots, u8 capacity, u
     return count;
 }
 
-static bool8 IsLotLayoutTraversable(const struct RogueRouteSceneLotDefinition *lotDefinition)
+static bool8 SpotHasVisiblePairedProp(const struct RogueRouteSceneLotDefinition *lotDefinition)
 {
-    u16 occupied = 0;
-    u16 open;
-    u16 visited = 0;
-    u16 frontier;
     u8 i;
 
-    // Dynamic objects may use the whole authored 3x3 clearing. Keep every
-    // remaining tile connected and every object reachable from a cardinally
-    // adjacent tile, so a recipe cannot create a wall or an inaccessible NPC.
     for(i = 0; i < lotDefinition->objectCount; ++i)
     {
-        const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
-        u16 bit;
-
-        if(abs(object->xOffset) > 1 || abs(object->yOffset) > 1)
-            return FALSE;
-
-        bit = 1 << ((object->yOffset + 1) * 3 + object->xOffset + 1);
-        if(occupied & bit)
-            return FALSE;
-        occupied |= bit;
+        if(lotDefinition->objects[i].propId != 0)
+            return TRUE;
     }
 
-    if((lotDefinition->requiredOpenMask & ~0x1FF) != 0
-        || (occupied & lotDefinition->requiredOpenMask) != 0)
+    return FALSE;
+}
+
+static bool8 HasPairedDecorSpot(const struct RogueRouteSpot *spots, u8 spotCount, u8 groupId, u8 terrainMask)
+{
+    u8 i;
+
+    for(i = 0; i < spotCount; ++i)
+    {
+        if(spots[i].id == groupId
+            && spots[i].type == ROGUE_ROUTE_SCENE_SPOT_DECOR
+            && (terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(spots[i].terrain)) != 0)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 IsSpotRecipeValid(const struct RogueRouteSceneLotDefinition *lotDefinition)
+{
+    u8 i;
+    bool8 hasPrimary = FALSE;
+    u8 propCount = 0;
+
+    if(lotDefinition->objectCount == 0
+        || lotDefinition->objectCount > 2
+        || lotDefinition->spotType >= ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT
+        || (lotDefinition->terrainMask & ~ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL) != 0)
         return FALSE;
 
-    open = (~occupied) & 0x1FF;
     for(i = 0; i < lotDefinition->objectCount; ++i)
     {
-        const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
-        u8 x = object->xOffset + 1;
-        u8 y = object->yOffset + 1;
-        u16 neighbours = 0;
-
-        if(x > 0)
-            neighbours |= 1 << (y * 3 + x - 1);
-        if(x < 2)
-            neighbours |= 1 << (y * 3 + x + 1);
-        if(y > 0)
-            neighbours |= 1 << ((y - 1) * 3 + x);
-        if(y < 2)
-            neighbours |= 1 << ((y + 1) * 3 + x);
-        if((neighbours & open) == 0)
-            return FALSE;
+        if(lotDefinition->objects[i].propId == 0)
+            hasPrimary = TRUE;
+        else
+            ++propCount;
     }
 
-    frontier = open & -open;
-    while(frontier != 0)
-    {
-        u16 next = 0;
+    if(!hasPrimary || propCount > 1)
+        return FALSE;
 
-        visited |= frontier;
-        for(i = 0; i < 9; ++i)
-        {
-            u8 x = i % 3;
-            u8 y = i / 3;
+    if(propCount != 0 && lotDefinition->spotType != ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR)
+        return FALSE;
 
-            if((frontier & (1 << i)) == 0)
-                continue;
-            if(x > 0)
-                next |= 1 << (i - 1);
-            if(x < 2)
-                next |= 1 << (i + 1);
-            if(y > 0)
-                next |= 1 << (i - 3);
-            if(y < 2)
-                next |= 1 << (i + 3);
-        }
-        frontier = next & open & ~visited;
-    }
-
-    return visited == open;
+    return TRUE;
 }
 
 static bool8 AddRecipeToPlan(
@@ -402,15 +374,15 @@ static bool8 AddRecipeToPlan(
     u8 recipeId,
     u8 ownerQuestId,
     u32 payload,
-    const struct RogueRouteLot *lots,
-    u8 lotCount,
-    u16 *usedLots,
+    const struct RogueRouteSpot *spots,
+    u8 spotCount,
+    u16 *usedSpotGroups,
     u8 *usedObjects,
     u8 objectBudget,
     struct RogueRouteSceneRng *rng)
 {
     const struct RogueRouteRecipeDefinition *definition = RogueRouteEvents_GetRecipeDefinition(recipeId);
-    u16 pendingUsedLots = *usedLots;
+    u16 pendingUsedSpotGroups = *usedSpotGroups;
     u8 selectedLots[ROGUE_ROUTE_SCENE_MAX_ROLES];
     u8 pendingObjects = *usedObjects;
     u8 role;
@@ -427,14 +399,16 @@ static bool8 AddRecipeToPlan(
         u8 selected;
         u8 i;
 
-        if(!IsLotLayoutTraversable(lotDefinition))
+        if(!IsSpotRecipeValid(lotDefinition))
             return FALSE;
 
-        for(i = 0; i < lotCount; ++i)
+        for(i = 0; i < spotCount; ++i)
         {
-            if((pendingUsedLots & (1 << lots[i].id)) == 0
-                && lots[i].size >= lotDefinition->minimumSize
-                && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(lots[i].terrain)) != 0)
+            if((pendingUsedSpotGroups & (1 << spots[i].id)) == 0
+                && spots[i].type == lotDefinition->spotType
+                && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(spots[i].terrain)) != 0
+                && (!SpotHasVisiblePairedProp(lotDefinition)
+                    || HasPairedDecorSpot(spots, spotCount, spots[i].id, lotDefinition->terrainMask)))
                 ++eligibleCount;
         }
 
@@ -442,15 +416,17 @@ static bool8 AddRecipeToPlan(
             return FALSE;
 
         selected = RogueRouteSceneRng_Next(rng) % eligibleCount;
-        for(i = 0; i < lotCount; ++i)
+        for(i = 0; i < spotCount; ++i)
         {
-            if((pendingUsedLots & (1 << lots[i].id)) == 0
-                && lots[i].size >= lotDefinition->minimumSize
-                && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(lots[i].terrain)) != 0
+            if((pendingUsedSpotGroups & (1 << spots[i].id)) == 0
+                && spots[i].type == lotDefinition->spotType
+                && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(spots[i].terrain)) != 0
+                && (!SpotHasVisiblePairedProp(lotDefinition)
+                    || HasPairedDecorSpot(spots, spotCount, spots[i].id, lotDefinition->terrainMask))
                 && selected-- == 0)
             {
-                selectedLots[role] = lots[i].id;
-                pendingUsedLots |= 1 << lots[i].id;
+                selectedLots[role] = spots[i].id;
+                pendingUsedSpotGroups |= 1 << spots[i].id;
                 break;
             }
         }
@@ -471,7 +447,7 @@ static bool8 AddRecipeToPlan(
         ++*placementCount;
     }
 
-    *usedLots = pendingUsedLots;
+    *usedSpotGroups = pendingUsedSpotGroups;
     *usedObjects = pendingObjects;
     return TRUE;
 }
@@ -514,11 +490,11 @@ static bool8 SelectRecipePayload(u8 roomId, u8 recipeId, u8 sceneSlot, u32 *payl
 static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
 {
     struct RogueRouteSceneRequest questRequests[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS] = {0};
-    struct RogueRouteLot lots[ROGUE_ROUTE_SCENE_MAX_LOTS];
+    struct RogueRouteSpot spots[ROGUE_ROUTE_SCENE_MAX_SPOTS];
     bool8 usedFallbackRecipes[ROGUE_ROUTE_SCENE_RECIPE_COUNT] = {FALSE};
     bool8 usedFallbackFamilies[ROGUE_ROUTE_SCENE_RECIPE_COUNT] = {FALSE};
     struct RogueRouteSceneRng rng;
-    u16 usedLots = 0;
+    u16 usedSpotGroups = 0;
     u8 baseObjectCount;
     u8 objectBudget;
     u8 usedObjects = 0;
@@ -527,12 +503,12 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
     u8 targetPlacements;
     u8 fallbackCount = RogueRouteEvents_GetFallbackCount();
     u8 questCount;
-    u8 lotCount;
+    u8 spotCount;
     u8 i;
 
     memset(plan, 0, sizeof(*plan));
-    lotCount = CollectRouteLots(roomId, lots, ARRAY_COUNT(lots), &baseObjectCount);
-    if(lotCount == 0 || baseObjectCount >= OBJECT_EVENT_TEMPLATES_COUNT)
+    spotCount = CollectRouteSpots(roomId, spots, ARRAY_COUNT(spots), &baseObjectCount);
+    if(spotCount == 0 || baseObjectCount >= OBJECT_EVENT_TEMPLATES_COUNT)
         return;
 
     objectBudget = OBJECT_EVENT_TEMPLATES_COUNT - baseObjectCount;
@@ -554,9 +530,9 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             questRequests[i].recipeId,
             questRequests[i].ownerQuestId,
             0,
-            lots,
-            lotCount,
-            &usedLots,
+            spots,
+            spotCount,
+            &usedSpotGroups,
             &usedObjects,
             objectBudget,
             &rng))
@@ -623,9 +599,9 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
                     fallback->recipeId,
                     ROGUE_ADVENTURE_QUEST_INVALID_ID,
                     payload,
-                    lots,
-                    lotCount,
-                    &usedLots,
+                    spots,
+                    spotCount,
+                    &usedSpotGroups,
                     &usedObjects,
                     objectBudget,
                     &rng))
@@ -847,33 +823,11 @@ void RogueRouteScenes_OnExitRoute(void)
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
 }
 
-static u8 FindFreeLocalId(const struct ObjectEventTemplate *objectEvents, u8 objectEventCount)
-{
-    u8 localId;
-    u8 i;
-
-    for(localId = 1; localId < OBJ_EVENT_ID_CAMERA; ++localId)
-    {
-        for(i = 0; i < objectEventCount; ++i)
-        {
-            if(objectEvents[i].localId == localId)
-                break;
-        }
-
-        if(i == objectEventCount)
-            return localId;
-    }
-
-    return 0;
-}
-
 static void AppendSceneObject(
     struct ObjectEventTemplate *objectEvents,
     u8 *objectEventCount,
-    const struct ObjectEventTemplate *anchor,
+    const struct ObjectEventTemplate *spot,
     u8 localId,
-    s8 xOffset,
-    s8 yOffset,
     u16 graphicsId,
     const u8 *script,
     u16 objectData,
@@ -884,10 +838,10 @@ static void AppendSceneObject(
     memset(objectEvent, 0, sizeof(*objectEvent));
     objectEvent->localId = localId;
     objectEvent->graphicsId = graphicsId;
-    objectEvent->x = anchor->x + xOffset;
-    objectEvent->y = anchor->y + yOffset;
-    objectEvent->elevation = anchor->elevation;
-    objectEvent->movementType = MOVEMENT_TYPE_FACE_DOWN;
+    objectEvent->x = spot->x;
+    objectEvent->y = spot->y;
+    objectEvent->elevation = spot->elevation;
+    objectEvent->movementType = spot->movementType;
     objectEvent->trainerType = TRAINER_TYPE_NONE;
     objectEvent->trainerRange_berryTreeId = objectData;
     objectEvent->script = script;
@@ -1064,10 +1018,8 @@ static bool8 IsSceneObjectVisible(
 static bool8 RestoreSceneObject(
     struct ObjectEventTemplate *objectEvents,
     u8 objectEventCount,
-    const struct ObjectEventTemplate *anchor,
+    const struct ObjectEventTemplate *spot,
     u8 localId,
-    s8 xOffset,
-    s8 yOffset,
     u16 graphicsId,
     const u8 *script,
     u16 objectData,
@@ -1080,18 +1032,18 @@ static bool8 RestoreSceneObject(
         struct ObjectEventTemplate *objectEvent = &objectEvents[i];
 
         if(objectEvent->localId == localId
-            && objectEvent->x == anchor->x + xOffset
-            && objectEvent->y == anchor->y + yOffset)
+            && objectEvent->x == spot->x
+            && objectEvent->y == spot->y)
         {
             u8 preservedLocalId = objectEvent->localId;
 
             memset(objectEvent, 0, sizeof(*objectEvent));
             objectEvent->localId = preservedLocalId;
             objectEvent->graphicsId = graphicsId;
-            objectEvent->x = anchor->x + xOffset;
-            objectEvent->y = anchor->y + yOffset;
-            objectEvent->elevation = anchor->elevation;
-            objectEvent->movementType = MOVEMENT_TYPE_FACE_DOWN;
+            objectEvent->x = spot->x;
+            objectEvent->y = spot->y;
+            objectEvent->elevation = spot->elevation;
+            objectEvent->movementType = spot->movementType;
             objectEvent->trainerType = TRAINER_TYPE_NONE;
             objectEvent->trainerRange_berryTreeId = objectData;
             objectEvent->script = script;
@@ -1106,9 +1058,7 @@ static bool8 RestoreSceneObject(
 static void RestoreSceneProp(
     struct ObjectEventTemplate *objectEvents,
     u8 objectEventCount,
-    const struct ObjectEventTemplate *anchor,
-    s8 xOffset,
-    s8 yOffset,
+    const struct ObjectEventTemplate *spot,
     u16 graphicsId,
     const u8 *script,
     u16 objectData,
@@ -1121,13 +1071,45 @@ static void RestoreSceneProp(
         const struct ObjectEventTemplate *objectEvent = &objectEvents[i];
 
         if(objectEvent->graphicsId == graphicsId
-            && objectEvent->x == anchor->x + xOffset
-            && objectEvent->y == anchor->y + yOffset)
+            && objectEvent->x == spot->x
+            && objectEvent->y == spot->y)
         {
-            RestoreSceneObject(objectEvents, objectEventCount, anchor, objectEvent->localId, xOffset, yOffset, graphicsId, script, objectData, flagId);
+            RestoreSceneObject(objectEvents, objectEventCount, spot, objectEvent->localId, graphicsId, script, objectData, flagId);
             return;
         }
     }
+}
+
+static const struct ObjectEventTemplate *FindRouteSceneSpot(
+    const struct ObjectEventTemplate *objectEvents,
+    u8 objectEventCount,
+    u8 groupId,
+    u8 spotType)
+{
+    u8 i;
+
+    for(i = 0; i < objectEventCount; ++i)
+    {
+        if(RogueRouteScenes_IsLotTemplate(&objectEvents[i])
+            && objectEvents[i].trainerRange_berryTreeId == groupId
+            && objectEvents[i].movementRangeX == spotType)
+            return &objectEvents[i];
+    }
+
+    return NULL;
+}
+
+static const struct ObjectEventTemplate *GetSceneObjectSpot(
+    const struct ObjectEventTemplate *spots,
+    u8 spotCount,
+    const struct RogueRouteSceneRequest *scene,
+    const struct RogueRouteSceneLotDefinition *lotDefinition,
+    const struct RogueRouteSceneObjectDefinition *object)
+{
+    if(object->propId == 0)
+        return FindRouteSceneSpot(spots, spotCount, scene->lotId, lotDefinition->spotType);
+
+    return FindRouteSceneSpot(spots, spotCount, scene->lotId, ROGUE_ROUTE_SCENE_SPOT_DECOR);
 }
 
 void RogueRouteScenes_RestoreObjectEvents(
@@ -1142,7 +1124,6 @@ void RogueRouteScenes_RestoreObjectEvents(
     {
         struct RogueRouteSceneRequest scene;
         const struct RogueRouteSceneLotDefinition *lotDefinition;
-        const struct ObjectEventTemplate *lot = NULL;
         u8 i;
 
         if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
@@ -1152,24 +1133,20 @@ void RogueRouteScenes_RestoreObjectEvents(
         if(lotDefinition == NULL)
             continue;
 
-        for(i = 0; i < baseObjectEventCount; ++i)
-        {
-            if(RogueRouteScenes_IsLotTemplate(&baseObjectEvents[i])
-                && baseObjectEvents[i].trainerRange_berryTreeId == scene.lotId)
-            {
-                lot = &baseObjectEvents[i];
-                break;
-            }
-        }
-
-        if(lot == NULL)
-            continue;
-
         for(i = 0; i < lotDefinition->objectCount; ++i)
         {
             const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
+            const struct ObjectEventTemplate *spot = GetSceneObjectSpot(
+                baseObjectEvents,
+                baseObjectEventCount,
+                &scene,
+                lotDefinition,
+                object);
             u16 graphicsId = ResolveSceneObjectGraphics(&scene, object);
             u16 flagId = 0;
+
+            if(spot == NULL)
+                continue;
 
             if(!IsSceneObjectVisible(&scene, object))
             {
@@ -1182,10 +1159,8 @@ void RogueRouteScenes_RestoreObjectEvents(
                 RestoreSceneObject(
                     objectEvents,
                     objectEventCount,
-                    lot,
-                    lot->localId,
-                    object->xOffset,
-                    object->yOffset,
+                    spot,
+                    spot->localId,
                     graphicsId,
                     object->script,
                     PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
@@ -1196,9 +1171,7 @@ void RogueRouteScenes_RestoreObjectEvents(
                 RestoreSceneProp(
                     objectEvents,
                     objectEventCount,
-                    lot,
-                    object->xOffset,
-                    object->yOffset,
+                    spot,
                     graphicsId,
                     object->script,
                     PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
@@ -1210,8 +1183,8 @@ void RogueRouteScenes_RestoreObjectEvents(
 
 void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvents, u8 *objectEventCount, u8 objectEventCapacity)
 {
-    struct ObjectEventTemplate lots[ROGUE_ROUTE_SCENE_MAX_LOTS];
-    bool8 foundLots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {FALSE};
+    struct ObjectEventTemplate spots[ROGUE_ROUTE_SCENE_MAX_SPOTS];
+    u8 spotCount = 0;
     u8 originalCount = *objectEventCount;
     u8 write = 0;
     u8 requiredCount = 0;
@@ -1222,9 +1195,8 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
     {
         if(RogueRouteScenes_IsLotTemplate(&objectEvents[i]))
         {
-            u8 lotId = objectEvents[i].trainerRange_berryTreeId;
-            lots[lotId] = objectEvents[i];
-            foundLots[lotId] = TRUE;
+            if(spotCount < ARRAY_COUNT(spots))
+                spots[spotCount++] = objectEvents[i];
         }
         else
         {
@@ -1260,15 +1232,11 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
     {
         struct RogueRouteSceneRequest scene;
         const struct RogueRouteSceneLotDefinition *lotDefinition;
-        const struct ObjectEventTemplate *lot;
         u8 objectIdx;
 
-        if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene)
-            || scene.lotId >= ARRAY_COUNT(lots)
-            || !foundLots[scene.lotId])
+        if(!RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
             continue;
 
-        lot = &lots[scene.lotId];
         lotDefinition = GetSceneLotDefinition(&scene);
         if(lotDefinition == NULL)
             continue;
@@ -1276,21 +1244,20 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
         for(objectIdx = 0; objectIdx < lotDefinition->objectCount; ++objectIdx)
         {
             const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[objectIdx];
-            u8 localId;
+            const struct ObjectEventTemplate *spot;
 
             if(!IsSceneObjectVisible(&scene, object))
                 continue;
 
-            localId = object->propId == 0
-                ? lot->localId
-                : FindFreeLocalId(objectEvents, *objectEventCount);
+            spot = GetSceneObjectSpot(spots, spotCount, &scene, lotDefinition, object);
+            if(spot == NULL)
+                continue;
+
             AppendSceneObject(
                 objectEvents,
                 objectEventCount,
-                lot,
-                localId,
-                object->xOffset,
-                object->yOffset,
+                spot,
+                spot->localId,
                 ResolveSceneObjectGraphics(&scene, object),
                 object->script,
                 PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
@@ -1299,60 +1266,6 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
     }
 }
 
-static void ApplyAccentMetatile(const struct ObjectEventTemplate *anchor, s8 xOffset, s8 yOffset)
-{
-    s16 x = anchor->x + xOffset;
-    s16 y = anchor->y + yOffset;
-    u16 metatile;
-
-    if(x < 0 || y < 0 || x >= gMapHeader.mapLayout->width || y >= gMapHeader.mapLayout->height)
-        return;
-
-    metatile = MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET);
-    if(gMapHeader.mapLayout->primaryTileset == &gTileset_General && metatile == METATILE_General_Grass)
-        MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, METATILE_General_Grass_Stone);
-    else if(gMapHeader.mapLayout->primaryTileset == &gTileset_GeneralHub && metatile == METATILE_GeneralHub_Grass)
-        MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, METATILE_GeneralHub_Pebbles);
-}
-
 void RogueRouteScenes_ApplyMetatiles(void)
 {
-    const struct ObjectEventTemplate *lots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {NULL};
-    u8 i;
-
-    if(gRogueAdvPath.currentRoomType != ADVPATH_ROOM_ROUTE)
-        return;
-
-    for(i = 0; i < gMapHeader.events->objectEventCount; ++i)
-    {
-        const struct ObjectEventTemplate *objectEvent = &gMapHeader.events->objectEvents[i];
-
-        if(RogueRouteScenes_IsLotTemplate(objectEvent))
-            lots[objectEvent->trainerRange_berryTreeId] = objectEvent;
-    }
-
-    for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
-    {
-        struct RogueRouteSceneRequest scene;
-        const struct RogueRouteSceneLotDefinition *lotDefinition;
-        const struct ObjectEventTemplate *lot;
-        u8 accentIdx;
-
-        if(!RogueRouteScenes_GetPlacementRequest(i, &scene)
-            || scene.lotId >= ARRAY_COUNT(lots)
-            || (lot = lots[scene.lotId]) == NULL)
-            continue;
-
-        lotDefinition = GetSceneLotDefinition(&scene);
-        if(lotDefinition == NULL)
-            continue;
-
-        for(accentIdx = 0; accentIdx < lotDefinition->accentCount; ++accentIdx)
-        {
-            ApplyAccentMetatile(
-                lot,
-                lotDefinition->accents[accentIdx].xOffset,
-                lotDefinition->accents[accentIdx].yOffset);
-        }
-    }
 }

@@ -82,28 +82,17 @@ struct RogueRouteSceneObjectDefinition
 {
     const u8 *script;
     u16 graphicsId;
-    s8 xOffset;
-    s8 yOffset;
     u8 propId;
     u8 visibleStateMask;
     u8 flags;
 };
 
-struct RogueRouteSceneAccentDefinition
-{
-    s8 xOffset;
-    s8 yOffset;
-};
-
 struct RogueRouteSceneLotDefinition
 {
     const struct RogueRouteSceneObjectDefinition *objects;
-    const struct RogueRouteSceneAccentDefinition *accents;
     u8 objectCount;
-    u8 accentCount;
-    u8 minimumSize;
+    u8 spotType;
     u8 terrainMask;
-    u16 requiredOpenMask;
 };
 
 struct RogueRouteRecipeDefinition

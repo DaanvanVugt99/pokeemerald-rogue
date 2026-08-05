@@ -46,14 +46,17 @@ Format follows Keep a Changelog loosely:
   similarly powered Pokémon with a coherent trained set and three perfect
   IVs; players can preview the offer, choose the exact partner to trade, and
   recover its held item safely. A once-per-Adventure Buried Cache event now
-  occupies three lots on one route: an archaeologist lends a route-local Field
+  occupies three exact event spots on one route: an archaeologist lends a route-local Field
   Shovel and a two-trait clue, while two environment-themed landmarks conceal
   either the cache or a recoverable wild ambush. Ancient, Trainer, relic, and
-  rare Charm caches provide distinct seeded reward classes. Active routes
-  expose eight small, medium, and large scene lots; the director independently
-  fills one to three lots so quest consumers and unrelated route events can
-  coexist. The per-room scene plan is packed into less memory than the former
-  single-scene descriptor. Route-event item and money exchanges now use a
+  rare Charm caches provide distinct seeded reward classes. Active routes now
+  expose Porymap-visible typed exact spots for NPCs, NPC-plus-decor scenes,
+  decor-only nodes, and plant patches instead of reserving generic 3×3 lots;
+  the director independently claims one to three spot groups so quest
+  consumers and unrelated route events can coexist while using sparse,
+  map-authored coordinates and facing. The per-room scene plan is packed into
+  less memory than the former single-scene descriptor. Route-event item and
+  money exchanges now use a
   shared stack-local atomic transaction layer with reusable rollback support.
 - Added terrain tags to route-scene lots and recipe placement rules so ordinary
   land scenes no longer spawn on water, current, water-door, ice, or other

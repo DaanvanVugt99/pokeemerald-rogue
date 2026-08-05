@@ -50,7 +50,6 @@ extern const u8 Rogue_RouteEvent_StolenTradeCaseCamp[];
 extern const u8 Rogue_RouteEvent_StolenTradeCasePayoff[];
 extern const u8 Rogue_RouteEvent_Prop[];
 extern const u8 Rogue_RouteEvent_HexedShrine[];
-extern const u8 Rogue_RouteEvent_HexedShrineProp[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilOffer[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilRestoration[];
 extern const u8 Rogue_RouteEvent_AnomalousFossilProp[];
@@ -194,12 +193,23 @@ static void SetupCurrentEvent(struct RogueAdvPath *originalPath, u8 *originalRoo
     gRogueRun.adventureRoomId = 0;
 }
 
-static void ExpectRouteScenePlansEqual(const struct RogueRouteScenePlan *a, const struct RogueRouteScenePlan *b)
+static void ClearAdventureQuestSlotsForRouteTest(void)
 {
     u8 i;
 
-    for(i = 0; i < ARRAY_COUNT(a->placements); ++i)
-        EXPECT_EQ(a->placements[i].packed, b->placements[i].packed);
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
+    {
+        gRogueRun.adventureQuests[i].definitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_NONE;
+        gRogueRun.adventureQuests[i].sceneRoomId = ROGUE_ADVENTURE_QUEST_INVALID_ROOM;
+    }
+}
+
+static void ExpectRouteScenePlansEqual(const struct RogueRouteScenePlan *a, const struct RogueRouteScenePlan *b)
+{
+    EXPECT_EQ(a->placements[0].packed, b->placements[0].packed);
+    EXPECT_EQ(a->placements[1].packed, b->placements[1].packed);
+    EXPECT_EQ(a->placements[2].packed, b->placements[2].packed);
 }
 
 static bool8 GetPlacementByRecipe(u8 recipeId, struct RogueRouteSceneRequest *request)
@@ -367,12 +377,14 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
 {
     struct RogueAdvPath originalPath;
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    static struct RogueRunData originalRun;
+    static struct RogueRunData baseRun;
     struct Pokemon originalParty[PARTY_SIZE];
-    struct RogueRouteScenePlan firstPlan;
     RAND_TYPE originalRogueRng = gRngRogueValue;
     RAND_TYPE originalStandardRng = gRngValue;
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
+    u16 originalDifficulty = Rogue_GetCurrentDifficulty();
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
     u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
@@ -386,13 +398,16 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     RAND_TYPE rogueRngBefore;
     RAND_TYPE standardRngBefore;
 
+    originalRun = gRogueRun;
     SetupCurrentEvent(&originalPath, &originalRoomId);
     memcpy(originalParty, gPlayerParty, sizeof(originalParty));
     memset(gPlayerParty, 0, sizeof(gPlayerParty));
     CreateMon(&gPlayerParty[0], SPECIES_MAGIKARP, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
     gPlayerPartyCount = 1;
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
-    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    memset(&gRogueRun, 0, sizeof(gRogueRun));
+    gRogueRun.adventureRoomId = 0;
+    ClearAdventureQuestSlotsForRouteTest();
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
@@ -400,13 +415,19 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
+    gRogueRun.routeSceneRoomId = 1;
+    Rogue_SetCurrentDifficulty(2);
+    baseRun = gRogueRun;
 
     for(seed = 1; seed <= 96; ++seed)
     {
+        gRogueRun = baseRun;
+        ClearAdventureQuestSlotsForRouteTest();
+        FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+        FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
         VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
         VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
         gRogueAdvPath.rooms[0].rngSeed = seed;
-        gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
         SeedRng(0x2468);
         SeedRogueRng(0x1357);
@@ -419,16 +440,6 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
         EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY), 0);
         EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2), 0);
 
-        firstPlan = gRogueAdvPath.rooms[0].routeScenePlan;
-        SeedRng(0xEF01);
-        SeedRogueRng(0xDCBA);
-        VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
-        VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
-        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
-        gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
-        RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
-        RogueRouteScenes_OnEnterRoute();
-        ExpectRouteScenePlansEqual(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan);
         EXPECT_GE(RogueRouteScenes_GetPlacementCount(), 1);
         EXPECT_LE(RogueRouteScenes_GetPlacementCount(), ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
 
@@ -549,12 +560,14 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     gRogueRun.teamEncounterNum = originalTeamNum;
     gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
+    Rogue_SetCurrentDifficulty(originalDifficulty);
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
     RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
+    gRogueRun = originalRun;
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
     gRngRogueValue = originalRogueRng;
@@ -647,11 +660,12 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         {
             struct ObjectEventTemplate objects[8] =
             {
-                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
-                {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 2, .script = Rogue_RouteEvent_Interact},
+                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 11, .y = 9, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+                {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 2, .script = Rogue_RouteEvent_Interact},
             };
-            u8 count = 3;
+            u8 count = 4;
             u8 archaeologistCount = 0;
             u8 suppliesCount = 0;
             u8 siteCount = 0;
@@ -673,6 +687,21 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
             EXPECT_EQ(archaeologistCount, 1);
             EXPECT_EQ(suppliesCount, 1);
             EXPECT_EQ(siteCount, 2);
+            for(i = 0; i < count; ++i)
+            {
+                if(objects[i].script == Rogue_RouteEvent_BuriedCacheArchaeologist)
+                {
+                    EXPECT_EQ(objects[i].localId, 41);
+                    EXPECT_EQ(objects[i].x, 10);
+                    EXPECT_EQ(objects[i].y, 10);
+                }
+                else if(objects[i].script == Rogue_RouteEvent_BuriedCacheSupplies)
+                {
+                    EXPECT_EQ(objects[i].localId, 44);
+                    EXPECT_EQ(objects[i].x, 11);
+                    EXPECT_EQ(objects[i].y, 9);
+                }
+            }
         }
 
         SelectPlacement(&siteA);
@@ -747,7 +776,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
-TEST("Route events provide clear typed lots on every classified active route")
+TEST("Route events provide typed exact spots on every classified active route")
 {
     u8 routeIdx;
 
@@ -757,9 +786,10 @@ TEST("Route events provide clear typed lots on every classified active route")
         const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(route->map.group, route->map.num);
         const struct MapLayout *mapLayout = mapHeader->mapLayout;
         const struct MapEvents *events = mapHeader->events;
-        const struct ObjectEventTemplate *lots[ROGUE_ROUTE_SCENE_MAX_LOTS] = {0};
-        u8 lotCount = 0;
-        u8 standardLotCount = 0;
+        bool8 hasDecorPair[ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS] = {FALSE};
+        u16 groupMask = 0;
+        u8 spotCount = 0;
+        u8 typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT] = {0};
         u8 baseObjectCount = 0;
         u8 objectIdx;
 
@@ -772,87 +802,69 @@ TEST("Route events provide clear typed lots on every classified active route")
 
             if(RogueRouteScenes_IsLotTemplate(object))
             {
-                u16 lotId = object->trainerRange_berryTreeId;
-                EXPECT_LT(lotId, ROGUE_ROUTE_SCENE_MAX_LOTS);
-                EXPECT_EQ(lots[lotId], NULL);
-                lots[lotId] = object;
-                ++lotCount;
+                u16 groupId = object->trainerRange_berryTreeId;
+                u16 block;
+
+                EXPECT_LT(groupId, ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS);
+                EXPECT_LT((u8)object->movementRangeX, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+                EXPECT_LT((u8)object->movementRangeY, ROGUE_ROUTE_SCENE_TERRAIN_COUNT);
+                EXPECT_GE(object->x, 0);
+                EXPECT_GE(object->y, 0);
+                EXPECT_LT(object->x, mapLayout->width);
+                EXPECT_LT(object->y, mapLayout->height);
+                EXPECT_NE(object->localId, 0);
+
+                block = mapLayout->map[object->y * mapLayout->width + object->x];
+                EXPECT_EQ((block & MAPGRID_ELEVATION_MASK) >> MAPGRID_ELEVATION_SHIFT, object->elevation);
                 if(object->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_LAND
                     || object->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_CAVE)
-                    ++standardLotCount;
+                    EXPECT(!IsTerrainForbiddenForNormalRouteLot(GetRouteTestMetatileBehavior(mapLayout, block)));
+
+                groupMask |= 1 << groupId;
+                ++spotCount;
+                ++typedSpotCounts[object->movementRangeX];
+                if(object->movementRangeX == ROGUE_ROUTE_SCENE_SPOT_DECOR)
+                    hasDecorPair[groupId] = TRUE;
             }
             else
                 ++baseObjectCount;
         }
 
-        EXPECT_GE(lotCount, 5);
-        EXPECT_LE(lotCount, 10);
-        EXPECT_GE(standardLotCount, ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
+        EXPECT_GE(spotCount, 8);
+        EXPECT_LE(spotCount, ROGUE_ROUTE_SCENE_MAX_SPOTS);
+        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR], 3);
+        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_DECOR], 2);
+        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH], 1);
+        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_NPC], 1);
         EXPECT_LE(baseObjectCount + ROGUE_ROUTE_SCENE_MAX_PLACEMENTS * 4, OBJECT_EVENT_TEMPLATES_COUNT);
 
-        for(objectIdx = 0; objectIdx < ROGUE_ROUTE_SCENE_MAX_LOTS; ++objectIdx)
+        for(objectIdx = 0; objectIdx < events->objectEventCount; ++objectIdx)
         {
-            const struct ObjectEventTemplate *lot = lots[objectIdx];
-            s16 firstOffset;
-            s16 lastOffset;
-            u8 size;
-            s16 x;
-            s16 y;
+            const struct ObjectEventTemplate *spot = &events->objectEvents[objectIdx];
             u8 otherIdx;
             u8 warpIdx;
 
-            if(lot == NULL)
+            if(!RogueRouteScenes_IsLotTemplate(spot))
                 continue;
 
-            size = lot->movementRangeX + 2;
-            firstOffset = -(size / 2);
-            lastOffset = firstOffset + size - 1;
-            EXPECT_GE(lot->x + firstOffset, 0);
-            EXPECT_GE(lot->y + firstOffset, 0);
-            EXPECT_LT(lot->x + lastOffset, mapLayout->width);
-            EXPECT_LT(lot->y + lastOffset, mapLayout->height);
-
-            for(y = lot->y + firstOffset; y <= lot->y + lastOffset; ++y)
-            {
-                for(x = lot->x + firstOffset; x <= lot->x + lastOffset; ++x)
-                {
-                    u16 block = mapLayout->map[y * mapLayout->width + x];
-                    u8 behavior = GetRouteTestMetatileBehavior(mapLayout, block);
-
-                    EXPECT_EQ(block & MAPGRID_COLLISION_MASK, 0);
-                    EXPECT_EQ((block & MAPGRID_ELEVATION_MASK) >> MAPGRID_ELEVATION_SHIFT, lot->elevation);
-                    if(lot->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_LAND
-                        || lot->movementRangeY == ROGUE_ROUTE_SCENE_TERRAIN_CAVE)
-                        EXPECT(!IsTerrainForbiddenForNormalRouteLot(behavior));
-                }
-            }
+            if(spot->movementRangeX == ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR)
+                EXPECT(hasDecorPair[spot->trainerRange_berryTreeId]);
 
             for(otherIdx = 0; otherIdx < events->objectEventCount; ++otherIdx)
             {
                 const struct ObjectEventTemplate *other = &events->objectEvents[otherIdx];
-                if(other != lot && !RogueRouteScenes_IsLotTemplate(other))
-                    EXPECT(other->x < lot->x + firstOffset || other->x > lot->x + lastOffset
-                        || other->y < lot->y + firstOffset || other->y > lot->y + lastOffset);
-                else if(other != lot)
-                {
-                    u8 otherSize = other->movementRangeX + 2;
-                    s16 otherFirst = -(otherSize / 2);
-                    s16 otherLast = otherFirst + otherSize - 1;
-
-                    EXPECT(lot->x + lastOffset < other->x + otherFirst
-                        || other->x + otherLast < lot->x + firstOffset
-                        || lot->y + lastOffset < other->y + otherFirst
-                        || other->y + otherLast < lot->y + firstOffset);
-                }
+                if(other != spot)
+                    EXPECT(other->x != spot->x || other->y != spot->y);
             }
 
             for(warpIdx = 0; warpIdx < events->warpCount; ++warpIdx)
             {
                 const struct WarpEvent *warp = &events->warps[warpIdx];
-                EXPECT(warp->x < lot->x + firstOffset || warp->x > lot->x + lastOffset
-                    || warp->y < lot->y + firstOffset || warp->y > lot->y + lastOffset);
+                EXPECT(warp->x != spot->x || warp->y != spot->y);
             }
         }
+
+        EXPECT_NE(groupMask, 0);
     }
 }
 
@@ -884,14 +896,18 @@ TEST("Route scene recipes compose bounded unique route objects")
         struct RogueRouteSceneRequest request;
         const struct ObjectEventTemplate baseObjects[] =
         {
-            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+            {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_NPC : ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 57, .y = 77, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
         };
         struct ObjectEventTemplate objects[8] =
         {
             {.localId = 1, .graphicsId = OBJ_EVENT_GFX_BOY_1, .x = 2, .y = 2},
             baseObjects[0],
             baseObjects[1],
+            baseObjects[2],
+            baseObjects[3],
         };
         const u8 *expectedScript = recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER ? Rogue_RouteEvent_StolenTradeCaseOffer
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP ? Rogue_RouteEvent_StolenTradeCaseCamp
@@ -901,14 +917,13 @@ TEST("Route scene recipes compose bounded unique route objects")
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutor
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT ? Rogue_RouteEvent_TravelingMerchant
             : Rogue_RouteEvent_AnomalousFossilRestoration;
-        const u8 *expectedPropScript = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE
-            ? Rogue_RouteEvent_HexedShrineProp
+        const u8 *expectedPropScript = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? NULL
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutorProp
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? Rogue_RouteEvent_AnomalousFossilProp
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? Rogue_RouteEvent_FossilWorkbench
             : Rogue_RouteEvent_Prop;
-        u8 count = 3;
-        u8 expectedCount = 3;
+        u8 count = 5;
+        u8 expectedCount = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? 2 : 3;
         u8 i;
         u8 j;
         u8 npcCount = 0;
@@ -934,13 +949,12 @@ TEST("Route scene recipes compose bounded unique route objects")
                 EXPECT_EQ(objects[i].y, 78);
                 EXPECT_EQ(objects[i].graphicsId, request.primaryGraphicsId);
             }
-            else if(objects[i].script == expectedPropScript)
+            else if(expectedPropScript != NULL && objects[i].script == expectedPropScript)
             {
                 ++propCount;
-                EXPECT_GE(objects[i].x, 55);
-                EXPECT_LE(objects[i].x, 57);
-                EXPECT_GE(objects[i].y, 77);
-                EXPECT_LE(objects[i].y, 79);
+                EXPECT_EQ(objects[i].localId, 43);
+                EXPECT_EQ(objects[i].x, 57);
+                EXPECT_EQ(objects[i].y, 77);
                 EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_BATTLE_STATUE);
                 EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_BREAKABLE_ROCK);
                 EXPECT_NE(objects[i].graphicsId, OBJ_EVENT_GFX_CUTTABLE_TREE);
@@ -953,14 +967,14 @@ TEST("Route scene recipes compose bounded unique route objects")
         }
 
         EXPECT_EQ(npcCount, 1);
-        EXPECT_EQ(propCount, 1);
+        EXPECT_EQ(propCount, expectedPropScript == NULL ? 0 : 1);
 
         // Save loading refreshes authored scripts by local ID. This used to
         // turn the NPC back into an inert anchor and could give props unrelated
         // scripts, including when a prop reused the other anchor's ID.
         for(i = 0; i < count; ++i)
         {
-            if(objects[i].script == expectedScript || objects[i].script == expectedPropScript)
+            if(objects[i].script == expectedScript || (expectedPropScript != NULL && objects[i].script == expectedPropScript))
                 objects[i].script = Rogue_RouteEvent_Interact;
         }
 
@@ -971,11 +985,11 @@ TEST("Route scene recipes compose bounded unique route objects")
         {
             if(objects[i].script == expectedScript)
                 ++npcCount;
-            else if(objects[i].script == expectedPropScript)
+            else if(expectedPropScript != NULL && objects[i].script == expectedPropScript)
                 ++propCount;
         }
         EXPECT_EQ(npcCount, 1);
-        EXPECT_EQ(propCount, 1);
+        EXPECT_EQ(propCount, expectedPropScript == NULL ? 0 : 1);
     }
 
     gRogueAdvPath = originalPath;
@@ -1036,13 +1050,14 @@ TEST("Semantic route props adapt supplies and camps to every environment")
 
         for(recipeIdx = 0; recipeIdx < ARRAY_COUNT(sRecipes); ++recipeIdx)
         {
-            struct ObjectEventTemplate objects[3] =
+            struct ObjectEventTemplate objects[4] =
             {
-                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
             };
             const u8 *propScript = recipeIdx == 0 ? Rogue_RouteEvent_Prop : Rogue_RouteEvent_UnboundTutorProp;
             u16 expectedGraphics = recipeIdx == 0 ? sExpectedSupplies[environment] : sExpectedCamps[environment];
-            u8 count = 1;
+            u8 count = 2;
             u8 i;
             bool8 foundProp = FALSE;
 
@@ -1055,8 +1070,9 @@ TEST("Semantic route props adapt supplies and camps to every environment")
                 {
                     foundProp = TRUE;
                     EXPECT_EQ(objects[i].graphicsId, expectedGraphics);
-                    EXPECT_EQ(objects[i].x, 11);
-                    EXPECT_EQ(objects[i].y, 35);
+                    EXPECT_EQ(objects[i].localId, 42);
+                    EXPECT_EQ(objects[i].x, 13);
+                    EXPECT_EQ(objects[i].y, 33);
                 }
             }
             EXPECT(foundProp);
@@ -1069,7 +1085,7 @@ TEST("Semantic route props adapt supplies and camps to every environment")
     gPlayerPartyCount = originalPartyCount;
 }
 
-TEST("Route scene layouts stay sparse accessible and locally traversable")
+TEST("Route scene spot recipes stay sparse and typed")
 {
     u8 recipeId;
 
@@ -1081,77 +1097,31 @@ TEST("Route scene layouts stay sparse accessible and locally traversable")
         EXPECT(recipe != NULL);
         for(role = 0; role < recipe->lotCount; ++role)
         {
-            const struct RogueRouteSceneLotDefinition *lot = &recipe->lots[role];
-            u16 occupied = 0;
-            u16 open;
-            u16 visited = 0;
-            u16 frontier;
+            const struct RogueRouteSceneLotDefinition *spot = &recipe->lots[role];
+            bool8 hasPrimary = FALSE;
+            u8 propCount = 0;
             u8 objectIdx;
 
-            EXPECT_LE(lot->objectCount, 3);
-            EXPECT_NE(lot->terrainMask, 0);
-            EXPECT_EQ(lot->terrainMask & ~ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL, 0);
-            EXPECT_EQ(lot->requiredOpenMask & ~0x1FF, 0);
-            for(objectIdx = 0; objectIdx < lot->objectCount; ++objectIdx)
+            EXPECT_LE(spot->objectCount, 2);
+            EXPECT_LT(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+            EXPECT_NE(spot->terrainMask, 0);
+            EXPECT_EQ(spot->terrainMask & ~ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL, 0);
+            for(objectIdx = 0; objectIdx < spot->objectCount; ++objectIdx)
             {
-                const struct RogueRouteSceneObjectDefinition *object = &lot->objects[objectIdx];
+                const struct RogueRouteSceneObjectDefinition *object = &spot->objects[objectIdx];
 
-                EXPECT_GE(object->xOffset, -1);
-                EXPECT_LE(object->xOffset, 1);
-                EXPECT_GE(object->yOffset, -1);
-                EXPECT_LE(object->yOffset, 1);
                 EXPECT_NE(object->graphicsId, OBJ_EVENT_GFX_BATTLE_STATUE);
                 EXPECT_NE(object->graphicsId, OBJ_EVENT_GFX_BREAKABLE_ROCK);
-                EXPECT_EQ(occupied & (1 << ((object->yOffset + 1) * 3 + object->xOffset + 1)), 0);
-                occupied |= 1 << ((object->yOffset + 1) * 3 + object->xOffset + 1);
+                if(object->propId == 0)
+                    hasPrimary = TRUE;
+                else
+                    ++propCount;
             }
 
-            open = (~occupied) & 0x1FF;
-            EXPECT_EQ(occupied & lot->requiredOpenMask, 0);
-            for(objectIdx = 0; objectIdx < lot->objectCount; ++objectIdx)
-            {
-                const struct RogueRouteSceneObjectDefinition *object = &lot->objects[objectIdx];
-                u8 x = object->xOffset + 1;
-                u8 y = object->yOffset + 1;
-                u16 neighbours = 0;
-
-                if(x > 0)
-                    neighbours |= 1 << (y * 3 + x - 1);
-                if(x < 2)
-                    neighbours |= 1 << (y * 3 + x + 1);
-                if(y > 0)
-                    neighbours |= 1 << ((y - 1) * 3 + x);
-                if(y < 2)
-                    neighbours |= 1 << ((y + 1) * 3 + x);
-                EXPECT_NE(neighbours & open, 0);
-            }
-
-            frontier = open & -open;
-            while(frontier != 0)
-            {
-                u16 next = 0;
-                u8 cell;
-
-                visited |= frontier;
-                for(cell = 0; cell < 9; ++cell)
-                {
-                    u8 x = cell % 3;
-                    u8 y = cell / 3;
-
-                    if((frontier & (1 << cell)) == 0)
-                        continue;
-                    if(x > 0)
-                        next |= 1 << (cell - 1);
-                    if(x < 2)
-                        next |= 1 << (cell + 1);
-                    if(y > 0)
-                        next |= 1 << (cell - 3);
-                    if(y < 2)
-                        next |= 1 << (cell + 3);
-                }
-                frontier = next & open & ~visited;
-            }
-            EXPECT_EQ(visited, open);
+            EXPECT(hasPrimary);
+            EXPECT_LE(propCount, 1);
+            if(propCount != 0)
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR);
         }
     }
 }
@@ -1162,19 +1132,23 @@ TEST("Declarative route scene visibility drives insertion and restoration")
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     const struct ObjectEventTemplate baseObjects[] =
     {
-        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 57, .y = 77, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
     };
     struct ObjectEventTemplate objects[8] =
     {
         {.localId = 1, .graphicsId = OBJ_EVENT_GFX_BOY_1, .x = 2, .y = 2},
         baseObjects[0],
         baseObjects[1],
+        baseObjects[2],
+        baseObjects[3],
     };
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u8 originalRoomId;
     bool8 originalHidden = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
-    u8 count = 3;
+    u8 count = 5;
     u8 i;
     bool8 foundConditionalProp;
 
@@ -1195,6 +1169,7 @@ TEST("Declarative route scene visibility drives insertion and restoration")
         if(objects[i].x == 57 && objects[i].y == 77)
         {
             foundConditionalProp = TRUE;
+            EXPECT_EQ(objects[i].localId, 43);
             EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE);
             EXPECT_EQ(objects[i].flagId, 0);
         }
@@ -1211,6 +1186,7 @@ TEST("Declarative route scene visibility drives insertion and restoration")
         if(objects[i].x == 57 && objects[i].y == 77)
         {
             foundConditionalProp = TRUE;
+            EXPECT_EQ(objects[i].localId, 43);
             EXPECT_EQ(objects[i].flagId, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
         }
     }
@@ -1221,7 +1197,9 @@ TEST("Declarative route scene visibility drives insertion and restoration")
     objects[0] = (struct ObjectEventTemplate){.localId = 1, .graphicsId = OBJ_EVENT_GFX_BOY_1, .x = 2, .y = 2};
     objects[1] = baseObjects[0];
     objects[2] = baseObjects[1];
-    count = 3;
+    objects[3] = baseObjects[2];
+    objects[4] = baseObjects[3];
+    count = 5;
     RogueRouteScenes_ModifyObjectEvents(objects, &count, ARRAY_COUNT(objects));
     EXPECT_EQ(count, 2);
     for(i = 0; i < count; ++i)
@@ -1234,19 +1212,16 @@ TEST("Declarative route scene visibility drives insertion and restoration")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
-TEST("Route scene metatiles stay bounded compatible and idempotent")
+TEST("Route scene spots do not paint broad metatile accents")
 {
     struct RogueAdvPath originalPath;
     struct BackupMapLayout originalBackup = gBackupMapLayout;
     struct MapHeader originalHeader = gMapHeader;
     const struct RogueRouteMap *routeMap = &gRogueRouteTable.routes[0].map;
     const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(routeMap->group, routeMap->num);
-    const struct ObjectEventTemplate *anchor = NULL;
     u8 originalRoomId;
     u32 cellCount;
     u32 i;
-    u16 x;
-    u16 y;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
     SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
@@ -1258,38 +1233,9 @@ TEST("Route scene metatiles stay bounded compatible and idempotent")
     for(i = 0; i < cellCount; ++i)
         sBackupMapData[i] = METATILE_General_Grass | (3 << MAPGRID_ELEVATION_SHIFT);
 
-    for(i = 0; i < mapHeader->events->objectEventCount; ++i)
-    {
-        if(RogueRouteScenes_IsLotTemplate(&mapHeader->events->objectEvents[i])
-            && mapHeader->events->objectEvents[i].trainerRange_berryTreeId == 0)
-            anchor = &mapHeader->events->objectEvents[i];
-    }
-    EXPECT_NE(anchor, NULL);
-    x = anchor->x + MAP_OFFSET;
-    y = anchor->y + MAP_OFFSET;
-
     RogueRouteScenes_ApplyMetatiles();
-    EXPECT_EQ(MapGridGetMetatileIdAt(x - 1, y - 1), METATILE_General_Grass_Stone);
-    EXPECT_EQ(MapGridGetMetatileIdAt(x + 1, y - 1), METATILE_General_Grass);
-    EXPECT_EQ(MapGridGetMetatileIdAt(x - 1, y), METATILE_General_Grass);
-    EXPECT_EQ(MapGridGetMetatileIdAt(x, y), METATILE_General_Grass);
-    EXPECT_EQ(MapGridGetElevationAt(x - 1, y - 1), 3);
-
-    RogueRouteScenes_ApplyMetatiles();
-    EXPECT_EQ(MapGridGetMetatileIdAt(x - 1, y - 1), METATILE_General_Grass_Stone);
-
-    MapGridSetMetatileIdAt(x - 1, y - 1, METATILE_General_TallGrass);
-    RogueRouteScenes_ApplyMetatiles();
-    EXPECT_EQ(MapGridGetMetatileIdAt(x - 1, y - 1), METATILE_General_TallGrass);
-
     for(i = 0; i < cellCount; ++i)
-        sBackupMapData[i] = METATILE_General_Grass | (3 << MAPGRID_ELEVATION_SHIFT);
-    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
-    RogueRouteScenes_ApplyMetatiles();
-    EXPECT_EQ(MapGridGetMetatileIdAt(x + 1, y + 1), METATILE_General_Grass_Stone);
-    EXPECT_EQ(MapGridGetMetatileIdAt(x - 1, y - 1), METATILE_General_Grass);
-    EXPECT_EQ(MapGridGetMetatileIdAt(x + 1, y), METATILE_General_Grass);
-    EXPECT_EQ(MapGridGetMetatileIdAt(x, y - 1), METATILE_General_Grass);
+        EXPECT_EQ(sBackupMapData[i], METATILE_General_Grass | (3 << MAPGRID_ELEVATION_SHIFT));
 
     gBackupMapLayout = originalBackup;
     gMapHeader = originalHeader;
@@ -1716,13 +1662,14 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     struct RogueRouteSceneRequest exchange;
     struct ObjectEventTemplate objects[5] =
     {
-        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
     };
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
-    u8 count = 1;
+    u8 count = 2;
     bool8 foundBreeder = FALSE;
     bool8 foundPokemon = FALSE;
     u8 i;
@@ -1763,7 +1710,7 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
 
     RogueRouteScenes_SetState(exchange.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     EXPECT(!RogueRouteScenes_IsFollowMonSlotReserved(1));
-    count = 1;
+    count = 2;
     objects[0] = (struct ObjectEventTemplate)
     {
         .localId = 41,
@@ -1771,7 +1718,19 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
         .x = 12,
         .y = 34,
         .elevation = 3,
-        .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM,
+        .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR,
+        .trainerType = TRAINER_TYPE_NONE,
+        .trainerRange_berryTreeId = 0,
+        .script = Rogue_RouteEvent_Interact,
+    };
+    objects[1] = (struct ObjectEventTemplate)
+    {
+        .localId = 42,
+        .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE,
+        .x = 13,
+        .y = 33,
+        .elevation = 3,
+        .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR,
         .trainerType = TRAINER_TYPE_NONE,
         .trainerRange_berryTreeId = 0,
         .script = Rogue_RouteEvent_Interact,
@@ -2094,9 +2053,9 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     {
         struct ObjectEventTemplate objects[3] =
         {
-            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[0].lotId, .script = Rogue_RouteEvent_Interact},
-            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[1].lotId, .script = Rogue_RouteEvent_Interact},
-            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_SMALL, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[2].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[0].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[1].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[2].lotId, .script = Rogue_RouteEvent_Interact},
         };
         u8 objectCount = ARRAY_COUNT(objects);
 
@@ -2211,13 +2170,14 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     struct RogueRouteSceneRequest artisan;
     struct ObjectEventTemplate objects[6] =
     {
-        {.localId = 40, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_LOT_MEDIUM, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 40, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 21, .y = 19, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
     };
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
-    u8 objectCount = 2;
+    u8 objectCount = 3;
     u8 questId;
     u16 apricorn;
     u16 ball;
@@ -2249,7 +2209,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     EXPECT_NE(grove.rewardItem, grove.trainerNum);
 
     RogueRouteScenes_ModifyObjectEvents(objects, &objectCount, ARRAY_COUNT(objects));
-    EXPECT_EQ(objectCount, 5);
+    EXPECT_EQ(objectCount, 3);
     for(i = 0; i < objectCount; ++i)
     {
         u8 j;
@@ -2263,7 +2223,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
         else if(objects[i].script == Rogue_RouteEvent_ApricornProp)
             ++propCount;
     }
-    EXPECT_EQ(treeCount, ROGUE_APRICORN_CHOICE_COUNT);
+    EXPECT_EQ(treeCount, 1);
     EXPECT_EQ(artisanCount, 1);
     EXPECT_EQ(propCount, 1);
 
