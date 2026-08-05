@@ -22,8 +22,6 @@ The following graphics are adapted from sheets in
 
 - `stump.png`: `Daisy Route.png` — Idilio, Heroalistar, Ekat, Zeo, Zein,
   J-Treecko252, 874521, The Red-Ex, Kyledove, Magiscarf, and Wesley FG.
-- `supply_crate.png`: `Cold Storage Interior.png` — Ekat, Vurtax, and
-  Heartlessdragoon.
 - `mossy_stone.png`, `round_stone.png`, and `stone_pile.png`: `More Ruins
   Tiles.png` — Ekat, Vurtax, and Heartlessdragoon.
 
@@ -49,3 +47,6 @@ exactly to native GBA scale before palette remapping.
 The remaining files in this directory are project-specific graphics created
 for Pokémon Emerald Rogue: Divergence. The Spirit Stone was designed as the
 distinct non-interactive marker for the Forbidden Stone quest.
+
+`supply_crate.png` reuses the repository's native moving-box object art so it
+shares the established Gen III object palette and silhouette.
