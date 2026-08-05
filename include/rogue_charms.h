@@ -76,7 +76,7 @@ u16 GetCurseValue(u8 effectType);
 
 void Rogue_RemoveCharmsFromBag(void);
 void Rogue_RemoveCursesFromBag(void);
-void Rogue_AddTemporaryDarkDealCurse(u16 itemId);
+bool8 Rogue_AddTemporaryDarkDealCurse(u16 itemId);
 bool8 Rogue_TryAddTemporaryDarkDealCurse(u16 itemId);
 bool8 Rogue_CanActivateTemporaryDarkDealCurse(u16 itemId);
 bool8 Rogue_TryActivateTemporaryDarkDealCurse(u16 itemId);

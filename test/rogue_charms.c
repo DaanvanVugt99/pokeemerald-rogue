@@ -305,3 +305,30 @@ TEST("charms: curses - Dark Deals offer exactly seventeen temporary battle curse
     EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_EVERSTONE_EVOS));
     EXPECT(!Rogue_IsCurseAvailableForDarkDeal(EFFECT_RANDOMAN_ROUTE_SPAWN));
 }
+
+TEST("charms: curses - temporary Dark Deal replacement preserves the old curse on failure")
+{
+    u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
+    u16 oldItemId = Rogue_SelectDarkDealCurseItem(0);
+    u16 newItemId = Rogue_SelectDarkDealCurseItem(1);
+
+    ClearBag();
+    gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+    EXPECT(Rogue_TryAddTemporaryDarkDealCurse(oldItemId));
+    EXPECT(CheckBagHasItem(oldItemId, 1));
+    EXPECT_EQ(gRogueRun.temporaryDarkDealCurseItem, oldItemId);
+
+    EXPECT(!Rogue_AddTemporaryDarkDealCurse(ITEM_POTION));
+    EXPECT(CheckBagHasItem(oldItemId, 1));
+    EXPECT(!CheckBagHasItem(ITEM_POTION, 1));
+    EXPECT_EQ(gRogueRun.temporaryDarkDealCurseItem, oldItemId);
+
+    EXPECT(Rogue_AddTemporaryDarkDealCurse(newItemId));
+    EXPECT(!CheckBagHasItem(oldItemId, 1));
+    EXPECT(CheckBagHasItem(newItemId, 1));
+    EXPECT_EQ(gRogueRun.temporaryDarkDealCurseItem, newItemId);
+
+    Rogue_ClearTemporaryDarkDealCurse();
+    gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
+    ClearBag();
+}

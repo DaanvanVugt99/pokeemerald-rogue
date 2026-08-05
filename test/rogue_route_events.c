@@ -2598,12 +2598,12 @@ TEST("Adventure quest registry reschedules skipped Stolen Trade Case nodes fairl
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
 
-    for(i = 0; i < 20; ++i)
+    for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
     {
         gRogueRun.adventureRoomId = i;
         EXPECT_EQ(RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE, &params), i);
     }
-    EXPECT_EQ(RogueAdventureQuests_GetCount(), 20);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), ROGUE_ADVENTURE_QUEST_CAPACITY);
 
     EXPECT(RogueAdventureQuests_TryCollectSceneRequest(30, &request, &priority));
     EXPECT_EQ(request.ownerQuestId, 0);
@@ -2615,7 +2615,7 @@ TEST("Adventure quest registry reschedules skipped Stolen Trade Case nodes fairl
     EXPECT(RogueAdventureQuests_TryCollectSceneRequest(31, &request, &priority));
     EXPECT_EQ(request.ownerQuestId, 1);
     EXPECT_EQ(RogueAdventureQuests_GetState(1), ROGUE_ADVENTURE_QUEST_STATE_READY);
-    EXPECT_EQ(RogueAdventureQuests_GetCount(), 20);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), ROGUE_ADVENTURE_QUEST_CAPACITY);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     gRogueRun.adventureRoomId = originalRoomId;
@@ -2764,7 +2764,7 @@ TEST("Adventure quest node signals update progress and complete only their targe
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
 }
 
-TEST("Adventure quest runtime packs 64 independent quest records into 512 bytes")
+TEST("Adventure quest runtime packs independent quest records into a compact run buffer")
 {
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     struct RogueAdventureQuestCreateParams params = {0};
@@ -2772,7 +2772,7 @@ TEST("Adventure quest runtime packs 64 independent quest records into 512 bytes"
 
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
-    EXPECT_EQ((u32)sizeof(gRogueRun.adventureQuests), 512);
+    EXPECT_EQ((u32)sizeof(gRogueRun.adventureQuests), ROGUE_ADVENTURE_QUEST_CAPACITY * 8);
 
     for(i = 0; i < ROGUE_ADVENTURE_QUEST_CAPACITY; ++i)
     {

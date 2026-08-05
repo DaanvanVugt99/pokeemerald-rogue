@@ -1050,6 +1050,8 @@ static void ExpandBuriedCachePayload(struct RogueRouteSceneRequest *request, u32
 #include "data/rogue_route_scene_recipes.h"
 #include "data/rogue_route_event_definitions.h"
 
+STATIC_ASSERT(ROGUE_ROUTE_FAMILY_COUNT <= ROGUE_ROUTE_FAMILY_HISTORY_PER_VAR * 2, RogueRouteEventFamilyHistoryCapacity);
+
 const struct RogueRouteRecipeDefinition *RogueRouteEvents_GetRecipeDefinition(u8 recipeId)
 {
     if(recipeId == ROGUE_ROUTE_SCENE_RECIPE_NONE
@@ -1075,7 +1077,7 @@ u8 RogueRouteEvents_GetFallbackCount(void)
 
 static bool8 GetFamilyHistoryLocation(u8 familyId, bool8 completed, u16 *varId, u16 *bit)
 {
-    if(familyId >= ROGUE_ROUTE_FAMILY_COUNT)
+    if(familyId >= ROGUE_ROUTE_FAMILY_COUNT || familyId >= ROGUE_ROUTE_FAMILY_HISTORY_PER_VAR * 2)
         return FALSE;
 
     *varId = familyId < ROGUE_ROUTE_FAMILY_HISTORY_PER_VAR

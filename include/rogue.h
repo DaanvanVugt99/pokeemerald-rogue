@@ -360,7 +360,7 @@ struct RogueRunData
     bool8 rivalHasShiny : 1;
 };
 
-STATIC_ASSERT(sizeof(((struct RogueRunData *)0)->adventureQuests) == 512, SizeOfAdventureQuestRuntime);
+STATIC_ASSERT(sizeof(((struct RogueRunData *)0)->adventureQuests) == ROGUE_ADVENTURE_QUEST_CAPACITY * 8, SizeOfAdventureQuestRuntime);
 
 struct RogueHubArea
 {

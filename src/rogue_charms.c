@@ -457,12 +457,43 @@ void Rogue_RemoveCursesFromBag(void)
     }
 }
 
-void Rogue_AddTemporaryDarkDealCurse(u16 itemId)
+static bool8 IsTemporaryDarkDealCurseItem(u16 itemId)
 {
-    if(gRogueRun.temporaryDarkDealCurseItem != ITEM_NONE)
-        Rogue_ClearTemporaryDarkDealCurse();
+    u8 effectType;
 
-    Rogue_TryAddTemporaryDarkDealCurse(itemId);
+    if(itemId == ITEM_NONE)
+        return FALSE;
+
+    for(effectType = 0; effectType < EFFECT_COUNT; ++effectType)
+    {
+        if(Rogue_IsCurseAvailableForDarkDeal(effectType) && EffectToCurseItem(effectType) == itemId)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 Rogue_AddTemporaryDarkDealCurse(u16 itemId)
+{
+    u16 oldItemId = gRogueRun.temporaryDarkDealCurseItem;
+
+    if(oldItemId == ITEM_NONE)
+        return Rogue_TryAddTemporaryDarkDealCurse(itemId);
+
+    if(!IsTemporaryDarkDealCurseItem(itemId) || !RemoveBagItem(oldItemId, 1))
+        return FALSE;
+
+    Rogue_PushPopup_LostItem(oldItemId, 1);
+    gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+    RecalcCharmCurseValues();
+
+    if(Rogue_TryAddTemporaryDarkDealCurse(itemId))
+        return TRUE;
+
+    if(AddBagItem(oldItemId, 1))
+        Rogue_TryActivateTemporaryDarkDealCurse(oldItemId);
+
+    return FALSE;
 }
 
 bool8 Rogue_TryAddTemporaryDarkDealCurse(u16 itemId)
