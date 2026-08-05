@@ -150,7 +150,7 @@ script Rogue_RouteEvent_BuriedCacheSite
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
-        msgbox(format("The shovel strikes a sealed {STR_VAR_3}. Its contents survived the years intact!"))
+        msgbox(format("The shovel strikes a sealed cache.\pType: {STR_VAR_3}\nIts contents survived the years intact!"))
     }
     else
     {
@@ -341,8 +341,8 @@ script Rogue_RouteEvent_BreedersExchange
 
     copyvar(VAR_0x8007, VAR_0x8004)
     copyvar(VAR_0x8009, VAR_0x8005)
-    msgbox(format("This {STR_VAR_1} has grown restless on the road.\pI think it needs a Trainer who battles a little differently.\pIf you caught a {STR_VAR_2} around here, I could make you a trade."))
-    msgbox(format("Would you like a closer look at {STR_VAR_1}?"), MSGBOX_YESNO)
+    msgbox(format("{STR_VAR_1} has grown restless on the road.\pI think it needs a Trainer who battles a little differently.\pIf you caught {STR_VAR_2} around here, I could make you a trade."))
+    msgbox(format("Would you like a closer look? Pokémon: {STR_VAR_1}"), MSGBOX_YESNO)
     if(var(VAR_RESULT) == YES)
     {
         special(RogueRouteEvents_ShowBreedersExchangePreview)
@@ -351,7 +351,7 @@ script Rogue_RouteEvent_BreedersExchange
 
     bufferspeciesname(STR_VAR_1, VAR_0x8007)
     bufferspeciesname(STR_VAR_2, VAR_0x8009)
-    msgbox(format("Trade a {STR_VAR_2} for this {STR_VAR_1}?"), MSGBOX_YESNO)
+    msgbox(format("Trade your {STR_VAR_2} for {STR_VAR_1}?"), MSGBOX_YESNO)
     if(var(VAR_RESULT) == NO)
     {
         msgbox(format("No pressure. A new partner is worth thinking over."))
@@ -373,7 +373,7 @@ script Rogue_RouteEvent_BreedersExchange
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_MON)
     {
         bufferspeciesname(STR_VAR_1, VAR_0x8009)
-        msgbox(format("I'm only looking for a {STR_VAR_1} from this route."))
+        msgbox(format("I'm only looking for {STR_VAR_1} from this route."))
         release
         end
     }
@@ -516,7 +516,7 @@ script Rogue_RouteEvent_AnomalousFossilOffer
 
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
-        msgbox(format("I've never seen a {STR_VAR_2} this well preserved! There's a {STR_VAR_1} inside, and its genetic pattern is extraordinary.\pA colleague farther ahead may be able to revive it as a Rare Unique Pokémon. Will you take it?"), MSGBOX_YESNO)
+        msgbox(format("I've never seen a fossil this well preserved!\pLabel: {STR_VAR_2}\nSpecies trace: {STR_VAR_1}\pA colleague farther ahead may be able to revive it as a Rare Unique Pokémon. Will you take it?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
         {
             special(RogueRouteEvents_TryAcceptAnomalousFossilQuest)
@@ -524,7 +524,7 @@ script Rogue_RouteEvent_AnomalousFossilOffer
             {
                 playfanfare(MUS_OBTAIN_ITEM)
                 waitfanfare
-                msgbox(format("You received the unusual {STR_VAR_2}.\pTake it to the fossil researcher farther along the road—and be gentle with it!"))
+                msgbox(format("You received the fossil: {STR_VAR_2}.\pTake it to the fossil researcher farther along the road—and be gentle with it!"))
             }
             else
             {
@@ -859,7 +859,7 @@ script Rogue_RouteEvent_ApricornTree
         }
         else
         {
-            msgbox(format("A plump {STR_VAR_1} sways from the branch. A Ball Maker could turn it into five {STR_VAR_2}.\pPick this Apricorn?"), MSGBOX_YESNO)
+            msgbox(format("This ripe Apricorn sways from the branch.\pColor: {STR_VAR_1}\nA Ball Maker could turn it into five {STR_VAR_2}.\pPick this Apricorn?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueRouteEvents_TryChooseApricorn)
@@ -918,7 +918,7 @@ script Rogue_RouteEvent_ApricornArtisan
         }
         else
         {
-            msgbox(format("Now that's a fine {STR_VAR_1}! I can shape it into five {STR_VAR_2}.\pShall I get to work?"), MSGBOX_YESNO)
+            msgbox(format("That {STR_VAR_1} is in fine shape! I can turn it into five {STR_VAR_2}.\pShall I get to work?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueRouteEvents_TryCraftApricornBalls)
@@ -941,7 +941,7 @@ script Rogue_RouteEvent_ApricornArtisan
             }
             else
             {
-                msgbox(format("No hurry. A good {STR_VAR_1} knows how to wait."))
+                msgbox(format("No hurry. That {STR_VAR_1} can wait a little longer."))
             }
         }
     }
@@ -1058,7 +1058,7 @@ script Rogue_RouteEvent_StolenTradeCasePayoff
     }
     else
     {
-        msgbox(format("Let me see... If that's my Trade Case, then your reward is ready: a {STR_VAR_1} and ¥5,000."))
+        msgbox(format("Let me see... If that's my Trade Case, then your reward is ready.\pReward: {STR_VAR_1} and ¥5,000."))
         special(RogueRouteEvents_TryClaimStolenTradeCaseReward)
         if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         {

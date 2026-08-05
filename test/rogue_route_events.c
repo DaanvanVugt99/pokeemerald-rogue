@@ -194,6 +194,14 @@ static void SetupCurrentEvent(struct RogueAdvPath *originalPath, u8 *originalRoo
     gRogueRun.adventureRoomId = 0;
 }
 
+static void ExpectRouteScenePlansEqual(const struct RogueRouteScenePlan *a, const struct RogueRouteScenePlan *b)
+{
+    u8 i;
+
+    for(i = 0; i < ARRAY_COUNT(a->placements); ++i)
+        EXPECT_EQ(a->placements[i].packed, b->placements[i].packed);
+}
+
 static bool8 GetPlacementByRecipe(u8 recipeId, struct RogueRouteSceneRequest *request)
 {
     u8 i;
@@ -333,7 +341,7 @@ TEST("Selected standalone route scene payloads remain immutable")
         FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
         RogueRouteScenes_OnEnterRoute();
 
-        EXPECT_EQ(memcmp(&gRogueAdvPath.rooms[0].routeScenePlan, &selectedPlan, sizeof(selectedPlan)), 0);
+        ExpectRouteScenePlansEqual(&gRogueAdvPath.rooms[0].routeScenePlan, &selectedPlan);
         EXPECT(RogueRouteScenes_GetPlacementRequest(0, &restored));
         EXPECT_EQ(memcmp(&restored, &selected, sizeof(selected)), 0);
 
@@ -420,7 +428,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
         gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
         RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
         RogueRouteScenes_OnEnterRoute();
-        EXPECT_EQ(memcmp(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan, sizeof(firstPlan)), 0);
+        ExpectRouteScenePlansEqual(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan);
         EXPECT_GE(RogueRouteScenes_GetPlacementCount(), 1);
         EXPECT_LE(RogueRouteScenes_GetPlacementCount(), ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
 
@@ -2670,7 +2678,7 @@ TEST("Route director composes three pending quest consumers and preserves them o
     firstPlan = gRogueAdvPath.rooms[0].routeScenePlan;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
-    EXPECT_EQ(memcmp(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan, sizeof(firstPlan)), 0);
+    ExpectRouteScenePlansEqual(&firstPlan, &gRogueAdvPath.rooms[0].routeScenePlan);
     EXPECT_EQ((u8)gRogueRun.adventureQuests[3].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
