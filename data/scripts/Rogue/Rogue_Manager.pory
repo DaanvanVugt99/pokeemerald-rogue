@@ -150,6 +150,7 @@ script Rogue_RouteEvent_BuriedCacheSite
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
+        special(RogueRouteEvents_BufferBuriedCacheData)
         msgbox(format("The shovel strikes a sealed cache.\pType: {STR_VAR_3}\nIts contents survived the years intact!"))
     }
     else
@@ -818,6 +819,7 @@ script Rogue_RouteEvent_ForbiddenStoneGiveReward
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
+        bufferitemname(STR_VAR_1, ITEM_ABILITY_PATCH)
         msgbox(format("The seal is strong again. You've done more than I could ask. Please—take this {STR_VAR_1} and ¥10,000."))
     }
     else
@@ -925,6 +927,7 @@ script Rogue_RouteEvent_ApricornArtisan
                 if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
                 {
                     call(Rogue_Common_DisplayPopups)
+                    bufferitemname(STR_VAR_2, VAR_0x8004)
                     msgbox(format("There we are! Five {STR_VAR_2}, made by hand and ready for adventure."))
                 }
                 else
