@@ -1145,14 +1145,17 @@ TEST("Declarative route scene visibility drives insertion and restoration")
         baseObjects[2],
         baseObjects[3],
     };
+    struct ObjectEventTemplate originalSavedTemplates[OBJECT_EVENT_TEMPLATES_COUNT];
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u8 originalRoomId;
+    u8 originalSavedCount = gSaveBlock1Ptr->objectEventTemplatesCount;
     bool8 originalHidden = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     u8 count = 5;
     u8 i;
     bool8 foundConditionalProp;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalSavedTemplates, gSaveBlock1Ptr->objectEventTemplates, sizeof(originalSavedTemplates));
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     gRogueRun.adventureQuests[0].definitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE;
@@ -1175,6 +1178,21 @@ TEST("Declarative route scene visibility drives insertion and restoration")
         }
     }
     EXPECT(foundConditionalProp);
+
+    memcpy(gSaveBlock1Ptr->objectEventTemplates, objects, count * sizeof(objects[0]));
+    gSaveBlock1Ptr->objectEventTemplatesCount = count;
+    RogueRouteScenes_HideProp(0, 1);
+    foundConditionalProp = FALSE;
+    for(i = 0; i < gSaveBlock1Ptr->objectEventTemplatesCount; ++i)
+    {
+        if(gSaveBlock1Ptr->objectEventTemplates[i].localId == 43)
+        {
+            foundConditionalProp = TRUE;
+            EXPECT_EQ(gSaveBlock1Ptr->objectEventTemplates[i].flagId, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+        }
+    }
+    EXPECT(foundConditionalProp);
+    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
 
     // Restoration consumes the same visibility definition and hides the
     // conditional object without changing the saved template's identity.
@@ -1206,6 +1224,8 @@ TEST("Declarative route scene visibility drives insertion and restoration")
         EXPECT(objects[i].x != 57 || objects[i].y != 77);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    memcpy(gSaveBlock1Ptr->objectEventTemplates, originalSavedTemplates, sizeof(originalSavedTemplates));
+    gSaveBlock1Ptr->objectEventTemplatesCount = originalSavedCount;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalHidden);
     gRogueAdvPath = originalPath;

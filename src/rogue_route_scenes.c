@@ -220,13 +220,16 @@ void RogueRouteScenes_HideProp(u8 sceneSlot, u8 propId)
     FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     for(i = 0; i < gSaveBlock1Ptr->objectEventTemplatesCount; ++i)
     {
-        const struct ObjectEventTemplate *objectEvent = &gSaveBlock1Ptr->objectEventTemplates[i];
+        struct ObjectEventTemplate *objectEvent = &gSaveBlock1Ptr->objectEventTemplates[i];
 
         if((objectEvent->script == Rogue_RouteEvent_Prop
                 || objectEvent->script == Rogue_RouteEvent_BreedersExchangePokemon)
             && GetSceneObjectSlot(objectEvent->trainerRange_berryTreeId) == sceneSlot
             && GetSceneObjectProp(objectEvent->trainerRange_berryTreeId) == propId)
+        {
+            objectEvent->flagId = FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN;
             RemoveObjectEventByLocalIdAndMap(objectEvent->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+        }
     }
 }
 
