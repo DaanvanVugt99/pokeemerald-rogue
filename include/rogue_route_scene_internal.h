@@ -92,6 +92,7 @@ struct RogueRouteSceneLotDefinition
     const struct RogueRouteSceneObjectDefinition *objects;
     u8 objectCount;
     u8 spotType;
+    u8 decorSpotType;
     u8 terrainMask;
 };
 

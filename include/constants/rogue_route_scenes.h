@@ -46,10 +46,30 @@ enum
 
 enum
 {
-    ROGUE_ROUTE_SCENE_SPOT_NPC,
-    ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR,
-    ROGUE_ROUTE_SCENE_SPOT_DECOR,
+    // Porymap route-event markers use:
+    // - Script: Rogue_RouteEvent_Interact
+    // - Sight Radius / Berry Tree ID: paired spot group, 0-15
+    // - Movement Radius X: one of these stage-shape categories
+    // - Movement Radius Y: terrain category
+    // - Movement Type: authored facing/movement for the spawned object.
+    //   PLANT_PATCH uses fixed facing as layout intent: up/down spawn a
+    //   horizontal three-tree patch above/below the marker, left/right spawn a
+    //   vertical three-tree patch beside the marker. Other movement types use a
+    //   centered horizontal patch.
+    ROGUE_ROUTE_SCENE_SPOT_SOLO_NPC,
+    ROGUE_ROUTE_SCENE_SPOT_STALL_NPC,
+    ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR,
+    ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC,
+    ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR,
+    ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC,
+    ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR,
+    ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC,
+    ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR,
+    ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC,
+    ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR,
+    ROGUE_ROUTE_SCENE_SPOT_MARKER,
     ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH,
+    ROGUE_ROUTE_SCENE_SPOT_WATER_NPC,
     ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT,
 };
 
@@ -70,8 +90,8 @@ enum
 #define ROGUE_ROUTE_SCENE_TERRAIN_MASK_STANDARD (ROGUE_ROUTE_SCENE_TERRAIN_MASK_LAND | ROGUE_ROUTE_SCENE_TERRAIN_MASK_CAVE)
 #define ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL ((1 << ROGUE_ROUTE_SCENE_TERRAIN_COUNT) - 1)
 
-#define ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS 10
-#define ROGUE_ROUTE_SCENE_MAX_SPOTS 10
+#define ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS 16
+#define ROGUE_ROUTE_SCENE_MAX_SPOTS 16
 #define ROGUE_ROUTE_SCENE_MAX_LOTS ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS
 #define ROGUE_ROUTE_SCENE_MAX_PLACEMENTS 3
 #define ROGUE_ROUTE_SCENE_MAX_ROLES 4

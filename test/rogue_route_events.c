@@ -232,6 +232,125 @@ static bool8 GetFirstPlacement(struct RogueRouteSceneRequest *request)
     return RogueRouteScenes_GetPlacementRequest(0, request);
 }
 
+static bool8 RouteHasDecorSpotForLot(const struct MapEvents *events, u8 groupId, const struct RogueRouteSceneLotDefinition *lot)
+{
+    u8 objectIdx;
+
+    if(lot->decorSpotType == ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT)
+        return TRUE;
+
+    for(objectIdx = 0; objectIdx < events->objectEventCount; ++objectIdx)
+    {
+        const struct ObjectEventTemplate *object = &events->objectEvents[objectIdx];
+
+        if(RogueRouteScenes_IsLotTemplate(object)
+            && object->trainerRange_berryTreeId == groupId
+            && object->movementRangeX == lot->decorSpotType
+            && (lot->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(object->movementRangeY)) != 0)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static u8 CountEligibleRouteGroupsForLot(u8 routeIdx, const struct RogueRouteSceneLotDefinition *lot)
+{
+    const struct RogueRouteEncounter *route = &gRogueRouteTable.routes[routeIdx];
+    const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(route->map.group, route->map.num);
+    const struct MapEvents *events = mapHeader->events;
+    u16 countedGroups = 0;
+    u8 count = 0;
+    u8 objectIdx;
+
+    for(objectIdx = 0; objectIdx < events->objectEventCount; ++objectIdx)
+    {
+        const struct ObjectEventTemplate *object = &events->objectEvents[objectIdx];
+        u8 groupId = object->trainerRange_berryTreeId;
+
+        if(RogueRouteScenes_IsLotTemplate(object)
+            && groupId < ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS
+            && (countedGroups & (1 << groupId)) == 0
+            && object->movementRangeX == lot->spotType
+            && (lot->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(object->movementRangeY)) != 0
+            && RouteHasDecorSpotForLot(events, groupId, lot))
+        {
+            countedGroups |= 1 << groupId;
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+static bool8 RouteCanHostRecipe(u8 routeIdx, u8 recipeId)
+{
+    const struct RogueRouteRecipeDefinition *recipe = RogueRouteEvents_GetRecipeDefinition(recipeId);
+    u16 usedGroups = 0;
+    u8 role;
+
+    for(role = 0; role < recipe->lotCount; ++role)
+    {
+        const struct RogueRouteSceneLotDefinition *lot = &recipe->lots[role];
+        const struct RogueRouteEncounter *route = &gRogueRouteTable.routes[routeIdx];
+        const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(route->map.group, route->map.num);
+        const struct MapEvents *events = mapHeader->events;
+        bool8 found = FALSE;
+        u8 objectIdx;
+
+        for(objectIdx = 0; objectIdx < events->objectEventCount; ++objectIdx)
+        {
+            const struct ObjectEventTemplate *object = &events->objectEvents[objectIdx];
+            u8 groupId = object->trainerRange_berryTreeId;
+
+            if(RogueRouteScenes_IsLotTemplate(object)
+                && groupId < ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS
+                && (usedGroups & (1 << groupId)) == 0
+                && object->movementRangeX == lot->spotType
+                && (lot->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(object->movementRangeY)) != 0
+                && RouteHasDecorSpotForLot(events, groupId, lot))
+            {
+                usedGroups |= 1 << groupId;
+                found = TRUE;
+                break;
+            }
+        }
+
+        if(!found)
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+static u8 FindRouteForRecipe(u8 recipeId)
+{
+    u8 routeIdx;
+
+    for(routeIdx = 0; routeIdx < gRogueRouteTable.routeCount; ++routeIdx)
+    {
+        if(RouteCanHostRecipe(routeIdx, recipeId))
+            return routeIdx;
+    }
+
+    EXPECT(FALSE);
+    return 0;
+}
+
+static u8 FindRouteWithRepeatedRecipeLot(u8 recipeId, u8 minCount)
+{
+    const struct RogueRouteRecipeDefinition *recipe = RogueRouteEvents_GetRecipeDefinition(recipeId);
+    u8 routeIdx;
+
+    for(routeIdx = 0; routeIdx < gRogueRouteTable.routeCount; ++routeIdx)
+    {
+        if(CountEligibleRouteGroupsForLot(routeIdx, &recipe->lots[0]) >= minCount)
+            return routeIdx;
+    }
+
+    EXPECT(FALSE);
+    return 0;
+}
+
 static void SelectPlacement(const struct RogueRouteSceneRequest *request)
 {
     gSelectedObjectEvent = 0;
@@ -328,7 +447,7 @@ TEST("Selected standalone route scene payloads remain immutable")
     u8 i;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
@@ -412,7 +531,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE);
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueRun.routeSceneRoomId = 1;
@@ -637,7 +756,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     u8 cacheType;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
     ClearBag();
     SetMoney(&gSaveBlock1Ptr->money, 0);
     for(seed = 1; seed < 256; ++seed)
@@ -660,10 +779,10 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         {
             struct ObjectEventTemplate objects[8] =
             {
-                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-                {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 11, .y = 9, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
-                {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 2, .script = Rogue_RouteEvent_Interact},
+                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 11, .y = 9, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+                {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 2, .script = Rogue_RouteEvent_Interact},
             };
             u8 count = 4;
             u8 archaeologistCount = 0;
@@ -778,6 +897,15 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
 
 TEST("Route events provide typed exact spots on every classified active route")
 {
+    bool8 hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT] = {FALSE};
+    bool8 hasEligibleStall = FALSE;
+    bool8 hasEligibleCamp = FALSE;
+    bool8 hasEligibleWorkbench = FALSE;
+    bool8 hasEligibleRelic = FALSE;
+    bool8 hasEligibleCreature = FALSE;
+    bool8 hasEligibleBuriedCache = FALSE;
+    bool8 hasEligibleApricornGrove = FALSE;
+    bool8 hasEligibleTideSalvage = FALSE;
     u8 routeIdx;
 
     for(routeIdx = 0; routeIdx < gRogueRouteTable.routeCount; ++routeIdx)
@@ -786,10 +914,10 @@ TEST("Route events provide typed exact spots on every classified active route")
         const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(route->map.group, route->map.num);
         const struct MapLayout *mapLayout = mapHeader->mapLayout;
         const struct MapEvents *events = mapHeader->events;
-        bool8 hasDecorPair[ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS] = {FALSE};
+        bool8 hasPairedSpot[ROGUE_ROUTE_SCENE_MAX_SPOT_GROUPS][ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT] = {FALSE};
+        u8 spotTypeCount[ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT] = {0};
         u16 groupMask = 0;
         u8 spotCount = 0;
-        u8 typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT] = {0};
         u8 baseObjectCount = 0;
         u8 objectIdx;
 
@@ -822,20 +950,16 @@ TEST("Route events provide typed exact spots on every classified active route")
 
                 groupMask |= 1 << groupId;
                 ++spotCount;
-                ++typedSpotCounts[object->movementRangeX];
-                if(object->movementRangeX == ROGUE_ROUTE_SCENE_SPOT_DECOR)
-                    hasDecorPair[groupId] = TRUE;
+                ++spotTypeCount[object->movementRangeX];
+                hasGlobalSpotType[object->movementRangeX] = TRUE;
+                hasPairedSpot[groupId][object->movementRangeX] = TRUE;
             }
             else
                 ++baseObjectCount;
         }
 
-        EXPECT_GE(spotCount, 8);
+        EXPECT_GE(spotCount, 4);
         EXPECT_LE(spotCount, ROGUE_ROUTE_SCENE_MAX_SPOTS);
-        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR], 3);
-        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_DECOR], 2);
-        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH], 1);
-        EXPECT_GE(typedSpotCounts[ROGUE_ROUTE_SCENE_SPOT_NPC], 1);
         EXPECT_LE(baseObjectCount + ROGUE_ROUTE_SCENE_MAX_PLACEMENTS * 4, OBJECT_EVENT_TEMPLATES_COUNT);
 
         for(objectIdx = 0; objectIdx < events->objectEventCount; ++objectIdx)
@@ -847,8 +971,45 @@ TEST("Route events provide typed exact spots on every classified active route")
             if(!RogueRouteScenes_IsLotTemplate(spot))
                 continue;
 
-            if(spot->movementRangeX == ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR)
-                EXPECT(hasDecorPair[spot->trainerRange_berryTreeId]);
+            switch(spot->movementRangeX)
+            {
+            case ROGUE_ROUTE_SCENE_SPOT_STALL_NPC:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR]);
+                hasEligibleStall = TRUE;
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_STALL_NPC]);
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR]);
+                hasEligibleCamp = TRUE;
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC]);
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR]);
+                hasEligibleWorkbench = TRUE;
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC]);
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC:
+                hasEligibleRelic = TRUE;
+                if(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR])
+                    hasEligibleBuriedCache = hasEligibleBuriedCache || spotTypeCount[ROGUE_ROUTE_SCENE_SPOT_MARKER] >= 2;
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC]);
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR]);
+                hasEligibleCreature = TRUE;
+                break;
+            case ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR:
+                EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC]);
+                break;
+            }
 
             for(otherIdx = 0; otherIdx < events->objectEventCount; ++otherIdx)
             {
@@ -865,7 +1026,34 @@ TEST("Route events provide typed exact spots on every classified active route")
         }
 
         EXPECT_NE(groupMask, 0);
+        if(spotTypeCount[ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH] != 0)
+            hasEligibleApricornGrove = TRUE;
+        if(spotTypeCount[ROGUE_ROUTE_SCENE_SPOT_WATER_NPC] != 0)
+            hasEligibleTideSalvage = TRUE;
     }
+
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_STALL_NPC]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_SOLO_NPC]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_MARKER]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_WATER_NPC]);
+    EXPECT(hasEligibleStall);
+    EXPECT(hasEligibleCamp);
+    EXPECT(hasEligibleWorkbench);
+    EXPECT(hasEligibleRelic);
+    EXPECT(hasEligibleCreature);
+    EXPECT(hasEligibleBuriedCache);
+    EXPECT(hasEligibleApricornGrove);
+    EXPECT(hasEligibleTideSalvage);
 }
 
 TEST("Route scene recipes compose bounded unique route objects")
@@ -893,13 +1081,21 @@ TEST("Route scene recipes compose bounded unique route objects")
     for(recipeIdx = 0; recipeIdx < ARRAY_COUNT(sRecipes); ++recipeIdx)
     {
         u8 recipeId = sRecipes[recipeIdx];
+        u8 primarySpotType = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC
+            : ROGUE_ROUTE_SCENE_SPOT_STALL_NPC;
+        u8 decorSpotType = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_MARKER
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR
+            : ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR;
         struct RogueRouteSceneRequest request;
         const struct ObjectEventTemplate baseObjects[] =
         {
-            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-            {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_NPC : ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
-            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 57, .y = 77, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_STALL_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+            {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = primarySpotType, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 57, .y = 77, .elevation = 3, .movementRangeX = decorSpotType, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
         };
         struct ObjectEventTemplate objects[8] =
         {
@@ -1052,8 +1248,8 @@ TEST("Semantic route props adapt supplies and camps to every environment")
         {
             struct ObjectEventTemplate objects[4] =
             {
-                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = recipeIdx == 0 ? ROGUE_ROUTE_SCENE_SPOT_STALL_NPC : ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = recipeIdx == 0 ? ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR : ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
             };
             const u8 *propScript = recipeIdx == 0 ? Rogue_RouteEvent_Prop : Rogue_RouteEvent_UnboundTutorProp;
             u16 expectedGraphics = recipeIdx == 0 ? sExpectedSupplies[environment] : sExpectedCamps[environment];
@@ -1102,7 +1298,7 @@ TEST("Route scene spot recipes stay sparse and typed")
             u8 propCount = 0;
             u8 objectIdx;
 
-            EXPECT_LE(spot->objectCount, 2);
+            EXPECT_LE(spot->objectCount, 3);
             EXPECT_LT(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
             EXPECT_NE(spot->terrainMask, 0);
             EXPECT_EQ(spot->terrainMask & ~ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL, 0);
@@ -1119,9 +1315,88 @@ TEST("Route scene spot recipes stay sparse and typed")
             }
 
             EXPECT(hasPrimary);
-            EXPECT_LE(propCount, 1);
-            if(propCount != 0)
-                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR);
+            if(spot->spotType == ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH)
+            {
+                EXPECT_EQ(propCount, 2);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+            }
+            else if(propCount != 0)
+            {
+                EXPECT_LE(propCount, 1);
+                EXPECT_LT(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+            }
+            else
+            {
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+            }
+
+            switch(recipeId)
+            {
+            case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER:
+            case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF:
+            case ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_STALL_NPC);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR);
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
+            case ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR);
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE:
+            case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER:
+            case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_PAYOFF:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER:
+            case ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION:
+            case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR);
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_MARKER);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN:
+                if(role == 0)
+                {
+                    EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH);
+                    EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+                }
+                else
+                {
+                    EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC);
+                    EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR);
+                }
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR);
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE:
+                if(role == 0)
+                {
+                    EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC);
+                    EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR);
+                }
+                else
+                {
+                    EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_MARKER);
+                    EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+                }
+                break;
+            case ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE:
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_WATER_NPC);
+                EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
+                EXPECT_EQ(spot->terrainMask, ROGUE_ROUTE_SCENE_TERRAIN_MASK_WATER);
+                break;
+            }
         }
     }
 }
@@ -1132,10 +1407,10 @@ TEST("Declarative route scene visibility drives insertion and restoration")
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     const struct ObjectEventTemplate baseObjects[] =
     {
-        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-        {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
-        {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 57, .y = 77, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 56, .y = 78, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 57, .y = 77, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
     };
     struct ObjectEventTemplate objects[8] =
     {
@@ -1292,7 +1567,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(3);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
     for(seed = 1; seed != 0; ++seed)
     {
         gRogueAdvPath.rooms[0].rngSeed = seed;
@@ -1362,7 +1637,7 @@ TEST("Hexed Shrine bargain is atomic persistent and route local")
     RogueRouteScenes_OnExitRoute();
     gRogueAdvPath.roomCount = 2;
     gRogueRun.adventureRoomId = 1;
-    gRogueAdvPath.rooms[1].roomParams.roomIdx = 1;
+    gRogueAdvPath.rooms[1].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
     gRogueAdvPath.rooms[1].rngSeed = 701;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
@@ -1501,7 +1776,7 @@ TEST("Traveling Merchant offers one seeded half-price shop with normal selling")
     u16 seed;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
 
@@ -1591,7 +1866,7 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE);
     gRogueAdvPath.rooms[0].rngSeed = 0xBEEF;
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
@@ -1682,8 +1957,8 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     struct RogueRouteSceneRequest exchange;
     struct ObjectEventTemplate objects[5] =
     {
-        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 13, .y = 33, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
     };
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
@@ -1697,7 +1972,7 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     SetupCurrentEvent(&originalPath, &originalRoomId);
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE);
     gRogueAdvPath.rooms[0].rngSeed = 0xCAFE;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
@@ -1738,7 +2013,7 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
         .x = 12,
         .y = 34,
         .elevation = 3,
-        .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR,
+        .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC,
         .trainerType = TRAINER_TYPE_NONE,
         .trainerRange_berryTreeId = 0,
         .script = Rogue_RouteEvent_Interact,
@@ -1750,7 +2025,7 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
         .x = 13,
         .y = 33,
         .elevation = 3,
-        .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR,
+        .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR,
         .trainerType = TRAINER_TYPE_NONE,
         .trainerRange_berryTreeId = 0,
         .script = Rogue_RouteEvent_Interact,
@@ -1802,6 +2077,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    bool8 originalPropA = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     u8 questId;
     u32 customMonId;
     u8 customType0;
@@ -1819,7 +2095,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     gRogueRun.temporaryDarkDealCurseItem = Rogue_SelectDarkDealCurseItem(0);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     Rogue_SetCurrentDifficulty(0);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
     for(i = 0; i < ARRAY_COUNT(sQuestFossils); ++i)
     {
         EXPECT_EQ(ItemId_GetPocket(sQuestFossils[i]), POCKET_KEY_ITEMS);
@@ -1852,6 +2128,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     RogueRouteEvents_TryAcceptAnomalousFossilQuest();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT(CheckBagHasItem(offer.requestedItem, 1));
+    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
     EXPECT(ItemId_GetImportance(offer.requestedItem));
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
     questId = RogueAdventureQuests_GetQuestIdAt(0);
@@ -1870,10 +2147,9 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     RogueRouteScenes_OnExitRoute();
     gRogueAdvPath.roomCount = 2;
     gRogueRun.adventureRoomId = 1;
-    gRogueAdvPath.rooms[1].roomParams.roomIdx = 1;
+    gRogueAdvPath.rooms[1].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION);
     gRogueAdvPath.rooms[1].rngSeed = 301;
-    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
-    RogueRouteScenes_OnEnterRoute();
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION, 0, questId);
     EXPECT(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION, &restoration));
     SelectPlacement(&restoration);
     EXPECT_EQ(restoration.recipeId, ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION);
@@ -1967,6 +2243,7 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     RestoreFlag(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED, originalComplete);
+    RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalPropA);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
     gRngValue = originalStandardRng;
@@ -2015,7 +2292,7 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     gRogueRun.routeSceneRoomId = 0;
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 1;
     gRogueAdvPath.rooms[0].rngSeed = 0x108;
 
     SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
@@ -2039,6 +2316,7 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     // Bind the first graph node as it would be on the next generated route.
     gRogueRun.adventureQuests[questId].routesUntilScene = 0;
     gRogueRun.adventureQuests[questId].sceneRoomId = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = 1;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
     EXPECT_EQ(RogueRouteScenes_GetPlacementCount(), ROGUE_FORBIDDEN_STONE_SOUL_COUNT);
@@ -2073,9 +2351,9 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     {
         struct ObjectEventTemplate objects[3] =
         {
-            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[0].lotId, .script = Rogue_RouteEvent_Interact},
-            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[1].lotId, .script = Rogue_RouteEvent_Interact},
-            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[2].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[0].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[1].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[2].lotId, .script = Rogue_RouteEvent_Interact},
         };
         u8 objectCount = ARRAY_COUNT(objects);
 
@@ -2190,9 +2468,9 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     struct RogueRouteSceneRequest artisan;
     struct ObjectEventTemplate objects[6] =
     {
-        {.localId = 40, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
-        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 21, .y = 19, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 40, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementType = MOVEMENT_TYPE_FACE_DOWN, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
+        {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+        {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 21, .y = 19, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
     };
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u8 originalRoomId;
@@ -2205,6 +2483,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     u8 treeCount = 0;
     u8 artisanCount = 0;
     u8 propCount = 0;
+    u8 apricornChoiceMask = 0;
     u8 i;
 
     ClearBag();
@@ -2212,7 +2491,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     gRogueRun.routeSceneRoomId = 0;
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN);
     gRogueAdvPath.rooms[0].rngSeed = 0xA91C;
 
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
@@ -2229,7 +2508,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     EXPECT_NE(grove.rewardItem, grove.trainerNum);
 
     RogueRouteScenes_ModifyObjectEvents(objects, &objectCount, ARRAY_COUNT(objects));
-    EXPECT_EQ(objectCount, 3);
+    EXPECT_EQ(objectCount, 5);
     for(i = 0; i < objectCount; ++i)
     {
         u8 j;
@@ -2237,13 +2516,23 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
         for(j = i + 1; j < objectCount; ++j)
             EXPECT_NE(objects[i].localId, objects[j].localId);
         if(objects[i].script == Rogue_RouteEvent_ApricornTree)
+        {
+            u8 choice = (objects[i].trainerRange_berryTreeId >> 4) & 0xF;
+
             ++treeCount;
+            apricornChoiceMask |= 1 << choice;
+            EXPECT_EQ(objects[i].y, 11);
+            EXPECT_GE(objects[i].x, 9);
+            EXPECT_LE(objects[i].x, 11);
+            EXPECT_EQ(objects[i].movementType, MOVEMENT_TYPE_FACE_DOWN);
+        }
         else if(objects[i].script == Rogue_RouteEvent_ApricornArtisan)
             ++artisanCount;
         else if(objects[i].script == Rogue_RouteEvent_ApricornProp)
             ++propCount;
     }
-    EXPECT_EQ(treeCount, 1);
+    EXPECT_EQ(treeCount, 3);
+    EXPECT_EQ(apricornChoiceMask, 0x7);
     EXPECT_EQ(artisanCount, 1);
     EXPECT_EQ(propCount, 1);
 
@@ -2298,7 +2587,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     gRogueRun.adventureRoomId = 0;
     gRogueRun.routeSceneRoomId = 0;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE);
     gRogueAdvPath.rooms[0].rngSeed = 0xB72D;
     SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
     EXPECT(GetFirstPlacement(&grove));
@@ -2314,7 +2603,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
 
     gRogueAdvPath.roomCount = 2;
     gRogueRun.adventureRoomId = 1;
-    gRogueAdvPath.rooms[1].roomParams.roomIdx = 1;
+    gRogueAdvPath.rooms[1].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN);
     gRogueAdvPath.rooms[1].rngSeed = 0xB72E;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
@@ -2374,7 +2663,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     gRogueRun.temporaryDarkDealCurseItem = Rogue_SelectDarkDealCurseItem(0);
     Rogue_SetCurrentDifficulty(0);
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER);
     for(seed = 1; seed != 0; ++seed)
     {
         gRogueAdvPath.rooms[0].rngSeed = seed;
@@ -2407,7 +2696,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     RogueRouteScenes_OnExitRoute();
     gRogueAdvPath.roomCount = 3;
     gRogueRun.adventureRoomId = 1;
-    gRogueAdvPath.rooms[1].roomParams.roomIdx = 1;
+    gRogueAdvPath.rooms[1].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
     gRogueAdvPath.rooms[1].rngSeed = 101;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[1]);
     RogueRouteScenes_OnEnterRoute();
@@ -2456,7 +2745,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     RogueRouteScenes_OnExitRoute();
 
     gRogueRun.adventureRoomId = 3;
-    gRogueAdvPath.rooms[3].roomParams.roomIdx = 3;
+    gRogueAdvPath.rooms[3].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP);
     gRogueAdvPath.rooms[3].rngSeed = 103;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[3]);
     RogueRouteScenes_OnEnterRoute();
@@ -2481,7 +2770,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     RogueRouteScenes_OnExitRoute();
     EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->nodeId, 1);
     gRogueRun.adventureRoomId = 4;
-    gRogueAdvPath.rooms[4].roomParams.roomIdx = 4;
+    gRogueAdvPath.rooms[4].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF);
     gRogueAdvPath.rooms[4].rngSeed = 104;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[4]);
     RogueRouteScenes_OnEnterRoute();
@@ -2534,7 +2823,7 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     RogueRouteScenes_OnExitRoute();
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
     gRogueRun.adventureRoomId = 5;
-    gRogueAdvPath.rooms[5].roomParams.roomIdx = 5;
+    gRogueAdvPath.rooms[5].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_PAYOFF);
     gRogueAdvPath.rooms[5].rngSeed = 105;
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[5]);
     RogueRouteScenes_OnEnterRoute();
@@ -2625,7 +2914,7 @@ TEST("Route director composes three pending quest consumers and preserves them o
     SetupCurrentEvent(&originalPath, &originalRoomId);
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = 0;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteWithRepeatedRecipeLot(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP, 3);
     gRogueAdvPath.rooms[0].rngSeed = 0x5151;
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
 

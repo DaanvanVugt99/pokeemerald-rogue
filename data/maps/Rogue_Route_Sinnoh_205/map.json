@@ -548,12 +548,12 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_WATER_NPC",
       "x": 3,
       "y": 75,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 1,
+      "movement_range_x": 13,
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
@@ -561,12 +561,12 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
       "x": 4,
       "y": 74,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 2,
+      "movement_range_x": 11,
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
@@ -574,12 +574,12 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_NPC",
       "x": 21,
       "y": 19,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 1,
+      "movement_range_x": 9,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "1",
@@ -587,12 +587,12 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_DECOR",
       "x": 22,
       "y": 20,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 2,
+      "movement_range_x": 10,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "1",
@@ -600,7 +600,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_STALL_NPC",
       "x": 26,
       "y": 50,
       "elevation": 3,
@@ -613,7 +613,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_STALL_DECOR",
       "x": 25,
       "y": 51,
       "elevation": 3,
@@ -626,12 +626,12 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_PLANT_PATCH",
       "x": 26,
       "y": 88,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 3,
+      "movement_range_x": 12,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "3",
@@ -639,7 +639,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_SOLO_NPC",
       "x": 44,
       "y": 11,
       "elevation": 3,

@@ -5495,6 +5495,21 @@ static const struct SpriteFrameImage sPicTable_RoutePropDigMound[] = {obj_frame_
 static const struct SpriteFrameImage sPicTable_RoutePropRoundStone[] = {obj_frame_tiles(gObjectEventPic_RoutePropRoundStone)};
 static const struct SpriteFrameImage sPicTable_RoutePropApricornTree[] = {overworld_frame(gObjectEventPic_PechaBerryTree, 2, 4, 4)};
 
+static const struct SpriteFrameImage sPicTable_RouteMarkerSoloNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerSoloNpc)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerStallNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerStallNpc)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerStallDecor[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerStallDecor)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerCampNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerCampNpc)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerCampDecor[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerCampDecor)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerWorkbenchNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerWorkbenchNpc)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerWorkbenchDecor[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerWorkbenchDecor)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerRelicNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerRelicNpc)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerRelicDecor[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerRelicDecor)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerCreatureNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerCreatureNpc)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerCreatureDecor[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerCreatureDecor)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerMarker[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerMarker)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerPlantPatch[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerPlantPatch)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerWaterNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerWaterNpc)};
+
 static const struct SpriteFrameImage sPicTable_Route_Bug[] = {
     overworld_frame(gObjectEventPic_Route_Bug, 2, 2, 0),
     overworld_frame(gObjectEventPic_Route_Bug, 2, 2, 1),

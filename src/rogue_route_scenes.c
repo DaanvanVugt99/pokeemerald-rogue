@@ -50,6 +50,13 @@ struct RogueRouteSpot
     u8 terrain;
 };
 
+static const struct ObjectEventTemplate *GetSceneObjectSpot(
+    const struct ObjectEventTemplate *spots,
+    u8 spotCount,
+    const struct RogueRouteSceneRequest *scene,
+    const struct RogueRouteSceneLotDefinition *lotDefinition,
+    const struct RogueRouteSceneObjectDefinition *object);
+
 void RogueRouteSceneRng_Seed(struct RogueRouteSceneRng *rng, u32 seed)
 {
 #ifdef ROGUE_FEATURE_HQ_RANDOM
@@ -317,6 +324,9 @@ static bool8 SpotHasVisiblePairedProp(const struct RogueRouteSceneLotDefinition 
 {
     u8 i;
 
+    if(lotDefinition->spotType == ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH)
+        return FALSE;
+
     for(i = 0; i < lotDefinition->objectCount; ++i)
     {
         if(lotDefinition->objects[i].propId != 0)
@@ -326,14 +336,14 @@ static bool8 SpotHasVisiblePairedProp(const struct RogueRouteSceneLotDefinition 
     return FALSE;
 }
 
-static bool8 HasPairedDecorSpot(const struct RogueRouteSpot *spots, u8 spotCount, u8 groupId, u8 terrainMask)
+static bool8 HasPairedDecorSpot(const struct RogueRouteSpot *spots, u8 spotCount, u8 groupId, u8 spotType, u8 terrainMask)
 {
     u8 i;
 
     for(i = 0; i < spotCount; ++i)
     {
         if(spots[i].id == groupId
-            && spots[i].type == ROGUE_ROUTE_SCENE_SPOT_DECOR
+            && spots[i].type == spotType
             && (terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(spots[i].terrain)) != 0)
             return TRUE;
     }
@@ -348,8 +358,9 @@ static bool8 IsSpotRecipeValid(const struct RogueRouteSceneLotDefinition *lotDef
     u8 propCount = 0;
 
     if(lotDefinition->objectCount == 0
-        || lotDefinition->objectCount > 2
+        || lotDefinition->objectCount > 3
         || lotDefinition->spotType >= ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT
+        || lotDefinition->decorSpotType > ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT
         || (lotDefinition->terrainMask & ~ROGUE_ROUTE_SCENE_TERRAIN_MASK_ALL) != 0)
         return FALSE;
 
@@ -361,11 +372,82 @@ static bool8 IsSpotRecipeValid(const struct RogueRouteSceneLotDefinition *lotDef
             ++propCount;
     }
 
-    if(!hasPrimary || propCount > 1)
+    if(!hasPrimary)
         return FALSE;
 
-    if(propCount != 0 && lotDefinition->spotType != ROGUE_ROUTE_SCENE_SPOT_NPC_WITH_DECOR)
+    if(lotDefinition->spotType == ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH)
+    {
+        if(propCount != 2 || lotDefinition->decorSpotType != ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT)
+            return FALSE;
+    }
+    else
+    {
+        if(propCount > 1)
+            return FALSE;
+
+        if((propCount != 0) != (lotDefinition->decorSpotType != ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+static bool8 IsPlantPatchObject(
+    const struct RogueRouteSceneLotDefinition *lotDefinition,
+    const struct RogueRouteSceneObjectDefinition *object)
+{
+    return lotDefinition->spotType == ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH
+        && object->propId < ROGUE_APRICORN_CHOICE_COUNT;
+}
+
+static void ApplyPlantPatchOffset(struct ObjectEventTemplate *spot, u8 propId)
+{
+    s8 xOffset = 0;
+    s8 yOffset = 0;
+
+    switch(spot->movementType)
+    {
+    case MOVEMENT_TYPE_FACE_UP:
+        xOffset = propId - 1;
+        yOffset = -1;
+        break;
+    case MOVEMENT_TYPE_FACE_DOWN:
+        xOffset = propId - 1;
+        yOffset = 1;
+        break;
+    case MOVEMENT_TYPE_FACE_LEFT:
+        xOffset = -1;
+        yOffset = propId - 1;
+        break;
+    case MOVEMENT_TYPE_FACE_RIGHT:
+        xOffset = 1;
+        yOffset = propId - 1;
+        break;
+    default:
+        xOffset = propId - 1;
+        break;
+    }
+
+    spot->x += xOffset;
+    spot->y += yOffset;
+}
+
+static bool8 GetResolvedSceneObjectSpot(
+    struct ObjectEventTemplate *resolvedSpot,
+    const struct ObjectEventTemplate *spots,
+    u8 spotCount,
+    const struct RogueRouteSceneRequest *scene,
+    const struct RogueRouteSceneLotDefinition *lotDefinition,
+    const struct RogueRouteSceneObjectDefinition *object)
+{
+    const struct ObjectEventTemplate *spot = GetSceneObjectSpot(spots, spotCount, scene, lotDefinition, object);
+
+    if(spot == NULL)
         return FALSE;
+
+    *resolvedSpot = *spot;
+    if(IsPlantPatchObject(lotDefinition, object))
+        ApplyPlantPatchOffset(resolvedSpot, object->propId);
 
     return TRUE;
 }
@@ -411,7 +493,7 @@ static bool8 AddRecipeToPlan(
                 && spots[i].type == lotDefinition->spotType
                 && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(spots[i].terrain)) != 0
                 && (!SpotHasVisiblePairedProp(lotDefinition)
-                    || HasPairedDecorSpot(spots, spotCount, spots[i].id, lotDefinition->terrainMask)))
+                    || HasPairedDecorSpot(spots, spotCount, spots[i].id, lotDefinition->decorSpotType, lotDefinition->terrainMask)))
                 ++eligibleCount;
         }
 
@@ -425,7 +507,7 @@ static bool8 AddRecipeToPlan(
                 && spots[i].type == lotDefinition->spotType
                 && (lotDefinition->terrainMask & ROGUE_ROUTE_SCENE_TERRAIN_MASK(spots[i].terrain)) != 0
                 && (!SpotHasVisiblePairedProp(lotDefinition)
-                    || HasPairedDecorSpot(spots, spotCount, spots[i].id, lotDefinition->terrainMask))
+                    || HasPairedDecorSpot(spots, spotCount, spots[i].id, lotDefinition->decorSpotType, lotDefinition->terrainMask))
                 && selected-- == 0)
             {
                 selectedLots[role] = spots[i].id;
@@ -1083,6 +1165,67 @@ static void RestoreSceneProp(
     }
 }
 
+static bool8 IsObjectLocalIdUsed(
+    const struct ObjectEventTemplate *objectEvents,
+    u8 objectEventCount,
+    const struct ObjectEventTemplate *reservedSpots,
+    u8 reservedSpotCount,
+    u8 allowedReservedLocalId,
+    u8 localId)
+{
+    u8 i;
+
+    for(i = 0; i < objectEventCount; ++i)
+    {
+        if(objectEvents[i].localId == localId)
+            return TRUE;
+    }
+
+    for(i = 0; i < reservedSpotCount; ++i)
+    {
+        if(reservedSpots[i].localId != allowedReservedLocalId
+            && reservedSpots[i].localId == localId)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static u8 AllocSceneObjectLocalId(
+    const struct ObjectEventTemplate *objectEvents,
+    u8 objectEventCount,
+    const struct ObjectEventTemplate *reservedSpots,
+    u8 reservedSpotCount,
+    u8 allowedReservedLocalId,
+    u8 preferredLocalId)
+{
+    u16 localId;
+
+    if(preferredLocalId != 0
+        && !IsObjectLocalIdUsed(
+            objectEvents,
+            objectEventCount,
+            reservedSpots,
+            reservedSpotCount,
+            allowedReservedLocalId,
+            preferredLocalId))
+        return preferredLocalId;
+
+    for(localId = 1; localId <= 0xFF; ++localId)
+    {
+        if(!IsObjectLocalIdUsed(
+            objectEvents,
+            objectEventCount,
+            reservedSpots,
+            reservedSpotCount,
+            allowedReservedLocalId,
+            localId))
+            return localId;
+    }
+
+    return 0;
+}
+
 static const struct ObjectEventTemplate *FindRouteSceneSpot(
     const struct ObjectEventTemplate *objectEvents,
     u8 objectEventCount,
@@ -1109,10 +1252,10 @@ static const struct ObjectEventTemplate *GetSceneObjectSpot(
     const struct RogueRouteSceneLotDefinition *lotDefinition,
     const struct RogueRouteSceneObjectDefinition *object)
 {
-    if(object->propId == 0)
+    if(object->propId == 0 || IsPlantPatchObject(lotDefinition, object))
         return FindRouteSceneSpot(spots, spotCount, scene->lotId, lotDefinition->spotType);
 
-    return FindRouteSceneSpot(spots, spotCount, scene->lotId, ROGUE_ROUTE_SCENE_SPOT_DECOR);
+    return FindRouteSceneSpot(spots, spotCount, scene->lotId, lotDefinition->decorSpotType);
 }
 
 void RogueRouteScenes_RestoreObjectEvents(
@@ -1139,16 +1282,17 @@ void RogueRouteScenes_RestoreObjectEvents(
         for(i = 0; i < lotDefinition->objectCount; ++i)
         {
             const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
-            const struct ObjectEventTemplate *spot = GetSceneObjectSpot(
+            struct ObjectEventTemplate spot;
+            u16 graphicsId = ResolveSceneObjectGraphics(&scene, object);
+            u16 flagId = 0;
+
+            if(!GetResolvedSceneObjectSpot(
+                &spot,
                 baseObjectEvents,
                 baseObjectEventCount,
                 &scene,
                 lotDefinition,
-                object);
-            u16 graphicsId = ResolveSceneObjectGraphics(&scene, object);
-            u16 flagId = 0;
-
-            if(spot == NULL)
+                object))
                 continue;
 
             if(!IsSceneObjectVisible(&scene, object))
@@ -1162,8 +1306,8 @@ void RogueRouteScenes_RestoreObjectEvents(
                 RestoreSceneObject(
                     objectEvents,
                     objectEventCount,
-                    spot,
-                    spot->localId,
+                    &spot,
+                    spot.localId,
                     graphicsId,
                     object->script,
                     PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
@@ -1174,7 +1318,7 @@ void RogueRouteScenes_RestoreObjectEvents(
                 RestoreSceneProp(
                     objectEvents,
                     objectEventCount,
-                    spot,
+                    &spot,
                     graphicsId,
                     object->script,
                     PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
@@ -1247,20 +1391,38 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
         for(objectIdx = 0; objectIdx < lotDefinition->objectCount; ++objectIdx)
         {
             const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[objectIdx];
-            const struct ObjectEventTemplate *spot;
+            struct ObjectEventTemplate spot;
+            u8 localId;
 
             if(!IsSceneObjectVisible(&scene, object))
                 continue;
 
-            spot = GetSceneObjectSpot(spots, spotCount, &scene, lotDefinition, object);
-            if(spot == NULL)
+            if(!GetResolvedSceneObjectSpot(
+                &spot,
+                spots,
+                spotCount,
+                &scene,
+                lotDefinition,
+                object))
+                continue;
+
+            localId = spot.localId;
+            if(IsPlantPatchObject(lotDefinition, object) && object->propId != 0)
+                localId = AllocSceneObjectLocalId(
+                    objectEvents,
+                    *objectEventCount,
+                    spots,
+                    spotCount,
+                    spot.localId,
+                    spot.localId + object->propId);
+            if(localId == 0)
                 continue;
 
             AppendSceneObject(
                 objectEvents,
                 objectEventCount,
-                spot,
-                spot->localId,
+                &spot,
+                localId,
                 ResolveSceneObjectGraphics(&scene, object),
                 object->script,
                 PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),

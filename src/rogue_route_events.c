@@ -1437,6 +1437,7 @@ void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void)
     }
 
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    RogueRouteScenes_HideProp(scene.sceneSlot, 1);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
