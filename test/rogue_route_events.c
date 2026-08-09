@@ -103,6 +103,87 @@ static void RestoreFlag(u16 flagId, bool8 value)
         FlagClear(flagId);
 }
 
+static bool8 IsBuriedCacheAmbushSpecies(u8 environment, u16 species)
+{
+    switch(environment)
+    {
+    case ROGUE_ROUTE_ENVIRONMENT_FIELD:
+        switch(species)
+        {
+        case SPECIES_SANDSHREW:
+        case SPECIES_DIGLETT:
+        case SPECIES_TRAPINCH:
+        case SPECIES_BALTOY:
+        case SPECIES_DUNSPARCE:
+        case SPECIES_NINCADA:
+            return TRUE;
+        }
+        break;
+    case ROGUE_ROUTE_ENVIRONMENT_FOREST:
+        switch(species)
+        {
+        case SPECIES_NINCADA:
+        case SPECIES_PARAS:
+        case SPECIES_SHROOMISH:
+        case SPECIES_PINECO:
+        case SPECIES_SPINARAK:
+        case SPECIES_DUNSPARCE:
+            return TRUE;
+        }
+        break;
+    case ROGUE_ROUTE_ENVIRONMENT_CAVE:
+        switch(species)
+        {
+        case SPECIES_GEODUDE:
+        case SPECIES_ONIX:
+        case SPECIES_DUNSPARCE:
+        case SPECIES_ZUBAT:
+        case SPECIES_WHISMUR:
+        case SPECIES_MAWILE:
+            return TRUE;
+        }
+        break;
+    case ROGUE_ROUTE_ENVIRONMENT_MOUNTAIN:
+        switch(species)
+        {
+        case SPECIES_GEODUDE:
+        case SPECIES_NOSEPASS:
+        case SPECIES_ARON:
+        case SPECIES_MACHOP:
+        case SPECIES_SANDSHREW:
+        case SPECIES_TRAPINCH:
+            return TRUE;
+        }
+        break;
+    case ROGUE_ROUTE_ENVIRONMENT_WATERFRONT:
+        switch(species)
+        {
+        case SPECIES_KRABBY:
+        case SPECIES_CORPHISH:
+        case SPECIES_CLAMPERL:
+        case SPECIES_WOOPER:
+        case SPECIES_LOTAD:
+        case SPECIES_PSYDUCK:
+            return TRUE;
+        }
+        break;
+    case ROGUE_ROUTE_ENVIRONMENT_URBAN:
+        switch(species)
+        {
+        case SPECIES_RATTATA:
+        case SPECIES_MEOWTH:
+        case SPECIES_ZIGZAGOON:
+        case SPECIES_VOLTORB:
+        case SPECIES_GRIMER:
+        case SPECIES_KOFFING:
+            return TRUE;
+        }
+        break;
+    }
+
+    return FALSE;
+}
+
 static u8 GetRouteTestMetatileBehavior(const struct MapLayout *mapLayout, u16 block)
 {
     u16 metatileId = block & MAPGRID_METATILE_ID_MASK;
@@ -856,6 +937,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
 
     EXPECT_LT(seed, 256);
     EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), siteA.trainerNum);
+    EXPECT(IsBuriedCacheAmbushSpecies(siteA.environment, siteA.trainerNum));
     EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
     EXPECT(!FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN));
     EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
