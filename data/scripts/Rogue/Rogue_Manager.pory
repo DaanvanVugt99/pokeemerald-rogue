@@ -340,22 +340,11 @@ script Rogue_RouteEvent_BreedersExchange
         end
     }
 
-    copyvar(VAR_0x8007, VAR_0x8004)
-    copyvar(VAR_0x8009, VAR_0x8005)
-    msgbox(format("{STR_VAR_1} has grown restless on the road.\pI think it needs a Trainer who battles a little differently.\pIf you caught {STR_VAR_2} around here, I could make you a trade."))
-    msgbox(format("Would you like a closer look? Pokémon: {STR_VAR_1}"), MSGBOX_YESNO)
-    if(var(VAR_RESULT) == YES)
-    {
-        special(RogueRouteEvents_ShowBreedersExchangePreview)
-        waitstate
-    }
-
-    bufferspeciesname(STR_VAR_1, VAR_0x8007)
-    bufferspeciesname(STR_VAR_2, VAR_0x8009)
-    msgbox(format("Trade your {STR_VAR_2} for {STR_VAR_1}?"), MSGBOX_YESNO)
+    msgbox(format("Hi! I'm a Pokémon Breeder.\pI'm looking for {STR_VAR_2} from this route."))
+    msgbox(format("If you have one, would you like to trade it for my {STR_VAR_1}?"), MSGBOX_YESNO)
     if(var(VAR_RESULT) == NO)
     {
-        msgbox(format("No pressure. A new partner is worth thinking over."))
+        msgbox(format("Oh, well... Come back if you change your mind."))
         release
         end
     }
@@ -373,7 +362,7 @@ script Rogue_RouteEvent_BreedersExchange
     special(RogueRouteEvents_ValidateBreedersExchangeSelection)
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_MON)
     {
-        bufferspeciesname(STR_VAR_1, VAR_0x8009)
+        bufferspeciesname(STR_VAR_1, VAR_0x8005)
         msgbox(format("I'm only looking for {STR_VAR_1} from this route."))
         release
         end
@@ -398,7 +387,7 @@ script Rogue_RouteEvent_BreedersExchange
     }
 
     bufferpartymonnick(STR_VAR_1, VAR_0x8006)
-    bufferspeciesname(STR_VAR_2, VAR_0x8007)
+    bufferspeciesname(STR_VAR_2, VAR_0x8004)
     msgbox(format("Trade {STR_VAR_1} for {STR_VAR_2}? This can't be undone."), MSGBOX_YESNO)
     if(var(VAR_RESULT) == NO)
     {
@@ -411,8 +400,8 @@ script Rogue_RouteEvent_BreedersExchange
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
-        bufferspeciesname(STR_VAR_1, VAR_0x8007)
-        msgbox(format("There we are. {STR_VAR_1} looks ready for the road—don't keep it waiting!"))
+        bufferspeciesname(STR_VAR_1, VAR_0x8004)
+        msgbox(format("Thanks! Please take good care of {STR_VAR_1}!"))
     }
     else
     {

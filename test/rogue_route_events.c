@@ -1995,6 +1995,8 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     struct RogueAdvPath originalPath;
     struct RogueWildEncounters originalWildEncounters = gRogueRun.wildEncounters;
     struct RogueRouteSceneRequest exchange;
+    struct ObjectEvent offeredObject = {0};
+    struct ObjectEventTemplate originalSavedTemplates[OBJECT_EVENT_TEMPLATES_COUNT];
     struct ObjectEventTemplate objects[5] =
     {
         {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
@@ -2002,6 +2004,7 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     };
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u8 originalSavedCount = gSaveBlock1Ptr->objectEventTemplatesCount;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     u8 count = 2;
@@ -2010,6 +2013,7 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     u8 i;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalSavedTemplates, gSaveBlock1Ptr->objectEventTemplates, sizeof(originalSavedTemplates));
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE);
@@ -2036,12 +2040,20 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
             EXPECT_EQ(objects[i].graphicsId, OBJ_EVENT_GFX_FOLLOW_MON_1);
             EXPECT_EQ(objects[i].x, 13);
             EXPECT_EQ(objects[i].y, 33);
+            offeredObject.graphicsId = objects[i].graphicsId;
+            offeredObject.localId = objects[i].localId;
+            offeredObject.mapNum = gSaveBlock1Ptr->location.mapNum;
+            offeredObject.mapGroup = gSaveBlock1Ptr->location.mapGroup;
+            offeredObject.trainerRange_berryTreeId = objects[i].trainerRange_berryTreeId;
         }
     }
     EXPECT(foundBreeder);
     EXPECT(foundPokemon);
     EXPECT_EQ(VarGet(VAR_FOLLOW_MON_1), exchange.rewardItem);
     EXPECT(RogueRouteScenes_IsFollowMonSlotReserved(1));
+    memcpy(gSaveBlock1Ptr->objectEventTemplates, objects, count * sizeof(objects[0]));
+    gSaveBlock1Ptr->objectEventTemplatesCount = count;
+    EXPECT(RogueRouteScenes_IsBreedersExchangePokemonObject(&offeredObject));
 
     RogueRouteScenes_SetState(exchange.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     EXPECT(!RogueRouteScenes_IsFollowMonSlotReserved(1));
@@ -2077,6 +2089,8 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
 
     gRogueRun.wildEncounters = originalWildEncounters;
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    memcpy(gSaveBlock1Ptr->objectEventTemplates, originalSavedTemplates, sizeof(originalSavedTemplates));
+    gSaveBlock1Ptr->objectEventTemplatesCount = originalSavedCount;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;

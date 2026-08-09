@@ -820,6 +820,33 @@ bool8 RogueRouteScenes_GetCurrentInteractionRequest(struct RogueRouteSceneReques
         request);
 }
 
+bool8 RogueRouteScenes_IsBreedersExchangePokemonObject(const struct ObjectEvent *objectEvent)
+{
+    const struct ObjectEventTemplate *template;
+    struct RogueRouteSceneRequest scene;
+    u16 objectData;
+
+    if(objectEvent == NULL || objectEvent->graphicsId != OBJ_EVENT_GFX_FOLLOW_MON_1)
+        return FALSE;
+
+    template = GetObjectEventTemplateByLocalIdAndMap(
+        objectEvent->localId,
+        objectEvent->mapNum,
+        objectEvent->mapGroup);
+    if(template == NULL || template->script != Rogue_RouteEvent_BreedersExchangePokemon)
+        return FALSE;
+
+    objectData = objectEvent->trainerRange_berryTreeId;
+    if(GetSceneObjectProp(objectData) != 1)
+        return FALSE;
+
+    return GetSceneRequestBySlotAndRole(
+            GetSceneObjectSlot(objectData),
+            GetSceneObjectRole(objectData),
+            &scene)
+        && scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE;
+}
+
 u8 RogueRouteScenes_GetSelectedPropId(void)
 {
     if(gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)

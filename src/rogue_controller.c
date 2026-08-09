@@ -4297,6 +4297,10 @@ bool8 Rogue_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEvent* 
     if(Rogue_RideMonIsCollisionExempt(obstacle, collider))
         return TRUE;
 
+    if(RogueRouteScenes_IsBreedersExchangePokemonObject(obstacle)
+        || RogueRouteScenes_IsBreedersExchangePokemonObject(collider))
+        return FALSE;
+
     if(FollowMon_IsCollisionExempt(obstacle, collider))
         return TRUE;
 
