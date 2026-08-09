@@ -91,6 +91,12 @@ static const struct RogueRouteSceneObjectDefinition sUnboundTutorObjects[] =
     SCENE_OBJECT(1, ROUTE_SCENE_GFX_SEMANTIC_CAMP, Rogue_RouteEvent_UnboundTutorProp),
 };
 
+static const struct RogueRouteSceneObjectDefinition sCampCookObjects[] =
+{
+    SCENE_OBJECT(0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_CampCook),
+    SCENE_OBJECT(1, ROUTE_SCENE_GFX_SECONDARY, Rogue_RouteEvent_CampCookProp),
+};
+
 static const struct RogueRouteSceneObjectDefinition sTravelingMerchantObjects[] =
 {
     SCENE_OBJECT(0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_TravelingMerchant),
@@ -173,6 +179,10 @@ static const struct RogueRouteSceneLotDefinition sApricornArtisanLots[] =
 static const struct RogueRouteSceneLotDefinition sUnboundTutorLots[] =
 {
     SCENE_SPOT_PAIR(ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, sUnboundTutorObjects),
+};
+static const struct RogueRouteSceneLotDefinition sCampCookLots[] =
+{
+    SCENE_SPOT_PAIR(ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, sCampCookObjects),
 };
 static const struct RogueRouteSceneLotDefinition sTravelingMerchantLots[] =
 {
@@ -304,6 +314,14 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sUnboundTutorLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
         .lotCount = ARRAY_COUNT(sUnboundTutorLots),
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK] =
+    {
+        .selectPayload = SelectCampCookPayload,
+        .expandPayload = ExpandCampCookPayload,
+        .lots = sCampCookLots,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
+        .lotCount = ARRAY_COUNT(sCampCookLots),
     },
     [ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT] =
     {

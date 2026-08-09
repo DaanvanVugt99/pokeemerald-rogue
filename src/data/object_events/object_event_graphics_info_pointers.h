@@ -511,7 +511,7 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomHeat;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomMow;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RotomWash;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorWardrobe;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorCauldren;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorCauldron;
 
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSpiritStone;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropOccultAltar;
@@ -1133,7 +1133,7 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_DECOR_ROTOM_MOW] =          &gObjectEventGraphicsInfo_DecorRotomMow,
     [OBJ_EVENT_GFX_DECOR_ROTOM_WASH] =         &gObjectEventGraphicsInfo_RotomWash,
     [OBJ_EVENT_GFX_DECOR_WARDROBE] =           &gObjectEventGraphicsInfo_DecorWardrobe,
-    [OBJ_EVENT_GFX_DECOR_CAULDREN] =           &gObjectEventGraphicsInfo_DecorCauldren,
+    [OBJ_EVENT_GFX_DECOR_CAULDRON] =           &gObjectEventGraphicsInfo_DecorCauldron,
 
     [OBJ_EVENT_GFX_BRENDAN_ALT] =              &gObjectEventGraphicsInfo_BrendanAlt,
     [OBJ_EVENT_GFX_MAY_ALT] =                  &gObjectEventGraphicsInfo_MayAlt,

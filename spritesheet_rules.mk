@@ -1129,7 +1129,7 @@ $(OBJEVENTGFXDIR)/rogue/decor_rotom_wash.4bpp: %.4bpp: %.png
 $(OBJEVENTGFXDIR)/rogue/decor_wardrobe.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -mwidth 4 -mheight 4
 
-$(OBJEVENTGFXDIR)/rogue/decor_cauldren.4bpp: %.4bpp: %.png
+$(OBJEVENTGFXDIR)/rogue/decor_cauldron.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -mwidth 2 -mheight 4
 
 $(OBJEVENTGFXDIR)/rogue/statue_level_0.4bpp: %.4bpp: %.png

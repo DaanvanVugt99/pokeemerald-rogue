@@ -206,6 +206,9 @@ gSpecials::
     def_special RogueRouteEvents_TryCraftApricornBalls
     def_special RogueRouteEvents_PrepareUnboundTutor
     def_special RogueRouteEvents_FinishUnboundTutor
+    def_special RogueRouteEvents_TryCampCookHealParty
+    def_special RogueRouteEvents_TryCampCookGiveBerries
+    def_special RogueRouteEvents_TryCampCookMaxPp
     def_special RogueRouteEvents_FinishTravelingMerchant
     def_special RogueRouteEvents_ShowBreedersExchangePreview
     def_special RogueRouteEvents_ValidateBreedersExchangeSelection

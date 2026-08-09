@@ -73,6 +73,8 @@ extern const u8 Rogue_RouteEvent_ApricornArtisan[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
 extern const u8 Rogue_RouteEvent_UnboundTutor[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
+extern const u8 Rogue_RouteEvent_CampCook[];
+extern const u8 Rogue_RouteEvent_CampCookProp[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 extern const u8 Rogue_RouteEvent_BreedersExchange[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
@@ -230,6 +232,12 @@ static bool8 CanShowUnboundTutor(u8 roomId)
     return gPlayerPartyCount != 0;
 }
 
+static bool8 CanShowCampCook(u8 roomId)
+{
+    (void)roomId;
+    return TRUE;
+}
+
 static bool8 CanShowTravelingMerchant(u8 roomId)
 {
     (void)roomId;
@@ -348,6 +356,28 @@ static const u16 sApricornBalls[] =
     ITEM_LOVE_BALL,
     ITEM_FAST_BALL,
     ITEM_HEAVY_BALL,
+};
+
+static const u16 sCampCookTypedResistBerries[] =
+{
+    ITEM_CHILAN_BERRY,
+    ITEM_OCCA_BERRY,
+    ITEM_PASSHO_BERRY,
+    ITEM_WACAN_BERRY,
+    ITEM_RINDO_BERRY,
+    ITEM_YACHE_BERRY,
+    ITEM_CHOPLE_BERRY,
+    ITEM_KEBIA_BERRY,
+    ITEM_SHUCA_BERRY,
+    ITEM_COBA_BERRY,
+    ITEM_PAYAPA_BERRY,
+    ITEM_TANGA_BERRY,
+    ITEM_CHARTI_BERRY,
+    ITEM_KASIB_BERRY,
+    ITEM_HABAN_BERRY,
+    ITEM_COLBUR_BERRY,
+    ITEM_BABIRI_BERRY,
+    ITEM_ROSELI_BERRY,
 };
 
 #include "data/rogue_unbound_tutor_moves.h"
@@ -611,6 +641,43 @@ static void ExpandUnboundTutorPayload(struct RogueRouteSceneRequest *request, u3
     request->requestedItem = moves[0];
     request->rewardItem = moves[1];
     request->trainerNum = moves[2];
+}
+
+static bool8 SelectCampCookPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    (void)request;
+    *payload = RogueRouteSceneRng_Next(rng);
+    return TRUE;
+}
+
+static u16 SelectCampCookBerryReward(struct RogueRouteSceneRng *rng)
+{
+    u8 attempts;
+
+    for(attempts = 0; attempts < 8; ++attempts)
+    {
+        u16 item;
+        u8 roll = RogueRouteSceneRng_Next(rng) % 3;
+
+        if(roll == 0)
+            item = ITEM_LUM_BERRY;
+        else if(roll == 1)
+            item = ITEM_SITRUS_BERRY;
+        else
+            item = sCampCookTypedResistBerries[RogueRouteSceneRng_Next(rng) % ARRAY_COUNT(sCampCookTypedResistBerries)];
+
+        if(Rogue_IsItemEnabled(item))
+            return item;
+    }
+
+    return ITEM_NONE;
+}
+
+static void ExpandCampCookPayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    request->primaryGraphicsId = OBJ_EVENT_GFX_COOK;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_DECOR_CAULDRON;
+    request->rewardAmount = payload;
 }
 
 static const u8 sTravelingMerchantShopCategories[] =
@@ -1970,6 +2037,119 @@ void RogueRouteEvents_FinishUnboundTutor(void)
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+static bool8 GetAvailableCampCookScene(struct RogueRouteSceneRequest *scene)
+{
+    return RogueRouteScenes_GetCurrentInteractionRequest(scene)
+        && scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK
+        && scene->source == ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF
+        && RogueRouteScenes_GetState(scene->sceneSlot) != ROGUE_ROUTE_EVENT_STATE_COMPLETED;
+}
+
+static void CompleteCampCookScene(const struct RogueRouteSceneRequest *scene)
+{
+    RogueRouteScenes_SetState(scene->sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
+    RogueRouteEvents_MarkSceneFamilyCompleted(scene);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_TryCampCookHealParty(void)
+{
+    struct RogueRouteSceneRequest scene;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!GetAvailableCampCookScene(&scene))
+        return;
+
+    CompleteCampCookScene(&scene);
+}
+
+void RogueRouteEvents_TryCampCookGiveBerries(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct RogueRouteSceneRng rng;
+    u16 rewards[ROGUE_CAMP_COOK_BERRY_REWARD_COUNT];
+    u8 rewardCount = 0;
+    u8 addedCount = 0;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!GetAvailableCampCookScene(&scene))
+        return;
+
+    RogueRouteSceneRng_Seed(&rng, scene.rewardAmount ^ 0xC00C);
+    while(rewardCount < ARRAY_COUNT(rewards))
+    {
+        u16 item = SelectCampCookBerryReward(&rng);
+
+        if(item == ITEM_NONE)
+            return;
+
+        rewards[rewardCount++] = item;
+    }
+
+    while(addedCount < ARRAY_COUNT(rewards))
+    {
+        if(!AddBagItem(rewards[addedCount], 1))
+        {
+            while(addedCount != 0)
+            {
+                --addedCount;
+                RemoveBagItem(rewards[addedCount], 1);
+            }
+
+            gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+            return;
+        }
+
+        ++addedCount;
+    }
+
+    for(addedCount = 0; addedCount < ARRAY_COUNT(rewards); ++addedCount)
+        Rogue_PushPopup_AddItem(rewards[addedCount], 1);
+
+    CompleteCampCookScene(&scene);
+}
+
+void RogueRouteEvents_TryCampCookMaxPp(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct Pokemon *mon;
+    u8 ppBonuses = 0;
+    u8 moveIdx;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(gSpecialVar_0x8004 >= PARTY_SIZE
+        || !GetAvailableCampCookScene(&scene))
+        return;
+
+    mon = &gPlayerParty[gSpecialVar_0x8004];
+    if(GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE
+        || GetMonData(mon, MON_DATA_IS_EGG))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_WRONG_MON;
+        return;
+    }
+
+    ppBonuses = GetMonData(mon, MON_DATA_PP_BONUSES);
+    for(moveIdx = 0; moveIdx < MAX_MON_MOVES; ++moveIdx)
+    {
+        u16 move = GetMonData(mon, MON_DATA_MOVE1 + moveIdx);
+
+        if(move != MOVE_NONE)
+        {
+            u8 maxPp;
+
+            ppBonuses &= gPPUpClearMask[moveIdx];
+            ppBonuses += gPPUpAddValues[moveIdx] * 3;
+            maxPp = CalculatePPWithBonus(move, ppBonuses, moveIdx);
+            SetMonData(mon, MON_DATA_PP1 + moveIdx, &maxPp);
+        }
+    }
+    SetMonData(mon, MON_DATA_PP_BONUSES, &ppBonuses);
+    CalculateMonStats(mon);
+
+    CompleteCampCookScene(&scene);
 }
 
 void RogueRouteEvents_FinishTravelingMerchant(void)

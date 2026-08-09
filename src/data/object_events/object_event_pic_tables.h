@@ -5478,8 +5478,8 @@ static const struct SpriteFrameImage sPicTable_DecorWardrobe[] = {
     obj_frame_tiles(gObjectEventPic_DecorWardrobe),
 };
 
-static const struct SpriteFrameImage sPicTable_DecorCauldren[] = {
-    obj_frame_tiles(gObjectEventPic_DecorCauldren),
+static const struct SpriteFrameImage sPicTable_DecorCauldron[] = {
+    obj_frame_tiles(gObjectEventPic_DecorCauldron),
 };
 
 static const struct SpriteFrameImage sPicTable_RoutePropSpiritStone[] = {obj_frame_tiles(gObjectEventPic_RoutePropSpiritStone)};

@@ -42,6 +42,9 @@ const VAR_BURIED_CACHE_SITE_DUG = VAR_0x8003
 
 const ROGUE_FOSSIL_RESTORATION_STABLE = 0
 const ROGUE_FOSSIL_RESTORATION_ADAPTIVE = 1
+const ROGUE_CAMP_COOK_CHOICE_HEAL = 0
+const ROGUE_CAMP_COOK_CHOICE_BERRIES = 1
+const ROGUE_CAMP_COOK_CHOICE_PP = 2
 
 const POKEDEX_SELECTION_CURATED = 0
 const POKEDEX_SELECTION_TRIAL = 1
@@ -252,6 +255,129 @@ script Rogue_RouteEvent_UnboundTutor
     }
 
     release
+}
+
+script Rogue_RouteEvent_CampCookProp
+{
+    lock
+
+    msgbox(format("A cookfire crackles warmly. Something smells good."))
+
+    release
+}
+
+script Rogue_RouteEvent_CampCook
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("The pot's empty now. Nothing better than a clean finish."))
+        release
+        end
+    }
+
+    msgbox(format("Hey, traveler! My stew's just about ready.\pA good meal can get a team back on its feet.\pWhat'll it be?"))
+    begindynamicmultichoice(16)
+    appenddynamicmultichoice("Full meal", ROGUE_CAMP_COOK_CHOICE_HEAL)
+    appenddynamicmultichoice("Berry pack", ROGUE_CAMP_COOK_CHOICE_BERRIES)
+    appenddynamicmultichoice("PP stew", ROGUE_CAMP_COOK_CHOICE_PP)
+    appenddynamicmultichoice("No thanks", MULTI_B_PRESSED)
+    enddynamicmultichoice(1, 0, 4, TRUE)
+
+    if(var(VAR_RESULT) == ROGUE_CAMP_COOK_CHOICE_HEAL)
+    {
+        call(Rogue_RouteEvent_CampCookHeal)
+    }
+    elif(var(VAR_RESULT) == ROGUE_CAMP_COOK_CHOICE_BERRIES)
+    {
+        call(Rogue_RouteEvent_CampCookBerries)
+    }
+    elif(var(VAR_RESULT) == ROGUE_CAMP_COOK_CHOICE_PP)
+    {
+        call(Rogue_RouteEvent_CampCookPp)
+    }
+    else
+    {
+        msgbox(format("No problem. The fire's warm if you need a quick rest."))
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_CampCookHeal
+{
+    msgbox(format("Then gather your Pokémon around the fire."))
+    call(Common_EventScript_OutOfCenterPartyHeal)
+    special(RogueRouteEvents_TryCampCookHealParty)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        msgbox(format("There we go! Everyone looks bright-eyed again."))
+    }
+    else
+    {
+        msgbox(format("Hm... The meal isn't coming together. Give me a moment."))
+    }
+
+    return
+}
+
+script Rogue_RouteEvent_CampCookBerries
+{
+    msgbox(format("I packed a few Berries for the road. Take them with you."))
+    special(RogueRouteEvents_TryCampCookGiveBerries)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        call(Rogue_Common_DisplayPopups)
+        msgbox(format("Those should come in handy between battles."))
+    }
+    else
+    {
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+        {
+            msgbox(format("Your Bag's packed tight. Make a little room and come back."))
+        }
+        else
+        {
+            msgbox(format("Hm... The meal isn't coming together. Give me a moment."))
+        }
+    }
+
+    return
+}
+
+script Rogue_RouteEvent_CampCookPp
+{
+    msgbox(format("This recipe wakes up a Pokémon's moves.\pWhich Pokémon should have some?"))
+    special(ChoosePartyMon)
+    waitstate
+    if(var(VAR_0x8004) == PARTY_NOTHING_CHOSEN)
+    {
+        msgbox(format("Changed your mind? That's fine. Best not to waste a good bowl."))
+        return
+    }
+
+    bufferpartymonnick(STR_VAR_1, VAR_0x8004)
+    special(RogueRouteEvents_TryCampCookMaxPp)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        msgbox(format("{STR_VAR_1} looks ready to give every move its all."))
+    }
+    else
+    {
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_MON)
+        {
+            msgbox(format("That Egg should stay warm, but it can't eat this yet."))
+        }
+        else
+        {
+            msgbox(format("Hm... The meal isn't coming together. Give me a moment."))
+        }
+    }
+
+    return
 }
 
 script Rogue_RouteEvent_TravelingMerchant

@@ -1,7 +1,7 @@
 const FLAG_HIDE_BERRIES0 = FLAG_TEMP_1
 const FLAG_HIDE_BERRIES1 = FLAG_TEMP_2
 const FLAG_HIDE_BERRIES2 = FLAG_TEMP_3
-const FLAG_HIDE_CAULDREN = FLAG_TEMP_4
+const FLAG_HIDE_CAULDRON = FLAG_TEMP_4
 
 const OBJ_EVENT_MART = 22
 
@@ -30,11 +30,11 @@ script Rogue_Area_FarmingField_OnMapLoad
     hubupgradeunlocked(HUB_UPGRADE_BERRY_FIELD_BREWING)
     if(var(VAR_RESULT) == TRUE)
     {
-        clearflag(FLAG_HIDE_CAULDREN)
+        clearflag(FLAG_HIDE_CAULDRON)
     }
     else
     {
-        setflag(FLAG_HIDE_CAULDREN)
+        setflag(FLAG_HIDE_CAULDRON)
     }
 
     hubupgradeunlocked(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD0)

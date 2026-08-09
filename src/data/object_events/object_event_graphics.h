@@ -930,7 +930,7 @@ const u32 gObjectEventPic_DecorRotomHeat[] = INCBIN_U32("graphics/object_events/
 const u32 gObjectEventPic_DecorRotomMow[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_mow.4bpp");
 const u32 gObjectEventPic_DecorRotomWash[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_wash.4bpp");
 const u32 gObjectEventPic_DecorWardrobe[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_wardrobe.4bpp");
-const u32 gObjectEventPic_DecorCauldren[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_cauldren.4bpp");
+const u32 gObjectEventPic_DecorCauldron[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_cauldron.4bpp");
 
 const u32 gObjectEventPic_RoutePropSpiritStone[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/spirit_stone.4bpp");
 const u32 gObjectEventPic_RoutePropOccultAltar[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/occult_altar.4bpp");
