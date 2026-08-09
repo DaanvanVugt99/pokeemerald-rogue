@@ -1068,6 +1068,7 @@ TEST("Route scene recipes compose bounded unique route objects")
     };
     struct RogueAdvPath originalPath;
     struct Pokemon originalParty[PARTY_SIZE];
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u8 originalPartyCount = gPlayerPartyCount;
     u8 originalRoomId;
     u8 recipeIdx;
@@ -1186,10 +1187,38 @@ TEST("Route scene recipes compose bounded unique route objects")
         }
         EXPECT_EQ(npcCount, 1);
         EXPECT_EQ(propCount, expectedPropScript == NULL ? 0 : 1);
+
+        if(recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER)
+        {
+            struct ObjectEventTemplate activeObjects[8] = {0};
+            u8 activeCount = 5;
+
+            activeObjects[0] = (struct ObjectEventTemplate){.localId = 1, .graphicsId = OBJ_EVENT_GFX_BOY_1, .x = 2, .y = 2};
+            activeObjects[1] = baseObjects[0];
+            activeObjects[2] = baseObjects[1];
+            activeObjects[3] = baseObjects[2];
+            activeObjects[4] = baseObjects[3];
+            RogueRouteScenes_SetState(request.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+            RogueRouteScenes_ModifyObjectEvents(activeObjects, &activeCount, ARRAY_COUNT(activeObjects));
+            EXPECT_EQ(activeCount, 2);
+            npcCount = 0;
+            propCount = 0;
+            for(i = 0; i < activeCount; ++i)
+            {
+                if(activeObjects[i].script == expectedScript)
+                    ++npcCount;
+                else if(activeObjects[i].script == expectedPropScript)
+                    ++propCount;
+            }
+            EXPECT_EQ(npcCount, 1);
+            EXPECT_EQ(propCount, 0);
+            RogueRouteScenes_SetState(request.sceneSlot, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+        }
     }
 
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     memcpy(gPlayerParty, originalParty, sizeof(originalParty));
     gPlayerPartyCount = originalPartyCount;
 }

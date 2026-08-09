@@ -7,6 +7,8 @@
 
 #define SCENE_OBJECT(prop, gfx, objectScript) \
     {objectScript, gfx, prop, ROUTE_SCENE_STATE_MASK_ALL, ROUTE_SCENE_OBJECT_FLAG_NONE}
+#define SCENE_OBJECT_WHILE_NOT_STARTED(prop, gfx, objectScript) \
+    {objectScript, gfx, prop, ROUTE_SCENE_STATE_MASK(ROGUE_ROUTE_EVENT_STATE_NOT_STARTED), ROUTE_SCENE_OBJECT_FLAG_NONE}
 #define SCENE_OBJECT_UNTIL_COMPLETED(prop, gfx, objectScript) \
     {objectScript, gfx, prop, ROUTE_SCENE_STATE_MASK_UNTIL_COMPLETED, ROUTE_SCENE_OBJECT_FLAG_NONE}
 #define SCENE_OBJECT_UNTIL_ROLE_COMPLETE(prop, gfx, objectScript) \
@@ -46,7 +48,7 @@ static const struct RogueRouteSceneObjectDefinition sHexedShrineObjects[] =
 static const struct RogueRouteSceneObjectDefinition sAnomalousFossilOfferObjects[] =
 {
     SCENE_OBJECT(0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_AnomalousFossilOffer),
-    SCENE_OBJECT(1, ROUTE_SCENE_GFX_SEMANTIC_RELIC, Rogue_RouteEvent_AnomalousFossilProp),
+    SCENE_OBJECT_WHILE_NOT_STARTED(1, ROUTE_SCENE_GFX_SEMANTIC_RELIC, Rogue_RouteEvent_AnomalousFossilProp),
 };
 
 static const struct RogueRouteSceneObjectDefinition sAnomalousFossilRestorationObjects[] =
