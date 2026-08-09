@@ -21,6 +21,7 @@
 #include "event_object_movement.h"
 #include "fieldmap.h"
 #include "item.h"
+#include "malloc.h"
 #include "metatile_behavior.h"
 #include "money.h"
 #include "move_relearner.h"
@@ -586,6 +587,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
     u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
@@ -618,6 +620,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueRun.routeSceneRoomId = 1;
     Rogue_SetCurrentDifficulty(2);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
     baseRun = gRogueRun;
 
     for(seed = 1; seed <= 96; ++seed)
@@ -762,6 +765,7 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     gRogueRun.teamEncounterNum = originalTeamNum;
     gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
     Rogue_SetCurrentDifficulty(originalDifficulty);
+    RoguePokedex_SetDexVariant(originalDexVariant);
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
@@ -1542,7 +1546,7 @@ TEST("Declarative route scene visibility drives insertion and restoration")
     bool8 foundConditionalProp;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
-    memcpy(originalSavedTemplates, gSaveBlock1Ptr->objectEventTemplates, sizeof(originalSavedTemplates));
+    memcpy(originalSavedTemplates, gSaveBlock1Ptr->objectEventTemplates, sizeof(*originalSavedTemplates) * OBJECT_EVENT_TEMPLATES_COUNT);
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     gRogueRun.adventureQuests[0].definitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE;
@@ -1621,7 +1625,7 @@ TEST("Declarative route scene visibility drives insertion and restoration")
         EXPECT(objects[i].x != 57 || objects[i].y != 77);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
-    memcpy(gSaveBlock1Ptr->objectEventTemplates, originalSavedTemplates, sizeof(originalSavedTemplates));
+    memcpy(gSaveBlock1Ptr->objectEventTemplates, originalSavedTemplates, sizeof(*originalSavedTemplates) * OBJECT_EVENT_TEMPLATES_COUNT);
     gSaveBlock1Ptr->objectEventTemplatesCount = originalSavedCount;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalHidden);
@@ -2074,11 +2078,11 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
 
 TEST("Breeder's Exchange composes a visible offer and removes it after trading")
 {
-    struct RogueAdvPath originalPath;
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
     struct RogueWildEncounters originalWildEncounters = gRogueRun.wildEncounters;
     struct RogueRouteSceneRequest exchange;
     struct ObjectEvent offeredObject = {0};
-    struct ObjectEventTemplate originalSavedTemplates[OBJECT_EVENT_TEMPLATES_COUNT];
+    struct ObjectEventTemplate *originalSavedTemplates = Alloc(sizeof(*originalSavedTemplates) * OBJECT_EVENT_TEMPLATES_COUNT);
     struct ObjectEventTemplate objects[5] =
     {
         {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 12, .y = 34, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
@@ -2094,8 +2098,19 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     bool8 foundPokemon = FALSE;
     u8 i;
 
-    SetupCurrentEvent(&originalPath, &originalRoomId);
-    memcpy(originalSavedTemplates, gSaveBlock1Ptr->objectEventTemplates, sizeof(originalSavedTemplates));
+    EXPECT_NE(originalPath, NULL);
+    EXPECT_NE(originalSavedTemplates, NULL);
+    if(originalPath == NULL || originalSavedTemplates == NULL)
+    {
+        if(originalPath != NULL)
+            Free(originalPath);
+        if(originalSavedTemplates != NULL)
+            Free(originalSavedTemplates);
+        return;
+    }
+
+    SetupCurrentEvent(originalPath, &originalRoomId);
+    memcpy(originalSavedTemplates, gSaveBlock1Ptr->objectEventTemplates, sizeof(*originalSavedTemplates) * OBJECT_EVENT_TEMPLATES_COUNT);
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE);
@@ -2171,12 +2186,14 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
 
     gRogueRun.wildEncounters = originalWildEncounters;
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
-    memcpy(gSaveBlock1Ptr->objectEventTemplates, originalSavedTemplates, sizeof(originalSavedTemplates));
+    memcpy(gSaveBlock1Ptr->objectEventTemplates, originalSavedTemplates, sizeof(*originalSavedTemplates) * OBJECT_EVENT_TEMPLATES_COUNT);
     gSaveBlock1Ptr->objectEventTemplatesCount = originalSavedCount;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
-    gRogueAdvPath = originalPath;
+    gRogueAdvPath = *originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
     RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
+    Free(originalPath);
+    Free(originalSavedTemplates);
 }
 
 TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Pokemon")

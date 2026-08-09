@@ -92,7 +92,7 @@ TEST("An exhausted path is replaced after its boss")
 
 TEST("Frontier Brain paths cache deterministic previews")
 {
-    struct RogueAdvPath originalPath = gRogueAdvPath;
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
     u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u16 originalBaseSeed = gRogueRun.baseSeed;
@@ -111,6 +111,11 @@ TEST("Frontier Brain paths cache deterministic previews")
     u8 scheduledDifficulties[ADVPATH_FRONTIER_BRAIN_COUNT];
     u8 i;
 
+    EXPECT_NE(originalPath, NULL);
+    if(originalPath == NULL)
+        return;
+
+    *originalPath = gRogueAdvPath;
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
     gRogueRun.baseSeed = 13579;
     Rogue_GetFrontierBrainSchedule(scheduledTrainers, scheduledDifficulties);
@@ -167,12 +172,13 @@ TEST("Frontier Brain paths cache deterministic previews")
     EXPECT(!RogueAdv_GenerateAdventurePathsIfRequired());
     EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
 
-    gRogueAdvPath = originalPath;
+    gRogueAdvPath = *originalPath;
     gRogueRun.baseSeed = originalBaseSeed;
     gRogueRun.adventureRoomId = originalRoomId;
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
     Rogue_SetCurrentDifficulty(originalDifficulty);
     gRngRogueValue = originalRng;
+    Free(originalPath);
 }
 
 TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anchor")

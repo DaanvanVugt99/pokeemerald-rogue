@@ -6426,7 +6426,6 @@ static u8 UNUSED RandomMonType(u16 seedFlag)
 
 #ifdef ROGUE_EXPANSION
 #define WILD_FORM_QUERY_NUM_SPECIES (PLACEHOLDER_START + 1)
-#define WILD_FORM_FAMILY_CAPACITY WILD_FORM_QUERY_NUM_SPECIES
 
 enum
 {
@@ -6895,7 +6894,6 @@ static bool8 GetWildApprovedFormList(u16 familyKey, const u16 **speciesList, u16
 
 #else
 #define WILD_FORM_QUERY_NUM_SPECIES NUM_SPECIES
-#define WILD_FORM_FAMILY_CAPACITY WILD_FORM_QUERY_NUM_SPECIES
 
 static u16 GetWildFormFamilyKey(u16 species)
 {
@@ -6933,16 +6931,14 @@ u16 RogueDebug_SelectWildSpeciesFromCurrentQuery(u16 familyRand, u16 formRand, b
     return SelectWildSpeciesFromFormFamilies(familyRand, formRand, WildFormFlatWeight, NULL, excludeSelectedFamily);
 }
 
-static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *familyCount, u16 *totalWeight, WeightCallback weightFunc, void *data)
+static u8 GetWildFormFamilyWeight(u16 familyKey, WeightCallback weightFunc, void *data)
 {
     u16 species;
     u16 weightIndex = 0;
+    u8 familyWeight = 0;
 #ifdef ROGUE_EXPANSION
     bool8 furfrouAnchorEligible = FALSE;
 #endif
-
-    *familyCount = 0;
-    *totalWeight = 0;
 
     for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
     {
@@ -6959,10 +6955,6 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *
 
             if(weight != 0)
             {
-                u16 i;
-                u16 familyKey = GetWildFormFamilyKey(species);
-                bool8 addNewWeight = FALSE;
-
 #ifdef ROGUE_EXPANSION
                 // Every Furfrou trim has Normal as its primary type. Requiring
                 // Natural Form to survive the query makes the family occupy one
@@ -6973,36 +6965,92 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *
                     continue;
 #endif
 
-                for(i = 0; i < *familyCount; ++i)
-                {
-                    if(familyKeys[i] == familyKey)
-                        break;
-                }
-
-                if(i == *familyCount)
-                {
-                    AGB_ASSERT(*familyCount < WILD_FORM_FAMILY_CAPACITY);
-
-                    if(*familyCount < WILD_FORM_FAMILY_CAPACITY)
-                    {
-                        familyKeys[i] = familyKey;
-                        familyWeights[i] = weight;
-                        addNewWeight = TRUE;
-                        ++(*familyCount);
-                    }
-                }
-                else if(weight > familyWeights[i])
-                {
-                    *totalWeight -= familyWeights[i];
-                    familyWeights[i] = weight;
-                    addNewWeight = TRUE;
-                }
-
-                if(addNewWeight)
-                    *totalWeight += weight;
+                if(GetWildFormFamilyKey(species) == familyKey && weight > familyWeight)
+                    familyWeight = weight;
             }
         }
     }
+
+    return familyWeight;
+}
+
+static bool8 HasCountedWildFormFamilyBefore(u16 limitSpecies, u16 familyKey, WeightCallback weightFunc, void *data)
+{
+    u16 species;
+    u16 weightIndex = 0;
+#ifdef ROGUE_EXPANSION
+    bool8 furfrouAnchorEligible = FALSE;
+#endif
+
+    for(species = SPECIES_NONE + 1; species < limitSpecies; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species))
+        {
+            u8 weight = weightFunc(weightIndex, species, data);
+
+            ++weightIndex;
+
+#ifdef ROGUE_EXPANSION
+            if(species == SPECIES_FURFROU_NATURAL)
+                furfrouAnchorEligible = weight != 0;
+#endif
+
+            if(weight != 0 && GetWildFormFamilyKey(species) == familyKey)
+            {
+#ifdef ROGUE_EXPANSION
+                if(familyKey == WILD_FORM_FAMILY_FURFROU
+                    && !furfrouAnchorEligible)
+                    continue;
+#endif
+
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+static u16 GetWildFormFamilyTotalWeight(WeightCallback weightFunc, void *data)
+{
+    u16 species;
+    u16 weightIndex = 0;
+    u16 totalWeight = 0;
+#ifdef ROGUE_EXPANSION
+    bool8 furfrouAnchorEligible = FALSE;
+#endif
+
+    for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
+    {
+        if(RogueMiscQuery_CheckState(species))
+        {
+            u8 weight = weightFunc(weightIndex, species, data);
+            u16 familyKey;
+
+            ++weightIndex;
+
+#ifdef ROGUE_EXPANSION
+            if(species == SPECIES_FURFROU_NATURAL)
+                furfrouAnchorEligible = weight != 0;
+#endif
+
+            if(weight == 0)
+                continue;
+
+            familyKey = GetWildFormFamilyKey(species);
+
+#ifdef ROGUE_EXPANSION
+            if(familyKey == WILD_FORM_FAMILY_FURFROU
+                && !furfrouAnchorEligible)
+                continue;
+#endif
+
+            if(!HasCountedWildFormFamilyBefore(species, familyKey, weightFunc, data))
+                totalWeight += GetWildFormFamilyWeight(familyKey, weightFunc, data);
+        }
+    }
+
+    return totalWeight;
 }
 
 static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue)
@@ -7087,34 +7135,59 @@ static void ExcludeWildFormFamilyFromQuery(u16 familyKey)
 
 static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
 {
-    u16 familyKeys[WILD_FORM_FAMILY_CAPACITY];
-    u8 familyWeights[WILD_FORM_FAMILY_CAPACITY];
-    u16 familyCount;
-    u16 totalWeight;
+    u16 totalWeight = GetWildFormFamilyTotalWeight(weightFunc, data);
     u16 targetWeight;
-    u16 i;
-    u16 selectedFamilyKey;
+    u16 selectedFamilyKey = SPECIES_NONE;
     u16 species;
-
-    BuildWildFormFamilyWeights(familyKeys, familyWeights, &familyCount, &totalWeight, weightFunc, data);
+    u16 weightIndex = 0;
+#ifdef ROGUE_EXPANSION
+    bool8 furfrouAnchorEligible = FALSE;
+#endif
 
     if(totalWeight == 0)
         return SPECIES_NONE;
 
     targetWeight = familyRand % totalWeight;
-    selectedFamilyKey = SPECIES_NONE;
 
-    for(i = 0; i < familyCount; ++i)
+    for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
     {
-        if(targetWeight < familyWeights[i])
+        if(RogueMiscQuery_CheckState(species))
         {
-            selectedFamilyKey = familyKeys[i];
-            break;
+            u8 weight = weightFunc(weightIndex, species, data);
+            u16 familyKey;
+
+            ++weightIndex;
+
+#ifdef ROGUE_EXPANSION
+            if(species == SPECIES_FURFROU_NATURAL)
+                furfrouAnchorEligible = weight != 0;
+#endif
+
+            if(weight == 0)
+                continue;
+
+            familyKey = GetWildFormFamilyKey(species);
+
+#ifdef ROGUE_EXPANSION
+            if(familyKey == WILD_FORM_FAMILY_FURFROU
+                && !furfrouAnchorEligible)
+                continue;
+#endif
+
+            if(!HasCountedWildFormFamilyBefore(species, familyKey, weightFunc, data))
+            {
+                u8 familyWeight = GetWildFormFamilyWeight(familyKey, weightFunc, data);
+
+                if(targetWeight < familyWeight)
+                {
+                    selectedFamilyKey = familyKey;
+                    break;
+                }
+
+                targetWeight -= familyWeight;
+            }
         }
-
-        targetWeight -= familyWeights[i];
     }
-
     AGB_ASSERT(selectedFamilyKey != SPECIES_NONE);
 
     // Furfrou trims have distinct typings, so typed queries must select from
