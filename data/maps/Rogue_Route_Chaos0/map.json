@@ -723,30 +723,34 @@
       "y": 32,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_CHAOS0",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     },
     {
       "x": 15,
       "y": 6,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_CHAOS0",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     },
     {
       "x": 42,
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_CHAOS0",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     },
     {
       "x": 66,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_CHAOS0",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     }
   ],
-  "coord_events": [],
-  "bg_events": []
+  "coord_events": [
+
+  ],
+  "bg_events": [
+
+  ]
 }

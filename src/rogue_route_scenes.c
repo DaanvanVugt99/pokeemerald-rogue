@@ -914,6 +914,7 @@ static void AppendSceneObject(
     const struct ObjectEventTemplate *spot,
     u8 localId,
     u16 graphicsId,
+    u8 movementType,
     const u8 *script,
     u16 objectData,
     u16 flagId)
@@ -926,7 +927,7 @@ static void AppendSceneObject(
     objectEvent->x = spot->x;
     objectEvent->y = spot->y;
     objectEvent->elevation = spot->elevation;
-    objectEvent->movementType = spot->movementType;
+    objectEvent->movementType = movementType;
     objectEvent->trainerType = TRAINER_TYPE_NONE;
     objectEvent->trainerRange_berryTreeId = objectData;
     objectEvent->script = script;
@@ -1100,12 +1101,24 @@ static bool8 IsSceneObjectVisible(
     return TRUE;
 }
 
+static u8 ResolveSceneObjectMovementType(
+    const struct RogueRouteSceneLotDefinition *lotDefinition,
+    const struct RogueRouteSceneObjectDefinition *object,
+    const struct ObjectEventTemplate *spot)
+{
+    if(IsPlantPatchObject(lotDefinition, object))
+        return MOVEMENT_TYPE_ROUTE_APRICORN_TREE;
+
+    return spot->movementType;
+}
+
 static bool8 RestoreSceneObject(
     struct ObjectEventTemplate *objectEvents,
     u8 objectEventCount,
     const struct ObjectEventTemplate *spot,
     u8 localId,
     u16 graphicsId,
+    u8 movementType,
     const u8 *script,
     u16 objectData,
     u16 flagId)
@@ -1128,7 +1141,7 @@ static bool8 RestoreSceneObject(
             objectEvent->x = spot->x;
             objectEvent->y = spot->y;
             objectEvent->elevation = spot->elevation;
-            objectEvent->movementType = spot->movementType;
+            objectEvent->movementType = movementType;
             objectEvent->trainerType = TRAINER_TYPE_NONE;
             objectEvent->trainerRange_berryTreeId = objectData;
             objectEvent->script = script;
@@ -1145,6 +1158,7 @@ static void RestoreSceneProp(
     u8 objectEventCount,
     const struct ObjectEventTemplate *spot,
     u16 graphicsId,
+    u8 movementType,
     const u8 *script,
     u16 objectData,
     u16 flagId)
@@ -1159,7 +1173,7 @@ static void RestoreSceneProp(
             && objectEvent->x == spot->x
             && objectEvent->y == spot->y)
         {
-            RestoreSceneObject(objectEvents, objectEventCount, spot, objectEvent->localId, graphicsId, script, objectData, flagId);
+            RestoreSceneObject(objectEvents, objectEventCount, spot, objectEvent->localId, graphicsId, movementType, script, objectData, flagId);
             return;
         }
     }
@@ -1284,6 +1298,7 @@ void RogueRouteScenes_RestoreObjectEvents(
             const struct RogueRouteSceneObjectDefinition *object = &lotDefinition->objects[i];
             struct ObjectEventTemplate spot;
             u16 graphicsId = ResolveSceneObjectGraphics(&scene, object);
+            u8 movementType;
             u16 flagId = 0;
 
             if(!GetResolvedSceneObjectSpot(
@@ -1295,6 +1310,7 @@ void RogueRouteScenes_RestoreObjectEvents(
                 object))
                 continue;
 
+            movementType = ResolveSceneObjectMovementType(lotDefinition, object, &spot);
             if(!IsSceneObjectVisible(&scene, object))
             {
                 FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
@@ -1309,6 +1325,7 @@ void RogueRouteScenes_RestoreObjectEvents(
                     &spot,
                     spot.localId,
                     graphicsId,
+                    movementType,
                     object->script,
                     PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
                     flagId);
@@ -1320,6 +1337,7 @@ void RogueRouteScenes_RestoreObjectEvents(
                     objectEventCount,
                     &spot,
                     graphicsId,
+                    movementType,
                     object->script,
                     PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
                     flagId);
@@ -1424,6 +1442,7 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
                 &spot,
                 localId,
                 ResolveSceneObjectGraphics(&scene, object),
+                ResolveSceneObjectMovementType(lotDefinition, object, &spot),
                 object->script,
                 PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
                 0);

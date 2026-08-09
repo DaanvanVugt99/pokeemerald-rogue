@@ -2524,7 +2524,7 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
             EXPECT_EQ(objects[i].y, 11);
             EXPECT_GE(objects[i].x, 9);
             EXPECT_LE(objects[i].x, 11);
-            EXPECT_EQ(objects[i].movementType, MOVEMENT_TYPE_FACE_DOWN);
+            EXPECT_EQ(objects[i].movementType, MOVEMENT_TYPE_ROUTE_APRICORN_TREE);
         }
         else if(objects[i].script == Rogue_RouteEvent_ApricornArtisan)
             ++artisanCount;
