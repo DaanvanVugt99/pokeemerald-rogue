@@ -16,7 +16,7 @@ struct RoguePartyMon
     u8 runTutorMoveLvl : 3;
     u8 pad0 : 4;
 
-    u8 pad1[2];
+    u16 abilityOverride;
 };
 
 STATIC_ASSERT(sizeof(struct RoguePartyMon) == 4, SizeOfRoguePartyMon);
@@ -160,7 +160,7 @@ struct RogueAdventureQuest
     u8 sceneRoomId : 6;
 };
 
-STATIC_ASSERT(sizeof(struct RogueRouteScenePlan) == 12, SizeOfRogueRouteScenePlan);
+STATIC_ASSERT(sizeof(struct RogueRouteScenePlan) == 16, SizeOfRogueRouteScenePlan);
 STATIC_ASSERT(sizeof(struct RogueAdventureQuest) == 8, SizeOfRogueAdventureQuest);
 STATIC_ASSERT(ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT <= 16, AdventureQuestDefinitionFitsPackedId);
 STATIC_ASSERT(ADVPATH_ROOM_COUNT < ROGUE_ADVENTURE_QUEST_INVALID_ROOM, AdventureRoomFitsPackedQuestRoom);

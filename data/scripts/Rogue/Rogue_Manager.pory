@@ -493,6 +493,133 @@ script Rogue_RouteEvent_TravelingMerchant
     release
 }
 
+script Rogue_RouteEvent_FieldRepairWorkbench
+{
+    lock
+
+    msgbox(format("A portable workbench is covered with tiny tools and loose screws."))
+
+    release
+}
+
+script Rogue_RouteEvent_FieldRepairPart
+{
+    lock
+
+    special(RogueRouteEvents_GetInteractionData)
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("Nothing else was left behind."))
+    }
+    else
+    {
+        special(RogueRouteEvents_CollectFieldRepairPart)
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        {
+            msgbox(format("You found a machine part."))
+        }
+        else
+        {
+            msgbox(format("There's nothing useful here now."))
+        }
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_FieldRepairBench
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    special(RogueRouteEvents_BufferFieldRepairBenchData)
+
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+    {
+        msgbox(format("The modulator is spent, but that tune-up should hold for the rest of your run."))
+        release
+        end
+    }
+
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+    {
+        msgbox(format("Ah, just my luck!\pI lost three machine parts nearby.\pBring them back and I can tune one Pokémon's Ability. Could you help?"), MSGBOX_YESNO)
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("Fair enough. I'll keep looking before the parts get kicked farther off the road."))
+            release
+            end
+        }
+
+        special(RogueRouteEvents_TryAcceptFieldRepairBenchQuest)
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        {
+            msgbox(format("Thanks. There should be three parts in all.\pIf you spot anything shiny, bring it here."))
+        }
+        else
+        {
+            msgbox(format("Hm... The modulator isn't responding. Give me a moment to check the wiring."))
+        }
+
+        release
+        end
+    }
+
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_ACTIVE)
+    {
+        buffernumberstring(STR_VAR_2, VAR_0x8007)
+        msgbox(format("I still need all three parts before I can start.\pRecovered: {STR_VAR_2}/3"))
+        release
+        end
+    }
+
+    msgbox(format("That's every part!\pLet's see what the modulator can do..."))
+    special(RogueRouteEvents_BufferFieldRepairBenchData)
+    if(var(VAR_0x8009) == FALSE)
+    {
+        msgbox(format("Oh... It stabilized as {STR_VAR_1}, but none of your current Pokémon can use that tune-up.\pBring me a compatible Pokémon and I'll keep the machine ready."))
+        release
+        end
+    }
+
+    msgbox(format("It stabilized as {STR_VAR_1}.\pWhich Pokémon should receive that Ability?"))
+    special(ChoosePartyMon)
+    waitstate
+    if(var(VAR_0x8004) == PARTY_NOTHING_CHOSEN)
+    {
+        msgbox(format("No problem. The machine is ready when you are."))
+        release
+        end
+    }
+
+    copyvar(VAR_0x8006, VAR_0x8004)
+    bufferpartymonnick(STR_VAR_2, VAR_0x8006)
+    msgbox(format("Tune {STR_VAR_2}'s Ability to {STR_VAR_1}?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == NO)
+    {
+        msgbox(format("Careful choice. The modulator only has one good pulse in it."))
+        release
+        end
+    }
+
+    special(RogueRouteEvents_TryApplyFieldRepairAbility)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        msgbox(format("{STR_VAR_2}'s Ability became {STR_VAR_1}!"))
+    }
+    elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_MON)
+    {
+        msgbox(format("That Pokémon won't respond to this tune-up. Choose another one."))
+    }
+    else
+    {
+        msgbox(format("The modulator cut out. I can try again once it settles."))
+    }
+
+    release
+}
+
 script Rogue_RouteEvent_TideSalvage
 {
     lock

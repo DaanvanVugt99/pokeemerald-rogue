@@ -643,6 +643,7 @@ const u8 gInitialMovementTypeFacingDirections[] = {
 #define OBJ_EVENT_PAL_TAG_ROUTE_EXT              0x11C3
 
 #define OBJ_EVENT_PAL_TAG_GLITCH_NPC_POKABBIE    0x11C4
+#define OBJ_EVENT_PAL_TAG_MACHINE_PART           0x11C5
 
 #define OBJ_EVENT_PAL_TAG_NONE                   0x11FF
 
@@ -822,6 +823,7 @@ static const struct SpritePalette sObjectEventSpritePalettes[] = {
     {gObjectEventPal_PlayerLightningStrike7Base, OBJ_EVENT_PAL_TAG_GLITCH_NPC_LS7},
     {gObjectEventPal_PlayerNacholordBase,       OBJ_EVENT_PAL_TAG_GLITCH_NPC_NACHO},
     {gObjectEventPal_PokabbieNormal,       OBJ_EVENT_PAL_TAG_GLITCH_NPC_POKABBIE},
+    {gObjectEventPal_MachinePart,          OBJ_EVENT_PAL_TAG_MACHINE_PART},
     //{gObjectEventPal_Glitch_NPC_Raven,      OBJ_EVENT_PAL_TAG_GLITCH_NPC_RAVEN},
     {gObjectEventPal_PlayerPlaceholder,     OBJ_EVENT_PAL_TAG_PLAYER},
     {gObjectEventPal_NetPlayerPlaceholder,     OBJ_EVENT_PAL_TAG_NET_PLAYER},

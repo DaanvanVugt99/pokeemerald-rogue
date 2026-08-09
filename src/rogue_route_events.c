@@ -1,5 +1,6 @@
 #include "global.h"
 
+#include "constants/abilities.h"
 #include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
 #include "constants/flags.h"
@@ -78,6 +79,9 @@ extern const u8 Rogue_RouteEvent_CampCook[];
 extern const u8 Rogue_RouteEvent_CampCookProp[];
 extern const u8 Rogue_RouteEvent_MysteryEggCourier[];
 extern const u8 Rogue_RouteEvent_MysteryEggCourierProp[];
+extern const u8 Rogue_RouteEvent_FieldRepairBench[];
+extern const u8 Rogue_RouteEvent_FieldRepairWorkbench[];
+extern const u8 Rogue_RouteEvent_FieldRepairPart[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 extern const u8 Rogue_RouteEvent_BreedersExchange[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
@@ -267,6 +271,13 @@ static bool8 CanShowMysteryEggCourier(u8 roomId)
     return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER)
         && Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY
         && CanSelectMysteryEggCourierSpecies();
+}
+
+static bool8 CanShowFieldRepairBench(u8 roomId)
+{
+    (void)roomId;
+    return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH)
+        && gPlayerPartyCount != 0;
 }
 
 static bool8 CanShowTravelingMerchant(u8 roomId)
@@ -818,6 +829,43 @@ static void ExpandTideSalvagePayload(struct RogueRouteSceneRequest *request, u32
     request->secondaryGraphicsId = OBJ_EVENT_GFX_SWIMMER_M;
     request->rewardItem = sTideSalvageRewards[payload].itemId;
     request->rewardAmount = sTideSalvageRewards[payload].count;
+}
+
+static bool8 SelectFieldRepairBenchPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    u16 groupCount = RogueGift_GetStandardAbilityGroupCount();
+    u16 startIndex;
+    u16 offset;
+
+    (void)request;
+    if(groupCount == 0)
+        return FALSE;
+
+    startIndex = RogueRouteSceneRng_Next(rng) % groupCount;
+    for(offset = 0; offset < groupCount; ++offset)
+    {
+        u16 ability = RogueGift_GetStandardAbilityByGroupIndex((startIndex + offset) % groupCount);
+
+        ability = RogueGift_GetStandardAbilityFlavor(ability, RogueRouteSceneRng_Next(rng));
+        if(ability != ABILITY_NONE && RogueGift_IsStandardAbilityEligible(ability))
+        {
+            *payload = ability;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static void ExpandFieldRepairBenchPayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    if(payload == ABILITY_NONE || payload >= ABILITIES_COUNT)
+        return;
+
+    request->primaryGraphicsId = OBJ_EVENT_GFX_DEVON_EMPLOYEE;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_WORK_TABLE;
+    request->rewardItem = payload;
+    request->trainerNum = TRAINER_NONE;
 }
 
 static bool8 SelectBreedersExchangePayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
@@ -2373,6 +2421,196 @@ void RogueRouteEvents_TryCompleteMysteryEggDelivery(void)
 
     Rogue_PushPopup_AddItem(ITEM_ESCAPE_ROPE, 1);
     scene.recipeId = ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER;
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+static u8 CountFieldRepairParts(u8 progress)
+{
+    return ((progress & (1 << 1)) != 0)
+        + ((progress & (1 << 2)) != 0)
+        + ((progress & (1 << 3)) != 0);
+}
+
+static u8 FindFieldRepairBenchQuest(void)
+{
+    return RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH);
+}
+
+static bool8 CanApplyFieldRepairAbilityToMon(struct Pokemon *mon, u16 ability)
+{
+    u16 species;
+
+    if(mon == NULL
+        || ability == ABILITY_NONE
+        || !RogueGift_IsStandardAbilityEligible(ability)
+        || GetMonData(mon, MON_DATA_SANITY_IS_EGG, NULL))
+        return FALSE;
+
+    species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+    if(species == SPECIES_NONE
+        || GetMonAbility(mon) == ability)
+        return FALSE;
+
+    return TRUE;
+}
+
+static bool8 CanAnyPartyMonApplyFieldRepairAbility(u16 ability)
+{
+    u8 i;
+
+    for(i = 0; i < gPlayerPartyCount; ++i)
+    {
+        if(CanApplyFieldRepairAbilityToMon(&gPlayerParty[i], ability))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+void RogueRouteEvents_BufferFieldRepairBenchData(void)
+{
+    struct RogueRouteSceneRequest scene;
+    u8 questId = FindFieldRepairBenchQuest();
+    const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+    u16 ability = ABILITY_NONE;
+
+    if(quest != NULL)
+        ability = quest->payload[0];
+    else if(RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        && scene.recipeId == ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH)
+        ability = scene.rewardItem;
+
+    if(ability < ABILITIES_COUNT)
+        StringCopy(gStringVar1, gAbilityNames[ability]);
+    else
+        StringCopy(gStringVar1, gText_ThreeQuestionMarks);
+
+    gSpecialVar_0x8007 = quest != NULL ? CountFieldRepairParts(quest->progress) : 0;
+    gSpecialVar_0x8009 = quest != NULL && CanAnyPartyMonApplyFieldRepairAbility(ability);
+}
+
+void RogueRouteEvents_TryAcceptFieldRepairBenchQuest(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct RogueAdventureQuestCreateParams params = {0};
+    u8 questId;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        || scene.lotRole != 0
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+        || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH)
+        || scene.rewardItem == ABILITY_NONE
+        || scene.rewardItem >= ABILITIES_COUNT)
+        return;
+
+    params.payload[0] = scene.rewardItem;
+    params.target = ROGUE_FIELD_REPAIR_PART_COUNT;
+    questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH, &params);
+    if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
+        return;
+
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+static u8 GetOrCreateFieldRepairBenchQuest(const struct RogueRouteSceneRequest *scene)
+{
+    struct RogueAdventureQuestCreateParams params = {0};
+    u8 questId = FindFieldRepairBenchQuest();
+
+    if(questId != ROGUE_ADVENTURE_QUEST_INVALID_ID)
+        return questId;
+    if(scene == NULL
+        || scene->recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH
+        || scene->source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        || scene->rewardItem == ABILITY_NONE
+        || scene->rewardItem >= ABILITIES_COUNT)
+        return ROGUE_ADVENTURE_QUEST_INVALID_ID;
+
+    params.payload[0] = scene->rewardItem;
+    params.target = ROGUE_FIELD_REPAIR_PART_COUNT;
+    return RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH, &params);
+}
+
+void RogueRouteEvents_CollectFieldRepairPart(void)
+{
+    struct RogueRouteSceneRequest scene;
+    u8 questId;
+    const struct RogueAdventureQuest *quest;
+    u8 roleBit;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH
+        || scene.lotRole == 0
+        || scene.lotRole >= ROGUE_ROUTE_SCENE_MAX_ROLES
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
+        return;
+
+    questId = GetOrCreateFieldRepairBenchQuest(&scene);
+    quest = RogueAdventureQuests_Get(questId);
+    roleBit = 1 << scene.lotRole;
+    if(quest == NULL)
+        return;
+    if((quest->progress & roleBit) != 0)
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_ALREADY_DUG;
+        return;
+    }
+
+    if(!RogueAdventureQuests_EmitSignalForQuest(
+            questId,
+            ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+            roleBit))
+        return;
+
+    if(RogueAdventureQuests_IsProgressTargetMet(questId))
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING);
+    else
+        RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+
+    RogueRouteScenes_HideCurrentInteractionObject();
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_TryApplyFieldRepairAbility(void)
+{
+    struct RogueRouteSceneRequest scene;
+    u8 questId = FindFieldRepairBenchQuest();
+    const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+    u8 partySlot = gSpecialVar_0x8006;
+    u16 ability;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(quest == NULL
+        || questId == ROGUE_ADVENTURE_QUEST_INVALID_ID
+        || !RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH
+        || scene.lotRole != 0
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING
+        || !RogueAdventureQuests_IsProgressTargetMet(questId))
+        return;
+
+    ability = quest->payload[0];
+    if(partySlot >= gPlayerPartyCount
+        || !CanApplyFieldRepairAbilityToMon(&gPlayerParty[partySlot], ability))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_WRONG_MON;
+        return;
+    }
+
+    if(!RogueAdventureQuests_EmitSignalForQuest(
+            questId,
+            ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+            1))
+        return;
+
+    gPlayerParty[partySlot].rogueExtraData.abilityOverride = ability;
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }

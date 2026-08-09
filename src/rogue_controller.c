@@ -4836,6 +4836,7 @@ static void BeginRogueRun_ModifyParty(void)
                 SetMonData(&gPlayerParty[i], MON_DATA_SPATK_EV, &temp);
                 SetMonData(&gPlayerParty[i], MON_DATA_SPDEF_EV, &temp);
                 gPlayerParty[i].rogueExtraData.runTutorMoveLvl = 0;
+                gPlayerParty[i].rogueExtraData.abilityOverride = ABILITY_NONE;
 
                 // Force to starter lvl
                 exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL)].growthRate, startLevel);
@@ -5431,12 +5432,17 @@ static u16 GetRequiredBadgesForEggToHatch(u16 species)
 
 static void EndRogueRun(void)
 {
+    u8 i;
+
     HandleForfeitingInCatchingContest();
 
     // Generated quests and their temporary cargo never survive the run boundary.
     RogueAdventureQuests_Clear();
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
+
+    for(i = 0; i < gPlayerPartyCount; ++i)
+        gPlayerParty[i].rogueExtraData.abilityOverride = ABILITY_NONE;
 
     if(Rogue_IsCampaignActive())
         Rogue_DeactivateActiveCampaign();
@@ -5451,8 +5457,6 @@ static void EndRogueRun(void)
 
     // We're back from adventure, so any mon we finished or retired with add to the safari
     {
-        u8 i;
-
         for(i = 0; i < gPlayerPartyCount; ++i)
         {
             u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);

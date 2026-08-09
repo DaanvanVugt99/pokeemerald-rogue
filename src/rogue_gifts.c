@@ -2348,6 +2348,26 @@ static bool8 IsNativeUniqueAbility(const struct DynamicEvolutionFamily* family, 
     return FALSE;
 }
 
+bool8 RogueGift_IsStandardAbilityEligible(u16 ability)
+{
+    return IsDynamicStandardAbilityEligible(ability);
+}
+
+u16 RogueGift_GetStandardAbilityGroupCount(void)
+{
+    return CountDynamicStandardAbilityGroups();
+}
+
+u16 RogueGift_GetStandardAbilityByGroupIndex(u16 groupIndex)
+{
+    return GetDynamicStandardAbilityGroupByIndex(groupIndex);
+}
+
+u16 RogueGift_GetStandardAbilityFlavor(u16 ability, u32 flavorRoll)
+{
+    return GetDynamicStandardAbilityFlavor(ability, flavorRoll);
+}
+
 #ifdef ROGUE_DEBUG
 bool8 RogueGift_DebugIsMoveNativeToEvolutionFamily(u16 species, u16 move)
 {

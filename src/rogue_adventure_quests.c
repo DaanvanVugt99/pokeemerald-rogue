@@ -1,5 +1,6 @@
 #include "global.h"
 
+#include "constants/abilities.h"
 #include "constants/event_objects.h"
 #include "constants/flags.h"
 #include "constants/items.h"
@@ -10,6 +11,7 @@
 #include "event_data.h"
 #include "item.h"
 #include "string_util.h"
+#include "battle_main.h"
 
 #include "rogue.h"
 #include "rogue_adventure_quests.h"
@@ -68,6 +70,10 @@ static const u8 sText_FindBallMaker[] = _("Bring the {STR_VAR_1} to a traveling 
 static const u8 sText_BallMakerReady[] = _("A traveling Ball Maker has set up along this route.\nReward: 5 {STR_VAR_2}");
 static const u8 sText_MysteryEggCourierTitle[] = _("Mystery Egg Courier");
 static const u8 sText_DeliverMysteryEgg[] = _("Deliver the Egg to the Day Care Lady at a rest stop.\nReward: Escape Rope");
+static const u8 sText_FieldRepairBenchTitle[] = _("Field Repair Bench");
+static const u8 sText_FindMachineParts[] = _("Find the three machine parts and return to the technician.\nRecovered: {STR_VAR_1}/3");
+static const u8 sText_AbilityModulatorReady[] = _("The technician is ready to tune one Pokémon's Ability.\nAbility: {STR_VAR_2}");
+static const u8 sText_UnknownAbility[] = _("??????????");
 static const u8 sText_UnknownQuestTitle[] = _("Adventure Quest");
 static const u8 sText_UnknownQuestDescription[] = _("Complete this quest before the adventure ends.");
 
@@ -90,6 +96,19 @@ static void PrepareApricornCraftingDescription(const struct RogueAdventureQuest 
 {
     CopyItemName(quest->payload[0], gStringVar1);
     CopyItemName(quest->payload[1], gStringVar2);
+}
+
+static void PrepareFieldRepairBenchDescription(const struct RogueAdventureQuest *quest)
+{
+    u8 recovered = ((quest->progress & (1 << 1)) != 0)
+        + ((quest->progress & (1 << 2)) != 0)
+        + ((quest->progress & (1 << 3)) != 0);
+
+    ConvertIntToDecimalStringN(gStringVar1, recovered, STR_CONV_MODE_LEFT_ALIGN, 1);
+    if(quest->payload[0] < ABILITIES_COUNT)
+        StringCopy(gStringVar2, gAbilityNames[quest->payload[0]]);
+    else
+        StringCopy(gStringVar2, sText_UnknownAbility);
 }
 
 u16 RogueAdventureQuests_GetFossilSpecies(u16 fossilItem)

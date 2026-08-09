@@ -5055,10 +5055,22 @@ u16 GetUniqueAbilityBySpeciesAndOtId(u16 species, u32 otId)
 
 u16 GetMonAbility(struct Pokemon *mon)
 {
-    u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-    u32 otId = GetMonData(mon, MON_DATA_OT_ID, NULL);
-    u8 abilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM, NULL);
-    return GetAbilityBySpecies(species, abilityNum, otId);
+    u32 monAddr = (u32)mon;
+    u32 partyStart = (u32)gPlayerParty;
+    u32 partyEnd = partyStart + sizeof(gPlayerParty[0]) * gPlayerPartyCount;
+
+    if(monAddr >= partyStart
+        && monAddr < partyEnd
+        && Rogue_IsRunActive()
+        && mon->rogueExtraData.abilityOverride != ABILITY_NONE)
+    {
+        return mon->rogueExtraData.abilityOverride;
+    }
+
+    return GetAbilityBySpecies(
+        GetMonData(mon, MON_DATA_SPECIES, NULL),
+        GetMonData(mon, MON_DATA_ABILITY_NUM, NULL),
+        GetMonData(mon, MON_DATA_OT_ID, NULL));
 }
 
 u16 GetMonUniqueAbility(struct Pokemon *mon)

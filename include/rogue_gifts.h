@@ -26,6 +26,10 @@ u16 RogueGift_GetCustomMonUniqueAbility(u32 id);
 bool8 RogueGift_IsDynamicUniqueAbilityEligible(u16 ability);
 bool8 RogueGift_IsAnomalousUniqueAbility(u16 ability);
 u16 RogueGift_GetDynamicUniqueAbilityPoolCount(void);
+bool8 RogueGift_IsStandardAbilityEligible(u16 ability);
+u16 RogueGift_GetStandardAbilityGroupCount(void);
+u16 RogueGift_GetStandardAbilityByGroupIndex(u16 groupIndex);
+u16 RogueGift_GetStandardAbilityFlavor(u16 ability, u32 flavorRoll);
 
 #ifdef ROGUE_DEBUG
 u16 RogueGift_DebugGetDynamicSynergyProfileId(u16 ability);

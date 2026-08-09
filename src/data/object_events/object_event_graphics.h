@@ -886,6 +886,7 @@ const u16 gObjectEventPal_Glitch_NPC_Erma[] = INCBIN_U16("graphics/object_events
 
 const u16 gObjectEventPal_Misc_Peonia[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/misc/peonia.gbapal");
 const u16 gObjectEventPal_RouteExt[] = INCBIN_U16("graphics/object_events/palettes/route_ext.gbapal");
+const u16 gObjectEventPal_MachinePart[] = INCBIN_U16("graphics/object_events/palettes/machine_part.gbapal");
 
 const u32 gObjectEventPic_PC[] = INCBIN_U32("graphics/object_events/pics/rogue/pc.4bpp");
 const u32 gObjectEventPic_PCStand[] = INCBIN_U32("graphics/object_events/pics/rogue/pc_stand.4bpp");

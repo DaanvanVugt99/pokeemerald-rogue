@@ -13,6 +13,8 @@
     {objectScript, gfx, prop, ROUTE_SCENE_STATE_MASK_UNTIL_COMPLETED, ROUTE_SCENE_OBJECT_FLAG_NONE}
 #define SCENE_OBJECT_UNTIL_ROLE_COMPLETE(prop, gfx, objectScript) \
     {objectScript, gfx, prop, ROUTE_SCENE_STATE_MASK_ALL, ROUTE_SCENE_OBJECT_FLAG_HIDE_IF_QUEST_ROLE_COMPLETE}
+#define SCENE_OBJECT_UNTIL_COMPLETED_OR_ROLE_COMPLETE(prop, gfx, objectScript) \
+    {objectScript, gfx, prop, ROUTE_SCENE_STATE_MASK_UNTIL_COMPLETED, ROUTE_SCENE_OBJECT_FLAG_HIDE_IF_QUEST_ROLE_COMPLETE}
 #define SCENE_SPOT_PAIR_ON(spotType, decorSpotType, terrainMask, objectDefs) \
     {objectDefs, ARRAY_COUNT(objectDefs), spotType, decorSpotType, terrainMask}
 #define SCENE_SPOT_ON(spotType, terrainMask, objectDefs) \
@@ -101,6 +103,17 @@ static const struct RogueRouteSceneObjectDefinition sMysteryEggCourierObjects[] 
 {
     SCENE_OBJECT(0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_MysteryEggCourier),
     SCENE_OBJECT_WHILE_NOT_STARTED(1, ROUTE_SCENE_GFX_SECONDARY, Rogue_RouteEvent_MysteryEggCourierProp),
+};
+
+static const struct RogueRouteSceneObjectDefinition sFieldRepairBenchObjects[] =
+{
+    SCENE_OBJECT(0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_FieldRepairBench),
+    SCENE_OBJECT(1, OBJ_EVENT_GFX_WORK_TABLE, Rogue_RouteEvent_FieldRepairWorkbench),
+};
+
+static const struct RogueRouteSceneObjectDefinition sFieldRepairPartObjects[] =
+{
+    SCENE_OBJECT_UNTIL_COMPLETED_OR_ROLE_COMPLETE(0, OBJ_EVENT_GFX_ITEM_MACHINE_PART, Rogue_RouteEvent_FieldRepairPart),
 };
 
 static const struct RogueRouteSceneObjectDefinition sTravelingMerchantObjects[] =
@@ -193,6 +206,13 @@ static const struct RogueRouteSceneLotDefinition sCampCookLots[] =
 static const struct RogueRouteSceneLotDefinition sMysteryEggCourierLots[] =
 {
     SCENE_SPOT_PAIR(ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, sMysteryEggCourierObjects),
+};
+static const struct RogueRouteSceneLotDefinition sFieldRepairBenchLots[] =
+{
+    SCENE_SPOT_PAIR(ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC, ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR, sFieldRepairBenchObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sFieldRepairPartObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sFieldRepairPartObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sFieldRepairPartObjects),
 };
 static const struct RogueRouteSceneLotDefinition sTravelingMerchantLots[] =
 {
@@ -342,6 +362,15 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lotCount = ARRAY_COUNT(sMysteryEggCourierLots),
         .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER,
     },
+    [ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH] =
+    {
+        .selectPayload = SelectFieldRepairBenchPayload,
+        .expandPayload = ExpandFieldRepairBenchPayload,
+        .lots = sFieldRepairBenchLots,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
+        .lotCount = ARRAY_COUNT(sFieldRepairBenchLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH,
+    },
     [ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT] =
     {
         .selectPayload = SelectTravelingMerchantPayload,
@@ -380,6 +409,7 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
 #undef SCENE_SPOT_PAIR_ON
 #undef SCENE_SPOT_PAIR
 #undef SCENE_SPOT
+#undef SCENE_OBJECT_UNTIL_COMPLETED_OR_ROLE_COMPLETE
 #undef SCENE_OBJECT_UNTIL_ROLE_COMPLETE
 #undef SCENE_OBJECT_UNTIL_COMPLETED
 #undef SCENE_OBJECT

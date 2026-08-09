@@ -94,6 +94,20 @@ static const struct RogueAdventureQuestNodeDefinition sMysteryEggCourierNodes[] 
     },
 };
 
+static const struct RogueAdventureQuestNodeDefinition sFieldRepairBenchNodes[] =
+{
+    {
+        .activeDescription = sText_FindMachineParts,
+        .readyDescription = sText_AbilityModulatorReady,
+        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_NONE,
+        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_OBJECTIVE_PROGRESS,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_SCENE_COMPLETED,
+        .flags = ROGUE_ADVENTURE_QUEST_NODE_FLAG_PROGRESS_SET_BITS,
+        .routeDelay = 0,
+    },
+};
+
 static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT] =
 {
     [ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE] =
@@ -146,6 +160,16 @@ static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENT
         .title = sText_MysteryEggCourierTitle,
         .nodes = sMysteryEggCourierNodes,
         .nodeCount = ARRAY_COUNT(sMysteryEggCourierNodes),
+        .initialNodeId = 0,
+        .cleanupItemSource = QUEST_ITEM_SOURCE_NONE,
+        .protectedItemSource = QUEST_ITEM_SOURCE_NONE,
+    },
+    [ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH] =
+    {
+        .title = sText_FieldRepairBenchTitle,
+        .nodes = sFieldRepairBenchNodes,
+        .prepareDescription = PrepareFieldRepairBenchDescription,
+        .nodeCount = ARRAY_COUNT(sFieldRepairBenchNodes),
         .initialNodeId = 0,
         .cleanupItemSource = QUEST_ITEM_SOURCE_NONE,
         .protectedItemSource = QUEST_ITEM_SOURCE_NONE,

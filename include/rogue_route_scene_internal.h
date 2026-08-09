@@ -134,6 +134,7 @@ void RogueRouteEvents_PrepareSceneTrainers(const struct RogueRouteSceneRequest *
 u8 RogueRouteEvents_OnExitScene(const struct RogueRouteSceneRequest *scene);
 
 bool8 RogueRouteScenes_GetCurrentInteractionRequest(struct RogueRouteSceneRequest *request);
+void RogueRouteScenes_HideCurrentInteractionObject(void);
 u8 RogueRouteScenes_GetSelectedPropId(void);
 void RogueRouteScenes_HideProp(u8 sceneSlot, u8 propId);
 

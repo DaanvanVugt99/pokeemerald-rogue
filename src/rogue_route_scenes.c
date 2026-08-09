@@ -253,6 +253,34 @@ void RogueRouteScenes_HideProp(u8 sceneSlot, u8 propId)
     }
 }
 
+void RogueRouteScenes_HideCurrentInteractionObject(void)
+{
+    struct ObjectEvent *selectedObject;
+    u8 i;
+
+    if(gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
+        return;
+
+    selectedObject = &gObjectEvents[gSelectedObjectEvent];
+
+    FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    for(i = 0; i < gSaveBlock1Ptr->objectEventTemplatesCount; ++i)
+    {
+        struct ObjectEventTemplate *template = &gSaveBlock1Ptr->objectEventTemplates[i];
+
+        if(template->localId == selectedObject->localId)
+        {
+            template->flagId = FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN;
+            break;
+        }
+    }
+
+    RemoveObjectEventByLocalIdAndMap(
+        selectedObject->localId,
+        selectedObject->mapNum,
+        selectedObject->mapGroup);
+}
+
 bool8 RogueRouteScenes_IsFollowMonSlotReserved(u8 slot)
 {
     u8 placementIdx;
@@ -747,10 +775,11 @@ static bool8 GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneReques
         && definition->linkedQuestDefinitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_NONE
         && RogueAdventureQuests_HasDefinition(definition->linkedQuestDefinitionId)
         && !allowSuppressedGenerator
-        // The combined Apricorn recipe deliberately uses its second lot as
-        // the same-route consumer after the grove creates the quest.
+        // These recipes deliberately keep same-route consumers visible after
+        // their generator creates the linked quest.
         && !(recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
-            && GetPlacementRole(placement) == 1))
+            && GetPlacementRole(placement) == 1)
+        && recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH)
         return FALSE;
 
     memset(request, 0, sizeof(*request));
@@ -1131,6 +1160,7 @@ static bool8 IsSceneObjectVisible(
     const struct RogueRouteSceneRequest *scene,
     const struct RogueRouteSceneObjectDefinition *object)
 {
+    const struct RogueRouteRecipeDefinition *definition;
     const struct RogueAdventureQuest *quest;
     u8 state = RogueRouteScenes_GetState(scene->sceneSlot);
 
@@ -1139,7 +1169,16 @@ static bool8 IsSceneObjectVisible(
 
     if((object->flags & ROUTE_SCENE_OBJECT_FLAG_HIDE_IF_QUEST_ROLE_COMPLETE) != 0)
     {
-        quest = RogueAdventureQuests_Get(scene->ownerQuestId);
+        u8 ownerQuestId = scene->ownerQuestId;
+
+        definition = RogueRouteEvents_GetRecipeDefinition(scene->recipeId);
+        if(ownerQuestId == ROGUE_ADVENTURE_QUEST_INVALID_ID
+            && definition != NULL
+            && definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+            && definition->linkedQuestDefinitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_NONE)
+            ownerQuestId = RogueAdventureQuests_FindByDefinition(definition->linkedQuestDefinitionId);
+
+        quest = RogueAdventureQuests_Get(ownerQuestId);
         if(quest != NULL && (quest->progress & (1 << scene->lotRole)) != 0)
             return FALSE;
     }
