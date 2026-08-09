@@ -85,14 +85,14 @@ script Rogue_RouteEvent_BuriedCacheArchaeologist
     {
         if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
         {
-            msgbox(format("My survey points to a buried cache somewhere along this route.\pThere are two promising landmarks, but only one matches the old notes: {STR_VAR_2}\pWould you test the site for me?"), MSGBOX_YESNO)
+            msgbox(format("I think there's something buried on this route.\pThe clue says: {STR_VAR_2}\pWould you help me dig it up?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueRouteEvents_TryAcceptBuriedCache)
                 if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
                 {
                     call(Rogue_Common_DisplayPopups)
-                    msgbox(format("Take this Field Shovel. Inspect both landmarks carefully—the wrong ground may not stay quiet."))
+                    msgbox(format("Here, take this.\pCheck the landmarks carefully. Digging in the wrong spot might disturb a wild Pokémon."))
                 }
                 else
                 {
@@ -106,7 +106,7 @@ script Rogue_RouteEvent_BuriedCacheArchaeologist
         }
         else
         {
-            msgbox(format("The old notes are precise: {STR_VAR_2}\pInspect both landmarks before you commit the shovel."))
+            msgbox(format("The clue says: {STR_VAR_2}\pCheck the landmarks carefully before you dig."))
         }
     }
 
@@ -133,7 +133,7 @@ script Rogue_RouteEvent_BuriedCacheSite
     }
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
-        msgbox(format("{STR_VAR_1}\pThe ground looks deliberately disturbed, but digging without the right tool would ruin the site."))
+        msgbox(format("{STR_VAR_1}\pThe ground looks disturbed. You'll need the right tool to dig here."))
         release
         end
     }
@@ -157,7 +157,7 @@ script Rogue_RouteEvent_BuriedCacheSite
     {
         if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE)
         {
-            msgbox(format("The soil gives way—but there is no cache. Something was nesting beneath it!"))
+            msgbox(format("The soil gives way, but there is no cache.\pA wild Pokémon was disturbed!"))
             playmoncry(VAR_0x8006, CRY_MODE_ENCOUNTER)
             waitmoncry
             special(BattleSetup_StartLegendaryBattle)
@@ -215,20 +215,19 @@ script Rogue_RouteEvent_UnboundTutor
     special(RogueRouteEvents_GetInteractionData)
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
-        msgbox(format("That technique is yours now. Go surprise someone with it."))
+        msgbox(format("That hidden technique is yours now.\pUse it well."))
     }
     else
     {
         special(RogueRouteEvents_PrepareUnboundTutor)
         if(var(VAR_RESULT) != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         {
-            msgbox(format("Hm... None of my lessons suit your team today."))
+            msgbox(format("Hm...\pI don't have a lesson for your Pokémon today."))
             release
             end
         }
 
-        msgbox(format("A good technique doesn't belong to any one species. It belongs to the Pokémon that masters it.\pI can teach one partner {STR_VAR_1}, {STR_VAR_2}, or {STR_VAR_3}.\pOne lesson only. Use left and right to look through your team."))
-        msgbox(format("Ready to train?"), MSGBOX_YESNO)
+        msgbox(format("I know a hidden technique that most Pokémon never get the chance to learn.\pI can teach any Pokémon {STR_VAR_1}, {STR_VAR_2}, or {STR_VAR_3}.\pBut only one lesson. Are you ready?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
         {
             setvar(VAR_0x8004, 0)
@@ -239,7 +238,7 @@ script Rogue_RouteEvent_UnboundTutor
             special(RogueRouteEvents_FinishUnboundTutor)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
-                msgbox(format("Good! No one will see that technique coming."))
+                msgbox(format("Good. That technique should surprise your opponents."))
             }
             else
             {
@@ -261,13 +260,13 @@ script Rogue_RouteEvent_TravelingMerchant
     faceplayer
 
     special(RogueRouteEvents_GetInteractionData)
-    message(format("Found a gap in the market, did I? My stock changes with the road, but my rule doesn't: everything is half price.\pBuying or selling?"))
+    message(format("Welcome!\pMy stock changes from place to place, but everything is half price.\pBuying or selling?"))
     waitmessage
 
     rogue_dynamicpokemart(VAR_0x8007)
     special(RogueRouteEvents_FinishTravelingMerchant)
 
-    msgbox(format("Much obliged. I'll be here until you move on."))
+    msgbox(format("Much obliged!\pI'll be here until you move on."))
     release
 }
 
@@ -286,8 +285,7 @@ script Rogue_RouteEvent_TideSalvage
         end
     }
 
-    msgbox(format("Hey! See that bundle caught in the current?\pHelp me haul it in, and whatever's useful is yours. I can make out {STR_VAR_1} in there."))
-    msgbox(format("Give me a hand?"), MSGBOX_YESNO)
+    msgbox(format("Hey! Something's caught in the current!\pI can see {STR_VAR_1} in there.\pWill you help me pull it in?"), MSGBOX_YESNO)
     if(var(VAR_RESULT) == NO)
     {
         msgbox(format("No worries. I'll keep an eye on it a little longer."))
@@ -299,7 +297,7 @@ script Rogue_RouteEvent_TideSalvage
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
-        msgbox(format("Nice pull! Good thing we got to it before the current did."))
+        msgbox(format("Nice work!\pWe got it before the current carried it off."))
     }
     else
     {
@@ -335,7 +333,7 @@ script Rogue_RouteEvent_BreedersExchange
     bufferspeciesname(STR_VAR_2, VAR_0x8005)
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
-        msgbox(format("I think {STR_VAR_1} has found the right road at last. Take good care of each other."))
+        msgbox(format("Please take good care of {STR_VAR_1}!"))
         release
         end
     }
@@ -363,7 +361,7 @@ script Rogue_RouteEvent_BreedersExchange
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_MON)
     {
         bufferspeciesname(STR_VAR_1, VAR_0x8005)
-        msgbox(format("I'm only looking for {STR_VAR_1} from this route."))
+        msgbox(format("Sorry, I'm looking for {STR_VAR_1} from this route."))
         release
         end
     }
@@ -405,7 +403,7 @@ script Rogue_RouteEvent_BreedersExchange
     }
     else
     {
-        msgbox(format("Hold on. The trade didn't go through, so nothing changed hands."))
+        msgbox(format("Oh? The trade couldn't be completed."))
     }
 
     release
@@ -435,7 +433,7 @@ script Rogue_RouteEvent_HexedShrine
     }
     else
     {
-        msgbox(format("A small burden for a handsome reward...\pTake the {STR_VAR_2}, and ¥{STR_VAR_1} is yours. The hex breaks when the next Boss falls."))
+        msgbox(format("A small burden... for a handsome reward.\pTake the {STR_VAR_2}, and ¥{STR_VAR_1} is yours. The hex fades when the next Boss falls."))
         copyvar(VAR_0x8004, VAR_0x8005)
         callnative(ScriptMenu_ShowItemDescription)
         msgbox(format("Do we have a bargain?"), MSGBOX_YESNO)
@@ -447,13 +445,13 @@ script Rogue_RouteEvent_HexedShrine
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
                 call(Rogue_Common_DisplayPopups)
-                msgbox(format("Heh heh... It is done. Defeat the next Boss, if you wish to be rid of it."))
+                msgbox(format("Heh heh...\pThe price has taken hold. Defeat the next Boss, if you wish to be rid of it."))
             }
             else
             {
                 if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
                 {
-                    msgbox(format("Your Bag is already groaning. It has no room for my little gift."))
+                    msgbox(format("Your Bag is too crowded for my little gift. Make room, then return."))
                 }
                 else
                 {
@@ -506,21 +504,20 @@ script Rogue_RouteEvent_AnomalousFossilOffer
 
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
-        msgbox(format("I've never seen a fossil this well preserved!\pLabel: {STR_VAR_2}\nSpecies trace: {STR_VAR_1}\pA colleague farther ahead may be able to revive it as a Rare Unique Pokémon. Will you take it?"), MSGBOX_YESNO)
+        msgbox(format("Oh! This fossil is in wonderful shape!\pIt's a {STR_VAR_2}. If restored, it may become {STR_VAR_1}.\pA researcher up ahead can revive it. Will you take it?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
         {
             special(RogueRouteEvents_TryAcceptAnomalousFossilQuest)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
-                playfanfare(MUS_OBTAIN_ITEM)
-                waitfanfare
-                msgbox(format("You received the fossil: {STR_VAR_2}.\pTake it to the fossil researcher farther along the road—and be gentle with it!"))
+                call(Rogue_Common_DisplayPopups)
+                msgbox(format("Please, take this.\pA researcher up ahead can revive it. And please, handle it carefully!"))
             }
             else
             {
                 if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
                 {
-                    msgbox(format("I won't risk squeezing it into an overstuffed Bag. Make some room first."))
+                    msgbox(format("Your Bag is too full.\pMake some room before taking the fossil."))
                 }
                 else
                 {
@@ -555,7 +552,7 @@ script Rogue_RouteEvent_AnomalousFossilRestoration
     else
     {
         special(RogueRouteEvents_BufferFossilRestorationData)
-        msgbox(format("Ah, the {STR_VAR_3}! I can bring it back in two different ways.\pA stable restoration keeps its {STR_VAR_1} typing. An adaptive one draws out {STR_VAR_2}.\pEither way, the Pokémon will be Rare and Unique."))
+        msgbox(format("Ah, you brought the {STR_VAR_3}!\pI can restore it two ways. Stable keeps its {STR_VAR_1} type. Adaptive brings out {STR_VAR_2}.\pWhich method should I use?"))
 
         begindynamicmultichoice(16)
         appenddynamicmultichoice("Stable", ROGUE_FOSSIL_RESTORATION_STABLE)
@@ -637,7 +634,7 @@ script Rogue_RouteEvent_AnomalousFossilTryRestore
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
-        msgbox(format("It's alive! Your Rare Unique Pokémon was revived at Lv. 1."))
+        msgbox(format("It's alive!\pYour rare Pokémon was revived at Lv. 1."))
     }
     else
     {
@@ -669,15 +666,14 @@ script Rogue_RouteEvent_ForbiddenStoneOffer
     special(RogueRouteEvents_GetInteractionData)
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
-        msgbox(format("This Odd Keystone once held Spiritomb—all 108 souls. But three have slipped their bonds.\pWill you carry the stone and call them home?"), MSGBOX_YESNO)
+        msgbox(format("This Odd Keystone once held Spiritomb.\pThree souls have escaped from it. Will you carry the stone and find them?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
         {
             special(RogueRouteEvents_TryAcceptForbiddenStoneQuest)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
-                playfanfare(MUS_OBTAIN_ITEM)
-                waitfanfare
-                msgbox(format("You received the Odd Keystone.\pKeep it close. The missing souls will feel its pull as you travel."))
+                call(Rogue_Common_DisplayPopups)
+                msgbox(format("Please, take this.\pKeep it close. The missing souls should react to it."))
             }
             else
             {
@@ -731,11 +727,11 @@ script Rogue_RouteEvent_ForbiddenStoneSoul
         buffernumberstring(STR_VAR_1, VAR_0x8007)
         if(var(VAR_0x8007) == 3)
         {
-            msgbox(format("The last soul sinks into the stone.\pAll 108 are together once more."))
+            msgbox(format("The last soul sank into the stone.\pAll 108 souls are together once more."))
         }
         else
         {
-            msgbox(format("The soul sinks into the stone.\pThe keystone now holds {STR_VAR_1} of the three missing souls."))
+            msgbox(format("The soul sank into the stone.\pThe Odd Keystone now holds {STR_VAR_1} of the three missing souls."))
         }
         removeobject(VAR_LAST_TALKED)
     }
@@ -766,7 +762,7 @@ script Rogue_RouteEvent_ForbiddenStonePayoff
         }
         else
         {
-            msgbox(format("The Odd Keystone is whole again... but Spiritomb is fighting the seal.\pStand with me for the final binding?"), MSGBOX_YESNO)
+            msgbox(format("The Odd Keystone is whole again.\pBut Spiritomb is fighting the seal. Will you help me bind it?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueRouteEvents_PrepareForbiddenStoneBattle)
@@ -809,7 +805,7 @@ script Rogue_RouteEvent_ForbiddenStoneGiveReward
     {
         call(Rogue_Common_DisplayPopups)
         bufferitemname(STR_VAR_1, ITEM_ABILITY_PATCH)
-        msgbox(format("The seal is strong again. You've done more than I could ask. Please—take this {STR_VAR_1} and ¥10,000."))
+        msgbox(format("The seal is strong again.\pPlease, take this reward."))
     }
     else
     {
@@ -850,21 +846,20 @@ script Rogue_RouteEvent_ApricornTree
         }
         else
         {
-            msgbox(format("This ripe Apricorn sways from the branch.\pColor: {STR_VAR_1}\nA Ball Maker could turn it into five {STR_VAR_2}.\pPick this Apricorn?"), MSGBOX_YESNO)
+            msgbox(format("A ripe {STR_VAR_1} Apricorn is growing here.\pA Ball Maker could turn it into five {STR_VAR_2}.\pPick it?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueRouteEvents_TryChooseApricorn)
                 if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
                 {
-                    playfanfare(MUS_OBTAIN_ITEM)
-                    waitfanfare
-                    msgbox(format("You picked the {STR_VAR_1}. Now to find a traveling Ball Maker!"))
+                    call(Rogue_Common_DisplayPopups)
+                    msgbox(format("You picked the {STR_VAR_1}.\pNow to find a Ball Maker!"))
                 }
                 else
                 {
                     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
                     {
-                        msgbox(format("There is nowhere safe to put it. Make some room in your Bag first."))
+                        msgbox(format("Your Bag is full.\pMake room before picking it."))
                     }
                     else
                     {
@@ -897,7 +892,7 @@ script Rogue_RouteEvent_ApricornArtisan
     special(RogueRouteEvents_GetInteractionData)
     if(var(VAR_0x8005) == ITEM_NONE)
     {
-        msgbox(format("I turn Apricorns into special Poké Balls. If you spot a grove, bring me your favorite."))
+        msgbox(format("I turn Apricorns into special Poké Balls.\pIf you find a grove, bring me one."))
     }
     else
     {
@@ -909,7 +904,7 @@ script Rogue_RouteEvent_ApricornArtisan
         }
         else
         {
-            msgbox(format("That {STR_VAR_1} is in fine shape! I can turn it into five {STR_VAR_2}.\pShall I get to work?"), MSGBOX_YESNO)
+            msgbox(format("That's a fine {STR_VAR_1}!\pI can make it into five {STR_VAR_2}.\pShall I start?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueRouteEvents_TryCraftApricornBalls)
@@ -917,7 +912,7 @@ script Rogue_RouteEvent_ApricornArtisan
                 {
                     call(Rogue_Common_DisplayPopups)
                     bufferitemname(STR_VAR_2, VAR_0x8004)
-                    msgbox(format("There we are! Five {STR_VAR_2}, made by hand and ready for adventure."))
+                    msgbox(format("There we are!\pFive {STR_VAR_2}, made from your Apricorn."))
                 }
                 else
                 {
@@ -949,13 +944,13 @@ script Rogue_RouteEvent_StolenTradeCaseOffer
     special(RogueRouteEvents_GetInteractionData)
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
-        msgbox(format("Thieves hit my caravan and ran off with a locked Trade Case! Without it, I can't move on.\pBring it back, and I'll give you a Large Bundle and ¥5,000. Can I count on you?"), MSGBOX_YESNO)
+        msgbox(format("Thieves stole my Trade Case!\pI can't open my shop without it. Bring it back, and I'll give you a Large Bundle and ¥5,000.\pWill you help me?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
         {
             special(RogueRouteEvents_TryAcceptStolenTradeCaseQuest)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
-                msgbox(format("Thank you! They fled up the road, so their camp can't be far.\pI'll find a safe place farther ahead and wait for you there."))
+                msgbox(format("Thank you!\pThey fled up the road, so their camp should be close. I'll wait for you farther ahead."))
             }
             else
             {
@@ -995,8 +990,7 @@ script Rogue_RouteEvent_StolenTradeCaseCamp
             special(RogueRouteEvents_FinishStolenTradeCaseBattle)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
-                playfanfare(MUS_OBTAIN_ITEM)
-                waitfanfare
+                call(Rogue_Common_DisplayPopups)
                 msgbox(format("You recovered the merchant's {STR_VAR_2}."))
             }
             else
@@ -1016,8 +1010,7 @@ script Rogue_RouteEvent_StolenTradeCaseCamp
                     special(RogueRouteEvents_FinishStolenTradeCaseBattle)
                     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
                     {
-                        playfanfare(MUS_OBTAIN_ITEM)
-                        waitfanfare
+                        call(Rogue_Common_DisplayPopups)
                         msgbox(format("You recovered the merchant's {STR_VAR_2}."))
                     }
                     else
@@ -1046,16 +1039,15 @@ script Rogue_RouteEvent_StolenTradeCasePayoff
 
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
-        msgbox(format("The caravan is moving again, all thanks to you. Safe travels, friend!"))
+        msgbox(format("The caravan is moving again, thanks to you.\pSafe travels!"))
     }
     else
     {
-        msgbox(format("Let me see... If that's my Trade Case, then your reward is ready.\pReward: {STR_VAR_1} and ¥5,000."))
+        msgbox(format("That's my Trade Case!\pYour reward is ready."))
         special(RogueRouteEvents_TryClaimStolenTradeCaseReward)
         if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
         {
-            playfanfare(MUS_OBTAIN_ITEM)
-            waitfanfare
+            call(Rogue_Common_DisplayPopups)
             msgbox(format("There are five Pokéblocks in that bundle. You've earned every last one."))
         }
         else

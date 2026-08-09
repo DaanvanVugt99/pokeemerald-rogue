@@ -1324,6 +1324,8 @@ void RogueRouteEvents_FinishStolenTradeCaseBattle(void)
         }
     }
 
+    if(!alreadyHasCase)
+        Rogue_PushPopup_AddItem(scene.requestedItem, 1);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteScenes_HideProp(scene.sceneSlot, 1);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
@@ -1361,6 +1363,8 @@ void RogueRouteEvents_TryClaimStolenTradeCaseReward(void)
     }
 
     FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    Rogue_PushPopup_AddItem(scene.rewardItem, 1);
+    Rogue_PushPopup_AddMoney(ROGUE_STOLEN_TRADE_CASE_REWARD_MONEY);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteScenes_HideProp(scene.sceneSlot, 1);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
@@ -1436,6 +1440,7 @@ void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void)
         return;
     }
 
+    Rogue_PushPopup_AddItem(scene.requestedItem, 1);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     RogueRouteScenes_HideProp(scene.sceneSlot, 1);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
@@ -1601,6 +1606,7 @@ void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void)
         return;
     }
 
+    Rogue_PushPopup_AddItem(ITEM_ODD_KEYSTONE, 1);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
@@ -1836,6 +1842,7 @@ void RogueRouteEvents_TryChooseApricorn(void)
         return;
     }
 
+    Rogue_PushPopup_AddItem(apricorn, 1);
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
