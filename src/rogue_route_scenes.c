@@ -23,8 +23,13 @@
 
 extern const u8 Rogue_RouteEvent_Interact[];
 extern const u8 Rogue_RouteEvent_Prop[];
+extern const u8 Rogue_RouteEvent_AnomalousFossilProp[];
+extern const u8 Rogue_RouteEvent_FossilWorkbench[];
+extern const u8 Rogue_RouteEvent_ApricornProp[];
+extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
-
+extern const u8 Rogue_RouteEvent_BuriedCacheSupplies[];
+extern const u8 Rogue_RouteEvent_BuriedCacheSite[];
 #define ROUTE_SCENE_RECIPE_SHIFT 0
 #define ROUTE_SCENE_RECIPE_MASK  0x3F
 #define ROUTE_SCENE_LOT_SHIFT    6
@@ -230,7 +235,13 @@ void RogueRouteScenes_HideProp(u8 sceneSlot, u8 propId)
         struct ObjectEventTemplate *objectEvent = &gSaveBlock1Ptr->objectEventTemplates[i];
 
         if((objectEvent->script == Rogue_RouteEvent_Prop
-                || objectEvent->script == Rogue_RouteEvent_BreedersExchangePokemon)
+                || objectEvent->script == Rogue_RouteEvent_AnomalousFossilProp
+                || objectEvent->script == Rogue_RouteEvent_FossilWorkbench
+                || objectEvent->script == Rogue_RouteEvent_ApricornProp
+                || objectEvent->script == Rogue_RouteEvent_UnboundTutorProp
+                || objectEvent->script == Rogue_RouteEvent_BreedersExchangePokemon
+                || objectEvent->script == Rogue_RouteEvent_BuriedCacheSupplies
+                || objectEvent->script == Rogue_RouteEvent_BuriedCacheSite)
             && GetSceneObjectSlot(objectEvent->trainerRange_berryTreeId) == sceneSlot
             && GetSceneObjectProp(objectEvent->trainerRange_berryTreeId) == propId)
         {
@@ -713,7 +724,7 @@ u8 RogueRouteScenes_GetPlacementCount(void)
     return count;
 }
 
-bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request)
+static bool8 GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request, bool8 allowSuppressedGenerator)
 {
     const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
     const struct RogueRouteScenePlacement *placement;
@@ -733,6 +744,7 @@ bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteS
     if(definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
         && definition->linkedQuestDefinitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_NONE
         && RogueAdventureQuests_HasDefinition(definition->linkedQuestDefinitionId)
+        && !allowSuppressedGenerator
         // The combined Apricorn recipe deliberately uses its second lot as
         // the same-route consumer after the grove creates the quest.
         && !(recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
@@ -774,13 +786,18 @@ bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteS
     return TRUE;
 }
 
+bool8 RogueRouteScenes_GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request)
+{
+    return GetPlacementRequest(placementIndex, request, FALSE);
+}
+
 static bool8 GetSceneRequestBySlotAndRole(u8 sceneSlot, u8 lotRole, struct RogueRouteSceneRequest *request)
 {
     u8 i;
 
     for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {
-        if(RogueRouteScenes_GetPlacementRequest(i, request)
+        if(GetPlacementRequest(i, request, TRUE)
             && request->sceneSlot == sceneSlot
             && request->lotRole == lotRole)
             return TRUE;

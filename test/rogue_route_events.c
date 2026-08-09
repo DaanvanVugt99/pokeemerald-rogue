@@ -18,6 +18,7 @@
 #include "constants/vars.h"
 
 #include "event_data.h"
+#include "event_object_movement.h"
 #include "fieldmap.h"
 #include "item.h"
 #include "metatile_behavior.h"
@@ -1484,7 +1485,15 @@ TEST("Declarative route scene visibility drives insertion and restoration")
     EXPECT(foundConditionalProp);
 
     memcpy(gSaveBlock1Ptr->objectEventTemplates, objects, count * sizeof(objects[0]));
-    gSaveBlock1Ptr->objectEventTemplatesCount = count;
+    gSaveBlock1Ptr->objectEventTemplates[count] = (struct ObjectEventTemplate){
+        .localId = 45,
+        .graphicsId = OBJ_EVENT_GFX_FOSSIL,
+        .x = 58,
+        .y = 77,
+        .script = Rogue_RouteEvent_AnomalousFossilProp,
+        .trainerRange_berryTreeId = 1 << 4,
+    };
+    gSaveBlock1Ptr->objectEventTemplatesCount = count + 1;
     RogueRouteScenes_HideProp(0, 1);
     foundConditionalProp = FALSE;
     for(i = 0; i < gSaveBlock1Ptr->objectEventTemplatesCount; ++i)
@@ -1494,6 +1503,8 @@ TEST("Declarative route scene visibility drives insertion and restoration")
             foundConditionalProp = TRUE;
             EXPECT_EQ(gSaveBlock1Ptr->objectEventTemplates[i].flagId, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
         }
+        if(gSaveBlock1Ptr->objectEventTemplates[i].localId == 45)
+            EXPECT_EQ(gSaveBlock1Ptr->objectEventTemplates[i].flagId, FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     }
     EXPECT(foundConditionalProp);
     EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
@@ -2163,6 +2174,10 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     questId = RogueAdventureQuests_GetQuestIdAt(0);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[0], offer.requestedItem);
     EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[1], offer.rewardAmount);
+    RogueRouteEvents_GetInteractionData();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    EXPECT_EQ(gSpecialVar_0x8004, offer.rewardItem);
+    EXPECT_EQ(gSpecialVar_0x8005, offer.requestedItem);
 
     RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
     RogueRouteScenes_OnEnterRoute();
@@ -2653,6 +2668,19 @@ TEST("Apricorn Crafting can finish locally or follow the player to a later route
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
     ClearBag();
+}
+
+TEST("Apricorn route trees expose berry animation frames")
+{
+    const struct ObjectEventGraphicsInfo *graphicsInfo =
+        GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_ROUTE_PROP_APRICORN_TREE);
+
+    EXPECT(graphicsInfo != NULL);
+    EXPECT(graphicsInfo->images != NULL);
+    EXPECT(graphicsInfo->images[7].data != NULL);
+    EXPECT(graphicsInfo->images[8].data != NULL);
+    EXPECT_EQ(graphicsInfo->images[7].size, 0x100);
+    EXPECT_EQ(graphicsInfo->images[8].size, 0x100);
 }
 
 TEST("Stolen Trade Case completes its three route-node handoffs")
