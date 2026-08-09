@@ -549,8 +549,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_NPC",
-      "x": 15,
-      "y": 71,
+      "x": 18,
+      "y": 67,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 9,
@@ -562,8 +562,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_DECOR",
-      "x": 16,
-      "y": 70,
+      "x": 17,
+      "y": 67,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 10,
@@ -576,7 +576,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_WATER_NPC",
       "x": 16,
-      "y": 28,
+      "y": 22,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 13,
@@ -587,9 +587,9 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
-      "x": 17,
-      "y": 29,
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 39,
+      "y": 15,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
@@ -601,8 +601,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_CAMP_NPC",
-      "x": 42,
-      "y": 49,
+      "x": 43,
+      "y": 70,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 3,
@@ -614,8 +614,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_CAMP_DECOR",
-      "x": 41,
-      "y": 50,
+      "x": 44,
+      "y": 71,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 4,
@@ -627,8 +627,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_PLANT_PATCH",
-      "x": 36,
-      "y": 93,
+      "x": 14,
+      "y": 81,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 12,
@@ -640,14 +640,66 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_SOLO_NPC",
-      "x": 19,
-      "y": 5,
-      "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "x": 21,
+      "y": 54,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "4",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 25,
+      "y": 18,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 42,
+      "y": 39,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 44,
+      "y": 67,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 8,
+      "y": 69,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "1",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     }
@@ -682,6 +734,10 @@
       "dest_warp_id": "55"
     }
   ],
-  "coord_events": [],
-  "bg_events": []
+  "coord_events": [
+
+  ],
+  "bg_events": [
+
+  ]
 }

@@ -653,8 +653,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_WATER_NPC",
-      "x": 12,
-      "y": 79,
+      "x": 14,
+      "y": 78,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 13,
@@ -665,9 +665,9 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
-      "x": 13,
-      "y": 78,
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 35,
+      "y": 71,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
@@ -679,8 +679,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_WATER_NPC",
-      "x": 27,
-      "y": 20,
+      "x": 26,
+      "y": 6,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 13,
@@ -691,9 +691,9 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
-      "x": 28,
-      "y": 21,
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 14,
+      "y": 40,
       "elevation": 1,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
@@ -705,8 +705,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_RELIC_NPC",
-      "x": 1,
-      "y": 42,
+      "x": 3,
+      "y": 29,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 7,
@@ -718,8 +718,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_RELIC_DECOR",
-      "x": 0,
-      "y": 43,
+      "x": 2,
+      "y": 29,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 8,
@@ -731,10 +731,10 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_PLANT_PATCH",
-      "x": 20,
-      "y": 111,
+      "x": 6,
+      "y": 48,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
       "movement_range_x": 12,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -744,14 +744,53 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_SOLO_NPC",
-      "x": 26,
-      "y": 55,
+      "x": 32,
+      "y": 86,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "4",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 23,
+      "y": 86,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 11,
+      "y": 37,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 48,
+      "y": 35,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     }
@@ -762,16 +801,20 @@
       "y": 113,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_JOHTO_WATER_FRONT0",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     },
     {
       "x": 48,
       "y": 12,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_JOHTO_WATER_FRONT0",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     }
   ],
-  "coord_events": [],
-  "bg_events": []
+  "coord_events": [
+
+  ],
+  "bg_events": [
+
+  ]
 }

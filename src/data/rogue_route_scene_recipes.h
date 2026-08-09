@@ -147,9 +147,9 @@ static const struct RogueRouteSceneLotDefinition sForbiddenStoneOfferLots[] =
 };
 static const struct RogueRouteSceneLotDefinition sForbiddenStoneSoulLots[] =
 {
-    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_MARKER, sForbiddenStoneSoulObjects),
-    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_MARKER, sForbiddenStoneSoulObjects),
-    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_MARKER, sForbiddenStoneSoulObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sForbiddenStoneSoulObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sForbiddenStoneSoulObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sForbiddenStoneSoulObjects),
 };
 static const struct RogueRouteSceneLotDefinition sForbiddenStonePayoffLots[] =
 {
@@ -183,8 +183,8 @@ static const struct RogueRouteSceneLotDefinition sBreedersExchangeLots[] =
 static const struct RogueRouteSceneLotDefinition sBuriedCacheLots[] =
 {
     SCENE_SPOT_PAIR(ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC, ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR, sBuriedCacheArchaeologistObjects),
-    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_MARKER, sBuriedCacheSiteObjects),
-    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_MARKER, sBuriedCacheSiteObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sBuriedCacheSiteObjects),
+    SCENE_SPOT(ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, sBuriedCacheSiteObjects),
 };
 static const struct RogueRouteSceneLotDefinition sTideSalvageLots[] =
 {

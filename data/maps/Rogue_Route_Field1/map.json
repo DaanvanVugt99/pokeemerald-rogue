@@ -692,8 +692,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_RELIC_NPC",
-      "x": 88,
-      "y": 12,
+      "x": 117,
+      "y": 16,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 7,
@@ -705,8 +705,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_RELIC_DECOR",
-      "x": 89,
-      "y": 11,
+      "x": 118,
+      "y": 16,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 8,
@@ -717,9 +717,9 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
-      "x": 36,
-      "y": 15,
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 32,
+      "y": 6,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
@@ -730,7 +730,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
       "x": 37,
       "y": 16,
       "elevation": 3,
@@ -738,40 +738,14 @@
       "movement_range_x": 11,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "1",
-      "script": "Rogue_RouteEvent_Interact",
-      "flag": "0"
-    },
-    {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
-      "x": 123,
-      "y": 13,
-      "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 11,
-      "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "2",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
-      "x": 122,
-      "y": 14,
-      "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 11,
-      "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "2",
-      "script": "Rogue_RouteEvent_Interact",
-      "flag": "0"
-    },
-    {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_MARKER",
-      "x": 5,
-      "y": 10,
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 106,
+      "y": 18,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
@@ -782,15 +756,41 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_SOLO_NPC",
-      "x": 61,
-      "y": 16,
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 64,
+      "y": 3,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 0,
+      "movement_range_x": 11,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "4",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
+      "x": 8,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 11,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "5",
+      "script": "Rogue_RouteEvent_Interact",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_SOLO_NPC",
+      "x": 51,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "6",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     }
@@ -801,30 +801,34 @@
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_FIELD1",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     },
     {
       "x": 2,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_FIELD1",
-      "dest_warp_id": 0
+      "dest_warp_id": "0"
     },
     {
       "x": 22,
       "y": 6,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_FIELD1",
-      "dest_warp_id": 55
+      "dest_warp_id": "55"
     },
     {
       "x": 56,
       "y": 5,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_ROUTE_FIELD1",
-      "dest_warp_id": 55
+      "dest_warp_id": "55"
     }
   ],
-  "coord_events": [],
-  "bg_events": []
+  "coord_events": [
+
+  ],
+  "bg_events": [
+
+  ]
 }

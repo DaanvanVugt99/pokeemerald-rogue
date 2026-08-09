@@ -781,8 +781,8 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
             {
                 {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
                 {.localId = 44, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 11, .y = 9, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 0, .script = Rogue_RouteEvent_Interact},
-                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
-                {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 2, .script = Rogue_RouteEvent_Interact},
+                {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 1, .script = Rogue_RouteEvent_Interact},
+                {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .elevation = 3, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = 2, .script = Rogue_RouteEvent_Interact},
             };
             u8 count = 4;
             u8 archaeologistCount = 0;
@@ -997,7 +997,7 @@ TEST("Route events provide typed exact spots on every classified active route")
             case ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC:
                 hasEligibleRelic = TRUE;
                 if(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR])
-                    hasEligibleBuriedCache = hasEligibleBuriedCache || spotTypeCount[ROGUE_ROUTE_SCENE_SPOT_MARKER] >= 2;
+                    hasEligibleBuriedCache = hasEligibleBuriedCache || spotTypeCount[ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE] >= 2;
                 break;
             case ROGUE_ROUTE_SCENE_SPOT_RELIC_DECOR:
                 EXPECT(hasPairedSpot[spot->trainerRange_berryTreeId][ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC]);
@@ -1043,7 +1043,7 @@ TEST("Route events provide typed exact spots on every classified active route")
     EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_CREATURE_NPC]);
     EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_CREATURE_DECOR]);
     EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_SOLO_NPC]);
-    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_MARKER]);
+    EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE]);
     EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_PLANT_PATCH]);
     EXPECT(hasGlobalSpotType[ROGUE_ROUTE_SCENE_SPOT_WATER_NPC]);
     EXPECT(hasEligibleStall);
@@ -1085,7 +1085,7 @@ TEST("Route scene recipes compose bounded unique route objects")
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC
             : ROGUE_ROUTE_SCENE_SPOT_STALL_NPC;
-        u8 decorSpotType = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_MARKER
+        u8 decorSpotType = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR
             : ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR;
@@ -1356,7 +1356,7 @@ TEST("Route scene spot recipes stay sparse and typed")
                 EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR);
                 break;
             case ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS:
-                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_MARKER);
+                EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE);
                 EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
                 break;
             case ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE:
@@ -1387,7 +1387,7 @@ TEST("Route scene spot recipes stay sparse and typed")
                 }
                 else
                 {
-                    EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_MARKER);
+                    EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE);
                     EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_TYPE_COUNT);
                 }
                 break;
@@ -2351,9 +2351,9 @@ TEST("Forbidden Stone binds three souls before its Spiritomb payoff")
     {
         struct ObjectEventTemplate objects[3] =
         {
-            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[0].lotId, .script = Rogue_RouteEvent_Interact},
-            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[1].lotId, .script = Rogue_RouteEvent_Interact},
-            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_MARKER, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[2].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 41, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 10, .y = 10, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[0].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 42, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 20, .y = 20, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[1].lotId, .script = Rogue_RouteEvent_Interact},
+            {.localId = 43, .graphicsId = OBJ_EVENT_GFX_MART_EMPLOYEE, .x = 30, .y = 30, .movementRangeX = ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE, .trainerType = TRAINER_TYPE_NONE, .trainerRange_berryTreeId = souls[2].lotId, .script = Rogue_RouteEvent_Interact},
         };
         u8 objectCount = ARRAY_COUNT(objects);
 

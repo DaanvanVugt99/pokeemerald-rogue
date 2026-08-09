@@ -5506,7 +5506,7 @@ static const struct SpriteFrameImage sPicTable_RouteMarkerRelicNpc[] = {obj_fram
 static const struct SpriteFrameImage sPicTable_RouteMarkerRelicDecor[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerRelicDecor)};
 static const struct SpriteFrameImage sPicTable_RouteMarkerCreatureNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerCreatureNpc)};
 static const struct SpriteFrameImage sPicTable_RouteMarkerCreatureDecor[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerCreatureDecor)};
-static const struct SpriteFrameImage sPicTable_RouteMarkerMarker[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerMarker)};
+static const struct SpriteFrameImage sPicTable_RouteMarkerCollectable[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerCollectable)};
 static const struct SpriteFrameImage sPicTable_RouteMarkerPlantPatch[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerPlantPatch)};
 static const struct SpriteFrameImage sPicTable_RouteMarkerWaterNpc[] = {obj_frame_tiles(gObjectEventPic_RouteMarkerWaterNpc)};
 

@@ -536,7 +536,7 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerRelicNp
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerRelicDecor;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCreatureNpc;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCreatureDecor;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerMarker;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCollectable;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerPlantPatch;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerWaterNpc;
 
@@ -1120,7 +1120,7 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_ROUTE_MARKER_RELIC_DECOR] =     &gObjectEventGraphicsInfo_RouteMarkerRelicDecor,
     [OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_NPC] =    &gObjectEventGraphicsInfo_RouteMarkerCreatureNpc,
     [OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_DECOR] =  &gObjectEventGraphicsInfo_RouteMarkerCreatureDecor,
-    [OBJ_EVENT_GFX_ROUTE_MARKER_MARKER] =          &gObjectEventGraphicsInfo_RouteMarkerMarker,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE] =     &gObjectEventGraphicsInfo_RouteMarkerCollectable,
     [OBJ_EVENT_GFX_ROUTE_MARKER_PLANT_PATCH] =     &gObjectEventGraphicsInfo_RouteMarkerPlantPatch,
     [OBJ_EVENT_GFX_ROUTE_MARKER_WATER_NPC] =       &gObjectEventGraphicsInfo_RouteMarkerWaterNpc,
     [OBJ_EVENT_GFX_FLAG_ADVENTURE] =           &gObjectEventGraphicsInfo_FlagAdventure,

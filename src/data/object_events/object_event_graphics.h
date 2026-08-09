@@ -955,7 +955,7 @@ const u32 gObjectEventPic_RouteMarkerRelicNpc[] = INCBIN_U32("graphics/object_ev
 const u32 gObjectEventPic_RouteMarkerRelicDecor[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/relic_decor.4bpp");
 const u32 gObjectEventPic_RouteMarkerCreatureNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/creature_npc.4bpp");
 const u32 gObjectEventPic_RouteMarkerCreatureDecor[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/creature_decor.4bpp");
-const u32 gObjectEventPic_RouteMarkerMarker[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/marker.4bpp");
+const u32 gObjectEventPic_RouteMarkerCollectable[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/collectable.4bpp");
 const u32 gObjectEventPic_RouteMarkerPlantPatch[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/plant_patch.4bpp");
 const u32 gObjectEventPic_RouteMarkerWaterNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/water_npc.4bpp");
 
