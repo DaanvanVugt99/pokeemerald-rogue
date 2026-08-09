@@ -17,6 +17,7 @@
 #include "constants/trainer_types.h"
 #include "constants/vars.h"
 
+#include "daycare.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "fieldmap.h"
@@ -66,6 +67,8 @@ extern const u8 Rogue_RouteEvent_UnboundTutor[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const u8 Rogue_RouteEvent_CampCook[];
 extern const u8 Rogue_RouteEvent_CampCookProp[];
+extern const u8 Rogue_RouteEvent_MysteryEggCourier[];
+extern const u8 Rogue_RouteEvent_MysteryEggCourierProp[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 extern const u8 Rogue_RouteEvent_BreedersExchange[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
@@ -512,6 +515,7 @@ TEST("Selected standalone route scene payloads remain immutable")
         ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE,
         ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK,
+        ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER,
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
         ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
         ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,
@@ -533,7 +537,6 @@ TEST("Selected standalone route scene payloads remain immutable")
     u8 i;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
-    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
@@ -545,6 +548,7 @@ TEST("Selected standalone route scene payloads remain immutable")
 
     for(i = 0; i < ARRAY_COUNT(sRecipes); ++i)
     {
+        gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(sRecipes[i]);
         gRogueAdvPath.rooms[0].rngSeed = 0x6100 + i;
         SetDebugPlacement(sRecipes[i], 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
         EXPECT(RogueRouteScenes_GetPlacementRequest(0, &selected));
@@ -694,6 +698,14 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
                 EXPECT_NE(request.requestedItem, request.rewardItem);
                 EXPECT_NE(request.requestedItem, request.trainerNum);
                 EXPECT_NE(request.rewardItem, request.trainerNum);
+            }
+            else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER)
+            {
+                EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
+                EXPECT_EQ(request.primaryGraphicsId, OBJ_EVENT_GFX_WOMAN_4);
+                EXPECT_EQ(request.secondaryGraphicsId, OBJ_EVENT_GFX_BIRCHS_BAG);
+                EXPECT_EQ(request.requestedItem, SPECIES_POOCHYENA);
+                EXPECT_EQ(request.rewardItem, ITEM_ESCAPE_ROPE);
             }
             else if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT)
             {
@@ -1155,31 +1167,49 @@ TEST("Route scene recipes compose bounded unique route objects")
         ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER,
         ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
         ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK,
+        ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER,
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
     };
     struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueWildEncounters originalWildEncounters = gRogueRun.wildEncounters;
     struct Pokemon originalParty[PARTY_SIZE];
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    bool8 originalPropA = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    bool8 originalPropB = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     u8 originalPartyCount = gPlayerPartyCount;
     u8 originalRoomId;
     u8 recipeIdx;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    ClearAdventureQuestSlotsForRouteTest();
     memcpy(originalParty, gPlayerParty, sizeof(originalParty));
     memset(gPlayerParty, 0, sizeof(gPlayerParty));
     CreateMon(&gPlayerParty[0], SPECIES_MAGIKARP, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, 0);
     gPlayerPartyCount = 1;
+    memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
+    gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
 
     for(recipeIdx = 0; recipeIdx < ARRAY_COUNT(sRecipes); ++recipeIdx)
     {
         u8 recipeId = sRecipes[recipeIdx];
         u8 primarySpotType = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_RELIC_NPC
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_NPC
-            : (recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR || recipeId == ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK) ? ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC
+            : (recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
+                || recipeId == ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK
+                || recipeId == ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER) ? ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC
             : ROGUE_ROUTE_SCENE_SPOT_STALL_NPC;
         u8 decorSpotType = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? ROGUE_ROUTE_SCENE_SPOT_COLLECTABLE
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? ROGUE_ROUTE_SCENE_SPOT_WORKBENCH_DECOR
-            : (recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR || recipeId == ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK) ? ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR
+            : (recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR
+                || recipeId == ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK
+                || recipeId == ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER) ? ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR
             : ROGUE_ROUTE_SCENE_SPOT_STALL_DECOR;
         struct RogueRouteSceneRequest request;
         const struct ObjectEventTemplate baseObjects[] =
@@ -1204,11 +1234,13 @@ TEST("Route scene recipes compose bounded unique route objects")
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? Rogue_RouteEvent_AnomalousFossilOffer
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutor
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK ? Rogue_RouteEvent_CampCook
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER ? Rogue_RouteEvent_MysteryEggCourier
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT ? Rogue_RouteEvent_TravelingMerchant
             : Rogue_RouteEvent_AnomalousFossilRestoration;
         const u8 *expectedPropScript = recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE ? NULL
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR ? Rogue_RouteEvent_UnboundTutorProp
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK ? Rogue_RouteEvent_CampCookProp
+            : recipeId == ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER ? Rogue_RouteEvent_MysteryEggCourierProp
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER ? Rogue_RouteEvent_AnomalousFossilProp
             : recipeId == ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION ? Rogue_RouteEvent_FossilWorkbench
             : Rogue_RouteEvent_Prop;
@@ -1219,6 +1251,9 @@ TEST("Route scene recipes compose bounded unique route objects")
         u8 npcCount = 0;
         u8 propCount = 0;
 
+        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+        FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+        FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
         SetDebugPlacement(recipeId, 1, ROGUE_ADVENTURE_QUEST_INVALID_ID);
         EXPECT(GetFirstPlacement(&request));
 
@@ -1312,6 +1347,12 @@ TEST("Route scene recipes compose bounded unique route objects")
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalPropA);
+    RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN, originalPropB);
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
+    gRogueRun.wildEncounters = originalWildEncounters;
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     memcpy(gPlayerParty, originalParty, sizeof(originalParty));
     gPlayerPartyCount = originalPartyCount;
 }
@@ -1463,6 +1504,7 @@ TEST("Route scene spot recipes stay sparse and typed")
             case ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_CAMP:
             case ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR:
             case ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK:
+            case ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER:
                 EXPECT_EQ(spot->spotType, ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC);
                 EXPECT_EQ(spot->decorSpotType, ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR);
                 break;
@@ -1983,6 +2025,97 @@ TEST("Camp Cook offers one route meal service")
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     memcpy(gPlayerParty, originalParty, sizeof(originalParty));
     gPlayerPartyCount = originalPartyCount;
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("Mystery Egg Courier uses a party Egg and Day Care delivery reward")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueWildEncounters originalWildEncounters = gRogueRun.wildEncounters;
+    struct Pokemon originalParty[PARTY_SIZE];
+    struct RogueRouteSceneRequest courier;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u8 originalPartyCount = gPlayerPartyCount;
+    u8 originalRoomId;
+    u8 questId;
+    u8 i;
+    u16 escapeRopeCount;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memcpy(originalParty, gPlayerParty, sizeof(originalParty));
+    ClearAdventureQuestSlotsForRouteTest();
+    ClearBag();
+    memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
+    gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+
+    SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT(GetFirstPlacement(&courier));
+    EXPECT_EQ(courier.primaryGraphicsId, OBJ_EVENT_GFX_OLD_MAN_2);
+    EXPECT_EQ(courier.secondaryGraphicsId, OBJ_EVENT_GFX_BIRCHS_BAG);
+    EXPECT_EQ(courier.requestedItem, SPECIES_POOCHYENA);
+    EXPECT_EQ(courier.rewardItem, ITEM_ESCAPE_ROPE);
+    SelectPlacement(&courier);
+
+    memset(gPlayerParty, 0, sizeof(gPlayerParty));
+    for(i = 0; i < PARTY_SIZE; ++i)
+        CreateMon(&gPlayerParty[i], SPECIES_MAGIKARP, 5, 0, FALSE, 0, OT_ID_PLAYER_ID, i + 1);
+    gPlayerPartyCount = PARTY_SIZE;
+
+    gSpecialVar_0x8006 = PARTY_NOTHING_CHOSEN;
+    RogueRouteEvents_TryAcceptMysteryEggCourierQuest();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+    EXPECT_EQ(RogueRouteScenes_GetState(courier.sceneSlot), ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
+
+    gSpecialVar_0x8006 = 2;
+    RogueRouteEvents_TryAcceptMysteryEggCourierQuest();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+    questId = RogueAdventureQuests_GetQuestIdAt(0);
+    EXPECT_EQ((u8)RogueAdventureQuests_Get(questId)->definitionId, ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER);
+    EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[0], SPECIES_POOCHYENA);
+    EXPECT_EQ(gPlayerPartyCount, PARTY_SIZE);
+    EXPECT(GetMonData(&gPlayerParty[2], MON_DATA_IS_EGG));
+    EXPECT_EQ(GetMonData(&gPlayerParty[2], MON_DATA_SPECIES), SPECIES_POOCHYENA);
+    EXPECT(GetMonData(&gPlayerParty[2], MON_DATA_MODERN_FATEFUL_ENCOUNTER));
+    EXPECT_EQ(RogueRouteScenes_GetState(courier.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    EXPECT(!ShouldEggHatch());
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+
+    RogueRouteEvents_BufferMysteryEggDelivery();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(gSpecialVar_0x8004, 2);
+
+    escapeRopeCount = GetItemCountInBag(ITEM_ESCAPE_ROPE);
+    RogueRouteEvents_TryCompleteMysteryEggDelivery();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
+    EXPECT_EQ(gPlayerPartyCount, PARTY_SIZE - 1);
+    EXPECT_EQ(GetItemCountInBag(ITEM_ESCAPE_ROPE), escapeRopeCount + 1);
+    EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_MYSTERY_EGG_COURIER));
+
+    ClearBag();
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
+    RoguePokedex_SetDexVariant(originalDexVariant);
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    memcpy(gPlayerParty, originalParty, sizeof(originalParty));
+    gPlayerPartyCount = originalPartyCount;
+    gRogueRun.wildEncounters = originalWildEncounters;
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
 }
@@ -3409,6 +3542,7 @@ TEST("All existing route events are registered through declarative tables")
         [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE] = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
         [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN] = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
         [ROGUE_ROUTE_SCENE_RECIPE_APRICORN_ARTISAN] = ROGUE_ADVENTURE_QUEST_DEFINITION_APRICORN_CRAFTING,
+        [ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER] = ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER,
     };
     static const u8 sExpectedFallbackRecipes[] =
     {
@@ -3420,6 +3554,7 @@ TEST("All existing route events are registered through declarative tables")
         ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN,
         ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR,
         ROGUE_ROUTE_SCENE_RECIPE_CAMP_COOK,
+        ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER,
         ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT,
         ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE,
         ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,

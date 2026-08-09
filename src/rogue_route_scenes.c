@@ -27,6 +27,7 @@ extern const u8 Rogue_RouteEvent_AnomalousFossilProp[];
 extern const u8 Rogue_RouteEvent_FossilWorkbench[];
 extern const u8 Rogue_RouteEvent_ApricornProp[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
+extern const u8 Rogue_RouteEvent_MysteryEggCourierProp[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
 extern const u8 Rogue_RouteEvent_BuriedCacheSupplies[];
 extern const u8 Rogue_RouteEvent_BuriedCacheSite[];
@@ -239,6 +240,7 @@ void RogueRouteScenes_HideProp(u8 sceneSlot, u8 propId)
                 || objectEvent->script == Rogue_RouteEvent_FossilWorkbench
                 || objectEvent->script == Rogue_RouteEvent_ApricornProp
                 || objectEvent->script == Rogue_RouteEvent_UnboundTutorProp
+                || objectEvent->script == Rogue_RouteEvent_MysteryEggCourierProp
                 || objectEvent->script == Rogue_RouteEvent_BreedersExchangePokemon
                 || objectEvent->script == Rogue_RouteEvent_BuriedCacheSupplies
                 || objectEvent->script == Rogue_RouteEvent_BuriedCacheSite)

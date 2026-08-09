@@ -97,6 +97,12 @@ static const struct RogueRouteSceneObjectDefinition sCampCookObjects[] =
     SCENE_OBJECT(1, ROUTE_SCENE_GFX_SECONDARY, Rogue_RouteEvent_CampCookProp),
 };
 
+static const struct RogueRouteSceneObjectDefinition sMysteryEggCourierObjects[] =
+{
+    SCENE_OBJECT(0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_MysteryEggCourier),
+    SCENE_OBJECT_WHILE_NOT_STARTED(1, ROUTE_SCENE_GFX_SECONDARY, Rogue_RouteEvent_MysteryEggCourierProp),
+};
+
 static const struct RogueRouteSceneObjectDefinition sTravelingMerchantObjects[] =
 {
     SCENE_OBJECT(0, ROUTE_SCENE_GFX_PRIMARY, Rogue_RouteEvent_TravelingMerchant),
@@ -183,6 +189,10 @@ static const struct RogueRouteSceneLotDefinition sUnboundTutorLots[] =
 static const struct RogueRouteSceneLotDefinition sCampCookLots[] =
 {
     SCENE_SPOT_PAIR(ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, sCampCookObjects),
+};
+static const struct RogueRouteSceneLotDefinition sMysteryEggCourierLots[] =
+{
+    SCENE_SPOT_PAIR(ROGUE_ROUTE_SCENE_SPOT_CAMP_NPC, ROGUE_ROUTE_SCENE_SPOT_CAMP_DECOR, sMysteryEggCourierObjects),
 };
 static const struct RogueRouteSceneLotDefinition sTravelingMerchantLots[] =
 {
@@ -322,6 +332,15 @@ static const struct RogueRouteRecipeDefinition sRouteRecipes[ROGUE_ROUTE_SCENE_R
         .lots = sCampCookLots,
         .source = ROGUE_ROUTE_SCENE_SOURCE_ONE_OFF,
         .lotCount = ARRAY_COUNT(sCampCookLots),
+    },
+    [ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER] =
+    {
+        .selectPayload = SelectMysteryEggCourierPayload,
+        .expandPayload = ExpandMysteryEggCourierPayload,
+        .lots = sMysteryEggCourierLots,
+        .source = ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR,
+        .lotCount = ARRAY_COUNT(sMysteryEggCourierLots),
+        .linkedQuestDefinitionId = ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER,
     },
     [ROGUE_ROUTE_SCENE_RECIPE_TRAVELING_MERCHANT] =
     {

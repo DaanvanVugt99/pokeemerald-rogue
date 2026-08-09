@@ -80,6 +80,20 @@ static const struct RogueAdventureQuestNodeDefinition sApricornCraftingNodes[] =
     },
 };
 
+static const struct RogueAdventureQuestNodeDefinition sMysteryEggCourierNodes[] =
+{
+    {
+        .activeDescription = sText_DeliverMysteryEgg,
+        .readyDescription = sText_DeliverMysteryEgg,
+        .sceneRecipeId = ROGUE_ROUTE_SCENE_RECIPE_NONE,
+        .nextNodeId = ROGUE_ADVENTURE_QUEST_NODE_COMPLETE,
+        .progressSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_NONE,
+        .completionSignal = ROGUE_ADVENTURE_QUEST_SIGNAL_DAYCARE_DELIVERY,
+        .flags = 0,
+        .routeDelay = 0,
+    },
+};
+
 static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT] =
 {
     [ROGUE_ADVENTURE_QUEST_DEFINITION_STOLEN_TRADE_CASE] =
@@ -126,6 +140,15 @@ static const struct RogueAdventureQuestDefinition sQuestDefinitions[ROGUE_ADVENT
         .initialNodeId = 0,
         .cleanupItemSource = QUEST_ITEM_SOURCE_PAYLOAD_0,
         .protectedItemSource = QUEST_ITEM_SOURCE_PAYLOAD_0,
+    },
+    [ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER] =
+    {
+        .title = sText_MysteryEggCourierTitle,
+        .nodes = sMysteryEggCourierNodes,
+        .nodeCount = ARRAY_COUNT(sMysteryEggCourierNodes),
+        .initialNodeId = 0,
+        .cleanupItemSource = QUEST_ITEM_SOURCE_NONE,
+        .protectedItemSource = QUEST_ITEM_SOURCE_NONE,
     },
 };
 

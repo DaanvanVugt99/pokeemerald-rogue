@@ -25,7 +25,10 @@
 #include "constants/hold_effects.h"
 #include "constants/moves.h"
 #include "constants/region_map_sections.h"
+#include "constants/rogue_adventure_quests.h"
 
+#include "rogue.h"
+#include "rogue_adventure_quests.h"
 #include "rogue_controller.h"
 
 #define IS_DITTO(species) (gSpeciesInfo[species].eggGroups[0] == EGG_GROUP_DITTO || gSpeciesInfo[species].eggGroups[1] == EGG_GROUP_DITTO)
@@ -33,6 +36,19 @@
 static void ClearDaycareMonMail(struct DaycareMail *mail);
 static void SetInitialEggData(struct Pokemon *mon, u16 species, struct DayCare *daycare);
 static void DaycarePrintMonInfo(u8 windowId, u32 daycareSlotId, u8 y);
+
+static bool8 IsMysteryEggCourierEgg(struct Pokemon *mon)
+{
+    u8 questId;
+    const struct RogueAdventureQuest *quest;
+
+    if(!GetMonData(mon, MON_DATA_MODERN_FATEFUL_ENCOUNTER))
+        return FALSE;
+
+    questId = RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER);
+    quest = RogueAdventureQuests_Get(questId);
+    return quest != NULL && GetMonData(mon, MON_DATA_SPECIES) == quest->payload[0];
+}
 static u8 ModifyBreedingScoreForOvalCharm(u8 score);
 
 //RogueNote: Stole memory for Rogue dynamic TMs
@@ -1158,6 +1174,8 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
             if (!GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
                 continue;
             if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_IS_BAD_EGG))
+                continue;
+            if (IsMysteryEggCourierEgg(&gPlayerParty[i]))
                 continue;
 
             // Always assume 0 egg cycles left, just incase people decide to be cheeky and pkhex eggs in

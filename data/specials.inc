@@ -209,6 +209,9 @@ gSpecials::
     def_special RogueRouteEvents_TryCampCookHealParty
     def_special RogueRouteEvents_TryCampCookGiveBerries
     def_special RogueRouteEvents_TryCampCookMaxPp
+    def_special RogueRouteEvents_TryAcceptMysteryEggCourierQuest
+    def_special RogueRouteEvents_BufferMysteryEggDelivery
+    def_special RogueRouteEvents_TryCompleteMysteryEggDelivery
     def_special RogueRouteEvents_FinishTravelingMerchant
     def_special RogueRouteEvents_ShowBreedersExchangePreview
     def_special RogueRouteEvents_ValidateBreedersExchangeSelection

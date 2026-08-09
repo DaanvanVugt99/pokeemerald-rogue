@@ -380,6 +380,103 @@ script Rogue_RouteEvent_CampCookPp
     return
 }
 
+script Rogue_RouteEvent_MysteryEggCourierProp
+{
+    lock
+
+    msgbox(format("A small carrier bag has been packed with extra care."))
+
+    release
+}
+
+script Rogue_RouteEvent_MysteryEggCourier
+{
+    lock
+    faceplayer
+
+    special(RogueRouteEvents_GetInteractionData)
+    bufferspeciesname(STR_VAR_1, VAR_0x8005)
+    bufferitemname(STR_VAR_2, VAR_0x8004)
+
+    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_ACTIVE)
+    {
+        msgbox(format("Please bring that Egg to the Day Care Lady at a rest stop.\pShe'll know how to keep it safe."))
+        release
+        end
+    }
+
+    msgbox(format("Hello there. I found a Pokémon Egg near this route.\pIt may hatch into {STR_VAR_1}, but it needs a safer place than the road.\pCould you carry it to the Day Care Lady at a rest stop?"), MSGBOX_YESNO)
+    if(var(VAR_RESULT) == NO)
+    {
+        msgbox(format("I understand. An Egg needs a careful Trainer."))
+        release
+        end
+    }
+
+    call(Rogue_RouteEvent_MysteryEggCourierTryAccept)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        call(Rogue_Common_DisplayPopups)
+        msgbox(format("Thank you. Please keep it with your team until you reach the Day Care Lady."))
+    }
+    elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON)
+    {
+        msgbox(format("Oh... It looks like this Egg can't travel with your team right now."))
+    }
+    else
+    {
+        msgbox(format("Something isn't right. I'll keep the Egg warm for now."))
+    }
+
+    release
+}
+
+script Rogue_RouteEvent_MysteryEggCourierTryAccept
+{
+    setvar(VAR_0x8006, PARTY_NOTHING_CHOSEN)
+    special(RogueRouteEvents_TryAcceptMysteryEggCourierQuest)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL)
+    {
+        msgbox(format("Your party is full. One Pokémon will have to be released before you can carry the Egg. Make room?"), MSGBOX_YESNO)
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("That's all right. The Egg can wait here a little longer."))
+            return
+        }
+
+        special(ChoosePartyMon)
+        waitstate
+        if(var(VAR_0x8004) == PARTY_NOTHING_CHOSEN)
+        {
+            msgbox(format("Changed your mind? That's fine. No Pokémon was released."))
+            return
+        }
+
+        copyvar(VAR_0x8006, VAR_0x8004)
+        bufferpartymonnick(STR_VAR_1, VAR_0x8006)
+        msgbox(format("Release {STR_VAR_1} and carry the Egg?"), MSGBOX_YESNO)
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("We'll leave your team as it is. No Pokémon was released."))
+            return
+        }
+
+        if(var(VAR_0x8006) == 0)
+        {
+            call(Rogue_ScriptHideFollower)
+        }
+        special(RogueRouteEvents_TryAcceptMysteryEggCourierQuest)
+        copyvar(VAR_0x8007, VAR_RESULT)
+        if(var(VAR_0x8006) == 0)
+        {
+            call(Rogue_ScriptShowFollower)
+        }
+        copyvar(VAR_RESULT, VAR_0x8007)
+    }
+
+    return
+}
+
 script Rogue_RouteEvent_TravelingMerchant
 {
     lock
@@ -2561,6 +2658,49 @@ script Rogue_SpeakDaycareLady
 {
     lock
     faceplayer
+
+    special(RogueRouteEvents_BufferMysteryEggDelivery)
+    if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        msgbox(format("Oh! Is that the Egg from the road?\pYou brought it all this way? Thank you, dear."))
+
+        if(var(VAR_0x8004) == 0)
+        {
+            call(Rogue_ScriptHideFollower)
+        }
+        special(RogueRouteEvents_TryCompleteMysteryEggDelivery)
+        copyvar(VAR_0x8007, VAR_RESULT)
+        if(var(VAR_0x8004) == 0)
+        {
+            call(Rogue_ScriptShowFollower)
+        }
+        copyvar(VAR_RESULT, VAR_0x8007)
+
+        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        {
+            call(Rogue_Common_DisplayPopups)
+            msgbox(format("We use these when young Pokémon wander too far from the yard.\pTake one with you. It may guide you safely back someday."))
+            release
+            end
+        }
+        elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_NO_SPACE)
+        {
+            msgbox(format("Oh dear. Your Bag is too full for my thanks.\pMake a little room, and I'll take the Egg then."))
+            release
+            end
+        }
+        else
+        {
+            msgbox(format("Oh? Something seems unsettled. Let's try again in a moment."))
+            release
+            end
+        }
+    }
+    elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM)
+    {
+        msgbox(format("Oh dear... I don't see the Egg with your team.\pIf you find it, please bring it straight to me."))
+    }
+
     msgbox(format("Why hello dear!\nI'm the Day Care Lady.\pI can hold onto Pokémon for you, if you'd like."), MSGBOX_DEFAULT)
 
     message(format("Which {PKMN} slot are you interested in?"))

@@ -66,6 +66,8 @@ static const u8 sText_SealingGroundReady[] = _("The Channeler is waiting somewhe
 static const u8 sText_ApricornCraftingTitle[] = _("Apricorn Crafting");
 static const u8 sText_FindBallMaker[] = _("Bring the {STR_VAR_1} to a traveling Ball Maker.\nReward: 5 {STR_VAR_2}");
 static const u8 sText_BallMakerReady[] = _("A traveling Ball Maker has set up along this route.\nReward: 5 {STR_VAR_2}");
+static const u8 sText_MysteryEggCourierTitle[] = _("Mystery Egg Courier");
+static const u8 sText_DeliverMysteryEgg[] = _("Deliver the Egg to the Day Care Lady at a rest stop.\nReward: Escape Rope");
 static const u8 sText_UnknownQuestTitle[] = _("Adventure Quest");
 static const u8 sText_UnknownQuestDescription[] = _("Complete this quest before the adventure ends.");
 
@@ -267,6 +269,15 @@ void RogueAdventureQuests_Clear(void)
 
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+}
+
+void RogueAdventureQuests_Remove(u8 questId)
+{
+    if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+        return;
+
+    CleanupQuest(&gRogueRun.adventureQuests[questId]);
+    memset(&gRogueRun.adventureQuests[questId], 0, sizeof(gRogueRun.adventureQuests[questId]));
 }
 
 u8 RogueAdventureQuests_Create(u8 definitionId, const struct RogueAdventureQuestCreateParams *params)

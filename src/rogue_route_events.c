@@ -19,6 +19,7 @@
 #include "event_object_movement.h"
 #include "battle_main.h"
 #include "characters.h"
+#include "daycare.h"
 #include "fieldmap.h"
 #include "field_screen_effect.h"
 #include "field_weather.h"
@@ -75,6 +76,8 @@ extern const u8 Rogue_RouteEvent_UnboundTutor[];
 extern const u8 Rogue_RouteEvent_UnboundTutorProp[];
 extern const u8 Rogue_RouteEvent_CampCook[];
 extern const u8 Rogue_RouteEvent_CampCookProp[];
+extern const u8 Rogue_RouteEvent_MysteryEggCourier[];
+extern const u8 Rogue_RouteEvent_MysteryEggCourierProp[];
 extern const u8 Rogue_RouteEvent_TravelingMerchant[];
 extern const u8 Rogue_RouteEvent_BreedersExchange[];
 extern const u8 Rogue_RouteEvent_BreedersExchangePokemon[];
@@ -236,6 +239,34 @@ static bool8 CanShowCampCook(u8 roomId)
 {
     (void)roomId;
     return TRUE;
+}
+
+static bool8 CanSelectMysteryEggCourierSpecies(void)
+{
+    u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
+    u8 i;
+
+    for(i = 0; i < encounterCount; ++i)
+    {
+        u16 species = Rogue_GetCurrentWildEncounterSpecies(i);
+        u16 eggSpecies = Rogue_GetEggSpecies(species);
+
+        if(eggSpecies != SPECIES_NONE
+            && eggSpecies != SPECIES_EGG
+            && RoguePokedex_IsSpeciesEnabled(eggSpecies))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 CanShowMysteryEggCourier(u8 roomId)
+{
+    (void)roomId;
+
+    return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER)
+        && Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY
+        && CanSelectMysteryEggCourierSpecies();
 }
 
 static bool8 CanShowTravelingMerchant(u8 roomId)
@@ -678,6 +709,42 @@ static void ExpandCampCookPayload(struct RogueRouteSceneRequest *request, u32 pa
     request->primaryGraphicsId = OBJ_EVENT_GFX_COOK;
     request->secondaryGraphicsId = OBJ_EVENT_GFX_DECOR_CAULDRON;
     request->rewardAmount = payload;
+}
+
+static bool8 SelectMysteryEggCourierPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
+{
+    u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
+    u8 startIndex;
+    u8 offset;
+
+    (void)request;
+    if(encounterCount == 0)
+        return FALSE;
+
+    startIndex = RogueRouteSceneRng_Next(rng) % encounterCount;
+    for(offset = 0; offset < encounterCount; ++offset)
+    {
+        u16 species = Rogue_GetCurrentWildEncounterSpecies((startIndex + offset) % encounterCount);
+        u16 eggSpecies = Rogue_GetEggSpecies(species);
+
+        if(eggSpecies != SPECIES_NONE
+            && eggSpecies != SPECIES_EGG
+            && RoguePokedex_IsSpeciesEnabled(eggSpecies))
+        {
+            *payload = eggSpecies;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static void ExpandMysteryEggCourierPayload(struct RogueRouteSceneRequest *request, u32 payload)
+{
+    request->primaryGraphicsId = OBJ_EVENT_GFX_OLD_MAN_2;
+    request->secondaryGraphicsId = OBJ_EVENT_GFX_BIRCHS_BAG;
+    request->requestedItem = payload;
+    request->rewardItem = ITEM_ESCAPE_ROPE;
 }
 
 static const u8 sTravelingMerchantShopCategories[] =
@@ -2150,6 +2217,164 @@ void RogueRouteEvents_TryCampCookMaxPp(void)
     CalculateMonStats(mon);
 
     CompleteCampCookScene(&scene);
+}
+
+static u8 FindMysteryEggCourierQuest(void)
+{
+    return RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER);
+}
+
+static u8 FindMysteryEggCourierPartySlot(u16 eggSpecies)
+{
+    u8 i;
+
+    for(i = 0; i < gPlayerPartyCount; ++i)
+    {
+        if(GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+            && Rogue_GetEggSpecies(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES)) == eggSpecies)
+            return i;
+    }
+
+    return PARTY_NOTHING_CHOSEN;
+}
+
+static u8 TryGiveMysteryEggToParty(u16 species, u8 replacementSlot)
+{
+    struct Pokemon egg;
+    bool8 isEgg = TRUE;
+    bool8 isCourierEgg = TRUE;
+    bool8 needsReplacement;
+    u8 destinationSlot;
+
+    if(species == SPECIES_NONE || species == SPECIES_EGG || !RogueTrial_CanReceiveGift())
+        return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+
+    CreateEgg(&egg, Rogue_GetEggSpecies(species), FALSE);
+    SetMonData(&egg, MON_DATA_IS_EGG, &isEgg);
+    SetMonData(&egg, MON_DATA_MODERN_FATEFUL_ENCOUNTER, &isCourierEgg);
+    needsReplacement = CalculatePlayerPartyCount() >= Rogue_GetMaxPartySize();
+
+    if(needsReplacement)
+    {
+        if(replacementSlot == PARTY_NOTHING_CHOSEN)
+            return ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL;
+        if(replacementSlot >= gPlayerPartyCount
+            || !Rogue_CanReleasePartyMonForCaughtMon(&egg, replacementSlot)
+            || !Rogue_TryRemoveDuplicateHeldItemForParty(&egg, replacementSlot, PARTY_SIZE))
+            return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+    }
+    else
+    {
+        if(!Rogue_CanAddCaughtMonToParty(&egg)
+            || !Rogue_TryRemoveDuplicateHeldItemForParty(&egg, PARTY_SIZE, PARTY_SIZE))
+            return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+    }
+
+    if(needsReplacement)
+    {
+        RemoveMonAtSlot(replacementSlot, TRUE, FALSE);
+        destinationSlot = replacementSlot;
+    }
+    else
+    {
+        destinationSlot = gPlayerPartyCount;
+    }
+
+    CopyMon(&gPlayerParty[destinationSlot], &egg, sizeof(egg));
+    CalculatePlayerPartyCount();
+    RogueTrial_OnMonGiven(&gPlayerParty[destinationSlot]);
+    Rogue_PushPopup_AddPokemon(SPECIES_EGG, FALSE, FALSE);
+    return ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_TryAcceptMysteryEggCourierQuest(void)
+{
+    struct RogueRouteSceneRequest scene;
+    struct RogueAdventureQuestCreateParams params = {0};
+    u8 questId;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
+        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER
+        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
+        || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER)
+        || scene.requestedItem == SPECIES_NONE
+        || scene.rewardItem != ITEM_ESCAPE_ROPE)
+        return;
+
+    params.payload[0] = scene.requestedItem;
+    questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER, &params);
+    if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
+        return;
+
+    gSpecialVar_Result = TryGiveMysteryEggToParty(scene.requestedItem, gSpecialVar_0x8006);
+    if(gSpecialVar_Result != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        RogueAdventureQuests_Remove(questId);
+        return;
+    }
+
+    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    RogueRouteScenes_HideProp(scene.sceneSlot, 1);
+}
+
+void RogueRouteEvents_BufferMysteryEggDelivery(void)
+{
+    u8 questId = FindMysteryEggCourierQuest();
+    const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    gSpecialVar_0x8004 = PARTY_NOTHING_CHOSEN;
+    if(quest == NULL)
+        return;
+
+    gSpecialVar_0x8004 = FindMysteryEggCourierPartySlot(quest->payload[0]);
+    gSpecialVar_Result = gSpecialVar_0x8004 == PARTY_NOTHING_CHOSEN
+        ? ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM
+        : ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
+}
+
+void RogueRouteEvents_TryCompleteMysteryEggDelivery(void)
+{
+    struct RogueRouteSceneRequest scene = {0};
+    u8 questId = FindMysteryEggCourierQuest();
+    const struct RogueAdventureQuest *quest = RogueAdventureQuests_Get(questId);
+    u8 partySlot;
+
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
+    if(quest == NULL)
+        return;
+
+    partySlot = FindMysteryEggCourierPartySlot(quest->payload[0]);
+    gSpecialVar_0x8004 = partySlot;
+    if(partySlot == PARTY_NOTHING_CHOSEN)
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_MISSING_ITEM;
+        return;
+    }
+    if(!CheckBagHasSpace(ITEM_ESCAPE_ROPE, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+    if(!RogueAdventureQuests_EmitSignalForQuest(
+            questId,
+            ROGUE_ADVENTURE_QUEST_SIGNAL_DAYCARE_DELIVERY,
+            1))
+        return;
+
+    RemoveMonAtSlot(partySlot, FALSE, TRUE);
+    if(!AddBagItem(ITEM_ESCAPE_ROPE, 1))
+    {
+        gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
+        return;
+    }
+
+    Rogue_PushPopup_AddItem(ITEM_ESCAPE_ROPE, 1);
+    scene.recipeId = ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER;
+    RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
 void RogueRouteEvents_FinishTravelingMerchant(void)
