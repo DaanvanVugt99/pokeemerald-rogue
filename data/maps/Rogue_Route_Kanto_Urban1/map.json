@@ -551,12 +551,12 @@
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
       "x": 74,
       "y": 53,
-      "elevation": 1,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
-      "movement_range_y": 1,
+      "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "1",
+      "trainer_sight_or_berry_tree_id": "5",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     },
@@ -616,12 +616,12 @@
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
       "x": 77,
       "y": 39,
-      "elevation": 1,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
-      "movement_range_y": 1,
+      "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "1",
+      "trainer_sight_or_berry_tree_id": "6",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     },
@@ -629,12 +629,12 @@
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
       "x": 73,
       "y": 19,
-      "elevation": 1,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
-      "movement_range_y": 1,
+      "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "1",
+      "trainer_sight_or_berry_tree_id": "7",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     },
@@ -642,12 +642,12 @@
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
       "x": 59,
       "y": 6,
-      "elevation": 1,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
-      "movement_range_y": 1,
+      "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "1",
+      "trainer_sight_or_berry_tree_id": "8",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     },
@@ -655,12 +655,12 @@
       "graphics_id": "OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE",
       "x": 13,
       "y": 2,
-      "elevation": 1,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 11,
-      "movement_range_y": 1,
+      "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "1",
+      "trainer_sight_or_berry_tree_id": "9",
       "script": "Rogue_RouteEvent_Interact",
       "flag": "0"
     }
@@ -681,10 +681,6 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-
-  ],
-  "bg_events": [
-
-  ]
+  "coord_events": [],
+  "bg_events": []
 }
