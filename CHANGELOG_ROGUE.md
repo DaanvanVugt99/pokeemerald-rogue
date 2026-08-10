@@ -295,6 +295,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Batched wild encounter family selection so starting an Adventure and loading
+  a route no longer rebuild the full eligible-species table for every grass or
+  fishing slot.
 - Limited each generated route-event family to one appearance per Adventure,
   removed accepted quest generators during restoration, corrected Adventure
   Quest book text bounds, and made fossil restoration safely offer a confirmed

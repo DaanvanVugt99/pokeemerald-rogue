@@ -6925,6 +6925,9 @@ struct WildFormFamilyScratch
 {
     u16 familyKeys[WILD_FORM_FAMILY_CAPACITY];
     u8 familyWeightsByKey[WILD_FORM_FAMILY_CAPACITY];
+    u16 familyCount;
+    u16 totalWeight;
+    u16 lastSelectedFamilyKey;
 };
 
 static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue);
@@ -6950,7 +6953,7 @@ u16 RogueDebug_SelectWildSpeciesFromCurrentQuery(u16 familyRand, u16 formRand, b
     return SelectWildSpeciesFromFormFamilies(familyRand, formRand, WildFormFlatWeight, NULL, excludeSelectedFamily);
 }
 
-static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeightsByKey, u16 *familyCount, u16 *totalWeight, WeightCallback weightFunc, void *data)
+static void BuildWildFormFamilyWeights(struct WildFormFamilyScratch *scratch, WeightCallback weightFunc, void *data)
 {
     u16 species;
     u16 weightIndex = 0;
@@ -6958,9 +6961,10 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeightsByKey, 
     bool8 furfrouAnchorEligible = FALSE;
 #endif
 
-    *familyCount = 0;
-    *totalWeight = 0;
-    memset(familyWeightsByKey, 0, sizeof(u8) * WILD_FORM_FAMILY_CAPACITY);
+    scratch->familyCount = 0;
+    scratch->totalWeight = 0;
+    scratch->lastSelectedFamilyKey = SPECIES_NONE;
+    memset(scratch->familyWeightsByKey, 0, sizeof(scratch->familyWeightsByKey));
 
     for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
     {
@@ -6993,27 +6997,67 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeightsByKey, 
                 if(familyKey >= WILD_FORM_FAMILY_CAPACITY)
                     continue;
 
-                if(familyWeightsByKey[familyKey] == 0)
+                if(scratch->familyWeightsByKey[familyKey] == 0)
                 {
-                    AGB_ASSERT(*familyCount < WILD_FORM_FAMILY_CAPACITY);
+                    AGB_ASSERT(scratch->familyCount < WILD_FORM_FAMILY_CAPACITY);
 
-                    if(*familyCount < WILD_FORM_FAMILY_CAPACITY)
+                    if(scratch->familyCount < WILD_FORM_FAMILY_CAPACITY)
                     {
-                        familyKeys[*familyCount] = familyKey;
-                        familyWeightsByKey[familyKey] = weight;
-                        ++(*familyCount);
-                        *totalWeight += weight;
+                        scratch->familyKeys[scratch->familyCount] = familyKey;
+                        scratch->familyWeightsByKey[familyKey] = weight;
+                        ++scratch->familyCount;
+                        scratch->totalWeight += weight;
                     }
                 }
-                else if(weight > familyWeightsByKey[familyKey])
+                else if(weight > scratch->familyWeightsByKey[familyKey])
                 {
-                    *totalWeight -= familyWeightsByKey[familyKey];
-                    familyWeightsByKey[familyKey] = weight;
-                    *totalWeight += weight;
+                    scratch->totalWeight -= scratch->familyWeightsByKey[familyKey];
+                    scratch->familyWeightsByKey[familyKey] = weight;
+                    scratch->totalWeight += weight;
                 }
             }
         }
     }
+}
+
+static void RemoveWildFormFamilyWeight(struct WildFormFamilyScratch *scratch, u16 familyKey)
+{
+    u8 familyWeight;
+
+    if(familyKey >= WILD_FORM_FAMILY_CAPACITY)
+        return;
+
+    familyWeight = scratch->familyWeightsByKey[familyKey];
+    scratch->familyWeightsByKey[familyKey] = 0;
+    scratch->totalWeight -= familyWeight;
+}
+
+static u16 SelectWildFormFamilyFromWeights(struct WildFormFamilyScratch *scratch, u16 randValue)
+{
+    u16 targetWeight;
+    u16 i;
+
+    if(scratch->totalWeight == 0)
+        return SPECIES_NONE;
+
+    targetWeight = randValue % scratch->totalWeight;
+    for(i = 0; i < scratch->familyCount; ++i)
+    {
+        u16 familyKey = scratch->familyKeys[i];
+        u8 familyWeight = scratch->familyWeightsByKey[familyKey];
+
+        if(targetWeight < familyWeight)
+        {
+            RemoveWildFormFamilyWeight(scratch, familyKey);
+            scratch->lastSelectedFamilyKey = familyKey;
+            return familyKey;
+        }
+
+        targetWeight -= familyWeight;
+    }
+
+    AGB_ASSERT(FALSE);
+    return SPECIES_NONE;
 }
 
 static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue)
@@ -7096,51 +7140,13 @@ static void ExcludeWildFormFamilyFromQuery(u16 familyKey)
     }
 }
 
-static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
+static u16 SelectWildSpeciesFromBuiltFormFamilies(struct WildFormFamilyScratch *scratch, u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
 {
-    struct WildFormFamilyScratch *scratch = Alloc(sizeof(*scratch));
-    u16 familyCount;
-    u16 totalWeight;
-    u16 targetWeight;
-    u16 i;
-    u16 selectedFamilyKey;
+    u16 selectedFamilyKey = SelectWildFormFamilyFromWeights(scratch, familyRand);
     u16 species;
 
-    if(scratch == NULL)
+    if(selectedFamilyKey == SPECIES_NONE)
         return SPECIES_NONE;
-
-    BuildWildFormFamilyWeights(
-        scratch->familyKeys,
-        scratch->familyWeightsByKey,
-        &familyCount,
-        &totalWeight,
-        weightFunc,
-        data);
-
-    if(totalWeight == 0)
-    {
-        Free(scratch);
-        return SPECIES_NONE;
-    }
-
-    targetWeight = familyRand % totalWeight;
-    selectedFamilyKey = SPECIES_NONE;
-
-    for(i = 0; i < familyCount; ++i)
-    {
-        u8 familyWeight = scratch->familyWeightsByKey[scratch->familyKeys[i]];
-
-        if(targetWeight < familyWeight)
-        {
-            selectedFamilyKey = scratch->familyKeys[i];
-            break;
-        }
-
-        targetWeight -= familyWeight;
-    }
-    Free(scratch);
-
-    AGB_ASSERT(selectedFamilyKey != SPECIES_NONE);
 
     // Furfrou trims have distinct typings, so typed queries must select from
     // the eligible trims instead of leaking an unrelated approved form.
@@ -7151,12 +7157,31 @@ static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, Weigh
 #endif
         species = SelectWildSpeciesFromApprovedForms(selectedFamilyKey, formRand);
 
+    // Families without curated form behavior use their species ID as the key.
+    // The family was only added if that species was active with nonzero weight.
+    if(species == SPECIES_NONE && selectedFamilyKey < WILD_FORM_QUERY_NUM_SPECIES)
+        species = selectedFamilyKey;
+
     if(species == SPECIES_NONE)
         species = SelectWildSpeciesFromEligibleFamily(selectedFamilyKey, formRand, weightFunc, data);
 
     if(excludeSelectedFamily)
         ExcludeWildFormFamilyFromQuery(selectedFamilyKey);
 
+    return species;
+}
+
+static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
+{
+    struct WildFormFamilyScratch *scratch = Alloc(sizeof(*scratch));
+    u16 species;
+
+    if(scratch == NULL)
+        return SPECIES_NONE;
+
+    BuildWildFormFamilyWeights(scratch, weightFunc, data);
+    species = SelectWildSpeciesFromBuiltFormFamilies(scratch, familyRand, formRand, weightFunc, data, excludeSelectedFamily);
+    Free(scratch);
     return species;
 }
 
@@ -12156,31 +12181,63 @@ static void EndWildEncounterQuery()
 
 static void RandomiseWildEncounters(void)
 {
+    struct WildFormFamilyScratch *scratch;
+
     BeginWildEncounterQuery();
+    scratch = Alloc(sizeof(*scratch));
+    if(scratch == NULL)
     {
         u8 i;
-        u8 typeHint = Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[gRogueRun.adventureRoomId]);
 
         for(i = 0; i < WILD_ENCOUNTER_GRASS_CAPACITY; ++i)
         {
-            if(i == 0)
-            {
-                gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseWildEncounters_CalculateInitialWeight, &typeHint, TRUE);
-
-                if(gRogueRun.wildEncounters.species[i] != SPECIES_NONE)
-                {
-                    // We actually have a mon of this type
-                    gRogueRun.wildEncounters.catchCounts[i] = 0;
-                    continue;
-                }
-
-                // Fallback below can hit if no mon of hint type exists, e.g. gen 1 on a dark hint route.
-            }
-
-            gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseWildEncounters_CalculateWeight, NULL, TRUE);
+            gRogueRun.wildEncounters.species[i] = SPECIES_NONE;
             gRogueRun.wildEncounters.catchCounts[i] = 0;
         }
+        EndWildEncounterQuery();
+        return;
     }
+
+    {
+        u8 i;
+        u8 typeHint = Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[gRogueRun.adventureRoomId]);
+        bool8 hasHintEncounter = FALSE;
+        u16 hintFamilyKey;
+
+        BuildWildFormFamilyWeights(scratch, RandomiseWildEncounters_CalculateInitialWeight, &typeHint);
+        gRogueRun.wildEncounters.species[0] = SelectWildSpeciesFromBuiltFormFamilies(
+            scratch,
+            RogueRandom(),
+            RogueRandom(),
+            RandomiseWildEncounters_CalculateInitialWeight,
+            &typeHint,
+            FALSE);
+        hasHintEncounter = gRogueRun.wildEncounters.species[0] != SPECIES_NONE;
+        hintFamilyKey = scratch->lastSelectedFamilyKey;
+
+        // The normal weights do not change between draws. Build them once, drop
+        // the hint family if one was selected, then remove subsequent families
+        // directly from the scratch table.
+        BuildWildFormFamilyWeights(scratch, RandomiseWildEncounters_CalculateWeight, NULL);
+        if(hasHintEncounter)
+            RemoveWildFormFamilyWeight(scratch, hintFamilyKey);
+
+        for(i = hasHintEncounter ? 1 : 0; i < WILD_ENCOUNTER_GRASS_CAPACITY; ++i)
+        {
+            gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromBuiltFormFamilies(
+                scratch,
+                RogueRandom(),
+                RogueRandom(),
+                RandomiseWildEncounters_CalculateWeight,
+                NULL,
+                FALSE);
+            gRogueRun.wildEncounters.catchCounts[i] = 0;
+        }
+
+        if(hasHintEncounter)
+            gRogueRun.wildEncounters.catchCounts[0] = 0;
+    }
+    Free(scratch);
     EndWildEncounterQuery();
 }
 
@@ -12293,6 +12350,8 @@ static u8 RandomiseFishingEncounters_CalculateWeight(u16 index, u16 species, voi
 
 static void RandomiseFishingEncounters(void)
 {
+    struct WildFormFamilyScratch *scratch;
+
     RogueMonQuery_Begin();
 
     RogueMonQuery_IsSpeciesActive();
@@ -12306,15 +12365,33 @@ static void RandomiseFishingEncounters(void)
     // Now we've evolved we're only caring about mons of this type
     RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, MON_TYPE_VAL_TO_FLAGS(TYPE_WATER));
 
+    scratch = Alloc(sizeof(*scratch));
     {
         u8 i;
 
+        if(scratch != NULL)
+            BuildWildFormFamilyWeights(scratch, RandomiseFishingEncounters_CalculateWeight, NULL);
+
         for(i = 0; i < WILD_ENCOUNTER_WATER_CAPACITY; ++i)
         {
-            gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseFishingEncounters_CalculateWeight, NULL, TRUE);
+            if(scratch == NULL)
+            {
+                gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SPECIES_NONE;
+            }
+            else
+            {
+                gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SelectWildSpeciesFromBuiltFormFamilies(
+                    scratch,
+                    RogueRandom(),
+                    RogueRandom(),
+                    RandomiseFishingEncounters_CalculateWeight,
+                    NULL,
+                    FALSE);
+            }
             gRogueRun.wildEncounters.catchCounts[WILD_ENCOUNTER_GRASS_CAPACITY + i] = 0;
         }
     }
+    Free(scratch);
 
     RogueMonQuery_End();
 }
