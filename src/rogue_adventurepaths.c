@@ -978,7 +978,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
 
         replaceCount = (replaceCount * replacePerc) / 100;
         replaceCount = max(replaceCount, minReplaceCount);
-        replaceCount = max(replaceCount, freeRoomCount);
+        replaceCount = min(replaceCount, freeRoomCount);
 
         if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
         {

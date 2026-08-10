@@ -66,6 +66,74 @@ TEST("A portal-pregenerated initial path is reused on map entry")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
+TEST("Seeded standard paths keep replacement composition bounded")
+{
+    static const struct
+    {
+        u16 seed;
+        u8 routeCount;
+        u8 specialCount;
+        u8 emptyCount;
+    } cases[] =
+    {
+        {13579, 9, 5, 3},
+        {24680, 5, 4, 3},
+        {54321, 5, 3, 2},
+        {65535, 7, 4, 4},
+    };
+    struct RogueAdvPath originalPath = gRogueAdvPath;
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+    u8 i;
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    Rogue_SetCurrentDifficulty(2);
+
+    for(i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        u8 routeCount = 0;
+        u8 specialCount = 0;
+        u8 emptyCount = 0;
+        u8 roomId;
+
+        gRogueRun.baseSeed = cases[i].seed;
+        gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+        memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+        EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+
+        for(roomId = 0; roomId < gRogueAdvPath.roomCount; ++roomId)
+        {
+            switch(gRogueAdvPath.rooms[roomId].roomType)
+            {
+            case ADVPATH_ROOM_ROUTE:
+                ++routeCount;
+                break;
+            case ADVPATH_ROOM_NONE:
+            case ADVPATH_ROOM_BOSS:
+                if(gRogueAdvPath.rooms[roomId].roomType == ADVPATH_ROOM_NONE)
+                    ++emptyCount;
+                break;
+            default:
+                ++specialCount;
+                break;
+            }
+        }
+
+        EXPECT_EQ(routeCount, cases[i].routeCount);
+        EXPECT_EQ(specialCount, cases[i].specialCount);
+        EXPECT_EQ(emptyCount, cases[i].emptyCount);
+        EXPECT_EQ(routeCount + specialCount + emptyCount, gRogueAdvPath.roomCount - 1);
+    }
+
+    gRogueAdvPath = originalPath;
+    gRogueRun.baseSeed = originalBaseSeed;
+    gRogueRun.adventureRoomId = originalRoomId;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+}
+
 TEST("An exhausted path is replaced after its boss")
 {
     struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
