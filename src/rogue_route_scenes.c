@@ -17,6 +17,7 @@
 #include "rogue_adventure_quests.h"
 #include "rogue_adventurepaths.h"
 #include "rogue_controller.h"
+#include "rogue_debug.h"
 #include "rogue_followmon.h"
 #include "rogue_route_scene_internal.h"
 #include "rogue_route_scenes.h"
@@ -890,6 +891,9 @@ void RogueRouteScenes_OnEnterRoute(void)
 {
     struct RogueRouteScenePlan *plan;
     u8 i;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 scenePlanStartClock;
+#endif
 
     if(gRogueRun.routeSceneRoomId != gRogueRun.adventureRoomId)
     {
@@ -904,7 +908,15 @@ void RogueRouteScenes_OnEnterRoute(void)
         return;
 
     if(RogueRouteScenes_GetPlacementCount() == 0)
+    {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        scenePlanStartClock = RogueDebug_SampleClock();
+#endif
         BuildRouteScenePlan(gRogueRun.adventureRoomId, plan);
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Route Load] Scene planning: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - scenePlanStartClock));
+#endif
+    }
 
     for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {
@@ -918,6 +930,9 @@ void RogueRouteScenes_OnEnterRoute(void)
 void RogueRouteScenes_PrepareRouteTrainers(void)
 {
     u8 placementIdx;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
@@ -925,6 +940,9 @@ void RogueRouteScenes_PrepareRouteTrainers(void)
         if(RogueRouteScenes_GetPlacementRequest(placementIdx, &scene))
             RogueRouteEvents_PrepareSceneTrainers(&scene);
     }
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Route Load] Scene trainer setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 void RogueRouteScenes_OnExitRoute(void)

@@ -4907,6 +4907,9 @@ static void BeginRogueRun_ModifyParty(void)
 
 static void BeginRogueRun_ConsiderItems(void)
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
     DebugPrintf("Evos: required bits %d, avaliable bits %d", gRogueBake_EvoItems_Count, ARRAY_COUNT(gRogueRun.activeEvoItemFlags) * 8);
     AGB_ASSERT(gRogueBake_EvoItems_Count <= ARRAY_COUNT(gRogueRun.activeEvoItemFlags) * 8);
 
@@ -4992,6 +4995,10 @@ static void BeginRogueRun_ConsiderItems(void)
         }
     }
 #endif
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Evolution item setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static bool8 CanEnterWithItem(u16 itemId, bool8 isBasicBagEnabled)
@@ -5037,6 +5044,9 @@ static void SetupRogueRunBag()
     u16 itemId;
     u32 quantity;
     bool8 isBasicBagEnabled = Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE);
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     SetMoney(&gSaveBlock1Ptr->money, 0);
     ClearBag();
@@ -5064,6 +5074,9 @@ static void SetupRogueRunBag()
     }
 
     RecalcCharmCurseValues();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Bag setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 enum
@@ -5291,6 +5304,9 @@ static void BeginRogueRunPhase_TeamEncounters(void)
 
 static void BeginRogueRunPhase_Trainers(void)
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
     // Choose bosses last
     Rogue_ChooseRivalTrainerForNewAdventure();
     Rogue_EnsureRivalBaseTeamForNewAdventure();
@@ -5302,6 +5318,9 @@ static void BeginRogueRunPhase_Trainers(void)
     ChooseUniqueDenForNewAdventure();
 
     RogueSafari_CompactEmptyEntries();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Trainer setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static void BeginRogueRunPhase_AdventurePath(void)
@@ -12182,6 +12201,9 @@ static void EndWildEncounterQuery()
 static void RandomiseWildEncounters(void)
 {
     struct WildFormFamilyScratch *scratch;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     BeginWildEncounterQuery();
     scratch = Alloc(sizeof(*scratch));
@@ -12195,6 +12217,9 @@ static void RandomiseWildEncounters(void)
             gRogueRun.wildEncounters.catchCounts[i] = 0;
         }
         EndWildEncounterQuery();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Room Load] Wild grass roster: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
         return;
     }
 
@@ -12239,6 +12264,9 @@ static void RandomiseWildEncounters(void)
     }
     Free(scratch);
     EndWildEncounterQuery();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Room Load] Wild grass roster: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 bool8 Rogue_CanScatterPokeblock(u16 itemId)
@@ -12351,6 +12379,9 @@ static u8 RandomiseFishingEncounters_CalculateWeight(u16 index, u16 species, voi
 static void RandomiseFishingEncounters(void)
 {
     struct WildFormFamilyScratch *scratch;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     RogueMonQuery_Begin();
 
@@ -12394,6 +12425,9 @@ static void RandomiseFishingEncounters(void)
     Free(scratch);
 
     RogueMonQuery_End();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Wild fishing roster: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 void Rogue_SafariTypeForMap(u8* outArray, u8 arraySize)
@@ -12467,6 +12501,9 @@ static void RandomiseEnabledTrainers()
     u16 i;
     u16 activeTrainers = 0;
     u16 trainerBuffer[ROGUE_MAX_ACTIVE_TRAINER_COUNT];
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT)
         Rogue_ChooseTeamHideoutTrainers(trainerBuffer, ARRAY_COUNT(trainerBuffer));
@@ -12488,6 +12525,9 @@ static void RandomiseEnabledTrainers()
         for(i = 0; i < enabledCount; ++i)
             Rogue_SetDynamicTrainer(i, trainerBuffer[i]);
 
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Room Load] Dynamic trainers: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
         return;
     }
 
@@ -12516,6 +12556,9 @@ static void RandomiseEnabledTrainers()
             }
         }
     }
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Room Load] Dynamic trainers: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 u8 GetLeadMonLevel(void);
@@ -13190,6 +13233,9 @@ static void RandomiseEnabledItems(void)
 {
     s32 i;
     u8 difficultyLevel = Rogue_GetCurrentDifficulty();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     if(Rogue_GetModeRules()->forceEndGameRouteItems)
     {
@@ -13211,6 +13257,9 @@ static void RandomiseEnabledItems(void)
     }
 
     RandomiseItemContent(difficultyLevel);
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Room Load] Item setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static void RandomiseMiniBossItemsAndRestoreSeed(void)
