@@ -115,6 +115,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Removed Electrocytes' rain requirement and gave Whiscash Spark plus select
+  Electric tutor access, replacing Swift with Shock Wave.
 - Reduced the default route-event budget to target zero, one, or two optional
   events per route, averaging one event while preserving mandatory Adventure
   Quest scenes.

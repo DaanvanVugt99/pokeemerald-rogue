@@ -979,6 +979,9 @@ namespace PokemonDataGenerator.Pokedex
 						TutorMoves.Add(rule.Move);
 				}
 
+				if (Species == "SPECIES_WHISCASH")
+					EraseMove("MOVE_SWIFT");
+
 				if (Species == "SPECIES_PAWMOT" || Species == "SPECIES_RABSCA")
 					// These sets were built to recycle Revival Blessing's PP, which is
 					// incompatible with Divergence's once-per-team battle limit.
