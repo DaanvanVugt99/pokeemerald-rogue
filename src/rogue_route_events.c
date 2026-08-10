@@ -246,12 +246,9 @@ static bool8 CanShowCampCook(u8 roomId)
     return TRUE;
 }
 
-static bool8 CanUseMysteryEggCourierSpecies(u16 eggSpecies, bool8 partyHasRoom);
-
 static bool8 CanSelectMysteryEggCourierSpecies(void)
 {
     u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
-    bool8 partyHasRoom = CalculatePlayerPartyCount() < Rogue_GetMaxPartySize();
     u8 i;
 
     for(i = 0; i < encounterCount; ++i)
@@ -259,30 +256,23 @@ static bool8 CanSelectMysteryEggCourierSpecies(void)
         u16 species = Rogue_GetCurrentWildEncounterSpecies(i);
         u16 eggSpecies = Rogue_GetEggSpecies(species);
 
-        if(CanUseMysteryEggCourierSpecies(eggSpecies, partyHasRoom))
+        if(eggSpecies != SPECIES_NONE
+            && eggSpecies != SPECIES_EGG
+            && RoguePokedex_IsSpeciesEnabled(eggSpecies))
             return TRUE;
     }
 
     return FALSE;
 }
 
-static bool8 CanUseMysteryEggCourierSpecies(u16 eggSpecies, bool8 partyHasRoom)
-{
-    if(eggSpecies == SPECIES_NONE
-        || eggSpecies == SPECIES_EGG
-        || !RoguePokedex_IsSpeciesEnabled(eggSpecies))
-        return FALSE;
-
-    // Do not offer an Egg that the Species Clause will reject while the party
-    // still has room. A full party can replace the conflicting team member.
-    return !Rogue_IsSpeciesClauseActive()
-        || !partyHasRoom
-        || !Rogue_PartyContainsSpeciesChain(eggSpecies, PARTY_SIZE, PARTY_SIZE);
-}
-
 static bool8 CanShowMysteryEggCourier(u8 roomId)
 {
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gRogueRun.trialState.trialId);
+
     (void)roomId;
+
+    if(RogueTrial_IsActive() && trial != NULL && trial->disableGifts)
+        return FALSE;
 
     return !RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER)
         && Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY
@@ -741,7 +731,6 @@ static void ExpandCampCookPayload(struct RogueRouteSceneRequest *request, u32 pa
 static bool8 SelectMysteryEggCourierPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
 {
     u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
-    bool8 partyHasRoom = CalculatePlayerPartyCount() < Rogue_GetMaxPartySize();
     u8 startIndex;
     u8 offset;
 
@@ -755,7 +744,9 @@ static bool8 SelectMysteryEggCourierPayload(const struct RogueRouteSceneRequest 
         u16 species = Rogue_GetCurrentWildEncounterSpecies((startIndex + offset) % encounterCount);
         u16 eggSpecies = Rogue_GetEggSpecies(species);
 
-        if(CanUseMysteryEggCourierSpecies(eggSpecies, partyHasRoom))
+        if(eggSpecies != SPECIES_NONE
+            && eggSpecies != SPECIES_EGG
+            && RoguePokedex_IsSpeciesEnabled(eggSpecies))
         {
             *payload = eggSpecies;
             return TRUE;
@@ -2339,11 +2330,7 @@ static u8 TryGiveMysteryEggToParty(u16 species, u8 replacementSlot)
         if(replacementSlot >= gPlayerPartyCount)
             return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
         if(!Rogue_CanReleasePartyMonForCaughtMon(&egg, replacementSlot))
-        {
-            if(!Rogue_CaughtMonFitsSpeciesClauseAfterRelease(&egg, replacementSlot))
-                return ROGUE_ROUTE_EVENT_RESULT_SPECIES_CLAUSE;
             return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
-        }
         if(!Rogue_TryRemoveDuplicateHeldItemForParty(&egg, replacementSlot, PARTY_SIZE))
             return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
     }
@@ -2351,11 +2338,7 @@ static u8 TryGiveMysteryEggToParty(u16 species, u8 replacementSlot)
     {
         if(!Rogue_CanAddCaughtMonToParty(&egg)
             || !Rogue_TryRemoveDuplicateHeldItemForParty(&egg, PARTY_SIZE, PARTY_SIZE))
-        {
-            if(Rogue_PartyHasDuplicateSpecies(&egg, PARTY_SIZE, PARTY_SIZE))
-                return ROGUE_ROUTE_EVENT_RESULT_SPECIES_CLAUSE;
             return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
-        }
     }
 
     if(needsReplacement)

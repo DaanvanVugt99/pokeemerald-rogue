@@ -37,7 +37,6 @@ const ROGUE_ROUTE_EVENT_RESULT_WRONG_MON = 7
 const ROGUE_ROUTE_EVENT_RESULT_PROTECTED_MON = 8
 const ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE = 9
 const ROGUE_ROUTE_EVENT_RESULT_ALREADY_DUG = 10
-const ROGUE_ROUTE_EVENT_RESULT_SPECIES_CLAUSE = 11
 const VAR_ROUTE_EVENT_STATE = VAR_0x8008
 const VAR_BURIED_CACHE_SITE_DUG = VAR_0x8003
 
@@ -429,10 +428,6 @@ script Rogue_RouteEvent_MysteryEggCourier
     elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON)
     {
         msgbox(format("Oh... It looks like this Egg can't travel with your team right now."))
-    }
-    elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SPECIES_CLAUSE)
-    {
-        msgbox(format("Oh... This Egg would hatch into {STR_VAR_1}, but your team already has one from that evolution line.\pThe Species Clause won't allow you to carry it."))
     }
     else
     {

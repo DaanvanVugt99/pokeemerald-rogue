@@ -405,6 +405,11 @@ bool8 Rogue_PartyHasDuplicateSpecies(struct Pokemon *mon, u8 ignoredSlot1, u8 ig
     if(!Rogue_IsSpeciesClauseActive())
         return FALSE;
 
+    // A courier Egg is a temporary delivery object and is not allowed to hatch
+    // during the run, so it must not participate in Species Clause checks.
+    if(RogueRouteEvents_IsMysteryEggCourierEgg(mon))
+        return FALSE;
+
 #ifdef ROGUE_EXPANSION
     species = GET_BASE_SPECIES_ID(GetMonData(mon, MON_DATA_SPECIES));
 #else

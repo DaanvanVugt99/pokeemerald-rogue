@@ -201,6 +201,17 @@ TEST("Species Clause ignores the active Mystery Egg Courier Egg for route catche
     RogueAdventureQuests_Clear();
     EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
 
+    // The courier Egg itself is also exempt while it is being carried to the
+    // Day Care, even when its target species shares a line with the party.
+    SetPartyMon(0, SPECIES_MIGHTYENA);
+    params.payload[0] = SPECIES_POOCHYENA;
+    EXPECT_NE(RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER, &params), ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    caughtMon = CreateCaughtMon(SPECIES_POOCHYENA);
+    SetMonData(&caughtMon, MON_DATA_IS_EGG, &isEgg);
+    SetMonData(&caughtMon, MON_DATA_MODERN_FATEFUL_ENCOUNTER, &isCourierEgg);
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+    EXPECT(Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 0));
+
     ClearCaughtMonTestState();
 }
 
