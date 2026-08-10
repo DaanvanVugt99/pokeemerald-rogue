@@ -205,6 +205,8 @@ EWRAM_DATA struct RogueRunData gRogueRun = {};
 EWRAM_DATA struct RogueLocalData gRogueLocal = {};
 EWRAM_DATA struct RogueAdvPath gRogueAdvPath = {};
 static EWRAM_DATA bool8 sSacredAshRecoveryPending = FALSE;
+static EWRAM_DATA bool8 sPendingRoomEntrySetup = FALSE;
+static EWRAM_DATA bool8 sExecutingDeferredRoomEntry = FALSE;
 
 static void ResetHotTracking();
 static void ClearRogueLocalData(void);
@@ -7642,6 +7644,19 @@ void Rogue_StartRunPortalTransition(void)
 
 void Rogue_OnWarpIntoMap(void)
 {
+    if(sPendingRoomEntrySetup)
+    {
+        struct WarpData deferredWarp = {};
+
+        // Room setup used to run while selecting the node, before DoWarp had
+        // a chance to start its fade. Run the same work after the warp task
+        // has reached the black-screen handoff instead.
+        sPendingRoomEntrySetup = FALSE;
+        sExecutingDeferredRoomEntry = TRUE;
+        Rogue_OnSetWarpData(&deferredWarp);
+        sExecutingDeferredRoomEntry = FALSE;
+    }
+
     gRogueAdvPath.isOverviewActive = FALSE;
 
     VarSet(VAR_ROGUE_ACTIVE_POKEBLOCK, ITEM_NONE);
@@ -7779,32 +7794,35 @@ static void TryOptionalRandomanSpawn()
 
 void Rogue_OnSetWarpData(struct WarpData *warp)
 {
-    if(warp->mapGroup == MAP_GROUP(ROGUE_HUB) && warp->mapNum == MAP_NUM(ROGUE_HUB))
+    if(!sExecutingDeferredRoomEntry)
+        sPendingRoomEntrySetup = FALSE;
+
+    if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_HUB) && warp->mapNum == MAP_NUM(ROGUE_HUB))
     {
         // Warping back to hub must be intentional
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_BOSS_VICTORY_LAP) && warp->mapNum == MAP_NUM(ROGUE_BOSS_VICTORY_LAP))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_BOSS_VICTORY_LAP) && warp->mapNum == MAP_NUM(ROGUE_BOSS_VICTORY_LAP))
     {
         // Never override this warp
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_BOSS_FINAL) && warp->mapNum == MAP_NUM(ROGUE_BOSS_FINAL))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_BOSS_FINAL) && warp->mapNum == MAP_NUM(ROGUE_BOSS_FINAL))
     {
         // Never override this warp
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE) && warp->mapNum == MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE) && warp->mapNum == MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE))
     {
         // Warping back to hub must be intentional
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_HUB_ADVENTURE_ENTERANCE) && warp->mapNum == MAP_NUM(ROGUE_HUB_ADVENTURE_ENTERANCE))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_HUB_ADVENTURE_ENTERANCE) && warp->mapNum == MAP_NUM(ROGUE_HUB_ADVENTURE_ENTERANCE))
     {
         // Warping back to hub must be intentional
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_ADVENTURE_PATHS) && warp->mapNum == MAP_NUM(ROGUE_ADVENTURE_PATHS))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_ADVENTURE_PATHS) && warp->mapNum == MAP_NUM(ROGUE_ADVENTURE_PATHS))
     {
         // Ensure the run has started if we're trying to directly warp into the paths screen
         if(!Rogue_IsRunActive())
@@ -7812,7 +7830,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
             BeginRogueRun();
         }
     }
-    else if(warp->warpId != 0 && warp->mapGroup == gSaveBlock1Ptr->location.mapGroup && warp->mapNum == gSaveBlock1Ptr->location.mapNum)
+    else if(!sExecutingDeferredRoomEntry && warp->warpId != 0 && warp->mapGroup == gSaveBlock1Ptr->location.mapGroup && warp->mapNum == gSaveBlock1Ptr->location.mapNum)
     {
         // Allow warping to non-0 warps within the same ID
         if(warp->warpId == WARP_ID_MAP_START)
@@ -7833,13 +7851,19 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
 
     if(Rogue_IsRunActive())
     {
-        u8 warpType = RogueAdv_OverrideNextWarp(warp);
+        u8 warpType = sExecutingDeferredRoomEntry ? ROGUE_WARP_TO_ROOM : RogueAdv_OverrideNextWarp(warp);
 
         if(warpType == ROGUE_WARP_TO_ADVPATH)
         {
         }
         else if(warpType == ROGUE_WARP_TO_ROOM)
         {
+            if(!sExecutingDeferredRoomEntry)
+            {
+                sPendingRoomEntrySetup = TRUE;
+            }
+            else
+            {
             ++gRogueRun.enteredRoomCounter;
 
             Rogue_ResetFlightCharges();
@@ -7865,6 +7889,9 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                 case ADVPATH_ROOM_ROUTE:
                 {
                     u8 weatherChance = 5 + 20 * gRogueAdvPath.currentRoomParams.perType.route.difficulty;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                    u32 routeEntryStartClock = RogueDebug_SampleClock();
+#endif
 
                     gRogueRun.currentRouteIndex = gRogueAdvPath.currentRoomParams.roomIdx;
                     RandomiseWildEncounters();
@@ -7903,6 +7930,9 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                             }
                         }
                     }
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                    DebugPrintf("[Room Load] Route entry setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - routeEntryStartClock));
+#endif
                     break;
                 }
 
@@ -8128,14 +8158,26 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
             VarSet(VAR_ROGUE_CURRENT_ROOM_IDX, gRogueRun.enteredRoomCounter);
             VarSet(VAR_ROGUE_CURRENT_LEVEL_CAP, Rogue_CalculatePlayerMaxLvl());
 
-            RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
-            RogueTrial_OnEnterEncounter();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+            {
+                u32 routeEntryHooksStartClock = RogueDebug_SampleClock();
+#endif
+                RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
+                RogueTrial_OnEnterEncounter();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+                    DebugPrintf("[Room Load] Route entry hooks: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - routeEntryHooksStartClock));
+            }
+#endif
+            }
         }
     }
 
-    gRogueLocal.totalMoneySpentOnMap = 0;
-
-    FollowMon_OnWarp();
+    if(!sExecutingDeferredRoomEntry)
+    {
+        gRogueLocal.totalMoneySpentOnMap = 0;
+        FollowMon_OnWarp();
+    }
 }
 
 void Rogue_ModifyMapHeader(struct MapHeader *mapHeader)
@@ -8338,7 +8380,15 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
             *objectEventCount = write;
 
             if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+            {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                u32 sceneObjectStartClock = RogueDebug_SampleClock();
+#endif
                 RogueRouteScenes_ModifyObjectEvents(objectEvents, objectEventCount, objectEventCapacity);
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                DebugPrintf("[Room Load] Scene object events: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - sceneObjectStartClock));
+#endif
+            }
         }
         else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE && loadingFromSave)
         {
