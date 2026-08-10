@@ -13,6 +13,7 @@
 #include "pokemon_icon.h"
 #include "region_map.h"
 #include "sound.h"
+#include "start_menu.h"
 #include "string_util.h"
 #include "strings.h"
 #include "task.h"
@@ -171,6 +172,9 @@ void InitStandardTextBoxWindows(void)
     sStartMenuWindowId = WINDOW_NONE;
     sMapNamePopupWindowId = WINDOW_NONE;
     sYesNoWindowId = WINDOW_NONE;
+    sHofPCTopBarWindowId = WINDOW_NONE;
+    sMenu.windowId = WINDOW_NONE;
+    StartMenu_ResetWindowState();
     InitQuestWindow();
 }
 

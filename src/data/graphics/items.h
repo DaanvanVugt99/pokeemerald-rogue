@@ -1837,6 +1837,9 @@ const u32 gItemIconPalette_OldRod[] = INCBIN_U32("graphics/items/icon_palettes/o
 const u32 gItemIcon_GoodRod[] = INCBIN_U32("graphics/items/icons/good_rod.4bpp.lz");
 const u32 gItemIconPalette_GoodRod[] = INCBIN_U32("graphics/items/icon_palettes/good_rod.gbapal.lz");
 
+const u32 gItemIcon_FieldShovel[] = INCBIN_U32("graphics/items/icons/field_shovel.4bpp.lz");
+const u32 gItemIconPalette_FieldShovel[] = INCBIN_U32("graphics/items/icon_palettes/field_shovel.gbapal.lz");
+
 const u32 gItemIcon_SuperRod[] = INCBIN_U32("graphics/items/icons/super_rod.4bpp.lz");
 const u32 gItemIconPalette_SuperRod[] = INCBIN_U32("graphics/items/icon_palettes/super_rod.gbapal.lz");
 

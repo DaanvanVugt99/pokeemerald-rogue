@@ -2185,6 +2185,8 @@ extern const u32 gItemIcon_OldRod[];
 extern const u32 gItemIconPalette_OldRod[];
 extern const u32 gItemIcon_GoodRod[];
 extern const u32 gItemIconPalette_GoodRod[];
+extern const u32 gItemIcon_FieldShovel[];
+extern const u32 gItemIconPalette_FieldShovel[];
 extern const u32 gItemIcon_SuperRod[];
 extern const u32 gItemIconPalette_SuperRod[];
 extern const u32 gItemIcon_DowsingMachine[];

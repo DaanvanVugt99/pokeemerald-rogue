@@ -246,9 +246,12 @@ static bool8 CanShowCampCook(u8 roomId)
     return TRUE;
 }
 
+static bool8 CanUseMysteryEggCourierSpecies(u16 eggSpecies, bool8 partyHasRoom);
+
 static bool8 CanSelectMysteryEggCourierSpecies(void)
 {
     u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
+    bool8 partyHasRoom = CalculatePlayerPartyCount() < Rogue_GetMaxPartySize();
     u8 i;
 
     for(i = 0; i < encounterCount; ++i)
@@ -256,13 +259,25 @@ static bool8 CanSelectMysteryEggCourierSpecies(void)
         u16 species = Rogue_GetCurrentWildEncounterSpecies(i);
         u16 eggSpecies = Rogue_GetEggSpecies(species);
 
-        if(eggSpecies != SPECIES_NONE
-            && eggSpecies != SPECIES_EGG
-            && RoguePokedex_IsSpeciesEnabled(eggSpecies))
+        if(CanUseMysteryEggCourierSpecies(eggSpecies, partyHasRoom))
             return TRUE;
     }
 
     return FALSE;
+}
+
+static bool8 CanUseMysteryEggCourierSpecies(u16 eggSpecies, bool8 partyHasRoom)
+{
+    if(eggSpecies == SPECIES_NONE
+        || eggSpecies == SPECIES_EGG
+        || !RoguePokedex_IsSpeciesEnabled(eggSpecies))
+        return FALSE;
+
+    // Do not offer an Egg that the Species Clause will reject while the party
+    // still has room. A full party can replace the conflicting team member.
+    return !Rogue_IsSpeciesClauseActive()
+        || !partyHasRoom
+        || !Rogue_PartyContainsSpeciesChain(eggSpecies, PARTY_SIZE, PARTY_SIZE);
 }
 
 static bool8 CanShowMysteryEggCourier(u8 roomId)
@@ -726,6 +741,7 @@ static void ExpandCampCookPayload(struct RogueRouteSceneRequest *request, u32 pa
 static bool8 SelectMysteryEggCourierPayload(const struct RogueRouteSceneRequest *request, struct RogueRouteSceneRng *rng, u32 *payload)
 {
     u8 encounterCount = Rogue_GetCurrentWildEncounterCount();
+    bool8 partyHasRoom = CalculatePlayerPartyCount() < Rogue_GetMaxPartySize();
     u8 startIndex;
     u8 offset;
 
@@ -739,9 +755,7 @@ static bool8 SelectMysteryEggCourierPayload(const struct RogueRouteSceneRequest 
         u16 species = Rogue_GetCurrentWildEncounterSpecies((startIndex + offset) % encounterCount);
         u16 eggSpecies = Rogue_GetEggSpecies(species);
 
-        if(eggSpecies != SPECIES_NONE
-            && eggSpecies != SPECIES_EGG
-            && RoguePokedex_IsSpeciesEnabled(eggSpecies))
+        if(CanUseMysteryEggCourierSpecies(eggSpecies, partyHasRoom))
         {
             *payload = eggSpecies;
             return TRUE;
@@ -1146,7 +1160,7 @@ static u16 SelectBuriedCacheAmbush(u8 environment, struct RogueRouteSceneRng *rn
     {
         u16 species = sBuriedCacheAmbushSpecies[environment][i];
 
-        if(RoguePokedex_IsSpeciesEnabled(species))
+        if(RoguePokedex_GetSpeciesCurrentNum(species) != 0)
             eligible[count++] = species;
     }
 
@@ -2322,16 +2336,26 @@ static u8 TryGiveMysteryEggToParty(u16 species, u8 replacementSlot)
     {
         if(replacementSlot == PARTY_NOTHING_CHOSEN)
             return ROGUE_ROUTE_EVENT_RESULT_PARTY_FULL;
-        if(replacementSlot >= gPlayerPartyCount
-            || !Rogue_CanReleasePartyMonForCaughtMon(&egg, replacementSlot)
-            || !Rogue_TryRemoveDuplicateHeldItemForParty(&egg, replacementSlot, PARTY_SIZE))
+        if(replacementSlot >= gPlayerPartyCount)
+            return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+        if(!Rogue_CanReleasePartyMonForCaughtMon(&egg, replacementSlot))
+        {
+            if(!Rogue_CaughtMonFitsSpeciesClauseAfterRelease(&egg, replacementSlot))
+                return ROGUE_ROUTE_EVENT_RESULT_SPECIES_CLAUSE;
+            return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+        }
+        if(!Rogue_TryRemoveDuplicateHeldItemForParty(&egg, replacementSlot, PARTY_SIZE))
             return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
     }
     else
     {
         if(!Rogue_CanAddCaughtMonToParty(&egg)
             || !Rogue_TryRemoveDuplicateHeldItemForParty(&egg, PARTY_SIZE, PARTY_SIZE))
+        {
+            if(Rogue_PartyHasDuplicateSpecies(&egg, PARTY_SIZE, PARTY_SIZE))
+                return ROGUE_ROUTE_EVENT_RESULT_SPECIES_CLAUSE;
             return ROGUE_ROUTE_EVENT_RESULT_CANT_GIVE_MON;
+        }
     }
 
     if(needsReplacement)
@@ -2347,7 +2371,6 @@ static u8 TryGiveMysteryEggToParty(u16 species, u8 replacementSlot)
     CopyMon(&gPlayerParty[destinationSlot], &egg, sizeof(egg));
     CalculatePlayerPartyCount();
     RogueTrial_OnMonGiven(&gPlayerParty[destinationSlot]);
-    Rogue_PushPopup_AddPokemon(SPECIES_EGG, FALSE, FALSE);
     return ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
@@ -2961,13 +2984,10 @@ static const u8 sText_BuriedCacheTypeAncient[] = _("ancient cache");
 static const u8 sText_BuriedCacheTypeTrainer[] = _("Trainer's cache");
 static const u8 sText_BuriedCacheTypeRelic[] = _("collector's relic");
 static const u8 sText_BuriedCacheTypeJackpot[] = _("exceptional treasure");
-static const u8 sText_BuriedCacheFindThe[] = _("Find the ");
-static const u8 sText_BuriedCacheBearing[] = _(" bearing ");
-static const u8 sText_BuriedCacheBeside[] = _(" beside ");
-static const u8 sText_BuriedCacheLookFor[] = _("Look for ");
-static const u8 sText_BuriedCacheObservationStart[] = _("A ");
-static const u8 sText_BuriedCacheObservationMark[] = _(" bears ");
-static const u8 sText_BuriedCacheObservationGround[] = _(". Around it lies ");
+static const u8 sText_BuriedCacheLandmarkLabel[] = _("Landmark: ");
+static const u8 sText_BuriedCacheMarkLabel[] = _("Mark: ");
+static const u8 sText_BuriedCacheGroundLabel[] = _("Ground: ");
+static const u8 sText_BuriedCacheNewline[] = _("\n");
 static const u8 sText_BuriedCachePeriod[] = _(".");
 static const u8 *const sBuriedCacheTypeNames[] =
 {
@@ -3028,25 +3048,31 @@ void RogueRouteEvents_BufferBuriedCacheData(void)
         if(data.clueTraitA == BURIED_CACHE_TRAIT_LANDMARK
             && data.clueTraitB == BURIED_CACHE_TRAIT_MARKING)
         {
-            StringCopy(gStringVar2, sText_BuriedCacheFindThe);
+            StringCopy(gStringVar2, sText_BuriedCacheLandmarkLabel);
             StringAppend(gStringVar2, sBuriedCacheLandmarkNames[environment][correct->landmark]);
-            StringAppend(gStringVar2, sText_BuriedCacheBearing);
+            StringAppend(gStringVar2, sText_BuriedCachePeriod);
+            StringAppend(gStringVar2, sText_BuriedCacheNewline);
+            StringAppend(gStringVar2, sText_BuriedCacheMarkLabel);
             StringAppend(gStringVar2, sBuriedCacheMarkingNames[correct->marking]);
             StringAppend(gStringVar2, sText_BuriedCachePeriod);
         }
         else if(data.clueTraitA == BURIED_CACHE_TRAIT_LANDMARK)
         {
-            StringCopy(gStringVar2, sText_BuriedCacheFindThe);
+            StringCopy(gStringVar2, sText_BuriedCacheLandmarkLabel);
             StringAppend(gStringVar2, sBuriedCacheLandmarkNames[environment][correct->landmark]);
-            StringAppend(gStringVar2, sText_BuriedCacheBeside);
+            StringAppend(gStringVar2, sText_BuriedCachePeriod);
+            StringAppend(gStringVar2, sText_BuriedCacheNewline);
+            StringAppend(gStringVar2, sText_BuriedCacheGroundLabel);
             StringAppend(gStringVar2, sBuriedCacheGroundNames[environment][correct->ground]);
             StringAppend(gStringVar2, sText_BuriedCachePeriod);
         }
         else
         {
-            StringCopy(gStringVar2, sText_BuriedCacheLookFor);
+            StringCopy(gStringVar2, sText_BuriedCacheMarkLabel);
             StringAppend(gStringVar2, sBuriedCacheMarkingNames[correct->marking]);
-            StringAppend(gStringVar2, sText_BuriedCacheBeside);
+            StringAppend(gStringVar2, sText_BuriedCachePeriod);
+            StringAppend(gStringVar2, sText_BuriedCacheNewline);
+            StringAppend(gStringVar2, sText_BuriedCacheGroundLabel);
             StringAppend(gStringVar2, sBuriedCacheGroundNames[environment][correct->ground]);
             StringAppend(gStringVar2, sText_BuriedCachePeriod);
         }
@@ -3056,11 +3082,15 @@ void RogueRouteEvents_BufferBuriedCacheData(void)
         return;
 
     site = &data.sites[scene.lotRole - 1];
-    StringCopy(gStringVar1, sText_BuriedCacheObservationStart);
+    StringCopy(gStringVar1, sText_BuriedCacheLandmarkLabel);
     StringAppend(gStringVar1, sBuriedCacheLandmarkNames[environment][site->landmark]);
-    StringAppend(gStringVar1, sText_BuriedCacheObservationMark);
+    StringAppend(gStringVar1, sText_BuriedCachePeriod);
+    StringAppend(gStringVar1, sText_BuriedCacheNewline);
+    StringAppend(gStringVar1, sText_BuriedCacheMarkLabel);
     StringAppend(gStringVar1, sBuriedCacheMarkingNames[site->marking]);
-    StringAppend(gStringVar1, sText_BuriedCacheObservationGround);
+    StringAppend(gStringVar1, sText_BuriedCachePeriod);
+    StringAppend(gStringVar1, sText_BuriedCacheNewline);
+    StringAppend(gStringVar1, sText_BuriedCacheGroundLabel);
     StringAppend(gStringVar1, sBuriedCacheGroundNames[environment][site->ground]);
     StringAppend(gStringVar1, sText_BuriedCachePeriod);
     gSpecialVar_0x8003 = IsBuriedCacheSiteDug(scene.lotRole);
@@ -3098,7 +3128,6 @@ static void PrepareBuriedCacheAmbush(const struct RogueRouteSceneRequest *scene,
     ZeroEnemyPartyMons();
     CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     gRngValue = originalRng;
-    Rogue_ActivateUncatchableWildBattle();
 }
 
 void RogueRouteEvents_TryDigBuriedCache(void)
@@ -3136,7 +3165,8 @@ void RogueRouteEvents_TryDigBuriedCache(void)
         }
 
         MarkBuriedCacheSiteDug(scene.lotRole);
-        PrepareBuriedCacheAmbush(&scene, data.ambushSpecies);
+        if(data.ambushSpecies != SPECIES_NONE)
+            PrepareBuriedCacheAmbush(&scene, data.ambushSpecies);
         gSpecialVar_0x8006 = data.ambushSpecies;
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE;
         return;

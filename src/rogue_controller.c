@@ -1620,8 +1620,6 @@ void Rogue_ModifyEggMon(struct Pokemon *mon)
 {
     u32 eggCyclesLeft = 0;
     SetMonData(mon, MON_DATA_FRIENDSHIP, &eggCyclesLeft);
-
-    Rogue_PushPopup_AddPokemon(SPECIES_EGG, FALSE, FALSE);
 }
 
 void Rogue_DiscardedCaughtMon(struct Pokemon *mon)

@@ -301,6 +301,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept Buried Cache ambush Pokémon within the active Pokédex and made them
+  catchable, safely skipped the ambush when no candidate is available,
+  repaired dynamically composed clue text, and gave the Field Shovel its own
+  CC0 item icon adapted from AntumDeluge's OpenGameArt asset.
 - Ensured Mystery Egg delivery only accepts the marked courier egg, keeps the
   quest and party state intact when the Escape Rope cannot be added, and keeps
   the Breeder's Exchange completion message aligned with the Pokémon actually

@@ -3,6 +3,7 @@
 #include "battle.h"
 #include "constants/abilities.h"
 #include "constants/battle.h"
+#include "characters.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/flags.h"
@@ -111,6 +112,19 @@ static void RestoreFlag(u16 flagId, bool8 value)
         FlagSet(flagId);
     else
         FlagClear(flagId);
+}
+
+static u8 CountTextCharacter(const u8 *text, u8 character)
+{
+    u8 count = 0;
+
+    while(*text != EOS)
+    {
+        if(*text++ == character)
+            ++count;
+    }
+
+    return count;
 }
 
 static bool8 IsBuriedCacheAmbushSpecies(u8 environment, u16 species)
@@ -886,6 +900,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     u32 originalMoney = GetMoney(&gSaveBlock1Ptr->money);
     bool8 originalFlagA = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     bool8 originalFlagB = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
     u8 originalRoomId;
     u16 seed;
     u16 rewardItem;
@@ -973,9 +988,11 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         SelectPlacement(&siteA);
         RogueRouteEvents_BufferBuriedCacheData();
         StringCopy(observationA, gStringVar1);
+        EXPECT_EQ(CountTextCharacter(observationA, CHAR_NEWLINE), 2);
         SelectPlacement(&siteB);
         RogueRouteEvents_BufferBuriedCacheData();
         StringCopy(observationB, gStringVar1);
+        EXPECT_EQ(CountTextCharacter(observationB, CHAR_NEWLINE), 2);
         EXPECT_NE(StringCompare(observationA, observationB), 0);
 
         SelectPlacement(&archaeologist);
@@ -983,6 +1000,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         rewardItem = gSpecialVar_0x8004;
         secondaryRewardItem = gSpecialVar_0x8005;
         cacheType = gSpecialVar_0x8007;
+        EXPECT_EQ(CountTextCharacter(gStringVar2, CHAR_NEWLINE), 1);
         RogueRouteEvents_TryAcceptBuriedCache();
         EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
         EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
@@ -1003,6 +1021,8 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     EXPECT_LT(seed, 256);
     EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), siteA.trainerNum);
     EXPECT(IsBuriedCacheAmbushSpecies(siteA.environment, siteA.trainerNum));
+    EXPECT_NE(RoguePokedex_GetSpeciesCurrentNum(siteA.trainerNum), 0);
+    EXPECT(!Rogue_IsShrineChallengeActive());
     EXPECT((VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_BURIED_CACHE_SITE_A_DUG) != 0);
     EXPECT((VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_BURIED_CACHE_SITE_B_DUG) == 0);
     EXPECT(!FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
@@ -1026,6 +1046,21 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     EXPECT_EQ(RogueRouteScenes_GetState(0), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_BURIED_CACHE));
 
+    // A wrong dig remains safe when this environment has no candidate in the active Pokédex.
+    ClearBag();
+    AddBagItem(ITEM_FIELD_SHOVEL, 1);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
+    RogueRouteScenes_SetState(0, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_UNOVA_BW);
+    siteA.environment = ROGUE_ROUTE_ENVIRONMENT_WATERFRONT;
+    ZeroEnemyPartyMons();
+    SelectPlacement(&siteA);
+    RogueRouteEvents_TryDigBuriedCache();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_WRONG_SITE);
+    EXPECT_EQ(gSpecialVar_0x8006, SPECIES_NONE);
+    EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), SPECIES_NONE);
+    EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
+
     // An unfinished borrowed tool never survives the route boundary.
     ClearBag();
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
@@ -1041,6 +1076,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalFlagA);
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN, originalFlagB);
+    RoguePokedex_SetDexVariant(originalDexVariant);
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
 }

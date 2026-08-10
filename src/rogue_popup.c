@@ -277,7 +277,6 @@ static const u8 sText_Popup_RoamerLegendary[] = _("{COLOR LIGHT_GREEN}{SHADOW GR
 static const u8 sText_Popup_GiftPokemon[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN}Gift Pokémon!");
 static const u8 sText_Popup_GiftShinyPokemon[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN}Gift Shiny {PKMN}!");
 static const u8 sText_Popup_GiftCustomPokemon[] = _("{COLOR LIGHT_BLUE}{SHADOW BLUE}Gift Unique {PKMN}!");
-static const u8 sText_Popup_DaycarePokemon[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN}Pokémon Egg");
 static const u8 sText_Popup_UniquePokemon[] = _("Unique Pokémon");
 static const u8 sText_Popup_UniquePokemonSubtitle[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN}Detected nearby!");
 static const u8 sText_Popup_None[] = _("");
@@ -1806,6 +1805,10 @@ void Rogue_PushPopup_UnlockedDecorVariant(u16 decorVariantId)
 
 void Rogue_PushPopup_AddPokemon(u16 species, bool8 isCustom, bool8 isShiny)
 {
+    // Eggs are delivered through Day Care dialogue and do not have a reward popup.
+    if(species == SPECIES_EGG)
+        return;
+
     struct PopupRequest* popup = CreateNewPopup();
 
     popup->templateId = POPUP_COMMON_INSTANT_POKEMON_TEXT;
@@ -1818,11 +1821,6 @@ void Rogue_PushPopup_AddPokemon(u16 species, bool8 isCustom, bool8 isShiny)
         popup->subtitleText = sText_Popup_GiftCustomPokemon;
     else if(isShiny)
         popup->subtitleText = sText_Popup_GiftShinyPokemon;
-    else if(species == SPECIES_EGG)
-    {
-        popup->titleText = sText_Popup_DaycarePokemon;
-        // no subtitle
-    }
     else
         popup->subtitleText = sText_Popup_GiftPokemon;
 }

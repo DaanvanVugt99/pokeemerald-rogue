@@ -20063,7 +20063,6 @@ if (triggeringAbility != ABILITY_NONE)
          && TARGET_TURN_DAMAGED
          && IsFinalMultiHitStrike()
          && moveType == TYPE_WATER
-         && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN)
          && CanBeParalyzed(gBattlerTarget)
          && RandomWeighted(RNG_SECONDARY_EFFECT, 70, 30))
         {

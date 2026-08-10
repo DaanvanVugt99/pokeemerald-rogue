@@ -27,7 +27,7 @@ SINGLE_BATTLE_TEST("Electrocytes gives Electric-type moves STAB", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Electrocytes gives Water-type moves a 30 percent chance to paralyze in rain")
+SINGLE_BATTLE_TEST("Electrocytes gives Water-type moves a 30 percent chance to paralyze")
 {
     PASSES_RANDOMLY(3, 10, RNG_SECONDARY_EFFECT);
     GIVEN {
@@ -41,18 +41,15 @@ SINGLE_BATTLE_TEST("Electrocytes gives Water-type moves a 30 percent chance to p
     }
 }
 
-SINGLE_BATTLE_TEST("Electrocytes does not paralyze from Water-type moves outside rain")
+SINGLE_BATTLE_TEST("Electrocytes can paralyze from Water-type moves outside rain")
 {
+    PASSES_RANDOMLY(3, 10, RNG_SECONDARY_EFFECT);
     GIVEN {
         PLAYER(SPECIES_WHISCASH) { Ability(ABILITY_OBLIVIOUS); Moves(MOVE_WATER_PULSE); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_WATER_PULSE); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_PULSE, player);
-        NONE_OF {
-            ABILITY_POPUP(player, ABILITY_ELECTROCYTES);
-            MESSAGE("Foe Wobbuffet is paralyzed! It may be unable to move!");
-        }
+    } THEN {
+        EXPECT_NE(opponent->status1 & STATUS1_PARALYSIS, 0);
     }
 }

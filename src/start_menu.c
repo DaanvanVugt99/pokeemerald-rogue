@@ -829,6 +829,14 @@ void ShowReturnToFieldStartMenu(void)
     gFieldCallback2 = FieldCB_ReturnToFieldStartMenu;
 }
 
+void StartMenu_ResetWindowState(void)
+{
+    sSafariBallsWindowId = WINDOW_NONE;
+    sBattlePyramidFloorWindowId = WINDOW_NONE;
+    sRogueRunWindowId = WINDOW_NONE;
+    sSaveInfoWindowId = WINDOW_NONE;
+}
+
 void Task_ShowStartMenu(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
