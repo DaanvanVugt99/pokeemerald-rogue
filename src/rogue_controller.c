@@ -6269,6 +6269,9 @@ static u8 SelectMiniBossRewardIndices(u16 trainerNum, struct Pokemon* party, u8 
     *indexA = PARTY_SIZE;
     *indexB = PARTY_SIZE;
 
+    if(partySize == 0 || trainerNum >= gRogueTrainerCount)
+        return MINIBOSS_REWARD_MODE_NO_LEGAL;
+
     if(overrideMode != 0xFF)
         return overrideMode;
 
@@ -6336,10 +6339,18 @@ void Rogue_SelectMiniBossRewardMons()
     u16 roomSeed = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed;
 
     AGB_ASSERT(partySize != 0);
+    if(partySize == 0)
+    {
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, SPECIES_NONE);
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, SPECIES_NONE);
+        gSpecialVar_Result = MINIBOSS_REWARD_MODE_NO_LEGAL;
+        return;
+    }
+
     gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, roomSeed);
 }
 
-static void GenerateMiniBossPreview(u8 roomIdx)
+static bool8 GenerateMiniBossPreview(u8 roomIdx)
 {
     struct RogueAdvPathRoom* room = &gRogueAdvPath.rooms[roomIdx];
     struct Pokemon* enemyParty = Alloc(sizeof(gEnemyParty));
@@ -6364,6 +6375,8 @@ static void GenerateMiniBossPreview(u8 roomIdx)
 
     AGB_ASSERT(room->roomType == ADVPATH_ROOM_MINIBOSS);
     AGB_ASSERT(enemyParty != NULL);
+    if(enemyParty == NULL)
+        return FALSE;
 
     memcpy(enemyParty, gEnemyParty, sizeof(gEnemyParty));
     ZeroEnemyPartyMons();
@@ -6388,7 +6401,14 @@ static void GenerateMiniBossPreview(u8 roomIdx)
     AGB_ASSERT(partySize >= 2);
 
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, trainerNum);
-    gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, room->rngSeed);
+    if(partySize != 0)
+        gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, room->rngSeed);
+    else
+    {
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, SPECIES_NONE);
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, SPECIES_NONE);
+        gSpecialVar_Result = MINIBOSS_REWARD_MODE_NO_LEGAL;
+    }
 
     memcpy(gEnemyParty, enemyParty, sizeof(gEnemyParty));
     Free(enemyParty);
@@ -6423,6 +6443,8 @@ static void GenerateMiniBossPreview(u8 roomIdx)
     gRngRogueValue = rogueRng;
     gRngValue = rng;
     gRng2Value = rng2;
+
+    return TRUE;
 }
 
 void Rogue_CacheMiniBossPreview(u8 roomIdx)
@@ -6433,7 +6455,8 @@ void Rogue_CacheMiniBossPreview(u8 roomIdx)
     u16 previousSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
     u16 previousResult = gSpecialVar_Result;
 
-    GenerateMiniBossPreview(roomIdx);
+    if(!GenerateMiniBossPreview(roomIdx))
+        return;
 
     room->roomParams.perType.miniboss.rewardSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
     room->roomParams.perType.miniboss.rewardSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
@@ -7655,6 +7678,12 @@ void Rogue_OnWarpIntoMap(void)
         sExecutingDeferredRoomEntry = TRUE;
         Rogue_OnSetWarpData(&deferredWarp);
         sExecutingDeferredRoomEntry = FALSE;
+
+        // Rogue_OnSetWarpData normally performs these after room setup. The
+        // deferred path suppresses that tail so the same work is completed
+        // after the map has reached the transition handoff.
+        gRogueLocal.totalMoneySpentOnMap = 0;
+        FollowMon_OnWarp();
     }
 
     gRogueAdvPath.isOverviewActive = FALSE;
@@ -7895,12 +7924,17 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
 
                     gRogueRun.currentRouteIndex = gRogueAdvPath.currentRoomParams.roomIdx;
                     RandomiseWildEncounters();
+                    RogueDebug_ValidateHeap("route after wild roster");
                     RogueRouteScenes_OnEnterRoute();
+                    RogueDebug_ValidateHeap("route after scene entry");
                     ResetTrainerBattles();
                     RandomiseBerryTrees();
                     RandomiseEnabledTrainers();
+                    RogueDebug_ValidateHeap("route after trainer setup");
                     RogueRouteScenes_PrepareRouteTrainers();
+                    RogueDebug_ValidateHeap("route after scene trainers");
                     RandomiseEnabledItems();
+                    RogueDebug_ValidateHeap("route after item setup");
                     TryOptionalRandomanSpawn();
 
                     if(Rogue_GetCurrentDifficulty() != 0 && RogueRandomChance(weatherChance, OVERWORLD_FLAG))
@@ -13216,7 +13250,7 @@ static void RandomiseItemContent(u8 difficultyLevel)
     u16 itemId;
     u8 difficultyModifier = Rogue_GetEncounterDifficultyModifier();
     u8 dropRarity = GetCurrentDropRarity();
-    struct RouteItemWeightContext routeItemContext;
+    struct RouteItemWeightContext *routeItemContext = NULL;
     bool8 allowSpecialItemDrops = gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE
         || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT;
 
@@ -13231,10 +13265,14 @@ static void RandomiseItemContent(u8 difficultyLevel)
             ++dropRarity;
     }
 
-    memset(&routeItemContext, 0, sizeof(routeItemContext));
-
     if(allowSpecialItemDrops)
-        InitRouteItemWeightContext(&routeItemContext);
+    {
+        routeItemContext = Alloc(sizeof(*routeItemContext));
+        if(routeItemContext != NULL)
+            InitRouteItemWeightContext(routeItemContext);
+        else
+            allowSpecialItemDrops = FALSE;
+    }
 
     RogueItemQuery_Begin();
     {
@@ -13283,7 +13321,7 @@ static void RandomiseItemContent(u8 difficultyLevel)
         }
 
         if(allowSpecialItemDrops)
-            ExcludeRouteSpecialItems(&routeItemContext);
+            ExcludeRouteSpecialItems(routeItemContext);
 
         RogueWeightQuery_Begin();
         {
@@ -13294,18 +13332,19 @@ static void RandomiseItemContent(u8 difficultyLevel)
             {
                 bool8 selectedSpecialItem = allowSpecialItemDrops
                     && !FlagGet(FLAG_ROGUE_ITEM_START + i)
-                    && RollRouteSpecialItemDrop(&routeItemContext)
-                    && TrySelectRouteSpecialItem(&routeItemContext, &itemId);
+                    && RollRouteSpecialItemDrop(routeItemContext)
+                    && TrySelectRouteSpecialItem(routeItemContext, &itemId);
 
                 if(!selectedSpecialItem)
                 {
-                    RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, &routeItemContext);
+                    RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, routeItemContext);
 
                     AGB_ASSERT(RogueWeightQuery_HasAnyWeights());
                     itemId = RogueWeightQuery_SelectRandomFromWeights(RogueRandom());
                 }
 
-                RouteItemContextRecordSelection(&routeItemContext, itemId);
+                if(allowSpecialItemDrops)
+                    RouteItemContextRecordSelection(routeItemContext, itemId);
                 VarSet(VAR_ROGUE_ITEM_START + i, itemId);
             }
         }
@@ -13313,6 +13352,7 @@ static void RandomiseItemContent(u8 difficultyLevel)
 
     }
     RogueItemQuery_End();
+    Free(routeItemContext);
 }
 
 static void RandomiseEnabledItems(void)

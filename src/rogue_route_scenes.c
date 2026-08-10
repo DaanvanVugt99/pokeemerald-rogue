@@ -1325,9 +1325,10 @@ void RogueRouteScenes_OnExitRoute(void)
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
 }
 
-static void AppendSceneObject(
+static bool8 AppendSceneObject(
     struct ObjectEventTemplate *objectEvents,
     u8 *objectEventCount,
+    u8 objectEventCapacity,
     const struct ObjectEventTemplate *spot,
     u8 localId,
     u16 graphicsId,
@@ -1336,7 +1337,15 @@ static void AppendSceneObject(
     u16 objectData,
     u16 flagId)
 {
-    struct ObjectEventTemplate *objectEvent = &objectEvents[(*objectEventCount)++];
+    struct ObjectEventTemplate *objectEvent;
+
+    if(*objectEventCount >= objectEventCapacity)
+    {
+        AGB_ASSERT(FALSE);
+        return FALSE;
+    }
+
+    objectEvent = &objectEvents[(*objectEventCount)++];
 
     memset(objectEvent, 0, sizeof(*objectEvent));
     objectEvent->localId = localId;
@@ -1349,6 +1358,7 @@ static void AppendSceneObject(
     objectEvent->trainerRange_berryTreeId = objectData;
     objectEvent->script = script;
     objectEvent->flagId = flagId;
+    return TRUE;
 }
 
 static const struct RogueRouteSceneLotDefinition *GetSceneLotDefinition(const struct RogueRouteSceneRequest *scene)
@@ -1779,8 +1789,8 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
     u8 spotCount = 0;
     u8 originalCount = *objectEventCount;
     u8 write = 0;
-    u8 baseObjectCount = 0;
-    u8 requiredCount = 0;
+    u16 baseObjectCount = 0;
+    u16 requiredCount = 0;
     u8 placementIdx;
     u8 i;
 
@@ -1873,6 +1883,7 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
             AppendSceneObject(
                 objectEvents,
                 objectEventCount,
+                objectEventCapacity,
                 &spot,
                 localId,
                 ResolveSceneObjectGraphics(&scene, object),

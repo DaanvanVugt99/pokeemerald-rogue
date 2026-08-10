@@ -65,13 +65,13 @@ static void WindowFunc_DrawStdFrameWithCustomTileAndPalette(u8, u8, u8, u8, u8, 
 static void WindowFunc_ClearStdWindowAndFrameToTransparent(u8, u8, u8, u8, u8, u8);
 static void task_free_buf_after_copying_tile_data_to_vram(u8 taskId);
 
-static EWRAM_DATA u8 sStartMenuWindowId = 0;
-static EWRAM_DATA u8 sMapNamePopupWindowId = 0;
+static EWRAM_DATA u8 sStartMenuWindowId = WINDOW_NONE;
+static EWRAM_DATA u8 sMapNamePopupWindowId = WINDOW_NONE;
 static EWRAM_DATA struct Menu sMenu = {0};
 static EWRAM_DATA u16 sTileNum = 0;
 static EWRAM_DATA u8 sPaletteNum = 0;
-static EWRAM_DATA u8 sYesNoWindowId = 0;
-static EWRAM_DATA u8 sHofPCTopBarWindowId = 0;
+static EWRAM_DATA u8 sYesNoWindowId = WINDOW_NONE;
+static EWRAM_DATA u8 sHofPCTopBarWindowId = WINDOW_NONE;
 static EWRAM_DATA bool8 sScheduledBgCopiesToVram[4] = {FALSE};
 static EWRAM_DATA u16 sTempTileDataBufferIdx = 0;
 static EWRAM_DATA void *sTempTileDataBuffer[0x20] = {NULL};
@@ -170,6 +170,7 @@ void InitStandardTextBoxWindows(void)
     InitWindows(sStandardTextBox_WindowTemplates);
     sStartMenuWindowId = WINDOW_NONE;
     sMapNamePopupWindowId = WINDOW_NONE;
+    sYesNoWindowId = WINDOW_NONE;
     InitQuestWindow();
 }
 
@@ -859,9 +860,8 @@ u8 HofPCTopBar_AddWindow(u8 bg, u8 xPos, u8 yPos, u8 palette, u16 baseTile)
     return sHofPCTopBarWindowId;
 }
 
-// All the below functions checking WINDOW_NONE only handle failure of AddWindow in the above function.
-// Because sHofPCTopBarWindowId is not initialized to WINDOW_NONE anywhere it does not handle
-// the window not having been drawn yet.
+// All the below functions checking WINDOW_NONE also handle the window not
+// having been drawn yet.
 void HofPCTopBar_Print(const u8 *string, u8 left, bool8 copyToVram)
 {
     u16 width = 0;
@@ -988,6 +988,9 @@ void RedrawMenuCursor(u8 oldPos, u8 newPos)
 {
     u8 width, height;
 
+    if (sMenu.windowId == WINDOW_NONE)
+        return;
+
     width = GetMenuCursorDimensionByFont(sMenu.fontId, 0);
     height = GetMenuCursorDimensionByFont(sMenu.fontId, 1);
     FillWindowPixelRect(sMenu.windowId, PIXEL_FILL(1), sMenu.left, sMenu.optionHeight * oldPos + sMenu.top, width, height);
@@ -998,6 +1001,9 @@ u8 Menu_MoveCursor(s8 cursorDelta)
 {
     u8 oldPos = sMenu.cursorPos;
     int newPos = sMenu.cursorPos + cursorDelta;
+
+    if (sMenu.windowId == WINDOW_NONE)
+        return sMenu.cursorPos;
 
     if (newPos < sMenu.minCursorPos)
         sMenu.cursorPos = sMenu.maxCursorPos;
@@ -1014,6 +1020,9 @@ u8 Menu_MoveCursorNoWrapAround(s8 cursorDelta)
 {
     u8 oldPos = sMenu.cursorPos;
     int newPos = sMenu.cursorPos + cursorDelta;
+
+    if (sMenu.windowId == WINDOW_NONE)
+        return sMenu.cursorPos;
 
     if (newPos < sMenu.minCursorPos)
         sMenu.cursorPos = sMenu.minCursorPos;
@@ -1033,6 +1042,9 @@ u8 Menu_GetCursorPos(void)
 
 s8 Menu_ProcessInput(void)
 {
+    if (sMenu.windowId == WINDOW_NONE)
+        return MENU_B_PRESSED;
+
     if (JOY_NEW(A_BUTTON))
     {
         if (!sMenu.APressMuted)
@@ -1062,6 +1074,9 @@ s8 Menu_ProcessInput(void)
 s8 Menu_ProcessInputNoWrap(void)
 {
     u8 oldPos = sMenu.cursorPos;
+
+    if (sMenu.windowId == WINDOW_NONE)
+        return MENU_B_PRESSED;
 
     if (JOY_NEW(A_BUTTON))
     {
@@ -1230,7 +1245,16 @@ static void CreateYesNoMenuAtPos(const struct WindowTemplate *window, u8 fontId,
 {
     struct TextPrinterTemplate printer;
 
+    if (sYesNoWindowId != WINDOW_NONE)
+        EraseYesNoWindow();
+
     sYesNoWindowId = AddWindow(window);
+    if (sYesNoWindowId == WINDOW_NONE)
+    {
+        sMenu.windowId = WINDOW_NONE;
+        return;
+    }
+
     LoadDarkUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
     DrawStdFrameWithCustomTileAndPalette(sYesNoWindowId, TRUE, baseTileNum, paletteNum);
 
@@ -1260,6 +1284,9 @@ static void UNUSED CreateYesNoMenuInTopLeft(const struct WindowTemplate *window,
 
 s8 Menu_ProcessInputNoWrapClearOnChoose(void)
 {
+    if (sYesNoWindowId == WINDOW_NONE)
+        return MENU_B_PRESSED;
+
     s8 result = Menu_ProcessInputNoWrap();
     if (result != MENU_NOTHING_CHOSEN)
         EraseYesNoWindow();
@@ -1268,8 +1295,12 @@ s8 Menu_ProcessInputNoWrapClearOnChoose(void)
 
 void EraseYesNoWindow(void)
 {
-    ClearStdWindowAndFrameToTransparent(sYesNoWindowId, TRUE);
-    RemoveWindow(sYesNoWindowId);
+    if (sYesNoWindowId != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrameToTransparent(sYesNoWindowId, TRUE);
+        RemoveWindow(sYesNoWindowId);
+        sYesNoWindowId = WINDOW_NONE;
+    }
 }
 
 static void PrintMenuActionGridText(u8 windowId, u8 fontId, u8 left, u8 top, u8 width, u8 height, u8 columns, u8 rows, const struct MenuAction *menuActions)
@@ -1678,7 +1709,16 @@ static void CreateYesNoMenuInternal(const struct WindowTemplate *window, u16 bas
 {
     struct TextPrinterTemplate printer;
 
+    if (sYesNoWindowId != WINDOW_NONE)
+        EraseYesNoWindow();
+
     sYesNoWindowId = AddWindow(window);
+    if (sYesNoWindowId == WINDOW_NONE)
+    {
+        sMenu.windowId = WINDOW_NONE;
+        return;
+    }
+
     if (useDarkBorder)
         LoadDarkUserWindowBorderGfx(sYesNoWindowId, baseTileNum, BG_PLTT_ID(paletteNum));
     else

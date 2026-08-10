@@ -34,6 +34,12 @@ void RogueDebug_MainCB(void);
 void RogueDebug_ResetFrameTimers();
 void RogueDebug_PrintTimers();
 
+#if defined(ROGUE_DEBUG) && !defined(NDEBUG)
+void RogueDebug_ValidateHeap(const char *phase);
+#else
+#define RogueDebug_ValidateHeap(phase) ((void)(phase))
+#endif
+
 
 #ifdef DEBUG_FEATURE_MEMORY_STOMP_TRACKING
 

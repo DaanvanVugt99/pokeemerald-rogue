@@ -531,7 +531,7 @@ void ApplyNewEncryptionKeyToGameStats(u32 newKey)
 
 void LoadObjEventTemplatesFromHeader(void)
 {
-    u8 objectCount = gMapHeader.events->objectEventCount;
+    u8 objectCount = min(gMapHeader.events->objectEventCount, ARRAY_COUNT(gSaveBlock1Ptr->objectEventTemplates));
 
     // Clear map object templates
     CpuFill32(0, gSaveBlock1Ptr->objectEventTemplates, sizeof(gSaveBlock1Ptr->objectEventTemplates));
@@ -539,9 +539,10 @@ void LoadObjEventTemplatesFromHeader(void)
     // Copy map header events to save block
     CpuCopy32(gMapHeader.events->objectEvents,
               gSaveBlock1Ptr->objectEventTemplates,
-              gMapHeader.events->objectEventCount * sizeof(struct ObjectEventTemplate));
+              objectCount * sizeof(struct ObjectEventTemplate));
     
     Rogue_ModifyObjectEvents(&gMapHeader, FALSE, gSaveBlock1Ptr->objectEventTemplates, &objectCount, ARRAY_COUNT(gSaveBlock1Ptr->objectEventTemplates));
+    RogueDebug_ValidateHeap("object events from header");
     gSaveBlock1Ptr->objectEventTemplatesCount = objectCount;
 }
 
@@ -553,17 +554,20 @@ void LoadSaveblockObjEventScripts(void)
     u8 mapHeaderObjectCount = gMapHeader.events->objectEventCount;
     s32 i, j, k;
 
-    for (i = 0; i < objectCount; i++)
+    if(mapHeaderObjectCount != 0)
     {
-        for(j = 0; j < mapHeaderObjectCount; j++)
+        for (i = 0; i < objectCount; i++)
         {
-            // Should be faster to just use the same index 95% of the time
-            k = (j + i) % mapHeaderObjectCount;
-
-            if(savObjTemplates[i].localId == mapHeaderObjTemplates[k].localId)
+            for(j = 0; j < mapHeaderObjectCount; j++)
             {
-                savObjTemplates[i].script = mapHeaderObjTemplates[k].script;
-                break;
+                // Should be faster to just use the same index 95% of the time
+                k = (j + i) % mapHeaderObjectCount;
+
+                if(savObjTemplates[i].localId == mapHeaderObjTemplates[k].localId)
+                {
+                    savObjTemplates[i].script = mapHeaderObjTemplates[k].script;
+                    break;
+                }
             }
         }
     }

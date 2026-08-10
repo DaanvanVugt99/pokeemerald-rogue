@@ -564,8 +564,46 @@ static void CloseQuestPopUpWindow(bool8 consumePopup);
 static u8 GetActiveOnScreenDisplayTimer();
 static void Task_QuestPopUpWindow(u8 taskId);
 static void ShowQuestPopUpWindow(void);
+static void DropPopupRequest(u8 taskId);
 
 static void ApplyPopupAnimation(struct PopupRequest* request, u16 timer, bool8);
+
+static bool8 ValidatePopupRequest(struct PopupRequest *request)
+{
+    struct PopupRequestTemplate const *template;
+    u8 i;
+
+    if(request->templateId >= ARRAY_COUNT(sPopupRequestTemplates))
+        return FALSE;
+
+    template = &sPopupRequestTemplates[request->templateId];
+    if(template->iconMode == POPUP_ICON_MODE_CUSTOM
+        && request->iconId >= POPUP_CUSTOM_ICON_COUNT)
+        return FALSE;
+
+    if(template->iconMode == POPUP_ICON_MODE_POKEMON
+        && request->iconId >= NUM_SPECIES)
+        request->iconId = SPECIES_NONE;
+
+    if(template->iconMode == POPUP_ICON_MODE_ITEM
+        && request->iconId >= ITEMS_COUNT)
+        request->iconId = ITEM_NONE;
+
+    for(i = 0; i < ARRAY_COUNT(request->expandTextType); ++i)
+    {
+        if(request->expandTextType[i] == TEXT_EXPAND_SPECIES_NAME
+            && request->expandTextData[i] >= NUM_SPECIES)
+            request->expandTextData[i] = SPECIES_NONE;
+        else if(request->expandTextType[i] == TEXT_EXPAND_ITEM_NAME
+            && request->expandTextData[i] >= ITEMS_COUNT)
+            request->expandTextData[i] = ITEM_NONE;
+        else if(request->expandTextType[i] == TEXT_EXPAND_PARTY_NICKNAME
+            && request->expandTextData[i] >= PARTY_SIZE)
+            request->expandTextType[i] = TEXT_EXPAND_NONE;
+    }
+
+    return TRUE;
+}
 
 void InitQuestWindow()
 {
@@ -603,11 +641,15 @@ static void RemoveQuestPopUpWindow(void)
     }
 }
 
-static u8 AddQuestPopUpWindow(struct PopupRequest* request)
+static bool8 AddQuestPopUpWindow(struct PopupRequest* request)
 {
-    struct PopupRequestTemplate const* template = &sPopupRequestTemplates[request->templateId];
+    struct PopupRequestTemplate const* template;
     sRoguePopups.hasPopupBeenSkipped = FALSE;
 
+    if(!ValidatePopupRequest(request))
+        return FALSE;
+
+    template = &sPopupRequestTemplates[request->templateId];
     RemoveQuestPopUpWindow();
 
     sRoguePopups.windowId = AddWindowParameterized(
@@ -619,6 +661,12 @@ static u8 AddQuestPopUpWindow(struct PopupRequest* request)
         15,
         0x107
     );
+
+    if(sRoguePopups.windowId == WINDOW_NONE)
+    {
+        DebugPrintf("[Popup] Main window allocation failed template:%d icon:%d", request->templateId, request->iconId);
+        return FALSE;
+    }
 
     // pal 14 is used the the borders
 
@@ -633,9 +681,16 @@ static u8 AddQuestPopUpWindow(struct PopupRequest* request)
             13,
             0x107 + (template->width * template->height)
         );
+
+        if(sRoguePopups.iconWindowId == WINDOW_NONE)
+        {
+            DebugPrintf("[Popup] Icon window allocation failed template:%d icon:%d", request->templateId, request->iconId);
+            RemoveQuestPopUpWindow();
+            return FALSE;
+        }
     }
 
-    return sRoguePopups.windowId;
+    return TRUE;
 }
 
 static void ShowQuestPopup(void)
@@ -643,7 +698,16 @@ static void ShowQuestPopup(void)
     if (!FuncIsActiveTask(Task_QuestPopUpWindow))
     {
         struct PopupRequest* popupRequest = GetCurrentPopup();
-        struct PopupRequestTemplate const* template = &sPopupRequestTemplates[popupRequest->templateId];
+        struct PopupRequestTemplate const* template;
+
+        if(!ValidatePopupRequest(popupRequest))
+        {
+            DebugPrintf("[Popup] Dropping invalid request template:%d icon:%d", popupRequest->templateId, popupRequest->iconId);
+            sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
+            return;
+        }
+
+        template = &sPopupRequestTemplates[popupRequest->templateId];
         
         sRoguePopups.taskId = CreateTask(Task_QuestPopUpWindow, 90);
         ApplyPopupAnimation(popupRequest, 0, FALSE);
@@ -854,10 +918,21 @@ static void Task_QuestPopUpWindow(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
     struct PopupRequest* popupRequest = GetCurrentPopup();
-    struct PopupRequestTemplate const* template = &sPopupRequestTemplates[popupRequest->templateId];
+    struct PopupRequestTemplate const* template;
     bool8 useEnterAnim = FALSE;
-    u16 animDuration = sRoguePopups.hasPopupBeenSkipped ? 1 : template->animDuration;
-    u16 displayDuration = sRoguePopups.hasPopupBeenSkipped ? SKIP_DISPLAY_DURATION : popupRequest->displayDuration;
+    u16 animDuration;
+    u16 displayDuration;
+
+    if(!ValidatePopupRequest(popupRequest))
+    {
+        DebugPrintf("[Popup] Dropping invalid active request template:%d icon:%d", popupRequest->templateId, popupRequest->iconId);
+        DropPopupRequest(taskId);
+        return;
+    }
+
+    template = &sPopupRequestTemplates[popupRequest->templateId];
+    animDuration = sRoguePopups.hasPopupBeenSkipped ? 1 : template->animDuration;
+    displayDuration = sRoguePopups.hasPopupBeenSkipped ? SKIP_DISPLAY_DURATION : popupRequest->displayDuration;
 
     switch (task->sStateNum)
     {
@@ -943,7 +1018,8 @@ static void CloseQuestPopUpWindow(bool8 consumePopup)
 {
     if (FuncIsActiveTask(Task_QuestPopUpWindow))
     {
-        ClearStdWindowAndFrame(GetQuestPopUpWindowId(), TRUE);
+        if(GetQuestPopUpWindowId() != WINDOW_NONE)
+            ClearStdWindowAndFrame(GetQuestPopUpWindowId(), TRUE);
 
         if(GetIconWindowId() != WINDOW_NONE)
         {
@@ -960,6 +1036,25 @@ static void CloseQuestPopUpWindow(bool8 consumePopup)
         if(consumePopup)
             sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
     }
+}
+
+static void DropPopupRequest(u8 taskId)
+{
+    if(GetQuestPopUpWindowId() != WINDOW_NONE)
+        ClearStdWindowAndFrame(GetQuestPopUpWindowId(), TRUE);
+
+    if(GetIconWindowId() != WINDOW_NONE)
+    {
+        FillWindowPixelBuffer(GetIconWindowId(), PIXEL_FILL(1));
+        ClearWindowTilemap(GetIconWindowId());
+        CopyWindowToVram(GetIconWindowId(), COPYWIN_FULL);
+    }
+
+    RemoveQuestPopUpWindow();
+    SetGpuReg_ForcedBlank(REG_OFFSET_BG0VOFS, 0);
+    SetGpuReg_ForcedBlank(REG_OFFSET_BG0HOFS, 0);
+    sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
+    DestroyTask(taskId);
 }
 
 //static u8* AppendTypeName(u8* strPointer, u8 type)
@@ -1111,7 +1206,10 @@ static void ExpandPopupText(struct PopupRequest* popup)
                     break;
 
                 case TEXT_EXPAND_PARTY_NICKNAME:
-                    StringCopy_Nickname(textDest[i], gPlayerParty[data].box.nickname);
+                    if(data < PARTY_SIZE)
+                        StringCopy_Nickname(textDest[i], gPlayerParty[data].box.nickname);
+                    else
+                        textDest[i][0] = EOS;
                     break;
 
                 case TEXT_EXPAND_UNSIGNED_NUMBER:
@@ -1129,9 +1227,25 @@ static void ExpandPopupText(struct PopupRequest* popup)
 static void ShowQuestPopUpWindow(void)
 {
     struct PopupRequest* popupRequest = GetCurrentPopup();
-    struct PopupRequestTemplate const* template = &sPopupRequestTemplates[popupRequest->templateId];
+    struct PopupRequestTemplate const* template;
 
-    AddQuestPopUpWindow(popupRequest);
+    if(!ValidatePopupRequest(popupRequest))
+    {
+        DebugPrint("[Popup] Invalid popup request");
+        DropPopupRequest(sRoguePopups.taskId);
+        return;
+    }
+
+    template = &sPopupRequestTemplates[popupRequest->templateId];
+
+    if(!AddQuestPopUpWindow(popupRequest))
+    {
+        // A failed window allocation must not be used as window ID 0xFF.
+        // Drop this request and let the overworld continue rather than
+        // turning an OOM into writes through gWindows[WINDOW_NONE].
+        DropPopupRequest(sRoguePopups.taskId);
+        return;
+    }
 
     PutWindowTilemap(GetQuestPopUpWindowId());
 
