@@ -158,7 +158,7 @@ TEST("An exhausted path is replaced after its boss")
     Free(originalPath);
 }
 
-TEST("Frontier Brain paths cache deterministic previews")
+TEST("Frontier Brain paths cache deterministic previews during loading")
 {
     struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
     u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
@@ -202,13 +202,16 @@ TEST("Frontier Brain paths cache deterministic previews")
             aceRoomSeed = gRogueAdvPath.rooms[i].rngSeed;
             EXPECT_EQ(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.trainerNum, trainerNum);
             EXPECT_NE(gRogueAdvPath.rooms[i].coords.x + 1, gRogueAdvPath.pathLength);
-            EXPECT(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.hasRewardPreview);
-            rewardSpeciesA = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardSpeciesA;
-            rewardSpeciesB = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardSpeciesB;
-            rewardMode = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardMode;
+            EXPECT(!gRogueAdvPath.rooms[i].roomParams.perType.miniboss.hasRewardPreview);
         }
     }
     EXPECT_EQ(roomCount, 1);
+    EXPECT_NE(aceRoomId, ADVPATH_INVALID_ROOM_ID);
+    RogueAdv_CacheMiniBossPreviews();
+    rewardSpeciesA = gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesA;
+    rewardSpeciesB = gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesB;
+    rewardMode = gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardMode;
+    EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
     generatedRoomCount = gRogueAdvPath.roomCount;
     generatedPathLength = gRogueAdvPath.pathLength;
 
@@ -221,23 +224,29 @@ TEST("Frontier Brain paths cache deterministic previews")
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomType, ADVPATH_ROOM_MINIBOSS);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].rngSeed, aceRoomSeed);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.trainerNum, trainerNum);
+    EXPECT(!gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+    RogueAdv_CacheMiniBossPreviews();
     EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesA, rewardSpeciesA);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesB, rewardSpeciesB);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardMode, rewardMode);
 
-    // Reused paths must repair a missing preview before the overview becomes
-    // interactive instead of generating the full team when the node is used.
+    // A reused path must be repaired during its loading phase, not when the
+    // player selects the node.
     gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview = FALSE;
     gRogueAdvPath.justGenerated = TRUE;
     gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
     EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT(!gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+    RogueAdv_CacheMiniBossPreviews();
     EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
 
     gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview = FALSE;
     gRogueAdvPath.justGenerated = FALSE;
     gRogueRun.adventureRoomId = aceRoomId;
     EXPECT(!RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT(!gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+    RogueAdv_CacheMiniBossPreviews();
     EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
 
     gRogueAdvPath = *originalPath;

@@ -370,8 +370,9 @@ Format follows Keep a Changelog loosely:
   border flashes.
 - Made Fault Finder set Stealth Rock when its triggering Steel move knocks out
   an active target that still has a replacement.
-- Warmed missing Frontier Brain reward previews whenever an existing adventure
-  path is reused, preventing full team generation during node interaction.
+- Prewarmed missing Frontier Brain reward previews during run loading and
+  overview warp transitions, keeping node entry instant without rebuilding the
+  full team during path materialization.
 - Made Auto Pickup collect item objects placed across counters and on tables,
   matching normal interaction targeting in hideouts.
 - Prevented Oricorio's Center Stage from calling the singles-incompatible
@@ -450,8 +451,9 @@ Format follows Keep a Changelog loosely:
 - Renamed ancient Paradox solo abilities as Instincts and future Paradox solo
   abilities as Protocols, and renamed Tyrantrum's and Koraidon's unrelated
   Primal abilities to Tyrant Storm and War Cry.
-- Frontier Brains now use the full badge level cap and cache their reward
-  previews during path generation, avoiding a delay when inspecting their nodes.
+- Frontier Brains now use the full badge level cap and prewarm deterministic
+  reward previews during run loading, avoiding full-team generation when their
+  nodes are selected.
 - Adrenaline now prevents poison status damage while retaining its poisoned
   punching-move healing effect and compatibility with Poison Heal.
 - Sand Stream and Snow Warning now make their holders immune to Sandstorm and

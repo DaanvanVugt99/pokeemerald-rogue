@@ -10,6 +10,7 @@
 extern EWRAM_DATA struct RogueAdvPath gRogueAdvPath;
 
 bool8 RogueAdv_GenerateAdventurePathsIfRequired();
+void RogueAdv_CacheMiniBossPreviews();
 void RogueAdv_ApplyAdventureMetatiles();
 void RogueAdv_Debug_ForceRegenerateAdventurePaths();
 #ifdef ROGUE_DEBUG

@@ -5089,6 +5089,7 @@ enum
     BEGIN_RUN_PHASE_TEAM_ENCOUNTERS,
     BEGIN_RUN_PHASE_TRAINERS,
     BEGIN_RUN_PHASE_ADVENTURE_PATH,
+    BEGIN_RUN_PHASE_MINIBOSS_PREVIEWS,
     BEGIN_RUN_PHASE_FINALIZE,
     BEGIN_RUN_PHASE_COUNT,
 };
@@ -5330,6 +5331,21 @@ static void BeginRogueRunPhase_AdventurePath(void)
     RogueAdv_GenerateAdventurePathsIfRequired();
 }
 
+static void BeginRogueRunPhase_MiniBossPreviews(void)
+{
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
+
+    // Keep full Frontier Brain setup behind the run loading screen so entering
+    // a previewed node does not inherit the generation cost.
+    RogueAdv_CacheMiniBossPreviews();
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Mini-boss previews: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
+}
+
 static void BeginRogueRunPhase_Finalize(void)
 {
     IncrementGameStat(GAME_STAT_TOTAL_RUNS);
@@ -5374,6 +5390,7 @@ static void BeginRogueRunPhase(u8 phase)
     if(phase == BEGIN_RUN_PHASE_RESET)
         sRunLoadStartClock = RogueDebug_SampleClock();
     phaseStartClock = RogueDebug_SampleClock();
+    DebugPrintf("[Run Load] phase start: %d", phase);
 #endif
 
     switch(phase)
@@ -5410,6 +5427,10 @@ static void BeginRogueRunPhase(u8 phase)
         BeginRogueRunPhase_AdventurePath();
         break;
 
+    case BEGIN_RUN_PHASE_MINIBOSS_PREVIEWS:
+        BeginRogueRunPhase_MiniBossPreviews();
+        break;
+
     case BEGIN_RUN_PHASE_FINALIZE:
         BeginRogueRunPhase_Finalize();
         break;
@@ -5417,9 +5438,10 @@ static void BeginRogueRunPhase(u8 phase)
 
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
     sRunLoadPhaseClocks[phase] = RogueDebug_SampleClock() - phaseStartClock;
+    DebugPrintf("[Run Load] phase end: %d (%d us)", phase, RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[phase]));
     if(phase == BEGIN_RUN_PHASE_FINALIZE)
     {
-        DebugPrintf("[Run Load] phases us: reset=%d world=%d bag=%d clauses=%d legends=%d teams=%d trainers=%d path=%d final=%d",
+        DebugPrintf("[Run Load] phases us: reset=%d world=%d bag=%d clauses=%d legends=%d teams=%d trainers=%d path=%d previews=%d final=%d",
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_RESET]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_WORLD_STATE]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_PARTY_AND_BAG]),
@@ -5428,6 +5450,7 @@ static void BeginRogueRunPhase(u8 phase)
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_TEAM_ENCOUNTERS]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_TRAINERS]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_ADVENTURE_PATH]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_MINIBOSS_PREVIEWS]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_FINALIZE]));
         DebugPrintf("[Run Load] setup total: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - sRunLoadStartClock));
     }
@@ -7648,7 +7671,20 @@ void Rogue_OnWarpIntoMap(void)
     }
     else if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS)
     {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        u32 previewStartClock = RogueDebug_SampleClock();
+#endif
+
         gRogueAdvPath.isOverviewActive = TRUE;
+
+        // Paths generated after a boss do not use the run-start portal phases.
+        // Finish their preview setup while the overview transition still
+        // covers the map, rather than deferring it to node interaction.
+        RogueAdv_CacheMiniBossPreviews();
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Adventure Path] Overview previews: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - previewStartClock));
+#endif
     }
     else if((gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE || gMapHeader.mapLayoutId == LAYOUT_ROGUE_HUB_ADVENTURE_ENTERANCE) && Rogue_IsRunActive())
     {

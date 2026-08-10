@@ -170,7 +170,7 @@ static u8 GetPathGenerationDifficulty()
         return Rogue_GetCurrentDifficulty();
 }
 
-static void CacheMissingMiniBossPreviews(void)
+void RogueAdv_CacheMiniBossPreviews(void)
 {
     u8 i;
 
@@ -1384,7 +1384,6 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
     {
         // The run portal already generated the initial path while the screen
         // was black. Reuse it on the first overview map load.
-        CacheMissingMiniBossPreviews();
         return TRUE;
     }
     else if(gRogueRun.adventureRoomId != ADVPATH_INVALID_ROOM_ID
@@ -1392,7 +1391,6 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
         && gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomType != ADVPATH_ROOM_BOSS)
     {
         // Path is still valid
-        CacheMissingMiniBossPreviews();
         gRogueAdvPath.justGenerated = FALSE;
         return FALSE;
     }
@@ -1583,11 +1581,6 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
         Rogue_ResetAdventurePathBuffers();
         GeneratePath(&pathSettings);
 
-        // Frontier Brain teams are deterministic from the room seed and stay
-        // five levels below the badge level cap, so cache their reward preview
-        // while the path is generated instead of stalling when the player
-        // inspects the node.
-        CacheMissingMiniBossPreviews();
         DebugPrint("ADVPATH: Finished generating path.");
 
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
