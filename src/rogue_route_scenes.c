@@ -1779,6 +1779,7 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
     u8 spotCount = 0;
     u8 originalCount = *objectEventCount;
     u8 write = 0;
+    u8 baseObjectCount = 0;
     u8 requiredCount = 0;
     u8 placementIdx;
     u8 i;
@@ -1792,10 +1793,9 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
         }
         else
         {
-            objectEvents[write++] = objectEvents[i];
+            ++baseObjectCount;
         }
     }
-    *objectEventCount = write;
 
     for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {
@@ -1817,8 +1817,15 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
         }
     }
 
-    if(*objectEventCount + requiredCount > objectEventCapacity)
+    if(baseObjectCount + requiredCount > objectEventCapacity)
         return;
+
+    for(i = 0; i < originalCount; ++i)
+    {
+        if(!RogueRouteScenes_IsLotTemplate(&objectEvents[i]))
+            objectEvents[write++] = objectEvents[i];
+    }
+    *objectEventCount = write;
 
     for(placementIdx = 0; placementIdx < RogueRouteScenes_GetPlacementCount(); ++placementIdx)
     {

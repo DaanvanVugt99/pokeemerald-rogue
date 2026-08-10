@@ -2294,6 +2294,7 @@ static u8 FindMysteryEggCourierPartySlot(u16 eggSpecies)
     for(i = 0; i < gPlayerPartyCount; ++i)
     {
         if(GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+            && GetMonData(&gPlayerParty[i], MON_DATA_MODERN_FATEFUL_ENCOUNTER)
             && Rogue_GetEggSpecies(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES)) == eggSpecies)
             return i;
     }
@@ -2421,18 +2422,21 @@ void RogueRouteEvents_TryCompleteMysteryEggDelivery(void)
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
-    if(!RogueAdventureQuests_EmitSignalForQuest(
-            questId,
-            ROGUE_ADVENTURE_QUEST_SIGNAL_DAYCARE_DELIVERY,
-            1))
-        return;
-
-    RemoveMonAtSlot(partySlot, FALSE, TRUE);
     if(!AddBagItem(ITEM_ESCAPE_ROPE, 1))
     {
         gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_NO_SPACE;
         return;
     }
+    if(!RogueAdventureQuests_EmitSignalForQuest(
+            questId,
+            ROGUE_ADVENTURE_QUEST_SIGNAL_DAYCARE_DELIVERY,
+            1))
+    {
+        RemoveBagItem(ITEM_ESCAPE_ROPE, 1);
+        return;
+    }
+
+    RemoveMonAtSlot(partySlot, FALSE, TRUE);
 
     Rogue_PushPopup_AddItem(ITEM_ESCAPE_ROPE, 1);
     scene.recipeId = ROGUE_ROUTE_SCENE_RECIPE_MYSTERY_EGG_COURIER;
@@ -2773,12 +2777,14 @@ static void Task_ShowBreedersExchangePreview(u8 taskId)
 
 void RogueRouteEvents_ShowBreedersExchangePreview(void)
 {
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
     ZeroEnemyPartyMons();
     if(!RogueRouteEvents_CreateBreedersExchangeMon(&gEnemyParty[0]))
         return;
 
     FadeScreen(FADE_TO_BLACK, 0);
     CreateTask(Task_ShowBreedersExchangePreview, 10);
+    gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
 static u8 ValidateBreedersExchangeSelection(
@@ -2877,6 +2883,7 @@ void RogueRouteEvents_TryCompleteBreedersExchange(void)
     RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     RogueRouteScenes_HideProp(scene.sceneSlot, 1);
     RogueRouteEvents_MarkSceneFamilyCompleted(&scene);
+    gSpecialVar_0x8004 = scene.rewardItem;
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 

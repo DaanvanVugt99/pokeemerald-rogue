@@ -301,6 +301,13 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Ensured Mystery Egg delivery only accepts the marked courier egg, keeps the
+  quest and party state intact when the Escape Rope cannot be added, and keeps
+  the Breeder's Exchange completion message aligned with the Pokémon actually
+  received. Failed breeder previews now return to the field instead of leaving
+  the script waiting indefinitely.
+- Preserved authored route objects when generated scene objects cannot fit the
+  map's object-event capacity.
 - Clarified the Mystery Egg summary state so it directs the player to bring the
   egg to the Day Care at a rest stop while the courier quest is active.
 - Batched wild encounter family selection so starting an Adventure and loading

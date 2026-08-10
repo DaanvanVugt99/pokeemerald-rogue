@@ -669,6 +669,12 @@ script Rogue_RouteEvent_BreedersExchangePokemon
     lock
     faceplayer
     special(RogueRouteEvents_ShowBreedersExchangePreview)
+    if(var(VAR_RESULT) != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+    {
+        msgbox(format("That offer is unavailable right now. Let's leave it here for the moment."))
+        release
+        end
+    }
     waitstate
     release
 }
@@ -748,7 +754,6 @@ script Rogue_RouteEvent_BreedersExchange
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
-        special(RogueRouteEvents_GetInteractionData)
         bufferspeciesname(STR_VAR_1, VAR_0x8004)
         msgbox(format("Thanks! Please take good care of {STR_VAR_1}!"))
     }

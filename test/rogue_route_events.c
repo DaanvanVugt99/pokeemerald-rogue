@@ -2151,6 +2151,9 @@ TEST("Mystery Egg Courier uses a party Egg and Day Care delivery reward")
     EXPECT(GetMonData(&gPlayerParty[2], MON_DATA_MODERN_FATEFUL_ENCOUNTER));
     EXPECT_EQ(RogueRouteScenes_GetState(courier.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
 
+    // A normal egg of the same species must not satisfy the courier quest.
+    CreateEgg(&gPlayerParty[0], Rogue_GetEggSpecies(SPECIES_POOCHYENA), FALSE);
+
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     EXPECT(!ShouldEggHatch());
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
@@ -2517,6 +2520,7 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     RogueRouteEvents_TryCompleteBreedersExchange();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(gSpecialVar_0x8004, exchange.rewardItem);
     EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), exchange.rewardItem);
     EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM), ITEM_NONE);
     EXPECT(CheckBagHasItem(ITEM_POTION, 1));
