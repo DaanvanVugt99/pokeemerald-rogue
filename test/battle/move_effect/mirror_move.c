@@ -4,6 +4,7 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_MIRROR_MOVE].effect == EFFECT_MIRROR_MOVE);
+    ASSUME(gBattleMoves[MOVE_MIRROR_MOVE].mirrorMoveBanned);
 }
 
 SINGLE_BATTLE_TEST("Mirror Move copies the last used move by the target")

@@ -2122,6 +2122,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .priority = 0,
         .split = SPLIT_STATUS,
         .zMoveEffect = Z_EFFECT_ATK_UP_2,
+        .mirrorMoveBanned = TRUE,
         .mimicBanned = TRUE,
         .metronomeBanned = B_UPDATED_MOVE_FLAGS >= GEN_4,
         .copycatBanned = TRUE,
