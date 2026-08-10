@@ -2417,6 +2417,7 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     u8 moveCount = 0;
     u8 stat;
     u8 moveIdx;
+    u8 nickname[POKEMON_NAME_LENGTH + 1];
     u16 heldItem;
     u32 uniqueOtId = OTID_FLAG_CUSTOM_MON | OTID_FLAG_DYNAMIC_CUSTOM_MON;
 
@@ -2447,6 +2448,8 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     EXPECT_EQ(GetMonData(&offeredMon, MON_DATA_LEVEL), Rogue_CalculatePlayerMonLvl());
     EXPECT_EQ(GetNature(&offeredMon), gRoguePokemonProfiles[exchange.rewardItem].competitiveSets[exchange.trainerNum].nature);
     EXPECT_EQ(RogueGift_GetCustomMonId(&offeredMon), CUSTOM_MON_NONE);
+    GetMonData(&offeredMon, MON_DATA_NICKNAME, nickname);
+    EXPECT_NE(StringCompareN(nickname, RoguePokedex_GetSpeciesName(exchange.rewardItem), POKEMON_NAME_LENGTH), 0);
     for(stat = 0; stat < NUM_STATS; ++stat)
     {
         if(GetMonData(&offeredMon, MON_DATA_HP_IV + stat) == 31)

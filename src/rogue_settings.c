@@ -754,6 +754,22 @@ static bool8 DoesPartyContainNickname(u8 const* str)
     return FALSE;
 }
 
+void Rogue_AssignAutomaticNicknameFromSeed(struct Pokemon *mon, u16 seed)
+{
+    u16 i;
+    u16 nicknameIdx = seed % ARRAY_COUNT(sNicknameTable_Global);
+
+    for(i = 0; i < ARRAY_COUNT(sNicknameTable_Global); ++i)
+    {
+        if(!DoesPartyContainNickname(sNicknameTable_Global[nicknameIdx]))
+            break;
+
+        nicknameIdx = (nicknameIdx + 1) % ARRAY_COUNT(sNicknameTable_Global);
+    }
+
+    SetMonData(mon, MON_DATA_NICKNAME, sNicknameTable_Global[nicknameIdx]);
+}
+
 bool8 Rogue_ShouldSkipAssignNickname(struct Pokemon* mon)
 {
     u32 customMonId;

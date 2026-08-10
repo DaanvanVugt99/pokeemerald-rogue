@@ -380,6 +380,9 @@ bool8 Rogue_PartyContainsSpeciesChain(u16 checkSpecies, u8 ignoredSlot1, u8 igno
         if(i == ignoredSlot1 || i == ignoredSlot2)
             continue;
 
+        if(RogueRouteEvents_IsMysteryEggCourierEgg(&gPlayerParty[i]))
+            continue;
+
 #ifdef ROGUE_EXPANSION
         species = GET_BASE_SPECIES_ID(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
 #else

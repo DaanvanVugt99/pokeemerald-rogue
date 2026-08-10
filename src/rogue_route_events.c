@@ -53,6 +53,7 @@
 #include "rogue_route_events.h"
 #include "rogue_route_scene_internal.h"
 #include "rogue_route_scenes.h"
+#include "rogue_settings.h"
 #include "rogue_trainers.h"
 #include "rogue_trials.h"
 
@@ -2272,6 +2273,20 @@ static u8 FindMysteryEggCourierQuest(void)
     return RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER);
 }
 
+bool8 RogueRouteEvents_IsMysteryEggCourierEgg(struct Pokemon *mon)
+{
+    u8 questId;
+    const struct RogueAdventureQuest *quest;
+
+    if(!GetMonData(mon, MON_DATA_IS_EGG)
+        || !GetMonData(mon, MON_DATA_MODERN_FATEFUL_ENCOUNTER))
+        return FALSE;
+
+    questId = FindMysteryEggCourierQuest();
+    quest = RogueAdventureQuests_Get(questId);
+    return quest != NULL && GetMonData(mon, MON_DATA_SPECIES) == quest->payload[0];
+}
+
 static u8 FindMysteryEggCourierPartySlot(u16 eggSpecies)
 {
     u8 i;
@@ -2692,6 +2707,7 @@ static bool8 CreateBreedersExchangeMonForScene(const struct RogueRouteSceneReque
         BREEDERS_EXCHANGE_OT_ID);
     SetMonData(mon, MON_DATA_OT_NAME, sBreedersExchangeOtName);
     SetMonData(mon, MON_DATA_POKEBALL, &pokeball);
+    Rogue_AssignAutomaticNicknameFromSeed(mon, scene->rewardAmount ^ scene->rewardItem ^ scene->trainerNum);
     Rogue_ApplyMonCompetitiveSet(
         mon,
         Rogue_CalculatePlayerMonLvl(),

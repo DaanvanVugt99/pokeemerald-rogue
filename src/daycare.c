@@ -25,11 +25,10 @@
 #include "constants/hold_effects.h"
 #include "constants/moves.h"
 #include "constants/region_map_sections.h"
-#include "constants/rogue_adventure_quests.h"
 
 #include "rogue.h"
-#include "rogue_adventure_quests.h"
 #include "rogue_controller.h"
+#include "rogue_route_events.h"
 
 #define IS_DITTO(species) (gSpeciesInfo[species].eggGroups[0] == EGG_GROUP_DITTO || gSpeciesInfo[species].eggGroups[1] == EGG_GROUP_DITTO)
 
@@ -39,15 +38,7 @@ static void DaycarePrintMonInfo(u8 windowId, u32 daycareSlotId, u8 y);
 
 static bool8 IsMysteryEggCourierEgg(struct Pokemon *mon)
 {
-    u8 questId;
-    const struct RogueAdventureQuest *quest;
-
-    if(!GetMonData(mon, MON_DATA_MODERN_FATEFUL_ENCOUNTER))
-        return FALSE;
-
-    questId = RogueAdventureQuests_FindByDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER);
-    quest = RogueAdventureQuests_Get(questId);
-    return quest != NULL && GetMonData(mon, MON_DATA_SPECIES) == quest->payload[0];
+    return RogueRouteEvents_IsMysteryEggCourierEgg(mon);
 }
 static u8 ModifyBreedingScoreForOvalCharm(u8 score);
 

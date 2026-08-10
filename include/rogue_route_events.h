@@ -27,6 +27,7 @@ void RogueRouteEvents_TryCampCookMaxPp(void);
 void RogueRouteEvents_TryAcceptMysteryEggCourierQuest(void);
 void RogueRouteEvents_BufferMysteryEggDelivery(void);
 void RogueRouteEvents_TryCompleteMysteryEggDelivery(void);
+bool8 RogueRouteEvents_IsMysteryEggCourierEgg(struct Pokemon *mon);
 void RogueRouteEvents_BufferFieldRepairBenchData(void);
 void RogueRouteEvents_TryAcceptFieldRepairBenchQuest(void);
 void RogueRouteEvents_CollectFieldRepairPart(void);

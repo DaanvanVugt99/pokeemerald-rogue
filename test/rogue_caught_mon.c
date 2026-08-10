@@ -4,6 +4,7 @@
 #include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/rogue.h"
+#include "constants/rogue_adventure_quests.h"
 #include "constants/rogue_pokedex.h"
 #include "constants/species.h"
 #include "constants/vars.h"
@@ -12,6 +13,7 @@
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
+#include "rogue_adventure_quests.h"
 #include "rogue_adventurepaths.h"
 #include "rogue_charms.h"
 #include "rogue_controller.h"
@@ -175,6 +177,29 @@ TEST("Species Clause allows sibling evolution branches but still blocks direct l
     EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
     EXPECT(Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 1));
     EXPECT(!Rogue_CanReleasePartyMonForCaughtMon(&caughtMon, 0));
+
+    ClearCaughtMonTestState();
+}
+
+TEST("Species Clause ignores the active Mystery Egg Courier Egg for route catches")
+{
+    struct RogueAdventureQuestCreateParams params = {0};
+    struct Pokemon caughtMon;
+    bool8 isEgg = TRUE;
+    bool8 isCourierEgg = TRUE;
+
+    ResetCaughtMonTestState();
+    params.payload[0] = SPECIES_POOCHYENA;
+    EXPECT_NE(RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_MYSTERY_EGG_COURIER, &params), ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    SetPartyMon(0, SPECIES_POOCHYENA);
+    SetMonData(&gPlayerParty[0], MON_DATA_IS_EGG, &isEgg);
+    SetMonData(&gPlayerParty[0], MON_DATA_MODERN_FATEFUL_ENCOUNTER, &isCourierEgg);
+    caughtMon = CreateCaughtMon(SPECIES_MIGHTYENA);
+
+    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+
+    RogueAdventureQuests_Clear();
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
 
     ClearCaughtMonTestState();
 }
