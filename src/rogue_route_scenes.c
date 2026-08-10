@@ -10,8 +10,10 @@
 
 #include "event_data.h"
 #include "event_object_movement.h"
+#include "malloc.h"
 #include "overworld.h"
 #include "random.h"
+#include "string.h"
 
 #include "rogue.h"
 #include "rogue_adventure_quests.h"
@@ -57,12 +59,37 @@ struct RogueRouteSpot
     u8 terrain;
 };
 
+struct RogueRouteSceneRequestCacheEntry
+{
+    struct RogueRouteSceneRequest request;
+    struct RogueAdventureQuest questState;
+    bool8 valid;
+    bool8 cacheable;
+};
+
+struct RogueRouteSceneRequestCache
+{
+    struct RogueRouteSceneRequestCacheEntry entries[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS];
+    struct RogueRouteScenePlan plan;
+    u8 roomId;
+    u8 routeIdx;
+    bool8 ready;
+};
+
+static struct RogueRouteSceneRequestCache *sRouteSceneRequestCache;
+// Keep the initial route-entry pass lazy so generators run before same-route consumers.
+static bool8 sRouteSceneRequestCacheBuilding;
+#if TESTING
+static EWRAM_DATA struct RogueRouteSceneRequestCache sTestingRouteSceneRequestCache;
+#endif
+
 static const struct ObjectEventTemplate *GetSceneObjectSpot(
     const struct ObjectEventTemplate *spots,
     u8 spotCount,
     const struct RogueRouteSceneRequest *scene,
     const struct RogueRouteSceneLotDefinition *lotDefinition,
     const struct RogueRouteSceneObjectDefinition *object);
+static void FreeRouteSceneRequestCache(void);
 
 void RogueRouteSceneRng_Seed(struct RogueRouteSceneRng *rng, u32 seed)
 {
@@ -221,6 +248,8 @@ void RogueRouteScenes_DebugSetPlacement(u8 placementIndex, u8 recipeId, u8 lotId
 
 void RogueRouteScenes_GenerateRoom(struct RogueAdvPathRoom *room)
 {
+    if(&room->routeScenePlan == GetCurrentScenePlan())
+        FreeRouteSceneRequestCache();
     memset(&room->routeScenePlan, 0, sizeof(room->routeScenePlan));
 }
 
@@ -755,7 +784,33 @@ u8 RogueRouteScenes_GetPlacementCount(void)
     return count;
 }
 
-static bool8 GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request, bool8 allowSuppressedGenerator)
+static bool8 IsPlacementRequestSuppressed(u8 placementIndex)
+{
+    const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
+    const struct RogueRouteScenePlacement *placement;
+    const struct RogueRouteRecipeDefinition *definition;
+    u8 recipeId;
+
+    if(plan == NULL || placementIndex >= ARRAY_COUNT(plan->placements))
+        return FALSE;
+
+    placement = &plan->placements[placementIndex];
+    recipeId = GetPlacementRecipe(placement);
+    definition = RogueRouteEvents_GetRecipeDefinition(recipeId);
+    if(definition == NULL)
+        return FALSE;
+
+    return definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
+        && definition->linkedQuestDefinitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_NONE
+        && RogueAdventureQuests_HasDefinition(definition->linkedQuestDefinitionId)
+        // These recipes deliberately keep same-route consumers visible after
+        // their generator creates the linked quest.
+        && !(recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
+            && GetPlacementRole(placement) == 1)
+        && recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH;
+}
+
+static bool8 BuildPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request, bool8 allowSuppressedGenerator)
 {
     const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
     const struct RogueRouteScenePlacement *placement;
@@ -772,15 +827,7 @@ static bool8 GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneReques
     routeIdx = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomParams.roomIdx;
     if(definition == NULL || routeIdx >= gRogueRouteTable.routeCount)
         return FALSE;
-    if(definition->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
-        && definition->linkedQuestDefinitionId != ROGUE_ADVENTURE_QUEST_DEFINITION_NONE
-        && RogueAdventureQuests_HasDefinition(definition->linkedQuestDefinitionId)
-        && !allowSuppressedGenerator
-        // These recipes deliberately keep same-route consumers visible after
-        // their generator creates the linked quest.
-        && !(recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
-            && GetPlacementRole(placement) == 1)
-        && recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH)
+    if(!allowSuppressedGenerator && IsPlacementRequestSuppressed(placementIndex))
         return FALSE;
 
     memset(request, 0, sizeof(*request));
@@ -815,6 +862,211 @@ static bool8 GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneReques
 
     request->recipeId = recipeId;
     request->source = definition->source;
+    return TRUE;
+}
+
+static bool8 IsPlacementRequestCacheable(const struct RogueRouteSceneRequest *request)
+{
+    // This artisan request reads the quest payload after its generator has
+    // been accepted, so it must be expanded against current quest state.
+    if(request->recipeId == ROGUE_ROUTE_SCENE_RECIPE_APRICORN_GROVE_AND_ARTISAN
+        && request->lotRole == 1)
+        return FALSE;
+
+    if(request->recipeId == ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE)
+    {
+        // Its reward pool can be temporarily invalid while route setup changes
+        // the active item context, so retry rather than freezing an empty roll.
+        return request->rewardItem != ITEM_NONE && request->trainerNum != SPECIES_NONE;
+    }
+
+    return TRUE;
+}
+
+static bool8 IsCachedRequestFresh(u8 placementIndex)
+{
+    struct RogueRouteSceneRequestCacheEntry *entry = &sRouteSceneRequestCache->entries[placementIndex];
+
+    if(!entry->valid || !entry->cacheable)
+        return FALSE;
+
+    if(entry->request.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+    {
+        u8 questId = entry->request.ownerQuestId;
+
+        if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+            return FALSE;
+
+        return memcmp(
+            &entry->questState,
+            &gRogueRun.adventureQuests[questId],
+            sizeof(entry->questState)) == 0;
+    }
+
+    return TRUE;
+}
+
+static void StoreCachedRequest(u8 placementIndex, const struct RogueRouteSceneRequest *request, bool8 valid)
+{
+    struct RogueRouteSceneRequestCacheEntry *entry = &sRouteSceneRequestCache->entries[placementIndex];
+
+    entry->valid = FALSE;
+    entry->cacheable = IsPlacementRequestCacheable(request);
+    if(!entry->cacheable)
+        return;
+
+    entry->request = *request;
+    if(request->source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+    {
+        u8 questId = request->ownerQuestId;
+
+        if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+        {
+            entry->cacheable = FALSE;
+            return;
+        }
+
+        memcpy(&entry->questState, &gRogueRun.adventureQuests[questId], sizeof(entry->questState));
+    }
+
+    entry->valid = valid;
+}
+
+static void FinalizeRouteSceneRequestCache(void)
+{
+    u8 placementIdx;
+
+    if(sRouteSceneRequestCache == NULL)
+        return;
+
+    for(placementIdx = 0; placementIdx < ARRAY_COUNT(sRouteSceneRequestCache->entries); ++placementIdx)
+    {
+        struct RogueRouteSceneRequestCacheEntry *entry = &sRouteSceneRequestCache->entries[placementIdx];
+
+        if(!entry->cacheable)
+        {
+            entry->valid = FALSE;
+            continue;
+        }
+
+        if(entry->request.source == ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
+        {
+            u8 questId = entry->request.ownerQuestId;
+
+            if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+            {
+                entry->valid = FALSE;
+                entry->cacheable = FALSE;
+                continue;
+            }
+
+            memcpy(&entry->questState, &gRogueRun.adventureQuests[questId], sizeof(entry->questState));
+        }
+
+        entry->valid = TRUE;
+    }
+
+    sRouteSceneRequestCache->ready = TRUE;
+}
+
+static void FreeRouteSceneRequestCache(void)
+{
+    if(sRouteSceneRequestCache != NULL)
+    {
+#if TESTING
+        if(sRouteSceneRequestCache == &sTestingRouteSceneRequestCache)
+        {
+            sRouteSceneRequestCache = NULL;
+            return;
+        }
+#endif
+        Free(sRouteSceneRequestCache);
+        sRouteSceneRequestCache = NULL;
+    }
+}
+
+static bool8 IsCurrentSceneRequestCacheValid(void)
+{
+    const struct RogueRouteScenePlan *plan = GetCurrentScenePlan();
+    u8 routeIdx;
+
+    if(sRouteSceneRequestCache == NULL
+        || plan == NULL
+        || sRouteSceneRequestCache->roomId != gRogueRun.adventureRoomId
+        || memcmp(&sRouteSceneRequestCache->plan, plan, sizeof(*plan)) != 0)
+        return FALSE;
+
+    routeIdx = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomParams.roomIdx;
+    return sRouteSceneRequestCache->routeIdx == routeIdx;
+}
+
+static void EnsureRouteSceneRequestCache(void)
+{
+    u8 placementCount;
+
+    if(IsCurrentSceneRequestCacheValid())
+        return;
+
+    FreeRouteSceneRequestCache();
+    placementCount = RogueRouteScenes_GetPlacementCount();
+    if(placementCount == 0)
+        return;
+
+#if TESTING
+    sRouteSceneRequestCache = &sTestingRouteSceneRequestCache;
+#else
+    sRouteSceneRequestCache = Alloc(sizeof(*sRouteSceneRequestCache));
+    if(sRouteSceneRequestCache == NULL)
+        return;
+#endif
+
+    memset(sRouteSceneRequestCache, 0, sizeof(*sRouteSceneRequestCache));
+    sRouteSceneRequestCache->roomId = gRogueRun.adventureRoomId;
+    sRouteSceneRequestCache->routeIdx = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].roomParams.roomIdx;
+    memcpy(&sRouteSceneRequestCache->plan, GetCurrentScenePlan(), sizeof(sRouteSceneRequestCache->plan));
+    sRouteSceneRequestCache->ready = !sRouteSceneRequestCacheBuilding;
+}
+
+static bool8 GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneRequest *request, bool8 allowSuppressedGenerator)
+{
+    struct RogueRouteSceneRequestCacheEntry *entry;
+
+    if(!allowSuppressedGenerator && IsPlacementRequestSuppressed(placementIndex))
+        return FALSE;
+
+    if(sRouteSceneRequestCache != NULL && !IsCurrentSceneRequestCacheValid())
+        FreeRouteSceneRequestCache();
+
+    if(sRouteSceneRequestCache == NULL)
+        EnsureRouteSceneRequestCache();
+
+    if(sRouteSceneRequestCache == NULL
+        || placementIndex >= ARRAY_COUNT(sRouteSceneRequestCache->entries))
+        return BuildPlacementRequest(placementIndex, request, allowSuppressedGenerator);
+
+    if(!sRouteSceneRequestCache->ready)
+    {
+        if(!BuildPlacementRequest(placementIndex, request, TRUE))
+            return FALSE;
+
+        StoreCachedRequest(placementIndex, request, FALSE);
+        return TRUE;
+    }
+
+    entry = &sRouteSceneRequestCache->entries[placementIndex];
+    if(IsCachedRequestFresh(placementIndex))
+    {
+        *request = entry->request;
+        return TRUE;
+    }
+
+    if(!BuildPlacementRequest(placementIndex, request, TRUE))
+    {
+        entry->valid = FALSE;
+        return FALSE;
+    }
+
+    StoreCachedRequest(placementIndex, request, TRUE);
     return TRUE;
 }
 
@@ -893,10 +1145,12 @@ void RogueRouteScenes_OnEnterRoute(void)
     u8 i;
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
     u32 scenePlanStartClock;
+    u32 sceneRequestCacheStartClock;
 #endif
 
     if(gRogueRun.routeSceneRoomId != gRogueRun.adventureRoomId)
     {
+        FreeRouteSceneRequestCache();
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
         FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
         FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
@@ -918,13 +1172,27 @@ void RogueRouteScenes_OnEnterRoute(void)
 #endif
     }
 
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    sceneRequestCacheStartClock = RogueDebug_SampleClock();
+#endif
+    sRouteSceneRequestCacheBuilding = TRUE;
+    EnsureRouteSceneRequestCache();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Route Load] Scene request cache setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - sceneRequestCacheStartClock));
+#endif
+
     for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
     {
         struct RogueRouteSceneRequest scene;
 
         if(RogueRouteScenes_GetPlacementRequest(i, &scene))
+        {
             RogueRouteEvents_OnEnterScene(&scene);
+        }
     }
+
+    FinalizeRouteSceneRequestCache();
+    sRouteSceneRequestCacheBuilding = FALSE;
 }
 
 void RogueRouteScenes_PrepareRouteTrainers(void)
@@ -996,6 +1264,7 @@ void RogueRouteScenes_OnExitRoute(void)
 
     RogueAdventureQuests_LeaveRoute(gRogueRun.adventureRoomId);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
+    FreeRouteSceneRequestCache();
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
