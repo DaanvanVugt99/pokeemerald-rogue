@@ -626,8 +626,10 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    bool8 seenSlots[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS];
     u8 originalPartyCount = gPlayerPartyCount;
     u16 seed;
+    u8 eventCount;
     u8 i;
     RAND_TYPE rogueRngBefore;
     RAND_TYPE standardRngBefore;
@@ -675,14 +677,22 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
         EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY), 0);
         EXPECT_EQ(VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2), 0);
 
-        EXPECT_GE(RogueRouteScenes_GetPlacementCount(), 1);
         EXPECT_LE(RogueRouteScenes_GetPlacementCount(), ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
+        memset(seenSlots, FALSE, sizeof(seenSlots));
+        eventCount = 0;
 
         for(i = 0; i < RogueRouteScenes_GetPlacementCount(); ++i)
         {
             struct RogueRouteSceneRequest request;
 
             EXPECT(RogueRouteScenes_GetPlacementRequest(i, &request));
+            EXPECT_LT(request.sceneSlot, ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
+            if(request.sceneSlot < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS
+                && !seenSlots[request.sceneSlot])
+            {
+                seenSlots[request.sceneSlot] = TRUE;
+                ++eventCount;
+            }
             if(request.recipeId == ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER)
             {
                 EXPECT_EQ((u8)request.source, ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR);
@@ -798,6 +808,8 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
                 }
             }
         }
+
+        EXPECT_LE(eventCount, 2);
     }
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));

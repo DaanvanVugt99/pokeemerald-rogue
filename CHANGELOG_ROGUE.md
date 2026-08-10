@@ -112,6 +112,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Reduced the default route-event budget to target zero, one, or two optional
+  events per route, averaging one event while preserving mandatory Adventure
+  Quest scenes.
 - Reworked generated route scenes around sparse, asymmetric compositions and
   environment-aware semantic props. Removed generic battle-statue pillars and
   decorative Rock Smash boulders, kept each lot locally traversable with its
@@ -295,6 +298,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Clarified the Mystery Egg summary state so it directs the player to bring the
+  egg to the Day Care at a rest stop while the courier quest is active.
 - Batched wild encounter family selection so starting an Adventure and loading
   a route no longer rebuild the full eligible-species table for every grass or
   fishing slot.

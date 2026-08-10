@@ -1071,6 +1071,7 @@ extern const u8 gText_XNatureProbablyMetAt[];
 extern const u8 gText_XNatureObtainedInTrade[];
 extern const u8 gText_EmptyString5[];
 extern const u8 gText_EggWillTakeALongTime[];
+extern const u8 gText_MysteryEggBringToDayCare[];
 extern const u8 gText_EggAboutToHatch[];
 extern const u8 gText_EggWillHatchSoon[];
 extern const u8 gText_EggWillTakeSomeTime[];

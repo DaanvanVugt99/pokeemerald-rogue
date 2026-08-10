@@ -602,6 +602,7 @@ const u8 gText_Info[] = _("Info");
 const u8 gText_PkmnIV[] = _("IVs");
 const u8 gText_PkmnEV[] = _("EVs");
 const u8 gText_EggWillTakeALongTime[] = _("It looks like this Egg will\ntake a long time to hatch.");
+const u8 gText_MysteryEggBringToDayCare[] = _("Bring this Egg to the DAY CARE\nat a rest stop.");
 const u8 gText_EggWillTakeSomeTime[] = _("What will hatch from this?\nIt will take some time.");
 const u8 gText_EggWillHatchSoon[] = _("It moves occasionally.\nIt should hatch soon.");
 const u8 gText_EggAboutToHatch[] = _("It's making sounds.\nIt's about to hatch!");

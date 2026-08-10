@@ -50,6 +50,7 @@ extern const u8 Rogue_RouteEvent_BuriedCacheSite[];
 #define ROUTE_SCENE_OBJECT_ROLE_MASK 0x03
 #define ROUTE_SCENE_OBJECT_PROP_SHIFT 4
 #define ROUTE_SCENE_OBJECT_PROP_MASK 0x0F
+#define ROUTE_SCENE_PLAN_MATERIALIZED_MARKER (1 << ROUTE_SCENE_LOT_SHIFT)
 
 struct RogueRouteSpot
 {
@@ -123,6 +124,18 @@ static struct RogueRouteScenePlan *GetCurrentScenePlan(void)
 static u8 GetPlacementRecipe(const struct RogueRouteScenePlacement *placement)
 {
     return (placement->packed >> ROUTE_SCENE_RECIPE_SHIFT) & ROUTE_SCENE_RECIPE_MASK;
+}
+
+static bool8 IsRouteScenePlanMaterialized(const struct RogueRouteScenePlan *plan)
+{
+    return GetPlacementRecipe(&plan->placements[0]) != ROGUE_ROUTE_SCENE_RECIPE_NONE
+        || plan->placements[0].packed == ROUTE_SCENE_PLAN_MATERIALIZED_MARKER;
+}
+
+static void MarkRouteScenePlanMaterialized(struct RogueRouteScenePlan *plan)
+{
+    if(!IsRouteScenePlanMaterialized(plan))
+        plan->placements[0].packed = ROUTE_SCENE_PLAN_MATERIALIZED_MARKER;
 }
 
 static u8 GetPlacementLot(const struct RogueRouteScenePlacement *placement)
@@ -643,6 +656,18 @@ static bool8 SelectRecipePayload(u8 roomId, u8 recipeId, u8 sceneSlot, u32 *payl
     return *payload <= ROUTE_SCENE_PAYLOAD_MASK;
 }
 
+static u8 RollTargetEventCount(struct RogueRouteSceneRng *rng)
+{
+    u8 roll = RogueRouteSceneRng_Next(rng) % 10;
+
+    // Empty, single-event, and two-event routes are weighted 20/60/20.
+    if(roll < 2)
+        return 0;
+    if(roll < 8)
+        return 1;
+    return 2;
+}
+
 static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
 {
     struct RogueRouteSceneRequest questRequests[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS] = {0};
@@ -655,8 +680,8 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
     u8 objectBudget;
     u8 usedObjects = 0;
     u8 placementCount = 0;
-    u8 sceneSlot = 0;
-    u8 targetPlacements;
+    u8 eventCount = 0;
+    u8 targetEvents;
     u8 fallbackCount = RogueRouteEvents_GetFallbackCount();
     u8 questCount;
     u8 spotCount;
@@ -665,17 +690,20 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
     memset(plan, 0, sizeof(*plan));
     spotCount = CollectRouteSpots(roomId, spots, ARRAY_COUNT(spots), &baseObjectCount);
     if(spotCount == 0 || baseObjectCount >= OBJECT_EVENT_TEMPLATES_COUNT)
+    {
+        MarkRouteScenePlanMaterialized(plan);
         return;
+    }
 
     objectBudget = OBJECT_EVENT_TEMPLATES_COUNT - baseObjectCount;
     RogueRouteSceneRng_Seed(&rng, gRogueAdvPath.rooms[roomId].rngSeed ^ 0xA7E1);
-    targetPlacements = 1 + RogueRouteSceneRng_Next(&rng) % ROGUE_ROUTE_SCENE_MAX_PLACEMENTS;
+    targetEvents = RollTargetEventCount(&rng);
 
     questCount = RogueAdventureQuests_CollectSceneRequests(
         roomId,
         questRequests,
         ARRAY_COUNT(questRequests));
-    targetPlacements = max(targetPlacements, questCount);
+    targetEvents = max(targetEvents, questCount);
 
     for(i = 0; i < questCount && placementCount < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS; ++i)
     {
@@ -692,10 +720,10 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             &usedObjects,
             objectBudget,
             &rng))
-            ++sceneSlot;
+            ++eventCount;
     }
 
-    while(placementCount < targetPlacements && sceneSlot < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS)
+    while(eventCount < targetEvents && placementCount < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS)
     {
         u16 totalWeight = 0;
         u16 roll;
@@ -747,7 +775,7 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
                 usedFallbackRecipes[fallback->recipeId] = TRUE;
 
             if(fallback != NULL
-                && SelectRecipePayload(roomId, fallback->recipeId, sceneSlot, &payload)
+                && SelectRecipePayload(roomId, fallback->recipeId, eventCount, &payload)
                 && AddRecipeToPlan(
                     plan,
                     &placementCount,
@@ -763,10 +791,12 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
                     &rng))
             {
                 usedFallbackFamilies[fallback->familyId] = TRUE;
-                ++sceneSlot;
+                ++eventCount;
             }
         }
     }
+
+    MarkRouteScenePlanMaterialized(plan);
 }
 
 u8 RogueRouteScenes_GetPlacementCount(void)
@@ -1142,13 +1172,14 @@ u8 RogueRouteScenes_GetSelectedPropId(void)
 void RogueRouteScenes_OnEnterRoute(void)
 {
     struct RogueRouteScenePlan *plan;
+    bool8 isNewRoute = gRogueRun.routeSceneRoomId != gRogueRun.adventureRoomId;
     u8 i;
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
     u32 scenePlanStartClock;
     u32 sceneRequestCacheStartClock;
 #endif
 
-    if(gRogueRun.routeSceneRoomId != gRogueRun.adventureRoomId)
+    if(isNewRoute)
     {
         FreeRouteSceneRequestCache();
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
@@ -1161,7 +1192,7 @@ void RogueRouteScenes_OnEnterRoute(void)
     if(plan == NULL)
         return;
 
-    if(RogueRouteScenes_GetPlacementCount() == 0)
+    if(!IsRouteScenePlanMaterialized(plan))
     {
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
         scenePlanStartClock = RogueDebug_SampleClock();
