@@ -22,6 +22,7 @@ bool8 RogueAdventureQuests_IsItemProtected(u16 itemId);
 bool8 RogueAdventureQuests_IsProgressTargetMet(u8 questId);
 u16 RogueAdventureQuests_GetFossilSpecies(u16 fossilItem);
 bool8 RogueAdventureQuests_BuildSceneRequest(u8 questId, struct RogueRouteSceneRequest *request);
+bool8 RogueAdventureQuests_BindSceneRequest(u8 questId, u8 roomId);
 u8 RogueAdventureQuests_CollectSceneRequests(u8 roomId, struct RogueRouteSceneRequest *requests, u8 capacity);
 bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSceneRequest *request, u16 *priority);
 void RogueAdventureQuests_LeaveRoute(u8 roomId);

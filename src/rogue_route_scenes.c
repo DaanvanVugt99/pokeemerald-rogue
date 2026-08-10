@@ -266,6 +266,17 @@ void RogueRouteScenes_GenerateRoom(struct RogueAdvPathRoom *room)
     memset(&room->routeScenePlan, 0, sizeof(room->routeScenePlan));
 }
 
+void RogueRouteScenes_RestoreCurrentRoutePlan(const struct RogueRouteScenePlan *plan)
+{
+    struct RogueRouteScenePlan *currentPlan = GetCurrentScenePlan();
+
+    if(currentPlan != NULL && plan != NULL)
+    {
+        FreeRouteSceneRequestCache();
+        *currentPlan = *plan;
+    }
+}
+
 void RogueRouteScenes_HideProp(u8 sceneSlot, u8 propId)
 {
     u8 i;
@@ -707,6 +718,10 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
 
     for(i = 0; i < questCount && placementCount < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS; ++i)
     {
+        u8 previousPlacementCount = placementCount;
+        u16 previousUsedSpotGroups = usedSpotGroups;
+        u8 previousUsedObjects = usedObjects;
+
         if(AddRecipeToPlan(
             plan,
             &placementCount,
@@ -720,7 +735,16 @@ static void BuildRouteScenePlan(u8 roomId, struct RogueRouteScenePlan *plan)
             &usedObjects,
             objectBudget,
             &rng))
-            ++eventCount;
+        {
+            if(RogueAdventureQuests_BindSceneRequest(questRequests[i].ownerQuestId, roomId))
+                ++eventCount;
+            else
+            {
+                placementCount = previousPlacementCount;
+                usedSpotGroups = previousUsedSpotGroups;
+                usedObjects = previousUsedObjects;
+            }
+        }
     }
 
     while(eventCount < targetEvents && placementCount < ROGUE_ROUTE_SCENE_MAX_PLACEMENTS)

@@ -4,11 +4,13 @@
 #include "global.h"
 
 struct RogueAdvPathRoom;
+struct RogueRouteScenePlan;
 struct RogueRouteSceneRequest;
 
 // Route lifecycle and scene composition are content-agnostic. Individual
 // interactions remain in rogue_route_events.h.
 void RogueRouteScenes_GenerateRoom(struct RogueAdvPathRoom *room);
+void RogueRouteScenes_RestoreCurrentRoutePlan(const struct RogueRouteScenePlan *plan);
 void RogueRouteScenes_OnEnterRoute(void);
 void RogueRouteScenes_PrepareRouteTrainers(void);
 void RogueRouteScenes_OnExitRoute(void);

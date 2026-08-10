@@ -896,6 +896,9 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
     ClearBag();
     SetMoney(&gSaveBlock1Ptr->money, 0);
+    FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
     for(seed = 1; seed < 256; ++seed)
     {
         gRogueAdvPath.rooms[0].rngSeed = seed;
@@ -912,6 +915,13 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         EXPECT_EQ(archaeologist.lotRole, 0);
         EXPECT_EQ(siteA.lotRole, 1);
         EXPECT_EQ(siteB.lotRole, 2);
+
+        // Generic hidden props are independent from buried-cache progress.
+        FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+        SelectPlacement(&siteA);
+        RogueRouteEvents_BufferBuriedCacheData();
+        EXPECT(!gSpecialVar_0x8003);
+        FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
 
         {
             struct ObjectEventTemplate objects[8] =
@@ -993,7 +1003,9 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     EXPECT_LT(seed, 256);
     EXPECT_EQ(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), siteA.trainerNum);
     EXPECT(IsBuriedCacheAmbushSpecies(siteA.environment, siteA.trainerNum));
-    EXPECT(FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
+    EXPECT((VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_BURIED_CACHE_SITE_A_DUG) != 0);
+    EXPECT((VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_BURIED_CACHE_SITE_B_DUG) == 0);
+    EXPECT(!FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN));
     EXPECT(!FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN));
     EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
     EXPECT_EQ(RogueRouteScenes_GetState(0), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
@@ -3514,6 +3526,136 @@ TEST("Adventure quest registry reschedules skipped Stolen Trade Case nodes fairl
     EXPECT_EQ(RogueAdventureQuests_GetCount(), ROGUE_ADVENTURE_QUEST_CAPACITY);
 
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("Route director leaves an unfit quest consumer ready for a later route")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueAdventureQuestCreateParams params =
+    {
+        .payload = {1000, 0},
+        .target = ROGUE_FORBIDDEN_STONE_SOUL_COUNT,
+    };
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u8 firstQuest;
+    u8 secondQuest;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteWithRepeatedRecipeLot(
+        ROGUE_ROUTE_SCENE_RECIPE_FORBIDDEN_STONE_SOULS,
+        3);
+    gRogueAdvPath.rooms[0].rngSeed = 0x2D91;
+
+    firstQuest = RogueAdventureQuests_Create(
+        ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+        &params);
+    secondQuest = RogueAdventureQuests_Create(
+        ROGUE_ADVENTURE_QUEST_DEFINITION_FORBIDDEN_STONE,
+        &params);
+    EXPECT_NE(firstQuest, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    EXPECT_NE(secondQuest, ROGUE_ADVENTURE_QUEST_INVALID_ID);
+    gRogueRun.adventureQuests[firstQuest].routesUntilScene = 0;
+    gRogueRun.adventureQuests[firstQuest].sceneRoomId = ROGUE_ADVENTURE_QUEST_INVALID_ROOM;
+    gRogueRun.adventureQuests[secondQuest].routesUntilScene = 0;
+    gRogueRun.adventureQuests[secondQuest].sceneRoomId = ROGUE_ADVENTURE_QUEST_INVALID_ROOM;
+
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_GE(RogueRouteScenes_GetPlacementCount(), 3);
+    EXPECT_LE(RogueRouteScenes_GetPlacementCount(), ROGUE_ROUTE_SCENE_MAX_PLACEMENTS);
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[firstQuest].sceneRoomId, 0);
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[secondQuest].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[secondQuest].routesUntilScene, 0);
+
+    RogueRouteScenes_OnExitRoute();
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[firstQuest].routesUntilScene, 2);
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[secondQuest].routesUntilScene, 0);
+    EXPECT_EQ((u8)gRogueRun.adventureQuests[secondQuest].sceneRoomId, ROGUE_ADVENTURE_QUEST_INVALID_ROOM);
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+}
+
+TEST("Restoring an accepted route plan preserves its state slot")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct RogueRouteScenePlan savedPlan;
+    struct RogueRouteSceneRequest offer;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    u8 originalRoomId;
+    u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u16 originalTeamEncounterNum = gRogueRun.teamEncounterNum;
+    u16 originalDifficulty = Rogue_GetCurrentDifficulty();
+    bool8 originalTradeCaseCompleted = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    bool8 originalPropAHidden = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    bool8 originalPropBHidden = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    u8 questId;
+    u16 seed;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
+    Rogue_SetCurrentDifficulty(0);
+    FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(
+        ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER);
+
+    for(seed = 1; seed != 0; ++seed)
+    {
+        gRogueAdvPath.rooms[0].rngSeed = seed;
+        RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+        RogueRouteScenes_OnEnterRoute();
+        if(GetPlacementByRecipe(ROGUE_ROUTE_SCENE_RECIPE_STOLEN_TRADE_CASE_OFFER, &offer))
+            break;
+    }
+    EXPECT_NE(seed, 0);
+    savedPlan = gRogueAdvPath.rooms[0].routeScenePlan;
+    SelectPlacement(&offer);
+    RogueRouteEvents_TryAcceptStolenTradeCaseQuest();
+    EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(RogueRouteScenes_GetState(offer.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    questId = RogueAdventureQuests_GetQuestIdAt(0);
+
+    RogueRouteScenes_GenerateRoom(&gRogueAdvPath.rooms[0]);
+    RogueRouteScenes_RestoreCurrentRoutePlan(&savedPlan);
+    RogueRouteScenes_OnEnterRoute();
+    EXPECT_EQ(gRogueAdvPath.rooms[0].routeScenePlan.placements[0].packed, savedPlan.placements[0].packed);
+    EXPECT_EQ(RogueRouteScenes_GetState(offer.sceneSlot), ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    EXPECT_EQ(RogueAdventureQuests_GetQuestIdAt(0), questId);
+
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
+    gRogueRun.teamEncounterNum = originalTeamEncounterNum;
+    if(originalTradeCaseCompleted)
+        FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    else
+        FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    if(originalPropAHidden)
+        FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    else
+        FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    if(originalPropBHidden)
+        FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    else
+        FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
 }
 

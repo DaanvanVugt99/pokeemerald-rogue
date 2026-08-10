@@ -2973,18 +2973,22 @@ static const u8 *const sBuriedCacheTypeNames[] =
 static bool8 IsBuriedCacheSiteDug(u8 lotRole)
 {
     if(lotRole == 1)
-        return FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+        return (VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_BURIED_CACHE_SITE_A_DUG) != 0;
     if(lotRole == 2)
-        return FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+        return (VarGet(VAR_ROGUE_ROUTE_EVENT_STATE) & ROUTE_SCENE_BURIED_CACHE_SITE_B_DUG) != 0;
     return FALSE;
 }
 
 static void MarkBuriedCacheSiteDug(u8 lotRole)
 {
+    u16 state = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+
     if(lotRole == 1)
-        FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+        state |= ROUTE_SCENE_BURIED_CACHE_SITE_A_DUG;
     else if(lotRole == 2)
-        FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
+        state |= ROUTE_SCENE_BURIED_CACHE_SITE_B_DUG;
+
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, state);
 }
 
 void RogueRouteEvents_BufferBuriedCacheData(void)

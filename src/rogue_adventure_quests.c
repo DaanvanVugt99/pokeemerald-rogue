@@ -417,6 +417,27 @@ bool8 RogueAdventureQuests_BuildSceneRequest(u8 questId, struct RogueRouteSceneR
     return definition->buildSceneRequest(quest, request);
 }
 
+bool8 RogueAdventureQuests_BindSceneRequest(u8 questId, u8 roomId)
+{
+    struct RogueAdventureQuest *quest;
+    const struct RogueAdventureQuestNodeDefinition *node;
+
+    if(questId >= ROGUE_ADVENTURE_QUEST_CAPACITY)
+        return FALSE;
+
+    quest = &gRogueRun.adventureQuests[questId];
+    node = GetNode(quest);
+    if(node == NULL
+        || (node->flags & ROGUE_ADVENTURE_QUEST_NODE_FLAG_ROUTE_SCENE) == 0
+        || quest->routesUntilScene != 0
+        || (quest->sceneRoomId != ROGUE_ADVENTURE_QUEST_INVALID_ROOM
+            && quest->sceneRoomId != roomId))
+        return FALSE;
+
+    quest->sceneRoomId = roomId;
+    return TRUE;
+}
+
 u8 RogueAdventureQuests_CollectSceneRequests(u8 roomId, struct RogueRouteSceneRequest *requests, u8 capacity)
 {
     u8 count = 0;
@@ -460,11 +481,14 @@ u8 RogueAdventureQuests_CollectSceneRequests(u8 roomId, struct RogueRouteSceneRe
             continue;
 
         if(quest->routesUntilScene != 0)
+        {
             --quest->routesUntilScene;
+            if(quest->routesUntilScene == 0)
+                quest->sceneRoomId = ROGUE_ADVENTURE_QUEST_INVALID_ROOM;
+        }
 
         if(quest->routesUntilScene == 0 && count < capacity)
         {
-            quest->sceneRoomId = roomId;
             if(RogueAdventureQuests_BuildSceneRequest(i, &requests[count]))
                 ++count;
         }
@@ -476,6 +500,9 @@ u8 RogueAdventureQuests_CollectSceneRequests(u8 roomId, struct RogueRouteSceneRe
 bool8 RogueAdventureQuests_TryCollectSceneRequest(u8 roomId, struct RogueRouteSceneRequest *request, u16 *priority)
 {
     if(RogueAdventureQuests_CollectSceneRequests(roomId, request, 1) == 0)
+        return FALSE;
+
+    if(!RogueAdventureQuests_BindSceneRequest(request->ownerQuestId, roomId))
         return FALSE;
 
     *priority = 1000 + ROGUE_ADVENTURE_QUEST_CAPACITY - request->ownerQuestId;

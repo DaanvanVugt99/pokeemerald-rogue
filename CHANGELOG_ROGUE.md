@@ -24,7 +24,8 @@ Format follows Keep a Changelog loosely:
   returning the recovered Trade Case at a final merchant checkpoint awards a
   Large Pokéblock Bundle and ¥5,000. Scene placement, quest state, key-item
   cargo, battles, and pending rewards remain deterministic across quicksaves
-  without changing save data. The same route director now selects from a
+  using a compact current-route save payload. The same route director now
+  selects from a
   weighted pool of valid content, including a one-off Hexed Shrine where the
   Dark Deal Devil offers immediate money in exchange for a temporary Curse
   that lasts until the next Boss falls, and an Anomalous Fossil quest that
@@ -58,6 +59,8 @@ Format follows Keep a Changelog loosely:
   less memory than the former single-scene descriptor. Route-event item and
   money exchanges now use a
   shared stack-local atomic transaction layer with reusable rollback support.
+  Active route scene plans now retain their compact placements through
+  development quickloads.
 - Added terrain tags to route-scene lots and recipe placement rules so ordinary
   land scenes no longer spawn on water, current, water-door, ice, or other
   special-movement terrain; special terrain lots are now available for future
@@ -303,6 +306,11 @@ Format follows Keep a Changelog loosely:
 - Batched wild encounter family selection so starting an Adventure and loading
   a route no longer rebuild the full eligible-species table for every grass or
   fishing slot.
+- Bound Adventure Quest route consumers only after their scene recipes fit, so
+  an unplaced multi-lot quest remains ready for a later route instead of being
+  delayed as though it had appeared.
+- Preserved the active route scene plan through development quickloads and
+  separated buried-cache site progress from the generic hidden-prop flags.
 - Limited each generated route-event family to one appearance per Adventure,
   removed accepted quest generators during restoration, corrected Adventure
   Quest book text bounds, and made fossil restoration safely offer a confirmed
