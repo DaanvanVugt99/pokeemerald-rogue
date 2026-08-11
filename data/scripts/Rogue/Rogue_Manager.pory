@@ -1353,6 +1353,7 @@ script Rogue_RouteEvent_StolenTradeCaseCamp
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
                 call(Rogue_Common_DisplayPopups)
+                bufferitemname(STR_VAR_2, VAR_0x8005)
                 msgbox(format("You recovered the merchant's {STR_VAR_2}."))
             }
             else
@@ -1373,6 +1374,7 @@ script Rogue_RouteEvent_StolenTradeCaseCamp
                     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
                     {
                         call(Rogue_Common_DisplayPopups)
+                        bufferitemname(STR_VAR_2, VAR_0x8005)
                         msgbox(format("You recovered the merchant's {STR_VAR_2}."))
                     }
                     else

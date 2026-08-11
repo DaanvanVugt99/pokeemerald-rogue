@@ -542,7 +542,6 @@ void LoadObjEventTemplatesFromHeader(void)
               objectCount * sizeof(struct ObjectEventTemplate));
     
     Rogue_ModifyObjectEvents(&gMapHeader, FALSE, gSaveBlock1Ptr->objectEventTemplates, &objectCount, ARRAY_COUNT(gSaveBlock1Ptr->objectEventTemplates));
-    RogueDebug_ValidateHeap("object events from header");
     gSaveBlock1Ptr->objectEventTemplatesCount = objectCount;
 }
 
@@ -1503,6 +1502,13 @@ void CleanupOverworldWindowsAndTilemaps(void)
 {
     ClearMirageTowerPulseBlendEffect();
     FreeAllOverworldWindowBuffers();
+
+    // These tilemaps are owned by the overworld rather than the window
+    // system. Unlink them before releasing them so a window created during a
+    // transition cannot retain a dangling BG pointer.
+    UnsetBgTilemapBuffer(1);
+    UnsetBgTilemapBuffer(2);
+    UnsetBgTilemapBuffer(3);
     TRY_FREE_AND_SET_NULL(gOverworldTilemapBuffer_Bg3);
     TRY_FREE_AND_SET_NULL(gOverworldTilemapBuffer_Bg2);
     TRY_FREE_AND_SET_NULL(gOverworldTilemapBuffer_Bg1);

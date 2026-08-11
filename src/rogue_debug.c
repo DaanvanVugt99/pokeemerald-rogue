@@ -2,7 +2,6 @@
 #include "global.h"
 #include "constants/songs.h"
 #include "main.h"
-#include "malloc.h"
 #include "sound.h"
 #include "string.h"
 #include "string_util.h"
@@ -161,34 +160,6 @@ void RogueDebug_MainCB(void)
     }
 #endif
 }
-
-#if !defined(NDEBUG)
-void RogueDebug_ValidateHeap(const char *phase)
-{
-    bool32 heapValid = CheckHeap();
-    const struct MemBlock *head = HeapHead();
-    const struct MemBlock *block = head;
-    u32 freeBytes = 0;
-    u32 largestFreeBlock = 0;
-
-    if(heapValid)
-    {
-        do
-        {
-            if(!block->allocated)
-            {
-                freeBytes += block->size;
-                largestFreeBlock = max(largestFreeBlock, block->size);
-            }
-            block = block->next;
-        }
-        while(block != head);
-    }
-
-    DebugPrintf("[Heap Check] %s valid:%d free:%d largest:%d", phase, heapValid, freeBytes, largestFreeBlock);
-    AGB_ASSERT(heapValid);
-}
-#endif
 
 void RogueDebug_ResetFrameTimers()
 {

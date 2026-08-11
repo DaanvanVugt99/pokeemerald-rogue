@@ -1146,18 +1146,23 @@ void FollowMon_OverworldCB()
                         MapGridGetElevationAt(x, y)
                     );
 
-                    gObjectEvents[objectEventId].rangeX = 8;
-                    gObjectEvents[objectEventId].rangeY = 8;
-
-                    // Hide reflections for spawns in water
-                    // (It just looks weird)
-                    if(IsSpawningWaterMons())
+                    if(objectEventId == OBJECT_EVENTS_COUNT)
                     {
-                        gObjectEvents[objectEventId].hideReflection = TRUE;
+                        sFollowMonData.spawnCountdown = FOLLOWMON_BLOCKED_SPAWN_DELAY;
                     }
+                    else
+                    {
+                        gObjectEvents[objectEventId].rangeX = 8;
+                        gObjectEvents[objectEventId].rangeY = 8;
 
-                    // Slower replacement spawning
-                    sFollowMonData.spawnCountdown = 60 * (3 + Random() % 2);
+                        // Hide reflections for spawns in water
+                        // (It just looks weird)
+                        if(IsSpawningWaterMons())
+                            gObjectEvents[objectEventId].hideReflection = TRUE;
+
+                        // Slower replacement spawning
+                        sFollowMonData.spawnCountdown = 60 * (3 + Random() % 2);
+                    }
                 }
 
                 if(Rogue_IsCatchingContestActive())

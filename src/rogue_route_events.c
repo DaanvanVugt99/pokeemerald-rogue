@@ -21,6 +21,7 @@
 #include "battle_main.h"
 #include "characters.h"
 #include "daycare.h"
+#include "debug.h"
 #include "fieldmap.h"
 #include "field_screen_effect.h"
 #include "field_weather.h"
@@ -2783,13 +2784,20 @@ static void Task_ShowBreedersExchangePreview(u8 taskId)
 
 void RogueRouteEvents_ShowBreedersExchangePreview(void)
 {
+    u8 taskId;
+
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_FAILED;
     ZeroEnemyPartyMons();
     if(!RogueRouteEvents_CreateBreedersExchangeMon(&gEnemyParty[0]))
         return;
 
+    if (!TryCreateTask(Task_ShowBreedersExchangePreview, 10, &taskId))
+    {
+        DebugPrint("[Route Event] Breeder preview task allocation failed");
+        return;
+    }
+
     FadeScreen(FADE_TO_BLACK, 0);
-    CreateTask(Task_ShowBreedersExchangePreview, 10);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 

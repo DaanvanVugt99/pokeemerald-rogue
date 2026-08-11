@@ -10,7 +10,6 @@
 
 #include "event_data.h"
 #include "event_object_movement.h"
-#include "malloc.h"
 #include "overworld.h"
 #include "random.h"
 #include "string.h"
@@ -77,12 +76,12 @@ struct RogueRouteSceneRequestCache
     bool8 ready;
 };
 
+// Map and battle setup reset gHeap wholesale, so this route-lived cache must
+// not retain heap storage across those transitions.
+static EWRAM_DATA struct RogueRouteSceneRequestCache sRouteSceneRequestCacheStorage = {0};
 static struct RogueRouteSceneRequestCache *sRouteSceneRequestCache;
 // Keep the initial route-entry pass lazy so generators run before same-route consumers.
 static bool8 sRouteSceneRequestCacheBuilding;
-#if TESTING
-static EWRAM_DATA struct RogueRouteSceneRequestCache sTestingRouteSceneRequestCache;
-#endif
 
 static const struct ObjectEventTemplate *GetSceneObjectSpot(
     const struct ObjectEventTemplate *spots,
@@ -90,7 +89,7 @@ static const struct ObjectEventTemplate *GetSceneObjectSpot(
     const struct RogueRouteSceneRequest *scene,
     const struct RogueRouteSceneLotDefinition *lotDefinition,
     const struct RogueRouteSceneObjectDefinition *object);
-static void FreeRouteSceneRequestCache(void);
+static void InvalidateRouteSceneRequestCache(void);
 
 void RogueRouteSceneRng_Seed(struct RogueRouteSceneRng *rng, u32 seed)
 {
@@ -262,7 +261,7 @@ void RogueRouteScenes_DebugSetPlacement(u8 placementIndex, u8 recipeId, u8 lotId
 void RogueRouteScenes_GenerateRoom(struct RogueAdvPathRoom *room)
 {
     if(&room->routeScenePlan == GetCurrentScenePlan())
-        FreeRouteSceneRequestCache();
+        InvalidateRouteSceneRequestCache();
     memset(&room->routeScenePlan, 0, sizeof(room->routeScenePlan));
 }
 
@@ -272,7 +271,7 @@ void RogueRouteScenes_RestoreCurrentRoutePlan(const struct RogueRouteScenePlan *
 
     if(currentPlan != NULL && plan != NULL)
     {
-        FreeRouteSceneRequestCache();
+        InvalidateRouteSceneRequestCache();
         *currentPlan = *plan;
     }
 }
@@ -1023,20 +1022,9 @@ static void FinalizeRouteSceneRequestCache(void)
     sRouteSceneRequestCache->ready = TRUE;
 }
 
-static void FreeRouteSceneRequestCache(void)
+static void InvalidateRouteSceneRequestCache(void)
 {
-    if(sRouteSceneRequestCache != NULL)
-    {
-#if TESTING
-        if(sRouteSceneRequestCache == &sTestingRouteSceneRequestCache)
-        {
-            sRouteSceneRequestCache = NULL;
-            return;
-        }
-#endif
-        Free(sRouteSceneRequestCache);
-        sRouteSceneRequestCache = NULL;
-    }
+    sRouteSceneRequestCache = NULL;
 }
 
 static bool8 IsCurrentSceneRequestCacheValid(void)
@@ -1061,18 +1049,12 @@ static void EnsureRouteSceneRequestCache(void)
     if(IsCurrentSceneRequestCacheValid())
         return;
 
-    FreeRouteSceneRequestCache();
+    InvalidateRouteSceneRequestCache();
     placementCount = RogueRouteScenes_GetPlacementCount();
     if(placementCount == 0)
         return;
 
-#if TESTING
-    sRouteSceneRequestCache = &sTestingRouteSceneRequestCache;
-#else
-    sRouteSceneRequestCache = Alloc(sizeof(*sRouteSceneRequestCache));
-    if(sRouteSceneRequestCache == NULL)
-        return;
-#endif
+    sRouteSceneRequestCache = &sRouteSceneRequestCacheStorage;
 
     memset(sRouteSceneRequestCache, 0, sizeof(*sRouteSceneRequestCache));
     sRouteSceneRequestCache->roomId = gRogueRun.adventureRoomId;
@@ -1089,7 +1071,7 @@ static bool8 GetPlacementRequest(u8 placementIndex, struct RogueRouteSceneReques
         return FALSE;
 
     if(sRouteSceneRequestCache != NULL && !IsCurrentSceneRequestCacheValid())
-        FreeRouteSceneRequestCache();
+        InvalidateRouteSceneRequestCache();
 
     if(sRouteSceneRequestCache == NULL)
         EnsureRouteSceneRequestCache();
@@ -1205,7 +1187,7 @@ void RogueRouteScenes_OnEnterRoute(void)
 
     if(isNewRoute)
     {
-        FreeRouteSceneRequestCache();
+        InvalidateRouteSceneRequestCache();
         VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
         FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
         FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
@@ -1319,7 +1301,7 @@ void RogueRouteScenes_OnExitRoute(void)
 
     RogueAdventureQuests_LeaveRoute(gRogueRun.adventureRoomId);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
-    FreeRouteSceneRequestCache();
+    InvalidateRouteSceneRequestCache();
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;

@@ -10,7 +10,6 @@
 #define MGBA_LOG_DEBUG  (4)
 #ifdef NDEBUG
 #define DebugPrintf(pBuf, ...)
-#define DebugPrintfLevel(level, pBuf, ...)
 #define MgbaOpen()
 #define MgbaClose()
 #define AGB_ASSERT(exp)

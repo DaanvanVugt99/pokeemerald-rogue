@@ -303,6 +303,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept cached route-scene requests outside the resettable map heap, preventing
+  popup and window memory corruption that could eventually crash the game.
 - Kept Buried Cache ambush Pokémon within the active Pokédex and made them
   catchable, safely skipped the ambush when no candidate is available,
   repaired dynamically composed clue text, and gave the Field Shovel its own

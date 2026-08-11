@@ -1,4 +1,5 @@
 #include "global.h"
+#include "debug.h"
 #include "task.h"
 
 struct Task gTasks[NUM_TASKS];
@@ -24,7 +25,7 @@ void ResetTasks(void)
     gTasks[NUM_TASKS - 1].next = TAIL_SENTINEL;
 }
 
-u8 CreateTask(TaskFunc func, u8 priority)
+bool8 TryCreateTask(TaskFunc func, u8 priority, u8 *taskId)
 {
     u8 i;
 
@@ -37,10 +38,23 @@ u8 CreateTask(TaskFunc func, u8 priority)
             InsertTask(i);
             memset(gTasks[i].data, 0, sizeof(gTasks[i].data));
             gTasks[i].isActive = TRUE;
-            return i;
+            *taskId = i;
+            return TRUE;
         }
     }
 
+    *taskId = TASK_NONE;
+    return FALSE;
+}
+
+u8 CreateTask(TaskFunc func, u8 priority)
+{
+    u8 taskId;
+
+    if (TryCreateTask(func, priority, &taskId))
+        return taskId;
+
+    DebugPrintf("[Task] Allocation failed func:%x priority:%d", (u32)func, priority);
     return 0;
 }
 

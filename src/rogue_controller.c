@@ -7927,17 +7927,12 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
 
                     gRogueRun.currentRouteIndex = gRogueAdvPath.currentRoomParams.roomIdx;
                     RandomiseWildEncounters();
-                    RogueDebug_ValidateHeap("route after wild roster");
                     RogueRouteScenes_OnEnterRoute();
-                    RogueDebug_ValidateHeap("route after scene entry");
                     ResetTrainerBattles();
                     RandomiseBerryTrees();
                     RandomiseEnabledTrainers();
-                    RogueDebug_ValidateHeap("route after trainer setup");
                     RogueRouteScenes_PrepareRouteTrainers();
-                    RogueDebug_ValidateHeap("route after scene trainers");
                     RandomiseEnabledItems();
-                    RogueDebug_ValidateHeap("route after item setup");
                     TryOptionalRandomanSpawn();
 
                     if(Rogue_GetCurrentDifficulty() != 0 && RogueRandomChance(weatherChance, OVERWORLD_FLAG))

@@ -2470,8 +2470,10 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     struct RogueAdventureQuestCreateParams questParams = {0};
     RAND_TYPE originalRogueRng = gRngRogueValue;
     RAND_TYPE originalStandardRng = gRngValue;
+    struct RogueTrialRunState originalTrialState = gRogueRun.trialState;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u16 originalHistory = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY);
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
     u8 originalPartyCount = gPlayerPartyCount;
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
@@ -2493,6 +2495,8 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE);
     gRogueAdvPath.rooms[0].rngSeed = 0xBEEF;
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
@@ -2566,6 +2570,8 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, originalHistory);
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    gRogueRun.trialState = originalTrialState;
+    RoguePokedex_SetDexVariant(originalDexVariant);
     gRogueRun.wildEncounters = originalWildEncounters;
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
     memcpy(gPlayerParty, originalParty, sizeof(originalParty));
@@ -2591,6 +2597,8 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     };
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    struct RogueTrialRunState originalTrialState = gRogueRun.trialState;
     u8 originalSavedCount = gSaveBlock1Ptr->objectEventTemplatesCount;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     bool8 originalRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
@@ -2616,6 +2624,8 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE);
     gRogueAdvPath.rooms[0].rngSeed = 0xCAFE;
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_BREEDERS_EXCHANGE, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
@@ -2687,6 +2697,8 @@ TEST("Breeder's Exchange composes a visible offer and removes it after trading")
 
     gRogueRun.wildEncounters = originalWildEncounters;
     gRogueRun.routeSceneRoomId = originalSceneRoomId;
+    gRogueRun.trialState = originalTrialState;
+    RoguePokedex_SetDexVariant(originalDexVariant);
     memcpy(gSaveBlock1Ptr->objectEventTemplates, originalSavedTemplates, sizeof(*originalSavedTemplates) * OBJECT_EVENT_TEMPLATES_COUNT);
     gSaveBlock1Ptr->objectEventTemplatesCount = originalSavedCount;
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);

@@ -23,6 +23,7 @@ struct Task
 extern struct Task gTasks[];
 
 void ResetTasks(void);
+bool8 TryCreateTask(TaskFunc func, u8 priority, u8 *taskId);
 u8 CreateTask(TaskFunc func, u8 priority);
 void DestroyTask(u8 taskId);
 void RunTasks(void);

@@ -400,6 +400,7 @@ static const u8 sWeatherNames[WEATHER_COUNT][14] = {
 #define tOnscreenTimer      data[1]
 #define sDisplayTimer       data[2]
 #define tIncomingPopUp      data[3]
+#define tConsumeOnClose     data[5]
 
 enum
 {
@@ -698,6 +699,7 @@ static void ShowQuestPopup(void)
     {
         struct PopupRequest* popupRequest = GetCurrentPopup();
         struct PopupRequestTemplate const* template;
+        u8 taskId;
 
         if(!ValidatePopupRequest(popupRequest))
         {
@@ -707,8 +709,15 @@ static void ShowQuestPopup(void)
         }
 
         template = &sPopupRequestTemplates[popupRequest->templateId];
-        
-        sRoguePopups.taskId = CreateTask(Task_QuestPopUpWindow, 90);
+
+        if (!TryCreateTask(Task_QuestPopUpWindow, 90, &taskId))
+        {
+            DebugPrintf("[Popup] Task allocation failed template:%d icon:%d", popupRequest->templateId, popupRequest->iconId);
+            sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
+            return;
+        }
+
+        sRoguePopups.taskId = taskId;
         ApplyPopupAnimation(popupRequest, 0, FALSE);
 
         gTasks[sRoguePopups.taskId].sStateNum = 6;
@@ -724,12 +733,82 @@ static void ShowQuestPopup(void)
 
 void Rogue_ClearPopupQueue(void)
 {
-    if (FuncIsActiveTask(Task_QuestPopUpWindow))
-        HideQuestPopUpWindow();
+    u8 taskId = FindTaskIdByFunc(Task_QuestPopUpWindow);
+
+    if (taskId != TASK_NONE)
+    {
+        SuspendQuestPopUpWindow();
+        // Queue clearing owns the final indices. A popup that had already
+        // begun its delayed close must not advance lastShownId afterward.
+        gTasks[taskId].tConsumeOnClose = FALSE;
+    }
 
     sRoguePopups.queuedId = 0;
     sRoguePopups.lastShownId = 0;
 }
+
+#if TESTING
+static struct
+{
+    u8 windowId;
+    u8 iconWindowId;
+    u8 taskId;
+    u8 lastShownId;
+    u8 queuedId;
+} sRoguePopupTestState;
+
+bool8 RoguePopup_TestBeginDeferredConsume(void)
+{
+    u8 taskId;
+
+    if (FindTaskIdByFunc(Task_QuestPopUpWindow) != TASK_NONE)
+        return FALSE;
+
+    sRoguePopupTestState.windowId = sRoguePopups.windowId;
+    sRoguePopupTestState.iconWindowId = sRoguePopups.iconWindowId;
+    sRoguePopupTestState.taskId = sRoguePopups.taskId;
+    sRoguePopupTestState.lastShownId = sRoguePopups.lastShownId;
+    sRoguePopupTestState.queuedId = sRoguePopups.queuedId;
+
+    if (!TryCreateTask(Task_QuestPopUpWindow, 90, &taskId))
+        return FALSE;
+
+    sRoguePopups.windowId = WINDOW_NONE;
+    sRoguePopups.iconWindowId = WINDOW_NONE;
+    sRoguePopups.taskId = taskId;
+    sRoguePopups.queuedId = 1;
+    sRoguePopups.lastShownId = 0;
+    gTasks[taskId].sStateNum = 5;
+    gTasks[taskId].tConsumeOnClose = TRUE;
+    return TRUE;
+}
+
+bool8 RoguePopup_TestDeferredCloseWillConsume(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_QuestPopUpWindow);
+
+    return taskId != TASK_NONE && gTasks[taskId].tConsumeOnClose;
+}
+
+bool8 RoguePopup_TestQueueIsEmpty(void)
+{
+    return sRoguePopups.queuedId == sRoguePopups.lastShownId;
+}
+
+void RoguePopup_TestEndDeferredConsume(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_QuestPopUpWindow);
+
+    if(taskId != TASK_NONE)
+        DestroyTask(taskId);
+
+    sRoguePopups.windowId = sRoguePopupTestState.windowId;
+    sRoguePopups.iconWindowId = sRoguePopupTestState.iconWindowId;
+    sRoguePopups.taskId = sRoguePopupTestState.taskId;
+    sRoguePopups.lastShownId = sRoguePopupTestState.lastShownId;
+    sRoguePopups.queuedId = sRoguePopupTestState.queuedId;
+}
+#endif
 
 
 #define SKIP_POPUP_BUTTONS A_BUTTON | B_BUTTON | START_BUTTON
@@ -916,11 +995,28 @@ static u8 GetActiveOnScreenDisplayTimer()
 static void Task_QuestPopUpWindow(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
-    struct PopupRequest* popupRequest = GetCurrentPopup();
+    struct PopupRequest* popupRequest;
     struct PopupRequestTemplate const* template;
     bool8 useEnterAnim = FALSE;
     u16 animDuration;
     u16 displayDuration;
+
+    if(task->sStateNum == 5)
+    {
+        if(IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        RemoveQuestPopUpWindow();
+        SetGpuReg_ForcedBlank(REG_OFFSET_BG0VOFS, 0);
+        SetGpuReg_ForcedBlank(REG_OFFSET_BG0HOFS, 0);
+        if(task->tConsumeOnClose)
+            sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
+        sRoguePopups.taskId = TASK_NONE;
+        DestroyTask(taskId);
+        return;
+    }
+
+    popupRequest = GetCurrentPopup();
 
     if(!ValidatePopupRequest(popupRequest))
     {
@@ -982,18 +1078,6 @@ static void Task_QuestPopUpWindow(u8 taskId)
         }
         break;
     case 4:
-        ClearStdWindowAndFrame(GetQuestPopUpWindowId(), TRUE);
-
-        if(GetIconWindowId() != WINDOW_NONE)
-        {
-            FillWindowPixelBuffer(GetIconWindowId(), PIXEL_FILL(1));
-            ClearWindowTilemap(GetIconWindowId());
-            CopyWindowToVram(GetIconWindowId(), COPYWIN_FULL);
-        }
-
-        task->sStateNum = 5;
-        break;
-    case 5:
         HideQuestPopUpWindow();
         return;
     }
@@ -1002,6 +1086,7 @@ static void Task_QuestPopUpWindow(u8 taskId)
 }
 
 #undef sStateNum
+#undef tConsumeOnClose
 
 static void HideQuestPopUpWindow(void)
 {
@@ -1015,30 +1100,25 @@ static void SuspendQuestPopUpWindow(void)
 
 static void CloseQuestPopUpWindow(bool8 consumePopup)
 {
-    if (FuncIsActiveTask(Task_QuestPopUpWindow))
+    u8 taskId = FindTaskIdByFunc(Task_QuestPopUpWindow);
+    struct Task *task;
+    struct PopupRequest *popupRequest;
+
+    if(taskId == TASK_NONE)
+        return;
+
+    task = &gTasks[taskId];
+    if(task->data[0] == 5)
     {
-        if(GetQuestPopUpWindowId() != WINDOW_NONE)
-            ClearStdWindowAndFrame(GetQuestPopUpWindowId(), TRUE);
-
-        if(GetIconWindowId() != WINDOW_NONE)
-        {
-            FillWindowPixelBuffer(GetIconWindowId(), PIXEL_FILL(1));
-            ClearWindowTilemap(GetIconWindowId());
-            CopyWindowToVram(GetIconWindowId(), COPYWIN_FULL);
-        }
-
-        RemoveQuestPopUpWindow();
-        SetGpuReg_ForcedBlank(REG_OFFSET_BG0VOFS, 0);
-        SetGpuReg_ForcedBlank(REG_OFFSET_BG0HOFS, 0);
-        DestroyTask(sRoguePopups.taskId);
-
         if(consumePopup)
-            sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
+            task->data[5] = TRUE;
+        return;
     }
-}
 
-static void DropPopupRequest(u8 taskId)
-{
+    popupRequest = GetCurrentPopup();
+    if(ValidatePopupRequest(popupRequest))
+        ApplyPopupAnimation(popupRequest, sPopupRequestTemplates[popupRequest->templateId].animDuration, FALSE);
+
     if(GetQuestPopUpWindowId() != WINDOW_NONE)
         ClearStdWindowAndFrame(GetQuestPopUpWindowId(), TRUE);
 
@@ -1049,10 +1129,23 @@ static void DropPopupRequest(u8 taskId)
         CopyWindowToVram(GetIconWindowId(), COPYWIN_FULL);
     }
 
+    task->data[5] = consumePopup;
+    task->data[0] = 5;
+}
+
+static void DropPopupRequest(u8 taskId)
+{
+    if(GetQuestPopUpWindowId() != WINDOW_NONE || GetIconWindowId() != WINDOW_NONE)
+    {
+        CloseQuestPopUpWindow(TRUE);
+        return;
+    }
+
     RemoveQuestPopUpWindow();
     SetGpuReg_ForcedBlank(REG_OFFSET_BG0VOFS, 0);
     SetGpuReg_ForcedBlank(REG_OFFSET_BG0HOFS, 0);
     sRoguePopups.lastShownId = (sRoguePopups.lastShownId + 1) % POPUP_QUEUE_CAPACITY;
+    sRoguePopups.taskId = TASK_NONE;
     DestroyTask(taskId);
 }
 

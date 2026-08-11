@@ -297,13 +297,14 @@ static void RemoveExtraStartMenuWindows(void);
 static bool32 PrintStartMenuActions(s8 *pIndex, u32 count);
 static bool32 InitStartMenuStep(void);
 static bool8 InitStartMenu(void);
-static void CreateStartMenuTask(TaskFunc followupFunc);
+static bool8 CreateStartMenuTask(TaskFunc followupFunc);
 static void ResetStartMenuInitialization(void);
 static void InitSave(void);
 static u8 RunSaveCallback(void);
 static void ShowSaveMessage(const u8 *message, u8 (*saveCallback)(void));
 static void HideSaveMessageWindow(void);
 static void HideSaveInfoWindow(void);
+static void ClearAndRemoveStartMenuWindow(bool8 copyToVram);
 static void SaveStartTimer(void);
 static bool8 SaveSuccesTimer(void);
 static bool8 SaveErrorTimer(void);
@@ -784,15 +785,21 @@ static void StartMenuTask(u8 taskId)
     }
 }
 
-static void CreateStartMenuTask(TaskFunc followupFunc)
+static bool8 CreateStartMenuTask(TaskFunc followupFunc)
 {
     u8 taskId;
 
     ResetStartMenuInitialization();
     sInitStartMenuData[0] = 0;
     sInitStartMenuData[1] = 0;
-    taskId = CreateTask(StartMenuTask, 0x50);
+    if (!TryCreateTask(StartMenuTask, 0x50, &taskId))
+    {
+        DebugPrint("[Start Menu] Task allocation failed");
+        return FALSE;
+    }
+
     SetTaskFuncWithFollowupFunc(taskId, StartMenuTask, followupFunc);
+    return TRUE;
 }
 
 static bool8 FieldCB_ReturnToFieldStartMenu(void)
@@ -859,13 +866,15 @@ void Task_ShowStartMenu(u8 taskId)
 
 void ShowStartMenu(void)
 {
+    if (!CreateStartMenuTask(Task_ShowStartMenu))
+        return;
+
     if (!IsOverworldLinkActive())
     {
         FreezeObjectEvents();
         PlayerFreeze();
         StopPlayerAvatar();
     }
-    CreateStartMenuTask(Task_ShowStartMenu);
     LockPlayerFieldControls();
 }
 
@@ -1151,8 +1160,7 @@ return TRUE;
 static void HideStartMenuDebug(void)
 {
     PlaySE(SE_SELECT);
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(TRUE);
 }
 
 static bool8 StartMenuLinkModePlayerNameCallback(void)
@@ -1181,8 +1189,8 @@ void ShowBattlePyramidStartMenu(void)
 {
     ClearDialogWindowAndFrameToTransparent(0, FALSE);
     ScriptUnfreezeObjectEvents();
-    CreateStartMenuTask(Task_ShowStartMenu);
-    LockPlayerFieldControls();
+    if (CreateStartMenuTask(Task_ShowStartMenu))
+        LockPlayerFieldControls();
 }
 
 static bool8 StartMenuBattlePyramidBagCallback(void)
@@ -1395,8 +1403,7 @@ static bool8 SaveErrorTimer(void)
 
 static u8 SaveConfirmSaveCallback(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(FALSE);
     if (!ShowSaveInfoWindow())
         DebugPrint("[Start Menu] Continuing save without save info window");
 
@@ -1414,8 +1421,7 @@ static u8 SaveConfirmSaveCallback(void)
 
 static u8 SaveForceSaveCallback(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(FALSE);
     if (!ShowSaveInfoWindow())
         DebugPrint("[Start Menu] Continuing save without save info window");
     sSaveDialogCallback = SaveSavingMessageCallback;
@@ -1594,8 +1600,7 @@ static void InitBattlePyramidRetire(void)
 
 static u8 BattlePyramidConfirmRetireCallback(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(FALSE);
     ShowSaveMessage(gText_BattlePyramidConfirmRetire, BattlePyramidRetireYesNoCallback);
 
     return SAVE_IN_PROGRESS;
@@ -1884,10 +1889,18 @@ void SaveForBattleTowerLink(void)
 
 static void HideStartMenuWindow(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(TRUE);
     ScriptUnfreezeObjectEvents();
     UnlockPlayerFieldControls();
+}
+
+static void ClearAndRemoveStartMenuWindow(bool8 copyToVram)
+{
+    u8 windowId = GetStartMenuWindowId();
+
+    if (windowId != WINDOW_NONE)
+        ClearStdWindowAndFrame(windowId, copyToVram);
+    RemoveStartMenuWindow();
 }
 
 void HideStartMenu(void)
