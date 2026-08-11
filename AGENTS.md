@@ -145,6 +145,17 @@ or validation workflows change.
   - Uncomment it to see the expected pattern and each candidate runtime string during headless test runs.
   - Always revert this after debugging so test output stays clean.
 
+## Interactive mGBA Timing Logs
+
+- Build a debug, non-test ROM before collecting runtime timings: `make -j4 RELEASE=0 TEST=0 pokeemerald.gba`.
+- Use a release ROM for subjective performance checks. The debug ROM enables `DEBUG_FEATURE_FRAME_TIMERS`, uses `-Og`, and sends many debug messages through the mGBA register, so its load times are not representative. Build a separate release ROM with `make -j4 RELEASE=1 TEST=0 ROM_NAME=pokeemerald_release.gba rom`.
+- In mGBA, open `Tools > View logs` and enable the `Info` level. `DebugPrintf` messages from the ROM are emitted through `MgbaPrintf`, whose completed output chunks are tagged as mGBA `Info`; enabling only `Debug` will miss them.
+- In `Tools > Advanced settings > Logging`, disable the `GBA DMA` `Info` category before measuring. DMA output can flood the log window and scroll the game timings out of its line limit.
+- Clear the log buffer, focus the emulator, perform exactly one transition, then reopen the log viewer and copy or inspect the captured text. Route-node captures should contain `[Room Load]` and `[Route Load]` lines; run-start captures should contain `[Run Load]` lines.
+- Filter captured text for `[Room Load]`, `[Route Load]`, `[Run Load]`, and `[Query]`. The reported `us` values are GBA-clock values converted to microseconds by `RogueDebug_ClockToDisplayUnits`, not host wall-clock measurements.
+- Query type IDs are `1 = mon`, `2 = item`, `3 = trainer`, `4 = adventure path`, `5 = moves`, and `6 = custom`. Use the surrounding stage timer to attribute nested query costs rather than summing the same query twice.
+- Do not treat a capture with only `[Run Load]` lines as a route-entry measurement; repeat the node transition if the route-specific markers are absent.
+
 ## macOS / clangd IDE Diagnostics Caveat
 
 - Host-side clang/clangd may report false positives for GBA attributes/macros (for example section attributes or GBA storage macros) because the project is built for `arm-none-eabi`, not native Mach-O.

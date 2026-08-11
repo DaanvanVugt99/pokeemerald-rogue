@@ -48,6 +48,16 @@ text gItemDesc_BigPokeblockBundle
     format("A big bundle that becomes Pokéblocks after an Adventure.")
 }
 
+text gItemDesc_TradeCase
+{
+    format("The locked case stolen from a caravan merchant.")
+}
+
+text gItemDesc_FieldShovel
+{
+    format("A borrowed tool for excavating marked sites on this route.")
+}
+
 text gItemDesc_TM
 {
     format("Reusable machine for teaching {PKMN} one specific move.")

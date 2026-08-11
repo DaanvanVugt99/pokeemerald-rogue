@@ -1865,9 +1865,9 @@ const struct Item gItems[] =
     [ITEM_ODD_KEYSTONE] =
     {
         .name = _("Odd Keystone"),
-        .price = 2100,
+        .price = 0,
         .description = sOddKeystoneDesc,
-        .pocket = POCKET_ITEMS,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .flingPower = 80,
@@ -2062,9 +2062,10 @@ const struct Item gItems[] =
     [ITEM_ARMOR_FOSSIL] =
     {
         .name = _("Armor Fossil"),
-        .price = 7000,
+        .price = 0,
         .description = sArmorFossilDesc,
-        .pocket = POCKET_ITEMS,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .flingPower = 100,
@@ -2073,9 +2074,10 @@ const struct Item gItems[] =
     [ITEM_SKULL_FOSSIL] =
     {
         .name = _("Skull Fossil"),
-        .price = 7000,
+        .price = 0,
         .description = sSkullFossilDesc,
-        .pocket = POCKET_ITEMS,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .flingPower = 100,
@@ -2084,9 +2086,10 @@ const struct Item gItems[] =
     [ITEM_COVER_FOSSIL] =
     {
         .name = _("Cover Fossil"),
-        .price = 7000,
+        .price = 0,
         .description = sCoverFossilDesc,
-        .pocket = POCKET_ITEMS,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .flingPower = 100,
@@ -2095,9 +2098,10 @@ const struct Item gItems[] =
     [ITEM_PLUME_FOSSIL] =
     {
         .name = _("Plume Fossil"),
-        .price = 7000,
+        .price = 0,
         .description = sPlumeFossilDesc,
-        .pocket = POCKET_ITEMS,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .flingPower = 100,
@@ -2106,9 +2110,10 @@ const struct Item gItems[] =
     [ITEM_JAW_FOSSIL] =
     {
         .name = _("Jaw Fossil"),
-        .price = 7000,
+        .price = 0,
         .description = sJawFossilDesc,
-        .pocket = POCKET_ITEMS,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .flingPower = 100,
@@ -2117,9 +2122,10 @@ const struct Item gItems[] =
     [ITEM_SAIL_FOSSIL] =
     {
         .name = _("Sail Fossil"),
-        .price = 7000,
+        .price = 0,
         .description = sSailFossilDesc,
-        .pocket = POCKET_ITEMS,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .flingPower = 100,
@@ -2283,7 +2289,7 @@ const struct Item gItems[] =
 
     [ITEM_YELLOW_APRICORN] =
     {
-        .name = _("YellwApricorn"),
+        .name = _("Yellow Apricorn"),
         .price = 200,
         .description = sYellowApricornDesc,
         .pocket = POCKET_ITEMS,
@@ -2293,7 +2299,7 @@ const struct Item gItems[] =
 
     [ITEM_GREEN_APRICORN] =
     {
-        .name = _("GreenApricorn"),
+        .name = _("Green Apricorn"),
         .price = 200,
         .description = sGreenApricornDesc,
         .pocket = POCKET_ITEMS,
@@ -2313,7 +2319,7 @@ const struct Item gItems[] =
 
     [ITEM_WHITE_APRICORN] =
     {
-        .name = _("WhiteApricorn"),
+        .name = _("White Apricorn"),
         .price = 200,
         .description = sWhiteApricornDesc,
         .pocket = POCKET_ITEMS,
@@ -2323,7 +2329,7 @@ const struct Item gItems[] =
 
     [ITEM_BLACK_APRICORN] =
     {
-        .name = _("BlackApricorn"),
+        .name = _("Black Apricorn"),
         .price = 200,
         .description = sBlackApricornDesc,
         .pocket = POCKET_ITEMS,

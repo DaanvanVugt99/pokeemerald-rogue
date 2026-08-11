@@ -66,6 +66,74 @@ TEST("A portal-pregenerated initial path is reused on map entry")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
+TEST("Seeded standard paths keep replacement composition bounded")
+{
+    static const struct
+    {
+        u16 seed;
+        u8 routeCount;
+        u8 specialCount;
+        u8 emptyCount;
+    } cases[] =
+    {
+        {13579, 9, 5, 3},
+        {24680, 5, 4, 3},
+        {54321, 5, 3, 2},
+        {65535, 7, 4, 4},
+    };
+    struct RogueAdvPath originalPath = gRogueAdvPath;
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+    u8 i;
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    Rogue_SetCurrentDifficulty(2);
+
+    for(i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        u8 routeCount = 0;
+        u8 specialCount = 0;
+        u8 emptyCount = 0;
+        u8 roomId;
+
+        gRogueRun.baseSeed = cases[i].seed;
+        gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+        memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+        EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+
+        for(roomId = 0; roomId < gRogueAdvPath.roomCount; ++roomId)
+        {
+            switch(gRogueAdvPath.rooms[roomId].roomType)
+            {
+            case ADVPATH_ROOM_ROUTE:
+                ++routeCount;
+                break;
+            case ADVPATH_ROOM_NONE:
+            case ADVPATH_ROOM_BOSS:
+                if(gRogueAdvPath.rooms[roomId].roomType == ADVPATH_ROOM_NONE)
+                    ++emptyCount;
+                break;
+            default:
+                ++specialCount;
+                break;
+            }
+        }
+
+        EXPECT_EQ(routeCount, cases[i].routeCount);
+        EXPECT_EQ(specialCount, cases[i].specialCount);
+        EXPECT_EQ(emptyCount, cases[i].emptyCount);
+        EXPECT_EQ(routeCount + specialCount + emptyCount, gRogueAdvPath.roomCount - 1);
+    }
+
+    gRogueAdvPath = originalPath;
+    gRogueRun.baseSeed = originalBaseSeed;
+    gRogueRun.adventureRoomId = originalRoomId;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+}
+
 TEST("An exhausted path is replaced after its boss")
 {
     struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
@@ -90,9 +158,9 @@ TEST("An exhausted path is replaced after its boss")
     Free(originalPath);
 }
 
-TEST("Frontier Brain paths cache deterministic previews")
+TEST("Frontier Brain paths cache deterministic previews during loading")
 {
-    struct RogueAdvPath originalPath = gRogueAdvPath;
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
     u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u16 originalBaseSeed = gRogueRun.baseSeed;
@@ -111,6 +179,11 @@ TEST("Frontier Brain paths cache deterministic previews")
     u8 scheduledDifficulties[ADVPATH_FRONTIER_BRAIN_COUNT];
     u8 i;
 
+    EXPECT_NE(originalPath, NULL);
+    if(originalPath == NULL)
+        return;
+
+    *originalPath = gRogueAdvPath;
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
     gRogueRun.baseSeed = 13579;
     Rogue_GetFrontierBrainSchedule(scheduledTrainers, scheduledDifficulties);
@@ -129,13 +202,16 @@ TEST("Frontier Brain paths cache deterministic previews")
             aceRoomSeed = gRogueAdvPath.rooms[i].rngSeed;
             EXPECT_EQ(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.trainerNum, trainerNum);
             EXPECT_NE(gRogueAdvPath.rooms[i].coords.x + 1, gRogueAdvPath.pathLength);
-            EXPECT(gRogueAdvPath.rooms[i].roomParams.perType.miniboss.hasRewardPreview);
-            rewardSpeciesA = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardSpeciesA;
-            rewardSpeciesB = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardSpeciesB;
-            rewardMode = gRogueAdvPath.rooms[i].roomParams.perType.miniboss.rewardMode;
+            EXPECT(!gRogueAdvPath.rooms[i].roomParams.perType.miniboss.hasRewardPreview);
         }
     }
     EXPECT_EQ(roomCount, 1);
+    EXPECT_NE(aceRoomId, ADVPATH_INVALID_ROOM_ID);
+    RogueAdv_CacheMiniBossPreviews();
+    rewardSpeciesA = gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesA;
+    rewardSpeciesB = gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesB;
+    rewardMode = gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardMode;
+    EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
     generatedRoomCount = gRogueAdvPath.roomCount;
     generatedPathLength = gRogueAdvPath.pathLength;
 
@@ -148,31 +224,38 @@ TEST("Frontier Brain paths cache deterministic previews")
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomType, ADVPATH_ROOM_MINIBOSS);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].rngSeed, aceRoomSeed);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.trainerNum, trainerNum);
+    EXPECT(!gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+    RogueAdv_CacheMiniBossPreviews();
     EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesA, rewardSpeciesA);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardSpeciesB, rewardSpeciesB);
     EXPECT_EQ(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.rewardMode, rewardMode);
 
-    // Reused paths must repair a missing preview before the overview becomes
-    // interactive instead of generating the full team when the node is used.
+    // A reused path must be repaired during its loading phase, not when the
+    // player selects the node.
     gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview = FALSE;
     gRogueAdvPath.justGenerated = TRUE;
     gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
     EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT(!gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+    RogueAdv_CacheMiniBossPreviews();
     EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
 
     gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview = FALSE;
     gRogueAdvPath.justGenerated = FALSE;
     gRogueRun.adventureRoomId = aceRoomId;
     EXPECT(!RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT(!gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
+    RogueAdv_CacheMiniBossPreviews();
     EXPECT(gRogueAdvPath.rooms[aceRoomId].roomParams.perType.miniboss.hasRewardPreview);
 
-    gRogueAdvPath = originalPath;
+    gRogueAdvPath = *originalPath;
     gRogueRun.baseSeed = originalBaseSeed;
     gRogueRun.adventureRoomId = originalRoomId;
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
     Rogue_SetCurrentDifficulty(originalDifficulty);
     gRngRogueValue = originalRng;
+    Free(originalPath);
 }
 
 TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anchor")

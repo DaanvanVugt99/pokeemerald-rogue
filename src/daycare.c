@@ -26,13 +26,20 @@
 #include "constants/moves.h"
 #include "constants/region_map_sections.h"
 
+#include "rogue.h"
 #include "rogue_controller.h"
+#include "rogue_route_events.h"
 
 #define IS_DITTO(species) (gSpeciesInfo[species].eggGroups[0] == EGG_GROUP_DITTO || gSpeciesInfo[species].eggGroups[1] == EGG_GROUP_DITTO)
 
 static void ClearDaycareMonMail(struct DaycareMail *mail);
 static void SetInitialEggData(struct Pokemon *mon, u16 species, struct DayCare *daycare);
 static void DaycarePrintMonInfo(u8 windowId, u32 daycareSlotId, u8 y);
+
+static bool8 IsMysteryEggCourierEgg(struct Pokemon *mon)
+{
+    return RogueRouteEvents_IsMysteryEggCourierEgg(mon);
+}
 static u8 ModifyBreedingScoreForOvalCharm(u8 score);
 
 //RogueNote: Stole memory for Rogue dynamic TMs
@@ -1158,6 +1165,8 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
             if (!GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
                 continue;
             if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_IS_BAD_EGG))
+                continue;
+            if (IsMysteryEggCourierEgg(&gPlayerParty[i]))
                 continue;
 
             // Always assume 0 egg cycles left, just incase people decide to be cheeky and pkhex eggs in

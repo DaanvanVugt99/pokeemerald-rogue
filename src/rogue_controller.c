@@ -64,6 +64,7 @@
 #include "trainer_card.h"
 
 #include "rogue.h"
+#include "rogue_adventure_quests.h"
 #include "rogue_assistant.h"
 #include "rogue_automation.h"
 #include "rogue_adventurepaths.h"
@@ -81,6 +82,8 @@
 #include "rogue_popup.h"
 #include "rogue_query.h"
 #include "rogue_run_start.h"
+#include "rogue_route_events.h"
+#include "rogue_route_scenes.h"
 #include "rogue_trials.h"
 #include "rogue_quest.h"
 #include "rogue_ridemon.h"
@@ -202,6 +205,8 @@ EWRAM_DATA struct RogueRunData gRogueRun = {};
 EWRAM_DATA struct RogueLocalData gRogueLocal = {};
 EWRAM_DATA struct RogueAdvPath gRogueAdvPath = {};
 static EWRAM_DATA bool8 sSacredAshRecoveryPending = FALSE;
+static EWRAM_DATA bool8 sPendingRoomEntrySetup = FALSE;
+static EWRAM_DATA bool8 sExecutingDeferredRoomEntry = FALSE;
 
 static void ResetHotTracking();
 static void ClearRogueLocalData(void);
@@ -377,6 +382,9 @@ bool8 Rogue_PartyContainsSpeciesChain(u16 checkSpecies, u8 ignoredSlot1, u8 igno
         if(i == ignoredSlot1 || i == ignoredSlot2)
             continue;
 
+        if(RogueRouteEvents_IsMysteryEggCourierEgg(&gPlayerParty[i]))
+            continue;
+
 #ifdef ROGUE_EXPANSION
         species = GET_BASE_SPECIES_ID(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
 #else
@@ -395,6 +403,11 @@ bool8 Rogue_PartyHasDuplicateSpecies(struct Pokemon *mon, u8 ignoredSlot1, u8 ig
     u16 species;
 
     if(!Rogue_IsSpeciesClauseActive())
+        return FALSE;
+
+    // A courier Egg is a temporary delivery object and is not allowed to hatch
+    // during the run, so it must not participate in Species Clause checks.
+    if(RogueRouteEvents_IsMysteryEggCourierEgg(mon))
         return FALSE;
 
 #ifdef ROGUE_EXPANSION
@@ -1612,8 +1625,6 @@ void Rogue_ModifyEggMon(struct Pokemon *mon)
 {
     u32 eggCyclesLeft = 0;
     SetMonData(mon, MON_DATA_FRIENDSHIP, &eggCyclesLeft);
-
-    Rogue_PushPopup_AddPokemon(SPECIES_EGG, FALSE, FALSE);
 }
 
 void Rogue_DiscardedCaughtMon(struct Pokemon *mon)
@@ -4294,6 +4305,10 @@ bool8 Rogue_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEvent* 
     if(Rogue_RideMonIsCollisionExempt(obstacle, collider))
         return TRUE;
 
+    if(RogueRouteScenes_IsBreedersExchangePokemonObject(obstacle)
+        || RogueRouteScenes_IsBreedersExchangePokemonObject(collider))
+        return FALSE;
+
     if(FollowMon_IsCollisionExempt(obstacle, collider))
         return TRUE;
 
@@ -4419,6 +4434,8 @@ void Rogue_OnLoadMap(void)
     {
         if(RogueAdv_IsViewingPath())
             RogueAdv_ApplyAdventureMetatiles();
+        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+            RogueRouteScenes_ApplyMetatiles();
     }
     else if(!Rogue_IsRunActive())
     {
@@ -4827,6 +4844,7 @@ static void BeginRogueRun_ModifyParty(void)
                 SetMonData(&gPlayerParty[i], MON_DATA_SPATK_EV, &temp);
                 SetMonData(&gPlayerParty[i], MON_DATA_SPDEF_EV, &temp);
                 gPlayerParty[i].rogueExtraData.runTutorMoveLvl = 0;
+                gPlayerParty[i].rogueExtraData.abilityOverride = ABILITY_NONE;
 
                 // Force to starter lvl
                 exp = Rogue_ModifyExperienceTables(gRogueSpeciesInfo[GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL)].growthRate, startLevel);
@@ -4894,6 +4912,9 @@ static void BeginRogueRun_ModifyParty(void)
 
 static void BeginRogueRun_ConsiderItems(void)
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
     DebugPrintf("Evos: required bits %d, avaliable bits %d", gRogueBake_EvoItems_Count, ARRAY_COUNT(gRogueRun.activeEvoItemFlags) * 8);
     AGB_ASSERT(gRogueBake_EvoItems_Count <= ARRAY_COUNT(gRogueRun.activeEvoItemFlags) * 8);
 
@@ -4979,6 +5000,10 @@ static void BeginRogueRun_ConsiderItems(void)
         }
     }
 #endif
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Evolution item setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static bool8 CanEnterWithItem(u16 itemId, bool8 isBasicBagEnabled)
@@ -5024,6 +5049,9 @@ static void SetupRogueRunBag()
     u16 itemId;
     u32 quantity;
     bool8 isBasicBagEnabled = Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE);
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     SetMoney(&gSaveBlock1Ptr->money, 0);
     ClearBag();
@@ -5051,6 +5079,9 @@ static void SetupRogueRunBag()
     }
 
     RecalcCharmCurseValues();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Bag setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 enum
@@ -5063,6 +5094,7 @@ enum
     BEGIN_RUN_PHASE_TEAM_ENCOUNTERS,
     BEGIN_RUN_PHASE_TRAINERS,
     BEGIN_RUN_PHASE_ADVENTURE_PATH,
+    BEGIN_RUN_PHASE_MINIBOSS_PREVIEWS,
     BEGIN_RUN_PHASE_FINALIZE,
     BEGIN_RUN_PHASE_COUNT,
 };
@@ -5073,6 +5105,7 @@ static void BeginRogueRunPhase_Reset(void)
 
     ClearRogueLocalData();
     memset(&gRogueRun, 0, sizeof(gRogueRun));
+    gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
     ClearHoneyTreePokeblock();
     ResetHotTracking();
@@ -5097,6 +5130,7 @@ static void BeginRogueRunPhase_Reset(void)
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     FlagClear(FLAG_ROGUE_IS_VICTORY_LAP);
     FlagClear(FLAG_ROGUE_MYSTERIOUS_SIGN_KNOWN);
+    FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
 
     SetLastHealLocationWarp(HEAL_LOCATION_ROGUE_HUB);
     if (RogueTrial_IsActive())
@@ -5110,6 +5144,8 @@ static void BeginRogueRunPhase_Reset(void)
 
     VarSet(VAR_ROGUE_COURIER_ITEM, ITEM_NONE);
     VarSet(VAR_ROGUE_COURIER_COUNT, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
     FlagClear(FLAG_ROGUE_COURIER_READY);
 
     gRogueRun.victoryLapTotalWins = 0;
@@ -5274,6 +5310,9 @@ static void BeginRogueRunPhase_TeamEncounters(void)
 
 static void BeginRogueRunPhase_Trainers(void)
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
     // Choose bosses last
     Rogue_ChooseRivalTrainerForNewAdventure();
     Rogue_EnsureRivalBaseTeamForNewAdventure();
@@ -5285,6 +5324,9 @@ static void BeginRogueRunPhase_Trainers(void)
     ChooseUniqueDenForNewAdventure();
 
     RogueSafari_CompactEmptyEntries();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Trainer setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static void BeginRogueRunPhase_AdventurePath(void)
@@ -5292,6 +5334,21 @@ static void BeginRogueRunPhase_AdventurePath(void)
     // Build the first path while the portal loading screen is already black so
     // map entry never inherits the remaining generation pause.
     RogueAdv_GenerateAdventurePathsIfRequired();
+}
+
+static void BeginRogueRunPhase_MiniBossPreviews(void)
+{
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
+
+    // Keep full Frontier Brain setup behind the run loading screen so entering
+    // a previewed node does not inherit the generation cost.
+    RogueAdv_CacheMiniBossPreviews();
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Mini-boss previews: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static void BeginRogueRunPhase_Finalize(void)
@@ -5338,6 +5395,7 @@ static void BeginRogueRunPhase(u8 phase)
     if(phase == BEGIN_RUN_PHASE_RESET)
         sRunLoadStartClock = RogueDebug_SampleClock();
     phaseStartClock = RogueDebug_SampleClock();
+    DebugPrintf("[Run Load] phase start: %d", phase);
 #endif
 
     switch(phase)
@@ -5374,6 +5432,10 @@ static void BeginRogueRunPhase(u8 phase)
         BeginRogueRunPhase_AdventurePath();
         break;
 
+    case BEGIN_RUN_PHASE_MINIBOSS_PREVIEWS:
+        BeginRogueRunPhase_MiniBossPreviews();
+        break;
+
     case BEGIN_RUN_PHASE_FINALIZE:
         BeginRogueRunPhase_Finalize();
         break;
@@ -5381,9 +5443,10 @@ static void BeginRogueRunPhase(u8 phase)
 
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
     sRunLoadPhaseClocks[phase] = RogueDebug_SampleClock() - phaseStartClock;
+    DebugPrintf("[Run Load] phase end: %d (%d us)", phase, RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[phase]));
     if(phase == BEGIN_RUN_PHASE_FINALIZE)
     {
-        DebugPrintf("[Run Load] phases us: reset=%d world=%d bag=%d clauses=%d legends=%d teams=%d trainers=%d path=%d final=%d",
+        DebugPrintf("[Run Load] phases us: reset=%d world=%d bag=%d clauses=%d legends=%d teams=%d trainers=%d path=%d previews=%d final=%d",
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_RESET]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_WORLD_STATE]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_PARTY_AND_BAG]),
@@ -5392,6 +5455,7 @@ static void BeginRogueRunPhase(u8 phase)
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_TEAM_ENCOUNTERS]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_TRAINERS]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_ADVENTURE_PATH]),
+            RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_MINIBOSS_PREVIEWS]),
             RogueDebug_ClockToDisplayUnits(sRunLoadPhaseClocks[BEGIN_RUN_PHASE_FINALIZE]));
         DebugPrintf("[Run Load] setup total: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - sRunLoadStartClock));
     }
@@ -5418,7 +5482,17 @@ static u16 GetRequiredBadgesForEggToHatch(u16 species)
 
 static void EndRogueRun(void)
 {
+    u8 i;
+
     HandleForfeitingInCatchingContest();
+
+    // Generated quests and their temporary cargo never survive the run boundary.
+    RogueAdventureQuests_Clear();
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, 0);
+
+    for(i = 0; i < gPlayerPartyCount; ++i)
+        gPlayerParty[i].rogueExtraData.abilityOverride = ABILITY_NONE;
 
     if(Rogue_IsCampaignActive())
         Rogue_DeactivateActiveCampaign();
@@ -5433,8 +5507,6 @@ static void EndRogueRun(void)
 
     // We're back from adventure, so any mon we finished or retired with add to the safari
     {
-        u8 i;
-
         for(i = 0; i < gPlayerPartyCount; ++i)
         {
             u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
@@ -5964,6 +6036,13 @@ bool8 Rogue_IsShrineChallengeActive(void)
     return gRogueLocal.isShrineChallengeActive;
 }
 
+void Rogue_ActivateUncatchableWildBattle(void)
+{
+    // Route-event bosses share the shrine guardian's transient battle rules:
+    // smart wild AI, no capture, and no Alpha encounter treatment.
+    gRogueLocal.isShrineChallengeActive = TRUE;
+}
+
 bool8 Rogue_HasChallengedShrine(void)
 {
     return gRogueRun.hasChallengedShrine;
@@ -6193,6 +6272,9 @@ static u8 SelectMiniBossRewardIndices(u16 trainerNum, struct Pokemon* party, u8 
     *indexA = PARTY_SIZE;
     *indexB = PARTY_SIZE;
 
+    if(partySize == 0 || trainerNum >= gRogueTrainerCount)
+        return MINIBOSS_REWARD_MODE_NO_LEGAL;
+
     if(overrideMode != 0xFF)
         return overrideMode;
 
@@ -6260,10 +6342,18 @@ void Rogue_SelectMiniBossRewardMons()
     u16 roomSeed = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed;
 
     AGB_ASSERT(partySize != 0);
+    if(partySize == 0)
+    {
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, SPECIES_NONE);
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, SPECIES_NONE);
+        gSpecialVar_Result = MINIBOSS_REWARD_MODE_NO_LEGAL;
+        return;
+    }
+
     gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, roomSeed);
 }
 
-static void GenerateMiniBossPreview(u8 roomIdx)
+static bool8 GenerateMiniBossPreview(u8 roomIdx)
 {
     struct RogueAdvPathRoom* room = &gRogueAdvPath.rooms[roomIdx];
     struct Pokemon* enemyParty = Alloc(sizeof(gEnemyParty));
@@ -6288,6 +6378,8 @@ static void GenerateMiniBossPreview(u8 roomIdx)
 
     AGB_ASSERT(room->roomType == ADVPATH_ROOM_MINIBOSS);
     AGB_ASSERT(enemyParty != NULL);
+    if(enemyParty == NULL)
+        return FALSE;
 
     memcpy(enemyParty, gEnemyParty, sizeof(gEnemyParty));
     ZeroEnemyPartyMons();
@@ -6312,7 +6404,14 @@ static void GenerateMiniBossPreview(u8 roomIdx)
     AGB_ASSERT(partySize >= 2);
 
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, trainerNum);
-    gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, room->rngSeed);
+    if(partySize != 0)
+        gSpecialVar_Result = BufferMiniBossRewardSelection(trainerNum, gEnemyParty, partySize, room->rngSeed);
+    else
+    {
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, SPECIES_NONE);
+        VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, SPECIES_NONE);
+        gSpecialVar_Result = MINIBOSS_REWARD_MODE_NO_LEGAL;
+    }
 
     memcpy(gEnemyParty, enemyParty, sizeof(gEnemyParty));
     Free(enemyParty);
@@ -6347,6 +6446,8 @@ static void GenerateMiniBossPreview(u8 roomIdx)
     gRngRogueValue = rogueRng;
     gRngValue = rng;
     gRng2Value = rng2;
+
+    return TRUE;
 }
 
 void Rogue_CacheMiniBossPreview(u8 roomIdx)
@@ -6357,7 +6458,8 @@ void Rogue_CacheMiniBossPreview(u8 roomIdx)
     u16 previousSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
     u16 previousResult = gSpecialVar_Result;
 
-    GenerateMiniBossPreview(roomIdx);
+    if(!GenerateMiniBossPreview(roomIdx))
+        return;
 
     room->roomParams.perType.miniboss.rewardSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
     room->roomParams.perType.miniboss.rewardSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
@@ -6401,7 +6503,6 @@ static u8 UNUSED RandomMonType(u16 seedFlag)
 
 #ifdef ROGUE_EXPANSION
 #define WILD_FORM_QUERY_NUM_SPECIES (PLACEHOLDER_START + 1)
-#define WILD_FORM_FAMILY_CAPACITY WILD_FORM_QUERY_NUM_SPECIES
 
 enum
 {
@@ -6870,7 +6971,6 @@ static bool8 GetWildApprovedFormList(u16 familyKey, const u16 **speciesList, u16
 
 #else
 #define WILD_FORM_QUERY_NUM_SPECIES NUM_SPECIES
-#define WILD_FORM_FAMILY_CAPACITY WILD_FORM_QUERY_NUM_SPECIES
 
 static u16 GetWildFormFamilyKey(u16 species)
 {
@@ -6884,6 +6984,21 @@ static bool8 GetWildApprovedFormList(u16 familyKey, const u16 **speciesList, u16
     return FALSE;
 }
 #endif
+
+#ifdef ROGUE_EXPANSION
+#define WILD_FORM_FAMILY_CAPACITY (WILD_FORM_FAMILY_GIMMIGHOUL + 1)
+#else
+#define WILD_FORM_FAMILY_CAPACITY WILD_FORM_QUERY_NUM_SPECIES
+#endif
+
+struct WildFormFamilyScratch
+{
+    u16 familyKeys[WILD_FORM_FAMILY_CAPACITY];
+    u8 familyWeightsByKey[WILD_FORM_FAMILY_CAPACITY];
+    u16 familyCount;
+    u16 totalWeight;
+    u16 lastSelectedFamilyKey;
+};
 
 static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue);
 static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily);
@@ -6908,7 +7023,7 @@ u16 RogueDebug_SelectWildSpeciesFromCurrentQuery(u16 familyRand, u16 formRand, b
     return SelectWildSpeciesFromFormFamilies(familyRand, formRand, WildFormFlatWeight, NULL, excludeSelectedFamily);
 }
 
-static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *familyCount, u16 *totalWeight, WeightCallback weightFunc, void *data)
+static void BuildWildFormFamilyWeights(struct WildFormFamilyScratch *scratch, WeightCallback weightFunc, void *data)
 {
     u16 species;
     u16 weightIndex = 0;
@@ -6916,8 +7031,10 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *
     bool8 furfrouAnchorEligible = FALSE;
 #endif
 
-    *familyCount = 0;
-    *totalWeight = 0;
+    scratch->familyCount = 0;
+    scratch->totalWeight = 0;
+    scratch->lastSelectedFamilyKey = SPECIES_NONE;
+    memset(scratch->familyWeightsByKey, 0, sizeof(scratch->familyWeightsByKey));
 
     for(species = SPECIES_NONE + 1; species < WILD_FORM_QUERY_NUM_SPECIES; ++species)
     {
@@ -6934,9 +7051,7 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *
 
             if(weight != 0)
             {
-                u16 i;
                 u16 familyKey = GetWildFormFamilyKey(species);
-                bool8 addNewWeight = FALSE;
 
 #ifdef ROGUE_EXPANSION
                 // Every Furfrou trim has Normal as its primary type. Requiring
@@ -6948,36 +7063,71 @@ static void BuildWildFormFamilyWeights(u16 *familyKeys, u8 *familyWeights, u16 *
                     continue;
 #endif
 
-                for(i = 0; i < *familyCount; ++i)
-                {
-                    if(familyKeys[i] == familyKey)
-                        break;
-                }
+                AGB_ASSERT(familyKey < WILD_FORM_FAMILY_CAPACITY);
+                if(familyKey >= WILD_FORM_FAMILY_CAPACITY)
+                    continue;
 
-                if(i == *familyCount)
+                if(scratch->familyWeightsByKey[familyKey] == 0)
                 {
-                    AGB_ASSERT(*familyCount < WILD_FORM_FAMILY_CAPACITY);
+                    AGB_ASSERT(scratch->familyCount < WILD_FORM_FAMILY_CAPACITY);
 
-                    if(*familyCount < WILD_FORM_FAMILY_CAPACITY)
+                    if(scratch->familyCount < WILD_FORM_FAMILY_CAPACITY)
                     {
-                        familyKeys[i] = familyKey;
-                        familyWeights[i] = weight;
-                        addNewWeight = TRUE;
-                        ++(*familyCount);
+                        scratch->familyKeys[scratch->familyCount] = familyKey;
+                        scratch->familyWeightsByKey[familyKey] = weight;
+                        ++scratch->familyCount;
+                        scratch->totalWeight += weight;
                     }
                 }
-                else if(weight > familyWeights[i])
+                else if(weight > scratch->familyWeightsByKey[familyKey])
                 {
-                    *totalWeight -= familyWeights[i];
-                    familyWeights[i] = weight;
-                    addNewWeight = TRUE;
+                    scratch->totalWeight -= scratch->familyWeightsByKey[familyKey];
+                    scratch->familyWeightsByKey[familyKey] = weight;
+                    scratch->totalWeight += weight;
                 }
-
-                if(addNewWeight)
-                    *totalWeight += weight;
             }
         }
     }
+}
+
+static void RemoveWildFormFamilyWeight(struct WildFormFamilyScratch *scratch, u16 familyKey)
+{
+    u8 familyWeight;
+
+    if(familyKey >= WILD_FORM_FAMILY_CAPACITY)
+        return;
+
+    familyWeight = scratch->familyWeightsByKey[familyKey];
+    scratch->familyWeightsByKey[familyKey] = 0;
+    scratch->totalWeight -= familyWeight;
+}
+
+static u16 SelectWildFormFamilyFromWeights(struct WildFormFamilyScratch *scratch, u16 randValue)
+{
+    u16 targetWeight;
+    u16 i;
+
+    if(scratch->totalWeight == 0)
+        return SPECIES_NONE;
+
+    targetWeight = randValue % scratch->totalWeight;
+    for(i = 0; i < scratch->familyCount; ++i)
+    {
+        u16 familyKey = scratch->familyKeys[i];
+        u8 familyWeight = scratch->familyWeightsByKey[familyKey];
+
+        if(targetWeight < familyWeight)
+        {
+            RemoveWildFormFamilyWeight(scratch, familyKey);
+            scratch->lastSelectedFamilyKey = familyKey;
+            return familyKey;
+        }
+
+        targetWeight -= familyWeight;
+    }
+
+    AGB_ASSERT(FALSE);
+    return SPECIES_NONE;
 }
 
 static u16 SelectWildSpeciesFromApprovedForms(u16 familyKey, u16 randValue)
@@ -7060,37 +7210,13 @@ static void ExcludeWildFormFamilyFromQuery(u16 familyKey)
     }
 }
 
-static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
+static u16 SelectWildSpeciesFromBuiltFormFamilies(struct WildFormFamilyScratch *scratch, u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
 {
-    u16 familyKeys[WILD_FORM_FAMILY_CAPACITY];
-    u8 familyWeights[WILD_FORM_FAMILY_CAPACITY];
-    u16 familyCount;
-    u16 totalWeight;
-    u16 targetWeight;
-    u16 i;
-    u16 selectedFamilyKey;
+    u16 selectedFamilyKey = SelectWildFormFamilyFromWeights(scratch, familyRand);
     u16 species;
 
-    BuildWildFormFamilyWeights(familyKeys, familyWeights, &familyCount, &totalWeight, weightFunc, data);
-
-    if(totalWeight == 0)
+    if(selectedFamilyKey == SPECIES_NONE)
         return SPECIES_NONE;
-
-    targetWeight = familyRand % totalWeight;
-    selectedFamilyKey = SPECIES_NONE;
-
-    for(i = 0; i < familyCount; ++i)
-    {
-        if(targetWeight < familyWeights[i])
-        {
-            selectedFamilyKey = familyKeys[i];
-            break;
-        }
-
-        targetWeight -= familyWeights[i];
-    }
-
-    AGB_ASSERT(selectedFamilyKey != SPECIES_NONE);
 
     // Furfrou trims have distinct typings, so typed queries must select from
     // the eligible trims instead of leaking an unrelated approved form.
@@ -7101,12 +7227,31 @@ static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, Weigh
 #endif
         species = SelectWildSpeciesFromApprovedForms(selectedFamilyKey, formRand);
 
+    // Families without curated form behavior use their species ID as the key.
+    // The family was only added if that species was active with nonzero weight.
+    if(species == SPECIES_NONE && selectedFamilyKey < WILD_FORM_QUERY_NUM_SPECIES)
+        species = selectedFamilyKey;
+
     if(species == SPECIES_NONE)
         species = SelectWildSpeciesFromEligibleFamily(selectedFamilyKey, formRand, weightFunc, data);
 
     if(excludeSelectedFamily)
         ExcludeWildFormFamilyFromQuery(selectedFamilyKey);
 
+    return species;
+}
+
+static u16 SelectWildSpeciesFromFormFamilies(u16 familyRand, u16 formRand, WeightCallback weightFunc, void *data, bool8 excludeSelectedFamily)
+{
+    struct WildFormFamilyScratch *scratch = Alloc(sizeof(*scratch));
+    u16 species;
+
+    if(scratch == NULL)
+        return SPECIES_NONE;
+
+    BuildWildFormFamilyWeights(scratch, weightFunc, data);
+    species = SelectWildSpeciesFromBuiltFormFamilies(scratch, familyRand, formRand, weightFunc, data, excludeSelectedFamily);
+    Free(scratch);
     return species;
 }
 
@@ -7525,6 +7670,25 @@ void Rogue_StartRunPortalTransition(void)
 
 void Rogue_OnWarpIntoMap(void)
 {
+    if(sPendingRoomEntrySetup)
+    {
+        struct WarpData deferredWarp = {};
+
+        // Room setup used to run while selecting the node, before DoWarp had
+        // a chance to start its fade. Run the same work after the warp task
+        // has reached the black-screen handoff instead.
+        sPendingRoomEntrySetup = FALSE;
+        sExecutingDeferredRoomEntry = TRUE;
+        Rogue_OnSetWarpData(&deferredWarp);
+        sExecutingDeferredRoomEntry = FALSE;
+
+        // Rogue_OnSetWarpData normally performs these after room setup. The
+        // deferred path suppresses that tail so the same work is completed
+        // after the map has reached the transition handoff.
+        gRogueLocal.totalMoneySpentOnMap = 0;
+        FollowMon_OnWarp();
+    }
+
     gRogueAdvPath.isOverviewActive = FALSE;
 
     VarSet(VAR_ROGUE_ACTIVE_POKEBLOCK, ITEM_NONE);
@@ -7554,7 +7718,20 @@ void Rogue_OnWarpIntoMap(void)
     }
     else if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS)
     {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        u32 previewStartClock = RogueDebug_SampleClock();
+#endif
+
         gRogueAdvPath.isOverviewActive = TRUE;
+
+        // Paths generated after a boss do not use the run-start portal phases.
+        // Finish their preview setup while the overview transition still
+        // covers the map, rather than deferring it to node interaction.
+        RogueAdv_CacheMiniBossPreviews();
+
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Adventure Path] Overview previews: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - previewStartClock));
+#endif
     }
     else if((gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE || gMapHeader.mapLayoutId == LAYOUT_ROGUE_HUB_ADVENTURE_ENTERANCE) && Rogue_IsRunActive())
     {
@@ -7649,32 +7826,35 @@ static void TryOptionalRandomanSpawn()
 
 void Rogue_OnSetWarpData(struct WarpData *warp)
 {
-    if(warp->mapGroup == MAP_GROUP(ROGUE_HUB) && warp->mapNum == MAP_NUM(ROGUE_HUB))
+    if(!sExecutingDeferredRoomEntry)
+        sPendingRoomEntrySetup = FALSE;
+
+    if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_HUB) && warp->mapNum == MAP_NUM(ROGUE_HUB))
     {
         // Warping back to hub must be intentional
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_BOSS_VICTORY_LAP) && warp->mapNum == MAP_NUM(ROGUE_BOSS_VICTORY_LAP))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_BOSS_VICTORY_LAP) && warp->mapNum == MAP_NUM(ROGUE_BOSS_VICTORY_LAP))
     {
         // Never override this warp
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_BOSS_FINAL) && warp->mapNum == MAP_NUM(ROGUE_BOSS_FINAL))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_BOSS_FINAL) && warp->mapNum == MAP_NUM(ROGUE_BOSS_FINAL))
     {
         // Never override this warp
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE) && warp->mapNum == MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE) && warp->mapNum == MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE))
     {
         // Warping back to hub must be intentional
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_HUB_ADVENTURE_ENTERANCE) && warp->mapNum == MAP_NUM(ROGUE_HUB_ADVENTURE_ENTERANCE))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_HUB_ADVENTURE_ENTERANCE) && warp->mapNum == MAP_NUM(ROGUE_HUB_ADVENTURE_ENTERANCE))
     {
         // Warping back to hub must be intentional
         return;
     }
-    else if(warp->mapGroup == MAP_GROUP(ROGUE_ADVENTURE_PATHS) && warp->mapNum == MAP_NUM(ROGUE_ADVENTURE_PATHS))
+    else if(!sExecutingDeferredRoomEntry && warp->mapGroup == MAP_GROUP(ROGUE_ADVENTURE_PATHS) && warp->mapNum == MAP_NUM(ROGUE_ADVENTURE_PATHS))
     {
         // Ensure the run has started if we're trying to directly warp into the paths screen
         if(!Rogue_IsRunActive())
@@ -7682,7 +7862,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
             BeginRogueRun();
         }
     }
-    else if(warp->warpId != 0 && warp->mapGroup == gSaveBlock1Ptr->location.mapGroup && warp->mapNum == gSaveBlock1Ptr->location.mapNum)
+    else if(!sExecutingDeferredRoomEntry && warp->warpId != 0 && warp->mapGroup == gSaveBlock1Ptr->location.mapGroup && warp->mapNum == gSaveBlock1Ptr->location.mapNum)
     {
         // Allow warping to non-0 warps within the same ID
         if(warp->warpId == WARP_ID_MAP_START)
@@ -7703,13 +7883,19 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
 
     if(Rogue_IsRunActive())
     {
-        u8 warpType = RogueAdv_OverrideNextWarp(warp);
+        u8 warpType = sExecutingDeferredRoomEntry ? ROGUE_WARP_TO_ROOM : RogueAdv_OverrideNextWarp(warp);
 
         if(warpType == ROGUE_WARP_TO_ADVPATH)
         {
         }
         else if(warpType == ROGUE_WARP_TO_ROOM)
         {
+            if(!sExecutingDeferredRoomEntry)
+            {
+                sPendingRoomEntrySetup = TRUE;
+            }
+            else
+            {
             ++gRogueRun.enteredRoomCounter;
 
             Rogue_ResetFlightCharges();
@@ -7735,13 +7921,17 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                 case ADVPATH_ROOM_ROUTE:
                 {
                     u8 weatherChance = 5 + 20 * gRogueAdvPath.currentRoomParams.perType.route.difficulty;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                    u32 routeEntryStartClock = RogueDebug_SampleClock();
+#endif
 
                     gRogueRun.currentRouteIndex = gRogueAdvPath.currentRoomParams.roomIdx;
-
                     RandomiseWildEncounters();
+                    RogueRouteScenes_OnEnterRoute();
                     ResetTrainerBattles();
                     RandomiseBerryTrees();
                     RandomiseEnabledTrainers();
+                    RogueRouteScenes_PrepareRouteTrainers();
                     RandomiseEnabledItems();
                     TryOptionalRandomanSpawn();
 
@@ -7772,6 +7962,9 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                             }
                         }
                     }
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                    DebugPrintf("[Room Load] Route entry setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - routeEntryStartClock));
+#endif
                     break;
                 }
 
@@ -7997,14 +8190,26 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
             VarSet(VAR_ROGUE_CURRENT_ROOM_IDX, gRogueRun.enteredRoomCounter);
             VarSet(VAR_ROGUE_CURRENT_LEVEL_CAP, Rogue_CalculatePlayerMaxLvl());
 
-            RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
-            RogueTrial_OnEnterEncounter();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+            {
+                u32 routeEntryHooksStartClock = RogueDebug_SampleClock();
+#endif
+                RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
+                RogueTrial_OnEnterEncounter();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+                    DebugPrintf("[Room Load] Route entry hooks: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - routeEntryHooksStartClock));
+            }
+#endif
+            }
         }
     }
 
-    gRogueLocal.totalMoneySpentOnMap = 0;
-
-    FollowMon_OnWarp();
+    if(!sExecutingDeferredRoomEntry)
+    {
+        gRogueLocal.totalMoneySpentOnMap = 0;
+        FollowMon_OnWarp();
+    }
 }
 
 void Rogue_ModifyMapHeader(struct MapHeader *mapHeader)
@@ -8205,6 +8410,28 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
             }
 
             *objectEventCount = write;
+
+            if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+            {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                u32 sceneObjectStartClock = RogueDebug_SampleClock();
+#endif
+                RogueRouteScenes_ModifyObjectEvents(objectEvents, objectEventCount, objectEventCapacity);
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+                DebugPrintf("[Room Load] Scene object events: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - sceneObjectStartClock));
+#endif
+            }
+        }
+        else if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE && loadingFromSave)
+        {
+            // Authored-script restoration uses local IDs, so generated scene
+            // objects must be rebound after it has run. The main NPC reuses an
+            // anchor ID and props may reuse IDs removed by route generation.
+            RogueRouteScenes_RestoreObjectEvents(
+                objectEvents,
+                *objectEventCount,
+                mapHeader->events->objectEvents,
+                mapHeader->events->objectEventCount);
         }
 
         // We need to reapply this as pending when loading from a save, as we would've already consumed it here
@@ -9262,6 +9489,8 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
     FlagClear(FLAG_ROGUE_TERASTALLIZE_BATTLE);
     CheckAndNotifyForFaintedMons();
     RogueQuest_OnTrigger(QUEST_TRIGGER_TRAINER_BATTLE_END);
+    if(Rogue_IsRunActive() && gBattleOutcome == B_OUTCOME_WON)
+        RogueAdventureQuests_EmitSignal(ROGUE_ADVENTURE_QUEST_SIGNAL_TRAINER_DEFEATED, 1);
     TryRewardHiddenStashCoins(trainerNum);
 
     if(Rogue_IsRunActive())
@@ -10455,6 +10684,19 @@ static u16 GetWildGrassEncounter(u8 index)
     return SPECIES_NONE;
 }
 
+u8 Rogue_GetCurrentWildEncounterCount(void)
+{
+    return GetCurrentWildEncounterCount();
+}
+
+u16 Rogue_GetCurrentWildEncounterSpecies(u8 index)
+{
+    if(index >= GetCurrentWildEncounterCount())
+        return SPECIES_NONE;
+
+    return GetWildGrassEncounter(index);
+}
+
 static u16 GetWildWaterEncounter(u8 index)
 {
     AGB_ASSERT(index < WILD_ENCOUNTER_WATER_CAPACITY);
@@ -11406,7 +11648,15 @@ static void ApplyMartSeed(u16 itemCategory)
     if(!Rogue_IsRunActive())
         return;
 
-    switch (itemCategory)
+    if(ROGUE_SHOP_IS_TRAVELING_MERCHANT(itemCategory))
+    {
+        SeedRogueRng(
+            gRogueAdvPath.rooms[gRogueRun.adventureRoomId].rngSeed
+            ^ (ROGUE_SHOP_GET_CATEGORY(itemCategory) * 0x45D9));
+        return;
+    }
+
+    switch (ROGUE_SHOP_GET_CATEGORY(itemCategory))
     {
     case ROGUE_SHOP_GENERAL:
         SeedRogueRng(gRogueRun.subSeeds[ROGUE_SUBSEED_SHOP_GENERAL]);
@@ -11493,6 +11743,7 @@ void Rogue_OpenMartQuery(u16 difficulty, u16 itemCategory, u16* minSalePrice)
     gRogueLocal.rngSeedToRestore = gRngRogueValue;
     ApplyMartSeed(itemCategory);
     randomSeed = RogueRandom();
+    itemCategory = ROGUE_SHOP_GET_CATEGORY(itemCategory);
 
     if(itemCategory == ROGUE_SHOP_COURIER)
     {
@@ -12067,32 +12318,73 @@ static void EndWildEncounterQuery()
 
 static void RandomiseWildEncounters(void)
 {
+    struct WildFormFamilyScratch *scratch;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
+
     BeginWildEncounterQuery();
+    scratch = Alloc(sizeof(*scratch));
+    if(scratch == NULL)
     {
         u8 i;
-        u8 typeHint = Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[gRogueRun.adventureRoomId]);
 
         for(i = 0; i < WILD_ENCOUNTER_GRASS_CAPACITY; ++i)
         {
-            if(i == 0)
-            {
-                gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseWildEncounters_CalculateInitialWeight, &typeHint, TRUE);
-
-                if(gRogueRun.wildEncounters.species[i] != SPECIES_NONE)
-                {
-                    // We actually have a mon of this type
-                    gRogueRun.wildEncounters.catchCounts[i] = 0;
-                    continue;
-                }
-
-                // Fallback below can hit if no mon of hint type exists, e.g. gen 1 on a dark hint route.
-            }
-
-            gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseWildEncounters_CalculateWeight, NULL, TRUE);
+            gRogueRun.wildEncounters.species[i] = SPECIES_NONE;
             gRogueRun.wildEncounters.catchCounts[i] = 0;
         }
+        EndWildEncounterQuery();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Room Load] Wild grass roster: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
+        return;
     }
+
+    {
+        u8 i;
+        u8 typeHint = Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[gRogueRun.adventureRoomId]);
+        bool8 hasHintEncounter = FALSE;
+        u16 hintFamilyKey;
+
+        BuildWildFormFamilyWeights(scratch, RandomiseWildEncounters_CalculateInitialWeight, &typeHint);
+        gRogueRun.wildEncounters.species[0] = SelectWildSpeciesFromBuiltFormFamilies(
+            scratch,
+            RogueRandom(),
+            RogueRandom(),
+            RandomiseWildEncounters_CalculateInitialWeight,
+            &typeHint,
+            FALSE);
+        hasHintEncounter = gRogueRun.wildEncounters.species[0] != SPECIES_NONE;
+        hintFamilyKey = scratch->lastSelectedFamilyKey;
+
+        // The normal weights do not change between draws. Build them once, drop
+        // the hint family if one was selected, then remove subsequent families
+        // directly from the scratch table.
+        BuildWildFormFamilyWeights(scratch, RandomiseWildEncounters_CalculateWeight, NULL);
+        if(hasHintEncounter)
+            RemoveWildFormFamilyWeight(scratch, hintFamilyKey);
+
+        for(i = hasHintEncounter ? 1 : 0; i < WILD_ENCOUNTER_GRASS_CAPACITY; ++i)
+        {
+            gRogueRun.wildEncounters.species[i] = SelectWildSpeciesFromBuiltFormFamilies(
+                scratch,
+                RogueRandom(),
+                RogueRandom(),
+                RandomiseWildEncounters_CalculateWeight,
+                NULL,
+                FALSE);
+            gRogueRun.wildEncounters.catchCounts[i] = 0;
+        }
+
+        if(hasHintEncounter)
+            gRogueRun.wildEncounters.catchCounts[0] = 0;
+    }
+    Free(scratch);
     EndWildEncounterQuery();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Room Load] Wild grass roster: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 bool8 Rogue_CanScatterPokeblock(u16 itemId)
@@ -12204,6 +12496,11 @@ static u8 RandomiseFishingEncounters_CalculateWeight(u16 index, u16 species, voi
 
 static void RandomiseFishingEncounters(void)
 {
+    struct WildFormFamilyScratch *scratch;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
+
     RogueMonQuery_Begin();
 
     RogueMonQuery_IsSpeciesActive();
@@ -12217,17 +12514,38 @@ static void RandomiseFishingEncounters(void)
     // Now we've evolved we're only caring about mons of this type
     RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, MON_TYPE_VAL_TO_FLAGS(TYPE_WATER));
 
+    scratch = Alloc(sizeof(*scratch));
     {
         u8 i;
 
+        if(scratch != NULL)
+            BuildWildFormFamilyWeights(scratch, RandomiseFishingEncounters_CalculateWeight, NULL);
+
         for(i = 0; i < WILD_ENCOUNTER_WATER_CAPACITY; ++i)
         {
-            gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SelectWildSpeciesFromFormFamilies(RogueRandom(), RogueRandom(), RandomiseFishingEncounters_CalculateWeight, NULL, TRUE);
+            if(scratch == NULL)
+            {
+                gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SPECIES_NONE;
+            }
+            else
+            {
+                gRogueRun.wildEncounters.species[WILD_ENCOUNTER_GRASS_CAPACITY + i] = SelectWildSpeciesFromBuiltFormFamilies(
+                    scratch,
+                    RogueRandom(),
+                    RogueRandom(),
+                    RandomiseFishingEncounters_CalculateWeight,
+                    NULL,
+                    FALSE);
+            }
             gRogueRun.wildEncounters.catchCounts[WILD_ENCOUNTER_GRASS_CAPACITY + i] = 0;
         }
     }
+    Free(scratch);
 
     RogueMonQuery_End();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Load] Wild fishing roster: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 void Rogue_SafariTypeForMap(u8* outArray, u8 arraySize)
@@ -12301,6 +12619,9 @@ static void RandomiseEnabledTrainers()
     u16 i;
     u16 activeTrainers = 0;
     u16 trainerBuffer[ROGUE_MAX_ACTIVE_TRAINER_COUNT];
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT)
         Rogue_ChooseTeamHideoutTrainers(trainerBuffer, ARRAY_COUNT(trainerBuffer));
@@ -12322,6 +12643,9 @@ static void RandomiseEnabledTrainers()
         for(i = 0; i < enabledCount; ++i)
             Rogue_SetDynamicTrainer(i, trainerBuffer[i]);
 
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+        DebugPrintf("[Room Load] Dynamic trainers: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
         return;
     }
 
@@ -12350,6 +12674,9 @@ static void RandomiseEnabledTrainers()
             }
         }
     }
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Room Load] Dynamic trainers: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 u8 GetLeadMonLevel(void);
@@ -12921,7 +13248,7 @@ static void RandomiseItemContent(u8 difficultyLevel)
     u16 itemId;
     u8 difficultyModifier = Rogue_GetEncounterDifficultyModifier();
     u8 dropRarity = GetCurrentDropRarity();
-    struct RouteItemWeightContext routeItemContext;
+    struct RouteItemWeightContext *routeItemContext = NULL;
     bool8 allowSpecialItemDrops = gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE
         || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT;
 
@@ -12936,10 +13263,14 @@ static void RandomiseItemContent(u8 difficultyLevel)
             ++dropRarity;
     }
 
-    memset(&routeItemContext, 0, sizeof(routeItemContext));
-
     if(allowSpecialItemDrops)
-        InitRouteItemWeightContext(&routeItemContext);
+    {
+        routeItemContext = Alloc(sizeof(*routeItemContext));
+        if(routeItemContext != NULL)
+            InitRouteItemWeightContext(routeItemContext);
+        else
+            allowSpecialItemDrops = FALSE;
+    }
 
     RogueItemQuery_Begin();
     {
@@ -12988,7 +13319,7 @@ static void RandomiseItemContent(u8 difficultyLevel)
         }
 
         if(allowSpecialItemDrops)
-            ExcludeRouteSpecialItems(&routeItemContext);
+            ExcludeRouteSpecialItems(routeItemContext);
 
         RogueWeightQuery_Begin();
         {
@@ -12999,18 +13330,19 @@ static void RandomiseItemContent(u8 difficultyLevel)
             {
                 bool8 selectedSpecialItem = allowSpecialItemDrops
                     && !FlagGet(FLAG_ROGUE_ITEM_START + i)
-                    && RollRouteSpecialItemDrop(&routeItemContext)
-                    && TrySelectRouteSpecialItem(&routeItemContext, &itemId);
+                    && RollRouteSpecialItemDrop(routeItemContext)
+                    && TrySelectRouteSpecialItem(routeItemContext, &itemId);
 
                 if(!selectedSpecialItem)
                 {
-                    RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, &routeItemContext);
+                    RogueWeightQuery_CalculateWeights(RouteItems_CalculateWeight, routeItemContext);
 
                     AGB_ASSERT(RogueWeightQuery_HasAnyWeights());
                     itemId = RogueWeightQuery_SelectRandomFromWeights(RogueRandom());
                 }
 
-                RouteItemContextRecordSelection(&routeItemContext, itemId);
+                if(allowSpecialItemDrops)
+                    RouteItemContextRecordSelection(routeItemContext, itemId);
                 VarSet(VAR_ROGUE_ITEM_START + i, itemId);
             }
         }
@@ -13018,12 +13350,16 @@ static void RandomiseItemContent(u8 difficultyLevel)
 
     }
     RogueItemQuery_End();
+    Free(routeItemContext);
 }
 
 static void RandomiseEnabledItems(void)
 {
     s32 i;
     u8 difficultyLevel = Rogue_GetCurrentDifficulty();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 startClock = RogueDebug_SampleClock();
+#endif
 
     if(Rogue_GetModeRules()->forceEndGameRouteItems)
     {
@@ -13045,6 +13381,9 @@ static void RandomiseEnabledItems(void)
     }
 
     RandomiseItemContent(difficultyLevel);
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Room Load] Item setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
+#endif
 }
 
 static void RandomiseMiniBossItemsAndRestoreSeed(void)

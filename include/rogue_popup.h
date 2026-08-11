@@ -81,4 +81,11 @@ void Rogue_PushPopup_TrialQuestsDisabled();
 
 void Rogue_PushPopup_CustomPopup(struct CustomPopup const* popup);
 
+#if TESTING
+bool8 RoguePopup_TestBeginDeferredConsume(void);
+bool8 RoguePopup_TestDeferredCloseWillConsume(void);
+bool8 RoguePopup_TestQueueIsEmpty(void);
+void RoguePopup_TestEndDeferredConsume(void);
+#endif
+
 #endif //QUEST_POPUP_H

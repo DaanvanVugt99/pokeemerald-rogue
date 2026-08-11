@@ -16,6 +16,57 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added a proof-of-concept seeded route-scene system with a route director,
+  reusable scene composer, compact ROM-defined quest graphs, and a dedicated
+  run-only Adventure Quest category. Its first complete quest chain is the
+  Stolen Trade Case: a fixed travelling merchant creates the quest, the run's
+  selected evil team builds a dynamically generated camp on a later route, and
+  returning the recovered Trade Case at a final merchant checkpoint awards a
+  Large Pokéblock Bundle and ¥5,000. Scene placement, quest state, key-item
+  cargo, battles, and pending rewards remain deterministic across quicksaves
+  using a compact current-route save payload. The same route director now
+  selects from a
+  weighted pool of valid content, including a one-off Hexed Shrine where the
+  Dark Deal Devil offers immediate money in exchange for a temporary Curse
+  that lasts until the next Boss falls, and an Anomalous Fossil quest that
+  carries a discovered Key Item fossil safely to a later restoration lab. The
+  restored Pokémon is always a level-1 Rare Unique, with a choice between
+  preserving its original typing or accepting a seeded adaptive typing. The Forbidden
+  Stone quest now gives the player an Odd Keystone, binds three escaped souls
+  at separate locations on a later route, and ends with an uncatchable
+  Spiritomb battle for an Ability Patch and ¥10,000. Apricorn Crafting now
+  presents three seeded Apricorns and lets the player choose one to exchange
+  for five matching Apricorn Balls. Its Ball Maker may share the current route
+  or follow the unfinished Adventure Quest onto a later branch. The one-off
+  Unbound Tutor offers one free lesson chosen from three seeded,
+  progression-scaled moves, and ignores normal species compatibility to enable
+  unusual builds. A once-per-Adventure Traveling Merchant now brings one
+  seeded shop category to a route, supports normal buying and selling, and
+  sells its entire inventory at half price. The once-per-Adventure Breeder's
+  Exchange requests a species from the current route in return for a visible,
+  similarly powered Pokémon with a coherent trained set and three perfect
+  IVs; players can preview the offer, choose the exact partner to trade, and
+  recover its held item safely. A once-per-Adventure Buried Cache event now
+  occupies three exact event spots on one route: an archaeologist lends a route-local Field
+  Shovel and a two-trait clue, while two environment-themed landmarks conceal
+  either the cache or a recoverable wild ambush. Ancient, Trainer, relic, and
+  rare Charm caches provide distinct seeded reward classes. Active routes now
+  expose Porymap-visible typed exact spots for NPCs, NPC-plus-decor scenes,
+  decor-only nodes, and plant patches instead of reserving generic 3×3 lots;
+  the director independently claims one to three spot groups so quest
+  consumers and unrelated route events can coexist while using sparse,
+  map-authored coordinates and facing. The per-room scene plan is packed into
+  less memory than the former single-scene descriptor. Route-event item and
+  money exchanges now use a
+  shared stack-local atomic transaction layer with reusable rollback support.
+  Active route scene plans now retain their compact placements through
+  development quickloads.
+- Added terrain tags to route-scene lots and recipe placement rules so ordinary
+  land scenes no longer spawn on water, current, water-door, ice, or other
+  special-movement terrain; special terrain lots are now available for future
+  water or ice-specific route events.
+- Added Tide Salvage, the first water-terrain route event, where an in-water
+  NPC offers one seeded salvage reward from a drifting bundle.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
   Unique Legendary Pokémon.
@@ -64,6 +115,39 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Removed Electrocytes' rain requirement and gave Whiscash Spark plus select
+  Electric tutor access, replacing Swift with Shock Wave.
+- Reduced the default route-event budget to target zero, one, or two optional
+  events per route, averaging one event while preserving mandatory Adventure
+  Quest scenes.
+- Reworked generated route scenes around sparse, asymmetric compositions and
+  environment-aware semantic props. Removed generic battle-statue pillars and
+  decorative Rock Smash boulders, kept each lot locally traversable with its
+  focal objects accessible, and replaced Spiritomb soul markers with a
+  dedicated cracked Spirit Stone. A compact route-prop art set now gives
+  merchants, camps, supplies, dig sites, shrines, and natural landmarks
+  environment-appropriate fixtures without reusing Cut trees, Strength
+  boulders, route-type markers, or cardboard moving boxes. Natural landmarks,
+  supplies, crates, and stumps now use credited public Gen III artwork
+  normalized to Emerald's existing object palettes.
+- Rewrote route-event and Adventure Quest copy with distinct voices for the
+  merchant, thief, researchers, Channeler, Ball Maker, Move Tutor, and Dark
+  Deal Devil, while retaining concise mechanical guidance and rewards.
+- Made route-scene presentation declarative: each recipe now defines its lots,
+  objects, scripts, state visibility, and metatile accents in one ROM data
+  table shared by initial composition and quicksave restoration. The generic
+  route-scene planner and compositor are now separated from event-specific
+  eligibility, payload generation, lifecycle hooks, and interactions, and use
+  an explicit local deterministic RNG without replacing either global stream.
+  Selected standalone payloads are retained in the existing 12-byte room plan,
+  so composition and quickload restoration never rerun content selection.
+  Adventure Quest nodes now also declare reusable progress and completion
+  signals, including additive and unique-objective progress, instead of
+  advancing through event-specific state mutations. Their run-time records
+  are packed from 12 to 8 bytes while retaining 64 simultaneous quests,
+  recovering 256 bytes of EWRAM. The initial five route-event families now
+  live in declarative event, scene-recipe, and quest-node tables, including
+  their copy, item policies, restoration behavior, and route-exit hooks.
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.
@@ -219,6 +303,36 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept cached route-scene requests outside the resettable map heap, preventing
+  popup and window memory corruption that could eventually crash the game.
+- Kept Buried Cache ambush Pokémon within the active Pokédex and made them
+  catchable, safely skipped the ambush when no candidate is available,
+  repaired dynamically composed clue text, and gave the Field Shovel its own
+  CC0 item icon adapted from AntumDeluge's OpenGameArt asset.
+- Ensured Mystery Egg delivery only accepts the marked courier egg, keeps the
+  quest and party state intact when the Escape Rope cannot be added, and keeps
+  the Breeder's Exchange completion message aligned with the Pokémon actually
+  received. Failed breeder previews now return to the field instead of leaving
+  the script waiting indefinitely.
+- Preserved authored route objects when generated scene objects cannot fit the
+  map's object-event capacity.
+- Clarified the Mystery Egg summary state so it directs the player to bring the
+  egg to the Day Care at a rest stop while the courier quest is active.
+- Batched wild encounter family selection so starting an Adventure and loading
+  a route no longer rebuild the full eligible-species table for every grass or
+  fishing slot.
+- Bound Adventure Quest route consumers only after their scene recipes fit, so
+  an unplaced multi-lot quest remains ready for a later route instead of being
+  delayed as though it had appeared.
+- Preserved the active route scene plan through development quickloads and
+  separated buried-cache site progress from the generic hidden-prop flags.
+- Limited each generated route-event family to one appearance per Adventure,
+  removed accepted quest generators during restoration, corrected Adventure
+  Quest book text bounds, and made fossil restoration safely offer a confirmed
+  party replacement without consuming the fossil when cancelled. Spirit Stone
+  markers now appear only for the three collectible souls, static scene props
+  no longer attempt invalid facing animations, and fossil props use
+  context-specific inspection text.
 - Prevented intermittent tilemap corruption when paging left from move
   relearning or replacement into the Pokémon stats summary.
 - Applied changed-type Unique Pokémon palette tinting to party, Day Care, and
@@ -284,8 +398,9 @@ Format follows Keep a Changelog loosely:
   border flashes.
 - Made Fault Finder set Stealth Rock when its triggering Steel move knocks out
   an active target that still has a replacement.
-- Warmed missing Frontier Brain reward previews whenever an existing adventure
-  path is reused, preventing full team generation during node interaction.
+- Prewarmed missing Frontier Brain reward previews during run loading and
+  overview warp transitions, keeping node entry instant without rebuilding the
+  full team during path materialization.
 - Made Auto Pickup collect item objects placed across counters and on tables,
   matching normal interaction targeting in hideouts.
 - Prevented Oricorio's Center Stage from calling the singles-incompatible
@@ -364,8 +479,9 @@ Format follows Keep a Changelog loosely:
 - Renamed ancient Paradox solo abilities as Instincts and future Paradox solo
   abilities as Protocols, and renamed Tyrantrum's and Koraidon's unrelated
   Primal abilities to Tyrant Storm and War Cry.
-- Frontier Brains now use the full badge level cap and cache their reward
-  previews during path generation, avoiding a delay when inspecting their nodes.
+- Frontier Brains now use the full badge level cap and prewarm deterministic
+  reward previews during run loading, avoiding full-team generation when their
+  nodes are selected.
 - Adrenaline now prevents poison status damage while retaining its poisoned
   punching-move healing effect and compatibility with Poison Heal.
 - Sand Stream and Snow Warning now make their holders immune to Sandstorm and

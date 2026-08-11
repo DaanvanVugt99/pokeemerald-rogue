@@ -886,6 +886,7 @@ const u16 gObjectEventPal_Glitch_NPC_Erma[] = INCBIN_U16("graphics/object_events
 
 const u16 gObjectEventPal_Misc_Peonia[] = INCBIN_U16("graphics/object_events/pics/rogue/npc/misc/peonia.gbapal");
 const u16 gObjectEventPal_RouteExt[] = INCBIN_U16("graphics/object_events/palettes/route_ext.gbapal");
+const u16 gObjectEventPal_MachinePart[] = INCBIN_U16("graphics/object_events/palettes/machine_part.gbapal");
 
 const u32 gObjectEventPic_PC[] = INCBIN_U32("graphics/object_events/pics/rogue/pc.4bpp");
 const u32 gObjectEventPic_PCStand[] = INCBIN_U32("graphics/object_events/pics/rogue/pc_stand.4bpp");
@@ -930,7 +931,34 @@ const u32 gObjectEventPic_DecorRotomHeat[] = INCBIN_U32("graphics/object_events/
 const u32 gObjectEventPic_DecorRotomMow[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_mow.4bpp");
 const u32 gObjectEventPic_DecorRotomWash[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_wash.4bpp");
 const u32 gObjectEventPic_DecorWardrobe[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_wardrobe.4bpp");
-const u32 gObjectEventPic_DecorCauldren[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_cauldren.4bpp");
+const u32 gObjectEventPic_DecorCauldron[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_cauldron.4bpp");
+
+const u32 gObjectEventPic_RoutePropSpiritStone[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/spirit_stone.4bpp");
+const u32 gObjectEventPic_RoutePropOccultAltar[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/occult_altar.4bpp");
+const u32 gObjectEventPic_RoutePropSupplyCrate[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/supply_crate.4bpp");
+const u32 gObjectEventPic_RoutePropStorageBarrel[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/storage_barrel.4bpp");
+const u32 gObjectEventPic_RoutePropStump[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/stump.4bpp");
+const u32 gObjectEventPic_RoutePropMossyStone[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/mossy_stone.4bpp");
+const u32 gObjectEventPic_RoutePropStonePile[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/stone_pile.4bpp");
+const u32 gObjectEventPic_RoutePropSplitRock[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/split_rock.4bpp");
+const u32 gObjectEventPic_RoutePropDriftwood[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/driftwood.4bpp");
+const u32 gObjectEventPic_RoutePropDigMound[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/dig_mound.4bpp");
+const u32 gObjectEventPic_RoutePropRoundStone[] = INCBIN_U32("graphics/object_events/pics/rogue/route_props/round_stone.4bpp");
+
+const u32 gObjectEventPic_RouteMarkerSoloNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/solo_npc.4bpp");
+const u32 gObjectEventPic_RouteMarkerStallNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/stall_npc.4bpp");
+const u32 gObjectEventPic_RouteMarkerStallDecor[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/stall_decor.4bpp");
+const u32 gObjectEventPic_RouteMarkerCampNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/camp_npc.4bpp");
+const u32 gObjectEventPic_RouteMarkerCampDecor[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/camp_decor.4bpp");
+const u32 gObjectEventPic_RouteMarkerWorkbenchNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/workbench_npc.4bpp");
+const u32 gObjectEventPic_RouteMarkerWorkbenchDecor[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/workbench_decor.4bpp");
+const u32 gObjectEventPic_RouteMarkerRelicNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/relic_npc.4bpp");
+const u32 gObjectEventPic_RouteMarkerRelicDecor[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/relic_decor.4bpp");
+const u32 gObjectEventPic_RouteMarkerCreatureNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/creature_npc.4bpp");
+const u32 gObjectEventPic_RouteMarkerCreatureDecor[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/creature_decor.4bpp");
+const u32 gObjectEventPic_RouteMarkerCollectable[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/collectable.4bpp");
+const u32 gObjectEventPic_RouteMarkerPlantPatch[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/plant_patch.4bpp");
+const u32 gObjectEventPic_RouteMarkerWaterNpc[] = INCBIN_U32("graphics/object_events/pics/rogue/route_markers/water_npc.4bpp");
 
 const u32 gObjectEventPic_Route_Bug[] = INCBIN_U32("graphics/object_events/pics/rogue/route/bug.4bpp");
 const u32 gObjectEventPic_Route_Dark[] = INCBIN_U32("graphics/object_events/pics/rogue/route/dark.4bpp");

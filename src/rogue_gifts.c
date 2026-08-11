@@ -4,19 +4,24 @@
 #include "constants/flags.h"
 #include "constants/items.h"
 #include "constants/moves.h"
+#include "constants/party_menu.h"
 #include "constants/region_map_sections.h"
 #include "constants/rgb.h"
 #include "event_data.h"
+#include "pokemon.h"
 #include "random.h"
 
 #include "rogue_baked.h"
+#include "rogue_charms.h"
 #include "rogue_colour_utils.h"
+#include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_hub.h"
 #include "rogue_pokedex.h"
 #include "rogue_query.h"
 #include "rogue_quest.h"
 #include "rogue_save.h"
+#include "rogue_trials.h"
 
 struct CustomTrainerData
 {
@@ -38,6 +43,48 @@ struct CustomMonData
     u16 heldItem;
     u16 isShiny : 1;
 };
+
+bool8 RogueGift_TryGiveMonToParty(struct Pokemon *mon, u8 replacementSlot)
+{
+    struct Pokemon preparedMon;
+    bool8 needsReplacement = CalculatePlayerPartyCount() >= Rogue_GetMaxPartySize();
+    u8 destinationSlot;
+
+    if(mon == NULL || !RogueTrial_CanReceiveGift())
+        return FALSE;
+
+    CopyMon(&preparedMon, mon, sizeof(preparedMon));
+    Rogue_ModifyGiveMon(&preparedMon);
+
+    if(needsReplacement)
+    {
+        if(replacementSlot >= gPlayerPartyCount
+            || !Rogue_CanReleasePartyMonForCaughtMon(&preparedMon, replacementSlot)
+            || !Rogue_TryRemoveDuplicateHeldItemForParty(&preparedMon, replacementSlot, PARTY_SIZE))
+            return FALSE;
+    }
+    else
+    {
+        if(!Rogue_CanAddCaughtMonToParty(&preparedMon)
+            || !Rogue_TryRemoveDuplicateHeldItemForParty(&preparedMon, PARTY_SIZE, PARTY_SIZE))
+            return FALSE;
+    }
+
+    if(needsReplacement)
+    {
+        RemoveMonAtSlot(replacementSlot, TRUE, FALSE);
+        destinationSlot = replacementSlot;
+    }
+    else
+    {
+        destinationSlot = gPlayerPartyCount;
+    }
+
+    CopyMon(&gPlayerParty[destinationSlot], &preparedMon, sizeof(preparedMon));
+    CalculatePlayerPartyCount();
+    RogueTrial_OnMonGiven(&gPlayerParty[destinationSlot]);
+    return TRUE;
+}
 
 static u8 const sRarityToCustomTrainerIndex[] = 
 {
@@ -2299,6 +2346,26 @@ static bool8 IsNativeUniqueAbility(const struct DynamicEvolutionFamily* family, 
     }
 
     return FALSE;
+}
+
+bool8 RogueGift_IsStandardAbilityEligible(u16 ability)
+{
+    return IsDynamicStandardAbilityEligible(ability);
+}
+
+u16 RogueGift_GetStandardAbilityGroupCount(void)
+{
+    return CountDynamicStandardAbilityGroups();
+}
+
+u16 RogueGift_GetStandardAbilityByGroupIndex(u16 groupIndex)
+{
+    return GetDynamicStandardAbilityGroupByIndex(groupIndex);
+}
+
+u16 RogueGift_GetStandardAbilityFlavor(u16 ability, u32 flavorRoll)
+{
+    return GetDynamicStandardAbilityFlavor(ability, flavorRoll);
 }
 
 #ifdef ROGUE_DEBUG

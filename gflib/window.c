@@ -54,7 +54,10 @@ bool16 InitWindows(const struct WindowTemplate *templates)
         {
             allocatedBaseBlock = BgTileAllocOp(bgLayer, 0, templates[i].width * templates[i].height, 0);
             if (allocatedBaseBlock == -1)
+            {
+                FreeAllWindowBuffers();
                 return FALSE;
+            }
         }
 
         if (gWindowBgTilemapBuffers[bgLayer] == NULL)
@@ -83,12 +86,7 @@ bool16 InitWindows(const struct WindowTemplate *templates)
 
         if (allocatedTilemapBuffer == NULL)
         {
-            if ((GetNumActiveWindowsOnBg(bgLayer) == 0) && (gWindowBgTilemapBuffers[bgLayer] != DummyWindowBgTilemap))
-            {
-                Free(gWindowBgTilemapBuffers[bgLayer]);
-                gWindowBgTilemapBuffers[bgLayer] = allocatedTilemapBuffer;
-            }
-
+            FreeAllWindowBuffers();
             return FALSE;
         }
 
@@ -160,8 +158,9 @@ u16 AddWindow(const struct WindowTemplate *template)
     {
         if ((GetNumActiveWindowsOnBg(bgLayer) == 0) && (gWindowBgTilemapBuffers[bgLayer] != DummyWindowBgTilemap))
         {
+            UnsetBgTilemapBuffer(bgLayer);
             Free(gWindowBgTilemapBuffers[bgLayer]);
-            gWindowBgTilemapBuffers[bgLayer] = allocatedTilemapBuffer;
+            gWindowBgTilemapBuffers[bgLayer] = NULL;
         }
         return WINDOW_NONE;
     }
@@ -217,6 +216,9 @@ int AddWindowWithoutTileMap(const struct WindowTemplate *template)
 
 void RemoveWindow(u8 windowId)
 {
+    if (windowId >= WINDOWS_MAX || gWindows[windowId].window.bg == 0xFF)
+        return;
+
     u8 bgLayer = gWindows[windowId].window.bg;
 
     if (gWindowTileAutoAllocEnabled == TRUE)
@@ -228,6 +230,7 @@ void RemoveWindow(u8 windowId)
     {
         if (gWindowBgTilemapBuffers[bgLayer] != DummyWindowBgTilemap)
         {
+            UnsetBgTilemapBuffer(bgLayer);
             Free(gWindowBgTilemapBuffers[bgLayer]);
             gWindowBgTilemapBuffers[bgLayer] = NULL;
         }
@@ -248,6 +251,10 @@ void FreeAllWindowBuffers(void)
     {
         if (gWindowBgTilemapBuffers[i] != NULL && gWindowBgTilemapBuffers[i] != DummyWindowBgTilemap)
         {
+            // The BG layer retains this pointer independently of the window
+            // allocator. Clear it before releasing the owned buffer so a
+            // later window cannot write through a dangling tilemap pointer.
+            UnsetBgTilemapBuffer(i);
             Free(gWindowBgTilemapBuffers[i]);
             gWindowBgTilemapBuffers[i] = NULL;
         }
@@ -255,11 +262,25 @@ void FreeAllWindowBuffers(void)
 
     for (i = 0; i < WINDOWS_MAX; ++i)
     {
+        if (gWindowTileAutoAllocEnabled == TRUE && gWindows[i].window.bg != 0xFF)
+        {
+            BgTileAllocOp(
+                gWindows[i].window.bg,
+                gWindows[i].window.baseBlock,
+                gWindows[i].window.width * gWindows[i].window.height,
+                2);
+        }
+
         if (gWindows[i].tileData != NULL)
         {
             Free(gWindows[i].tileData);
             gWindows[i].tileData = NULL;
         }
+
+        // FreeAllWindowBuffers invalidates every window, not just its pixel
+        // data. Keeping the old template makes the slot look active and lets
+        // later code address freed buffers through the stale window ID.
+        gWindows[i].window = sDummyWindowTemplate;
     }
 }
 

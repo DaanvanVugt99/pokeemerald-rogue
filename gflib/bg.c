@@ -858,10 +858,8 @@ void SetBgTilemapBuffer(u8 bg, void *tilemap)
 
 void UnsetBgTilemapBuffer(u8 bg)
 {
-    if (!IsInvalidBg32(bg) && GetBgControlAttribute(bg, BG_CTRL_ATTR_VISIBLE))
-    {
+    if (!IsInvalidBg32(bg))
         sGpuBgConfigs2[bg].tilemap = NULL;
-    }
 }
 
 void *GetBgTilemapBuffer(u8 bg)

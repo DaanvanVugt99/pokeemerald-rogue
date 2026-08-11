@@ -300,6 +300,7 @@ static void (*const sMovementTypeCallbacks[])(struct Sprite *) =
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_UP] = MovementType_WalkSlowlyInPlace,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_LEFT] = MovementType_WalkSlowlyInPlace,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_RIGHT] = MovementType_WalkSlowlyInPlace,
+    [MOVEMENT_TYPE_ROUTE_APRICORN_TREE] = MovementType_RouteApricornTree,
 };
 
 static const bool8 sMovementTypeHasRange[NUM_MOVEMENT_TYPES] = {
@@ -428,6 +429,7 @@ const u8 gInitialMovementTypeFacingDirections[] = {
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_UP] = DIR_NORTH,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_LEFT] = DIR_WEST,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_RIGHT] = DIR_EAST,
+    [MOVEMENT_TYPE_ROUTE_APRICORN_TREE] = DIR_SOUTH,
 };
 
 #define OBJ_EVENT_PAL_TAG_BRENDAN                 0x1100
@@ -641,6 +643,7 @@ const u8 gInitialMovementTypeFacingDirections[] = {
 #define OBJ_EVENT_PAL_TAG_ROUTE_EXT              0x11C3
 
 #define OBJ_EVENT_PAL_TAG_GLITCH_NPC_POKABBIE    0x11C4
+#define OBJ_EVENT_PAL_TAG_MACHINE_PART           0x11C5
 
 #define OBJ_EVENT_PAL_TAG_NONE                   0x11FF
 
@@ -820,6 +823,7 @@ static const struct SpritePalette sObjectEventSpritePalettes[] = {
     {gObjectEventPal_PlayerLightningStrike7Base, OBJ_EVENT_PAL_TAG_GLITCH_NPC_LS7},
     {gObjectEventPal_PlayerNacholordBase,       OBJ_EVENT_PAL_TAG_GLITCH_NPC_NACHO},
     {gObjectEventPal_PokabbieNormal,       OBJ_EVENT_PAL_TAG_GLITCH_NPC_POKABBIE},
+    {gObjectEventPal_MachinePart,          OBJ_EVENT_PAL_TAG_MACHINE_PART},
     //{gObjectEventPal_Glitch_NPC_Raven,      OBJ_EVENT_PAL_TAG_GLITCH_NPC_RAVEN},
     {gObjectEventPal_PlayerPlaceholder,     OBJ_EVENT_PAL_TAG_PLAYER},
     {gObjectEventPal_NetPlayerPlaceholder,     OBJ_EVENT_PAL_TAG_NET_PLAYER},
@@ -3857,6 +3861,17 @@ bool8 MovementType_BerryTreeGrowth_SparkleEnd(struct ObjectEvent *objectEvent, s
         return TRUE;
     }
     return FALSE;
+}
+
+void MovementType_RouteApricornTree(struct Sprite *sprite)
+{
+    if (sprite->sTypeFuncId == 0)
+    {
+        StartSpriteAnim(sprite, BERRY_STAGE_BERRIES - 1);
+        sprite->sTypeFuncId = 1;
+    }
+
+    MovementType_None(sprite);
 }
 
 movement_type_def(MovementType_FaceDownAndUp, gMovementTypeFuncs_FaceDownAndUp)

@@ -61,6 +61,7 @@ u8 Rogue_GetStartingMonCapacity();
 bool8 Rogue_ShouldSkipAssignNickname(struct Pokemon* mon);
 bool8 Rogue_ShouldSkipAssignNicknameYesNoMessage();
 bool8 Rogue_ShouldForceNicknameScreen();
+void Rogue_AssignAutomaticNicknameFromSeed(struct Pokemon *mon, u16 seed);
 
 // UI
 void Rogue_OpenDifficultyConfigMenu(RogueDifficultyMenuCallback callback);

@@ -4698,6 +4698,12 @@
       "species": "SPECIES_ZWEILOUS",
       "move": "MOVE_FIERY_WRATH",
       "level": 68
+    },
+    {
+      "id": "level-whiscash-spark",
+      "species": "SPECIES_WHISCASH",
+      "move": "MOVE_SPARK",
+      "level": 30
     }
   ],
   "tutor": [
@@ -9740,6 +9746,21 @@
       "id": "retained-tutor-zweilous-nightfall",
       "move": "MOVE_NIGHTFALL",
       "species": "SPECIES_ZWEILOUS"
+    },
+    {
+      "id": "tutor-whiscash-charge_beam",
+      "move": "MOVE_CHARGE_BEAM",
+      "species": "SPECIES_WHISCASH"
+    },
+    {
+      "id": "tutor-whiscash-shock_wave",
+      "move": "MOVE_SHOCK_WAVE",
+      "species": "SPECIES_WHISCASH"
+    },
+    {
+      "id": "tutor-whiscash-wild_charge",
+      "move": "MOVE_WILD_CHARGE",
+      "species": "SPECIES_WHISCASH"
     }
   ]
 }

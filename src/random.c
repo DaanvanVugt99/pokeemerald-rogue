@@ -10,8 +10,6 @@ struct PCG32 gRngValue;
 struct PCG32 gRng2Value;
 struct PCG32 gRngRogueValue;
 
-u32 RandomPCG32(struct PCG32* rng);
-
 u32 Random32(void)
 {
     return RandomPCG32(&gRngValue);

@@ -524,9 +524,9 @@
 #define FLAG_DEBUG_NO_ENCOUNTER              0x1DE // Unused Flag
 #define FLAG_DEBUG_NO_TRAINER_SEE            0x1DF // Unused Flag
 #define FLAG_DEBUG_NO_COLLISION              0x1E0 // Unused Flag
-#define FLAG_UNUSED_0x1E1                    0x1E1 // Unused Flag
-#define FLAG_UNUSED_0x1E2                    0x1E2 // Unused Flag
-#define FLAG_UNUSED_0x1E3                    0x1E3 // Unused Flag
+#define FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN 0x1E1
+#define FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN 0x1E2
+#define FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED 0x1E3
 
 // Mystery Gift Flags (Unknown)
 #define FLAG_MYSTERY_GIFT_DONE               0x1E4

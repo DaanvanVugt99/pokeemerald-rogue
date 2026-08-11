@@ -501,6 +501,7 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_ItemTeraShard;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_GrassDefault;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_GoldGrass;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_UniqueDenGrass;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_ItemMachinePart;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_FlagAdventure;
 
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorBed;
@@ -511,7 +512,34 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomHeat;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomMow;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RotomWash;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorWardrobe;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorCauldren;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorCauldron;
+
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSpiritStone;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropOccultAltar;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSupplyCrate;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropStorageBarrel;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropStump;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropMossyStone;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropStonePile;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropSplitRock;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropDriftwood;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropDigMound;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropRoundStone;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RoutePropApricornTree;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerSoloNpc;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerStallNpc;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerStallDecor;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCampNpc;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCampDecor;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerWorkbenchNpc;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerWorkbenchDecor;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerRelicNpc;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerRelicDecor;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCreatureNpc;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCreatureDecor;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerCollectable;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerPlantPatch;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RouteMarkerWaterNpc;
 
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanAlt;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MayAlt;
@@ -1070,6 +1098,33 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_GOLD_GRASS] =               &gObjectEventGraphicsInfo_GoldGrass,
     [OBJ_EVENT_GFX_UNIQUE_DEN_GRASS] =         &gObjectEventGraphicsInfo_UniqueDenGrass,
     [OBJ_EVENT_GFX_GOLD_LEGENDARY_STATUE] =    &gObjectEventGraphicsInfo_GoldLegendaryStatue,
+    [OBJ_EVENT_GFX_ROUTE_PROP_SPIRIT_STONE] =   &gObjectEventGraphicsInfo_RoutePropSpiritStone,
+    [OBJ_EVENT_GFX_ROUTE_PROP_OCCULT_ALTAR] =   &gObjectEventGraphicsInfo_RoutePropOccultAltar,
+    [OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE] =   &gObjectEventGraphicsInfo_RoutePropSupplyCrate,
+    [OBJ_EVENT_GFX_ROUTE_PROP_STORAGE_BARREL] = &gObjectEventGraphicsInfo_RoutePropStorageBarrel,
+    [OBJ_EVENT_GFX_ROUTE_PROP_STUMP] =          &gObjectEventGraphicsInfo_RoutePropStump,
+    [OBJ_EVENT_GFX_ROUTE_PROP_MOSSY_STONE] =    &gObjectEventGraphicsInfo_RoutePropMossyStone,
+    [OBJ_EVENT_GFX_ROUTE_PROP_STONE_PILE] =     &gObjectEventGraphicsInfo_RoutePropStonePile,
+    [OBJ_EVENT_GFX_ROUTE_PROP_SPLIT_ROCK] =     &gObjectEventGraphicsInfo_RoutePropSplitRock,
+    [OBJ_EVENT_GFX_ROUTE_PROP_DRIFTWOOD] =      &gObjectEventGraphicsInfo_RoutePropDriftwood,
+    [OBJ_EVENT_GFX_ROUTE_PROP_DIG_MOUND] =      &gObjectEventGraphicsInfo_RoutePropDigMound,
+    [OBJ_EVENT_GFX_ROUTE_PROP_ROUND_STONE] =    &gObjectEventGraphicsInfo_RoutePropRoundStone,
+    [OBJ_EVENT_GFX_ROUTE_PROP_APRICORN_TREE] =  &gObjectEventGraphicsInfo_RoutePropApricornTree,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_SOLO_NPC] =        &gObjectEventGraphicsInfo_RouteMarkerSoloNpc,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_STALL_NPC] =       &gObjectEventGraphicsInfo_RouteMarkerStallNpc,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_STALL_DECOR] =     &gObjectEventGraphicsInfo_RouteMarkerStallDecor,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_CAMP_NPC] =        &gObjectEventGraphicsInfo_RouteMarkerCampNpc,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_CAMP_DECOR] =      &gObjectEventGraphicsInfo_RouteMarkerCampDecor,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_WORKBENCH_NPC] =   &gObjectEventGraphicsInfo_RouteMarkerWorkbenchNpc,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_WORKBENCH_DECOR] = &gObjectEventGraphicsInfo_RouteMarkerWorkbenchDecor,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_RELIC_NPC] =       &gObjectEventGraphicsInfo_RouteMarkerRelicNpc,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_RELIC_DECOR] =     &gObjectEventGraphicsInfo_RouteMarkerRelicDecor,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_NPC] =    &gObjectEventGraphicsInfo_RouteMarkerCreatureNpc,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_CREATURE_DECOR] =  &gObjectEventGraphicsInfo_RouteMarkerCreatureDecor,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_COLLECTABLE] =     &gObjectEventGraphicsInfo_RouteMarkerCollectable,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_PLANT_PATCH] =     &gObjectEventGraphicsInfo_RouteMarkerPlantPatch,
+    [OBJ_EVENT_GFX_ROUTE_MARKER_WATER_NPC] =       &gObjectEventGraphicsInfo_RouteMarkerWaterNpc,
+    [OBJ_EVENT_GFX_ITEM_MACHINE_PART] =        &gObjectEventGraphicsInfo_ItemMachinePart,
     [OBJ_EVENT_GFX_FLAG_ADVENTURE] =           &gObjectEventGraphicsInfo_FlagAdventure,
 
     [OBJ_EVENT_GFX_DECOR_BED] =                &gObjectEventGraphicsInfo_DecorBed,
@@ -1080,7 +1135,7 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_DECOR_ROTOM_MOW] =          &gObjectEventGraphicsInfo_DecorRotomMow,
     [OBJ_EVENT_GFX_DECOR_ROTOM_WASH] =         &gObjectEventGraphicsInfo_RotomWash,
     [OBJ_EVENT_GFX_DECOR_WARDROBE] =           &gObjectEventGraphicsInfo_DecorWardrobe,
-    [OBJ_EVENT_GFX_DECOR_CAULDREN] =           &gObjectEventGraphicsInfo_DecorCauldren,
+    [OBJ_EVENT_GFX_DECOR_CAULDRON] =           &gObjectEventGraphicsInfo_DecorCauldron,
 
     [OBJ_EVENT_GFX_BRENDAN_ALT] =              &gObjectEventGraphicsInfo_BrendanAlt,
     [OBJ_EVENT_GFX_MAY_ALT] =                  &gObjectEventGraphicsInfo_MayAlt,

@@ -67,7 +67,15 @@ script Rogue_Graveyard_SelectOption_Internal {
         // Give a temporary curse item which isn't one of the charm options
         special(Rogue_GiveTemporaryDarkDealCurse)
         call(Rogue_Common_DisplayPopups)
-        
+
+        if(var(VAR_RESULT) != TRUE)
+        {
+            msgbox(format("The Curse could not take hold."), MSGBOX_DEFAULT)
+            closemessage
+            callnative(ScriptMenu_HideItemDescription)
+            return
+        }
+
         copyvar(VAR_0x8004, VAR_ROGUE_ITEM10)
         callnative(ScriptMenu_ShowItemDescription)
         msgbox(format("You have been afflicted with a new Curse.\pIt will fade once you defeat this level's Boss."), MSGBOX_DEFAULT)

@@ -172,6 +172,7 @@ enum {
 #define TEACH_STATE_RELEARN       0
 #define TEACH_STATE_EGG_MOVES     1
 #define TEACH_STATE_TUTOR_MOVES   2
+#define TEACH_STATE_UNBOUND       3
 
 static EWRAM_DATA struct
 {
@@ -440,6 +441,11 @@ void TeachMoveSetContextTutorMove(void)
     sMoveRelearnerMenuSate.teachMoveState = TEACH_STATE_TUTOR_MOVES;
 }
 
+void TeachMoveSetContextUnbound(void)
+{
+    sMoveRelearnerMenuSate.teachMoveState = TEACH_STATE_UNBOUND;
+}
+
 void TeachMoveFromContext(void)
 {
     sMoveRelearnerMenuSate.inPartyMenu = FALSE;
@@ -480,6 +486,20 @@ static void GatherLearnableMoves(struct Pokemon* mon)
     {
         sMoveRelearnerStruct->numMenuChoices = GetTutorMoves(mon, sMoveRelearnerStruct->movesToLearn, ARRAY_COUNT(sMoveRelearnerStruct->movesToLearn));
     }
+    else if(sMoveRelearnerMenuSate.teachMoveState == TEACH_STATE_UNBOUND)
+    {
+        const u16 offeredMoves[] = {gSpecialVar_0x8007, gSpecialVar_0x8008, gSpecialVar_0x8009};
+        u8 i;
+
+        sMoveRelearnerStruct->numMenuChoices = 0;
+        for(i = 0; i < ARRAY_COUNT(offeredMoves); ++i)
+        {
+            if(offeredMoves[i] != MOVE_NONE && !MonKnowsMove(mon, offeredMoves[i]))
+                sMoveRelearnerStruct->movesToLearn[sMoveRelearnerStruct->numMenuChoices++] = offeredMoves[i];
+        }
+        if(sMoveRelearnerStruct->numMenuChoices == 0)
+            sMoveRelearnerStruct->movesToLearn[sMoveRelearnerStruct->numMenuChoices++] = MOVE_UNAVAILABLE;
+    }
     else // TEACH_STATE_RELEARN
     {
         u16 temp;
@@ -509,6 +529,19 @@ u8 GetNumberOfRelearnableMovesForContext(struct Pokemon* mon)
     {
         return sMoveRelearnerStruct->numMenuChoices = GetTutorMoves(mon, sMoveRelearnerStruct->movesToLearn, ARRAY_COUNT(sMoveRelearnerStruct->movesToLearn));
     }
+    else if(sMoveRelearnerMenuSate.teachMoveState == TEACH_STATE_UNBOUND)
+    {
+        const u16 offeredMoves[] = {gSpecialVar_0x8007, gSpecialVar_0x8008, gSpecialVar_0x8009};
+        u8 count = 0;
+        u8 i;
+
+        for(i = 0; i < ARRAY_COUNT(offeredMoves); ++i)
+        {
+            if(offeredMoves[i] != MOVE_NONE && !MonKnowsMove(mon, offeredMoves[i]))
+                ++count;
+        }
+        return count;
+    }
     else // TEACH_STATE_RELEARN
     {
         return sMoveRelearnerStruct->numMenuChoices = GetMoveRelearnerMoves(mon, sMoveRelearnerStruct->movesToLearn);
@@ -517,7 +550,8 @@ u8 GetNumberOfRelearnableMovesForContext(struct Pokemon* mon)
 
 static bool8 DoesTeachingCostMoney()
 {
-    return !sMoveRelearnerMenuSate.inPartyMenu;
+    return !sMoveRelearnerMenuSate.inPartyMenu
+        && sMoveRelearnerMenuSate.teachMoveState != TEACH_STATE_UNBOUND;
 }
 
 static u8 GetMoveStatsYOffset(u8 yEnabledOffset)
@@ -991,6 +1025,12 @@ static void DoMoveRelearnerMain(void)
             else
             {
                 PlaySE(SE_SELECT);
+            }
+
+            if(sMoveRelearnerMenuSate.teachMoveState == TEACH_STATE_UNBOUND)
+            {
+                sMoveRelearnerStruct->state = MENU_STATE_FADE_AND_RETURN;
+                break;
             }
 
             // Recreate list to remove move we just taught

@@ -15196,6 +15196,13 @@ static void SetMoveForMirrorMove(u32 move)
     gBattlescriptCurrInstr = gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect];
 }
 
+static bool32 IsValidMirrorMoveTarget(u32 move)
+{
+    return move != MOVE_NONE
+        && move != MOVE_UNAVAILABLE
+        && !gBattleMoves[move].mirrorMoveBanned;
+}
+
 static void Cmd_trymirrormove(void)
 {
     CMD_ARGS();
@@ -15209,7 +15216,7 @@ static void Cmd_trymirrormove(void)
         if (i != gBattlerAttacker)
         {
             move = gBattleStruct->lastTakenMoveFrom[gBattlerAttacker][i];
-            if (move != MOVE_NONE && move != MOVE_UNAVAILABLE)
+            if (IsValidMirrorMoveTarget(move))
             {
                 validMoves[validMovesCount] = move;
                 validMovesCount++;
@@ -15218,7 +15225,7 @@ static void Cmd_trymirrormove(void)
     }
 
     move = gBattleStruct->lastTakenMove[gBattlerAttacker];
-    if (move != MOVE_NONE && move != MOVE_UNAVAILABLE)
+    if (IsValidMirrorMoveTarget(move))
     {
         SetMoveForMirrorMove(move);
     }

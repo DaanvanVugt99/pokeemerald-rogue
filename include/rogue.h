@@ -2,6 +2,8 @@
 #define GUARD_ROGUE_H
 
 #include "global.h"
+#include "constants/rogue_adventure_quests.h"
+#include "constants/rogue_route_scenes.h"
 #include "rogue_trials.h"
 
 // Extra data for pokemon in party
@@ -14,7 +16,7 @@ struct RoguePartyMon
     u8 runTutorMoveLvl : 3;
     u8 pad0 : 4;
 
-    u8 pad1[2];
+    u16 abilityOverride;
 };
 
 STATIC_ASSERT(sizeof(struct RoguePartyMon) == 4, SizeOfRoguePartyMon);
@@ -118,6 +120,51 @@ struct RogueAdvPathRoomParams
     } perType;
 };
 
+// A transient expanded scene request. Adventure-path rooms retain the selected
+// standalone payload or quest owner directly in the packed placement below.
+struct RogueRouteSceneRequest
+{
+    u16 rewardItem;
+    u16 requestedItem;
+    u16 trainerNum;
+    u16 primaryGraphicsId;
+    u16 secondaryGraphicsId;
+    u16 rewardAmount;
+    u8 recipeId;
+    u8 environment;
+    u8 lotId;
+    u8 lotRole;
+    u8 sceneSlot;
+    u8 source;
+    u8 ownerQuestId;
+};
+
+struct RogueRouteScenePlacement
+{
+    u32 packed;
+};
+
+struct RogueRouteScenePlan
+{
+    struct RogueRouteScenePlacement placements[ROGUE_ROUTE_SCENE_MAX_PLACEMENTS];
+};
+
+struct RogueAdventureQuest
+{
+    u16 payload[2];
+    u8 definitionId : 4;
+    u8 nodeId : 4;
+    u8 progress;
+    u8 target;
+    u8 routesUntilScene : 2;
+    u8 sceneRoomId : 6;
+};
+
+STATIC_ASSERT(sizeof(struct RogueRouteScenePlan) == 16, SizeOfRogueRouteScenePlan);
+STATIC_ASSERT(sizeof(struct RogueAdventureQuest) == 8, SizeOfRogueAdventureQuest);
+STATIC_ASSERT(ROGUE_ADVENTURE_QUEST_DEFINITION_COUNT <= 16, AdventureQuestDefinitionFitsPackedId);
+STATIC_ASSERT(ADVPATH_ROOM_COUNT < ROGUE_ADVENTURE_QUEST_INVALID_ROOM, AdventureRoomFitsPackedQuestRoom);
+
 struct RogueAdvPathNode
 {
     u8 roomType;
@@ -130,6 +177,7 @@ struct RogueAdvPathRoom
 {
     struct Coords8 coords;
     struct RogueAdvPathRoomParams roomParams;
+    struct RogueRouteScenePlan routeScenePlan;
     u16 rngSeed;
     u8 roomType;
     u8 connectionMask;
@@ -269,6 +317,7 @@ struct RogueRunData
     u16 dynamicTRMoves[NUM_TECHNICAL_RECORDS];
     u16 partyHeldItems[PARTY_SIZE];
     u16 dynamicTrainerNums[ROGUE_MAX_ACTIVE_TRAINER_COUNT];
+    struct RogueAdventureQuest adventureQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     u8 legendaryDifficulties[ADVPATH_LEGEND_COUNT];
     u8 teamEncounterDifficulties[ADVPATH_TEAM_ENCOUNTER_COUNT];
     u8 rivalEncounterDifficulties[ROGUE_RIVAL_MAX_ROUTE_ENCOUNTERS];
@@ -296,6 +345,7 @@ struct RogueRunData
     bool8 hasChallengedShrine : 1;
     u8 adventureRoomId;
     u8 currentRouteIndex;
+    u8 routeSceneRoomId;
     u8 currentLevelOffset;
     u8 partySnapshotCount;
 #ifdef ROGUE_EXPANSION
@@ -309,6 +359,8 @@ struct RogueRunData
     bool8 hasPendingRivalBattle : 1;
     bool8 rivalHasShiny : 1;
 };
+
+STATIC_ASSERT(sizeof(((struct RogueRunData *)0)->adventureQuests) == ROGUE_ADVENTURE_QUEST_CAPACITY * 8, SizeOfAdventureQuestRuntime);
 
 struct RogueHubArea
 {
@@ -349,6 +401,7 @@ struct RogueRouteMap
 struct RogueRouteEncounter
 {
     u8 dropRarity;
+    u8 environment;
     u16 mapFlags;
     struct RogueRouteMap map;
     const u8 wildTypeTable[3];

@@ -188,6 +188,42 @@ gSpecials::
 	def_special ChoosePartyMon
 	def_special Rogue_StartRunPortalTransition
 	def_special Rogue_SeedRandomGenerators
+	def_special RogueRouteEvents_GetInteractionData
+    def_special RogueRouteEvents_TryAcceptStolenTradeCaseQuest
+    def_special RogueRouteEvents_BeginStolenTradeCaseBattle
+    def_special RogueRouteEvents_FinishStolenTradeCaseBattle
+    def_special RogueRouteEvents_TryClaimStolenTradeCaseReward
+    def_special RogueRouteEvents_TryAcceptHexedShrine
+    def_special RogueRouteEvents_TryAcceptAnomalousFossilQuest
+    def_special RogueRouteEvents_BufferFossilRestorationData
+    def_special RogueRouteEvents_TryRestoreAnomalousFossil
+    def_special RogueRouteEvents_TryAcceptForbiddenStoneQuest
+    def_special RogueRouteEvents_CollectForbiddenStoneSoul
+    def_special RogueRouteEvents_PrepareForbiddenStoneBattle
+    def_special RogueRouteEvents_FinishForbiddenStoneBattle
+    def_special RogueRouteEvents_BufferApricornTreeData
+    def_special RogueRouteEvents_TryChooseApricorn
+    def_special RogueRouteEvents_TryCraftApricornBalls
+    def_special RogueRouteEvents_PrepareUnboundTutor
+    def_special RogueRouteEvents_FinishUnboundTutor
+    def_special RogueRouteEvents_TryCampCookHealParty
+    def_special RogueRouteEvents_TryCampCookGiveBerries
+    def_special RogueRouteEvents_TryCampCookMaxPp
+    def_special RogueRouteEvents_TryAcceptMysteryEggCourierQuest
+    def_special RogueRouteEvents_BufferMysteryEggDelivery
+    def_special RogueRouteEvents_TryCompleteMysteryEggDelivery
+    def_special RogueRouteEvents_BufferFieldRepairBenchData
+    def_special RogueRouteEvents_TryAcceptFieldRepairBenchQuest
+    def_special RogueRouteEvents_CollectFieldRepairPart
+    def_special RogueRouteEvents_TryApplyFieldRepairAbility
+    def_special RogueRouteEvents_FinishTravelingMerchant
+    def_special RogueRouteEvents_ShowBreedersExchangePreview
+    def_special RogueRouteEvents_ValidateBreedersExchangeSelection
+    def_special RogueRouteEvents_TryCompleteBreedersExchange
+    def_special RogueRouteEvents_BufferBuriedCacheData
+    def_special RogueRouteEvents_TryAcceptBuriedCache
+    def_special RogueRouteEvents_TryDigBuriedCache
+    def_special RogueRouteEvents_TryClaimTideSalvage
 	def_special Rogue_RandomisePartyMon
 	def_special Rogue_AlterMonIVs
 	def_special Rogue_ApplyStatusToMon

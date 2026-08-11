@@ -18,6 +18,7 @@
 #include "rogue_multiplayer.h"
 #include "rogue_ridemon.h"
 #include "rogue_save.h"
+#include "rogue_route_scenes.h"
 
 #define ROGUE_SAVE_BLOCK_CAPACITY (sizeof(struct BoxPokemon) * IN_BOX_COUNT * LEFTOVER_BOXES_COUNT)
 #define ROGUE_SAVE_SECRET_ID 0x4456
@@ -53,6 +54,7 @@ STATIC_ASSERT(sizeof(struct RogueSaveBlock) < ROGUE_SAVE_BLOCK_CAPACITY, RogueSa
 STATIC_ASSERT(LAST_ITEM_TR <= LAST_ITEM_DYNAMIC, DynamicRogueItemsExceedReservedRange);
 
 static EWRAM_DATA struct RogueRunRestoreBlock sRunRestoreBlock = {0};
+static EWRAM_DATA struct RogueRouteScenePlan sSerializedRouteScenePlan = {0};
 
 static void FlipEncryptMemory(void* ptr, size_t size, u32 encryptionKey)
 {
@@ -253,6 +255,18 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
     SerializeData(stream, &saveBlock->lastTrialPokedexVariant, sizeof(saveBlock->lastTrialPokedexVariant));
     SerializeData(stream, &saveBlock->hasLastTrialSelection, sizeof(saveBlock->hasLastTrialSelection));
 
+    if(stream->isWriteMode)
+    {
+        memset(&sSerializedRouteScenePlan, 0, sizeof(sSerializedRouteScenePlan));
+        if(Rogue_IsRunActive()
+            && gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE
+            && gRogueRun.adventureRoomId < gRogueAdvPath.roomCount)
+        {
+            sSerializedRouteScenePlan = gRogueAdvPath.rooms[gRogueRun.adventureRoomId].routeScenePlan;
+        }
+    }
+    SerializeData(stream, &sSerializedRouteScenePlan, sizeof(sSerializedRouteScenePlan));
+
     SerializeData(stream, &gRogueAdvPath.currentRoomParams, sizeof(gRogueAdvPath.currentRoomParams));
     SerializeData(stream, &gRogueAdvPath.currentRoomType, sizeof(gRogueAdvPath.currentRoomType));
 
@@ -412,6 +426,11 @@ void RogueSave_OnSaveLoaded()
     {
         // We need to regenerate here, as we need to know which
         RogueAdv_GenerateAdventurePathsIfRequired();
+
+        if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE)
+            RogueRouteScenes_RestoreCurrentRoutePlan(&sSerializedRouteScenePlan);
+
+        memset(&sSerializedRouteScenePlan, 0, sizeof(sSerializedRouteScenePlan));
 
         gRogueAdvPath.isOverviewActive = FALSE;
 

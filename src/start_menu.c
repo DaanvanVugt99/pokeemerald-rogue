@@ -52,6 +52,7 @@
 #include "rogue.h"
 #include "rogue_controller.h"
 #include "rogue_charms.h"
+#include "rogue_debug.h"
 #include "rogue_hub.h"
 #include "rogue_multiplayer.h"
 #include "rogue_player_customisation.h"
@@ -96,18 +97,19 @@ enum
 bool8 (*gMenuCallback)(void);
 
 // EWRAM
-EWRAM_DATA static u8 sSafariBallsWindowId = 0;
-EWRAM_DATA static u8 sBattlePyramidFloorWindowId = 0;
-EWRAM_DATA static u8 sRogueRunWindowId = 0;
+EWRAM_DATA static u8 sSafariBallsWindowId = WINDOW_NONE;
+EWRAM_DATA static u8 sBattlePyramidFloorWindowId = WINDOW_NONE;
+EWRAM_DATA static u8 sRogueRunWindowId = WINDOW_NONE;
 EWRAM_DATA static u8 sStartMenuCursorPos = 0;
 EWRAM_DATA static u8 sNumStartMenuActions = 0;
 EWRAM_DATA static u8 sCurrentStartMenuActions[9] = {0};
 EWRAM_DATA static s8 sInitStartMenuData[2] = {0};
+EWRAM_DATA static bool8 sStartMenuInitializationFailed = FALSE;
 
 EWRAM_DATA static u8 (*sSaveDialogCallback)(void) = NULL;
 EWRAM_DATA static u8 sSaveDialogTimer = 0;
 EWRAM_DATA static bool8 sSavingComplete = FALSE;
-EWRAM_DATA static u8 sSaveInfoWindowId = 0;
+EWRAM_DATA static u8 sSaveInfoWindowId = WINDOW_NONE;
 EWRAM_DATA static bool8 sBufferedAButton = FALSE;
 
 // Menu action callbacks
@@ -287,19 +289,22 @@ static void BuildUnionRoomStartMenu(void);
 static void BuildBattlePikeStartMenu(void);
 static void BuildBattlePyramidStartMenu(void);
 static void BuildMultiPartnerRoomStartMenu(void);
-static void ShowSafariBallsWindow(void);
-static void ShowPyramidFloorWindow(void);
-static void ShowExtraStartMenuWindows(void);
+static bool8 ShowSafariBallsWindow(void);
+static bool8 ShowPyramidFloorWindow(void);
+static bool8 ShowRogueRunWindow(void);
+static bool8 ShowExtraStartMenuWindows(void);
 static void RemoveExtraStartMenuWindows(void);
 static bool32 PrintStartMenuActions(s8 *pIndex, u32 count);
 static bool32 InitStartMenuStep(void);
-static void InitStartMenu(void);
-static void CreateStartMenuTask(TaskFunc followupFunc);
+static bool8 InitStartMenu(void);
+static bool8 CreateStartMenuTask(TaskFunc followupFunc);
+static void ResetStartMenuInitialization(void);
 static void InitSave(void);
 static u8 RunSaveCallback(void);
 static void ShowSaveMessage(const u8 *message, u8 (*saveCallback)(void));
 static void HideSaveMessageWindow(void);
 static void HideSaveInfoWindow(void);
+static void ClearAndRemoveStartMenuWindow(bool8 copyToVram);
 static void SaveStartTimer(void);
 static bool8 SaveSuccesTimer(void);
 static bool8 SaveErrorTimer(void);
@@ -307,7 +312,7 @@ static void InitBattlePyramidRetire(void);
 static void VBlankCB_LinkBattleSave(void);
 static bool32 InitSaveWindowAfterLinkBattle(u8 *par1);
 static void CB2_SaveAfterLinkBattle(void);
-static void ShowSaveInfoWindow(void);
+static bool8 ShowSaveInfoWindow(void);
 static void RemoveSaveInfoWindow(void);
 static void HideStartMenuWindow(void);
 static void HideStartMenuDebug(void);
@@ -537,9 +542,15 @@ static void BuildMultiPartnerRoomStartMenu(void)
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 
-static void ShowSafariBallsWindow(void)
+static bool8 ShowSafariBallsWindow(void)
 {
     sSafariBallsWindowId = AddWindow(&sWindowTemplate_SafariBalls);
+    if (sSafariBallsWindowId == WINDOW_NONE)
+    {
+        DebugPrint("[Start Menu] Safari window allocation failed");
+        return FALSE;
+    }
+
     PutWindowTilemap(sSafariBallsWindowId);
     DrawStdWindowFrame(sSafariBallsWindowId, FALSE);
     ConvertIntToDecimalStringN(gStringVar1, gNumSafariBalls, STR_CONV_MODE_RIGHT_ALIGN, 2);
@@ -548,14 +559,21 @@ static void ShowSafariBallsWindow(void)
     CopyWindowToVram(sSafariBallsWindowId, COPYWIN_GFX);
     
     Rogue_CreateMiniMenuExtraGFX();
+    return TRUE;
 }
 
-static void ShowPyramidFloorWindow(void)
+static bool8 ShowPyramidFloorWindow(void)
 {
     if (gSaveBlock2Ptr->frontier.curChallengeBattleNum == FRONTIER_STAGES_PER_CHALLENGE)
         sBattlePyramidFloorWindowId = AddWindow(&sWindowTemplate_PyramidPeak);
     else
         sBattlePyramidFloorWindowId = AddWindow(&sWindowTemplate_PyramidFloor);
+
+    if (sBattlePyramidFloorWindowId == WINDOW_NONE)
+    {
+        DebugPrint("[Start Menu] Pyramid window allocation failed");
+        return FALSE;
+    }
 
     PutWindowTilemap(sBattlePyramidFloorWindowId);
     DrawStdWindowFrame(sBattlePyramidFloorWindowId, FALSE);
@@ -563,9 +581,10 @@ static void ShowPyramidFloorWindow(void)
     StringExpandPlaceholders(gStringVar4, gText_BattlePyramidFloor);
     AddTextPrinterParameterized(sBattlePyramidFloorWindowId, FONT_NORMAL, gStringVar4, 0, 1, TEXT_SKIP_DRAW, NULL);
     CopyWindowToVram(sBattlePyramidFloorWindowId, COPYWIN_GFX);
+    return TRUE;
 }
 
-static void ShowRogueRunWindow(void)
+static bool8 ShowRogueRunWindow(void)
 {
     struct WindowTemplate windowTemplate;
     memcpy(&windowTemplate, &sRogueRunWindowTemplate, sizeof(windowTemplate));
@@ -574,45 +593,68 @@ static void ShowRogueRunWindow(void)
         windowTemplate.width = 16;
 
     sRogueRunWindowId = AddWindow(&windowTemplate);
+    if (sRogueRunWindowId == WINDOW_NONE)
+    {
+        DebugPrint("[Start Menu] Rogue run window allocation failed");
+        return FALSE;
+    }
+
     PutWindowTilemap(sRogueRunWindowId);
     DrawStdWindowFrame(sRogueRunWindowId, FALSE);
     AddTextPrinterParameterized(sRogueRunWindowId, FONT_NORMAL, Rogue_GetMiniMenuContent(), 0, 1, TEXT_SKIP_DRAW, NULL);
     CopyWindowToVram(sRogueRunWindowId, COPYWIN_GFX);
 
     Rogue_CreateMiniMenuExtraGFX();
+    return TRUE;
 }
 
-static void ShowExtraStartMenuWindows(void)
+static bool8 ShowExtraStartMenuWindows(void)
 {
+    bool8 success = TRUE;
+
+    // A save flow or a previous initialization may have removed the main
+    // window while leaving an extra window alive. Always start from a clean
+    // set so re-entry cannot leak another window slot.
+    RemoveExtraStartMenuWindows();
+
     if (GetSafariZoneFlag())
-        ShowSafariBallsWindow();
+        success &= ShowSafariBallsWindow();
     if (InBattlePyramid())
-        ShowPyramidFloorWindow();
+        success &= ShowPyramidFloorWindow();
     if (Rogue_ShouldShowMiniMenu())
-        ShowRogueRunWindow();
+        success &= ShowRogueRunWindow();
+
+    return success;
 }
 
 static void RemoveExtraStartMenuWindows(void)
 {
-    if (GetSafariZoneFlag())
-    {
+    bool8 removeMiniMenuGfx = sSafariBallsWindowId != WINDOW_NONE
+        || sRogueRunWindowId != WINDOW_NONE;
+
+    if (removeMiniMenuGfx)
         Rogue_RemoveMiniMenuExtraGFX();
 
+    if (sSafariBallsWindowId != WINDOW_NONE)
+    {
         ClearStdWindowAndFrameToTransparent(sSafariBallsWindowId, FALSE);
         CopyWindowToVram(sSafariBallsWindowId, COPYWIN_GFX);
         RemoveWindow(sSafariBallsWindowId);
+        sSafariBallsWindowId = WINDOW_NONE;
     }
-    if (InBattlePyramid())
+
+    if (sBattlePyramidFloorWindowId != WINDOW_NONE)
     {
         ClearStdWindowAndFrameToTransparent(sBattlePyramidFloorWindowId, FALSE);
         RemoveWindow(sBattlePyramidFloorWindowId);
+        sBattlePyramidFloorWindowId = WINDOW_NONE;
     }
-    if (Rogue_ShouldShowMiniMenu())
-    {
-        Rogue_RemoveMiniMenuExtraGFX();
 
+    if (sRogueRunWindowId != WINDOW_NONE)
+    {
         ClearStdWindowAndFrameToTransparent(sRogueRunWindowId, FALSE);
         RemoveWindow(sRogueRunWindowId);
+        sRogueRunWindowId = WINDOW_NONE;
     }
 }
 
@@ -661,13 +703,29 @@ static bool32 InitStartMenuStep(void)
         sInitStartMenuData[0]++;
         break;
     case 2:
+    {
+        u8 windowId;
+
         LoadDarkMessageBoxAndBorderGfx();
-        DrawStdWindowFrame(AddStartMenuWindow(sNumStartMenuActions), FALSE);
+        windowId = AddStartMenuWindow(sNumStartMenuActions);
+        if (windowId == WINDOW_NONE)
+        {
+            DebugPrint("[Start Menu] Main window allocation failed");
+            sStartMenuInitializationFailed = TRUE;
+            return TRUE;
+        }
+
+        DrawStdWindowFrame(windowId, FALSE);
         sInitStartMenuData[1] = 0;
         sInitStartMenuData[0]++;
         break;
+    }
     case 3:
-        ShowExtraStartMenuWindows();
+        if (!ShowExtraStartMenuWindows())
+        {
+            sStartMenuInitializationFailed = TRUE;
+            return TRUE;
+        }
         sInitStartMenuData[0]++;
         break;
     case 4:
@@ -675,6 +733,13 @@ static bool32 InitStartMenuStep(void)
             sInitStartMenuData[0]++;
         break;
     case 5:
+        if (GetStartMenuWindowId() == WINDOW_NONE)
+        {
+            DebugPrint("[Start Menu] Main window disappeared during setup");
+            sStartMenuInitializationFailed = TRUE;
+            return TRUE;
+        }
+
         sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, 9, 16, sNumStartMenuActions, sStartMenuCursorPos);
         CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_MAP);
         return TRUE;
@@ -683,28 +748,58 @@ static bool32 InitStartMenuStep(void)
     return FALSE;
 }
 
-static void InitStartMenu(void)
+static bool8 InitStartMenu(void)
 {
+    ResetStartMenuInitialization();
     sInitStartMenuData[0] = 0;
     sInitStartMenuData[1] = 0;
     while (!InitStartMenuStep())
         ;
+
+    if (sStartMenuInitializationFailed)
+    {
+        RemoveExtraStartMenuWindows();
+        RemoveStartMenuWindow();
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 static void StartMenuTask(u8 taskId)
 {
     if (InitStartMenuStep() == TRUE)
-        SwitchTaskToFollowupFunc(taskId);
+    {
+        if (sStartMenuInitializationFailed)
+        {
+            RemoveExtraStartMenuWindows();
+            RemoveStartMenuWindow();
+            ScriptUnfreezeObjectEvents();
+            UnlockPlayerFieldControls();
+            DestroyTask(taskId);
+        }
+        else
+        {
+            SwitchTaskToFollowupFunc(taskId);
+        }
+    }
 }
 
-static void CreateStartMenuTask(TaskFunc followupFunc)
+static bool8 CreateStartMenuTask(TaskFunc followupFunc)
 {
     u8 taskId;
 
+    ResetStartMenuInitialization();
     sInitStartMenuData[0] = 0;
     sInitStartMenuData[1] = 0;
-    taskId = CreateTask(StartMenuTask, 0x50);
+    if (!TryCreateTask(StartMenuTask, 0x50, &taskId))
+    {
+        DebugPrint("[Start Menu] Task allocation failed");
+        return FALSE;
+    }
+
     SetTaskFuncWithFollowupFunc(taskId, StartMenuTask, followupFunc);
+    return TRUE;
 }
 
 static bool8 FieldCB_ReturnToFieldStartMenu(void)
@@ -714,15 +809,39 @@ static bool8 FieldCB_ReturnToFieldStartMenu(void)
         return FALSE;
     }
 
+    if (sStartMenuInitializationFailed)
+    {
+        RemoveExtraStartMenuWindows();
+        RemoveStartMenuWindow();
+        FadeInFromBlack();
+        ScriptUnfreezeObjectEvents();
+        UnlockPlayerFieldControls();
+        return TRUE;
+    }
+
     ReturnToFieldOpenStartMenu();
     return TRUE;
 }
 
+static void ResetStartMenuInitialization(void)
+{
+    sStartMenuInitializationFailed = FALSE;
+}
+
 void ShowReturnToFieldStartMenu(void)
 {
+    ResetStartMenuInitialization();
     sInitStartMenuData[0] = 0;
     sInitStartMenuData[1] = 0;
     gFieldCallback2 = FieldCB_ReturnToFieldStartMenu;
+}
+
+void StartMenu_ResetWindowState(void)
+{
+    sSafariBallsWindowId = WINDOW_NONE;
+    sBattlePyramidFloorWindowId = WINDOW_NONE;
+    sRogueRunWindowId = WINDOW_NONE;
+    sSaveInfoWindowId = WINDOW_NONE;
 }
 
 void Task_ShowStartMenu(u8 taskId)
@@ -747,13 +866,15 @@ void Task_ShowStartMenu(u8 taskId)
 
 void ShowStartMenu(void)
 {
+    if (!CreateStartMenuTask(Task_ShowStartMenu))
+        return;
+
     if (!IsOverworldLinkActive())
     {
         FreezeObjectEvents();
         PlayerFreeze();
         StopPlayerAvatar();
     }
-    CreateStartMenuTask(Task_ShowStartMenu);
     LockPlayerFieldControls();
 }
 
@@ -961,8 +1082,7 @@ static bool8 StartMenuPlayerNameCallback(void)
 
 static bool8 StartMenuSaveCallback(void)
 {
-    if (InBattlePyramid())
-        RemoveExtraStartMenuWindows();
+    RemoveExtraStartMenuWindows();
 
     gMenuCallback = SaveStartCallback; // Display save menu
 
@@ -1040,8 +1160,7 @@ return TRUE;
 static void HideStartMenuDebug(void)
 {
     PlaySE(SE_SELECT);
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(TRUE);
 }
 
 static bool8 StartMenuLinkModePlayerNameCallback(void)
@@ -1070,8 +1189,8 @@ void ShowBattlePyramidStartMenu(void)
 {
     ClearDialogWindowAndFrameToTransparent(0, FALSE);
     ScriptUnfreezeObjectEvents();
-    CreateStartMenuTask(Task_ShowStartMenu);
-    LockPlayerFieldControls();
+    if (CreateStartMenuTask(Task_ShowStartMenu))
+        LockPlayerFieldControls();
 }
 
 static bool8 StartMenuBattlePyramidBagCallback(void)
@@ -1105,8 +1224,14 @@ static bool8 SaveCallback(void)
         return FALSE;
     case SAVE_CANCELED: // Back to start menu
         ClearDialogWindowAndFrameToTransparent(0, FALSE);
-        InitStartMenu();
-        gMenuCallback = HandleStartMenuInput;
+        if (InitStartMenu())
+            gMenuCallback = HandleStartMenuInput;
+        else
+        {
+            ScriptUnfreezeObjectEvents();
+            UnlockPlayerFieldControls();
+            return TRUE;
+        }
         return FALSE;
     case SAVE_SUCCESS:
     case SAVE_ERROR:    // Close start menu
@@ -1130,8 +1255,14 @@ static bool8 BattlePyramidRetireStartCallback(void)
 
 static bool8 BattlePyramidRetireReturnCallback(void)
 {
-    InitStartMenu();
-    gMenuCallback = HandleStartMenuInput;
+    if (InitStartMenu())
+        gMenuCallback = HandleStartMenuInput;
+    else
+    {
+        ScriptUnfreezeObjectEvents();
+        UnlockPlayerFieldControls();
+        return TRUE;
+    }
 
     return FALSE;
 }
@@ -1272,9 +1403,9 @@ static bool8 SaveErrorTimer(void)
 
 static u8 SaveConfirmSaveCallback(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-    RemoveStartMenuWindow();
-    ShowSaveInfoWindow();
+    ClearAndRemoveStartMenuWindow(FALSE);
+    if (!ShowSaveInfoWindow())
+        DebugPrint("[Start Menu] Continuing save without save info window");
 
     if (InBattlePyramid())
     {
@@ -1290,9 +1421,9 @@ static u8 SaveConfirmSaveCallback(void)
 
 static u8 SaveForceSaveCallback(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-    RemoveStartMenuWindow();
-    ShowSaveInfoWindow();
+    ClearAndRemoveStartMenuWindow(FALSE);
+    if (!ShowSaveInfoWindow())
+        DebugPrint("[Start Menu] Continuing save without save info window");
     sSaveDialogCallback = SaveSavingMessageCallback;
     return SAVE_IN_PROGRESS;
 }
@@ -1469,8 +1600,7 @@ static void InitBattlePyramidRetire(void)
 
 static u8 BattlePyramidConfirmRetireCallback(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(FALSE);
     ShowSaveMessage(gText_BattlePyramidConfirmRetire, BattlePyramidRetireYesNoCallback);
 
     return SAVE_IN_PROGRESS;
@@ -1633,12 +1763,15 @@ static void Task_SaveAfterLinkBattle(u8 taskId)
     }
 }
 
-static void ShowSaveInfoWindow(void)
+static bool8 ShowSaveInfoWindow(void)
 {
     struct WindowTemplate saveInfoWindow = sSaveInfoWindowTemplate;
     u8 color = 0;
     u32 xOffset;
     u32 yOffset;
+
+    if (sSaveInfoWindowId != WINDOW_NONE)
+        RemoveSaveInfoWindow();
 
     if (!FlagGet(FLAG_SYS_POKEDEX_GET))
     {
@@ -1646,6 +1779,12 @@ static void ShowSaveInfoWindow(void)
     }
 
     sSaveInfoWindowId = AddWindow(&saveInfoWindow);
+    if (sSaveInfoWindowId == WINDOW_NONE)
+    {
+        DebugPrint("[Start Menu] Save info window allocation failed");
+        return FALSE;
+    }
+
     DrawStdWindowFrame(sSaveInfoWindowId, FALSE);
 
     // Unique text colour for player?
@@ -1715,12 +1854,17 @@ static void ShowSaveInfoWindow(void)
     AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, xOffset, yOffset, TEXT_SKIP_DRAW, NULL);
 
     CopyWindowToVram(sSaveInfoWindowId, COPYWIN_GFX);
+    return TRUE;
 }
 
 static void RemoveSaveInfoWindow(void)
 {
-    ClearStdWindowAndFrame(sSaveInfoWindowId, FALSE);
-    RemoveWindow(sSaveInfoWindowId);
+    if (sSaveInfoWindowId != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrame(sSaveInfoWindowId, FALSE);
+        RemoveWindow(sSaveInfoWindowId);
+        sSaveInfoWindowId = WINDOW_NONE;
+    }
 }
 
 static void Task_WaitForBattleTowerLinkSave(u8 taskId)
@@ -1745,10 +1889,18 @@ void SaveForBattleTowerLink(void)
 
 static void HideStartMenuWindow(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
+    ClearAndRemoveStartMenuWindow(TRUE);
     ScriptUnfreezeObjectEvents();
     UnlockPlayerFieldControls();
+}
+
+static void ClearAndRemoveStartMenuWindow(bool8 copyToVram)
+{
+    u8 windowId = GetStartMenuWindowId();
+
+    if (windowId != WINDOW_NONE)
+        ClearStdWindowAndFrame(windowId, copyToVram);
+    RemoveStartMenuWindow();
 }
 
 void HideStartMenu(void)

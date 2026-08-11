@@ -681,7 +681,7 @@ script Rogue_StartAdventureInternal
         }
     }
 
-    call(Common_EventScript_ForceSaveGame)
+    call(Common_EventScript_SaveGame)
     if(var(VAR_RESULT) == YES)
     {
         if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_GO_ON_ADVENTURE)

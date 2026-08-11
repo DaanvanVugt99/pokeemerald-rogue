@@ -55,6 +55,7 @@
 #include "rogue_controller.h"
 #include "rogue_gifts.h"
 #include "rogue_quest.h"
+#include "rogue_route_events.h"
 #include "rogue_trials.h"
 
 enum {
@@ -4291,7 +4292,9 @@ static void PrintEggState(void)
     const u8 *text;
     struct PokeSummary *sum = &sMonSummaryScreen->summary;
 
-    if (sMonSummaryScreen->summary.sanity == TRUE)
+    if (RogueRouteEvents_IsMysteryEggCourierEgg(&sMonSummaryScreen->currentMon))
+        text = gText_MysteryEggBringToDayCare;
+    else if (sMonSummaryScreen->summary.sanity == TRUE)
         text = gText_EggWillTakeALongTime;
     else if (sum->friendship <= 5)
         text = gText_EggAboutToHatch;

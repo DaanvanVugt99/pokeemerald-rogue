@@ -969,7 +969,7 @@ void Rogue_ClearCurses(void)
 
 void Rogue_GiveTemporaryDarkDealCurse(void)
 {
-    Rogue_AddTemporaryDarkDealCurse(VarGet(VAR_ROGUE_ITEM10));
+    gSpecialVar_Result = Rogue_AddTemporaryDarkDealCurse(VarGet(VAR_ROGUE_ITEM10));
 }
 
 void Rogue_IsRoamerActive(void)

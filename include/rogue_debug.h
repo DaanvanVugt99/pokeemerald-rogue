@@ -34,7 +34,6 @@ void RogueDebug_MainCB(void);
 void RogueDebug_ResetFrameTimers();
 void RogueDebug_PrintTimers();
 
-
 #ifdef DEBUG_FEATURE_MEMORY_STOMP_TRACKING
 
 #define MEMORY_STOMP_TRACKING_SET_TARGET(ptr, size) RogueMemStomp_SetTarget(ptr, size)
@@ -74,6 +73,8 @@ void RogueMemStomp_Poll();
     X(ROGUE_MP_PROCESS_PLAYER_COMMANDS) \
     X(ROGUE_POPUPS) \
     X(ROGUE_FOLLOWMON_CB) \
+    X(ROGUE_FOLLOWMON_SLOT_SCAN) \
+    X(ROGUE_FOLLOWMON_SPAWN_ATTEMPT) \
     X(ROGUE_RIDEMON_UPDATE) \
 
 #define TIMER_ENUM(timer) FRAME_TIMER_ ## timer,
