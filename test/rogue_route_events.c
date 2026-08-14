@@ -988,11 +988,11 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         SelectPlacement(&siteA);
         RogueRouteEvents_BufferBuriedCacheData();
         StringCopy(observationA, gStringVar1);
-        EXPECT_EQ(CountTextCharacter(observationA, CHAR_NEWLINE), 2);
+        EXPECT_EQ(CountTextCharacter(observationA, CHAR_NEWLINE), 0);
         SelectPlacement(&siteB);
         RogueRouteEvents_BufferBuriedCacheData();
         StringCopy(observationB, gStringVar1);
-        EXPECT_EQ(CountTextCharacter(observationB, CHAR_NEWLINE), 2);
+        EXPECT_EQ(CountTextCharacter(observationB, CHAR_NEWLINE), 0);
         EXPECT_NE(StringCompare(observationA, observationB), 0);
 
         SelectPlacement(&archaeologist);
@@ -1000,7 +1000,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         rewardItem = gSpecialVar_0x8004;
         secondaryRewardItem = gSpecialVar_0x8005;
         cacheType = gSpecialVar_0x8007;
-        EXPECT_EQ(CountTextCharacter(gStringVar2, CHAR_NEWLINE), 1);
+        EXPECT_EQ(CountTextCharacter(gStringVar2, CHAR_NEWLINE), 0);
         RogueRouteEvents_TryAcceptBuriedCache();
         EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
         EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));

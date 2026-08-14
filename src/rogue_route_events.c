@@ -2912,8 +2912,8 @@ static const u8 sText_BuriedCacheCaveLandmark1[] = _("rubble pile");
 static const u8 sText_BuriedCacheCaveLandmark2[] = _("abandoned crate");
 static const u8 sText_BuriedCacheMountainLandmark0[] = _("stone pile");
 static const u8 sText_BuriedCacheMountainLandmark1[] = _("split rock");
-static const u8 sText_BuriedCacheMountainLandmark2[] = _("weathered supplies");
-static const u8 sText_BuriedCacheWaterLandmark0[] = _("driftwood");
+static const u8 sText_BuriedCacheMountainLandmark2[] = _("weathered supply bundle");
+static const u8 sText_BuriedCacheWaterLandmark0[] = _("piece of driftwood");
 static const u8 sText_BuriedCacheWaterLandmark1[] = _("washed-up crate");
 static const u8 sText_BuriedCacheWaterLandmark2[] = _("smooth stone");
 static const u8 sText_BuriedCacheUrbanLandmark0[] = _("shipping crate");
@@ -2928,6 +2928,18 @@ static const u8 *const sBuriedCacheLandmarkNames[ROGUE_ROUTE_ENVIRONMENT_COUNT][
     {sText_BuriedCacheMountainLandmark0, sText_BuriedCacheMountainLandmark1, sText_BuriedCacheMountainLandmark2},
     {sText_BuriedCacheWaterLandmark0, sText_BuriedCacheWaterLandmark1, sText_BuriedCacheWaterLandmark2},
     {sText_BuriedCacheUrbanLandmark0, sText_BuriedCacheUrbanLandmark1, sText_BuriedCacheUrbanLandmark2},
+};
+
+static const u8 sText_BuriedCacheArticleA[] = _("a ");
+static const u8 sText_BuriedCacheArticleAn[] = _("an ");
+static const u8 *const sBuriedCacheLandmarkArticles[ROGUE_ROUTE_ENVIRONMENT_COUNT][3] =
+{
+    {sText_BuriedCacheArticleAn, sText_BuriedCacheArticleA, sText_BuriedCacheArticleAn},
+    {sText_BuriedCacheArticleAn, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
+    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleAn},
+    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
+    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
+    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
 };
 
 static const u8 sText_BuriedCacheMarking0[] = _("a crescent mark");
@@ -2971,14 +2983,18 @@ static const u8 *const sBuriedCacheGroundNames[ROGUE_ROUTE_ENVIRONMENT_COUNT][3]
     {sText_BuriedCacheUrbanGround0, sText_BuriedCacheUrbanGround1, sText_BuriedCacheUrbanGround2},
 };
 
-static const u8 sText_BuriedCacheTypeAncient[] = _("ancient cache");
-static const u8 sText_BuriedCacheTypeTrainer[] = _("Trainer's cache");
-static const u8 sText_BuriedCacheTypeRelic[] = _("collector's relic");
-static const u8 sText_BuriedCacheTypeJackpot[] = _("exceptional treasure");
-static const u8 sText_BuriedCacheLandmarkLabel[] = _("Landmark: ");
-static const u8 sText_BuriedCacheMarkLabel[] = _("Mark: ");
-static const u8 sText_BuriedCacheGroundLabel[] = _("Ground: ");
-static const u8 sText_BuriedCacheNewline[] = _("\n");
+static const u8 sText_BuriedCacheTypeAncient[] = _("a cache of ancient treasures");
+static const u8 sText_BuriedCacheTypeTrainer[] = _("a trainer's old stash");
+static const u8 sText_BuriedCacheTypeRelic[] = _("a collector's prized relic");
+static const u8 sText_BuriedCacheTypeJackpot[] = _("a rare treasure");
+static const u8 sText_BuriedCacheClueLandmarkPrefix[] = _("Look for the ");
+static const u8 sText_BuriedCacheClueMarkPrefix[] = _("Look for ");
+static const u8 sText_BuriedCacheClueWith[] = _(" with ");
+static const u8 sText_BuriedCacheClueSurroundedBy[] = _(" surrounded by ");
+static const u8 sText_BuriedCacheClueOn[] = _(" on ");
+static const u8 sText_BuriedCacheSitePrefix[] = _("This is ");
+static const u8 sText_BuriedCacheSiteWith[] = _(" with ");
+static const u8 sText_BuriedCacheSiteSurroundedBy[] = _(", surrounded by ");
 static const u8 sText_BuriedCachePeriod[] = _(".");
 static const u8 *const sBuriedCacheTypeNames[] =
 {
@@ -3009,6 +3025,48 @@ static void MarkBuriedCacheSiteDug(u8 lotRole)
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, state);
 }
 
+static void BuildBuriedCacheClue(u8 *dest, u8 environment, const struct BuriedCacheData *data)
+{
+    const struct BuriedCacheSiteData *correct = &data->sites[data->correctSite];
+
+    if(data->clueTraitA == BURIED_CACHE_TRAIT_LANDMARK
+        && data->clueTraitB == BURIED_CACHE_TRAIT_MARKING)
+    {
+        StringCopy(dest, sText_BuriedCacheClueLandmarkPrefix);
+        StringAppend(dest, sBuriedCacheLandmarkNames[environment][correct->landmark]);
+        StringAppend(dest, sText_BuriedCacheClueWith);
+        StringAppend(dest, sBuriedCacheMarkingNames[correct->marking]);
+    }
+    else if(data->clueTraitA == BURIED_CACHE_TRAIT_LANDMARK)
+    {
+        StringCopy(dest, sText_BuriedCacheClueLandmarkPrefix);
+        StringAppend(dest, sBuriedCacheLandmarkNames[environment][correct->landmark]);
+        StringAppend(dest, sText_BuriedCacheClueSurroundedBy);
+        StringAppend(dest, sBuriedCacheGroundNames[environment][correct->ground]);
+    }
+    else
+    {
+        StringCopy(dest, sText_BuriedCacheClueMarkPrefix);
+        StringAppend(dest, sBuriedCacheMarkingNames[correct->marking]);
+        StringAppend(dest, sText_BuriedCacheClueOn);
+        StringAppend(dest, sBuriedCacheGroundNames[environment][correct->ground]);
+    }
+
+    StringAppend(dest, sText_BuriedCachePeriod);
+}
+
+static void BuildBuriedCacheSiteDescription(u8 *dest, u8 environment, const struct BuriedCacheSiteData *site)
+{
+    StringCopy(dest, sText_BuriedCacheSitePrefix);
+    StringAppend(dest, sBuriedCacheLandmarkArticles[environment][site->landmark]);
+    StringAppend(dest, sBuriedCacheLandmarkNames[environment][site->landmark]);
+    StringAppend(dest, sText_BuriedCacheSiteWith);
+    StringAppend(dest, sBuriedCacheMarkingNames[site->marking]);
+    StringAppend(dest, sText_BuriedCacheSiteSurroundedBy);
+    StringAppend(dest, sBuriedCacheGroundNames[environment][site->ground]);
+    StringAppend(dest, sText_BuriedCachePeriod);
+}
+
 void RogueRouteEvents_BufferBuriedCacheData(void)
 {
     struct RogueRouteSceneRequest scene;
@@ -3033,57 +3091,13 @@ void RogueRouteEvents_BufferBuriedCacheData(void)
     gSpecialVar_0x8006 = data.ambushSpecies;
     gSpecialVar_0x8007 = data.cacheType;
     StringCopy(gStringVar3, sBuriedCacheTypeNames[data.cacheType]);
-    {
-        const struct BuriedCacheSiteData *correct = &data.sites[data.correctSite];
-
-        if(data.clueTraitA == BURIED_CACHE_TRAIT_LANDMARK
-            && data.clueTraitB == BURIED_CACHE_TRAIT_MARKING)
-        {
-            StringCopy(gStringVar2, sText_BuriedCacheLandmarkLabel);
-            StringAppend(gStringVar2, sBuriedCacheLandmarkNames[environment][correct->landmark]);
-            StringAppend(gStringVar2, sText_BuriedCachePeriod);
-            StringAppend(gStringVar2, sText_BuriedCacheNewline);
-            StringAppend(gStringVar2, sText_BuriedCacheMarkLabel);
-            StringAppend(gStringVar2, sBuriedCacheMarkingNames[correct->marking]);
-            StringAppend(gStringVar2, sText_BuriedCachePeriod);
-        }
-        else if(data.clueTraitA == BURIED_CACHE_TRAIT_LANDMARK)
-        {
-            StringCopy(gStringVar2, sText_BuriedCacheLandmarkLabel);
-            StringAppend(gStringVar2, sBuriedCacheLandmarkNames[environment][correct->landmark]);
-            StringAppend(gStringVar2, sText_BuriedCachePeriod);
-            StringAppend(gStringVar2, sText_BuriedCacheNewline);
-            StringAppend(gStringVar2, sText_BuriedCacheGroundLabel);
-            StringAppend(gStringVar2, sBuriedCacheGroundNames[environment][correct->ground]);
-            StringAppend(gStringVar2, sText_BuriedCachePeriod);
-        }
-        else
-        {
-            StringCopy(gStringVar2, sText_BuriedCacheMarkLabel);
-            StringAppend(gStringVar2, sBuriedCacheMarkingNames[correct->marking]);
-            StringAppend(gStringVar2, sText_BuriedCachePeriod);
-            StringAppend(gStringVar2, sText_BuriedCacheNewline);
-            StringAppend(gStringVar2, sText_BuriedCacheGroundLabel);
-            StringAppend(gStringVar2, sBuriedCacheGroundNames[environment][correct->ground]);
-            StringAppend(gStringVar2, sText_BuriedCachePeriod);
-        }
-    }
+    BuildBuriedCacheClue(gStringVar2, environment, &data);
 
     if(scene.lotRole == 0)
         return;
 
     site = &data.sites[scene.lotRole - 1];
-    StringCopy(gStringVar1, sText_BuriedCacheLandmarkLabel);
-    StringAppend(gStringVar1, sBuriedCacheLandmarkNames[environment][site->landmark]);
-    StringAppend(gStringVar1, sText_BuriedCachePeriod);
-    StringAppend(gStringVar1, sText_BuriedCacheNewline);
-    StringAppend(gStringVar1, sText_BuriedCacheMarkLabel);
-    StringAppend(gStringVar1, sBuriedCacheMarkingNames[site->marking]);
-    StringAppend(gStringVar1, sText_BuriedCachePeriod);
-    StringAppend(gStringVar1, sText_BuriedCacheNewline);
-    StringAppend(gStringVar1, sText_BuriedCacheGroundLabel);
-    StringAppend(gStringVar1, sBuriedCacheGroundNames[environment][site->ground]);
-    StringAppend(gStringVar1, sText_BuriedCachePeriod);
+    BuildBuriedCacheSiteDescription(gStringVar1, environment, site);
     gSpecialVar_0x8003 = IsBuriedCacheSiteDug(scene.lotRole);
 }
 

@@ -133,6 +133,8 @@ Format follows Keep a Changelog loosely:
 - Rewrote route-event and Adventure Quest copy with distinct voices for the
   merchant, thief, researchers, Channeler, Ball Maker, Move Tutor, and Dark
   Deal Devil, while retaining concise mechanical guidance and rewards.
+- Polished Buried Cache dialogue so clues, landmark descriptions, and reward
+  categories read as natural sentences without repeating the clue at each site.
 - Made route-scene presentation declarative: each recipe now defines its lots,
   objects, scripts, state visibility, and metatile accents in one ROM data
   table shared by initial composition and quicksave restoration. The generic

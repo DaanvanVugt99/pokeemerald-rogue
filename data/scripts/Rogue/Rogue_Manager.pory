@@ -88,7 +88,7 @@ script Rogue_RouteEvent_BuriedCacheArchaeologist
     {
         if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
         {
-            msgbox(format("I think there's something buried on this route.\pThe clue says: {STR_VAR_2}\pWould you help me dig it up?"), MSGBOX_YESNO)
+            msgbox(format("I think there's something buried on this route.\pI found this clue:\p{STR_VAR_2}\pWould you help me dig it up?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueRouteEvents_TryAcceptBuriedCache)
@@ -109,7 +109,7 @@ script Rogue_RouteEvent_BuriedCacheArchaeologist
         }
         else
         {
-            msgbox(format("The clue says: {STR_VAR_2}\pCheck the landmarks carefully before you dig."))
+            msgbox(format("The clue reads:\p{STR_VAR_2}\pCheck each landmark carefully before you dig."))
         }
     }
 
@@ -141,7 +141,7 @@ script Rogue_RouteEvent_BuriedCacheSite
         end
     }
 
-    msgbox(format("{STR_VAR_1}\pThe clue says: {STR_VAR_2}\pDig here?"), MSGBOX_YESNO)
+    msgbox(format("{STR_VAR_1}\pDig here?"), MSGBOX_YESNO)
     if(var(VAR_RESULT) == NO)
     {
         msgbox(format("You leave the ground untouched."))
@@ -154,7 +154,7 @@ script Rogue_RouteEvent_BuriedCacheSite
     {
         call(Rogue_Common_DisplayPopups)
         special(RogueRouteEvents_BufferBuriedCacheData)
-        msgbox(format("The shovel strikes a sealed cache.\pType: {STR_VAR_3}\nIts contents survived the years intact!"))
+        msgbox(format("The shovel strikes a sealed cache.\pInside, you find {STR_VAR_3}.\pIts contents survived the years intact!"))
     }
     else
     {
