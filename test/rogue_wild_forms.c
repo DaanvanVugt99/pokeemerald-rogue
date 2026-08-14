@@ -300,6 +300,26 @@ TEST("Pokedex family eligibility does not change canonical numbering")
 #endif
 }
 
+TEST("Mega forms inherit display eligibility from their base species")
+{
+#if defined(ROGUE_EXPANSION)
+    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_LETSGO);
+    EXPECT(RoguePokedex_IsSpeciesEnabledForDisplay(SPECIES_CHARIZARD));
+    EXPECT(RoguePokedex_IsSpeciesEnabledForDisplay(SPECIES_CHARIZARD_MEGA_X));
+    EXPECT(RoguePokedex_IsSpeciesEnabledForDisplay(SPECIES_CLEFABLE));
+    EXPECT(RoguePokedex_IsSpeciesEnabledForDisplay(SPECIES_CLEFABLE_MEGA));
+
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+    EXPECT(!RoguePokedex_IsSpeciesEnabledForDisplay(SPECIES_CHARIZARD_MEGA_X));
+
+    RoguePokedex_SetDexVariant(originalDexVariant);
+#else
+    ASSUME(FALSE);
+#endif
+}
+
 TEST("Pokedex family eligibility only permits appropriate regional forms")
 {
 #if defined(ROGUE_EXPANSION)

@@ -175,6 +175,8 @@ Format follows Keep a Changelog loosely:
 - Reworked Professor Birch's dialogue throughout the introduction, hub services,
   and alternate partner flow to emphasize his enthusiastic field research,
   observations of wild Pokémon, and curiosity about Adventures.
+- Fixed Mega-Evolved Pokémon being marked as outside the selected Pokédex in
+  party and storage displays when their base species is included.
 - Assigned Professor Elm to the Encounter Lab, where he studies Pokémon released
   or fainted during Adventures, with dialogue and music reflecting his
   evolution-focused, easily flustered character.

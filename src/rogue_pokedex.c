@@ -4478,8 +4478,11 @@ u16 RoguePokedex_GetSpeciesCurrentNum(u16 species)
 u16 RoguePokedex_RedirectSpeciesGetSetFlag(u16 species)
 {
 #ifdef ROGUE_EXPANSION
-    //if(species >= SPECIES_VENUSAUR_MEGA && species <= SPECIES_GROUDON_PRIMAL)
-    //    return GET_BASE_SPECIES_ID(species);
+    if(species >= SPECIES_VENUSAUR_MEGA && species <= SPECIES_GROUDON_PRIMAL)
+        return GET_BASE_SPECIES_ID(species);
+
+    if(species >= SPECIES_CLEFABLE_MEGA && species <= SPECIES_GLIMMORA_MEGA)
+        return GET_BASE_SPECIES_ID(species);
 
     if(species >= SPECIES_PIKACHU_COSPLAY && species <= SPECIES_PIKACHU_WORLD_CAP)
         return SPECIES_PIKACHU;
