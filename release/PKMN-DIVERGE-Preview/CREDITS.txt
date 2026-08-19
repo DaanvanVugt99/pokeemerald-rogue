@@ -1,0 +1,13 @@
+Pokemon Emerald Rogue: Divergence
+
+Project and hack creator:
+- Pokabbie
+
+Built on:
+- pret's pokeemerald decompilation project
+- RHH Hideout's pokeemerald-expansion
+- Pokabbie's Pokemon Emerald Rogue
+
+The full contributor and asset credits are available in the game's Credits
+sequence. Please keep those credits intact when sharing or redistributing the
+preview.

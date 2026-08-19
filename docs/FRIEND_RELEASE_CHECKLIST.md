@@ -8,27 +8,30 @@ progression, and save safety than it is about balance or content completeness.
 
 Do not send the build until every item in this section is checked.
 
-- [ ] Freeze the candidate commit: no uncommitted source or data changes.
-- [ ] Decide whether this is an untagged friend preview or a versioned release.
-- [ ] Give the build a visible preview name or build identifier.
-- [ ] Confirm the legacy multiplayer feature is disabled cleanly and its hub
+- [x] Freeze the candidate commit: no uncommitted source or data changes.
+- [x] Decide whether this is an untagged friend preview or a versioned release.
+- [x] Give the build a visible preview name or build identifier.
+      Build identifier: `Preview`.
+- [x] Confirm the legacy multiplayer feature is disabled cleanly and its hub
       dialogue does not promise functionality that is unavailable.
-- [ ] Run `git diff --check`.
-- [ ] Run `./scripts/launch_build_test.sh --check-all-suites` successfully.
-- [ ] Build the release ROM from the same candidate commit with
+- [x] Run `git diff --check`.
+- [x] Run `./scripts/launch_build_test.sh --check-all-suites` successfully.
+- [x] Build the release ROM from the same candidate commit with
       `./scripts/launch_build_release.sh`.
-- [ ] Boot that exact release ROM in mGBA.
-- [ ] Start a fresh save and reach the first Adventure without a crash,
+- [x] Boot that exact release ROM in mGBA.
+- [x] Start a fresh save and reach the first Adventure without a crash,
       softlock, or broken onboarding state.
-- [ ] Complete at least one representative Adventure, including saving and
+- [x] Complete at least one representative Adventure, including saving and
       reloading once.
-- [ ] Verify both a won run and a lost or abandoned run return safely to the
+- [x] Verify both a won run and a lost or abandoned run return safely to the
       hub.
-- [ ] Confirm there are no known data-loss, hardlock, repeatable crash, or
+- [x] Confirm there are no known data-loss, hardlock, repeatable crash, or
       main-progression bugs.
-- [ ] Write a short known-issues list for non-blocking problems.
-- [ ] Package the build with setup notes, credits, and a SHA-256 checksum.
-- [ ] Tell testers where and how to report feedback.
+- [x] Write a short known-issues list for non-blocking problems.
+      Known issues: None reported during this preview pass.
+- [x] Package the build with setup notes, credits, and a SHA-256 checksum.
+- [x] Tell testers where and how to report feedback.
+      Feedback channel: message the release organizer directly.
 
 ## 1. Freeze the Scope
 
