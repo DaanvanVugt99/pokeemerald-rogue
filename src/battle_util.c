@@ -6753,22 +6753,6 @@ void QueueLastPourForHeal(u32 battler)
         gBattleStruct->uniqueAbilityUsed[side] |= partyBit;
 }
 
-void QueuePremonitionForSpeedRise(u32 battler)
-{
-    u32 side;
-
-    if (battler >= gBattlersCount
-     || !IsBattlerAlive(battler)
-     || !HasBattlerAbility(battler, ABILITY_PREMONITION))
-        return;
-
-    side = GetBattlerSide(battler);
-    if (gSideStatuses[side] & SIDE_STATUS_TAILWIND)
-        return;
-
-    QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_PREMONITION, battler, battler, battler);
-}
-
 void QueueCounterstepForSpeedRise(u32 battler)
 {
     u32 i;
@@ -6905,25 +6889,6 @@ static bool32 TryActivateLastPour(u32 battler)
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     StartAbilityCalledMoveScript();
-    return TRUE;
-}
-
-static bool32 TryActivatePremonition(u32 battler)
-{
-    u32 side;
-
-    if (!IsBattlerAlive(battler)
-     || !HasBattlerAbility(battler, ABILITY_PREMONITION))
-        return FALSE;
-
-    side = GetBattlerSide(battler);
-    if (gSideStatuses[side] & SIDE_STATUS_TAILWIND)
-        return FALSE;
-
-    SetBattlerTriggeredAbility(battler, ABILITY_PREMONITION);
-    gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
-    BattleScriptPushCursor();
-    gBattlescriptCurrInstr = BattleScript_StormGliderTailwind;
     return TRUE;
 }
 
@@ -7087,12 +7052,6 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
     {
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateLastPour(battler))
-            return TRUE;
-    }
-    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_PREMONITION)
-    {
-        ClearPendingUniqueAbilityEffect(battler);
-        if (TryActivatePremonition(battler))
             return TRUE;
     }
     else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_BITTER_RUSE)
@@ -12261,6 +12220,39 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gSideTimers[GetBattlerSide(battler)].tailwindBattlerId = gBattlerAttacker;
                 gSideTimers[GetBattlerSide(battler)].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
                 BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
+                effect++;
+            }
+            break;
+        case ABILITY_TEMPORAL_SHIFT:
+            if (!gSpecialStatuses[battler].switchInAbilityDone)
+            {
+                side = GetBattlerSide(battler);
+                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
+
+                // Do not let repeated entries cancel Trick Room or combine the
+                // two opposing forms of speed control on this Pokemon's side.
+                if ((gFieldStatuses & STATUS_FIELD_TRICK_ROOM)
+                 || (gSideStatuses[side] & SIDE_STATUS_TAILWIND))
+                    break;
+
+                SetBattlerTriggeredAbility(battler, ABILITY_TEMPORAL_SHIFT);
+                gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+
+                if (RandomUniform(RNG_ROGUE_TEMPORAL_SHIFT, 0, 1) == 0)
+                {
+                    SetAtkCancellerForCalledMove();
+                    gCalledMove = MOVE_TRICK_ROOM;
+                    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                    gProtectStructs[battler].extraMoveUsed = TRUE;
+                    StartAbilityCalledMoveScript();
+                }
+                else
+                {
+                    gSideStatuses[side] |= SIDE_STATUS_TAILWIND;
+                    gSideTimers[side].tailwindBattlerId = battler;
+                    gSideTimers[side].tailwindTimer = B_TAILWIND_TURNS >= GEN_5 ? 4 : 3;
+                    BattleScriptPushCursorAndCallback(BattleScript_StrongWindsActivated);
+                }
                 effect++;
             }
             break;

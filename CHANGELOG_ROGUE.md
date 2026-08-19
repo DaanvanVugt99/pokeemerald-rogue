@@ -115,6 +115,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Replaced Hisuian Braviary's Premonition with Temporal Shift, which randomly
+  sets Trick Room or Tailwind on switch-in when neither effect is already
+  active.
 - Removed Electrocytes' rain requirement and gave Whiscash Spark plus select
   Electric tutor access, replacing Swift with Shock Wave.
 - Reduced the default route-event budget to target zero, one, or two optional

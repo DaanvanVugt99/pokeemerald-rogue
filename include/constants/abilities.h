@@ -958,7 +958,7 @@
 #define ABILITY_WANDERING_HUNTER       924
 #define ABILITY_SMOG_REFINERY           925
 #define ABILITY_SNOWBALL_FIGHT          926
-#define ABILITY_PREMONITION             927
+#define ABILITY_TEMPORAL_SHIFT          927
 #define ABILITY_HORN_LOCK               928
 #define ABILITY_COUNTERSPELL            929
 #define ABILITY_FEVER_PITCH              930

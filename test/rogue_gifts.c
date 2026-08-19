@@ -588,7 +588,7 @@ TEST("Dynamic unique ability eligibility audit contains 583 abilities")
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_WANDERING_HUNTER));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SMOG_REFINERY));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_SNOWBALL_FIGHT));
-    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_PREMONITION));
+    EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_TEMPORAL_SHIFT));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_HORN_LOCK));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_COUNTERSPELL));
     EXPECT(RogueGift_IsDynamicUniqueAbilityEligible(ABILITY_FEVER_PITCH));
@@ -681,7 +681,7 @@ TEST("Newest dynamic unique abilities use their required synergy profiles")
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_WANDERING_HUNTER), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_FALSE_GROUND), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_SMOG_REFINERY), 0);
-    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_PREMONITION), 0);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_TEMPORAL_SHIFT), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_COUNTERSPELL), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_FEVER_PITCH), 0);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyProfileId(ABILITY_VANISHING_ACT), 0);
