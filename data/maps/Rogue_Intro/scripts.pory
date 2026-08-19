@@ -222,7 +222,7 @@ script Rogue_PreIntro
 
             while(var(VAR_0x8000) == NO)
             {
-                msgbox(format("{COLOR BLUE}Finally, what is your favorite Pokémon game?\pIts Pokédex will shape your first partner choices and adventures."), MSGBOX_DEFAULT)
+                msgbox(format("{COLOR BLUE}Finally, choose which Pokédex this run will use.\pIt determines the Pokémon available in your adventure and your first partner choices."), MSGBOX_DEFAULT)
                 call(Rogue_Common_SelectCuratedPokedex)
                 setvar(VAR_0x8004, NO)
 

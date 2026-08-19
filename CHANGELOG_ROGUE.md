@@ -115,6 +115,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Clarified the onboarding prompt so it explicitly tells players that they are
+  choosing the Pokédex for the run and that it controls the available Pokémon
+  and first partner choices.
 - Replaced Hisuian Braviary's Premonition with Temporal Shift, which randomly
   sets Trick Room or Tailwind on switch-in when neither effect is already
   active.
@@ -310,6 +313,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Restored the title and menu windows in the player customization screen by
+  terminating its window-template list correctly.
 - Kept cached route-scene requests outside the resettable map heap, preventing
   popup and window memory corruption that could eventually crash the game.
 - Kept Buried Cache ambush Pokémon within the active Pokédex and made them
