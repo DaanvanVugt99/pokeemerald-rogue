@@ -4613,7 +4613,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .backPicYOffset = 6,
         //.backAnimId = BACK_ANIM_NONE,
         PALETTES(ZacianHeroOfManyBattles),
-        ICON(ZacianHeroOfManyBattles, 2),
+        ICON(ZacianHeroOfManyBattles, 0),
     },
 
     [SPECIES_ZACIAN_CROWNED_SWORD] =
@@ -4642,7 +4642,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .backPicYOffset = 6,
         //.backAnimId = BACK_ANIM_NONE,
         PALETTES(ZacianCrownedSword),
-        ICON(ZacianCrownedSword, 2),
+        ICON(ZacianCrownedSword, 0),
     },
 #endif //P_FAMILY_ZACIAN
 
@@ -4697,7 +4697,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .backPicYOffset = 5,
         //.backAnimId = BACK_ANIM_NONE,
         PALETTES(ZamazentaHeroOfManyBattles),
-        ICON(ZamazentaHeroOfManyBattles, 2),
+        ICON(ZamazentaHeroOfManyBattles, 0),
     },
 
     [SPECIES_ZAMAZENTA_CROWNED_SHIELD] =
@@ -4726,7 +4726,7 @@ const struct SpeciesInfo gSpeciesInfoGen8[] =
         .backPicYOffset = 3,
         //.backAnimId = BACK_ANIM_NONE,
         PALETTES(ZamazentaCrownedShield),
-        ICON(ZamazentaCrownedShield, 2),
+        ICON(ZamazentaCrownedShield, 0),
     },
 #endif //P_FAMILY_ZAMAZENTA
 

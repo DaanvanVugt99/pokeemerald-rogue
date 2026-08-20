@@ -119,6 +119,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Ported upstream battle visual polish for gimmick triggers, Mega/Primal
+  evolution particles, Gust palette cycling, trainer intro palettes, and a
+  batch of updated Pokémon form sprites and icons.
 - Clarified the onboarding prompt so it explicitly tells players that they are
   choosing the Pokédex for the run and that it controls the available Pokémon
   and first partner choices.

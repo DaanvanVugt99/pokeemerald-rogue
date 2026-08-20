@@ -242,12 +242,12 @@ bool32 TryChangeZIndicator(u8 battler, u8 moveIndex)
 #define SINGLES_Z_TRIGGER_POS_X_OPTIMAL     (38)
 #define SINGLES_Z_TRIGGER_POS_X_PRIORITY    (39)
 #define SINGLES_Z_TRIGGER_POS_X_SLIDE       (15)
-#define SINGLES_Z_TRIGGER_POS_Y_DIFF        (-8)
+#define SINGLES_Z_TRIGGER_POS_Y_DIFF        (-5)
 
 #define DOUBLES_Z_TRIGGER_POS_X_OPTIMAL     SINGLES_Z_TRIGGER_POS_X_OPTIMAL
 #define DOUBLES_Z_TRIGGER_POS_X_PRIORITY    SINGLES_Z_TRIGGER_POS_X_PRIORITY
 #define DOUBLES_Z_TRIGGER_POS_X_SLIDE       SINGLES_Z_TRIGGER_POS_X_SLIDE
-#define DOUBLES_Z_TRIGGER_POS_Y_DIFF        (-1)
+#define DOUBLES_Z_TRIGGER_POS_Y_DIFF        (-2)
 
 #define tBattler    data[0]
 #define tHide       data[1]

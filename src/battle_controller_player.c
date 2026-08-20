@@ -2681,7 +2681,8 @@ static void PlayerHandleOneReturnValue_Duplicate(u32 battler)
 
 static void PlayerHandleIntroTrainerBallThrow(u32 battler)
 {
-    const u32 *trainerPal = gTrainerBackPicPaletteTable[RoguePlayer_GetTrainerBackPic()].data;
+    u32 trainerPicId = PlayerGetTrainerBackPicId();
+    const u32 *trainerPal = gTrainerBackPicPaletteTable[trainerPicId].data;
     BtlController_HandleIntroTrainerBallThrow(battler, 0xD6F8, trainerPal, 31, Intro_TryShinyAnimShowHealthbox);
 }
 
