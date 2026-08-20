@@ -5006,10 +5006,20 @@ void AnimTask_CycleMagicalLeafPal(u8 taskId)
     switch (task->data[0])
     {
     case 0:
-        task->data[8] = OBJ_PLTT_ID(IndexOfSpritePaletteTag(ANIM_TAG_LEAF));
-        task->data[12] = OBJ_PLTT_ID(IndexOfSpritePaletteTag(ANIM_TAG_RAZOR_LEAF));
+    {
+        u8 leafPalette = IndexOfSpritePaletteTag(ANIM_TAG_LEAF);
+        u8 razorLeafPalette = IndexOfSpritePaletteTag(ANIM_TAG_RAZOR_LEAF);
+
+        if (leafPalette == 0xFF || razorLeafPalette == 0xFF)
+        {
+            DestroyAnimVisualTask(taskId);
+            return;
+        }
+        task->data[8] = OBJ_PLTT_ID(leafPalette);
+        task->data[12] = OBJ_PLTT_ID(razorLeafPalette);
         task->data[0]++;
         break;
+    }
     case 1:
         if (++task->data[9] >= 0)
         {
@@ -7215,8 +7225,14 @@ static void AnimPoisonJabProjectile(struct Sprite *sprite)
 
 void AnimTask_BlendNightSlash(u8 taskId)
 {
-    int paletteOffset = IndexOfSpritePaletteTag(ANIM_TAG_SLASH) * 16 + 256;
-    BlendPalette(paletteOffset, 16, 6, RGB_RED);
+    u8 palette = IndexOfSpritePaletteTag(ANIM_TAG_SLASH);
+
+    if (palette == 0xFF)
+    {
+        DestroyAnimVisualTask(taskId);
+        return;
+    }
+    BlendPalette(OBJ_PLTT_ID(palette), 16, 6, RGB_RED);
     DestroyAnimVisualTask(taskId);
 }
 

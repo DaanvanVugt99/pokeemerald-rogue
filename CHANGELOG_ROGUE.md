@@ -119,6 +119,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Corrected Pokédex body-color classifications for the new Mega Evolutions to
+  match Pokémon HOME.
 - Improved battle readability with separate 4× and ¼× move-selection labels,
   actual held-item icons for Knock Off and stealing moves, Berry-eating
   animations for held Berry effects, and clearer side, hazard, Berry, and
@@ -326,6 +328,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented missing move-animation palettes from causing out-of-bounds palette
+  writes during Night Slash, Magical Leaf, and Aurora Beam.
 - Restored the title and menu windows in the player customization screen by
   terminating its window-template list correctly.
 - Kept cached route-scene requests outside the resettable map heap, preventing

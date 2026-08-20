@@ -264,6 +264,12 @@ u32 CalcByteArraySum(const u8 *data, u32 length)
 void BlendPalette(u16 palOffset, u16 numEntries, u8 coeff, u32 blendColor)
 {
     u16 i;
+
+    if (palOffset + numEntries > PLTT_BUFFER_SIZE)
+    {
+        AGB_ASSERT(FALSE);
+        return;
+    }
     for (i = 0; i < numEntries; i++)
     {
         u16 index = i + palOffset;
