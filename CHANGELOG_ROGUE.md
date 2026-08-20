@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added an optional `LTO=1` release-build mode with isolated build artifacts
+  and a linker layout that recovers ROM and working-memory headroom.
 - Added canonical Dragon Darts targeting so its two strikes split between valid
   opponents in double battles and redirect around protected, immune, absent,
   or otherwise untargetable opponents.
@@ -122,6 +124,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Optimized encrypted Pokémon data access by combining checksum and encryption
+  passes and replacing repeated substructure searches with constant-time
+  lookups, accelerating Pokémon-heavy Rogue generation and UI paths.
 - Corrected Pokédex body-color classifications for the new Mega Evolutions to
   match Pokémon HOME.
 - Improved battle readability with separate 4× and ¼× move-selection labels,

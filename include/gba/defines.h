@@ -14,11 +14,14 @@
 #define EWRAM_DATA __attribute__((section("ewram_data")))
 #endif
 #define UNUSED __attribute__((unused))
+#define ARM_FUNC __attribute__((target("arm")))
 
 #if MODERN
 #define NOINLINE __attribute__((noinline))
+#define ALWAYS_INLINE inline __attribute__((always_inline))
 #else
 #define NOINLINE
+#define ALWAYS_INLINE inline
 #endif
 
 #define ALIGNED(n) __attribute__((aligned(n)))

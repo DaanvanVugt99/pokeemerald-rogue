@@ -83,19 +83,30 @@ REVISION     := 0
 TEST         ?= 0
 ANALYZE      ?= 0
 UNUSED_ERROR ?= 0
+# Enables link-time optimization for smaller, more efficient release ROMs.
+LTO          ?= 0
 
 ifeq (check,$(MAKECMDGOALS))
   TEST := 1
+endif
+
+# The split test harness uses partial linking and does not use the LTO path.
+ifeq ($(TEST),1)
+override LTO := 0
 endif
 
 CPP := $(PREFIX)cpp
 
 OBJ_BASE_DIR_NAME := build
 
+ifneq ($(LTO),0)
+LTO_SUFFIX := _lto
+endif
+
 ROM_NAME := pokeemerald.gba
 ELF_NAME := $(ROM_NAME:.gba=.elf)
 MAP_NAME := $(ROM_NAME:.gba=.map)
-OBJ_DIR_NAME := $(OBJ_BASE_DIR_NAME)/modern_$(BUILD_CONFIG)
+OBJ_DIR_NAME := $(OBJ_BASE_DIR_NAME)/modern_$(BUILD_CONFIG)$(LTO_SUFFIX)
 TEST_OBJ_DIR_NAME := build/modern_test
 
 SHELL := /bin/bash -o pipefail
@@ -128,7 +139,7 @@ SONG_BUILDDIR = $(OBJ_DIR)/$(SONG_SUBDIR)
 MID_BUILDDIR = $(OBJ_DIR)/$(MID_SUBDIR)
 TEST_BUILDDIR = $(OBJ_DIR)/$(TEST_SUBDIR)
 
-ASFLAGS := -mcpu=arm7tdmi --defsym MODERN=1
+ASFLAGS := -mcpu=arm7tdmi -march=armv4t -meabi=5 --defsym MODERN=1
 
 ifeq ($(EXPANSION), 1)
 ASFLAGS += --defsym ROGUE_EXPANSION=1
@@ -150,7 +161,12 @@ override CFLAGS += -Og
 else
 override CFLAGS += -O2
 endif
-override CFLAGS += -gdwarf-4 -gstrict-dwarf -mthumb -mthumb-interwork -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast -std=gnu17 -Werror -Wall -Wno-strict-aliasing -Wno-attribute-alias -Woverride-init
+override CFLAGS += -gdwarf-4 -gstrict-dwarf -mthumb -mthumb-interwork -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -Wno-pointer-to-int-cast -std=gnu17 -Werror -Wall -Wno-strict-aliasing -Wno-attribute-alias -Woverride-init
+ifneq ($(LTO),0)
+override CFLAGS += -flto=auto -fno-fat-lto-objects -fno-asynchronous-unwind-tables -ffunction-sections -fdata-sections
+else
+override CFLAGS += -fno-toplevel-reorder
+endif
 ifeq ($(ANALYZE),1)
 override CFLAGS += -fanalyzer
 endif
@@ -555,16 +571,30 @@ $1: $2 $$(shell $(SCANINC) -I include -I gflib $(TOOLCHAIN_INCLUDE_DIRS) $2)
 endef
 $(foreach src, $(TEST_SRCS), $(eval $(call TEST_DEP,$(patsubst $(TEST_SUBDIR)/%.c,$(TEST_BUILDDIR)/%.o,$(src)),$(src),$(patsubst $(TEST_SUBDIR)/%.c,%,$(src)))))
 
+ifneq ($(LTO),0)
+LD_SCRIPT := ld_script_lto.ld
+else
 LD_SCRIPT := ld_script_modern.ld
+endif
 
 $(OBJ_DIR)/ld_script.ld: $(LD_SCRIPT)
 	cd $(OBJ_DIR) && sed "s#tools/#../../tools/#g" ../../$(LD_SCRIPT) > ld_script.ld
 
+ifneq ($(LTO),0)
+ROM_LDFLAGS := -march=armv4t -mabi=apcs-gnu -mcpu=arm7tdmi -flto=auto
+ROM_LDFLAGS += -Xlinker -Map=../../$(MAP) -Xlinker --print-memory-usage -Xlinker --gc-sections
+ROM_LDFLAGS += -Xassembler -meabi=5 -Xassembler -march=armv4t -Xassembler -mcpu=arm7tdmi
+$(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) libagbsyscall
+	@echo "cd $(OBJ_DIR) && $(ARMCC) $(ROM_LDFLAGS) -T ld_script.ld -o ../../$@ <objects> <lib>"
+	+@cd $(OBJ_DIR) && $(ARMCC) $(ROM_LDFLAGS) -T ld_script.ld -o ../../$@ $(OBJS_REL) $(LIB)
+	$(FIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
+else
 ROM_LDFLAGS := -Map ../../$(MAP)
 $(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) libagbsyscall
 	@echo "cd $(OBJ_DIR) && $(LD) $(ROM_LDFLAGS) -T ld_script.ld -o ../../$@ <objects> <lib>"
 	@cd $(OBJ_DIR) && $(LD) $(ROM_LDFLAGS) -T ld_script.ld --print-memory-usage -o ../../$@ $(OBJS_REL) $(LIB) | cat
 	$(FIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
+endif
 
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
