@@ -3154,6 +3154,10 @@ static void BattleStartClearSetData(void)
     }
 
     gBattleStruct->swapDamageCategory = FALSE; // Photon Geyser, Shell Side Arm, Light That Burns the Sky
+    gBattleStruct->descriptionSubmenu = FALSE;
+    gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
+    gBattleStruct->moveInfoCategorySpriteId = MAX_SPRITES;
+    gBattleStruct->moveTypeBadgeSpriteId = MAX_SPRITES;
     gSelectedMonPartyId = PARTY_SIZE; // Revival Blessing
 }
 

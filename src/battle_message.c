@@ -2508,7 +2508,7 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NORMAL,
         .x = 2,
-        .y = 1,
+        .y = 0,
         .speed = 0,
         .fgColor = 12,
         .bgColor = 14,
@@ -2650,6 +2650,18 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
         .fgColor = 1,
         .shadowColor = 6,
     },
+    [B_WIN_MOVE_DESCRIPTION] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NORMAL,
+        .x = 4,
+        .y = 1,
+        .letterSpacing = 0,
+        .lineSpacing = 0,
+        .speed = 0,
+        .fgColor = TEXT_DYNAMIC_COLOR_4,
+        .bgColor = TEXT_DYNAMIC_COLOR_5,
+        .shadowColor = TEXT_DYNAMIC_COLOR_6,
+    },
 };
 
 static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
@@ -2748,7 +2760,7 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NORMAL,
         .x = 2,
-        .y = 1,
+        .y = 0,
         .speed = 0,
         .fgColor = 12,
         .bgColor = 14,
@@ -2882,6 +2894,18 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
         .fgColor = 2,
         .bgColor = 1,
         .shadowColor = 3,
+    },
+    [B_WIN_MOVE_DESCRIPTION] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NORMAL,
+        .x = 4,
+        .y = 1,
+        .letterSpacing = 0,
+        .lineSpacing = 0,
+        .speed = 0,
+        .fgColor = TEXT_DYNAMIC_COLOR_4,
+        .bgColor = TEXT_DYNAMIC_COLOR_5,
+        .shadowColor = TEXT_DYNAMIC_COLOR_6,
     },
 };
 

@@ -365,12 +365,11 @@ enum
     MAX_POWER_TIER_8,   // 100 or 150 damage
 };
 
-// Gets the base power of a Max Move.
-u8 GetMaxMovePower(u16 move)
+static u8 GetMaxMovePowerInternal(u16 move, u16 maxMove)
 {
     u8 tier;
     // G-Max Drum Solo, G-Max Hydrosnipe, and G-Max Fireball always have 160 base power.
-    if (gBattleMoves[GetMaxMove(gBattlerAttacker, move)].argument == MAX_EFFECT_FIXED_POWER)
+    if (gBattleMoves[maxMove].argument == MAX_EFFECT_FIXED_POWER)
         return 160;
 
     // Exceptions to all other rules below:
@@ -415,6 +414,18 @@ u8 GetMaxMovePower(u16 move)
             case MAX_POWER_TIER_8: return 150;
         }
     }
+}
+
+// Gets the base power of a Max Move for the active attacker.
+u8 GetMaxMovePower(u16 move)
+{
+    return GetMaxMovePowerInternal(move, GetMaxMove(gBattlerAttacker, move));
+}
+
+// Gets the display power without relying on the currently active attacker.
+u8 GetMaxMovePowerForBattler(u16 battlerId, u16 move)
+{
+    return GetMaxMovePowerInternal(move, GetMaxMove(battlerId, move));
 }
 
 static u8 GetMaxPowerTier(u16 move)

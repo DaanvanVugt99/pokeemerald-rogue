@@ -550,18 +550,20 @@ static void ZMoveSelectionDisplayPpNumber(u32 battler)
 
 static void ZMoveSelectionDisplayMoveType(u16 zMove, u32 battler)
 {
-    u8 *txtPtr;
     u8 zMoveType;
 
     GET_MOVE_TYPE(zMove, zMoveType);
 
-    txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);
-    *(txtPtr)++ = EXT_CTRL_CODE_BEGIN;
-    *(txtPtr)++ = EXT_CTRL_CODE_FONT;
-    *(txtPtr)++ = FONT_NORMAL;
-
-    StringCopy(txtPtr, gTypeNames[zMoveType]);
+    gDisplayedStringBattle[0] = EOS;
+    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+    if (!UpdateBattleMoveTypeBadge(zMoveType))
+    {
+        StringCopy(gDisplayedStringBattle, gTypeNames[zMoveType]);
+        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
+    }
+
+    (void)battler;
 }
 
 const u8 *GetZMoveName(u16 move)

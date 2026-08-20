@@ -4,6 +4,7 @@
 #include "battle_arena.h"
 #include "battle_controllers.h"
 #include "battle_dome.h"
+#include "battle_dynamax.h"
 #include "battle_interface.h"
 #include "battle_main.h"
 #include "battle_message.h"
@@ -19,11 +20,13 @@
 #include "link.h"
 #include "main.h"
 #include "m4a.h"
+#include "menu.h"
 #include "palette.h"
 #include "party_menu.h"
 #include "pokeball.h"
 #include "pokedex.h"
 #include "pokemon.h"
+#include "pokemon_summary_screen.h"
 #include "random.h"
 #include "recorded_battle.h"
 #include "reshow_battle_screen.h"
@@ -97,6 +100,9 @@ static void MoveSelectionDisplayPpNumber(u32 battler);
 static void MoveSelectionDisplayPpString(u32 battler);
 static void MoveSelectionDisplayMoveType(u32 battler);
 static void MoveSelectionDisplayMoveNames(u32 battler);
+static void TryMoveSelectionDisplayMoveDescription(u32 battler);
+static void MoveSelectionDisplayMoveDescription(u32 battler);
+static void CloseMoveSelectionDescription(void);
 static void HandleMoveSwitching(u32 battler);
 static void SwitchIn_HandleSoundAndEnd(u32 battler);
 static void WaitForMonSelection(u32 battler);
@@ -503,6 +509,7 @@ static void HandleInputChooseTarget(u32 battler)
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
+        TryHideMoveInfoWindow();
         gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
         if (gBattleStruct->mega.playerSelect)
             BtlController_EmitTwoReturnValues(battler, BUFFER_B, 10, gMoveSelectionCursor[battler] | RET_MEGA_EVOLUTION | (gMultiUsePlayerCursor << 8));
@@ -525,6 +532,7 @@ static void HandleInputChooseTarget(u32 battler)
         PlaySE(SE_SELECT);
         gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
+        TryAddMoveInfoWindow();
         DoBounceEffect(battler, BOUNCE_HEALTHBOX, 7, 1);
         DoBounceEffect(battler, BOUNCE_MON, 7, 1);
         EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
@@ -655,6 +663,7 @@ static void HandleInputShowEntireFieldTargets(u32 battler)
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
+        TryHideMoveInfoWindow();
         HideAllTargets();
         if (gBattleStruct->mega.playerSelect)
             BtlController_EmitTwoReturnValues(battler, BUFFER_B, 10, gMoveSelectionCursor[battler] | RET_MEGA_EVOLUTION | (gMultiUsePlayerCursor << 8));
@@ -675,6 +684,7 @@ static void HandleInputShowEntireFieldTargets(u32 battler)
         PlaySE(SE_SELECT);
         HideAllTargets();
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
+        TryAddMoveInfoWindow();
         DoBounceEffect(battler, BOUNCE_HEALTHBOX, 7, 1);
         DoBounceEffect(battler, BOUNCE_MON, 7, 1);
     }
@@ -690,6 +700,7 @@ static void HandleInputShowTargets(u32 battler)
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
+        TryHideMoveInfoWindow();
         HideAllTargets();
         if (gBattleStruct->mega.playerSelect)
             BtlController_EmitTwoReturnValues(battler, BUFFER_B, 10, gMoveSelectionCursor[battler] | RET_MEGA_EVOLUTION | (gMultiUsePlayerCursor << 8));
@@ -711,6 +722,7 @@ static void HandleInputShowTargets(u32 battler)
         PlaySE(SE_SELECT);
         HideAllTargets();
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
+        TryAddMoveInfoWindow();
         DoBounceEffect(battler, BOUNCE_HEALTHBOX, 7, 1);
         DoBounceEffect(battler, BOUNCE_MON, 7, 1);
     }
@@ -736,9 +748,10 @@ static void HandleInputChooseMove(u32 battler)
     else
         gPlayerDpadHoldFrames = 0;
 
-    if (JOY_NEW(A_BUTTON))
+    if (JOY_NEW(A_BUTTON) && !gBattleStruct->descriptionSubmenu)
     {
         PlaySE(SE_SELECT);
+        TryHideMoveInfoWindow();
         moveTarget = GetBattlerMoveTargetType(battler, moveInfo->moves[gMoveSelectionCursor[battler]]);
 
         if (gBattleStruct->zmove.viewing)
@@ -844,6 +857,7 @@ static void HandleInputChooseMove(u32 battler)
         }
     }
     else if ((JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
+          && !gBattleStruct->descriptionSubmenu
           && (gBattleStruct->zmove.viewing || !CanUseEndlessCoreStatusMove(battler)))
     {
         PlaySE(SE_SELECT);
@@ -860,6 +874,8 @@ static void HandleInputChooseMove(u32 battler)
             gBattleStruct->zmove.viable = FALSE;
             BtlController_EmitTwoReturnValues(battler, BUFFER_B, 10, 0xFFFF);
             HideTriggerSprites();
+            TryHideMoveInfoWindow();
+            DestroyBattleMoveTypeBadge();
             PlayerBufferExecCompleted(battler);
         }
     }
@@ -873,6 +889,7 @@ static void HandleInputChooseMove(u32 battler)
             MoveSelectionCreateCursorAt(gMoveSelectionCursor[battler], 0);
             MoveSelectionDisplayPpNumber(battler);
             MoveSelectionDisplayMoveType(battler);
+            TryMoveSelectionDisplayMoveDescription(battler);
             TryChangeZIndicator(battler, gMoveSelectionCursor[battler]);
         }
     }
@@ -887,6 +904,7 @@ static void HandleInputChooseMove(u32 battler)
             MoveSelectionCreateCursorAt(gMoveSelectionCursor[battler], 0);
             MoveSelectionDisplayPpNumber(battler);
             MoveSelectionDisplayMoveType(battler);
+            TryMoveSelectionDisplayMoveDescription(battler);
             TryChangeZIndicator(battler, gMoveSelectionCursor[battler]);
         }
     }
@@ -900,6 +918,7 @@ static void HandleInputChooseMove(u32 battler)
             MoveSelectionCreateCursorAt(gMoveSelectionCursor[battler], 0);
             MoveSelectionDisplayPpNumber(battler);
             MoveSelectionDisplayMoveType(battler);
+            TryMoveSelectionDisplayMoveDescription(battler);
             TryChangeZIndicator(battler, gMoveSelectionCursor[battler]);
         }
     }
@@ -914,10 +933,11 @@ static void HandleInputChooseMove(u32 battler)
             MoveSelectionCreateCursorAt(gMoveSelectionCursor[battler], 0);
             MoveSelectionDisplayPpNumber(battler);
             MoveSelectionDisplayMoveType(battler);
+            TryMoveSelectionDisplayMoveDescription(battler);
             TryChangeZIndicator(battler, gMoveSelectionCursor[battler]);
         }
     }
-    else if (JOY_NEW(SELECT_BUTTON) && !gBattleStruct->zmove.viewing)
+    else if (JOY_NEW(SELECT_BUTTON) && !gBattleStruct->zmove.viewing && !gBattleStruct->descriptionSubmenu)
     {
         if (gNumberOfMovesToChoose > 1 && !(gBattleTypeFlags & BATTLE_TYPE_LINK))
         {
@@ -932,6 +952,23 @@ static void HandleInputChooseMove(u32 battler)
             BattlePutTextOnWindow(gText_BattleSwitchWhich, B_WIN_SWITCH_PROMPT);
             gBattlerControllerFuncs[battler] = HandleMoveSwitching;
         }
+    }
+    else if (gBattleStruct->descriptionSubmenu)
+    {
+        if (JOY_NEW(B_MOVE_DESCRIPTION_BUTTON | A_BUTTON | B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            CloseMoveSelectionDescription();
+        }
+    }
+    else if (B_SHOW_MOVE_DESCRIPTION
+          && JOY_NEW(B_MOVE_DESCRIPTION_BUTTON)
+          && !(B_MOVE_DESCRIPTION_BUTTON == L_BUTTON
+            && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_L_EQUALS_A))
+    {
+        PlaySE(SE_SELECT);
+        gBattleStruct->descriptionSubmenu = TRUE;
+        MoveSelectionDisplayMoveDescription(battler);
     }
     else if (JOY_NEW(START_BUTTON))
     {
@@ -962,6 +999,7 @@ static void HandleInputChooseMove(u32 battler)
             gBattleStruct->dynamax.playerSelect ^= 1;
             MoveSelectionDisplayMoveNames(battler);
             MoveSelectionCreateCursorAt(gMoveSelectionCursor[battler], 0);
+            MoveSelectionDisplayMoveType(battler);
             ChangeDynamaxTriggerSprite(gBattleStruct->dynamax.triggerSpriteId, gBattleStruct->dynamax.playerSelect);
             PlaySE(SE_SELECT);
         }
@@ -978,6 +1016,7 @@ static void HandleInputChooseMove(u32 battler)
 static void CleanupConfirmedMoveSelection(void)
 {
     RogueBH_RemoveBattleOverlay(FALSE);
+    DestroyBattleMoveTypeBadge();
     gBattle_BG0_X = 0;
 }
 
@@ -2016,9 +2055,13 @@ static void MoveSelectionDisplayMoveType(u32 battler)
         displayType = GetMoveDisplayTyping(battler, move);
     }
 
-    txtPtr = gDisplayedStringBattle;
-    txtPtr = StringCopy(txtPtr, gTypeNames[displayType]);
+    gDisplayedStringBattle[0] = EOS;
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
+    if (!UpdateBattleMoveTypeBadge(displayType))
+    {
+        StringCopy(gDisplayedStringBattle, gTypeNames[displayType]);
+        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
+    }
 
     txtPtr = gDisplayedStringBattle;
     //*(txtPtr)++ = CHAR_SPACER;
@@ -2070,6 +2113,98 @@ static void MoveSelectionDisplayMoveType(u32 battler)
 
     *(txtPtr)++ = EOS;
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+}
+
+static void TryMoveSelectionDisplayMoveDescription(u32 battler)
+{
+    if (gBattleStruct->descriptionSubmenu)
+        MoveSelectionDisplayMoveDescription(battler);
+}
+
+static void MoveSelectionDisplayMoveDescription(u32 battler)
+{
+#define MOVE_INFO_DESCRIPTION_WIDTH 136
+#define MOVE_INFO_CATEGORY_ICON_X 34
+    static const u8 sText_Category[] = _("CAT: ");
+    static const u8 sText_Power[] = _("PWR: ");
+    static const u8 sText_Accuracy[] = _("ACC: ");
+    static const u8 sText_CategoryStart[] = _("{FONT_NARROW}{CLEAR_TO 0x00}");
+    static const u8 sText_PowerStart[] = _("{CLEAR_TO 0x34}");
+    static const u8 sText_AccuracyStart[] = _("{CLEAR_TO 0x64}");
+    static const u8 sText_DescriptionStart[] = _("{FONT_NORMAL}");
+    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
+    u16 baseMove = moveInfo->moves[gMoveSelectionCursor[battler]];
+    u16 displayMove = baseMove;
+    u16 power = gBattleMoves[baseMove].power;
+    u16 accuracy = gBattleMoves[baseMove].accuracy;
+    u8 split = gBattleMoves[baseMove].split;
+    u8 powerText[4];
+    u8 accuracyText[4];
+    u8 *text = gDisplayedStringBattle;
+    u8 *descriptionStart;
+
+    if (gBattleStruct->zmove.viewing && gBattleStruct->zmove.chosenZMove != MOVE_Z_STATUS)
+    {
+        displayMove = gBattleStruct->zmove.chosenZMove;
+        power = displayMove >= MOVE_CATASTROPIKA
+              ? gBattleMoves[displayMove].power
+              : GetZMovePower(baseMove);
+        accuracy = 0;
+        split = gBattleMoves[displayMove].split;
+    }
+    else if ((gBattleStruct->dynamax.playerSelect && CanDynamax(battler)) || IsDynamaxed(battler))
+    {
+        displayMove = GetMaxMove(battler, baseMove);
+        power = displayMove == MOVE_MAX_GUARD ? 0 : GetMaxMovePowerForBattler(battler, baseMove);
+        accuracy = 0;
+        split = gBattleMoves[baseMove].split;
+    }
+
+    LoadMessageBoxAndBorderGfx();
+    DrawStdWindowFrame(B_WIN_MOVE_DESCRIPTION, FALSE);
+
+    if (power < 2)
+        StringCopy(powerText, gText_BattleSwitchWhich5);
+    else
+        ConvertIntToDecimalStringN(powerText, power, STR_CONV_MODE_LEFT_ALIGN, 3);
+    if (accuracy < 2)
+        StringCopy(accuracyText, gText_BattleSwitchWhich5);
+    else
+        ConvertIntToDecimalStringN(accuracyText, accuracy, STR_CONV_MODE_LEFT_ALIGN, 3);
+
+    text = StringCopy(text, sText_CategoryStart);
+    text = StringCopy(text, sText_Category);
+    text = StringCopy(text, sText_PowerStart);
+    text = StringCopy(text, sText_Power);
+    text = StringCopy(text, powerText);
+    text = StringCopy(text, sText_AccuracyStart);
+    text = StringCopy(text, sText_Accuracy);
+    text = StringCopy(text, accuracyText);
+    text = StringCopy(text, gText_NewLine);
+    text = StringCopy(text, sText_DescriptionStart);
+    descriptionStart = text;
+    text = StringCopy(text, GetMoveDescription(displayMove));
+    WrapFontIdToFit(descriptionStart, text, FONT_NORMAL, MOVE_INFO_DESCRIPTION_WIDTH);
+    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_DESCRIPTION);
+
+    LoadMoveSplitSpritesheetAndPalette();
+    if (gBattleStruct->moveInfoCategorySpriteId >= MAX_SPRITES
+     || !gSprites[gBattleStruct->moveInfoCategorySpriteId].inUse)
+        gBattleStruct->moveInfoCategorySpriteId = CreateMoveSplitIcon(split, MOVE_INFO_CATEGORY_ICON_X, 56);
+    else
+        StartSpriteAnim(&gSprites[gBattleStruct->moveInfoCategorySpriteId], split);
+
+    CopyWindowToVram(B_WIN_MOVE_DESCRIPTION, COPYWIN_FULL);
+#undef MOVE_INFO_DESCRIPTION_WIDTH
+#undef MOVE_INFO_CATEGORY_ICON_X
+}
+
+static void CloseMoveSelectionDescription(void)
+{
+    gBattleStruct->descriptionSubmenu = FALSE;
+    DestroyMoveSplitIcon(gBattleStruct->moveInfoCategorySpriteId);
+    gBattleStruct->moveInfoCategorySpriteId = MAX_SPRITES;
+    ClearStdWindowAndFrameToTransparent(B_WIN_MOVE_DESCRIPTION, TRUE);
 }
 
 #define FLIP_VERTICAL (0x08 << 8)
@@ -2381,6 +2516,7 @@ static void HandleChooseMoveAfterDma3(u32 battler)
     {
         gBattle_BG0_X = 0;
         gBattle_BG0_Y = DISPLAY_HEIGHT * 2;
+        TryAddMoveInfoWindow();
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
     }
 }

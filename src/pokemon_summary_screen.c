@@ -363,7 +363,29 @@ static void UpdateSkillsPageStatsTitle(void);
 
 // const rom data
 #include "data/text/move_descriptions.h"
+#include "data/text/special_move_descriptions.h"
 #include "data/text/nature_names.h"
+
+const u8 *GetMoveDescription(u16 move)
+{
+    const u8 *description;
+
+    if (move == MOVE_NONE || move >= MOVES_COUNT_ALL)
+        return gNotDoneYetDescription;
+
+    if (move < MOVES_COUNT)
+    {
+        if (gBattleMoves[move].effect == EFFECT_PLACEHOLDER)
+            return gNotDoneYetDescription;
+        description = gMoveDescriptionPointers[move - 1];
+    }
+    else
+    {
+        description = sSpecialMoveDescriptionPointers[move - MOVES_COUNT];
+    }
+
+    return description != NULL ? description : gNotDoneYetDescription;
+}
 
 static const struct BgTemplate sBgTemplates[] =
 {
@@ -1446,8 +1468,10 @@ static const u16 sMarkings_Pal[] = INCBIN_U16("graphics/summary_screen/markings.
 
 void LoadMoveSplitSpritesheetAndPalette()
 {
-    LoadCompressedSpriteSheet(&sSpriteSheet_SplitIcons);
-    LoadSpritePalette(&sSpritePal_SplitIcons);
+    if (GetSpriteTileStartByTag(TAG_SPLIT_ICONS) == 0xFFFF)
+        LoadCompressedSpriteSheet(&sSpriteSheet_SplitIcons);
+    if (IndexOfSpritePaletteTag(TAG_SPLIT_ICONS) == 0xFF)
+        LoadSpritePalette(&sSpritePal_SplitIcons);
 }
 
 u8 CreateMoveSplitIcon(u32 split, u8 x, u8 y)
@@ -1463,7 +1487,8 @@ u8 CreateMoveSplitIcon(u32 split, u8 x, u8 y)
 
 void DestroyMoveSplitIcon(u8 spriteId)
 {
-    DestroySprite(&gSprites[spriteId]);
+    if (spriteId < MAX_SPRITES && gSprites[spriteId].inUse)
+        DestroySprite(&gSprites[spriteId]);
 }
 
 static u8 ShowSplitIcon(u32 split)
@@ -4865,19 +4890,14 @@ static void Task_PrintUniqueAbilityPage(u8 taskId)
 static void PrintMoveDetails(u16 move)
 {
     u8 windowId = AddWindowFromTemplateList(sPageMovesTemplate, PSS_DATA_WINDOW_MOVE_DESCRIPTION);
-    u8 moveEffect;
     FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
     if (move != MOVE_NONE)
     {
-        moveEffect = gBattleMoves[move].effect;
         if (B_SHOW_SPLIT_ICON == TRUE)
             ShowSplitIcon(GetBattleMoveSplit(move));
         PrintMovePowerAndAccuracy(move);
 
-        if (moveEffect != EFFECT_PLACEHOLDER)
-            PrintTextOnWindow(windowId, gMoveDescriptionPointers[move - 1], 6, 1, 0, 0);
-        else
-            PrintTextOnWindow(windowId, gNotDoneYetDescription, 6, 1, 0, 0);
+        PrintTextOnWindow(windowId, GetMoveDescription(move), 6, 1, 0, 0);
         PutWindowTilemap(windowId);
     }
     else

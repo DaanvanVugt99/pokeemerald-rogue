@@ -26,6 +26,8 @@ SPINDAGFXDIR := graphics/pokemon/spinda/spots
 types := normal fight flying poison ground rock bug ghost steel mystery fire water grass electric psychic ice dragon dark fairy stellar
 contest_types := cool beauty cute smart tough
 
+$(C_BUILDDIR)/battle_interface.o: $(types:%=$(TYPESGFXDIR)/%.4bpp.lz)
+
 ###  ###
 
 $(PARTYMENUGFXDIR)/bg.gbapal: $(PARTYMENUGFXDIR)/bg0.gbapal \
@@ -252,6 +254,9 @@ $(FONTGFXDIR)/narrow.latfont: $(FONTGFXDIR)/latin_narrow.png
 	$(GFX) $< $@
 
 $(FONTGFXDIR)/small_narrow.latfont: $(FONTGFXDIR)/latin_small_narrow.png
+	$(GFX) $< $@
+
+$(FONTGFXDIR)/narrower.latfont: $(FONTGFXDIR)/latin_narrower.png
 	$(GFX) $< $@
 
 $(FONTGFXDIR)/small.hwjpnfont: $(FONTGFXDIR)/japanese_small.png

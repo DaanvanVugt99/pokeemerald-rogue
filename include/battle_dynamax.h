@@ -70,6 +70,7 @@ bool32 IsMoveBlockedByDynamax(u16 move);
 bool32 ShouldUseMaxMove(u16 battlerId, u16 baseMove);
 u16 GetMaxMove(u16 battlerId, u16 baseMove);
 u8 GetMaxMovePower(u16 move);
+u8 GetMaxMovePowerForBattler(u16 battlerId, u16 move);
 bool32 IsMaxMove(u16 move);
 const u8 *GetMaxMoveName(u16 move);
 void ChooseDamageNonTypesString(u8 type);

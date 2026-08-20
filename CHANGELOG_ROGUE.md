@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added an in-battle Move Info panel on L with category, power, accuracy, and
+  adaptively fitted descriptions for normal, Z-, and Max Moves, plus compact
+  summary-style type badges in the Fight menu.
 - Added direct level-move remembering from eligible party Pokémon's summary
   screens, returning to the same Pokémon's Moves page after teaching or
   cancelling.
