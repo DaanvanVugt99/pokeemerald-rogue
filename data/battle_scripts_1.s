@@ -472,6 +472,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectOrderUp                 @ EFFECT_ORDER_UP
 	.4byte BattleScript_EffectSpicyExtract            @ EFFECT_SPICY_EXTRACT
 	.4byte BattleScript_EffectPsychicNoiseHit         @ EFFECT_PSYCHIC_NOISE
+	.4byte BattleScript_EffectHit                     @ EFFECT_DRAGON_DARTS
 
 BattleScript_EffectGlaiveRush::
 	call BattleScript_EffectHit_Ret
@@ -9120,6 +9121,7 @@ BattleScript_AttackerFormChangeEnd3::
 
 BattleScript_AttackerFormChangeEnd3NoPopup::
 	call BattleScript_AttackerFormChangeNoPopup
+	sethword sABILITY_OVERWRITE, 0
 	end3
 
 BattleScript_AttackerFormChangeWithString::

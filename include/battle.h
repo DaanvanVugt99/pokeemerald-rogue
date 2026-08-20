@@ -225,6 +225,9 @@ struct SpecialStatus
     u8 switchInRetaliateCharmDone:1;
     u8 switchInStandCharmDone:1;
     u8 switchOutAbilityDone:1;
+    u8 symbiosisBerryConsumed:1;
+    u8 dragonDartsSingleTarget:1;
+    u8 dragonDartsFollowMe:1;
     u8 gemParam;
     // End of byte
     u8 gemBoost:1;

@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added canonical Dragon Darts targeting so its two strikes split between valid
+  opponents in double battles and redirect around protected, immune, absent,
+  or otherwise untargetable opponents.
 - Added battle-entry sprite animations for the remaining Gen VII roster,
   Alolan forms, selected Gen VIII species, and the Gen I Mega Evolutions,
   ported from five merged pokeemerald-expansion animation batches with their
@@ -328,6 +331,12 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed multi-target previews leaving the acting battler's target bounce active
+  after confirming or cancelling a move.
+- Fixed Hunger Switch leaving its name in the next Ability popup after Morpeko's
+  end-of-turn form change.
+- Fixed spread moves consuming a resistance Berry received through Symbiosis a
+  second time.
 - Prevented missing move-animation palettes from causing out-of-bounds palette
   writes during Night Slash, Magical Leaf, and Aurora Beam.
 - Restored the title and menu windows in the player customization screen by

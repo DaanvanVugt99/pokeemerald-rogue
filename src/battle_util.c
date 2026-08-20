@@ -679,6 +679,8 @@ void HandleAction_UseMove(void)
         && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gSideTimers[side].followmeTarget))
     {
         gBattleStruct->moveTarget[gBattlerAttacker] = gBattlerTarget = gSideTimers[side].followmeTarget; // follow me moxie fix
+        if (gBattleMoves[gCurrentMove].effect == EFFECT_DRAGON_DARTS)
+            gSpecialStatuses[gBattlerAttacker].dragonDartsFollowMe = TRUE;
     }
     else if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
            && gSideTimers[side].followmeTimer == 0
@@ -4656,6 +4658,12 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 {
                     gMultiHitCounter = gBattleMoves[gCurrentMove].strikeCount;
                     PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 3, 0)
+
+                    if (gBattleMoves[gCurrentMove].effect == EFFECT_DRAGON_DARTS
+                     && !gSpecialStatuses[gBattlerAttacker].dragonDartsFollowMe
+                     && CanDragonDartsTargetPartner(gBattlerAttacker, gBattlerTarget)
+                     && IsDragonDartsTargetFullyImmune(gBattlerAttacker, gBattlerTarget))
+                        gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
                 }
 
                 isMultiHitMove = TRUE;
@@ -28429,6 +28437,72 @@ bool32 CanTargetBattler(u32 battlerAtk, u32 battlerDef, u16 move)
       && GetBattlerSide(battlerAtk) == GetBattlerSide(battlerDef))
         return FALSE;
     return TRUE;
+}
+
+bool32 CanDragonDartsTargetPartner(u32 battlerAtk, u32 battlerDef)
+{
+    return (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+        && IsBattlerAlive(BATTLE_PARTNER(battlerDef))
+        && battlerDef != BATTLE_PARTNER(battlerAtk);
+}
+
+static bool32 HasDragonDartsAbsorbingAbility(u32 battler, u32 moveType)
+{
+    switch (moveType)
+    {
+    case TYPE_ELECTRIC:
+        return HasBattlerAbility(battler, ABILITY_VOLT_ABSORB)
+            || HasBattlerAbility(battler, ABILITY_MOTOR_DRIVE)
+            || HasBattlerAbility(battler, ABILITY_LIGHTNING_ROD);
+    case TYPE_WATER:
+        return HasBattlerAbility(battler, ABILITY_WATER_ABSORB)
+            || HasBattlerAbility(battler, ABILITY_DRY_SKIN)
+            || HasBattlerAbility(battler, ABILITY_STORM_DRAIN)
+            || HasBattlerAbility(battler, ABILITY_LOW_TIDE);
+    case TYPE_GRASS:
+        return HasBattlerAbility(battler, ABILITY_SAP_SIPPER);
+    case TYPE_FAIRY:
+        return HasBattlerAbility(battler, ABILITY_FAIRY_ABSORB);
+    case TYPE_ROCK:
+        return HasBattlerAbility(battler, ABILITY_MORTAR_SHELL);
+    case TYPE_BUG:
+        return HasBattlerAbility(battler, ABILITY_INSECTIVORE);
+    case TYPE_FLYING:
+        return HasBattlerAbility(battler, ABILITY_AERODYNAMIC);
+    case TYPE_FIRE:
+        return HasBattlerAbility(battler, ABILITY_FLASH_FREEZE)
+            || HasBattlerAbility(battler, ABILITY_MELTDOWN)
+            || HasBattlerAbility(battler, ABILITY_WELL_BAKED_BODY)
+            || (HasBattlerAbility(battler, ABILITY_FLASH_FIRE)
+             && (B_FLASH_FIRE_FROZEN >= GEN_5 || !(gBattleMons[battler].status1 & STATUS1_FREEZE)));
+    case TYPE_GROUND:
+        return HasBattlerAbility(battler, ABILITY_EARTH_EATER);
+    }
+
+    return FALSE;
+}
+
+bool32 IsDragonDartsTargetFullyImmune(u32 battlerAtk, u32 battlerDef)
+{
+    u32 moveType;
+    u32 movePower = GetMovePowerForShieldAbilities(battlerAtk, MOVE_DRAGON_DARTS);
+
+    GET_MOVE_TYPE(MOVE_DRAGON_DARTS, moveType);
+
+    if (CalcTypeEffectivenessMultiplier(MOVE_DRAGON_DARTS, moveType, battlerAtk, battlerDef, GetBattlerAbility(battlerDef), FALSE) == UQ_4_12(0.0)
+     || IsBattlerProtected(battlerDef, MOVE_DRAGON_DARTS)
+     || IsSemiInvulnerable(battlerDef, MOVE_DRAGON_DARTS)
+     || HasDragonDartsAbsorbingAbility(battlerDef, moveType)
+     || (gBattleMoves[MOVE_DRAGON_DARTS].windMove && HasBattlerAbility(battlerDef, ABILITY_WIND_RIDER)))
+        return TRUE;
+
+    if ((movePower >= BLAST_SHIELD_MIN_POWER && HasBattlerAbility(battlerDef, ABILITY_BLAST_SHIELD))
+     || (movePower <= FLAK_SHIELD_MAX_POWER && HasBattlerAbility(battlerDef, ABILITY_FLAK_SHIELD))
+     || (gBattleMoves[MOVE_DRAGON_DARTS].soundMove && HasBattlerAbility(battlerDef, ABILITY_SOUNDPROOF))
+     || (gBattleMoves[MOVE_DRAGON_DARTS].ballisticMove && HasBattlerAbility(battlerDef, ABILITY_BULLETPROOF)))
+        return TRUE;
+
+    return FALSE;
 }
 
 static void SetRandomMultiHitCounter()

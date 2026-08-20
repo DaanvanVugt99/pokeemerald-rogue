@@ -445,6 +445,7 @@ static void RemoveAllTerrains(void);
 static u16 GetStatLossPreventionAbility(u32 battler, u32 statId, bool8 isIntimidate);
 
 static void Cmd_attackcanceler(void);
+static void AccuracyCheck(const u8 *nextInstr, const u8 *failInstr, u16 move);
 static void Cmd_accuracycheck(void);
 static void Cmd_attackstring(void);
 static void Cmd_ppreduce(void);
@@ -2128,30 +2129,22 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     return calc;
 }
 
-static void Cmd_accuracycheck(void)
+static void AccuracyCheck(const u8 *nextInstr, const u8 *failInstr, u16 move)
 {
-    CMD_ARGS(const u8 *failInstr, u16 move);
-
-    u32 type, move = cmd->move;
+    u32 type;
     u32 moveTarget = GetBattlerMoveTargetType(gBattlerAttacker, move);
     u32 abilityAtk = GetBattlerAbility(gBattlerAttacker);
     u32 abilityDef = GetBattlerAbility(gBattlerTarget);
     u32 holdEffectAtk = GetBattlerHoldEffect(gBattlerAttacker, TRUE);
 
-    if (move == ACC_CURR_MOVE)
-        move = gCurrentMove;
-
-    if (TryActivateCrashProtocol(gBattlescriptCurrInstr))
-        return;
-
     if (move == NO_ACC_CALC_CHECK_LOCK_ON)
     {
         if (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
-            gBattlescriptCurrInstr = cmd->nextInstr;
+            gBattlescriptCurrInstr = nextInstr;
         else if (gStatuses3[gBattlerTarget] & (STATUS3_SEMI_INVULNERABLE))
-            gBattlescriptCurrInstr = cmd->failInstr;
+            gBattlescriptCurrInstr = failInstr;
         else if (!JumpIfMoveAffectedByProtect(gCurrentMove))
-            gBattlescriptCurrInstr = cmd->nextInstr;
+            gBattlescriptCurrInstr = nextInstr;
     }
     else if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_2ND_HIT
         || (gSpecialStatuses[gBattlerAttacker].multiHitOn
@@ -2159,7 +2152,7 @@ static void Cmd_accuracycheck(void)
         || !(gBattleMoves[move].effect == EFFECT_TRIPLE_KICK || gBattleMoves[move].effect == EFFECT_POPULATION_BOMB))))
     {
         // No acc checks for second hit of Parental Bond or multi hit moves, except Triple Kick/Triple Axel/Population Bomb
-        gBattlescriptCurrInstr = cmd->nextInstr;
+        gBattlescriptCurrInstr = nextInstr;
     }
     else
     {
@@ -2195,6 +2188,19 @@ static void Cmd_accuracycheck(void)
             if (holdEffectAtk == HOLD_EFFECT_BLUNDER_POLICY)
                 gBattleStruct->blunderPolicy = TRUE;    // Only activates from missing through acc/evasion checks
 
+            if (gBattleMoves[gCurrentMove].effect == EFFECT_DRAGON_DARTS
+             && !gSpecialStatuses[gBattlerAttacker].dragonDartsSingleTarget
+             && !gSpecialStatuses[gBattlerAttacker].dragonDartsFollowMe
+             && CanDragonDartsTargetPartner(gBattlerAttacker, gBattlerTarget)
+             && !IsDragonDartsTargetFullyImmune(gBattlerAttacker, BATTLE_PARTNER(gBattlerTarget)))
+            {
+                gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
+                gSpecialStatuses[gBattlerAttacker].dragonDartsSingleTarget = TRUE;
+                gMoveResultFlags &= ~MOVE_RESULT_MISSED;
+                gBattlescriptCurrInstr = nextInstr;
+                return;
+            }
+
             if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE &&
                 (moveTarget == MOVE_TARGET_BOTH || moveTarget == MOVE_TARGET_FOES_AND_ALLY))
                 gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_ATK;
@@ -2206,6 +2212,57 @@ static void Cmd_accuracycheck(void)
         }
         JumpIfMoveFailed(7, move);
     }
+}
+
+static void Cmd_accuracycheck(void)
+{
+    CMD_ARGS(const u8 *failInstr, u16 move);
+    u16 move = cmd->move;
+
+    if (move == ACC_CURR_MOVE)
+        move = gCurrentMove;
+
+    if (TryActivateCrashProtocol(gBattlescriptCurrInstr))
+        return;
+
+    if (gBattleMoves[gCurrentMove].effect == EFFECT_DRAGON_DARTS
+     && !gSpecialStatuses[gBattlerAttacker].dragonDartsFollowMe
+     && !gSpecialStatuses[gBattlerAttacker].multiHitOn
+     && CanDragonDartsTargetPartner(gBattlerAttacker, gBattlerTarget))
+    {
+        u32 partner = BATTLE_PARTNER(gBattlerTarget);
+        u32 abilityAtk = GetBattlerAbility(gBattlerAttacker);
+        u32 abilityDef = GetBattlerAbility(partner);
+        u32 holdEffectAtk = GetBattlerHoldEffect(gBattlerAttacker, TRUE);
+        u32 accuracy;
+
+        if (IsDragonDartsTargetFullyImmune(gBattlerAttacker, partner))
+        {
+            gSpecialStatuses[gBattlerAttacker].dragonDartsSingleTarget = TRUE;
+        }
+        else if (abilityAtk != ABILITY_NO_GUARD
+              && abilityDef != ABILITY_NO_GUARD
+              && !(gStatuses3[partner] & STATUS3_ALWAYS_HITS
+                && gDisableStructs[partner].battlerWithSureHit == gBattlerAttacker)
+              && !(gStatuses3[partner] & STATUS3_TELEKINESIS)
+              && !(gStatuses4[partner] & STATUS4_GLAIVE_RUSH)
+              && !gBattleStruct->zmove.active)
+        {
+            accuracy = GetTotalAccuracy(
+                gBattlerAttacker,
+                partner,
+                move,
+                abilityAtk,
+                abilityDef,
+                holdEffectAtk,
+                GetBattlerHoldEffect(partner, TRUE)
+            );
+            if (!RandomPercentage(RNG_ACCURACY, accuracy))
+                gSpecialStatuses[gBattlerAttacker].dragonDartsSingleTarget = TRUE;
+        }
+    }
+
+    AccuracyCheck(cmd->nextInstr, cmd->failInstr, move);
 }
 
 static void Cmd_attackstring(void)
@@ -7545,6 +7602,13 @@ static void Cmd_moveend(void)
         }
         case MOVEEND_MULTIHIT_MOVE:
         {
+            bool32 dragonDartsCanChangeTarget = gBattleMoves[gCurrentMove].effect == EFFECT_DRAGON_DARTS
+                                              && !gSpecialStatuses[gBattlerAttacker].dragonDartsSingleTarget
+                                              && !gSpecialStatuses[gBattlerAttacker].dragonDartsFollowMe
+                                              && gBattleStruct->moveTarget[gBattlerAttacker] == gBattlerTarget
+                                              && CanDragonDartsTargetPartner(gBattlerAttacker, gBattlerTarget)
+                                              && !IsDragonDartsTargetFullyImmune(gBattlerAttacker, BATTLE_PARTNER(gBattlerTarget));
+
             if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
             && gMultiHitCounter
@@ -7553,7 +7617,7 @@ static void Cmd_moveend(void)
                 gMultiHitCounter--;
 
                 gBattleScripting.multihitString[4]++;
-                if (gMultiHitCounter == 0 || !gBattleMons[gBattlerTarget].hp)
+                if (gMultiHitCounter == 0 || (!gBattleMons[gBattlerTarget].hp && !dragonDartsCanChangeTarget))
                 {
                     BattleScriptPushCursor();
                     if (gBattleMoves[gCurrentMove].argument == MOVE_EFFECT_SCALE_SHOT && !NoAliveMonsForEitherParty())
@@ -7568,10 +7632,8 @@ static void Cmd_moveend(void)
                 }
                 else
                 {
-                    if (gCurrentMove == MOVE_DRAGON_DARTS)
-                    {
-                        // TODO
-                    }
+                    if (dragonDartsCanChangeTarget)
+                        gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
 
                     if (gBattleMons[gBattlerAttacker].hp
                     && gBattleMons[gBattlerTarget].hp
@@ -8792,11 +8854,12 @@ static void Cmd_moveend(void)
         case MOVEEND_SYMBIOSIS:
             for (i = 0; i < gBattlersCount; i++)
             {
-                if ((gSpecialStatuses[i].berryReduced
+                if ((gSpecialStatuses[i].symbiosisBerryConsumed
                       || (B_SYMBIOSIS_GEMS >= GEN_7 && gSpecialStatuses[i].gemBoost))
                     && SYMBIOSIS_CHECK(i, BATTLE_PARTNER(i)))
                 {
                     BestowItem(BATTLE_PARTNER(i), i);
+                    gSpecialStatuses[i].berryReduced = FALSE;
                     gLastUsedAbility = gBattleMons[BATTLE_PARTNER(i)].ability;
                     gBattleScripting.battler = gBattlerAbility = BATTLE_PARTNER(i);
                     gBattlerAttacker = i;
@@ -8804,6 +8867,7 @@ static void Cmd_moveend(void)
                     gBattlescriptCurrInstr = BattleScript_SymbiosisActivates;
                     effect = TRUE;
                 }
+                gSpecialStatuses[i].symbiosisBerryConsumed = FALSE;
             }
             gBattleScripting.moveendState++;
             break;
@@ -8862,6 +8926,9 @@ static void Cmd_moveend(void)
             gSpecialStatuses[gBattlerAttacker].damagedMons = 0;
             gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = 0;
             gSpecialStatuses[gBattlerAttacker].flockStepStatRaised = FALSE;
+            gSpecialStatuses[gBattlerAttacker].dragonDartsSingleTarget = FALSE;
+            gSpecialStatuses[gBattlerAttacker].dragonDartsFollowMe = FALSE;
+            gSpecialStatuses[gBattlerTarget].symbiosisBerryConsumed = FALSE;
             gSpecialStatuses[gBattlerTarget].berryReduced = FALSE;
             gBattleScripting.moveEffect = 0;
             if (gBattleResources->flags->flags[gBattlerAttacker] & RESOURCE_FLAG_FALLEN_SKIES)
@@ -10922,6 +10989,8 @@ static void Cmd_removeitem(void)
 
     battler = GetBattlerForBattleScript(cmd->battler);
     itemId = gBattleMons[battler].item;
+    if (gSpecialStatuses[battler].berryReduced)
+        gSpecialStatuses[battler].symbiosisBerryConsumed = TRUE;
     // Popped Air Balloon cannot be restored by any means.
     // Corroded items cannot be restored either.
     if (GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_AIR_BALLOON

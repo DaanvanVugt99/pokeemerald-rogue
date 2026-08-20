@@ -449,7 +449,8 @@
 #define EFFECT_ORDER_UP                     443
 #define EFFECT_SPICY_EXTRACT                444
 #define EFFECT_PSYCHIC_NOISE                445
+#define EFFECT_DRAGON_DARTS                 446
 
-#define NUM_BATTLE_MOVE_EFFECTS             446
+#define NUM_BATTLE_MOVE_EFFECTS             447
 
 #endif  // GUARD_CONSTANTS_BATTLE_MOVE_EFFECTS_H

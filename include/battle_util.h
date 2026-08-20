@@ -316,6 +316,8 @@ u16 GetUsedHeldItem(u32 battler);
 bool32 IsBattlerWeatherAffected(u32 battler, u32 weatherFlags);
 u32 GetBattlerMoveTargetType(u32 battler, u32 move);
 bool32 CanTargetBattler(u32 battlerAtk, u32 battlerDef, u16 move);
+bool32 CanDragonDartsTargetPartner(u32 battlerAtk, u32 battlerDef);
+bool32 IsDragonDartsTargetFullyImmune(u32 battlerAtk, u32 battlerDef);
 void CopyMonLevelAndBaseStatsToBattleMon(u32 battler, struct Pokemon *mon);
 void CopyMonAbilityAndTypesToBattleMon(u32 battler, struct Pokemon *mon);
 void RecalcBattlerStats(u32 battler, struct Pokemon *mon);
