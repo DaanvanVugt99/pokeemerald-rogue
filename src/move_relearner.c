@@ -199,6 +199,8 @@ static EWRAM_DATA struct {
     bool8 showContestInfo;
     u8 teachMoveState;
     bool8 inPartyMenu : 1;
+    bool8 fromSummaryScreen : 1;
+    MainCallback summaryReturnCallback;
 } sMoveRelearnerMenuSate = {0};
 
 static const u16 sUI_Pal[] = INCBIN_U16("graphics/interface/ui_learn_move.gbapal");
@@ -386,7 +388,7 @@ static void CreateUISprites(void);
 static void CB2_MoveRelearnerMain(void);
 static void Task_WaitForFadeOut(u8 taskId);
 static void Task_WaitForFadeOutFromPartyMenu(u8 taskId);
-static void CB2_InitLearnMove(void);
+void CB2_InitLearnMove(void);
 static void CB2_InitLearnMoveReturnFromSelectMove(void);
 static void InitMoveRelearnerBackgroundLayers(void);
 static void AddScrollArrows(void);
@@ -449,6 +451,8 @@ void TeachMoveSetContextUnbound(void)
 void TeachMoveFromContext(void)
 {
     sMoveRelearnerMenuSate.inPartyMenu = FALSE;
+    sMoveRelearnerMenuSate.fromSummaryScreen = FALSE;
+    sMoveRelearnerMenuSate.summaryReturnCallback = NULL;
 
     LockPlayerFieldControls();
     CreateTask(Task_WaitForFadeOut, 10);
@@ -459,9 +463,18 @@ void TeachMoveFromContext(void)
 void TeachMoveFromContextFromTask(u8 taskId)
 {
     sMoveRelearnerMenuSate.inPartyMenu = TRUE;
+    sMoveRelearnerMenuSate.fromSummaryScreen = FALSE;
+    sMoveRelearnerMenuSate.summaryReturnCallback = NULL;
 
     // no fade needed (expected to already be ready when this is called)
     gTasks[taskId].func = Task_WaitForFadeOutFromPartyMenu;
+}
+
+void TeachMoveFromSummaryScreen(MainCallback returnCallback)
+{
+    sMoveRelearnerMenuSate.inPartyMenu = TRUE;
+    sMoveRelearnerMenuSate.fromSummaryScreen = TRUE;
+    sMoveRelearnerMenuSate.summaryReturnCallback = returnCallback;
 }
 
 // Script arguments: The pokemon to teach is in VAR_0x8004
@@ -469,6 +482,9 @@ void TeachMoveFromContextFromTask(u8 taskId)
 void TeachMoveRelearnerMove(void)
 {
     sMoveRelearnerMenuSate.teachMoveState = TEACH_STATE_RELEARN;
+    sMoveRelearnerMenuSate.inPartyMenu = FALSE;
+    sMoveRelearnerMenuSate.fromSummaryScreen = FALSE;
+    sMoveRelearnerMenuSate.summaryReturnCallback = NULL;
 
     LockPlayerFieldControls();
     CreateTask(Task_WaitForFadeOut, 10);
@@ -591,7 +607,7 @@ static void Task_WaitForFadeOutFromPartyMenu(u8 taskId)
     }
 }
 
-static void CB2_InitLearnMove(void)
+void CB2_InitLearnMove(void)
 {
     ResetSpriteData();
     FreeAllSpritePalettes();
@@ -928,9 +944,18 @@ static void DoMoveRelearnerMain(void)
     case MENU_STATE_RETURN_TO_FIELD:
         if (!gPaletteFade.active)
         {
+            u8 partyMon = sMoveRelearnerStruct->partyMon;
+            MainCallback summaryReturnCallback = sMoveRelearnerMenuSate.summaryReturnCallback;
+
             FreeMoveRelearnerResources();
 
-            if(sMoveRelearnerMenuSate.inPartyMenu)
+            if (sMoveRelearnerMenuSate.fromSummaryScreen)
+            {
+                sMoveRelearnerMenuSate.fromSummaryScreen = FALSE;
+                sMoveRelearnerMenuSate.summaryReturnCallback = NULL;
+                ShowPartyPokemonSummaryScreenOnMovesPage(partyMon, summaryReturnCallback);
+            }
+            else if(sMoveRelearnerMenuSate.inPartyMenu)
             {
                 ReturnToPartyMenuSubMenu();
             }

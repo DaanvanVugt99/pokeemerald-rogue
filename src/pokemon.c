@@ -2089,10 +2089,10 @@ static void DecryptBoxMon(struct BoxPokemon *boxMon)
 
 static const u8 sSubstructOffsets[4][24] =
 {
-    [SUBSTRUCT_TYPE_0] = {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3},
-    [SUBSTRUCT_TYPE_1] = {1, 1, 2, 2, 3, 3, 0, 0, 2, 2, 3, 3, 0, 0, 1, 1, 3, 3, 0, 0, 1, 1, 2, 2},
-    [SUBSTRUCT_TYPE_2] = {2, 3, 1, 3, 1, 2, 2, 3, 0, 3, 0, 2, 1, 3, 0, 3, 0, 1, 1, 2, 0, 2, 0, 1},
-    [SUBSTRUCT_TYPE_3] = {3, 2, 3, 1, 2, 1, 3, 2, 3, 0, 2, 0, 3, 1, 3, 0, 1, 0, 2, 1, 2, 0, 1, 0},
+    [SUBSTRUCT_TYPE_0] = {0, 0, 0, 0, 0, 0, 1, 1, 2, 3, 2, 3, 1, 1, 2, 3, 2, 3, 1, 1, 2, 3, 2, 3},
+    [SUBSTRUCT_TYPE_1] = {1, 1, 2, 3, 2, 3, 0, 0, 0, 0, 0, 0, 2, 3, 1, 1, 3, 2, 2, 3, 1, 1, 3, 2},
+    [SUBSTRUCT_TYPE_2] = {2, 3, 1, 1, 3, 2, 2, 3, 1, 1, 3, 2, 0, 0, 0, 0, 0, 0, 3, 2, 3, 2, 1, 1},
+    [SUBSTRUCT_TYPE_3] = {3, 2, 3, 2, 1, 1, 3, 2, 3, 2, 1, 1, 3, 2, 3, 2, 1, 1, 0, 0, 0, 0, 0, 0},
 };
 
 ARM_FUNC NOINLINE static u32 ConstantMod24(u32 value)
@@ -7210,6 +7210,54 @@ u8 GetLevelUpMovesBySpecies(u16 species, u16 *moves)
 u8 GetNumberOfRelearnableMoves(struct Pokemon *mon)
 {
     return GetNumberOfRelearnableMovesForContext(mon);
+}
+
+bool8 HasLevelUpMovesToRelearn(struct Pokemon *mon)
+{
+    u16 learnedMoves[MAX_MON_MOVES];
+    u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+    u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+    u32 rewardMonId = RogueGift_GetCustomMonId(mon);
+    u16 i;
+    u16 j;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        learnedMoves[i] = GetMonData(mon, MON_DATA_MOVE1 + i, NULL);
+
+    if (rewardMonId != 0)
+    {
+        u16 moveCount = RogueGift_GetCustomMonMoveCount(rewardMonId);
+
+        for (i = 0; i < moveCount; i++)
+        {
+            u16 move = RogueGift_GetCustomMonMove(rewardMonId, i);
+
+            if (move == MOVE_NONE)
+                break;
+
+            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != move; j++)
+                ;
+
+            if (j == MAX_MON_MOVES)
+                return TRUE;
+        }
+    }
+
+    for (i = 0; gRoguePokemonProfiles[species].levelUpMoves[i].move != MOVE_NONE; i++)
+    {
+        u16 move = gRoguePokemonProfiles[species].levelUpMoves[i].move;
+
+        if (gRoguePokemonProfiles[species].levelUpMoves[i].level > level)
+            continue;
+
+        for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != move; j++)
+            ;
+
+        if (j == MAX_MON_MOVES)
+            return TRUE;
+    }
+
+    return FALSE;
 }
 
 u16 SpeciesToPokedexNum(u16 species)

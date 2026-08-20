@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added direct level-move remembering from eligible party Pokémon's summary
+  screens, returning to the same Pokémon's Moves page after teaching or
+  cancelling.
 - Added an optional `LTO=1` release-build mode with isolated build artifacts
   and a linker layout that recovers ROM and working-memory headroom.
 - Added canonical Dragon Darts targeting so its two strikes split between valid
@@ -124,6 +127,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Polished the Pokémon summary screen with explicit Stats, IVs, EVs, and Base
+  Stats headers plus clearer move-reordering controls.
 - Optimized encrypted Pokémon data access by combining checksum and encryption
   passes and replacing repeated substructure searches with constant-time
   lookups, accelerating Pokémon-heavy Rogue generation and UI paths.
@@ -336,6 +341,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Corrected the optimized Pokémon substructure lookup table so party Pokémon
+  retain their canonical data layout across all personality values.
 - Fixed multi-target previews leaving the acting battler's target bounce active
   after confirming or cancelling a move.
 - Fixed Hunger Switch leaving its name in the next Ability popup after Morpeko's
