@@ -77,7 +77,7 @@ SINGLE_BATTLE_TEST("Winter Stash doubles Micle Berry accuracy as a unique abilit
         TURN { MOVE(player, MOVE_HYPNOSIS); MOVE(opponent, MOVE_DRAGON_RAGE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_RAGE, opponent);
-        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_BERRY, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPNOSIS, player);
     } THEN {
         EXPECT(opponent->status1 & STATUS1_SLEEP);

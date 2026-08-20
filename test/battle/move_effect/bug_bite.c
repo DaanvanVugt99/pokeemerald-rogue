@@ -125,11 +125,11 @@ SINGLE_BATTLE_TEST("Tanga Berry activates before Bug Bite")
         TURN { MOVE(player, MOVE_BUG_BITE); }
     } SCENE {
         MESSAGE("Wobbuffet used Bug Bite!");
-        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_BERRY, opponent);
         MESSAGE("Foe Wobbuffet ate its Tanga Berry!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_BUG_BITE, player);
         HP_BAR(opponent);
-        MESSAGE("Tanga Berry weakened the damage to Foe Wobbuffet!");
+        MESSAGE("Foe Wobbuffet's Tanga Berry lessened the damage it took!");
     } THEN {
         EXPECT_EQ(player->item, ITEM_NONE);
     }

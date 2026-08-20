@@ -5,6 +5,7 @@
 #include "decompress.h"
 #include "gpu_regs.h"
 #include "graphics.h"
+#include "item_icon.h"
 #include "main.h"
 #include "math_util.h"
 #include "palette.h"
@@ -4438,6 +4439,32 @@ static void AnimKnockOffItem(struct Sprite *sprite)
     }
 }
 
+void AnimTask_KnockOffItem(u8 taskId)
+{
+    u8 iconSpriteId = AddItemIconSprite(ANIM_TAG_ITEM_BAG, ANIM_TAG_ITEM_BAG, gLastUsedItem);
+
+    if (iconSpriteId != MAX_SPRITES)
+    {
+        struct Sprite *sprite = &gSprites[iconSpriteId];
+
+        sprite->x = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_X);
+        sprite->y = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_Y)
+                  + GetBattlerSpriteCoordAttr(gBattleAnimTarget, BATTLER_COORD_ATTR_HEIGHT) / 2;
+        sprite->oam.priority = 2;
+        sprite->oam.affineMode = ST_OAM_AFFINE_NORMAL;
+        sprite->affineAnims = gFallingBagAffineAnimTable;
+        sprite->callback = AnimKnockOffItem;
+
+        CalcCenterToCornerVec(sprite, sprite->oam.shape, sprite->oam.size, sprite->oam.affineMode);
+        InitSpriteAffineAnim(sprite);
+        gAnimVisualTaskCount++;
+    }
+
+    FreeSpriteTilesByTag(ANIM_TAG_ITEM_BAG);
+    FreeSpritePaletteByTag(ANIM_TAG_ITEM_BAG);
+    DestroyAnimVisualTask(taskId);
+}
+
 // Animates a heal particle upward.
 // arg 0: initial x pixel offset
 // arg 1: initial y pixel offset
@@ -4481,6 +4508,32 @@ static void AnimItemSteal(struct Sprite *sprite)
 
     sprite->data[4] = 60;
     sprite->callback = AnimItemSteal_Step3;
+}
+
+void AnimTask_StealItem(u8 taskId)
+{
+    u8 iconSpriteId = AddItemIconSprite(ANIM_TAG_ITEM_BAG, ANIM_TAG_ITEM_BAG, gLastUsedItem);
+
+    if (iconSpriteId != MAX_SPRITES)
+    {
+        struct Sprite *sprite = &gSprites[iconSpriteId];
+
+        sprite->x = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_X);
+        sprite->y = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_Y)
+                  + GetBattlerSpriteCoordAttr(gBattleAnimTarget, BATTLER_COORD_ATTR_HEIGHT) / 2;
+        sprite->oam.priority = 2;
+        sprite->oam.affineMode = ST_OAM_AFFINE_NORMAL;
+        sprite->affineAnims = gFallingBagAffineAnimTable;
+        sprite->callback = AnimItemSteal;
+
+        CalcCenterToCornerVec(sprite, sprite->oam.shape, sprite->oam.size, sprite->oam.affineMode);
+        InitSpriteAffineAnim(sprite);
+        gAnimVisualTaskCount++;
+    }
+
+    DestroyAnimVisualTask(taskId);
+    FreeSpriteTilesByTag(ANIM_TAG_ITEM_BAG);
+    FreeSpritePaletteByTag(ANIM_TAG_ITEM_BAG);
 }
 
 static void AnimItemSteal_Step3(struct Sprite *sprite)

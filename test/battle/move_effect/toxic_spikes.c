@@ -18,7 +18,7 @@ SINGLE_BATTLE_TEST("Toxic Spikes inflicts poison on switch in")
         TURN {}
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         MESSAGE("2 sent out Wynaut!");
         ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, opponent);
         STATUS_ICON(opponent, poison: TRUE);
@@ -38,9 +38,9 @@ SINGLE_BATTLE_TEST("Toxic Spikes inflicts bad poison on switch in")
         TURN {}
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         MESSAGE("2 sent out Wynaut!");
         ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, opponent);
         STATUS_ICON(opponent, badPoison: TRUE);
@@ -61,9 +61,9 @@ SINGLE_BATTLE_TEST("Toxic Spikes fails after 2 layers")
         TURN {}
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         MESSAGE("Wobbuffet used Toxic Spikes!");
         MESSAGE("But it failed!");
         MESSAGE("2 sent out Wynaut!");
@@ -176,7 +176,7 @@ SINGLE_BATTLE_TEST("Toxic Spikes are removed by grounded Poison-type Pokémon on
     } SCENE {
         if (grounded) {
             NOT STATUS_ICON(opponent, poison: TRUE);
-            MESSAGE("The poison spikes disappeared from around the opposing team's feet!");
+            MESSAGE("The Toxic Spikes disappeared from around the opposing side!");
             NOT STATUS_ICON(opponent, poison: TRUE);
         } else {
             NOT STATUS_ICON(opponent, poison: TRUE);
@@ -204,7 +204,7 @@ SINGLE_BATTLE_TEST("Toxic Spikes are removed by Poison-type Pokémon affected by
         TURN { SWITCH(opponent, 0); }
     } SCENE {
         NOT STATUS_ICON(opponent, poison: TRUE);
-        MESSAGE("The poison spikes disappeared from around the opposing team's feet!");
+        MESSAGE("The Toxic Spikes disappeared from around the opposing side!");
         NOT STATUS_ICON(opponent, poison: TRUE);
     }
 }
@@ -224,7 +224,7 @@ SINGLE_BATTLE_TEST("Toxic Spikes inflicts poison on switch in after Primal Rever
     } SCENE {
         MESSAGE("Foe Wobbuffet used Toxic Spikes!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, opponent);
-        MESSAGE("Poison Spikes were scattered all around your team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around your side!");
         // Switch in
         MESSAGE("Go! Groudon!");
         ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_PSN, player);

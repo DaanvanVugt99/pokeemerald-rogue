@@ -23,7 +23,7 @@ SINGLE_BATTLE_TEST("Burning Heart scorches the opposing field when the user uses
         TURN { MOVE(player, MOVE_EMBER); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_BURNING_HEART);
-        MESSAGE("A sea of fire enveloped the opposing team!");
+        MESSAGE("A sea of fire enveloped the opposing side!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_SEA_OF_FIRE);
         EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_SEA_OF_FIRE));
@@ -43,7 +43,7 @@ SINGLE_BATTLE_TEST("Burning Heart only triggers once per switch-in")
         TURN { MOVE(player, MOVE_EMBER); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_BURNING_HEART);
-        MESSAGE("The sea of fire around the opposing team disappeared!");
+        MESSAGE("The sea of fire around the opposing side disappeared!");
         NOT ABILITY_POPUP(player, ABILITY_BURNING_HEART);
     } THEN {
         EXPECT(!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_SEA_OF_FIRE));
@@ -105,7 +105,7 @@ SINGLE_BATTLE_TEST("Iron Will creates a Swamp on the opposing field when the use
         TURN { MOVE(player, MOVE_RAZOR_LEAF); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_IRON_WILL);
-        MESSAGE("A swamp enveloped the opposing team!");
+        MESSAGE("A swamp enveloped the opposing side!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_SWAMP);
         EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_SWAMP));
@@ -125,7 +125,7 @@ SINGLE_BATTLE_TEST("Iron Will only triggers once per switch-in")
         TURN { MOVE(player, MOVE_RAZOR_LEAF); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_IRON_WILL);
-        MESSAGE("The swamp around the opposing team disappeared!");
+        MESSAGE("The swamp around the opposing side disappeared!");
         NOT ABILITY_POPUP(player, ABILITY_IRON_WILL);
     } THEN {
         EXPECT(!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_SWAMP));

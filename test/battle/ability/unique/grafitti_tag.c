@@ -15,7 +15,7 @@ SINGLE_BATTLE_TEST("Grafitti Tag makes a tagged foe leave Toxic Spikes when swit
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponent);
         MESSAGE("Grafaiai tagged\nthe opposing Pokemon!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, opponent);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_TOXIC_SPIKES);
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 1);
@@ -36,9 +36,9 @@ SINGLE_BATTLE_TEST("Grafitti Tag is consumed after the tagged foe switches out")
         ABILITY_POPUP(player, ABILITY_GRAFITTI_TAG);
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_GRAFITTI_TAG, opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, opponent);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         NONE_OF {
-            MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+            MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         }
     } THEN {
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 1);
@@ -60,7 +60,7 @@ SINGLE_BATTLE_TEST("Grafitti Tag makes a tagged foe leave Toxic Spikes when fain
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         MESSAGE("Foe Wobbuffet fainted!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
-        MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+        MESSAGE("Toxic Spikes were scattered all around the opposing side!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_TOXIC_SPIKES);
         EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 1);
@@ -81,7 +81,7 @@ SINGLE_BATTLE_TEST("Grafitti Tag does not leave Toxic Spikes when the final foe 
         MESSAGE("Foe Wobbuffet fainted!");
         NONE_OF {
             ANIMATION(ANIM_TYPE_MOVE, MOVE_TOXIC_SPIKES, player);
-            MESSAGE("Poison Spikes were scattered all around the opposing team's feet!");
+            MESSAGE("Toxic Spikes were scattered all around the opposing side!");
         }
     } THEN {
         EXPECT(!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_TOXIC_SPIKES));

@@ -119,6 +119,12 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Improved battle readability with separate 4× and ¼× move-selection labels,
+  actual held-item icons for Knock Off and stealing moves, Berry-eating
+  animations for held Berry effects, and clearer side, hazard, Berry, and
+  battlefield messages.
+- Reclaimed 216 bytes of scarce EWRAM by removing unused save/link debug state
+  and keeping cable-car and TV-show scratch data local to the code that uses it.
 - Ported upstream battle visual polish for gimmick triggers, Mega/Primal
   evolution particles, Gust palette cycling, trainer intro palettes, and a
   batch of updated Pokémon form sprites and icons.

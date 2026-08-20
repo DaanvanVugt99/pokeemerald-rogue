@@ -50,7 +50,7 @@ SINGLE_BATTLE_TEST("Ultra Bastion only triggers on the first switch-in each batt
         ABILITY_POPUP(player, ABILITY_ULTRA_BASTION);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STEALTH_ROCK, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DEFOG, opponent);
-        MESSAGE("The pointed stones disappeared from around the opposing team!");
+        MESSAGE("The pointed stones disappeared from the opposing side!");
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_ULTRA_BASTION);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_STEALTH_ROCK, player);

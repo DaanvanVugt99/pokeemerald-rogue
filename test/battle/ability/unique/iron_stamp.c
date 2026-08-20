@@ -23,8 +23,8 @@ SINGLE_BATTLE_TEST("Iron Stamp activates Spikes and Stealth Rock after a Steel-t
         TURN { MOVE(player, MOVE_STEALTH_ROCK); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_IRON_HEAD, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        MESSAGE("Spikes were scattered all around the opposing team!");
-        MESSAGE("Pointed stones float in the air around the opposing team!");
+        MESSAGE("Spikes were scattered all around the opposing side!");
+        MESSAGE("Pointed stones float in the air on the opposing side!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_IRON_HEAD, player);
         HP_BAR(opponent, captureDamage: &moveDamage);
         ABILITY_POPUP(player, ABILITY_IRON_STAMP);

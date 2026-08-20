@@ -26,7 +26,7 @@ SINGLE_BATTLE_TEST("Storm Glider sets Tailwind the first time the Wattrel line i
         HP_BAR(player);
         ABILITY_POPUP(player, ABILITY_STORM_GLIDER);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
-        MESSAGE("The tailwind blew from\nbehind your team!");
+        MESSAGE("A tailwind started blowing on\nyour side!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND);
         EXPECT(gSideTimers[B_SIDE_PLAYER].tailwindTimer > 0);
@@ -47,7 +47,7 @@ SINGLE_BATTLE_TEST("Storm Glider does not use Charge when the first hit is a win
         HP_BAR(player);
         ABILITY_POPUP(player, ABILITY_STORM_GLIDER);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
-        MESSAGE("The tailwind blew from\nbehind your team!");
+        MESSAGE("A tailwind started blowing on\nyour side!");
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_CHARGE, player);
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND);

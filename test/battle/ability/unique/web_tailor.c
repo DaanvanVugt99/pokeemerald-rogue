@@ -21,7 +21,7 @@ SINGLE_BATTLE_TEST("Web Tailor makes slicing moves also use Sticky Web with two 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         ABILITY_POPUP(player, ABILITY_WEB_TAILOR);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, player);
-        MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+        MESSAGE("A sticky web spreads out on the ground on the opposing side!");
     }
 }
 

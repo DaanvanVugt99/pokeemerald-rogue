@@ -59,7 +59,7 @@ SINGLE_BATTLE_TEST("Dirty Tricks preserves faint flow if Metronome calls a move 
         ABILITY_POPUP(player, ABILITY_DIRTY_TRICKS);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
-        MESSAGE("The tailwind blew from\nbehind your team!");
+        MESSAGE("A tailwind started blowing on\nyour side!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_WOBBUFFET);
         EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND);

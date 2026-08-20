@@ -107,10 +107,10 @@ DOUBLE_BATTLE_TEST("Court Change used by the player swaps Mist, Safeguard, Lucky
         MESSAGE("Wynaut swapped the battle effects affecting each side!");
         // The effects now end for the player side.
         MESSAGE("Ally's Mist wore off!");
-        MESSAGE("Ally's party is no longer protected by Safeguard!");
+        MESSAGE("Ally's side is no longer protected by Safeguard!");
         MESSAGE("Ally's Reflect wore off!");
-        MESSAGE("Your team's Lucky Chant wore off!");
-        MESSAGE("Your team's tailwind petered out!");
+        MESSAGE("Your side's Lucky Chant wore off!");
+        MESSAGE("Your side's tailwind petered out!");
         MESSAGE("Ally's Light Screen wore off!");
     }
 }
@@ -144,10 +144,10 @@ DOUBLE_BATTLE_TEST("Court Change used by the opponent swaps Mist, Safeguard, Luc
         MESSAGE("Foe Wynaut swapped the battle effects affecting each side!");
         // The effects now end for the player side.
         MESSAGE("Foe's Mist wore off!");
-        MESSAGE("Foe's party is no longer protected by Safeguard!");
+        MESSAGE("Foe's side is no longer protected by Safeguard!");
         MESSAGE("Foe's Reflect wore off!");
-        MESSAGE("The opposing team's Lucky Chant wore off!");
-        MESSAGE("The opposing team's tailwind petered out!");
+        MESSAGE("The opposing side's Lucky Chant wore off!");
+        MESSAGE("The opposing side's tailwind petered out!");
         MESSAGE("Foe's Light Screen wore off!");
     }
 }

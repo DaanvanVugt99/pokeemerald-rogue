@@ -60,7 +60,7 @@ SINGLE_BATTLE_TEST("Tumbleweed sets Tailwind when the user faints")
         HP_BAR(player, hp: 0);
         ABILITY_POPUP(player, ABILITY_TUMBLEWEED);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
-        MESSAGE("The tailwind blew from\nbehind your team!");
+        MESSAGE("A tailwind started blowing on\nyour side!");
     } THEN {
         EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND);
         EXPECT(gSideTimers[B_SIDE_PLAYER].tailwindTimer > 0);
@@ -99,7 +99,7 @@ DOUBLE_BATTLE_TEST("Tumbleweed Tailwind activates ally Wind Power when the user 
     } SCENE {
         ABILITY_POPUP(playerLeft, ABILITY_TUMBLEWEED);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, playerLeft);
-        MESSAGE("The tailwind blew from\nbehind your team!");
+        MESSAGE("A tailwind started blowing on\nyour side!");
         NOT ABILITY_POPUP(playerLeft, ABILITY_WIND_POWER);
         ABILITY_POPUP(playerRight, ABILITY_WIND_POWER);
     } THEN {

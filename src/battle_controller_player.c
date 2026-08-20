@@ -1864,9 +1864,7 @@ static u8 GetMoveDisplayTyping(u32 battler, u16 move)
 
 #define TYPE_x0     0
 #define TYPE_x0_25  5
-#define TYPE_x0_50  10
 #define TYPE_x1     20
-#define TYPE_x2     40
 #define TYPE_x4     80
 
 int GetMovePower(u16 move, u8 moveType, u16 defType1, u16 defType2, u16 defAbility, u16 mode);
@@ -1874,24 +1872,30 @@ int GetMovePower(u16 move, u8 moveType, u16 defType1, u16 defType2, u16 defAbili
 extern const u8 gText_MoveEffective[];
 extern const u8 gText_MoveNoEffect[];
 extern const u8 gText_MoveSuperEffective[];
+extern const u8 gText_MoveExtremelyEffective[];
 extern const u8 gText_MoveNotVeryEffective[];
+extern const u8 gText_MoveMostlyIneffective[];
 extern const u8 gText_MoveSlash[];
 extern const u8 gText_MoveShortEffective[];
 extern const u8 gText_MoveShortNoEffect[];
 extern const u8 gText_MoveShortSuperEffective[];
+extern const u8 gText_MoveShortExtremelyEffective[];
 extern const u8 gText_MoveShortNotVeryEffective[];
+extern const u8 gText_MoveShortMostlyIneffective[];
 
 enum
 {
     EFFECTIVENESS_NO_EFFECT,
+    EFFECTIVENESS_MOSTLY_INEFFECTIVE,
     EFFECTIVENESS_NOT_VERY_EFFECTIVE,
     EFFECTIVENESS_EFFECTIVE,
     EFFECTIVENESS_SUPER_EFFECTIVE,
+    EFFECTIVENESS_EXTREMELY_EFFECTIVE,
 };
 
 static u16 GetDisplayAbility(u16 ability)
 {
-    if(ability != ABILITY_WONDER_GUARD)
+    if (ability != ABILITY_WONDER_GUARD)
     {
         // Don't spoil the vast majority of abilities
         ability = ABILITY_NONE;
@@ -1909,6 +1913,10 @@ static u8 GetDisplayEffectiveness(u16 move, u16 displayType, u32 battler, u32 op
     {
         return EFFECTIVENESS_NO_EFFECT;
     }
+    else if (typeModifier <= UQ_4_12(0.25))
+    {
+        return EFFECTIVENESS_MOSTLY_INEFFECTIVE;
+    }
     else if (typeModifier < UQ_4_12(1.0))
     {
         return EFFECTIVENESS_NOT_VERY_EFFECTIVE;
@@ -1916,6 +1924,10 @@ static u8 GetDisplayEffectiveness(u16 move, u16 displayType, u32 battler, u32 op
     else if (typeModifier == UQ_4_12(1.0))
     {
         return EFFECTIVENESS_EFFECTIVE;
+    }
+    else if (typeModifier >= UQ_4_12(4.0))
+    {
+        return EFFECTIVENESS_EXTREMELY_EFFECTIVE;
     }
     else // if (typeModifier > UQ_4_12(1.0))
     {
@@ -1926,19 +1938,27 @@ static u8 GetDisplayEffectiveness(u16 move, u16 displayType, u32 battler, u32 op
     u8 type2 = gBattleMons[opposingBattler].type2;
     int typeEffect = GetMovePower(move, displayType, type1, type2, GetDisplayAbility(ability), 0);
 
-    if(typeEffect == TYPE_x0)
+    if (typeEffect == TYPE_x0)
     {
         return EFFECTIVENESS_NO_EFFECT;
     }
-    else if(typeEffect == TYPE_x1)
+    else if (typeEffect <= TYPE_x0_25)
+    {
+        return EFFECTIVENESS_MOSTLY_INEFFECTIVE;
+    }
+    else if (typeEffect == TYPE_x1)
     {
         return EFFECTIVENESS_EFFECTIVE;
     }
-    else if(typeEffect < TYPE_x1)
+    else if (typeEffect < TYPE_x1)
     {
         return EFFECTIVENESS_NOT_VERY_EFFECTIVE;
     }
-    else //if(typeEffect > TYPE_x1)
+    else if (typeEffect >= TYPE_x4)
+    {
+        return EFFECTIVENESS_EXTREMELY_EFFECTIVE;
+    }
+    else // if (typeEffect > TYPE_x1)
     {
         return EFFECTIVENESS_SUPER_EFFECTIVE;
     }
@@ -1955,8 +1975,14 @@ static u8 const* GetDisplayEffectivenessLongString(u8 effectiveness)
     case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
         return gText_MoveNotVeryEffective;
 
+    case EFFECTIVENESS_MOSTLY_INEFFECTIVE:
+        return gText_MoveMostlyIneffective;
+
     case EFFECTIVENESS_SUPER_EFFECTIVE:
         return gText_MoveSuperEffective;
+
+    case EFFECTIVENESS_EXTREMELY_EFFECTIVE:
+        return gText_MoveExtremelyEffective;
 
     //case EFFECTIVENESS_EFFECTIVE:
     default:
@@ -1974,8 +2000,14 @@ static u8 const* GetDisplayEffectivenessShortString(u8 effectiveness)
     case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
         return gText_MoveShortNotVeryEffective;
 
+    case EFFECTIVENESS_MOSTLY_INEFFECTIVE:
+        return gText_MoveShortMostlyIneffective;
+
     case EFFECTIVENESS_SUPER_EFFECTIVE:
         return gText_MoveShortSuperEffective;
+
+    case EFFECTIVENESS_EXTREMELY_EFFECTIVE:
+        return gText_MoveShortExtremelyEffective;
 
     //case EFFECTIVENESS_EFFECTIVE:
     default:

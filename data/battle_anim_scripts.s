@@ -1055,6 +1055,7 @@ gBattleAnims_General::
 	.4byte General_GrafittiTag              @ B_ANIM_GRAFITTI_TAG
 	.4byte General_SacredAsh                @ B_ANIM_SACRED_ASH
 	.4byte General_GalaricaRoundsLoad       @ B_ANIM_GALARICA_ROUNDS_LOAD
+	.4byte General_HeldItemBerry            @ B_ANIM_HELD_ITEM_BERRY
 
 	.align 2
 gBattleAnims_Special::
@@ -13830,6 +13831,7 @@ Move_JAW_LOCK::
 	delay 0x1
 	end
 
+General_HeldItemBerry:
 Move_STUFF_CHEEKS::
 	loadspritegfx ANIM_TAG_BERRY_NORMAL
 	loadspritegfx ANIM_TAG_SHARP_TEETH
@@ -28500,8 +28502,7 @@ General_PokeblockThrow:
 	end
 
 General_ItemKnockoff:
-	loadspritegfx ANIM_TAG_ITEM_BAG
-	createsprite gKnockOffItemSpriteTemplate, ANIM_TARGET, 2
+	createvisualtask AnimTask_KnockOffItem, ANIM_TARGET, 2
 	end
 
 General_TurnTrap:
@@ -28764,11 +28765,10 @@ General_MonHit:
 	end
 
 General_ItemSteal:
-	loadspritegfx ANIM_TAG_ITEM_BAG
 	createvisualtask AnimTask_SetAnimAttackerAndTargetForEffectAtk, 2
 	createvisualtask AnimTask_SetTargetToEffectBattler, 2  @ Redundant with above
 	delay 1
-	createsprite gItemStealSpriteTemplate, ANIM_ATTACKER, 2, 0, -5, 10, 2, -1
+	createvisualtask AnimTask_StealItem, ANIM_TARGET, 2
 	end
 
 General_SnatchMove:

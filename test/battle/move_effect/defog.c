@@ -125,7 +125,7 @@ DOUBLE_BATTLE_TEST("Defog lowers evasiveness by 1 and removes Mist and Safeguard
             STATUS_ICON(opponentRight, badPoison: TRUE);
         }
         else {
-            MESSAGE("Foe Wobbuffet's party is protected by Safeguard!");
+            MESSAGE("Foe Wobbuffet's side is protected by Safeguard!");
             NOT STATUS_ICON(opponentRight, badPoison: TRUE);
         }
     }
@@ -154,8 +154,8 @@ DOUBLE_BATTLE_TEST("Defog lowers evasiveness by 1 and removes Stealth Rock and S
         if (move == MOVE_DEFOG) {
             ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, opponentLeft);
             MESSAGE("Foe Wobbuffet's evasiveness fell!");
-            MESSAGE("The pointed stones disappeared from around your team!");
-            MESSAGE("The sticky web has disappeared from the ground around your team!");
+            MESSAGE("The pointed stones disappeared from your side!");
+            MESSAGE("The sticky web disappeared from the ground on your side!");
         }
         // Switch happens
         MESSAGE("Wobbuffet, that's enough! Come back!");
@@ -198,7 +198,7 @@ SINGLE_BATTLE_TEST("Defog lowers evasiveness by 1 and removes Spikes from player
         if (move == MOVE_DEFOG) {
             ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, opponent);
             MESSAGE("Foe Wobbuffet's evasiveness fell!");
-            MESSAGE("The spikes disappeared from the ground around your team!");
+            MESSAGE("The spikes disappeared from the ground around your side!");
         }
         // Switch happens
         MESSAGE("Wobbuffet, that's enough! Come back!");
@@ -270,7 +270,7 @@ SINGLE_BATTLE_TEST("Defog lowers evasiveness by 1 and removes Toxic Spikes from 
         if (move == MOVE_DEFOG) {
             ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
             MESSAGE("Wobbuffet's evasiveness fell!");
-            MESSAGE("The poison spikes disappeared from the ground around the opposing team!");
+            MESSAGE("The Toxic Spikes disappeared from the ground around the opposing side!");
         }
         // Switch happens
         MESSAGE("2 sent out Wobbuffet!");
@@ -356,15 +356,15 @@ DOUBLE_BATTLE_TEST("Defog lowers evasiveness by 1 and removes everything it can"
         MESSAGE("Ally's Aurora Veil wore off!");
         MESSAGE("Ally's Safeguard wore off!");
 
-        MESSAGE("The spikes disappeared from the ground around your team!");
-        MESSAGE("The pointed stones disappeared from around your team!");
-        MESSAGE("The poison spikes disappeared from the ground around your team!");
-        MESSAGE("The sticky web has disappeared from the ground around your team!");
+        MESSAGE("The spikes disappeared from the ground around your side!");
+        MESSAGE("The pointed stones disappeared from your side!");
+        MESSAGE("The Toxic Spikes disappeared from the ground around your side!");
+        MESSAGE("The sticky web disappeared from the ground on your side!");
 
         // Opponent side
-        MESSAGE("The spikes disappeared from the ground around the opposing team!");
-        MESSAGE("The pointed stones disappeared from around the opposing team!");
-        MESSAGE("The poison spikes disappeared from the ground around the opposing team!");
-        MESSAGE("The sticky web has disappeared from the ground around the opposing team!");
+        MESSAGE("The spikes disappeared from the ground around the opposing side!");
+        MESSAGE("The pointed stones disappeared from the opposing side!");
+        MESSAGE("The Toxic Spikes disappeared from the ground around the opposing side!");
+        MESSAGE("The sticky web disappeared from the ground on the opposing side!");
     }
 }

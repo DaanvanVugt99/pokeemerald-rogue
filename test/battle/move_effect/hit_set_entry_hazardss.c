@@ -24,10 +24,10 @@ SINGLE_BATTLE_TEST("Stone Axe / Ceaseless Edge set up hazards after hitting the 
         ANIMATION(ANIM_TYPE_MOVE, move, player);
         HP_BAR(opponent);
         if (move == MOVE_CEASELESS_EDGE) {
-            MESSAGE("Spikes were scattered all around the opposing team!");
+            MESSAGE("Spikes were scattered all around the opposing side!");
         }
         else {
-            MESSAGE("Pointed stones float in the air around the opposing team!");
+            MESSAGE("Pointed stones float in the air on the opposing side!");
         }
         MESSAGE("2 sent out Wobbuffet!");
         if (move == MOVE_CEASELESS_EDGE) {
@@ -58,19 +58,19 @@ SINGLE_BATTLE_TEST("Ceaseless Edge can set up to 3 layers of Spikes")
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CEASELESS_EDGE, player);
         HP_BAR(opponent);
-        MESSAGE("Spikes were scattered all around the opposing team!");
+        MESSAGE("Spikes were scattered all around the opposing side!");
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CEASELESS_EDGE, player);
         HP_BAR(opponent);
-        MESSAGE("Spikes were scattered all around the opposing team!");
+        MESSAGE("Spikes were scattered all around the opposing side!");
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CEASELESS_EDGE, player);
         HP_BAR(opponent);
-        MESSAGE("Spikes were scattered all around the opposing team!");
+        MESSAGE("Spikes were scattered all around the opposing side!");
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CEASELESS_EDGE, player);
         HP_BAR(opponent);
-        NOT MESSAGE("Spikes were scattered all around the opposing team!");
+        NOT MESSAGE("Spikes were scattered all around the opposing side!");
 
         MESSAGE("2 sent out Wynaut!");
         HP_BAR(opponent, damage: maxHP / 4);
@@ -95,23 +95,22 @@ SINGLE_BATTLE_TEST("Stone Axe can set up pointed stones only once")
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STONE_AXE, player);
         HP_BAR(opponent);
-        MESSAGE("Pointed stones float in the air around the opposing team!");
+        MESSAGE("Pointed stones float in the air on the opposing side!");
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STONE_AXE, player);
         HP_BAR(opponent);
-        NOT MESSAGE("Pointed stones float in the air around the opposing team!");
+        NOT MESSAGE("Pointed stones float in the air on the opposing side!");
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STONE_AXE, player);
         HP_BAR(opponent);
-        NOT MESSAGE("Pointed stones float in the air around the opposing team!");
+        NOT MESSAGE("Pointed stones float in the air on the opposing side!");
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STONE_AXE, player);
         HP_BAR(opponent);
-        NOT MESSAGE("Pointed stones float in the air around the opposing team!");
+        NOT MESSAGE("Pointed stones float in the air on the opposing side!");
 
         MESSAGE("2 sent out Wynaut!");
         HP_BAR(opponent, damage: maxHP / 8);
         MESSAGE("Pointed stones dug into Foe Wynaut!");
     }
 }
-

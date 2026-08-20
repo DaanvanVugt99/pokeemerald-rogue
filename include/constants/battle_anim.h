@@ -584,6 +584,7 @@
 #define B_ANIM_GRAFITTI_TAG             54
 #define B_ANIM_SACRED_ASH               55
 #define B_ANIM_GALARICA_ROUNDS_LOAD     56
+#define B_ANIM_HELD_ITEM_BERRY          57
 
 // special animations table (gBattleAnims_Special)
 #define B_ANIM_LVL_UP                   0

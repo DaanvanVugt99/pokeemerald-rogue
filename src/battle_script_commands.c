@@ -3270,7 +3270,7 @@ static void Cmd_resultmessage(void)
                 if (GetBattlerSide(gBattlerTarget) != B_SIDE_PLAYER && gBattleStruct->trainerSlideFirstSuperEffectiveHitMsgState != 2)
                     gBattleStruct->trainerSlideFirstSuperEffectiveHitMsgState = 1;
 
-                stringId = gMoveResultEffectiveness == UQ_4_12(4.0)
+                stringId = gMoveResultEffectiveness >= UQ_4_12(4.0)
                          ? STRINGID_ITSEXTREMELYEFFECTIVE
                          : STRINGID_SUPEREFFECTIVE;
             }
@@ -3278,7 +3278,7 @@ static void Cmd_resultmessage(void)
         case MOVE_RESULT_NOT_VERY_EFFECTIVE:
             if (!gMultiHitCounter)
             {
-                stringId = gMoveResultEffectiveness == UQ_4_12(0.25)
+                stringId = gMoveResultEffectiveness <= UQ_4_12(0.25)
                          ? STRINGID_ITSMOSTLYINEFFECTIVE
                          : STRINGID_NOTVERYEFFECTIVE;
             }

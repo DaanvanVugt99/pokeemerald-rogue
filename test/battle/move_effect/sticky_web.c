@@ -18,7 +18,7 @@ SINGLE_BATTLE_TEST("Sticky Web lowers Speed by 1 on switch-in")
         TURN {}
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, player);
-        MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+        MESSAGE("A sticky web spreads out on the ground on the opposing side!");
         MESSAGE("2 sent out Wynaut!");
         MESSAGE("Foe Wynaut was caught in a Sticky Web!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, opponent);
@@ -37,7 +37,7 @@ SINGLE_BATTLE_TEST("Sticky Web can only be set up 1 time")
     } SCENE {
         MESSAGE("Wobbuffet used Sticky Web!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, player);
-        MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+        MESSAGE("A sticky web spreads out on the ground on the opposing side!");
 
         MESSAGE("Wobbuffet used Sticky Web!");
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, player);
@@ -62,7 +62,7 @@ DOUBLE_BATTLE_TEST("Sticky Web lowers Speed by 1 in a double battle after Explos
         TURN {}
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, playerRight);
-        MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+        MESSAGE("A sticky web spreads out on the ground on the opposing side!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_EXPLOSION, playerLeft);
         MESSAGE("2 sent out Wynaut!");
         MESSAGE("Foe Wynaut was caught in a Sticky Web!");
@@ -87,7 +87,7 @@ SINGLE_BATTLE_TEST("Sticky Web raises Speed by 1 for a Pokemon with Contrary")
         TURN {}
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, player);
-        MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+        MESSAGE("A sticky web spreads out on the ground on the opposing side!");
         MESSAGE("2 sent out Shuckle!");
         MESSAGE("Foe Shuckle was caught in a Sticky Web!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, opponent);
@@ -119,9 +119,9 @@ DOUBLE_BATTLE_TEST("Sticky Web has correct interactions with Mirror Armor - the 
         TURN { SWITCH(playerRight, 2); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, BATTLER_OPPONENT);
-        MESSAGE("A sticky web spreads out on the ground around your team!");
+        MESSAGE("A sticky web spreads out on the ground on your side!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, BATTLER_PLAYER);
-        MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+        MESSAGE("A sticky web spreads out on the ground on the opposing side!");
 
         MESSAGE("Go! Corviknigh!");
         MESSAGE("Corviknigh was caught in a Sticky Web!");
@@ -160,14 +160,14 @@ DOUBLE_BATTLE_TEST("Sticky Web has correct interactions with Mirror Armor - no o
     } SCENE {
         if (speedPlayer > speedOpponent) {
             ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, playerRight);
-            MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+            MESSAGE("A sticky web spreads out on the ground on the opposing side!");
             ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, opponentLeft);
-            MESSAGE("A sticky web spreads out on the ground around your team!");
+            MESSAGE("A sticky web spreads out on the ground on your side!");
         } else {
             ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, opponentLeft);
-            MESSAGE("A sticky web spreads out on the ground around your team!");
+            MESSAGE("A sticky web spreads out on the ground on your side!");
             ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, playerRight);
-            MESSAGE("A sticky web spreads out on the ground around the opposing team!");
+            MESSAGE("A sticky web spreads out on the ground on the opposing side!");
         }
 
         MESSAGE("Go! Corviknigh!");
@@ -211,7 +211,7 @@ DOUBLE_BATTLE_TEST("Sticky Web has correct interactions with Mirror Armor - no o
         TURN { SWITCH(playerRight, 2); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_STICKY_WEB, opponentLeft);
-        MESSAGE("A sticky web spreads out on the ground around your team!");
+        MESSAGE("A sticky web spreads out on the ground on your side!");
 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_MEMENTO, opponentLeft);
         MESSAGE("Foe Caterpie fainted!");
