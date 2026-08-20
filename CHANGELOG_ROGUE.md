@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added battle-entry sprite animations for the remaining Gen VII roster,
+  Alolan forms, selected Gen VIII species, and the Gen I Mega Evolutions,
+  ported from five merged pokeemerald-expansion animation batches with their
+  required palette, back-sprite, and timing corrections.
 - Added a proof-of-concept seeded route-scene system with a route director,
   reusable scene composer, compact ROM-defined quest graphs, and a dedicated
   run-only Adventure Quest category. Its first complete quest chain is the

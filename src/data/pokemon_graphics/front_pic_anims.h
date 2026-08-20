@@ -5,6 +5,8 @@ static const union AnimCmd sAnim_##name##_1[] = \
     ANIMCMD_END,                                \
 }
 
+#define ANIM_FRAMES(...) (const union AnimCmd *const[]) { sAnim_GeneralFrame0, (const union AnimCmd[]) { __VA_ARGS__ ANIMCMD_END, }, }
+
 #define PLACEHOLDER_ANIM_TWO_FRAMES(name)       \
 static const union AnimCmd sAnim_##name##_1[] = \
 {                                               \
@@ -9400,7 +9402,14 @@ PLACEHOLDER_ANIM_SINGLE_FRAME(Necrozma);
 #endif //P_FAMILY_NECROZMA
 
 #if P_FAMILY_MAGEARNA
-PLACEHOLDER_ANIM_SINGLE_FRAME(Magearna);
+static const union AnimCmd sAnim_Magearna_1[] =
+{
+    ANIMCMD_FRAME(1, 40),
+    ANIMCMD_FRAME(1, 40),
+    ANIMCMD_FRAME(1, 40),
+    ANIMCMD_FRAME(0, 1),
+    ANIMCMD_END,
+};
 #endif //P_FAMILY_MAGEARNA
 
 #if P_FAMILY_MARSHADOW
