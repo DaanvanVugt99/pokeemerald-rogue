@@ -1699,48 +1699,6 @@ static u32 GenerateFossilCustomMonId(const struct RogueRouteSceneRequest *scene,
     return customMonId;
 }
 
-static void BufferFossilCustomTyping(u8 *dest, u16 species, u32 customMonId)
-{
-    static const u8 sText_TypeSeparator[] = _("/");
-    u8 type1 = RogueGift_GetCustomMonType(customMonId, 0);
-    u8 type2 = RogueGift_GetCustomMonType(customMonId, 1);
-
-    if(!IS_STANDARD_TYPE(type1))
-        type1 = RoguePokedex_GetSpeciesType(species, 0);
-    if(!IS_STANDARD_TYPE(type2))
-        type2 = RoguePokedex_GetSpeciesType(species, 1);
-
-    StringCopy(dest, gTypeNames[type1]);
-    if(type2 != type1)
-    {
-        StringAppend(dest, sText_TypeSeparator);
-        StringAppend(dest, gTypeNames[type2]);
-    }
-}
-
-void RogueRouteEvents_BufferFossilRestorationData(void)
-{
-    struct RogueRouteSceneRequest scene;
-
-    gStringVar1[0] = EOS;
-    gStringVar2[0] = EOS;
-    gStringVar3[0] = EOS;
-    if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene)
-        || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_RESTORATION
-        || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_NODE)
-        return;
-
-    BufferFossilCustomTyping(
-        gStringVar1,
-        scene.rewardItem,
-        GenerateFossilCustomMonId(&scene, ROGUE_FOSSIL_RESTORATION_STABLE));
-    BufferFossilCustomTyping(
-        gStringVar2,
-        scene.rewardItem,
-        GenerateFossilCustomMonId(&scene, ROGUE_FOSSIL_RESTORATION_ADAPTIVE));
-    StringCopy(gStringVar3, RoguePokedex_GetSpeciesName(scene.rewardItem));
-}
-
 void RogueRouteEvents_TryRestoreAnomalousFossil(void)
 {
     struct RogueRouteSceneRequest scene;
@@ -1768,11 +1726,7 @@ void RogueRouteEvents_TryRestoreAnomalousFossil(void)
     }
 
     originalRng = gRngValue;
-    SeedRng(scene.rewardAmount ^ (restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0x51A7 : 0xB4E3));
-    customMonId = RogueGift_CreateDynamicMonIdRawWithTypingChance(
-        UNIQUE_RARITY_RARE,
-        scene.rewardItem,
-        restoration == ROGUE_FOSSIL_RESTORATION_STABLE ? 0 : 100);
+    customMonId = GenerateFossilCustomMonId(&scene, restoration);
     RogueGift_CreateMon(customMonId, &mon, scene.rewardItem, 1, USE_RANDOM_IVS);
     gRngValue = originalRng;
 
@@ -2930,18 +2884,6 @@ static const u8 *const sBuriedCacheLandmarkNames[ROGUE_ROUTE_ENVIRONMENT_COUNT][
     {sText_BuriedCacheUrbanLandmark0, sText_BuriedCacheUrbanLandmark1, sText_BuriedCacheUrbanLandmark2},
 };
 
-static const u8 sText_BuriedCacheArticleA[] = _("a ");
-static const u8 sText_BuriedCacheArticleAn[] = _("an ");
-static const u8 *const sBuriedCacheLandmarkArticles[ROGUE_ROUTE_ENVIRONMENT_COUNT][3] =
-{
-    {sText_BuriedCacheArticleAn, sText_BuriedCacheArticleA, sText_BuriedCacheArticleAn},
-    {sText_BuriedCacheArticleAn, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
-    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleAn},
-    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
-    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
-    {sText_BuriedCacheArticleA, sText_BuriedCacheArticleA, sText_BuriedCacheArticleA},
-};
-
 static const u8 sText_BuriedCacheMarking0[] = _("a crescent mark");
 static const u8 sText_BuriedCacheMarking1[] = _("a spiral mark");
 static const u8 sText_BuriedCacheMarking2[] = _("crossed lines");
@@ -2987,14 +2929,10 @@ static const u8 sText_BuriedCacheTypeAncient[] = _("a cache of ancient treasures
 static const u8 sText_BuriedCacheTypeTrainer[] = _("a trainer's old stash");
 static const u8 sText_BuriedCacheTypeRelic[] = _("a collector's prized relic");
 static const u8 sText_BuriedCacheTypeJackpot[] = _("a rare treasure");
-static const u8 sText_BuriedCacheClueLandmarkPrefix[] = _("Look for the ");
-static const u8 sText_BuriedCacheClueMarkPrefix[] = _("Look for ");
-static const u8 sText_BuriedCacheClueWith[] = _(" with ");
-static const u8 sText_BuriedCacheClueSurroundedBy[] = _(" surrounded by ");
-static const u8 sText_BuriedCacheClueOn[] = _(" on ");
-static const u8 sText_BuriedCacheSitePrefix[] = _("This is ");
-static const u8 sText_BuriedCacheSiteWith[] = _(" with ");
-static const u8 sText_BuriedCacheSiteSurroundedBy[] = _(", surrounded by ");
+static const u8 sText_BuriedCacheLandmarkLabel[] = _("Landmark: ");
+static const u8 sText_BuriedCacheMarkLabel[] = _("Mark: ");
+static const u8 sText_BuriedCacheGroundLabel[] = _("Ground: ");
+static const u8 sText_BuriedCacheNewline[] = _("\n");
 static const u8 sText_BuriedCachePeriod[] = _(".");
 static const u8 *const sBuriedCacheTypeNames[] =
 {
@@ -3032,23 +2970,29 @@ static void BuildBuriedCacheClue(u8 *dest, u8 environment, const struct BuriedCa
     if(data->clueTraitA == BURIED_CACHE_TRAIT_LANDMARK
         && data->clueTraitB == BURIED_CACHE_TRAIT_MARKING)
     {
-        StringCopy(dest, sText_BuriedCacheClueLandmarkPrefix);
+        StringCopy(dest, sText_BuriedCacheLandmarkLabel);
         StringAppend(dest, sBuriedCacheLandmarkNames[environment][correct->landmark]);
-        StringAppend(dest, sText_BuriedCacheClueWith);
+        StringAppend(dest, sText_BuriedCachePeriod);
+        StringAppend(dest, sText_BuriedCacheNewline);
+        StringAppend(dest, sText_BuriedCacheMarkLabel);
         StringAppend(dest, sBuriedCacheMarkingNames[correct->marking]);
     }
     else if(data->clueTraitA == BURIED_CACHE_TRAIT_LANDMARK)
     {
-        StringCopy(dest, sText_BuriedCacheClueLandmarkPrefix);
+        StringCopy(dest, sText_BuriedCacheLandmarkLabel);
         StringAppend(dest, sBuriedCacheLandmarkNames[environment][correct->landmark]);
-        StringAppend(dest, sText_BuriedCacheClueSurroundedBy);
+        StringAppend(dest, sText_BuriedCachePeriod);
+        StringAppend(dest, sText_BuriedCacheNewline);
+        StringAppend(dest, sText_BuriedCacheGroundLabel);
         StringAppend(dest, sBuriedCacheGroundNames[environment][correct->ground]);
     }
     else
     {
-        StringCopy(dest, sText_BuriedCacheClueMarkPrefix);
+        StringCopy(dest, sText_BuriedCacheMarkLabel);
         StringAppend(dest, sBuriedCacheMarkingNames[correct->marking]);
-        StringAppend(dest, sText_BuriedCacheClueOn);
+        StringAppend(dest, sText_BuriedCachePeriod);
+        StringAppend(dest, sText_BuriedCacheNewline);
+        StringAppend(dest, sText_BuriedCacheGroundLabel);
         StringAppend(dest, sBuriedCacheGroundNames[environment][correct->ground]);
     }
 
@@ -3057,12 +3001,15 @@ static void BuildBuriedCacheClue(u8 *dest, u8 environment, const struct BuriedCa
 
 static void BuildBuriedCacheSiteDescription(u8 *dest, u8 environment, const struct BuriedCacheSiteData *site)
 {
-    StringCopy(dest, sText_BuriedCacheSitePrefix);
-    StringAppend(dest, sBuriedCacheLandmarkArticles[environment][site->landmark]);
+    StringCopy(dest, sText_BuriedCacheLandmarkLabel);
     StringAppend(dest, sBuriedCacheLandmarkNames[environment][site->landmark]);
-    StringAppend(dest, sText_BuriedCacheSiteWith);
+    StringAppend(dest, sText_BuriedCachePeriod);
+    StringAppend(dest, sText_BuriedCacheNewline);
+    StringAppend(dest, sText_BuriedCacheMarkLabel);
     StringAppend(dest, sBuriedCacheMarkingNames[site->marking]);
-    StringAppend(dest, sText_BuriedCacheSiteSurroundedBy);
+    StringAppend(dest, sText_BuriedCachePeriod);
+    StringAppend(dest, sText_BuriedCacheNewline);
+    StringAppend(dest, sText_BuriedCacheGroundLabel);
     StringAppend(dest, sBuriedCacheGroundNames[environment][site->ground]);
     StringAppend(dest, sText_BuriedCachePeriod);
 }

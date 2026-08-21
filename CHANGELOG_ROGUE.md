@@ -172,6 +172,14 @@ Format follows Keep a Changelog loosely:
   Deal Devil, while retaining concise mechanical guidance and rewards.
 - Polished Buried Cache dialogue so clues, landmark descriptions, and reward
   categories read as natural sentences without repeating the clue at each site.
+- Restored explicit line breaks in Buried Cache's dynamic clues and site
+  descriptions so they remain readable in the dialogue window.
+- Removed the duplicated researcher handoff from the Anomalous Fossil pickup
+  dialogue.
+- Removed article-sensitive fossil-name wording from the Anomalous Fossil
+  dialogue.
+- Made the fossil researcher describe adaptive typing generically so its
+  dialogue cannot disagree with the generated Rare Unique Pokémon.
 - Made route-scene presentation declarative: each recipe now defines its lots,
   objects, scripts, state visibility, and metatile accents in one ROM data
   table shared by initial composition and quicksave restoration. The generic

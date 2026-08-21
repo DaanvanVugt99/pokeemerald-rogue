@@ -866,14 +866,14 @@ script Rogue_RouteEvent_AnomalousFossilOffer
 
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
     {
-        msgbox(format("Oh! This fossil is in wonderful shape!\pIt's a {STR_VAR_2}. If restored, it may become {STR_VAR_1}.\pA researcher up ahead can revive it. Will you take it?"), MSGBOX_YESNO)
+        msgbox(format("Oh! This fossil is in remarkable condition!\pA researcher farther along the road may be able to bring {STR_VAR_1} back to life.\pWill you take it?"), MSGBOX_YESNO)
         if(var(VAR_RESULT) == YES)
         {
             special(RogueRouteEvents_TryAcceptAnomalousFossilQuest)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
                 call(Rogue_Common_DisplayPopups)
-                msgbox(format("Please, take this.\pA researcher up ahead can revive it. And please, handle it carefully!"))
+                msgbox(format("Here, take it.\pHandle it carefully on the road!"))
             }
             else
             {
@@ -913,8 +913,7 @@ script Rogue_RouteEvent_AnomalousFossilRestoration
     }
     else
     {
-        special(RogueRouteEvents_BufferFossilRestorationData)
-        msgbox(format("Ah, you brought the {STR_VAR_3}!\pI can restore it two ways. Stable keeps its {STR_VAR_1} type. Adaptive brings out {STR_VAR_2}.\pWhich method should I use?"))
+        msgbox(format("Ah, you brought the fossil!\pI can restore it in one of two ways. Stable preserves its original typing. Adaptive gives it a new typing.\pWhich would you like?"))
 
         begindynamicmultichoice(16)
         appenddynamicmultichoice("Stable", ROGUE_FOSSIL_RESTORATION_STABLE)
@@ -927,11 +926,11 @@ script Rogue_RouteEvent_AnomalousFossilRestoration
             copyvar(VAR_0x8004, VAR_RESULT)
             if(var(VAR_0x8004) == ROGUE_FOSSIL_RESTORATION_STABLE)
             {
-                msgbox(format("Preserve its original typing?"), MSGBOX_YESNO)
+                msgbox(format("Keep its original typing?"), MSGBOX_YESNO)
             }
             else
             {
-                msgbox(format("Draw out its adaptive typing?"), MSGBOX_YESNO)
+                msgbox(format("Give it a new typing?"), MSGBOX_YESNO)
             }
 
             if(var(VAR_RESULT) == YES)

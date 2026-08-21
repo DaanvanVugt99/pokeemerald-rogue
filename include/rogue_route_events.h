@@ -10,7 +10,6 @@ void RogueRouteEvents_FinishStolenTradeCaseBattle(void);
 void RogueRouteEvents_TryClaimStolenTradeCaseReward(void);
 void RogueRouteEvents_TryAcceptHexedShrine(void);
 void RogueRouteEvents_TryAcceptAnomalousFossilQuest(void);
-void RogueRouteEvents_BufferFossilRestorationData(void);
 void RogueRouteEvents_TryRestoreAnomalousFossil(void);
 void RogueRouteEvents_TryAcceptForbiddenStoneQuest(void);
 void RogueRouteEvents_CollectForbiddenStoneSoul(void);

@@ -195,7 +195,6 @@ gSpecials::
     def_special RogueRouteEvents_TryClaimStolenTradeCaseReward
     def_special RogueRouteEvents_TryAcceptHexedShrine
     def_special RogueRouteEvents_TryAcceptAnomalousFossilQuest
-    def_special RogueRouteEvents_BufferFossilRestorationData
     def_special RogueRouteEvents_TryRestoreAnomalousFossil
     def_special RogueRouteEvents_TryAcceptForbiddenStoneQuest
     def_special RogueRouteEvents_CollectForbiddenStoneSoul

@@ -988,11 +988,11 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         SelectPlacement(&siteA);
         RogueRouteEvents_BufferBuriedCacheData();
         StringCopy(observationA, gStringVar1);
-        EXPECT_EQ(CountTextCharacter(observationA, CHAR_NEWLINE), 0);
+        EXPECT_EQ(CountTextCharacter(observationA, CHAR_NEWLINE), 2);
         SelectPlacement(&siteB);
         RogueRouteEvents_BufferBuriedCacheData();
         StringCopy(observationB, gStringVar1);
-        EXPECT_EQ(CountTextCharacter(observationB, CHAR_NEWLINE), 0);
+        EXPECT_EQ(CountTextCharacter(observationB, CHAR_NEWLINE), 2);
         EXPECT_NE(StringCompare(observationA, observationB), 0);
 
         SelectPlacement(&archaeologist);
@@ -1000,7 +1000,7 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         rewardItem = gSpecialVar_0x8004;
         secondaryRewardItem = gSpecialVar_0x8005;
         cacheType = gSpecialVar_0x8007;
-        EXPECT_EQ(CountTextCharacter(gStringVar2, CHAR_NEWLINE), 0);
+        EXPECT_EQ(CountTextCharacter(gStringVar2, CHAR_NEWLINE), 1);
         RogueRouteEvents_TryAcceptBuriedCache();
         EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
         EXPECT(CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
@@ -2828,11 +2828,6 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     EXPECT_EQ(restoration.requestedItem, offer.requestedItem);
     EXPECT_EQ(restoration.rewardItem, offer.rewardItem);
     EXPECT_EQ(restoration.rewardAmount, offer.rewardAmount);
-
-    SeedRng(0x2468);
-    rngBefore = gRngValue;
-    RogueRouteEvents_BufferFossilRestorationData();
-    EXPECT_EQ(memcmp(&gRngValue, &rngBefore, sizeof(rngBefore)), 0);
 
     // A full party requires an explicit replacement. Cancelling at this point
     // leaves both the fossil and quest untouched.
