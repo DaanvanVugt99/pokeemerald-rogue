@@ -238,6 +238,15 @@
 #define LAST_ITEM_TR                    ITEM_TR50
 #define NUM_TECHNICAL_RECORDS           50
 
+#define ITEM_CURSED_LENS                (LAST_ITEM_TR + 1)
+#define ITEM_VOW_OF_SILENCE             (LAST_ITEM_TR + 2)
+#define ITEM_BLOOD_OATH                 (LAST_ITEM_TR + 3)
+#define ITEM_HOLLOW_SUN                 (LAST_ITEM_TR + 4)
+
+#define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
+#define LAST_ITEM_ROOM_REWARD           ITEM_HOLLOW_SUN
+#define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
+
 #define ITEM_SORT_MODE_TYPE         0
 #define ITEM_SORT_MODE_NAME         1
 #define ITEM_SORT_MODE_VALUE        2
@@ -283,6 +292,7 @@
 #define ADVPATH_ROOM_BOSS               15
 #define ADVPATH_ROOM_BATTLE_TOWER       16
 #define ADVPATH_ROOM_UNIQUE_DEN         17
+#define ADVPATH_ROOM_ITEM               18
 
 // Frontier Brain post-battle recruitment modes.
 #define MINIBOSS_REWARD_MODE_NONE       0
@@ -296,7 +306,7 @@
 #define NICKNAME_ACTION_ASK             1
 #define NICKNAME_ACTION_FORCE           2
 
-#define ADVPATH_ROOM_COUNT              18
+#define ADVPATH_ROOM_COUNT              19
 
 
 #define ADVPATH_SUBROOM_ROUTE_CALM          0

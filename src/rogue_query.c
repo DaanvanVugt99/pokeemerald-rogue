@@ -1203,7 +1203,7 @@ void RogueItemQuery_IsItemActive()
 
     for(itemId = ITEM_NONE + 1; itemId < QUERY_NUM_ITEMS; ++itemId)
     {
-        SetQueryBitFlag(itemId, Rogue_IsItemEnabled(itemId));
+        SetQueryBitFlag(itemId, Rogue_IsItemEnabled(itemId) && !Rogue_IsItemRoomReward(itemId));
     }
 }
 

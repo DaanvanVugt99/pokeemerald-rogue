@@ -95,6 +95,10 @@ extern const u8 gItemDesc_ReachCurse[];
 extern const u8 gItemDesc_AccuracyCurse[];
 extern const u8 gItemDesc_RetaliateCurse[];
 extern const u8 gItemDesc_StandCurse[];
+extern const u8 gItemDesc_CursedLens[];
+extern const u8 gItemDesc_VowOfSilence[];
+extern const u8 gItemDesc_BloodOath[];
+extern const u8 gItemDesc_HollowSun[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2146,6 +2150,66 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_TMHM,
         .iconImage = gItemIcon_TM,
         .iconPalette = gItemIconPalette_FightingTMHM,
+    },
+
+    [ITEM_CURSED_LENS - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Cursed Lens"),
+        .itemId = ITEM_CURSED_LENS,
+        .price = 0,
+        .description = gItemDesc_CursedLens,
+        .holdEffect = HOLD_EFFECT_CURSED_LENS,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_ScopeLens,
+        .iconPalette = gItemIconPalette_CursedLens,
+    },
+
+    [ITEM_VOW_OF_SILENCE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Vow of Silence"),
+        .itemId = ITEM_VOW_OF_SILENCE,
+        .price = 0,
+        .description = gItemDesc_VowOfSilence,
+        .holdEffect = HOLD_EFFECT_VOW_OF_SILENCE,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_ChoiceBand,
+        .iconPalette = gItemIconPalette_VowOfSilence,
+    },
+
+    [ITEM_BLOOD_OATH - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Blood Oath"),
+        .itemId = ITEM_BLOOD_OATH,
+        .price = 0,
+        .description = gItemDesc_BloodOath,
+        .holdEffect = HOLD_EFFECT_BLOOD_OATH,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_FocusSash,
+        .iconPalette = gItemIconPalette_BloodOath,
+    },
+
+    [ITEM_HOLLOW_SUN - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Hollow Sun"),
+        .itemId = ITEM_HOLLOW_SUN,
+        .price = 0,
+        .description = gItemDesc_HollowSun,
+        .holdEffect = HOLD_EFFECT_HOLLOW_SUN,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_LightBall,
+        .iconPalette = gItemIconPalette_HollowSun,
     },
 
 #ifdef ROGUE_DEBUG

@@ -2721,6 +2721,25 @@ static void Cmd_adjustdamage(void)
         endureCharmActive = ActivateEndureCharm(gBattlerTarget);
     }
 
+    // Blood Oath is the final direct-hit survival check so existing
+    // Endure/Sturdy-style effects get the opportunity to save the holder first.
+    if (holdEffect == HOLD_EFFECT_BLOOD_OATH
+     && !gProtectStructs[gBattlerTarget].endured
+     && !gSpecialStatuses[gBattlerTarget].focusBanded
+     && !gSpecialStatuses[gBattlerTarget].focusSashed
+     && !gSpecialStatuses[gBattlerTarget].sturdied
+     && !divineFavorActive
+     && (B_AFFECTION_MECHANICS == FALSE || !gSpecialStatuses[gBattlerTarget].affectionEndured)
+     && !endureCharmActive
+     && !gProtectStructs[gBattlerTarget].confusionSelfDmg
+     && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+     && !IS_MOVE_STATUS(gCurrentMove)
+     && gBattleMoves[gCurrentMove].effect != EFFECT_FALSE_SWIPE)
+    {
+        RecordItemEffectBattle(gBattlerTarget, holdEffect);
+        gSpecialStatuses[gBattlerTarget].focusSashed = TRUE;
+    }
+
     if (gBattleMoves[gCurrentMove].effect != EFFECT_FALSE_SWIPE
         && !gProtectStructs[gBattlerTarget].endured
         && !gSpecialStatuses[gBattlerTarget].focusBanded
@@ -16680,6 +16699,14 @@ static void Cmd_tryKO(void)
             {
                 gBattleMoveDamage = max(1, gBattleMons[gBattlerTarget].maxHP / 2);
                 RecordAbilityBattle(gBattlerTarget, ABILITY_MENHIR);
+            }
+            else if (holdEffect == HOLD_EFFECT_BLOOD_OATH)
+            {
+                gSpecialStatuses[gBattlerTarget].focusSashed = TRUE;
+                RecordItemEffectBattle(gBattlerTarget, holdEffect);
+                gBattleMoveDamage = gBattleMons[gBattlerTarget].hp - 1;
+                gMoveResultFlags |= MOVE_RESULT_FOE_HUNG_ON;
+                gLastUsedItem = gBattleMons[gBattlerTarget].item;
             }
             else
             {

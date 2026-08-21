@@ -117,6 +117,11 @@ struct RogueAdvPathRoomParams
             u8 rewardMode;
             bool8 hasRewardPreview;
         } miniboss;
+        struct
+        {
+            u16 itemId;
+            u8 scheduleSlot;
+        } itemRoom;
     } perType;
 };
 

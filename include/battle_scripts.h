@@ -476,6 +476,7 @@ extern const u8 BattleScript_MoveUsedGravityPrevents[];
 extern const u8 BattleScript_SelectingNotAllowedMoveGravityInPalace[];
 extern const u8 BattleScript_SelectingNotAllowedMoveHealBlock[];
 extern const u8 BattleScript_MoveUsedHealBlockPrevents[];
+extern const u8 BattleScript_MoveUsedVowOfSilencePrevents[];
 extern const u8 BattleScript_SelectingNotAllowedMoveHealBlockInPalace[];
 extern const u8 BattleScript_ToxicSpikesFree[];
 extern const u8 BattleScript_StickyWebFree[];

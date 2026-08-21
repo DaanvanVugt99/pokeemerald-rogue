@@ -3084,6 +3084,11 @@ bool8 Rogue_IsItemEnabled(u16 itemId)
     }
 }
 
+bool8 Rogue_IsItemRoomReward(u16 itemId)
+{
+    return itemId >= FIRST_ITEM_ROOM_REWARD && itemId <= LAST_ITEM_ROOM_REWARD;
+}
+
 bool8 IsMegaEvolutionEnabled(void)
 {
 #if TESTING && defined(ROGUE_EXPANSION)
@@ -5131,6 +5136,9 @@ static void BeginRogueRunPhase_Reset(void)
     FlagClear(FLAG_ROGUE_IS_VICTORY_LAP);
     FlagClear(FLAG_ROGUE_MYSTERIOUS_SIGN_KNOWN);
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
+    FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+    FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_1);
+    FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_2);
 
     SetLastHealLocationWarp(HEAL_LOCATION_ROGUE_HUB);
     if (RogueTrial_IsActive())
@@ -8102,6 +8110,25 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                     break;
                 }
 
+                case ADVPATH_ROOM_ITEM:
+                {
+                    u8 scheduleSlot = gRogueAdvPath.currentRoomParams.perType.itemRoom.scheduleSlot;
+
+                    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, gRogueAdvPath.currentRoomParams.perType.itemRoom.itemId);
+                    VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, scheduleSlot);
+
+                    if(scheduleSlot >= ITEM_ROOM_REWARD_COUNT)
+                    {
+                        AGB_ASSERT(FALSE);
+                        FlagSet(FLAG_TEMP_1);
+                    }
+                    else if(RogueAdv_IsItemRoomRewardClaimed(scheduleSlot))
+                        FlagSet(FLAG_TEMP_1);
+                    else
+                        FlagClear(FLAG_TEMP_1);
+                    break;
+                }
+
                 case ADVPATH_ROOM_DARK_DEAL:
                 {
                     RandomiseCharmItems();
@@ -10745,7 +10772,7 @@ void Rogue_ModifyWildMonHeldItem(u16* itemId)
             return;
         }
 
-        if(!Rogue_IsItemEnabled(*itemId))
+        if(Rogue_IsItemRoomReward(*itemId) || !Rogue_IsItemEnabled(*itemId))
         {
             *itemId = 0;
         }

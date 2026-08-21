@@ -9,6 +9,7 @@
 #include "event_object_movement.h"
 #include "fieldmap.h"
 #include "field_screen_effect.h"
+#include "item.h"
 #include "malloc.h"
 #include "overworld.h"
 #include "random.h"
@@ -60,6 +61,9 @@
 #define ROOM_CONNECTION_MASK_BOT     (1 << ROOM_CONNECTION_BOT)
 
 #define MAX_CONNECTION_GENERATOR_COLUMNS 5
+
+#define ITEM_ROOM_SCHEDULE_COUNT 3
+#define ITEM_ROOM_SCHEDULE_SALT 0x4954454Du
 
 #define gSpecialVar_ScriptNodeID        gSpecialVar_0x8004
 #define gSpecialVar_ScriptNodeParam0    gSpecialVar_0x8005
@@ -169,6 +173,141 @@ static u8 GetPathGenerationDifficulty()
     else
         return Rogue_GetCurrentDifficulty();
 }
+
+struct ItemRoomScheduleEntry
+{
+    u16 itemId;
+    u8 difficulty;
+};
+
+static u32 AdvanceItemRoomScheduleRng(u32 *state)
+{
+    *state = *state * 1664525u + 1013904223u;
+    return *state;
+}
+
+static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
+{
+    u16 items[ITEM_ROOM_REWARD_COUNT] =
+    {
+        ITEM_CURSED_LENS,
+        ITEM_VOW_OF_SILENCE,
+        ITEM_BLOOD_OATH,
+        ITEM_HOLLOW_SUN,
+    };
+    u32 state = ((u32)gRogueRun.baseSeed << 16)
+        ^ gRogueRun.baseSeed
+        ^ ((u32)Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM) << 8)
+        ^ ITEM_ROOM_SCHEDULE_SALT;
+    bool8 hasBonusRoom;
+    u8 i;
+
+    for(i = 0; i < ITEM_ROOM_SCHEDULE_COUNT; ++i)
+    {
+        schedule[i].itemId = ITEM_NONE;
+        schedule[i].difficulty = ROGUE_MAX_BOSS_COUNT;
+    }
+
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+        return;
+
+    schedule[0].difficulty = 1 + AdvanceItemRoomScheduleRng(&state) % 7;
+    hasBonusRoom = (AdvanceItemRoomScheduleRng(&state) & 1) != 0;
+
+    if(hasBonusRoom)
+    {
+        schedule[1].difficulty = 1 + AdvanceItemRoomScheduleRng(&state) % 6;
+        if(schedule[1].difficulty >= schedule[0].difficulty)
+            ++schedule[1].difficulty;
+    }
+
+    schedule[2].difficulty = 9 + AdvanceItemRoomScheduleRng(&state) % 4;
+
+    for(i = ITEM_ROOM_REWARD_COUNT - 1; i != 0; --i)
+    {
+        u8 other = AdvanceItemRoomScheduleRng(&state) % (i + 1);
+        u16 temp = items[i];
+        items[i] = items[other];
+        items[other] = temp;
+    }
+
+    for(i = 0; i < ITEM_ROOM_SCHEDULE_COUNT; ++i)
+    {
+        if(schedule[i].difficulty != ROGUE_MAX_BOSS_COUNT)
+            schedule[i].itemId = items[i];
+    }
+}
+
+static bool8 GetScheduledItemRoom(u8 difficulty, u8 *scheduleSlot, u16 *itemId)
+{
+    struct ItemRoomScheduleEntry schedule[ITEM_ROOM_SCHEDULE_COUNT];
+    u8 i;
+
+    GetItemRoomSchedule(schedule);
+
+    for(i = 0; i < ITEM_ROOM_SCHEDULE_COUNT; ++i)
+    {
+        if(schedule[i].difficulty == difficulty)
+        {
+            *scheduleSlot = i;
+            *itemId = schedule[i].itemId;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static u16 GetItemRoomClaimFlag(u8 scheduleSlot)
+{
+    switch(scheduleSlot)
+    {
+    case 0:
+        return FLAG_ROGUE_ITEM_ROOM_CLAIMED_0;
+    case 1:
+        return FLAG_ROGUE_ITEM_ROOM_CLAIMED_1;
+    case 2:
+        return FLAG_ROGUE_ITEM_ROOM_CLAIMED_2;
+    default:
+        return 0;
+    }
+}
+
+bool8 RogueAdv_IsItemRoomRewardClaimed(u8 scheduleSlot)
+{
+    u16 flag = GetItemRoomClaimFlag(scheduleSlot);
+
+    return flag != 0 && FlagGet(flag);
+}
+
+bool8 RogueAdv_TryClaimItemRoomReward(u8 scheduleSlot, u16 itemId)
+{
+    u16 flag = GetItemRoomClaimFlag(scheduleSlot);
+
+    if(flag == 0 || !Rogue_IsItemRoomReward(itemId) || FlagGet(flag))
+        return FALSE;
+
+    if(!AddBagItem(itemId, 1))
+        return FALSE;
+
+    FlagSet(flag);
+    return TRUE;
+}
+
+#ifdef ROGUE_DEBUG
+bool8 RogueAdv_Debug_GetItemRoomSchedule(u8 slot, u8 *difficulty, u16 *itemId)
+{
+    struct ItemRoomScheduleEntry schedule[ITEM_ROOM_SCHEDULE_COUNT];
+
+    if(slot >= ITEM_ROOM_SCHEDULE_COUNT)
+        return FALSE;
+
+    GetItemRoomSchedule(schedule);
+    *difficulty = schedule[slot].difficulty;
+    *itemId = schedule[slot].itemId;
+    return schedule[slot].difficulty != ROGUE_MAX_BOSS_COUNT;
+}
+#endif
 
 void RogueAdv_CacheMiniBossPreviews(void)
 {
@@ -594,6 +733,7 @@ static u8 ReplaceRoomEncounters_CalculateWeight(u16 weightIndex, u16 roomId, voi
     case ADVPATH_ROOM_BATTLE_SIM:
     case ADVPATH_ROOM_BATTLE_TOWER:
     case ADVPATH_ROOM_MINIBOSS:
+    case ADVPATH_ROOM_ITEM:
         // Don't want to place in first column
         if(existingRoom->currentCoords.x + 1 == settings->pathSettings->totalLength)
             weight -= 40;
@@ -787,6 +927,22 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         AGB_ASSERT(placedFrontierBrain);
         if(placedFrontierBrain)
             --freeRoomCount;
+    }
+
+    // Item Rooms are scheduled from an isolated local RNG. Claim their route
+    // slot before any ordinary random special-room replacements are made.
+    {
+        u8 scheduleSlot = 0;
+        u16 itemId = ITEM_NONE;
+
+        if(GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId))
+        {
+            bool8 placedItemRoom = ReplaceRoomEncounter(pathSettings, ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_ITEM);
+
+            AGB_ASSERT(placedItemRoom);
+            if(placedItemRoom)
+                --freeRoomCount;
+        }
     }
 
     // Randomly replace a routes with empty tiles
@@ -1244,6 +1400,19 @@ static void MaterializeRoom(u8 roomId)
         room->roomParams.perType.miniboss.trainerNum = Rogue_GetScheduledFrontierBrainTrainer(GetPathGenerationDifficulty());
         AGB_ASSERT(room->roomParams.perType.miniboss.trainerNum != TRAINER_NONE);
         break;
+
+    case ADVPATH_ROOM_ITEM:
+    {
+        u8 scheduleSlot = 0;
+        u16 itemId = ITEM_NONE;
+        bool8 hasScheduledRoom = GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId);
+
+        AGB_ASSERT(hasScheduledRoom);
+        room->roomParams.roomIdx = 0;
+        room->roomParams.perType.itemRoom.itemId = itemId;
+        room->roomParams.perType.itemRoom.scheduleSlot = scheduleSlot;
+        break;
+    }
 
     case ADVPATH_ROOM_WILD_DEN:
         room->roomParams.roomIdx = 0;
@@ -2221,6 +2390,11 @@ static void ApplyCurrentNodeWarp(struct WarpData *warp)
             warp->mapGroup = MAP_GROUP(ROGUE_ENCOUNTER_BATTLE_TOWER);
             warp->mapNum = MAP_NUM(ROGUE_ENCOUNTER_BATTLE_TOWER);
             break;
+
+        case ADVPATH_ROOM_ITEM:
+            warp->mapGroup = MAP_GROUP(ROGUE_ENCOUNTER_ITEM_ROOM);
+            warp->mapNum = MAP_NUM(ROGUE_ENCOUNTER_ITEM_ROOM);
+            break;
     }
 }
 
@@ -2490,6 +2664,9 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
 
         case ADVPATH_ROOM_BATTLE_TOWER:
             return OBJ_EVENT_GFX_MISC_YOUNG_COUPLE_F;
+
+        case ADVPATH_ROOM_ITEM:
+            return OBJ_EVENT_GFX_ITEM_HOLD_ITEM;
 
         case ADVPATH_ROOM_BOSS:
             return OBJ_EVENT_GFX_BATTLE_STATUE;

@@ -315,6 +315,9 @@ static u16 GetRandomGemstashItemForBattler(u32 battler)
 
 static bool32 IsTrashAlchemyItemRejected(u32 item)
 {
+    if (Rogue_IsItemRoomReward(item))
+        return TRUE;
+
     switch (ItemId_GetHoldEffect(item))
     {
     case HOLD_EFFECT_NONE:
@@ -2136,7 +2139,9 @@ u32 TrySetCantSelectMoveBattleScript(u32 battler)
             limitations++;
         }
     }
-    else if (holdEffect == HOLD_EFFECT_ASSAULT_VEST && IS_MOVE_STATUS(move) && move != MOVE_ME_FIRST)
+    else if (((holdEffect == HOLD_EFFECT_ASSAULT_VEST && move != MOVE_ME_FIRST)
+          || holdEffect == HOLD_EFFECT_VOW_OF_SILENCE)
+          && IS_MOVE_STATUS(move))
     {
         if (IsDynamaxed(gBattlerAttacker))
             gCurrentMove = MOVE_MAX_GUARD;
@@ -2241,8 +2246,11 @@ u8 CheckMoveLimitations(u32 battler, u8 unusableMoves, u16 check)
         // Choice Items
         else if (check & MOVE_LIMITATION_CHOICE_ITEM && HOLD_EFFECT_CHOICE(holdEffect) && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != gBattleMons[battler].moves[i])
             unusableMoves |= gBitTable[i];
-        // Assault Vest
-        else if (check & MOVE_LIMITATION_ASSAULT_VEST && holdEffect == HOLD_EFFECT_ASSAULT_VEST && IS_MOVE_STATUS(gBattleMons[battler].moves[i]) && gBattleMons[battler].moves[i] != MOVE_ME_FIRST)
+        // Assault Vest and Vow of Silence
+        else if (check & MOVE_LIMITATION_ASSAULT_VEST
+              && ((holdEffect == HOLD_EFFECT_ASSAULT_VEST && gBattleMons[battler].moves[i] != MOVE_ME_FIRST)
+               || holdEffect == HOLD_EFFECT_VOW_OF_SILENCE)
+              && IS_MOVE_STATUS(gBattleMons[battler].moves[i]))
             unusableMoves |= gBitTable[i];
         // Gravity
         else if (check & MOVE_LIMITATION_GRAVITY && IsGravityPreventingMove(gBattleMons[battler].moves[i]))
@@ -4377,6 +4385,19 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 gBattleScripting.battler = gBattlerAttacker;
                 CancelMultiTurnMoves(gBattlerAttacker);
                 gBattlescriptCurrInstr = BattleScript_MoveUsedHealBlockPrevents;
+                gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
+                effect = 1;
+            }
+            gBattleStruct->atkCancellerTracker++;
+            break;
+        case CANCELLER_VOW_OF_SILENCE:
+            if (GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_VOW_OF_SILENCE
+             && IS_MOVE_STATUS(gCurrentMove))
+            {
+                gLastUsedItem = gBattleMons[gBattlerAttacker].item;
+                gPotentialItemEffectBattler = gBattlerAttacker;
+                CancelMultiTurnMoves(gBattlerAttacker);
+                gBattlescriptCurrInstr = BattleScript_MoveUsedVowOfSilencePrevents;
                 gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
                 effect = 1;
             }
@@ -26339,7 +26360,7 @@ static inline uq4_12_t GetDefenderPartnerAbilitiesModifier(u32 battlerPartnerDef
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetAttackerItemsModifier(u32 battlerAtk, uq4_12_t typeEffectivenessModifier, u32 holdEffectAtk)
+static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12_t typeEffectivenessModifier, u32 holdEffectAtk)
 {
     u32 percentBoost;
     switch (holdEffectAtk)
@@ -26354,6 +26375,18 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 battlerAtk, uq4_12_t typeEff
         break;
     case HOLD_EFFECT_LIFE_ORB:
         return UQ_4_12(1.3);
+        break;
+    case HOLD_EFFECT_CURSED_LENS:
+        if (move == MOVE_NONE || IS_MOVE_STATUS(move))
+            break;
+        if (typeEffectivenessModifier > UQ_4_12(1.0))
+            return UQ_4_12(1.3);
+        if (typeEffectivenessModifier > UQ_4_12(0.0) && typeEffectivenessModifier < UQ_4_12(1.0))
+            return UQ_4_12(0.8);
+        break;
+    case HOLD_EFFECT_VOW_OF_SILENCE:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+            return UQ_4_12(1.25);
         break;
     }
     return UQ_4_12(1.0);
@@ -26410,7 +26443,7 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(battlerAtk, typeEffectivenessModifier, holdEffectAtk));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(moveType, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
     }
     else
@@ -26419,7 +26452,7 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(moveType, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(battlerAtk, typeEffectivenessModifier, holdEffectAtk));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk));
     }
     return finalModifier;
 }
@@ -26574,9 +26607,49 @@ s32 CalculateMoveDamageVars(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveTy
                                 typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
 }
 
-static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 moveType, u32 battlerDef, u32 defType, u32 battlerAtk, bool32 recordAbilities)
+static uq4_12_t GetInverseTypeMultiplier(uq4_12_t multiplier)
 {
-    uq4_12_t mod = GetTypeModifier(moveType, defType);
+    switch (multiplier)
+    {
+    case UQ_4_12(0.0):
+    case UQ_4_12(0.5):
+        return UQ_4_12(2.0);
+    case UQ_4_12(2.0):
+        return UQ_4_12(0.5);
+    case UQ_4_12(1.0):
+    default:
+        return UQ_4_12(1.0);
+    }
+}
+
+static uq4_12_t GetHollowSunTypeMultiplier(uq4_12_t multiplier)
+{
+    if (multiplier == UQ_4_12(0.0))
+        return UQ_4_12(0.0);
+    return GetInverseTypeMultiplier(multiplier);
+}
+
+static uq4_12_t GetTypeModifierForBattler(u32 atkType, u32 defType, u32 battlerDef, bool32 checkDefenderItem)
+{
+    uq4_12_t modifier = sTypeEffectivenessTable[atkType][defType];
+
+    // Apply Hollow Sun per defending type so dual-type 4x and 1/4x matchups
+    // invert correctly. The active held-effect query also handles Klutz,
+    // Embargo, and Magic Room in the same way as other held items.
+    if (checkDefenderItem
+        && battlerDef < gBattlersCount
+        && GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_HOLLOW_SUN)
+        modifier = GetHollowSunTypeMultiplier(modifier);
+
+    if (IsInverseBattleActive())
+        modifier = GetInverseTypeMultiplier(modifier);
+
+    return modifier;
+}
+
+static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 moveType, u32 battlerDef, u32 defType, u32 battlerAtk, bool32 recordAbilities, bool32 checkDefenderItem)
+{
+    uq4_12_t mod = GetTypeModifierForBattler(moveType, defType, battlerDef, checkDefenderItem);
     u32 abilityAtk = GetBattlerAbility(battlerAtk);
 
     if (move != MOVE_STRUGGLE
@@ -26675,9 +26748,9 @@ static inline void TryNoticeIllusionInTypeEffectiveness(u32 move, u32 moveType, 
     if (!GetIllusionMonTypes(battlerDef, illusionTypes))
         return;
 
-    MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, illusionTypes[0], battlerAtk, FALSE);
+    MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, illusionTypes[0], battlerAtk, FALSE, TRUE);
     if (illusionTypes[1] != illusionTypes[0])
-        MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, illusionTypes[1], battlerAtk, FALSE);
+        MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, illusionTypes[1], battlerAtk, FALSE, TRUE);
 
     if (presumedModifier != resultingModifier)
         RecordAbilityBattle(battlerDef, ABILITY_ILLUSION);
@@ -26712,12 +26785,12 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
 {
     u32 illusionSpecies;
 
-    MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 0, FALSE), battlerAtk, recordAbilities);
+    MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 0, FALSE), battlerAtk, recordAbilities, TRUE);
     if (GetBattlerType(battlerDef, 1, FALSE) != GetBattlerType(battlerDef, 0, FALSE))
-        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 1, FALSE), battlerAtk, recordAbilities);
+        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 1, FALSE), battlerAtk, recordAbilities, TRUE);
     if (GetBattlerType(battlerDef, 2, FALSE) != TYPE_MYSTERY && GetBattlerType(battlerDef, 2, FALSE) != GetBattlerType(battlerDef, 1, FALSE)
         && GetBattlerType(battlerDef, 2, FALSE) != GetBattlerType(battlerDef, 0, FALSE))
-        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 2, FALSE), battlerAtk, recordAbilities);
+        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 2, FALSE), battlerAtk, recordAbilities, TRUE);
 
     if (recordAbilities && (illusionSpecies = GetIllusionMonSpecies(battlerDef)))
         TryNoticeIllusionInTypeEffectiveness(move, moveType, battlerAtk, battlerDef, modifier);
@@ -26965,19 +27038,19 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
 
     if (GetIllusionMonTypes(battlerDef, illusionTypes))
     {
-        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, illusionTypes[0], battlerAtk, recordAbilities);
+        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, illusionTypes[0], battlerAtk, recordAbilities, TRUE);
         if (illusionTypes[1] != illusionTypes[0])
-            MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, illusionTypes[1], battlerAtk, recordAbilities);
+            MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, illusionTypes[1], battlerAtk, recordAbilities, TRUE);
 
         return modifier;
     }
 
-    MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 0, FALSE), battlerAtk, recordAbilities);
+    MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 0, FALSE), battlerAtk, recordAbilities, TRUE);
     if (GetBattlerType(battlerDef, 1, FALSE) != GetBattlerType(battlerDef, 0, FALSE))
-        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 1, FALSE), battlerAtk, recordAbilities);
+        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 1, FALSE), battlerAtk, recordAbilities, TRUE);
     if (GetBattlerType(battlerDef, 2, FALSE) != TYPE_MYSTERY && GetBattlerType(battlerDef, 2, FALSE) != GetBattlerType(battlerDef, 1, FALSE)
         && GetBattlerType(battlerDef, 2, FALSE) != GetBattlerType(battlerDef, 0, FALSE))
-        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 2, FALSE), battlerAtk, recordAbilities);
+        MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 2, FALSE), battlerAtk, recordAbilities, TRUE);
 
     if (HasSeaGuardianResistances(battlerDef))
         modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
@@ -27132,9 +27205,9 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 o
             u8 defType1 = GetTypeBySpecies(speciesDef, 0, otIdDef);
             u8 defType2 = GetTypeBySpecies(speciesDef, 1, otIdDef);
 
-            MulByTypeEffectiveness(&modifier, move, moveType, 0, defType1, 0, FALSE);
+            MulByTypeEffectiveness(&modifier, move, moveType, 0, defType1, 0, FALSE, FALSE);
             if (defType2 != defType1)
-                MulByTypeEffectiveness(&modifier, move, moveType, 0, defType2, 0, FALSE);
+                MulByTypeEffectiveness(&modifier, move, moveType, 0, defType2, 0, FALSE, FALSE);
         }
 
         if (moveType == TYPE_GROUND && (abilityDef == ABILITY_LEVITATE || abilityDef == ABILITY_EELEVATE) && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
@@ -27148,21 +27221,6 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 o
 
     UpdateMoveResultFlags(modifier);
     return modifier;
-}
-
-static uq4_12_t GetInverseTypeMultiplier(uq4_12_t multiplier)
-{
-    switch (multiplier)
-    {
-    case UQ_4_12(0.0):
-    case UQ_4_12(0.5):
-        return UQ_4_12(2.0);
-    case UQ_4_12(2.0):
-        return UQ_4_12(0.5);
-    case UQ_4_12(1.0):
-    default:
-        return UQ_4_12(1.0);
-    }
 }
 
 uq4_12_t GetTypeModifier(u32 atkType, u32 defType)

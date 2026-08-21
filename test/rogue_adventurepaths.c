@@ -5,6 +5,7 @@
 #include "constants/rogue.h"
 #include "constants/species.h"
 #include "event_data.h"
+#include "item.h"
 #include "malloc.h"
 #include "pokemon.h"
 #include "random.h"
@@ -631,4 +632,200 @@ TEST("Unique Legendary battles and catches preserve their generated payload")
     gRngValue = originalRng;
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+}
+
+TEST("Item Room schedules are deterministic and do not mutate the path RNG")
+{
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    RAND_TYPE originalRng = gRngRogueValue;
+    RAND_TYPE scheduleRng;
+    u8 firstDifficulties[3];
+    u16 firstItems[3];
+    u8 difficulty;
+    u16 itemId;
+    u8 i;
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    gRogueRun.baseSeed = 31415;
+    SeedRogueRng(27182);
+    scheduleRng = gRngRogueValue;
+
+    for(i = 0; i < 3; ++i)
+    {
+        bool8 active = RogueAdv_Debug_GetItemRoomSchedule(i, &firstDifficulties[i], &firstItems[i]);
+
+        if(i != 1)
+            EXPECT(active);
+    }
+
+    EXPECT_EQ(gRngRogueValue, scheduleRng);
+
+    for(i = 0; i < 3; ++i)
+    {
+        bool8 active = RogueAdv_Debug_GetItemRoomSchedule(i, &difficulty, &itemId);
+
+        EXPECT_EQ(difficulty, firstDifficulties[i]);
+        EXPECT_EQ(itemId, firstItems[i]);
+        EXPECT_EQ(active, firstDifficulties[i] != ROGUE_MAX_BOSS_COUNT);
+    }
+
+    EXPECT_GE(firstDifficulties[0], 1);
+    EXPECT_LE(firstDifficulties[0], 7);
+    if(firstDifficulties[1] != ROGUE_MAX_BOSS_COUNT)
+    {
+        EXPECT_GE(firstDifficulties[1], 1);
+        EXPECT_LE(firstDifficulties[1], 7);
+        EXPECT_NE(firstDifficulties[1], firstDifficulties[0]);
+        EXPECT_NE(firstItems[1], firstItems[0]);
+        EXPECT_NE(firstItems[1], firstItems[2]);
+    }
+    EXPECT_GE(firstDifficulties[2], 9);
+    EXPECT_LE(firstDifficulties[2], 12);
+    EXPECT_NE(firstItems[2], firstItems[0]);
+    EXPECT(Rogue_IsItemRoomReward(firstItems[0]));
+    EXPECT(Rogue_IsItemRoomReward(firstItems[2]));
+
+    gRogueRun.baseSeed = originalBaseSeed;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    gRngRogueValue = originalRng;
+}
+
+TEST("Item Room schedules include both two-room and three-room seeds")
+{
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    bool8 foundTwoRooms = FALSE;
+    bool8 foundThreeRooms = FALSE;
+    u16 seed;
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+
+    for(seed = 0; seed < 256 && (!foundTwoRooms || !foundThreeRooms); ++seed)
+    {
+        u8 difficulty;
+        u16 itemId;
+
+        gRogueRun.baseSeed = seed;
+        if(RogueAdv_Debug_GetItemRoomSchedule(1, &difficulty, &itemId))
+            foundThreeRooms = TRUE;
+        else
+            foundTwoRooms = TRUE;
+    }
+
+    EXPECT(foundTwoRooms);
+    EXPECT(foundThreeRooms);
+
+    gRogueRun.baseSeed = originalBaseSeed;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+}
+
+TEST("Standard and Slow Path place scheduled Item Rooms while Gauntlet does not")
+{
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+    RAND_TYPE originalRng = gRngRogueValue;
+    u8 modes[] = {ROGUE_GAME_MODE_STANDARD, ROGUE_GAME_MODE_SLOW_PATH};
+    u8 modeIdx;
+
+    EXPECT_NE(originalPath, NULL);
+    if(originalPath == NULL)
+        return;
+
+    *originalPath = gRogueAdvPath;
+    gRogueRun.baseSeed = 31415;
+
+    for(modeIdx = 0; modeIdx < ARRAY_COUNT(modes); ++modeIdx)
+    {
+        u8 scheduledDifficulty;
+        u16 scheduledItem;
+        u8 roomCount = 0;
+        u8 roomId;
+
+        Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, modes[modeIdx]);
+        EXPECT(RogueAdv_Debug_GetItemRoomSchedule(0, &scheduledDifficulty, &scheduledItem));
+        Rogue_SetCurrentDifficulty(scheduledDifficulty);
+        gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+        memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+        EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+
+        for(roomId = 0; roomId < gRogueAdvPath.roomCount; ++roomId)
+        {
+            if(gRogueAdvPath.rooms[roomId].roomType == ADVPATH_ROOM_ITEM)
+            {
+                ++roomCount;
+                EXPECT_EQ(gRogueAdvPath.rooms[roomId].roomParams.perType.itemRoom.itemId, scheduledItem);
+                EXPECT_EQ(gRogueAdvPath.rooms[roomId].roomParams.perType.itemRoom.scheduleSlot, 0);
+                EXPECT_NE(gRogueAdvPath.rooms[roomId].coords.x + 1, gRogueAdvPath.pathLength);
+            }
+        }
+        EXPECT_EQ(roomCount, 1);
+    }
+
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_GAUNTLET);
+    {
+        u8 difficulty;
+        u16 itemId;
+        u8 slot;
+
+        for(slot = 0; slot < 3; ++slot)
+            EXPECT(!RogueAdv_Debug_GetItemRoomSchedule(slot, &difficulty, &itemId));
+    }
+
+    gRogueAdvPath = *originalPath;
+    gRogueRun.baseSeed = originalBaseSeed;
+    gRogueRun.adventureRoomId = originalRoomId;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRngRogueValue = originalRng;
+    Free(originalPath);
+}
+
+TEST("Item Room rewards are excluded from generic item queries")
+{
+    u8 *queryFlags;
+    u16 itemId;
+
+    RogueItemQuery_Begin();
+    RogueItemQuery_IsItemActive();
+    queryFlags = RogueItemQuery_EndWithBitwiseCloneAlloc();
+
+    EXPECT_NE(queryFlags, NULL);
+    if(queryFlags != NULL)
+    {
+        for(itemId = FIRST_ITEM_ROOM_REWARD; itemId <= LAST_ITEM_ROOM_REWARD; ++itemId)
+        {
+            EXPECT(Rogue_IsItemRoomReward(itemId));
+            EXPECT(!RogueMiscQuery_CheckStateCustom(itemId, queryFlags));
+        }
+        Free(queryFlags);
+    }
+}
+
+TEST("Claimed Item Room schedule slots cannot grant their reward twice")
+{
+    bool8 originalClaimed = FlagGet(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+    u16 originalCount = CountTotalItemQuantityInBag(ITEM_CURSED_LENS);
+
+    while(RemoveBagItem(ITEM_CURSED_LENS, 1))
+        ;
+    FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+
+    EXPECT(RogueAdv_TryClaimItemRoomReward(0, ITEM_CURSED_LENS));
+    EXPECT(RogueAdv_IsItemRoomRewardClaimed(0));
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_CURSED_LENS), 1);
+
+    EXPECT(!RogueAdv_TryClaimItemRoomReward(0, ITEM_CURSED_LENS));
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_CURSED_LENS), 1);
+
+    RemoveBagItem(ITEM_CURSED_LENS, 1);
+    if(originalCount != 0)
+        AddBagItem(ITEM_CURSED_LENS, originalCount);
+    if(originalClaimed)
+        FlagSet(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+    else
+        FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
 }

@@ -572,7 +572,10 @@ void SetBattlerData(u32 battlerId)
         else
             gBattleMons[battlerId].ability = ABILITY_NONE;
 
-        if (AI_PARTY->mons[side][gBattlerPartyIndexes[battlerId]].heldEffect == 0)
+        // Hollow Sun changes the type matchup itself, so keep it active while
+        // simulating damage even before the AI has recorded the item effect.
+        if (AI_PARTY->mons[side][gBattlerPartyIndexes[battlerId]].heldEffect == 0
+         && ItemId_GetHoldEffect(gBattleMons[battlerId].item) != HOLD_EFFECT_HOLLOW_SUN)
             gBattleMons[battlerId].item = 0;
 
         for (i = 0; i < MAX_MON_MOVES; i++)
@@ -1208,6 +1211,10 @@ bool32 CanTargetFaintAi(u32 battlerDef, u32 battlerAtk)
         if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && !(unusable & gBitTable[i])
             && AI_DATA->simulatedDmg[battlerDef][battlerAtk][i] >= gBattleMons[battlerAtk].hp)
         {
+            if (AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_BLOOD_OATH
+             && gBattleMoves[moves[i]].effect != EFFECT_MULTI_HIT
+             && gBattleMoves[moves[i]].strikeCount <= 1)
+                continue;
             return TRUE;
         }
     }
@@ -1234,7 +1241,14 @@ bool32 CanAIFaintTarget(u32 battlerAtk, u32 battlerDef, u32 numHits)
                 dmg *= numHits;
 
             if (gBattleMons[battlerDef].hp <= dmg)
+            {
+                if (numHits == 0
+                 && AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_BLOOD_OATH
+                 && gBattleMoves[moves[i]].effect != EFFECT_MULTI_HIT
+                 && gBattleMoves[moves[i]].strikeCount <= 1)
+                    continue;
                 return TRUE;
+            }
         }
     }
 
@@ -1246,6 +1260,11 @@ bool32 CanTargetMoveFaintAi(u32 move, u32 battlerDef, u32 battlerAtk, u32 nHits)
     u32 indexSlot = GetMoveSlot(GetMovesArray(battlerDef), move);
     if (indexSlot < MAX_MON_MOVES)
     {
+        if (nHits <= 1
+         && AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_BLOOD_OATH
+         && gBattleMoves[move].effect != EFFECT_MULTI_HIT
+         && gBattleMoves[move].strikeCount <= 1)
+            return FALSE;
         if (GetNoOfHitsToKO(AI_DATA->simulatedDmg[battlerDef][battlerAtk][indexSlot], gBattleMons[battlerAtk].hp) <= nHits)
             return TRUE;
     }
@@ -1272,6 +1291,10 @@ bool32 CanTargetFaintAiWithMod(u32 battlerDef, u32 battlerAtk, s32 hpMod, s32 dm
 
         if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && !(unusable & gBitTable[i]) && dmg >= hpCheck)
         {
+            if (AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_BLOOD_OATH
+             && gBattleMoves[moves[i]].effect != EFFECT_MULTI_HIT
+             && gBattleMoves[moves[i]].strikeCount <= 1)
+                continue;
             return TRUE;
         }
     }
@@ -1644,6 +1667,8 @@ bool32 ShouldTryOHKO(u32 battlerAtk, u32 battlerDef, u32 atkAbility, u32 defAbil
     if (holdEffect == HOLD_EFFECT_FOCUS_BAND && (Random() % 100) < AI_DATA->holdEffectParams[battlerDef])
         return FALSE;   //probabilistically speaking, focus band should activate so dont OHKO
     else if (holdEffect == HOLD_EFFECT_FOCUS_SASH && AtMaxHp(battlerDef))
+        return FALSE;
+    else if (holdEffect == HOLD_EFFECT_BLOOD_OATH)
         return FALSE;
 
     if (!DoesBattlerIgnoreAbilityChecks(atkAbility, move) && defAbility == ABILITY_STURDY)
@@ -2710,6 +2735,7 @@ bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32
                         return PIVOT;   // Won't get the two turns, pivot
 
                     if (!IS_MOVE_STATUS(move) && (shouldSwitch
+                        || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_BLOOD_OATH
                         || (AtMaxHp(battlerDef) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH
                         || (B_STURDY >= GEN_5 && defAbility == ABILITY_STURDY)
                         || defAbility == ABILITY_MULTISCALE
@@ -2718,10 +2744,11 @@ bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32
                 }
                 else if (!hasStatBoost)
                 {
-                    if (!IS_MOVE_STATUS(move) && (AtMaxHp(battlerDef) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH
+                    if (!IS_MOVE_STATUS(move) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_BLOOD_OATH
+                        || (AtMaxHp(battlerDef) && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH
                         || (B_STURDY >= GEN_5 && defAbility == ABILITY_STURDY)
                         || defAbility == ABILITY_MULTISCALE
-                        || defAbility == ABILITY_SHADOW_SHIELD)))
+                        || defAbility == ABILITY_SHADOW_SHIELD))))
                         return PIVOT;   // pivot to break sash/sturdy/multiscale
 
                     if (shouldSwitch)
@@ -2797,6 +2824,7 @@ bool32 ShouldPivot(u32 battlerAtk, u32 battlerDef, u32 defAbility, u32 move, u32
                     // can knock out foe in 2 hits
                     if (IS_MOVE_STATUS(move) && (shouldSwitch //Damaging move
                       //&& (switchScore >= SWITCHING_INCREASE_RESIST_ALL_MOVES + SWITCHING_INCREASE_KO_FOE //remove hazards
+                     || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_BLOOD_OATH
                      || (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_FOCUS_SASH && AtMaxHp(battlerDef))))
                         return DONT_PIVOT; // Pivot to break the sash
                     else

@@ -13,10 +13,13 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired();
 void RogueAdv_CacheMiniBossPreviews();
 void RogueAdv_ApplyAdventureMetatiles();
 void RogueAdv_Debug_ForceRegenerateAdventurePaths();
+bool8 RogueAdv_IsItemRoomRewardClaimed(u8 scheduleSlot);
+bool8 RogueAdv_TryClaimItemRoomReward(u8 scheduleSlot, u16 itemId);
 #ifdef ROGUE_DEBUG
 u32 RogueAdv_Debug_GenerateUniqueLegendaryCustomMonId(u16 species);
 u32 RogueAdv_Debug_GenerateUniqueDenCustomMonId(u16 species);
 u16 RogueAdv_Debug_GetFullRestStopWeight(u8 difficulty);
+bool8 RogueAdv_Debug_GetItemRoomSchedule(u8 slot, u8 *difficulty, u16 *itemId);
 #endif
 
 u8 RogueAdv_GetTileNum();

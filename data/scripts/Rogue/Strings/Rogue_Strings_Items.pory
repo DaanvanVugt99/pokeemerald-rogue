@@ -68,6 +68,26 @@ text gItemDesc_TR
     format("Reusable machine for teaching {PKMN} one specific move.")
 }
 
+text gItemDesc_CursedLens
+{
+    format("Boosts supereffective moves by 30%, but weakens resisted moves by 20%.")
+}
+
+text gItemDesc_VowOfSilence
+{
+    format("Boosts damaging moves by 25%, but prevents the use of status moves.")
+}
+
+text gItemDesc_BloodOath
+{
+    format("Survives a direct KO hit with 1 HP, then the item is consumed.")
+}
+
+text gItemDesc_HollowSun
+{
+    format("Incoming weaknesses become resistances, and resistances become weaknesses.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

@@ -168,6 +168,12 @@
 #define HOLD_EFFECT_BERSERK_GENE        184
 #define HOLD_EFFECT_ROTTEN_BERRY        185
 
+// Divergence Item Room effects
+#define HOLD_EFFECT_CURSED_LENS         186
+#define HOLD_EFFECT_VOW_OF_SILENCE      187
+#define HOLD_EFFECT_BLOOD_OATH          188
+#define HOLD_EFFECT_HOLLOW_SUN          189
+
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 
 // Terrain seed params

@@ -1,0 +1,74 @@
+mapscripts Rogue_Encounter_ItemRoom_MapScripts {}
+
+script Rogue_Encounter_ItemRoom_Pedestal
+{
+    lock
+
+    switch(var(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1))
+    {
+        case 0:
+            if(flag(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0))
+            {
+                msgbox(format("The pedestal is empty."))
+                release
+                return
+            }
+        case 1:
+            if(flag(FLAG_ROGUE_ITEM_ROOM_CLAIMED_1))
+            {
+                msgbox(format("The pedestal is empty."))
+                release
+                return
+            }
+        case 2:
+            if(flag(FLAG_ROGUE_ITEM_ROOM_CLAIMED_2))
+            {
+                msgbox(format("The pedestal is empty."))
+                release
+                return
+            }
+        default:
+            msgbox(format("Something is wrong with the pedestal."))
+            release
+            return
+    }
+
+    bufferitemname(STR_VAR_1, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA)
+
+    switch(var(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA))
+    {
+        case ITEM_CURSED_LENS:
+            msgbox(format("It's the {STR_VAR_1}.\pSuper-effective moves deal 30% more damage, but resisted moves deal 20% less.\pTake it?"), MSGBOX_YESNO)
+
+        case ITEM_VOW_OF_SILENCE:
+            msgbox(format("It's the {STR_VAR_1}.\pDamaging moves deal 25% more damage, but status moves cannot be used.\pTake it?"), MSGBOX_YESNO)
+
+        case ITEM_BLOOD_OATH:
+            msgbox(format("It's the {STR_VAR_1}.\pA direct hit that would knock out its holder instead leaves 1 HP, then consumes the item.\pTake it?"), MSGBOX_YESNO)
+
+        case ITEM_HOLLOW_SUN:
+            msgbox(format("It's the {STR_VAR_1}.\pIncoming weaknesses become resistances, and resistances become weaknesses.\pTake it?"), MSGBOX_YESNO)
+
+        default:
+            msgbox(format("Something is wrong with the pedestal."))
+            setvar(VAR_RESULT, NO)
+    }
+
+    if(var(VAR_RESULT) == YES)
+    {
+        special(Rogue_TryClaimItemRoomReward)
+
+        if(var(VAR_RESULT) == YES)
+        {
+            setflag(FLAG_TEMP_1)
+            removeobject(VAR_LAST_TALKED)
+            call(Rogue_Common_DisplayPopups)
+        }
+        else
+        {
+            msgbox(format("Your Bag is full.\pThe item remains on the pedestal."))
+        }
+    }
+
+    release
+}

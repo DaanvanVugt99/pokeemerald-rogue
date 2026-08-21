@@ -1452,6 +1452,16 @@ void Popup_NewBadgeGet()
     Rogue_PushPopup_NewBadgeGet(Rogue_GetCurrentDifficulty() - 1);
 }
 
+void Rogue_TryClaimItemRoomReward()
+{
+    u16 itemId = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
+    u8 scheduleSlot = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
+
+    gSpecialVar_Result = RogueAdv_TryClaimItemRoomReward(scheduleSlot, itemId);
+    if(gSpecialVar_Result)
+        Rogue_PushPopup_AddItem(itemId, 1);
+}
+
 u16 Rogue_GetBagCapacityUpgradeLevel()
 {
     return gSaveBlock1Ptr->bagCapacityUpgrades;

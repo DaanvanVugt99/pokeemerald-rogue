@@ -8820,6 +8820,11 @@ BattleScript_MoveUsedHealBlockPrevents::
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_MoveEnd
 
+BattleScript_MoveUsedVowOfSilencePrevents::
+	printstring STRINGID_ASSAULTVESTDOESNTALLOW
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+
 BattleScript_SelectingNotAllowedMoveHealBlockInPalace::
 	printstring STRINGID_HEALBLOCKPREVENTSUSAGE
 	goto BattleScript_SelectingUnusableMoveInPalace
@@ -13603,7 +13608,9 @@ BattleScript_HangedOnMsg::
 	playanimation BS_TARGET, B_ANIM_HANGED_ON
 	printstring STRINGID_PKMNHUNGONWITHX
 	waitmessage B_WAIT_TIME_LONG
-	jumpifnoholdeffect BS_TARGET, HOLD_EFFECT_FOCUS_SASH, BattleScript_HangedOnMsgRet
+	jumpifholdeffect BS_TARGET, HOLD_EFFECT_FOCUS_SASH, BattleScript_HangedOnMsgRemoveItem
+	jumpifnoholdeffect BS_TARGET, HOLD_EFFECT_BLOOD_OATH, BattleScript_HangedOnMsgRet
+BattleScript_HangedOnMsgRemoveItem:
 	removeitem BS_TARGET
 BattleScript_HangedOnMsgRet:
 	return

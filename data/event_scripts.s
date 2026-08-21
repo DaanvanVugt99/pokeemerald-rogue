@@ -724,6 +724,7 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Route_Johto_Field0/scripts.inc"
 
 	.include "data/maps/Rogue_Encounter_Lab/scripts.inc"
+	.include "data/maps/Rogue_Encounter_ItemRoom/scripts.inc"
 
 	.include "data/maps/Rogue_Route_Kanto_Forest0/scripts.inc"
 

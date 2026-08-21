@@ -369,6 +369,7 @@ gSpecials::
 	def_special Rogue_SetTimeAndSeason
 	def_special Popup_CannotTakeItem
 	def_special Popup_NewBadgeGet
+	def_special Rogue_TryClaimItemRoomReward
 	def_special Rogue_GetBagCapacityUpgradeLevel
 	def_special Rogue_IncreaseBagCapacityUpgradeLevel
 	def_special Rogue_BufferBagUpgradeCost

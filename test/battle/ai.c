@@ -2,6 +2,42 @@
 #include "test/battle.h"
 #include "battle_ai_util.h"
 
+AI_SINGLE_BATTLE_TEST("AI treats status moves as unusable with Vow of Silence")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_VOW_OF_SILENCE); Moves(MOVE_RECOVER, MOVE_TACKLE); }
+    } WHEN {
+        TURN { EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI KO prediction recognizes Blood Oath survival")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { HP(20); MaxHP(100); Item(ITEM_BLOOD_OATH); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_DRAGON_RAGE, MOVE_SPLASH); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_DRAGON_RAGE, MOVE_SPLASH); }
+    } THEN {
+        gBattleResources->aiData->holdEffects[B_POSITION_PLAYER_LEFT] = HOLD_EFFECT_BLOOD_OATH;
+        EXPECT(!CanAIFaintTarget(B_POSITION_OPPONENT_LEFT, B_POSITION_PLAYER_LEFT, 0));
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI understands Hollow Sun type inversion")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_TANGELA) { Item(ITEM_HOLLOW_SUN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_EMBER, MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_WATER_GUN, MOVE_EMBER); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI gets baited by Protect Switch tactics") // This behavior is to be fixed.
 {
     GIVEN {

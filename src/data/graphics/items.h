@@ -1125,6 +1125,7 @@ const u32 gItemIconPalette_UltranecroziumZ[] = INCBIN_U32("graphics/items/icon_p
 
 const u32 gItemIcon_LightBall[] = INCBIN_U32("graphics/items/icons/light_ball.4bpp.lz");
 const u32 gItemIconPalette_LightBall[] = INCBIN_U32("graphics/items/icon_palettes/light_ball.gbapal.lz");
+const u32 gItemIconPalette_HollowSun[] = INCBIN_U32("graphics/items/icon_palettes/hollow_sun.gbapal.lz");
 
 const u32 gItemIcon_Leek[] = INCBIN_U32("graphics/items/icons/leek.4bpp.lz");
 const u32 gItemIconPalette_Leek[] = INCBIN_U32("graphics/items/icon_palettes/leek.gbapal.lz");
@@ -1280,6 +1281,7 @@ const u32 gItemIconPalette_MetalCoat[] = INCBIN_U32("graphics/items/icon_palette
 
 const u32 gItemIcon_ChoiceBand[] = INCBIN_U32("graphics/items/icons/choice_band.4bpp.lz");
 const u32 gItemIconPalette_ChoiceBand[] = INCBIN_U32("graphics/items/icon_palettes/choice_band.gbapal.lz");
+const u32 gItemIconPalette_VowOfSilence[] = INCBIN_U32("graphics/items/icon_palettes/vow_of_silence.gbapal.lz");
 
 const u32 gItemIcon_ChoiceSpecs[] = INCBIN_U32("graphics/items/icons/choice_specs.4bpp.lz");
 const u32 gItemIconPalette_ChoiceSpecs[] = INCBIN_U32("graphics/items/icon_palettes/choice_specs.gbapal.lz");
@@ -1388,6 +1390,7 @@ const u32 gItemIconPalette_LuckyEgg[] = INCBIN_U32("graphics/items/icon_palettes
 
 const u32 gItemIcon_ScopeLens[] = INCBIN_U32("graphics/items/icons/scope_lens.4bpp.lz");
 const u32 gItemIconPalette_ScopeLens[] = INCBIN_U32("graphics/items/icon_palettes/scope_lens.gbapal.lz");
+const u32 gItemIconPalette_CursedLens[] = INCBIN_U32("graphics/items/icon_palettes/cursed_lens.gbapal.lz");
 
 const u32 gItemIcon_Leftovers[] = INCBIN_U32("graphics/items/icons/leftovers.4bpp.lz");
 const u32 gItemIconPalette_Leftovers[] = INCBIN_U32("graphics/items/icon_palettes/leftovers.gbapal.lz");
@@ -1417,6 +1420,7 @@ const u32 gItemIconPalette_PowerHerb[] = INCBIN_U32("graphics/items/icon_palette
 
 const u32 gItemIcon_FocusSash[] = INCBIN_U32("graphics/items/icons/focus_sash.4bpp.lz");
 const u32 gItemIconPalette_FocusSash[] = INCBIN_U32("graphics/items/icon_palettes/focus_sash.gbapal.lz");
+const u32 gItemIconPalette_BloodOath[] = INCBIN_U32("graphics/items/icon_palettes/blood_oath.gbapal.lz");
 
 const u32 gItemIcon_ZoomLens[] = INCBIN_U32("graphics/items/icons/zoom_lens.4bpp.lz");
 const u32 gItemIconPalette_ZoomLens[] = INCBIN_U32("graphics/items/icon_palettes/zoom_lens.gbapal.lz");

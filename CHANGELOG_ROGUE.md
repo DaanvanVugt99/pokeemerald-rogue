@@ -16,6 +16,13 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added deterministic Item Rooms to Standard and Slow Path Adventures, with
+  three isolated cursed held-item rewards: Cursed Lens, Vow of Silence, and
+  Blood Oath.
+- Added palette-only cursed recolors for the three Item Room held-item icons,
+  reusing the existing Scope Lens, Choice Band, and Focus Sash artwork.
+- Added Hollow Sun, an Item Room held item that reverses non-neutral incoming
+  type matchups while preserving neutral and immune results.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and
   adaptively fitted descriptions for normal, Z-, and Max Moves, plus compact
   summary-style type badges in the Fight menu.
