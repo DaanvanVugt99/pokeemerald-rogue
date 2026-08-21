@@ -6307,13 +6307,18 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
             moveType = ItemId_GetSecondaryId(item);
         break;
     case EFFECT_REVELATION_DANCE:
-        if (gSpeciesInfo[species].types[0] != TYPE_MYSTERY)
-            moveType = gSpeciesInfo[species].types[0];
-        else if (gSpeciesInfo[species].types[1] != TYPE_MYSTERY)
-            moveType = gSpeciesInfo[species].types[1];
+    {
+        u8 type1 = GetTypeBySpecies(species, 0, otId);
+        u8 type2 = GetTypeBySpecies(species, 1, otId);
+
+        if (type1 != TYPE_MYSTERY)
+            moveType = type1;
+        else if (type2 != TYPE_MYSTERY)
+            moveType = type2;
         break;
+    }
     case EFFECT_RAGING_BULL:
-        moveType = gSpeciesInfo[species].types[1];
+        moveType = GetTypeBySpecies(species, 1, otId);
         break;
     case EFFECT_NATURAL_GIFT:
         if (ItemId_GetPocket(item) == POCKET_BERRIES)

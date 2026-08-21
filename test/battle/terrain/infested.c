@@ -1,5 +1,21 @@
 #include "global.h"
+#include "constants/rogue.h"
+#include "pokemon.h"
 #include "test/battle.h"
+
+static u32 DynamicTypeCustomMonId(u32 type, u32 typeSlot)
+{
+    return OTID_FLAG_CUSTOM_MON
+        | OTID_FLAG_DYNAMIC_CUSTOM_MON
+        | (1 << 28) // COMPRESSED_FORMAT_MON_TYPE
+        | (typeSlot << 5)
+        | type;
+}
+
+static void CreateDynamicTypeMon(struct Pokemon *mon, u16 species, u32 type, u32 typeSlot)
+{
+    CreateMon(mon, species, 100, 0, TRUE, 0, OT_ID_CUSTOM_MON, DynamicTypeCustomMonId(type, typeSlot));
+}
 
 ASSUMPTIONS
 {
@@ -140,6 +156,24 @@ SINGLE_BATTLE_TEST("Infested Terrain does not damage Bug-type switch ins")
         TURN { SWITCH(opponent, 1); }
     } SCENE {
         NOT HP_BAR(opponent);
+    }
+}
+
+SINGLE_BATTLE_TEST("Infested Terrain uses dynamic typing for switch ins")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_CATERPIE);
+        OPPONENT(SPECIES_RATICATE);
+
+        CreateDynamicTypeMon(&OPPONENT_PARTY[1], SPECIES_RATICATE, TYPE_BUG, 0);
+    } WHEN {
+        TURN { MOVE(player, MOVE_INFESTED_TERRAIN); }
+        TURN { SWITCH(opponent, 1); }
+    } SCENE {
+        NOT HP_BAR(opponent);
+    } THEN {
+        EXPECT_EQ(opponent->type1, TYPE_BUG);
     }
 }
 

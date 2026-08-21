@@ -6201,8 +6201,9 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem, s
                     for (j = 0; j < PARTY_SIZE; j++)
                     {
                         u16 currSpecies = GetMonData(&gPlayerParty[j], MON_DATA_SPECIES, NULL);
-                        if (gSpeciesInfo[currSpecies].types[0] == TYPE_DARK
-                         || gSpeciesInfo[currSpecies].types[1] == TYPE_DARK)
+                        u32 currOtId = GetMonData(&gPlayerParty[j], MON_DATA_OT_ID);
+                        if (GetTypeBySpecies(currSpecies, 0, currOtId) == TYPE_DARK
+                         || GetTypeBySpecies(currSpecies, 1, currOtId) == TYPE_DARK)
                         {
                             targetSpecies = evo.targetSpecies;
                             break;

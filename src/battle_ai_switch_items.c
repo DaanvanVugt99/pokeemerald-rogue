@@ -64,20 +64,23 @@ static bool32 DoesPartyShareTypeWithPartyMon(struct Pokemon *party, s32 firstId,
 {
     s32 i;
     u16 species = GetMonData(&party[monPartyId], MON_DATA_SPECIES);
-    u32 monType1 = gSpeciesInfo[species].types[0];
-    u32 monType2 = gSpeciesInfo[species].types[1];
+    u32 otId = GetMonData(&party[monPartyId], MON_DATA_OT_ID);
+    u32 monType1 = GetTypeBySpecies(species, 0, otId);
+    u32 monType2 = GetTypeBySpecies(species, 1, otId);
 
     for (i = firstId; i < lastId; i++)
     {
         u16 otherSpecies;
+        u32 otherOtId;
         u32 otherType1, otherType2;
 
         if (!IsValidForBattle(&party[i]))
             continue;
 
         otherSpecies = GetMonData(&party[i], MON_DATA_SPECIES);
-        otherType1 = gSpeciesInfo[otherSpecies].types[0];
-        otherType2 = gSpeciesInfo[otherSpecies].types[1];
+        otherOtId = GetMonData(&party[i], MON_DATA_OT_ID);
+        otherType1 = GetTypeBySpecies(otherSpecies, 0, otherOtId);
+        otherType2 = GetTypeBySpecies(otherSpecies, 1, otherOtId);
 
         if (otherType1 != monType1
          && otherType1 != monType2
@@ -1213,8 +1216,9 @@ static u32 GetBestMonTypeMatchup(struct Pokemon *party, int firstId, int lastId,
 
                 u8 atkType1 = gBattleMons[opposingBattler].type1;
                 u8 atkType2 = gBattleMons[opposingBattler].type2;
-                u8 defType1 = gSpeciesInfo[species].types[0];
-                u8 defType2 = gSpeciesInfo[species].types[1];
+                u32 otId = GetMonData(&party[i], MON_DATA_OT_ID);
+                u8 defType1 = GetTypeBySpecies(species, 0, otId);
+                u8 defType2 = GetTypeBySpecies(species, 1, otId);
 
                 typeEffectiveness = uq4_12_multiply(typeEffectiveness, (GetTypeModifier(atkType1, defType1)));
                 if (atkType2 != atkType1)
@@ -1706,7 +1710,7 @@ static u16 GetSwitchinTypeMatchup(u32 opposingBattler, struct BattlePokemon batt
 
     // Check type matchup
     u16 typeEffectiveness = UQ_4_12(1.0);
-    u8 atkType1 = gSpeciesInfo[gBattleMons[opposingBattler].species].types[0], atkType2 = gSpeciesInfo[gBattleMons[opposingBattler].species].types[1],
+    u8 atkType1 = gBattleMons[opposingBattler].type1, atkType2 = gBattleMons[opposingBattler].type2,
     defType1 = battleMon.type1, defType2 = battleMon.type2;
 
     // Multiply type effectiveness by a factor depending on type matchup

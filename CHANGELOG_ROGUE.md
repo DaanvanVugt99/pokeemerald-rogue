@@ -352,6 +352,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Applied dynamic custom Pokémon typing to switch-in hazards, battle AI
+  predictions, and party type checks so altered typings are respected outside
+  active battle slots.
 - Corrected the optimized Pokémon substructure lookup table so party Pokémon
   retain their canonical data layout across all personality values.
 - Fixed multi-target previews leaving the acting battler's target bounce active

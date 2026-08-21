@@ -9046,17 +9046,19 @@ static inline u32 CountFaintedPartyAlliesOfType(u32 battler, u32 type)
     for (i = firstMonId; i < lastMonId; i++)
     {
         u16 species;
+        u32 otId;
 
         if (i == gBattlerPartyIndexes[battler])
             continue;
         species = GetMonData(&party[i], MON_DATA_SPECIES);
+        otId = GetMonData(&party[i], MON_DATA_OT_ID);
         if (species == SPECIES_NONE)
             continue;
         if (GetMonData(&party[i], MON_DATA_IS_EGG))
             continue;
         if (GetMonData(&party[i], MON_DATA_HP) != 0)
             continue;
-        if (gSpeciesInfo[species].types[0] == type || gSpeciesInfo[species].types[1] == type)
+        if (GetTypeBySpecies(species, 0, otId) == type || GetTypeBySpecies(species, 1, otId) == type)
             count++;
     }
 
@@ -9258,7 +9260,7 @@ static bool32 TryApplyAbilitySuppressionWithGastroAcid(u32 attacker, u32 target,
 static u32 GetForecastFrillSecondaryType(u32 battler)
 {
     if (!WEATHER_HAS_EFFECT)
-        return gSpeciesInfo[gBattleMons[battler].species].types[1];
+        return GetTypeBySpecies(gBattleMons[battler].species, 1, gBattleMons[battler].otId);
 
     if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
         return TYPE_FIRE;
@@ -9273,7 +9275,7 @@ static u32 GetForecastFrillSecondaryType(u32 battler)
     if (IsBattlerWeatherAffected(battler, B_WEATHER_ECLIPSE))
         return TYPE_DARK;
 
-    return gSpeciesInfo[gBattleMons[battler].species].types[1];
+    return GetTypeBySpecies(gBattleMons[battler].species, 1, gBattleMons[battler].otId);
 }
 
 static bool32 TryForecastFrillChangeSecondaryType(u32 battler)
@@ -26664,13 +26666,18 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
     *modifier = uq4_12_multiply(*modifier, mod);
 }
 
-static inline void TryNoticeIllusionInTypeEffectiveness(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t resultingModifier, u32 illusionSpecies)
+static inline void TryNoticeIllusionInTypeEffectiveness(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t resultingModifier)
 {
     // Check if the type effectiveness would've been different if the pokemon really had the types as the disguise.
     uq4_12_t presumedModifier = UQ_4_12(1.0);
-    MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, gSpeciesInfo[illusionSpecies].types[0], battlerAtk, FALSE);
-    if (gSpeciesInfo[illusionSpecies].types[1] != gSpeciesInfo[illusionSpecies].types[0])
-        MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, gSpeciesInfo[illusionSpecies].types[1], battlerAtk, FALSE);
+    u8 illusionTypes[3];
+
+    if (!GetIllusionMonTypes(battlerDef, illusionTypes))
+        return;
+
+    MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, illusionTypes[0], battlerAtk, FALSE);
+    if (illusionTypes[1] != illusionTypes[0])
+        MulByTypeEffectiveness(&presumedModifier, move, moveType, battlerDef, illusionTypes[1], battlerAtk, FALSE);
 
     if (presumedModifier != resultingModifier)
         RecordAbilityBattle(battlerDef, ABILITY_ILLUSION);
@@ -26713,7 +26720,7 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
         MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 2, FALSE), battlerAtk, recordAbilities);
 
     if (recordAbilities && (illusionSpecies = GetIllusionMonSpecies(battlerDef)))
-        TryNoticeIllusionInTypeEffectiveness(move, moveType, battlerAtk, battlerDef, modifier, illusionSpecies);
+        TryNoticeIllusionInTypeEffectiveness(move, moveType, battlerAtk, battlerDef, modifier);
 
     if (HasSeaGuardianResistances(battlerDef))
         modifier = uq4_12_multiply(modifier, GetTypeModifier(moveType, TYPE_WATER));
@@ -27122,9 +27129,12 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 o
     {
         if (!(gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN && moveType == TYPE_NORMAL && gBattleMoves[move].power != 0))
         {
-            MulByTypeEffectiveness(&modifier, move, moveType, 0, gSpeciesInfo[speciesDef].types[0], 0, FALSE);
-            if (gSpeciesInfo[speciesDef].types[1] != gSpeciesInfo[speciesDef].types[0])
-                MulByTypeEffectiveness(&modifier, move, moveType, 0, gSpeciesInfo[speciesDef].types[1], 0, FALSE);
+            u8 defType1 = GetTypeBySpecies(speciesDef, 0, otIdDef);
+            u8 defType2 = GetTypeBySpecies(speciesDef, 1, otIdDef);
+
+            MulByTypeEffectiveness(&modifier, move, moveType, 0, defType1, 0, FALSE);
+            if (defType2 != defType1)
+                MulByTypeEffectiveness(&modifier, move, moveType, 0, defType2, 0, FALSE);
         }
 
         if (moveType == TYPE_GROUND && (abilityDef == ABILITY_LEVITATE || abilityDef == ABILITY_EELEVATE) && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
@@ -28769,7 +28779,8 @@ bool8 CanMonParticipateInSkyBattle(struct Pokemon *mon)
 
     bool8 hasLevitateAbility = gSpeciesInfo[species].abilities[monAbilityNum] == ABILITY_LEVITATE
                              || gSpeciesInfo[species].abilities[monAbilityNum] == ABILITY_EELEVATE;
-    bool8 isFlyingType = gSpeciesInfo[species].types[0] == TYPE_FLYING || gSpeciesInfo[species].types[1] == TYPE_FLYING;
+    u32 otId = GetMonData(mon, MON_DATA_OT_ID);
+    bool8 isFlyingType = GetTypeBySpecies(species, 0, otId) == TYPE_FLYING || GetTypeBySpecies(species, 1, otId) == TYPE_FLYING;
     bool8 monIsValidAndNotEgg = GetMonData(mon, MON_DATA_SANITY_HAS_SPECIES) && !GetMonData(mon, MON_DATA_IS_EGG);
 
     if (monIsValidAndNotEgg)

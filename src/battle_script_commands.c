@@ -9970,8 +9970,8 @@ static s32 GetSwitchInInfestedTerrainDamage(u32 battler)
 {
     const struct BattlePokemon *incomingMon = (const struct BattlePokemon *)&gBattleResources->bufferB[battler][4];
     u16 species = incomingMon->species;
-    u8 type1 = gSpeciesInfo[species].types[0];
-    u8 type2 = gSpeciesInfo[species].types[1];
+    u8 type1 = GetTypeBySpecies(species, 0, incomingMon->otId);
+    u8 type2 = GetTypeBySpecies(species, 1, incomingMon->otId);
     u32 maxHp = incomingMon->maxHP;
 
     if (type1 == TYPE_BUG || type2 == TYPE_BUG)
@@ -11568,6 +11568,9 @@ static bool32 TryActivateMeanStreakPoison(u32 battler)
 static bool32 CanSepticFumesPoisonPartyMon(u32 battlerAtk, u32 battlerTarget, struct Pokemon *mon)
 {
     u32 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+    u32 otId = GetMonData(mon, MON_DATA_OT_ID);
+    u8 type1 = GetTypeBySpecies(species, 0, otId);
+    u8 type2 = GetTypeBySpecies(species, 1, otId);
     u32 ability;
     u32 uniqueAbility;
 
@@ -11581,10 +11584,10 @@ static bool32 CanSepticFumesPoisonPartyMon(u32 battlerAtk, u32 battlerTarget, st
     uniqueAbility = GetMonUniqueAbility(mon);
 
     if (!HasBattlerAbility(battlerAtk, ABILITY_CORROSION)
-     && (gSpeciesInfo[species].types[0] == TYPE_POISON
-      || gSpeciesInfo[species].types[1] == TYPE_POISON
-      || gSpeciesInfo[species].types[0] == TYPE_STEEL
-      || gSpeciesInfo[species].types[1] == TYPE_STEEL))
+     && (type1 == TYPE_POISON
+      || type2 == TYPE_POISON
+      || type1 == TYPE_STEEL
+      || type2 == TYPE_STEEL))
         return FALSE;
 
     if (ability == ABILITY_IMMUNITY
