@@ -3138,7 +3138,9 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
         if (GetMonData(&mons[1], MON_DATA_SPECIES) != SPECIES_NONE)
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SWITCH);
 
-        if (!inCatchingContest && GetNumberOfRelearnableMoves(&mons[slotId]) != 0)
+        if (!inCatchingContest
+            && !GetMonData(&mons[slotId], MON_DATA_IS_EGG)
+            && GetNumberOfRelearnableMoves(&mons[slotId]) != 0)
         {
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_RELEARN_MOVE);
         }

@@ -946,10 +946,9 @@ static void DoMoveRelearnerMain(void)
         {
             u8 partyMon = sMoveRelearnerStruct->partyMon;
             MainCallback summaryReturnCallback = sMoveRelearnerMenuSate.summaryReturnCallback;
+            bool8 returnToSummaryScreen = sMoveRelearnerMenuSate.fromSummaryScreen;
 
-            FreeMoveRelearnerResources();
-
-            if (sMoveRelearnerMenuSate.fromSummaryScreen)
+            if (returnToSummaryScreen)
             {
                 sMoveRelearnerMenuSate.fromSummaryScreen = FALSE;
                 sMoveRelearnerMenuSate.summaryReturnCallback = NULL;
@@ -963,6 +962,8 @@ static void DoMoveRelearnerMain(void)
             {
                 SetMainCallback2(CB2_ReturnToField);
             }
+
+            FreeMoveRelearnerResources();
         }
         break;
     case MENU_STATE_FADE_FROM_SUMMARY_SCREEN:
