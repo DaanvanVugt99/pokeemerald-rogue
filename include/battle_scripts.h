@@ -614,6 +614,8 @@ extern const u8 BattleScript_EffectDiamondStorm[];
 extern const u8 BattleScript_EffectClangorousSoulblaze[];
 extern const u8 BattleScript_StickyBarbTransfer[];
 extern const u8 BattleScript_AttackerItemStatRaise[];
+extern const u8 BattleScript_MaliceOrbPhysical[];
+extern const u8 BattleScript_MaliceOrbSpecial[];
 extern const u8 BattleScript_RedCardActivates[];
 extern const u8 BattleScript_RedCardActivationNoSwitch[];
 extern const u8 BattleScript_EjectButtonActivates[];

@@ -7,6 +7,7 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_VOW_OF_SILENCE) == HOLD_EFFECT_VOW_OF_SILENCE);
     ASSUME(ItemId_GetHoldEffect(ITEM_BLOOD_OATH) == HOLD_EFFECT_BLOOD_OATH);
     ASSUME(ItemId_GetHoldEffect(ITEM_HOLLOW_SUN) == HOLD_EFFECT_HOLLOW_SUN);
+    ASSUME(ItemId_GetHoldEffect(ITEM_MALICE_ORB) == HOLD_EFFECT_MALICE_ORB);
 }
 
 SINGLE_BATTLE_TEST("Cursed Lens applies once from final type effectiveness", s16 damage)
@@ -415,5 +416,80 @@ SINGLE_BATTLE_TEST("Klutz suppresses Blood Oath")
         TURN { MOVE(opponent, MOVE_DRAGON_RAGE); }
     } SCENE {
         HP_BAR(player, hp: 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Malice Orb trades the matching defensive stage for an offensive stage")
+{
+    u16 move;
+
+    PARAMETRIZE { move = MOVE_TACKLE; }
+    PARAMETRIZE { move = MOVE_PSYBEAM; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].split == SPLIT_PHYSICAL);
+        ASSUME(gBattleMoves[MOVE_PSYBEAM].split == SPLIT_SPECIAL);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); SpAttack(120); Item(ITEM_MALICE_ORB); Moves(move); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, move); }
+    } THEN {
+        if (move == MOVE_TACKLE)
+        {
+            EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 1);
+            EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+            EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
+            EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
+        }
+        else
+        {
+            EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+            EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+            EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 1);
+            EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE - 1);
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Malice Orb activates once after a multi-hit move")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ARM_THRUST].split == SPLIT_PHYSICAL);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(ITEM_MALICE_ORB); Moves(MOVE_ARM_THRUST); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_ARM_THRUST); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Malice Orb does not activate for status moves")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_CELEBRATE].split == SPLIT_STATUS);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_MALICE_ORB); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Malice Orb")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Attack(120); Item(ITEM_MALICE_ORB); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
     }
 }

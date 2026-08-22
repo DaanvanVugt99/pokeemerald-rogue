@@ -23,6 +23,10 @@ Format follows Keep a Changelog loosely:
   reusing the existing Scope Lens, Choice Band, and Focus Sash artwork.
 - Added Hollow Sun, an Item Room held item that reverses non-neutral incoming
   type matchups while preserving neutral and immune results.
+- Added Malice Orb, an Item Room held item that trades a defensive stat stage
+  for an offensive stat stage after successful physical or special attacks.
+- Added a debug-only Forced Item Room setting that places the first available
+  scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and
   adaptively fitted descriptions for normal, Z-, and Max Moves, plus compact
   summary-style type badges in the Fight menu.

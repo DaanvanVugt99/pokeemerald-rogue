@@ -19415,6 +19415,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_MALICE_ORB
+         && IsBattlerAlive(battler)
+         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+         && IsFinalMultiHitStrikeAndTarget()
+         && gSpecialStatuses[battler].damagedMons
+         && (IS_MOVE_PHYSICAL(move) || IS_MOVE_SPECIAL(move))
+         && (CompareStat(battler, IS_MOVE_PHYSICAL(move) ? STAT_ATK : STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN)
+             || CompareStat(battler, IS_MOVE_PHYSICAL(move) ? STAT_DEF : STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)))
+        {
+            gLastUsedItem = gBattleMons[battler].item;
+            gBattlerAttacker = battler;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = IS_MOVE_PHYSICAL(move) ? BattleScript_MaliceOrbPhysical : BattleScript_MaliceOrbSpecial;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_DRAGON_MAJESTY)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0

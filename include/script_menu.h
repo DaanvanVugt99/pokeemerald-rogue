@@ -31,5 +31,6 @@ void ScriptMenu_DisplayTextInWindow(const u8* str, u8 x, u8 y, u8 width, u8 heig
 void ScriptMenu_ShowDynamicUniqueMonPic(void);
 void ScriptMenu_ShowSafariOfferDetails(void);
 void ScriptMenu_ShowRunReview(void);
+void ScriptMenu_ShowItemRoomPreview(void);
 
 #endif //GUARD_SCRIPT_MENU_H

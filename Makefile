@@ -431,6 +431,10 @@ check-rogue-bake-data:
 
 $(C_BUILDDIR)/berry_crush.o: override CFLAGS += -Wno-address-of-packed-member
 
+# This table is included directly by item.c. Keep it as an explicit prerequisite
+# even for NODEP builds, where scaninc dependency discovery is disabled.
+$(C_BUILDDIR)/item.o: $(DATA_SRC_SUBDIR)/rogue_items.h
+
 include $(ROGUEPORYSCRIPTSDIR)/rogue_poryscripts.mk
 include graphics_file_rules.mk
 include map_data_rules.mk

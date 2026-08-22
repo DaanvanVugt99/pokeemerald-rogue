@@ -1462,6 +1462,12 @@ void Rogue_TryClaimItemRoomReward()
         Rogue_PushPopup_AddItem(itemId, 1);
 }
 
+void Rogue_ShowItemRoomPreview(void)
+{
+    gSpecialVar_0x8004 = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
+    ScriptMenu_ShowItemRoomPreview();
+}
+
 u16 Rogue_GetBagCapacityUpgradeLevel()
 {
     return gSaveBlock1Ptr->bagCapacityUpgrades;

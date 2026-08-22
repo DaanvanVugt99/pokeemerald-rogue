@@ -1414,6 +1414,7 @@ const u32 gItemIconPalette_LightClay[] = INCBIN_U32("graphics/items/icon_palette
 
 const u32 gItemIcon_LifeOrb[] = INCBIN_U32("graphics/items/icons/life_orb.4bpp.lz");
 const u32 gItemIconPalette_LifeOrb[] = INCBIN_U32("graphics/items/icon_palettes/life_orb.gbapal.lz");
+const u32 gItemIconPalette_MaliceOrb[] = INCBIN_U32("graphics/items/icon_palettes/malice_orb.gbapal.lz");
 
 const u32 gItemIcon_PowerHerb[] = INCBIN_U32("graphics/items/icons/power_herb.4bpp.lz");
 const u32 gItemIconPalette_PowerHerb[] = INCBIN_U32("graphics/items/icon_palettes/power_herb.gbapal.lz");

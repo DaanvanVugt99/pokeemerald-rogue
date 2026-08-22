@@ -526,6 +526,7 @@ static u8 const sMenuName_DebugToggleDisableAssistantTimeout[] = _("Disable Assi
 
 static u8 const sMenuName_DebugRangeStartDifficulty[] = _("START DIFFICULTY");
 static u8 const sMenuName_DebugRangeForcedRoute[] = _("FORCED ROUTE");
+static u8 const sMenuName_DebugRangeForcedItemRoom[] = _("FORCED ITEM ROOM");
 static u8 const sMenuName_DebugRangeForcedEvilTeam[] = _("FORCED TEAM");
 #endif
 
@@ -598,6 +599,7 @@ enum
 
     MENUITEM_MENU_DEBUG_RANGE_START_DIFFICULTY,
     MENUITEM_MENU_DEBUG_RANGE_FORCED_ROUTE,
+    MENUITEM_MENU_DEBUG_RANGE_FORCED_ITEM_ROOM,
     MENUITEM_MENU_DEBUG_RANGE_FORCED_EVIL_TEAM,
 #endif
 
@@ -1090,6 +1092,12 @@ static const struct MenuEntry sOptionMenuItems[] =
         .processInput = DebugRange_ForcedRouteProcessInput,
         .drawChoices = DebugRange_ForcedRouteDrawChoices
     },
+    [MENUITEM_MENU_DEBUG_RANGE_FORCED_ITEM_ROOM] =
+    {
+        .itemName = sMenuName_DebugRangeForcedItemRoom,
+        .processInput = DebugToggle_ProcessInput,
+        .drawChoices = DebugToggle_DrawChoices
+    },
     [MENUITEM_MENU_DEBUG_RANGE_FORCED_EVIL_TEAM] = 
     {
         .itemName = sMenuName_DebugRangeForcedEvilTeam,
@@ -1219,6 +1227,7 @@ static const struct MenuEntries sOptionMenuEntries[SUBMENUITEM_COUNT] =
 
             MENUITEM_MENU_DEBUG_RANGE_START_DIFFICULTY,
             MENUITEM_MENU_DEBUG_RANGE_FORCED_ROUTE,
+            MENUITEM_MENU_DEBUG_RANGE_FORCED_ITEM_ROOM,
             MENUITEM_MENU_DEBUG_RANGE_FORCED_EVIL_TEAM,
 
             MENUITEM_CANCEL
@@ -2495,6 +2504,9 @@ static u8 GetMenuItemValue(u8 menuItem)
     case MENUITEM_MENU_DEBUG_RANGE_FORCED_ROUTE:
         return RogueDebug_GetConfigRange(DEBUG_RANGE_FORCED_ROUTE);
 
+    case MENUITEM_MENU_DEBUG_RANGE_FORCED_ITEM_ROOM:
+        return RogueDebug_GetConfigRange(DEBUG_RANGE_FORCED_ITEM_ROOM);
+
     case MENUITEM_MENU_DEBUG_RANGE_FORCED_EVIL_TEAM:
         return RogueDebug_GetConfigRange(DEBUG_RANGE_FORCED_EVIL_TEAM);
 #endif
@@ -2713,6 +2725,10 @@ static void SetMenuItemValue(u8 menuItem, u8 value)
 
     case MENUITEM_MENU_DEBUG_RANGE_FORCED_ROUTE:
         RogueDebug_SetConfigRange(DEBUG_RANGE_FORCED_ROUTE, value);
+        break;
+
+    case MENUITEM_MENU_DEBUG_RANGE_FORCED_ITEM_ROOM:
+        RogueDebug_SetConfigRange(DEBUG_RANGE_FORCED_ITEM_ROOM, value);
         break;
 
     case MENUITEM_MENU_DEBUG_RANGE_FORCED_EVIL_TEAM:

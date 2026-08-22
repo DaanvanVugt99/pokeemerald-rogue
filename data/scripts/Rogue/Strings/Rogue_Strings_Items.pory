@@ -88,6 +88,11 @@ text gItemDesc_HollowSun
     format("Incoming weaknesses become resistances, and resistances become weaknesses.")
 }
 
+text gItemDesc_MaliceOrb
+{
+    format("Physical moves raise Attack and lower Defense. Special moves raise Sp. Atk and lower Sp. Def.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

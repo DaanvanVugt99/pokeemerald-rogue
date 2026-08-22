@@ -1905,6 +1905,7 @@ extern const u32 gItemIcon_LightClay[];
 extern const u32 gItemIconPalette_LightClay[];
 extern const u32 gItemIcon_LifeOrb[];
 extern const u32 gItemIconPalette_LifeOrb[];
+extern const u32 gItemIconPalette_MaliceOrb[];
 extern const u32 gItemIcon_PowerHerb[];
 extern const u32 gItemIconPalette_PowerHerb[];
 extern const u32 gItemIcon_FocusSash[];

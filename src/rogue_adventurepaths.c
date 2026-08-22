@@ -194,6 +194,7 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         ITEM_VOW_OF_SILENCE,
         ITEM_BLOOD_OATH,
         ITEM_HOLLOW_SUN,
+        ITEM_MALICE_ORB,
     };
     u32 state = ((u32)gRogueRun.baseSeed << 16)
         ^ gRogueRun.baseSeed
@@ -257,6 +258,35 @@ static bool8 GetScheduledItemRoom(u8 difficulty, u8 *scheduleSlot, u16 *itemId)
 
     return FALSE;
 }
+
+#ifdef ROGUE_DEBUG
+static bool8 GetDebugForcedItemRoom(u8 *scheduleSlot, u16 *itemId)
+{
+    struct ItemRoomScheduleEntry schedule[ITEM_ROOM_SCHEDULE_COUNT];
+    u8 i;
+
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET
+        || RogueDebug_GetConfigRange(DEBUG_RANGE_FORCED_ITEM_ROOM) == 0)
+        return FALSE;
+
+    // Use the first active scheduled reward so the debug room still consumes
+    // a real schedule slot and cannot duplicate a normal Item Room later.
+    GetItemRoomSchedule(schedule);
+    for(i = 0; i < ITEM_ROOM_SCHEDULE_COUNT; ++i)
+    {
+        if(schedule[i].itemId != ITEM_NONE)
+        {
+            if(scheduleSlot != NULL)
+                *scheduleSlot = i;
+            if(itemId != NULL)
+                *itemId = schedule[i].itemId;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+#endif
 
 static u16 GetItemRoomClaimFlag(u8 scheduleSlot)
 {
@@ -932,16 +962,62 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     // Item Rooms are scheduled from an isolated local RNG. Claim their route
     // slot before any ordinary random special-room replacements are made.
     {
-        u8 scheduleSlot = 0;
-        u16 itemId = ITEM_NONE;
-
-        if(GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId))
+#ifdef ROGUE_DEBUG
+        if(GetDebugForcedItemRoom(NULL, NULL))
         {
-            bool8 placedItemRoom = ReplaceRoomEncounter(pathSettings, ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_ITEM);
+            u8 itemRoomId = (u8)-1;
+            bool8 replacedRoute = FALSE;
 
-            AGB_ASSERT(placedItemRoom);
-            if(placedItemRoom)
-                --freeRoomCount;
+            // Replace the first playable non-boss node so the room is
+            // immediately available from a newly generated path.
+            for(i = 0; i < pathSettings->nodeCount; ++i)
+            {
+                if(IsStartingPathRoom(pathSettings, &pathSettings->roomScratch[i])
+                    && pathSettings->roomScratch[i].roomType != ADVPATH_ROOM_BOSS)
+                {
+                    itemRoomId = i;
+                    break;
+                }
+            }
+
+            // Fall back to any route if the generated layout has no playable
+            // node at its starting line.
+            if(itemRoomId == (u8)-1)
+            {
+                for(i = 0; i < pathSettings->nodeCount; ++i)
+                {
+                    if(pathSettings->roomScratch[i].roomType == ADVPATH_ROOM_ROUTE)
+                    {
+                        itemRoomId = i;
+                        break;
+                    }
+                }
+            }
+
+            if(itemRoomId != (u8)-1)
+            {
+                replacedRoute = pathSettings->roomScratch[itemRoomId].roomType == ADVPATH_ROOM_ROUTE;
+                AssignRoomInstance(pathSettings, itemRoomId, ADVPATH_ROOM_ITEM);
+                if(replacedRoute)
+                    --freeRoomCount;
+            }
+
+            AGB_ASSERT(itemRoomId != (u8)-1);
+        }
+        else
+#endif
+        {
+            u8 scheduleSlot = 0;
+            u16 itemId = ITEM_NONE;
+
+            if(GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId))
+            {
+                bool8 placedItemRoom = ReplaceRoomEncounter(pathSettings, ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_ITEM);
+
+                AGB_ASSERT(placedItemRoom);
+                if(placedItemRoom)
+                    --freeRoomCount;
+            }
         }
     }
 
@@ -1405,9 +1481,16 @@ static void MaterializeRoom(u8 roomId)
     {
         u8 scheduleSlot = 0;
         u16 itemId = ITEM_NONE;
-        bool8 hasScheduledRoom = GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId);
+#ifdef ROGUE_DEBUG
+        bool8 hasScheduledRoom = GetDebugForcedItemRoom(&scheduleSlot, &itemId);
+
+        if(!hasScheduledRoom)
+            hasScheduledRoom = GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId);
 
         AGB_ASSERT(hasScheduledRoom);
+#else
+        GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId);
+#endif
         room->roomParams.roomIdx = 0;
         room->roomParams.perType.itemRoom.itemId = itemId;
         room->roomParams.perType.itemRoom.scheduleSlot = scheduleSlot;

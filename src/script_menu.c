@@ -6,6 +6,7 @@
 #include "decompress.h"
 #include "event_data.h"
 #include "field_effect.h"
+#include "field_message_box.h"
 #include "field_specials.h"
 #include "item.h"
 #include "item_icon.h"
@@ -63,6 +64,7 @@ static void CreateStartMenuForPokenavTutorial(void);
 static void InitMultichoiceNoWrap(bool8 ignoreBPress, u8 unusedCount, u8 windowId, u8 multichoiceId);
 static void Task_ShowRunReviewInput(u8 taskId);
 static void Task_SafariOfferDetailsInput(u8 taskId);
+static void Task_ItemRoomPreviewInput(u8 taskId);
 
 bool8 ScriptMenu_Multichoice(u8 left, u8 top, u8 multichoiceId, bool8 ignoreBPress)
 {
@@ -1370,6 +1372,333 @@ static void Task_ShowItemDescriptionInput(u8 taskId)
 }
 
 static u8 const sText_ItemName[] = _("{COLOR BLUE}{STR_VAR_1}");
+static u8 const sText_ItemRoomPreviewTake[] = _("{A_BUTTON} Take");
+static u8 const sText_ItemRoomPreviewLeave[] = _("{B_BUTTON} Leave");
+
+// The preview uses the same three-panel composition as the Safari offer UI:
+// an icon card, a details card, and a dedicated action bar. BG0 is the
+// overworld's UI layer, so the field message box is cleared before the panels
+// are created and the panel tilemap is cleared before the script resumes. The
+// actual room layers are BG1-BG3.
+#define ITEM_ROOM_PREVIEW_ICON_TAG 0xF530
+#define ITEM_ROOM_PREVIEW_WINDOW_BASE_OFFSET 100
+#define ITEM_ROOM_PREVIEW_PIC_X 1
+#define ITEM_ROOM_PREVIEW_PIC_Y 1
+#define ITEM_ROOM_PREVIEW_PIC_WIDTH 8
+#define ITEM_ROOM_PREVIEW_PIC_HEIGHT 8
+#define ITEM_ROOM_PREVIEW_DETAILS_X 11
+#define ITEM_ROOM_PREVIEW_DETAILS_Y 1
+#define ITEM_ROOM_PREVIEW_DETAILS_WIDTH 16
+#define ITEM_ROOM_PREVIEW_DETAILS_HEIGHT 10
+#define ITEM_ROOM_PREVIEW_ACTIONS_X 1
+#define ITEM_ROOM_PREVIEW_ACTIONS_Y 13
+#define ITEM_ROOM_PREVIEW_ACTIONS_WIDTH 26
+#define ITEM_ROOM_PREVIEW_ACTIONS_HEIGHT 3
+#define ITEM_ROOM_PREVIEW_ICON_X 52
+#define ITEM_ROOM_PREVIEW_ICON_Y 52
+#define ITEM_ROOM_PREVIEW_DESCRIPTION_WIDTH (ITEM_ROOM_PREVIEW_DETAILS_WIDTH * 8 - 4)
+
+#define tItemRoomPreviewPicWindow     data[0]
+#define tItemRoomPreviewDetailsWindow data[1]
+#define tItemRoomPreviewActionsWindow data[2]
+#define tItemRoomPreviewIconSpriteId  data[3]
+#define tItemRoomPreviewState         data[4]
+
+enum
+{
+    ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_BG,
+    ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_GFX,
+    ITEM_ROOM_PREVIEW_STATE_INPUT,
+    ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_CLEANUP,
+};
+
+static u8 AddItemRoomPreviewWindow(u8 x, u8 y, u8 width, u8 height, u16 baseBlockOffset)
+{
+    struct WindowTemplate template = CreateWindowTemplate(
+        0,
+        x + 1,
+        y + 1,
+        width,
+        height,
+        15,
+        ITEM_ROOM_PREVIEW_WINDOW_BASE_OFFSET + baseBlockOffset);
+    u8 windowId = AddWindow(&template);
+
+    if (windowId != WINDOW_NONE)
+        PutWindowTilemap(windowId);
+
+    return windowId;
+}
+
+static void DrawItemRoomPreviewWindowFrames(u8 picWindow, u8 detailsWindow, u8 actionsWindow)
+{
+    SetDarkStandardWindowBorderStyle(picWindow, FALSE);
+    SetDarkStandardWindowBorderStyle(detailsWindow, FALSE);
+    SetDarkStandardWindowBorderStyle(actionsWindow, FALSE);
+}
+
+static void PrintItemRoomPreviewPicWindow(u8 windowId)
+{
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    CopyWindowToVram(windowId, COPYWIN_GFX);
+}
+
+static void BufferWrappedItemRoomDescription(u8 *dest, const u8 *src)
+{
+    u8 currentLine[128];
+    u8 word[64];
+    u8 candidate[128];
+    u16 lineLength;
+    u16 wordLength;
+    u16 length;
+
+    dest[0] = EOS;
+    currentLine[0] = EOS;
+
+    while (*src != EOS)
+    {
+        while (*src == CHAR_SPACE)
+            ++src;
+
+        if (*src == EOS)
+            break;
+
+        if (*src == CHAR_NEWLINE || *src == CHAR_PROMPT_SCROLL)
+        {
+            if (currentLine[0] != EOS)
+            {
+                if (dest[0] != EOS)
+                {
+                    length = StringLength(dest);
+                    dest[length++] = CHAR_NEWLINE;
+                    dest[length] = EOS;
+                }
+                StringAppend(dest, currentLine);
+                currentLine[0] = EOS;
+            }
+            ++src;
+            continue;
+        }
+
+        wordLength = 0;
+        while (*src != EOS && *src != CHAR_SPACE && *src != CHAR_NEWLINE && *src != CHAR_PROMPT_SCROLL)
+            word[wordLength++] = *src++;
+        word[wordLength] = EOS;
+
+        if (currentLine[0] == EOS)
+        {
+            StringCopy(currentLine, word);
+            continue;
+        }
+
+        StringCopy(candidate, currentLine);
+        lineLength = StringLength(candidate);
+        candidate[lineLength++] = CHAR_SPACE;
+        candidate[lineLength] = EOS;
+        StringAppend(candidate, word);
+
+        if (GetStringWidth(FONT_SMALL_NARROW, candidate, 0) <= ITEM_ROOM_PREVIEW_DESCRIPTION_WIDTH)
+        {
+            StringCopy(currentLine, candidate);
+        }
+        else
+        {
+            if (dest[0] != EOS)
+            {
+                length = StringLength(dest);
+                dest[length++] = CHAR_NEWLINE;
+                dest[length] = EOS;
+            }
+            StringAppend(dest, currentLine);
+            StringCopy(currentLine, word);
+        }
+    }
+
+    if (currentLine[0] != EOS)
+    {
+        if (dest[0] != EOS)
+        {
+            length = StringLength(dest);
+            dest[length++] = CHAR_NEWLINE;
+            dest[length] = EOS;
+        }
+        StringAppend(dest, currentLine);
+    }
+}
+
+static void PrintItemRoomPreviewDetails(u8 windowId, u16 itemId)
+{
+    static const u8 textColor[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+
+    StringCopy(gStringVar1, ItemId_GetName(itemId));
+    StringExpandPlaceholders(gStringVar4, sText_ItemName);
+    AddTextPrinterParameterized(windowId, FONT_NORMAL, gStringVar4, 2, 2, TEXT_SKIP_DRAW, NULL);
+
+    BufferWrappedItemRoomDescription(gStringVar4, ItemId_GetDescription(itemId));
+    AddTextPrinterParameterized4(windowId, FONT_SMALL_NARROW, 2, 22, 0, 1, textColor, TEXT_SKIP_DRAW, gStringVar4);
+
+    CopyWindowToVram(windowId, COPYWIN_GFX);
+}
+
+static void PrintItemRoomPreviewActions(u8 windowId)
+{
+    s16 leaveWidth = GetStringWidth(FONT_SMALL_NARROW, sText_ItemRoomPreviewLeave, 0);
+    s16 leaveX = ITEM_ROOM_PREVIEW_ACTIONS_WIDTH * 8 - leaveWidth - 8;
+
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_ItemRoomPreviewTake, 8, 5, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, sText_ItemRoomPreviewLeave, leaveX, 5, TEXT_SKIP_DRAW, NULL);
+    CopyWindowToVram(windowId, COPYWIN_GFX);
+}
+
+static void CreateItemRoomPreviewIcon(u8 taskId, u16 itemId)
+{
+    u8 spriteId;
+
+    FreeSpriteTilesByTag(ITEM_ROOM_PREVIEW_ICON_TAG);
+    FreeSpritePaletteByTag(ITEM_ROOM_PREVIEW_ICON_TAG);
+    spriteId = AddItemIconSprite(ITEM_ROOM_PREVIEW_ICON_TAG, ITEM_ROOM_PREVIEW_ICON_TAG, itemId);
+
+    if (spriteId == MAX_SPRITES)
+    {
+        gTasks[taskId].tItemRoomPreviewIconSpriteId = SPRITE_NONE;
+        return;
+    }
+
+    // Item icons are 24x24 pixels packed into the top-left of their 32x32
+    // sprite, so offset the sprite by four pixels to center the visible art.
+    gSprites[spriteId].x = ITEM_ROOM_PREVIEW_ICON_X;
+    gSprites[spriteId].y = ITEM_ROOM_PREVIEW_ICON_Y;
+    gSprites[spriteId].oam.priority = 0;
+    gSprites[spriteId].invisible = TRUE;
+    gTasks[taskId].tItemRoomPreviewIconSpriteId = spriteId;
+}
+
+static bool8 InitItemRoomPreview(u8 taskId, u16 itemId)
+{
+    gTasks[taskId].tItemRoomPreviewPicWindow = AddItemRoomPreviewWindow(
+        ITEM_ROOM_PREVIEW_PIC_X,
+        ITEM_ROOM_PREVIEW_PIC_Y,
+        ITEM_ROOM_PREVIEW_PIC_WIDTH,
+        ITEM_ROOM_PREVIEW_PIC_HEIGHT,
+        0);
+    gTasks[taskId].tItemRoomPreviewDetailsWindow = AddItemRoomPreviewWindow(
+        ITEM_ROOM_PREVIEW_DETAILS_X,
+        ITEM_ROOM_PREVIEW_DETAILS_Y,
+        ITEM_ROOM_PREVIEW_DETAILS_WIDTH,
+        ITEM_ROOM_PREVIEW_DETAILS_HEIGHT,
+        ITEM_ROOM_PREVIEW_PIC_WIDTH * ITEM_ROOM_PREVIEW_PIC_HEIGHT);
+    gTasks[taskId].tItemRoomPreviewActionsWindow = AddItemRoomPreviewWindow(
+        ITEM_ROOM_PREVIEW_ACTIONS_X,
+        ITEM_ROOM_PREVIEW_ACTIONS_Y,
+        ITEM_ROOM_PREVIEW_ACTIONS_WIDTH,
+        ITEM_ROOM_PREVIEW_ACTIONS_HEIGHT,
+        ITEM_ROOM_PREVIEW_PIC_WIDTH * ITEM_ROOM_PREVIEW_PIC_HEIGHT
+            + ITEM_ROOM_PREVIEW_DETAILS_WIDTH * ITEM_ROOM_PREVIEW_DETAILS_HEIGHT);
+
+    if (gTasks[taskId].tItemRoomPreviewPicWindow == WINDOW_NONE
+     || gTasks[taskId].tItemRoomPreviewDetailsWindow == WINDOW_NONE
+     || gTasks[taskId].tItemRoomPreviewActionsWindow == WINDOW_NONE)
+        return FALSE;
+
+    DrawItemRoomPreviewWindowFrames(
+        gTasks[taskId].tItemRoomPreviewPicWindow,
+        gTasks[taskId].tItemRoomPreviewDetailsWindow,
+        gTasks[taskId].tItemRoomPreviewActionsWindow);
+    PrintItemRoomPreviewPicWindow(gTasks[taskId].tItemRoomPreviewPicWindow);
+    PrintItemRoomPreviewDetails(gTasks[taskId].tItemRoomPreviewDetailsWindow, itemId);
+    PrintItemRoomPreviewActions(gTasks[taskId].tItemRoomPreviewActionsWindow);
+    CreateItemRoomPreviewIcon(taskId, itemId);
+    CopyBgTilemapBufferToVram(0);
+    return TRUE;
+}
+
+static void CleanupItemRoomPreview(u8 taskId)
+{
+    if (gTasks[taskId].tItemRoomPreviewIconSpriteId != SPRITE_NONE)
+    {
+        DestroySpriteAndFreeResources(&gSprites[gTasks[taskId].tItemRoomPreviewIconSpriteId]);
+        gTasks[taskId].tItemRoomPreviewIconSpriteId = SPRITE_NONE;
+    }
+
+    if (gTasks[taskId].tItemRoomPreviewPicWindow != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrameToTransparent(gTasks[taskId].tItemRoomPreviewPicWindow, FALSE);
+        RemoveWindow(gTasks[taskId].tItemRoomPreviewPicWindow);
+        gTasks[taskId].tItemRoomPreviewPicWindow = WINDOW_NONE;
+    }
+    if (gTasks[taskId].tItemRoomPreviewDetailsWindow != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrameToTransparent(gTasks[taskId].tItemRoomPreviewDetailsWindow, FALSE);
+        RemoveWindow(gTasks[taskId].tItemRoomPreviewDetailsWindow);
+        gTasks[taskId].tItemRoomPreviewDetailsWindow = WINDOW_NONE;
+    }
+    if (gTasks[taskId].tItemRoomPreviewActionsWindow != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrameToTransparent(gTasks[taskId].tItemRoomPreviewActionsWindow, FALSE);
+        RemoveWindow(gTasks[taskId].tItemRoomPreviewActionsWindow);
+        gTasks[taskId].tItemRoomPreviewActionsWindow = WINDOW_NONE;
+    }
+
+    CopyBgTilemapBufferToVram(0);
+}
+
+static void Task_ItemRoomPreviewInput(u8 taskId)
+{
+    switch (gTasks[taskId].tItemRoomPreviewState)
+    {
+    case ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_BG:
+        if (IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        if (!InitItemRoomPreview(taskId, gSpecialVar_0x8004))
+        {
+            CleanupItemRoomPreview(taskId);
+            gSpecialVar_Result = 0;
+            gTasks[taskId].tItemRoomPreviewState = ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_CLEANUP;
+            return;
+        }
+
+        gTasks[taskId].tItemRoomPreviewState = ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_GFX;
+        return;
+    case ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_GFX:
+        if (IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        if (gTasks[taskId].tItemRoomPreviewIconSpriteId != SPRITE_NONE)
+            gSprites[gTasks[taskId].tItemRoomPreviewIconSpriteId].invisible = FALSE;
+        gTasks[taskId].tItemRoomPreviewState = ITEM_ROOM_PREVIEW_STATE_INPUT;
+        return;
+    case ITEM_ROOM_PREVIEW_STATE_INPUT:
+        if (JOY_NEW(A_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            gSpecialVar_Result = 1;
+        }
+        else if (JOY_NEW(B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            gSpecialVar_Result = 0;
+        }
+        else
+        {
+            return;
+        }
+
+        CleanupItemRoomPreview(taskId);
+        gTasks[taskId].tItemRoomPreviewState = ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_CLEANUP;
+        return;
+    case ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_CLEANUP:
+        if (IsDma3ManagerBusyWithBgCopy())
+            return;
+
+        ScriptContext_Enable();
+        DestroyTask(taskId);
+        return;
+    }
+}
 
 static void PrintItemDescriptionToWindow(u8 windowId, u16 itemId)
 {
@@ -1409,6 +1738,27 @@ void ScriptMenu_HideItemDescription()
     RemoveWindow(gTasks[taskId].data[0]);
     DestroyTask(taskId);
 }
+
+void ScriptMenu_ShowItemRoomPreview(void)
+{
+    u8 taskId;
+
+    gSpecialVar_Result = 0;
+    HideFieldMessageBox();
+
+    taskId = CreateTask(Task_ItemRoomPreviewInput, 0);
+    gTasks[taskId].tItemRoomPreviewPicWindow = WINDOW_NONE;
+    gTasks[taskId].tItemRoomPreviewDetailsWindow = WINDOW_NONE;
+    gTasks[taskId].tItemRoomPreviewActionsWindow = WINDOW_NONE;
+    gTasks[taskId].tItemRoomPreviewIconSpriteId = SPRITE_NONE;
+    gTasks[taskId].tItemRoomPreviewState = ITEM_ROOM_PREVIEW_STATE_WAIT_FOR_BG;
+}
+
+#undef tItemRoomPreviewPicWindow
+#undef tItemRoomPreviewDetailsWindow
+#undef tItemRoomPreviewActionsWindow
+#undef tItemRoomPreviewIconSpriteId
+#undef tItemRoomPreviewState
 
 static u8 const sText_RogueAssistant[] = _("{COLOR BLUE}Rogue Assistant");
 static u8 const sText_RogueAssistantInfo[] = _("Download from:\n{COLOR BLUE}https://rogue.assist.pokabbie.com\n\n{COLOR RED}Never download from other links!");

@@ -33,26 +33,8 @@ script Rogue_Encounter_ItemRoom_Pedestal
             return
     }
 
-    bufferitemname(STR_VAR_1, VAR_ROGUE_SPECIAL_ENCOUNTER_DATA)
-
-    switch(var(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA))
-    {
-        case ITEM_CURSED_LENS:
-            msgbox(format("It's the {STR_VAR_1}.\pSuper-effective moves deal 30% more damage, but resisted moves deal 20% less.\pTake it?"), MSGBOX_YESNO)
-
-        case ITEM_VOW_OF_SILENCE:
-            msgbox(format("It's the {STR_VAR_1}.\pDamaging moves deal 25% more damage, but status moves cannot be used.\pTake it?"), MSGBOX_YESNO)
-
-        case ITEM_BLOOD_OATH:
-            msgbox(format("It's the {STR_VAR_1}.\pA direct hit that would knock out its holder instead leaves 1 HP, then consumes the item.\pTake it?"), MSGBOX_YESNO)
-
-        case ITEM_HOLLOW_SUN:
-            msgbox(format("It's the {STR_VAR_1}.\pIncoming weaknesses become resistances, and resistances become weaknesses.\pTake it?"), MSGBOX_YESNO)
-
-        default:
-            msgbox(format("Something is wrong with the pedestal."))
-            setvar(VAR_RESULT, NO)
-    }
+    callnative(Rogue_ShowItemRoomPreview)
+    waitstate
 
     if(var(VAR_RESULT) == YES)
     {

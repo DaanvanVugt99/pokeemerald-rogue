@@ -242,9 +242,10 @@
 #define ITEM_VOW_OF_SILENCE             (LAST_ITEM_TR + 2)
 #define ITEM_BLOOD_OATH                 (LAST_ITEM_TR + 3)
 #define ITEM_HOLLOW_SUN                 (LAST_ITEM_TR + 4)
+#define ITEM_MALICE_ORB                 (LAST_ITEM_TR + 5)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_HOLLOW_SUN
+#define LAST_ITEM_ROOM_REWARD           ITEM_MALICE_ORB
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0
@@ -666,7 +667,7 @@
 // DEBUG_RANGE_
 #define DEBUG_RANGE_START_DIFFICULTY                (DEBUG_START_VALUE + 0)
 #define DEBUG_RANGE_FORCED_ROUTE                    (DEBUG_START_VALUE + 1)
-// ...
+#define DEBUG_RANGE_FORCED_ITEM_ROOM                (DEBUG_START_VALUE + 2) // Reuses the existing reserved debug range slot.
 #define DEBUG_RANGE_FORCED_EVIL_TEAM                (DEBUG_START_VALUE + 3)
 #define DEBUG_RANGE_COUNT                           4
 
