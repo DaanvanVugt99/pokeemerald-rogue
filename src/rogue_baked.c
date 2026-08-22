@@ -1014,6 +1014,11 @@ const u8* Rogue_GetItemDesc(u16 itemIdx)
     return NULL;
 }
 
+const u8* Rogue_GetItemRoomDescription(u16 itemId)
+{
+    return NULL;
+}
+
 u16 Rogue_GetPrice(u16 itemId)
 {
     return 0;
@@ -1033,6 +1038,11 @@ extern const u8 gText_EscapeRopeDesc[];
 extern const u8 gItemDesc_TM[];
 extern const u8 gItemDesc_TR[];
 extern const u8 gItemDesc_MaxMushroom[];
+extern const u8 gItemRoomDesc_CursedLens[];
+extern const u8 gItemRoomDesc_VowOfSilence[];
+extern const u8 gItemRoomDesc_BloodOath[];
+extern const u8 gItemRoomDesc_HollowSun[];
+extern const u8 gItemRoomDesc_MaliceOrb[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1082,6 +1092,25 @@ const u8* Rogue_GetItemDesc(u16 itemId)
     }
 
     return gItems[itemId].description;
+}
+
+const u8* Rogue_GetItemRoomDescription(u16 itemId)
+{
+    switch (itemId)
+    {
+    case ITEM_CURSED_LENS:
+        return gItemRoomDesc_CursedLens;
+    case ITEM_VOW_OF_SILENCE:
+        return gItemRoomDesc_VowOfSilence;
+    case ITEM_BLOOD_OATH:
+        return gItemRoomDesc_BloodOath;
+    case ITEM_HOLLOW_SUN:
+        return gItemRoomDesc_HollowSun;
+    case ITEM_MALICE_ORB:
+        return gItemRoomDesc_MaliceOrb;
+    default:
+        return Rogue_GetItemDesc(itemId);
+    }
 }
 
 const void* Rogue_GetItemIconPicOrPalette(u16 itemId, u8 which)

@@ -37,6 +37,7 @@
 
 #include "rogue_controller.h"
 #include "rogue_charms.h"
+#include "rogue_baked.h"
 #include "rogue_gifts.h"
 #include "rogue_hub.h"
 #include "rogue_pokedex.h"
@@ -1457,28 +1458,15 @@ static void BufferWrappedItemRoomDescription(u8 *dest, const u8 *src)
 
     while (*src != EOS)
     {
-        while (*src == CHAR_SPACE)
+        // The item strings are compiled with the bag's line width, so their
+        // generated line controls are only source-formatting hints here.
+        // Reflow the words against the wider preview window instead of
+        // preserving those earlier breaks.
+        while (*src == CHAR_SPACE || *src == CHAR_NEWLINE || *src == CHAR_PROMPT_SCROLL)
             ++src;
 
         if (*src == EOS)
             break;
-
-        if (*src == CHAR_NEWLINE || *src == CHAR_PROMPT_SCROLL)
-        {
-            if (currentLine[0] != EOS)
-            {
-                if (dest[0] != EOS)
-                {
-                    length = StringLength(dest);
-                    dest[length++] = CHAR_NEWLINE;
-                    dest[length] = EOS;
-                }
-                StringAppend(dest, currentLine);
-                currentLine[0] = EOS;
-            }
-            ++src;
-            continue;
-        }
 
         wordLength = 0;
         while (*src != EOS && *src != CHAR_SPACE && *src != CHAR_NEWLINE && *src != CHAR_PROMPT_SCROLL)
@@ -1536,8 +1524,8 @@ static void PrintItemRoomPreviewDetails(u8 windowId, u16 itemId)
     StringExpandPlaceholders(gStringVar4, sText_ItemName);
     AddTextPrinterParameterized(windowId, FONT_NORMAL, gStringVar4, 2, 2, TEXT_SKIP_DRAW, NULL);
 
-    BufferWrappedItemRoomDescription(gStringVar4, ItemId_GetDescription(itemId));
-    AddTextPrinterParameterized4(windowId, FONT_SMALL_NARROW, 2, 22, 0, 1, textColor, TEXT_SKIP_DRAW, gStringVar4);
+    BufferWrappedItemRoomDescription(gStringVar4, Rogue_GetItemRoomDescription(itemId));
+    AddTextPrinterParameterized4(windowId, FONT_SMALL_NARROW, 2, 20, 0, 1, textColor, TEXT_SKIP_DRAW, gStringVar4);
 
     CopyWindowToVram(windowId, COPYWIN_GFX);
 }

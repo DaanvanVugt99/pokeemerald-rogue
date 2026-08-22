@@ -70,25 +70,50 @@ text gItemDesc_TR
 
 text gItemDesc_CursedLens
 {
+    format("Super-effective +30%; resisted -20% damage.")
+}
+
+text gItemRoomDesc_CursedLens
+{
     format("Boosts supereffective moves by 30%, but weakens resisted moves by 20%.")
 }
 
 text gItemDesc_VowOfSilence
+{
+    format("Damaging moves: +25%. Status moves are unusable.")
+}
+
+text gItemRoomDesc_VowOfSilence
 {
     format("Boosts damaging moves by 25%, but prevents the use of status moves.")
 }
 
 text gItemDesc_BloodOath
 {
+    format("Survive one direct KO at 1 HP; item is consumed.")
+}
+
+text gItemRoomDesc_BloodOath
+{
     format("Survives a direct KO hit with 1 HP, then the item is consumed.")
 }
 
 text gItemDesc_HollowSun
 {
+    format("Weaknesses swap with resistances.")
+}
+
+text gItemRoomDesc_HollowSun
+{
     format("Incoming weaknesses become resistances, and resistances become weaknesses.")
 }
 
 text gItemDesc_MaliceOrb
+{
+    format("Physical: +1 Atk/-1 Def. Special: +1 SpA/-1 SpD.")
+}
+
+text gItemRoomDesc_MaliceOrb
 {
     format("Physical moves raise Attack and lower Defense. Special moves raise Sp. Atk and lower Sp. Def.")
 }

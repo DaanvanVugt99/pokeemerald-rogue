@@ -1329,6 +1329,9 @@ static void BagMenu_ItemPrintCallback(u8 windowId, u32 itemIndex, u8 y)
 
 static void PrintItemDescription(int itemIndex)
 {
+    // TODO(Item Room): Add an Inspect action for Item Room rewards so the Bag
+    // can open the full description from Rogue_GetItemRoomDescription(), while
+    // keeping the compact description shown in this window.
     if(sTempDisableDescriptionPrint)
         return;
 
