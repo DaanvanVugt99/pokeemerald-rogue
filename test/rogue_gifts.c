@@ -643,7 +643,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
     for(ability = ABILITY_STRONG_WINDS; ability <= ABILITY_LIVING_LIBRARY; ++ability)
     {
         u16 profileId = RogueGift_DebugGetDynamicSynergyProfileId(ability);
-        u16 moves[3];
+        u16 moves[5];
         u8 moveCount = 0;
         u8 i;
         u8 j;
@@ -667,10 +667,10 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         }
 
         EXPECT_GE(moveCount, 1);
-        EXPECT_LE(moveCount, 3);
+        EXPECT_LE(moveCount, 5);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 253);
+    EXPECT_EQ(pairedAbilityCount, 258);
 }
 
 TEST("Newest dynamic unique abilities use their required synergy profiles")
@@ -739,8 +739,18 @@ TEST("Direct move synergy uses battle semantics instead of learnability")
 
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_DYNAMIC_PUNCH));
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_INFERNO));
-    EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_SING));
-    EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_FOCUS_BLAST));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_ZAP_CANNON));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_SING));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_FOCUS_BLAST));
+    EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SIGHTING_SYSTEM, MOVE_TACKLE));
+
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_TANTRUM, MOVE_FOCUS_BLAST));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_MARKSMAN, MOVE_ZAP_CANNON));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_MONSOON, MOVE_INFERNO));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_INTENT, MOVE_DYNAMIC_PUNCH));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_TOXIC_DELUGE, MOVE_GUNK_SHOT));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_TOXIC_DELUGE, MOVE_TOXIC));
+    EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_TOXIC_DELUGE, MOVE_FLAMETHROWER));
 
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_SOLARBOOST, MOVE_WEATHER_BALL));
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_STEALTH, MOVE_PHANTOM_FORCE));

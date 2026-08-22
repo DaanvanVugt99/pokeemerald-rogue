@@ -143,6 +143,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Redesigned the Magnemite line's Sighting System: status moves gain +1
+  priority, while damaging moves cannot miss and have -3 priority; its
+  accuracy-oriented dynamic gift synergy now offers five curated moves.
+- Added accuracy-oriented dynamic gift profiles for Tantrum, Toxic Deluge,
+  Marksman, Monsoon, and Intent.
 - Polished the Pokémon summary screen with explicit Stats, IVs, EVs, and Base
   Stats headers plus clearer move-reordering controls.
 - Optimized encrypted Pokémon data access by combining checksum and encryption
