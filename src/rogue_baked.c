@@ -1043,6 +1043,7 @@ extern const u8 gItemRoomDesc_VowOfSilence[];
 extern const u8 gItemRoomDesc_BloodOath[];
 extern const u8 gItemRoomDesc_HollowSun[];
 extern const u8 gItemRoomDesc_MaliceOrb[];
+extern const u8 gItemRoomDesc_Graveglass[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1108,6 +1109,8 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_HollowSun;
     case ITEM_MALICE_ORB:
         return gItemRoomDesc_MaliceOrb;
+    case ITEM_GRAVEGLASS:
+        return gItemRoomDesc_Graveglass;
     default:
         return Rogue_GetItemDesc(itemId);
     }

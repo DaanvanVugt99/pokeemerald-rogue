@@ -118,6 +118,16 @@ text gItemRoomDesc_MaliceOrb
     format("Physical moves raise Attack and lower Defense. Special moves raise Sp. Atk and lower Sp. Def.")
 }
 
+text gItemDesc_Graveglass
+{
+    format("Adds Ghost typing; always escapes traps and wild battles.")
+}
+
+text gItemRoomDesc_Graveglass
+{
+    format("Adds Ghost typing.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

@@ -174,6 +174,7 @@
 #define HOLD_EFFECT_BLOOD_OATH          188
 #define HOLD_EFFECT_HOLLOW_SUN          189
 #define HOLD_EFFECT_MALICE_ORB          190
+#define HOLD_EFFECT_GRAVEGLASS          191
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

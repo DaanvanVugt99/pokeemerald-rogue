@@ -28901,6 +28901,12 @@ bool8 IsMonBannedFromSkyBattles(u16 species)
     }
 }
 
+static bool32 IsGraveglassActive(u32 battler)
+{
+    return gBattleMons[battler].item == ITEM_GRAVEGLASS
+        && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_GRAVEGLASS;
+}
+
 u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera)
 {
     u32 chromaticType = GetBattlerChromaticFluxType(battler);
@@ -28917,6 +28923,20 @@ u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera)
     // Handle Terastallization
     if (IsTerastallized(battler) && teraType != TYPE_STELLAR && !ignoreTera)
         return GetBattlerTeraType(battler);
+
+    // Graveglass fills the unused second slot for a monotype and the dynamic
+    // third slot for a dual-type. Keep this derived so item suppression,
+    // removal, form changes, and other runtime type changes are respected.
+    if (IsGraveglassActive(battler)
+     && types[0] != TYPE_GHOST
+     && types[1] != TYPE_GHOST
+     && types[2] != TYPE_GHOST)
+    {
+        if (types[1] == types[0] || !IS_STANDARD_TYPE(types[1]))
+            types[1] = TYPE_GHOST;
+        else if (types[2] == TYPE_MYSTERY)
+            types[2] = TYPE_GHOST;
+    }
 
     // Handle Roost's Flying-type suppression
     if (typeIndex == 0 || typeIndex == 1)

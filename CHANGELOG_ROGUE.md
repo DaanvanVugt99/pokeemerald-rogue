@@ -25,6 +25,8 @@ Format follows Keep a Changelog loosely:
   type matchups while preserving neutral and immune results.
 - Added Malice Orb, an Item Room held item that trades a defensive stat stage
   for an offensive stat stage after successful physical or special attacks.
+- Added Graveglass, an Item Room held item that adds Ghost typing and grants
+  Ghost's trapping immunity and guaranteed wild-battle escape.
 - Added a debug-only Forced Item Room setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and

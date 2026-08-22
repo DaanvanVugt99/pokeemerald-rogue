@@ -1310,6 +1310,7 @@ const u32 gItemIconPalette_HeatRock[] = INCBIN_U32("graphics/items/icon_palettes
 
 const u32 gItemIcon_DimRock[] = INCBIN_U32("graphics/items/icons/dim_rock.4bpp.lz");
 const u32 gItemIconPalette_DimRock[] = INCBIN_U32("graphics/items/icon_palettes/dim_rock.gbapal.lz");
+const u32 gItemIconPalette_Graveglass[] = INCBIN_U32("graphics/items/icon_palettes/graveglass.gbapal.lz");
 
 const u32 gItemIcon_SmoothRock[] = INCBIN_U32("graphics/items/icons/smooth_rock.4bpp.lz");
 const u32 gItemIconPalette_SmoothRock[] = INCBIN_U32("graphics/items/icon_palettes/smooth_rock.gbapal.lz");

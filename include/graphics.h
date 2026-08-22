@@ -1837,6 +1837,7 @@ extern const u32 gItemIcon_HeatRock[];
 extern const u32 gItemIconPalette_HeatRock[];
 extern const u32 gItemIcon_DimRock[];
 extern const u32 gItemIconPalette_DimRock[];
+extern const u32 gItemIconPalette_Graveglass[];
 extern const u32 gItemIcon_SmoothRock[];
 extern const u32 gItemIconPalette_SmoothRock[];
 extern const u32 gItemIcon_IcyRock[];

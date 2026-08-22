@@ -243,9 +243,10 @@
 #define ITEM_BLOOD_OATH                 (LAST_ITEM_TR + 3)
 #define ITEM_HOLLOW_SUN                 (LAST_ITEM_TR + 4)
 #define ITEM_MALICE_ORB                 (LAST_ITEM_TR + 5)
+#define ITEM_GRAVEGLASS                 (LAST_ITEM_TR + 6)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_MALICE_ORB
+#define LAST_ITEM_ROOM_REWARD           ITEM_GRAVEGLASS
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

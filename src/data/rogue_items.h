@@ -100,6 +100,7 @@ extern const u8 gItemDesc_VowOfSilence[];
 extern const u8 gItemDesc_BloodOath[];
 extern const u8 gItemDesc_HollowSun[];
 extern const u8 gItemDesc_MaliceOrb[];
+extern const u8 gItemDesc_Graveglass[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2226,6 +2227,21 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_LifeOrb,
         .iconPalette = gItemIconPalette_MaliceOrb,
+    },
+
+    [ITEM_GRAVEGLASS - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Graveglass"),
+        .itemId = ITEM_GRAVEGLASS,
+        .price = 0,
+        .description = gItemDesc_Graveglass,
+        .holdEffect = HOLD_EFFECT_GRAVEGLASS,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_DimRock,
+        .iconPalette = gItemIconPalette_Graveglass,
     },
 
 #ifdef ROGUE_DEBUG

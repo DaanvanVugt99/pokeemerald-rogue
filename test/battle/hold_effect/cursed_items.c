@@ -8,6 +8,7 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_BLOOD_OATH) == HOLD_EFFECT_BLOOD_OATH);
     ASSUME(ItemId_GetHoldEffect(ITEM_HOLLOW_SUN) == HOLD_EFFECT_HOLLOW_SUN);
     ASSUME(ItemId_GetHoldEffect(ITEM_MALICE_ORB) == HOLD_EFFECT_MALICE_ORB);
+    ASSUME(ItemId_GetHoldEffect(ITEM_GRAVEGLASS) == HOLD_EFFECT_GRAVEGLASS);
 }
 
 SINGLE_BATTLE_TEST("Cursed Lens applies once from final type effectiveness", s16 damage)
@@ -491,5 +492,67 @@ SINGLE_BATTLE_TEST("Klutz suppresses Malice Orb")
     } THEN {
         EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
         EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Graveglass adds Ghost to monotypes and dual-types")
+{
+    u16 species;
+    u32 battler;
+
+    PARAMETRIZE { species = SPECIES_WOBBUFFET; }
+    PARAMETRIZE { species = SPECIES_PELIPPER; }
+
+    GIVEN {
+        PLAYER(species) { Item(ITEM_GRAVEGLASS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        if (species == SPECIES_WOBBUFFET)
+        {
+            EXPECT_EQ(GetBattlerType(battler, 0, FALSE), TYPE_PSYCHIC);
+            EXPECT_EQ(GetBattlerType(battler, 1, FALSE), TYPE_GHOST);
+            EXPECT_EQ(GetBattlerType(battler, 2, FALSE), TYPE_MYSTERY);
+        }
+        else
+        {
+            EXPECT_EQ(GetBattlerType(battler, 0, FALSE), TYPE_WATER);
+            EXPECT_EQ(GetBattlerType(battler, 1, FALSE), TYPE_FLYING);
+            EXPECT_EQ(GetBattlerType(battler, 2, FALSE), TYPE_GHOST);
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Graveglass grants Ghost escape behavior")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_GRAVEGLASS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_MEAN_LOOK); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_MEAN_LOOK); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(CanBattlerEscape(battler), TRUE);
+        EXPECT_EQ(IsRunningFromBattleImpossible(battler), BATTLE_RUN_SUCCESS);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Graveglass typing and escape behavior")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Item(ITEM_GRAVEGLASS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_NE(GetBattlerType(battler, 1, FALSE), TYPE_GHOST);
+        EXPECT_EQ(IsAbilityPreventingEscape(battler), GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT) + 1);
     }
 }

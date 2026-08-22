@@ -572,10 +572,12 @@ void SetBattlerData(u32 battlerId)
         else
             gBattleMons[battlerId].ability = ABILITY_NONE;
 
-        // Hollow Sun changes the type matchup itself, so keep it active while
-        // simulating damage even before the AI has recorded the item effect.
+        // Hollow Sun and Graveglass change the battler's effective typing or
+        // matchup itself, so keep them active while simulating even before the
+        // AI has recorded the item effect.
         if (AI_PARTY->mons[side][gBattlerPartyIndexes[battlerId]].heldEffect == 0
-         && ItemId_GetHoldEffect(gBattleMons[battlerId].item) != HOLD_EFFECT_HOLLOW_SUN)
+         && ItemId_GetHoldEffect(gBattleMons[battlerId].item) != HOLD_EFFECT_HOLLOW_SUN
+         && ItemId_GetHoldEffect(gBattleMons[battlerId].item) != HOLD_EFFECT_GRAVEGLASS)
             gBattleMons[battlerId].item = 0;
 
         for (i = 0; i < MAX_MON_MOVES; i++)
