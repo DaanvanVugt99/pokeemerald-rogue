@@ -10,6 +10,7 @@
 #include "palette.h"
 #include "pokedex.h"
 #include "pokemon.h"
+#include "pokemon_animation.h"
 #include "random.h"
 #include "scanline_effect.h"
 #include "sound.h"
@@ -47,6 +48,7 @@ static void Task_DeclineStarter(u8 taskId);
 static void Task_MoveStarterChooseCursor(u8 taskId);
 static void Task_CreateStarterLabel(u8 taskId);
 static void CreateStarterPokemonLabel(u8 selection);
+static void StartStarterPokemonAnimation(u8 taskId);
 static u8 CreatePokemonFrontSprite(u16 species, u8 x, u8 y);
 static void SpriteCB_SelectionHand(struct Sprite *sprite);
 static void SpriteCB_Pokeball(struct Sprite *sprite);
@@ -370,6 +372,7 @@ static void VblankCB_StarterChoose(void)
 #define tStarterSelection   data[0]
 #define tPkmnSpriteId       data[1]
 #define tCircleSpriteId     data[2]
+#define tPkmnAnimDelay      data[3]
 
 // Data for sSpriteTemplate_Pokeball
 #define sTaskId data[0]
@@ -531,13 +534,38 @@ static void Task_WaitForStarterSprite(u8 taskId)
         gSprites[gTasks[taskId].tCircleSpriteId].x == STARTER_PKMN_POS_X &&
         gSprites[gTasks[taskId].tCircleSpriteId].y == STARTER_PKMN_POS_Y)
     {
-        gTasks[taskId].func = Task_AskConfirmStarter;
+        StartStarterPokemonAnimation(taskId);
     }
+}
+
+static void StartStarterPokemonAnimation(u8 taskId)
+{
+    u16 species = GetStarterPokemon(gTasks[taskId].tStarterSelection);
+    struct Sprite *sprite = &gSprites[gTasks[taskId].tPkmnSpriteId];
+
+    PlayCry_Normal(species, 0);
+
+    // The reveal uses its own affine matrix. Release it before starting the
+    // same front-sprite animation used by the summary screen. The starter bag
+    // displays front sprites facing opposite the summary screen, so preserve
+    // that facing and mirror the animation with it.
+    FreeSpriteOamMatrix(sprite);
+    sprite->data[1] = TRUE;
+    sprite->data[2] = 0;
+    sprite->hFlip = FALSE;
+
+    if (HasTwoFramesAnimation(species))
+        StartSpriteAnim(sprite, 1);
+
+    gTasks[taskId].tPkmnAnimDelay = gSpeciesInfo[species].frontAnimDelay;
+    if (gTasks[taskId].tPkmnAnimDelay == 0)
+        StartMonSummaryAnimation(sprite, gSpeciesInfo[species].frontAnimId);
+
+    gTasks[taskId].func = Task_AskConfirmStarter;
 }
 
 static void Task_AskConfirmStarter(u8 taskId)
 {
-    PlayCry_Normal(GetStarterPokemon(gTasks[taskId].tStarterSelection), 0);
     FillWindowPixelBuffer(0, PIXEL_FILL(1));
     AddTextPrinterParameterized(0, FONT_NORMAL, gText_ConfirmStarterChoice, 0, 1, 0, NULL);
     ScheduleBgCopyTilemapToVram(0);
@@ -558,6 +586,14 @@ static void Task_HandleConfirmStarterInput(u8 taskId)
 {
     u8 spriteId;
 
+    if (gTasks[taskId].tPkmnAnimDelay != 0 && --gTasks[taskId].tPkmnAnimDelay == 0)
+    {
+        u16 species = GetStarterPokemon(gTasks[taskId].tStarterSelection);
+        struct Sprite *sprite = &gSprites[gTasks[taskId].tPkmnSpriteId];
+
+        StartMonSummaryAnimation(sprite, gSpeciesInfo[species].frontAnimId);
+    }
+
     switch (Menu_ProcessInputNoWrapClearOnChoose())
     {
     case 0:  // YES
@@ -570,11 +606,11 @@ static void Task_HandleConfirmStarterInput(u8 taskId)
     case MENU_B_PRESSED:
         PlaySE(SE_SELECT);
         spriteId = gTasks[taskId].tPkmnSpriteId;
-        FreeOamMatrix(gSprites[spriteId].oam.matrixNum);
+        FreeSpriteOamMatrix(&gSprites[spriteId]);
         FreeAndDestroyMonPicSprite(spriteId);
 
         spriteId = gTasks[taskId].tCircleSpriteId;
-        FreeOamMatrix(gSprites[spriteId].oam.matrixNum);
+        FreeSpriteOamMatrix(&gSprites[spriteId]);
         DestroySprite(&gSprites[spriteId]);
         gTasks[taskId].func = Task_DeclineStarter;
         break;

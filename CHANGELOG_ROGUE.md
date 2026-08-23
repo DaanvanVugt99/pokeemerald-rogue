@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added each starter's summary-style front-sprite animation to its Poké Ball
+  inspection reveal in the three-choice starter bag.
 - Added deterministic Item Rooms to Standard and Slow Path Adventures, with
   three isolated cursed held-item rewards: Bane Lens, Hush Band, and Fate
   Sash.
