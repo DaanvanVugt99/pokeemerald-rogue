@@ -17,7 +17,7 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_GAMBLERS_CLAW) == HOLD_EFFECT_GAMBLERS_CLAW);
 }
 
-SINGLE_BATTLE_TEST("Cursed Lens applies once from final type effectiveness", s16 damage)
+SINGLE_BATTLE_TEST("Bane Lens applies once from final type effectiveness", s16 damage)
 {
     u16 item;
     u16 targetSpecies;
@@ -53,7 +53,7 @@ SINGLE_BATTLE_TEST("Cursed Lens applies once from final type effectiveness", s16
     }
 }
 
-SINGLE_BATTLE_TEST("Cursed Lens respects runtime type changes", s16 damage)
+SINGLE_BATTLE_TEST("Bane Lens respects runtime type changes", s16 damage)
 {
     u16 item;
 
@@ -74,7 +74,7 @@ SINGLE_BATTLE_TEST("Cursed Lens respects runtime type changes", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Cursed Lens leaves immunities and fixed damage unchanged", s16 damage)
+SINGLE_BATTLE_TEST("Bane Lens leaves immunities and fixed damage unchanged", s16 damage)
 {
     u16 item;
     u16 move;
@@ -101,7 +101,7 @@ SINGLE_BATTLE_TEST("Cursed Lens leaves immunities and fixed damage unchanged", s
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Cursed Lens", s16 damage)
+SINGLE_BATTLE_TEST("Klutz suppresses Bane Lens", s16 damage)
 {
     u16 item;
 
@@ -120,7 +120,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Cursed Lens", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Hollow Sun reverses non-neutral incoming matchups and preserves neutral and immunity", s16 damage)
+SINGLE_BATTLE_TEST("Eclipse Orb reverses non-neutral incoming matchups and preserves neutral and immunity", s16 damage)
 {
     u16 item;
     u16 move;
@@ -159,7 +159,7 @@ SINGLE_BATTLE_TEST("Hollow Sun reverses non-neutral incoming matchups and preser
     }
 }
 
-SINGLE_BATTLE_TEST("Hollow Sun respects runtime typing changes", s16 damage)
+SINGLE_BATTLE_TEST("Eclipse Orb respects runtime typing changes", s16 damage)
 {
     u16 item;
 
@@ -180,7 +180,7 @@ SINGLE_BATTLE_TEST("Hollow Sun respects runtime typing changes", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Hollow Sun", s16 damage)
+SINGLE_BATTLE_TEST("Klutz suppresses Eclipse Orb", s16 damage)
 {
     u16 item;
 
@@ -199,7 +199,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Hollow Sun", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Vow of Silence boosts physical and special direct damage", s16 damage)
+SINGLE_BATTLE_TEST("Hush Band boosts physical and special direct damage", s16 damage)
 {
     u16 item;
     u16 move;
@@ -222,7 +222,7 @@ SINGLE_BATTLE_TEST("Vow of Silence boosts physical and special direct damage", s
     }
 }
 
-SINGLE_BATTLE_TEST("Vow of Silence blocks status moves and preserves Struggle fallback")
+SINGLE_BATTLE_TEST("Hush Band blocks status moves and preserves Struggle fallback")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_VOW_OF_SILENCE); Moves(MOVE_CELEBRATE); }
@@ -234,7 +234,7 @@ SINGLE_BATTLE_TEST("Vow of Silence blocks status moves and preserves Struggle fa
     }
 }
 
-SINGLE_BATTLE_TEST("Vow of Silence blocks Me First")
+SINGLE_BATTLE_TEST("Hush Band blocks Me First")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_VOW_OF_SILENCE); Moves(MOVE_ME_FIRST, MOVE_TACKLE); }
@@ -244,7 +244,7 @@ SINGLE_BATTLE_TEST("Vow of Silence blocks Me First")
     }
 }
 
-SINGLE_BATTLE_TEST("Vow of Silence blocks a called status move at execution")
+SINGLE_BATTLE_TEST("Hush Band blocks a called status move at execution")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_RUINATION].effect == EFFECT_SUPER_FANG);
@@ -256,12 +256,12 @@ SINGLE_BATTLE_TEST("Vow of Silence blocks a called status move at execution")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RUINATION, player);
         ABILITY_POPUP(player, ABILITY_CINDER_EDICT);
-        MESSAGE("Vow of Silence's effects prevent status moves from being used!");
+        MESSAGE("Hush Band's effects prevent status moves from being used!");
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_SUNNY_DAY, player);
     }
 }
 
-SINGLE_BATTLE_TEST("Vow of Silence leaves fixed damage unchanged", s16 damage)
+SINGLE_BATTLE_TEST("Hush Band leaves fixed damage unchanged", s16 damage)
 {
     u16 item;
 
@@ -281,7 +281,7 @@ SINGLE_BATTLE_TEST("Vow of Silence leaves fixed damage unchanged", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Vow of Silence does not boost confusion self-damage", s16 damage)
+SINGLE_BATTLE_TEST("Hush Band does not boost confusion self-damage", s16 damage)
 {
     u16 item;
 
@@ -301,7 +301,7 @@ SINGLE_BATTLE_TEST("Vow of Silence does not boost confusion self-damage", s16 da
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Vow of Silence", s16 damage)
+SINGLE_BATTLE_TEST("Klutz suppresses Hush Band", s16 damage)
 {
     u16 item;
 
@@ -320,7 +320,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Vow of Silence", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Blood Oath saves its holder below full HP and is consumed")
+SINGLE_BATTLE_TEST("Fate Sash saves its holder below full HP and is consumed")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { HP(20); MaxHP(100); Item(ITEM_BLOOD_OATH); }
@@ -335,7 +335,7 @@ SINGLE_BATTLE_TEST("Blood Oath saves its holder below full HP and is consumed")
     }
 }
 
-SINGLE_BATTLE_TEST("Blood Oath can stop an OHKO move")
+SINGLE_BATTLE_TEST("Fate Sash can stop an OHKO move")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { HP(50); MaxHP(100); Item(ITEM_BLOOD_OATH); }
@@ -349,7 +349,7 @@ SINGLE_BATTLE_TEST("Blood Oath can stop an OHKO move")
     }
 }
 
-SINGLE_BATTLE_TEST("Blood Oath is consumed before a later multi-hit strike")
+SINGLE_BATTLE_TEST("Fate Sash is consumed before a later multi-hit strike")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_ARM_THRUST].effect == EFFECT_MULTI_HIT);
@@ -365,7 +365,7 @@ SINGLE_BATTLE_TEST("Blood Oath is consumed before a later multi-hit strike")
     }
 }
 
-SINGLE_BATTLE_TEST("Blood Oath does not prevent indirect damage")
+SINGLE_BATTLE_TEST("Fate Sash does not prevent indirect damage")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { HP(1); MaxHP(100); Status1(STATUS1_POISON); Item(ITEM_BLOOD_OATH); Moves(MOVE_CELEBRATE); }
@@ -379,7 +379,7 @@ SINGLE_BATTLE_TEST("Blood Oath does not prevent indirect damage")
     }
 }
 
-SINGLE_BATTLE_TEST("Sturdy and Endure take precedence over Blood Oath")
+SINGLE_BATTLE_TEST("Sturdy and Endure take precedence over Fate Sash")
 {
     u16 move;
     u16 ability;
@@ -400,7 +400,7 @@ SINGLE_BATTLE_TEST("Sturdy and Endure take precedence over Blood Oath")
     }
 }
 
-SINGLE_BATTLE_TEST("False Swipe does not consume Blood Oath")
+SINGLE_BATTLE_TEST("False Swipe does not consume Fate Sash")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { HP(20); MaxHP(100); Defense(1); Item(ITEM_BLOOD_OATH); }
@@ -414,7 +414,7 @@ SINGLE_BATTLE_TEST("False Swipe does not consume Blood Oath")
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Blood Oath")
+SINGLE_BATTLE_TEST("Klutz suppresses Fate Sash")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { HP(20); MaxHP(100); Ability(ABILITY_KLUTZ); Item(ITEM_BLOOD_OATH); }
@@ -426,7 +426,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Blood Oath")
     }
 }
 
-SINGLE_BATTLE_TEST("Petrified Heart boosts physical and special defense", s16 damage)
+SINGLE_BATTLE_TEST("Stone Heart boosts physical and special defense", s16 damage)
 {
     u16 item;
     u32 move;
@@ -451,7 +451,7 @@ SINGLE_BATTLE_TEST("Petrified Heart boosts physical and special defense", s16 da
     }
 }
 
-SINGLE_BATTLE_TEST("Petrified Heart halves Speed and blocks recovery")
+SINGLE_BATTLE_TEST("Stone Heart halves Speed and blocks recovery")
 {
     u32 battler;
 
@@ -470,7 +470,7 @@ SINGLE_BATTLE_TEST("Petrified Heart halves Speed and blocks recovery")
     }
 }
 
-DOUBLE_BATTLE_TEST("Petrified Heart blocks healing from an ally's Pollen Puff")
+DOUBLE_BATTLE_TEST("Stone Heart blocks healing from an ally's Pollen Puff")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_POLLEN_PUFF].effect == EFFECT_HIT_ENEMY_HEAL_ALLY);
@@ -485,7 +485,7 @@ DOUBLE_BATTLE_TEST("Petrified Heart blocks healing from an ally's Pollen Puff")
     }
 }
 
-SINGLE_BATTLE_TEST("Petrified Heart blocks Leech Seed recovery")
+SINGLE_BATTLE_TEST("Stone Heart blocks Leech Seed recovery")
 {
     PASSES_RANDOMLY(90, 100, RNG_ACCURACY);
     GIVEN {
@@ -500,7 +500,7 @@ SINGLE_BATTLE_TEST("Petrified Heart blocks Leech Seed recovery")
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Petrified Heart's Speed and healing block")
+SINGLE_BATTLE_TEST("Klutz suppresses Stone Heart's Speed and healing block")
 {
     u32 battler;
 
@@ -517,7 +517,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Petrified Heart's Speed and healing block")
     }
 }
 
-SINGLE_BATTLE_TEST("False Idol suppresses the holder's Ability and boosts direct damage", s16 damage)
+SINGLE_BATTLE_TEST("Null Idol suppresses the holder's Ability and boosts direct damage", s16 damage)
 {
     u16 item;
     u32 battler;
@@ -540,7 +540,7 @@ SINGLE_BATTLE_TEST("False Idol suppresses the holder's Ability and boosts direct
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses False Idol", s16 damage)
+SINGLE_BATTLE_TEST("Klutz suppresses Null Idol", s16 damage)
 {
     u16 item;
 
@@ -618,7 +618,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Rusted Anchor", s16 damage)
     }
 }
 
-SINGLE_BATTLE_TEST("Malice Orb trades the matching defensive stage for an offensive stage")
+SINGLE_BATTLE_TEST("Grudge Orb trades the matching defensive stage for an offensive stage")
 {
     u16 move;
 
@@ -650,7 +650,7 @@ SINGLE_BATTLE_TEST("Malice Orb trades the matching defensive stage for an offens
     }
 }
 
-SINGLE_BATTLE_TEST("Malice Orb activates once after a multi-hit move")
+SINGLE_BATTLE_TEST("Grudge Orb activates once after a multi-hit move")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_ARM_THRUST].split == SPLIT_PHYSICAL);
@@ -664,7 +664,7 @@ SINGLE_BATTLE_TEST("Malice Orb activates once after a multi-hit move")
     }
 }
 
-SINGLE_BATTLE_TEST("Malice Orb does not activate for status moves")
+SINGLE_BATTLE_TEST("Grudge Orb does not activate for status moves")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_CELEBRATE].split == SPLIT_STATUS);
@@ -680,7 +680,7 @@ SINGLE_BATTLE_TEST("Malice Orb does not activate for status moves")
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Malice Orb")
+SINGLE_BATTLE_TEST("Klutz suppresses Grudge Orb")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Attack(120); Item(ITEM_MALICE_ORB); Moves(MOVE_TACKLE); }
@@ -693,7 +693,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Malice Orb")
     }
 }
 
-SINGLE_BATTLE_TEST("Graveglass adds Ghost to monotypes and dual-types")
+SINGLE_BATTLE_TEST("Phantom Stone adds Ghost to monotypes and dual-types")
 {
     u16 species;
     u32 battler;
@@ -723,7 +723,7 @@ SINGLE_BATTLE_TEST("Graveglass adds Ghost to monotypes and dual-types")
     }
 }
 
-SINGLE_BATTLE_TEST("Graveglass grants Ghost escape behavior")
+SINGLE_BATTLE_TEST("Phantom Stone grants Ghost escape behavior")
 {
     u32 battler;
 
@@ -739,7 +739,7 @@ SINGLE_BATTLE_TEST("Graveglass grants Ghost escape behavior")
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Graveglass typing and escape behavior")
+SINGLE_BATTLE_TEST("Klutz suppresses Phantom Stone typing and escape behavior")
 {
     u32 battler;
 
@@ -755,7 +755,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Graveglass typing and escape behavior")
     }
 }
 
-SINGLE_BATTLE_TEST("Witch's Thread gives status moves +1 priority")
+SINGLE_BATTLE_TEST("Hex Thread gives status moves +1 priority")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_TAIL_WHIP].split == SPLIT_STATUS);
@@ -769,7 +769,7 @@ SINGLE_BATTLE_TEST("Witch's Thread gives status moves +1 priority")
     }
 }
 
-SINGLE_BATTLE_TEST("Witch's Thread reflects Synchronize-compatible status effects to its holder")
+SINGLE_BATTLE_TEST("Hex Thread reflects Synchronize-compatible status effects to its holder")
 {
     u32 move;
     u32 status;
@@ -792,7 +792,7 @@ SINGLE_BATTLE_TEST("Witch's Thread reflects Synchronize-compatible status effect
     }
 }
 
-SINGLE_BATTLE_TEST("Witch's Thread respects status immunities when reflecting status")
+SINGLE_BATTLE_TEST("Hex Thread respects status immunities when reflecting status")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_WILL_O_WISP].effect == EFFECT_WILL_O_WISP);
@@ -807,7 +807,7 @@ SINGLE_BATTLE_TEST("Witch's Thread respects status immunities when reflecting st
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Witch's Thread priority and status reflection")
+SINGLE_BATTLE_TEST("Klutz suppresses Hex Thread priority and status reflection")
 {
     GIVEN {
         ASSUME(gBattleMoves[MOVE_WILL_O_WISP].effect == EFFECT_WILL_O_WISP);
@@ -822,7 +822,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Witch's Thread priority and status reflecti
     }
 }
 
-SINGLE_BATTLE_TEST("Gambler's Claw gives first-turn priority and later-turn penalty")
+SINGLE_BATTLE_TEST("Gambit Claw gives first-turn priority and later-turn penalty")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Speed(5); Item(ITEM_GAMBLERS_CLAW); Moves(MOVE_CELEBRATE); }
@@ -838,7 +838,7 @@ SINGLE_BATTLE_TEST("Gambler's Claw gives first-turn priority and later-turn pena
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Gambler's Claw priority changes")
+SINGLE_BATTLE_TEST("Klutz suppresses Gambit Claw priority changes")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Speed(5); Item(ITEM_GAMBLERS_CLAW); Moves(MOVE_CELEBRATE); }
@@ -851,7 +851,7 @@ SINGLE_BATTLE_TEST("Klutz suppresses Gambler's Claw priority changes")
     }
 }
 
-SINGLE_BATTLE_TEST("Ashen Crown raises all stats and marks the holder to perish after a KO")
+SINGLE_BATTLE_TEST("Doom Crown raises all stats and marks the holder to perish after a KO")
 {
     u32 battler;
     u32 perishSongTimer;
@@ -875,7 +875,7 @@ SINGLE_BATTLE_TEST("Ashen Crown raises all stats and marks the holder to perish 
     }
 }
 
-SINGLE_BATTLE_TEST("Ashen Crown does not restart or reannounce an active perish countdown")
+SINGLE_BATTLE_TEST("Doom Crown does not restart or reannounce an active perish countdown")
 {
     u32 battler;
     u32 perishSongTimer;
@@ -906,7 +906,7 @@ SINGLE_BATTLE_TEST("Ashen Crown does not restart or reannounce an active perish 
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Ashen Crown")
+SINGLE_BATTLE_TEST("Klutz suppresses Doom Crown")
 {
     u32 battler;
 

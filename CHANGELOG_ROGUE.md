@@ -17,27 +17,27 @@ Format follows Keep a Changelog loosely:
 ### Added
 
 - Added deterministic Item Rooms to Standard and Slow Path Adventures, with
-  three isolated cursed held-item rewards: Cursed Lens, Vow of Silence, and
-  Blood Oath.
+  three isolated cursed held-item rewards: Bane Lens, Hush Band, and Fate
+  Sash.
 - Added palette-only cursed recolors for the three Item Room held-item icons,
   reusing the existing Scope Lens, Choice Band, and Focus Sash artwork.
-- Added Hollow Sun, an Item Room held item that reverses non-neutral incoming
+- Added Eclipse Orb, an Item Room held item that reverses non-neutral incoming
   type matchups while preserving neutral and immune results.
-- Added Malice Orb, an Item Room held item that trades a defensive stat stage
+- Added Grudge Orb, an Item Room held item that trades a defensive stat stage
   for an offensive stat stage after successful physical or special attacks.
-- Added Graveglass, an Item Room held item that adds Ghost typing and grants
+- Added Phantom Stone, an Item Room held item that adds Ghost typing and grants
   Ghost's trapping immunity and guaranteed wild-battle escape.
-- Added Ashen Crown, an Item Room held item that boosts all combat stats after
+- Added Doom Crown, an Item Room held item that boosts all combat stats after
   a knockout while marking its holder for a Perish Song countdown.
-- Added Witch's Thread, an Item Room held item that gives status moves priority
+- Added Hex Thread, an Item Room held item that gives status moves priority
   and reflects burn, poison, and paralysis back onto its holder.
-- Added Petrified Heart, an Item Room held item that boosts both defenses while
+- Added Stone Heart, an Item Room held item that boosts both defenses while
   halving Speed and preventing HP recovery.
-- Added False Idol, an Item Room held item that suppresses the holder's Ability
+- Added Null Idol, an Item Room held item that suppresses the holder's Ability
   and boosts ordinary direct damaging moves.
 - Added Rusted Anchor, an Item Room held item that makes physical moves use
   Defense instead of Attack.
-- Added Gambler's Claw, an Item Room held item that grants priority on the
+- Added Gambit Claw, an Item Room held item that grants priority on the
   holder's first turn after entry and penalizes priority on later turns.
 - Added a debug-only Forced Item Room setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
@@ -155,6 +155,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Renamed the Item Room held-item rewards to Bane Lens, Hush Band, Fate Sash,
+  Eclipse Orb, Grudge Orb, Phantom Stone, Doom Crown, Hex Thread, Stone Heart,
+  Null Idol, Rusted Anchor, and Gambit Claw without changing their effects,
+  sprites, palettes, or stable item IDs.
 - Redesigned the Magnemite line's Sighting System: status moves gain +1
   priority, while damaging moves cannot miss and have -3 priority; its
   accuracy-oriented dynamic gift synergy now offers five curated moves.

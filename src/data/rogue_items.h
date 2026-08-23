@@ -2162,7 +2162,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_CURSED_LENS - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Cursed Lens"),
+        .name = _("Bane Lens"),
         .itemId = ITEM_CURSED_LENS,
         .price = 0,
         .description = gItemDesc_CursedLens,
@@ -2177,7 +2177,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_VOW_OF_SILENCE - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Vow of Silence"),
+        .name = _("Hush Band"),
         .itemId = ITEM_VOW_OF_SILENCE,
         .price = 0,
         .description = gItemDesc_VowOfSilence,
@@ -2192,7 +2192,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_BLOOD_OATH - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Blood Oath"),
+        .name = _("Fate Sash"),
         .itemId = ITEM_BLOOD_OATH,
         .price = 0,
         .description = gItemDesc_BloodOath,
@@ -2207,7 +2207,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_HOLLOW_SUN - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Hollow Sun"),
+        .name = _("Eclipse Orb"),
         .itemId = ITEM_HOLLOW_SUN,
         .price = 0,
         .description = gItemDesc_HollowSun,
@@ -2222,7 +2222,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_MALICE_ORB - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Malice Orb"),
+        .name = _("Grudge Orb"),
         .itemId = ITEM_MALICE_ORB,
         .price = 0,
         .description = gItemDesc_MaliceOrb,
@@ -2237,7 +2237,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_GRAVEGLASS - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Graveglass"),
+        .name = _("Phantom Stone"),
         .itemId = ITEM_GRAVEGLASS,
         .price = 0,
         .description = gItemDesc_Graveglass,
@@ -2252,7 +2252,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_ASHEN_CROWN - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Ashen Crown"),
+        .name = _("Doom Crown"),
         .itemId = ITEM_ASHEN_CROWN,
         .price = 0,
         .description = gItemDesc_AshenCrown,
@@ -2267,7 +2267,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_WITCHS_THREAD - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Witch's Thread"),
+        .name = _("Hex Thread"),
         .itemId = ITEM_WITCHS_THREAD,
         .price = 0,
         .description = gItemDesc_WitchsThread,
@@ -2282,7 +2282,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_PETRIFIED_HEART - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Petrified Heart"),
+        .name = _("Stone Heart"),
         .itemId = ITEM_PETRIFIED_HEART,
         .price = 0,
         .description = gItemDesc_PetrifiedHeart,
@@ -2297,7 +2297,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_FALSE_IDOL - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("False Idol"),
+        .name = _("Null Idol"),
         .itemId = ITEM_FALSE_IDOL,
         .price = 0,
         .description = gItemDesc_FalseIdol,
@@ -2327,7 +2327,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_GAMBLERS_CLAW - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Gambler's Claw"),
+        .name = _("Gambit Claw"),
         .itemId = ITEM_GAMBLERS_CLAW,
         .price = 0,
         .description = gItemDesc_GamblersClaw,

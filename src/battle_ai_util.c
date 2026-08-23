@@ -572,7 +572,7 @@ void SetBattlerData(u32 battlerId)
         else
             gBattleMons[battlerId].ability = ABILITY_NONE;
 
-        // Hollow Sun and Graveglass change the battler's effective typing or
+        // Eclipse Orb and Phantom Stone change the battler's effective typing or
         // matchup itself, so keep them active while simulating even before the
         // AI has recorded the item effect.
         if (AI_PARTY->mons[side][gBattlerPartyIndexes[battlerId]].heldEffect == 0

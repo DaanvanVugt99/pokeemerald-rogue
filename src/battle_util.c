@@ -2248,7 +2248,7 @@ u8 CheckMoveLimitations(u32 battler, u8 unusableMoves, u16 check)
         // Choice Items
         else if (check & MOVE_LIMITATION_CHOICE_ITEM && HOLD_EFFECT_CHOICE(holdEffect) && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != gBattleMons[battler].moves[i])
             unusableMoves |= gBitTable[i];
-        // Assault Vest and Vow of Silence
+        // Assault Vest and Hush Band
         else if (check & MOVE_LIMITATION_ASSAULT_VEST
               && ((holdEffect == HOLD_EFFECT_ASSAULT_VEST && gBattleMons[battler].moves[i] != MOVE_ME_FIRST)
                || holdEffect == HOLD_EFFECT_VOW_OF_SILENCE)
@@ -20838,7 +20838,7 @@ static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability)
     if (IsMyceliumMightOnField())
         return TRUE;
 
-    // False Idol suppresses the holder's abilities, but raw Klutz must still
+    // Null Idol suppresses the holder's abilities, but raw Klutz must still
     // suppress the item itself without recursing through ability lookup.
     if (ItemId_GetHoldEffect(gBattleMons[battler].item) == HOLD_EFFECT_FALSE_IDOL
      && !(gStatuses3[battler] & STATUS3_EMBARGO)
@@ -26671,7 +26671,7 @@ static uq4_12_t GetTypeModifierForBattler(u32 atkType, u32 defType, u32 battlerD
 {
     uq4_12_t modifier = sTypeEffectivenessTable[atkType][defType];
 
-    // Apply Hollow Sun per defending type so dual-type 4x and 1/4x matchups
+    // Apply Eclipse Orb per defending type so dual-type 4x and 1/4x matchups
     // invert correctly. The active held-effect query also handles Klutz,
     // Embargo, and Magic Room in the same way as other held items.
     if (checkDefenderItem
@@ -28944,7 +28944,7 @@ u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera)
     if (IsTerastallized(battler) && teraType != TYPE_STELLAR && !ignoreTera)
         return GetBattlerTeraType(battler);
 
-    // Graveglass fills the unused second slot for a monotype and the dynamic
+    // Phantom Stone fills the unused second slot for a monotype and the dynamic
     // third slot for a dual-type. Keep this derived so item suppression,
     // removal, form changes, and other runtime type changes are respected.
     if (IsGraveglassActive(battler)

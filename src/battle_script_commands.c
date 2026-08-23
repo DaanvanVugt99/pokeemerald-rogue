@@ -2717,7 +2717,7 @@ static void Cmd_adjustdamage(void)
         endureCharmActive = ActivateEndureCharm(gBattlerTarget);
     }
 
-    // Blood Oath is the final direct-hit survival check so existing
+    // Fate Sash is the final direct-hit survival check so existing
     // Endure/Sturdy-style effects get the opportunity to save the holder first.
     if (holdEffect == HOLD_EFFECT_BLOOD_OATH
      && !gProtectStructs[gBattlerTarget].endured
