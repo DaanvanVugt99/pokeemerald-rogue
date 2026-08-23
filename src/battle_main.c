@@ -4917,7 +4917,9 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
     }
 
     // item effects
-    if (holdEffect == HOLD_EFFECT_MACHO_BRACE || holdEffect == HOLD_EFFECT_POWER_ITEM)
+    if (holdEffect == HOLD_EFFECT_MACHO_BRACE
+     || holdEffect == HOLD_EFFECT_POWER_ITEM
+     || holdEffect == HOLD_EFFECT_PETRIFIED_HEART)
         speed /= 2;
     else if (holdEffect == HOLD_EFFECT_IRON_BALL)
         speed /= 2;
@@ -5081,8 +5083,20 @@ s8 GetMovePriority(u32 battler, u16 move)
     if (gBattleStruct->dynamax.usingMaxMove[battler] && gBattleMoves[move].split == SPLIT_STATUS)
         return gBattleMoves[MOVE_MAX_GUARD].priority;
 
+    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_GAMBLERS_CLAW)
+    {
+        if (gDisableStructs[battler].isFirstTurn)
+            priority++;
+        else
+            priority--;
+    }
+
     if ((gBattleStruct->switchInTransferFlags[battler] & SWITCH_IN_TRANSFER_ROYAL_ADVANCE_ACTIVE_MASK)
      && !IS_MOVE_STATUS(move))
+        priority++;
+
+    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_WITCHS_THREAD
+     && IS_MOVE_STATUS(move))
         priority++;
 
     if (ability == ABILITY_GALE_WINGS

@@ -244,9 +244,15 @@
 #define ITEM_HOLLOW_SUN                 (LAST_ITEM_TR + 4)
 #define ITEM_MALICE_ORB                 (LAST_ITEM_TR + 5)
 #define ITEM_GRAVEGLASS                 (LAST_ITEM_TR + 6)
+#define ITEM_ASHEN_CROWN                (LAST_ITEM_TR + 7)
+#define ITEM_WITCHS_THREAD              (LAST_ITEM_TR + 8)
+#define ITEM_PETRIFIED_HEART             (LAST_ITEM_TR + 9)
+#define ITEM_FALSE_IDOL                  (LAST_ITEM_TR + 10)
+#define ITEM_RUSTED_ANCHOR               (LAST_ITEM_TR + 11)
+#define ITEM_GAMBLERS_CLAW               (LAST_ITEM_TR + 12)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_GRAVEGLASS
+#define LAST_ITEM_ROOM_REWARD           ITEM_GAMBLERS_CLAW
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

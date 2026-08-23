@@ -6869,6 +6869,34 @@ static const u8 *TryReignSetFields(u32 battler, u32 ability)
     return NULL;
 }
 
+static bool32 TryActivateWitchsThread(void)
+{
+    u16 moveEffect;
+
+    if (GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_WITCHS_THREAD
+     || !(gHitMarker & HITMARKER_SYNCHRONISE_EFFECT))
+        return FALSE;
+
+    // Consume the original status marker just like native Synchronize. The
+    // reflected effect is cleared separately by the item script below.
+    gHitMarker &= ~HITMARKER_SYNCHRONISE_EFFECT;
+
+    if (!IsBattlerAlive(gBattlerAttacker)
+     || (gBattleMons[gBattlerAttacker].status1 & STATUS1_ANY))
+        return FALSE;
+
+    moveEffect = gBattleStruct->synchronizeMoveEffect & ~(MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN);
+    if (B_SYNCHRONIZE_TOXIC < GEN_5 && moveEffect == MOVE_EFFECT_TOXIC)
+        moveEffect = MOVE_EFFECT_POISON;
+
+    gBattleScripting.moveEffect = moveEffect | MOVE_EFFECT_AFFECTS_USER;
+    gBattleScripting.battler = gBattlerTarget;
+    gLastUsedItem = gBattleMons[gBattlerAttacker].item;
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = BattleScript_WitchsThreadActivates;
+    return TRUE;
+}
+
 static void Cmd_moveend(void)
 {
     CMD_ARGS(u8 endMode, u8 endState);
@@ -7093,7 +7121,8 @@ static void Cmd_moveend(void)
             }
             break;
         case MOVEEND_SYNCHRONIZE_TARGET: // target synchronize
-            if (AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE, gBattlerTarget, 0, 0, 0))
+            if (TryActivateWitchsThread()
+             || AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE, gBattlerTarget, 0, 0, 0))
                 effect = TRUE;
             gBattleScripting.moveendState++;
             break;
@@ -12923,6 +12952,32 @@ static void Cmd_various(void)
             PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = BattleScript_MomentumCharmActivates;
+            return;
+        }
+        break;
+    }
+    case VARIOUS_TRY_ACTIVATE_ASHEN_CROWN:
+    {
+        VARIOUS_ARGS();
+
+        if (battler == gBattlerAttacker
+         && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_ASHEN_CROWN
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && IsBattlerAlive(battler))
+        {
+            const u8 *activationScript = BattleScript_AshenCrownStatsOnly;
+
+            if (!(gStatuses3[battler] & STATUS3_PERISH_SONG))
+            {
+                gStatuses3[battler] |= STATUS3_PERISH_SONG;
+                gDisableStructs[battler].perishSongTimer = 3;
+                activationScript = BattleScript_AshenCrownActivates;
+            }
+            gLastUsedItem = gBattleMons[battler].item;
+            gBattlerAttacker = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = activationScript;
             return;
         }
         break;

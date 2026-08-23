@@ -163,13 +163,16 @@ or validation workflows change.
 
 ## Troubleshooting Build State
 
-- If dependency state looks stale or odd after branch switches, use tidy/clean targets and rebuild.
+- Do not use `make mostlyclean` or `make clean` as a routine stale-build fix in this checkout. The target recursively removes every `*.1bpp`, `*.4bpp`, `*.8bpp`, `*.gbapal`, and `*.lz` file, including tracked source assets and ignored generated graphics. Its `%.lz: %` rules do not automatically rebuild files referenced by `INCBIN` from C or assembly, so a clean can leave the tree unable to make a ROM even though the source is valid.
+- If generated data changed but an object still predates the generated include, regenerate the exact generated target and remove or force-rebuild only the affected object (for example `build/modern_debug/data/event_scripts.o`). Do not broaden that to a repository-wide clean.
+- After any cleanup, immediately run `git status --short` and check for tracked deletions. Restore only explicitly identified accidental deletions with `git restore -- <paths>`; never use `git restore .` while user changes are present.
 - Useful targets:
   - `make tidycheck`
   - `make mostlyclean`
   - `make clean`
-- Prefer `make tidycheck` for stale test objects. Use broader clean targets
-  only when the narrower cleanup does not solve the problem.
+- Prefer `make tidycheck` for stale test objects. Use broader clean targets only
+  with an asset backup or a deliberate plan to regenerate the complete ignored
+  graphics cache.
 
 ## Item Icon Asset Notes
 

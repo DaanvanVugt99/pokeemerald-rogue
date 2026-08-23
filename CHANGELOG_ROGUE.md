@@ -27,6 +27,18 @@ Format follows Keep a Changelog loosely:
   for an offensive stat stage after successful physical or special attacks.
 - Added Graveglass, an Item Room held item that adds Ghost typing and grants
   Ghost's trapping immunity and guaranteed wild-battle escape.
+- Added Ashen Crown, an Item Room held item that boosts all combat stats after
+  a knockout while marking its holder for a Perish Song countdown.
+- Added Witch's Thread, an Item Room held item that gives status moves priority
+  and reflects burn, poison, and paralysis back onto its holder.
+- Added Petrified Heart, an Item Room held item that boosts both defenses while
+  halving Speed and preventing HP recovery.
+- Added False Idol, an Item Room held item that suppresses the holder's Ability
+  and boosts ordinary direct damaging moves.
+- Added Rusted Anchor, an Item Room held item that makes physical moves use
+  Defense instead of Attack.
+- Added Gambler's Claw, an Item Room held item that grants priority on the
+  holder's first turn after entry and penalizes priority on later turns.
 - Added a debug-only Forced Item Room setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and

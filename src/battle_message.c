@@ -757,6 +757,7 @@ static const u8 sText_FetchedPokeBall[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} fou
 static const u8 sText_BattlerAbilityRaisedStat[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nraised its {B_BUFF1}!");
 static const u8 sText_ASandstormKickedUp[] = _("A sandstorm kicked up!");
 static const u8 sText_PkmnsWillPerishIn3Turns[] = _("Both Pokémon will perish\nin three turns!");
+static const u8 sText_PkmnWillPerishIn3Turns[] = _("{B_ATK_NAME_WITH_PREFIX} will perish\nin three turns!");
 static const u8 sText_AbilityRaisedStatDrastically[] = _("{B_DEF_ABILITY} raised {B_DEF_NAME_WITH_PREFIX}'s\n{B_BUFF1} drastically!");
 static const u8 sText_AsOneEnters[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} has two Abilities!");
 static const u8 sText_PkmnMadeShellGleam[] = _("{B_DEF_NAME_WITH_PREFIX} made its shell gleam!\nIt's distorting type matchups!");
@@ -908,6 +909,7 @@ static const u8 sText_HornLockSwappedTypes[] = _("{B_ATK_NAME_WITH_PREFIX} swapp
 const u8 *const gBattleStringsTable[BATTLESTRINGS_COUNT] =
 {
     [STRINGID_DUALITYFOUNDBALANCE - BATTLESTRINGS_TABLE_START] = sText_DualityFoundBalance,
+    [STRINGID_PKMNWILLPERISHIN3TURNS - BATTLESTRINGS_TABLE_START] = sText_PkmnWillPerishIn3Turns,
     [STRINGID_HORNLOCKSWAPPEDTYPES - BATTLESTRINGS_TABLE_START] = sText_HornLockSwappedTypes,
     [STRINGID_EMERALDACCORDRESTORED - BATTLESTRINGS_TABLE_START] = sText_EmeraldAccordRestored,
     [STRINGID_COMMANDERACTIVATES - BATTLESTRINGS_TABLE_START] = sText_CommanderActivates,

@@ -9,6 +9,12 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_HOLLOW_SUN) == HOLD_EFFECT_HOLLOW_SUN);
     ASSUME(ItemId_GetHoldEffect(ITEM_MALICE_ORB) == HOLD_EFFECT_MALICE_ORB);
     ASSUME(ItemId_GetHoldEffect(ITEM_GRAVEGLASS) == HOLD_EFFECT_GRAVEGLASS);
+    ASSUME(ItemId_GetHoldEffect(ITEM_ASHEN_CROWN) == HOLD_EFFECT_ASHEN_CROWN);
+    ASSUME(ItemId_GetHoldEffect(ITEM_WITCHS_THREAD) == HOLD_EFFECT_WITCHS_THREAD);
+    ASSUME(ItemId_GetHoldEffect(ITEM_PETRIFIED_HEART) == HOLD_EFFECT_PETRIFIED_HEART);
+    ASSUME(ItemId_GetHoldEffect(ITEM_FALSE_IDOL) == HOLD_EFFECT_FALSE_IDOL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_RUSTED_ANCHOR) == HOLD_EFFECT_RUSTED_ANCHOR);
+    ASSUME(ItemId_GetHoldEffect(ITEM_GAMBLERS_CLAW) == HOLD_EFFECT_GAMBLERS_CLAW);
 }
 
 SINGLE_BATTLE_TEST("Cursed Lens applies once from final type effectiveness", s16 damage)
@@ -420,6 +426,198 @@ SINGLE_BATTLE_TEST("Klutz suppresses Blood Oath")
     }
 }
 
+SINGLE_BATTLE_TEST("Petrified Heart boosts physical and special defense", s16 damage)
+{
+    u16 item;
+    u32 move;
+
+    PARAMETRIZE { item = ITEM_NONE;             move = MOVE_TACKLE; }
+    PARAMETRIZE { item = ITEM_PETRIFIED_HEART; move = MOVE_TACKLE; }
+    PARAMETRIZE { item = ITEM_NONE;             move = MOVE_PSYBEAM; }
+    PARAMETRIZE { item = ITEM_PETRIFIED_HEART; move = MOVE_PSYBEAM; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].split == SPLIT_PHYSICAL);
+        ASSUME(gBattleMoves[MOVE_PSYBEAM].split == SPLIT_SPECIAL);
+        PLAYER(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); Item(item); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(120); SpAttack(120); Moves(move); }
+    } WHEN {
+        TURN { MOVE(opponent, move); }
+    } SCENE {
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[1].damage, UQ_4_12(1.5), results[0].damage);
+        EXPECT_MUL_EQ(results[3].damage, UQ_4_12(1.5), results[2].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Petrified Heart halves Speed and blocks recovery")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); HP(1); MaxHP(100); Item(ITEM_PETRIFIED_HEART); Moves(MOVE_RECOVER, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_RECOVER, allowed: FALSE); MOVE(player, MOVE_TACKLE); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(player->item, ITEM_PETRIFIED_HEART);
+        EXPECT_EQ(GetBattlerHoldEffect(battler, TRUE), HOLD_EFFECT_PETRIFIED_HEART);
+        EXPECT_EQ(GetBattlerTotalSpeedStat(battler), 50);
+        EXPECT_EQ(IsBattlerHealBlocked(battler), TRUE);
+        EXPECT_EQ(player->hp, 1);
+    }
+}
+
+DOUBLE_BATTLE_TEST("Petrified Heart blocks healing from an ally's Pollen Puff")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_POLLEN_PUFF].effect == EFFECT_HIT_ENEMY_HEAL_ALLY);
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); MaxHP(100); Item(ITEM_PETRIFIED_HEART); }
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_POLLEN_PUFF); }
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WYNAUT);
+    } WHEN {
+        TURN { MOVE(playerRight, MOVE_POLLEN_PUFF, target: playerLeft); }
+    } THEN {
+        EXPECT_EQ(playerLeft->hp, 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Petrified Heart blocks Leech Seed recovery")
+{
+    PASSES_RANDOMLY(90, 100, RNG_ACCURACY);
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_LEECH_SEED].effect == EFFECT_LEECH_SEED);
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); MaxHP(100); Item(ITEM_PETRIFIED_HEART); Moves(MOVE_LEECH_SEED); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(100); MaxHP(100); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_LEECH_SEED); }
+    } THEN {
+        EXPECT_EQ(player->hp, 1);
+        EXPECT_LT(opponent->hp, 100);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Petrified Heart's Speed and healing block")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Speed(100); HP(1); MaxHP(100); Item(ITEM_PETRIFIED_HEART); Moves(MOVE_RECOVER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_RECOVER); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(GetBattlerTotalSpeedStat(battler), 100);
+        EXPECT_EQ(IsBattlerHealBlocked(battler), FALSE);
+        EXPECT_EQ(player->hp, 51);
+    }
+}
+
+SINGLE_BATTLE_TEST("False Idol suppresses the holder's Ability and boosts direct damage", s16 damage)
+{
+    u16 item;
+    u32 battler;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_FALSE_IDOL; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_STURDY); Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(GetBattlerAbility(battler), item == ITEM_FALSE_IDOL ? ABILITY_NONE : ABILITY_STURDY);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.3), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses False Idol", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_FALSE_IDOL; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } THEN {
+        EXPECT_EQ(GetBattlerAbility(GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)), ABILITY_KLUTZ);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Rusted Anchor makes physical moves use Defense", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_RUSTED_ANCHOR; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(40); Defense(200); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_GT(results[1].damage, results[0].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Rusted Anchor does not change special moves", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_RUSTED_ANCHOR; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { SpAttack(120); Defense(200); Item(item); Moves(MOVE_PSYBEAM); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_PSYBEAM); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[1].damage, results[0].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Rusted Anchor", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_RUSTED_ANCHOR; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Attack(40); Defense(200); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[1].damage, results[0].damage);
+    }
+}
+
 SINGLE_BATTLE_TEST("Malice Orb trades the matching defensive stage for an offensive stage")
 {
     u16 move;
@@ -554,5 +752,177 @@ SINGLE_BATTLE_TEST("Klutz suppresses Graveglass typing and escape behavior")
         battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
         EXPECT_NE(GetBattlerType(battler, 1, FALSE), TYPE_GHOST);
         EXPECT_EQ(IsAbilityPreventingEscape(battler), GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT) + 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Witch's Thread gives status moves +1 priority")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TAIL_WHIP].split == SPLIT_STATUS);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(5); Item(ITEM_WITCHS_THREAD); Moves(MOVE_TAIL_WHIP); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(10); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TAIL_WHIP); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TAIL_WHIP, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
+    }
+}
+
+SINGLE_BATTLE_TEST("Witch's Thread reflects Synchronize-compatible status effects to its holder")
+{
+    u32 move;
+    u32 status;
+
+    PARAMETRIZE { move = MOVE_WILL_O_WISP; status = STATUS1_BURN; }
+    PARAMETRIZE { move = MOVE_THUNDER_WAVE; status = STATUS1_PARALYSIS; }
+    PARAMETRIZE { move = MOVE_TOXIC; status = STATUS1_TOXIC_POISON; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_WILL_O_WISP].effect == EFFECT_WILL_O_WISP);
+        ASSUME(gBattleMoves[MOVE_THUNDER_WAVE].effect == EFFECT_PARALYZE);
+        ASSUME(gBattleMoves[MOVE_TOXIC].effect == EFFECT_TOXIC);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_WITCHS_THREAD); Moves(move); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, move); }
+    } THEN {
+        EXPECT(player->status1 & status);
+        EXPECT(opponent->status1 & status);
+    }
+}
+
+SINGLE_BATTLE_TEST("Witch's Thread respects status immunities when reflecting status")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_WILL_O_WISP].effect == EFFECT_WILL_O_WISP);
+        PLAYER(SPECIES_CHARIZARD) { Item(ITEM_WITCHS_THREAD); Moves(MOVE_WILL_O_WISP); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_WILL_O_WISP); }
+    } THEN {
+        EXPECT_EQ(player->status1, STATUS1_NONE);
+        EXPECT(player->status1 != STATUS1_BURN);
+        EXPECT(opponent->status1 & STATUS1_BURN);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Witch's Thread priority and status reflection")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_WILL_O_WISP].effect == EFFECT_WILL_O_WISP);
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Item(ITEM_WITCHS_THREAD); Moves(MOVE_WILL_O_WISP); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_WILL_O_WISP); }
+    } THEN {
+        EXPECT_EQ(GetMovePriority(B_POSITION_PLAYER_LEFT, MOVE_WILL_O_WISP), 0);
+        EXPECT_EQ(player->status1, STATUS1_NONE);
+        EXPECT(opponent->status1 & STATUS1_BURN);
+    }
+}
+
+SINGLE_BATTLE_TEST("Gambler's Claw gives first-turn priority and later-turn penalty")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(5); Item(ITEM_GAMBLERS_CLAW); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(10); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Wobbuffet used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Wobbuffet used Celebrate!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Gambler's Claw priority changes")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Speed(5); Item(ITEM_GAMBLERS_CLAW); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(10); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        MESSAGE("Foe Wobbuffet used Celebrate!");
+        MESSAGE("Wobbuffet used Celebrate!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Ashen Crown raises all stats and marks the holder to perish after a KO")
+{
+    u32 battler;
+    u32 perishSongTimer;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_ASHEN_CROWN); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 1); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 1);
+        EXPECT(gStatuses3[battler] & STATUS3_PERISH_SONG);
+        perishSongTimer = gDisableStructs[battler].perishSongTimer;
+        EXPECT_GT(perishSongTimer, 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Ashen Crown does not restart or reannounce an active perish countdown")
+{
+    u32 battler;
+    u32 perishSongTimer;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_ASHEN_CROWN); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 2); }
+    } SCENE {
+        MESSAGE("Wobbuffet will perish in three turns!");
+        MESSAGE("Wobbuffet's PERISH count fell to 3!");
+        NOT MESSAGE("Wobbuffet will perish in three turns!");
+        MESSAGE("Wobbuffet's PERISH count fell to 2!");
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 2);
+        EXPECT(gStatuses3[battler] & STATUS3_PERISH_SONG);
+        perishSongTimer = gDisableStructs[battler].perishSongTimer;
+        EXPECT_EQ(perishSongTimer, 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Ashen Crown")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Item(ITEM_ASHEN_CROWN); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 1); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(gStatuses3[battler] & STATUS3_PERISH_SONG, 0);
     }
 }

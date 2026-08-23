@@ -101,6 +101,12 @@ extern const u8 gItemDesc_BloodOath[];
 extern const u8 gItemDesc_HollowSun[];
 extern const u8 gItemDesc_MaliceOrb[];
 extern const u8 gItemDesc_Graveglass[];
+extern const u8 gItemDesc_AshenCrown[];
+extern const u8 gItemDesc_WitchsThread[];
+extern const u8 gItemDesc_PetrifiedHeart[];
+extern const u8 gItemDesc_FalseIdol[];
+extern const u8 gItemDesc_RustedAnchor[];
+extern const u8 gItemDesc_GamblersClaw[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2242,6 +2248,96 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_DimRock,
         .iconPalette = gItemIconPalette_Graveglass,
+    },
+
+    [ITEM_ASHEN_CROWN - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Ashen Crown"),
+        .itemId = ITEM_ASHEN_CROWN,
+        .price = 0,
+        .description = gItemDesc_AshenCrown,
+        .holdEffect = HOLD_EFFECT_ASHEN_CROWN,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_KingsRock,
+        .iconPalette = gItemIconPalette_AshenCrown,
+    },
+
+    [ITEM_WITCHS_THREAD - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Witch's Thread"),
+        .itemId = ITEM_WITCHS_THREAD,
+        .price = 0,
+        .description = gItemDesc_WitchsThread,
+        .holdEffect = HOLD_EFFECT_WITCHS_THREAD,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_DestinyKnot,
+        .iconPalette = gItemIconPalette_WitchsThread,
+    },
+
+    [ITEM_PETRIFIED_HEART - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Petrified Heart"),
+        .itemId = ITEM_PETRIFIED_HEART,
+        .price = 0,
+        .description = gItemDesc_PetrifiedHeart,
+        .holdEffect = HOLD_EFFECT_PETRIFIED_HEART,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_HeartScale,
+        .iconPalette = gItemIconPalette_PetrifiedHeart,
+    },
+
+    [ITEM_FALSE_IDOL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("False Idol"),
+        .itemId = ITEM_FALSE_IDOL,
+        .price = 0,
+        .description = gItemDesc_FalseIdol,
+        .holdEffect = HOLD_EFFECT_FALSE_IDOL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_OddKeystone,
+        .iconPalette = gItemIconPalette_FalseIdol,
+    },
+
+    [ITEM_RUSTED_ANCHOR - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Rusted Anchor"),
+        .itemId = ITEM_RUSTED_ANCHOR,
+        .price = 0,
+        .description = gItemDesc_RustedAnchor,
+        .holdEffect = HOLD_EFFECT_RUSTED_ANCHOR,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_IronBall,
+        .iconPalette = gItemIconPalette_RustedAnchor,
+    },
+
+    [ITEM_GAMBLERS_CLAW - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Gambler's Claw"),
+        .itemId = ITEM_GAMBLERS_CLAW,
+        .price = 0,
+        .description = gItemDesc_GamblersClaw,
+        .holdEffect = HOLD_EFFECT_GAMBLERS_CLAW,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_QuickClaw,
+        .iconPalette = gItemIconPalette_GamblersClaw,
     },
 
 #ifdef ROGUE_DEBUG

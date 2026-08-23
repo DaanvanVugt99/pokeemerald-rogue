@@ -128,6 +128,66 @@ text gItemRoomDesc_Graveglass
     format("Adds Ghost typing.")
 }
 
+text gItemDesc_AshenCrown
+{
+    format("On KO, raises all stats; inflicts Perish Song.")
+}
+
+text gItemRoomDesc_AshenCrown
+{
+    format("After a KO, raises all five stats by 1 stage. The holder will perish in three turns.")
+}
+
+text gItemDesc_WitchsThread
+{
+    format("Status moves gain +1 priority. Burn, poison, and paralysis are reflected.")
+}
+
+text gItemRoomDesc_WitchsThread
+{
+    format("Status moves gain priority. Burn, poison, and paralysis inflicted by the holder are also attempted on it.")
+}
+
+text gItemDesc_PetrifiedHeart
+{
+    format("Defense and Sp. Def: +50%. Speed: -50%. Cannot recover HP.")
+}
+
+text gItemRoomDesc_PetrifiedHeart
+{
+    format("Raises Defense and Sp. Def by 50%, but halves Speed and prevents HP recovery.")
+}
+
+text gItemDesc_FalseIdol
+{
+    format("Suppresses Ability. Direct damaging moves: +30%.")
+}
+
+text gItemRoomDesc_FalseIdol
+{
+    format("Suppresses the holder's Ability. Ordinary direct damaging moves deal 30% more damage.")
+}
+
+text gItemDesc_RustedAnchor
+{
+    format("Physical moves use Defense instead of Attack.")
+}
+
+text gItemRoomDesc_RustedAnchor
+{
+    format("Physical moves calculate damage using Defense instead of Attack, like Body Press.")
+}
+
+text gItemDesc_GamblersClaw
+{
+    format("First turn: +1 priority. Later turns: -1 priority.")
+}
+
+text gItemRoomDesc_GamblersClaw
+{
+    format("Moves gain +1 priority on the first turn after entry, then suffer -1 priority on later turns.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

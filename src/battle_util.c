@@ -97,6 +97,7 @@ static u32 GetBattlerItemHoldEffectParam(u32 battler, u32 item);
 static bool32 CanBeInfinitelyConfused(u32 battler);
 static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability);
 static bool32 IsBattlerAbilitySuppressedByMoldBreaker(u32 battler, u32 ability);
+static u32 GetBattlerUniqueAbilityRaw(u32 battler);
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
@@ -1936,6 +1937,7 @@ u32 GetMovePowerForShieldAbilities(u32 battlerAtk, u32 move)
 bool32 IsBattlerHealBlocked(u32 battler)
 {
     return (gStatuses3[battler] & STATUS3_HEAL_BLOCK)
+        || GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_PETRIFIED_HEART
         || IsAbilityOnOpposingSide(battler, ABILITY_BOG_BODY);
 }
 
@@ -20836,6 +20838,15 @@ static bool32 IsBattlerAbilitySuppressedCommon(u32 battler, u32 ability)
     if (IsMyceliumMightOnField())
         return TRUE;
 
+    // False Idol suppresses the holder's abilities, but raw Klutz must still
+    // suppress the item itself without recursing through ability lookup.
+    if (ItemId_GetHoldEffect(gBattleMons[battler].item) == HOLD_EFFECT_FALSE_IDOL
+     && !(gStatuses3[battler] & STATUS3_EMBARGO)
+     && !(gFieldStatuses & STATUS_FIELD_MAGIC_ROOM)
+     && gBattleMons[battler].ability != ABILITY_KLUTZ
+     && GetBattlerUniqueAbilityRaw(battler) != ABILITY_KLUTZ)
+        return TRUE;
+
     return FALSE;
 }
 
@@ -25107,7 +25118,8 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             atkStage = gBattleMons[battlerAtk].statStages[STAT_SPDEF];
         }
     }
-    else if (gBattleMoves[move].effect == EFFECT_BODY_PRESS)
+    else if (gBattleMoves[move].effect == EFFECT_BODY_PRESS
+          || (holdEffectAtk == HOLD_EFFECT_RUSTED_ANCHOR && IS_MOVE_PHYSICAL(move)))
     {
         if (move == MOVE_JETSTREAM)
         {
@@ -25591,6 +25603,9 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
     case HOLD_EFFECT_EVIOLITE:
         if (CanEvolve(gBattleMons[battlerDef].species))
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        break;
+    case HOLD_EFFECT_PETRIFIED_HEART:
+        modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case HOLD_EFFECT_ASSAULT_VEST:
         if (!usesDefStat)
@@ -26406,6 +26421,10 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
             return UQ_4_12(1.25);
         break;
+    case HOLD_EFFECT_FALSE_IDOL:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+            return UQ_4_12(1.3);
+        break;
     }
     return UQ_4_12(1.0);
 }
@@ -26513,6 +26532,7 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
         usesOwnAttackStat = IS_MOVE_PHYSICAL(move)
             && gBattleMoves[move].effect != EFFECT_FOUL_PLAY
             && gBattleMoves[move].effect != EFFECT_BODY_PRESS
+            && !(holdEffectAtk == HOLD_EFFECT_RUSTED_ANCHOR && IS_MOVE_PHYSICAL(move))
             && !HasBattlerAbility(battlerAtk, ABILITY_ANCIENT_IDOL);
         usesOwnSpAttackStat = IS_MOVE_SPECIAL(move)
             && gBattleMoves[move].effect != EFFECT_FOUL_PLAY

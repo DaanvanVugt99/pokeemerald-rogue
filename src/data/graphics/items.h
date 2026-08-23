@@ -1311,6 +1311,11 @@ const u32 gItemIconPalette_HeatRock[] = INCBIN_U32("graphics/items/icon_palettes
 const u32 gItemIcon_DimRock[] = INCBIN_U32("graphics/items/icons/dim_rock.4bpp.lz");
 const u32 gItemIconPalette_DimRock[] = INCBIN_U32("graphics/items/icon_palettes/dim_rock.gbapal.lz");
 const u32 gItemIconPalette_Graveglass[] = INCBIN_U32("graphics/items/icon_palettes/graveglass.gbapal.lz");
+const u32 gItemIconPalette_AshenCrown[] = INCBIN_U32("graphics/items/icon_palettes/ashen_crown.gbapal.lz");
+const u32 gItemIconPalette_WitchsThread[] = INCBIN_U32("graphics/items/icon_palettes/witchs_thread.gbapal.lz");
+const u32 gItemIconPalette_PetrifiedHeart[] = INCBIN_U32("graphics/items/icon_palettes/petrified_heart.gbapal.lz");
+const u32 gItemIconPalette_FalseIdol[] = INCBIN_U32("graphics/items/icon_palettes/false_idol.gbapal.lz");
+const u32 gItemIconPalette_GamblersClaw[] = INCBIN_U32("graphics/items/icon_palettes/gamblers_claw.gbapal.lz");
 
 const u32 gItemIcon_SmoothRock[] = INCBIN_U32("graphics/items/icons/smooth_rock.4bpp.lz");
 const u32 gItemIconPalette_SmoothRock[] = INCBIN_U32("graphics/items/icon_palettes/smooth_rock.gbapal.lz");
@@ -1432,6 +1437,7 @@ const u32 gItemIconPalette_Metronome[] = INCBIN_U32("graphics/items/icon_palette
 
 const u32 gItemIcon_IronBall[] = INCBIN_U32("graphics/items/icons/iron_ball.4bpp.lz");
 const u32 gItemIconPalette_IronBall[] = INCBIN_U32("graphics/items/icon_palettes/iron_ball.gbapal.lz");
+const u32 gItemIconPalette_RustedAnchor[] = INCBIN_U32("graphics/items/icon_palettes/rusted_anchor.gbapal.lz");
 
 const u32 gItemIcon_LaggingTail[] = INCBIN_U32("graphics/items/icons/lagging_tail.4bpp.lz");
 const u32 gItemIconPalette_LaggingTail[] = INCBIN_U32("graphics/items/icon_palettes/lagging_tail.gbapal.lz");

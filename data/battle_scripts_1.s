@@ -4574,6 +4574,7 @@ BattleScript_EffectRestoreHp::
 	attackcanceler
 	attackstring
 	ppreduce
+	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_MoveUsedHealBlockPrevents
 	tryhealhalfhealth BattleScript_AlreadyAtFullHp, BS_ATTACKER
 	attackanimation
 	waitanimation
@@ -7353,6 +7354,7 @@ BattleScript_FaintTarget::
 	tryactivatebeastboost BS_ATTACKER
 	tryactivategrimneigh BS_ATTACKER    @ and as one shadow rider
 	tryactivatemomentumcharm BS_ATTACKER
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_ASHEN_CROWN
 	tryactivatebattlebond BS_ATTACKER
 	tryactivateshatter BS_ATTACKER
 	trytrainerslidefirstdownmsg BS_TARGET
@@ -8270,6 +8272,20 @@ BattleScript_MaliceOrbSpecialTryDefense:
 	waitmessage B_WAIT_TIME_LONG
 
 BattleScript_MaliceOrbEnd:
+	return
+
+BattleScript_AshenCrownActivates::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	call BattleScript_AllStatsUp
+	printstring STRINGID_PKMNWILLPERISHIN3TURNS
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_AshenCrownStatsOnly::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	call BattleScript_AllStatsUp
 	return
 
 BattleScript_MistProtected::
@@ -13300,6 +13316,13 @@ BattleScript_SynchronizeActivates::
 	waitstate
 	call BattleScript_AbilityPopUp
 	seteffectprimary
+	return
+
+BattleScript_WitchsThreadActivates::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	seteffectprimary
+	bicword gHitMarker, HITMARKER_SYNCHRONISE_EFFECT
 	return
 
 BattleScript_NoItemSteal::
