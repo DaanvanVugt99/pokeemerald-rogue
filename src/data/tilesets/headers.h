@@ -922,5 +922,5 @@ const struct Tileset gTileset_AdventurePaths =
     .palettes = gTilesetPalettes_AdventurePaths,
     .metatiles = gMetatiles_AdventurePaths,
     .metatileAttributes = gMetatileAttributes_AdventurePaths,
-    .callback = NULL,
+    .callback = InitTilesetAnim_AdventurePaths,
 };

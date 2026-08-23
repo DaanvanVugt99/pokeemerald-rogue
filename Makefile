@@ -434,6 +434,32 @@ $(C_BUILDDIR)/berry_crush.o: override CFLAGS += -Wno-address-of-packed-member
 # This table is included directly by item.c. Keep it as an explicit prerequisite
 # even for NODEP builds, where scaninc dependency discovery is disabled.
 $(C_BUILDDIR)/item.o: $(DATA_SRC_SUBDIR)/rogue_items.h
+$(C_BUILDDIR)/credits.o: $(DATA_SRC_SUBDIR)/credits.h
+
+# Adventure Paths assets are pulled in through nested headers and generated map
+# includes. Keep them explicit so regenerating the tileset cannot leave a ROM
+# linked against stale INCBIN data (especially in NODEP builds).
+ADVENTURE_PATHS_TILESET_ASSETS := \
+	data/tilesets/secondary/adventure_paths/tiles.4bpp.lz \
+	data/tilesets/secondary/adventure_paths/palettes/06.gbapal \
+	data/tilesets/secondary/adventure_paths/palettes/07.gbapal \
+	data/tilesets/secondary/adventure_paths/palettes/08.gbapal \
+	data/tilesets/secondary/adventure_paths/metatiles.bin \
+	data/tilesets/secondary/adventure_paths/metatile_attributes.bin
+
+ADVENTURE_PATHS_ANIM_ASSETS := \
+	data/tilesets/secondary/adventure_paths/anim/stars/0.4bpp \
+	data/tilesets/secondary/adventure_paths/anim/stars/1.4bpp \
+	data/tilesets/secondary/adventure_paths/anim/stars/2.4bpp \
+	data/tilesets/secondary/adventure_paths/anim/stars/3.4bpp
+
+ADVENTURE_PATHS_MAP_ASSETS := \
+	data/layouts/Rogue_AdventurePaths/map.bin \
+	data/layouts/Rogue_AdventurePaths/border.bin
+
+$(C_BUILDDIR)/tilesets.o: $(ADVENTURE_PATHS_TILESET_ASSETS)
+$(C_BUILDDIR)/tileset_anims.o: $(ADVENTURE_PATHS_ANIM_ASSETS)
+$(DATA_ASM_BUILDDIR)/maps.o: $(ADVENTURE_PATHS_MAP_ASSETS)
 
 include $(ROGUEPORYSCRIPTSDIR)/rogue_poryscripts.mk
 include graphics_file_rules.mk

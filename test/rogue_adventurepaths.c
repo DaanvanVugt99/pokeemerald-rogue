@@ -67,6 +67,133 @@ TEST("A portal-pregenerated initial path is reused on map entry")
     gRogueRun.adventureRoomId = originalRoomId;
 }
 
+TEST("Adventure island layouts are connected deterministic and RNG neutral")
+{
+    static const struct
+    {
+        u8 gameMode;
+        u16 seed;
+        u8 difficulty;
+        u8 terraceStage;
+    } cases[] =
+    {
+        {ROGUE_GAME_MODE_STANDARD, 13579, 2, 0},
+        {ROGUE_GAME_MODE_SLOW_PATH, 24680, 2, 0},
+        {ROGUE_GAME_MODE_GAUNTLET, 54321, 0, 0},
+        {ROGUE_GAME_MODE_STANDARD, 24680, ROGUE_ELITE_START_DIFFICULTY, 1},
+        {ROGUE_GAME_MODE_SLOW_PATH, 54321, ROGUE_ELITE_START_DIFFICULTY, 1},
+        {ROGUE_GAME_MODE_GAUNTLET, 13579, ROGUE_ELITE_START_DIFFICULTY, 1},
+        {ROGUE_GAME_MODE_STANDARD, 54321, ROGUE_CHAMP_START_DIFFICULTY, 2},
+        {ROGUE_GAME_MODE_SLOW_PATH, 13579, ROGUE_CHAMP_START_DIFFICULTY, 2},
+        {ROGUE_GAME_MODE_GAUNTLET, 24680, ROGUE_CHAMP_START_DIFFICULTY, 2},
+        {ROGUE_GAME_MODE_STANDARD, 13579, ROGUE_FINAL_CHAMP_DIFFICULTY, 3},
+        {ROGUE_GAME_MODE_SLOW_PATH, 24680, ROGUE_FINAL_CHAMP_DIFFICULTY, 3},
+        {ROGUE_GAME_MODE_GAUNTLET, 54321, ROGUE_FINAL_CHAMP_DIFFICULTY, 3},
+    };
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+    RAND_TYPE originalRng = gRngRogueValue;
+    u16 totalFormations = 0;
+    u16 totalCrystals = 0;
+    u8 i;
+
+    EXPECT_NE(originalPath, NULL);
+    if(originalPath == NULL)
+        return;
+
+    *originalPath = gRogueAdvPath;
+    for(i = 0; i < ARRAY_COUNT(cases); ++i)
+    {
+        u32 firstHash;
+        u32 secondHash;
+        RAND_TYPE rngAfterGeneration;
+        u16 formationCount;
+        u16 accentCount;
+        u16 crystalCount;
+        u8 terraceStage;
+
+        Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, cases[i].gameMode);
+        Rogue_SetCurrentDifficulty(cases[i].difficulty);
+        gRogueRun.baseSeed = cases[i].seed;
+        gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+        memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+        EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+
+        rngAfterGeneration = gRngRogueValue;
+        EXPECT(RogueAdv_Debug_ValidateIslandLayout(&firstHash));
+        EXPECT_EQ(gRngRogueValue, rngAfterGeneration);
+        EXPECT(RogueAdv_Debug_ValidateIslandLayout(&secondHash));
+        EXPECT_EQ(firstHash, secondHash);
+        EXPECT_EQ(gRngRogueValue, rngAfterGeneration);
+        EXPECT(RogueAdv_Debug_GetIslandGeologyStats(&formationCount, &accentCount, &crystalCount, &terraceStage));
+        EXPECT_EQ(terraceStage, cases[i].terraceStage);
+        EXPECT_GT(accentCount, 0);
+        EXPECT_EQ(gRngRogueValue, rngAfterGeneration);
+        totalFormations += formationCount;
+        totalCrystals += crystalCount;
+    }
+    EXPECT_GT(totalFormations, 0);
+    EXPECT_GT(totalCrystals, 0);
+
+    gRogueAdvPath = *originalPath;
+    gRogueRun.baseSeed = originalBaseSeed;
+    gRogueRun.adventureRoomId = originalRoomId;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRngRogueValue = originalRng;
+    Free(originalPath);
+}
+
+TEST("Adventure island preserves the return trail blocker")
+{
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
+    u16 originalBaseSeed = gRogueRun.baseSeed;
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalDifficulty = Rogue_GetCurrentDifficulty();
+    u8 originalRoomId = gRogueRun.adventureRoomId;
+    RAND_TYPE originalRng = gRngRogueValue;
+    u32 layoutHash;
+    u32 rebuiltLayoutHash;
+    u16 formationCount;
+    u16 accentCount;
+    u16 crystalCount;
+    u8 terraceStage;
+
+    EXPECT_NE(originalPath, NULL);
+    if(originalPath == NULL)
+        return;
+
+    *originalPath = gRogueAdvPath;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    Rogue_SetCurrentDifficulty(2);
+    gRogueRun.baseSeed = 13579;
+    gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+    memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+    EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+    EXPECT_GT(gRogueAdvPath.roomCount, 1);
+
+    gRogueAdvPath.justGenerated = FALSE;
+    gRogueRun.adventureRoomId = 1;
+    EXPECT(RogueAdv_Debug_ValidateIslandLayout(&layoutHash));
+    EXPECT(RogueAdv_Debug_HasBlockedIslandTrail());
+    EXPECT(RogueAdv_Debug_GetIslandGeologyStats(&formationCount, &accentCount, &crystalCount, &terraceStage));
+    EXPECT_EQ(terraceStage, 0);
+    EXPECT_GT(accentCount, 0);
+    EXPECT(RogueAdv_Debug_ValidateIslandLayout(&rebuiltLayoutHash));
+    EXPECT_EQ(layoutHash, rebuiltLayoutHash);
+
+    gRogueAdvPath = *originalPath;
+    gRogueRun.baseSeed = originalBaseSeed;
+    gRogueRun.adventureRoomId = originalRoomId;
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_SetCurrentDifficulty(originalDifficulty);
+    gRngRogueValue = originalRng;
+    Free(originalPath);
+}
+
 TEST("Seeded standard paths keep replacement composition bounded")
 {
     static const struct

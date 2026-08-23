@@ -452,14 +452,12 @@ static u16 GetDesiredTintForCurrentMap(u16 inTint, bool8 isOverworld)
 
 void RogueToD_ModifyOverworldPalette(u16 offset, u16 size)
 {
-    bool8 isObjectPal = offset >= OBJ_PLTT_ID(0);
     bool8 isDirty = FALSE;
 
-    //if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS && isObjectPal)
-    //{
-    //    // We don't want to tint the overworld sprites in the adventure paths screen
-    //    return;
-    //}
+    // The Adventure Paths are a self-lit pocket world. Keeping both the map
+    // and its familiar node sprites untinted preserves their intended contrast.
+    if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS)
+        return;
 
     if(RogueToD_ApplySeasonVisuals())
     {

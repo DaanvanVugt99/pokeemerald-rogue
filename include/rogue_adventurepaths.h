@@ -20,6 +20,9 @@ u32 RogueAdv_Debug_GenerateUniqueLegendaryCustomMonId(u16 species);
 u32 RogueAdv_Debug_GenerateUniqueDenCustomMonId(u16 species);
 u16 RogueAdv_Debug_GetFullRestStopWeight(u8 difficulty);
 bool8 RogueAdv_Debug_GetItemRoomSchedule(u8 slot, u8 *difficulty, u16 *itemId);
+bool8 RogueAdv_Debug_ValidateIslandLayout(u32 *layoutHash);
+bool8 RogueAdv_Debug_HasBlockedIslandTrail(void);
+bool8 RogueAdv_Debug_GetIslandGeologyStats(u16 *formationCount, u16 *accentCount, u16 *crystalCount, u8 *terraceStage);
 #endif
 
 u8 RogueAdv_GetTileNum();

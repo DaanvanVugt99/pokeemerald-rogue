@@ -83,7 +83,9 @@
     method(1003, "UlithiumDragon", 0) \
     method(1004, "HighNoonMoon", 0) \
     method(1005, "xDracolich", 0) \
-    method(1006, "", CREDITS_FLAG_BREAK) \
+    method(1006, "J-Treecko", 0) \
+    method(1007, "Buch", 0) \
+    method(1008, "", CREDITS_FLAG_BREAK) \
     \
     method(1100, "ZacWeavile", 0) \
     method(1101, "Gnomowladny", 0) \

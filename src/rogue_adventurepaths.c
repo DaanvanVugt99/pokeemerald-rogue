@@ -1,6 +1,7 @@
 #include "global.h"
 #include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
+#include "constants/layouts.h"
 #include "constants/metatile_labels.h"
 #include "constants/trainer_types.h"
 #include "constants/rogue.h"
@@ -38,12 +39,27 @@
 #define PATH_MAP_OFFSET_X (4)
 #define PATH_MAP_OFFSET_Y (4)
 
+#define ADVENTURE_PATHS_MAP_WIDTH 44
+#define ADVENTURE_PATHS_MAP_HEIGHT 44
+#define ADVENTURE_PATHS_MAP_CELL_COUNT (ADVENTURE_PATHS_MAP_WIDTH * ADVENTURE_PATHS_MAP_HEIGHT)
+#define ADVENTURE_PATHS_MASK_SIZE ((ADVENTURE_PATHS_MAP_CELL_COUNT + 3) / 4)
+#define ADVENTURE_PATHS_LEVEL_SIZE ((ADVENTURE_PATHS_MAP_CELL_COUNT + 1) / 2)
+
+#define ISLAND_MASK_TRAIL   (1 << 0)
+#define ISLAND_MASK_BLOCKED (1 << 1)
+
+#define ADVENTURE_ISLAND_MAX_EXPANSION 5
+#define ADVENTURE_FORMATION_BACKGROUND_COUNT 15
+
 #define ADJUST_COORDS_X(val) (gRogueAdvPath.pathLength - val - 1)   // invert so we place the first node at the end
 #define ADJUST_COORDS_Y(val) (val - gRogueAdvPath.pathMinY + 1)     // start at coord 0
 
 
 #define ROOM_TO_METATILE_X(val) ((ADJUST_COORDS_X(val) * ROOM_TO_WORLD_X) + MAP_OFFSET + PATH_MAP_OFFSET_X)
 #define ROOM_TO_METATILE_Y(val) ((ADJUST_COORDS_Y(val) * ROOM_TO_WORLD_Y) + MAP_OFFSET + PATH_MAP_OFFSET_Y)
+
+#define ROOM_TO_MAP_X(val) (ROOM_TO_METATILE_X(val) - MAP_OFFSET)
+#define ROOM_TO_MAP_Y(val) (ROOM_TO_METATILE_Y(val) - MAP_OFFSET)
 
 #define ROOM_TO_OBJECT_EVENT_X(val) ((ADJUST_COORDS_X(val) * ROOM_TO_WORLD_X) + PATH_MAP_OFFSET_X + 2)
 #define ROOM_TO_OBJECT_EVENT_Y(val) ((ADJUST_COORDS_Y(val) * ROOM_TO_WORLD_Y) + PATH_MAP_OFFSET_Y)
@@ -101,45 +117,13 @@ struct AdvPathSettings
 };
 
 
-struct MetatileOffset
-{
-    s16 x;
-    s16 y;
-    u32 metatile;
-};
-
-struct MetatileConnection
-{
-    u16 centre;
-    u16 left;
-    u16 right;
-    u16 up;
-    u16 down;
-};
-
-static const struct MetatileOffset sSparseTreeDecorationMetatiles[] =
-{
-    { 0, 0, METATILE_GeneralHub_Tree_BottomLeft_Sparse },
-    { 1, 0, METATILE_GeneralHub_Tree_BottomRight_Sparse },
-    { 0, -1, METATILE_GeneralHub_Tree_TopLeft_Sparse },
-    { 1, -1, METATILE_GeneralHub_Tree_TopRight_Sparse },
-    { 0, -2, METATILE_GeneralHub_Tree_TopLeft_CapGrass },
-    { 1, -2, METATILE_GeneralHub_Tree_TopRight_CapGrass },
-};
-
-static const struct MetatileOffset sDenseTreeDecorationMetatiles[] =
-{
-    { 0, 0, METATILE_GeneralHub_Tree_BottomLeft_Dense },
-    { 1, 0, METATILE_GeneralHub_Tree_BottomRight_Dense },
-    { 0, -1, METATILE_GeneralHub_Tree_TopLeft_Sparse },
-    { 1, -1, METATILE_GeneralHub_Tree_TopRight_Sparse },
-    { 0, -2, METATILE_GeneralHub_Tree_TopLeft_CapGrass },
-    { 1, -2, METATILE_GeneralHub_Tree_TopRight_CapGrass },
-};
+static EWRAM_DATA u8 *sAdventureIslandMask = NULL;
+static EWRAM_DATA u8 *sAdventureIslandLevels = NULL;
 
 static bool8 IsObjectEventVisible(struct RogueAdvPathRoom* room);
 static bool8 ShouldBlockObjectEvent(struct RogueAdvPathRoom* room);
 static void BufferTypeAdjective(u8 type);
+static void CacheAdventureIslandSurface(void);
 
 static void GeneratePath(struct AdvPathSettings* pathSettings);
 static void GenerateFloorLayout(struct Coords8 currentCoords, struct AdvPathSettings* pathSettings);
@@ -1897,477 +1881,1248 @@ bool8 RogueAdv_IsViewingPath()
     return gRogueAdvPath.isOverviewActive != 0;
 }
 
-static bool32 IsPathMetatile(u32 tile)
+static bool8 IsIslandCoordInBounds(s16 x, s16 y)
 {
-    switch (tile)
+    return x >= 0 && x < ADVENTURE_PATHS_MAP_WIDTH
+        && y >= 0 && y < ADVENTURE_PATHS_MAP_HEIGHT;
+}
+
+static bool8 AllocAdventureIslandMask(void)
+{
+    AGB_ASSERT(sAdventureIslandMask == NULL);
+    AGB_ASSERT(sAdventureIslandLevels == NULL);
+    sAdventureIslandMask = AllocZeroed(ADVENTURE_PATHS_MASK_SIZE);
+    sAdventureIslandLevels = AllocZeroed(ADVENTURE_PATHS_LEVEL_SIZE);
+    if(sAdventureIslandMask == NULL || sAdventureIslandLevels == NULL)
     {
-    case METATILE_GeneralHub_SandPath_Centre:
-    case METATILE_GeneralHub_SandPath_Conn_EastWest_North:
-    case METATILE_GeneralHub_SandPath_Conn_EastWest_South:
-    case METATILE_GeneralHub_SandPath_Conn_NorthEast:
-    case METATILE_GeneralHub_SandPath_Conn_NorthSouth_East:
-    case METATILE_GeneralHub_SandPath_Conn_NorthSouth_West:
-    case METATILE_GeneralHub_SandPath_Conn_NorthWest:
-    case METATILE_GeneralHub_SandPath_Conn_SouthEast:
-    case METATILE_GeneralHub_SandPath_Conn_SouthWest:
-    case METATILE_GeneralHub_SandPath_Stone:
-    case METATILE_AdventurePaths_SandPath_Horizontal:
-    case METATILE_AdventurePaths_SandPath_Horizontal_Blocked:
-    case METATILE_AdventurePaths_SandPath_Horizontal_EndEast:
-    case METATILE_AdventurePaths_SandPath_Horizontal_EndWest:
-    case METATILE_AdventurePaths_SandPath_Vertical:
-    case METATILE_AdventurePaths_SandPath_Vertical_Blocked:
-    case METATILE_AdventurePaths_SandPath_Vertical_EndNorth:
-    case METATILE_AdventurePaths_SandPath_Vertical_EndSouth:
-        return TRUE;
+        Free(sAdventureIslandMask);
+        Free(sAdventureIslandLevels);
+        sAdventureIslandMask = NULL;
+        sAdventureIslandLevels = NULL;
+        return FALSE;
     }
-
-    return FALSE;
+    return TRUE;
 }
 
-static const struct MetatileOffset *GetTreeDecorationByBottomLeft(u32 metatile)
+static void FreeAdventureIslandMask(void)
 {
-    if(metatile == sSparseTreeDecorationMetatiles[0].metatile)
-        return sSparseTreeDecorationMetatiles;
-    if(metatile == sDenseTreeDecorationMetatiles[0].metatile)
-        return sDenseTreeDecorationMetatiles;
-
-    return NULL;
+    Free(sAdventureIslandMask);
+    Free(sAdventureIslandLevels);
+    sAdventureIslandMask = NULL;
+    sAdventureIslandLevels = NULL;
 }
 
-static bool32 IsTreeDecorationMetatileAtOffset(u32 metatile, u32 offset)
+static u8 GetAdventureIslandLevel(s16 x, s16 y)
 {
-    return metatile == sSparseTreeDecorationMetatiles[offset].metatile
-        || metatile == sDenseTreeDecorationMetatiles[offset].metatile;
+    u16 index;
+    u8 shift;
+
+    if(!IsIslandCoordInBounds(x, y))
+        return 0;
+    index = y * ADVENTURE_PATHS_MAP_WIDTH + x;
+    shift = (index & 1) * 4;
+    return (sAdventureIslandLevels[index / 2] >> shift) & 0xF;
 }
 
-static bool8 IsInsideMountainTile(u16 x, u16 y)
+static void SetAdventureIslandLevel(s16 x, s16 y, u8 level)
 {
-    u32 metatile = MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET);
+    u16 index;
+    u8 shift;
+    u8 mask;
 
-    switch (metatile)
-    {
-    case METATILE_GeneralHub_SandPath_Centre:
-    case METATILE_GeneralHub_SandPath_Stone:
-
-    case METATILE_GeneralHub_Mountain_Centre:
-    case METATILE_GeneralHub_Mountain_Conn_EastWest_North:
-    case METATILE_GeneralHub_Mountain_Conn_EastWest_South:
-    case METATILE_GeneralHub_Mountain_Conn_NorthEast:
-    case METATILE_GeneralHub_Mountain_Conn_NorthSouth_East:
-    case METATILE_GeneralHub_Mountain_Conn_NorthSouth_West:
-    case METATILE_GeneralHub_Mountain_Conn_NorthWest:
-    case METATILE_GeneralHub_Mountain_Conn_SouthEast:
-    case METATILE_GeneralHub_Mountain_Conn_SouthWest:
-    case METATILE_GeneralHub_Mountain_Conn_SouthEast_Inside:
-    case METATILE_GeneralHub_Mountain_Conn_SouthWest_Inside:
-
-    case METATILE_GeneralHub_MountainRaised_Conn_EastWest_North:
-    case METATILE_GeneralHub_MountainRaised_Conn_EastWest_South:
-    case METATILE_GeneralHub_MountainRaised_Conn_NorthEast:
-    case METATILE_GeneralHub_MountainRaised_Conn_NorthSouth_East:
-    case METATILE_GeneralHub_MountainRaised_Conn_NorthSouth_West:
-    case METATILE_GeneralHub_MountainRaised_Conn_NorthWest:
-    case METATILE_GeneralHub_MountainRaised_Conn_SouthEast:
-    case METATILE_GeneralHub_MountainRaised_Conn_SouthWest:
-
-    case METATILE_AdventurePaths_Mountain_Conn_EastWest_South_Grass:
-    case METATILE_AdventurePaths_MountainRaised_Conn_EastWest_South_Grass:
-        return TRUE;
-    }
-
-    return FALSE;
+    if(!IsIslandCoordInBounds(x, y))
+        return;
+    index = y * ADVENTURE_PATHS_MAP_WIDTH + x;
+    shift = (index & 1) * 4;
+    mask = 0xF << shift;
+    sAdventureIslandLevels[index / 2] = (sAdventureIslandLevels[index / 2] & ~mask) | ((level & 0xF) << shift);
 }
 
-static bool8 IsInsideMountainTileInDir(u16 x, u16 y, u8 dir)
+static u8 GetIslandMaskCell(s16 x, s16 y)
 {
-    switch (dir)
-    {
-    case DIR_NORTH:
-        return IsInsideMountainTile(x, y - 1);
-    case DIR_EAST:
-        return IsInsideMountainTile(x + 1, y);
-    case DIR_SOUTH:
-        return IsInsideMountainTile(x, y + 1);
-    case DIR_WEST:
-        return IsInsideMountainTile(x - 1, y);
-    }
-    return FALSE;
+    u16 index = y * ADVENTURE_PATHS_MAP_WIDTH + x;
+    u8 shift = (index & 3) * 2;
+
+    return (sAdventureIslandMask[index / 4] >> shift) & 0x3;
 }
 
-static void WalkCoordsInDir(u16* x, u16* y, u8 dir)
+static void SetIslandMaskCell(s16 x, s16 y, u8 value)
 {
-    switch (dir)
-    {
-    case DIR_NORTH:
-        *y -= 1;
-        break;
-    case DIR_EAST:
-        *x += 1;
-        break;
-    case DIR_SOUTH:
-        *y += 1;
-        break;
-    case DIR_WEST:
-        *x -= 1;
-        break;
-    }
+    u16 index = y * ADVENTURE_PATHS_MAP_WIDTH + x;
+    u8 shift = (index & 3) * 2;
+    u8 mask = 0x3 << shift;
+
+    sAdventureIslandMask[index / 4] = (sAdventureIslandMask[index / 4] & ~mask) | ((value & 0x3) << shift);
 }
 
-#define DIR_CHANGE(from, to) (oldWalkDir == from && currWalkDir == to)
-
-static u32 GetMountainMetatileInternal(u8 oldWalkDir, u8 currWalkDir, u8 lookDir)
+static bool8 HasIslandMaskFlag(s16 x, s16 y, u8 flag)
 {
-    if(oldWalkDir == currWalkDir)
-    {
-        switch (currWalkDir)
-        {
-        case DIR_NORTH:
-        case DIR_SOUTH:
-            return (lookDir == DIR_EAST) ? METATILE_GeneralHub_Mountain_Conn_NorthSouth_East : METATILE_GeneralHub_Mountain_Conn_NorthSouth_West;
-        case DIR_EAST:
-        case DIR_WEST:
-            return (lookDir == DIR_NORTH) ? METATILE_GeneralHub_Mountain_Conn_EastWest_North : METATILE_AdventurePaths_Mountain_Conn_EastWest_South_Grass;
-        }
-    }
+    return IsIslandCoordInBounds(x, y) && ((GetIslandMaskCell(x, y) & flag) != 0);
+}
+
+static bool8 SetTrailMaskCell(s16 x, s16 y, bool8 blocked)
+{
+    u8 cell;
+
+    if(!IsIslandCoordInBounds(x, y))
+        return FALSE;
+
+    cell = GetIslandMaskCell(x, y);
+    cell |= ISLAND_MASK_TRAIL;
+    if(blocked)
+        cell |= ISLAND_MASK_BLOCKED;
     else
-    {
-        if(DIR_CHANGE(DIR_NORTH, DIR_EAST))
-            return METATILE_GeneralHub_Mountain_Conn_SouthEast;
-        if(DIR_CHANGE(DIR_EAST, DIR_SOUTH))
-            return METATILE_GeneralHub_Mountain_Conn_SouthWest;
-        if(DIR_CHANGE(DIR_SOUTH, DIR_WEST))
-            return METATILE_GeneralHub_Mountain_Conn_NorthWest;
-        if(DIR_CHANGE(DIR_WEST, DIR_NORTH))
-            return METATILE_GeneralHub_Mountain_Conn_NorthEast;
-        if(DIR_CHANGE(DIR_SOUTH, DIR_EAST))
-            return METATILE_AdventurePaths_MountainRaised_Conn_EastWest_South_Grass;
-        if(DIR_CHANGE(DIR_EAST, DIR_NORTH))
-            return METATILE_AdventurePaths_MountainRaised_Conn_EastWest_South_Grass;
-        if(DIR_CHANGE(DIR_WEST, DIR_SOUTH))
-            return METATILE_GeneralHub_Mountain_Conn_SouthEast_Inside;
-        if(DIR_CHANGE(DIR_NORTH, DIR_WEST))
-            return METATILE_GeneralHub_Mountain_Conn_SouthWest_Inside;
-    }
-
-    return METATILE_GeneralHub_Mountain_Centre;
+        cell &= ~ISLAND_MASK_BLOCKED;
+    SetIslandMaskCell(x, y, cell);
+    return TRUE;
 }
 
-static u32 GetMountainMetatile(u8 oldWalkDir, u8 currWalkDir, u8 lookDir, u32 layerIndex, u32 layerCount)
+static u32 GetAdventureIslandCoordHash(u16 x, u16 y, u32 salt)
 {
-    u32 metatile = GetMountainMetatileInternal(oldWalkDir, currWalkDir, lookDir);
-    u32 bottomLayerIndex = layerCount - 1;
+    u32 hash = 2166136261u;
 
-    if(layerCount > 1)
-    {
-        if(metatile == METATILE_AdventurePaths_MountainRaised_Conn_EastWest_South_Grass || metatile == METATILE_AdventurePaths_Mountain_Conn_EastWest_South_Grass)
-        {
-            if(layerIndex == 0)
-                return METATILE_AdventurePaths_MountainRaised_Conn_EastWest_South_Grass;
-            else if(layerIndex == bottomLayerIndex)
-                return metatile == METATILE_AdventurePaths_Mountain_Conn_EastWest_South_Grass ? METATILE_GeneralHub_Mountain_Conn_EastWest_South : METATILE_GeneralHub_MountainRaised_Conn_EastWest_South;
-            else
-                return METATILE_GeneralHub_MountainRaised_Conn_EastWest_South;
-        }
-
-        if(layerIndex != bottomLayerIndex)
-        {
-            switch (metatile)
-            {
-            case METATILE_GeneralHub_Mountain_Conn_SouthEast_Inside:
-            case METATILE_GeneralHub_Mountain_Conn_SouthWest_Inside:
-                break;
-            default:
-                return metatile + 3;
-            }
-        }
-    }
-
-    return metatile;
+    hash = (hash ^ gRogueRun.baseSeed) * 16777619u;
+    hash = (hash ^ x) * 16777619u;
+    hash = (hash ^ y) * 16777619u;
+    hash = (hash ^ salt) * 16777619u;
+    hash ^= hash >> 13;
+    hash *= 0x85EBCA6Bu;
+    return hash ^ (hash >> 16);
 }
 
-#undef DIR_CHANGE
-
-void RogueAdv_ApplyAdventureMetatiles()
+static bool8 BuildAdventureIslandMask(void)
 {
-    struct Coords16 treesCoords[32];
-    const struct MetatileOffset *treeDecorations[ARRAY_COUNT(treesCoords)];
-    u32 metatile;
-    u16 x, y;
-    u16 treeCount;
-    u32 i, j;
-    bool8 isValid;
+    bool8 allTrailCellsInBounds = TRUE;
+    s16 x;
+    s16 y;
+    u32 i;
+    u32 j;
 
-    // Detect trees, as we will likely need to remove them later
-    treeCount = 0;
+    memset(sAdventureIslandMask, 0, ADVENTURE_PATHS_MASK_SIZE);
 
-    for(y = 0; y < gMapHeader.mapLayout->height; ++y)
-    for(x = 0; x < gMapHeader.mapLayout->width; ++x)
-    {
-        const struct MetatileOffset *treeDecoration;
+    if(gRogueAdvPath.roomCount == 0)
+        return FALSE;
 
-        metatile = MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET);
-        treeDecoration = GetTreeDecorationByBottomLeft(metatile);
-
-        if(treeDecoration != NULL)
-        {
-            treesCoords[treeCount].x = x;
-            treesCoords[treeCount].y = y;
-            treeDecorations[treeCount] = treeDecoration;
-            ++treeCount;
-
-            AGB_ASSERT(treeCount < ARRAY_COUNT(treesCoords));
-        }
-    }
-
-    // Draw room path
     for(i = 0; i < gRogueAdvPath.roomCount; ++i)
     {
-        // Move coords into world space
-        x = ROOM_TO_METATILE_X(gRogueAdvPath.rooms[i].coords.x);
-        y = ROOM_TO_METATILE_Y(gRogueAdvPath.rooms[i].coords.y);
+        x = ROOM_TO_MAP_X(gRogueAdvPath.rooms[i].coords.x);
+        y = ROOM_TO_MAP_Y(gRogueAdvPath.rooms[i].coords.y);
 
-        // Main tile where object will be placed
-        //
-        
-        if(ShouldBlockObjectEvent(&gRogueAdvPath.rooms[i]))
-        {
-            // Place rock to block way back
-            MapGridSetMetatileIdAt(x + 2, y, METATILE_GeneralHub_SandPath_Stone | MAPGRID_COLLISION_MASK);
-        }
-        else
-        {
-            MapGridSetMetatileIdAt(x + 2, y, METATILE_GeneralHub_SandPath_Centre);
-        }
+        allTrailCellsInBounds &= SetTrailMaskCell(x + 2, y, ShouldBlockObjectEvent(&gRogueAdvPath.rooms[i]));
+        allTrailCellsInBounds &= SetTrailMaskCell(x + 1, y, FALSE);
 
-        // Place connecting tiles infront
-        //
-        // ROOM_CONNECTION_MASK_MID (Always needed)
-        MapGridSetMetatileIdAt(x + 1, y + 0, METATILE_GeneralHub_SandPath_Centre);
-        
         if((gRogueAdvPath.rooms[i].connectionMask & ROOM_CONNECTION_MASK_TOP) != 0)
-            MapGridSetMetatileIdAt(x + 1, y + 1, METATILE_GeneralHub_SandPath_Centre);
-
+            allTrailCellsInBounds &= SetTrailMaskCell(x + 1, y + 1, FALSE);
         if((gRogueAdvPath.rooms[i].connectionMask & ROOM_CONNECTION_MASK_BOT) != 0)
-            MapGridSetMetatileIdAt(x + 1, y - 1, METATILE_GeneralHub_SandPath_Centre);
+            allTrailCellsInBounds &= SetTrailMaskCell(x + 1, y - 1, FALSE);
 
-        // Place connecting tiles behind (Unless we're the final node)
-        //
         if(i != 0)
         {
             for(j = 1; j < ROOM_TO_WORLD_X; ++j)
             {
-                if(j == 1 && IsObjectEventVisible(&gRogueAdvPath.rooms[i]))
-                    // Place stone to block interacting from the back
-                    MapGridSetMetatileIdAt(x + 2 + j, y, METATILE_GeneralHub_SandPath_Stone | MAPGRID_COLLISION_MASK);
-                else
-                    MapGridSetMetatileIdAt(x + 2 + j, y, METATILE_GeneralHub_SandPath_Centre);
+                bool8 blocked = j == 1 && IsObjectEventVisible(&gRogueAdvPath.rooms[i]);
+                allTrailCellsInBounds &= SetTrailMaskCell(x + 2 + j, y, blocked);
             }
         }
     }
 
-    // Draw initial start line
     {
-        // find start/end coords
-        u8 minY = (u8)-1;
-        u8 maxY = 0;
-
-        x = 0;
-        y = 0;
+        s16 minY = ADVENTURE_PATHS_MAP_HEIGHT;
+        s16 maxY = -1;
+        s16 startX = -1;
 
         for(i = 0; i < gRogueAdvPath.roomCount; ++i)
         {
-            // Count if in first column
             if(gRogueAdvPath.rooms[i].coords.x == gRogueAdvPath.pathLength - 1)
             {
-                // Move coords into world space
-                x = ROOM_TO_METATILE_X(gRogueAdvPath.rooms[i].coords.x);
-                y = ROOM_TO_METATILE_Y(gRogueAdvPath.rooms[i].coords.y);
-
+                startX = ROOM_TO_MAP_X(gRogueAdvPath.rooms[i].coords.x);
+                y = ROOM_TO_MAP_Y(gRogueAdvPath.rooms[i].coords.y);
                 minY = min(minY, y);
                 maxY = max(maxY, y);
             }
         }
 
-        for(i = minY; i <= maxY; ++i)
+        if(startX < 0)
         {
-            MapGridSetMetatileIdAt(x + 1, i, METATILE_GeneralHub_SandPath_Centre);
+            allTrailCellsInBounds = FALSE;
+        }
+        else
+        {
+            for(y = minY; y <= maxY; ++y)
+                allTrailCellsInBounds &= SetTrailMaskCell(startX + 1, y, FALSE);
         }
     }
 
-    // Apply mountain outline
+    CacheAdventureIslandSurface();
+    return allTrailCellsInBounds;
+}
+
+static u8 GetAdventureTerraceStage(void)
+{
+    u8 difficulty = GetPathGenerationDifficulty();
+
+    if(difficulty >= ROGUE_FINAL_CHAMP_DIFFICULTY)
+        return 3;
+    if(difficulty >= ROGUE_CHAMP_START_DIFFICULTY)
+        return 2;
+    if(difficulty >= ROGUE_ELITE_START_DIFFICULTY)
+        return 1;
+    return 0;
+}
+
+static u8 GetAdventureSurfaceLevelForDistance(u8 terraceStage, u8 distance)
+{
+    if(terraceStage == 0)
+        return 1;
+    if(distance <= 1)
+        return terraceStage + 1;
+    if(distance <= 3)
+        return terraceStage;
+    return terraceStage - (distance - 3);
+}
+
+static bool8 IsAdventureIslandSurfaceCell(s16 x, s16 y)
+{
+    return GetAdventureIslandLevel(x, y) != 0;
+}
+
+static void CacheAdventureIslandSurface(void)
+{
+    u8 terraceStage = GetAdventureTerraceStage();
+    u8 expansion = 2 + terraceStage;
+    u8 distance;
+    s16 x;
+    s16 y;
+
+    memset(sAdventureIslandLevels, 0, ADVENTURE_PATHS_LEVEL_SIZE);
+
+    // Store distance + 1 temporarily. Each bounded pass expands the previous
+    // frontier in eight directions without consuming gameplay RNG.
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
-        u32 layerIndex;
-        u32 layerCount = 0;
-
-        if(Rogue_GetCurrentDifficulty() == ROGUE_FINAL_CHAMP_DIFFICULTY)
-            layerCount = 8;
-        else if(Rogue_GetCurrentDifficulty() == ROGUE_CHAMP_START_DIFFICULTY)
-            layerCount = 3;
-        else if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
-            layerCount = 1;
-
-        for(layerIndex = 0; layerIndex < layerCount; ++layerIndex)
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
         {
-            bool8 foundStart = FALSE;
-            u8 walkDir = DIR_NORTH;
-            u8 lookDir = DIR_EAST;
-            u8 prevWalkDir;
-            u16 startX = 0;
-            u16 startY = 0;
+            if(HasIslandMaskFlag(x, y, ISLAND_MASK_TRAIL))
+                SetAdventureIslandLevel(x, y, 1);
+        }
+    }
 
-            for(y = 0; y < gMapHeader.mapLayout->height && !foundStart; ++y)
+    for(distance = 1; distance <= expansion; ++distance)
+    {
+        for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+        {
+            for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
             {
-                for(x = 0; x < gMapHeader.mapLayout->width && !foundStart; ++x)
+                s16 offsetX;
+                s16 offsetY;
+
+                if(GetAdventureIslandLevel(x, y) != 0)
+                    continue;
+                for(offsetY = -1; offsetY <= 1; ++offsetY)
                 {
-                    if(IsInsideMountainTile(x, y))
+                    for(offsetX = -1; offsetX <= 1; ++offsetX)
                     {
-                        foundStart = TRUE;
-                        break;
+                        if(GetAdventureIslandLevel(x + offsetX, y + offsetY) == distance)
+                        {
+                            SetAdventureIslandLevel(x, y, distance + 1);
+                            offsetX = 2;
+                            offsetY = 2;
+                        }
                     }
-
-                    startX = x;
-                    startY = y;
-                }
-            }
-
-            if(!foundStart)
-                continue;
-
-            x = startX;
-            y = startY;
-
-            for(i = 0; i < 1024; ++i)
-            {
-                bool8 walkingInside = IsInsideMountainTileInDir(x, y, walkDir);
-                bool8 lookingInside = IsInsideMountainTileInDir(x, y, lookDir);
-
-                prevWalkDir = walkDir;
-
-                if(walkingInside)
-                {
-                    u8 oldLookDir = lookDir;
-                    lookDir = walkDir;
-                    walkDir = GetOppositeDirection(oldLookDir);
-                }
-                else if(!lookingInside)
-                {
-                    u8 oldWalkDir = walkDir;
-                    walkDir = lookDir;
-                    lookDir = GetOppositeDirection(oldWalkDir);
-                }
-
-                if(i != 0)
-                    MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, GetMountainMetatile(prevWalkDir, walkDir, lookDir, layerIndex, layerCount) | MAPGRID_COLLISION_MASK);
-
-                WalkCoordsInDir(&x, &y, walkDir);
-
-                if(x == startX && y == startY)
-                {
-                    MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, GetMountainMetatile(walkDir, walkDir, lookDir, layerIndex, layerCount) | MAPGRID_COLLISION_MASK);
-                    break;
                 }
             }
         }
     }
 
-    // Remove any decorations that may have been split in parts by the path placement
-    for(j = 0; j < treeCount; ++j)
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
-        const struct MetatileOffset *treeDecoration = treeDecorations[j];
-
-        x = treesCoords[j].x + MAP_OFFSET;
-        y = treesCoords[j].y + MAP_OFFSET;
-
-        // Check for any missing tiles
-        isValid = TRUE;
-
-        for(i = 0; i < ARRAY_COUNT(sSparseTreeDecorationMetatiles); ++i)
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
         {
-            if(MapGridGetMetatileIdAt(x + treeDecoration[i].x, y + treeDecoration[i].y) != treeDecoration[i].metatile)
-            {
-                isValid = FALSE;
-                break;
-            }
-        }
+            u8 encodedDistance = GetAdventureIslandLevel(x, y);
 
-        // If we're missing a tile remove rest of the tree
-        if(!isValid)
-        {
-            for(i = 0; i < ARRAY_COUNT(sSparseTreeDecorationMetatiles); ++i)
+            if(encodedDistance != 0)
             {
-                if(IsTreeDecorationMetatileAtOffset(MapGridGetMetatileIdAt(x + treeDecoration[i].x, y + treeDecoration[i].y), i))
-                {
-                    MapGridSetMetatileIdAt(x + treeDecoration[i].x, y + treeDecoration[i].y, METATILE_General_Grass | MAPGRID_COLLISION_MASK);
-                }
+                SetAdventureIslandLevel(x, y, GetAdventureSurfaceLevelForDistance(terraceStage, encodedDistance - 1));
+                if(!HasIslandMaskFlag(x, y, ISLAND_MASK_TRAIL))
+                    SetIslandMaskCell(x, y, ISLAND_MASK_BLOCKED);
             }
         }
     }
 
-    // Pretty up the paths
-    for(y = 0; y < gMapHeader.mapLayout->height; ++y)
-    for(x = 0; x < gMapHeader.mapLayout->width; ++x)
+    // Fill isolated one-cell pinholes at the lowest surrounding plane.
+    for(y = 1; y < ADVENTURE_PATHS_MAP_HEIGHT - 1; ++y)
     {
-        metatile = MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET);
-
-        if(metatile == METATILE_GeneralHub_SandPath_Centre)
+        for(x = 1; x < ADVENTURE_PATHS_MAP_WIDTH - 1; ++x)
         {
-            bool32 left = IsPathMetatile(MapGridGetMetatileIdAt(x + MAP_OFFSET - 1, y + MAP_OFFSET + 0));
-            bool32 right = IsPathMetatile(MapGridGetMetatileIdAt(x + MAP_OFFSET + 1, y + MAP_OFFSET + 0));
-            bool32 up = IsPathMetatile(MapGridGetMetatileIdAt(x + MAP_OFFSET + 0, y + MAP_OFFSET - 1));
-            bool32 down = IsPathMetatile(MapGridGetMetatileIdAt(x + MAP_OFFSET + 0, y + MAP_OFFSET + 1));
+            if(GetAdventureIslandLevel(x, y) == 0
+                && GetAdventureIslandLevel(x, y - 1) != 0
+                && GetAdventureIslandLevel(x + 1, y) != 0
+                && GetAdventureIslandLevel(x, y + 1) != 0
+                && GetAdventureIslandLevel(x - 1, y) != 0)
+            {
+                u8 level = min(
+                    min(GetAdventureIslandLevel(x, y - 1), GetAdventureIslandLevel(x + 1, y)),
+                    min(GetAdventureIslandLevel(x, y + 1), GetAdventureIslandLevel(x - 1, y))
+                );
 
-            // -
-            if(left && right && !up && !down)
-                metatile = METATILE_AdventurePaths_SandPath_Horizontal;
-            // |
-            else if(!left && !right && up && down)
-                metatile = METATILE_AdventurePaths_SandPath_Vertical;
-
-            // |-
-            else if(!left && right && !up && down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_SouthEast;
-            // -|
-            else if(left && !right && !up && down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_SouthWest;
-            // _|
-            else if(left && !right && up && !down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_NorthWest;
-            // |_
-            else if(!left && right && up && !down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_NorthEast;
-
-            // _|_
-            else if(left && right && up && !down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_EastWest_North;
-            // -|-
-            else if(left && right && !up && down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_EastWest_South;
-            // -+
-            else if(left && !right && up && down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_NorthSouth_West;
-            // +-
-            else if(!left && right && up && down)
-                metatile = METATILE_GeneralHub_SandPath_Conn_NorthSouth_East;
-
-            // --x
-            else if(left && !right && !up && !down)
-                metatile = METATILE_AdventurePaths_SandPath_Horizontal_EndEast;
-            // x--
-            else if(!left && right && !up && !down)
-                metatile = METATILE_AdventurePaths_SandPath_Horizontal_EndWest;
-
-
-            if(metatile != METATILE_GeneralHub_SandPath_Centre)
-                MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, metatile);
-
-        }
-        else if(metatile == METATILE_GeneralHub_SandPath_Stone)
-        {
-            MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, METATILE_AdventurePaths_SandPath_Horizontal_Blocked | MAPGRID_COLLISION_MASK);
+                SetAdventureIslandLevel(x, y, level);
+                SetIslandMaskCell(x, y, ISLAND_MASK_BLOCKED);
+            }
         }
     }
 }
+
+static u16 GetAdventureVoidMetatile(u16 x, u16 y)
+{
+    switch(GetAdventureIslandCoordHash(x, y, 0x564F4944) % 10)
+    {
+    case 0:
+        return METATILE_AdventurePaths_Void_Stars0;
+    case 1:
+        return METATILE_AdventurePaths_Void_Stars1;
+    case 2:
+        return METATILE_AdventurePaths_Void_Stars2;
+    default:
+        return METATILE_AdventurePaths_Void;
+    }
+}
+
+static u16 GetAdventureIslandMetatile(u16 x, u16 y)
+{
+    u8 level = GetAdventureIslandLevel(x, y);
+    bool8 north = GetAdventureIslandLevel(x, y - 1) >= level;
+    bool8 east = GetAdventureIslandLevel(x + 1, y) >= level;
+    bool8 south = GetAdventureIslandLevel(x, y + 1) >= level;
+    bool8 west = GetAdventureIslandLevel(x - 1, y) >= level;
+
+    if(!north && !east)
+        return METATILE_AdventurePaths_Island_Corner_NorthEast;
+    if(!east && !south)
+        return METATILE_AdventurePaths_Island_Corner_SouthEast;
+    if(!south && !west)
+        return METATILE_AdventurePaths_Island_Corner_SouthWest;
+    if(!west && !north)
+        return METATILE_AdventurePaths_Island_Corner_NorthWest;
+    if(!north)
+        return METATILE_AdventurePaths_Island_Edge_North;
+    if(!east)
+        return METATILE_AdventurePaths_Island_Edge_East;
+    if(!south)
+    {
+        switch(GetAdventureIslandCoordHash(x, y, 0x534F5554) % 3)
+        {
+        case 1:
+            return METATILE_AdventurePaths_Island_Edge_South1;
+        case 2:
+            return METATILE_AdventurePaths_Island_Edge_South2;
+        default:
+            return METATILE_AdventurePaths_Island_Edge_South;
+        }
+    }
+    if(!west)
+        return METATILE_AdventurePaths_Island_Edge_West;
+
+    if(GetAdventureIslandLevel(x + 1, y - 1) < level)
+        return METATILE_AdventurePaths_Island_InnerCorner_NorthEast;
+    if(GetAdventureIslandLevel(x + 1, y + 1) < level)
+        return METATILE_AdventurePaths_Island_InnerCorner_SouthEast;
+    if(GetAdventureIslandLevel(x - 1, y + 1) < level)
+        return METATILE_AdventurePaths_Island_InnerCorner_SouthWest;
+    if(GetAdventureIslandLevel(x - 1, y - 1) < level)
+        return METATILE_AdventurePaths_Island_InnerCorner_NorthWest;
+
+    return METATILE_AdventurePaths_Island_Interior0
+        + (GetAdventureIslandCoordHash(x, y, 0x524F434B) % 3);
+}
+
+static u16 GetAdventureCliffMetatile(u16 x, u16 y)
+{
+    bool8 left = !IsAdventureIslandSurfaceCell(x - 1, y)
+        && IsAdventureIslandSurfaceCell(x - 1, y - 1);
+    bool8 right = !IsAdventureIslandSurfaceCell(x + 1, y)
+        && IsAdventureIslandSurfaceCell(x + 1, y - 1);
+
+    if(!left && right)
+        return METATILE_AdventurePaths_Island_Underside_Left;
+    if(left && !right)
+        return METATILE_AdventurePaths_Island_Underside_Right;
+    switch(GetAdventureIslandCoordHash(x, y, 0x434C4946) % 3)
+    {
+    case 1:
+        return METATILE_AdventurePaths_Island_Underside_Middle1;
+    case 2:
+        return METATILE_AdventurePaths_Island_Underside_Middle2;
+    default:
+        return METATILE_AdventurePaths_Island_Underside_Middle0;
+    }
+}
+
+static bool8 IsAdventureCliffCell(s16 x, s16 y)
+{
+    return !IsAdventureIslandSurfaceCell(x, y)
+        && IsAdventureIslandSurfaceCell(x, y - 1);
+}
+
+static bool8 IsAdventureTerraceFaceCell(s16 x, s16 y)
+{
+    u8 level = GetAdventureIslandLevel(x, y);
+
+    return level != 0 && GetAdventureIslandLevel(x, y - 1) > level;
+}
+
+#if 0
+static bool8 IsAdventureLandmarkDecorationCandidate(s16 x, s16 y)
+{
+    s16 offsetX;
+    s16 offsetY;
+
+    // The anchor is the bottom cell of a 1x2 decoration. Both artwork cells
+    // must be ordinary impassable rock, never a trail or blocker.
+    if(!IsIslandCoordInBounds(x, y)
+        || !IsIslandCoordInBounds(x, y - 1)
+        || GetIslandMaskCell(x, y - 1) != ISLAND_MASK_BLOCKED
+        || GetIslandMaskCell(x, y) != ISLAND_MASK_BLOCKED)
+        return FALSE;
+
+    // Preserve one complete island-surface tile around the artwork. This is
+    // what prevents its baked rock background from cutting into the void.
+    for(offsetY = -2; offsetY <= 1; ++offsetY)
+    {
+        for(offsetX = -1; offsetX <= 1; ++offsetX)
+        {
+            if(!IsAdventureIslandSurfaceCell(x + offsetX, y + offsetY))
+                return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+static bool8 IsAdventureSurfaceDecorationCandidate(s16 x, s16 y)
+{
+    s16 offsetX;
+    s16 offsetY;
+
+    if(!IsIslandCoordInBounds(x, y)
+        || GetIslandMaskCell(x, y) != ISLAND_MASK_BLOCKED)
+        return FALSE;
+
+    // Surface decals use an interior metatile background, so retain one ring
+    // of island surface around them to keep that background seamless.
+    for(offsetY = -1; offsetY <= 1; ++offsetY)
+    {
+        for(offsetX = -1; offsetX <= 1; ++offsetX)
+        {
+            if(!IsAdventureIslandSurfaceCell(x + offsetX, y + offsetY))
+                return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+static bool8 IsAdventureEdgeDecorationCandidate(s16 x, s16 y, u8 *type)
+{
+    bool8 north;
+    bool8 east;
+    bool8 south;
+    bool8 west;
+
+    if(!IsIslandCoordInBounds(x, y)
+        || GetIslandMaskCell(x, y) != ISLAND_MASK_BLOCKED)
+        return FALSE;
+
+    north = IsAdventureIslandSurfaceCell(x, y - 1);
+    east = IsAdventureIslandSurfaceCell(x + 1, y);
+    south = IsAdventureIslandSurfaceCell(x, y + 1);
+    west = IsAdventureIslandSurfaceCell(x - 1, y);
+
+    // V1 edge art supports a single exposed north, west, or east edge. South
+    // edges are reserved for the cliff face and underside silhouette.
+    if(!north && east && south && west)
+        *type = GetAdventureIslandCoordHash(x, y, 0x45444745) % 2;
+    else if(north && east && south && !west)
+        *type = 2 + (GetAdventureIslandCoordHash(x, y, 0x45444745) % 2);
+    else if(north && !east && south && west)
+        *type = 4 + (GetAdventureIslandCoordHash(x, y, 0x45444745) % 2);
+    else
+        return FALSE;
+    return TRUE;
+}
+
+static bool8 IsAdventureDecorationSeparated(const struct AdventureDecorationPlan *plan, s16 x, s16 y, u8 kind)
+{
+    u8 i;
+
+    for(i = 0; i < plan->count; ++i)
+    {
+        s16 deltaX = x - plan->entries[i].x;
+        s16 deltaY = y - plan->entries[i].y;
+
+        if(kind == ADVENTURE_EDGE_DECORATION || plan->entries[i].kind == ADVENTURE_EDGE_DECORATION)
+        {
+            if(kind == ADVENTURE_EDGE_DECORATION
+                && plan->entries[i].kind == ADVENTURE_EDGE_DECORATION
+                && deltaX >= -3 && deltaX <= 3
+                && deltaY >= -3 && deltaY <= 3)
+                return FALSE;
+            if(deltaX == 0 && deltaY == 0)
+                return FALSE;
+        }
+        else if(kind == ADVENTURE_LANDMARK_DECORATION
+            && plan->entries[i].kind == ADVENTURE_LANDMARK_DECORATION)
+        {
+            // A 1x2 footprint retains a complete empty row between landmarks.
+            if(deltaX >= -1 && deltaX <= 1 && deltaY >= -2 && deltaY <= 2)
+                return FALSE;
+        }
+        else if(kind == ADVENTURE_SURFACE_DECORATION
+            && plan->entries[i].kind == ADVENTURE_SURFACE_DECORATION)
+        {
+            if(deltaX == 0 && deltaY == 0)
+                return FALSE;
+        }
+        else
+        {
+            s16 surfaceX = kind == ADVENTURE_SURFACE_DECORATION ? x : plan->entries[i].x;
+            s16 surfaceY = kind == ADVENTURE_SURFACE_DECORATION ? y : plan->entries[i].y;
+            s16 landmarkX = kind == ADVENTURE_LANDMARK_DECORATION ? x : plan->entries[i].x;
+            s16 landmarkY = kind == ADVENTURE_LANDMARK_DECORATION ? y : plan->entries[i].y;
+
+            if(surfaceX == landmarkX
+                && (surfaceY == landmarkY || surfaceY == landmarkY - 1))
+                return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+static bool8 TryAddAdventureDecoration(struct AdventureDecorationPlan *plan, u8 kind, u8 ordinal, s16 minY, s16 maxY)
+{
+    bool8 foundCandidate = FALSE;
+    u32 bestScore = 0;
+    s16 bestX = 0;
+    s16 bestY = 0;
+    s16 x;
+    s16 y;
+
+    for(y = minY; y < maxY; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            u32 score;
+            u8 edgeType = 0;
+            bool8 isCandidate;
+
+            if(kind == ADVENTURE_LANDMARK_DECORATION)
+                isCandidate = IsAdventureLandmarkDecorationCandidate(x, y);
+            else if(kind == ADVENTURE_SURFACE_DECORATION)
+                isCandidate = IsAdventureSurfaceDecorationCandidate(x, y);
+            else
+                isCandidate = IsAdventureEdgeDecorationCandidate(x, y, &edgeType);
+
+            if(!isCandidate || !IsAdventureDecorationSeparated(plan, x, y, kind))
+                continue;
+
+            score = GetAdventureIslandCoordHash(x, y, (0x4445434F + kind * 0x11111111) ^ ordinal);
+            if(!foundCandidate || score > bestScore)
+            {
+                foundCandidate = TRUE;
+                bestScore = score;
+                bestX = x;
+                bestY = y;
+            }
+        }
+    }
+
+    if(!foundCandidate)
+        return FALSE;
+
+    plan->entries[plan->count].x = bestX;
+    plan->entries[plan->count].y = bestY;
+    plan->entries[plan->count].kind = kind;
+    if(kind == ADVENTURE_EDGE_DECORATION)
+        IsAdventureEdgeDecorationCandidate(bestX, bestY, &plan->entries[plan->count].type);
+    else if(ordinal < ADVENTURE_DECORATION_TYPE_COUNT)
+        plan->entries[plan->count].type = ((GetAdventureIslandCoordHash(0, 0, kind == ADVENTURE_SURFACE_DECORATION ? 0x53555246 : 0x4C414E44) % ADVENTURE_DECORATION_TYPE_COUNT) + ordinal * 5) % ADVENTURE_DECORATION_TYPE_COUNT;
+    else
+        plan->entries[plan->count].type = GetAdventureIslandCoordHash(bestX, bestY, kind == ADVENTURE_SURFACE_DECORATION ? 0x53555246 : 0x4C414E44) % ADVENTURE_DECORATION_TYPE_COUNT;
+    ++plan->count;
+    return TRUE;
+}
+
+static bool8 TryAddSurfaceDecorationNearLandmark(struct AdventureDecorationPlan *plan, u8 landmarkIndex, u8 ordinal)
+{
+    bool8 foundCandidate = FALSE;
+    u32 bestScore = 0;
+    s16 bestX = 0;
+    s16 bestY = 0;
+    s16 landmarkX = plan->entries[landmarkIndex].x;
+    s16 landmarkY = plan->entries[landmarkIndex].y;
+    s16 x;
+    s16 y;
+
+    for(y = landmarkY - 3; y <= landmarkY + 3; ++y)
+    {
+        for(x = landmarkX - 3; x <= landmarkX + 3; ++x)
+        {
+            s16 deltaX = x - landmarkX;
+            s16 deltaY = y - landmarkY;
+            s16 distance = (deltaX < 0 ? -deltaX : deltaX) + (deltaY < 0 ? -deltaY : deltaY);
+            u32 score;
+
+            if(distance < 2 || distance > 4
+                || !IsAdventureSurfaceDecorationCandidate(x, y)
+                || !IsAdventureDecorationSeparated(plan, x, y, ADVENTURE_SURFACE_DECORATION))
+                continue;
+
+            score = GetAdventureIslandCoordHash(x, y, 0x47524F55 ^ ordinal);
+            if(!foundCandidate || score > bestScore)
+            {
+                foundCandidate = TRUE;
+                bestScore = score;
+                bestX = x;
+                bestY = y;
+            }
+        }
+    }
+
+    if(!foundCandidate)
+        return FALSE;
+
+    plan->entries[plan->count].x = bestX;
+    plan->entries[plan->count].y = bestY;
+    plan->entries[plan->count].kind = ADVENTURE_SURFACE_DECORATION;
+    plan->entries[plan->count].type = ((GetAdventureIslandCoordHash(0, 0, 0x53555246) % ADVENTURE_DECORATION_TYPE_COUNT) + ordinal * 5) % ADVENTURE_DECORATION_TYPE_COUNT;
+    ++plan->count;
+    return TRUE;
+}
+
+static void BuildAdventureDecorationPlan(struct AdventureDecorationPlan *plan)
+{
+    u8 landmarkTarget = ADVENTURE_LANDMARK_MIN_COUNT
+        + (GetAdventureIslandCoordHash(0, 0, 0x4C4D434F) % (ADVENTURE_LANDMARK_MAX_COUNT - ADVENTURE_LANDMARK_MIN_COUNT + 1));
+    u8 surfaceTarget = ADVENTURE_SURFACE_MIN_COUNT
+        + (GetAdventureIslandCoordHash(0, 0, 0x5346434F) % (ADVENTURE_SURFACE_MAX_COUNT - ADVENTURE_SURFACE_MIN_COUNT + 1));
+    u8 edgeTarget = ADVENTURE_EDGE_MIN_COUNT
+        + (GetAdventureIslandCoordHash(0, 0, 0x4544434F) % (ADVENTURE_EDGE_MAX_COUNT - ADVENTURE_EDGE_MIN_COUNT + 1));
+    u8 landmarkCount = 0;
+    u8 surfaceCount = 0;
+    u8 edgeCount = 0;
+    u8 band;
+    u8 i;
+
+    memset(plan, 0, sizeof(*plan));
+
+    for(band = 0; band < 4 && landmarkCount < landmarkTarget; ++band)
+    {
+        if(TryAddAdventureDecoration(plan, ADVENTURE_LANDMARK_DECORATION, landmarkCount,
+            band * ADVENTURE_PATHS_MAP_HEIGHT / 4,
+            (band + 1) * ADVENTURE_PATHS_MAP_HEIGHT / 4))
+            ++landmarkCount;
+    }
+    while(landmarkCount < landmarkTarget
+        && TryAddAdventureDecoration(plan, ADVENTURE_LANDMARK_DECORATION, landmarkCount, 0, ADVENTURE_PATHS_MAP_HEIGHT))
+        ++landmarkCount;
+
+    // Compose formations by giving each landmark one nearby quiet detail
+    // before adding any independent surface variation.
+    for(i = 0; i < landmarkCount && surfaceCount < surfaceTarget; ++i)
+    {
+        if(TryAddSurfaceDecorationNearLandmark(plan, i, surfaceCount))
+            ++surfaceCount;
+    }
+
+    for(band = 0; band < 4 && surfaceCount < surfaceTarget; ++band)
+    {
+        if(TryAddAdventureDecoration(plan, ADVENTURE_SURFACE_DECORATION, surfaceCount,
+            band * ADVENTURE_PATHS_MAP_HEIGHT / 4,
+            (band + 1) * ADVENTURE_PATHS_MAP_HEIGHT / 4))
+            ++surfaceCount;
+    }
+    while(surfaceCount < surfaceTarget
+        && TryAddAdventureDecoration(plan, ADVENTURE_SURFACE_DECORATION, surfaceCount, 0, ADVENTURE_PATHS_MAP_HEIGHT))
+        ++surfaceCount;
+
+    while(edgeCount < edgeTarget
+        && TryAddAdventureDecoration(plan, ADVENTURE_EDGE_DECORATION, edgeCount, 0, ADVENTURE_PATHS_MAP_HEIGHT))
+        ++edgeCount;
+}
+
+static bool8 GetAdventureDecorationPart(const struct AdventureDecorationPlan *plan, s16 x, s16 y, u8 *type, u8 *kind, bool8 *bottom)
+{
+    u8 i;
+
+    for(i = 0; i < plan->count; ++i)
+    {
+        if(x != plan->entries[i].x)
+            continue;
+        if(y == plan->entries[i].y)
+            *bottom = TRUE;
+        else if(plan->entries[i].kind == ADVENTURE_LANDMARK_DECORATION && y == plan->entries[i].y - 1)
+            *bottom = FALSE;
+        else
+            continue;
+
+        *type = plan->entries[i].type;
+        *kind = plan->entries[i].kind;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static u16 GetAdventureDecorationMetatile(u8 type, u8 kind, bool8 bottom)
+{
+    if(kind == ADVENTURE_SURFACE_DECORATION)
+        return METATILE_AdventurePaths_Decor_ShardCyan + type;
+    if(kind == ADVENTURE_EDGE_DECORATION)
+        return METATILE_AdventurePaths_Decor_EdgeCrystalCyan_North + type;
+    return METATILE_AdventurePaths_Decor_CrystalCyan_Top + type * 2 + (bottom ? 1 : 0);
+}
+
+#endif
+
+static u16 GetAdventureSurfaceTemplateMetatile(s16 x, s16 y)
+{
+    const struct MapLayout *layout;
+
+    if(!IsIslandCoordInBounds(x, y))
+        return METATILE_AdventurePaths_Island_Interior0;
+    layout = GetMapLayout(LAYOUT_ROGUE_ADVENTURE_PATHS);
+    return layout->map[y * ADVENTURE_PATHS_MAP_WIDTH + x] & MAPGRID_METATILE_ID_MASK;
+}
+
+static bool8 IsAdventureFormationMetatile(u16 metatile)
+{
+    return (metatile >= METATILE_AdventurePaths_FormationA_TopLeft
+            && metatile <= METATILE_AdventurePaths_FormationA_BottomRight)
+        || (metatile >= METATILE_AdventurePaths_FormationB_TopLeft
+            && metatile <= METATILE_AdventurePaths_FormationB_BottomRight);
+}
+
+static bool8 GetAdventureFormationAnchor(s16 x, s16 y, s16 *anchorX, s16 *anchorY, u16 *baseMetatile)
+{
+    u16 metatile = GetAdventureSurfaceTemplateMetatile(x, y);
+    u16 offset;
+
+    if(metatile >= METATILE_AdventurePaths_FormationA_TopLeft
+        && metatile <= METATILE_AdventurePaths_FormationA_BottomRight)
+    {
+        *baseMetatile = METATILE_AdventurePaths_FormationA_TopLeft;
+    }
+    else if(metatile >= METATILE_AdventurePaths_FormationB_TopLeft
+        && metatile <= METATILE_AdventurePaths_FormationB_BottomRight)
+    {
+        *baseMetatile = METATILE_AdventurePaths_FormationB_TopLeft;
+    }
+    else
+    {
+        return FALSE;
+    }
+
+    offset = metatile - *baseMetatile;
+    *anchorX = x - (offset & 1);
+    *anchorY = y - (offset / 2);
+    return TRUE;
+}
+
+static bool8 IsAdventureFormationValid(s16 anchorX, s16 anchorY, u16 baseMetatile)
+{
+    u8 level = GetAdventureIslandLevel(anchorX, anchorY);
+    s16 offsetX;
+    s16 offsetY;
+
+    if(level == 0)
+        return FALSE;
+
+    // Match the original tree cleanup: the complete authored footprint must
+    // survive on one uninterrupted plane without crossing a trail.
+    for(offsetY = 0; offsetY < 3; ++offsetY)
+    {
+        for(offsetX = 0; offsetX < 2; ++offsetX)
+        {
+            s16 x = anchorX + offsetX;
+            s16 y = anchorY + offsetY;
+
+            if(GetAdventureIslandLevel(x, y) != level)
+                return FALSE;
+            if(HasIslandMaskFlag(x, y, ISLAND_MASK_TRAIL))
+                return FALSE;
+            if(IsAdventureTerraceFaceCell(x, y))
+                return FALSE;
+        }
+    }
+
+    for(offsetY = 0; offsetY < 3; ++offsetY)
+    {
+        for(offsetX = 0; offsetX < 2; ++offsetX)
+        {
+            if(GetAdventureSurfaceTemplateMetatile(anchorX + offsetX, anchorY + offsetY)
+                != baseMetatile + offsetY * 2 + offsetX)
+                return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+static u8 GetAdventureFormationBackgroundIndex(u16 metatile)
+{
+    if(metatile >= METATILE_AdventurePaths_Island_Interior0
+        && metatile <= METATILE_AdventurePaths_Island_Interior2)
+        return metatile - METATILE_AdventurePaths_Island_Interior0;
+    if(metatile == METATILE_AdventurePaths_Island_Edge_North)
+        return 3;
+    if(metatile == METATILE_AdventurePaths_Island_Edge_East)
+        return 4;
+    if(metatile == METATILE_AdventurePaths_Island_Edge_South
+        || metatile == METATILE_AdventurePaths_Island_Edge_South1
+        || metatile == METATILE_AdventurePaths_Island_Edge_South2)
+        return 5;
+    if(metatile == METATILE_AdventurePaths_Island_Edge_West)
+        return 6;
+    if(metatile >= METATILE_AdventurePaths_Island_Corner_NorthEast
+        && metatile <= METATILE_AdventurePaths_Island_Corner_NorthWest)
+        return 7 + metatile - METATILE_AdventurePaths_Island_Corner_NorthEast;
+    if(metatile >= METATILE_AdventurePaths_Island_InnerCorner_NorthEast
+        && metatile <= METATILE_AdventurePaths_Island_InnerCorner_NorthWest)
+        return 11 + metatile - METATILE_AdventurePaths_Island_InnerCorner_NorthEast;
+    return 0;
+}
+
+static bool8 IsAdventureTemplateAccentMetatile(u16 metatile)
+{
+    return (metatile >= METATILE_AdventurePaths_Surface_Fractured0
+            && metatile <= METATILE_AdventurePaths_Surface_Pebbles1)
+        || (metatile >= METATILE_AdventurePaths_Surface_Rock0
+            && metatile <= METATILE_AdventurePaths_Surface_MineralViolet)
+        || (metatile >= METATILE_AdventurePaths_Surface_CrystalClusterBlue0
+            && metatile <= METATILE_AdventurePaths_Surface_CrystalClusterBlue1);
+}
+
+static bool8 IsAdventureInteriorPlaneCell(s16 x, s16 y)
+{
+    u8 level = GetAdventureIslandLevel(x, y);
+
+    return level != 0
+        && GetAdventureIslandLevel(x, y - 1) == level
+        && GetAdventureIslandLevel(x + 1, y) == level
+        && GetAdventureIslandLevel(x, y + 1) == level
+        && GetAdventureIslandLevel(x - 1, y) == level
+        && !IsAdventureTerraceFaceCell(x, y);
+}
+
+static u16 GetAdventureTemplateFallbackMetatile(s16 x, s16 y)
+{
+    return METATILE_AdventurePaths_Island_Interior0
+        + (GetAdventureIslandCoordHash(x, y, 0x544D504C) % 3);
+}
+
+static u16 GetAdventureTemplateMetatile(s16 x, s16 y)
+{
+    u16 metatile = GetAdventureSurfaceTemplateMetatile(x, y);
+
+    if(IsAdventureFormationMetatile(metatile))
+    {
+        s16 anchorX;
+        s16 anchorY;
+        u16 baseMetatile;
+
+        if(GetAdventureFormationAnchor(x, y, &anchorX, &anchorY, &baseMetatile)
+            && IsAdventureFormationValid(anchorX, anchorY, baseMetatile))
+        {
+            u16 overlayBase = baseMetatile == METATILE_AdventurePaths_FormationA_TopLeft
+                ? METATILE_AdventurePaths_FormationOverlayA_Base
+                : METATILE_AdventurePaths_FormationOverlayB_Base;
+            u8 part = metatile - baseMetatile;
+            u8 background = GetAdventureFormationBackgroundIndex(GetAdventureIslandMetatile(x, y));
+
+            return overlayBase + part * ADVENTURE_FORMATION_BACKGROUND_COUNT + background;
+        }
+        return GetAdventureTemplateFallbackMetatile(x, y);
+    }
+
+    if(IsAdventureTemplateAccentMetatile(metatile))
+    {
+        if(IsAdventureInteriorPlaneCell(x, y))
+            return metatile;
+        return GetAdventureTemplateFallbackMetatile(x, y);
+    }
+
+    if(metatile >= METATILE_AdventurePaths_Island_Interior0
+        && metatile <= METATILE_AdventurePaths_Island_Interior2)
+        return metatile;
+    return GetAdventureTemplateFallbackMetatile(x, y);
+}
+
+static u16 GetAdventureTrailMetatile(u16 x, u16 y)
+{
+    u8 connections = 0;
+
+    if(HasIslandMaskFlag(x, y - 1, ISLAND_MASK_TRAIL))
+        connections |= 1 << 0;
+    if(HasIslandMaskFlag(x + 1, y, ISLAND_MASK_TRAIL))
+        connections |= 1 << 1;
+    if(HasIslandMaskFlag(x, y + 1, ISLAND_MASK_TRAIL))
+        connections |= 1 << 2;
+    if(HasIslandMaskFlag(x - 1, y, ISLAND_MASK_TRAIL))
+        connections |= 1 << 3;
+
+    if(HasIslandMaskFlag(x, y, ISLAND_MASK_BLOCKED))
+    {
+        if((connections & ((1 << 1) | (1 << 3))) != 0)
+            return METATILE_AdventurePaths_Trail_BlockedHorizontal;
+        return METATILE_AdventurePaths_Trail_BlockedVertical;
+    }
+
+    switch(connections)
+    {
+    case 0:
+        return METATILE_AdventurePaths_Trail_Centre;
+    case (1 << 0):
+        return METATILE_AdventurePaths_Trail_EndNorth;
+    case (1 << 1):
+        return METATILE_AdventurePaths_Trail_EndEast;
+    case (1 << 2):
+        return METATILE_AdventurePaths_Trail_EndSouth;
+    case (1 << 3):
+        return METATILE_AdventurePaths_Trail_EndWest;
+    case (1 << 0) | (1 << 2):
+        return METATILE_AdventurePaths_Trail_Vertical;
+    case (1 << 1) | (1 << 3):
+        return METATILE_AdventurePaths_Trail_Horizontal;
+    case (1 << 0) | (1 << 1):
+        return METATILE_AdventurePaths_Trail_Corner_NorthEast;
+    case (1 << 1) | (1 << 2):
+        return METATILE_AdventurePaths_Trail_Corner_SouthEast;
+    case (1 << 2) | (1 << 3):
+        return METATILE_AdventurePaths_Trail_Corner_SouthWest;
+    case (1 << 3) | (1 << 0):
+        return METATILE_AdventurePaths_Trail_Corner_NorthWest;
+    case (1 << 1) | (1 << 2) | (1 << 3):
+        return METATILE_AdventurePaths_Trail_T_MissingNorth;
+    case (1 << 0) | (1 << 2) | (1 << 3):
+        return METATILE_AdventurePaths_Trail_T_MissingEast;
+    case (1 << 0) | (1 << 1) | (1 << 3):
+        return METATILE_AdventurePaths_Trail_T_MissingSouth;
+    case (1 << 0) | (1 << 1) | (1 << 2):
+        return METATILE_AdventurePaths_Trail_T_MissingWest;
+    default:
+        return METATILE_AdventurePaths_Trail_Cross;
+    }
+}
+
+static u16 GetAdventureRenderedMetatile(s16 x, s16 y, bool8 *impassable)
+{
+    u8 mask = GetIslandMaskCell(x, y);
+
+    *impassable = TRUE;
+    if((mask & ISLAND_MASK_TRAIL) != 0)
+    {
+        *impassable = (mask & ISLAND_MASK_BLOCKED) != 0;
+        return GetAdventureTrailMetatile(x, y);
+    }
+    if(IsAdventureTerraceFaceCell(x, y))
+        return METATILE_AdventurePaths_Terrace_Face0
+            + (GetAdventureIslandCoordHash(x, y, 0x54455252) % 3);
+    if(IsAdventureIslandSurfaceCell(x, y))
+    {
+        u16 metatile = GetAdventureIslandMetatile(x, y);
+
+        if(metatile >= METATILE_AdventurePaths_Island_Interior0
+            && metatile <= METATILE_AdventurePaths_Island_Interior2)
+            return GetAdventureTemplateMetatile(x, y);
+        return metatile;
+    }
+    if(IsAdventureCliffCell(x, y))
+        return GetAdventureCliffMetatile(x, y);
+    return GetAdventureVoidMetatile(x, y);
+}
+
+static void PaintAdventureIsland(void)
+{
+    u16 x;
+    u16 y;
+
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            bool8 impassable;
+            u16 metatile = GetAdventureRenderedMetatile(x, y, &impassable);
+
+            if(impassable)
+                metatile |= MAPGRID_COLLISION_MASK;
+            MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, metatile);
+        }
+    }
+}
+
+void RogueAdv_ApplyAdventureMetatiles()
+{
+    bool8 allTrailCellsInBounds;
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    u32 renderStartClock = RogueDebug_SampleClock();
+#endif
+
+    AGB_ASSERT(gMapHeader.mapLayout->width == ADVENTURE_PATHS_MAP_WIDTH);
+    AGB_ASSERT(gMapHeader.mapLayout->height == ADVENTURE_PATHS_MAP_HEIGHT);
+
+    if(!AllocAdventureIslandMask())
+    {
+        AGB_ASSERT(FALSE);
+        return;
+    }
+
+    allTrailCellsInBounds = BuildAdventureIslandMask();
+    AGB_ASSERT(allTrailCellsInBounds);
+    PaintAdventureIsland();
+    FreeAdventureIslandMask();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Adventure Path] Island rendering: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - renderStartClock));
+#endif
+}
+
+#ifdef ROGUE_DEBUG
+static bool8 IsAdventureIslandConnected(void)
+{
+    bool8 changed;
+    bool8 foundStart = FALSE;
+    u16 trailCount = 0;
+    u16 visitedCount = 0;
+    s16 x;
+    s16 y;
+
+    // Reuse the blocker bit as a temporary visited bit. The caller rebuilds
+    // the deterministic blocker state before hashing or querying it again.
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            u8 cell = GetIslandMaskCell(x, y);
+
+            cell &= ~ISLAND_MASK_BLOCKED;
+            if((cell & ISLAND_MASK_TRAIL) != 0)
+            {
+                ++trailCount;
+                if(!foundStart)
+                {
+                    cell |= ISLAND_MASK_BLOCKED;
+                    foundStart = TRUE;
+                }
+            }
+            SetIslandMaskCell(x, y, cell);
+        }
+    }
+
+    do
+    {
+        changed = FALSE;
+        for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+        {
+            for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+            {
+                if(!HasIslandMaskFlag(x, y, ISLAND_MASK_TRAIL)
+                    || HasIslandMaskFlag(x, y, ISLAND_MASK_BLOCKED))
+                    continue;
+
+                if((HasIslandMaskFlag(x, y - 1, ISLAND_MASK_TRAIL) && HasIslandMaskFlag(x, y - 1, ISLAND_MASK_BLOCKED))
+                    || (HasIslandMaskFlag(x + 1, y, ISLAND_MASK_TRAIL) && HasIslandMaskFlag(x + 1, y, ISLAND_MASK_BLOCKED))
+                    || (HasIslandMaskFlag(x, y + 1, ISLAND_MASK_TRAIL) && HasIslandMaskFlag(x, y + 1, ISLAND_MASK_BLOCKED))
+                    || (HasIslandMaskFlag(x - 1, y, ISLAND_MASK_TRAIL) && HasIslandMaskFlag(x - 1, y, ISLAND_MASK_BLOCKED)))
+                {
+                    SetIslandMaskCell(x, y, GetIslandMaskCell(x, y) | ISLAND_MASK_BLOCKED);
+                    changed = TRUE;
+                }
+            }
+        }
+    } while(changed);
+
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            if(HasIslandMaskFlag(x, y, ISLAND_MASK_TRAIL)
+                && HasIslandMaskFlag(x, y, ISLAND_MASK_BLOCKED))
+            {
+                ++visitedCount;
+            }
+        }
+    }
+    return trailCount != 0 && trailCount == visitedCount;
+}
+
+#if 0
+static bool8 IsAdventureDecorationPlanValid(const struct AdventureDecorationPlan *plan)
+{
+    struct AdventureDecorationPlan prefix = {0};
+    u8 i;
+
+    if(plan->count > ADVENTURE_DECORATION_MAX_COUNT)
+        return FALSE;
+
+    for(i = 0; i < plan->count; ++i)
+    {
+        bool8 bottomImpassable;
+        bool8 isCandidate;
+        u8 edgeType = 0;
+        u16 bottomMetatile;
+
+        if(plan->entries[i].kind == ADVENTURE_LANDMARK_DECORATION)
+            isCandidate = IsAdventureLandmarkDecorationCandidate(plan->entries[i].x, plan->entries[i].y);
+        else if(plan->entries[i].kind == ADVENTURE_SURFACE_DECORATION)
+            isCandidate = IsAdventureSurfaceDecorationCandidate(plan->entries[i].x, plan->entries[i].y);
+        else if(plan->entries[i].kind == ADVENTURE_EDGE_DECORATION)
+            isCandidate = IsAdventureEdgeDecorationCandidate(plan->entries[i].x, plan->entries[i].y, &edgeType);
+        else
+            return FALSE;
+
+        if(plan->entries[i].type >= ADVENTURE_DECORATION_TYPE_COUNT
+            || !isCandidate
+            || (plan->entries[i].kind == ADVENTURE_EDGE_DECORATION && edgeType != plan->entries[i].type)
+            || !IsAdventureDecorationSeparated(&prefix, plan->entries[i].x, plan->entries[i].y, plan->entries[i].kind))
+            return FALSE;
+
+        bottomMetatile = GetAdventureRenderedMetatile(plan, plan->entries[i].x, plan->entries[i].y, &bottomImpassable);
+        if(!bottomImpassable
+            || bottomMetatile != GetAdventureDecorationMetatile(plan->entries[i].type, plan->entries[i].kind, TRUE))
+            return FALSE;
+
+        if(plan->entries[i].kind == ADVENTURE_LANDMARK_DECORATION)
+        {
+            bool8 topImpassable;
+            u16 topMetatile = GetAdventureRenderedMetatile(plan, plan->entries[i].x, plan->entries[i].y - 1, &topImpassable);
+
+            if(!topImpassable
+                || topMetatile != GetAdventureDecorationMetatile(plan->entries[i].type, ADVENTURE_LANDMARK_DECORATION, FALSE))
+                return FALSE;
+        }
+
+        prefix.entries[prefix.count++] = plan->entries[i];
+    }
+    return TRUE;
+}
+#endif
+
+bool8 RogueAdv_Debug_ValidateIslandLayout(u32 *layoutHash)
+{
+    bool8 isValid;
+    u32 hash = 2166136261u;
+    s16 x;
+    s16 y;
+
+    if(!AllocAdventureIslandMask())
+        return FALSE;
+
+    isValid = BuildAdventureIslandMask();
+    isValid &= IsAdventureIslandConnected();
+    isValid &= BuildAdventureIslandMask();
+
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            u8 cell = GetIslandMaskCell(x, y);
+            u8 level = GetAdventureIslandLevel(x, y);
+            bool8 impassable;
+            u16 metatile = GetAdventureRenderedMetatile(x, y, &impassable);
+
+            if((cell & ISLAND_MASK_TRAIL) != 0 && level == 0)
+                isValid = FALSE;
+            if((cell & ISLAND_MASK_TRAIL) != 0 && (cell & ISLAND_MASK_BLOCKED) == 0 && impassable)
+                isValid = FALSE;
+            if(((cell & ISLAND_MASK_TRAIL) == 0 || (cell & ISLAND_MASK_BLOCKED) != 0) && !impassable)
+                isValid = FALSE;
+            hash = (hash ^ cell) * 16777619u;
+            hash = (hash ^ level) * 16777619u;
+            hash = (hash ^ metatile) * 16777619u;
+        }
+    }
+
+    if(layoutHash != NULL)
+        *layoutHash = hash;
+    FreeAdventureIslandMask();
+    return isValid;
+}
+
+bool8 RogueAdv_Debug_HasBlockedIslandTrail(void)
+{
+    bool8 foundBlockedTrail = FALSE;
+    s16 x;
+    s16 y;
+
+    if(!AllocAdventureIslandMask())
+        return FALSE;
+
+    BuildAdventureIslandMask();
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            if((GetIslandMaskCell(x, y) & (ISLAND_MASK_TRAIL | ISLAND_MASK_BLOCKED))
+                == (ISLAND_MASK_TRAIL | ISLAND_MASK_BLOCKED))
+            {
+                foundBlockedTrail = TRUE;
+                break;
+            }
+        }
+        if(foundBlockedTrail)
+            break;
+    }
+    FreeAdventureIslandMask();
+    return foundBlockedTrail;
+}
+
+bool8 RogueAdv_Debug_GetIslandGeologyStats(u16 *formationCount, u16 *accentCount, u16 *crystalCount, u8 *terraceStage)
+{
+    u16 formations = 0;
+    u16 accents = 0;
+    u16 crystals = 0;
+    s16 x;
+    s16 y;
+
+    if(!AllocAdventureIslandMask())
+        return FALSE;
+
+    BuildAdventureIslandMask();
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            u16 metatile = GetAdventureTemplateMetatile(x, y);
+            u16 sourceMetatile = GetAdventureSurfaceTemplateMetatile(x, y);
+
+            if(sourceMetatile == METATILE_AdventurePaths_FormationA_TopLeft
+                || sourceMetatile == METATILE_AdventurePaths_FormationB_TopLeft)
+            {
+                s16 anchorX;
+                s16 anchorY;
+                u16 baseMetatile;
+
+                if(GetAdventureFormationAnchor(x, y, &anchorX, &anchorY, &baseMetatile)
+                    && IsAdventureFormationValid(anchorX, anchorY, baseMetatile))
+                    ++formations;
+            }
+            else if(IsAdventureTemplateAccentMetatile(metatile)
+                && IsAdventureIslandSurfaceCell(x, y))
+            {
+                ++accents;
+                if(metatile >= METATILE_AdventurePaths_Surface_CrystalClusterBlue0
+                    && metatile <= METATILE_AdventurePaths_Surface_CrystalClusterBlue1)
+                    ++crystals;
+            }
+        }
+    }
+    FreeAdventureIslandMask();
+
+    if(formationCount != NULL)
+        *formationCount = formations;
+    if(accentCount != NULL)
+        *accentCount = accents;
+    if(crystalCount != NULL)
+        *crystalCount = crystals;
+    if(terraceStage != NULL)
+        *terraceStage = GetAdventureTerraceStage();
+    return TRUE;
+}
+#endif
 
 
 static void SetBossRoomWarp(u16 trainerNum, struct WarpData* warp)

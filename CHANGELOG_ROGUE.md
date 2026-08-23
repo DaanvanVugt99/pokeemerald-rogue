@@ -16,6 +16,14 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Reworked the generated Adventure Paths into a connected floating astral-rock
+  island with dedicated stone trails, impassable cosmic void and cliffs, and
+  deterministic animated starfields that preserve the existing node flow;
+  transformed the original authored terrain composition into broad astral
+  geology, added late-game terrace layers, and adapted cohesive CC0 floating-
+  island edges, embedded mineral formations, restrained recolored rock
+  outcrops, and large clear-blue faceted crystal clusters at the original
+  map's authored decoration anchors.
 - Added each starter's summary-style front-sprite animation to its Poké Ball
   inspection reveal in the three-choice starter bag.
 - Added deterministic Item Rooms to Standard and Slow Path Adventures, with
@@ -388,6 +396,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Corrected Adventure Paths geology overlay priority so the player and room
+  nodes render above nearby rocks and crystal clusters.
 - Applied dynamic custom Pokémon typing to switch-in hazards, battle AI
   predictions, and party type checks so altered typings are respected outside
   active battle slots.
