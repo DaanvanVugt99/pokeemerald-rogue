@@ -246,6 +246,7 @@ u16 GetLevelBallMultiplier(u32 attacker, u32 target);
 u16 GetHeavyBallMultiplier(u32 attacker, u32 target);
 void BattleScriptExecute(const u8 *BS_ptr);
 void BattleScriptPushCursorAndCallback(const u8 *BS_ptr);
+bool32 TryActivateMetronomeTreasure(void);
 u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn);
 void ClearVariousBattlerFlags(u32 battler);
 void HandleAction_RunBattleScript(void);

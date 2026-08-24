@@ -359,9 +359,11 @@
 #define MOVEEND_OPPORTUNIST                       39    // Occurs after other stat change items/abilities to try and copy the boosts
 #define MOVEEND_DELIVERY_BAG                      40
 #define MOVEEND_COUNTERSPELL                      41
-#define MOVEEND_SAME_MOVE_TURNS                   42
-#define MOVEEND_CLEAR_BITS                        43
-#define MOVEEND_COUNT                             44
+#define MOVEEND_METRONOME_ITEMS                   42
+#define MOVEEND_SAME_MOVE_TURNS                   43
+#define MOVEEND_CLEAR_BITS                        44
+#define MOVEEND_RESTORE_METRONOME_ITEM_CONTEXT    45
+#define MOVEEND_COUNT                             46
 
 // switch cases
 #define B_SWITCH_NORMAL     0

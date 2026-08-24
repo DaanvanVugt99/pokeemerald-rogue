@@ -19,6 +19,9 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_TURNABOUT_TOTEM) == HOLD_EFFECT_TURNABOUT_TOTEM);
     ASSUME(ItemId_GetHoldEffect(ITEM_JESTER_SWITCH) == HOLD_EFFECT_JESTER_SWITCH);
     ASSUME(ItemId_GetHoldEffect(ITEM_WAYWARD_INCENSE) == HOLD_EFFECT_WAYWARD_INCENSE);
+    ASSUME(ItemId_GetHoldEffect(ITEM_CHAOS_CHARM) == HOLD_EFFECT_CHAOS_CHARM);
+    ASSUME(ItemId_GetHoldEffect(ITEM_MISCHIEF_QUILL) == HOLD_EFFECT_MISCHIEF_QUILL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_FINALE_BELL) == HOLD_EFFECT_FINALE_BELL);
 }
 
 SINGLE_BATTLE_TEST("Bane Lens applies once from final type effectiveness", s16 damage)
@@ -1388,5 +1391,213 @@ SINGLE_BATTLE_TEST("Klutz suppresses Doom Crown")
         EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
         EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
         EXPECT_EQ(gStatuses3[battler] & STATUS3_PERISH_SONG, 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Chaos Charm has a 20 percent chance to follow a damaging move with Metronome")
+{
+    bool32 activates;
+
+    PARAMETRIZE { activates = TRUE; }
+    PARAMETRIZE { activates = FALSE; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CHAOS_CHARM); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_CHAOS_CHARM, activates)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        if (activates)
+        {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        }
+        else
+        {
+            NONE_OF {
+                ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+                ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+            }
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Chaos Charm does not follow status moves with Metronome")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CHAOS_CHARM); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Mischief Quill follows only the first status move after entry with Metronome")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_MISCHIEF_QUILL); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Mischief Quill refreshes after switching out and back in")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_MISCHIEF_QUILL); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(player->item, ITEM_MISCHIEF_QUILL);
+        EXPECT(!gBattleStruct->metronomeItemChainActive);
+        EXPECT(gDisableStructs[battler].mischiefQuillUsed);
+    }
+}
+
+SINGLE_BATTLE_TEST("Mischief Quill and Improv keep independent Metronome triggers")
+{
+    GIVEN {
+        PLAYER(SPECIES_MR_MIME) { HP(50); MaxHP(100); Ability(ABILITY_SOUNDPROOF); UniqueAbility(ABILITY_IMPROV); Item(ITEM_MISCHIEF_QUILL); Moves(MOVE_RECOVER); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_RECOVER, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_IMPROV);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Finale Bell triggers strictly below one quarter HP and uses Metronome three times")
+{
+    u16 initialHp;
+    bool32 activates;
+
+    PARAMETRIZE { initialHp = 74; activates = TRUE; }
+    PARAMETRIZE { initialHp = 75; activates = FALSE; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(initialHp); MaxHP(100); Speed(1); Item(ITEM_FINALE_BELL); Moves(MOVE_SPLASH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Level(50); Speed(2); HP(1000); MaxHP(1000); Moves(MOVE_NIGHT_SHADE); }
+    } WHEN {
+        if (activates)
+            TURN { MOVE(opponent, MOVE_NIGHT_SHADE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(player, MOVE_SPLASH); }
+        else
+            TURN { MOVE(opponent, MOVE_NIGHT_SHADE); MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_NIGHT_SHADE, opponent);
+        if (activates)
+        {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+        }
+        else
+        {
+            NONE_OF {
+                ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+                ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+            }
+        }
+    } THEN {
+        if (activates)
+            EXPECT_EQ(player->item, ITEM_NONE);
+        else
+            EXPECT_EQ(player->item, ITEM_FINALE_BELL);
+    }
+}
+
+SINGLE_BATTLE_TEST("Finale Bell cannot activate twice after Recycle")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(60); MaxHP(100); Speed(1); Item(ITEM_FINALE_BELL); Moves(MOVE_SPLASH, MOVE_RECYCLE, MOVE_RECOVER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Level(50); Speed(2); HP(1000); MaxHP(1000); Moves(MOVE_NIGHT_SHADE, MOVE_SPLASH); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_NIGHT_SHADE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(player, MOVE_SPLASH); }
+        TURN { MOVE(opponent, MOVE_SPLASH); MOVE(player, MOVE_RECYCLE); }
+        TURN { MOVE(opponent, MOVE_SPLASH); MOVE(player, MOVE_RECOVER); }
+        TURN { MOVE(opponent, MOVE_NIGHT_SHADE); MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RECYCLE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RECOVER, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_NIGHT_SHADE, opponent);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_FINALE_BELL);
+    }
+}
+
+SINGLE_BATTLE_TEST("Finale Bell is restored after battle")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(74); MaxHP(100); Speed(1); Item(ITEM_FINALE_BELL); Moves(MOVE_SPLASH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Level(50); Speed(2); HP(1000); MaxHP(1000); Moves(MOVE_NIGHT_SHADE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_NIGHT_SHADE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(player, MOVE_SPLASH); }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
+        TryRestoreHeldItems();
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM), ITEM_FINALE_BELL);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Finale Bell")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(74); MaxHP(100); Speed(1); Ability(ABILITY_KLUTZ); Item(ITEM_FINALE_BELL); Moves(MOVE_SPLASH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Level(50); Speed(2); Moves(MOVE_NIGHT_SHADE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_NIGHT_SHADE); MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_FINALE_BELL);
     }
 }

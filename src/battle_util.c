@@ -9117,6 +9117,134 @@ static inline bool32 HadAtLeastQuarterHpNowHasLess(u32 battler)
             && gBattleMons[battler].hp < cutoff);
 }
 
+static bool32 TryGetMetronomeTreasureTarget(u32 battler, u32 *target)
+{
+    u32 i;
+
+    if (*target < gBattlersCount
+     && IsBattlerAlive(*target)
+     && GetBattlerSide(*target) != GetBattlerSide(battler))
+        return TRUE;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (IsBattlerAlive(i) && GetBattlerSide(i) != GetBattlerSide(battler))
+        {
+            *target = i;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static bool32 CanUseMetronomeTreasure(u32 battler, u32 *target)
+{
+    return IsBattlerAlive(battler)
+        && !NoAliveMonsForEitherParty()
+        && (battler != gBattlerAttacker || !IsCurrentMoveSwitchingUser())
+        && !gProtectStructs[battler].confusionSelfDmg
+        && !(gBattleMons[battler].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+        && TryGetMetronomeTreasureTarget(battler, target);
+}
+
+static void StartMetronomeTreasureChain(u32 battler, u32 target, bool32 consumeItem)
+{
+    gBattleStruct->savedMetronomeItemAttacker = gBattlerAttacker;
+    gBattleStruct->savedMetronomeItemTarget = gBattlerTarget;
+    SetAtkCancellerForCalledMove();
+    gBattleStruct->metronomeItemChainActive = TRUE;
+    gBattlerAttacker = gBattlerAbility = gBattleScripting.battler = battler;
+    gBattlerTarget = target;
+    gCalledMove = MOVE_METRONOME;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    gLastUsedItem = gBattleMons[battler].item;
+    RecordItemEffectBattle(battler, GetBattlerHoldEffect(battler, FALSE));
+    BattleScriptPushCursor();
+    gBattlescriptCurrInstr = consumeItem
+        ? BattleScript_FinaleBellUsesCalledMove
+        : BattleScript_MetronomeItemUsesCalledMove;
+}
+
+bool32 TryActivateMetronomeTreasure(void)
+{
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+    u32 i;
+
+    if (gBattleStruct->metronomeItemChainActive)
+    {
+        u32 battler = gBattlerAttacker;
+        u32 target = gBattlerTarget;
+
+        if (gBattleStruct->finaleBellMetronomeRepeats[battler] == 0)
+            return FALSE;
+
+        if (!CanUseMetronomeTreasure(battler, &target))
+        {
+            gBattleStruct->finaleBellMetronomeRepeats[battler] = 0;
+            return FALSE;
+        }
+
+        gBattleStruct->finaleBellMetronomeRepeats[battler]--;
+        SetAtkCancellerForCalledMove();
+        gBattlerTarget = target;
+        gCalledMove = MOVE_METRONOME;
+        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMoveNoPopup;
+        return TRUE;
+    }
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+        u32 target = gBattlerTarget;
+        u32 holdEffect;
+
+        if (!gProtectStructs[battler].metronomeItemPending)
+            continue;
+
+        gProtectStructs[battler].metronomeItemPending = FALSE;
+        holdEffect = GetBattlerHoldEffect(battler, TRUE);
+        if ((holdEffect != HOLD_EFFECT_CHAOS_CHARM && holdEffect != HOLD_EFFECT_MISCHIEF_QUILL)
+         || !CanUseMetronomeTreasure(battler, &target))
+            continue;
+
+        if (holdEffect == HOLD_EFFECT_CHAOS_CHARM
+         && !RandomPercentage(RNG_ROGUE_CHAOS_CHARM, 20))
+            continue;
+
+        if (holdEffect == HOLD_EFFECT_MISCHIEF_QUILL)
+            gDisableStructs[battler].mischiefQuillUsed = TRUE;
+
+        StartMetronomeTreasureChain(battler, target, FALSE);
+        return TRUE;
+    }
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+        u32 side = GetBattlerSide(battler);
+        u32 partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+        u32 target = gBattlerTarget;
+
+        if (GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_FINALE_BELL
+         || (gBattleStruct->finaleBellUsed[side] & partyBit)
+         || !HadAtLeastQuarterHpNowHasLess(battler)
+         || !CanUseMetronomeTreasure(battler, &target))
+            continue;
+
+        gBattleStruct->finaleBellUsed[side] |= partyBit;
+        gBattleStruct->finaleBellMetronomeRepeats[battler] = 2;
+        StartMetronomeTreasureChain(battler, target, TRUE);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 static inline bool32 CanAbilityDisableBattler(u32 battler)
 {
     return gDisableStructs[battler].disabledMove == MOVE_NONE
@@ -28304,7 +28432,8 @@ void TryRestoreHeldItems(void)
     {
         if (B_RESTORE_HELD_BATTLE_ITEMS == TRUE
          || gBattleStruct->itemLost[i].stolen
-         || gBattleStruct->usedHeldItems[i][B_SIDE_PLAYER] == ITEM_BOOSTER_ENERGY)
+         || gBattleStruct->usedHeldItems[i][B_SIDE_PLAYER] == ITEM_BOOSTER_ENERGY
+         || gBattleStruct->usedHeldItems[i][B_SIDE_PLAYER] == ITEM_FINALE_BELL)
         {
             lostItem = gBattleStruct->itemLost[i].originalItem;
             if (lostItem != ITEM_NONE && ItemId_GetPocket(lostItem) != POCKET_BERRIES)

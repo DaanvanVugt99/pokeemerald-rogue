@@ -63,6 +63,14 @@ Format follows Keep a Changelog loosely:
   holder out after surviving direct damage and passes its stat changes.
 - Added Wayward Incense, a Treasure held item that grants STAB to off-type
   damaging moves while removing it from natural same-type moves.
+- Added Chaos Charm, a Treasure held item that gives damaging moves a 20%
+  chance to be followed by Metronome.
+- Added Mischief Quill, a Treasure held item that follows the holder's first
+  status move after each entry with Metronome.
+- Added Finale Bell, a restorable Treasure held item that is consumed to use
+  Metronome three times when its holder falls below 25% HP.
+- Added 30 credited, native 24x24 Treasure concept icons and GBA-ready palettes
+  from the Tower of Ashes resource pack for future held-item designs.
 - Added a debug-only Forced Treasure setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and

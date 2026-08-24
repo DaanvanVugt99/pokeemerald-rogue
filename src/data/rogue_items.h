@@ -111,6 +111,9 @@ extern const u8 gItemDesc_TempoDial[];
 extern const u8 gItemDesc_TurnaboutTotem[];
 extern const u8 gItemDesc_JesterSwitch[];
 extern const u8 gItemDesc_WaywardIncense[];
+extern const u8 gItemDesc_ChaosCharm[];
+extern const u8 gItemDesc_MischiefQuill[];
+extern const u8 gItemDesc_FinaleBell[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2402,6 +2405,51 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_OddIncense,
         .iconPalette = gItemIconPalette_WaywardIncense,
+    },
+
+    [ITEM_CHAOS_CHARM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Chaos Charm"),
+        .itemId = ITEM_CHAOS_CHARM,
+        .price = 0,
+        .description = gItemDesc_ChaosCharm,
+        .holdEffect = HOLD_EFFECT_CHAOS_CHARM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_ShinyCharm,
+        .iconPalette = gItemIconPalette_ChaosCharm,
+    },
+
+    [ITEM_MISCHIEF_QUILL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Mischief Quill"),
+        .itemId = ITEM_MISCHIEF_QUILL,
+        .price = 0,
+        .description = gItemDesc_MischiefQuill,
+        .holdEffect = HOLD_EFFECT_MISCHIEF_QUILL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_CleverFeather,
+        .iconPalette = gItemIconPalette_MischiefQuill,
+    },
+
+    [ITEM_FINALE_BELL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Finale Bell"),
+        .itemId = ITEM_FINALE_BELL,
+        .price = 0,
+        .description = gItemDesc_FinaleBell,
+        .holdEffect = HOLD_EFFECT_FINALE_BELL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_SootheBell,
+        .iconPalette = gItemIconPalette_FinaleBell,
     },
 
 #ifdef ROGUE_DEBUG

@@ -254,9 +254,12 @@
 #define ITEM_TURNABOUT_TOTEM              (LAST_ITEM_TR + 14)
 #define ITEM_JESTER_SWITCH                (LAST_ITEM_TR + 15)
 #define ITEM_WAYWARD_INCENSE              (LAST_ITEM_TR + 16)
+#define ITEM_CHAOS_CHARM                   (LAST_ITEM_TR + 17)
+#define ITEM_MISCHIEF_QUILL                (LAST_ITEM_TR + 18)
+#define ITEM_FINALE_BELL                   (LAST_ITEM_TR + 19)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_WAYWARD_INCENSE
+#define LAST_ITEM_ROOM_REWARD           ITEM_FINALE_BELL
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

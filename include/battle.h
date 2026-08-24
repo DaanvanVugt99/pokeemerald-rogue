@@ -134,6 +134,7 @@ struct DisableStruct
     u8 uniqueOncePerSwitchInUsed:1;
     u8 preparationCharmUsed:1;
     u8 proteanCharmUsed:1;
+    u8 mischiefQuillUsed:1;
     u8 ultraAscentActive:1;
     u8 grafittiTagged:1;
     u8 grafittiTagColor:2;
@@ -191,6 +192,7 @@ struct ProtectStruct
     u16 uniqueAbilityActive:1;
     u16 extraMoveUsed:1;
     u16 uniqueAbilityTriggeredThisTurn:1;
+    u16 metronomeItemPending:1;
     u16 activateOpportunist:2; // 2 - to copy stats. 1 - stats copied (do not repeat). 0 - no stats to copy
     u16 driftSongMoveUsed:1;
     u32 physicalDmg;
@@ -737,6 +739,11 @@ struct BattleStruct
     u8 savedBattlerTarget;
     u8 savedFaintBattlerAttacker;
     u8 savedFaintBattlerTarget;
+    u8 savedMetronomeItemAttacker;
+    u8 savedMetronomeItemTarget;
+    bool8 metronomeItemChainActive;
+    u8 finaleBellUsed[NUM_BATTLE_SIDES];
+    u8 finaleBellMetronomeRepeats[MAX_BATTLERS_COUNT];
     bool8 ateBoost[MAX_BATTLERS_COUNT];
     u8 activeAbilityPopUps; // as bits for each battler
     u8 abilityPopUpSpriteIds[MAX_BATTLERS_COUNT][2];    // two per battler

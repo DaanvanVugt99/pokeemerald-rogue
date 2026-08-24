@@ -228,6 +228,36 @@ text gItemRoomDesc_WaywardIncense
     format("Damaging moves outside the holder's natural types receive STAB, while moves matching its natural types do not.")
 }
 
+text gItemDesc_ChaosCharm
+{
+    format("Damaging moves have a 20% chance to be followed by Metronome.")
+}
+
+text gItemRoomDesc_ChaosCharm
+{
+    format("After the holder uses a damaging move, it has a 20% chance to follow up with Metronome.")
+}
+
+text gItemDesc_MischiefQuill
+{
+    format("First status move after entry is followed by Metronome.")
+}
+
+text gItemRoomDesc_MischiefQuill
+{
+    format("The first status move the holder uses after entering battle is followed by Metronome.")
+}
+
+text gItemDesc_FinaleBell
+{
+    format("Below 25% HP, uses Metronome 3 times; consumed for battle.")
+}
+
+text gItemRoomDesc_FinaleBell
+{
+    format("When the holder falls below 25% HP, it uses Metronome three times and consumes the item for the battle.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

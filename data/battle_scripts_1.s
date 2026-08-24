@@ -12753,6 +12753,23 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_MetronomeItemUsesCalledMove::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	setlastuseditem BS_ATTACKER
+	printstring STRINGID_METRONOMEITEMACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
+BattleScript_FinaleBellUsesCalledMove::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	setlastuseditem BS_ATTACKER
+	printstring STRINGID_METRONOMEITEMACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	removeitem BS_ATTACKER
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_BitterRuseUsesCalledMove::
 	copybyte gBattlerAttacker, sBATTLER
 	copybyte gBattlerAbility, sBATTLER

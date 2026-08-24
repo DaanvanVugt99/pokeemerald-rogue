@@ -1644,6 +1644,17 @@ static void Cmd_attackcanceler(void)
         gDisableStructs[gBattlerAttacker].preparationCharmUsed = TRUE;
     }
 
+    if (!gBattleStruct->isAtkCancelerForCalledMove)
+    {
+        u32 holdEffect = GetBattlerHoldEffect(gBattlerAttacker, TRUE);
+
+        if ((holdEffect == HOLD_EFFECT_CHAOS_CHARM && !IS_MOVE_STATUS(gCurrentMove))
+         || (holdEffect == HOLD_EFFECT_MISCHIEF_QUILL
+          && IS_MOVE_STATUS(gCurrentMove)
+          && !gDisableStructs[gBattlerAttacker].mischiefQuillUsed))
+            gProtectStructs[gBattlerAttacker].metronomeItemPending = TRUE;
+    }
+
     // Check if no available target present on the field or if Sky Battles ban the move
     if ((NoTargetPresent(gBattlerAttacker, gCurrentMove)
         && (!gBattleMoves[gCurrentMove].twoTurnMove || (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS)))
@@ -8940,6 +8951,12 @@ static void Cmd_moveend(void)
             else
                 gBattleScripting.moveendState++;
             break;
+        case MOVEEND_METRONOME_ITEMS:
+            if (TryActivateMetronomeTreasure())
+                effect = TRUE;
+            else
+                gBattleScripting.moveendState++;
+            break;
         case MOVEEND_SAME_MOVE_TURNS:
             if (gCurrentMove != gLastResultingMoves[gBattlerAttacker] || gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
                 gBattleStruct->sameMoveTurns[gBattlerAttacker] = 0;
@@ -9016,6 +9033,15 @@ static void Cmd_moveend(void)
 
             ClearFaintedCommanderPairings();
 
+            gBattleScripting.moveendState++;
+            break;
+        case MOVEEND_RESTORE_METRONOME_ITEM_CONTEXT:
+            if (gBattleStruct->metronomeItemChainActive)
+            {
+                gBattlerAttacker = gBattleStruct->savedMetronomeItemAttacker;
+                gBattlerTarget = gBattleStruct->savedMetronomeItemTarget;
+                gBattleStruct->metronomeItemChainActive = FALSE;
+            }
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_COUNT:
