@@ -194,6 +194,10 @@
 #define HOLD_EFFECT_SAND_TOTEM           208
 #define HOLD_EFFECT_SNOW_TOTEM           209
 #define HOLD_EFFECT_ACID_RAIN_TOTEM      210
+#define HOLD_EFFECT_ELECTRIC_TIKI        211
+#define HOLD_EFFECT_GRASSY_TIKI          212
+#define HOLD_EFFECT_MISTY_TIKI           213
+#define HOLD_EFFECT_PSYCHIC_TIKI         214
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

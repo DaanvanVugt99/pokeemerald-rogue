@@ -201,6 +201,7 @@ void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler);
 void QueueSaltFortressForDefenseRise(u32 battler);
 void QueueLastPourForHeal(u32 battler);
 void QueueCounterstepForSpeedRise(u32 battler);
+void QueuePsychicTikiForStatRise(u32 battler);
 void QueueBitterRuseForTypeImmunity(void);
 bool32 TryActivatePendingUniqueAbilityEffect(void);
 bool32 TryActivatePendingUniqueAbilityEffectOfKind(u32 effect);

@@ -120,6 +120,10 @@ extern const u8 gItemDesc_RainTotem[];
 extern const u8 gItemDesc_SandTotem[];
 extern const u8 gItemDesc_SnowTotem[];
 extern const u8 gItemDesc_AcidRainTotem[];
+extern const u8 gItemDesc_ElectricTiki[];
+extern const u8 gItemDesc_GrassyTiki[];
+extern const u8 gItemDesc_MistyTiki[];
+extern const u8 gItemDesc_PsychicTiki[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2546,6 +2550,66 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureAcidRainTotem,
         .iconPalette = gItemIconPalette_TreasureAcidRainTotem,
+    },
+
+    [ITEM_ELECTRIC_TIKI - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Electric Tiki"),
+        .itemId = ITEM_ELECTRIC_TIKI,
+        .price = 0,
+        .description = gItemDesc_ElectricTiki,
+        .holdEffect = HOLD_EFFECT_ELECTRIC_TIKI,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureElectricTiki,
+        .iconPalette = gItemIconPalette_TreasureElectricTiki,
+    },
+
+    [ITEM_GRASSY_TIKI - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Grassy Tiki"),
+        .itemId = ITEM_GRASSY_TIKI,
+        .price = 0,
+        .description = gItemDesc_GrassyTiki,
+        .holdEffect = HOLD_EFFECT_GRASSY_TIKI,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureGrassyTiki,
+        .iconPalette = gItemIconPalette_TreasureGrassyTiki,
+    },
+
+    [ITEM_MISTY_TIKI - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Misty Tiki"),
+        .itemId = ITEM_MISTY_TIKI,
+        .price = 0,
+        .description = gItemDesc_MistyTiki,
+        .holdEffect = HOLD_EFFECT_MISTY_TIKI,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureMistyTiki,
+        .iconPalette = gItemIconPalette_TreasureMistyTiki,
+    },
+
+    [ITEM_PSYCHIC_TIKI - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Psychic Tiki"),
+        .itemId = ITEM_PSYCHIC_TIKI,
+        .price = 0,
+        .description = gItemDesc_PsychicTiki,
+        .holdEffect = HOLD_EFFECT_PSYCHIC_TIKI,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasurePsychicTiki,
+        .iconPalette = gItemIconPalette_TreasurePsychicTiki,
     },
 
 #ifdef ROGUE_DEBUG

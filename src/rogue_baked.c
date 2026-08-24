@@ -1063,6 +1063,10 @@ extern const u8 gItemRoomDesc_RainTotem[];
 extern const u8 gItemRoomDesc_SandTotem[];
 extern const u8 gItemRoomDesc_SnowTotem[];
 extern const u8 gItemRoomDesc_AcidRainTotem[];
+extern const u8 gItemRoomDesc_ElectricTiki[];
+extern const u8 gItemRoomDesc_GrassyTiki[];
+extern const u8 gItemRoomDesc_MistyTiki[];
+extern const u8 gItemRoomDesc_PsychicTiki[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1168,6 +1172,14 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_SnowTotem;
     case ITEM_ACID_RAIN_TOTEM:
         return gItemRoomDesc_AcidRainTotem;
+    case ITEM_ELECTRIC_TIKI:
+        return gItemRoomDesc_ElectricTiki;
+    case ITEM_GRASSY_TIKI:
+        return gItemRoomDesc_GrassyTiki;
+    case ITEM_MISTY_TIKI:
+        return gItemRoomDesc_MistyTiki;
+    case ITEM_PSYCHIC_TIKI:
+        return gItemRoomDesc_PsychicTiki;
     default:
         return Rogue_GetItemDesc(itemId);
     }

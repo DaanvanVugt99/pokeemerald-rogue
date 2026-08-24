@@ -12611,6 +12611,23 @@ BattleScript_AcidRainTotemPoisons::
 	seteffectprimary
 	return
 
+BattleScript_TikiActivates_Ret::
+	call BattleScript_TikiActivates
+	return
+
+BattleScript_TikiActivates_End2::
+	call BattleScript_TikiActivates
+	end2
+
+BattleScript_TikiActivates:
+	pause B_WAIT_TIME_SHORT
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	return
+
 BattleScript_MeanStreakRestoreAfterPoison::
 	various BS_SCRIPTING, VARIOUS_RESTORE_ATTACKER_AND_TARGET
 	return

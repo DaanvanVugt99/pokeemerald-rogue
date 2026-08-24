@@ -125,7 +125,7 @@ text gItemDesc_Graveglass
 
 text gItemRoomDesc_Graveglass
 {
-    format("Adds Ghost typing.")
+    format("Adds Ghost typing and guarantees escape from traps and wild battles.")
 }
 
 text gItemDesc_AshenCrown
@@ -240,12 +240,12 @@ text gItemRoomDesc_ChaosCharm
 
 text gItemDesc_MischiefQuill
 {
-    format("First status move after entry is followed by Metronome.")
+    format("First status move each switch-in also uses Metronome.")
 }
 
 text gItemRoomDesc_MischiefQuill
 {
-    format("The first status move the holder uses after entering battle is followed by Metronome.")
+    format("The holder's first status move each switch-in also uses Metronome.")
 }
 
 text gItemDesc_FinaleBell
@@ -300,12 +300,12 @@ text gItemRoomDesc_SandTotem
 
 text gItemDesc_SnowTotem
 {
-    format("In snow, takes 35% less supereffective damage.")
+    format("In snow, takes 35% less super-effective damage.")
 }
 
 text gItemRoomDesc_SnowTotem
 {
-    format("During snow, reduces supereffective damage received by 35%.")
+    format("During snow, reduces super-effective damage received by 35%.")
 }
 
 text gItemDesc_AcidRainTotem
@@ -316,6 +316,46 @@ text gItemDesc_AcidRainTotem
 text gItemRoomDesc_AcidRainTotem
 {
     format("Prevents acid-rain damage. During acid rain, damaging moves poison their targets.")
+}
+
+text gItemDesc_ElectricTiki
+{
+    format("First priority move each battle sets Electric Terrain.")
+}
+
+text gItemRoomDesc_ElectricTiki
+{
+    format("The holder's first priority move each battle sets Electric Terrain.")
+}
+
+text gItemDesc_GrassyTiki
+{
+    format("First move to restore HP each battle sets Grassy Terrain.")
+}
+
+text gItemRoomDesc_GrassyTiki
+{
+    format("The holder's first move to restore its HP each battle sets Grassy Terrain.")
+}
+
+text gItemDesc_MistyTiki
+{
+    format("First status move each battle sets Misty Terrain.")
+}
+
+text gItemRoomDesc_MistyTiki
+{
+    format("The holder's first status move each battle sets Misty Terrain.")
+}
+
+text gItemDesc_PsychicTiki
+{
+    format("First stat rise each battle sets Psychic Terrain.")
+}
+
+text gItemRoomDesc_PsychicTiki
+{
+    format("The first time one of the holder's stats rises each battle, it sets Psychic Terrain.")
 }
 
 text gItemDesc_MaxMushroom

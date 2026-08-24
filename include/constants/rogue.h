@@ -263,9 +263,13 @@
 #define ITEM_SAND_TOTEM                    (LAST_ITEM_TR + 23)
 #define ITEM_SNOW_TOTEM                    (LAST_ITEM_TR + 24)
 #define ITEM_ACID_RAIN_TOTEM               (LAST_ITEM_TR + 25)
+#define ITEM_ELECTRIC_TIKI                  (LAST_ITEM_TR + 26)
+#define ITEM_GRASSY_TIKI                    (LAST_ITEM_TR + 27)
+#define ITEM_MISTY_TIKI                     (LAST_ITEM_TR + 28)
+#define ITEM_PSYCHIC_TIKI                   (LAST_ITEM_TR + 29)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_ACID_RAIN_TOTEM
+#define LAST_ITEM_ROOM_REWARD           ITEM_PSYCHIC_TIKI
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

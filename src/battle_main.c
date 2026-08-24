@@ -3412,6 +3412,7 @@ const u8* FaintClearSetData(u32 battler)
     gProtectStructs[battler].usedGravityPreventedMove = FALSE;
     gProtectStructs[battler].usedThroatChopPreventedMove = FALSE;
     gProtectStructs[battler].statRaised = FALSE;
+    gBattleStruct->psychicTikiStatRisePending &= ~gBitTable[battler];
     gProtectStructs[battler].statFell = FALSE;
     gProtectStructs[battler].pranksterElevated = FALSE;
     gProtectStructs[battler].preparationCharmElevated = FALSE;

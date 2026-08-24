@@ -16154,6 +16154,10 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
      && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_INCREASE)
         QueueCounterstepForSpeedRise(battler);
 
+    if (statValue > 0
+     && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_INCREASE)
+        QueuePsychicTikiForStatRise(battler);
+
     if (statId == STAT_DEF
      && statValue < 0
      && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_STAT_WONT_DECREASE)

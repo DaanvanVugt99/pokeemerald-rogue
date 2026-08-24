@@ -22383,10 +22383,106 @@ static bool32 ShouldDelayWhiteHerbAtMoveEnd(u32 battler)
     return FALSE;
 }
 
+static bool32 IsTikiItemUsed(u32 battler)
+{
+    return gBattleStruct->tikiItemUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]];
+}
+
+static bool32 TryActivateTikiTerrain(u32 battler, u32 terrain, u32 terrainMessage, bool32 execute)
+{
+    if (!IsBattlerAlive(battler)
+     || IsTikiItemUsed(battler)
+     || !TryChangeBattleTerrain(battler, terrain, &gFieldTimers.terrainTimer))
+        return FALSE;
+
+    gBattleStruct->tikiItemUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+    gLastUsedItem = gBattleMons[battler].item;
+    gPotentialItemEffectBattler = gBattleScripting.battler = battler;
+    gBattleCommunication[MULTISTRING_CHOOSER] = terrainMessage;
+    RecordItemEffectBattle(battler, GetBattlerHoldEffect(battler, TRUE));
+    if (execute)
+        BattleScriptExecute(BattleScript_TikiActivates_End2);
+    else
+    {
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_TikiActivates_Ret;
+    }
+    return TRUE;
+}
+
+static bool32 DidTikiTriggerMoveSucceed(u32 battler)
+{
+    return battler == gBattlerAttacker
+        && IsBattlerAlive(battler)
+        && DidMoveSucceedForMoveEndEffects(battler)
+        && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+        && !gProtectStructs[battler].confusionSelfDmg
+        && IsFinalMultiHitStrike();
+}
+
+static bool32 TryActivateMoveTriggeredTiki(u32 battler, u16 holdEffect)
+{
+    if (IsTikiItemUsed(battler) || !DidTikiTriggerMoveSucceed(battler))
+        return FALSE;
+
+    switch (holdEffect)
+    {
+    case HOLD_EFFECT_ELECTRIC_TIKI:
+        if (GetExecutingMovePriority(battler) > 0)
+            return TryActivateTikiTerrain(battler, STATUS_FIELD_ELECTRIC_TERRAIN, B_MSG_TERRAIN_SET_ELECTRIC, FALSE);
+        break;
+    case HOLD_EFFECT_GRASSY_TIKI:
+        if (IsHealingMove(gCurrentMove)
+         && gBattleMons[battler].hp > gBattleStruct->hpBefore[battler])
+            return TryActivateTikiTerrain(battler, STATUS_FIELD_GRASSY_TERRAIN, B_MSG_TERRAIN_SET_GRASSY, FALSE);
+        break;
+    case HOLD_EFFECT_MISTY_TIKI:
+        if (IS_MOVE_STATUS(gCurrentMove))
+            return TryActivateTikiTerrain(battler, STATUS_FIELD_MISTY_TERRAIN, B_MSG_TERRAIN_SET_MISTY, FALSE);
+        break;
+    }
+    return FALSE;
+}
+
+void QueuePsychicTikiForStatRise(u32 battler)
+{
+    if (battler < gBattlersCount
+     && IsBattlerAlive(battler)
+     && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_PSYCHIC_TIKI
+     && !IsTikiItemUsed(battler))
+        gBattleStruct->psychicTikiStatRisePending |= gBitTable[battler];
+}
+
+static bool32 TryActivatePendingPsychicTiki(u32 battler, bool32 execute)
+{
+    if (!(gBattleStruct->psychicTikiStatRisePending & gBitTable[battler]))
+        return FALSE;
+
+    gBattleStruct->psychicTikiStatRisePending &= ~gBitTable[battler];
+    if (GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_PSYCHIC_TIKI
+     || IsTikiItemUsed(battler))
+        return FALSE;
+
+    return TryActivateTikiTerrain(battler, STATUS_FIELD_PSYCHIC_TERRAIN, B_MSG_TERRAIN_SET_PSYCHIC, execute);
+}
+
 static u8 ItemEffectMoveEnd(u32 battler, u16 holdEffect)
 {
     u8 effect = 0;
     u32 i;
+
+    if (holdEffect == HOLD_EFFECT_PSYCHIC_TIKI)
+    {
+        if (TryActivatePendingPsychicTiki(battler, FALSE))
+            return ITEM_EFFECT_OTHER;
+    }
+    else if (holdEffect == HOLD_EFFECT_ELECTRIC_TIKI
+          || holdEffect == HOLD_EFFECT_GRASSY_TIKI
+          || holdEffect == HOLD_EFFECT_MISTY_TIKI)
+    {
+        if (TryActivateMoveTriggeredTiki(battler, holdEffect))
+            return ITEM_EFFECT_OTHER;
+    }
 
     switch (holdEffect)
     {
@@ -22888,6 +22984,10 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 if (TryBoosterEnergy(battler))
                     effect = ITEM_EFFECT_OTHER;
                 break;
+            case HOLD_EFFECT_PSYCHIC_TIKI:
+                if (TryActivatePendingPsychicTiki(battler, TRUE))
+                    effect = ITEM_EFFECT_OTHER;
+                break;
             case HOLD_EFFECT_EJECT_PACK:
                 if (gProtectStructs[battler].statFell
                  && gProtectStructs[battler].disableEjectPack == 0
@@ -23014,6 +23114,10 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             case HOLD_EFFECT_RAIN_TOTEM:
                 if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN))
                     goto LEFTOVERS;
+                break;
+            case HOLD_EFFECT_PSYCHIC_TIKI:
+                if (TryActivatePendingPsychicTiki(battler, TRUE))
+                    effect = ITEM_EFFECT_OTHER;
                 break;
             case HOLD_EFFECT_CONFUSE_SPICY:
                 if (!moveTurn)
