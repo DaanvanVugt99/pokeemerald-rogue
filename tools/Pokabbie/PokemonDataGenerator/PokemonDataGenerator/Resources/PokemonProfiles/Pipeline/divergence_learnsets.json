@@ -1874,6 +1874,18 @@
       "level": 50
     },
     {
+      "id": "level-luvdisc-heart_swap",
+      "species": "SPECIES_LUVDISC",
+      "move": "MOVE_HEART_SWAP",
+      "level": 39
+    },
+    {
+      "id": "level-luvdisc-take_heart",
+      "species": "SPECIES_LUVDISC",
+      "move": "MOVE_TAKE_HEART",
+      "level": 52
+    },
+    {
       "id": "retained-level-abomasnow-cold_snap",
       "species": "SPECIES_ABOMASNOW",
       "move": "MOVE_COLD_SNAP",

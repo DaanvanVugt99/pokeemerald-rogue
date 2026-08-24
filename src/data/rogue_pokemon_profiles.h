@@ -105627,10 +105627,12 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_LUVDISC[] =
 	{ .move=MOVE_SWEET_KISS, .level=31 },
 	{ .move=MOVE_TAKE_DOWN, .level=34 },
 	{ .move=MOVE_BABY_DOLL_EYES, .level=37 },
+	{ .move=MOVE_HEART_SWAP, .level=39 },
 	{ .move=MOVE_AQUA_RING, .level=40 },
 	{ .move=MOVE_SOAK, .level=42 },
 	{ .move=MOVE_HYDRO_PUMP, .level=46 },
 	{ .move=MOVE_SAFEGUARD, .level=49 },
+	{ .move=MOVE_TAKE_HEART, .level=52 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 

@@ -455,7 +455,9 @@ ADVENTURE_PATHS_ANIM_ASSETS := \
 
 ADVENTURE_PATHS_MAP_ASSETS := \
 	data/layouts/Rogue_AdventurePaths/map.bin \
-	data/layouts/Rogue_AdventurePaths/border.bin
+	data/layouts/Rogue_AdventurePaths/border.bin \
+	data/layouts/Rogue_Encounter_ItemRoom/map.bin \
+	data/layouts/Rogue_Encounter_ItemRoom/border.bin
 
 $(C_BUILDDIR)/tilesets.o: $(ADVENTURE_PATHS_TILESET_ASSETS)
 $(C_BUILDDIR)/tileset_anims.o: $(ADVENTURE_PATHS_ANIM_ASSETS)

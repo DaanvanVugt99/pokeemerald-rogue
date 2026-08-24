@@ -20,6 +20,7 @@
 #include "rogue.h"
 #include "rogue_controller.h"
 #include "rogue_debug.h"
+#include "rogue_followmon.h"
 
 #include "rogue_adventurepaths.h"
 #include "rogue_campaign.h"
@@ -3326,6 +3327,9 @@ void RogueAdv_ModifyObjectEvents(struct MapHeader *mapHeader, struct ObjectEvent
         {
             if(IsObjectEventVisible(&gRogueAdvPath.rooms[i]))
             {
+                if(gRogueAdvPath.rooms[i].roomType == ADVPATH_ROOM_ITEM)
+                    FollowMon_SetGraphics(0, SPECIES_SABLEYE, FALSE, 0);
+
                 objectEvents[writeIdx].localId = writeIdx;
                 objectEvents[writeIdx].graphicsId = SelectObjectGfxForRoom(&gRogueAdvPath.rooms[i]);
                 objectEvents[writeIdx].x = x;
@@ -3511,7 +3515,7 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
             return OBJ_EVENT_GFX_MISC_YOUNG_COUPLE_F;
 
         case ADVPATH_ROOM_ITEM:
-            return OBJ_EVENT_GFX_ITEM_HOLD_ITEM;
+            return OBJ_EVENT_GFX_FOLLOW_MON_0;
 
         case ADVPATH_ROOM_BOSS:
             return OBJ_EVENT_GFX_BATTLE_STATUE;
@@ -3524,6 +3528,9 @@ static u8 SelectObjectMovementTypeForRoom(struct RogueAdvPathRoom* room)
 {
     switch(room->roomType)
     {
+        case ADVPATH_ROOM_ITEM:
+            return MOVEMENT_TYPE_FACE_DOWN;
+
         case ADVPATH_ROOM_ROUTE:
         {
             switch(room->roomParams.perType.route.difficulty)

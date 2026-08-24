@@ -2180,6 +2180,16 @@
       "secondary_tileset": "gTileset_BattleFrontierTower",
       "border_filepath": "data/layouts/Rogue_Encounter_BattleTower/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Encounter_BattleTower/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_ENCOUNTER_ITEM_ROOM",
+      "name": "Rogue_Encounter_ItemRoom_Layout",
+      "width": 17,
+      "height": 17,
+      "primary_tileset": "gTileset_GeneralHub",
+      "secondary_tileset": "gTileset_AdventurePaths",
+      "border_filepath": "data/layouts/Rogue_Encounter_ItemRoom/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_Encounter_ItemRoom/map.bin"
     }
   ]
 }

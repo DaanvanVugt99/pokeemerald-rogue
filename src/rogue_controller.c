@@ -30,6 +30,7 @@
 #include "graphics.h"
 #include "international_string_util.h"
 #include "item.h"
+#include "item_icon.h"
 #include "item_menu.h"
 #include "event_object_movement.h"
 #include "fieldmap.h"
@@ -59,6 +60,7 @@
 #include "strings.h"
 #include "string_util.h"
 #include "sound.h"
+#include "sprite.h"
 #include "task.h"
 #include "text.h"
 #include "trainer_card.h"
@@ -4307,6 +4309,9 @@ void Rogue_OnReturnToField()
 
 bool8 Rogue_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEvent* collider)
 {
+    if(FollowMon_IsItemRoomSableyeObject(obstacle) || FollowMon_IsItemRoomSableyeObject(collider))
+        return FALSE;
+
     if(Rogue_RideMonIsCollisionExempt(obstacle, collider))
         return TRUE;
 
@@ -4332,12 +4337,93 @@ bool8 Rogue_IsRunningToggledOn()
     return gSaveBlock2Ptr->optionsAutoRunActive;
 }
 
+#define ITEM_ROOM_OVERWORLD_ICON_TAG 0xF531
+
+static bool8 IsItemRoomRewardObject(struct ObjectEvent *objectEvent)
+{
+    return gMapHeader.mapLayoutId == LAYOUT_ROGUE_ENCOUNTER_ITEM_ROOM
+        && objectEvent->graphicsId == OBJ_EVENT_GFX_ITEM_HOLD_ITEM;
+}
+
+static void SpriteCB_ItemRoomOverworldIcon(struct Sprite *sprite)
+{
+    u8 objectEventId = sprite->data[0];
+
+    if(objectEventId >= OBJECT_EVENTS_COUNT
+        || !gObjectEvents[objectEventId].active
+        || !IsItemRoomRewardObject(&gObjectEvents[objectEventId]))
+    {
+        sprite->invisible = TRUE;
+        return;
+    }
+    else
+    {
+        struct ObjectEvent *objectEvent = &gObjectEvents[objectEventId];
+        struct Sprite *objectSprite = &gSprites[objectEvent->spriteId];
+
+        // The visible icon occupies the top-left 24x24 pixels of a 32x32
+        // sprite. Centre it horizontally and lift it onto the plinth.
+        sprite->x = objectSprite->x + 4;
+        sprite->y = objectSprite->y;
+        sprite->coordOffsetEnabled = objectSprite->coordOffsetEnabled;
+        sprite->oam.priority = objectSprite->oam.priority;
+        sprite->subpriority = objectSprite->subpriority;
+        sprite->invisible = objectEvent->invisible;
+
+        // Retain the object event as the solid, interactable anchor without
+        // drawing its generic held-item marker underneath the real icon.
+        objectSprite->invisible = TRUE;
+    }
+}
+
+static void DestroyItemRoomOverworldIcon(void)
+{
+    u8 spriteId;
+
+    for(spriteId = 0; spriteId < MAX_SPRITES; ++spriteId)
+    {
+        if(gSprites[spriteId].inUse
+            && gSprites[spriteId].callback == SpriteCB_ItemRoomOverworldIcon)
+        {
+            DestroySprite(&gSprites[spriteId]);
+        }
+    }
+
+    FreeSpriteTilesByTag(ITEM_ROOM_OVERWORLD_ICON_TAG);
+    FreeSpritePaletteByTag(ITEM_ROOM_OVERWORLD_ICON_TAG);
+}
+
+static void CreateItemRoomOverworldIcon(u8 objectEventId)
+{
+    u16 itemId = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA);
+    u8 spriteId;
+
+    DestroyItemRoomOverworldIcon();
+    if(itemId == ITEM_NONE)
+        return;
+
+    spriteId = AddItemIconSprite(
+        ITEM_ROOM_OVERWORLD_ICON_TAG,
+        ITEM_ROOM_OVERWORLD_ICON_TAG,
+        itemId
+    );
+    if(spriteId == MAX_SPRITES)
+        return;
+
+    gSprites[spriteId].data[0] = objectEventId;
+    gSprites[spriteId].callback = SpriteCB_ItemRoomOverworldIcon;
+    SpriteCB_ItemRoomOverworldIcon(&gSprites[spriteId]);
+}
+
 void Rogue_OnSpawnObjectEvent(struct ObjectEvent *objectEvent, u8 objectEventId)
 {
     if(FollowMon_IsMonObject(objectEvent, TRUE))
     {
         FollowMon_OnObjectEventSpawned(objectEvent);
     }
+
+    if(IsItemRoomRewardObject(objectEvent))
+        CreateItemRoomOverworldIcon(objectEventId);
 
     if (objectEvent->localId >= OBJ_EVENT_ID_MULTIPLAYER_FIRST && objectEvent->localId <= OBJ_EVENT_ID_MULTIPLAYER_LAST)
     {
@@ -4351,6 +4437,9 @@ void Rogue_OnRemoveObjectEvent(struct ObjectEvent *objectEvent)
     {
         FollowMon_OnObjectEventRemoved(objectEvent);
     }
+
+    if(IsItemRoomRewardObject(objectEvent))
+        DestroyItemRoomOverworldIcon();
 
     if (objectEvent->localId >= OBJ_EVENT_ID_MULTIPLAYER_FIRST && objectEvent->localId <= OBJ_EVENT_ID_MULTIPLAYER_LAST)
     {
@@ -8114,6 +8203,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
                 {
                     u8 scheduleSlot = gRogueAdvPath.currentRoomParams.perType.itemRoom.scheduleSlot;
 
+                    FollowMon_SetGraphics(0, SPECIES_SABLEYE, FALSE, 0);
                     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, gRogueAdvPath.currentRoomParams.perType.itemRoom.itemId);
                     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1, scheduleSlot);
 

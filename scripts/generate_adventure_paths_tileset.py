@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TILESET = ROOT / "data/tilesets/secondary/adventure_paths"
 LAYOUT = ROOT / "data/layouts/Rogue_AdventurePaths"
+ITEM_ROOM_LAYOUT = ROOT / "data/layouts/Rogue_Encounter_ItemRoom"
 ISLAND_EDGE_SOURCE = TILESET / "island_edges.png"
 CAVE_TILE_SOURCE = ROOT / "data/tilesets/secondary/cave/tiles.png"
 GENERAL_HUB = ROOT / "data/tilesets/primary/general_hub"
@@ -21,6 +22,8 @@ SHEET_WIDTH_TILES = 16
 METATILE_COUNT = 512
 MAP_WIDTH = 44
 MAP_HEIGHT = 44
+ITEM_ROOM_WIDTH = 17
+ITEM_ROOM_HEIGHT = 17
 
 SECONDARY_TILE_BASE = 512
 METATILE_BASE = 0x200
@@ -30,6 +33,7 @@ FORMATION_OVERLAY_B_BASE = FORMATION_OVERLAY_A_BASE + 6 * FORMATION_BACKGROUND_C
 MAP_COLLISION = 1 << 10
 MAP_ELEVATION = 3 << 12
 METATILE_LAYER_COVERED = 1 << 12
+METATILE_BEHAVIOR_SOUTH_ARROW_WARP = 0x65
 
 PALETTE_VOID = 6
 PALETTE_ROCK = 7
@@ -167,6 +171,8 @@ METATILES = {
     "Surface_MineralViolet": 0x24F,
     "Surface_CrystalClusterBlue0": 0x304,
     "Surface_CrystalClusterBlue1": 0x305,
+    "Trail_ExitSouth": 0x306,
+    "Item_Pedestal": 0x307,
 }
 
 
@@ -466,6 +472,35 @@ def fleck_metatile(color: int) -> list[list[int]]:
     pixels = rock_metatile(set(), variant=color & 1)
     for x, y, value in ((7, 7, color), (8, 7, 13 if color == 12 else 15), (7, 8, 6), (11, 3, 5)):
         pixels[y][x] = value
+    return pixels
+
+
+def item_pedestal_metatile() -> list[list[int]]:
+    """Draw a low crystal plinth without covering the item object above it."""
+    pixels = rock_metatile(set(), variant=1)
+    shape = (
+        (7,  ".....CCCCCC....."),
+        (8,  "...CCBBBBBBCC..."),
+        (9,  "..CBBBBBBBBBBC.."),
+        (10, "...dddddddddd..."),
+        (11, "...eFFFFFFFFe..."),
+        (12, "....eFFFFFFe...."),
+        (13, "....eeFFFFee...."),
+        (14, ".....eeeeee....."),
+        (15, "....ssssssss...."),
+    )
+    colors = {
+        "C": 13,
+        "B": 10,
+        "d": 8,
+        "e": 7,
+        "F": 5,
+        "s": 3,
+    }
+    for y, row in shape:
+        for x, symbol in enumerate(row):
+            if symbol != ".":
+                pixels[y][x] = colors[symbol]
     return pixels
 
 
@@ -795,6 +830,9 @@ def build_assets() -> tuple[list[list[list[int]]], list[list[int]]]:
     }
     for name, connections in trail_shapes.items():
         put(name, trail_metatile(connections), PALETTE_PATH)
+    # The Item Room exit occupies the island's southern lip. Keep a dedicated
+    # metatile for its warp behavior, but draw it as the matching bottom edge.
+    put("Trail_ExitSouth", south_edge_metatile(edge_source, 2), PALETTE_ROCK)
     put("Trail_BlockedHorizontal", trail_metatile({"E", "W"}, blocked="H"), PALETTE_PATH)
     put("Trail_BlockedVertical", trail_metatile({"N", "S"}, blocked="V"), PALETTE_PATH)
 
@@ -804,6 +842,8 @@ def build_assets() -> tuple[list[list[list[int]]], list[list[int]]]:
     put("Surface_FleckViolet", fleck_metatile(14), PALETTE_ROCK)
     put("Surface_Pebbles0", pebble_metatile(0), PALETTE_ROCK)
     put("Surface_Pebbles1", pebble_metatile(1), PALETTE_ROCK)
+
+    put("Item_Pedestal", item_pedestal_metatile(), PALETTE_ROCK)
 
     original_rock = render_general_hub_metatile_overlay(0x0E0)
     surface_rock_names = (
@@ -932,6 +972,155 @@ def write_layout_template() -> None:
     (LAYOUT / "border.bin").write_bytes(struct.pack("<4H", *([METATILES["Void"]] * 4)))
 
 
+def get_item_room_void_metatile(x: int, y: int) -> int:
+    value = ((x + 0x9E37) * 0x45D9F3B) ^ ((y + 0x7F4A) * 0x119DE1F3)
+    value ^= value >> 16
+    variant = value % 10
+    if variant < 3:
+        return METATILES[f"Void_Stars{variant}"]
+    return METATILES["Void"]
+
+
+def write_item_room_layout() -> None:
+    """Write the static Sableye-themed floating island used by Item Rooms."""
+    surface_bounds = {
+        2: (6, 10),
+        3: (4, 12),
+        **{y: (3, 13) for y in range(4, 13)},
+        13: (5, 11),
+        14: (7, 9),
+    }
+    surface = {
+        (x, y)
+        for y, (left, right) in surface_bounds.items()
+        for x in range(left, right + 1)
+    }
+    trail = {(8, y) for y in range(5, 15)}
+    solid_decorations = {(8, 4)}
+    crystals = {
+        (5, 5): "Surface_CrystalClusterBlue0",
+        (11, 5): "Surface_CrystalClusterBlue1",
+        (4, 9): "Surface_CrystalClusterBlue1",
+        (12, 9): "Surface_CrystalClusterBlue0",
+    }
+    accents = {
+        (6, 8): "Surface_MineralCyan",
+        (10, 8): "Surface_MineralViolet",
+        (5, 11): "Surface_FleckViolet",
+        (11, 11): "Surface_FleckCyan",
+    }
+    # Preserve the hand-authored surface details from the Item Room map while
+    # keeping this generator as the source of truth for regenerated layouts.
+    authored_overrides = {
+        (8, 3): ("Surface_Fractured1", False),
+        (6, 4): ("Surface_Fractured1", False),
+        (8, 4): ("Surface_Fractured1", True),
+        (10, 4): ("Surface_Fractured1", False),
+        (8, 5): ("Island_Interior2", True),
+        (12, 5): ("Surface_Fractured1", False),
+        (8, 6): ("Item_Pedestal", True),
+        (12, 6): ("Surface_Fractured1", False),
+        (6, 8): ("Surface_MineralCyan", True),
+        (10, 8): ("Surface_MineralViolet", True),
+        (4, 10): ("Surface_Fractured1", False),
+        (7, 10): ("Island_Interior2", False),
+        (6, 11): ("Surface_Fractured1", False),
+        (12, 11): ("Surface_Fractured1", False),
+        (4, 12): ("Island_Edge_South", True),
+        (10, 12): ("Surface_Fractured1", False),
+        (10, 13): ("Island_Edge_South", True),
+    }
+
+    def is_surface(x: int, y: int) -> bool:
+        return (x, y) in surface
+
+    def island_metatile(x: int, y: int) -> int:
+        north = is_surface(x, y - 1)
+        east = is_surface(x + 1, y)
+        south = is_surface(x, y + 1)
+        west = is_surface(x - 1, y)
+
+        if not north and not east:
+            return METATILES["Island_Corner_NorthEast"]
+        if not east and not south:
+            return METATILES["Island_Corner_SouthEast"]
+        if not south and not west:
+            return METATILES["Island_Corner_SouthWest"]
+        if not west and not north:
+            return METATILES["Island_Corner_NorthWest"]
+        if not north:
+            return METATILES["Island_Edge_North"]
+        if not east:
+            return METATILES["Island_Edge_East"]
+        if not south:
+            return METATILES["Island_Edge_South"] + ((x * 5 + y * 3) % 3)
+        if not west:
+            return METATILES["Island_Edge_West"]
+        if not is_surface(x + 1, y - 1):
+            return METATILES["Island_InnerCorner_NorthEast"]
+        if not is_surface(x + 1, y + 1):
+            return METATILES["Island_InnerCorner_SouthEast"]
+        if not is_surface(x - 1, y + 1):
+            return METATILES["Island_InnerCorner_SouthWest"]
+        if not is_surface(x - 1, y - 1):
+            return METATILES["Island_InnerCorner_NorthWest"]
+        return METATILES["Island_Interior0"] + ((x * 5 + y * 7) % 3)
+
+    def trail_metatile(x: int, y: int) -> int:
+        north = (x, y - 1) in trail
+        south = (x, y + 1) in trail
+        if north and south:
+            return METATILES["Trail_Vertical"]
+        if north:
+            return METATILES["Trail_ExitSouth"]
+        if south:
+            return METATILES["Trail_EndSouth"]
+        return METATILES["Trail_Centre"]
+
+    entries = []
+    for y in range(ITEM_ROOM_HEIGHT):
+        for x in range(ITEM_ROOM_WIDTH):
+            collision = MAP_COLLISION
+            if (x, y) in surface:
+                metatile = island_metatile(x, y)
+                if (x, y) in trail:
+                    metatile = trail_metatile(x, y)
+                    collision = 0
+                elif (x, y) in crystals:
+                    metatile = METATILES[crystals[(x, y)]]
+                elif (x, y) in accents:
+                    metatile = METATILES[accents[(x, y)]]
+                    collision = 0
+                elif (x, y) in solid_decorations:
+                    pass
+                elif all(
+                    is_surface(nx, ny)
+                    for nx, ny in ((x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y))
+                ):
+                    collision = 0
+            elif is_surface(x, y - 1):
+                left = not is_surface(x - 1, y) and is_surface(x - 1, y - 1)
+                right = not is_surface(x + 1, y) and is_surface(x + 1, y - 1)
+                if not left and right:
+                    metatile = METATILES["Island_Underside_Left"]
+                elif left and not right:
+                    metatile = METATILES["Island_Underside_Right"]
+                else:
+                    metatile = METATILES["Island_Underside_Middle0"] + ((x + y) % 3)
+            else:
+                metatile = get_item_room_void_metatile(x, y)
+
+            if (x, y) in authored_overrides:
+                metatile_name, is_solid = authored_overrides[(x, y)]
+                metatile = METATILES[metatile_name]
+                collision = MAP_COLLISION if is_solid else 0
+            entries.append(metatile | collision | MAP_ELEVATION)
+
+    ITEM_ROOM_LAYOUT.mkdir(parents=True, exist_ok=True)
+    (ITEM_ROOM_LAYOUT / "map.bin").write_bytes(struct.pack(f"<{len(entries)}H", *entries))
+    (ITEM_ROOM_LAYOUT / "border.bin").write_bytes(struct.pack("<4H", *([METATILES["Void"]] * 4)))
+
+
 def main() -> None:
     tiles, metatiles = build_assets()
     if len(tiles) > 512:
@@ -953,9 +1142,11 @@ def main() -> None:
     )
     for metatile in covered_metatiles:
         attributes[metatile - METATILE_BASE] = METATILE_LAYER_COVERED
+    attributes[METATILES["Trail_ExitSouth"] - METATILE_BASE] = METATILE_BEHAVIOR_SOUTH_ARROW_WARP
     (TILESET / "metatile_attributes.bin").write_bytes(struct.pack(f"<{len(attributes)}H", *attributes))
 
     write_layout_template()
+    write_item_room_layout()
     print(f"Generated {len(tiles)} tiles and {len(METATILES)} named metatiles")
 
 

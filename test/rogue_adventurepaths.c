@@ -1,17 +1,25 @@
 #include "global.h"
 #include "constants/abilities.h"
+#include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/flags.h"
+#include "constants/layouts.h"
+#include "constants/metatile_labels.h"
+#include "constants/metatile_behaviors.h"
 #include "constants/rogue.h"
+#include "constants/songs.h"
 #include "constants/species.h"
 #include "event_data.h"
+#include "fieldmap.h"
 #include "item.h"
 #include "malloc.h"
 #include "pokemon.h"
 #include "random.h"
+#include "overworld.h"
 #include "rogue.h"
 #include "rogue_adventurepaths.h"
 #include "rogue_controller.h"
+#include "rogue_followmon.h"
 #include "rogue_gifts.h"
 #include "rogue_hub.h"
 #include "rogue_pokedex.h"
@@ -21,6 +29,8 @@
 #include "rogue_trainers.h"
 #include "rogue_trials.h"
 #include "test/test.h"
+
+extern const u8 Rogue_Encounter_ItemRoom_Sableye[];
 
 static void ExpectGeneratedAbilityIsRerolled(u16 species, u32 customMonId)
 {
@@ -696,6 +706,106 @@ TEST("Unique Legendary rooms use a gold statue")
     EXPECT_EQ(objectEvents[0].graphicsId, OBJ_EVENT_GFX_GOLD_LEGENDARY_STATUE);
 
     gRogueAdvPath = originalPath;
+}
+
+TEST("Item Rooms distinguish their Sableye marker from their guardian")
+{
+    struct RogueAdvPath originalPath = gRogueAdvPath;
+    u16 originalMapLayoutId = gMapHeader.mapLayoutId;
+    u16 originalFollowMon = FollowMon_GetGraphics(0);
+    struct ObjectEvent sableyeObject = {.graphicsId = OBJ_EVENT_GFX_FOLLOW_MON_0};
+    struct ObjectEvent otherObject = {0};
+    struct ObjectEventTemplate objectEvents[1] = {0};
+    u8 objectEventCount = 0;
+
+    memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+    gRogueAdvPath.roomCount = 1;
+    gRogueAdvPath.justGenerated = TRUE;
+    gRogueAdvPath.rooms[0].roomType = ADVPATH_ROOM_ITEM;
+
+    RogueAdv_ModifyObjectEvents(NULL, objectEvents, &objectEventCount, ARRAY_COUNT(objectEvents));
+    EXPECT_EQ(objectEventCount, 1);
+    EXPECT_EQ(objectEvents[0].graphicsId, OBJ_EVENT_GFX_FOLLOW_MON_0);
+    EXPECT_EQ(objectEvents[0].movementType, MOVEMENT_TYPE_FACE_DOWN);
+    EXPECT_EQ(FollowMon_GetGraphics(0), SPECIES_SABLEYE);
+
+    gMapHeader.mapLayoutId = LAYOUT_ROGUE_ADVENTURE_PATHS;
+    EXPECT(!FollowMon_ShouldAlwaysAnimation(&sableyeObject));
+    EXPECT(!FollowMon_IsCollisionExempt(&sableyeObject, &otherObject));
+    EXPECT(!Rogue_IsCollisionExempt(&sableyeObject, &otherObject));
+
+    gMapHeader.mapLayoutId = LAYOUT_ROGUE_ENCOUNTER_ITEM_ROOM;
+    EXPECT(FollowMon_ShouldAlwaysAnimation(&sableyeObject));
+    EXPECT(!FollowMon_IsCollisionExempt(&sableyeObject, &otherObject));
+    EXPECT(!Rogue_IsCollisionExempt(&sableyeObject, &otherObject));
+
+    FollowMon_SetGraphicsRaw(0, originalFollowMon, 0);
+    gMapHeader.mapLayoutId = originalMapLayoutId;
+    gRogueAdvPath = originalPath;
+}
+
+TEST("Item Room Sableye is solid and interactive")
+{
+    const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(
+        MAP_GROUP(ROGUE_ENCOUNTER_ITEM_ROOM),
+        MAP_NUM(ROGUE_ENCOUNTER_ITEM_ROOM)
+    );
+    const struct ObjectEventTemplate *sableye = &mapHeader->events->objectEvents[0];
+    u16 block = mapHeader->mapLayout->map[sableye->y * mapHeader->mapLayout->width + sableye->x];
+
+    EXPECT_EQ(sableye->graphicsId, OBJ_EVENT_GFX_FOLLOW_MON_0);
+    EXPECT_EQ(sableye->movementType, MOVEMENT_TYPE_FACE_DOWN);
+    EXPECT_EQ(sableye->script, Rogue_Encounter_ItemRoom_Sableye);
+    EXPECT_NE((block & MAPGRID_COLLISION_MASK) >> MAPGRID_COLLISION_SHIFT, 0);
+}
+
+TEST("Item Room rewards rest on a solid pedestal")
+{
+    const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(
+        MAP_GROUP(ROGUE_ENCOUNTER_ITEM_ROOM),
+        MAP_NUM(ROGUE_ENCOUNTER_ITEM_ROOM)
+    );
+    const struct ObjectEventTemplate *reward = &mapHeader->events->objectEvents[1];
+    u16 block = mapHeader->mapLayout->map[reward->y * mapHeader->mapLayout->width + reward->x];
+    u16 attribute = mapHeader->mapLayout->secondaryTileset->metatileAttributes[
+        (block & MAPGRID_METATILE_ID_MASK) - NUM_METATILES_IN_PRIMARY
+    ];
+
+    EXPECT_EQ(reward->graphicsId, OBJ_EVENT_GFX_ITEM_HOLD_ITEM);
+    EXPECT_EQ(block & MAPGRID_METATILE_ID_MASK, METATILE_AdventurePaths_Item_Pedestal);
+    EXPECT_NE((block & MAPGRID_COLLISION_MASK) >> MAPGRID_COLLISION_SHIFT, 0);
+    EXPECT_EQ((attribute & METATILE_ATTR_LAYER_MASK) >> METATILE_ATTR_LAYER_SHIFT, METATILE_LAYER_TYPE_NORMAL);
+}
+
+TEST("Item Rooms exit south back to the adventure path")
+{
+    const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(
+        MAP_GROUP(ROGUE_ENCOUNTER_ITEM_ROOM),
+        MAP_NUM(ROGUE_ENCOUNTER_ITEM_ROOM)
+    );
+    const struct MapLayout *mapLayout = mapHeader->mapLayout;
+    const struct WarpEvent *warp = &mapHeader->events->warps[0];
+    u16 block = mapLayout->map[14 * mapLayout->width + 8];
+    u16 metatileId = block & MAPGRID_METATILE_ID_MASK;
+    u8 behavior = mapLayout->secondaryTileset->metatileAttributes[metatileId - NUM_METATILES_IN_PRIMARY]
+        & METATILE_ATTR_BEHAVIOR_MASK;
+
+    EXPECT_EQ(mapHeader->events->warpCount, 1);
+    EXPECT_EQ(warp->x, 8);
+    EXPECT_EQ(warp->y, 14);
+    EXPECT_EQ((block & MAPGRID_COLLISION_MASK) >> MAPGRID_COLLISION_SHIFT, 0);
+    EXPECT_EQ(metatileId, METATILE_AdventurePaths_Trail_ExitSouth);
+    EXPECT_EQ(behavior, MB_SOUTH_ARROW_WARP);
+}
+
+TEST("Item Rooms use the Diamond and Pearl title theme")
+{
+    const struct MapHeader *mapHeader = Overworld_GetMapHeaderByGroupAndId(
+        MAP_GROUP(ROGUE_ENCOUNTER_ITEM_ROOM),
+        MAP_NUM(ROGUE_ENCOUNTER_ITEM_ROOM)
+    );
+
+    EXPECT_EQ(mapHeader->music, MUS_DP_TITLE);
 }
 
 TEST("Unique Legendary rooms convert roamers into stationary encounters")

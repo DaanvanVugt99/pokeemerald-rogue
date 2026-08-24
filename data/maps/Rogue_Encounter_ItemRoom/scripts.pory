@@ -1,5 +1,14 @@
 mapscripts Rogue_Encounter_ItemRoom_MapScripts {}
 
+script Rogue_Encounter_ItemRoom_Sableye
+{
+    lock
+    faceplayer
+    playmoncry(SPECIES_SABLEYE, CRY_MODE_NORMAL)
+    waitmoncry
+    release
+}
+
 script Rogue_Encounter_ItemRoom_Pedestal
 {
     lock

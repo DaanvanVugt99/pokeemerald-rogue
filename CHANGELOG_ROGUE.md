@@ -29,6 +29,12 @@ Format follows Keep a Changelog loosely:
 - Added deterministic Item Rooms to Standard and Slow Path Adventures, with
   three isolated cursed held-item rewards: Bane Lens, Hush Band, and Fate
   Sash.
+- Rethemed Item Rooms as floating crystal islands guarded by an animated
+  Sableye that turns and cries when spoken to, and replaced their Adventure
+  Paths held-item marker with a still version of the mascot's overworld sprite;
+  each reward displays its actual bag icon on a low crystal plinth, walking
+  south from the island tip returns to the Adventure Paths, and the Diamond and
+  Pearl title theme accompanies the room.
 - Added palette-only cursed recolors for the three Item Room held-item icons,
   reusing the existing Scope Lens, Choice Band, and Focus Sash artwork.
 - Added Eclipse Orb, an Item Room held item that reverses non-neutral incoming
@@ -165,6 +171,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Expanded Luvdisc's level-up learnset with Heart Swap at level 37 and Take
+  Heart at level 49.
 - Renamed the Item Room held-item rewards to Bane Lens, Hush Band, Fate Sash,
   Eclipse Orb, Grudge Orb, Phantom Stone, Doom Crown, Hex Thread, Stone Heart,
   Null Idol, Rusted Anchor, and Gambit Claw without changing their effects,

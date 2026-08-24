@@ -551,8 +551,23 @@ static bool8 IsExpensiveWeatherActive()
     return FALSE;
 }
 
+bool8 FollowMon_IsItemRoomSableyeObject(struct ObjectEvent *objectEvent)
+{
+    if(objectEvent == NULL || objectEvent->graphicsId != OBJ_EVENT_GFX_FOLLOW_MON_0)
+        return FALSE;
+
+    return gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS
+        || gMapHeader.mapLayoutId == LAYOUT_ROGUE_ENCOUNTER_ITEM_ROOM;
+}
+
 bool8 FollowMon_ShouldAlwaysAnimation(struct ObjectEvent *objectEvent)
 {
+    // Keep the Adventure Paths room marker readable as an icon, but let the
+    // Sableye guarding the room use the normal animated overworld sprite.
+    if(FollowMon_IsItemRoomSableyeObject(objectEvent)
+        && gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS)
+        return FALSE;
+
     return TRUE;
 
     //if(Rogue_InWildSafari())
@@ -609,6 +624,9 @@ static bool8 AreElevationsCompatible(u8 a, u8 b)
 bool8 FollowMon_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEvent* collider)
 {
     struct ObjectEvent* player = &gObjectEvents[gPlayerAvatar.objectEventId];
+
+    if(FollowMon_IsItemRoomSableyeObject(obstacle) || FollowMon_IsItemRoomSableyeObject(collider))
+        return FALSE;
 
     // Disable collision exemption for tutorial
     //if(Rogue_InWildSafari() && VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_CATCH_MON)

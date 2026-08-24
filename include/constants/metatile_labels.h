@@ -83,6 +83,8 @@
 #define METATILE_AdventurePaths_FormationOverlayB_Base              0x2AA
 #define METATILE_AdventurePaths_Surface_CrystalClusterBlue0          0x304
 #define METATILE_AdventurePaths_Surface_CrystalClusterBlue1          0x305
+#define METATILE_AdventurePaths_Trail_ExitSouth                       0x306
+#define METATILE_AdventurePaths_Item_Pedestal                         0x307
 
 // gTileset_BattleArena
 #define METATILE_BattleArena_Door  0x21B
