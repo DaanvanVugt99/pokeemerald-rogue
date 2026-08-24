@@ -4,6 +4,7 @@
 #include "constants/event_objects.h"
 #include "constants/flags.h"
 #include "constants/layouts.h"
+#include "constants/map_types.h"
 #include "constants/metatile_labels.h"
 #include "constants/metatile_behaviors.h"
 #include "constants/rogue.h"
@@ -26,6 +27,7 @@
 #include "rogue_query.h"
 #include "rogue_save.h"
 #include "rogue_settings.h"
+#include "rogue_timeofday.h"
 #include "rogue_trainers.h"
 #include "rogue_trials.h"
 #include "test/test.h"
@@ -806,6 +808,31 @@ TEST("Item Rooms use the Diamond and Pearl title theme")
     );
 
     EXPECT_EQ(mapHeader->music, MUS_DP_TITLE);
+}
+
+TEST("Item Rooms preserve their authored palette")
+{
+    u16 originalMapLayoutId = gMapHeader.mapLayoutId;
+    u8 originalMapType = gMapHeader.mapType;
+    bool8 originalSeasonVisuals = gSaveBlock2Ptr->seasonVisuals;
+    bool8 originalTimeOfDayVisuals = gSaveBlock2Ptr->timeOfDayVisuals;
+
+    gSaveBlock2Ptr->seasonVisuals = TRUE;
+    gSaveBlock2Ptr->timeOfDayVisuals = TRUE;
+    gMapHeader.mapType = MAP_TYPE_ROUTE;
+
+    gMapHeader.mapLayoutId = LAYOUT_ROGUE_ENCOUNTER_BATTLE_TOWER;
+    EXPECT(RogueToD_ApplySeasonVisuals());
+    EXPECT(RogueToD_ApplyTimeVisuals());
+
+    gMapHeader.mapLayoutId = LAYOUT_ROGUE_ENCOUNTER_ITEM_ROOM;
+    EXPECT(!RogueToD_ApplySeasonVisuals());
+    EXPECT(!RogueToD_ApplyTimeVisuals());
+
+    gSaveBlock2Ptr->seasonVisuals = originalSeasonVisuals;
+    gSaveBlock2Ptr->timeOfDayVisuals = originalTimeOfDayVisuals;
+    gMapHeader.mapType = originalMapType;
+    gMapHeader.mapLayoutId = originalMapLayoutId;
 }
 
 TEST("Unique Legendary rooms convert roamers into stationary encounters")

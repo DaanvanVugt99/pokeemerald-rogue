@@ -59,7 +59,7 @@
 #define RGB_DAYTIME         RGB_WHITE
 #define RGB_SUNSET          RGB(31, 16, 16)
 
-#define DAYS_PER_SEASON     2 
+#define DAYS_PER_SEASON     2
 
 struct ToDPalette
 {
@@ -388,7 +388,7 @@ static void TintPalette_ToD(u16 *palette, u16 size, u16 colour)
     //if(RogueToD_IsNight())
     //{
     //    TintPalette_CompareOverrideWithMultiplyFallback(
-    //        palette, size, 
+    //        palette, size,
     //        gTilesetPalettes_General02_Day, gTilesetPalettes_General02_Night,
     //        GET_R(colour), GET_G(colour), GET_B(colour)
     //    );
@@ -403,6 +403,10 @@ bool8 RogueToD_ApplySeasonVisuals()
 {
     switch (gMapHeader.mapLayoutId)
     {
+    case LAYOUT_ROGUE_ENCOUNTER_ITEM_ROOM:
+        // Treasure encounters should not inherit ordinary route seasons.
+        return FALSE;
+
     case LAYOUT_ROGUE_ROUTE_SINNOH_217:
     case LAYOUT_ROGUE_ROUTE_SINNOH_MT_CORONET:
         return SEASON_WINTER;
@@ -418,9 +422,10 @@ bool8 RogueToD_ApplySeasonVisuals()
 
 bool8 RogueToD_ApplyTimeVisuals()
 {
-    if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS)
+    if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_ADVENTURE_PATHS
+        || gMapHeader.mapLayoutId == LAYOUT_ROGUE_ENCOUNTER_ITEM_ROOM)
     {
-        // Time of day is bad for visibility on adventure paths screen so just disable it
+        // These astral spaces are self-lit and rely on their authored contrast.
         return FALSE;
     }
 

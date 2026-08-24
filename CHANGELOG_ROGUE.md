@@ -428,6 +428,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Preserved the Treasure encounter's authored astral palette by excluding the
+  room from seasonal recoloring and time-of-day tinting.
 - Kept header dependency scanning enabled for direct ROM/ELF build targets,
   preventing stale object layouts from corrupting battle memory.
 - Fixed Treasure encounter pedestal icons reverting to the generic held-item
