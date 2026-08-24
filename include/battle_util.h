@@ -187,6 +187,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_BITTER_RUSE,
     PENDING_UNIQUE_EFFECT_COUNTERSTEP,
     PENDING_UNIQUE_EFFECT_STARMOBILE,
+    PENDING_UNIQUE_EFFECT_ECHO_SCEPTER,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
@@ -198,6 +199,7 @@ void QueueMoonlightForHeal(u32 healedBattler, u32 healAmount);
 void QueueBrutalChargeForDefenseDrop(u32 loweredBattler, u32 sourceBattler);
 void QueueStaticStashForConsumedItem(u32 battler);
 void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler);
+void QueueEchoScepterForDamage(u32 battler, u32 sourceBattler);
 void QueueSaltFortressForDefenseRise(u32 battler);
 void QueueLastPourForHeal(u32 battler);
 void QueueCounterstepForSpeedRise(u32 battler);

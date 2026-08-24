@@ -6701,6 +6701,30 @@ void QueueLivingShadowForDamage(u32 battler, u32 sourceBattler)
         gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
 }
 
+void QueueEchoScepterForDamage(u32 battler, u32 sourceBattler)
+{
+    u32 partyBit;
+
+    if (battler >= gBattlersCount
+     || sourceBattler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || !IsBattlerAlive(sourceBattler)
+     || GetBattlerSide(battler) == GetBattlerSide(sourceBattler)
+     || GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_ECHO_SCEPTER
+     || gCurrentMove == MOVE_NONE
+     || gCurrentMove == MOVE_UNAVAILABLE
+     || IS_MOVE_STATUS(gCurrentMove)
+     || gBattleMoves[gCurrentMove].copycatBanned)
+        return;
+
+    partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+    if (gBattleStruct->echoScepterUsed[GetBattlerSide(battler)] & partyBit)
+        return;
+
+    if (QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_ECHO_SCEPTER, battler, sourceBattler, sourceBattler))
+        gBattleStruct->echoScepterUsed[GetBattlerSide(battler)] |= partyBit;
+}
+
 void QueueSaltFortressForDefenseRise(u32 battler)
 {
     u32 target;
@@ -6999,6 +7023,36 @@ static bool32 TryActivateLivingShadow(u32 battler, u32 source, u32 target)
     return TRUE;
 }
 
+static bool32 TryActivateEchoScepter(u32 battler, u32 source, u32 target)
+{
+    u32 move = gCurrentMove;
+
+    if (!IsBattlerAlive(battler)
+     || source >= gBattlersCount
+     || target >= gBattlersCount
+     || !IsBattlerAlive(target)
+     || GetBattlerSide(battler) == GetBattlerSide(target)
+     || GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_ECHO_SCEPTER
+     || move == MOVE_NONE
+     || move == MOVE_UNAVAILABLE
+     || IS_MOVE_STATUS(move)
+     || gBattleMoves[move].copycatBanned
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    gLastUsedItem = gBattleMons[battler].item;
+    gPotentialItemEffectBattler = battler;
+    RecordItemEffectBattle(battler, HOLD_EFFECT_ECHO_SCEPTER);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    StartAbilityCalledMoveScriptAt(BattleScript_EchoScepterUsesCalledMove);
+    return TRUE;
+}
+
 static bool32 TryActivateSaltFortress(u32 battler, u32 target)
 {
     if (!IsBattlerAlive(battler)
@@ -7071,6 +7125,15 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
 
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateLivingShadow(battler, source, target))
+            return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_ECHO_SCEPTER)
+    {
+        u32 source = GetPendingUniqueAbilitySource(battler);
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (TryActivateEchoScepter(battler, source, target))
             return TRUE;
     }
     else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_SALT_FORTRESS)
@@ -26743,6 +26806,10 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
             return UQ_4_12(1.3);
         break;
+    case HOLD_EFFECT_GLASS_SWORD:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+            return UQ_4_12(1.5);
+        break;
     }
     return UQ_4_12(1.0);
 }
@@ -26764,6 +26831,8 @@ static inline uq4_12_t GetDefenderItemsModifier(u32 moveType, u32 battlerDef, uq
             return (abilityDef == ABILITY_RIPEN || HasBattlerAbility(battlerDef, ABILITY_WINTER_STASH)) ? UQ_4_12(0.25) : UQ_4_12(0.5);
         }
         break;
+    case HOLD_EFFECT_GLASS_SWORD:
+        return UQ_4_12(1.5);
     }
     return UQ_4_12(1.0);
 }

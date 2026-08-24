@@ -204,6 +204,9 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         ITEM_GRASSY_TIKI,
         ITEM_MISTY_TIKI,
         ITEM_PSYCHIC_TIKI,
+        ITEM_GLASS_SWORD,
+        ITEM_WONDER_SHIELD,
+        ITEM_ECHO_SCEPTER,
     };
     u32 state = ((u32)gRogueRun.baseSeed << 16)
         ^ gRogueRun.baseSeed

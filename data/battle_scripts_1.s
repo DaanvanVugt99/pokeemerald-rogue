@@ -12611,6 +12611,14 @@ BattleScript_AcidRainTotemPoisons::
 	seteffectprimary
 	return
 
+BattleScript_WonderShieldActivates::
+	pause B_WAIT_TIME_SHORT
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	setlastuseditem BS_SCRIPTING
+	printstring STRINGID_WONDERSHIELDNULLIFIED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_TikiActivates_Ret::
 	call BattleScript_TikiActivates
 	return
@@ -12790,6 +12798,14 @@ BattleScript_FinaleBellUsesCalledMove::
 	printstring STRINGID_METRONOMEITEMACTIVATES
 	waitmessage B_WAIT_TIME_LONG
 	removeitem BS_ATTACKER
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
+BattleScript_EchoScepterUsesCalledMove::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	setlastuseditem BS_ATTACKER
+	printstring STRINGID_ECHOSCEPTERACTIVATES
+	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_AbilityUsesCalledMoveNoPopup
 
 BattleScript_BitterRuseUsesCalledMove::

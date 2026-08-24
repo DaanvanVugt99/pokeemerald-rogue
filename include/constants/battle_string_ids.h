@@ -765,8 +765,10 @@
 #define STRINGID_DUALITYFOUNDBALANCE                  763
 #define STRINGID_PKMNWILLPERISHIN3TURNS               764
 #define STRINGID_METRONOMEITEMACTIVATES                765
+#define STRINGID_ECHOSCEPTERACTIVATES                  766
+#define STRINGID_WONDERSHIELDNULLIFIED                 767
 
-#define BATTLESTRINGS_COUNT                           766
+#define BATTLESTRINGS_COUNT                           768
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

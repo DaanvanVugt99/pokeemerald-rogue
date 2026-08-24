@@ -1067,6 +1067,9 @@ extern const u8 gItemRoomDesc_ElectricTiki[];
 extern const u8 gItemRoomDesc_GrassyTiki[];
 extern const u8 gItemRoomDesc_MistyTiki[];
 extern const u8 gItemRoomDesc_PsychicTiki[];
+extern const u8 gItemRoomDesc_GlassSword[];
+extern const u8 gItemRoomDesc_WonderShield[];
+extern const u8 gItemRoomDesc_EchoScepter[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1180,6 +1183,12 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_MistyTiki;
     case ITEM_PSYCHIC_TIKI:
         return gItemRoomDesc_PsychicTiki;
+    case ITEM_GLASS_SWORD:
+        return gItemRoomDesc_GlassSword;
+    case ITEM_WONDER_SHIELD:
+        return gItemRoomDesc_WonderShield;
+    case ITEM_ECHO_SCEPTER:
+        return gItemRoomDesc_EchoScepter;
     default:
         return Rogue_GetItemDesc(itemId);
     }

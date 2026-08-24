@@ -267,9 +267,12 @@
 #define ITEM_GRASSY_TIKI                    (LAST_ITEM_TR + 27)
 #define ITEM_MISTY_TIKI                     (LAST_ITEM_TR + 28)
 #define ITEM_PSYCHIC_TIKI                   (LAST_ITEM_TR + 29)
+#define ITEM_GLASS_SWORD                    (LAST_ITEM_TR + 30)
+#define ITEM_WONDER_SHIELD                  (LAST_ITEM_TR + 31)
+#define ITEM_ECHO_SCEPTER                   (LAST_ITEM_TR + 32)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_PSYCHIC_TIKI
+#define LAST_ITEM_ROOM_REWARD           ITEM_ECHO_SCEPTER
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

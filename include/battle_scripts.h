@@ -32,6 +32,8 @@ extern const u8 BattleScript_AbilityUsesCalledMove[];
 extern const u8 BattleScript_AbilityUsesCalledMoveNoPopup[];
 extern const u8 BattleScript_MetronomeItemUsesCalledMove[];
 extern const u8 BattleScript_FinaleBellUsesCalledMove[];
+extern const u8 BattleScript_EchoScepterUsesCalledMove[];
+extern const u8 BattleScript_WonderShieldActivates[];
 extern const u8 BattleScript_RuinousRiteActivates[];
 extern const u8 BattleScript_MaliciousMindUsesConfuseRayAndDisable[];
 extern const u8 BattleScript_MeanStreakRestoreAfterPoison[];

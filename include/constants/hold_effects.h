@@ -198,6 +198,9 @@
 #define HOLD_EFFECT_GRASSY_TIKI          212
 #define HOLD_EFFECT_MISTY_TIKI           213
 #define HOLD_EFFECT_PSYCHIC_TIKI         214
+#define HOLD_EFFECT_GLASS_SWORD          215
+#define HOLD_EFFECT_WONDER_SHIELD        216
+#define HOLD_EFFECT_ECHO_SCEPTER         217
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

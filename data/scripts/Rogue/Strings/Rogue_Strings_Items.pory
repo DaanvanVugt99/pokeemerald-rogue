@@ -358,6 +358,36 @@ text gItemRoomDesc_PsychicTiki
     format("The first time one of the holder's stats rises each battle, it sets Psychic Terrain.")
 }
 
+text gItemDesc_GlassSword
+{
+    format("Damaging moves used by or against the holder: +50%.")
+}
+
+text gItemRoomDesc_GlassSword
+{
+    format("Damaging moves used by or against the holder deal 50% more damage.")
+}
+
+text gItemDesc_WonderShield
+{
+    format("First super-effective damaging move each battle deals no damage.")
+}
+
+text gItemRoomDesc_WonderShield
+{
+    format("The first super-effective damaging move to hit the holder each battle deals no damage.")
+}
+
+text gItemDesc_EchoScepter
+{
+    format("Once per battle, surviving damage echoes the attacker's move.")
+}
+
+text gItemRoomDesc_EchoScepter
+{
+    format("Once per battle, after surviving a damaging move, the holder uses that move against its attacker.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

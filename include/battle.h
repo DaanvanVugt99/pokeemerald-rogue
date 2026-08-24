@@ -842,6 +842,9 @@ struct BattleStruct
     u8 quickDrawRandom[MAX_BATTLERS_COUNT];
     u8 jesterSwitchUsed[NUM_BATTLE_SIDES];
     u8 tikiItemUsed[NUM_BATTLE_SIDES];
+    u8 echoScepterUsed[NUM_BATTLE_SIDES];
+    u8 wonderShieldUsed[NUM_BATTLE_SIDES];
+    u8 wonderShieldProtected;
     u8 psychicTikiStatRisePending;
     u8 jesterSwitchPassStats;
 };

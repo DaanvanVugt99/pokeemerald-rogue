@@ -1450,6 +1450,10 @@ static void Cmd_attackcanceler(void)
 
     s32 i, moveType, targetMoveType;
     u16 attackerAbility = GetBattlerAbility(gBattlerAttacker);
+    // A multi-hit move restarts its move script for later strikes without printing
+    // the attack string again. Keep Wonder Shield active until the whole move ends.
+    if (!gSpecialStatuses[gBattlerAttacker].multiHitOn)
+        gBattleStruct->wonderShieldProtected = 0;
     gBattleStruct->royalAdvanceActivated &= ~gBitTable[gBattlerAttacker];
     GET_MOVE_TYPE(gCurrentMove, moveType);
     targetMoveType = GetTargetAdjustedMoveType(gCurrentMove, gBattlerAttacker, gBattlerTarget, moveType);
@@ -2656,6 +2660,7 @@ static void Cmd_adjustdamage(void)
     u32 rand = Random() % 100;
     bool8 endureCharmActive = FALSE;
     bool8 divineFavorActive = FALSE;
+    bool8 wonderShieldActivated = FALSE;
 
     GET_MOVE_TYPE(gCurrentMove, moveType);
 
@@ -2675,6 +2680,29 @@ static void Cmd_adjustdamage(void)
         RecordAbilityBattle(gBattlerTarget, ABILITY_ICE_FACE);
         gBattleResources->flags->flags[gBattlerTarget] |= RESOURCE_FLAG_ICE_FACE;
         // Form change will be done after attack animation in Cmd_resultmessage.
+        goto END;
+    }
+    if (gBattleStruct->wonderShieldProtected & gBitTable[gBattlerTarget])
+    {
+        gMoveResultFlags &= ~(MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE);
+        gBattleMoveDamage = 0;
+        goto END;
+    }
+    if (GetBattlerHoldEffect(gBattlerTarget, TRUE) == HOLD_EFFECT_WONDER_SHIELD
+     && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
+     && gBattleMoveDamage > 0
+     && gBattlerAttacker != gBattlerTarget
+     && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+     && !(gBattleStruct->wonderShieldUsed[GetBattlerSide(gBattlerTarget)] & gBitTable[gBattlerPartyIndexes[gBattlerTarget]]))
+    {
+        gBattleStruct->wonderShieldUsed[GetBattlerSide(gBattlerTarget)] |= gBitTable[gBattlerPartyIndexes[gBattlerTarget]];
+        gBattleStruct->wonderShieldProtected |= gBitTable[gBattlerTarget];
+        gMoveResultFlags &= ~(MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE);
+        gBattleMoveDamage = 0;
+        gLastUsedItem = gBattleMons[gBattlerTarget].item;
+        gPotentialItemEffectBattler = gBattleScripting.battler = gBattlerTarget;
+        RecordItemEffectBattle(gBattlerTarget, HOLD_EFFECT_WONDER_SHIELD);
+        wonderShieldActivated = TRUE;
         goto END;
     }
     if (HasBattlerAbility(gBattlerTarget, ABILITY_MENHIR)
@@ -2814,6 +2842,11 @@ END:
         BattleScriptPushCursor();
         gBattlescriptCurrInstr = BattleScript_GemActivates;
         gLastUsedItem = gBattleMons[gBattlerAttacker].item;
+    }
+    if (wonderShieldActivated)
+    {
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_WonderShieldActivates;
     }
 
     // B_WEATHER_STRONG_WINDS prints a string when it's about to reduce the power
@@ -3181,7 +3214,10 @@ static void Cmd_datahpupdate(void)
                 if (gHpDealt > 0
                  && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
                  && battler != gBattlerAttacker)
+                {
                     QueueLivingShadowForDamage(battler, gBattlerAttacker);
+                    QueueEchoScepterForDamage(battler, gBattlerAttacker);
+                }
 
                 if (gBattleMons[battler].hp == 0
                  && gBattleMoveDamage > 0

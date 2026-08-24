@@ -75,6 +75,8 @@ Format follows Keep a Changelog loosely:
   and Acid Rain Totems, each with a strong effect gated by its matching weather.
 - Added four terrain-themed Tiki Treasure rewards that set Electric, Grassy,
   Misty, or Psychic Terrain after their matching battle trigger once per battle.
+- Added Glass Sword, Wonder Shield, and Echo Scepter Treasure rewards for
+  high-risk damage, one-time weakness protection, and copied counterattacks.
 - Added a debug-only Forced Treasure setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and

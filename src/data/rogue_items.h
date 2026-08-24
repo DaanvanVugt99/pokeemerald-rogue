@@ -124,6 +124,9 @@ extern const u8 gItemDesc_ElectricTiki[];
 extern const u8 gItemDesc_GrassyTiki[];
 extern const u8 gItemDesc_MistyTiki[];
 extern const u8 gItemDesc_PsychicTiki[];
+extern const u8 gItemDesc_GlassSword[];
+extern const u8 gItemDesc_WonderShield[];
+extern const u8 gItemDesc_EchoScepter[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2610,6 +2613,51 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasurePsychicTiki,
         .iconPalette = gItemIconPalette_TreasurePsychicTiki,
+    },
+
+    [ITEM_GLASS_SWORD - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Glass Sword"),
+        .itemId = ITEM_GLASS_SWORD,
+        .price = 0,
+        .description = gItemDesc_GlassSword,
+        .holdEffect = HOLD_EFFECT_GLASS_SWORD,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureGlassCannon,
+        .iconPalette = gItemIconPalette_TreasureGlassCannon,
+    },
+
+    [ITEM_WONDER_SHIELD - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Wonder Shield"),
+        .itemId = ITEM_WONDER_SHIELD,
+        .price = 0,
+        .description = gItemDesc_WonderShield,
+        .holdEffect = HOLD_EFFECT_WONDER_SHIELD,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureWonderShield,
+        .iconPalette = gItemIconPalette_TreasureWonderShield,
+    },
+
+    [ITEM_ECHO_SCEPTER - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Echo Scepter"),
+        .itemId = ITEM_ECHO_SCEPTER,
+        .price = 0,
+        .description = gItemDesc_EchoScepter,
+        .holdEffect = HOLD_EFFECT_ECHO_SCEPTER,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureEchoScepter,
+        .iconPalette = gItemIconPalette_TreasureEchoScepter,
     },
 
 #ifdef ROGUE_DEBUG
