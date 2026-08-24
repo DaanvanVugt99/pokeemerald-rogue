@@ -188,6 +188,46 @@ text gItemRoomDesc_GamblersClaw
     format("Moves gain +1 priority on the first turn after entry, then suffer -1 priority on later turns.")
 }
 
+text gItemDesc_TempoDial
+{
+    format("Damaging moves: +30%. Cannot repeat the same move.")
+}
+
+text gItemRoomDesc_TempoDial
+{
+    format("Boosts damaging moves by 30%, but prevents the holder from selecting the same move twice in a row.")
+}
+
+text gItemDesc_TurnaboutTotem
+{
+    format("Lower offense: +50%. Higher offense: -25%. No effect if tied.")
+}
+
+text gItemRoomDesc_TurnaboutTotem
+{
+    format("Raises the lower of Attack or Sp. Atk by 50% and lowers the higher by 25%. Does nothing while they are equal.")
+}
+
+text gItemDesc_JesterSwitch
+{
+    format("Once per battle, damage forces a switch and passes stat changes.")
+}
+
+text gItemRoomDesc_JesterSwitch
+{
+    format("Once per battle, surviving direct damage switches the holder out and passes its stat changes. Fails without a replacement.")
+}
+
+text gItemDesc_WaywardIncense
+{
+    format("Off-type moves gain STAB; natural STAB moves lose the bonus.")
+}
+
+text gItemRoomDesc_WaywardIncense
+{
+    format("Damaging moves outside the holder's natural types receive STAB, while moves matching its natural types do not.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

@@ -168,7 +168,7 @@
 #define HOLD_EFFECT_BERSERK_GENE        184
 #define HOLD_EFFECT_ROTTEN_BERRY        185
 
-// Divergence Item Room effects
+// Divergence Treasure effects
 #define HOLD_EFFECT_CURSED_LENS         186
 #define HOLD_EFFECT_VOW_OF_SILENCE      187
 #define HOLD_EFFECT_BLOOD_OATH          188
@@ -181,6 +181,10 @@
 #define HOLD_EFFECT_FALSE_IDOL          195
 #define HOLD_EFFECT_RUSTED_ANCHOR       196
 #define HOLD_EFFECT_GAMBLERS_CLAW       197
+#define HOLD_EFFECT_TEMPO_DIAL          198
+#define HOLD_EFFECT_TURNABOUT_TOTEM     199
+#define HOLD_EFFECT_JESTER_SWITCH       200
+#define HOLD_EFFECT_WAYWARD_INCENSE     201
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

@@ -1986,7 +1986,8 @@ u32 TrySetCantSelectMoveBattleScript(u32 battler)
      && move == gLastMoves[battler]
      && move != MOVE_STRUGGLE
      && ((gBattleMons[battler].status2 & STATUS2_TORMENT)
-      || HasBattlerAbility(battler, ABILITY_SWITCHSTEP)))
+      || HasBattlerAbility(battler, ABILITY_SWITCHSTEP)
+      || holdEffect == HOLD_EFFECT_TEMPO_DIAL))
     {
         CancelMultiTurnMoves(battler);
         if (gBattleTypeFlags & BATTLE_TYPE_PALACE)
@@ -2234,7 +2235,8 @@ u8 CheckMoveLimitations(u32 battler, u8 unusableMoves, u16 check)
         else if (check & MOVE_LIMITATION_TORMENTED
               && gBattleMons[battler].moves[i] == gLastMoves[battler]
               && ((gBattleMons[battler].status2 & STATUS2_TORMENT)
-               || HasBattlerAbility(battler, ABILITY_SWITCHSTEP)))
+               || HasBattlerAbility(battler, ABILITY_SWITCHSTEP)
+               || holdEffect == HOLD_EFFECT_TEMPO_DIAL))
             unusableMoves |= gBitTable[i];
         // Taunt
         else if (check & MOVE_LIMITATION_TAUNT && gDisableStructs[battler].tauntTimer && IS_MOVE_STATUS(gBattleMons[battler].moves[i]))
@@ -25418,6 +25420,19 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
         if (usesOwnSpAttackStat && !IsDynamaxed(battlerAtk))
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
+    case HOLD_EFFECT_TURNABOUT_TOTEM:
+    {
+        u32 attack = GetStagedOffensiveStat(battlerAtk, STAT_ATK);
+        u32 spAttack = GetStagedOffensiveStat(battlerAtk, STAT_SPATK);
+
+        if ((usesOwnAttackStat && attack < spAttack)
+         || (usesOwnSpAttackStat && spAttack < attack))
+            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        else if ((usesOwnAttackStat && attack > spAttack)
+              || (usesOwnSpAttackStat && spAttack > attack))
+            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
+        break;
+    }
     }
 
     // The offensive stats of a Player's Pokémon are boosted by x1.1 (+10%) if they have the 1st badge and 7th badges.
@@ -25777,10 +25792,30 @@ static inline uq4_12_t GetAdaptabilityCharmBoost(u32 battlerAtk)
     return charmModifier;
 }
 
-static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveType, u32 move, u32 abilityAtk)
+static bool32 IsNaturalStabType(u32 battlerAtk, u32 moveType)
+{
+    u32 teraType;
+
+    if (!IsTerastallized(battlerAtk))
+        return IS_BATTLER_OF_TYPE(battlerAtk, moveType);
+
+    teraType = GetBattlerTeraType(battlerAtk);
+    return IS_BATTLER_OF_BASE_TYPE(battlerAtk, moveType)
+        || (teraType != TYPE_STELLAR && teraType == moveType);
+}
+
+static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveType, u32 move, u32 abilityAtk, u32 holdEffectAtk)
 {
     bool32 hasAdaptability = HasBattlerAbility(battlerAtk, ABILITY_ADAPTABILITY);
 
+    if (holdEffectAtk == HOLD_EFFECT_WAYWARD_INCENSE)
+    {
+        if (move == MOVE_STRUGGLE || move == MOVE_NONE)
+            return UQ_4_12(1.0);
+        if (IsNaturalStabType(battlerAtk, moveType))
+            return UQ_4_12(1.0);
+        return uq4_12_add(hasAdaptability ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
+    }
     if (gBattleStruct->pledgeMove && IS_BATTLER_OF_TYPE(BATTLE_PARTNER(battlerAtk), moveType))
         return uq4_12_add(hasAdaptability ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
     else if (move == MOVE_STRUGGLE || move == MOVE_NONE)
@@ -26425,6 +26460,10 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
             return UQ_4_12(1.3);
         break;
+    case HOLD_EFFECT_TEMPO_DIAL:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+            return UQ_4_12(1.3);
+        break;
     }
     return UQ_4_12(1.0);
 }
@@ -26560,13 +26599,17 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
         dmg /= 100;
     }
 
-    if (IsTerastallized(battlerAtk))
+    if (holdEffectAtk == HOLD_EFFECT_WAYWARD_INCENSE)
+    {
+        DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk));
+    }
+    else if (IsTerastallized(battlerAtk))
     {
         DAMAGE_APPLY_MODIFIER(GetTeraMultiplier(battlerAtk, moveType));
     }
     else
     {
-        DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk));
+        DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk));
     }
     if (((GetBattlerSide(battlerAtk) == B_SIDE_PLAYER && IsCharmActive(EFFECT_TINTED_DAMAGE))
       || (GetBattlerSide(battlerAtk) == B_SIDE_OPPONENT && IsCurseActive(EFFECT_TINTED_DAMAGE)))

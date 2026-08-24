@@ -1050,6 +1050,10 @@ extern const u8 gItemRoomDesc_PetrifiedHeart[];
 extern const u8 gItemRoomDesc_FalseIdol[];
 extern const u8 gItemRoomDesc_RustedAnchor[];
 extern const u8 gItemRoomDesc_GamblersClaw[];
+extern const u8 gItemRoomDesc_TempoDial[];
+extern const u8 gItemRoomDesc_TurnaboutTotem[];
+extern const u8 gItemRoomDesc_JesterSwitch[];
+extern const u8 gItemRoomDesc_WaywardIncense[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1129,6 +1133,14 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_RustedAnchor;
     case ITEM_GAMBLERS_CLAW:
         return gItemRoomDesc_GamblersClaw;
+    case ITEM_TEMPO_DIAL:
+        return gItemRoomDesc_TempoDial;
+    case ITEM_TURNABOUT_TOTEM:
+        return gItemRoomDesc_TurnaboutTotem;
+    case ITEM_JESTER_SWITCH:
+        return gItemRoomDesc_JesterSwitch;
+    case ITEM_WAYWARD_INCENSE:
+        return gItemRoomDesc_WaywardIncense;
     default:
         return Rogue_GetItemDesc(itemId);
     }

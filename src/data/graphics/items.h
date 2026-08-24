@@ -1316,6 +1316,10 @@ const u32 gItemIconPalette_WitchsThread[] = INCBIN_U32("graphics/items/icon_pale
 const u32 gItemIconPalette_PetrifiedHeart[] = INCBIN_U32("graphics/items/icon_palettes/petrified_heart.gbapal.lz");
 const u32 gItemIconPalette_FalseIdol[] = INCBIN_U32("graphics/items/icon_palettes/false_idol.gbapal.lz");
 const u32 gItemIconPalette_GamblersClaw[] = INCBIN_U32("graphics/items/icon_palettes/gamblers_claw.gbapal.lz");
+const u32 gItemIconPalette_TempoDial[] = INCBIN_U32("graphics/items/icon_palettes/tempo_dial.gbapal.lz");
+const u32 gItemIconPalette_TurnaboutTotem[] = INCBIN_U32("graphics/items/icon_palettes/turnabout_totem.gbapal.lz");
+const u32 gItemIconPalette_JesterSwitch[] = INCBIN_U32("graphics/items/icon_palettes/jester_switch.gbapal.lz");
+const u32 gItemIconPalette_WaywardIncense[] = INCBIN_U32("graphics/items/icon_palettes/wayward_incense.gbapal.lz");
 
 const u32 gItemIcon_SmoothRock[] = INCBIN_U32("graphics/items/icons/smooth_rock.4bpp.lz");
 const u32 gItemIconPalette_SmoothRock[] = INCBIN_U32("graphics/items/icon_palettes/smooth_rock.gbapal.lz");

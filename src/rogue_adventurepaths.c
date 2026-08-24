@@ -187,6 +187,10 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         ITEM_FALSE_IDOL,
         ITEM_RUSTED_ANCHOR,
         ITEM_GAMBLERS_CLAW,
+        ITEM_TEMPO_DIAL,
+        ITEM_TURNABOUT_TOTEM,
+        ITEM_JESTER_SWITCH,
+        ITEM_WAYWARD_INCENSE,
     };
     u32 state = ((u32)gRogueRun.baseSeed << 16)
         ^ gRogueRun.baseSeed

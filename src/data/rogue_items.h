@@ -107,6 +107,10 @@ extern const u8 gItemDesc_PetrifiedHeart[];
 extern const u8 gItemDesc_FalseIdol[];
 extern const u8 gItemDesc_RustedAnchor[];
 extern const u8 gItemDesc_GamblersClaw[];
+extern const u8 gItemDesc_TempoDial[];
+extern const u8 gItemDesc_TurnaboutTotem[];
+extern const u8 gItemDesc_JesterSwitch[];
+extern const u8 gItemDesc_WaywardIncense[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2338,6 +2342,66 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_QuickClaw,
         .iconPalette = gItemIconPalette_GamblersClaw,
+    },
+
+    [ITEM_TEMPO_DIAL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Tempo Dial"),
+        .itemId = ITEM_TEMPO_DIAL,
+        .price = 0,
+        .description = gItemDesc_TempoDial,
+        .holdEffect = HOLD_EFFECT_TEMPO_DIAL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_Metronome,
+        .iconPalette = gItemIconPalette_TempoDial,
+    },
+
+    [ITEM_TURNABOUT_TOTEM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Turnabout Totem"),
+        .itemId = ITEM_TURNABOUT_TOTEM,
+        .price = 0,
+        .description = gItemDesc_TurnaboutTotem,
+        .holdEffect = HOLD_EFFECT_TURNABOUT_TOTEM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_StrangeSouvenir,
+        .iconPalette = gItemIconPalette_TurnaboutTotem,
+    },
+
+    [ITEM_JESTER_SWITCH - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Jester Switch"),
+        .itemId = ITEM_JESTER_SWITCH,
+        .price = 0,
+        .description = gItemDesc_JesterSwitch,
+        .holdEffect = HOLD_EFFECT_JESTER_SWITCH,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_EjectButton,
+        .iconPalette = gItemIconPalette_JesterSwitch,
+    },
+
+    [ITEM_WAYWARD_INCENSE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Wayward Incense"),
+        .itemId = ITEM_WAYWARD_INCENSE,
+        .price = 0,
+        .description = gItemDesc_WaywardIncense,
+        .holdEffect = HOLD_EFFECT_WAYWARD_INCENSE,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_OddIncense,
+        .iconPalette = gItemIconPalette_WaywardIncense,
     },
 
 #ifdef ROGUE_DEBUG

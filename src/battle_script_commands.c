@@ -7716,8 +7716,7 @@ static void Cmd_moveend(void)
         case MOVEEND_EJECT_BUTTON:
             if (gBattleMoves[gCurrentMove].effect != EFFECT_HIT_SWITCH_TARGET
               && IsBattlerAlive(gBattlerAttacker)
-              && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
-              && (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)))
+              && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
             {
                 // Since we check if battler was damaged, we don't need to check move result.
                 // In fact, doing so actually prevents multi-target moves from activating eject button properly
@@ -7726,14 +7725,28 @@ static void Cmd_moveend(void)
                 for (i = 0; i < gBattlersCount; i++)
                 {
                     u8 battler = battlers[i];
+                    u32 holdEffect = GetBattlerHoldEffect(battler, TRUE);
+                    u32 side = GetBattlerSide(battler);
+                    u8 partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+
                     // Attacker is the damage-dealer, battler is mon to be switched out
                     if (IsBattlerAlive(battler)
                       && gBattlerAttacker != battler
-                      && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_EJECT_BUTTON
+                      && (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
+                       || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+                       || (GetBattlerSide(battler) == B_SIDE_PLAYER && holdEffect == HOLD_EFFECT_JESTER_SWITCH))
+                      && (holdEffect == HOLD_EFFECT_EJECT_BUTTON
+                       || (holdEffect == HOLD_EFFECT_JESTER_SWITCH
+                        && !(gBattleStruct->jesterSwitchUsed[side] & partyBit)))
                       && BATTLER_TURN_DAMAGED(battler)
                       && CanBattlerSwitch(battler)
                       && CountUsablePartyMons(battler) > 0)  // Has mon to switch into
                     {
+                        if (holdEffect == HOLD_EFFECT_JESTER_SWITCH)
+                        {
+                            gBattleStruct->jesterSwitchUsed[side] |= partyBit;
+                            gBattleStruct->jesterSwitchPassStats |= gBitTable[battler];
+                        }
                         gBattleScripting.battler = battler;
                         gLastUsedItem = gBattleMons[battler].item;
                         if (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE)
@@ -9321,6 +9334,7 @@ static void Cmd_switchindataupdate(void)
     bool32 outgoingRksRelayActive;
     bool32 incomingRksRelayActive;
     bool32 preserveBatonPassState;
+    bool32 preserveJesterSwitchStats;
     bool32 rksRelayActive;
     bool32 shipOfTheseusActive;
     u32 battler, i;
@@ -9356,6 +9370,8 @@ static void Cmd_switchindataupdate(void)
     }
 
     preserveBatonPassState = gBattleMoves[gCurrentMove].effect == EFFECT_BATON_PASS;
+    preserveJesterSwitchStats = gBattleStruct->jesterSwitchPassStats & gBitTable[battler];
+    gBattleStruct->jesterSwitchPassStats &= ~gBitTable[battler];
     outgoingRksRelayActive = outgoingHasRksRelay && CanRksRelayWithAlly(&oldData, &gBattleMons[battler]);
     incomingRksRelayActive = HasBattlerAbility(battler, ABILITY_RKS_RELAY) && CanRksRelayWithAlly(&gBattleMons[battler], &oldData);
     rksRelayActive = !preserveBatonPassState
@@ -9380,6 +9396,12 @@ static void Cmd_switchindataupdate(void)
     }
 
     SwitchInClearSetData(battler, preserveBatonPassState);
+
+    if (preserveJesterSwitchStats)
+    {
+        for (i = 0; i < NUM_BATTLE_STATS; i++)
+            gBattleMons[battler].statStages[i] = oldData.statStages[i];
+    }
 
     if (shipOfTheseusActive)
     {

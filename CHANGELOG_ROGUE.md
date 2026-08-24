@@ -55,6 +55,14 @@ Format follows Keep a Changelog loosely:
   Defense instead of Attack.
 - Added Gambit Claw, a Treasure held item that grants priority on the
   holder's first turn after entry and penalizes priority on later turns.
+- Added Tempo Dial, a Treasure held item that boosts damaging moves by 30%
+  while preventing the holder from selecting the same move twice in a row.
+- Added Turnabout Totem, a Treasure held item that boosts the lower of Attack
+  and Sp. Atk by 50%, lowers the higher by 25%, and has no effect while tied.
+- Added Jester Switch, a once-per-battle Treasure held item that switches its
+  holder out after surviving direct damage and passes its stat changes.
+- Added Wayward Incense, a Treasure held item that grants STAB to off-type
+  damaging moves while removing it from natural same-type moves.
 - Added a debug-only Forced Treasure setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and

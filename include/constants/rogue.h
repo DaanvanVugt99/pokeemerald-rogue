@@ -250,9 +250,13 @@
 #define ITEM_FALSE_IDOL                  (LAST_ITEM_TR + 10)
 #define ITEM_RUSTED_ANCHOR               (LAST_ITEM_TR + 11)
 #define ITEM_GAMBLERS_CLAW               (LAST_ITEM_TR + 12)
+#define ITEM_TEMPO_DIAL                   (LAST_ITEM_TR + 13)
+#define ITEM_TURNABOUT_TOTEM              (LAST_ITEM_TR + 14)
+#define ITEM_JESTER_SWITCH                (LAST_ITEM_TR + 15)
+#define ITEM_WAYWARD_INCENSE              (LAST_ITEM_TR + 16)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_GAMBLERS_CLAW
+#define LAST_ITEM_ROOM_REWARD           ITEM_WAYWARD_INCENSE
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

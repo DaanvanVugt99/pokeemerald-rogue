@@ -15,6 +15,10 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_FALSE_IDOL) == HOLD_EFFECT_FALSE_IDOL);
     ASSUME(ItemId_GetHoldEffect(ITEM_RUSTED_ANCHOR) == HOLD_EFFECT_RUSTED_ANCHOR);
     ASSUME(ItemId_GetHoldEffect(ITEM_GAMBLERS_CLAW) == HOLD_EFFECT_GAMBLERS_CLAW);
+    ASSUME(ItemId_GetHoldEffect(ITEM_TEMPO_DIAL) == HOLD_EFFECT_TEMPO_DIAL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_TURNABOUT_TOTEM) == HOLD_EFFECT_TURNABOUT_TOTEM);
+    ASSUME(ItemId_GetHoldEffect(ITEM_JESTER_SWITCH) == HOLD_EFFECT_JESTER_SWITCH);
+    ASSUME(ItemId_GetHoldEffect(ITEM_WAYWARD_INCENSE) == HOLD_EFFECT_WAYWARD_INCENSE);
 }
 
 SINGLE_BATTLE_TEST("Bane Lens applies once from final type effectiveness", s16 damage)
@@ -848,6 +852,466 @@ SINGLE_BATTLE_TEST("Klutz suppresses Gambit Claw priority changes")
     } SCENE {
         MESSAGE("Foe Wobbuffet used Celebrate!");
         MESSAGE("Wobbuffet used Celebrate!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Tempo Dial boosts damaging moves by 30%", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TEMPO_DIAL; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.3), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Tempo Dial prevents consecutive move uses")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_TEMPO_DIAL); Moves(MOVE_TACKLE, MOVE_EMBER); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_TACKLE, allowed: FALSE); MOVE(player, MOVE_EMBER); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Tempo Dial forces Struggle when its only move was just used")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_TEMPO_DIAL); Moves(MOVE_SPLASH); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_SPLASH); }
+        TURN { MOVE(player, MOVE_SPLASH, allowed: FALSE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPLASH, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_STRUGGLE, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Tempo Dial's damage boost", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TEMPO_DIAL; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Tempo Dial's move restriction")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Item(ITEM_TEMPO_DIAL); Moves(MOVE_SPLASH); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_SPLASH); }
+        TURN { MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPLASH, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPLASH, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Turnabout Totem boosts the lower Attack by 50%", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TURNABOUT_TOTEM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(80); SpAttack(200); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Turnabout Totem lowers the higher Attack by 25%", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TURNABOUT_TOTEM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(200); SpAttack(80); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.75), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Turnabout Totem boosts the lower Sp. Atk by 50%", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TURNABOUT_TOTEM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(200); SpAttack(80); Item(item); Moves(MOVE_EMBER); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Turnabout Totem lowers the higher Sp. Atk by 25%", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TURNABOUT_TOTEM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(80); SpAttack(200); Item(item); Moves(MOVE_EMBER); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.75), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Turnabout Totem has no effect while Attack and Sp. Atk are equal", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TURNABOUT_TOTEM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); SpAttack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Turnabout Totem updates when stat stages make Attack and Sp. Atk equal", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TURNABOUT_TOTEM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(150); SpAttack(100); Speed(1); Item(item); Moves(MOVE_SPLASH, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); Speed(2); HP(1000); MaxHP(1000); Moves(MOVE_GROWL, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_GROWL); MOVE(player, MOVE_SPLASH); }
+        TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Turnabout Totem", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_TURNABOUT_TOTEM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Attack(80); SpAttack(200); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Jester Switch passes positive stat changes but not other Baton Pass state")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Item(ITEM_JESTER_SWITCH); Moves(MOVE_FOCUS_ENERGY, MOVE_SWORDS_DANCE, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); Moves(MOVE_SPLASH, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SPLASH); MOVE(player, MOVE_FOCUS_ENERGY); }
+        TURN { MOVE(opponent, MOVE_SPLASH); MOVE(player, MOVE_SWORDS_DANCE); }
+        TURN { MOVE(opponent, MOVE_TACKLE); SEND_OUT(player, 1); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_FOCUS_ENERGY, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        MESSAGE("Go! Wynaut!");
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT(!(player->status2 & STATUS2_FOCUS_ENERGY));
+    }
+}
+
+SINGLE_BATTLE_TEST("Jester Switch passes negative stat changes")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Item(ITEM_JESTER_SWITCH); Moves(MOVE_SPLASH, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WYNAUT) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); Moves(MOVE_GROWL, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_GROWL); MOVE(player, MOVE_SPLASH); }
+        TURN { MOVE(opponent, MOVE_TACKLE); SEND_OUT(player, 1); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        MESSAGE("Go! Wynaut!");
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE - 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Jester Switch does not activate without an available replacement")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Item(ITEM_JESTER_SWITCH); Moves(MOVE_SPLASH); }
+        PLAYER(SPECIES_WYNAUT) { Speed(1); HP(0); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_JESTER_SWITCH);
+    }
+}
+
+SINGLE_BATTLE_TEST("Jester Switch does not activate when direct damage knocks the holder out")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Defense(1); Speed(1); HP(1); MaxHP(100); Item(ITEM_JESTER_SWITCH); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WYNAUT) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(300); Speed(2); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); SEND_OUT(player, 1); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        MESSAGE("Wobbuffet fainted!");
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        }
+    }
+}
+
+SINGLE_BATTLE_TEST("Jester Switch does not activate from indirect damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Item(ITEM_JESTER_SWITCH); Moves(MOVE_SPLASH); }
+        PLAYER(SPECIES_WYNAUT) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); Moves(MOVE_WILL_O_WISP); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_WILL_O_WISP); MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WILL_O_WISP, opponent);
+        HP_BAR(player);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_JESTER_SWITCH);
+    }
+}
+
+SINGLE_BATTLE_TEST("Klutz suppresses Jester Switch")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Speed(1); Item(ITEM_JESTER_SWITCH); Moves(MOVE_SPLASH); }
+        PLAYER(SPECIES_WYNAUT) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_JESTER_SWITCH);
+    }
+}
+
+SINGLE_BATTLE_TEST("Jester Switch cannot activate twice after Recycle")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Item(ITEM_JESTER_SWITCH); Moves(MOVE_SWORDS_DANCE, MOVE_RECYCLE, MOVE_SPLASH, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WYNAUT) { Speed(3); Moves(MOVE_BATON_PASS, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); Moves(MOVE_SPLASH, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SPLASH); MOVE(player, MOVE_SWORDS_DANCE); }
+        TURN { MOVE(opponent, MOVE_TACKLE); SEND_OUT(player, 1); }
+        TURN { MOVE(player, MOVE_BATON_PASS); SEND_OUT(player, 0); MOVE(opponent, MOVE_SPLASH); }
+        TURN { MOVE(opponent, MOVE_SPLASH); MOVE(player, MOVE_RECYCLE); }
+        TURN { MOVE(opponent, MOVE_TACKLE); MOVE(player, MOVE_SPLASH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        MESSAGE("Go! Wynaut!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BATON_PASS, player);
+        MESSAGE("Go! Wobbuffet!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RECYCLE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet is switched out with the Jester Switch!");
+        }
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_JESTER_SWITCH);
+    }
+}
+
+SINGLE_BATTLE_TEST("Wayward Incense grants off-type STAB and removes natural STAB", s16 offTypeDamage, s16 naturalDamage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_WAYWARD_INCENSE; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_HEADBUTT].type == TYPE_NORMAL);
+        ASSUME(gBattleMoves[MOVE_PSYCHIC].type == TYPE_PSYCHIC);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); SpAttack(120); Item(item); Moves(MOVE_HEADBUTT, MOVE_PSYCHIC); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HEADBUTT); }
+        TURN { MOVE(player, MOVE_PSYCHIC); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].offTypeDamage);
+        HP_BAR(opponent, captureDamage: &results[i].naturalDamage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].offTypeDamage, UQ_4_12(1.5), results[1].offTypeDamage);
+        EXPECT_MUL_EQ(results[1].naturalDamage, UQ_4_12(1.5), results[0].naturalDamage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Wayward Incense granted STAB is strengthened by Adaptability", s16 offTypeDamage, s16 naturalDamage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_WAYWARD_INCENSE; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_HEADBUTT].type == TYPE_NORMAL);
+        ASSUME(gBattleMoves[MOVE_WATER_PULSE].type == TYPE_WATER);
+        PLAYER(SPECIES_CRAWDAUNT) { Ability(ABILITY_ADAPTABILITY); Attack(120); SpAttack(120); Item(item); Moves(MOVE_HEADBUTT, MOVE_WATER_PULSE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HEADBUTT); }
+        TURN { MOVE(player, MOVE_WATER_PULSE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].offTypeDamage);
+        HP_BAR(opponent, captureDamage: &results[i].naturalDamage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].offTypeDamage, UQ_4_12(2.0), results[1].offTypeDamage);
+        EXPECT_MUL_EQ(results[1].naturalDamage, UQ_4_12(2.0), results[0].naturalDamage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Wayward Incense inverts both base and Tera STAB", s16 teraDamage, s16 baseDamage, s16 offTypeDamage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_WAYWARD_INCENSE; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_HEADBUTT].type == TYPE_NORMAL);
+        ASSUME(gBattleMoves[MOVE_PSYCHIC].type == TYPE_PSYCHIC);
+        ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); SpAttack(120); TeraType(TYPE_NORMAL); Item(item); Moves(MOVE_HEADBUTT, MOVE_PSYCHIC, MOVE_EMBER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HEADBUTT, tera: TRUE); }
+        TURN { MOVE(player, MOVE_PSYCHIC); }
+        TURN { MOVE(player, MOVE_EMBER); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].teraDamage);
+        HP_BAR(opponent, captureDamage: &results[i].baseDamage);
+        HP_BAR(opponent, captureDamage: &results[i].offTypeDamage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[1].teraDamage, UQ_4_12(1.5), results[0].teraDamage);
+        EXPECT_MUL_EQ(results[1].baseDamage, UQ_4_12(1.5), results[0].baseDamage);
+        EXPECT_MUL_EQ(results[0].offTypeDamage, UQ_4_12(1.5), results[1].offTypeDamage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Wayward Incense is suppressed by Klutz", s16 offTypeDamage, s16 naturalDamage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_WAYWARD_INCENSE; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); Attack(120); SpAttack(120); Item(item); Moves(MOVE_HEADBUTT, MOVE_PSYCHIC); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_HEADBUTT); }
+        TURN { MOVE(player, MOVE_PSYCHIC); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].offTypeDamage);
+        HP_BAR(opponent, captureDamage: &results[i].naturalDamage);
+    } FINALLY {
+        EXPECT_EQ(results[0].offTypeDamage, results[1].offTypeDamage);
+        EXPECT_EQ(results[0].naturalDamage, results[1].naturalDamage);
     }
 }
 
