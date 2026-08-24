@@ -193,6 +193,13 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Varied each Adventure Paths island with seeded surface-decoration offsets
+  and an irregular safe rock perimeter of coves and protruding lobes, with a
+  two-tile minimum width that prevents jagged single-tile extrusions and
+  diagonal-aware side transitions that smooth stepped vertical edges while
+  preserving square south-facing cliff lips; replaced repeated per-layer
+  expansion with an output-equivalent two-pass distance transform to reduce
+  map-generation time.
 - Removed the white matte outlines from all 30 ported Treasure item icons while
   preserving their indexed palettes and enclosed highlights.
 - Expanded Luvdisc's level-up learnset with Heart Swap at level 37 and Take
@@ -428,6 +435,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept the partner Pokémon following the player during the scripted Adventure
+  entrance walk when starting immediately after arriving beside the nurse.
 - Preserved the Treasure encounter's authored astral palette by excluding the
   room from seasonal recoloring and time-of-day tinting.
 - Kept header dependency scanning enabled for direct ROM/ELF build targets,

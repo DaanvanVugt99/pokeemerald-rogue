@@ -361,6 +361,7 @@ gSpecials::
 	def_special Rogue_SafeSmartCheck
 	def_special Rogue_CanActivatePikinEasterEgg
 	def_special Rogue_SetupFollowParterMonObjectEvent
+	def_special Rogue_PrepareFollowerForRunStart
 	def_special Rogue_RegisterRideMon
 	def_special Rogue_NormalizeRidingWhistles
 	def_special Rogue_RunRewardLvls

@@ -42,6 +42,7 @@ void StairsMoveFollower(void);
 void FollowMe_HandleBike(void);
 void FollowMe_HandleSprite(void);
 void FollowMe_WarpSetEnd(void);
+void FollowMe_PrepareForScriptedMovement(void);
 void CreateFollowerAvatar(void);
 void EscalatorMoveFollower(u8 movementType);
 void EscalatorMoveFollowerFinish(void);

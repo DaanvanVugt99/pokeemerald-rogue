@@ -1206,6 +1206,30 @@ void FollowMe_WarpSetEnd(void)
     follower->movementDirection = player->movementDirection;
 }
 
+void FollowMe_PrepareForScriptedMovement(void)
+{
+    struct ObjectEvent *player;
+    struct ObjectEvent *follower;
+
+    if (!gSaveBlock2Ptr->follower.inProgress
+     || !gSaveBlock2Ptr->follower.warpEnd
+     || gSaveBlock2Ptr->follower.comeOutDoorStairs != 0)
+        return;
+
+    // FOLLOWER_FLAG_FOLLOW_DURING_SCRIPT intentionally does not bypass the
+    // script lock while a warp handoff is pending, because doing so during a
+    // door exit can reveal the follower too early. Once a non-door arrival is
+    // complete, resolve that handoff explicitly before a script moves the
+    // player so FollowMe can honor the flag normally.
+    player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    follower = &gObjectEvents[GetFollowerMapObjId()];
+    gSaveBlock2Ptr->follower.warpEnd = 0;
+    follower->invisible = FALSE;
+    MoveObjectEventToMapCoords(follower, player->currentCoords.x, player->currentCoords.y);
+    ObjectEventTurn(follower, player->facingDirection);
+    PlayerLogCoordinates(player);
+}
+
 void CreateFollowerAvatar(void)
 {
     struct ObjectEvent* player;

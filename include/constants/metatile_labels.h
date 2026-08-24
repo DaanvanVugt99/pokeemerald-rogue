@@ -85,6 +85,10 @@
 #define METATILE_AdventurePaths_Surface_CrystalClusterBlue1          0x305
 #define METATILE_AdventurePaths_Trail_ExitSouth                       0x306
 #define METATILE_AdventurePaths_Item_Pedestal                         0x307
+#define METATILE_AdventurePaths_Island_Edge_WestSlopeNorth            0x308
+#define METATILE_AdventurePaths_Island_Edge_WestSlopeSouth            0x309
+#define METATILE_AdventurePaths_Island_Edge_EastSlopeNorth            0x30A
+#define METATILE_AdventurePaths_Island_Edge_EastSlopeSouth            0x30B
 
 // gTileset_BattleArena
 #define METATILE_BattleArena_Door  0x21B

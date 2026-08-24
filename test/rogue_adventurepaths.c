@@ -108,8 +108,13 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalRoomId = gRogueRun.adventureRoomId;
     RAND_TYPE originalRng = gRngRogueValue;
-    u16 totalFormations = 0;
     u16 totalCrystals = 0;
+    u16 totalPrunedInnerFringe = 0;
+    u16 totalOuterFringe = 0;
+    s8 firstTemplateOffsetX = 0;
+    s8 firstTemplateOffsetY = 0;
+    bool8 foundDifferentTemplateOffset = FALSE;
+    u32 hashChecksum = 2166136261u;
     u8 i;
 
     EXPECT_NE(originalPath, NULL);
@@ -125,6 +130,12 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
         u16 formationCount;
         u16 accentCount;
         u16 crystalCount;
+        u16 keptInnerFringe;
+        u16 prunedInnerFringe;
+        u16 outerFringe;
+        u16 narrowFringe;
+        s8 templateOffsetX;
+        s8 templateOffsetY;
         u8 terraceStage;
 
         Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, cases[i].gameMode);
@@ -136,6 +147,7 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
 
         rngAfterGeneration = gRngRogueValue;
         EXPECT(RogueAdv_Debug_ValidateIslandLayout(&firstHash));
+        hashChecksum = (hashChecksum ^ firstHash) * 16777619u;
         EXPECT_EQ(gRngRogueValue, rngAfterGeneration);
         EXPECT(RogueAdv_Debug_ValidateIslandLayout(&secondHash));
         EXPECT_EQ(firstHash, secondHash);
@@ -144,11 +156,39 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
         EXPECT_EQ(terraceStage, cases[i].terraceStage);
         EXPECT_GT(accentCount, 0);
         EXPECT_EQ(gRngRogueValue, rngAfterGeneration);
-        totalFormations += formationCount;
+        EXPECT(RogueAdv_Debug_GetIslandVisualStats(
+            &templateOffsetX,
+            &templateOffsetY,
+            &keptInnerFringe,
+            &prunedInnerFringe,
+            &outerFringe,
+            &narrowFringe
+        ));
+        EXPECT_GE(templateOffsetX, -2);
+        EXPECT_LE(templateOffsetX, 2);
+        EXPECT_GE(templateOffsetY, -2);
+        EXPECT_LE(templateOffsetY, 2);
+        EXPECT_GT(keptInnerFringe, 0);
+        EXPECT_EQ(narrowFringe, 0);
+        if(i == 0)
+        {
+            firstTemplateOffsetX = templateOffsetX;
+            firstTemplateOffsetY = templateOffsetY;
+        }
+        else if(templateOffsetX != firstTemplateOffsetX || templateOffsetY != firstTemplateOffsetY)
+        {
+            foundDifferentTemplateOffset = TRUE;
+        }
         totalCrystals += crystalCount;
+        totalPrunedInnerFringe += prunedInnerFringe;
+        totalOuterFringe += outerFringe;
     }
-    EXPECT_GT(totalFormations, 0);
     EXPECT_GT(totalCrystals, 0);
+    EXPECT_GT(totalPrunedInnerFringe, 0);
+    EXPECT_GT(totalOuterFringe, 0);
+    EXPECT(foundDifferentTemplateOffset);
+    // Keep seeded silhouette and edge-autotiling output stable for this matrix.
+    EXPECT_EQ(hashChecksum, 0x12AA1ADA);
 
     gRogueAdvPath = *originalPath;
     gRogueRun.baseSeed = originalBaseSeed;

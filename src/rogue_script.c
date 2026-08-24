@@ -10,6 +10,7 @@
 #include "battle_setup.h"
 #include "event_data.h"
 #include "event_object_movement.h"
+#include "follow_me.h"
 #include "field_player_avatar.h"
 #include "field_screen_effect.h"
 #include "item.h"
@@ -1341,6 +1342,11 @@ void Rogue_SetupFollowParterMonObjectEvent()
 {
     FollowMon_ClearCachedPartnerSpecies();
     SetupFollowParterMonObjectEvent();
+}
+
+void Rogue_PrepareFollowerForRunStart()
+{
+    FollowMe_PrepareForScriptedMovement();
 }
 
 void Rogue_RegisterRideMon()

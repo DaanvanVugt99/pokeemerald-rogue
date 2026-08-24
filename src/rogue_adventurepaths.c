@@ -49,7 +49,11 @@
 #define ISLAND_MASK_TRAIL   (1 << 0)
 #define ISLAND_MASK_BLOCKED (1 << 1)
 
-#define ADVENTURE_ISLAND_MAX_EXPANSION 5
+#define ADVENTURE_ISLAND_MAX_EXPANSION 6
+#define ADVENTURE_ISLAND_DISTANCE_UNREACHED 0xF
+#define ADVENTURE_ISLAND_INNER_FRINGE_THRESHOLD 72
+#define ADVENTURE_ISLAND_OUTER_FRINGE_THRESHOLD 150
+#define ADVENTURE_TEMPLATE_OFFSET_RADIUS 2
 #define ADVENTURE_FORMATION_BACKGROUND_COUNT 15
 
 #define ADJUST_COORDS_X(val) (gRogueAdvPath.pathLength - val - 1)   // invert so we place the first node at the end
@@ -117,6 +121,21 @@ struct AdvPathSettings
     u8 nodeCount;
 };
 
+struct AdventureIslandVisualStats
+{
+    u16 keptInnerFringe;
+    u16 prunedInnerFringe;
+    u16 outerFringe;
+    u16 narrowFringe;
+};
+
+struct AdventureIslandVisualSettings
+{
+    const u16 *surfaceTemplate;
+    u32 visualHash;
+    s8 templateOffsetX;
+    s8 templateOffsetY;
+};
 
 static EWRAM_DATA u8 *sAdventureIslandMask = NULL;
 static EWRAM_DATA u8 *sAdventureIslandLevels = NULL;
@@ -124,7 +143,9 @@ static EWRAM_DATA u8 *sAdventureIslandLevels = NULL;
 static bool8 IsObjectEventVisible(struct RogueAdvPathRoom* room);
 static bool8 ShouldBlockObjectEvent(struct RogueAdvPathRoom* room);
 static void BufferTypeAdjective(u8 type);
-static void CacheAdventureIslandSurface(void);
+static void CacheAdventureIslandSurface(struct AdventureIslandVisualStats *visualStats);
+static u16 GetAdventureSurfaceTemplateMetatile(s16 x, s16 y);
+static bool8 IsAdventureFormationMetatile(u16 metatile);
 
 static void GeneratePath(struct AdvPathSettings* pathSettings);
 static void GenerateFloorLayout(struct Coords8 currentCoords, struct AdvPathSettings* pathSettings);
@@ -1913,7 +1934,9 @@ static bool8 AllocAdventureIslandMask(void)
     AGB_ASSERT(sAdventureIslandMask == NULL);
     AGB_ASSERT(sAdventureIslandLevels == NULL);
     sAdventureIslandMask = AllocZeroed(ADVENTURE_PATHS_MASK_SIZE);
-    sAdventureIslandLevels = AllocZeroed(ADVENTURE_PATHS_LEVEL_SIZE);
+    sAdventureIslandLevels = AllocZeroed(
+        ADVENTURE_PATHS_LEVEL_SIZE + sizeof(struct AdventureIslandVisualSettings)
+    );
     if(sAdventureIslandMask == NULL || sAdventureIslandLevels == NULL)
     {
         Free(sAdventureIslandMask);
@@ -2011,7 +2034,214 @@ static u32 GetAdventureIslandCoordHash(u16 x, u16 y, u32 salt)
     return hash ^ (hash >> 16);
 }
 
-static bool8 BuildAdventureIslandMask(void)
+static u32 GetAdventureIslandSegmentHash(u32 salt)
+{
+    return GetAdventureIslandCoordHash(
+        gRogueAdvPath.pathLength,
+        GetPathGenerationDifficulty(),
+        salt
+    );
+}
+
+static struct AdventureIslandVisualSettings *GetAdventureIslandVisualSettings(void)
+{
+    return (struct AdventureIslandVisualSettings *)&sAdventureIslandLevels[ADVENTURE_PATHS_LEVEL_SIZE];
+}
+
+static s8 GetAdventureTemplateOffsetFromVisualHash(u32 visualHash, u32 salt)
+{
+    u32 hash = visualHash ^ salt;
+
+    hash ^= hash >> 13;
+    hash *= 0x85EBCA6Bu;
+    hash ^= hash >> 16;
+    return hash
+        % (ADVENTURE_TEMPLATE_OFFSET_RADIUS * 2 + 1)
+        - ADVENTURE_TEMPLATE_OFFSET_RADIUS;
+}
+
+static void CacheAdventureIslandVisualSettings(void)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+
+    settings->surfaceTemplate = GetMapLayout(LAYOUT_ROGUE_ADVENTURE_PATHS)->map;
+    settings->visualHash = GetAdventureIslandSegmentHash(0x5345474D);
+    settings->templateOffsetX = GetAdventureTemplateOffsetFromVisualHash(settings->visualHash, 0x544D5048);
+    settings->templateOffsetY = GetAdventureTemplateOffsetFromVisualHash(settings->visualHash, 0x544D5056);
+}
+
+static u8 GetAdventureIslandSilhouetteNoise(s16 x, s16 y, u32 visualHash)
+{
+    u32 broadNoise = GetAdventureIslandCoordHash(x / 4, y / 4, 0x42524F41 ^ visualHash) & 0xFF;
+    u32 mediumNoise = GetAdventureIslandCoordHash(x / 2, y / 2, 0x4D454449 ^ visualHash) & 0xFF;
+    u32 detailNoise = GetAdventureIslandCoordHash(x, y, 0x44455441 ^ visualHash) & 0xFF;
+
+    // Broad noise supplies recognizable lobes; the lighter higher-frequency
+    // layers stop their borders from looking like aligned rectangles.
+    return (broadNoise * 2 + mediumNoise + detailNoise) / 4;
+}
+
+static bool8 HasAdventureIslandInwardNeighbour(s16 x, s16 y, u8 encodedDistance)
+{
+    u8 north = GetAdventureIslandLevel(x, y - 1);
+    u8 east = GetAdventureIslandLevel(x + 1, y);
+    u8 south = GetAdventureIslandLevel(x, y + 1);
+    u8 west = GetAdventureIslandLevel(x - 1, y);
+
+    return (north != 0 && north < encodedDistance)
+        || (east != 0 && east < encodedDistance)
+        || (south != 0 && south < encodedDistance)
+        || (west != 0 && west < encodedDistance);
+}
+
+static bool8 IsAdventureIslandCellInSolid2x2(s16 x, s16 y)
+{
+    s16 anchorX;
+    s16 anchorY;
+
+    // A cell may occupy any corner of its supporting 2x2 block.
+    for(anchorY = y - 1; anchorY <= y; ++anchorY)
+    {
+        for(anchorX = x - 1; anchorX <= x; ++anchorX)
+        {
+            if(GetAdventureIslandLevel(anchorX, anchorY) != 0
+                && GetAdventureIslandLevel(anchorX + 1, anchorY) != 0
+                && GetAdventureIslandLevel(anchorX, anchorY + 1) != 0
+                && GetAdventureIslandLevel(anchorX + 1, anchorY + 1) != 0)
+            {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+static void RemoveNarrowAdventureIslandFringe(u8 innerFringeDistance, u8 outerFringeDistance)
+{
+    s16 x;
+    s16 y;
+
+    // Mark first and remove second so every decision sees the same silhouette.
+    // Requiring membership in a filled 2x2 block eliminates one-tile teeth in
+    // either direction without eroding the guaranteed inner route buffer.
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            u8 encodedDistance = GetAdventureIslandLevel(x, y);
+
+            if((encodedDistance == innerFringeDistance
+                    || encodedDistance == outerFringeDistance)
+                && !IsAdventureIslandCellInSolid2x2(x, y))
+            {
+                SetIslandMaskCell(x, y, GetIslandMaskCell(x, y) | ISLAND_MASK_BLOCKED);
+            }
+        }
+    }
+
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            if(!HasIslandMaskFlag(x, y, ISLAND_MASK_TRAIL)
+                && HasIslandMaskFlag(x, y, ISLAND_MASK_BLOCKED))
+            {
+                SetAdventureIslandLevel(x, y, 0);
+                SetIslandMaskCell(x, y, 0);
+            }
+        }
+    }
+}
+
+static void ShapeAdventureIslandFringe(u8 expansion, struct AdventureIslandVisualStats *visualStats)
+{
+    u8 innerFringeDistance = expansion + 1;
+    u8 outerFringeDistance = expansion + 2;
+    u32 visualHash = GetAdventureIslandVisualSettings()->visualHash;
+    u16 innerFringeCandidates = 0;
+    u16 keptInnerFringe = 0;
+    u16 outerFringe = 0;
+    s16 x;
+    s16 y;
+
+    // The original dilation remains intact through expansion - 1. Vary its
+    // outer ring and selectively retain one additional ring, producing safe
+    // coves and lobes without ever touching the traversable trail network.
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            u8 encodedDistance = GetAdventureIslandLevel(x, y);
+
+            if(encodedDistance == innerFringeDistance
+                || encodedDistance == outerFringeDistance)
+            {
+                u8 noise = GetAdventureIslandSilhouetteNoise(x, y, visualHash);
+
+                if(encodedDistance == innerFringeDistance)
+                    ++innerFringeCandidates;
+                if((encodedDistance == innerFringeDistance
+                        && noise < ADVENTURE_ISLAND_INNER_FRINGE_THRESHOLD)
+                    || (encodedDistance == outerFringeDistance
+                        && noise < ADVENTURE_ISLAND_OUTER_FRINGE_THRESHOLD))
+                {
+                    // Keep authored multi-cell formations whole; their own
+                    // validation still removes any footprint that did not fit.
+                    if(!IsAdventureFormationMetatile(GetAdventureSurfaceTemplateMetatile(x, y)))
+                        SetAdventureIslandLevel(x, y, 0);
+                }
+            }
+        }
+    }
+
+    // Remove fringe cells that the noisy cut disconnected from the preceding
+    // ring. Requiring a cardinal attachment also rounds square dilation corners.
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            u8 encodedDistance = GetAdventureIslandLevel(x, y);
+
+            if((encodedDistance == innerFringeDistance
+                    || encodedDistance == outerFringeDistance)
+                && !HasAdventureIslandInwardNeighbour(x, y, encodedDistance)
+                && !IsAdventureFormationMetatile(GetAdventureSurfaceTemplateMetatile(x, y)))
+            {
+                SetAdventureIslandLevel(x, y, 0);
+            }
+        }
+    }
+
+    RemoveNarrowAdventureIslandFringe(innerFringeDistance, outerFringeDistance);
+
+    if(visualStats != NULL)
+    {
+        visualStats->narrowFringe = 0;
+        for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+        {
+            for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+            {
+                if(GetAdventureIslandLevel(x, y) == innerFringeDistance)
+                {
+                    ++keptInnerFringe;
+                    if(!IsAdventureIslandCellInSolid2x2(x, y))
+                        ++visualStats->narrowFringe;
+                }
+                else if(GetAdventureIslandLevel(x, y) == outerFringeDistance)
+                {
+                    ++outerFringe;
+                    if(!IsAdventureIslandCellInSolid2x2(x, y))
+                        ++visualStats->narrowFringe;
+                }
+            }
+        }
+        visualStats->keptInnerFringe = keptInnerFringe;
+        visualStats->prunedInnerFringe = innerFringeCandidates - keptInnerFringe;
+        visualStats->outerFringe = outerFringe;
+    }
+}
+
+static bool8 BuildAdventureIslandMask(struct AdventureIslandVisualStats *visualStats)
 {
     bool8 allTrailCellsInBounds = TRUE;
     s16 x;
@@ -2020,7 +2250,7 @@ static bool8 BuildAdventureIslandMask(void)
     u32 j;
 
     memset(sAdventureIslandMask, 0, ADVENTURE_PATHS_MASK_SIZE);
-
+    CacheAdventureIslandVisualSettings();
     if(gRogueAdvPath.roomCount == 0)
         return FALSE;
 
@@ -2074,7 +2304,7 @@ static bool8 BuildAdventureIslandMask(void)
         }
     }
 
-    CacheAdventureIslandSurface();
+    CacheAdventureIslandSurface(visualStats);
     return allTrailCellsInBounds;
 }
 
@@ -2099,6 +2329,8 @@ static u8 GetAdventureSurfaceLevelForDistance(u8 terraceStage, u8 distance)
         return terraceStage + 1;
     if(distance <= 3)
         return terraceStage;
+    if(distance >= terraceStage + 3)
+        return 1;
     return terraceStage - (distance - 3);
 }
 
@@ -2107,53 +2339,81 @@ static bool8 IsAdventureIslandSurfaceCell(s16 x, s16 y)
     return GetAdventureIslandLevel(x, y) != 0;
 }
 
-static void CacheAdventureIslandSurface(void)
+static u8 GetAdventureIslandEncodedDistance(s16 x, s16 y)
+{
+    if(!IsIslandCoordInBounds(x, y))
+        return ADVENTURE_ISLAND_DISTANCE_UNREACHED;
+    return GetAdventureIslandLevel(x, y);
+}
+
+static void CacheAdventureIslandSurface(struct AdventureIslandVisualStats *visualStats)
 {
     u8 terraceStage = GetAdventureTerraceStage();
     u8 expansion = 2 + terraceStage;
-    u8 distance;
+    u8 maxExpansion = min(expansion + 1, ADVENTURE_ISLAND_MAX_EXPANSION);
     s16 x;
     s16 y;
 
     memset(sAdventureIslandLevels, 0, ADVENTURE_PATHS_LEVEL_SIZE);
 
-    // Store distance + 1 temporarily. Each bounded pass expands the previous
-    // frontier in eight directions without consuming gameplay RNG.
+    // Store distance + 1 temporarily. Unreached cells use the largest value
+    // available in the packed nibble until the two distance-transform sweeps.
     for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
         for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
         {
             if(HasIslandMaskFlag(x, y, ISLAND_MASK_TRAIL))
                 SetAdventureIslandLevel(x, y, 1);
+            else
+                SetAdventureIslandLevel(x, y, ADVENTURE_ISLAND_DISTANCE_UNREACHED);
         }
     }
 
-    for(distance = 1; distance <= expansion; ++distance)
+    // An eight-neighbour distance field is a Chebyshev distance transform.
+    // Forward and backward sweeps produce the same result as expanding every
+    // frontier separately, but visit each map cell only twice.
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
-        for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
         {
-            for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
-            {
-                s16 offsetX;
-                s16 offsetY;
+            u8 encodedDistance = GetAdventureIslandLevel(x, y);
+            u8 neighbourDistance = min(
+                min(GetAdventureIslandEncodedDistance(x - 1, y - 1), GetAdventureIslandEncodedDistance(x, y - 1)),
+                min(GetAdventureIslandEncodedDistance(x + 1, y - 1), GetAdventureIslandEncodedDistance(x - 1, y))
+            );
 
-                if(GetAdventureIslandLevel(x, y) != 0)
-                    continue;
-                for(offsetY = -1; offsetY <= 1; ++offsetY)
-                {
-                    for(offsetX = -1; offsetX <= 1; ++offsetX)
-                    {
-                        if(GetAdventureIslandLevel(x + offsetX, y + offsetY) == distance)
-                        {
-                            SetAdventureIslandLevel(x, y, distance + 1);
-                            offsetX = 2;
-                            offsetY = 2;
-                        }
-                    }
-                }
-            }
+            if(neighbourDistance < ADVENTURE_ISLAND_DISTANCE_UNREACHED
+                && neighbourDistance + 1 < encodedDistance)
+                SetAdventureIslandLevel(x, y, neighbourDistance + 1);
         }
     }
+
+    for(y = ADVENTURE_PATHS_MAP_HEIGHT - 1; y >= 0; --y)
+    {
+        for(x = ADVENTURE_PATHS_MAP_WIDTH - 1; x >= 0; --x)
+        {
+            u8 encodedDistance = GetAdventureIslandLevel(x, y);
+            u8 neighbourDistance = min(
+                min(GetAdventureIslandEncodedDistance(x + 1, y), GetAdventureIslandEncodedDistance(x - 1, y + 1)),
+                min(GetAdventureIslandEncodedDistance(x, y + 1), GetAdventureIslandEncodedDistance(x + 1, y + 1))
+            );
+
+            if(neighbourDistance < ADVENTURE_ISLAND_DISTANCE_UNREACHED
+                && neighbourDistance + 1 < encodedDistance)
+                SetAdventureIslandLevel(x, y, neighbourDistance + 1);
+        }
+    }
+
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            if(GetAdventureIslandLevel(x, y) > maxExpansion + 1)
+                SetAdventureIslandLevel(x, y, 0);
+        }
+    }
+
+    ShapeAdventureIslandFringe(expansion, visualStats);
 
     for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
@@ -2215,6 +2475,10 @@ static u16 GetAdventureIslandMetatile(u16 x, u16 y)
     bool8 east = GetAdventureIslandLevel(x + 1, y) >= level;
     bool8 south = GetAdventureIslandLevel(x, y + 1) >= level;
     bool8 west = GetAdventureIslandLevel(x - 1, y) >= level;
+    bool8 northEast = GetAdventureIslandLevel(x + 1, y - 1) >= level;
+    bool8 southEast = GetAdventureIslandLevel(x + 1, y + 1) >= level;
+    bool8 southWest = GetAdventureIslandLevel(x - 1, y + 1) >= level;
+    bool8 northWest = GetAdventureIslandLevel(x - 1, y - 1) >= level;
 
     if(!north && !east)
         return METATILE_AdventurePaths_Island_Corner_NorthEast;
@@ -2227,7 +2491,19 @@ static u16 GetAdventureIslandMetatile(u16 x, u16 y)
     if(!north)
         return METATILE_AdventurePaths_Island_Edge_North;
     if(!east)
-        return METATILE_AdventurePaths_Island_Edge_East;
+    {
+        if(northEast && !southEast)
+            return METATILE_AdventurePaths_Island_Edge_EastSlopeNorth;
+        if(!northEast && southEast)
+            return METATILE_AdventurePaths_Island_Edge_EastSlopeSouth;
+
+        // Alternate matching halves along uninterrupted side walls. An even
+        // row's lower inset meets the odd row's upper inset, creating a soft
+        // diagonal shadow without introducing a one-pixel seam or sawtooth.
+        return (y & 1)
+            ? METATILE_AdventurePaths_Island_Edge_EastSlopeSouth
+            : METATILE_AdventurePaths_Island_Edge_EastSlopeNorth;
+    }
     if(!south)
     {
         switch(GetAdventureIslandCoordHash(x, y, 0x534F5554) % 3)
@@ -2241,15 +2517,23 @@ static u16 GetAdventureIslandMetatile(u16 x, u16 y)
         }
     }
     if(!west)
-        return METATILE_AdventurePaths_Island_Edge_West;
+    {
+        if(northWest && !southWest)
+            return METATILE_AdventurePaths_Island_Edge_WestSlopeNorth;
+        if(!northWest && southWest)
+            return METATILE_AdventurePaths_Island_Edge_WestSlopeSouth;
+        return (y & 1)
+            ? METATILE_AdventurePaths_Island_Edge_WestSlopeSouth
+            : METATILE_AdventurePaths_Island_Edge_WestSlopeNorth;
+    }
 
-    if(GetAdventureIslandLevel(x + 1, y - 1) < level)
+    if(!northEast)
         return METATILE_AdventurePaths_Island_InnerCorner_NorthEast;
-    if(GetAdventureIslandLevel(x + 1, y + 1) < level)
+    if(!southEast)
         return METATILE_AdventurePaths_Island_InnerCorner_SouthEast;
-    if(GetAdventureIslandLevel(x - 1, y + 1) < level)
+    if(!southWest)
         return METATILE_AdventurePaths_Island_InnerCorner_SouthWest;
-    if(GetAdventureIslandLevel(x - 1, y - 1) < level)
+    if(!northWest)
         return METATILE_AdventurePaths_Island_InnerCorner_NorthWest;
 
     return METATILE_AdventurePaths_Island_Interior0
@@ -2603,12 +2887,20 @@ static u16 GetAdventureDecorationMetatile(u8 type, u8 kind, bool8 bottom)
 
 static u16 GetAdventureSurfaceTemplateMetatile(s16 x, s16 y)
 {
-    const struct MapLayout *layout;
-
     if(!IsIslandCoordInBounds(x, y))
         return METATILE_AdventurePaths_Island_Interior0;
-    layout = GetMapLayout(LAYOUT_ROGUE_ADVENTURE_PATHS);
-    return layout->map[y * ADVENTURE_PATHS_MAP_WIDTH + x] & MAPGRID_METATILE_ID_MASK;
+    return GetAdventureIslandVisualSettings()->surfaceTemplate[y * ADVENTURE_PATHS_MAP_WIDTH + x]
+        & MAPGRID_METATILE_ID_MASK;
+}
+
+static u16 GetAdventureOffsetSurfaceTemplateMetatile(s16 x, s16 y)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+
+    return GetAdventureSurfaceTemplateMetatile(
+        x + settings->templateOffsetX,
+        y + settings->templateOffsetY
+    );
 }
 
 static bool8 IsAdventureFormationMetatile(u16 metatile)
@@ -2760,6 +3052,9 @@ static u16 GetAdventureTemplateMetatile(s16 x, s16 y)
         return GetAdventureTemplateFallbackMetatile(x, y);
     }
 
+    // Large formations retain their carefully composed anchors. Shift the
+    // one-cell surface details, which can move safely without splitting art.
+    metatile = GetAdventureOffsetSurfaceTemplateMetatile(x, y);
     if(IsAdventureTemplateAccentMetatile(metatile))
     {
         if(IsAdventureInteriorPlaneCell(x, y))
@@ -2892,7 +3187,7 @@ void RogueAdv_ApplyAdventureMetatiles()
         return;
     }
 
-    allTrailCellsInBounds = BuildAdventureIslandMask();
+    allTrailCellsInBounds = BuildAdventureIslandMask(NULL);
     AGB_ASSERT(allTrailCellsInBounds);
     PaintAdventureIsland();
     FreeAdventureIslandMask();
@@ -3032,9 +3327,9 @@ bool8 RogueAdv_Debug_ValidateIslandLayout(u32 *layoutHash)
     if(!AllocAdventureIslandMask())
         return FALSE;
 
-    isValid = BuildAdventureIslandMask();
+    isValid = BuildAdventureIslandMask(NULL);
     isValid &= IsAdventureIslandConnected();
-    isValid &= BuildAdventureIslandMask();
+    isValid &= BuildAdventureIslandMask(NULL);
 
     for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
@@ -3072,7 +3367,7 @@ bool8 RogueAdv_Debug_HasBlockedIslandTrail(void)
     if(!AllocAdventureIslandMask())
         return FALSE;
 
-    BuildAdventureIslandMask();
+    BuildAdventureIslandMask(NULL);
     for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
         for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
@@ -3102,7 +3397,7 @@ bool8 RogueAdv_Debug_GetIslandGeologyStats(u16 *formationCount, u16 *accentCount
     if(!AllocAdventureIslandMask())
         return FALSE;
 
-    BuildAdventureIslandMask();
+    BuildAdventureIslandMask(NULL);
     for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
     {
         for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
@@ -3141,6 +3436,37 @@ bool8 RogueAdv_Debug_GetIslandGeologyStats(u16 *formationCount, u16 *accentCount
         *crystalCount = crystals;
     if(terraceStage != NULL)
         *terraceStage = GetAdventureTerraceStage();
+    return TRUE;
+}
+
+bool8 RogueAdv_Debug_GetIslandVisualStats(s8 *templateOffsetX, s8 *templateOffsetY, u16 *keptInnerFringe, u16 *prunedInnerFringe, u16 *outerFringe, u16 *narrowFringe)
+{
+    struct AdventureIslandVisualStats visualStats;
+    struct AdventureIslandVisualSettings *settings;
+
+    if(!AllocAdventureIslandMask())
+        return FALSE;
+    if(!BuildAdventureIslandMask(&visualStats))
+    {
+        FreeAdventureIslandMask();
+        return FALSE;
+    }
+    settings = GetAdventureIslandVisualSettings();
+
+    if(templateOffsetX != NULL)
+        *templateOffsetX = settings->templateOffsetX;
+    if(templateOffsetY != NULL)
+        *templateOffsetY = settings->templateOffsetY;
+    if(keptInnerFringe != NULL)
+        *keptInnerFringe = visualStats.keptInnerFringe;
+    if(prunedInnerFringe != NULL)
+        *prunedInnerFringe = visualStats.prunedInnerFringe;
+    if(outerFringe != NULL)
+        *outerFringe = visualStats.outerFringe;
+    if(narrowFringe != NULL)
+        *narrowFringe = visualStats.narrowFringe;
+
+    FreeAdventureIslandMask();
     return TRUE;
 }
 #endif

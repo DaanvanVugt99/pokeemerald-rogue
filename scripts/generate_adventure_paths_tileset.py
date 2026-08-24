@@ -173,6 +173,10 @@ METATILES = {
     "Surface_CrystalClusterBlue1": 0x305,
     "Trail_ExitSouth": 0x306,
     "Item_Pedestal": 0x307,
+    "Island_Edge_WestSlopeNorth": 0x308,
+    "Island_Edge_WestSlopeSouth": 0x309,
+    "Island_Edge_EastSlopeNorth": 0x30A,
+    "Island_Edge_EastSlopeSouth": 0x30B,
 }
 
 
@@ -363,19 +367,43 @@ def star_tiles(frame: int) -> list[list[list[int]]]:
     return tiles
 
 
-def rock_metatile(missing: set[str], inner: str | None = None, variant: int = 0) -> list[list[int]]:
+def rock_metatile(
+    missing: set[str],
+    inner: str | None = None,
+    variant: int = 0,
+    side_slope: str | None = None,
+) -> list[list[int]]:
     pixels = blank(16, 16)
     north_jag = (0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
     west_jag = (1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0)
 
     def is_rock(x: int, y: int) -> bool:
-        if "N" in missing and y < 2 + north_jag[x]:
+        north_edge = 2 + north_jag[x]
+        south_edge = 13 - north_jag[15 - x]
+        west_edge = 2 + west_jag[y]
+        east_edge = 13 - west_jag[15 - y]
+
+        # A cardinal-only edge is correct along an uninterrupted wall, but a
+        # one-cell step needs a short diagonal transition. Let the surface
+        # reach the appropriate corner, then blend back into the normal inset
+        # over half a metatile. South-facing lips deliberately stay flat so
+        # the floating-island underside remains visually supported.
+        if side_slope == "WN" and y < 8:
+            west_edge = min(west_edge, max(0, (y - 1) // 2))
+        elif side_slope == "WS" and y >= 8:
+            west_edge = min(west_edge, max(0, (14 - y) // 2))
+        elif side_slope == "EN" and y < 8:
+            east_edge = max(east_edge, 15 - max(0, (y - 1) // 2))
+        elif side_slope == "ES" and y >= 8:
+            east_edge = max(east_edge, 15 - max(0, (14 - y) // 2))
+
+        if "N" in missing and y < north_edge:
             return False
-        if "S" in missing and y > 13 - north_jag[15 - x]:
+        if "S" in missing and y > south_edge:
             return False
-        if "W" in missing and x < 2 + west_jag[y]:
+        if "W" in missing and x < west_edge:
             return False
-        if "E" in missing and x > 13 - west_jag[15 - y]:
+        if "E" in missing and x > east_edge:
             return False
         if inner == "NE" and x > 11 and y < 4 and x - y > 10:
             return False
@@ -450,6 +478,11 @@ def edge_metatile(source: list[list[int]], case: str, variant: int = 0) -> list[
 def south_edge_metatile(source: list[list[int]], column: int, variant: int = 0) -> list[list[int]]:
     pixels = rock_metatile({"S"}, variant=variant)
     return overlay_pixels(pixels, source, column * 16, 96)
+
+
+def side_slope_metatile(case: str) -> list[list[int]]:
+    side = case[0]
+    return rock_metatile({side}, side_slope=case)
 
 
 def underside_metatile(source: list[list[int]], column: int) -> list[list[int]]:
@@ -796,6 +829,10 @@ def build_assets() -> tuple[list[list[list[int]]], list[list[int]]]:
     put("Island_Edge_South1", south_edge_metatile(edge_source, 1, 1), PALETTE_ROCK)
     put("Island_Edge_South2", south_edge_metatile(edge_source, 3, 2), PALETTE_ROCK)
     put("Island_Edge_West", edge_metatile(edge_source, "W"), PALETTE_ROCK)
+    put("Island_Edge_WestSlopeNorth", side_slope_metatile("WN"), PALETTE_ROCK)
+    put("Island_Edge_WestSlopeSouth", side_slope_metatile("WS"), PALETTE_ROCK)
+    put("Island_Edge_EastSlopeNorth", side_slope_metatile("EN"), PALETTE_ROCK)
+    put("Island_Edge_EastSlopeSouth", side_slope_metatile("ES"), PALETTE_ROCK)
     for short, full in (("NE", "NorthEast"), ("SE", "SouthEast"), ("SW", "SouthWest"), ("NW", "NorthWest")):
         put(f"Island_Corner_{full}", edge_metatile(edge_source, short), PALETTE_ROCK)
         put(f"Island_InnerCorner_{full}", edge_metatile(edge_source, f"INNER_{short}"), PALETTE_ROCK)

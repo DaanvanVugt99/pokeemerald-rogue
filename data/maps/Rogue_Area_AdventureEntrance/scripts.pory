@@ -684,6 +684,8 @@ script Rogue_StartAdventureInternal
     call(Common_EventScript_SaveGame)
     if(var(VAR_RESULT) == YES)
     {
+        special(Rogue_PrepareFollowerForRunStart)
+
         if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_GO_ON_ADVENTURE)
         {
             addvar(VAR_ROGUE_INTRO_STATE, 1)
