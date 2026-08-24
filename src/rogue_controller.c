@@ -4368,10 +4368,15 @@ static void SpriteCB_ItemRoomOverworldIcon(struct Sprite *sprite)
         sprite->coordOffsetEnabled = objectSprite->coordOffsetEnabled;
         sprite->oam.priority = objectSprite->oam.priority;
         sprite->subpriority = objectSprite->subpriority;
-        sprite->invisible = objectEvent->invisible;
+        sprite->invisible = objectEvent->offScreen;
 
         // Retain the object event as the solid, interactable anchor without
         // drawing its generic held-item marker underneath the real icon.
+        // Store this on the object event as well as the sprite: overworld
+        // visibility updates can rewrite a sprite's `invisible` bit while a
+        // field menu is open, so changing only the sprite lets the generic
+        // held-item marker reappear when the preview closes.
+        objectEvent->invisible = TRUE;
         objectSprite->invisible = TRUE;
     }
 }

@@ -193,6 +193,8 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Removed the white matte outlines from all 30 ported Treasure item icons while
+  preserving their indexed palettes and enclosed highlights.
 - Expanded Luvdisc's level-up learnset with Heart Swap at level 37 and Take
   Heart at level 49.
 - Renamed the Treasure held-item rewards to Bane Lens, Hush Band, Fate Sash,
@@ -426,6 +428,10 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Kept header dependency scanning enabled for direct ROM/ELF build targets,
+  preventing stale object layouts from corrupting battle memory.
+- Fixed Treasure encounter pedestal icons reverting to the generic held-item
+  marker after closing the reward preview.
 - Corrected Adventure Paths geology overlay priority so the player and room
   nodes render above nearby rocks and crystal clusters.
 - Applied dynamic custom Pokémon typing to switch-in hazards, battle AI
