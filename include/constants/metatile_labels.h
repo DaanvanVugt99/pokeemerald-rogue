@@ -97,6 +97,23 @@
 #define METATILE_AdventurePaths_Terrace_FaceRightSlant0               0x311
 #define METATILE_AdventurePaths_Terrace_FaceRightSlant1               0x312
 #define METATILE_AdventurePaths_Terrace_FaceRightSlant2               0x313
+#define METATILE_AdventurePaths_Satellite_SurfaceLeft                  0x314
+#define METATILE_AdventurePaths_Satellite_SurfaceMiddle0               0x315
+#define METATILE_AdventurePaths_Satellite_SurfaceMiddle1               0x316
+#define METATILE_AdventurePaths_Satellite_SurfaceMiddle2               0x317
+#define METATILE_AdventurePaths_Satellite_SurfaceRight                 0x318
+#define METATILE_AdventurePaths_Debris_Single0                         0x319
+#define METATILE_AdventurePaths_Debris_Single1                         0x31A
+#define METATILE_AdventurePaths_Debris_Single2                         0x31B
+#define METATILE_AdventurePaths_Debris_Single3                         0x31C
+#define METATILE_AdventurePaths_Debris_Single4                         0x31D
+#define METATILE_AdventurePaths_Debris_Single5                         0x31E
+#define METATILE_AdventurePaths_Debris_Single6                         0x31F
+#define METATILE_AdventurePaths_Debris_Single7                         0x320
+#define METATILE_AdventurePaths_Debris_Single8                         0x321
+#define METATILE_AdventurePaths_Debris_Single9                         0x322
+#define METATILE_AdventurePaths_Debris_PairLeft                        0x323
+#define METATILE_AdventurePaths_Debris_PairRight                       0x324
 
 // gTileset_BattleArena
 #define METATILE_BattleArena_Door  0x21B

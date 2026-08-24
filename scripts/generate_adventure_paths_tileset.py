@@ -185,6 +185,23 @@ METATILES = {
     "Terrace_FaceRightSlant0": 0x311,
     "Terrace_FaceRightSlant1": 0x312,
     "Terrace_FaceRightSlant2": 0x313,
+    "Satellite_SurfaceLeft": 0x314,
+    "Satellite_SurfaceMiddle0": 0x315,
+    "Satellite_SurfaceMiddle1": 0x316,
+    "Satellite_SurfaceMiddle2": 0x317,
+    "Satellite_SurfaceRight": 0x318,
+    "Debris_Single0": 0x319,
+    "Debris_Single1": 0x31A,
+    "Debris_Single2": 0x31B,
+    "Debris_Single3": 0x31C,
+    "Debris_Single4": 0x31D,
+    "Debris_Single5": 0x31E,
+    "Debris_Single6": 0x31F,
+    "Debris_Single7": 0x320,
+    "Debris_Single8": 0x321,
+    "Debris_Single9": 0x322,
+    "Debris_PairLeft": 0x323,
+    "Debris_PairRight": 0x324,
 }
 
 
@@ -536,6 +553,169 @@ def wall_shadow_metatile(
                 if x == 0 or source[112 + y][x - 1] == 0:
                     result[y][x] = 4
     return result
+
+
+def cobbled_debris_pixels(
+    source: list[list[int]],
+    width: int,
+    spans: tuple[tuple[int, int, int], ...],
+    texture_offset: int = 0,
+) -> list[list[int]]:
+    """Cut a broken silhouette from the authored platform underside."""
+    pixels = blank(width, 16)
+    occupied = {
+        (x, y)
+        for y, start_x, end_x in spans
+        for x in range(start_x, end_x + 1)
+    }
+
+    for x, y in occupied:
+        # The source row is the same cobbled cliff face used by the island.
+        # Re-light exposed pixels after cutting so mirrored silhouettes keep
+        # their top-lit appearance instead of mirroring the lighting too.
+        color = source[112 + y][16 + ((x + texture_offset) % 32)]
+        if (x, y - 1) not in occupied:
+            color = 7
+        elif (x, y + 1) not in occupied:
+            color = 4
+        elif (x - 1, y) not in occupied:
+            color = max(color, 6)
+        pixels[y][x] = color
+    return pixels
+
+
+def mirror_debris_spans(
+    width: int,
+    spans: tuple[tuple[int, int, int], ...],
+) -> tuple[tuple[int, int, int], ...]:
+    return tuple((y, width - 1 - end_x, width - 1 - start_x) for y, start_x, end_x in spans)
+
+
+def single_debris_metatiles(source: list[list[int]]) -> list[list[list[int]]]:
+    """Build five one-cell debris compositions and consistently lit mirrors."""
+    silhouettes = (
+        # A tall shard with a fractured two-prong underside.
+        (
+            (2, 7, 9),
+            (3, 5, 11),
+            (4, 4, 12),
+            (5, 3, 12),
+            (6, 3, 11),
+            (7, 4, 11),
+            (8, 4, 7),
+            (8, 9, 10),
+            (9, 5, 6),
+            (9, 9, 9),
+            (10, 6, 6),
+        ),
+        # A broad, low slab that reads as a snapped piece of cliff wall.
+        (
+            (4, 5, 9),
+            (5, 3, 11),
+            (6, 2, 12),
+            (7, 2, 12),
+            (8, 3, 11),
+            (9, 4, 7),
+            (9, 9, 10),
+            (10, 5, 6),
+            (10, 9, 9),
+        ),
+        # An offset chunk with a visible bite and a long broken point.
+        (
+            (3, 7, 10),
+            (4, 5, 11),
+            (5, 4, 12),
+            (6, 3, 8),
+            (6, 10, 12),
+            (7, 3, 11),
+            (8, 4, 10),
+            (9, 5, 7),
+            (9, 9, 9),
+            (10, 6, 6),
+        ),
+        # A large shard pushed left of the cell with a detached chip to the
+        # right, deliberately disguising the metatile's centre point.
+        (
+            (3, 3, 6),
+            (4, 2, 8),
+            (5, 1, 8),
+            (5, 12, 13),
+            (6, 1, 7),
+            (6, 11, 13),
+            (7, 2, 6),
+            (7, 11, 12),
+            (8, 3, 5),
+            (8, 12, 12),
+            (9, 4, 4),
+        ),
+        # Three separate fragments at different heights make a loose debris
+        # field while still occupying just one map cell.
+        (
+            (2, 13, 13),
+            (3, 12, 14),
+            (4, 13, 13),
+            (5, 7, 10),
+            (6, 6, 11),
+            (7, 6, 11),
+            (8, 2, 3),
+            (8, 7, 10),
+            (9, 1, 4),
+            (9, 8, 9),
+            (10, 2, 3),
+        ),
+    )
+    variants = []
+    for index, spans in enumerate(silhouettes):
+        for rendered_spans in (spans, mirror_debris_spans(16, spans)):
+            variants.append(cobbled_debris_pixels(source, 16, rendered_spans, index * 7))
+    return variants
+
+
+def paired_debris_metatiles(source: list[list[int]]) -> tuple[list[list[int]], list[list[int]]]:
+    """Cut an asymmetric broken slab from the authored cliff-face texture."""
+    pixels = blank(32, 16)
+    row_spans = {
+        2: ((8, 13), (19, 23)),
+        3: ((5, 16), (18, 25)),
+        4: ((3, 27),),
+        5: ((2, 29),),
+        6: ((1, 30),),
+        7: ((2, 29),),
+        8: ((4, 28),),
+        9: ((6, 13), (15, 26)),
+        10: ((7, 12), (17, 25)),
+        11: ((9, 11), (19, 23)),
+        12: ((10, 10), (21, 21)),
+    }
+    occupied = {
+        (x, y)
+        for y, spans in row_spans.items()
+        for start_x, end_x in spans
+        for x in range(start_x, end_x + 1)
+    }
+
+    for x, y in occupied:
+        # Columns 1 and 2 of the source's underside strip are complete cobble
+        # faces, so the debris genuinely looks broken from the platform wall.
+        color = source[112 + y][16 + x]
+        if (x, y - 1) not in occupied or (x - 1, y) not in occupied:
+            color = 7
+        elif (x, y + 1) not in occupied:
+            color = 4
+        pixels[y][x] = color
+
+    for x, y in ((14, 4), (14, 5), (15, 6), (14, 7), (15, 8), (14, 9),
+                 (23, 5), (22, 6), (22, 7), (21, 8)):
+        if (x, y) in occupied:
+            pixels[y][x] = 4
+    pixels[3][1] = 7
+    pixels[4][2] = 5
+    pixels[9][30] = 5
+    pixels[12][4] = 4
+    return (
+        [row[:16] for row in pixels],
+        [row[16:] for row in pixels],
+    )
 
 
 def underside_metatile(source: list[list[int]], column: int) -> list[list[int]]:
@@ -908,6 +1088,30 @@ def build_assets() -> tuple[list[list[list[int]]], list[list[int]]]:
         put(f"Island_Corner_{full}", edge_metatile(edge_source, short), PALETTE_ROCK)
     for short, full in (("NE", "NorthEast"), ("SE", "SouthEast"), ("SW", "SouthWest"), ("NW", "NorthWest")):
         put(f"Island_InnerCorner_{full}", edge_metatile(edge_source, f"INNER_{short}"), PALETTE_ROCK)
+
+    satellite_left = overlay_pixels(north_west_corner, edge_source, 0, 96)
+    satellite_middles = [
+        overlay_pixels(north_edge, edge_source, column * 16, 96)
+        for column in (1, 2, 3)
+    ]
+    satellite_right = overlay_pixels(north_east_corner, edge_source, 5 * 16, 96)
+    satellite_seam = [row[0] for row in satellite_middles[0]]
+    for y in range(16):
+        satellite_left[y][15] = satellite_seam[y]
+        satellite_right[y][0] = satellite_seam[y]
+        for middle in satellite_middles:
+            middle[y][0] = satellite_seam[y]
+            middle[y][15] = satellite_seam[y]
+    put("Satellite_SurfaceLeft", satellite_left, PALETTE_ROCK)
+    for index, middle in enumerate(satellite_middles):
+        put(f"Satellite_SurfaceMiddle{index}", middle, PALETTE_ROCK)
+    put("Satellite_SurfaceRight", satellite_right, PALETTE_ROCK)
+
+    debris_pair_left, debris_pair_right = paired_debris_metatiles(edge_source)
+    for index, debris in enumerate(single_debris_metatiles(edge_source)):
+        put(f"Debris_Single{index}", debris, PALETTE_ROCK)
+    put("Debris_PairLeft", debris_pair_left, PALETTE_ROCK)
+    put("Debris_PairRight", debris_pair_right, PALETTE_ROCK)
 
     put("Island_CliffFace", cliff_metatile("centre", 0), PALETTE_ROCK)
     put("Island_CliffFace_Left", cliff_metatile("left"), PALETTE_ROCK)

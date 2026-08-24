@@ -55,6 +55,14 @@
 #define ADVENTURE_ISLAND_OUTER_FRINGE_THRESHOLD 150
 #define ADVENTURE_TEMPLATE_OFFSET_RADIUS 2
 #define ADVENTURE_FORMATION_BACKGROUND_COUNT 15
+#define ADVENTURE_SATELLITE_MAX_COUNT 2
+#define ADVENTURE_SATELLITE_MIN_WIDTH 2
+#define ADVENTURE_SATELLITE_MAX_WIDTH 4
+#define ADVENTURE_SATELLITE_HEIGHT 2
+#define ADVENTURE_DEBRIS_MIN_COUNT 15
+#define ADVENTURE_DEBRIS_MAX_COUNT 23
+#define ADVENTURE_DEBRIS_SINGLE_VARIANT_COUNT 10
+#define ADVENTURE_PERIPHERAL_PLACEMENT_ATTEMPTS 64
 
 #define ADJUST_COORDS_X(val) (gRogueAdvPath.pathLength - val - 1)   // invert so we place the first node at the end
 #define ADJUST_COORDS_Y(val) (val - gRogueAdvPath.pathMinY + 1)     // start at coord 0
@@ -129,12 +137,30 @@ struct AdventureIslandVisualStats
     u16 narrowFringe;
 };
 
+struct AdventureSatelliteIsland
+{
+    u8 x;
+    u8 y;
+    u8 width;
+};
+
+struct AdventureFloatingDebris
+{
+    u8 x;
+    u8 y;
+    u8 width;
+};
+
 struct AdventureIslandVisualSettings
 {
     const u16 *surfaceTemplate;
     u32 visualHash;
     s8 templateOffsetX;
     s8 templateOffsetY;
+    u8 satelliteCount;
+    u8 debrisCount;
+    struct AdventureSatelliteIsland satellites[ADVENTURE_SATELLITE_MAX_COUNT];
+    struct AdventureFloatingDebris debris[ADVENTURE_DEBRIS_MAX_COUNT];
 };
 
 static EWRAM_DATA u8 *sAdventureIslandMask = NULL;
@@ -144,6 +170,7 @@ static bool8 IsObjectEventVisible(struct RogueAdvPathRoom* room);
 static bool8 ShouldBlockObjectEvent(struct RogueAdvPathRoom* room);
 static void BufferTypeAdjective(u8 type);
 static void CacheAdventureIslandSurface(struct AdventureIslandVisualStats *visualStats);
+static void BuildAdventurePeripheralPlan(void);
 static u16 GetAdventureSurfaceTemplateMetatile(s16 x, s16 y);
 static bool8 IsAdventureFormationMetatile(u16 metatile);
 
@@ -2068,6 +2095,8 @@ static void CacheAdventureIslandVisualSettings(void)
     settings->visualHash = GetAdventureIslandSegmentHash(0x5345474D);
     settings->templateOffsetX = GetAdventureTemplateOffsetFromVisualHash(settings->visualHash, 0x544D5048);
     settings->templateOffsetY = GetAdventureTemplateOffsetFromVisualHash(settings->visualHash, 0x544D5056);
+    settings->satelliteCount = 0;
+    settings->debrisCount = 0;
 }
 
 static u8 GetAdventureIslandSilhouetteNoise(s16 x, s16 y, u32 visualHash)
@@ -2305,6 +2334,7 @@ static bool8 BuildAdventureIslandMask(struct AdventureIslandVisualStats *visualS
     }
 
     CacheAdventureIslandSurface(visualStats);
+    BuildAdventurePeripheralPlan();
     return allTrailCellsInBounds;
 }
 
@@ -2453,6 +2483,202 @@ static void CacheAdventureIslandSurface(struct AdventureIslandVisualStats *visua
     }
 }
 
+static bool8 IsAdventureSatelliteCell(s16 x, s16 y)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    u8 i;
+
+    for(i = 0; i < settings->satelliteCount; ++i)
+    {
+        const struct AdventureSatelliteIsland *satellite = &settings->satellites[i];
+
+        if(x >= satellite->x && x < satellite->x + satellite->width
+            && y >= satellite->y && y < satellite->y + ADVENTURE_SATELLITE_HEIGHT)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static bool8 IsAdventureSatelliteCandidate(s16 x, s16 y, u8 width)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    bool8 nearMainIsland = FALSE;
+    s16 offsetX;
+    s16 offsetY;
+    u8 i;
+
+    if(x < 2 || y < 2
+        || x + width + 2 > ADVENTURE_PATHS_MAP_WIDTH
+        || y + ADVENTURE_SATELLITE_HEIGHT + 2 > ADVENTURE_PATHS_MAP_HEIGHT)
+        return FALSE;
+
+    // A two-cell void moat keeps satellites visually separate from the main
+    // island and guarantees every exposed side remains at least two cells.
+    for(offsetY = -2; offsetY < ADVENTURE_SATELLITE_HEIGHT + 2; ++offsetY)
+    {
+        for(offsetX = -2; offsetX < width + 2; ++offsetX)
+        {
+            if(IsAdventureIslandSurfaceCell(x + offsetX, y + offsetY))
+                return FALSE;
+        }
+    }
+
+    // Keep them close enough to the primary silhouette to enter the camera's
+    // peripheral view instead of disappearing into unused map corners.
+    for(offsetY = -6; offsetY < ADVENTURE_SATELLITE_HEIGHT + 6 && !nearMainIsland; ++offsetY)
+    {
+        for(offsetX = -6; offsetX < width + 6; ++offsetX)
+        {
+            if(IsAdventureIslandSurfaceCell(x + offsetX, y + offsetY))
+            {
+                nearMainIsland = TRUE;
+                break;
+            }
+        }
+    }
+    if(!nearMainIsland)
+        return FALSE;
+
+    for(i = 0; i < settings->satelliteCount; ++i)
+    {
+        const struct AdventureSatelliteIsland *satellite = &settings->satellites[i];
+
+        if(x < satellite->x + satellite->width + 2
+            && x + width + 2 > satellite->x
+            && y < satellite->y + ADVENTURE_SATELLITE_HEIGHT + 2
+            && y + ADVENTURE_SATELLITE_HEIGHT + 2 > satellite->y)
+            return FALSE;
+    }
+    return TRUE;
+}
+
+static bool8 TryAddAdventureSatellite(u8 ordinal)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    u8 attempt;
+
+    for(attempt = 0; attempt < ADVENTURE_PERIPHERAL_PLACEMENT_ATTEMPTS; ++attempt)
+    {
+        u32 hash = GetAdventureIslandCoordHash(attempt, ordinal, 0x53415445);
+        u8 width = ADVENTURE_SATELLITE_MIN_WIDTH
+            + (hash % (ADVENTURE_SATELLITE_MAX_WIDTH - ADVENTURE_SATELLITE_MIN_WIDTH + 1));
+        s16 x = 2 + ((hash >> 8) % (ADVENTURE_PATHS_MAP_WIDTH - width - 3));
+        s16 y = 2 + ((hash >> 16) % (ADVENTURE_PATHS_MAP_HEIGHT - ADVENTURE_SATELLITE_HEIGHT - 3));
+
+        if(!IsAdventureSatelliteCandidate(x, y, width))
+            continue;
+
+        settings->satellites[settings->satelliteCount].x = x;
+        settings->satellites[settings->satelliteCount].y = y;
+        settings->satellites[settings->satelliteCount].width = width;
+        ++settings->satelliteCount;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static bool8 IsAdventureDebrisCandidate(s16 x, s16 y, u8 width)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    bool8 nearLand = FALSE;
+    s16 offsetX;
+    s16 offsetY;
+    u8 i;
+
+    if(x < 1 || y < 1 || x + width + 1 > ADVENTURE_PATHS_MAP_WIDTH || y + 1 >= ADVENTURE_PATHS_MAP_HEIGHT)
+        return FALSE;
+
+    for(offsetX = -1; offsetX <= width; ++offsetX)
+    {
+        // Avoid both the main surface and its hanging cliff row.
+        if(IsAdventureIslandSurfaceCell(x + offsetX, y)
+            || IsAdventureIslandSurfaceCell(x + offsetX, y - 1)
+            || IsAdventureSatelliteCell(x + offsetX, y))
+            return FALSE;
+    }
+
+    for(offsetY = -4; offsetY <= 4 && !nearLand; ++offsetY)
+    {
+        for(offsetX = -4; offsetX < width + 4; ++offsetX)
+        {
+            if(IsAdventureIslandSurfaceCell(x + offsetX, y + offsetY)
+                || IsAdventureSatelliteCell(x + offsetX, y + offsetY))
+            {
+                nearLand = TRUE;
+                break;
+            }
+        }
+    }
+    if(!nearLand)
+        return FALSE;
+
+    for(i = 0; i < settings->debrisCount; ++i)
+    {
+        const struct AdventureFloatingDebris *debris = &settings->debris[i];
+
+        // The debris artwork has transparent breathing room within each cell,
+        // so neighboring placements remain distinct. Only reject actual map-
+        // cell overlap; a larger exclusion halo prevents dense debris fields.
+        if(y == debris->y
+            && x < debris->x + debris->width
+            && x + width > debris->x)
+            return FALSE;
+    }
+    return TRUE;
+}
+
+static bool8 TryAddAdventureDebris(u8 ordinal, u8 width)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    u8 attempt;
+
+    for(attempt = 0; attempt < ADVENTURE_PERIPHERAL_PLACEMENT_ATTEMPTS; ++attempt)
+    {
+        u32 hash = GetAdventureIslandCoordHash(attempt, ordinal, 0x44454252 ^ width);
+        s16 x = 1 + ((hash >> 8) % (ADVENTURE_PATHS_MAP_WIDTH - width - 1));
+        s16 y = 1 + ((hash >> 16) % (ADVENTURE_PATHS_MAP_HEIGHT - 2));
+
+        if(!IsAdventureDebrisCandidate(x, y, width))
+            continue;
+
+        settings->debris[settings->debrisCount].x = x;
+        settings->debris[settings->debrisCount].y = y;
+        settings->debris[settings->debrisCount].width = width;
+        ++settings->debrisCount;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static void BuildAdventurePeripheralPlan(void)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    u8 satelliteTarget = (settings->visualHash >> 8) % (ADVENTURE_SATELLITE_MAX_COUNT + 1);
+    u8 debrisTarget = ADVENTURE_DEBRIS_MIN_COUNT
+        + ((settings->visualHash >> 16) % (ADVENTURE_DEBRIS_MAX_COUNT - ADVENTURE_DEBRIS_MIN_COUNT + 1));
+    u8 i;
+    u8 debrisOrdinal;
+
+    settings->satelliteCount = 0;
+    settings->debrisCount = 0;
+    for(i = 0; i < satelliteTarget; ++i)
+    {
+        if(!TryAddAdventureSatellite(i))
+            break;
+    }
+
+    // Keep one coherent two-cell formation, then densely scatter single-cell
+    // debris around it. This yields 14-22 singles depending on the visual seed.
+    for(debrisOrdinal = 0;
+        settings->debrisCount < debrisTarget && debrisOrdinal < ADVENTURE_DEBRIS_MAX_COUNT * 4;
+        ++debrisOrdinal)
+    {
+        u8 width = settings->debrisCount == 1 ? 2 : 1;
+
+        TryAddAdventureDebris(debrisOrdinal, width);
+    }
+}
+
 static u16 GetAdventureVoidMetatile(u16 x, u16 y)
 {
     switch(GetAdventureIslandCoordHash(x, y, 0x564F4944) % 10)
@@ -2466,6 +2692,74 @@ static u16 GetAdventureVoidMetatile(u16 x, u16 y)
     default:
         return METATILE_AdventurePaths_Void;
     }
+}
+
+static bool8 GetAdventureSatelliteMetatile(s16 x, s16 y, u16 *metatile)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    u8 i;
+
+    for(i = 0; i < settings->satelliteCount; ++i)
+    {
+        const struct AdventureSatelliteIsland *satellite = &settings->satellites[i];
+        s16 relativeX;
+        s16 relativeY;
+
+        if(x < satellite->x || x >= satellite->x + satellite->width
+            || y < satellite->y || y >= satellite->y + ADVENTURE_SATELLITE_HEIGHT)
+            continue;
+
+        relativeX = x - satellite->x;
+        relativeY = y - satellite->y;
+        if(relativeY == 0)
+        {
+            if(relativeX == 0)
+                *metatile = METATILE_AdventurePaths_Satellite_SurfaceLeft;
+            else if(relativeX == satellite->width - 1)
+                *metatile = METATILE_AdventurePaths_Satellite_SurfaceRight;
+            else
+                *metatile = METATILE_AdventurePaths_Satellite_SurfaceMiddle0
+                    + (GetAdventureIslandCoordHash(x, y, 0x53415454) % 3);
+        }
+        else if(relativeX == 0)
+        {
+            *metatile = METATILE_AdventurePaths_Island_Underside_Left;
+        }
+        else if(relativeX == satellite->width - 1)
+        {
+            *metatile = METATILE_AdventurePaths_Island_Underside_Right;
+        }
+        else
+        {
+            *metatile = METATILE_AdventurePaths_Island_Underside_Middle0
+                + (GetAdventureIslandCoordHash(x, y, 0x53415442) % 3);
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static bool8 GetAdventureDebrisMetatile(s16 x, s16 y, u16 *metatile)
+{
+    struct AdventureIslandVisualSettings *settings = GetAdventureIslandVisualSettings();
+    u8 i;
+
+    for(i = 0; i < settings->debrisCount; ++i)
+    {
+        const struct AdventureFloatingDebris *debris = &settings->debris[i];
+
+        if(y != debris->y || x < debris->x || x >= debris->x + debris->width)
+            continue;
+        if(debris->width == 1)
+            *metatile = METATILE_AdventurePaths_Debris_Single0
+                + (GetAdventureIslandCoordHash(x, y, 0x53484152) % ADVENTURE_DEBRIS_SINGLE_VARIANT_COUNT);
+        else if(x == debris->x)
+            *metatile = METATILE_AdventurePaths_Debris_PairLeft;
+        else
+            *metatile = METATILE_AdventurePaths_Debris_PairRight;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 static u16 GetAdventureIslandMetatile(u16 x, u16 y)
@@ -3177,6 +3471,7 @@ static u16 GetAdventureTrailMetatile(u16 x, u16 y)
 static u16 GetAdventureRenderedMetatile(s16 x, s16 y, bool8 *impassable)
 {
     u8 mask = GetIslandMaskCell(x, y);
+    u16 peripheralMetatile;
 
     *impassable = TRUE;
     if((mask & ISLAND_MASK_TRAIL) != 0)
@@ -3197,6 +3492,9 @@ static u16 GetAdventureRenderedMetatile(s16 x, s16 y, bool8 *impassable)
     }
     if(IsAdventureCliffCell(x, y))
         return GetAdventureCliffMetatile(x, y);
+    if(GetAdventureSatelliteMetatile(x, y, &peripheralMetatile)
+        || GetAdventureDebrisMetatile(x, y, &peripheralMetatile))
+        return peripheralMetatile;
     return GetAdventureVoidMetatile(x, y);
 }
 
@@ -3470,6 +3768,85 @@ bool8 RogueAdv_Debug_ValidateIslandWallStyles(u16 *styleCounts)
         }
     }
 
+    FreeAdventureIslandMask();
+    return isValid;
+}
+
+bool8 RogueAdv_Debug_GetIslandPeripheralStats(u8 *satelliteCount, u8 *singleDebrisCount, u8 *pairedDebrisCount)
+{
+    struct AdventureIslandVisualSettings *settings;
+    bool8 isValid = TRUE;
+    u8 singles = 0;
+    u8 pairs = 0;
+    u8 i;
+
+    if(!AllocAdventureIslandMask())
+        return FALSE;
+
+    BuildAdventureIslandMask(NULL);
+    settings = GetAdventureIslandVisualSettings();
+    if(settings->satelliteCount > ADVENTURE_SATELLITE_MAX_COUNT
+        || settings->debrisCount > ADVENTURE_DEBRIS_MAX_COUNT)
+        isValid = FALSE;
+
+    for(i = 0; i < settings->satelliteCount; ++i)
+    {
+        const struct AdventureSatelliteIsland *satellite = &settings->satellites[i];
+        s16 x;
+        s16 y;
+        u8 j;
+
+        if(satellite->width < ADVENTURE_SATELLITE_MIN_WIDTH
+            || satellite->width > ADVENTURE_SATELLITE_MAX_WIDTH
+            || satellite->x + satellite->width > ADVENTURE_PATHS_MAP_WIDTH
+            || satellite->y + ADVENTURE_SATELLITE_HEIGHT > ADVENTURE_PATHS_MAP_HEIGHT)
+            isValid = FALSE;
+
+        for(y = satellite->y; y < satellite->y + ADVENTURE_SATELLITE_HEIGHT; ++y)
+        {
+            for(x = satellite->x; x < satellite->x + satellite->width; ++x)
+            {
+                u16 metatile;
+
+                if(IsAdventureIslandSurfaceCell(x, y)
+                    || !GetAdventureSatelliteMetatile(x, y, &metatile))
+                    isValid = FALSE;
+            }
+        }
+
+        for(j = i + 1; j < settings->satelliteCount; ++j)
+        {
+            const struct AdventureSatelliteIsland *other = &settings->satellites[j];
+
+            if(satellite->x < other->x + other->width
+                && satellite->x + satellite->width > other->x
+                && satellite->y < other->y + ADVENTURE_SATELLITE_HEIGHT
+                && satellite->y + ADVENTURE_SATELLITE_HEIGHT > other->y)
+                isValid = FALSE;
+        }
+    }
+
+    for(i = 0; i < settings->debrisCount; ++i)
+    {
+        const struct AdventureFloatingDebris *debris = &settings->debris[i];
+        u16 metatile;
+
+        if(debris->width == 1)
+            ++singles;
+        else if(debris->width == 2)
+            ++pairs;
+        else
+            isValid = FALSE;
+        if(!GetAdventureDebrisMetatile(debris->x, debris->y, &metatile))
+            isValid = FALSE;
+    }
+
+    if(satelliteCount != NULL)
+        *satelliteCount = settings->satelliteCount;
+    if(singleDebrisCount != NULL)
+        *singleDebrisCount = singles;
+    if(pairedDebrisCount != NULL)
+        *pairedDebrisCount = pairs;
     FreeAdventureIslandMask();
     return isValid;
 }

@@ -112,6 +112,9 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     u16 totalPrunedInnerFringe = 0;
     u16 totalOuterFringe = 0;
     u16 totalWallStyles[4] = {0};
+    u16 totalSingleDebris = 0;
+    u16 totalPairedDebris = 0;
+    bool8 foundSatelliteCounts[3] = {FALSE};
     s8 firstTemplateOffsetX = 0;
     s8 firstTemplateOffsetY = 0;
     bool8 foundDifferentTemplateOffset = FALSE;
@@ -139,6 +142,9 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
         s8 templateOffsetX;
         s8 templateOffsetY;
         u8 terraceStage;
+        u8 satelliteCount;
+        u8 singleDebrisCount;
+        u8 pairedDebrisCount;
 
         Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, cases[i].gameMode);
         Rogue_SetCurrentDifficulty(cases[i].difficulty);
@@ -150,6 +156,14 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
         rngAfterGeneration = gRngRogueValue;
         EXPECT(RogueAdv_Debug_ValidateIslandLayout(&firstHash));
         EXPECT(RogueAdv_Debug_ValidateIslandWallStyles(wallStyles));
+        EXPECT(RogueAdv_Debug_GetIslandPeripheralStats(&satelliteCount, &singleDebrisCount, &pairedDebrisCount));
+        EXPECT_LE(satelliteCount, 2);
+        EXPECT_GE(singleDebrisCount, 14);
+        EXPECT_LE(singleDebrisCount, 22);
+        EXPECT_EQ(pairedDebrisCount, 1);
+        foundSatelliteCounts[satelliteCount] = TRUE;
+        totalSingleDebris += singleDebrisCount;
+        totalPairedDebris += pairedDebrisCount;
         totalWallStyles[0] += wallStyles[0];
         totalWallStyles[1] += wallStyles[1];
         totalWallStyles[2] += wallStyles[2];
@@ -197,9 +211,14 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     EXPECT_GT(totalWallStyles[1], 0);
     EXPECT_GT(totalWallStyles[2], 0);
     EXPECT_GT(totalWallStyles[3], 0);
+    EXPECT(foundSatelliteCounts[0]);
+    EXPECT(foundSatelliteCounts[1]);
+    EXPECT(foundSatelliteCounts[2]);
+    EXPECT_GT(totalSingleDebris, 0);
+    EXPECT_GT(totalPairedDebris, 0);
     EXPECT(foundDifferentTemplateOffset);
     // Keep seeded silhouette and edge-autotiling output stable for this matrix.
-    EXPECT_EQ(hashChecksum, 0x1A8D8247);
+    EXPECT_EQ(hashChecksum, 0x82EFF482);
 
     gRogueAdvPath = *originalPath;
     gRogueRun.baseSeed = originalBaseSeed;

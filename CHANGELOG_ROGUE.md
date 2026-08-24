@@ -201,6 +201,12 @@ Format follows Keep a Changelog loosely:
   shadowed platform exit, and exposed-right slant at both cliffs and terraces;
   replaced repeated per-layer expansion with an output-equivalent two-pass
   distance transform to reduce map-generation time.
+- Added zero to two seeded miniature floating islands around each Adventure
+  Paths silhouette, plus fourteen to twenty-two single-cell shards and one
+  connected two-cell debris formation cut from the platform's cobbled cliff
+  texture; single cells vary among five broken compositions and their
+  consistently lit mirrors, including offset shards and loose multi-fragment
+  clusters that disguise the metatile grid.
 - Removed the white matte outlines from all 30 ported Treasure item icons while
   preserving their indexed palettes and enclosed highlights.
 - Expanded Luvdisc's level-up learnset with Heart Swap at level 37 and Take

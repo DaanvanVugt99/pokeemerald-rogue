@@ -22,6 +22,7 @@ u16 RogueAdv_Debug_GetFullRestStopWeight(u8 difficulty);
 bool8 RogueAdv_Debug_GetItemRoomSchedule(u8 slot, u8 *difficulty, u16 *itemId);
 bool8 RogueAdv_Debug_ValidateIslandLayout(u32 *layoutHash);
 bool8 RogueAdv_Debug_ValidateIslandWallStyles(u16 *styleCounts);
+bool8 RogueAdv_Debug_GetIslandPeripheralStats(u8 *satelliteCount, u8 *singleDebrisCount, u8 *pairedDebrisCount);
 bool8 RogueAdv_Debug_HasBlockedIslandTrail(void);
 bool8 RogueAdv_Debug_GetIslandGeologyStats(u16 *formationCount, u16 *accentCount, u16 *crystalCount, u8 *terraceStage);
 bool8 RogueAdv_Debug_GetIslandVisualStats(s8 *templateOffsetX, s8 *templateOffsetY, u16 *keptInnerFringe, u16 *prunedInnerFringe, u16 *outerFringe, u16 *narrowFringe);
