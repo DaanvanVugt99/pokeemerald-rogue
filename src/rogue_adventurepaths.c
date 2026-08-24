@@ -194,6 +194,12 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         ITEM_CHAOS_CHARM,
         ITEM_MISCHIEF_QUILL,
         ITEM_FINALE_BELL,
+        ITEM_ECLIPSE_TOTEM,
+        ITEM_SUN_TOTEM,
+        ITEM_RAIN_TOTEM,
+        ITEM_SAND_TOTEM,
+        ITEM_SNOW_TOTEM,
+        ITEM_ACID_RAIN_TOTEM,
     };
     u32 state = ((u32)gRogueRun.baseSeed << 16)
         ^ gRogueRun.baseSeed

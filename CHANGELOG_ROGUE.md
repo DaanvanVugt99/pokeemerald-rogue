@@ -71,6 +71,8 @@ Format follows Keep a Changelog loosely:
   Metronome three times when its holder falls below 25% HP.
 - Added 30 credited, native 24x24 Treasure concept icons and GBA-ready palettes
   from the Tower of Ashes resource pack for future held-item designs.
+- Added six weather-themed Treasure rewards: Eclipse, Sun, Rain, Sand, Snow,
+  and Acid Rain Totems, each with a strong effect gated by its matching weather.
 - Added a debug-only Forced Treasure setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and

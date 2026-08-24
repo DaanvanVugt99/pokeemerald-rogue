@@ -257,9 +257,15 @@
 #define ITEM_CHAOS_CHARM                   (LAST_ITEM_TR + 17)
 #define ITEM_MISCHIEF_QUILL                (LAST_ITEM_TR + 18)
 #define ITEM_FINALE_BELL                   (LAST_ITEM_TR + 19)
+#define ITEM_ECLIPSE_TOTEM                 (LAST_ITEM_TR + 20)
+#define ITEM_SUN_TOTEM                     (LAST_ITEM_TR + 21)
+#define ITEM_RAIN_TOTEM                    (LAST_ITEM_TR + 22)
+#define ITEM_SAND_TOTEM                    (LAST_ITEM_TR + 23)
+#define ITEM_SNOW_TOTEM                    (LAST_ITEM_TR + 24)
+#define ITEM_ACID_RAIN_TOTEM               (LAST_ITEM_TR + 25)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_FINALE_BELL
+#define LAST_ITEM_ROOM_REWARD           ITEM_ACID_RAIN_TOTEM
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

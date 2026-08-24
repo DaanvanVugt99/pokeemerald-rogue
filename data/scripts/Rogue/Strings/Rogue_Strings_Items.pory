@@ -258,6 +258,66 @@ text gItemRoomDesc_FinaleBell
     format("When the holder falls below 25% HP, it uses Metronome three times and consumes the item for the battle.")
 }
 
+text gItemDesc_EclipseTotem
+{
+    format("In Eclipse: Dark STAB; Speed +50%.")
+}
+
+text gItemRoomDesc_EclipseTotem
+{
+    format("During Eclipse, grants STAB to Dark moves and raises Speed by 50%.")
+}
+
+text gItemDesc_SunTotem
+{
+    format("In sunlight, attacks heal 1/3 of damage dealt.")
+}
+
+text gItemRoomDesc_SunTotem
+{
+    format("During sunlight, damaging moves restore one-third of the damage dealt.")
+}
+
+text gItemDesc_RainTotem
+{
+    format("In rain, adds Water typing; restores 1/16 HP each turn.")
+}
+
+text gItemRoomDesc_RainTotem
+{
+    format("During rain, adds Water typing and restores 1/16 of max HP each turn.")
+}
+
+text gItemDesc_SandTotem
+{
+    format("No sand damage. In sand: Defense and Sp. Def +50%.")
+}
+
+text gItemRoomDesc_SandTotem
+{
+    format("Prevents sandstorm damage. During sand, raises Defense and Sp. Def by 50%.")
+}
+
+text gItemDesc_SnowTotem
+{
+    format("In snow, takes 35% less supereffective damage.")
+}
+
+text gItemRoomDesc_SnowTotem
+{
+    format("During snow, reduces supereffective damage received by 35%.")
+}
+
+text gItemDesc_AcidRainTotem
+{
+    format("No acid-rain damage. In acid rain, attacks poison.")
+}
+
+text gItemRoomDesc_AcidRainTotem
+{
+    format("Prevents acid-rain damage. During acid rain, damaging moves poison their targets.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

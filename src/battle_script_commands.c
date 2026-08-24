@@ -16909,7 +16909,8 @@ static void Cmd_weatherdamage(void)
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
                 && !IsWeatherDamageBlockedByUniqueAbility(gBattlerAttacker, B_WEATHER_SANDSTORM)
-                && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
+                && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES
+                && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAND_TOTEM)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
                 if (gBattleMoveDamage == 0)
@@ -16960,7 +16961,10 @@ static void Cmd_weatherdamage(void)
         }
         if (gBattleWeather & B_WEATHER_ACID_RAIN)
         {
+            u32 holdEffect = GetBattlerHoldEffect(gBattlerAttacker, TRUE);
+
             if (HasBattlerAbility(gBattlerAttacker, ABILITY_CORROSIVE_AMP)
+                && holdEffect != HOLD_EFFECT_ACID_RAIN_TOTEM
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)))
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
@@ -16984,7 +16988,8 @@ static void Cmd_weatherdamage(void)
                 && !(gStatuses3[gBattlerAttacker] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER))
                 && !hollowNestWeatherImmune
                 && !IsWeatherDamageBlockedByUniqueAbility(gBattlerAttacker, B_WEATHER_ACID_RAIN)
-                && GetBattlerHoldEffect(gBattlerAttacker, TRUE) != HOLD_EFFECT_SAFETY_GOGGLES)
+                && holdEffect != HOLD_EFFECT_SAFETY_GOGGLES
+                && holdEffect != HOLD_EFFECT_ACID_RAIN_TOTEM)
             {
                 gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerAttacker) / 16;
                 if (gBattleMoveDamage == 0)

@@ -23011,6 +23011,10 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     RecordItemEffectBattle(battler, battlerHoldEffect);
                 }
                 break;
+            case HOLD_EFFECT_RAIN_TOTEM:
+                if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN))
+                    goto LEFTOVERS;
+                break;
             case HOLD_EFFECT_CONFUSE_SPICY:
                 if (!moveTurn)
                     effect = HealConfuseBerry(battler, gLastUsedItem, FLAVOR_SPICY, TRUE);
@@ -23301,6 +23305,22 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     gBattlescriptCurrInstr = BattleScript_AttackerItemStatRaise;
                 }
                 break;
+            case HOLD_EFFECT_ACID_RAIN_TOTEM:
+                if (gBattleMoveDamage != 0
+                 && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+                 && TARGET_TURN_DAMAGED
+                 && gBattleMons[gBattlerTarget].hp != 0
+                 && IsFinalMultiHitStrike()
+                 && IsBattlerWeatherAffected(gBattlerAttacker, B_WEATHER_ACID_RAIN)
+                 && CanBePoisoned(gBattlerAttacker, gBattlerTarget))
+                {
+                    gLastUsedItem = atkItem;
+                    gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_AcidRainTotemPoisons;
+                    effect = ITEM_STATUS_CHANGE;
+                }
+                break;
             }
 
             if(shouldFlinch)
@@ -23327,6 +23347,26 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 gPotentialItemEffectBattler = gBattlerAttacker;
                 gBattleScripting.battler = gBattlerAttacker;
                 gBattleMoveDamage = (gSpecialStatuses[gBattlerTarget].shellBellDmg / atkHoldEffectParam) * -1;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = -1;
+                gSpecialStatuses[gBattlerTarget].shellBellDmg = 0;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_ItemHealHP_Ret;
+                effect = ITEM_HP_CHANGE;
+            }
+            break;
+        case HOLD_EFFECT_SUN_TOTEM:
+            if (gSpecialStatuses[gBattlerAttacker].damagedMons
+                && gBattlerAttacker != gBattlerTarget
+                && gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP
+                && gBattleMons[gBattlerAttacker].hp != 0
+                && IsBattlerWeatherAffected(gBattlerAttacker, B_WEATHER_SUN)
+                && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(gBattlerAttacker)))
+            {
+                gLastUsedItem = atkItem;
+                gPotentialItemEffectBattler = gBattlerAttacker;
+                gBattleScripting.battler = gBattlerAttacker;
+                gBattleMoveDamage = (gSpecialStatuses[gBattlerTarget].shellBellDmg / 3) * -1;
                 if (gBattleMoveDamage == 0)
                     gBattleMoveDamage = -1;
                 gSpecialStatuses[gBattlerTarget].shellBellDmg = 0;
@@ -25750,6 +25790,10 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
     case HOLD_EFFECT_PETRIFIED_HEART:
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
+    case HOLD_EFFECT_SAND_TOTEM:
+        if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM))
+            modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        break;
     case HOLD_EFFECT_ASSAULT_VEST:
         if (!usesDefStat)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
@@ -25955,6 +25999,9 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
          || ((HasBattlerAbility(battlerAtk, ABILITY_LEVITATE) || HasBattlerAbility(battlerAtk, ABILITY_EELEVATE)) && moveType == TYPE_FLYING)
          || (HasBattlerAbility(battlerAtk, ABILITY_MOON_TOTEM) && moveType == TYPE_DARK)
          || (HasBattlerAbility(battlerAtk, ABILITY_SUN_TOTEM) && moveType == TYPE_FIRE)
+         || (holdEffectAtk == HOLD_EFFECT_ECLIPSE_TOTEM
+          && moveType == TYPE_DARK
+          && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_ECLIPSE))
          || (HasBattlerAbility(battlerAtk, ABILITY_ELECTROCYTES) && moveType == TYPE_ELECTRIC)
          || (HasBattlerAbilityIgnoreMoldBreaker(battlerAtk, ABILITY_ENVIRONMENTAL) && IsEnvironmentalTypeActive(battlerAtk, moveType))
          || (HasBattlerAbility(battlerAtk, ABILITY_ADAPTIVE_ORIGIN)
@@ -26733,7 +26780,19 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     }
     else if (IsTerastallized(battlerAtk))
     {
-        DAMAGE_APPLY_MODIFIER(GetTeraMultiplier(battlerAtk, moveType));
+        uq4_12_t stabModifier = GetTeraMultiplier(battlerAtk, moveType);
+
+        // Terastallization replaces the normal STAB path, so explicitly keep
+        // Eclipse Totem's granted Dark STAB when it is the stronger bonus.
+        if (holdEffectAtk == HOLD_EFFECT_ECLIPSE_TOTEM
+         && moveType == TYPE_DARK
+         && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_ECLIPSE))
+        {
+            uq4_12_t eclipseStabModifier = GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk);
+            if (eclipseStabModifier > stabModifier)
+                stabModifier = eclipseStabModifier;
+        }
+        DAMAGE_APPLY_MODIFIER(stabModifier);
     }
     else
     {
@@ -26746,6 +26805,10 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
         DAMAGE_APPLY_MODIFIER(UQ_4_12(1.0));
     else
         DAMAGE_APPLY_MODIFIER(typeEffectivenessModifier);
+    if (holdEffectDef == HOLD_EFFECT_SNOW_TOTEM
+     && typeEffectivenessModifier >= UQ_4_12(2.0)
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
+        DAMAGE_APPLY_MODIFIER(UQ_4_12(0.65));
     DAMAGE_APPLY_MODIFIER(GetBurnOrFrostBiteModifier(battlerAtk, move, abilityAtk, usesOwnAttackStat, usesOwnSpAttackStat));
     DAMAGE_APPLY_MODIFIER(GetZMaxMoveAgainstProtectionModifier(battlerDef, move));
     DAMAGE_APPLY_MODIFIER(GetOtherModifiers(move, moveType, battlerAtk, battlerDef, isCrit, typeEffectivenessModifier, updateFlags, abilityAtk, abilityDef, holdEffectAtk, holdEffectDef));
@@ -29099,6 +29162,23 @@ static bool32 IsGraveglassActive(u32 battler)
         && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_GRAVEGLASS;
 }
 
+static bool32 IsRainTotemActive(u32 battler)
+{
+    return GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_RAIN_TOTEM
+        && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN);
+}
+
+static void AddDerivedBattlerType(u16 types[3], u16 type)
+{
+    if (types[0] == type || types[1] == type || types[2] == type)
+        return;
+
+    if (types[1] == types[0] || !IS_STANDARD_TYPE(types[1]))
+        types[1] = type;
+    else if (types[2] == TYPE_MYSTERY)
+        types[2] = type;
+}
+
 u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera)
 {
     u32 chromaticType = GetBattlerChromaticFluxType(battler);
@@ -29119,16 +29199,13 @@ u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera)
     // Phantom Stone fills the unused second slot for a monotype and the dynamic
     // third slot for a dual-type. Keep this derived so item suppression,
     // removal, form changes, and other runtime type changes are respected.
-    if (IsGraveglassActive(battler)
-     && types[0] != TYPE_GHOST
-     && types[1] != TYPE_GHOST
-     && types[2] != TYPE_GHOST)
-    {
-        if (types[1] == types[0] || !IS_STANDARD_TYPE(types[1]))
-            types[1] = TYPE_GHOST;
-        else if (types[2] == TYPE_MYSTERY)
-            types[2] = TYPE_GHOST;
-    }
+    if (IsGraveglassActive(battler))
+        AddDerivedBattlerType(types, TYPE_GHOST);
+
+    // Rain Totem follows the same derived-type rules as Phantom Stone so the
+    // type disappears immediately when rain ends or the item is suppressed.
+    if (IsRainTotemActive(battler))
+        AddDerivedBattlerType(types, TYPE_WATER);
 
     // Handle Roost's Flying-type suppression
     if (typeIndex == 0 || typeIndex == 1)

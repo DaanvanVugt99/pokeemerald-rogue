@@ -355,6 +355,7 @@ extern const u8 BattleScript_PollenPuffActivates[];
 extern const u8 BattleScript_RoughSkinActivates[];
 extern const u8 BattleScript_CuteCharmActivates[];
 extern const u8 BattleScript_AbilityStatusEffect[];
+extern const u8 BattleScript_AcidRainTotemPoisons[];
 extern const u8 BattleScript_ForestAmbushActivates[];
 extern const u8 BattleScript_AbilityTrapsTarget[];
 extern const u8 BattleScript_DistortionTauntActivates[];

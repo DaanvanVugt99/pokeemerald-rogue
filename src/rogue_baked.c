@@ -1057,6 +1057,12 @@ extern const u8 gItemRoomDesc_WaywardIncense[];
 extern const u8 gItemRoomDesc_ChaosCharm[];
 extern const u8 gItemRoomDesc_MischiefQuill[];
 extern const u8 gItemRoomDesc_FinaleBell[];
+extern const u8 gItemRoomDesc_EclipseTotem[];
+extern const u8 gItemRoomDesc_SunTotem[];
+extern const u8 gItemRoomDesc_RainTotem[];
+extern const u8 gItemRoomDesc_SandTotem[];
+extern const u8 gItemRoomDesc_SnowTotem[];
+extern const u8 gItemRoomDesc_AcidRainTotem[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1150,6 +1156,18 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_MischiefQuill;
     case ITEM_FINALE_BELL:
         return gItemRoomDesc_FinaleBell;
+    case ITEM_ECLIPSE_TOTEM:
+        return gItemRoomDesc_EclipseTotem;
+    case ITEM_SUN_TOTEM:
+        return gItemRoomDesc_SunTotem;
+    case ITEM_RAIN_TOTEM:
+        return gItemRoomDesc_RainTotem;
+    case ITEM_SAND_TOTEM:
+        return gItemRoomDesc_SandTotem;
+    case ITEM_SNOW_TOTEM:
+        return gItemRoomDesc_SnowTotem;
+    case ITEM_ACID_RAIN_TOTEM:
+        return gItemRoomDesc_AcidRainTotem;
     default:
         return Rogue_GetItemDesc(itemId);
     }

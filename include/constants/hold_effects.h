@@ -188,6 +188,12 @@
 #define HOLD_EFFECT_CHAOS_CHARM          202
 #define HOLD_EFFECT_MISCHIEF_QUILL       203
 #define HOLD_EFFECT_FINALE_BELL          204
+#define HOLD_EFFECT_ECLIPSE_TOTEM        205
+#define HOLD_EFFECT_SUN_TOTEM            206
+#define HOLD_EFFECT_RAIN_TOTEM           207
+#define HOLD_EFFECT_SAND_TOTEM           208
+#define HOLD_EFFECT_SNOW_TOTEM           209
+#define HOLD_EFFECT_ACID_RAIN_TOTEM      210
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

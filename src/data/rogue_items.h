@@ -114,6 +114,12 @@ extern const u8 gItemDesc_WaywardIncense[];
 extern const u8 gItemDesc_ChaosCharm[];
 extern const u8 gItemDesc_MischiefQuill[];
 extern const u8 gItemDesc_FinaleBell[];
+extern const u8 gItemDesc_EclipseTotem[];
+extern const u8 gItemDesc_SunTotem[];
+extern const u8 gItemDesc_RainTotem[];
+extern const u8 gItemDesc_SandTotem[];
+extern const u8 gItemDesc_SnowTotem[];
+extern const u8 gItemDesc_AcidRainTotem[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2450,6 +2456,96 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_SootheBell,
         .iconPalette = gItemIconPalette_FinaleBell,
+    },
+
+    [ITEM_ECLIPSE_TOTEM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Eclipse Totem"),
+        .itemId = ITEM_ECLIPSE_TOTEM,
+        .price = 0,
+        .description = gItemDesc_EclipseTotem,
+        .holdEffect = HOLD_EFFECT_ECLIPSE_TOTEM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureEclipseTotem,
+        .iconPalette = gItemIconPalette_TreasureEclipseTotem,
+    },
+
+    [ITEM_SUN_TOTEM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Sun Totem"),
+        .itemId = ITEM_SUN_TOTEM,
+        .price = 0,
+        .description = gItemDesc_SunTotem,
+        .holdEffect = HOLD_EFFECT_SUN_TOTEM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureSunTotem,
+        .iconPalette = gItemIconPalette_TreasureSunTotem,
+    },
+
+    [ITEM_RAIN_TOTEM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Rain Totem"),
+        .itemId = ITEM_RAIN_TOTEM,
+        .price = 0,
+        .description = gItemDesc_RainTotem,
+        .holdEffect = HOLD_EFFECT_RAIN_TOTEM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureRainTotem,
+        .iconPalette = gItemIconPalette_TreasureRainTotem,
+    },
+
+    [ITEM_SAND_TOTEM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Sand Totem"),
+        .itemId = ITEM_SAND_TOTEM,
+        .price = 0,
+        .description = gItemDesc_SandTotem,
+        .holdEffect = HOLD_EFFECT_SAND_TOTEM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureSandTotem,
+        .iconPalette = gItemIconPalette_TreasureSandTotem,
+    },
+
+    [ITEM_SNOW_TOTEM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Snow Totem"),
+        .itemId = ITEM_SNOW_TOTEM,
+        .price = 0,
+        .description = gItemDesc_SnowTotem,
+        .holdEffect = HOLD_EFFECT_SNOW_TOTEM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureHailTotem,
+        .iconPalette = gItemIconPalette_TreasureHailTotem,
+    },
+
+    [ITEM_ACID_RAIN_TOTEM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Acid Rain Totem"),
+        .itemId = ITEM_ACID_RAIN_TOTEM,
+        .price = 0,
+        .description = gItemDesc_AcidRainTotem,
+        .holdEffect = HOLD_EFFECT_ACID_RAIN_TOTEM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureAcidRainTotem,
+        .iconPalette = gItemIconPalette_TreasureAcidRainTotem,
     },
 
 #ifdef ROGUE_DEBUG
