@@ -526,7 +526,7 @@ static u8 const sMenuName_DebugToggleDisableAssistantTimeout[] = _("Disable Assi
 
 static u8 const sMenuName_DebugRangeStartDifficulty[] = _("START DIFFICULTY");
 static u8 const sMenuName_DebugRangeForcedRoute[] = _("FORCED ROUTE");
-static u8 const sMenuName_DebugRangeForcedItemRoom[] = _("FORCED ITEM ROOM");
+static u8 const sMenuName_DebugRangeForcedItemRoom[] = _("FORCED TREASURE");
 static u8 const sMenuName_DebugRangeForcedEvilTeam[] = _("FORCED TEAM");
 #endif
 

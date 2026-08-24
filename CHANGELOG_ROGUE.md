@@ -26,36 +26,36 @@ Format follows Keep a Changelog loosely:
   map's authored decoration anchors.
 - Added each starter's summary-style front-sprite animation to its Poké Ball
   inspection reveal in the three-choice starter bag.
-- Added deterministic Item Rooms to Standard and Slow Path Adventures, with
-  three isolated cursed held-item rewards: Bane Lens, Hush Band, and Fate
-  Sash.
-- Rethemed Item Rooms as floating crystal islands guarded by an animated
+- Added deterministic Treasure encounters to Standard and Slow Path
+  Adventures, with three isolated held-item rewards: Bane Lens, Hush Band, and
+  Fate Sash.
+- Themed Treasure encounters as floating crystal islands guarded by an animated
   Sableye that turns and cries when spoken to, and replaced their Adventure
   Paths held-item marker with a still version of the mascot's overworld sprite;
   each reward displays its actual bag icon on a low crystal plinth, walking
   south from the island tip returns to the Adventure Paths, and the Diamond and
-  Pearl title theme accompanies the room.
-- Added palette-only cursed recolors for the three Item Room held-item icons,
-  reusing the existing Scope Lens, Choice Band, and Focus Sash artwork.
-- Added Eclipse Orb, an Item Room held item that reverses non-neutral incoming
+  Pearl title theme accompanies the encounter.
+- Added palette-only cursed recolors for the first three Treasure held-item
+  icons, reusing the existing Scope Lens, Choice Band, and Focus Sash artwork.
+- Added Eclipse Orb, a Treasure held item that reverses non-neutral incoming
   type matchups while preserving neutral and immune results.
-- Added Grudge Orb, an Item Room held item that trades a defensive stat stage
+- Added Grudge Orb, a Treasure held item that trades a defensive stat stage
   for an offensive stat stage after successful physical or special attacks.
-- Added Phantom Stone, an Item Room held item that adds Ghost typing and grants
+- Added Phantom Stone, a Treasure held item that adds Ghost typing and grants
   Ghost's trapping immunity and guaranteed wild-battle escape.
-- Added Doom Crown, an Item Room held item that boosts all combat stats after
+- Added Doom Crown, a Treasure held item that boosts all combat stats after
   a knockout while marking its holder for a Perish Song countdown.
-- Added Hex Thread, an Item Room held item that gives status moves priority
+- Added Hex Thread, a Treasure held item that gives status moves priority
   and reflects burn, poison, and paralysis back onto its holder.
-- Added Stone Heart, an Item Room held item that boosts both defenses while
+- Added Stone Heart, a Treasure held item that boosts both defenses while
   halving Speed and preventing HP recovery.
-- Added Null Idol, an Item Room held item that suppresses the holder's Ability
+- Added Null Idol, a Treasure held item that suppresses the holder's Ability
   and boosts ordinary direct damaging moves.
-- Added Rusted Anchor, an Item Room held item that makes physical moves use
+- Added Rusted Anchor, a Treasure held item that makes physical moves use
   Defense instead of Attack.
-- Added Gambit Claw, an Item Room held item that grants priority on the
+- Added Gambit Claw, a Treasure held item that grants priority on the
   holder's first turn after entry and penalizes priority on later turns.
-- Added a debug-only Forced Item Room setting that places the first available
+- Added a debug-only Forced Treasure setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and
   adaptively fitted descriptions for normal, Z-, and Max Moves, plus compact
@@ -173,7 +173,7 @@ Format follows Keep a Changelog loosely:
 
 - Expanded Luvdisc's level-up learnset with Heart Swap at level 37 and Take
   Heart at level 49.
-- Renamed the Item Room held-item rewards to Bane Lens, Hush Band, Fate Sash,
+- Renamed the Treasure held-item rewards to Bane Lens, Hush Band, Fate Sash,
   Eclipse Orb, Grudge Orb, Phantom Stone, Doom Crown, Hex Thread, Stone Heart,
   Null Idol, Rusted Anchor, and Gambit Claw without changing their effects,
   sprites, palettes, or stable item IDs.

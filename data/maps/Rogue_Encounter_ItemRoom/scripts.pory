@@ -57,7 +57,7 @@ script Rogue_Encounter_ItemRoom_Pedestal
         }
         else
         {
-            msgbox(format("Your Bag is full.\pThe item remains on the pedestal."))
+            msgbox(format("Your Bag is full.\pThe treasure remains on the pedestal."))
         }
     }
 

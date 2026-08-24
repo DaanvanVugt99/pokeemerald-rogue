@@ -86,7 +86,7 @@ script Rogue_AdventurePaths_InteractRoom
             msgbox(format("It's a Pokémon Lab.\nEnter this encounter?"), MSGBOX_YESNO)
 
         case ADVPATH_ROOM_ITEM:
-            msgbox(format("It's an Item Room.\nEnter this encounter?"), MSGBOX_YESNO)
+            msgbox(format("A Treasure awaits!\nEnter this encounter?"), MSGBOX_YESNO)
 
         case ADVPATH_ROOM_SHRINE:
             msgbox(format("It's a Mysterious Shrine.\nEnter this encounter?"), MSGBOX_YESNO)
