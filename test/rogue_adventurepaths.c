@@ -111,6 +111,7 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     u16 totalCrystals = 0;
     u16 totalPrunedInnerFringe = 0;
     u16 totalOuterFringe = 0;
+    u16 totalWallStyles[4] = {0};
     s8 firstTemplateOffsetX = 0;
     s8 firstTemplateOffsetY = 0;
     bool8 foundDifferentTemplateOffset = FALSE;
@@ -134,6 +135,7 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
         u16 prunedInnerFringe;
         u16 outerFringe;
         u16 narrowFringe;
+        u16 wallStyles[4];
         s8 templateOffsetX;
         s8 templateOffsetY;
         u8 terraceStage;
@@ -147,6 +149,11 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
 
         rngAfterGeneration = gRngRogueValue;
         EXPECT(RogueAdv_Debug_ValidateIslandLayout(&firstHash));
+        EXPECT(RogueAdv_Debug_ValidateIslandWallStyles(wallStyles));
+        totalWallStyles[0] += wallStyles[0];
+        totalWallStyles[1] += wallStyles[1];
+        totalWallStyles[2] += wallStyles[2];
+        totalWallStyles[3] += wallStyles[3];
         hashChecksum = (hashChecksum ^ firstHash) * 16777619u;
         EXPECT_EQ(gRngRogueValue, rngAfterGeneration);
         EXPECT(RogueAdv_Debug_ValidateIslandLayout(&secondHash));
@@ -186,9 +193,13 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     EXPECT_GT(totalCrystals, 0);
     EXPECT_GT(totalPrunedInnerFringe, 0);
     EXPECT_GT(totalOuterFringe, 0);
+    EXPECT_GT(totalWallStyles[0], 0);
+    EXPECT_GT(totalWallStyles[1], 0);
+    EXPECT_GT(totalWallStyles[2], 0);
+    EXPECT_GT(totalWallStyles[3], 0);
     EXPECT(foundDifferentTemplateOffset);
     // Keep seeded silhouette and edge-autotiling output stable for this matrix.
-    EXPECT_EQ(hashChecksum, 0x12AA1ADA);
+    EXPECT_EQ(hashChecksum, 0x1A8D8247);
 
     gRogueAdvPath = *originalPath;
     gRogueRun.baseSeed = originalBaseSeed;

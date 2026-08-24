@@ -2480,6 +2480,9 @@ static u16 GetAdventureIslandMetatile(u16 x, u16 y)
     bool8 southWest = GetAdventureIslandLevel(x - 1, y + 1) >= level;
     bool8 northWest = GetAdventureIslandLevel(x - 1, y - 1) >= level;
 
+    // Keep the walkable surface on the ordinary 47-case cardinal outline.
+    // The horizontal perspective rules belong to the visible wall row below,
+    // where platform, edge, and void are distinguishable from one another.
     if(!north && !east)
         return METATILE_AdventurePaths_Island_Corner_NorthEast;
     if(!east && !south)
@@ -2491,19 +2494,7 @@ static u16 GetAdventureIslandMetatile(u16 x, u16 y)
     if(!north)
         return METATILE_AdventurePaths_Island_Edge_North;
     if(!east)
-    {
-        if(northEast && !southEast)
-            return METATILE_AdventurePaths_Island_Edge_EastSlopeNorth;
-        if(!northEast && southEast)
-            return METATILE_AdventurePaths_Island_Edge_EastSlopeSouth;
-
-        // Alternate matching halves along uninterrupted side walls. An even
-        // row's lower inset meets the odd row's upper inset, creating a soft
-        // diagonal shadow without introducing a one-pixel seam or sawtooth.
-        return (y & 1)
-            ? METATILE_AdventurePaths_Island_Edge_EastSlopeSouth
-            : METATILE_AdventurePaths_Island_Edge_EastSlopeNorth;
-    }
+        return METATILE_AdventurePaths_Island_Edge_East;
     if(!south)
     {
         switch(GetAdventureIslandCoordHash(x, y, 0x534F5554) % 3)
@@ -2517,15 +2508,7 @@ static u16 GetAdventureIslandMetatile(u16 x, u16 y)
         }
     }
     if(!west)
-    {
-        if(northWest && !southWest)
-            return METATILE_AdventurePaths_Island_Edge_WestSlopeNorth;
-        if(!northWest && southWest)
-            return METATILE_AdventurePaths_Island_Edge_WestSlopeSouth;
-        return (y & 1)
-            ? METATILE_AdventurePaths_Island_Edge_WestSlopeSouth
-            : METATILE_AdventurePaths_Island_Edge_WestSlopeNorth;
-    }
+        return METATILE_AdventurePaths_Island_Edge_West;
 
     if(!northEast)
         return METATILE_AdventurePaths_Island_InnerCorner_NorthEast;
@@ -2540,28 +2523,6 @@ static u16 GetAdventureIslandMetatile(u16 x, u16 y)
         + (GetAdventureIslandCoordHash(x, y, 0x524F434B) % 3);
 }
 
-static u16 GetAdventureCliffMetatile(u16 x, u16 y)
-{
-    bool8 left = !IsAdventureIslandSurfaceCell(x - 1, y)
-        && IsAdventureIslandSurfaceCell(x - 1, y - 1);
-    bool8 right = !IsAdventureIslandSurfaceCell(x + 1, y)
-        && IsAdventureIslandSurfaceCell(x + 1, y - 1);
-
-    if(!left && right)
-        return METATILE_AdventurePaths_Island_Underside_Left;
-    if(left && !right)
-        return METATILE_AdventurePaths_Island_Underside_Right;
-    switch(GetAdventureIslandCoordHash(x, y, 0x434C4946) % 3)
-    {
-    case 1:
-        return METATILE_AdventurePaths_Island_Underside_Middle1;
-    case 2:
-        return METATILE_AdventurePaths_Island_Underside_Middle2;
-    default:
-        return METATILE_AdventurePaths_Island_Underside_Middle0;
-    }
-}
-
 static bool8 IsAdventureCliffCell(s16 x, s16 y)
 {
     return !IsAdventureIslandSurfaceCell(x, y)
@@ -2573,6 +2534,94 @@ static bool8 IsAdventureTerraceFaceCell(s16 x, s16 y)
     u8 level = GetAdventureIslandLevel(x, y);
 
     return level != 0 && GetAdventureIslandLevel(x, y - 1) > level;
+}
+
+enum AdventureWallNeighbor
+{
+    ADVENTURE_WALL_NEIGHBOR_NOTHING,
+    ADVENTURE_WALL_NEIGHBOR_EDGE,
+    ADVENTURE_WALL_NEIGHBOR_PLATFORM,
+};
+
+enum AdventureWallStyle
+{
+    ADVENTURE_WALL_STYLE_LEFT_SLANT,
+    ADVENTURE_WALL_STYLE_SQUARE,
+    ADVENTURE_WALL_STYLE_SHADOW,
+    ADVENTURE_WALL_STYLE_RIGHT_SLANT,
+};
+
+static u8 GetAdventureWallNeighbor(s16 x, s16 y)
+{
+    if(IsAdventureCliffCell(x, y) || IsAdventureTerraceFaceCell(x, y))
+        return ADVENTURE_WALL_NEIGHBOR_EDGE;
+    if(IsAdventureIslandSurfaceCell(x, y))
+        return ADVENTURE_WALL_NEIGHBOR_PLATFORM;
+    return ADVENTURE_WALL_NEIGHBOR_NOTHING;
+}
+
+static u8 GetAdventureWallStyle(s16 x, s16 y)
+{
+    u8 left = GetAdventureWallNeighbor(x - 1, y);
+    u8 right = GetAdventureWallNeighbor(x + 1, y);
+
+    // These are deliberately horizontal contour rules, not a symmetric blob
+    // autotiler. EDGE includes both square and slanted wall cells, so a style
+    // never depends recursively on which artwork its neighbour selected.
+    if(left == ADVENTURE_WALL_NEIGHBOR_NOTHING)
+        return ADVENTURE_WALL_STYLE_LEFT_SLANT;
+    if(left == ADVENTURE_WALL_NEIGHBOR_EDGE
+        && right == ADVENTURE_WALL_NEIGHBOR_PLATFORM)
+        return ADVENTURE_WALL_STYLE_SQUARE;
+    if(left == ADVENTURE_WALL_NEIGHBOR_PLATFORM
+        && right == ADVENTURE_WALL_NEIGHBOR_EDGE)
+        return ADVENTURE_WALL_STYLE_SHADOW;
+    if(right == ADVENTURE_WALL_NEIGHBOR_NOTHING)
+        return ADVENTURE_WALL_STYLE_RIGHT_SLANT;
+    return ADVENTURE_WALL_STYLE_SQUARE;
+}
+
+static u16 GetAdventureTerraceFaceMetatile(u16 x, u16 y)
+{
+    u8 variant = GetAdventureIslandCoordHash(x, y, 0x54455252) % 3;
+
+    switch(GetAdventureWallStyle(x, y))
+    {
+    case ADVENTURE_WALL_STYLE_LEFT_SLANT:
+        return METATILE_AdventurePaths_Terrace_FaceLeftSlant0 + variant;
+    case ADVENTURE_WALL_STYLE_SHADOW:
+        return METATILE_AdventurePaths_Terrace_FaceShadow0 + variant;
+    case ADVENTURE_WALL_STYLE_RIGHT_SLANT:
+        return METATILE_AdventurePaths_Terrace_FaceRightSlant0 + variant;
+    default:
+        return METATILE_AdventurePaths_Terrace_Face0 + variant;
+    }
+}
+
+static u16 GetAdventureCliffMetatile(u16 x, u16 y)
+{
+    switch(GetAdventureWallStyle(x, y))
+    {
+    case ADVENTURE_WALL_STYLE_LEFT_SLANT:
+        return METATILE_AdventurePaths_Island_Underside_Left;
+    case ADVENTURE_WALL_STYLE_SHADOW:
+        return METATILE_AdventurePaths_Island_Underside_Shadow0
+            + (GetAdventureIslandCoordHash(x, y, 0x53484457) % 3);
+    case ADVENTURE_WALL_STYLE_RIGHT_SLANT:
+        return METATILE_AdventurePaths_Island_Underside_Right;
+    default:
+        break;
+    }
+
+    switch(GetAdventureIslandCoordHash(x, y, 0x434C4946) % 3)
+    {
+    case 1:
+        return METATILE_AdventurePaths_Island_Underside_Middle1;
+    case 2:
+        return METATILE_AdventurePaths_Island_Underside_Middle2;
+    default:
+        return METATILE_AdventurePaths_Island_Underside_Middle0;
+    }
 }
 
 #if 0
@@ -3136,8 +3185,7 @@ static u16 GetAdventureRenderedMetatile(s16 x, s16 y, bool8 *impassable)
         return GetAdventureTrailMetatile(x, y);
     }
     if(IsAdventureTerraceFaceCell(x, y))
-        return METATILE_AdventurePaths_Terrace_Face0
-            + (GetAdventureIslandCoordHash(x, y, 0x54455252) % 3);
+        return GetAdventureTerraceFaceMetatile(x, y);
     if(IsAdventureIslandSurfaceCell(x, y))
     {
         u16 metatile = GetAdventureIslandMetatile(x, y);
@@ -3354,6 +3402,74 @@ bool8 RogueAdv_Debug_ValidateIslandLayout(u32 *layoutHash)
 
     if(layoutHash != NULL)
         *layoutHash = hash;
+    FreeAdventureIslandMask();
+    return isValid;
+}
+
+bool8 RogueAdv_Debug_ValidateIslandWallStyles(u16 *styleCounts)
+{
+    bool8 isValid = TRUE;
+    s16 x;
+    s16 y;
+
+    if(!AllocAdventureIslandMask())
+        return FALSE;
+
+    BuildAdventureIslandMask(NULL);
+    if(styleCounts != NULL)
+        memset(styleCounts, 0, sizeof(u16) * 4);
+
+    for(y = 0; y < ADVENTURE_PATHS_MAP_HEIGHT; ++y)
+    {
+        for(x = 0; x < ADVENTURE_PATHS_MAP_WIDTH; ++x)
+        {
+            bool8 isTerrace = IsAdventureTerraceFaceCell(x, y);
+            bool8 isCliff = IsAdventureCliffCell(x, y);
+            u8 style;
+            u16 metatile;
+
+            if(!isTerrace && !isCliff)
+                continue;
+
+            style = GetAdventureWallStyle(x, y);
+            metatile = isTerrace
+                ? GetAdventureTerraceFaceMetatile(x, y)
+                : GetAdventureCliffMetatile(x, y);
+            if(styleCounts != NULL)
+                ++styleCounts[style];
+
+            switch(style)
+            {
+            case ADVENTURE_WALL_STYLE_LEFT_SLANT:
+                isValid &= isTerrace
+                    ? metatile >= METATILE_AdventurePaths_Terrace_FaceLeftSlant0
+                        && metatile <= METATILE_AdventurePaths_Terrace_FaceLeftSlant2
+                    : metatile == METATILE_AdventurePaths_Island_Underside_Left;
+                break;
+            case ADVENTURE_WALL_STYLE_SHADOW:
+                isValid &= isTerrace
+                    ? metatile >= METATILE_AdventurePaths_Terrace_FaceShadow0
+                        && metatile <= METATILE_AdventurePaths_Terrace_FaceShadow2
+                    : metatile >= METATILE_AdventurePaths_Island_Underside_Shadow0
+                        && metatile <= METATILE_AdventurePaths_Island_Underside_Shadow2;
+                break;
+            case ADVENTURE_WALL_STYLE_RIGHT_SLANT:
+                isValid &= isTerrace
+                    ? metatile >= METATILE_AdventurePaths_Terrace_FaceRightSlant0
+                        && metatile <= METATILE_AdventurePaths_Terrace_FaceRightSlant2
+                    : metatile == METATILE_AdventurePaths_Island_Underside_Right;
+                break;
+            default:
+                isValid &= isTerrace
+                    ? metatile >= METATILE_AdventurePaths_Terrace_Face0
+                        && metatile <= METATILE_AdventurePaths_Terrace_Face2
+                    : metatile >= METATILE_AdventurePaths_Island_Underside_Middle0
+                        && metatile <= METATILE_AdventurePaths_Island_Underside_Middle2;
+                break;
+            }
+        }
+    }
+
     FreeAdventureIslandMask();
     return isValid;
 }

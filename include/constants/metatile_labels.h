@@ -85,10 +85,18 @@
 #define METATILE_AdventurePaths_Surface_CrystalClusterBlue1          0x305
 #define METATILE_AdventurePaths_Trail_ExitSouth                       0x306
 #define METATILE_AdventurePaths_Item_Pedestal                         0x307
-#define METATILE_AdventurePaths_Island_Edge_WestSlopeNorth            0x308
-#define METATILE_AdventurePaths_Island_Edge_WestSlopeSouth            0x309
-#define METATILE_AdventurePaths_Island_Edge_EastSlopeNorth            0x30A
-#define METATILE_AdventurePaths_Island_Edge_EastSlopeSouth            0x30B
+#define METATILE_AdventurePaths_Island_Underside_Shadow0              0x308
+#define METATILE_AdventurePaths_Island_Underside_Shadow1              0x309
+#define METATILE_AdventurePaths_Island_Underside_Shadow2              0x30A
+#define METATILE_AdventurePaths_Terrace_FaceLeftSlant0                0x30B
+#define METATILE_AdventurePaths_Terrace_FaceLeftSlant1                0x30C
+#define METATILE_AdventurePaths_Terrace_FaceLeftSlant2                0x30D
+#define METATILE_AdventurePaths_Terrace_FaceShadow0                   0x30E
+#define METATILE_AdventurePaths_Terrace_FaceShadow1                   0x30F
+#define METATILE_AdventurePaths_Terrace_FaceShadow2                   0x310
+#define METATILE_AdventurePaths_Terrace_FaceRightSlant0               0x311
+#define METATILE_AdventurePaths_Terrace_FaceRightSlant1               0x312
+#define METATILE_AdventurePaths_Terrace_FaceRightSlant2               0x313
 
 // gTileset_BattleArena
 #define METATILE_BattleArena_Door  0x21B

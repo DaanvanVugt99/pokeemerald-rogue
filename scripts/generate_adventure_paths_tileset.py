@@ -173,10 +173,18 @@ METATILES = {
     "Surface_CrystalClusterBlue1": 0x305,
     "Trail_ExitSouth": 0x306,
     "Item_Pedestal": 0x307,
-    "Island_Edge_WestSlopeNorth": 0x308,
-    "Island_Edge_WestSlopeSouth": 0x309,
-    "Island_Edge_EastSlopeNorth": 0x30A,
-    "Island_Edge_EastSlopeSouth": 0x30B,
+    "Island_Underside_Shadow0": 0x308,
+    "Island_Underside_Shadow1": 0x309,
+    "Island_Underside_Shadow2": 0x30A,
+    "Terrace_FaceLeftSlant0": 0x30B,
+    "Terrace_FaceLeftSlant1": 0x30C,
+    "Terrace_FaceLeftSlant2": 0x30D,
+    "Terrace_FaceShadow0": 0x30E,
+    "Terrace_FaceShadow1": 0x30F,
+    "Terrace_FaceShadow2": 0x310,
+    "Terrace_FaceRightSlant0": 0x311,
+    "Terrace_FaceRightSlant1": 0x312,
+    "Terrace_FaceRightSlant2": 0x313,
 }
 
 
@@ -371,7 +379,6 @@ def rock_metatile(
     missing: set[str],
     inner: str | None = None,
     variant: int = 0,
-    side_slope: str | None = None,
 ) -> list[list[int]]:
     pixels = blank(16, 16)
     north_jag = (0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
@@ -382,20 +389,6 @@ def rock_metatile(
         south_edge = 13 - north_jag[15 - x]
         west_edge = 2 + west_jag[y]
         east_edge = 13 - west_jag[15 - y]
-
-        # A cardinal-only edge is correct along an uninterrupted wall, but a
-        # one-cell step needs a short diagonal transition. Let the surface
-        # reach the appropriate corner, then blend back into the normal inset
-        # over half a metatile. South-facing lips deliberately stay flat so
-        # the floating-island underside remains visually supported.
-        if side_slope == "WN" and y < 8:
-            west_edge = min(west_edge, max(0, (y - 1) // 2))
-        elif side_slope == "WS" and y >= 8:
-            west_edge = min(west_edge, max(0, (14 - y) // 2))
-        elif side_slope == "EN" and y < 8:
-            east_edge = max(east_edge, 15 - max(0, (y - 1) // 2))
-        elif side_slope == "ES" and y >= 8:
-            east_edge = max(east_edge, 15 - max(0, (14 - y) // 2))
 
         if "N" in missing and y < north_edge:
             return False
@@ -459,6 +452,27 @@ def overlay_pixels(base: list[list[int]], source: list[list[int]], source_x: int
     return result
 
 
+def round_upper_corner(pixels: list[list[int]], side: str, radius: int = 5) -> list[list[int]]:
+    """Trim a small quarter-circle from an exposed north corner."""
+    result = [row[:] for row in pixels]
+
+    def is_inside(x: int, y: int) -> bool:
+        local_x = x if side == "W" else 15 - x
+        if local_x >= radius or y >= radius:
+            return True
+        return (local_x - radius) ** 2 + (y - radius) ** 2 <= radius ** 2
+
+    for y in range(radius):
+        for x in range(16):
+            if not is_inside(x, y):
+                result[y][x] = 1
+            elif result[y][x] != 1 and side == "W" and x > 0 and not is_inside(x - 1, y):
+                result[y][x] = 7
+            elif result[y][x] != 1 and side == "E" and x < 15 and not is_inside(x + 1, y):
+                result[y][x] = 7
+    return result
+
+
 def edge_metatile(source: list[list[int]], case: str, variant: int = 0) -> list[list[int]]:
     missing = set(case) if not case.startswith("INNER_") else set()
     inner = case.removeprefix("INNER_") if case.startswith("INNER_") else None
@@ -472,6 +486,10 @@ def edge_metatile(source: list[list[int]], case: str, variant: int = 0) -> list[
         pixels = overlay_pixels(pixels, source, 0, 96)
     elif case == "SE":
         pixels = overlay_pixels(pixels, source, 5 * 16, 96)
+    elif case == "NW":
+        pixels = round_upper_corner(pixels, "W")
+    elif case == "NE":
+        pixels = round_upper_corner(pixels, "E")
     return pixels
 
 
@@ -480,9 +498,44 @@ def south_edge_metatile(source: list[list[int]], column: int, variant: int = 0) 
     return overlay_pixels(pixels, source, column * 16, 96)
 
 
-def side_slope_metatile(case: str) -> list[list[int]]:
-    side = case[0]
-    return rock_metatile({side}, side_slope=case)
+def apply_wall_slant(pixels: list[list[int]], source: list[list[int]], column: int) -> list[list[int]]:
+    """Clip a wall face to one of the authored full-height outer slopes."""
+    result = [row[:] for row in pixels]
+
+    for y in range(16):
+        for x in range(16):
+            mask = source[112 + y][column * 16 + x]
+            if mask == 0:
+                result[y][x] = 1
+            elif column == 0 and (x == 0 or source[112 + y][column * 16 + x - 1] == 0):
+                result[y][x] = 7
+            elif column == 5 and (x == 15 or source[112 + y][column * 16 + x + 1] == 0):
+                result[y][x] = 7
+    return result
+
+
+def wall_shadow_metatile(
+    surface: list[list[int]],
+    face: list[list[int]],
+    source: list[list[int]],
+) -> list[list[int]]:
+    """Join a platform on the left to a wall on the right with a \\ shadow."""
+    result = [row[:] for row in surface]
+    shadow_ramp = {4: 1, 5: 1, 6: 2, 7: 3}
+
+    for y in range(16):
+        for x in range(16):
+            mask = source[112 + y][x]
+            if mask == 0:
+                # Keep just enough stone texture to read as a shadow rather
+                # than a missing tile, using the near-black end of the
+                # Adventure Paths rock palette.
+                result[y][x] = shadow_ramp.get(surface[y][x], 1)
+            else:
+                result[y][x] = face[y][x]
+                if x == 0 or source[112 + y][x - 1] == 0:
+                    result[y][x] = 4
+    return result
 
 
 def underside_metatile(source: list[list[int]], column: int) -> list[list[int]]:
@@ -823,18 +876,37 @@ def build_assets() -> tuple[list[list[list[int]]], list[list[int]]]:
     put("Island_Interior0", rock_metatile(set(), variant=0), PALETTE_ROCK)
     put("Island_Interior1", rock_metatile(set(), variant=1), PALETTE_ROCK)
     put("Island_Interior2", rock_metatile(set(), variant=2), PALETTE_ROCK)
-    put("Island_Edge_North", edge_metatile(edge_source, "N"), PALETTE_ROCK)
-    put("Island_Edge_East", edge_metatile(edge_source, "E"), PALETTE_ROCK)
+    north_edge = edge_metatile(edge_source, "N")
+    east_edge = edge_metatile(edge_source, "E")
+    west_edge = edge_metatile(edge_source, "W")
+    put("Island_Edge_North", north_edge, PALETTE_ROCK)
+    put("Island_Edge_East", east_edge, PALETTE_ROCK)
     put("Island_Edge_South", south_edge_metatile(edge_source, 2), PALETTE_ROCK)
     put("Island_Edge_South1", south_edge_metatile(edge_source, 1, 1), PALETTE_ROCK)
     put("Island_Edge_South2", south_edge_metatile(edge_source, 3, 2), PALETTE_ROCK)
-    put("Island_Edge_West", edge_metatile(edge_source, "W"), PALETTE_ROCK)
-    put("Island_Edge_WestSlopeNorth", side_slope_metatile("WN"), PALETTE_ROCK)
-    put("Island_Edge_WestSlopeSouth", side_slope_metatile("WS"), PALETTE_ROCK)
-    put("Island_Edge_EastSlopeNorth", side_slope_metatile("EN"), PALETTE_ROCK)
-    put("Island_Edge_EastSlopeSouth", side_slope_metatile("ES"), PALETTE_ROCK)
-    for short, full in (("NE", "NorthEast"), ("SE", "SouthEast"), ("SW", "SouthWest"), ("NW", "NorthWest")):
+    put("Island_Edge_West", west_edge, PALETTE_ROCK)
+
+    north_west_corner = edge_metatile(edge_source, "NW")
+    north_east_corner = edge_metatile(edge_source, "NE")
+    for y in range(16):
+        north_west_corner[y][15] = north_edge[y][0]
+        north_east_corner[y][0] = north_edge[y][15]
+    for x in range(16):
+        north_west_corner[15][x] = west_edge[0][x]
+        north_east_corner[15][x] = east_edge[0][x]
+
+    # Treat the adjoining edge profiles as a contract. If either straight
+    # edge changes later, corner generation must still meet it pixel-for-pixel.
+    assert [row[15] for row in north_west_corner[:15]] == [row[0] for row in north_edge[:15]]
+    assert [row[0] for row in north_east_corner[:15]] == [row[15] for row in north_edge[:15]]
+    assert north_west_corner[15] == west_edge[0]
+    assert north_east_corner[15] == east_edge[0]
+    put("Island_Corner_NorthWest", north_west_corner, PALETTE_ROCK)
+    put("Island_Corner_NorthEast", north_east_corner, PALETTE_ROCK)
+
+    for short, full in (("SE", "SouthEast"), ("SW", "SouthWest")):
         put(f"Island_Corner_{full}", edge_metatile(edge_source, short), PALETTE_ROCK)
+    for short, full in (("NE", "NorthEast"), ("SE", "SouthEast"), ("SW", "SouthWest"), ("NW", "NorthWest")):
         put(f"Island_InnerCorner_{full}", edge_metatile(edge_source, f"INNER_{short}"), PALETTE_ROCK)
 
     put("Island_CliffFace", cliff_metatile("centre", 0), PALETTE_ROCK)
@@ -848,13 +920,31 @@ def build_assets() -> tuple[list[list[list[int]]], list[list[int]]]:
 
     terrace_source_ids = (0x069, 0x06C, 0x079)
     for index, source_id in enumerate(terrace_source_ids):
-        put(f"Terrace_Face{index}", astral_recolor_rgb(render_general_hub_metatile(source_id)), PALETTE_ROCK)
+        terrace = astral_recolor_rgb(render_general_hub_metatile(source_id))
+        put(f"Terrace_Face{index}", terrace, PALETTE_ROCK)
+        put(f"Terrace_FaceLeftSlant{index}", apply_wall_slant(terrace, edge_source, 0), PALETTE_ROCK)
+        put(
+            f"Terrace_FaceShadow{index}",
+            wall_shadow_metatile(rock_metatile(set(), variant=index), terrace, edge_source),
+            PALETTE_ROCK,
+        )
+        put(f"Terrace_FaceRightSlant{index}", apply_wall_slant(terrace, edge_source, 5), PALETTE_ROCK)
 
     put("Island_Underside_Left", underside_metatile(edge_source, 0), PALETTE_ROCK)
     put("Island_Underside_Middle0", underside_metatile(edge_source, 1), PALETTE_ROCK)
     put("Island_Underside_Middle1", underside_metatile(edge_source, 2), PALETTE_ROCK)
     put("Island_Underside_Middle2", underside_metatile(edge_source, 3), PALETTE_ROCK)
     put("Island_Underside_Right", underside_metatile(edge_source, 5), PALETTE_ROCK)
+    for index in range(3):
+        put(
+            f"Island_Underside_Shadow{index}",
+            wall_shadow_metatile(
+                rock_metatile(set(), variant=index),
+                underside_metatile(edge_source, index + 1),
+                edge_source,
+            ),
+            PALETTE_ROCK,
+        )
 
     trail_shapes = {
         "Trail_Centre": set(), "Trail_Horizontal": {"E", "W"}, "Trail_Vertical": {"N", "S"},
