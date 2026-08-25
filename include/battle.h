@@ -846,6 +846,8 @@ struct BattleStruct
     u8 tikiItemUsed[NUM_BATTLE_SIDES];
     u8 echoScepterUsed[NUM_BATTLE_SIDES];
     u8 wonderShieldUsed[NUM_BATTLE_SIDES];
+    u8 ambushTalonUsed[NUM_BATTLE_SIDES];
+    u8 ambushTalonElevated;
     u8 wonderShieldProtected;
     u8 psychicTikiStatRisePending;
     u8 jesterSwitchPassStats;

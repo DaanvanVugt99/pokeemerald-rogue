@@ -12,6 +12,9 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_COMPOUND_GOGGLES) == HOLD_EFFECT_COMPOUND_GOGGLES);
     ASSUME(ItemId_GetHoldEffect(ITEM_GREEDY_GLOVES) == HOLD_EFFECT_GREEDY_GLOVES);
     ASSUME(ItemId_GetHoldEffect(ITEM_IMPACT_PLATING) == HOLD_EFFECT_IMPACT_PLATING);
+    ASSUME(ItemId_GetHoldEffect(ITEM_CHIME_JEWEL) == HOLD_EFFECT_CHIME_JEWEL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_AMBUSH_TALON) == HOLD_EFFECT_AMBUSH_TALON);
+    ASSUME(ItemId_GetHoldEffect(ITEM_PURITY_JEWEL) == HOLD_EFFECT_PURITY_JEWEL);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -373,5 +376,99 @@ SINGLE_BATTLE_TEST("Treasure batch: Impact Plating raises non-contact damage by 
         HP_BAR(player, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Chime Jewel raises Speed after a sound-based move")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_GROWL].soundMove);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CHIME_JEWEL); Moves(MOVE_GROWL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Chime Jewel ignores non-sound moves")
+{
+    GIVEN {
+        ASSUME(!gBattleMoves[MOVE_TACKLE].soundMove);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CHIME_JEWEL); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Ambush Talon gives only the holder's first move priority")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); HP(500); MaxHP(500); Item(ITEM_AMBUSH_TALON); Moves(MOVE_GROWL, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); HP(500); MaxHP(500); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_GROWL); MOVE(opponent, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GROWL, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Purity Jewel boosts damage when every move has one type", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_PURITY_JEWEL; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
+        ASSUME(gBattleMoves[MOVE_GROWL].type == TYPE_NORMAL);
+        ASSUME(gBattleMoves[MOVE_SWORDS_DANCE].type == TYPE_NORMAL);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE, MOVE_GROWL, MOVE_SWORDS_DANCE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Purity Jewel counts status moves when checking types", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_PURITY_JEWEL; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
+        ASSUME(gBattleMoves[MOVE_THUNDER_WAVE].type == TYPE_ELECTRIC);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE, MOVE_THUNDER_WAVE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
     }
 }

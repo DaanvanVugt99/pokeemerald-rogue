@@ -3432,6 +3432,11 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
             ADJUST_SCORE(-2);
     }
 
+    if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_CHIME_JEWEL
+     && gBattleMoves[move].soundMove
+     && BattlerStatCanRise(battlerAtk, aiData->abilities[battlerAtk], STAT_SPEED))
+        ADJUST_SCORE(1);
+
     // Stat theft remains a threat rather than making setup categorically unusable.
     // Damaging setup moves are still evaluated as attacks.
     if (IS_MOVE_STATUS(move)

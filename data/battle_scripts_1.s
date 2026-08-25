@@ -8241,6 +8241,20 @@ BattleScript_FuryMantleActivates::
 BattleScript_FuryMantleActivatesRet:
 	return
 
+BattleScript_ChimeJewelActivates::
+	copybyte sBATTLER, gBattlerAttacker
+	statbuffchange MOVE_EFFECT_AFFECTS_USER, BattleScript_ChimeJewelActivatesRet
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_ChimeJewelActivatesRet
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_USINGITEMSTATOFPKMNROSE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_ChimeJewelActivatesRet:
+	return
+
 BattleScript_AttackerItemStatRaise::
 	copybyte sBATTLER, gBattlerAttacker
 	statbuffchange MOVE_EFFECT_AFFECTS_USER, BattleScript_AttackerItemStatRaiseRet

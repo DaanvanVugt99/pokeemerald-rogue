@@ -133,6 +133,9 @@ extern const u8 gItemDesc_FuryMantle[];
 extern const u8 gItemDesc_CompoundGoggles[];
 extern const u8 gItemDesc_GreedyGloves[];
 extern const u8 gItemDesc_ImpactPlating[];
+extern const u8 gItemDesc_ChimeJewel[];
+extern const u8 gItemDesc_AmbushTalon[];
+extern const u8 gItemDesc_PurityJewel[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2754,6 +2757,51 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureBufferShield,
         .iconPalette = gItemIconPalette_TreasureBufferShield,
+    },
+
+    [ITEM_CHIME_JEWEL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Chime Jewel"),
+        .itemId = ITEM_CHIME_JEWEL,
+        .price = 0,
+        .description = gItemDesc_ChimeJewel,
+        .holdEffect = HOLD_EFFECT_CHIME_JEWEL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureBellJewel,
+        .iconPalette = gItemIconPalette_TreasureBellJewel,
+    },
+
+    [ITEM_AMBUSH_TALON - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Ambush Talon"),
+        .itemId = ITEM_AMBUSH_TALON,
+        .price = 0,
+        .description = gItemDesc_AmbushTalon,
+        .holdEffect = HOLD_EFFECT_AMBUSH_TALON,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureQuickTalon,
+        .iconPalette = gItemIconPalette_TreasureQuickTalon,
+    },
+
+    [ITEM_PURITY_JEWEL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Purity Jewel"),
+        .itemId = ITEM_PURITY_JEWEL,
+        .price = 0,
+        .description = gItemDesc_PurityJewel,
+        .holdEffect = HOLD_EFFECT_PURITY_JEWEL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureSpecialistJewel,
+        .iconPalette = gItemIconPalette_TreasureSpecialistJewel,
     },
 
 #ifdef ROGUE_DEBUG

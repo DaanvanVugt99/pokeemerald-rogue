@@ -50,6 +50,60 @@ AI_SINGLE_BATTLE_TEST("AI uses Twin Goggles accuracy when comparing damaging mov
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI values Chime Jewel's Speed boost on sound-based moves")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ROUND].soundMove);
+        ASSUME(!gBattleMoves[MOVE_SWIFT].soundMove);
+        ASSUME(gBattleMoves[MOVE_ROUND].power == gBattleMoves[MOVE_SWIFT].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_CHIME_JEWEL); Moves(MOVE_ROUND, MOVE_SWIFT); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_ROUND, MOVE_SWIFT); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI understands Ambush Talon's first-move priority")
+{
+    u16 item;
+    s16 expectedScore;
+
+    PARAMETRIZE { item = ITEM_NONE; expectedScore = 104; }
+    PARAMETRIZE { item = ITEM_AMBUSH_TALON; expectedScore = 105; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); HP(1); MaxHP(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Item(item); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_TACKLE); SCORE_EQ_VAL(opponent, MOVE_TACKLE, expectedScore); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI damage prediction includes Purity Jewel", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_PURITY_JEWEL; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
+        ASSUME(gBattleMoves[MOVE_GROWL].type == TYPE_NORMAL);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE, MOVE_GROWL); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    } THEN {
+        u8 effectiveness;
+        results[i].damage = AI_CalcDamageSaveBattlers(MOVE_TACKLE, B_POSITION_OPPONENT_LEFT, B_POSITION_PLAYER_LEFT, &effectiveness, FALSE);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI accounts for Impact Plating after the item is revealed")
 {
     GIVEN {

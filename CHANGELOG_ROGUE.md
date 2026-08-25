@@ -75,6 +75,9 @@ Format follows Keep a Changelog loosely:
   Metronome three times when its holder falls below 25% HP.
 - Added 30 credited, native 24x24 Treasure concept icons and GBA-ready palettes
   from the Tower of Ashes resource pack for future held-item designs.
+- Added 41 more credited, native 24x24 Treasure concept icons and GBA-ready
+  palettes selected from Tower of Ashes, NocTurn's Megapack, and the How You
+  Survive a Pokémon Journey resource pack.
 - Added six weather-themed Treasure rewards: Eclipse, Sun, Rain, Sand, Snow,
   and Acid Rain Totems, each with a strong effect gated by its matching weather.
 - Added four terrain-themed Tiki Treasure rewards that set Electric, Grassy,
@@ -87,6 +90,8 @@ Format follows Keep a Changelog loosely:
 - Added Twin Goggles, Greedy Gloves, and Impact Plating Treasure rewards
   for accurate effect-free attacks, contact-based stat theft, and polarized
   contact protection.
+- Added Chime Jewel, Ambush Talon, and Purity Jewel Treasure rewards for
+  sound-driven Speed boosts, one-time opening priority, and same-type movesets.
 - Added a debug-only Forced Treasure setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and

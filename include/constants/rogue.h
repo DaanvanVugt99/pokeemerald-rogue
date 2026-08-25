@@ -275,9 +275,12 @@
 #define ITEM_COMPOUND_GOGGLES               (LAST_ITEM_TR + 36)
 #define ITEM_GREEDY_GLOVES                  (LAST_ITEM_TR + 37)
 #define ITEM_IMPACT_PLATING                 (LAST_ITEM_TR + 38)
+#define ITEM_CHIME_JEWEL                    (LAST_ITEM_TR + 39)
+#define ITEM_AMBUSH_TALON                   (LAST_ITEM_TR + 40)
+#define ITEM_PURITY_JEWEL                   (LAST_ITEM_TR + 41)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_IMPACT_PLATING
+#define LAST_ITEM_ROOM_REWARD           ITEM_PURITY_JEWEL
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

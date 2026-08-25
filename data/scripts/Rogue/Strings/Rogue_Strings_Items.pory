@@ -448,6 +448,36 @@ text gItemRoomDesc_ImpactPlating
     format("The holder takes half damage from contact moves, but 50% more damage from non-contact moves.")
 }
 
+text gItemDesc_ChimeJewel
+{
+    format("Using a sound-based move raises the holder's Speed by 1.")
+}
+
+text gItemRoomDesc_ChimeJewel
+{
+    format("After the holder uses a sound-based move, its Speed rises by 1 stage.")
+}
+
+text gItemDesc_AmbushTalon
+{
+    format("Once per battle, the holder's first move gains +1 priority.")
+}
+
+text gItemRoomDesc_AmbushTalon
+{
+    format("Once per battle, the holder's first move gains +1 priority.")
+}
+
+text gItemDesc_PurityJewel
+{
+    format("Boosts damaging moves by 50% if all the holder's moves are one type.")
+}
+
+text gItemRoomDesc_PurityJewel
+{
+    format("If all the holder's moves are the same type, its damaging moves deal 50% more damage.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

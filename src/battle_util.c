@@ -23576,6 +23576,22 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 gBattlescriptCurrInstr = BattleScript_AttackerItemStatRaise;
             }
             break;
+        case HOLD_EFFECT_CHIME_JEWEL:
+            if (gProtectStructs[gBattlerAttacker].targetAffected
+             && gBattleMons[gBattlerAttacker].hp != 0
+             && gBattleMoves[gCurrentMove].soundMove
+             && CompareStat(gBattlerAttacker, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN)
+             && !NoAliveMonsForEitherParty())
+            {
+                gLastUsedItem = atkItem;
+                gBattleScripting.battler = gBattlerAttacker;
+                RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_CHIME_JEWEL);
+                SET_STATCHANGER(STAT_SPEED, 1, FALSE);
+                effect = ITEM_STATS_CHANGE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_ChimeJewelActivates;
+            }
+            break;
         }
 
         if (IsBattlerAlive(gBattlerAttacker)
@@ -26808,6 +26824,26 @@ static inline uq4_12_t GetDefenderPartnerAbilitiesModifier(u32 battlerPartnerDef
     return UQ_4_12(1.0);
 }
 
+static bool32 AreBattlerMovesOneType(u32 battler)
+{
+    u32 i;
+    u32 sharedType = NUMBER_OF_MON_TYPES;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        u32 move = gBattleMons[battler].moves[i];
+
+        if (move == MOVE_NONE || move == MOVE_UNAVAILABLE)
+            continue;
+        if (sharedType == NUMBER_OF_MON_TYPES)
+            sharedType = gBattleMoves[move].type;
+        else if (gBattleMoves[move].type != sharedType)
+            return FALSE;
+    }
+
+    return sharedType != NUMBER_OF_MON_TYPES;
+}
+
 static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12_t typeEffectivenessModifier, u32 holdEffectAtk, bool32 updateFlags)
 {
     u32 percentBoost;
@@ -26866,6 +26902,14 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12
         break;
     case HOLD_EFFECT_GLASS_SWORD:
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
+            return UQ_4_12(1.5);
+        }
+        break;
+    case HOLD_EFFECT_PURITY_JEWEL:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move) && AreBattlerMovesOneType(battlerAtk))
         {
             if (updateFlags)
                 RecordItemEffectBattle(battlerAtk, holdEffectAtk);

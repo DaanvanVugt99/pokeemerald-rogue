@@ -5072,6 +5072,7 @@ s8 GetMovePriority(u32 battler, u16 move)
 {
     s8 priority;
     u16 ability = GetBattlerAbility(battler);
+    u32 partyBit = gBitTable[gBattlerPartyIndexes[battler]];
 
     if (gBattleStruct->zmove.toBeUsed[battler] && gBattleMoves[move].power != 0)
         move = gBattleStruct->zmove.toBeUsed[battler];
@@ -5101,6 +5102,14 @@ s8 GetMovePriority(u32 battler, u16 move)
     if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_WITCHS_THREAD
      && IS_MOVE_STATUS(move))
         priority++;
+
+    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_AMBUSH_TALON
+     && (!(gBattleStruct->ambushTalonUsed[GetBattlerSide(battler)] & partyBit)
+      || (gBattleStruct->ambushTalonElevated & gBitTable[battler])))
+    {
+        gBattleStruct->ambushTalonElevated |= gBitTable[battler];
+        priority++;
+    }
 
     if (ability == ABILITY_GALE_WINGS
         && (B_GALE_WINGS < GEN_7 || BATTLER_MAX_HP(battler))
@@ -5593,6 +5602,8 @@ static void TurnValuesCleanUp(bool8 var0)
 
     gSideStatuses[B_SIDE_PLAYER] &= ~(SIDE_STATUS_QUICK_GUARD | SIDE_STATUS_WIDE_GUARD | SIDE_STATUS_CRAFTY_SHIELD | SIDE_STATUS_MAT_BLOCK);
     gSideStatuses[B_SIDE_OPPONENT] &= ~(SIDE_STATUS_QUICK_GUARD | SIDE_STATUS_WIDE_GUARD | SIDE_STATUS_CRAFTY_SHIELD | SIDE_STATUS_MAT_BLOCK);
+    if (!var0)
+        gBattleStruct->ambushTalonElevated = 0;
     gSideTimers[B_SIDE_PLAYER].followmeTimer = 0;
     gSideTimers[B_SIDE_OPPONENT].followmeTimer = 0;
 
@@ -5775,16 +5786,29 @@ static void CheckChangingTurnOrderEffects(void)
     {
         while (gBattleStruct->quickClawBattlerId < gBattlersCount)
         {
+            bool32 ambushTalonActivated;
+
             battler = gBattlerAttacker = gBattleStruct->quickClawBattlerId;
             gBattleStruct->quickClawBattlerId++;
+            ambushTalonActivated = (gBattleStruct->ambushTalonElevated & gBitTable[battler])
+                                && !(gBattleStruct->ambushTalonUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]);
             if (gChosenActionByBattler[battler] == B_ACTION_USE_MOVE
-             && gChosenMoveByBattler[battler] != MOVE_FOCUS_PUNCH   // quick claw message doesn't need to activate here
-             && (gProtectStructs[battler].usedCustapBerry || gProtectStructs[battler].quickDraw)
-             && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
+             && ((gChosenMoveByBattler[battler] != MOVE_FOCUS_PUNCH
+               && (gProtectStructs[battler].usedCustapBerry || gProtectStructs[battler].quickDraw))
+              || ambushTalonActivated)
+             && (!(gBattleMons[battler].status1 & STATUS1_SLEEP) || ambushTalonActivated)
              && !(gDisableStructs[gBattlerAttacker].truantCounter)
              && !(gProtectStructs[battler].noValidMoves))
             {
-                if (gProtectStructs[battler].usedCustapBerry)
+                if (ambushTalonActivated)
+                {
+                    gBattleStruct->ambushTalonUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+                    gLastUsedItem = gBattleMons[battler].item;
+                    PREPARE_ITEM_BUFFER(gBattleTextBuff1, gLastUsedItem);
+                    RecordItemEffectBattle(battler, HOLD_EFFECT_AMBUSH_TALON);
+                    BattleScriptExecute(BattleScript_QuickClawActivation);
+                }
+                else if (gProtectStructs[battler].usedCustapBerry)
                 {
                     gLastUsedItem = gBattleMons[battler].item;
                     PREPARE_ITEM_BUFFER(gBattleTextBuff1, gLastUsedItem);
