@@ -868,9 +868,19 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             if (AI_BattlerHasMoveAbsorbingAbility(battlerDef, moveType))
                 return 0;
 
+            if (gBattleMoves[move].magicCoatAffected
+             && (AI_HasAbility(battlerDef, ABILITY_MAGIC_BOUNCE)
+              || AI_HasAbility(battlerDef, ABILITY_OMNISENSE)))
+                RETURN_SCORE_MINUS(20);
+
             if (atkPriority > 0
-              && AI_HasAbility(battlerDef, ABILITY_GRIDLOCK)
-              && AI_IsTerrainAffected(battlerDef, STATUS_FIELD_ELECTRIC_TERRAIN))
+             && ((AI_HasAbility(battlerDef, ABILITY_GRIDLOCK)
+               && AI_IsTerrainAffected(battlerDef, STATUS_FIELD_ELECTRIC_TERRAIN))
+              || (AI_IsAbilityOnSide(battlerDef, ABILITY_ROYAL_STORM)
+               && (gBattleWeather & B_WEATHER_RAIN))
+              || (AI_IsAbilityOnSide(battlerDef, ABILITY_AUTHORITY)
+               && gBattleMoves[move].target != MOVE_TARGET_ALL_BATTLERS
+               && gBattleMoves[move].target != MOVE_TARGET_OPPONENTS_FIELD)))
                 RETURN_SCORE_MINUS(10);
 
             if ((atkPriority > 0 || AI_IsSwitchingMove(move))
@@ -941,10 +951,6 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 if (IS_BATTLER_OF_TYPE(battlerDef, TYPE_GRASS) && (IsNonVolatileStatusMoveEffect(moveEffect) || IsStatLoweringEffect(moveEffect)))
                     RETURN_SCORE_MINUS(10);
                 break;
-            case ABILITY_MAGIC_BOUNCE:
-                if (gBattleMoves[move].magicCoatAffected)
-                    RETURN_SCORE_MINUS(20);
-                break;
             case ABILITY_CONTRARY:
                 if (IsStatLoweringEffect(moveEffect))
                     RETURN_SCORE_MINUS(20);
@@ -993,6 +999,12 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             // target partner ability checks & not attacking partner
             if (isDoubleBattle)
             {
+                if (gBattleMoves[move].magicCoatAffected
+                 && moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY | MOVE_TARGET_OPPONENTS_FIELD)
+                 && (AI_HasAbility(BATTLE_PARTNER(battlerDef), ABILITY_MAGIC_BOUNCE)
+                  || AI_HasAbility(BATTLE_PARTNER(battlerDef), ABILITY_OMNISENSE)))
+                    RETURN_SCORE_MINUS(20);
+
                 switch (aiData->abilities[BATTLE_PARTNER(battlerDef)])
                 {
                 case ABILITY_LIGHTNING_ROD:
@@ -1001,10 +1013,6 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                     break;
                 case ABILITY_STORM_DRAIN:
                     if (moveType == TYPE_WATER && !IsMoveRedirectionPrevented(move, aiData->abilities[battlerAtk]))
-                        RETURN_SCORE_MINUS(20);
-                    break;
-                case ABILITY_MAGIC_BOUNCE:
-                    if (gBattleMoves[move].magicCoatAffected && moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY | MOVE_TARGET_OPPONENTS_FIELD))
                         RETURN_SCORE_MINUS(20);
                     break;
                 case ABILITY_SWEET_VEIL:
@@ -1473,7 +1481,9 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 ADJUST_SCORE(-10);
             else if (AI_HasAbility(battlerDef, ABILITY_SUCTION_CUPS)
                   || AI_HasAbility(battlerDef, ABILITY_UNMOVABLE)
-                  || AI_HasAbility(battlerDef, ABILITY_STRANGE_GUEST))
+                  || AI_HasAbility(battlerDef, ABILITY_STRANGE_GUEST)
+                  || (AI_HasAbility(battlerDef, ABILITY_ROOTED_SHRINE)
+                   && AI_IsTerrainAffected(battlerDef, STATUS_FIELD_GRASSY_TERRAIN)))
                 ADJUST_SCORE(-10);
             else if (IsDynamaxed(battlerDef))
                 ADJUST_SCORE(-10);
@@ -3399,7 +3409,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     struct AiLogicData *aiData = AI_DATA;
     u32 movesetIndex = AI_THINKING_STRUCT->movesetIndex;
     u32 effectiveness = aiData->effectiveness[battlerAtk][battlerDef][movesetIndex];
-    u32 secondaryEffectChance = AI_CalcSecondaryEffectChance(battlerAtk, move, gBattleMoves[move].secondaryEffectChance);
+    u32 secondaryEffectChance = AI_CalcSecondaryEffectChance(battlerAtk, battlerDef, move, gBattleMoves[move].secondaryEffectChance);
     s8 atkPriority = GetMovePriority(battlerAtk, move);
     u32 predictedMove = aiData->predictedMoves[battlerDef];
     u32 predictedMoveSlot = GetMoveSlot(GetMovesArray(battlerDef), predictedMove);
@@ -3413,6 +3423,14 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     // Targeting partner, check benefits of doing that instead
     if (IS_TARGETING_PARTNER(battlerAtk, battlerDef))
         return score;
+
+    if (IS_MOVE_STATUS(move))
+    {
+        if (AI_IsAbilityOnSide(battlerDef, ABILITY_PRECOGNITION))
+            ADJUST_SCORE(-3);
+        if (AI_IsAbilityOnSide(battlerDef, ABILITY_COUNTERSPELL))
+            ADJUST_SCORE(-2);
+    }
 
     // Stat theft remains a threat rather than making setup categorically unusable.
     // Damaging setup moves are still evaluated as attacks.

@@ -33,6 +33,7 @@
     return FALSE
 
 static u32 AI_GetEffectiveness(uq4_12_t multiplier);
+static bool32 AI_BattlerBlocksAdditionalEffects(u32 battler, u32 move);
 
 // Const Data
 static const s8 sAiAbilityRatings[ABILITIES_COUNT] =
@@ -903,6 +904,9 @@ static bool32 AI_IsMoveEffectInPlus(u32 battlerAtk, u32 battlerDef, u32 move, s3
 
     if (AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_COMPOUND_GOGGLES
      && gBattleMoves[move].sheerForceBoost)
+        return FALSE;
+
+    if (AI_BattlerBlocksAdditionalEffects(battlerDef, move))
         return FALSE;
 
     switch (gBattleMoves[move].effect)
@@ -1875,14 +1879,22 @@ void ProtectChecks(u32 battlerAtk, u32 battlerDef, u32 move, u32 predictedMove, 
 // stat stages
 bool32 ShouldLowerStat(u32 battler, u32 battlerAbility, u32 stat)
 {
-    if (gBattleMons[battler].statStages[stat] > MIN_STAT_STAGE && battlerAbility != ABILITY_CONTRARY)
+    if (gBattleMons[battler].statStages[stat] > MIN_STAT_STAGE
+     && battlerAbility != ABILITY_CONTRARY
+     && !AI_HasAbility(battler, ABILITY_CONTRARY))
     {
         if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_CLEAR_AMULET
-         || battlerAbility == ABILITY_CLEAR_BODY
-         || battlerAbility == ABILITY_WHITE_SMOKE
-         || battlerAbility == ABILITY_FULL_METAL_BODY
+         || AI_HasAbility(battler, ABILITY_CLEAR_BODY)
+         || AI_HasAbility(battler, ABILITY_CRYSTAL_ARMOR)
+         || AI_HasAbility(battler, ABILITY_FULL_METAL_BODY)
+         || AI_HasAbility(battler, ABILITY_WHITE_SMOKE)
+         || (AI_HasAbility(battler, ABILITY_SAND_SKIMMER)
+          && WEATHER_HAS_EFFECT
+          && (gBattleWeather & B_WEATHER_SANDSTORM))
          || (stat == STAT_SPEED
-          && battlerAbility == ABILITY_FIELD_RUNNER
+          && AI_HasAbility(battler, ABILITY_INSOMNIA))
+         || (stat == STAT_SPEED
+          && AI_HasAbility(battler, ABILITY_FIELD_RUNNER)
           && AI_IsTerrainAffected(battler, STATUS_FIELD_PLAIN_TERRAIN)))
             return FALSE;
 
@@ -2972,6 +2984,7 @@ bool32 AI_CanSleep(u32 battler, u32 ability)
       || AI_HasAbility(battler, ABILITY_VITAL_SPIRIT)
       || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
+      || (AI_HasAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || gBattleMons[battler].status1 & STATUS1_ANY
       || gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_SAFEGUARD
       || (gFieldStatuses & (STATUS_FIELD_MISTY_TERRAIN | STATUS_FIELD_ELECTRIC_TERRAIN))
@@ -2997,6 +3010,7 @@ static bool32 AI_CanBePoisoned(u32 battlerAtk, u32 battlerDef, u32 move)
      || AI_HasAbility(battlerDef, ABILITY_UNKNOWN_BIOLOGY)
      || AI_HasAbility(battlerDef, ABILITY_IMMUNITY)
      || AI_HasAbility(battlerDef, ABILITY_COMATOSE)
+     || (AI_HasAbility(battlerDef, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battlerDef))
      || AI_IsAbilityOnSide(battlerDef, ABILITY_PASTEL_VEIL)
      || gBattleMons[battlerDef].status1 & STATUS1_ANY
      || IsAbilityStatusProtected(battlerDef)
@@ -3040,6 +3054,7 @@ static bool32 AI_CanBeParalyzed(u32 battler, u32 ability)
     if (AI_HasAbility(battler, ABILITY_LIMBER)
       || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
+      || (AI_HasAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || IS_BATTLER_OF_TYPE(battler, TYPE_ELECTRIC)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler))
@@ -3087,6 +3102,7 @@ bool32 AI_CanBeBurned(u32 battler, u32 ability)
       || AI_HasAbility(battler, ABILITY_WATER_BUBBLE)
       || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
+      || (AI_HasAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || IS_BATTLER_OF_TYPE(battler, TYPE_FIRE)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)
@@ -3100,6 +3116,7 @@ bool32 AI_CanGetFrostbite(u32 battler, u32 ability)
     if (AI_HasAbility(battler, ABILITY_MAGMA_ARMOR)
       || AI_HasAbility(battler, ABILITY_UNKNOWN_BIOLOGY)
       || AI_HasAbility(battler, ABILITY_COMATOSE)
+      || (AI_HasAbility(battler, ABILITY_DOMINION) && IsOnlyAliveMonInParty(battler))
       || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
       || gBattleMons[battler].status1 & STATUS1_ANY
       || IsAbilityStatusProtected(battler)
@@ -3157,10 +3174,24 @@ bool32 AI_CanBeInfatuated(u32 battlerAtk, u32 battlerDef, u32 defAbility)
     return TRUE;
 }
 
+static bool32 AI_BattlerBlocksAdditionalEffects(u32 battler, u32 move)
+{
+    if (IS_MOVE_STATUS(move))
+        return FALSE;
+
+    if (AI_HasAbility(battler, ABILITY_SMOG_REFINERY))
+        return TRUE;
+
+    return AI_HasAbility(battler, ABILITY_TOXISPHERE)
+        && WEATHER_HAS_EFFECT
+        && (gBattleWeather & B_WEATHER_ACID_RAIN);
+}
+
 u32 ShouldTryToFlinch(u32 battlerAtk, u32 battlerDef, u32 atkAbility, u32 defAbility, u32 move)
 {
     if (((AI_DATA->abilities[battlerAtk] != ABILITY_MOLD_BREAKER && (defAbility == ABILITY_SHIELD_DUST || defAbility == ABILITY_INNER_FOCUS))
       || AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_COVERT_CLOAK
+      || AI_BattlerBlocksAdditionalEffects(battlerDef, move)
       || DoesSubstituteBlockMove(battlerAtk, battlerDef, move)
       || AI_WhoStrikesFirst(battlerAtk, battlerDef, move) == AI_IS_SLOWER)) // Opponent goes first
     {
@@ -4012,12 +4043,15 @@ bool32 AI_IsBattlerAsleepOrComatose(u32 battlerId)
     return (gBattleMons[battlerId].status1 & STATUS1_SLEEP) || AI_HasAbility(battlerId, ABILITY_COMATOSE);
 }
 
-u32 AI_CalcSecondaryEffectChance(u32 battler, u32 move, u32 secondaryEffectChance)
+u32 AI_CalcSecondaryEffectChance(u32 battlerAtk, u32 battlerDef, u32 move, u32 secondaryEffectChance)
 {
-    if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_COMPOUND_GOGGLES && !IS_MOVE_STATUS(move))
+    if (AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_COMPOUND_GOGGLES && !IS_MOVE_STATUS(move))
         return 0;
 
-    if (AI_DATA->abilities[battler] == ABILITY_SERENE_GRACE)
+    if (AI_BattlerBlocksAdditionalEffects(battlerDef, move))
+        return 0;
+
+    if (AI_DATA->abilities[battlerAtk] == ABILITY_SERENE_GRACE)
         secondaryEffectChance *= 2;
 
     return secondaryEffectChance;

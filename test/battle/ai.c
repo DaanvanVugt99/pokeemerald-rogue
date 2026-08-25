@@ -350,6 +350,129 @@ AI_SINGLE_BATTLE_TEST("AI scores priority moves below safe moves against known G
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI scores priority moves below safe moves against Royal Storm and Authority")
+{
+    u16 ability;
+    u16 species;
+
+    PARAMETRIZE { species = SPECIES_POLITOED; ability = ABILITY_ROYAL_STORM; }
+    PARAMETRIZE { species = SPECIES_HONEDGE; ability = ABILITY_AUTHORITY; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_AQUA_JET].priority > 0);
+        ASSUME(gBattleMoves[MOVE_AQUA_JET].power == gBattleMoves[MOVE_WATER_GUN].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(species) { Ability(ABILITY_DAMP); UniqueAbility(ability); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_AQUA_JET, MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_WATER_GUN, MOVE_AQUA_JET); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores status moves below safe moves against last-mon Dominion")
+{
+    u16 statusMove;
+
+    PARAMETRIZE { statusMove = MOVE_SPORE; }
+    PARAMETRIZE { statusMove = MOVE_TOXIC; }
+    PARAMETRIZE { statusMove = MOVE_WILL_O_WISP; }
+    PARAMETRIZE { statusMove = MOVE_THUNDER_WAVE; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_TYRANITAR) { UniqueAbility(ABILITY_DOMINION); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(statusMove, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, statusMove); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores stat drops below default against Crystal Armor and active Sand Skimmer")
+{
+    u16 ability;
+    u16 species;
+    u16 setupMove;
+
+    PARAMETRIZE { species = SPECIES_CLAMPERL; ability = ABILITY_CRYSTAL_ARMOR; setupMove = MOVE_CELEBRATE; }
+    PARAMETRIZE { species = SPECIES_GLIGAR; ability = ABILITY_SAND_SKIMMER; setupMove = MOVE_SANDSTORM; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(species) { UniqueAbility(ability); Moves(setupMove); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SCREECH, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, setupMove); EXPECT_MOVES(opponent, MOVE_SCREECH, MOVE_TACKLE); }
+        TURN { MOVE(player, setupMove); SCORE_LT_VAL(opponent, MOVE_SCREECH, AI_SCORE_DEFAULT); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI scores phazing below default against Rooted Shrine in Grassy Terrain")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ROAR].effect == EFFECT_ROAR);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_TAPU_BULU) { UniqueAbility(ABILITY_ROOTED_SHRINE); Moves(MOVE_GRASSY_TERRAIN); }
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_ROAR, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_GRASSY_TERRAIN); EXPECT_MOVES(opponent, MOVE_ROAR, MOVE_TACKLE); }
+        TURN { MOVE(player, MOVE_GRASSY_TERRAIN); SCORE_LT_VAL(opponent, MOVE_ROAR, AI_SCORE_DEFAULT); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI does not value blocked secondary effects against Toxisphere and Smog Refinery")
+{
+    u16 ability;
+    u16 species;
+
+    PARAMETRIZE { species = SPECIES_WEEZING; ability = ABILITY_TOXISPHERE; }
+    PARAMETRIZE { species = SPECIES_WEEZING_GALARIAN; ability = ABILITY_SMOG_REFINERY; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_BUBBLE].power == gBattleMoves[MOVE_WATER_GUN].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(species) { Speed(200); UniqueAbility(ability); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(10); Moves(MOVE_BUBBLE, MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { SCORE_EQ(opponent, MOVE_BUBBLE, MOVE_WATER_GUN); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI does not value blocked flinches against Toxisphere and Smog Refinery")
+{
+    u16 ability;
+    u16 species;
+
+    PARAMETRIZE { species = SPECIES_WEEZING; ability = ABILITY_TOXISPHERE; }
+    PARAMETRIZE { species = SPECIES_WEEZING_GALARIAN; ability = ABILITY_SMOG_REFINERY; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_BITE].power == gBattleMoves[MOVE_FEINT_ATTACK].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(species) { Speed(10); UniqueAbility(ability); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(200); Moves(MOVE_BITE, MOVE_FEINT_ATTACK); }
+    } WHEN {
+        TURN { SCORE_EQ(opponent, MOVE_BITE, MOVE_FEINT_ATTACK); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI penalizes status moves against Precognition and Counterspell")
+{
+    u16 ability;
+    u16 species;
+
+    PARAMETRIZE { species = SPECIES_ESPEON; ability = ABILITY_PRECOGNITION; }
+    PARAMETRIZE { species = SPECIES_SLOWKING_GALARIAN; ability = ABILITY_COUNTERSPELL; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_VIABILITY);
+        PLAYER(species) { UniqueAbility(ability); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SPLASH); }
+    } WHEN {
+        TURN { SCORE_LT_VAL(opponent, MOVE_SPLASH, AI_SCORE_DEFAULT); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI scores priority and switching moves below safe moves against known Lock Protocol")
 {
     u16 blockedMove;

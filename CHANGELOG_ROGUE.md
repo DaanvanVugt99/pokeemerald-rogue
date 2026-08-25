@@ -459,6 +459,11 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Taught the battle AI to account for Omnisense reflection, Royal Storm and
+  Authority priority blocking, Dominion's last-mon status immunity, Crystal
+  Armor and Sand Skimmer stat protection, Rooted Shrine phazing immunity,
+  Toxisphere and Smog Refinery secondary-effect blocking, and retaliation from
+  Precognition and Counterspell.
 - Kept the partner Pokémon following the player during the scripted Adventure
   entrance walk when starting immediately after arriving beside the nurse.
 - Preserved the Treasure encounter's authored astral palette by excluding the
