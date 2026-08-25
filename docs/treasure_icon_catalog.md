@@ -26,6 +26,7 @@ palette reduction, or resizing.
 | Glass Sword | `GlassCannon` | Large offense-for-defense trade | Implemented | Tower of Ashes |
 | Glyph Codex | `GlyphCodex` | Changes the holder to each move's type before use | Implemented | Tower of Ashes |
 | Golden Egg | `GoldenEgg` | Gives healing moves priority at half HP or less | Implemented | Tower of Ashes |
+| Decoy Doll | `DecoyDoll` | Spends 25% max HP on entry to create a Substitute | Implemented | Base-game Poké Doll recolor |
 | Golden Idol | `GoldenIdol` | Greed, sacrifice, or cursed rewards | TBD | Tower of Ashes |
 | Grassy Tiki | `GrassyTiki` | Grassy Terrain or Grass-type interaction | Implemented | Tower of Ashes |
 | Greedy Gloves | `GreedyGlove` | Contact moves steal the target's positive stat changes before damage | Implemented | Tower of Ashes |
@@ -54,7 +55,7 @@ palette reduction, or resizing.
 | Ho-Oh Plume | `HoOhPlume` | Open concept | TBD | Tower of Ashes |
 | Hourglass | `Hourglass` | Open concept | TBD | Tower of Ashes |
 | Monotonous Armor | `MonotonousArmor` | Open concept | TBD | Tower of Ashes |
-| Monotype | `Monotype` | Open concept | TBD | Tower of Ashes |
+| Monotype Serum | `Monotype` | Removes the secondary type while preserving its STAB | Implemented | Tower of Ashes |
 | No Guard Belt | `NoGuardBelt` | Open concept | TBD | Tower of Ashes |
 | Renegade Orb | `RenegadeOrb` | Open concept | TBD | Tower of Ashes |
 | Shaman Staff | `ShamanStaff` | Open concept | TBD | Tower of Ashes |
@@ -62,7 +63,7 @@ palette reduction, or resizing.
 | Tinted Shield | `TintedShield` | Open concept | TBD | Tower of Ashes |
 | Tricky Box | `TrickyBox` | Answers opposing status moves with Copycat | Implemented | Tower of Ashes |
 | Vest Jewel | `VestJewel` | Open concept | TBD | Tower of Ashes |
-| Wood Cannon | `WoodCannon` | Open concept | TBD | Tower of Ashes |
+| Wooden Sword | `WoodCannon` | Single-hit attacks strike three times at 40% power; only the first can add effects | Implemented | Tower of Ashes |
 | X Ancient | `XAncient` | Open concept | TBD | Tower of Ashes |
 | Elred Berry | `ElredBerry` | Open concept | TBD | NocTurn |
 | Honey Badge | `HoneyBadge` | Open concept | TBD | NocTurn |

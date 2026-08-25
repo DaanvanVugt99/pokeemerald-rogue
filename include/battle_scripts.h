@@ -35,6 +35,7 @@ extern const u8 BattleScript_FinaleBellUsesCalledMove[];
 extern const u8 BattleScript_EchoScepterUsesCalledMove[];
 extern const u8 BattleScript_TrickyBoxUsesCopycat[];
 extern const u8 BattleScript_WonderShieldActivates[];
+extern const u8 BattleScript_DecoyDollActivates[];
 extern const u8 BattleScript_GreedyGlovesSteal[];
 extern const u8 BattleScript_RuinousRiteActivates[];
 extern const u8 BattleScript_MaliciousMindUsesConfuseRayAndDisable[];

@@ -1877,6 +1877,8 @@ extern const u32 gItemIcon_TreasureGlyphCodex[];
 extern const u32 gItemIconPalette_TreasureGlyphCodex[];
 extern const u32 gItemIcon_TreasureGoldenEgg[];
 extern const u32 gItemIconPalette_TreasureGoldenEgg[];
+extern const u32 gItemIcon_TreasureDecoyDoll[];
+extern const u32 gItemIconPalette_TreasureDecoyDoll[];
 extern const u32 gItemIcon_TreasureGoldenIdol[];
 extern const u32 gItemIconPalette_TreasureGoldenIdol[];
 extern const u32 gItemIcon_TreasureGrassyTiki[];

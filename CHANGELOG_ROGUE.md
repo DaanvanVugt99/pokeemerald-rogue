@@ -20,6 +20,10 @@ Format follows Keep a Changelog loosely:
   whichever of its physical or special category would deal more damage.
 - Added Briar Bracer and Tricky Box Treasure held items, afflicting contact
   attackers with Leech Seed and answering opposing status moves with Copycat.
+- Added Monotype Serum, Decoy Doll, and Wooden Sword Treasure held items for
+  secondary-type removal with retained STAB, an entry Substitute paid for with
+  25% max HP, and three 40%-power strikes from single-hit attacks respectively;
+  Decoy Doll uses a shiny-Clefairy-inspired recolor of the base Poké Doll.
 - Added Hexing Wand, Fickle Hat, and Golden Egg Treasure held items, rewarding
   status pressure, volatile end-of-turn stat changes, and low-HP healing
   priority respectively.

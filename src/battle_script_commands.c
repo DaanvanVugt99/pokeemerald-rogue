@@ -1556,6 +1556,7 @@ static void Cmd_attackcanceler(void)
     }
 
     if (gSpecialStatuses[gBattlerAttacker].parentalBondState == PARENTAL_BOND_OFF
+    && !gSpecialStatuses[gBattlerAttacker].woodenSwordMultiHit
     && (GetBattlerAbility(gBattlerAttacker) == ABILITY_PARENTAL_BOND
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_CHAMPION) && gBattleMoves[gCurrentMove].punchingMove)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON)
@@ -5247,6 +5248,15 @@ static void Cmd_seteffectwithchance(void)
 
     u32 percentChance = CalcSecondaryEffectChance(gBattlerAttacker, gBattleMoves[gCurrentMove].secondaryEffectChance, gBattleMoves[gCurrentMove].effect);
 
+    if (gSpecialStatuses[gBattlerAttacker].woodenSwordMultiHit
+     && gSpecialStatuses[gBattlerAttacker].multiHitOn)
+    {
+        gBattleScripting.moveEffect = 0;
+        gBattleScripting.multihitMoveEffect = 0;
+        gBattlescriptCurrInstr = cmd->nextInstr;
+        return;
+    }
+
     if (gProtectStructs[gBattlerAttacker].extraMoveUsed)
     {
         u32 tempChance = VarGet(VAR_TEMP_MOVEEFECT_CHANCE);
@@ -5298,6 +5308,14 @@ static void Cmd_seteffectwithchance(void)
 static void Cmd_seteffectprimary(void)
 {
     CMD_ARGS();
+
+    if (gSpecialStatuses[gBattlerAttacker].woodenSwordMultiHit
+     && gSpecialStatuses[gBattlerAttacker].multiHitOn)
+    {
+        gBattleScripting.moveEffect = 0;
+        gBattlescriptCurrInstr = cmd->nextInstr;
+        return;
+    }
 
     SetMoveEffect(TRUE, 0);
 }
@@ -20794,6 +20812,25 @@ bool32 IsMoveAffectedByParentalBond(u32 move, u32 battler)
         return TRUE;
     }
     return FALSE;
+}
+
+bool32 IsMoveAffectedByWoodenSword(u32 move, u32 battler, u32 holdEffect)
+{
+    u32 target;
+
+    if (holdEffect != HOLD_EFFECT_WOODEN_SWORD
+     || move == MOVE_NONE
+     || move == MOVE_UNAVAILABLE
+     || move == MOVE_STRUGGLE
+     || gBattleMoves[move].parentalBondBanned
+     || gBattleMoves[move].split == SPLIT_STATUS
+     || gBattleMoves[move].power <= 1
+     || gBattleMoves[move].effect == EFFECT_MULTI_HIT
+     || gBattleMoves[move].strikeCount > 1)
+        return FALSE;
+
+    target = GetBattlerMoveTargetType(battler, move);
+    return target != MOVE_TARGET_BOTH && target != MOVE_TARGET_FOES_AND_ALLY;
 }
 
 static bool8 IsFinalStrikeEffect(u16 move)

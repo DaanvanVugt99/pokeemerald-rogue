@@ -137,6 +137,28 @@ AI_SINGLE_BATTLE_TEST("AI damage prediction includes Hexing Wand", s16 damage)
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI damage prediction includes Wooden Sword's three strikes", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_WOODEN_SWORD; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    } THEN {
+        u8 effectiveness;
+        results[i].damage = AI_CalcDamageSaveBattlers(MOVE_TACKLE, B_POSITION_OPPONENT_LEFT, B_POSITION_PLAYER_LEFT, &effectiveness, FALSE);
+    } FINALLY {
+        EXPECT_GT(results[1].damage * 10, results[0].damage * 12 - 2);
+        EXPECT_LT(results[1].damage * 10, results[0].damage * 13 + 2);
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI understands Golden Egg priority on healing attacks")
 {
     u16 item;

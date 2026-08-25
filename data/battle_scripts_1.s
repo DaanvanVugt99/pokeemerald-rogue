@@ -12676,6 +12676,17 @@ BattleScript_WonderShieldActivates::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_DecoyDollActivates::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	setlastuseditem BS_SCRIPTING
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE | HITMARKER_IGNORE_DISGUISE
+	healthbarupdate BS_SCRIPTING
+	datahpupdate BS_SCRIPTING
+	playanimation BS_SCRIPTING, B_ANIM_SUBSTITUTE_APPEAR
+	printstring STRINGID_DECOYDOLLCREATED
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
 BattleScript_TikiActivates_Ret::
 	call BattleScript_TikiActivates
 	return

@@ -548,6 +548,36 @@ text gItemRoomDesc_Raincoat
     format("During rain, the holder is immune to all Water-type moves.")
 }
 
+text gItemDesc_MonotypeSerum
+{
+    format("Removes the holder's secondary type, but preserves its STAB.")
+}
+
+text gItemRoomDesc_MonotypeSerum
+{
+    format("The holder loses its secondary type but still receives STAB on moves of that type.")
+}
+
+text gItemDesc_DecoyDoll
+{
+    format("On entry, spends 25% max HP to create a Substitute.")
+}
+
+text gItemRoomDesc_DecoyDoll
+{
+    format("On switch-in, the holder loses 25% of its maximum HP and creates a Substitute.")
+}
+
+text gItemDesc_WoodenSword
+{
+    format("Single-hit attacks strike 3 times at 40% power each.")
+}
+
+text gItemRoomDesc_WoodenSword
+{
+    format("Single-hit damaging moves strike 3 times at 40% power each. Only the first hit can trigger additional effects.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

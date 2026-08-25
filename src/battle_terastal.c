@@ -156,7 +156,7 @@ uq4_12_t GetTeraMultiplier(u32 battler, u32 type)
     if (teraType == TYPE_STELLAR)
     {
         bool32 shouldBoost = IsTypeStellarBoosted(battler, type);
-        if (IS_BATTLER_OF_BASE_TYPE(battler, type))
+        if (IS_BATTLER_OF_BASE_TYPE(battler, type) || DoesMonotypeSerumRetainStab(battler, type))
         {
             if (shouldBoost)
                 return UQ_4_12(2.0);
@@ -169,7 +169,7 @@ uq4_12_t GetTeraMultiplier(u32 battler, u32 type)
             return UQ_4_12(1.0);
     }
     // Base and Tera type.
-    if (type == teraType && IS_BATTLER_OF_BASE_TYPE(battler, type))
+    if (type == teraType && (IS_BATTLER_OF_BASE_TYPE(battler, type) || DoesMonotypeSerumRetainStab(battler, type)))
     {
         if (hasAdaptability)
             return UQ_4_12(2.25);
@@ -177,8 +177,8 @@ uq4_12_t GetTeraMultiplier(u32 battler, u32 type)
             return UQ_4_12(2.0);
     }
     // Base or Tera type only.
-    else if ((type == teraType && !IS_BATTLER_OF_BASE_TYPE(battler, type))
-             || (type != teraType && IS_BATTLER_OF_BASE_TYPE(battler, type)))
+    else if ((type == teraType && !IS_BATTLER_OF_BASE_TYPE(battler, type) && !DoesMonotypeSerumRetainStab(battler, type))
+             || (type != teraType && (IS_BATTLER_OF_BASE_TYPE(battler, type) || DoesMonotypeSerumRetainStab(battler, type))))
     {
         if (hasAdaptability)
             return UQ_4_12(2.0);

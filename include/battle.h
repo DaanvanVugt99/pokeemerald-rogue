@@ -250,6 +250,7 @@ struct SpecialStatus
     u8 switchInUniqueAbilityDone:1;
     u8 flockStepOriginalTarget:3;
     u8 flockStepStatRaised:1;
+    u8 woodenSwordMultiHit:1;
 };
 
 struct SideTimer

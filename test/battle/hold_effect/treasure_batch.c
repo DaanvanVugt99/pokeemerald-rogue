@@ -21,6 +21,9 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_BRIAR_BRACER) == HOLD_EFFECT_BRIAR_BRACER);
     ASSUME(ItemId_GetHoldEffect(ITEM_TRICKY_BOX) == HOLD_EFFECT_TRICKY_BOX);
     ASSUME(ItemId_GetHoldEffect(ITEM_ADAPTIVE_SPECS) == HOLD_EFFECT_ADAPTIVE_SPECS);
+    ASSUME(ItemId_GetHoldEffect(ITEM_MONOTYPE_SERUM) == HOLD_EFFECT_MONOTYPE_SERUM);
+    ASSUME(ItemId_GetHoldEffect(ITEM_DECOY_DOLL) == HOLD_EFFECT_DECOY_DOLL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_WOODEN_SWORD) == HOLD_EFFECT_WOODEN_SWORD);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -30,6 +33,12 @@ ASSUMPTIONS
     ASSUME(!gBattleMoves[MOVE_WATER_GUN].copycatBanned);
     ASSUME(IsMoveInherentlyMakingContact(MOVE_TACKLE));
     ASSUME(!IsMoveInherentlyMakingContact(MOVE_WATER_GUN));
+    ASSUME(gSpeciesInfo[SPECIES_SCIZOR].types[0] == TYPE_BUG);
+    ASSUME(gSpeciesInfo[SPECIES_SCIZOR].types[1] == TYPE_STEEL);
+    ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
+    ASSUME(gBattleMoves[MOVE_METAL_CLAW].type == TYPE_STEEL);
+    ASSUME(gBattleMoves[MOVE_FIRE_LASH].secondaryEffectChance == 100);
+    ASSUME(gBattleMoves[MOVE_SONIC_BOOM].effect == EFFECT_SONICBOOM);
 }
 
 SINGLE_BATTLE_TEST("Treasure batch: Glass Sword raises damage dealt by 50 percent", s16 damage)
@@ -851,5 +860,159 @@ SINGLE_BATTLE_TEST("Treasure batch: Adaptive Specs preserves a move's inherent c
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
     } THEN {
         EXPECT(gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_LEECHSEED);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Monotype Serum removes the holder's secondary defensive type", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_MONOTYPE_SERUM; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { SpAttack(120); Moves(MOVE_EMBER); }
+        OPPONENT(SPECIES_SCIZOR) { SpDefense(120); HP(1000); MaxHP(1000); Item(item); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Monotype Serum preserves STAB for the removed secondary type", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_MONOTYPE_SERUM; }
+
+    GIVEN {
+        PLAYER(SPECIES_SCIZOR) { Attack(120); Item(item); Moves(MOVE_METAL_CLAW); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_METAL_CLAW, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Monotype Serum removes secondary-type status immunities")
+{
+    GIVEN {
+        PLAYER(SPECIES_SCIZOR) { Item(ITEM_MONOTYPE_SERUM); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TOXIC); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TOXIC); }
+    } THEN {
+        EXPECT(player->status1 & STATUS1_TOXIC_POISON);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Decoy Doll pays one quarter max HP and creates a Substitute on entry")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(200); MaxHP(200); Item(ITEM_DECOY_DOLL); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        HP_BAR(player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_SUBSTITUTE_APPEAR, player);
+        MESSAGE("Wobbuffet's Decoy Doll created a substitute!");
+    } THEN {
+        EXPECT_EQ(player->hp, 150);
+        EXPECT(player->status2 & STATUS2_SUBSTITUTE);
+        EXPECT_EQ(gDisableStructs[B_POSITION_PLAYER_LEFT].substituteHP, 50);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Decoy Doll does not activate when the holder cannot pay its HP cost")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(50); MaxHP(200); Item(ITEM_DECOY_DOLL); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+            MESSAGE("Wobbuffet's Decoy Doll created a substitute!");
+        }
+    } THEN {
+        EXPECT_EQ(player->hp, 50);
+        EXPECT(!(player->status2 & STATUS2_SUBSTITUTE));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Wooden Sword makes a single-hit attack strike three times")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(ITEM_WOODEN_SWORD); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        HP_BAR(opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        HP_BAR(opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        HP_BAR(opponent);
+        MESSAGE("Hit 3 time(s)!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Wooden Sword deals 40 percent power per hit", s16 firstDamage, s16 secondDamage, s16 thirdDamage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_WOODEN_SWORD; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].firstDamage);
+        if (item == ITEM_WOODEN_SWORD) {
+            HP_BAR(opponent, captureDamage: &results[i].secondDamage);
+            HP_BAR(opponent, captureDamage: &results[i].thirdDamage);
+        }
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].firstDamage, UQ_4_12(0.4), results[1].firstDamage);
+        EXPECT_EQ(results[1].firstDamage, results[1].secondDamage);
+        EXPECT_EQ(results[1].firstDamage, results[1].thirdDamage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Wooden Sword only allows the first hit's additional effect")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(ITEM_WOODEN_SWORD); Moves(MOVE_FIRE_LASH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_FIRE_LASH, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(opponent->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Wooden Sword does not repeat fixed-damage moves")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_WOODEN_SWORD); Moves(MOVE_SONIC_BOOM); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(100); MaxHP(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SONIC_BOOM); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(opponent->hp, 80);
     }
 }

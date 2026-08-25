@@ -771,8 +771,9 @@
 #define STRINGID_TRICKYBOXACTIVATES                    769
 #define STRINGID_ECLIPSEORBREVEALED                    770
 #define STRINGID_PHANTOMSTONEREVEALED                  771
+#define STRINGID_DECOYDOLLCREATED                      772
 
-#define BATTLESTRINGS_COUNT                           772
+#define BATTLESTRINGS_COUNT                           773
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

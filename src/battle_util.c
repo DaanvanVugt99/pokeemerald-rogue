@@ -4647,6 +4647,9 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
         {
             bool32 isMultiHitMove = FALSE;
 
+            if (!gSpecialStatuses[gBattlerAttacker].multiHitOn)
+                gSpecialStatuses[gBattlerAttacker].woodenSwordMultiHit = FALSE;
+
             if (gBattleMoves[gCurrentMove].effect == EFFECT_MULTI_HIT)
             {
                 u16 ability = gBattleMons[gBattlerAttacker].ability;
@@ -4691,6 +4694,13 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                         gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
                 }
 
+                isMultiHitMove = TRUE;
+            }
+            else if (IsMoveAffectedByWoodenSword(gCurrentMove, gBattlerAttacker, GetBattlerHoldEffect(gBattlerAttacker, TRUE)))
+            {
+                gMultiHitCounter = 3;
+                PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)
+                gSpecialStatuses[gBattlerAttacker].woodenSwordMultiHit = TRUE;
                 isMultiHitMove = TRUE;
             }
 
@@ -23151,6 +23161,26 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 BattleScriptPushCursorAndCallback(BattleScript_PhantomStoneReveals);
                 RecordItemEffectBattle(battler, HOLD_EFFECT_GRAVEGLASS);
                 break;
+            case HOLD_EFFECT_DECOY_DOLL:
+            {
+                u32 substituteHp = GetNonDynamaxMaxHP(battler) / 4;
+
+                if (substituteHp == 0)
+                    substituteHp = 1;
+
+                if (gBattleMons[battler].hp > substituteHp
+                 && !(gBattleMons[battler].status2 & STATUS2_SUBSTITUTE))
+                {
+                    gBattleMoveDamage = substituteHp;
+                    gBattleMons[battler].status2 |= STATUS2_SUBSTITUTE;
+                    gDisableStructs[battler].substituteHP = substituteHp;
+                    gBattleScripting.battler = battler;
+                    BattleScriptExecute(BattleScript_DecoyDollActivates);
+                    RecordItemEffectBattle(battler, HOLD_EFFECT_DECOY_DOLL);
+                    effect = ITEM_EFFECT_OTHER;
+                }
+                break;
+            }
             case HOLD_EFFECT_ROOM_SERVICE:
                 if (TryRoomService(battler))
                 {
@@ -25582,6 +25612,14 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         if (gBattleMoves[move].punchingMove)
            modifier = uq4_12_multiply(modifier, UQ_4_12(1.1));
         break;
+    case HOLD_EFFECT_WOODEN_SWORD:
+        if (IsMoveAffectedByWoodenSword(move, battlerAtk, holdEffectAtk))
+        {
+            modifier = uq4_12_multiply(modifier, UQ_4_12(0.4));
+            if (updateFlags && !gSpecialStatuses[battlerAtk].multiHitOn)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
+        }
+        break;
     }
 
     // Terastallization boosts weak, non-priority, non-multi hit moves after modifiers to 60 BP.
@@ -25591,6 +25629,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         && uq4_12_multiply_by_int_half_down(modifier, basePower) < 60
         && gBattleMoves[move].strikeCount < 2
         && gBattleMoves[move].effect != EFFECT_MULTI_HIT
+        && !IsMoveAffectedByWoodenSword(move, battlerAtk, holdEffectAtk)
         && gBattleMoves[move].priority == 0)
     {
         return 60;
@@ -26377,7 +26416,8 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
         return uq4_12_add(hasAdaptability ? UQ_4_12(2.0) : UQ_4_12(1.5), GetAdaptabilityCharmBoost(battlerAtk));
     else if (move == MOVE_STRUGGLE || move == MOVE_NONE)
         return UQ_4_12(1.0);
-    else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType))
+    else if (!IS_BATTLER_OF_TYPE(battlerAtk, moveType)
+          && !DoesMonotypeSerumRetainStab(battlerAtk, moveType))
     {
         if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
          || (HasBattlerAbility(battlerAtk, ABILITY_WATER_GLIDE) && moveType == TYPE_FLYING)
@@ -27237,6 +27277,9 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
         dmg /= 100;
     }
 
+    if (updateFlags && DoesMonotypeSerumRetainStab(battlerAtk, moveType))
+        RecordItemEffectBattle(battlerAtk, HOLD_EFFECT_MONOTYPE_SERUM);
+
     if (holdEffectAtk == HOLD_EFFECT_WAYWARD_INCENSE)
     {
         if (updateFlags)
@@ -27618,6 +27661,11 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
      && GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_RAIN_TOTEM
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
         RecordItemEffectBattle(battlerDef, HOLD_EFFECT_RAIN_TOTEM);
+
+    if (recordAbilities
+     && GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_MONOTYPE_SERUM
+     && gBattleMons[battlerDef].type1 != gBattleMons[battlerDef].type2)
+        RecordItemEffectBattle(battlerDef, HOLD_EFFECT_MONOTYPE_SERUM);
 
     MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 0, FALSE), battlerAtk, recordAbilities, TRUE);
     if (GetBattlerType(battlerDef, 1, FALSE) != GetBattlerType(battlerDef, 0, FALSE))
@@ -29749,6 +29797,19 @@ static bool32 IsRainTotemActive(u32 battler)
         && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN);
 }
 
+static bool32 IsMonotypeSerumActive(u32 battler)
+{
+    return GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_MONOTYPE_SERUM;
+}
+
+bool32 DoesMonotypeSerumRetainStab(u32 battler, u32 type)
+{
+    return IsMonotypeSerumActive(battler)
+        && IS_STANDARD_TYPE(gBattleMons[battler].type2)
+        && gBattleMons[battler].type2 != gBattleMons[battler].type1
+        && gBattleMons[battler].type2 == type;
+}
+
 static void AddDerivedBattlerType(u16 types[3], u16 type)
 {
     if (types[0] == type || types[1] == type || types[2] == type)
@@ -29787,6 +29848,12 @@ u8 GetBattlerType(u32 battler, u8 typeIndex, bool32 ignoreTera)
     // type disappears immediately when rain ends or the item is suppressed.
     if (IsRainTotemActive(battler))
         AddDerivedBattlerType(types, TYPE_WATER);
+
+    // Suppress the current secondary type without mutating the battle mon so
+    // removing or suppressing the item restores it immediately. Offensive
+    // STAB for this hidden type is handled separately.
+    if (IsMonotypeSerumActive(battler))
+        types[1] = types[0];
 
     // Handle Roost's Flying-type suppression
     if (typeIndex == 0 || typeIndex == 1)

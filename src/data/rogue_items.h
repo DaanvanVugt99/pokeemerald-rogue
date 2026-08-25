@@ -143,6 +143,9 @@ extern const u8 gItemDesc_BriarBracer[];
 extern const u8 gItemDesc_TrickyBox[];
 extern const u8 gItemDesc_AdaptiveSpecs[];
 extern const u8 gItemDesc_Raincoat[];
+extern const u8 gItemDesc_MonotypeSerum[];
+extern const u8 gItemDesc_DecoyDoll[];
+extern const u8 gItemDesc_WoodenSword[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2914,6 +2917,51 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureRaincoat,
         .iconPalette = gItemIconPalette_TreasureRaincoat,
+    },
+
+    [ITEM_MONOTYPE_SERUM - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Monotype Serum"),
+        .itemId = ITEM_MONOTYPE_SERUM,
+        .price = 0,
+        .description = gItemDesc_MonotypeSerum,
+        .holdEffect = HOLD_EFFECT_MONOTYPE_SERUM,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureMonotype,
+        .iconPalette = gItemIconPalette_TreasureMonotype,
+    },
+
+    [ITEM_DECOY_DOLL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Decoy Doll"),
+        .itemId = ITEM_DECOY_DOLL,
+        .price = 0,
+        .description = gItemDesc_DecoyDoll,
+        .holdEffect = HOLD_EFFECT_DECOY_DOLL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureDecoyDoll,
+        .iconPalette = gItemIconPalette_TreasureDecoyDoll,
+    },
+
+    [ITEM_WOODEN_SWORD - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Wooden Sword"),
+        .itemId = ITEM_WOODEN_SWORD,
+        .price = 0,
+        .description = gItemDesc_WoodenSword,
+        .holdEffect = HOLD_EFFECT_WOODEN_SWORD,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureWoodCannon,
+        .iconPalette = gItemIconPalette_TreasureWoodCannon,
     },
 
 #ifdef ROGUE_DEBUG
