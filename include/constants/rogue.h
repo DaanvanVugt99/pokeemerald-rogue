@@ -145,7 +145,6 @@
 #define ITEM_DEBUG_UNUSED1              (ITEM_ROGUE_ITEM_FIRST + 49)
 #endif
 
-
 // Dynamic Rogue items may move between content revisions. They are cleared from
 // saved bags whenever ROGUE_DYNAMIC_ITEM_LAYOUT_VERSION changes.
 #define FIRST_ITEM_DYNAMIC              (ITEM_ROGUE_ITEM_FIRST + 50)
@@ -270,9 +269,15 @@
 #define ITEM_GLASS_SWORD                    (LAST_ITEM_TR + 30)
 #define ITEM_WONDER_SHIELD                  (LAST_ITEM_TR + 31)
 #define ITEM_ECHO_SCEPTER                   (LAST_ITEM_TR + 32)
+#define ITEM_GLYPH_CODEX                    (LAST_ITEM_TR + 33)
+#define ITEM_PRECISE_LENS                   (LAST_ITEM_TR + 34)
+#define ITEM_FURY_MANTLE                    (LAST_ITEM_TR + 35)
+#define ITEM_COMPOUND_GOGGLES               (LAST_ITEM_TR + 36)
+#define ITEM_GREEDY_GLOVES                  (LAST_ITEM_TR + 37)
+#define ITEM_IMPACT_PLATING                 (LAST_ITEM_TR + 38)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_ECHO_SCEPTER
+#define LAST_ITEM_ROOM_REWARD           ITEM_IMPACT_PLATING
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

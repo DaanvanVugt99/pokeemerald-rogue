@@ -550,6 +550,7 @@ TEST("Selected standalone route scene payloads remain immutable")
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    u8 originalTrialId = gRogueRun.trialState.trialId;
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
     bool8 originalComplete = FlagGet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
@@ -565,6 +566,7 @@ TEST("Selected standalone route scene payloads remain immutable")
     gRogueRun.wildEncounters.species[0] = SPECIES_MIGHTYENA;
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
+    gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(2);
@@ -608,6 +610,7 @@ TEST("Selected standalone route scene payloads remain immutable")
 
     Rogue_SetCurrentDifficulty(originalDifficulty);
     RoguePokedex_SetDexVariant(originalDexVariant);
+    gRogueRun.trialState.trialId = originalTrialId;
     gRogueRun.teamEncounterNum = originalTeamNum;
     gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;
     gRogueRun.routeSceneRoomId = originalSceneRoomId;

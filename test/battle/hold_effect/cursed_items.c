@@ -1318,7 +1318,7 @@ SINGLE_BATTLE_TEST("Wayward Incense is suppressed by Klutz", s16 offTypeDamage, 
     }
 }
 
-SINGLE_BATTLE_TEST("Doom Crown raises all stats and marks the holder to perish after a KO")
+SINGLE_BATTLE_TEST("Fated Crown raises all stats and marks the holder to perish after a KO")
 {
     u32 battler;
     u32 perishSongTimer;
@@ -1342,7 +1342,7 @@ SINGLE_BATTLE_TEST("Doom Crown raises all stats and marks the holder to perish a
     }
 }
 
-SINGLE_BATTLE_TEST("Doom Crown does not restart or reannounce an active perish countdown")
+SINGLE_BATTLE_TEST("Fated Crown does not restart or reannounce an active perish countdown")
 {
     u32 battler;
     u32 perishSongTimer;
@@ -1373,7 +1373,7 @@ SINGLE_BATTLE_TEST("Doom Crown does not restart or reannounce an active perish c
     }
 }
 
-SINGLE_BATTLE_TEST("Klutz suppresses Doom Crown")
+SINGLE_BATTLE_TEST("Klutz suppresses Fated Crown")
 {
     u32 battler;
 

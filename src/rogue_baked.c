@@ -1070,6 +1070,12 @@ extern const u8 gItemRoomDesc_PsychicTiki[];
 extern const u8 gItemRoomDesc_GlassSword[];
 extern const u8 gItemRoomDesc_WonderShield[];
 extern const u8 gItemRoomDesc_EchoScepter[];
+extern const u8 gItemRoomDesc_GlyphCodex[];
+extern const u8 gItemRoomDesc_PreciseLens[];
+extern const u8 gItemRoomDesc_FuryMantle[];
+extern const u8 gItemRoomDesc_CompoundGoggles[];
+extern const u8 gItemRoomDesc_GreedyGloves[];
+extern const u8 gItemRoomDesc_ImpactPlating[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1189,6 +1195,18 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_WonderShield;
     case ITEM_ECHO_SCEPTER:
         return gItemRoomDesc_EchoScepter;
+    case ITEM_GLYPH_CODEX:
+        return gItemRoomDesc_GlyphCodex;
+    case ITEM_PRECISE_LENS:
+        return gItemRoomDesc_PreciseLens;
+    case ITEM_FURY_MANTLE:
+        return gItemRoomDesc_FuryMantle;
+    case ITEM_COMPOUND_GOGGLES:
+        return gItemRoomDesc_CompoundGoggles;
+    case ITEM_GREEDY_GLOVES:
+        return gItemRoomDesc_GreedyGloves;
+    case ITEM_IMPACT_PLATING:
+        return gItemRoomDesc_ImpactPlating;
     default:
         return Rogue_GetItemDesc(itemId);
     }

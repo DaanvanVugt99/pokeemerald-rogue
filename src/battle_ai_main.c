@@ -1713,6 +1713,11 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
              || IsMoveEffectWeather(aiData->partnerMove))
                 ADJUST_SCORE(-8);
             break;
+        case EFFECT_CORROSIVE_CLOUDS:
+            if (weather & (B_WEATHER_ACID_RAIN | B_WEATHER_PRIMAL_ANY)
+             || IsMoveEffectWeather(aiData->partnerMove))
+                ADJUST_SCORE(-8);
+            break;
         case EFFECT_RAIN_DANCE:
             if (weather & (B_WEATHER_RAIN | B_WEATHER_PRIMAL_ANY)
              || IsMoveEffectWeather(aiData->partnerMove))
@@ -2890,6 +2895,7 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         case EFFECT_RAIN_DANCE:
         case EFFECT_SANDSTORM:
         case EFFECT_ECLIPSE:
+        case EFFECT_CORROSIVE_CLOUDS:
             if (IsMoveEffectWeather(move))
                 ADJUST_SCORE(-10);
             break;
@@ -2949,8 +2955,16 @@ static s32 AI_DoubleBattle(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
         break;
     case EFFECT_ECLIPSE:
         if (IsBattlerAlive(battlerAtkPartner)
-         && (HasMoveWithType(battlerAtkPartner, TYPE_DARK)
+         && (atkPartnerHoldEffect == HOLD_EFFECT_ECLIPSE_TOTEM
+          || HasMoveWithType(battlerAtkPartner, TYPE_DARK)
           || HasMoveWithType(FOE(battlerAtkPartner), TYPE_FAIRY)))
+        {
+            RETURN_SCORE_PLUS(1);
+        }
+        break;
+    case EFFECT_CORROSIVE_CLOUDS:
+        if (IsBattlerAlive(battlerAtkPartner)
+         && atkPartnerHoldEffect == HOLD_EFFECT_ACID_RAIN_TOTEM)
         {
             RETURN_SCORE_PLUS(1);
         }
@@ -3385,7 +3399,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     struct AiLogicData *aiData = AI_DATA;
     u32 movesetIndex = AI_THINKING_STRUCT->movesetIndex;
     u32 effectiveness = aiData->effectiveness[battlerAtk][battlerDef][movesetIndex];
-    u32 secondaryEffectChance = AI_CalcSecondaryEffectChance(battlerAtk, gBattleMoves[move].secondaryEffectChance);
+    u32 secondaryEffectChance = AI_CalcSecondaryEffectChance(battlerAtk, move, gBattleMoves[move].secondaryEffectChance);
     s8 atkPriority = GetMovePriority(battlerAtk, move);
     u32 predictedMove = aiData->predictedMoves[battlerDef];
     u32 predictedMoveSlot = GetMoveSlot(GetMovesArray(battlerDef), predictedMove);
@@ -3399,6 +3413,78 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     // Targeting partner, check benefits of doing that instead
     if (IS_TARGETING_PARTNER(battlerAtk, battlerDef))
         return score;
+
+    // Stat theft remains a threat rather than making setup categorically unusable.
+    // Damaging setup moves are still evaluated as attacks.
+    if (IS_MOVE_STATUS(move)
+     && IsStatRaisingEffect(moveEffect)
+     && AI_BattlerCanStealPositiveStatChanges(battlerDef)
+     && !IsBattlerIncapacitated(battlerDef, aiData->abilities[battlerDef]))
+        ADJUST_SCORE(-2);
+
+    if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_WITCHS_THREAD && IS_MOVE_STATUS(move))
+    {
+        bool32 reflectsStatus = FALSE;
+
+        switch (moveEffect)
+        {
+        case EFFECT_WILL_O_WISP:
+            reflectsStatus = CanBeBurned(battlerAtk);
+            break;
+        case EFFECT_POISON:
+        case EFFECT_TOXIC:
+        case EFFECT_TOXIC_THREAD:
+            reflectsStatus = CanBePoisoned(battlerAtk, battlerAtk);
+            break;
+        case EFFECT_PARALYZE:
+            reflectsStatus = CanBeParalyzed(battlerAtk);
+            break;
+        }
+
+        if (reflectsStatus)
+            ADJUST_SCORE(-3);
+    }
+
+    if (!IS_MOVE_STATUS(move))
+    {
+        if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_MALICE_ORB
+         && ((IS_MOVE_PHYSICAL(move) && BattlerStatCanRise(battlerAtk, aiData->abilities[battlerAtk], STAT_ATK))
+          || (IS_MOVE_SPECIAL(move) && BattlerStatCanRise(battlerAtk, aiData->abilities[battlerAtk], STAT_SPATK))))
+            ADJUST_SCORE(1);
+
+        if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_SUN_TOTEM
+         && AI_GetWeather(aiData) & B_WEATHER_SUN
+         && !BATTLER_MAX_HP(battlerAtk))
+            ADJUST_SCORE(1);
+
+        if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_ACID_RAIN_TOTEM
+         && AI_GetWeather(aiData) & B_WEATHER_ACID_RAIN
+         && AI_CanPoison(battlerAtk, battlerDef, aiData->abilities[battlerDef], move, MOVE_NONE))
+            ADJUST_SCORE(1);
+    }
+
+    if (!(gBattleStruct->tikiItemUsed[GetBattlerSide(battlerAtk)] & gBitTable[gBattlerPartyIndexes[battlerAtk]]))
+    {
+        switch (aiData->holdEffects[battlerAtk])
+        {
+        case HOLD_EFFECT_ELECTRIC_TIKI:
+            if (!(gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN) && GetMovePriority(battlerAtk, move) > 0)
+                ADJUST_SCORE(1);
+            break;
+        case HOLD_EFFECT_GRASSY_TIKI:
+            if (!(gFieldStatuses & STATUS_FIELD_GRASSY_TERRAIN) && IsHealingMove(move) && !BATTLER_MAX_HP(battlerAtk))
+                ADJUST_SCORE(1);
+            break;
+        case HOLD_EFFECT_MISTY_TIKI:
+            if (!(gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN) && IS_MOVE_STATUS(move))
+                ADJUST_SCORE(1);
+            break;
+        case HOLD_EFFECT_PSYCHIC_TIKI:
+            if (!(gFieldStatuses & STATUS_FIELD_PSYCHIC_TERRAIN) && IsStatRaisingEffect(moveEffect))
+                ADJUST_SCORE(1);
+            break;
+        }
+    }
 
     if (gBattleMoves[move].power)
         score += AI_CompareDamagingMoves(battlerAtk, battlerDef, movesetIndex);
@@ -4170,7 +4256,7 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
             ADJUST_SCORE(3);
         break;
     case EFFECT_SANDSTORM:
-        if (ShouldSetSandstorm(battlerAtk, aiData->holdEffects[battlerAtk], aiData->holdEffects[battlerAtk]))
+        if (ShouldSetSandstorm(battlerAtk, aiData->abilities[battlerAtk], aiData->holdEffects[battlerAtk]))
         {
             ADJUST_SCORE(1);
             if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_SMOOTH_ROCK)
@@ -4219,10 +4305,22 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
             ADJUST_SCORE(1);
             if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_DIM_ROCK)
                 ADJUST_SCORE(1);
+            if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_ECLIPSE_TOTEM)
+                ADJUST_SCORE(2);
             if (HasMoveWithType(battlerAtk, TYPE_DARK) || HasMoveWithType(BATTLE_PARTNER(battlerAtk), TYPE_DARK))
                 ADJUST_SCORE(1);
             if (HasMoveWithType(battlerDef, TYPE_FAIRY) || HasMoveWithType(BATTLE_PARTNER(battlerDef), TYPE_FAIRY))
                 ADJUST_SCORE(1);
+        }
+        break;
+    case EFFECT_CORROSIVE_CLOUDS:
+        if (!(gBattleWeather & (B_WEATHER_ACID_RAIN | B_WEATHER_PRIMAL_ANY)))
+        {
+            ADJUST_SCORE(1);
+            if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_ACID_ROCK)
+                ADJUST_SCORE(1);
+            if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_ACID_RAIN_TOTEM)
+                ADJUST_SCORE(2);
         }
         break;
     case EFFECT_RAIN_DANCE:
@@ -5214,6 +5312,7 @@ static s32 AI_SetupFirstTurn(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
     case EFFECT_HAIL:
     case EFFECT_SNOWSCAPE:
     case EFFECT_ECLIPSE:
+    case EFFECT_CORROSIVE_CLOUDS:
     case EFFECT_GEOMANCY:
     case EFFECT_VICTORY_DANCE:
     case EFFECT_HIT_SET_ENTRY_HAZARD:
@@ -5476,6 +5575,7 @@ static s32 AI_HPAware(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
             case EFFECT_SNOWSCAPE:
             case EFFECT_RAIN_DANCE:
             case EFFECT_ECLIPSE:
+            case EFFECT_CORROSIVE_CLOUDS:
             case EFFECT_FILLET_AWAY:
                 ADJUST_SCORE(-2);
                 break;

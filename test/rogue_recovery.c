@@ -7,6 +7,7 @@
 #include "constants/species.h"
 #include "event_data.h"
 #include "item.h"
+#include "malloc.h"
 #include "pokemon.h"
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
@@ -31,6 +32,8 @@ static const u8 sTrainerConfigToggles[] =
 #endif
 };
 
+static struct Pokemon *sOriginalParty;
+
 static void ClearRecoveryTestState(void)
 {
     u8 i;
@@ -41,6 +44,23 @@ static void ClearRecoveryTestState(void)
 
     for(i = 0; i < PARTY_SIZE; ++i)
         ZeroMonData(&gPlayerParty[i]);
+    CalculatePlayerPartyCount();
+}
+
+static void BeginRecoveryTest(void)
+{
+    sOriginalParty = Alloc(sizeof(gPlayerParty));
+    AGB_ASSERT(sOriginalParty != NULL);
+    memcpy(sOriginalParty, gPlayerParty, sizeof(gPlayerParty));
+    ClearRecoveryTestState();
+}
+
+static void EndRecoveryTest(void)
+{
+    ClearRecoveryTestState();
+    memcpy(gPlayerParty, sOriginalParty, sizeof(gPlayerParty));
+    Free(sOriginalParty);
+    sOriginalParty = NULL;
     CalculatePlayerPartyCount();
 }
 
@@ -64,7 +84,7 @@ TEST("Sacred Ash can restore the full party after battle losses")
 {
     bool8 releaseFaintedMons = Rogue_GetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS);
 
-    ClearRecoveryTestState();
+    BeginRecoveryTest();
     CreateRecoveryTestParty();
     AddBagItem(ITEM_SACRED_ASH, 1);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, TRUE);
@@ -82,7 +102,7 @@ TEST("Sacred Ash can restore the full party after battle losses")
 
     EXPECT(!Rogue_BufferSacredAshRecovery());
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
-    ClearRecoveryTestState();
+    EndRecoveryTest();
 }
 
 TEST("Sacred Ash recovery identifies every lost Pokemon by nickname")
@@ -94,7 +114,7 @@ TEST("Sacred Ash recovery identifies every lost Pokemon by nickname")
     bool8 releaseFaintedMons = Rogue_GetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS);
     u32 hp = 0;
 
-    ClearRecoveryTestState();
+    BeginRecoveryTest();
     CreateRecoveryTestParty();
     SetMonData(&gPlayerParty[0], MON_DATA_NICKNAME, sFirstNickname);
     SetMonData(&gPlayerParty[1], MON_DATA_NICKNAME, sSecondNickname);
@@ -109,7 +129,7 @@ TEST("Sacred Ash recovery identifies every lost Pokemon by nickname")
 
     Rogue_DeclineSacredAshRecovery();
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
-    ClearRecoveryTestState();
+    EndRecoveryTest();
 }
 
 TEST("Each Sacred Ash copy can recover a separate battle")
@@ -117,7 +137,7 @@ TEST("Each Sacred Ash copy can recover a separate battle")
     bool8 releaseFaintedMons = Rogue_GetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS);
     u32 value;
 
-    ClearRecoveryTestState();
+    BeginRecoveryTest();
     CreateRecoveryTestParty();
     EXPECT(AddBagItem(ITEM_SACRED_ASH, 2));
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, TRUE);
@@ -140,14 +160,14 @@ TEST("Each Sacred Ash copy can recover a separate battle")
     EXPECT_EQ(gPlayerPartyCount, 2);
 
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
-    ClearRecoveryTestState();
+    EndRecoveryTest();
 }
 
 TEST("Declining Sacred Ash preserves the item and releases fainted Pokemon normally")
 {
     bool8 releaseFaintedMons = Rogue_GetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS);
 
-    ClearRecoveryTestState();
+    BeginRecoveryTest();
     CreateRecoveryTestParty();
     AddBagItem(ITEM_SACRED_ASH, 1);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, TRUE);
@@ -161,7 +181,7 @@ TEST("Declining Sacred Ash preserves the item and releases fainted Pokemon norma
     EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP), 1);
 
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
-    ClearRecoveryTestState();
+    EndRecoveryTest();
 }
 
 TEST("Surviving a wild battle queues Sacred Ash recovery for party losses")
@@ -171,7 +191,7 @@ TEST("Surviving a wild battle queues Sacred Ash recovery for party losses")
     u8 previousDifficulty = Rogue_GetCurrentDifficulty();
     u8 previousBattleOutcome = gBattleOutcome;
 
-    ClearRecoveryTestState();
+    BeginRecoveryTest();
     CreateRecoveryTestParty();
     AddBagItem(ITEM_SACRED_ASH, 1);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
@@ -194,7 +214,7 @@ TEST("Surviving a wild battle queues Sacred Ash recovery for party losses")
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
     Rogue_SetCurrentDifficulty(previousDifficulty);
     gBattleOutcome = previousBattleOutcome;
-    ClearRecoveryTestState();
+    EndRecoveryTest();
 }
 
 TEST("Battle teardown defers losses until Sacred Ash availability is checked on the field")
@@ -204,7 +224,7 @@ TEST("Battle teardown defers losses until Sacred Ash availability is checked on 
     u8 previousDifficulty = Rogue_GetCurrentDifficulty();
     u8 previousBattleOutcome = gBattleOutcome;
 
-    ClearRecoveryTestState();
+    BeginRecoveryTest();
     CreateRecoveryTestParty();
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, TRUE);
@@ -228,7 +248,7 @@ TEST("Battle teardown defers losses until Sacred Ash availability is checked on 
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
     Rogue_SetCurrentDifficulty(previousDifficulty);
     gBattleOutcome = previousBattleOutcome;
-    ClearRecoveryTestState();
+    EndRecoveryTest();
 }
 
 TEST("Sacred Ash is not offered when the Final Quest preserves fainted Pokemon")
@@ -248,7 +268,7 @@ TEST("Sacred Ash is not offered when the Final Quest preserves fainted Pokemon")
         Rogue_SetConfigToggle(sTrainerConfigToggles[i], FALSE);
     }
 
-    ClearRecoveryTestState();
+    BeginRecoveryTest();
     CreateRecoveryTestParty();
     AddBagItem(ITEM_SACRED_ASH, 1);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
@@ -276,5 +296,5 @@ TEST("Sacred Ash is not offered when the Final Quest preserves fainted Pokemon")
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, releaseFaintedMons);
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, previousGameMode);
     Rogue_SetCurrentDifficulty(previousDifficulty);
-    ClearRecoveryTestState();
+    EndRecoveryTest();
 }

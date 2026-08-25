@@ -6,6 +6,12 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_GLASS_SWORD) == HOLD_EFFECT_GLASS_SWORD);
     ASSUME(ItemId_GetHoldEffect(ITEM_WONDER_SHIELD) == HOLD_EFFECT_WONDER_SHIELD);
     ASSUME(ItemId_GetHoldEffect(ITEM_ECHO_SCEPTER) == HOLD_EFFECT_ECHO_SCEPTER);
+    ASSUME(ItemId_GetHoldEffect(ITEM_GLYPH_CODEX) == HOLD_EFFECT_GLYPH_CODEX);
+    ASSUME(ItemId_GetHoldEffect(ITEM_PRECISE_LENS) == HOLD_EFFECT_PRECISE_LENS);
+    ASSUME(ItemId_GetHoldEffect(ITEM_FURY_MANTLE) == HOLD_EFFECT_FURY_MANTLE);
+    ASSUME(ItemId_GetHoldEffect(ITEM_COMPOUND_GOGGLES) == HOLD_EFFECT_COMPOUND_GOGGLES);
+    ASSUME(ItemId_GetHoldEffect(ITEM_GREEDY_GLOVES) == HOLD_EFFECT_GREEDY_GLOVES);
+    ASSUME(ItemId_GetHoldEffect(ITEM_IMPACT_PLATING) == HOLD_EFFECT_IMPACT_PLATING);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -13,6 +19,8 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_PIN_MISSILE].effect == EFFECT_MULTI_HIT);
     ASSUME(gBattleMoves[MOVE_WATER_GUN].power > 0);
     ASSUME(!gBattleMoves[MOVE_WATER_GUN].copycatBanned);
+    ASSUME(IsMoveInherentlyMakingContact(MOVE_TACKLE));
+    ASSUME(!IsMoveInherentlyMakingContact(MOVE_WATER_GUN));
 }
 
 SINGLE_BATTLE_TEST("Treasure batch: Glass Sword raises damage dealt by 50 percent", s16 damage)
@@ -168,5 +176,202 @@ SINGLE_BATTLE_TEST("Treasure batch: Echo Scepter does not activate if its holder
             ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
         }
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Glyph Codex changes the holder to every move's type")
+{
+    GIVEN {
+        PLAYER(SPECIES_KECLEON) { Item(ITEM_GLYPH_CODEX); Moves(MOVE_WATER_GUN, MOVE_EMBER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_EMBER); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Kecleon transformed into the Water type!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Kecleon transformed into the Fire type!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
+    } THEN {
+        EXPECT_EQ(player->type1, TYPE_FIRE);
+        EXPECT_EQ(player->type2, TYPE_FIRE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Precise Lens guarantees a critical hit when moving after the target")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Item(ITEM_PRECISE_LENS); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        MESSAGE("A critical hit!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Precise Lens does not guarantee a critical hit when moving first")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Item(ITEM_PRECISE_LENS); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_CRITICAL_HIT, FALSE)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        NOT MESSAGE("A critical hit!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Fury Mantle randomly raises Attack after a contact hit")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Item(ITEM_FURY_MANTLE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_FURY_MANTLE, 0)); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 1);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Fury Mantle randomly raises Speed after a contact hit")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Item(ITEM_FURY_MANTLE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_FURY_MANTLE, 1)); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Fury Mantle does not activate after a non-contact hit")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Item(ITEM_FURY_MANTLE); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, opponent);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Twin Goggles double damaging move accuracy")
+{
+    ASSUME(gBattleMoves[MOVE_THUNDER].accuracy == 70);
+    PASSES_RANDOMLY(100, 100, RNG_ACCURACY);
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_COMPOUND_GOGGLES); Moves(MOVE_THUNDER); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_THUNDER); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDER, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Twin Goggles prevent damaging move additional effects")
+{
+    ASSUME(gBattleMoves[MOVE_THUNDER_SHOCK].effect == EFFECT_PARALYZE_HIT);
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_COMPOUND_GOGGLES); Moves(MOVE_THUNDER_SHOCK); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_THUNDER_SHOCK, WITH_RNG(RNG_SECONDARY_EFFECT, TRUE)); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_THUNDER_SHOCK, player);
+        NOT STATUS_ICON(opponent, paralysis: TRUE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Greedy Gloves steal boosts before a contact move deals damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Item(ITEM_GREEDY_GLOVES); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_SWORDS_DANCE, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_SWORDS_DANCE); }
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet stole the target's boosted stats!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Greedy Gloves do not steal boosts with non-contact moves")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Item(ITEM_GREEDY_GLOVES); Moves(MOVE_WATER_GUN, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_SWORDS_DANCE, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_SWORDS_DANCE); }
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Impact Plating halves contact damage", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_IMPACT_PLATING; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Item(item); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(120); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Impact Plating raises non-contact damage by 50 percent", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_IMPACT_PLATING; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { SpDefense(120); HP(1000); MaxHP(1000); Item(item); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpAttack(120); Moves(MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_WATER_GUN, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
     }
 }

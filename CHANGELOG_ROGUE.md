@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Treasure Hunter, a Main Quest completed by discovering a Treasure room
+  for the first time, rewarding ¥10000, 5 Building Supplies, and 5 Dark
+  Pokéblocks.
+
 - Reworked the generated Adventure Paths into a connected floating astral-rock
   island with dedicated stone trails, impassable cosmic void and cliffs, and
   deterministic animated starfields that preserve the existing node flow;
@@ -43,7 +47,7 @@ Format follows Keep a Changelog loosely:
   for an offensive stat stage after successful physical or special attacks.
 - Added Phantom Stone, a Treasure held item that adds Ghost typing and grants
   Ghost's trapping immunity and guaranteed wild-battle escape.
-- Added Doom Crown, a Treasure held item that boosts all combat stats after
+- Added Fated Crown, a Treasure held item that boosts all combat stats after
   a knockout while marking its holder for a Perish Song countdown.
 - Added Hex Thread, a Treasure held item that gives status moves priority
   and reflects burn, poison, and paralysis back onto its holder.
@@ -77,6 +81,12 @@ Format follows Keep a Changelog loosely:
   Misty, or Psychic Terrain after their matching battle trigger once per battle.
 - Added Glass Sword, Wonder Shield, and Echo Scepter Treasure rewards for
   high-risk damage, one-time weakness protection, and copied counterattacks.
+- Added Glyph Codex, Precise Lens, and Fury Mantle Treasure rewards for
+  move-by-move type changing, delayed guaranteed critical hits, and random
+  Attack or Speed boosts after contact hits.
+- Added Twin Goggles, Greedy Gloves, and Impact Plating Treasure rewards
+  for accurate effect-free attacks, contact-based stat theft, and polarized
+  contact protection.
 - Added a debug-only Forced Treasure setting that places the first available
   scheduled reward on the first playable node of a newly generated path.
 - Added an in-battle Move Info panel on L with category, power, accuracy, and
@@ -193,6 +203,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Expanded the reserved Rogue item-ID block to 512 entries, leaving room for
+  308 additional custom items without another capacity change.
+- Updated battle AI to learn revealed Treasure effects and account for their
+  damage, move restrictions, weather and terrain payoffs, stat theft, reflected
+  status, and one-time protection through the existing shared battle systems.
 - Varied each Adventure Paths island with seeded surface-decoration offsets
   and an irregular safe rock perimeter of coves and protruding lobes, with a
   two-tile minimum width that prevents jagged single-tile extrusions and
@@ -207,12 +222,14 @@ Format follows Keep a Changelog loosely:
   texture; single cells vary among five broken compositions and their
   consistently lit mirrors, including offset shards and loose multi-fragment
   clusters that disguise the metatile grid.
+- Renamed Doom Crown to Fated Crown and replaced its harsh red-and-black
+  palette with polished gold, deep brown, and a restrained burgundy accent.
 - Removed the white matte outlines from all 30 ported Treasure item icons while
   preserving their indexed palettes and enclosed highlights.
 - Expanded Luvdisc's level-up learnset with Heart Swap at level 37 and Take
   Heart at level 49.
 - Renamed the Treasure held-item rewards to Bane Lens, Hush Band, Fate Sash,
-  Eclipse Orb, Grudge Orb, Phantom Stone, Doom Crown, Hex Thread, Stone Heart,
+  Eclipse Orb, Grudge Orb, Phantom Stone, Fated Crown, Hex Thread, Stone Heart,
   Null Idol, Rusted Anchor, and Gambit Claw without changing their effects,
   sprites, palettes, or stable item IDs.
 - Redesigned the Magnemite line's Sighting System: status moves gain +1

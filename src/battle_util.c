@@ -19622,6 +19622,7 @@ if (triggeringAbility != ABILITY_NONE)
              || CompareStat(battler, IS_MOVE_PHYSICAL(move) ? STAT_DEF : STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)))
         {
             gLastUsedItem = gBattleMons[battler].item;
+            RecordItemEffectBattle(battler, HOLD_EFFECT_MALICE_ORB);
             gBattlerAttacker = battler;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = IS_MOVE_PHYSICAL(move) ? BattleScript_MaliceOrbPhysical : BattleScript_MaliceOrbSpecial;
@@ -23482,6 +23483,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                  && CanBePoisoned(gBattlerAttacker, gBattlerTarget))
                 {
                     gLastUsedItem = atkItem;
+                    RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_ACID_RAIN_TOTEM);
                     gBattleScripting.moveEffect = MOVE_EFFECT_POISON;
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_AcidRainTotemPoisons;
@@ -23533,6 +23535,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 gLastUsedItem = atkItem;
                 gPotentialItemEffectBattler = gBattlerAttacker;
                 gBattleScripting.battler = gBattlerAttacker;
+                RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_SUN_TOTEM);
                 gBattleMoveDamage = (gSpecialStatuses[gBattlerTarget].shellBellDmg / 3) * -1;
                 if (gBattleMoveDamage == 0)
                     gBattleMoveDamage = -1;
@@ -23625,6 +23628,25 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     gBattlescriptCurrInstr = BattleScript_RockyHelmetActivates;
                     PREPARE_ITEM_BUFFER(gBattleTextBuff1, gLastUsedItem);
                     RecordItemEffectBattle(battler, HOLD_EFFECT_ROCKY_HELMET);
+                }
+                break;
+            case HOLD_EFFECT_FURY_MANTLE:
+                if (IsBattlerAlive(battler)
+                 && TARGET_TURN_DAMAGED
+                 && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+                 && (CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN)
+                  || CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN)))
+                {
+                    u32 stat = RandomUniform(RNG_ROGUE_FURY_MANTLE, 0, 1) == 0 ? STAT_ATK : STAT_SPEED;
+
+                    if (!CompareStat(battler, stat, MAX_STAT_STAGE, CMP_LESS_THAN))
+                        stat = (stat == STAT_ATK) ? STAT_SPEED : STAT_ATK;
+
+                    effect = ITEM_STATS_CHANGE;
+                    SET_STATCHANGER(stat, 1, FALSE);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_FuryMantleActivates;
+                    RecordItemEffectBattle(battler, HOLD_EFFECT_FURY_MANTLE);
                 }
                 break;
             case HOLD_EFFECT_WEAKNESS_POLICY:
@@ -25458,6 +25480,8 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
     else if (gBattleMoves[move].effect == EFFECT_BODY_PRESS
           || (holdEffectAtk == HOLD_EFFECT_RUSTED_ANCHOR && IS_MOVE_PHYSICAL(move)))
     {
+        if (holdEffectAtk == HOLD_EFFECT_RUSTED_ANCHOR && updateFlags)
+            RecordItemEffectBattle(battlerAtk, holdEffectAtk);
         if (move == MOVE_JETSTREAM)
         {
             // Keep Speed stages separate so critical hits and Unaware can still
@@ -25762,10 +25786,18 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
 
         if ((usesOwnAttackStat && attack < spAttack)
          || (usesOwnSpAttackStat && spAttack < attack))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        }
         else if ((usesOwnAttackStat && attack > spAttack)
               || (usesOwnSpAttackStat && spAttack > attack))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(0.75));
+        }
         break;
     }
     }
@@ -25955,11 +25987,17 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case HOLD_EFFECT_PETRIFIED_HEART:
+        if (updateFlags)
+            RecordItemEffectBattle(battlerDef, holdEffectDef);
         modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case HOLD_EFFECT_SAND_TOTEM:
         if (IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerDef, holdEffectDef);
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
+        }
         break;
     case HOLD_EFFECT_ASSAULT_VEST:
         if (!usesDefStat)
@@ -26770,7 +26808,7 @@ static inline uq4_12_t GetDefenderPartnerAbilitiesModifier(u32 battlerPartnerDef
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12_t typeEffectivenessModifier, u32 holdEffectAtk)
+static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12_t typeEffectivenessModifier, u32 holdEffectAtk, bool32 updateFlags)
 {
     u32 percentBoost;
     switch (holdEffectAtk)
@@ -26790,31 +26828,55 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12
         if (move == MOVE_NONE || IS_MOVE_STATUS(move))
             break;
         if (typeEffectivenessModifier > UQ_4_12(1.0))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             return UQ_4_12(1.3);
+        }
         if (typeEffectivenessModifier > UQ_4_12(0.0) && typeEffectivenessModifier < UQ_4_12(1.0))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             return UQ_4_12(0.8);
+        }
         break;
     case HOLD_EFFECT_VOW_OF_SILENCE:
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             return UQ_4_12(1.25);
+        }
         break;
     case HOLD_EFFECT_FALSE_IDOL:
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             return UQ_4_12(1.3);
+        }
         break;
     case HOLD_EFFECT_TEMPO_DIAL:
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             return UQ_4_12(1.3);
+        }
         break;
     case HOLD_EFFECT_GLASS_SWORD:
         if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             return UQ_4_12(1.5);
+        }
         break;
     }
     return UQ_4_12(1.0);
 }
 
-static inline uq4_12_t GetDefenderItemsModifier(u32 moveType, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 updateFlags, u32 abilityDef, u32 holdEffectDef)
+static inline uq4_12_t GetDefenderItemsModifier(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 updateFlags, u32 abilityDef, u32 holdEffectDef)
 {
     u32 holdEffectDefParam = GetBattlerHoldEffectParam(battlerDef);
     u32 itemDef = gBattleMons[battlerDef].item;
@@ -26832,6 +26894,14 @@ static inline uq4_12_t GetDefenderItemsModifier(u32 moveType, u32 battlerDef, uq
         }
         break;
     case HOLD_EFFECT_GLASS_SWORD:
+        if (updateFlags)
+            RecordItemEffectBattle(battlerDef, holdEffectDef);
+        return UQ_4_12(1.5);
+    case HOLD_EFFECT_IMPACT_PLATING:
+        if (updateFlags && typeEffectivenessModifier > UQ_4_12(0.0))
+            RecordItemEffectBattle(battlerDef, HOLD_EFFECT_IMPACT_PLATING);
+        if (IsMoveMakingContact(move, battlerAtk))
+            return UQ_4_12(0.5);
         return UQ_4_12(1.5);
     }
     return UQ_4_12(1.0);
@@ -26867,16 +26937,16 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk));
-        DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(moveType, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk, updateFlags));
+        DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
     }
     else
     {
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
-        DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(moveType, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk));
+        DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk, updateFlags));
     }
     return finalModifier;
 }
@@ -26949,6 +27019,8 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
 
     if (holdEffectAtk == HOLD_EFFECT_WAYWARD_INCENSE)
     {
+        if (updateFlags)
+            RecordItemEffectBattle(battlerAtk, holdEffectAtk);
         DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk));
     }
     else if (IsTerastallized(battlerAtk))
@@ -26961,6 +27033,8 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
          && moveType == TYPE_DARK
          && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_ECLIPSE))
         {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             uq4_12_t eclipseStabModifier = GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk);
             if (eclipseStabModifier > stabModifier)
                 stabModifier = eclipseStabModifier;
@@ -26969,6 +27043,14 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     }
     else
     {
+        if (updateFlags
+         && ((holdEffectAtk == HOLD_EFFECT_ECLIPSE_TOTEM
+           && moveType == TYPE_DARK
+           && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_ECLIPSE))
+          || (holdEffectAtk == HOLD_EFFECT_RAIN_TOTEM
+           && moveType == TYPE_WATER
+           && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_RAIN))))
+            RecordItemEffectBattle(battlerAtk, holdEffectAtk);
         DAMAGE_APPLY_MODIFIER(GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk));
     }
     if (((GetBattlerSide(battlerAtk) == B_SIDE_PLAYER && IsCharmActive(EFFECT_TINTED_DAMAGE))
@@ -26981,7 +27063,11 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
     if (holdEffectDef == HOLD_EFFECT_SNOW_TOTEM
      && typeEffectivenessModifier >= UQ_4_12(2.0)
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
+    {
+        if (updateFlags)
+            RecordItemEffectBattle(battlerDef, holdEffectDef);
         DAMAGE_APPLY_MODIFIER(UQ_4_12(0.65));
+    }
     DAMAGE_APPLY_MODIFIER(GetBurnOrFrostBiteModifier(battlerAtk, move, abilityAtk, usesOwnAttackStat, usesOwnSpAttackStat));
     DAMAGE_APPLY_MODIFIER(GetZMaxMoveAgainstProtectionModifier(battlerDef, move));
     DAMAGE_APPLY_MODIFIER(GetOtherModifiers(move, moveType, battlerAtk, battlerDef, isCrit, typeEffectivenessModifier, updateFlags, abilityAtk, abilityDef, holdEffectAtk, holdEffectDef));
@@ -27229,6 +27315,11 @@ static void UpdateMoveResultFlags(uq4_12_t modifier)
 static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, bool32 recordAbilities, uq4_12_t modifier, u32 defAbility)
 {
     u32 illusionSpecies;
+
+    if (recordAbilities
+     && GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_RAIN_TOTEM
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
+        RecordItemEffectBattle(battlerDef, HOLD_EFFECT_RAIN_TOTEM);
 
     MulByTypeEffectiveness(&modifier, move, moveType, battlerDef, GetBattlerType(battlerDef, 0, FALSE), battlerAtk, recordAbilities, TRUE);
     if (GetBattlerType(battlerDef, 1, FALSE) != GetBattlerType(battlerDef, 0, FALSE))

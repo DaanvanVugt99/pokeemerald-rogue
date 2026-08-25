@@ -135,6 +135,31 @@ TEST("New Main Quest rewards follow their progression tiers and Pokeblock distri
     EXPECT(QuestHasMoneyReward(QUEST_ID_A_UNIQUE_LEGEND, QUEST_REWARD_HUGE_MONEY));
     EXPECT(QuestHasItemReward(QUEST_ID_A_UNIQUE_LEGEND, ITEM_BUILDING_SUPPLIES, QUEST_REWARD_MEDIUM_BUILD_AMOUNT));
     EXPECT(QuestHasItemReward(QUEST_ID_A_UNIQUE_LEGEND, ITEM_POKEBLOCK_DRAGON, 5));
+
+    EXPECT(RogueQuest_GetConstFlag(QUEST_ID_TREASURE_HUNTER, QUEST_CONST_IS_MAIN_QUEST));
+    EXPECT_EQ(RogueQuest_GetRewardCount(QUEST_ID_TREASURE_HUNTER), 3);
+    EXPECT(QuestHasMoneyReward(QUEST_ID_TREASURE_HUNTER, QUEST_REWARD_HUGE_MONEY));
+    EXPECT(QuestHasItemReward(QUEST_ID_TREASURE_HUNTER, ITEM_BUILDING_SUPPLIES, QUEST_REWARD_SMALL_BUILD_AMOUNT));
+    EXPECT(QuestHasItemReward(QUEST_ID_TREASURE_HUNTER, ITEM_POKEBLOCK_DARK, 5));
+}
+
+TEST("Treasure Hunter completes upon entering a Treasure room for the first time")
+{
+    ResetQuestTestState();
+
+    EXPECT(RogueQuest_IsQuestUnlocked(QUEST_ID_TREASURE_HUNTER));
+    EXPECT(RogueQuest_IsQuestActive(QUEST_ID_TREASURE_HUNTER));
+
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_ROUTE;
+    RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
+    EXPECT(!RogueQuest_GetStateFlag(QUEST_ID_TREASURE_HUNTER, QUEST_STATE_HAS_COMPLETE));
+
+    gRogueAdvPath.currentRoomType = ADVPATH_ROOM_ITEM;
+    RogueQuest_OnTrigger(QUEST_TRIGGER_ENTER_ENCOUNTER);
+    EXPECT(RogueQuest_GetStateFlag(QUEST_ID_TREASURE_HUNTER, QUEST_STATE_HAS_COMPLETE));
+    EXPECT(RogueQuest_HasPendingRewards(QUEST_ID_TREASURE_HUNTER));
+
+    ClearQuestTestState();
 }
 
 TEST("Frontier Brain completes only from a defeated Frontier Brain room")

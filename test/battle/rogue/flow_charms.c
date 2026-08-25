@@ -740,7 +740,7 @@ SINGLE_BATTLE_TEST("charms: flow - Struggle does not consume Protean Charm")
         player->type1 = TYPE_WATER;
         player->type2 = TYPE_WATER;
         player->type3 = TYPE_MYSTERY;
-        EXPECT(!ProteanTryChangeType(B_POSITION_PLAYER_LEFT, ABILITY_COLOR_CHANGE, MOVE_STRUGGLE, TYPE_NORMAL, TRUE, &charmActivated));
+        EXPECT(!ProteanTryChangeType(B_POSITION_PLAYER_LEFT, ABILITY_COLOR_CHANGE, MOVE_STRUGGLE, TYPE_NORMAL, TRUE, &charmActivated, NULL));
         EXPECT(!charmActivated);
         EXPECT(!gDisableStructs[B_POSITION_PLAYER_LEFT].proteanCharmUsed);
         EXPECT_EQ(player->type1, TYPE_WATER);

@@ -1,0 +1,37 @@
+{
+    "condition": "",
+    "defaults":
+    {
+        "display_group": "default_quests",
+        "flags":
+        [
+            "MAIN_QUEST_DEFAULT",
+            "ACTIVE_IN_RUN"
+        ]
+    },
+    "quest_groups":
+    {
+        "divergence_quests":
+        [
+            {
+                "name": "Treasure Hunter",
+                "description": "Discover a Treasure room during an Adventure.",
+                "triggers":
+                [
+                    {
+                        "on": [ "ENTER_ENCOUNTER" ],
+                        "condition": "CurrentlyInRoomType",
+                        "params": [ "ADVPATH_ROOM_ITEM" ],
+                        "pass": "SUCCESS"
+                    }
+                ],
+                "rewards":
+                [
+                    { "money": "QUEST_REWARD_HUGE_MONEY" },
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
+                    { "item": "ITEM_POKEBLOCK_DARK", "count": "5" }
+                ]
+            }
+        ]
+    }
+}

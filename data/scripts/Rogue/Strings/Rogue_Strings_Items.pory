@@ -388,6 +388,66 @@ text gItemRoomDesc_EchoScepter
     format("Once per battle, after surviving a damaging move, the holder uses that move against its attacker.")
 }
 
+text gItemDesc_GlyphCodex
+{
+    format("Before using a move, changes the holder to that move's type.")
+}
+
+text gItemRoomDesc_GlyphCodex
+{
+    format("Before using a move, the holder changes to that move's type.")
+}
+
+text gItemDesc_PreciseLens
+{
+    format("Damaging moves always crit if the holder moves after its target.")
+}
+
+text gItemRoomDesc_PreciseLens
+{
+    format("The holder's damaging moves always land a critical hit if it moves after its target.")
+}
+
+text gItemDesc_FuryMantle
+{
+    format("Contact hits randomly raise the holder's Attack or Speed by 1.")
+}
+
+text gItemRoomDesc_FuryMantle
+{
+    format("When the holder is hit by a contact move, either its Attack or Speed rises by 1 at random.")
+}
+
+text gItemDesc_CompoundGoggles
+{
+    format("Doubles damaging-move accuracy, but prevents additional effects.")
+}
+
+text gItemRoomDesc_CompoundGoggles
+{
+    format("The holder's damaging moves have twice their usual accuracy, but their additional effects do not occur.")
+}
+
+text gItemDesc_GreedyGloves
+{
+    format("Contact moves steal the target's stat boosts before dealing damage.")
+}
+
+text gItemRoomDesc_GreedyGloves
+{
+    format("Before dealing damage with a contact move, the holder steals the target's positive stat changes.")
+}
+
+text gItemDesc_ImpactPlating
+{
+    format("Halves contact damage, but raises non-contact damage by 50%.")
+}
+
+text gItemRoomDesc_ImpactPlating
+{
+    format("The holder takes half damage from contact moves, but 50% more damage from non-contact moves.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

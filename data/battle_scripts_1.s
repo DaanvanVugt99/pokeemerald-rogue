@@ -2111,6 +2111,16 @@ BattleScript_SpectralThiefSteal::
 	spectralthiefprintstats
 	return
 
+BattleScript_GreedyGlovesSteal::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	setlastuseditem BS_ATTACKER
+	printstring STRINGID_SPECTRALTHIEFSTEAL
+	waitmessage B_WAIT_TIME_LONG
+	setbyte sB_ANIM_ARG2, 0
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	spectralthiefprintstats
+	return
+
 BattleScript_EffectSpectralThief:
 	setmoveeffect MOVE_EFFECT_SPECTRAL_THIEF
 	call BattleScript_EffectHitNoEffect_Ret
@@ -8217,6 +8227,20 @@ BattleScript_TargetItemStatRaise::
 BattleScript_TargetItemStatRaiseRemoveItemRet:
 	return
 
+BattleScript_FuryMantleActivates::
+	copybyte sBATTLER, gBattlerTarget
+	playanimation BS_TARGET, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	statbuffchange 0, BattleScript_FuryMantleActivatesRet
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_FuryMantleActivatesRet
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_USINGITEMSTATOFPKMNROSE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_FuryMantleActivatesRet:
+	return
+
 BattleScript_AttackerItemStatRaise::
 	copybyte sBATTLER, gBattlerAttacker
 	statbuffchange MOVE_EFFECT_AFFECTS_USER, BattleScript_AttackerItemStatRaiseRet
@@ -12075,6 +12099,14 @@ BattleScript_ProteanActivates::
 
 BattleScript_ProteanCharmActivates::
 	pause B_WAIT_TIME_SHORTEST
+	printstring STRINGID_PKMNCHANGEDTYPE
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_GlyphCodexActivates::
+	pause B_WAIT_TIME_SHORTEST
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
 	printstring STRINGID_PKMNCHANGEDTYPE
 	waitmessage B_WAIT_TIME_LONG
 	return

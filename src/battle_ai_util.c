@@ -765,7 +765,7 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
     {
         s32 critChanceIndex, normalDmg, fixedBasePower, n;
 
-        ProteanTryChangeType(battlerAtk, aiData->abilities[battlerAtk], move, moveType, FALSE, NULL);
+        ProteanTryChangeType(battlerAtk, aiData->abilities[battlerAtk], move, moveType, FALSE, NULL, NULL);
         // Certain moves like Rollout calculate damage based on values which change during the move execution, but before calling dmg calc.
         switch (gBattleMoves[move].effect)
         {
@@ -867,6 +867,14 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
     // convert multiper to AI_EFFECTIVENESS_xX
     *typeEffectiveness = AI_GetEffectiveness(effectivenessMultiplier);
 
+    if (aiData->holdEffects[battlerDef] == HOLD_EFFECT_WONDER_SHIELD
+     && *typeEffectiveness >= AI_EFFECTIVENESS_x2
+     && !(gBattleStruct->wonderShieldUsed[GetBattlerSide(battlerDef)] & gBitTable[gBattlerPartyIndexes[battlerDef]]))
+    {
+        dmg = 0;
+        *typeEffectiveness = AI_EFFECTIVENESS_x0;
+    }
+
     gBattleStruct->swapDamageCategory = FALSE;
     gBattleStruct->zmove.active = FALSE;
     gBattleStruct->zmove.baseMoves[battlerAtk] = MOVE_NONE;
@@ -892,6 +900,10 @@ static bool32 AI_IsMoveEffectInPlus(u32 battlerAtk, u32 battlerDef, u32 move, s3
     u32 i;
     u32 abilityDef = AI_DATA->abilities[battlerDef];
     u32 abilityAtk = AI_DATA->abilities[battlerAtk];
+
+    if (AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_COMPOUND_GOGGLES
+     && gBattleMoves[move].sheerForceBoost)
+        return FALSE;
 
     switch (gBattleMoves[move].effect)
     {
@@ -1008,6 +1020,10 @@ static bool32 AI_IsMoveEffectInMinus(u32 battlerAtk, u32 battlerDef, u32 move, s
 {
     u32 abilityAtk = AI_DATA->abilities[battlerAtk];
     u32 abilityDef = AI_DATA->abilities[battlerDef];
+
+    if (AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_COMPOUND_GOGGLES
+     && gBattleMoves[move].sheerForceBoost)
+        return FALSE;
 
     switch (gBattleMoves[move].effect)
     {
@@ -1706,6 +1722,7 @@ bool32 ShouldSetSandstorm(u32 battler, u32 ability, u32 holdEffect)
       || ability == ABILITY_OVERCOAT
       || ability == ABILITY_MAGIC_GUARD
       || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES
+      || holdEffect == HOLD_EFFECT_SAND_TOTEM
       || IS_BATTLER_OF_TYPE(battler, TYPE_ROCK)
       || IS_BATTLER_OF_TYPE(battler, TYPE_STEEL)
       || IS_BATTLER_OF_TYPE(battler, TYPE_GROUND)
@@ -1730,6 +1747,7 @@ bool32 ShouldSetHail(u32 battler, u32 ability, u32 holdEffect)
       || ability == ABILITY_MAGIC_GUARD
       || ability == ABILITY_OVERCOAT
       || holdEffect == HOLD_EFFECT_SAFETY_GOGGLES
+      || holdEffect == HOLD_EFFECT_SNOW_TOTEM
       || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
       || HasMove(battler, MOVE_BLIZZARD)
       || HasMoveEffect(battler, EFFECT_AURORA_VEIL)
@@ -1752,6 +1770,7 @@ bool32 ShouldSetRain(u32 battlerAtk, u32 atkAbility, u32 holdEffect)
       || atkAbility == ABILITY_HYDRATION
       || atkAbility == ABILITY_RAIN_DISH
       || atkAbility == ABILITY_DRY_SKIN
+      || holdEffect == HOLD_EFFECT_RAIN_TOTEM
       || HasMoveEffect(battlerAtk, EFFECT_ELECTRO_SHOT)
       || HasMoveEffect(battlerAtk, EFFECT_THUNDER)
       || HasMoveEffect(battlerAtk, EFFECT_HURRICANE)
@@ -1776,6 +1795,7 @@ bool32 ShouldSetSun(u32 battlerAtk, u32 atkAbility, u32 holdEffect)
       || atkAbility == ABILITY_LEAF_GUARD
       || atkAbility == ABILITY_SOLAR_POWER
       || atkAbility == ABILITY_HARVEST
+      || holdEffect == HOLD_EFFECT_SUN_TOTEM
       || HasMoveEffect(battlerAtk, EFFECT_SOLAR_BEAM)
       || HasMoveEffect(battlerAtk, EFFECT_MORNING_SUN)
       || HasMoveEffect(battlerAtk, EFFECT_SYNTHESIS)
@@ -1799,6 +1819,7 @@ bool32 ShouldSetSnow(u32 battler, u32 ability, u32 holdEffect)
       || ability == ABILITY_ICE_BODY
       || IS_FORECAST_ABILITY(ability)
       || ability == ABILITY_SLUSH_RUSH
+      || holdEffect == HOLD_EFFECT_SNOW_TOTEM
       || IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
       || HasMove(battler, MOVE_BLIZZARD)
       || HasMoveEffect(battler, EFFECT_AURORA_VEIL)
@@ -2118,6 +2139,29 @@ bool32 HasMoveEffect(u32 battlerId, u32 moveEffect)
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
         if (moves[i] != MOVE_NONE && moves[i] != MOVE_UNAVAILABLE && gBattleMoves[moves[i]].effect == moveEffect)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool32 AI_BattlerCanStealPositiveStatChanges(u32 battlerId)
+{
+    u32 i;
+    u16 *moves = GetMovesArray(battlerId);
+
+    if (HasMoveEffect(battlerId, EFFECT_SPECTRAL_THIEF))
+        return TRUE;
+
+    if (AI_DATA->holdEffects[battlerId] != HOLD_EFFECT_GREEDY_GLOVES)
+        return FALSE;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        if (moves[i] != MOVE_NONE
+         && moves[i] != MOVE_UNAVAILABLE
+         && !IS_MOVE_STATUS(moves[i])
+         && AI_MoveMakesContact(AI_DATA->abilities[battlerId], AI_DATA->holdEffects[battlerId], moves[i]))
             return TRUE;
     }
 
@@ -3387,7 +3431,8 @@ bool32 IsMoveEffectWeather(u32 move)
       || gBattleMoves[move].effect == EFFECT_SANDSTORM
       || gBattleMoves[move].effect == EFFECT_HAIL
       || gBattleMoves[move].effect == EFFECT_SNOWSCAPE
-      || gBattleMoves[move].effect == EFFECT_ECLIPSE))
+      || gBattleMoves[move].effect == EFFECT_ECLIPSE
+      || gBattleMoves[move].effect == EFFECT_CORROSIVE_CLOUDS))
         return TRUE;
     return FALSE;
 }
@@ -3967,8 +4012,11 @@ bool32 AI_IsBattlerAsleepOrComatose(u32 battlerId)
     return (gBattleMons[battlerId].status1 & STATUS1_SLEEP) || AI_HasAbility(battlerId, ABILITY_COMATOSE);
 }
 
-u32 AI_CalcSecondaryEffectChance(u32 battler, u32 secondaryEffectChance)
+u32 AI_CalcSecondaryEffectChance(u32 battler, u32 move, u32 secondaryEffectChance)
 {
+    if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_COMPOUND_GOGGLES && !IS_MOVE_STATUS(move))
+        return 0;
+
     if (AI_DATA->abilities[battler] == ABILITY_SERENE_GRACE)
         secondaryEffectChance *= 2;
 

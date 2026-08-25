@@ -38,6 +38,112 @@ AI_SINGLE_BATTLE_TEST("AI understands Hollow Sun type inversion")
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI uses Twin Goggles accuracy when comparing damaging moves")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_DYNAMIC_PUNCH].accuracy == 50);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_COMPOUND_GOGGLES); Moves(MOVE_DYNAMIC_PUNCH, MOVE_STRENGTH); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_DYNAMIC_PUNCH, MOVE_STRENGTH); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI accounts for Impact Plating after the item is revealed")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].power == gBattleMoves[MOVE_WATER_GUN].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Item(ITEM_IMPACT_PLATING); Moves(MOVE_DRAGON_RAGE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); HP(1); MaxHP(1); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE, MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_DRAGON_RAGE); EXPECT_MOVE(opponent, MOVE_TACKLE); EXPECT_SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_CELEBRATE); SCORE_GT(opponent, MOVE_WATER_GUN, MOVE_TACKLE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI is less eager to set up against revealed Greedy Gloves")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Item(ITEM_GREEDY_GLOVES); Moves(MOVE_TACKLE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); HP(1); MaxHP(1); Moves(MOVE_DEFENSE_CURL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_SWORDS_DANCE, MOVE_TACKLE); }
+    } WHEN {
+        TURN { EXPECT_MOVE(opponent, MOVE_DEFENSE_CURL); MOVE(player, MOVE_TACKLE); EXPECT_SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_CELEBRATE); SCORE_GT(opponent, MOVE_TACKLE, MOVE_SWORDS_DANCE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI reduces setup value against known Spectral Thief like Greedy Gloves")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_MARSHADOW) { Speed(50); Moves(MOVE_SPECTRAL_THIEF, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); HP(1); MaxHP(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_SWORDS_DANCE, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SPECTRAL_THIEF); EXPECT_MOVE(opponent, MOVE_CELEBRATE); EXPECT_SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_CELEBRATE); SCORE_LT_VAL(opponent, MOVE_SWORDS_DANCE, AI_SCORE_DEFAULT); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("Treasure AI audit: Wonder Shield blocks super-effective damage predictions while unused")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_BUG_BITE].type == TYPE_BUG);
+        ASSUME(gBattleMoves[MOVE_BUG_BITE].power > gBattleMoves[MOVE_TACKLE].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_WONDER_SHIELD); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_BUG_BITE, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_BUG_BITE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("Treasure AI audit: weather totems encourage their matching weather")
+{
+    u32 item, weatherMove;
+
+    PARAMETRIZE { item = ITEM_RAIN_TOTEM; weatherMove = MOVE_RAIN_DANCE; }
+    PARAMETRIZE { item = ITEM_ACID_RAIN_TOTEM; weatherMove = MOVE_ACID_RAIN; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ACID_RAIN].effect == EFFECT_CORROSIVE_CLOUDS);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(item); Moves(weatherMove, MOVE_SPLASH); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, weatherMove, MOVE_SPLASH); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("Treasure AI audit: Electric Tiki adds value to its priority trigger")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_QUICK_ATTACK].power == gBattleMoves[MOVE_TACKLE].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_ELECTRIC_TIKI); Moves(MOVE_QUICK_ATTACK, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_QUICK_ATTACK, MOVE_TACKLE); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("Treasure AI audit: Witch's Thread accounts for reflected status")
+{
+    GIVEN {
+        ASSUME(CanBePoisoned(B_POSITION_OPPONENT_LEFT, B_POSITION_OPPONENT_LEFT));
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_WITCHS_THREAD); Moves(MOVE_TOXIC, MOVE_TACKLE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_TACKLE, MOVE_TOXIC); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI gets baited by Protect Switch tactics") // This behavior is to be fixed.
 {
     GIVEN {

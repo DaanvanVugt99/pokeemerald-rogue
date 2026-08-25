@@ -127,6 +127,12 @@ extern const u8 gItemDesc_PsychicTiki[];
 extern const u8 gItemDesc_GlassSword[];
 extern const u8 gItemDesc_WonderShield[];
 extern const u8 gItemDesc_EchoScepter[];
+extern const u8 gItemDesc_GlyphCodex[];
+extern const u8 gItemDesc_PreciseLens[];
+extern const u8 gItemDesc_FuryMantle[];
+extern const u8 gItemDesc_CompoundGoggles[];
+extern const u8 gItemDesc_GreedyGloves[];
+extern const u8 gItemDesc_ImpactPlating[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2272,7 +2278,7 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
 
     [ITEM_ASHEN_CROWN - ITEM_ROGUE_ITEM_FIRST] =
     {
-        .name = _("Doom Crown"),
+        .name = _("Fated Crown"),
         .itemId = ITEM_ASHEN_CROWN,
         .price = 0,
         .description = gItemDesc_AshenCrown,
@@ -2658,6 +2664,96 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureEchoScepter,
         .iconPalette = gItemIconPalette_TreasureEchoScepter,
+    },
+
+    [ITEM_GLYPH_CODEX - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Glyph Codex"),
+        .itemId = ITEM_GLYPH_CODEX,
+        .price = 0,
+        .description = gItemDesc_GlyphCodex,
+        .holdEffect = HOLD_EFFECT_GLYPH_CODEX,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureGlyphCodex,
+        .iconPalette = gItemIconPalette_TreasureGlyphCodex,
+    },
+
+    [ITEM_PRECISE_LENS - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Precise Lens"),
+        .itemId = ITEM_PRECISE_LENS,
+        .price = 0,
+        .description = gItemDesc_PreciseLens,
+        .holdEffect = HOLD_EFFECT_PRECISE_LENS,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureFocusLens,
+        .iconPalette = gItemIconPalette_TreasureFocusLens,
+    },
+
+    [ITEM_FURY_MANTLE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Fury Mantle"),
+        .itemId = ITEM_FURY_MANTLE,
+        .price = 0,
+        .description = gItemDesc_FuryMantle,
+        .holdEffect = HOLD_EFFECT_FURY_MANTLE,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureFinalStand,
+        .iconPalette = gItemIconPalette_TreasureFinalStand,
+    },
+
+    [ITEM_COMPOUND_GOGGLES - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Twin Goggles"),
+        .itemId = ITEM_COMPOUND_GOGGLES,
+        .price = 0,
+        .description = gItemDesc_CompoundGoggles,
+        .holdEffect = HOLD_EFFECT_COMPOUND_GOGGLES,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureCompoundLens,
+        .iconPalette = gItemIconPalette_TreasureCompoundLens,
+    },
+
+    [ITEM_GREEDY_GLOVES - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Greedy Gloves"),
+        .itemId = ITEM_GREEDY_GLOVES,
+        .price = 0,
+        .description = gItemDesc_GreedyGloves,
+        .holdEffect = HOLD_EFFECT_GREEDY_GLOVES,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureGreedyGlove,
+        .iconPalette = gItemIconPalette_TreasureGreedyGlove,
+    },
+
+    [ITEM_IMPACT_PLATING - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Impact Plating"),
+        .itemId = ITEM_IMPACT_PLATING,
+        .price = 0,
+        .description = gItemDesc_ImpactPlating,
+        .holdEffect = HOLD_EFFECT_IMPACT_PLATING,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureBufferShield,
+        .iconPalette = gItemIconPalette_TreasureBufferShield,
     },
 
 #ifdef ROGUE_DEBUG
