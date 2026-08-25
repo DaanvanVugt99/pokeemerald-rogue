@@ -1097,6 +1097,24 @@ AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: AI considers hazard damage whe
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI switch candidates apply existing defenses from the unique ability slot")
+{
+    u32 aiSmartSwitchFlags;
+
+    PARAMETRIZE { aiSmartSwitchFlags = 0; }
+    PARAMETRIZE { aiSmartSwitchFlags = AI_FLAG_SMART_MON_CHOICES; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT | aiSmartSwitchFlags);
+        PLAYER(SPECIES_CHARMANDER) { Level(30); SpAttack(10); Moves(MOVE_EMBER); }
+        OPPONENT(SPECIES_NATU) { Level(1); Moves(MOVE_NONE); }
+        OPPONENT(SPECIES_LUGIA) { Level(30); HP(300); MaxHP(300); SpDefense(300); SpAttack(1); Moves(MOVE_SURF); }
+        OPPONENT(SPECIES_XATU) { Level(30); HP(600); MaxHP(600); SpDefense(600); SpAttack(500); Moves(MOVE_PSYCHIC); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER); EXPECT_SWITCH(opponent, 1); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: Mid-battle switches prioritize type matchup + SE move, then type matchup")
 {
     u32 aiSmartSwitchFlags = 0;

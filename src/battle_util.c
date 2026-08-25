@@ -27729,7 +27729,7 @@ uq4_12_t CalcTypeEffectivenessMultiplierForUI(u32 move, u32 moveType, u32 battle
     return modifier;
 }
 
-uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 otIdDef, u16 abilityDef)
+uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 otIdDef, u16 abilityDef, u16 uniqueAbilityDef)
 {
     uq4_12_t modifier = UQ_4_12(1.0);
     u8 moveType = gBattleMoves[move].type;
@@ -27746,12 +27746,19 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 o
                 MulByTypeEffectiveness(&modifier, move, moveType, 0, defType2, 0, FALSE, FALSE);
         }
 
-        if (moveType == TYPE_GROUND && (abilityDef == ABILITY_LEVITATE || abilityDef == ABILITY_EELEVATE) && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
+        if (moveType == TYPE_GROUND
+         && (abilityDef == ABILITY_LEVITATE
+          || abilityDef == ABILITY_EELEVATE
+          || uniqueAbilityDef == ABILITY_LEVITATE
+          || uniqueAbilityDef == ABILITY_EELEVATE)
+         && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
             modifier = UQ_4_12(0.0);
         if (moveType == TYPE_FIGHTING
-         && (abilityDef == ABILITY_SOFT_BODY || GetUniqueAbilityBySpeciesAndOtId(speciesDef, otIdDef) == ABILITY_SOFT_BODY))
+         && (abilityDef == ABILITY_SOFT_BODY || uniqueAbilityDef == ABILITY_SOFT_BODY))
             modifier = UQ_4_12(0.0);
-        if (abilityDef == ABILITY_WONDER_GUARD && modifier <= UQ_4_12(1.0) && gBattleMoves[move].power)
+        if ((abilityDef == ABILITY_WONDER_GUARD || uniqueAbilityDef == ABILITY_WONDER_GUARD)
+         && modifier <= UQ_4_12(1.0)
+         && gBattleMoves[move].power)
             modifier = UQ_4_12(0.0);
     }
 

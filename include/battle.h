@@ -345,8 +345,10 @@ struct AIPartyData // Opposing battlers - party mons.
 struct SwitchinCandidate
 {
     struct BattlePokemon battleMon;
+    u16 uniqueAbility;
     bool8 hypotheticalStatus;
 };
+STATIC_ASSERT(sizeof(struct SwitchinCandidate) == 100, SizeOfSwitchinCandidate);
 
 // Ai Data used when deciding which move to use, computed only once before each turn's start.
 struct AiLogicData

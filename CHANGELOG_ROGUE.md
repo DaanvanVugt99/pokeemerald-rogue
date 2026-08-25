@@ -463,7 +463,8 @@ Format follows Keep a Changelog loosely:
   Authority priority blocking, Dominion's last-mon status immunity, Crystal
   Armor and Sand Skimmer stat protection, Rooted Shrine phazing immunity,
   Toxisphere and Smog Refinery secondary-effect blocking, and retaliation from
-  Precognition and Counterspell.
+  Precognition and Counterspell. Switch-in candidate evaluation now applies
+  existing Ability rules to both ordinary and unique Ability slots.
 - Kept the partner Pokémon following the player during the scripted Adventure
   entrance walk when starting immediately after arriving beside the nurse.
 - Preserved the Treasure encounter's authored astral palette by excluding the
