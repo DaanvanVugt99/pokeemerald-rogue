@@ -16,11 +16,15 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Adaptive Specs, a Treasure held item that makes each damaging move use
+  whichever of its physical or special category would deal more damage.
 - Added Briar Bracer and Tricky Box Treasure held items, afflicting contact
   attackers with Leech Seed and answering opposing status moves with Copycat.
 - Added Hexing Wand, Fickle Hat, and Golden Egg Treasure held items, rewarding
   status pressure, volatile end-of-turn stat changes, and low-HP healing
   priority respectively.
+- Added Raincoat, a Treasure held item that grants immunity to Water-type moves
+  while rain is active.
 - Added Treasure Hunter, a Main Quest completed by discovering a Treasure room
   for the first time, rewarding ¥10000, 5 Building Supplies, and 5 Dark
   Pokéblocks.

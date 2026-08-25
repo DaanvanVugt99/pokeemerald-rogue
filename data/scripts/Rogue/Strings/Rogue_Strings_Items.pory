@@ -528,6 +528,26 @@ text gItemRoomDesc_TrickyBox
     format("After an opposing {PKMN} uses a status move, the holder uses Copycat targeting that opponent.")
 }
 
+text gItemDesc_AdaptiveSpecs
+{
+    format("Damaging moves use whichever category deals more damage.")
+}
+
+text gItemRoomDesc_AdaptiveSpecs
+{
+    format("Each damaging move becomes physical or special, whichever would deal more damage.")
+}
+
+text gItemDesc_Raincoat
+{
+    format("In rain, immune to Water moves.")
+}
+
+text gItemRoomDesc_Raincoat
+{
+    format("During rain, the holder is immune to all Water-type moves.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

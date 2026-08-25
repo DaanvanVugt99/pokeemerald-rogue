@@ -3154,6 +3154,8 @@ static void BattleStartClearSetData(void)
     }
 
     gBattleStruct->swapDamageCategory = FALSE; // Photon Geyser, Shell Side Arm, Light That Burns the Sky
+    gBattleStruct->adaptiveSpecsActive = FALSE;
+    gBattleStruct->adaptiveSpecsMove = MOVE_NONE;
     gBattleStruct->descriptionSubmenu = FALSE;
     gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
     gBattleStruct->moveInfoCategorySpriteId = MAX_SPRITES;

@@ -141,6 +141,8 @@ extern const u8 gItemDesc_FickleHat[];
 extern const u8 gItemDesc_GoldenEgg[];
 extern const u8 gItemDesc_BriarBracer[];
 extern const u8 gItemDesc_TrickyBox[];
+extern const u8 gItemDesc_AdaptiveSpecs[];
+extern const u8 gItemDesc_Raincoat[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2882,6 +2884,36 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureTrickyBox,
         .iconPalette = gItemIconPalette_TreasureTrickyBox,
+    },
+
+    [ITEM_ADAPTIVE_SPECS - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Adaptive Specs"),
+        .itemId = ITEM_ADAPTIVE_SPECS,
+        .price = 0,
+        .description = gItemDesc_AdaptiveSpecs,
+        .holdEffect = HOLD_EFFECT_ADAPTIVE_SPECS,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureChampionsSpecs,
+        .iconPalette = gItemIconPalette_TreasureChampionsSpecs,
+    },
+
+    [ITEM_RAINCOAT - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Raincoat"),
+        .itemId = ITEM_RAINCOAT,
+        .price = 0,
+        .description = gItemDesc_Raincoat,
+        .holdEffect = HOLD_EFFECT_RAINCOAT,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureRaincoat,
+        .iconPalette = gItemIconPalette_TreasureRaincoat,
     },
 
 #ifdef ROGUE_DEBUG

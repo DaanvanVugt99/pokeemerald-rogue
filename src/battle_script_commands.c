@@ -9147,6 +9147,8 @@ static void Cmd_moveend(void)
             gBattleStruct->hitSwitchTargetFailed = FALSE;
             gBattleStruct->isAtkCancelerForCalledMove = FALSE;
             gBattleStruct->swapDamageCategory = FALSE;
+            gBattleStruct->adaptiveSpecsActive = FALSE;
+            gBattleStruct->adaptiveSpecsMove = MOVE_NONE;
             gBattleStruct->enduredDamage = 0;
             gBattleStruct->distortedTypeMatchups = 0;
 
@@ -14014,7 +14016,10 @@ static void Cmd_various(void)
         VARIOUS_ARGS(const u8 *failInstr);
         if ((GetBattlerType(gBattlerTarget, 0, FALSE) == gBattleMoves[gCurrentMove].type
             && GetBattlerType(gBattlerTarget, 1, FALSE) == gBattleMoves[gCurrentMove].type)
-            || IsTerastallized(gBattlerTarget))
+            || IsTerastallized(gBattlerTarget)
+            || (gBattleMoves[gCurrentMove].type == TYPE_WATER
+                && GetBattlerHoldEffect(gBattlerTarget, TRUE) == HOLD_EFFECT_RAINCOAT
+                && IsBattlerWeatherAffected(gBattlerTarget, B_WEATHER_RAIN)))
         {
             gBattlescriptCurrInstr = cmd->failInstr;
         }

@@ -27304,7 +27304,11 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
 static inline s32 DoMoveDamageCalc(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower,
                             bool32 isCrit, bool32 randomFactor, bool32 updateFlags, uq4_12_t typeEffectivenessModifier, u32 weather)
 {
+    s32 damage;
     u32 holdEffectAtk, holdEffectDef, abilityAtk, abilityDef;
+    bool32 savedAdaptiveSpecsActive;
+    bool32 savedSwapDamageCategory;
+    u16 savedAdaptiveSpecsMove;
 
     if (typeEffectivenessModifier == UQ_4_12(0.0))
         return 0;
@@ -27314,8 +27318,53 @@ static inline s32 DoMoveDamageCalc(u32 move, u32 battlerAtk, u32 battlerDef, u32
     abilityAtk = GetBattlerAbility(battlerAtk);
     abilityDef = GetBattlerAbility(battlerDef);
 
+    if (holdEffectAtk == HOLD_EFFECT_ADAPTIVE_SPECS
+     && !IS_MOVE_STATUS(move)
+     && (fixedBasePower != 0 || gBattleMoves[move].power != 0))
+    {
+        s32 physicalDamage;
+        s32 specialDamage;
+        u32 originalSplit;
+
+        savedAdaptiveSpecsActive = gBattleStruct->adaptiveSpecsActive;
+        savedSwapDamageCategory = gBattleStruct->swapDamageCategory;
+        savedAdaptiveSpecsMove = gBattleStruct->adaptiveSpecsMove;
+        if (gBattleStruct->zmove.active)
+            originalSplit = gBattleStruct->zmove.activeSplit;
+        else if (IsMaxMove(move))
+            originalSplit = gBattleStruct->dynamax.activeSplit;
+        else
+            originalSplit = gBattleMoves[move].split;
+
+        gBattleStruct->adaptiveSpecsActive = TRUE;
+        gBattleStruct->adaptiveSpecsMove = move;
+        gBattleStruct->swapDamageCategory = TRUE;
+        physicalDamage = DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, FALSE,
+                                             FALSE, typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
+
+        gBattleStruct->swapDamageCategory = FALSE;
+        specialDamage = DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, FALSE,
+                                            FALSE, typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
+
+        gBattleStruct->swapDamageCategory = physicalDamage > specialDamage
+                                         || (physicalDamage == specialDamage && originalSplit == SPLIT_PHYSICAL);
+        damage = DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, randomFactor,
+                                      updateFlags, typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
+        if (updateFlags)
+        {
+            RecordItemEffectBattle(battlerAtk, holdEffectAtk);
+        }
+        else
+        {
+            gBattleStruct->adaptiveSpecsActive = savedAdaptiveSpecsActive;
+            gBattleStruct->swapDamageCategory = savedSwapDamageCategory;
+            gBattleStruct->adaptiveSpecsMove = savedAdaptiveSpecsMove;
+        }
+        return damage;
+    }
+
     return DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, randomFactor,
-                            updateFlags, typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
+                                updateFlags, typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
 }
 
 #undef DAMAGE_APPLY_MODIFIER
@@ -27353,7 +27402,36 @@ u32 GetTargetAdjustedMoveType(u32 move, u32 battlerAtk, u32 battlerDef, u32 move
 s32 CalculateMoveDamageVars(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, s32 fixedBasePower, uq4_12_t typeEffectivenessModifier,
                                           u32 weather, bool32 isCrit, u32 holdEffectAtk, u32 holdEffectDef, u32 abilityAtk, u32 abilityDef)
 {
+    s32 physicalDamage;
+    s32 specialDamage;
+    bool32 savedAdaptiveSpecsActive;
+    bool32 savedSwapDamageCategory;
+    u16 savedAdaptiveSpecsMove;
+
     moveType = GetTargetAdjustedMoveType(move, battlerAtk, battlerDef, moveType);
+    if (holdEffectAtk == HOLD_EFFECT_ADAPTIVE_SPECS
+     && !IS_MOVE_STATUS(move)
+     && (fixedBasePower != 0 || gBattleMoves[move].power != 0))
+    {
+        savedAdaptiveSpecsActive = gBattleStruct->adaptiveSpecsActive;
+        savedSwapDamageCategory = gBattleStruct->swapDamageCategory;
+        savedAdaptiveSpecsMove = gBattleStruct->adaptiveSpecsMove;
+        gBattleStruct->adaptiveSpecsActive = TRUE;
+        gBattleStruct->adaptiveSpecsMove = move;
+
+        gBattleStruct->swapDamageCategory = TRUE;
+        physicalDamage = DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, FALSE, FALSE,
+                                             typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
+        gBattleStruct->swapDamageCategory = FALSE;
+        specialDamage = DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, FALSE, FALSE,
+                                            typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
+
+        gBattleStruct->adaptiveSpecsActive = savedAdaptiveSpecsActive;
+        gBattleStruct->swapDamageCategory = savedSwapDamageCategory;
+        gBattleStruct->adaptiveSpecsMove = savedAdaptiveSpecsMove;
+        return max(physicalDamage, specialDamage);
+    }
+
     return DoMoveDamageCalcVars(move, battlerAtk, battlerDef, moveType, fixedBasePower, isCrit, FALSE, FALSE,
                                 typeEffectivenessModifier, weather, holdEffectAtk, holdEffectDef, abilityAtk, abilityDef);
 }
@@ -27588,6 +27666,14 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
             gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
             RecordAbilityBattle(battlerDef, ABILITY_MOONVEIL);
         }
+    }
+    else if (moveType == TYPE_WATER
+     && GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_RAINCOAT
+     && IsBattlerWeatherAffected(battlerDef, B_WEATHER_RAIN))
+    {
+        modifier = UQ_4_12(0.0);
+        if (recordAbilities)
+            RecordItemEffectBattle(battlerDef, HOLD_EFFECT_RAINCOAT);
     }
     else if (gBattleMoves[move].split == SPLIT_STATUS && move != MOVE_THUNDER_WAVE)
     {
@@ -28633,6 +28719,10 @@ bool32 ShouldGetStatBadgeBoost(u16 badgeFlag, u32 battler)
 
 u8 GetBattleMoveSplit(u32 moveId)
 {
+    if (gBattleStruct != NULL
+     && gBattleStruct->adaptiveSpecsActive
+     && gBattleStruct->adaptiveSpecsMove == moveId)
+        return gBattleStruct->swapDamageCategory ? SPLIT_PHYSICAL : SPLIT_SPECIAL;
     if (gBattleStruct != NULL && gBattleStruct->zmove.active && !IS_MOVE_STATUS(moveId))
         return gBattleStruct->zmove.activeSplit;
     if (gBattleStruct != NULL && IsMaxMove(moveId)) // TODO: Might be buggy depending on when this is called.

@@ -283,9 +283,11 @@
 #define ITEM_GOLDEN_EGG                     (LAST_ITEM_TR + 44)
 #define ITEM_BRIAR_BRACER                   (LAST_ITEM_TR + 45)
 #define ITEM_TRICKY_BOX                     (LAST_ITEM_TR + 46)
+#define ITEM_ADAPTIVE_SPECS                  (LAST_ITEM_TR + 47)
+#define ITEM_RAINCOAT                        (LAST_ITEM_TR + 48)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_TRICKY_BOX
+#define LAST_ITEM_ROOM_REWARD           ITEM_RAINCOAT
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

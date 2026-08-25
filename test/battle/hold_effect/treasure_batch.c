@@ -20,6 +20,7 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_GOLDEN_EGG) == HOLD_EFFECT_GOLDEN_EGG);
     ASSUME(ItemId_GetHoldEffect(ITEM_BRIAR_BRACER) == HOLD_EFFECT_BRIAR_BRACER);
     ASSUME(ItemId_GetHoldEffect(ITEM_TRICKY_BOX) == HOLD_EFFECT_TRICKY_BOX);
+    ASSUME(ItemId_GetHoldEffect(ITEM_ADAPTIVE_SPECS) == HOLD_EFFECT_ADAPTIVE_SPECS);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -784,5 +785,71 @@ DOUBLE_BATTLE_TEST("Treasure batch: Tricky Box targets the status move's user in
     } THEN {
         EXPECT(opponentRight->status1 & STATUS1_BURN);
         EXPECT(!(opponentLeft->status1 & STATUS1_BURN));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Adaptive Specs makes special moves physical when that deals more damage", s16 damage)
+{
+    u32 move;
+    u16 item;
+
+    PARAMETRIZE { move = MOVE_TACKLE; item = ITEM_NONE; }
+    PARAMETRIZE { move = MOVE_WATER_GUN; item = ITEM_ADAPTIVE_SPECS; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].power == gBattleMoves[MOVE_WATER_GUN].power);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(240); SpAttack(20); Item(item); Moves(move); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, move, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Adaptive Specs makes physical moves special when that deals more damage", s16 damage)
+{
+    u32 move;
+    u16 item;
+
+    PARAMETRIZE { move = MOVE_WATER_GUN; item = ITEM_NONE; }
+    PARAMETRIZE { move = MOVE_TACKLE; item = ITEM_ADAPTIVE_SPECS; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].power == gBattleMoves[MOVE_WATER_GUN].power);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(20); SpAttack(240); Item(item); Moves(move); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, move, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Adaptive Specs does not make non-contact moves contact")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(240); SpAttack(20); Item(ITEM_ADAPTIVE_SPECS); Moves(MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_BRIAR_BRACER); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(!(gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_LEECHSEED));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Adaptive Specs preserves a move's inherent contact")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(20); SpAttack(240); Item(ITEM_ADAPTIVE_SPECS); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_BRIAR_BRACER); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(gStatuses3[B_POSITION_PLAYER_LEFT] & STATUS3_LEECHSEED);
     }
 }

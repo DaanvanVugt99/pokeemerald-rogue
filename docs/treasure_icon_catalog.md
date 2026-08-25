@@ -43,7 +43,7 @@ palette reduction, or resizing.
 | Sun Totem | `SunTotem` | Sun and Fire/Grass-type interaction | Implemented | Tower of Ashes |
 | Eclipse Totem | `EclipseTotem` | Eclipse Orb mechanics or inverted matchups | Implemented | Tower of Ashes |
 | Wonder Shield | `WonderShield` | Type matchup defense or conditional immunity | Implemented | Tower of Ashes |
-| Champion's Specs | `ChampionsSpecs` | Open concept | TBD | Tower of Ashes |
+| Adaptive Specs | `ChampionsSpecs` | Damaging moves use whichever category deals more damage | Implemented | Tower of Ashes |
 | Choice Jewel | `ChoiceJewel` | Open concept | TBD | Tower of Ashes |
 | Clear Armor | `ClearArmor` | Open concept | TBD | Tower of Ashes |
 | Crush | `Crush` | Open concept | TBD | Tower of Ashes |
@@ -78,7 +78,7 @@ palette reduction, or resizing.
 | Food Supply | `FoodSupply` | Open concept | TBD | How You Survive |
 | Name Card | `NameCard` | Open concept | TBD | How You Survive |
 | Poké Food Can | `PokeFoodCan` | Open concept | TBD | How You Survive |
-| Raincoat | `Raincoat` | Open concept | TBD | How You Survive |
+| Raincoat | `Raincoat` | Grants immunity to Water-type moves during rain | Implemented | How You Survive |
 | Sleeping Bag | `SleepingBag` | Open concept | TBD | How You Survive |
 | STR Salve | `StrSalve` | Open concept | TBD | How You Survive |
 | Tent Bag | `TentBag` | Open concept | TBD | How You Survive |

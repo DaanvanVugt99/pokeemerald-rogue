@@ -1084,6 +1084,8 @@ extern const u8 gItemRoomDesc_FickleHat[];
 extern const u8 gItemRoomDesc_GoldenEgg[];
 extern const u8 gItemRoomDesc_BriarBracer[];
 extern const u8 gItemRoomDesc_TrickyBox[];
+extern const u8 gItemRoomDesc_AdaptiveSpecs[];
+extern const u8 gItemRoomDesc_Raincoat[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1231,6 +1233,10 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_BriarBracer;
     case ITEM_TRICKY_BOX:
         return gItemRoomDesc_TrickyBox;
+    case ITEM_ADAPTIVE_SPECS:
+        return gItemRoomDesc_AdaptiveSpecs;
+    case ITEM_RAINCOAT:
+        return gItemRoomDesc_Raincoat;
     default:
         return Rogue_GetItemDesc(itemId);
     }

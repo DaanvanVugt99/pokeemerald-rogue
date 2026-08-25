@@ -9,9 +9,11 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_SAND_TOTEM) == HOLD_EFFECT_SAND_TOTEM);
     ASSUME(ItemId_GetHoldEffect(ITEM_SNOW_TOTEM) == HOLD_EFFECT_SNOW_TOTEM);
     ASSUME(ItemId_GetHoldEffect(ITEM_ACID_RAIN_TOTEM) == HOLD_EFFECT_ACID_RAIN_TOTEM);
+    ASSUME(ItemId_GetHoldEffect(ITEM_RAINCOAT) == HOLD_EFFECT_RAINCOAT);
     ASSUME(gBattleMoves[MOVE_ECLIPSE].effect == EFFECT_ECLIPSE);
     ASSUME(gBattleMoves[MOVE_ACID_RAIN].effect == EFFECT_CORROSIVE_CLOUDS);
     ASSUME(gBattleMoves[MOVE_SNOWSCAPE].effect == EFFECT_SNOWSCAPE);
+    ASSUME(gBattleMoves[MOVE_SOAK].effect == EFFECT_SOAK);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_SWIFT].split == SPLIT_SPECIAL);
 }
@@ -94,6 +96,63 @@ SINGLE_BATTLE_TEST("Weather Totem: Rain restores one sixteenth HP at end of turn
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Wobbuffet's Rain Totem restored its HP a little!");
         HP_BAR(player, damage: -10);
+    }
+}
+
+SINGLE_BATTLE_TEST("Raincoat does not change Water damage outside rain", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_RAINCOAT; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Item(item); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpAttack(120); Moves(MOVE_CELEBRATE, MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN); }
+    } SCENE {
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_GT(results[0].damage, 0);
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Raincoat blocks Water moves during rain")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Item(ITEM_RAINCOAT); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpAttack(120); Moves(MOVE_RAIN_DANCE, MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_RAIN_DANCE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN); }
+    } SCENE {
+        NONE_OF {
+            HP_BAR(player);
+        }
+    } THEN {
+        EXPECT_EQ(player->hp, player->maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Raincoat blocks Soak during rain")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_RAINCOAT); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_RAIN_DANCE, MOVE_SOAK); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_RAIN_DANCE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_SOAK); }
+    } SCENE {
+        MESSAGE("But it failed!");
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(GetBattlerType(battler, 0, FALSE), TYPE_PSYCHIC);
+        EXPECT_EQ(GetBattlerType(battler, 1, FALSE), TYPE_PSYCHIC);
     }
 }
 

@@ -50,6 +50,18 @@ AI_SINGLE_BATTLE_TEST("AI uses Twin Goggles accuracy when comparing damaging mov
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI evaluates both damage categories with Adaptive Specs")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_WATER_PULSE].power > gBattleMoves[MOVE_TACKLE].power);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Defense(120); SpDefense(120); HP(1000); MaxHP(1000); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(240); SpAttack(20); Item(ITEM_ADAPTIVE_SPECS); Moves(MOVE_TACKLE, MOVE_WATER_PULSE); }
+    } WHEN {
+        TURN { SCORE_GT(opponent, MOVE_WATER_PULSE, MOVE_TACKLE); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI values Chime Jewel's Speed boost on sound-based moves")
 {
     GIVEN {
@@ -225,11 +237,12 @@ AI_SINGLE_BATTLE_TEST("Treasure AI audit: Wonder Shield blocks super-effective d
     }
 }
 
-AI_SINGLE_BATTLE_TEST("Treasure AI audit: weather totems encourage their matching weather")
+AI_SINGLE_BATTLE_TEST("Treasure AI audit: weather treasures encourage their matching weather")
 {
     u32 item, weatherMove;
 
     PARAMETRIZE { item = ITEM_RAIN_TOTEM; weatherMove = MOVE_RAIN_DANCE; }
+    PARAMETRIZE { item = ITEM_RAINCOAT; weatherMove = MOVE_RAIN_DANCE; }
     PARAMETRIZE { item = ITEM_ACID_RAIN_TOTEM; weatherMove = MOVE_ACID_RAIN; }
 
     GIVEN {

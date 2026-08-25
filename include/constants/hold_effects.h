@@ -215,6 +215,8 @@
 #define HOLD_EFFECT_GOLDEN_EGG           229
 #define HOLD_EFFECT_BRIAR_BRACER          230
 #define HOLD_EFFECT_TRICKY_BOX            231
+#define HOLD_EFFECT_ADAPTIVE_SPECS         232
+#define HOLD_EFFECT_RAINCOAT               233
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

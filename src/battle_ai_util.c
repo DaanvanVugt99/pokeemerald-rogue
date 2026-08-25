@@ -877,6 +877,8 @@ s32 AI_CalcDamage(u32 move, u32 battlerAtk, u32 battlerDef, u8 *typeEffectivenes
     }
 
     gBattleStruct->swapDamageCategory = FALSE;
+    gBattleStruct->adaptiveSpecsActive = FALSE;
+    gBattleStruct->adaptiveSpecsMove = MOVE_NONE;
     gBattleStruct->zmove.active = FALSE;
     gBattleStruct->zmove.baseMoves[battlerAtk] = MOVE_NONE;
     if (toggledDynamax)
@@ -1782,6 +1784,7 @@ bool32 ShouldSetRain(u32 battlerAtk, u32 atkAbility, u32 holdEffect)
       || atkAbility == ABILITY_RAIN_DISH
       || atkAbility == ABILITY_DRY_SKIN
       || holdEffect == HOLD_EFFECT_RAIN_TOTEM
+      || holdEffect == HOLD_EFFECT_RAINCOAT
       || HasMoveEffect(battlerAtk, EFFECT_ELECTRO_SHOT)
       || HasMoveEffect(battlerAtk, EFFECT_THUNDER)
       || HasMoveEffect(battlerAtk, EFFECT_HURRICANE)
