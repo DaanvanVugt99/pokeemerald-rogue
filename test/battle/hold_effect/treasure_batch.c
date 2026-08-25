@@ -554,6 +554,8 @@ SINGLE_BATTLE_TEST("Treasure batch: Golden Egg gives healing moves priority at h
     } WHEN {
         TURN { MOVE(player, MOVE_RECOVER); MOVE(opponent, MOVE_TACKLE); }
     } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet can act faster, thanks to Golden Egg!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RECOVER, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
     }
@@ -567,7 +569,23 @@ SINGLE_BATTLE_TEST("Treasure batch: Golden Egg does not give priority above half
     } WHEN {
         TURN { MOVE(player, MOVE_RECOVER); MOVE(opponent, MOVE_TACKLE); }
     } SCENE {
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_RECOVER, player);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Golden Egg does not give Max Moves priority")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_ABSORB].healBlockBanned);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); HP(100); MaxHP(200); Item(ITEM_GOLDEN_EGG); Moves(MOVE_ABSORB); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Attack(1); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_ABSORB, dynamax: TRUE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        MESSAGE("Wobbuffet used Max Overgrowth!");
     }
 }

@@ -467,6 +467,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented Golden Egg from granting priority to Dynamax attacks derived from
+  healing moves, and made its priority activation visible in battle.
 - Taught the battle AI to account for Omnisense reflection, Royal Storm and
   Authority priority blocking, Dominion's last-mon status immunity, Crystal
   Armor and Sand Skimmer stat protection, Rooted Shrine phazing immunity,

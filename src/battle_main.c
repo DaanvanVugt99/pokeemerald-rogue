@@ -5068,6 +5068,15 @@ static bool32 IsSolarboostPriorityMove(u32 battler, u16 move)
     return moveType == TYPE_FIRE;
 }
 
+static bool32 ShouldGoldenEggElevateMove(u32 battler, u16 move)
+{
+    return GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_GOLDEN_EGG
+        && gBattleMons[battler].hp != 0
+        && gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 2
+        && IsHealingMove(move)
+        && !ShouldUseMaxMove(battler, move);
+}
+
 s8 GetMovePriority(u32 battler, u16 move)
 {
     s8 priority;
@@ -5111,10 +5120,7 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
-    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_GOLDEN_EGG
-     && gBattleMons[battler].hp != 0
-     && gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 2
-     && IsHealingMove(move))
+    if (ShouldGoldenEggElevateMove(battler, move))
         priority++;
 
     if (ability == ABILITY_GALE_WINGS
@@ -5793,15 +5799,22 @@ static void CheckChangingTurnOrderEffects(void)
         while (gBattleStruct->quickClawBattlerId < gBattlersCount)
         {
             bool32 ambushTalonActivated;
+            bool32 goldenEggActivated;
+            u16 priorityMove;
 
             battler = gBattlerAttacker = gBattleStruct->quickClawBattlerId;
             gBattleStruct->quickClawBattlerId++;
             ambushTalonActivated = (gBattleStruct->ambushTalonElevated & gBitTable[battler])
                                 && !(gBattleStruct->ambushTalonUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]);
+            priorityMove = gChosenMoveByBattler[battler];
+            if (gBattleStruct->zmove.toBeUsed[battler] && gBattleMoves[priorityMove].power != 0)
+                priorityMove = gBattleStruct->zmove.toBeUsed[battler];
+            goldenEggActivated = ShouldGoldenEggElevateMove(battler, priorityMove);
             if (gChosenActionByBattler[battler] == B_ACTION_USE_MOVE
              && ((gChosenMoveByBattler[battler] != MOVE_FOCUS_PUNCH
                && (gProtectStructs[battler].usedCustapBerry || gProtectStructs[battler].quickDraw))
-              || ambushTalonActivated)
+              || ambushTalonActivated
+              || goldenEggActivated)
              && (!(gBattleMons[battler].status1 & STATUS1_SLEEP) || ambushTalonActivated)
              && !(gDisableStructs[gBattlerAttacker].truantCounter)
              && !(gProtectStructs[battler].noValidMoves))
@@ -5812,6 +5825,13 @@ static void CheckChangingTurnOrderEffects(void)
                     gLastUsedItem = gBattleMons[battler].item;
                     PREPARE_ITEM_BUFFER(gBattleTextBuff1, gLastUsedItem);
                     RecordItemEffectBattle(battler, HOLD_EFFECT_AMBUSH_TALON);
+                    BattleScriptExecute(BattleScript_QuickClawActivation);
+                }
+                else if (goldenEggActivated)
+                {
+                    gLastUsedItem = gBattleMons[battler].item;
+                    PREPARE_ITEM_BUFFER(gBattleTextBuff1, gLastUsedItem);
+                    RecordItemEffectBattle(battler, HOLD_EFFECT_GOLDEN_EGG);
                     BattleScriptExecute(BattleScript_QuickClawActivation);
                 }
                 else if (gProtectStructs[battler].usedCustapBerry)
