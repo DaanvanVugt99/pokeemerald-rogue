@@ -69,6 +69,28 @@ SINGLE_BATTLE_TEST("Treasure batch: Glass Sword raises damage received by 50 per
     }
 }
 
+SINGLE_BATTLE_TEST("Treasure batch: Glass Sword and Impact Plating do not modify confusion self-damage", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_GLASS_SWORD; }
+    PARAMETRIZE { item = ITEM_IMPACT_PLATING; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CONFUSE_RAY, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CONFUSE_RAY); }
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_CONFUSION, TRUE)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(player, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+        EXPECT_EQ(results[0].damage, results[2].damage);
+    }
+}
+
 SINGLE_BATTLE_TEST("Treasure batch: Wonder Shield nullifies the first super effective damaging move")
 {
     GIVEN {
@@ -184,6 +206,27 @@ SINGLE_BATTLE_TEST("Treasure batch: Echo Scepter does not activate if its holder
             ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
         }
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Echo Scepter preserves its charge after U-turn")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Item(ITEM_ECHO_SCEPTER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Moves(MOVE_U_TURN, MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_U_TURN); SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_CELEBRATE); SWITCH(opponent, 0); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, opponent);
+        HP_BAR(player);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet's Echo Scepter echoed the attack!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
     }
 }
 

@@ -166,6 +166,19 @@ SINGLE_BATTLE_TEST("Eclipse Orb reverses non-neutral incoming matchups and prese
     }
 }
 
+SINGLE_BATTLE_TEST("Eclipse Orb reveals its inverted matchups on switch-in")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_HOLLOW_SUN); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet's Eclipse Orb inverted its type matchups!");
+    }
+}
+
 SINGLE_BATTLE_TEST("Eclipse Orb respects runtime typing changes", s16 damage)
 {
     u16 item;
@@ -730,6 +743,19 @@ SINGLE_BATTLE_TEST("Phantom Stone adds Ghost to monotypes and dual-types")
     }
 }
 
+SINGLE_BATTLE_TEST("Phantom Stone reveals its added Ghost type on switch-in")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_GRAVEGLASS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet's Phantom Stone added the Ghost type!");
+    }
+}
+
 SINGLE_BATTLE_TEST("Phantom Stone grants Ghost escape behavior")
 {
     u32 battler;
@@ -1268,6 +1294,31 @@ SINGLE_BATTLE_TEST("Wayward Incense granted STAB is strengthened by Adaptability
     }
 }
 
+SINGLE_BATTLE_TEST("Wayward Incense uses species types after temporary type changes", s16 damage)
+{
+    u16 item;
+    u16 move;
+
+    PARAMETRIZE { item = ITEM_NONE;            move = MOVE_EMBER; }
+    PARAMETRIZE { item = ITEM_WAYWARD_INCENSE; move = MOVE_EMBER; }
+    PARAMETRIZE { item = ITEM_NONE;            move = MOVE_WATER_GUN; }
+    PARAMETRIZE { item = ITEM_WAYWARD_INCENSE; move = MOVE_WATER_GUN; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_SOAK].effect == EFFECT_SOAK);
+        PLAYER(SPECIES_CHARMANDER) { SpAttack(120); Item(item); Moves(MOVE_CELEBRATE, move); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpDefense(120); HP(1000); MaxHP(1000); Moves(MOVE_SOAK, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_SOAK); }
+        TURN { MOVE(player, move); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+        EXPECT_EQ(results[2].damage, results[3].damage);
+    }
+}
+
 SINGLE_BATTLE_TEST("Wayward Incense inverts both base and Tera STAB", s16 teraDamage, s16 baseDamage, s16 offTypeDamage)
 {
     u16 item;
@@ -1568,6 +1619,25 @@ SINGLE_BATTLE_TEST("Finale Bell cannot activate twice after Recycle")
         }
     } THEN {
         EXPECT_EQ(player->item, ITEM_FINALE_BELL);
+    }
+}
+
+SINGLE_BATTLE_TEST("Finale Bell triggers from residual damage while the holder is asleep")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(30); MaxHP(100); Status1(STATUS1_SLEEP); Item(ITEM_FINALE_BELL); Moves(MOVE_SPLASH); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_BAD_DREAMS); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SPLASH); MOVE(opponent, MOVE_CELEBRATE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); }
+    } SCENE {
+        MESSAGE("Wobbuffet is tormented!");
+        HP_BAR(player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
+    } THEN {
+        EXPECT_EQ(player->item, ITEM_NONE);
     }
 }
 

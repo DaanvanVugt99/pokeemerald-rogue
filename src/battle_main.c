@@ -4047,6 +4047,8 @@ void BattleTurnPassed(void)
             return;
         if (DoBattlerEndTurnEffects())
             return;
+        if (TryActivateAnyPendingFinaleBell())
+            return;
         if (DoNaturalOrderEndTurnEffect())
             return;
     }

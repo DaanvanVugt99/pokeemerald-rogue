@@ -213,6 +213,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Eclipse Orb and Phantom Stone now reveal their battle effects on switch-in,
+  and battle type indicators resolve item-granted typing consistently.
+
 - Expanded the reserved Rogue item-ID block to 512 entries, leaving room for
   308 additional custom items without another capacity change.
 - Updated battle AI to learn revealed Treasure effects and account for their
@@ -468,6 +471,12 @@ Format follows Keep a Changelog loosely:
   Transform so the ability can always activate.
 
 ### Fixed
+
+- Corrected Treasure held-item edge cases: Glass Sword and Impact Plating no
+  longer alter confusion self-damage, Echo Scepter keeps its charge when a
+  switching attack cannot be echoed safely, Wayward Incense uses the holder's
+  species types rather than temporary type changes, and Finale Bell reliably
+  notices direct or residual threshold crossings even while asleep or frozen.
 
 - Prevented Golden Egg from granting priority to Dynamax attacks derived from
   healing moves, and made its priority activation visible in battle.

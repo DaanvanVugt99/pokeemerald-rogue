@@ -13727,6 +13727,18 @@ BattleScript_AirBaloonMsgIn::
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
+BattleScript_EclipseOrbReveals::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	printstring STRINGID_ECLIPSEORBREVEALED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_PhantomStoneReveals::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	printstring STRINGID_PHANTOMSTONEREVEALED
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_AirBaloonMsgPop::
 	printstring STRINGID_AIRBALLOONPOP
 	waitmessage B_WAIT_TIME_LONG

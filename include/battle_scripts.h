@@ -559,6 +559,8 @@ extern const u8 BattleScript_RockyHelmetActivates[];
 extern const u8 BattleScript_ItemHurtEnd2[];
 extern const u8 BattleScript_AirBaloonMsgIn[];
 extern const u8 BattleScript_AirBaloonMsgPop[];
+extern const u8 BattleScript_EclipseOrbReveals[];
+extern const u8 BattleScript_PhantomStoneReveals[];
 extern const u8 BattleScript_ItemHurtRet[];
 extern const u8 BattleScript_ToxicOrb[];
 extern const u8 BattleScript_FlameOrb[];

@@ -3208,6 +3208,8 @@ static void Cmd_datahpupdate(void)
             }
             else
             {
+                u16 oldHp = gBattleMons[battler].hp;
+
                 if (gHitMarker & HITMARKER_IGNORE_BIDE)
                 {
                     gHitMarker &= ~HITMARKER_IGNORE_BIDE;
@@ -3232,6 +3234,8 @@ static void Cmd_datahpupdate(void)
                     gHpDealt = gBattleMons[battler].hp;
                     gBattleMons[battler].hp = 0;
                 }
+
+                QueueFinaleBellForHpLoss(battler, oldHp);
 
                 // Record damage for Shell Bell
                 if (gSpecialStatuses[battler].shellBellDmg == 0 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))

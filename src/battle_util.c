@@ -6721,8 +6721,7 @@ void QueueEchoScepterForDamage(u32 battler, u32 sourceBattler)
     if (gBattleStruct->echoScepterUsed[GetBattlerSide(battler)] & partyBit)
         return;
 
-    if (QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_ECHO_SCEPTER, battler, sourceBattler, sourceBattler))
-        gBattleStruct->echoScepterUsed[GetBattlerSide(battler)] |= partyBit;
+    QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_ECHO_SCEPTER, battler, sourceBattler, sourceBattler);
 }
 
 void QueueSaltFortressForDefenseRise(u32 battler)
@@ -7026,6 +7025,7 @@ static bool32 TryActivateLivingShadow(u32 battler, u32 source, u32 target)
 static bool32 TryActivateEchoScepter(u32 battler, u32 source, u32 target)
 {
     u32 move = gCurrentMove;
+    u32 partyBit;
 
     if (!IsBattlerAlive(battler)
      || source >= gBattlersCount
@@ -7040,6 +7040,8 @@ static bool32 TryActivateEchoScepter(u32 battler, u32 source, u32 target)
      || !CanUseExtraMove(battler, target))
         return FALSE;
 
+    partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+    gBattleStruct->echoScepterUsed[GetBattlerSide(battler)] |= partyBit;
     gLastUsedItem = gBattleMons[battler].item;
     gPotentialItemEffectBattler = battler;
     RecordItemEffectBattle(battler, HOLD_EFFECT_ECHO_SCEPTER);
@@ -9212,12 +9214,37 @@ static inline bool32 HadMoreThanHalfHpNowHasLess(u32 battler)
              && gBattleMons[battler].hp < cutoff);
 }
 
+static inline u32 GetQuarterHpCutoff(u32 battler)
+{
+    return gBattleMons[battler].maxHP / 4 + ((gBattleMons[battler].maxHP % 4) != 0);
+}
+
 static inline bool32 HadAtLeastQuarterHpNowHasLess(u32 battler)
 {
-    u32 cutoff = gBattleMons[battler].maxHP / 4 + ((gBattleMons[battler].maxHP % 4) != 0);
+    u32 cutoff = GetQuarterHpCutoff(battler);
 
-    return (gBattleStruct->hpBefore[battler] >= cutoff
-            && gBattleMons[battler].hp < cutoff);
+    return gBattleStruct->hpBefore[battler] >= cutoff
+        && gBattleMons[battler].hp < cutoff;
+}
+
+void QueueFinaleBellForHpLoss(u32 battler, u32 oldHp)
+{
+    u32 side;
+    u32 partyBit;
+    u32 cutoff;
+
+    if (battler >= gBattlersCount
+     || !IsBattlerAlive(battler)
+     || GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_FINALE_BELL)
+        return;
+
+    side = GetBattlerSide(battler);
+    partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+    cutoff = GetQuarterHpCutoff(battler);
+    if (!(gBattleStruct->finaleBellUsed[side] & partyBit)
+     && oldHp >= cutoff
+     && gBattleMons[battler].hp < cutoff)
+        gBattleStruct->finaleBellPending[side] |= partyBit;
 }
 
 static bool32 TryGetMetronomeTreasureTarget(u32 battler, u32 *target)
@@ -9251,8 +9278,19 @@ static bool32 CanUseMetronomeTreasure(u32 battler, u32 *target)
         && TryGetMetronomeTreasureTarget(battler, target);
 }
 
-static void StartMetronomeTreasureChain(u32 battler, u32 target, bool32 consumeItem)
+static bool32 CanUseFinaleBell(u32 battler, u32 *target)
 {
+    return IsBattlerAlive(battler)
+        && !NoAliveMonsForEitherParty()
+        && TryGetMetronomeTreasureTarget(battler, target);
+}
+
+static void StartMetronomeTreasureChain(u32 battler, u32 target, bool32 consumeItem, bool32 fromBattleScript)
+{
+    const u8 *script = consumeItem
+        ? BattleScript_FinaleBellUsesCalledMove
+        : BattleScript_MetronomeItemUsesCalledMove;
+
     gBattleStruct->savedMetronomeItemAttacker = gBattlerAttacker;
     gBattleStruct->savedMetronomeItemTarget = gBattlerTarget;
     SetAtkCancellerForCalledMove();
@@ -9264,10 +9302,15 @@ static void StartMetronomeTreasureChain(u32 battler, u32 target, bool32 consumeI
     gProtectStructs[battler].extraMoveUsed = TRUE;
     gLastUsedItem = gBattleMons[battler].item;
     RecordItemEffectBattle(battler, GetBattlerHoldEffect(battler, FALSE));
-    BattleScriptPushCursor();
-    gBattlescriptCurrInstr = consumeItem
-        ? BattleScript_FinaleBellUsesCalledMove
-        : BattleScript_MetronomeItemUsesCalledMove;
+    if (fromBattleScript)
+    {
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = script;
+    }
+    else
+    {
+        BattleScriptExecute(script);
+    }
 }
 
 bool32 TryActivateMetronomeTreasure(void)
@@ -9283,7 +9326,7 @@ bool32 TryActivateMetronomeTreasure(void)
         if (gBattleStruct->finaleBellMetronomeRepeats[battler] == 0)
             return FALSE;
 
-        if (!CanUseMetronomeTreasure(battler, &target))
+        if (!CanUseFinaleBell(battler, &target))
         {
             gBattleStruct->finaleBellMetronomeRepeats[battler] = 0;
             return FALSE;
@@ -9322,7 +9365,7 @@ bool32 TryActivateMetronomeTreasure(void)
         if (holdEffect == HOLD_EFFECT_MISCHIEF_QUILL)
             gDisableStructs[battler].mischiefQuillUsed = TRUE;
 
-        StartMetronomeTreasureChain(battler, target, FALSE);
+        StartMetronomeTreasureChain(battler, target, FALSE, TRUE);
         return TRUE;
     }
 
@@ -9335,14 +9378,56 @@ bool32 TryActivateMetronomeTreasure(void)
 
         if (GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_FINALE_BELL
          || (gBattleStruct->finaleBellUsed[side] & partyBit)
-         || !HadAtLeastQuarterHpNowHasLess(battler)
-         || !CanUseMetronomeTreasure(battler, &target))
+         || !(gBattleStruct->finaleBellPending[side] & partyBit)
+         || !CanUseFinaleBell(battler, &target))
             continue;
 
+        gBattleStruct->finaleBellPending[side] &= ~partyBit;
         gBattleStruct->finaleBellUsed[side] |= partyBit;
         gBattleStruct->finaleBellMetronomeRepeats[battler] = 2;
-        StartMetronomeTreasureChain(battler, target, TRUE);
+        StartMetronomeTreasureChain(battler, target, TRUE, TRUE);
         return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool32 TryActivatePendingFinaleBell(u32 battler)
+{
+    u32 side = GetBattlerSide(battler);
+    u32 partyBit = gBitTable[gBattlerPartyIndexes[battler]];
+    u32 target = gBattlerTarget;
+
+    if (!(gBattleStruct->finaleBellPending[side] & partyBit))
+        return FALSE;
+
+    if (GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_FINALE_BELL
+     || (gBattleStruct->finaleBellUsed[side] & partyBit))
+    {
+        gBattleStruct->finaleBellPending[side] &= ~partyBit;
+        return FALSE;
+    }
+
+    if (!CanUseFinaleBell(battler, &target))
+        return FALSE;
+
+    gBattleStruct->finaleBellPending[side] &= ~partyBit;
+    gBattleStruct->finaleBellUsed[side] |= partyBit;
+    gBattleStruct->finaleBellMetronomeRepeats[battler] = 2;
+    StartMetronomeTreasureChain(battler, target, TRUE, FALSE);
+    return TRUE;
+}
+
+bool32 TryActivateAnyPendingFinaleBell(void)
+{
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+    u32 i;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (TryActivatePendingFinaleBell(battlers[i]))
+            return TRUE;
     }
 
     return FALSE;
@@ -23054,6 +23139,18 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 BattleScriptPushCursorAndCallback(BattleScript_AirBaloonMsgIn);
                 RecordItemEffectBattle(battler, HOLD_EFFECT_AIR_BALLOON);
                 break;
+            case HOLD_EFFECT_HOLLOW_SUN:
+                effect = ITEM_EFFECT_OTHER;
+                gBattleScripting.battler = battler;
+                BattleScriptPushCursorAndCallback(BattleScript_EclipseOrbReveals);
+                RecordItemEffectBattle(battler, HOLD_EFFECT_HOLLOW_SUN);
+                break;
+            case HOLD_EFFECT_GRAVEGLASS:
+                effect = ITEM_EFFECT_OTHER;
+                gBattleScripting.battler = battler;
+                BattleScriptPushCursorAndCallback(BattleScript_PhantomStoneReveals);
+                RecordItemEffectBattle(battler, HOLD_EFFECT_GRAVEGLASS);
+                break;
             case HOLD_EFFECT_ROOM_SERVICE:
                 if (TryRoomService(battler))
                 {
@@ -26252,12 +26349,15 @@ static inline uq4_12_t GetAdaptabilityCharmBoost(u32 battlerAtk)
 static bool32 IsNaturalStabType(u32 battlerAtk, u32 moveType)
 {
     u32 teraType;
+    u32 type1 = GetTypeBySpecies(gBattleMons[battlerAtk].species, 0, gBattleMons[battlerAtk].otId);
+    u32 type2 = GetTypeBySpecies(gBattleMons[battlerAtk].species, 1, gBattleMons[battlerAtk].otId);
 
     if (!IsTerastallized(battlerAtk))
-        return IS_BATTLER_OF_TYPE(battlerAtk, moveType);
+        return moveType == type1 || moveType == type2;
 
     teraType = GetBattlerTeraType(battlerAtk);
-    return IS_BATTLER_OF_BASE_TYPE(battlerAtk, moveType)
+    return moveType == type1
+        || moveType == type2
         || (teraType != TYPE_STELLAR && teraType == moveType);
 }
 
@@ -27010,10 +27110,14 @@ static inline uq4_12_t GetDefenderItemsModifier(u32 move, u32 moveType, u32 batt
         }
         break;
     case HOLD_EFFECT_GLASS_SWORD:
+        if (move == MOVE_NONE)
+            break;
         if (updateFlags)
             RecordItemEffectBattle(battlerDef, holdEffectDef);
         return UQ_4_12(1.5);
     case HOLD_EFFECT_IMPACT_PLATING:
+        if (move == MOVE_NONE)
+            break;
         if (updateFlags && typeEffectivenessModifier > UQ_4_12(0.0))
             RecordItemEffectBattle(battlerDef, HOLD_EFFECT_IMPACT_PLATING);
         if (IsMoveMakingContact(move, battlerAtk))

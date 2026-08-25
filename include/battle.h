@@ -745,6 +745,7 @@ struct BattleStruct
     u8 savedMetronomeItemTarget;
     bool8 metronomeItemChainActive;
     u8 finaleBellUsed[NUM_BATTLE_SIDES];
+    u8 finaleBellPending[NUM_BATTLE_SIDES];
     u8 finaleBellMetronomeRepeats[MAX_BATTLERS_COUNT];
     bool8 ateBoost[MAX_BATTLERS_COUNT];
     u8 activeAbilityPopUps; // as bits for each battler

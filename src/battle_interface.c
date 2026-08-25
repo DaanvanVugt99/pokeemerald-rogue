@@ -1951,40 +1951,12 @@ static bool32 TypeIndicator_IsDisplayableType(u32 type)
 
 static void TypeIndicator_GetResolvedTypes(u32 battlerId, u8 *types)
 {
-    u32 teraType;
-
     if (GetIllusionMonTypes(battlerId, types))
         return;
 
-    types[0] = gBattleMons[battlerId].type1;
-    types[1] = gBattleMons[battlerId].type2;
-    types[2] = gBattleMons[battlerId].type3;
-
-    if (IsTerastallized(battlerId))
-    {
-        teraType = GetBattlerTeraType(battlerId);
-        if (teraType != TYPE_STELLAR)
-        {
-            types[0] = teraType;
-            types[1] = teraType;
-            types[2] = TYPE_MYSTERY;
-        }
-    }
-    else if (gBattleResources->flags->flags[battlerId] & RESOURCE_FLAG_ROOST)
-    {
-        if (types[0] == TYPE_FLYING && types[1] == TYPE_FLYING)
-        {
-            types[0] = B_ROOST_PURE_FLYING >= GEN_5 ? TYPE_NORMAL : TYPE_MYSTERY;
-            types[1] = B_ROOST_PURE_FLYING >= GEN_5 ? TYPE_NORMAL : TYPE_MYSTERY;
-        }
-        else
-        {
-            if (types[0] == TYPE_FLYING)
-                types[0] = TYPE_MYSTERY;
-            if (types[1] == TYPE_FLYING)
-                types[1] = TYPE_MYSTERY;
-        }
-    }
+    types[0] = GetBattlerType(battlerId, 0, FALSE);
+    types[1] = GetBattlerType(battlerId, 1, FALSE);
+    types[2] = GetBattlerType(battlerId, 2, FALSE);
 }
 
 static u32 TypeIndicator_GetType(u32 battlerId, u32 slot)
