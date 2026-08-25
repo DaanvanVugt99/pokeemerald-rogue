@@ -508,6 +508,26 @@ text gItemRoomDesc_GoldenEgg
     format("While the holder has half its maximum HP or less, moves that restore HP gain +1 priority.")
 }
 
+text gItemDesc_BriarBracer
+{
+    format("Contact attackers are afflicted by Leech Seed.")
+}
+
+text gItemRoomDesc_BriarBracer
+{
+    format("{PKMN} that damage the holder with contact are afflicted by Leech Seed.")
+}
+
+text gItemDesc_TrickyBox
+{
+    format("After an opposing {PKMN} uses a status move, the holder uses Copycat.")
+}
+
+text gItemRoomDesc_TrickyBox
+{
+    format("After an opposing {PKMN} uses a status move, the holder uses Copycat targeting that opponent.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

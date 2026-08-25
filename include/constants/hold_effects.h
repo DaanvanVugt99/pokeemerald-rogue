@@ -213,6 +213,8 @@
 #define HOLD_EFFECT_HEXING_WAND          227
 #define HOLD_EFFECT_FICKLE_HAT           228
 #define HOLD_EFFECT_GOLDEN_EGG           229
+#define HOLD_EFFECT_BRIAR_BRACER          230
+#define HOLD_EFFECT_TRICKY_BOX            231
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

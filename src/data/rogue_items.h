@@ -139,6 +139,8 @@ extern const u8 gItemDesc_PurityJewel[];
 extern const u8 gItemDesc_HexingWand[];
 extern const u8 gItemDesc_FickleHat[];
 extern const u8 gItemDesc_GoldenEgg[];
+extern const u8 gItemDesc_BriarBracer[];
+extern const u8 gItemDesc_TrickyBox[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2850,6 +2852,36 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureGoldenEgg,
         .iconPalette = gItemIconPalette_TreasureGoldenEgg,
+    },
+
+    [ITEM_BRIAR_BRACER - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Briar Bracer"),
+        .itemId = ITEM_BRIAR_BRACER,
+        .price = 0,
+        .description = gItemDesc_BriarBracer,
+        .holdEffect = HOLD_EFFECT_BRIAR_BRACER,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureThornmail,
+        .iconPalette = gItemIconPalette_TreasureThornmail,
+    },
+
+    [ITEM_TRICKY_BOX - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Tricky Box"),
+        .itemId = ITEM_TRICKY_BOX,
+        .price = 0,
+        .description = gItemDesc_TrickyBox,
+        .holdEffect = HOLD_EFFECT_TRICKY_BOX,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureTrickyBox,
+        .iconPalette = gItemIconPalette_TreasureTrickyBox,
     },
 
 #ifdef ROGUE_DEBUG

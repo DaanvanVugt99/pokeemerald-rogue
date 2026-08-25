@@ -281,9 +281,11 @@
 #define ITEM_HEXING_WAND                    (LAST_ITEM_TR + 42)
 #define ITEM_FICKLE_HAT                     (LAST_ITEM_TR + 43)
 #define ITEM_GOLDEN_EGG                     (LAST_ITEM_TR + 44)
+#define ITEM_BRIAR_BRACER                   (LAST_ITEM_TR + 45)
+#define ITEM_TRICKY_BOX                     (LAST_ITEM_TR + 46)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_GOLDEN_EGG
+#define LAST_ITEM_ROOM_REWARD           ITEM_TRICKY_BOX
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

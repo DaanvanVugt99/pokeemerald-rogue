@@ -143,6 +143,35 @@ AI_SINGLE_BATTLE_TEST("AI understands Golden Egg priority on healing attacks")
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI avoids contact into a revealed Briar Bracer when damage is equal")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].power == gBattleMoves[MOVE_WATER_GUN].power);
+        ASSUME(IsMoveInherentlyMakingContact(MOVE_TACKLE));
+        ASSUME(!IsMoveInherentlyMakingContact(MOVE_WATER_GUN));
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Item(ITEM_BRIAR_BRACER); Moves(MOVE_DRAGON_RAGE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); HP(1); MaxHP(1); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_TACKLE, MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_DRAGON_RAGE); EXPECT_MOVE(opponent, MOVE_TACKLE); EXPECT_SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_WATER_GUN); }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI avoids status moves into a revealed Tricky Box")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); Item(ITEM_TRICKY_BOX); Moves(MOVE_DRAGON_RAGE, MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); HP(1); MaxHP(1); Moves(MOVE_GROWL); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_GROWL, MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_DRAGON_RAGE); EXPECT_MOVE(opponent, MOVE_GROWL); EXPECT_SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI accounts for Impact Plating after the item is revealed")
 {
     GIVEN {

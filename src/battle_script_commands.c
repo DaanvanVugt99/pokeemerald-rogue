@@ -9060,6 +9060,12 @@ static void Cmd_moveend(void)
             else
                 gBattleScripting.moveendState++;
             break;
+        case MOVEEND_TRICKY_BOX:
+            if (TryUseTrickyBoxCopycatOnStatusMove())
+                effect = TRUE;
+            else
+                gBattleScripting.moveendState++;
+            break;
         case MOVEEND_METRONOME_ITEMS:
             if (TryActivateMetronomeTreasure())
                 effect = TRUE;
@@ -21792,6 +21798,7 @@ void BS_TryHealPulse(void)
 void BS_TryCopycat(void)
 {
     NATIVE_ARGS(const u8 *failInstr);
+    u32 trickyBoxTarget = gBattlerTarget;
 
     if (gLastUsedMove == MOVE_NONE || gLastUsedMove == MOVE_UNAVAILABLE || gBattleMoves[gLastUsedMove].copycatBanned)
     {
@@ -21805,7 +21812,20 @@ void BS_TryCopycat(void)
             gCalledMove = gLastUsedMove;
 
         gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-        gBattlerTarget = GetMoveTarget(gCalledMove, NO_TARGET_OVERRIDE);
+        if (gBattleStruct->isAtkCancelerForCalledMove
+         && ItemId_GetHoldEffect(gLastUsedItem) == HOLD_EFFECT_TRICKY_BOX
+         && (GetBattlerMoveTargetType(gBattlerAttacker, gCalledMove) == MOVE_TARGET_SELECTED
+          || GetBattlerMoveTargetType(gBattlerAttacker, gCalledMove) == MOVE_TARGET_USER_OR_SELECTED)
+         && IsBattlerAlive(trickyBoxTarget)
+         && GetBattlerSide(trickyBoxTarget) != GetBattlerSide(gBattlerAttacker))
+        {
+            gBattlerTarget = trickyBoxTarget;
+            *(gBattleStruct->moveTarget + gBattlerAttacker) = trickyBoxTarget;
+        }
+        else
+        {
+            gBattlerTarget = GetMoveTarget(gCalledMove, NO_TARGET_OVERRIDE);
+        }
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
 }

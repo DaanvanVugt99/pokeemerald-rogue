@@ -18,6 +18,8 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_HEXING_WAND) == HOLD_EFFECT_HEXING_WAND);
     ASSUME(ItemId_GetHoldEffect(ITEM_FICKLE_HAT) == HOLD_EFFECT_FICKLE_HAT);
     ASSUME(ItemId_GetHoldEffect(ITEM_GOLDEN_EGG) == HOLD_EFFECT_GOLDEN_EGG);
+    ASSUME(ItemId_GetHoldEffect(ITEM_BRIAR_BRACER) == HOLD_EFFECT_BRIAR_BRACER);
+    ASSUME(ItemId_GetHoldEffect(ITEM_TRICKY_BOX) == HOLD_EFFECT_TRICKY_BOX);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -587,5 +589,157 @@ SINGLE_BATTLE_TEST("Treasure batch: Golden Egg does not give Max Moves priority"
         NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
         MESSAGE("Wobbuffet used Max Overgrowth!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Briar Bracer afflicts contact attackers with Leech Seed")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_BRIAR_BRACER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Foe Wobbuffet was seeded by Wobbuffet's Briar Bracer!");
+    } THEN {
+        EXPECT(gStatuses3[B_POSITION_OPPONENT_LEFT] & STATUS3_LEECHSEED);
+        EXPECT_EQ(gStatuses3[B_POSITION_OPPONENT_LEFT] & STATUS3_LEECHSEED_BATTLER, B_POSITION_PLAYER_LEFT);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Briar Bracer ignores non-contact attacks")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_BRIAR_BRACER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_WATER_GUN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WATER_GUN); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, opponent);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT(!(gStatuses3[B_POSITION_OPPONENT_LEFT] & STATUS3_LEECHSEED));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Briar Bracer respects Grass immunity")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_BRIAR_BRACER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_BULBASAUR) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT(!(gStatuses3[B_POSITION_OPPONENT_LEFT] & STATUS3_LEECHSEED));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Briar Bracer is prevented by Protective Pads")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_BRIAR_BRACER); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_PROTECTIVE_PADS); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT(!(gStatuses3[B_POSITION_OPPONENT_LEFT] & STATUS3_LEECHSEED));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Tricky Box answers an opposing status move with Copycat")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_TRICKY_BOX); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_WILL_O_WISP); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_WILL_O_WISP); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WILL_O_WISP, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet's Tricky Box answered the move!");
+        MESSAGE("Wobbuffet used Copycat!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WILL_O_WISP, player);
+    } THEN {
+        EXPECT(player->status1 & STATUS1_BURN);
+        EXPECT(opponent->status1 & STATUS1_BURN);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Tricky Box copies self-targeting status moves")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_TRICKY_BOX); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SWORDS_DANCE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_SWORDS_DANCE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Wobbuffet used Copycat!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SWORDS_DANCE, player);
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Tricky Box reacts when the opposing status move fails")
+{
+    GIVEN {
+        PLAYER(SPECIES_SANDSHREW) { Item(ITEM_TRICKY_BOX); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_THUNDER_WAVE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_THUNDER_WAVE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        MESSAGE("Sandshrew used Copycat!");
+    } THEN {
+        EXPECT(!(player->status1 & STATUS1_PARALYSIS));
+        EXPECT(opponent->status1 & STATUS1_PARALYSIS);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Tricky Box ignores damaging moves")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_TRICKY_BOX); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        NOT ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    }
+}
+
+DOUBLE_BATTLE_TEST("Treasure batch: Tricky Box targets the status move's user in doubles")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Item(ITEM_TRICKY_BOX); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(90); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(80); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(110); Moves(MOVE_WILL_O_WISP); }
+    } WHEN {
+        TURN {
+            MOVE(playerLeft, MOVE_CELEBRATE);
+            MOVE(playerRight, MOVE_CELEBRATE);
+            MOVE(opponentLeft, MOVE_CELEBRATE);
+            MOVE(opponentRight, MOVE_WILL_O_WISP, target: playerLeft);
+        }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WILL_O_WISP, opponentRight);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, playerLeft);
+        MESSAGE("Wobbuffet used Copycat!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WILL_O_WISP, playerLeft);
+    } THEN {
+        EXPECT(opponentRight->status1 & STATUS1_BURN);
+        EXPECT(!(opponentLeft->status1 & STATUS1_BURN));
     }
 }

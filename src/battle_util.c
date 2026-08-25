@@ -7337,6 +7337,46 @@ bool32 TryUseCounterspellCalledMoveOnStatusMove(void)
     return FALSE;
 }
 
+bool32 TryUseTrickyBoxCopycatOnStatusMove(void)
+{
+    u32 statusUser = gBattlerAttacker;
+    u8 battlers[MAX_BATTLERS_COUNT] = {0, 1, 2, 3};
+    u32 i;
+
+    if (!IS_MOVE_STATUS(gCurrentMove)
+     || gBattleStruct->isAtkCancelerForCalledMove
+     || (gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+     || gProtectStructs[statusUser].confusionSelfDmg)
+        return FALSE;
+
+    SortBattlersBySpeed(battlers, FALSE);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        u32 battler = battlers[i];
+
+        if (GetBattlerSide(battler) == GetBattlerSide(statusUser)
+         || GetBattlerHoldEffect(battler, TRUE) != HOLD_EFFECT_TRICKY_BOX
+         || !CanUseExtraMove(battler, statusUser))
+            continue;
+
+        SetAtkCancellerForCalledMove();
+        gLastUsedMove = gCurrentMove;
+        gBattlerAttacker = gBattlerAbility = gBattleScripting.battler = battler;
+        gBattlerTarget = statusUser;
+        gCalledMove = MOVE_COPYCAT;
+        gMoveResultFlags = 0;
+        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+        gProtectStructs[battler].extraMoveUsed = TRUE;
+        gLastUsedItem = gBattleMons[battler].item;
+        RecordItemEffectBattle(battler, HOLD_EFFECT_TRICKY_BOX);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_TrickyBoxUsesCopycat;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 static const u16 sWishmakerMoves[] =
 {
     MOVE_LIFE_DEW,
@@ -23672,6 +23712,21 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     BattleScriptPushCursor();
                     gBattlescriptCurrInstr = BattleScript_FuryMantleActivates;
                     RecordItemEffectBattle(battler, HOLD_EFFECT_FURY_MANTLE);
+                }
+                break;
+            case HOLD_EFFECT_BRIAR_BRACER:
+                if (TARGET_TURN_DAMAGED
+                 && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
+                 && IsBattlerAlive(gBattlerAttacker)
+                 && !IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_GRASS)
+                 && !(gStatuses3[gBattlerAttacker] & STATUS3_LEECHSEED))
+                {
+                    gStatuses3[gBattlerAttacker] &= ~STATUS3_LEECHSEED_BATTLER;
+                    gStatuses3[gBattlerAttacker] |= battler | STATUS3_LEECHSEED;
+                    effect = ITEM_EFFECT_OTHER;
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_BriarBracerActivates;
+                    RecordItemEffectBattle(battler, HOLD_EFFECT_BRIAR_BRACER);
                 }
                 break;
             case HOLD_EFFECT_WEAKNESS_POLICY:

@@ -16,6 +16,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Briar Bracer and Tricky Box Treasure held items, afflicting contact
+  attackers with Leech Seed and answering opposing status moves with Copycat.
 - Added Hexing Wand, Fickle Hat, and Golden Egg Treasure held items, rewarding
   status pressure, volatile end-of-turn stat changes, and low-HP healing
   priority respectively.

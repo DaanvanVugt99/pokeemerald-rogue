@@ -1065,14 +1065,21 @@ u32 AI_WhichMoveBetter(u32 move1, u32 move2, u32 battlerAtk, u32 battlerDef, s32
     bool32 effect1, effect2;
     s32 defAbility = AI_DATA->abilities[battlerDef];
 
-    // Check if physical moves hurt.
+    // Check if contact moves trigger retaliation.
     if (AI_DATA->holdEffects[battlerAtk] != HOLD_EFFECT_PROTECTIVE_PADS
         && (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_ROCKY_HELMET
-        || defAbility == ABILITY_IRON_BARBS || defAbility == ABILITY_ROUGH_SKIN))
+         || (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_BRIAR_BRACER
+          && !(gStatuses3[battlerAtk] & STATUS3_LEECHSEED)
+          && !IS_BATTLER_OF_TYPE(battlerAtk, TYPE_GRASS))
+         || defAbility == ABILITY_IRON_BARBS
+         || defAbility == ABILITY_ROUGH_SKIN))
     {
-        if (IS_MOVE_PHYSICAL(move1) && !IS_MOVE_PHYSICAL(move2))
+        bool32 move1MakesContact = AI_MoveMakesContact(AI_DATA->abilities[battlerAtk], AI_DATA->holdEffects[battlerAtk], move1);
+        bool32 move2MakesContact = AI_MoveMakesContact(AI_DATA->abilities[battlerAtk], AI_DATA->holdEffects[battlerAtk], move2);
+
+        if (move1MakesContact && !move2MakesContact)
             return 1;
-        if (IS_MOVE_PHYSICAL(move2) && !IS_MOVE_PHYSICAL(move1))
+        if (move2MakesContact && !move1MakesContact)
             return 0;
     }
 

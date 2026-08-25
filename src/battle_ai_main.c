@@ -3430,6 +3430,16 @@ static s32 AI_CheckViability(u32 battlerAtk, u32 battlerDef, u32 move, s32 score
             ADJUST_SCORE(-3);
         if (AI_IsAbilityOnSide(battlerDef, ABILITY_COUNTERSPELL))
             ADJUST_SCORE(-2);
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (IsBattlerAlive(i)
+             && GetBattlerSide(i) != GetBattlerSide(battlerAtk)
+             && aiData->holdEffects[i] == HOLD_EFFECT_TRICKY_BOX)
+            {
+                ADJUST_SCORE(-2);
+                break;
+            }
+        }
     }
 
     if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_CHIME_JEWEL

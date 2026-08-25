@@ -149,6 +149,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType);
 void SetAtkCancellerForCalledMove(void);
 bool32 TryUseDeliveryBagCalledMoveOnStatusMove(void);
 bool32 TryUseCounterspellCalledMoveOnStatusMove(void);
+bool32 TryUseTrickyBoxCopycatOnStatusMove(void);
 bool32 TryUseDarkDimensionCalledMove(u32 battler);
 u8 AtkCanceller_UnableToUseMove2(void);
 bool32 HasNoMonsToSwitch(u32 battler, u8 r1, u8 r2);

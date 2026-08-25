@@ -58,9 +58,9 @@ palette reduction, or resizing.
 | No Guard Belt | `NoGuardBelt` | Open concept | TBD | Tower of Ashes |
 | Renegade Orb | `RenegadeOrb` | Open concept | TBD | Tower of Ashes |
 | Shaman Staff | `ShamanStaff` | Open concept | TBD | Tower of Ashes |
-| Thornmail | `Thornmail` | Open concept | TBD | Tower of Ashes |
+| Briar Bracer | `Thornmail` | Contact attackers are afflicted by Leech Seed | Implemented | Tower of Ashes |
 | Tinted Shield | `TintedShield` | Open concept | TBD | Tower of Ashes |
-| Tricky Box | `TrickyBox` | Open concept | TBD | Tower of Ashes |
+| Tricky Box | `TrickyBox` | Answers opposing status moves with Copycat | Implemented | Tower of Ashes |
 | Vest Jewel | `VestJewel` | Open concept | TBD | Tower of Ashes |
 | Wood Cannon | `WoodCannon` | Open concept | TBD | Tower of Ashes |
 | X Ancient | `XAncient` | Open concept | TBD | Tower of Ashes |

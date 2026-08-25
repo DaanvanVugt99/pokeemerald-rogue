@@ -8241,6 +8241,13 @@ BattleScript_FuryMantleActivates::
 BattleScript_FuryMantleActivatesRet:
 	return
 
+BattleScript_BriarBracerActivates::
+	playanimation BS_TARGET, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	printstring STRINGID_BRIARBRACERACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_ChimeJewelActivates::
 	copybyte sBATTLER, gBattlerAttacker
 	statbuffchange MOVE_EFFECT_AFFECTS_USER, BattleScript_ChimeJewelActivatesRet
@@ -12855,6 +12862,14 @@ BattleScript_EchoScepterUsesCalledMove::
 	waitanimation
 	setlastuseditem BS_ATTACKER
 	printstring STRINGID_ECHOSCEPTERACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
+BattleScript_TrickyBoxUsesCopycat::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	setlastuseditem BS_ATTACKER
+	printstring STRINGID_TRICKYBOXACTIVATES
 	waitmessage B_WAIT_TIME_LONG
 	goto BattleScript_AbilityUsesCalledMoveNoPopup
 
