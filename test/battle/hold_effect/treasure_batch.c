@@ -15,6 +15,9 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_CHIME_JEWEL) == HOLD_EFFECT_CHIME_JEWEL);
     ASSUME(ItemId_GetHoldEffect(ITEM_AMBUSH_TALON) == HOLD_EFFECT_AMBUSH_TALON);
     ASSUME(ItemId_GetHoldEffect(ITEM_PURITY_JEWEL) == HOLD_EFFECT_PURITY_JEWEL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_HEXING_WAND) == HOLD_EFFECT_HEXING_WAND);
+    ASSUME(ItemId_GetHoldEffect(ITEM_FICKLE_HAT) == HOLD_EFFECT_FICKLE_HAT);
+    ASSUME(ItemId_GetHoldEffect(ITEM_GOLDEN_EGG) == HOLD_EFFECT_GOLDEN_EGG);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -470,5 +473,101 @@ SINGLE_BATTLE_TEST("Treasure batch: Purity Jewel counts status moves when checki
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Hexing Wand boosts damage against statused targets", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_HEXING_WAND; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Status1(STATUS1_BURN); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Hexing Wand does not boost damage against healthy targets", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_HEXING_WAND; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Fickle Hat sharply raises and lowers different random stats")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_FICKLE_HAT); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
+    } THEN {
+        u32 stat;
+        u32 raised = 0;
+        u32 lowered = 0;
+        u32 unchanged = 0;
+
+        for (stat = STAT_ATK; stat < NUM_STATS; stat++)
+        {
+            if (player->statStages[stat] == DEFAULT_STAT_STAGE + 2)
+                raised++;
+            else if (player->statStages[stat] == DEFAULT_STAT_STAGE - 2)
+                lowered++;
+            else if (player->statStages[stat] == DEFAULT_STAT_STAGE)
+                unchanged++;
+        }
+        EXPECT_EQ(raised, 1);
+        EXPECT_EQ(lowered, 1);
+        EXPECT_EQ(unchanged, NUM_STATS - 3);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Golden Egg gives healing moves priority at half HP")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); HP(100); MaxHP(200); Item(ITEM_GOLDEN_EGG); Moves(MOVE_RECOVER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Attack(1); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_RECOVER); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RECOVER, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Golden Egg does not give priority above half HP")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(50); HP(101); MaxHP(200); Item(ITEM_GOLDEN_EGG); Moves(MOVE_RECOVER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Attack(1); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_RECOVER); MOVE(opponent, MOVE_TACKLE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_RECOVER, player);
     }
 }

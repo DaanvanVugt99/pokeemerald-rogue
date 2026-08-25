@@ -5111,6 +5111,12 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
+    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_GOLDEN_EGG
+     && gBattleMons[battler].hp != 0
+     && gBattleMons[battler].hp <= gBattleMons[battler].maxHP / 2
+     && IsHealingMove(move))
+        priority++;
+
     if (ability == ABILITY_GALE_WINGS
         && (B_GALE_WINGS < GEN_7 || BATTLER_MAX_HP(battler))
         && gBattleMoves[move].type == TYPE_FLYING)

@@ -136,6 +136,9 @@ extern const u8 gItemDesc_ImpactPlating[];
 extern const u8 gItemDesc_ChimeJewel[];
 extern const u8 gItemDesc_AmbushTalon[];
 extern const u8 gItemDesc_PurityJewel[];
+extern const u8 gItemDesc_HexingWand[];
+extern const u8 gItemDesc_FickleHat[];
+extern const u8 gItemDesc_GoldenEgg[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2802,6 +2805,51 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureSpecialistJewel,
         .iconPalette = gItemIconPalette_TreasureSpecialistJewel,
+    },
+
+    [ITEM_HEXING_WAND - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Hexing Wand"),
+        .itemId = ITEM_HEXING_WAND,
+        .price = 0,
+        .description = gItemDesc_HexingWand,
+        .holdEffect = HOLD_EFFECT_HEXING_WAND,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureHexingWand,
+        .iconPalette = gItemIconPalette_TreasureHexingWand,
+    },
+
+    [ITEM_FICKLE_HAT - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Fickle Hat"),
+        .itemId = ITEM_FICKLE_HAT,
+        .price = 0,
+        .description = gItemDesc_FickleHat,
+        .holdEffect = HOLD_EFFECT_FICKLE_HAT,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureMoodyHat,
+        .iconPalette = gItemIconPalette_TreasureMoodyHat,
+    },
+
+    [ITEM_GOLDEN_EGG - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Golden Egg"),
+        .itemId = ITEM_GOLDEN_EGG,
+        .price = 0,
+        .description = gItemDesc_GoldenEgg,
+        .holdEffect = HOLD_EFFECT_GOLDEN_EGG,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureGoldenEgg,
+        .iconPalette = gItemIconPalette_TreasureGoldenEgg,
     },
 
 #ifdef ROGUE_DEBUG

@@ -3207,7 +3207,7 @@ if (ability == ABILITY_MAGIC_GUARD) \
 }
 
 bool8 ActiveAlphaMonEndure(u32 battler);
-static bool32 PrepareMoodyStatChanges(u32 battler, u32 raiseStages);
+static bool32 PrepareMoodyStatChanges(u32 battler, u32 raiseStages, u32 lowerStages);
 
 static void HandleAlphaMonStatusEndure(u32 battler)
 {
@@ -3271,7 +3271,7 @@ u8 DoBattlerEndTurnEffects(void)
              && IsBattlerAlive(battler)
              && IsCharmActive(EFFECT_MOODY_CHARM)
              && gDisableStructs[battler].isFirstTurn != 2
-             && PrepareMoodyStatChanges(battler, 1))
+             && PrepareMoodyStatChanges(battler, 1, 1))
             {
                 BattleScriptExecute(BattleScript_MoodyCharmActivates);
                 effect++;
@@ -9582,7 +9582,7 @@ static bool32 TryActivateTripwire(u32 battler)
     return FALSE;
 }
 
-static bool32 PrepareMoodyStatChanges(u32 battler, u32 raiseStages)
+static bool32 PrepareMoodyStatChanges(u32 battler, u32 raiseStages, u32 lowerStages)
 {
     u32 stat, raiseCount = 0, lowerCount = 0;
     u32 statsNum = B_MOODY_ACC_EVASION >= GEN_8 ? NUM_STATS : NUM_BATTLE_STATS;
@@ -9619,7 +9619,7 @@ static bool32 PrepareMoodyStatChanges(u32 battler, u32 raiseStages)
     if (lowerCount != 0)
     {
         stat = validToLower[RandomUniform(RNG_MOODY_LOWER, 0, lowerCount - 1)];
-        SET_STATCHANGER2(gBattleScripting.savedStatChanger, stat, 1, TRUE);
+        SET_STATCHANGER2(gBattleScripting.savedStatChanger, stat, lowerStages, TRUE);
     }
 
     return TRUE;
@@ -13041,7 +13041,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 }
                 break;
             case ABILITY_MOODY:
-                if (gDisableStructs[battler].isFirstTurn != 2 && PrepareMoodyStatChanges(battler, 2))
+                if (gDisableStructs[battler].isFirstTurn != 2 && PrepareMoodyStatChanges(battler, 2, 1))
                 {
                     BattleScriptPushCursorAndCallback(BattleScript_MoodyActivates);
                     effect++;
@@ -23183,6 +23183,15 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 if (TryActivatePendingPsychicTiki(battler, TRUE))
                     effect = ITEM_EFFECT_OTHER;
                 break;
+            case HOLD_EFFECT_FICKLE_HAT:
+                if (!moveTurn && PrepareMoodyStatChanges(battler, 2, 2))
+                {
+                    gBattlerAttacker = gPotentialItemEffectBattler = gBattleScripting.battler = battler;
+                    BattleScriptExecute(BattleScript_FickleHatActivates);
+                    RecordItemEffectBattle(battler, battlerHoldEffect);
+                    effect = ITEM_EFFECT_OTHER;
+                }
+                break;
             case HOLD_EFFECT_CONFUSE_SPICY:
                 if (!moveTurn)
                     effect = HealConfuseBerry(battler, gLastUsedItem, FLAVOR_SPICY, TRUE);
@@ -26844,7 +26853,7 @@ static bool32 AreBattlerMovesOneType(u32 battler)
     return sharedType != NUMBER_OF_MON_TYPES;
 }
 
-static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12_t typeEffectivenessModifier, u32 holdEffectAtk, bool32 updateFlags)
+static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, u32 holdEffectAtk, bool32 updateFlags)
 {
     u32 percentBoost;
     switch (holdEffectAtk)
@@ -26916,6 +26925,14 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, uq4_12
             return UQ_4_12(1.5);
         }
         break;
+    case HOLD_EFFECT_HEXING_WAND:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move) && (gBattleMons[battlerDef].status1 & STATUS1_ANY))
+        {
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
+            return UQ_4_12(1.5);
+        }
+        break;
     }
     return UQ_4_12(1.0);
 }
@@ -26981,7 +26998,7 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderAbilitiesModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk, updateFlags));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, battlerDef, typeEffectivenessModifier, holdEffectAtk, updateFlags));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
     }
     else
@@ -26990,7 +27007,7 @@ static inline uq4_12_t GetOtherModifiers(u32 move, u32 moveType, u32 battlerAtk,
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderPartnerAbilitiesModifier(battlerDefPartner));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerAbilitiesModifier(battlerAtk, battlerDef, typeEffectivenessModifier, isCrit, abilityAtk));
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(move, moveType, battlerAtk, battlerDef, typeEffectivenessModifier, updateFlags, abilityDef, holdEffectDef));
-        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, typeEffectivenessModifier, holdEffectAtk, updateFlags));
+        DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(move, battlerAtk, battlerDef, typeEffectivenessModifier, holdEffectAtk, updateFlags));
     }
     return finalModifier;
 }

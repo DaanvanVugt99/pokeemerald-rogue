@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Hexing Wand, Fickle Hat, and Golden Egg Treasure held items, rewarding
+  status pressure, volatile end-of-turn stat changes, and low-HP healing
+  priority respectively.
 - Added Treasure Hunter, a Main Quest completed by discovering a Treasure room
   for the first time, rewarding ¥10000, 5 Building Supplies, and 5 Dark
   Pokéblocks.

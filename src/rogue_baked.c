@@ -1079,6 +1079,9 @@ extern const u8 gItemRoomDesc_ImpactPlating[];
 extern const u8 gItemRoomDesc_ChimeJewel[];
 extern const u8 gItemRoomDesc_AmbushTalon[];
 extern const u8 gItemRoomDesc_PurityJewel[];
+extern const u8 gItemRoomDesc_HexingWand[];
+extern const u8 gItemRoomDesc_FickleHat[];
+extern const u8 gItemRoomDesc_GoldenEgg[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1216,6 +1219,12 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_AmbushTalon;
     case ITEM_PURITY_JEWEL:
         return gItemRoomDesc_PurityJewel;
+    case ITEM_HEXING_WAND:
+        return gItemRoomDesc_HexingWand;
+    case ITEM_FICKLE_HAT:
+        return gItemRoomDesc_FickleHat;
+    case ITEM_GOLDEN_EGG:
+        return gItemRoomDesc_GoldenEgg;
     default:
         return Rogue_GetItemDesc(itemId);
     }

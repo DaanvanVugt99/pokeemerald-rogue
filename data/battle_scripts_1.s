@@ -10187,6 +10187,10 @@ BattleScript_MoodyLower:
 BattleScript_MoodyEnd:
 	end3
 
+BattleScript_FickleHatActivates::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	goto BattleScript_MoodyCharmActivates
+
 BattleScript_EmergencyExit::
 	pause 5
 	call BattleScript_AbilityPopUp

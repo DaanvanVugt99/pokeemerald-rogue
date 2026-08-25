@@ -478,6 +478,36 @@ text gItemRoomDesc_PurityJewel
     format("If all the holder's moves are the same type, its damaging moves deal 50% more damage.")
 }
 
+text gItemDesc_HexingWand
+{
+    format("Boosts damaging moves by 50% against targets with a status condition.")
+}
+
+text gItemRoomDesc_HexingWand
+{
+    format("The holder's damaging moves deal 50% more damage to targets with a status condition.")
+}
+
+text gItemDesc_FickleHat
+{
+    format("At each turn's end, sharply raises one stat and sharply lowers another.")
+}
+
+text gItemRoomDesc_FickleHat
+{
+    format("At the end of each turn, one random stat rises by 2 stages and a different random stat falls by 2 stages.")
+}
+
+text gItemDesc_GoldenEgg
+{
+    format("At half HP or less, healing moves gain +1 priority.")
+}
+
+text gItemRoomDesc_GoldenEgg
+{
+    format("While the holder has half its maximum HP or less, moves that restore HP gain +1 priority.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

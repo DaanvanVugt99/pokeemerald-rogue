@@ -210,6 +210,9 @@
 #define HOLD_EFFECT_CHIME_JEWEL          224
 #define HOLD_EFFECT_AMBUSH_TALON         225
 #define HOLD_EFFECT_PURITY_JEWEL         226
+#define HOLD_EFFECT_HEXING_WAND          227
+#define HOLD_EFFECT_FICKLE_HAT           228
+#define HOLD_EFFECT_GOLDEN_EGG           229
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

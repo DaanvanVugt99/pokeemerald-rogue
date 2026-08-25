@@ -25,15 +25,15 @@ palette reduction, or resizing.
 | Gambler's Vest | `GamblersVest` | Volatility, random rewards, or risk protection | TBD | Tower of Ashes |
 | Glass Sword | `GlassCannon` | Large offense-for-defense trade | Implemented | Tower of Ashes |
 | Glyph Codex | `GlyphCodex` | Changes the holder to each move's type before use | Implemented | Tower of Ashes |
-| Golden Egg | `GoldenEgg` | Growth, recovery, or run-level rewards | TBD | Tower of Ashes |
+| Golden Egg | `GoldenEgg` | Gives healing moves priority at half HP or less | Implemented | Tower of Ashes |
 | Golden Idol | `GoldenIdol` | Greed, sacrifice, or cursed rewards | TBD | Tower of Ashes |
 | Grassy Tiki | `GrassyTiki` | Grassy Terrain or Grass-type interaction | Implemented | Tower of Ashes |
 | Greedy Gloves | `GreedyGlove` | Contact moves steal the target's positive stat changes before damage | Implemented | Tower of Ashes |
 | Snow Totem | `HailTotem` | Snow and Ice-type teams | Implemented | Tower of Ashes |
-| Hexing Wand | `HexingWand` | Status conditions, curses, or reflected effects | TBD | Tower of Ashes |
+| Hexing Wand | `HexingWand` | Boosts damage against statused targets | Implemented | Tower of Ashes |
 | Misty Tiki | `MistyTiki` | Misty Terrain or Fairy-type interaction | Implemented | Tower of Ashes |
 | Psychic Tiki | `PsychicTiki` | Psychic Terrain or Psychic-type interaction | Implemented | Tower of Ashes |
-| Moody Hat | `MoodyHat` | Stat-stage roulette or switching | TBD | Tower of Ashes |
+| Fickle Hat | `MoodyHat` | Sharply raises one random stat and lowers another each turn | Implemented | Tower of Ashes |
 | Ambush Talon | `QuickTalon` | Gives the holder's first move +1 priority once per battle | Implemented | Tower of Ashes |
 | Rain Totem | `RainTotem` | Rain and Water-type teams | Implemented | Tower of Ashes |
 | Acid Rain Totem | `AcidRainTotem` | Acid Rain and Poison-type teams | Implemented | Tower of Ashes |

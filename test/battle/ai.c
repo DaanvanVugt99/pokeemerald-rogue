@@ -104,6 +104,45 @@ AI_SINGLE_BATTLE_TEST("AI damage prediction includes Purity Jewel", s16 damage)
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI damage prediction includes Hexing Wand", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_HEXING_WAND; }
+
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Status1(STATUS1_POISON); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_TACKLE); }
+    } THEN {
+        u8 effectiveness;
+        results[i].damage = AI_CalcDamageSaveBattlers(MOVE_TACKLE, B_POSITION_OPPONENT_LEFT, B_POSITION_PLAYER_LEFT, &effectiveness, FALSE);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI understands Golden Egg priority on healing attacks")
+{
+    u16 item;
+    s16 expectedScore;
+
+    PARAMETRIZE { item = ITEM_NONE; expectedScore = 104; }
+    PARAMETRIZE { item = ITEM_GOLDEN_EGG; expectedScore = 105; }
+
+    GIVEN {
+        ASSUME(IsHealingMove(MOVE_ABSORB));
+        AI_FLAGS(AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); HP(1); MaxHP(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); HP(50); MaxHP(100); Item(item); Moves(MOVE_ABSORB); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); EXPECT_MOVE(opponent, MOVE_ABSORB); SCORE_EQ_VAL(opponent, MOVE_ABSORB, expectedScore); }
+    }
+}
+
 AI_SINGLE_BATTLE_TEST("AI accounts for Impact Plating after the item is revealed")
 {
     GIVEN {

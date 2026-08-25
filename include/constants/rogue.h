@@ -278,9 +278,12 @@
 #define ITEM_CHIME_JEWEL                    (LAST_ITEM_TR + 39)
 #define ITEM_AMBUSH_TALON                   (LAST_ITEM_TR + 40)
 #define ITEM_PURITY_JEWEL                   (LAST_ITEM_TR + 41)
+#define ITEM_HEXING_WAND                    (LAST_ITEM_TR + 42)
+#define ITEM_FICKLE_HAT                     (LAST_ITEM_TR + 43)
+#define ITEM_GOLDEN_EGG                     (LAST_ITEM_TR + 44)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_PURITY_JEWEL
+#define LAST_ITEM_ROOM_REWARD           ITEM_GOLDEN_EGG
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0
