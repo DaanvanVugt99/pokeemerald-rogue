@@ -26160,7 +26160,7 @@ static bool32 CanEvolve(u32 species)
     return FALSE;
 }
 
-static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, bool32 isCrit, bool32 updateFlags, u32 atkAbility, u32 defAbility, u32 holdEffectDef, u32 weather, bool32 usesDefStat)
+static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, bool32 isCrit, bool32 updateFlags, u32 atkAbility, u32 defAbility, u32 holdEffectAtk, u32 holdEffectDef, u32 weather, bool32 usesDefStat)
 {
     u8 defStage;
     u32 defStat, def, spDef;
@@ -26197,6 +26197,9 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
         defStage = DEFAULT_STAT_STAGE;
     // pokemon with unaware ignore defense stat changes while dealing damage
     if (atkAbility == ABILITY_UNAWARE || IsAbilityOnField(ABILITY_EQUILIBRIUM) || ApplyUnawareCurse(battlerAtk, defStage))
+        defStage = DEFAULT_STAT_STAGE;
+    // Huge Sword ignores positive defensive stat stages.
+    if (holdEffectAtk == HOLD_EFFECT_HUGE_SWORD && defStage > DEFAULT_STAT_STAGE)
         defStage = DEFAULT_STAT_STAGE;
     // certain moves also ignore stat changes
     if (gBattleMoves[move].ignoresTargetDefenseEvasionStages)
@@ -26379,7 +26382,7 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
     return uq4_12_multiply_by_int_half_down(modifier, defStat);
 }
 
-static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, bool32 isCrit, bool32 updateFlags, u32 atkAbility, u32 defAbility, u32 holdEffectDef, u32 weather)
+static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 moveType, bool32 isCrit, bool32 updateFlags, u32 atkAbility, u32 defAbility, u32 holdEffectAtk, u32 holdEffectDef, u32 weather)
 {
     bool32 usesDefStat;
 
@@ -26400,8 +26403,8 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
           && moveType == TYPE_DRAGON
           && !IS_MOVE_STATUS(move))
     {
-        u32 defStat = CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, FALSE, atkAbility, defAbility, holdEffectDef, weather, TRUE);
-        u32 spDefStat = CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, FALSE, atkAbility, defAbility, holdEffectDef, weather, FALSE);
+        u32 defStat = CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, FALSE, atkAbility, defAbility, holdEffectAtk, holdEffectDef, weather, TRUE);
+        u32 spDefStat = CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, FALSE, atkAbility, defAbility, holdEffectAtk, holdEffectDef, weather, FALSE);
 
         usesDefStat = defStat <= spDefStat;
         if (updateFlags)
@@ -26423,7 +26426,7 @@ static inline u32 CalcDefenseStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 
         usesDefStat = FALSE;
     }
 
-    return CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, atkAbility, defAbility, holdEffectDef, weather, usesDefStat);
+    return CalcDefenseStatFromSide(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, atkAbility, defAbility, holdEffectAtk, holdEffectDef, weather, usesDefStat);
 }
 
 // base damage formula before adding any modifiers
@@ -27367,7 +27370,7 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
         gBattleMovePower = CalcMoveBasePowerAfterModifiers(move, battlerAtk, battlerDef, moveType, updateFlags, abilityAtk, abilityDef, holdEffectAtk, weather);
 
     userFinalAttack = CalcAttackStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectAtk);
-    targetFinalDefense = CalcDefenseStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectDef, weather);
+    targetFinalDefense = CalcDefenseStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectAtk, holdEffectDef, weather);
     if (ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
     {
         usesOwnAttackStat = IS_MOVE_SPECIAL(move);

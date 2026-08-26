@@ -50,9 +50,9 @@ palette reduction, or resizing.
 | Crush | `Crush` | Open concept | TBD | Tower of Ashes |
 | Drain Blade | `DrainBlade` | Damaging moves restore damage dealt, with doubled healing against weakened targets | Implemented | Tower of Ashes |
 | Grand Plaza | `GrandPlaza` | Open concept | TBD | Tower of Ashes |
-| Guts Sword | `GutsSword` | Open concept | TBD | Tower of Ashes |
+| Huge Sword | `GutsSword` | Attacks ignore positive Defense and Special Defense stages | Implemented | Tower of Ashes |
 | Healing Lamp | `HealingLamp` | Restores 1/8 max HP each turn, but moves consume 1 additional PP | Implemented | Tower of Ashes |
-| Ho-Oh Plume | `HoOhPlume` | Open concept | TBD | Tower of Ashes |
+| Ho-Oh Plume | `HoOhPlume` | Once per battle, switching out fully restores HP and cures status | Implemented | Tower of Ashes |
 | Hourglass | `Hourglass` | Halves Speed, then raises Speed by 2 stages at the end of each turn | Implemented | Tower of Ashes |
 | Monotonous Armor | `MonotonousArmor` | Open concept | TBD | Tower of Ashes |
 | Monotype Serum | `Monotype` | Removes the secondary type while preserving its STAB | Implemented | Tower of Ashes |

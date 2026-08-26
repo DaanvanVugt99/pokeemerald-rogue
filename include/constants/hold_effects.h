@@ -229,6 +229,8 @@
 #define HOLD_EFFECT_WINGED_BOOTS            243
 #define HOLD_EFFECT_PINWHEEL                244
 #define HOLD_EFFECT_ROYAL_JELLY             245
+#define HOLD_EFFECT_HUGE_SWORD              246
+#define HOLD_EFFECT_HO_OH_PLUME             247
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

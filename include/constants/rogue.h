@@ -297,9 +297,11 @@
 #define ITEM_WINGED_BOOTS                   (LAST_ITEM_TR + 58)
 #define ITEM_PINWHEEL                       (LAST_ITEM_TR + 59)
 #define ITEM_ROYAL_JELLY                    (LAST_ITEM_TR + 60)
+#define ITEM_HUGE_SWORD                     (LAST_ITEM_TR + 61)
+#define ITEM_HO_OH_PLUME                    (LAST_ITEM_TR + 62)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_ROYAL_JELLY
+#define LAST_ITEM_ROOM_REWARD           ITEM_HO_OH_PLUME
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

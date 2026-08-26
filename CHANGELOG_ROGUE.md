@@ -20,8 +20,12 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Ho-Oh Plume, a Treasure held item that once per battle fully restores
+  its holder's HP and cures its status when it switches out.
 - Added Royal Jelly, a Treasure held item that doubles Bug-type move damage but
   halves damage from the holder's non-Bug damaging moves.
+- Added Huge Sword, a Treasure held item whose attacks ignore positive Defense
+  and Special Defense stages.
 - Added Pinwheel, a Treasure held item that switches its holder out after it
   successfully uses a wind move.
 - Added Victor's Band, a Treasure held item that restores 25% max HP after its

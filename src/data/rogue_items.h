@@ -155,6 +155,8 @@ extern const u8 gItemDesc_VictorsBand[];
 extern const u8 gItemDesc_WingedBoots[];
 extern const u8 gItemDesc_Pinwheel[];
 extern const u8 gItemDesc_RoyalJelly[];
+extern const u8 gItemDesc_HugeSword[];
+extern const u8 gItemDesc_HoOhPlume[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -3107,6 +3109,36 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureHoneyBadge,
         .iconPalette = gItemIconPalette_TreasureHoneyBadge,
+    },
+
+    [ITEM_HUGE_SWORD - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Huge Sword"),
+        .itemId = ITEM_HUGE_SWORD,
+        .price = 0,
+        .description = gItemDesc_HugeSword,
+        .holdEffect = HOLD_EFFECT_HUGE_SWORD,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureGutsSword,
+        .iconPalette = gItemIconPalette_TreasureGutsSword,
+    },
+
+    [ITEM_HO_OH_PLUME - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Ho-Oh Plume"),
+        .itemId = ITEM_HO_OH_PLUME,
+        .price = 0,
+        .description = gItemDesc_HoOhPlume,
+        .holdEffect = HOLD_EFFECT_HO_OH_PLUME,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureHoOhPlume,
+        .iconPalette = gItemIconPalette_TreasureHoOhPlume,
     },
 
 #ifdef ROGUE_DEBUG

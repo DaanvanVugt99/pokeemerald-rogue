@@ -19467,6 +19467,7 @@ static void Cmd_switchoutabilities(void)
     u32 battler = GetBattlerForBattleScript(cmd->battler);
     u32 healAmount = 0;
     u32 maxHP = GetNonDynamaxMaxHP(battler);
+    u32 partyBit = gBitTable[gBattlerPartyIndexes[battler]];
 
     // Undo dynamax here to ensure we reset the HP correctly
     UndoDynamax(battler);
@@ -19479,6 +19480,46 @@ static void Cmd_switchoutabilities(void)
     }
     else
     {
+        if (gBattleMons[battler].hp != 0
+         && gBattleOutcome == 0
+         && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_HO_OH_PLUME
+         && !(gBattleStruct->hoOhPlumeUsed[GetBattlerSide(battler)] & partyBit)
+         && (gBattleMons[battler].hp < maxHP || gBattleMons[battler].status1 != 0))
+        {
+            if (gBattleMons[battler].status1 != 0)
+            {
+                gBattleMons[battler].status1 = 0;
+                BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_STATUS_BATTLE,
+                                             partyBit,
+                                             sizeof(gBattleMons[battler].status1),
+                                             &gBattleMons[battler].status1);
+                MarkBattlerForControllerExec(battler);
+
+                // Send HP through the controller on the next pass so the
+                // status update is not overwritten in the shared buffer.
+                if (gBattleMons[battler].hp < maxHP)
+                    return;
+            }
+
+            gBattleStruct->hoOhPlumeUsed[GetBattlerSide(battler)] |= partyBit;
+            if (gBattleMons[battler].hp < maxHP)
+            {
+                gBattleMons[battler].hp = maxHP;
+                BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_HP_BATTLE,
+                                             partyBit,
+                                             sizeof(gBattleMons[battler].hp),
+                                             &gBattleMons[battler].hp);
+                MarkBattlerForControllerExec(battler);
+            }
+
+            gLastUsedItem = gBattleMons[battler].item;
+            gBattleScripting.battler = battler;
+            RecordItemEffectBattle(battler, HOLD_EFFECT_HO_OH_PLUME);
+            BattleScriptPush(gBattlescriptCurrInstr);
+            gBattlescriptCurrInstr = BattleScript_HoOhPlumeActivates;
+            return;
+        }
+
         if (!gSpecialStatuses[battler].switchOutAbilityDone
          && TrySetGrafittiTagToxicSpikes(battler))
         {

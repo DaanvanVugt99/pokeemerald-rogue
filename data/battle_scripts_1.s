@@ -826,6 +826,11 @@ BattleScript_PinwheelActivates::
 BattleScript_PinwheelEnd:
 	return
 
+BattleScript_HoOhPlumeActivates::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	return
+
 BattleScript_EffectPledge::
 	attackcanceler
 	setpledge BattleScript_HitFromAccCheck

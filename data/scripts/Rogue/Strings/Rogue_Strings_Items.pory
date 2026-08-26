@@ -668,6 +668,26 @@ text gItemRoomDesc_RoyalJelly
     format("Bug-type moves deal 2× damage, but non-Bug damaging moves deal 50% less damage.")
 }
 
+text gItemDesc_HugeSword
+{
+    format("Attacks ignore positive Defense and Special Defense stages.")
+}
+
+text gItemRoomDesc_HugeSword
+{
+    format("The holder's attacks ignore positive Defense and Special Defense stages.")
+}
+
+text gItemDesc_HoOhPlume
+{
+    format("Once per battle, switching out fully restores HP and cures status.")
+}
+
+text gItemRoomDesc_HoOhPlume
+{
+    format("Once per battle, switching out while hurt or statused fully restores the holder's HP and cures its status.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

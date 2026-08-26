@@ -34,6 +34,8 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_WINGED_BOOTS) == HOLD_EFFECT_WINGED_BOOTS);
     ASSUME(ItemId_GetHoldEffect(ITEM_PINWHEEL) == HOLD_EFFECT_PINWHEEL);
     ASSUME(ItemId_GetHoldEffect(ITEM_ROYAL_JELLY) == HOLD_EFFECT_ROYAL_JELLY);
+    ASSUME(ItemId_GetHoldEffect(ITEM_HUGE_SWORD) == HOLD_EFFECT_HUGE_SWORD);
+    ASSUME(ItemId_GetHoldEffect(ITEM_HO_OH_PLUME) == HOLD_EFFECT_HO_OH_PLUME);
     ASSUME(gBattleMoves[MOVE_GUST].windMove);
     ASSUME(gBattleMoves[MOVE_TAILWIND].windMove);
     ASSUME(gBattleMoves[MOVE_ICY_WIND].windMove);
@@ -113,6 +115,69 @@ SINGLE_BATTLE_TEST("Treasure batch: Royal Jelly halves non-Bug move damage", s16
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Huge Sword ignores positive Defense stages", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_HUGE_SWORD; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].split == SPLIT_PHYSICAL);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_CELEBRATE, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_HARDEN, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_HARDEN); }
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Huge Sword ignores positive Special Defense stages", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_HUGE_SWORD; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_PSYBEAM].split == SPLIT_SPECIAL);
+        PLAYER(SPECIES_WOBBUFFET) { SpAttack(120); Item(item); Moves(MOVE_CELEBRATE, MOVE_PSYBEAM); }
+        OPPONENT(SPECIES_WOBBUFFET) { SpDefense(120); HP(1000); MaxHP(1000); Moves(MOVE_AMNESIA, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_AMNESIA); }
+        TURN { MOVE(player, MOVE_PSYBEAM, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Huge Sword preserves negative Defense stages", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_HUGE_SWORD; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].split == SPLIT_PHYSICAL);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_CELEBRATE, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_TAIL_WHIP, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_TAIL_WHIP); }
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
     }
 }
 
@@ -1460,5 +1525,111 @@ DOUBLE_BATTLE_TEST("Treasure batch: Pinwheel waits for a spread wind move to hit
         EXPECT_EQ(playerLeft->species, SPECIES_MAGIKARP);
         EXPECT_LT(opponentLeft->hp, opponentLeft->maxHP);
         EXPECT_LT(opponentRight->hp, opponentRight->maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Ho-Oh Plume fully restores HP and status on switch out")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); Status1(STATUS1_BURN); Item(ITEM_HO_OH_PLUME); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP));
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_STATUS), 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Ho-Oh Plume cures status at full HP")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Status1(STATUS1_PARALYSIS); Item(ITEM_HO_OH_PLUME); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP));
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_STATUS), 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Ho-Oh Plume activates only once per battle")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); Item(ITEM_HO_OH_PLUME); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SONIC_BOOM); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_SONIC_BOOM); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_SONIC_BOOM); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_SONIC_BOOM); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) - 20);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Ho-Oh Plume waits for a switch that can restore something")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_HO_OH_PLUME); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_SONIC_BOOM); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_SONIC_BOOM); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_SONIC_BOOM); }
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_SONIC_BOOM); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Ho-Oh Plume activates after a pivot move")
+{
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_U_TURN].effect == EFFECT_HIT_ESCAPE);
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); Item(ITEM_HO_OH_PLUME); Moves(MOVE_U_TURN); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_U_TURN); SEND_OUT(player, 1); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Klutz suppresses Ho-Oh Plume")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); Status1(STATUS1_BURN); Ability(ABILITY_KLUTZ); Item(ITEM_HO_OH_PLUME); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP), 40);
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_STATUS), STATUS1_BURN);
     }
 }
