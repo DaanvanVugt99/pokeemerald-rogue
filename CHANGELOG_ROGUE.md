@@ -14,6 +14,10 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Fixed
+
+- Regenerated the baked form-item index after the recent item-table changes
+
 ### Added
 
 - Added Adaptive Specs, a Treasure held item that makes each damaging move use

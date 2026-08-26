@@ -5298,6 +5298,15 @@ static void BeginRogueRunPhase_Reset(void)
     gRogueRun.currentLevelOffset = Rogue_GetModeRules()->initialLevelOffset;
     gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
 
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Gen] reset complete baseSeed=%u mode=%d generator=%d difficulty=%d levelOffset=%d",
+        gRogueRun.baseSeed,
+        Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM),
+        Rogue_GetModeRules()->adventureGenerator,
+        Rogue_GetCurrentDifficulty(),
+        gRogueRun.currentLevelOffset);
+#endif
+
     if(gRogueRun.currentLevelOffset == 0)
     {
         // Apply default
@@ -5433,9 +5442,21 @@ static void BeginRogueRunPhase_Trainers(void)
 
 static void BeginRogueRunPhase_AdventurePath(void)
 {
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Gen] adventure path begin difficulty=%d room=%d roomCount=%d",
+        Rogue_GetCurrentDifficulty(),
+        gRogueRun.adventureRoomId,
+        gRogueAdvPath.roomCount);
+#endif
     // Build the first path while the portal loading screen is already black so
     // map entry never inherits the remaining generation pause.
     RogueAdv_GenerateAdventurePathsIfRequired();
+#ifdef DEBUG_FEATURE_FRAME_TIMERS
+    DebugPrintf("[Run Gen] adventure path end room=%d roomCount=%d currentType=%d",
+        gRogueRun.adventureRoomId,
+        gRogueAdvPath.roomCount,
+        gRogueAdvPath.currentRoomType);
+#endif
 }
 
 static void BeginRogueRunPhase_MiniBossPreviews(void)

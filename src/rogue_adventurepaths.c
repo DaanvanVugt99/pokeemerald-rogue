@@ -94,6 +94,12 @@
 #define ITEM_ROOM_SCHEDULE_COUNT 3
 #define ITEM_ROOM_SCHEDULE_SALT 0x4954454Du
 
+#if defined(ROGUE_DEBUG) && !TESTING
+#define RUN_GEN_DEBUG(...) DebugPrintf(__VA_ARGS__)
+#else
+#define RUN_GEN_DEBUG(...)
+#endif
+
 #define gSpecialVar_ScriptNodeID        gSpecialVar_0x8004
 #define gSpecialVar_ScriptNodeParam0    gSpecialVar_0x8005
 #define gSpecialVar_ScriptNodeParam1    gSpecialVar_0x8006
@@ -289,7 +295,15 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
     }
 
     if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET)
+    {
+        RUN_GEN_DEBUG("[Run Gen] item schedule disabled generator=%d baseSeed=%u rewardCount=%d first=%d last=%d",
+            Rogue_GetModeRules()->adventureGenerator,
+            gRogueRun.baseSeed,
+            ITEM_ROOM_REWARD_COUNT,
+            ITEM_CURSED_LENS,
+            ITEM_WOODEN_SWORD);
         return;
+    }
 
     schedule[0].difficulty = 1 + AdvanceItemRoomScheduleRng(&state) % 7;
     hasBonusRoom = (AdvanceItemRoomScheduleRng(&state) & 1) != 0;
@@ -316,6 +330,18 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         if(schedule[i].difficulty != ROGUE_MAX_BOSS_COUNT)
             schedule[i].itemId = items[i];
     }
+
+    RUN_GEN_DEBUG("[Run Gen] item schedule baseSeed=%u rewardCount=%d first=%d last=%d slots=%d:%d/%d:%d/%d:%d",
+        gRogueRun.baseSeed,
+        ITEM_ROOM_REWARD_COUNT,
+        ITEM_CURSED_LENS,
+        ITEM_WOODEN_SWORD,
+        schedule[0].difficulty,
+        schedule[0].itemId,
+        schedule[1].difficulty,
+        schedule[1].itemId,
+        schedule[2].difficulty,
+        schedule[2].itemId);
 }
 
 static bool8 GetScheduledItemRoom(u8 difficulty, u8 *scheduleSlot, u16 *itemId)
@@ -331,10 +357,19 @@ static bool8 GetScheduledItemRoom(u8 difficulty, u8 *scheduleSlot, u16 *itemId)
         {
             *scheduleSlot = i;
             *itemId = schedule[i].itemId;
+            RUN_GEN_DEBUG("[Run Gen] item match difficulty=%d slot=%d item=%d", difficulty, i, *itemId);
             return TRUE;
         }
     }
 
+    RUN_GEN_DEBUG("[Run Gen] item no match difficulty=%d slots=%d:%d/%d:%d/%d:%d",
+        difficulty,
+        schedule[0].difficulty,
+        schedule[0].itemId,
+        schedule[1].difficulty,
+        schedule[1].itemId,
+        schedule[2].difficulty,
+        schedule[2].itemId);
     return FALSE;
 }
 
@@ -437,6 +472,8 @@ static void GeneratePath(struct AdvPathSettings* pathSettings)
     u32 materializationStartClock;
 #endif
 
+    if(pathSettings->generator == NULL)
+        RUN_GEN_DEBUG("[Run Gen] ASSERT generator is NULL", 0);
     AGB_ASSERT(pathSettings->generator != NULL);
 
     memset(pathSettings->roomScratch, 0, sizeof(pathSettings->roomScratch));
@@ -455,6 +492,7 @@ static void GeneratePath(struct AdvPathSettings* pathSettings)
 #endif
         GenerateFloorLayout(coords, pathSettings);
         GenerateRoomPlacements(pathSettings);
+        RUN_GEN_DEBUG("[Run Gen] assignment complete nodes=%d totalLength=%d", pathSettings->nodeCount, pathSettings->totalLength);
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
         materializationStartClock = RogueDebug_SampleClock();
         DebugPrintf("[Run Load] Path assignment: %d us", RogueDebug_ClockToDisplayUnits(materializationStartClock - assignmentStartClock));
@@ -494,6 +532,10 @@ static void GenerateFloorLayout(struct Coords8 currentCoords, struct AdvPathSett
     if(pathSettings->nodeCount >= ROGUE_ADVPATH_ROOM_CAPACITY)
     {
         // Cannot generate any more
+        RUN_GEN_DEBUG("[Run Gen] floor layout reached capacity=%d at x=%d y=%d",
+            ROGUE_ADVPATH_ROOM_CAPACITY,
+            currentCoords.x,
+            currentCoords.y);
         DebugPrint("ADVPATH: \tReached room/node capacity.");
         return;
     }
@@ -895,6 +937,9 @@ static bool8 ReplaceRoomEncounter(struct AdvPathSettings* pathSettings, u8 fromR
     if(totalWeight != 0)
     {
         u16 targetWeight = RogueRandom() % totalWeight;
+#if defined(ROGUE_DEBUG) && !TESTING
+        u16 originalTargetWeight = targetWeight;
+#endif
 
         for(i = 0; i < candidateCount; ++i)
         {
@@ -907,10 +952,20 @@ static bool8 ReplaceRoomEncounter(struct AdvPathSettings* pathSettings, u8 fromR
             targetWeight -= weights[i];
         }
 
+        RUN_GEN_DEBUG("[Run Gen] ASSERT encounter replacement missed from=%d to=%d candidates=%d totalWeight=%d roll=%d",
+            fromRoomType,
+            toRoomType,
+            candidateCount,
+            totalWeight,
+            originalTargetWeight);
         AGB_ASSERT(FALSE);
         return TRUE;
     }
 
+    RUN_GEN_DEBUG("[Run Gen] encounter replacement unavailable from=%d to=%d nodes=%d",
+        fromRoomType,
+        toRoomType,
+        pathSettings->nodeCount);
     return FALSE;
 }
 
@@ -1033,6 +1088,12 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
     {
         bool8 placedFrontierBrain = ReplaceRoomEncounter(pathSettings, ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_MINIBOSS);
 
+        if(!placedFrontierBrain)
+            RUN_GEN_DEBUG("[Run Gen] ASSERT frontier placement failed difficulty=%d trainer=%d nodes=%d freeRooms=%d",
+                GetPathGenerationDifficulty(),
+                Rogue_GetScheduledFrontierBrainTrainer(GetPathGenerationDifficulty()),
+                pathSettings->nodeCount,
+                freeRoomCount);
         AGB_ASSERT(placedFrontierBrain);
         if(placedFrontierBrain)
             --freeRoomCount;
@@ -1081,6 +1142,10 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
                     --freeRoomCount;
             }
 
+            if(itemRoomId == (u8)-1)
+                RUN_GEN_DEBUG("[Run Gen] ASSERT forced item room has no candidate nodes=%d freeRooms=%d",
+                    pathSettings->nodeCount,
+                    freeRoomCount);
             AGB_ASSERT(itemRoomId != (u8)-1);
         }
         else
@@ -1093,6 +1158,13 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
             {
                 bool8 placedItemRoom = ReplaceRoomEncounter(pathSettings, ADVPATH_ROOM_ROUTE, ADVPATH_ROOM_ITEM);
 
+                if(!placedItemRoom)
+                    RUN_GEN_DEBUG("[Run Gen] ASSERT item room placement failed difficulty=%d slot=%d item=%d nodes=%d freeRooms=%d",
+                        Rogue_GetCurrentDifficulty(),
+                        scheduleSlot,
+                        itemId,
+                        pathSettings->nodeCount,
+                        freeRoomCount);
                 AGB_ASSERT(placedItemRoom);
                 if(placedItemRoom)
                     --freeRoomCount;
@@ -1382,6 +1454,7 @@ static u8 FindRoomOfType(struct AdvPathSettings* pathSettings, u16 type)
             return i;
     }
 
+    RUN_GEN_DEBUG("[Run Gen] ASSERT room type not found type=%d nodes=%d", type, pathSettings->nodeCount);
     AGB_ASSERT(FALSE);
     return 0;
 }
@@ -1529,6 +1602,11 @@ static void MaterializeRoom(u8 roomId)
     {
     case ADVPATH_ROOM_BOSS:
         // Specifically use the correct difficulty here regardless of if we are faking or not.
+        if(Rogue_GetCurrentDifficulty() >= ARRAY_COUNT(gRogueRun.bossTrainerNums))
+            RUN_GEN_DEBUG("[Run Gen] ASSERT boss difficulty out of range room=%d difficulty=%d capacity=%d",
+                roomId,
+                Rogue_GetCurrentDifficulty(),
+                ARRAY_COUNT(gRogueRun.bossTrainerNums));
         AGB_ASSERT(Rogue_GetCurrentDifficulty() < ARRAY_COUNT(gRogueRun.bossTrainerNums));
         room->roomParams.perType.boss.trainerNum = gRogueRun.bossTrainerNums[Rogue_GetCurrentDifficulty()];
         break;
@@ -1553,6 +1631,10 @@ static void MaterializeRoom(u8 roomId)
     case ADVPATH_ROOM_MINIBOSS:
         room->roomParams.roomIdx = 0;
         room->roomParams.perType.miniboss.trainerNum = Rogue_GetScheduledFrontierBrainTrainer(GetPathGenerationDifficulty());
+        if(room->roomParams.perType.miniboss.trainerNum == TRAINER_NONE)
+            RUN_GEN_DEBUG("[Run Gen] ASSERT miniboss has no trainer room=%d difficulty=%d",
+                roomId,
+                GetPathGenerationDifficulty());
         AGB_ASSERT(room->roomParams.perType.miniboss.trainerNum != TRAINER_NONE);
         break;
 
@@ -1566,6 +1648,12 @@ static void MaterializeRoom(u8 roomId)
         if(!hasScheduledRoom)
             hasScheduledRoom = GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId);
 
+        if(!hasScheduledRoom)
+            RUN_GEN_DEBUG("[Run Gen] ASSERT item room has no schedule difficulty=%d room=%d slot=%d item=%d",
+                Rogue_GetCurrentDifficulty(),
+                roomId,
+                scheduleSlot,
+                itemId);
         AGB_ASSERT(hasScheduledRoom);
 #else
         GetScheduledItemRoom(Rogue_GetCurrentDifficulty(), &scheduleSlot, &itemId);
@@ -1573,6 +1661,12 @@ static void MaterializeRoom(u8 roomId)
         room->roomParams.roomIdx = 0;
         room->roomParams.perType.itemRoom.itemId = itemId;
         room->roomParams.perType.itemRoom.scheduleSlot = scheduleSlot;
+        RUN_GEN_DEBUG("[Run Gen] materialized item room=%d difficulty=%d slot=%d item=%d rewardRange=%d",
+            roomId,
+            Rogue_GetCurrentDifficulty(),
+            scheduleSlot,
+            itemId,
+            Rogue_IsItemRoomReward(itemId));
         break;
     }
 
@@ -1689,6 +1783,16 @@ static u8 GenerateRoomConnectionMask(struct Coords8 coords, struct AdvPathSettin
     // keep going until we have the required number of connections
     while(!(connCount >= minConnCount && connCount <= maxConnCount));
 
+    if(mask == 0)
+        RUN_GEN_DEBUG("[Run Gen] ASSERT connection mask is zero x=%d y=%d min=%d max=%d chances=%d/%d/%d rng=%u",
+            coords.x,
+            coords.y,
+            minConnCount,
+            maxConnCount,
+            branchingChances[ROOM_CONNECTION_TOP],
+            branchingChances[ROOM_CONNECTION_MID],
+            branchingChances[ROOM_CONNECTION_BOT],
+            gRngRogueValue);
     AGB_ASSERT(mask != 0);
 
     return mask;
@@ -1732,6 +1836,16 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
 #endif
         struct AdvPathSettings pathSettings = {0};
         struct AdvPathGenerator generator = {0};
+
+        RUN_GEN_DEBUG("[Run Gen] begin baseSeed=%u room=%d roomCount=%d justGenerated=%d mode=%d generator=%d currentDifficulty=%d pathDifficulty=%d",
+            gRogueRun.baseSeed,
+            gRogueRun.adventureRoomId,
+            gRogueAdvPath.roomCount,
+            gRogueAdvPath.justGenerated,
+            Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM),
+            Rogue_GetModeRules()->adventureGenerator,
+            Rogue_GetCurrentDifficulty(),
+            GetPathGenerationDifficulty());
 
         // If we have a valid room ID, then we're reloading a previous save
         bool8 isNewGeneration = gRogueRun.adventureRoomId == ADVPATH_INVALID_ROOM_ID;
@@ -1780,6 +1894,11 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
 
             // This is the seed for this path
             SeedRogueRng(seed);
+            RUN_GEN_DEBUG("[Run Gen] path seed=%d totalLength=%d pathDifficulty=%d rng=%u",
+                seed,
+                pathSettings.totalLength,
+                GetPathGenerationDifficulty(),
+                gRngRogueValue);
         }
 
         // Select some branching presets for the layout generation
@@ -1837,6 +1956,9 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
                         break;
 
                     default:
+                        RUN_GEN_DEBUG("[Run Gen] ASSERT invalid standard column preset column=%d pathDifficulty=%d",
+                            i,
+                            GetPathGenerationDifficulty());
                         AGB_ASSERT(FALSE);
                         break;
                     }
@@ -1901,6 +2023,9 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
                         break;
                     
                     default:
+                        RUN_GEN_DEBUG("[Run Gen] ASSERT invalid column preset column=%d pathDifficulty=%d",
+                            i,
+                            GetPathGenerationDifficulty());
                         AGB_ASSERT(FALSE);
                         break;
                     }
@@ -1911,6 +2036,13 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
         DebugPrintf("ADVPATH: Generating path for seed %d.", gRngRogueValue);
         Rogue_ResetAdventurePathBuffers();
         GeneratePath(&pathSettings);
+
+        RUN_GEN_DEBUG("[Run Gen] complete nodes=%d rooms=%d minY=%d maxY=%d pathLength=%d",
+            pathSettings.nodeCount,
+            gRogueAdvPath.roomCount,
+            gRogueAdvPath.pathMinY,
+            gRogueAdvPath.pathMaxY,
+            gRogueAdvPath.pathLength);
 
         DebugPrint("ADVPATH: Finished generating path.");
 
