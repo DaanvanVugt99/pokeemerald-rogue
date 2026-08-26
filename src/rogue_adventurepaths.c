@@ -283,6 +283,8 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         ITEM_HOURGLASS,
         ITEM_GOLDEN_IDOL,
         ITEM_DRAIN_BLADE,
+        ITEM_HEALING_LAMP,
+        ITEM_CRYSTAL_WAND,
     };
     u32 state = ((u32)gRogueRun.baseSeed << 16)
         ^ gRogueRun.baseSeed
@@ -304,7 +306,7 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
             gRogueRun.baseSeed,
             ITEM_ROOM_REWARD_COUNT,
             ITEM_CURSED_LENS,
-            ITEM_DRAIN_BLADE);
+            ITEM_CRYSTAL_WAND);
         return;
     }
 
@@ -338,7 +340,7 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         gRogueRun.baseSeed,
         ITEM_ROOM_REWARD_COUNT,
         ITEM_CURSED_LENS,
-        ITEM_DRAIN_BLADE,
+        ITEM_CRYSTAL_WAND,
         schedule[0].difficulty,
         schedule[0].itemId,
         schedule[1].difficulty,

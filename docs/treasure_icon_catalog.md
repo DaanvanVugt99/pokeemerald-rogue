@@ -38,7 +38,7 @@ palette reduction, or resizing.
 | Ambush Talon | `QuickTalon` | Gives the holder's first move +1 priority once per battle | Implemented | Tower of Ashes |
 | Rain Totem | `RainTotem` | Rain and Water-type teams | Implemented | Tower of Ashes |
 | Acid Rain Totem | `AcidRainTotem` | Acid Rain and Poison-type teams | Implemented | Tower of Ashes |
-| Ramping Staff | `RampingStaff` | Consecutive turns or escalating effects | TBD | Tower of Ashes |
+| Crystal Wand | `RampingStaff` | Super-effective moves raise Defense once per turn | Implemented | Tower of Ashes |
 | Sand Totem | `SandTotem` | Sandstorm and Rock/Ground/Steel teams | Implemented | Tower of Ashes |
 | Purity Jewel | `SpecialistJewel` | Boosts damage when all known moves have the same type | Implemented | Tower of Ashes |
 | Sun Totem | `SunTotem` | Sun and Fire/Grass-type interaction | Implemented | Tower of Ashes |
@@ -51,7 +51,7 @@ palette reduction, or resizing.
 | Drain Blade | `DrainBlade` | Damaging moves restore damage dealt, with doubled healing against weakened targets | Implemented | Tower of Ashes |
 | Grand Plaza | `GrandPlaza` | Open concept | TBD | Tower of Ashes |
 | Guts Sword | `GutsSword` | Open concept | TBD | Tower of Ashes |
-| Healing Lamp | `HealingLamp` | Open concept | TBD | Tower of Ashes |
+| Healing Lamp | `HealingLamp` | Restores 1/8 max HP each turn, but moves consume 1 additional PP | Implemented | Tower of Ashes |
 | Ho-Oh Plume | `HoOhPlume` | Open concept | TBD | Tower of Ashes |
 | Hourglass | `Hourglass` | Halves Speed, then raises Speed by 2 stages at the end of each turn | Implemented | Tower of Ashes |
 | Monotonous Armor | `MonotonousArmor` | Open concept | TBD | Tower of Ashes |

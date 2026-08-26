@@ -617,6 +617,7 @@ extern const u8 BattleScript_QuickDrawActivation[];
 extern const u8 BattleScript_CustapBerryActivation[];
 extern const u8 BattleScript_PriorityCharmActivation[];
 extern const u8 BattleScript_ChimeJewelActivates[];
+extern const u8 BattleScript_CrystalWandActivates[];
 extern const u8 BattleScript_HourglassActivates[];
 extern const u8 BattleScript_MicleBerryActivateEnd2[];
 extern const u8 BattleScript_MicleBerryActivateRet[];

@@ -28,6 +28,8 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_HOURGLASS) == HOLD_EFFECT_HOURGLASS);
     ASSUME(ItemId_GetHoldEffect(ITEM_GOLDEN_IDOL) == HOLD_EFFECT_GOLDEN_IDOL);
     ASSUME(ItemId_GetHoldEffect(ITEM_DRAIN_BLADE) == HOLD_EFFECT_DRAIN_BLADE);
+    ASSUME(ItemId_GetHoldEffect(ITEM_HEALING_LAMP) == HOLD_EFFECT_HEALING_LAMP);
+    ASSUME(ItemId_GetHoldEffect(ITEM_CRYSTAL_WAND) == HOLD_EFFECT_CRYSTAL_WAND);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -1040,6 +1042,55 @@ SINGLE_BATTLE_TEST("Treasure batch: Hourglass halves Speed and ramps it by two s
     }
 }
 
+SINGLE_BATTLE_TEST("Treasure batch: Crystal Wand raises Defense after super-effective damage once per turn")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CRYSTAL_WAND); Moves(MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_CHARMANDER) { HP(10000); MaxHP(10000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE + 2);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Crystal Wand does not activate on neutral damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CRYSTAL_WAND); Moves(MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(10000); MaxHP(10000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Crystal Wand does not activate when Wonder Shield nullifies damage")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CRYSTAL_WAND); Moves(MOVE_WATER_GUN); }
+        OPPONENT(SPECIES_CHARMANDER) { HP(10000); MaxHP(10000); Item(ITEM_WONDER_SHIELD); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Crystal Wand activates once after a multi-hit move")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CRYSTAL_WAND); Moves(MOVE_TRIPLE_DIVE); }
+        OPPONENT(SPECIES_CHARMANDER) { HP(10000); MaxHP(10000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TRIPLE_DIVE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE + 1);
+    }
+}
+
 SINGLE_BATTLE_TEST("Treasure batch: Golden Idol scales damage with money and caps at 50 percent", s16 damage)
 {
     u16 item;
@@ -1144,5 +1195,54 @@ DOUBLE_BATTLE_TEST("Treasure batch: Golden Idol does not stack with Amulet Coin"
     } THEN {
         EXPECT(gBattleStruct->moneyMultiplier == 2);
         EXPECT(gBattleStruct->moneyMultiplierItem);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Healing Lamp restores one eighth max HP at end of turn")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); MaxHP(96); Item(ITEM_HEALING_LAMP); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->hp, 13);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Healing Lamp makes the holder's moves consume one additional PP")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_HEALING_LAMP); MovesWithPP({MOVE_CELEBRATE, 10}); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->pp[0], 8);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Healing Lamp's PP cost stacks with Pressure")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_HEALING_LAMP); MovesWithPP({MOVE_TACKLE, 10}); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_PRESSURE); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->pp[0], 7);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Klutz suppresses both Healing Lamp effects")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_KLUTZ); HP(1); MaxHP(96); Item(ITEM_HEALING_LAMP); MovesWithPP({MOVE_CELEBRATE, 10}); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(player->hp, 1);
+        EXPECT_EQ(player->pp[0], 9);
     }
 }

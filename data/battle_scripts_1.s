@@ -8262,6 +8262,20 @@ BattleScript_ChimeJewelActivates::
 BattleScript_ChimeJewelActivatesRet:
 	return
 
+BattleScript_CrystalWandActivates::
+	copybyte sBATTLER, gBattlerAttacker
+	statbuffchange MOVE_EFFECT_AFFECTS_USER, BattleScript_CrystalWandActivatesRet
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_CrystalWandActivatesRet
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	waitanimation
+	printstring STRINGID_USINGITEMSTATOFPKMNROSE
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_CrystalWandActivatesRet:
+	return
+
 BattleScript_HourglassActivates::
 	copybyte sBATTLER, gBattlerAttacker
 	statbuffchange MOVE_EFFECT_AFFECTS_USER, BattleScript_HourglassActivatesRet

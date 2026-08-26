@@ -23343,6 +23343,19 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     RecordItemEffectBattle(battler, battlerHoldEffect);
                 }
                 break;
+            case HOLD_EFFECT_HEALING_LAMP:
+                if (gBattleMons[battler].hp < gBattleMons[battler].maxHP && !moveTurn
+                  && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler)))
+                {
+                    gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
+                    if (gBattleMoveDamage == 0)
+                        gBattleMoveDamage = 1;
+                    gBattleMoveDamage *= -1;
+                    BattleScriptExecute(BattleScript_ItemHealHP_End2);
+                    effect = ITEM_HP_CHANGE;
+                    RecordItemEffectBattle(battler, battlerHoldEffect);
+                }
+                break;
             case HOLD_EFFECT_RAIN_TOTEM:
                 if (IsBattlerWeatherAffected(battler, B_WEATHER_RAIN))
                     goto LEFTOVERS;
@@ -23824,6 +23837,25 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 effect = ITEM_STATS_CHANGE;
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_ChimeJewelActivates;
+            }
+            break;
+        case HOLD_EFFECT_CRYSTAL_WAND:
+            if (gSpecialStatuses[gBattlerAttacker].superEffectiveDamage
+             && IsBattlerAlive(gBattlerAttacker)
+             && !gProtectStructs[gBattlerAttacker].crystalWandUsed
+             && !IS_MOVE_STATUS(gCurrentMove)
+             && CompareStat(gBattlerAttacker, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN)
+             && !NoAliveMonsForEitherParty())
+            {
+                gProtectStructs[gBattlerAttacker].crystalWandUsed = TRUE;
+                gLastUsedItem = atkItem;
+                gPotentialItemEffectBattler = gBattlerAttacker;
+                gBattleScripting.battler = gBattlerAttacker;
+                RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_CRYSTAL_WAND);
+                SET_STATCHANGER(STAT_DEF, 1, FALSE);
+                effect = ITEM_STATS_CHANGE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_CrystalWandActivates;
             }
             break;
         }

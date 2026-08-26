@@ -608,6 +608,26 @@ text gItemRoomDesc_DrainBlade
     format("Damaging moves restore 1/8 of damage dealt, or 1/4 if the target was below half HP before the move.")
 }
 
+text gItemDesc_HealingLamp
+{
+    format("Restores 1/8 max HP each turn. Moves use 1 extra PP.")
+}
+
+text gItemRoomDesc_HealingLamp
+{
+    format("At the end of each turn, restores 1/8 max HP. Each move the holder uses consumes 1 additional PP.")
+}
+
+text gItemDesc_CrystalWand
+{
+    format("Super-effective moves raise the holder's Defense by 1 stage once per turn.")
+}
+
+text gItemRoomDesc_CrystalWand
+{
+    format("After dealing super-effective damage, the holder's Defense rises by 1 stage once per turn.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

@@ -1092,6 +1092,8 @@ extern const u8 gItemRoomDesc_WoodenSword[];
 extern const u8 gItemRoomDesc_Hourglass[];
 extern const u8 gItemRoomDesc_GoldenIdol[];
 extern const u8 gItemRoomDesc_DrainBlade[];
+extern const u8 gItemRoomDesc_HealingLamp[];
+extern const u8 gItemRoomDesc_CrystalWand[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1255,6 +1257,10 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_GoldenIdol;
     case ITEM_DRAIN_BLADE:
         return gItemRoomDesc_DrainBlade;
+    case ITEM_HEALING_LAMP:
+        return gItemRoomDesc_HealingLamp;
+    case ITEM_CRYSTAL_WAND:
+        return gItemRoomDesc_CrystalWand;
     default:
         return Rogue_GetItemDesc(itemId);
     }

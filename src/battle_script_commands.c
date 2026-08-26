@@ -2405,6 +2405,12 @@ static void Cmd_ppreduce(void)
 
     if (!(gHitMarker & (HITMARKER_NO_PPDEDUCT | HITMARKER_NO_ATTACKSTRING)) && gBattleMons[gBattlerAttacker].pp[gCurrMovePos])
     {
+        if (GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_HEALING_LAMP)
+        {
+            ppToDeduct++;
+            RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_HEALING_LAMP);
+        }
+
         gProtectStructs[gBattlerAttacker].notFirstStrike = TRUE;
 
         // For item Metronome, echoed voice
@@ -2884,8 +2890,11 @@ END:
     gBattlescriptCurrInstr = cmd->nextInstr;
 
     if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && gBattleMoveDamage >= 1)
+    {
         gSpecialStatuses[gBattlerAttacker].damagedMons |= gBitTable[gBattlerTarget];
-
+        if (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
+            gSpecialStatuses[gBattlerAttacker].superEffectiveDamage = TRUE;
+    }
     // Check gems and damage reducing berries.
     if (gSpecialStatuses[gBattlerTarget].berryReduced
         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)

@@ -149,6 +149,8 @@ extern const u8 gItemDesc_WoodenSword[];
 extern const u8 gItemDesc_Hourglass[];
 extern const u8 gItemDesc_GoldenIdol[];
 extern const u8 gItemDesc_DrainBlade[];
+extern const u8 gItemDesc_HealingLamp[];
+extern const u8 gItemDesc_CrystalWand[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -3011,6 +3013,36 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureDrainBlade,
         .iconPalette = gItemIconPalette_TreasureDrainBlade,
+    },
+
+    [ITEM_HEALING_LAMP - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Healing Lamp"),
+        .itemId = ITEM_HEALING_LAMP,
+        .price = 0,
+        .description = gItemDesc_HealingLamp,
+        .holdEffect = HOLD_EFFECT_HEALING_LAMP,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureHealingLamp,
+        .iconPalette = gItemIconPalette_TreasureHealingLamp,
+    },
+
+    [ITEM_CRYSTAL_WAND - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Crystal Wand"),
+        .itemId = ITEM_CRYSTAL_WAND,
+        .price = 0,
+        .description = gItemDesc_CrystalWand,
+        .holdEffect = HOLD_EFFECT_CRYSTAL_WAND,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureRampingStaff,
+        .iconPalette = gItemIconPalette_TreasureRampingStaff,
     },
 
 #ifdef ROGUE_DEBUG

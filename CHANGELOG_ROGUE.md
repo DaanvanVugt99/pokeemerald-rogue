@@ -20,12 +20,16 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Healing Lamp, a Treasure held item that restores 1/8 max HP at the end
+  of each turn, but makes the holder's moves consume one additional PP.
 - Added Golden Idol, a Treasure held item that boosts damage by 1% per ¥1,000
   carried, up to 50%, and also doubles prize money when its holder enters battle.
 - Added Drain Blade, a Treasure held item that restores 1/8 of damaging-move
   damage, doubling the healing when the target began the move below half HP.
 - Added Hourglass, a Treasure held item that halves the holder's Speed but raises
   it by two stages at the end of each turn.
+- Added Crystal Wand, a Treasure held item that raises the holder's Defense once
+  per turn after it deals super-effective damage.
 - Added Adaptive Specs, a Treasure held item that makes each damaging move use
   whichever of its physical or special category would deal more damage.
 - Added Briar Bracer and Tricky Box Treasure held items, afflicting contact

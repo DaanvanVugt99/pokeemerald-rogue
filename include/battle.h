@@ -195,6 +195,7 @@ struct ProtectStruct
     u16 metronomeItemPending:1;
     u16 activateOpportunist:2; // 2 - to copy stats. 1 - stats copied (do not repeat). 0 - no stats to copy
     u16 driftSongMoveUsed:1;
+    u16 crystalWandUsed:1;
     u32 physicalDmg;
     u32 specialDmg;
     u8 physicalBattlerId;
@@ -242,6 +243,7 @@ struct SpecialStatus
     u8 affectionEndured:1;
     // End of byte
     u8 damagedMons:4; // Mons that have been damaged directly by using a move, includes substitute.
+    u8 superEffectiveDamage:1;
     u8 dancerUsedMove:1;
     u8 dancerOriginalTarget:3;
     // End of byte

@@ -223,6 +223,8 @@
 #define HOLD_EFFECT_HOURGLASS              237
 #define HOLD_EFFECT_GOLDEN_IDOL            238
 #define HOLD_EFFECT_DRAIN_BLADE            239
+#define HOLD_EFFECT_HEALING_LAMP            240
+#define HOLD_EFFECT_CRYSTAL_WAND           241
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

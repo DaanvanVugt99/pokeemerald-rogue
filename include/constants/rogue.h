@@ -291,9 +291,11 @@
 #define ITEM_HOURGLASS                      (LAST_ITEM_TR + 52)
 #define ITEM_GOLDEN_IDOL                    (LAST_ITEM_TR + 53)
 #define ITEM_DRAIN_BLADE                    (LAST_ITEM_TR + 54)
+#define ITEM_HEALING_LAMP                   (LAST_ITEM_TR + 55)
+#define ITEM_CRYSTAL_WAND                   (LAST_ITEM_TR + 56)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_DRAIN_BLADE
+#define LAST_ITEM_ROOM_REWARD           ITEM_CRYSTAL_WAND
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0
