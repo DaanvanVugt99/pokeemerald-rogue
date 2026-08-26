@@ -293,9 +293,13 @@
 #define ITEM_DRAIN_BLADE                    (LAST_ITEM_TR + 54)
 #define ITEM_HEALING_LAMP                   (LAST_ITEM_TR + 55)
 #define ITEM_CRYSTAL_WAND                   (LAST_ITEM_TR + 56)
+#define ITEM_VICTORS_BAND                   (LAST_ITEM_TR + 57)
+#define ITEM_WINGED_BOOTS                   (LAST_ITEM_TR + 58)
+#define ITEM_PINWHEEL                       (LAST_ITEM_TR + 59)
+#define ITEM_ROYAL_JELLY                    (LAST_ITEM_TR + 60)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_CRYSTAL_WAND
+#define LAST_ITEM_ROOM_REWARD           ITEM_ROYAL_JELLY
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

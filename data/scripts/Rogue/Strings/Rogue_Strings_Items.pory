@@ -628,6 +628,46 @@ text gItemRoomDesc_CrystalWand
     format("After dealing super-effective damage, the holder's Defense rises by 1 stage once per turn.")
 }
 
+text gItemDesc_VictorsBand
+{
+    format("After a KO, restores 25% max HP.")
+}
+
+text gItemRoomDesc_VictorsBand
+{
+    format("After the holder knocks out an opposing Pokémon, it restores 25% of its maximum HP.")
+}
+
+text gItemDesc_WingedBoots
+{
+    format("Doubles the holder's Speed at or below half HP.")
+}
+
+text gItemRoomDesc_WingedBoots
+{
+    format("While at or below half HP, the holder's Speed is doubled.")
+}
+
+text gItemDesc_Pinwheel
+{
+    format("After a successful wind move, the holder switches out.")
+}
+
+text gItemRoomDesc_Pinwheel
+{
+    format("After successfully using a wind move, the holder switches out if another party Pokémon is available.")
+}
+
+text gItemDesc_RoyalJelly
+{
+    format("Bug-type moves deal 2× damage, but non-Bug damaging moves deal 50% less damage.")
+}
+
+text gItemRoomDesc_RoyalJelly
+{
+    format("Bug-type moves deal 2× damage, but non-Bug damaging moves deal 50% less damage.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

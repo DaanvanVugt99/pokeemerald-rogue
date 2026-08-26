@@ -803,6 +803,29 @@ BattleScript_UndertowActivates::
 BattleScript_UndertowEnd:
 	return
 
+BattleScript_PinwheelActivates::
+	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	jumpifbattletype BATTLE_TYPE_ARENA, BattleScript_PinwheelEnd
+	jumpifcantswitch SWITCH_IGNORE_ESCAPE_PREVENTION | BS_ATTACKER, BattleScript_PinwheelEnd
+	openpartyscreen BS_ATTACKER, BattleScript_PinwheelEnd
+	switchoutabilities BS_ATTACKER
+	waitstate
+	switchhandleorder BS_ATTACKER, 2
+	returntoball BS_ATTACKER, FALSE
+	getswitchedmondata BS_ATTACKER
+	switchindataupdate BS_ATTACKER
+	hpthresholds BS_ATTACKER
+	trytoclearprimalweather
+	printstring STRINGID_EMPTYSTRING3
+	waitmessage 1
+	printstring STRINGID_SWITCHINMON
+	switchinanim BS_ATTACKER, TRUE
+	waitstate
+	switchineffects BS_ATTACKER
+BattleScript_PinwheelEnd:
+	return
+
 BattleScript_EffectPledge::
 	attackcanceler
 	setpledge BattleScript_HitFromAccCheck
@@ -7365,6 +7388,7 @@ BattleScript_FaintTarget::
 	tryactivategrimneigh BS_ATTACKER    @ and as one shadow rider
 	tryactivatemomentumcharm BS_ATTACKER
 	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_ASHEN_CROWN
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_VICTORS_BAND
 	tryactivatebattlebond BS_ATTACKER
 	tryactivateshatter BS_ATTACKER
 	trytrainerslidefirstdownmsg BS_TARGET

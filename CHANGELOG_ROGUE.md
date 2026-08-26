@@ -20,6 +20,14 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Royal Jelly, a Treasure held item that doubles Bug-type move damage but
+  halves damage from the holder's non-Bug damaging moves.
+- Added Pinwheel, a Treasure held item that switches its holder out after it
+  successfully uses a wind move.
+- Added Victor's Band, a Treasure held item that restores 25% max HP after its
+  holder knocks out an opposing Pokémon.
+- Added Winged Boots, a Treasure held item that doubles the holder's Speed at or
+  below half HP.
 - Added Healing Lamp, a Treasure held item that restores 1/8 max HP at the end
   of each turn, but makes the holder's moves consume one additional PP.
 - Added Golden Idol, a Treasure held item that boosts damage by 1% per ¥1,000

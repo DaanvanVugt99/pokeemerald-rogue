@@ -14,9 +14,9 @@ palette reduction, or resizing.
 | Working name | Graphics symbol suffix | Design lane | Effect status | Source |
 | --- | --- | --- | --- | --- |
 | Chime Jewel | `BellJewel` | Sound moves raise the holder's Speed | Implemented | Tower of Ashes |
-| Berserker's Greaves | `BerserkersGreaves` | Low-HP aggression, commitment, or Speed | TBD | Tower of Ashes |
+| Winged Boots | `BerserkersGreaves` | Doubles Speed at or below half HP | Implemented | Tower of Ashes |
 | Impact Plating | `BufferShield` | Halves contact damage, but takes 50% more from non-contact moves | Implemented | Tower of Ashes |
-| Champion's Band | `ChampionsBand` | Knockouts, streaks, or earned momentum | TBD | Tower of Ashes |
+| Victor's Band | `ChampionsBand` | Restores 25% max HP after the holder knocks out an opposing Pokémon | Implemented | Tower of Ashes |
 | Twin Goggles | `CompoundLens` | Doubles damaging-move accuracy, but prevents additional effects | Implemented | Tower of Ashes |
 | Echo Scepter | `EchoScepter` | Repeated moves, copied effects, or echoes | Implemented | Tower of Ashes |
 | Electric Tiki | `ElectricTiki` | Electric Terrain or Electric-type interaction | Implemented | Tower of Ashes |
@@ -66,11 +66,11 @@ palette reduction, or resizing.
 | Wooden Sword | `WoodCannon` | Single-hit attacks strike three times at 40% power; only the first can add effects | Implemented | Tower of Ashes |
 | X Ancient | `XAncient` | Open concept | TBD | Tower of Ashes |
 | Elred Berry | `ElredBerry` | Open concept | TBD | NocTurn |
-| Honey Badge | `HoneyBadge` | Open concept | TBD | NocTurn |
+| Royal Jelly | `HoneyBadge` | Bug-type moves deal 2× damage; non-Bug damaging moves deal 50% less damage | Implemented | NocTurn |
 | Item 692 | `Item692` | Open concept | TBD | NocTurn |
 | Item 693 | `Item693` | Open concept | TBD | NocTurn |
 | Megaphone | `Megaphone` | Open concept | TBD | NocTurn |
-| Pinwheel | `Pinwheel` | Open concept | TBD | NocTurn |
+| Pinwheel | `Pinwheel` | Successfully using a wind move switches the holder out | Implemented | NocTurn |
 | Pixie Dust | `PixieDust` | Open concept | TBD | NocTurn |
 | Shock Bracer | `ShockBracer` | Open concept | TBD | NocTurn |
 | Vital Herb | `VitalHerb` | Open concept | TBD | NocTurn |

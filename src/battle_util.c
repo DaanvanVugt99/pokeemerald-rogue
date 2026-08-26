@@ -23858,6 +23858,30 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 gBattlescriptCurrInstr = BattleScript_CrystalWandActivates;
             }
             break;
+        case HOLD_EFFECT_PINWHEEL:
+            if (gBattleMoves[gCurrentMove].windMove
+             && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE
+             && IsBattlerAlive(gBattlerAttacker)
+             && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
+             && CountUsablePartyMons(gBattlerAttacker) > 0
+             && (gProtectStructs[gBattlerAttacker].targetAffected
+              || (IS_MOVE_STATUS(gCurrentMove)
+               && !(gMoveResultFlags & MOVE_RESULT_FAILED)))
+             && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+             && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
+             && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
+             && gBattleOutcome == 0
+             && !NoAliveMonsForEitherParty())
+            {
+                gLastUsedItem = atkItem;
+                gPotentialItemEffectBattler = gBattleScripting.battler = gBattlerAttacker;
+                gSpecialStatuses[gBattlerAttacker].preventLifeOrbDamage = TRUE;
+                RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_PINWHEEL);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_PinwheelActivates;
+                effect = ITEM_EFFECT_OTHER;
+            }
+            break;
         }
 
         if (IsBattlerAlive(gBattlerAttacker)
@@ -27225,6 +27249,17 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, u32 ba
             if (updateFlags)
                 RecordItemEffectBattle(battlerAtk, holdEffectAtk);
             return UQ_4_12(1.5);
+        }
+        break;
+    case HOLD_EFFECT_ROYAL_JELLY:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move))
+        {
+            u32 moveType;
+
+            GET_MOVE_TYPE(move, moveType);
+            if (updateFlags)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
+            return moveType == TYPE_BUG ? UQ_4_12(2.0) : UQ_4_12(0.5);
         }
         break;
     }

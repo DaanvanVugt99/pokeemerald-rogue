@@ -225,6 +225,10 @@
 #define HOLD_EFFECT_DRAIN_BLADE            239
 #define HOLD_EFFECT_HEALING_LAMP            240
 #define HOLD_EFFECT_CRYSTAL_WAND           241
+#define HOLD_EFFECT_VICTORS_BAND           242
+#define HOLD_EFFECT_WINGED_BOOTS            243
+#define HOLD_EFFECT_PINWHEEL                244
+#define HOLD_EFFECT_ROYAL_JELLY             245
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

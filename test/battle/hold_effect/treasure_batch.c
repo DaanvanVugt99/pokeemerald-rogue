@@ -30,17 +30,29 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_DRAIN_BLADE) == HOLD_EFFECT_DRAIN_BLADE);
     ASSUME(ItemId_GetHoldEffect(ITEM_HEALING_LAMP) == HOLD_EFFECT_HEALING_LAMP);
     ASSUME(ItemId_GetHoldEffect(ITEM_CRYSTAL_WAND) == HOLD_EFFECT_CRYSTAL_WAND);
+    ASSUME(ItemId_GetHoldEffect(ITEM_VICTORS_BAND) == HOLD_EFFECT_VICTORS_BAND);
+    ASSUME(ItemId_GetHoldEffect(ITEM_WINGED_BOOTS) == HOLD_EFFECT_WINGED_BOOTS);
+    ASSUME(ItemId_GetHoldEffect(ITEM_PINWHEEL) == HOLD_EFFECT_PINWHEEL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_ROYAL_JELLY) == HOLD_EFFECT_ROYAL_JELLY);
+    ASSUME(gBattleMoves[MOVE_GUST].windMove);
+    ASSUME(gBattleMoves[MOVE_TAILWIND].windMove);
+    ASSUME(gBattleMoves[MOVE_ICY_WIND].windMove);
+    ASSUME(!gBattleMoves[MOVE_CELEBRATE].windMove);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
     ASSUME(gBattleMoves[MOVE_PIN_MISSILE].type == TYPE_BUG);
     ASSUME(gBattleMoves[MOVE_PIN_MISSILE].effect == EFFECT_MULTI_HIT);
+    ASSUME(gBattleMoves[MOVE_BUG_BITE].type == TYPE_BUG);
+    ASSUME(gBattleMoves[MOVE_BUG_BITE].power > 0);
     ASSUME(gBattleMoves[MOVE_WATER_GUN].power > 0);
     ASSUME(!gBattleMoves[MOVE_WATER_GUN].copycatBanned);
     ASSUME(IsMoveInherentlyMakingContact(MOVE_TACKLE));
     ASSUME(!IsMoveInherentlyMakingContact(MOVE_WATER_GUN));
     ASSUME(gSpeciesInfo[SPECIES_SCIZOR].types[0] == TYPE_BUG);
     ASSUME(gSpeciesInfo[SPECIES_SCIZOR].types[1] == TYPE_STEEL);
+    ASSUME(gSpeciesInfo[SPECIES_SNORLAX].types[0] == TYPE_NORMAL);
+    ASSUME(gSpeciesInfo[SPECIES_SNORLAX].types[1] == TYPE_NORMAL);
     ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
     ASSUME(gBattleMoves[MOVE_METAL_CLAW].type == TYPE_STEEL);
     ASSUME(gBattleMoves[MOVE_FIRE_LASH].secondaryEffectChance == 100);
@@ -63,6 +75,44 @@ SINGLE_BATTLE_TEST("Treasure batch: Glass Sword raises damage dealt by 50 percen
         HP_BAR(opponent, captureDamage: &results[i].damage);
     } FINALLY {
         EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Royal Jelly doubles Bug-type move damage", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_ROYAL_JELLY; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_BUG_BITE); }
+        OPPONENT(SPECIES_SNORLAX) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_BUG_BITE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(2.0), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Royal Jelly halves non-Bug move damage", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_ROYAL_JELLY; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_SNORLAX) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.5), results[1].damage);
     }
 }
 
@@ -1042,6 +1092,34 @@ SINGLE_BATTLE_TEST("Treasure batch: Hourglass halves Speed and ramps it by two s
     }
 }
 
+SINGLE_BATTLE_TEST("Treasure batch: Winged Boots doubles Speed at half HP")
+{
+    u32 battler;
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); HP(50); MaxHP(100); Item(ITEM_WINGED_BOOTS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(GetBattlerTotalSpeedStat(battler), 200);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Winged Boots is inactive above half HP")
+{
+    u32 battler;
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); HP(51); MaxHP(100); Item(ITEM_WINGED_BOOTS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(GetBattlerTotalSpeedStat(battler), 100);
+    }
+}
+
 SINGLE_BATTLE_TEST("Treasure batch: Crystal Wand raises Defense after super-effective damage once per turn")
 {
     GIVEN {
@@ -1234,6 +1312,19 @@ SINGLE_BATTLE_TEST("Treasure batch: Healing Lamp's PP cost stacks with Pressure"
     }
 }
 
+SINGLE_BATTLE_TEST("Treasure batch: Victor's Band restores 25 percent max HP after a knockout")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); HP(500); MaxHP(1000); Item(ITEM_VICTORS_BAND); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 1); }
+    } THEN {
+        EXPECT_EQ(player->hp, 750);
+    }
+}
+
 SINGLE_BATTLE_TEST("Treasure batch: Klutz suppresses both Healing Lamp effects")
 {
     GIVEN {
@@ -1244,5 +1335,130 @@ SINGLE_BATTLE_TEST("Treasure batch: Klutz suppresses both Healing Lamp effects")
     } THEN {
         EXPECT_EQ(player->hp, 1);
         EXPECT_EQ(player->pp[0], 9);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Pinwheel switches the holder out after a successful wind attack")
+{
+    GIVEN {
+        PLAYER(SPECIES_PIDGEOT) { Item(ITEM_PINWHEEL); Moves(MOVE_GUST); }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_GUST); SEND_OUT(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GUST, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_WOBBUFFET);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Pinwheel switches the holder out after a successful wind status move")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_PINWHEEL); Moves(MOVE_TAILWIND); }
+        PLAYER(SPECIES_MAGIKARP);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TAILWIND); SEND_OUT(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TAILWIND, player);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_MAGIKARP);
+        EXPECT(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_TAILWIND);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Pinwheel does not switch the holder out when a wind move fails")
+{
+    GIVEN {
+        PLAYER(SPECIES_PIDGEOT) { Item(ITEM_PINWHEEL); Moves(MOVE_GUST); }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_PROTECT); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_PROTECT); MOVE(player, MOVE_GUST); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, opponent);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_PIDGEOT);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Pinwheel does not activate without a reserve Pokemon")
+{
+    GIVEN {
+        PLAYER(SPECIES_PIDGEOT) { Item(ITEM_PINWHEEL); Moves(MOVE_GUST); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_GUST); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GUST, player);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_PIDGEOT);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Pinwheel ignores moves without the wind flag")
+{
+    GIVEN {
+        PLAYER(SPECIES_PIDGEOT) { Item(ITEM_PINWHEEL); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_PIDGEOT);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Klutz suppresses Pinwheel")
+{
+    GIVEN {
+        PLAYER(SPECIES_PIDGEOT) { Ability(ABILITY_KLUTZ); Item(ITEM_PINWHEEL); Moves(MOVE_GUST); }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_GUST); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_GUST, player);
+        NONE_OF {
+            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        }
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_PIDGEOT);
+    }
+}
+
+DOUBLE_BATTLE_TEST("Treasure batch: Pinwheel waits for a spread wind move to hit every target")
+{
+    GIVEN {
+        PLAYER(SPECIES_PIDGEOT) { Speed(100); Item(ITEM_PINWHEEL); Moves(MOVE_ICY_WIND); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); }
+        PLAYER(SPECIES_MAGIKARP) { Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(playerLeft, MOVE_ICY_WIND); SEND_OUT(playerLeft, 2); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ICY_WIND, playerLeft);
+        HP_BAR(opponentLeft);
+        HP_BAR(opponentRight);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, playerLeft);
+    } THEN {
+        EXPECT_EQ(playerLeft->species, SPECIES_MAGIKARP);
+        EXPECT_LT(opponentLeft->hp, opponentLeft->maxHP);
+        EXPECT_LT(opponentRight->hp, opponentRight->maxHP);
     }
 }

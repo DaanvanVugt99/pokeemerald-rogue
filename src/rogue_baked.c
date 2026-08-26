@@ -1094,6 +1094,10 @@ extern const u8 gItemRoomDesc_GoldenIdol[];
 extern const u8 gItemRoomDesc_DrainBlade[];
 extern const u8 gItemRoomDesc_HealingLamp[];
 extern const u8 gItemRoomDesc_CrystalWand[];
+extern const u8 gItemRoomDesc_VictorsBand[];
+extern const u8 gItemRoomDesc_WingedBoots[];
+extern const u8 gItemRoomDesc_Pinwheel[];
+extern const u8 gItemRoomDesc_RoyalJelly[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1261,6 +1265,14 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_HealingLamp;
     case ITEM_CRYSTAL_WAND:
         return gItemRoomDesc_CrystalWand;
+    case ITEM_VICTORS_BAND:
+        return gItemRoomDesc_VictorsBand;
+    case ITEM_WINGED_BOOTS:
+        return gItemRoomDesc_WingedBoots;
+    case ITEM_PINWHEEL:
+        return gItemRoomDesc_Pinwheel;
+    case ITEM_ROYAL_JELLY:
+        return gItemRoomDesc_RoyalJelly;
     default:
         return Rogue_GetItemDesc(itemId);
     }

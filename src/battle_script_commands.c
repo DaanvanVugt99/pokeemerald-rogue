@@ -13192,6 +13192,31 @@ static void Cmd_various(void)
         }
         break;
     }
+    case VARIOUS_TRY_ACTIVATE_VICTORS_BAND:
+    {
+        VARIOUS_ARGS();
+
+        if (battler == gBattlerAttacker
+         && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_VICTORS_BAND
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && IsBattlerAlive(battler)
+         && gBattleMons[battler].hp != gBattleMons[battler].maxHP
+         && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(battler)))
+        {
+            gLastUsedItem = gBattleMons[battler].item;
+            gPotentialItemEffectBattler = battler;
+            gBattleScripting.battler = battler;
+            RecordItemEffectBattle(battler, HOLD_EFFECT_VICTORS_BAND);
+            gBattleMoveDamage = -(GetNonDynamaxMaxHP(battler) / 4);
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = -1;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_ItemHealHP_Ret;
+            return;
+        }
+        break;
+    }
     case VARIOUS_TRY_ACTIVATE_RAPID_REPLICA:
     {
         VARIOUS_ARGS(const u8 *failInstr);

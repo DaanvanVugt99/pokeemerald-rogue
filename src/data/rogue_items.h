@@ -151,6 +151,10 @@ extern const u8 gItemDesc_GoldenIdol[];
 extern const u8 gItemDesc_DrainBlade[];
 extern const u8 gItemDesc_HealingLamp[];
 extern const u8 gItemDesc_CrystalWand[];
+extern const u8 gItemDesc_VictorsBand[];
+extern const u8 gItemDesc_WingedBoots[];
+extern const u8 gItemDesc_Pinwheel[];
+extern const u8 gItemDesc_RoyalJelly[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -3043,6 +3047,66 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureRampingStaff,
         .iconPalette = gItemIconPalette_TreasureRampingStaff,
+    },
+
+    [ITEM_VICTORS_BAND - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Victor's Band"),
+        .itemId = ITEM_VICTORS_BAND,
+        .price = 0,
+        .description = gItemDesc_VictorsBand,
+        .holdEffect = HOLD_EFFECT_VICTORS_BAND,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureChampionsBand,
+        .iconPalette = gItemIconPalette_TreasureChampionsBand,
+    },
+
+    [ITEM_WINGED_BOOTS - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Winged Boots"),
+        .itemId = ITEM_WINGED_BOOTS,
+        .price = 0,
+        .description = gItemDesc_WingedBoots,
+        .holdEffect = HOLD_EFFECT_WINGED_BOOTS,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureBerserkersGreaves,
+        .iconPalette = gItemIconPalette_TreasureBerserkersGreaves,
+    },
+
+    [ITEM_PINWHEEL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Pinwheel"),
+        .itemId = ITEM_PINWHEEL,
+        .price = 0,
+        .description = gItemDesc_Pinwheel,
+        .holdEffect = HOLD_EFFECT_PINWHEEL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasurePinwheel,
+        .iconPalette = gItemIconPalette_TreasurePinwheel,
+    },
+
+    [ITEM_ROYAL_JELLY - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Royal Jelly"),
+        .itemId = ITEM_ROYAL_JELLY,
+        .price = 0,
+        .description = gItemDesc_RoyalJelly,
+        .holdEffect = HOLD_EFFECT_ROYAL_JELLY,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureHoneyBadge,
+        .iconPalette = gItemIconPalette_TreasureHoneyBadge,
     },
 
 #ifdef ROGUE_DEBUG
