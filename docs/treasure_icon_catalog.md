@@ -27,7 +27,7 @@ palette reduction, or resizing.
 | Glyph Codex | `GlyphCodex` | Changes the holder to each move's type before use | Implemented | Tower of Ashes |
 | Golden Egg | `GoldenEgg` | Gives healing moves priority at half HP or less | Implemented | Tower of Ashes |
 | Decoy Doll | `DecoyDoll` | Spends 25% max HP on entry to create a Substitute | Implemented | Base-game Poké Doll recolor |
-| Golden Idol | `GoldenIdol` | Greed, sacrifice, or cursed rewards | TBD | Tower of Ashes |
+| Golden Idol | `GoldenIdol` | Damage scales with money carried and doubles prize money | Implemented | Tower of Ashes |
 | Grassy Tiki | `GrassyTiki` | Grassy Terrain or Grass-type interaction | Implemented | Tower of Ashes |
 | Greedy Gloves | `GreedyGlove` | Contact moves steal the target's positive stat changes before damage | Implemented | Tower of Ashes |
 | Snow Totem | `HailTotem` | Snow and Ice-type teams | Implemented | Tower of Ashes |
@@ -48,12 +48,12 @@ palette reduction, or resizing.
 | Choice Jewel | `ChoiceJewel` | Open concept | TBD | Tower of Ashes |
 | Clear Armor | `ClearArmor` | Open concept | TBD | Tower of Ashes |
 | Crush | `Crush` | Open concept | TBD | Tower of Ashes |
-| Drain Blade | `DrainBlade` | Open concept | TBD | Tower of Ashes |
+| Drain Blade | `DrainBlade` | Damaging moves restore damage dealt, with doubled healing against weakened targets | Implemented | Tower of Ashes |
 | Grand Plaza | `GrandPlaza` | Open concept | TBD | Tower of Ashes |
 | Guts Sword | `GutsSword` | Open concept | TBD | Tower of Ashes |
 | Healing Lamp | `HealingLamp` | Open concept | TBD | Tower of Ashes |
 | Ho-Oh Plume | `HoOhPlume` | Open concept | TBD | Tower of Ashes |
-| Hourglass | `Hourglass` | Open concept | TBD | Tower of Ashes |
+| Hourglass | `Hourglass` | Halves Speed, then raises Speed by 2 stages at the end of each turn | Implemented | Tower of Ashes |
 | Monotonous Armor | `MonotonousArmor` | Open concept | TBD | Tower of Ashes |
 | Monotype Serum | `Monotype` | Removes the secondary type while preserving its STAB | Implemented | Tower of Ashes |
 | No Guard Belt | `NoGuardBelt` | Open concept | TBD | Tower of Ashes |

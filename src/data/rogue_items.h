@@ -146,6 +146,9 @@ extern const u8 gItemDesc_Raincoat[];
 extern const u8 gItemDesc_MonotypeSerum[];
 extern const u8 gItemDesc_DecoyDoll[];
 extern const u8 gItemDesc_WoodenSword[];
+extern const u8 gItemDesc_Hourglass[];
+extern const u8 gItemDesc_GoldenIdol[];
+extern const u8 gItemDesc_DrainBlade[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -2962,6 +2965,52 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureWoodCannon,
         .iconPalette = gItemIconPalette_TreasureWoodCannon,
+    },
+
+    [ITEM_HOURGLASS - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Hourglass"),
+        .itemId = ITEM_HOURGLASS,
+        .price = 0,
+        .description = gItemDesc_Hourglass,
+        .holdEffect = HOLD_EFFECT_HOURGLASS,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureHourglass,
+        .iconPalette = gItemIconPalette_TreasureHourglass,
+    },
+
+    [ITEM_GOLDEN_IDOL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Golden Idol"),
+        .itemId = ITEM_GOLDEN_IDOL,
+        .price = 0,
+        .description = gItemDesc_GoldenIdol,
+        .holdEffect = HOLD_EFFECT_GOLDEN_IDOL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureGoldenIdol,
+        .iconPalette = gItemIconPalette_TreasureGoldenIdol,
+    },
+
+    [ITEM_DRAIN_BLADE - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Drain Blade"),
+        .itemId = ITEM_DRAIN_BLADE,
+        .price = 0,
+        .description = gItemDesc_DrainBlade,
+        .holdEffect = HOLD_EFFECT_DRAIN_BLADE,
+        .holdEffectParam = 8,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureDrainBlade,
+        .iconPalette = gItemIconPalette_TreasureDrainBlade,
     },
 
 #ifdef ROGUE_DEBUG

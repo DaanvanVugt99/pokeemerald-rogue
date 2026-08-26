@@ -1,6 +1,7 @@
 #include "global.h"
 #include "test/battle.h"
 #include "battle_ai_util.h"
+#include "money.h"
 
 AI_SINGLE_BATTLE_TEST("AI treats status moves as unusable with Vow of Silence")
 {
@@ -156,6 +157,29 @@ AI_SINGLE_BATTLE_TEST("AI damage prediction includes Wooden Sword's three strike
     } FINALLY {
         EXPECT_GT(results[1].damage * 10, results[0].damage * 12 - 2);
         EXPECT_LT(results[1].damage * 10, results[0].damage * 13 + 2);
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI damage prediction includes Golden Idol wealth scaling", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_GOLDEN_IDOL; }
+
+    GIVEN {
+        SetMoney(&gSaveBlock1Ptr->money, 50000);
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); EXPECT_MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        u8 effectiveness;
+        results[i].damage = AI_CalcDamageSaveBattlers(MOVE_TACKLE, B_POSITION_PLAYER_LEFT, B_POSITION_OPPONENT_LEFT, &effectiveness, FALSE);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+        SetMoney(&gSaveBlock1Ptr->money, 0);
     }
 }
 

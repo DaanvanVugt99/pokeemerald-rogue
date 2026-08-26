@@ -578,6 +578,36 @@ text gItemRoomDesc_WoodenSword
     format("Single-hit damaging moves strike 3 times at 40% power each. Only the first hit can trigger additional effects.")
 }
 
+text gItemDesc_Hourglass
+{
+    format("The holder's Speed is halved, but rises sharply at the end of each turn.")
+}
+
+text gItemRoomDesc_Hourglass
+{
+    format("The holder's Speed is halved, but rises by 2 stages at the end of each turn.")
+}
+
+text gItemDesc_GoldenIdol
+{
+    format("Boosts damage based on money carried. Doubles prize money.")
+}
+
+text gItemRoomDesc_GoldenIdol
+{
+    format("The holder deals 1% more damage per ¥1,000 carried, up to 50%. If it enters battle, prize money is doubled.")
+}
+
+text gItemDesc_DrainBlade
+{
+    format("Damaging moves restore 1/8 of damage dealt. This is doubled against targets below half HP.")
+}
+
+text gItemRoomDesc_DrainBlade
+{
+    format("Damaging moves restore 1/8 of damage dealt, or 1/4 if the target was below half HP before the move.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

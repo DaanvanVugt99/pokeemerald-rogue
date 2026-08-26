@@ -204,6 +204,7 @@ struct ProtectStruct
 struct SpecialStatus
 {
     s32 shellBellDmg;
+    s32 drainBladeDmg;
     s32 physicalDmg;
     s32 specialDmg;
     u8 physicalBattlerId;

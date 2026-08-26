@@ -1,5 +1,6 @@
 #include "global.h"
 #include "test/battle.h"
+#include "money.h"
 
 ASSUMPTIONS
 {
@@ -24,6 +25,9 @@ ASSUMPTIONS
     ASSUME(ItemId_GetHoldEffect(ITEM_MONOTYPE_SERUM) == HOLD_EFFECT_MONOTYPE_SERUM);
     ASSUME(ItemId_GetHoldEffect(ITEM_DECOY_DOLL) == HOLD_EFFECT_DECOY_DOLL);
     ASSUME(ItemId_GetHoldEffect(ITEM_WOODEN_SWORD) == HOLD_EFFECT_WOODEN_SWORD);
+    ASSUME(ItemId_GetHoldEffect(ITEM_HOURGLASS) == HOLD_EFFECT_HOURGLASS);
+    ASSUME(ItemId_GetHoldEffect(ITEM_GOLDEN_IDOL) == HOLD_EFFECT_GOLDEN_IDOL);
+    ASSUME(ItemId_GetHoldEffect(ITEM_DRAIN_BLADE) == HOLD_EFFECT_DRAIN_BLADE);
     ASSUME(gBattleMoves[MOVE_TACKLE].power > 0);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_BITE].power > 0);
@@ -1014,5 +1018,131 @@ SINGLE_BATTLE_TEST("Treasure batch: Wooden Sword does not repeat fixed-damage mo
         TURN { MOVE(player, MOVE_SONIC_BOOM); MOVE(opponent, MOVE_CELEBRATE); }
     } THEN {
         EXPECT_EQ(opponent->hp, 80);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Hourglass halves Speed and ramps it by two stages each turn")
+{
+    u32 battler;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Speed(100); Item(ITEM_HOURGLASS); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 6);
+        EXPECT_EQ(GetBattlerTotalSpeedStat(battler), 200);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Golden Idol scales damage with money and caps at 50 percent", s16 damage)
+{
+    u16 item;
+    u32 money;
+
+    PARAMETRIZE { item = ITEM_NONE; money = 0; }
+    PARAMETRIZE { item = ITEM_GOLDEN_IDOL; money = 999; }
+    PARAMETRIZE { item = ITEM_GOLDEN_IDOL; money = 20000; }
+    PARAMETRIZE { item = ITEM_GOLDEN_IDOL; money = 50000; }
+    PARAMETRIZE { item = ITEM_GOLDEN_IDOL; money = MAX_MONEY; }
+
+    GIVEN {
+        SetMoney(&gSaveBlock1Ptr->money, money);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(item); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.2), results[2].damage);
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[3].damage);
+        EXPECT_EQ(results[3].damage, results[4].damage);
+        SetMoney(&gSaveBlock1Ptr->money, 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Golden Idol shares the Amulet Coin prize-money effect")
+{
+    u16 item;
+    u8 expectedMultiplier;
+
+    PARAMETRIZE { item = ITEM_NONE; expectedMultiplier = 1; }
+    PARAMETRIZE { item = ITEM_AMULET_COIN; expectedMultiplier = 2; }
+    PARAMETRIZE { item = ITEM_GOLDEN_IDOL; expectedMultiplier = 2; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(item); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(gBattleStruct->moneyMultiplier == expectedMultiplier);
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Drain Blade heals based on damage and target HP", s16 damage, s16 healing)
+{
+    u16 targetHp;
+
+    PARAMETRIZE { targetHp = 1000; }
+    PARAMETRIZE { targetHp = 500; }
+    PARAMETRIZE { targetHp = 400; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); HP(500); MaxHP(1000); Item(ITEM_DRAIN_BLADE); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(targetHp); MaxHP(1000); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+        HP_BAR(player, captureDamage: &results[i].healing);
+    } FINALLY {
+        EXPECT_EQ(results[0].healing, -max(1, results[0].damage / 8));
+        EXPECT_EQ(results[1].healing, -max(1, results[1].damage / 8));
+        EXPECT_EQ(results[2].healing, -max(1, results[2].damage / 4));
+    }
+}
+
+SINGLE_BATTLE_TEST("Treasure batch: Drain Blade combines multi-hit damage into one heal")
+{
+    s16 firstDamage;
+    s16 secondDamage;
+    s16 healing;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Attack(300); HP(500); MaxHP(1000); Item(ITEM_DRAIN_BLADE); Moves(MOVE_DOUBLE_HIT); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(1); HP(10000); MaxHP(10000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_DOUBLE_HIT, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DOUBLE_HIT, player);
+        HP_BAR(opponent, captureDamage: &firstDamage);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DOUBLE_HIT, player);
+        HP_BAR(opponent, captureDamage: &secondDamage);
+        HP_BAR(player, captureDamage: &healing);
+    } THEN {
+        EXPECT_EQ(healing, -max(1, (firstDamage + secondDamage) / 8));
+    }
+}
+
+DOUBLE_BATTLE_TEST("Treasure batch: Golden Idol does not stack with Amulet Coin")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_GOLDEN_IDOL); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_AMULET_COIN); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(playerLeft, MOVE_CELEBRATE); MOVE(playerRight, MOVE_CELEBRATE); MOVE(opponentLeft, MOVE_CELEBRATE); MOVE(opponentRight, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT(gBattleStruct->moneyMultiplier == 2);
+        EXPECT(gBattleStruct->moneyMultiplierItem);
     }
 }

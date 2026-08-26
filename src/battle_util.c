@@ -22948,6 +22948,7 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             switch (battlerHoldEffect)
             {
             case HOLD_EFFECT_DOUBLE_PRIZE:
+            case HOLD_EFFECT_GOLDEN_IDOL:
                 if (GetBattlerSide(battler) == B_SIDE_PLAYER && !gBattleStruct->moneyMultiplierItem)
                 {
                     gBattleStruct->moneyMultiplier *= 2;
@@ -23359,6 +23360,17 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                     effect = ITEM_EFFECT_OTHER;
                 }
                 break;
+            case HOLD_EFFECT_HOURGLASS:
+                if (!moveTurn
+                 && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+                {
+                    gBattlerAttacker = gPotentialItemEffectBattler = gBattleScripting.battler = battler;
+                    SET_STATCHANGER(STAT_SPEED, 2, FALSE);
+                    BattleScriptExecute(BattleScript_HourglassActivates);
+                    RecordItemEffectBattle(battler, battlerHoldEffect);
+                    effect = ITEM_EFFECT_OTHER;
+                }
+                break;
             case HOLD_EFFECT_CONFUSE_SPICY:
                 if (!moveTurn)
                     effect = HealConfuseBerry(battler, gLastUsedItem, FLAVOR_SPICY, TRUE);
@@ -23698,6 +23710,52 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_ItemHealHP_Ret;
                 effect = ITEM_HP_CHANGE;
+            }
+            break;
+        case HOLD_EFFECT_DRAIN_BLADE:
+            if (gSpecialStatuses[gBattlerAttacker].damagedMons)
+            {
+                s32 drainBladeHeal = 0;
+                s32 drainBladeDamage = 0;
+                s32 drainBladeNormalDamage = 0;
+                s32 drainBladeBoostedDamage = 0;
+                u8 divisor = max(1, atkHoldEffectParam);
+
+                for (i = 0; i < gBattlersCount; i++)
+                {
+                    if (gSpecialStatuses[gBattlerAttacker].damagedMons & gBitTable[i]
+                     && gSpecialStatuses[i].drainBladeDmg > 0)
+                    {
+                        drainBladeDamage += gSpecialStatuses[i].drainBladeDmg;
+
+                        // Use the target's HP before the move so a KO does not automatically
+                        // receive the stronger drain rate.
+                        if ((u32)gBattleStruct->hpBefore[i] * 2 < gBattleMons[i].maxHP)
+                            drainBladeBoostedDamage += gSpecialStatuses[i].drainBladeDmg;
+                        else
+                            drainBladeNormalDamage += gSpecialStatuses[i].drainBladeDmg;
+                    }
+                    gSpecialStatuses[i].drainBladeDmg = 0;
+                }
+
+                drainBladeHeal = drainBladeNormalDamage / divisor
+                    + drainBladeBoostedDamage / max(1, divisor / 2);
+
+                if (drainBladeDamage > 0
+                 && gBattlerAttacker != gBattlerTarget
+                 && gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP
+                 && gBattleMons[gBattlerAttacker].hp != 0
+                 && (B_HEAL_BLOCKING < GEN_5 || !IsBattlerHealBlocked(gBattlerAttacker)))
+                {
+                    gLastUsedItem = atkItem;
+                    gPotentialItemEffectBattler = gBattlerAttacker;
+                    gBattleScripting.battler = gBattlerAttacker;
+                    RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_DRAIN_BLADE);
+                    gBattleMoveDamage = -max(1, drainBladeHeal);
+                    BattleScriptPushCursor();
+                    gBattlescriptCurrInstr = BattleScript_ItemHealHP_Ret;
+                    effect = ITEM_HP_CHANGE;
+                }
             }
             break;
         case HOLD_EFFECT_SUN_TOTEM:
@@ -27053,6 +27111,15 @@ static inline uq4_12_t GetAttackerItemsModifier(u32 move, u32 battlerAtk, u32 ba
     u32 percentBoost;
     switch (holdEffectAtk)
     {
+    case HOLD_EFFECT_GOLDEN_IDOL:
+        if (move != MOVE_NONE && !IS_MOVE_STATUS(move) && GetBattlerSide(battlerAtk) == B_SIDE_PLAYER)
+        {
+            percentBoost = min(50, GetMoney(&gSaveBlock1Ptr->money) / 1000);
+            if (updateFlags && percentBoost != 0)
+                RecordItemEffectBattle(battlerAtk, holdEffectAtk);
+            return uq4_12_add(sPercentToModifier[percentBoost], UQ_4_12(1.0));
+        }
+        break;
     case HOLD_EFFECT_METRONOME:
         percentBoost = min((gBattleStruct->sameMoveTurns[battlerAtk] * GetBattlerHoldEffectParam(battlerAtk)), 100);
         return uq4_12_add(sPercentToModifier[percentBoost], UQ_4_12(1.0));

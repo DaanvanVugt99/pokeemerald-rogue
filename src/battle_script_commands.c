@@ -3147,6 +3147,12 @@ static void Cmd_datahpupdate(void)
                 gHpDealt = gDisableStructs[battler].substituteHP;
                 gDisableStructs[battler].substituteHP = 0;
             }
+
+            if (battler != gBattlerAttacker
+             && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+             && GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_DRAIN_BLADE)
+                gSpecialStatuses[battler].drainBladeDmg += gHpDealt;
+
             // check substitute fading
             if (gDisableStructs[battler].substituteHP == 0)
             {
@@ -3241,6 +3247,13 @@ static void Cmd_datahpupdate(void)
                 // Record damage for Shell Bell
                 if (gSpecialStatuses[battler].shellBellDmg == 0 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                     gSpecialStatuses[battler].shellBellDmg = gHpDealt;
+
+                // Drain Blade records all direct damage dealt by the holder's move so it can
+                // resolve one combined heal after the final hit.
+                if (battler != gBattlerAttacker
+                 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
+                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_DRAIN_BLADE)
+                    gSpecialStatuses[battler].drainBladeDmg += gHpDealt;
 
                 // Note: While physicalDmg/specialDmg below are only distinguished between for Counter/Mirror Coat, they are
                 //       used in combination as general damage trackers for other purposes. specialDmg is additionally used

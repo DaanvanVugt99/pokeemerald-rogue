@@ -220,6 +220,9 @@
 #define HOLD_EFFECT_MONOTYPE_SERUM        234
 #define HOLD_EFFECT_DECOY_DOLL            235
 #define HOLD_EFFECT_WOODEN_SWORD          236
+#define HOLD_EFFECT_HOURGLASS              237
+#define HOLD_EFFECT_GOLDEN_IDOL            238
+#define HOLD_EFFECT_DRAIN_BLADE            239
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

@@ -20,6 +20,12 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added Golden Idol, a Treasure held item that boosts damage by 1% per ¥1,000
+  carried, up to 50%, and also doubles prize money when its holder enters battle.
+- Added Drain Blade, a Treasure held item that restores 1/8 of damaging-move
+  damage, doubling the healing when the target began the move below half HP.
+- Added Hourglass, a Treasure held item that halves the holder's Speed but raises
+  it by two stages at the end of each turn.
 - Added Adaptive Specs, a Treasure held item that makes each damaging move use
   whichever of its physical or special category would deal more damage.
 - Added Briar Bracer and Tricky Box Treasure held items, afflicting contact

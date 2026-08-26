@@ -4924,7 +4924,8 @@ static u32 GetBattlerTotalSpeedStatArgsInternal(u32 battler, u32 ability, u32 ho
     // item effects
     if (holdEffect == HOLD_EFFECT_MACHO_BRACE
      || holdEffect == HOLD_EFFECT_POWER_ITEM
-     || holdEffect == HOLD_EFFECT_PETRIFIED_HEART)
+     || holdEffect == HOLD_EFFECT_PETRIFIED_HEART
+     || holdEffect == HOLD_EFFECT_HOURGLASS)
         speed /= 2;
     else if (holdEffect == HOLD_EFFECT_IRON_BALL)
         speed /= 2;

@@ -288,9 +288,12 @@
 #define ITEM_MONOTYPE_SERUM                 (LAST_ITEM_TR + 49)
 #define ITEM_DECOY_DOLL                     (LAST_ITEM_TR + 50)
 #define ITEM_WOODEN_SWORD                   (LAST_ITEM_TR + 51)
+#define ITEM_HOURGLASS                      (LAST_ITEM_TR + 52)
+#define ITEM_GOLDEN_IDOL                    (LAST_ITEM_TR + 53)
+#define ITEM_DRAIN_BLADE                    (LAST_ITEM_TR + 54)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_WOODEN_SWORD
+#define LAST_ITEM_ROOM_REWARD           ITEM_DRAIN_BLADE
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0
