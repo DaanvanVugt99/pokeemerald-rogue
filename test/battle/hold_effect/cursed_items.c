@@ -179,6 +179,26 @@ SINGLE_BATTLE_TEST("Eclipse Orb reveals its inverted matchups on switch-in")
     }
 }
 
+SINGLE_BATTLE_TEST("Eclipse Orb reverses Freeze-Dry's Water weakness", s16 damage)
+{
+    u16 item;
+
+    PARAMETRIZE { item = ITEM_NONE; }
+    PARAMETRIZE { item = ITEM_HOLLOW_SUN; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_FREEZE_DRY].effect == EFFECT_FREEZE_DRY);
+        PLAYER(SPECIES_WOBBUFFET) { SpAttack(120); Moves(MOVE_FREEZE_DRY); }
+        OPPONENT(SPECIES_SQUIRTLE) { SpDefense(120); Item(item); HP(1000); MaxHP(1000); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_FREEZE_DRY, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(0.25), results[1].damage);
+    }
+}
+
 SINGLE_BATTLE_TEST("Eclipse Orb respects runtime typing changes", s16 damage)
 {
     u16 item;
@@ -517,6 +537,19 @@ SINGLE_BATTLE_TEST("Stone Heart blocks Leech Seed recovery")
     } THEN {
         EXPECT_EQ(player->hp, 1);
         EXPECT_LT(opponent->hp, 100);
+    }
+}
+
+SINGLE_BATTLE_TEST("Stone Heart blocks Regenerator recovery on switch-out")
+{
+    GIVEN {
+        PLAYER(SPECIES_SLOWPOKE) { HP(40); Ability(ABILITY_REGENERATOR); Item(ITEM_PETRIFIED_HEART); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP), 40);
     }
 }
 

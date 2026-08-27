@@ -804,6 +804,21 @@ SINGLE_BATTLE_TEST("charms: flow - Regen Charm restores one quarter HP on switch
     }
 }
 
+SINGLE_BATTLE_TEST("charms: flow - Stone Heart blocks Regen Charm on switch out")
+{
+    GIVEN {
+        SetRegenCharms(1, 0);
+        PLAYER(SPECIES_WOBBUFFET) { HP(40); Item(ITEM_PETRIFIED_HEART); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP), 40);
+        ClearCharmTestState();
+    }
+}
+
 SINGLE_BATTLE_TEST("charms: flow - Regen Charm stacks independently with Regenerator")
 {
     GIVEN {

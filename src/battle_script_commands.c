@@ -3158,9 +3158,18 @@ static void Cmd_datahpupdate(void)
             }
 
             if (battler != gBattlerAttacker
-             && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
-             && GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_DRAIN_BLADE)
-                gSpecialStatuses[battler].drainBladeDmg += gHpDealt;
+             && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
+            {
+                switch (GetBattlerHoldEffect(gBattlerAttacker, TRUE))
+                {
+                case HOLD_EFFECT_DRAIN_BLADE:
+                    gSpecialStatuses[battler].drainBladeDmg += gHpDealt;
+                    break;
+                case HOLD_EFFECT_SUN_TOTEM:
+                    gSpecialStatuses[battler].sunTotemDmg += gHpDealt;
+                    break;
+                }
+            }
 
             // check substitute fading
             if (gDisableStructs[battler].substituteHP == 0)
@@ -3257,12 +3266,21 @@ static void Cmd_datahpupdate(void)
                 if (gSpecialStatuses[battler].shellBellDmg == 0 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                     gSpecialStatuses[battler].shellBellDmg = gHpDealt;
 
-                // Drain Blade records all direct damage dealt by the holder's move so it can
-                // resolve one combined heal after the final hit.
+                // Healing treasures record all direct damage dealt by the holder's move so
+                // they can resolve one combined heal after the final hit.
                 if (battler != gBattlerAttacker
-                 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
-                 && GetBattlerHoldEffect(gBattlerAttacker, TRUE) == HOLD_EFFECT_DRAIN_BLADE)
-                    gSpecialStatuses[battler].drainBladeDmg += gHpDealt;
+                 && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
+                {
+                    switch (GetBattlerHoldEffect(gBattlerAttacker, TRUE))
+                    {
+                    case HOLD_EFFECT_DRAIN_BLADE:
+                        gSpecialStatuses[battler].drainBladeDmg += gHpDealt;
+                        break;
+                    case HOLD_EFFECT_SUN_TOTEM:
+                        gSpecialStatuses[battler].sunTotemDmg += gHpDealt;
+                        break;
+                    }
+                }
 
                 // Note: While physicalDmg/specialDmg below are only distinguished between for Counter/Mirror Coat, they are
                 //       used in combination as general damage trackers for other purposes. specialDmg is additionally used
@@ -19579,7 +19597,7 @@ static void Cmd_switchoutabilities(void)
          && IsCharmActive(EFFECT_REGEN_CHARM))
             healAmount += maxHP / 4;
 
-        if (healAmount != 0)
+        if (healAmount != 0 && !IsBattlerHealBlocked(battler))
         {
             gBattleMoveDamage = min(gBattleMons[battler].hp + healAmount, maxHP);
             BtlController_EmitSetMonData(battler, BUFFER_A, REQUEST_HP_BATTLE,

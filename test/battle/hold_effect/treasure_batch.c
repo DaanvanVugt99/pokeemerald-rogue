@@ -139,6 +139,23 @@ SINGLE_BATTLE_TEST("Treasure batch: Huge Sword ignores positive Defense stages",
     }
 }
 
+SINGLE_BATTLE_TEST("Treasure batch: Huge Sword records its effect after ignoring a Defense boost")
+{
+    u32 battler;
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_TACKLE].split == SPLIT_PHYSICAL);
+        PLAYER(SPECIES_WOBBUFFET) { Attack(120); Item(ITEM_HUGE_SWORD); Moves(MOVE_CELEBRATE, MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Defense(120); HP(1000); MaxHP(1000); Moves(MOVE_HARDEN, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CELEBRATE); MOVE(opponent, MOVE_HARDEN); }
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        battler = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        EXPECT_EQ(BATTLE_HISTORY->itemEffects[battler], HOLD_EFFECT_HUGE_SWORD);
+    }
+}
+
 SINGLE_BATTLE_TEST("Treasure batch: Huge Sword ignores positive Special Defense stages", s16 damage)
 {
     u16 item;

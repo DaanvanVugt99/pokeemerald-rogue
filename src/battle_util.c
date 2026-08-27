@@ -23772,7 +23772,17 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
             }
             break;
         case HOLD_EFFECT_SUN_TOTEM:
-            if (gSpecialStatuses[gBattlerAttacker].damagedMons
+        {
+            s32 sunTotemDamage = 0;
+
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (gSpecialStatuses[gBattlerAttacker].damagedMons & gBitTable[i])
+                    sunTotemDamage += gSpecialStatuses[i].sunTotemDmg;
+                gSpecialStatuses[i].sunTotemDmg = 0;
+            }
+
+            if (sunTotemDamage > 0
                 && gBattlerAttacker != gBattlerTarget
                 && gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP
                 && gBattleMons[gBattlerAttacker].hp != 0
@@ -23783,15 +23793,13 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
                 gPotentialItemEffectBattler = gBattlerAttacker;
                 gBattleScripting.battler = gBattlerAttacker;
                 RecordItemEffectBattle(gBattlerAttacker, HOLD_EFFECT_SUN_TOTEM);
-                gBattleMoveDamage = (gSpecialStatuses[gBattlerTarget].shellBellDmg / 3) * -1;
-                if (gBattleMoveDamage == 0)
-                    gBattleMoveDamage = -1;
-                gSpecialStatuses[gBattlerTarget].shellBellDmg = 0;
+                gBattleMoveDamage = -max(1, sunTotemDamage / 3);
                 BattleScriptPushCursor();
                 gBattlescriptCurrInstr = BattleScript_ItemHealHP_Ret;
                 effect = ITEM_HP_CHANGE;
             }
             break;
+        }
         case HOLD_EFFECT_LIFE_ORB:
             if (IsBattlerAlive(gBattlerAttacker)
                 && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
@@ -26200,7 +26208,11 @@ static inline u32 CalcDefenseStatFromSide(u32 move, u32 battlerAtk, u32 battlerD
         defStage = DEFAULT_STAT_STAGE;
     // Huge Sword ignores positive defensive stat stages.
     if (holdEffectAtk == HOLD_EFFECT_HUGE_SWORD && defStage > DEFAULT_STAT_STAGE)
+    {
+        if (updateFlags)
+            RecordItemEffectBattle(battlerAtk, holdEffectAtk);
         defStage = DEFAULT_STAT_STAGE;
+    }
     // certain moves also ignore stat changes
     if (gBattleMoves[move].ignoresTargetDefenseEvasionStages)
         defStage = DEFAULT_STAT_STAGE;
@@ -27638,17 +27650,9 @@ static uq4_12_t GetHollowSunTypeMultiplier(uq4_12_t multiplier)
     return GetInverseTypeMultiplier(multiplier);
 }
 
-static uq4_12_t GetTypeModifierForBattler(u32 atkType, u32 defType, u32 battlerDef, bool32 checkDefenderItem)
+static uq4_12_t GetBattleTypeModifier(u32 atkType, u32 defType)
 {
     uq4_12_t modifier = sTypeEffectivenessTable[atkType][defType];
-
-    // Apply Eclipse Orb per defending type so dual-type 4x and 1/4x matchups
-    // invert correctly. The active held-effect query also handles Klutz,
-    // Embargo, and Magic Room in the same way as other held items.
-    if (checkDefenderItem
-        && battlerDef < gBattlersCount
-        && GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_HOLLOW_SUN)
-        modifier = GetHollowSunTypeMultiplier(modifier);
 
     if (IsInverseBattleActive())
         modifier = GetInverseTypeMultiplier(modifier);
@@ -27658,7 +27662,7 @@ static uq4_12_t GetTypeModifierForBattler(u32 atkType, u32 defType, u32 battlerD
 
 static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 moveType, u32 battlerDef, u32 defType, u32 battlerAtk, bool32 recordAbilities, bool32 checkDefenderItem)
 {
-    uq4_12_t mod = GetTypeModifierForBattler(moveType, defType, battlerDef, checkDefenderItem);
+    uq4_12_t mod = GetBattleTypeModifier(moveType, defType);
     u32 abilityAtk = GetBattlerAbility(battlerAtk);
 
     if (move != MOVE_STRUGGLE
@@ -27730,6 +27734,13 @@ static inline void MulByTypeEffectiveness(uq4_12_t *modifier, u32 move, u32 move
         mod = UQ_4_12(2.0);
     if (moveType == TYPE_STELLAR && IsTerastallized(battlerDef))
         mod = UQ_4_12(2.0);
+
+    // Apply Eclipse Orb after move-specific type changes, but still per
+    // defending type so dual-type 4x and 1/4x matchups invert correctly.
+    if (checkDefenderItem
+        && battlerDef < gBattlersCount
+        && GetBattlerHoldEffect(battlerDef, TRUE) == HOLD_EFFECT_HOLLOW_SUN)
+        mod = GetHollowSunTypeMultiplier(mod);
 
     // B_WEATHER_STRONG_WINDS weakens Super Effective moves against Flying-type Pokémon
     if (gBattleWeather & B_WEATHER_STRONG_WINDS && WEATHER_HAS_EFFECT)

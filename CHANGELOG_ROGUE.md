@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Fixed Treasure edge cases so Stone Heart blocks switch-out recovery, Sun
+  Totem heals from all hits and spread targets, Eclipse Orb reverses
+  move-specific weaknesses, and Huge Sword reveals its effect to battle AI.
 - Regenerated the baked form-item index after the recent item-table changes
 
 ### Added

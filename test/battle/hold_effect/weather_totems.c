@@ -14,6 +14,8 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_ACID_RAIN].effect == EFFECT_CORROSIVE_CLOUDS);
     ASSUME(gBattleMoves[MOVE_SNOWSCAPE].effect == EFFECT_SNOWSCAPE);
     ASSUME(gBattleMoves[MOVE_SOAK].effect == EFFECT_SOAK);
+    ASSUME(gBattleMoves[MOVE_DOUBLE_KICK].strikeCount == 2);
+    ASSUME(gBattleMoves[MOVE_HYPER_VOICE].target == MOVE_TARGET_BOTH);
     ASSUME(gBattleMoves[MOVE_BITE].type == TYPE_DARK);
     ASSUME(gBattleMoves[MOVE_SWIFT].split == SPLIT_SPECIAL);
 }
@@ -65,6 +67,52 @@ SINGLE_BATTLE_TEST("Weather Totem: Sun heals one third of damage dealt during su
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Wobbuffet's Sun Totem restored its HP a little!");
         HP_BAR(player, damage: -13);
+    }
+}
+
+SINGLE_BATTLE_TEST("Weather Totem: Sun heals from every hit of a multi-hit move")
+{
+    s16 firstHit;
+    s16 secondHit;
+    s16 healing;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); MaxHP(1000); Attack(500); Item(ITEM_SUN_TOTEM); Moves(MOVE_SUNNY_DAY, MOVE_DOUBLE_KICK); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Defense(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_SUNNY_DAY); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_DOUBLE_KICK, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &firstHit);
+        HP_BAR(opponent, captureDamage: &secondHit);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        HP_BAR(player, captureDamage: &healing);
+    } THEN {
+        EXPECT_EQ(healing, -max(1, (firstHit + secondHit) / 3));
+    }
+}
+
+DOUBLE_BATTLE_TEST("Weather Totem: Sun heals from damage dealt to every spread target")
+{
+    s16 leftDamage;
+    s16 rightDamage;
+    s16 healing;
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); MaxHP(1000); SpAttack(500); Item(ITEM_SUN_TOTEM); Moves(MOVE_SUNNY_DAY, MOVE_HYPER_VOICE); }
+        PLAYER(SPECIES_WYNAUT) { Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); SpDefense(50); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1000); MaxHP(1000); SpDefense(50); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(playerLeft, MOVE_SUNNY_DAY); }
+        TURN { MOVE(playerLeft, MOVE_HYPER_VOICE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); }
+    } SCENE {
+        HP_BAR(opponentLeft, captureDamage: &leftDamage);
+        HP_BAR(opponentRight, captureDamage: &rightDamage);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, playerLeft);
+        HP_BAR(playerLeft, captureDamage: &healing);
+    } THEN {
+        EXPECT_EQ(healing, -max(1, (leftDamage + rightDamage) / 3));
     }
 }
 
