@@ -5,11 +5,14 @@ script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(cd "$script_dir/.." && pwd)"
 cd "$repo_root" || exit 1
 
+num_cores=""
 if command -v sysctl >/dev/null 2>&1; then
-    num_cores="$(sysctl -n hw.ncpu 2>/dev/null)"
-elif command -v nproc >/dev/null 2>&1; then
+    num_cores="$(sysctl -n hw.ncpu 2>/dev/null || true)"
+fi
+if [ -z "$num_cores" ] && command -v nproc >/dev/null 2>&1; then
     num_cores="$(nproc)"
-else
+fi
+if [ -z "$num_cores" ] && command -v getconf >/dev/null 2>&1; then
     num_cores="$(getconf _NPROCESSORS_ONLN 2>/dev/null)"
 fi
 

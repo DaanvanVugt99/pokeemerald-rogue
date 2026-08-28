@@ -17,6 +17,8 @@ Makefile text eol=lf
 *.hpp text eol=lf
 *.md text eol=lf
 *.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
 *.cs whitespace=cr-at-eol
 *.yml text eol=lf
 

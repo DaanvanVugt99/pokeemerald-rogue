@@ -5,6 +5,8 @@ material retained from the projects it builds upon.
 
 ## Current Divergence Documentation
 
+- [Windows development setup](windows_setup.md) covers devkitPro/MSYS2,
+  Poryscript bootstrapping, builds, tests, and optional emulator configuration.
 - [Friend release checklist](FRIEND_RELEASE_CHECKLIST.md) defines the
   ship/no-ship gate, manual smoke test, friend-test package, and feedback exit
   criteria for a small private preview.

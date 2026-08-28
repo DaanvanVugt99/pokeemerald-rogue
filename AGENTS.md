@@ -8,11 +8,18 @@ or validation workflows change.
 
 - Project: Pokemon Emerald Rogue: Divergence (`pokeemerald-rogue`).
 - Primary test launcher: `./scripts/launch_build_test.sh`.
+- On Windows, audit/install local prerequisites with
+  `.\scripts\check_windows_setup.ps1 -InstallPoryscript` and use the matching
+  `.bat` launchers, such as
+  `.\scripts\launch_build_test.bat --check-all-suites`.
+- With a WSL1 checkout mounted from `C:`, invoke the Linux launchers from
+  PowerShell with `wsl`, for example
+  `wsl ./scripts/launch_build_test.sh --check-all-suites`.
 - Toolchain expected: `devkitARM` (`arm-none-eabi-*` in `PATH`).
 - For interactive test ROM runs: `mgba` in `PATH`.
 - For headless checks: `mgba-rom-test` in `PATH` (used via `make check` + hydra wrapper).
-- Species-report generation requires Python 3 and a C preprocessor (`clang`,
-  `gcc`, `cc`, or `arm-none-eabi-gcc`).
+- Species-report generation requires Python 3 plus host C and C++ compilers
+  (Clang or GCC; the generator discovers common command names automatically).
 - Pokémon-profile generation requires Mono plus `msbuild` or `xbuild`.
   `refresh` additionally requires network access; `generate` and `verify` are
   offline.

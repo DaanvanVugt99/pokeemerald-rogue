@@ -46,6 +46,23 @@ Common validation commands:
 ./scripts/launch_build_test.sh --ui
 ```
 
+On Windows, use the devkitPro/MSYS2 wrappers instead:
+
+```powershell
+.\scripts\check_windows_setup.ps1 -InstallPoryscript
+.\scripts\launch_build_test.bat --check-all-suites
+```
+
+For the faster WSL1 path with this checkout on `C:`, invoke the Linux launcher
+directly from PowerShell:
+
+```powershell
+wsl ./scripts/launch_build_test.sh --check-all-suites
+```
+
+See [docs/windows_setup.md](docs/windows_setup.md) for the one-time setup and
+the WSL1, MSYS2, mGBA, and Python configuration.
+
 Use the split-suite validation path for normal full checks. The legacy
 monolithic test ROM build can run into the 32 MiB linker layout limit and should
 not be treated as the normal full-validation target.

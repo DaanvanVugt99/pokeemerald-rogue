@@ -2,7 +2,11 @@ TOOLCHAIN := $(DEVKITARM)
 COMPARE ?= 0
 RELEASE ?= 0
 EXPANSION := 1
+ifeq ($(OS),Windows_NT)
+PYTHON ?= python
+else
 PYTHON ?= python3
+endif
 
 ifeq (compare,$(MAKECMDGOALS))
   COMPARE := 1
@@ -97,7 +101,12 @@ endif
 
 CPP := $(PREFIX)cpp
 
+IS_WSL := $(findstring microsoft,$(shell uname -r 2>/dev/null | tr '[:upper:]' '[:lower:]'))
+ifneq ($(IS_WSL),)
+OBJ_BASE_DIR_NAME := build_wsl
+else
 OBJ_BASE_DIR_NAME := build
+endif
 
 ifneq ($(LTO),0)
 LTO_SUFFIX := _lto
@@ -107,9 +116,10 @@ ROM_NAME := pokeemerald.gba
 ELF_NAME := $(ROM_NAME:.gba=.elf)
 MAP_NAME := $(ROM_NAME:.gba=.map)
 OBJ_DIR_NAME := $(OBJ_BASE_DIR_NAME)/modern_$(BUILD_CONFIG)$(LTO_SUFFIX)
-TEST_OBJ_DIR_NAME := build/modern_test
+TEST_OBJ_DIR_NAME := $(OBJ_BASE_DIR_NAME)/modern_test
 
-SHELL := /bin/bash -o pipefail
+SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -c
 
 ROM := $(ROM_NAME)
 OBJ_DIR := $(OBJ_DIR_NAME)

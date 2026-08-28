@@ -31,15 +31,38 @@ fi
 
 mkdir -p "${build_dir}"
 
-c_compiler="${CC:-clang}"
-cxx_compiler="${CXX:-clang++}"
+c_compiler="${CC:-}"
+if [[ -z "${c_compiler}" ]]; then
+    for candidate in clang gcc cc; do
+        if command -v "${candidate}" >/dev/null 2>&1; then
+            c_compiler="${candidate}"
+            break
+        fi
+    done
+fi
+
+cxx_compiler="${CXX:-}"
+if [[ -z "${cxx_compiler}" ]]; then
+    for candidate in clang++ g++ c++; do
+        if command -v "${candidate}" >/dev/null 2>&1; then
+            cxx_compiler="${candidate}"
+            break
+        fi
+    done
+fi
+
+if [[ -z "${c_compiler}" || -z "${cxx_compiler}" ]]; then
+    echo "Error: a host C and C++ compiler are required (Clang or GCC)." >&2
+    exit 1
+fi
+
 common_flags=(
     -DROGUE_BAKING=1
     -DROGUE_EXPANSION=1
     -Wno-visibility
-    -I"${tool_dir}/Inc"
-    -I"${repo_root}/include"
-    -I"${repo_root}/src"
+    -iquote "${tool_dir}/Inc"
+    -iquote "${repo_root}/include"
+    -iquote "${repo_root}/src"
 )
 
 "${c_compiler}" -std=c11 "${common_flags[@]}" \

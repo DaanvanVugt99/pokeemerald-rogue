@@ -1,10 +1,16 @@
 @echo off
-cd %~dp0../
+setlocal
+cd /d "%~dp0.." || exit /b 1
 
 echo == Launching mGBA ==
 
-set MGBA_PATH=D:\Games\ROM tools\mGBA\mGBA-0.10.0-win64\mGBA.exe
-set ROM_PATH=%cd%\pokeemerald-test.elf
+call "%~dp0find_mgba.bat" || exit /b 1
+set "ROM_PATH=%cd%\pokeemerald-test.elf"
 
-echo Launching: "%MGBA_PATH%" -g "%ROM_PATH%"
-start "" "%MGBA_PATH%" -g "%ROM_PATH%"
+if not exist "%ROM_PATH%" (
+    echo Error: test ELF not found: "%ROM_PATH%" 1>&2
+    exit /b 1
+)
+
+echo Launching: "%MGBA_EXE%" -g "%ROM_PATH%"
+start "" "%MGBA_EXE%" -g "%ROM_PATH%"
