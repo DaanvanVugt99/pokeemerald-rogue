@@ -1821,10 +1821,11 @@ static const u8 sText_RunReviewRewardOpen[] = _(" (");
 static const u8 sText_RunReviewRewardClose[] = _(" rewards)");
 static const u8 sText_RunReviewPokedexSuffix[] = _(" Pokédex");
 static const u8 sText_RunReviewCustom[] = _("Custom");
-static const u8 sText_RunReviewPartyPrefix[] = _("Party: ");
-static const u8 sText_RunReviewFixedTeam[] = _("Fixed Trial team");
-static const u8 sText_RunReviewPartnerRequired[] = _("Random Partner required");
-static const u8 sText_RunReviewMaxPrefix[] = _("max ");
+static const u8 sText_RunReviewTeamPrefix[] = _("Team: ");
+static const u8 sText_RunReviewCurrentParty[] = _("Current Party");
+static const u8 sText_RunReviewStarterBag[] = _("Starter Bag");
+static const u8 sText_RunReviewStarterBagRequired[] = _("Starter Bag required");
+static const u8 sText_RunReviewFixedTeam[] = _("Fixed Trial Team");
 static const u8 sText_RunReviewPokemonSuffix[] = _(" Pokémon");
 static const u8 sText_RunReviewBlockedParty[] = _("{COLOR RED}{SHADOW LIGHT_RED}! Adjust your party before starting");
 static const u8 sText_RunReviewBlockedDayCare[] = _("{COLOR RED}{SHADOW LIGHT_RED}! Adjust the Day Care before starting");
@@ -2324,7 +2325,8 @@ static void PrintRunReview(u8 taskId)
         PrintRunReviewSummaryLine(windowId, text, 47);
 
         dest = StringCopy(text, sText_RunReviewBlueColor);
-        if (context->teamPolicy == RUN_START_TEAM_FIXED_TRIAL)
+        dest = StringAppend(dest, sText_RunReviewTeamPrefix);
+        if (context->effectiveTeamSource == RUN_START_TEAM_SOURCE_FIXED_TRIAL)
         {
             dest = StringAppend(dest, sText_RunReviewFixedTeam);
             dest = StringAppend(dest, sText_RunReviewValueColor);
@@ -2332,18 +2334,17 @@ static void PrintRunReview(u8 taskId)
             dest = ConvertIntToDecimalStringN(dest, context->partyCapacity, STR_CONV_MODE_LEFT_ALIGN, 1);
             StringAppend(dest, sText_RunReviewPokemonSuffix);
         }
-        else if (context->requiresRandomPartner)
+        else if (context->effectiveTeamSource == RUN_START_TEAM_SOURCE_STARTER_BAG)
         {
-            dest = StringAppend(dest, sText_RunReviewPartnerRequired);
-            dest = StringAppend(dest, sText_RunReviewValueColor);
-            dest = StringAppend(dest, sText_RunReviewSummarySeparator);
-            dest = StringAppend(dest, sText_RunReviewMaxPrefix);
-            ConvertIntToDecimalStringN(dest, context->partyCapacity, STR_CONV_MODE_LEFT_ALIGN, 1);
+            StringAppend(dest, context->requiresRandomPartner
+                ? sText_RunReviewStarterBagRequired
+                : sText_RunReviewStarterBag);
         }
         else
         {
-            dest = StringAppend(dest, sText_RunReviewPartyPrefix);
+            dest = StringAppend(dest, sText_RunReviewCurrentParty);
             dest = StringAppend(dest, sText_RunReviewValueColor);
+            dest = StringAppend(dest, sText_RunReviewSummarySeparator);
             dest = ConvertIntToDecimalStringN(dest, partyCount, STR_CONV_MODE_LEFT_ALIGN, 1);
             dest = StringAppend(dest, sText_RunReviewPageSeparator);
             ConvertIntToDecimalStringN(dest, context->partyCapacity, STR_CONV_MODE_LEFT_ALIGN, 1);

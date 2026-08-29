@@ -23,6 +23,9 @@
 static EWRAM_DATA struct RogueRunStartContext sRunStartContext;
 
 static const u8 sText_AdventureSettings[] = _("Adventure Settings");
+static const u8 sText_StartingTeam[] = _("Starting Team");
+static const u8 sText_CurrentParty[] = _("Current Party");
+static const u8 sText_StarterBag[] = _("Starter Bag");
 static const u8 sText_Pokedex[] = _("Pokédex");
 static const u8 sText_Trial[] = _("Trial");
 static const u8 sText_Difficulty[] = _("Difficulty");
@@ -188,6 +191,7 @@ void RogueRunStart_Refresh(void)
 {
     bool8 partyInvalid = FALSE;
     bool8 canUseRandomPartner;
+    bool8 usesIntegratedTeamChoice;
     bool8 replacesParty;
     bool8 fixedParty;
     u8 clauseReason;
@@ -222,6 +226,7 @@ void RogueRunStart_Refresh(void)
         || Rogue_GetModeRules()->disableTrialQuests
         || AnyCharmsActive();
     sRunStartContext.requiresRandomPartner = FALSE;
+    sRunStartContext.canUseCurrentParty = FALSE;
     sRunStartContext.readinessReason = RUN_START_REASON_NONE;
     sRunStartContext.eligibilityReason = ROGUE_TRIAL_ELIGIBILITY_OK;
     sRunStartContext.ineligibleSpecies = SPECIES_NONE;
@@ -231,6 +236,12 @@ void RogueRunStart_Refresh(void)
         || RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER)
         ? RUN_START_TEAM_OPTIONAL_PARTNER
         : RUN_START_TEAM_CURRENT;
+    usesIntegratedTeamChoice = sRunStartContext.source == RUN_START_SOURCE_NORMAL
+        || sRunStartContext.source == RUN_START_SOURCE_TRIAL;
+    sRunStartContext.canUseStarterBag = usesIntegratedTeamChoice
+        && (sRunStartContext.source == RUN_START_SOURCE_TRIAL
+         || RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER));
+    sRunStartContext.effectiveTeamSource = RUN_START_TEAM_SOURCE_CURRENT_PARTY;
 
     if (!IsMultiplayerClientJoinable())
     {
@@ -256,6 +267,7 @@ void RogueRunStart_Refresh(void)
         if (trial != NULL)
             sRunStartContext.partyCapacity = trial->fixedStartingPartyCount;
         sRunStartContext.teamPolicy = RUN_START_TEAM_FIXED_TRIAL;
+        sRunStartContext.effectiveTeamSource = RUN_START_TEAM_SOURCE_FIXED_TRIAL;
         sRunStartContext.readiness = RUN_START_READY;
         return;
     }
@@ -263,6 +275,7 @@ void RogueRunStart_Refresh(void)
     {
         sRunStartContext.requiresRandomPartner = TRUE;
         sRunStartContext.teamPolicy = RUN_START_TEAM_REQUIRED_PARTNER;
+        sRunStartContext.effectiveTeamSource = RUN_START_TEAM_SOURCE_STARTER_BAG;
         sRunStartContext.readinessReason = RUN_START_REASON_TRIAL_REPLACES_PARTY;
         sRunStartContext.readiness = RUN_START_READY_REQUIRES_PARTNER;
         return;
@@ -296,12 +309,15 @@ void RogueRunStart_Refresh(void)
     canUseRandomPartner = sRunStartContext.source == RUN_START_SOURCE_TRIAL
         || RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER);
 
-    if (partyInvalid || clauseReason != RUN_START_REASON_NONE)
+    sRunStartContext.canUseCurrentParty = !partyInvalid && clauseReason == RUN_START_REASON_NONE;
+
+    if (!sRunStartContext.canUseCurrentParty)
     {
         if (canUseRandomPartner)
         {
             sRunStartContext.requiresRandomPartner = TRUE;
             sRunStartContext.teamPolicy = RUN_START_TEAM_REQUIRED_PARTNER;
+            sRunStartContext.effectiveTeamSource = RUN_START_TEAM_SOURCE_STARTER_BAG;
             sRunStartContext.readiness = RUN_START_READY_REQUIRES_PARTNER;
         }
         else
@@ -309,6 +325,13 @@ void RogueRunStart_Refresh(void)
             sRunStartContext.readiness = RUN_START_BLOCKED_PARTY;
         }
         return;
+    }
+
+    if (usesIntegratedTeamChoice
+     && sRunStartContext.preferredTeamSource == RUN_START_TEAM_SOURCE_STARTER_BAG
+     && sRunStartContext.canUseStarterBag)
+    {
+        sRunStartContext.effectiveTeamSource = RUN_START_TEAM_SOURCE_STARTER_BAG;
     }
 
     sRunStartContext.readiness = RUN_START_READY;
@@ -354,8 +377,57 @@ void RogueRunStart_RequiresRandomPartner(void)
     gSpecialVar_Result = sRunStartContext.isActive && sRunStartContext.requiresRandomPartner;
 }
 
+void RogueRunStart_GetPreferredTeamSource(void)
+{
+    gSpecialVar_Result = sRunStartContext.preferredTeamSource;
+}
+
+void RogueRunStart_SetPreferredTeamSource(void)
+{
+    if (!sRunStartContext.isActive)
+        return;
+
+    if (gSpecialVar_0x8007 == RUN_START_TEAM_SOURCE_CURRENT_PARTY
+     || gSpecialVar_0x8007 == RUN_START_TEAM_SOURCE_STARTER_BAG)
+    {
+        sRunStartContext.preferredTeamSource = gSpecialVar_0x8007;
+        RogueRunStart_Refresh();
+    }
+}
+
+void RogueRunStart_UsesStarterBag(void)
+{
+    gSpecialVar_Result = sRunStartContext.isActive
+        && sRunStartContext.effectiveTeamSource == RUN_START_TEAM_SOURCE_STARTER_BAG;
+}
+
+void RogueRunStart_UsesIntegratedTeamChoice(void)
+{
+    gSpecialVar_Result = sRunStartContext.isActive
+        && (sRunStartContext.source == RUN_START_SOURCE_NORMAL
+         || sRunStartContext.source == RUN_START_SOURCE_TRIAL);
+}
+
+void RogueRunStart_HasTeamSourceChoice(void)
+{
+    gSpecialVar_Result = sRunStartContext.isActive
+        && sRunStartContext.canUseCurrentParty
+        && sRunStartContext.canUseStarterBag;
+}
+
+void RogueRunStart_AppendTeamSourceOptions(void)
+{
+    if (sRunStartContext.canUseCurrentParty)
+        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_CurrentParty, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    if (sRunStartContext.canUseStarterBag)
+        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_StarterBag, RUN_START_TEAM_SOURCE_STARTER_BAG);
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Back, MULTI_B_PRESSED);
+}
+
 void RogueRunStart_AppendStandardEditOptions(void)
 {
+    if (sRunStartContext.canUseCurrentParty && sRunStartContext.canUseStarterBag)
+        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_StartingTeam, RUN_START_EDIT_STARTING_TEAM);
     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_AdventureSettings, RUN_START_EDIT_SETTINGS);
     if (sRunStartContext.canEdit && RoguePokedex_IsVariantEditEnabled())
         ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Pokedex, RUN_START_EDIT_POKEDEX);
@@ -367,6 +439,8 @@ void RogueRunStart_AppendTrialEditOptions(void)
     const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(sRunStartContext.trialId);
     u16 pokedexOptionCount;
 
+    if (sRunStartContext.canUseCurrentParty && sRunStartContext.canUseStarterBag)
+        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_StartingTeam, RUN_START_EDIT_STARTING_TEAM);
     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Trial, RUN_START_EDIT_TRIAL);
 
     if (trial != NULL && !trial->hasForcedDifficulty)

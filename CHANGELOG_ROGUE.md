@@ -14,6 +14,12 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Changed
+
+- Moved the Current Party versus Starter Bag choice into the run overview's
+  Edit menu for standard Adventures and Trials, including clear forced-team
+  states and returning to the overview when Starter Bag selection is cancelled.
+
 ### Fixed
 
 - Updated Windows development support with portable MSYS2 and mGBA discovery,

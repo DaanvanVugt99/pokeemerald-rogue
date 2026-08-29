@@ -42,6 +42,13 @@ enum RogueRunStartTeamPolicy
     RUN_START_TEAM_FIXED_TRIAL,
 };
 
+enum RogueRunStartTeamSource
+{
+    RUN_START_TEAM_SOURCE_CURRENT_PARTY,
+    RUN_START_TEAM_SOURCE_STARTER_BAG,
+    RUN_START_TEAM_SOURCE_FIXED_TRIAL,
+};
+
 enum RogueRunReviewAction
 {
     RUN_REVIEW_ACTION_BACK,
@@ -56,6 +63,7 @@ enum RogueRunStartEditOption
     RUN_START_EDIT_TRIAL,
     RUN_START_EDIT_DIFFICULTY,
     RUN_START_EDIT_TRIAL_POKEDEX,
+    RUN_START_EDIT_STARTING_TEAM,
 };
 
 enum RogueTrialSetupStage
@@ -78,6 +86,8 @@ struct RogueRunStartContext
     u8 pokedexVariant;
     u8 partyCapacity;
     u8 teamPolicy;
+    u8 preferredTeamSource;
+    u8 effectiveTeamSource;
     u8 eligibilityReason;
     u16 ineligibleSpecies;
     u16 eligibilityParam;
@@ -85,6 +95,8 @@ struct RogueRunStartContext
     bool8 isActive;
     bool8 canEdit;
     bool8 requiresRandomPartner;
+    bool8 canUseCurrentParty;
+    bool8 canUseStarterBag;
     bool8 hasPendingQuestRewards;
     bool8 mainQuestsDisabled;
     bool8 trialQuestsDisabled;
@@ -100,6 +112,12 @@ bool8 RogueRunStart_CanStart(void);
 
 void RogueRunStart_CheckCanStart(void);
 void RogueRunStart_RequiresRandomPartner(void);
+void RogueRunStart_GetPreferredTeamSource(void);
+void RogueRunStart_SetPreferredTeamSource(void);
+void RogueRunStart_UsesStarterBag(void);
+void RogueRunStart_UsesIntegratedTeamChoice(void);
+void RogueRunStart_HasTeamSourceChoice(void);
+void RogueRunStart_AppendTeamSourceOptions(void);
 void RogueRunStart_AppendStandardEditOptions(void);
 void RogueRunStart_AppendTrialEditOptions(void);
 

@@ -9,6 +9,9 @@ const VAR_TRIAL_MENU_CHOICE = VAR_TEMP_1
 const VAR_INTRO_SCRIPT_STATE = VAR_TEMP_2
 const VAR_ALLOW_STARTER_CHOICE = VAR_TEMP_3
 const VAR_RUN_REVIEW_STAGE = VAR_TEMP_4
+const VAR_RUN_START_TEAM_PREFERENCE = VAR_TEMP_5
+const VAR_RUN_START_OUTCOME = VAR_TEMP_6
+const VAR_RUN_START_USES_TEAM_CHOICE = VAR_TEMP_7
 
 const RUN_REVIEW_ACTION_BACK = 0
 const RUN_REVIEW_ACTION_START = 1
@@ -19,6 +22,13 @@ const RUN_START_EDIT_POKEDEX = 1
 const RUN_START_EDIT_TRIAL = 2
 const RUN_START_EDIT_DIFFICULTY = 3
 const RUN_START_EDIT_TRIAL_POKEDEX = 4
+const RUN_START_EDIT_STARTING_TEAM = 5
+
+const RUN_START_TEAM_SOURCE_CURRENT_PARTY = 0
+const RUN_START_TEAM_SOURCE_STARTER_BAG = 1
+
+const RUN_START_OUTCOME_EXIT = 0
+const RUN_START_OUTCOME_RETRY = 1
 
 const TRIAL_SETUP_STAGE_TRIAL = 0
 const TRIAL_SETUP_STAGE_DIFFICULTY = 1
@@ -331,6 +341,7 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
 script Rogue_Area_AdventureEntrance_StandardRunReview
 {
     call(Rogue_ResetAdventureVars)
+    setvar(VAR_RUN_START_TEAM_PREFERENCE, RUN_START_TEAM_SOURCE_CURRENT_PARTY)
     callnative(RogueRunStart_PrepareStandard)
     setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
 
@@ -351,20 +362,41 @@ script Rogue_Area_AdventureEntrance_StandardRunReview
             callnative(RogueRunStart_AppendStandardEditOptions)
             enddynamicmultichoice(1, 0, 3, TRUE)
             copyvar(VAR_RUN_REVIEW_STAGE, VAR_RESULT)
-            callnative(RogueRunStart_Clear)
 
-            if(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_SETTINGS)
+            if(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_STARTING_TEAM)
             {
+                begindynamicmultichoice(16)
+                callnative(RogueRunStart_AppendTeamSourceOptions)
+                enddynamicmultichoice(1, 0, 3, TRUE)
+                if(var(VAR_RESULT) != MULTI_B_PRESSED)
+                {
+                    copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
+                    copyvar(VAR_0x8007, VAR_RESULT)
+                    callnative(RogueRunStart_SetPreferredTeamSource)
+                }
+            }
+            elif(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_SETTINGS)
+            {
+                callnative(RogueRunStart_GetPreferredTeamSource)
+                copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
+                callnative(RogueRunStart_Clear)
                 special(Special_ViewDifficultyConfigMenu)
                 waitstate
+                callnative(RogueRunStart_PrepareStandard)
+                copyvar(VAR_0x8007, VAR_RUN_START_TEAM_PREFERENCE)
+                callnative(RogueRunStart_SetPreferredTeamSource)
             }
             elif(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_POKEDEX)
             {
+                callnative(RogueRunStart_GetPreferredTeamSource)
+                copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
+                callnative(RogueRunStart_Clear)
                 special(Special_ViewRoguePokedex)
                 waitstate
+                callnative(RogueRunStart_PrepareStandard)
+                copyvar(VAR_0x8007, VAR_RUN_START_TEAM_PREFERENCE)
+                callnative(RogueRunStart_SetPreferredTeamSource)
             }
-
-            callnative(RogueRunStart_PrepareStandard)
         }
         else
         {
@@ -372,8 +404,11 @@ script Rogue_Area_AdventureEntrance_StandardRunReview
             if(var(VAR_RESULT) == YES)
             {
                 call(Rogue_StartAdventureInternal)
-                callnative(RogueRunStart_Clear)
-                return
+                if(var(VAR_RUN_START_OUTCOME) != RUN_START_OUTCOME_RETRY)
+                {
+                    callnative(RogueRunStart_Clear)
+                    return
+                }
             }
         }
     }
@@ -383,6 +418,7 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
 {
     lockall
     faceplayer
+    setvar(VAR_RUN_START_TEAM_PREFERENCE, RUN_START_TEAM_SOURCE_CURRENT_PARTY)
 
     special(RogueTrial_CanUseAttendant)
     if(var(VAR_RESULT) == NO)
@@ -526,6 +562,8 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
         else
         {
             callnative(RogueRunStart_PrepareTrial)
+            copyvar(VAR_0x8007, VAR_RUN_START_TEAM_PREFERENCE)
+            callnative(RogueRunStart_SetPreferredTeamSource)
             closemessage
             callnative(ScriptMenu_ShowRunReview)
             waitstate
@@ -541,9 +579,26 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
                 callnative(RogueRunStart_AppendTrialEditOptions)
                 enddynamicmultichoice(1, 0, 4, TRUE)
                 copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
+                callnative(RogueRunStart_GetPreferredTeamSource)
+                copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
+
+                if(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_STARTING_TEAM)
+                {
+                    begindynamicmultichoice(16)
+                    callnative(RogueRunStart_AppendTeamSourceOptions)
+                    enddynamicmultichoice(1, 0, 3, TRUE)
+                    if(var(VAR_RESULT) != MULTI_B_PRESSED)
+                    {
+                        copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
+                    }
+                }
                 callnative(RogueRunStart_Clear)
 
-                if(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_TRIAL)
+                if(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_STARTING_TEAM)
+                {
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+                }
+                elif(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_TRIAL)
                 {
                     setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
                 }
@@ -567,8 +622,15 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
                 {
                     call(Rogue_ResetAdventureVars)
                     call(Rogue_StartAdventureInternal)
-                    callnative(RogueRunStart_Clear)
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
+                    if(var(VAR_RUN_START_OUTCOME) == RUN_START_OUTCOME_RETRY)
+                    {
+                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+                    }
+                    else
+                    {
+                        callnative(RogueRunStart_Clear)
+                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
+                    }
                 }
             }
         }
@@ -592,6 +654,8 @@ script Rogue_ResetAdventureVars
 
 script Rogue_StartAdventureInternal
 {
+    setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_EXIT)
+
     special(Rogue_IsMultiplayerClient)
     if(var(VAR_RESULT) == YES)
     {
@@ -609,21 +673,35 @@ script Rogue_StartAdventureInternal
     setvar(VAR_TRIAL_MENU_CHOICE, NO)
     setvar(VAR_ALLOW_STARTER_CHOICE, NO)
 
-    callnative(RogueRunStart_RequiresRandomPartner)
-    if(var(VAR_RESULT) == YES)
+    callnative(RogueRunStart_UsesIntegratedTeamChoice)
+    copyvar(VAR_RUN_START_USES_TEAM_CHOICE, VAR_RESULT)
+    if(var(VAR_RUN_START_USES_TEAM_CHOICE) == YES)
     {
-        setvar(VAR_TRIAL_MENU_CHOICE, YES)
+        callnative(RogueRunStart_UsesStarterBag)
+        if(var(VAR_RESULT) == YES)
+        {
+            setvar(VAR_TRIAL_MENU_CHOICE, YES)
+            setvar(VAR_ALLOW_STARTER_CHOICE, YES)
+        }
     }
-
-    if(!flag(FLAG_HIDE_STARTER_BAG))
+    else
     {
-        setvar(VAR_ALLOW_STARTER_CHOICE, YES)
-    }
+        callnative(RogueRunStart_RequiresRandomPartner)
+        if(var(VAR_RESULT) == YES)
+        {
+            setvar(VAR_TRIAL_MENU_CHOICE, YES)
+        }
 
-    special(RogueTrial_HasPendingSelection)
-    if(var(VAR_RESULT) == YES)
-    {
-        setvar(VAR_ALLOW_STARTER_CHOICE, YES)
+        if(!flag(FLAG_HIDE_STARTER_BAG))
+        {
+            setvar(VAR_ALLOW_STARTER_CHOICE, YES)
+        }
+
+        special(RogueTrial_HasPendingSelection)
+        if(var(VAR_RESULT) == YES)
+        {
+            setvar(VAR_ALLOW_STARTER_CHOICE, YES)
+        }
     }
 
     getpartysize
@@ -901,6 +979,10 @@ script Rogue_Adventure_CancelStarterSelection
     }
 
     waitmovement(0)
+    if(var(VAR_RUN_START_USES_TEAM_CHOICE) == YES)
+    {
+        setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_RETRY)
+    }
     return
 }
 

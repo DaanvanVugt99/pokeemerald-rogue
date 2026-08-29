@@ -422,3 +422,150 @@ TEST("Run review: clearing removes staged settings and pending Trial state")
 
     FinishRunReviewTest();
 }
+
+TEST("Run review: Starting Team defaults to an eligible Current Party")
+{
+    bool8 hadStarterBagUpgrade;
+    const struct RogueRunStartContext *context;
+
+    ResetRunReviewTestState();
+    hadStarterBagUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER);
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, TRUE);
+    SetRunReviewPartyMon(0, SPECIES_TREECKO);
+
+    RogueRunStart_PrepareStandard();
+    context = RogueRunStart_GetContext();
+    EXPECT(context->canUseCurrentParty);
+    EXPECT(context->canUseStarterBag);
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT(RogueRunStart_CanStart());
+
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, hadStarterBagUpgrade);
+    FinishRunReviewTest();
+}
+
+TEST("Run review: Starting Team retains an explicit Starter Bag choice")
+{
+    bool8 hadStarterBagUpgrade;
+    const struct RogueRunStartContext *context;
+
+    ResetRunReviewTestState();
+    hadStarterBagUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER);
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, TRUE);
+    SetRunReviewPartyMon(0, SPECIES_TREECKO);
+    RogueRunStart_PrepareStandard();
+
+    gSpecialVar_0x8007 = RUN_START_TEAM_SOURCE_STARTER_BAG;
+    RogueRunStart_SetPreferredTeamSource();
+    context = RogueRunStart_GetContext();
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+    EXPECT(!context->requiresRandomPartner);
+    EXPECT(RogueRunStart_CanStart());
+
+    RogueRunStart_Refresh();
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, hadStarterBagUpgrade);
+    FinishRunReviewTest();
+}
+
+TEST("Run review: Starting Team forces Starter Bag for an invalid party")
+{
+    bool8 hadStarterBagUpgrade;
+    const struct RogueRunStartContext *context;
+
+    ResetRunReviewTestState();
+    hadStarterBagUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, TRUE);
+    SetRunReviewPartyMon(0, SPECIES_ZIGZAGOON);
+    SetRunReviewPartyMon(1, SPECIES_ZIGZAGOON);
+
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, TRUE);
+    RogueRunStart_PrepareStandard();
+    context = RogueRunStart_GetContext();
+    EXPECT(!context->canUseCurrentParty);
+    EXPECT(context->canUseStarterBag);
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+    EXPECT(context->requiresRandomPartner);
+    EXPECT(RogueRunStart_CanStart());
+
+    RogueRunStart_Clear();
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, FALSE);
+    RogueRunStart_PrepareStandard();
+    context = RogueRunStart_GetContext();
+    EXPECT(!context->canUseCurrentParty);
+    EXPECT(!context->canUseStarterBag);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT_EQ(context->readiness, RUN_START_BLOCKED_PARTY);
+    EXPECT(!RogueRunStart_CanStart());
+
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, hadStarterBagUpgrade);
+    FinishRunReviewTest();
+}
+
+TEST("Run review: Starting Team Trial rules override the preference")
+{
+    const struct RogueRunStartContext *context;
+
+    ResetRunReviewTestState();
+    SetRunReviewPartyMon(0, SPECIES_TREECKO);
+    SetRunReviewPartyMon(1, SPECIES_TORCHIC);
+    SelectRunReviewTrial(ROGUE_TRIAL_IRON_MONO, DIFFICULTY_LEVEL_AVERAGE, POKEDEX_VARIANT_NATIONAL_GEN9);
+    RogueRunStart_PrepareTrial();
+    context = RogueRunStart_GetContext();
+    EXPECT_EQ(context->readinessReason, RUN_START_REASON_PARTY_CAPACITY);
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+
+    RogueRunStart_Clear();
+    memset(&gPlayerParty[1], 0, sizeof(gPlayerParty[1]));
+    CalculatePlayerPartyCount();
+    SelectRunReviewTrial(ROGUE_TRIAL_INSANE_MODE, DIFFICULTY_LEVEL_HARD, POKEDEX_VARIANT_NATIONAL_GEN9);
+    RogueRunStart_PrepareTrial();
+    context = RogueRunStart_GetContext();
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+    EXPECT(context->requiresRandomPartner);
+
+    RogueRunStart_Clear();
+    SelectRunReviewTrial(ROGUE_TRIAL_ORRE_STYLE, DIFFICULTY_LEVEL_AVERAGE, POKEDEX_VARIANT_NATIONAL_GEN9);
+    RogueRunStart_PrepareTrial();
+    gSpecialVar_0x8007 = RUN_START_TEAM_SOURCE_STARTER_BAG;
+    RogueRunStart_SetPreferredTeamSource();
+    context = RogueRunStart_GetContext();
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_FIXED_TRIAL);
+
+    FinishRunReviewTest();
+}
+
+TEST("Run review: Starting Team restores Current Party when it becomes eligible")
+{
+    bool8 hadStarterBagUpgrade;
+    const struct RogueRunStartContext *context;
+
+    ResetRunReviewTestState();
+    hadStarterBagUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER);
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, TRUE);
+    Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, TRUE);
+    SetRunReviewPartyMon(0, SPECIES_ZIGZAGOON);
+    SetRunReviewPartyMon(1, SPECIES_ZIGZAGOON);
+    RogueRunStart_PrepareStandard();
+    context = RogueRunStart_GetContext();
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_STARTER_BAG);
+
+    memset(&gPlayerParty[1], 0, sizeof(gPlayerParty[1]));
+    CalculatePlayerPartyCount();
+    RogueRunStart_Refresh();
+    EXPECT_EQ(context->preferredTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT_EQ(context->effectiveTeamSource, RUN_START_TEAM_SOURCE_CURRENT_PARTY);
+    EXPECT(context->canUseCurrentParty);
+
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, hadStarterBagUpgrade);
+    FinishRunReviewTest();
+}
