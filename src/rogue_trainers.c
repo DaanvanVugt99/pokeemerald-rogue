@@ -493,6 +493,14 @@ u8 Rogue_CalculateMiniBossMonLvl()
 
 u8 Rogue_CalculateRivalMonLvl()
 {
+    // Divergence's Standard generator is the upstream Fast Path. Keep rivals
+    // alongside the player's level there, except on Brutal difficulty.
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD
+        && Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) != DIFFICULTY_LEVEL_BRUTAL)
+    {
+        return Rogue_CalculatePlayerMonLvl();
+    }
+
     return Rogue_CalculateTrainerLvlCap(TRUE);
 }
 
