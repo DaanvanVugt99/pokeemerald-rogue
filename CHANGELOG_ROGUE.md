@@ -23,6 +23,8 @@ Format follows Keep a Changelog loosely:
   including in multiplayer runs.
 - Gauntlet runs, including Rainbow Gauntlet, now expose the full tutor-move pool.
 - Removed obsolete level-up NPCs from Day Care and Market Rest Stops.
+- Battle Tower rooms now offer more trainer encounters with a smaller money
+  bonus per battle.
 
 ### Fixed
 
@@ -39,6 +41,8 @@ Format follows Keep a Changelog loosely:
   move-specific weaknesses, and Huge Sword reveals its effect to battle AI.
 - Applied route-style pickup quantities to berry and item pickups in Rest Stops.
 - Frontier Brains now use the same level policy as rival encounters.
+- Battle AI now recognizes tutor moves when checking whether an Illusion is
+  plausible.
 - Regenerated the baked form-item index after the recent item-table changes
 - Increased Battle Checker party snapshot capacity and advanced the internal
   Rogue save schema; older development saves are intentionally discarded.

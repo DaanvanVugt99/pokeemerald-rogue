@@ -528,8 +528,17 @@ static bool32 ShouldFailForIllusion(u32 illusionSpecies, u32 battlerId)
         if (gRoguePokemonProfiles[illusionSpecies].levelUpMoves[j].move != MOVE_NONE)
             continue;
 
-        // The used move can be learned from Tm/Hm or Move Tutors.
-        if (CanSpeciesLearnTM(illusionSpecies, move)) // todo tutor hookup too
+        // The used move can be learned from Move Tutors.
+        for (j = 0; gRoguePokemonProfiles[illusionSpecies].tutorMoves[j] != MOVE_NONE; j++)
+        {
+            if (gRoguePokemonProfiles[illusionSpecies].tutorMoves[j] == move)
+                break;
+        }
+        if (gRoguePokemonProfiles[illusionSpecies].tutorMoves[j] != MOVE_NONE)
+            continue;
+
+        // The used move can be learned from a TM or HM.
+        if (CanSpeciesLearnTM(illusionSpecies, move))
             continue;
 
         // 'Illegal move', AI won't fail for the illusion.
