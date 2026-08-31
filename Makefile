@@ -302,6 +302,9 @@ C_SRCS := $(filter-out \
 	$(C_SRCS))
 C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
 
+# Test sources are only needed for test ELF targets. Keep their source and
+# dependency scans out of normal ROM builds, where they add no prerequisites.
+ifeq ($(TEST),1)
 TEST_SRCS_IN := $(wildcard $(TEST_SUBDIR)/*.c $(TEST_SUBDIR)/*/*.c $(TEST_SUBDIR)/*/*/*.c $(TEST_SUBDIR)/*/*/*/*.c)
 TEST_SRCS_ALL := $(foreach src,$(TEST_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
 TEST_HARNESS_SRCS := $(TEST_SUBDIR)/test_runner.c $(TEST_SUBDIR)/test_runner_args.c $(TEST_SUBDIR)/test_runner_battle.c
@@ -339,6 +342,7 @@ endif
 TEST_SRCS := $(TEST_HARNESS_SRCS) $(TEST_CASE_SRCS)
 TEST_OBJS := $(patsubst $(TEST_SUBDIR)/%.c,$(TEST_BUILDDIR)/%.o,$(TEST_SRCS))
 TEST_OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(TEST_OBJS))
+endif
 
 GFLIB_SRCS := $(wildcard $(GFLIB_SUBDIR)/*.c)
 GFLIB_OBJS := $(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o,$(GFLIB_SRCS))
@@ -609,12 +613,14 @@ $(SONG_BUILDDIR)/%.o: $(SONG_SUBDIR)/%.s
 	$(AS) $(ASFLAGS) -I sound -o $@ $<
 
 # NOTE: Based on C_DEP above, but without NODEP and KEEP_TEMPS handling.
+ifeq ($(TEST),1)
 define TEST_DEP
 $1: $2 $$(shell $(SCANINC) -I include -I gflib $(TOOLCHAIN_INCLUDE_DIRS) $2)
 	@echo "$$(CC1) <flags> -o $$@ $$<"
 	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
 endef
 $(foreach src, $(TEST_SRCS), $(eval $(call TEST_DEP,$(patsubst $(TEST_SUBDIR)/%.c,$(TEST_BUILDDIR)/%.o,$(src)),$(src),$(patsubst $(TEST_SUBDIR)/%.c,%,$(src)))))
+endif
 
 ifneq ($(LTO),0)
 LD_SCRIPT := ld_script_lto.ld

@@ -1,12 +1,13 @@
 # Windows Development Setup
 
-Divergence supports both WSL1 and the MSYS2 environment bundled with devkitPro.
-WSL1 is preferred for this repository while it lives on the Windows `C:` drive;
-MSYS2 remains a supported fallback. Both environments use the same checkout and
-generated-asset cache. ARM object files are kept separate automatically under
-`build_wsl/` so switching toolchains cannot reuse incompatible objects.
+Divergence supports WSL1, WSL2, and the MSYS2 environment bundled with
+devkitPro. WSL1 works well when the checkout must remain on the Windows `C:`
+drive; WSL2 provides the best build performance when the checkout lives in its
+Linux filesystem. MSYS2 remains a supported fallback. ARM object files are kept
+separate automatically under `build_wsl/` so switching toolchains cannot reuse
+incompatible objects.
 
-## Preferred WSL1 workflow
+## WSL1 workflow for a Windows checkout
 
 Install Ubuntu as WSL1 so Windows tools such as Zed can continue to access the
 checkout directly:
@@ -45,9 +46,32 @@ wsl ./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"
 ```
 
 The Linux launcher builds the ROM, while `launch_emu_debug.bat` opens it in the
-native Windows mGBA application. WSL2 can also work, but a checkout under
-`/mnt/c` is generally better suited to WSL1; WSL2 performs best when the whole
-checkout lives in its Linux filesystem.
+native Windows mGBA application. The launchers use at most four build jobs by
+default; set `BUILD_JOBS` to override that limit when more memory is available.
+
+## Fast WSL2 workflow
+
+For the best build throughput, run the checkout from the WSL2 Linux filesystem
+instead of `/mnt/c`. This avoids Windows filesystem metadata overhead during
+Makefile dependency scans and parallel compilation. Convert the distribution if
+needed, then create a Linux-side checkout:
+
+```powershell
+wsl --set-version Ubuntu-24.04 2
+wsl
+```
+
+```sh
+mkdir -p ~/src
+cd ~/src
+git clone <repository-url> pokeemerald-rogue
+cd pokeemerald-rogue
+./scripts/launch_build_debug.sh
+```
+
+If the Windows checkout has uncommitted work, save or commit it before copying
+or cloning so the two checkouts cannot diverge accidentally. Windows editors can
+still open the Linux-side checkout through `\\wsl$\Ubuntu-24.04\home\...`.
 
 ## MSYS2 workflow
 

@@ -12,9 +12,13 @@ or validation workflows change.
   `.\scripts\check_windows_setup.ps1 -InstallPoryscript` and use the matching
   `.bat` launchers, such as
   `.\scripts\launch_build_test.bat --check-all-suites`.
+- Build launchers use at most four concurrent jobs by default; set `BUILD_JOBS`
+  to override the cap when the host has enough memory.
 - With a WSL1 checkout mounted from `C:`, invoke the Linux launchers from
   PowerShell with `wsl`, for example
   `wsl ./scripts/launch_build_test.sh --check-all-suites`.
+- For maximum build throughput, use WSL2 with the checkout in the Linux
+  filesystem rather than under `/mnt/c`.
 - Toolchain expected: `devkitARM` (`arm-none-eabi-*` in `PATH`).
 - For interactive test ROM runs: `mgba` in `PATH`.
 - For headless checks: `mgba-rom-test` in `PATH` (used via `make check` + hydra wrapper).

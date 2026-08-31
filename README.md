@@ -1,4 +1,4 @@
-# Pokemon Emerald Rogue: Divergence
+ # Pokemon Emerald Rogue: Divergence
 
 Pokemon Emerald Rogue: Divergence is a standalone fork of Pokemon Emerald
 Rogue focused on expressive run variety and expanded battle identity through

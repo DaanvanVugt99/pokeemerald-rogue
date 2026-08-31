@@ -27,6 +27,9 @@ Format follows Keep a Changelog loosely:
 - Updated Windows development support with portable MSYS2 and mGBA discovery,
   correct launcher exit-code propagation, argument forwarding, a dependency
   audit/Poryscript bootstrap script, and explicit batch-file line endings.
+- Reduced normal ROM build overhead by skipping test dependency scans when
+  `TEST=0` and capped launcher parallelism at four jobs by default, with a
+  `BUILD_JOBS` override for larger hosts.
 - Fixed Treasure edge cases so Stone Heart blocks switch-out recovery, Sun
   Totem heals from all hits and spread targets, Eclipse Orb reverses
   move-specific weaknesses, and Huge Sword reveals its effect to battle AI.
@@ -80,6 +83,8 @@ Format follows Keep a Changelog loosely:
 - Added Treasure Hunter, a Main Quest completed by discovering a Treasure room
   for the first time, rewarding ¥10000, 5 Building Supplies, and 5 Dark
   Pokéblocks.
+- Added New Frontier, a Main Quest completed by clearing a Battle Tower, with a
+  Battle Checker reward for reviewing previous boss and Rival battles.
 
 - Reworked the generated Adventure Paths into a connected floating astral-rock
   island with dedicated stone trails, impassable cosmic void and cliffs, and

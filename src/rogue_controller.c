@@ -5484,7 +5484,7 @@ static void BeginRogueRunPhase_Finalize(void)
     RogueQuest_ActivateQuestsFor(QUEST_CONST_ACTIVE_IN_RUN);
     RogueQuest_OnTrigger(QUEST_TRIGGER_RUN_START);
 
-    Rogue_AddPartySnapshot();
+    Rogue_AddPartySnapshot(-1);
 
     if(Rogue_ShouldDisableMainQuests())
         Rogue_PushPopup_MainQuestsDisabled();
@@ -9200,11 +9200,6 @@ void Rogue_Battle_StartTrainerBattle(void)
 
     SetupTrainerBattleInternal(gTrainerBattleOpponent_A);
 
-    if(!Rogue_IsVictoryLapActive() && Rogue_IsBossTrainer(gTrainerBattleOpponent_A))
-    {
-        Rogue_AddPartySnapshot();
-    }
-
     RememberPartyHeldItems();
     RememberPartyHealth();
 
@@ -9228,6 +9223,11 @@ void Rogue_Battle_StartTrainerBattle(void)
 
 void Rogue_Battle_TrainerTeamReady(void)
 {
+    if(!Rogue_IsVictoryLapActive() && (Rogue_IsBossTrainer(gTrainerBattleOpponent_A) || Rogue_IsRivalTrainer(gTrainerBattleOpponent_A)))
+    {
+        Rogue_AddPartySnapshot(gTrainerBattleOpponent_A);
+    }
+
     if(Rogue_IsFinalQuestFinalBoss())
     {
         u32 temp;
@@ -9710,7 +9710,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
                 if(Rogue_GetCurrentDifficulty() >= ROGUE_MAX_BOSS_COUNT)
                 {
                     // Snapshot HoF team
-                    Rogue_AddPartySnapshot();
+                    Rogue_AddPartySnapshot(-1);
                     UpdateTrainerCardMonIconsFromParty();
 
                     FlagSet(FLAG_IS_CHAMPION);
@@ -10249,7 +10249,7 @@ u32 Rogue_CalcBagUpgradeCost()
     return 500 + 250 * (u32)(gSaveBlock1Ptr->bagCapacityUpgrades);
 }
 
-void Rogue_AddPartySnapshot()
+void Rogue_AddPartySnapshot(u16 trainerId)
 {
     AGB_ASSERT(gRogueRun.partySnapshotCount < ARRAY_COUNT(gRogueRun.partySnapshots));
 
@@ -10259,6 +10259,9 @@ void Rogue_AddPartySnapshot()
         u8 index = gRogueRun.partySnapshotCount++;
         memset(&gRogueRun.partySnapshots[index], 0, sizeof(gRogueRun.partySnapshots[index]));
 
+        gRogueRun.partySnapshots[index].trainerId = trainerId;
+
+        // Player party
         s = 0;
 
         for(i = 0; i < PARTY_SIZE; ++i)
@@ -10267,6 +10270,18 @@ void Rogue_AddPartySnapshot()
             {
                 gRogueRun.partySnapshots[index].partySpeciesGfx[s] = FollowMon_GetMonGraphics(&gPlayerParty[i]);
                 gRogueRun.partySnapshots[index].partyPersonalities[s] = (GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY) & ~24); // remove nature part as that might change
+                ++s;
+            }
+        }
+
+        // Opponent party
+        s = 0;
+
+        for(i = 0; i < PARTY_SIZE; ++i)
+        {
+            if(GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) != SPECIES_NONE && GetMonData(&gEnemyParty[i], MON_DATA_HP) != 0)
+            {
+                gRogueRun.partySnapshots[index].enemySpeciesGfx[s] = FollowMon_GetMonGraphics(&gEnemyParty[i]);
                 ++s;
             }
         }

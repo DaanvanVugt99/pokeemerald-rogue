@@ -2,6 +2,7 @@
 
 extern const u8 gItemDesc_EvolutionItem[];
 extern const u8 gItemDesc_QuestLog[];
+extern const u8 gItemDesc_BattleChecker[];
 extern const u8 gItemDesc_HealingFlask[];
 extern const u8 gItemDesc_RidingWhistle[];
 extern const u8 gItemDesc_GoldRidingWhistle[];
@@ -489,6 +490,24 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .type = ITEM_USE_FIELD,
         .registrability = TRUE,
         .fieldUseFunc = ItemUseOutOfBattle_UniqueScanner,
+    },
+
+    [ITEM_BATTLE_CHECKER - ITEM_ROGUE_ITEM_FIRST] =
+    {
+#ifdef ROGUE_EXPANSION
+        .name = _("Battle Checker"),
+#else
+        .name = _("BATTLE CHECKER"),
+#endif
+        .itemId = ITEM_BATTLE_CHECKER,
+        .price = 0,
+        .description = gItemDesc_BattleChecker,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_BattleChecker,
+        .iconImage = gItemIcon_FameChecker,
+        .iconPalette = gItemIconPalette_FameChecker,
     },
 
     // Pokeblock

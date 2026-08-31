@@ -78,20 +78,34 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-num_cores=""
-if command -v sysctl >/dev/null 2>&1; then
-    num_cores="$(sysctl -n hw.ncpu 2>/dev/null || true)"
-fi
-if [ -z "$num_cores" ] && command -v nproc >/dev/null 2>&1; then
-    num_cores="$(nproc)"
-fi
-if [ -z "$num_cores" ] && command -v getconf >/dev/null 2>&1; then
-    num_cores="$(getconf _NPROCESSORS_ONLN 2>/dev/null)"
+if [ -n "${BUILD_JOBS:-}" ]; then
+    num_cores="$BUILD_JOBS"
+else
+    num_cores=""
+    if command -v sysctl >/dev/null 2>&1; then
+        num_cores="$(sysctl -n hw.ncpu 2>/dev/null || true)"
+    fi
+    if [ -z "$num_cores" ] && command -v nproc >/dev/null 2>&1; then
+        num_cores="$(nproc)"
+    fi
+    if [ -z "$num_cores" ] && command -v getconf >/dev/null 2>&1; then
+        num_cores="$(getconf _NPROCESSORS_ONLN 2>/dev/null)"
+    fi
+
+    if [ -z "${num_cores:-}" ]; then
+        num_cores=4
+    fi
+    if [ "$num_cores" -gt 4 ]; then
+        num_cores=4
+    fi
 fi
 
-if [ -z "${num_cores:-}" ]; then
-    num_cores=4
-fi
+case "$num_cores" in
+    ''|*[!0-9]*|0)
+        echo "Error: BUILD_JOBS must be a positive integer." >&2
+        exit 2
+        ;;
+esac
 
 echo "Working Directory: $PWD"
 echo "Mode: $mode"
