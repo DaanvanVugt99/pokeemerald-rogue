@@ -341,6 +341,8 @@
 #define TRAINER_BACK_PIC_COMMUNITY_POKABBIE     15
 #define TRAINER_BACK_PIC_CALEM                  16
 #define TRAINER_BACK_PIC_SERENA                 17
+#define TRAINER_BACK_PIC_HILDA                  18
+#define TRAINER_BACK_PIC_HILBERT                19
 
 #define TRAINER_BACK_PIC_PLAYER                 0xFF
 
