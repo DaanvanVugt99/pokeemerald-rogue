@@ -4376,9 +4376,85 @@ bool8 RogueAdv_CanUseEscapeRope(void)
     return FALSE;
 }
 
+static u8 GetDenTypeForRoom(struct RogueAdvPathRoom const* room, u8 typeSlot)
+{
+    if(room->roomType != ADVPATH_ROOM_WILD_DEN)
+        return TYPE_MYSTERY;
+
+    return GetTypeBySpecies(room->roomParams.perType.wildDen.species, typeSlot, 0);
+}
+
 u8 Rogue_GetTypeForHintForRoom(struct RogueAdvPathRoom const* room)
 {
-    return gRogueRouteTable.routes[room->roomParams.roomIdx].wildTypeTable[(room->coords.x + room->coords.y) % ARRAY_COUNT(gRogueRouteTable.routes[0].wildTypeTable)];
+    u8 typeSlot;
+    u8 type;
+
+    if(room->roomType == ADVPATH_ROOM_ROUTE)
+    {
+        return gRogueRouteTable.routes[room->roomParams.roomIdx].wildTypeTable[(room->coords.x + room->coords.y) % ARRAY_COUNT(gRogueRouteTable.routes[0].wildTypeTable)];
+    }
+
+    if(room->roomType == ADVPATH_ROOM_WILD_DEN)
+    {
+        typeSlot = (room->coords.x + room->coords.y) % 2;
+        type = GetDenTypeForRoom(room, typeSlot);
+
+        // Single-typed species may only populate one slot. Fall back to the
+        // other slot before showing ???.
+        if(!IS_STANDARD_TYPE(type))
+            type = GetDenTypeForRoom(room, typeSlot ^ 1);
+
+        return IS_STANDARD_TYPE(type) ? type : TYPE_MYSTERY;
+    }
+
+    return TYPE_MYSTERY;
+}
+
+static u16 SelectTypeObjectGfx(u8 type, bool8 wildDen)
+{
+    switch(type)
+    {
+        case TYPE_BUG:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_BUG : OBJ_EVENT_GFX_ROUTE_BUG;
+        case TYPE_DARK:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_DARK : OBJ_EVENT_GFX_ROUTE_DARK;
+        case TYPE_DRAGON:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_DRAGON : OBJ_EVENT_GFX_ROUTE_DRAGON;
+        case TYPE_ELECTRIC:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_ELECTRIC : OBJ_EVENT_GFX_ROUTE_ELECTRIC;
+#ifdef ROGUE_EXPANSION
+        case TYPE_FAIRY:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_FAIRY : OBJ_EVENT_GFX_ROUTE_FAIRY;
+#endif
+        case TYPE_FIGHTING:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_FIGHTING : OBJ_EVENT_GFX_ROUTE_FIGHTING;
+        case TYPE_FIRE:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_FIRE : OBJ_EVENT_GFX_ROUTE_FIRE;
+        case TYPE_FLYING:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_FLYING : OBJ_EVENT_GFX_ROUTE_FLYING;
+        case TYPE_GHOST:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_GHOST : OBJ_EVENT_GFX_ROUTE_GHOST;
+        case TYPE_GRASS:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_GRASS : OBJ_EVENT_GFX_ROUTE_GRASS;
+        case TYPE_GROUND:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_GROUND : OBJ_EVENT_GFX_ROUTE_GROUND;
+        case TYPE_ICE:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_ICE : OBJ_EVENT_GFX_ROUTE_ICE;
+        case TYPE_NORMAL:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_NORMAL : OBJ_EVENT_GFX_ROUTE_NORMAL;
+        case TYPE_POISON:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_POISON : OBJ_EVENT_GFX_ROUTE_POISON;
+        case TYPE_PSYCHIC:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_PSYCHIC : OBJ_EVENT_GFX_ROUTE_PSYCHIC;
+        case TYPE_ROCK:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_ROCK : OBJ_EVENT_GFX_ROUTE_ROCK;
+        case TYPE_STEEL:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_STEEL : OBJ_EVENT_GFX_ROUTE_STEEL;
+        case TYPE_WATER:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_WATER : OBJ_EVENT_GFX_ROUTE_WATER;
+        default:
+            return wildDen ? OBJ_EVENT_GFX_WILD_DEN_MYSTERY : OBJ_EVENT_GFX_ROUTE_MYSTERY;
+    }
 }
 
 static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
@@ -4389,53 +4465,7 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
             return 0;
             
         case ADVPATH_ROOM_ROUTE:
-        {
-            switch(Rogue_GetTypeForHintForRoom(room))
-            {
-                case TYPE_BUG:
-                    return OBJ_EVENT_GFX_ROUTE_BUG;
-                case TYPE_DARK:
-                    return OBJ_EVENT_GFX_ROUTE_DARK;
-                case TYPE_DRAGON:
-                    return OBJ_EVENT_GFX_ROUTE_DRAGON;
-                case TYPE_ELECTRIC:
-                    return OBJ_EVENT_GFX_ROUTE_ELECTRIC;
-#ifdef ROGUE_EXPANSION
-                case TYPE_FAIRY:
-                    return OBJ_EVENT_GFX_ROUTE_FAIRY;
-#endif
-                case TYPE_FIGHTING:
-                    return OBJ_EVENT_GFX_ROUTE_FIGHTING;
-                case TYPE_FIRE:
-                    return OBJ_EVENT_GFX_ROUTE_FIRE;
-                case TYPE_FLYING:
-                    return OBJ_EVENT_GFX_ROUTE_FLYING;
-                case TYPE_GHOST:
-                    return OBJ_EVENT_GFX_ROUTE_GHOST;
-                case TYPE_GRASS:
-                    return OBJ_EVENT_GFX_ROUTE_GRASS;
-                case TYPE_GROUND:
-                    return OBJ_EVENT_GFX_ROUTE_GROUND;
-                case TYPE_ICE:
-                    return OBJ_EVENT_GFX_ROUTE_ICE;
-                case TYPE_NORMAL:
-                    return OBJ_EVENT_GFX_ROUTE_NORMAL;
-                case TYPE_POISON:
-                    return OBJ_EVENT_GFX_ROUTE_POISON;
-                case TYPE_PSYCHIC:
-                    return OBJ_EVENT_GFX_ROUTE_PSYCHIC;
-                case TYPE_ROCK:
-                    return OBJ_EVENT_GFX_ROUTE_ROCK;
-                case TYPE_STEEL:
-                    return OBJ_EVENT_GFX_ROUTE_STEEL;
-                case TYPE_WATER:
-                    return OBJ_EVENT_GFX_ROUTE_WATER;
-
-                default:
-                //case TYPE_MYSTERY:
-                    return OBJ_EVENT_GFX_ROUTE_MYSTERY;
-            }
-        }
+            return SelectTypeObjectGfx(Rogue_GetTypeForHintForRoom(room), FALSE);
 
         case ADVPATH_ROOM_RESTSTOP:
             return gRogueRestStopEncounterInfo.mapTable[room->roomParams.roomIdx].encounterId;
@@ -4483,7 +4513,7 @@ static u16 SelectObjectGfxForRoom(struct RogueAdvPathRoom* room)
             return Rogue_GetTrainerObjectEventGfx(room->roomParams.perType.miniboss.trainerNum);
 
         case ADVPATH_ROOM_WILD_DEN:
-            return OBJ_EVENT_GFX_GRASS_DEFAULT;
+            return SelectTypeObjectGfx(Rogue_GetTypeForHintForRoom(room), TRUE);
 
         case ADVPATH_ROOM_UNIQUE_DEN:
             return OBJ_EVENT_GFX_UNIQUE_DEN_GRASS;
@@ -4708,6 +4738,10 @@ void RogueAdv_GetLastInteractedRoomParams()
     {
         case ADVPATH_ROOM_ROUTE:
             gSpecialVar_ScriptNodeParam1 = gRogueAdvPath.rooms[roomIdx].roomParams.perType.route.difficulty;
+            BufferTypeAdjective(Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[roomIdx]));
+            break;
+
+        case ADVPATH_ROOM_WILD_DEN:
             BufferTypeAdjective(Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[roomIdx]));
             break;
 

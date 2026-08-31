@@ -757,6 +757,45 @@ TEST("Unique Den generation is replay deterministic and preserves general RNG")
     gRngRogueValue = originalRogueRng;
 }
 
+TEST("Wild dens use type graphics while unique dens retain their marker")
+{
+    struct RogueAdvPath originalPath = gRogueAdvPath;
+    struct ObjectEventTemplate objectEvents[3] = {0};
+    u8 objectEventCount = 0;
+
+    memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+    gRogueAdvPath.roomCount = 3;
+    gRogueAdvPath.pathLength = 2;
+    gRogueAdvPath.justGenerated = TRUE;
+
+    gRogueAdvPath.rooms[0].roomType = ADVPATH_ROOM_WILD_DEN;
+    gRogueAdvPath.rooms[0].coords.x = 0;
+    gRogueAdvPath.rooms[0].coords.y = 0;
+    gRogueAdvPath.rooms[0].roomParams.perType.wildDen.species = SPECIES_CHARIZARD;
+
+    gRogueAdvPath.rooms[1].roomType = ADVPATH_ROOM_WILD_DEN;
+    gRogueAdvPath.rooms[1].coords.x = 1;
+    gRogueAdvPath.rooms[1].coords.y = 0;
+    gRogueAdvPath.rooms[1].roomParams.perType.wildDen.species = SPECIES_CHARIZARD;
+
+    gRogueAdvPath.rooms[2].roomType = ADVPATH_ROOM_UNIQUE_DEN;
+    gRogueAdvPath.rooms[2].coords.x = 0;
+    gRogueAdvPath.rooms[2].coords.y = 1;
+    gRogueAdvPath.rooms[2].roomParams.perType.uniqueDen.species = SPECIES_SQUIRTLE;
+
+    EXPECT_EQ(Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[0]), TYPE_FIRE);
+    EXPECT_EQ(Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[1]), TYPE_FLYING);
+    EXPECT_EQ(Rogue_GetTypeForHintForRoom(&gRogueAdvPath.rooms[2]), TYPE_MYSTERY);
+
+    RogueAdv_ModifyObjectEvents(NULL, objectEvents, &objectEventCount, ARRAY_COUNT(objectEvents));
+    EXPECT_EQ(objectEventCount, 3);
+    EXPECT_EQ(objectEvents[0].graphicsId, OBJ_EVENT_GFX_WILD_DEN_FIRE);
+    EXPECT_EQ(objectEvents[1].graphicsId, OBJ_EVENT_GFX_WILD_DEN_FLYING);
+    EXPECT_EQ(objectEvents[2].graphicsId, OBJ_EVENT_GFX_UNIQUE_DEN_GRASS);
+
+    gRogueAdvPath = originalPath;
+}
+
 TEST("Unique Legendary rooms use a gold statue")
 {
     struct RogueAdvPath originalPath = gRogueAdvPath;

@@ -34,6 +34,9 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Ported upstream 2.2's type-colored Pokémon den sprites for Adventure Paths,
+  with a matching type adjective for trained den encounters while preserving
+  the unique den's purple map marker.
 - Ported the Black and White trainer backsprites for Hilbert and Hilda from
   Emerald Rogue 2.2, including layered outfit recoloring and a corrected
   Hilbert palette in place of upstream's all-black placeholder.
