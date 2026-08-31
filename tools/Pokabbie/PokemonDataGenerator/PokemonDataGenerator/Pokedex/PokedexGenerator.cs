@@ -83,6 +83,7 @@ namespace PokemonDataGenerator.Pokedex
 
 				fullDexes.Add(GatherDexData("extras_conquest", "Conquest", 5, "conquest-gallery"));
 				fullDexes.Add(GatherDexData("extras_legendsarceus", "Legends Arceus", 8, "hisui"));
+				fullDexes.Add(GatherResourceDexData("extras_colosseum", "Colosseum + XD", 3, "Orre Colosseum.csv"));
 
 				fullDexes.Add(GatherDexData("national_gen1", "Gen I National", 1, "national"));
 				fullDexes.Add(GatherDexData("national_gen2", "Gen II National", 2, "national"));

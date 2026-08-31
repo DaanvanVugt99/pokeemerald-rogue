@@ -286,9 +286,15 @@
             },
             {
                 "name": "Orre Style",
-                "description": "Complete the Orre Style Trial with Umbreon and Espeon.\\nBattle gimmicks are disabled.",
+                "description": "Complete the Orre Style Trial with the Colosseum + XD Pokédex, Umbreon and Espeon.\\nBattle gimmicks are disabled.",
                 "triggers":
                 [
+                    {
+                        "on": [ "RUN_START" ],
+                        "condition": "IsPokedexVariant",
+                        "params": [ "POKEDEX_VARIANT_EXTRAS_COLOSSEUM" ],
+                        "fail": "FAIL"
+                    },
                     {
                         "on": [ "ENTER_HALL_OF_FAME" ],
                         "condition": "TrialCompleteAndPartyContainsAllSpecies",
@@ -305,13 +311,8 @@
                         "custom_mon_id": "CUSTOM_MON_EXOTIC_LOTAD"
                     },
                     {
-                        "species": "SPECIES_UMBREON",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    },
-                    {
-                        "species": "SPECIES_ESPEON",
-                        "shiny": true,
+                        "species": "SPECIES_LUGIA",
+                        "custom_mon_id": "CUSTOM_MON_EXOTIC_LUGIA",
                         "difficulty": "HARD"
                     }
                 ]

@@ -49,6 +49,11 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added the Colosseum + XD Pokédex option to starting and normal-run setup,
+  with its Orre Style quest awarding an exotic Lugia.
+- Expanded the Colosseum + XD Pokédex with its remaining upstream species.
+- Bumped the internal Rogue save schema; existing development saves are
+  intentionally discarded for this Pokédex update.
 - Added dedicated overworld graphics for Escape Rope and non-battle treasure
   rewards such as Nuggets and Stardust.
 - Ported upstream 2.2's type-colored Pokémon den sprites for Adventure Paths,

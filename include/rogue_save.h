@@ -7,7 +7,7 @@ extern struct RogueSaveBlock *gRogueSaveBlock;
 
 // First internal development save schema. Bump this when the serialized
 // Rogue block layout changes; incompatible development saves are discarded.
-#define ROGUE_SAVE_VERSION 8
+#define ROGUE_SAVE_VERSION 9
 
 // Increment whenever dynamic Rogue item IDs are rearranged. Loading a save with
 // an older layout removes dynamic items from both its current and restored bags.

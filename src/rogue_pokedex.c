@@ -5220,6 +5220,7 @@ static const u8 sText_Kalos[] = _("Kalos");
 static const u8 sText_Alola[] = _("Alola");
 static const u8 sText_Galar[] = _("Galar");
 static const u8 sText_Paldea[] = _("Paldea");
+static const u8 sText_Extras[] = _("Extras");
 static const u8 sText_National[] = _("National");
 
 static const u8 sCuratedPokedexKanto[] =
@@ -5278,6 +5279,11 @@ static const u8 sCuratedPokedexPaldea[] =
     POKEDEX_VARIANT_PALDEA_FULLDLC,
 };
 
+static const u8 sCuratedPokedexExtras[] =
+{
+    POKEDEX_VARIANT_EXTRAS_COLOSSEUM,
+};
+
 static const u8 sCuratedPokedexNational[] =
 {
     POKEDEX_VARIANT_NATIONAL_GEN1,
@@ -5302,6 +5308,7 @@ static const struct CuratedPokedexGroup sCuratedPokedexGroups[] =
     {sText_Alola, sCuratedPokedexAlola, ARRAY_COUNT(sCuratedPokedexAlola)},
     {sText_Galar, sCuratedPokedexGalar, ARRAY_COUNT(sCuratedPokedexGalar)},
     {sText_Paldea, sCuratedPokedexPaldea, ARRAY_COUNT(sCuratedPokedexPaldea)},
+    {sText_Extras, sCuratedPokedexExtras, ARRAY_COUNT(sCuratedPokedexExtras)},
     {sText_National, sCuratedPokedexNational, ARRAY_COUNT(sCuratedPokedexNational)},
 };
 #endif
@@ -5329,6 +5336,7 @@ bool8 RoguePokedex_IsCuratedVariant(u8 variant)
     case POKEDEX_VARIANT_PALDEA_SCVI:
     case POKEDEX_VARIANT_PALDEA_FULLDLC:
     case POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS:
+    case POKEDEX_VARIANT_EXTRAS_COLOSSEUM:
     case POKEDEX_VARIANT_NATIONAL_GEN1:
     case POKEDEX_VARIANT_NATIONAL_GEN2:
     case POKEDEX_VARIANT_NATIONAL_GEN3:
@@ -5537,6 +5545,13 @@ void RoguePokedex_ApplyTrainerPoolForVariant(u8 variant)
     case POKEDEX_VARIANT_PALDEA_SCVI:
     case POKEDEX_VARIANT_PALDEA_FULLDLC:
         Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, TRUE);
+        break;
+    case POKEDEX_VARIANT_EXTRAS_COLOSSEUM:
+        // Colosseum and XD draw from the Gen 1-3 roster, so keep all
+        // corresponding regional trainer pools available in normal runs.
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
+        Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, TRUE);
         break;
     default:
         Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
