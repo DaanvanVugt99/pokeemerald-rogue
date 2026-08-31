@@ -21,6 +21,8 @@ Format follows Keep a Changelog loosely:
   states and returning to the overview when Starter Bag selection is cancelled.
 - Standard-path rivals now match the player's level except on Brutal difficulty,
   including in multiplayer runs.
+- Gauntlet runs, including Rainbow Gauntlet, now expose the full tutor-move pool.
+- Removed obsolete level-up NPCs from Day Care and Market Rest Stops.
 
 ### Fixed
 
@@ -35,6 +37,8 @@ Format follows Keep a Changelog loosely:
 - Fixed Treasure edge cases so Stone Heart blocks switch-out recovery, Sun
   Totem heals from all hits and spread targets, Eclipse Orb reverses
   move-specific weaknesses, and Huge Sword reveals its effect to battle AI.
+- Applied route-style pickup quantities to berry and item pickups in Rest Stops.
+- Frontier Brains now use the same level policy as rival encounters.
 - Regenerated the baked form-item index after the recent item-table changes
 - Increased Battle Checker party snapshot capacity and advanced the internal
   Rogue save schema; older development saves are intentionally discarded.

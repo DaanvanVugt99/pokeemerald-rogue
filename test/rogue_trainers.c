@@ -369,19 +369,24 @@ TEST("Frontier Brains use competitive movesets on the first Average path")
     gRngValue = originalRng;
 }
 
-TEST("Frontier Brains stay five levels below the badge level cap")
+TEST("Frontier Brains match the rival encounter level")
 {
+    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalLevelOffset = gRogueRun.currentLevelOffset;
 
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
     Rogue_SetCurrentDifficulty(6);
     gRogueRun.currentLevelOffset = 10;
 
     EXPECT_EQ(Rogue_CalculateBossMonLvl(), 75);
-    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), 70);
-    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculateBossMonLvl() - 5);
-    EXPECT_NE(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculatePlayerMonLvl());
+    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculatePlayerMonLvl());
+    EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculateRivalMonLvl());
 
+    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
     Rogue_SetCurrentDifficulty(originalDifficulty);
     gRogueRun.currentLevelOffset = originalLevelOffset;
 }

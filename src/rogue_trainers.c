@@ -28,7 +28,6 @@
 #include "rogue_trials.h"
 
 #define TRAINER_SHINY_PERC 25
-#define FRONTIER_BRAIN_LEVEL_OFFSET 5
 
 #define RIVAL_BASE_TEAM_DIFFICULTY      ROGUE_ELITE_START_DIFFICULTY - 2
 
@@ -488,7 +487,8 @@ u8 Rogue_CalculateTrainerMonLvl()
 
 u8 Rogue_CalculateMiniBossMonLvl()
 {
-    return Rogue_CalculateBossMonLvl() - FRONTIER_BRAIN_LEVEL_OFFSET;
+    // Frontier Brains follow the same level policy as rival encounters.
+    return Rogue_CalculateRivalMonLvl();
 }
 
 u8 Rogue_CalculateRivalMonLvl()

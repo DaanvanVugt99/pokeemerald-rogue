@@ -70,6 +70,7 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
         .disableRivalEncounters = TRUE,
         .disableRouteTrainers = TRUE,
         .forceFullShopInventory = TRUE,
+        .forceFullTutorMoves = TRUE,
         .adventureGenerator = ADV_GENERATOR_GAUNTLET,
     },
     [ROGUE_GAME_MODE_RAINBOW_GAUNTLET] = 
@@ -87,6 +88,7 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
         .disableRivalEncounters = TRUE,
         .disableRouteTrainers = TRUE,
         .forceFullShopInventory = TRUE,
+        .forceFullTutorMoves = TRUE,
         .adventureGenerator = ADV_GENERATOR_GAUNTLET,
     },
     [ROGUE_GAME_MODE_SLOW_PATH] =

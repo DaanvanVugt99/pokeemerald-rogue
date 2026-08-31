@@ -85,6 +85,7 @@
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
+#include "rogue_settings.h"
 
 enum {
     MENU_SUMMARY,
@@ -2429,6 +2430,8 @@ u8 GetTutorMoves(struct Pokemon *pokemon, u16 *tutorMoves, u16 tutorMovesCapacit
     u16 write = 0;
     u16 species = GetMonData(pokemon, MON_DATA_SPECIES);
     u8 tutorMoveLvlCount = Rogue_IsRunActive() ? TUTOR_MOVE_LVL_COUNT_RUN : TUTOR_MOVE_LVL_COUNT_HUB;
+    if(Rogue_IsRunActive() && Rogue_GetModeRules()->forceFullTutorMoves)
+        tutorMoveLvlCount = 1;
     u8 tutorMoveLvl = Rogue_IsRunActive() ? pokemon->rogueExtraData.runTutorMoveLvl : GetMonData(pokemon, MON_DATA_TUTOR_MOVE_LVL);
     u32 compatValue;
     u32 uniqueMoveSet = Rogue_IsRunActive() ? GetMonData(pokemon, MON_DATA_PERSONALITY) : GetMonData(pokemon, MON_DATA_OT_ID);
