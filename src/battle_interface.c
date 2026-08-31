@@ -4018,9 +4018,8 @@ static void Task_FreeAbilityPopUpGfx(u8 taskId)
 
 // last used ball
 #define LAST_BALL_WINDOW_TAG 0xD721
-#define LAST_BALL_WINDOW_PAL_TAG 0xD722
+#define BATTLE_OPTION_WINDOW_PAL_TAG 0xD722
 #define MOVE_INFO_WINDOW_TAG 0xD723
-#define MOVE_INFO_WINDOW_PAL_TAG 0xD724
 #define MOVE_TYPE_BADGE_TILE_TAG 0xD725
 #define MOVE_TYPE_BADGE_PAL_TAG 0xD726
 
@@ -4151,7 +4150,7 @@ static const struct OamData sOamData_LastUsedBall =
 static const struct SpriteTemplate sSpriteTemplate_LastUsedBallWindow =
 {
     .tileTag = LAST_BALL_WINDOW_TAG,
-    .paletteTag = LAST_BALL_WINDOW_PAL_TAG,
+    .paletteTag = BATTLE_OPTION_WINDOW_PAL_TAG,
     .oam = &sOamData_LastUsedBall,
     .anims = gDummySpriteAnimTable,
     .images = NULL,
@@ -4179,7 +4178,7 @@ static const struct OamData sOamData_MoveInfoWindow =
 static const struct SpriteTemplate sSpriteTemplate_MoveInfoWindow =
 {
     .tileTag = MOVE_INFO_WINDOW_TAG,
-    .paletteTag = MOVE_INFO_WINDOW_PAL_TAG,
+    .paletteTag = BATTLE_OPTION_WINDOW_PAL_TAG,
     .oam = &sOamData_MoveInfoWindow,
     .anims = gDummySpriteAnimTable,
     .images = NULL,
@@ -4232,14 +4231,11 @@ static const u16 sLastUsedBallWindowPalette[] =
     RGB(0, 0, 0),
 };
 
-static const struct SpritePalette sSpritePalette_LastUsedBallWindow =
+// These buttons use the same colors and can overlap while sliding between menus.
+// Sharing their palette leaves room for the dynamically colored move type badge.
+static const struct SpritePalette sSpritePalette_BattleOptionWindow =
 {
-    sLastUsedBallWindowPalette, LAST_BALL_WINDOW_PAL_TAG
-};
-
-static const struct SpritePalette sSpritePalette_MoveInfoWindow =
-{
-    sLastUsedBallWindowPalette, MOVE_INFO_WINDOW_PAL_TAG
+    sLastUsedBallWindowPalette, BATTLE_OPTION_WINDOW_PAL_TAG
 };
 
 #define LAST_USED_BALL_X_F    14
@@ -4324,6 +4320,18 @@ static u16 GetBallCatchPotential(u16 ball)
     default:
         return 100;
     }
+}
+
+static u8 LoadBattleOptionWindowPalette(void)
+{
+    u8 paletteNum = LoadSpritePalette(&sSpritePalette_BattleOptionWindow);
+
+    // LoadSpritePalette does not reload an existing tag. Refresh it because the
+    // last-used-ball button may have tinted this shared palette gray.
+    if (paletteNum != 0xFF)
+        LoadPalette(sLastUsedBallWindowPalette, OBJ_PLTT_ID(paletteNum), PLTT_SIZE_4BPP);
+
+    return paletteNum;
 }
 
 void SelectBestBallToDisplay(void)
@@ -4439,7 +4447,8 @@ void TryAddLastUsedBallItemSprites(void)
     }
 
     // window
-    LoadSpritePalette(&sSpritePalette_LastUsedBallWindow);
+    if (LoadBattleOptionWindowPalette() == 0xFF)
+        return;
     if (GetSpriteTileStartByTag(LAST_BALL_WINDOW_TAG) == 0xFFFF)
         LoadSpriteSheet(&sSpriteSheet_LastUsedBallWindow);
 
@@ -4467,12 +4476,36 @@ void TryAddLastUsedBallItemSprites(void)
         ArrowsChangeColorLastBallCycle(0); //Default the arrows to be invisible
 }
 
+static bool32 IsMoveInfoSpriteValid(void)
+{
+    u8 spriteId = gBattleStruct->moveInfoSpriteId;
+
+    return spriteId < MAX_SPRITES
+        && gSprites[spriteId].inUse
+        && gSprites[spriteId].callback == SpriteCB_MoveInfoWin;
+}
+
+static bool32 IsLastUsedBallWindowSpriteValid(void)
+{
+    u8 spriteId = gBattleStruct->ballSpriteIds[1];
+
+    return spriteId < MAX_SPRITES
+        && gSprites[spriteId].inUse
+        && gSprites[spriteId].callback == SpriteCB_LastUsedBallWin;
+}
+
+static void FreeBattleOptionWindowPaletteIfUnused(void)
+{
+    if (!IsLastUsedBallWindowSpriteValid() && !IsMoveInfoSpriteValid())
+        FreeSpritePaletteByTag(BATTLE_OPTION_WINDOW_PAL_TAG);
+}
+
 static void DestroyLastUsedBallWinGfx(struct Sprite *sprite)
 {
     FreeSpriteTilesByTag(LAST_BALL_WINDOW_TAG);
-    FreeSpritePaletteByTag(LAST_BALL_WINDOW_PAL_TAG);
     DestroySprite(sprite);
     gBattleStruct->ballSpriteIds[1] = MAX_SPRITES;
+    FreeBattleOptionWindowPaletteIfUnused();
 }
 
 static void DestroyLastUsedBallGfx(struct Sprite *sprite)
@@ -4483,15 +4516,6 @@ static void DestroyLastUsedBallGfx(struct Sprite *sprite)
     gBattleStruct->ballSpriteIds[0] = MAX_SPRITES;
 }
 
-static bool32 IsMoveInfoSpriteValid(void)
-{
-    u8 spriteId = gBattleStruct->moveInfoSpriteId;
-
-    return spriteId < MAX_SPRITES
-        && gSprites[spriteId].inUse
-        && gSprites[spriteId].callback == SpriteCB_MoveInfoWin;
-}
-
 static bool32 IsMoveTypeBadgeSpriteValid(void)
 {
     u8 spriteId = gBattleStruct->moveTypeBadgeSpriteId;
@@ -4499,6 +4523,24 @@ static bool32 IsMoveTypeBadgeSpriteValid(void)
     return spriteId < MAX_SPRITES
         && gSprites[spriteId].inUse
         && gSprites[spriteId].template == &sSpriteTemplate_MoveTypeBadge;
+}
+
+static bool32 IsMoveTypeBadgePaletteExclusive(u8 paletteNum)
+{
+    u32 i;
+    u8 badgeSpriteId = IsMoveTypeBadgeSpriteValid()
+                     ? gBattleStruct->moveTypeBadgeSpriteId
+                     : MAX_SPRITES;
+
+    for (i = 0; i < MAX_SPRITES; i++)
+    {
+        if (i != badgeSpriteId
+         && gSprites[i].inUse
+         && gSprites[i].oam.paletteNum == paletteNum)
+            return FALSE;
+    }
+
+    return TRUE;
 }
 
 bool32 UpdateBattleMoveTypeBadge(u8 type)
@@ -4536,6 +4578,11 @@ bool32 UpdateBattleMoveTypeBadge(u8 type)
     if (paletteNum == 0xFF)
     {
         FreeSpriteTilesByTag(MOVE_TYPE_BADGE_TILE_TAG);
+        return FALSE;
+    }
+    if (!IsMoveTypeBadgePaletteExclusive(paletteNum))
+    {
+        DestroyBattleMoveTypeBadge();
         return FALSE;
     }
     LoadPalette(sMoveTypeBadgePalettes[sMoveTypeBadgePaletteGroup[type]],
@@ -4589,8 +4636,8 @@ void TryAddMoveInfoWindow(void)
     }
 
     gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
-    if (IndexOfSpritePaletteTag(MOVE_INFO_WINDOW_PAL_TAG) == 0xFF)
-        LoadSpritePalette(&sSpritePalette_MoveInfoWindow);
+    if (LoadBattleOptionWindowPalette() == 0xFF)
+        return;
     if (GetSpriteTileStartByTag(MOVE_INFO_WINDOW_TAG) == 0xFFFF)
         LoadSpriteSheet(&sSpriteSheet_MoveInfoWindow);
 
@@ -4606,7 +4653,7 @@ void TryAddMoveInfoWindow(void)
     else
     {
         FreeSpriteTilesByTag(MOVE_INFO_WINDOW_TAG);
-        FreeSpritePaletteByTag(MOVE_INFO_WINDOW_PAL_TAG);
+        FreeBattleOptionWindowPaletteIfUnused();
     }
 }
 
@@ -4621,9 +4668,9 @@ void TryHideMoveInfoWindow(void)
 static void DestroyMoveInfoWinGfx(struct Sprite *sprite)
 {
     FreeSpriteTilesByTag(MOVE_INFO_WINDOW_TAG);
-    FreeSpritePaletteByTag(MOVE_INFO_WINDOW_PAL_TAG);
     DestroySprite(sprite);
     gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
+    FreeBattleOptionWindowPaletteIfUnused();
 }
 
 static void SpriteCB_LastUsedBallWin(struct Sprite *sprite)

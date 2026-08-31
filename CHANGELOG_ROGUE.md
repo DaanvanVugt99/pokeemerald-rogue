@@ -22,6 +22,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevented move type badges from recoloring the move-info tab and battle
+  gimmick buttons when changing the selected move.
 - Updated Windows development support with portable MSYS2 and mGBA discovery,
   correct launcher exit-code propagation, argument forwarding, a dependency
   audit/Poryscript bootstrap script, and explicit batch-file line endings.
