@@ -4,6 +4,7 @@
 #include "event_data.h"
 #include "item.h"
 #include "rogue.h"
+#include "rogue_baked.h"
 #include "rogue_save.h"
 #include "test/test.h"
 
@@ -35,6 +36,16 @@ TEST("Dynamic Rogue item groups are packed into the versioned range")
     EXPECT_EQ(FIRST_ITEM_CURSE, LAST_ITEM_CHARM + 1);
     EXPECT_EQ(FIRST_ITEM_TR, LAST_ITEM_CURSE + 1);
     EXPECT_LE(LAST_ITEM_TR, LAST_ITEM_DYNAMIC);
+}
+
+TEST("Treasure item classification separates sale items from usable rewards")
+{
+    EXPECT(Rogue_IsTreasureItem(ITEM_NUGGET));
+    EXPECT(Rogue_IsTreasureItem(ITEM_STARDUST));
+    EXPECT(Rogue_IsTreasureItem(ITEM_BIG_NUGGET));
+    EXPECT(!Rogue_IsTreasureItem(ITEM_ESCAPE_ROPE));
+    EXPECT(!Rogue_IsTreasureItem(ITEM_POTION));
+    EXPECT(!Rogue_IsTreasureItem(ITEM_POKE_DOLL));
 }
 
 TEST("Changing the dynamic item layout clears dynamic items from saved bags")

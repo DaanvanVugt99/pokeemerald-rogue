@@ -5429,6 +5429,14 @@ static const struct SpriteFrameImage sPicTable_ItemTeraShard[] = {
     obj_frame_tiles(gObjectEventPic_ItemTeraShard),
 };
 
+static const struct SpriteFrameImage sPicTable_ItemEscapeRope[] = {
+    obj_frame_tiles(gObjectEventPic_ItemEscapeRope),
+};
+
+static const struct SpriteFrameImage sPicTable_ItemTreasure[] = {
+    obj_frame_tiles(gObjectEventPic_ItemTreasure),
+};
+
 static const struct SpriteFrameImage sPicTable_GrassDefault[] = {
     obj_frame_tiles(gObjectEventPic_GrassDefault),
 };

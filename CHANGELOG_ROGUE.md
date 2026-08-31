@@ -34,6 +34,8 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Added dedicated overworld graphics for Escape Rope and non-battle treasure
+  rewards such as Nuggets and Stardust.
 - Ported upstream 2.2's type-colored Pokémon den sprites for Adventure Paths,
   with a matching type adjective for trained den encounters while preserving
   the unique den's purple map marker.
