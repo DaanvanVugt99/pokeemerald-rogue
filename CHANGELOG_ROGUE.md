@@ -31,7 +31,9 @@ Format follows Keep a Changelog loosely:
 - Reserved the full split test suite for explicit CI/release validation and made
   the test launcher refuse to start that long-running check implicitly.
 - Restored clean-checkout GitHub validation, limited CI to Divergence's `main`
-  branch, and added native macOS debug and release builds.
+  branch, added native macOS debug and release builds with GNU Make, and moved
+  function tests onto a dedicated EWRAM stack so large fixtures cannot corrupt
+  the headless runner.
 
 ### Fixed
 

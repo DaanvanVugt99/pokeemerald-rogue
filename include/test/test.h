@@ -58,10 +58,13 @@ extern const char gTestRunnerArgv[256];
 
 extern const struct TestRunner gAssumptionsRunner;
 
+#define FUNCTION_TEST_STACK_SIZE 8192
+
 struct FunctionTestRunnerState
 {
     u16 parameters;
     u16 runParameter;
+    u8 stack[FUNCTION_TEST_STACK_SIZE];
 };
 
 extern const struct TestRunner gFunctionTestRunner;

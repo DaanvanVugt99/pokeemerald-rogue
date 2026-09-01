@@ -397,6 +397,28 @@ static void FunctionTest_SetUp(void *data)
     SeedRng(0);
 }
 
+// Function tests can carry fixtures that are larger than the GBA main stack.
+// Run them on EWRAM-backed scratch space, as battle tests already do.
+NAKED static void InvokeFunctionTestWithStack(void (*function)(void), void *stack)
+{
+    asm("push {r4-r6,lr}\n\
+         mov r4, r0\n\
+         mov r5, r1\n\
+         mov r6, sp\n\
+         mov sp, r5\n\
+         push {r6}\n\
+         ldr r6, =FunctionTestRestoreSP + 1\n\
+         mov lr, r6\n\
+         bx r4\n\
+    FunctionTestRestoreSP:\n\
+         pop {r0}\n\
+         mov sp, r0\n\
+         pop {r4-r6}\n\
+         pop {r0}\n\
+         bx r0\n\
+        .pool");
+}
+
 static void FunctionTest_Run(void *data)
 {
     void (*function)(void) = data;
@@ -405,7 +427,7 @@ static void FunctionTest_Run(void *data)
         if (gFunctionTestRunnerState->parameters)
             MgbaPrintf_(":N%s %d/%d", gTestRunnerState.test->name, gFunctionTestRunnerState->runParameter + 1, gFunctionTestRunnerState->parameters);
         gFunctionTestRunnerState->parameters = 0;
-        function();
+        InvokeFunctionTestWithStack(function, &gFunctionTestRunnerState->stack[FUNCTION_TEST_STACK_SIZE]);
     } while (++gFunctionTestRunnerState->runParameter < gFunctionTestRunnerState->parameters);
 }
 

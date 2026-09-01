@@ -82,7 +82,7 @@ jobs:
 
       - name: Install toolchain and host dependencies
         run: |
-          brew install libpng pkgconf
+          brew install libpng make pkgconf
           brew install --cask gcc-arm-embedded
           test -f "$(arm-none-eabi-gcc -print-file-name=libc.a)"
           test -f "$(arm-none-eabi-gcc -print-file-name=libnosys.a)"
@@ -91,14 +91,14 @@ jobs:
         run: ./init_deps.sh
 
       - name: Check Species Change Report
-        run: make check-species-report
+        run: gmake check-species-report
 
       - name: Build Debug
         env:
           RELEASE: 0
-        run: make -j4 -O all
+        run: gmake -j4 -O all
 
       - name: Build Release
         env:
           RELEASE: 1
-        run: make -j4 -O all
+        run: gmake -j4 -O all
