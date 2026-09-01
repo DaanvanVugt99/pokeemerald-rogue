@@ -44,8 +44,11 @@ Format follows Keep a Changelog loosely:
 - Battle AI now recognizes tutor moves when checking whether an Illusion is
   plausible.
 - Regenerated the baked form-item index after the recent item-table changes
-- Increased Battle Checker party snapshot capacity and advanced the internal
-  Rogue save schema; older development saves are intentionally discarded.
+- Sized Battle Checker party snapshot capacity to retain the starting party,
+  every boss and rival encounter, and the Hall-of-Fame party, and advanced the
+  internal Rogue save schema; older development saves are intentionally discarded.
+- Removed Dark Void's Darkrai-only restriction so Exotic Lugia can use its
+  intended reward moveset.
 
 ### Added
 

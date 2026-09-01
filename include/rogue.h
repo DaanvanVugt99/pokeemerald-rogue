@@ -310,11 +310,13 @@ struct RoguePartySnapshot
     u16 trainerId;
 };
 
+#define ROGUE_MAX_PARTY_SNAPSHOT_COUNT (2 + ROGUE_MAX_BOSS_COUNT + ROGUE_RIVAL_MAX_ROUTE_ENCOUNTERS) // Start, battles, and Hall of Fame
+
 struct RogueRunData
 {
     struct RogueTrialRunState trialState;
     struct RogueWildEncounters wildEncounters;
-    struct RoguePartySnapshot partySnapshots[ROGUE_MAX_BOSS_COUNT + 5];
+    struct RoguePartySnapshot partySnapshots[ROGUE_MAX_PARTY_SNAPSHOT_COUNT];
     struct RoguePokemonFacade labParty[LAB_MON_COUNT];
     u16 subSeeds[ROGUE_SUBSEED_COUNT];
     u16 bossTrainerNums[ROGUE_MAX_BOSS_COUNT];

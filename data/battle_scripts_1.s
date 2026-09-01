@@ -3860,10 +3860,6 @@ BattleScript_PrintMoveMissedEnd3::
 	end3
 
 BattleScript_EffectDarkVoid::
-.if B_DARK_VOID_FAIL >= GEN_7
-	jumpifspecies BS_ATTACKER, SPECIES_DARKRAI, BattleScript_EffectSleep
-	goto BattleScript_PokemonCantUseTheMove
-.endif
 BattleScript_EffectSleep::
 	attackcanceler
 	attackstring

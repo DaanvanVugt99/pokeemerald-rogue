@@ -210,7 +210,7 @@ void Rogue_OpenBattleChecker(MainCallback callback)
     gMain.savedCallback = callback;
     LockPlayerFieldControls();
     gFieldCallback = FieldCB_ContinueScriptHandleMusic;
-    
+
     AGB_ASSERT(sBattleCheckerTilemapPtr == NULL);
     AGB_ASSERT(sBattleCheckerState == NULL);
 
@@ -240,7 +240,7 @@ void Rogue_OpenBattleChecker(MainCallback callback)
     LoadPalette(sBattleCheckerBgPalettes, 0, ARRAY_COUNT(sBattleCheckerBgPalettes) * 32);
     sBattleCheckerTilemapPtr = Alloc(0x1000);
     sBattleCheckerState = AllocZeroed(sizeof(struct BattleCheckerState));
-    
+
     sBattleCheckerState->currIndex = gRogueRun.partySnapshotCount - 1;
     sBattleCheckerState->playerTrainerSprite = SPRITE_NONE;
     sBattleCheckerState->enemyTrainerSprite = SPRITE_NONE;
@@ -326,7 +326,7 @@ static void FreeTrainerSprites()
         FreeAndDestroyTrainerPicSprite(sBattleCheckerState->playerTrainerSprite);
         sBattleCheckerState->playerTrainerSprite = SPRITE_NONE;
     }
-    
+
     if(sBattleCheckerState->enemyTrainerSprite != SPRITE_NONE)
     {
         FreeAndDestroyTrainerPicSprite(sBattleCheckerState->enemyTrainerSprite);
@@ -376,7 +376,7 @@ static void InitBattleCheckerHeader(void)
     AGB_ASSERT(sBattleCheckerState != NULL);
 
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(0));
-    
+
     str = ConvertUIntToDecimalStringN(str, sBattleCheckerState->currIndex + 1, STR_CONV_MODE_RIGHT_ALIGN, 2);
     str = StringAppend(str, sText_Slash);
     str = ConvertUIntToDecimalStringN(str, gRogueRun.partySnapshotCount, STR_CONV_MODE_RIGHT_ALIGN, 2);
@@ -420,27 +420,27 @@ static void InitBattleCheckerSprites(void)
             if(iconSpecies != SPECIES_NONE)
             {
                 CreateMonIcon(
-                    iconSpecies, 
+                    iconSpecies,
                     SpriteCB_MonIcon, // todo - if fainted SpriteCallbackDummy
                     52 + 32 * (i % 3),
                     104 + 32 * (i / 3),
-                    0, 
+                    0,
                     snapshot->partyPersonalities[i],
                     MON_MALE
                 );
             }
-            
+
             if(snapshot->trainerId != INVALID_TRAINDER_ID)
             {
                 iconSpecies = GFX_ICON_SPECIES(snapshot->enemySpeciesGfx[i]);
                 if(iconSpecies != SPECIES_NONE)
                 {
                     CreateMonIcon(
-                        iconSpecies, 
+                        iconSpecies,
                         SpriteCB_MonIcon, // todo - if fainted SpriteCallbackDummy
                         124 + 32 * (i % 3),
                         32 + 32 * (i /3),
-                        0, 
+                        0,
                         0,
                         MON_MALE
                     );
@@ -450,20 +450,20 @@ static void InitBattleCheckerSprites(void)
 
         // Player trainer
         sBattleCheckerState->playerTrainerSprite = CreateTrainerPicSprite(
-            RoguePlayer_GetTrainerFrontPic(), 
+            RoguePlayer_GetTrainerFrontPic(),
             TRUE,
-            172, 32 + 92, 
-            9, 
+            172, 32 + 92,
+            9,
             TAG_NONE);
 
         // Enemy trainer
         if(snapshot->trainerId != INVALID_TRAINDER_ID)
         {
             sBattleCheckerState->enemyTrainerSprite = CreateTrainerPicSprite(
-                Rogue_GetTrainer(snapshot->trainerId)->trainerPic, 
+                Rogue_GetTrainer(snapshot->trainerId)->trainerPic,
                 TRUE,
-                68, 40 + 12, 
-                8, 
+                68, 40 + 12,
+                8,
                 TAG_NONE);
         }
     }

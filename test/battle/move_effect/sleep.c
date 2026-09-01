@@ -4,7 +4,22 @@
 ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_HYPNOSIS].effect == EFFECT_SLEEP);
+    ASSUME(gBattleMoves[MOVE_DARK_VOID].effect == EFFECT_DARK_VOID);
     ASSUME(gBattleMoves[MOVE_REST].effect == EFFECT_REST);
+}
+
+SINGLE_BATTLE_TEST("Dark Void can be used by Pokemon other than Darkrai")
+{
+    GIVEN {
+        PLAYER(SPECIES_LUGIA) { Moves(MOVE_DARK_VOID); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_DARK_VOID); }
+    } SCENE {
+        MESSAGE("Lugia used Dark Void!");
+    } THEN {
+        EXPECT(opponent->status1 & STATUS1_SLEEP);
+    }
 }
 
 SINGLE_BATTLE_TEST("Hypnosis guarantees one sleep turn, can wake on turn two, and wakes by turn three")
