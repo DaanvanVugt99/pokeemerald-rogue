@@ -250,7 +250,7 @@ MAKEFLAGS += --no-print-directory
 # Secondary expansion is required for dependency variables in object rules.
 .SECONDEXPANSION:
 
-.PHONY: all rom clean compare tidy tools check-tools mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall modern tidymodern check species-report check-species-report rogue-bake-data check-rogue-bake-data FORCE
+.PHONY: all rom clean compare tidy tools check-tools customjson-tool mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall modern tidymodern check species-report check-species-report rogue-bake-data check-rogue-bake-data FORCE
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
@@ -386,6 +386,9 @@ all: rom
 tools: $(TOOLDIRS)
 
 check-tools: $(CHECKTOOLDIRS)
+
+customjson-tool:
+	@$(MAKE) -C tools/Pokabbie/Build/CustomJson
 
 syms: $(SYM)
 

@@ -1,5 +1,21 @@
 # JSON files are run through customjson, which is a Pokabbie specific tool that converts JSON data to an output file
 
+CUSTOM_JSON_TARGETS := \
+	$(DATA_SRC_SUBDIR)/rogue/battle_music.h \
+	$(DATA_SRC_SUBDIR)/rogue/trainers.h \
+	$(DATA_SRC_SUBDIR)/rogue/quests.h \
+	$(DATA_SRC_SUBDIR)/rogue/pokemon_nicknames.h \
+	include/constants/generated/quests.h \
+	include/constants/generated/quest_consts.h \
+	$(ROGUEPORYSCRIPTSDIR)/Generated/trainers.pory \
+	$(ROGUEPORYSCRIPTSDIR)/Generated/quests.pory \
+	$(DATA_SRC_SUBDIR)/rogue/custom_mons.h \
+	include/constants/generated/custom_mons.h \
+	$(DATA_SRC_SUBDIR)/rogue/decorations.h \
+	include/constants/generated/decorations.h
+
+$(CUSTOM_JSON_TARGETS): | customjson-tool
+
 AUTO_GEN_TARGETS += $(DATA_SRC_SUBDIR)/rogue/*.h
 AUTO_GEN_TARGETS += include/constants/generated/*.h
 AUTO_GEN_TARGETS += $(ROGUEPORYSCRIPTSDIR)/Generated/*.pory
