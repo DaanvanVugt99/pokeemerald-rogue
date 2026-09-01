@@ -6273,7 +6273,9 @@ static void SelectShrineGuardianMoves(const u16 *customMoves, u8 customMoveCount
 void Rogue_PrepareShrineChallenge(void)
 {
     u8 i;
-    u8 level = Rogue_CalculateBossMonLvl();
+    // Keep this special encounter on the same level policy as rivals and
+    // Frontier Brains (player level on Standard, trainer cap on Brutal).
+    u8 level = Rogue_CalculateRivalMonLvl();
     u16 species = SPECIES_HO_OH;
     u16 customMoves[MAX_MON_MOVES];
     u16 customMoveCount;

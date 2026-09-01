@@ -95,8 +95,11 @@ or validation workflows change.
 
 ## Test Commands and Validation
 
-- Full split-suite validation:
+- Full split-suite release/CI validation:
   - `./scripts/launch_build_test.sh --check-all-suites`
+- GitHub Actions runs the full Linux validation suite on pushes and pull
+  requests to `main`, plus debug and release compilation on macOS. Prefer that
+  background validation over repeating the complete suite locally.
 - Focused suite validation:
   - `./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"`
 - Available suites: `core`, `ai`, `ability`, `ability_unique`, `moves`,
@@ -109,12 +112,24 @@ or validation workflows change.
   - This all-in-one test ROM is near the 32 MiB linker layout limit and may fail with `tests`/`dacs` overlap. Do not treat this as the required day-to-day full validation path.
 - Run in emulator UI:
   - `./scripts/launch_build_test.sh --ui`
-- Docs-only changes: run `git diff --check`.
+- Default local validation budget: run `git diff --check`, an incremental ROM
+  build when compiled inputs changed, and at most the narrowest relevant
+  filtered test. Stop there when those checks pass.
+- Map/object/script-only changes: regenerate or incrementally build the affected
+  map/ROM. Do not run a headless suite unless an existing focused test directly
+  covers the changed behavior.
+- Small scoped C or test changes: run one relevant filtered test first. Run its
+  unfiltered suite only when the change affects several behaviors in that suite
+  or no reliable focused filter exists and the risk justifies it.
 - Generated-data changes: run the generator's verification command plus the
-  narrowest relevant runtime tests.
-- Focused code or test changes: run the relevant filtered suite first.
-- Broad battle, content, engine, generated-profile, or release changes: run
-  `./scripts/launch_build_test.sh --check-all-suites`.
+  narrowest relevant runtime test; do not broaden validation merely because the
+  generated diff is large.
+- Run `--check-all-suites` only for release candidates, CI, explicit user
+  requests, or genuinely cross-cutting engine changes expected to affect
+  multiple test suites. Ordinary content ports and isolated battle setup changes
+  do not qualify by themselves.
+- The test launcher deliberately requires an explicit mode. Invoking it without
+  arguments must not start full validation.
 - If validation cannot run because `devkitARM`, `mgba`, or `mgba-rom-test` is missing, record the exact missing dependency and do not report the check as passed.
 
 ## Upstream Port Policy

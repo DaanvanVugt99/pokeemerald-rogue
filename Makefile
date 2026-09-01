@@ -432,11 +432,13 @@ tidycheck:
 	rm -f $(TESTELF) $(HEADLESSELF)
 	rm -rf $(TEST_OBJ_DIR_NAME)
 
-species-report:
+SPECIES_REPORT_GENERATED_DEPS := include/constants/generated/quest_consts.h
+
+species-report: $(SPECIES_REPORT_GENERATED_DEPS)
 	$(PYTHON) scripts/generate_species_change_report.py
 	scripts/generate_rogue_bake_data.sh
 
-check-species-report:
+check-species-report: $(SPECIES_REPORT_GENERATED_DEPS)
 	$(PYTHON) scripts/generate_species_change_report.py --check
 	scripts/generate_rogue_bake_data.sh --check
 

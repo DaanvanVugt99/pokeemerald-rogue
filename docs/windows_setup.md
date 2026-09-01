@@ -127,8 +127,14 @@ Re-run the audit at any time:
 ```powershell
 .\scripts\launch_build_debug.bat
 .\scripts\launch_build_release.bat
-.\scripts\launch_build_test.bat --check-all-suites
 .\scripts\launch_build_test.bat --check --suite ability --filter "Intimidate"
+```
+
+Run the full split suite explicitly for CI or release validation, not as a
+routine local check:
+
+```powershell
+.\scripts\launch_build_test.bat --check-all-suites
 ```
 
 The Windows wrappers forward all arguments and return the underlying build's

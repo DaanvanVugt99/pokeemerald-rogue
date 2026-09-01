@@ -667,6 +667,12 @@ void BattleSetup_StartShrineBattle(void)
     TryUpdateGymLeaderRematchFromWild();
 
     Rogue_Battle_StartWildBattle();
+
+    // The Sacred Ash trial's type-changing guardian should remain a pure
+    // typing challenge. Do not let the normal wild-battle setup re-enable
+    // Tera, and do not carry a Dynamax battle over from a previous trainer.
+    FlagClear(FLAG_ROGUE_DYNAMAX_BATTLE);
+    FlagClear(FLAG_ROGUE_TERASTALLIZE_BATTLE);
 }
 
 void StartGroudonKyogreBattle(void)

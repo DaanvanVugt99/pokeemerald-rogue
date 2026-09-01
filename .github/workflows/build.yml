@@ -1,24 +1,26 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-      - vanilla
-      - vanilla-dev
-      - expansion
-      - expansion-dev
   pull_request:
     branches:
       - main
-      - vanilla
-      - vanilla-dev
-      - expansion
-      - expansion-dev
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  linux:
+    name: Linux build and tests
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     container: devkitpro/devkitarm
     env:
       GAME_VERSION: EMERALD
@@ -32,15 +34,11 @@ jobs:
 
       - name: Install binutils
         run: |
-          sudo apt update
-          sudo apt install -y build-essential libpng-dev libelf-dev
-        # build-essential, git, and libpng-dev are already installed
-        # gcc-arm-none-eabi is only needed for the modern build
-        # as an alternative to dkP
+          apt-get update
+          apt-get install -y build-essential libpng-dev libelf-dev
 
       - name: Install Dependencies
-        run: |
-          ./init_deps.sh
+        run: ./init_deps.sh
 
       - name: Check Species Change Report
         run: make check-species-report
@@ -49,13 +47,13 @@ jobs:
         env:
           COMPARE: 0
           RELEASE: 0
-        run: make -j${nproc} -O all
+        run: make -j4 -O all
 
       - name: Build Release
         env:
           COMPARE: 0
           RELEASE: 1
-        run: make -j${nproc} -O all
+        run: make -j4 -O all
 
       - name: Update Memory Stats
         uses: actions/upload-artifact@v4
@@ -64,4 +62,43 @@ jobs:
           path: pokeemerald_memorystats.csv
 
       - name: Test
+        env:
+          BUILD_JOBS: 4
         run: ./scripts/launch_build_test.sh --check-all-suites
+
+  macos:
+    name: macOS build
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      GAME_VERSION: EMERALD
+      GAME_REVISION: 0
+      GAME_LANGUAGE: ENGLISH
+      COMPARE: 0
+      UNUSED_ERROR: 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain and host dependencies
+        run: |
+          brew install libpng pkgconf
+          brew install --cask gcc-arm-embedded
+          test -f "$(arm-none-eabi-gcc -print-file-name=libc.a)"
+          test -f "$(arm-none-eabi-gcc -print-file-name=libnosys.a)"
+
+      - name: Install project dependencies
+        run: ./init_deps.sh
+
+      - name: Check Species Change Report
+        run: make check-species-report
+
+      - name: Build Debug
+        env:
+          RELEASE: 0
+        run: make -j4 -O all
+
+      - name: Build Release
+        env:
+          RELEASE: 1
+        run: make -j4 -O all

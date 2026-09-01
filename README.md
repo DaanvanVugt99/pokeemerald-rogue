@@ -38,32 +38,38 @@ Expected tools:
 - `mgba` for interactive ROM runs
 - `mgba-rom-test` for headless checks
 
-Common validation commands:
+Day-to-day focused validation:
+
+```sh
+./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"
+./scripts/launch_build_test.sh --ui
+```
+
+The full split suite is reserved for CI and release validation because it can
+take more than 30 minutes on a local machine:
 
 ```sh
 ./scripts/launch_build_test.sh --check-all-suites
-./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"
-./scripts/launch_build_test.sh --ui
 ```
 
 On Windows, use the devkitPro/MSYS2 wrappers instead:
 
 ```powershell
 .\scripts\check_windows_setup.ps1 -InstallPoryscript
-.\scripts\launch_build_test.bat --check-all-suites
+.\scripts\launch_build_test.bat --check --suite ability --filter "Intimidate"
 ```
 
 For the faster WSL1 path with this checkout on `C:`, invoke the Linux launcher
 directly from PowerShell:
 
 ```powershell
-wsl ./scripts/launch_build_test.sh --check-all-suites
+wsl ./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"
 ```
 
 See [docs/windows_setup.md](docs/windows_setup.md) for the one-time setup and
 the WSL1, MSYS2, mGBA, and Python configuration.
 
-Use the split-suite validation path for normal full checks. The legacy
+Use the split-suite validation path for CI and release checks. The legacy
 monolithic test ROM build can run into the 32 MiB linker layout limit and should
 not be treated as the normal full-validation target.
 

@@ -12,22 +12,27 @@ test_suite="${TEST_SUITE:-}"
 check_all_suites=0
 all_suites=(core ai ability ability_unique moves items forms rogue)
 
-if [ $# -eq 0 ]; then
-    check_all_suites=1
-fi
-
 usage() {
     echo "Usage: $0 [--check-all-suites|--check|--build|--ui] [--suite SUITE] [--filter \"Test name prefix\"]"
     echo "  --check-all-suites"
-    echo "            Recommended full validation: run all split test suites sequentially (default)"
+    echo "            Release/CI validation: run all split test suites sequentially"
+    echo "            This is intentionally explicit because it can take 30+ minutes locally."
     echo "  --check   Build and run headless tests via 'make check'"
-    echo "            Recommended focused validation: --check --suite ability --filter \"Some Test\""
+    echo "            Requires --suite, --filter, or both for focused validation."
+    echo "            Example: --check --suite ability --filter \"Some Test\""
     echo "  --suite   Compile only one test suite: core, ai, ability, ability_unique, moves, items, forms, rogue"
     echo "  --filter  Set TESTS prefix filter and compile only matching test files"
     echo "  --build   Legacy: build the monolithic all-in-one pokeemerald-test.elf only"
     echo "            This target may fail near the 32 MiB test ROM linker limit; use --check-all-suites for full validation."
     echo "  --ui      Build and launch the monolithic pokeemerald-test.elf in mGBA"
 }
+
+if [ $# -eq 0 ]; then
+    echo "No validation mode selected. Refusing to start the full suite implicitly."
+    echo
+    usage
+    exit 2
+fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -77,6 +82,12 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+
+if [ "$mode" = "check" ] && [ "$check_all_suites" -eq 0 ] && [ -z "$test_suite" ] && [ -z "$test_to_run_prefix" ]; then
+    echo "Error: --check requires --suite, --filter, or both."
+    echo "Use --check-all-suites explicitly for release/CI validation."
+    exit 2
+fi
 
 if [ -n "${BUILD_JOBS:-}" ]; then
     num_cores="$BUILD_JOBS"

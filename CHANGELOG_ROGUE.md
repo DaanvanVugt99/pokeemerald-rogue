@@ -23,8 +23,15 @@ Format follows Keep a Changelog loosely:
   including in multiplayer runs.
 - Gauntlet runs, including Rainbow Gauntlet, now expose the full tutor-move pool.
 - Removed obsolete level-up NPCs from Day Care and Market Rest Stops.
+- Removed the remaining level-up NPC from Battle Rest Stops; the Sacred Ash
+  Ho-Oh trial now follows the rival/Frontier level policy and disables Tera and
+  Dynamax for its dedicated typing challenge.
 - Battle Tower rooms now offer more trainer encounters with a smaller money
   bonus per battle.
+- Reserved the full split test suite for explicit CI/release validation and made
+  the test launcher refuse to start that long-running check implicitly.
+- Restored clean-checkout GitHub validation, limited CI to Divergence's `main`
+  branch, and added native macOS debug and release builds.
 
 ### Fixed
 
