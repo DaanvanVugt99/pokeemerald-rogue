@@ -9,6 +9,10 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_WATER_GUN].type == TYPE_WATER);
     ASSUME(gBattleMoves[MOVE_TACKLE].type == TYPE_NORMAL);
     ASSUME(gBattleMoves[MOVE_TACKLE].makesContact);
+    ASSUME(gBattleMoves[MOVE_FIRE_PUNCH].makesContact);
+    ASSUME(gBattleMoves[MOVE_FIRE_PUNCH].type == TYPE_FIRE);
+    ASSUME(!gBattleMoves[MOVE_EMBER].makesContact);
+    ASSUME(gBattleMoves[MOVE_EMBER].type == TYPE_FIRE);
     ASSUME(!gBattleMoves[MOVE_WATER_GUN].makesContact);
     ASSUME(gBattleMoves[MOVE_PROTECT].effect == EFFECT_PROTECT);
     ASSUME(gBattleMoves[MOVE_SPIKY_SHIELD].effect == EFFECT_PROTECT);
@@ -35,6 +39,34 @@ SINGLE_BATTLE_TEST("Mega Sol lets Solar Beam skip its charge turn and rain damag
             EXPECT_EQ(gBattleWeather, B_WEATHER_NONE);
     } FINALLY {
         EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Aura Guard halves all contact damage without a Fire weakness", s16 damage)
+{
+    u32 ability;
+    u32 move;
+    PARAMETRIZE { ability = ABILITY_KLUTZ;       move = MOVE_TACKLE; }
+    PARAMETRIZE { ability = ABILITY_AURA_GUARD;  move = MOVE_TACKLE; }
+    PARAMETRIZE { ability = ABILITY_KLUTZ;       move = MOVE_FIRE_PUNCH; }
+    PARAMETRIZE { ability = ABILITY_AURA_GUARD;  move = MOVE_FIRE_PUNCH; }
+    PARAMETRIZE { ability = ABILITY_KLUTZ;       move = MOVE_EMBER; }
+    PARAMETRIZE { ability = ABILITY_AURA_GUARD;  move = MOVE_EMBER; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_STUFFUL) { Ability(ability); }
+    } WHEN {
+        TURN { MOVE(player, move); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        if (move == MOVE_TACKLE)
+            EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.5), results[1].damage);
+        else if (move == MOVE_FIRE_PUNCH)
+            EXPECT_MUL_EQ(results[2].damage, Q_4_12(0.5), results[3].damage);
+        else
+            EXPECT_EQ(results[4].damage, results[5].damage);
     }
 }
 

@@ -49,6 +49,11 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Updated the revealed Z-A Mega abilities: Mega Absol Z uses Sharpness, Mega
+  Garchomp Z uses Levitate, and Mega Lucario Z uses the new Aura Guard ability,
+  which halves damage from contact moves.
+- Refreshed the remaining second-drop Z-A Mega sprite and palette assets from
+  upstream for Raichu X, Staraptor, Scolipede, Dragalge, and Pyroar.
 - Added the Colosseum + XD Pokédex option to starting and normal-run setup,
   with its Orre Style quest awarding an exotic Lugia.
 - Expanded the Colosseum + XD Pokédex with its remaining upstream species.
