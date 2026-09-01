@@ -660,6 +660,10 @@ TEST("Route event fallback registry is deterministic and RNG neutral")
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     gRogueRun.adventureRoomId = 0;
+    memset(gRogueRun.activeEvoItemFlags, 0xFF, sizeof(gRogueRun.activeEvoItemFlags));
+#ifdef ROGUE_EXPANSION
+    memset(gRogueRun.activeFormItemFlags, 0xFF, sizeof(gRogueRun.activeFormItemFlags));
+#endif
     ClearAdventureQuestSlotsForRouteTest();
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
