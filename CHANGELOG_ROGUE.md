@@ -22,10 +22,11 @@ Format follows Keep a Changelog loosely:
 - Standard-path rivals now match the player's level except on Brutal difficulty,
   including in multiplayer runs.
 - Gauntlet runs, including Rainbow Gauntlet, now expose the full tutor-move pool.
-- Removed obsolete level-up NPCs from Day Care and Market Rest Stops.
-- Removed the remaining level-up NPC from Battle Rest Stops; the Sacred Ash
-  Ho-Oh trial now follows the rival/Frontier level policy and disables Tera and
-  Dynamax for its dedicated typing challenge.
+- Limited rest-stop level-up NPCs to Full Rest Stops, removing obsolete
+  placements from Day Care, Market, and Battle Rest Stops.
+- Removed the level-up NPC from Mysterious Shrines; the Sacred Ash Ho-Oh trial
+  now follows the rival/Frontier level policy and disables Tera and Dynamax for
+  its dedicated typing challenge.
 - Battle Tower rooms now offer more trainer encounters with a smaller money
   bonus per battle.
 - Reserved the full split test suite for explicit CI/release validation and made
