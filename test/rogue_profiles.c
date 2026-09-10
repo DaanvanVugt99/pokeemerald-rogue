@@ -1,4 +1,6 @@
 #include "global.h"
+#include "text.h"
+#include "string_util.h"
 #include "constants/abilities.h"
 #include "constants/moves.h"
 #include "constants/rogue.h"
@@ -378,12 +380,70 @@ TEST("Focused stat buffs support underperforming Pokemon's unique roles")
     EXPECT_EQ(gSpeciesInfo[SPECIES_HYPNO].baseSpAttack, 95);
 }
 
-TEST("Falinks stat buff markers are baked for Pokedex display")
+TEST("Pokedex Inspect preserves canonical stats rather than buff flags")
 {
-    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_HP));
-    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_ATK));
-    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_DEF));
-    EXPECT(!Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_SPATK));
-    EXPECT(Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_SPDEF));
-    EXPECT(!Rogue_IsSpeciesStatBuffed(SPECIES_FALINKS, STAT_SPEED));
+    const struct RogueSpeciesBaseline *baseline = Rogue_GetSpeciesBaseline(SPECIES_FALINKS);
+    EXPECT(baseline != NULL);
+    EXPECT_EQ(baseline->stats[STAT_HP], 65);
+    EXPECT_EQ(baseline->stats[STAT_ATK], 100);
+    EXPECT_EQ(baseline->stats[STAT_DEF], 100);
+    EXPECT_EQ(baseline->stats[STAT_SPATK], 70);
+    EXPECT_EQ(baseline->stats[STAT_SPDEF], 60);
+    EXPECT_EQ(baseline->stats[STAT_SPEED], 75);
+    EXPECT_EQ(baseline->types[0], TYPE_FIGHTING);
+    EXPECT_EQ(baseline->abilities[0], ABILITY_BATTLE_ARMOR);
+    EXPECT_EQ(baseline->abilities[2], ABILITY_DEFIANT);
+}
+
+TEST("Pokedex Inspect uses each Mega form's own baseline")
+{
+    const struct RogueSpeciesBaseline *regular = Rogue_GetSpeciesBaseline(SPECIES_PIDGEOT);
+    const struct RogueSpeciesBaseline *mega = Rogue_GetSpeciesBaseline(SPECIES_PIDGEOT_MEGA);
+    EXPECT(regular != NULL);
+    EXPECT(mega != NULL);
+    EXPECT_EQ(regular->stats[STAT_SPATK], 70);
+    EXPECT_EQ(mega->stats[STAT_SPATK], 135);
+    EXPECT_EQ(regular->abilities[0], ABILITY_KEEN_EYE);
+    EXPECT_EQ(mega->abilities[0], ABILITY_NO_GUARD);
+}
+
+TEST("Pokedex Inspect rejects unavailable and out-of-range baselines")
+{
+    EXPECT(Rogue_GetSpeciesBaseline(SPECIES_NONE) == NULL);
+    EXPECT(Rogue_GetSpeciesBaseline(SPECIES_ABSOL_MEGA_Z) == NULL);
+    EXPECT(Rogue_GetSpeciesBaseline(NUM_SPECIES) == NULL);
+    EXPECT(Rogue_GetSpeciesBaseline(0xFFFF) == NULL);
+}
+
+TEST("Pokedex Inspect text fits the split stat and Ability columns")
+{
+    extern const u8 gAbilityNames[][ABILITY_NAME_LENGTH + 1];
+    static const u8 positive[] = _("999+255");
+    static const u8 negative[] = _("999-255");
+    static const u8 current[] = _("999");
+    static const u8 marker[] = _("!");
+    u16 species;
+    u8 slot;
+    u8 text[ABILITY_NAME_LENGTH + 2];
+    EXPECT(GetStringWidth(FONT_SMALL_NARROW, positive, 0) < 117 - 72);
+    EXPECT(GetStringWidth(FONT_SMALL_NARROW, negative, 0) < 117 - 72);
+    EXPECT(GetStringWidth(FONT_SMALL_NARROW, current, 0) <= 136 - 117);
+    for (species = 1; species < NUM_SPECIES; ++species)
+    {
+        const struct RogueSpeciesBaseline *baseline = Rogue_GetSpeciesBaseline(species);
+        for (slot = 0; slot < NUM_ABILITY_SLOTS; ++slot)
+        {
+            StringCopy(text, marker);
+            StringAppend(text, gAbilityNames[gSpeciesInfo[species].abilities[slot]]);
+            EXPECT(GetStringWidth(FONT_SMALL_NARROW, text, 0) <= 66
+                || GetStringWidth(FONT_NARROWER, text, 0) <= 66);
+            if (baseline != NULL)
+            {
+                StringCopy(text, marker);
+                StringAppend(text, gAbilityNames[baseline->abilities[slot]]);
+                EXPECT(GetStringWidth(FONT_SMALL_NARROW, text, 0) <= 66
+                    || GetStringWidth(FONT_NARROWER, text, 0) <= 66);
+            }
+        }
+    }
 }

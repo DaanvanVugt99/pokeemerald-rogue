@@ -6,7 +6,6 @@
 #include <vector>
 #include <set>
 
-#include "data/rogue_stat_buff_flags.h"
 
 extern "C"
 {
@@ -317,7 +316,6 @@ int main()
 		for (int s = SPECIES_NONE; s < NUM_SPECIES; ++s)
 		{
 			u32 typeFlags = 0;
-			u8 statBuffFlags = GetDivergenceStatBuffFlags(s);
 
 			for (int t = 0; t < NUMBER_OF_MON_TYPES; ++t)
 			{
@@ -329,8 +327,6 @@ int main()
 			file << "\t\t.eggSpecies = " << (int)eggLookup[s] << ",\n";
 			file << "\t\t.evolutionCount = " << (int)evolutionCountLookup[s] << ",\n";
 			file << "\t\t.evolutionChainTypeFlags = " << (int)typeFlags << ",\n";
-			if (statBuffFlags != 0)
-				file << "\t\t.statBuffFlags = " << (int)statBuffFlags << ",\n";
 			file << "\t},\n";
 		}
 		file << "};\n";

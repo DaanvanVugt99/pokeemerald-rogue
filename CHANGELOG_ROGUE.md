@@ -16,6 +16,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Replaced the Pokédex's stat-buff `+` markers with upstream-style A: Inspect:
+  original stats plus signed changes, current values and the actual BST delta.
+  Changed typings and Ability slots are marked and Inspect shows their original
+  values. Species without a canonical baseline are explicitly labelled.
 - Implemented the targeted rebalance Ability decisions: Huntail gains Intimidate,
   Gorebyss gains Dazzling, Volbeat uses Illuminate / Tinted Lens / Swarm, and
   Illumise uses Oblivious / Tinted Lens / Swarm. Gigalith retains its existing

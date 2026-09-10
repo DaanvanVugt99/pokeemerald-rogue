@@ -2389,16 +2389,18 @@ u32 Rogue_GetSpeciesEvolutionChainTypeFlags(u16 species)
 #endif
 }
 
-bool8 Rogue_IsSpeciesStatBuffed(u16 species, u8 stat)
-{
-#ifdef ROGUE_BAKE_VALID
-    if (species >= NUM_SPECIES || stat >= NUM_STATS)
-        return FALSE;
-
-    return (gRogueBake_SpeciesData[species].statBuffFlags & (1u << stat)) != 0;
-#else
-    return FALSE;
+#if defined(ROGUE_EXPANSION) && !defined(ROGUE_BAKING)
+#include "constants/abilities.h"
+#include "data/rogue_species_baselines.h"
 #endif
+
+const struct RogueSpeciesBaseline *Rogue_GetSpeciesBaseline(u16 species)
+{
+#if defined(ROGUE_EXPANSION) && !defined(ROGUE_BAKING)
+    if (species < NUM_SPECIES && sSpeciesBaselines[species].stats[STAT_HP] != 0)
+        return &sSpeciesBaselines[species];
+#endif
+    return NULL;
 }
 
 u32 Rogue_GetTypeFlagsFromArray(const u8* types, u8 count)

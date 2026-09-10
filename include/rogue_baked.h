@@ -57,7 +57,15 @@ bool8 Rogue_DoesEvolveInto(u16 fromSpecies, u16 toSpecies);
 void Rogue_AppendSpeciesTypeFlags(u16 species, u32* outFlags);
 u32 Rogue_GetSpeciesEvolutionChainTypeFlags(u16 species);
 u32 Rogue_GetTypeFlagsFromArray(const u8* types, u8 count);
-bool8 Rogue_IsSpeciesStatBuffed(u16 species, u8 stat);
+struct RogueSpeciesBaseline
+{
+    // Indexed by STAT_* (the engine places Speed before the special stats).
+    u8 stats[6];
+    u8 types[2];
+    u16 abilities[3];
+};
+
+const struct RogueSpeciesBaseline *Rogue_GetSpeciesBaseline(u16 species);
 
 u32 Rogue_GetMonFlags(u16 species);
 bool8 Rogue_CheckMonFlags(u16 species, u32 flag);
