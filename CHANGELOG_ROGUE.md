@@ -16,6 +16,15 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Implemented the targeted rebalance Ability decisions: Huntail gains Intimidate,
+  Gorebyss gains Dazzling, Volbeat uses Illuminate / Tinted Lens / Swarm, and
+  Illumise uses Oblivious / Tinted Lens / Swarm. Gigalith retains its existing
+  Sturdy / Stamina / Sand Force arrangement.
+- Shieldon and Bastiodon gain Solid Rock in their second slot; Impenetrable now
+  blocks super-effective special attacks instead of reducing them to neutral damage.
+- Slakoth and Slaking gain hidden Slow Start. On shared-type teams, King's Domain
+  suppresses their regular Ability (including both Truant and Slow Start) while
+  leaving the unique Ability active.
 - Moved the Current Party versus Starter Bag choice into the run overview's
   Edit menu for standard Adventures and Trials, including clear forced-team
   states and returning to the overview when Starter Bag selection is cancelled.

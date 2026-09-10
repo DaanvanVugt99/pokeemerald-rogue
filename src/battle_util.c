@@ -147,7 +147,6 @@ static bool32 TryTriggerCounterpunchAfterPunchingMove(u32 battler, u32 move);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
 static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move);
-static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef);
 static bool32 IsEnvironmentalTypeActive(u32 battler, u32 type);
 static bool32 IsAnyEnvironmentalTypeActive(u32 battler);
 static bool32 IsAnyOpposingBattlerStatused(u32 battler);
@@ -4324,7 +4323,7 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
         case CANCELLER_TRUANT: // truant
             if (GetBattlerAbility(gBattlerAttacker) == ABILITY_TRUANT
              && gDisableStructs[gBattlerAttacker].truantCounter
-             && !IsTruantLoafingSuppressed(gBattlerAttacker))
+             && !IsKingsDomainActive(gBattlerAttacker))
             {
                 CancelMultiTurnMoves(gBattlerAttacker);
                 gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
@@ -5302,9 +5301,10 @@ bool32 DoesPartyShareCurrentTypeWithBattler(u32 battler)
     return TRUE;
 }
 
-bool32 IsTruantLoafingSuppressed(u32 battler)
+bool32 IsKingsDomainActive(u32 battler)
 {
-    return HasBattlerAbility(battler, ABILITY_KINGS_DOMAIN)
+    return GetBattlerUniqueAbilityRaw(battler) == ABILITY_KINGS_DOMAIN
+        && GetBattlerUniqueAbilityIgnoreMoldBreaker(battler) == ABILITY_KINGS_DOMAIN
         && DoesPartyShareTypeWithBattler(battler);
 }
 
@@ -15378,17 +15378,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (ShouldImpenetrableSoftenMove(move, moveEndAttacker, battler)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
-         && BATTLER_TURN_DAMAGED(moveEndTarget))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_IMPENETRABLE);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_DesertShroudActivates;
-            effect++;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_COLD_SNAP)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && !gProtectStructs[moveEndAttacker].confusionSelfDmg
@@ -21237,6 +21226,11 @@ u32 GetBattlerPrimaryAbilityIgnoreMoldBreaker(u32 battler)
         return ABILITY_NONE;
 
     if (IsBattlerAbilitySuppressedCommon(battler, gBattleMons[battler].ability))
+        return ABILITY_NONE;
+
+    // Suppress only the regular slot, without recursing through primary lookup.
+    // The unique Ability and the party condition remain live throughout battle.
+    if (IsKingsDomainActive(battler))
         return ABILITY_NONE;
 
     return gBattleMons[battler].ability;
@@ -27981,10 +27975,13 @@ uq4_12_t CalcTypeEffectivenessMultiplier(u32 move, u32 moveType, u32 battlerAtk,
 
     if (modifier > UQ_4_12(1.0) && IS_MOVE_SPECIAL(move) && HasBattlerAbility(battlerDef, ABILITY_IMPENETRABLE))
     {
-        modifier = UQ_4_12(1.0);
+        modifier = UQ_4_12(0.0);
         if (recordAbilities)
         {
             SetBattlerTriggeredAbility(battlerDef, ABILITY_IMPENETRABLE);
+            gMoveResultFlags |= MOVE_RESULT_MISSED;
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
             RecordAbilityBattle(battlerDef, ABILITY_IMPENETRABLE);
         }
     }
@@ -28054,25 +28051,6 @@ static bool32 HasBerryDoubleEffect(u32 battler)
 {
     return HasBattlerAbility(battler, ABILITY_RIPEN)
         || HasBattlerAbility(battler, ABILITY_WINTER_STASH);
-}
-
-static bool32 ShouldImpenetrableSoftenMove(u32 move, u32 battlerAtk, u32 battlerDef)
-{
-    u32 moveType;
-    uq4_12_t modifier = UQ_4_12(1.0);
-
-    if (!HasBattlerAbility(battlerDef, ABILITY_IMPENETRABLE) || !IS_MOVE_SPECIAL(move))
-        return FALSE;
-
-    GET_MOVE_TYPE(move, moveType);
-    if (move == MOVE_STRUGGLE || moveType == TYPE_MYSTERY)
-        return FALSE;
-
-    modifier = CalcTypeEffectivenessMultiplierInternal(move, moveType, battlerAtk, battlerDef, FALSE, modifier, GetBattlerAbility(battlerDef));
-    if (gBattleMoves[move].effect == EFFECT_TWO_TYPED_MOVE)
-        modifier = CalcTypeEffectivenessMultiplierInternal(move, gBattleMoves[move].argument, battlerAtk, battlerDef, FALSE, modifier, GetBattlerAbility(battlerDef));
-
-    return modifier > UQ_4_12(1.0);
 }
 
 static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u32 moveType, u32 battlerAtk, u32 battlerDef, bool32 recordAbilities, uq4_12_t modifier, u32 defAbility)
@@ -28223,10 +28201,13 @@ uq4_12_t CalcTypeEffectivenessMultiplierForUI(u32 move, u32 moveType, u32 battle
 
     if (modifier > UQ_4_12(1.0) && IS_MOVE_SPECIAL(move) && HasBattlerAbility(battlerDef, ABILITY_IMPENETRABLE))
     {
-        modifier = UQ_4_12(1.0);
+        modifier = UQ_4_12(0.0);
         if (recordAbilities)
         {
             SetBattlerTriggeredAbility(battlerDef, ABILITY_IMPENETRABLE);
+            gMoveResultFlags |= MOVE_RESULT_MISSED;
+            gLastLandedMoves[battlerDef] = 0;
+            gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
             RecordAbilityBattle(battlerDef, ABILITY_IMPENETRABLE);
         }
     }
@@ -28266,6 +28247,10 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 o
         if ((abilityDef == ABILITY_WONDER_GUARD || uniqueAbilityDef == ABILITY_WONDER_GUARD)
          && modifier <= UQ_4_12(1.0)
          && gBattleMoves[move].power)
+            modifier = UQ_4_12(0.0);
+        if ((abilityDef == ABILITY_IMPENETRABLE || uniqueAbilityDef == ABILITY_IMPENETRABLE)
+         && modifier > UQ_4_12(1.0)
+         && IS_MOVE_SPECIAL(move))
             modifier = UQ_4_12(0.0);
     }
 

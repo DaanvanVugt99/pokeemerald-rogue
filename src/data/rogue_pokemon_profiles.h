@@ -92228,7 +92228,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_VOLBEAT[
 	{
 		.flags= (0 | MON_FLAGS_GEN6PU),
 		.heldItem=ITEM_HEAT_ROCK,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_RELAXED,
@@ -92258,7 +92258,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_VOLBEAT[
 	{
 		.flags= (0 | MON_FLAGS_GEN6ZU),
 		.heldItem=ITEM_DAMP_ROCK,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_RELAXED,
@@ -92273,7 +92273,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_VOLBEAT[
 	{
 		.flags= (0 | MON_FLAGS_GEN7PU),
 		.heldItem=ITEM_HEAT_ROCK,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_RELAXED,
@@ -92288,7 +92288,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_VOLBEAT[
 	{
 		.flags= (0 | MON_FLAGS_GEN7PU),
 		.heldItem=ITEM_HEAVY_DUTY_BOOTS,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_RELAXED,
@@ -92303,7 +92303,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_VOLBEAT[
 	{
 		.flags= (0 | MON_FLAGS_GEN7ZU),
 		.heldItem=ITEM_HEAT_ROCK,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_RELAXED,
@@ -92318,7 +92318,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_VOLBEAT[
 	{
 		.flags= (0 | MON_FLAGS_GEN7ZU),
 		.heldItem=ITEM_HEAT_ROCK,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_CAREFUL,
@@ -92333,7 +92333,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_VOLBEAT[
 	{
 		.flags= (0 | MON_FLAGS_GEN9PU),
 		.heldItem=ITEM_HEAVY_DUTY_BOOTS,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_CAREFUL,
@@ -92476,7 +92476,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_ILLUMISE
 	{
 		.flags= (0 | MON_FLAGS_GEN7PU),
 		.heldItem=ITEM_HEAT_ROCK,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_RELAXED,
@@ -92491,7 +92491,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_ILLUMISE
 	{
 		.flags= (0 | MON_FLAGS_GEN71V1),
 		.heldItem=ITEM_FAIRIUM_Z,
-		.ability=ABILITY_PRANKSTER,
+		.ability=ABILITY_SWARM,
 		.hiddenPowerType=TYPE_NONE,
 		.teraType=TYPE_NONE,
 		.nature=NATURE_BOLD,

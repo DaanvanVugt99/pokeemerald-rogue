@@ -11,6 +11,7 @@ SPECIES_AURORUS,Aurorus,123,77,72,99,92,58,123,77,72,99,92,58,Rock / Ice,Rock / 
 SPECIES_AVALUGG,Avalugg,95,117,184,44,46,28,95,117,184,44,55,28,Ice,Ice,Own Tempo / Ice Body / Sturdy,Own Tempo / Ice Body / Sturdy,true,false,false
 SPECIES_BANETTE,Banette,64,115,65,83,63,65,74,125,75,83,73,75,Ghost,Ghost,Insomnia / Frisk / Cursed Body,Insomnia / Frisk / Cursed Body,true,false,false
 SPECIES_BANETTE_MEGA,Banette,64,165,75,93,83,75,74,175,85,93,93,85,Ghost,Ghost,Prankster / Prankster / Prankster,Prankster / Prankster / Prankster,true,false,false
+SPECIES_BASTIODON,Bastiodon,60,52,168,47,138,30,60,52,168,47,138,30,Rock / Steel,Rock / Steel,Sturdy / — / Soundproof,Sturdy / Solid Rock / Soundproof,false,false,true
 SPECIES_BEAUTIFLY,Beautifly,60,70,50,100,50,65,60,70,50,100,50,85,Bug / Flying,Bug / Flying,Swarm / — / Rivalry,Swarm / — / Rivalry,true,false,false
 SPECIES_BEHEEYEM,Beheeyem,75,75,75,125,95,40,85,75,75,125,95,40,Psychic,Psychic,Telepathy / Synchronize / Analytic,Telepathy / Synchronize / Analytic,true,false,false
 SPECIES_BOLTUND,Boltund,69,90,60,90,60,121,69,100,60,90,60,121,Electric,Electric,Strong Jaw / — / Competitive,Strong Jaw / — / Competitive,true,false,false
@@ -60,15 +61,15 @@ SPECIES_GIGALITH,Gigalith,85,135,130,60,80,25,85,135,130,60,80,25,Rock,Rock,Stur
 SPECIES_GLIMMORA_MEGA,Glimmora,83,90,105,150,96,101,83,90,105,150,96,101,Rock / Poison,Rock / Poison,Adaptability / Adaptability / Adaptability,Adaptability / — / Adaptability,false,false,true
 SPECIES_GOLDUCK,Golduck,80,82,78,95,80,85,80,82,78,95,80,85,Water,Water / Psychic,Damp / Cloud Nine / Swift Swim,Damp / Cloud Nine / Swift Swim,false,true,false
 SPECIES_GOODRA,Goodra,90,100,70,110,150,80,90,100,70,110,150,80,Dragon,Dragon / Poison,Sap Sipper / Hydration / Gooey,Sap Sipper / Hydration / Gooey,false,true,false
-SPECIES_GOREBYSS,Gorebyss,55,84,105,114,75,52,55,84,105,114,75,52,Water,Water / Fairy,Swift Swim / — / Hydration,Swift Swim / — / Hydration,false,true,false
+SPECIES_GOREBYSS,Gorebyss,55,84,105,114,75,52,55,84,105,114,75,52,Water,Water / Fairy,Swift Swim / — / Hydration,Swift Swim / Dazzling / Hydration,false,true,true
 SPECIES_GRAPPLOCT,Grapploct,80,118,90,70,80,42,80,118,90,70,90,42,Fighting,Fighting,Limber / — / Technician,Limber / — / Technician,true,false,false
 SPECIES_GRENINJA_MEGA,Greninja,72,125,77,133,81,142,72,125,77,133,81,142,Water / Dark,Water / Dark,Protean / Protean / Protean,Protean / — / Protean,false,false,true
 SPECIES_GRUMPIG,Grumpig,80,45,65,90,110,80,90,45,75,100,110,80,Psychic,Psychic,Thick Fat / Own Tempo / Gluttony,Thick Fat / Own Tempo / Gluttony,true,false,false
 SPECIES_GUMSHOOS,Gumshoos,88,110,60,55,60,45,100,110,60,55,60,45,Normal,Normal,Stakeout / Strong Jaw / Adaptability,Stakeout / Strong Jaw / Adaptability,true,false,false
 SPECIES_HEATMOR,Heatmor,85,97,66,105,66,65,85,97,66,105,66,80,Fire,Fire,Gluttony / Flash Fire / White Smoke,Gluttony / Flash Fire / White Smoke,true,false,false
-SPECIES_HUNTAIL,Huntail,55,104,105,94,75,52,55,104,105,94,75,52,Water,Water / Dragon,Swift Swim / — / Water Veil,Swift Swim / — / Water Veil,false,true,false
+SPECIES_HUNTAIL,Huntail,55,104,105,94,75,52,55,104,105,94,75,52,Water,Water / Dragon,Swift Swim / — / Water Veil,Swift Swim / Intimidate / Water Veil,false,true,true
 SPECIES_HYPNO,Hypno,85,73,70,73,115,67,85,73,70,95,115,67,Psychic,Psychic,Insomnia / Forewarn / Inner Focus,Insomnia / Forewarn / Inner Focus,true,false,false
-SPECIES_ILLUMISE,Illumise,65,47,75,73,85,85,65,47,75,73,85,85,Bug,Bug / Fairy,Oblivious / Tinted Lens / Prankster,Oblivious / Tinted Lens / Prankster,false,true,false
+SPECIES_ILLUMISE,Illumise,65,47,75,73,85,85,65,47,75,73,85,85,Bug,Bug / Fairy,Oblivious / Tinted Lens / Prankster,Oblivious / Tinted Lens / Swarm,false,true,true
 SPECIES_INDEEDEE_FEMALE,Indeedee,70,55,65,95,105,85,70,55,65,95,105,85,Psychic / Normal,Psychic / Normal,Own Tempo / Synchronize / Psychic Surge,Own Tempo / Synchronize / Telepathy,false,false,true
 SPECIES_INDEEDEE_MALE,Indeedee,60,65,55,105,95,95,60,65,55,105,95,95,Psychic / Normal,Psychic / Normal,Inner Focus / Synchronize / Psychic Surge,Inner Focus / Synchronize / Telepathy,false,false,true
 SPECIES_KECLEON,Kecleon,60,90,70,60,120,40,70,90,80,60,120,40,Normal,Normal,Color Change / — / Protean,Color Change / — / Protean,true,false,false
@@ -106,7 +107,10 @@ SPECIES_ROTOM_FROST,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / I
 SPECIES_ROTOM_HEAT,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / Fire,Electric / Fire,Levitate / — / —,Static / — / Flash Fire,false,false,true
 SPECIES_ROTOM_MOW,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / Grass,Electric / Grass,Levitate / — / —,Static / — / Grassy Surge,false,false,true
 SPECIES_ROTOM_WASH,Rotom,50,65,107,105,107,86,50,65,107,105,107,86,Electric / Water,Electric / Water,Levitate / — / —,Static / — / Water Absorb,false,false,true
+SPECIES_SHIELDON,Shieldon,30,42,118,42,88,30,30,42,118,42,88,30,Rock / Steel,Rock / Steel,Sturdy / — / Soundproof,Sturdy / Solid Rock / Soundproof,false,false,true
 SPECIES_SHIINOTIC,Shiinotic,60,45,80,90,100,30,75,45,80,90,100,30,Grass / Fairy,Grass / Fairy,Illuminate / Effect Spore / Rain Dish,Illuminate / Effect Spore / Rain Dish,true,false,false
+SPECIES_SLAKING,Slaking,150,160,100,95,65,100,150,160,100,95,65,100,Normal,Normal,Truant / — / —,Truant / — / Slow Start,false,false,true
+SPECIES_SLAKOTH,Slakoth,60,60,60,35,35,30,60,60,60,35,35,30,Normal,Normal,Truant / — / —,Truant / — / Slow Start,false,false,true
 SPECIES_SMOLIV,Smoliv,41,35,45,58,51,30,41,35,45,58,51,30,Grass / Normal,Grass / Normal,Early Bird / — / Harvest,Natural Cure / — / Harvest,false,false,true
 SPECIES_SNOVER,Snover,60,62,50,62,60,40,60,62,50,62,60,40,Grass / Ice,Grass / Ice,Snow Warning / — / Soundproof,Grass Pelt / — / Soundproof,false,false,true
 SPECIES_SPIDOPS,Spidops,60,79,92,52,86,35,75,79,92,52,86,35,Bug,Bug,Insomnia / — / Stakeout,Insomnia / — / Stakeout,true,false,false
@@ -155,7 +159,7 @@ SPECIES_UNOWN_Y,Unown,48,72,48,72,48,48,48,72,48,72,48,72,Psychic,Psychic,Levita
 SPECIES_UNOWN_Z,Unown,48,72,48,72,48,48,48,72,48,72,48,72,Psychic,Psychic,Levitate / — / —,Levitate / — / —,true,false,false
 SPECIES_VANILLUXE,Vanilluxe,71,95,85,110,95,79,71,95,85,110,95,79,Ice,Ice,Ice Body / Snow Warning / Weak Armor,Ice Body / Slush Rush / Weak Armor,false,false,true
 SPECIES_VICTREEBEL_MEGA,Victreebel,80,125,85,135,95,70,80,125,85,135,95,70,Grass / Poison,Grass / Poison,Innards Out / Innards Out / Innards Out,Innards Out / — / Innards Out,false,false,true
-SPECIES_VOLBEAT,Volbeat,65,73,75,47,85,85,65,73,75,47,85,85,Bug,Bug / Electric,Illuminate / Swarm / Prankster,Illuminate / Swarm / Prankster,false,true,false
+SPECIES_VOLBEAT,Volbeat,65,73,75,47,85,85,65,73,75,47,85,85,Bug,Bug / Electric,Illuminate / Swarm / Prankster,Illuminate / Tinted Lens / Swarm,false,true,true
 SPECIES_WATCHOG,Watchog,60,85,69,60,69,77,60,95,69,60,69,77,Normal,Normal,Illuminate / Keen Eye / Analytic,Illuminate / Keen Eye / Analytic,true,false,false
 SPECIES_WIGGLYTUFF,Wigglytuff,140,70,45,85,50,45,140,70,65,85,65,45,Normal / Fairy,Normal / Fairy,Cute Charm / Competitive / Frisk,Cute Charm / Competitive / Frisk,true,false,false
 SPECIES_WOBBUFFET_PUNCHING,Wobbuffet,190,115,10,1,10,79,190,115,10,1,10,79,Psychic / Fighting,Psychic / Fighting,Stance Change / — / —,Shadow Tag / — / Telepathy,false,false,true

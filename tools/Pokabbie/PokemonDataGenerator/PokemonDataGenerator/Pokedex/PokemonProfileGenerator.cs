@@ -870,6 +870,10 @@ namespace PokemonDataGenerator.Pokedex
 						break;
 					case "SPECIES_VOLBEAT":
 						UpdateVolbeatCompetitiveSets();
+						ReplaceCompetitiveAbility("ABILITY_PRANKSTER", "ABILITY_SWARM");
+						break;
+					case "SPECIES_ILLUMISE":
+						ReplaceCompetitiveAbility("ABILITY_PRANKSTER", "ABILITY_SWARM");
 						break;
 					case "SPECIES_HUNTAIL":
 						UpdateHuntailCompetitiveSets();

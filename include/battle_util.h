@@ -161,7 +161,7 @@ bool32 DoesPartyShareCurrentTypeWithBattler(u32 battler);
 u32 GetBattlerCreationType(u32 battler);
 bool32 DoesPartyHaveUniqueTypes(u32 battler);
 bool32 IsBoneMove(u32 move);
-bool32 IsTruantLoafingSuppressed(u32 battler);
+bool32 IsKingsDomainActive(u32 battler);
 bool32 IsPrismRefractionActive(u32 battler, u32 move);
 bool32 IsEndlessCoreStatusMove(u32 battler, u32 move);
 bool32 CanUseEndlessCoreStatusMove(u32 battler);

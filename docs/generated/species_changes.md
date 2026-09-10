@@ -14,7 +14,7 @@ Unique Abilities are intentionally excluded because they have no vanilla field t
 
 - Base-stat changes: 101 species/forms
 - Typing changes: 29 species/forms
-- Normal Ability changes: 37 species/forms
+- Normal Ability changes: 45 species/forms
 - Species/forms without a canonical baseline: 25
 
 ## Base Stats
@@ -126,9 +126,13 @@ Unique Abilities are intentionally excluded because they have no vanilla field t
 | Amaura | Refrigerate / — / Snow Warning | Refrigerate / — / Solid Rock |
 | Arboliva | Seed Sower / — / Harvest | Natural Cure / — / Harvest |
 | Aurorus | Refrigerate / — / Snow Warning | Refrigerate / — / Solid Rock |
+| Bastiodon | Sturdy / — / Soundproof | Sturdy / Solid Rock / Soundproof |
 | Dolliv | Early Bird / — / Harvest | Natural Cure / — / Harvest |
 | Gengar (2 forms) | Cursed Body / — / — | Levitate / — / — |
 | Gigalith | Sturdy / Sand Stream / Sand Force | Sturdy / Stamina / Sand Force |
+| Gorebyss | Swift Swim / — / Hydration | Swift Swim / Dazzling / Hydration |
+| Huntail | Swift Swim / — / Water Veil | Swift Swim / Intimidate / Water Veil |
+| Illumise | Oblivious / Tinted Lens / Prankster | Oblivious / Tinted Lens / Swarm |
 | Indeedee (Female) | Own Tempo / Synchronize / Psychic Surge | Own Tempo / Synchronize / Telepathy |
 | Indeedee (Male) | Inner Focus / Synchronize / Psychic Surge | Inner Focus / Synchronize / Telepathy |
 | Mega Abomasnow | Snow Warning / Snow Warning / Snow Warning | Grass Pelt / Grass Pelt / Grass Pelt |
@@ -152,11 +156,15 @@ Unique Abilities are intentionally excluded because they have no vanilla field t
 | Rotom (Heat) | Levitate / — / — | Static / — / Flash Fire |
 | Rotom (Mow) | Levitate / — / — | Static / — / Grassy Surge |
 | Rotom (Wash) | Levitate / — / — | Static / — / Water Absorb |
+| Shieldon | Sturdy / — / Soundproof | Sturdy / Solid Rock / Soundproof |
+| Slaking | Truant / — / — | Truant / — / Slow Start |
+| Slakoth | Truant / — / — | Truant / — / Slow Start |
 | Smoliv | Early Bird / — / Harvest | Natural Cure / — / Harvest |
 | Snover | Snow Warning / — / Soundproof | Grass Pelt / — / Soundproof |
 | Torkoal | White Smoke / Drought / Shell Armor | Flame Body / Steam Engine / Shell Armor |
 | Tyranitar | Sand Stream / — / Unnerve | Battle Armor / — / Unnerve |
 | Vanilluxe | Ice Body / Snow Warning / Weak Armor | Ice Body / Slush Rush / Weak Armor |
+| Volbeat | Illuminate / Swarm / Prankster | Illuminate / Tinted Lens / Swarm |
 | Wobbuffet (Punching) | Stance Change / — / — | Shadow Tag / — / Telepathy |
 
 ## Missing Canonical Baseline

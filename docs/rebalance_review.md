@@ -1,10 +1,116 @@
 # Upstream 2.2 Rebalance Review
 
 This ledger records design decisions made while comparing Divergence with
-upstream 2.2's experimental Revised Mode. Nothing in this file changes runtime
-data; the decisions will be implemented together after the review.
+upstream 2.2's experimental Revised Mode. Decisions remain pending unless
+explicitly marked implemented below; approving a row does not by itself change
+runtime data.
 
 Upstream comparison commit: `c0ea02119f`
+
+## Implemented targeted Ability decisions — 2026-09-08
+
+- [x] Huntail: Swift Swim / Intimidate / Water Veil.
+- [x] Gorebyss: Swift Swim / Dazzling / Hydration.
+- [x] Gigalith: verified the existing Sturdy / Stamina / Sand Force arrangement
+  and its competitive-set remap; no additional change needed.
+- [x] Volbeat: Illuminate / Tinted Lens / Swarm.
+- [x] Illumise: Oblivious / Tinted Lens / Swarm.
+- [x] Shieldon and Bastiodon: Sturdy / Solid Rock / Soundproof; Impenetrable
+  now negates super-effective special moves. Physical attacks remain unaffected
+  by Impenetrable, and Mold Breaker can bypass it.
+- [x] Slakoth and Slaking: Truant / empty / Slow Start; King's Domain suppresses
+  the regular Ability when the party shares a type, including both drawbacks.
+  Vigoroth is unchanged in this implementation batch.
+- [x] Regenerated species reports and baked data; regenerated Volbeat/Illumise
+  competitive sets to remove Prankster, with no unrelated profile changes.
+
+Only these Ability decisions are crossed off. Their separately approved stats,
+typing, and learnsets remain pending, including Volbeat/Illumise's 465-BST
+spreads. The starter and Eeveelution audit tables below are also still approval
+records, not implementation status.
+
+Validation passed: four Impenetrable tests, four King's Domain tests, competitive
+profile Ability legality, species/bake verification, deterministic profile
+verification, the normal debug ROM build, and `git diff --check`. The legacy
+profile project did not compile with the installed Mono toolset; refresh and
+verification used the same pipeline sources compiled as a profile-only runner.
+
+## Move-distribution audit — approved revisions
+
+Approved on 2026-09-08, including the tentative cut recommendations. These
+revise the pending decisions below; they do not mark learnsets implemented.
+Remove the newly proposed additions rather than replacing each with another
+coverage move. Preserve existing move access and unrelated approved changes.
+
+- Mystical Fire: skip Meowstic (both genders and Megas), Cursola, and Sunflora.
+  Sunflora also skips Flamethrower; retain Fiery Dance and Heat Wave, with Heat
+  Wave serving its doubles option.
+- Power Gem: skip Clefable, Elgyem, Beheeyem, and Delcatty.
+- Hurricane: skip Beautifly, Dustox, Venomoth, Swoobat, and Jumpluff. Other
+  approved recipients and evolutionary access extensions remain approved.
+- Coverage packages: skip Energy Ball and Flash Cannon on Ampharos and the
+  Voltorb line, plus Aura Sphere on Electrode. Retain Bug Buzz on Voltorb and
+  Electrode, but skip it on Chatot and the Magnemite line.
+- Other cuts: Apple Acid on Bellossom; Fiery Dance on Lilligant; Scale Shot on
+  Chewtle/Drednaw; Mach Punch on Tarountula/Spidops.
+- Retain the approved Head Smash additions. Cubone/Marowak was an optional
+  reconsideration, not a recommended cut.
+
+## Learnset accumulation audit — approved corrections
+
+Approved on 2026-09-08. Move access should normally accumulate through evolution,
+including regional branches, even when level-up timing differs. Preserve direct
+learning access as well as the ability to carry a learned move through evolution.
+Apply approved access consistently to associated Mega and Gigantamax forms.
+
+The individual rows below now include the identified missing moves: Headbutt on
+Metang/Metagross; Mystical Fire on Quilava/Hisuian Typhlosion; Low Sweep/Revenge
+on Hisuian Samurott; Dual Chop on Electivire; Natural Gift on both Exeggutor forms;
+Grudge/Hypnosis on Mismagius; Sucker Punch on Pangoro; Hurricane on Tranquill;
+Sing on Prinplup; Steel Wing on Hisuian Braviary; Air Cutter on Drizzile/Togekiss;
+Poison Fang on Ariados; and Bubble on Grapploct.
+
+Reverse the conflicting rejections of Crunch on Purugly, Lunge on Parasect, and
+Head Smash on Alolan Marowak. Add Tearful Look to Hisuian Sliggoo. Withdraw the
+proposed Recover addition from shared pre-evolution Goomy; retain it on regular
+Sliggoo/Goodra only, preserving the rejection on the Hisuian branch.
+
+These are pending learnset decisions, not implemented changes or a certification
+that every learnset is gap-free. During implementation, check cumulative access
+automatically and document any intentional exceptions explicitly.
+
+## Typing audit — approved revisions
+
+Approved on 2026-09-08. Typing should express a specific identity, not merely
+reward access to matching moves or supply convenient resistances. These revise
+pending design decisions; no runtime typing changes are marked implemented here.
+Previously approved stats, Abilities, and moves remain unchanged by this audit.
+
+| Pokemon | Final approved typing after audit |
+|---|---|
+| Ampharos | Electric; Mega remains Electric/Dragon |
+| Beartic | Ice |
+| Bellossom | Grass |
+| Feraligatr | Water; Mega remains Water/Dragon |
+| Skiddo / Gogoat | Grass |
+| Goodra | Dragon, reverting Divergence's Poison addition; Hisuian Goodra remains Dragon/Steel |
+| Gothita / Gothorita / Gothitelle | Psychic |
+| Snubbull / Granbull | Fairy |
+| Lycanroc (Midday) | Rock |
+| Meganium | Grass; Mega remains Grass/Fairy |
+| Sceptile | Grass; Mega remains Grass/Dragon |
+| Ursaring | Normal; Ursaluna forms remain unchanged |
+
+The user explicitly retains Gorebyss's Water/Fairy, Huntail's Water/Dragon,
+Mega Banette's approved Ghost/Normal, Dodrio's Ground/Flying, and Seviper's
+approved Poison/Dark. Do not apply the suggested reversions to these five.
+
+Retain all other positively reviewed typings, including the lake trio's
+Psychic/Fairy, Ninetales's Fire/Fairy, Mismagius's Ghost/Fairy, Luvdisc's
+Water/Fairy, and the existing Illumise/Volbeat and Furfrou design systems.
+Pignite/Emboar's deliberately chosen Fire/Ground design remains approved, with
+Mega Emboar Fire/Fighting: the audit flagged this for reconsideration but did not
+recommend a definite reversal. No replacement typing or move removals are implied.
 
 ## Remaining Upstream Revised Pokemon
 
@@ -28,7 +134,7 @@ Divergence design; they do not consume a review-batch slot.
 | Alomomola | Keep Divergence as-is; skip Toxic; retain Healing Current and Alluring Voice. |
 | Altaria | Keep Divergence as-is for both forms; skip upstream's +0/+20/+0/+20/+0/+0 changes, Astonish, and Natural Gift; leave Brave Bird, Dragon Dance, and Refresh as tutors; retain Sparkling Aria and Cotton Guarding. |
 | Ambipom | Add Arm Thrust, Dual Chop, and Quick Attack by level plus Pursuit as a tutor; skip upstream's +0/+5/+0/+8/+0/+0 stats; retain Upper Hand, Plain Terrain, and Handywork. |
-| Ampharos | Change base Ampharos to Electric/Dragon; use Static / Overcoat / Cotton Down; retain Mold Breaker on Mega Ampharos; add Signal Beam by level plus Draco Meteor, Energy Ball, and Flash Cannon as tutors; retain Dazzling Gleam, Ion Deluge, Beacon, Buzzy Buzz, and Static Burst; skip Tail Glow, Rock Climb, Transistor, and upstream's +5/+5/+5/+0/+0/+0 stats for both forms. |
+| Ampharos | Keep base Ampharos pure Electric, reserving Electric/Dragon for Mega; use Static / Overcoat / Cotton Down; retain Mold Breaker on Mega Ampharos; add Signal Beam by level plus Draco Meteor as a tutor; retain Dazzling Gleam, Ion Deluge, Beacon, Buzzy Buzz, and Static Burst; skip Energy Ball, Flash Cannon, Tail Glow, Rock Climb, Transistor, and upstream's +5/+5/+5/+0/+0/+0 stats for both forms. |
 | Annihilape | Use Defiant / Anger Point / Vital Spirit, replacing Inner Focus; retain Tantrum, Eclipse, and current stats. |
 | Anorith | Add Lunge as a tutor; skip Bug Buzz and Rock Climb; retain Fossil Drill, Acid Rain, Infested Terrain, and current stats. |
 | Appletun | Use upstream's +0/+0/+5/+5/+5/+0 stats for Appletun and its Gigantamax form; add Superpower as a tutor; skip Toxic, Return, and Frustration; retain Orchard and Wild Growth. |
@@ -55,12 +161,12 @@ Divergence design; they do not consume a review-batch slot.
 | Basculin (White-Striped) | Keep Divergence as-is; skip upstream's +20/+0/+0/+10/+0/+0 stats; retain Death Current and Eclipse. |
 | Bastiodon | Add Solid Rock in slot 2 and Head Smash by level; redesign Impenetrable so super-effective special moves are completely negated; retain Soundproof, Power Shift, every existing move, and current stats; skip upstream's +0/+20/+0/-20/+0/+0 redistribution, Slack Off, and Toxic. |
 | Bayleef | Use Overgrow / Filter / Triage; add Aromatherapy by level; skip Draining Kiss, Moonblast, and Natural Gift; retain Giga Drain, Leech Seed, Jungle Healing, Flower Field, and current stats. |
-| Beartic | Change to Ice/Fighting; use Swift Swim / Slush Rush / Tough Claws; add Ice Shard by level plus Triple Axel and Waterfall as tutors; skip upstream's +10/+0/+0/+0/+0/+5 stats, Bide, Rock Smash, Hail, Low Sweep, and Work Up; retain moves removed by upstream, Ice Floe, and Divergence's custom moves. |
+| Beartic | Keep pure Ice, skipping the Fighting addition; use Swift Swim / Slush Rush / Tough Claws; add Ice Shard by level plus Triple Axel and Waterfall as tutors; skip upstream's +10/+0/+0/+0/+0/+5 stats, Bide, Rock Smash, Hail, Low Sweep, and Work Up; retain moves removed by upstream, Ice Floe, and Divergence's custom moves. |
 | Beedrill | Add Drill Peck and Megahorn by level plus Dual Wingbeat as a tutor; leave Drill Run and X-Scissor as tutor-only and skip Skitter Smack; skip base Beedrill's +0/+25/+0/-5/+15/+20 and Mega Beedrill's +0/+25/+15/+15/+30/+25 stats; retain Toxic Tandem and Divergence's existing additions. |
 | Beldum | Add Rock Head in slot 2 and Headbutt as a tutor; retain Hive Mind and current stats. |
-| Bellossom | Change to Grass/Fairy; use Chlorophyll / Cloud Nine / Healer; add Draining Kiss, Fiery Dance, and Leaf Blade by level plus Apple Acid as a tutor; retain Moonblast, Moonlight, all moves removed by upstream, Festival, and current stats; skip Earth Power and the remaining level reshuffle. |
+| Bellossom | Keep pure Grass, skipping the Fairy addition; use Chlorophyll / Cloud Nine / Healer; add Draining Kiss, Fiery Dance, and Leaf Blade by level; retain Moonblast, Moonlight, all moves removed by upstream, Festival, and current stats; skip Apple Acid, Earth Power, and the remaining level reshuffle. |
 | Bibarel | Use upstream's +15/+15/+5/+0/+5/+0 stats; skip Rock Climb; retain Spillway. |
-| Bisharp | Add Leaf Blade and Psycho Cut by level; skip Air Slash, Embargo, and Feint Attack; retain Retaliate, Power Play, Eclipse, and current stats. |
+| Bisharp | Keep Divergence: retain Retaliate, Power Play, Eclipse, the existing learnset, and current stats; skip Leaf Blade, Psycho Cut, Air Slash, Embargo, and Feint Attack. This prevents an evolved Bisharp from carrying extra coverage into the already exceptional Kingambit. |
 | Blastoise | Use Torrent / Rain Dish / Shell Armor on regular and Gigantamax Blastoise while retaining Mega Launcher on Mega Blastoise; skip upstream's +0/+0/+0/+5/+0/+0 stats for all forms, Scald, and Toxic; retain Shell Formation. |
 | Blaziken | Add Early Bird in slot 2; skip upstream's +0/+0/+5/+0/+0/+0 stats for both forms; retain Blaze, Speed Boost, Flash Firestorm, and Divergence's kicking moves. |
 | Blitzle | Add Flame Wheel, Flare Blitz, High Horsepower, and Nuzzle by level; skip Bounce, Lunge, Pursuit, Flamethrower, and Low Sweep; retain Zippy Zap, Volt Tackle, Redline, the custom tutors, and current stats. |
@@ -69,6 +175,7 @@ Divergence design; they do not consume a review-batch slot.
 | Bouffalant | Use upstream's +0/+0/+0/+0/+0/+10 stats; add Thrash by level plus Body Press, Flame Charge, Head Smash, and Heat Crash as tutors; skip Rage; leave Body Slam and Pursuit as tutor-only; retain Tackle, Throat Chop, Plain Terrain, and Battle Fury. |
 | Braixen | Use Blaze / Magician / Magic Guard; retain Spellbook, Torch Song, and current stats. Reassess consistency when reviewing Delphox. |
 | Braviary | Add Quash and Steel Wing as tutors; retain Warpath, the existing learnset, and current stats. |
+| Braviary (Hisuian) | Add Steel Wing as a tutor to preserve Rufflet's approved access; otherwise retain existing Abilities, moves, typing, and stats. |
 | Breloom | Add Mind Reader, Sky Uppercut, and Spore by level; retain Growth, Poison Powder, Toxic, Worry Seed, Brick Break, Focus Punch, Adrenaline, and current stats. |
 | Bronzong | Add Teleport and Fly as tutors; retain Doom Desire, Psyshield Bash, Brainstorm, Eclipse, Equilibrium, and current stats. |
 | Bronzor | Add Teleport as a tutor; retain Doom Desire, Psyshield Bash, Brainstorm, Eclipse, Equilibrium, and current stats. |
@@ -89,15 +196,15 @@ Divergence design; they do not consume a review-batch slot.
 | Centiskorch | Use upstream's +0/+0/+0/-25/+0/+25 stats for regular and Gigantamax Centiskorch; retain Sizzly Slide at Divergence's level 40 placement, Molten Burrow, Coil, Fire Lash, Lunge, and the custom terrain tutors; skip Toxic, Return, Frustration, and Hidden Power. |
 | Chandelure | Add Mystical Fire and Dazzling Gleam as tutors; retain Pyromancy, Eerie Spell, Eclipse, Nightfall, and current stats. |
 | Charizard | Use Blaze / Defiant / Solar Power on regular and Gigantamax Charizard; add Dual Wingbeat as a tutor; retain Mega Charizard's existing Abilities, Thermal Lift, Tailwind, and current stats, skipping upstream's +0/+0/+0/+1/+0/+0 regular and Gigantamax stats, +0/+1/+0/+0/+0/+0 Mega X stats, and +0/+0/+0/+1/+0/+0 Mega Y stats. |
-| Charjabug | Use +0/+20/+0/+0/+0/+20, skipping upstream's additional 10 HP; retain Battery, Dynamo, and the custom terrain tutors. |
+| Charjabug | Use +0/+20/+0/+0/+0/+0, skipping upstream's 10 HP and 20 Speed increases; retain Battery, Dynamo, and the custom terrain tutors. Keeping only Attack preserves its physical cocoon niche without making evolution into unchanged Vikavolt lose Speed. |
 | Charmander | Add Defiant in slot 2; retain Blaze, Solar Power, Thermal Lift, and current stats. |
 | Charmeleon | Add Defiant in slot 2; retain Blaze, Solar Power, Thermal Lift, and current stats. |
-| Chatot | Use Soundproof / Tangled Feet / Punk Rock; add Air Slash, Role Play, and Boomburst by level plus Bug Buzz as a tutor; retain Relic Song, Chatterbox, and current stats, skipping upstream's +0/+0/+5/+12/+8/+5 stats. |
+| Chatot | Use Soundproof / Tangled Feet / Punk Rock; add Air Slash, Role Play, and Boomburst by level; retain Relic Song, Chatterbox, and current stats; skip Bug Buzz and upstream's +0/+0/+5/+12/+8/+5 stats. |
 | Cherrim | Use upstream's +0/+40/+0/+0/+5/+5 stats for both forms; add Sleep Powder, Stun Spore, and Solar Blade by level; retain Flower Shield, Leafage, and Bloom Burst; skip Lucky Chant and X-Scissor. |
 | Cherubi | Use upstream's +10/+0/+15/+0/+0/+5 stats; add Sleep Powder, Stun Spore, and Sunny Day by level; retain Leafage and Bloom Burst; skip Solar Blade, Lucky Chant, and Play Rough. |
-| Chesnaught | Use upstream's +5/+0/+0/+0/+0/+0 stats; add Iron Barbs in slot 2; make Needle Arm a level-up move; add Horn Leech as a tutor; retain Bramble Guard and Spiky Shield; skip Belly Drum and Rock Climb. |
+| Chesnaught | Use upstream's +5/+0/+0/+0/+0/+0 stats for regular and Mega Chesnaught, producing 93/137/172/74/115/44 (BST 635) on Mega; add Iron Barbs in slot 2 to regular Chesnaught while retaining Mega's Bulletproof; make Needle Arm a level-up move; add Horn Leech as a tutor; retain Bramble Guard and Spiky Shield; skip Belly Drum and Rock Climb. |
 | Chespin | Add Iron Barbs in slot 2 plus Needle Arm and Bulk Up by level; retain Bramble Guard and current stats; skip Stone Edge, Horn Leech, and Rock Climb. |
-| Chewtle | Add Aqua Jet and Shell Smash by level plus Scale Shot as a tutor; retain Ripjaw, the existing level moves, and current stats; skip upstream's remaining tutors. |
+| Chewtle | Add Aqua Jet and Shell Smash by level; retain Ripjaw, the existing level moves, and current stats; skip Scale Shot and upstream's remaining tutors. |
 | Chikorita | Use Overgrow / Filter / Triage; add Aromatherapy by level; retain Leech Seed, Giga Drain, Jungle Healing, Flower Field, and current stats; skip Natural Gift, Draining Kiss, Moonblast, Dazzling Gleam, and Play Rough. |
 | Chimchar | Add Flame Body in slot 2; retain Blaze, Iron Fist, Spellfist, and current stats; skip Rock Climb. |
 | Chinchou | Add Signal Beam and Parabolic Charge by level; retain Take Down, Splishy Splash, Abyssal Light, and current stats; leave Ion Deluge as tutor-only and skip Bubble. |
@@ -106,7 +213,7 @@ Divergence design; they do not consume a review-batch slot.
 | Cinderace | Add Receiver in slot 2 for regular and Gigantamax Cinderace; retain Blaze, Libero, Playmaker, and current stats, skipping upstream's +0/+0/+0/+5/+0/+0 stats and generic legacy tutors. |
 | Clamperl | Keep Divergence as-is; skip Battle Armor because Crystal Armor already prevents critical hits; retain Shell Armor, Rattled, Crystal Armor, and current stats. |
 | Claydol | Add Heal Block and Recover by level plus Fly, Power Gem, and Tri Attack as tutors; retain Mystical Power, Eclipse, Ancient Idol, and current stats, skipping upstream's +0/+0/+0/+10/+0/+0 stats. |
-| Clefable | Add Spotlight at level 1 and Power Gem as a tutor; retain Meteor Mash, Life Dew, Moonblast's current placement, Alluring Voice, Air Slash, Moonlight, and current stats; skip the other duplicated level-1 moves. |
+| Clefable | Add Spotlight at level 1; retain Meteor Mash, Life Dew, Moonblast's current placement, Alluring Voice, Air Slash, Moonlight, and current stats; skip Power Gem and the other duplicated level-1 moves. |
 | Clefairy | Add Spotlight at level 1 and Draining Kiss by level; retain Splash, Sweet Kiss, Charm, Copycat, Life Dew, Alluring Voice, Moonlight, and current stats; skip Double Slap, Bestow, Wake-Up Slap, Minimize, Lucky Chant, and Body Slam. |
 | Cleffa | Add Magical Leaf and Draining Kiss by level; retain Splash, Alluring Voice, Moonlight, and current stats. |
 | Clobbopus | Change to Fighting/Water; use Limber / Sticky Hold / Technician; add Bubble, Aqua Jet, and Mach Punch by level plus Flip Turn as a tutor; retain Octolock and current stats; skip the generic legacy tutors. |
@@ -121,7 +228,7 @@ Divergence design; they do not consume a review-batch slot.
 | Crabominable | Add Power-Up Punch, Dizzy Punch, and Mach Punch by level plus Crabhammer as a tutor; retain Protect, Brick Break, Slam, Cold Snap, Upper Hand, Frostbite Ritual, and current stats; skip Bubble and Pursuit. |
 | Crabrawler | Add Power-Up Punch, Dizzy Punch, and Mach Punch by level; retain Protect, Brick Break, Slam, Crabhammer, Upper Hand, Frostbite Ritual, and current stats; skip Bubble and Pursuit. |
 | Cradily | Add Power Whip, Pain Split, and Sappy Seed by level plus Power Gem as a tutor; retain Wrap, Leech Seed, Mega Drain, Salt Cure, Acid Rain, Petrifying Roots, and current stats; skip Constrict, Wring Out, and Toxic. |
-| Cramorant | Use +0/+0/+0/+15/+0/+20, skipping upstream's 10 Defense increase; add Belch and Surf by level; retain Mouthful, Gulp Missile, and the existing learnset; skip Superpower, Scald, and the generic legacy tutors. |
+| Cramorant | Use +0/+0/+0/+15/+0/+20 for normal, Gulping, and Gorging forms, skipping upstream's 10 Defense increase; add Belch and Surf by level for every form; retain Mouthful, Gulp Missile, and the existing learnset; skip Superpower, Scald, and the generic legacy tutors. The shared code definitions should propagate these automatically. |
 | Cranidos | Keep Divergence as-is; skip Rock Head and Rock Climb because recoil-free Head Smash would be too reliable alongside Accelerock and Thick Skull; retain Mold Breaker, Sheer Force, and current stats. |
 | Crobat | Use upstream's +0/+0/+0/+20/+0/+0 stats; add Sniper in slot 2; retain Inner Focus, Infiltrator, Vampiric, Eclipse, and Jetstream. |
 | Croconaw | Add Strong Jaw in slot 2 and Psychic Fangs by level; retain Jaw Lock, Death Roll, and current stats; skip Rage, Night Slash, and Chip Away. |
@@ -129,10 +236,10 @@ Divergence design; they do not consume a review-batch slot.
 | Cryogonal | Use upstream's +0/+0/+0/+15/+0/+0 stats; retain Freezy Frost at Divergence's existing level 60 placement, Flash Freeze, and the existing learnset; skip Sharpen. |
 | Cubchoo | Add Ice Fang by level; retain Frost Breath, Snowscape, Ice Hammer, Mountain Gale, Cold Snap, Ice Floe, and current stats; skip Bide, Rock Smash, and Hail. |
 | Cubone | Add Head Smash as a tutor; retain Bone Keeper, the bone moves, and current stats; skip Rock Climb. |
-| Cursola | Use +0/-20/+0/+0/+0/+25, skipping upstream's 20 HP and 5 Defense increases; add Unburden in slot 2 and Mystical Fire as a tutor; retain Wailing Reef, Acid Rain, and Eclipse; skip the generic legacy tutors. |
+| Cursola | Use +0/-20/+0/+0/+0/+25, skipping upstream's 20 HP and 5 Defense increases; add Unburden in slot 2; retain Wailing Reef, Acid Rain, and Eclipse; skip Mystical Fire and the generic legacy tutors. |
 | Cyndaquil | Use Blaze / Flash Fire / Adaptability; add Mystical Fire as a tutor; retain Blinding Smoke and current stats. Reassess the package on its evolutions individually. |
-| Decidueye | Use upstream's +0/+0/+0/+0/+0/+5 stats; retain Upper Hand, Cold Snap, Eclipse, and Night Hunter. |
-| Decidueye (Hisuian) | Use upstream's +0/+0/+5/+0/+0/+0 stats; retain Upper Hand and Wandering Hunter. |
+| Decidueye | Use upstream's +0/+0/+0/+0/+0/+5 stats; add Keen Eye in slot 2 throughout Rowlet / Dartrix / Decidueye; retain Overgrow, hidden Long Reach, Upper Hand, Cold Snap, Eclipse, and Night Hunter. |
+| Decidueye (Hisuian) | Use upstream's +0/+0/+5/+0/+0/+0 stats; add Keen Eye in slot 2, matching Rowlet and Dartrix; retain Overgrow, hidden Scrappy, Upper Hand, and Wandering Hunter. |
 | Deerling (all forms) | Add Camouflage, Nature Power, Jump Kick, and High Horsepower by level; retain Bullet Seed, Zen Headbutt, Plain Terrain, Seasons Greeting, and current stats; skip Feint Attack, Aromatherapy, Lunge, and Captivate. |
 | Delphox | Use Blaze / Magician / Magic Guard; retain Mega Delphox's existing Ability, Spellbook, Torch Song, Psychic Noise, and current stats, skipping upstream's +0/+0/+0/+1/+0/+0 stats and Toxic. |
 | Deoxys | Keep Divergence as-is; skip Moody; retain Pressure, Psychic Noise, Eclipse, Unknown Biology, and current stats. |
@@ -149,10 +256,10 @@ Divergence design; they do not consume a review-batch slot.
 | Dragonair | Add Fly as a tutor; retain Dragon Majesty and current stats. |
 | Drakloak | Add Shadow Claw by level; retain U-turn, Eject, the existing learnset, and current stats; skip Shadow Sneak and the generic tutors. |
 | Drampa | Use upstream's +25/-15/+0/+0/+0/+0 stats; apply the same delta to Mega Drampa, producing 103/70/110/160/116/36 (BST 595), so Mega Evolution preserves HP progression; retain Berserk, Sap Sipper, Cloud Nine, Dragon Energy, Earth Power, and Elementalist. |
-| Drednaw | Add Aqua Jet and Shell Smash by level plus Scale Shot as a tutor; retain Head Smash, Jaw Lock, Ripjaw, the existing learnset, and current stats; skip the remaining tutors. |
+| Drednaw | Add Aqua Jet and Shell Smash by level; retain Head Smash, Jaw Lock, Ripjaw, the existing learnset, and current stats; skip Scale Shot and the remaining tutors. |
 | Drifblim | Replace Aftermath with Wind Rider; add Ominous Wind, Air Slash, and Hurricane by level plus Poltergeist as a tutor; retain Strength Sap, Self-Destruct, Destiny Bond, Tailwind, Floaty Fall, Eclipse, Stage Fright, Balloon Burst, and current stats; skip Constrict, Amnesia, Extrasensory, and Flamethrower. |
 | Drifloon | Replace Aftermath with Wind Rider; add Ominous Wind, Air Slash, and Hurricane by level; retain Self-Destruct, Destiny Bond, Tailwind, Floaty Fall, Eclipse, Stage Fright, Balloon Burst, and current stats; skip Constrict, Amnesia, and Extrasensory. |
-| Drizzile | Add Shed Skin in slot 2; retain Torrent, Sniper, Take Aim, the existing learnset, and current stats; skip the generic tutors. |
+| Drizzile | Add Shed Skin in slot 2 and Air Cutter as a tutor, preserving Sobble's access; retain Torrent, Sniper, Take Aim, the existing learnset, and current stats; skip the generic tutors. |
 | Druddigon | Use upstream's +13/+0/+0/+0/+0/-7 stats; add Dragon Hammer by level plus Spikes and Roost as tutors; retain Metal Claw, Iron Head, Dragon Breath, Rough Skin, Sheer Force, Mold Breaker, and Treasure Hoard; skip the remaining additions. |
 | Ducklett | Replace Keen Eye with Friend Guard; add Hydro Pump by level; retain Big Pecks, Hydration, Migration, the existing learnset, and current stats; skip Water Sport. |
 | Dugtrio | Add Rototiller by level and make Magnitude a level-up move rather than compatibility-only; retain Sandstorm, Thousand Waves, Sinkhole, Swords Dance as a tutor, the existing learnset, and current stats; skip Mud Bomb and Final Gambit. |
@@ -165,29 +272,29 @@ Divergence design; they do not consume a review-batch slot.
 | Eevee | Keep Divergence as-is; retain Potential, Veevee Volley, Trump Card, Alluring Voice, Plain Terrain, and current stats; skip Grass Knot. |
 | Ekans | Replace level-up Sludge Bomb with Poison Fang; retain Glare, Strike Fear, Acid Rain, Jaw Lock, the existing learnset, and current stats; skip Mud Bomb. |
 | Electabuzz | Use Volt Absorb / Static / Vital Spirit; add Dual Chop by level; retain Charge, Giga Impact, Dynamo Fists, the existing learnset, and current stats; leave Cross Chop, Electro Ball, and Wild Charge as tutors; skip Close Combat and Rock Climb. |
-| Electivire | Add Iron Fist in slot 2; add Mach Punch and Close Combat by level plus Drain Punch as a tutor; retain Electric/Fighting typing, Charge, Thunder, Plasma Fists, Dynamo Fists, the existing learnset, and current stats; skip Rock Climb and unnecessary tutor-to-level duplicates. |
-| Electrode | Add Buzzy Buzz by level plus Energy Ball, Bug Buzz, Aura Sphere, and Flash Cannon as tutors; retain Thunder Shock, Volt Break, Static Burst, Thundercrush, Zippy Zap, the existing learnset, and current stats. |
+| Electivire | Add Iron Fist in slot 2; add Mach Punch, Close Combat, and Dual Chop by level plus Drain Punch as a tutor; retain Electric/Fighting typing, Charge, Thunder, Plasma Fists, Dynamo Fists, the existing learnset, and current stats; skip Rock Climb and unnecessary tutor-to-level duplicates. |
+| Electrode | Add Buzzy Buzz by level plus Bug Buzz as a tutor; retain Thunder Shock, Volt Break, Static Burst, Thundercrush, Zippy Zap, the existing learnset, and current stats; skip Energy Ball, Aura Sphere, and Flash Cannon. |
 | Elekid | Use Volt Absorb / Static / Vital Spirit; add Dual Chop by level; retain Charge, Plasma Fists, Thundercrush, Dynamo Fists, the existing learnset, and current stats; leave Cross Chop, Electro Ball, and Wild Charge as tutors. |
-| Elgyem | Add Power Gem as a tutor; retain Teleport, Recover, Lumina Crash, Brainstorm, Eclipse, Odd Signal, the existing learnset, and current stats; skip the wholesale level additions and remaining tutors, including Mystical Fire. |
-| Emboar | Use +5/+2/+15/-30/+15/+0 stats and apply the same delta to Mega Emboar, producing 115/150/90/80/125/75 (BST 635); retain Fire/Fighting typing for both forms; use Blaze / Reckless / Mold Breaker on regular Emboar; add High Horsepower and Hammer Arm by level; retain Scorching Relay and the existing learnset; skip V-create, Mud Shot, Odor Sleuth, Iron Tail, and Rock Climb. |
+| Elgyem | Keep Divergence; retain Teleport, Recover, Lumina Crash, Brainstorm, Eclipse, Odd Signal, the existing learnset, and current stats; skip Power Gem, Mystical Fire, the wholesale level additions, and remaining tutors. |
+| Emboar | Port upstream's Fire/Ground redesign for regular Emboar while deliberately retaining Fire/Fighting on Mega Emboar. Use the full upstream +5/+2/+15/-30/+15/+0 stat delta, producing 115/125/80/70/80/65 (BST 535), and apply the same delta to Mega Emboar, producing 115/150/90/80/125/75 (BST 635). Retain the approved Blaze / Thick Fat / Mold Breaker on regular Emboar rather than reverting slot 2 to upstream's Reckless; retain Mega's Mold Breaker. Add High Horsepower as the evolution move, Mud Shot and Hammer Arm at level 1, Odor Sleuth at level 9, Cross Chop at level 68, and V-create at level 75; preserve existing moves and Scorching Relay. Mega shares the learnset, including V-create and the Ground moves, but gains Fighting STAB in exchange for Ground STAB. Skip duplicate early-level placements and the unrelated Iron Tail / Rock Climb tutors under the standing selective-port rule. V-create reverses the earlier rejection and should be assessed on both forms during balance testing. |
 | Empoleon | Use +0/+0/+0/+5/+0/+0 stats; add Vital Spirit in slot 2; add Brave Bird by level plus Sing and Calm Mind as tutors; retain Water Gun, Wave Crash, Regal Decree, the existing sound moves, and the rest of the learnset; skip Bubble, Toxic, Rock Climb, Scald, and Baby-Doll Eyes. |
 | Entei | Replace hidden Inner Focus with Flash Fire; retain Scorched Reign, the existing learnset, and current stats; skip High Horsepower and Earthquake. |
 | Escavalier | Replace Swarm with No Guard; add Smart Strike, Shelter, and Twineedle by level plus Gyro Ball as a tutor; retain Knightly, Meteor Assault, Infested Terrain, the existing learnset, and current stats; skip Fury Attack, Slash, Acid Spray, Toxic, and Night Slash. |
-| Espeon | Add Power Gem and Glitzy Glow by level; retain Precognition, Lumina Crash, Psychic Noise, Veevee Volley, Brainstorm, Eclipse, all moves upstream removes, and current stats; skip Extrasensory, Aura Sphere, Quash, Mystical Fire, Zap Cannon, and Growth. |
+| Espeon | Use Synchronize / Forewarn / Magic Bounce, replacing the duplicate slot 2; add Power Gem and Glitzy Glow by level; retain Precognition, Lumina Crash, Psychic Noise, Veevee Volley, Brainstorm, Eclipse, all moves upstream removes, and current stats; skip Extrasensory, Aura Sphere, Quash, Mystical Fire, Zap Cannon, and Growth. |
 | Exeggcute | Make Barrage a level-up move rather than compatibility-only; add Soft-Boiled, Natural Gift, and Bestow by level; remove Divergence's Grav Apple; retain Absorb, Mega Drain, Giga Drain, Synthesis, Multitask, Psychic Noise, Brainstorm, and current stats; skip Sleep Powder, Stun Spore, and Poison Powder. |
-| Exeggutor | Add Soft-Boiled as a tutor; retain Multitask, Barrage, Egg Bomb, Grav Apple, Psychic Noise, Brainstorm, the existing learnset, and current stats; skip Earth Power and Weather Ball to avoid generic coverage and weather-tool homogenization. |
-| Exeggutor (Alolan) | Add Soft-Boiled and Dragon Dance as tutors; retain Tall Tale, Barrage, Egg Bomb, Psychic Noise, the existing learnset, and current stats; skip upstream's +0/+20/+0/-20/+0/+0 redistribution, Superpower, Explosion, Earth Power, and the generic legacy tutors. |
+| Exeggutor | Add Soft-Boiled as a tutor and Natural Gift by level, preserving Exeggcute's access; retain Multitask, Barrage, Egg Bomb, Grav Apple, Psychic Noise, Brainstorm, the existing learnset, and current stats; skip Earth Power and Weather Ball to avoid generic coverage and weather-tool homogenization. |
+| Exeggutor (Alolan) | Add Soft-Boiled and Dragon Dance as tutors plus Natural Gift by level, preserving Exeggcute's access; retain Tall Tale, Barrage, Egg Bomb, Psychic Noise, the existing learnset, and current stats; skip upstream's +0/+20/+0/-20/+0/+0 redistribution, Superpower, Explosion, Earth Power, and the generic legacy tutors. |
 | Exploud | Use Soundproof / Scrappy / Punk Rock; retain Overdrive, Boomburst, Uproar, Plain Terrain, Distortion, the existing learnset, and current stats; skip upstream's +0/+10/+0/+10/+0/+10 stats, Synchronoise, and Bug Buzz. |
 | Farfetch'd | Change Normal/Flying to Fighting/Flying; use Super Luck / Sharpness / Defiant; add Sacred Sword by level plus Swirling Blade as a tutor; retain Cut, Leaf Blade, Duelist, Trump Card, the existing learnset, and current stats; skip upstream's +3/+20/+10/-3/-2/+50 stats and the remaining additions. |
 | Farfetch'd (Galarian) | Add Sharpness in slot 2; add Sacred Sword and Swirling Blade as tutors; retain Sword and Board, the existing learnset, and current stats; skip upstream's +18/+20/+20/+5/+0/+10 stats, Drill Run, Roost, and the generic tutors. |
 | Fearow | Add Intimidate in slot 2 while retaining Keen Eye and hidden Sniper; retain Territorial, Beak Blast, Plain Terrain, the existing learnset, and current stats; skip upstream's +0/+20/+0/+0/+0/+0 stats, Brave Bird, Dual Wingbeat, and Snarl. |
 | Fennekin | Use Blaze / Magician / Magic Guard; retain Spellbook, the existing learnset, and current stats. |
-| Feraligatr | Use +0/+5/+0/-10/+0/+10 stats and apply the same redistribution to Mega Feraligatr, producing 85/165/125/79/93/88 (BST 635); change regular Feraligatr from Water to Water/Dark while retaining Mega Feraligatr's Water/Dragon typing; use Torrent / Strong Jaw / Sheer Force; add Psychic Fangs by level; retain Jaw Lock, Death Roll, and all existing moves; skip the remaining additions. |
+| Feraligatr | Use +0/+5/+0/-10/+0/+10 stats and apply the same redistribution to Mega Feraligatr, producing 85/165/125/79/93/88 (BST 635); keep regular Feraligatr pure Water while retaining Mega Feraligatr's Water/Dragon typing; use Torrent / Strong Jaw / Sheer Force; add Psychic Fangs by level; retain Jaw Lock, Death Roll, and all existing moves; skip Dark typing and the remaining additions. |
 | Finneon | Replace Water Veil with Dazzling; add Tail Glow by level; retain Tailwind, Submerge, Sparkling Aria, the existing learnset, and current stats; skip upstream's +1/-20/+4/+11/+0/+4 stats and the remaining move additions. |
 | Flaaffy | Use Static / Overcoat / Cotton Down; retain Beacon, Buzzy Buzz, Static Burst, the existing learnset, and current stats; skip upstream's +5/+0/+5/+5/+0/+0 stats. |
 | Flabebe | Add Natural Cure in slot 2; add Draining Kiss and Aromatherapy by level; retain Safeguard, Synthesis at its current placement, Flower Ritual, Fleur Cannon, Alluring Voice, the existing learnset, and current stats for every flower form; skip Lucky Chant. |
 | Flapple | Use +0/+0/+0/-10/+0/+25 stats for regular and Gigantamax Flapple; add Scale Shot as a tutor; retain Orchard, Wild Growth, and the existing learnset; skip Roost and the generic tutors. |
-| Flareon | Keep Divergence as-is; retain Baton Pass, the existing Fire attacks, Guts, Smolder, Veevee Volley, and current stats; skip upstream's +45/+0/+0/-30/-45/+30 stats, Close Combat, Play Rough, Sizzly Slide, and the new tutors. |
+| Flareon | Use Flash Fire / Flare Boost / Guts, replacing the duplicate slot 2; Smolder activates Flare Boost's special damage increase as an alternative to physical Guts; retain Baton Pass, the existing Fire attacks, Smolder, Veevee Volley, and current stats; skip upstream's +45/+0/+0/-30/-45/+30 stats, Close Combat, Play Rough, Sizzly Slide, and the new tutors. |
 | Floatzel | Keep Swift Swim / Water Veil and do not add Technician; add Tail Slap as a tutor; retain Liquidation, Soak, Wave Crash, Undertow, Aqua Step, Surging Strikes, the existing learnset, and current stats; skip Fake Out, Pursuit, Razor Wind, Sonic Boom, and the remaining tutors. |
 | Floette | Add Natural Cure in slot 2 for every flower form, including Eternal Flower; add Draining Kiss and Aromatherapy by level; retain Safeguard, Synthesis, Flower Ritual, Fleur Cannon, Eternal Flower's distinct moves, the existing learnset, and current stats; skip Lucky Chant. |
 | Florges | Add Natural Cure in slot 2 for every flower form; retain Fairy/Grass typing, Flower Ritual, Psychic Noise, Alluring Voice, the existing support moves, and current stats; skip Toxic. |
@@ -215,7 +322,7 @@ Divergence design; they do not consume a review-batch slot.
 | Glalie | Change regular and Mega Glalie to Ice/Rock; replace Ice Body with Levitate on regular Glalie; add Rock Slide and Icicle Crash by level; retain Cold Snap, all existing moves, and current stats; skip base Glalie's +0/+30/+30/-20/-20/+0 stats, Mega Glalie's +0/+10/+50/-40/+0/+0 stats, Head Smash, and the Rock tutors. |
 | Glameow | Use upstream's +1/+10/+3/+3/+3/+5 stats and add Crunch as a tutor; retain Fatal Grace and Plain Terrain. |
 | Gloom | Add Leaf Guard in slot 2; retain Moonblast, Toxic Bloom, Acid Rain, the existing learnset, and current stats; skip Apple Acid, Natural Gift, Lucky Chant, Sludge, and Petal Blizzard. |
-| Gogoat | Use upstream's +0/+8/+10/-30/+6/+6 stats and change to Grass/Normal; retain Horn Leech, Milk Drink, Wild Growth, and Ruminate; skip Superpower, Return, and Rock Climb. |
+| Gogoat | Use upstream's +0/+8/+10/-30/+6/+6 stats and keep pure Grass, skipping the Normal addition; retain Horn Leech, Milk Drink, Wild Growth, and Ruminate; skip Superpower, Return, and Rock Climb. |
 | Golbat | Use upstream's +0/+0/+0/+15/+0/+0 stats; add Sniper in slot 2 and Hurricane as a tutor; retain Inner Focus, Infiltrator, Vampiric, Eclipse, and Jetstream. |
 | Goldeen | Use upstream's +0/+10/+0/-10/+0/+10 stats; retain Piercing Verdict and the existing learnset. |
 | Golduck | Use upstream's +0/-10/+0/+5/+0/+15 stats and retain Divergence's Water/Psychic typing; add Psychic by level; leave Power Gem as tutor-only; retain Headache, Aqua Step, Brainstorm, and Psychic Noise; skip Extrasensory, Me First, Water Sport, and Aura Sphere. |
@@ -223,15 +330,15 @@ Divergence design; they do not consume a review-batch slot.
 | Golem (Alolan) | Add Rapid Spin, Accelerock, and Steamroller by level; leave Wild Charge as tutor-only; retain Railgun Charge, all existing moves, and current stats; skip Heat Crash and the legacy tutors. |
 | Golett | Add Focus Punch by level and make Magnitude level-up rather than compatibility-only; retain Heavy Slam, Phantom Force, Shadow Ball, Rage Fist, Rocket Fist, Eclipse, and current stats; skip Rollout, Shadow Sneak, and Stone Edge. |
 | Golurk | Add Focus Punch by level, make Magnitude level-up rather than compatibility-only, and add Power-Up Punch as a tutor for regular and Mega Golurk; retain current stats, Shadow Ball, Rocket Fist, Rage Fist, Headlong Rush, and Eclipse; skip upstream's +26/+1/+5/+0/+5/+0 stats, Heat Crash, Rollout, Mud-Slap, and Shadow Sneak. Applying the upstream delta to Mega Golurk would produce 620 BST. |
-| Goodra | Retain Divergence's Dragon/Poison typing and current stats; add Acid Armor, Recover, and Sludge Wave by level; retain Water Gun, all existing moves, and Sludge Shift; skip upstream's Dragon/Water typing, Bubble, Bide, Hydro Pump, Outrage, and Waterfall. |
+| Goodra | Use pure Dragon, reverting Divergence's Poison addition; keep current stats; add Acid Armor, Recover, and Sludge Wave by level; retain Water Gun, all existing moves, and Sludge Shift; skip upstream's Dragon/Water typing, Bubble, Bide, Hydro Pump, Outrage, and Waterfall. Hisuian Goodra remains Dragon/Steel. |
 | Goodra (Hisuian) | Add Metal Burst and Steel Roller by level; retain Iron Head, all moves upstream removes, Shelter, and current stats; leave Flash Cannon as tutor-only; skip Recover, Iron Defense, Mirror Shot, Bubble, and Bide. |
-| Goomy | Retain pure Dragon typing and current stats; add Recover and Tearful Look by level; retain Water Gun, all existing moves, and Sludge Shift; skip upstream's Dragon/Water typing, Bubble, Bide, Hydro Pump, and Water tutors. |
-| Gorebyss | Keep Divergence as-is; retain Water/Fairy typing, Swift Swim / empty slot / Hydration, Shell Game, Take Heart, Alluring Voice, Misty Terrain, and current stats; skip Water/Psychic typing, Regenerator, Dark Pulse, Liquidation, and Psyshock. |
-| Gothita | Change to Psychic/Dark and add Dark Pulse by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Double Slap, Embargo, Feint Attack, Heal Block, and Telekinesis. |
-| Gothorita | Change to Psychic/Dark and add Dark Pulse by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip the remainder of upstream's level replacement. |
-| Gothitelle | Change to Psychic/Dark and add Dark Pulse and Night Daze by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Will-O-Wisp and the remainder of upstream's additions. |
+| Goomy | Retain pure Dragon typing and current stats; add Tearful Look by level; retain Water Gun, all existing moves, and Sludge Shift; skip Recover so it cannot carry into the Hisuian branch, plus upstream's Dragon/Water typing, Bubble, Bide, Hydro Pump, and Water tutors. Recover remains approved on regular Sliggoo and Goodra. |
+| Gorebyss | Add Dazzling in slot 2, using Swift Swim / Dazzling / Hydration; retain Water/Fairy typing, Shell Game, Take Heart, Alluring Voice, Misty Terrain, the existing moves, and current stats; skip Water/Psychic typing, Regenerator, Dark Pulse, Liquidation, and Psyshock. Review priority protection alongside Shell Game and Shell Smash in playtesting. |
+| Gothita | Keep pure Psychic and add Dark Pulse by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Dark typing, Double Slap, Embargo, Feint Attack, Heal Block, and Telekinesis. |
+| Gothorita | Keep pure Psychic and add Dark Pulse by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Dark typing and the remainder of upstream's level replacement. |
+| Gothitelle | Keep pure Psychic and add Dark Pulse and Night Daze by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Dark typing, Will-O-Wisp, and the remainder of upstream's additions. |
 | Gourgeist | Replace Insomnia with Flash Fire for every size; add Shadow Punch by level plus Synthesis and Fire Punch as tutors; retain Moonblast, Haunted Harvest, Eclipse, Stage Fright, and current stats. |
-| Granbull | Use upstream's +10/+0/+0/+0/+0/+0 stats and change to Fairy/Fighting; add Double Kick by level; leave Close Combat and Super Fang as tutor-only; retain Growl, Last Resort, Brutal Charge, and Plain Terrain; skip Dynamic Punch, Rage, Covet, and Toxic. |
+| Granbull | Use upstream's +10/+0/+0/+0/+0/+0 stats and keep pure Fairy, skipping the Fighting addition; add Double Kick by level; leave Close Combat and Super Fang as tutor-only; retain Growl, Last Resort, Brutal Charge, and Plain Terrain; skip Dynamic Punch, Rage, Covet, and Toxic. |
 | Graveler | Add Rapid Spin and Accelerock by level and make Magnitude level-up rather than compatibility-only; retain Aftershock, all existing moves, and current stats; skip Head Smash and Mud Sport. |
 | Graveler (Alolan) | Add Rapid Spin and Accelerock by level; leave Wild Charge as tutor-only; retain Railgun Charge, all existing moves, and current stats; skip the legacy tutors. |
 | Greedent | Add Recycle by level; retain Stuff Cheeks, Cheek Pouch, Gluttony, Messy Eater, Plain Terrain, the existing learnset, and current stats; skip Toxic, Return, and Frustration. |
@@ -247,19 +354,19 @@ Divergence design; they do not consume a review-batch slot.
 | Herdier | Add Odor Sleuth by level; retain Baby-Doll Eyes, Field Runner, Plain Terrain, and current stats; skip High Horsepower. |
 | Honedge | Add Sharpness as its hidden Ability and Swirling Blade by level; retain No Guard, every existing move, Bitter Blade, Authority, Eclipse, and current stats. |
 | Hoppip | Use upstream's +0/+0/+0/+10/+0/+0 stats and Wind Rider / Infiltrator / Aerilate; add Air Cutter, Air Slash, Hyper Voice, and Rage Powder by level; retain all existing moves, Pollen Puff, and Floaty Fall; skip Worry Seed duplication, Toxic, and Round. |
-| Huntail | Add Psychic Fangs by level; retain Water/Dragon typing, Swift Swim / empty slot / Water Veil, Dragon Tail, Abyssal Maw, and current stats; skip Water/Dark typing, Intimidate, and Liquidation. |
+| Huntail | Add Psychic Fangs by level and Intimidate in slot 2, using Swift Swim / Intimidate / Water Veil; retain Water/Dragon typing, Dragon Tail, Abyssal Maw, the existing moves, and current stats; skip Water/Dark typing and Liquidation. Review Intimidate's safer Shell Smash setup alongside Abyssal Maw in playtesting. |
 | Hydreigon | Keep Divergence as-is; retain Apocalypse, Fiery Wrath, Eclipse, Nightfall, the existing learnset, and current stats; skip Dragon Rage and Steel Wing. |
 | Igglybuff | Add Draining Kiss by level; retain Cute Charm / Competitive / Friend Guard, Disable, Soft Body, Alluring Voice, and current stats; skip Huge Power. |
-| Illumise | Use upstream's `+5/-14/+10/+14/+10/+15`; retain Bug/Fairy typing and Oblivious / Tinted Lens / Prankster; add Disarming Voice, Quiver Dance, Draining Kiss, and Moonblast by level; retain Flatter, all existing moves, Shimmer, and Response; skip Covet, Dual Wingbeat, and Lunge. |
-| Incineroar | Keep Divergence as-is; retain Showdown, Eclipse, and current stats; skip upstream's `+5/+0/+0/+0/+0/+0`. |
+| Illumise | Use `+0/-14/+10/+14/+10/+15`, producing 65/33/85/87/95/100 (BST 465); skip upstream's additional 5 HP to match Volbeat's approved BST, preserving their equal vanilla BST of 430. Use Oblivious / Tinted Lens / Swarm, replacing Prankster because Response provides conditional status priority; retain Bug/Fairy typing; add Disarming Voice, Quiver Dance, Draining Kiss, and Moonblast by level; retain Flatter, all existing moves, Shimmer, and Response; skip Covet, Dual Wingbeat, and Lunge. |
+| Incineroar | Add Rivalry in slot 2 throughout Litten / Torracat / Incineroar; retain Blaze, hidden Intimidate, Showdown, Eclipse, existing moves, and current stats; skip upstream's `+5/+0/+0/+0/+0/+0`. |
 | Infernape | Use Blaze / Flame Body / Iron Fist; retain Spellfist, Torment, Raging Fury, the existing learnset, and current stats; skip upstream's `+0/+0/+0/+0/+0/+1`, Punishment, Pyro Ball, and Rock Climb. |
 | Inteleon | Add Shed Skin in slot 2, matching Drizzile and preserving the starter-wide second-Ability pattern; add Frost Breath as a tutor; retain Torrent, Sniper, Take Aim, the existing learnset, and current stats; skip Nasty Plot and the generic tutors. |
 | Ivysaur | Add Sweet Veil in slot 2; retain Overgrow, Chlorophyll, Vine Lash, Acid Rain, the existing learnset, and current stats. |
 | Jellicent | Keep Divergence as-is; retain Water Absorb / Cursed Body / Damp, Recover, Strength Sap, Bouncy Bubble, Maelstrom, and current stats; skip Water Bubble and Toxic. |
 | Jigglypuff | Use upstream's `+0/-10/+0/+10/+0/+0`; use Friend Guard / Competitive / Frisk; add Draining Kiss, Moonblast, and Boomburst by level; retain all existing moves, Soft Body, and Alluring Voice; skip Huge Power, Double Slap, Rollout, and Wake-Up Slap. |
 | Jirachi | Keep Divergence as-is; retain Wishmaker, the existing learnset, and current stats; skip Draco Meteor. |
-| Jolteon | Add Buzzy Buzz by level; retain all existing moves, Ionize, Veevee Volley, and current stats; skip Shock Wave, Extrasensory, Thunderbolt duplication, and Grass Knot. |
-| Jumpluff | Use upstream's `+0/+0/+0/+30/+0/+0` and Wind Rider / Infiltrator / Aerilate; add Air Cutter, Air Slash, Hyper Voice, and Rage Powder by level plus Hurricane as a tutor; retain all existing moves, Pollen Puff, and Floaty Fall; skip Worry Seed duplication, Fly, and Round. |
+| Jolteon | Use Volt Absorb / Static / Quick Feet, replacing the duplicate slot 2; add Buzzy Buzz by level; retain all existing moves, Ionize, Veevee Volley, and current stats; skip Shock Wave, Extrasensory, Thunderbolt duplication, and Grass Knot. |
+| Jumpluff | Use upstream's `+0/+0/+0/+30/+0/+0` and Wind Rider / Infiltrator / Aerilate; add Air Cutter, Air Slash, Hyper Voice, and Rage Powder by level; retain all existing moves, Pollen Puff, and Floaty Fall; skip Hurricane, Worry Seed duplication, Fly, and Round. |
 | Jynx | Use upstream's `+10/-10/+0/+10/+0/+0`; add Draining Kiss by level; retain Sweet Kiss, Copycat, Confusion, Sing, Psychic, all existing moves, Sweet Nothings, and Freezing Glare; skip the physical additions, Psycho Boost, and Power Gem. |
 | Karrablast | Use No Guard / Shed Skin / Swarm, matching Escavalier's No Guard in slot 1 while retaining the stage-specific remaining Abilities; retain Knightly, Meteor Assault, Infested Terrain, the existing learnset, and current stats. |
 | Keldeo | Keep Divergence as-is for both forms; retain Flowing Lesson / Resolute Blade, the existing learnset, and current stats; skip Megahorn, Swirling Blade, Low Sweep, and Rock Climb. |
@@ -283,7 +390,7 @@ Divergence design; they do not consume a review-batch slot.
 | Lickilicky | Keep current stats; use Unaware / Oblivious / Cloud Nine, replacing Own Tempo while preserving Oblivious's Taunt immunity for the tank role; add Curse as a tutor; retain Taste Test and existing moves; skip Rock Climb. |
 | Lickitung | Keep current stats; use Unaware / Oblivious / Cloud Nine consistently with Lickilicky; retain its existing Curse tutor, Taste Test, and existing moves; skip Rock Climb. |
 | Lileep | Add Power Gem as a tutor, matching Cradily; retain Petrifying Roots, Salt Cure, the existing learnset, and current stats. |
-| Lilligant | Add Fiery Dance by level; retain Pretty Petals, all existing moves, and current stats; skip upstream's `+0/+0/+0/+5/+0/+5`, Extrasensory, Recover, and the powder/support tutors. |
+| Lilligant | Keep Divergence; retain Pretty Petals, all existing moves, and current stats; skip upstream's `+0/+0/+0/+5/+0/+5`, Fiery Dance, Extrasensory, Recover, and the powder/support tutors. |
 | Linoone | Add Tail Slap by level; retain Pin Missile, Hone Claws, Baby-Doll Eyes, Take Down, Flail, Switchstep, Plain Terrain, and current stats; skip upstream's `+7/+15/-1/+0/-1/+10`, Play Rough, Rototiller, Odor Sleuth, Mud Sport, Bestow, and the tutors. |
 | Galarian Linoone | Keep Divergence as-is; retain Heckler, the existing learnset, and current stats; skip upstream's `+7/+15/-1/+0/-1/+10` and the generic tutors. |
 | Litleo | Use upstream's `+0/+20/+0/+0/+0/+0` and add Flare Blitz by level; retain every existing move and Battlecry; skip Iron Tail and Incinerate duplication. Continue the physical direction when Pyroar is reviewed. |
@@ -298,7 +405,7 @@ Divergence design; they do not consume a review-batch slot.
 | Lunatone | Use upstream's `+0/+0/+0/+20/+0/+0`; add Night Daze and Lunar Dance by level and move Power Gem from tutor-only to level-up; retain Moonlight, all existing moves, Moon Totem, Eclipse, and Moongeist Beam; skip Psywave, Embargo, Heal Block, and Toxic. |
 | Luxio | Add Baby-Doll Eyes and Nuzzle by level; retain Volt Switch, Thunder Wave, Thunder Fang, Volt Tackle, Play Rough as tutor-only, X-Ray Jaws, all existing moves, and current stats. |
 | Luxray | Keep pure Electric typing; add Psychic Fangs, Baby-Doll Eyes, and Nuzzle by level; retain Volt Switch, Thunder Wave, Thunder Fang, Volt Tackle, Play Rough as tutor-only, X-Ray Jaws, all existing moves, and current stats; skip Electric/Dark typing, Sucker Punch, Dark Pulse, and Nasty Plot. |
-| Lycanroc (Midday) | Change Rock to Rock/Ground and replace Keen Eye with Super Luck; add Drill Run by level; retain Sucker Punch, Double Team, Instinct, all existing moves, and current stats; skip the other Ground moves and tutors. |
+| Lycanroc (Midday) | Keep pure Rock and replace Keen Eye with Super Luck; add Drill Run by level; retain Sucker Punch, Double Team, Instinct, all existing moves, and current stats; skip Ground typing and the other Ground moves and tutors. |
 | Lycanroc (Dusk) | Use Tough Claws / Own Tempo / Stakeout and add Thrash by level; retain Crush Claw, every existing move, Instinct, and current stats; skip the elemental fangs, Rock Climb, and Iron Tail. |
 | Lycanroc (Midnight) | Keep Rock/Dark typing; use Reckless / Vital Spirit / No Guard; add Accelerock and Head Smash by level; retain Double Team, Endure, Instinct, all existing moves, and current stats; skip Rock/Fighting typing, Submission, Close Combat, Rock Climb, and Earthquake. |
 | Machamp | Add Mach Punch and Drain Punch as tutors to regular and Gigantamax Machamp; retain Champion, the existing learnset, and current stats; skip Rock Climb. |
@@ -307,9 +414,9 @@ Divergence design; they do not consume a review-batch slot.
 | Magby | Add Scorching Sands as a tutor, matching Magmar and Magmortar's existing access; retain Flame Body / empty slot / Vital Spirit, Flameheart, all existing moves, and current stats; skip Magma Armor and the added level moves. |
 | Magmar | Keep Divergence as-is; retain Flame Body / empty slot / Vital Spirit, Flame Wheel, Scary Face, Low Kick, Hyper Beam, Flameheart, Scorching Sands, all existing moves, and current stats; skip Magma Armor, Moonblast, Scald, and the other additions. |
 | Magmortar | Replace Vital Spirit with Quick Draw, using Flame Body / empty slot / Quick Draw; retain Flameheart, Armor Cannon, Scorching Sands, Fire Blast, every existing move, and current stats; skip Flash Fire, Moonblast, Scald, Magma Storm, and the other additions. |
-| Magnemite | Add Bug Buzz as a tutor; retain Thunder Cage, Sighting System, the existing learnset, and current stats. |
-| Magneton | Add Bug Buzz as a tutor; retain Thunder Cage, Sighting System, the existing learnset, and current stats. |
-| Magnezone | Add Bug Buzz as a tutor; retain Signal Beam, Thunder Cage, Sighting System, the existing learnset, and current stats. |
+| Magnemite | Keep Divergence; skip Bug Buzz; retain Thunder Cage, Sighting System, the existing learnset, and current stats. |
+| Magneton | Keep Divergence; skip Bug Buzz; retain Thunder Cage, Sighting System, the existing learnset, and current stats. |
+| Magnezone | Keep Divergence; skip Bug Buzz; retain Signal Beam, Thunder Cage, Sighting System, the existing learnset, and current stats. |
 | Manaphy | Keep Divergence's current stats and learnset, including Water Gun and Take Heart; retain Tideborn and Alluring Voice; leave Hydro Pump as tutor-only; skip Bubble, Water Sport, Signal Beam, and upstream's level reshuffle. |
 | Mandibuzz | Add Quash as a tutor; retain Carrion Hour, Eclipse, the existing learnset, and current stats; skip Superpower and Zen Headbutt. |
 | Manectric | Keep Divergence as-is for both forms; retain Signal Beam, Static Burst, Charged Cry, the existing learnset, and current stats; skip Energy Ball. |
@@ -321,13 +428,13 @@ Divergence design; they do not consume a review-batch slot.
 | Mawile | Keep Divergence as-is for both forms; retain Vicejaw and current stats; skip upstream's +0/+10/+5/+0/+5/+0 base-form increase rather than applying it inconsistently to Mega Mawile. |
 | Medicham | Add Mind Reader by level and Psycho Cut as a tutor for both forms; leave Close Combat as tutor-only; retain Empty Hand, Axe Kick, every existing move, and current stats; skip upstream's +0/+0/+5/+20/+5/+10 stats for both forms, Acrobatics, and the wholesale replacement. |
 | Meditite | Add Meditate and Mind Reader by level; retain Work Up, Psybeam, Upper Hand, every existing move, and current stats; leave Close Combat and Psycho Cut as tutor-only; skip upstream's +0/+0/+0/+20/+0/+0 stats and wholesale replacement. |
-| Meganium | Change regular Meganium to Grass/Fairy and use Overgrow / Filter / Triage; add Draining Kiss and Moonblast by level; retain Aromatherapy, Jungle Healing, Flower Field, Earth Power, Dazzling Gleam, every existing move, and current stats for both forms; skip upstream's +0/+0/+0/+10/+0/+0 rather than pushing Mega Meganium to 153 Special Attack, plus Natural Gift, Play Rough, Rock Climb, and the wholesale replacement. |
+| Meganium | Keep regular Meganium pure Grass, reserving Grass/Fairy for Mega; use Overgrow / Filter / Triage; add Draining Kiss and Moonblast by level; retain Aromatherapy, Jungle Healing, Flower Field, Earth Power, Dazzling Gleam, every existing move, and current stats for both forms; skip upstream's +0/+0/+0/+10/+0/+0 rather than pushing Mega Meganium to 153 Special Attack, plus Natural Gift, Play Rough, Rock Climb, and the wholesale replacement. |
 | Meloetta | Add Wake-Up Slap as a tutor; retain Aria Forme's current stats, Pirouette Forme's physical stats, Close Combat, Relic Song's current placement, every existing move, Opening Verse, Final Step, and Alluring Voice; skip Pirouette's +0/-51/+0/+51/+0/+0 redistribution, Aura Sphere, and the wholesale replacement. |
 | Meowth | Use upstream's +5/+15/+0/-10/+0/+0 stats for regular and Gigantamax Meowth; retain Passive Income, Cheap Trick, Plain Terrain, and the existing learnset; skip Dazzling Gleam and Surf. |
 | Meowth (Galarian) | Add Bullet Punch as a tutor; retain Double Iron Bash, Tough Claws, Raid Leader, the existing learnset, and current stats; skip Surf and the generic legacy tutors. |
 | Mesprit | Change to Psychic/Fairy and add Moonblast by level; leave Play Rough as tutor-only; retain Psychic, Psybeam, Mystical Power, Healing Wish, Burning Heart, Psychic Noise, all existing moves, and current stats; skip Natural Gift, Lucky Chant, and the wholesale replacement. |
-| Metagross | Add Iron Fist in slot 2 to regular Metagross and Fly as a tutor for both forms; retain Mega Metagross's Tough Claws, Psyshield Bash, Rock Polish, Hive Mind, every existing move, and current stats. |
-| Metang | Add Iron Fist in slot 2 and Fly as a tutor; retain Psyshield Bash, Psychic Noise, Hive Mind, the existing learnset, and current stats. Beldum retains its separately approved Rock Head package until evolving arms. |
+| Metagross | Add Iron Fist in slot 2 to regular Metagross and Fly plus Headbutt as tutors for both forms; retain Mega Metagross's Tough Claws, Psyshield Bash, Rock Polish, Hive Mind, every existing move, and current stats. |
+| Metang | Add Iron Fist in slot 2 and Fly plus Headbutt as tutors; retain Psyshield Bash, Psychic Noise, Hive Mind, the existing learnset, and current stats. Beldum retains its separately approved Rock Head package until evolving arms. |
 | Mienfoo | Add Meditate by level; retain Drain Punch, Aura Sphere, High Jump Kick, every existing move, Like Water, Thunderous Kick, Upper Hand, Jetstream, and current stats; skip Double Slap, Jump Kick, Rock Climb, and the wholesale replacement. |
 | Mienshao | Add Meditate by level and Blaze Kick as a tutor; retain Drain Punch, Aura Sphere, High Jump Kick, every existing move, Like Water, Thunderous Kick, Upper Hand, Jetstream, and current stats; skip Double Slap, Jump Kick, Rock Climb, and the wholesale replacement. |
 | Milotic | Keep pure Water and current stats; add Moonblast by level; retain Disarming Voice, Life Dew, Sparkling Aria, Tragic Beauty, and every existing move; skip upstream's Water/Fairy typing, Water Sport, Toxic, Dazzling Gleam, and the wholesale replacement. |
@@ -337,7 +444,7 @@ Divergence design; they do not consume a review-batch slot.
 | Minior | Use upstream's +20/+0/+0/+0/+0/+0 stats for every Meteor and Core form and add Air Slash as a tutor; retain Shields Down, Blast Shield, Flak Shield, and the existing learnset. |
 | Minun | Use upstream's +5/+50/+45/-35/-35/+15 stats; add Nuzzle, Fake Out, Thunder Punch, Wild Charge, and Swords Dance by level plus Knock Off and U-turn as tutors; retain all moves upstream removes, Minus, Volt Absorb, Negative Charge, Gear Up, Static Burst, and Alluring Voice; skip Signal Beam and Flash Cannon. |
 | Misdreavus | Add Fairy Wind, Draining Kiss, Grudge, and Moonblast by level plus Hypnosis as a tutor; retain Confusion, every existing move, Hexcraft, Eerie Spell, Psychic Noise, Eclipse, Nightfall, and Stage Fright; skip Psywave, the wholesale replacement, and any typing change. |
-| Mismagius | Change to Ghost/Fairy; add Fairy Wind by level and Moonblast as a tutor; retain Draining Kiss, every existing move, Hexcraft, Eerie Spell, Psychic Noise, Destiny Bond, Eclipse, Nightfall, Stage Fright, and current stats; skip Lucky Chant and Psywave. |
+| Mismagius | Change to Ghost/Fairy; add Fairy Wind and Grudge by level plus Moonblast and Hypnosis as tutors, preserving Misdreavus's access; retain Draining Kiss, every existing move, Hexcraft, Eerie Spell, Psychic Noise, Destiny Bond, Eclipse, Nightfall, Stage Fright, and current stats; skip Lucky Chant and Psywave. |
 | Moltres | Add Extrasensory as a tutor; retain Solar Call, the existing learnset, and current stats. |
 | Moltres (Galarian) | Keep Divergence as-is; retain Spirit Feast, Eclipse, Nightfall, the existing learnset, and current stats; skip Extrasensory and the generic legacy tutors. |
 | Monferno | Use Blaze / Flame Body / Iron Fist, matching Chimchar and Infernape; retain Spellfist, Upper Hand, the existing learnset, and current stats; skip Rock Climb. |
@@ -369,8 +476,9 @@ Divergence design; they do not consume a review-batch slot.
 | Pachirisu | Use upstream's +0/+0/+10/+35/+0/+0 stats, replace Run Away with Prankster, and add Reflect as a tutor; retain Pickup, Volt Absorb, Winter Stash, and every existing move. |
 | Palafin (Hero Form) | Keep Divergence as-is; retain vanilla Hero Form stats, Zero to Hero, Hero Landing, and every existing move; skip upstream's +0/-15/-10/-20/-5/+0 nerf. |
 | Pancham | Add Sucker Punch as a tutor; retain Second Wind, Darkest Lariat, Eclipse, every existing move, and current stats. |
+| Pangoro | Add Sucker Punch as a tutor, preserving Pancham's approved access; otherwise retain existing Abilities, moves, typing, and stats. |
 | Paras | Add Lunge and Crabhammer by level; retain every existing move, Fungal Infection, Acid Rain, Infested Terrain, Wild Growth, and current stats. |
-| Pawniard | Add Psycho Cut by level; retain every existing move, Power Play, Beat Up, Eclipse, and current stats; skip Feint Attack, Embargo, and the wholesale replacement. |
+| Pawniard | Keep Divergence: retain every existing move, Power Play, Beat Up, Eclipse, and current stats; skip Psycho Cut, Feint Attack, Embargo, and the wholesale replacement. This keeps the full line unchanged without letting the new coverage carry into Kingambit after evolution. |
 | Pelipper | Keep Divergence as-is; retain Keen Eye / Wind Rider / Rain Dish, Monsoon, and current stats; skip upstream's +0/+0/+10/+0/+10/+0 stats. |
 | Perrserker | Use upstream's +0/+0/+5/+0/+20/+0 stats and add Bullet Punch as a tutor; retain Double Iron Bash, Raid Leader, existing Abilities, and every existing move; skip Surf and the generic legacy tutors. |
 | Persian | Use upstream's +0/+20/+0/+15/+0/+0 stats and add Quash as a tutor; retain Passive Income, Cheap Trick, Plain Terrain, and every existing move; skip Dazzling Gleam and Surf. |
@@ -382,7 +490,7 @@ Divergence design; they do not consume a review-batch slot.
 | Pidgeotto | Use upstream's +0/-10/-5/+15/+0/+0 redistribution, matching Pidgey, and add Echoed Voice, Air Cutter, and Swift by level; retain every existing move and Strong Winds; skip Ominous Wind, Uproar, Hyper Voice, and the wholesale replacement. |
 | Pidgeot | Use a moderated +0/-20/-5/+25/+0/+0 redistribution for both Pidgeot and Mega Pidgeot, producing 95 and 160 Special Attack without raising either form's BST; add Echoed Voice, Air Cutter, Swift, and Hyper Voice by level; retain every existing move, Strong Winds, and Mega Pidgeot's No Guard; skip upstream's larger and inconsistent form increases, Ominous Wind, Uproar, Dual Wingbeat, and the wholesale replacement. |
 | Pidove | Use upstream's +0/-19/+0/+19/+0/+0 redistribution, replace Rivalry with Unaware, and add Swift by level plus Hurricane as a tutor; retain every existing move, Soaring Gale, and Plain Terrain; skip Razor Wind, Facade, and the wholesale replacement. |
-| Pignite | Keep Fire/Fighting and current stats; use Blaze / Thick Fat / Sheer Force; retain every existing move and Scorching Relay; skip Mud Shot, Earthquake, upstream's Ground typing, and the wholesale replacement. |
+| Pignite | Change to Fire/Ground, beginning the approved Emboar Ground redesign; keep current stats and Blaze / Thick Fat / Sheer Force. Add Mud Shot as the evolution move, retain Arm Thrust at level 1, add Odor Sleuth at level 9, and add Earthquake as a tutor. Preserve Endure, every other existing move, and Scorching Relay; skip duplicate early-level placements from upstream's replacement. Tepig remains pure Fire; Mega Emboar deliberately returns to Fire/Fighting. |
 | Pikachu | Add Splishy Splash, Floaty Fall, and Zippy Zap by level; retain every existing move, Pika Papow, Static Charge, Alluring Voice, Upper Hand, and current stats; skip the wholesale replacement. Apply the move additions to regular and Gigantamax Pikachu consistently. |
 | Pinsir | Add Megahorn by level for both forms; retain every existing move, Burrowing Horns, Mega Pinsir's Aerilate, and current stats; leave Revenge, Brick Break, and Thrash as tutors; skip Rock Climb and the wholesale replacement. |
 | Piplup | Add Vital Spirit in slot 2 plus Sing and Calm Mind as tutors, matching Empoleon; retain Regal Decree, every existing move, and current stats; skip Baby-Doll Eyes, Dual Wingbeat, and Scald. |
@@ -394,17 +502,17 @@ Divergence design; they do not consume a review-batch slot.
 | Poochyena | Use a restrained +0/+0/+0/+0/+0/+15 stat increase, echoing half of Divergence Mightyena's +30 Speed rather than upstream's +0/+20/+0/+0/+0/+30; retain Full Moon, Eclipse, Jaw Lock, and every existing move. |
 | Primarina | Keep current stats; add Healer in slot 2 across the entire Popplio line; retain Torrent, Liquid Voice, Solo Serenade, and every existing move; skip upstream's +0/+0/+5/+0/+0/+0 Defense increase. |
 | Primeape | Use Defiant / Anger Point / Vital Spirit, matching Mankey and Annihilape; retain Tantrum, Eclipse, every existing move, and current stats; skip Gorilla Tactics, Rock Climb, and Cut. |
-| Prinplup | Add Vital Spirit in slot 2 and Calm Mind as a tutor, matching Piplup and Empoleon; retain Regal Decree, every existing move, and current stats. |
+| Prinplup | Add Vital Spirit in slot 2 and Calm Mind plus Sing as tutors, matching Piplup and Empoleon; retain Regal Decree, every existing move, and current stats. |
 | Probopass | Use upstream's +10/-5/-10/+15/-10/+0 redistribution but retain Rock/Steel typing; add Tri Attack as its evolution move; retain every existing move, Gravity Well, Tachyon Cutter, and Power Shift; skip Rock/Electric typing, Head Smash, and the wholesale replacement. |
 | Pumpkaboo | Replace Insomnia with Flash Fire for every size and add Synthesis and Flame Charge as tutors; retain Haunted Harvest, Eclipse, Stage Fright, every existing move, and current stats. |
-| Purugly | Use upstream's +19/+13/+6/+1/+1/+3 stats and add Slack Off by level; retain Fatal Grace, Plain Terrain, and every existing move; skip Toxic, Play Rough, Crunch, and the wholesale replacement. |
+| Purugly | Use upstream's +19/+13/+6/+1/+1/+3 stats; add Slack Off by level and Crunch as a tutor, preserving Glameow's access; retain Fatal Grace, Plain Terrain, and every existing move; skip Toxic, Play Rough, and the wholesale replacement. |
 | Pyroar | Use a moderated +0/+20/+0/+0/+0/+0 increase for both Pyroar and Mega Pyroar, matching Litleo, and add Flare Blitz by level; retain every existing move, Battlecry, and Mega Pyroar's Fire Mane; skip upstream's remaining 15 Attack, Iron Tail, and Return. |
 | Pyukumuku | Use a moderated, unchanged-BST +30/-30/+0/+0/+0/+0 redistribution, producing 85 HP and 30 Attack; retain Innards Out, Unaware, Washed Ashore, and every existing move; skip upstream's additional 20 HP. |
 | Quagsire | Use upstream's +0/+10/+10/+0/+0/+0 stats; retain Clueless, Unaware, Recover, and every existing move. |
-| Quilava | Use Blaze / Flash Fire / Adaptability, matching Cyndaquil; retain Blinding Smoke, every existing move, and current stats. |
+| Quilava | Use Blaze / Flash Fire / Adaptability and add Mystical Fire as a tutor, matching Cyndaquil and Typhlosion; retain Blinding Smoke, every existing move, and current stats. |
 | Quilladin | Add Iron Barbs in slot 2; add Pin Missile as its evolution move and Needle Arm and Bulk Up by level; retain Bramble Guard, every existing move, and current stats; skip the remainder of upstream's wholesale replacement. |
-| Qwilfish | Use upstream's +0/+0/+10/-10/+0/+10 redistribution and add Fell Stinger once as a late-level move; retain Toxic Monsoon, Acid Rain, and every existing move; skip Bubble, Minimize, Revenge, and the wholesale replacement. |
-| Qwilfish (Hisuian) | Use upstream's +0/+0/+10/-10/+0/+10 redistribution, matching regular Qwilfish; retain Barbed Monsoon, Acid Rain, Eclipse, and every existing move. Carry the same physical direction into Overqwil when reviewed. |
+| Qwilfish | Use +0/+0/+10/-10/+0/+0, skipping upstream's 10 Speed increase to retain BST 440, matching unchanged Hisuian Qwilfish; add Fell Stinger once as a late-level move; retain Toxic Monsoon, Acid Rain, and every existing move; skip Bubble, Minimize, Revenge, and the wholesale replacement. |
+| Qwilfish (Hisuian) | Keep vanilla stats and BST 440, matching regular Qwilfish's approved unchanged-BST redistribution; retain Barbed Monsoon, Acid Rain, Eclipse, and every existing move. Keep Overqwil unchanged. |
 | Raboot | Add Receiver in slot 2, matching Cinderace; retain Blaze, Libero, Playmaker, every existing move, and current stats. |
 | Raichu | Use upstream's +0/+5/+0/+5/+0/+0 stats for Raichu and apply the same delta to Mega Raichu X and Mega Raichu Y; add Splishy Splash, Floaty Fall, and Zippy Zap as tutors; retain Pika Papow, Static Charge, and every existing move; skip Psychic and Fly. Balance-watch the three premium partner moves on both Mega forms during testing. |
 | Raichu (Alolan) | Keep current stats, skipping upstream's +0/+0/+0/+5/+5/+0; add Splishy Splash, Floaty Fall, and Zippy Zap as tutors; retain Pika Papow, Brain Surf, and every existing move. Balance-watch the premium partner moves alongside regular Raichu and both Mega forms. |
@@ -432,16 +540,16 @@ Divergence design; they do not consume a review-batch slot.
 | Runerigus | Use upstream's +10/+10/+0/-10/+0/+0 redistribution, add Solid Rock as its hidden Ability, and add Shadow Sneak by level; retain Cursed Tablet, Eclipse, Infernal Parade, and every existing move; skip Bulk Up, the legacy tutors, and upstream's wholesale learnset. |
 | Sableye | Keep current stats for regular and Mega Sableye, skipping upstream's mismatched stat increases; replace Keen Eye with Magic Guard on regular Sableye; retain Stall, Prankster, Mega Sableye's Magic Bounce, Gemstash, Make It Rain, Cheap Trick, Eclipse, and every existing move. |
 | Samurott | Use upstream's +0/+10/+0/-3/+0/+0 stats; change to Water/Fighting; use Torrent / Shell Armor / Super Luck; add Sacred Sword, Low Sweep, Revenge, and Close Combat by level plus Swirling Blade as a tutor; retain Tidal Switch, Upper Hand, Soak, Aerial Ace, and every existing move; skip Shell Smash and the remaining additions. |
-| Samurott (Hisuian) | Use upstream's +0/+2/+0/+0/+0/+5 stats and add Swirling Blade as a tutor; retain Torrent, Sharpness, Momentum, and every existing move. |
+| Samurott (Hisuian) | Use upstream's +0/+2/+0/+0/+0/+5 stats; add Shell Armor in slot 2, using Torrent / Shell Armor / Sharpness to preserve Oshawott and Dewott's second-Ability progression; add Swirling Blade as a tutor plus Low Sweep and Revenge by level, preserving Dewott's access; retain Momentum and every existing move. |
 | Sandshrew | Add Rough Skin in slot 2 and Sand Tomb by level; retain Sharp Quills, Spin Out, Bulldoze, Agility, every existing move, current stats, and Magnitude as compatibility-only; skip Accelerock and promoting Magnitude to level-up. |
 | Sandshrew (Alolan) | Add Ice Body in slot 2 and add Ice Shard and Ice Ball by level; remove Jetstream from Divergence's tutors; retain Snowplow, Spin Out, Cold Snap, Mist, Rollout, Snowscape, every other existing move, and current stats; skip Bide, Hail, and the legacy tutors. |
 | Sandslash | Use upstream's +0/+10/+10/-20/+10/+0 redistribution, add Rough Skin in slot 2, and add Spikes and Spiky Shield by level; retain Sharp Quills, Spin Out, Bulldoze, every existing move, and Magnitude as compatibility-only; skip Accelerock, promoting Magnitude to level-up, and the generic tutors. |
 | Sandslash (Alolan) | Add Iron Barbs in slot 2 and add Spikes, Spiky Shield, Metal Burst, Defense Curl, and Ice Ball by level; retain Snowplow, Spin Out, Cold Snap, Swords Dance, every existing move, and current stats; skip the legacy tutors. |
 | Sawsbuck | Use upstream's +5/+10/+0/+0/+0/+0 stats for all four seasonal forms; add Camouflage, Nature Power, Jump Kick, and High Horsepower by level, matching Deerling; retain Seasons Greeting, Bullet Seed, Zen Headbutt, and every existing move; skip Aromatherapy, Feint Attack, Lunge, Captivate, and the tutors. |
-| Sceptile | Use a consistent +0/+20/+0/-20/+0/+0 redistribution for Sceptile and Mega Sceptile, matching Grovyle rather than upstream's mismatched form changes; change regular Sceptile to Grass/Dragon; add Hyper Cutter in slot 2 plus Dual Chop, Night Slash, Fury Cutter, and Slash by level; retain Canopy Stalker, Mega Sceptile's Lightning Rod, and every existing move; skip Dragon Dance and the remaining additions. |
+| Sceptile | Use a consistent +0/+20/+0/-20/+0/+0 redistribution for Sceptile and Mega Sceptile, matching Grovyle rather than upstream's mismatched form changes; keep regular Sceptile pure Grass, reserving Grass/Dragon for Mega; add Hyper Cutter in slot 2 plus Dual Chop, Night Slash, Fury Cutter, and Slash by level; retain Canopy Stalker, Mega Sceptile's Lightning Rod, and every existing move; skip Dragon Dance and the remaining additions. |
 | Scorbunny | Add Receiver in slot 2, matching Raboot and Cinderace; retain Blaze, Libero, Playmaker, every existing move, and current stats. |
 | Scovillain | Keep current stats for Scovillain and Mega Scovillain, skipping upstream's +0/+0/+0/-33/+0/+33 redistribution; add Temper Flare and Raging Fury by level; retain Capsaicin Craze, Mega Scovillain's existing design, Solar Beam, Overheat, and every existing move; skip Solar Blade and Dragon Dance. |
-| Seaking | Keep Divergence as-is; retain Piercing Verdict, Horn Drill, every existing move, and current stats; skip upstream's +0/+30/+15/-20/+0/+10 redistribution. |
+| Seaking | Use upstream's full +0/+30/+15/-20/+0/+10 stats, producing 80/122/80/45/80/78 (BST 485); retain Piercing Verdict, Horn Drill, and every existing move. This preserves Goldeen's approved +10 Speed without an evolution regression; revisit Piercing Verdict later if the stronger spread proves excessive. |
 | Sealeo | Add Ice Ball and Slack Off by level; retain Blubber, Cold Snap, Surf, Snowscape, every existing move, and current stats; skip Hail and upstream's wholesale learnset. |
 | Seedot | Use upstream's +0/+5/+0/+0/+0/+0 stats; retain Forest Ambush, False Surrender, and every existing move. |
 | Seel | Replace hidden Ice Body with Ice Scales, matching Dewgong; retain Thick Fat, Hydration, Glacial Mass, every existing move, and current stats. |
@@ -458,7 +566,7 @@ Divergence design; they do not consume a review-batch slot.
 | Silvally | Use upstream's +5/+5/+5/+5/+5/+5 stats for every type; retain RKS System, RKS Relay, and every existing move; skip Rock Climb. |
 | Sirfetch'd | Keep current stats, skipping upstream's +23/+5/+0/+0/+0/+5 increase; add Sharpness in slot 2, Sacred Sword by level, and Swirling Blade as a tutor, matching Galarian Farfetch'd; retain Sword and Board and every existing move; skip Drill Run, Roost, and the generic tutors. |
 | Sizzlipede | Use upstream's +0/+0/+0/-5/+0/+5 redistribution, beginning Centiskorch's approved Speed shift; retain Molten Burrow, Sizzly Slide, Acid Rain, Infested Terrain, and every existing move; skip Toxic. |
-| Skiddo | Change to Grass/Normal, matching Gogoat; retain Ruminate, Wild Growth, every existing move, and current stats; skip Return and Rock Climb. |
+| Skiddo | Keep pure Grass, matching Gogoat; retain Ruminate, Wild Growth, every existing move, and current stats; skip Normal typing, Return, and Rock Climb. |
 | Skiploom | Use upstream's +0/+0/+0/+20/+0/+0 stats and Wind Rider / Infiltrator / Aerilate; add Air Cutter, Air Slash, Hyper Voice, and Rage Powder by level; retain Pollen Puff, Floaty Fall, and every existing move. |
 | Skitty | Use upstream's +0/+5/+5/+5/+5/+10 stats and add Hone Claws as a tutor; retain Heartbreak, Plain Terrain, and every existing move; skip Cut. |
 | Skuntank | Keep current stats, skipping upstream's +12/+2/+3/+24/-1/+1 increase; add Acid Spray and Venom Drench by level; retain Septic Fumes, Acid Rain, Foul Mixture, Eclipse, Venoshock, and every existing move; skip Fire Spin, Slash, Poison Jab, and Gunk Shot. |
@@ -466,7 +574,7 @@ Divergence design; they do not consume a review-batch slot.
 | Slaking | Add Slow Start as its hidden Ability while retaining Truant; redesign King's Domain so, when the party shares a type, it nullifies the effects of Slaking's active regular Ability whether it is Truant or Slow Start; retain Plain Terrain, every existing move, and current stats; skip the older attack additions. |
 | Slakoth | Add Slow Start as its hidden Ability while retaining Truant, matching Slaking; apply the redesigned King's Domain so its shared-type condition nullifies either regular Ability; retain Plain Terrain, every existing move, and current stats; skip the older attack additions. |
 | Sliggoo | Keep pure Dragon typing and current stats; add Recover and Tearful Look by level; retain Sludge Shift, Water Gun, and every existing move; skip Water typing, Bubble, Bide, Hydro Pump, and the Water tutors. |
-| Sliggoo (Hisuian) | Add Steel Roller by level; retain Shelter, Acid Armor, Rain Dance, Iron Head, every existing move, and current stats; skip Recover, Iron Defense, Mirror Shot, Bubble, and Bide. |
+| Sliggoo (Hisuian) | Add Steel Roller and Tearful Look by level, preserving Goomy's approved utility; retain Shelter, Acid Armor, Rain Dance, Iron Head, every existing move, and current stats; skip Recover, Iron Defense, Mirror Shot, Bubble, and Bide. |
 | Slowbro (Galarian) | Use upstream's +0/-25/+10/+15/+0/+0 redistribution; retain Quick Draw, Regenerator, Galarica Rounds, Shell Side Arm, Acid Rain, and every existing move. |
 | Slowking | Keep Divergence as-is; retain Royal Rebuke, Psychic Noise, Trump Card, every existing move, and current stats; skip Aura Sphere. |
 | Slugma | Use upstream's +10/+10/+10/+20/+10/+0 stats and add Power Gem by level; retain Basalt Shell, Steam Eruption, Acid Rain, and every existing move; skip Flame Burst. |
@@ -475,7 +583,7 @@ Divergence design; they do not consume a review-batch slot.
 | Sneasel | Make Ice Shard a level-up move rather than tutor-only; retain Inner Focus / Keen Eye / Pickpocket, Cold Read, Cheap Trick, Eclipse, every existing move, and current stats; skip Technician, Power-Up Punch, and the older Dark moves. |
 | Snivy | Add Multiscale in slot 2, matching Servine and Serperior; retain pure Grass typing, Root Network, every existing move, and current stats; skip Dragon Rage and Aqua Tail. |
 | Snorlax | Add Rollout by level; retain Deep Sleep, Stuff Cheeks, Plain Terrain, every existing move, and current stats; skip Slack Off, Chip Away, and Rock Climb. |
-| Snubbull | Use upstream's +5/+0/+0/+0/+0/+0 stats and change to Fairy/Fighting, matching Granbull; add Double Kick by level; retain Brutal Charge, Plain Terrain, Jaw Lock, every existing move, and Super Fang as a tutor; skip Covet, Rage, Dynamic Punch, and Close Combat. |
+| Snubbull | Use upstream's +5/+0/+0/+0/+0/+0 stats and keep pure Fairy, matching Granbull; add Double Kick by level; retain Brutal Charge, Plain Terrain, Jaw Lock, every existing move, and Super Fang as a tutor; skip Fighting typing, Covet, Rage, Dynamic Punch, and Close Combat. |
 | Sobble | Add Shed Skin in slot 2, completing the approved Sobble-line Ability package, and add Air Cutter as a tutor; retain Torrent, Sniper, Take Aim, every existing move, and current stats; skip the generic tutors. |
 | Solrock | Use upstream's +0/+20/+0/+0/+0/+0 stats; retain Sun Totem, Flare Blitz, Sunsteel Strike, and every existing move; skip Mystical Fire, Rock Wrecker, and the wholesale learnset reshuffle. |
 | Spearow | Add Intimidate in slot 2, matching Fearow; retain Keen Eye, hidden Sniper, Territorial, Beak Blast, every existing move, and current stats; skip Brave Bird and Dual Wingbeat. |
@@ -498,45 +606,45 @@ Divergence design; they do not consume a review-batch slot.
 | Swanna | Use upstream's +7/-24/+2/+22/+20/+0 redistribution and replace Keen Eye with Friend Guard, matching Ducklett; add Hydro Pump by level; retain Big Pecks, Hydration, Migration, and every existing move; skip Water Sport. |
 | Swellow | Use upstream's +0/+0/+0/+10/+0/+0 stats; retain Brave Bird, Air Slash, Boomburst, Guts, Scrappy, Bravery, and every existing move; skip Extreme Speed and Dual Wingbeat. |
 | Swirlix | Add Covet by level, matching Slurpuff; retain Sugar Rush, Aromatherapy, Draining Kiss, String Shot, every existing move, and current stats; skip Light Screen and Safeguard. |
-| Swoobat | Use upstream's +3/+0/+8/+9/+20/+0 stats; add Heart Swap by level and Hurricane as a tutor; retain Simple, Stored Power, Mood Swing, every existing move, and Nasty Plot as a tutor; skip Mystical Fire and the wholesale learnset replacement. |
-| Sylveon | Add Sparkly Swirl as a late-level move; retain Serene Voice, Veevee Volley, Alluring Voice, every existing move, and current stats; skip Grass Knot and the wholesale learnset replacement. |
+| Swoobat | Use upstream's +3/+0/+8/+9/+20/+0 stats; add Heart Swap by level; retain Simple, Stored Power, Mood Swing, every existing move, and Nasty Plot as a tutor; skip Hurricane, Mystical Fire, and the wholesale learnset replacement. |
+| Sylveon | Use Cute Charm / Healer / Pixilate, replacing the duplicate slot 2; add Sparkly Swirl as a late-level move; retain Serene Voice, Veevee Volley, Alluring Voice, every existing move, and current stats; skip Grass Knot and the wholesale learnset replacement. |
 | Taillow | Keep Divergence as-is; retain Guts, Scrappy, Bravery, Jetstream, every existing move, and current stats; skip Dual Wingbeat, matching Swellow. |
 | Talonflame | Use upstream's +0/+10/+0/+0/+0/+0 stats; retain Flame Body, Gale Wings, Windsurge, Jetstream, Plain Terrain, and every existing move. |
 | Tapu Bulu | Add Play Rough and Rototiller by level; retain Grassy Surge, Rooted Shrine, and every existing move; skip the tutor duplicates, Toxic, Rock Climb, and upstream's wholesale learnset replacement. |
 | Tapu Fini | Add Refresh by level; retain Misty Surge, Mistbound Shrine, every existing move, and current stats. |
 | Tapu Koko | Add Play Rough by level; retain Electric Surge, Crackling Shrine, every existing move, and current stats; skip Mirror Move, Electro Ball, and upstream's wholesale learnset replacement. |
-| Tarountula | Use Analytic / Stakeout / Disguise, matching Spidops; add Mach Punch, Stealth Rock, Pounce, and Rage Powder by level; retain Tripwire, Acid Rain, Infested Terrain, every existing move, and current stats; skip False Surrender and Poison Jab. |
+| Tarountula | Use Analytic / Stakeout / Disguise, matching Spidops; add Stealth Rock, Pounce, and Rage Powder by level; retain Tripwire, Acid Rain, Infested Terrain, every existing move, and current stats; skip Mach Punch, False Surrender, and Poison Jab. |
 | Tauros | Keep Divergence as-is; retain Raging Bull, Open Field, Plain Terrain, every existing move, and current stats; skip upstream's +0/+0/+0/+30/+0/+0 Special Attack increase, Head Charge, and Strength. |
 | Teddiursa | Use Quick Feet / Supersweet Syrup / Honey Gather and add Mega Kick as a tutor; retain Honey Rage, every existing move, and current stats; skip the Ground moves and upstream's wholesale learnset replacement, deferring the Ground identity decision until Ursaring. |
 | Tepig | Use Blaze / Thick Fat / Sheer Force, matching Pignite; retain Scorching Relay, every existing move, and current stats. |
 | Terrakion | Add Swirling Blade as a tutor; retain Vengeful Force, every existing move, and current stats; skip Low Sweep and Rock Climb. |
 | Thwackey | Add Soundproof in slot 2, completing the approved Grookey-line package; retain Mischief, every existing move, and current stats; skip the generic legacy tutors. |
-| Togekiss | Keep Divergence as-is; retain Divine Favor, every existing move, and current stats; skip Soft-Boiled, Calm Mind, Moonblast, and Hurricane. |
+| Togekiss | Add Air Cutter by level, preserving Togetic's access; retain Divine Favor, every existing move, and current stats; skip Soft-Boiled, Calm Mind, Moonblast, and Hurricane. |
 | Togepi | Make Draining Kiss a level-up move rather than tutor-only; retain Divine Favor, every existing move, and current stats; skip Moonblast, Soft-Boiled, Calm Mind, and upstream's wholesale learnset replacement. |
 | Togetic | Add Air Cutter and Draining Kiss by level; retain Divine Favor, every existing move, and current stats; skip Moonblast, Calm Mind, Hurricane, Brave Bird, Extrasensory, and upstream's wholesale learnset replacement. |
 | Torchic | Add Early Bird in slot 2, matching Combusken and Blaziken; retain Blaze, Speed Boost, Flash Firestorm, every existing move, and current stats. |
 | Torterra | Keep current stats, skipping upstream's +10/+0/+5/-10/+0/+5 redistribution; add Rock Head in slot 2; retain Uproot, Grav Apple, and every existing move; skip Head Smash, Shell Smash, Sleep Powder, Leaf Blade, and Rock Climb. |
 | Totodile | Add Strong Jaw in slot 2 and Psychic Fangs by level, matching Croconaw and Feraligatr; retain Death Roll, Jaw Lock, every existing move, and current stats; skip Dragon Rush, Avalanche, and upstream's wholesale learnset replacement. |
-| Tranquill | Use upstream's +3/-27/+3/+27/+0/+1 redistribution and replace Rivalry with Unaware, continuing Pidove's approved special redesign; make Swift a level-up move rather than tutor-only; retain Soaring Gale and every existing move; skip Brave Bird and upstream's wholesale learnset replacement. |
+| Tranquill | Use upstream's +3/-27/+3/+27/+0/+1 redistribution and replace Rivalry with Unaware, continuing Pidove's approved special redesign; make Swift a level-up move rather than tutor-only and add Hurricane as a tutor, preserving Pidove's access; retain Soaring Gale and every existing move; skip Brave Bird and upstream's wholesale learnset replacement. |
 | Trapinch | Keep pure Ground typing and current stats, skipping upstream's Bug/Ground typing and +10/+0/+0/+0/+0/+0 increase; make Bug Bite a level-up move rather than tutor-only; retain Desert Shroud, First Impression as a tutor, and every existing move; skip Lunge, Uproar, and upstream's wholesale learnset replacement. |
 | Treecko | Use upstream's +0/+20/+0/-20/+0/+0 redistribution, add Hyper Cutter in slot 2, and add Slash by level; retain Sunstalker and every existing move; skip Dynamic Punch, Work Up, Slam, Assurance, and Iron Tail. |
 | Trubbish | Keep Divergence as-is; retain Trash Heap, Pain Split, Baneful Bunker, Acid Rain, every existing move, and current stats; skip upstream's +15/+0/+0/+5/+0/+0 increase, Cross Poison, and wholesale learnset replacement. |
 | Turtwig | Add Rock Head in slot 2, completing the approved line; retain Uproot, Grav Apple by level, Shell Smash as an existing tutor, every existing move, and current stats; skip Sleep Powder, Leaf Blade, Rock Climb, and upstream's wholesale learnset replacement. |
 | Tynamo | Add Nuzzle at level 1, matching Eelektrik and Eelektross; retain Bioluminescence, Thunder Wave, every existing move, and current stats. |
-| Typhlosion (Hisuian) | Keep current stats, skipping upstream's +0/+0/-5/+10/-5/+1 redistribution; add Flash Fire in slot 2; retain Blaze, hidden Frisk, Guiding Flames, and every existing move. |
+| Typhlosion (Hisuian) | Keep current stats, skipping upstream's +0/+0/-5/+10/-5/+1 redistribution; add Flash Fire in slot 2 and Mystical Fire as a tutor, preserving Cyndaquil/Quilava's access; retain Blaze, hidden Frisk, Guiding Flames, and every existing move. |
 | Typhlosion | Keep pure Fire typing and current stats, skipping upstream's Fire/Ground typing and +0/-5/-5/+15/-5/+1 redistribution; use Blaze / Flash Fire / Adaptability and add Mystical Fire as a tutor; retain Blinding Smoke and every existing move; skip Earth Power, Scorching Sands, Rock Climb, and upstream's wholesale learnset replacement. |
 | Tyranitar | Keep Divergence as-is; retain Battle Armor / empty slot / Unnerve, Dominion, every existing move, and current stats; skip Earth Eater. Upstream gives Earth Eater to Larvitar and Tyranitar but not Pupitar, and completing the package would make Tyranitar too strong. |
 | Tyrantrum | Keep Divergence as-is; retain Strong Jaw, Rock Head, Head Smash, Horn Drill, Tyrant Storm, every existing move, and current stats; skip Accelerock and upstream's wholesale learnset replacement. |
 | Tyrunt | Keep Divergence as-is; retain Strong Jaw, Sturdy, Horn Drill, Tyrant Storm, every existing move, and current stats; skip Accelerock and upstream's wholesale learnset replacement, matching Tyrantrum. |
-| Umbreon | Replace hidden Inner Focus with Poison Touch and add Baddy Bad as a late-level move; retain Shadow Carapace, Eclipse, Veevee Volley, every existing move, and current stats; skip Play Rough, Gunk Shot, Mystical Fire, Power Gem, and the other upstream additions. |
+| Umbreon | Use Synchronize / Inner Focus / Poison Touch, moving its former hidden Inner Focus into the duplicate second slot; add Baddy Bad as a late-level move; retain Shadow Carapace, Eclipse, Veevee Volley, every existing move, and current stats; skip Play Rough, Gunk Shot, Mystical Fire, Power Gem, and the other upstream additions. |
 | Unfezant | Use upstream's +0/-50/+0/+45/+0/+2 redistribution and replace Rivalry with Unaware, completing Pidove and Tranquill's approved special progression; make Swift a level-up move rather than tutor-only; retain Soaring Gale, Hurricane as an existing tutor, and every existing move; skip Boomburst, Brave Bird, and upstream's wholesale learnset replacement. |
-| Ursaring | Change Normal to Ground/Normal, use Guts / Supersweet Syrup / Unnerve, and add Mega Kick as a tutor; retain Honey Rage, High Horsepower, Earthquake access, every existing move, and current stats. |
+| Ursaring | Keep pure Normal, reserving Ground/Normal for Ursaluna; use Guts / Supersweet Syrup / Unnerve and add Mega Kick as a tutor; retain Honey Rage, High Horsepower, Earthquake access, every existing move, and current stats. Ursaluna and Bloodmoon Ursaluna may naturally retain Mega Kick after evolution; in Divergence it is Fighting-type coverage rather than Normal STAB. |
 | Uxie | Change Psychic to Psychic/Fairy and add Moonblast by level, completing the approved lake-trio direction; retain Still Mind, every existing move, and current stats; skip Play Rough, Natural Gift, and upstream's wholesale learnset replacement. |
 | Vanillish | Keep Divergence as-is and mono-Ice; retain Meltdown, every existing move, and current stats; skip upstream's +0/-6/+0/+0/+0/+6 redistribution, Disarming Voice, Mirror Shot, and wholesale learnset replacement. |
 | Vanillite | Keep Divergence as-is and mono-Ice; retain Meltdown, every existing move, and current stats; skip upstream's +0/-6/+0/+0/+0/+6 redistribution, Disarming Voice, Mirror Shot, and wholesale learnset replacement. |
 | Vanilluxe | Keep Divergence as-is and mono-Ice; retain Meltdown, Slush Rush, every existing move, and current stats; skip upstream's Ice/Fairy typing, +0/-16/+0/+0/+0/+16 redistribution, Moonblast, Power Gem, Dazzling Gleam, Extrasensory, and wholesale learnset replacement. |
-| Vaporeon | Add Bouncy Bubble as a late-level move; retain Body of Water, Veevee Volley, every existing move, and current stats; skip Scald, Extrasensory, Grass Knot, Toxic, and upstream's wholesale learnset replacement. |
-| Venomoth | Use upstream's +0/-10/+0/+10/+0/+0 redistribution and add Hurricane as a tutor; retain Neurotoxin, Morning Sun as an existing tutor, and every existing move. |
+| Vaporeon | Use Water Absorb / Water Veil / Hydration, replacing the duplicate slot 2; add Bouncy Bubble as a late-level move; retain Body of Water, Veevee Volley, every existing move, and current stats; skip Scald, Extrasensory, Grass Knot, Toxic, and upstream's wholesale learnset replacement. |
+| Venomoth | Use upstream's +0/-10/+0/+10/+0/+0 redistribution; skip Hurricane; retain Neurotoxin, Morning Sun as an existing tutor, and every existing move. |
 | Venonat | Use upstream's +10/+0/+5/+10/+5/+0 stats; retain Neurotoxin and every existing move. |
 | Venusaur | Keep current stats for Venusaur, Mega Venusaur, and Gigantamax Venusaur, skipping upstream's +0/+0/+0/+10/+0/+0 increase; add Sweet Veil in slot 2 to regular and Gigantamax Venusaur, matching Bulbasaur and Ivysaur; retain Mega Venusaur's Thick Fat, Vine Lash, and every existing move. |
 | Vespiquen | Use Pressure / Unnerve / Queenly Majesty and add Fly as a tutor; retain Hive Command, every existing move, and current stats. |
@@ -550,7 +658,7 @@ Divergence design; they do not consume a review-batch slot.
 | Volbeat | Use upstream's +0/-40/+0/+60/+0/+15; retain Bug/Electric typing; use Illuminate / Tinted Lens / Swarm, replacing redundant Prankster; add Flash, Charge Beam, Signal Beam, Thunderbolt, and Thunder by level plus Volt Switch as a tutor; skip Dual Wingbeat; retain Call, Shimmer, Infested Terrain, and every existing move. |
 | Volcanion | Add Thermal Exchange as its hidden Ability; retain Water Absorb, Pressure Valve, every existing move, and current stats. |
 | Volcarona | Add Inferno as a tutor; retain Radiant, Quiver Dance, Fiery Dance, every existing move, and current stats. |
-| Voltorb | Add Energy Ball, Bug Buzz, and Flash Cannon as tutors, matching Electrode's approved projectile package while reserving Aura Sphere for the final stage; retain Volt Break, Static Burst, Thundercrush, Zippy Zap, every existing move, and current stats. |
+| Voltorb | Add Bug Buzz as a tutor, matching Electrode; skip Energy Ball and Flash Cannon; retain Volt Break, Static Burst, Thundercrush, Zippy Zap, every existing move, and current stats. |
 | Vullaby | Add Hurricane as a tutor; retain Carrion Hour, Eclipse, every existing move, and current stats; skip Superpower and Zen Headbutt, matching the Mandibuzz decision. |
 | Vulpix | Add Moonblast as a tutor; retain Sun Revelry, every existing move, and current stats; skip Dazzling Gleam, which remains Ninetales's evolution move. |
 | Wailord | Use upstream's +30/+0/+0/+0/+0/+0; add Bouncy Bubble as a late-level move; retain Body Slam, Tidal Flood, and every existing move; skip Focus Blast and the wholesale learnset reshuffle. |
@@ -583,27 +691,27 @@ Divergence design; they do not consume a review-batch slot.
 | Pokemon | Decision |
 |---|---|
 | Arbok | Replace level-up Sludge Bomb with Poison Fang. |
-| Ariados | Keep Divergence as-is. |
+| Ariados | Add Poison Fang by level, preserving Spinarak's approved access; otherwise keep Divergence as-is. |
 | Aromatisse | Copy the upstream Revised Mode learnset. |
 | Banette | Copy upstream's base stats for Banette and Mega Banette; add Normal as Mega Banette's secondary type. |
-| Beautifly | Use 60/70/50/120/50/85; add Air Slash and Hurricane plus upstream's Fly, Iron Defense, Ominous Wind, and Struggle Bug tutors. |
-| Beheeyem | Add Psycho Boost as a late-level capstone and Power Gem as a tutor; keep Divergence's existing learnset additions and skip the rest of upstream's wholesale replacement, including Mystical Fire. |
+| Beautifly | Use 60/70/50/120/50/85; add Air Slash plus upstream's Fly, Iron Defense, Ominous Wind, and Struggle Bug tutors; skip Hurricane. |
+| Beheeyem | Add Psycho Boost as a late-level capstone; keep Divergence's existing learnset additions; skip Power Gem and the rest of upstream's wholesale replacement, including Mystical Fire. |
 | Boltund | Add Ice Fang as a tutor; skip upstream's other tutor additions and keep Divergence's existing stats. |
 | Cacturne | Add Rough Skin in regular Ability slot 2; make Needle Arm a level-up move; add Rock Climb and Scorching Sands as tutors; keep Power Trip and Divergence's existing changes. |
 | Carnivine | Add Leech Life as a tutor; skip Dark Pulse and keep Divergence's +20 HP. |
 | Castform | Keep Divergence as-is; do not copy upstream's faster, frailer stat spread. |
 | Chimecho | Keep Divergence as-is; skip upstream's Power Gem, Weather Ball, and stat changes. |
 | Dedenne | Replace Plus with Electric Surge; add Charge Beam and Draining Kiss; retain Super Fang and skip Thunder Wave. Defer possible 67/58/67/90/67/101 stat spread. |
-| Delcatty | Add Hone Claws and Power Gem as tutors; skip Cut. Defer upstream's much larger stat increase. |
+| Delcatty | Add Hone Claws as a tutor; skip Power Gem and Cut. Defer upstream's much larger stat increase. |
 | Delibird | Replace Hustle with Technician and Insomnia with Sheer Force; add Icy Wind, Swift, Air Cutter, Brave Bird, Air Slash, Blizzard, and Hurricane by level plus Nasty Plot and U-turn as tutors; skip Work Up, Hone Claws, Cut, Strength, and upstream's larger stat increase. |
 | Dewgong | Replace Ice Body with Ice Scales; use 90/70/80/90/95/70; retain Glacial Mass and Alluring Voice. |
 | Dubwool | Add Rock Climb as a tutor; use 82/90/100/60/90/88; skip upstream's legacy tutor additions. |
-| Dustox | Add Sludge Bomb and Hurricane by level and Struggle Bug as a tutor; skip Fly, Ominous Wind, and upstream's stat redistribution; retain Repellant and Divergence's stats. |
+| Dustox | Add Sludge Bomb by level and Struggle Bug as a tutor; skip Hurricane, Fly, Ominous Wind, and upstream's stat redistribution; retain Repellant and Divergence's stats. |
 | Eldegoss | Keep Divergence as-is; skip upstream's legacy tutor and stat additions. |
 | Emolga | Add Wild Charge and Electro Ball by level; skip Pursuit, Shock Wave, Last Resort, the wholesale level reshuffle, and upstream's physical stat spread. |
 | Falinks | Keep Divergence as-is; do not port upstream's Bug typing, moves, tutors, or stat spread. |
 | Frosmoth | Keep Divergence as-is; skip upstream's legacy tutor additions. |
-| Grapploct | Change to Fighting/Water; add Sticky Hold in slot 2; add Aqua Jet, Mach Punch, Liquidation, and Arm Thrust by level plus Flip Turn as a tutor; skip Bubble, Brutal Swing, legacy tutors, and upstream's stats; retain Octolock. |
+| Grapploct | Change to Fighting/Water; add Sticky Hold in slot 2; add Aqua Jet, Mach Punch, Liquidation, Arm Thrust, and Bubble by level plus Flip Turn as a tutor, preserving Clobbopus's access; skip Brutal Swing, legacy tutors, and upstream's stats; retain Octolock. |
 | Grumpig | Add Slack Off and Magic Coat by level; retain Confusion, Scramble, and Divergence's stats; skip Psywave, Odor Sleuth, and Extrasensory. |
 | Gumshoos | Use 88/125/70/52/70/45; otherwise retain Divergence's Abilities and learnset. |
 | Heatmor | Add Power Whip as a tutor; skip upstream's other Ability, move, and stat changes. |
@@ -617,18 +725,18 @@ Divergence design; they do not consume a review-batch slot.
 | Luvdisc | Change to Water/Fairy; add Hydration in slot 2 and replace hidden Hydration with Soul-Heart; add Lovely Kiss and Moonblast by level; retain Wish, Baby-Doll Eyes, Heartthrob, and Divergence's stats; skip Heart Stamp, Captivate, Scald, and upstream's stats. |
 | Magcargo | Replace Magma Armor with Weak Armor and hidden Weak Armor with Solid Rock; add Shelter and Power Gem by level; retain Basalt Shell, Steam Eruption, Acid Rain, and Divergence's stats; skip Flame Burst, Toxic, and upstream's stats. |
 | Maractus | Use Water Absorb / Rough Skin / Seed Sower; use 75/106/72/86/81/60; add Horn Leech by level and make Needle Arm level-up rather than compatibility-only; retain Prickly and Divergence's Spiky Shield placement; skip the wholesale upstream learnset and Scald. |
-| Marowak | Add Head Smash as a tutor to regular Marowak; skip Rock Climb and Alolan Marowak's legacy additions; otherwise retain both forms as-is. |
-| Meowstic | Add Mystical Fire as a tutor to both genders and their Megas; retain Divergence's gender-differentiated stats and Screen Test. |
+| Marowak | Add Head Smash as a tutor to regular and Alolan Marowak, preserving Cubone's approved access; assess the move on both forms during balance testing; skip Rock Climb and Alolan Marowak's legacy additions; otherwise retain both forms as-is. |
+| Meowstic | Skip Mystical Fire for both genders and their Megas; retain Divergence's existing moves, gender-differentiated stats, and Screen Test. |
 | Mightyena | Keep Divergence as-is; skip upstream's stat redistribution. |
 | Mothim | Add Compound Eyes in slot 2; use 70/70/50/110/50/100; add Hurricane as a tutor; retain Swarm Surge, Shimmer, and the custom terrain tutors. |
 | Oinkologne | Keep Divergence as-is for both genders. |
 | Orbeetle | Keep Divergence as-is for both forms; skip Signal Beam and upstream's legacy tutors. |
-| Parasect | Add Crabhammer and Sappy Seed by level plus Grassy Glide as a tutor; skip Lunge, Bug Buzz, and Skitter Smack; retain Divergence's Ghost/Grass typing, stats, and Fungal Infection. |
+| Parasect | Add Crabhammer, Sappy Seed, and Lunge by level plus Grassy Glide as a tutor, preserving Paras's access despite the typing change; skip Bug Buzz and Skitter Smack; retain Divergence's Ghost/Grass typing, stats, and Fungal Infection. |
 | Shiinotic | Use 90/45/80/100/105/30; otherwise retain Divergence as-is. |
-| Spidops | Use Analytic / Stakeout / Disguise; use 85/94/92/52/86/41; add Mach Punch, Stealth Rock, Pounce, and Rage Powder by level; retain moves removed by upstream and skip False Surrender and Poison Jab. |
+| Spidops | Use Analytic / Stakeout / Disguise; use 85/94/92/52/86/41; add Stealth Rock, Pounce, and Rage Powder by level; retain moves removed by upstream; skip Mach Punch, False Surrender, and Poison Jab. |
 | Squawkabilly | Keep Divergence as-is for all four forms; skip upstream's stat increases. |
 | Stonjourner | Keep Divergence as-is; skip upstream's legacy tutor additions. |
-| Sunflora | Retain pure Grass typing and Divergence's stats; replace Early Bird with Seed Sower; add Heat Wave and Fiery Dance by level plus Flamethrower and Mystical Fire as tutors; retain Solarboost, Chloroblast, and Sappy Seed; skip upstream's other Fire tutors and wholesale learnset. |
+| Sunflora | Retain pure Grass typing and Divergence's stats; replace Early Bird with Seed Sower; add Heat Wave and Fiery Dance by level, keeping Heat Wave as its doubles option; retain Solarboost, Chloroblast, and Sappy Seed; skip Flamethrower, Mystical Fire, upstream's other Fire tutors, and wholesale learnset. |
 | Thievul | Use 70/38/58/97/112/90; add Mystical Fire by level; retain Bag of Tricks, Cheap Trick, and Eclipse; skip upstream's legacy tutors. |
 | Togedemaru | Add Rollout and Zippy Zap by level; otherwise retain Divergence as-is. |
 | Trevenant | Keep Divergence as-is; retain Grave Grove, the +10 HP increase, Psychic Noise, Eclipse, Sappy Seed, and Wild Growth. |
@@ -644,4 +752,52 @@ Divergence design; they do not consume a review-batch slot.
 
 Stats and typing remain a separate review track from Abilities and learnsets.
 
+## Shared design rules audit — approved decisions
 
+All 27 standard starter families receive a distinct second regular Ability.
+The following table records slot 2, not the hidden or unique Ability. Each entry
+applies to all evolutionary stages.
+Regional Decidueye, Typhlosion, and Samurott use the same second slot as their
+shared pre-evolutions. Gigantamax forms follow their base forms; Megas retain
+their separately approved Mega Abilities. Battle Bond Greninja retains Battle Bond.
+
+| Generation | Grass family — slot 2 | Fire family — slot 2 | Water family — slot 2 |
+|---|---|---|---|
+| 1 | Bulbasaur — Sweet Veil | Charmander — Defiant | Squirtle — Rain Dish |
+| 2 | Chikorita — Filter | Cyndaquil — Flash Fire | Totodile — Strong Jaw |
+| 3 | Treecko — Hyper Cutter | Torchic — Early Bird | Mudkip — Damp |
+| 4 | Turtwig — Rock Head | Chimchar — Flame Body | Piplup — Vital Spirit |
+| 5 | Snivy — Multiscale | Tepig — Thick Fat | Oshawott — Shell Armor |
+| 6 | Chespin — Iron Barbs | Fennekin — Magician | Froakie — Infiltrator |
+| 7 | Rowlet — Keen Eye | Litten — Rivalry | Popplio — Healer |
+| 8 | Grookey — Soundproof | Scorbunny — Receiver | Sobble — Shed Skin |
+| 9 | Sprigatito — Magician | Fuecoco — Soundproof | Quaxly — Dancer |
+
+The newly approved Paldea packages are Overgrow / Magician / Protean for
+Sprigatito, Floragato, and Meowscarada; Blaze / Soundproof / Unaware for Fuecoco,
+Crocalor, and Skeledirge; and Torrent / Dancer / Moxie for Quaxly, Quaxwell, and
+Quaquaval. Preserve their current stats, moves, and unique Abilities.
+
+Every Eeveelution has three distinct regular Abilities in the approved design:
+
+| Pokemon | Slot 1 | Slot 2 | Hidden Ability |
+|---|---|---|---|
+| Vaporeon | Water Absorb | Water Veil | Hydration |
+| Jolteon | Volt Absorb | Static | Quick Feet |
+| Flareon | Flash Fire | Flare Boost | Guts |
+| Espeon | Synchronize | Forewarn | Magic Bounce |
+| Umbreon | Synchronize | Inner Focus | Poison Touch |
+| Leafeon | Leaf Guard | Super Luck | Chlorophyll |
+| Glaceon | Snow Cloak | Serene Grace | Ice Body |
+| Sylveon | Cute Charm | Healer | Pixilate |
+
+Eevee itself already has Run Away / Adaptability / Anticipation and needs no
+change. Smolder activates Flare Boost in the current battle code, giving Flareon
+a special attacking alternative to Guts without changing its stats.
+
+Volbeat and Illumise retain equal BSTs: both are 430 in the canonical baseline
+and will be 465 after the approved changes. Illumise drops the earlier +5 HP
+increase and replaces hidden Prankster with Swarm, matching Volbeat's final two
+slots while retaining its distinct first Ability. Both Qwilfish forms remain at
+440 BST. Huntail gains Intimidate and Gorebyss gains Dazzling in slot 2, giving
+both three distinct regular Abilities; their stats stay unchanged.

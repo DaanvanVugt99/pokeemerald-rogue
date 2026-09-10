@@ -1,8 +1,8 @@
 {
   "SchemaVersion": 1,
-  "RefreshedAtUtc": "2026-07-30T20:40:03.3774590Z",
-  "SourceAggregateSha256": "a24d144756aab0fee18ce38620cadbaf11aee147ab3fc9e55902e94c7a457f33",
-  "CachedBundleSha256": "95be66683dffb5afc32c4b19ae982b2b1eaae40598ed7353af082fe4f32747c1",
+  "RefreshedAtUtc": "2026-09-08T10:04:36.5360190Z",
+  "SourceAggregateSha256": "b035434d3bc8f53bacbbb747dc432c2bb56a8e9e6cbec8ccc9b2d79cfe335bea",
+  "CachedBundleSha256": "88591f632ca65fdaf82145907a5e57ac4cbb6a11fcf7b0fdb050d9123cc0af89",
   "Sources": [
     "https://pokeapi.co/api/v2/",
     "https://play.pokemonshowdown.com/data/pokedex.json",
@@ -22,6 +22,8 @@
     "species_pelipper-ability-ability_drizzle-to-ability_wind_rider": 37,
     "volbeat-electric-tail-glow": 1,
     "volbeat-remove-dead-damp-rock": 1,
+    "species_volbeat-ability-ability_prankster-to-ability_swarm": 7,
+    "species_illumise-ability-ability_prankster-to-ability_swarm": 2,
     "species_torkoal-ability-ability_white_smoke-to-ability_flame_body": 0,
     "species_torkoal-ability-ability_drought-to-ability_steam_engine": 30,
     "huntail-abyssal-maw-mixed-shell-smash": 1,

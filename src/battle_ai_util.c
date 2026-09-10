@@ -2995,7 +2995,7 @@ bool32 IsBattlerIncapacitated(u32 battler, u32 ability)
       && !CanUseEndlessCoreStatusMove(battler))
      || (ability == ABILITY_TRUANT
       && gDisableStructs[battler].truantCounter != 0
-      && !IsTruantLoafingSuppressed(battler)))
+      && !IsKingsDomainActive(battler)))
         return TRUE;
 
     return FALSE;
