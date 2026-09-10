@@ -10,7 +10,9 @@ Upstream comparison commit: `c0ea02119f`
 ## Implemented targeted Ability decisions — 2026-09-08
 
 - [x] Huntail: Swift Swim / Intimidate / Water Veil.
-- [x] Gorebyss: Swift Swim / Dazzling / Hydration.
+- [x] Gorebyss: Swift Swim / Dazzling / Hydration implemented on 2026-09-08.
+  Superseded by the pending 2026-09-10 Regenerator decision below; runtime still
+  uses Dazzling until that follow-up is implemented.
 - [x] Gigalith: verified the existing Sturdy / Stamina / Sand Force arrangement
   and its competitive-set remap; no additional change needed.
 - [x] Volbeat: Illuminate / Tinted Lens / Swarm.
@@ -111,6 +113,43 @@ Water/Fairy, and the existing Illumise/Volbeat and Furfrou design systems.
 Pignite/Emboar's deliberately chosen Fire/Ground design remains approved, with
 Mega Emboar Fire/Fighting: the audit flagged this for reconsideration but did not
 recommend a definite reversal. No replacement typing or move removals are implied.
+
+## Combined-power audit — approved decisions, 2026-09-10
+
+These are pending revisions, not runtime implementation. Preserve all unrelated
+approved stats, typings, Abilities, and moves.
+
+- Keep Zippy Zap's current move effect, power, and priority unchanged. Retain its
+  existing Voltorb/Electrode and Blitzle/Zebstrika access and the approved Togedemaru
+  addition. Withdraw its Pikachu/Raichu additions across every form, including
+  Gigantamax Pikachu, Alolan Raichu, and both Mega Raichu forms. Do not introduce
+  access through Pichu or another Pikachu form: evolution must not bypass the
+  restriction. Splishy Splash and Floaty Fall remain approved.
+- Trial Volbeat/Illumise as approved, including Call/Response priority for Baton
+  Pass. Do not implement the suggested priority exclusion before playtesting.
+- Gorebyss: replace slot-2 Dazzling with Regenerator, producing Swift Swim /
+  Regenerator / Hydration. Keep Water/Fairy and Shell Game. This supersedes the
+  already implemented Dazzling choice and earlier Regenerator rejection. Test
+  Regenerator with Shell Smash and Baton Pass as well as defensive pivoting;
+  the same set can exploit both roles.
+- Pidgeot and Mega Pidgeot: reduce the approved SpA delta from +25 to +15,
+  resulting in +0/-20/-5/+15/+0/+0 and 85/150 SpA respectively. Other deltas
+  stay unchanged, so each form's BST is now 10 below its canonical baseline.
+- Whiscash: retain Simple and +15 Attack but drop the +15 Defense; final delta
+  is +0/+15/+0/+0/+2/+0. Breaking Swipe remains approved.
+- Luvdisc: keep Lovely Kiss triggering Heartthrob's additional Attract. Test the
+  full package before changing it; low bulk and imperfect sleep accuracy remain
+  intended counterplay.
+- Emboar and Mega Emboar: withdraw V-create; keep the rest of the approved
+  Fire/Ground redesign and the Mega's Fire/Fighting typing.
+- Numel, Camerupt, and Mega Camerupt: retain the approved Slack Off addition.
+- Swoobat: reduce the approved SpD delta from +20 to +10; final delta is
+  +3/+0/+8/+9/+10/+0 (BST 455). Other decisions remain unchanged.
+- Shieldon/Bastiodon: retain Solid Rock and the implemented Impenetrable immunity
+  to super-effective special moves. Intended role is a very bulky special wall
+  and utility Pokemon, with low offense, low Speed, and physical vulnerabilities.
+  Keep Slack Off and other new reliable recovery additions off the line; do not
+  revert the immunity to neutral damage. Existing moves remain unchanged.
 
 ## Remaining Upstream Revised Pokemon
 
@@ -276,7 +315,7 @@ Divergence design; they do not consume a review-batch slot.
 | Electrode | Add Buzzy Buzz by level plus Bug Buzz as a tutor; retain Thunder Shock, Volt Break, Static Burst, Thundercrush, Zippy Zap, the existing learnset, and current stats; skip Energy Ball, Aura Sphere, and Flash Cannon. |
 | Elekid | Use Volt Absorb / Static / Vital Spirit; add Dual Chop by level; retain Charge, Plasma Fists, Thundercrush, Dynamo Fists, the existing learnset, and current stats; leave Cross Chop, Electro Ball, and Wild Charge as tutors. |
 | Elgyem | Keep Divergence; retain Teleport, Recover, Lumina Crash, Brainstorm, Eclipse, Odd Signal, the existing learnset, and current stats; skip Power Gem, Mystical Fire, the wholesale level additions, and remaining tutors. |
-| Emboar | Port upstream's Fire/Ground redesign for regular Emboar while deliberately retaining Fire/Fighting on Mega Emboar. Use the full upstream +5/+2/+15/-30/+15/+0 stat delta, producing 115/125/80/70/80/65 (BST 535), and apply the same delta to Mega Emboar, producing 115/150/90/80/125/75 (BST 635). Retain the approved Blaze / Thick Fat / Mold Breaker on regular Emboar rather than reverting slot 2 to upstream's Reckless; retain Mega's Mold Breaker. Add High Horsepower as the evolution move, Mud Shot and Hammer Arm at level 1, Odor Sleuth at level 9, Cross Chop at level 68, and V-create at level 75; preserve existing moves and Scorching Relay. Mega shares the learnset, including V-create and the Ground moves, but gains Fighting STAB in exchange for Ground STAB. Skip duplicate early-level placements and the unrelated Iron Tail / Rock Climb tutors under the standing selective-port rule. V-create reverses the earlier rejection and should be assessed on both forms during balance testing. |
+| Emboar | Port upstream's Fire/Ground redesign for regular Emboar while deliberately retaining Fire/Fighting on Mega Emboar. Use the full upstream +5/+2/+15/-30/+15/+0 stat delta, producing 115/125/80/70/80/65 (BST 535), and apply the same delta to Mega Emboar, producing 115/150/90/80/125/75 (BST 635). Retain the approved Blaze / Thick Fat / Mold Breaker on regular Emboar rather than reverting slot 2 to upstream's Reckless; retain Mega's Mold Breaker. Add High Horsepower as the evolution move, Mud Shot and Hammer Arm at level 1, Odor Sleuth at level 9, and Cross Chop at level 68; preserve existing moves and Scorching Relay. Mega shares the learnset, including the Ground moves, but gains Fighting STAB in exchange for Ground STAB. Skip V-create on both forms, duplicate early-level placements, and the unrelated Iron Tail / Rock Climb tutors under the standing selective-port rule. |
 | Empoleon | Use +0/+0/+0/+5/+0/+0 stats; add Vital Spirit in slot 2; add Brave Bird by level plus Sing and Calm Mind as tutors; retain Water Gun, Wave Crash, Regal Decree, the existing sound moves, and the rest of the learnset; skip Bubble, Toxic, Rock Climb, Scald, and Baby-Doll Eyes. |
 | Entei | Replace hidden Inner Focus with Flash Fire; retain Scorched Reign, the existing learnset, and current stats; skip High Horsepower and Earthquake. |
 | Escavalier | Replace Swarm with No Guard; add Smart Strike, Shelter, and Twineedle by level plus Gyro Ball as a tutor; retain Knightly, Meteor Assault, Infested Terrain, the existing learnset, and current stats; skip Fury Attack, Slash, Acid Spray, Toxic, and Night Slash. |
@@ -333,7 +372,7 @@ Divergence design; they do not consume a review-batch slot.
 | Goodra | Use pure Dragon, reverting Divergence's Poison addition; keep current stats; add Acid Armor, Recover, and Sludge Wave by level; retain Water Gun, all existing moves, and Sludge Shift; skip upstream's Dragon/Water typing, Bubble, Bide, Hydro Pump, Outrage, and Waterfall. Hisuian Goodra remains Dragon/Steel. |
 | Goodra (Hisuian) | Add Metal Burst and Steel Roller by level; retain Iron Head, all moves upstream removes, Shelter, and current stats; leave Flash Cannon as tutor-only; skip Recover, Iron Defense, Mirror Shot, Bubble, and Bide. |
 | Goomy | Retain pure Dragon typing and current stats; add Tearful Look by level; retain Water Gun, all existing moves, and Sludge Shift; skip Recover so it cannot carry into the Hisuian branch, plus upstream's Dragon/Water typing, Bubble, Bide, Hydro Pump, and Water tutors. Recover remains approved on regular Sliggoo and Goodra. |
-| Gorebyss | Add Dazzling in slot 2, using Swift Swim / Dazzling / Hydration; retain Water/Fairy typing, Shell Game, Take Heart, Alluring Voice, Misty Terrain, the existing moves, and current stats; skip Water/Psychic typing, Regenerator, Dark Pulse, Liquidation, and Psyshock. Review priority protection alongside Shell Game and Shell Smash in playtesting. |
+| Gorebyss | Replace the implemented slot-2 Dazzling with Regenerator, using Swift Swim / Regenerator / Hydration; retain Water/Fairy typing, Shell Game, Take Heart, Alluring Voice, Misty Terrain, the existing moves, and current stats; skip Water/Psychic typing, Dark Pulse, Liquidation, and Psyshock. Regenerator is pending implementation and supersedes its earlier rejection. Test defensive pivoting and Regenerator healing after boosted Baton Pass together, not as mutually exclusive roles. |
 | Gothita | Keep pure Psychic and add Dark Pulse by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Dark typing, Double Slap, Embargo, Feint Attack, Heal Block, and Telekinesis. |
 | Gothorita | Keep pure Psychic and add Dark Pulse by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Dark typing and the remainder of upstream's level replacement. |
 | Gothitelle | Keep pure Psychic and add Dark Pulse and Night Daze by level; retain Psych Up, Twisted Hour, Psychic Noise, Eclipse, and current stats; skip Dark typing, Will-O-Wisp, and the remainder of upstream's additions. |
@@ -488,10 +527,10 @@ Divergence design; they do not consume a review-batch slot.
 | Phione | Keep Divergence as-is; retain Take Heart, Drift Song, Alluring Voice, every existing move, and current stats; skip Bubble and Water Sport and leave Hydro Pump as tutor-only. |
 | Pidgey | Use upstream's +0/-10/-5/+15/+0/+0 redistribution and add Echoed Voice, Air Cutter, and Swift by level; retain every existing move and Strong Winds; skip Ominous Wind, Uproar, Hyper Voice, and the wholesale replacement. |
 | Pidgeotto | Use upstream's +0/-10/-5/+15/+0/+0 redistribution, matching Pidgey, and add Echoed Voice, Air Cutter, and Swift by level; retain every existing move and Strong Winds; skip Ominous Wind, Uproar, Hyper Voice, and the wholesale replacement. |
-| Pidgeot | Use a moderated +0/-20/-5/+25/+0/+0 redistribution for both Pidgeot and Mega Pidgeot, producing 95 and 160 Special Attack without raising either form's BST; add Echoed Voice, Air Cutter, Swift, and Hyper Voice by level; retain every existing move, Strong Winds, and Mega Pidgeot's No Guard; skip upstream's larger and inconsistent form increases, Ominous Wind, Uproar, Dual Wingbeat, and the wholesale replacement. |
+| Pidgeot | Use a moderated +0/-20/-5/+15/+0/+0 delta for both Pidgeot and Mega Pidgeot, producing 85 and 150 Special Attack and reducing each form's canonical BST by 10; add Echoed Voice, Air Cutter, Swift, and Hyper Voice by level; retain every existing move, Strong Winds, and Mega Pidgeot's No Guard; skip upstream's larger and inconsistent form increases, Ominous Wind, Uproar, Dual Wingbeat, and the wholesale replacement. |
 | Pidove | Use upstream's +0/-19/+0/+19/+0/+0 redistribution, replace Rivalry with Unaware, and add Swift by level plus Hurricane as a tutor; retain every existing move, Soaring Gale, and Plain Terrain; skip Razor Wind, Facade, and the wholesale replacement. |
 | Pignite | Change to Fire/Ground, beginning the approved Emboar Ground redesign; keep current stats and Blaze / Thick Fat / Sheer Force. Add Mud Shot as the evolution move, retain Arm Thrust at level 1, add Odor Sleuth at level 9, and add Earthquake as a tutor. Preserve Endure, every other existing move, and Scorching Relay; skip duplicate early-level placements from upstream's replacement. Tepig remains pure Fire; Mega Emboar deliberately returns to Fire/Fighting. |
-| Pikachu | Add Splishy Splash, Floaty Fall, and Zippy Zap by level; retain every existing move, Pika Papow, Static Charge, Alluring Voice, Upper Hand, and current stats; skip the wholesale replacement. Apply the move additions to regular and Gigantamax Pikachu consistently. |
+| Pikachu | Add Splishy Splash and Floaty Fall by level; retain every existing move, Pika Papow, Static Charge, Alluring Voice, Upper Hand, and current stats; skip Zippy Zap and the wholesale replacement. Apply the move additions to regular and Gigantamax Pikachu consistently. Do not add Zippy Zap to any Pikachu form or Pichu, preventing inheritance into the restricted Raichu/Mega forms. |
 | Pinsir | Add Megahorn by level for both forms; retain every existing move, Burrowing Horns, Mega Pinsir's Aerilate, and current stats; leave Revenge, Brick Break, and Thrash as tutors; skip Rock Climb and the wholesale replacement. |
 | Piplup | Add Vital Spirit in slot 2 plus Sing and Calm Mind as tutors, matching Empoleon; retain Regal Decree, every existing move, and current stats; skip Baby-Doll Eyes, Dual Wingbeat, and Scald. |
 | Plusle | Use upstream's +0/+0/+10/+10/+10/+15 stats, matching the approved 450 BST Minun redesign; retain Plus, Lightning Rod, Positive Charge, Gear Up, Static Burst, and Alluring Voice; skip Psychic, Signal Beam, and Flash Cannon. |
@@ -514,8 +553,8 @@ Divergence design; they do not consume a review-batch slot.
 | Qwilfish | Use +0/+0/+10/-10/+0/+0, skipping upstream's 10 Speed increase to retain BST 440, matching unchanged Hisuian Qwilfish; add Fell Stinger once as a late-level move; retain Toxic Monsoon, Acid Rain, and every existing move; skip Bubble, Minimize, Revenge, and the wholesale replacement. |
 | Qwilfish (Hisuian) | Keep vanilla stats and BST 440, matching regular Qwilfish's approved unchanged-BST redistribution; retain Barbed Monsoon, Acid Rain, Eclipse, and every existing move. Keep Overqwil unchanged. |
 | Raboot | Add Receiver in slot 2, matching Cinderace; retain Blaze, Libero, Playmaker, every existing move, and current stats. |
-| Raichu | Use upstream's +0/+5/+0/+5/+0/+0 stats for Raichu and apply the same delta to Mega Raichu X and Mega Raichu Y; add Splishy Splash, Floaty Fall, and Zippy Zap as tutors; retain Pika Papow, Static Charge, and every existing move; skip Psychic and Fly. Balance-watch the three premium partner moves on both Mega forms during testing. |
-| Raichu (Alolan) | Keep current stats, skipping upstream's +0/+0/+0/+5/+5/+0; add Splishy Splash, Floaty Fall, and Zippy Zap as tutors; retain Pika Papow, Brain Surf, and every existing move. Balance-watch the premium partner moves alongside regular Raichu and both Mega forms. |
+| Raichu | Use upstream's +0/+5/+0/+5/+0/+0 stats for Raichu and apply the same delta to Mega Raichu X and Mega Raichu Y; add Splishy Splash and Floaty Fall as tutors; retain Pika Papow, Static Charge, and every existing move; skip Zippy Zap for all forms, Psychic, and Fly. Balance-watch the two retained partner moves on both Mega forms during testing; Pikachu/Pichu must not provide inherited Zippy Zap access. |
+| Raichu (Alolan) | Keep current stats, skipping upstream's +0/+0/+0/+5/+5/+0; add Splishy Splash and Floaty Fall as tutors; skip Zippy Zap consistently with the entire Pikachu/Raichu family; retain Pika Papow, Brain Surf, and every existing move. Balance-watch the retained partner moves alongside regular Raichu and both Mega forms. |
 | Raikou | Replace hidden Inner Focus with Volt Absorb; retain Lightning Field, every existing move, and current stats; skip Toxic. |
 | Ralts | Keep Divergence as-is; retain Moonveil, Alluring Voice, every existing move, and current stats; skip upstream's +0/+0/+0/+20/+20/+0 stats, Recover, Ice Beam, and wholesale learnset. |
 | Rampardos | Keep Divergence as-is; retain Accelerock, Head Smash, Thick Skull, every existing move, and current stats; skip Rock Head, Rock Climb, and upstream's wholesale learnset. |
@@ -606,7 +645,7 @@ Divergence design; they do not consume a review-batch slot.
 | Swanna | Use upstream's +7/-24/+2/+22/+20/+0 redistribution and replace Keen Eye with Friend Guard, matching Ducklett; add Hydro Pump by level; retain Big Pecks, Hydration, Migration, and every existing move; skip Water Sport. |
 | Swellow | Use upstream's +0/+0/+0/+10/+0/+0 stats; retain Brave Bird, Air Slash, Boomburst, Guts, Scrappy, Bravery, and every existing move; skip Extreme Speed and Dual Wingbeat. |
 | Swirlix | Add Covet by level, matching Slurpuff; retain Sugar Rush, Aromatherapy, Draining Kiss, String Shot, every existing move, and current stats; skip Light Screen and Safeguard. |
-| Swoobat | Use upstream's +3/+0/+8/+9/+20/+0 stats; add Heart Swap by level; retain Simple, Stored Power, Mood Swing, every existing move, and Nasty Plot as a tutor; skip Hurricane, Mystical Fire, and the wholesale learnset replacement. |
+| Swoobat | Use a moderated +3/+0/+8/+9/+10/+0 stat delta (BST 455), reducing the previously approved SpD increase by 10; add Heart Swap by level; retain Simple, Stored Power, Mood Swing, every existing move, and Nasty Plot as a tutor; skip Hurricane, Mystical Fire, and the wholesale learnset replacement. |
 | Sylveon | Use Cute Charm / Healer / Pixilate, replacing the duplicate slot 2; add Sparkly Swirl as a late-level move; retain Serene Voice, Veevee Volley, Alluring Voice, every existing move, and current stats; skip Grass Knot and the wholesale learnset replacement. |
 | Taillow | Keep Divergence as-is; retain Guts, Scrappy, Bravery, Jetstream, every existing move, and current stats; skip Dual Wingbeat, matching Swellow. |
 | Talonflame | Use upstream's +0/+10/+0/+0/+0/+0 stats; retain Flame Body, Gale Wings, Windsurge, Jetstream, Plain Terrain, and every existing move. |
@@ -666,7 +705,7 @@ Divergence design; they do not consume a review-batch slot.
 | Weavile | Keep Divergence as-is; retain Night Slash, Cold Read, Cheap Trick, Eclipse, every existing move, and current stats; skip Crunch. |
 | Galarian Weezing | Add Aromatherapy by level; retain the existing Gunk Shot, Smog Refinery, every existing move, and current stats; skip Lava Plume and the generic legacy tutors. |
 | Whimsicott | Use upstream's +0/+0/+0/+10/+0/+0; add Sleep Powder by level, matching Cottonee; retain Tufted Away, the existing Hurricane, Moonblast, Tailwind, and every existing move; skip Grass Whistle and the wholesale learnset reshuffle. |
-| Whiscash | Use upstream's +0/+15/+15/+0/+2/+0; replace Oblivious with Simple and add Breaking Swipe as a tutor, matching Barboach; retain Electrocytes and every existing move. |
+| Whiscash | Use +0/+15/+0/+0/+2/+0, skipping upstream's +15 Defense while retaining +15 Attack; replace Oblivious with Simple and add Breaking Swipe as a tutor, matching Barboach; retain Electrocytes and every existing move. |
 | Whismur | Add Scrappy in slot 2, matching Loudred; retain Soundproof, Rattled, Distortion, every existing move, and current stats; skip Bug Buzz, matching the Exploud decision. |
 | Woobat | Use upstream's +0/+0/+0/+10/+0/+0; retain Simple, Stored Power, Mood Swing, and every existing move; skip the wholesale level-up replacement. |
 | Wooloo | Use upstream's +10/+10/+0/+0/+0/+0, matching Dubwool; retain Grazing Field and every existing move; skip Toxic, Return, Frustration, and Hidden Power. |
@@ -799,5 +838,5 @@ Volbeat and Illumise retain equal BSTs: both are 430 in the canonical baseline
 and will be 465 after the approved changes. Illumise drops the earlier +5 HP
 increase and replaces hidden Prankster with Swarm, matching Volbeat's final two
 slots while retaining its distinct first Ability. Both Qwilfish forms remain at
-440 BST. Huntail gains Intimidate and Gorebyss gains Dazzling in slot 2, giving
+440 BST. Huntail gains Intimidate and Gorebyss gains Regenerator in slot 2, giving
 both three distinct regular Abilities; their stats stay unchanged.
