@@ -1318,26 +1318,18 @@ void Rogue_ModifyCatchRate(u16 species, u16 ball, u16* catchRate, u16* ballMulti
 #endif
         }
 
-        if(difficulty <= 1) // First 2 badges
+        if(difficulty <= ROGUE_GYM_MID_DIFFICULTY) // 0-4 badges earned
         {
             *ballMultiplier = *ballMultiplier * 8;
         }
-        else if(difficulty <= 2)
+        else if(difficulty < ROGUE_ELITE_START_DIFFICULTY) // 5-7 badges earned
         {
             *ballMultiplier = *ballMultiplier * 4;
         }
-        else if(difficulty <= ROGUE_GYM_MID_DIFFICULTY - 1)
-        {
-            *ballMultiplier = *ballMultiplier * 3;
-        }
-        else if(difficulty <= ROGUE_ELITE_START_DIFFICULTY - 1)
-        {
-            // Minimum of 2x multiplier whilst doing gyms?
-            *ballMultiplier = *ballMultiplier * 2;
-        }
         else
         {
-            // Elite 4 back to normal catch rates
+            // Keep recruitment viable from the Elite Four onward.
+            *ballMultiplier = *ballMultiplier * 2;
         }
 
         // Modify the catch rate based on how many times we've caught this mon

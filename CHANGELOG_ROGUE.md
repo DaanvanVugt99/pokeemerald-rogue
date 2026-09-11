@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Increased run catch bonuses to 8x at 0-4 badges earned, 4x at 5-7 badges,
+  and 2x from the Elite Four onward to ease team rebuilding. Existing
+  repeated-catch restrictions remain unchanged.
 - Pokédex move lists now mark Divergence-added level-up and tutor/TM/TR access
   with a star and a legend. Markers are generated from the locked source
   profiles, with shared-form inheritance and no additional RAM structures.
