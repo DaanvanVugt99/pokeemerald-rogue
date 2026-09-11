@@ -3,6 +3,13 @@
 This directory holds project design references for Pokemon Emerald Rogue:
 Divergence.
 
+## Ascension Difficulty
+
+[Ascension difficulty design](ascension.md) records the accepted first A0-A20
+progression, fixed rules, cumulative rules-window examples, and outstanding
+balance and implementation questions. It is a design reference, not implemented
+game behavior.
+
 ## Pokemon Romhack Tracker
 
 [pokemon_romhack_tracker.xlsx](pokemon_romhack_tracker.xlsx) is a working

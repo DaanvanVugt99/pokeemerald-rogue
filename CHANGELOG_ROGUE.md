@@ -1597,6 +1597,8 @@ Format follows Keep a Changelog loosely:
 
 ### Docs
 
+- Saved the first A0-A20 ascension difficulty design, including tiered opponent
+  upgrades, milestones, cumulative rules-window examples, and balance questions.
 - Added the Pokemon romhack tracker as the general design reference for unique
   abilities and Pokemon notes.
 
