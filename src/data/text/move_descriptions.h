@@ -3396,6 +3396,14 @@ static const u8 sBrainstormDescription[] = _(
     "Deals damage, then triggers\n"
     "a random mental effect.");
 
+static const u8 sSwirlingBladeDescription[] = _(
+    "A whirling blade attack with\n"
+    "a high critical-hit ratio.");
+
+static const u8 sFlameRelayDescription[] = _(
+    "A fiery charge that hits, then\n"
+    "switches the user with an ally.");
+
 const u8 gNotDoneYetDescription[] = _(
     "This move can't be used. Its\n"
     "effect is in development.");
@@ -4255,6 +4263,8 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_STATIC_BURST - 1] = sStaticBurstDescription,
     [MOVE_CHEAP_TRICK - 1] = sCheapTrickDescription,
     [MOVE_BRAINSTORM - 1] = sBrainstormDescription,
+    [MOVE_SWIRLING_BLADE - 1] = sSwirlingBladeDescription,
+    [MOVE_FLAME_RELAY - 1] = sFlameRelayDescription,
     [MOVE_TERA_STARSTORM - 1] = sTeraStarstormDescription,
     [MOVE_FICKLE_BEAM - 1] = sFickleBeamDescription,
     [MOVE_BURNING_BULWARK - 1] = sBurningBulwarkDescription,

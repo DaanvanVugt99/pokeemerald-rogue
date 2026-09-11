@@ -62,6 +62,26 @@ SINGLE_BATTLE_TEST("Smolder activates Guts for damage calculation", s16 damage)
     }
 }
 
+SINGLE_BATTLE_TEST("Smolder activates Flare Boost without an actual burn", s16 damage)
+{
+    bool32 smolder;
+    PARAMETRIZE { smolder = FALSE; }
+    PARAMETRIZE { smolder = TRUE; }
+
+    GIVEN {
+        PLAYER(SPECIES_FLAREON) { Ability(ABILITY_FLARE_BOOST); UniqueAbility(smolder ? ABILITY_SMOLDER : ABILITY_OPEN_FIELD); Moves(MOVE_FLAMETHROWER); }
+        OPPONENT(SPECIES_WYNAUT) { HP(400); MaxHP(400); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_FLAMETHROWER); MOVE(opponent, MOVE_CELEBRATE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } THEN {
+        EXPECT_EQ(player->status1, STATUS1_NONE);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, UQ_4_12(1.5), results[1].damage);
+    }
+}
+
 SINGLE_BATTLE_TEST("Smolder does not affect opposing special damage", s16 damage)
 {
     u16 uniqueAbility;

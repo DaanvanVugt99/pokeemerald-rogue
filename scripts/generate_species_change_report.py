@@ -406,8 +406,9 @@ def species_label(record: SpeciesRecord) -> str:
     return f"{record.name} ({prettify_constant(suffix)})"
 
 
-def extract_species_records(root: Path) -> dict[str, SpeciesRecord]:
-    preprocessed = preprocess_species_table(root)
+def extract_species_records(root: Path, preprocessed: str | None = None) -> dict[str, SpeciesRecord]:
+    if preprocessed is None:
+        preprocessed = preprocess_species_table(root)
     species_keys = species_key_by_id(root)
     type_names = reverse_constant_map(
         root,

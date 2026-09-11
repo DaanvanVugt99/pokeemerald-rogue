@@ -60,3 +60,6 @@ pokeemerald-*.png
 # Personal design tracker and Excel's temporary open-workbook artifact.
 docs/design/pokemon_romhack_tracker.xlsx
 docs/design/~$pokemon_romhack_tracker.xlsx
+
+# Local Python tooling bytecode.
+__pycache__/

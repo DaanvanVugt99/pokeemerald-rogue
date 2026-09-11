@@ -174,7 +174,7 @@ static const struct WindowTemplate sMonEntryWinTemplates[WIN_COUNT + 1] =
 #ifdef ROGUE_EXPANSION
 static const u8 sTitle_Stats[] = _("Stats");
 static const u8 sTitle_UniqueAbility[] = _("Unique");
-static const u8 sTitle_Moves[] = _("Moves");
+static const u8 sTitle_Moves[] = _("Moves {STAR_ICON}=New");
 static const u8 sTitle_Evolutions[] = _("Evolutions");
 static const u8 sTitle_Forms[] = _("Forms");
 static const u8 sTitle_Riding[] = _("Poké Ride");
@@ -215,7 +215,7 @@ static const u8 sText_NoFormData[] = _("{COLOR RED}{SHADOW LIGHT_RED}No Form dat
 #else
 static const u8 sTitle_Stats[] = _("STATS");
 static const u8 sTitle_UniqueAbility[] = _("UNIQUE");
-static const u8 sTitle_Moves[] = _("MOVES");
+static const u8 sTitle_Moves[] = _("MOVES {STAR_ICON}=New");
 static const u8 sTitle_Evolutions[] = _("EVOLUTIONS");
 static const u8 sTitle_Forms[] = _("FORMS");
 static const u8 sTitle_Riding[] = _("POKé RIDE");
@@ -1458,6 +1458,22 @@ static void PrintStatLine(const u8 *title, u32 y, u16 value, u16 original,
         0, 0, valueColor, TEXT_SKIP_DRAW, gStringVar4);
 }
 
+u16 RoguePokedex_GetAbilitySlot(u16 species, u8 slot, u32 otId)
+{
+    u32 customMonId;
+    if (species >= NUM_SPECIES || slot >= ARRAY_COUNT(gRogueSpeciesInfo[species].abilities))
+        return ABILITY_NONE;
+    if (IsOtherTrainer(otId))
+    {
+        customMonId = RogueGift_GetCustomMonIdBySpecies(species, otId);
+        if (customMonId != 0 && RogueGift_GetCustomMonAbilityCount(customMonId) != 0)
+            return RogueGift_GetCustomMonAbility(customMonId, slot);
+    }
+    // GetAbilityBySpecies deliberately fills empty slots for battle use.
+    // The dex must preserve those empty slots when comparing against vanilla.
+    return gRogueSpeciesInfo[species].abilities[slot];
+}
+
 static void DisplayMonStatsText(void)
 {
     static const u8 *const labels[NUM_STATS] =
@@ -1494,7 +1510,7 @@ static void DisplayMonStatsText(void)
         sPokedexMenu->isInspectModeActive && baseline != NULL ? sText_OriginalAbilities : sText_Abilities);
     for (i = 0; i < NUM_ABILITY_SLOTS; ++i)
     {
-        u16 current = GetAbilityBySpecies(species, i, sPokedexMenu->viewOtId);
+        u16 current = RoguePokedex_GetAbilitySlot(species, i, sPokedexMenu->viewOtId);
         u16 ability = sPokedexMenu->isInspectModeActive && baseline != NULL ? baseline->abilities[i] : current;
         bool8 changed = baseline != NULL && current != baseline->abilities[i];
         StringCopy(gStringVar4, changed ? sText_Changed : gText_EmptyString2);
@@ -1676,6 +1692,47 @@ static u16 GetMaxMoveScrollOffset()
     return count - min(count, MAX_LIST_DISPLAY_COUNT);
 }
 
+bool8 RoguePokedex_IsMoveAddition(u16 species, u16 moveIndex, bool8 tutor)
+{
+    extern const u8 *const gRoguePokemonMoveAdditions[NUM_SPECIES];
+    const u8 *bits;
+    u32 count, offset = 0;
+
+    if (species >= NUM_SPECIES || (bits = gRoguePokemonMoveAdditions[species]) == NULL)
+        return FALSE;
+    for (count = 0; gRoguePokemonProfiles[species].levelUpMoves[count].move != MOVE_NONE; ++count)
+        ;
+    if (tutor)
+    {
+        offset = count;
+        for (count = 0; gRoguePokemonProfiles[species].tutorMoves[count] != MOVE_NONE; ++count)
+            ;
+    }
+    if (moveIndex >= count)
+        return FALSE;
+    offset += moveIndex;
+    return (bits[offset / 8] & (1 << (offset % 8))) != 0;
+}
+
+void RoguePokedex_PrintMoveLine(u8 windowId, const u8 *text, u8 row, bool8 added)
+{
+    // FONT_SMALL_NARROW has no visible STAR_ICON glyph. Keep this 7x7 marker
+    // independent of font coverage, and within the reserved eight-pixel gutter.
+    static const u8 starRows[] = { 0x08, 0x1C, 0x7F, 0x3E, 0x1C, 0x36, 0x63 };
+    const u8 color[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
+    u8 font = GetStringWidth(FONT_NARROW, text, 0) <= 128 ? FONT_NARROW : FONT_SMALL_NARROW;
+    FillWindowPixelRect(windowId, PIXEL_FILL(0), 0, 16 * row, 8, 16);
+    AddTextPrinterParameterized4(windowId, font, 8, 16 * row,
+        0, 0, color, TEXT_SKIP_DRAW, text);
+    if (added)
+    {
+        for (u32 y = 0; y < ARRAY_COUNT(starRows); ++y)
+            for (u32 x = 0; x < 7; ++x)
+                if (starRows[y] & (1 << x))
+                    FillWindowPixelRect(windowId, PIXEL_FILL(TEXT_COLOR_GREEN), 1 + x, 16 * row + 4 + y, 1, 1);
+    }
+}
+
 static void DisplayMonMovesText()
 {
     u8 i;
@@ -1735,7 +1792,7 @@ static void DisplayMonMovesText()
             
             if(listIndex >= sPokedexMenu->listScrollAmount)
             {
-                AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, ySpacing * displayCount, 0, 0, color, TEXT_SKIP_DRAW, gStringVar3);
+                RoguePokedex_PrintMoveLine(WIN_MON_PAGE_CONTENT, gStringVar3, displayCount, RoguePokedex_IsMoveAddition(species, i, FALSE));
                 ++displayCount;
             }
             ++listIndex;
@@ -1762,7 +1819,7 @@ static void DisplayMonMovesText()
                 StringCopy(gStringVar1, gMoveNames[moveId]);
                 StringExpandPlaceholders(gStringVar2, gText_PokedexMovesTR);
 
-                AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, ySpacing * displayCount, 0, 0, color, TEXT_SKIP_DRAW, gStringVar2);
+                RoguePokedex_PrintMoveLine(WIN_MON_PAGE_CONTENT, gStringVar2, displayCount, RoguePokedex_IsMoveAddition(species, i, TRUE));
                 ++displayCount;
             }
             ++listIndex;
@@ -1789,7 +1846,7 @@ static void DisplayMonMovesText()
                 StringCopy(gStringVar1, gMoveNames[moveId]);
                 StringExpandPlaceholders(gStringVar2, gText_PokedexMovesTM);
 
-                AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, ySpacing * displayCount, 0, 0, color, TEXT_SKIP_DRAW, gStringVar2);
+                RoguePokedex_PrintMoveLine(WIN_MON_PAGE_CONTENT, gStringVar2, displayCount, RoguePokedex_IsMoveAddition(species, i, TRUE));
                 ++displayCount;
             }
             ++listIndex;
@@ -1816,7 +1873,7 @@ static void DisplayMonMovesText()
                 StringCopy(gStringVar1, gMoveNames[moveId]);
                 StringExpandPlaceholders(gStringVar2, gText_PokedexMovesTutor);
 
-                AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, ySpacing * displayCount, 0, 0, color, TEXT_SKIP_DRAW, gStringVar2);
+                RoguePokedex_PrintMoveLine(WIN_MON_PAGE_CONTENT, gStringVar2, displayCount, RoguePokedex_IsMoveAddition(species, i, TRUE));
                 ++displayCount;
             }
             ++listIndex;

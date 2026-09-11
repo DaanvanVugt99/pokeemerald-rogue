@@ -7,12 +7,152 @@ runtime data.
 
 Upstream comparison commit: `c0ea02119f`
 
+## Implementation progress — 2026-09-11
+
+The resumable implementation log is `docs/rebalance_implementation.md`; exact
+normalized targets and verification coverage are in
+`tools/data/rebalance_manifest.json`. Later implementation status in these
+records supersedes historical "pending" wording in the approval notes below.
+**Implementation complete.** All **650/650 decisions** are reconciled against
+**1,052 species/forms**, with all **54 shared invariants** passing. There are
+no exact-target mismatches, uncovered runtime changes, or new evolution
+move-access gaps. The 1,371 historical gaps remain separately reported, not
+silently filled or claimed absent.
+
+Generated profiles/species/bake verification, 19 checker tests, the focused
+mechanic and competitive-legality tests, and the playable debug ROM build
+pass. Flame Relay's six behavior tests pass. This completion status supersedes
+all historical "pending implementation" wording in the approval rows/audits
+below. Competitive-balance and visual playtesting remain separate from this
+implementation signoff; no commit or push was made.
+
+- [x] Remaining Ability packages and all final stat/move families, including
+  explicit Mega Crabominable and Pikachu costume/cap form coverage.
+- [x] Aromatisse's Revised learnset and the regular Ponyta/Rapidash-exclusive
+  Flame Relay (70 BP physical Fire pivot, level 40); shared Jump Kick access.
+- [x] Final whole-tree coverage audit, generated verification and ROM build.
+
+- [x] Selected moves for 41 additional decisions, including the Clefairy,
+  Golett, Meditite, Togepi, Natu, Skwovet, Pancham and Herdier families;
+  Arceus/Tapu signatures and other approved utility/capstone additions.
+  Matching forms and Medicham's inherited Meditate access are verified.
+
+- [x] Appletun/Flapple stats and tutors, including Gigantamax; Applin Leaf Storm;
+  Swirlix/Slurpuff Covet; Galarian Slowbro, Surskit and Swalot stats; Trapinch
+  level-up Bug Bite. Twenty additional decisions, including explicit rejected
+  changes, are reconciled and verified.
+
+- [x] Wool, gear, hive, dream and legendary-beast Ability packages; Lickitung's
+  final Unaware slot; Durant, Dusknoir and the Oddish family; selected Ampharos,
+  Bellossom and Rotom moves. Rotom's existing form Abilities are preserved.
+
+- [x] Rolling-rock, Machop/Crabrawler punch, Chewtle, Seedot, Blitzle,
+  seasonal-deer, Shinx, Garchomp, Omanyte, Remoraid and seal packages, with
+  their associated forms and existing tutors preserved. Shieldon/Bastiodon
+  Head Smash and Vigoroth's hidden Sheer Force are verified; the existing
+  Impenetrable and King's Domain mechanics remain unchanged.
+
+- [x] Approved stat progressions and selected moves for the Lotad, Wooper,
+  Centiskorch, Meowth, Jynx, Onix and Zigzagoon families; both Raticate forms,
+  Gogoat, Noctowl and selected standalone specialists. All Minior forms share
+  HP/Air Slash changes; all Silvally types reach 600 BST. Mega/Gigantamax
+  deltas and the deliberate Charjabug/Vikavolt exception are verified.
+
+- [x] Mankey, Aron, Gastly, Zubat and Elekid Ability families; Magby/Magmortar,
+  Chinchou/Lanturn, Tynamo/Eelektross, Voltorb/Electrode and both Glalie forms:
+  selected data and competitive remaps verified, without unrelated source
+  drift. All new move access accumulates through the covered forms/stages.
+
+- [x] Lake trio, Ninetales, Misdreavus/Mismagius, Gothita and Goodra lines,
+  Seviper, Froslass/Mega, every Furfrou trim, Buneary/Lopunny and
+  Glameow/Purugly: final typing/stats/moves verified, including the explicit
+  Goomy/Hisuian Recover exclusion. Existing Goodra Acid Armor tutor preserved.
+
+- [x] Selected bird/legendary tutors, Cramorant battle forms, Growlithe,
+  Bagon, Beedrill, Phanpy, Dragonair, Chingling, Poochyena, Mienfoo,
+  Togedemaru and all Unown forms: final data applied and verified. Regional
+  bird and Meowstic preservation targets pass; no new evolution move gaps.
+
+- [x] Selective Aipom, Anorith, Baltoy, Bronzor, Buizel, coal, Dwebble,
+  Cubone, Cottonee, Lileep, Dreepy, Litwick and Beldum family changes,
+  plus Dhelmise and Druddigon: exact targets and generated data verified;
+  competitive Ability legality test and playable ROM build pass.
+
+- [x] Farfetch'd lines, Hoppip, Kricketot, Ledyba, Sunkern, Tarountula/Spidops,
+  Dedenne, Delibird, Klawf, Luvdisc, Maractus and Turtonator: approved data
+  applied, final distribution cuts preserved, generated artifacts verified.
+- [x] Spider Disguise now works once per battle without changing species;
+  switching preserves its spent state. Eleven Disguise tests, five Tripwire
+  tests and two Unspeakable tests pass, including their combined behavior.
+- [x] Another 31 keep-as-is decisions reconciled across 69 complete-family/form
+  targets, including all Vivillon patterns, both Basculin evolutions, regional
+  Lilligant and the applicable Megas. No gameplay changes were made for them.
+
+- [x] Butterfree (including Gigantamax), Venonat/Venomoth, Azurill/Marill/Azumarill,
+  Bonsly/Sudowoodo, Bunnelby/Diggersby, Drampa/Mega Drampa and Goldeen/Seaking:
+  approved stats applied and exact runtime targets checked; existing typing,
+  Abilities and learnsets preserved.
+- [x] Clamperl/Huntail/Gorebyss: Clamperl unchanged, Huntail gains Psychic Fangs
+  at level 55, Gorebyss now uses Swift Swim / Regenerator / Hydration. Both
+  ordinary Regenerator switching and Shell Game's boosted Baton Pass passed
+  focused battle tests.
+- [x] Swirling Blade port and Honedge family: the move passes slicing,
+  critical-hit and contact tests; Honedge/Doublade gain hidden Sharpness and
+  level-26 Swirling Blade, while both Aegislash stances gain it at level 1.
+  Existing stats, moves and Aegislash's Stance Change remain unchanged.
+- [x] All 27 standard starter families: approved stats, second Ability slots,
+  selective moves and final typing decisions applied across their stages and
+  associated Mega, regional, Gigantamax and Greninja transformation forms.
+  Emboar's 11 old Reckless sets now use Mold Breaker; the reviewed source refresh
+  introduced no unrelated profile changes. Exact targets, generated data,
+  competitive Ability legality and the playable ROM build pass. Newly added
+  move access has no evolution gaps; historical gaps remain separately listed
+  for final reconciliation.
+- [x] Eevee family: all approved Ability arrangements and selective moves,
+  including Glaceon's stats; Flare Boost/Smolder passes its focused damage test.
+- [x] Volbeat/Illumise, both Qwilfish forms, Wurmple family, Elgyem/Beheeyem,
+  Pidgey family (including Mega), Numel/Camerupt (including Mega),
+  Barboach/Whiscash, Woobat/Swoobat and Burmy's complete split evolutions:
+  final audited targets applied. Exact manifest coverage is 139/650 rows and
+  169 species/forms, with 40 shared-design checks and no new evolution move gaps.
+  Competitive Camerupt, Barboach and Whiscash sets use Simple where required;
+  the guarded refresh contains only those 11 Ability replacements.
+- [x] Reconciled 24 additional keep-as-is decisions across complete families:
+  Gigalith, Calyrex, Deoxys, Miltank, Victini, Castform, Eldegoss, Falinks,
+  Frosmoth, Hypno, Kecleon, Oinkologne, Orbeetle, Squawkabilly, Stonjourner,
+  Trevenant, Watchog and Wugtrio. All 46 applicable stages/forms match the pinned
+  starting runtime and learnsets exactly. Total coverage is now 163/650 rows
+  and 215 species/forms; no gameplay changes were needed for this group.
+- [x] Reconciled 21 more keep-as-is rows: Absol, Alcremie, Alomomola,
+  Ralts/Kirlia/Gardevoir/Gallade, Axew/Haxorus, Cranidos/Rampardos,
+  Galvantula, Hydreigon/Zweilous, Jirachi, Kyogre, Lugia, Manaphy, Mimikyu,
+  Phione and Tauros. Complete families/forms add 97 preservation targets.
+  Coverage is 184/650 rows and 312 species/forms, with all 40 shared invariants
+  passing. Generated verification, focused runtime tests and the playable
+  debug ROM build pass; whole-ledger completion remains pending.
+- [ ] Remaining decisions, new moves and final whole-ledger reconciliation.
+
+Follow-up content checkpoint:
+
+- [x] Ekans, Spinarak, Cacnea, Skitty, Seel, Wooloo, Spoink, Finneon, Slugma,
+  Nickit, Clobbopus, Paras, Yungoos and Morelull families: final approved
+  stats, Abilities, typings and selective moves implemented across both stages.
+  No new evolution-access gaps; existing moves and tutors remain unless an
+  explicit level-only replacement was approved.
+- [x] Cobalion, Terrakion, Virizion and both Zacian forms gain their approved
+  Swirling Blade tutors; Cobalion also gains Rock Polish. Keldeo and the full
+  Pawniard line remain unchanged as approved.
+- [x] Carnivine, Heatmor, Emolga, Komala, Bruxish and Bouffalant: selective
+  approved moves/stats applied. Manifest coverage is now 223/650 rows and
+  356 species/forms; exact targets and deterministic profile verification pass.
+  Species/bake verification, the runtime competitive Ability legality test,
+  all 17 checker tests, and the playable debug ROM build also pass.
+
 ## Implemented targeted Ability decisions — 2026-09-08
 
 - [x] Huntail: Swift Swim / Intimidate / Water Veil.
-- [x] Gorebyss: Swift Swim / Dazzling / Hydration implemented on 2026-09-08.
-  Superseded by the pending 2026-09-10 Regenerator decision below; runtime still
-  uses Dazzling until that follow-up is implemented.
+- [x] Gorebyss: the original Dazzling choice was superseded by Regenerator;
+  the 2026-09-10 follow-up is now implemented and tested, as recorded above.
 - [x] Gigalith: verified the existing Sturdy / Stamina / Sand Force arrangement
   and its competitive-set remap; no additional change needed.
 - [x] Volbeat: Illuminate / Tinted Lens / Swarm.
@@ -26,10 +166,11 @@ Upstream comparison commit: `c0ea02119f`
 - [x] Regenerated species reports and baked data; regenerated Volbeat/Illumise
   competitive sets to remove Prankster, with no unrelated profile changes.
 
-Only these Ability decisions are crossed off. Their separately approved stats,
-typing, and learnsets remain pending, including Volbeat/Illumise's 465-BST
-spreads. The starter and Eeveelution audit tables below are also still approval
-records, not implementation status.
+This section records the original targeted Ability batch. Separately approved
+stats, typing and learnsets remain pending unless recorded in Implementation
+progress above. The starter and Eeveelution audit tables below are also
+approval records, not
+implementation status.
 
 Validation passed: four Impenetrable tests, four King's Domain tests, competitive
 profile Ability legality, species/bake verification, deterministic profile

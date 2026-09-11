@@ -12,89 +12,250 @@ Unique Abilities are intentionally excluded because they have no vanilla field t
 
 ## Summary
 
-- Base-stat changes: 101 species/forms
-- Typing changes: 29 species/forms
-- Normal Ability changes: 45 species/forms
+- Base-stat changes: 307 species/forms
+- Typing changes: 47 species/forms
+- Normal Ability changes: 295 species/forms
 - Species/forms without a canonical baseline: 25
 
 ## Base Stats
 
 | Pokémon | Canonical | Divergence | Change |
 |---|---|---|---|
+| Alolan Persian | 65/60/60/75/65/115 (440) | 65/60/60/95/65/120 (465) | +0/+0/+0/+20/+0/+5 (BST +25) |
+| Alolan Raticate | 75/71/70/40/80/77 (413) | 75/80/70/35/100/90 (450) | +0/+9/+0/-5/+20/+13 (BST +37) |
+| Appletun (2 forms) | 110/85/80/100/80/30 (485) | 110/85/85/105/85/30 (500) | +0/+0/+5/+5/+5/+0 (BST +15) |
 | Arbok | 60/95/69/65/79/80 (448) | 80/95/69/65/79/80 (468) | +20/+0/+0/+0/+0/+0 (BST +20) |
 | Ariados | 70/90/70/60/70/40 (400) | 90/90/70/60/70/40 (420) | +20/+0/+0/+0/+0/+0 (BST +20) |
 | Aromatisse | 101/72/72/99/89/29 (462) | 101/72/85/99/89/29 (475) | +0/+0/+13/+0/+0/+0 (BST +13) |
 | Avalugg | 95/117/184/44/46/28 (514) | 95/117/184/44/55/28 (523) | +0/+0/+0/+0/+9/+0 (BST +9) |
-| Banette | 64/115/65/83/63/65 (455) | 74/125/75/83/73/75 (505) | +10/+10/+10/+0/+10/+10 (BST +50) |
-| Beautifly | 60/70/50/100/50/65 (395) | 60/70/50/100/50/85 (415) | +0/+0/+0/+0/+0/+20 (BST +20) |
+| Azumarill | 100/50/80/60/80/50 (420) | 100/50/80/80/80/50 (440) | +0/+0/+0/+20/+0/+0 (BST +20) |
+| Azurill | 50/20/40/20/40/20 (190) | 50/20/40/40/40/20 (210) | +0/+0/+0/+20/+0/+0 (BST +20) |
+| Banette | 64/115/65/83/63/65 (455) | 64/125/65/93/63/65 (475) | +0/+10/+0/+10/+0/+0 (BST +20) |
+| Beautifly | 60/70/50/100/50/65 (395) | 60/70/50/120/50/85 (435) | +0/+0/+0/+20/+0/+20 (BST +40) |
 | Beheeyem | 75/75/75/125/95/40 (485) | 85/75/75/125/95/40 (495) | +10/+0/+0/+0/+0/+0 (BST +10) |
+| Bibarel | 79/85/60/55/60/71 (410) | 94/100/65/55/65/71 (450) | +15/+15/+5/+0/+5/+0 (BST +40) |
 | Boltund | 69/90/60/90/60/121 (490) | 69/100/60/90/60/121 (500) | +0/+10/+0/+0/+0/+0 (BST +10) |
+| Bonsly | 50/80/95/10/45/10 (290) | 60/85/95/10/55/10 (315) | +10/+5/+0/+0/+10/+0 (BST +25) |
+| Bouffalant | 95/110/95/40/95/55 (490) | 95/110/95/40/95/65 (500) | +0/+0/+0/+0/+0/+10 (BST +10) |
+| Bruxish | 68/105/70/70/70/92 (475) | 68/105/70/60/80/102 (485) | +0/+0/+0/-10/+10/+10 (BST +10) |
+| Bunnelby | 38/36/38/32/36/57 (237) | 45/38/40/30/40/57 (250) | +7/+2/+2/-2/+4/+0 (BST +13) |
+| Butterfree (2 forms) | 60/45/50/90/80/70 (395) | 65/45/60/100/90/90 (450) | +5/+0/+10/+10/+10/+20 (BST +55) |
 | Cacturne | 70/115/60/115/60/55 (475) | 70/115/70/115/70/65 (505) | +0/+0/+10/+0/+10/+10 (BST +30) |
 | Carnivine | 74/100/72/90/72/46 (454) | 94/100/72/90/72/46 (474) | +20/+0/+0/+0/+0/+0 (BST +20) |
 | Castform (4 forms) | 70/70/70/70/70/70 (420) | 80/60/70/90/70/80 (450) | +10/-10/+0/+20/+0/+10 (BST +30) |
+| Centiskorc (2 forms) | 100/115/65/90/90/65 (525) | 100/115/65/65/90/90 (525) | +0/+0/+0/-25/+0/+25 (BST +0) |
+| Charjabug | 57/82/95/55/75/36 (400) | 57/102/95/55/75/36 (420) | +0/+20/+0/+0/+0/+0 (BST +20) |
+| Cherrim (2 forms) | 70/60/70/87/78/85 (450) | 70/100/70/87/83/90 (500) | +0/+40/+0/+0/+5/+5 (BST +50) |
+| Cherubi | 45/35/45/62/53/35 (275) | 55/35/60/62/53/40 (305) | +10/+0/+15/+0/+0/+5 (BST +30) |
+| Chesnaught | 88/107/122/74/75/64 (530) | 93/107/122/74/75/64 (535) | +5/+0/+0/+0/+0/+0 (BST +5) |
 | Chimecho | 75/50/80/95/90/65 (455) | 85/50/85/100/95/75 (490) | +10/+0/+5/+5/+5/+10 (BST +35) |
+| Chingling | 45/30/50/65/50/45 (285) | 45/30/50/80/60/45 (310) | +0/+0/+0/+15/+10/+0 (BST +25) |
+| Cinccino | 75/95/60/65/60/115 (470) | 80/100/60/65/60/115 (480) | +5/+5/+0/+0/+0/+0 (BST +10) |
+| Cofagrigus | 58/50/145/95/105/30 (483) | 68/40/145/105/105/30 (493) | +10/-10/+0/+10/+0/+0 (BST +10) |
+| Corsola | 65/55/95/65/95/35 (410) | 65/45/115/90/115/35 (465) | +0/-10/+20/+25/+20/+0 (BST +55) |
+| Cramorant (3 forms) | 70/85/55/85/95/85 (475) | 70/85/55/100/95/105 (510) | +0/+0/+0/+15/+0/+20 (BST +35) |
+| Crobat | 85/90/80/70/80/130 (535) | 85/90/80/90/80/130 (555) | +0/+0/+0/+20/+0/+0 (BST +20) |
+| Crustle | 70/105/125/65/75/45 (485) | 70/105/125/65/75/55 (495) | +0/+0/+0/+0/+0/+10 (BST +10) |
+| Cryogonal | 80/50/50/95/135/105 (515) | 80/50/50/110/135/105 (530) | +0/+0/+0/+15/+0/+0 (BST +15) |
+| Cursola | 60/95/50/145/130/30 (510) | 60/75/50/145/130/55 (515) | +0/-20/+0/+0/+0/+25 (BST +5) |
+| Decidueye | 78/107/75/100/100/70 (530) | 78/107/75/100/100/75 (535) | +0/+0/+0/+0/+0/+5 (BST +5) |
 | Dedenne | 67/58/57/81/67/101 (431) | 67/58/57/95/67/101 (445) | +0/+0/+0/+14/+0/+0 (BST +14) |
 | Delcatty | 70/65/65/55/55/90 (400) | 70/85/65/75/55/90 (440) | +0/+20/+0/+20/+0/+0 (BST +40) |
 | Delibird | 45/55/45/65/45/75 (330) | 45/80/45/85/45/105 (405) | +0/+25/+0/+20/+0/+30 (BST +75) |
-| Dewgong | 90/70/80/70/95/70 (475) | 90/70/100/70/95/70 (495) | +0/+0/+20/+0/+0/+0 (BST +20) |
-| Dubwool | 72/80/100/60/90/88 (490) | 80/80/100/60/90/88 (498) | +8/+0/+0/+0/+0/+0 (BST +8) |
+| Dewgong | 90/70/80/70/95/70 (475) | 90/70/80/90/95/70 (495) | +0/+0/+0/+20/+0/+0 (BST +20) |
+| Dewott | 75/75/60/83/60/60 (413) | 75/83/60/75/60/60 (413) | +0/+8/+0/-8/+0/+0 (BST +0) |
+| Diggersby | 85/56/77/50/77/78 (423) | 101/61/80/50/80/78 (450) | +16/+5/+3/+0/+3/+0 (BST +27) |
+| Drampa | 78/60/85/135/91/36 (485) | 103/45/85/135/91/36 (495) | +25/-15/+0/+0/+0/+0 (BST +10) |
+| Druddigon | 77/120/90/60/90/48 (485) | 90/120/90/60/90/41 (491) | +13/+0/+0/+0/+0/-7 (BST +6) |
+| Dubwool | 72/80/100/60/90/88 (490) | 82/90/100/60/90/88 (510) | +10/+10/+0/+0/+0/+0 (BST +20) |
+| Dunsparce | 100/70/70/65/65/45 (415) | 100/90/70/65/65/45 (435) | +0/+20/+0/+0/+0/+0 (BST +20) |
 | Dustox | 60/50/70/50/90/65 (385) | 80/50/70/50/90/65 (405) | +20/+0/+0/+0/+0/+0 (BST +20) |
 | Eldegoss | 60/50/90/80/120/60 (460) | 75/50/90/80/120/60 (475) | +15/+0/+0/+0/+0/+0 (BST +15) |
+| Emboar | 110/123/65/100/65/65 (528) | 115/125/80/70/80/65 (535) | +5/+2/+15/-30/+15/+0 (BST +7) |
 | Emolga | 55/75/60/75/60/103 (428) | 55/75/60/85/60/103 (438) | +0/+0/+0/+10/+0/+0 (BST +10) |
+| Empoleon | 84/86/88/111/101/60 (530) | 84/86/88/116/101/60 (535) | +0/+0/+0/+5/+0/+0 (BST +5) |
 | Falinks | 65/100/100/70/60/75 (470) | 75/110/110/70/70/75 (510) | +10/+10/+10/+0/+10/+0 (BST +40) |
+| Feraligatr | 85/105/100/79/83/78 (530) | 85/110/100/69/83/88 (535) | +0/+5/+0/-10/+0/+10 (BST +5) |
+| Flapple (2 forms) | 70/110/80/95/60/70 (485) | 70/110/80/85/60/95 (500) | +0/+0/+0/-10/+0/+25 (BST +15) |
+| Froslass | 70/80/70/80/70/110 (480) | 70/70/70/110/70/110 (500) | +0/-10/+0/+30/+0/+0 (BST +20) |
 | Frosmoth | 70/65/60/125/90/65 (475) | 70/65/60/125/90/80 (490) | +0/+0/+0/+0/+0/+15 (BST +15) |
+| Furfrou (10 forms) | 75/80/60/65/90/102 (472) | 75/90/60/65/100/102 (492) | +0/+10/+0/+0/+10/+0 (BST +20) |
+| Furret | 85/76/64/45/55/90 (415) | 95/85/65/45/55/105 (450) | +10/+9/+1/+0/+0/+15 (BST +35) |
+| Galarian Corsola | 60/55/100/65/100/30 (410) | 60/45/100/90/100/30 (425) | +0/-10/+0/+25/+0/+0 (BST +15) |
+| Galarian Mr. Mime | 50/65/65/90/90/100 (460) | 50/55/65/100/90/105 (465) | +0/-10/+0/+10/+0/+5 (BST +5) |
+| Galarian Slowbro | 95/100/95/100/70/30 (490) | 95/75/105/115/70/30 (490) | +0/-25/+10/+15/+0/+0 (BST +0) |
+| Galarian Stunfisk | 109/81/99/66/84/32 (471) | 109/90/99/66/84/32 (480) | +0/+9/+0/+0/+0/+0 (BST +9) |
+| Glaceon | 65/60/110/130/95/65 (525) | 65/60/110/130/65/95 (525) | +0/+0/+0/+0/-30/+30 (BST +0) |
+| Glameow | 49/55/42/42/37/85 (310) | 50/65/45/45/40/90 (335) | +1/+10/+3/+3/+3/+5 (BST +25) |
+| Gogoat | 123/100/62/97/81/68 (531) | 123/108/72/67/87/74 (531) | +0/+8/+10/-30/+6/+6 (BST +0) |
+| Golbat | 75/80/70/65/75/90 (455) | 75/80/70/80/75/90 (470) | +0/+0/+0/+15/+0/+0 (BST +15) |
+| Goldeen | 45/67/60/35/50/63 (320) | 45/77/60/25/50/73 (330) | +0/+10/+0/-10/+0/+10 (BST +10) |
+| Golduck | 80/82/78/95/80/85 (500) | 80/72/78/100/80/100 (510) | +0/-10/+0/+5/+0/+15 (BST +10) |
+| Granbull | 90/120/75/60/60/45 (450) | 100/120/75/60/60/45 (460) | +10/+0/+0/+0/+0/+0 (BST +10) |
 | Grapploct | 80/118/90/70/80/42 (480) | 80/118/90/70/90/42 (490) | +0/+0/+0/+0/+10/+0 (BST +10) |
+| Greninja (2 forms) | 72/95/67/103/71/122 (530) | 72/100/67/103/71/122 (535) | +0/+5/+0/+0/+0/+0 (BST +5) |
+| Greninja (Ash) | 72/145/67/153/71/132 (640) | 72/150/67/153/71/132 (645) | +0/+5/+0/+0/+0/+0 (BST +5) |
+| Grovyle | 50/65/45/85/65/95 (405) | 50/85/45/65/65/95 (405) | +0/+20/+0/-20/+0/+0 (BST +0) |
 | Grumpig | 80/45/65/90/110/80 (470) | 90/45/75/100/110/80 (500) | +10/+0/+10/+10/+0/+0 (BST +30) |
-| Gumshoos | 88/110/60/55/60/45 (418) | 100/110/60/55/60/45 (430) | +12/+0/+0/+0/+0/+0 (BST +12) |
+| Gumshoos | 88/110/60/55/60/45 (418) | 88/125/70/52/70/45 (450) | +0/+15/+10/-3/+10/+0 (BST +32) |
 | Heatmor | 85/97/66/105/66/65 (484) | 85/97/66/105/66/80 (499) | +0/+0/+0/+0/+0/+15 (BST +15) |
+| Hisuian Decidueye | 88/112/80/95/95/60 (530) | 88/112/85/95/95/60 (535) | +0/+0/+5/+0/+0/+0 (BST +5) |
+| Hisuian Samurott | 90/108/80/100/65/85 (528) | 90/110/80/100/65/90 (535) | +0/+2/+0/+0/+0/+5 (BST +7) |
+| Hoppip | 35/35/40/35/55/50 (250) | 35/35/40/45/55/50 (260) | +0/+0/+0/+10/+0/+0 (BST +10) |
 | Hypno | 85/73/70/73/115/67 (483) | 85/73/70/95/115/67 (505) | +0/+0/+0/+22/+0/+0 (BST +22) |
+| Illumise | 65/47/75/73/85/85 (430) | 65/33/85/87/95/100 (465) | +0/-14/+10/+14/+10/+15 (BST +35) |
+| Jigglypuff | 115/45/20/45/25/20 (270) | 115/35/20/55/25/20 (270) | +0/-10/+0/+10/+0/+0 (BST +0) |
+| Jumpluff | 75/55/70/55/95/110 (460) | 75/55/70/85/95/110 (490) | +0/+0/+0/+30/+0/+0 (BST +30) |
+| Jynx | 65/50/35/115/95/95 (455) | 75/40/35/125/95/95 (465) | +10/-10/+0/+10/+0/+0 (BST +10) |
 | Kecleon | 60/90/70/60/120/40 (440) | 70/90/80/60/120/40 (460) | +10/+0/+10/+0/+0/+0 (BST +20) |
 | Klawf | 70/100/115/35/55/75 (450) | 70/100/115/35/70/75 (465) | +0/+0/+0/+0/+15/+0 (BST +15) |
-| Komala | 65/115/65/75/95/65 (480) | 65/115/80/75/95/65 (495) | +0/+0/+15/+0/+0/+0 (BST +15) |
+| Komala | 65/115/65/75/95/65 (480) | 85/115/65/75/95/75 (510) | +20/+0/+0/+0/+0/+10 (BST +30) |
+| Kricketot | 37/25/41/25/41/25 (194) | 37/35/41/35/41/25 (214) | +0/+10/+0/+10/+0/+0 (BST +20) |
 | Kricketune | 77/85/51/55/51/65 (384) | 77/95/61/65/61/65 (424) | +0/+10/+10/+10/+10/+0 (BST +40) |
+| Lanturn | 125/58/58/76/76/67 (460) | 125/58/58/91/86/67 (485) | +0/+0/+0/+15/+10/+0 (BST +25) |
 | Ledian | 55/35/50/55/110/85 (390) | 65/85/50/55/110/90 (455) | +10/+50/+0/+0/+0/+5 (BST +65) |
+| Litleo | 62/50/58/73/54/72 (369) | 62/70/58/73/54/72 (389) | +0/+20/+0/+0/+0/+0 (BST +20) |
+| Lombre | 60/50/50/60/70/50 (340) | 60/50/50/60/70/60 (350) | +0/+0/+0/+0/+0/+10 (BST +10) |
+| Lotad | 40/30/30/40/50/30 (220) | 40/30/30/40/50/35 (225) | +0/+0/+0/+0/+0/+5 (BST +5) |
+| Ludicolo | 80/70/70/90/100/70 (480) | 80/70/70/90/100/90 (500) | +0/+0/+0/+0/+0/+20 (BST +20) |
 | Lumineon | 69/69/76/69/86/91 (460) | 69/89/76/89/86/91 (500) | +0/+20/+0/+20/+0/+0 (BST +40) |
+| Lunatone | 90/55/65/95/85/70 (460) | 90/55/65/115/85/70 (480) | +0/+0/+0/+20/+0/+0 (BST +20) |
 | Luvdisc | 43/30/55/40/65/97 (330) | 53/30/55/85/65/122 (410) | +10/+0/+0/+45/+0/+25 (BST +80) |
 | Magcargo | 60/50/120/90/80/30 (430) | 80/50/120/90/80/30 (450) | +20/+0/+0/+0/+0/+0 (BST +20) |
-| Maractus | 75/86/67/106/67/60 (461) | 90/86/67/106/67/60 (476) | +15/+0/+0/+0/+0/+0 (BST +15) |
+| Maractus | 75/86/67/106/67/60 (461) | 75/106/72/86/81/60 (480) | +0/+20/+5/-20/+14/+0 (BST +19) |
+| Marill | 70/20/50/20/50/40 (250) | 70/20/50/40/50/40 (270) | +0/+0/+0/+20/+0/+0 (BST +20) |
 | Marowak (2 forms) | 60/80/110/50/80/45 (425) | 70/90/110/50/80/45 (445) | +10/+10/+0/+0/+0/+0 (BST +20) |
-| Mega Banette | 64/165/75/93/83/75 (555) | 74/175/85/93/93/85 (605) | +10/+10/+10/+0/+10/+10 (BST +50) |
+| Mega Banette | 64/165/75/93/83/75 (555) | 64/175/75/103/83/75 (575) | +0/+10/+0/+10/+0/+0 (BST +20) |
+| Mega Chesnaught | 88/137/172/74/115/44 (630) | 93/137/172/74/115/44 (635) | +5/+0/+0/+0/+0/+0 (BST +5) |
 | Mega Chimecho | 75/50/110/135/120/65 (555) | 85/50/115/140/125/75 (590) | +10/+0/+5/+5/+5/+10 (BST +35) |
+| Mega Drampa | 78/85/110/160/116/36 (585) | 103/70/110/160/116/36 (595) | +25/-15/+0/+0/+0/+0 (BST +10) |
+| Mega Emboar | 110/148/75/110/110/75 (628) | 115/150/90/80/125/75 (635) | +5/+2/+15/-30/+15/+0 (BST +7) |
+| Mega Feraligatr | 85/160/125/89/93/78 (630) | 85/165/125/79/93/88 (635) | +0/+5/+0/-10/+0/+10 (BST +5) |
+| Mega Froslass | 70/80/70/140/100/120 (580) | 70/70/70/170/100/120 (600) | +0/-10/+0/+30/+0/+0 (BST +20) |
+| Mega Greninja | 72/125/77/133/81/142 (630) | 72/130/77/133/81/142 (635) | +0/+5/+0/+0/+0/+0 (BST +5) |
+| Mega Pidgeot | 83/80/80/135/80/121 (579) | 83/60/75/150/80/121 (569) | +0/-20/-5/+15/+0/+0 (BST -10) |
+| Mega Sceptile | 70/110/75/145/85/145 (630) | 70/130/75/125/85/145 (630) | +0/+20/+0/-20/+0/+0 (BST +0) |
+| Mega Steelix | 75/125/230/55/95/30 (610) | 75/145/230/45/95/30 (620) | +0/+20/+0/-10/+0/+0 (BST +10) |
 | Meowstic (F Mega) | 74/48/76/143/101/124 (566) | 74/48/76/155/101/124 (578) | +0/+0/+0/+12/+0/+0 (BST +12) |
 | Meowstic (Female) | 74/48/76/83/81/104 (466) | 74/48/76/95/81/104 (478) | +0/+0/+0/+12/+0/+0 (BST +12) |
 | Meowstic (M Mega) | 74/48/76/143/101/124 (566) | 86/48/76/143/101/124 (578) | +12/+0/+0/+0/+0/+0 (BST +12) |
 | Meowstic (Male) | 74/48/76/83/81/104 (466) | 86/48/76/83/81/104 (478) | +12/+0/+0/+0/+0/+0 (BST +12) |
+| Meowth (2 forms) | 40/45/35/40/40/90 (290) | 45/60/35/30/40/90 (300) | +5/+15/+0/-10/+0/+0 (BST +10) |
 | Mightyena | 70/90/70/60/60/70 (420) | 70/90/70/60/60/100 (450) | +0/+0/+0/+0/+0/+30 (BST +30) |
-| Mothim | 70/94/50/94/50/66 (424) | 70/94/50/94/50/86 (444) | +0/+0/+0/+0/+0/+20 (BST +20) |
+| Mime Jr. | 20/25/45/70/90/60 (310) | 20/15/45/80/90/65 (315) | +0/-10/+0/+10/+0/+5 (BST +5) |
+| Minior (7 forms) | 60/100/60/100/60/120 (500) | 80/100/60/100/60/120 (520) | +20/+0/+0/+0/+0/+0 (BST +20) |
+| Minior (7 forms) | 60/60/100/60/100/60 (440) | 80/60/100/60/100/60 (460) | +20/+0/+0/+0/+0/+0 (BST +20) |
+| Minun | 60/40/50/75/85/95 (405) | 65/90/95/40/50/110 (450) | +5/+50/+45/-35/-35/+15 (BST +45) |
+| Mothim | 70/94/50/94/50/66 (424) | 70/70/50/110/50/100 (450) | +0/-24/+0/+16/+0/+34 (BST +26) |
+| Mr. Mime | 40/45/65/100/120/90 (460) | 40/35/65/110/120/95 (465) | +0/-10/+0/+10/+0/+5 (BST +5) |
+| Mr. Rime | 80/85/75/110/100/70 (520) | 80/65/75/110/100/100 (530) | +0/-20/+0/+0/+0/+30 (BST +10) |
+| Noctowl | 100/50/50/86/96/70 (452) | 110/40/40/106/116/60 (472) | +10/-10/-10/+20/+20/-10 (BST +20) |
+| Nosepass | 30/45/135/45/90/30 (375) | 30/35/135/55/90/30 (375) | +0/-10/+0/+10/+0/+0 (BST +0) |
+| Nuzleaf | 70/70/40/60/40/60 (340) | 70/80/40/60/40/60 (350) | +0/+10/+0/+0/+0/+0 (BST +10) |
+| Obstagoon | 93/90/101/60/81/95 (520) | 98/100/101/55/81/100 (535) | +5/+10/+0/-5/+0/+5 (BST +15) |
+| Octillery | 75/105/75/105/75/45 (480) | 75/115/75/115/75/45 (500) | +0/+10/+0/+10/+0/+0 (BST +20) |
 | Oinkologne (Female) | 115/90/70/59/90/65 (489) | 115/90/80/59/90/65 (499) | +0/+0/+10/+0/+0/+0 (BST +10) |
 | Oinkologne (Male) | 110/100/75/59/80/65 (489) | 110/110/75/59/80/65 (499) | +0/+10/+0/+0/+0/+0 (BST +10) |
+| Onix | 35/45/160/30/45/70 (385) | 35/75/160/30/45/80 (425) | +0/+30/+0/+0/+0/+10 (BST +40) |
 | Orbeetle (2 forms) | 60/45/110/80/120/90 (505) | 60/45/110/95/120/90 (520) | +0/+0/+0/+15/+0/+0 (BST +15) |
+| Oshawott | 55/55/45/63/45/45 (308) | 55/63/45/55/45/45 (308) | +0/+8/+0/-8/+0/+0 (BST +0) |
+| Pachirisu | 60/45/70/45/90/95 (405) | 60/45/80/80/90/95 (450) | +0/+0/+10/+35/+0/+0 (BST +45) |
 | Parasect | 60/95/80/60/80/30 (405) | 80/95/80/60/80/30 (425) | +20/+0/+0/+0/+0/+0 (BST +20) |
-| Shiinotic | 60/45/80/90/100/30 (405) | 75/45/80/90/100/30 (420) | +15/+0/+0/+0/+0/+0 (BST +15) |
-| Spidops | 60/79/92/52/86/35 (404) | 75/79/92/52/86/35 (419) | +15/+0/+0/+0/+0/+0 (BST +15) |
+| Perrserker | 70/110/100/50/60/50 (440) | 70/110/105/50/80/50 (465) | +0/+0/+5/+0/+20/+0 (BST +25) |
+| Persian | 65/70/60/65/65/115 (440) | 65/90/60/80/65/115 (475) | +0/+20/+0/+15/+0/+0 (BST +35) |
+| Pidgeot | 83/80/75/70/70/101 (479) | 83/60/70/85/70/101 (469) | +0/-20/-5/+15/+0/+0 (BST -10) |
+| Pidgeotto | 63/60/55/50/50/71 (349) | 63/50/50/65/50/71 (349) | +0/-10/-5/+15/+0/+0 (BST +0) |
+| Pidgey | 40/45/40/35/35/56 (251) | 40/35/35/50/35/56 (251) | +0/-10/-5/+15/+0/+0 (BST +0) |
+| Pidove | 50/55/50/36/30/43 (264) | 50/36/50/55/30/43 (264) | +0/-19/+0/+19/+0/+0 (BST +0) |
+| Plusle | 60/50/40/85/75/95 (405) | 60/50/50/95/85/110 (450) | +0/+0/+10/+10/+10/+15 (BST +45) |
+| Poliwrath | 90/95/95/70/90/70 (510) | 90/105/95/60/90/70 (510) | +0/+10/+0/-10/+0/+0 (BST +0) |
+| Poochyena | 35/55/35/30/30/35 (220) | 35/55/35/30/30/50 (235) | +0/+0/+0/+0/+0/+15 (BST +15) |
+| Probopass | 60/55/145/75/150/40 (525) | 70/50/135/90/140/40 (525) | +10/-5/-10/+15/-10/+0 (BST +0) |
+| Purugly | 71/82/64/64/59/112 (452) | 90/95/70/65/60/115 (495) | +19/+13/+6/+1/+1/+3 (BST +43) |
+| Pyroar | 86/68/72/109/66/106 (507) | 86/88/72/109/66/106 (527) | +0/+20/+0/+0/+0/+0 (BST +20) |
+| Pyukumuku | 55/60/130/30/130/5 (410) | 85/30/130/30/130/5 (410) | +30/-30/+0/+0/+0/+0 (BST +0) |
+| Quagsire | 95/85/85/65/65/35 (430) | 95/95/95/65/65/35 (450) | +0/+10/+10/+0/+0/+0 (BST +20) |
+| Qwilfish | 65/95/85/55/55/85 (440) | 65/95/95/45/55/85 (440) | +0/+0/+10/-10/+0/+0 (BST +0) |
+| Raichu | 60/90/55/90/80/110 (485) | 60/95/55/95/80/110 (495) | +0/+5/+0/+5/+0/+0 (BST +10) |
+| Raticate | 55/81/60/50/70/97 (413) | 55/97/70/45/70/113 (450) | +0/+16/+10/-5/+0/+16 (BST +37) |
+| Rotom | 50/50/77/95/77/91 (440) | 50/50/77/95/77/101 (450) | +0/+0/+0/+0/+0/+10 (BST +10) |
+| Runerigus | 58/95/145/50/105/30 (483) | 68/105/145/40/105/30 (493) | +10/+10/+0/-10/+0/+0 (BST +10) |
+| Samurott | 95/100/85/108/70/70 (528) | 95/110/85/105/70/70 (535) | +0/+10/+0/-3/+0/+0 (BST +7) |
+| Sandslash | 75/100/110/45/55/65 (450) | 75/110/120/25/65/65 (460) | +0/+10/+10/-20/+10/+0 (BST +10) |
+| Sawsbuck (4 forms) | 80/100/70/60/70/95 (475) | 85/110/70/60/70/95 (490) | +5/+10/+0/+0/+0/+0 (BST +15) |
+| Sceptile | 70/85/65/105/85/120 (530) | 70/105/65/85/85/120 (530) | +0/+20/+0/-20/+0/+0 (BST +0) |
+| Seaking | 80/92/65/65/80/68 (450) | 80/122/80/45/80/78 (485) | +0/+30/+15/-20/+0/+10 (BST +35) |
+| Seedot | 40/40/50/30/30/30 (220) | 40/45/50/30/30/30 (225) | +0/+5/+0/+0/+0/+0 (BST +5) |
+| Sentret | 35/46/34/35/45/20 (215) | 45/45/35/35/45/40 (245) | +10/-1/+1/+0/+0/+20 (BST +30) |
+| Seviper | 73/100/60/100/60/65 (458) | 75/115/60/80/60/75 (465) | +2/+15/+0/-20/+0/+10 (BST +7) |
+| Shiftry | 90/100/60/90/60/80 (480) | 90/120/60/90/60/80 (500) | +0/+20/+0/+0/+0/+0 (BST +20) |
+| Shiinotic | 60/45/80/90/100/30 (405) | 90/45/80/100/105/30 (450) | +30/+0/+0/+10/+5/+0 (BST +45) |
+| Silvally (18 forms) | 95/95/95/95/95/95 (570) | 100/100/100/100/100/100 (600) | +5/+5/+5/+5/+5/+5 (BST +30) |
+| Sizzlipede | 50/65/45/50/50/45 (305) | 50/65/45/45/50/50 (305) | +0/+0/+0/-5/+0/+5 (BST +0) |
+| Skiploom | 55/45/50/45/65/80 (340) | 55/45/50/65/65/80 (360) | +0/+0/+0/+20/+0/+0 (BST +20) |
+| Skitty | 50/45/45/35/35/50 (260) | 50/50/50/40/40/60 (290) | +0/+5/+5/+5/+5/+10 (BST +30) |
+| Slugma | 40/40/40/70/40/20 (250) | 50/50/50/90/50/20 (310) | +10/+10/+10/+20/+10/+0 (BST +60) |
+| Slurpuff | 82/80/86/85/75/72 (480) | 82/90/86/85/75/72 (490) | +0/+10/+0/+0/+0/+0 (BST +10) |
+| Smoochum | 45/30/15/85/65/65 (305) | 45/30/15/95/65/65 (315) | +0/+0/+0/+10/+0/+0 (BST +10) |
+| Snubbull | 60/80/50/40/40/30 (300) | 65/80/50/40/40/30 (305) | +5/+0/+0/+0/+0/+0 (BST +5) |
+| Solrock | 90/95/85/55/65/70 (460) | 90/115/85/55/65/70 (480) | +0/+20/+0/+0/+0/+0 (BST +20) |
+| Spidops | 60/79/92/52/86/35 (404) | 85/94/92/52/86/41 (450) | +25/+15/+0/+0/+0/+6 (BST +46) |
+| Spoink | 60/25/35/70/80/60 (330) | 65/25/35/70/80/60 (335) | +5/+0/+0/+0/+0/+0 (BST +5) |
 | Sqawkabily (4 forms) | 82/96/51/45/51/92 (417) | 90/96/51/45/51/92 (425) | +8/+0/+0/+0/+0/+0 (BST +8) |
+| Steelix | 75/85/200/55/65/30 (510) | 75/105/200/45/65/30 (520) | +0/+20/+0/-10/+0/+0 (BST +10) |
 | Stonjourne (R) | 100/125/135/20/20/70 (470) | 100/125/135/20/45/70 (495) | +0/+0/+0/+0/+25/+0 (BST +25) |
+| Stoutland | 85/110/90/45/90/80 (500) | 95/115/90/45/90/80 (515) | +10/+5/+0/+0/+0/+0 (BST +15) |
+| Stunfisk | 109/66/84/81/99/32 (471) | 109/66/84/90/99/32 (480) | +0/+0/+0/+9/+0/+0 (BST +9) |
+| Sudowoodo | 70/100/115/30/65/30 (410) | 90/115/125/30/75/30 (465) | +20/+15/+10/+0/+10/+0 (BST +55) |
 | Sunflora | 75/75/55/105/85/30 (425) | 75/75/55/105/85/50 (445) | +0/+0/+0/+0/+0/+20 (BST +20) |
-| Thievul | 70/58/58/87/92/90 (455) | 70/58/58/100/92/90 (468) | +0/+0/+0/+13/+0/+0 (BST +13) |
+| Sunkern | 30/30/30/30/30/30 (180) | 50/30/50/30/50/30 (240) | +20/+0/+20/+0/+20/+0 (BST +60) |
+| Surskit | 40/30/32/50/52/65 (269) | 40/30/30/55/55/65 (275) | +0/+0/-2/+5/+3/+0 (BST +6) |
+| Swalot | 100/73/83/73/83/55 (467) | 100/73/88/93/88/55 (497) | +0/+0/+5/+20/+5/+0 (BST +30) |
+| Swanna | 75/87/63/87/63/98 (473) | 82/63/65/109/83/98 (500) | +7/-24/+2/+22/+20/+0 (BST +27) |
+| Swellow | 60/85/60/75/50/125 (455) | 60/85/60/85/50/125 (465) | +0/+0/+0/+10/+0/+0 (BST +10) |
+| Swoobat | 67/57/55/77/55/114 (425) | 70/57/63/86/65/114 (455) | +3/+0/+8/+9/+10/+0 (BST +30) |
+| Talonflame | 78/81/71/74/69/126 (499) | 78/91/71/74/69/126 (509) | +0/+10/+0/+0/+0/+0 (BST +10) |
+| Thievul | 70/58/58/87/92/90 (455) | 70/38/58/97/112/90 (465) | +0/-20/+0/+10/+20/+0 (BST +10) |
 | Togedemaru | 65/98/63/40/73/96 (435) | 75/98/63/40/73/96 (445) | +10/+0/+0/+0/+0/+0 (BST +10) |
+| Tranquill | 62/77/62/50/42/65 (358) | 65/50/65/77/42/66 (365) | +3/-27/+3/+27/+0/+1 (BST +7) |
+| Treecko | 40/45/35/65/55/70 (310) | 40/65/35/45/55/70 (310) | +0/+20/+0/-20/+0/+0 (BST +0) |
 | Trevenant | 85/110/76/65/82/56 (474) | 95/110/76/65/82/56 (484) | +10/+0/+0/+0/+0/+0 (BST +10) |
 | Tropius | 99/68/83/72/87/51 (460) | 99/68/83/92/87/51 (480) | +0/+0/+0/+20/+0/+0 (BST +20) |
-| Turtonator | 60/78/135/91/85/36 (485) | 70/78/135/91/85/36 (495) | +10/+0/+0/+0/+0/+0 (BST +10) |
+| Turtonator | 60/78/135/91/85/36 (485) | 80/58/135/101/85/36 (495) | +20/-20/+0/+10/+0/+0 (BST +10) |
+| Unfezant | 80/115/80/65/55/93 (488) | 80/65/80/110/55/95 (485) | +0/-50/+0/+45/+0/+2 (BST -3) |
 | Unown (28 forms) | 48/72/48/72/48/48 (336) | 48/72/48/72/48/72 (360) | +0/+0/+0/+0/+0/+24 (BST +24) |
+| Venomoth | 70/65/60/90/75/90 (450) | 70/55/60/100/75/90 (450) | +0/-10/+0/+10/+0/+0 (BST +0) |
+| Venonat | 60/55/50/40/55/45 (305) | 70/55/55/50/60/45 (335) | +10/+0/+5/+10/+5/+0 (BST +30) |
+| Volbeat | 65/73/75/47/85/85 (430) | 65/33/75/107/85/100 (465) | +0/-40/+0/+60/+0/+15 (BST +35) |
+| Wailord | 170/90/45/90/45/60 (500) | 200/90/45/90/45/60 (530) | +30/+0/+0/+0/+0/+0 (BST +30) |
 | Watchog | 60/85/69/60/69/77 (420) | 60/95/69/60/69/77 (430) | +0/+10/+0/+0/+0/+0 (BST +10) |
+| Whimsicott | 60/67/85/77/75/116 (480) | 60/67/85/87/75/116 (490) | +0/+0/+0/+10/+0/+0 (BST +10) |
+| Whiscash | 110/78/73/76/71/60 (468) | 110/93/73/76/73/60 (485) | +0/+15/+0/+0/+2/+0 (BST +17) |
 | Wigglytuff | 140/70/45/85/50/45 (435) | 140/70/65/85/65/45 (470) | +0/+0/+20/+0/+15/+0 (BST +35) |
-| Wormadam (Plant Cloak) | 60/59/85/79/105/36 (424) | 80/59/85/79/105/36 (444) | +20/+0/+0/+0/+0/+0 (BST +20) |
-| Wormadam (Sandy Cloak) | 60/79/105/59/85/36 (424) | 80/79/105/59/85/36 (444) | +20/+0/+0/+0/+0/+0 (BST +20) |
-| Wormadam (Trash Cloak) | 60/69/95/69/95/36 (424) | 80/69/95/69/95/36 (444) | +20/+0/+0/+0/+0/+0 (BST +20) |
+| Woobat | 65/45/43/55/43/72 (323) | 65/45/43/65/43/72 (333) | +0/+0/+0/+10/+0/+0 (BST +10) |
+| Wooloo | 42/40/55/40/45/48 (270) | 52/50/55/40/45/48 (290) | +10/+10/+0/+0/+0/+0 (BST +20) |
+| Wooper (2 forms) | 55/45/45/25/25/15 (210) | 55/55/55/25/25/15 (230) | +0/+10/+10/+0/+0/+0 (BST +20) |
+| Wormadam (Plant Cloak) | 60/59/85/79/105/36 (424) | 60/50/90/110/110/30 (450) | +0/-9/+5/+31/+5/-6 (BST +26) |
+| Wormadam (Sandy Cloak) | 60/79/105/59/85/36 (424) | 80/85/105/59/85/36 (450) | +20/+6/+0/+0/+0/+0 (BST +26) |
+| Wormadam (Trash Cloak) | 60/69/95/69/95/36 (424) | 80/72/95/72/95/36 (450) | +20/+3/+0/+3/+0/+0 (BST +26) |
 | Wugtrio | 35/100/50/50/70/120 (425) | 35/115/50/50/70/120 (440) | +0/+15/+0/+0/+0/+0 (BST +15) |
+| Xatu | 65/75/70/95/70/95 (470) | 65/65/70/105/80/95 (480) | +0/-10/+0/+10/+10/+0 (BST +10) |
+| Zangoose | 73/115/60/60/60/90 (458) | 75/115/60/60/60/95 (465) | +2/+0/+0/+0/+0/+5 (BST +7) |
+| Zubat | 40/45/35/30/40/55 (245) | 40/45/35/45/40/55 (260) | +0/+0/+0/+15/+0/+0 (BST +15) |
 
 ## Typing
 
 | Pokémon | Canonical | Divergence |
 |---|---|---|
+| Accelgor | Bug | Bug / Dark |
+| Azelf | Psychic | Psychic / Fairy |
 | Bonsly | Rock | Grass |
+| Clobbopus | Fighting | Fighting / Water |
+| Dewott | Water | Water / Fighting |
 | Dodrio | Normal / Flying | Ground / Flying |
 | Electivire | Electric | Electric / Fighting |
+| Emboar | Fire / Fighting | Fire / Ground |
+| Farfetchd | Normal / Flying | Fighting / Flying |
 | Florges (5 forms) | Fairy | Fairy / Grass |
 | Furfrou (Dandy Trim) | Normal | Normal / Dark |
 | Furfrou (Debutante Trim) | Normal | Normal / Grass |
@@ -105,17 +266,28 @@ Unique Abilities are intentionally excluded because they have no vanilla field t
 | Furfrou (Matron Trim) | Normal | Normal / Psychic |
 | Furfrou (Pharaoh Trim) | Normal | Normal / Ground |
 | Furfrou (Star Trim) | Normal | Normal / Electric |
+| Glalie (2 forms) | Ice | Ice / Rock |
 | Golduck | Water | Water / Psychic |
-| Goodra | Dragon | Dragon / Poison |
 | Gorebyss | Water | Water / Fairy |
+| Grapploct | Fighting | Fighting / Water |
 | Huntail | Water | Water / Dragon |
 | Illumise | Bug | Bug / Fairy |
+| Lopunny | Normal | Normal / Fighting |
+| Luvdisc | Water | Water / Fairy |
 | Lycanroc (Midnight) | Rock | Rock / Dark |
 | Masquerain | Bug / Flying | Bug / Water |
 | Mega Absol | Dark | Dark / Fairy |
+| Mega Banette | Ghost | Ghost / Normal |
+| Mesprit | Psychic | Psychic / Fairy |
+| Mismagius | Ghost | Ghost / Fairy |
+| Ninetales | Fire | Fire / Fairy |
 | Noctowl | Normal / Flying | Psychic / Flying |
 | Parasect | Bug / Grass | Ghost / Grass |
+| Pignite | Fire / Fighting | Fire / Ground |
+| Samurott | Water | Water / Fighting |
+| Seviper | Poison | Poison / Dark |
 | Sudowoodo | Rock | Grass |
+| Uxie | Psychic | Psychic / Fairy |
 | Volbeat | Bug | Bug / Electric |
 
 ## Normal Abilities
@@ -123,18 +295,151 @@ Unique Abilities are intentionally excluded because they have no vanilla field t
 | Pokémon | Canonical | Divergence |
 |---|---|---|
 | Abomasnow | Snow Warning / — / Soundproof | Grass Pelt / — / Soundproof |
+| Accelgor | Hydration / Sticky Hold / Unburden | Infiltrator / Sticky Hold / Unburden |
+| Aggron | Sturdy / Rock Head / Heavy Metal | Sturdy / Rock Head / Earth Eater |
+| Alolan Sandshrew | Snow Cloak / — / Slush Rush | Snow Cloak / Ice Body / Slush Rush |
+| Alolan Sandslash | Snow Cloak / — / Slush Rush | Snow Cloak / Iron Barbs / Slush Rush |
 | Amaura | Refrigerate / — / Snow Warning | Refrigerate / — / Solid Rock |
+| Ampharos | Static / — / Plus | Static / Overcoat / Cotton Down |
+| Annihilape | Vital Spirit / Inner Focus / Defiant | Defiant / Anger Point / Vital Spirit |
 | Arboliva | Seed Sower / — / Harvest | Natural Cure / — / Harvest |
+| Aron | Sturdy / Rock Head / Heavy Metal | Sturdy / Rock Head / Earth Eater |
 | Aurorus | Refrigerate / — / Snow Warning | Refrigerate / — / Solid Rock |
+| Barboach | Oblivious / Anticipation / Hydration | Simple / Anticipation / Hydration |
 | Bastiodon | Sturdy / — / Soundproof | Sturdy / Solid Rock / Soundproof |
+| Bayleef | Overgrow / — / Leaf Guard | Overgrow / Filter / Triage |
+| Beartic | Snow Cloak / Slush Rush / Swift Swim | Swift Swim / Slush Rush / Tough Claws |
+| Beldum | Clear Body / — / Light Metal | Clear Body / Rock Head / Light Metal |
+| Bellossom | Chlorophyll / — / Healer | Chlorophyll / Cloud Nine / Healer |
+| Blastoise (2 forms) | Torrent / — / Rain Dish | Torrent / Rain Dish / Shell Armor |
+| Blaziken | Blaze / — / Speed Boost | Blaze / Early Bird / Speed Boost |
+| Braixen | Blaze / — / Magician | Blaze / Magician / Magic Guard |
+| Brionne | Torrent / — / Liquid Voice | Torrent / Healer / Liquid Voice |
+| Bulbasaur | Overgrow / — / Chlorophyll | Overgrow / Sweet Veil / Chlorophyll |
+| Burmy (3 forms) | Shed Skin / — / Overcoat | Shed Skin / Battle Armor / Overcoat |
+| Cacnea | Sand Veil / — / Water Absorb | Sand Veil / Rough Skin / Water Absorb |
+| Cacturne | Sand Veil / — / Water Absorb | Sand Veil / Rough Skin / Water Absorb |
+| Camerupt | Magma Armor / Solid Rock / Anger Point | Magma Armor / Simple / Solid Rock |
+| Charizard (2 forms) | Blaze / — / Solar Power | Blaze / Defiant / Solar Power |
+| Charmander | Blaze / — / Solar Power | Blaze / Defiant / Solar Power |
+| Charmeleon | Blaze / — / Solar Power | Blaze / Defiant / Solar Power |
+| Chatot | Keen Eye / Tangled Feet / Big Pecks | Soundproof / Tangled Feet / Punk Rock |
+| Chesnaught | Overgrow / — / Bulletproof | Overgrow / Iron Barbs / Bulletproof |
+| Chespin | Overgrow / — / Bulletproof | Overgrow / Iron Barbs / Bulletproof |
+| Chikorita | Overgrow / — / Leaf Guard | Overgrow / Filter / Triage |
+| Chimchar | Blaze / — / Iron Fist | Blaze / Flame Body / Iron Fist |
+| Cinderace (2 forms) | Blaze / — / Libero | Blaze / Receiver / Libero |
+| Clobbopus | Limber / — / Technician | Limber / Sticky Hold / Technician |
+| Combee | Honey Gather / — / Hustle | Honey Gather / Hustle / Sweet Veil |
+| Combusken | Blaze / — / Speed Boost | Blaze / Early Bird / Speed Boost |
+| Crobat | Inner Focus / — / Infiltrator | Inner Focus / Sniper / Infiltrator |
+| Crocalor | Blaze / — / Unaware | Blaze / Soundproof / Unaware |
+| Croconaw | Torrent / — / Sheer Force | Torrent / Strong Jaw / Sheer Force |
+| Cursola | Weak Armor / — / Perish Body | Weak Armor / Unburden / Perish Body |
+| Cyndaquil | Blaze / — / Flash Fire | Blaze / Flash Fire / Adaptability |
+| Dartrix | Overgrow / — / Long Reach | Overgrow / Keen Eye / Long Reach |
+| Decidueye | Overgrow / — / Long Reach | Overgrow / Keen Eye / Long Reach |
+| Dedenne | Cheek Pouch / Pickup / Plus | Cheek Pouch / Pickup / Electric Surge |
+| Delibird | Vital Spirit / Hustle / Insomnia | Vital Spirit / Technician / Sheer Force |
+| Delphox | Blaze / — / Magician | Blaze / Magician / Magic Guard |
+| Dewgong | Thick Fat / Hydration / Ice Body | Thick Fat / Hydration / Ice Scales |
+| Dewott | Torrent / — / Shell Armor | Torrent / Shell Armor / Super Luck |
 | Dolliv | Early Bird / — / Harvest | Natural Cure / — / Harvest |
-| Gengar (2 forms) | Cursed Body / — / — | Levitate / — / — |
+| Doublade | No Guard / — / — | No Guard / — / Sharpness |
+| Drifblim | Aftermath / Unburden / Flare Boost | Wind Rider / Unburden / Flare Boost |
+| Drifloon | Aftermath / Unburden / Flare Boost | Wind Rider / Unburden / Flare Boost |
+| Drizzile | Torrent / — / Sniper | Torrent / Shed Skin / Sniper |
+| Ducklett | Keen Eye / Big Pecks / Hydration | Friend Guard / Big Pecks / Hydration |
+| Durant | Swarm / Hustle / Truant | Heatproof / Hustle / Truant |
+| Dusknoir | Pressure / — / Frisk | Iron Fist / — / Frisk |
+| Electabuzz | Static / — / Vital Spirit | Volt Absorb / Static / Vital Spirit |
+| Electivire | Motor Drive / — / Vital Spirit | Motor Drive / Iron Fist / Vital Spirit |
+| Elekid | Static / — / Vital Spirit | Volt Absorb / Static / Vital Spirit |
+| Emboar | Blaze / — / Reckless | Blaze / Thick Fat / Mold Breaker |
+| Empoleon | Torrent / — / Competitive | Torrent / Vital Spirit / Competitive |
+| Entei | Pressure / — / Inner Focus | Pressure / — / Flash Fire |
+| Escavalier | Swarm / Shell Armor / Overcoat | No Guard / Shell Armor / Overcoat |
+| Espeon | Synchronize / Synchronize / Magic Bounce | Synchronize / Forewarn / Magic Bounce |
+| Exploud | Soundproof / — / Scrappy | Soundproof / Scrappy / Punk Rock |
+| Farfetchd | Keen Eye / Inner Focus / Defiant | Super Luck / Sharpness / Defiant |
+| Farfetchd Galarian | Steadfast / — / Scrappy | Steadfast / Sharpness / Scrappy |
+| Fearow | Keen Eye / — / Sniper | Keen Eye / Intimidate / Sniper |
+| Fennekin | Blaze / — / Magician | Blaze / Magician / Magic Guard |
+| Feraligatr | Torrent / — / Sheer Force | Torrent / Strong Jaw / Sheer Force |
+| Finneon | Swift Swim / Storm Drain / Water Veil | Swift Swim / Storm Drain / Dazzling |
+| Flaaffy | Static / — / Plus | Static / Overcoat / Cotton Down |
+| Flabébé (5 forms) | Flower Veil / — / Symbiosis | Flower Veil / Natural Cure / Symbiosis |
+| Flareon | Flash Fire / Flash Fire / Guts | Flash Fire / Flare Boost / Guts |
+| Floette (6 forms) | Flower Veil / — / Symbiosis | Flower Veil / Natural Cure / Symbiosis |
+| Floragato | Overgrow / — / Protean | Overgrow / Magician / Protean |
+| Florges (5 forms) | Flower Veil / — / Symbiosis | Flower Veil / Natural Cure / Symbiosis |
+| Froakie | Torrent / — / Protean | Torrent / Infiltrator / Protean |
+| Frogadier | Torrent / — / Protean | Torrent / Infiltrator / Protean |
+| Froslass | Snow Cloak / — / Cursed Body | Snow Cloak / Levitate / Cursed Body |
+| Fuecoco | Blaze / — / Unaware | Blaze / Soundproof / Unaware |
+| Furret | Run Away / Keen Eye / Frisk | Scrappy / Keen Eye / Frisk |
+| Galarian Corsola | Weak Armor / — / Cursed Body | Weak Armor / Unburden / Cursed Body |
+| Galarian Stunfisk | Mimicry / — / — | Mimicry / Dry Skin / — |
+| Garbodor (2 forms) | Stench / Weak Armor / Aftermath | Stench / Toxic Debris / Aftermath |
+| Gastly | Levitate / — / — | Cursed Body / — / Levitate |
+| Gengar (2 forms) | Cursed Body / — / — | Cursed Body / — / Levitate |
 | Gigalith | Sturdy / Sand Stream / Sand Force | Sturdy / Stamina / Sand Force |
-| Gorebyss | Swift Swim / — / Hydration | Swift Swim / Dazzling / Hydration |
+| Glaceon | Snow Cloak / Snow Cloak / Ice Body | Snow Cloak / Serene Grace / Ice Body |
+| Glalie | Inner Focus / Ice Body / Moody | Inner Focus / Levitate / Moody |
+| Gloom | Chlorophyll / — / Stench | Chlorophyll / Leaf Guard / Stench |
+| Golbat | Inner Focus / — / Infiltrator | Inner Focus / Sniper / Infiltrator |
+| Gorebyss | Swift Swim / — / Hydration | Swift Swim / Regenerator / Hydration |
+| Gourgeist (4 forms) | Pickup / Frisk / Insomnia | Pickup / Frisk / Flash Fire |
+| Grapploct | Limber / — / Technician | Limber / Sticky Hold / Technician |
+| Greninja | Torrent / — / Protean | Torrent / Infiltrator / Protean |
+| Grookey | Overgrow / — / Grassy Surge | Overgrow / Soundproof / Grassy Surge |
+| Grotle | Overgrow / — / Shell Armor | Overgrow / Rock Head / Shell Armor |
+| Grovyle | Overgrow / — / Unburden | Overgrow / Hyper Cutter / Unburden |
+| Haunter | Levitate / — / — | Cursed Body / — / Levitate |
+| Hisuian Decidueye | Overgrow / — / Scrappy | Overgrow / Keen Eye / Scrappy |
+| Hisuian Samurott | Torrent / — / Sharpness | Torrent / Shell Armor / Sharpness |
+| Hisuian Typhlosion | Blaze / — / Frisk | Blaze / Flash Fire / Frisk |
+| Honedge | No Guard / — / — | No Guard / — / Sharpness |
+| Hoppip | Chlorophyll / Leaf Guard / Infiltrator | Wind Rider / Infiltrator / Aerilate |
 | Huntail | Swift Swim / — / Water Veil | Swift Swim / Intimidate / Water Veil |
 | Illumise | Oblivious / Tinted Lens / Prankster | Oblivious / Tinted Lens / Swarm |
+| Incineroar | Blaze / — / Intimidate | Blaze / Rivalry / Intimidate |
 | Indeedee (Female) | Own Tempo / Synchronize / Psychic Surge | Own Tempo / Synchronize / Telepathy |
 | Indeedee (Male) | Inner Focus / Synchronize / Psychic Surge | Inner Focus / Synchronize / Telepathy |
+| Infernape | Blaze / — / Iron Fist | Blaze / Flame Body / Iron Fist |
+| Inteleon (2 forms) | Torrent / — / Sniper | Torrent / Shed Skin / Sniper |
+| Ivysaur | Overgrow / — / Chlorophyll | Overgrow / Sweet Veil / Chlorophyll |
+| Jigglypuff | Cute Charm / Competitive / Friend Guard | Friend Guard / Competitive / Frisk |
+| Jolteon | Volt Absorb / Volt Absorb / Quick Feet | Volt Absorb / Static / Quick Feet |
+| Jumpluff | Chlorophyll / Leaf Guard / Infiltrator | Wind Rider / Infiltrator / Aerilate |
+| Karrablast | Swarm / Shed Skin / No Guard | No Guard / Shed Skin / Swarm |
+| Klang | Plus / Minus / Clear Body | Plus / Minus / Levitate |
+| Klawf | Anger Shell / Shell Armor / Regenerator | Anger Shell / Sharpness / Technician |
+| Klink | Plus / Minus / Clear Body | Plus / Minus / Levitate |
+| Klinklang | Plus / Minus / Clear Body | Plus / Minus / Levitate |
+| Kricketot | Shed Skin / — / Run Away | Swarm / Shed Skin / Run Away |
+| Kricketune | Swarm / — / Technician | Swarm / Soundproof / Technician |
+| Lairon | Sturdy / Rock Head / Heavy Metal | Sturdy / Rock Head / Earth Eater |
+| Leafeon | Leaf Guard / Leaf Guard / Chlorophyll | Leaf Guard / Super Luck / Chlorophyll |
+| Ledian | Swarm / Early Bird / Iron Fist | Swarm / Technician / Iron Fist |
+| Ledyba | Swarm / Early Bird / Rattled | Swarm / Technician / Iron Fist |
+| Lickilicky | Own Tempo / Oblivious / Cloud Nine | Unaware / Oblivious / Cloud Nine |
+| Lickitung | Own Tempo / Oblivious / Cloud Nine | Unaware / Oblivious / Cloud Nine |
+| Litten | Blaze / — / Intimidate | Blaze / Rivalry / Intimidate |
+| Loudred | Soundproof / — / Scrappy | Soundproof / Scrappy / Rattled |
+| Lucario | Steadfast / Inner Focus / Justified | Steadfast / Inner Focus / Mega Launcher |
+| Lumineon | Swift Swim / Storm Drain / Water Veil | Swift Swim / Storm Drain / Dazzling |
+| Luvdisc | Swift Swim / — / Hydration | Swift Swim / Hydration / Soul Heart |
+| Lycanroc (Dusk) | Tough Claws / — / — | Tough Claws / Own Tempo / Stakeout |
+| Lycanroc (Midday) | Keen Eye / Sand Rush / Steadfast | Super Luck / Sand Rush / Steadfast |
+| Lycanroc (Midnight) | Keen Eye / Vital Spirit / No Guard | Reckless / Vital Spirit / No Guard |
+| Magcargo | Magma Armor / Flame Body / Weak Armor | Weak Armor / Flame Body / Solid Rock |
+| Magmortar | Flame Body / — / Vital Spirit | Flame Body / — / Quick Draw |
+| Mankey | Vital Spirit / Anger Point / Defiant | Defiant / Anger Point / Vital Spirit |
+| Maractus | Water Absorb / Chlorophyll / Storm Drain | Water Absorb / Rough Skin / Seed Sower |
+| Mareep | Static / — / Plus | Static / Overcoat / Cotton Down |
+| Marshtomp | Torrent / — / Damp | Torrent / Damp / Water Veil |
+| Masquerain | Intimidate / — / Unnerve | Intimidate / Levitate / Unnerve |
 | Mega Abomasnow | Snow Warning / Snow Warning / Snow Warning | Grass Pelt / Grass Pelt / Grass Pelt |
 | Mega Chesnaught | Bulletproof / Bulletproof / Bulletproof | Bulletproof / — / Bulletproof |
 | Mega Chimecho | Levitate / Levitate / Levitate | Levitate / — / — |
@@ -146,26 +451,115 @@ Unique Abilities are intentionally excluded because they have no vanilla field t
 | Mega Meganium | Mega Sol / Mega Sol / Mega Sol | Mega Sol / — / Mega Sol |
 | Mega Tyranitar | Sand Stream / Sand Stream / Sand Stream | Battle Armor / Battle Armor / Battle Armor |
 | Mega Victreebel | Innards Out / Innards Out / Innards Out | Innards Out / — / Innards Out |
+| Meganium | Overgrow / — / Leaf Guard | Overgrow / Filter / Triage |
+| Meowscarad (A) | Overgrow / — / Protean | Overgrow / Magician / Protean |
+| Metagross | Clear Body / — / Light Metal | Clear Body / Iron Fist / Light Metal |
+| Metang | Clear Body / — / Light Metal | Clear Body / Iron Fist / Light Metal |
+| Monferno | Blaze / — / Iron Fist | Blaze / Flame Body / Iron Fist |
+| Mothim | Swarm / — / Tinted Lens | Swarm / Compound Eyes / Tinted Lens |
+| Mudkip | Torrent / — / Damp | Torrent / Damp / Water Veil |
+| Munna | Forewarn / Synchronize / Telepathy | Forewarn / Synchronize / Comatose |
+| Musharna | Forewarn / Synchronize / Telepathy | Forewarn / Synchronize / Comatose |
 | Noctowl | Insomnia / Keen Eye / Tinted Lens | Insomnia / Gale Wings / Tinted Lens |
+| Oddish | Chlorophyll / — / Run Away | Chlorophyll / Leaf Guard / Run Away |
+| Oshawott | Torrent / — / Shell Armor | Torrent / Shell Armor / Super Luck |
+| Pachirisu | Run Away / Pickup / Volt Absorb | Prankster / Pickup / Volt Absorb |
 | Pelipper | Keen Eye / Drizzle / Rain Dish | Keen Eye / Wind Rider / Rain Dish |
+| Pidove | Big Pecks / Super Luck / Rivalry | Big Pecks / Super Luck / Unaware |
+| Pignite | Blaze / — / Thick Fat | Blaze / Thick Fat / Sheer Force |
 | Pincurchin | Lightning Rod / — / Electric Surge | Lightning Rod / — / Innards Out |
+| Piplup | Torrent / — / Competitive | Torrent / Vital Spirit / Competitive |
 | Politoed | Water Absorb / Damp / Drizzle | Water Absorb / Damp / Liquid Voice |
+| Popplio | Torrent / — / Liquid Voice | Torrent / Healer / Liquid Voice |
+| Primarina | Torrent / — / Liquid Voice | Torrent / Healer / Liquid Voice |
+| Primeape | Vital Spirit / Anger Point / Defiant | Defiant / Anger Point / Vital Spirit |
+| Prinplup | Torrent / — / Competitive | Torrent / Vital Spirit / Competitive |
+| Pumpkaboo (4 forms) | Pickup / Frisk / Insomnia | Pickup / Frisk / Flash Fire |
+| Quaquaval | Torrent / — / Moxie | Torrent / Dancer / Moxie |
+| Quaxly | Torrent / — / Moxie | Torrent / Dancer / Moxie |
+| Quaxwell | Torrent / — / Moxie | Torrent / Dancer / Moxie |
+| Quilava | Blaze / — / Flash Fire | Blaze / Flash Fire / Adaptability |
+| Quilladin | Overgrow / — / Bulletproof | Overgrow / Iron Barbs / Bulletproof |
+| Raboot | Blaze / — / Libero | Blaze / Receiver / Libero |
+| Raikou | Pressure / — / Inner Focus | Pressure / — / Volt Absorb |
+| Regice | Clear Body / — / Ice Body | Clear Body / Filter / Ice Body |
+| Regirock | Clear Body / — / Sturdy | Clear Body / Solid Rock / Sturdy |
+| Registeel | Clear Body / — / Light Metal | Clear Body / Heatproof / Light Metal |
+| Rillaboom (2 forms) | Overgrow / — / Grassy Surge | Overgrow / Soundproof / Grassy Surge |
 | Rotom | Levitate / — / — | Static / — / Cursed Body |
 | Rotom (Fan) | Levitate / — / — | Static / — / Wind Power |
 | Rotom (Frost) | Levitate / — / — | Static / — / Snow Warning |
 | Rotom (Heat) | Levitate / — / — | Static / — / Flash Fire |
 | Rotom (Mow) | Levitate / — / — | Static / — / Grassy Surge |
 | Rotom (Wash) | Levitate / — / — | Static / — / Water Absorb |
+| Rowlet | Overgrow / — / Long Reach | Overgrow / Keen Eye / Long Reach |
+| Runerigus | Wandering Spirit / — / — | Wandering Spirit / — / Solid Rock |
+| Sableye | Keen Eye / Stall / Prankster | Magic Guard / Stall / Prankster |
+| Samurott | Torrent / — / Shell Armor | Torrent / Shell Armor / Super Luck |
+| Sandshrew | Sand Veil / — / Sand Rush | Sand Veil / Rough Skin / Sand Rush |
+| Sandslash | Sand Veil / — / Sand Rush | Sand Veil / Rough Skin / Sand Rush |
+| Sceptile | Overgrow / — / Unburden | Overgrow / Hyper Cutter / Unburden |
+| Scorbunny | Blaze / — / Libero | Blaze / Receiver / Libero |
+| Seel | Thick Fat / Hydration / Ice Body | Thick Fat / Hydration / Ice Scales |
+| Sentret | Run Away / Keen Eye / Frisk | Scrappy / Keen Eye / Frisk |
+| Serperior | Overgrow / — / Contrary | Overgrow / Multiscale / Contrary |
+| Servine | Overgrow / — / Contrary | Overgrow / Multiscale / Contrary |
 | Shieldon | Sturdy / — / Soundproof | Sturdy / Solid Rock / Soundproof |
+| Sirfetchd | Steadfast / — / Scrappy | Steadfast / Sharpness / Scrappy |
+| Skeledirge | Blaze / — / Unaware | Blaze / Soundproof / Unaware |
+| Skiploom | Chlorophyll / Leaf Guard / Infiltrator | Wind Rider / Infiltrator / Aerilate |
 | Slaking | Truant / — / — | Truant / — / Slow Start |
 | Slakoth | Truant / — / — | Truant / — / Slow Start |
 | Smoliv | Early Bird / — / Harvest | Natural Cure / — / Harvest |
+| Snivy | Overgrow / — / Contrary | Overgrow / Multiscale / Contrary |
 | Snover | Snow Warning / — / Soundproof | Grass Pelt / — / Soundproof |
+| Sobble | Torrent / — / Sniper | Torrent / Shed Skin / Sniper |
+| Spearow | Keen Eye / — / Sniper | Keen Eye / Intimidate / Sniper |
+| Spidops | Insomnia / — / Stakeout | Analytic / Stakeout / Disguise |
+| Sprigatito | Overgrow / — / Protean | Overgrow / Magician / Protean |
+| Squirtle | Torrent / — / Rain Dish | Torrent / Rain Dish / Shell Armor |
+| Stunfisk | Static / Limber / Sand Veil | Static / Dry Skin / Sand Veil |
+| Suicune | Pressure / — / Inner Focus | Pressure / — / Water Absorb |
+| Sunflora | Chlorophyll / Solar Power / Early Bird | Chlorophyll / Solar Power / Seed Sower |
+| Sunkern | Chlorophyll / Solar Power / Early Bird | Chlorophyll / Solar Power / Seed Sower |
+| Swampert | Torrent / — / Damp | Torrent / Damp / Water Veil |
+| Swanna | Keen Eye / Big Pecks / Hydration | Friend Guard / Big Pecks / Hydration |
+| Sylveon | Cute Charm / Cute Charm / Pixilate | Cute Charm / Healer / Pixilate |
+| Tarountula | Insomnia / — / Stakeout | Analytic / Stakeout / Disguise |
+| Teddiursa | Pickup / Quick Feet / Honey Gather | Quick Feet / Supersweet Syrup / Honey Gather |
+| Tepig | Blaze / — / Thick Fat | Blaze / Thick Fat / Sheer Force |
+| Thwackey | Overgrow / — / Grassy Surge | Overgrow / Soundproof / Grassy Surge |
+| Torchic | Blaze / — / Speed Boost | Blaze / Early Bird / Speed Boost |
 | Torkoal | White Smoke / Drought / Shell Armor | Flame Body / Steam Engine / Shell Armor |
+| Torracat | Blaze / — / Intimidate | Blaze / Rivalry / Intimidate |
+| Torterra | Overgrow / — / Shell Armor | Overgrow / Rock Head / Shell Armor |
+| Totodile | Torrent / — / Sheer Force | Torrent / Strong Jaw / Sheer Force |
+| Tranquill | Big Pecks / Super Luck / Rivalry | Big Pecks / Super Luck / Unaware |
+| Treecko | Overgrow / — / Unburden | Overgrow / Hyper Cutter / Unburden |
+| Turtonator | Shell Armor / — / — | Shell Armor / Anger Shell / Magma Armor |
+| Turtwig | Overgrow / — / Shell Armor | Overgrow / Rock Head / Shell Armor |
+| Typhlosion | Blaze / — / Flash Fire | Blaze / Flash Fire / Adaptability |
 | Tyranitar | Sand Stream / — / Unnerve | Battle Armor / — / Unnerve |
+| Umbreon | Synchronize / Synchronize / Inner Focus | Synchronize / Inner Focus / Poison Touch |
+| Unfezant | Big Pecks / Super Luck / Rivalry | Big Pecks / Super Luck / Unaware |
+| Ursaring | Guts / Quick Feet / Unnerve | Guts / Supersweet Syrup / Unnerve |
 | Vanilluxe | Ice Body / Snow Warning / Weak Armor | Ice Body / Slush Rush / Weak Armor |
+| Vaporeon | Water Absorb / Water Absorb / Hydration | Water Absorb / Water Veil / Hydration |
+| Venusaur (2 forms) | Overgrow / — / Chlorophyll | Overgrow / Sweet Veil / Chlorophyll |
+| Vespiquen | Pressure / — / Unnerve | Pressure / Unnerve / Queenly Majesty |
+| Vigoroth | Vital Spirit / — / — | Vital Spirit / — / Sheer Force |
+| Vileplume | Chlorophyll / — / Effect Spore | Chlorophyll / Leaf Guard / Effect Spore |
 | Volbeat | Illuminate / Swarm / Prankster | Illuminate / Tinted Lens / Swarm |
+| Volcanion | Water Absorb / — / — | Water Absorb / — / Thermal Exchange |
+| Wartortle | Torrent / — / Rain Dish | Torrent / Rain Dish / Shell Armor |
+| Whiscash | Oblivious / Anticipation / Hydration | Simple / Anticipation / Hydration |
+| Whismur | Soundproof / — / Rattled | Soundproof / Scrappy / Rattled |
+| Wigglytuff | Cute Charm / Competitive / Frisk | Friend Guard / Competitive / Frisk |
 | Wobbuffet (Punching) | Stance Change / — / — | Shadow Tag / — / Telepathy |
+| Wormadam (Plant Cloak) | Anticipation / — / Overcoat | Anticipation / Shield Dust / Overcoat |
+| Wormadam (Sandy Cloak) | Anticipation / — / Overcoat | Anticipation / Rough Skin / Overcoat |
+| Wormadam (Trash Cloak) | Anticipation / — / Overcoat | Anticipation / Wonder Skin / Overcoat |
+| Zubat | Inner Focus / — / Infiltrator | Inner Focus / Sniper / Infiltrator |
 
 ## Missing Canonical Baseline
 

@@ -7,6 +7,53 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_MISTY_TERRAIN].effect == EFFECT_MISTY_TERRAIN);
 }
 
+SINGLE_BATTLE_TEST("Shell Game: Regenerator heals an ordinary defensive switch")
+{
+    GIVEN {
+        PLAYER(SPECIES_GOREBYSS) {
+            HP(30);
+            Ability(ABILITY_REGENERATOR);
+            UniqueAbility(ABILITY_SHELL_GAME);
+        }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  30 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 3);
+    }
+}
+
+SINGLE_BATTLE_TEST("Shell Game: Regenerator heals while Baton Pass transfers Shell Smash boosts")
+{
+    GIVEN {
+        PLAYER(SPECIES_GOREBYSS) {
+            HP(30); Speed(1);
+            Ability(ABILITY_REGENERATOR);
+            UniqueAbility(ABILITY_SHELL_GAME);
+            Moves(MOVE_SHELL_SMASH, MOVE_BATON_PASS);
+        }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(2); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_MISTY_TERRAIN, MOVE_CELEBRATE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_MISTY_TERRAIN); MOVE(player, MOVE_SHELL_SMASH); }
+        TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_BATON_PASS); SEND_OUT(player, 1); }
+    } THEN {
+        EXPECT_EQ(GetMonData(&gPlayerParty[0], MON_DATA_HP),
+                  30 + GetMonData(&gPlayerParty[0], MON_DATA_MAX_HP) / 3);
+        EXPECT_EQ(player->species, SPECIES_WOBBUFFET);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponent->statStages[STAT_DEF], DEFAULT_STAT_STAGE - 1);
+        EXPECT_EQ(opponent->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE - 1);
+        EXPECT(!(gFieldStatuses & STATUS_FIELD_MISTY_TERRAIN));
+    }
+}
+
 SINGLE_BATTLE_TEST("Shell Game transfers Shell Smash's defensive drops in Misty Terrain")
 {
     GIVEN {

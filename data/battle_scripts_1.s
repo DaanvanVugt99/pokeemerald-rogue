@@ -9384,6 +9384,15 @@ BattleScript_TargetFormChange::
 	call BattleScript_TargetFormChangeNoPopup
 	return
 
+BattleScript_DisguiseWithoutFormChange::
+	pause 5
+	call BattleScript_AbilityPopUpTarget
+.if B_DISGUISE_HP_LOSS >= GEN_8
+	healthbarupdate BS_SCRIPTING
+	datahpupdate BS_SCRIPTING
+.endif
+	return
+
 BattleScript_TargetFormChangeWithString::
 	pause 5
 	call BattleScript_AbilityPopUpTarget

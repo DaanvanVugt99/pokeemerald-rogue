@@ -1542,7 +1542,2871 @@
       "species": "SPECIES_DECIDUEYE_HISUIAN"
     }
   ],
+  "removeLevelUp": [{"id":"rebalance-ekans-remove-level-sludge_bomb","species":"SPECIES_EKANS","move":"MOVE_SLUDGE_BOMB"},{"id":"rebalance-arbok-remove-level-sludge_bomb","species":"SPECIES_ARBOK","move":"MOVE_SLUDGE_BOMB"}],
   "levelUp": [
+    {
+      "id": "rebalance-horse-ponyta-jump_kick",
+      "species": "SPECIES_PONYTA",
+      "move": "MOVE_JUMP_KICK",
+      "level": 43
+    },
+    {
+      "id": "rebalance-horse-ponyta-flame_relay",
+      "species": "SPECIES_PONYTA",
+      "move": "MOVE_FLAME_RELAY",
+      "level": 40
+    },
+    {
+      "id": "rebalance-horse-rapidash-jump_kick",
+      "species": "SPECIES_RAPIDASH",
+      "move": "MOVE_JUMP_KICK",
+      "level": 43
+    },
+    {
+      "id": "rebalance-horse-rapidash-flame_relay",
+      "species": "SPECIES_RAPIDASH",
+      "move": "MOVE_FLAME_RELAY",
+      "level": 40
+    },
+    {
+      "id": "rebalance-horse-ponyta_galarian-jump_kick",
+      "species": "SPECIES_PONYTA_GALARIAN",
+      "move": "MOVE_JUMP_KICK",
+      "level": 43
+    },
+    {
+      "id": "rebalance-horse-rapidash_galarian-jump_kick",
+      "species": "SPECIES_RAPIDASH_GALARIAN",
+      "move": "MOVE_JUMP_KICK",
+      "level": 46
+    },
+    {
+      "id": "rebalance-aromatisse-level-odor_sleuth",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_ODOR_SLEUTH",
+      "level": 1
+    },
+    {
+      "id": "rebalance-aromatisse-level-echoed_voice",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_ECHOED_VOICE",
+      "level": 13
+    },
+    {
+      "id": "rebalance-aromatisse-level-calm_mind",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_CALM_MIND",
+      "level": 17
+    },
+    {
+      "id": "rebalance-aromatisse-level-draining_kiss",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 21
+    },
+    {
+      "id": "rebalance-aromatisse-level-aromatherapy",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_AROMATHERAPY",
+      "level": 25
+    },
+    {
+      "id": "rebalance-aromatisse-level-attract",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_ATTRACT",
+      "level": 29
+    },
+    {
+      "id": "rebalance-aromatisse-level-moonblast",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_MOONBLAST",
+      "level": 31
+    },
+    {
+      "id": "rebalance-aromatisse-level-charm",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_CHARM",
+      "level": 35
+    },
+    {
+      "id": "rebalance-aromatisse-level-flail",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_FLAIL",
+      "level": 38
+    },
+    {
+      "id": "rebalance-aromatisse-level-misty_terrain",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_MISTY_TERRAIN",
+      "level": 42
+    },
+    {
+      "id": "rebalance-aromatisse-level-skill_swap",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_SKILL_SWAP",
+      "level": 44
+    },
+    {
+      "id": "rebalance-aromatisse-level-psychic",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_PSYCHIC",
+      "level": 48
+    },
+    {
+      "id": "rebalance-aromatisse-level-disarming_voice",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_DISARMING_VOICE",
+      "level": 53
+    },
+    {
+      "id": "rebalance-aromatisse-level-reflect",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_REFLECT",
+      "level": 57
+    },
+    {
+      "id": "rebalance-aromatisse-level-psych_up",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_PSYCH_UP",
+      "level": 64
+    },
+    {
+      "id": "rebalance-aromatisse-level-sparkly_swirl",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_SPARKLY_SWIRL",
+      "level": 70
+    },
+    {
+      "id": "rebalance-partner-pikachu_cosplay-splishy_splash",
+      "species": "SPECIES_PIKACHU_COSPLAY",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_cosplay-floaty_fall",
+      "species": "SPECIES_PIKACHU_COSPLAY",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_rock_star-splishy_splash",
+      "species": "SPECIES_PIKACHU_ROCK_STAR",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_rock_star-floaty_fall",
+      "species": "SPECIES_PIKACHU_ROCK_STAR",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_belle-splishy_splash",
+      "species": "SPECIES_PIKACHU_BELLE",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_belle-floaty_fall",
+      "species": "SPECIES_PIKACHU_BELLE",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_pop_star-splishy_splash",
+      "species": "SPECIES_PIKACHU_POP_STAR",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_pop_star-floaty_fall",
+      "species": "SPECIES_PIKACHU_POP_STAR",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_ph_d-splishy_splash",
+      "species": "SPECIES_PIKACHU_PH_D",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_ph_d-floaty_fall",
+      "species": "SPECIES_PIKACHU_PH_D",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_libre-splishy_splash",
+      "species": "SPECIES_PIKACHU_LIBRE",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_libre-floaty_fall",
+      "species": "SPECIES_PIKACHU_LIBRE",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_original_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_ORIGINAL_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_original_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_ORIGINAL_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_hoenn_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_HOENN_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_hoenn_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_HOENN_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_sinnoh_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_SINNOH_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_sinnoh_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_SINNOH_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_unova_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_UNOVA_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_unova_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_UNOVA_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_kalos_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_KALOS_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_kalos_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_KALOS_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_alola_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_ALOLA_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_alola_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_ALOLA_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_partner_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_PARTNER_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_partner_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_PARTNER_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_world_cap-splishy_splash",
+      "species": "SPECIES_PIKACHU_WORLD_CAP",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-partner-pikachu_world_cap-floaty_fall",
+      "species": "SPECIES_PIKACHU_WORLD_CAP",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-final-level-cherubi-stun_spore",
+      "species": "SPECIES_CHERUBI",
+      "move": "MOVE_STUN_SPORE",
+      "level": 16
+    },
+    {
+      "id": "rebalance-final-level-cherubi-sleep_powder",
+      "species": "SPECIES_CHERUBI",
+      "move": "MOVE_SLEEP_POWDER",
+      "level": 16
+    },
+    {
+      "id": "rebalance-final-level-cherubi-sunny_day",
+      "species": "SPECIES_CHERUBI",
+      "move": "MOVE_SUNNY_DAY",
+      "level": 22
+    },
+    {
+      "id": "rebalance-final-level-cherrim-stun_spore",
+      "species": "SPECIES_CHERRIM",
+      "move": "MOVE_STUN_SPORE",
+      "level": 16
+    },
+    {
+      "id": "rebalance-final-level-cherrim-sleep_powder",
+      "species": "SPECIES_CHERRIM",
+      "move": "MOVE_SLEEP_POWDER",
+      "level": 16
+    },
+    {
+      "id": "rebalance-final-level-cherrim-solar_blade",
+      "species": "SPECIES_CHERRIM",
+      "move": "MOVE_SOLAR_BLADE",
+      "level": 43
+    },
+    {
+      "id": "rebalance-final-level-dodrio-jump_kick",
+      "species": "SPECIES_DODRIO",
+      "move": "MOVE_JUMP_KICK",
+      "level": 43
+    },
+    {
+      "id": "rebalance-final-level-dodrio-high_jump_kick",
+      "species": "SPECIES_DODRIO",
+      "move": "MOVE_HIGH_JUMP_KICK",
+      "level": 60
+    },
+    {
+      "id": "rebalance-final-level-dugtrio-rototiller",
+      "species": "SPECIES_DUGTRIO",
+      "move": "MOVE_ROTOTILLER",
+      "level": 1
+    },
+    {
+      "id": "rebalance-final-level-dugtrio-magnitude",
+      "species": "SPECIES_DUGTRIO",
+      "move": "MOVE_MAGNITUDE",
+      "level": 14
+    },
+    {
+      "id": "rebalance-final-level-exeggcute-barrage",
+      "species": "SPECIES_EXEGGCUTE",
+      "move": "MOVE_BARRAGE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-final-level-exeggcute-soft_boiled",
+      "species": "SPECIES_EXEGGCUTE",
+      "move": "MOVE_SOFT_BOILED",
+      "level": 34
+    },
+    {
+      "id": "rebalance-final-level-exeggcute-natural_gift",
+      "species": "SPECIES_EXEGGCUTE",
+      "move": "MOVE_NATURAL_GIFT",
+      "level": 37
+    },
+    {
+      "id": "rebalance-final-level-exeggcute-bestow",
+      "species": "SPECIES_EXEGGCUTE",
+      "move": "MOVE_BESTOW",
+      "level": 50
+    },
+    {
+      "id": "rebalance-final-level-exeggutor-natural_gift",
+      "species": "SPECIES_EXEGGUTOR",
+      "move": "MOVE_NATURAL_GIFT",
+      "level": 37
+    },
+    {
+      "id": "rebalance-final-level-exeggutor-bestow",
+      "species": "SPECIES_EXEGGUTOR",
+      "move": "MOVE_BESTOW",
+      "level": 50
+    },
+    {
+      "id": "rebalance-final-level-exeggutor_alolan-natural_gift",
+      "species": "SPECIES_EXEGGUTOR_ALOLAN",
+      "move": "MOVE_NATURAL_GIFT",
+      "level": 37
+    },
+    {
+      "id": "rebalance-final-level-exeggutor_alolan-bestow",
+      "species": "SPECIES_EXEGGUTOR_ALOLAN",
+      "move": "MOVE_BESTOW",
+      "level": 50
+    },
+    {
+      "id": "rebalance-final-level-golduck-psychic",
+      "species": "SPECIES_GOLDUCK",
+      "move": "MOVE_PSYCHIC",
+      "level": 46
+    },
+    {
+      "id": "rebalance-final-level-granbull-double_kick",
+      "species": "SPECIES_GRANBULL",
+      "move": "MOVE_DOUBLE_KICK",
+      "level": 23
+    },
+    {
+      "id": "rebalance-final-level-snubbull-double_kick",
+      "species": "SPECIES_SNUBBULL",
+      "move": "MOVE_DOUBLE_KICK",
+      "level": 21
+    },
+    {
+      "id": "rebalance-final-level-litleo-flare_blitz",
+      "species": "SPECIES_LITLEO",
+      "move": "MOVE_FLARE_BLITZ",
+      "level": 46
+    },
+    {
+      "id": "rebalance-final-level-pyroar-flare_blitz",
+      "species": "SPECIES_PYROAR",
+      "move": "MOVE_FLARE_BLITZ",
+      "level": 51
+    },
+    {
+      "id": "rebalance-final-level-mr_mime-barrier",
+      "species": "SPECIES_MR_MIME",
+      "move": "MOVE_BARRIER",
+      "level": 1
+    },
+    {
+      "id": "rebalance-final-level-mr_mime-glitzy_glow",
+      "species": "SPECIES_MR_MIME",
+      "move": "MOVE_GLITZY_GLOW",
+      "level": 53
+    },
+    {
+      "id": "rebalance-final-level-mr_mime_galarian-freezy_frost",
+      "species": "SPECIES_MR_MIME_GALARIAN",
+      "move": "MOVE_FREEZY_FROST",
+      "level": 55
+    },
+    {
+      "id": "rebalance-final-level-mr_rime-freezy_frost",
+      "species": "SPECIES_MR_RIME",
+      "move": "MOVE_FREEZY_FROST",
+      "level": 55
+    },
+    {
+      "id": "rebalance-final-level-minun-nuzzle",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_NUZZLE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-final-level-minun-fake_out",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_FAKE_OUT",
+      "level": 16
+    },
+    {
+      "id": "rebalance-final-level-minun-thunder_punch",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_THUNDER_PUNCH",
+      "level": 31
+    },
+    {
+      "id": "rebalance-final-level-minun-wild_charge",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_WILD_CHARGE",
+      "level": 43
+    },
+    {
+      "id": "rebalance-final-level-minun-swords_dance",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_SWORDS_DANCE",
+      "level": 46
+    },
+    {
+      "id": "rebalance-final-level-pikachu-splishy_splash",
+      "species": "SPECIES_PIKACHU",
+      "move": "MOVE_SPLISHY_SPLASH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-final-level-pikachu-floaty_fall",
+      "species": "SPECIES_PIKACHU",
+      "move": "MOVE_FLOATY_FALL",
+      "level": 61
+    },
+    {
+      "id": "rebalance-final-level-poliwrath-mind_reader",
+      "species": "SPECIES_POLIWRATH",
+      "move": "MOVE_MIND_READER",
+      "level": 43
+    },
+    {
+      "id": "rebalance-final-level-poliwrath-storm_throw",
+      "species": "SPECIES_POLIWRATH",
+      "move": "MOVE_STORM_THROW",
+      "level": 53
+    },
+    {
+      "id": "rebalance-final-level-scovillain-temper_flare",
+      "species": "SPECIES_SCOVILLAIN",
+      "move": "MOVE_TEMPER_FLARE",
+      "level": 47
+    },
+    {
+      "id": "rebalance-final-level-scovillain-raging_fury",
+      "species": "SPECIES_SCOVILLAIN",
+      "move": "MOVE_RAGING_FURY",
+      "level": 55
+    },
+    {
+      "id": "rebalance-final-level-skuntank-acid_spray",
+      "species": "SPECIES_SKUNTANK",
+      "move": "MOVE_ACID_SPRAY",
+      "level": 19
+    },
+    {
+      "id": "rebalance-final-level-skuntank-venom_drench",
+      "species": "SPECIES_SKUNTANK",
+      "move": "MOVE_VENOM_DRENCH",
+      "level": 37
+    },
+    {
+      "id": "rebalance-final-level-stunky-venom_drench",
+      "species": "SPECIES_STUNKY",
+      "move": "MOVE_VENOM_DRENCH",
+      "level": 37
+    },
+    {
+      "id": "rebalance-accelgor-dark_pulse",
+      "species": "SPECIES_ACCELGOR",
+      "move": "MOVE_DARK_PULSE",
+      "level": 0
+    },
+    {
+      "id": "rebalance-accelgor-me_first",
+      "species": "SPECIES_ACCELGOR",
+      "move": "MOVE_ME_FIRST",
+      "level": 28
+    },
+    {
+      "id": "rebalance-beartic-ice_shard",
+      "species": "SPECIES_BEARTIC",
+      "move": "MOVE_ICE_SHARD",
+      "level": 1
+    },
+    {
+      "id": "rebalance-cubchoo-ice_fang",
+      "species": "SPECIES_CUBCHOO",
+      "move": "MOVE_ICE_FANG",
+      "level": 19
+    },
+    {
+      "id": "rebalance-chatot-air_slash",
+      "species": "SPECIES_CHATOT",
+      "move": "MOVE_AIR_SLASH",
+      "level": 29
+    },
+    {
+      "id": "rebalance-chatot-role_play",
+      "species": "SPECIES_CHATOT",
+      "move": "MOVE_ROLE_PLAY",
+      "level": 57
+    },
+    {
+      "id": "rebalance-chatot-boomburst",
+      "species": "SPECIES_CHATOT",
+      "move": "MOVE_BOOMBURST",
+      "level": 61
+    },
+    {
+      "id": "rebalance-cofagrigus-ominous_wind",
+      "species": "SPECIES_COFAGRIGUS",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-yamask-ominous_wind",
+      "species": "SPECIES_YAMASK",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-runerigus-shadow_sneak",
+      "species": "SPECIES_RUNERIGUS",
+      "move": "MOVE_SHADOW_SNEAK",
+      "level": 41
+    },
+    {
+      "id": "rebalance-yamask_galarian-shadow_sneak",
+      "species": "SPECIES_YAMASK_GALARIAN",
+      "move": "MOVE_SHADOW_SNEAK",
+      "level": 36
+    },
+    {
+      "id": "rebalance-drifloon-ominous_wind",
+      "species": "SPECIES_DRIFLOON",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 20
+    },
+    {
+      "id": "rebalance-drifloon-air_slash",
+      "species": "SPECIES_DRIFLOON",
+      "move": "MOVE_AIR_SLASH",
+      "level": 32
+    },
+    {
+      "id": "rebalance-drifloon-hurricane",
+      "species": "SPECIES_DRIFLOON",
+      "move": "MOVE_HURRICANE",
+      "level": 55
+    },
+    {
+      "id": "rebalance-drifblim-ominous_wind",
+      "species": "SPECIES_DRIFBLIM",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 20
+    },
+    {
+      "id": "rebalance-drifblim-air_slash",
+      "species": "SPECIES_DRIFBLIM",
+      "move": "MOVE_AIR_SLASH",
+      "level": 34
+    },
+    {
+      "id": "rebalance-drifblim-hurricane",
+      "species": "SPECIES_DRIFBLIM",
+      "move": "MOVE_HURRICANE",
+      "level": 65
+    },
+    {
+      "id": "rebalance-ducklett-hydro_pump",
+      "species": "SPECIES_DUCKLETT",
+      "move": "MOVE_HYDRO_PUMP",
+      "level": 50
+    },
+    {
+      "id": "rebalance-swanna-hydro_pump",
+      "species": "SPECIES_SWANNA",
+      "move": "MOVE_HYDRO_PUMP",
+      "level": 62
+    },
+    {
+      "id": "rebalance-escavalier-smart_strike",
+      "species": "SPECIES_ESCAVALIER",
+      "move": "MOVE_SMART_STRIKE",
+      "level": 0
+    },
+    {
+      "id": "rebalance-escavalier-shelter",
+      "species": "SPECIES_ESCAVALIER",
+      "move": "MOVE_SHELTER",
+      "level": 1
+    },
+    {
+      "id": "rebalance-escavalier-twineedle",
+      "species": "SPECIES_ESCAVALIER",
+      "move": "MOVE_TWINEEDLE",
+      "level": 13
+    },
+    {
+      "id": "rebalance-flabebe-draining_kiss",
+      "species": "SPECIES_FLABEBE",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 30
+    },
+    {
+      "id": "rebalance-flabebe-aromatherapy",
+      "species": "SPECIES_FLABEBE",
+      "move": "MOVE_AROMATHERAPY",
+      "level": 33
+    },
+    {
+      "id": "rebalance-floette-draining_kiss",
+      "species": "SPECIES_FLOETTE",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 34
+    },
+    {
+      "id": "rebalance-floette-aromatherapy",
+      "species": "SPECIES_FLOETTE",
+      "move": "MOVE_AROMATHERAPY",
+      "level": 38
+    },
+    {
+      "id": "rebalance-floette_eternal_flower-draining_kiss",
+      "species": "SPECIES_FLOETTE_ETERNAL_FLOWER",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 34
+    },
+    {
+      "id": "rebalance-floette_eternal_flower-aromatherapy",
+      "species": "SPECIES_FLOETTE_ETERNAL_FLOWER",
+      "move": "MOVE_AROMATHERAPY",
+      "level": 38
+    },
+    {
+      "id": "rebalance-sentret-tail_slap",
+      "species": "SPECIES_SENTRET",
+      "move": "MOVE_TAIL_SLAP",
+      "level": 51
+    },
+    {
+      "id": "rebalance-furret-tail_slap",
+      "species": "SPECIES_FURRET",
+      "move": "MOVE_TAIL_SLAP",
+      "level": 62
+    },
+    {
+      "id": "rebalance-furret-extreme_speed",
+      "species": "SPECIES_FURRET",
+      "move": "MOVE_EXTREME_SPEED",
+      "level": 75
+    },
+    {
+      "id": "rebalance-gourgeist-shadow_punch",
+      "species": "SPECIES_GOURGEIST",
+      "move": "MOVE_SHADOW_PUNCH",
+      "level": 0
+    },
+    {
+      "id": "rebalance-igglybuff-draining_kiss",
+      "species": "SPECIES_IGGLYBUFF",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 13
+    },
+    {
+      "id": "rebalance-jigglypuff-draining_kiss",
+      "species": "SPECIES_JIGGLYPUFF",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 15
+    },
+    {
+      "id": "rebalance-jigglypuff-moonblast",
+      "species": "SPECIES_JIGGLYPUFF",
+      "move": "MOVE_MOONBLAST",
+      "level": 29
+    },
+    {
+      "id": "rebalance-jigglypuff-boomburst",
+      "species": "SPECIES_JIGGLYPUFF",
+      "move": "MOVE_BOOMBURST",
+      "level": 49
+    },
+    {
+      "id": "rebalance-wigglytuff-moonblast",
+      "species": "SPECIES_WIGGLYTUFF",
+      "move": "MOVE_MOONBLAST",
+      "level": 1
+    },
+    {
+      "id": "rebalance-wigglytuff-boomburst",
+      "species": "SPECIES_WIGGLYTUFF",
+      "move": "MOVE_BOOMBURST",
+      "level": 50
+    },
+    {
+      "id": "rebalance-lucario-power_up_punch",
+      "species": "SPECIES_LUCARIO",
+      "move": "MOVE_POWER_UP_PUNCH",
+      "level": 15
+    },
+    {
+      "id": "rebalance-lycanroc-drill_run",
+      "species": "SPECIES_LYCANROC",
+      "move": "MOVE_DRILL_RUN",
+      "level": 32
+    },
+    {
+      "id": "rebalance-lycanroc_dusk-thrash",
+      "species": "SPECIES_LYCANROC_DUSK",
+      "move": "MOVE_THRASH",
+      "level": 0
+    },
+    {
+      "id": "rebalance-lycanroc_midnight-accelerock",
+      "species": "SPECIES_LYCANROC_MIDNIGHT",
+      "move": "MOVE_ACCELEROCK",
+      "level": 0
+    },
+    {
+      "id": "rebalance-lycanroc_midnight-head_smash",
+      "species": "SPECIES_LYCANROC_MIDNIGHT",
+      "move": "MOVE_HEAD_SMASH",
+      "level": 56
+    },
+    {
+      "id": "rebalance-pidove-swift",
+      "species": "SPECIES_PIDOVE",
+      "move": "MOVE_SWIFT",
+      "level": 21
+    },
+    {
+      "id": "rebalance-tranquill-swift",
+      "species": "SPECIES_TRANQUILL",
+      "move": "MOVE_SWIFT",
+      "level": 22
+    },
+    {
+      "id": "rebalance-unfezant-swift",
+      "species": "SPECIES_UNFEZANT",
+      "move": "MOVE_SWIFT",
+      "level": 22
+    },
+    {
+      "id": "rebalance-regice-freeze_dry",
+      "species": "SPECIES_REGICE",
+      "move": "MOVE_FREEZE_DRY",
+      "level": 73
+    },
+    {
+      "id": "rebalance-regice-freezy_frost",
+      "species": "SPECIES_REGICE",
+      "move": "MOVE_FREEZY_FROST",
+      "level": 80
+    },
+    {
+      "id": "rebalance-regirock-rock_wrecker",
+      "species": "SPECIES_REGIROCK",
+      "move": "MOVE_ROCK_WRECKER",
+      "level": 80
+    },
+    {
+      "id": "rebalance-registeel-double_iron_bash",
+      "species": "SPECIES_REGISTEEL",
+      "move": "MOVE_DOUBLE_IRON_BASH",
+      "level": 80
+    },
+    {
+      "id": "rebalance-sandshrew-sand_tomb",
+      "species": "SPECIES_SANDSHREW",
+      "move": "MOVE_SAND_TOMB",
+      "level": 23
+    },
+    {
+      "id": "rebalance-sandslash-spikes",
+      "species": "SPECIES_SANDSLASH",
+      "move": "MOVE_SPIKES",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sandslash-spiky_shield",
+      "species": "SPECIES_SANDSLASH",
+      "move": "MOVE_SPIKY_SHIELD",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sandshrew_alolan-ice_shard",
+      "species": "SPECIES_SANDSHREW_ALOLAN",
+      "move": "MOVE_ICE_SHARD",
+      "level": 13
+    },
+    {
+      "id": "rebalance-sandshrew_alolan-ice_ball",
+      "species": "SPECIES_SANDSHREW_ALOLAN",
+      "move": "MOVE_ICE_BALL",
+      "level": 7
+    },
+    {
+      "id": "rebalance-sandslash_alolan-spikes",
+      "species": "SPECIES_SANDSLASH_ALOLAN",
+      "move": "MOVE_SPIKES",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sandslash_alolan-spiky_shield",
+      "species": "SPECIES_SANDSLASH_ALOLAN",
+      "move": "MOVE_SPIKY_SHIELD",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sandslash_alolan-metal_burst",
+      "species": "SPECIES_SANDSLASH_ALOLAN",
+      "move": "MOVE_METAL_BURST",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sandslash_alolan-defense_curl",
+      "species": "SPECIES_SANDSLASH_ALOLAN",
+      "move": "MOVE_DEFENSE_CURL",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sandslash_alolan-ice_ball",
+      "species": "SPECIES_SANDSLASH_ALOLAN",
+      "move": "MOVE_ICE_BALL",
+      "level": 1
+    },
+    {
+      "id": "rebalance-stunfisk_galarian-iron_head",
+      "species": "SPECIES_STUNFISK_GALARIAN",
+      "move": "MOVE_IRON_HEAD",
+      "level": 55
+    },
+    {
+      "id": "rebalance-aerodactyl-brave_bird",
+      "species": "SPECIES_AERODACTYL",
+      "move": "MOVE_BRAVE_BIRD",
+      "level": 81
+    },
+    {
+      "id": "rebalance-alakazam-miracle_eye",
+      "species": "SPECIES_ALAKAZAM",
+      "move": "MOVE_MIRACLE_EYE",
+      "level": 23
+    },
+    {
+      "id": "rebalance-alakazam-telekinesis",
+      "species": "SPECIES_ALAKAZAM",
+      "move": "MOVE_TELEKINESIS",
+      "level": 33
+    },
+    {
+      "id": "rebalance-alakazam-aura_sphere",
+      "species": "SPECIES_ALAKAZAM",
+      "move": "MOVE_AURA_SPHERE",
+      "level": 49
+    },
+    {
+      "id": "rebalance-arceus-punishment",
+      "species": "SPECIES_ARCEUS",
+      "move": "MOVE_PUNISHMENT",
+      "level": 1
+    },
+    {
+      "id": "rebalance-arceus-roar_of_time",
+      "species": "SPECIES_ARCEUS",
+      "move": "MOVE_ROAR_OF_TIME",
+      "level": 1
+    },
+    {
+      "id": "rebalance-arceus-shadow_force",
+      "species": "SPECIES_ARCEUS",
+      "move": "MOVE_SHADOW_FORCE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-arceus-spacial_rend",
+      "species": "SPECIES_ARCEUS",
+      "move": "MOVE_SPACIAL_REND",
+      "level": 1
+    },
+    {
+      "id": "rebalance-breloom-mind_reader",
+      "species": "SPECIES_BRELOOM",
+      "move": "MOVE_MIND_READER",
+      "level": 33
+    },
+    {
+      "id": "rebalance-breloom-sky_uppercut",
+      "species": "SPECIES_BRELOOM",
+      "move": "MOVE_SKY_UPPERCUT",
+      "level": 39
+    },
+    {
+      "id": "rebalance-breloom-spore",
+      "species": "SPECIES_BRELOOM",
+      "move": "MOVE_SPORE",
+      "level": 50
+    },
+    {
+      "id": "rebalance-clefable-spotlight",
+      "species": "SPECIES_CLEFABLE",
+      "move": "MOVE_SPOTLIGHT",
+      "level": 1
+    },
+    {
+      "id": "rebalance-clefairy-spotlight",
+      "species": "SPECIES_CLEFAIRY",
+      "move": "MOVE_SPOTLIGHT",
+      "level": 1
+    },
+    {
+      "id": "rebalance-clefairy-draining_kiss",
+      "species": "SPECIES_CLEFAIRY",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 19
+    },
+    {
+      "id": "rebalance-cleffa-magical_leaf",
+      "species": "SPECIES_CLEFFA",
+      "move": "MOVE_MAGICAL_LEAF",
+      "level": 16
+    },
+    {
+      "id": "rebalance-cleffa-draining_kiss",
+      "species": "SPECIES_CLEFFA",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 19
+    },
+    {
+      "id": "rebalance-golett-magnitude",
+      "species": "SPECIES_GOLETT",
+      "move": "MOVE_MAGNITUDE",
+      "level": 30
+    },
+    {
+      "id": "rebalance-golett-focus_punch",
+      "species": "SPECIES_GOLETT",
+      "move": "MOVE_FOCUS_PUNCH",
+      "level": 61
+    },
+    {
+      "id": "rebalance-golurk-magnitude",
+      "species": "SPECIES_GOLURK",
+      "move": "MOVE_MAGNITUDE",
+      "level": 30
+    },
+    {
+      "id": "rebalance-golurk-focus_punch",
+      "species": "SPECIES_GOLURK",
+      "move": "MOVE_FOCUS_PUNCH",
+      "level": 69
+    },
+    {
+      "id": "rebalance-kingler-aqua_jet",
+      "species": "SPECIES_KINGLER",
+      "move": "MOVE_AQUA_JET",
+      "level": 1
+    },
+    {
+      "id": "rebalance-kingler-ice_hammer",
+      "species": "SPECIES_KINGLER",
+      "move": "MOVE_ICE_HAMMER",
+      "level": 70
+    },
+    {
+      "id": "rebalance-meditite-meditate",
+      "species": "SPECIES_MEDITITE",
+      "move": "MOVE_MEDITATE",
+      "level": 4
+    },
+    {
+      "id": "rebalance-meditite-mind_reader",
+      "species": "SPECIES_MEDITITE",
+      "move": "MOVE_MIND_READER",
+      "level": 25
+    },
+    {
+      "id": "rebalance-medicham-mind_reader",
+      "species": "SPECIES_MEDICHAM",
+      "move": "MOVE_MIND_READER",
+      "level": 25
+    },
+    {
+      "id": "rebalance-medicham-meditate",
+      "species": "SPECIES_MEDICHAM",
+      "move": "MOVE_MEDITATE",
+      "level": 4
+    },
+    {
+      "id": "rebalance-milotic-moonblast",
+      "species": "SPECIES_MILOTIC",
+      "move": "MOVE_MOONBLAST",
+      "level": 44
+    },
+    {
+      "id": "rebalance-natu-lucky_chant",
+      "species": "SPECIES_NATU",
+      "move": "MOVE_LUCKY_CHANT",
+      "level": 12
+    },
+    {
+      "id": "rebalance-natu-ominous_wind",
+      "species": "SPECIES_NATU",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 20
+    },
+    {
+      "id": "rebalance-natu-miracle_eye",
+      "species": "SPECIES_NATU",
+      "move": "MOVE_MIRACLE_EYE",
+      "level": 36
+    },
+    {
+      "id": "rebalance-xatu-lucky_chant",
+      "species": "SPECIES_XATU",
+      "move": "MOVE_LUCKY_CHANT",
+      "level": 12
+    },
+    {
+      "id": "rebalance-xatu-ominous_wind",
+      "species": "SPECIES_XATU",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 20
+    },
+    {
+      "id": "rebalance-xatu-miracle_eye",
+      "species": "SPECIES_XATU",
+      "move": "MOVE_MIRACLE_EYE",
+      "level": 39
+    },
+    {
+      "id": "rebalance-nidoking-thrash",
+      "species": "SPECIES_NIDOKING",
+      "move": "MOVE_THRASH",
+      "level": 35
+    },
+    {
+      "id": "rebalance-nidoqueen-body_slam",
+      "species": "SPECIES_NIDOQUEEN",
+      "move": "MOVE_BODY_SLAM",
+      "level": 35
+    },
+    {
+      "id": "rebalance-ninjask-first_impression",
+      "species": "SPECIES_NINJASK",
+      "move": "MOVE_FIRST_IMPRESSION",
+      "level": 29
+    },
+    {
+      "id": "rebalance-pinsir-megahorn",
+      "species": "SPECIES_PINSIR",
+      "move": "MOVE_MEGAHORN",
+      "level": 47
+    },
+    {
+      "id": "rebalance-shuckle-encore",
+      "species": "SPECIES_SHUCKLE",
+      "move": "MOVE_ENCORE",
+      "level": 5
+    },
+    {
+      "id": "rebalance-sneasel-ice_shard",
+      "species": "SPECIES_SNEASEL",
+      "move": "MOVE_ICE_SHARD",
+      "level": 50
+    },
+    {
+      "id": "rebalance-snorlax-rollout",
+      "species": "SPECIES_SNORLAX",
+      "move": "MOVE_ROLLOUT",
+      "level": 36
+    },
+    {
+      "id": "rebalance-togepi-draining_kiss",
+      "species": "SPECIES_TOGEPI",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 20
+    },
+    {
+      "id": "rebalance-togetic-air_cutter",
+      "species": "SPECIES_TOGETIC",
+      "move": "MOVE_AIR_CUTTER",
+      "level": 0
+    },
+    {
+      "id": "rebalance-togetic-draining_kiss",
+      "species": "SPECIES_TOGETIC",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 20
+    },
+    {
+      "id": "rebalance-togekiss-air_cutter",
+      "species": "SPECIES_TOGEKISS",
+      "move": "MOVE_AIR_CUTTER",
+      "level": 1
+    },
+    {
+      "id": "rebalance-greedent-recycle",
+      "species": "SPECIES_GREEDENT",
+      "move": "MOVE_RECYCLE",
+      "level": 62
+    },
+    {
+      "id": "rebalance-skwovet-recycle",
+      "species": "SPECIES_SKWOVET",
+      "move": "MOVE_RECYCLE",
+      "level": 50
+    },
+    {
+      "id": "rebalance-guzzlord-steamroller",
+      "species": "SPECIES_GUZZLORD",
+      "move": "MOVE_STEAMROLLER",
+      "level": 19
+    },
+    {
+      "id": "rebalance-guzzlord-wring_out",
+      "species": "SPECIES_GUZZLORD",
+      "move": "MOVE_WRING_OUT",
+      "level": 67
+    },
+    {
+      "id": "rebalance-guzzlord-dragon_hammer",
+      "species": "SPECIES_GUZZLORD",
+      "move": "MOVE_DRAGON_HAMMER",
+      "level": 73
+    },
+    {
+      "id": "rebalance-muk-venom_drench",
+      "species": "SPECIES_MUK",
+      "move": "MOVE_VENOM_DRENCH",
+      "level": 0
+    },
+    {
+      "id": "rebalance-muk_alolan-venom_drench",
+      "species": "SPECIES_MUK_ALOLAN",
+      "move": "MOVE_VENOM_DRENCH",
+      "level": 0
+    },
+    {
+      "id": "rebalance-muk_alolan-parting_shot",
+      "species": "SPECIES_MUK_ALOLAN",
+      "move": "MOVE_PARTING_SHOT",
+      "level": 1
+    },
+    {
+      "id": "rebalance-weezing_galarian-aromatherapy",
+      "species": "SPECIES_WEEZING_GALARIAN",
+      "move": "MOVE_AROMATHERAPY",
+      "level": 24
+    },
+    {
+      "id": "rebalance-tapu_bulu-play_rough",
+      "species": "SPECIES_TAPU_BULU",
+      "move": "MOVE_PLAY_ROUGH",
+      "level": 63
+    },
+    {
+      "id": "rebalance-tapu_bulu-rototiller",
+      "species": "SPECIES_TAPU_BULU",
+      "move": "MOVE_ROTOTILLER",
+      "level": 38
+    },
+    {
+      "id": "rebalance-tapu_fini-refresh",
+      "species": "SPECIES_TAPU_FINI",
+      "move": "MOVE_REFRESH",
+      "level": 26
+    },
+    {
+      "id": "rebalance-tapu_koko-play_rough",
+      "species": "SPECIES_TAPU_KOKO",
+      "move": "MOVE_PLAY_ROUGH",
+      "level": 63
+    },
+    {
+      "id": "rebalance-herdier-odor_sleuth",
+      "species": "SPECIES_HERDIER",
+      "move": "MOVE_ODOR_SLEUTH",
+      "level": 5
+    },
+    {
+      "id": "rebalance-stoutland-odor_sleuth",
+      "species": "SPECIES_STOUTLAND",
+      "move": "MOVE_ODOR_SLEUTH",
+      "level": 5
+    },
+    {
+      "id": "rebalance-swirlix-covet",
+      "species": "SPECIES_SWIRLIX",
+      "move": "MOVE_COVET",
+      "level": 29
+    },
+    {
+      "id": "rebalance-slurpuff-covet",
+      "species": "SPECIES_SLURPUFF",
+      "move": "MOVE_COVET",
+      "level": 29
+    },
+    {
+      "id": "rebalance-trapinch-bug_bite",
+      "species": "SPECIES_TRAPINCH",
+      "move": "MOVE_BUG_BITE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-ampharos-signal_beam",
+      "species": "SPECIES_AMPHAROS",
+      "move": "MOVE_SIGNAL_BEAM",
+      "level": 51
+    },
+    {
+      "id": "rebalance-klink-flame_wheel",
+      "species": "SPECIES_KLINK",
+      "move": "MOVE_FLAME_WHEEL",
+      "level": 28
+    },
+    {
+      "id": "rebalance-klang-flame_wheel",
+      "species": "SPECIES_KLANG",
+      "move": "MOVE_FLAME_WHEEL",
+      "level": 28
+    },
+    {
+      "id": "rebalance-klinklang-flame_wheel",
+      "species": "SPECIES_KLINKLANG",
+      "move": "MOVE_FLAME_WHEEL",
+      "level": 28
+    },
+    {
+      "id": "rebalance-bellossom-draining_kiss",
+      "species": "SPECIES_BELLOSSOM",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 0
+    },
+    {
+      "id": "rebalance-bellossom-leaf_blade",
+      "species": "SPECIES_BELLOSSOM",
+      "move": "MOVE_LEAF_BLADE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-bellossom-fiery_dance",
+      "species": "SPECIES_BELLOSSOM",
+      "move": "MOVE_FIERY_DANCE",
+      "level": 79
+    },
+    {
+      "id": "rebalance-rotom-ominous_wind",
+      "species": "SPECIES_ROTOM",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-rotom-shadow_ball",
+      "species": "SPECIES_ROTOM",
+      "move": "MOVE_SHADOW_BALL",
+      "level": 45
+    },
+    {
+      "id": "rebalance-rotom_fan-ominous_wind",
+      "species": "SPECIES_ROTOM_FAN",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-rotom_fan-hurricane",
+      "species": "SPECIES_ROTOM_FAN",
+      "move": "MOVE_HURRICANE",
+      "level": 45
+    },
+    {
+      "id": "rebalance-rotom_frost-ominous_wind",
+      "species": "SPECIES_ROTOM_FROST",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-rotom_frost-blizzard",
+      "species": "SPECIES_ROTOM_FROST",
+      "move": "MOVE_BLIZZARD",
+      "level": 45
+    },
+    {
+      "id": "rebalance-rotom_heat-ominous_wind",
+      "species": "SPECIES_ROTOM_HEAT",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-rotom_heat-overheat",
+      "species": "SPECIES_ROTOM_HEAT",
+      "move": "MOVE_OVERHEAT",
+      "level": 45
+    },
+    {
+      "id": "rebalance-rotom_mow-ominous_wind",
+      "species": "SPECIES_ROTOM_MOW",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-rotom_mow-leaf_storm",
+      "species": "SPECIES_ROTOM_MOW",
+      "move": "MOVE_LEAF_STORM",
+      "level": 45
+    },
+    {
+      "id": "rebalance-rotom_wash-ominous_wind",
+      "species": "SPECIES_ROTOM_WASH",
+      "move": "MOVE_OMINOUS_WIND",
+      "level": 25
+    },
+    {
+      "id": "rebalance-rotom_wash-hydro_pump",
+      "species": "SPECIES_ROTOM_WASH",
+      "move": "MOVE_HYDRO_PUMP",
+      "level": 45
+    },
+    {
+      "id": "rebalance-shieldon-head_smash",
+      "species": "SPECIES_SHIELDON",
+      "move": "MOVE_HEAD_SMASH",
+      "level": 51
+    },
+    {
+      "id": "rebalance-bastiodon-head_smash",
+      "species": "SPECIES_BASTIODON",
+      "move": "MOVE_HEAD_SMASH",
+      "level": 66
+    },
+    {
+      "id": "rebalance-geodude-rapid_spin",
+      "species": "SPECIES_GEODUDE",
+      "move": "MOVE_RAPID_SPIN",
+      "level": 1
+    },
+    {
+      "id": "rebalance-geodude-accelerock",
+      "species": "SPECIES_GEODUDE",
+      "move": "MOVE_ACCELEROCK",
+      "level": 36
+    },
+    {
+      "id": "rebalance-geodude-magnitude",
+      "species": "SPECIES_GEODUDE",
+      "move": "MOVE_MAGNITUDE",
+      "level": 12
+    },
+    {
+      "id": "rebalance-geodude_alolan-rapid_spin",
+      "species": "SPECIES_GEODUDE_ALOLAN",
+      "move": "MOVE_RAPID_SPIN",
+      "level": 1
+    },
+    {
+      "id": "rebalance-geodude_alolan-accelerock",
+      "species": "SPECIES_GEODUDE_ALOLAN",
+      "move": "MOVE_ACCELEROCK",
+      "level": 36
+    },
+    {
+      "id": "rebalance-graveler-rapid_spin",
+      "species": "SPECIES_GRAVELER",
+      "move": "MOVE_RAPID_SPIN",
+      "level": 1
+    },
+    {
+      "id": "rebalance-graveler-accelerock",
+      "species": "SPECIES_GRAVELER",
+      "move": "MOVE_ACCELEROCK",
+      "level": 44
+    },
+    {
+      "id": "rebalance-graveler-magnitude",
+      "species": "SPECIES_GRAVELER",
+      "move": "MOVE_MAGNITUDE",
+      "level": 12
+    },
+    {
+      "id": "rebalance-graveler_alolan-rapid_spin",
+      "species": "SPECIES_GRAVELER_ALOLAN",
+      "move": "MOVE_RAPID_SPIN",
+      "level": 1
+    },
+    {
+      "id": "rebalance-graveler_alolan-accelerock",
+      "species": "SPECIES_GRAVELER_ALOLAN",
+      "move": "MOVE_ACCELEROCK",
+      "level": 44
+    },
+    {
+      "id": "rebalance-golem-rapid_spin",
+      "species": "SPECIES_GOLEM",
+      "move": "MOVE_RAPID_SPIN",
+      "level": 1
+    },
+    {
+      "id": "rebalance-golem-accelerock",
+      "species": "SPECIES_GOLEM",
+      "move": "MOVE_ACCELEROCK",
+      "level": 44
+    },
+    {
+      "id": "rebalance-golem-magnitude",
+      "species": "SPECIES_GOLEM",
+      "move": "MOVE_MAGNITUDE",
+      "level": 12
+    },
+    {
+      "id": "rebalance-golem-steamroller",
+      "species": "SPECIES_GOLEM",
+      "move": "MOVE_STEAMROLLER",
+      "level": 10
+    },
+    {
+      "id": "rebalance-golem_alolan-rapid_spin",
+      "species": "SPECIES_GOLEM_ALOLAN",
+      "move": "MOVE_RAPID_SPIN",
+      "level": 1
+    },
+    {
+      "id": "rebalance-golem_alolan-accelerock",
+      "species": "SPECIES_GOLEM_ALOLAN",
+      "move": "MOVE_ACCELEROCK",
+      "level": 44
+    },
+    {
+      "id": "rebalance-golem_alolan-steamroller",
+      "species": "SPECIES_GOLEM_ALOLAN",
+      "move": "MOVE_STEAMROLLER",
+      "level": 10
+    },
+    {
+      "id": "rebalance-crabrawler-power_up_punch",
+      "species": "SPECIES_CRABRAWLER",
+      "move": "MOVE_POWER_UP_PUNCH",
+      "level": 20
+    },
+    {
+      "id": "rebalance-crabrawler-dizzy_punch",
+      "species": "SPECIES_CRABRAWLER",
+      "move": "MOVE_DIZZY_PUNCH",
+      "level": 23
+    },
+    {
+      "id": "rebalance-crabrawler-mach_punch",
+      "species": "SPECIES_CRABRAWLER",
+      "move": "MOVE_MACH_PUNCH",
+      "level": 27
+    },
+    {
+      "id": "rebalance-crabominable-power_up_punch",
+      "species": "SPECIES_CRABOMINABLE",
+      "move": "MOVE_POWER_UP_PUNCH",
+      "level": 20
+    },
+    {
+      "id": "rebalance-crabominable-dizzy_punch",
+      "species": "SPECIES_CRABOMINABLE",
+      "move": "MOVE_DIZZY_PUNCH",
+      "level": 23
+    },
+    {
+      "id": "rebalance-crabominable-mach_punch",
+      "species": "SPECIES_CRABOMINABLE",
+      "move": "MOVE_MACH_PUNCH",
+      "level": 27
+    },
+    {
+      "id": "rebalance-chewtle-aqua_jet",
+      "species": "SPECIES_CHEWTLE",
+      "move": "MOVE_AQUA_JET",
+      "level": 24
+    },
+    {
+      "id": "rebalance-chewtle-shell_smash",
+      "species": "SPECIES_CHEWTLE",
+      "move": "MOVE_SHELL_SMASH",
+      "level": 54
+    },
+    {
+      "id": "rebalance-drednaw-aqua_jet",
+      "species": "SPECIES_DREDNAW",
+      "move": "MOVE_AQUA_JET",
+      "level": 25
+    },
+    {
+      "id": "rebalance-drednaw-shell_smash",
+      "species": "SPECIES_DREDNAW",
+      "move": "MOVE_SHELL_SMASH",
+      "level": 74
+    },
+    {
+      "id": "rebalance-shiftry-parting_shot",
+      "species": "SPECIES_SHIFTRY",
+      "move": "MOVE_PARTING_SHOT",
+      "level": 0
+    },
+    {
+      "id": "rebalance-blitzle-nuzzle",
+      "species": "SPECIES_BLITZLE",
+      "move": "MOVE_NUZZLE",
+      "level": 26
+    },
+    {
+      "id": "rebalance-blitzle-flame_wheel",
+      "species": "SPECIES_BLITZLE",
+      "move": "MOVE_FLAME_WHEEL",
+      "level": 30
+    },
+    {
+      "id": "rebalance-blitzle-high_horsepower",
+      "species": "SPECIES_BLITZLE",
+      "move": "MOVE_HIGH_HORSEPOWER",
+      "level": 47
+    },
+    {
+      "id": "rebalance-blitzle-flare_blitz",
+      "species": "SPECIES_BLITZLE",
+      "move": "MOVE_FLARE_BLITZ",
+      "level": 58
+    },
+    {
+      "id": "rebalance-zebstrika-nuzzle",
+      "species": "SPECIES_ZEBSTRIKA",
+      "move": "MOVE_NUZZLE",
+      "level": 26
+    },
+    {
+      "id": "rebalance-zebstrika-flame_wheel",
+      "species": "SPECIES_ZEBSTRIKA",
+      "move": "MOVE_FLAME_WHEEL",
+      "level": 30
+    },
+    {
+      "id": "rebalance-zebstrika-flare_blitz",
+      "species": "SPECIES_ZEBSTRIKA",
+      "move": "MOVE_FLARE_BLITZ",
+      "level": 66
+    },
+    {
+      "id": "rebalance-deerling-camouflage",
+      "species": "SPECIES_DEERLING",
+      "move": "MOVE_CAMOUFLAGE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-deerling-jump_kick",
+      "species": "SPECIES_DEERLING",
+      "move": "MOVE_JUMP_KICK",
+      "level": 24
+    },
+    {
+      "id": "rebalance-deerling-nature_power",
+      "species": "SPECIES_DEERLING",
+      "move": "MOVE_NATURE_POWER",
+      "level": 41
+    },
+    {
+      "id": "rebalance-deerling-high_horsepower",
+      "species": "SPECIES_DEERLING",
+      "move": "MOVE_HIGH_HORSEPOWER",
+      "level": 44
+    },
+    {
+      "id": "rebalance-sawsbuck-camouflage",
+      "species": "SPECIES_SAWSBUCK",
+      "move": "MOVE_CAMOUFLAGE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sawsbuck-jump_kick",
+      "species": "SPECIES_SAWSBUCK",
+      "move": "MOVE_JUMP_KICK",
+      "level": 24
+    },
+    {
+      "id": "rebalance-sawsbuck-nature_power",
+      "species": "SPECIES_SAWSBUCK",
+      "move": "MOVE_NATURE_POWER",
+      "level": 44
+    },
+    {
+      "id": "rebalance-sawsbuck-high_horsepower",
+      "species": "SPECIES_SAWSBUCK",
+      "move": "MOVE_HIGH_HORSEPOWER",
+      "level": 48
+    },
+    {
+      "id": "rebalance-shinx-baby_doll_eyes",
+      "species": "SPECIES_SHINX",
+      "move": "MOVE_BABY_DOLL_EYES",
+      "level": 7
+    },
+    {
+      "id": "rebalance-shinx-nuzzle",
+      "species": "SPECIES_SHINX",
+      "move": "MOVE_NUZZLE",
+      "level": 10
+    },
+    {
+      "id": "rebalance-shinx-thunder_fang",
+      "species": "SPECIES_SHINX",
+      "move": "MOVE_THUNDER_FANG",
+      "level": 27
+    },
+    {
+      "id": "rebalance-luxio-baby_doll_eyes",
+      "species": "SPECIES_LUXIO",
+      "move": "MOVE_BABY_DOLL_EYES",
+      "level": 9
+    },
+    {
+      "id": "rebalance-luxio-nuzzle",
+      "species": "SPECIES_LUXIO",
+      "move": "MOVE_NUZZLE",
+      "level": 13
+    },
+    {
+      "id": "rebalance-luxray-baby_doll_eyes",
+      "species": "SPECIES_LUXRAY",
+      "move": "MOVE_BABY_DOLL_EYES",
+      "level": 9
+    },
+    {
+      "id": "rebalance-luxray-nuzzle",
+      "species": "SPECIES_LUXRAY",
+      "move": "MOVE_NUZZLE",
+      "level": 13
+    },
+    {
+      "id": "rebalance-luxray-psychic_fangs",
+      "species": "SPECIES_LUXRAY",
+      "move": "MOVE_PSYCHIC_FANGS",
+      "level": 1
+    },
+    {
+      "id": "rebalance-gabite-dual_chop",
+      "species": "SPECIES_GABITE",
+      "move": "MOVE_DUAL_CHOP",
+      "level": 0
+    },
+    {
+      "id": "rebalance-garchomp-dual_chop",
+      "species": "SPECIES_GARCHOMP",
+      "move": "MOVE_DUAL_CHOP",
+      "level": 1
+    },
+    {
+      "id": "rebalance-omanyte-power_gem",
+      "species": "SPECIES_OMANYTE",
+      "move": "MOVE_POWER_GEM",
+      "level": 46
+    },
+    {
+      "id": "rebalance-omastar-power_gem",
+      "species": "SPECIES_OMASTAR",
+      "move": "MOVE_POWER_GEM",
+      "level": 56
+    },
+    {
+      "id": "rebalance-omastar-shelter",
+      "species": "SPECIES_OMASTAR",
+      "move": "MOVE_SHELTER",
+      "level": 1
+    },
+    {
+      "id": "rebalance-remoraid-signal_beam",
+      "species": "SPECIES_REMORAID",
+      "move": "MOVE_SIGNAL_BEAM",
+      "level": 26
+    },
+    {
+      "id": "rebalance-remoraid-icicle_spear",
+      "species": "SPECIES_REMORAID",
+      "move": "MOVE_ICICLE_SPEAR",
+      "level": 29
+    },
+    {
+      "id": "rebalance-remoraid-zap_cannon",
+      "species": "SPECIES_REMORAID",
+      "move": "MOVE_ZAP_CANNON",
+      "level": 57
+    },
+    {
+      "id": "rebalance-octillery-signal_beam",
+      "species": "SPECIES_OCTILLERY",
+      "move": "MOVE_SIGNAL_BEAM",
+      "level": 29
+    },
+    {
+      "id": "rebalance-octillery-icicle_spear",
+      "species": "SPECIES_OCTILLERY",
+      "move": "MOVE_ICICLE_SPEAR",
+      "level": 33
+    },
+    {
+      "id": "rebalance-octillery-zap_cannon",
+      "species": "SPECIES_OCTILLERY",
+      "move": "MOVE_ZAP_CANNON",
+      "level": 65
+    },
+    {
+      "id": "rebalance-spheal-ice_ball",
+      "species": "SPECIES_SPHEAL",
+      "move": "MOVE_ICE_BALL",
+      "level": 13
+    },
+    {
+      "id": "rebalance-spheal-slack_off",
+      "species": "SPECIES_SPHEAL",
+      "move": "MOVE_SLACK_OFF",
+      "level": 33
+    },
+    {
+      "id": "rebalance-sealeo-ice_ball",
+      "species": "SPECIES_SEALEO",
+      "move": "MOVE_ICE_BALL",
+      "level": 13
+    },
+    {
+      "id": "rebalance-sealeo-slack_off",
+      "species": "SPECIES_SEALEO",
+      "move": "MOVE_SLACK_OFF",
+      "level": 36
+    },
+    {
+      "id": "rebalance-walrein-ice_ball",
+      "species": "SPECIES_WALREIN",
+      "move": "MOVE_ICE_BALL",
+      "level": 13
+    },
+    {
+      "id": "rebalance-walrein-slack_off",
+      "species": "SPECIES_WALREIN",
+      "move": "MOVE_SLACK_OFF",
+      "level": 37
+    },
+    {
+      "id": "rebalance-jynx-draining_kiss",
+      "move": "MOVE_DRAINING_KISS",
+      "species": "SPECIES_JYNX",
+      "level": 1
+    },
+    {
+      "id": "rebalance-smoochum-draining_kiss",
+      "move": "MOVE_DRAINING_KISS",
+      "species": "SPECIES_SMOOCHUM",
+      "level": 1
+    },
+    {
+      "id": "rebalance-onix-glare",
+      "move": "MOVE_GLARE",
+      "species": "SPECIES_ONIX",
+      "level": 30
+    },
+    {
+      "id": "rebalance-onix-coil",
+      "move": "MOVE_COIL",
+      "species": "SPECIES_ONIX",
+      "level": 50
+    },
+    {
+      "id": "rebalance-steelix-glare",
+      "move": "MOVE_GLARE",
+      "species": "SPECIES_STEELIX",
+      "level": 30
+    },
+    {
+      "id": "rebalance-steelix-coil",
+      "move": "MOVE_COIL",
+      "species": "SPECIES_STEELIX",
+      "level": 50
+    },
+    {
+      "id": "rebalance-linoone-tail_slap",
+      "move": "MOVE_TAIL_SLAP",
+      "species": "SPECIES_LINOONE",
+      "level": 38
+    },
+    {
+      "id": "rebalance-lunatone-night_daze",
+      "move": "MOVE_NIGHT_DAZE",
+      "species": "SPECIES_LUNATONE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-lunatone-power_gem",
+      "move": "MOVE_POWER_GEM",
+      "species": "SPECIES_LUNATONE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-lunatone-lunar_dance",
+      "move": "MOVE_LUNAR_DANCE",
+      "species": "SPECIES_LUNATONE",
+      "level": 55
+    },
+    {
+      "id": "rebalance-wailord-bouncy_bubble",
+      "move": "MOVE_BOUNCY_BUBBLE",
+      "species": "SPECIES_WAILORD",
+      "level": 72
+    },
+    {
+      "id": "rebalance-gengar-nightmare",
+      "species": "SPECIES_GENGAR",
+      "move": "MOVE_NIGHTMARE",
+      "level": 61
+    },
+    {
+      "id": "rebalance-elekid-dual_chop",
+      "species": "SPECIES_ELEKID",
+      "move": "MOVE_DUAL_CHOP",
+      "level": 43
+    },
+    {
+      "id": "rebalance-electabuzz-dual_chop",
+      "species": "SPECIES_ELECTABUZZ",
+      "move": "MOVE_DUAL_CHOP",
+      "level": 43
+    },
+    {
+      "id": "rebalance-electivire-mach_punch",
+      "species": "SPECIES_ELECTIVIRE",
+      "move": "MOVE_MACH_PUNCH",
+      "level": 0
+    },
+    {
+      "id": "rebalance-electivire-dual_chop",
+      "species": "SPECIES_ELECTIVIRE",
+      "move": "MOVE_DUAL_CHOP",
+      "level": 43
+    },
+    {
+      "id": "rebalance-electivire-close_combat",
+      "species": "SPECIES_ELECTIVIRE",
+      "move": "MOVE_CLOSE_COMBAT",
+      "level": 54
+    },
+    {
+      "id": "rebalance-chinchou-signal_beam",
+      "species": "SPECIES_CHINCHOU",
+      "move": "MOVE_SIGNAL_BEAM",
+      "level": 28
+    },
+    {
+      "id": "rebalance-chinchou-parabolic_charge",
+      "species": "SPECIES_CHINCHOU",
+      "move": "MOVE_PARABOLIC_CHARGE",
+      "level": 39
+    },
+    {
+      "id": "rebalance-lanturn-signal_beam",
+      "species": "SPECIES_LANTURN",
+      "move": "MOVE_SIGNAL_BEAM",
+      "level": 29
+    },
+    {
+      "id": "rebalance-lanturn-parabolic_charge",
+      "species": "SPECIES_LANTURN",
+      "move": "MOVE_PARABOLIC_CHARGE",
+      "level": 43
+    },
+    {
+      "id": "rebalance-lanturn-tail_glow",
+      "species": "SPECIES_LANTURN",
+      "move": "MOVE_TAIL_GLOW",
+      "level": 62
+    },
+    {
+      "id": "rebalance-tynamo-nuzzle",
+      "species": "SPECIES_TYNAMO",
+      "move": "MOVE_NUZZLE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-eelektrik-nuzzle",
+      "species": "SPECIES_EELEKTRIK",
+      "move": "MOVE_NUZZLE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-eelektrik-breaking_swipe",
+      "species": "SPECIES_EELEKTRIK",
+      "move": "MOVE_BREAKING_SWIPE",
+      "level": 4
+    },
+    {
+      "id": "rebalance-eelektrik-psychic_fangs",
+      "species": "SPECIES_EELEKTRIK",
+      "move": "MOVE_PSYCHIC_FANGS",
+      "level": 34
+    },
+    {
+      "id": "rebalance-eelektrik-leech_life",
+      "species": "SPECIES_EELEKTRIK",
+      "move": "MOVE_LEECH_LIFE",
+      "level": 39
+    },
+    {
+      "id": "rebalance-eelektross-nuzzle",
+      "species": "SPECIES_EELEKTROSS",
+      "move": "MOVE_NUZZLE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-eelektross-breaking_swipe",
+      "species": "SPECIES_EELEKTROSS",
+      "move": "MOVE_BREAKING_SWIPE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-electrode-buzzy_buzz",
+      "species": "SPECIES_ELECTRODE",
+      "move": "MOVE_BUZZY_BUZZ",
+      "level": 65
+    },
+    {
+      "id": "rebalance-glalie-rock_slide",
+      "species": "SPECIES_GLALIE",
+      "move": "MOVE_ROCK_SLIDE",
+      "level": 0
+    },
+    {
+      "id": "rebalance-glalie-icicle_crash",
+      "species": "SPECIES_GLALIE",
+      "move": "MOVE_ICICLE_CRASH",
+      "level": 46
+    },
+    {
+      "id": "rebalance-buneary-frustration",
+      "species": "SPECIES_BUNEARY",
+      "move": "MOVE_FRUSTRATION",
+      "level": 1
+    },
+    {
+      "id": "rebalance-buneary-jump_kick",
+      "species": "SPECIES_BUNEARY",
+      "move": "MOVE_JUMP_KICK",
+      "level": 23
+    },
+    {
+      "id": "rebalance-buneary-dizzy_punch",
+      "species": "SPECIES_BUNEARY",
+      "move": "MOVE_DIZZY_PUNCH",
+      "level": 36
+    },
+    {
+      "id": "rebalance-lopunny-mega_kick",
+      "species": "SPECIES_LOPUNNY",
+      "move": "MOVE_MEGA_KICK",
+      "level": 0
+    },
+    {
+      "id": "rebalance-lopunny-jump_kick",
+      "species": "SPECIES_LOPUNNY",
+      "move": "MOVE_JUMP_KICK",
+      "level": 23
+    },
+    {
+      "id": "rebalance-lopunny-blaze_kick",
+      "species": "SPECIES_LOPUNNY",
+      "move": "MOVE_BLAZE_KICK",
+      "level": 30
+    },
+    {
+      "id": "rebalance-lopunny-dizzy_punch",
+      "species": "SPECIES_LOPUNNY",
+      "move": "MOVE_DIZZY_PUNCH",
+      "level": 36
+    },
+    {
+      "id": "rebalance-purugly-slack_off",
+      "species": "SPECIES_PURUGLY",
+      "move": "MOVE_SLACK_OFF",
+      "level": 41
+    },
+    {
+      "id": "rebalance-azelf-moonblast",
+      "species": "SPECIES_AZELF",
+      "move": "MOVE_MOONBLAST",
+      "level": 41
+    },
+    {
+      "id": "rebalance-mesprit-moonblast",
+      "species": "SPECIES_MESPRIT",
+      "move": "MOVE_MOONBLAST",
+      "level": 41
+    },
+    {
+      "id": "rebalance-uxie-moonblast",
+      "species": "SPECIES_UXIE",
+      "move": "MOVE_MOONBLAST",
+      "level": 41
+    },
+    {
+      "id": "rebalance-ninetales-dazzling_gleam",
+      "species": "SPECIES_NINETALES",
+      "move": "MOVE_DAZZLING_GLEAM",
+      "level": 0
+    },
+    {
+      "id": "rebalance-misdreavus-fairy_wind",
+      "species": "SPECIES_MISDREAVUS",
+      "move": "MOVE_FAIRY_WIND",
+      "level": 11
+    },
+    {
+      "id": "rebalance-misdreavus-draining_kiss",
+      "species": "SPECIES_MISDREAVUS",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 34
+    },
+    {
+      "id": "rebalance-misdreavus-grudge",
+      "species": "SPECIES_MISDREAVUS",
+      "move": "MOVE_GRUDGE",
+      "level": 50
+    },
+    {
+      "id": "rebalance-misdreavus-moonblast",
+      "species": "SPECIES_MISDREAVUS",
+      "move": "MOVE_MOONBLAST",
+      "level": 60
+    },
+    {
+      "id": "rebalance-mismagius-fairy_wind",
+      "species": "SPECIES_MISMAGIUS",
+      "move": "MOVE_FAIRY_WIND",
+      "level": 1
+    },
+    {
+      "id": "rebalance-mismagius-grudge",
+      "species": "SPECIES_MISMAGIUS",
+      "move": "MOVE_GRUDGE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-goomy-tearful_look",
+      "species": "SPECIES_GOOMY",
+      "move": "MOVE_TEARFUL_LOOK",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sliggoo-tearful_look",
+      "species": "SPECIES_SLIGGOO",
+      "move": "MOVE_TEARFUL_LOOK",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sliggoo-recover",
+      "species": "SPECIES_SLIGGOO",
+      "move": "MOVE_RECOVER",
+      "level": 44
+    },
+    {
+      "id": "rebalance-goodra-acid_armor",
+      "species": "SPECIES_GOODRA",
+      "move": "MOVE_ACID_ARMOR",
+      "level": 1
+    },
+    {
+      "id": "rebalance-goodra-recover",
+      "species": "SPECIES_GOODRA",
+      "move": "MOVE_RECOVER",
+      "level": 44
+    },
+    {
+      "id": "rebalance-goodra-sludge_wave",
+      "species": "SPECIES_GOODRA",
+      "move": "MOVE_SLUDGE_WAVE",
+      "level": 63
+    },
+    {
+      "id": "rebalance-sliggoo_hisuian-tearful_look",
+      "species": "SPECIES_SLIGGOO_HISUIAN",
+      "move": "MOVE_TEARFUL_LOOK",
+      "level": 1
+    },
+    {
+      "id": "rebalance-sliggoo_hisuian-steel_roller",
+      "species": "SPECIES_SLIGGOO_HISUIAN",
+      "move": "MOVE_STEEL_ROLLER",
+      "level": 35
+    },
+    {
+      "id": "rebalance-goodra_hisuian-steel_roller",
+      "species": "SPECIES_GOODRA_HISUIAN",
+      "move": "MOVE_STEEL_ROLLER",
+      "level": 35
+    },
+    {
+      "id": "rebalance-goodra_hisuian-metal_burst",
+      "species": "SPECIES_GOODRA_HISUIAN",
+      "move": "MOVE_METAL_BURST",
+      "level": 63
+    },
+    {
+      "id": "rebalance-gothita-dark_pulse",
+      "species": "SPECIES_GOTHITA",
+      "move": "MOVE_DARK_PULSE",
+      "level": 43
+    },
+    {
+      "id": "rebalance-gothorita-dark_pulse",
+      "species": "SPECIES_GOTHORITA",
+      "move": "MOVE_DARK_PULSE",
+      "level": 46
+    },
+    {
+      "id": "rebalance-gothitelle-dark_pulse",
+      "species": "SPECIES_GOTHITELLE",
+      "move": "MOVE_DARK_PULSE",
+      "level": 49
+    },
+    {
+      "id": "rebalance-gothitelle-night_daze",
+      "species": "SPECIES_GOTHITELLE",
+      "move": "MOVE_NIGHT_DAZE",
+      "level": 65
+    },
+    {
+      "id": "rebalance-seviper-venom_drench",
+      "species": "SPECIES_SEVIPER",
+      "move": "MOVE_VENOM_DRENCH",
+      "level": 24
+    },
+    {
+      "id": "rebalance-seviper-night_slash",
+      "species": "SPECIES_SEVIPER",
+      "move": "MOVE_NIGHT_SLASH",
+      "level": 26
+    },
+    {
+      "id": "rebalance-seviper-gunk_shot",
+      "species": "SPECIES_SEVIPER",
+      "move": "MOVE_GUNK_SHOT",
+      "level": 58
+    },
+    {
+      "id": "rebalance-seviper-power_whip",
+      "species": "SPECIES_SEVIPER",
+      "move": "MOVE_POWER_WHIP",
+      "level": 62
+    },
+    {
+      "id": "rebalance-chingling-extrasensory",
+      "species": "SPECIES_CHINGLING",
+      "move": "MOVE_EXTRASENSORY",
+      "level": 22
+    },
+    {
+      "id": "rebalance-chingling-disarming_voice",
+      "species": "SPECIES_CHINGLING",
+      "move": "MOVE_DISARMING_VOICE",
+      "level": 25
+    },
+    {
+      "id": "rebalance-mienfoo-meditate",
+      "species": "SPECIES_MIENFOO",
+      "move": "MOVE_MEDITATE",
+      "level": 5
+    },
+    {
+      "id": "rebalance-mienshao-meditate",
+      "species": "SPECIES_MIENSHAO",
+      "move": "MOVE_MEDITATE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-togedemaru-rollout",
+      "species": "SPECIES_TOGEDEMARU",
+      "move": "MOVE_ROLLOUT",
+      "level": 9
+    },
+    {
+      "id": "rebalance-togedemaru-zippy_zap",
+      "species": "SPECIES_TOGEDEMARU",
+      "move": "MOVE_ZIPPY_ZAP",
+      "level": 57
+    },
+    {
+      "id": "rebalance-unown-nature_power",
+      "species": "SPECIES_UNOWN",
+      "move": "MOVE_NATURE_POWER",
+      "level": 1
+    },
+    {
+      "id": "rebalance-beedrill-drill_peck",
+      "species": "SPECIES_BEEDRILL",
+      "move": "MOVE_DRILL_PECK",
+      "level": 34
+    },
+    {
+      "id": "rebalance-beedrill-megahorn",
+      "species": "SPECIES_BEEDRILL",
+      "move": "MOVE_MEGAHORN",
+      "level": 45
+    },
+    {
+      "id": "rebalance-cramorant-belch",
+      "species": "SPECIES_CRAMORANT",
+      "move": "MOVE_BELCH",
+      "level": 1
+    },
+    {
+      "id": "rebalance-cramorant-surf",
+      "species": "SPECIES_CRAMORANT",
+      "move": "MOVE_SURF",
+      "level": 45
+    },
+    {
+      "id": "rebalance-donphan-magnitude",
+      "species": "SPECIES_DONPHAN",
+      "move": "MOVE_MAGNITUDE",
+      "level": 33
+    },
+    {
+      "id": "rebalance-phanpy-magnitude",
+      "species": "SPECIES_PHANPY",
+      "move": "MOVE_MAGNITUDE",
+      "level": 31
+    },
+    {
+      "id": "rebalance-tropius-natural_gift",
+      "species": "SPECIES_TROPIUS",
+      "move": "MOVE_NATURAL_GIFT",
+      "level": 30
+    },
+    {
+      "id": "rebalance-tropius-bestow",
+      "species": "SPECIES_TROPIUS",
+      "move": "MOVE_BESTOW",
+      "level": 46
+    },
+    {
+      "id": "rebalance-aipom-quick_attack",
+      "species": "SPECIES_AIPOM",
+      "move": "MOVE_QUICK_ATTACK",
+      "level": 1
+    },
+    {
+      "id": "rebalance-ambipom-quick_attack",
+      "species": "SPECIES_AMBIPOM",
+      "move": "MOVE_QUICK_ATTACK",
+      "level": 1
+    },
+    {
+      "id": "rebalance-ambipom-dual_chop",
+      "species": "SPECIES_AMBIPOM",
+      "move": "MOVE_DUAL_CHOP",
+      "level": 1
+    },
+    {
+      "id": "rebalance-ambipom-arm_thrust",
+      "species": "SPECIES_AMBIPOM",
+      "move": "MOVE_ARM_THRUST",
+      "level": 46
+    },
+    {
+      "id": "rebalance-armaldo-first_impression",
+      "species": "SPECIES_ARMALDO",
+      "move": "MOVE_FIRST_IMPRESSION",
+      "level": 69
+    },
+    {
+      "id": "rebalance-baltoy-heal_block",
+      "species": "SPECIES_BALTOY",
+      "move": "MOVE_HEAL_BLOCK",
+      "level": 10
+    },
+    {
+      "id": "rebalance-baltoy-recover",
+      "species": "SPECIES_BALTOY",
+      "move": "MOVE_RECOVER",
+      "level": 37
+    },
+    {
+      "id": "rebalance-claydol-heal_block",
+      "species": "SPECIES_CLAYDOL",
+      "move": "MOVE_HEAL_BLOCK",
+      "level": 10
+    },
+    {
+      "id": "rebalance-claydol-recover",
+      "species": "SPECIES_CLAYDOL",
+      "move": "MOVE_RECOVER",
+      "level": 38
+    },
+    {
+      "id": "rebalance-rolycoly-lava_plume",
+      "species": "SPECIES_ROLYCOLY",
+      "move": "MOVE_LAVA_PLUME",
+      "level": 28
+    },
+    {
+      "id": "rebalance-rolycoly-power_gem",
+      "species": "SPECIES_ROLYCOLY",
+      "move": "MOVE_POWER_GEM",
+      "level": 45
+    },
+    {
+      "id": "rebalance-carkol-lava_plume",
+      "species": "SPECIES_CARKOL",
+      "move": "MOVE_LAVA_PLUME",
+      "level": 31
+    },
+    {
+      "id": "rebalance-carkol-power_gem",
+      "species": "SPECIES_CARKOL",
+      "move": "MOVE_POWER_GEM",
+      "level": 52
+    },
+    {
+      "id": "rebalance-carkol-burn_up",
+      "species": "SPECIES_CARKOL",
+      "move": "MOVE_BURN_UP",
+      "level": 55
+    },
+    {
+      "id": "rebalance-coalossal-lava_plume",
+      "species": "SPECIES_COALOSSAL",
+      "move": "MOVE_LAVA_PLUME",
+      "level": 32
+    },
+    {
+      "id": "rebalance-coalossal-power_gem",
+      "species": "SPECIES_COALOSSAL",
+      "move": "MOVE_POWER_GEM",
+      "level": 59
+    },
+    {
+      "id": "rebalance-coalossal-burn_up",
+      "species": "SPECIES_COALOSSAL",
+      "move": "MOVE_BURN_UP",
+      "level": 63
+    },
+    {
+      "id": "rebalance-dwebble-crabhammer",
+      "species": "SPECIES_DWEBBLE",
+      "move": "MOVE_CRABHAMMER",
+      "level": 47
+    },
+    {
+      "id": "rebalance-crustle-crabhammer",
+      "species": "SPECIES_CRUSTLE",
+      "move": "MOVE_CRABHAMMER",
+      "level": 62
+    },
+    {
+      "id": "rebalance-cottonee-sleep_powder",
+      "species": "SPECIES_COTTONEE",
+      "move": "MOVE_SLEEP_POWDER",
+      "level": 36
+    },
+    {
+      "id": "rebalance-whimsicott-sleep_powder",
+      "species": "SPECIES_WHIMSICOTT",
+      "move": "MOVE_SLEEP_POWDER",
+      "level": 65
+    },
+    {
+      "id": "rebalance-cradily-power_whip",
+      "species": "SPECIES_CRADILY",
+      "move": "MOVE_POWER_WHIP",
+      "level": 0
+    },
+    {
+      "id": "rebalance-cradily-pain_split",
+      "species": "SPECIES_CRADILY",
+      "move": "MOVE_PAIN_SPLIT",
+      "level": 1
+    },
+    {
+      "id": "rebalance-cradily-sappy_seed",
+      "species": "SPECIES_CRADILY",
+      "move": "MOVE_SAPPY_SEED",
+      "level": 69
+    },
+    {
+      "id": "rebalance-drakloak-shadow_claw",
+      "species": "SPECIES_DRAKLOAK",
+      "move": "MOVE_SHADOW_CLAW",
+      "level": 56
+    },
+    {
+      "id": "rebalance-dragapult-shadow_claw",
+      "species": "SPECIES_DRAGAPULT",
+      "move": "MOVE_SHADOW_CLAW",
+      "level": 56
+    },
+    {
+      "id": "rebalance-dhelmise-spirit_shackle",
+      "species": "SPECIES_DHELMISE",
+      "move": "MOVE_SPIRIT_SHACKLE",
+      "level": 64
+    },
+    {
+      "id": "rebalance-druddigon-dragon_hammer",
+      "species": "SPECIES_DRUDDIGON",
+      "move": "MOVE_DRAGON_HAMMER",
+      "level": 58
+    },
+    {
+      "id": "rebalance-farfetchd-sacred_sword",
+      "species": "SPECIES_FARFETCHD",
+      "move": "MOVE_SACRED_SWORD",
+      "level": 60
+    },
+    {
+      "id": "rebalance-sirfetchd-sacred_sword",
+      "species": "SPECIES_SIRFETCHD",
+      "move": "MOVE_SACRED_SWORD",
+      "level": 0
+    },
+    {
+      "id": "rebalance-hoppip-air_cutter",
+      "species": "SPECIES_HOPPIP",
+      "move": "MOVE_AIR_CUTTER",
+      "level": 14
+    },
+    {
+      "id": "rebalance-hoppip-rage_powder",
+      "species": "SPECIES_HOPPIP",
+      "move": "MOVE_RAGE_POWDER",
+      "level": 28
+    },
+    {
+      "id": "rebalance-hoppip-air_slash",
+      "species": "SPECIES_HOPPIP",
+      "move": "MOVE_AIR_SLASH",
+      "level": 43
+    },
+    {
+      "id": "rebalance-hoppip-hyper_voice",
+      "species": "SPECIES_HOPPIP",
+      "move": "MOVE_HYPER_VOICE",
+      "level": 52
+    },
+    {
+      "id": "rebalance-skiploom-air_cutter",
+      "species": "SPECIES_SKIPLOOM",
+      "move": "MOVE_AIR_CUTTER",
+      "level": 14
+    },
+    {
+      "id": "rebalance-skiploom-rage_powder",
+      "species": "SPECIES_SKIPLOOM",
+      "move": "MOVE_RAGE_POWDER",
+      "level": 32
+    },
+    {
+      "id": "rebalance-skiploom-air_slash",
+      "species": "SPECIES_SKIPLOOM",
+      "move": "MOVE_AIR_SLASH",
+      "level": 52
+    },
+    {
+      "id": "rebalance-skiploom-hyper_voice",
+      "species": "SPECIES_SKIPLOOM",
+      "move": "MOVE_HYPER_VOICE",
+      "level": 64
+    },
+    {
+      "id": "rebalance-jumpluff-air_cutter",
+      "species": "SPECIES_JUMPLUFF",
+      "move": "MOVE_AIR_CUTTER",
+      "level": 14
+    },
+    {
+      "id": "rebalance-jumpluff-rage_powder",
+      "species": "SPECIES_JUMPLUFF",
+      "move": "MOVE_RAGE_POWDER",
+      "level": 34
+    },
+    {
+      "id": "rebalance-jumpluff-air_slash",
+      "species": "SPECIES_JUMPLUFF",
+      "move": "MOVE_AIR_SLASH",
+      "level": 59
+    },
+    {
+      "id": "rebalance-jumpluff-hyper_voice",
+      "species": "SPECIES_JUMPLUFF",
+      "move": "MOVE_HYPER_VOICE",
+      "level": 75
+    },
+    {
+      "id": "rebalance-dedenne-charge_beam",
+      "species": "SPECIES_DEDENNE",
+      "move": "MOVE_CHARGE_BEAM",
+      "level": 32
+    },
+    {
+      "id": "rebalance-dedenne-draining_kiss",
+      "species": "SPECIES_DEDENNE",
+      "move": "MOVE_DRAINING_KISS",
+      "level": 47
+    },
+    {
+      "id": "rebalance-delibird-icy_wind",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_ICY_WIND",
+      "level": 5
+    },
+    {
+      "id": "rebalance-delibird-swift",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_SWIFT",
+      "level": 15
+    },
+    {
+      "id": "rebalance-delibird-air_cutter",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_AIR_CUTTER",
+      "level": 35
+    },
+    {
+      "id": "rebalance-delibird-brave_bird",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_BRAVE_BIRD",
+      "level": 45
+    },
+    {
+      "id": "rebalance-delibird-air_slash",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_AIR_SLASH",
+      "level": 55
+    },
+    {
+      "id": "rebalance-delibird-blizzard",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_BLIZZARD",
+      "level": 65
+    },
+    {
+      "id": "rebalance-delibird-hurricane",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_HURRICANE",
+      "level": 75
+    },
+    {
+      "id": "rebalance-klawf-accelerock",
+      "species": "SPECIES_KLAWF",
+      "move": "MOVE_ACCELEROCK",
+      "level": 35
+    },
+    {
+      "id": "rebalance-klawf-mighty_cleave",
+      "species": "SPECIES_KLAWF",
+      "move": "MOVE_MIGHTY_CLEAVE",
+      "level": 63
+    },
+    {
+      "id": "rebalance-kricketune-pin_missile",
+      "species": "SPECIES_KRICKETUNE",
+      "move": "MOVE_PIN_MISSILE",
+      "level": 22
+    },
+    {
+      "id": "rebalance-ledyba-meteor_mash",
+      "species": "SPECIES_LEDYBA",
+      "move": "MOVE_METEOR_MASH",
+      "level": 44
+    },
+    {
+      "id": "rebalance-ledian-mega_punch",
+      "species": "SPECIES_LEDIAN",
+      "move": "MOVE_MEGA_PUNCH",
+      "level": 0
+    },
+    {
+      "id": "rebalance-ledian-meteor_mash",
+      "species": "SPECIES_LEDIAN",
+      "move": "MOVE_METEOR_MASH",
+      "level": 52
+    },
+    {
+      "id": "rebalance-luvdisc-moonblast",
+      "species": "SPECIES_LUVDISC",
+      "move": "MOVE_MOONBLAST",
+      "level": 40
+    },
+    {
+      "id": "rebalance-luvdisc-lovely_kiss",
+      "species": "SPECIES_LUVDISC",
+      "move": "MOVE_LOVELY_KISS",
+      "level": 55
+    },
+    {
+      "id": "rebalance-maractus-horn_leech",
+      "species": "SPECIES_MARACTUS",
+      "move": "MOVE_HORN_LEECH",
+      "level": 26
+    },
+    {
+      "id": "rebalance-maractus-needle_arm",
+      "species": "SPECIES_MARACTUS",
+      "move": "MOVE_NEEDLE_ARM",
+      "level": 50
+    },
+    {
+      "id": "rebalance-tarountula-stealth_rock",
+      "species": "SPECIES_TAROUNTULA",
+      "move": "MOVE_STEALTH_ROCK",
+      "level": 29
+    },
+    {
+      "id": "rebalance-tarountula-pounce",
+      "species": "SPECIES_TAROUNTULA",
+      "move": "MOVE_POUNCE",
+      "level": 44
+    },
+    {
+      "id": "rebalance-tarountula-rage_powder",
+      "species": "SPECIES_TAROUNTULA",
+      "move": "MOVE_RAGE_POWDER",
+      "level": 47
+    },
+    {
+      "id": "rebalance-spidops-stealth_rock",
+      "species": "SPECIES_SPIDOPS",
+      "move": "MOVE_STEALTH_ROCK",
+      "level": 33
+    },
+    {
+      "id": "rebalance-spidops-pounce",
+      "species": "SPECIES_SPIDOPS",
+      "move": "MOVE_POUNCE",
+      "level": 49
+    },
+    {
+      "id": "rebalance-spidops-rage_powder",
+      "species": "SPECIES_SPIDOPS",
+      "move": "MOVE_RAGE_POWDER",
+      "level": 53
+    },
+    {
+      "id": "rebalance-sunflora-heat_wave",
+      "species": "SPECIES_SUNFLORA",
+      "move": "MOVE_HEAT_WAVE",
+      "level": 47
+    },
+    {
+      "id": "rebalance-sunflora-fiery_dance",
+      "species": "SPECIES_SUNFLORA",
+      "move": "MOVE_FIERY_DANCE",
+      "level": 57
+    },
+    {"id":"rebalance-emolga-electro_ball","species":"SPECIES_EMOLGA","move":"MOVE_ELECTRO_BALL","level":26},
+    {"id":"rebalance-emolga-wild_charge","species":"SPECIES_EMOLGA","move":"MOVE_WILD_CHARGE","level":55},
+    {"id":"rebalance-bouffalant-thrash","species":"SPECIES_BOUFFALANT","move":"MOVE_THRASH","level":50},
+    {"id":"rebalance-ekans-poison_fang","species":"SPECIES_EKANS","move":"MOVE_POISON_FANG","level":33},
+    {"id":"rebalance-arbok-poison_fang","species":"SPECIES_ARBOK","move":"MOVE_POISON_FANG","level":39},
+    {"id":"rebalance-spinarak-poison_fang","species":"SPECIES_SPINARAK","move":"MOVE_POISON_FANG","level":15},
+    {"id":"rebalance-ariados-poison_fang","species":"SPECIES_ARIADOS","move":"MOVE_POISON_FANG","level":15},
+    {"id":"rebalance-cacnea-needle_arm","species":"SPECIES_CACNEA","move":"MOVE_NEEDLE_ARM","level":42},
+    {"id":"rebalance-cacturne-needle_arm","species":"SPECIES_CACTURNE","move":"MOVE_NEEDLE_ARM","level":43},
+    {"id":"rebalance-spoink-magic_coat","species":"SPECIES_SPOINK","move":"MOVE_MAGIC_COAT","level":19},
+    {"id":"rebalance-spoink-slack_off","species":"SPECIES_SPOINK","move":"MOVE_SLACK_OFF","level":47},
+    {"id":"rebalance-grumpig-magic_coat","species":"SPECIES_GRUMPIG","move":"MOVE_MAGIC_COAT","level":25},
+    {"id":"rebalance-grumpig-slack_off","species":"SPECIES_GRUMPIG","move":"MOVE_SLACK_OFF","level":57},
+    {"id":"rebalance-finneon-tail_glow","species":"SPECIES_FINNEON","move":"MOVE_TAIL_GLOW","level":57},
+    {"id":"rebalance-lumineon-tail_glow","species":"SPECIES_LUMINEON","move":"MOVE_TAIL_GLOW","level":65},
+    {"id":"rebalance-slugma-power_gem","species":"SPECIES_SLUGMA","move":"MOVE_POWER_GEM","level":39},
+    {"id":"rebalance-magcargo-shelter","species":"SPECIES_MAGCARGO","move":"MOVE_SHELTER","level":1},
+    {"id":"rebalance-magcargo-power_gem","species":"SPECIES_MAGCARGO","move":"MOVE_POWER_GEM","level":40},
+    {"id":"rebalance-nickit-mystical_fire","species":"SPECIES_NICKIT","move":"MOVE_MYSTICAL_FIRE","level":39},
+    {"id":"rebalance-thievul-mystical_fire","species":"SPECIES_THIEVUL","move":"MOVE_MYSTICAL_FIRE","level":49},
+    {"id":"rebalance-clobbopus-bubble","species":"SPECIES_CLOBBOPUS","move":"MOVE_BUBBLE","level":8},
+    {"id":"rebalance-clobbopus-aqua_jet","species":"SPECIES_CLOBBOPUS","move":"MOVE_AQUA_JET","level":28},
+    {"id":"rebalance-clobbopus-mach_punch","species":"SPECIES_CLOBBOPUS","move":"MOVE_MACH_PUNCH","level":44},
+    {"id":"rebalance-grapploct-bubble","species":"SPECIES_GRAPPLOCT","move":"MOVE_BUBBLE","level":8},
+    {"id":"rebalance-grapploct-aqua_jet","species":"SPECIES_GRAPPLOCT","move":"MOVE_AQUA_JET","level":28},
+    {"id":"rebalance-grapploct-mach_punch","species":"SPECIES_GRAPPLOCT","move":"MOVE_MACH_PUNCH","level":44},
+    {"id":"rebalance-grapploct-liquidation","species":"SPECIES_GRAPPLOCT","move":"MOVE_LIQUIDATION","level":60},
+    {"id":"rebalance-grapploct-arm_thrust","species":"SPECIES_GRAPPLOCT","move":"MOVE_ARM_THRUST","level":64},
+    {"id":"rebalance-paras-lunge","species":"SPECIES_PARAS","move":"MOVE_LUNGE","level":36},
+    {"id":"rebalance-paras-crabhammer","species":"SPECIES_PARAS","move":"MOVE_CRABHAMMER","level":50},
+    {"id":"rebalance-parasect-lunge","species":"SPECIES_PARASECT","move":"MOVE_LUNGE","level":41},
+    {"id":"rebalance-parasect-crabhammer","species":"SPECIES_PARASECT","move":"MOVE_CRABHAMMER","level":57},
+    {"id":"rebalance-parasect-sappy_seed","species":"SPECIES_PARASECT","move":"MOVE_SAPPY_SEED","level":69},
+    {"id": "rebalance-pidgey-echoed_voice", "species": "SPECIES_PIDGEY", "move": "MOVE_ECHOED_VOICE", "level": 7},
+    {"id": "rebalance-pidgey-air_cutter", "species": "SPECIES_PIDGEY", "move": "MOVE_AIR_CUTTER", "level": 16},
+    {"id": "rebalance-pidgey-swift", "species": "SPECIES_PIDGEY", "move": "MOVE_SWIFT", "level": 25},
+    {"id": "rebalance-pidgeotto-echoed_voice", "species": "SPECIES_PIDGEOTTO", "move": "MOVE_ECHOED_VOICE", "level": 8},
+    {"id": "rebalance-pidgeotto-air_cutter", "species": "SPECIES_PIDGEOTTO", "move": "MOVE_AIR_CUTTER", "level": 19},
+    {"id": "rebalance-pidgeotto-swift", "species": "SPECIES_PIDGEOTTO", "move": "MOVE_SWIFT", "level": 29},
+    {"id": "rebalance-pidgeot-echoed_voice", "species": "SPECIES_PIDGEOT", "move": "MOVE_ECHOED_VOICE", "level": 9},
+    {"id": "rebalance-pidgeot-air_cutter", "species": "SPECIES_PIDGEOT", "move": "MOVE_AIR_CUTTER", "level": 21},
+    {"id": "rebalance-pidgeot-swift", "species": "SPECIES_PIDGEOT", "move": "MOVE_SWIFT", "level": 33},
+    {"id": "rebalance-pidgeot-hyper_voice", "species": "SPECIES_PIDGEOT", "move": "MOVE_HYPER_VOICE", "level": 62},
+    {"id": "rebalance-numel-slack_off", "species": "SPECIES_NUMEL", "move": "MOVE_SLACK_OFF", "level": 34},
+    {"id": "rebalance-camerupt-slack_off", "species": "SPECIES_CAMERUPT", "move": "MOVE_SLACK_OFF", "level": 35},
+    {"id": "rebalance-swoobat-heart_swap", "species": "SPECIES_SWOOBAT", "move": "MOVE_HEART_SWAP", "level": 0},
+    {"id": "rebalance-volbeat-flash", "species": "SPECIES_VOLBEAT", "move": "MOVE_FLASH", "level": 1},
+    {"id": "rebalance-volbeat-charge_beam", "species": "SPECIES_VOLBEAT", "move": "MOVE_CHARGE_BEAM", "level": 17},
+    {"id": "rebalance-volbeat-signal_beam", "species": "SPECIES_VOLBEAT", "move": "MOVE_SIGNAL_BEAM", "level": 26},
+    {"id": "rebalance-volbeat-thunderbolt", "species": "SPECIES_VOLBEAT", "move": "MOVE_THUNDERBOLT", "level": 32},
+    {"id": "rebalance-volbeat-thunder", "species": "SPECIES_VOLBEAT", "move": "MOVE_THUNDER", "level": 60},
+    {"id": "rebalance-illumise-disarming_voice", "species": "SPECIES_ILLUMISE", "move": "MOVE_DISARMING_VOICE", "level": 17},
+    {"id": "rebalance-illumise-quiver_dance", "species": "SPECIES_ILLUMISE", "move": "MOVE_QUIVER_DANCE", "level": 23},
+    {"id": "rebalance-illumise-draining_kiss", "species": "SPECIES_ILLUMISE", "move": "MOVE_DRAINING_KISS", "level": 32},
+    {"id": "rebalance-illumise-moonblast", "species": "SPECIES_ILLUMISE", "move": "MOVE_MOONBLAST", "level": 60},
+    {"id": "rebalance-qwilfish-fell_stinger", "species": "SPECIES_QWILFISH", "move": "MOVE_FELL_STINGER", "level": 61},
+    {"id": "rebalance-beautifly-air_slash", "species": "SPECIES_BEAUTIFLY", "move": "MOVE_AIR_SLASH", "level": 30},
+    {"id": "rebalance-dustox-sludge_bomb", "species": "SPECIES_DUSTOX", "move": "MOVE_SLUDGE_BOMB", "level": 30},
+    {"id": "rebalance-beheeyem-psycho_boost", "species": "SPECIES_BEHEEYEM", "move": "MOVE_PSYCHO_BOOST", "level": 75},
+    {"id": "rebalance-vaporeon-bouncy_bubble", "species": "SPECIES_VAPOREON", "move": "MOVE_BOUNCY_BUBBLE", "level": 60},
+    {"id": "rebalance-jolteon-buzzy_buzz", "species": "SPECIES_JOLTEON", "move": "MOVE_BUZZY_BUZZ", "level": 60},
+    {"id": "rebalance-espeon-power_gem", "species": "SPECIES_ESPEON", "move": "MOVE_POWER_GEM", "level": 33},
+    {"id": "rebalance-espeon-glitzy_glow", "species": "SPECIES_ESPEON", "move": "MOVE_GLITZY_GLOW", "level": 60},
+    {"id": "rebalance-umbreon-baddy_bad", "species": "SPECIES_UMBREON", "move": "MOVE_BADDY_BAD", "level": 60},
+    {"id": "rebalance-leafeon-night_slash", "species": "SPECIES_LEAFEON", "move": "MOVE_NIGHT_SLASH", "level": 26},
+    {"id": "rebalance-leafeon-psycho_cut", "species": "SPECIES_LEAFEON", "move": "MOVE_PSYCHO_CUT", "level": 50},
+    {"id": "rebalance-glaceon-freezy_frost", "species": "SPECIES_GLACEON", "move": "MOVE_FREEZY_FROST", "level": 60},
+    {"id": "rebalance-sylveon-sparkly_swirl", "species": "SPECIES_SYLVEON", "move": "MOVE_SPARKLY_SWIRL", "level": 60},
+    {"id": "rebalance-chespin-needle_arm", "species": "SPECIES_CHESPIN", "move": "MOVE_NEEDLE_ARM", "level": 32},
+    {"id": "rebalance-chespin-bulk_up", "species": "SPECIES_CHESPIN", "move": "MOVE_BULK_UP", "level": 39},
+    {"id": "rebalance-quilladin-pin_missile", "species": "SPECIES_QUILLADIN", "move": "MOVE_PIN_MISSILE", "level": 0},
+    {"id": "rebalance-quilladin-needle_arm", "species": "SPECIES_QUILLADIN", "move": "MOVE_NEEDLE_ARM", "level": 35},
+    {"id": "rebalance-quilladin-bulk_up", "species": "SPECIES_QUILLADIN", "move": "MOVE_BULK_UP", "level": 44},
+    {"id": "rebalance-chesnaught-needle_arm", "species": "SPECIES_CHESNAUGHT", "move": "MOVE_NEEDLE_ARM", "level": 35},
+    {"id": "rebalance-servine-dragon_breath", "species": "SPECIES_SERVINE", "move": "MOVE_DRAGON_BREATH", "level": 0},
+    {"id": "rebalance-serperior-dragon_breath", "species": "SPECIES_SERPERIOR", "move": "MOVE_DRAGON_BREATH", "level": 1},
+    {"id": "rebalance-serperior-dragon_pulse", "species": "SPECIES_SERPERIOR", "move": "MOVE_DRAGON_PULSE", "level": 0},
+    {"id": "rebalance-serperior-dragon_rush", "species": "SPECIES_SERPERIOR", "move": "MOVE_DRAGON_RUSH", "level": 75},
+    {"id": "rebalance-pignite-mud_shot", "species": "SPECIES_PIGNITE", "move": "MOVE_MUD_SHOT", "level": 0},
+    {"id": "rebalance-pignite-arm_thrust", "species": "SPECIES_PIGNITE", "move": "MOVE_ARM_THRUST", "level": 1},
+    {"id": "rebalance-pignite-odor_sleuth", "species": "SPECIES_PIGNITE", "move": "MOVE_ODOR_SLEUTH", "level": 9},
+    {"id": "rebalance-emboar-high_horsepower", "species": "SPECIES_EMBOAR", "move": "MOVE_HIGH_HORSEPOWER", "level": 0},
+    {"id": "rebalance-emboar-mud_shot", "species": "SPECIES_EMBOAR", "move": "MOVE_MUD_SHOT", "level": 1},
+    {"id": "rebalance-emboar-hammer_arm", "species": "SPECIES_EMBOAR", "move": "MOVE_HAMMER_ARM", "level": 1},
+    {"id": "rebalance-emboar-odor_sleuth", "species": "SPECIES_EMBOAR", "move": "MOVE_ODOR_SLEUTH", "level": 9},
+    {"id": "rebalance-emboar-cross_chop", "species": "SPECIES_EMBOAR", "move": "MOVE_CROSS_CHOP", "level": 68},
+    {"id": "rebalance-dewott-low_sweep", "species": "SPECIES_DEWOTT", "move": "MOVE_LOW_SWEEP", "level": 0},
+    {"id": "rebalance-dewott-revenge", "species": "SPECIES_DEWOTT", "move": "MOVE_REVENGE", "level": 29},
+    {"id": "rebalance-samurott-sacred_sword", "species": "SPECIES_SAMUROTT", "move": "MOVE_SACRED_SWORD", "level": 0},
+    {"id": "rebalance-samurott-low_sweep", "species": "SPECIES_SAMUROTT", "move": "MOVE_LOW_SWEEP", "level": 1},
+    {"id": "rebalance-samurott-revenge", "species": "SPECIES_SAMUROTT", "move": "MOVE_REVENGE", "level": 29},
+    {"id": "rebalance-samurott-close_combat", "species": "SPECIES_SAMUROTT", "move": "MOVE_CLOSE_COMBAT", "level": 68},
+    {"id": "rebalance-samurott_hisuian-low_sweep", "species": "SPECIES_SAMUROTT_HISUIAN", "move": "MOVE_LOW_SWEEP", "level": 1},
+    {"id": "rebalance-samurott_hisuian-revenge", "species": "SPECIES_SAMUROTT_HISUIAN", "move": "MOVE_REVENGE", "level": 29},
+    {"id": "rebalance-empoleon-brave_bird", "species": "SPECIES_EMPOLEON", "move": "MOVE_BRAVE_BIRD", "level": 73},
+    {"id": "rebalance-chikorita-aromatherapy", "species": "SPECIES_CHIKORITA", "move": "MOVE_AROMATHERAPY", "level": 42},
+    {"id": "rebalance-bayleef-aromatherapy", "species": "SPECIES_BAYLEEF", "move": "MOVE_AROMATHERAPY", "level": 50},
+    {"id": "rebalance-meganium-draining_kiss", "species": "SPECIES_MEGANIUM", "move": "MOVE_DRAINING_KISS", "level": 30},
+    {"id": "rebalance-meganium-moonblast", "species": "SPECIES_MEGANIUM", "move": "MOVE_MOONBLAST", "level": 40},
+    {"id": "rebalance-totodile-psychic_fangs", "species": "SPECIES_TOTODILE", "move": "MOVE_PSYCHIC_FANGS", "level": 52},
+    {"id": "rebalance-croconaw-psychic_fangs", "species": "SPECIES_CROCONAW", "move": "MOVE_PSYCHIC_FANGS", "level": 63},
+    {"id": "rebalance-feraligatr-psychic_fangs", "species": "SPECIES_FERALIGATR", "move": "MOVE_PSYCHIC_FANGS", "level": 80},
+    {"id": "rebalance-treecko-slash", "species": "SPECIES_TREECKO", "move": "MOVE_SLASH", "level": 30},
+    {"id": "rebalance-grovyle-fury_cutter", "species": "SPECIES_GROVYLE", "move": "MOVE_FURY_CUTTER", "level": 21},
+    {"id": "rebalance-grovyle-slash", "species": "SPECIES_GROVYLE", "move": "MOVE_SLASH", "level": 37},
+    {"id": "rebalance-sceptile-dual_chop", "species": "SPECIES_SCEPTILE", "move": "MOVE_DUAL_CHOP", "level": 0},
+    {"id": "rebalance-sceptile-night_slash", "species": "SPECIES_SCEPTILE", "move": "MOVE_NIGHT_SLASH", "level": 1},
+    {"id": "rebalance-sceptile-fury_cutter", "species": "SPECIES_SCEPTILE", "move": "MOVE_FURY_CUTTER", "level": 22},
+    {"id": "rebalance-sceptile-slash", "species": "SPECIES_SCEPTILE", "move": "MOVE_SLASH", "level": 40},
+    {
+      "id": "rebalance-honedge-swirling_blade",
+      "species": "SPECIES_HONEDGE",
+      "move": "MOVE_SWIRLING_BLADE",
+      "level": 26
+    },
+    {
+      "id": "rebalance-doublade-swirling_blade",
+      "species": "SPECIES_DOUBLADE",
+      "move": "MOVE_SWIRLING_BLADE",
+      "level": 26
+    },
+    {
+      "id": "rebalance-aegislash-swirling_blade",
+      "species": "SPECIES_AEGISLASH",
+      "move": "MOVE_SWIRLING_BLADE",
+      "level": 1
+    },
+    {
+      "id": "rebalance-huntail-psychic_fangs",
+      "species": "SPECIES_HUNTAIL",
+      "move": "MOVE_PSYCHIC_FANGS",
+      "level": 55
+    },
     {
       "id": "level-unown-secret_power",
       "species": "SPECIES_UNOWN",
@@ -2556,12 +5420,6 @@
       "species": "SPECIES_ETERNATUS",
       "move": "MOVE_ACID_RAIN",
       "level": 76
-    },
-    {
-      "id": "retained-level-exeggcute-grav_apple",
-      "species": "SPECIES_EXEGGCUTE",
-      "move": "MOVE_GRAV_APPLE",
-      "level": 58
     },
     {
       "id": "retained-level-exeggutor-grav_apple",
@@ -4719,6 +7577,1064 @@
     }
   ],
   "tutor": [
+    {
+      "id": "rebalance-aromatisse-tutor-toxic",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_TOXIC"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-charge_beam",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_CHARGE_BEAM"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-calm_mind",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_CALM_MIND"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-draining_kiss",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_DRAINING_KISS"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-attract",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_ATTRACT"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-charm",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_CHARM"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-misty_terrain",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_MISTY_TERRAIN"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-skill_swap",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_SKILL_SWAP"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-psychic",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_PSYCHIC"
+    },
+    {
+      "id": "rebalance-aromatisse-tutor-reflect",
+      "species": "SPECIES_AROMATISSE",
+      "move": "MOVE_REFLECT"
+    },
+    {
+      "id": "rebalance-final-tutor-dodrio-u_turn",
+      "species": "SPECIES_DODRIO",
+      "move": "MOVE_U_TURN"
+    },
+    {
+      "id": "rebalance-final-tutor-exeggutor-soft_boiled",
+      "species": "SPECIES_EXEGGUTOR",
+      "move": "MOVE_SOFT_BOILED"
+    },
+    {
+      "id": "rebalance-final-tutor-exeggutor_alolan-soft_boiled",
+      "species": "SPECIES_EXEGGUTOR_ALOLAN",
+      "move": "MOVE_SOFT_BOILED"
+    },
+    {
+      "id": "rebalance-final-tutor-exeggutor_alolan-dragon_dance",
+      "species": "SPECIES_EXEGGUTOR_ALOLAN",
+      "move": "MOVE_DRAGON_DANCE"
+    },
+    {
+      "id": "rebalance-final-tutor-minun-knock_off",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_KNOCK_OFF"
+    },
+    {
+      "id": "rebalance-final-tutor-minun-u_turn",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_U_TURN"
+    },
+    {
+      "id": "rebalance-final-tutor-raichu-splishy_splash",
+      "species": "SPECIES_RAICHU",
+      "move": "MOVE_SPLISHY_SPLASH"
+    },
+    {
+      "id": "rebalance-final-tutor-raichu-floaty_fall",
+      "species": "SPECIES_RAICHU",
+      "move": "MOVE_FLOATY_FALL"
+    },
+    {
+      "id": "rebalance-final-tutor-raichu_alolan-splishy_splash",
+      "species": "SPECIES_RAICHU_ALOLAN",
+      "move": "MOVE_SPLISHY_SPLASH"
+    },
+    {
+      "id": "rebalance-final-tutor-raichu_alolan-floaty_fall",
+      "species": "SPECIES_RAICHU_ALOLAN",
+      "move": "MOVE_FLOATY_FALL"
+    },
+    {
+      "id": "rebalance-final-preserve-cherubi-sunny_day",
+      "species": "SPECIES_CHERUBI",
+      "move": "MOVE_SUNNY_DAY"
+    },
+    {
+      "id": "rebalance-final-preserve-cherrim-solar_blade",
+      "species": "SPECIES_CHERRIM",
+      "move": "MOVE_SOLAR_BLADE"
+    },
+    {
+      "id": "rebalance-final-preserve-dodrio-jump_kick",
+      "species": "SPECIES_DODRIO",
+      "move": "MOVE_JUMP_KICK"
+    },
+    {
+      "id": "rebalance-final-preserve-golduck-psychic",
+      "species": "SPECIES_GOLDUCK",
+      "move": "MOVE_PSYCHIC"
+    },
+    {
+      "id": "rebalance-final-preserve-litleo-flare_blitz",
+      "species": "SPECIES_LITLEO",
+      "move": "MOVE_FLARE_BLITZ"
+    },
+    {
+      "id": "rebalance-final-preserve-pyroar-flare_blitz",
+      "species": "SPECIES_PYROAR",
+      "move": "MOVE_FLARE_BLITZ"
+    },
+    {
+      "id": "rebalance-final-preserve-minun-nuzzle",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_NUZZLE"
+    },
+    {
+      "id": "rebalance-final-preserve-minun-thunder_punch",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_THUNDER_PUNCH"
+    },
+    {
+      "id": "rebalance-final-preserve-minun-wild_charge",
+      "species": "SPECIES_MINUN",
+      "move": "MOVE_WILD_CHARGE"
+    },
+    {
+      "id": "rebalance-final-preserve-scovillain-temper_flare",
+      "species": "SPECIES_SCOVILLAIN",
+      "move": "MOVE_TEMPER_FLARE"
+    },
+    {
+      "id": "rebalance-final-preserve-skuntank-acid_spray",
+      "species": "SPECIES_SKUNTANK",
+      "move": "MOVE_ACID_SPRAY"
+    },
+    {
+      "id": "rebalance-beartic-triple_axel",
+      "species": "SPECIES_BEARTIC",
+      "move": "MOVE_TRIPLE_AXEL"
+    },
+    {
+      "id": "rebalance-beartic-waterfall",
+      "species": "SPECIES_BEARTIC",
+      "move": "MOVE_WATERFALL"
+    },
+    {
+      "id": "rebalance-drifblim-poltergeist",
+      "species": "SPECIES_DRIFBLIM",
+      "move": "MOVE_POLTERGEIST"
+    },
+    {
+      "id": "rebalance-escavalier-gyro_ball",
+      "species": "SPECIES_ESCAVALIER",
+      "move": "MOVE_GYRO_BALL"
+    },
+    {
+      "id": "rebalance-pumpkaboo-synthesis",
+      "species": "SPECIES_PUMPKABOO",
+      "move": "MOVE_SYNTHESIS"
+    },
+    {
+      "id": "rebalance-pumpkaboo-flame_charge",
+      "species": "SPECIES_PUMPKABOO",
+      "move": "MOVE_FLAME_CHARGE"
+    },
+    {
+      "id": "rebalance-gourgeist-synthesis",
+      "species": "SPECIES_GOURGEIST",
+      "move": "MOVE_SYNTHESIS"
+    },
+    {
+      "id": "rebalance-gourgeist-fire_punch",
+      "species": "SPECIES_GOURGEIST",
+      "move": "MOVE_FIRE_PUNCH"
+    },
+    {
+      "id": "rebalance-pachirisu-reflect",
+      "species": "SPECIES_PACHIRISU",
+      "move": "MOVE_REFLECT"
+    },
+    {
+      "id": "rebalance-pidove-hurricane",
+      "species": "SPECIES_PIDOVE",
+      "move": "MOVE_HURRICANE"
+    },
+    {
+      "id": "rebalance-tranquill-hurricane",
+      "species": "SPECIES_TRANQUILL",
+      "move": "MOVE_HURRICANE"
+    },
+    {
+      "id": "rebalance-stunfisk_galarian-spikes",
+      "species": "SPECIES_STUNFISK_GALARIAN",
+      "move": "MOVE_SPIKES"
+    },
+    {
+      "id": "rebalance-teddiursa-mega_kick",
+      "species": "SPECIES_TEDDIURSA",
+      "move": "MOVE_MEGA_KICK"
+    },
+    {
+      "id": "rebalance-ursaring-mega_kick",
+      "species": "SPECIES_URSARING",
+      "move": "MOVE_MEGA_KICK"
+    },
+    {
+      "id": "rebalance-ursaluna-mega_kick",
+      "species": "SPECIES_URSALUNA",
+      "move": "MOVE_MEGA_KICK"
+    },
+    {
+      "id": "rebalance-ursaluna_bloodmoon-mega_kick",
+      "species": "SPECIES_URSALUNA_BLOODMOON",
+      "move": "MOVE_MEGA_KICK"
+    },
+    {
+      "id": "preserve-rebalance-cubchoo-ice_fang-tutor",
+      "species": "SPECIES_CUBCHOO",
+      "move": "MOVE_ICE_FANG"
+    },
+    {
+      "id": "preserve-rebalance-chatot-role_play-tutor",
+      "species": "SPECIES_CHATOT",
+      "move": "MOVE_ROLE_PLAY"
+    },
+    {
+      "id": "preserve-rebalance-chatot-boomburst-tutor",
+      "species": "SPECIES_CHATOT",
+      "move": "MOVE_BOOMBURST"
+    },
+    {
+      "id": "preserve-rebalance-drifblim-air_slash-tutor",
+      "species": "SPECIES_DRIFBLIM",
+      "move": "MOVE_AIR_SLASH"
+    },
+    {
+      "id": "preserve-rebalance-swanna-hydro_pump-tutor",
+      "species": "SPECIES_SWANNA",
+      "move": "MOVE_HYDRO_PUMP"
+    },
+    {
+      "id": "preserve-rebalance-escavalier-smart_strike-tutor",
+      "species": "SPECIES_ESCAVALIER",
+      "move": "MOVE_SMART_STRIKE"
+    },
+    {
+      "id": "preserve-rebalance-flabebe-draining_kiss-tutor",
+      "species": "SPECIES_FLABEBE",
+      "move": "MOVE_DRAINING_KISS"
+    },
+    {
+      "id": "preserve-rebalance-floette-draining_kiss-tutor",
+      "species": "SPECIES_FLOETTE",
+      "move": "MOVE_DRAINING_KISS"
+    },
+    {
+      "id": "preserve-rebalance-floette_eternal_flower-draining_kiss-tutor",
+      "species": "SPECIES_FLOETTE_ETERNAL_FLOWER",
+      "move": "MOVE_DRAINING_KISS"
+    },
+    {
+      "id": "preserve-rebalance-igglybuff-draining_kiss-tutor",
+      "species": "SPECIES_IGGLYBUFF",
+      "move": "MOVE_DRAINING_KISS"
+    },
+    {
+      "id": "preserve-rebalance-jigglypuff-draining_kiss-tutor",
+      "species": "SPECIES_JIGGLYPUFF",
+      "move": "MOVE_DRAINING_KISS"
+    },
+    {
+      "id": "preserve-rebalance-lycanroc-drill_run-tutor",
+      "species": "SPECIES_LYCANROC",
+      "move": "MOVE_DRILL_RUN"
+    },
+    {
+      "id": "preserve-rebalance-pidove-swift-tutor",
+      "species": "SPECIES_PIDOVE",
+      "move": "MOVE_SWIFT"
+    },
+    {
+      "id": "preserve-rebalance-tranquill-swift-tutor",
+      "species": "SPECIES_TRANQUILL",
+      "move": "MOVE_SWIFT"
+    },
+    {
+      "id": "preserve-rebalance-unfezant-swift-tutor",
+      "species": "SPECIES_UNFEZANT",
+      "move": "MOVE_SWIFT"
+    },
+    {
+      "id": "preserve-rebalance-sandshrew-sand_tomb-tutor",
+      "species": "SPECIES_SANDSHREW",
+      "move": "MOVE_SAND_TOMB"
+    },
+    {
+      "id": "preserve-rebalance-sandslash-spikes-tutor",
+      "species": "SPECIES_SANDSLASH",
+      "move": "MOVE_SPIKES"
+    },
+    {
+      "id": "preserve-rebalance-sandshrew_alolan-ice_shard-tutor",
+      "species": "SPECIES_SANDSHREW_ALOLAN",
+      "move": "MOVE_ICE_SHARD"
+    },
+    {
+      "id": "preserve-rebalance-sandslash_alolan-spikes-tutor",
+      "species": "SPECIES_SANDSLASH_ALOLAN",
+      "move": "MOVE_SPIKES"
+    },
+    {
+      "id": "rebalance-alakazam-charge_beam",
+      "species": "SPECIES_ALAKAZAM",
+      "move": "MOVE_CHARGE_BEAM"
+    },
+    {
+      "id": "rebalance-golurk-power_up_punch",
+      "species": "SPECIES_GOLURK",
+      "move": "MOVE_POWER_UP_PUNCH"
+    },
+    {
+      "id": "rebalance-medicham-psycho_cut",
+      "species": "SPECIES_MEDICHAM",
+      "move": "MOVE_PSYCHO_CUT"
+    },
+    {
+      "id": "rebalance-meloetta-wake_up_slap",
+      "species": "SPECIES_MELOETTA",
+      "move": "MOVE_WAKE_UP_SLAP"
+    },
+    {
+      "id": "rebalance-yanmega-hypnosis",
+      "species": "SPECIES_YANMEGA",
+      "move": "MOVE_HYPNOSIS"
+    },
+    {
+      "id": "rebalance-yanmega-fly",
+      "species": "SPECIES_YANMEGA",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "rebalance-yanmega-hurricane",
+      "species": "SPECIES_YANMEGA",
+      "move": "MOVE_HURRICANE"
+    },
+    {
+      "id": "rebalance-pancham-sucker_punch",
+      "species": "SPECIES_PANCHAM",
+      "move": "MOVE_SUCKER_PUNCH"
+    },
+    {
+      "id": "rebalance-pangoro-sucker_punch",
+      "species": "SPECIES_PANGORO",
+      "move": "MOVE_SUCKER_PUNCH"
+    },
+    {
+      "species": "SPECIES_ARCEUS",
+      "move": "MOVE_SHADOW_FORCE",
+      "id": "preserve-rebalance-arceus-shadow_force-tutor"
+    },
+    {
+      "species": "SPECIES_BRELOOM",
+      "move": "MOVE_SPORE",
+      "id": "preserve-rebalance-breloom-spore-tutor"
+    },
+    {
+      "species": "SPECIES_CLEFAIRY",
+      "move": "MOVE_DRAINING_KISS",
+      "id": "preserve-rebalance-clefairy-draining_kiss-tutor"
+    },
+    {
+      "species": "SPECIES_CLEFFA",
+      "move": "MOVE_MAGICAL_LEAF",
+      "id": "preserve-rebalance-cleffa-magical_leaf-tutor"
+    },
+    {
+      "species": "SPECIES_CLEFFA",
+      "move": "MOVE_DRAINING_KISS",
+      "id": "preserve-rebalance-cleffa-draining_kiss-tutor"
+    },
+    {
+      "species": "SPECIES_GOLETT",
+      "move": "MOVE_MAGNITUDE",
+      "id": "preserve-rebalance-golett-magnitude-tutor"
+    },
+    {
+      "species": "SPECIES_GOLETT",
+      "move": "MOVE_FOCUS_PUNCH",
+      "id": "preserve-rebalance-golett-focus_punch-tutor"
+    },
+    {
+      "species": "SPECIES_GOLURK",
+      "move": "MOVE_MAGNITUDE",
+      "id": "preserve-rebalance-golurk-magnitude-tutor"
+    },
+    {
+      "species": "SPECIES_GOLURK",
+      "move": "MOVE_FOCUS_PUNCH",
+      "id": "preserve-rebalance-golurk-focus_punch-tutor"
+    },
+    {
+      "species": "SPECIES_NIDOQUEEN",
+      "move": "MOVE_BODY_SLAM",
+      "id": "preserve-rebalance-nidoqueen-body_slam-tutor"
+    },
+    {
+      "species": "SPECIES_SHUCKLE",
+      "move": "MOVE_ENCORE",
+      "id": "preserve-rebalance-shuckle-encore-tutor"
+    },
+    {
+      "species": "SPECIES_SNEASEL",
+      "move": "MOVE_ICE_SHARD",
+      "id": "preserve-rebalance-sneasel-ice_shard-tutor"
+    },
+    {
+      "species": "SPECIES_TOGEPI",
+      "move": "MOVE_DRAINING_KISS",
+      "id": "preserve-rebalance-togepi-draining_kiss-tutor"
+    },
+    {
+      "species": "SPECIES_TOGETIC",
+      "move": "MOVE_DRAINING_KISS",
+      "id": "preserve-rebalance-togetic-draining_kiss-tutor"
+    },
+    {
+      "id": "rebalance-applin-leaf_storm",
+      "species": "SPECIES_APPLIN",
+      "move": "MOVE_LEAF_STORM"
+    },
+    {
+      "id": "rebalance-appletun-superpower",
+      "species": "SPECIES_APPLETUN",
+      "move": "MOVE_SUPERPOWER"
+    },
+    {
+      "id": "rebalance-flapple-scale_shot",
+      "species": "SPECIES_FLAPPLE",
+      "move": "MOVE_SCALE_SHOT"
+    },
+    {
+      "id": "preserve-rebalance-trapinch-bug_bite-tutor",
+      "species": "SPECIES_TRAPINCH",
+      "move": "MOVE_BUG_BITE"
+    },
+    {
+      "id": "rebalance-ampharos-draco_meteor",
+      "species": "SPECIES_AMPHAROS",
+      "move": "MOVE_DRACO_METEOR"
+    },
+    {
+      "id": "rebalance-lickilicky-curse",
+      "species": "SPECIES_LICKILICKY",
+      "move": "MOVE_CURSE"
+    },
+    {
+      "id": "rebalance-vespiquen-fly",
+      "species": "SPECIES_VESPIQUEN",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "preserve-rebalance-drednaw-shell_smash-tutor",
+      "species": "SPECIES_DREDNAW",
+      "move": "MOVE_SHELL_SMASH"
+    },
+    {
+      "id": "preserve-rebalance-deerling-jump_kick-tutor",
+      "species": "SPECIES_DEERLING",
+      "move": "MOVE_JUMP_KICK"
+    },
+    {
+      "id": "preserve-rebalance-sawsbuck-jump_kick-tutor",
+      "species": "SPECIES_SAWSBUCK",
+      "move": "MOVE_JUMP_KICK"
+    },
+    {
+      "id": "preserve-rebalance-garchomp-dual_chop-tutor",
+      "species": "SPECIES_GARCHOMP",
+      "move": "MOVE_DUAL_CHOP"
+    },
+    {
+      "id": "rebalance-machop-mach_punch",
+      "species": "SPECIES_MACHOP",
+      "move": "MOVE_MACH_PUNCH"
+    },
+    {
+      "id": "rebalance-machop-drain_punch",
+      "species": "SPECIES_MACHOP",
+      "move": "MOVE_DRAIN_PUNCH"
+    },
+    {
+      "id": "rebalance-machoke-mach_punch",
+      "species": "SPECIES_MACHOKE",
+      "move": "MOVE_MACH_PUNCH"
+    },
+    {
+      "id": "rebalance-machoke-drain_punch",
+      "species": "SPECIES_MACHOKE",
+      "move": "MOVE_DRAIN_PUNCH"
+    },
+    {
+      "id": "rebalance-machamp-mach_punch",
+      "species": "SPECIES_MACHAMP",
+      "move": "MOVE_MACH_PUNCH"
+    },
+    {
+      "id": "rebalance-machamp-drain_punch",
+      "species": "SPECIES_MACHAMP",
+      "move": "MOVE_DRAIN_PUNCH"
+    },
+    {
+      "id": "rebalance-crabominable-crabhammer",
+      "species": "SPECIES_CRABOMINABLE",
+      "move": "MOVE_CRABHAMMER"
+    },
+    {
+      "id": "rebalance-garchomp-fly",
+      "species": "SPECIES_GARCHOMP",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "rebalance-persian-quash",
+      "move": "MOVE_QUASH",
+      "species": "SPECIES_PERSIAN"
+    },
+    {
+      "id": "rebalance-perrserker-bullet_punch",
+      "move": "MOVE_BULLET_PUNCH",
+      "species": "SPECIES_PERRSERKER"
+    },
+    {
+      "id": "rebalance-meowth_galarian-bullet_punch",
+      "move": "MOVE_BULLET_PUNCH",
+      "species": "SPECIES_MEOWTH_GALARIAN"
+    },
+    {
+      "id": "rebalance-minior-air_slash",
+      "move": "MOVE_AIR_SLASH",
+      "species": "SPECIES_MINIOR"
+    },
+    {
+      "id": "rebalance-zubat-hurricane",
+      "species": "SPECIES_ZUBAT",
+      "move": "MOVE_HURRICANE"
+    },
+    {
+      "id": "rebalance-golbat-hurricane",
+      "species": "SPECIES_GOLBAT",
+      "move": "MOVE_HURRICANE"
+    },
+    {
+      "id": "rebalance-crobat-hurricane",
+      "species": "SPECIES_CROBAT",
+      "move": "MOVE_HURRICANE"
+    },
+    {
+      "id": "rebalance-electivire-drain_punch",
+      "species": "SPECIES_ELECTIVIRE",
+      "move": "MOVE_DRAIN_PUNCH"
+    },
+    {
+      "id": "rebalance-magby-scorching_sands",
+      "species": "SPECIES_MAGBY",
+      "move": "MOVE_SCORCHING_SANDS"
+    },
+    {
+      "id": "rebalance-eelektross-psychic_fangs",
+      "species": "SPECIES_EELEKTROSS",
+      "move": "MOVE_PSYCHIC_FANGS"
+    },
+    {
+      "id": "rebalance-eelektross-leech_life",
+      "species": "SPECIES_EELEKTROSS",
+      "move": "MOVE_LEECH_LIFE"
+    },
+    {
+      "id": "rebalance-voltorb-bug_buzz",
+      "species": "SPECIES_VOLTORB",
+      "move": "MOVE_BUG_BUZZ"
+    },
+    {
+      "id": "rebalance-electrode-bug_buzz",
+      "species": "SPECIES_ELECTRODE",
+      "move": "MOVE_BUG_BUZZ"
+    },
+    {
+      "id": "rebalance-glameow-crunch",
+      "species": "SPECIES_GLAMEOW",
+      "move": "MOVE_CRUNCH"
+    },
+    {
+      "id": "rebalance-purugly-crunch",
+      "species": "SPECIES_PURUGLY",
+      "move": "MOVE_CRUNCH"
+    },
+    {"id": "preserve-rebalance-goodra-acid-armor-tutor", "species": "SPECIES_GOODRA", "move": "MOVE_ACID_ARMOR"},
+    {
+      "id": "rebalance-vulpix-moonblast",
+      "species": "SPECIES_VULPIX",
+      "move": "MOVE_MOONBLAST"
+    },
+    {
+      "id": "rebalance-ninetales-moonblast",
+      "species": "SPECIES_NINETALES",
+      "move": "MOVE_MOONBLAST"
+    },
+    {
+      "id": "rebalance-misdreavus-hypnosis",
+      "species": "SPECIES_MISDREAVUS",
+      "move": "MOVE_HYPNOSIS"
+    },
+    {
+      "id": "rebalance-mismagius-moonblast",
+      "species": "SPECIES_MISMAGIUS",
+      "move": "MOVE_MOONBLAST"
+    },
+    {
+      "id": "rebalance-mismagius-hypnosis",
+      "species": "SPECIES_MISMAGIUS",
+      "move": "MOVE_HYPNOSIS"
+    },
+    {
+      "id": "rebalance-mienshao-blaze_kick",
+      "species": "SPECIES_MIENSHAO",
+      "move": "MOVE_BLAZE_KICK"
+    },
+    {
+      "id": "rebalance-growlithe-hone_claws",
+      "species": "SPECIES_GROWLITHE",
+      "move": "MOVE_HONE_CLAWS"
+    },
+    {
+      "id": "rebalance-arcanine-hone_claws",
+      "species": "SPECIES_ARCANINE",
+      "move": "MOVE_HONE_CLAWS"
+    },
+    {
+      "id": "rebalance-bagon-wish",
+      "species": "SPECIES_BAGON",
+      "move": "MOVE_WISH"
+    },
+    {
+      "id": "rebalance-salamence-wish",
+      "species": "SPECIES_SALAMENCE",
+      "move": "MOVE_WISH"
+    },
+    {
+      "id": "rebalance-beedrill-dual_wingbeat",
+      "species": "SPECIES_BEEDRILL",
+      "move": "MOVE_DUAL_WINGBEAT"
+    },
+    {
+      "id": "rebalance-dragonair-fly",
+      "species": "SPECIES_DRAGONAIR",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "rebalance-mandibuzz-quash",
+      "species": "SPECIES_MANDIBUZZ",
+      "move": "MOVE_QUASH"
+    },
+    {
+      "id": "rebalance-vullaby-hurricane",
+      "species": "SPECIES_VULLABY",
+      "move": "MOVE_HURRICANE"
+    },
+    {
+      "id": "rebalance-moltres-extrasensory",
+      "species": "SPECIES_MOLTRES",
+      "move": "MOVE_EXTRASENSORY"
+    },
+    {
+      "id": "rebalance-articuno-extrasensory",
+      "species": "SPECIES_ARTICUNO",
+      "move": "MOVE_EXTRASENSORY"
+    },
+    {
+      "id": "rebalance-zapdos-air_slash",
+      "species": "SPECIES_ZAPDOS",
+      "move": "MOVE_AIR_SLASH"
+    },
+    {
+      "id": "rebalance-zapdos-extrasensory",
+      "species": "SPECIES_ZAPDOS",
+      "move": "MOVE_EXTRASENSORY"
+    },
+    {
+      "id": "rebalance-kyurem-icicle_crash",
+      "species": "SPECIES_KYUREM",
+      "move": "MOVE_ICICLE_CRASH"
+    },
+    {
+      "id": "rebalance-kyurem_black-icicle_crash",
+      "species": "SPECIES_KYUREM_BLACK",
+      "move": "MOVE_ICICLE_CRASH"
+    },
+    {
+      "id": "rebalance-kyurem_white-icicle_crash",
+      "species": "SPECIES_KYUREM_WHITE",
+      "move": "MOVE_ICICLE_CRASH"
+    },
+    {
+      "id": "rebalance-volcarona-inferno",
+      "species": "SPECIES_VOLCARONA",
+      "move": "MOVE_INFERNO"
+    },
+    {
+      "id": "rebalance-boltund-ice_fang",
+      "species": "SPECIES_BOLTUND",
+      "move": "MOVE_ICE_FANG"
+    },
+    {
+      "id": "rebalance-tropius-weather_ball",
+      "species": "SPECIES_TROPIUS",
+      "move": "MOVE_WEATHER_BALL"
+    },
+    {
+      "id": "rebalance-rufflet-steel_wing",
+      "species": "SPECIES_RUFFLET",
+      "move": "MOVE_STEEL_WING"
+    },
+    {
+      "id": "rebalance-braviary-quash",
+      "species": "SPECIES_BRAVIARY",
+      "move": "MOVE_QUASH"
+    },
+    {
+      "id": "rebalance-braviary-steel_wing",
+      "species": "SPECIES_BRAVIARY",
+      "move": "MOVE_STEEL_WING"
+    },
+    {
+      "id": "rebalance-braviary_hisuian-steel_wing",
+      "species": "SPECIES_BRAVIARY_HISUIAN",
+      "move": "MOVE_STEEL_WING"
+    },
+    {
+      "id": "rebalance-ambipom-pursuit",
+      "species": "SPECIES_AMBIPOM",
+      "move": "MOVE_PURSUIT"
+    },
+    {
+      "id": "rebalance-anorith-lunge",
+      "species": "SPECIES_ANORITH",
+      "move": "MOVE_LUNGE"
+    },
+    {
+      "id": "rebalance-armaldo-lunge",
+      "species": "SPECIES_ARMALDO",
+      "move": "MOVE_LUNGE"
+    },
+    {
+      "id": "rebalance-armaldo-rock_climb",
+      "species": "SPECIES_ARMALDO",
+      "move": "MOVE_ROCK_CLIMB"
+    },
+    {
+      "id": "rebalance-baltoy-power_gem",
+      "species": "SPECIES_BALTOY",
+      "move": "MOVE_POWER_GEM"
+    },
+    {
+      "id": "rebalance-claydol-fly",
+      "species": "SPECIES_CLAYDOL",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "rebalance-claydol-power_gem",
+      "species": "SPECIES_CLAYDOL",
+      "move": "MOVE_POWER_GEM"
+    },
+    {
+      "id": "rebalance-claydol-tri_attack",
+      "species": "SPECIES_CLAYDOL",
+      "move": "MOVE_TRI_ATTACK"
+    },
+    {
+      "id": "rebalance-bronzor-teleport",
+      "species": "SPECIES_BRONZOR",
+      "move": "MOVE_TELEPORT"
+    },
+    {
+      "id": "rebalance-bronzong-teleport",
+      "species": "SPECIES_BRONZONG",
+      "move": "MOVE_TELEPORT"
+    },
+    {
+      "id": "rebalance-bronzong-fly",
+      "species": "SPECIES_BRONZONG",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "rebalance-buizel-tail_slap",
+      "species": "SPECIES_BUIZEL",
+      "move": "MOVE_TAIL_SLAP"
+    },
+    {
+      "id": "rebalance-floatzel-tail_slap",
+      "species": "SPECIES_FLOATZEL",
+      "move": "MOVE_TAIL_SLAP"
+    },
+    {
+      "id": "rebalance-cubone-head_smash",
+      "species": "SPECIES_CUBONE",
+      "move": "MOVE_HEAD_SMASH"
+    },
+    {
+      "id": "rebalance-marowak-head_smash",
+      "species": "SPECIES_MAROWAK",
+      "move": "MOVE_HEAD_SMASH"
+    },
+    {
+      "id": "rebalance-marowak_alolan-head_smash",
+      "species": "SPECIES_MAROWAK_ALOLAN",
+      "move": "MOVE_HEAD_SMASH"
+    },
+    {
+      "id": "rebalance-lileep-power_gem",
+      "species": "SPECIES_LILEEP",
+      "move": "MOVE_POWER_GEM"
+    },
+    {
+      "id": "rebalance-cradily-power_gem",
+      "species": "SPECIES_CRADILY",
+      "move": "MOVE_POWER_GEM"
+    },
+    {
+      "id": "rebalance-litwick-mystical_fire",
+      "species": "SPECIES_LITWICK",
+      "move": "MOVE_MYSTICAL_FIRE"
+    },
+    {
+      "id": "rebalance-litwick-dazzling_gleam",
+      "species": "SPECIES_LITWICK",
+      "move": "MOVE_DAZZLING_GLEAM"
+    },
+    {
+      "id": "rebalance-lampent-mystical_fire",
+      "species": "SPECIES_LAMPENT",
+      "move": "MOVE_MYSTICAL_FIRE"
+    },
+    {
+      "id": "rebalance-lampent-dazzling_gleam",
+      "species": "SPECIES_LAMPENT",
+      "move": "MOVE_DAZZLING_GLEAM"
+    },
+    {
+      "id": "rebalance-chandelure-mystical_fire",
+      "species": "SPECIES_CHANDELURE",
+      "move": "MOVE_MYSTICAL_FIRE"
+    },
+    {
+      "id": "rebalance-chandelure-dazzling_gleam",
+      "species": "SPECIES_CHANDELURE",
+      "move": "MOVE_DAZZLING_GLEAM"
+    },
+    {
+      "id": "rebalance-druddigon-spikes",
+      "species": "SPECIES_DRUDDIGON",
+      "move": "MOVE_SPIKES"
+    },
+    {
+      "id": "rebalance-druddigon-roost",
+      "species": "SPECIES_DRUDDIGON",
+      "move": "MOVE_ROOST"
+    },
+    {
+      "id": "rebalance-beldum-headbutt",
+      "species": "SPECIES_BELDUM",
+      "move": "MOVE_HEADBUTT"
+    },
+    {
+      "id": "rebalance-metang-headbutt",
+      "species": "SPECIES_METANG",
+      "move": "MOVE_HEADBUTT"
+    },
+    {
+      "id": "rebalance-metang-fly",
+      "species": "SPECIES_METANG",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "rebalance-metagross-headbutt",
+      "species": "SPECIES_METAGROSS",
+      "move": "MOVE_HEADBUTT"
+    },
+    {
+      "id": "rebalance-metagross-fly",
+      "species": "SPECIES_METAGROSS",
+      "move": "MOVE_FLY"
+    },
+    {
+      "id": "rebalance-farfetchd-swirling_blade",
+      "species": "SPECIES_FARFETCHD",
+      "move": "MOVE_SWIRLING_BLADE"
+    },
+    {
+      "id": "rebalance-farfetchd_galarian-sacred_sword",
+      "species": "SPECIES_FARFETCHD_GALARIAN",
+      "move": "MOVE_SACRED_SWORD"
+    },
+    {
+      "id": "rebalance-farfetchd_galarian-swirling_blade",
+      "species": "SPECIES_FARFETCHD_GALARIAN",
+      "move": "MOVE_SWIRLING_BLADE"
+    },
+    {
+      "id": "rebalance-sirfetchd-swirling_blade",
+      "species": "SPECIES_SIRFETCHD",
+      "move": "MOVE_SWIRLING_BLADE"
+    },
+    {
+      "id": "rebalance-delibird-nasty_plot",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_NASTY_PLOT"
+    },
+    {
+      "id": "rebalance-delibird-u_turn",
+      "species": "SPECIES_DELIBIRD",
+      "move": "MOVE_U_TURN"
+    },
+    {
+      "id": "rebalance-kricketune-bullet_seed",
+      "species": "SPECIES_KRICKETUNE",
+      "move": "MOVE_BULLET_SEED"
+    },
+    {
+      "id": "rebalance-kricketune-rock_tomb",
+      "species": "SPECIES_KRICKETUNE",
+      "move": "MOVE_ROCK_TOMB"
+    },
+    {
+      "id": "rebalance-kricketune-bulldoze",
+      "species": "SPECIES_KRICKETUNE",
+      "move": "MOVE_BULLDOZE"
+    },
+    {
+      "id": "rebalance-ledyba-mega_punch",
+      "species": "SPECIES_LEDYBA",
+      "move": "MOVE_MEGA_PUNCH"
+    },
+    {
+      "id": "rebalance-ledyba-dual_wingbeat",
+      "species": "SPECIES_LEDYBA",
+      "move": "MOVE_DUAL_WINGBEAT"
+    },
+    {
+      "id": "rebalance-ledyba-lunge",
+      "species": "SPECIES_LEDYBA",
+      "move": "MOVE_LUNGE"
+    },
+    {
+      "id": "rebalance-ledian-dual_wingbeat",
+      "species": "SPECIES_LEDIAN",
+      "move": "MOVE_DUAL_WINGBEAT"
+    },
+    {
+      "id": "rebalance-ledian-lunge",
+      "species": "SPECIES_LEDIAN",
+      "move": "MOVE_LUNGE"
+    },
+    {
+      "id": "rebalance-turtonator-lava_plume",
+      "species": "SPECIES_TURTONATOR",
+      "move": "MOVE_LAVA_PLUME"
+    },
+    {
+      "id": "rebalance-turtonator-dragon_tail",
+      "species": "SPECIES_TURTONATOR",
+      "move": "MOVE_DRAGON_TAIL"
+    },
+    {"id":"rebalance-cobalion-rock_polish","species":"SPECIES_COBALION","move":"MOVE_ROCK_POLISH"},
+    {"id":"rebalance-cobalion-swirling_blade","species":"SPECIES_COBALION","move":"MOVE_SWIRLING_BLADE"},
+    {"id":"rebalance-terrakion-swirling_blade","species":"SPECIES_TERRAKION","move":"MOVE_SWIRLING_BLADE"},
+    {"id":"rebalance-virizion-swirling_blade","species":"SPECIES_VIRIZION","move":"MOVE_SWIRLING_BLADE"},
+    {"id":"rebalance-zacian-swirling_blade","species":"SPECIES_ZACIAN","move":"MOVE_SWIRLING_BLADE"},
+    {"id":"rebalance-zacian_crowned_sword-swirling_blade","species":"SPECIES_ZACIAN_CROWNED_SWORD","move":"MOVE_SWIRLING_BLADE"},
+    {"id":"rebalance-carnivine-leech_life","species":"SPECIES_CARNIVINE","move":"MOVE_LEECH_LIFE"},
+    {"id":"rebalance-heatmor-power_whip","species":"SPECIES_HEATMOR","move":"MOVE_POWER_WHIP"},
+    {"id":"rebalance-bouffalant-body_press","species":"SPECIES_BOUFFALANT","move":"MOVE_BODY_PRESS"},
+    {"id":"rebalance-bouffalant-flame_charge","species":"SPECIES_BOUFFALANT","move":"MOVE_FLAME_CHARGE"},
+    {"id":"rebalance-bouffalant-head_smash","species":"SPECIES_BOUFFALANT","move":"MOVE_HEAD_SMASH"},
+    {"id":"rebalance-bouffalant-heat_crash","species":"SPECIES_BOUFFALANT","move":"MOVE_HEAT_CRASH"},
+    {"id":"rebalance-cacnea-scorching_sands","species":"SPECIES_CACNEA","move":"MOVE_SCORCHING_SANDS"},
+    {"id":"rebalance-cacturne-scorching_sands","species":"SPECIES_CACTURNE","move":"MOVE_SCORCHING_SANDS"},
+    {"id":"rebalance-cacturne-rock_climb","species":"SPECIES_CACTURNE","move":"MOVE_ROCK_CLIMB"},
+    {"id":"rebalance-skitty-hone_claws","species":"SPECIES_SKITTY","move":"MOVE_HONE_CLAWS"},
+    {"id":"rebalance-delcatty-hone_claws","species":"SPECIES_DELCATTY","move":"MOVE_HONE_CLAWS"},
+    {"id":"rebalance-dubwool-rock_climb","species":"SPECIES_DUBWOOL","move":"MOVE_ROCK_CLIMB"},
+    {"id":"rebalance-clobbopus-flip_turn","species":"SPECIES_CLOBBOPUS","move":"MOVE_FLIP_TURN"},
+    {"id":"rebalance-grapploct-flip_turn","species":"SPECIES_GRAPPLOCT","move":"MOVE_FLIP_TURN"},
+    {"id":"rebalance-parasect-grassy_glide","species":"SPECIES_PARASECT","move":"MOVE_GRASSY_GLIDE"},
+    {"id": "rebalance-camerupt-power_gem", "species": "SPECIES_CAMERUPT", "move": "MOVE_POWER_GEM"},
+    {"id": "rebalance-barboach-breaking_swipe", "species": "SPECIES_BARBOACH", "move": "MOVE_BREAKING_SWIPE"},
+    {"id": "rebalance-whiscash-breaking_swipe", "species": "SPECIES_WHISCASH", "move": "MOVE_BREAKING_SWIPE"},
+    {"id": "rebalance-mothim-hurricane", "species": "SPECIES_MOTHIM", "move": "MOVE_HURRICANE"},
+    {"id": "rebalance-volbeat-volt_switch", "species": "SPECIES_VOLBEAT", "move": "MOVE_VOLT_SWITCH"},
+    {"id": "rebalance-volbeat-preserve_thunder_tutor", "species": "SPECIES_VOLBEAT", "move": "MOVE_THUNDER"},
+    {"id": "rebalance-beautifly-fly", "species": "SPECIES_BEAUTIFLY", "move": "MOVE_FLY"},
+    {"id": "rebalance-beautifly-iron_defense", "species": "SPECIES_BEAUTIFLY", "move": "MOVE_IRON_DEFENSE"},
+    {"id": "rebalance-beautifly-ominous_wind", "species": "SPECIES_BEAUTIFLY", "move": "MOVE_OMINOUS_WIND"},
+    {"id": "rebalance-beautifly-struggle_bug", "species": "SPECIES_BEAUTIFLY", "move": "MOVE_STRUGGLE_BUG"},
+    {"id": "rebalance-dustox-struggle_bug", "species": "SPECIES_DUSTOX", "move": "MOVE_STRUGGLE_BUG"},
+    {"id": "rebalance-chesnaught-horn_leech", "species": "SPECIES_CHESNAUGHT", "move": "MOVE_HORN_LEECH"},
+    {"id": "rebalance-pignite-earthquake", "species": "SPECIES_PIGNITE", "move": "MOVE_EARTHQUAKE"},
+    {"id": "rebalance-samurott-swirling_blade", "species": "SPECIES_SAMUROTT", "move": "MOVE_SWIRLING_BLADE"},
+    {"id": "rebalance-samurott_hisuian-swirling_blade", "species": "SPECIES_SAMUROTT_HISUIAN", "move": "MOVE_SWIRLING_BLADE"},
+    {"id": "rebalance-chikorita-preserve_aromatherapy_tutor", "species": "SPECIES_CHIKORITA", "move": "MOVE_AROMATHERAPY"},
+    {"id": "rebalance-piplup-sing", "species": "SPECIES_PIPLUP", "move": "MOVE_SING"},
+    {"id": "rebalance-piplup-calm_mind", "species": "SPECIES_PIPLUP", "move": "MOVE_CALM_MIND"},
+    {"id": "rebalance-prinplup-sing", "species": "SPECIES_PRINPLUP", "move": "MOVE_SING"},
+    {"id": "rebalance-prinplup-calm_mind", "species": "SPECIES_PRINPLUP", "move": "MOVE_CALM_MIND"},
+    {"id": "rebalance-empoleon-sing", "species": "SPECIES_EMPOLEON", "move": "MOVE_SING"},
+    {"id": "rebalance-empoleon-calm_mind", "species": "SPECIES_EMPOLEON", "move": "MOVE_CALM_MIND"},
+    {"id": "rebalance-cyndaquil-mystical_fire", "species": "SPECIES_CYNDAQUIL", "move": "MOVE_MYSTICAL_FIRE"},
+    {"id": "rebalance-quilava-mystical_fire", "species": "SPECIES_QUILAVA", "move": "MOVE_MYSTICAL_FIRE"},
+    {"id": "rebalance-typhlosion-mystical_fire", "species": "SPECIES_TYPHLOSION", "move": "MOVE_MYSTICAL_FIRE"},
+    {"id": "rebalance-typhlosion_hisuian-mystical_fire", "species": "SPECIES_TYPHLOSION_HISUIAN", "move": "MOVE_MYSTICAL_FIRE"},
+    {
+      "id": "rebalance-sobble-air_cutter",
+      "species": "SPECIES_SOBBLE",
+      "move": "MOVE_AIR_CUTTER"
+    },
+    {
+      "id": "rebalance-drizzile-air_cutter",
+      "species": "SPECIES_DRIZZILE",
+      "move": "MOVE_AIR_CUTTER"
+    },
+    {
+      "id": "rebalance-inteleon-frost_breath",
+      "species": "SPECIES_INTELEON",
+      "move": "MOVE_FROST_BREATH"
+    },
+    {
+      "id": "rebalance-charizard-dual_wingbeat",
+      "species": "SPECIES_CHARIZARD",
+      "move": "MOVE_DUAL_WINGBEAT"
+    },
     {
       "id": "tutor-blaziken-sky_uppercut",
       "move": "MOVE_SKY_UPPERCUT",
@@ -8332,11 +12248,6 @@
     {
       "id": "retained-tutor-sandshrew_alolan-cold_snap",
       "move": "MOVE_COLD_SNAP",
-      "species": "SPECIES_SANDSHREW_ALOLAN"
-    },
-    {
-      "id": "retained-tutor-sandshrew_alolan-jetstream",
-      "move": "MOVE_JETSTREAM",
       "species": "SPECIES_SANDSHREW_ALOLAN"
     },
     {

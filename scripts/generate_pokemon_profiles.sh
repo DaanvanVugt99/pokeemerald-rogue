@@ -5,8 +5,8 @@ set -euo pipefail
 SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIRECTORY}/.." && pwd)"
 GENERATOR_DIRECTORY="${PROJECT_ROOT}/tools/Pokabbie/PokemonDataGenerator/PokemonDataGenerator"
-PROJECT_FILE="${GENERATOR_DIRECTORY}/PokemonDataGenerator.csproj"
-EXECUTABLE_DIRECTORY="${GENERATOR_DIRECTORY}/bin/Release"
+PROJECT_FILE="${GENERATOR_DIRECTORY}/ProfilePipeline.csproj"
+EXECUTABLE_DIRECTORY="${GENERATOR_DIRECTORY}/bin/Profiles"
 
 if [[ $# -lt 1 ]]; then
     echo "Usage: $0 refresh [--accept-removals] | generate | verify" >&2
@@ -39,4 +39,4 @@ fi
 cd "${EXECUTABLE_DIRECTORY}"
 export MONO_IOMAP=all
 export POKEEMERALD_ROGUE_ROOT="${PROJECT_ROOT}"
-exec mono PokemonDataGenerator.exe profiles "$@"
+exec mono ProfilePipeline.exe "$@"

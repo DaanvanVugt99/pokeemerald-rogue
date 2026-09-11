@@ -1,6 +1,29 @@
 #include "global.h"
 #include "test/battle.h"
 
+SINGLE_BATTLE_TEST("Tripwire remains armed while Disguise absorbs a hit")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        PLAYER(SPECIES_SPIDOPS) { Ability(ABILITY_DISGUISE); UniqueAbility(ABILITY_TRIPWIRE); HP(400); MaxHP(400); }
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET) { HP(400); MaxHP(400); }
+    } WHEN {
+        TURN { SWITCH(player, 1); MOVE(opponent, MOVE_TACKLE); }
+        TURN { SWITCH(opponent, 1); }
+    } SCENE {
+        ABILITY_POPUP(player, ABILITY_DISGUISE);
+        HP_BAR(player, damage: 50);
+        ABILITY_POPUP(player, ABILITY_TRIPWIRE);
+        HP_BAR(opponent, damage: 50);
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_SPIDOPS);
+        EXPECT_EQ(player->hp, 350);
+        EXPECT_EQ(opponent->hp, 350);
+        EXPECT_EQ(opponent->statStages[STAT_SPEED], DEFAULT_STAT_STAGE - 1);
+    }
+}
+
 SINGLE_BATTLE_TEST("Tripwire damages and lowers Speed when the first opposing Pokemon switches in")
 {
     GIVEN {

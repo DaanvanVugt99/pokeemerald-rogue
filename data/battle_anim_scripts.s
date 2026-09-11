@@ -890,6 +890,8 @@ gBattleAnims_Moves::
 	.4byte Move_STATIC_BURST
 	.4byte Move_CHEAP_TRICK
 	.4byte Move_BRAINSTORM
+	.4byte Move_SWIRLING_BLADE
+	.4byte Move_FLAME_RELAY
 @@@@ Z MOVES
 	.4byte Move_BREAKNECK_BLITZ
 	.4byte Move_ALL_OUT_PUMMELING
@@ -29766,6 +29768,12 @@ Move_CHEAP_TRICK:
 	createsprite gSimplePaletteBlendSpriteTemplate, ANIM_ATTACKER, 2, F_PAL_BG, 2, 8, 0, RGB_BLACK
 	waitforvisualfinish
 	end
+
+Move_SWIRLING_BLADE:
+	goto Move_SACRED_SWORD
+
+Move_FLAME_RELAY:
+	goto Move_FLAME_CHARGE
 
 Move_BRAINSTORM:
 	loadspritegfx ANIM_TAG_BLUE_RING

@@ -338,6 +338,7 @@ namespace PokemonDataGenerator.Pokedex
 			public int SchemaVersion { get; set; }
 			public List<LearnsetRule> CompatibilityTutor { get; set; } = new List<LearnsetRule>();
 			public List<LearnsetRule> LevelUp { get; set; } = new List<LearnsetRule>();
+			public List<LearnsetRule> RemoveLevelUp { get; set; } = new List<LearnsetRule>();
 			public List<LearnsetRule> Tutor { get; set; } = new List<LearnsetRule>();
 		}
 
@@ -360,6 +361,7 @@ namespace PokemonDataGenerator.Pokedex
 							throw new InvalidDataException($"Unsupported Divergence learnset-rule schema {s_LearnsetRules.SchemaVersion}");
 						List<LearnsetRule> allRules = s_LearnsetRules.CompatibilityTutor
 							.Concat(s_LearnsetRules.LevelUp)
+							.Concat(s_LearnsetRules.RemoveLevelUp)
 							.Concat(s_LearnsetRules.Tutor)
 							.ToList();
 						if (allRules.GroupBy(rule => rule.Id).Any(group => group.Count() != 1))
@@ -380,6 +382,10 @@ namespace PokemonDataGenerator.Pokedex
 			public List<LevelUpMove> LevelUpMoves;
 			public List<string> TutorMoves;
 			public List<PokemonCompetitiveSet> CompetitiveSets;
+
+			// Transient provenance: never change the pinned source cache or runtime profile layout.
+			[JsonIgnore] public HashSet<string> SourceLevelMoves;
+			[JsonIgnore] public HashSet<string> SourceTutorMoves;
 
 			internal static PokemonProfile FromSource(SourcePokemonProfile sourceProfile)
 			{
@@ -859,11 +865,141 @@ namespace PokemonDataGenerator.Pokedex
 			{
 				switch (Species)
 				{
+					case "SPECIES_ACCELGOR":
+						ReplaceCompetitiveAbility("ABILITY_HYDRATION", "ABILITY_INFILTRATOR");
+						break;
+					case "SPECIES_BEARTIC":
+						ReplaceCompetitiveAbility("ABILITY_SNOW_CLOAK", "ABILITY_TOUGH_CLAWS");
+						break;
+					case "SPECIES_CHATOT":
+						ReplaceCompetitiveAbility("ABILITY_KEEN_EYE", "ABILITY_SOUNDPROOF");
+						ReplaceCompetitiveAbility("ABILITY_BIG_PECKS", "ABILITY_PUNK_ROCK");
+						break;
+					case "SPECIES_DRIFLOON":
+					case "SPECIES_DRIFBLIM":
+						ReplaceCompetitiveAbility("ABILITY_AFTERMATH", "ABILITY_WIND_RIDER");
+						break;
+					case "SPECIES_DUCKLETT":
+					case "SPECIES_SWANNA":
+						ReplaceCompetitiveAbility("ABILITY_KEEN_EYE", "ABILITY_FRIEND_GUARD");
+						break;
+					case "SPECIES_ESCAVALIER":
+						ReplaceCompetitiveAbility("ABILITY_SWARM", "ABILITY_NO_GUARD");
+						break;
+					case "SPECIES_SENTRET":
+					case "SPECIES_FURRET":
+						ReplaceCompetitiveAbility("ABILITY_RUN_AWAY", "ABILITY_SCRAPPY");
+						break;
+					case "SPECIES_GARBODOR":
+						ReplaceCompetitiveAbility("ABILITY_WEAK_ARMOR", "ABILITY_TOXIC_DEBRIS");
+						break;
+					case "SPECIES_PUMPKABOO":
+					case "SPECIES_GOURGEIST":
+						ReplaceCompetitiveAbility("ABILITY_INSOMNIA", "ABILITY_FLASH_FIRE");
+						break;
+					case "SPECIES_JIGGLYPUFF":
+					case "SPECIES_WIGGLYTUFF":
+						ReplaceCompetitiveAbility("ABILITY_CUTE_CHARM", "ABILITY_FRIEND_GUARD");
+						break;
+					case "SPECIES_LUCARIO":
+						ReplaceCompetitiveAbility("ABILITY_JUSTIFIED", "ABILITY_MEGA_LAUNCHER");
+						break;
+					case "SPECIES_LYCANROC":
+						ReplaceCompetitiveAbility("ABILITY_KEEN_EYE", "ABILITY_SUPER_LUCK");
+						break;
+					case "SPECIES_LYCANROC_MIDNIGHT":
+						ReplaceCompetitiveAbility("ABILITY_KEEN_EYE", "ABILITY_RECKLESS");
+						break;
+					case "SPECIES_PACHIRISU":
+						ReplaceCompetitiveAbility("ABILITY_RUN_AWAY", "ABILITY_PRANKSTER");
+						break;
+					case "SPECIES_PIDOVE":
+					case "SPECIES_TRANQUILL":
+					case "SPECIES_UNFEZANT":
+						ReplaceCompetitiveAbility("ABILITY_RIVALRY", "ABILITY_UNAWARE");
+						break;
+					case "SPECIES_SABLEYE":
+						ReplaceCompetitiveAbility("ABILITY_KEEN_EYE", "ABILITY_MAGIC_GUARD");
+						break;
+					case "SPECIES_STUNFISK":
+						ReplaceCompetitiveAbility("ABILITY_LIMBER", "ABILITY_DRY_SKIN");
+						break;
+					case "SPECIES_TEDDIURSA":
+						ReplaceCompetitiveAbility("ABILITY_PICKUP", "ABILITY_SUPERSWEET_SYRUP");
+						break;
+					case "SPECIES_URSARING":
+						// Preserve the old status-orb sets' Facade synergy after Quick Feet is removed.
+						ReplaceCompetitiveAbility("ABILITY_QUICK_FEET", "ABILITY_GUTS");
+						break;
+					case "SPECIES_MAREEP":
+					case "SPECIES_FLAAFFY":
+					case "SPECIES_AMPHAROS":
+						ReplaceCompetitiveAbility("ABILITY_PLUS", "ABILITY_COTTON_DOWN");
+						break;
+					case "SPECIES_KLINK":
+					case "SPECIES_KLANG":
+					case "SPECIES_KLINKLANG":
+						ReplaceCompetitiveAbility("ABILITY_CLEAR_BODY", "ABILITY_LEVITATE");
+						break;
+					case "SPECIES_LICKITUNG":
+					case "SPECIES_LICKILICKY":
+						ReplaceCompetitiveAbility("ABILITY_OWN_TEMPO", "ABILITY_UNAWARE");
+						break;
+					case "SPECIES_MUNNA":
+					case "SPECIES_MUSHARNA":
+						ReplaceCompetitiveAbility("ABILITY_TELEPATHY", "ABILITY_COMATOSE");
+						break;
+					case "SPECIES_DURANT":
+						ReplaceCompetitiveAbility("ABILITY_SWARM", "ABILITY_HEATPROOF");
+						break;
+					case "SPECIES_DUSKNOIR":
+						ReplaceCompetitiveAbility("ABILITY_PRESSURE", "ABILITY_IRON_FIST");
+						break;
+					case "SPECIES_ENTEI":
+						ReplaceCompetitiveAbility("ABILITY_INNER_FOCUS", "ABILITY_FLASH_FIRE");
+						break;
+					case "SPECIES_RAIKOU":
+						ReplaceCompetitiveAbility("ABILITY_INNER_FOCUS", "ABILITY_VOLT_ABSORB");
+						break;
+					case "SPECIES_SUICUNE":
+						ReplaceCompetitiveAbility("ABILITY_INNER_FOCUS", "ABILITY_WATER_ABSORB");
+						break;
+					case "SPECIES_ARON":
+					case "SPECIES_LAIRON":
+					case "SPECIES_AGGRON":
+						ReplaceCompetitiveAbility("ABILITY_HEAVY_METAL", "ABILITY_EARTH_EATER");
+						break;
+					case "SPECIES_MAGMORTAR":
+						ReplaceCompetitiveAbility("ABILITY_VITAL_SPIRIT", "ABILITY_QUICK_DRAW");
+						break;
+					case "SPECIES_GLALIE":
+						ReplaceCompetitiveAbility("ABILITY_ICE_BODY", "ABILITY_LEVITATE");
+						break;
+					case "SPECIES_EMBOAR":
+						ReplaceCompetitiveAbility("ABILITY_RECKLESS", "ABILITY_MOLD_BREAKER");
+						break;
+					case "SPECIES_JUMPLUFF":
+						ReplaceCompetitiveAbility("ABILITY_CHLOROPHYLL", "ABILITY_WIND_RIDER");
+						break;
+					case "SPECIES_KLAWF":
+						ReplaceCompetitiveAbility("ABILITY_REGENERATOR", "ABILITY_TECHNICIAN");
+						break;
+					case "SPECIES_LEDYBA":
+						ReplaceCompetitiveAbility("ABILITY_RATTLED", "ABILITY_IRON_FIST");
+						break;
+					case "SPECIES_CAMERUPT":
+						ReplaceCompetitiveAbility("ABILITY_ANGER_POINT", "ABILITY_SIMPLE");
+						break;
+					case "SPECIES_BARBOACH":
+					case "SPECIES_WHISCASH":
+						ReplaceCompetitiveAbility("ABILITY_OBLIVIOUS", "ABILITY_SIMPLE");
+						break;
 					case "SPECIES_UNOWN":
 						UpdateUnownCompetitiveSets();
 						break;
 					case "SPECIES_LEDIAN":
 						UpdateLedianCompetitiveSets();
+						ReplaceCompetitiveAbility("ABILITY_EARLY_BIRD", "ABILITY_TECHNICIAN");
 						break;
 					case "SPECIES_PARASECT":
 						UpdateParasectCompetitiveSets();
@@ -968,6 +1104,10 @@ namespace PokemonDataGenerator.Pokedex
 						TutorMoves.Add(rule.Move);
 				}
 
+				// Explicit level-only removals do not revoke tutor compatibility.
+				foreach (LearnsetRule rule in LearnsetRules.RemoveLevelUp.Where(rule => rule.Species == Species))
+					LevelUpMoves.RemoveAll(move => move.Move == rule.Move);
+
 				foreach (LearnsetRule rule in LearnsetRules.LevelUp.Where(rule => rule.Species == Species))
 				{
 					LevelUpMove existingMove = LevelUpMoves.FirstOrDefault(move => move.Move == rule.Move);
@@ -1010,6 +1150,13 @@ namespace PokemonDataGenerator.Pokedex
 
 			public void FormatDataForGame()
 			{
+				SourceLevelMoves = new HashSet<string>(LevelUpMoves.Select(move => move.Move));
+				SourceTutorMoves = new HashSet<string>(TutorMoves);
+				if (!GameDataHelpers.IsVanillaVersion)
+				{
+					if (SourceLevelMoves.Remove("MOVE_HAIL")) SourceLevelMoves.Add("MOVE_SNOWSCAPE");
+					if (SourceTutorMoves.Remove("MOVE_HAIL")) SourceTutorMoves.Add("MOVE_SNOWSCAPE");
+				}
 				if (!GameDataHelpers.IsVanillaVersion)
 					RestoreImplementedMoveData();
 
@@ -2155,6 +2302,33 @@ namespace PokemonDataGenerator.Pokedex
 				lowerBlock.AppendLine($"\t}},");
 			}
 
+			lowerBlock.AppendLine("};");
+
+			// ROM-only bitmaps: level entries first, then tutors, matching their exported order.
+			// Redirected forms share both the learnset and its provenance. No RAM structs grow.
+			HashSet<string> markedProfiles = new HashSet<string>();
+			foreach (var profile in profiles)
+			{
+				var added = profile.LevelUpMoves.Select(move => !profile.SourceLevelMoves.Contains(move.Move))
+					.Concat(profile.TutorMoves.Select(move => !profile.SourceTutorMoves.Contains(move))).ToArray();
+				if (!added.Any(value => value))
+					continue;
+				markedProfiles.Add(profile.Species);
+				upperBlock.AppendLine($"static const u8 sMoveAdditions_{profile.Species}[] = {{");
+				for (int start = 0; start < added.Length; start += 8)
+				{
+					int bits = 0;
+					for (int bit = 0; bit < 8 && start + bit < added.Length; ++bit)
+						if (added[start + bit]) bits |= 1 << bit;
+					upperBlock.AppendLine($"\t0x{bits:X2},");
+				}
+				upperBlock.AppendLine("};");
+			}
+			lowerBlock.AppendLine("\nconst u8 *const gRoguePokemonMoveAdditions[NUM_SPECIES] = {");
+			foreach (var profile in profiles.Where(profile => markedProfiles.Contains(profile.Species)))
+				lowerBlock.AppendLine($"\t[{profile.Species}] = sMoveAdditions_{profile.Species},");
+			foreach (var redirect in redirectedSpecies.Where(pair => markedProfiles.Contains(pair.Value)))
+				lowerBlock.AppendLine($"\t[{redirect.Key}] = sMoveAdditions_{redirect.Value},");
 			lowerBlock.AppendLine("};");
 
 			File.WriteAllText(filePath, upperBlock.ToString() + "\n"+ lowerBlock.ToString());

@@ -3184,18 +3184,31 @@ static void Cmd_datahpupdate(void)
         {
             // TODO: Convert this to a proper FORM_CHANGE type.
             u32 side = GetBattlerSide(battler);
+            bool32 changesForm = gBattleMons[battler].species == SPECIES_MIMIKYU_DISGUISED;
             bool32 triggerUnspeakable = HasBattlerAbility(battler, ABILITY_UNSPEAKABLE)
                                      && IsBattlerAlive(gBattlerAttacker)
                                      && !gDisableStructs[battler].uniqueOncePerSwitchInUsed;
             gBattleScripting.battler = battler;
-            if (gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] == SPECIES_NONE)
-                gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] = gBattleMons[battler].species;
-            gBattleMons[battler].species = SPECIES_MIMIKYU_BUSTED;
+            if (changesForm)
+            {
+                if (gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] == SPECIES_NONE)
+                    gBattleStruct->changedSpecies[side][gBattlerPartyIndexes[battler]] = gBattleMons[battler].species;
+                gBattleMons[battler].species = SPECIES_MIMIKYU_BUSTED;
+            }
+            else
+            {
+                gBattleStruct->transformationAbilityUsed[side] |= gBitTable[gBattlerPartyIndexes[battler]];
+                gBattleMoveDamage = 0;
+            }
             if (B_DISGUISE_HP_LOSS >= GEN_8 && !gProtectStructs[battler].confusionSelfDmg)
                 gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 8;
             SetBattlerTriggeredAbility(battler, ABILITY_DISGUISE);
             BattleScriptPush(cmd->nextInstr);
-            if (triggerUnspeakable)
+            if (!changesForm)
+            {
+                gBattlescriptCurrInstr = BattleScript_DisguiseWithoutFormChange;
+            }
+            else if (triggerUnspeakable)
             {
                 gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
                 RecordAbilityBattle(battler, ABILITY_UNSPEAKABLE);
@@ -19890,8 +19903,7 @@ bool32 DoesSubstituteBlockMove(u32 battlerAtk, u32 battlerDef, u32 move)
 
 bool32 DoesDisguiseBlockMove(u32 battler, u32 move)
 {
-    if (!(gBattleMons[battler].species == SPECIES_MIMIKYU_DISGUISED)
-        || gBattleMons[battler].status2 & STATUS2_TRANSFORMED
+    if (!IsBattlerDisguiseIntact(battler)
         || (!gProtectStructs[battler].confusionSelfDmg && (IS_MOVE_STATUS(move) || gHitMarker & HITMARKER_PASSIVE_DAMAGE))
         || GetBattlerAbility(battler) != ABILITY_DISGUISE)
         return FALSE;

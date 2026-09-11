@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>ProfilePipeline</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <OutputPath>bin\Profiles\</OutputPath>
+    <IntermediateOutputPath>obj\Profiles\</IntermediateOutputPath>
+    <Optimize>true</Optimize>
+    <LangVersion>7.2</LangVersion>
+    <NewtonsoftJsonPath Condition="'$(NewtonsoftJsonPath)' == '' and Exists('..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll')">..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</NewtonsoftJsonPath>
+    <NewtonsoftJsonPath Condition="'$(NewtonsoftJsonPath)' == ''">bin\Release\Newtonsoft.Json.dll</NewtonsoftJsonPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(NewtonsoftJsonPath)</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Compile Include="ProfilePipelineProgram.cs" />
+    <Compile Include="ContentCache.cs" />
+    <Compile Include="Pokedex\PokemonProfileGenerator.cs" />
+    <Compile Include="Pokedex\PokemonProfilePipeline.cs" />
+    <Compile Include="Utils\GameDataHelpers.cs" />
+    <Compile Include="Utils\PokeAPI.cs" />
+    <Compile Include="Utils\PokemonMoveHelpers.cs" />
+  </ItemGroup>
+  <Target Name="CheckJsonDependency" BeforeTargets="ResolveReferences" Condition="!Exists('$(NewtonsoftJsonPath)')">
+    <Error Text="Newtonsoft.Json.dll is missing. Restore Newtonsoft.Json 13.0.1 or set /p:NewtonsoftJsonPath=/absolute/path/Newtonsoft.Json.dll." />
+  </Target>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

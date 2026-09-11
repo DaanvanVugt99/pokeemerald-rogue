@@ -4,7 +4,22 @@
 Showdown data, followed by a small, project-owned Divergence overlay. Ordinary
 game builds use the committed header and never contact upstream services.
 
+The generated header also contains ROM-only Pokédex move-addition bitmaps.
+A star marks level-up or tutor access absent from the pinned source profile
+before Divergence processing. New access is tracked separately for each method;
+moving an existing level-up move to another level is not a new addition, and
+the Hail/Snowscape rename is normalized. Redirected forms share their profile's
+markers. This metadata does not expand the runtime profile or any RAM/save
+structure, and it is regenerated and verified by the same offline commands.
+
 ## Commands
+
+The launcher builds the dedicated `ProfilePipeline.csproj` and runs
+`bin/Profiles/ProfilePipeline.exe`. It requires Mono and MSBuild/xbuild, but
+does not compile the unrelated Windows sprite tools or require PresentationCore.
+Newtonsoft.Json 13.0.1 is resolved from the generator's NuGet packages folder,
+with its existing `bin/Release` dependency as a fallback. The full
+`PokemonDataGenerator.csproj` remains available for other generator commands.
 
 Run these commands from the repository root:
 
@@ -46,6 +61,10 @@ are the reviewable inputs:
   bundle used to generate the committed header.
 - `divergence_learnsets.json`: explicit level-up, tutor, and legacy move
   compatibility rules. This is where project-owned move distribution belongs.
+  The optional `removeLevelUp` list uses named species/move rules to remove
+  level-up access only, before applying `levelUp` additions. It leaves tutor
+  compatibility intact (for example Ekans/Arbok replacing level-up Sludge Bomb
+  with Poison Fang). All rule IDs remain unique across the lists.
 - `divergence_competitive_sets.json`: intentional Rogue sets with stable IDs
   and roles. Upstream sets should not be copied here wholesale.
 - `za_mega_expected_bases.json`: the 49 protected Legends Z-A Mega forms and

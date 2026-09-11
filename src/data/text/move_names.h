@@ -865,6 +865,8 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_STATIC_BURST] = _("Static Burst"),
     [MOVE_CHEAP_TRICK] = _("Cheap Trick"),
     [MOVE_BRAINSTORM] = _("Brainstorm"),
+    [MOVE_SWIRLING_BLADE] = _("Swirling Blade"),
+    [MOVE_FLAME_RELAY] = _("Flame Relay"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("Max Guard"),
     [MOVE_MAX_STRIKE] = _("Max Strike"),
@@ -1787,6 +1789,8 @@ const u8 gMoveNames[MOVES_COUNT_DYNAMAX][MOVE_NAME_LENGTH + 1] =
     [MOVE_STATIC_BURST] = _("StaticBurst"),
     [MOVE_CHEAP_TRICK] = _("CheapTrick"),
     [MOVE_BRAINSTORM] = _("Brainstorm"),
+    [MOVE_SWIRLING_BLADE] = _("SwirlBlade"),
+    [MOVE_FLAME_RELAY] = _("FlameRelay"),
     // Max Moves
     [MOVE_MAX_GUARD] = _("M-Guard"),
     [MOVE_MAX_STRIKE] = _("M-Strike"),

@@ -16,6 +16,138 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Pokédex move lists now mark Divergence-added level-up and tutor/TM/TR access
+  with a star and a legend. Markers are generated from the locked source
+  profiles, with shared-form inheritance and no additional RAM structures.
+  Row stars are drawn directly because the small font lacks a visible star
+  glyph. Empty Ability slots no longer show false change marks caused by
+  battle-only Ability fallback logic.
+- Completed the rebalance ledger implementation and full-data reconciliation:
+  650 decisions, explicit evolution/form targets and shared-design invariants.
+  The checker now catches changes inherited by forms outside its manifest,
+  as well as new evolution move gaps and mismatched approved data.
+- Completed the final approved rebalance packages: Plusle/Minun's paired
+  450-BST redesign, Banette/Mega Banette stats and Mega-only Normal typing,
+  the Cherrim, Mime, Pyroar and Raichu form progressions, and selected remaining
+  learnsets. Pikachu/Raichu gain Splishy Splash and Floaty Fall consistently
+  across forms, without Zippy Zap. Aromatisse gains its approved Revised
+  learnset; Exeggutor's two forms retain the new Harvest tools.
+- Added Flame Relay, a 70-power physical Fire contact move that switches its
+  user after hitting, exclusively for regular Ponyta/Rapidash at level 40.
+  Both regional lines gain their approved Jump Kick access. Existing learnable
+  move identifiers and save layouts remain unchanged.
+- Applied the remaining approved Ability packages for the balloon, sound,
+  flower, pumpkin, bird, bear and defensive families, with their selected
+  stats and moves. Mega Abilities and rejected typing/stat changes remain
+  intact. Alolan Sandshrew loses Jetstream, while Mega Kick now remains
+  directly learnable throughout Teddiursa's approved evolution branches.
+- Applied the approved selected move packages for the Clefairy, Golett,
+  Meditite, Togepi, Natu, Skwovet, Pancham and Herdier families, with matching
+  form access and existing tutors preserved. Added the selected Arceus/Tapu
+  signature tools, physical capstones and utility moves without importing
+  rejected coverage. Xatu, Zangoose and Stoutland receive their approved stats.
+- Applied the approved Appletun/Flapple stat changes consistently to Gigantamax
+  forms, with Superpower/Scale Shot tutors and Applin's Leaf Storm tutor.
+  Swirlix/Slurpuff gain Covet, Slurpuff gains Attack, and Galarian Slowbro,
+  Surskit and Swalot receive their approved stat changes. Trapinch keeps Ground
+  typing and gains level-up Bug Bite without losing its existing tutor.
+- Applied the approved wool, gear, dream, hive and legendary-beast Ability
+  packages, Lickitung-line Unaware, Durant Heatproof and Dusknoir Iron Fist.
+  Oddish's line gains Leaf Guard; Bellossom keeps Grass and gains Cloud Nine
+  with its selected dance/blade moves. Ampharos stays Electric with its
+  selected Signal Beam/Draco Meteor access. Rotom's existing form Abilities
+  remain intact alongside its selected Ghost/appliance moves and base Speed.
+- Applied the approved rolling-rock, Machop/Crabrawler punch, Chewtle shell,
+  Blitzle, seasonal-deer, Shinx, Garchomp, Omanyte, Remoraid and seal move
+  packages, with the selected Seedot, Sawsbuck and Octillery stats. Existing
+  tutors are preserved alongside new level-up access, including associated
+  regional, Mega and Gigantamax forms. Added Shieldon/Bastiodon's Head Smash
+  without new recovery, and Vigoroth's hidden Sheer Force; the previously
+  approved Impenetrable and King's Domain behavior remains unchanged.
+- Applied the approved stat progressions for Lotad, Wooper, Sizzlipede,
+  Meowth, Onix and Jynx families, plus the selected standalone specialists.
+  All Minior Meteor/Core forms gain matching HP and Air Slash; every Silvally
+  type reaches 600 BST. Added Lunatone's lunar moves, Wailord's Bouncy Bubble,
+  Linoone's Tail Slap, Persian's Quash and the Galarian Meowth-line Bullet Punch.
+  Charjabug gains only Attack, Vikavolt and Clodsire stay unchanged, Gogoat
+  remains pure Grass, and matching Mega/Gigantamax stat deltas are verified.
+- Applied the approved Mankey, Aron, Gastly, Zubat and Elekid Ability-family
+  changes, Magmortar's hidden Quick Draw, and selected Chinchou, Tynamo,
+  Voltorb and Magby moves. Glalie/Mega Glalie gain Ice/Rock and the selected
+  Rock Slide/Icicle Crash access; regular Glalie receives Levitate. Rejected
+  Mega stat increases and Electric-family coverage remain excluded.
+- Applied the final approved typing audit to the lake trio, Ninetales,
+  Mismagius, Goodra and Seviper with their selective move packages; Gothita's
+  line remains pure Psychic. Recover is restricted to regular Sliggoo/Goodra,
+  not Goomy or the Hisuian branch. Added the approved Froslass/Mega Froslass
+  stats, Furfrou trim stats, and Buneary/Lopunny and Glameow/Purugly packages.
+- Applied the approved bird/legendary tutors, Beedrill attacks, Bagon-line
+  Wish, Growlithe-line Hone Claws, Phanpy-line Magnitude, and selected Tropius,
+  Boltund and Volcarona moves. Cramorant's three battle forms share its approved
+  Special Attack/Speed increases and Belch/Surf placements. Added Chingling's
+  special improvements, Poochyena's moderated Speed, Mienfoo/Mienshao's selected
+  martial moves, Togedemaru's rolling/electric moves, and Nature Power on every
+  Unown form. Rejected regional-bird coverage and Meowstic changes stay excluded.
+- Applied the approved selective moves across the Aipom, Anorith, Baltoy,
+  Bronzor, Buizel, Rolycoly, Dwebble, Cubone, Cottonee, Lileep, Dreepy and
+  Litwick families, plus Dhelmise and Druddigon. Added Beldum's Rock Head and
+  Metang/Metagross's Iron Fist, with the approved Headbutt/Fly progression;
+  Mega Metagross keeps Tough Claws. Matching Mega/regional/Gigantamax move
+  access is preserved without restoring rejected coverage or Technician.
+- Applied the approved Farfetch'd, Hoppip, Kricketot, Ledyba, Sunkern and spider
+  family designs, plus selective Dedenne, Delibird, Klawf, Luvdisc, Maractus
+  and Turtonator changes. Existing move access and final coverage cuts remain
+  intact; competitive sets use the newly selected Abilities where necessary.
+- Disguise now works on Tarountula and Spidops: it blocks one hit per battle,
+  costs one eighth of maximum HP, and does not reset on switching. Their species
+  stay unchanged; Mimikyu retains its busted form and Unspeakable behavior.
+  Spider shields reuse the existing per-party transformation flags, without
+  expanding battle RAM structures.
+  The in-game description no longer incorrectly restricts it to Mimikyu.
+- Applied another set of final rebalance families: Ekans/Arbok's level-only
+  Poison Fang replacement, Cacnea/Cacturne's Rough Skin and selected moves,
+  Seel/Dewgong's Ice Scales, Finneon/Lumineon's Dazzling/Tail Glow, and
+  Clobbopus/Grapploct's Fighting/Water moves and Sticky Hold. Ported the approved
+  Spinarak, Skitty, Wooloo, Spoink, Slugma, Nickit, Paras, Gumshoos and Shiinotic
+  family changes while preserving their existing access and rejected coverage.
+- Added the approved Swirling Blade tutors to Cobalion, Terrakion, Virizion
+  and both Zacian forms; kept Keldeo and the Pawniard line unchanged. Applied
+  the selective Carnivine, Heatmor, Emolga, Komala, Bruxish and Bouffalant ports.
+- Implemented the approved Eevee family Ability and partner-move package,
+  including Glaceon's Speed redistribution and a tested Flare Boost/Smolder
+  alternative. All Eeveelutions retain three distinct regular Abilities.
+- Applied equal 465-BST Volbeat/Illumise designs, equal 440-BST Qwilfish forms,
+  and distinct 450-BST Wormadam cloaks. Ported the selective Beautifly, Dustox,
+  Mothim and Beheeyem moves without restoring the rejected coverage additions.
+- Applied the final moderated Pidgeot/Mega Pidgeot, Swoobat and Whiscash stats;
+  added their approved family moves, Numel/Camerupt's Slack Off, and the Simple
+  Ability routes for Camerupt and Barboach/Whiscash. Competitive sets no longer
+  request those species' replaced Abilities.
+- Added explicit rebalance checks for shared BST, starter second-Ability,
+  Eeveelution Ability-count and approved Mega/transformation stat-delta rules.
+- Applied the final approved starter-family rebalance across all nine
+  generations, including consistent second Ability slots, selective learnsets,
+  and matching approved stat deltas on Mega and transformation forms. Pignite
+  and regular Emboar become Fire/Ground while Mega Emboar stays Fire/Fighting;
+  V-create remains excluded. Competitive Emboar sets use Mold Breaker instead
+  of the removed Reckless. Existing Mega Ability exceptions are preserved.
+- Extended rebalance verification to follow compiled evolution branches and
+  flag newly added moves that disappear at later stages, while separately
+  reporting historical learnset gaps for reconciliation.
+- Ported upstream Revised Swirling Blade's 70-BP physical Steel slicing attack,
+  including its increased critical-hit chance, contact flag, description and
+  Sacred Sword animation. Existing learnable move IDs are preserved; approved
+  species distribution is applied through the rebalance ledger batches.
+- Began applying the approved rebalance ledger: Butterfree (including
+  Gigantamax), Venonat/Venomoth, Azurill's line, Bonsly/Sudowoodo,
+  Bunnelby/Diggersby, Drampa (including Mega) and Goldeen/Seaking receive their
+  approved stats. Huntail gains level-55 Psychic Fangs, and Gorebyss's second
+  Ability changes from Dazzling to Regenerator, including normal switch-out
+  healing after boosted Baton Pass.
+- Added a pinned-baseline rebalance manifest checker that verifies exact stats,
+  typing, Ability slots and learnsets, detects changed approval text, and keeps
+  unfinished ledger decisions visible rather than treating partial checks as
+  full implementation.
 - Replaced the Pokédex's stat-buff `+` markers with upstream-style A: Inspect:
   original stats plus signed changes, current values and the actual BST delta.
   Changed typings and Ability slots are marked and Inspect shows their original
@@ -51,6 +183,8 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Made the profile launcher build a dedicated profile-only executable, avoiding
+  unrelated Windows sprite-tool compilation failures under Mono.
 - Prevented move type badges from recoloring the move-info tab and battle
   gimmick buttons when changing the selected move.
 - Updated Windows development support with portable MSYS2 and mGBA discovery,

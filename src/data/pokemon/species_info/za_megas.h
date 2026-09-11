@@ -269,10 +269,10 @@
     [SPECIES_FERALIGATR_MEGA] =
     {
         .baseHP        = 85,
-        .baseAttack    = 160,
+        .baseAttack    = 165,
         .baseDefense   = 125,
-        .baseSpeed     = 78,
-        .baseSpAttack  = 89,
+        .baseSpeed     = 88,
+        .baseSpAttack  = 79,
         .baseSpDefense = 93,
         .types = { TYPE_WATER, TYPE_DRAGON },
         .catchRate = 45,
@@ -369,10 +369,10 @@
     [SPECIES_FROSLASS_MEGA] =
     {
         .baseHP        = 70,
-        .baseAttack    = 80,
+        .baseAttack    = 70,
         .baseDefense   = 70,
         .baseSpeed     = 120,
-        .baseSpAttack  = 140,
+        .baseSpAttack  = 170,
         .baseSpDefense = 100,
         .types = { TYPE_ICE, TYPE_GHOST },
         .catchRate = 75,
@@ -414,12 +414,12 @@
 #if P_MEGA_EVOLUTIONS
     [SPECIES_EMBOAR_MEGA] =
     {
-        .baseHP        = 110,
-        .baseAttack    = 148,
-        .baseDefense   = 75,
+        .baseHP        = 115,
+        .baseAttack    = 150,
+        .baseDefense   = 90,
         .baseSpeed     = 75,
-        .baseSpAttack  = 110,
-        .baseSpDefense = 110,
+        .baseSpAttack  = 80,
+        .baseSpDefense = 125,
         .types = { TYPE_FIRE, TYPE_FIGHTING },
         .catchRate = 45,
         .expYield = (GEN_LATEST >= GEN_8) ? 264 : 238,
@@ -699,7 +699,7 @@
 #if P_MEGA_EVOLUTIONS
     [SPECIES_CHESNAUGHT_MEGA] =
     {
-        .baseHP        = 88,
+        .baseHP        = 93,
         .baseAttack    = 137,
         .baseDefense   = 172,
         .baseSpeed     = 44,
@@ -790,7 +790,7 @@
     [SPECIES_GRENINJA_MEGA] =
     {
         .baseHP        = 72,
-        .baseAttack    = 125,
+        .baseAttack    = 130,
         .baseDefense   = 77,
         .baseSpeed     = 142,
         .baseSpAttack  = 133,
@@ -837,7 +837,7 @@
     [SPECIES_PYROAR_MEGA] =
     {
         .baseHP        = 86,
-        .baseAttack    = 88,
+        .baseAttack    = 108,
         .baseDefense   = 92,
         .baseSpeed     = 126,
         .baseSpAttack  = 129,
@@ -1160,8 +1160,8 @@
 #if P_MEGA_EVOLUTIONS
     [SPECIES_DRAMPA_MEGA] =
     {
-        .baseHP        = 78,
-        .baseAttack    = 85,
+        .baseHP        = 103,
+        .baseAttack    = 70,
         .baseDefense   = 110,
         .baseSpeed     = 36,
         .baseSpAttack  = 160,
@@ -1408,10 +1408,10 @@
     [SPECIES_RAICHU_MEGA_X] =
     {
         .baseHP        = 60,
-        .baseAttack    = 135,
+        .baseAttack    = 140,
         .baseDefense   = 95,
         .baseSpeed     = 110,
-        .baseSpAttack  = 90,
+        .baseSpAttack  = 95,
         .baseSpDefense = 95,
         .types = { TYPE_ELECTRIC, TYPE_ELECTRIC },
         .catchRate = 75,
@@ -1454,10 +1454,10 @@
     [SPECIES_RAICHU_MEGA_Y] =
     {
         .baseHP        = 60,
-        .baseAttack    = 100,
+        .baseAttack    = 105,
         .baseDefense   = 55,
         .baseSpeed     = 130,
-        .baseSpAttack  = 160,
+        .baseSpAttack  = 165,
         .baseSpDefense = 80,
         .types = { TYPE_ELECTRIC, TYPE_ELECTRIC },
         .catchRate = 75,

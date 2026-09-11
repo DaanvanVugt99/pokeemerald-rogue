@@ -21043,6 +21043,24 @@ bool32 TryPrimalReversion(u32 battler)
     return FALSE;
 }
 
+bool32 IsBattlerDisguiseIntact(u32 battler)
+{
+    if (gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
+        return FALSE;
+
+    switch (gBattleMons[battler].species)
+    {
+    case SPECIES_MIMIKYU_DISGUISED:
+        return TRUE;
+    case SPECIES_TAROUNTULA:
+    case SPECIES_SPIDOPS:
+        return !(gBattleStruct->transformationAbilityUsed[GetBattlerSide(battler)]
+                 & gBitTable[gBattlerPartyIndexes[battler]]);
+    default:
+        return FALSE;
+    }
+}
+
 bool32 IsNeutralizingGasBannedAbility(u32 ability)
 {
     switch (ability)

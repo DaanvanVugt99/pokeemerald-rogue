@@ -1,5 +1,6 @@
 #include "global.h"
 #include "text.h"
+#include "window.h"
 #include "string_util.h"
 #include "constants/abilities.h"
 #include "constants/moves.h"
@@ -7,6 +8,7 @@
 #include "pokemon.h"
 #include "rogue.h"
 #include "rogue_baked.h"
+#include "rogue_pokedex.h"
 #include "test/test.h"
 
 static bool32 SpeciesHasCompetitiveAbility(u16 species, u16 ability)
@@ -393,6 +395,140 @@ TEST("Pokedex Inspect preserves canonical stats rather than buff flags")
     EXPECT_EQ(baseline->types[0], TYPE_FIGHTING);
     EXPECT_EQ(baseline->abilities[0], ABILITY_BATTLE_ARMOR);
     EXPECT_EQ(baseline->abilities[2], ABILITY_DEFIANT);
+}
+
+TEST("Pokedex Inspect compares Gogoat's redistributed stats even with unchanged BST")
+{
+    const struct RogueSpeciesBaseline *baseline = Rogue_GetSpeciesBaseline(SPECIES_GOGOAT);
+    static const s8 expectedDelta[NUM_STATS] = {
+        [STAT_HP] = 0, [STAT_ATK] = 8, [STAT_DEF] = 10,
+        [STAT_SPATK] = -30, [STAT_SPDEF] = 6, [STAT_SPEED] = 6,
+    };
+    u8 current[NUM_STATS];
+    s32 totalDelta = 0;
+    EXPECT(baseline != NULL);
+    RoguePokedex_GetSpeciesStatArray(SPECIES_GOGOAT, current, ARRAY_COUNT(current));
+    for (u32 stat = 0; stat < NUM_STATS; ++stat)
+    {
+        EXPECT_EQ((s32)current[stat] - baseline->stats[stat], expectedDelta[stat]);
+        totalDelta += expectedDelta[stat];
+    }
+    EXPECT_EQ(totalDelta, 0);
+}
+
+TEST("Pokedex Inspect distinguishes Cacturne's current Rough Skin from its empty base slot")
+{
+    const struct RogueSpeciesBaseline *baseline = Rogue_GetSpeciesBaseline(SPECIES_CACTURNE);
+    EXPECT(baseline != NULL);
+    EXPECT_EQ(baseline->abilities[1], ABILITY_NONE);
+    EXPECT_EQ(RoguePokedex_GetAbilitySlot(SPECIES_CACTURNE, 1, 0), ABILITY_ROUGH_SKIN);
+}
+
+TEST("Pokedex Inspect preserves empty Ability slots instead of flagging a battle fallback")
+{
+    const struct RogueSpeciesBaseline *baseline = Rogue_GetSpeciesBaseline(SPECIES_BEAUTIFLY);
+    EXPECT(baseline != NULL);
+    EXPECT_EQ(GetAbilityBySpecies(SPECIES_BEAUTIFLY, 1, 0), ABILITY_SWARM);
+    EXPECT_EQ(RoguePokedex_GetAbilitySlot(SPECIES_BEAUTIFLY, 1, 0), ABILITY_NONE);
+    EXPECT_EQ(RoguePokedex_GetAbilitySlot(SPECIES_BEAUTIFLY, 1, 0), baseline->abilities[1]);
+    EXPECT_EQ(RoguePokedex_GetAbilitySlot(SPECIES_BEAUTIFLY, 0, 0), ABILITY_SWARM);
+    EXPECT_EQ(RoguePokedex_GetAbilitySlot(SPECIES_BEAUTIFLY, 2, 0), ABILITY_RIVALRY);
+    EXPECT_EQ(RoguePokedex_GetAbilitySlot(NUM_SPECIES, 0, 0), ABILITY_NONE);
+    EXPECT_EQ(RoguePokedex_GetAbilitySlot(SPECIES_BEAUTIFLY, NUM_ABILITY_SLOTS, 0), ABILITY_NONE);
+}
+
+static bool8 HasMarkedPokedexMove(u16 species, u16 move, bool8 tutor)
+{
+    const struct RoguePokemonProfile *profile = &gRoguePokemonProfiles[species];
+    for (u16 i = 0; tutor ? profile->tutorMoves[i] != MOVE_NONE : profile->levelUpMoves[i].move != MOVE_NONE; ++i)
+    {
+        if ((tutor ? profile->tutorMoves[i] : profile->levelUpMoves[i].move) == move)
+            return RoguePokedex_IsMoveAddition(species, i, tutor);
+    }
+    return FALSE;
+}
+
+TEST("Pokedex move markers identify added level access and tutors, not original moves")
+{
+    EXPECT(HasMarkedPokedexMove(SPECIES_PONYTA, MOVE_FLAME_RELAY, FALSE));
+    EXPECT(HasMarkedPokedexMove(SPECIES_CACTURNE, MOVE_NEEDLE_ARM, FALSE));
+    EXPECT(HasMarkedPokedexMove(SPECIES_GOGOAT, MOVE_WILD_GROWTH, FALSE));
+    EXPECT(HasMarkedPokedexMove(SPECIES_CACTURNE, MOVE_ECLIPSE, TRUE));
+    EXPECT(!HasMarkedPokedexMove(SPECIES_GOGOAT, MOVE_HORN_LEECH, FALSE));
+    EXPECT(!HasMarkedPokedexMove(SPECIES_GOGOAT, MOVE_PROTECT, TRUE));
+}
+
+TEST("Pokedex move markers follow shared form profiles and reject invalid indices")
+{
+    EXPECT(HasMarkedPokedexMove(SPECIES_PIKACHU, MOVE_FLOATY_FALL, FALSE));
+    EXPECT(HasMarkedPokedexMove(SPECIES_PIKACHU_GIGANTAMAX, MOVE_FLOATY_FALL, FALSE));
+    EXPECT(!RoguePokedex_IsMoveAddition(SPECIES_NONE, 0, FALSE));
+    EXPECT(!RoguePokedex_IsMoveAddition(NUM_SPECIES, 0, TRUE));
+    EXPECT(!RoguePokedex_IsMoveAddition(SPECIES_PONYTA, 0xFFFF, FALSE));
+    EXPECT(!RoguePokedex_IsMoveAddition(SPECIES_PONYTA, 0xFFFF, TRUE));
+}
+
+TEST("Pokedex move marker legend and move lines fit their windows")
+{
+    static const u8 title[] = _("MOVES {STAR_ICON}=New");
+    extern const u8 gMoveNames[MOVES_COUNT][MOVE_NAME_LENGTH + 1];
+    static const u8 prefix[] = _("Tutor ");
+    u8 text[MOVE_NAME_LENGTH + 16];
+    EXPECT(GetStringWidth(FONT_NORMAL, title, 0) <= 88);
+    for (u32 move = 1; move < MOVES_COUNT; ++move)
+    {
+        StringCopy(text, prefix);
+        StringAppend(text, gMoveNames[move]);
+        EXPECT(GetStringWidth(FONT_NARROW, text, 0) <= 128
+            || GetStringWidth(FONT_SMALL_NARROW, text, 0) <= 128);
+    }
+}
+
+static u8 GetPokedexTestPixel(u8 windowId, u32 x, u32 y)
+{
+    u32 width = gWindows[windowId].window.width;
+    u32 offset = ((y / 8) * width + x / 8) * 32 + (y % 8) * 4 + (x % 8) / 2;
+    return (gWindows[windowId].tileData[offset] >> ((x % 2) * 4)) & 0xF;
+}
+
+TEST("Pokedex move markers render visible pixels and clear when scrolling to an original move")
+{
+    static const struct WindowTemplate windows[] = {
+        { .bg = 0, .width = 17, .height = 16, .paletteNum = 15, .baseBlock = 0 },
+        DUMMY_WIN_TEMPLATE,
+    };
+    static const u8 airSlash[] = _("{COLOR RED}{LV}30 {COLOR DARK_GRAY}Air Slash");
+    static const u8 needleArm[] = _("{COLOR RED}{LV}43 {COLOR DARK_GRAY}Needle Arm");
+    static const u8 gigaDrain[] = _("{COLOR RED}{LV}32 {COLOR DARK_GRAY}Giga Drain");
+    u32 markedPixels[2] = {0};
+    u32 textPixels = 0;
+    EXPECT(InitWindows(windows));
+    SetDefaultFontsPointer();
+    FillWindowPixelBuffer(0, PIXEL_FILL(0));
+    RoguePokedex_PrintMoveLine(0, airSlash, 0, HasMarkedPokedexMove(SPECIES_BEAUTIFLY, MOVE_AIR_SLASH, FALSE));
+    RoguePokedex_PrintMoveLine(0, needleArm, 1, HasMarkedPokedexMove(SPECIES_CACTURNE, MOVE_NEEDLE_ARM, FALSE));
+    RoguePokedex_PrintMoveLine(0, gigaDrain, 2, FALSE);
+    for (u32 y = 0; y < 48; ++y)
+    {
+        for (u32 x = 0; x < 8; ++x)
+        {
+            u8 pixel = GetPokedexTestPixel(0, x, y);
+            if (y < 32)
+                markedPixels[y / 16] += pixel == TEXT_COLOR_GREEN;
+            else
+                EXPECT_EQ(pixel, 0);
+        }
+        for (u32 x = 8; x < 136; ++x)
+            textPixels += GetPokedexTestPixel(0, x, y) != 0;
+    }
+    EXPECT_GT(markedPixels[0], 0);
+    EXPECT_GT(markedPixels[1], 0);
+    EXPECT_GT(textPixels, 0);
+    RoguePokedex_PrintMoveLine(0, gigaDrain, 0, FALSE);
+    for (u32 y = 0; y < 16; ++y)
+        for (u32 x = 0; x < 8; ++x)
+            EXPECT_EQ(GetPokedexTestPixel(0, x, y), 0);
+    FreeAllWindowBuffers();
 }
 
 TEST("Pokedex Inspect uses each Mega form's own baseline")

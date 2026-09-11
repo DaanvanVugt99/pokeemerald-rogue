@@ -215,6 +215,7 @@ void SetGrafittiTag(u32 battler);
 void ResetGrafittiTagPaletteCache(u32 battler);
 void ReapplyGrafittiTagPalettes(void);
 bool32 TryPrimalReversion(u32 battler);
+bool32 IsBattlerDisguiseIntact(u32 battler);
 bool32 IsNeutralizingGasOnField(void);
 bool32 IsMoldBreakerTypeAbility(u32 ability);
 u32 GetBattlerAbility(u32 battler);

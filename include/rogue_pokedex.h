@@ -60,5 +60,8 @@ u16 RoguePokedex_GetSpeciesBST(u16 species);
 u8 RoguePokedex_GetSpeciesBestStat(u16 species);
 u8 RoguePokedex_GetSpeciesWorstStat(u16 species);
 void RoguePokedex_GetSpeciesStatArray(u16 species, u8* stats, u8 bufferSize);
+bool8 RoguePokedex_IsMoveAddition(u16 species, u16 moveIndex, bool8 tutor);
+u16 RoguePokedex_GetAbilitySlot(u16 species, u8 slot, u32 otId);
+void RoguePokedex_PrintMoveLine(u8 windowId, const u8 *text, u8 row, bool8 added);
 
 #endif
