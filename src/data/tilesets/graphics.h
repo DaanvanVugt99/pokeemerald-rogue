@@ -703,6 +703,27 @@ const u16 gTilesetPalettes_SecretBaseBrownCave[][16] =
 	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/15.gbapal"),
 };
 
+// Private stone palette; ordinary dens and secret bases retain their palettes.
+const u16 gTilesetPalettes_UniqueDen[][16] =
+{
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/00.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/01.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/02.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/03.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/04.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/05.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/unique_den/palettes/06.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/07.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/08.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/09.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/10.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/11.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/12.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/13.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/14.gbapal"),
+	INCBIN_U16("data/tilesets/secondary/secret_base/brown_cave/palettes/15.gbapal"),
+};
+
 const u32 gTilesetTiles_SecretBaseTreeCompressed[] = INCBIN_U32("data/tilesets/secondary/secret_base/tree/unused_tiles.4bpp.lz");
 
 const u16 gTilesetPalettes_SecretBaseTree[][16] =

@@ -25,6 +25,13 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Give Unique Dens a dedicated grey-stone chamber with a muted purple exit,
+  retaining the encounter layout and leaving ordinary leafy dens unchanged.
+
+- Port upstream's golden Honey Tree icon from c503f32 and replace the Unique
+  Den's purple grass with a medium stone arch and gently pulsing purple opening, distinguishing both from
+  type-colored wild dens by silhouette.
+
 - Put Begin Adventure first at the entrance. Keep the selected Pokédex visible
   before its editing unlock, with locked help text; the first clear unlocks editing.
 

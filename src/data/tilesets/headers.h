@@ -361,6 +361,17 @@ const struct Tileset gTileset_SecretBaseBrownCave =
     .callback = NULL,
 };
 
+const struct Tileset gTileset_UniqueDen =
+{
+    .isCompressed = FALSE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_SecretBaseBrownCave,
+    .palettes = gTilesetPalettes_UniqueDen,
+    .metatiles = gMetatiles_SecretBaseSecondary,
+    .metatileAttributes = gMetatileAttributes_SecretBaseSecondary,
+    .callback = NULL,
+};
+
 const struct Tileset gTileset_SecretBaseTree =
 {
     .isCompressed = FALSE,

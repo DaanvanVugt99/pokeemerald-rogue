@@ -2190,6 +2190,16 @@
       "secondary_tileset": "gTileset_AdventurePaths",
       "border_filepath": "data/layouts/Rogue_Encounter_ItemRoom/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Encounter_ItemRoom/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_ENCOUNTER_UNIQUE_DEN",
+      "name": "Rogue_Encounter_UniqueDen_Layout",
+      "width": 11,
+      "height": 15,
+      "primary_tileset": "gTileset_SecretBase",
+      "secondary_tileset": "gTileset_UniqueDen",
+      "border_filepath": "data/layouts/Rogue_Encounter_UniqueDen/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_Encounter_UniqueDen/map.bin"
     }
   ]
 }

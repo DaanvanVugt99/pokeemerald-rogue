@@ -4188,9 +4188,13 @@ static void ApplyCurrentNodeWarp(struct WarpData *warp)
             break;
 
         case ADVPATH_ROOM_WILD_DEN:
-        case ADVPATH_ROOM_UNIQUE_DEN:
             warp->mapGroup = MAP_GROUP(ROGUE_ENCOUNTER_DEN);
             warp->mapNum = MAP_NUM(ROGUE_ENCOUNTER_DEN);
+            break;
+
+        case ADVPATH_ROOM_UNIQUE_DEN:
+            warp->mapGroup = MAP_GROUP(ROGUE_ENCOUNTER_UNIQUE_DEN);
+            warp->mapNum = MAP_NUM(ROGUE_ENCOUNTER_UNIQUE_DEN);
             break;
 
         case ADVPATH_ROOM_HONEY_TREE:

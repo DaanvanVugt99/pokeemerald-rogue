@@ -698,6 +698,7 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Encounter_MiniBoss/scripts.inc"
 
 	.include "data/maps/Rogue_Encounter_Den/scripts.inc"
+	.include "data/maps/Rogue_Encounter_UniqueDen/scripts.inc"
 
 	.include "data/maps/Rogue_Encounter_GameShow/scripts.inc"
 

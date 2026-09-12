@@ -156,6 +156,7 @@
 #define MAP_ROGUE_BOSS_VICTORY_LAP              (35 | (7 << 8))
 #define MAP_ROGUE_ENCOUNTER_BATTLE_TOWER        (36 | (7 << 8))
 #define MAP_ROGUE_ENCOUNTER_ITEM_ROOM           (37 | (7 << 8))
+#define MAP_ROGUE_ENCOUNTER_UNIQUE_DEN          (38 | (7 << 8))
 
 // gMapGroup_RogueAdventureMonEncounters
 #define MAP_ROGUE_SOUTHERN_ISLAND_LATIOS   (0 | (8 << 8))

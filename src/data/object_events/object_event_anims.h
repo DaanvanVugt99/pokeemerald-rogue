@@ -799,6 +799,19 @@ static const union AnimCmd *const sAnimTable_Inanimate[] = {
     [ANIM_STAY_STILL] = sAnim_StayStill,
 };
 
+// Only the purple opening changes; the stone arch stays fixed throughout.
+static const union AnimCmd sAnim_UniqueDenPulse[] = {
+    ANIMCMD_FRAME(0, 48),
+    ANIMCMD_FRAME(1, 24),
+    ANIMCMD_FRAME(2, 48),
+    ANIMCMD_FRAME(1, 24),
+    ANIMCMD_JUMP(0),
+};
+
+static const union AnimCmd *const sAnimTable_UniqueDenPulse[] = {
+    [ANIM_STAY_STILL] = sAnim_UniqueDenPulse,
+};
+
 static const union AnimCmd *const sAnimTable_QuintyPlump[] = {
     [ANIM_STD_FACE_SOUTH] = sAnim_QuintyPlumpFaceSouth,
     [ANIM_STD_FACE_NORTH] = sAnim_QuintyPlumpFaceNorth,
